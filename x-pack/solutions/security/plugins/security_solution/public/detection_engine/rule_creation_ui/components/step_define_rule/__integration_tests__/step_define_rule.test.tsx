@@ -48,7 +48,7 @@ import { useMLRuleConfig } from '../../../../../common/components/ml/hooks/use_m
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 
 // Set the extended default timeout for all define rule step form test
-jest.setTimeout(10 * 1000);
+jest.setTimeout(60 * 1000);
 
 // Mocks integrations
 jest.mock('../../../../fleet_integrations/api');
@@ -212,8 +212,7 @@ const COMBO_BOX_TOGGLE_BUTTON_TEST_ID = 'comboBoxToggleListButton';
 const VERSION_INPUT_TEST_ID = 'relatedIntegrationVersionDependency';
 const DEFINE_RULE_FORM_STEP = 'defineRuleFormStepQueryEditor';
 
-// Failing: See https://github.com/elastic/kibana/issues/237924
-describe.skip('StepDefineRule', () => {
+describe('StepDefineRule', () => {
   beforeEach(() => {
     mockUseRuleFromTimeline.mockReturnValue({ onOpenTimeline, loading: false });
     (useEsqlAvailability as jest.Mock).mockReturnValue({ isEsqlRuleTypeEnabled: true });

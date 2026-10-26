@@ -33,6 +33,4 @@ fileGroups:
   src:
     - public/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

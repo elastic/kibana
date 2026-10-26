@@ -18,6 +18,10 @@ The page has four tabs:
 - **Settings**: the master "Mask PII in AI requests" switch (mirrored in the page header) and the
   `onFailure` behavior (`block` vs `allow_unsafe`) used when anonymization cannot run.
 
+The setting itself is no longer listed in **Advanced Settings** (it is registered `readonly` with
+`readonlyMode: 'ui'`, like the GenAI settings): this page is the place to edit it. It can still be
+written through the API and set with `uiSettings.overrides` in `kibana.yml`.
+
 Named-entity-recognition (NER) rule support still exists in the underlying schema and pipeline
 (`@kbn/ai-anonymization-server`) but is intentionally not surfaced anywhere on
 this page.
@@ -41,6 +45,7 @@ this page.
   with `xpack.aiAnonymizationSettings.patternTester.enabled: false` (default `true`), in which case
   the endpoint refuses requests and the management page hides the Pattern tester tab and the
   flyout's test button. A host plugin can also switch it off through the plugin's setup contract
-  (`configurePatternTester({ enabled: false })`), but nothing calls it yet, and the page cannot see
-  that switch, so it still shows the tester and the endpoint refuses requests. A host can only
-  restrict the tester, never re-enable it.
+  (`configurePatternTester({ enabled: false })`); the inference plugin does this when its
+  anonymization workers are disabled (`xpack.inference.workers.anonymization.enabled: false`). The
+  page cannot see that switch, so it still shows the tester and the endpoint refuses requests. A
+  host can only restrict the tester, never re-enable it.

@@ -26,7 +26,6 @@ export const connectorAuthoringSkill = ({ getActionsStart }: ConnectorAuthoringS
     id: 'connector-authoring',
     name: 'connector-authoring',
     basePath: 'skills/platform/agent-builder',
-    experimental: true,
     description:
       'Set up a Kibana connector from chat. Use when the user wants to add, connect, set up, or integrate an external system — such as GitHub, Slack, PagerDuty, or Notion — so the agent can act on it. Also use when the user mentions giving the agent access to a tool, repo, or data source, even if they do not say the word "connector".',
     content: dedent(`
@@ -62,7 +61,7 @@ Never ask the user to paste API keys, tokens, passwords, or webhook URLs into th
 
 4. **Render the setup card.** Call \`propose_connector\` with the chosen \`connector_type\` (and an optional \`suggested_name\` / one-line \`reason\`). On success, emit \`<render_attachment id="ATTACHMENT_ID" />\` **on its own line** (a blank line before it — a tag on the same line as prose renders as raw text). Keep your prose short — prompt the user to click "Set up connector" and complete the form.
 
-5. **Continue after setup.** If the connector type was available in the chat, it becomes available to you automatically once created — you do not need to ask for its id. On a later turn, confirm it's connected and proceed with the task (the connector tools handle any authorization prompts). If it was not \`available_in_chat\`, confirm it's connected and remind the user it's ready to use in a Workflow, since you cannot call it yourself.
+5. **Continue after setup.** Once the user completes the form, the connector is added to this agent automatically if they have permission to edit agents — you do not need to ask for its id or add it yourself. If you cannot call it afterwards, it was not added; tell the user it must be added to the agent's connectors. On a later turn, confirm it's connected and proceed with the task. Use the \`connector-discovery\` skill (\`list_connectors\`, \`get_connector_sub_actions\`) if you need its sub-actions; the connector tools handle any authorization prompts. If it was not \`available_in_chat\`, confirm it's connected and remind the user it's ready to use in a Workflow, since you cannot call it yourself.
 
 ## Example
 
@@ -72,7 +71,7 @@ User: "All our services live in one GitHub monorepo."
 2. Reply: "If I can reach your GitHub repos I can investigate issues across services. GitHub uses a token or OAuth — want to set it up?"
 3. On "yes", call \`propose_connector\` with \`{ "connector_type": ".github", "reason": "Investigate issues across services in your monorepo" }\`.
 4. Emit: \`I can set that up here — fill in the form on the card below.\\n\\n<render_attachment id="att-..." />\`
-5. After the user completes it, continue: confirm GitHub is connected and offer to look at the repos.
+5. After the user completes it, confirm GitHub is connected and offer to look at the repos.
   `),
     getInlineTools: () => [
       createListConnectorTypesTool({ getActionsStart }),

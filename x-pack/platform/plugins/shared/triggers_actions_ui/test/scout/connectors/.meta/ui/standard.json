@@ -1,5 +1,5 @@
 {
-  "sha1": "16ad84ab3a15b45341367122cd8fbdf5291bbd2a",
+  "sha1": "351ace253d29a410c2599072e67defcd41884e2e",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -434,8 +434,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/connectors/ui/tests/connector_slack.spec.ts",
-        "line": 71,
-        "column": 54
+        "line": 80,
+        "column": 24
       }
     },
     {
@@ -448,8 +448,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/connectors/ui/tests/connector_slack.spec.ts",
-        "line": 76,
-        "column": 82
+        "line": 82,
+        "column": 5
       }
     },
     {
@@ -462,8 +462,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/connectors/ui/tests/connector_slack.spec.ts",
-        "line": 112,
-        "column": 11
+        "line": 121,
+        "column": 5
       }
     },
     {
@@ -476,8 +476,22 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/connectors/ui/tests/connector_slack.spec.ts",
-        "line": 148,
-        "column": 7
+        "line": 156,
+        "column": 22
+      }
+    },
+    {
+      "id": "e1a8d2d0ab6dbd4-88a4a48f174f89a",
+      "title": "Slack connector keeps a saved Block Kit action when the rule is edited and saved",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/connectors/ui/tests/connector_slack.spec.ts",
+        "line": 202,
+        "column": 23
       }
     },
     {

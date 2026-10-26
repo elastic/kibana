@@ -5,16 +5,24 @@
  * 2.0.
  */
 
-import { uniqueByGroup, readBulkOutcome, createBulkActionError } from './helpers';
+import { uniqueBySeries, readBulkOutcome, createBulkActionError } from './helpers';
 
-const ep = (group_hash: string, id = group_hash) => ({ group_hash, 'episode.id': id } as any);
+const ep = (series_id: string | null | undefined, id = 'e', group_hash = 'g1') =>
+  ({ series_id, group_hash, 'episode.id': id } as any);
 
-describe('uniqueByGroup', () => {
-  it('dedupes by group_hash', () => {
-    expect(uniqueByGroup([ep('g1'), ep('g1', 'x'), ep('g2')])).toHaveLength(2);
+describe('uniqueBySeries', () => {
+  it('dedupes by series_id', () => {
+    expect(uniqueBySeries([ep('s1'), ep('s1', 'x'), ep('s2')])).toHaveLength(2);
+  });
+  it('keeps episodes of different series that share a group_hash', () => {
+    const rows = uniqueBySeries([ep('s1', 'a', 'shared'), ep('s2', 'b', 'shared')]);
+    expect(rows.map((row) => row.series_id)).toEqual(['s1', 's2']);
+  });
+  it('drops episodes without a series_id', () => {
+    expect(uniqueBySeries([ep(null), ep(undefined), ep('s1')])).toHaveLength(1);
   });
   it('handles empty input', () => {
-    expect(uniqueByGroup([])).toEqual([]);
+    expect(uniqueBySeries([])).toEqual([]);
   });
 });
 

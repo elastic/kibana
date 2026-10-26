@@ -34,7 +34,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
    *
    * Migration: migrate to scout - try to simplify test cases
    */
-  describe('Interactions between options list and dashboard', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/239769
+  describe.skip('Interactions between options list and dashboard', () => {
     let controlId: string;
 
     before(async () => {

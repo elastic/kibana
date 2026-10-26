@@ -23,6 +23,18 @@ export interface AttachmentValidateContext {
 }
 
 /**
+ * Context passed to the {@link AttachmentTypeDefinition.onOriginUpdated} hook.
+ */
+export interface AttachmentOriginUpdatedContext {
+  request: KibanaRequest;
+  conversationId: string;
+  /** The agent the conversation belongs to. */
+  agentId: string;
+  /** Whether the caller has the privilege to create and edit agents. */
+  canManageAgents: boolean;
+}
+
+/**
  * Server-side definition of an attachment type.
  */
 export interface AttachmentTypeDefinition<TType extends string = string, TContent = unknown> {
@@ -65,6 +77,15 @@ export interface AttachmentTypeDefinition<TType extends string = string, TConten
     attachment: VersionedAttachmentWithOrigin<TType, TContent>,
     context: AttachmentResolveContext
   ) => MaybePromise<boolean>;
+  /**
+   * Optional hook called by the update-origin route after a user links the attachment to an origin
+   * (e.g. a card that created a saved object). A thrown error does not fail the request: it is
+   * logged and returned to the client as a warning, so keep the message user-readable.
+   */
+  onOriginUpdated?: (
+    attachment: VersionedAttachmentWithOrigin<TType, TContent>,
+    context: AttachmentOriginUpdatedContext
+  ) => MaybePromise<void>;
   /**
    * should return the list of tools from the registry which should be exposed to the agent
    * when attachments of that type are present in the conversation.

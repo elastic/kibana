@@ -33,10 +33,18 @@ async function getExtractIocsTool(): Promise<BuiltinSkillBoundedTool> {
   return tool;
 }
 
-async function runExtractIocs(hosts: string[] = ['WKSTN-RECV01'], timeWindowHours?: number) {
+async function runExtractIocs(
+  hosts: string[] = ['WKSTN-RECV01'],
+  timeWindowHours?: number,
+  window?: { start: string; end: string; margin_hours?: number }
+) {
   const tool = await getExtractIocsTool();
   const toolReturn = await tool.handler(
-    { hosts, ...(timeWindowHours !== undefined ? { time_window_hours: timeWindowHours } : {}) },
+    {
+      hosts,
+      ...(timeWindowHours !== undefined ? { time_window_hours: timeWindowHours } : {}),
+      ...window,
+    },
     mockContext
   );
   if (!isToolHandlerStandardReturn(toolReturn)) {
@@ -64,13 +72,58 @@ describe(`${ENDPOINT_FORENSIC_EXTRACT_IOCS_TOOL_ID} handler`, () => {
   });
 
   it('scopes the ES|QL query to the named hosts, lookback window, and drop_null_columns', async () => {
-    await runExtractIocs(['WKSTN-RECV01', 'SRV-DC01'], 24);
+    jest.useFakeTimers().setSystemTime(new Date('2026-10-17T12:00:00.000Z'));
+    try {
+      await runExtractIocs(['WKSTN-RECV01', 'SRV-DC01'], 24);
+    } finally {
+      jest.useRealTimers();
+    }
 
     expect(mockEsqlQuery).toHaveBeenCalledWith({
       query: expect.stringContaining('host.name IN ("WKSTN-RECV01", "SRV-DC01")'),
       drop_null_columns: true,
     });
-    expect(mockEsqlQuery.mock.calls[0][0].query).toContain('NOW() - 24 HOURS');
+    expect(mockEsqlQuery.mock.calls[0][0].query).toContain(
+      '@timestamp >= TO_DATETIME("2026-10-16T12:00:00.000Z") AND @timestamp <= TO_DATETIME("2026-10-17T12:00:00.000Z")'
+    );
+  });
+
+  // Anchored on the incident rather than on now, so a host's older activity cannot
+  // land in this incident's indicator list.
+  it('scopes the ES|QL query to the padded incident window when start and end are given', async () => {
+    const results = await runExtractIocs(['azep-bd79f31511'], undefined, {
+      start: '2026-10-16T10:00:00.000Z',
+      end: '2026-10-16T11:30:00.000Z',
+      margin_hours: 2,
+    });
+
+    expect(mockEsqlQuery.mock.calls[0][0].query).toContain(
+      '@timestamp >= TO_DATETIME("2026-10-16T08:00:00.000Z") AND @timestamp <= TO_DATETIME("2026-10-16T13:30:00.000Z")'
+    );
+    expect(mockEsqlQuery.mock.calls[0][0].query).not.toContain('NOW()');
+    expect((results[0].data as { searched_window: unknown }).searched_window).toEqual({
+      start: '2026-10-16T08:00:00.000Z',
+      end: '2026-10-16T13:30:00.000Z',
+      anchor: 'incident',
+    });
+  });
+
+  it('scopes the ES|QL query to the padded window when start and end are the same instant', async () => {
+    const instant = '2026-10-16T10:00:00.000Z';
+    const results = await runExtractIocs(['azep-bd79f31511'], undefined, {
+      start: instant,
+      end: instant,
+      margin_hours: 2,
+    });
+
+    expect(mockEsqlQuery.mock.calls[0][0].query).toContain(
+      '@timestamp >= TO_DATETIME("2026-10-16T08:00:00.000Z") AND @timestamp <= TO_DATETIME("2026-10-16T12:00:00.000Z")'
+    );
+    expect((results[0].data as { searched_window: unknown }).searched_window).toEqual({
+      start: '2026-10-16T08:00:00.000Z',
+      end: '2026-10-16T12:00:00.000Z',
+      anchor: 'incident',
+    });
   });
 
   it('does not attach osquery live-state guidance — Defend telemetry only', async () => {

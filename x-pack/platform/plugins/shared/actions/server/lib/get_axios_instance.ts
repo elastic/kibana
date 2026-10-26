@@ -28,6 +28,7 @@ import type { ActionsConfigurationUtilities } from '../actions_config';
 import type { ConnectorTokenClientContract } from '../types';
 import { getBeforeRedirectFn } from './before_redirect';
 import { getAxiosAuthStrategy } from './axios_auth_strategies';
+import { recordConnectorAuth } from './connector_metrics';
 import type { AuthStrategyDeps, AxiosAuthStrategy } from './axios_auth_strategies';
 
 export type ConnectorInfo = Omit<ActionInfo, 'rawAction'>;
@@ -63,6 +64,7 @@ type ConnectorAuthDeps = Pick<
 
 interface ConnectorAuthOpts {
   connectorId: string;
+  connectorTypeId?: string;
   connectorTokenClient?: ConnectorTokenClientContract;
   secrets: ValidatedSecrets;
   authMode?: AuthMode;
@@ -86,7 +88,14 @@ const getAuthTypeId = (secrets: ValidatedSecrets): string =>
  */
 const resolveConnectorAuth = (
   { authTypeRegistry, configurationUtilities, logger }: ConnectorAuthDeps,
-  { connectorId, secrets, connectorTokenClient, authMode, profileUid }: ConnectorAuthOpts
+  {
+    connectorId,
+    connectorTypeId,
+    secrets,
+    connectorTokenClient,
+    authMode,
+    profileUid,
+  }: ConnectorAuthOpts
 ): ResolvedConnectorAuth => {
   const authTypeId = getAuthTypeId(secrets);
   // throws if auth type is not found
@@ -94,6 +103,7 @@ const resolveConnectorAuth = (
   const strategy = getAxiosAuthStrategy(authTypeId);
   const strategyDeps = {
     connectorId,
+    connectorTypeId,
     secrets,
     connectorTokenClient,
     logger,
@@ -103,7 +113,27 @@ const resolveConnectorAuth = (
   };
   const authCtx: AuthContext = {
     getCustomHostSettings: (url: string) => configurationUtilities.getCustomHostSettings(url),
-    getToken: (opts: GetTokenOpts) => strategy.getToken(opts, strategyDeps),
+    getToken: async (opts: GetTokenOpts) => {
+      try {
+        const token = await strategy.getToken(opts, strategyDeps);
+        // A null token means none could be obtained (missing credentials or a failed refresh), so it is a failure.
+        recordConnectorAuth({
+          phase: 'token',
+          authType: authTypeId,
+          connectorType: connectorTypeId,
+          ...(token === null ? { errorType: 'token_request_failed' as const } : {}),
+        });
+        return token;
+      } catch (error) {
+        recordConnectorAuth({
+          phase: 'token',
+          authType: authTypeId,
+          connectorType: connectorTypeId,
+          errorType: 'token_request_failed',
+        });
+        throw error;
+      }
+    },
     logger,
     proxySettings: configurationUtilities.getProxySettings(),
     sslSettings: configurationUtilities.getSSLSettings(),
@@ -177,6 +207,8 @@ const logMaxContentLengthError = ({
 export interface GetAxiosInstanceWithAuthFnOpts {
   additionalHeaders?: Record<string, AxiosHeaderValue>;
   connectorId: string;
+  /** Only used to label auth metrics. */
+  connectorTypeId?: string;
   connectorTokenClient?: ConnectorTokenClientContract;
   secrets: ValidatedSecrets;
   signal?: AbortSignal;
@@ -199,6 +231,8 @@ export class UnsupportedAuthProducerError extends Error {
 
 export interface GetCredentialFnOpts {
   connectorId: string;
+  /** Only used to label auth metrics. */
+  connectorTypeId?: string;
   connectorTokenClient?: ConnectorTokenClientContract;
   secrets: ValidatedSecrets;
   authMode?: AuthMode;
@@ -214,6 +248,7 @@ export const getCredentialWithAuth = ({
 }: GetAxiosInstanceOpts): GetCredentialFn => {
   return ({
     connectorId,
+    connectorTypeId,
     secrets,
     connectorTokenClient,
     authMode,
@@ -221,7 +256,7 @@ export const getCredentialWithAuth = ({
   }: GetCredentialFnOpts): CredentialAccessor => {
     const { authType, authTypeId, authCtx } = resolveConnectorAuth(
       { authTypeRegistry, configurationUtilities, logger },
-      { connectorId, secrets, connectorTokenClient, authMode, profileUid }
+      { connectorId, connectorTypeId, secrets, connectorTokenClient, authMode, profileUid }
     );
 
     return {
@@ -244,6 +279,7 @@ export const getAxiosInstanceWithAuth = ({
   return async ({
     additionalHeaders,
     connectorId,
+    connectorTypeId,
     secrets,
     connectorTokenClient,
     signal,
@@ -259,7 +295,7 @@ export const getAxiosInstanceWithAuth = ({
 
       const { authType, strategy, strategyDeps, authCtx } = resolveConnectorAuth(
         { authTypeRegistry, configurationUtilities, logger },
-        { connectorId, secrets, connectorTokenClient, authMode, profileUid }
+        { connectorId, connectorTypeId, secrets, connectorTokenClient, authMode, profileUid }
       );
 
       const { maxContentLength, timeout: settingsTimeout } =

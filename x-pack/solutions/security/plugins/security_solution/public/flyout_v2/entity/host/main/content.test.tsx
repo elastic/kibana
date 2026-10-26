@@ -47,10 +47,11 @@ jest.mock(
     AssetCriticalityAccordion: () => <div data-test-subj="assetCriticalityAccordionMock" />,
   })
 );
+const mockEntityHighlightsAccordion = jest.fn((_props: { mode?: string }) => null);
 jest.mock(
   '../../../../entity_analytics/components/entity_details_flyout/components/entity_highlights',
   () => ({
-    EntityHighlightsAccordion: () => null,
+    EntityHighlightsAccordion: (props: { mode?: string }) => mockEntityHighlightsAccordion(props),
   })
 );
 const mockEntityInsight = jest.fn((_props: { aliasRecords?: readonly unknown[] }) => null);
@@ -59,6 +60,14 @@ jest.mock('../../../../cloud_security_posture/components/entity_insight', () => 
 }));
 jest.mock('../../shared/components/observed_data_section', () => ({
   ObservedDataSection: () => null,
+}));
+const mockUseAnomalyOverview = jest.fn((_params: { from?: number; to?: number }) => ({
+  data: undefined,
+  isLoading: false,
+  isError: false,
+}));
+jest.mock('../../../../entity_analytics/api/hooks/use_anomaly_overview', () => ({
+  useAnomalyOverview: (params: { from?: number; to?: number }) => mockUseAnomalyOverview(params),
 }));
 
 const defaultProps = {
@@ -100,6 +109,13 @@ describe('Content — graph/resolution navigation gating', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     (useHasEntityResolutionLicense as jest.Mock).mockReturnValue(true);
+  });
+
+  it('forwards the view mode to the resolution section so the target row stays linkable', () => {
+    render(<Content {...defaultProps} mode="resolved" />, { wrapper: TestProviders });
+    expect(mockResolutionSection).toHaveBeenLastCalledWith(
+      expect.objectContaining({ mode: 'resolved' })
+    );
   });
 
   it('forwards openDetailsPanel to the graph and resolution sections by default', () => {
@@ -209,6 +225,27 @@ describe('Content — group view', () => {
     );
   });
 
+  it('forwards the view mode to the entity summary so it covers the whole group', () => {
+    render(<Content {...defaultProps} mode="resolved" />, { wrapper: TestProviders });
+    expect(mockEntityHighlightsAccordion).toHaveBeenLastCalledWith(
+      expect.objectContaining({ mode: 'resolved' })
+    );
+  });
+
+  it('tells the entity summary to wait while the entity store record is loading', () => {
+    render(<Content {...defaultProps} isEntityRecordLoading />, { wrapper: TestProviders });
+    expect(mockEntityHighlightsAccordion).toHaveBeenLastCalledWith(
+      expect.objectContaining({ isEntityRecordLoading: true })
+    );
+  });
+
+  it('leaves the entity summary in single mode when no mode is given', () => {
+    render(<Content {...defaultProps} />, { wrapper: TestProviders });
+    expect(mockEntityHighlightsAccordion).toHaveBeenLastCalledWith(
+      expect.objectContaining({ mode: undefined })
+    );
+  });
+
   it('forwards the alias records to the insights so alerts and findings cover the whole group', () => {
     const aliasRecords = [{ entity: { id: 'host:alias' }, host: { name: 'alias' } }] as never;
     render(<Content {...defaultProps} isGroupView aliasRecords={aliasRecords} />, {
@@ -245,5 +282,34 @@ describe('Content — legacy asset criticality accordion gating', () => {
       { wrapper: TestProviders }
     );
     expect(screen.queryByTestId('assetCriticalityAccordionMock')).not.toBeInTheDocument();
+  });
+});
+
+describe('Content — scope time range', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    jest.useFakeTimers().setSystemTime(new Date('2024-06-15T12:00:00.000Z'));
+  });
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
+  it('lets the server default the anomaly overview lookback when the scope does not pin a range', () => {
+    render(<Content {...defaultProps} />, { wrapper: TestProviders });
+    expect(mockUseAnomalyOverview).toHaveBeenLastCalledWith(
+      expect.objectContaining({ from: undefined, to: undefined })
+    );
+  });
+
+  it('bounds the anomaly overview to the pinned range when opened from the new Entity Analytics home', () => {
+    render(<Content {...defaultProps} scopeId="entity-analytics-new-entities-table-7d" />, {
+      wrapper: TestProviders,
+    });
+    expect(mockUseAnomalyOverview).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        from: new Date('2024-06-08T12:00:00.000Z').valueOf(),
+        to: new Date('2024-06-15T12:00:00.000Z').valueOf(),
+      })
+    );
   });
 });

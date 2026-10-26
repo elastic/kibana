@@ -8,8 +8,9 @@ import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiText } from '@elastic/
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useLocation } from 'react-router-dom';
-import { hasUsableProfilingData, ProfilingSchema } from '@kbn/profiling-utils';
+import { ProfilingSchema } from '@kbn/profiling-utils';
 import { AsyncStatus } from '../hooks/use_async';
+import { hasProfilingData } from '../utils/has_profiling_data';
 import { PROFILING_PATHNAMES } from '../routing/pathnames';
 import { useProfilingRouter } from '../hooks/use_profiling_router';
 import { useLicenseContext } from './contexts/license/use_license_context';
@@ -88,7 +89,7 @@ export function CheckStatus({ children }: { children: React.ReactElement }) {
     return children;
   }
 
-  if (hasUsableProfilingData(data) || UTILITY_PATHNAMES.includes(pathname)) {
+  if (hasProfilingData(data) || UTILITY_PATHNAMES.includes(pathname)) {
     return children;
   }
 

@@ -41,6 +41,11 @@ import { handleNoAlerts } from './helpers/handle_no_alerts';
 import { mapFailedStepToTelemetry } from './helpers/map_failed_step_to_telemetry';
 import { PipelineStepError } from './helpers/pipeline_step_error';
 import { resolveFailedStep } from './helpers/resolve_failed_step';
+import {
+  attackDiscoveryTemplateOmissionMessage,
+  capAttackDiscoveryTemplateCount,
+  takeAttackDiscoveryTemplateAlerts,
+} from '../../graphs/template_completion';
 import { runGenerationStep } from './steps/generation_step';
 import { runRetrievalStep } from './steps/retrieval_step';
 import { type ManualOrchestrationOutcome, runValidationStep } from './steps/validation_step';
@@ -86,6 +91,7 @@ export const runManualOrchestration = async ({
   sourceMetadata,
   spaceId,
   start,
+  templateAlertLimit,
   trigger,
   workflowConfig,
   workflowsManagementApi,
@@ -126,6 +132,12 @@ export const runManualOrchestration = async ({
   sourceMetadata?: SourceMetadata;
   spaceId: string;
   start?: string;
+  /**
+   * Set when the connector accepts only a prompt template. Retrieval and the
+   * candidate set are capped at this many alerts so coverage counts match the
+   * alerts the template can analyze.
+   */
+  templateAlertLimit?: number;
   /**
    * How generation was triggered (`manual` | `schedule` | `workflow` |
    * `agent_builder`). The gate runs for every trigger EXCEPT `agent_builder`
@@ -207,6 +219,8 @@ export const runManualOrchestration = async ({
     }
   };
 
+  const retrievalSize = templateAlertLimit != null ? capAttackDiscoveryTemplateCount(size) : size;
+
   try {
     timings.retrievalStart = Date.now();
 
@@ -246,7 +260,7 @@ export const runManualOrchestration = async ({
         logger,
         maxWaitMs: getRemainingBudgetMs(),
         request,
-        size,
+        size: retrievalSize,
         source,
         spaceId,
         start,
@@ -286,7 +300,7 @@ export const runManualOrchestration = async ({
         logger,
         maxWaitMs: getRemainingBudgetMs(),
         request,
-        size,
+        size: retrievalSize,
         skillEnabled: workflowConfig.skill_enabled,
         source,
         spaceId,
@@ -314,6 +328,19 @@ export const runManualOrchestration = async ({
           workflowId: ATTACK_DISCOVERY_SKILL_ALERT_RETRIEVAL_WORKFLOW_ID,
         });
       }
+    }
+
+    if (templateAlertLimit != null && candidateResult.alerts.length > templateAlertLimit) {
+      const limited = takeAttackDiscoveryTemplateAlerts(candidateResult.alerts);
+      logger.warn(
+        attackDiscoveryTemplateOmissionMessage(limited.omitted, candidateResult.alerts.length)
+      );
+      candidateResult = {
+        ...candidateResult,
+        alerts: limited.alerts,
+        anonymizedAlerts: candidateResult.anonymizedAlerts.slice(0, templateAlertLimit),
+        alertsContextCount: limited.alerts.length,
+      };
     }
 
     state.alertRetrievalResult = candidateResult;
@@ -361,7 +388,7 @@ export const runManualOrchestration = async ({
       logger,
       maxWaitMs: getRemainingBudgetMs(),
       request,
-      size,
+      size: retrievalSize,
       source,
       sourceMetadata,
       spaceId,

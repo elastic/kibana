@@ -114,6 +114,10 @@ tags:
   - description: Data view APIs enable you to manage data views, formerly known as Kibana index patterns.
     name: data views
     x-displayName: Data views
+  - name: data-views-v2
+    description: |
+      Data view APIs enable you to manage data views, formerly known as Kibana index patterns. Use these endpoints to list, retrieve, create, replace, and delete data views with the as-code data view definition.
+    x-displayName: Data views v2
   - name: Discover sessions
     description: |
       A [Discover session](https://www.elastic.co/docs/explore-analyze/discover) is a saved exploration of your data in Discover. Each session contains one or more tabs, and each tab stores its own data source, query, filters, columns, sorting, and chart settings. Use this API to create and manage Discover sessions programmatically.
@@ -600,7 +604,7 @@ paths:
       responses:
         '200':
           description: Returns the OAuth callback script
-      summary: ''
+      summary: Get OAuth callback script
       tags:
         - connectors
       x-state: ''
@@ -3559,7 +3563,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Update the origin reference for an attachment. Use this after saving a by-value attachment to link it to its persistent store.<br/><br/>[Required authorization] Route required privileges: agentBuilder:read.
+        Update the origin reference for an attachment. Use this after saving a by-value attachment to link it to its persistent store.<br/><br/>[Required authorization] Route required privileges: agentBuilder:read. Extended privileges (optional, expand functionality when granted): agentBuilder:manageAgents.
       operationId: put-agent-builder-conversations-conversation-id-attachments-attachment-id-origin
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -5347,15 +5351,21 @@ paths:
                         description: |-
                           Execute an ES|QL query and return the results in a tabular format.
 
-                          **IMPORTANT**: This tool only **runs** queries; it does not write them.
-                          Think of this as the final step after a query has been prepared.
+                          ## Usage
 
-                          You **must** get the query from one of two sources before calling this tool:
-                          1.  The output of the `platform.core.generate_esql` tool (if the tool is available).
-                          2.  A verbatim query provided directly by the user.
+                          This tool runs an ES|QL query; it does not write one.
 
-                          Under no circumstances should you invent, guess, or modify a query yourself for this tool.
-                          If you need a query, use the `platform.core.generate_esql` tool first.
+                          ### Where the query comes from
+
+                          By default, when you need a new query, use the `platform_core_generate_esql` tool rather than writing it yourself: it inspects the target data and applies ES|QL guidance that is easy to get wrong when writing a query from memory.
+                          Adapting an earlier query to a new question, such as another metric or field, counts as writing a new query: call `platform_core_generate_esql` again for each new question.
+
+                          You can run a query as-is when it comes from:
+                          - the user,
+                          - your instructions or a skill you loaded, such as a query template,
+                          - the result of another tool, or an attachment.
+
+                          These are default guidelines. If your instructions or a skill you loaded tell you to write ES|QL queries yourself and run them with this tool, do so. Do the same if the `platform_core_generate_esql` tool is not available to you.
                         id: platform.core.execute_esql
                         readonly: true
                         schema:
@@ -8637,12 +8647,13 @@ paths:
             maximum: 100
             minimum: 1
             type: integer
-        - description: 'A KQL filter to apply to the action policies. Supported fields: id, name, description, enabled.'
+        - description: 'A KQL filter to apply to the action policies. Supported fields: id, name, description, enabled. Cannot be empty. Omit it to list every action policy.'
           in: query
           name: filter
           required: false
           schema:
             maxLength: 4096
+            minLength: 1
             type: string
         - description: A text string to search across action policy fields.
           in: query
@@ -8781,7 +8792,7 @@ paths:
       summary: List action policies
       tags:
         - alerting-v2
-      x-state: Experimental
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -8911,7 +8922,7 @@ paths:
                     message: The current user does not have the required privileges for this request.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the user does not have the required privileges, or the current license does not support action policies. Creating, updating, and enabling action policies requires an active Enterprise license.
+          description: Indicates the user does not have the required privileges, or the current license does not support action policies. Creating, updating, upserting, and enabling action policies requires an active Enterprise license. Reading, disabling, snoozing, deleting, and rotating the API key of an existing policy do not, so existing policies can still be maintained after a license lapses.
         '500':
           content:
             application/json:
@@ -8941,7 +8952,7 @@ paths:
       summary: Create an action policy
       tags:
         - alerting-v2
-      x-state: Experimental
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -9064,7 +9075,7 @@ paths:
       summary: Delete action policies in bulk by ID
       tags:
         - alerting-v2
-      x-state: Experimental
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -9187,7 +9198,7 @@ paths:
       summary: Disable action policies in bulk by ID
       tags:
         - alerting-v2
-      x-state: Experimental
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -9290,7 +9301,7 @@ paths:
                     message: The current user does not have the required privileges for this request.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the user does not have the required privileges, or the current license does not support action policies. Creating, updating, and enabling action policies requires an active Enterprise license.
+          description: Indicates the user does not have the required privileges, or the current license does not support action policies. Creating, updating, upserting, and enabling action policies requires an active Enterprise license. Reading, disabling, snoozing, deleting, and rotating the API key of an existing policy do not, so existing policies can still be maintained after a license lapses.
         '500':
           content:
             application/json:
@@ -9320,7 +9331,7 @@ paths:
       summary: Enable action policies in bulk by ID
       tags:
         - alerting-v2
-      x-state: Experimental
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -9353,7 +9364,7 @@ paths:
                   ids:
                     - action-policy-1
                     - action-policy-2
-                  snoozed_until: '2026-01-16T12:00:00.000Z'
+                  snoozed_until: '2099-01-16T12:00:00.000Z'
             schema:
               $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_snooze_action_policies_request'
       responses:
@@ -9444,7 +9455,7 @@ paths:
       summary: Snooze action policies in bulk by ID
       tags:
         - alerting-v2
-      x-state: Experimental
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -9567,7 +9578,7 @@ paths:
       summary: Cancel snooze for action policies in bulk by ID
       tags:
         - alerting-v2
-      x-state: Experimental
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -9690,7 +9701,7 @@ paths:
       summary: Rotate API keys for action policies in bulk by ID
       tags:
         - alerting-v2
-      x-state: Experimental
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -9815,7 +9826,7 @@ paths:
       summary: Delete an action policy
       tags:
         - alerting-v2
-      x-state: Experimental
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -9960,7 +9971,7 @@ paths:
       summary: Get an action policy
       tags:
         - alerting-v2
-      x-state: Experimental
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -10093,7 +10104,7 @@ paths:
                     message: The current user does not have the required privileges for this request.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the user does not have the required privileges, or the current license does not support action policies. Creating, updating, and enabling action policies requires an active Enterprise license.
+          description: Indicates the user does not have the required privileges, or the current license does not support action policies. Creating, updating, upserting, and enabling action policies requires an active Enterprise license. Reading, disabling, snoozing, deleting, and rotating the API key of an existing policy do not, so existing policies can still be maintained after a license lapses.
         '404':
           content:
             application/json:
@@ -10153,7 +10164,7 @@ paths:
       summary: Partially update an action policy.
       tags:
         - alerting-v2
-      x-state: Experimental
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -10322,7 +10333,7 @@ paths:
                     message: The current user does not have the required privileges for this request.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the user does not have the required privileges, or the current license does not support action policies. Creating, updating, and enabling action policies requires an active Enterprise license.
+          description: Indicates the user does not have the required privileges, or the current license does not support action policies. Creating, updating, upserting, and enabling action policies requires an active Enterprise license. Reading, disabling, snoozing, deleting, and rotating the API key of an existing policy do not, so existing policies can still be maintained after a license lapses.
         '409':
           content:
             application/json:
@@ -10367,7 +10378,7 @@ paths:
       summary: Create or replace an action policy
       tags:
         - alerting-v2
-      x-state: Experimental
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -10535,7 +10546,7 @@ paths:
       summary: Disable an action policy
       tags:
         - alerting-v2
-      x-state: Experimental
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -10653,7 +10664,7 @@ paths:
                     message: The current user does not have the required privileges for this request.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the user does not have the required privileges, or the current license does not support action policies. Creating, updating, and enabling action policies requires an active Enterprise license.
+          description: Indicates the user does not have the required privileges, or the current license does not support action policies. Creating, updating, upserting, and enabling action policies requires an active Enterprise license. Reading, disabling, snoozing, deleting, and rotating the API key of an existing policy do not, so existing policies can still be maintained after a license lapses.
         '404':
           content:
             application/json:
@@ -10713,7 +10724,7 @@ paths:
       summary: Enable an action policy
       tags:
         - alerting-v2
-      x-state: Experimental
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -10752,7 +10763,7 @@ paths:
               snoozeActionPolicyRequest:
                 summary: Snooze until a specific timestamp
                 value:
-                  snoozed_until: '2026-01-16T12:00:00.000Z'
+                  snoozed_until: '2099-01-16T12:00:00.000Z'
             schema:
               $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_snooze_action_policy_request'
       responses:
@@ -10778,7 +10789,7 @@ paths:
                       tags:
                         - production
                     name: Notify on production alerts
-                    snoozed_until: '2026-01-16T12:00:00.000Z'
+                    snoozed_until: '2099-01-16T12:00:00.000Z'
                     throttle:
                       strategy: on_status_change
                     updated_at: '2026-01-15T12:00:00.000Z'
@@ -10892,7 +10903,7 @@ paths:
       summary: Snooze an action policy
       tags:
         - alerting-v2
-      x-state: Experimental
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -11060,7 +11071,7 @@ paths:
       summary: Unsnooze an action policy
       tags:
         - alerting-v2
-      x-state: Experimental
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -11228,7 +11239,7 @@ paths:
       summary: Update an action policy API key
       tags:
         - alerting-v2
-      x-state: Experimental
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -11352,7 +11363,7 @@ paths:
       summary: Bulk acknowledge alerts
       tags:
         - alerting-v2
-      x-state: Experimental
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -11472,7 +11483,7 @@ paths:
       summary: Bulk activate alerts
       tags:
         - alerting-v2
-      x-state: Experimental
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -11594,7 +11605,7 @@ paths:
       summary: Bulk assign alerts
       tags:
         - alerting-v2
-      x-state: Experimental
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -11714,7 +11725,7 @@ paths:
       summary: Bulk deactivate alerts
       tags:
         - alerting-v2
-      x-state: Experimental
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -11838,7 +11849,7 @@ paths:
       summary: Bulk tag alerts
       tags:
         - alerting-v2
-      x-state: Experimental
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -11958,7 +11969,7 @@ paths:
       summary: Bulk unacknowledge alerts
       tags:
         - alerting-v2
-      x-state: Experimental
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -12105,7 +12116,7 @@ paths:
       summary: Acknowledge an alert
       tags:
         - alerting-v2
-      x-state: Experimental
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -12252,7 +12263,7 @@ paths:
       summary: Activate an alert
       tags:
         - alerting-v2
-      x-state: Experimental
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -12400,7 +12411,7 @@ paths:
       summary: Assign an alert to a user
       tags:
         - alerting-v2
-      x-state: Experimental
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -12547,7 +12558,7 @@ paths:
       summary: Deactivate an alert
       tags:
         - alerting-v2
-      x-state: Experimental
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -12697,7 +12708,7 @@ paths:
       summary: Tag an alert
       tags:
         - alerting-v2
-      x-state: Experimental
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -12844,7 +12855,7 @@ paths:
       summary: Unacknowledge an alert
       tags:
         - alerting-v2
-      x-state: Experimental
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -12878,12 +12889,13 @@ paths:
             maximum: 100
             minimum: 1
             type: integer
-        - description: Inclusive ISO datetime lower bound on the event timestamp; overrides the default 24-hour window. Independent of alert_ids — e.g. set it to an alert’s start time to scope results to that alert’s lifetime.
+        - description: Inclusive ISO datetime lower bound on the event timestamp. Defaults to 24 hours before `to`, or before the request when `to` is omitted. Independent of alert_ids — e.g. set it to an alert’s start time to scope results to that alert’s lifetime.
           in: query
           name: from
           required: false
           schema:
             format: date-time
+            maxLength: 64
             type: string
         - description: Inclusive ISO datetime upper bound on the event timestamp.
           in: query
@@ -12891,6 +12903,7 @@ paths:
           required: false
           schema:
             format: date-time
+            maxLength: 64
             type: string
         - description: Alert filter. Narrows events to those referencing at least one of the provided alert IDs.
           in: query
@@ -12986,7 +12999,7 @@ paths:
                     per_page: 20
                     total: 1
               schema:
-                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_policy_execution_history_response'
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_action_policy_execution_history_response'
           description: Returns a paginated list of execution history events.
         '400':
           content:
@@ -13060,7 +13073,7 @@ paths:
       summary: List action policy executions
       tags:
         - alerting-v2
-      x-state: Experimental
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -13088,6 +13101,14 @@ paths:
             maxItems: 50
             minItems: 1
             type: array
+        - description: Free-text search. Matches rule name, description or rule ID (case-insensitive). Combined with rule_ids using AND.
+          in: query
+          name: search
+          required: false
+          schema:
+            maxLength: 256
+            minLength: 1
+            type: string
         - description: 'Outcome filter. '
           in: query
           name: outcomes
@@ -13101,12 +13122,13 @@ paths:
             maxItems: 2
             minItems: 1
             type: array
-        - description: Inclusive ISO datetime lower bound on event.start.
+        - description: Inclusive ISO datetime lower bound on event.start. Defaults to 24 hours before `to`, or before the request when `to` is omitted. Set it to see older executions.
           in: query
           name: from
           required: false
           schema:
             format: date-time
+            maxLength: 64
             type: string
         - description: Inclusive ISO datetime upper bound on event.start.
           in: query
@@ -13114,6 +13136,7 @@ paths:
           required: false
           schema:
             format: date-time
+            maxLength: 64
             type: string
         - description: Sort field. Defaults to started_at.
           in: query
@@ -13168,7 +13191,6 @@ paths:
                         rule:
                           id: rule-1
                           version: 3
-                        space_id: default
                         started_at: '2026-01-15T12:00:00.000Z'
                         timings:
                           duration_ms: 1250
@@ -13177,7 +13199,7 @@ paths:
                     per_page: 20
                     total: 1
               schema:
-                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_executions_response'
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_execution_history_response'
           description: Returns a paginated list of rule execution events.
         '400':
           content:
@@ -13251,7 +13273,7 @@ paths:
       summary: List rule executions
       tags:
         - alerting-v2
-      x-state: Experimental
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -13283,12 +13305,13 @@ paths:
             maximum: 100
             minimum: 1
             type: integer
-        - description: The filter to apply to the rules.
+        - description: 'A KQL filter to apply to the rules. Supported fields: id, kind, enabled, metadata.name, metadata.description, metadata.tags, metadata.routing_tags. Cannot be empty. Omit it to list every rule.'
           in: query
           name: filter
           required: false
           schema:
             maxLength: 4096
+            minLength: 1
             type: string
         - description: The field to sort rules by.
           in: query
@@ -13445,7 +13468,7 @@ paths:
       summary: List rules
       tags:
         - alerting-v2
-      x-state: Experimental
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -13626,7 +13649,7 @@ paths:
       summary: Create a rule
       tags:
         - alerting-v2
-      x-state: Experimental
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -13880,7 +13903,7 @@ paths:
       summary: Create rules in bulk
       tags:
         - alerting-v2
-      x-state: Experimental
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -14000,7 +14023,7 @@ paths:
       summary: Delete rules in bulk by ID
       tags:
         - alerting-v2
-      x-state: Experimental
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -14120,7 +14143,7 @@ paths:
       summary: Disable rules in bulk by ID
       tags:
         - alerting-v2
-      x-state: Experimental
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -14240,7 +14263,7 @@ paths:
       summary: Enable rules in bulk by ID
       tags:
         - alerting-v2
-      x-state: Experimental
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -14253,7 +14276,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        [Required authorization] Route required privileges: read_alerting-v2-rules.
+        Returns the requested rules. Ids that match no rule are reported per item in `errors` as `RULE_NOT_FOUND`. The request itself succeeds as long as it is valid.<br/><br/>[Required authorization] Route required privileges: read_alerting-v2-rules.
       operationId: post-alerting-v2-rules-bulk-get
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -14281,8 +14304,15 @@ paths:
             application/json:
               examples:
                 bulkGetRulesResponse:
-                  summary: Returned the requested rules
+                  summary: Returned one rule and reported the other id as not found
                   value:
+                    errors:
+                      - error:
+                          code: RULE_NOT_FOUND
+                          details:
+                            rule_id: rule-id-2
+                          message: Rule with id "rule-id-2" not found
+                        id: rule-id-2
                     items:
                       - created_at: '2026-01-15T12:00:00.000Z'
                         created_by:
@@ -14324,7 +14354,7 @@ paths:
                         version: 1
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_get_rules_response'
-          description: Returns the requested rules.
+          description: Returns the rules that were found in `items` and a per-item error in `errors` for every id that matched no rule.
         '400':
           content:
             application/json:
@@ -14368,19 +14398,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates the user does not have the required privileges to perform the request.
-        '404':
-          content:
-            application/json:
-              examples:
-                rulesNotFound:
-                  summary: One or more requested rule ids could not be found
-                  value:
-                    code: NOT_FOUND
-                    error: Not Found
-                    message: Saved object [alerting_rule/rule-1] not found
-              schema:
-                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: One or more rule ids could not be found.
         '500':
           content:
             application/json:
@@ -14410,7 +14427,7 @@ paths:
       summary: Get rules in bulk
       tags:
         - alerting-v2
-      x-state: Experimental
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -14530,7 +14547,7 @@ paths:
       summary: Update the API key of rules in bulk by ID
       tags:
         - alerting-v2
-      x-state: Experimental
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -14652,7 +14669,7 @@ paths:
       summary: Delete rules matching a query (dry-run by default)
       tags:
         - alerting-v2
-      x-state: Experimental
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -14774,7 +14791,7 @@ paths:
       summary: Disable rules matching a query (dry-run by default)
       tags:
         - alerting-v2
-      x-state: Experimental
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -14896,7 +14913,7 @@ paths:
       summary: Enable rules matching a query (dry-run by default)
       tags:
         - alerting-v2
-      x-state: Experimental
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -15018,7 +15035,7 @@ paths:
       summary: Update the API key of rules matching a query (dry-run by default)
       tags:
         - alerting-v2
-      x-state: Experimental
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -15143,7 +15160,7 @@ paths:
       summary: Delete a rule
       tags:
         - alerting-v2
-      x-state: Experimental
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -15192,8 +15209,6 @@ paths:
                       tags:
                         - production
                         - infra
-                      template:
-                        id: host-cpu-high
                     no_data:
                       strategy: keep_last
                     query:
@@ -15308,7 +15323,7 @@ paths:
       summary: Get a rule
       tags:
         - alerting-v2
-      x-state: Experimental
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -15503,7 +15518,7 @@ paths:
       summary: Update a rule
       tags:
         - alerting-v2
-      x-state: Experimental
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -15756,7 +15771,7 @@ paths:
       summary: Create or replace a rule
       tags:
         - alerting-v2
-      x-state: Experimental
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -15942,7 +15957,7 @@ paths:
       summary: Disable a rule
       tags:
         - alerting-v2
-      x-state: Experimental
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -16124,7 +16139,7 @@ paths:
       summary: Enable a rule
       tags:
         - alerting-v2
-      x-state: Experimental
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -16259,7 +16274,7 @@ paths:
       summary: Run a rule now
       tags:
         - alerting-v2
-      x-state: Experimental
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -25762,6 +25777,660 @@ paths:
           source: |
             POST kbn://api/data_views/swap_references/_preview
             {"fromId":"abcd-efg","toId":"xyz-123"}
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+  /api/data_views/v2:
+    get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/data_views/v2</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Returns a paginated list of the data views in the current space. Each item includes only the name, index pattern, and time field. To get the full definition, use `GET /api/data_views/v2/{id}`.
+      operationId: get-data-views-v2
+      parameters:
+        - description: The page of results to return.
+          in: query
+          name: page
+          required: false
+          schema:
+            default: 1
+            minimum: 1
+            type: number
+        - description: The number of results to return per page.
+          in: query
+          name: per_page
+          required: false
+          schema:
+            default: 20
+            maximum: 1000
+            minimum: 1
+            type: number
+        - description: Filters results by `name` and `index_pattern` using Elasticsearch [`simple_query_string`](https://www.elastic.co/docs/reference/query-languages/query-dsl/query-dsl-simple-query-string-query) syntax.
+          in: query
+          name: query
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                getDataViewsResponse:
+                  summary: Paginated data views response
+                  value:
+                    data:
+                      - data:
+                          index_pattern: logs-*
+                          name: Web logs
+                          time_field: '@timestamp'
+                        id: c0ffee00-d57a-11ef-9a52-4f3c2a8d0e1b
+                        meta:
+                          created_at: '2026-01-15T10:00:00.000Z'
+                          created_by: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
+                          managed: false
+                          spaces:
+                            - default
+                          updated_at: '2026-01-16T08:30:00.000Z'
+                          updated_by: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
+                          version: WzIsMV0=
+                      - data:
+                          index_pattern: metrics-*
+                          name: Metrics
+                        id: a1b2c3d4-d57a-11ef-9a52-4f3c2a8d0e1b
+                        meta:
+                          created_at: '2026-01-15T11:00:00.000Z'
+                          managed: false
+                          spaces:
+                            - default
+                          updated_at: '2026-01-15T11:00:00.000Z'
+                          version: WzMsMV0=
+                    meta:
+                      page: 1
+                      per_page: 20
+                      total: 2
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  data:
+                    items:
+                      type: object
+                      properties:
+                        data:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            index_pattern:
+                              $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-index-pattern-schema'
+                            name:
+                              description: 'The name of the data view. Example: "Sample data view".'
+                              maxLength: 256
+                              minLength: 1
+                              title: Data view name
+                              type: string
+                            time_field:
+                              $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-time-field-schema'
+                          required:
+                            - index_pattern
+                        id:
+                          description: The ID of the data view.
+                          maxLength: 1000
+                          type: string
+                        meta:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            created_at:
+                              description: Timestamp when the object was created (ISO 8601).
+                              type: string
+                            created_by:
+                              description: User profile ID of the user who created the object.
+                              type: string
+                            managed:
+                              description: When `true`, the object is managed by Kibana and cannot be edited by users.
+                              type: boolean
+                            owner:
+                              description: Identifier of the plugin or team that owns this object.
+                              type: string
+                            spaces:
+                              description: The IDs of the spaces where the data view is available.
+                              items:
+                                maxLength: 1000
+                                type: string
+                              maxItems: 100
+                              type: array
+                            updated_at:
+                              description: Timestamp when the object was last updated (ISO 8601).
+                              type: string
+                            updated_by:
+                              description: User profile ID of the user who last updated the object.
+                              type: string
+                            version:
+                              description: Internal version identifier for optimistic concurrency control.
+                              type: string
+                      required:
+                        - id
+                        - data
+                        - meta
+                    maxItems: 1000
+                    type: array
+                  meta:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      page:
+                        default: 1
+                        description: The returned page of results.
+                        minimum: 1
+                        type: number
+                      per_page:
+                        default: 20
+                        description: The number of results returned per page.
+                        maximum: 1000
+                        minimum: 1
+                        type: number
+                      total:
+                        description: The total number of results matching the query.
+                        type: number
+                    required:
+                      - total
+                required:
+                  - data
+                  - meta
+          description: OK
+        '400':
+          description: bad request
+      summary: Search data views
+      tags:
+        - data-views-v2
+      x-state: Generally available
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/data_views/v2</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Creates a data view and returns it. Kibana generates the data view ID. If a data view with the same name already exists, the request fails with a conflict.<br/><br/>[Required authorization] Route required privileges: indexPatterns:manage.
+      operationId: post-data-views-v2
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              createDataViewRequest:
+                summary: Create a data view
+                value:
+                  index_pattern: logs-*
+                  name: Web logs
+                  time_field: '@timestamp'
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                allow_hidden_indices:
+                  description: When `true`, allows the data view to match hidden indices.
+                  title: Allow hidden and system indices
+                  type: boolean
+                field_filters:
+                  $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-field-filters-schema'
+                field_settings:
+                  additionalProperties:
+                    $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-saved-field-settings-entry'
+                  description: Settings for individual fields, keyed by field name. To change how Kibana displays a field from the backing indices, set its label, description, format, or popularity. To define a runtime field, use the runtime field name and set `type`.
+                  title: Field settings
+                  type: object
+                index_pattern:
+                  $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-index-pattern-schema'
+                name:
+                  description: 'The name of the data view. Example: "Sample data view".'
+                  maxLength: 256
+                  minLength: 1
+                  title: Data view name
+                  type: string
+                time_field:
+                  $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-time-field-schema'
+              required:
+                - index_pattern
+      responses:
+        '201':
+          content:
+            application/json:
+              examples:
+                dataViewResponse:
+                  summary: Data view response
+                  value:
+                    data:
+                      index_pattern: logs-*
+                      name: Web logs
+                      time_field: '@timestamp'
+                    id: c0ffee00-d57a-11ef-9a52-4f3c2a8d0e1b
+                    meta:
+                      managed: false
+                      spaces:
+                        - default
+                      version: WzEsMV0=
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-saved-data-view-spec-schema'
+                    description: The data view definition.
+                  id:
+                    description: The ID of the data view.
+                    maxLength: 1000
+                    type: string
+                  meta:
+                    additionalProperties: false
+                    description: Metadata about the data view.
+                    type: object
+                    properties:
+                      created_at:
+                        description: Timestamp when the object was created (ISO 8601).
+                        type: string
+                      created_by:
+                        description: User profile ID of the user who created the object.
+                        type: string
+                      managed:
+                        description: When `true`, the object is managed by Kibana and cannot be edited by users.
+                        type: boolean
+                      owner:
+                        description: Identifier of the plugin or team that owns this object.
+                        type: string
+                      spaces:
+                        description: The IDs of the spaces where the data view is available.
+                        items:
+                          maxLength: 1000
+                          type: string
+                        maxItems: 100
+                        type: array
+                      updated_at:
+                        description: Timestamp when the object was last updated (ISO 8601).
+                        type: string
+                      updated_by:
+                        description: User profile ID of the user who last updated the object.
+                        type: string
+                      version:
+                        description: Internal version identifier for optimistic concurrency control.
+                        type: string
+                required:
+                  - id
+                  - data
+                  - meta
+          description: The data view was created.
+        '400':
+          description: The request is invalid, for example when a field format type does not exist.
+        '403':
+          description: forbidden
+        '409':
+          description: A data view with the same name already exists.
+      summary: Create a data view
+      tags:
+        - data-views-v2
+      x-state: Generally available
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+  /api/data_views/v2/{id}:
+    delete:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/data_views/v2/{id}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Permanently deletes a data view by ID. You can't recover a deleted data view.<br/><br/>[Required authorization] Route required privileges: indexPatterns:manage.
+      operationId: delete-data-views-v2-id
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: The ID of the data view to delete.
+          in: path
+          name: id
+          required: true
+          schema:
+            maxLength: 1000
+            minLength: 1
+            type: string
+      responses:
+        '204':
+          description: deleted
+        '403':
+          description: forbidden
+        '404':
+          description: not found
+      summary: Delete a data view
+      tags:
+        - data-views-v2
+      x-state: Generally available
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+    get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/data_views/v2/{id}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Returns a data view by ID, including its field settings and runtime fields.
+      operationId: get-data-views-v2-id
+      parameters:
+        - description: The ID of the data view to return.
+          in: path
+          name: id
+          required: true
+          schema:
+            maxLength: 1000
+            minLength: 1
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                dataViewResponse:
+                  summary: Data view response
+                  value:
+                    data:
+                      index_pattern: logs-*
+                      name: Web logs
+                      time_field: '@timestamp'
+                    id: c0ffee00-d57a-11ef-9a52-4f3c2a8d0e1b
+                    meta:
+                      managed: false
+                      spaces:
+                        - default
+                      version: WzEsMV0=
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-saved-data-view-spec-schema'
+                    description: The data view definition.
+                  id:
+                    description: The ID of the data view.
+                    maxLength: 1000
+                    type: string
+                  meta:
+                    additionalProperties: false
+                    description: Metadata about the data view.
+                    type: object
+                    properties:
+                      created_at:
+                        description: Timestamp when the object was created (ISO 8601).
+                        type: string
+                      created_by:
+                        description: User profile ID of the user who created the object.
+                        type: string
+                      managed:
+                        description: When `true`, the object is managed by Kibana and cannot be edited by users.
+                        type: boolean
+                      owner:
+                        description: Identifier of the plugin or team that owns this object.
+                        type: string
+                      spaces:
+                        description: The IDs of the spaces where the data view is available.
+                        items:
+                          maxLength: 1000
+                          type: string
+                        maxItems: 100
+                        type: array
+                      updated_at:
+                        description: Timestamp when the object was last updated (ISO 8601).
+                        type: string
+                      updated_by:
+                        description: User profile ID of the user who last updated the object.
+                        type: string
+                      version:
+                        description: Internal version identifier for optimistic concurrency control.
+                        type: string
+                required:
+                  - id
+                  - data
+                  - meta
+          description: OK
+        '404':
+          description: not found
+      summary: Get a data view
+      tags:
+        - data-views-v2
+      x-state: Generally available
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+    put:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/data_views/v2/{id}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Creates the data view with the ID in the path, or replaces its definition if it already exists. Returns `201` when the request creates a data view and `200` when it replaces one. A replacement removes any optional property you omit, such as `time_field`.<br/><br/>[Required authorization] Route required privileges: indexPatterns:manage.
+      operationId: put-data-views-v2-id
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: The ID of the data view to create or update.
+          in: path
+          name: id
+          required: true
+          schema:
+            maxLength: 1000
+            minLength: 1
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              updateDataViewRequest:
+                summary: Create or update a data view
+                value:
+                  index_pattern: logs-*
+                  name: Web logs
+                  time_field: '@timestamp'
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                allow_hidden_indices:
+                  description: When `true`, allows the data view to match hidden indices.
+                  title: Allow hidden and system indices
+                  type: boolean
+                field_filters:
+                  $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-field-filters-schema'
+                field_settings:
+                  additionalProperties:
+                    $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-saved-field-settings-entry'
+                  description: Settings for individual fields, keyed by field name. To change how Kibana displays a field from the backing indices, set its label, description, format, or popularity. To define a runtime field, use the runtime field name and set `type`.
+                  title: Field settings
+                  type: object
+                index_pattern:
+                  $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-index-pattern-schema'
+                name:
+                  description: 'The name of the data view. Example: "Sample data view".'
+                  maxLength: 256
+                  minLength: 1
+                  title: Data view name
+                  type: string
+                time_field:
+                  $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-time-field-schema'
+              required:
+                - index_pattern
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                dataViewResponse:
+                  summary: Data view response
+                  value:
+                    data:
+                      index_pattern: logs-*
+                      name: Web logs
+                      time_field: '@timestamp'
+                    id: c0ffee00-d57a-11ef-9a52-4f3c2a8d0e1b
+                    meta:
+                      managed: false
+                      spaces:
+                        - default
+                      version: WzEsMV0=
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-saved-data-view-spec-schema'
+                    description: The data view definition.
+                  id:
+                    description: The ID of the data view.
+                    maxLength: 1000
+                    type: string
+                  meta:
+                    additionalProperties: false
+                    description: Metadata about the data view.
+                    type: object
+                    properties:
+                      created_at:
+                        description: Timestamp when the object was created (ISO 8601).
+                        type: string
+                      created_by:
+                        description: User profile ID of the user who created the object.
+                        type: string
+                      managed:
+                        description: When `true`, the object is managed by Kibana and cannot be edited by users.
+                        type: boolean
+                      owner:
+                        description: Identifier of the plugin or team that owns this object.
+                        type: string
+                      spaces:
+                        description: The IDs of the spaces where the data view is available.
+                        items:
+                          maxLength: 1000
+                          type: string
+                        maxItems: 100
+                        type: array
+                      updated_at:
+                        description: Timestamp when the object was last updated (ISO 8601).
+                        type: string
+                      updated_by:
+                        description: User profile ID of the user who last updated the object.
+                        type: string
+                      version:
+                        description: Internal version identifier for optimistic concurrency control.
+                        type: string
+                required:
+                  - id
+                  - data
+                  - meta
+          description: updated
+        '201':
+          content:
+            application/json:
+              examples:
+                dataViewResponse:
+                  summary: Data view response
+                  value:
+                    data:
+                      index_pattern: logs-*
+                      name: Web logs
+                      time_field: '@timestamp'
+                    id: c0ffee00-d57a-11ef-9a52-4f3c2a8d0e1b
+                    meta:
+                      managed: false
+                      spaces:
+                        - default
+                      version: WzEsMV0=
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-saved-data-view-spec-schema'
+                    description: The data view definition.
+                  id:
+                    description: The ID of the data view.
+                    maxLength: 1000
+                    type: string
+                  meta:
+                    additionalProperties: false
+                    description: Metadata about the data view.
+                    type: object
+                    properties:
+                      created_at:
+                        description: Timestamp when the object was created (ISO 8601).
+                        type: string
+                      created_by:
+                        description: User profile ID of the user who created the object.
+                        type: string
+                      managed:
+                        description: When `true`, the object is managed by Kibana and cannot be edited by users.
+                        type: boolean
+                      owner:
+                        description: Identifier of the plugin or team that owns this object.
+                        type: string
+                      spaces:
+                        description: The IDs of the spaces where the data view is available.
+                        items:
+                          maxLength: 1000
+                          type: string
+                        maxItems: 100
+                        type: array
+                      updated_at:
+                        description: Timestamp when the object was last updated (ISO 8601).
+                        type: string
+                      updated_by:
+                        description: User profile ID of the user who last updated the object.
+                        type: string
+                      version:
+                        description: Internal version identifier for optimistic concurrency control.
+                        type: string
+                required:
+                  - id
+                  - data
+                  - meta
+          description: created
+        '400':
+          description: invalid request
+        '403':
+          description: forbidden
+        '409':
+          description: conflict
+      summary: Upsert a data view
+      tags:
+        - data-views-v2
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -47411,9 +48080,17 @@ paths:
                     - ecs
                     - otel
                   type: string
+                description:
+                  description: Integration description from the Service settings step.
+                  maxLength: 2048
+                  type: string
                 globalRegion:
                   description: Global AWS region from the Service Settings step.
                   maxLength: 64
+                  type: string
+                integrationName:
+                  description: Integration name as entered in the Service settings step, before any per-package suffix is applied.
+                  maxLength: 160
                   type: string
                 mechanisms:
                   description: Delivery mechanisms active in this deployment.
@@ -47571,6 +48248,9 @@ paths:
                       deploymentName:
                         description: Opaque deployment name; for AWS, the CFN stack name.
                         type: string
+                      description:
+                        description: Integration description from the Service settings step.
+                        type: string
                       ecfStacks:
                         description: ECF CloudFormation stacks launched as part of this deployment. Written by the wizard after the user clicks Launch.
                         items:
@@ -47617,6 +48297,9 @@ paths:
                         description: Global AWS region from the Service Settings step.
                         type: string
                       id:
+                        type: string
+                      integrationName:
+                        description: Integration name as entered in the Service settings step, before any per-package suffix is applied.
                         type: string
                       mechanisms:
                         items:
@@ -47918,6 +48601,9 @@ paths:
                       deploymentName:
                         description: Opaque deployment name; for AWS, the CFN stack name.
                         type: string
+                      description:
+                        description: Integration description from the Service settings step.
+                        type: string
                       ecfStacks:
                         description: ECF CloudFormation stacks launched as part of this deployment. Written by the wizard after the user clicks Launch.
                         items:
@@ -47964,6 +48650,9 @@ paths:
                         description: Global AWS region from the Service Settings step.
                         type: string
                       id:
+                        type: string
+                      integrationName:
+                        description: Integration name as entered in the Service settings step, before any per-package suffix is applied.
                         type: string
                       mechanisms:
                         items:
@@ -48158,6 +48847,11 @@ paths:
                 deploymentName:
                   maxLength: 255
                   type: string
+                description:
+                  description: Integration description from the Service settings step. Send null to clear it.
+                  maxLength: 2048
+                  nullable: true
+                  type: string
                 ecfStacks:
                   description: ECF CloudFormation stacks to record for this deployment.
                   items:
@@ -48200,6 +48894,10 @@ paths:
                       - templateVersion
                   maxItems: 10
                   type: array
+                integrationName:
+                  description: Integration name used by the last deploy, before any per-package suffix. Refreshed on each deploy because an unedited default name follows the service selection.
+                  maxLength: 160
+                  type: string
                 mechanisms:
                   description: Delivery mechanisms active in this deployment. Replaces the stored mechanisms array.
                   items:
@@ -48325,6 +49023,9 @@ paths:
                       deploymentName:
                         description: Opaque deployment name; for AWS, the CFN stack name.
                         type: string
+                      description:
+                        description: Integration description from the Service settings step.
+                        type: string
                       ecfStacks:
                         description: ECF CloudFormation stacks launched as part of this deployment. Written by the wizard after the user clicks Launch.
                         items:
@@ -48371,6 +49072,9 @@ paths:
                         description: Global AWS region from the Service Settings step.
                         type: string
                       id:
+                        type: string
+                      integrationName:
+                        description: Integration name as entered in the Service settings step, before any per-package suffix is applied.
                         type: string
                       mechanisms:
                         items:
@@ -48599,6 +49303,9 @@ paths:
                         deploymentName:
                           description: Opaque deployment name; for AWS, the CFN stack name.
                           type: string
+                        description:
+                          description: Integration description from the Service settings step.
+                          type: string
                         ecfStacks:
                           description: ECF CloudFormation stacks launched as part of this deployment. Written by the wizard after the user clicks Launch.
                           items:
@@ -48645,6 +49352,9 @@ paths:
                           description: Global AWS region from the Service Settings step.
                           type: string
                         id:
+                          type: string
+                        integrationName:
+                          description: Integration name as entered in the Service settings step, before any per-package suffix is applied.
                           type: string
                         mechanisms:
                           items:
@@ -69602,6 +70312,7 @@ paths:
                     '@timestamp':
                       description: The time the entity record was last updated.
                       format: date-time
+                      maxLength: 64
                       type: string
                     asset:
                       additionalProperties: false
@@ -69715,14 +70426,17 @@ paths:
                             first_seen:
                               description: When the entity was first observed.
                               format: date-time
+                              maxLength: 64
                               type: string
                             last_activity:
                               description: When the entity last generated activity.
                               format: date-time
+                              maxLength: 64
                               type: string
                             last_seen:
                               description: When the entity was last observed.
                               format: date-time
+                              maxLength: 64
                               type: string
                         name:
                           description: Human-readable name of the entity.
@@ -70144,6 +70858,7 @@ paths:
                         ingested:
                           description: When the event was ingested into Elasticsearch.
                           format: date-time
+                          maxLength: 64
                           type: string
                     labels:
                       additionalProperties: {}
@@ -70220,6 +70935,7 @@ paths:
                     '@timestamp':
                       description: The time the entity record was last updated.
                       format: date-time
+                      maxLength: 64
                       type: string
                     asset:
                       additionalProperties: false
@@ -70333,14 +71049,17 @@ paths:
                             first_seen:
                               description: When the entity was first observed.
                               format: date-time
+                              maxLength: 64
                               type: string
                             last_activity:
                               description: When the entity last generated activity.
                               format: date-time
+                              maxLength: 64
                               type: string
                             last_seen:
                               description: When the entity was last observed.
                               format: date-time
+                              maxLength: 64
                               type: string
                         name:
                           description: Human-readable name of the entity.
@@ -70762,6 +71481,7 @@ paths:
                         ingested:
                           description: When the event was ingested into Elasticsearch.
                           format: date-time
+                          maxLength: 64
                           type: string
                     host:
                       additionalProperties: false
@@ -70870,6 +71590,7 @@ paths:
                     '@timestamp':
                       description: The time the entity record was last updated.
                       format: date-time
+                      maxLength: 64
                       type: string
                     asset:
                       additionalProperties: false
@@ -70983,14 +71704,17 @@ paths:
                             first_seen:
                               description: When the entity was first observed.
                               format: date-time
+                              maxLength: 64
                               type: string
                             last_activity:
                               description: When the entity last generated activity.
                               format: date-time
+                              maxLength: 64
                               type: string
                             last_seen:
                               description: When the entity was last observed.
                               format: date-time
+                              maxLength: 64
                               type: string
                         name:
                           description: Human-readable name of the entity.
@@ -71412,6 +72136,7 @@ paths:
                         ingested:
                           description: When the event was ingested into Elasticsearch.
                           format: date-time
+                          maxLength: 64
                           type: string
                     labels:
                       additionalProperties: {}
@@ -71495,6 +72220,7 @@ paths:
                     '@timestamp':
                       description: The time the entity record was last updated.
                       format: date-time
+                      maxLength: 64
                       type: string
                     asset:
                       additionalProperties: false
@@ -71655,14 +72381,17 @@ paths:
                             first_seen:
                               description: When the entity was first observed.
                               format: date-time
+                              maxLength: 64
                               type: string
                             last_activity:
                               description: When the entity last generated activity.
                               format: date-time
+                              maxLength: 64
                               type: string
                             last_seen:
                               description: When the entity was last observed.
                               format: date-time
+                              maxLength: 64
                               type: string
                         name:
                           description: Human-readable name of the entity.
@@ -72083,6 +72812,7 @@ paths:
                       properties:
                         ingested:
                           format: date-time
+                          maxLength: 64
                           type: string
                     labels:
                       additionalProperties: {}
@@ -72276,6 +73006,7 @@ paths:
                     '@timestamp':
                       description: The time the entity record was last updated.
                       format: date-time
+                      maxLength: 64
                       type: string
                     asset:
                       additionalProperties: false
@@ -72389,14 +73120,17 @@ paths:
                             first_seen:
                               description: When the entity was first observed.
                               format: date-time
+                              maxLength: 64
                               type: string
                             last_activity:
                               description: When the entity last generated activity.
                               format: date-time
+                              maxLength: 64
                               type: string
                             last_seen:
                               description: When the entity was last observed.
                               format: date-time
+                              maxLength: 64
                               type: string
                         name:
                           description: Human-readable name of the entity.
@@ -72818,6 +73552,7 @@ paths:
                         ingested:
                           description: When the event was ingested into Elasticsearch.
                           format: date-time
+                          maxLength: 64
                           type: string
                     labels:
                       additionalProperties: {}
@@ -72894,6 +73629,7 @@ paths:
                     '@timestamp':
                       description: The time the entity record was last updated.
                       format: date-time
+                      maxLength: 64
                       type: string
                     asset:
                       additionalProperties: false
@@ -73007,14 +73743,17 @@ paths:
                             first_seen:
                               description: When the entity was first observed.
                               format: date-time
+                              maxLength: 64
                               type: string
                             last_activity:
                               description: When the entity last generated activity.
                               format: date-time
+                              maxLength: 64
                               type: string
                             last_seen:
                               description: When the entity was last observed.
                               format: date-time
+                              maxLength: 64
                               type: string
                         name:
                           description: Human-readable name of the entity.
@@ -73436,6 +74175,7 @@ paths:
                         ingested:
                           description: When the event was ingested into Elasticsearch.
                           format: date-time
+                          maxLength: 64
                           type: string
                     host:
                       additionalProperties: false
@@ -73544,6 +74284,7 @@ paths:
                     '@timestamp':
                       description: The time the entity record was last updated.
                       format: date-time
+                      maxLength: 64
                       type: string
                     asset:
                       additionalProperties: false
@@ -73657,14 +74398,17 @@ paths:
                             first_seen:
                               description: When the entity was first observed.
                               format: date-time
+                              maxLength: 64
                               type: string
                             last_activity:
                               description: When the entity last generated activity.
                               format: date-time
+                              maxLength: 64
                               type: string
                             last_seen:
                               description: When the entity was last observed.
                               format: date-time
+                              maxLength: 64
                               type: string
                         name:
                           description: Human-readable name of the entity.
@@ -74086,6 +74830,7 @@ paths:
                         ingested:
                           description: When the event was ingested into Elasticsearch.
                           format: date-time
+                          maxLength: 64
                           type: string
                     labels:
                       additionalProperties: {}
@@ -74169,6 +74914,7 @@ paths:
                     '@timestamp':
                       description: The time the entity record was last updated.
                       format: date-time
+                      maxLength: 64
                       type: string
                     asset:
                       additionalProperties: false
@@ -74329,14 +75075,17 @@ paths:
                             first_seen:
                               description: When the entity was first observed.
                               format: date-time
+                              maxLength: 64
                               type: string
                             last_activity:
                               description: When the entity last generated activity.
                               format: date-time
+                              maxLength: 64
                               type: string
                             last_seen:
                               description: When the entity was last observed.
                               format: date-time
+                              maxLength: 64
                               type: string
                         name:
                           description: Human-readable name of the entity.
@@ -74757,6 +75506,7 @@ paths:
                       properties:
                         ingested:
                           format: date-time
+                          maxLength: 64
                           type: string
                     labels:
                       additionalProperties: {}
@@ -74950,6 +75700,7 @@ paths:
                               '@timestamp':
                                 description: The time the entity record was last updated.
                                 format: date-time
+                                maxLength: 64
                                 type: string
                               asset:
                                 additionalProperties: false
@@ -75063,14 +75814,17 @@ paths:
                                       first_seen:
                                         description: When the entity was first observed.
                                         format: date-time
+                                        maxLength: 64
                                         type: string
                                       last_activity:
                                         description: When the entity last generated activity.
                                         format: date-time
+                                        maxLength: 64
                                         type: string
                                       last_seen:
                                         description: When the entity was last observed.
                                         format: date-time
+                                        maxLength: 64
                                         type: string
                                   name:
                                     description: Human-readable name of the entity.
@@ -75492,6 +76246,7 @@ paths:
                                   ingested:
                                     description: When the event was ingested into Elasticsearch.
                                     format: date-time
+                                    maxLength: 64
                                     type: string
                               labels:
                                 additionalProperties: {}
@@ -75568,6 +76323,7 @@ paths:
                               '@timestamp':
                                 description: The time the entity record was last updated.
                                 format: date-time
+                                maxLength: 64
                                 type: string
                               asset:
                                 additionalProperties: false
@@ -75681,14 +76437,17 @@ paths:
                                       first_seen:
                                         description: When the entity was first observed.
                                         format: date-time
+                                        maxLength: 64
                                         type: string
                                       last_activity:
                                         description: When the entity last generated activity.
                                         format: date-time
+                                        maxLength: 64
                                         type: string
                                       last_seen:
                                         description: When the entity was last observed.
                                         format: date-time
+                                        maxLength: 64
                                         type: string
                                   name:
                                     description: Human-readable name of the entity.
@@ -76110,6 +76869,7 @@ paths:
                                   ingested:
                                     description: When the event was ingested into Elasticsearch.
                                     format: date-time
+                                    maxLength: 64
                                     type: string
                               host:
                                 additionalProperties: false
@@ -76218,6 +76978,7 @@ paths:
                               '@timestamp':
                                 description: The time the entity record was last updated.
                                 format: date-time
+                                maxLength: 64
                                 type: string
                               asset:
                                 additionalProperties: false
@@ -76331,14 +77092,17 @@ paths:
                                       first_seen:
                                         description: When the entity was first observed.
                                         format: date-time
+                                        maxLength: 64
                                         type: string
                                       last_activity:
                                         description: When the entity last generated activity.
                                         format: date-time
+                                        maxLength: 64
                                         type: string
                                       last_seen:
                                         description: When the entity was last observed.
                                         format: date-time
+                                        maxLength: 64
                                         type: string
                                   name:
                                     description: Human-readable name of the entity.
@@ -76760,6 +77524,7 @@ paths:
                                   ingested:
                                     description: When the event was ingested into Elasticsearch.
                                     format: date-time
+                                    maxLength: 64
                                     type: string
                               labels:
                                 additionalProperties: {}
@@ -76843,6 +77608,7 @@ paths:
                               '@timestamp':
                                 description: The time the entity record was last updated.
                                 format: date-time
+                                maxLength: 64
                                 type: string
                               asset:
                                 additionalProperties: false
@@ -77003,14 +77769,17 @@ paths:
                                       first_seen:
                                         description: When the entity was first observed.
                                         format: date-time
+                                        maxLength: 64
                                         type: string
                                       last_activity:
                                         description: When the entity last generated activity.
                                         format: date-time
+                                        maxLength: 64
                                         type: string
                                       last_seen:
                                         description: When the entity was last observed.
                                         format: date-time
+                                        maxLength: 64
                                         type: string
                                   name:
                                     description: Human-readable name of the entity.
@@ -77431,6 +78200,7 @@ paths:
                                 properties:
                                   ingested:
                                     format: date-time
+                                    maxLength: 64
                                     type: string
                               labels:
                                 additionalProperties: {}
@@ -130099,7 +130869,7 @@ paths:
                   maxLength: 1000
                   type: string
                 include:
-                  $ref: '#/components/schemas/Kibana_HTTP_APIs__zod_v4_56___schema0'
+                  $ref: '#/components/schemas/Kibana_HTTP_APIs__zod_v4_63___schema0'
                 name:
                   maxLength: 256
                   type: string
@@ -146973,7 +147743,7 @@ components:
           type: boolean
       required:
         - data_view
-    Kibana_HTTP_APIs__zod_v4_56___schema0:
+    Kibana_HTTP_APIs__zod_v4_63___schema0:
       anyOf:
         - additionalProperties: false
           type: object
@@ -147002,7 +147772,7 @@ components:
                 routing:
                   items:
                     allOf:
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs__zod_v4_56___schema0'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs__zod_v4_63___schema0'
                       - type: object
                         properties:
                           destination:
@@ -147539,6 +148309,154 @@ components:
         propertyName: type
       oneOf:
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_workflow_action_policy_destination'
+    Kibana_HTTP_APIs_alerting_action_policy_execution_history_item:
+      additionalProperties: false
+      type: object
+      properties:
+        action_group_count:
+          type: number
+        alert_count:
+          type: number
+        alerts:
+          description: Alert IDs referenced by this event, bounded to 50. Empty when the event references no alerts. Use `alert_count` for the true total.
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+            required:
+              - id
+          maxItems: 50
+          type: array
+        dispatched_at:
+          format: date-time
+          maxLength: 64
+          type: string
+        error:
+          additionalProperties: false
+          description: Failure details. Omitted when the dispatch did not fail.
+          type: object
+          properties:
+            message:
+              type: string
+            stack_trace:
+              description: Omitted when the source recorded no trace.
+              type: string
+          required:
+            - message
+        failure_reason:
+          enum:
+            - missing_api_key
+            - workflow_not_found
+            - workflow_disabled
+            - schedule_error
+            - license_not_supported
+          type: string
+        outcome:
+          enum:
+            - success
+            - throttled
+            - failure
+          type: string
+        policy:
+          additionalProperties: false
+          type: object
+          properties:
+            id:
+              type: string
+            name:
+              description: Omitted when the referenced resource could not be resolved.
+              type: string
+          required:
+            - id
+        rule_count:
+          description: Number of rules referenced by this event after search or rule-filter narrowing. Unlike `total` on a list response, this is an exact count and it can exceed `rules.length` when the embedded array is truncated to the cap.
+          type: number
+        rules:
+          description: Rules referenced by this event, bounded to 20. When a search or rule filter narrows the match, this array is intersected with the matched subset server-side. Use `rule_count` for the full count.
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              name:
+                description: Omitted when the referenced resource could not be resolved.
+                type: string
+            required:
+              - id
+          maxItems: 20
+          type: array
+        workflows:
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              name:
+                description: Omitted when the referenced resource could not be resolved.
+                type: string
+            required:
+              - id
+          maxItems: 100
+          type: array
+      required:
+        - dispatched_at
+        - policy
+        - outcome
+        - alert_count
+        - alerts
+        - action_group_count
+        - rules
+        - rule_count
+        - workflows
+    Kibana_HTTP_APIs_alerting_action_policy_execution_history_response:
+      additionalProperties: false
+      type: object
+      properties:
+        items:
+          items:
+            $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_action_policy_execution_history_item'
+          type: array
+        page:
+          maximum: 9007199254740991
+          minimum: 1
+          type: integer
+        per_page:
+          maximum: 9007199254740991
+          minimum: 1
+          type: integer
+        search_matches:
+          additionalProperties: false
+          description: Per-type match counts for the active search. Omitted when no search was provided. When is_truncated is true the server ID filter was capped and the result may be truncated.
+          type: object
+          properties:
+            is_truncated:
+              description: True when the server filter cap was reached and results may be truncated.
+              type: boolean
+            policy_count:
+              description: 'The number of action policies matching the search. This count is an estimate: results above 10,000 may be reported as 10,000.'
+              maximum: 9007199254740991
+              minimum: 0
+              type: integer
+            rule_count:
+              description: 'The number of rules matching the search. This count is an estimate: results above 10,000 may be reported as 10,000.'
+              maximum: 9007199254740991
+              minimum: 0
+              type: integer
+          required:
+            - policy_count
+            - rule_count
+            - is_truncated
+        total:
+          description: 'The number of action policy events matching the query. This count is an estimate: results above 10,000 may be reported as 10,000.'
+          maximum: 9007199254740991
+          minimum: 0
+          type: integer
+      required:
+        - items
+        - page
+        - per_page
+        - total
     Kibana_HTTP_APIs_alerting_action_policy_grouping:
       discriminator:
         mapping:
@@ -147624,6 +148542,7 @@ components:
         created_at:
           description: The ISO datetime when the action policy was created.
           format: date-time
+          maxLength: 64
           type: string
         created_by:
           allOf:
@@ -147678,6 +148597,7 @@ components:
         updated_at:
           description: The ISO datetime when the action policy was last updated.
           format: date-time
+          maxLength: 64
           type: string
         updated_by:
           allOf:
@@ -147861,7 +148781,7 @@ components:
       type: object
       properties:
         ids:
-          description: Explicit list of IDs to operate on.
+          description: Explicit list of IDs to operate on. Each id can appear at most once.
           items:
             maxLength: 150
             minLength: 1
@@ -147895,6 +148815,38 @@ components:
           maxLength: 256
           minLength: 1
           type: string
+    Kibana_HTTP_APIs_alerting_bulk_create_error:
+      additionalProperties: false
+      type: object
+      properties:
+        error:
+          additionalProperties: false
+          type: object
+          properties:
+            code:
+              description: Stable error code you can branch on, for example `INVALID_SCHEDULE` or `RULE_ALREADY_EXISTS`.
+              type: string
+            details:
+              additionalProperties: {}
+              description: Optional structured context whose keys depend on `code`. Identifier keys such as `rule_id`, `action_policy_id` and `group_hash` are stable, permanent public identifiers. On a 400 request-validation error, `details.source` (`params`, `query`, or `body`) names the failing part and is the only guaranteed key. The sibling `details.errors` may change. Do not branch on it.
+              type: object
+            message:
+              description: A readable explanation of the error. The wording can change without notice. Do not parse this field.
+              type: string
+          required:
+            - code
+            - message
+        id:
+          description: The client-supplied `id` of the failed item. Omitted when the item had none.
+          type: string
+        index:
+          description: Zero-based position of the failed item in the request `items`.
+          maximum: 9007199254740991
+          minimum: 0
+          type: integer
+      required:
+        - error
+        - index
     Kibana_HTTP_APIs_alerting_bulk_create_rule_item:
       additionalProperties: false
       type: object
@@ -147970,32 +148922,9 @@ components:
       type: object
       properties:
         errors:
-          description: Errors for rules that could not be created. Each entry includes the rule `id` and the error. Empty when every requested rule was created.
+          description: Errors for rules that could not be created. Each entry carries the `index` of the item in the request, its `id` when one was supplied, and the error. Empty when every requested rule was created.
           items:
-            type: object
-            properties:
-              error:
-                type: object
-                properties:
-                  code:
-                    description: Stable error code you can branch on, for example `INVALID_SCHEDULE` or `RULE_ALREADY_EXISTS`.
-                    type: string
-                  details:
-                    additionalProperties: {}
-                    description: Optional extra information about the error, for example field validation issues or the `rule_id` when that ID already exists.
-                    type: object
-                  message:
-                    description: A readable explanation of the error. The wording can change without notice. Do not parse this field.
-                    type: string
-                required:
-                  - code
-                  - message
-              id:
-                description: The identifier of the resource that failed.
-                type: string
-            required:
-              - id
-              - error
+            $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_create_error'
           type: array
         items:
           description: Rules that were created. Rules listed in `errors` are not included.
@@ -148058,13 +148987,42 @@ components:
       additionalProperties: false
       type: object
       properties:
+        errors:
+          description: Errors for rules that could not be returned, keyed by the requested `id`. A rule that does not exist is reported as `RULE_NOT_FOUND`. Empty when every requested rule was found.
+          items:
+            type: object
+            properties:
+              error:
+                type: object
+                properties:
+                  code:
+                    description: Stable error code you can branch on, for example `INVALID_SCHEDULE` or `RULE_ALREADY_EXISTS`.
+                    type: string
+                  details:
+                    additionalProperties: {}
+                    description: Optional structured context whose keys depend on `code`. Identifier keys such as `rule_id`, `action_policy_id` and `group_hash` are stable, permanent public identifiers. On a 400 request-validation error, `details.source` (`params`, `query`, or `body`) names the failing part and is the only guaranteed key. The sibling `details.errors` may change. Do not branch on it.
+                    type: object
+                  message:
+                    description: A readable explanation of the error. The wording can change without notice. Do not parse this field.
+                    type: string
+                required:
+                  - code
+                  - message
+              id:
+                description: The identifier of the resource that failed.
+                type: string
+            required:
+              - id
+              - error
+          type: array
         items:
-          description: The requested rules, in the same order as the requested ids.
+          description: The rules that were found, in the same order as the requested ids. Rules listed in `errors` are not included.
           items:
             $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_response'
           type: array
       required:
         - items
+        - errors
     Kibana_HTTP_APIs_alerting_bulk_operation_response:
       additionalProperties: false
       description: Result of an executed bulk operation.
@@ -148088,7 +149046,7 @@ components:
                     type: string
                   details:
                     additionalProperties: {}
-                    description: Optional extra information about the error, for example field validation issues or the `rule_id` when that ID already exists.
+                    description: Optional structured context whose keys depend on `code`. Identifier keys such as `rule_id`, `action_policy_id` and `group_hash` are stable, permanent public identifiers. On a 400 request-validation error, `details.source` (`params`, `query`, or `body`) names the failing part and is the only guaranteed key. The sibling `details.errors` may change. Do not branch on it.
                     type: object
                   message:
                     description: A readable explanation of the error. The wording can change without notice. Do not parse this field.
@@ -148111,7 +149069,7 @@ components:
       type: object
       properties:
         ids:
-          description: Explicit list of IDs to operate on.
+          description: Explicit list of IDs to operate on. Each id can appear at most once.
           items:
             maxLength: 150
             minLength: 1
@@ -148121,8 +149079,9 @@ components:
           minItems: 1
           type: array
         snoozed_until:
-          description: The ISO datetime until which the targeted action policies should be snoozed.
+          description: The ISO datetime until which the targeted action policies should be snoozed. Must be in the future. A past or current instant is rejected with 400.
           format: date-time
+          maxLength: 64
           type: string
       required:
         - ids
@@ -148137,12 +149096,14 @@ components:
           minLength: 1
           type: string
         tags:
-          description: Replaces the alert's tags. Send `[]` to clear.
+          description: Replaces the alert's tags. Send `null` to clear them. An empty array is rejected.
           items:
             maxLength: 128
             minLength: 1
             type: string
           maxItems: 20
+          minItems: 1
+          nullable: true
           type: array
       required:
         - tags
@@ -148193,7 +149154,7 @@ components:
           type: string
         details:
           additionalProperties: {}
-          description: Optional extra information about the error, for example field validation issues or the `rule_id` when that ID already exists.
+          description: Optional structured context whose keys depend on `code`. Identifier keys such as `rule_id`, `action_policy_id` and `group_hash` are stable, permanent public identifiers. On a 400 request-validation error, `details.source` (`params`, `query`, or `body`) names the failing part and is the only guaranteed key. The sibling `details.errors` may change. Do not branch on it.
           type: object
         error:
           description: A short human-readable summary of the error category (e.g., "Not Found", "Bad Request"). Subject to change without notice. Do not parse or rely on its content.
@@ -148219,7 +149180,7 @@ components:
           minLength: 1
           type: string
         destinations:
-          description: The list of destinations. At least one is required.
+          description: The list of destinations. At least one is required. Each one can appear at most once.
           items:
             $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_action_policy_destination'
           maxItems: 10
@@ -148344,12 +149305,14 @@ components:
       type: object
       properties:
         tags:
-          description: Replaces the alert's tags. Send `[]` to clear.
+          description: Replaces the alert's tags. Send `null` to clear them. An empty array is rejected.
           items:
             maxLength: 128
             minLength: 1
             type: string
           maxItems: 20
+          minItems: 1
+          nullable: true
           type: array
       required:
         - tags
@@ -148357,149 +149320,6 @@ components:
       additionalProperties: false
       type: object
       properties: {}
-    Kibana_HTTP_APIs_alerting_policy_execution_history_item:
-      additionalProperties: false
-      type: object
-      properties:
-        action_group_count:
-          type: number
-        alert_count:
-          type: number
-        alerts:
-          description: Alert IDs referenced by this event, bounded to 50. Empty when the event references no alerts. Use `alert_count` for the true total.
-          items:
-            type: object
-            properties:
-              id:
-                type: string
-            required:
-              - id
-          maxItems: 50
-          type: array
-        dispatched_at:
-          format: date-time
-          type: string
-        error:
-          additionalProperties: false
-          description: Failure details. Omitted when the dispatch did not fail.
-          type: object
-          properties:
-            message:
-              type: string
-            stack_trace:
-              description: Omitted when the source recorded no trace.
-              type: string
-          required:
-            - message
-        failure_reason:
-          enum:
-            - missing_api_key
-            - workflow_not_found
-            - workflow_disabled
-            - schedule_error
-            - license_not_supported
-          type: string
-        outcome:
-          enum:
-            - success
-            - throttled
-            - failure
-          type: string
-        policy:
-          additionalProperties: false
-          type: object
-          properties:
-            id:
-              type: string
-            name:
-              description: Omitted when the referenced resource could not be resolved.
-              type: string
-          required:
-            - id
-        rule_count:
-          description: Number of rules referenced by this event after search or rule-filter narrowing. Unlike `total` on a list response, this is an exact count and it can exceed `rules.length` when the embedded array is truncated to the cap.
-          type: number
-        rules:
-          description: Rules referenced by this event, bounded to 20. When a search or rule filter narrows the match, this array is intersected with the matched subset server-side. Use `rule_count` for the full count.
-          items:
-            type: object
-            properties:
-              id:
-                type: string
-              name:
-                description: Omitted when the referenced resource could not be resolved.
-                type: string
-            required:
-              - id
-          maxItems: 20
-          type: array
-        workflows:
-          items:
-            type: object
-            properties:
-              id:
-                type: string
-              name:
-                description: Omitted when the referenced resource could not be resolved.
-                type: string
-            required:
-              - id
-          maxItems: 100
-          type: array
-      required:
-        - dispatched_at
-        - policy
-        - outcome
-        - alert_count
-        - alerts
-        - action_group_count
-        - rules
-        - rule_count
-        - workflows
-    Kibana_HTTP_APIs_alerting_policy_execution_history_response:
-      additionalProperties: false
-      type: object
-      properties:
-        items:
-          items:
-            $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_policy_execution_history_item'
-          type: array
-        page:
-          maximum: 9007199254740991
-          minimum: 1
-          type: integer
-        per_page:
-          maximum: 9007199254740991
-          minimum: 1
-          type: integer
-        search_matches:
-          additionalProperties: false
-          description: Per-type match counts for the active search. Omitted when no search was provided. When is_truncated is true the server ID filter was capped and the result may be truncated.
-          type: object
-          properties:
-            is_truncated:
-              description: True when the server filter cap was reached and results may be truncated.
-              type: boolean
-            policies:
-              description: 'Policies matching the search. This count is an estimate: results above 10,000 may be reported as 10,000.'
-              type: number
-            rules:
-              description: 'Rules matching the search. This count is an estimate: results above 10,000 may be reported as 10,000.'
-              type: number
-          required:
-            - policies
-            - rules
-            - is_truncated
-        total:
-          description: 'The number of action policy events matching the query. This count is an estimate: results above 10,000 may be reported as 10,000.'
-          maximum: 9007199254740991
-          minimum: 0
-          type: integer
-      required:
-        - items
-        - page
-        - per_page
-        - total
     Kibana_HTTP_APIs_alerting_put_action_policy:
       additionalProperties: false
       type: object
@@ -148510,7 +149330,7 @@ components:
           minLength: 1
           type: string
         destinations:
-          description: The list of destinations. At least one is required.
+          description: The list of destinations. At least one is required. Each one can appear at most once.
           items:
             $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_action_policy_destination'
           maxItems: 10
@@ -148643,12 +149463,13 @@ components:
           maxLength: 10000
           minLength: 1
           type: string
-    Kibana_HTTP_APIs_alerting_rule_execution:
+    Kibana_HTTP_APIs_alerting_rule_execution_history_item:
       additionalProperties: false
       type: object
       properties:
         ended_at:
           format: date-time
+          maxLength: 64
           type: string
         error:
           additionalProperties: false
@@ -148685,10 +149506,9 @@ components:
               type: integer
           required:
             - id
-        space_id:
-          type: string
         started_at:
           format: date-time
+          maxLength: 64
           type: string
         timings:
           additionalProperties: false
@@ -148710,18 +149530,17 @@ components:
       required:
         - id
         - rule
-        - space_id
         - started_at
         - ended_at
         - timings
         - outcome
-    Kibana_HTTP_APIs_alerting_rule_executions_response:
+    Kibana_HTTP_APIs_alerting_rule_execution_history_response:
       additionalProperties: false
       type: object
       properties:
         items:
           items:
-            $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_execution'
+            $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_execution_history_item'
           type: array
         page:
           maximum: 9007199254740991
@@ -148731,6 +149550,22 @@ components:
           maximum: 9007199254740991
           minimum: 1
           type: integer
+        search_matches:
+          additionalProperties: false
+          description: Match counts for the active search. Omitted when no search was provided.
+          type: object
+          properties:
+            is_truncated:
+              description: True when more than 500 rules matched the search. Only the executions of the first 500 matching rules are returned, so the results are incomplete. Narrow the search to see the rest.
+              type: boolean
+            rule_count:
+              description: 'The number of rules matching the search. This count is an estimate: results above 10,000 may be reported as 10,000.'
+              maximum: 9007199254740991
+              minimum: 0
+              type: integer
+          required:
+            - rule_count
+            - is_truncated
         total:
           description: 'The number of rule executions matching the query. This count is an estimate: results above 10,000 may be reported as 10,000.'
           maximum: 9007199254740991
@@ -149077,6 +149912,7 @@ components:
         created_at:
           description: ISO timestamp when the rule was created.
           format: date-time
+          maxLength: 64
           type: string
         created_by:
           allOf:
@@ -149103,62 +149939,7 @@ components:
               type: string
           description: Whether the rule creates alerts (`alert`) or only stores matching events (`signal`).
         metadata:
-          additionalProperties: false
-          description: Rule metadata.
-          type: object
-          properties:
-            builder:
-              additionalProperties: false
-              description: Identifies the rule builder that authored this rule (e.g. "threshold"). Absent for rules authored directly in ES|QL; send `null` on PATCH to clear it.
-              type: object
-              properties:
-                type:
-                  description: Rule builder type.
-                  maxLength: 64
-                  minLength: 1
-                  type: string
-              required:
-                - type
-            description:
-              description: Human-readable description of the rule. Omit to leave it unset; send `null` on PATCH to clear it. An empty string is rejected.
-              maxLength: 1024
-              minLength: 1
-              type: string
-            name:
-              description: Rule name (must be unique within the space).
-              maxLength: 256
-              minLength: 1
-              type: string
-            routing_tags:
-              description: Routing tags that link alerts from this rule to action policies. An action policy applies when its `matcher.tags` contains at least one of these tags. Only allowed when kind is "alert".
-              items:
-                maxLength: 128
-                minLength: 1
-                type: string
-              maxItems: 20
-              minItems: 1
-              type: array
-            tags:
-              description: Tags for categorization, e.g. ["production", "infra"].
-              items:
-                maxLength: 128
-                minLength: 1
-                type: string
-              maxItems: 20
-              minItems: 1
-              type: array
-            template:
-              additionalProperties: false
-              description: The rule template this rule was created from.
-              type: object
-              properties:
-                id:
-                  description: Id of the rule template.
-                  type: string
-              required:
-                - id
-          required:
-            - name
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_metadata'
         no_data:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_no_data'
         query:
@@ -149178,6 +149959,7 @@ components:
         updated_at:
           description: ISO timestamp when the rule was last updated.
           format: date-time
+          maxLength: 64
           type: string
         updated_by:
           allOf:
@@ -149343,8 +150125,9 @@ components:
       type: object
       properties:
         snoozed_until:
-          description: The ISO datetime until which the action policy should be snoozed.
+          description: The ISO datetime until which the action policy should be snoozed. Must be in the future. A past or current instant is rejected with 400.
           format: date-time
+          maxLength: 64
           type: string
       required:
         - snoozed_until
@@ -149359,7 +150142,7 @@ components:
           nullable: true
           type: string
         destinations:
-          description: The list of destinations. At least one is required.
+          description: The list of destinations. At least one is required. Each one can appear at most once.
           items:
             $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_action_policy_destination'
           maxItems: 10
@@ -160864,6 +161647,8 @@ components:
         field_settings:
           additionalProperties:
             $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-field-settings-entry'
+          description: Settings for individual fields, keyed by field name. To change how Kibana displays a field from the backing indices, set its label, description, or format. To define a runtime field, use the runtime field name and set `type`.
+          title: Field settings
           type: object
         index_pattern:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-index-pattern-schema'
@@ -162335,6 +163120,20 @@ components:
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-data-view-field-setting'
       description: Display overrides for an indexed field, or a runtime field definition when `type` is set to a runtime field kind.
       title: Field settings or runtime field
+    Kibana_HTTP_APIs_kbn-field-settings-with-popularity:
+      additionalProperties: false
+      description: Display overrides for a field. These settings can define a custom label, description, format and popularity.
+      properties:
+        custom_description:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-field-custom-description'
+        custom_label:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-field-custom-label'
+        format:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-field-format'
+        popularity:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-runtime-field-popularity'
+      title: Field settings
+      type: object
     Kibana_HTTP_APIs_kbn-index-pattern-schema:
       description: 'The index pattern (Elasticsearch index expression) to use as the data source. Example: "my-index-*".'
       minLength: 1
@@ -162426,6 +163225,11 @@ components:
         - type
       title: Runtime field base
       type: object
+    Kibana_HTTP_APIs_kbn-runtime-field-popularity:
+      description: Adjust the popularity to make the field appear higher or lower in the fields list. By default, Discover orders fields from most selected to least selected.
+      minimum: 0
+      title: Popularity
+      type: number
     Kibana_HTTP_APIs_kbn-runtime-field-schema:
       additionalProperties: false
       properties:
@@ -162460,6 +163264,103 @@ components:
         - geo_point
       title: Type
       type: string
+    Kibana_HTTP_APIs_kbn-saved-composite-runtime-field-schema:
+      additionalProperties: false
+      properties:
+        fields:
+          additionalProperties:
+            $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-saved-runtime-field-base-schema'
+          type: object
+        script:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-runtime-field-script'
+        type:
+          enum:
+            - composite
+          type: string
+      required:
+        - type
+        - fields
+      title: Saved composite runtime field
+      type: object
+    Kibana_HTTP_APIs_kbn-saved-data-view-spec-schema:
+      additionalProperties: false
+      description: Defines an stored data source with a mandatory index pattern and optional settings like id, name, show hidden indices and field settings.
+      properties:
+        allow_hidden_indices:
+          description: When `true`, allows the data view to match hidden indices.
+          title: Allow hidden and system indices
+          type: boolean
+        field_filters:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-field-filters-schema'
+        field_settings:
+          additionalProperties:
+            $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-saved-field-settings-entry'
+          description: Settings for individual fields, keyed by field name. To change how Kibana displays a field from the backing indices, set its label, description, format, or popularity. To define a runtime field, use the runtime field name and set `type`.
+          title: Field settings
+          type: object
+        id:
+          description: Kibana provides a unique identifier for each data view, or you can create your own.
+          maxLength: 256
+          minLength: 1
+          title: Data view ID
+          type: string
+        index_pattern:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-index-pattern-schema'
+        name:
+          description: 'The name of the data view. Example: "Sample data view".'
+          maxLength: 256
+          minLength: 1
+          title: Data view name
+          type: string
+        time_field:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-time-field-schema'
+      required:
+        - index_pattern
+      title: Saved data view spec
+      type: object
+    Kibana_HTTP_APIs_kbn-saved-field-settings-entry:
+      anyOf:
+        - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-saved-composite-runtime-field-schema'
+        - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-saved-runtime-field-schema'
+        - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-field-settings-with-popularity'
+      description: Display overrides for an indexed field, or a runtime field definition when `type` is set to a runtime field kind.
+      title: Field settings or runtime field
+    Kibana_HTTP_APIs_kbn-saved-runtime-field-base-schema:
+      additionalProperties: false
+      properties:
+        custom_description:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-field-custom-description'
+        custom_label:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-field-custom-label'
+        format:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-field-format'
+        popularity:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-runtime-field-popularity'
+        type:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-runtime-field-type'
+      required:
+        - type
+      title: Saved runtime field base
+      type: object
+    Kibana_HTTP_APIs_kbn-saved-runtime-field-schema:
+      additionalProperties: false
+      properties:
+        custom_description:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-field-custom-description'
+        custom_label:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-field-custom-label'
+        format:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-field-format'
+        popularity:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-runtime-field-popularity'
+        script:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-runtime-field-script'
+        type:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-runtime-field-type'
+      required:
+        - type
+      title: Saved runtime field
+      type: object
     Kibana_HTTP_APIs_kbn-tags-attributes:
       additionalProperties: false
       type: object
@@ -176877,8 +177778,11 @@ components:
                   anyOf:
                     - type: string
                     - type: number
+                    - type: boolean
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMultiValueCell'
                     - $ref: '#/components/schemas/Kibana_HTTP_APIs_visRangeKey'
                     - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMultiFieldKey'
+                  nullable: true
                 maxItems: 1000
                 type: array
             required:
@@ -178362,8 +179266,11 @@ components:
                   anyOf:
                     - type: string
                     - type: number
+                    - type: boolean
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMultiValueCell'
                     - $ref: '#/components/schemas/Kibana_HTTP_APIs_visRangeKey'
                     - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMultiFieldKey'
+                  nullable: true
                 maxItems: 100
                 type: array
             required:
@@ -180092,6 +180999,7 @@ components:
       type: object
     Kibana_HTTP_APIs_visMultiFieldKey:
       additionalProperties: false
+      description: Composite key from a multi-terms bucket.
       properties:
         keys:
           items:
@@ -180107,6 +181015,22 @@ components:
         - keys
       title: Multi Field Key
       type: object
+    Kibana_HTTP_APIs_visMultiValueCell:
+      anyOf:
+        - items:
+            type: string
+          maxItems: 100
+          type: array
+        - items:
+            type: number
+          maxItems: 100
+          type: array
+        - items:
+            type: boolean
+          maxItems: 100
+          type: array
+      description: Values of a multi-value cell.
+      title: Multi Value Cell
     Kibana_HTTP_APIs_visNoColor:
       additionalProperties: false
       description: Explicitly disables coloring
@@ -180529,6 +181453,7 @@ components:
       type: object
     Kibana_HTTP_APIs_visRangeKey:
       additionalProperties: false
+      description: Identifies a range bucket. Omit either bound for an open end.
       properties:
         from:
           anyOf:
@@ -180550,8 +181475,6 @@ components:
                   - type: string
                   - type: number
             required:
-              - from
-              - to
               - label
           maxItems: 100
           type: array
@@ -180565,8 +181488,6 @@ components:
           type: string
       required:
         - type
-        - from
-        - to
         - ranges
       title: Range Key
       type: object
@@ -183464,7 +184385,7 @@ components:
       type: object
       properties:
         fill:
-          default: solid
+          default: gradient
           description: 'Area fill type: solid or gradient.'
           enum:
             - solid
@@ -197636,17 +198557,14 @@ components:
         - name
         - riskModifier
         - managed
-    Security_Exceptions_API_BlocklistHashOrPathEntry:
-      type: object
+    Security_Exceptions_API_BlocklistHashEntry:
       properties:
         field:
-          description: File hash or path field
+          description: File hash field
           enum:
             - file.hash.md5
             - file.hash.sha1
             - file.hash.sha256
-            - file.path
-            - file.path.caseless
           type: string
         operator:
           description: Must be the value "included"
@@ -197654,14 +198572,17 @@ components:
             - included
           type: string
         type:
-          description: Must be match_any for blocklists
+          description: Must be match_any for blocklist hash entries
           enum:
             - match_any
           type: string
         value:
-          description: Array of hash values or file paths
+          description: Array of hash values
           items:
+            maxLength: 4096
+            minLength: 1
             type: string
+          maxItems: 2000
           minItems: 1
           type: array
       required:
@@ -197669,6 +198590,8 @@ components:
         - type
         - value
         - operator
+      title: Blocklist hash entry
+      type: object
     Security_Exceptions_API_BlocklistLinuxProperties:
       description: Blocklist list item properties (Linux, code signature not supported).
       type: object
@@ -197677,9 +198600,12 @@ components:
           description: |
             **Validation rules:**
             * Hash entries: up to 3 (one for each hash type: md5, sha1, sha256)
-            * Path entry: only 1 allowed
+            * Path or File Name entry: only 1 allowed
           items:
-            $ref: '#/components/schemas/Security_Exceptions_API_BlocklistHashOrPathEntry'
+            oneOf:
+              - $ref: '#/components/schemas/Security_Exceptions_API_BlocklistHashEntry'
+              - $ref: '#/components/schemas/Security_Exceptions_API_BlocklistPathOrFileNameMatchAnyEntry'
+              - $ref: '#/components/schemas/Security_Exceptions_API_BlocklistPathOrFileNameWildcardEntry'
           minItems: 1
           type: array
         list_id:
@@ -197708,9 +198634,12 @@ components:
           description: |
             **Validation rules:**
             * Hash entries: up to 3 (one for each hash type: md5, sha1, sha256)
-            * Path entry: only 1 allowed
+            * Path or File Name entry: only 1 allowed
           items:
-            $ref: '#/components/schemas/Security_Exceptions_API_BlocklistHashOrPathEntry'
+            oneOf:
+              - $ref: '#/components/schemas/Security_Exceptions_API_BlocklistHashEntry'
+              - $ref: '#/components/schemas/Security_Exceptions_API_BlocklistPathOrFileNameMatchAnyEntry'
+              - $ref: '#/components/schemas/Security_Exceptions_API_BlocklistPathOrFileNameWildcardEntry'
           minItems: 1
           type: array
         list_id:
@@ -197731,8 +198660,77 @@ components:
           $ref: '#/components/schemas/Security_Exceptions_API_EndpointArtifactTags'
       required:
         - list_id
-    Security_Exceptions_API_BlocklistWindowsCodeSignatureEntry:
+    Security_Exceptions_API_BlocklistPathOrFileNameMatchAnyEntry:
+      properties:
+        field:
+          description: File path or file name field (available on all OS)
+          enum:
+            - file.path
+            - file.path.caseless
+            - file.name
+            - file.name.caseless
+          type: string
+        operator:
+          description: Must be the value "included"
+          enum:
+            - included
+          type: string
+        type:
+          description: Must be `match_any` ("is one of")
+          enum:
+            - match_any
+          type: string
+        value:
+          description: Array of values
+          items:
+            maxLength: 4096
+            minLength: 1
+            type: string
+          maxItems: 2000
+          minItems: 1
+          type: array
+      required:
+        - field
+        - type
+        - value
+        - operator
+      title: Blocklist path or file name "is one of" entry
       type: object
+    Security_Exceptions_API_BlocklistPathOrFileNameWildcardEntry:
+      properties:
+        field:
+          description: |
+            File path or file name field (available on all OS). `file.name.caseless` is used for
+            `wildcard` (Match) entries on Windows and macOS, since both have case-insensitive filesystems.
+          enum:
+            - file.path
+            - file.path.caseless
+            - file.name
+            - file.name.caseless
+          type: string
+        operator:
+          description: Must be the value "included"
+          enum:
+            - included
+          type: string
+        type:
+          description: Must be `wildcard` ("Matches", supports `*` and `?` wildcards)
+          enum:
+            - wildcard
+          type: string
+        value:
+          description: Single value
+          maxLength: 4096
+          minLength: 1
+          type: string
+      required:
+        - field
+        - type
+        - value
+        - operator
+      title: Blocklist path or file name "Match" entry
+      type: object
+    Security_Exceptions_API_BlocklistWindowsCodeSignatureEntry:
       properties:
         entries:
           description: Nested subject_name entries
@@ -197785,6 +198783,8 @@ components:
         - field
         - type
         - entries
+      title: Blocklist Windows code signature entry
+      type: object
     Security_Exceptions_API_BlocklistWindowsProperties:
       description: Blocklist list item properties (Windows, supports code signature).
       type: object
@@ -197793,11 +198793,13 @@ components:
           description: |
             **Validation rules:**
             * Hash entries: up to 3 (one for each hash type: md5, sha1, sha256)
-            * Path entry: only 1 allowed
+            * Path or File Name entry: only 1 allowed
             * Code signature entry: only 1 allowed
           items:
             oneOf:
-              - $ref: '#/components/schemas/Security_Exceptions_API_BlocklistHashOrPathEntry'
+              - $ref: '#/components/schemas/Security_Exceptions_API_BlocklistHashEntry'
+              - $ref: '#/components/schemas/Security_Exceptions_API_BlocklistPathOrFileNameMatchAnyEntry'
+              - $ref: '#/components/schemas/Security_Exceptions_API_BlocklistPathOrFileNameWildcardEntry'
               - $ref: '#/components/schemas/Security_Exceptions_API_BlocklistWindowsCodeSignatureEntry'
           minItems: 1
           type: array

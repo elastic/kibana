@@ -1,5 +1,5 @@
 {
-  "sha1": "6d9ddd5305de7260c3bb58351150be7a29d9429d",
+  "sha1": "e6e5c1d0ec29e3d58d5a135bee7f8c5f21a65b51",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -512,8 +512,8 @@
       }
     },
     {
-      "id": "53930ab6f1fc97d-9769bb34d445fad",
-      "title": "Traces in Discover - Profile disabled in non-observability configs should not display trace-specific columns in data view mode (Classic)",
+      "id": "53930ab6f1fc97d-975df6e69d1c960",
+      "title": "Traces in Discover - Profile gated by solution view should not display trace-specific columns in data view mode (Search)",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -521,13 +521,13 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/profile_disabled.spec.ts",
-        "line": 31,
-        "column": 50
+        "line": 30,
+        "column": 33
       }
     },
     {
-      "id": "53930ab6f1fc97d-ba6702658f026b8",
-      "title": "Traces in Discover - Profile disabled in non-observability configs should not render RED metrics charts in ESQL mode (Classic)",
+      "id": "53930ab6f1fc97d-e74660ebaa31fad",
+      "title": "Traces in Discover - Profile gated by solution view should not render RED metrics charts in ESQL mode (Search)",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -535,13 +535,13 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/profile_disabled.spec.ts",
-        "line": 41,
-        "column": 56
+        "line": 40,
+        "column": 37
       }
     },
     {
-      "id": "53930ab6f1fc97d-de0d56f85499f05",
-      "title": "Traces in Discover - Profile disabled in non-observability configs should not show Overview tab in document flyout (Classic)",
+      "id": "53930ab6f1fc97d-65398bb4b948e3b",
+      "title": "Traces in Discover - Profile gated by solution view should not show Overview tab in document flyout (Search)",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -549,13 +549,13 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/profile_disabled.spec.ts",
-        "line": 57,
-        "column": 41
+        "line": 56,
+        "column": 28
       }
     },
     {
-      "id": "53930ab6f1fc97d-a7770e39a4e073a",
-      "title": "Traces in Discover - Profile disabled in non-observability configs should not display trace-specific columns in data view mode (Search)",
+      "id": "53930ab6f1fc97d-3d4a4d699a9dba2",
+      "title": "Traces in Discover - Profile gated by solution view should not display trace-specific columns in data view mode (Security)",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -563,13 +563,13 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/profile_disabled.spec.ts",
-        "line": 31,
-        "column": 50
+        "line": 30,
+        "column": 33
       }
     },
     {
-      "id": "53930ab6f1fc97d-0caf01adc247915",
-      "title": "Traces in Discover - Profile disabled in non-observability configs should not render RED metrics charts in ESQL mode (Search)",
+      "id": "53930ab6f1fc97d-55b78ddfb3e56a2",
+      "title": "Traces in Discover - Profile gated by solution view should not render RED metrics charts in ESQL mode (Security)",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -577,13 +577,13 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/profile_disabled.spec.ts",
-        "line": 41,
-        "column": 56
+        "line": 40,
+        "column": 37
       }
     },
     {
-      "id": "53930ab6f1fc97d-b3574ba39cb8851",
-      "title": "Traces in Discover - Profile disabled in non-observability configs should not show Overview tab in document flyout (Search)",
+      "id": "53930ab6f1fc97d-0e69a6bed2177ff",
+      "title": "Traces in Discover - Profile gated by solution view should not show Overview tab in document flyout (Security)",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -591,50 +591,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/profile_disabled.spec.ts",
-        "line": 57,
-        "column": 41
-      }
-    },
-    {
-      "id": "53930ab6f1fc97d-7fa76165ecffbff",
-      "title": "Traces in Discover - Profile disabled in non-observability configs should not display trace-specific columns in data view mode (Security)",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/profile_disabled.spec.ts",
-        "line": 31,
-        "column": 50
-      }
-    },
-    {
-      "id": "53930ab6f1fc97d-ce21131b4b582fa",
-      "title": "Traces in Discover - Profile disabled in non-observability configs should not render RED metrics charts in ESQL mode (Security)",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/profile_disabled.spec.ts",
-        "line": 41,
-        "column": 56
-      }
-    },
-    {
-      "id": "53930ab6f1fc97d-be0a84e32b7b264",
-      "title": "Traces in Discover - Profile disabled in non-observability configs should not show Overview tab in document flyout (Security)",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/profile_disabled.spec.ts",
-        "line": 57,
-        "column": 41
+        "line": 56,
+        "column": 28
       }
     },
     {

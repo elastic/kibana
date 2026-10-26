@@ -19,7 +19,11 @@ import { RULE_WORKFLOW_TRIGGERS, RuleCreatedTriggerId } from './triggers';
 
 const ruleCreatedEvent: RuleCreatedEvent = {
   type: RULE_CREATED_EVENT_TYPE,
-  payload: { ruleId: 'rule-1', spaceId: 'my-space', correlationId: 'corr-1' },
+  payload: {
+    ruleId: 'rule-1',
+    spaceId: 'my-space',
+    correlationId: 'corr-1',
+  },
 };
 
 // Workflows only ever see the projected rule reference, never the full payload.
@@ -74,7 +78,7 @@ describe('RuleWorkflowSubscriber', () => {
 
       await handlerFor(bus, RULE_CREATED_EVENT_TYPE)(ruleCreatedEvent, {
         request,
-        origin: 'internal',
+        origin: { actor: 'internal', channel: 'system' },
       });
 
       expect(workflowsExtensions.getClient).not.toHaveBeenCalled();
@@ -85,7 +89,10 @@ describe('RuleWorkflowSubscriber', () => {
     it("forwards context.request through WorkflowService, with the binding's triggerId and the event payload", async () => {
       subscriber.start();
 
-      await handlerFor(bus, RULE_CREATED_EVENT_TYPE)(ruleCreatedEvent, { request, origin: 'user' });
+      await handlerFor(bus, RULE_CREATED_EVENT_TYPE)(ruleCreatedEvent, {
+        request,
+        origin: { actor: 'user', channel: 'api' },
+      });
 
       // The acting user's request must reach getClient so the workflow runs with
       // the same credentials/space that changed the rule (RNA #504 requirement 3).
@@ -100,7 +107,10 @@ describe('RuleWorkflowSubscriber', () => {
       subscriber.start();
 
       await expect(
-        handlerFor(bus, RULE_CREATED_EVENT_TYPE)(ruleCreatedEvent, { request, origin: 'user' })
+        handlerFor(bus, RULE_CREATED_EVENT_TYPE)(ruleCreatedEvent, {
+          request,
+          origin: { actor: 'user', channel: 'api' },
+        })
       ).resolves.toBeUndefined();
 
       expect(mockLogger.error).toHaveBeenCalledTimes(1);

@@ -58,3 +58,25 @@ export const CUSTOM_YARA_SIGNATURES_LICENSE_UPSELL = i18n.translate(
     defaultMessage: 'Custom YARA signatures require an Enterprise license.',
   }
 );
+
+export const REGISTRY_CREDENTIAL_HARDENING_SWITCH_LABEL = i18n.translate(
+  'xpack.securitySolution.endpoint.policy.details.registryCredentialHardening',
+  {
+    defaultMessage: 'Registry credential hardening',
+  }
+);
+
+export const REGISTRY_CREDENTIAL_HARDENING_HINT = i18n.translate(
+  'xpack.securitySolution.endpoint.policyDetailsConfig.registryCredentialHardeningTooltip',
+  {
+    defaultMessage:
+      'Blocks saving the SAM, SECURITY and SYSTEM registry hives, a common credential-dumping technique. Trusted applications are allowed.',
+  }
+);
+
+export const REGISTRY_CREDENTIAL_HARDENING_LICENSE_UPSELL = i18n.translate(
+  'xpack.securitySolution.endpoint.policy.protections.registryCredentialHardeningLicenseTooltip',
+  {
+    defaultMessage: 'Registry credential hardening requires an Enterprise license.',
+  }
+);
