@@ -159,6 +159,28 @@ describe('loadReportHuntContext', () => {
       });
     });
 
+    it('carries every excluded value past the hunt IOC cap so none escapes the denylist', async () => {
+      esClient.search.mockResolvedValue(
+        withIocs([
+          { type: 'hash', value: 'a'.repeat(64), tier: 'discriminating' },
+          ...Array.from({ length: 150 }, (_, i) => ({
+            type: 'ip',
+            value: `203.0.${Math.floor(i / 256)}.${i % 256}`,
+            tier: 'reference',
+          })),
+        ])
+      );
+      const context = await loadReportHuntContext({
+        esClient,
+        spaceId: 'hunt-a',
+        reportId: 'rpt-1',
+      });
+      expect(context?.iocs).toEqual([{ type: 'hash', value: 'a'.repeat(64) }]);
+      expect(context?.excluded_iocs?.count).toBe(150);
+      expect(context?.excluded_iocs?.values).toHaveLength(150);
+      expect(context?.excluded_iocs?.values[149]).toEqual({ type: 'ip', value: '203.0.0.149' });
+    });
+
     it('does not change truncated accounting when IOCs are excluded by adjudication', async () => {
       esClient.search.mockResolvedValue(
         withIocs([

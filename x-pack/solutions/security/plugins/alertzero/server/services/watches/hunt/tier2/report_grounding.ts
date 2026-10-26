@@ -502,7 +502,9 @@ const unescapeRegex = (value: string): string =>
  * tokens it refuses to ground positively (`MATCH` on a dotted IP/domain, `RLIKE` with parens or
  * quantifiers, `NOT RLIKE`) and would fail open here. A literal carries a rejected value when a
  * wildcard-free or regex-unescaped fragment equals one or embeds one as a term, unless it is an
- * eligible IOC or a distinguishing substring of one.
+ * eligible IOC or a distinguishing substring of one. The whole literal is tried first: an exact
+ * eligible URL carrying `?` in its query string is the hunt the run asked for, not a pattern
+ * whose `?`-split prefix happens to end at the rejected host.
  */
 const rejectedValueCarriedBy = (
   query: ESQLAstQueryExpression,
@@ -514,6 +516,13 @@ const rejectedValueCarriedBy = (
     visitLiteral: (literal) => {
       if (found !== undefined) return;
       const stripped = valueOf(literal).replace(REGEXP_SURROUND, '');
+      const whole = normalize(stripped);
+      if (
+        eligible.has(whole) ||
+        (whole.length >= MIN_GROUNDING_LENGTH && isSpecificToEligibleIoc(whole, rejected, eligible))
+      ) {
+        return;
+      }
       const unescaped = unescapeRegex(stripped);
       const candidates = [...stripped.split(LIKE_WILDCARDS), ...unescaped.split(LIKE_WILDCARDS)];
       for (const candidate of candidates) {

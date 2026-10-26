@@ -386,6 +386,38 @@ describe('assertEsqlGroundedInReport', () => {
           reason: 'query filters on a fragment of a value intel review rejected (github)',
         });
       });
+
+      it('keeps an exact eligible URL whose query string carries ? grounded under a rejected host', () => {
+        const download = 'https://drive.google.com/uc?export=download&id=payload';
+        const text = `The second stage was pulled from ${download} on first run.`;
+        const eligibleWins = {
+          reportText: text,
+          iocValues: [download],
+          excludedIocValues: ['drive.google.com'],
+        };
+        expect(
+          assertEsqlGroundedInReport(
+            `FROM logs-* | WHERE url.full == "${download}" | LIMIT 10`,
+            eligibleWins
+          ).ok
+        ).toBe(true);
+        expect(
+          assertEsqlGroundedInReport(
+            `FROM logs-* | WHERE url.full IN ("${download}") | LIMIT 10`,
+            eligibleWins
+          ).ok
+        ).toBe(true);
+        // The bare host, with or without scheme, still hunts all of Drive.
+        expect(
+          assertEsqlGroundedInReport(
+            'FROM logs-* | WHERE url.full == "https://drive.google.com/" | LIMIT 10',
+            eligibleWins
+          )
+        ).toEqual({
+          ok: false,
+          reason: 'query filters on a value intel review rejected (drive.google.com)',
+        });
+      });
     });
   });
 

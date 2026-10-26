@@ -20,7 +20,9 @@ export interface ReportHuntContext {
    * Searchable report IOCs this run will not hunt because adjudication rejected
    * them (or left them `deferred_unreviewed`). Present only when at least one
    * such IOC remains after dedupe. `count` is the full deduped ineligible set;
-   * `values` is capped like `iocs` for the Tier 2 prompt and grounding denylist.
+   * `values` carries every one within the value-length bound, up to the stored
+   * IOC ceiling, since a rejected value missing from the Tier 2 denylist is one
+   * the gate would let a query filter on. The prompt caps its own copy.
    */
   excluded_iocs?: { count: number; values: HuntIoc[] };
   /**
@@ -79,6 +81,11 @@ export const MAX_HUNT_REPORT_TEXT_CHARS = 200_000;
 /** Matches the OpenAPI `iocs` maxItems and `HuntIoc.value` maxLength. */
 export const MAX_HUNT_REPORT_IOCS = 100;
 const MAX_HUNT_IOC_VALUE_CHARS = 2048;
+/**
+ * Excluded values are a denylist, not a search list, so they are not held to the hunt IOC cap.
+ * Matches `MAX_IOCS_PER_REPORT` in the extract_iocs service, the most a stored report holds.
+ */
+const MAX_HUNT_EXCLUDED_IOCS = 5_000;
 /** Matches the OpenAPI `techniques` maxItems and item maxLength. */
 export const MAX_HUNT_REPORT_TECHNIQUES = 100;
 const MAX_HUNT_TECHNIQUE_CHARS = 32;
@@ -207,7 +214,7 @@ export const loadReportHuntContext = async ({
           count: dedupedIneligible.length,
           values: dedupedIneligible
             .filter(isWithinIocValueBound)
-            .slice(0, MAX_HUNT_REPORT_IOCS)
+            .slice(0, MAX_HUNT_EXCLUDED_IOCS)
             .map(({ type, value }) => ({ type, value })),
         }
       : undefined;
