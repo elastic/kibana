@@ -73,37 +73,39 @@ const getResponseSizeHeaderBytes = ({
   headerName: string;
 }): number | undefined => getFinitePositiveNumber(getErrorHeaderValue({ error, headerName }));
 
-const secondsUntil = (epochMs: number): number =>
-  Math.max(0, Math.ceil((epochMs - Date.now()) / 1000));
+const getHttpStatus = (error: unknown): number | undefined => {
+  const status = (error as AxiosLikeError | undefined)?.response?.status;
+  return typeof status === 'number' ? status : undefined;
+};
 
-const getRetryAfterSeconds = (error: unknown): number | undefined => {
+// A time in the past means the service can be called again now.
+const notBeforeNow = (epochMs: number): Date => new Date(Math.max(epochMs, Date.now()));
+
+/**
+ * When the service says it can be called again, from `Retry-After` (delta-seconds or an HTTP
+ * date), else from a rate-limit reset header, for errors that carry an HTTP response.
+ */
+const getRetryDate = (error: unknown): Date | undefined => {
+  if (getHttpStatus(error) === undefined) return undefined;
+
   const retryAfter = getErrorHeaderValue({ error, headerName: 'retry-after' });
   if (typeof retryAfter === 'string' && retryAfter.trim() !== '') {
     const seconds = getFinitePositiveNumber(retryAfter.trim());
-    if (seconds !== undefined) return Math.ceil(seconds);
+    if (seconds !== undefined) return new Date(Date.now() + seconds * 1000);
     const dateMs = Date.parse(retryAfter);
-    if (!Number.isNaN(dateMs)) return secondsUntil(dateMs);
+    if (!Number.isNaN(dateMs)) return notBeforeNow(dateMs);
   }
 
   for (const headerName of RATE_LIMIT_RESET_HEADERS) {
     const reset = getFinitePositiveNumber(getErrorHeaderValue({ error, headerName }));
     if (reset !== undefined) {
-      return reset >= MIN_EPOCH_SECONDS ? secondsUntil(reset * 1000) : Math.ceil(reset);
+      return reset >= MIN_EPOCH_SECONDS
+        ? notBeforeNow(reset * 1000)
+        : new Date(Date.now() + reset * 1000);
     }
   }
 
   return undefined;
-};
-
-const getHttpErrorMeta = (error: unknown): { statusCode?: number; retryAfterSeconds?: number } => {
-  const status = (error as AxiosLikeError | undefined)?.response?.status;
-  if (typeof status !== 'number') return {};
-
-  const retryAfterSeconds = getRetryAfterSeconds(error);
-  return {
-    statusCode: status,
-    ...(retryAfterSeconds !== undefined ? { retryAfterSeconds } : {}),
-  };
 };
 
 const getErrorMeta = ({
@@ -114,11 +116,12 @@ const getErrorMeta = ({
   contentLengthBytes?: number;
 }): Record<string, unknown> | undefined => {
   const connectorActionErrorMeta = getConnectorActionErrorMeta(error);
+  const statusCode = getHttpStatus(error);
   // Connector-provided metadata (e.g. file size from provider API) takes
   // precedence over generic header-derived values.
   const errorMeta = {
     ...(contentLengthBytes !== undefined ? { contentLengthBytes } : {}),
-    ...getHttpErrorMeta(error),
+    ...(statusCode !== undefined ? { statusCode } : {}),
     ...connectorActionErrorMeta,
   };
 
@@ -330,6 +333,7 @@ export const generateExecutorFunction = ({
         headerName: actions[subAction].responseSizeHeader ?? DEFAULT_RESPONSE_SIZE_HEADER,
       });
       const errorMeta = getErrorMeta({ error, contentLengthBytes });
+      const retryDate = getRetryDate(error);
       logger.error(`error on ${connectorId} event: ${errorMessage}`);
       return {
         status: 'error',
@@ -338,6 +342,8 @@ export const generateExecutorFunction = ({
         ...(errorMeta ? { errorMeta } : {}),
         ...(errorSource === TaskErrorSource.USER
           ? { retry: false, errorSource: TaskErrorSource.USER }
+          : retryDate
+          ? { retry: retryDate }
           : {}),
       };
     } finally {

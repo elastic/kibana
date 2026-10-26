@@ -20,7 +20,7 @@ import type { GetAxiosInstanceWithAuthFn, GetCredentialFn } from '../get_axios_i
 import { LeasePool } from '../lease_pool';
 import { createConnectorNetworkSettings } from './create_connector_network_settings';
 import type { ActionsConfigurationUtilities } from '../../actions_config';
-import { TaskErrorSource } from '@kbn/task-manager-plugin/server';
+import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
 import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
 
 describe('generateExecutorFunction', () => {
@@ -1352,8 +1352,9 @@ describe('generateExecutorFunction', () => {
       });
     });
 
-    describe('HTTP error metadata', () => {
+    describe('HTTP status and retry date', () => {
       const now = Date.parse('2026-10-23T12:00:00Z');
+      const inSeconds = (seconds: number) => new Date(now + seconds * 1000);
 
       const makeHttpError = (
         status: number,
@@ -1378,37 +1379,38 @@ describe('generateExecutorFunction', () => {
         dateNowSpy.mockRestore();
       });
 
-      it('includes the status code and Retry-After seconds for a 429', async () => {
+      it('returns the status code and retries at Retry-After seconds for a 429', async () => {
         const result = await executeWithError(makeHttpError(429, { 'Retry-After': '30' }));
 
         expect(result).toEqual({
           status: 'error',
           message: 'Request failed with status code 429',
           actionId: connectorId,
-          errorMeta: { statusCode: 429, retryAfterSeconds: 30 },
+          errorMeta: { statusCode: 429 },
+          retry: inSeconds(30),
         });
       });
 
-      it('converts an HTTP-date Retry-After to seconds', async () => {
+      it('retries at an HTTP-date Retry-After', async () => {
         const retryAt = new Date(now + 90_000).toUTCString();
 
         const result = await executeWithError(makeHttpError(503, { 'retry-after': retryAt }));
 
-        expect(result.errorMeta).toEqual({ statusCode: 503, retryAfterSeconds: 90 });
+        expect(result.retry).toEqual(inSeconds(90));
       });
 
-      it('reports zero seconds for an HTTP-date Retry-After in the past', async () => {
+      it('retries now for an HTTP-date Retry-After in the past', async () => {
         const retryAt = new Date(now - 60_000).toUTCString();
 
         const result = await executeWithError(makeHttpError(429, { 'retry-after': retryAt }));
 
-        expect(result.errorMeta).toEqual({ statusCode: 429, retryAfterSeconds: 0 });
+        expect(result.retry).toEqual(new Date(now));
       });
 
       it('falls back to a delta-seconds ratelimit-reset header', async () => {
         const result = await executeWithError(makeHttpError(429, { 'ratelimit-reset': '12' }));
 
-        expect(result.errorMeta).toEqual({ statusCode: 429, retryAfterSeconds: 12 });
+        expect(result.retry).toEqual(inSeconds(12));
       });
 
       it('falls back to an epoch-seconds x-ratelimit-reset header', async () => {
@@ -1416,7 +1418,7 @@ describe('generateExecutorFunction', () => {
 
         const result = await executeWithError(makeHttpError(403, { 'x-ratelimit-reset': resetAt }));
 
-        expect(result.errorMeta).toEqual({ statusCode: 403, retryAfterSeconds: 45 });
+        expect(result).toMatchObject({ errorMeta: { statusCode: 403 }, retry: inSeconds(45) });
       });
 
       it('prefers Retry-After over rate-limit reset headers', async () => {
@@ -1424,22 +1426,35 @@ describe('generateExecutorFunction', () => {
           makeHttpError(429, { 'retry-after': '5', 'x-ratelimit-reset': '60' })
         );
 
-        expect(result.errorMeta).toEqual({ statusCode: 429, retryAfterSeconds: 5 });
+        expect(result.retry).toEqual(inSeconds(5));
       });
 
-      it('includes only the status code when no retry header is present', async () => {
+      it('returns only the status code when no retry header is present', async () => {
         const result = await executeWithError(makeHttpError(400));
 
         expect(result.errorMeta).toEqual({ statusCode: 400 });
+        expect(result).not.toHaveProperty('retry');
       });
 
       it('ignores an unparseable Retry-After', async () => {
         const result = await executeWithError(makeHttpError(429, { 'retry-after': 'soon' }));
 
         expect(result.errorMeta).toEqual({ statusCode: 429 });
+        expect(result).not.toHaveProperty('retry');
       });
 
-      it('keeps connector-provided metadata alongside the HTTP metadata', async () => {
+      it('keeps retry false for errors classified as user errors', async () => {
+        const error = createTaskRunError(
+          makeHttpError(429, { 'retry-after': '30' }),
+          TaskErrorSource.USER
+        );
+
+        const result = await executeWithError(error);
+
+        expect(result).toMatchObject({ retry: false, errorSource: TaskErrorSource.USER });
+      });
+
+      it('keeps connector-provided metadata alongside the status code', async () => {
         const error = makeHttpError(413, { 'content-length': '2048' });
         setConnectorActionErrorMeta(error, { estimatedOutputBytes: 4096 });
 
@@ -1452,7 +1467,7 @@ describe('generateExecutorFunction', () => {
         });
       });
 
-      it('does not add HTTP metadata to errors without a response status', async () => {
+      it('adds neither to errors without a response status', async () => {
         const error = Object.assign(new Error('socket hang up'), {
           response: { headers: { 'retry-after': '30' } },
         });
