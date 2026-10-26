@@ -25,19 +25,12 @@ import {
   mapDestinationStatsRows,
   noDestinationStats,
 } from './mappers/map_destination_stats_result';
-import {
-  joinProcessorRows,
-  mapProcessorStatsRows,
-  noProcessorStats,
-} from './mappers/map_processor_stats_result';
+import { mapProcessorStatsRows, noProcessorStats } from './mappers/map_processor_stats_result';
 import {
   buildDestinationRateQuery,
   buildDestinationSumsQuery,
 } from './query_builders/build_destination_stats_queries';
-import {
-  buildProcessorRateQuery,
-  buildProcessorSumsQuery,
-} from './query_builders/build_processor_stats_queries';
+import { buildProcessorSumsQuery } from './query_builders/build_processor_stats_queries';
 import { buildStreamProbeQuery } from './query_builders/build_stream_probe_query';
 import type { StatsQueryBaseParams } from './query_builders/filters';
 import { getSeriesBucketMs } from './utils/series_bucket';
@@ -294,11 +287,8 @@ export class UnitStatsClient {
     const what = 'processor stats';
 
     try {
-      const [rateRows, sumsRows] = await Promise.all([
-        this.runQuery(buildProcessorRateQuery({ ...baseParams, ids })),
-        this.runQuery(buildProcessorSumsQuery({ ...baseParams, ids })),
-      ]);
-      const mapped = mapProcessorStatsRows({ rows: joinProcessorRows({ rateRows, sumsRows }) });
+      const rows = await this.runQuery(buildProcessorSumsQuery({ ...baseParams, ids }));
+      const mapped = mapProcessorStatsRows({ rows });
 
       return {
         results: Object.fromEntries(ids.map((id) => [id, mapped[id] ?? noProcessorStats()])),

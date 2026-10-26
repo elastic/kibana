@@ -6,19 +6,17 @@
  */
 
 import { streamsUnitStatsProcessorResultSchema } from '@kbn/streams-schema';
-import { joinProcessorRows, mapProcessorStatsRows } from './map_processor_stats_result';
+import { mapProcessorStatsRows } from './map_processor_stats_result';
 
 describe('mapProcessorStatsRows', () => {
-  const joined = {
+  const row = {
+    step: 'uppercase-message',
     incoming_rate: 4.6,
-    sum_items_in: 3870,
     avg_duration_per_item: 5.2e-6,
   };
 
-  it('places the joined rows into the result, with units', () => {
-    const result = mapProcessorStatsRows({ rows: { 'uppercase-message': joined } })[
-      'uppercase-message'
-    ];
+  it('places the row into the result, with units', () => {
+    const result = mapProcessorStatsRows({ rows: [row] })['uppercase-message'];
 
     expect(result).toEqual({
       processing_duration: { average: { value: 5.2e-6, unit: 's' } },
@@ -33,7 +31,7 @@ describe('mapProcessorStatsRows', () => {
   });
 
   it('has a result for every processor', () => {
-    const rows = { 'uppercase-message': joined, 'add-tags': { ...joined, incoming_rate: 2.1 } };
+    const rows = [row, { ...row, step: 'add-tags', incoming_rate: 2.1 }];
 
     const results = mapProcessorStatsRows({ rows });
 
@@ -42,13 +40,7 @@ describe('mapProcessorStatsRows', () => {
   });
 
   it('leaves a column that ES|QL returned as null as no data', () => {
-    const rows = {
-      'uppercase-message': {
-        incoming_rate: null,
-        sum_items_in: 3870,
-        avg_duration_per_item: null,
-      },
-    };
+    const rows = [{ step: 'uppercase-message', incoming_rate: null, avg_duration_per_item: null }];
 
     const result = mapProcessorStatsRows({ rows })['uppercase-message'];
 
@@ -58,15 +50,13 @@ describe('mapProcessorStatsRows', () => {
 
   // Processor failures are not queried yet, so there is no failed_rate column.
   it('leaves the failed rate as no data when there is no failed_rate column', () => {
-    const result = mapProcessorStatsRows({ rows: { 'uppercase-message': joined } })[
-      'uppercase-message'
-    ];
+    const result = mapProcessorStatsRows({ rows: [row] })['uppercase-message'];
 
     expect(result.events.failed.rate.value).toBeNull();
   });
 
   it('places the failed rate once the query returns it, including a real zero', () => {
-    const rows = { 'uppercase-message': { ...joined, failed_rate: 0 } };
+    const rows = [{ ...row, failed_rate: 0 }];
 
     const result = mapProcessorStatsRows({ rows })['uppercase-message'];
 
@@ -75,31 +65,5 @@ describe('mapProcessorStatsRows', () => {
       unit: '{item}',
       time_unit: 's',
     });
-  });
-});
-
-const rateRows = [{ step: 'uppercase-message', incoming_rate: 4.6 }];
-
-const sumsRows = [{ step: 'uppercase-message', sum_items_in: 3870, avg_duration_per_item: 5.2e-6 }];
-
-describe('joinProcessorRows', () => {
-  it('has one object per processor with its rate and sums', () => {
-    expect(joinProcessorRows({ rateRows, sumsRows })).toEqual({
-      'uppercase-message': {
-        incoming_rate: 4.6,
-        sum_items_in: 3870,
-        avg_duration_per_item: 5.2e-6,
-      },
-    });
-  });
-
-  it('keeps a processor with items in and no rate row', () => {
-    expect(joinProcessorRows({ rateRows: [], sumsRows })).toEqual({
-      'uppercase-message': { sum_items_in: 3870, avg_duration_per_item: 5.2e-6 },
-    });
-  });
-
-  it('has no processors for no rows', () => {
-    expect(joinProcessorRows({ rateRows: [], sumsRows: [] })).toEqual({});
   });
 });

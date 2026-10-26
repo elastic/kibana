@@ -37,10 +37,13 @@ const filterDestinations = (
   );
 
 /**
- * Rate, failures rate and latency per destination, from the time series. `RATE` is not an
- * exact sum (it needs two samples per series and takes the first as its baseline), so the
- * series comes from `buildDestinationSumsQuery`. `failed_rate` counts every outcome except
- * `success`: 0 when there is a rate and no failures, null when there is no rate.
+ * Rate, failed rate and latency per destination over the window, from a plain `FROM`. A rate is
+ * the exact sum of items over the length of the window. A sum of per-series `RATE`s would count
+ * a series that ends and one that starts inside the window both in full. The window length is
+ * taken in milliseconds: `DATE_DIFF` in seconds truncates, which skews short windows.
+ * `failed_rate` counts every outcome except `success`: 0 when there are items and no failures,
+ * null when there are no items. `AVG` of the duration histograms is the mean of all observations. `items` is a
+ * counter, so it is cast first.
  */
 export const buildDestinationRateQuery = (params: DestinationStatsQueryParams): ComposerQuery => {
   const items = normalizeColumn(DESTINATION_ITEMS_FIELD);
@@ -51,19 +54,22 @@ export const buildDestinationRateQuery = (params: DestinationStatsQueryParams): 
   const failedRate = esql.col(STATS_COLUMN.failedRate);
   const avgLatency = esql.col(STATS_COLUMN.avgLatency);
   const id = esql.col(STATS_COLUMN.id);
+  const { start, end } = params.window;
 
-  return filterDestinations(esql.ts(UNIT_METRICS_STREAM), params)
-    .pipe`STATS ${incomingRate} = SUM(RATE(${items})),
-        ${failedRate} = SUM(RATE(${items})) WHERE ${outcome} != "success",
+  return filterDestinations(esql.from(UNIT_METRICS_STREAM), params)
+    .pipe`EVAL delta = TO_DOUBLE(${items})`.pipe`STATS sum_items = SUM(delta),
+        failed_items = SUM(delta) WHERE ${outcome} != "success",
         ${avgLatency} = AVG(${duration})
       BY ${id} = ${destinationId}`
-    .pipe`EVAL ${failedRate} = CASE(${incomingRate} IS NOT NULL AND ${failedRate} IS NULL, 0.0, ${failedRate})`;
+    .pipe`EVAL window_seconds = DATE_DIFF("milliseconds", ${start}, ${end}) / 1000.0`
+    .pipe`EVAL ${incomingRate} = sum_items / window_seconds,
+        ${failedRate} = CASE(sum_items IS NOT NULL, COALESCE(failed_items, 0.0) / window_seconds)`
+    .pipe`KEEP ${id}, ${incomingRate}, ${failedRate}, ${avgLatency}`;
 };
 
 /**
- * Items per destination and time bucket, ordered by bucket, from a plain `FROM`: a plain sum
- * inside `TS` is the last value of each series, not a sum of deltas. `items` is a counter, so
- * it is cast first.
+ * Items per destination and time bucket, ordered by bucket, from a plain `FROM`. `items` is a
+ * counter, so it is cast first.
  * Returns at most `ESQL_MAX_ROWS` rows (ids times buckets) and truncates silently. A request
  * names a bounded number of ids and `bucketMs` gives at most `SERIES_MAX_BUCKETS` buckets, so
  * the result always fits.

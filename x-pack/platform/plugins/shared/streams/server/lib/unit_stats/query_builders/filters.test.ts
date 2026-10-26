@@ -47,18 +47,19 @@ describe('filterByUnitAndWindow', () => {
 
 describe('filterByIds', () => {
   it('keeps the documents whose field is one of the ids', () => {
-    const query = filterByIds(esql.from(UNIT_METRICS_STREAM), 'attributes.streams.destination.id', [
-      'es-prod',
-      'es-dev',
-    ]);
+    const query = filterByIds(
+      esql.from(UNIT_METRICS_STREAM),
+      'scope.attributes.streams.destination.id',
+      ['es-prod', 'es-dev']
+    );
 
     expect(print(query)).toBe(
-      `FROM ${UNIT_METRICS_STREAM} | WHERE attributes.streams.destination.id IN ("es-prod", "es-dev")`
+      `FROM ${UNIT_METRICS_STREAM} | WHERE scope.attributes.streams.destination.id IN ("es-prod", "es-dev")`
     );
   });
 
   it('escapes quotes in ids and does not read them as columns', () => {
-    const query = filterByIds(esql.from(UNIT_METRICS_STREAM), 'attributes.streams.step.id', [
+    const query = filterByIds(esql.from(UNIT_METRICS_STREAM), 'scope.attributes.streams.step.id', [
       'we"ird',
     ]);
 

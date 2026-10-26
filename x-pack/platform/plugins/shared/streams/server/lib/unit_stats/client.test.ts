@@ -59,39 +59,38 @@ const responses = {
       [240, 'es-prod', '2026-10-19T11:47:00.000Z'],
     ],
   },
-  processorRate: {
+  processor: {
     columns: [
+      { name: 'step', type: 'keyword' },
       { name: 'incoming_rate', type: 'double' },
-      { name: 'step', type: 'keyword' },
-    ],
-    values: [[4.6, 'uppercase-message']],
-  },
-  processorSums: {
-    columns: [
-      { name: 'sum_items_in', type: 'double' },
       { name: 'avg_duration_per_item', type: 'double' },
-      { name: 'step', type: 'keyword' },
     ],
-    values: [[3870, 5.2e-6, 'uppercase-message']],
+    values: [['uppercase-message', 4.6, 5.2e-6]],
   },
 };
 
 type QueryName = keyof typeof responses;
 
 const isProbe = (query: string) => query.endsWith('| LIMIT 0');
-/** The stats queries start with a `SET` command, so the source is not at the start. */
-const isRateQuery = (query: string) => query.includes('; TS ');
+/** Only the per-destination aggregate divides by the window, the series query does not. */
+const isDestinationRateQuery = (query: string) => query.includes('window_seconds');
+
+const queryName = (query: string): QueryName => {
+  if (!query.includes('scope.attributes.streams.destination.id')) return 'processor';
+
+  return isDestinationRateQuery(query) ? 'destinationRate' : 'destinationSums';
+};
 
 /**
- * Answers each `esql.query` by what the query asks for: a `TS` or a `FROM` query, for
- * destinations or for processors. An override replaces the answer, and can throw.
+ * Answers each `esql.query` by what the query asks for: the probe, or the stats query of
+ * destinations (rates, or the series) or of processors. An override replaces the answer, and can
+ * throw.
  */
 const makeEsql = (overrides: Partial<Record<QueryName, () => EsqlResponse>> = {}) =>
   jest.fn(async ({ query }: { query: string }) => {
     if (isProbe(query)) return (overrides.probe ?? (() => responses.probe))();
 
-    const kind = query.includes('attributes.streams.destination.id') ? 'destination' : 'processor';
-    const name = `${kind}${isRateQuery(query) ? 'Rate' : 'Sums'}` as QueryName;
+    const name = queryName(query);
 
     return (overrides[name] ?? (() => responses[name]))();
   });
@@ -199,12 +198,12 @@ describe('UnitStatsClient.getStats', () => {
       expect(Object.keys(destinationResponse.components.destinations)).toEqual(['es-prod']);
       expect(destinationResponse.components.processors).toEqual({});
       statsQueries(destinationsOnly).forEach((query) =>
-        expect(query).toContain('attributes.streams.destination.id')
+        expect(query).toContain('scope.attributes.streams.destination.id')
       );
       expect(processorResponse.components.destinations).toEqual({});
       expect(Object.keys(processorResponse.components.processors)).toEqual(['uppercase-message']);
       statsQueries(processorsOnly).forEach((query) =>
-        expect(query).toContain('attributes.streams.step.id')
+        expect(query).toContain('scope.attributes.streams.step.id')
       );
     });
 
@@ -252,7 +251,7 @@ describe('UnitStatsClient.getStats', () => {
 
       const unpinnedQueries = statsQueries(unpinned);
       const pinnedQueries = statsQueries(pinned);
-      expect(unpinnedQueries).toHaveLength(4);
+      expect(unpinnedQueries).toHaveLength(3);
       unpinnedQueries.forEach((query) => {
         expect(query).toContain('resource.attributes.unit.id == "default"');
         expect(query).toContain(`@timestamp >= "${timeRange.start}"`);
@@ -276,7 +275,9 @@ describe('UnitStatsClient.getStats', () => {
       });
       const maxDestinations = destinationsOf(MAX_STREAMS_UNIT_STATS_COMPONENTS);
       const sumsQueries = (esql: jest.Mock) =>
-        statsQueries(esql).filter((query) => !isRateQuery(query) && query.includes('destination'));
+        statsQueries(esql).filter(
+          (query) => !isDestinationRateQuery(query) && query.includes('destination')
+        );
 
       it('asks for the sums once and the rates once', async () => {
         const esql = makeEsql();
@@ -285,7 +286,7 @@ describe('UnitStatsClient.getStats', () => {
 
         expect(sumsQueries(esql)).toHaveLength(1);
         const rateQueries = statsQueries(esql).filter(
-          (query) => isRateQuery(query) && query.includes('destination')
+          (query) => isDestinationRateQuery(query) && query.includes('destination')
         );
         expect(rateQueries).toHaveLength(1);
       });
@@ -339,8 +340,7 @@ describe('UnitStatsClient.getStats', () => {
       const esql = makeEsql({
         destinationRate: empty,
         destinationSums: empty,
-        processorRate: empty,
-        processorSums: empty,
+        processor: empty,
       });
 
       const response = await run(esql, { filter: { config_hash: 'nope' } });
@@ -370,7 +370,7 @@ describe('UnitStatsClient.getStats', () => {
     });
 
     it('puts the same error on every processor when a processor query fails', async () => {
-      const response = await run(makeEsql({ processorSums: failWith(responseError(500)) }));
+      const response = await run(makeEsql({ processor: failWith(responseError(500)) }));
 
       expect(response.components.processors['uppercase-message'].error?.code).toBe('error');
       expect(response.components.destinations['es-prod'].error).toBeUndefined();
@@ -408,7 +408,7 @@ describe('UnitStatsClient.getStats', () => {
         run(
           makeEsql({
             destinationSums: failWith(responseError(429)),
-            processorRate: failWith(responseError(429)),
+            processor: failWith(responseError(429)),
           })
         )
       ).rejects.toMatchObject({ code: 'unavailable', statusCode: 503 });
@@ -419,7 +419,7 @@ describe('UnitStatsClient.getStats', () => {
         run(
           makeEsql({
             destinationRate: failWith(responseError(429)),
-            processorRate: failWith(responseError(403)),
+            processor: failWith(responseError(403)),
           })
         )
       ).rejects.toMatchObject({ code: 'forbidden', statusCode: 403 });
@@ -427,7 +427,7 @@ describe('UnitStatsClient.getStats', () => {
         run(
           makeEsql({
             destinationRate: failWith(responseError(429)),
-            processorRate: failWith(new errors.TimeoutError('timeout', {} as never)),
+            processor: failWith(new errors.TimeoutError('timeout', {} as never)),
           })
         )
       ).rejects.toMatchObject({ code: 'timeout', statusCode: 503 });
@@ -446,7 +446,7 @@ describe('UnitStatsClient.getStats', () => {
         run(
           makeEsql({
             destinationRate: failWith(responseError(500)),
-            processorSums: failWith(responseError(500)),
+            processor: failWith(responseError(500)),
           })
         )
       ).rejects.toMatchObject({ code: 'error', statusCode: 500 });

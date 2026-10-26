@@ -31,12 +31,12 @@ export const CONFIG_HASH_FIELD = 'resource.attributes.streams.config.hash';
 export const DIRECTION_FIELD = 'attributes.direction';
 export const OUTCOME_FIELD = 'attributes.outcome';
 
-export const DESTINATION_ID_FIELD = 'attributes.streams.destination.id';
+export const DESTINATION_ID_FIELD = 'scope.attributes.streams.destination.id';
 export const DESTINATION_ITEMS_FIELD = 'metrics.streams.destination.items';
 export const DESTINATION_DURATION_FIELD = 'metrics.streams.destination.duration';
 
 /** The telemetry calls a processor a step. */
-export const STEP_ID_FIELD = 'attributes.streams.step.id';
+export const STEP_ID_FIELD = 'scope.attributes.streams.step.id';
 export const STEP_ITEMS_FIELD = 'metrics.streams.step.items';
 export const STEP_DURATION_FIELD = 'metrics.streams.step.duration';
 
