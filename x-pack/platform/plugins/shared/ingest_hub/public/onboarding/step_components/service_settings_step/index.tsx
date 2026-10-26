@@ -12,12 +12,10 @@ import {
   EuiButtonEmpty,
   EuiButtonIcon,
   EuiCallOut,
-  EuiComboBox,
   EuiContextMenuItem,
   EuiContextMenuPanel,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFormRow,
   EuiIconTip,
   EuiInMemoryTable,
   EuiPopover,
@@ -36,11 +34,7 @@ import {
   getSourcePolicyName,
 } from '../authenticate_and_deploy_step/deploy_group_helpers';
 import { supportsIntegrationSettings } from './integration_settings';
-import {
-  AWS_REGION_OPTIONS,
-  getRegionFieldName,
-  hasConfigurableFlyoutFields,
-} from './field_config';
+import { getRegionFieldName, hasConfigurableFlyoutFields } from './field_config';
 import type { ServiceInstance } from './use_service_settings';
 import { useServiceSettings } from './use_service_settings';
 import { ServiceSettingsFlyout } from './service_settings_flyout';
@@ -153,9 +147,6 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
     addDuplicate(duplicateSourceInstanceId, name, varsByDataStream, enabledDataStreams, namespace);
     setDuplicateSourceInstanceId(null);
   };
-
-  const globalRegionOptions = AWS_REGION_OPTIONS;
-  const selectedGlobalRegionOption = globalRegion ? [{ label: globalRegion }] : [];
 
   const continueTooltipContent = useMemo(() => {
     if (isReady && !hasUnloadedSelectedManifests && !hasErroredSelectedManifests) return undefined;
@@ -433,80 +424,6 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
             </p>
           </EuiText>
         </EuiFlexItem>
-        <EuiFlexItem grow={false} style={{ minWidth: 260 }}>
-          <EuiFormRow
-            display="rowCompressed"
-            label={
-              <>
-                {i18n.translate('xpack.ingestHub.serviceSettingsStep.globalRegion.label', {
-                  defaultMessage: 'Global AWS region',
-                })}{' '}
-                <EuiIconTip
-                  type="info"
-                  color="subdued"
-                  content={i18n.translate('xpack.ingestHub.serviceSettingsStep.globalRegion.note', {
-                    defaultMessage: 'Applies to all services',
-                  })}
-                />
-              </>
-            }
-            isInvalid={globalRegionTouched && !globalRegion.trim()}
-            error={
-              globalRegionTouched && !globalRegion.trim() ? (
-                <span data-test-subj="serviceSettingsStep-globalRegionError">
-                  {i18n.translate('xpack.ingestHub.serviceSettingsStep.globalRegion.error', {
-                    defaultMessage: 'A global region is required.',
-                  })}
-                </span>
-              ) : undefined
-            }
-          >
-            {(() => {
-              const comboBox = (
-                <EuiComboBox
-                  compressed
-                  singleSelection={{ asPlainText: true }}
-                  options={globalRegionOptions}
-                  selectedOptions={selectedGlobalRegionOption}
-                  onChange={(selected) => {
-                    setGlobalRegionTouched(true);
-                    setGlobalRegion(selected[0]?.label ?? '');
-                  }}
-                  onCreateOption={(searchValue) => {
-                    setGlobalRegionTouched(true);
-                    setGlobalRegion(searchValue);
-                  }}
-                  isInvalid={globalRegionTouched && !globalRegion.trim()}
-                  isDisabled={isRegionDisabled}
-                  customOptionText='Use "{searchValue}" as region'
-                  placeholder={i18n.translate(
-                    'xpack.ingestHub.serviceSettingsStep.globalRegion.placeholder',
-                    { defaultMessage: 'Select or enter a region' }
-                  )}
-                  data-test-subj="serviceSettingsStep-globalRegion"
-                />
-              );
-              if (!isRegionDisabled) return comboBox;
-              // span needed: disabled EuiComboBox has pointer-events:none; the span intercepts
-              // hover events so the tooltip fires even when the field is non-interactive.
-              return (
-                <EuiToolTip
-                  content={i18n.translate(
-                    'xpack.ingestHub.serviceSettingsStep.globalRegion.disabledTooltip',
-                    {
-                      defaultMessage:
-                        'Region cannot be changed after services have been deployed. To use a different region, start a new session.',
-                    }
-                  )}
-                >
-                  <span tabIndex={0} style={{ display: 'block' }}>
-                    {comboBox}
-                  </span>
-                </EuiToolTip>
-              );
-            })()}
-          </EuiFormRow>
-        </EuiFlexItem>
       </EuiFlexGroup>
 
       <EuiSpacer size="m" />
@@ -518,6 +435,11 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
         description={description}
         onDescriptionChange={setDescription}
         descriptionError={descriptionError}
+        globalRegion={globalRegion}
+        onGlobalRegionChange={setGlobalRegion}
+        globalRegionTouched={globalRegionTouched}
+        onGlobalRegionTouched={() => setGlobalRegionTouched(true)}
+        isGlobalRegionDisabled={isRegionDisabled}
       />
       <EuiSpacer size="m" />
 

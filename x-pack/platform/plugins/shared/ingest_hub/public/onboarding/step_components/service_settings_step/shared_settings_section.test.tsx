@@ -21,11 +21,18 @@ const renderSection = (props: Partial<React.ComponentProps<typeof SharedSettings
         onIntegrationNameChange={onIntegrationNameChange}
         description=""
         onDescriptionChange={onDescriptionChange}
+        globalRegion="us-east-1"
+        onGlobalRegionChange={jest.fn()}
+        globalRegionTouched={false}
+        onGlobalRegionTouched={jest.fn()}
         {...props}
       />
     </I18nProvider>
   );
-  return { onIntegrationNameChange, onDescriptionChange };
+  return {
+    onIntegrationNameChange,
+    onDescriptionChange,
+  };
 };
 
 describe('SharedSettingsSection', () => {
