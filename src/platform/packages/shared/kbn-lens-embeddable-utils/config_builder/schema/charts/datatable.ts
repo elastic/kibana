@@ -156,13 +156,10 @@ const datatableStylingSchema = lazySchema(() =>
       /**
        * Paging configuration
        */
-      paging: z
-        .literal(LENS_DATATABLE_PAGE_SIZE_OPTIONS)
-        .optional()
-        .meta({
-          description:
-            'Rows per page. When set, pagination is enabled with the specified number of rows.',
-        }),
+      paging: z.literal(LENS_DATATABLE_PAGE_SIZE_OPTIONS).optional().meta({
+        description:
+          'Rows per page. When set, pagination is enabled with the specified number of rows.',
+      }),
       /**
        * Sorting configuration
        */

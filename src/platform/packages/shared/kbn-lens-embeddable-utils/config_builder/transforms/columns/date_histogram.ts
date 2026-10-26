@@ -48,7 +48,8 @@ export function fromDateHistogramLensStateToAPI(
     operation: 'date_histogram',
     ...getLensAPIBucketSharedProps(column),
     suggested_interval: column.params.interval,
-    use_original_time_range: column.params.ignoreTimeRange ?? LENS_DATE_HISTOGRAM_IGNORE_TIME_RANGE_DEFAULT,
+    use_original_time_range:
+      column.params.ignoreTimeRange ?? LENS_DATE_HISTOGRAM_IGNORE_TIME_RANGE_DEFAULT,
     include_empty_rows: column.params.includeEmptyRows ?? LENS_DATE_HISTOGRAM_EMPTY_ROWS_DEFAULT,
     drop_partial_intervals: column.params.dropPartials ?? LENS_DATE_HISTOGRAM_DROP_PARTIALS_DEFAULT,
   };
