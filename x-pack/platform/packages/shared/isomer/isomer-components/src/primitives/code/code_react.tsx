@@ -8,6 +8,7 @@
 import React, { useEffect, useState } from 'react';
 import type { Renderers, StyledRenderContext } from '@elastic/isomer-sdk';
 import { nodeAnchor } from '@elastic/isomer-sdk';
+import { i18n } from '@kbn/i18n';
 import { classNames, isomerDistillery } from '@kbn/isomer-theme';
 
 import type { ComponentsPackTypes } from '../../lib';
@@ -70,6 +71,21 @@ const Code = ({ node, context, anchored = true }: CodeProps & { anchored?: boole
   </pre>
 );
 
+const copyLabel = (language: string | undefined): string =>
+  language
+    ? i18n.translate('xpack.isomer.components.code.copyLanguageAriaLabel', {
+        defaultMessage: 'Copy {language} code',
+        values: { language },
+      })
+    : i18n.translate('xpack.isomer.components.code.copyAriaLabel', {
+        defaultMessage: 'Copy code',
+      });
+
+const copyText = (): string =>
+  i18n.translate('xpack.isomer.components.code.copyButton', { defaultMessage: 'Copy' });
+const copiedText = (): string =>
+  i18n.translate('xpack.isomer.components.code.copiedButton', { defaultMessage: 'Copied' });
+
 const hasClipboard = (): boolean =>
   typeof navigator !== 'undefined' && typeof navigator.clipboard?.writeText === 'function';
 
@@ -100,10 +116,10 @@ const CopyableCode = ({ node, context }: CodeProps) => {
         <button
           type="button"
           className={classNames(context, handles.copy)}
-          aria-label={node.language ? `Copy ${node.language} code` : 'Copy code'}
+          aria-label={copyLabel(node.language)}
           onClick={copy}
         >
-          <span aria-live="polite">{copied ? 'Copied' : 'Copy'}</span>
+          <span aria-live="polite">{copied ? copiedText() : copyText()}</span>
         </button>
       ) : null}
     </div>

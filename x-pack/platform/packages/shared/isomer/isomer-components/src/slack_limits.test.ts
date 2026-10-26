@@ -202,6 +202,6 @@ describe('Slack slots below their schema cap', () => {
     for (const element of elements) {
       expect(elementText(element).length).toBeLessThanOrEqual(SLACK_LIMITS.sectionTextChars);
     }
-    expect(elements.map(elementText).join('').replace(/\n/g, '')).toBe(text.replace(/\n/g, ''));
+    expect(elements.map(elementText).join('')).toBe(text);
   });
 });

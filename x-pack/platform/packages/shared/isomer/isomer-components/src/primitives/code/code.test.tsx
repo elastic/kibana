@@ -56,7 +56,7 @@ describe('code', () => {
       .map((inline) => ('text' in inline ? inline.text : ''))
       .join('');
 
-    expect(printed.replace(/\n/g, '')).toBe(text.slice(0, 12000).replace(/\n/g, ''));
+    expect(printed).toBe(text.slice(0, 12000));
   });
 
   it('fences Markdown longer than any backtick run, with the language', () => {

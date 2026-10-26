@@ -13,7 +13,7 @@ import { classNames, isomerDistillery } from '@kbn/isomer-theme';
 import type { ComponentsPackTypes } from '../../lib';
 import type { TableNode } from './table';
 import type { SortDirection, TableView } from './table_model';
-import { tableView } from './table_model';
+import { noRowsNote, tableView } from './table_model';
 import { TABLE_SORT_ATTRIBUTES, TABLE_SORT_ENHANCEMENT } from './table_sort';
 
 const { handles } = isomerDistillery.createStyleModule(
@@ -159,7 +159,7 @@ const Table = ({ node, context, view: { columns, rows, cells, note }, sortable }
         </tbody>
       </table>
       {note || rows.length === 0 ? (
-        <p className={classNames(context, handles.note)}>{note ?? 'No rows'}</p>
+        <p className={classNames(context, handles.note)}>{note ?? noRowsNote()}</p>
       ) : null}
     </div>
   );

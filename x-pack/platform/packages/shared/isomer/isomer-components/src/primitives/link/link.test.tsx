@@ -52,7 +52,13 @@ describe('link', () => {
     expect(view({ app: 'discover', path: '//evil.example' })).toBe(false);
     expect(view({ app: 'discover', path: '/../../evil' })).toBe(false);
     expect(view({ app: 'discover', path: '/\\evil.example' })).toBe(false);
+    expect(view({ app: 'discover', path: '/%2e%2e/management' })).toBe(false);
+    expect(view({ app: 'discover', path: '/%2E%2E' })).toBe(false);
+    expect(view({ app: 'discover', path: '/.%2e/management?x' })).toBe(false);
+    expect(view({ app: 'discover', path: '/.\t./management' })).toBe(false);
     expect(view({ app: 'discover/../x' })).toBe(false);
+    expect(view({ app: '..' })).toBe(false);
+    expect(view({ app: 'discover', path: '#/../x' })).toBe(true);
     expect(view({ app: 'discover', path: '/view/a..b?q=..' })).toBe(true);
   });
 
@@ -92,18 +98,35 @@ describe('link', () => {
   });
 
   it('resolves an app link in React through the host’s resolver', () => {
-    const resolveAppLink = jest.fn(({ app, path }) => `/base/s/ops/app/${app}${path ?? ''}`);
+    const resolveKibanaPath = jest.fn((path: string) => `/base/s/ops${path}`);
 
-    expect(react(discover, { resolveAppLink })).toBe(
+    expect(react(discover, { resolveKibanaPath })).toBe(
       '<p class="componentsLink-root"><a href="/base/s/ops/app/discover#/?_a=(query:(esql:&#x27;FROM logs&#x27;))" class="componentsLink-anchor">Open in Discover</a></p>'
     );
-    expect(resolveAppLink).toHaveBeenCalledWith({ app: 'discover', path: discover.path });
+    expect(resolveKibanaPath).toHaveBeenCalledWith(`/app/discover${discover.path}`);
+  });
+
+  it('links an app by its route on every host, not by its app id', () => {
+    const security: LinkNode = { type: 'link', label: 'Alerts', app: 'security', path: '/alerts' };
+
+    expect(react(security, { resolveKibanaPath: (path) => `/base${path}` })).toContain(
+      'href="/base/app/security/alerts"'
+    );
+    expect(slack(security, 'https://kibana.example.com/base')).toEqual([
+      {
+        type: 'section',
+        text: {
+          type: 'mrkdwn',
+          text: '<https://kibana.example.com/base/app/security/alerts|Alerts>',
+        },
+      },
+    ]);
   });
 
   it('renders nothing in React when the app link does not resolve', () => {
     expect(react(discover)).toBe('');
-    expect(react(discover, { resolveAppLink: () => undefined })).toBe('');
-    expect(react(discover, { resolveAppLink: () => 'data:text/html,<b>hi</b>' })).toBe('');
+    expect(react(discover, { resolveKibanaPath: () => undefined })).toBe('');
+    expect(react(discover, { resolveKibanaPath: () => 'data:text/html,<b>hi</b>' })).toBe('');
   });
 
   it('links an absolute URL in React with no resolver', () => {
