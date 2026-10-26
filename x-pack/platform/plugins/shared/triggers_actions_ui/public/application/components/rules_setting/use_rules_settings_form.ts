@@ -131,7 +131,7 @@ export const useRulesSettingsForm = ({
     onClose();
   }, [onClose, resetFlappingSettings, resetQueryDelaySettings]);
 
-  const { mutate } = useUpdateRuleSettings({
+  const { mutate, isLoading: isSaving } = useUpdateRuleSettings({
     onSave,
     onClose,
     setUpdatingRulesSettings,
@@ -145,7 +145,7 @@ export const useRulesSettingsForm = ({
 
   const isChanged = hasFlappingChanged || hasQueryDelayChanged;
   const hasMinimumWritePermissions = canWriteFlappingSettings || canWriteQueryDelaySettings;
-  const isSaveDisabled = !isChanged || !hasMinimumWritePermissions;
+  const isSaveDisabled = !isChanged || !hasMinimumWritePermissions || isSaving;
 
   const onSettingChange: RulesSettingsForm['onSettingChange'] = (setting, key, value) => {
     if (setting === 'flapping') {
@@ -181,13 +181,21 @@ export const useRulesSettingsForm = ({
     const updatedSettings: RulesSettingsProperties = {};
     if (canWriteFlappingSettings && hasFlappingChanged) {
       updatedSettings.flapping = flappingSettings;
-      setFlappingSettings(flappingSettings!, true);
     }
     if (canWriteQueryDelaySettings && hasQueryDelayChanged) {
       updatedSettings.queryDelay = queryDelaySettings;
-      setQueryDelaySettings(queryDelaySettings!, true);
     }
-    mutate(updatedSettings);
+    // Only treat the values as saved once the API succeeded, so a failed save can be retried.
+    mutate(updatedSettings, {
+      onSuccess: () => {
+        if (updatedSettings.flapping) {
+          setFlappingSettings(updatedSettings.flapping, true);
+        }
+        if (updatedSettings.queryDelay) {
+          setQueryDelaySettings(updatedSettings.queryDelay, true);
+        }
+      },
+    });
   };
 
   return {

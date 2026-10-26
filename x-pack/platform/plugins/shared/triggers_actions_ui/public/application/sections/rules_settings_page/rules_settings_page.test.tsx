@@ -10,7 +10,7 @@ import { Router } from '@kbn/shared-ux-router';
 import { createMemoryHistory } from 'history';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { render, screen, fireEvent, cleanup, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, cleanup, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { coreMock } from '@kbn/core/public/mocks';
 import type { IToasts } from '@kbn/core/public';
@@ -235,5 +235,30 @@ describe('RulesSettingsPageContainer', () => {
     await userEvent.click(screen.getByTestId('rulesSettingsPageSaveButton'));
 
     await waitFor(() => expect(history.location.pathname).toBe('/logs'));
+  });
+
+  it('stays on the page while the save is in flight and after it fails', async () => {
+    let rejectUpdate: (reason?: unknown) => void = () => {};
+    updateFlappingSettingsMock.mockReturnValue(
+      new Promise((_resolve, reject) => {
+        rejectUpdate = reject;
+      })
+    );
+    const history = renderPage('/logs');
+    await screen.findByTestId('rulesSettingsFlappingSection');
+
+    fireEvent.change(screen.getByTestId('lookBackWindowRangeInput'), { target: { value: 20 } });
+    await userEvent.click(screen.getByTestId('rulesSettingsPageSaveButton'));
+
+    await waitFor(() => expect(updateFlappingSettingsMock).toHaveBeenCalledTimes(1));
+    expect(history.location.pathname).toBe('/settings');
+    expect(screen.getByTestId('rulesSettingsPageSaveButton')).toBeDisabled();
+
+    await act(async () => {
+      rejectUpdate(new Error('boom'));
+    });
+
+    await waitFor(() => expect(screen.getByTestId('rulesSettingsPageSaveButton')).toBeEnabled());
+    expect(history.location.pathname).toBe('/settings');
   });
 });
