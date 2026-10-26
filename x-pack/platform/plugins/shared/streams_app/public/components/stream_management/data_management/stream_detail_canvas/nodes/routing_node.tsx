@@ -117,7 +117,15 @@ export function RoutingNode({ data, selected, dragging }: NodeProps<RoutingNodeT
           >
             <EuiFlexGroup alignItems="center">
               <EuiFlexItem grow={false}>
-                <EuiIcon type="branch" size="m" aria-hidden={true} />
+                <EuiIcon
+                  type="branch"
+                  size="m"
+                  aria-hidden={true}
+                  css={css`
+                    transform: translateZ(0) rotate(90deg);
+                    backface-visibility: hidden;
+                  `}
+                />
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
