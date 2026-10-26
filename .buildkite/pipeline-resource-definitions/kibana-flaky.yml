@@ -27,6 +27,7 @@ spec:
             paths:
               - .buildkite
               - .node-version
+              - .nvmrc
               - package.json
               - tsconfig.base.json
               - versions.json

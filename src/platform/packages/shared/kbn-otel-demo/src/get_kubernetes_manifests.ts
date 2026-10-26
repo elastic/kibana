@@ -16,7 +16,7 @@ interface K8sManifestOptions {
   elasticsearchEndpoint: string;
   username: string;
   password: string;
-  logsIndex: string;
+  logsIndex?: string;
   collectorConfigYaml: string;
   /** Per-service environment variable overrides from failure scenarios */
   envOverrides?: Record<string, Record<string, string>>;

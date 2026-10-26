@@ -147,6 +147,12 @@ export interface RunContext {
    * is generated using the API key and passed as part of the run context.
    */
   fakeRequest?: KibanaRequest;
+
+  /**
+   * Set instead of `fakeRequest` when the task was scheduled with `runAs`. Do all the work that
+   * needs the service account inside `runAs.withScopedRequest`.
+   */
+  runAs?: TaskRunAsContext;
   signal: AbortSignal;
 
   /**
@@ -480,6 +486,22 @@ export interface TaskRunAsDefinition {
   withScopedRequest<T>(
     params: ServiceAccountWorkloadRequestParams,
     fn: (request: KibanaRequest) => Promise<T>
+  ): Promise<T>;
+}
+
+/**
+ * Runs work as the service account bound to the workload a task was scheduled to run as.
+ */
+export interface TaskRunAsContext {
+  /**
+   * Runs `fn` with a request authenticated as the workload's service account. The request stops
+   * working once `fn` settles. Pass `expectedServiceAccountId` to reject before minting when the
+   * workload is bound to another account; `null` is the same as omitting it. A task scheduled with
+   * a non-null `expectedServiceAccountId` always uses that one, and rejects a different one.
+   */
+  withScopedRequest<T>(
+    fn: (request: KibanaRequest) => Promise<T>,
+    options?: { expectedServiceAccountId?: string | null }
   ): Promise<T>;
 }
 
@@ -862,6 +884,12 @@ export interface ApiKeyOptions {
    * such as workflows.
    */
   cloneApiKey?: boolean;
+  /**
+   * Defaults to true, so Elasticsearch refreshes after granting or cloning the task's API key and a
+   * search-based lookup of the new key (e.g. `GET _security/api_key`) finds it when the task runs.
+   * Set to false to skip the refresh: scheduling is faster, but that lookup may briefly miss the key.
+   */
+  refreshApiKey?: boolean;
   /**
    * When true with a request, grant only the Elasticsearch API key (skip UIAM). Intended for
    * tests and narrow internal flows that need tasks with ES credentials only.

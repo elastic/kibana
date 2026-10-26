@@ -54,6 +54,11 @@ import {
 import { useDataState } from '../../hooks/use_data_state';
 import { getDefinedControlGroupState } from '../../state_management/utils/get_defined_control_group_state';
 
+const LENS_ACTIONS_OPTIONS: UseUnifiedHistogramProps['lensActionsOptions'] = {
+  navigation: { originatingApp: 'discover' },
+  telemetrySource: 'discover',
+};
+
 const TAB_ATTRIBUTE_TO_TRIGGER_CHART_FETCH: Array<keyof UnifiedHistogramFetchParamsExternal> = [
   'externalVisContext',
   'breakdownField',
@@ -62,7 +67,7 @@ const TAB_ATTRIBUTE_TO_TRIGGER_CHART_FETCH: Array<keyof UnifiedHistogramFetchPar
 
 /**
  * A new source for the same dataset (revert → setDataView) is not a source change.
- * Classic compares `id`. ES|QL compares `datasetKey`, because `id` is a query hash
+ * Classic compares `id`. ES|QL compares `datasetId`, because `id` is a query hash
  * and changes when the query text changes even if FROM, time field, and project
  * routing stay the same.
  */
@@ -420,6 +425,7 @@ export const useDiscoverHistogram = (
       enableLensVisService: true,
       services,
       localStorageKeyPrefix: 'discover',
+      lensActionsOptions: LENS_ACTIONS_OPTIONS,
       initialState: {
         chartHidden,
         topPanelHeight: options?.initialLayoutProps?.topPanelHeight,

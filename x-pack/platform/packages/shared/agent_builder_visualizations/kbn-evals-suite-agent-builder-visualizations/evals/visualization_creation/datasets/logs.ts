@@ -105,7 +105,6 @@ export const LOGS_EXAMPLES: VisualizationDatasetExample[] = withDataSource('logs
     question:
       'Create a heatmap of request counts by hour of day and response code in kibana_sample_data_logs.',
     query: `FROM ${INDEX}
-| WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend
 | EVAL hour = DATE_EXTRACT("HOUR_OF_DAY", @timestamp)
 | STATS \`Request Count\` = COUNT(*) BY hour, response.keyword`,
     x: 'hour',

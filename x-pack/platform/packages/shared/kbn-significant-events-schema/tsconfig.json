@@ -11,7 +11,6 @@
     "@kbn/zod-helpers",
     "@kbn/streamlang",
     "@kbn/inference-common",
-    "@kbn/workflows",
     "@kbn/i18n"
   ],
   "exclude": ["target/**/*"]

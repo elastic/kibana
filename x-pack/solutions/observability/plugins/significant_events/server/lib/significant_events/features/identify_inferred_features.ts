@@ -9,7 +9,6 @@ import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/logging';
 import type { ChatCompletionTokenCount } from '@kbn/inference-common';
-import type { StreamType, Streams } from '@kbn/streams-schema';
 import {
   type Feature,
   type FeatureUpsert,
@@ -163,8 +162,7 @@ export interface FeaturesIdentifiedTelemetry {
   run_id: string;
   connector_id: string;
   iteration: number;
-  stream_name: string;
-  stream_type: StreamType;
+  source_id: string;
   docs_count: number;
   excluded_features_count: number;
   total_filters: number;
@@ -187,8 +185,7 @@ export interface TelemetryContext {
   run_id: string;
   connector_id: string;
   iteration: number;
-  stream_name: string;
-  stream_type: StreamType;
+  source_id: string;
   docs_count: number;
   excluded_features_count: number;
   total_filters: number;
@@ -250,7 +247,7 @@ export function buildTelemetry(
 
 interface RunInferredIterationOptions {
   kiClient: KnowledgeIndicatorClient;
-  streamName: string;
+  sourceId: string;
   runId: string;
   allFeatures: Feature[];
   discoveredFeatures: Feature[];
@@ -289,7 +286,7 @@ interface InferredIterationResult {
 
 async function runInferredIteration({
   kiClient,
-  streamName,
+  sourceId,
   runId,
   allFeatures,
   discoveredFeatures,
@@ -324,7 +321,7 @@ async function runInferredIteration({
     buildKnownFeatureIds(allKnownFeatures);
   if (knownFeatureIdsDropped > 0) {
     logger.debug(
-      `known_feature_ids inventory for stream "${streamName}" exceeded its budget; dropped the ${knownFeatureIdsDropped} stalest ids`
+      `known_feature_ids inventory for source "${sourceId}" exceeded its budget; dropped the ${knownFeatureIdsDropped} stalest ids`
     );
   }
   const excludedSummaries: ExcludedFeatureSummary[] = excludedFeatures
@@ -340,7 +337,7 @@ async function runInferredIteration({
       agentBuilder,
       request,
       connectorId,
-      streamName,
+      sourceId,
       sampleDocuments: documents,
       excludedFeatures: excludedSummaries,
       previouslyIdentifiedFeatures: topRanked.map(toFeatureProjection),
@@ -409,9 +406,7 @@ export interface IdentifyInferredFeaturesOptions {
   connectorId: string;
   logger: Logger;
   signal: AbortSignal;
-  streamName: string;
-  streamType: StreamType;
-  definition: Streams.all.Definition;
+  sourceId: string;
   runId: string;
   documents: InferenceDocument[];
   totalFilters: number;
@@ -438,8 +433,7 @@ export async function identifyInferredFeatures({
   connectorId,
   logger,
   signal,
-  streamName,
-  streamType,
+  sourceId,
   runId,
   documents,
   totalFilters,
@@ -456,8 +450,8 @@ export async function identifyInferredFeatures({
   }
 
   const [{ hits: allFeatures }, { hits: excludedFeatures }] = await Promise.all([
-    kiClient.getFeatures(streamName),
-    kiClient.getExcludedFeatures(streamName),
+    kiClient.getFeatures(sourceId),
+    kiClient.getExcludedFeatures(sourceId),
   ]);
 
   const discoveredFeatures = allFeatures.filter((f) => !isComputedFeature(f) && f.run_id === runId);
@@ -466,7 +460,7 @@ export async function identifyInferredFeatures({
 
   const iterationResult = await runInferredIteration({
     kiClient,
-    streamName,
+    sourceId,
     runId,
     allFeatures,
     discoveredFeatures,
@@ -492,8 +486,7 @@ export async function identifyInferredFeatures({
     run_id: runId,
     connector_id: connectorId,
     iteration,
-    stream_name: streamName,
-    stream_type: streamType,
+    source_id: sourceId,
     docs_count: docsCount,
     excluded_features_count: excludedFeatures.length,
     total_filters: totalFilters,
@@ -536,7 +529,7 @@ export async function identifyInferredFeatures({
   if (allChanged.length > 0) {
     const priorBySlug = new Map(allFeatures.map((f) => [normalizeFeatureSlug(f.id), f]));
     await kiClient.bulk(
-      streamName,
+      sourceId,
       allChanged.map((feature) => {
         const prior = priorBySlug.get(normalizeFeatureSlug(feature.id));
         const expiresAt = !prior || prior.expires_at ? kiClient.getDefaultExpiresAt() : undefined;

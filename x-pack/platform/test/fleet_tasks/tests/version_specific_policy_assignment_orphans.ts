@@ -103,6 +103,10 @@ export default function (providerContext: FtrProviderContextWithServices) {
       await es.cluster.putSettings({
         persistent: { 'search.allow_expensive_queries': null },
       });
+      // `before` can fail ahead of the policy creation, leaving nothing to clean up here.
+      if (!parentId) {
+        return;
+      }
       await es.deleteByQuery({
         index: '.fleet-policies',
         refresh: true,
@@ -120,6 +124,10 @@ export default function (providerContext: FtrProviderContextWithServices) {
       await createAgentDoc(providerContext, 'agent-no-base', variantId(), '9.4.0');
       // Not an orphan: plain (non-versioned) policy id without policy_base_id.
       await createAgentDoc(providerContext, 'agent-plain', parentId, '9.4.0');
+      // OpAMP collectors are not moved, and do not keep the variant doc from being deleted.
+      await createAgentDoc(providerContext, 'opamp-collector', variantId(), '9.4.0', true, {
+        type: 'OPAMP',
+      });
 
       await retry.tryForTime(TASK_TIMEOUT, async () => {
         const agent = await getAgent('agent-no-base');
@@ -128,6 +136,7 @@ export default function (providerContext: FtrProviderContextWithServices) {
         expect(docs.some((p: any) => p.policy_id === variantId())).to.be(false);
       });
       expect((await getAgent('agent-plain')).policy_id).to.be(parentId);
+      expect((await getAgent('opamp-collector')).policy_id).to.be(variantId());
     });
 
     it('reassigns an agent without policy_base_id when its variant doc is already gone', async () => {

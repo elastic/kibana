@@ -33,16 +33,16 @@ export const CREATE_RULE_MENU_BUTTON = i18n.translate(
   }
 );
 
+export const CREATE_RULE_MORE_OPTIONS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.contextMenu.moreOptionsAriaLabel',
+  {
+    defaultMessage: 'More rule creation options',
+  }
+);
+
 export const AI_RULE_CREATION = i18n.translate(
   'xpack.securitySolution.detectionEngine.createRule.contextMenu.aiRuleCreation',
   {
     defaultMessage: 'AI rule creation',
-  }
-);
-
-export const MANUAL_RULE_CREATION = i18n.translate(
-  'xpack.securitySolution.detectionEngine.createRule.contextMenu.manual',
-  {
-    defaultMessage: 'Manual rule creation',
   }
 );

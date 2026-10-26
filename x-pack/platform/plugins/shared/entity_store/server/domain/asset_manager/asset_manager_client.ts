@@ -504,18 +504,43 @@ export class AssetManagerClient {
         engines,
         { historySnapshot, logsExtraction: logsExtractionConfig, excludedUserNames },
         globalOverrides,
+        dualProcessEnabled,
       ] = await Promise.all([
         this.engineDescriptorClient.getAll(),
         this.globalStateClient.findOrThrow(),
         this.globalStateClient.findLogExtractionOverrides(),
+        this.isDualProcessEnabled(),
       ]);
 
       const status = this.calculateEntityStoreStatus(engines);
+      // Report the config each running process resolves: priority and non-priority for
+      // dual-process types, single for the rest.
+      const isDualProcess = (type: EntityType) =>
+        dualProcessEnabled && hasPriorityExtractionGate(type);
       const logsExtractionConfigByType = Object.fromEntries(
         engines.map((engine) => [
           engine.type,
-          getMergedConfig(engine.type, globalOverrides, engine.logExtractionConfig),
+          getMergedConfig(
+            engine.type,
+            globalOverrides,
+            engine.logExtractionConfig,
+            isDualProcess(engine.type) ? EXTRACTION_MODE.priority : EXTRACTION_MODE.single
+          ),
         ])
+      ) as Partial<Record<EntityType, LogExtractionConfig>>;
+      const nonPriorityLogsExtractionConfigByType = Object.fromEntries(
+        engines
+          .filter(({ type }) => isDualProcess(type))
+          .map((engine) => [
+            engine.type,
+            getMergedConfig(
+              engine.type,
+              globalOverrides,
+              engine.logExtractionConfig,
+              EXTRACTION_MODE.nonPriority,
+              engine.nonPriorityLogExtractionConfig
+            ),
+          ])
       ) as Partial<Record<EntityType, LogExtractionConfig>>;
 
       if (withComponents) {
@@ -528,6 +553,7 @@ export class AssetManagerClient {
           historySnapshot,
           logsExtractionConfig,
           logsExtractionConfigByType,
+          nonPriorityLogsExtractionConfigByType,
           excludedUserNames,
         };
       }
@@ -538,6 +564,7 @@ export class AssetManagerClient {
         historySnapshot,
         logsExtractionConfig,
         logsExtractionConfigByType,
+        nonPriorityLogsExtractionConfigByType,
         excludedUserNames,
       };
     } catch (error) {
@@ -738,11 +765,13 @@ export class AssetManagerClient {
     };
   }
 
+  // Component probes run as the internal user: the status must describe the cluster, not what the
+  // requesting user is allowed to see (a 403 would otherwise read as "not installed").
   private async getIndexTemplateComponents(): Promise<EngineComponentStatus[]> {
     const resource = 'index_template';
     const latestId = getLatestIndexTemplateId(this.namespace);
-    const latestExists = await this.tryAsBoolean(
-      this.esClient.indices.getIndexTemplate({ name: latestId })
+    const latestExists = await this.existsOrFalseOnNotFound(
+      this.internalEsClient.indices.getIndexTemplate({ name: latestId })
     );
     return [{ id: latestId, installed: latestExists, resource }];
   }
@@ -750,7 +779,7 @@ export class AssetManagerClient {
   private async getIndexComponents(): Promise<EngineComponentStatus[]> {
     const resource: EngineComponentResource = 'index';
     const latestIndex = getLatestEntitiesIndexName(this.namespace);
-    const latestExists = await this.esClient.indices.exists({ index: latestIndex });
+    const latestExists = await this.internalEsClient.indices.exists({ index: latestIndex });
     return [{ id: latestIndex, installed: latestExists, resource }];
   }
 
@@ -759,8 +788,8 @@ export class AssetManagerClient {
   ): Promise<EngineComponentStatus[]> {
     const resource: EngineComponentResource = 'component_template';
     const latestName = getComponentTemplateName(definition.type, this.namespace);
-    const latestExists = await this.tryAsBoolean(
-      this.esClient.cluster.getComponentTemplate({ name: latestName })
+    const latestExists = await this.existsOrFalseOnNotFound(
+      this.internalEsClient.cluster.getComponentTemplate({ name: latestName })
     );
     return [{ id: latestName, installed: latestExists, resource }];
   }
@@ -870,6 +899,19 @@ export class AssetManagerClient {
       allowLegacyMigration: await this.isLegacySecurityAssetsMigrationEnabled(),
     });
     return true;
+  }
+
+  private async existsOrFalseOnNotFound(promise: Promise<unknown>): Promise<boolean> {
+    try {
+      await promise;
+      return true;
+    } catch (error) {
+      const { statusCode, meta } = error as { statusCode?: number; meta?: { statusCode?: number } };
+      if ((meta?.statusCode ?? statusCode) === 404) {
+        return false;
+      }
+      throw error;
+    }
   }
 
   /**

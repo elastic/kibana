@@ -29,7 +29,7 @@ export function getTimelionVisDefinition(dependencies: TimelionVisDependencies) 
   return {
     name: TIMELION_VIS_NAME,
     title: 'Timelion',
-    icon: 'visTimelion',
+    icon: 'productTimelion',
     description: i18n.translate('timelion.timelionDescription', {
       defaultMessage: 'Show time series data on a graph.',
     }),

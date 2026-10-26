@@ -16,17 +16,21 @@ import {
 export const visContextSchema = z
   .object({
     suggestion_type: z
-      .union([
-        z.literal(UnifiedHistogramSuggestionType.lensSuggestion),
-        z.literal(UnifiedHistogramSuggestionType.histogramForESQL),
-        z.literal(UnifiedHistogramSuggestionType.histogramForDataView),
+      .enum([
+        UnifiedHistogramSuggestionType.lensSuggestion,
+        UnifiedHistogramSuggestionType.histogramForESQL,
+        UnifiedHistogramSuggestionType.histogramForDataView,
       ])
       .meta({
         description:
           'Chart suggestion type used by Discover to generate this histogram configuration.',
       }),
     attributes: z.record(z.string().max(MAX_VIS_CONTEXT_ATTRIBUTE_KEY_LENGTH), z.any()).meta({
-      description: 'Chart configuration payload for the selected `suggestion_type`.',
+      description: 'Lens visualization attributes used to render the Discover chart.',
     }),
   })
-  .strict();
+  .strict()
+  .meta({
+    description:
+      'The saved chart configuration. Discover reuses it when compatible with the tab’s current settings and query results; otherwise, it rebuilds the chart.',
+  });

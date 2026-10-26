@@ -63,7 +63,7 @@ export const WorkflowExecutionsSearchBar = React.memo<WorkflowExecutionsSearchBa
           onQueryChange={onQueryChange}
           onQuerySubmit={onQuerySubmit}
           onRefreshChange={onRefreshChange}
-          placeholder={i18n.translate('workflowsManagement.executionsPage.searchPlaceholder', {
+          placeholder={i18n.translate('workflows.executionsPage.searchPlaceholder', {
             defaultMessage: 'Filter your data using KQL syntax',
           })}
           query={query}

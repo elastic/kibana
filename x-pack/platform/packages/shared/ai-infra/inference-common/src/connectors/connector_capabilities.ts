@@ -6,6 +6,7 @@
  */
 
 import type { InferenceConnector } from './connectors';
+import type { EisInferenceEndpointMetadata } from '../inference_endpoints';
 import { getModelDefinition } from './known_models';
 import { getConnectorDefaultModel } from './connector_config';
 import { elasticModelDictionary } from '../const';
@@ -30,6 +31,14 @@ export const getContextWindowSize = (connector: InferenceConnector): number | un
 
   return undefined;
 };
+
+/**
+ * True when this endpoint rejects raw messages and accepts only a prompt template.
+ * An omitted `templates` capability means either request shape is accepted.
+ */
+export const isTemplateRequiredConnector = (
+  connector: Pick<InferenceConnector, 'metadata'> | { metadata?: EisInferenceEndpointMetadata }
+): boolean => connector.metadata?.capabilities?.templates?.policy === 'required';
 
 /**
  * Retrieve the reasoning effort levels the connector's model supports, as advertised by EIS.

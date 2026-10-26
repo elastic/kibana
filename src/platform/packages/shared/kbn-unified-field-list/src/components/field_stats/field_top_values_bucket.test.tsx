@@ -104,11 +104,11 @@ describe('UnifiedFieldList <FieldTopValuesBucket />', () => {
     expect(screen.getAllByRole('button')).toHaveLength(2);
   });
 
-  it('renders 48px placeholder instead of buttons when type is "other"', () => {
+  it('renders hidden filter buttons when type is "other" and onAddOtherFilter is undefined', () => {
     renderBucket({ type: 'other', onAddFilter: jest.fn() });
 
     expect(screen.queryAllByRole('button')).toHaveLength(0);
-    expect(screen.getByTestId('test-filterActions-placeholder')).toBeInTheDocument();
+    expect(screen.getByTestId('plus-extension-__other__')).not.toBeVisible();
   });
 
   it('calls onAddFilter with "+" when plus button is clicked', async () => {
@@ -155,6 +155,19 @@ describe('UnifiedFieldList <FieldTopValuesBucket />', () => {
     expect(
       screen.getByRole('button', { name: 'Filter for extension: "sourceA"' })
     ).toBeInTheDocument();
+  });
+
+  it('uses the custom label for the filter button labels but not for the test subjects', () => {
+    const fieldWithCustomLabel = new DataViewField({
+      ...filterableField.toSpec(),
+      customLabel: 'File extension',
+    });
+
+    renderBucket({ field: fieldWithCustomLabel, onAddFilter: jest.fn() });
+
+    expect(
+      screen.getByRole('button', { name: 'Filter for File extension: "sourceA"' })
+    ).toHaveAttribute('data-test-subj', 'plus-extension-sourceA');
   });
 
   it('calls overrideFieldTopValueBar and applies returned overrides', () => {

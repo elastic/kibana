@@ -74,6 +74,9 @@ describe('createChatCompleteApi', () => {
     inference: {
       get: jest.fn().mockResolvedValue({ endpoints: [] }),
     },
+    transport: {
+      request: jest.fn(),
+    },
   } as any;
   beforeEach(() => {
     request = httpServerMock.createKibanaRequest();
@@ -926,6 +929,7 @@ describe('createChatCompleteApi', () => {
       expect(createInferenceEndpointExecutorMock).toHaveBeenCalledWith({
         inferenceId: '.my-inference-endpoint',
         esClient: mockEsClient,
+        stream: true,
       });
       expect(inferenceEndpointAdapterMock.chatComplete).toHaveBeenCalledTimes(1);
       expect(inferenceEndpointAdapterMock.chatComplete).toHaveBeenCalledWith(
@@ -1007,6 +1011,7 @@ describe('createChatCompleteApi', () => {
       expect(createInferenceEndpointExecutorMock).toHaveBeenCalledWith({
         inferenceId: 'my-endpoint',
         esClient: mockEsClient,
+        stream: true,
       });
     });
 
@@ -1067,6 +1072,89 @@ describe('createChatCompleteApi', () => {
       expect(events).toHaveLength(2);
       expect(events[0].content).toBe('chunk-1');
       expect(events[1].content).toBe('chunk-2');
+    });
+
+    describe('streaming preference', () => {
+      const createChatCompleteWithStreamingPreference = (
+        shouldStreamInferenceEndpoint: jest.Mock
+      ) => {
+        const callbackApi = createChatCompleteCallbackApi({
+          request,
+          namespace: 'default',
+          actions,
+          logger,
+          anonymizationRulesPromise: Promise.resolve([]),
+          regexWorker,
+          esClient: mockEsClient,
+          endpointIdCache,
+          shouldStreamInferenceEndpoint,
+        });
+        return createChatCompleteApi({ callbackApi });
+      };
+
+      it('streams when no resolver is provided', async () => {
+        await chatComplete({
+          connectorId: 'my-endpoint',
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          maxRetries: 0,
+        });
+
+        expect(createInferenceEndpointExecutorMock).toHaveBeenCalledWith(
+          expect.objectContaining({ stream: true })
+        );
+      });
+
+      it('does not stream when the resolver says so for the endpoint service', async () => {
+        const shouldStreamInferenceEndpoint = jest.fn().mockResolvedValue(false);
+        const chatCompleteWithPreference = createChatCompleteWithStreamingPreference(
+          shouldStreamInferenceEndpoint
+        );
+
+        await chatCompleteWithPreference({
+          connectorId: 'my-endpoint',
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          maxRetries: 0,
+        });
+
+        expect(shouldStreamInferenceEndpoint).toHaveBeenCalledTimes(1);
+        expect(shouldStreamInferenceEndpoint).toHaveBeenCalledWith('openai');
+        expect(createInferenceEndpointExecutorMock).toHaveBeenCalledWith({
+          inferenceId: 'my-endpoint',
+          esClient: mockEsClient,
+          stream: false,
+        });
+      });
+
+      it('applies the streaming preference when a stack connector resolves to an inference endpoint', async () => {
+        const endpointConnector = createInferenceConnectorMock({
+          connectorId: '.my-inference-endpoint',
+          isInferenceEndpoint: true,
+        });
+        getInferenceExecutorMock.mockResolvedValue(
+          createInferenceExecutorMock({ connector: endpointConnector })
+        );
+        resolveInferenceEndpointMock.mockResolvedValue({
+          inferenceId: '.my-inference-endpoint',
+          provider: 'openai',
+          modelId: 'gpt-4o',
+          taskType: 'chat_completion',
+        });
+        const chatCompleteWithPreference = createChatCompleteWithStreamingPreference(
+          jest.fn().mockResolvedValue(false)
+        );
+
+        await chatCompleteWithPreference({
+          connectorId: 'stack-connector-id',
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          maxRetries: 0,
+        });
+
+        expect(createInferenceEndpointExecutorMock).toHaveBeenCalledWith({
+          inferenceId: '.my-inference-endpoint',
+          esClient: mockEsClient,
+          stream: false,
+        });
+      });
     });
   });
 
@@ -1161,6 +1249,225 @@ describe('createChatCompleteApi', () => {
 
       expect(inferenceAdapter.chatComplete).toHaveBeenCalledWith(
         expect.objectContaining({ system: 'You are a helpful assistant.' })
+      );
+    });
+  });
+
+  describe('template anonymization', () => {
+    const emailRule: AnonymizationRule = {
+      type: 'RegExp',
+      entityClass: 'EMAIL',
+      pattern: '([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,})',
+      enabled: true,
+    };
+    const mockEndpointExecutor = { invoke: jest.fn() };
+
+    const chatCompleteWithEmailRule = () => {
+      jest
+        .mocked(regexWorker.run)
+        .mockImplementation(async (payload) => executeRegexRulesTask(payload));
+
+      const callbackApiWithRules = createChatCompleteCallbackApi({
+        request,
+        namespace: 'default',
+        actions,
+        logger,
+        anonymizationRulesPromise: Promise.resolve([emailRule]),
+        regexWorker,
+        esClient: mockEsClient,
+        endpointIdCache,
+      });
+      return createChatCompleteApi({ callbackApi: callbackApiWithRules });
+    };
+
+    beforeEach(() => {
+      mockEsClient.inference.get.mockResolvedValue({
+        endpoints: [
+          { inference_id: 'my-endpoint', task_type: 'chat_completion', service: 'openai' },
+        ],
+      });
+      resolveInferenceEndpointMock.mockResolvedValue({
+        inferenceId: 'my-endpoint',
+        provider: 'openai',
+        modelId: 'gpt-4o',
+        taskType: 'chat_completion',
+      });
+      createInferenceEndpointExecutorMock.mockReturnValue(mockEndpointExecutor);
+    });
+
+    it('masks emails inside template variables and restores them in the response', async () => {
+      inferenceEndpointAdapterMock.chatComplete.mockImplementation((options) =>
+        of(chunkEvent(`saw ${String(options.template?.variables.cited_alerts)}`))
+      );
+
+      const response = await chatCompleteWithEmailRule()({
+        connectorId: 'my-endpoint',
+        messages: [],
+        template: {
+          id: '.attack-discovery-fp-tp',
+          version: 1,
+          variables: {
+            cited_alerts: 'host claudia@example.com did it',
+            count: 2,
+            hits: [{ host: { name: 'web-01' }, user: 'ada@example.com' }],
+          },
+        },
+        maxRetries: 0,
+      });
+
+      expect(inferenceEndpointAdapterMock.chatComplete).toHaveBeenCalledWith(
+        expect.objectContaining({
+          template: {
+            id: '.attack-discovery-fp-tp',
+            version: 1,
+            variables: {
+              cited_alerts: expect.stringMatching(/^host EMAIL_\w+ did it$/),
+              count: 2,
+              hits: [
+                {
+                  host: { name: 'web-01' },
+                  user: expect.stringMatching(/^EMAIL_\w+$/),
+                },
+              ],
+            },
+          },
+        })
+      );
+      expect(response.content).toBe('saw host claudia@example.com did it');
+    });
+  });
+
+  describe('template token usage', () => {
+    const tokenUsageLogger = {
+      log: jest.fn().mockResolvedValue(undefined),
+      setEsClient: jest.fn(),
+    };
+    const isTokenUsageTrackingEnabled = jest.fn().mockResolvedValue(true);
+
+    beforeEach(() => {
+      tokenUsageLogger.log.mockClear();
+      isTokenUsageTrackingEnabled.mockClear();
+      mockEsClient.inference.get.mockResolvedValue({
+        endpoints: [
+          { inference_id: 'my-endpoint', task_type: 'chat_completion', service: 'openai' },
+        ],
+      });
+      resolveInferenceEndpointMock.mockResolvedValue({
+        inferenceId: 'my-endpoint',
+        provider: 'openai',
+        modelId: 'gpt-4o',
+        taskType: 'chat_completion',
+      });
+      createInferenceEndpointExecutorMock.mockReturnValue({ invoke: jest.fn() });
+      inferenceEndpointAdapterMock.chatComplete.mockReturnValue(
+        of(
+          chunkEvent('ok'),
+          tokensEvent({ prompt: 12, completion: 4, total: 16 }, { model: 'gpt-4o' })
+        )
+      );
+    });
+
+    it('records token usage when a template completion reports token counts', async () => {
+      const callbackApi = createChatCompleteCallbackApi({
+        request,
+        namespace: 'default',
+        actions,
+        logger,
+        anonymizationRulesPromise: Promise.resolve([]),
+        regexWorker,
+        esClient: mockEsClient,
+        endpointIdCache,
+        tokenUsageLogger: tokenUsageLogger as any,
+        isTokenUsageTrackingEnabled,
+      });
+
+      await createChatCompleteApi({ callbackApi })({
+        connectorId: 'my-endpoint',
+        messages: [],
+        modelName: 'gpt-4o',
+        metadata: {
+          connectorTelemetry: {
+            pluginId: 'alertzero_fp_tp_analysis',
+            aggregateBy: 'alertzero_parent',
+          },
+        },
+        template: {
+          id: '.attack-discovery-fp-tp',
+          version: 1,
+          variables: { cited_alerts: 'no email here' },
+        },
+        maxRetries: 0,
+      });
+
+      await new Promise((resolve) => setImmediate(resolve));
+
+      expect(tokenUsageLogger.log).toHaveBeenCalledWith({
+        tokens: { prompt: 12, completion: 4, total: 16 },
+        model: 'gpt-4o',
+        context: expect.objectContaining({
+          connectorId: 'my-endpoint',
+          featureId: 'alertzero_fp_tp_analysis',
+          parentFeatureId: 'alertzero_parent',
+        }),
+      });
+    });
+  });
+
+  describe('anonymization onFailure', () => {
+    const brokenRegexRule: AnonymizationRule = {
+      type: 'RegExp',
+      entityClass: 'EMAIL',
+      pattern: '(unclosed',
+      enabled: true,
+    };
+
+    // Runs the real regex task, so the invalid pattern fails the way it does in production.
+    const chatCompleteWithBrokenRule = (onFailurePromise?: Promise<'block' | 'allow_unsafe'>) => {
+      jest
+        .mocked(regexWorker.run)
+        .mockImplementation(async (payload) => executeRegexRulesTask(payload));
+
+      const callbackApiWithRules = createChatCompleteCallbackApi({
+        request,
+        namespace: 'default',
+        actions,
+        logger,
+        anonymizationRulesPromise: Promise.resolve([brokenRegexRule]),
+        regexWorker,
+        esClient: mockEsClient,
+        endpointIdCache,
+        anonymization: { onFailurePromise },
+      });
+      return createChatCompleteApi({ callbackApi: callbackApiWithRules })({
+        connectorId: 'connectorId',
+        messages: [{ role: MessageRole.User, content: 'write to claudia@example.com' }],
+        maxRetries: 0,
+      });
+    };
+
+    beforeEach(() => {
+      inferenceAdapter.chatComplete.mockReturnValue(of(chunkEvent('chunk-1')));
+    });
+
+    it('fails the request when a rule cannot run and no failure mode is set', async () => {
+      await expect(chatCompleteWithBrokenRule()).rejects.toThrow('invalid regular expression');
+      expect(inferenceAdapter.chatComplete).not.toHaveBeenCalled();
+    });
+
+    it('fails the request when the failure mode is "block"', async () => {
+      await expect(chatCompleteWithBrokenRule(Promise.resolve('block'))).rejects.toThrow(
+        'invalid regular expression'
+      );
+      expect(inferenceAdapter.chatComplete).not.toHaveBeenCalled();
+    });
+
+    it('sends the messages unmasked when the failure mode is "allow_unsafe"', async () => {
+      await chatCompleteWithBrokenRule(Promise.resolve('allow_unsafe'));
+
+      expect(inferenceAdapter.chatComplete).toHaveBeenCalledWith(
+        expect.objectContaining({
+          messages: [expect.objectContaining({ content: 'write to claudia@example.com' })],
+        })
       );
     });
   });

@@ -24,8 +24,8 @@ import {
   type StoredDiscoverSession,
 } from '@kbn/saved-search-plugin/common';
 import {
-  DISCOVER_SESSION_API_VERSION,
   DISCOVER_SESSION_INTERNAL_API_BASE_PATH,
+  DISCOVER_SESSION_INTERNAL_API_VERSION,
 } from '../../common/constants';
 import {
   discoverSessionInternalParamsSchema,
@@ -164,10 +164,14 @@ describe('registerInternalRoutes', () => {
   });
 
   const getVersion = (method: 'get' | 'post' | 'put', path: string) => {
-    const version = router.versioned.getRoute(method, path).versions[DISCOVER_SESSION_API_VERSION];
+    const version = router.versioned.getRoute(method, path).versions[
+      DISCOVER_SESSION_INTERNAL_API_VERSION
+    ];
 
     if (!version) {
-      throw new Error(`No version [${DISCOVER_SESSION_API_VERSION}] registered for ${path}`);
+      throw new Error(
+        `No version [${DISCOVER_SESSION_INTERNAL_API_VERSION}] registered for ${path}`
+      );
     }
 
     return version;
@@ -488,8 +492,8 @@ describe('registerInternalRoutes', () => {
               type: 'dropped_property',
               tab_id: 'tab',
               key: 'control_panels',
-              message:
-                'Unable to transform control panels. Error: controlGroupJson is not valid JSON',
+              value: '{',
+              message: 'Invalid JSON.',
             },
           ],
         },

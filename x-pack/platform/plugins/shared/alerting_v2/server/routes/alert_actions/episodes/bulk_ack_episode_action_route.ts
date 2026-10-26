@@ -15,8 +15,9 @@ import { createBulkEpisodeActionRouteForType } from './create_bulk_episode_actio
 export const BulkAckEpisodeActionRoute = createBulkEpisodeActionRouteForType({
   actionType: ALERT_EPISODE_ACTION_TYPE.ACK,
   pathSuffix: '_bulk_ack',
-  summary: 'Bulk acknowledge alert episodes',
+  summary: 'Bulk acknowledge alerts',
   bodySchema: bulkAckEpisodeActionBodySchema,
   oasOperationObject: bulkAckEpisodeActionOasExamples,
   access: 'public' as const,
+  availability: { stability: 'stable' as const, since: '9.6.0' },
 });

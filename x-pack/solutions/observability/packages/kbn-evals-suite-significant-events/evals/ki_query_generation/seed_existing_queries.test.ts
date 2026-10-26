@@ -21,7 +21,7 @@ describe('seedExistingQueries', () => {
   it('replaces stored queries with rerun fixtures while preserving their ids', async () => {
     await seedExistingQueries({
       esClient,
-      streamName: 'logs.test',
+      sourceId: 'source-uuid',
       existingQueries: [
         {
           id: 'seed-query',
@@ -39,7 +39,7 @@ describe('seedExistingQueries', () => {
         index: KNOWLEDGE_INDICATORS_DATA_STREAM,
         query: {
           bool: {
-            filter: [{ term: { type: 'query' } }, { term: { 'stream.name': 'logs.test' } }],
+            filter: [{ term: { type: 'query' } }, { term: { 'source.id': 'source-uuid' } }],
           },
         },
       })
@@ -52,7 +52,7 @@ describe('seedExistingQueries', () => {
           id: 'seed-query',
           type: 'query',
           title: 'Existing failure',
-          'stream.name': 'logs.test',
+          'source.id': 'source-uuid',
           query: {
             esql: 'FROM logs | WHERE message:"failure"',
             query_type: 'match',
@@ -68,7 +68,7 @@ describe('seedExistingQueries', () => {
   it('clears stored queries for a clean arm without indexing replacements', async () => {
     await seedExistingQueries({
       esClient,
-      streamName: 'logs.test',
+      sourceId: 'source-uuid',
       existingQueries: [],
     });
 

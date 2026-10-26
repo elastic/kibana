@@ -16,11 +16,13 @@ interface WorkflowStep {
   type: string;
   if?: string;
   condition?: string;
+  foreach?: string;
   steps?: WorkflowStep[];
   with?: {
     query?: string;
     filter?: unknown;
     params?: unknown;
+    body?: unknown;
   };
 }
 
@@ -72,22 +74,25 @@ describe('significant events fair batch selection', () => {
     expect(query).toContain('latest_timestamp = MAX(@timestamp)');
     expect(query).toContain('suppressed_age_minutes');
     expect(query).toContain('staleness_minutes');
-    expect(query).toContain('recent_detection_count < ?2');
-    expect(query).toContain('suppressed_age_minutes >= ?3');
-    expect(query).toContain('severity_score >= ?4');
+    expect(query).toContain(
+      'EVAL held_back = recent_detection_count >= ?2 AND suppressed_age_minutes < ?3 AND severity_score < ?4'
+    );
     expect(query).toContain(
       'EVAL flaky_probe = recent_detection_count >= ?2 AND suppressed_age_minutes >= ?3'
     );
-    expect(query).toContain('KEEP rule_uuid, _source, score, recent_detection_count, flaky_probe');
+    expect(query).toContain(
+      'KEEP rule_uuid, _source, score, recent_detection_count, flaky_probe, held_back'
+    );
 
     const queryLines = query?.split('\n') ?? [];
-    const suppressionLineIdx = queryLines.findIndex((l: string) =>
-      l.includes('recent_detection_count < ?2')
+    const suppressionLineIdx = queryLines.findIndex((l: string) => l.includes('EVAL held_back'));
+    const sortLineIdx = queryLines.findIndex((l: string) =>
+      l.includes('SORT held_back ASC, score DESC')
     );
     const limitLineIdx = queryLines.findIndex((l: string) => l.includes('LIMIT ?1'));
     expect(suppressionLineIdx).toBeGreaterThan(-1);
-    expect(limitLineIdx).toBeGreaterThan(-1);
-    expect(suppressionLineIdx).toBeLessThan(limitLineIdx);
+    expect(sortLineIdx).toBeGreaterThan(suppressionLineIdx);
+    expect(limitLineIdx).toBeGreaterThan(sortLineIdx);
 
     const coalesceLineIdx = queryLines.findIndex((l: string) =>
       l.includes('COALESCE(severity_score')
@@ -128,6 +133,29 @@ describe('significant events fair batch selection', () => {
     expect(backlog?.with?.query).toContain('processed_count == 0');
   });
 
+  it('chunks skipped detection markers at the route limit', () => {
+    const discovery = parse(DISCOVERY_YAML) as { steps: WorkflowStep[] };
+    const outer = discovery.steps
+      .find(({ name }) => name === 'stamp_skipped_detections')
+      ?.steps?.find(({ name }) => name === 'foreach_stamp_skipped');
+    const prepare = outer?.steps?.find(({ name }) => name === 'prepare_skipped_marker') as
+      | (WorkflowStep & { with?: { detection_ids?: string; rule_uuid?: string } })
+      | undefined;
+    const chunk = outer?.steps?.find(({ name }) => name === 'foreach_skipped_detection_chunk');
+    const write = chunk?.steps?.find(({ name }) => name === 'write_skipped_marker');
+
+    expect(prepare?.with?.detection_ids).toContain('join: "," | split: ","');
+    expect(prepare?.with?.rule_uuid).toBe('${{ foreach.item[1] }}');
+    expect(chunk?.type).toBe('foreach');
+    expect(chunk?.foreach).toBe(
+      '${{ steps.prepare_skipped_marker.output.detection_ids | chunk: 1000 | json }}'
+    );
+    expect(write?.with?.body).toMatchObject({ detection_ids: '${{ foreach.item }}' });
+    expect(JSON.stringify(write?.with?.body)).toContain(
+      'steps.prepare_skipped_marker.output.rule_uuid'
+    );
+  });
+
   it('reports hasWork from the batch size so the drain loop can continue without a queue count', () => {
     const discovery = parse(DISCOVERY_YAML) as {
       outputs: Array<{ name: string }>;
@@ -137,17 +165,80 @@ describe('significant events fair batch selection', () => {
     expect(discovery.outputs.map(({ name }) => name)).toEqual([
       'processedCount',
       'hasWork',
-      'suppressedRuleCount',
+      'skippedCount',
+      'heldBackCount',
+      'needsAgentCount',
+      'classifierReasonCounts',
+      'classifierProbeStatusCounts',
+      'classifierFailed',
     ]);
     expect(discovery.steps.find(({ name }) => name === 'output_result')?.with).toMatchObject({
       hasWork: true,
     });
-    expect(discovery.steps.find(({ name }) => name === 'output_result')?.with).toHaveProperty(
-      'suppressedRuleCount'
-    );
-    expect(findStepRecursive(discovery.steps, 'output_no_detections')?.with).toHaveProperty(
-      'suppressedRuleCount'
-    );
+  });
+
+  describe("the rule's last agent review", () => {
+    const query = () => getStep(DISCOVERY_YAML, 'get_detections').with?.query ?? '';
+
+    it('counts skip markers apart from processed markers, per detection', () => {
+      expect(query()).toContain(
+        '| INLINE STATS processed_count = COUNT(processed_by), skipped_count = COUNT(skip.event_id), processed_at = MAX(@timestamp) WHERE processed_by IS NOT NULL BY detection_id'
+      );
+    });
+
+    it('is when the agent last processed a detection of the rule without a skip, not the detection time', () => {
+      expect(query()).toContain(
+        'last_reviewed_at = MAX(processed_at) WHERE processed_count > 0 AND skipped_count == 0 BY rule_uuid'
+      );
+      expect(query()).toContain(
+        'KEEP rule_uuid, _source, score, recent_detection_count, flaky_probe, held_back, last_reviewed_at'
+      );
+    });
+  });
+
+  describe('the detections the flaky-rule gate holds back', () => {
+    const query = () => {
+      const text = getStep(DISCOVERY_YAML, 'get_detections').with?.query;
+      if (!text) throw new Error('get_detections has no query');
+      return text;
+    };
+    const lines = () =>
+      query()
+        .split('\n')
+        .map((line) => line.trim());
+
+    it('are flagged in the same query instead of dropped by it', () => {
+      expect(lines().some((line) => line.startsWith('| WHERE recent_detection_count'))).toBe(false);
+      expect(getStep(DISCOVERY_YAML, 'get_detections').with?.query).toContain(
+        'EVAL held_back = recent_detection_count >= ?2 AND suppressed_age_minutes < ?3 AND severity_score < ?4'
+      );
+    });
+
+    it('is a rule the gate holds back exactly when it fails all three of its exits', () => {
+      // The gate lets a rule through on `recent < ?2 OR age >= ?3 OR severity >= ?4`, and the flag is
+      // its complement (De Morgan), so what is held back is what was dropped before.
+      const held = lines().find((line) => line.startsWith('| EVAL held_back'));
+
+      expect(held).toBe(
+        '| EVAL held_back = recent_detection_count >= ?2 AND suppressed_age_minutes < ?3 AND severity_score < ?4'
+      );
+    });
+
+    it('sorts after the rows the agent may read, so it never takes their batch slots', () => {
+      expect(lines()).toContain('| SORT held_back ASC, score DESC, @timestamp ASC, _id ASC');
+    });
+
+    it('is a named column of the result, which the classifier reads by that name', () => {
+      const keep = lines().find((line) => line.startsWith('| KEEP '));
+
+      expect(keep?.replace('| KEEP ', '').split(', ')).toContain('held_back');
+    });
+
+    it('has no second selection query', () => {
+      const discovery = parse(DISCOVERY_YAML) as { steps: WorkflowStep[] };
+
+      expect(discovery.steps.some(({ name }) => name === 'get_suppressed_detections')).toBe(false);
+    });
   });
 
   it('carries the three flaky-rule throttle inputs with documented defaults', () => {

@@ -245,6 +245,7 @@ export const EventSchema = schema.maybe(
           })
         ),
         saved_objects: schema.maybe(
+          // codeql[js/kibana/unbounded-array-in-schema] internal validation — not route input
           schema.arrayOf(
             schema.object({
               rel: ecsString(),
@@ -315,6 +316,7 @@ export const EventSchema = schema.maybe(
                   })
                 ),
                 results: schema.maybe(
+                  // codeql[js/kibana/unbounded-array-in-schema] internal validation — not route input
                   schema.arrayOf(
                     schema.object({
                       rule_id: ecsString(),
@@ -357,6 +359,7 @@ export const EventSchema = schema.maybe(
 );
 
 function ecsStringMulti() {
+  // codeql[js/kibana/unbounded-array-in-schema] internal validation — not route input
   return schema.maybe(schema.arrayOf(schema.string()));
 }
 
@@ -389,6 +392,7 @@ function ecsDateRange() {
 }
 
 function ecsDateRangeMulti() {
+  // codeql[js/kibana/unbounded-array-in-schema] internal validation — not route input
   return schema.maybe(schema.arrayOf(ecsDateRangeBase()));
 }
 

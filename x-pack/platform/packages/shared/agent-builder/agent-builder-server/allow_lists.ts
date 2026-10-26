@@ -195,6 +195,7 @@ export const isAllowedBuiltinAgent = (agentName: string): agentName is AgentBuil
 export const AGENT_BUILDER_AGENT_TYPES = [
   chatAgentTypeId,
   `${internalNamespaces.platformNightshift}.investigation-type`,
+  `${internalNamespaces.platformNightshift}.assistant-type`,
   `${internalNamespaces.platformSignificantEvents}.decision-tree-reinforcement-type`,
   `${internalNamespaces.platformSignificantEvents}.discovery-type`,
   `${internalNamespaces.security}.alertzero-type`,
@@ -226,14 +227,15 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'cases-analytics',
 
   // Platform – Alerting
-  'rule-management',
-  'action-policy-management',
+  'rule-authoring',
+  'action-policy-authoring',
 
   // Platform – Dashboard
   'dashboards',
 
   // Platform – Discover
   'discover-data-analysis',
+  'discover-session',
 
   // Platform – Streams
   'streams-management',
@@ -371,6 +373,7 @@ export const AGENT_BUILDER_BUILTIN_ATTACHMENTS = [
 
   // Platform – Discover
   'esql.query_results',
+  'discover.session',
 
   // Platform – Workflows
   'workflow.yaml',
@@ -393,6 +396,7 @@ export const AGENT_BUILDER_BUILTIN_ATTACHMENTS = [
   'security.alerts',
   'security.entity',
   'security.entity_analytics_dashboard',
+  'security.entity_analytics_ai_brief',
   'security.entity_graph',
   'security.entity_risk_score_history',
   'security.exception',
@@ -415,6 +419,8 @@ export const AGENT_BUILDER_BUILTIN_ATTACHMENTS = [
   // gated behind xpack.alertzero.enabled
   'security.threat',
   'security.significant_security_event',
+  // hidden; server-registered only
+  'security.hunt_coordinator_result',
 
   // Observability
   'observability.ai_insight',
@@ -457,4 +463,16 @@ export const isAllowedBuiltinAttachment = (
   attachmentTypeId: string
 ): attachmentTypeId is AgentBuilderBuiltinAttachment => {
   return (AGENT_BUILDER_BUILTIN_ATTACHMENTS as readonly string[]).includes(attachmentTypeId);
+};
+
+/**
+ * This is a manually maintained list of all cycle hooks registered in Agent Builder.
+ * The intention is to force a code review from the Agent Builder team when any team adds a new cycle hook.
+ */
+export const AGENT_BUILDER_CYCLE_HOOKS = [] as const;
+
+export type AgentBuilderCycleHook = (typeof AGENT_BUILDER_CYCLE_HOOKS)[number];
+
+export const isAllowedCycleHook = (hookId: string): hookId is AgentBuilderCycleHook => {
+  return (AGENT_BUILDER_CYCLE_HOOKS as readonly string[]).includes(hookId);
 };

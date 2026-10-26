@@ -21,6 +21,8 @@ interface UseKeyboardNavigationOptions {
   onNodeSelect: (node: ServiceMapNode | null) => void;
   onEdgeSelect: (edge: ServiceMapEdge | null) => void;
   onPopoverClose: () => void;
+  /** When false, disables keyboard selection to match mouse click + drag being disabled. */
+  isInteractive?: boolean;
 }
 
 interface UseKeyboardNavigationResult {
@@ -47,6 +49,7 @@ export function useKeyboardNavigation({
   onNodeSelect,
   onEdgeSelect,
   onPopoverClose,
+  isInteractive = true,
 }: UseKeyboardNavigationOptions): UseKeyboardNavigationResult {
   const [screenReaderAnnouncement, setScreenReaderAnnouncement] = useState<string>('');
 
@@ -89,6 +92,9 @@ export function useKeyboardNavigation({
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
+      if (!isInteractive) {
+        return;
+      }
       if (event.key === 'Escape' && (selectedNodeForPopover || selectedEdgeForPopover)) {
         event.preventDefault();
         onPopoverClose();
@@ -186,6 +192,7 @@ export function useKeyboardNavigation({
     onEdgeSelect,
     onPopoverClose,
     findNodeInDirection,
+    isInteractive,
   ]);
 
   return {

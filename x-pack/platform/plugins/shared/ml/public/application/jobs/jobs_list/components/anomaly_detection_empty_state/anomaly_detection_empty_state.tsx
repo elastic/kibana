@@ -8,6 +8,7 @@
 import type { FC } from 'react';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { EuiEmptyPromptProps } from '@elastic/eui';
 import { EuiButton, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
@@ -24,7 +25,8 @@ export const AnomalyDetectionEmptyState: FC<{
   centered?: boolean;
   customCss?: SerializedStyles;
   iconSize?: 'fullWidth' | 'original' | 's' | 'm' | 'l' | 'xl';
-}> = ({ showDocsLink = false, centered = false, customCss, iconSize }) => {
+  titleSize?: EuiEmptyPromptProps['titleSize'];
+}> = ({ showDocsLink = false, centered = false, customCss, iconSize, titleSize }) => {
   const canCreateJob = usePermissionCheck('canCreateJob');
   const disableCreateAnomalyDetectionJob = !canCreateJob || !mlNodesAvailable();
 
@@ -45,6 +47,7 @@ export const AnomalyDetectionEmptyState: FC<{
         defaultMessage: 'Anomaly detection',
       })}
       iconSize={iconSize}
+      titleSize={titleSize}
       title={i18n.translate('xpack.ml.overview.anomalyDetection.createFirstJobMessage', {
         defaultMessage: 'Anomaly detection',
       })}

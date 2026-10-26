@@ -160,7 +160,7 @@ export const OverviewPage: FC = () => {
             <>
               <EuiFlexGroup direction="column">
                 <EuiFlexItem>
-                  <EuiTitle size="m">
+                  <EuiTitle size="s">
                     <h2>
                       {i18n.translate('xpack.ml.overview.analyzeYourDataTitle', {
                         defaultMessage: 'Analyze your data',
@@ -190,7 +190,7 @@ export const OverviewPage: FC = () => {
           {canUseAiops ? (
             <>
               <EuiFlexGroup direction="column">
-                <EuiTitle size="m">
+                <EuiTitle size="s">
                   <h2>
                     {i18n.translate('xpack.ml.overview.aiopsLabsTitle', {
                       defaultMessage: 'Surface insights',
@@ -327,7 +327,7 @@ export const OverviewPage: FC = () => {
             </>
           ) : null}
           <EuiFlexGroup direction="column">
-            <EuiTitle size="m">
+            <EuiTitle size="s">
               <h2>
                 {i18n.translate('xpack.ml.overview.visualizeYourDataTitle', {
                   defaultMessage: 'Visualize your data',
@@ -337,7 +337,7 @@ export const OverviewPage: FC = () => {
             <DataVisualizerGrid isEsqlEnabled={isEsqlEnabled} cardTitleSize="xs" />
           </EuiFlexGroup>
         </EuiFlexGroup>
-        <EuiHorizontalRule />
+        <EuiHorizontalRule margin="xxl" />
         <EuiFlexGroup>
           {isADEnabled || isNLPEnabled || isDFAEnabled ? (
             <EuiFlexItem>
@@ -402,6 +402,7 @@ export const OverviewPage: FC = () => {
             />
           </EuiFlexItem>
         </EuiFlexGroup>
+        <EuiSpacer size="xxl" />
         <HelpMenu docLink={helpLink} />
       </EuiPageBody>
     </>

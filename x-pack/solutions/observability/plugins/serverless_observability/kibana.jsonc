@@ -19,7 +19,13 @@
       "security",
       "navigation"
     ],
-    "optionalPlugins": ["cases", "streams", "observabilityAIAssistant", "workflowsManagement"],
+    "optionalPlugins": [
+      "cases",
+      "streams",
+      "observabilityAIAssistant",
+      "workflowsManagement",
+      "profiling"
+    ],
     "requiredBundles": ["significantEvents"]
   }
 }

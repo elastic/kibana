@@ -17,7 +17,10 @@ export const createObservabilityLogsDataSourceProfileProviders = (
   const logsDataSourceProfileProvider = createLogsDataSourceProfileProvider(providerServices);
 
   return [
-    ...createIntegrationLogsDataSourceProfileProviders(logsDataSourceProfileProvider),
+    ...createIntegrationLogsDataSourceProfileProviders(
+      logsDataSourceProfileProvider,
+      providerServices.uiSettings
+    ),
     logsDataSourceProfileProvider,
   ];
 };

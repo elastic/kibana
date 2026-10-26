@@ -9,7 +9,7 @@
 
 import { lazySchema, z } from '@kbn/zod/v4';
 import type { AxiosInstance } from 'axios';
-import type { AuthContext, AuthTypeSpec } from '../connector_spec';
+import type { AuthContext, AuthTypeSpec, GetTokenOpts } from '../connector_spec';
 import * as i18n from './translations';
 
 export const OAUTH_CLIENT_CREDENTIALS_PRIVATE_KEY_JWT_ID =
@@ -84,6 +84,31 @@ const authSchema = lazySchema(() =>
 
 type AuthSchemaType = z.infer<typeof authSchema>;
 
+const buildGetTokenOpts = (secret: AuthSchemaType): GetTokenOpts => ({
+  authType: OAUTH_CLIENT_CREDENTIALS_PRIVATE_KEY_JWT_ID,
+  tokenUrl: secret.tokenUrl,
+  scope: secret.scope,
+  clientId: secret.clientId,
+});
+
+const resolveAccessToken = async (ctx: AuthContext, secret: AuthSchemaType): Promise<string> => {
+  let token;
+  try {
+    token = await ctx.getToken(buildGetTokenOpts(secret));
+  } catch (error) {
+    throw new Error(
+      `Unable to retrieve/refresh the access token from ${secret.tokenUrl}: ${error.message}`,
+      { cause: error }
+    );
+  }
+
+  if (!token) {
+    throw new Error(`Unable to retrieve new access token from ${secret.tokenUrl}`);
+  }
+
+  return token;
+};
+
 /**
  * OAuth2 client_credentials with a signed-JWT client_assertion
  * (RFC 7521 + RFC 7523 §2.2). Provider-neutral: works for any OAuth server
@@ -113,26 +138,13 @@ export const OAuthClientCredentialsPrivateKeyJwt: AuthTypeSpec<AuthSchemaType> =
     axiosInstance: AxiosInstance,
     secret: AuthSchemaType
   ): Promise<AxiosInstance> => {
-    let token;
-    try {
-      token = await ctx.getToken({
-        authType: OAUTH_CLIENT_CREDENTIALS_PRIVATE_KEY_JWT_ID,
-        tokenUrl: secret.tokenUrl,
-        scope: secret.scope,
-        clientId: secret.clientId,
-      });
-    } catch (error) {
-      throw new Error(
-        `Unable to retrieve/refresh the access token from ${secret.tokenUrl}: ${error.message}`,
-        { cause: error }
-      );
-    }
-
-    if (!token) {
-      throw new Error(`Unable to retrieve new access token from ${secret.tokenUrl}`);
-    }
-
-    axiosInstance.defaults.headers.common.Authorization = token;
+    axiosInstance.defaults.headers.common.Authorization = await resolveAccessToken(ctx, secret);
     return axiosInstance;
   },
+  getAuthHeaders: async (
+    ctx: AuthContext,
+    secret: AuthSchemaType
+  ): Promise<Record<string, string>> => ({
+    Authorization: await resolveAccessToken(ctx, secret),
+  }),
 };

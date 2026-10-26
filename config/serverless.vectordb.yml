@@ -35,6 +35,9 @@ xpack.cloud.serverless.project_type: vectordb
 ## Enable the Serverless Vectordb plugin
 xpack.serverless.vectordb.enabled: true
 
+## Enable the shared Elasticsearch home page
+xpack.elasticsearchHome.enabled: true
+
 ## Set the home route
 uiSettings.overrides.defaultRoute: /app/vectordb
 

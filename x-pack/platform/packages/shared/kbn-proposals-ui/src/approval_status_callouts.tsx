@@ -8,7 +8,7 @@
 import React, { memo } from 'react';
 import { css } from '@emotion/react';
 import { EuiSpacer, useEuiTheme } from '@elastic/eui';
-import { KbnWarningCallout } from '@kbn/ui-callout';
+import { KbnDangerCallout, KbnWarningCallout } from '@kbn/ui-callout';
 import { APPROVAL_MODAL_TRANSLATIONS } from './translations';
 
 interface ApprovalStatusCalloutsProps {
@@ -16,6 +16,11 @@ interface ApprovalStatusCalloutsProps {
   isPending: boolean;
   /** Error from a prior run of this proposal's action, explaining why it is offered again. */
   previousExecutionError?: string;
+  /**
+   * Error from this proposal's own run, for a failed attempt that a retry replaced. A replaced
+   * proposal shows no outcome banner, so without this its "Failed" badge would carry no reason.
+   */
+  failedAttemptError?: string;
   /**
    * Whether the proposal is expired — its deadline passed, or the workflow settled it as
    * `status: 'expired'` beforehand (e.g. after exhausting its retry attempts). The header badge
@@ -29,15 +34,16 @@ interface ApprovalStatusCalloutsProps {
 }
 
 /**
- * The warning callouts `ApprovalContent` shows between the body and the footer: why a proposal is
- * being offered again after a failed attempt, and why an expired one can no longer be actioned.
- * Split out from `ApprovalContent` itself only because both conditions render the same
- * spacer-callout-spacer shape, not because they share any state.
+ * The callouts `ApprovalContent` shows between the body and the footer: why a proposal is
+ * being offered again after a failed attempt, why a replaced attempt failed, and why an expired
+ * one can no longer be actioned. Split out from `ApprovalContent` itself only because every
+ * condition renders the same spacer-callout-spacer shape, not because they share any state.
  */
 export const ApprovalStatusCallouts = memo<ApprovalStatusCalloutsProps>(
   ({
     isPending,
     previousExecutionError,
+    failedAttemptError,
     isExpired,
     expiredReason,
     'data-test-subj': dataTestSubj,
@@ -51,14 +57,31 @@ export const ApprovalStatusCallouts = memo<ApprovalStatusCalloutsProps>(
           <>
             <EuiSpacer size="m" />
             <div css={css({ padding: `0 ${euiTheme.size.base}` })}>
-              <KbnWarningCallout
+              <KbnDangerCallout
                 announceOnMount
                 size="s"
                 title={APPROVAL_MODAL_TRANSLATIONS.previousFailureCalloutTitle}
                 data-test-subj={dataTestSubj ? `${dataTestSubj}-previous-failure` : undefined}
               >
                 {previousExecutionError}
-              </KbnWarningCallout>
+              </KbnDangerCallout>
+              <EuiSpacer size="m" />
+            </div>
+          </>
+        )}
+
+        {failedAttemptError && (
+          <>
+            <EuiSpacer size="m" />
+            <div css={css({ padding: `0 ${euiTheme.size.base}` })}>
+              <KbnDangerCallout
+                announceOnMount
+                size="s"
+                title={APPROVAL_MODAL_TRANSLATIONS.failedAttemptCalloutTitle}
+                data-test-subj={dataTestSubj ? `${dataTestSubj}-failed-attempt` : undefined}
+              >
+                {failedAttemptError}
+              </KbnDangerCallout>
               <EuiSpacer size="m" />
             </div>
           </>

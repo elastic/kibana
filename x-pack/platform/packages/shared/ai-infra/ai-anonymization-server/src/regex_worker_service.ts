@@ -48,6 +48,11 @@ export class RegexWorkerService {
     });
   }
 
+  /** Whether tasks run in isolated worker threads (as opposed to synchronously in-process). */
+  isEnabled(): boolean {
+    return this.enabled;
+  }
+
   /**
    * Execute a task in a worker.  Falls back to synchronous execution when the
    * worker is disabled

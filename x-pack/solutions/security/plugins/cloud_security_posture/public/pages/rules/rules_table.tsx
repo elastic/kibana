@@ -4,11 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import type {
   Criteria,
   EuiTableFieldDataColumnType,
   EuiBasicTableProps,
+  EuiTableSelectionType,
   EuiTableSortingType,
 } from '@elastic/eui';
 import {
@@ -16,7 +17,6 @@ import {
   EuiBasicTable,
   useEuiTheme,
   EuiSwitch,
-  EuiCheckbox,
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
@@ -26,7 +26,6 @@ import {
   CHANGE_RULE_STATE,
   uiMetricService,
 } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
-import { uniqBy } from 'lodash';
 import { ColumnNameWithTooltip } from '../../components/column_name_with_tooltip';
 import type { CspBenchmarkRulesWithStates, RulesState } from './rules_container';
 import * as TEST_SUBJECTS from './test_subjects';
@@ -46,18 +45,7 @@ type RulesTableProps = Pick<
   onSortChange: (value: 'asc' | 'desc') => void;
 };
 
-type GetColumnProps = Pick<
-  RulesTableProps,
-  'onRuleClick' | 'selectedRules' | 'setSelectedRules'
-> & {
-  items: CspBenchmarkRulesWithStates[];
-  setIsAllRulesSelectedThisPage: (isAllRulesSelected: boolean) => void;
-  isAllRulesSelectedThisPage: boolean;
-  isCurrentPageRulesASubset: (
-    currentPageRulesArray: CspBenchmarkRulesWithStates[],
-    selectedRulesArray: CspBenchmarkRulesWithStates[]
-  ) => boolean;
-};
+type GetColumnProps = Pick<RulesTableProps, 'onRuleClick'>;
 
 export const RulesTable = ({
   setPagination,
@@ -106,38 +94,44 @@ export const RulesTable = ({
     },
   });
 
-  const [isAllRulesSelectedThisPage, setIsAllRulesSelectedThisPage] = useState<boolean>(false);
+  // EuiBasicTable's native selection only tracks rows that are on the current page: any selected
+  // item that is missing from `items` is dropped (and reported via `onSelectionChange`).
+  // The rules page keeps a selection that spans pages (e.g. "Select all N rules"), so the table is
+  // only given the part of that selection that is visible on this page, and changes reported by the
+  // table are merged back into the full selection.
+  const selectedRuleIds = useMemo(
+    () => new Set(selectedRules.map((rule) => rule.metadata.id)),
+    [selectedRules]
+  );
 
-  const isCurrentPageRulesASubset = (
-    currentPageRulesArray: CspBenchmarkRulesWithStates[],
-    selectedRulesArray: CspBenchmarkRulesWithStates[]
-  ) => {
-    let i: number = 0;
-    const newCurrentPageRulesArray = currentPageRulesArray.map((rule) => rule.metadata);
-    const newSelectedRulesArray = selectedRulesArray.map((rule) => rule.metadata);
+  const currentPageSelection = useMemo(
+    () => items.filter((rule) => selectedRuleIds.has(rule.metadata.id)),
+    [items, selectedRuleIds]
+  );
 
-    while (i < newCurrentPageRulesArray.length) {
-      if (!newSelectedRulesArray.includes(newCurrentPageRulesArray[i])) return false;
-      i++;
-    }
-    return true;
+  const onSelectionChange = useCallback(
+    (newCurrentPageSelection: CspBenchmarkRulesWithStates[]) => {
+      const currentPageRuleIds = new Set(items.map((rule) => rule.metadata.id));
+      const selectionFromOtherPages = selectedRules.filter(
+        (rule) => !currentPageRuleIds.has(rule.metadata.id)
+      );
+      setSelectedRules([...selectionFromOtherPages, ...newCurrentPageSelection]);
+    },
+    [items, selectedRules, setSelectedRules]
+  );
+
+  const selection: EuiTableSelectionType<CspBenchmarkRulesWithStates> = {
+    selected: currentPageSelection,
+    onSelectionChange,
+    // EuiBasicTable uses this message as the row checkbox's accessible name (and tooltip)
+    selectableMessage: (_isSelectable, rule) =>
+      i18n.translate('xpack.csp.rules.rulesTable.selectRuleAriaLabel', {
+        defaultMessage: 'Select rule: {ruleName}',
+        values: { ruleName: rule.metadata?.name || rule.metadata?.id },
+      }),
   };
 
-  useEffect(() => {
-    if (selectedRules.length >= items.length && items.length > 0 && selectedRules.length > 0)
-      setIsAllRulesSelectedThisPage(true);
-    else setIsAllRulesSelectedThisPage(false);
-  }, [items.length, selectedRules.length]);
-
-  const columns = getColumns({
-    selectedRules,
-    setSelectedRules,
-    items,
-    setIsAllRulesSelectedThisPage,
-    isAllRulesSelectedThisPage,
-    isCurrentPageRulesASubset,
-    onRuleClick,
-  });
+  const columns = getColumns({ onRuleClick });
 
   return (
     <>
@@ -151,6 +145,7 @@ export const RulesTable = ({
         onChange={onTableChange}
         itemId={(v) => v.metadata.id}
         rowProps={rowProps}
+        selection={selection}
         sorting={sorting}
         tableCaption={i18n.translate('xpack.csp.rules.rulesTable.tableCaption', {
           defaultMessage: 'CSP benchmark rules list',
@@ -161,72 +156,8 @@ export const RulesTable = ({
 };
 
 const getColumns = ({
-  selectedRules,
-  setSelectedRules,
-  items,
-  isAllRulesSelectedThisPage,
-  isCurrentPageRulesASubset,
   onRuleClick,
 }: GetColumnProps): Array<EuiTableFieldDataColumnType<CspBenchmarkRulesWithStates>> => [
-  {
-    field: 'action',
-    name: (
-      <EuiCheckbox
-        id={RULES_TABLE.RULES_ROW_SELECT_ALL_CURRENT_PAGE}
-        checked={isCurrentPageRulesASubset(items, selectedRules) && isAllRulesSelectedThisPage}
-        onChange={() => {
-          const uniqueSelectedRules = uniqBy([...selectedRules, ...items], 'metadata.id');
-          const onChangeSelectAllThisPageFn = () => {
-            setSelectedRules(uniqueSelectedRules);
-          };
-          const onChangeDeselectAllThisPageFn = () => {
-            setSelectedRules(
-              selectedRules.filter(
-                (element: CspBenchmarkRulesWithStates) =>
-                  !items.find(
-                    (item: CspBenchmarkRulesWithStates) =>
-                      item.metadata?.id === element.metadata?.id
-                  )
-              )
-            );
-          };
-          return isCurrentPageRulesASubset(items, selectedRules) && isAllRulesSelectedThisPage
-            ? onChangeDeselectAllThisPageFn()
-            : onChangeSelectAllThisPageFn();
-        }}
-        aria-label={i18n.translate('xpack.csp.rules.rulesTable.selectAllRulesAriaLabel', {
-          defaultMessage: 'Select all rules on current page',
-        })}
-      />
-    ),
-    width: '40px',
-    sortable: false,
-    render: (_rules, item: CspBenchmarkRulesWithStates) => {
-      return (
-        <EuiCheckbox
-          checked={selectedRules.some(
-            (rule: CspBenchmarkRulesWithStates) => rule.metadata?.id === item.metadata?.id
-          )}
-          id={`cloud-security-fields-selector-item-${item.metadata?.id}`}
-          data-test-subj={`cloud-security-fields-selector-item-${item.metadata?.id}`}
-          onChange={(e) => {
-            const isChecked = e.target.checked;
-            return isChecked
-              ? setSelectedRules([...selectedRules, item])
-              : setSelectedRules(
-                  selectedRules.filter(
-                    (rule: CspBenchmarkRulesWithStates) => rule.metadata?.id !== item.metadata?.id
-                  )
-                );
-          }}
-          aria-label={i18n.translate('xpack.csp.rules.rulesTable.selectRuleAriaLabel', {
-            defaultMessage: 'Select rule: {ruleName}',
-            values: { ruleName: item.metadata?.name || item.metadata?.id },
-          })}
-        />
-      );
-    },
-  },
   {
     field: 'metadata.benchmark.rule_number',
     name: i18n.translate('xpack.csp.rules.rulesTable.ruleNumberColumnLabel', {

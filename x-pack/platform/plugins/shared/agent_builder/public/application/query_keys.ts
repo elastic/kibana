@@ -70,6 +70,7 @@ export const queryKeys = {
     all: ['skills'] as const,
     list: ['skills', 'list'] as const,
     byId: (skillId?: string) => ['skills', skillId],
+    allByAgent: ['skills', 'byAgent'] as const,
     byAgent: (agentId?: string) => ['skills', 'byAgent', agentId],
   },
   sml: {

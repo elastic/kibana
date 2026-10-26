@@ -10,10 +10,13 @@ import { readFileSync } from 'fs';
 import { chunk, partition } from 'lodash';
 import { Agent } from 'undici';
 
+import { schema } from '@kbn/config-schema';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import {
   deriveInternalCallerAttestation,
   HTTPAuthorizationHeader,
+  isExternalUiamCredential,
+  resolveUiamClientAuthentication,
   UIAM_INTERNAL_CALLER_ATTESTATION_HEADER,
 } from '@kbn/core-security-server';
 import type {
@@ -36,7 +39,10 @@ import {
   getUiamClientAuthentication,
   type UiamClientAuthentication,
 } from './get_client_authentication';
-import { getUiamCredentialsFromRequest } from './get_uiam_credentials';
+import {
+  getUiamAuthorizationHeaderFromRequest,
+  getUiamCredentialsFromRequest,
+} from './get_uiam_credentials';
 import { getProtectedResource } from './oauth_protected_resource';
 import type {
   ServiceAccountAssumableBy,
@@ -78,7 +84,7 @@ export interface GrantUiamApiKeyRequestBody {
   description: string;
   /** Indicates whether this is an internal API key. */
   internal: boolean;
-  /** Optional expiration time for the API key (e.g., '1d', '7d'). */
+  /** Optional expiration time for the API key as an ISO-8601 duration (e.g., 'PT4H', 'P7D'). */
   expiration?: string;
   /** Role assignments that define access and resource limits for the API key. */
   role_assignments: {
@@ -477,7 +483,7 @@ export class UiamService implements UiamServicePublic {
     this.#userAgentHeader = `Kibana/${options.kibanaVersion}`;
 
     // Destructure existing config and re-create it again after validation to make TypeScript can infer the proper types.
-    const { enabled, url, sharedSecret, ssl } = config;
+    const { enabled, url, sharedSecret, ssl, unsafe = {} } = config;
     if (!enabled) {
       throw new Error('UIAM is not enabled.');
     }
@@ -490,7 +496,13 @@ export class UiamService implements UiamServicePublic {
       throw new Error('UIAM shared secret is not configured.');
     }
 
-    this.#config = { enabled, url, sharedSecret, ssl };
+    this.#config = { enabled, url, sharedSecret, ssl, unsafe };
+
+    if (unsafe.grantedApiKeyDefaultExpiration) {
+      this.#logger.warn(
+        `\`xpack.security.uiam.unsafe.grantedApiKeyDefaultExpiration\` is set to [${unsafe.grantedApiKeyDefaultExpiration.toISOString()}]: internal API keys granted without an explicit expiration will expire. This setting is intended only for short-lived test projects and must not be used in production or long-lived projects, as rules and other background tasks relying on these API keys will fail once the keys expire.`
+      );
+    }
     this.#dispatcher = this.#createFetchDispatcher();
   }
 
@@ -513,15 +525,28 @@ export class UiamService implements UiamServicePublic {
     };
   }
 
-  /**
-   * Builds the `Authorization` and client authentication headers for a UIAM call made on behalf of
-   * the given request: the request's own UIAM access token, plus the client authentication that
-   * rode in with it, or Kibana's own shared secret when none was supplied.
-   */
   #getRequestAuthenticationHeaders(request: KibanaRequest): Record<string, string> {
+    const credential = getUiamAuthorizationHeaderFromRequest(request);
+    const clientAuthentication = resolveUiamClientAuthentication(
+      this.#config.sharedSecret,
+      request.isFakeRequest
+        ? {
+            credentialSource: isExternalUiamCredential(request) ? 'external' : 'internal',
+            credential,
+          }
+        : {
+            credentialSource: 'inbound',
+            credential,
+            relayedClientAuthentication: request.headers[ES_CLIENT_AUTHENTICATION_HEADER],
+            requestHeaders: request.headers,
+          }
+    );
+
     return {
-      ...this.#getClientAuthenticationHeaders(getUiamClientAuthentication(request)),
-      Authorization: `Bearer ${getUiamCredentialsFromRequest(request)}`,
+      ...(typeof clientAuthentication === 'string'
+        ? { [ES_CLIENT_AUTHENTICATION_HEADER]: clientAuthentication }
+        : {}),
+      Authorization: credential.toString(),
     };
   }
 
@@ -686,10 +711,13 @@ export class UiamService implements UiamServicePublic {
     );
 
     try {
+      const expiration = params.expiration
+        ? schema.duration().validate(params.expiration)
+        : this.#config.unsafe.grantedApiKeyDefaultExpiration;
       const body: GrantUiamApiKeyRequestBody = {
         description: params.name,
         internal: true,
-        ...(params.expiration ? { expiration: params.expiration } : {}),
+        ...(expiration ? { expiration: expiration.toISOString() } : {}),
         role_assignments: {
           // currently required  to downscope privileges
           limit: {

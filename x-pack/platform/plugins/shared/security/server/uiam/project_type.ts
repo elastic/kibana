@@ -11,7 +11,6 @@ import {
   KIBANA_SEARCH_SOLUTION,
   KIBANA_SECURITY_SOLUTION,
   KIBANA_VECTORDB_SOLUTION,
-  KIBANA_WORKPLACE_AI_SOLUTION,
   type KibanaSolution,
 } from '@kbn/projects-solutions-groups';
 
@@ -23,5 +22,4 @@ export const KIBANA_SOLUTION_TO_UIAM_PROJECT_TYPE: Record<KibanaSolution, UiamPr
   [KIBANA_OBSERVABILITY_SOLUTION]: 'observability',
   [KIBANA_SECURITY_SOLUTION]: 'security',
   [KIBANA_VECTORDB_SOLUTION]: 'vectordb',
-  [KIBANA_WORKPLACE_AI_SOLUTION]: 'workplaceai',
 };

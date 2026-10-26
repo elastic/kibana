@@ -14,6 +14,7 @@ import { writeFileSync, mkdirSync } from 'fs';
 import { inspect } from 'util';
 
 import xmlBuilder from 'xmlbuilder';
+import { ToolingLog } from '@kbn/tooling-log';
 import { getUniqueJunitReportPath } from '../report_path';
 
 import { getSnapshotOfRunnableLogs } from './log_cache';
@@ -29,6 +30,7 @@ export function setupJUnitReportGeneration(runner, options = {}) {
     rootDirectory = REPO_ROOT,
     getTestMetadata = () => ({}),
     metadata,
+    log = new ToolingLog({ level: 'error', writeTo: process.stderr }),
   } = options;
 
   const stats = {};
@@ -85,7 +87,7 @@ export function setupJUnitReportGeneration(runner, options = {}) {
   runner.on('fail', setEndTime);
   runner.on('suite end', () => setEndTime(stats));
 
-  runner.on('end', () => {
+  const writeReport = () => {
     // crawl the test graph to collect all defined tests
     const allTests = findAllTests(runner.suite);
     if (!allTests.length) {
@@ -184,5 +186,15 @@ export function setupJUnitReportGeneration(runner, options = {}) {
     const reportXML = root.end();
     mkdirSync(dirname(reportPath), { recursive: true });
     writeFileSync(reportPath, reportXML, 'utf8');
+  };
+
+  // a throwing 'end' listener prevents mocha from calling the run callback and hangs the runner
+  runner.on('end', () => {
+    try {
+      writeReport();
+    } catch (error) {
+      log.error(`Failed to write JUnit report [${reportName}]`);
+      log.error(error);
+    }
   });
 }

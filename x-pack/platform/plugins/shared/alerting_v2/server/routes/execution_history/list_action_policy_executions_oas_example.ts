@@ -16,7 +16,7 @@ export const LIST_ACTION_POLICY_EXECUTIONS_RESPONSE: ListPolicyExecutionHistoryR
       policy: { id: 'action-policy-1', name: 'Notify on production alerts' },
       outcome: 'success',
       alert_count: 1,
-      alerts: [{ id: 'episode-1' }],
+      alerts: [{ id: 'alert-1' }],
       action_group_count: 1,
       rules: [{ id: 'rule-1', name: 'Host CPU high' }],
       rule_count: 1,

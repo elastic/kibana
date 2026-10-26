@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { DataViewSource } from '@kbn/data-source';
 import { getExtendedDiscoverStateContainer } from '../customizations';
 import {
   getDataStateContainer,
@@ -575,9 +576,9 @@ export function getDiscoverStateMock({
   if (finalSavedSearch) {
     const dataView = finalSavedSearch.searchSource.getField('index');
 
-    tabRuntimeState.currentDataView$.next(dataView);
-
     if (dataView) {
+      tabRuntimeState.currentDataSource$.next(new DataViewSource(dataView));
+
       internalState.dispatch(
         internalStateActions.loadDataViewList.fulfilled([dataView as DataViewListItem], 'requestId')
       );

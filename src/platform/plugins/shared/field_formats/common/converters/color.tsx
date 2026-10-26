@@ -16,6 +16,7 @@ import type { ReactConvertFunction, TextContextTypeConvert } from '../types';
 import { FIELD_FORMAT_IDS } from '../types';
 import { asPrettyString } from '../utils';
 import { DEFAULT_CONVERTER_COLOR } from '../constants/color_default';
+import { NumberFormat } from './number';
 
 /** @public */
 export class ColorFormat extends FieldFormat {
@@ -25,11 +26,31 @@ export class ColorFormat extends FieldFormat {
   });
   static fieldType = [KBN_FIELD_TYPES.NUMBER, KBN_FIELD_TYPES.STRING, KBN_FIELD_TYPES.BOOLEAN];
 
+  // nested number formatter, created once per instance since params don't change
+  private numberFormat: NumberFormat | undefined;
+
   getParamDefaults() {
     return {
       fieldType: null, // populated by editor, see controller below
       colors: [cloneDeep(DEFAULT_CONVERTER_COLOR)],
     };
+  }
+
+  // number fields can optionally be formatted with a numeral pattern before applying colors
+  private formatValue(
+    val: string | number | boolean,
+    options?: { skipFormattingInStringifiedJSON?: boolean }
+  ): string {
+    const pattern = this.param('pattern');
+    if (this.param('fieldType') !== 'number' || !pattern) {
+      return asPrettyString(val, options);
+    }
+
+    if (!this.numberFormat) {
+      this.numberFormat = new NumberFormat({ pattern }, this.getConfig);
+    }
+
+    return this.numberFormat.convertToText(val, options);
   }
 
   findColorRuleForVal(val: string | number | boolean) {
@@ -72,7 +93,7 @@ export class ColorFormat extends FieldFormat {
       return missing;
     }
 
-    return asPrettyString(val, options);
+    return this.formatValue(val, options);
   };
 
   reactConvert: ReactConvertFunction = (val, options) => {
@@ -83,7 +104,7 @@ export class ColorFormat extends FieldFormat {
 
     const value = val as string | number | boolean;
     const color = this.findColorRuleForVal(value) as typeof DEFAULT_CONVERTER_COLOR;
-    const displayVal = asPrettyString(value, options);
+    const displayVal = this.formatValue(value, options);
 
     if (!color) return displayVal;
 

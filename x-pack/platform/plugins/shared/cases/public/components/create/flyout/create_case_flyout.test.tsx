@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { screen, waitFor } from '@testing-library/react';
+import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import { CreateCaseFlyout } from './create_case_flyout';
@@ -18,7 +18,6 @@ import { useGetSupportedActionConnectors } from '../../../containers/configure/u
 import { useAvailableCasesOwners } from '../../app/use_available_owners';
 import { connectorsMock } from '../../../containers/mock';
 import { useCaseConfigureResponse } from '../../configure_cases/__mock__';
-import { waitForComponentToUpdate } from '../../../common/test_utils';
 
 jest.mock('../../../containers/use_get_tags');
 jest.mock('../../../containers/configure/use_get_supported_action_connectors');
@@ -49,33 +48,27 @@ describe('CreateCaseFlyout', () => {
     useGetCaseConfigurationMock.mockImplementation(() => useCaseConfigureResponse);
   });
 
-  it('renders', async () => {
+  it('renders', () => {
     renderWithTestingProviders(<CreateCaseFlyout {...defaultProps} />);
-    await waitForComponentToUpdate();
 
-    expect(await screen.findByTestId('create-case-flyout')).toBeInTheDocument();
+    expect(screen.getByTestId('create-case-flyout')).toBeInTheDocument();
   });
 
   it('should call onCloseCaseModal when closing the flyout', async () => {
     renderWithTestingProviders(<CreateCaseFlyout {...defaultProps} />);
-    await waitForComponentToUpdate();
 
-    await userEvent.click(await screen.findByTestId('euiFlyoutCloseButton'));
+    await userEvent.click(screen.getByTestId('euiFlyoutCloseButton'));
 
-    await waitFor(() => {
-      expect(onClose).toHaveBeenCalled();
-    });
+    expect(onClose).toHaveBeenCalled();
   });
 
-  it('renders headerContent when passed', async () => {
+  it('renders headerContent when passed', () => {
     const headerContent = <p data-test-subj="testing123" />;
     renderWithTestingProviders(
       <CreateCaseFlyout {...defaultProps} headerContent={headerContent} />
     );
 
-    await waitForComponentToUpdate();
-
-    expect(await screen.findByTestId('create-case-flyout-header')).toBeInTheDocument();
-    expect(await screen.findByTestId('testing123')).toBeInTheDocument();
+    expect(screen.getByTestId('create-case-flyout-header')).toBeInTheDocument();
+    expect(screen.getByTestId('testing123')).toBeInTheDocument();
   });
 });
