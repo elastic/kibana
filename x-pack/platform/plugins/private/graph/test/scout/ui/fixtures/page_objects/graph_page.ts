@@ -14,6 +14,7 @@ import {
 } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 
+const APP_BOOT_TIMEOUT = 45_000;
 const LISTING_TIMEOUT = 20_000;
 
 export class GraphPage {
@@ -73,7 +74,12 @@ export class GraphPage {
   private readonly drilldownsSettingsTab: Locator;
   private readonly addDrilldownButton: Locator;
 
-  constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
+  constructor(
+    private readonly page: ScoutPage,
+    private readonly kbnUrl: KibanaUrl,
+    // Parallel runs scope each worker to its own space; single-thread runs use the default space.
+    private readonly spaceId?: string
+  ) {
     this.contentList = new ContentListWrapper(page);
     this.appMenu = new AppMenu(page);
     this.createGraphPromptButton = this.page.getByTestId('graphCreateGraphPromptButton');
@@ -132,12 +138,19 @@ export class GraphPage {
     this.vennSmallTerm2 = this.page.getByTestId('graphVennSmallTerm2');
   }
 
+  // Gate on `domcontentloaded`: Kibana's bundle graph defers `load` past app mount.
+  private async gotoGraphApp(spaceId?: string) {
+    await this.page.goto(this.kbnUrl.app('graph', { space: spaceId }), {
+      waitUntil: 'domcontentloaded',
+    });
+  }
+
   async goto() {
-    await this.page.gotoApp('graph');
+    await this.gotoGraphApp(this.spaceId);
   }
 
   async gotoInSpace(spaceId: string) {
-    await this.page.goto(this.kbnUrl.app('graph', { space: spaceId }));
+    await this.gotoGraphApp(spaceId);
   }
 
   async waitForListing() {
@@ -145,7 +158,7 @@ export class GraphPage {
     // both or Playwright strict mode fails when the empty listing is ready.
     await this.emptyState
       .or(this.contentList.searchBox)
-      .waitFor({ state: 'visible', timeout: LISTING_TIMEOUT });
+      .waitFor({ state: 'visible', timeout: APP_BOOT_TIMEOUT });
   }
 
   async clickCreateGraph() {

@@ -5,10 +5,13 @@
  * 2.0.
  */
 
+import { ALERT_ACTIONS_DATA_STREAM, ALERT_EVENTS_DATA_STREAM } from '@kbn/alerting-v2-constants';
 import type {
   AlertInvestigationContext,
   AlertSnapshot,
   AlertSnapshotEvaluation,
+  InvestigationAlertSnapshot,
+  V2AlertSnapshot,
 } from '../../common';
 
 /**
@@ -30,6 +33,8 @@ import type {
  * a stack overflow.
  */
 const MAX_NESTING_DEPTH = 10;
+
+const CLASSIC_ALERT_INDICES = '.alerts-*';
 
 const FENCE_OPEN = '<alert_data>';
 const FENCE_CLOSE = '</alert_data>';
@@ -128,7 +133,30 @@ function describeCondition(alert: AlertSnapshot): string | undefined {
   return undefined;
 }
 
-function describeAlert(alert: AlertSnapshot): string {
+function describeV2Alert(alert: V2AlertSnapshot): string {
+  const lines = [
+    `Alerting v2 episode ${sanitize(alert.id)} of rule ${
+      alert.rule_name
+        ? `"${sanitize(alert.rule_name)}" (${sanitize(alert.rule_id)})`
+        : sanitize(alert.rule_id)
+    } is ${sanitize(alert.status)}, first seen at ${sanitize(alert.start)}.`,
+    `This is a v2 alert, not a classic one: it is not stored in the .alerts-* indices. Its events are in the ${ALERT_EVENTS_DATA_STREAM} data stream (filter on episode.id and type == "alert"), its actions are in ${ALERT_ACTIONS_DATA_STREAM}, and the rule is the v2 rule with the id above.`,
+    `Group hash: ${sanitize(alert.group_hash)}`,
+  ];
+
+  if (alert.last_event_timestamp) {
+    lines.push(`Last event at ${sanitize(alert.last_event_timestamp)}.`);
+  }
+  if (alert.severity) lines.push(`Severity: ${sanitize(alert.severity)}`);
+  if (alert.source) lines.push(`Source: ${sanitize(alert.source)}`);
+  if (alert.data) lines.push(`Alert data: ${sanitize(JSON.stringify(bounded(alert.data)))}`);
+
+  return lines.join('\n');
+}
+
+function describeAlert(alert: InvestigationAlertSnapshot): string {
+  if (alert.alert_version === 'v2') return describeV2Alert(alert);
+
   const lines = [
     `Rule "${sanitize(alert.rule_name)}" (${sanitize(alert.rule_category)}, type ${sanitize(
       alert.rule_type_id
@@ -155,6 +183,10 @@ function describeAlert(alert: AlertSnapshot): string {
   if (alert.flapping) {
     lines.push('This alert is flapping, so the condition is switching in and out repeatedly.');
   }
+
+  lines.push(
+    `Before you conclude, query the ${CLASSIC_ALERT_INDICES} indices (filter on kibana.alert.uuid) and read this alert's full document.`
+  );
 
   if (alert.rule_parameters) {
     lines.push(`Rule parameters: ${sanitize(JSON.stringify(bounded(alert.rule_parameters)))}`);
