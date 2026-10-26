@@ -7,35 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Logger } from '@kbn/core/server';
 import type { EsWorkflowExecution, WorkflowStepExecutionListDto } from '@kbn/workflows';
 import { WorkflowExecutionNotFoundError } from '@kbn/workflows/common/errors';
-import type {
-  GetStepExecutionsByIdsOptions,
-  GetWorkflowExecutionsByIdsOptions,
-  StepExecutionsDataClient,
-  WorkflowExecutionsDataClient,
-} from '@kbn/workflows-execution-engine/server';
-import { searchStepExecutions, type StepExecutionListResult } from './search_step_executions';
+import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
+import type { StepExecutionListResult } from './search_step_executions';
 import {
   ES_MAX_RESULT_WINDOW,
   WORKFLOW_EXECUTION_STEPS_PAGINATION_EXCEEDED_MESSAGE,
   WorkflowHistoryPaginationError,
 } from '../../lib/workflow_history_pagination_error';
 
-const PARENT_SOURCE_INCLUDES: Array<keyof EsWorkflowExecution> = [
-  'spaceId',
-  'managed',
-  'stepExecutionIds',
-];
+const PARENT_SOURCE_INCLUDES = ['spaceId', 'managed', 'stepExecutionIds'] as const;
 
-const STEP_METADATA_SOURCE_EXCLUDES: NonNullable<GetStepExecutionsByIdsOptions['sourceExcludes']> =
-  ['input', 'output'];
+const STEP_METADATA_SOURCE_EXCLUDES = ['input', 'output'] as const;
 
 export interface GetExecutionStepExecutionsParams {
-  workflowExecutionsDataClient: WorkflowExecutionsDataClient;
-  stepExecutionsDataClient: StepExecutionsDataClient;
-  logger: Logger;
+  workflowsExecutionEngine: WorkflowsExecutionEnginePluginStart;
   workflowExecutionId: string;
   spaceId: string;
   page: number;
@@ -68,19 +55,19 @@ const toResult = (
  * Both paths return start order (id-list order / `startedAt:asc`) so page 1 is the beginning of the run.
  */
 export const getExecutionStepExecutions = async ({
-  workflowExecutionsDataClient,
-  stepExecutionsDataClient,
-  logger,
+  workflowsExecutionEngine,
   workflowExecutionId,
   spaceId,
   page,
   size,
 }: GetExecutionStepExecutionsParams): Promise<GetExecutionStepExecutionsResult> => {
-  const { items } = await workflowExecutionsDataClient.getByIds([workflowExecutionId], {
-    sourceIncludes: PARENT_SOURCE_INCLUDES as GetWorkflowExecutionsByIdsOptions['sourceIncludes'],
+  const executions = await workflowsExecutionEngine.getWorkflowExecutionsById({
+    ids: [workflowExecutionId],
+    spaceId,
+    sourceIncludes: PARENT_SOURCE_INCLUDES,
   });
-  const doc = items[0]?.document;
-  if (!doc || doc.spaceId !== spaceId) {
+  const doc = executions[0];
+  if (!doc) {
     throw new WorkflowExecutionNotFoundError(`Workflow execution ${workflowExecutionId} not found`);
   }
 
@@ -92,11 +79,13 @@ export const getExecutionStepExecutions = async ({
       return toResult(doc, emptyPage(page, size, total));
     }
 
-    const { items: stepItems } = await stepExecutionsDataClient.getByIds(ids, {
+    const stepItems = await workflowsExecutionEngine.getStepExecutionsByIds({
+      ids,
+      spaceId,
       sourceExcludes: STEP_METADATA_SOURCE_EXCLUDES,
     });
     return toResult(doc, {
-      results: stepItems.map(({ document }) => document),
+      results: stepItems,
       total,
       page,
       size,
@@ -108,18 +97,15 @@ export const getExecutionStepExecutions = async ({
     throw new WorkflowHistoryPaginationError(WORKFLOW_EXECUTION_STEPS_PAGINATION_EXCEEDED_MESSAGE);
   }
 
-  return toResult(
-    doc,
-    await searchStepExecutions({
-      stepExecutionsDataClient,
-      logger,
-      workflowExecutionId,
-      spaceId,
-      sourceExcludes: STEP_METADATA_SOURCE_EXCLUDES,
-      page,
-      size,
-      // Start order so page 1 matches mget of stepExecutionIds (append-on-start).
-      sort: 'startedAt:asc',
-    })
-  );
+  const stepExecutionsList = await workflowsExecutionEngine.searchSteps({
+    executionId: workflowExecutionId,
+    spaceId,
+    page,
+    size,
+    includeInput: false,
+    includeOutput: false,
+    sort: 'startedAt:asc',
+  });
+
+  return toResult(doc, stepExecutionsList);
 };

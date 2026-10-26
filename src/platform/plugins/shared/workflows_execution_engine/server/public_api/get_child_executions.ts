@@ -14,27 +14,12 @@ import type {
   EsWorkflowStepExecution,
   WorkflowStepExecutionDto,
 } from '@kbn/workflows';
-import type {
-  GetWorkflowExecutionsByIdsOptions,
-  StepExecutionsDataClient,
-  WorkflowExecutionsDataClient,
-} from '@kbn/workflows-execution-engine/server';
-import { getStepExecutionsByWorkflowExecution } from '@kbn/workflows-execution-engine/server';
+import type { ExecutionReadDeps, GetChildExecutionsParams } from './types';
+import type { GetWorkflowExecutionsByIdsOptions } from '../repositories/data_access_layer';
+import { getStepExecutionsByWorkflowExecution } from '../repositories/data_access_layer/lib/get_step_executions_by_workflow_execution';
 
-interface GetChildWorkflowExecutionsParams {
-  workflowExecutionsDataClient: WorkflowExecutionsDataClient;
-  stepExecutionsDataClient: StepExecutionsDataClient;
-  parentExecutionId: string;
-  spaceId: string;
-}
-
-interface ChildRef {
-  stepExecutionId: string;
-  childExecutionId: string;
-}
-
-const STEP_SOURCE_EXCLUDES: (keyof EsWorkflowStepExecution)[] = ['input', 'output'];
-const PARENT_SOURCE_INCLUDES: (keyof EsWorkflowExecution)[] = ['spaceId', 'stepExecutionIds'];
+const STEP_SOURCE_EXCLUDES: Array<keyof EsWorkflowStepExecution> = ['input', 'output'];
+const PARENT_SOURCE_INCLUDES: Array<keyof EsWorkflowExecution> = ['spaceId', 'stepExecutionIds'];
 const CHILD_SOURCE_INCLUDES = [
   'id',
   'spaceId',
@@ -44,10 +29,9 @@ const CHILD_SOURCE_INCLUDES = [
   'stepExecutionIds',
 ] as GetWorkflowExecutionsByIdsOptions['sourceIncludes'];
 
-// The child execution id is written to step state as soon as the child run starts,
-// so a still-running or waiting child is linkable too. That matters for HITL: the
-// parent step sits in `waiting_for_child` exactly when the user needs the link.
-const extractChildRefs = (steps: EsWorkflowStepExecution[]): ChildRef[] =>
+const extractChildRefs = (
+  steps: EsWorkflowStepExecution[]
+): Array<{ stepExecutionId: string; childExecutionId: string }> =>
   steps
     .filter(
       (step) => isExecuteSyncStepType(step.stepType) && typeof step.state?.executionId === 'string'
@@ -57,62 +41,31 @@ const extractChildRefs = (steps: EsWorkflowStepExecution[]): ChildRef[] =>
       childExecutionId: String(step.state?.executionId),
     }));
 
-const fetchChildDocs = async (
-  workflowExecutionsDataClient: WorkflowExecutionsDataClient,
-  childIds: string[],
-  spaceId: string
-): Promise<Map<string, EsWorkflowExecution>> => {
-  const { items } = await workflowExecutionsDataClient.getByIds(childIds, {
-    sourceIncludes: CHILD_SOURCE_INCLUDES,
-  });
-
-  const result = new Map<string, EsWorkflowExecution>();
-  for (const { document: doc } of items) {
-    if (doc.spaceId === spaceId) {
-      result.set(doc.id, doc);
-    }
-  }
-  return result;
-};
-
-const groupStepsByWorkflowRunId = (
-  steps: EsWorkflowStepExecution[]
-): Map<string, WorkflowStepExecutionDto[]> => {
-  const result = new Map<string, WorkflowStepExecutionDto[]>();
-  for (const step of steps) {
-    const { spaceId: _spaceId, ...dto } = step;
-    const list = result.get(step.workflowRunId) ?? [];
-    list.push(dto);
-    result.set(step.workflowRunId, list);
-  }
-  return result;
-};
-
-export const getChildWorkflowExecutions = async ({
-  workflowExecutionsDataClient,
-  stepExecutionsDataClient,
-  parentExecutionId,
-  spaceId,
-}: GetChildWorkflowExecutionsParams): Promise<ChildWorkflowExecutionItem[]> => {
+/**
+ * Returns child runs started by sync-execute steps of a parent run, without step input or output.
+ * Throws when the parent document does not exist. A parent in another space, or a parent with no
+ * child links, returns an empty list.
+ */
+export const getChildExecutions = async (
+  deps: ExecutionReadDeps,
+  { parentExecutionId, spaceId }: GetChildExecutionsParams
+): Promise<ChildWorkflowExecutionItem[]> => {
   const { items: parentItems, missing: parentMissing } =
-    await workflowExecutionsDataClient.getByIds([parentExecutionId], {
+    await deps.workflowExecutionsDataClient.getByIds([parentExecutionId], {
       sourceIncludes: [...PARENT_SOURCE_INCLUDES],
     });
 
-  // Throw so callers can distinguish "parent doesn't exist" from "parent has no
-  // child executions" — both cases would otherwise silently return [].
   if (parentMissing.includes(parentExecutionId)) {
     throw new Error(`Workflow execution not found: ${parentExecutionId}`);
   }
 
   const parentDoc = parentItems[0]?.document;
-
   if (!parentDoc || parentDoc.spaceId !== spaceId) {
     return [];
   }
 
   const parentStepExecutions = await getStepExecutionsByWorkflowExecution({
-    stepExecutionsDataClient,
+    stepExecutionsDataClient: deps.stepExecutionsDataClient,
     workflowExecutionId: parentExecutionId,
     stepExecutionIds: parentDoc.stepExecutionIds,
     sourceExcludes: STEP_SOURCE_EXCLUDES,
@@ -123,27 +76,37 @@ export const getChildWorkflowExecutions = async ({
     return [];
   }
 
-  const childDocMap = await fetchChildDocs(
-    workflowExecutionsDataClient,
+  const { items } = await deps.workflowExecutionsDataClient.getByIds(
     childRefs.map((ref) => ref.childExecutionId),
-    spaceId
+    { sourceIncludes: CHILD_SOURCE_INCLUDES }
   );
+  const childDocMap = new Map<string, EsWorkflowExecution>();
+  for (const { document: doc } of items) {
+    if (doc.spaceId === spaceId) {
+      childDocMap.set(doc.id, doc);
+    }
+  }
 
   const allChildStepExecutionIds = Array.from(childDocMap.values()).flatMap(
     (doc) => doc.stepExecutionIds ?? []
   );
-
   const childStepExecutions =
     allChildStepExecutionIds.length > 0
       ? await getStepExecutionsByWorkflowExecution({
-          stepExecutionsDataClient,
+          stepExecutionsDataClient: deps.stepExecutionsDataClient,
           workflowExecutionId: '',
           stepExecutionIds: allChildStepExecutionIds,
           sourceExcludes: STEP_SOURCE_EXCLUDES,
         })
       : [];
 
-  const stepsByRunId = groupStepsByWorkflowRunId(childStepExecutions);
+  const stepsByRunId = new Map<string, WorkflowStepExecutionDto[]>();
+  for (const step of childStepExecutions) {
+    const { spaceId: _spaceId, ...dto } = step;
+    const list = stepsByRunId.get(step.workflowRunId) ?? [];
+    list.push(dto);
+    stepsByRunId.set(step.workflowRunId, list);
+  }
 
   return childRefs.flatMap((ref) => {
     const doc = childDocMap.get(ref.childExecutionId);

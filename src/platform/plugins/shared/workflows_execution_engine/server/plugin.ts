@@ -79,6 +79,19 @@ import {
   stampWorkflowTaskRunEventFields,
 } from './lib/workflow_task_run_event_fields';
 import { WorkflowsMeteringService } from './metering/metering_service';
+import { getChildExecutions } from './public_api/get_child_executions';
+import { getDailyExecutionCounts } from './public_api/get_daily_execution_counts';
+import { getExecution } from './public_api/get_execution';
+import { getExecutionSteps } from './public_api/get_execution_steps';
+import { getStep } from './public_api/get_step';
+import { getStepExecutionsByIds } from './public_api/get_step_executions_by_ids';
+import { getStepFacets } from './public_api/get_step_facets';
+import { getWaitingStepId } from './public_api/get_waiting_step_id';
+import { getWorkflowExecutionsById } from './public_api/get_workflow_executions_by_id';
+import { hasNonTerminalExecution } from './public_api/has_non_terminal_execution';
+import { searchExecutionView } from './public_api/search_execution_view';
+import { searchExecutions } from './public_api/search_executions';
+import { searchSteps } from './public_api/search_steps';
 import { createDataClientBundle, type DataClientBundle } from './repositories/data_access_layer';
 import { LogsRepository } from './repositories/logs_repository';
 import { initializeLogsRepositoryDataStream } from './repositories/logs_repository/data_stream';
@@ -1215,7 +1228,10 @@ export class WorkflowsExecutionEnginePlugin
     return {};
   }
 
-  public start(coreStart: CoreStart, plugins: WorkflowsExecutionEnginePluginStartDeps) {
+  public start(
+    coreStart: CoreStart,
+    plugins: WorkflowsExecutionEnginePluginStartDeps
+  ): WorkflowsExecutionEnginePluginStart {
     this.logger.debug('workflows-execution-engine: Start');
 
     if (!this.setupDependencies) {
@@ -2079,6 +2095,12 @@ export class WorkflowsExecutionEnginePlugin
       },
     };
 
+    const executionReadDeps = {
+      logger: this.logger,
+      workflowExecutionsDataClient: this.dataClientBundle.createWorkflowDataClient(),
+      stepExecutionsDataClient: this.dataClientBundle.createStepDataClient(),
+    };
+
     return {
       workflowEventLoggerService,
       executeWorkflow,
@@ -2090,6 +2112,19 @@ export class WorkflowsExecutionEnginePlugin
       resumeWorkflowExecution,
       triggerEvents,
       serviceAccountBindings: coreStart.security.serviceAccounts,
+      getExecution: (params) => getExecution(executionReadDeps, params),
+      getWorkflowExecutionsById: (params) => getWorkflowExecutionsById(executionReadDeps, params),
+      getExecutionSteps: (params) => getExecutionSteps(executionReadDeps, params),
+      getChildExecutions: (params) => getChildExecutions(executionReadDeps, params),
+      searchExecutions: (params) => searchExecutions(executionReadDeps, params),
+      searchExecutionView: (params) => searchExecutionView(executionReadDeps, params),
+      searchSteps: (params) => searchSteps(executionReadDeps, params),
+      getStepFacets: (params) => getStepFacets(executionReadDeps, params),
+      getStep: (params) => getStep(executionReadDeps, params),
+      getStepExecutionsByIds: (params) => getStepExecutionsByIds(executionReadDeps, params),
+      getWaitingStepId: (params) => getWaitingStepId(executionReadDeps, params),
+      getDailyExecutionCounts: (params) => getDailyExecutionCounts(executionReadDeps, params),
+      hasNonTerminalExecution: (params) => hasNonTerminalExecution(executionReadDeps, params),
       __internalStorage: {
         workflowExecutionsDataClient: this.dataClientBundle.createWorkflowDataClient(),
         stepExecutionsDataClient: this.dataClientBundle.createStepDataClient(),

@@ -21,6 +21,7 @@ import {
   createMockGetExecutionsByIdsResponse,
   createMockStepDataClient,
   createMockWorkflowDataClient,
+  workflowsExecutionEngineMock,
 } from '@kbn/workflows-execution-engine/server/mocks';
 
 import { WorkflowExecutionQueryService } from './workflow_execution_query_service';
@@ -66,6 +67,7 @@ describe('WorkflowExecutionQueryService', () => {
     service = new WorkflowExecutionQueryService({
       logger: mockLogger,
       esClient: mockEsClient,
+      workflowsExecutionEngine: workflowsExecutionEngineMock.createStart(),
       workflowExecutionsDataClient: mockWorkflowDataClient,
       stepExecutionsDataClient: mockStepDataClient,
       workflowEventLoggerService: mockEventLoggerService,
