@@ -97,7 +97,7 @@ export const DURATION_PERCENTILE = 75;
 export const TEST_STEP_TIMEOUT_MINUTES = 50;
 
 /**
- * Agent disk sizes (GiB) per step type. `undefined` uses `DEFAULT_AGENT_IMAGE_CONFIG.diskSizeGb`;
+ * Agent disk sizes (GiB) per step type. `undefined` uses the agent image default;
  * set a number to override it.
  */
 export const AGENT_DISK_GIB: Readonly<
