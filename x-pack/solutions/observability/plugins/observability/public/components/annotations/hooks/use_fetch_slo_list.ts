@@ -6,8 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { FindSLOResponse } from '@kbn/slo-schema';
-import { useQuery } from '@tanstack/react-query';
+import type { FindSLOResponse } from '@kbn/slo-schema';
+import { useQuery } from '@kbn/react-query';
 import { useKibana } from '../../../utils/kibana_react';
 
 export interface SLOListParams {

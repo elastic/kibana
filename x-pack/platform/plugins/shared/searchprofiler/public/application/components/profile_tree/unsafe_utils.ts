@@ -6,11 +6,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import tinycolor from 'tinycolor2';
+import chroma from 'chroma-js';
 import _ from 'lodash';
 
-import { BreakdownItem, Index, Operation, Shard, Targets } from '../../types';
-import { IndexMap } from './types';
+import type { BreakdownItem, Index, Operation, Shard, Targets } from '../../types';
+import type { IndexMap } from './types';
 import { MAX_TREE_DEPTH } from './constants';
 
 export const comparator = (v1: number, v2: number) => {
@@ -48,6 +48,11 @@ function getToolTip(key: string) {
     case 'advance':
       return i18n.translate('xpack.searchProfiler.advanceTimeDescription', {
         defaultMessage: 'The time taken to advance the iterator to the next document.',
+      });
+    case 'into_bit_set':
+      return i18n.translate('xpack.searchProfiler.intoBitSetTimeDescription', {
+        defaultMessage:
+          'The time taken to collect matching document IDs into a bit set for a range of documents.',
       });
     default:
       return '';
@@ -95,15 +100,12 @@ export function normalizeBreakdown(breakdown: Record<string, number>) {
   Object.keys(breakdown)
     .sort()
     .forEach((key) => {
-      let relative = 0;
-      if (key.indexOf('_count') === -1) {
-        relative = ((breakdown[key] / total) * 100).toFixed(1) as any;
-      }
+      const relativeRatio = key.indexOf('_count') === -1 ? breakdown[key] / total : 0;
       final.push({
         key,
         time: breakdown[key],
-        relative,
-        color: tinycolor.mix('#F5F5F5', '#FFAFAF', relative).toHexString(),
+        relative: Number((relativeRatio * 100).toFixed(1)),
+        color: chroma.mix('#F5F5F5', '#FFAFAF', relativeRatio).hex(),
         tip: getToolTip(key),
       });
     });
@@ -147,17 +149,17 @@ export function normalizeIndices(indices: IndexMap, target: Targets) {
   for (const index of Object.values(indices)) {
     index.shards.sort(sortQueryComponents);
     for (const shard of index.shards) {
-      shard.relative = ((shard.time / index.time) * 100).toFixed(2);
-      shard.color = tinycolor.mix('#F5F5F5', '#FFAFAF', shard.relative as any).toHexString();
+      const relativeTimeRatio = shard.time / index.time;
+      shard.relative = (relativeTimeRatio * 100).toFixed(2);
+      shard.color = chroma.mix('#F5F5F5', '#FFAFAF', relativeTimeRatio).hex();
     }
   }
 }
 
 export function normalizeTime(operation: Operation, totalTime: number) {
-  operation.timePercentage = ((timeInMilliseconds(operation) / totalTime) * 100).toFixed(2);
-  operation.absoluteColor = tinycolor
-    .mix('#F5F5F5', '#FFAFAF', +operation.timePercentage)
-    .toHexString();
+  const timeRatio = timeInMilliseconds(operation) / totalTime;
+  operation.timePercentage = (timeRatio * 100).toFixed(2);
+  operation.absoluteColor = chroma.mix('#F5F5F5', '#FFAFAF', timeRatio).hex();
 }
 
 export function initTree<T>(

@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
-import {
+import type {
   HasParentApi,
   PublishesDataLoading,
   PublishesDataViews,
@@ -20,8 +20,6 @@ import {
 } from '@kbn/presentation-publishing';
 
 export type SearchSerializedState = SerializedTimeRange;
-
-export type SearchRuntimeState = SearchSerializedState;
 
 export type SearchApi = DefaultEmbeddableApi<SearchSerializedState> &
   PublishesDataViews &

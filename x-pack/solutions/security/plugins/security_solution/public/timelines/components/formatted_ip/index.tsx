@@ -15,6 +15,11 @@ import { FlowTargetSourceDest } from '../../../../common/search_strategy/securit
 import { getOrEmptyTagFromValue } from '../../../common/components/empty_value';
 import { NetworkDetailsLink } from '../../../common/components/links';
 import { NetworkPanelKey } from '../../../flyout/network_details';
+import { FlyoutLink } from '../../../flyout/shared/components/flyout_link';
+import { OpenFlyoutLink } from '../../../flyout_v2/shared/components/open_flyout_link';
+import { useFlyoutApi } from '../../../flyout_v2/use_flyout_api';
+import { FLYOUT_ORIGIN } from '../../../common/lib/telemetry';
+import { useIsNewFlyoutEnabled } from '../../../common/hooks/use_is_new_flyout_enabled';
 
 const tryStringify = (value: string | object | null | undefined): string => {
   try {
@@ -53,10 +58,10 @@ const AddressLinksItemComponent: React.FC<AddressLinksItemProps> = ({
   title,
 }) => {
   const { openFlyout } = useExpandableFlyoutApi();
+  const enableNewFlyout = useIsNewFlyoutEnabled();
+  const { openNetworkFlyout } = useFlyoutApi();
 
   const eventContext = useContext(StatefulEventContext);
-  const isInTimelineContext =
-    address && eventContext?.enableIpDetailsFlyout && eventContext?.timelineID;
 
   const openNetworkDetailsSidePanel = useCallback(
     (ip: string) => {
@@ -64,22 +69,28 @@ const AddressLinksItemComponent: React.FC<AddressLinksItemProps> = ({
         onClick();
       }
 
-      if (eventContext && isInTimelineContext) {
+      const flowTarget = fieldName.includes(FlowTargetSourceDest.destination)
+        ? FlowTargetSourceDest.destination
+        : FlowTargetSourceDest.source;
+
+      if (enableNewFlyout) {
+        // This branch only renders when `Component` is provided, i.e. from the alerts/timeline
+        // table's `EuiDataGrid` cell (see the `content` memo below) — not from inside a flyout.
+        openNetworkFlyout({ ip, flowTarget, origin: FLYOUT_ORIGIN.TABLE_FIELD_LINK });
+      } else if (eventContext) {
         openFlyout({
           right: {
             id: NetworkPanelKey,
             params: {
               ip,
               scopeId: eventContext.timelineID,
-              flowTarget: fieldName.includes(FlowTargetSourceDest.destination)
-                ? FlowTargetSourceDest.destination
-                : FlowTargetSourceDest.source,
+              flowTarget,
             },
           },
         });
       }
     },
-    [onClick, eventContext, isInTimelineContext, fieldName, openFlyout]
+    [onClick, eventContext, fieldName, openFlyout, enableNewFlyout, openNetworkFlyout]
   );
 
   // The below is explicitly defined this way as the onClick takes precedence when it and the href are both defined
@@ -91,19 +102,35 @@ const AddressLinksItemComponent: React.FC<AddressLinksItemProps> = ({
           Component={Component}
           ip={address}
           isButton={isButton}
-          onClick={isInTimelineContext ? openNetworkDetailsSidePanel : undefined}
+          onClick={openNetworkDetailsSidePanel}
           title={title}
+        />
+      ) : enableNewFlyout ? (
+        <OpenFlyoutLink
+          field={fieldName}
+          value={address}
+          asParent
+          data-test-subj="network-details"
         />
       ) : (
-        <NetworkDetailsLink
-          Component={Component}
-          ip={address}
-          isButton={isButton}
-          onClick={isInTimelineContext ? openNetworkDetailsSidePanel : undefined}
-          title={title}
+        <FlyoutLink
+          field={fieldName}
+          value={address}
+          identityFields={{ [fieldName]: address }}
+          scopeId={eventContext?.timelineID ?? ''}
+          data-test-subj="network-details"
         />
       ),
-    [Component, address, isButton, isInTimelineContext, openNetworkDetailsSidePanel, title]
+    [
+      Component,
+      address,
+      isButton,
+      openNetworkDetailsSidePanel,
+      title,
+      eventContext?.timelineID,
+      fieldName,
+      enableNewFlyout,
+    ]
   );
 
   return content;

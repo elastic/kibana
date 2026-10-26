@@ -6,7 +6,7 @@
  */
 
 module.exports = {
-  preset: '@kbn/test',
+  preset: '@kbn/jest',
   rootDir: '../../../../../../..',
   roots: ['<rootDir>/x-pack/solutions/security/plugins/security_solution/public/detections'],
   coverageDirectory:
@@ -16,4 +16,7 @@ module.exports = {
     '<rootDir>/x-pack/solutions/security/plugins/security_solution/public/detections/**/*.{ts,tsx}',
   ],
   moduleNameMapper: require('../../server/__mocks__/module_name_map'),
+  setupFilesAfterEnv: [
+    '<rootDir>/x-pack/solutions/security/plugins/security_solution/public/detections/test/setup.ts',
+  ],
 };

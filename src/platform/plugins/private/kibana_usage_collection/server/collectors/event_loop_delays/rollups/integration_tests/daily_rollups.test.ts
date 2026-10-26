@@ -21,30 +21,16 @@ import {
   createRootWithCorePlugins,
 } from '@kbn/core-test-helpers-kbn-server';
 
+import { isSavedObjectErrorResult } from '@kbn/core/server';
 import { metricsServiceMock } from '@kbn/core/server/mocks';
 
-import {
-  SAVED_OBJECTS_DAILY_TYPE,
-  serializeSavedObjectId,
-  EventLoopDelaysDaily,
-} from '../../saved_objects';
+import type { EventLoopDelaysDaily } from '../../saved_objects';
+import { SAVED_OBJECTS_DAILY_TYPE, serializeSavedObjectId } from '../../saved_objects';
 import { rollDailyData } from '../daily';
 
 const eventLoopDelaysMonitor = metricsServiceMock.createEventLoopDelaysMonitor();
 
-/*
- * Mocking the constructor of moment, so we can control the time of the day.
- * This is to avoid flaky tests when starting to run before midnight and ending the test after midnight
- * because the logic might remove one extra document since we moved to the next day.
- */
-jest.doMock('moment', () => {
-  const mockedMoment = (date?: MomentInput) => moment(date ?? '2023-07-04T10:00:00.000Z');
-  Object.setPrototypeOf(mockedMoment, moment); // inherit the prototype of `moment` so it has all the same methods.
-  return mockedMoment;
-});
-
-function createRawObject(date: moment.MomentInput): SavedObject<EventLoopDelaysDaily> {
-  const pid = Math.round(Math.random() * 10000);
+function createRawObject(date: MomentInput, pid: number): SavedObject<EventLoopDelaysDaily> {
   const instanceUuid = 'mock_instance';
 
   return {
@@ -62,19 +48,31 @@ function createRawObject(date: moment.MomentInput): SavedObject<EventLoopDelaysD
 }
 
 function createRawEventLoopDelaysDailyDocs() {
+  const now = moment();
   const rawEventLoopDelaysDaily = [
-    createRawObject(moment()),
-    createRawObject(moment()),
-    createRawObject(moment().subtract(1, 'days')),
-    createRawObject(moment().subtract(3, 'days')),
+    createRawObject(now, 1000),
+    createRawObject(now, 1001),
+    createRawObject(now.clone().subtract(1, 'days'), 1002),
+    createRawObject(now.clone().subtract(2, 'days'), 1003),
   ];
 
   const outdatedRawEventLoopDelaysDaily = [
-    createRawObject(moment().subtract(5, 'days')),
-    createRawObject(moment().subtract(7, 'days')),
+    createRawObject(now.clone().subtract(5, 'days'), 1004),
+    createRawObject(now.clone().subtract(7, 'days'), 1005),
   ];
 
   return { rawEventLoopDelaysDaily, outdatedRawEventLoopDelaysDaily };
+}
+
+function comparableSavedObjects(savedObjects: Array<SavedObject<EventLoopDelaysDaily>>) {
+  return savedObjects
+    .map(({ id, type, attributes, references }) => ({
+      id,
+      type,
+      attributes,
+      references,
+    }))
+    .sort(({ id: idA }, { id: idB }) => idA.localeCompare(idB));
 }
 
 describe(`daily rollups integration test`, () => {
@@ -106,15 +104,17 @@ describe(`daily rollups integration test`, () => {
     rawEventLoopDelaysDaily = rawDailyDocs.rawEventLoopDelaysDaily;
     outdatedRawEventLoopDelaysDaily = rawDailyDocs.outdatedRawEventLoopDelaysDaily;
 
-    await internalRepository.bulkCreate<EventLoopDelaysDaily>(
-      [...rawEventLoopDelaysDaily, ...outdatedRawEventLoopDelaysDaily],
-      { refresh: true }
-    );
+    const { saved_objects: createdSavedObjects } =
+      await internalRepository.bulkCreate<EventLoopDelaysDaily>(
+        [...rawEventLoopDelaysDaily, ...outdatedRawEventLoopDelaysDaily],
+        { refresh: true }
+      );
+    expect(createdSavedObjects.filter(isSavedObjectErrorResult)).toEqual([]);
   });
 
   afterAll(async () => {
-    await esServer.stop();
-    await root.shutdown();
+    await root?.shutdown();
+    await esServer?.stop();
   });
 
   it('deletes documents older that 3 days from the saved objects repository', async () => {
@@ -122,14 +122,12 @@ describe(`daily rollups integration test`, () => {
     await esClient.indices.refresh({ index: `.kibana` }); // Make sure that the changes are searchable
     const { total, saved_objects: savedObjects } =
       await internalRepository.find<EventLoopDelaysDaily>({ type: SAVED_OBJECTS_DAILY_TYPE });
+    expect(savedObjects.map(({ id }) => id).sort()).toEqual(
+      rawEventLoopDelaysDaily.map(({ id }) => id).sort()
+    );
     expect(total).toBe(rawEventLoopDelaysDaily.length);
-    expect(
-      savedObjects.map(({ id, type, attributes, references }) => ({
-        id,
-        type,
-        attributes,
-        references,
-      }))
-    ).toEqual(rawEventLoopDelaysDaily);
+    expect(comparableSavedObjects(savedObjects)).toEqual(
+      comparableSavedObjects(rawEventLoopDelaysDaily)
+    );
   });
 });

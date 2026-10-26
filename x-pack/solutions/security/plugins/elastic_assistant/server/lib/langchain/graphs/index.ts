@@ -5,45 +5,49 @@
  * 2.0.
  */
 
-import { DEFEND_INSIGHTS_ID } from '@kbn/elastic-assistant-common';
+// Re-export graph types from @kbn/discoveries
+export type {
+  AttackDiscoveryGraphMetadata,
+  AttackDiscoveryGraphState,
+  BaseGraphState,
+  DefendInsightsGraphMetadata,
+  DefendInsightsGraphState,
+  GetAttackDiscoveryGraph,
+  GetDefendInsightsGraph,
+  GraphInsightTypes,
+} from '@kbn/discoveries';
+export type {
+  DefaultAttackDiscoveryGraph,
+  GetDefaultAttackDiscoveryGraphParams,
+} from '@kbn/discoveries';
+export { getDefaultAttackDiscoveryGraph } from '@kbn/discoveries';
+export type {
+  DefaultDefendInsightsGraph,
+  GetDefaultDefendInsightsGraphParams,
+} from '@kbn/discoveries';
+export { getDefaultDefendInsightsGraph } from '@kbn/discoveries';
 
-import {
-  getDefaultAssistantGraph,
+import { getDefaultAttackDiscoveryGraph, getDefaultDefendInsightsGraph } from '@kbn/discoveries';
+import type {
+  AttackDiscoveryGraphMetadata,
+  DefendInsightsGraphMetadata,
+  GetAttackDiscoveryGraph,
+  GetDefendInsightsGraph,
+} from '@kbn/discoveries';
+import { DEFEND_INSIGHTS_ID, DefendInsightType } from '@kbn/elastic-assistant-common';
+import type {
   GetDefaultAssistantGraphParams,
   DefaultAssistantGraph,
 } from './default_assistant_graph/graph';
-import {
-  DefaultAttackDiscoveryGraph,
-  GetDefaultAttackDiscoveryGraphParams,
-  getDefaultAttackDiscoveryGraph,
-} from '../../attack_discovery/graphs/default_attack_discovery_graph';
-import {
-  DefaultDefendInsightsGraph,
-  GetDefaultDefendInsightsGraphParams,
-  getDefaultDefendInsightsGraph,
-} from '../../defend_insights/graphs/default_defend_insights_graph';
+import { getDefaultAssistantGraph } from './default_assistant_graph/graph';
 
-export type GetAssistantGraph = (params: GetDefaultAssistantGraphParams) => DefaultAssistantGraph;
-export type GetAttackDiscoveryGraph = (
-  params: GetDefaultAttackDiscoveryGraphParams
-) => DefaultAttackDiscoveryGraph;
-export type GetDefendInsightsGraph = (
-  params: GetDefaultDefendInsightsGraphParams
-) => DefaultDefendInsightsGraph;
+export type GetAssistantGraph = (
+  params: GetDefaultAssistantGraphParams
+) => Promise<DefaultAssistantGraph>;
 
 export interface AssistantGraphMetadata {
   getDefaultAssistantGraph: GetAssistantGraph;
   graphType: 'assistant';
-}
-
-export interface AttackDiscoveryGraphMetadata {
-  getDefaultAttackDiscoveryGraph: GetAttackDiscoveryGraph;
-  graphType: 'attack-discovery';
-}
-
-export interface DefendInsightsGraphMetadata {
-  getDefaultDefendInsightsGraph: GetDefendInsightsGraph;
-  graphType: typeof DEFEND_INSIGHTS_ID;
 }
 
 export type GraphMetadata =
@@ -60,11 +64,17 @@ export const ASSISTANT_GRAPH_MAP: Record<string, GraphMetadata> = {
     graphType: 'assistant',
   },
   DefaultAttackDiscoveryGraph: {
-    getDefaultAttackDiscoveryGraph,
+    getDefaultAttackDiscoveryGraph: getDefaultAttackDiscoveryGraph as GetAttackDiscoveryGraph,
     graphType: 'attack-discovery',
   },
-  DefaultDefendInsightsGraph: {
-    getDefaultDefendInsightsGraph,
+  DefaultDefendInsightsIncompatibleAntivirusGraph: {
+    getDefaultDefendInsightsGraph: getDefaultDefendInsightsGraph as GetDefendInsightsGraph,
     graphType: DEFEND_INSIGHTS_ID,
+    insightType: DefendInsightType.enum.incompatible_antivirus,
+  },
+  DefaultDefendInsightsPolicyResponseFailureGraphBar: {
+    getDefaultDefendInsightsGraph: getDefaultDefendInsightsGraph as GetDefendInsightsGraph,
+    graphType: DEFEND_INSIGHTS_ID,
+    insightType: DefendInsightType.enum.policy_response_failure,
   },
 };

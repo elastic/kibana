@@ -8,24 +8,24 @@
  */
 
 import React from 'react';
-import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
 import { render, screen } from '@testing-library/react';
 import { getRowMenuControlColumn } from './row_menu_control_column';
+import { createAvailableControlsGetter } from './row_control_column';
 import { dataTableContextMock } from '../../../../__mocks__/table_context';
 import { mockRowAdditionalLeadingControls } from '../../../../__mocks__/external_control_columns';
 import { UnifiedDataTableContext } from '../../../table_context';
+import userEvent from '@testing-library/user-event';
 
 describe('getRowMenuControlColumn', () => {
   const contextMock = {
     ...dataTableContextMock,
   };
 
-  it('should render the component', () => {
+  it('should render the component', async () => {
     const mockClick = jest.fn();
     const props = {
       id: 'test_row_menu_control',
-      headerAriaLabel: 'row control',
-      renderControl: jest.fn((Control, rowProps) => (
+      render: jest.fn((Control, rowProps) => (
         <Control
           label={`test-${rowProps.rowIndex}`}
           tooltipContent={`test-${rowProps.rowIndex}`}
@@ -34,13 +34,13 @@ describe('getRowMenuControlColumn', () => {
         />
       )),
     };
-    const rowMenuControlColumn = getRowMenuControlColumn([
-      props,
-      mockRowAdditionalLeadingControls[0],
-      mockRowAdditionalLeadingControls[1],
-    ]);
-    const RowMenuControlColumn =
-      rowMenuControlColumn.rowCellRender as React.FC<EuiDataGridCellValueElementProps>;
+    const RowMenuControlColumn = getRowMenuControlColumn(
+      createAvailableControlsGetter([
+        props,
+        mockRowAdditionalLeadingControls[0],
+        mockRowAdditionalLeadingControls[1],
+      ])
+    );
     render(
       <UnifiedDataTableContext.Provider value={contextMock}>
         <RowMenuControlColumn
@@ -54,18 +54,21 @@ describe('getRowMenuControlColumn', () => {
         />
       </UnifiedDataTableContext.Provider>
     );
-    const menuButton = screen.getByTestId('unifiedDataTable_test_row_menu_control');
+    const menuButton = screen.getByTestId(
+      'unifiedDataTable_additionalRowControl_test_row_menu_controlMenu'
+    );
     expect(menuButton).toBeInTheDocument();
 
-    menuButton.click();
+    await userEvent.click(menuButton);
 
-    expect(screen.getByTestId('exampleRowControl-visBarVerticalStacked')).toBeInTheDocument();
+    expect(screen.getByTestId('exampleRowControl-chartBarVerticalStack')).toBeInTheDocument();
     expect(screen.getByTestId('exampleRowControl-heart')).toBeInTheDocument();
 
     const button = screen.getByTestId('unifiedDataTable_rowMenu_test_row_menu_control');
     expect(button).toBeInTheDocument();
 
-    button.click();
+    await userEvent.click(button);
+
     expect(mockClick).toHaveBeenCalledWith({ record: contextMock.getRowByIndex(1), rowIndex: 1 });
   });
 });

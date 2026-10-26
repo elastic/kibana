@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import React, { memo, useState, useCallback, useEffect } from 'react';
+import React, { memo, useMemo, useState, useCallback, useEffect } from 'react';
+import { buildDataTableRecord, type EsHitRecord } from '@kbn/discover-utils';
 import { EuiButtonGroup, EuiSpacer } from '@elastic/eui';
 import type { EuiButtonGroupOptionProps } from '@elastic/eui/src/components/button/button_group/button_group';
-import { useExpandableFlyoutState } from '@kbn/expandable-flyout';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   uiMetricService,
   GRAPH_INVESTIGATION,
 } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
-import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
+import { useStableExpandableFlyoutState } from '../../../shared/hooks/use_stable_expandable_flyout_state';
 import { useDocumentDetailsContext } from '../../shared/context';
 import {
   VISUALIZE_TAB_BUTTON_GROUP_TEST_ID,
@@ -28,9 +28,9 @@ import { SESSION_VIEW_ID, SessionView } from '../components/session_view';
 import { ALERTS_ACTIONS } from '../../../../common/lib/apm/user_actions';
 import { useStartTransaction } from '../../../../common/lib/apm/use_start_transaction';
 import { GRAPH_ID, GraphVisualization } from '../components/graph_visualization';
-import { useGraphPreview } from '../../shared/hooks/use_graph_preview';
+import { useGraphPreview } from '../../../../flyout_v2/document/main/hooks/use_graph_preview';
+import { useUpsellingComponent } from '../../../../common/hooks/use_upselling';
 import { METRIC_TYPE } from '../../../../common/lib/telemetry';
-import { ENABLE_GRAPH_VISUALIZATION_SETTING } from '../../../../../common/constants';
 
 const visualizeButtons: EuiButtonGroupOptionProps[] = [
   {
@@ -57,7 +57,7 @@ const visualizeButtons: EuiButtonGroupOptionProps[] = [
 
 const graphVisualizationButton: EuiButtonGroupOptionProps = {
   id: GRAPH_ID,
-  iconType: 'beaker',
+  iconType: 'flask',
   iconSide: 'right',
   toolTipProps: {
     title: (
@@ -87,9 +87,9 @@ const graphVisualizationButton: EuiButtonGroupOptionProps = {
  * Visualize view displayed in the document details expandable flyout left section
  */
 export const VisualizeTab = memo(() => {
-  const { getFieldsData, dataAsNestedObject, dataFormattedForFieldBrowser } =
-    useDocumentDetailsContext();
-  const panels = useExpandableFlyoutState();
+  const { searchHit } = useDocumentDetailsContext();
+  const hit = useMemo(() => buildDataTableRecord(searchHit as EsHitRecord), [searchHit]);
+  const panels = useStableExpandableFlyoutState();
   const [activeVisualizationId, setActiveVisualizationId] = useState(
     panels.left?.path?.subTab ?? SESSION_VIEW_ID
   );
@@ -106,35 +106,39 @@ export const VisualizeTab = memo(() => {
     [startTransaction]
   );
 
-  useEffect(() => {
-    if (panels.left?.path?.subTab) {
-      setActiveVisualizationId(panels.left?.path?.subTab);
-
-      if (panels.left?.path?.subTab === GRAPH_ID) {
-        uiMetricService.trackUiMetric(METRIC_TYPE.CLICK, GRAPH_INVESTIGATION);
-      }
-    }
-  }, [panels.left?.path?.subTab]);
-
   // Decide whether to show the graph preview or not
-  const { hasGraphRepresentation } = useGraphPreview({
-    getFieldsData,
-    ecsData: dataAsNestedObject,
-    dataFormattedForFieldBrowser,
-  });
+  const { shouldShowGraph, hasGraphData } = useGraphPreview({ hit });
 
-  const [graphVisualizationEnabled] = useUiSetting$<boolean>(ENABLE_GRAPH_VISUALIZATION_SETTING);
+  // Show upsell when event has graph data but license is insufficient (ESS only)
+  const GraphVisualizationUpsell = useUpsellingComponent('graph_visualization');
+  const showGraphButton = shouldShowGraph || (hasGraphData && !!GraphVisualizationUpsell);
 
   const options = [...visualizeButtons];
 
-  if (hasGraphRepresentation && graphVisualizationEnabled) {
+  if (showGraphButton) {
     options.push(graphVisualizationButton);
   }
+
+  useEffect(() => {
+    if (panels.left?.path?.subTab) {
+      const newId = panels.left.path.subTab;
+
+      // Check if we need to select a different tab when graph is not available
+      if (newId === GRAPH_ID && !showGraphButton) {
+        setActiveVisualizationId(SESSION_VIEW_ID);
+      } else {
+        setActiveVisualizationId(newId);
+
+        if (newId === GRAPH_ID) {
+          uiMetricService.trackUiMetric(METRIC_TYPE.CLICK, GRAPH_INVESTIGATION);
+        }
+      }
+    }
+  }, [panels.left?.path?.subTab, showGraphButton]);
 
   return (
     <>
       <EuiButtonGroup
-        color="primary"
         name="coarsness"
         legend={i18n.translate(
           'xpack.securitySolution.flyout.left.visualize.buttonGroupLegendLabel',
@@ -152,7 +156,12 @@ export const VisualizeTab = memo(() => {
       <EuiSpacer size="m" />
       {activeVisualizationId === SESSION_VIEW_ID && <SessionView />}
       {activeVisualizationId === ANALYZE_GRAPH_ID && <AnalyzeGraph />}
-      {activeVisualizationId === GRAPH_ID && <GraphVisualization />}
+      {activeVisualizationId === GRAPH_ID &&
+        (shouldShowGraph ? (
+          <GraphVisualization />
+        ) : (
+          hasGraphData && !!GraphVisualizationUpsell && <GraphVisualizationUpsell />
+        ))}
     </>
   );
 });

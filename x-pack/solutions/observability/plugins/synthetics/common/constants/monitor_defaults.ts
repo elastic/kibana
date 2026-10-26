@@ -5,27 +5,32 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-import {
-  CodeEditorMode,
+import type {
+  APIAdvancedFields,
+  APISimpleFields,
   BrowserAdvancedFields,
   BrowserSimpleFields,
   CommonFields,
-  MonitorTypeEnum,
-  FormMonitorType,
   HTTPAdvancedFields,
-  HTTPMethod,
   HTTPSimpleFields,
   ICMPSimpleFields,
-  Mode,
   MonitorDefaults,
-  ResponseBodyIndexPolicy,
-  ScheduleUnit,
-  ScreenshotOption,
-  SourceType,
   TCPAdvancedFields,
   TCPSimpleFields,
   ThrottlingConfig,
   TLSFields,
+} from '../runtime_types/monitor_management';
+import {
+  CodeEditorMode,
+  MonitorTypeEnum,
+  FormMonitorType,
+  HTTPMethod,
+  KerberosAuthType,
+  Mode,
+  ResponseBodyIndexPolicy,
+  ScheduleUnit,
+  ScreenshotOption,
+  SourceType,
   TLSVersion,
   VerificationMode,
 } from '../runtime_types/monitor_management';
@@ -154,6 +159,8 @@ export const DEFAULT_COMMON_FIELDS: CommonFields = {
   [ConfigKey.PARAMS]: '',
   [ConfigKey.LABELS]: {},
   [ConfigKey.MAX_ATTEMPTS]: 2,
+  [ConfigKey.MAINTENANCE_WINDOWS]: [],
+  [ConfigKey.KIBANA_SPACES]: [],
   revision: 1,
 };
 
@@ -163,6 +170,7 @@ export const DEFAULT_BROWSER_ADVANCED_FIELDS: BrowserAdvancedFields = {
   [ConfigKey.JOURNEY_FILTERS_MATCH]: '',
   [ConfigKey.JOURNEY_FILTERS_TAGS]: [],
   [ConfigKey.IGNORE_HTTPS_ERRORS]: false,
+  [ConfigKey.CERTIFICATE_ERROR_SPKI_ALLOWLIST]: [],
   [ConfigKey.THROTTLING_CONFIG]: PROFILES_MAP[PROFILE_VALUES_ENUM.DEFAULT],
 };
 
@@ -188,6 +196,32 @@ export const DEFAULT_BROWSER_SIMPLE_FIELDS: BrowserSimpleFields = {
   [ConfigKey.URLS]: '',
   [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorType.MULTISTEP,
   [ConfigKey.TIMEOUT]: null,
+};
+
+// API monitor defaults — same SO shape as Browser (APIFields in
+// runtime_types/monitor_management/monitor_types.ts) except SCREENSHOTS and
+// THROTTLING_CONFIG, which API's codec omits entirely (they're browser/CDP-
+// specific and Heartbeat's `api` plugin, elastic/beats#50802, never launches
+// a browser). Distinguished by MONITOR_TYPE / FORM_MONITOR_TYPE.
+//
+// Other browser advanced fields (SYNTHETICS_ARGS, JOURNEY_FILTERS_*,
+// IGNORE_HTTPS_ERRORS) apply to API journeys too and inherit cleanly.
+// Likewise PLAYWRIGHT_OPTIONS in simple fields applies to APIRequestContext
+// per elastic/synthetics#997 + elastic/beats#50802.
+export const DEFAULT_API_SIMPLE_FIELDS: APISimpleFields = {
+  ...DEFAULT_BROWSER_SIMPLE_FIELDS,
+  [ConfigKey.MONITOR_TYPE]: MonitorTypeEnum.API,
+  [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorType.API,
+};
+
+export const DEFAULT_API_ADVANCED_FIELDS: APIAdvancedFields = {
+  [ConfigKey.SYNTHETICS_ARGS]: DEFAULT_BROWSER_ADVANCED_FIELDS[ConfigKey.SYNTHETICS_ARGS],
+  [ConfigKey.JOURNEY_FILTERS_MATCH]:
+    DEFAULT_BROWSER_ADVANCED_FIELDS[ConfigKey.JOURNEY_FILTERS_MATCH],
+  [ConfigKey.JOURNEY_FILTERS_TAGS]: DEFAULT_BROWSER_ADVANCED_FIELDS[ConfigKey.JOURNEY_FILTERS_TAGS],
+  [ConfigKey.IGNORE_HTTPS_ERRORS]: DEFAULT_BROWSER_ADVANCED_FIELDS[ConfigKey.IGNORE_HTTPS_ERRORS],
+  [ConfigKey.CERTIFICATE_ERROR_SPKI_ALLOWLIST]:
+    DEFAULT_BROWSER_ADVANCED_FIELDS[ConfigKey.CERTIFICATE_ERROR_SPKI_ALLOWLIST],
 };
 
 export const DEFAULT_HTTP_SIMPLE_FIELDS: HTTPSimpleFields = {
@@ -224,6 +258,25 @@ export const DEFAULT_HTTP_ADVANCED_FIELDS: HTTPAdvancedFields = {
   [ConfigKey.RESPONSE_BODY_MAX_BYTES]: '1024',
   [ConfigKey.IPV4]: true,
   [ConfigKey.IPV6]: true,
+  [ConfigKey.KERBEROS]: {
+    enabled: false,
+    auth_type: KerberosAuthType.PASSWORD,
+    username: '',
+    password: '',
+    keytab: '',
+    config_path: '',
+    krb5_conf: '',
+    realm: '',
+    service_name: '',
+    enable_krb5_fast: false,
+  },
+  [ConfigKey.NTLM]: {
+    enabled: false,
+    username: '',
+    password: '',
+    domain: '',
+    workstation: '',
+  },
 };
 
 export const DEFAULT_ICMP_SIMPLE_FIELDS: ICMPSimpleFields = {
@@ -291,4 +344,11 @@ export const DEFAULT_FIELDS: MonitorDefaults = {
     ...DEFAULT_BROWSER_ADVANCED_FIELDS,
     ...DEFAULT_TLS_FIELDS,
   },
+  [MonitorTypeEnum.API]: {
+    ...DEFAULT_API_SIMPLE_FIELDS,
+    ...DEFAULT_API_ADVANCED_FIELDS,
+    ...DEFAULT_TLS_FIELDS,
+  },
 };
+
+export const HEARTBEAT_BROWSER_MONITOR_TIMEOUT_OVERHEAD_SECONDS = 30;

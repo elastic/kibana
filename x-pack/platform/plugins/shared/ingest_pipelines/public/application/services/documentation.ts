@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DocLinksStart } from '@kbn/core/public';
+import type { DocLinksStart } from '@kbn/core/public';
 
 export class DocumentationService {
   private esDocBasePath: string = '';
@@ -13,6 +13,7 @@ export class DocumentationService {
   private processorsUrl: string = '';
   private handlingFailureUrl: string = '';
   private createPipelineUrl: string = '';
+  private fieldAccessPatternUrl: string = '';
   private createPipelineCSVUrl: string = '';
   private simulatePipelineApiUrl: string = '';
   private enrichDataUrl: string = '';
@@ -21,16 +22,20 @@ export class DocumentationService {
   private classificationUrl: string = '';
   private regressionUrl: string = '';
   private documentationUrl: string = '';
+  private createIndexParameters: string = '';
+  private docLinks: DocLinksStart | undefined;
 
   public setup(docLinks: DocLinksStart): void {
-    const { DOC_LINK_VERSION, ELASTIC_WEBSITE_URL, links } = docLinks;
-    const docsBase = `${ELASTIC_WEBSITE_URL}guide/en`;
+    const { links } = docLinks;
 
-    this.esDocBasePath = `${docsBase}/elasticsearch/reference/${DOC_LINK_VERSION}`;
+    this.docLinks = docLinks;
+
+    this.esDocBasePath = links.elasticsearch.docsBase;
     this.ingestNodeUrl = links.ingest.pipelines;
     this.processorsUrl = links.ingest.processors;
     this.handlingFailureUrl = links.ingest.pipelineFailure;
-    this.createPipelineUrl = links.ingest.pipelines;
+    this.createPipelineUrl = links.ingest.pipelineCreate;
+    this.fieldAccessPatternUrl = links.ingest.fieldAccessPattern;
     this.createPipelineCSVUrl = links.ingest.csvPipelines;
     this.simulatePipelineApiUrl = links.apis.simulatePipeline;
     this.enrichDataUrl = links.ingest.enrich;
@@ -39,6 +44,7 @@ export class DocumentationService {
     this.classificationUrl = links.ingest.inferenceClassification;
     this.regressionUrl = links.ingest.inferenceRegression;
     this.documentationUrl = links.ingest.inference;
+    this.createIndexParameters = links.elasticsearch.createIndexParameters;
   }
 
   public getEsDocsBasePath() {
@@ -59,6 +65,10 @@ export class DocumentationService {
 
   public getCreatePipelineUrl() {
     return this.createPipelineUrl;
+  }
+
+  public getFieldAccessPatternUrl() {
+    return this.fieldAccessPatternUrl;
   }
 
   public getCreatePipelineCSVUrl() {
@@ -91,6 +101,14 @@ export class DocumentationService {
 
   public getDocumentationUrl() {
     return this.documentationUrl;
+  }
+
+  public getIndexParametersUrl() {
+    return this.createIndexParameters;
+  }
+
+  public getDocLinks(): undefined | DocLinksStart {
+    return this.docLinks;
   }
 }
 

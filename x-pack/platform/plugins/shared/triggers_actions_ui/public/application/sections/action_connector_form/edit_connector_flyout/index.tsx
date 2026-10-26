@@ -5,37 +5,59 @@
  * 2.0.
  */
 
-import React, { memo, ReactNode, useCallback, useEffect, useRef, useState } from 'react';
+import type { ReactNode } from 'react';
+import React, { memo, useCallback, useContext, useEffect, useRef, useMemo, useState } from 'react';
+import useDebounce from 'react-use/lib/useDebounce';
+import type { IconType } from '@elastic/eui';
 import {
+  EuiButton,
   EuiFlyout,
   EuiFlyoutBody,
-  EuiButton,
   EuiConfirmModal,
   EuiCallOut,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLoadingSpinner,
   EuiSpacer,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { ActionTypeExecutorResult, isActionTypeExecutorResult } from '@kbn/actions-plugin/common';
-import { Option, none, some } from 'fp-ts/lib/Option';
+import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
+import { isActionTypeExecutorResult } from '@kbn/actions-plugin/common';
+import type { Option } from 'fp-ts/Option';
+import { none, some } from 'fp-ts/Option';
+import type { ConnectorFormSchema } from '@kbn/alerts-ui-shared';
+import { useActionTypeModel } from '@kbn/alerts-ui-shared/src/common/hooks/use_action_type_model';
+import { connectorTypeIsDual } from '@kbn/connector-specs';
 import { ReadOnlyConnectorMessage } from './read_only';
-import {
+import type {
   ActionConnector,
-  ActionTypeModel,
   ActionTypeRegistryContract,
-  EditConnectorTabs,
   UserConfiguredActionConnector,
 } from '../../../../types';
-import { ConnectorForm, ConnectorFormState } from '../connector_form';
-import type { ConnectorFormSchema } from '../types';
+import { EditConnectorTabs } from '../../../../types';
+import type { ConnectorFormState } from '../connector_form';
+import { ConnectorForm } from '../connector_form';
 import { useUpdateConnector } from '../../../hooks/use_edit_connector';
 import { useKibana } from '../../../../common/lib/kibana';
+import { ConnectorContext } from '../../../context/connector_context';
 import { hasSaveActionsCapability } from '../../../lib/capabilities';
+import { getSpecConnectorTestExecutionParams } from '../../../lib/get_spec_connector_test_execution_params';
 import { TestConnectorForm } from '../test_connector_form';
 import { ConnectorRulesList } from '../connector_rules_list';
 import { useExecuteConnector } from '../../../hooks/use_execute_connector';
 import { FlyoutHeader } from './header';
 import { FlyoutFooter } from './footer';
+import { InboundIngressCredentials } from '../inbound_ingress_credentials';
+import { InboundEventsSaveToGenerateCallout } from '../inbound_events_save_to_generate_callout';
+import {
+  getInboundIngestToken,
+  isInboundEventsEnabledPayload,
+  readClusterInboundEventsEnabled,
+  isInboundIngressConnector,
+} from '../../../lib/inbound_ingress';
+import { useRotateInboundIngress } from '../../../hooks/use_rotate_inbound_ingress';
 
 export interface EditConnectorFlyoutProps {
   actionTypeRegistry: ActionTypeRegistryContract;
@@ -43,6 +65,18 @@ export interface EditConnectorFlyoutProps {
   onClose: () => void;
   tab?: EditConnectorTabs;
   onConnectorUpdated?: (connector: ActionConnector) => void;
+  isServerless?: boolean;
+  icon?: IconType;
+  hideRulesTab?: boolean;
+}
+
+interface EditConnectorFlyoutContentProps extends EditConnectorFlyoutProps {
+  isFormModified: boolean;
+  onFormModifiedChange: (isModified: boolean) => void;
+  onCloseAttempt: () => void;
+  showConfirmModal: boolean;
+  onConfirmModalCancel: () => void;
+  beforeCloseRef: React.MutableRefObject<() => void>;
 }
 
 const getConnectorWithoutSecrets = (
@@ -51,24 +85,122 @@ const getConnectorWithoutSecrets = (
   ...connector,
   isMissingSecrets: connector.isMissingSecrets ?? false,
   secrets: {},
+  authMode: connector.authMode ?? 'shared',
 });
 
-const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
+interface ConnectorSpecLoadStateProps {
+  showLoadingSpinner: boolean;
+  actionTypeModelError: Error | null;
+  onRetry: () => void;
+}
+
+/**
+ * Loading spinner and load-error callout shared by the configuration and
+ * test tabs while the connector spec is being fetched.
+ */
+const ConnectorSpecLoadState: React.FC<ConnectorSpecLoadStateProps> = ({
+  showLoadingSpinner,
+  actionTypeModelError,
+  onRetry,
+}) => (
+  <>
+    {showLoadingSpinner && (
+      <EuiFlexGroup
+        direction="column"
+        justifyContent="center"
+        alignItems="center"
+        style={{ minHeight: 200 }}
+        aria-live="polite"
+      >
+        <EuiFlexItem grow={false}>
+          <EuiLoadingSpinner size="xl" />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          {i18n.translate(
+            'xpack.triggersActionsUI.sections.editConnectorForm.loadingConnectorConfiguration',
+            {
+              defaultMessage: 'Loading connector configuration...',
+            }
+          )}
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    )}
+
+    {actionTypeModelError && (
+      <>
+        <EuiCallOut
+          announceOnMount
+          size="s"
+          color="danger"
+          iconType="error"
+          data-test-subj="connector-spec-load-error"
+          title={i18n.translate(
+            'xpack.triggersActionsUI.sections.actionConnectorAdd.specLoadError',
+            {
+              defaultMessage: 'Failed to load connector configuration',
+            }
+          )}
+        >
+          <p>
+            {i18n.translate(
+              'xpack.triggersActionsUI.sections.editConnectorForm.specLoadErrorDescription',
+              {
+                defaultMessage:
+                  'The connector form could not be loaded. Try again, or contact your administrator if the problem persists.',
+              }
+            )}
+          </p>
+          <EuiSpacer size="s" />
+          <EuiButton color="danger" data-test-subj="connector-spec-load-retry" onClick={onRetry}>
+            {i18n.translate(
+              'xpack.triggersActionsUI.sections.editConnectorForm.specLoadErrorRetry',
+              {
+                defaultMessage: 'Retry',
+              }
+            )}
+          </EuiButton>
+        </EuiCallOut>
+        <EuiSpacer size="m" />
+      </>
+    )}
+  </>
+);
+
+export const EditConnectorFlyoutContent: React.FC<EditConnectorFlyoutContentProps> = ({
   actionTypeRegistry,
   connector,
   onClose,
   tab = EditConnectorTabs.Configuration,
   onConnectorUpdated,
+  icon,
+  hideRulesTab = false,
+  isFormModified,
+  onFormModifiedChange: onFormModifiedChangeProp,
+  onCloseAttempt,
+  showConfirmModal,
+  onConfirmModalCancel,
+  beforeCloseRef,
 }) => {
+  const confirmModalTitleId = useGeneratedHtmlId();
+
+  const services = useKibana().services;
+  const connectorContext = useContext(ConnectorContext);
   const {
     docLinks,
+    http,
+    uiSettings,
     application: { capabilities },
-  } = useKibana().services;
+  } = services;
+  const isClusterInboundEventsEnabled = readClusterInboundEventsEnabled(
+    services,
+    connectorContext?.services
+  );
 
   const isMounted = useRef(false);
   const canSave = hasSaveActionsCapability(capabilities);
   const { isLoading: isUpdatingConnector, updateConnector } = useUpdateConnector();
   const { isLoading: isExecutingConnector, executeConnector } = useExecuteConnector();
+  const { isLoading: isRotating, rotateIngress } = useRotateInboundIngress();
   const [showFormErrors, setShowFormErrors] = useState<boolean>(false);
 
   const [preSubmitValidationErrorMessage, setPreSubmitValidationErrorMessage] =
@@ -90,6 +222,13 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
   const [testExecutionActionParams, setTestExecutionActionParams] = useState<
     Record<string, unknown>
   >({});
+
+  const onEditAction = useCallback(
+    (field: string, value: unknown) =>
+      setTestExecutionActionParams((oldParams) => ({ ...oldParams, [field]: value })),
+    []
+  );
+
   const [testExecutionResult, setTestExecutionResult] =
     useState<Option<ActionTypeExecutorResult<unknown> | undefined>>(none);
 
@@ -104,21 +243,127 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
     [testExecutionResult, setTestExecutionResult]
   );
 
-  const [isFormModified, setIsFormModified] = useState<boolean>(false);
-  const [showConfirmModal, setShowConfirmModal] = useState<boolean>(false);
-  const [isEdit, setIsEdit] = useState<boolean>(true);
+  const [isEdit] = useState<boolean>(true);
   const [isSaved, setIsSaved] = useState<boolean>(false);
+  // Bumped after each save so the form remounts against the saved connector.
+  const [formRevision, setFormRevision] = useState(0);
+  const [formConnector, setFormConnector] = useState<ActionConnector | null>(null);
+  // One-time ingest token. Parents unmount the flyout from onConnectorUpdated, so notify on close.
+  const [revealedInboundConnector, setRevealedInboundConnector] = useState<ActionConnector | null>(
+    null
+  );
   const { preSubmitValidator, submit, isValid: isFormValid, isSubmitting } = formState;
   const hasErrors = isFormValid === false;
-  const isSaving = isUpdatingConnector || isSubmitting || isExecutingConnector;
-  const actionTypeModel: ActionTypeModel | null = actionTypeRegistry.get(connector.actionTypeId);
-  const showButtons = canSave && actionTypeModel && !connector.isPreconfigured;
+  const isSaving = isUpdatingConnector || isSubmitting || isExecutingConnector || isRotating;
+
+  const {
+    actionTypeModel,
+    isLoading: isLoadingActionTypeModel,
+    error: actionTypeModelError,
+    refetch: refetchConnectorSpec,
+  } = useActionTypeModel({
+    actionTypeRegistry,
+    actionTypeId: connector.actionTypeId,
+    http,
+    docLinks,
+    uiSettings,
+  });
+
+  const isSpecConnector = !actionTypeRegistry.has(connector.actionTypeId);
+  const isTestable = actionTypeModel?.isTestable ?? actionTypeRegistry.has(connector.actionTypeId);
+
+  const onIngestTokenRotated = useCallback(
+    (ingestToken: string) => {
+      setRevealedInboundConnector((current) => {
+        const base = current ?? formConnector ?? connector;
+        return { ...base, secrets: { ingestToken } } as ActionConnector;
+      });
+    },
+    [connector, formConnector]
+  );
+
+  const inboundSettingsContent = useMemo(() => {
+    const inboundConnector = revealedInboundConnector ?? formConnector ?? connector;
+    if (
+      isClusterInboundEventsEnabled &&
+      isInboundIngressConnector(inboundConnector) &&
+      !connectorTypeIsDual(inboundConnector.actionTypeId)
+    ) {
+      return (
+        <InboundIngressCredentials
+          connector={inboundConnector}
+          allowRotate={canSave && !inboundConnector.isPreconfigured}
+          onIngestTokenRotated={onIngestTokenRotated}
+        />
+      );
+    }
+    if (connectorTypeIsDual(inboundConnector.actionTypeId) && isClusterInboundEventsEnabled) {
+      if (inboundConnector.isInboundEventsEnabled === true) {
+        return (
+          <InboundIngressCredentials
+            connector={inboundConnector}
+            allowRotate={canSave && !inboundConnector.isPreconfigured}
+            onIngestTokenRotated={onIngestTokenRotated}
+          />
+        );
+      }
+      return <InboundEventsSaveToGenerateCallout />;
+    }
+    return undefined;
+  }, [
+    canSave,
+    connector,
+    formConnector,
+    isClusterInboundEventsEnabled,
+    onIngestTokenRotated,
+    revealedInboundConnector,
+  ]);
+
+  // Delay the spinner so quick spec loads don't flash a loading state.
+  const [showLoadingSpinner, setShowLoadingSpinner] = useState(false);
+  useDebounce(() => setShowLoadingSpinner(isLoadingActionTypeModel), 300, [
+    isLoadingActionTypeModel,
+  ]);
+
+  const showButtons =
+    canSave &&
+    actionTypeModel &&
+    !connector.isPreconfigured &&
+    !isLoadingActionTypeModel &&
+    !actionTypeModelError;
+  const disabled =
+    !isFormModified ||
+    hasErrors ||
+    isSaving ||
+    isLoadingActionTypeModel ||
+    !!actionTypeModelError ||
+    !actionTypeModel;
+
+  const connectorWithoutSecrets = useMemo(
+    () =>
+      getConnectorWithoutSecrets(
+        (formConnector ?? connector) as UserConfiguredActionConnector<
+          Record<string, unknown>,
+          Record<string, unknown>
+        >
+      ),
+    [connector, formConnector]
+  );
+
+  const resolvedTestExecutionActionParams = useMemo(
+    () =>
+      getSpecConnectorTestExecutionParams(testExecutionActionParams, {
+        isSpec: isSpecConnector,
+        isTestable,
+      }),
+    [isSpecConnector, isTestable, testExecutionActionParams]
+  );
 
   const onExecutionAction = useCallback(async () => {
     try {
       const res = await executeConnector({
         connectorId: connector.id,
-        params: testExecutionActionParams,
+        params: resolvedTestExecutionActionParams,
       });
 
       setTestExecutionResult(some(res));
@@ -132,26 +377,18 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
           };
       setTestExecutionResult(some(result));
     }
-  }, [connector.id, executeConnector, testExecutionActionParams]);
+  }, [connector.id, executeConnector, resolvedTestExecutionActionParams]);
 
   const onFormModifiedChange = useCallback(
     (formModified: boolean) => {
       if (formModified) {
         setIsSaved(false);
       }
-      setIsFormModified(formModified);
+      onFormModifiedChangeProp(formModified);
       setTestExecutionResult(none);
     },
-    [setIsFormModified]
+    [onFormModifiedChangeProp]
   );
-
-  const closeFlyout = useCallback(() => {
-    if (isFormModified) {
-      setShowConfirmModal(true);
-      return;
-    }
-    onClose();
-  }, [onClose, isFormModified, setShowConfirmModal]);
 
   const onClickSave = useCallback(async () => {
     setPreSubmitValidationErrorMessage(null);
@@ -177,13 +414,17 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
        * At this point the form is valid
        * and there are no pre submit error messages.
        */
-
-      const { name, config, secrets } = data;
+      const { name, config, secrets, isInboundEventsEnabled } = data;
       const validConnector = {
         id: connector.id,
         name: name ?? '',
         config: config ?? {},
         secrets: secrets ?? {},
+        ...isInboundEventsEnabledPayload(
+          connector.actionTypeId,
+          isInboundEventsEnabled,
+          isClusterInboundEventsEnabled
+        ),
       };
 
       const updatedConnector = await updateConnector(validConnector);
@@ -193,14 +434,53 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
          * ConnectorFormSchema has been saved.
          * Set the from to clean state.
          */
-        onFormModifiedChange(false);
+        const heldConnector = revealedInboundConnector;
+        const previousEnabled =
+          (heldConnector ?? formConnector ?? connector).isInboundEventsEnabled === true;
+        const enablingNow =
+          connectorTypeIsDual(connector.actionTypeId) &&
+          isInboundEventsEnabled === true &&
+          !previousEnabled;
 
-        if (onConnectorUpdated) {
-          onConnectorUpdated(updatedConnector);
+        let nextConnector = updatedConnector;
+        if (enablingNow) {
+          try {
+            const rotated = await rotateIngress(updatedConnector.id);
+            nextConnector = {
+              ...updatedConnector,
+              secrets: { ingestToken: rotated.ingestToken },
+            } as ActionConnector;
+          } catch {
+            // Danger toast is shown by the rotate hook. Inbound is on; user can rotate.
+          }
+          setRevealedInboundConnector(nextConnector);
+        } else if (heldConnector) {
+          const ingestToken =
+            nextConnector.isInboundEventsEnabled === true
+              ? getInboundIngestToken(heldConnector)
+              : undefined;
+          setRevealedInboundConnector(
+            ingestToken
+              ? ({ ...nextConnector, secrets: { ingestToken } } as ActionConnector)
+              : nextConnector
+          );
+        } else if (onConnectorUpdated) {
+          const ingestToken =
+            nextConnector.isInboundEventsEnabled === true
+              ? getInboundIngestToken(connector)
+              : undefined;
+          const published = ingestToken
+            ? ({ ...nextConnector, secrets: { ingestToken } } as ActionConnector)
+            : nextConnector;
+          if (ingestToken) {
+            setRevealedInboundConnector(published);
+          }
+          onConnectorUpdated(published);
         }
+        setFormConnector(nextConnector);
+        setFormRevision((revision) => revision + 1);
+        onFormModifiedChange(false);
         setIsSaved(true);
-        setIsEdit(false);
-        setIsEdit(true);
       }
 
       return updatedConnector;
@@ -208,13 +488,35 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
       setShowFormErrors(true);
     }
   }, [
-    onConnectorUpdated,
     submit,
     preSubmitValidator,
-    connector.id,
+    connector,
+    isClusterInboundEventsEnabled,
     updateConnector,
     onFormModifiedChange,
+    revealedInboundConnector,
+    formConnector,
+    onConnectorUpdated,
+    rotateIngress,
   ]);
+
+  const notifyRevealedInboundConnector = useCallback(() => {
+    if (revealedInboundConnector && onConnectorUpdated) {
+      onConnectorUpdated(revealedInboundConnector);
+    }
+  }, [onConnectorUpdated, revealedInboundConnector]);
+
+  const handleDiscardAndClose = useCallback(() => {
+    notifyRevealedInboundConnector();
+    onClose();
+  }, [notifyRevealedInboundConnector, onClose]);
+
+  useEffect(() => {
+    beforeCloseRef.current = notifyRevealedInboundConnector;
+    return () => {
+      beforeCloseRef.current = () => undefined;
+    };
+  }, [beforeCloseRef, notifyRevealedInboundConnector]);
 
   useEffect(() => {
     isMounted.current = true;
@@ -233,6 +535,7 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
               {showFormErrors && (
                 <>
                   <EuiCallOut
+                    announceOnMount
                     size="s"
                     color="danger"
                     iconType="warning"
@@ -247,36 +550,25 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
                   <EuiSpacer size="m" />
                 </>
               )}
-              <ConnectorForm
-                actionTypeModel={actionTypeModel}
-                connector={getConnectorWithoutSecrets(connector)}
-                isEdit={isEdit}
-                onChange={setFormState}
-                onFormModifiedChange={onFormModifiedChange}
+              <ConnectorSpecLoadState
+                showLoadingSpinner={showLoadingSpinner}
+                actionTypeModelError={actionTypeModelError}
+                onRetry={refetchConnectorSpec}
               />
-              {!!preSubmitValidationErrorMessage && <p>{preSubmitValidationErrorMessage}</p>}
-              {showButtons && (
-                <EuiButton
-                  fill
-                  iconType={isSaved ? 'check' : undefined}
-                  color="primary"
-                  data-test-subj="edit-connector-flyout-save-btn"
-                  isLoading={isSaving}
-                  onClick={onClickSave}
-                  disabled={!isFormModified || hasErrors || isSaving}
-                >
-                  {isSaved ? (
-                    <FormattedMessage
-                      id="xpack.triggersActionsUI.sections.editConnectorForm.saveButtonSavedLabel"
-                      defaultMessage="Changes Saved"
-                    />
-                  ) : (
-                    <FormattedMessage
-                      id="xpack.triggersActionsUI.sections.editConnectorForm.saveButtonLabel"
-                      defaultMessage="Save"
-                    />
-                  )}
-                </EuiButton>
+
+              {actionTypeModel && !isLoadingActionTypeModel && !actionTypeModelError && (
+                <>
+                  <ConnectorForm
+                    key={formRevision}
+                    actionTypeModel={actionTypeModel}
+                    connector={connectorWithoutSecrets}
+                    isEdit={isEdit}
+                    onChange={setFormState}
+                    onFormModifiedChange={onFormModifiedChange}
+                    settingsContent={inboundSettingsContent}
+                  />
+                  {!!preSubmitValidationErrorMessage && <p>{preSubmitValidationErrorMessage}</p>}
+                </>
               )}
             </>
           )}
@@ -294,74 +586,113 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
     );
   }, [
     connector,
+    connectorWithoutSecrets,
     docLinks.links.alerting.preconfiguredConnectors,
     actionTypeModel,
+    actionTypeModelError,
     isEdit,
+    isLoadingActionTypeModel,
+    showLoadingSpinner,
     showFormErrors,
     onFormModifiedChange,
     preSubmitValidationErrorMessage,
-    showButtons,
-    isSaved,
-    isSaving,
-    onClickSave,
-    isFormModified,
-    hasErrors,
+    refetchConnectorSpec,
+    inboundSettingsContent,
+    formRevision,
   ]);
 
   const renderTestTab = useCallback(() => {
     return (
-      <TestConnectorForm
-        connector={connector}
-        executeEnabled={!isFormModified}
-        actionParams={testExecutionActionParams}
-        setActionParams={setTestExecutionActionParams}
-        onExecutionAction={onExecutionAction}
-        isExecutingAction={isExecutingConnector}
-        executionResult={testExecutionResult}
-        actionTypeRegistry={actionTypeRegistry}
-      />
+      <>
+        <ConnectorSpecLoadState
+          showLoadingSpinner={showLoadingSpinner}
+          actionTypeModelError={actionTypeModelError}
+          onRetry={refetchConnectorSpec}
+        />
+
+        {actionTypeModel && !isLoadingActionTypeModel && !actionTypeModelError && (
+          <TestConnectorForm
+            connector={connectorWithoutSecrets}
+            executeEnabled={!isFormModified}
+            actionParams={resolvedTestExecutionActionParams}
+            onEditAction={onEditAction}
+            onExecutionAction={onExecutionAction}
+            isExecutingAction={isExecutingConnector}
+            executionResult={testExecutionResult}
+            actionTypeModel={actionTypeModel}
+            hideActionParamsStep={isSpecConnector}
+          />
+        )}
+      </>
     );
   }, [
-    connector,
-    actionTypeRegistry,
-    isExecutingConnector,
+    connectorWithoutSecrets,
     isFormModified,
-    testExecutionActionParams,
-    testExecutionResult,
+    resolvedTestExecutionActionParams,
+    onEditAction,
     onExecutionAction,
+    isExecutingConnector,
+    testExecutionResult,
+    actionTypeModel,
+    isLoadingActionTypeModel,
+    actionTypeModelError,
+    showLoadingSpinner,
+    refetchConnectorSpec,
+    isSpecConnector,
   ]);
 
   const renderConnectorRulesList = useCallback(() => {
     return <ConnectorRulesList connector={connector} />;
   }, [connector]);
 
+  const savedConnector = formConnector ?? connector;
+
+  // This specific logic can be removed once inference connectors are no longer experimental. Tracked here https://github.com/elastic/kibana/issues/244985
+  const isExperimental: boolean | undefined = useMemo(() => {
+    if (
+      connector &&
+      'config' in connector &&
+      connector.config?.inferenceId === '.rainbow-sprinkles-elastic'
+    ) {
+      return false;
+    }
+    return actionTypeModel?.isExperimental;
+  }, [actionTypeModel, connector]);
+
   return (
     <>
-      <EuiFlyout
-        onClose={closeFlyout}
-        aria-labelledby="flyoutActionEditTitle"
-        size="m"
-        data-test-subj="edit-connector-flyout"
-      >
-        <FlyoutHeader
-          isPreconfigured={connector.isPreconfigured}
-          connectorName={connector.name}
-          connectorTypeDesc={actionTypeModel?.selectMessage}
-          setTab={handleSetTab}
-          selectedTab={selectedTab}
-          icon={actionTypeModel?.iconClass}
-          isExperimental={actionTypeModel?.isExperimental}
-          subFeature={actionTypeModel?.subFeature}
-        />
-        <EuiFlyoutBody>
-          {selectedTab === EditConnectorTabs.Configuration && renderConfigurationTab()}
-          {selectedTab === EditConnectorTabs.Test && renderTestTab()}
-          {selectedTab === EditConnectorTabs.Rules && renderConnectorRulesList()}
-        </EuiFlyoutBody>
-        <FlyoutFooter onClose={closeFlyout} />
-      </EuiFlyout>
+      <FlyoutHeader
+        isPreconfigured={savedConnector.isPreconfigured}
+        connectorName={savedConnector.name}
+        connectorTypeDesc={
+          actionTypeModel?.selectMessagePreconfigured || actionTypeModel?.selectMessage || ''
+        }
+        setTab={handleSetTab}
+        selectedTab={selectedTab}
+        icon={icon ?? actionTypeModel?.iconClass}
+        isExperimental={isExperimental}
+        subFeature={actionTypeModel?.subFeature}
+        isTestable={isTestable}
+        hideRulesTab={hideRulesTab}
+        docsUrl={actionTypeModel?.docsUrl}
+      />
+      <EuiFlyoutBody>
+        {selectedTab === EditConnectorTabs.Configuration && renderConfigurationTab()}
+        {selectedTab === EditConnectorTabs.Test && renderTestTab()}
+        {selectedTab === EditConnectorTabs.Rules && renderConnectorRulesList()}
+      </EuiFlyoutBody>
+      <FlyoutFooter
+        onClose={onCloseAttempt}
+        isSaving={isSaving}
+        isSaved={isSaved}
+        disabled={disabled}
+        showButtons={showButtons}
+        onClickSave={onClickSave}
+      />
       {showConfirmModal && (
         <EuiConfirmModal
+          aria-labelledby={confirmModalTitleId}
+          titleProps={{ id: confirmModalTitleId }}
           buttonColor="danger"
           data-test-subj="closeConnectorEditConfirm"
           title={i18n.translate(
@@ -371,9 +702,9 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
             }
           )}
           onCancel={() => {
-            setShowConfirmModal(false);
+            onConfirmModalCancel();
           }}
-          onConfirm={onClose}
+          onConfirm={handleDiscardAndClose}
           cancelButtonText={i18n.translate(
             'xpack.triggersActionsUI.sections.confirmConnectorEditClose.cancelButtonLabel',
             {
@@ -394,6 +725,54 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
         </EuiConfirmModal>
       )}
     </>
+  );
+};
+
+const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
+  actionTypeRegistry,
+  connector,
+  onClose,
+  tab = EditConnectorTabs.Configuration,
+  onConnectorUpdated,
+  icon,
+  hideRulesTab = false,
+}) => {
+  const [isFormModified, setIsFormModified] = useState(false);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const beforeCloseRef = useRef<() => void>(() => undefined);
+
+  const onFlyoutClose = useCallback(() => {
+    if (isFormModified) {
+      setShowConfirmModal(true);
+      return;
+    }
+    beforeCloseRef.current();
+    onClose();
+  }, [isFormModified, onClose]);
+
+  return (
+    <EuiFlyout
+      onClose={onFlyoutClose}
+      aria-labelledby="flyoutActionEditTitle"
+      size="m"
+      data-test-subj="edit-connector-flyout"
+    >
+      <EditConnectorFlyoutContent
+        actionTypeRegistry={actionTypeRegistry}
+        connector={connector}
+        onClose={onClose}
+        tab={tab}
+        onConnectorUpdated={onConnectorUpdated}
+        icon={icon}
+        hideRulesTab={hideRulesTab}
+        isFormModified={isFormModified}
+        onFormModifiedChange={setIsFormModified}
+        onCloseAttempt={onFlyoutClose}
+        showConfirmModal={showConfirmModal}
+        onConfirmModalCancel={() => setShowConfirmModal(false)}
+        beforeCloseRef={beforeCloseRef}
+      />
+    </EuiFlyout>
   );
 };
 

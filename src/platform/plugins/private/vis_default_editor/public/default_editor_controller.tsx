@@ -9,11 +9,11 @@
 
 import React, { Suspense, lazy } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { EventEmitter } from 'events';
+import type { EventEmitter } from 'events';
 import { EuiErrorBoundary, EuiLoadingChart } from '@elastic/eui';
 
-import { Vis, VisualizeEmbeddableContract } from '@kbn/visualizations-plugin/public';
-import { IEditorController, EditorRenderProps } from '@kbn/visualizations-plugin/public';
+import type { Vis, VisualizeEmbeddableContract } from '@kbn/visualizations-plugin/public';
+import type { IEditorController, EditorRenderProps } from '@kbn/visualizations-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { getCoreStart } from './services';
 

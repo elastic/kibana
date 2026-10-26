@@ -28,14 +28,22 @@ export const AGENT_POLICY_DEFAULT_MONITORING_DATASETS = [
   'elastic_agent.auditbeat',
   'elastic_agent.heartbeat',
   'elastic_agent.cloudbeat',
+  'elastic_agent.cloud_defend',
   'elastic_agent.pf_host_agent',
   'elastic_agent.pf_elastic_collector',
   'elastic_agent.pf_elastic_symbolizer',
 ];
 
 export const LICENSE_FOR_SCHEDULE_UPGRADE = 'platinum';
+export const LICENSE_FOR_AGENT_MIGRATION = 'enterprise';
+export const LICENSE_FOR_AGENT_ROLLBACK = 'enterprise';
 
 export const DEFAULT_MAX_AGENT_POLICIES_WITH_INACTIVITY_TIMEOUT = 750;
 
 export const AGENT_LOG_LEVELS = ['error', 'warning', 'info', 'debug'] as const;
 export const DEFAULT_LOG_LEVEL = 'info' as const;
+
+export const AGENT_POLICY_VERSION_SEPARATOR = '#';
+
+/** Version suffix used for the non-version-specific copy of a policy, e.g. `policy123#sentinel`. */
+export const AGENT_POLICY_SENTINEL_VERSION = 'sentinel';

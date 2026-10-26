@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
+import type {
   APM_APP_ID,
   LOGS_APP_ID,
   METRICS_APP_ID,
@@ -16,12 +16,19 @@ import {
   OBSERVABILITY_ONBOARDING_APP_ID,
   OBSERVABILITY_OVERVIEW_APP_ID,
   SYNTHETICS_APP_ID,
+  UPTIME_APP_ID,
   SLO_APP_ID,
   AI_ASSISTANT_APP_ID,
   OBLT_UX_APP_ID,
+  OBLT_DIGITAL_EXPERIENCE_APP_ID,
   OBLT_PROFILING_APP_ID,
   INVENTORY_APP_ID,
   STREAMS_APP_ID,
+  SIGNIFICANT_EVENTS_APP_ID,
+  INGEST_HUB_APP_ID,
+  ONBOARDING_APP_ID,
+  NIGHTSHIFT_APP_ID,
+  OBSERVABILITY_ALERTING_APP_ID,
 } from './constants';
 
 type LogsApp = typeof LOGS_APP_ID;
@@ -31,13 +38,20 @@ type ObservabilityOverviewApp = typeof OBSERVABILITY_OVERVIEW_APP_ID;
 type MetricsApp = typeof METRICS_APP_ID;
 type ApmApp = typeof APM_APP_ID;
 type SyntheticsApp = typeof SYNTHETICS_APP_ID;
+type UptimeApp = typeof UPTIME_APP_ID;
 type ObservabilityOnboardingApp = typeof OBSERVABILITY_ONBOARDING_APP_ID;
 type SloApp = typeof SLO_APP_ID;
 type AiAssistantApp = typeof AI_ASSISTANT_APP_ID;
 type ObltUxApp = typeof OBLT_UX_APP_ID;
+type ObltDigitalExperienceApp = typeof OBLT_DIGITAL_EXPERIENCE_APP_ID;
 type ObltProfilingApp = typeof OBLT_PROFILING_APP_ID;
 type InventoryApp = typeof INVENTORY_APP_ID;
 type StreamsApp = typeof STREAMS_APP_ID;
+type SignificantEventsApp = typeof SIGNIFICANT_EVENTS_APP_ID;
+type IngestHubApp = typeof INGEST_HUB_APP_ID;
+type OnboardingApp = typeof ONBOARDING_APP_ID;
+type NightshiftApp = typeof NIGHTSHIFT_APP_ID;
+type ObservabilityAlertingApp = typeof OBSERVABILITY_ALERTING_APP_ID;
 
 export type AppId =
   | LogsApp
@@ -48,12 +62,19 @@ export type AppId =
   | ApmApp
   | MetricsApp
   | SyntheticsApp
+  | UptimeApp
   | SloApp
   | AiAssistantApp
   | ObltUxApp
+  | ObltDigitalExperienceApp
   | ObltProfilingApp
   | InventoryApp
-  | StreamsApp;
+  | StreamsApp
+  | SignificantEventsApp
+  | IngestHubApp
+  | OnboardingApp
+  | NightshiftApp
+  | ObservabilityAlertingApp;
 
 export type LogsLinkId = 'log-categories' | 'settings' | 'anomalies' | 'stream';
 
@@ -84,9 +105,23 @@ export type ApmLinkId =
 
 export type SyntheticsLinkId = 'certificates' | 'overview';
 
+export type UptimeLinkId = 'Certificates';
+
 export type ProfilingLinkId = 'stacktraces' | 'flamegraphs' | 'functions';
 
 export type StreamsLinkId = 'overview';
+
+export type SignificantEventsLinkId = 'events' | 'rules';
+
+export type NightshiftLinkId = 'detections' | 'knowledge_indicators' | 'sources';
+
+export type ObservabilityAlertingLinkId =
+  | 'alerts'
+  | 'rules-v1'
+  | 'rules-v2'
+  | 'rule-library'
+  | 'action-policies'
+  | 'execution-history';
 
 export type LinkId =
   | LogsLinkId
@@ -94,6 +129,7 @@ export type LinkId =
   | MetricsLinkId
   | ApmLinkId
   | SyntheticsLinkId
+  | UptimeLinkId
   | ProfilingLinkId
   | StreamsLinkId;
 
@@ -104,6 +140,10 @@ export type DeepLinkId =
   | `${MetricsApp}:${MetricsLinkId}`
   | `${ApmApp}:${ApmLinkId}`
   | `${SyntheticsApp}:${SyntheticsLinkId}`
+  | `${UptimeApp}:${UptimeLinkId}`
   | `${ObltProfilingApp}:${ProfilingLinkId}`
   | `${InventoryApp}:${InventoryLinkId}`
-  | `${StreamsApp}:${StreamsLinkId}`;
+  | `${StreamsApp}:${StreamsLinkId}`
+  | `${SignificantEventsApp}:${SignificantEventsLinkId}`
+  | `${NightshiftApp}:${NightshiftLinkId}`
+  | `${ObservabilityAlertingApp}:${ObservabilityAlertingLinkId}`;

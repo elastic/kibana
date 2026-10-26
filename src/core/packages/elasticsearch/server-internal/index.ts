@@ -12,17 +12,17 @@ export { config, configSchema, ElasticsearchConfig } from './src/elasticsearch_c
 export type { ElasticsearchConfigType } from './src/elasticsearch_config';
 export type {
   NodesVersionCompatibility,
-  PollEsNodesVersionOptions,
   NodesInfo,
   NodeInfo,
-} from './src/version_check/ensure_es_version';
+} from './src/version_check/nodes_version_compatibility';
+export type { CheckEsNodesVersionOptions } from './src/version_check/nodes_version';
 export type {
   ElasticsearchStatusMeta,
   InternalElasticsearchServicePreboot,
   InternalElasticsearchServiceSetup,
   InternalElasticsearchServiceStart,
 } from './src/types';
-export { pollEsNodesVersion } from './src/version_check/ensure_es_version';
+export { checkEsNodesVersion } from './src/version_check/nodes_version';
 export {
   isSupportedEsServer,
   isNotFoundFromUnsupportedServer,
@@ -31,5 +31,4 @@ export { CoreElasticsearchRouteHandlerContext } from './src/elasticsearch_route_
 export { retryCallCluster, migrationRetryCallCluster } from './src/retry_call_cluster';
 export { isInlineScriptingEnabled } from './src/is_scripting_enabled';
 export { getCapabilitiesFromClient } from './src/get_capabilities';
-export { isRetryableEsClientError } from './src/retryable_es_client_errors';
 export type { ClusterInfo } from './src/get_cluster_info';

@@ -15,8 +15,13 @@ import type {
   SolutionTelemetrySchema,
   AssigneesSchema,
   AttachmentFrameworkSchema,
-  AttachmentItemsSchema,
+  AttachmentTypeStatsSchema,
   CustomFieldsSolutionTelemetrySchema,
+  FieldLibrarySolutionTelemetrySchema,
+  ObservablesSchema,
+  TemplatesSolutionTelemetrySchema,
+  WorkflowsSolutionTelemetrySchema,
+  UserActionsSourceTelemetrySchema,
 } from './types';
 
 const long: TypeLong = { type: 'long' };
@@ -29,34 +34,71 @@ const countSchema: CountSchema = {
   daily: long,
 };
 
-interface AttachmentRegistrySchema {
-  type: 'array';
-  items: AttachmentItemsSchema;
-}
-
-const attachmentRegistrySchema: AttachmentRegistrySchema = {
-  type: 'array',
-  items: {
-    average: long,
-    maxOnACase: long,
-    total: long,
-    type: string,
+const attachmentTypeStatsSchema: AttachmentTypeStatsSchema = {
+  total: {
+    type: 'long',
+    _meta: { description: 'Total number of attachments of this type, across all cases' },
+  },
+  average: {
+    type: 'long',
+    _meta: { description: 'Average number of attachments of this type per case' },
   },
 };
 
 const attachmentFrameworkSchema: AttachmentFrameworkSchema = {
-  persistableAttachments: attachmentRegistrySchema,
-  externalAttachments: attachmentRegistrySchema,
+  attachmentsByType: {
+    DYNAMIC_KEY: attachmentTypeStatsSchema,
+  },
+  bySavedObject: {
+    legacy: {
+      total: {
+        type: 'long',
+        _meta: {
+          description:
+            'Total number of attachments sourced from the legacy comment saved object (entity-aware: bulk alert/event attachments count by referenced id)',
+        },
+      },
+    },
+    unified: {
+      total: {
+        type: 'long',
+        _meta: {
+          description:
+            'Total number of attachments sourced from the unified attachment saved object (entity-aware: bulk alert/event attachments count by referenced id)',
+        },
+      },
+    },
+  },
   files: {
-    average: long,
     averageSize: long,
-    maxOnACase: long,
-    total: long,
     topMimeTypes: {
       type: 'array',
       items: {
         count: long,
         name: string,
+      },
+    },
+  },
+};
+
+const userActionsSourceSchema: UserActionsSourceTelemetrySchema = {
+  bySource: {
+    type: 'array',
+    items: {
+      source: {
+        type: 'keyword',
+        _meta: {
+          description:
+            'Source of the user action (e.g. user, api, agent, workflow, rule, attack). User actions without a source are reported as unknown',
+        },
+      },
+      type: {
+        type: 'keyword',
+        _meta: { description: 'User action type (e.g. comment, status, assignees)' },
+      },
+      total: {
+        type: 'long',
+        _meta: { description: 'Total number of user actions with this source and type' },
       },
     },
   },
@@ -68,10 +110,50 @@ const assigneesSchema: AssigneesSchema = {
   totalWithAtLeastOne: long,
 };
 
+const statusSchema: StatusSchema = {
+  open: long,
+  inProgress: long,
+  closed: long,
+};
+
+const observablesSchema: ObservablesSchema = {
+  auto: {
+    default: {
+      type: 'long',
+      _meta: { description: 'Number of default type observables automatically extracted' },
+    },
+    custom: {
+      type: 'long',
+      _meta: { description: 'Number of custom type observables automatically extracted' },
+    },
+  },
+  manual: {
+    default: {
+      type: 'long',
+      _meta: { description: 'Number of default type observables manually added' },
+    },
+    custom: {
+      type: 'long',
+      _meta: { description: 'Number of custom type observables manually added' },
+    },
+  },
+  total: {
+    type: 'long',
+    _meta: { description: 'Total number of observables' },
+  },
+};
+
 const solutionTelemetry: SolutionTelemetrySchema = {
   ...countSchema,
   assignees: assigneesSchema,
   attachmentFramework: attachmentFrameworkSchema,
+  totalWithAlerts: long,
+  status: statusSchema,
+  observables: observablesSchema,
+  totalWithMaxObservables: {
+    type: 'long',
+    _meta: { description: 'Number of cases with maximum observables' },
+  },
 };
 
 const customFieldsSolutionTelemetrySchema: CustomFieldsSolutionTelemetrySchema = {
@@ -84,16 +166,261 @@ const customFieldsSolutionTelemetrySchema: CustomFieldsSolutionTelemetrySchema =
   },
 };
 
-const statusSchema: StatusSchema = {
-  open: long,
-  inProgress: long,
-  closed: long,
-};
-
 const latestDatesSchema: LatestDatesSchema = {
   createdAt: string,
   updatedAt: string,
   closedAt: string,
+};
+
+const fieldLibrarySolutionTelemetrySchema: FieldLibrarySolutionTelemetrySchema = {
+  total: {
+    type: 'long',
+    _meta: {
+      description:
+        'Number of field definitions in the Field Library for this scope. The all scope spans every owner, including owners outside the three reported solutions, so the solution scopes need not sum to it.',
+    },
+  },
+  totalGlobal: {
+    type: 'long',
+    _meta: {
+      description:
+        'Number of field definitions applied to every case. Includes the global definitions created by the templates v1 to v2 migration to mirror pre-existing custom fields, which cannot be distinguished from author-created ones.',
+    },
+  },
+  totalReusable: {
+    type: 'long',
+    _meta: {
+      description:
+        'Number of field definitions available to be referenced by a template rather than applied to every case. Counts availability, not actual template references.',
+    },
+  },
+};
+
+const templatesSolutionTelemetrySchema: TemplatesSolutionTelemetrySchema = {
+  total: {
+    type: 'long',
+    _meta: {
+      description:
+        'Number of live templates, counting each template once by its latest non-soft-deleted version',
+    },
+  },
+  totalEnabled: {
+    type: 'long',
+    _meta: {
+      description:
+        'Number of live templates that are enabled. Templates persisted before the enabled flag existed count as enabled, matching how the templates service reads it',
+    },
+  },
+  totalDisabled: {
+    type: 'long',
+    _meta: { description: 'Number of live templates that are disabled' },
+  },
+  totalSoftDeleted: {
+    type: 'long',
+    _meta: { description: 'Number of templates that have been soft-deleted' },
+  },
+  totalMigratedFromV1: {
+    type: 'long',
+    _meta: {
+      description:
+        'Number of live templates that were created by the templates v1 to v2 migration rather than authored directly',
+    },
+  },
+  versionPercentiles: {
+    p50: {
+      type: 'long',
+      _meta: {
+        description: 'Rounded 50th percentile of the version across live templates',
+      },
+    },
+    p90: {
+      type: 'long',
+      _meta: {
+        description: 'Rounded 90th percentile of the version across live templates',
+      },
+    },
+    p99: {
+      type: 'long',
+      _meta: {
+        description: 'Rounded 99th percentile of the version across live templates',
+      },
+    },
+  },
+  fieldCount: {
+    total: {
+      type: 'long',
+      _meta: {
+        description:
+          'Total number of fields declared across all live templates. Counts fields as written in the definition, so it includes a $ref field whose library definition is missing, and is therefore not comparable with the fieldDefinitions totals below',
+      },
+    },
+    max: {
+      type: 'long',
+      _meta: { description: 'Highest number of fields declared by a single live template' },
+    },
+    average: {
+      type: 'long',
+      _meta: { description: 'Average number of fields declared per live template, rounded' },
+    },
+  },
+  fieldDefinitions: {
+    totalsByControl: {
+      DYNAMIC_KEY: {
+        type: 'long',
+        _meta: {
+          description:
+            'Number of resolved field definitions using this control across live templates. Only the most frequent controls are reported',
+        },
+      },
+    },
+    totalsByType: {
+      DYNAMIC_KEY: {
+        type: 'long',
+        _meta: {
+          description:
+            'Number of resolved field definitions using this field type across live templates. Only the most frequent types are reported',
+        },
+      },
+    },
+  },
+  cases: {
+    withTemplate: {
+      total: {
+        type: 'long',
+        _meta: {
+          description:
+            'Number of cases that reference a template. A case records the template it was created from, but an update may later change or clear that reference, so this is a current-state count',
+        },
+      },
+      monthly: {
+        type: 'long',
+        _meta: {
+          description: 'Cases created in the last month that reference a template',
+        },
+      },
+      weekly: {
+        type: 'long',
+        _meta: {
+          description: 'Cases created in the last week that reference a template',
+        },
+      },
+      daily: {
+        type: 'long',
+        _meta: {
+          description: 'Cases created in the last day that reference a template',
+        },
+      },
+    },
+    withoutTemplate: {
+      total: {
+        type: 'long',
+        _meta: {
+          description: 'Number of cases that reference no template',
+        },
+      },
+      monthly: {
+        type: 'long',
+        _meta: {
+          description: 'Cases created in the last month that reference no template',
+        },
+      },
+      weekly: {
+        type: 'long',
+        _meta: {
+          description: 'Cases created in the last week that reference no template',
+        },
+      },
+      daily: {
+        type: 'long',
+        _meta: {
+          description: 'Cases created in the last day that reference no template',
+        },
+      },
+    },
+  },
+};
+
+const workflowsSolutionTelemetrySchema: WorkflowsSolutionTelemetrySchema = {
+  runs: {
+    total: {
+      type: 'long',
+      _meta: { description: 'Total number of workflow runs recorded on cases' },
+    },
+    monthly: {
+      type: 'long',
+      _meta: { description: 'Number of workflow runs recorded on cases in the last month' },
+    },
+    weekly: {
+      type: 'long',
+      _meta: { description: 'Number of workflow runs recorded on cases in the last week' },
+    },
+    daily: {
+      type: 'long',
+      _meta: { description: 'Number of workflow runs recorded on cases in the last day' },
+    },
+  },
+  totalCasesWithRuns: {
+    type: 'long',
+    _meta: { description: 'Number of distinct cases that have had at least one workflow run' },
+  },
+  totalUniqueUsers: {
+    type: 'long',
+    _meta: {
+      description: 'Cardinality of distinct usernames that have triggered a workflow from a case',
+    },
+  },
+  byOriginType: {
+    case: {
+      type: 'long',
+      _meta: { description: 'Runs triggered from the case detail page' },
+    },
+    observable: {
+      type: 'long',
+      _meta: { description: 'Runs triggered from the observables table for a single observable' },
+    },
+    observables: {
+      type: 'long',
+      _meta: {
+        description: 'Runs triggered from the observables table with a multi-observable selection',
+      },
+    },
+    attachment: {
+      type: 'long',
+      _meta: {
+        description:
+          'Runs triggered from a single attachment row (for example an alert or event) in a case',
+      },
+    },
+    attachments: {
+      type: 'long',
+      _meta: {
+        description:
+          'Runs triggered from a bulk attachment selection (for example alerts) in a case',
+      },
+    },
+    unattributed: {
+      type: 'long',
+      _meta: {
+        description: 'Runs carrying no single-case origin, such as cases-list bulk runs',
+      },
+    },
+  },
+  byAttachmentType: {
+    DYNAMIC_KEY: {
+      type: 'long',
+      _meta: {
+        description:
+          'Attachment-origin runs triggered from this attachment type, keyed by type name with `.` replaced by `_` (for example `security_alert`)',
+      },
+    },
+  },
+  configurationsWithWorkflowTags: {
+    type: 'long',
+    _meta: {
+      description:
+        'Number of case configurations that have at least one workflow tag set. Tag values are never reported.',
+    },
+  },
 };
 
 export const casesSchema: CasesTelemetrySchema = {
@@ -105,6 +432,19 @@ export const casesSchema: CasesTelemetrySchema = {
       status: statusSchema,
       syncAlertsOn: long,
       syncAlertsOff: long,
+      extractObservablesOn: {
+        type: 'long',
+        _meta: { description: 'Automatically extract observables setting enabled' },
+      },
+      extractObservablesOff: {
+        type: 'long',
+        _meta: { description: 'Automatically extract observables setting disabled' },
+      },
+      observables: observablesSchema,
+      totalWithMaxObservables: {
+        type: 'long',
+        _meta: { description: 'Number of cases with maximum observables' },
+      },
       totalUsers: long,
       totalParticipants: long,
       totalTags: long,
@@ -116,17 +456,69 @@ export const casesSchema: CasesTelemetrySchema = {
     obs: solutionTelemetry,
     main: solutionTelemetry,
   },
-  userActions: { all: { ...countSchema, maxOnACase: long } },
+  userActions: {
+    all: { ...countSchema, maxOnACase: long, ...userActionsSourceSchema },
+    sec: userActionsSourceSchema,
+    obs: userActionsSourceSchema,
+    main: userActionsSourceSchema,
+  },
   comments: { all: { ...countSchema, maxOnACase: long } },
-  alerts: { all: { ...countSchema, maxOnACase: long } },
+  alerts: {
+    all: { ...countSchema, maxOnACase: long },
+    obs: { ...countSchema, maxOnACase: long },
+    sec: { ...countSchema, maxOnACase: long },
+    main: { ...countSchema, maxOnACase: long },
+  },
   connectors: {
     all: {
-      all: { totalAttached: long },
-      itsm: { totalAttached: long },
-      sir: { totalAttached: long },
-      jira: { totalAttached: long },
-      resilient: { totalAttached: long },
-      swimlane: { totalAttached: long },
+      all: {
+        totalAttached: {
+          type: 'long',
+          _meta: { description: 'Total number of all cases with any connector attached' },
+        },
+      },
+      itsm: {
+        totalAttached: {
+          type: 'long',
+          _meta: { description: 'Total number of cases with ServiceNow ITSM connector attached' },
+        },
+      },
+      sir: {
+        totalAttached: {
+          type: 'long',
+          _meta: { description: 'Total number of cases with ServiceNow SIR connector attached' },
+        },
+      },
+      jira: {
+        totalAttached: {
+          type: 'long',
+          _meta: { description: 'Total number of cases with Jira connector attached' },
+        },
+      },
+      resilient: {
+        totalAttached: {
+          type: 'long',
+          _meta: { description: 'Total number of cases with Resilient connector attached' },
+        },
+      },
+      swimlane: {
+        totalAttached: {
+          type: 'long',
+          _meta: { description: 'Total number of cases with Swimlane connector attached' },
+        },
+      },
+      thehive: {
+        totalAttached: {
+          type: 'long',
+          _meta: { description: 'Total number of cases with The Hive connector attached' },
+        },
+      },
+      caseswebhook: {
+        totalAttached: {
+          type: 'long',
+          _meta: { description: 'Total number of cases with Cases Webhook connector attached' },
+        },
+      },
       maxAttachedToACase: long,
     },
   },
@@ -148,5 +540,23 @@ export const casesSchema: CasesTelemetrySchema = {
   casesSystemAction: {
     totalCasesCreated: long,
     totalRules: long,
+  },
+  templates: {
+    all: templatesSolutionTelemetrySchema,
+    sec: templatesSolutionTelemetrySchema,
+    obs: templatesSolutionTelemetrySchema,
+    main: templatesSolutionTelemetrySchema,
+  },
+  fieldLibrary: {
+    all: fieldLibrarySolutionTelemetrySchema,
+    sec: fieldLibrarySolutionTelemetrySchema,
+    obs: fieldLibrarySolutionTelemetrySchema,
+    main: fieldLibrarySolutionTelemetrySchema,
+  },
+  workflows: {
+    all: workflowsSolutionTelemetrySchema,
+    sec: workflowsSolutionTelemetrySchema,
+    obs: workflowsSolutionTelemetrySchema,
+    main: workflowsSolutionTelemetrySchema,
   },
 };

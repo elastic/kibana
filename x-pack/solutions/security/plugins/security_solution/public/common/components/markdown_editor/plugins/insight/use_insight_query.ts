@@ -10,13 +10,15 @@ import type { Filter } from '@kbn/es-query';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import type { DataProvider } from '@kbn/timelines-plugin/common';
 import { DataLoadingState } from '@kbn/unified-data-table';
+import { PageScope } from '../../../../../data_view_manager/constants';
 import { TimelineId } from '../../../../../../common/types/timeline';
 import { useKibana } from '../../../../lib/kibana';
 import { combineQueries } from '../../../../lib/kuery';
 import { useTimelineEvents } from '../../../../../timelines/containers';
-import { useSourcererDataView } from '../../../../../sourcerer/containers';
-import { SourcererScopeName } from '../../../../../sourcerer/store/model';
 import type { TimeRange } from '../../../../store/inputs/model';
+import { useDataView } from '../../../../../data_view_manager/hooks/use_data_view';
+import { useSelectedPatterns } from '../../../../../data_view_manager/hooks/use_selected_patterns';
+import { useBrowserFields } from '../../../../../data_view_manager/hooks/use_browser_fields';
 
 const fields = ['*'];
 const runtimeMappings = {};
@@ -41,9 +43,10 @@ export const useInsightQuery = ({
 }: UseInsightQuery): UseInsightQueryResult => {
   const { uiSettings } = useKibana().services;
   const esQueryConfig = useMemo(() => getEsQueryConfig(uiSettings), [uiSettings]);
-  const { browserFields, selectedPatterns, sourcererDataView, dataViewId } = useSourcererDataView(
-    SourcererScopeName.timeline
-  );
+  const { dataView } = useDataView(PageScope.timeline);
+  const selectedPatterns = useSelectedPatterns(dataView);
+  const browserFields = useBrowserFields(dataView);
+
   const [hasError, setHasError] = useState(false);
   const combinedQueries = useMemo(() => {
     try {
@@ -51,7 +54,7 @@ export const useInsightQuery = ({
         const parsedCombinedQueries = combineQueries({
           config: esQueryConfig,
           dataProviders,
-          dataViewSpec: sourcererDataView,
+          dataView,
           browserFields,
           filters,
           kqlQuery: {
@@ -66,10 +69,10 @@ export const useInsightQuery = ({
       setHasError(true);
       return null;
     }
-  }, [browserFields, dataProviders, esQueryConfig, hasError, sourcererDataView, filters]);
+  }, [hasError, esQueryConfig, dataProviders, dataView, browserFields, filters]);
 
   const [dataLoadingState, { events, totalCount }] = useTimelineEvents({
-    dataViewId,
+    dataViewId: dataView.id ?? '',
     fields,
     filterQuery: combinedQueries?.filterQuery,
     id: TimelineId.active,

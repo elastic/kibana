@@ -9,14 +9,17 @@
 import { resolve } from 'path';
 import { readFileSync } from 'fs';
 
+import { parse as parseYaml } from 'yaml';
 import { REPO_ROOT } from '@kbn/repo-info';
-import { RenovatePackageRule, ruleFilter, packageFilter } from './rule';
+import type { RenovatePackageRule } from './rule';
+import { ruleFilter, packageFilter } from './rule';
 
 export const parseConfig = (() => {
   let cache: {
     renovateRules: RenovatePackageRule[];
     packageDependencies: string[];
     packageDevDependencies: string[];
+    packageResolutions: string[];
   } | null = null;
 
   return () => {
@@ -26,9 +29,12 @@ export const parseConfig = (() => {
 
     const renovateFile = resolve(REPO_ROOT, 'renovate.json');
     const packageFile = resolve(REPO_ROOT, 'package.json');
+    const workspaceFile = resolve(REPO_ROOT, 'pnpm-workspace.yaml');
 
     const renovateConfig = JSON.parse(readFileSync(renovateFile, 'utf8'));
     const packageConfig = JSON.parse(readFileSync(packageFile, 'utf8'));
+    // pnpm 11 keeps overrides in pnpm-workspace.yaml, not package.json.
+    const workspaceConfig = parseYaml(readFileSync(workspaceFile, 'utf8')) ?? {};
 
     const renovateRules = (renovateConfig?.packageRules || []).filter(ruleFilter);
     const packageDependencies = Object.keys(packageConfig?.dependencies || {}).filter(
@@ -37,8 +43,12 @@ export const parseConfig = (() => {
     const packageDevDependencies = Object.keys(packageConfig?.devDependencies || {}).filter(
       packageFilter
     );
+    const packageResolutions = Object.keys({
+      ...packageConfig?.resolutions,
+      ...workspaceConfig?.overrides,
+    });
 
-    cache = { renovateRules, packageDependencies, packageDevDependencies };
+    cache = { renovateRules, packageDependencies, packageDevDependencies, packageResolutions };
     return cache;
   };
 })();

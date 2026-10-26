@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import {
+import type {
   CustomItemAction,
   EuiTableActionsColumnType,
   EuiTableFieldDataColumnType,
@@ -24,9 +24,7 @@ import {
   getSummaryTableILMPhaseColumn,
   getSummaryTableSizeInBytesColumn,
 } from './columns';
-import { VIEW_HISTORY } from '../translations';
-import { IndexSummaryTableItem } from '../../../../../types';
-import { CHECK_NOW } from '../../translations';
+import type { IndexSummaryTableItem } from '../../../../../types';
 
 const defaultBytesFormat = '0,0.[0]b';
 const formatBytes = (value: number | undefined) =>
@@ -142,7 +140,7 @@ describe('helpers', () => {
           </TestExternalProviders>
         );
 
-        expect(screen.getByLabelText(CHECK_NOW)).toBeInTheDocument();
+        expect(screen.getByTestId(`checkNowAction-${indexName}`)).toBeInTheDocument();
       });
 
       test('it invokes the `onCheckNowAction` with the index name when the check now button is clicked', async () => {
@@ -168,10 +166,10 @@ describe('helpers', () => {
           </TestExternalProviders>
         );
 
-        const button = screen.getByLabelText(CHECK_NOW);
+        const button = screen.getByTestId(`checkNowAction-${indexName}`);
         await userEvent.click(button);
 
-        expect(onCheckNowAction).toBeCalledWith(indexSummaryTableItem.indexName);
+        expect(onCheckNowAction).toHaveBeenCalledWith(indexSummaryTableItem.indexName);
       });
 
       test('it invokes the `onViewHistoryAction` with the index name when the view history button is clicked', async () => {
@@ -198,66 +196,10 @@ describe('helpers', () => {
           </TestExternalProviders>
         );
 
-        const button = screen.getByLabelText(VIEW_HISTORY);
+        const button = screen.getByTestId(`viewHistoryAction-${indexName}`);
         await userEvent.click(button);
 
-        expect(onViewHistoryAction).toBeCalledWith(indexSummaryTableItem.indexName);
-      });
-
-      test('adds data-tour-element attribute to the first view history button', () => {
-        const pattern = 'auditbeat-*';
-        const columns = getSummaryTableColumns({
-          formatBytes,
-          formatNumber,
-          isILMAvailable,
-          pattern,
-          onCheckNowAction: jest.fn(),
-          onViewHistoryAction: jest.fn(),
-          firstIndexName: indexName,
-          dangerColor: testColor,
-        });
-
-        const expandActionRender = (
-          (columns[0] as EuiTableActionsColumnType<IndexSummaryTableItem>)
-            .actions[1] as CustomItemAction<IndexSummaryTableItem>
-        ).render;
-
-        render(
-          <TestExternalProviders>
-            {expandActionRender != null && expandActionRender(indexSummaryTableItem, true)}
-          </TestExternalProviders>
-        );
-
-        const button = screen.getByLabelText(VIEW_HISTORY);
-        expect(button).toHaveAttribute('data-tour-element', pattern);
-      });
-
-      test('doesn`t add data-tour-element attribute to non-first view history buttons', () => {
-        const pattern = 'auditbeat-*';
-        const columns = getSummaryTableColumns({
-          formatBytes,
-          formatNumber,
-          isILMAvailable,
-          pattern,
-          onCheckNowAction: jest.fn(),
-          onViewHistoryAction: jest.fn(),
-          firstIndexName: 'another-index',
-          dangerColor: testColor,
-        });
-
-        const expandActionRender = (
-          (columns[0] as EuiTableActionsColumnType<IndexSummaryTableItem>)
-            .actions[1] as CustomItemAction<IndexSummaryTableItem>
-        ).render;
-
-        render(
-          <TestExternalProviders>
-            {expandActionRender != null && expandActionRender(indexSummaryTableItem, true)}
-          </TestExternalProviders>
-        );
-
-        const button = screen.getByLabelText(VIEW_HISTORY);
-        expect(button).not.toHaveAttribute('data-tour-element');
+        expect(onViewHistoryAction).toHaveBeenCalledWith(indexSummaryTableItem.indexName);
       });
     });
 

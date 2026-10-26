@@ -10,14 +10,14 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useValues } from 'kea';
 
 import { EuiFlexItem } from '@elastic/eui';
-import { BrushTriggerEvent } from '@kbn/charts-plugin/public';
-import { DataView } from '@kbn/data-views-plugin/common';
+import type { BrushTriggerEvent } from '@kbn/charts-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/common';
 
-import { TimeRange } from '@kbn/es-query';
-import { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
-import { FormulaPublicApi, TypedLensByValueInput } from '@kbn/lens-plugin/public';
+import type { TimeRange } from '@kbn/es-query';
+import type { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
+import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 
-import { AnalyticsCollection } from '../../../../common/types/analytics';
+import type { AnalyticsCollection } from '../../../../common/types/analytics';
 
 import { KibanaLogic } from '../../shared/kibana';
 import { findOrCreateDataView } from '../utils/find_or_create_data_view';
@@ -35,11 +35,7 @@ interface WithLensDataParams<Props, OutputState> {
     isLoading: boolean,
     adapters?: Partial<DefaultInspectorAdapters>
   ) => OutputState;
-  getAttributes: (
-    dataView: DataView,
-    formulaApi: FormulaPublicApi,
-    props: Props
-  ) => TypedLensByValueInput['attributes'];
+  getAttributes: (dataView: DataView, props: Props) => TypedLensByValueInput['attributes'];
   initialValues: OutputState;
 }
 
@@ -55,11 +51,7 @@ export const withLensData = <T extends {} = {}, OutputState extends {} = {}>(
     const { lens } = useValues(KibanaLogic);
     const [dataView, setDataView] = useState<DataView | null>(null);
     const [data, setData] = useState<OutputState>(initialValues);
-    const [formula, setFormula] = useState<FormulaPublicApi | null>(null);
-    const attributes = useMemo(
-      () => dataView && formula && getAttributes(dataView, formula, props),
-      [dataView, formula, props]
-    );
+    const attributes = useMemo(() => dataView && getAttributes(dataView, props), [dataView, props]);
     const handleBrushEnd = ({ range }: BrushTriggerEvent['data']) => {
       const [min, max] = range;
 
@@ -75,14 +67,6 @@ export const withLensData = <T extends {} = {}, OutputState extends {} = {}>(
         setDataView(await findOrCreateDataView(props.collection));
       })();
     }, [props]);
-    useEffect(() => {
-      (async () => {
-        if (lens?.stateHelperApi) {
-          const helper = await lens.stateHelperApi();
-          setFormula(helper.formula);
-        }
-      })();
-    }, []);
 
     if (!lens) return null;
 

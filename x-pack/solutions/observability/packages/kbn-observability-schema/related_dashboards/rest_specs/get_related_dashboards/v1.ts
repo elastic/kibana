@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
-import { relatedDashboardSchema } from '../../schema/related_dashboard/v1';
+import { z } from '@kbn/zod/v4';
+import { linkedDashboardSchema, suggestedDashboardSchema } from '../../schema/related_dashboard/v1';
 
 export const getRelatedDashboardsParamsSchema = z.object({
   query: z.object({
-    alertId: z.string(),
+    alertId: z.string().max(256),
   }),
 });
 
 export const getRelatedDashboardsResponseSchema = z.object({
-  suggestedDashboards: z.array(relatedDashboardSchema),
-  linkedDashboards: z.array(relatedDashboardSchema),
+  suggestedDashboards: z.array(suggestedDashboardSchema),
+  linkedDashboards: z.array(linkedDashboardSchema),
 });
 
 export type GetRelatedDashboardsResponse = z.output<typeof getRelatedDashboardsResponseSchema>;

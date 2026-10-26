@@ -63,6 +63,7 @@ export const MetricsExplorerAreaChart = ({ metric, id, series, type, stack, opac
       id={chartId}
       key={chartId}
       name={createMetricLabel(metric)}
+      // Defaults to multi layer time axis as of Elastic Charts v70
       xScaleType={ScaleType.Time}
       yScaleType={ScaleType.Linear}
       xAccessor="timestamp"
@@ -101,6 +102,7 @@ export const MetricsExplorerBarChart = ({ metric, id, series, stack }: Props) =>
       id={chartId}
       key={chartId}
       name={createMetricLabel(metric)}
+      // Defaults to multi layer time axis as of Elastic Charts v70
       xScaleType={ScaleType.Time}
       yScaleType={ScaleType.Linear}
       xAccessor="timestamp"

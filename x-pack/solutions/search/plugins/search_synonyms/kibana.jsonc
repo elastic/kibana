@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/search-synonyms",
-  "owner": "@elastic/search-kibana",
+  "owner": "@elastic/search-ml-ux",
   "group": "search",
   "visibility": "private",
   "plugin": {
@@ -17,8 +17,10 @@
     ],
     "optionalPlugins": [
       "console",
+      "cloud",
       "usageCollection",
       "searchNavigation",
+      "share",
     ],
     "requiredBundles": [
       "kibanaReact",

@@ -9,8 +9,8 @@ import { orderByTime } from '../process_event';
 import type { IndexedProcessTree } from '../../types';
 import type { ResolverNode } from '../../../../common/endpoint/types';
 import {
-  levelOrder as baseLevelOrder,
   calculateGenerationsAndDescendants,
+  levelOrder as baseLevelOrder,
 } from '../../lib/tree_sequencers';
 import * as nodeModel from '../../../../common/endpoint/models/node';
 
@@ -158,14 +158,14 @@ export function root(tree: IndexedProcessTree) {
     return null;
   }
   // any node will do
-  let current: ResolverNode = tree.idToNode.values().next().value;
+  let current: ResolverNode | undefined = tree.idToNode.values().next().value;
 
   // iteratively swap current w/ its parent
-  while (parent(tree, current) !== undefined) {
+  while (current && parent(tree, current) !== undefined) {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     current = parent(tree, current)!;
   }
-  return current;
+  return current ?? null;
 }
 
 /**

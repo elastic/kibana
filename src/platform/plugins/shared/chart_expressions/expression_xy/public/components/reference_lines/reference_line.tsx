@@ -7,13 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { FC } from 'react';
-import { Position } from '@elastic/charts';
-import { FieldFormat } from '@kbn/field-formats-plugin/common';
-import { ReferenceLineConfig } from '../../../common/types';
+import type { FC } from 'react';
+import React from 'react';
+import type { Position } from '@elastic/charts';
+import type { FieldFormat } from '@kbn/field-formats-plugin/common';
+import type { ReferenceLineConfig } from '../../../common/types';
 import { ReferenceLineAnnotations } from './reference_line_annotations';
-import { AxesMap, GroupsConfiguration } from '../../helpers';
-import { FormattersMap, getAxisGroupForReferenceLine } from './utils';
+import type { AxesMap, GroupsConfiguration } from '../../helpers';
+import type { FormattersMap } from './utils';
+import { getAxisGroupForReferenceLine } from './utils';
 
 interface ReferenceLineProps {
   layer: ReferenceLineConfig;
@@ -51,7 +53,7 @@ export const ReferenceLine: FC<ReferenceLineProps> = ({
   const axisGroup = getAxisGroupForReferenceLine(axesConfiguration, decorationConfig, isHorizontal);
 
   const formatter =
-    formatters[decorationConfig.forAccessor] || axisGroup?.formatter || xAxisFormatter;
+    axisGroup?.formatter ?? formatters[decorationConfig.forAccessor] ?? xAxisFormatter;
   const id = `${layer.layerId}-${value}`;
   const name = decorationConfig.textVisibility
     ? columnToLabelMap[decorationConfig.forAccessor]

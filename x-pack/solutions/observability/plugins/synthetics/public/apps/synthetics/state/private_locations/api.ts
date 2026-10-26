@@ -5,10 +5,15 @@
  * 2.0.
  */
 
-import { NewLocation } from '../../components/settings/private_locations/add_location_flyout';
-import { AgentPolicyInfo } from '../../../../../common/types';
+import type { EditPrivateLocationAttributes } from '../../../../../server/routes/settings/private_locations/edit_private_location';
+import type { ResetPrivateLocationResponse } from '../../../../../server/routes/settings/private_locations/reset_private_location';
+import type { NewLocation } from '../../components/settings/private_locations/add_or_edit_location_flyout';
+import type { AgentPolicyInfo } from '../../../../../common/types';
 import { INITIAL_REST_VERSION, SYNTHETICS_API_URLS } from '../../../../../common/constants';
-import { PrivateLocation, SyntheticsPrivateLocations } from '../../../../../common/runtime_types';
+import type {
+  PrivateLocation,
+  SyntheticsPrivateLocations,
+} from '../../../../../common/runtime_types';
 import { apiService } from '../../../../utils/api_service/api_service';
 
 export const fetchAgentPolicies = async (): Promise<AgentPolicyInfo[]> => {
@@ -18,7 +23,19 @@ export const fetchAgentPolicies = async (): Promise<AgentPolicyInfo[]> => {
 export const createSyntheticsPrivateLocation = async (
   newLocation: NewLocation
 ): Promise<PrivateLocation> => {
-  return await apiService.post(SYNTHETICS_API_URLS.PRIVATE_LOCATIONS, newLocation, undefined, {
+  return apiService.post(SYNTHETICS_API_URLS.PRIVATE_LOCATIONS, newLocation, {
+    version: INITIAL_REST_VERSION,
+  });
+};
+
+export const editSyntheticsPrivateLocation = async ({
+  locationId,
+  newAttributes,
+}: {
+  locationId: string;
+  newAttributes: EditPrivateLocationAttributes;
+}): Promise<PrivateLocation> => {
+  return apiService.put(`${SYNTHETICS_API_URLS.PRIVATE_LOCATIONS}/${locationId}`, newAttributes, {
     version: INITIAL_REST_VERSION,
   });
 };
@@ -27,6 +44,14 @@ export const getSyntheticsPrivateLocations = async (): Promise<SyntheticsPrivate
   return await apiService.get(SYNTHETICS_API_URLS.PRIVATE_LOCATIONS, {
     version: INITIAL_REST_VERSION,
   });
+};
+
+export const resetSyntheticsPrivateLocation = async (
+  locationId: string
+): Promise<ResetPrivateLocationResponse> => {
+  return await apiService.post(
+    SYNTHETICS_API_URLS.PRIVATE_LOCATION_RESET.replace('{id}', locationId)
+  );
 };
 
 export const deleteSyntheticsPrivateLocation = async (

@@ -10,7 +10,7 @@
 import { EuiSpacer, EuiPageTemplate } from '@elastic/eui';
 import React from 'react';
 import { APP_WRAPPER_CLASS } from '@kbn/core-application-common';
-import { Error } from '../types';
+import type { Error } from '../types';
 
 interface Props {
   title: React.ReactNode;
@@ -34,7 +34,7 @@ export const PageError: React.FunctionComponent<Props> = ({
   ...rest
 }) => {
   const errorString = error?.error;
-  const cause = error?.cause; // wrapEsError() on the server adds a "cause" array
+  const cause = error?.cause ?? error?.attributes?.causes;
   const message = error?.message;
 
   const errorContent = (

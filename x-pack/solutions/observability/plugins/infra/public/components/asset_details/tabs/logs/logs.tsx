@@ -5,162 +5,144 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useRef, useState } from 'react';
-import useDebounce from 'react-use/lib/useDebounce';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { i18n } from '@kbn/i18n';
-import { EuiFieldSearch, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { LogStream } from '@kbn/logs-shared-plugin/public';
-import {
-  DEFAULT_LOG_VIEW,
-  getLogsLocatorFromUrlService,
-  getNodeQuery,
-  type LogViewReference,
-} from '@kbn/logs-shared-plugin/common';
+import React, { useMemo } from 'react';
+import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { findInventoryFields } from '@kbn/metrics-data-access-plugin/common';
-import { OpenInLogsExplorerButton } from '@kbn/logs-shared-plugin/public';
-import moment from 'moment';
+import { LazySavedSearchComponent } from '@kbn/saved-search-component';
+import useAsync from 'react-use/lib/useAsync';
+import { Global, css } from '@emotion/react';
+import {
+  buildCustomFilter,
+  FilterStateStore,
+  fromKueryExpression,
+  toElasticsearchQuery,
+} from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
-import { InfraLoadingPanel } from '../../../loading';
 import { useAssetDetailsRenderPropsContext } from '../../hooks/use_asset_details_render_props';
-import { useDataViewsContext } from '../../hooks/use_data_views';
 import { useDatePickerContext } from '../../hooks/use_date_picker';
 import { useAssetDetailsUrlState } from '../../hooks/use_asset_details_url_state';
-import { useIntersectingState } from '../../hooks/use_intersecting_state';
-
-const TEXT_QUERY_THROTTLE_INTERVAL_MS = 500;
 
 export const Logs = () => {
-  const ref = useRef<HTMLDivElement>(null);
-  const { getDateRangeInTimestamp, dateRange, autoRefresh } = useDatePickerContext();
-  const [urlState, setUrlState] = useAssetDetailsUrlState();
-  const { asset } = useAssetDetailsRenderPropsContext();
-  const { logs } = useDataViewsContext();
+  const { euiTheme } = useEuiTheme();
+  const { dateRange } = useDatePickerContext();
+  const [urlState] = useAssetDetailsUrlState();
+  const { entity } = useAssetDetailsRenderPropsContext();
+  const textQueryDebounced = urlState?.logsSearch ?? '';
 
-  const { loading: logViewLoading, reference: logViewReference } = logs ?? {};
-
-  const { services } = useKibanaContextForPlugin();
-  const logsLocator = getLogsLocatorFromUrlService(services.share.url)!;
-  const [textQuery, setTextQuery] = useState(urlState?.logsSearch ?? '');
-  const [textQueryDebounced, setTextQueryDebounced] = useState(urlState?.logsSearch ?? '');
-
-  const currentTimestamp = getDateRangeInTimestamp().to;
-  const state = useIntersectingState(ref, {
-    currentTimestamp,
-    startTimestamp: currentTimestamp - 60 * 60 * 1000,
-    dateRange,
-    autoRefresh,
-  });
-
-  useDebounce(
-    () => {
-      setUrlState({ logsSearch: textQuery });
-      setTextQueryDebounced(textQuery);
-    },
-    TEXT_QUERY_THROTTLE_INTERVAL_MS,
-    [textQuery]
-  );
-
-  const filter = useMemo(() => {
-    const query = [
-      `${findInventoryFields(asset.type).id}: "${asset.id}"`,
-      ...(textQueryDebounced !== '' ? [textQueryDebounced] : []),
-    ].join(' and ');
-
-    return {
-      language: 'kuery',
-      query,
-    };
-  }, [asset.type, asset.id, textQueryDebounced]);
-
-  const onQueryChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setTextQuery(e.target.value);
-  }, []);
-
-  const logView: LogViewReference = useMemo(
-    () => (logViewReference ? logViewReference : DEFAULT_LOG_VIEW),
-    [logViewReference]
-  );
-
-  const logsUrl = useMemo(() => {
-    return logsLocator.getRedirectUrl({
-      query: getNodeQuery({
-        nodeField: findInventoryFields(asset.type).id,
-        nodeId: asset.id,
-        filter: textQueryDebounced,
-      }),
-      timeRange: {
-        from: moment(state.startTimestamp).toISOString(),
-        to: moment(state.currentTimestamp).toISOString(),
+  const {
+    services: {
+      logsDataAccess: {
+        services: { logSourcesService },
       },
-      logView,
-    });
-  }, [
-    logsLocator,
-    asset.id,
-    asset.type,
-    state.startTimestamp,
-    state.currentTimestamp,
-    textQueryDebounced,
-    logView,
-  ]);
+      embeddable,
+      dataViews,
+      data: {
+        search: { searchSource },
+      },
+    },
+  } = useKibanaContextForPlugin();
+
+  const logSources = useAsync(logSourcesService.getFlattenedLogSources);
+
+  const entityContextFilter = useMemo(
+    () => [
+      toElasticsearchQuery(
+        fromKueryExpression(`${findInventoryFields(entity.type).id}: "${entity.id}"`)
+      ),
+    ],
+    [entity.type, entity.id]
+  );
+
+  // User search filter - should be highlighted
+  const userSearchFilter = useMemo(() => {
+    if (!textQueryDebounced || textQueryDebounced.trim() === '') {
+      return [];
+    }
+
+    try {
+      return [toElasticsearchQuery(fromKueryExpression(textQueryDebounced))];
+    } catch (err) {
+      // Invalid/incomplete query, return empty array to avoid breaking the component
+      return [];
+    }
+  }, [textQueryDebounced]);
+
+  // User search filters - WILL be highlighted
+  const documentFilters = useMemo<Filter[]>(() => {
+    // Exit early if no log sources
+    if (!logSources.value) {
+      return [];
+    }
+
+    // Add user search filter (enable highlighting)
+    if (userSearchFilter.length > 0) {
+      return [
+        buildCustomFilter(
+          logSources.value,
+          userSearchFilter[0],
+          false,
+          false,
+          'User Search',
+          FilterStateStore.APP_STATE
+        ),
+      ];
+    }
+
+    return [];
+  }, [userSearchFilter, logSources.value]);
+
+  // Entity context filters - WON'T be highlighted
+  const nonHighlightingFilters = useMemo<Filter[]>(() => {
+    // Exit early if no log sources
+    if (!logSources.value) {
+      return [];
+    }
+
+    // Add entity context filter (skip highlighting)
+    if (entityContextFilter.length > 0) {
+      return [
+        buildCustomFilter(
+          logSources.value,
+          entityContextFilter[0],
+          false,
+          false,
+          'Entity Context',
+          FilterStateStore.APP_STATE
+        ),
+      ];
+    }
+
+    return [];
+  }, [entityContextFilter, logSources.value]);
 
   return (
-    <EuiFlexGroup direction="column" ref={ref}>
-      <EuiFlexItem grow={false}>
-        <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
-          <EuiFlexItem>
-            <EuiFieldSearch
-              data-test-subj="infraAssetDetailsLogsTabFieldSearch"
-              fullWidth
-              placeholder={i18n.translate('xpack.infra.nodeDetails.logs.textFieldPlaceholder', {
-                defaultMessage: 'Search for log entries...',
-              })}
-              value={textQuery}
-              isClearable
-              onChange={onQueryChange}
+    <>
+      <Global
+        styles={css`
+          .DiscoverFlyout {
+            z-index: ${euiTheme.levels.mask} !important;
+          }
+        `}
+      />
+      <EuiFlexGroup direction="column">
+        <EuiFlexItem>
+          {logSources.value ? (
+            <LazySavedSearchComponent
+              dependencies={{ embeddable, searchSource, dataViews }}
+              index={logSources.value}
+              timeRange={dateRange}
+              filters={documentFilters}
+              nonHighlightingFilters={nonHighlightingFilters}
+              height="68vh"
+              displayOptions={{
+                solutionNavIdOverride: 'oblt',
+                enableFilters: false,
+              }}
             />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <OpenInLogsExplorerButton
-              href={logsUrl}
-              testSubject={'infraAssetDetailsLogsTabOpenInLogsButton'}
-              size="xs"
-              flush="both"
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
-      <EuiFlexItem>
-        {logViewLoading || !logViewReference ? (
-          <InfraLoadingPanel
-            width="100%"
-            height="60vh"
-            text={
-              <FormattedMessage
-                id="xpack.infra.hostsViewPage.tabs.logs.loadingEntriesLabel"
-                defaultMessage="Loading entries"
-              />
-            }
-          />
-        ) : (
-          <LogStream
-            logView={logView}
-            startTimestamp={state.startTimestamp}
-            endTimestamp={state.currentTimestamp}
-            startDateExpression={
-              state.autoRefresh && !state.autoRefresh.isPaused ? state.dateRange.from : undefined
-            }
-            endDateExpression={
-              state.autoRefresh && !state.autoRefresh.isPaused ? state.dateRange.to : undefined
-            }
-            query={filter}
-            height="60vh"
-            showFlyoutAction
-            isStreaming={state.autoRefresh && !state.autoRefresh.isPaused}
-          />
-        )}
-      </EuiFlexItem>
-    </EuiFlexGroup>
+          ) : null}
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </>
   );
 };

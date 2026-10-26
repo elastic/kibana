@@ -11,6 +11,7 @@ import { merge } from 'rxjs';
 import type { EuiTableActionsColumnType } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { UI_SETTINGS, type DataViewField } from '@kbn/data-plugin/common';
+import type { Filter } from '@kbn/es-query';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 import seedrandom from 'seedrandom';
 import type { Dictionary } from '@kbn/ml-url-state';
@@ -62,16 +63,25 @@ const DEFAULT_SAMPLING_OPTION: SamplingOption = {
   seed: '',
   probability: 0,
 };
-export const useDataVisualizerGridData = (
+export const useDataVisualizerGridData = ({
+  input,
+  dataVisualizerListState,
+  savedRandomSamplerPreference,
+  onUpdate,
+  projectRouting,
+  isInteractive = true,
+}: {
   // Data view is required for non-ES|QL queries like kuery or lucene
-  input: Required<FieldStatisticTableEmbeddableProps, 'dataView'>,
-  dataVisualizerListState: Required<DataVisualizerIndexBasedAppState>,
-  savedRandomSamplerPreference?: RandomSamplerOption,
-  onUpdate?: (params: Dictionary<unknown>) => void
-) => {
+  input: Required<FieldStatisticTableEmbeddableProps, 'dataView'>;
+  dataVisualizerListState: Required<DataVisualizerIndexBasedAppState>;
+  savedRandomSamplerPreference?: RandomSamplerOption;
+  onUpdate?: (params: Dictionary<unknown>) => void;
+  projectRouting?: string;
+  isInteractive?: boolean;
+}) => {
   const loadIndexDataStartTime = useRef<number | undefined>(window.performance.now());
   const { services } = useDataVisualizerKibana();
-  const { uiSettings, data, security, executionContext, analytics } = services;
+  const { uiSettings, data, security, executionContext, analytics, cps } = services;
 
   const parentExecutionContext = useObservable(executionContext?.context$);
 
@@ -184,6 +194,32 @@ export const useDataVisualizerGridData = (
     data.query.filterManager,
   ]);
 
+  // Hydrate saved-search filters into FilterManager after render so filter badges appear
+  // without triggering UnifiedSearch setState during useMemo/render.
+  useEffect(() => {
+    const savedFilters = currentSavedSearch?.searchSource?.getField('filter') as
+      | Filter[]
+      | undefined;
+    if (!savedFilters?.length) {
+      return;
+    }
+
+    const filterManager = data.query.filterManager;
+    const existing = filterManager.getFilters();
+    const missing = savedFilters.filter(
+      (savedFilter) =>
+        !existing.some(
+          (existingFilter) =>
+            existingFilter.meta?.key === savedFilter.meta?.key &&
+            JSON.stringify(existingFilter.meta?.params) === JSON.stringify(savedFilter.meta?.params)
+        )
+    );
+
+    if (missing.length > 0) {
+      filterManager.addFilters(missing);
+    }
+  }, [currentSavedSearch, data.query.filterManager]);
+
   const _timeBuckets = useTimeBuckets(uiSettings);
 
   const timefilter = useTimefilter({
@@ -240,7 +276,7 @@ export const useDataVisualizerGridData = (
           return;
         }
         const fieldName = field.displayName !== undefined ? field.displayName : field.name;
-        if (!OMIT_FIELDS.includes(fieldName)) {
+        if (field.type !== SUPPORTED_FIELD_TYPES.UNKNOWN && !OMIT_FIELDS.includes(fieldName)) {
           if (
             field.aggregatable === true &&
             !NON_AGGREGATABLE_FIELD_TYPES.has(field.type) &&
@@ -260,6 +296,7 @@ export const useDataVisualizerGridData = (
         searchQuery,
         sessionId: searchSessionId,
         index: currentDataView.title,
+        projectRouting: projectRouting ?? cps?.cpsManager?.getProjectRouting(),
         timeFieldName: currentDataView.timeFieldName,
         runtimeFieldMap: currentDataView.getRuntimeMappings(),
         aggregatableFields,
@@ -279,6 +316,8 @@ export const useDataVisualizerGridData = (
       browserSessionSeed,
       input.timeRange?.from,
       input.timeRange?.to,
+      projectRouting,
+      cps,
     ]
   );
 
@@ -574,7 +613,7 @@ export const useDataVisualizerGridData = (
   // Inject custom action column for the index based visualizer
   // Hide the column completely if no access to any of the plugins
   const extendedColumns = useMemo(() => {
-    if (!input.dataView) return undefined;
+    if (!isInteractive || !input.dataView) return undefined;
     const actions = getActions(
       input.dataView,
       services,
@@ -595,12 +634,20 @@ export const useDataVisualizerGridData = (
     };
 
     return [actionColumn];
-  }, [input.dataView, services, searchQueryLanguage, searchString, input.allowEditDataView]);
+  }, [
+    isInteractive,
+    input.dataView,
+    services,
+    searchQueryLanguage,
+    searchString,
+    input.allowEditDataView,
+  ]);
 
   return {
     progress: combinedProgress,
     overallStatsProgress,
     configs,
+    fieldsCount: configs.length,
     queryOrAggregateQuery,
     searchQueryLanguage,
     searchString,

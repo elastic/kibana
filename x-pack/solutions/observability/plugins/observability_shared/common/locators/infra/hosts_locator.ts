@@ -4,12 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { SerializableRecord } from '@kbn/utility-types';
+import type { SerializableRecord } from '@kbn/utility-types';
 import rison from '@kbn/rison';
-import { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/common';
+import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/common';
 import type { Filter } from '@kbn/es-query';
 
 export type HostsLocator = LocatorPublic<HostsLocatorParams>;
+export type DataSchemaFormat = 'ecs' | 'semconv';
 
 export interface HostsLocatorParams extends SerializableRecord {
   query?: {
@@ -23,6 +24,7 @@ export interface HostsLocatorParams extends SerializableRecord {
   filters?: Filter[];
   panelFilters?: Filter[];
   limit?: number;
+  preferredSchema?: DataSchemaFormat | null;
   tableProperties?: {
     detailsItemId?: string;
     pagination: {
@@ -49,6 +51,7 @@ export class HostsLocatorDefinition implements LocatorDefinition<HostsLocatorPar
       filters: params.filters ?? [],
       panelFilters: params.panelFilters ?? [],
       limit: params.limit ?? DEFAULT_HOST_LIMIT,
+      preferredSchema: params.preferredSchema ?? null,
     };
     const searchString = rison.encodeUnknown(paramsWithDefaults);
     const tableProperties = rison.encodeUnknown(params.tableProperties);

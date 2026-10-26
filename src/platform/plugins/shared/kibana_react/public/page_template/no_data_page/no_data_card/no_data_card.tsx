@@ -8,9 +8,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { FunctionComponent } from 'react';
-import { EuiButton, EuiCard, EuiCardProps } from '@elastic/eui';
-import { NoDataPageActions, NO_DATA_RECOMMENDED } from '../no_data_page';
+import type { FunctionComponent } from 'react';
+import React from 'react';
+import type { EuiCardProps } from '@elastic/eui';
+import { EuiButton, EuiCard } from '@elastic/eui';
+import type { NoDataPageActions } from '../no_data_page';
+import { NO_DATA_RECOMMENDED } from '../no_data_page';
 
 // Custom cards require all the props the EuiCard does
 type NoDataCard = EuiCardProps & NoDataPageActions;
@@ -20,10 +23,30 @@ export const NoDataCard: FunctionComponent<NoDataPageActions> = ({
   title,
   button,
   layout,
+  href,
+  onClick,
+  isDisabled,
+  target,
+  rel,
   ...cardRest
 }) => {
+  const hasAction = href !== undefined || onClick !== undefined;
+
   const footer =
-    typeof button !== 'string' ? button : <EuiButton fill>{button || title}</EuiButton>;
+    typeof button !== 'string' && typeof button !== 'undefined' ? (
+      button
+    ) : typeof button === 'string' || hasAction ? (
+      <EuiButton
+        fill
+        href={href}
+        onClick={onClick}
+        isDisabled={isDisabled}
+        target={target}
+        rel={rel}
+      >
+        {button || title}
+      </EuiButton>
+    ) : undefined;
 
   return (
     <EuiCard
@@ -37,6 +60,7 @@ export const NoDataCard: FunctionComponent<NoDataPageActions> = ({
       betaBadgeProps={recommended ? { label: NO_DATA_RECOMMENDED } : undefined}
       footer={footer}
       layout={layout as 'vertical' | undefined}
+      isDisabled={isDisabled}
       {...cardRest}
     />
   );

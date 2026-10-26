@@ -13,16 +13,17 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
-  EuiCallOut,
   EuiLink,
   EuiSwitch,
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 
-import { UseField, Field, UseMultiFields, FieldHook } from '../../../shared_imports';
+import type { FieldHook } from '../../../shared_imports';
+import { UseField, Field, UseMultiFields } from '../../../shared_imports';
 import { getFieldConfig } from '../../../lib';
-import { NormalizedField } from '../../../types';
+import type { NormalizedField } from '../../../types';
 import { EditFieldFormRow } from '../fields/edit_field';
 import { documentationService } from '../../../../../services/documentation';
 import { FielddataFrequencyFilterPercentage } from './fielddata_frequency_filter_percentage';
@@ -112,9 +113,7 @@ export const FieldDataParameter = ({ field, defaultToggleValue }: Props) => {
 
           return (
             <>
-              <EuiCallOut
-                color="warning"
-                iconType="warning"
+              <KbnWarningCallout
                 size="s"
                 title={
                   <FormattedMessage

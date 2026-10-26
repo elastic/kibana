@@ -8,18 +8,13 @@
 import React from 'react';
 import { EuiFormRow } from '@elastic/eui';
 
-import {
-  LazyExpressionInput,
-  ExpressionInputProps,
-  withSuspense,
-} from '@kbn/presentation-util-plugin/public';
+import type { ExpressionInputProps } from './types';
+import { ExpressionInputInternal } from './expression_input_internal';
 
 interface Props extends Omit<ExpressionInputProps, 'height'> {
   /** Optional string for displaying error messages */
   error?: string;
 }
-
-const Input = withSuspense(LazyExpressionInput);
 
 export const ExpressionInput = ({ error, ...rest }: Props) => {
   return (
@@ -31,7 +26,7 @@ export const ExpressionInput = ({ error, ...rest }: Props) => {
         error={error}
       >
         <div className="canvasExpressionInput__editor">
-          <Input height="100%" {...rest} />
+          <ExpressionInputInternal height="100%" {...rest} />
         </div>
       </EuiFormRow>
     </div>

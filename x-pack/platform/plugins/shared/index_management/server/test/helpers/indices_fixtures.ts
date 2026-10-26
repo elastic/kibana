@@ -5,8 +5,11 @@
  * 2.0.
  */
 
-import { IndicesIndexState, IndicesStatsIndicesStats } from '@elastic/elasticsearch/lib/api/types';
-import { Index } from '../..';
+import type {
+  IndicesIndexState,
+  IndicesStatsIndicesStats,
+} from '@elastic/elasticsearch/lib/api/types';
+import type { Index } from '../..';
 
 // fixtures return minimal index properties needed for API tests
 
@@ -41,8 +44,8 @@ export const createTestIndexResponse = (index?: Partial<Index>) => {
     name: 'test_index',
     primary: 1,
     replica: 1,
-    size: '100b',
-    primary_size: '100b',
+    size: 100,
+    primary_size: 100,
     status: 'open',
     uuid: 'test_index',
     ...index,

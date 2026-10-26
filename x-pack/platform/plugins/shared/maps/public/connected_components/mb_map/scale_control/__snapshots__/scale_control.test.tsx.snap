@@ -1,27 +1,168 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`isFullScreen 1`] = `
-<div
-  className="mapScaleControl mapScaleControlFullScreen"
-  style={
+<ScaleControl
+  isFullScreen={true}
+  mbMap={
     Object {
-      "width": "62.7474245034397px",
+      "getBounds": [Function],
+      "getContainer": [Function],
+      "getZoom": [Function],
+      "off": [Function],
+      "on": [Function],
+      "unproject": [Function],
     }
   }
 >
-  ~50 km
-</div>
+  <div
+    css="unknown styles"
+    style={
+      Object {
+        "width": "62.7474245034397px",
+      }
+    }
+  >
+    <Insertion
+      cache={
+        Object {
+          "insert": [Function],
+          "inserted": Object {
+            "1g3n1r4-mapScaleControlStyles-mapScaleControlFullScreenStyles": true,
+            "jzey84-mapScaleControlStyles": true,
+          },
+          "key": "css",
+          "nonce": undefined,
+          "registered": Object {},
+          "sheet": StyleSheet {
+            "_insertTag": [Function],
+            "before": null,
+            "container": <head>
+              <style
+                data-emotion="css"
+                data-s=""
+              >
+                
+              </style>
+            </head>,
+            "ctr": 2,
+            "insertionPoint": undefined,
+            "isSpeedy": true,
+            "key": "css",
+            "nonce": undefined,
+            "prepend": undefined,
+            "tags": Array [
+              <style
+                data-emotion="css"
+                data-s=""
+              >
+                
+              </style>,
+            ],
+          },
+        }
+      }
+      isStringTag={true}
+      serialized={
+        Object {
+          "name": "1g3n1r4-mapScaleControlStyles-mapScaleControlFullScreenStyles",
+          "next": undefined,
+          "styles": "position:absolute;z-index:1000;left:12px;bottom:12px;pointer-events:none;color:#384861;border-left:2px solid #38486199;border-bottom:2px solid #38486199;text-align:right;background-color:#F6F9FC;padding-left:4px;padding-right:4px;;label:mapScaleControlStyles;;bottom:calc(24px * 2);;label:mapScaleControlFullScreenStyles;;",
+        }
+      }
+    />
+    <div
+      className="css-1g3n1r4-mapScaleControlStyles-mapScaleControlFullScreenStyles"
+      style={
+        Object {
+          "width": "62.7474245034397px",
+        }
+      }
+    >
+      ~50 km
+    </div>
+  </div>
+</ScaleControl>
 `;
 
 exports[`render 1`] = `
-<div
-  className="mapScaleControl"
-  style={
+<ScaleControl
+  isFullScreen={false}
+  mbMap={
     Object {
-      "width": "62.7474245034397px",
+      "getBounds": [Function],
+      "getContainer": [Function],
+      "getZoom": [Function],
+      "off": [Function],
+      "on": [Function],
+      "unproject": [Function],
     }
   }
 >
-  ~50 km
-</div>
+  <div
+    css="unknown styles"
+    style={
+      Object {
+        "width": "62.7474245034397px",
+      }
+    }
+  >
+    <Insertion
+      cache={
+        Object {
+          "insert": [Function],
+          "inserted": Object {
+            "jzey84-mapScaleControlStyles": true,
+          },
+          "key": "css",
+          "nonce": undefined,
+          "registered": Object {},
+          "sheet": StyleSheet {
+            "_insertTag": [Function],
+            "before": null,
+            "container": <head>
+              <style
+                data-emotion="css"
+                data-s=""
+              >
+                
+              </style>
+            </head>,
+            "ctr": 1,
+            "insertionPoint": undefined,
+            "isSpeedy": true,
+            "key": "css",
+            "nonce": undefined,
+            "prepend": undefined,
+            "tags": Array [
+              <style
+                data-emotion="css"
+                data-s=""
+              >
+                
+              </style>,
+            ],
+          },
+        }
+      }
+      isStringTag={true}
+      serialized={
+        Object {
+          "name": "jzey84-mapScaleControlStyles",
+          "next": undefined,
+          "styles": "position:absolute;z-index:1000;left:12px;bottom:12px;pointer-events:none;color:#384861;border-left:2px solid #38486199;border-bottom:2px solid #38486199;text-align:right;background-color:#F6F9FC;padding-left:4px;padding-right:4px;;label:mapScaleControlStyles;;;",
+        }
+      }
+    />
+    <div
+      className="css-jzey84-mapScaleControlStyles"
+      style={
+        Object {
+          "width": "62.7474245034397px",
+        }
+      }
+    >
+      ~50 km
+    </div>
+  </div>
+</ScaleControl>
 `;

@@ -5,15 +5,19 @@
  * 2.0.
  */
 import { withApmSpan } from '@kbn/apm-data-access-plugin/server/utils/with_apm_span';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { isEmpty } from 'lodash';
 import { isKibanaResponse } from '@kbn/core-http-server';
+import { getProjectRoutingFromRequest } from '@kbn/observability-utils-server/es/get_project_routing_from_request';
 import { MonitorConfigRepository } from './services/monitor_config_repository';
+import { MonitorIntegrationHealthApi } from './services/monitor_integration_health_api';
 import { syntheticsServiceApiKey } from './saved_objects/service_api_key';
+import { syntheticsSecretConnectionType } from '../common/types/saved_objects';
 import { isTestUser, SyntheticsEsClient } from './lib';
-import { SYNTHETICS_INDEX_PATTERN } from '../common/constants';
 import { checkIndicesReadPrivileges } from './synthetics_service/authentication/check_has_privilege';
-import { SyntheticsRouteWrapper } from './routes/types';
+import { resolveHeartbeatIndices } from './services/resolve_heartbeat_indices';
+import { wrapZodRequestValidation } from './routes/zod_query';
+import type { SyntheticsRouteWrapper } from './routes/types';
 
 export const syntheticsRouteWrapper: SyntheticsRouteWrapper = (
   syntheticsRoute,
@@ -21,6 +25,8 @@ export const syntheticsRouteWrapper: SyntheticsRouteWrapper = (
   syntheticsMonitorClient
 ) => ({
   ...syntheticsRoute,
+  validate: wrapZodRequestValidation(syntheticsRoute.validate),
+  validation: wrapZodRequestValidation(syntheticsRoute.validation),
   options: {
     ...(syntheticsRoute.options ?? {}),
   },
@@ -30,6 +36,11 @@ export const syntheticsRouteWrapper: SyntheticsRouteWrapper = (
         'uptime-read',
         ...(syntheticsRoute.requiredPrivileges ?? []),
         ...(syntheticsRoute?.writeAccess ? ['uptime-write'] : []),
+        // OR-set: at least one of these privileges must be satisfied. Used to allow a
+        // route for either a full-write user or a more granular privilege holder.
+        ...(syntheticsRoute.anyRequiredPrivileges?.length
+          ? [{ anyRequired: syntheticsRoute.anyRequiredPrivileges }]
+          : []),
       ],
     },
   },
@@ -39,11 +50,20 @@ export const syntheticsRouteWrapper: SyntheticsRouteWrapper = (
 
       const { client: esClient } = elasticsearch;
       const savedObjectsClient = savedObjects.getClient({
-        includedHiddenTypes: [syntheticsServiceApiKey.name],
+        includedHiddenTypes: [syntheticsServiceApiKey.name, syntheticsSecretConnectionType],
       });
 
       // specifically needed for the synthetics service api key generation
       server.authSavedObjectsClient = savedObjectsClient;
+
+      const spaceId = server.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
+
+      const heartbeatIndices = await resolveHeartbeatIndices({
+        server,
+        spaceId,
+        savedObjectsClient,
+        esClient: esClient.asCurrentUser,
+      });
 
       const syntheticsEsClient = new SyntheticsEsClient(
         savedObjectsClient,
@@ -52,7 +72,12 @@ export const syntheticsRouteWrapper: SyntheticsRouteWrapper = (
           request,
           uiSettings,
           isDev: Boolean(server.isDev) && !isTestUser(server),
-          heartbeatIndices: SYNTHETICS_INDEX_PATTERN,
+          heartbeatIndices,
+          // CRUD / settings stay origin-only even if a client sends the header.
+          projectRouting:
+            !syntheticsRoute.writeAccess && server.isCpsEnabled
+              ? getProjectRoutingFromRequest(request)
+              : undefined,
         }
       );
 
@@ -63,10 +88,15 @@ export const syntheticsRouteWrapper: SyntheticsRouteWrapper = (
         encryptedSavedObjectsClient
       );
 
-      const spaceId = server.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
+      const monitorIntegrationHealthApi = new MonitorIntegrationHealthApi(
+        server,
+        savedObjectsClient,
+        monitorConfigRepository,
+        spaceId
+      );
 
       try {
-        const res = await syntheticsRoute.handler({
+        const data = {
           syntheticsEsClient,
           savedObjectsClient,
           context,
@@ -76,7 +106,11 @@ export const syntheticsRouteWrapper: SyntheticsRouteWrapper = (
           spaceId,
           syntheticsMonitorClient,
           monitorConfigRepository,
-        });
+          monitorIntegrationHealthApi,
+        };
+
+        const res = await server.fleet.runWithCache(() => syntheticsRoute.handler(data));
+
         if (isKibanaResponse(res)) {
           return res;
         }
@@ -105,6 +139,9 @@ export const syntheticsRouteWrapper: SyntheticsRouteWrapper = (
           },
         });
       } catch (e) {
+        if (isKibanaResponse(e)) {
+          return e;
+        }
         if (e.statusCode === 403) {
           const privileges = await checkIndicesReadPrivileges(syntheticsEsClient);
           if (!privileges.has_all_requested) {
@@ -115,8 +152,11 @@ export const syntheticsRouteWrapper: SyntheticsRouteWrapper = (
               },
             });
           }
+        } else if (e.statusCode >= 500) {
+          server.logger.error(e);
+        } else {
+          server.logger.debug(e);
         }
-        server.logger.error(e);
         throw e;
       }
     });

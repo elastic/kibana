@@ -92,4 +92,110 @@ describe('useCalculateImpactEstimate', () => {
       annualizedCoreSeconds: 17520000,
     });
   });
+
+  it('handles division by zero when totalSamples is 0', () => {
+    const calculateImpactEstimates = useCalculateImpactEstimate();
+    const { selfCPU, totalCPU, totalSamples } = calculateImpactEstimates({
+      countExclusive: 100,
+      countInclusive: 200,
+      totalSamples: 0,
+      totalSeconds: 15 * 60, // 15m
+    });
+
+    expect(totalCPU).toEqual({
+      percentage: 0,
+      coreSeconds: 0,
+      annualizedCoreSeconds: 0,
+    });
+
+    expect(selfCPU).toEqual({
+      percentage: 0,
+      coreSeconds: 0,
+      annualizedCoreSeconds: 0,
+    });
+
+    expect(totalSamples).toEqual({
+      percentage: 0,
+      coreSeconds: 0,
+      annualizedCoreSeconds: 0,
+    });
+  });
+
+  it('handles division by zero when totalSeconds is 0', () => {
+    const calculateImpactEstimates = useCalculateImpactEstimate();
+    const { selfCPU, totalCPU, totalSamples } = calculateImpactEstimates({
+      countExclusive: 100,
+      countInclusive: 200,
+      totalSamples: 9500,
+      totalSeconds: 0,
+    });
+
+    expect(totalCPU).toEqual({
+      percentage: 0,
+      coreSeconds: 0,
+      annualizedCoreSeconds: 0,
+    });
+
+    expect(selfCPU).toEqual({
+      percentage: 0,
+      coreSeconds: 0,
+      annualizedCoreSeconds: 0,
+    });
+
+    expect(totalSamples).toEqual({
+      percentage: 0,
+      coreSeconds: 0,
+      annualizedCoreSeconds: 0,
+    });
+  });
+
+  it('handles division by zero when both totalSamples and totalSeconds are 0', () => {
+    const calculateImpactEstimates = useCalculateImpactEstimate();
+    const { selfCPU, totalCPU, totalSamples } = calculateImpactEstimates({
+      countExclusive: 100,
+      countInclusive: 200,
+      totalSamples: 0,
+      totalSeconds: 0,
+    });
+
+    expect(totalCPU).toEqual({
+      percentage: 0,
+      coreSeconds: 0,
+      annualizedCoreSeconds: 0,
+    });
+
+    expect(selfCPU).toEqual({
+      percentage: 0,
+      coreSeconds: 0,
+      annualizedCoreSeconds: 0,
+    });
+
+    expect(totalSamples).toEqual({
+      percentage: 0,
+      coreSeconds: 0,
+      annualizedCoreSeconds: 0,
+    });
+  });
+
+  it('handles zero samples with non-zero totalSamples', () => {
+    const calculateImpactEstimates = useCalculateImpactEstimate();
+    const { selfCPU, totalCPU } = calculateImpactEstimates({
+      countExclusive: 0,
+      countInclusive: 0,
+      totalSamples: 9500,
+      totalSeconds: 15 * 60, // 15m
+    });
+
+    expect(totalCPU).toEqual({
+      percentage: 0,
+      coreSeconds: 0,
+      annualizedCoreSeconds: 0,
+    });
+
+    expect(selfCPU).toEqual({
+      percentage: 0,
+      coreSeconds: 0,
+      annualizedCoreSeconds: 0,
+    });
+  });
 });

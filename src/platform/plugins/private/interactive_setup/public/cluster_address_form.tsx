@@ -74,13 +74,12 @@ export const ClusterAddressForm: FunctionComponent<ClusterAddressFormProps> = ({
     },
     onSubmit: async (values) => {
       const url = new URL(values.host);
-      const host = `${url.protocol}//${url.hostname}:${url.port || 9200}`;
 
       const result = await http.post<PingResult>('/internal/interactive_setup/ping', {
-        body: JSON.stringify({ host }),
+        body: JSON.stringify({ host: url.origin }),
       });
 
-      onSuccess?.(result, { host });
+      onSuccess?.(result, { host: url.origin });
     },
   });
 
@@ -107,6 +106,7 @@ export const ClusterAddressForm: FunctionComponent<ClusterAddressFormProps> = ({
         fullWidth
       >
         <EuiFieldText
+          data-test-subj="interactiveSetupClusterAddressInput"
           name="host"
           value={form.values.host}
           isInvalid={form.touched.host && !!form.errors.host}
@@ -118,7 +118,7 @@ export const ClusterAddressForm: FunctionComponent<ClusterAddressFormProps> = ({
 
       <EuiFlexGroup responsive={false} justifyContent="flexEnd">
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty flush="right" iconType="arrowLeft" onClick={onCancel}>
+          <EuiButtonEmpty flush="right" iconType="chevronSingleLeft" onClick={onCancel}>
             <FormattedMessage
               id="interactiveSetup.clusterAddressForm.cancelButton"
               defaultMessage="Back"
@@ -127,6 +127,7 @@ export const ClusterAddressForm: FunctionComponent<ClusterAddressFormProps> = ({
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButton
+            data-test-subj="interactiveSetupCheckAddressButton"
             type="submit"
             isLoading={form.isSubmitting}
             isDisabled={form.isSubmitted && form.isInvalid}

@@ -8,26 +8,26 @@
  */
 
 import type { MetricsCollector } from '@kbn/core-metrics-server';
+import { lazyObject } from '@kbn/lazy-object';
 import { createMockOpsProcessMetrics } from './process.mocks';
 
 const createMock = () => {
-  const mocked: jest.Mocked<MetricsCollector<any>> = {
-    collect: jest.fn(),
+  const mocked: jest.Mocked<MetricsCollector<any>> = lazyObject({
+    collect: jest.fn().mockResolvedValue({}),
     reset: jest.fn(),
-  };
-
-  mocked.collect.mockResolvedValue({});
+  });
 
   return mocked;
 };
 
-const createMockProcessMetricsCollector = () => ({
-  ...createMock(),
-  registerMetrics: jest.fn().mockResolvedValue({}),
-});
+const createMockWithRegisterMetrics = () =>
+  lazyObject({
+    ...createMock(),
+    registerMetrics: jest.fn().mockResolvedValue({}),
+  });
 
 export const collectorMock = {
   create: createMock,
   createOpsProcessMetrics: createMockOpsProcessMetrics,
-  createProcessMetricsCollector: createMockProcessMetricsCollector,
+  createMockWithRegisterMetrics,
 };

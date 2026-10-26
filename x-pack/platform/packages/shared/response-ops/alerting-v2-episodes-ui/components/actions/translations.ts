@@ -1,0 +1,378 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { i18n } from '@kbn/i18n';
+
+/** --- Acknowledge action --- */
+export const ACKNOWLEDGE_ACTION_ACKNOWLEDGE = i18n.translate(
+  'xpack.alertingV2EpisodesUi.episodesUi.acknowledgeAction.acknowledge',
+  {
+    defaultMessage: 'Acknowledge',
+  }
+);
+
+export const ACKNOWLEDGE_ACTION_UNACKNOWLEDGE = i18n.translate(
+  'xpack.alertingV2EpisodesUi.episodesUi.acknowledgeAction.unacknowledge',
+  {
+    defaultMessage: 'Unacknowledge',
+  }
+);
+
+/** --- Actions container --- */
+export const ACTIONS_MORE_ACTIONS_ARIA_LABEL = i18n.translate(
+  'xpack.alertingV2EpisodesUi.episodesUi.actions.moreActionsAriaLabel',
+  {
+    defaultMessage: 'More actions',
+  }
+);
+
+export const ACTIONS_VIEW_DETAILS_LABEL = i18n.translate(
+  'xpack.alertingV2EpisodesUi.episodesUi.actions.viewDetailsLabel',
+  {
+    defaultMessage: 'View details',
+  }
+);
+
+/** --- Open in Discover action --- */
+export const ACTIONS_OPEN_IN_DISCOVER_LABEL = i18n.translate(
+  'xpack.alertingV2EpisodesUi.episodesUi.actions.openInDiscoverLabel',
+  {
+    defaultMessage: 'Open in Discover',
+  }
+);
+
+/** --- Edit assignee action --- */
+export const ACTIONS_EDIT_ASSIGNEE_LABEL = i18n.translate(
+  'xpack.alertingV2EpisodesUi.episodesUi.actions.editAssignee',
+  {
+    defaultMessage: 'Edit assignee',
+  }
+);
+
+/** --- Resolve action --- */
+export const RESOLVE_ACTION_ACTIVATE = i18n.translate(
+  'xpack.alertingV2EpisodesUi.episodesUi.resolveAction.activate',
+  {
+    defaultMessage: 'Unresolve',
+  }
+);
+
+export const RESOLVE_ACTION_DEACTIVATE = i18n.translate(
+  'xpack.alertingV2EpisodesUi.episodesUi.resolveAction.deactivate',
+  {
+    defaultMessage: 'Resolve',
+  }
+);
+
+export const RESOLVE_ACTION_REASON = i18n.translate(
+  'xpack.alertingV2EpisodesUi.episodesUi.resolveAction.reason',
+  {
+    defaultMessage: 'Updated from alerts actions UI',
+  }
+);
+
+/** --- Snooze action --- */
+export const SNOOZE_ACTION_UNSNOOZE = i18n.translate(
+  'xpack.alertingV2EpisodesUi.episodesUi.snoozeAction.unsnooze',
+  {
+    defaultMessage: 'Unsnooze',
+  }
+);
+
+export const SNOOZE_ACTION_SNOOZE = i18n.translate(
+  'xpack.alertingV2EpisodesUi.episodesUi.snoozeAction.snooze',
+  {
+    defaultMessage: 'Snooze',
+  }
+);
+
+export const SNOOZE_ACTION_POPOVER_ARIA_LABEL = i18n.translate(
+  'xpack.alertingV2EpisodesUi.episodesUi.snoozeAction.popoverAriaLabel',
+  {
+    defaultMessage: 'Snooze actions',
+  }
+);
+
+/** --- Tag badges (list cell) --- */
+export const TAGS_MORE_BADGE_ARIA_LABEL = i18n.translate(
+  'xpack.alertingV2EpisodesUi.episodesUi.tags.moreTags.ariaLabel',
+  {
+    defaultMessage: 'more tags badge',
+  }
+);
+
+export const TAGS_MORE_POPOVER_ARIA_LABEL = i18n.translate(
+  'xpack.alertingV2EpisodesUi.episodesUi.tags.moreTagsAriaLabel',
+  {
+    defaultMessage: 'more tags',
+  }
+);
+
+/** --- Tags flyout & toolbar --- */
+export const TAGS_ACTION_EDIT_TAGS = i18n.translate(
+  'xpack.alertingV2EpisodesUi.episodesUi.tagsAction.editTags',
+  {
+    defaultMessage: 'Edit alert tags',
+  }
+);
+
+export const TAGS_ACTION_FLYOUT_TITLE = i18n.translate(
+  'xpack.alertingV2EpisodesUi.episodesUi.tagsAction.flyoutTitle',
+  {
+    defaultMessage: 'Edit alert tags',
+  }
+);
+
+export const getTagsActionAddNewOptionLabel = (tag: string) =>
+  i18n.translate('xpack.alertingV2EpisodesUi.episodesUi.tagsAction.addNewTagOption', {
+    defaultMessage: 'Add "{tag}" as a new tag',
+    values: { tag },
+  });
+
+export const TAGS_ACTION_SEARCH_PLACEHOLDER = i18n.translate(
+  'xpack.alertingV2EpisodesUi.episodesUi.tagsAction.searchPlaceholder',
+  {
+    defaultMessage: 'Search or add a tag',
+  }
+);
+
+export const TAGS_ACTION_EMPTY_TAGS = i18n.translate(
+  'xpack.alertingV2EpisodesUi.episodesUi.tagsAction.emptyTags',
+  {
+    defaultMessage: 'No tags yet',
+  }
+);
+
+export const TAGS_ACTION_NO_MATCHES = i18n.translate(
+  'xpack.alertingV2EpisodesUi.episodesUi.tagsAction.noMatches',
+  {
+    defaultMessage: 'No matches',
+  }
+);
+
+export const TAGS_ACTION_TAG_TOO_LONG_TITLE = i18n.translate(
+  'xpack.alertingV2EpisodesUi.episodesUi.tagsAction.tagTooLongTitle',
+  {
+    defaultMessage: 'Tag length limit exceeded',
+  }
+);
+
+export const getTagsActionTagTooLongBody = (maxLength: number) =>
+  i18n.translate('xpack.alertingV2EpisodesUi.episodesUi.tagsAction.tagTooLongBody', {
+    defaultMessage:
+      'One or more selected tags exceed the maximum length of {maxLength} characters.',
+    values: { maxLength },
+  });
+
+export const TAGS_ACTION_TOO_MANY_TAGS_TITLE = i18n.translate(
+  'xpack.alertingV2EpisodesUi.episodesUi.tagsAction.tooManyTagsTitle',
+  {
+    defaultMessage: 'Maximum number of tags selected',
+  }
+);
+
+export const getTagsActionTooManyTagsBody = (maxTags: number) =>
+  i18n.translate('xpack.alertingV2EpisodesUi.episodesUi.tagsAction.tooManyTagsBody', {
+    defaultMessage: 'You can save at most {maxTags} tags per alert.',
+    values: { maxTags },
+  });
+
+export const TAGS_ACTION_CANCEL = i18n.translate(
+  'xpack.alertingV2EpisodesUi.episodesUi.tagsAction.cancel',
+  {
+    defaultMessage: 'Cancel',
+  }
+);
+
+export const TAGS_ACTION_SAVE = i18n.translate(
+  'xpack.alertingV2EpisodesUi.episodesUi.tagsAction.save',
+  {
+    defaultMessage: 'Save',
+  }
+);
+
+export const getTagsActionTotalTagsLabel = (totalTags: number) =>
+  i18n.translate('xpack.alertingV2EpisodesUi.episodesUi.tagsAction.totalTags', {
+    defaultMessage: 'Total tags: {totalTags}',
+    values: { totalTags },
+  });
+
+export const getTagsActionSelectedTagsLabel = (selectedTags: number) =>
+  i18n.translate('xpack.alertingV2EpisodesUi.episodesUi.tagsAction.selectedTagsLabel', {
+    defaultMessage: 'Selected: {selectedTags}',
+    values: { selectedTags },
+  });
+
+export const TAGS_ACTION_SELECT_ALL = i18n.translate(
+  'xpack.alertingV2EpisodesUi.episodesUi.tagsAction.selectAll',
+  {
+    defaultMessage: 'Select all',
+  }
+);
+
+export const TAGS_ACTION_SELECT_NONE = i18n.translate(
+  'xpack.alertingV2EpisodesUi.episodesUi.tagsAction.selectNone',
+  {
+    defaultMessage: 'Select none',
+  }
+);
+
+/** --- Bulk snooze modal --- */
+export const BULK_SNOOZE_MODAL_TITLE = i18n.translate(
+  'xpack.alertingV2EpisodesUi.episodesUi.bulkSnoozeModal.title',
+  {
+    defaultMessage: 'Snooze selected alerts',
+  }
+);
+
+/** --- Bulk tags modal --- */
+export const BULK_TAGS_MODAL_TITLE = i18n.translate(
+  'xpack.alertingV2EpisodesUi.episodesUi.bulkTagsModal.title',
+  {
+    defaultMessage: 'Set alert tags for selected alerts',
+  }
+);
+
+export const BULK_TAGS_MODAL_REPLACE_WARNING = i18n.translate(
+  'xpack.alertingV2EpisodesUi.episodesUi.bulkTagsModal.replaceWarning',
+  {
+    defaultMessage: 'These alert tags will replace any existing alert tags on all selected alerts.',
+  }
+);
+
+export const BULK_TAGS_MODAL_COMBOBOX_PLACEHOLDER = i18n.translate(
+  'xpack.alertingV2EpisodesUi.episodesUi.bulkTagsModal.comboboxPlaceholder',
+  {
+    defaultMessage: 'Add tags',
+  }
+);
+
+export const BULK_TAGS_MODAL_CANCEL = i18n.translate(
+  'xpack.alertingV2EpisodesUi.episodesUi.bulkTagsModal.cancel',
+  {
+    defaultMessage: 'Cancel',
+  }
+);
+
+export const BULK_TAGS_MODAL_SAVE = i18n.translate(
+  'xpack.alertingV2EpisodesUi.episodesUi.bulkTagsModal.save',
+  {
+    defaultMessage: 'Save',
+  }
+);
+
+/** --- Edit episode assignee panel --- */
+export const ASSIGNEE_PANEL_EMPTY_LIST_TITLE = (totalEpisodes: number) =>
+  i18n.translate('xpack.alertingV2EpisodesUi.episodes.assignees.panel.emptyListTitle', {
+    defaultMessage:
+      'The selected {totalEpisodes, plural, =1 {alert does} other {alerts do}} not have any assigned users',
+    values: { totalEpisodes },
+  });
+
+export const ASSIGNEE_PANEL_EMPTY_LIST_HELP = i18n.translate(
+  'xpack.alertingV2EpisodesUi.episodes.assignees.panel.emptyListHelp',
+  {
+    defaultMessage: 'Search to assign users.',
+  }
+);
+
+export const ASSIGNEE_PANEL_NO_MATCHES_USER_TITLE = i18n.translate(
+  'xpack.alertingV2EpisodesUi.episodes.assignees.panel.noMatchesUserTitle',
+  {
+    defaultMessage: "User doesn't exist or is unavailable",
+  }
+);
+
+export const ASSIGNEE_PANEL_NO_MATCHES_MODIFY_SEARCH = i18n.translate(
+  'xpack.alertingV2EpisodesUi.episodes.assignees.panel.noMatchesModifySearch',
+  {
+    defaultMessage: "Modify your search or check the user's privileges.",
+  }
+);
+
+export const ASSIGNEE_PANEL_NO_MATCHES_LEARN_PRIVILEGES = i18n.translate(
+  'xpack.alertingV2EpisodesUi.episodes.assignees.panel.noMatchesLearnPrivileges',
+  {
+    defaultMessage: 'Learn what privileges grant access to cases.',
+  }
+);
+
+export const ASSIGNEE_PANEL_CURRENT_PROFILE_ERROR_TITLE = i18n.translate(
+  'xpack.alertingV2EpisodesUi.episodes.assignees.panel.currentProfileErrorTitle',
+  {
+    defaultMessage: 'Could not load current assignee',
+  }
+);
+
+export const ASSIGNEE_PANEL_SUGGEST_ERROR_TITLE = i18n.translate(
+  'xpack.alertingV2EpisodesUi.episodes.assignees.panel.suggestErrorTitle',
+  {
+    defaultMessage: 'Could not search users',
+  }
+);
+
+export const ASSIGNEE_PANEL_TITLE = i18n.translate(
+  'xpack.alertingV2EpisodesUi.episodes.assignees.panel.title',
+  {
+    defaultMessage: 'Edit assignee',
+  }
+);
+
+export const ASSIGNEE_PANEL_SEARCH_PLACEHOLDER = i18n.translate(
+  'xpack.alertingV2EpisodesUi.episodes.assignees.panel.searchPlaceholder',
+  {
+    defaultMessage: 'Search users',
+  }
+);
+
+export const ASSIGNEE_PANEL_NO_ASSIGNEE_OPTION = i18n.translate(
+  'xpack.alertingV2EpisodesUi.episodes.assignees.panel.noAssigneeOption',
+  {
+    defaultMessage: 'No assignee',
+  }
+);
+
+export const ASSIGNEE_PANEL_APPLY = i18n.translate(
+  'xpack.alertingV2EpisodesUi.episodes.assignees.panel.apply',
+  {
+    defaultMessage: 'Apply',
+  }
+);
+
+export const ASSIGNEE_PANEL_MODAL_ARIA_LABEL = (totalEpisodes: number) =>
+  i18n.translate('xpack.alertingV2EpisodesUi.episodes.assignees.panel.modalAriaLabel', {
+    defaultMessage: 'Edit assignee of {totalEpisodes, plural, =1 {# alert} other {# alerts}}',
+    values: { totalEpisodes },
+  });
+
+export const ASSIGNEE_ADD_BUTTON_ARIA_LABEL = i18n.translate(
+  'xpack.alertingV2EpisodesUi.episodes.assignees.addButtonAriaLabel',
+  {
+    defaultMessage: 'Add assignee',
+  }
+);
+
+export const ASSIGNEE_ADD_BUTTON_TOOLTIP = i18n.translate(
+  'xpack.alertingV2EpisodesUi.episodes.assignees.addButtonTooltip',
+  {
+    defaultMessage: 'Assign this alert',
+  }
+);
+
+export const ASSIGNEE_CHANGE_BUTTON_ARIA_LABEL = i18n.translate(
+  'xpack.alertingV2EpisodesUi.episodes.assignees.changeButtonAriaLabel',
+  {
+    defaultMessage: 'Change assignee',
+  }
+);
+
+export const ASSIGNEE_CHANGE_BUTTON_TOOLTIP = i18n.translate(
+  'xpack.alertingV2EpisodesUi.episodes.assignees.changeButtonTooltip',
+  {
+    defaultMessage: 'Change or remove the assignee',
+  }
+);

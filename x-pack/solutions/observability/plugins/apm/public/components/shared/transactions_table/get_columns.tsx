@@ -5,25 +5,19 @@
  * 2.0.
  */
 
-import {
-  EuiBadge,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiToolTip,
-  EuiIconTip,
-  RIGHT_ALIGNMENT,
-} from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import type { TypeOf } from '@kbn/typed-react-router-config';
 import type { ValuesType } from 'utility-types';
 import { ALERT_STATUS_ACTIVE } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
+import type { APIReturnType } from '@kbn/apm-api-shared';
+import { listMetricColumnPreset, impactColumnPreset } from '../../../utils/column_presets';
 import {
   asMillisecondDuration,
   asPercent,
   asTransactionRate,
 } from '../../../../common/utils/formatters';
-import type { APIReturnType } from '../../../services/rest/create_call_apm_api';
 import { ChartType, getTimeSeriesColor } from '../charts/helper/get_timeseries_color';
 import { ImpactBar } from '../impact_bar';
 import { TransactionDetailLink } from '../links/apm/transaction_detail_link';
@@ -31,7 +25,6 @@ import { ListMetric } from '../list_metric';
 import { isTimeComparison } from '../time_comparison/get_comparison_options';
 import { getLatencyColumnLabel } from './get_latency_column_label';
 import type { ApmRoutes } from '../../routing/apm_route_config';
-import { unit } from '../../../utils/style';
 import type { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
 import { TRANSACTION_NAME, TRANSACTION_TYPE } from '../../../../common/es_fields/apm';
 import { fieldValuePairToKql } from '../../../../common/utils/field_value_pair_to_kql';
@@ -63,7 +56,7 @@ export function getColumns({
   latencyAggregationType?: LatencyAggregationType;
   detailedStatisticsLoading: boolean;
   detailedStatistics?: TransactionGroupDetailedStatistics;
-  comparisonEnabled?: boolean;
+  comparisonEnabled: boolean;
   shouldShowSparkPlots?: boolean;
   showAlertsColumn: boolean;
   offset?: string;
@@ -80,7 +73,8 @@ export function getColumns({
             name: i18n.translate('xpack.apm.transactionsTableColumnName.alertsColumnLabel', {
               defaultMessage: 'Active alerts',
             }),
-            width: `${unit * 6}px`,
+            className: 'eui-textNoWrap',
+            width: '7em',
             render: (_, { alertsCount, name, transactionType }) => {
               if (!alertsCount) {
                 return null;
@@ -91,7 +85,8 @@ export function getColumns({
                   content={i18n.translate(
                     'xpack.apm.home.transactionsTableColumnName.tooltip.activeAlertsExplanation',
                     {
-                      defaultMessage: 'Active alerts',
+                      defaultMessage:
+                        'Active alerts for this transaction, regardless of latency aggregation.',
                     }
                   )}
                 >
@@ -102,8 +97,10 @@ export function getColumns({
                       path: { serviceName },
                       query: {
                         ...query,
+                        rangeTo: 'now',
+                        // Badge counts ignore page kuery; scope click-through to
+                        // this transaction only so the Alerts list matches the badge.
                         kuery: [
-                          query.kuery,
                           ...fieldValuePairToKql(TRANSACTION_NAME, name),
                           ...fieldValuePairToKql(TRANSACTION_TYPE, transactionType),
                         ]
@@ -127,17 +124,22 @@ export function getColumns({
       name: i18n.translate('xpack.apm.serviceOverview.transactionsTableColumnName', {
         defaultMessage: 'Name',
       }),
-      width: '30%',
+      minWidth: '12em',
+      maxWidth: '20em', // This is just a recommendation and the column will grow if the container allows it
       render: (_, { name, transactionType: type }) => {
         return (
           <TransactionDetailLink
-            serviceName={serviceName}
             transactionName={name}
-            transactionType={type}
-            latencyAggregationType={latencyAggregationType}
-            comparisonEnabled={comparisonEnabled}
-            offset={offset}
-            overflowCount={transactionOverflowCount}
+            href={link('/services/{serviceName}/transactions/view', {
+              path: { serviceName },
+              query: {
+                ...query,
+                transactionName: name,
+                transactionType: type,
+                comparisonEnabled,
+                offset,
+              },
+            })}
           >
             {name}
           </TransactionDetailLink>
@@ -145,10 +147,10 @@ export function getColumns({
       },
     },
     {
+      ...listMetricColumnPreset(),
       field: 'latency',
       sortable: true,
       name: getLatencyColumnLabel(latencyAggregationType),
-      align: RIGHT_ALIGNMENT,
       render: (_, { latency, name }) => {
         const currentTimeseries = detailedStatistics?.currentPeriod?.[name]?.latency;
         const previousTimeseries = detailedStatistics?.previousPeriod?.[name]?.latency;
@@ -172,12 +174,12 @@ export function getColumns({
       },
     },
     {
+      ...listMetricColumnPreset(),
       field: 'throughput',
       sortable: true,
       name: i18n.translate('xpack.apm.serviceOverview.transactionsTableColumnThroughput', {
         defaultMessage: 'Throughput',
       }),
-      align: RIGHT_ALIGNMENT,
       render: (_, { throughput, name }) => {
         const currentTimeseries = detailedStatistics?.currentPeriod?.[name]?.throughput;
         const previousTimeseries = detailedStatistics?.previousPeriod?.[name]?.throughput;
@@ -201,30 +203,23 @@ export function getColumns({
       },
     },
     {
+      ...listMetricColumnPreset(),
       field: 'errorRate',
       sortable: true,
-      name: (
-        <>
-          {i18n.translate('xpack.apm.serviceOverview.transactionsTableColumnErrorRate', {
-            defaultMessage: 'Failed transaction rate',
-          })}
-          &nbsp;
-          <EuiIconTip
-            size="s"
-            color="subdued"
-            type="questionInCircle"
-            className="eui-alignCenter"
-            content={i18n.translate(
-              'xpack.apm.serviceOverview.transactionsTableColumnErrorRateTip',
-              {
-                defaultMessage:
-                  "The percentage of failed transactions for the selected service. HTTP server transactions with a 4xx status code (client error) aren't considered failures because the caller, not the server, caused the failure.",
-              }
-            )}
-          />
-        </>
-      ),
-      align: RIGHT_ALIGNMENT,
+      className: 'eui-textNoWrap',
+      name: i18n.translate('xpack.apm.serviceOverview.transactionsTableColumnErrorRate', {
+        defaultMessage: 'Failed transaction rate',
+      }),
+      nameTooltip: {
+        content: i18n.translate('xpack.apm.serviceOverview.transactionsTableColumnErrorRateTip', {
+          defaultMessage:
+            "The percentage of failed transactions for the selected service. HTTP server transactions with a 4xx status code (client error) aren't considered failures because the caller, not the server, caused the failure.",
+        }),
+        icon: 'question',
+        iconProps: {
+          color: 'subdued',
+        },
+      },
       render: (_, { errorRate, name }) => {
         const currentTimeseries = detailedStatistics?.currentPeriod?.[name]?.errorRate;
         const previousTimeseries = detailedStatistics?.previousPeriod?.[name]?.errorRate;
@@ -248,27 +243,22 @@ export function getColumns({
       },
     },
     {
+      ...impactColumnPreset(),
       field: 'impact',
       sortable: true,
-      name: (
-        <>
-          {i18n.translate('xpack.apm.serviceOverview.transactionsTableColumnImpact', {
-            defaultMessage: 'Impact',
-          })}
-          &nbsp;
-          <EuiIconTip
-            size="s"
-            color="subdued"
-            type="questionInCircle"
-            className="eui-alignCenter"
-            content={i18n.translate('xpack.apm.serviceOverview.transactionsTableColumnImpactTip', {
-              defaultMessage:
-                'The most used and slowest endpoints in your service. Calculated by multiplying latency by throughput.',
-            })}
-          />
-        </>
-      ),
-      align: RIGHT_ALIGNMENT,
+      name: i18n.translate('xpack.apm.serviceOverview.transactionsTableColumnImpact', {
+        defaultMessage: 'Impact',
+      }),
+      nameTooltip: {
+        content: i18n.translate('xpack.apm.serviceOverview.transactionsTableColumnImpactTip', {
+          defaultMessage:
+            'The most used and slowest endpoints in your service. Calculated by multiplying latency by throughput.',
+        }),
+        icon: 'question',
+        iconProps: {
+          color: 'subdued',
+        },
+      },
       render: (_, { name }) => {
         const currentImpact = detailedStatistics?.currentPeriod?.[name]?.impact ?? 0;
         const previousImpact = detailedStatistics?.previousPeriod?.[name]?.impact;

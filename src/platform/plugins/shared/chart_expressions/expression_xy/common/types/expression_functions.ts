@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type AxisProps, HorizontalAlignment, Position, VerticalAlignment } from '@elastic/charts';
+import type { HorizontalAlignment, Position, VerticalAlignment } from '@elastic/charts';
+import { type AxisProps } from '@elastic/charts';
 import type { $Values } from '@kbn/utility-types';
 import type { PaletteOutput } from '@kbn/coloring';
 import type {
@@ -17,16 +18,18 @@ import type {
   ExecutionContext,
   ExpressionFunctionDefinition,
 } from '@kbn/expressions-plugin/common';
-import {
+import type { EventAnnotationOutput } from '@kbn/event-annotation-plugin/common';
+
+import type {
+  MakeOverridesSerializable,
+  Simplify,
+  ExpressionValueVisDimension,
+  LegendLayout,
   LegendSize,
   XYLegendValue,
-  LegendLayout,
-  ExpressionValueVisDimension,
-} from '@kbn/visualizations-plugin/common';
-import { EventAnnotationOutput } from '@kbn/event-annotation-plugin/common';
-
-import { MakeOverridesSerializable, Simplify } from '@kbn/chart-expressions-common/types';
-import {
+} from '@kbn/chart-expressions-common';
+import type { AxisFormatPolicy } from '../axis_format_policy_types';
+import type {
   AxisExtentModes,
   FillStyles,
   FittingFunctions,
@@ -56,8 +59,10 @@ import {
   LAYERED_XY_VIS,
   EXTENDED_ANNOTATION_LAYER,
   EXTENDED_REFERENCE_LINE_DECORATION_CONFIG,
+  PointVisibilityOptions,
+  AreaFillOptions,
 } from '../constants';
-import { XYRender } from './expression_renderers';
+import type { XYRender } from './expression_renderers';
 
 export type EndValue = $Values<typeof EndValues>;
 export type LayerType = $Values<typeof LayerTypes>;
@@ -73,6 +78,8 @@ export type ValueLabelMode = $Values<typeof ValueLabelModes>;
 export type AxisExtentMode = $Values<typeof AxisExtentModes>;
 export type FittingFunction = $Values<typeof FittingFunctions>;
 export type AvailableReferenceLineIcon = $Values<typeof AvailableReferenceLineIcons>;
+export type PointVisibility = $Values<typeof PointVisibilityOptions>;
+export type AreaFillOption = $Values<typeof AreaFillOptions>;
 
 export interface AxesSettingsConfig {
   yLeft: boolean;
@@ -240,6 +247,7 @@ export interface XYArgs extends DataLayerArgs {
   referenceLines: ReferenceLineConfigResult[];
   fittingFunction?: FittingFunction;
   fillOpacity?: number;
+  areaFill?: AreaFillOption;
   hideEndzones?: boolean;
   ariaLabel?: string;
   yAxisConfigs?: YAxisConfigResult[];
@@ -290,6 +298,7 @@ export interface LayeredXYArgs {
   annotations?: ExpressionAnnotationResult;
   fittingFunction?: FittingFunction;
   fillOpacity?: number;
+  areaFill?: AreaFillOption;
   hideEndzones?: boolean;
   ariaLabel?: string;
   yAxisConfigs?: YAxisConfigResult[];
@@ -304,6 +313,7 @@ export interface LayeredXYArgs {
   splitRowAccessor?: ExpressionValueVisDimension | string;
   splitColumnAccessor?: ExpressionValueVisDimension | string;
   singleTable?: boolean;
+  pointVisibility?: PointVisibility;
 }
 
 export interface XYProps {
@@ -314,6 +324,7 @@ export interface XYProps {
   layers: CommonXYLayerConfig[];
   fittingFunction?: FittingFunction;
   fillOpacity?: number;
+  areaFill?: AreaFillOption;
   hideEndzones?: boolean;
   ariaLabel?: string;
   yAxisConfigs?: YAxisConfigResult[];
@@ -329,6 +340,8 @@ export interface XYProps {
   showTooltip: boolean;
   singleTable?: boolean;
   annotations?: ExpressionAnnotationResult;
+  pointVisibility?: PointVisibility;
+  axisFormatPolicies?: AxisFormatPolicy[];
 }
 
 export interface AnnotationLayerArgs {

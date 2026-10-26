@@ -16,6 +16,7 @@ import type {
 import type {
   FeatureFlagsService,
   InternalFeatureFlagsSetup,
+  InternalFeatureFlagsStart,
 } from '@kbn/core-feature-flags-server-internal';
 import { of } from 'rxjs';
 
@@ -23,11 +24,13 @@ const createFeatureFlagsInternalSetup = (): jest.Mocked<InternalFeatureFlagsSetu
   return {
     ...createFeatureFlagsSetup(),
     getOverrides: jest.fn().mockReturnValue({}),
+    getInitialFeatureFlags: jest.fn().mockImplementation(async () => ({})),
   };
 };
 
 const createFeatureFlagsSetup = (): jest.Mocked<FeatureFlagsSetup> => {
   return {
+    setInitialFeatureFlagsGetter: jest.fn(),
     setProvider: jest.fn(),
     appendContext: jest.fn(),
   };
@@ -36,12 +39,18 @@ const createFeatureFlagsSetup = (): jest.Mocked<FeatureFlagsSetup> => {
 const createFeatureFlagsStart = (): jest.Mocked<FeatureFlagsStart> => {
   return {
     appendContext: jest.fn(),
-    getBooleanValue: jest.fn().mockImplementation(async (_, fallback) => fallback),
-    getNumberValue: jest.fn().mockImplementation(async (_, fallback) => fallback),
-    getStringValue: jest.fn().mockImplementation(async (_, fallback) => fallback),
     getBooleanValue$: jest.fn().mockImplementation((_, fallback) => of(fallback)),
     getStringValue$: jest.fn().mockImplementation((_, fallback) => of(fallback)),
     getNumberValue$: jest.fn().mockImplementation((_, fallback) => of(fallback)),
+  };
+};
+
+const createFeatureFlagsInternalStart = (): jest.Mocked<InternalFeatureFlagsStart> => {
+  return {
+    ...createFeatureFlagsStart(),
+    getBooleanValue: jest.fn().mockImplementation(async (_, fallback) => fallback),
+    getNumberValue: jest.fn().mockImplementation(async (_, fallback) => fallback),
+    getStringValue: jest.fn().mockImplementation(async (_, fallback) => fallback),
   };
 };
 
@@ -81,6 +90,10 @@ export const coreFeatureFlagsMock = {
    * Mocks the start contract
    */
   createStart: createFeatureFlagsStart,
+  /**
+   * Mocks the core-internal start contract, including one-shot evaluation used by request handlers
+   */
+  createInternalStart: createFeatureFlagsInternalStart,
   /**
    * Mocks the request handler context contract
    */

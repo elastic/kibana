@@ -19,8 +19,8 @@ export const ConnectorViewIndexLink: React.FC<{
   const { share } = useValues(KibanaLogic);
 
   const searchIndexDetailsUrl = share?.url.locators
-    .get('SEARCH_INDEX_DETAILS_LOCATOR_ID')
-    ?.useUrl({ indexName });
+    .get('SEARCH_INDEX_MANAGEMENT_LOCATOR_ID')
+    ?.useUrl({ indexName, page: 'index_details' });
 
   return searchIndexDetailsUrl ? (
     <EuiLink

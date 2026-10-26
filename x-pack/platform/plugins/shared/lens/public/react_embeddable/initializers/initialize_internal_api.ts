@@ -6,20 +6,22 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import { initializeTitleManager } from '@kbn/presentation-publishing';
+import { apiHasDisableTriggers, type initializeTitleManager } from '@kbn/presentation-publishing';
+import type { ESQLControlVariable } from '@kbn/esql-types';
 import { apiPublishesESQLVariables } from '@kbn/esql-types';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { buildObservableVariable, createEmptyLensState } from '../helper';
 import type {
   ExpressionWrapperProps,
-  LensEmbeddableStartServices,
   LensInternalApi,
   LensOverrides,
   LensRuntimeState,
   VisualizationContext,
-} from '../types';
+  UserMessage,
+} from '@kbn/lens-common';
+import { createEmptyLensState } from '../helper';
+
 import { apiHasAbortController, apiHasLensComponentProps } from '../type_guards';
-import type { UserMessage } from '../../types';
+import type { LensEmbeddableStartServices } from '../types';
 
 export function initializeInternalApi(
   initialState: LensRuntimeState,
@@ -27,19 +29,20 @@ export function initializeInternalApi(
   titleManager: ReturnType<typeof initializeTitleManager>,
   { visualizationMap }: LensEmbeddableStartServices
 ): LensInternalApi {
-  const [hasRenderCompleted$] = buildObservableVariable<boolean>(false);
-  const [expressionParams$] = buildObservableVariable<ExpressionWrapperProps | null>(null);
-  const expressionAbortController$ = new BehaviorSubject<AbortController | undefined>(undefined);
-  if (apiHasAbortController(parentApi)) {
-    expressionAbortController$.next(parentApi.abortController);
-  }
-  const [renderCount$] = buildObservableVariable<number>(0);
+  const hasRenderCompleted$ = new BehaviorSubject<boolean>(false);
+  const expressionParams$ = new BehaviorSubject<ExpressionWrapperProps | null>(null);
+  const expressionAbortController$ = new BehaviorSubject<AbortController>(
+    apiHasAbortController(parentApi) ? parentApi.abortController : new AbortController()
+  );
+  const renderCount$ = new BehaviorSubject<number>(0);
 
   const attributes$ = new BehaviorSubject<LensRuntimeState['attributes']>(
     initialState.attributes || createEmptyLensState().attributes
   );
   const overrides$ = new BehaviorSubject(initialState.overrides);
-  const disableTriggers$ = new BehaviorSubject(initialState.disableTriggers);
+  const disableTriggers$ = apiHasDisableTriggers(parentApi)
+    ? parentApi.disableTriggers$
+    : new BehaviorSubject(initialState.disableTriggers ?? false);
   const dataLoading$ = new BehaviorSubject<boolean | undefined>(undefined);
 
   const dataViews$ = new BehaviorSubject<DataView[] | undefined>(undefined);
@@ -55,6 +58,7 @@ export function initializeInternalApi(
   const isNewlyCreated$ = new BehaviorSubject<boolean>(initialState.isNewPanel || false);
 
   const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
+  const loadError$ = new BehaviorSubject<Error | undefined>(initialState.loadError);
   const visualizationContext$ = new BehaviorSubject<VisualizationContext>({
     // doc can point to a different set of attributes for the visualization
     // i.e. when inline editing or applying a suggestion
@@ -67,13 +71,16 @@ export function initializeInternalApi(
     activeData: undefined,
   });
 
-  const [esqlVariables$] = buildObservableVariable(
-    apiPublishesESQLVariables(parentApi) ? parentApi.esqlVariables$ : []
-  );
+  const esqlVariables$ = apiPublishesESQLVariables(parentApi)
+    ? parentApi.esqlVariables$
+    : new BehaviorSubject<ESQLControlVariable[]>([]);
+
+  const isEditingInProgress$ = new BehaviorSubject<boolean>(false);
 
   // No need to expose anything at public API right now, that would happen later on
   // where each initializer will pick what it needs and publish it
   return {
+    loadError$,
     attributes$,
     overrides$,
     disableTriggers$,
@@ -88,6 +95,8 @@ export function initializeInternalApi(
     blockingError$,
     messages$,
     validationMessages$,
+    isEditingInProgress: () => isEditingInProgress$.getValue(),
+    updateEditingState: (inProgress: boolean) => isEditingInProgress$.next(inProgress),
     dispatchError: () => {
       hasRenderCompleted$.next(true);
       renderCount$.next(renderCount$.getValue() + 1);
@@ -102,16 +111,13 @@ export function initializeInternalApi(
     updateDataLoading: (newDataLoading: boolean | undefined) => dataLoading$.next(newDataLoading),
     updateOverrides: (overrides: LensOverrides['overrides']) => overrides$.next(overrides),
     updateAttributes: (attributes: LensRuntimeState['attributes']) => attributes$.next(attributes),
-    updateAbortController: (abortController: AbortController | undefined) =>
+    updateAbortController: (abortController: AbortController) =>
       expressionAbortController$.next(abortController),
     updateDataViews: (dataViews: DataView[] | undefined) => dataViews$.next(dataViews),
     updateMessages: (newMessages: UserMessage[]) => messages$.next(newMessages),
     updateValidationMessages: (newMessages: UserMessage[]) => validationMessages$.next(newMessages),
-    resetAllMessages: () => {
-      messages$.next([]);
-      validationMessages$.next([]);
-    },
     updateBlockingError: (blockingError: Error | undefined) => blockingError$.next(blockingError),
+    updateLoadError: (loadError: Error | undefined) => loadError$.next(loadError),
     setAsCreated: () => isNewlyCreated$.next(false),
     getDisplayOptions: () => {
       const latestAttributes = attributes$.getValue();

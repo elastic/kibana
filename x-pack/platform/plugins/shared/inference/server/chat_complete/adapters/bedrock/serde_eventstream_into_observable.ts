@@ -9,9 +9,13 @@ import { EventStreamMarshaller } from '@smithy/eventstream-serde-node';
 import { fromUtf8, toUtf8 } from '@smithy/util-utf8';
 import { identity } from 'lodash';
 import { Observable } from 'rxjs';
-import { Readable } from 'stream';
-import { Message } from '@smithy/types';
-import { createInferenceInternalError } from '@kbn/inference-common';
+import type { Readable } from 'stream';
+import {
+  createInferenceInternalError,
+  createInferenceRequestError,
+  MAX_STREAM_DURATION_MS,
+} from '@kbn/inference-common';
+import type { ConverseBedrockChunkMember } from './converse_type';
 
 interface ModelStreamErrorException {
   name: 'ModelStreamErrorException';
@@ -19,21 +23,21 @@ interface ModelStreamErrorException {
   originalMessage?: string;
 }
 
-export interface BedrockChunkMember {
-  chunk: Message;
-}
-
 export interface ModelStreamErrorExceptionMember {
   modelStreamErrorException: ModelStreamErrorException;
 }
+export interface BedrockStreamChunkMember {
+  chunk: ConverseBedrockChunkMember;
+}
 
-export type BedrockStreamMember = BedrockChunkMember | ModelStreamErrorExceptionMember;
+export type BedrockStreamMember = BedrockStreamChunkMember | ModelStreamErrorExceptionMember;
 
 // AWS uses SerDe to send over serialized data, so we use their
 // @smithy library to parse the stream data
 
 export function serdeEventstreamIntoObservable(
-  readable: Readable
+  readable: Readable,
+  { maxDurationMs = MAX_STREAM_DURATION_MS }: { maxDurationMs?: number } = {}
 ): Observable<BedrockStreamMember> {
   return new Observable<BedrockStreamMember>((subscriber) => {
     const marshaller = new EventStreamMarshaller({
@@ -41,11 +45,30 @@ export function serdeEventstreamIntoObservable(
       utf8Decoder: fromUtf8,
     });
 
+    let tornDown = false;
+    const deadline = Date.now() + maxDurationMs;
+    const createTimeoutError = () =>
+      createInferenceRequestError(
+        `Inference stream exceeded the maximum allowed duration of ${maxDurationMs}ms`,
+        408
+      );
+
+    // idle-stream guard only: a busy stream drains on the microtask queue,
+    // starving timers — the in-band deadline check below covers that case
+    const maxDurationTimer = setTimeout(() => {
+      readable.destroy(createTimeoutError());
+    }, maxDurationMs);
+
     async function processStream() {
       for await (const chunk of marshaller.deserialize<BedrockStreamMember>(readable, identity)) {
+        if (Date.now() > deadline) {
+          throw createTimeoutError();
+        }
         if (chunk) {
           subscriber.next(chunk);
         }
+        // yield a macrotask per chunk so timers and cancellation stay serviced
+        await new Promise<void>((resolve) => setImmediate(resolve));
       }
     }
 
@@ -54,6 +77,10 @@ export function serdeEventstreamIntoObservable(
         subscriber.complete();
       },
       (error) => {
+        // teardown destroy rejects the iteration; don't surface it after unsubscribe
+        if (tornDown) {
+          return;
+        }
         if (!(error instanceof Error)) {
           try {
             const exceptionType = error.headers[':exception-type'].value;
@@ -72,5 +99,11 @@ export function serdeEventstreamIntoObservable(
         subscriber.error(error);
       }
     );
+
+    return () => {
+      tornDown = true;
+      clearTimeout(maxDurationTimer);
+      readable.destroy();
+    };
   });
 }

@@ -6,8 +6,9 @@
  */
 
 import React, { useEffect, useRef } from 'react';
+import { BehaviorSubject } from 'rxjs';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
-import { ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
+import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import { useSearchApi } from '@kbn/presentation-publishing';
 import type {
   LayerDescriptor,
@@ -15,9 +16,10 @@ import type {
   MapSettings,
 } from '../../../common/descriptor_types';
 import { createBasemapLayerDescriptor } from '../../classes/layers/create_basemap_layer_descriptor';
-import { MapApi, MapRuntimeState, MapSerializedState } from '../types';
+import type { MapApi } from '../types';
 import { MAP_SAVED_OBJECT_TYPE } from '../../../common/constants';
-import { RenderToolTipContent } from '../../classes/tooltips/tooltip_property';
+import type { MapEmbeddableState } from '../../../common';
+import type { RenderToolTipContent } from '../../classes/tooltips/tooltip_property';
 import { MAP_RENDERER_TYPE } from './types';
 
 function getLayers(layerList: LayerDescriptor[]) {
@@ -37,15 +39,13 @@ export interface Props {
   mapCenter?: MapCenterAndZoom;
   getTooltipRenderer?: () => RenderToolTipContent;
   onApiAvailable?: (api: MapApi) => void;
-  /*
-   * Set to false to exclude sharing attributes 'data-*'.
-   */
-  isSharable?: boolean;
+  interactive?: boolean;
 }
 
 export function MapRenderer(props: Props) {
   const mapApiRef = useRef<MapApi | undefined>(undefined);
   const beforeApiReadyLayerListRef = useRef<LayerDescriptor[] | undefined>(undefined);
+  const viewMode$ = new BehaviorSubject(props.interactive === false ? 'non-interactive' : 'view');
 
   useEffect(() => {
     if (mapApiRef.current) {
@@ -63,27 +63,24 @@ export function MapRenderer(props: Props) {
 
   return (
     <div className="mapEmbeddableContainer">
-      <ReactEmbeddableRenderer<MapSerializedState, MapRuntimeState, MapApi>
+      <EmbeddableRenderer<MapEmbeddableState, MapApi>
         type={MAP_SAVED_OBJECT_TYPE}
         getParentApi={() => ({
           type: MAP_RENDERER_TYPE,
+          viewMode$,
           getTooltipRenderer: props.getTooltipRenderer,
           hideFilterActions: props.hideFilterActions,
-          isSharable: props.isSharable,
           getSerializedStateForChild: () => {
             return {
-              rawState: {
-                attributes: {
-                  title: props.title ?? '',
-                  layerListJSON: JSON.stringify(getLayers(props.layerList)),
-                },
-                hidePanelTitles: !Boolean(props.title),
-                isLayerTOCOpen:
-                  typeof props.isLayerTOCOpen === 'boolean' ? props.isLayerTOCOpen : false,
-                mapCenter: props.mapCenter,
-                mapSettings: props.mapSettings ?? {},
+              attributes: {
+                title: props.title ?? '',
+                layers: getLayers(props.layerList),
               },
-              references: [],
+              hidePanelTitles: !Boolean(props.title),
+              isLayerTOCOpen:
+                typeof props.isLayerTOCOpen === 'boolean' ? props.isLayerTOCOpen : false,
+              mapCenter: props.mapCenter,
+              mapSettings: props.mapSettings ?? {},
             };
           },
           ...searchApi,

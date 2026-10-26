@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { IngestPipelineParams } from '@kbn/search-connectors';
+import type { IngestPipelineParams } from '@kbn/search-connectors';
 
 import { createApiLogic } from '../../../shared/api_logic/create_api_logic';
 import { HttpLogic } from '../../../shared/http';
@@ -26,7 +26,9 @@ export const updatePipeline = async ({
   connectorId,
   pipeline,
 }: PostPipelineArgs): Promise<PostPipelineResponse> => {
-  const route = `/internal/enterprise_search/connectors/${connectorId}/pipeline`;
+  const route = `/internal/enterprise_search/connectors/${encodeURIComponent(
+    connectorId
+  )}/pipeline`;
 
   await HttpLogic.values.http.put(route, {
     body: JSON.stringify(pipeline),

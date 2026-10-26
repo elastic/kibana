@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { APP_HEADER_TEST_SUBJECTS, APP_MENU_TEST_SUBJECTS } from '@kbn/app-header';
 import { FtrService } from '../ftr_provider_context';
 
 export class SharePageObject extends FtrService {
@@ -14,6 +15,7 @@ export class SharePageObject extends FtrService {
   private readonly find = this.ctx.getService('find');
   private readonly log = this.ctx.getService('log');
   private readonly retry = this.ctx.getService('retry');
+  private readonly appMenu = this.ctx.getPageObject('appMenu');
 
   /**
    * @description attempt to close the share modal, if it's open
@@ -42,10 +44,21 @@ export class SharePageObject extends FtrService {
   }
 
   async clickShareTopNavButton() {
-    return this.testSubjects.click('shareTopNavButton');
+    // The project header renders share as a title action revealed on header hover, outside the menu.
+    // The app menu renders inside the project header, so list the header first.
+    const variant = await this.testSubjects.waitForFirst(
+      [APP_HEADER_TEST_SUBJECTS.root, APP_MENU_TEST_SUBJECTS.root],
+      { timeout: 5000 }
+    );
+    if (variant === APP_HEADER_TEST_SUBJECTS.root) {
+      await this.testSubjects.moveMouseTo(APP_HEADER_TEST_SUBJECTS.root);
+      await this.testSubjects.click(`~${APP_HEADER_TEST_SUBJECTS.shareButton}`);
+      return;
+    }
+    return this.appMenu.clickMenuItem(APP_HEADER_TEST_SUBJECTS.shareButton);
   }
 
-  async openShareModalItem(itemTitle: 'link' | 'export' | 'embed') {
+  async openShareModalItem(itemTitle: 'link' | 'embed') {
     this.log.debug(`openShareModalItem title: ${itemTitle}`);
     const isShareModalOpen = await this.isShareModalOpen();
     if (!isShareModalOpen) {

@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { AnyAction, Dispatch } from 'redux';
-import { ThunkDispatch } from 'redux-thunk';
+import type { AnyAction, Dispatch } from 'redux-v4';
+import type { ThunkDispatch } from 'redux-thunk-v2';
 import type { Query } from '@kbn/es-query';
-import { Adapters } from '@kbn/inspector-plugin/common/adapters';
-import { MapStoreState } from '../reducers/store';
+import type { Adapters } from '@kbn/inspector-plugin/common/adapters';
+import type { Writable } from '@kbn/utility-types';
+import type { MapStoreState } from '../reducers/store';
 import {
   createLayerInstance,
   getEditState,
@@ -18,11 +19,14 @@ import {
   getLayerList,
   getLayerListRaw,
   getMapColors,
-  getMapReady,
   getSelectedLayerId,
 } from '../selectors/map_selectors';
 import { FLYOUT_STATE } from '../reducers/ui';
-import { cancelRequest, getInspectorAdapters } from '../reducers/non_serializable_instances';
+import {
+  cancelRequest,
+  getInspectorAdapters,
+  getMapReady,
+} from '../reducers/non_serializable_instances';
 import { hideTOCDetails, setDrawMode, showTOCDetails, updateFlyout } from './ui_actions';
 import {
   ADD_LAYER,
@@ -44,35 +48,32 @@ import {
   UPDATE_SOURCE_PROP,
 } from './map_action_constants';
 import { clearDataRequests, syncDataForLayerId, updateStyleMeta } from './data_request_actions';
-import {
+import type {
   Attribution,
   JoinDescriptor,
   LayerDescriptor,
+  LayerGroupDescriptor,
   StyleDescriptor,
   TileError,
   TileMetaFeature,
   VectorLayerDescriptor,
   VectorStyleDescriptor,
 } from '../../common/descriptor_types';
-import { ILayer } from '../classes/layers/layer';
+import type { ILayer } from '../classes/layers/layer';
 import { hasVectorLayerMethod } from '../classes/layers/vector_layer';
-import { OnSourceChangeArgs } from '../classes/sources/source';
+import type { OnSourceChangeArgs } from '../classes/sources/source';
 import { isESVectorTileSource } from '../classes/sources/es_source';
-import {
-  DRAW_MODE,
-  LAYER_STYLE_TYPE,
-  LAYER_TYPE,
-  SCALING_TYPES,
-  STYLE_TYPE,
-} from '../../common/constants';
-import { IVectorStyle } from '../classes/styles/vector/vector_style';
+import type { LAYER_TYPE } from '../../common/constants';
+import { DRAW_MODE, LAYER_STYLE_TYPE, SCALING_TYPES, STYLE_TYPE } from '../../common/constants';
+import type { IVectorStyle } from '../classes/styles/vector/vector_style';
 import { notifyLicensedFeatureUsage } from '../licensed_features';
-import { IESAggField } from '../classes/fields/agg';
-import { IField } from '../classes/fields/field';
+import type { IESAggField } from '../classes/fields/agg';
+import type { IField } from '../classes/fields/field';
 import type { IVectorSource } from '../classes/sources/vector_source';
 import { getDrawMode, getOpenTOCDetails } from '../selectors/ui_selectors';
 import { isLayerGroup, LayerGroup } from '../classes/layers/layer_group';
 import { isSpatialJoin } from '../classes/joins/is_spatial_join';
+import { getRuntimeState } from './get_runtime_state';
 
 export function trackCurrentLayerState(layerId: string) {
   return {
@@ -120,15 +121,53 @@ export function replaceLayerList(newLayerList: LayerDescriptor[]) {
       dispatch({
         type: CLEAR_WAITING_FOR_MAP_READY_LAYER_LIST,
       });
-    } else {
-      getLayerListRaw(getState()).forEach(({ id }) => {
-        dispatch(removeLayerFromLayerList(id));
+
+      newLayerList.forEach((layerDescriptor) => {
+        dispatch(addLayer(layerDescriptor));
       });
+      return;
     }
 
-    newLayerList.forEach((layerDescriptor) => {
-      dispatch(addLayer(layerDescriptor));
+    const newLayerIds = newLayerList.map(({ id }) => id);
+
+    const currentLayers: Record<string, LayerDescriptor> = {};
+    getLayerListRaw(getState()).forEach((layerDescriptor) => {
+      currentLayers[layerDescriptor.id] = layerDescriptor;
+
+      // Remove layers that no longer exist
+      if (!newLayerIds.includes(layerDescriptor.id)) {
+        dispatch(removeLayerFromLayerList(layerDescriptor.id));
+      }
     });
+
+    newLayerList.forEach((newLayerDescriptor) => {
+      const currentLayerDescriptor = currentLayers[newLayerDescriptor.id];
+      // Add layers that do not currently exist
+      if (!currentLayerDescriptor) {
+        dispatch(addLayer(newLayerDescriptor));
+        return;
+      }
+
+      // Reset layer with new state + current runtime
+      dispatch(
+        updateLayerDescriptor({
+          ...newLayerDescriptor,
+          ...getRuntimeState(currentLayerDescriptor),
+        })
+      );
+      dispatch(syncDataForLayerId(newLayerDescriptor.id, false));
+    });
+
+    // reset ordering
+    const replacedLayerList = getLayerListRaw(getState());
+    const newOrder = [];
+    for (let i = 0; i < newLayerList.length; i++) {
+      const index = replacedLayerList.findIndex(({ id }) => id === newLayerList[i].id);
+      if (index !== -1) {
+        newOrder.push(index);
+      }
+    }
+    dispatch(updateLayerOrder(newOrder));
   };
 }
 
@@ -872,7 +911,7 @@ export function createLayerGroup(draggedLayerId: string, combineLayerId: string)
     dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
     getState: () => MapStoreState
   ) => {
-    const group = LayerGroup.createDescriptor({});
+    const group = LayerGroup.createDescriptor({}) as Writable<LayerGroupDescriptor>;
     const combineLayerDescriptor = getLayerDescriptor(getState(), combineLayerId);
     if (combineLayerDescriptor?.parent) {
       group.parent = combineLayerDescriptor.parent;

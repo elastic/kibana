@@ -13,7 +13,7 @@ import type {
   AnnotationsRequestProcessorsFunction,
   AnnotationsRequestProcessorsParams,
 } from './types';
-import { DefaultSearchCapabilities } from '../../../search_strategies/capabilities/default_search_capabilities';
+import type { DefaultSearchCapabilities } from '../../../search_strategies/capabilities/default_search_capabilities';
 
 describe('query', () => {
   let req: AnnotationsRequestProcessorsParams['req'];
@@ -59,6 +59,7 @@ describe('query', () => {
       req,
       panel,
       annotation,
+      // @ts-expect-error upgrade typescript v5.9.3
       esQueryConfig,
       annotationIndex,
       capabilities,
@@ -82,6 +83,7 @@ describe('query', () => {
       req,
       panel,
       annotation,
+      // @ts-expect-error upgrade typescript v5.9.3
       esQueryConfig,
       annotationIndex,
       capabilities,
@@ -129,6 +131,7 @@ describe('query', () => {
       req,
       panel,
       annotation,
+      // @ts-expect-error upgrade typescript v5.9.3
       esQueryConfig,
       annotationIndex,
       capabilities,
@@ -196,6 +199,7 @@ describe('query', () => {
       req,
       panel,
       annotation,
+      // @ts-expect-error upgrade typescript v5.9.3
       esQueryConfig,
       annotationIndex,
       capabilities,
@@ -250,6 +254,7 @@ describe('query', () => {
       req,
       panel,
       annotation,
+      // @ts-expect-error upgrade typescript v5.9.3
       esQueryConfig,
       annotationIndex,
       capabilities,
@@ -351,6 +356,7 @@ describe('query', () => {
       req,
       panel,
       annotation,
+      // @ts-expect-error upgrade typescript v5.9.3
       esQueryConfig,
       annotationIndex,
       capabilities,
@@ -389,6 +395,7 @@ describe('query', () => {
       req,
       panel,
       annotation,
+      // @ts-expect-error upgrade typescript v5.9.3
       esQueryConfig,
       annotationIndex,
       capabilities,

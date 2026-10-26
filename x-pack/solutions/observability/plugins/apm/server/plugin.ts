@@ -16,6 +16,7 @@ import type {
 import { alertsLocatorID } from '@kbn/observability-plugin/common';
 import { Dataset } from '@kbn/rule-registry-plugin/server';
 import { isEmpty, mapValues } from 'lodash';
+import { firstValueFrom } from 'rxjs';
 import type { APMConfig } from '.';
 import { APM_SERVER_FEATURE_ID } from '.';
 import { apmTutorialCustomIntegration } from '../common/tutorial/tutorials';
@@ -51,6 +52,9 @@ import type {
   APMPluginSetupDependencies,
   APMPluginStartDependencies,
 } from './types';
+import { registerDataProviders } from './agent_builder/data_provider/register_data_providers';
+import { registerServiceMapAgentBuilder } from './agent_builder/register_service_map';
+import { registerServiceMapEmbeddableTransforms } from './lib/embeddables/register_service_map_embeddable_transforms';
 
 export class APMPlugin
   implements Plugin<APMPluginSetup, void, APMPluginSetupDependencies, APMPluginStartDependencies>
@@ -130,6 +134,13 @@ export class APMPlugin
       const { getApmIndices } = plugins.apmDataAccess;
       return getApmIndices(soClient);
     })();
+    const managedOtlpServiceFeaturePromise = (async () => {
+      const coreStart = await getCoreStart();
+
+      return await firstValueFrom(
+        coreStart.featureFlags.getBooleanValue$('observability.managedOtlpServiceEnabled', false)
+      );
+    })();
 
     // This if else block will go away in favour of removing Home Tutorial Integration
     // Ideally we will directly register a custom integration and pass the configs
@@ -138,14 +149,17 @@ export class APMPlugin
     if (currentConfig.serverlessOnboarding && plugins.customIntegrations) {
       plugins.customIntegrations?.registerCustomIntegration(apmTutorialCustomIntegration);
     } else {
-      apmIndicesPromise
-        .then((apmIndices) => {
+      Promise.all([apmIndicesPromise, managedOtlpServiceFeaturePromise])
+        .then(([apmIndices, isManagedOtlpServiceFeatureEnabled]) => {
           plugins.home?.tutorials.registerTutorial(
             tutorialProvider({
               apmConfig: currentConfig,
               apmIndices,
               cloud: plugins.cloud,
+              observability: plugins.observability,
               isFleetPluginEnabled: !isEmpty(resourcePlugins.fleet),
+              isManagedOtlpServiceFeatureEnabled,
+              managedOtlpServiceUrl: plugins.observability.managedOtlpServiceUrl,
             })
           );
         })
@@ -234,8 +248,21 @@ export class APMPlugin
     );
 
     plugins.observability.alertDetailsContextualInsightsService.registerHandler(
-      getAlertDetailsContextHandler(getCoreStart(), resourcePlugins, logger)
+      getAlertDetailsContextHandler({ setup: core, start: getCoreStart }, resourcePlugins, logger)
     );
+
+    registerDataProviders({
+      core,
+      plugins,
+      config: currentConfig,
+      logger: this.logger!.get('observabilityAgentBuilder'),
+    });
+
+    registerServiceMapEmbeddableTransforms(plugins.embeddable);
+
+    if (plugins.agentBuilder) {
+      registerServiceMapAgentBuilder({ agentBuilder: plugins.agentBuilder });
+    }
 
     registerDeprecations({
       core,

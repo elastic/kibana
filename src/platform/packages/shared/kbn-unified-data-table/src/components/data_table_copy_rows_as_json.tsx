@@ -27,13 +27,13 @@ export const DataTableCopyRowsAsJson: React.FC<DataTableCopyRowsAsJsonProps> = (
   onCompleted,
 }) => {
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
-  const { selectedDocsState, isPlainRecord } = useContext(UnifiedDataTableContext);
+  const { selectedDocsState, dataSource } = useContext(UnifiedDataTableContext);
   const { getSelectedDocsOrderedByRows } = selectedDocsState;
 
   return (
     <EuiContextMenuItem
       data-test-subj="dscGridCopySelectedDocumentsJSON"
-      icon="copyClipboard"
+      icon="copy"
       disabled={isProcessing}
       onClick={async () => {
         setIsProcessing(true);
@@ -46,7 +46,7 @@ export const DataTableCopyRowsAsJson: React.FC<DataTableCopyRowsAsJsonProps> = (
         onCompleted();
       }}
     >
-      {isPlainRecord ? (
+      {dataSource?.kind === 'esql' ? (
         <FormattedMessage
           id="unifiedDataTable.copyResultsToClipboardJSON"
           defaultMessage="Copy results as JSON"

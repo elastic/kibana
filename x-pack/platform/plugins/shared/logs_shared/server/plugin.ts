@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import { CoreStart, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
+import type { CoreStart, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import { defaultLogViewId } from '../common/log_views';
-import { LogsSharedConfig } from '../common/plugin_config';
+import type { LogsSharedConfig } from '../common/plugin_config';
 import { registerDeprecations } from './deprecations';
 import { featureFlagUiSettings } from './feature_flags';
 import { KibanaFramework } from './lib/adapters/framework/kibana_framework_adapter';
 import { LogsSharedKibanaLogEntriesAdapter } from './lib/adapters/log_entries/kibana_log_entries_adapter';
 import { LogsSharedLogEntriesDomain } from './lib/domains/log_entries_domain';
-import { LogsSharedBackendLibs, LogsSharedDomainLibs } from './lib/logs_shared_types';
+import type { LogsSharedBackendLibs, LogsSharedDomainLibs } from './lib/logs_shared_types';
 import { initLogsSharedServer } from './logs_shared_server';
 import { logViewSavedObjectType } from './saved_objects';
 import { LogEntriesService } from './services/log_entries';
 import { LogViewsService } from './services/log_views';
-import {
+import type {
   LogsSharedPluginCoreSetup,
   LogsSharedPluginSetup,
   LogsSharedPluginStart,
@@ -59,6 +59,7 @@ export class LogsSharedPlugin
 
     if (!isServerless) {
       // Conditionally register log view saved objects
+      // eslint-disable-next-line @kbn/eslint/no_conditional_saved_object_type_registration -- TODO: remove conditional registration; tracked for follow-up PR
       core.savedObjects.registerType(logViewSavedObjectType);
     } else {
       // Register a static internal view to use as a fallback when the log view SO is not registered

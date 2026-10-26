@@ -6,9 +6,9 @@
  */
 
 import React, { useMemo } from 'react';
+import type { BrushEndListener, XYChartElementEvent } from '@elastic/charts';
 import {
   Axis,
-  BrushEndListener,
   Chart,
   Position,
   ScaleType,
@@ -16,41 +16,31 @@ import {
   TooltipHeader,
   TooltipContainer,
   TooltipTable,
-  XYChartElementEvent,
   BarSeries,
 } from '@elastic/charts';
-import { EuiButton, EuiHorizontalRule, EuiToolTip, formatDate } from '@elastic/eui';
-import { InPortal } from 'react-reverse-portal';
+import { EuiHorizontalRule, formatDate } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { parse } from '@kbn/datemath';
-import { TooltipValue } from '@elastic/charts/dist/specs';
-import moment from 'moment';
+import type { TooltipValue } from '@elastic/charts/dist/specs';
 import { useChartThemes } from '../../hooks/use_chart_themes';
-import { AnnotationsPermissions } from '../../components/annotations/hooks/use_annotation_permissions';
-import { createAnnotationPortal } from './create_annotation_btn';
-import { useAnnotations } from '../../components/annotations/use_annotations';
-import { Annotation } from '../../../common/annotations';
+import type { useAnnotations } from '../../components/annotations/use_annotations';
+import type { Annotation } from '../../../common/annotations';
 
 export function AnnotationsListChart({
   data,
   start,
   end,
-  isEditing,
-  setIsEditing,
-  permissions,
+  createAnnotation,
+  ObservabilityAnnotations,
+  onAnnotationClick,
 }: {
   data: Annotation[];
   start: string;
   end: string;
-  isEditing: Annotation | null;
-  permissions?: AnnotationsPermissions;
-  setIsEditing: (annotation: Annotation | null) => void;
+  createAnnotation: ReturnType<typeof useAnnotations>['createAnnotation'];
+  ObservabilityAnnotations: ReturnType<typeof useAnnotations>['ObservabilityAnnotations'];
+  onAnnotationClick: ReturnType<typeof useAnnotations>['onAnnotationClick'];
 }) {
-  const { ObservabilityAnnotations, createAnnotation, onAnnotationClick } = useAnnotations({
-    editAnnotation: isEditing,
-    setEditAnnotation: setIsEditing,
-  });
-
   const brushEndListener: BrushEndListener = ({ x }) => {
     if (!x) {
       return;
@@ -81,31 +71,6 @@ export function AnnotationsListChart({
 
   return (
     <>
-      <InPortal node={createAnnotationPortal}>
-        <EuiToolTip
-          content={
-            !permissions?.write
-              ? i18n.translate('xpack.observability.createAnnotation.missingPermissions', {
-                  defaultMessage: 'You do not have permission to create annotations',
-                })
-              : ''
-          }
-        >
-          <EuiButton
-            isDisabled={!permissions?.write}
-            data-test-subj="o11yRenderToolsRightCreateAnnotationButton"
-            key="createAnnotation"
-            onClick={() => {
-              createAnnotation(moment().subtract(1, 'day').toISOString());
-            }}
-            fill={true}
-          >
-            {i18n.translate('xpack.observability.renderToolsRight.createAnnotationButtonLabel', {
-              defaultMessage: 'Create annotation',
-            })}
-          </EuiButton>
-        </EuiToolTip>
-      </InPortal>
       <Chart size={{ height: 300 }}>
         <Settings
           onElementClick={([geometry, _]) => {
@@ -153,6 +118,7 @@ export function AnnotationsListChart({
         />
         <BarSeries
           id="bars"
+          // Defaults to multi layer time axis as of Elastic Charts v70
           xScaleType={ScaleType.Time}
           yScaleType={ScaleType.Linear}
           xAccessor="x"

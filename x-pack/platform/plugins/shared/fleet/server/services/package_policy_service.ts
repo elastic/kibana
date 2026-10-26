@@ -12,11 +12,12 @@ import type {
   RequestHandlerContext,
   ElasticsearchClient,
   SavedObjectsClientContract,
+  SavedObjectsFindResponse,
+  SavedObjectsFindOptions,
+  SavedObjectsFindResult,
 } from '@kbn/core/server';
 
 import type { SavedObjectError } from '@kbn/core-saved-objects-common';
-
-import type { HTTPAuthorizationHeader } from '../../common/http_authorization_header';
 
 import type {
   PostDeletePackagePoliciesResponse,
@@ -26,8 +27,15 @@ import type {
   ListResult,
   UpgradePackagePolicyDryRunResponseItem,
 } from '../../common';
+import type { AgentPolicyPackagePoliciesSummary, PackagePolicyAssetsMap } from '../../common/types';
 import type { DeletePackagePoliciesResponse } from '../../common/types';
-import type { NewPackagePolicy, UpdatePackagePolicy, PackagePolicy } from '../types';
+import type {
+  NewPackagePolicy,
+  UpdatePackagePolicy,
+  UpdatePackagePolicyWithId,
+  PackagePolicy,
+  PackagePolicySOAttributes,
+} from '../types';
 import type { ExternalCallback } from '..';
 
 import type { NewPackagePolicyWithId } from './package_policy';
@@ -47,7 +55,7 @@ export type RunExternalCallbacksPackagePolicyArgument<A extends ExternalCallback
     : A extends 'packagePolicyPostCreate'
     ? PackagePolicy
     : A extends 'packagePolicyUpdate'
-    ? UpdatePackagePolicy
+    ? UpdatePackagePolicyWithId
     : A extends 'packagePolicyPostUpdate'
     ? PackagePolicy
     : never;
@@ -76,13 +84,13 @@ export interface PackagePolicyClient {
       spaceId?: string;
       id?: string;
       user?: AuthenticatedUser;
-      authorizationHeader?: HTTPAuthorizationHeader | null;
       bumpRevision?: boolean;
       force?: boolean;
       skipEnsureInstalled?: boolean;
       skipUniqueNameVerification?: boolean;
       overwrite?: boolean;
       packageInfo?: PackageInfo;
+      createDatasetTemplates?: boolean;
     },
     context?: RequestHandlerContext,
     request?: KibanaRequest
@@ -101,9 +109,9 @@ export interface PackagePolicyClient {
       user?: AuthenticatedUser;
       bumpRevision?: boolean;
       force?: true;
-      authorizationHeader?: HTTPAuthorizationHeader | null;
       asyncDeploy?: boolean;
-    }
+    },
+    request?: KibanaRequest
   ): Promise<{
     created: PackagePolicy[];
     failed: Array<{ packagePolicy: NewPackagePolicy; error?: Error | SavedObjectError }>;
@@ -112,14 +120,8 @@ export interface PackagePolicyClient {
   bulkUpdate(
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
-    packagePolicyUpdates: UpdatePackagePolicy[],
-    options?: {
-      user?: AuthenticatedUser;
-      force?: boolean;
-      asyncDeploy?: boolean;
-      fromBulkUpgrade?: boolean;
-      oldPackagePolicies?: PackagePolicy[];
-    },
+    packagePolicyUpdates: UpdatePackagePolicyWithId[],
+    options?: PackagePolicyClientBulkUpdateOptions,
     currentVersion?: string
   ): Promise<{
     updatedPolicies: PackagePolicy[] | null;
@@ -129,26 +131,58 @@ export interface PackagePolicyClient {
     }>;
   }>;
 
+  /**
+   * Persists partial package-policy attributes without running the full Fleet update pipeline.
+   * Callers are responsible for validation, revision metadata, callbacks, and agent deployment.
+   */
+  bulkUpdatePartial(
+    soClient: SavedObjectsClientContract,
+    packagePolicyUpdates: PackagePolicyPartialUpdate[]
+  ): Promise<PackagePolicyPartialUpdateResult>;
+
   bulkUpgrade(
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
     ids: string[],
-    options?: { user?: AuthenticatedUser; force?: boolean },
+    options?: { user?: AuthenticatedUser; force?: boolean; batchSize?: number },
     pkgVersion?: string
   ): Promise<UpgradePackagePolicyResponse>;
 
-  get(soClient: SavedObjectsClientContract, id: string): Promise<PackagePolicy | null>;
+  get(
+    soClient: SavedObjectsClientContract,
+    id: string,
+    options?: PackagePolicyClientGetOptions
+  ): Promise<PackagePolicy | null>;
 
   findAllForAgentPolicy(
     soClient: SavedObjectsClientContract,
-    agentPolicyId: string
+    agentPolicyId: string,
+    options?: PackagePolicyClientFindAllForAgentPolicyOptions
   ): Promise<PackagePolicy[]>;
+
+  getSummaryForAgentPolicies(
+    soClient: SavedObjectsClientContract,
+    agentPolicyIds: string[]
+  ): Promise<Map<string, AgentPolicyPackagePoliciesSummary>>;
+
+  compilePackagePolicyForVersions(
+    soClient: SavedObjectsClientContract,
+    packageInfo: PackageInfo,
+    assetsMap: PackagePolicyAssetsMap,
+    packagePolicy: PackagePolicy,
+    agentVersions?: string[]
+  ): Promise<void>;
 
   getByIDs(
     soClient: SavedObjectsClientContract,
     ids: string[],
-    options?: { ignoreMissing?: boolean }
+    options?: Omit<PackagePolicyClientGetByIdsOptions, 'fields'>
   ): Promise<PackagePolicy[]>;
+  getByIDs(
+    soClient: SavedObjectsClientContract,
+    ids: string[],
+    options: PackagePolicyClientGetByIdsOptions & { fields: string[] }
+  ): Promise<PartialPackagePolicy[]>;
 
   list(
     soClient: SavedObjectsClientContract,
@@ -157,7 +191,7 @@ export interface PackagePolicyClient {
 
   listIds(
     soClient: SavedObjectsClientContract,
-    options: ListWithKuery
+    options: PackagePolicyClientListIdsOptions
   ): Promise<ListResult<string>>;
 
   update(
@@ -165,20 +199,21 @@ export interface PackagePolicyClient {
     esClient: ElasticsearchClient,
     id: string,
     packagePolicyUpdate: UpdatePackagePolicy,
-    options?: { user?: AuthenticatedUser; force?: boolean; skipUniqueNameVerification?: boolean },
-    currentVersion?: string
+    options?: {
+      user?: AuthenticatedUser;
+      force?: boolean;
+      skipUniqueNameVerification?: boolean;
+      bumpRevision?: boolean;
+    },
+    /** Request context so update callbacks can use the caller's Elasticsearch client. */
+    context?: RequestHandlerContext
   ): Promise<PackagePolicy>;
 
   delete(
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
     ids: string[],
-    options?: {
-      user?: AuthenticatedUser;
-      skipUnassignFromAgentPolicies?: boolean;
-      force?: boolean;
-      asyncDeploy?: boolean;
-    },
+    options?: PackagePolicyClientDeleteOptions,
     context?: RequestHandlerContext,
     request?: KibanaRequest
   ): Promise<PostDeletePackagePoliciesResponse>;
@@ -247,6 +282,11 @@ export interface PackagePolicyClient {
     options?: { force?: boolean }
   ): Promise<void>;
 
+  getSpacesForPoliciesUsingOutput(outputId: string): Promise<{
+    spaceIds: Set<string>;
+    truncated: boolean;
+  }>;
+
   /**
    * Returns an `AsyncIterable` for retrieving all integration policy IDs
    * @param soClient
@@ -266,11 +306,119 @@ export interface PackagePolicyClient {
     soClient: SavedObjectsClientContract,
     options?: PackagePolicyClientFetchAllItemsOptions
   ): Promise<AsyncIterable<PackagePolicy[]>>;
+
+  getPackagePolicySavedObjects(
+    soClient: SavedObjectsClientContract,
+    options: PackagePolicyClientRollbackOptions
+  ): Promise<SavedObjectsFindResponse<PackagePolicySOAttributes, unknown>>;
+
+  rollback(
+    soClient: SavedObjectsClientContract,
+    packagePolicies: Array<SavedObjectsFindResult<PackagePolicySOAttributes>>,
+    previousVersion: string
+  ): Promise<RollbackResult>;
+
+  restoreRollback(
+    soClient: SavedObjectsClientContract,
+    rollbackResult: RollbackResult
+  ): Promise<void>;
+
+  cleanupRollbackSavedObjects(
+    soClient: SavedObjectsClientContract,
+    rollbackResult: RollbackResult
+  ): Promise<void>;
+
+  bumpAgentPolicyRevisionAfterRollback(
+    soClient: SavedObjectsClientContract,
+    rollbackResult: RollbackResult
+  ): Promise<void>;
 }
 
-export type PackagePolicyClientFetchAllItemIdsOptions = Pick<ListWithKuery, 'perPage' | 'kuery'>;
+interface WithSpaceIdsOption {
+  /**
+   * The space IDs that should be targeted for data retrieval. The SO client provided to the services
+   * still needs to have access to those spaces.
+   * When using an un-scoped so client (has access to all spaces) and wanting to retrieve data across
+   * all space, use a value of `*` (ex. `spaceIds: ['*']`)
+   */
+  spaceIds?: string[];
+}
+
+export interface RollbackResult {
+  updatedPolicies: Record<string, Array<SavedObjectsFindResult<PackagePolicySOAttributes>>>;
+  copiedPolicies: Record<string, Array<SavedObjectsFindResult<PackagePolicySOAttributes>>>;
+  previousVersionPolicies: Record<string, Array<SavedObjectsFindResult<PackagePolicySOAttributes>>>;
+}
+
+export type PackagePolicyClientFetchAllItemIdsOptions = Pick<ListWithKuery, 'perPage' | 'kuery'> &
+  WithSpaceIdsOption;
 
 export type PackagePolicyClientFetchAllItemsOptions = Pick<
   ListWithKuery,
-  'perPage' | 'kuery' | 'sortField' | 'sortOrder'
->;
+  'perPage' | 'kuery' | 'sortField' | 'sortOrder' | 'fields'
+> &
+  WithSpaceIdsOption;
+
+export type PartialPackagePolicy = Pick<PackagePolicy, 'id'> & Partial<PackagePolicy>;
+
+export interface PackagePolicyPartialUpdate {
+  id: string;
+  version: string;
+  attributes: Partial<PackagePolicySOAttributes>;
+}
+
+export interface PackagePolicyPartialUpdateResult {
+  updatedPolicies: PartialPackagePolicy[];
+  failedPolicies: Array<{
+    update: PackagePolicyPartialUpdate;
+    error: SavedObjectError;
+  }>;
+}
+
+export interface PackagePolicyClientGetByIdsOptions extends WithSpaceIdsOption {
+  ignoreMissing?: boolean;
+  fields?: string[];
+}
+
+export interface PackagePolicyClientDeleteOptions extends WithSpaceIdsOption {
+  user?: AuthenticatedUser;
+  /**
+   * When true, skip unassigning from surviving agent policies and skip the agent policy revision
+   * bump. This also suppresses the agentless agent policy cascade-delete. Use only when the caller
+   * manages those side-effects itself.
+   */
+  skipUnassignFromAgentPolicies?: boolean;
+  /** Skip the agent policy revision bump when the caller will perform it separately. */
+  bumpRevision?: boolean;
+  /** Bypass `is_managed` and hosted-agent-policy guards. */
+  force?: boolean;
+  asyncDeploy?: boolean;
+  ignoreMissing?: boolean;
+}
+
+export interface PackagePolicyClientBulkUpdateOptions {
+  user?: AuthenticatedUser;
+  force?: boolean;
+  /** Skip the agent policy revision bump when the caller will perform it separately. */
+  bumpRevision?: boolean;
+  asyncDeploy?: boolean;
+  fromBulkUpgrade?: boolean;
+  oldPackagePolicies?: PackagePolicy[];
+}
+
+export type PackagePolicyClientFindAllForAgentPolicyOptions = WithSpaceIdsOption;
+
+export interface PackagePolicyClientGetOptions {
+  /**
+   * The space IDs that should be targeted for data retrieval. The SO client provided to the services
+   * still needs to have access to the space defined here.
+   * When using an un-scoped so client (has access to all spaces) and wanting to retrieve data across
+   * all space, use a value of `*` (ex. `spaceId: '*'`)
+   */
+  spaceId?: string;
+}
+
+export type PackagePolicyClientListIdsOptions = ListWithKuery & WithSpaceIdsOption;
+
+export type PackagePolicyClientRollbackOptions = Omit<SavedObjectsFindOptions, 'type'> &
+  WithSpaceIdsOption;

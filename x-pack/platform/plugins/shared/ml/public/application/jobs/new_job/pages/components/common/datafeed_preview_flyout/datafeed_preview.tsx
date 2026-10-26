@@ -18,14 +18,15 @@ import {
   EuiButton,
 } from '@elastic/eui';
 
-import type { CombinedJob } from '../../../../../../../../common/types/anomaly_detection_jobs';
+import type { CombinedJob } from '@kbn/ml-common-types/anomaly_detection_jobs/combined_job';
 import { MLJobEditor } from '../../../../../jobs_list/components/ml_job_editor';
 import { useMlApi } from '../../../../../../contexts/kibana';
 
 export const DatafeedPreview: FC<{
   combinedJob: CombinedJob | null;
   heightOffset?: number;
-}> = ({ combinedJob, heightOffset = 0 }) => {
+  flyoutTitleId?: string;
+}> = ({ combinedJob, heightOffset = 0, flyoutTitleId }) => {
   const {
     jobs: { datafeedPreview },
   } = useMlApi();
@@ -99,7 +100,7 @@ export const DatafeedPreview: FC<{
       <EuiFlexGroup>
         <EuiFlexItem>
           <EuiTitle size="s">
-            <h5>
+            <h5 id={flyoutTitleId}>
               <FormattedMessage
                 id="xpack.ml.newJob.wizard.datafeedPreviewFlyout.title"
                 defaultMessage="Datafeed preview"

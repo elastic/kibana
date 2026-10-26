@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
-import { Redirect, RouteChildrenProps } from 'react-router-dom';
+import type { FC } from 'react';
+import React from 'react';
+import type { RouteChildrenProps } from 'react-router-dom';
+import { Redirect } from 'react-router-dom';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
-import { History } from 'history';
-import { parse, stringify } from 'query-string';
+import type { History } from 'history';
+import queryString from 'query-string';
 import { HomeRoute } from './home';
 import { WorkpadRoute, ExportWorkpadRoute } from './workpad';
 
@@ -18,10 +20,10 @@ const isHashPath = (hash: string) => {
 };
 
 const mergeQueryStrings = (query: string, queryFromHash: string) => {
-  const queryObject = parse(query);
-  const hashObject = parse(queryFromHash);
+  const queryObject = queryString.parse(query);
+  const hashObject = queryString.parse(queryFromHash);
 
-  return stringify({ ...queryObject, ...hashObject });
+  return queryString.stringify({ ...queryObject, ...hashObject });
 };
 
 export const CanvasRouter: FC<{ history: History }> = ({ history }) => (

@@ -29,7 +29,6 @@ import useUpdateEffect from 'react-use/lib/useUpdateEffect';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { DocLink } from './doc_link';
 import { getCommandLineSnippet } from './get_command_line_snippet';
 import { SubmitErrorCallout } from './submit_error_callout';
 import { TextTruncate } from './text_truncate';
@@ -131,6 +130,7 @@ export const EnrollmentTokenForm: FunctionComponent<EnrollmentTokenFormProps> = 
         fullWidth
       >
         <EuiTextArea
+          data-test-subj="interactiveSetupEnrollmentTokenInput"
           name="token"
           value={form.values.token}
           isInvalid={form.touched.token && !!form.errors.token}
@@ -144,7 +144,12 @@ export const EnrollmentTokenForm: FunctionComponent<EnrollmentTokenFormProps> = 
 
       <EuiFlexGroup responsive={false} justifyContent="flexEnd">
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty flush="right" iconType="gear" onClick={onCancel}>
+          <EuiButtonEmpty
+            data-test-subj="interactiveSetupConfigureManuallyButton"
+            flush="right"
+            iconType="gear"
+            onClick={onCancel}
+          >
             <FormattedMessage
               id="interactiveSetup.enrollmentTokenForm.cancelButton"
               defaultMessage="Configure manually"
@@ -153,6 +158,7 @@ export const EnrollmentTokenForm: FunctionComponent<EnrollmentTokenFormProps> = 
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButton
+            data-test-subj="interactiveSetupSubmitEnrollmentTokenButton"
             buttonRef={buttonRef}
             type="submit"
             isLoading={form.isSubmitting}
@@ -228,6 +234,7 @@ export function compareAddresses(a: string, b: string) {
 }
 
 export const EnrollmentTokenHelpPopover = () => {
+  const { docLinks } = useKibana();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const button = (
@@ -245,6 +252,9 @@ export const EnrollmentTokenHelpPopover = () => {
       anchorPosition="rightCenter"
       isOpen={isPopoverOpen}
       closePopover={() => setIsPopoverOpen(false)}
+      aria-label={i18n.translate('interactiveSetup.enrollmentTokenHelpPopover.ariaLabel', {
+        defaultMessage: 'Enrollment token help',
+      })}
     >
       <EuiText size="s" grow={false}>
         <p>
@@ -266,12 +276,16 @@ export const EnrollmentTokenHelpPopover = () => {
         </EuiCodeBlock>
       </EuiText>
       <EuiPopoverFooter>
-        <DocLink app="elasticsearch" doc="configuring-stack-security.html">
+        <EuiLink
+          href={docLinks.links.security.enableElasticSearchSecurityFeatures}
+          target="_blank"
+          external
+        >
           <FormattedMessage
             id="interactiveSetup.enrollmentTokenHelpPopover.docLinkText"
             defaultMessage="Learn how to set up Elastic."
           />
-        </DocLink>
+        </EuiLink>
       </EuiPopoverFooter>
     </EuiPopover>
   );

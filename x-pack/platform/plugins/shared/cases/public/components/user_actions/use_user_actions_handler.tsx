@@ -13,6 +13,7 @@ import { useUpdateComment } from '../../containers/use_update_comment';
 import type { AddCommentRefObject } from '../add_comment';
 import type { UserActionMarkdownRefObject } from './markdown_form';
 import type { UserActionBuilderArgs } from './types';
+import type { RelatedRemovalOptions } from '../../client/attachment_framework/types';
 import { NEW_COMMENT_ID } from './constants';
 import { useDeleteComment } from '../../containers/use_delete_comment';
 import { useRefreshCaseViewPage } from '../case_view/use_on_refresh_case_view_page';
@@ -22,13 +23,17 @@ export type UseUserActionsHandler = Pick<
   | 'loadingCommentIds'
   | 'selectedOutlineCommentId'
   | 'manageMarkdownEditIds'
-  | 'commentRefs'
-  | 'handleManageMarkdownEditId'
   | 'handleOutlineComment'
-  | 'handleSaveComment'
-  | 'handleManageQuote'
   | 'handleDeleteComment'
-> & { handleUpdate: (updatedCase: CaseUI) => void };
+> & {
+  commentRefs: React.MutableRefObject<
+    Record<string, AddCommentRefObject | UserActionMarkdownRefObject | null | undefined>
+  >;
+  handleManageMarkdownEditId: (id: string) => void;
+  handleSaveComment: (props: { id: string; version: string }, content: string) => void;
+  handleManageQuote: (quote: string) => void;
+  handleUpdate: (updatedCase: CaseUI) => void;
+};
 
 const isAddCommentRef = (
   ref: AddCommentRefObject | UserActionMarkdownRefObject | null | undefined
@@ -103,8 +108,13 @@ export const useUserActionsHandler = (): UseUserActionsHandler => {
   );
 
   const handleDeleteComment = useCallback(
-    (id: string, successToasterTitle: string) => {
-      deleteComment({ caseId, commentId: id, successToasterTitle });
+    (id: string, successToasterTitle: string, options?: RelatedRemovalOptions) => {
+      deleteComment({
+        caseId,
+        commentId: id,
+        successToasterTitle,
+        includeRelated: options?.includeRelated,
+      });
     },
     [caseId, deleteComment]
   );

@@ -18,6 +18,7 @@ import type { TimeBuckets, TimeBucketsInterval } from '@kbn/ml-time-buckets';
 import { useTimeBuckets } from '@kbn/ml-time-buckets';
 import { createDefaultQuery } from '@kbn/aiops-common/create_default_query';
 import { getEsQueryConfig } from '@kbn/data-service';
+import type { ChangePointAggregationFunction } from '@kbn/aiops-server-schemas/embeddables/change_point_chart';
 import { useFilterQueryUpdates } from '../../hooks/use_filters_query';
 import { type ChangePointType, DEFAULT_AGG_FUNCTION } from './constants';
 import { getEsQueryFromSavedSearch } from '../../application/utils/search_utils';
@@ -30,7 +31,7 @@ export interface ChangePointDetectionPageUrlState {
 }
 
 export interface FieldConfig {
-  fn: string;
+  fn: ChangePointAggregationFunction;
   splitField?: string;
   metricField: string;
 }
@@ -74,14 +75,14 @@ export const ChangePointDetectionContext = createContext<{
 export interface ChangePointAnnotation {
   id: string;
   label: string;
-  reason: string;
-  timestamp: string;
+  reason?: string;
+  timestamp?: string;
   group?: {
     name: string;
     value: string;
   };
   type: ChangePointType;
-  p_value: number;
+  p_value?: number;
 }
 
 export type SelectedChangePoint = FieldConfig & ChangePointAnnotation;

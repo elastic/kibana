@@ -12,8 +12,8 @@ import {
   EuiSkeletonText,
   useIsWithinBreakpoints,
 } from '@elastic/eui';
-import { EuiFlexGridProps } from '@elastic/eui/src/components/flex/flex_grid';
-import { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import type { EuiFlexGridProps } from '@elastic/eui/src/components/flex/flex_grid';
+import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React from 'react';
 import { useFetchActiveAlerts } from '../../../../hooks/use_fetch_active_alerts';
 import { useFetchHistoricalSummary } from '../../../../hooks/use_fetch_historical_summary';
@@ -24,6 +24,7 @@ export interface Props {
   sloList: SLOWithSummaryResponse[];
   loading: boolean;
   error: boolean;
+  isInteractive?: boolean;
 }
 
 const useColumns = () => {
@@ -43,7 +44,7 @@ const useColumns = () => {
   }
 };
 
-export function SloListCardView({ sloList, loading, error }: Props) {
+export function SloListCardView({ sloList, loading, error, isInteractive = true }: Props) {
   const sloIdsAndInstanceIds = sloList.map((slo) => [slo.id, slo.instanceId] as [string, string]);
   const { data: activeAlertsBySlo } = useFetchActiveAlerts({ sloIdsAndInstanceIds });
   const { data: rulesBySlo, refetchRules } = useFetchRulesForSlo({
@@ -81,6 +82,7 @@ export function SloListCardView({ sloList, loading, error }: Props) {
               }
               historicalSummaryLoading={historicalSummaryLoading}
               refetchRules={refetchRules}
+              isInteractive={isInteractive}
             />
           </EuiFlexItem>
         ))}
@@ -97,7 +99,7 @@ function LoadingSloGrid({ gridSize }: { gridSize: number }) {
       <EuiFlexGrid gutterSize="m" columns={COLUMNS as EuiFlexGridProps['columns']}>
         {loaders.map((_, i) => (
           <EuiFlexItem key={i}>
-            <EuiPanel style={{ height: '200px' }} hasBorder={true}>
+            <EuiPanel css={{ height: '200px' }} hasBorder={true}>
               <EuiSkeletonText lines={2} />
             </EuiPanel>{' '}
           </EuiFlexItem>

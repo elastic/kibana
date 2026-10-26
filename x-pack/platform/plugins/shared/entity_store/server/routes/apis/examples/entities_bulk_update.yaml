@@ -1,0 +1,89 @@
+requestBody:
+  content:
+    application/json:
+      examples:
+        bulkUpdateExample:
+          summary: "Bulk update multiple entities"
+          description: "Update a host entity and a user entity in a single request."
+          value:
+            entities:
+              - type: host
+                doc:
+                  entity:
+                    id: "host:web-server-prod-01"
+                    name: "web-server-prod-01"
+                    type: "host"
+                    attributes:
+                      asset: true
+                  host:
+                    name: "web-server-prod-01"
+              - type: user
+                doc:
+                  entity:
+                    id: "user:jane.doe@example.com"
+                    name: "jane.doe"
+                    type: "user"
+                    attributes:
+                      managed: true
+                  user:
+                    name: "jane.doe"
+responses:
+  200:
+    description: "Indicates a successful response."
+    content:
+      application/json:
+        examples:
+          bulkUpdateSuccessExample:
+            summary: "All entities updated"
+            description: "All entities were successfully updated with no errors."
+            value:
+              ok: true
+              errors: []
+          bulkUpdatePartialExample:
+            summary: "Partial success with errors"
+            description: "Some entities were updated but others encountered Elasticsearch-level errors."
+            value:
+              ok: true
+              errors:
+                - _id: "5de9f93a68a72532e736bf5a6184b06300b9cabf"
+                  status: 404
+                  type: "document_missing_exception"
+                  reason: "[5de9f93a68a72532e736bf5a6184b06300b9cabf]: document missing"
+  400:
+    description: "Bad request."
+    content:
+      application/json:
+        examples:
+          protectedFieldsExample:
+            summary: "Protected fields without force"
+            description: "The request attempts to update protected fields without the force query parameter."
+            value:
+              statusCode: 400
+              error: "Bad Request"
+              message: "Bad request: The following attributes are not allowed to be updated without forcing it (?force=true): entity.name, entity.type"
+x-codeSamples:
+  - lang: curl
+    source: |
+      curl -X PUT -H "kbn-xsrf: true" -H "Authorization: ApiKey ${API_KEY}" \
+        -H "Content-Type: application/json" \
+        -d '{"entities":[{"type":"host","doc":{"entity":{"id":"host:web-server-prod-01","name":"web-server-prod-01","type":"host","attributes":{"asset":true}},"host":{"name":"web-server-prod-01"}}}]}' \
+        "${KIBANA_URL}/api/security/entity_store/entities/bulk?force=true"
+  - lang: Console
+    source: |
+      PUT kbn://api/security/entity_store/entities/bulk?force=true
+      {
+        "entities": [
+          {
+            "type": "host",
+            "doc": {
+              "entity": {
+                "id": "host:web-server-prod-01",
+                "name": "web-server-prod-01",
+                "type": "host",
+                "attributes": { "asset": true }
+              },
+              "host": { "name": "web-server-prod-01" }
+            }
+          }
+        ]
+      }

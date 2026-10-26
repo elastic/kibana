@@ -8,12 +8,12 @@
  */
 
 import chalk from 'chalk';
-import { OpenAPIV3 } from 'openapi-types';
-import { ResolvedDocument } from '../ref_resolver/resolved_document';
+import type { OpenAPIV3 } from 'openapi-types';
+import type { ResolvedDocument } from '../ref_resolver/resolved_document';
 import { isRefNode } from '../process_document';
 import { mergeOperations } from './merge_operations';
 import { mergeArrays } from './merge_arrays';
-import { MergeOptions } from './merge_options';
+import type { MergeOptions } from './merge_options';
 
 export function mergePaths(
   resolvedDocuments: ResolvedDocument[],

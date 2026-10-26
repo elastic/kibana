@@ -66,6 +66,7 @@ export interface LogCategorizationPageProps {
   selectedField: DataViewField;
   onClose: () => void;
   additionalFilter?: CategorizationAdditionalFilter;
+  projectRouting?: string;
 }
 
 const BAR_TARGET = 20;
@@ -76,6 +77,7 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
   selectedField,
   onClose,
   additionalFilter,
+  projectRouting,
 }) => {
   const {
     notifications: { toasts },
@@ -84,6 +86,7 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
     },
     uiSettings,
     embeddingOrigin,
+    cps,
   } = useAiopsAppContext();
 
   const { runValidateFieldRequest, cancelRequest: cancelValidationRequest } =
@@ -153,7 +156,10 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
     undefined,
     undefined,
     undefined,
-    BAR_TARGET
+    BAR_TARGET,
+    undefined,
+    undefined,
+    projectRouting
   );
 
   const { getActions, openInDiscover } = useActions(
@@ -201,6 +207,7 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
           timeRange,
           searchQuery,
           runtimeMappings,
+          projectRouting ?? cps?.cpsManager?.getProjectRouting(),
           {
             [AIOPS_ANALYSIS_RUN_ORIGIN]: embeddingOrigin,
           }
@@ -212,6 +219,7 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
           timeRange,
           searchQuery,
           runtimeMappings,
+          projectRouting ?? cps?.cpsManager?.getProjectRouting(),
           intervalMs,
           additionalFilter
         ),
@@ -263,11 +271,13 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
     cancelRequest,
     runValidateFieldRequest,
     searchQuery,
+    cps?.cpsManager,
     embeddingOrigin,
     runCategorizeRequest,
     intervalMs,
     additionalFilter,
     toasts,
+    projectRouting,
   ]);
 
   useEffect(() => {
@@ -359,8 +369,9 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
                           <EuiIcon
                             size="s"
                             color="subdued"
-                            type="questionInCircle"
+                            type="question"
                             className="eui-alignTop"
+                            aria-hidden={true}
                           />
                         </EuiFlexItem>
                       </EuiFlexGroup>
@@ -391,8 +402,9 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
                           <EuiIcon
                             size="s"
                             color="subdued"
-                            type="questionInCircle"
+                            type="question"
                             className="eui-alignTop"
+                            aria-hidden={true}
                           />
                         </EuiFlexItem>
                       </EuiFlexGroup>

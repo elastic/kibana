@@ -6,7 +6,7 @@
  */
 
 import type moment from 'moment';
-
+import { sum } from 'lodash';
 import type { estypes } from '@elastic/elasticsearch';
 
 import { withSecuritySpan } from '../../../../../utils/with_security_span';
@@ -20,6 +20,7 @@ import {
   addToSearchAfterReturn,
   getUnprocessedExceptionsWarnings,
   getMaxSignalsWarning,
+  getTotalHitsValue,
   mergeReturns,
 } from '../../utils/utils';
 import type { SuppressionBucket } from './wrap_suppressed_alerts';
@@ -27,6 +28,7 @@ import { wrapSuppressedAlerts } from './wrap_suppressed_alerts';
 import { buildGroupByFieldAggregation } from './build_group_by_field_aggregation';
 import type { EventGroupingMultiBucketAggregationResult } from './build_group_by_field_aggregation';
 import { singleSearchAfter } from '../../utils/single_search_after';
+import { reportMissingAggregations } from '../../utils/no_readable_shards';
 import { bulkCreateWithSuppression } from '../../utils/bulk_create_with_suppression';
 import type { UnifiedQueryRuleParams } from '../../../rule_schema';
 import type { BuildReasonMessage } from '../../utils/reason_formatters';
@@ -199,7 +201,7 @@ export const groupAndBulkCreate = async ({
         runtimeMappings: sharedParams.runtimeMappings,
         additionalFilters: bucketHistoryFilter,
       });
-      const { searchResult, searchDuration, searchErrors, loggedRequests } =
+      const { searchResult, searchDuration, searchErrors, searchWarnings, loggedRequests } =
         await singleSearchAfter({
           searchRequest,
           services,
@@ -217,14 +219,29 @@ export const groupAndBulkCreate = async ({
       }
       toReturn.searchAfterTimes.push(searchDuration);
       toReturn.errors.push(...searchErrors);
+      toReturn.warningMessages.push(...searchWarnings);
+      toReturn.totalEventsFound = getTotalHitsValue(searchResult.hits.total);
 
       const eventsByGroupResponseWithAggs =
         searchResult as EventGroupingMultiBucketAggregationResult;
       if (!eventsByGroupResponseWithAggs.aggregations) {
-        throw new Error('expected to find aggregations on search result');
+        reportMissingAggregations({
+          searchResult,
+          searchErrors,
+          searchWarnings,
+          result: toReturn,
+          inputIndex: sharedParams.inputIndex,
+          cpsLinkedProjects: sharedParams.cpsData?.linkedProjects,
+          unexpectedErrorMessage: 'expected to find aggregations on search result',
+        });
+
+        return toReturn;
       }
 
       const buckets = eventsByGroupResponseWithAggs.aggregations.eventGroups.buckets;
+
+      // Collect rule execution metrics
+      toReturn.alertsCandidateCount = sum(buckets.map((b) => b.doc_count));
 
       // we can create only as many unsuppressed alerts, as total number of alerts(suppressed and unsuppressed) does not exceeds maxSignals
       const maxUnsuppressedCount = tuple.maxSignals - buckets.length;
@@ -283,7 +300,7 @@ export const groupAndBulkCreate = async ({
         });
         addToSearchAfterReturn({ current: toReturn, next: bulkCreateResult });
         sharedParams.ruleExecutionLogger.debug(
-          `created ${bulkCreateResult.createdItemsCount} signals`
+          `Alerts bulk creation completed: ${bulkCreateResult.createdItemsCount}`
         );
       } else {
         const bulkCreateResult = await bulkCreate({
@@ -299,7 +316,7 @@ export const groupAndBulkCreate = async ({
           },
         });
         sharedParams.ruleExecutionLogger.debug(
-          `created ${bulkCreateResult.createdItemsCount} signals`
+          `Alerts bulk creation completed: ${bulkCreateResult.createdItemsCount}`
         );
       }
 

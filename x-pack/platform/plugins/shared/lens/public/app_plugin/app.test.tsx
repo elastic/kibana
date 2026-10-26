@@ -6,11 +6,16 @@
  */
 
 import React from 'react';
-import { Observable, Subject } from 'rxjs';
+import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import { act } from 'react-dom/test-utils';
 import { App } from './app';
-import { LensAppProps, LensAppServices } from './types';
-import { LensDocument, SavedObjectIndexStore } from '../persistence';
+import type { LensAppProps } from './types';
+import type {
+  LensDocument,
+  LensAppServices,
+  LensAppState,
+  VisualizeEditorContext,
+} from '@kbn/lens-common';
 import {
   visualizationMap,
   datasourceMap,
@@ -19,33 +24,57 @@ import {
   mockStoreDeps,
   defaultDoc,
 } from '../mocks';
-import { checkForDuplicateTitle } from '../persistence';
 import { createMemoryHistory } from 'history';
-import type { Query } from '@kbn/es-query';
 import { FilterManager } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { buildExistsFilter, FilterStateStore } from '@kbn/es-query';
 import type { FieldSpec } from '@kbn/data-plugin/common';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { serverlessMock } from '@kbn/serverless/public/mocks';
-import { cloneDeep } from 'lodash';
 import moment from 'moment';
-import { setState, LensAppState } from '../state_management';
+import { setState } from '../state_management';
 import { coreMock } from '@kbn/core/public/mocks';
-import { LensSerializedState } from '..';
+import type { LensSerializedState } from '..';
 import { createMockedField, createMockedIndexPattern } from '../datasources/form_based/mocks';
 import { faker } from '@faker-js/faker';
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { VisualizeEditorContext } from '../types';
 import { setMockedPresentationUtilServices } from '@kbn/presentation-util-plugin/public/mocks';
+import { ChromeServiceProvider } from '@kbn/core-chrome-browser-context';
+import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
+import { EditorFrameServiceProvider } from '../editor_frame_service/editor_frame_service_context';
+import { trackCreateUiCounterEvents } from '../lens_ui_telemetry';
 
-jest.mock('../persistence/saved_objects_utils/check_for_duplicate_title', () => ({
-  checkForDuplicateTitle: jest.fn(),
+jest.mock('../lens_ui_telemetry', () => ({
+  ...jest.requireActual('../lens_ui_telemetry'),
+  trackCreateUiCounterEvents: jest.fn(),
 }));
+
 jest.mock('lodash', () => ({
   ...jest.requireActual('lodash'),
   debounce: (fn: unknown) => fn,
+}));
+
+// Force wide breakpoints so the AppHeader app menu renders its items inline
+// instead of collapsing them into the overflow popover (jsdom defaults smaller).
+jest.mock('@kbn/ui-chrome-layout', () => ({
+  ...jest.requireActual('@kbn/ui-chrome-layout'),
+  useCurrentChromeApplicationBreakpoint: () => 'xl',
+}));
+
+jest.mock('@elastic/eui', () => ({
+  ...jest.requireActual('@elastic/eui'),
+  useCurrentEuiBreakpoint: () => 'xl',
+  useIsWithinBreakpoints: (breakpoints: string[]) => breakpoints.includes('xl'),
+}));
+
+// AppMenu only registers with chrome and returns null.
+// Render AppHeader inline in unit tests so menu item test subjects remain assertable.
+jest.mock('@kbn/core-chrome-app-menu', () => ({
+  AppMenu: ({ config }: { config?: unknown }) => {
+    const { AppHeader } = jest.requireActual('@kbn/app-header');
+    return <AppHeader title="lens" menu={config} />;
+  },
 }));
 
 const defaultSavedObjectId: string = faker.string.uuid();
@@ -54,15 +83,13 @@ const waitToLoad = async () =>
   await act(async () => new Promise((resolve) => setTimeout(resolve, 0)));
 
 function getLensDocumentMock(propsOverrides?: Partial<LensDocument>) {
-  return cloneDeep({ ...defaultDoc, ...propsOverrides });
+  return structuredClone({ ...defaultDoc, ...propsOverrides });
 }
 
 describe('Lens App', () => {
   let props: jest.Mocked<LensAppProps>;
-  let services: jest.Mocked<LensAppServices> = makeDefaultServices(
-    new Subject<string>(),
-    'sessionId-1'
-  );
+  let chrome: ReturnType<typeof chromeServiceMock.createStartContract>;
+  let services: jest.Mocked<LensAppServices>;
   beforeAll(() => setMockedPresentationUtilServices());
 
   beforeEach(() => {
@@ -77,19 +104,16 @@ describe('Lens App', () => {
       redirectToOrigin: jest.fn(),
       onAppLeave: jest.fn(),
       setHeaderActionMenu: jest.fn(),
-      datasourceMap,
-      visualizationMap,
       topNavMenuEntryGenerators: [],
       theme$: new Observable(),
       coreStart: coreMock.createStart(),
-      savedObjectStore: {
-        save: jest.fn(),
-        load: jest.fn(),
-        search: jest.fn(),
-      } as unknown as SavedObjectIndexStore,
     };
 
-    services = makeDefaultServices(new Subject<string>(), 'sessionId-1');
+    chrome = chromeServiceMock.createStartContract();
+    services = {
+      ...makeDefaultServices(new Subject<string>(), 'sessionId-1'),
+      chrome,
+    };
   });
 
   afterEach(() => {
@@ -98,11 +122,22 @@ describe('Lens App', () => {
 
   async function renderApp({
     preloadedState,
+    datasourceMapOverride,
   }: {
     preloadedState?: Partial<LensAppState>;
+    datasourceMapOverride?: typeof datasourceMap;
   } = {}) {
     const Wrapper = ({ children }: { children: React.ReactNode }) => (
-      <KibanaContextProvider services={services}>{children}</KibanaContextProvider>
+      <KibanaContextProvider services={services}>
+        <ChromeServiceProvider value={{ chrome }}>
+          <EditorFrameServiceProvider
+            visualizationMap={visualizationMap}
+            datasourceMap={datasourceMapOverride ?? datasourceMap}
+          >
+            {children}
+          </EditorFrameServiceProvider>
+        </ChromeServiceProvider>
+      </KibanaContextProvider>
     );
 
     const {
@@ -134,6 +169,98 @@ describe('Lens App', () => {
     expect(screen.getByText('Editor frame')).toBeInTheDocument();
   });
 
+  describe('ChromeAppHeaderRegistration', () => {
+    function enableProjectChrome() {
+      chrome.getChromeStyle.mockReturnValue('project');
+      chrome.getChromeStyle$.mockReturnValue(new BehaviorSubject('project'));
+      chrome.appHeader.set.mockReturnValue(jest.fn());
+    }
+
+    it('registers title and leaves the search bar separate', async () => {
+      enableProjectChrome();
+      await renderApp();
+
+      expect(chrome.appHeader.set).toHaveBeenCalledWith(
+        expect.objectContaining({
+          title: undefined,
+          back: undefined,
+          spacing: 'compact',
+          menu: expect.objectContaining({
+            primaryActionItem: expect.objectContaining({
+              testId: 'lnsApp_saveButton',
+            }),
+          }),
+        })
+      );
+      expect(services.unifiedSearch.ui.AggregateQuerySearchBar).toHaveBeenCalledWith(
+        expect.objectContaining({
+          showFilterBar: true,
+          showQueryInput: true,
+        }),
+        {}
+      );
+      expect(screen.getByTestId('lnsApp_topNav')).toBeInTheDocument();
+    });
+
+    it('registers the document title when a saved visualization is loaded', async () => {
+      enableProjectChrome();
+      await renderApp({
+        preloadedState: {
+          persistedDoc: getLensDocumentMock({
+            title: 'My Lens visualization',
+          }),
+        },
+      });
+
+      expect(chrome.appHeader.set).toHaveBeenCalledWith(
+        expect.objectContaining({
+          title: 'My Lens visualization',
+        })
+      );
+    });
+
+    it('registers the managed badge', async () => {
+      enableProjectChrome();
+      await renderApp({
+        preloadedState: {
+          managed: true,
+        },
+      });
+
+      expect(chrome.appHeader.set).toHaveBeenCalledWith(
+        expect.objectContaining({
+          badges: expect.arrayContaining([
+            expect.objectContaining({
+              'data-test-subj': 'managedContentBadge',
+            }),
+          ]),
+        })
+      );
+    });
+
+    it('registers an explicit back to the originating dashboard when editing from a panel', async () => {
+      enableProjectChrome();
+      props.redirectToOrigin = jest.fn();
+      props.incomingState = {
+        originatingApp: 'dashboards',
+        originatingPath: '/view/abc',
+      };
+      services.getOriginatingAppName = jest.fn(() => 'Dashboards');
+
+      await renderApp();
+
+      expect(chrome.appHeader.set).toHaveBeenCalledWith(
+        expect.objectContaining({
+          back: expect.objectContaining({
+            href: expect.stringContaining('dashboards'),
+            label: 'Dashboards',
+            onClick: expect.any(Function),
+          }),
+        })
+      );
+    });
+  });
+
   it('updates global filters with store state', async () => {
     const pinnedField = createMockedField({ name: 'pinnedField', type: '' });
     const indexPattern = createMockedIndexPattern({ id: 'index1' }, [pinnedField]);
@@ -162,16 +289,15 @@ describe('Lens App', () => {
       props.topNavMenuEntryGenerators = [
         () => ({
           label: 'My entry',
+          testId: 'lnsApp_myEntry',
           run: runFn,
         }),
       ];
       await renderApp();
-      expect(services.navigation.ui.AggregateQueryTopNavMenu).toHaveBeenCalledWith(
-        expect.objectContaining({
-          config: expect.arrayContaining([{ label: 'My entry', run: runFn }]),
-        }),
-        {}
-      );
+      const entry = screen.getByTestId('lnsApp_myEntry');
+      expect(entry).toBeInTheDocument();
+      await userEvent.click(entry);
+      expect(runFn).toHaveBeenCalled();
     });
 
     it('passes current state, filter, query timerange and initial context into getter', async () => {
@@ -182,10 +308,11 @@ describe('Lens App', () => {
           state: {
             visState: true,
           },
+          selectedLayerId: null,
         },
-        activeDatasourceId: 'testDatasource',
+        activeDatasourceId: 'formBased',
         datasourceStates: {
-          testDatasource: {
+          formBased: {
             isLoading: false,
             state: { datasourceState: true },
           },
@@ -222,9 +349,9 @@ describe('Lens App', () => {
           query: preloadedState.query,
           filters: preloadedState.filters,
           datasourceStates: {
-            testDatasource: {
+            formBased: {
               isLoading: false,
-              state: preloadedState.datasourceStates.testDatasource.state,
+              state: preloadedState.datasourceStates.formBased.state,
             },
           },
         })
@@ -240,16 +367,14 @@ describe('Lens App', () => {
     });
 
     it('sets breadcrumbs when the document title changes', async () => {
+      // Override the default mock to ensure no originating app
+      services.getOriginatingAppName = jest.fn(() => undefined);
       const { lensStore } = await renderApp();
 
-      expect(services.chrome.setBreadcrumbs).toHaveBeenCalledWith([
-        {
-          text: 'Visualize Library',
-          href: '/testbasepath/app/visualize#/',
-          onClick: expect.anything(),
-        },
-        { text: 'Create' },
-      ]);
+      const expectedCreateBreadcrumbs = [{ text: 'Create' }];
+      expect(services.chrome.setBreadcrumbs).toHaveBeenCalledWith(expectedCreateBreadcrumbs, {
+        project: { value: expectedCreateBreadcrumbs, absolute: true },
+      });
 
       await act(async () => {
         await lensStore.dispatch(
@@ -259,14 +384,10 @@ describe('Lens App', () => {
         );
       });
 
-      expect(services.chrome.setBreadcrumbs).toHaveBeenCalledWith([
-        {
-          text: 'Visualize Library',
-          href: '/testbasepath/app/visualize#/',
-          onClick: expect.anything(),
-        },
-        { text: 'Daaaaaaadaumching!' },
-      ]);
+      const expectedSavedBreadcrumbs = [{ text: 'Daaaaaaadaumching!' }];
+      expect(services.chrome.setBreadcrumbs).toHaveBeenCalledWith(expectedSavedBreadcrumbs, {
+        project: { value: expectedSavedBreadcrumbs, absolute: true },
+      });
     });
 
     it('sets originatingApp breadcrumb when the document title changes', async () => {
@@ -276,17 +397,19 @@ describe('Lens App', () => {
         preloadedState: { isLinkedToOriginatingApp: false },
       });
 
-      expect(services.chrome.setBreadcrumbs).toHaveBeenCalledWith([
+      const expectedOriginCreateBreadcrumbs = [
         {
-          text: 'Visualize Library',
-          href: '/testbasepath/app/visualize#/',
+          text: 'The Coolest Container Ever Made',
           onClick: expect.anything(),
         },
         { text: 'Create' },
-      ]);
+      ];
+      expect(services.chrome.setBreadcrumbs).toHaveBeenCalledWith(expectedOriginCreateBreadcrumbs, {
+        project: { value: expectedOriginCreateBreadcrumbs, absolute: true },
+      });
 
       await act(async () => {
-        await rerender({ initialInput: { savedObjectId: breadcrumbDocSavedObjectId } });
+        await rerender({ initialInput: { ref_id: breadcrumbDocSavedObjectId } });
 
         lensStore.dispatch(
           setState({
@@ -295,14 +418,16 @@ describe('Lens App', () => {
         );
       });
 
-      expect(services.chrome.setBreadcrumbs).toHaveBeenCalledWith([
+      const expectedOriginSavedBreadcrumbs = [
         {
-          text: 'Visualize Library',
-          href: '/testbasepath/app/visualize#/',
+          text: 'The Coolest Container Ever Made',
           onClick: expect.anything(),
         },
         { text: 'Daaaaaaadaumching!' },
-      ]);
+      ];
+      expect(services.chrome.setBreadcrumbs).toHaveBeenCalledWith(expectedOriginSavedBreadcrumbs, {
+        project: { value: expectedOriginSavedBreadcrumbs, absolute: true },
+      });
     });
 
     it('sets serverless breadcrumbs when the document title changes when serverless service is available', async () => {
@@ -313,7 +438,7 @@ describe('Lens App', () => {
       expect(serverless.setBreadcrumbs).toHaveBeenCalledWith({ text: 'Create' });
 
       await act(async () => {
-        rerender({ initialInput: { savedObjectId: breadcrumbDocSavedObjectId } });
+        rerender({ initialInput: { ref_id: breadcrumbDocSavedObjectId } });
         lensStore.dispatch(
           setState({
             persistedDoc: breadcrumbDoc,
@@ -323,6 +448,116 @@ describe('Lens App', () => {
 
       expect(services.chrome.setBreadcrumbs).not.toHaveBeenCalled();
       expect(serverless.setBreadcrumbs).toHaveBeenCalledWith({ text: 'Daaaaaaadaumching!' });
+    });
+
+    it('prepends incomingBreadcrumbs from incomingState when provided', async () => {
+      const incomingBreadcrumbs = [
+        { text: 'My Dashboard', href: '/app/dashboards#/view/123' },
+        { text: 'Visualizations', href: '/app/dashboards#/list/visualizations' },
+      ];
+      props.incomingState = {
+        originatingApp: 'dashboards',
+        breadcrumbs: incomingBreadcrumbs,
+      };
+      services.getOriginatingAppName = jest.fn(() => 'My Dashboard');
+      const { lensStore } = await renderApp();
+
+      const expectedCreateBreadcrumbs = [...incomingBreadcrumbs, { text: 'Create' }];
+      expect(services.chrome.setBreadcrumbs).toHaveBeenCalledWith(expectedCreateBreadcrumbs, {
+        project: { value: expectedCreateBreadcrumbs, absolute: true },
+      });
+
+      await act(async () => {
+        lensStore.dispatch(setState({ persistedDoc: breadcrumbDoc }));
+      });
+
+      const expectedSavedBreadcrumbs = [...incomingBreadcrumbs, { text: 'Daaaaaaadaumching!' }];
+      expect(services.chrome.setBreadcrumbs).toHaveBeenCalledWith(expectedSavedBreadcrumbs, {
+        project: { value: expectedSavedBreadcrumbs, absolute: true },
+      });
+    });
+
+    it('falls back to incomingBreadcrumbs from initialContext when incomingState has no breadcrumbs', async () => {
+      const contextBreadcrumbs = [
+        { text: 'Dashboards', href: '/app/dashboards#/list' },
+        { text: 'Visualizations', href: '/app/dashboards#/list/visualizations' },
+      ];
+      props.incomingState = undefined;
+      props.initialContext = {
+        isVisualizeAction: true,
+        breadcrumbs: contextBreadcrumbs,
+      } as VisualizeEditorContext;
+      services.getOriginatingAppName = jest.fn(() => undefined);
+      const { lensStore } = await renderApp();
+
+      const expectedCreateBreadcrumbs = [...contextBreadcrumbs, { text: 'Create' }];
+      expect(services.chrome.setBreadcrumbs).toHaveBeenCalledWith(expectedCreateBreadcrumbs, {
+        project: { value: expectedCreateBreadcrumbs, absolute: true },
+      });
+
+      await act(async () => {
+        lensStore.dispatch(setState({ persistedDoc: breadcrumbDoc }));
+      });
+
+      const expectedSavedBreadcrumbs = [...contextBreadcrumbs, { text: 'Daaaaaaadaumching!' }];
+      expect(services.chrome.setBreadcrumbs).toHaveBeenCalledWith(expectedSavedBreadcrumbs, {
+        project: { value: expectedSavedBreadcrumbs, absolute: true },
+      });
+    });
+
+    it('incomingState breadcrumbs take precedence over initialContext breadcrumbs when both are present', async () => {
+      const stateBreadcrumbs = [{ text: 'From State', href: '/app/dashboards#/view/state' }];
+      const contextBreadcrumbs = [{ text: 'From Context', href: '/app/dashboards#/list' }];
+      props.incomingState = {
+        originatingApp: 'dashboards',
+        breadcrumbs: stateBreadcrumbs,
+      };
+      props.initialContext = {
+        isVisualizeAction: true,
+        breadcrumbs: contextBreadcrumbs,
+      } as VisualizeEditorContext;
+      services.getOriginatingAppName = jest.fn(() => 'From State');
+      await renderApp();
+
+      const expectedBreadcrumbs = [...stateBreadcrumbs, { text: 'Create' }];
+      expect(services.chrome.setBreadcrumbs).toHaveBeenCalledWith(expectedBreadcrumbs, {
+        project: { value: expectedBreadcrumbs, absolute: true },
+      });
+      // Context breadcrumbs must NOT appear
+      expect(services.chrome.setBreadcrumbs).not.toHaveBeenCalledWith(
+        expect.arrayContaining([expect.objectContaining({ text: 'From Context' })]),
+        expect.anything()
+      );
+    });
+
+    it('shows "Edit visualization" title in by-value mode (linked to origin, no savedObjectId)', async () => {
+      props.incomingState = { originatingApp: 'dashboards', originatingPath: '/view/123' };
+      services.getOriginatingAppName = jest.fn(() => 'My Dashboard');
+      const { lensStore } = await renderApp({
+        preloadedState: { isLinkedToOriginatingApp: true },
+      });
+
+      // Dispatch a persisted doc — by-value means isLinkedToOriginatingApp && !savedObjectId
+      // so initialInput has no ref_id, therefore savedObjectId is undefined
+      await act(async () => {
+        lensStore.dispatch(setState({ persistedDoc: breadcrumbDoc }));
+      });
+
+      const expectedByValueBreadcrumbs = [
+        { text: 'My Dashboard', onClick: expect.anything() },
+        { text: 'Edit visualization' },
+      ];
+      expect(services.chrome.setBreadcrumbs).toHaveBeenCalledWith(expectedByValueBreadcrumbs, {
+        project: { value: expectedByValueBreadcrumbs, absolute: true },
+      });
+    });
+
+    it('does not update breadcrumbs when savedObjectId is set but persistedDoc has not loaded yet', async () => {
+      services.getOriginatingAppName = jest.fn(() => undefined);
+      props.initialInput = { ref_id: breadcrumbDocSavedObjectId };
+      await renderApp({ preloadedState: { persistedDoc: undefined } });
+
+      expect(services.chrome.setBreadcrumbs).not.toHaveBeenCalled();
     });
   });
 
@@ -334,7 +569,7 @@ describe('Lens App', () => {
           async (id) => ({ id, isTimeBased: () => true, isPersisted: () => true } as DataView)
         );
       await renderApp();
-      expect(services.navigation.ui.AggregateQueryTopNavMenu).toHaveBeenCalledWith(
+      expect(services.unifiedSearch.ui.AggregateQuerySearchBar).toHaveBeenCalledWith(
         expect.objectContaining({ showDatePicker: true }),
         {}
       );
@@ -346,9 +581,16 @@ describe('Lens App', () => {
           async (id) => ({ id, isTimeBased: () => true, isPersisted: () => true } as DataView)
         );
 
-      props.datasourceMap.testDatasource.isTimeBased = () => true;
-      await renderApp();
-      expect(services.navigation.ui.AggregateQueryTopNavMenu).toHaveBeenCalledWith(
+      await renderApp({
+        datasourceMapOverride: {
+          ...datasourceMap,
+          formBased: {
+            ...datasourceMap.formBased,
+            isTimeBased: jest.fn((_state, _indexPatterns) => true),
+          },
+        },
+      });
+      expect(services.unifiedSearch.ui.AggregateQuerySearchBar).toHaveBeenCalledWith(
         expect.objectContaining({ showDatePicker: true }),
         {}
       );
@@ -360,9 +602,16 @@ describe('Lens App', () => {
           async (id) => ({ id, isTimeBased: () => true, isPersisted: () => true } as DataView)
         );
 
-      props.datasourceMap.testDatasource.isTimeBased = () => false;
-      await renderApp();
-      expect(services.navigation.ui.AggregateQueryTopNavMenu).toHaveBeenCalledWith(
+      await renderApp({
+        datasourceMapOverride: {
+          ...datasourceMap,
+          formBased: {
+            ...datasourceMap.formBased,
+            isTimeBased: jest.fn((_state, _indexPatterns) => false),
+          },
+        },
+      });
+      expect(services.unifiedSearch.ui.AggregateQuerySearchBar).toHaveBeenCalledWith(
         expect.objectContaining({ showDatePicker: false }),
         {}
       );
@@ -376,22 +625,22 @@ describe('Lens App', () => {
       const document = {
         savedObjectId: defaultSavedObjectId,
         state: {
-          query: 'fake query',
+          query: { query: 'fake query', language: 'kuery' },
           filters: [{ query: { match_phrase: { src: 'test' } } }],
         },
         references: [{ type: 'index-pattern', id: '1', name: 'index-pattern-0' }],
       } as unknown as LensDocument;
 
-      (services.navigation.ui.AggregateQueryTopNavMenu as jest.Mock).mockClear();
+      (services.unifiedSearch.ui.AggregateQuerySearchBar as jest.Mock).mockClear();
       act(() => {
         lensStore.dispatch(
           setState({
-            query: 'fake query' as unknown as Query,
+            query: { query: 'fake query', language: 'kuery' },
             persistedDoc: document,
           })
         );
       });
-      expect(services.navigation.ui.AggregateQueryTopNavMenu).toHaveBeenCalledWith(
+      expect(services.unifiedSearch.ui.AggregateQuerySearchBar).toHaveBeenCalledWith(
         expect.objectContaining({
           dataViewPickerComponentProps: expect.objectContaining({
             currentDataViewId: 'mockip',
@@ -419,14 +668,16 @@ describe('Lens App', () => {
         references: [{ type: 'index-pattern', id: '1', name: 'index-pattern-0' }],
       });
 
-      await lensStore.dispatch(
-        setState({
-          query,
-          persistedDoc: document,
-        })
-      );
+      await act(async () => {
+        await lensStore.dispatch(
+          setState({
+            query,
+            persistedDoc: document,
+          })
+        );
+      });
 
-      expect(services.navigation.ui.AggregateQueryTopNavMenu).toHaveBeenCalledWith(
+      expect(services.unifiedSearch.ui.AggregateQuerySearchBar).toHaveBeenCalledWith(
         expect.objectContaining({
           query,
           indexPatterns: [
@@ -447,7 +698,7 @@ describe('Lens App', () => {
         .fn()
         .mockResolvedValue(Promise.reject({ reason: 'Could not locate that data view' }));
       await renderApp();
-      expect(services.navigation.ui.AggregateQueryTopNavMenu).toHaveBeenCalledWith(
+      expect(services.unifiedSearch.ui.AggregateQuerySearchBar).toHaveBeenCalledWith(
         expect.objectContaining({ indexPatterns: [] }),
         {}
       );
@@ -455,8 +706,17 @@ describe('Lens App', () => {
 
     describe('save buttons', () => {
       const querySaveButton = () => screen.queryByTestId('lnsApp_saveButton');
-      const clickSaveButton = async () =>
-        await act(async () => await userEvent.click(screen.getByTestId('lnsApp_saveButton')));
+      const saveMenuUser = userEvent.setup({ pointerEventsCheck: 0, delay: null });
+      const openSaveOptionsIfNeeded = async () => {
+        const saveOptions = screen.queryByTestId('lnsApp_saveAndReturnButton-secondary-button');
+        if (saveOptions) {
+          await saveMenuUser.click(saveOptions);
+        }
+      };
+      const clickSaveButton = async () => {
+        await openSaveOptionsIfNeeded();
+        await saveMenuUser.click(await screen.findByTestId('lnsApp_saveButton'));
+      };
 
       const querySaveAndReturnButton = () => screen.queryByTestId('lnsApp_saveAndReturnButton');
       const waitForModalVisible = async () =>
@@ -497,11 +757,14 @@ describe('Lens App', () => {
 
         props = {
           ...props,
-          initialInput: prevSavedObjectId ? { savedObjectId: prevSavedObjectId } : undefined,
+          initialInput: prevSavedObjectId ? { ref_id: prevSavedObjectId } : undefined,
         };
 
         if (comesFromDashboard) {
-          props.incomingState = { originatingApp: 'dashboards' };
+          props.incomingState = {
+            originatingApp: 'dashboards',
+            originatingPath: '#/view/123',
+          };
         }
 
         const { lensStore } = await renderApp({
@@ -553,6 +816,7 @@ describe('Lens App', () => {
       it('Shows Save and Return and Save to library buttons in create by value mode with originating app', async () => {
         props.incomingState = {
           originatingApp: 'dashboards',
+          originatingPath: '#/view/123',
           valueInput: {
             id: 'whatchaGonnaDoWith',
             attributes: {
@@ -570,14 +834,16 @@ describe('Lens App', () => {
         });
 
         expect(querySaveAndReturnButton()).toBeEnabled();
-        expect(querySaveButton()).toHaveTextContent('Save to library');
+        await openSaveOptionsIfNeeded();
+        expect(await screen.findByTestId('lnsApp_saveButton')).toHaveTextContent('Save to library');
       });
 
       it('Shows Save and Return and Save As buttons in edit by reference mode', async () => {
         props.incomingState = {
           originatingApp: 'dashboards',
+          originatingPath: '#/view/123',
         };
-        props.initialInput = { savedObjectId: defaultSavedObjectId, id: '5678' };
+        props.initialInput = { ref_id: defaultSavedObjectId, id: '5678' };
         await renderApp({
           preloadedState: {
             isSaveable: true,
@@ -586,7 +852,8 @@ describe('Lens App', () => {
         });
 
         expect(querySaveAndReturnButton()).toBeEnabled();
-        expect(querySaveButton()).toHaveTextContent('Save as');
+        await openSaveOptionsIfNeeded();
+        expect(await screen.findByTestId('lnsApp_saveButton')).toHaveTextContent('Save as');
       });
 
       it('applies all changes on-save', async () => {
@@ -720,30 +987,6 @@ describe('Lens App', () => {
         );
       });
 
-      it('checks for duplicate title before saving', async () => {
-        await save({
-          savedObjectId: defaultSavedObjectId,
-          prevSavedObjectId: defaultSavedObjectId,
-          preloadedState: {
-            isSaveable: true,
-            persistedDoc: { savedObjectId: defaultSavedObjectId } as unknown as LensDocument,
-            isLinkedToOriginatingApp: true,
-          },
-        });
-
-        expect(checkForDuplicateTitle).toHaveBeenCalledWith(
-          {
-            copyOnSave: true,
-            displayName: 'Lens visualization',
-            isTitleDuplicateConfirmed: false,
-            lastSavedTitle: '',
-            title: 'hello there',
-          },
-          expect.any(Function),
-          expect.anything()
-        );
-      });
-
       it('saves new doc and redirects to originating app', async () => {
         await save({
           savedObjectId: undefined,
@@ -758,20 +1001,19 @@ describe('Lens App', () => {
           undefined
         );
         expect(props.redirectToOrigin).toHaveBeenCalledWith({
-          state: expect.objectContaining({ savedObjectId: defaultSavedObjectId }),
+          state: expect.objectContaining({ ref_id: defaultSavedObjectId }),
           isCopied: false,
         });
       });
 
       it('handles save failure by showing a warning, but still allows another save', async () => {
-        const mockedConsoleDir = jest.spyOn(console, 'dir').mockImplementation(() => {}); // mocked console.dir to avoid messages in the console when running tests
-
         services.attributeService.saveToLibrary = jest
           .fn()
           .mockRejectedValue({ message: 'failed' });
 
         props.incomingState = {
           originatingApp: 'dashboards',
+          originatingPath: '#/view/123',
         };
 
         await renderApp({
@@ -787,9 +1029,66 @@ describe('Lens App', () => {
 
         expect(props.redirectTo).not.toHaveBeenCalled();
         expect(services.attributeService.saveToLibrary).toHaveBeenCalled();
-        // eslint-disable-next-line no-console
-        expect(console.dir).toHaveBeenCalledTimes(1);
-        mockedConsoleDir.mockRestore();
+        expect(services.notifications.toasts.addDanger).toHaveBeenCalledWith(
+          expect.objectContaining({
+            title: expect.stringContaining('failed'),
+          })
+        );
+      });
+
+      it('tracks a creation when a new doc is saved and returned to the originating app', async () => {
+        await save({ savedObjectId: undefined });
+        expect(props.redirectToOrigin).toHaveBeenCalled();
+        expect(trackCreateUiCounterEvents).toHaveBeenCalledTimes(1);
+        expect(trackCreateUiCounterEvents).toHaveBeenCalledWith('dsl', 'dashboards');
+      });
+
+      it('does not track a creation when an existing doc is saved', async () => {
+        await save({
+          savedObjectId: defaultSavedObjectId,
+          prevSavedObjectId: defaultSavedObjectId,
+          comesFromDashboard: false,
+          preloadedState: {
+            persistedDoc: getLensDocumentMock({ savedObjectId: defaultSavedObjectId }),
+          },
+        });
+        expect(services.attributeService.saveToLibrary).toHaveBeenCalled();
+        expect(trackCreateUiCounterEvents).not.toHaveBeenCalled();
+      });
+
+      it('tracks a creation when an existing doc is saved as a new copy', async () => {
+        const doc = getLensDocumentMock();
+        props.incomingState = { originatingApp: 'visualize' };
+        await save({
+          savedObjectId: doc.savedObjectId,
+          newCopyOnSave: true,
+          preloadedState: { persistedDoc: doc },
+          prevSavedObjectId: 'prevId',
+          comesFromDashboard: false,
+        });
+        expect(trackCreateUiCounterEvents).toHaveBeenCalledTimes(1);
+        expect(trackCreateUiCounterEvents).toHaveBeenCalledWith('dsl', 'library');
+      });
+
+      it('does not track a creation when the save fails', async () => {
+        services.attributeService.saveToLibrary = jest
+          .fn()
+          .mockRejectedValue({ message: 'failed' });
+        props.incomingState = {
+          originatingApp: 'dashboards',
+          originatingPath: '#/view/123',
+        };
+
+        await renderApp({
+          preloadedState: { isSaveable: true, isLinkedToOriginatingApp: true },
+        });
+        await clickSaveButton();
+        await userEvent.type(screen.getByTestId('savedObjectTitle'), 'hello there');
+        await userEvent.click(screen.getByTestId('confirmSaveSavedObjectButton'));
+        await waitToLoad();
+
+        expect(services.notifications.toasts.addDanger).toHaveBeenCalled();
+        expect(trackCreateUiCounterEvents).not.toHaveBeenCalled();
       });
 
       it('does not show the copy button on first save', async () => {
@@ -808,11 +1107,17 @@ describe('Lens App', () => {
   });
 
   describe('share button', () => {
-    const getShareButton = () => screen.getByTestId('lnsApp_shareButton');
+    const getShareButton = async () => {
+      const overflow = screen.queryByTestId('app-menu-overflow-button');
+      if (overflow) {
+        await userEvent.click(overflow);
+      }
+      return screen.getByTestId(/lnsApp_shareButton/);
+    };
 
     it('should be disabled when no data is available', async () => {
       await renderApp({ preloadedState: { isSaveable: true } });
-      expect(getShareButton()).toBeDisabled();
+      expect(await getShareButton()).toBeDisabled();
     });
 
     it('should not disable share when not saveable', async () => {
@@ -823,7 +1128,7 @@ describe('Lens App', () => {
         },
       });
 
-      expect(getShareButton()).toBeEnabled();
+      expect(await getShareButton()).toBeEnabled();
     });
 
     it('should still be enabled even if the user is missing save permissions', async () => {
@@ -838,7 +1143,7 @@ describe('Lens App', () => {
           activeData: { layer1: { type: 'datatable', columns: [], rows: [] } },
         },
       });
-      expect(getShareButton()).toBeEnabled();
+      expect(await getShareButton()).toBeEnabled();
     });
 
     it('should still be enabled even if the user is missing shortUrl permissions', async () => {
@@ -854,7 +1159,7 @@ describe('Lens App', () => {
         },
       });
 
-      expect(getShareButton()).toBeEnabled();
+      expect(await getShareButton()).toBeEnabled();
     });
 
     it('should be disabled if the user is missing shortUrl permissions and visualization is not saveable', async () => {
@@ -869,22 +1174,30 @@ describe('Lens App', () => {
           activeData: { layer1: { type: 'datatable', columns: [], rows: [] } },
         },
       });
-      expect(getShareButton()).toBeDisabled();
+      expect(await getShareButton()).toBeDisabled();
     });
   });
 
   describe('inspector', () => {
+    const getInspectButton = async () => {
+      const overflow = screen.queryByTestId('app-menu-overflow-button');
+      if (overflow) {
+        await userEvent.click(overflow);
+      }
+      return screen.getByTestId('lnsApp_inspectButton');
+    };
+
     it('inspector button should be available', async () => {
       await renderApp({
         preloadedState: { isSaveable: true },
       });
-      expect(screen.getByTestId('lnsApp_inspectButton')).toBeEnabled();
+      expect(await getInspectButton()).toBeEnabled();
     });
     it('should open inspect panel', async () => {
       await renderApp({
         preloadedState: { isSaveable: true },
       });
-      await userEvent.click(screen.getByTestId('lnsApp_inspectButton'));
+      await userEvent.click(await getInspectButton());
       expect(services.inspector.inspect).toHaveBeenCalledTimes(1);
     });
   });
@@ -892,7 +1205,7 @@ describe('Lens App', () => {
   describe('query bar state management', () => {
     it('uses the default time and query language settings', async () => {
       const { lensStore } = await renderApp();
-      expect(services.navigation.ui.AggregateQueryTopNavMenu).toHaveBeenCalledWith(
+      expect(services.unifiedSearch.ui.AggregateQuerySearchBar).toHaveBeenCalledWith(
         expect.objectContaining({
           query: { query: '', language: 'lucene' },
           dateRangeFrom: 'now-7d',
@@ -918,7 +1231,7 @@ describe('Lens App', () => {
         min: moment('2021-01-09T04:00:00.000Z'),
         max: moment('2021-01-09T08:00:00.000Z'),
       });
-      const onQuerySubmit = (services.navigation.ui.AggregateQueryTopNavMenu as jest.Mock).mock
+      const onQuerySubmit = (services.unifiedSearch.ui.AggregateQuerySearchBar as jest.Mock).mock
         .calls[0][0].onQuerySubmit;
       await act(async () =>
         onQuerySubmit({
@@ -927,7 +1240,7 @@ describe('Lens App', () => {
         })
       );
 
-      expect(services.navigation.ui.AggregateQueryTopNavMenu).toHaveBeenCalledWith(
+      expect(services.unifiedSearch.ui.AggregateQuerySearchBar).toHaveBeenCalledWith(
         expect.objectContaining({
           query: { query: 'new', language: 'lucene' },
           dateRangeFrom: 'now-14d',
@@ -961,7 +1274,9 @@ describe('Lens App', () => {
         }),
       });
 
-      services.data.query.filterManager.setFilters([buildExistsFilter(field, indexPattern)]);
+      act(() =>
+        services.data.query.filterManager.setFilters([buildExistsFilter(field, indexPattern)])
+      );
 
       expect(lensStore.getState()).toEqual({
         lens: expect.objectContaining({
@@ -979,8 +1294,9 @@ describe('Lens App', () => {
         }),
       });
 
-      const AggregateQueryTopNavMenu = services.navigation.ui.AggregateQueryTopNavMenu as jest.Mock;
-      const onQuerySubmit = AggregateQueryTopNavMenu.mock.calls[0][0].onQuerySubmit;
+      const AggregateQuerySearchBar = services.unifiedSearch.ui
+        .AggregateQuerySearchBar as jest.Mock;
+      const onQuerySubmit = AggregateQuerySearchBar.mock.calls[0][0].onQuerySubmit;
       act(() =>
         onQuerySubmit({
           dateRange: { from: 'now-14d', to: 'now-7d' },
@@ -1024,7 +1340,7 @@ describe('Lens App', () => {
     it('persists the saved query ID when the query is saved', async () => {
       await renderApp();
 
-      expect(services.navigation.ui.AggregateQueryTopNavMenu).toHaveBeenCalledWith(
+      expect(services.unifiedSearch.ui.AggregateQuerySearchBar).toHaveBeenCalledWith(
         expect.objectContaining({
           savedQuery: undefined,
           onSaved: expect.any(Function),
@@ -1034,7 +1350,7 @@ describe('Lens App', () => {
         {}
       );
 
-      const onSaved = (services.navigation.ui.AggregateQueryTopNavMenu as jest.Mock).mock
+      const onSaved = (services.unifiedSearch.ui.AggregateQuerySearchBar as jest.Mock).mock
         .calls[0][0].onSaved;
       act(() => {
         onSaved({
@@ -1047,7 +1363,7 @@ describe('Lens App', () => {
           namespaces: ['default'],
         });
       });
-      expect(services.navigation.ui.AggregateQueryTopNavMenu).toHaveBeenCalledWith(
+      expect(services.unifiedSearch.ui.AggregateQuerySearchBar).toHaveBeenCalledWith(
         expect.objectContaining({
           savedQuery: {
             id: '1',
@@ -1066,7 +1382,7 @@ describe('Lens App', () => {
     it('changes the saved query ID when the query is updated', async () => {
       await renderApp();
       const { onSaved, onSavedQueryUpdated } = (
-        services.navigation.ui.AggregateQueryTopNavMenu as jest.Mock
+        services.unifiedSearch.ui.AggregateQuerySearchBar as jest.Mock
       ).mock.calls[0][0];
       act(() => {
         onSaved({
@@ -1090,7 +1406,7 @@ describe('Lens App', () => {
           namespaces: ['default'],
         });
       });
-      expect(services.navigation.ui.AggregateQueryTopNavMenu).toHaveBeenCalledWith(
+      expect(services.unifiedSearch.ui.AggregateQuerySearchBar).toHaveBeenCalledWith(
         expect.objectContaining({
           savedQuery: {
             id: '2',
@@ -1108,8 +1424,9 @@ describe('Lens App', () => {
 
     it('updates the query if saved query is selected', async () => {
       await renderApp();
-      const { onSavedQueryUpdated } = (services.navigation.ui.AggregateQueryTopNavMenu as jest.Mock)
-        .mock.calls[0][0];
+      const { onSavedQueryUpdated } = (
+        services.unifiedSearch.ui.AggregateQuerySearchBar as jest.Mock
+      ).mock.calls[0][0];
       act(() => {
         onSavedQueryUpdated({
           id: '2',
@@ -1121,7 +1438,7 @@ describe('Lens App', () => {
           namespaces: ['default'],
         });
       });
-      expect(services.navigation.ui.AggregateQueryTopNavMenu).toHaveBeenCalledWith(
+      expect(services.unifiedSearch.ui.AggregateQuerySearchBar).toHaveBeenCalledWith(
         expect.objectContaining({
           query: { query: 'abc:def', language: 'lucene' },
         }),
@@ -1132,7 +1449,7 @@ describe('Lens App', () => {
     it('clears all existing unpinned filters when the active saved query is cleared', async () => {
       const { lensStore } = await renderApp();
       const { onQuerySubmit, onClearSavedQuery } = (
-        services.navigation.ui.AggregateQueryTopNavMenu as jest.Mock
+        services.unifiedSearch.ui.AggregateQuerySearchBar as jest.Mock
       ).mock.calls[0][0];
       act(() =>
         onQuerySubmit({
@@ -1160,7 +1477,7 @@ describe('Lens App', () => {
     it('updates the searchSessionId when the query is updated', async () => {
       const { lensStore } = await renderApp();
       const { onSaved, onSavedQueryUpdated } = (
-        services.navigation.ui.AggregateQueryTopNavMenu as jest.Mock
+        services.unifiedSearch.ui.AggregateQuerySearchBar as jest.Mock
       ).mock.calls[0][0];
       act(() => {
         onSaved({
@@ -1194,7 +1511,7 @@ describe('Lens App', () => {
     it('updates the searchSessionId when the active saved query is cleared', async () => {
       const { lensStore } = await renderApp();
       const { onQuerySubmit, onClearSavedQuery } = (
-        services.navigation.ui.AggregateQueryTopNavMenu as jest.Mock
+        services.unifiedSearch.ui.AggregateQuerySearchBar as jest.Mock
       ).mock.calls[0][0];
       act(() =>
         onQuerySubmit({
@@ -1219,8 +1536,8 @@ describe('Lens App', () => {
 
     it('dispatches update to searchSessionId and dateRange when the user hits refresh', async () => {
       const { lensStore } = await renderApp();
-      const { onQuerySubmit } = (services.navigation.ui.AggregateQueryTopNavMenu as jest.Mock).mock
-        .calls[0][0];
+      const { onQuerySubmit } = (services.unifiedSearch.ui.AggregateQuerySearchBar as jest.Mock)
+        .mock.calls[0][0];
       act(() =>
         onQuerySubmit({
           dateRange: { from: 'now-7d', to: 'now' },
@@ -1299,6 +1616,7 @@ describe('Lens App', () => {
           visualization: {
             activeId: 'testVis',
             state: {},
+            selectedLayerId: null,
           },
           isSaveable: true,
         },
@@ -1318,6 +1636,7 @@ describe('Lens App', () => {
           visualization: {
             activeId: 'testVis',
             state: {},
+            selectedLayerId: null,
           },
           isSaveable: true,
         },
@@ -1354,7 +1673,7 @@ describe('Lens App', () => {
         ],
         type: 'lnsXY',
         savedObjectId: '',
-        vizEditorOriginatingAppUrl: '#/tsvb-link',
+        visEditorOriginatingAppUrl: '#/tsvb-link',
         isVisualizeAction: true,
       } as unknown as VisualizeEditorContext;
 
@@ -1364,6 +1683,7 @@ describe('Lens App', () => {
           visualization: {
             activeId: 'testVis',
             state: {},
+            selectedLayerId: null,
           },
           isSaveable: true,
         },
@@ -1382,7 +1702,7 @@ describe('Lens App', () => {
           state: {
             ...localDoc.state,
             datasourceStates: {
-              testDatasource: 'datasource',
+              formBased: 'datasource',
             },
             visualization: {},
           },
@@ -1392,12 +1712,20 @@ describe('Lens App', () => {
         visualization: {
           activeId: 'testVis',
           state: {},
+          selectedLayerId: null,
         },
       };
 
-      props.datasourceMap.testDatasource.isEqual = jest.fn().mockReturnValue(true); // if this returns false, the documents won't be accounted equal
-
-      await renderApp({ preloadedState });
+      await renderApp({
+        preloadedState,
+        datasourceMapOverride: {
+          ...datasourceMap,
+          formBased: {
+            ...datasourceMap.formBased,
+            isEqual: jest.fn().mockReturnValue(true), // if this returns false, the documents won't be accounted equal
+          },
+        },
+      });
 
       const lastCallArg = props.onAppLeave.mock.lastCall![0];
       lastCallArg?.({ default: defaultLeave, confirm: confirmLeave });

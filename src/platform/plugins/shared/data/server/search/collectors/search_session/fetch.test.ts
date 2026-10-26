@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SavedObjectsErrorHelpers, Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { fetchProvider } from './fetch';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 
@@ -40,7 +41,7 @@ describe('fetchProvider', () => {
     expect(collRes.transientCount).toBe(0);
     expect(collRes.persistedCount).toBe(0);
     expect(collRes.totalCount).toBe(0);
-    expect(mockLogger.warn).not.toBeCalled();
+    expect(mockLogger.warn).not.toHaveBeenCalled();
   });
 
   test('returns when ES throws an error', async () => {
@@ -52,7 +53,7 @@ describe('fetchProvider', () => {
     expect(collRes.transientCount).toBe(0);
     expect(collRes.persistedCount).toBe(0);
     expect(collRes.totalCount).toBe(0);
-    expect(mockLogger.warn).toBeCalledTimes(1);
+    expect(mockLogger.warn).toHaveBeenCalledTimes(1);
   });
 
   test('returns when ES returns full buckets', async () => {

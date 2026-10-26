@@ -65,17 +65,6 @@ const metricsFeaturesTests: FeatureTest[] = [
     items: [{ title: 'Associated hosts', value: basicCaseMetrics.alerts!.hosts!.total! }],
   },
   {
-    feature: CaseMetricsFeature.ACTIONS_ISOLATE_HOST,
-    items: [
-      {
-        title: 'Isolated hosts',
-        value:
-          basicCaseMetrics.actions!.isolateHost!.isolate.total -
-          basicCaseMetrics.actions!.isolateHost!.unisolate.total,
-      },
-    ],
-  },
-  {
     feature: CaseMetricsFeature.CONNECTORS,
     items: [{ title: 'Total connectors', value: basicCaseMetrics.connectors!.total! }],
   },
@@ -171,24 +160,6 @@ describe('CaseViewMetrics', () => {
 
     expect(screen.getByText('2 milliseconds')).toBeInTheDocument();
     expect(screen.queryByTestId('case-metrics-lifespan-reopen-icon')).not.toBeInTheDocument();
-  });
-
-  it('should prevent negative value for isolateHost actions', () => {
-    const incosistentMetrics = {
-      actions: {
-        isolateHost: {
-          isolate: { total: 1 },
-          unisolate: { total: 2 },
-        },
-      },
-    };
-
-    renderCaseMetrics({
-      metrics: incosistentMetrics,
-      features: [CaseMetricsFeature.ACTIONS_ISOLATE_HOST],
-    });
-    expect(screen.getByText('Isolated hosts')).toBeInTheDocument();
-    expect(screen.getByText('0')).toBeInTheDocument();
   });
 
   describe.each(metricsFeaturesTests)('Metrics feature tests', ({ feature, items }) => {

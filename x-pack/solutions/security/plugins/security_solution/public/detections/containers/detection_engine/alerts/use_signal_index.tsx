@@ -7,14 +7,13 @@
 
 import { useEffect, useState } from 'react';
 import { isSecurityAppError } from '@kbn/securitysolution-t-grid';
-import { useSelector } from 'react-redux';
 
+import { useSignalIndexMappingOutdated } from '../../../../data_view_manager/hooks/use_signal_index_mapping_outdated';
+import { useSignalIndexName } from '../../../../data_view_manager/hooks/use_signal_index_name';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { createSignalIndex, getSignalIndex } from './api';
 import * as i18n from './translations';
 import { useAlertsPrivileges } from './use_alerts_privileges';
-import { sourcererSelectors } from '../../../../common/store';
-import type { State } from '../../../../common/store';
 
 type Func = () => Promise<void>;
 
@@ -28,8 +27,6 @@ export interface ReturnSignalIndex {
 
 /**
  * Hook for managing signal index
- *
- *
  */
 export const useSignalIndex = (): ReturnSignalIndex => {
   const [loading, setLoading] = useState(true);
@@ -42,13 +39,8 @@ export const useSignalIndex = (): ReturnSignalIndex => {
   const { addError } = useAppToasts();
   const { hasIndexRead } = useAlertsPrivileges();
 
-  const signalIndexMappingOutdated = useSelector((state: State) => {
-    return sourcererSelectors.signalIndexMappingOutdated(state);
-  });
-
-  const signalIndexName = useSelector((state: State) => {
-    return sourcererSelectors.signalIndexName(state);
-  });
+  const signalIndexMappingOutdated = useSignalIndexMappingOutdated();
+  const signalIndexName = useSignalIndexName();
 
   useEffect(() => {
     let isSubscribed = true;

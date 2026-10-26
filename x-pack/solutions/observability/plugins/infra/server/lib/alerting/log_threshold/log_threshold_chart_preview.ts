@@ -7,7 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 import type { ResolvedLogView } from '@kbn/logs-shared-plugin/common';
-import { decodeOrThrow } from '@kbn/io-ts-utils';
+import type { estypes } from '@elastic/elasticsearch';
+import { isLeft } from 'fp-ts/Either';
 import type {
   ExecutionTimeRange,
   GroupedSearchQueryResponse,
@@ -27,6 +28,11 @@ import type { InfraPluginRequestHandlerContext } from '../../../types';
 import type { KibanaFramework } from '../../adapters/framework/kibana_framework_adapter';
 import { buildFiltersFromCriteria } from '../../../../common/alerting/logs/log_threshold/query_helpers';
 import { getGroupedESQuery, getUngroupedESQuery } from './log_threshold_executor';
+import {
+  formatLogThresholdSearchResponseError,
+  getSearchResponseErrorContext,
+  type LogThresholdSearchResponseErrorContext,
+} from './format_search_response_error';
 
 const COMPOSITE_GROUP_SIZE = 40;
 
@@ -83,17 +89,24 @@ export async function getChartPreviewData(
   );
 
   const series = isGrouped
-    ? processGroupedResults(await getGroupedResults(expandedQuery, requestContext, callWithRequest))
+    ? processGroupedResults(
+        await getGroupedResults(expandedQuery, requestContext, callWithRequest, {
+          indexPattern: indices,
+          groupBy,
+        })
+      )
     : processUngroupedResults(
-        await getUngroupedResults(expandedQuery, requestContext, callWithRequest)
+        await getUngroupedResults(expandedQuery, requestContext, callWithRequest, {
+          indexPattern: indices,
+        })
       );
 
   return { series };
 }
 
 // Expand the same query that powers the executor with a date histogram aggregation
-const addHistogramAggregationToQuery = (
-  query: any,
+export const addHistogramAggregationToQuery = (
+  query: estypes.SearchRequest,
   rangeFilter: any,
   interval: string,
   timestampField: string,
@@ -114,24 +127,48 @@ const addHistogramAggregationToQuery = (
     },
   };
 
-  if (isGrouped) {
-    const isOptimizedQuery = !query.body.aggregations.groups.aggregations?.filtered_results;
-
-    if (isOptimizedQuery) {
-      query.body.aggregations.groups.aggregations = {
-        ...query.body.aggregations.groups.aggregations,
-        ...histogramAggregation,
-      };
-    } else {
-      query.body.aggregations.groups.aggregations.filtered_results = {
-        ...query.body.aggregations.groups.aggregations.filtered_results,
-        aggregations: histogramAggregation,
-      };
-    }
-  } else {
-    query.body = {
-      ...query.body,
+  if (!isGrouped) {
+    query = {
+      ...query,
       aggregations: histogramAggregation,
+    };
+    return query;
+  }
+
+  const aggs = query.aggregations;
+  const groups = aggs?.groups;
+  const groupsAggs = groups?.aggregations;
+
+  if (!aggs || !groups || !groupsAggs) {
+    return query;
+  }
+
+  const isOptimizedQuery = !groupsAggs.filtered_results;
+
+  if (isOptimizedQuery) {
+    query.aggregations = {
+      ...aggs,
+      groups: {
+        ...groups,
+        aggregations: {
+          ...groupsAggs,
+          ...histogramAggregation,
+        },
+      },
+    };
+  } else {
+    query.aggregations = {
+      ...aggs,
+      groups: {
+        ...groups,
+        aggregations: {
+          ...groupsAggs,
+          filtered_results: {
+            ...groupsAggs.filtered_results,
+            aggregations: histogramAggregation,
+          },
+        },
+      },
     };
   }
 
@@ -141,27 +178,55 @@ const addHistogramAggregationToQuery = (
 const getUngroupedResults = async (
   query: object,
   requestContext: InfraPluginRequestHandlerContext,
-  callWithRequest: KibanaFramework['callWithRequest']
+  callWithRequest: KibanaFramework['callWithRequest'],
+  errorContext: LogThresholdSearchResponseErrorContext = {}
 ) => {
-  return decodeOrThrow(UngroupedSearchQueryResponseRT)(
-    await callWithRequest(requestContext, 'search', query)
-  );
+  const searchResponse = await callWithRequest(requestContext, 'search', query);
+  const decoded = UngroupedSearchQueryResponseRT.decode(searchResponse);
+
+  if (isLeft(decoded)) {
+    throw new Error(
+      formatLogThresholdSearchResponseError({
+        searchResponse,
+        validationErrors: decoded.left,
+        responseType: 'ungrouped',
+        errorContext: getSearchResponseErrorContext(query, errorContext),
+      })
+    );
+  }
+
+  return decoded.right;
 };
 
 const getGroupedResults = async (
   query: object,
   requestContext: InfraPluginRequestHandlerContext,
-  callWithRequest: KibanaFramework['callWithRequest']
+  callWithRequest: KibanaFramework['callWithRequest'],
+  errorContext: LogThresholdSearchResponseErrorContext = {}
 ) => {
   let compositeGroupBuckets: GroupedSearchQueryResponse['aggregations']['groups']['buckets'] = [];
   let lastAfterKey: GroupedSearchQueryResponse['aggregations']['groups']['after_key'] | undefined;
+  const resolvedErrorContext = getSearchResponseErrorContext(query, errorContext);
 
   while (true) {
     const queryWithAfterKey: any = { ...query };
-    queryWithAfterKey.body.aggregations.groups.composite.after = lastAfterKey;
-    const groupResponse: GroupedSearchQueryResponse = decodeOrThrow(GroupedSearchQueryResponseRT)(
-      await callWithRequest(requestContext, 'search', queryWithAfterKey)
-    );
+    queryWithAfterKey.aggregations.groups.composite.after = lastAfterKey;
+    const searchResponse = await callWithRequest(requestContext, 'search', queryWithAfterKey);
+    const decoded = GroupedSearchQueryResponseRT.decode(searchResponse);
+
+    if (isLeft(decoded)) {
+      throw new Error(
+        formatLogThresholdSearchResponseError({
+          searchResponse,
+          validationErrors: decoded.left,
+          responseType: 'grouped',
+          errorContext: resolvedErrorContext,
+        })
+      );
+    }
+
+    const groupResponse = decoded.right;
+
     compositeGroupBuckets = [
       ...compositeGroupBuckets,
       ...groupResponse.aggregations.groups.buckets,

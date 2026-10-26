@@ -24,8 +24,6 @@ describe('riskEnginConfigureSavedObjectRoute', () => {
   let getStartServicesMock: jest.Mock;
 
   beforeEach(() => {
-    jest.resetAllMocks();
-
     server = serverMock.create();
     const { clients } = requestContextMock.createTools();
     mockRiskEngineDataClient = riskEngineDataClientMock.create();
@@ -75,5 +73,18 @@ describe('riskEnginConfigureSavedObjectRoute', () => {
       range: { start: 'now-30d', end: 'now' },
       excludeAlertTags: ['tag1'],
     });
+  });
+
+  it('passes page_size to updateRiskEngineSavedObject', async () => {
+    const request = buildRequest({
+      page_size: 5000,
+    });
+    const response = await server.inject(request, context);
+    expect(response.status).toEqual(200);
+    expect(mockRiskEngineDataClient.updateRiskEngineSavedObject).toHaveBeenCalledWith(
+      expect.objectContaining({
+        pageSize: 5000,
+      })
+    );
   });
 });

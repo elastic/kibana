@@ -11,29 +11,38 @@ import { BehaviorSubject } from 'rxjs';
 
 export interface SidebarVisibility {
   isCollapsed$: BehaviorSubject<boolean>;
-  toggle: (isCollapsed: boolean) => void;
+  toggle: (isCollapsed: boolean, updateLocalStorage?: boolean) => void;
+  initialValue: boolean;
 }
 
 export interface GetSidebarStateParams {
   localStorageKey?: string;
+  isInitiallyCollapsed?: boolean;
 }
 
 /**
  * For managing sidebar visibility state
  * @param localStorageKey
+ * @param isInitiallyCollapsed
  */
 export const getSidebarVisibility = ({
   localStorageKey,
+  isInitiallyCollapsed,
 }: GetSidebarStateParams): SidebarVisibility => {
-  const isCollapsed$ = new BehaviorSubject<boolean>(
-    localStorageKey ? getIsCollapsed(localStorageKey) : false
-  );
+  const isCollapsedBasedOnLocalStorage = localStorageKey ? getIsCollapsed(localStorageKey) : false;
+  const initialValue =
+    typeof isInitiallyCollapsed === 'boolean'
+      ? isInitiallyCollapsed
+      : isCollapsedBasedOnLocalStorage;
+
+  const isCollapsed$ = new BehaviorSubject<boolean>(initialValue);
 
   return {
+    initialValue,
     isCollapsed$,
-    toggle: (isCollapsed) => {
+    toggle: (isCollapsed, updateLocalStorage = true) => {
       isCollapsed$.next(isCollapsed);
-      if (localStorageKey) {
+      if (updateLocalStorage && localStorageKey) {
         setIsCollapsed(localStorageKey, isCollapsed);
       }
     },

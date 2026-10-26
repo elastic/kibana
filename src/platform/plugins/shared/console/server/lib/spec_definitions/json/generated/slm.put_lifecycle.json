@@ -16,13 +16,46 @@
         "0"
       ]
     },
+    "data_autocomplete_rules": {
+      "config": {
+        "ignore_unavailable": {
+          "__one_of": [
+            true,
+            false
+          ]
+        },
+        "indices": "",
+        "include_global_state": {
+          "__one_of": [
+            true,
+            false
+          ]
+        },
+        "feature_states": [],
+        "metadata": {},
+        "partial": {
+          "__one_of": [
+            true,
+            false
+          ]
+        }
+      },
+      "name": "",
+      "repository": "",
+      "retention": {
+        "expire_after": "",
+        "max_count": "",
+        "min_count": ""
+      },
+      "schedule": ""
+    },
     "methods": [
       "PUT"
     ],
     "patterns": [
       "_slm/policy/{policy_id}"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/slm-api-put-policy.html",
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-slm-put-lifecycle",
     "availability": {
       "stack": true,
       "serverless": false

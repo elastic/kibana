@@ -5,26 +5,26 @@
  * 2.0.
  */
 
-import type { OnTimeChangeProps } from '@elastic/eui';
-import { EuiSuperDatePicker, EuiSpacer } from '@elastic/eui';
+import type { EuiSuperUpdateButtonProps, OnTimeChangeProps } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSuperDatePicker, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { FilterManager } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { Filter, Query } from '@kbn/es-query';
 import { debounce } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
-
+import { PageScope } from '../../../../../data_view_manager/constants';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { getCommonTimeRanges } from '../helpers/get_common_time_ranges';
-import { useSourcererDataView } from '../../../../../sourcerer/containers';
-import { SourcererScopeName } from '../../../../../sourcerer/store/model';
-import { useDataView } from '../use_data_view';
 import type { AlertsSelectionSettings } from '../../types';
+import { useDataView } from '../../../../../data_view_manager/hooks/use_data_view';
 
-export const MAX_ALERTS = 500;
-export const MIN_ALERTS = 50;
 export const STEP = 50;
 export const NO_INDEX_PATTERNS: DataView[] = [];
+
+const updateButtonProps: EuiSuperUpdateButtonProps = {
+  fill: false,
+};
 
 interface Props {
   filterManager: FilterManager;
@@ -42,22 +42,15 @@ const AlertSelectionQueryComponent: React.FC<Props> = ({
       ui: { SearchBar },
     },
   } = useKibana().services;
+  const { euiTheme } = useEuiTheme();
 
-  // get the sourcerer `DataViewSpec` for alerts:
-  const { sourcererDataView, loading: isLoadingIndexPattern } = useSourcererDataView(
-    SourcererScopeName.detections
-  );
-
-  // create a `DataView` from the `DataViewSpec`:
-  const alertsDataView = useDataView({
-    dataViewSpec: sourcererDataView,
-    loading: isLoadingIndexPattern,
-  });
+  const { dataView, status } = useDataView(PageScope.alerts);
+  const isLoadingIndexPattern = status !== 'ready';
 
   // create a container for the alerts `DataView`, as required by the search bar:
   const indexPatterns: DataView[] = useMemo(
-    () => (alertsDataView ? [alertsDataView] : NO_INDEX_PATTERNS),
-    [alertsDataView]
+    () => (dataView ? [dataView] : NO_INDEX_PATTERNS),
+    [dataView]
   );
 
   // Users accumulate an "unsubmitted" query as they type in the search bar,
@@ -144,14 +137,80 @@ const AlertSelectionQueryComponent: React.FC<Props> = ({
   );
 
   return (
-    <>
-      <div
+    <EuiFlexGroup
+      css={css`
+        gap: ${euiTheme.size.s};
+      `}
+      data-test-subj="alertSelectionQuery"
+      gutterSize="none"
+      wrap={true}
+    >
+      <EuiFlexItem
         css={css`
           .uniSearchBar {
             padding: 0;
           }
+
+          .kbnQueryBar__wrap {
+            height: ${euiTheme.size.xxl};
+          }
+
+          && .kbnQueryBar__textarea {
+            height: ${euiTheme.size.xxl};
+            min-height: ${euiTheme.size.xxl};
+            padding-bottom: 10px;
+            padding-top: 10px;
+          }
+
+          .kbnQueryBar__textareaWrap > .euiFormControlLayoutIcons {
+            max-height: ${euiTheme.size.xxl};
+          }
+
+          .kbnQueryBar__filterButtonGroup .kbnFilterButtonGroup {
+            align-items: center;
+            display: flex;
+            height: ${euiTheme.size.xxl};
+          }
+
+          .kbnQueryBar__filterButtonGroup .euiButtonIcon {
+            align-items: center;
+            background-color: ${euiTheme.colors.lightestShade};
+            block-size: ${euiTheme.size.xxl};
+            display: inline-flex;
+            inline-size: ${euiTheme.size.xxl};
+            justify-content: center;
+          }
+
+          && .kbnQueryBar__filterButtonGroup [data-test-subj='showQueryBarMenu'] {
+            color: ${euiTheme.colors.textSubdued};
+          }
+
+          && .kbnQueryBar__filterButtonGroup [data-test-subj='addFilter'] {
+            color: ${euiTheme.colors.emptyShade};
+            position: relative;
+          }
+
+          && .kbnQueryBar__filterButtonGroup [data-test-subj='addFilter']::before {
+            background-color: ${euiTheme.colors.primary};
+            block-size: ${euiTheme.size.base};
+            border-radius: 50%;
+            content: '';
+            inline-size: ${euiTheme.size.base};
+            inset: 0;
+            margin: auto;
+            pointer-events: none;
+            position: absolute;
+          }
+
+          &&
+            .kbnQueryBar__filterButtonGroup
+            [data-test-subj='addFilter']
+            svg[data-icon-type='plusCircle']
+            path:nth-of-type(2) {
+            display: none;
+          }
         `}
-        data-test-subj="alertSelectionQuery"
+        grow={2}
       >
         <SearchBar
           appName="siem"
@@ -171,21 +230,36 @@ const AlertSelectionQueryComponent: React.FC<Props> = ({
           onQuerySubmit={onQuerySubmit}
           query={settings.query}
         />
-      </div>
+      </EuiFlexItem>
 
-      <EuiSpacer size="xs" />
-      <EuiSpacer size="s" />
+      <EuiFlexItem
+        css={css`
+          min-width: 308px;
 
-      <EuiSuperDatePicker
-        commonlyUsedRanges={commonlyUsedRanges}
-        data-test-subj="alertSelectionDatePicker"
-        end={settings.end}
-        isDisabled={false}
-        onTimeChange={onTimeChange}
-        showUpdateButton="iconOnly"
-        start={settings.start}
-      />
-    </>
+          [data-test-subj='alertSelectionDatePicker'] .euiFormControlLayout__prepend {
+            background-color: ${euiTheme.colors.lightestShade};
+          }
+
+          [data-test-subj='alertSelectionDatePicker']
+            .euiFormControlLayout__prepend
+            button.euiFormPrepend {
+            background-color: ${euiTheme.colors.lightestShade};
+          }
+        `}
+        grow={1}
+      >
+        <EuiSuperDatePicker
+          commonlyUsedRanges={commonlyUsedRanges}
+          data-test-subj="alertSelectionDatePicker"
+          end={settings.end}
+          isDisabled={false}
+          onTimeChange={onTimeChange}
+          showUpdateButton="iconOnly"
+          start={settings.start}
+          updateButtonProps={updateButtonProps}
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };
 

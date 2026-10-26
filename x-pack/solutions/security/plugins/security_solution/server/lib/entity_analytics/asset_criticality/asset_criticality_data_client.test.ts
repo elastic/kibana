@@ -43,7 +43,7 @@ describe('AssetCriticalityDataClient', () => {
           index: '.asset-criticality.asset-criticality-default',
           mappings: {
             _meta: {
-              version: 3,
+              version: 4,
             },
             dynamic: 'strict',
             properties: {
@@ -119,9 +119,24 @@ describe('AssetCriticalityDataClient', () => {
                   },
                 },
               },
+              entity: {
+                properties: {
+                  asset: {
+                    properties: {
+                      criticality: {
+                        type: 'keyword',
+                      },
+                    },
+                  },
+                  id: {
+                    type: 'keyword',
+                  },
+                },
+              },
             },
           },
           settings: {
+            auto_expand_replicas: '0-1',
             default_pipeline: 'entity_analytics_create_eventIngest_from_timestamp-pipeline-default',
           },
         },

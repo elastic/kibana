@@ -1,0 +1,47 @@
+{
+  "journeyName": "POST /internal/telemetry/clusters/_stats - 1600 dataviews",
+  "scalabilitySetup": {
+    "warmup": [
+      {
+        "action": "constantUsersPerSec",
+        "userCount": 10,
+        "duration": "30s"
+      }
+    ],
+    "test": [
+      {
+        "action": "rampUsersPerSec",
+        "minUsersCount": 10,
+        "maxUsersCount": 400,
+        "duration": "195s"
+      }
+    ],
+    "maxDuration": "5m"
+  },
+  "testData": {
+    "esArchives": [],
+    "kbnArchives": ["x-pack/platform/test/scalability/fixtures/kbn_archiver/1600-dataviews.json"]
+  },
+  "streams": [
+    {
+      "requests": [
+        {
+          "http": {
+            "method": "POST",
+            "path": "/internal/telemetry/clusters/_stats",
+            "body": "{}",
+            "headers": {
+              "Cookie": "",
+              "Kbn-Version": "",
+              "Accept-Encoding": "gzip, deflate, br",
+              "Content-Type": "application/json",
+              "elastic-api-version": "2",
+              "x-elastic-internal-origin": "kibana"
+            },
+            "statusCode": 200
+          }
+        }
+      ]
+    }
+  ]
+}

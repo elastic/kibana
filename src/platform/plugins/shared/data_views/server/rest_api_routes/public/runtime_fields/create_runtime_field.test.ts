@@ -10,7 +10,7 @@
 import { createRuntimeField } from './create_runtime_field';
 import { dataViewsService } from '../../../mocks';
 import { getUsageCollection } from '../test_utils';
-import { DataViewLazy } from '../../../../common';
+import type { DataViewLazy } from '../../../../common';
 
 describe('create runtime field', () => {
   it('call usageCollection', async () => {
@@ -39,6 +39,6 @@ describe('create runtime field', () => {
         type: 'keyword',
       },
     });
-    expect(usageCollection.incrementCounter).toBeCalledTimes(1);
+    expect(usageCollection.incrementCounter).toHaveBeenCalledTimes(1);
   });
 });

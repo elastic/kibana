@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { Plugin, CoreSetup } from '@kbn/core/public';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { LensPublicStart } from '@kbn/lens-plugin/public';
-import { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
+import type { Plugin, CoreSetup } from '@kbn/core/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { LensPublicStart } from '@kbn/lens-plugin/public';
+import type { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
 import { mount } from './mount';
 
 export interface SetupDependencies {
@@ -41,7 +41,6 @@ export class EmbeddedLensExamplePlugin
           label: 'README',
           href: 'https://github.com/elastic/kibana/tree/main/x-pack/examples/embedded_lens_example',
           iconType: 'logoGithub',
-          size: 's',
           target: '_blank',
         },
       ],

@@ -7,8 +7,8 @@
 import React from 'react';
 import { renderHook } from '@testing-library/react';
 import { useLocationName } from './use_location_name';
-import { WrappedHelper } from '../utils/testing';
-import { OverviewStatusMetaData } from '../../../../common/runtime_types';
+import { HookWrapper } from '../utils/testing/hook_helpers';
+import type { OverviewStatusMetaData } from '../../../../common/runtime_types';
 
 describe('useLocationName', () => {
   beforeEach(() => {
@@ -18,7 +18,7 @@ describe('useLocationName', () => {
   it('returns expected label', () => {
     const WrapperWithState = ({ children }: React.PropsWithChildren) => {
       return (
-        <WrappedHelper
+        <HookWrapper
           state={{
             serviceLocations: {
               locationsLoaded: true,
@@ -41,14 +41,14 @@ describe('useLocationName', () => {
           }}
         >
           {React.createElement(React.Fragment, null, children)}
-        </WrappedHelper>
+        </HookWrapper>
       );
     };
 
     const { result } = renderHook(
       () =>
         useLocationName({
-          locationId: 'us_central',
+          locations: [{ id: 'us_central' }],
         } as OverviewStatusMetaData),
       { wrapper: WrapperWithState }
     );
@@ -58,7 +58,7 @@ describe('useLocationName', () => {
   it('returns the location id if matching location cannot be found', () => {
     const WrapperWithState = ({ children }: React.PropsWithChildren) => {
       return (
-        <WrappedHelper
+        <HookWrapper
           state={{
             serviceLocations: {
               locationsLoaded: true,
@@ -81,14 +81,14 @@ describe('useLocationName', () => {
           }}
         >
           {React.createElement(React.Fragment, null, children)}
-        </WrappedHelper>
+        </HookWrapper>
       );
     };
 
     const { result } = renderHook(
       () =>
         useLocationName({
-          locationId: 'us_central_qa',
+          locations: [{ id: 'us_central_qa' }],
         } as OverviewStatusMetaData),
       { wrapper: WrapperWithState }
     );

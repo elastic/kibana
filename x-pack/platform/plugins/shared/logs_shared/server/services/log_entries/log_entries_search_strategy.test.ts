@@ -14,7 +14,7 @@ import {
   uiSettingsServiceMock,
 } from '@kbn/core/server/mocks';
 import type { IEsSearchRequest, IEsSearchResponse } from '@kbn/search-types';
-import { ISearchStrategy, SearchStrategyDependencies } from '@kbn/data-plugin/server';
+import type { ISearchStrategy, SearchStrategyDependencies } from '@kbn/data-plugin/server';
 import { createSearchSessionsClientMock } from '@kbn/data-plugin/server/search/mocks';
 import { createResolvedLogViewLazyMock } from '../../../common/log_views/resolved_log_view.mock';
 import { createLogViewsClientMock } from '../log_views/log_views_client.mock';
@@ -228,7 +228,7 @@ describe('LogEntries search strategy', () => {
       mockDependencies
     );
 
-    await expect(response.toPromise()).rejects.toThrowError(errors.ResponseError);
+    await expect(response.toPromise()).rejects.toThrow(errors.ResponseError);
   });
 
   it('forwards cancellation to the underlying search strategy', async () => {

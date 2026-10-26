@@ -1,11 +1,11 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
     "types": [
       "jest",
       "node",
-      "@emotion/react/types/css-prop",
+      "@kbn/ambient-ui-types",
     ]
   },
   "include": [
@@ -16,6 +16,7 @@
     "@kbn/i18n",
     "@kbn/test-jest-helpers",
     "@kbn/shared-ux-markdown",
+    "@kbn/licensing-types",
   ],
   "exclude": [
     "target/**/*",

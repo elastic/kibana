@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { createSelector } from 'reselect';
-import { SyntheticsAppState } from '../root_reducer';
-import { AppState } from '..';
+import { createSelector } from 'reselect-v4';
+import type { SyntheticsAppState } from '../root_reducer';
+import type { AppState } from '..';
 
 export const selectDynamicSettings = (state: SyntheticsAppState) => state.dynamicSettings;
 const getState = (appState: AppState) => appState.agentPolicies;
 export const selectAgentPolicies = createSelector(getState, (state) => state);
 
 export const selectAddingNewPrivateLocation = (state: AppState) =>
-  state.privateLocations.isCreatePrivateLocationFlyoutVisible ?? false;
+  state.privateLocations.isPrivateLocationFlyoutVisible ?? false;
 
 export const selectLocationMonitors = (state: AppState) => ({
   locationMonitors: state.dynamicSettings.locationMonitors,

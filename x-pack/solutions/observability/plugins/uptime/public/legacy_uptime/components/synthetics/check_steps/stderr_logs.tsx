@@ -5,30 +5,29 @@
  * 2.0.
  */
 
+import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
-  EuiBasicTableColumn,
   EuiButtonEmpty,
-  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHighlight,
-  EuiLink,
   EuiSpacer,
   EuiTitle,
   formatDate,
 } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { EuiInMemoryTable } from '@elastic/eui';
 import moment from 'moment';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import { useStdErrorLogs } from './use_std_error_logs';
-import { ClientPluginsStart } from '../../../../plugin';
+import type { ClientPluginsStart } from '../../../../plugin';
 import { selectDynamicSettings } from '../../../state/selectors';
-import { Ping } from '../../../../../common/runtime_types';
+import type { Ping } from '../../../../../common/runtime_types';
 
 export const StdErrorLogs = ({
   monitorId,
@@ -112,21 +111,17 @@ export const StdErrorLogs = ({
               </EuiTitle>
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiLink data-test-subj="syntheticsStdErrorLogsLink">
-                <EuiButtonEmpty
-                  data-test-subj="syntheticsStdErrorLogsButton"
-                  href={discoverLink}
-                  iconType="discoverApp"
-                  isDisabled={!discoverLink}
-                >
-                  {VIEW_IN_DISCOVER_LABEL}
-                </EuiButtonEmpty>
-              </EuiLink>
+              <EuiButtonEmpty
+                data-test-subj="syntheticsStdErrorLogsButton"
+                href={discoverLink}
+                iconType="discoverApp"
+                isDisabled={!discoverLink}
+              >
+                {VIEW_IN_DISCOVER_LABEL}
+              </EuiButtonEmpty>
             </EuiFlexItem>
           </EuiFlexGroup>
-          <EuiCallOut title={ERROR_SUMMARY_LABEL} color="danger" iconType="warning">
-            <p>{summaryMessage}</p>
-          </EuiCallOut>
+          <KbnDangerCallout announceOnMount title={ERROR_SUMMARY_LABEL} text={summaryMessage} />
         </>
       )}
 
@@ -142,6 +137,7 @@ export const StdErrorLogs = ({
         executeQueryOptions={{
           defaultFields: ['@timestamp', 'synthetics.payload.message'],
         }}
+        tableCaption={title ?? TEST_RUN_LOGS_LABEL}
       />
     </>
   );

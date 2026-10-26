@@ -6,7 +6,7 @@
  */
 
 import { createHash } from 'node:crypto';
-import stringify from 'json-stable-stringify';
+import { stableStringify } from '@kbn/std';
 
 export class CryptoService {
   public getHash(payload: string): string {
@@ -21,6 +21,6 @@ export class CryptoService {
       return null;
     }
 
-    return stringify(obj);
+    return stableStringify(obj);
   }
 }

@@ -10,17 +10,27 @@
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import type { EuiThemeComputed } from '@elastic/eui';
 import { createStubIndexPattern } from '@kbn/data-views-plugin/common/data_view.stub';
+import { EsqlSource } from '@kbn/data-source';
+import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { createDataViewDataSource, createEsqlDataSource } from '../../../../../common/data_sources';
 import type { DataSourceProfileProviderParams, RootContext } from '../../../profiles';
 import { DataSourceCategory, SolutionType } from '../../../profiles';
-import { createContextAwarenessMocks } from '../../../__mocks__';
-import { createLogsDataSourceProfileProvider } from './profile';
+import { createProfileProviderSharedServicesMock } from '../../../__mocks__';
+import { createLogsDataSourceProfileProvider, isLogsDataSourceContext } from './profile';
 import { DataGridDensity } from '@kbn/unified-data-table';
 import { dataViewWithTimefieldMock } from '../../../../__mocks__/data_view_with_timefield';
 import type { ContextWithProfileId } from '../../../profile_service';
 import { OBSERVABILITY_ROOT_PROFILE_ID } from '../consts';
+import { RESOLUTION_MATCH } from './__mocks__/logs_data_source_resolution_match';
+import { EMPTY_CONTEXT_AWARENESS_TOOLKIT } from '../../../toolkit';
 
-const mockServices = createContextAwarenessMocks().profileProviderServices;
+const mockServices = createProfileProviderSharedServicesMock();
+
+const makeDatatableColumn = (name: string, type: string): DatatableColumn => ({
+  id: name,
+  name,
+  meta: { type: type as DatatableColumn['meta']['type'] },
+});
 
 describe('logsDataSourceProfileProvider', () => {
   const logsDataSourceProfileProvider = createLogsDataSourceProfileProvider(mockServices);
@@ -41,10 +51,6 @@ describe('logsDataSourceProfileProvider', () => {
   const ROOT_CONTEXT: ContextWithProfileId<RootContext> = {
     profileId: OBSERVABILITY_ROOT_PROFILE_ID,
     solutionType: SolutionType.Observability,
-  };
-  const RESOLUTION_MATCH = {
-    isMatch: true,
-    context: { category: DataSourceCategory.Logs },
   };
   const RESOLUTION_MISMATCH = {
     isMatch: false,
@@ -113,7 +119,7 @@ describe('logsDataSourceProfileProvider', () => {
     expect(
       logsDataSourceProfileProvider.resolve({
         ...params,
-        rootContext: { profileId: 'other-root-profile', solutionType: SolutionType.Default },
+        rootContext: { profileId: 'classic-nav-root-profile', solutionType: SolutionType.Default },
       })
     ).toEqual(RESOLUTION_MISMATCH);
     expect(
@@ -156,19 +162,24 @@ describe('logsDataSourceProfileProvider', () => {
   });
 
   describe('getRowIndicator', () => {
+    beforeEach(() => {
+      EsqlSource.clearCache();
+    });
+
     it('should return the correct color for a given log level', () => {
       const row = buildDataTableRecord({ fields: { 'log.level': 'info' } });
       const euiTheme = { euiTheme: { colors: {} } } as unknown as EuiThemeComputed;
       const getRowIndicatorProvider =
         logsDataSourceProfileProvider.profile.getRowIndicatorProvider?.(() => undefined, {
-          context: { category: DataSourceCategory.Logs },
+          context: RESOLUTION_MATCH.context,
+          toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
         });
       const getRowIndicator = getRowIndicatorProvider?.({
         dataView: dataViewWithLogLevel,
       });
 
       expect(getRowIndicator).toBeDefined();
-      expect(getRowIndicator?.(row, euiTheme)).toEqual({ color: '#90bdff', label: 'Info' });
+      expect(getRowIndicator?.(row, euiTheme)).toEqual({ color: '#adccff', label: 'Info' });
     });
 
     it('should not return a color for a missing log level in the document', () => {
@@ -176,7 +187,8 @@ describe('logsDataSourceProfileProvider', () => {
       const euiTheme = { euiTheme: { colors: {} } } as unknown as EuiThemeComputed;
       const getRowIndicatorProvider =
         logsDataSourceProfileProvider.profile.getRowIndicatorProvider?.(() => undefined, {
-          context: { category: DataSourceCategory.Logs },
+          context: RESOLUTION_MATCH.context,
+          toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
         });
       const getRowIndicator = getRowIndicatorProvider?.({
         dataView: dataViewWithLogLevel,
@@ -189,10 +201,49 @@ describe('logsDataSourceProfileProvider', () => {
     it('should not set the color indicator handler if data view does not have log level field', () => {
       const getRowIndicatorProvider =
         logsDataSourceProfileProvider.profile.getRowIndicatorProvider?.(() => undefined, {
-          context: { category: DataSourceCategory.Logs },
+          context: RESOLUTION_MATCH.context,
+          toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
         });
       const getRowIndicator = getRowIndicatorProvider?.({
         dataView: dataViewWithoutLogLevel,
+      });
+
+      expect(getRowIndicator).toBeUndefined();
+    });
+
+    it('should set the color indicator handler when the data source has a log level column', async () => {
+      const dataSource = await EsqlSource.create({
+        query: 'FROM logs-*',
+        resultColumns: [makeDatatableColumn('log.level', 'string')],
+        timeFieldName: '@timestamp',
+      });
+      const getRowIndicatorProvider =
+        logsDataSourceProfileProvider.profile.getRowIndicatorProvider?.(() => undefined, {
+          context: RESOLUTION_MATCH.context,
+          toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
+        });
+      const getRowIndicator = getRowIndicatorProvider?.({
+        dataView: dataViewWithoutLogLevel,
+        dataSource,
+      });
+
+      expect(getRowIndicator).toBeDefined();
+    });
+
+    it('should not set the color indicator handler when the data source has no log level column', async () => {
+      const dataSource = await EsqlSource.create({
+        query: 'FROM logs-* | STATS count = COUNT(*)',
+        resultColumns: [makeDatatableColumn('count', 'number')],
+        timeFieldName: '@timestamp',
+      });
+      const getRowIndicatorProvider =
+        logsDataSourceProfileProvider.profile.getRowIndicatorProvider?.(() => undefined, {
+          context: RESOLUTION_MATCH.context,
+          toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
+        });
+      const getRowIndicator = getRowIndicatorProvider?.({
+        dataView: dataViewWithoutLogLevel,
+        dataSource,
       });
 
       expect(getRowIndicator).toBeUndefined();
@@ -201,14 +252,18 @@ describe('logsDataSourceProfileProvider', () => {
 
   describe('getCellRenderers', () => {
     it('should return cell renderers for log level fields', () => {
+      const toolkit = {
+        ...EMPTY_CONTEXT_AWARENESS_TOOLKIT,
+        actions: {
+          ...EMPTY_CONTEXT_AWARENESS_TOOLKIT.actions,
+          addFilter: jest.fn(),
+        },
+      };
       const getCellRenderers = logsDataSourceProfileProvider.profile.getCellRenderers?.(
         () => ({}),
-        {
-          context: { category: DataSourceCategory.Logs },
-        }
+        { context: RESOLUTION_MATCH.context, toolkit }
       );
       const getCellRenderersParams = {
-        actions: { addFilter: jest.fn() },
         dataView: dataViewWithTimefieldMock,
         density: DataGridDensity.COMPACT,
         rowHeight: 0,
@@ -225,9 +280,17 @@ describe('logsDataSourceProfileProvider', () => {
 
   describe('getRowAdditionalLeadingControls', () => {
     it('should return the passed additional controls', () => {
+      const toolkit = {
+        ...EMPTY_CONTEXT_AWARENESS_TOOLKIT,
+        actions: {
+          ...EMPTY_CONTEXT_AWARENESS_TOOLKIT.actions,
+          setExpandedDoc: jest.fn(),
+        },
+      };
       const getRowAdditionalLeadingControls =
         logsDataSourceProfileProvider.profile.getRowAdditionalLeadingControls?.(() => undefined, {
-          context: { category: DataSourceCategory.Logs },
+          context: RESOLUTION_MATCH.context,
+          toolkit,
         });
       const rowAdditionalLeadingControls = getRowAdditionalLeadingControls?.({
         dataView: dataViewWithLogLevel,
@@ -237,5 +300,58 @@ describe('logsDataSourceProfileProvider', () => {
       expect(rowAdditionalLeadingControls?.[0].id).toBe('connectedDegradedDocs');
       expect(rowAdditionalLeadingControls?.[1].id).toBe('connectedStacktraceDocs');
     });
+
+    it('should not return the passed additional controls if the flag is turned off', () => {
+      const getRowAdditionalLeadingControls =
+        logsDataSourceProfileProvider.profile.getRowAdditionalLeadingControls?.(() => undefined, {
+          context: RESOLUTION_MATCH.context,
+          toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
+        });
+      const rowAdditionalLeadingControls = getRowAdditionalLeadingControls?.({
+        dataView: dataViewWithLogLevel,
+      });
+
+      expect(rowAdditionalLeadingControls).toHaveLength(0);
+    });
+  });
+
+  describe('getColumnsConfiguration', () => {
+    it('should return custom configuration for the "_source" column', () => {
+      const getColumnsConfiguration =
+        logsDataSourceProfileProvider.profile.getColumnsConfiguration?.(() => ({}), {
+          context: RESOLUTION_MATCH.context,
+          toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
+        });
+
+      const columnConfiguration = getColumnsConfiguration?.();
+
+      expect(columnConfiguration).toBeDefined();
+      expect(columnConfiguration).toHaveProperty('_source');
+
+      const config = columnConfiguration!._source({
+        column: { id: '_source', displayAsText: 'Summary' },
+        headerRowHeight: 1,
+      });
+
+      expect(config).toBeDefined();
+      expect(config).toHaveProperty('display');
+    });
+  });
+});
+
+describe('isLogsDataSourceContext', () => {
+  it('should return true for context with DataSourceCategory.Logs and logOverviewContext$', () => {
+    expect(isLogsDataSourceContext(RESOLUTION_MATCH.context)).toBe(true);
+  });
+
+  it('should return false for context with other DataSourceCategory', () => {
+    expect(
+      isLogsDataSourceContext({ ...RESOLUTION_MATCH.context, category: DataSourceCategory.Default })
+    ).toBe(false);
+  });
+
+  it('should return false for context without logOverviewContext$', () => {
+    const { logOverviewContext$, ...restContext } = RESOLUTION_MATCH.context;
+    expect(isLogsDataSourceContext(restContext)).toBe(false);
   });
 });

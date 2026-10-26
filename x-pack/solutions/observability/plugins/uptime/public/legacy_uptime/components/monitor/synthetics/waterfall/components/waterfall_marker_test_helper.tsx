@@ -8,7 +8,7 @@
 import React from 'react';
 import { UptimeStartupPluginsContext } from '../../../../../contexts';
 import { WaterfallContext } from '../context/waterfall_chart';
-import { JourneyStep } from '../../../../../../../common/runtime_types';
+import type { JourneyStep } from '../../../../../../../common/runtime_types';
 
 const EmbeddableMock = ({
   title,

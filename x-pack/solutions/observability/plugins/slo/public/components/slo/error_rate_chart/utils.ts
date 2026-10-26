@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { SLOWithSummaryResponse, timeslicesBudgetingMethodSchema } from '@kbn/slo-schema';
+import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import moment from 'moment';
-import { TimeRange } from './use_lens_definition';
+import type { TimeRange } from './use_lens_definition';
 
 // For a timeslice SLO
 // When the date range is lower than 24 hours, we force the interval to be the timeslice window
@@ -15,7 +15,7 @@ import { TimeRange } from './use_lens_definition';
 export function getLensDefinitionInterval(dataTimeRange: TimeRange, slo: SLOWithSummaryResponse) {
   const dataTimeRangeDuration = moment(dataTimeRange.to).diff(moment(dataTimeRange.from), 'ms');
   const interval =
-    timeslicesBudgetingMethodSchema.is(slo.budgetingMethod) &&
+    slo.budgetingMethod === 'timeslices' &&
     dataTimeRangeDuration <= 86400000 &&
     slo.objective?.timesliceWindow
       ? slo.objective.timesliceWindow

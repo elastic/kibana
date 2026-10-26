@@ -9,7 +9,8 @@ import React from 'react';
 
 import { useValues } from 'kea';
 
-import { EuiButton, EuiButtonProps } from '@elastic/eui';
+import type { EuiButtonProps } from '@elastic/eui';
+import { EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { docLinks } from '../doc_links';
@@ -32,7 +33,7 @@ export const ManageLicenseButton: React.FC<EuiButtonProps> = (props) => {
       })}
     </EuiButtonTo>
   ) : (
-    <EuiButton {...props} target="_blank" iconType="popout" href={docLinks.licenseManagement}>
+    <EuiButton {...props} target="_blank" iconType="external" href={docLinks.licenseManagement}>
       {i18n.translate('xpack.enterpriseSearch.licenseDocumentationLink', {
         defaultMessage: 'Learn more about license features',
       })}

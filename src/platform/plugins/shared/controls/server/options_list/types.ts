@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
-import { OptionsListSelection } from '../../common/options_list/options_list_selections';
-import {
+import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { OptionsListSelection } from '@kbn/controls-schemas';
+import type {
   OptionsListParsedSuggestions,
   OptionsListRequestBody,
 } from '../../common/options_list/types';
@@ -27,5 +27,6 @@ export interface OptionsListValidationAggregationBuilder {
 
 export interface OptionsListSuggestionAggregationBuilder {
   buildAggregation: (req: OptionsListRequestBody) => unknown;
+  buildSearchFilter?: (req: OptionsListRequestBody) => unknown | undefined;
   parse: (response: SearchResponse, req: OptionsListRequestBody) => OptionsListParsedSuggestions;
 }

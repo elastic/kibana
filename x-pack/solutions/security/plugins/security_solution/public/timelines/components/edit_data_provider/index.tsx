@@ -238,7 +238,7 @@ export const StatefulEditDataProvider = React.memo<Props>(
                     placeholder={i18n.SELECT_AN_OPERATOR}
                     selectedOptions={updatedOperator}
                     singleSelection={{ asPlainText: true }}
-                    style={{ minWidth: OPERATOR_COMBO_BOX_WIDTH }}
+                    css={{ minWidth: OPERATOR_COMBO_BOX_WIDTH }}
                   />
                 </EuiFormRow>
               </EuiFlexItem>
@@ -271,6 +271,7 @@ export const StatefulEditDataProvider = React.memo<Props>(
             {type === DataProviderTypeEnum.template && showComboBoxInput && (
               <>
                 <EuiCallOut
+                  announceOnMount={false}
                   color="warning"
                   iconType="warning"
                   size="s"

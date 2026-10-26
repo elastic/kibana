@@ -10,7 +10,8 @@
 import React from 'react';
 import { FieldDescription } from './field_description';
 import { render, screen } from '@testing-library/react';
-import { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
+import { userEvent } from '@testing-library/user-event';
+import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import { SHOULD_TRUNCATE_FIELD_DESCRIPTION_LOCALSTORAGE_KEY } from './field_description';
 
 const mockSetLocalStorage = jest.fn();
@@ -51,12 +52,16 @@ describe('FieldDescription', () => {
     const customDescription = 'test this long desc '.repeat(8).trim();
     render(<FieldDescription field={{ name: 'bytes', type: 'number', customDescription }} />);
     expect(screen.queryByTestId('fieldDescription-bytes')).toHaveTextContent(customDescription);
-    screen.queryByTestId('toggleFieldDescription-bytes')?.click();
+
+    await userEvent.click(screen.getByTestId('toggleFieldDescription-bytes'));
+
     expect(screen.queryByTestId('fieldDescription-bytes')).toHaveTextContent(
       `${customDescription}View less`
     );
     expect(mockSetLocalStorage).toHaveBeenCalledWith(false);
-    screen.queryByTestId('toggleFieldDescription-bytes')?.click();
+
+    await userEvent.click(screen.getByTestId('toggleFieldDescription-bytes'));
+
     expect(screen.queryByTestId('fieldDescription-bytes')).toHaveTextContent(customDescription);
     expect(mockSetLocalStorage).toHaveBeenCalledWith(true);
   });
@@ -93,6 +98,7 @@ describe('FieldDescription', () => {
         fieldsMetadata: {
           bytes: { description: 'ESC desc', type: 'long' },
         },
+        streamFieldsMetadata: undefined,
         loading: false,
         error: undefined,
         reload: jest.fn(),
@@ -116,6 +122,7 @@ describe('FieldDescription', () => {
         fieldsMetadata: {
           bytes: { description: 'ESC desc', type: 'long' },
         },
+        streamFieldsMetadata: undefined,
         loading: false,
         error: undefined,
         reload: jest.fn(),
@@ -141,6 +148,7 @@ describe('FieldDescription', () => {
         fieldsMetadata: {
           bytes: { description: 'ESC desc', type: 'keyword' },
         },
+        streamFieldsMetadata: undefined,
         loading: false,
         error: undefined,
         reload: jest.fn(),
@@ -160,6 +168,7 @@ describe('FieldDescription', () => {
     const fieldsMetadataService: Partial<FieldsMetadataPublicStart> = {
       useFieldsMetadata: jest.fn(() => ({
         fieldsMetadata: {},
+        streamFieldsMetadata: undefined,
         loading: false,
         error: undefined,
         reload: jest.fn(),

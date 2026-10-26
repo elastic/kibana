@@ -7,13 +7,13 @@
 
 import agent from 'elastic-apm-node';
 import { createHash } from 'crypto';
-import { get, invert, isEmpty, merge, partition } from 'lodash';
+import { get, invert, isArray, isEmpty, isEqual, merge, sum } from 'lodash';
 import moment from 'moment';
 import objectHash from 'object-hash';
 
 import dateMath from '@kbn/datemath';
-import { isCCSRemoteIndexName } from '@kbn/es-query';
 import type { estypes, TransportResult } from '@elastic/elasticsearch';
+import { addSpanLabels } from '@kbn/apm-utils';
 import {
   ALERT_UUID,
   ALERT_RULE_UUID,
@@ -31,15 +31,16 @@ import type {
   FoundExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 
-import type { ElasticsearchClient, IUiSettingsClient } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
+import { ENDPOINT_ARTIFACT_LIST_IDS } from '@kbn/securitysolution-list-constants';
 import type { AlertingServerSetup } from '@kbn/alerting-plugin/server';
 import { parseDuration } from '@kbn/alerting-plugin/server';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
-import type { SanitizedRuleAction } from '@kbn/alerting-plugin/common';
+import type { SanitizedRuleAction, GapReason } from '@kbn/alerting-plugin/common';
+import { gapReasonType } from '@kbn/alerting-plugin/common';
 import type { SuppressionFieldsLatest } from '@kbn/rule-registry-plugin/common/schemas';
 import type { TimestampOverride } from '../../../../../common/api/detection_engine/model/rule_schema';
 import type { Privilege } from '../../../../../common/api/detection_engine';
-import { RuleExecutionStatusEnum } from '../../../../../common/api/detection_engine/rule_monitoring';
 import type {
   SearchAfterAndBulkCreateReturnType,
   SignalSearchResponse,
@@ -64,13 +65,12 @@ import type { BaseHit, SearchTypes } from '../../../../../common/detection_engin
 import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
 import { withSecuritySpan } from '../../../../utils/with_security_span';
 import type {
-  BaseFieldsLatest,
+  DetectionAlertLatest,
   DetectionAlert,
-  EqlBuildingBlockFieldsLatest,
-  EqlShellFieldsLatest,
-  WrappedFieldsLatest,
+  EqlBuildingBlockAlertLatest,
+  EqlShellAlertLatest,
+  WrappedAlert,
 } from '../../../../../common/api/detection_engine/model/alerts';
-import { ENABLE_CCS_READ_WARNING_SETTING } from '../../../../../common/constants';
 import type { GenericBulkCreateResponse } from '../factories';
 import type {
   ExtraFieldsForShellAlert,
@@ -79,88 +79,21 @@ import type {
 import type { BuildReasonMessage } from './reason_formatters';
 import { getSuppressionTerms } from './suppression_utils';
 import { robustGet } from './source_fields_merging/utils/robust_field_access';
-import {
-  SECURITY_NUM_EXCEPTION_ITEMS,
-  SECURITY_NUM_INDICES_MATCHING_PATTERN,
-  SECURITY_QUERY_SPAN_S,
-} from './apm_field_names';
-
+import { SECURITY_NUM_EXCEPTION_ITEMS, SECURITY_QUERY_SPAN_S } from './apm_field_names';
+import { buildTimeRangeFilter } from './build_events_query';
 export const MAX_RULE_GAP_RATIO = 4;
-
-export const hasReadIndexPrivileges = async (args: {
-  privileges: Privilege;
-  ruleExecutionLogger: IRuleExecutionLogForExecutors;
-  uiSettingsClient: IUiSettingsClient;
-}): Promise<string | undefined> => {
-  const { privileges, ruleExecutionLogger, uiSettingsClient } = args;
-
-  const isCcsPermissionWarningEnabled = await uiSettingsClient.get(ENABLE_CCS_READ_WARNING_SETTING);
-
-  const indexNames = Object.keys(privileges.index);
-  const filteredIndexNames = isCcsPermissionWarningEnabled
-    ? indexNames
-    : indexNames.filter((indexName) => {
-        return !isCCSRemoteIndexName(indexName);
-      });
-
-  const [, indexesWithNoReadPrivileges] = partition(
-    filteredIndexNames,
-    (indexName) => privileges.index[indexName].read
-  );
-
-  let warningStatusMessage;
-
-  // Some indices have read privileges others do not.
-  if (indexesWithNoReadPrivileges.length > 0) {
-    const indexesString = JSON.stringify(indexesWithNoReadPrivileges);
-    warningStatusMessage = `This rule may not have the required read privileges to the following index patterns: ${indexesString}`;
-    await ruleExecutionLogger.logStatusChange({
-      newStatus: RuleExecutionStatusEnum['partial failure'],
-      message: warningStatusMessage,
-    });
-  }
-
-  return warningStatusMessage;
-};
 
 export const hasTimestampFields = async (args: {
   timestampField: string;
-  // any is derived from here
-  // node_modules/@elastic/elasticsearch/lib/api/kibana.d.ts
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  timestampFieldCapsResponse: TransportResult<Record<string, any>, unknown>;
-  inputIndices: string[];
+  timestampFieldCapsResponse: TransportResult<estypes.FieldCapsResponse, unknown>;
   ruleExecutionLogger: IRuleExecutionLogForExecutors;
 }): Promise<{
   foundNoIndices: boolean;
   warningMessage: string | undefined;
 }> => {
-  const { timestampField, timestampFieldCapsResponse, inputIndices, ruleExecutionLogger } = args;
-  const { ruleName } = ruleExecutionLogger.context;
+  const { timestampField, timestampFieldCapsResponse, ruleExecutionLogger } = args;
 
-  agent.setCustomContext({
-    [SECURITY_NUM_INDICES_MATCHING_PATTERN]: timestampFieldCapsResponse.body.indices?.length,
-  });
-
-  if (isEmpty(timestampFieldCapsResponse.body.indices)) {
-    const errorString = `This rule is attempting to query data from Elasticsearch indices listed in the "Index patterns" section of the rule definition, however no index matching: ${JSON.stringify(
-      inputIndices
-    )} was found. This warning will continue to appear until a matching index is created or this rule is disabled. ${
-      ruleName === 'Endpoint Security'
-        ? 'If you have recently enrolled agents enabled with Endpoint Security through Fleet, this warning should stop once an alert is sent from an agent.'
-        : ''
-    }`;
-
-    await ruleExecutionLogger.logStatusChange({
-      newStatus: RuleExecutionStatusEnum['partial failure'],
-      message: errorString.trimEnd(),
-    });
-
-    return {
-      foundNoIndices: true,
-      warningMessage: errorString.trimEnd(),
-    };
-  } else if (
+  if (
     isEmpty(timestampFieldCapsResponse.body.fields) ||
     timestampFieldCapsResponse.body.fields[timestampField] == null ||
     timestampFieldCapsResponse.body.fields[timestampField]?.unmapped?.indices != null
@@ -178,15 +111,78 @@ export const hasTimestampFields = async (args: {
         : timestampFieldCapsResponse.body.fields[timestampField]?.unmapped?.indices
     )}`;
 
-    await ruleExecutionLogger.logStatusChange({
-      newStatus: RuleExecutionStatusEnum['partial failure'],
-      message: errorString,
-    });
+    ruleExecutionLogger.warn(errorString);
 
     return { foundNoIndices: false, warningMessage: errorString };
   }
 
   return { foundNoIndices: false, warningMessage: undefined };
+};
+
+/**
+ * Identifies frozen indices from the provided input indices.
+ * If any of the input indices resolve to frozen indices within the specified time range, they are returned by this function.
+ * @param {string[]} params.inputIndices - The list of input index patterns or indices to check.
+ * @param {ElasticsearchClient} params.internalEsClient - A client to be used to query the elasticsearch cluster on behalf of the internal Kibana user.
+ * @param {ElasticsearchClient} params.currentUserEsClient - A client to be used to query the elasticsearch cluster on behalf of the user that initiated the request to the Kibana server.
+ * @param {string} params.to - The end of the time range for the query (e.g., "now").
+ * @param {string} params.from - The start of the time range for the query (e.g., "now-1d").
+ * @param {string} params.primaryTimestamp - The primary timestamp field used for filtering.
+ * @param {string | undefined} params.secondaryTimestamp - The secondary timestamp field used for filtering, if applicable.
+ * @returns {Promise<string[]>} A promise that resolves to a list of frozen indices.
+ */
+export const checkForFrozenIndices = async ({
+  inputIndices,
+  internalEsClient,
+  currentUserEsClient,
+  to,
+  from,
+  primaryTimestamp,
+  secondaryTimestamp,
+}: {
+  inputIndices: string[];
+  internalEsClient: ElasticsearchClient;
+  currentUserEsClient: ElasticsearchClient;
+  to: string;
+  from: string;
+  primaryTimestamp: string;
+  secondaryTimestamp: string | undefined;
+}): Promise<string[]> => {
+  const fieldCapsResponse = await currentUserEsClient.fieldCaps({
+    index: inputIndices,
+    fields: ['_id'],
+    ignore_unavailable: true,
+    index_filter: buildTimeRangeFilter({
+      to,
+      from,
+      primaryTimestamp,
+      secondaryTimestamp,
+    }),
+  });
+
+  const resolvedQueryIndices = isArray(fieldCapsResponse.indices)
+    ? fieldCapsResponse.indices
+    : [fieldCapsResponse.indices];
+
+  // Frozen indices start with `partial-`, but it's possible
+  // for some regular hot/warm index to start with that prefix as well by coincidence. If we find indices with that naming pattern,
+  // we fetch information about the index using ilm explain to verify that they are actually frozen indices.
+  const partialIndices = resolvedQueryIndices.filter((index) => index.startsWith('partial-'));
+  if (partialIndices.length <= 0) {
+    return [];
+  }
+
+  const explainResponse = await internalEsClient.ilm.explainLifecycle({
+    // Use the original index patterns again instead of just the concrete names of the indices:
+    // the list of concrete indices could be huge and make the request URL too large, but we know the list of index patterns works
+    index: inputIndices.join(','),
+    filter_path: 'indices.*.phase,indices.*.managed',
+  });
+
+  return partialIndices.filter((index) => {
+    const indexResponse = explainResponse.indices[index];
+    return indexResponse !== undefined && indexResponse.managed && indexResponse.phase === 'frozen';
+  });
 };
 
 export const checkPrivilegesFromEsClient = async (
@@ -231,15 +227,26 @@ export const getNumCatchupIntervals = ({
 export const getExceptions = async ({
   client,
   lists,
+  shouldFilterOutEndpointExceptions,
 }: {
   client: ExceptionListClient;
   lists: ListArray;
+  shouldFilterOutEndpointExceptions: boolean;
 }): Promise<ExceptionListItemSchema[]> => {
   return withSecuritySpan('getExceptions', async () => {
-    if (lists.length > 0) {
+    const filteredLists = shouldFilterOutEndpointExceptions
+      ? lists.filter(
+          ({ list_id: listId }) =>
+            !(ENDPOINT_ARTIFACT_LIST_IDS as readonly string[]).includes(listId)
+        )
+      : lists;
+
+    if (filteredLists.length > 0) {
       try {
-        const listIds = lists.map(({ list_id: listId }) => listId);
-        const namespaceTypes = lists.map(({ namespace_type: namespaceType }) => namespaceType);
+        const listIds = filteredLists.map(({ list_id: listId }) => listId);
+        const namespaceTypes = filteredLists.map(
+          ({ namespace_type: namespaceType }) => namespaceType
+        );
 
         // Stream the results from the Point In Time (PIT) finder into this array
         let items: ExceptionListItemSchema[] = [];
@@ -300,9 +307,58 @@ export const getGapBetweenRuns = ({
     return moment.duration(0);
   }
   const driftTolerance = moment.duration(originalTo.diff(originalFrom));
-  agent.addLabels({ [SECURITY_QUERY_SPAN_S]: driftTolerance.asSeconds() }, false);
+  addSpanLabels({ [SECURITY_QUERY_SPAN_S]: driftTolerance.asSeconds() }, { isString: false });
   const currentDuration = moment.duration(moment(startedAt).diff(previousStartedAt));
   return currentDuration.subtract(driftTolerance);
+};
+
+export { type GapReason } from '@kbn/alerting-plugin/common';
+
+/**
+ * Determines why a gap occurred between rule executions.
+ *
+ * Returns `rule_disabled` only when the rule was re-enabled during the gap
+ * and fired promptly after (within the lookback window). Defaults to
+ * `rule_did_not_run` in all other cases (outages, missing data, etc).
+ *
+ * Known limitation: a brief toggle during an unrelated outage can be
+ * misclassified as rule_disabled.
+ */
+export const getGapReason = ({
+  previousStartedAt,
+  startedAt,
+  lastEnabledAt,
+  originalFrom,
+  originalTo,
+}: {
+  previousStartedAt: Date | null | undefined;
+  startedAt: Date;
+  lastEnabledAt: Date | null | undefined;
+  originalFrom: moment.Moment;
+  originalTo: moment.Moment;
+}): GapReason => {
+  if (previousStartedAt == null || lastEnabledAt == null) {
+    return { type: gapReasonType.RULE_DID_NOT_RUN };
+  }
+
+  const lastEnabledAtMs = lastEnabledAt.getTime();
+  const previousStartedAtMs = previousStartedAt.getTime();
+  const startedAtMs = startedAt.getTime();
+
+  const isInGapWindow = lastEnabledAtMs > previousStartedAtMs && lastEnabledAtMs <= startedAtMs;
+
+  if (!isInGapWindow) {
+    return { type: gapReasonType.RULE_DID_NOT_RUN };
+  }
+
+  const driftToleranceMs = originalTo.diff(originalFrom);
+  const postEnableDelayMs = startedAtMs - lastEnabledAtMs;
+
+  if (postEnableDelayMs <= driftToleranceMs) {
+    return { type: gapReasonType.RULE_DISABLED };
+  }
+
+  return { type: gapReasonType.RULE_DID_NOT_RUN };
 };
 
 export const makeFloatString = (num: number): string => Number(num).toFixed(2);
@@ -316,6 +372,7 @@ export const getRuleRangeTuples = async ({
   maxSignals,
   ruleExecutionLogger,
   alerting,
+  lastEnabledAt,
 }: {
   startedAt: Date;
   previousStartedAt: Date | null | undefined;
@@ -325,6 +382,7 @@ export const getRuleRangeTuples = async ({
   maxSignals: number;
   ruleExecutionLogger: IRuleExecutionLogForExecutors;
   alerting: AlertingServerSetup;
+  lastEnabledAt: Date | null | undefined;
 }) => {
   const originalFrom = dateMath.parse(from, { forceNow: startedAt });
   const originalTo = dateMath.parse(to, { forceNow: startedAt });
@@ -338,10 +396,7 @@ export const getRuleRangeTuples = async ({
   if (maxSignals > maxAlertsAllowed) {
     maxSignalsToUse = maxAlertsAllowed;
     warningStatusMessage = `The rule's max alerts per run setting (${maxSignals}) is greater than the Kibana alerting limit (${maxAlertsAllowed}). The rule will only write a maximum of ${maxAlertsAllowed} alerts per rule run.`;
-    await ruleExecutionLogger.logStatusChange({
-      newStatus: RuleExecutionStatusEnum['partial failure'],
-      message: warningStatusMessage,
-    });
+    ruleExecutionLogger.warn(warningStatusMessage);
   }
 
   const tuples = [
@@ -355,11 +410,17 @@ export const getRuleRangeTuples = async ({
   const intervalDuration = parseInterval(interval);
   if (intervalDuration == null) {
     ruleExecutionLogger.error(
-      `Failed to compute gap between rule runs: could not parse rule interval "${JSON.stringify(
+      `Error computing gap between rule runs\nError: could not parse rule interval "${JSON.stringify(
         interval
       )}"`
     );
-    return { tuples, remainingGap: moment.duration(0), warningStatusMessage };
+    return {
+      tuples,
+      remainingGap: moment.duration(0),
+      warningStatusMessage,
+      originalFrom,
+      originalTo,
+    };
   }
 
   const gap = getGapBetweenRuns({
@@ -389,11 +450,19 @@ export const getRuleRangeTuples = async ({
   );
 
   let gapRange;
+  let detectedGapReason: GapReason | undefined;
   if (remainingGapMilliseconds > 0 && previousStartedAt != null) {
     gapRange = {
       gte: previousStartedAt.toISOString(),
       lte: moment(previousStartedAt).add(remainingGapMilliseconds).toDate().toISOString(),
     };
+    detectedGapReason = getGapReason({
+      previousStartedAt,
+      startedAt,
+      lastEnabledAt,
+      originalFrom,
+      originalTo,
+    });
   }
 
   return {
@@ -401,6 +470,9 @@ export const getRuleRangeTuples = async ({
     remainingGap: moment.duration(remainingGapMilliseconds),
     warningStatusMessage,
     gap: gapRange,
+    gapReason: detectedGapReason,
+    originalFrom,
+    originalTo,
   };
 };
 
@@ -491,6 +563,41 @@ export const createErrorsFromShard = ({ errors }: { errors: ShardError[] }): str
 };
 
 /**
+ * Given the `_clusters` section of a cross-cluster or cross-project search response this will return
+ * an array of warning strings for conditions that are only reported per cluster, e.g. a remote cluster
+ * with `skip_unavailable: true` being unreachable or a linked project rejecting the search. These are
+ * warnings rather than errors because Elasticsearch still returns the data of the reachable clusters.
+ * Failures already present in `_shards.failures` are omitted.
+ */
+export const createWarningsFromClusters = ({
+  clusters,
+  shardErrors,
+}: {
+  clusters: estypes.ClusterStatistics | undefined;
+  shardErrors: string[];
+}): string[] => {
+  const details = clusters?.details ?? {};
+  const knownShardErrors = new Set(shardErrors);
+
+  return Object.entries(details).flatMap(([alias, detail]) => {
+    const failures = createErrorsFromShard({ errors: detail.failures ?? [] })
+      .filter((failure) => !knownShardErrors.has(failure))
+      .map(
+        (failure) =>
+          `Cluster "${alias}" is "${detail.status}" and its data may be missing from this rule run: ${failure}`
+      );
+
+    if (failures.length === 0 && (detail.status === 'skipped' || detail.status === 'failed')) {
+      return [
+        `Cluster "${alias}" is "${detail.status}" and its data is missing from this rule run (indices: "${detail.indices}").`,
+      ];
+    }
+
+    return failures;
+  });
+};
+
+/**
  * Given a search hit this will return a valid last date if it can find one, otherwise it
  * will return undefined. This tries the "fields" first to get a formatted date time if it can, but if
  * it cannot it will resort to using the "_source" fields second which can be problematic if the date time
@@ -556,6 +663,7 @@ export const createSearchAfterReturnTypeFromResponse = <
           )
         );
       }),
+    alertsCandidateCount: searchResult.hits.hits.length,
   });
 };
 
@@ -565,22 +673,26 @@ export const createSearchAfterReturnType = ({
   searchAfterTimes,
   enrichmentTimes,
   bulkCreateTimes,
+  alertsCandidateCount,
   createdSignalsCount,
   createdSignals,
   errors,
   warningMessages,
   suppressedAlertsCount,
+  totalEventsFound,
 }: {
   success?: boolean | undefined;
   warning?: boolean;
   searchAfterTimes?: string[] | undefined;
   enrichmentTimes?: string[] | undefined;
   bulkCreateTimes?: string[] | undefined;
+  alertsCandidateCount?: number | undefined;
   createdSignalsCount?: number | undefined;
   createdSignals?: unknown[] | undefined;
   errors?: string[] | undefined;
   warningMessages?: string[] | undefined;
   suppressedAlertsCount?: number | undefined;
+  totalEventsFound?: number | undefined;
 } = {}): SearchAfterAndBulkCreateReturnType => {
   return {
     success: success ?? true,
@@ -588,6 +700,7 @@ export const createSearchAfterReturnType = ({
     searchAfterTimes: searchAfterTimes ?? [],
     enrichmentTimes: enrichmentTimes ?? [],
     bulkCreateTimes: bulkCreateTimes ?? [],
+    alertsCandidateCount,
     createdSignalsCount: createdSignalsCount ?? 0,
     createdSignals: createdSignals ?? [],
     errors: errors ?? [],
@@ -604,7 +717,7 @@ export const addToSearchAfterReturn = ({
   next,
 }: {
   current: SearchAfterAndBulkCreateReturnType;
-  next: Omit<GenericBulkCreateResponse<BaseFieldsLatest>, 'alertsWereTruncated'>;
+  next: Omit<GenericBulkCreateResponse<DetectionAlertLatest>, 'alertsWereTruncated'>;
 }) => {
   current.success = current.success && next.success;
   current.createdSignalsCount += next.createdItemsCount;
@@ -628,11 +741,13 @@ export const mergeReturns = (
       searchAfterTimes: existingSearchAfterTimes,
       bulkCreateTimes: existingBulkCreateTimes,
       enrichmentTimes: existingEnrichmentTimes,
+      alertsCandidateCount: existingAlertsCandidateCount,
       createdSignalsCount: existingCreatedSignalsCount,
       createdSignals: existingCreatedSignals,
       errors: existingErrors,
       warningMessages: existingWarningMessages,
       suppressedAlertsCount: existingSuppressedAlertsCount,
+      totalEventsFound: existingTotalEventsFound,
     }: SearchAfterAndBulkCreateReturnType = prev;
 
     const {
@@ -641,11 +756,13 @@ export const mergeReturns = (
       searchAfterTimes: newSearchAfterTimes,
       enrichmentTimes: newEnrichmentTimes,
       bulkCreateTimes: newBulkCreateTimes,
+      alertsCandidateCount: newAlertsCandidateCount,
       createdSignalsCount: newCreatedSignalsCount,
       createdSignals: newCreatedSignals,
       errors: newErrors,
       warningMessages: newWarningMessages,
       suppressedAlertsCount: newSuppressedAlertsCount,
+      totalEventsFound: newTotalEventsFound,
     }: SearchAfterAndBulkCreateReturnType = next;
 
     return {
@@ -654,11 +771,13 @@ export const mergeReturns = (
       searchAfterTimes: [...existingSearchAfterTimes, ...newSearchAfterTimes],
       enrichmentTimes: [...existingEnrichmentTimes, ...newEnrichmentTimes],
       bulkCreateTimes: [...existingBulkCreateTimes, ...newBulkCreateTimes],
+      alertsCandidateCount: sum([existingAlertsCandidateCount, newAlertsCandidateCount]),
       createdSignalsCount: existingCreatedSignalsCount + newCreatedSignalsCount,
       createdSignals: [...existingCreatedSignals, ...newCreatedSignals],
       errors: [...new Set([...existingErrors, ...newErrors])],
       warningMessages: [...existingWarningMessages, ...newWarningMessages],
       suppressedAlertsCount: (existingSuppressedAlertsCount ?? 0) + (newSuppressedAlertsCount ?? 0),
+      totalEventsFound: (existingTotalEventsFound ?? 0) + (newTotalEventsFound ?? 0),
     };
   });
 };
@@ -705,15 +824,53 @@ export const isMachineLearningParams = (params: RuleParams): params is MachineLe
  * @param sortIds estypes.SortResults | undefined
  * @returns SortResults
  */
+// stringified Java Long.MAX_VALUE, used as a sentinel sort value when Elasticsearch expects one
+const LONG_MAX_VALUE = '9223372036854775807';
+
 export const getSafeSortIds = (sortIds: estypes.SortResults | undefined) => {
   return sortIds?.map((sortId) => {
     // haven't determined when we would receive a null value for a sort id
     // but in case we do, default to sending the stringified Java max_int
     if (sortId == null || sortId === '' || Number(sortId) >= Number.MAX_SAFE_INTEGER) {
-      return '9223372036854775807';
+      return LONG_MAX_VALUE;
     }
     return sortId;
   });
+};
+
+/**
+ * Same Long.MAX_VALUE clamping as {@link getSafeSortIds}, for cursors that mix formatted
+ * date_nanos values with plain date ones. Null and empty values are left as they are so callers
+ * can stop paging via {@link getUnusableCursorWarning}: replacing them with the sentinel would
+ * put the cursor outside the range a date_nanos field accepts.
+ */
+export const getSafeNanosSortIds = (sortIds: estypes.SortResults | undefined) => {
+  return sortIds?.map((sortId) => {
+    if (sortId != null && sortId !== '' && Number(sortId) >= Number.MAX_SAFE_INTEGER) {
+      return LONG_MAX_VALUE;
+    }
+    return sortId;
+  });
+};
+
+// in mixed date/date_nanos patterns, timestamps missing or outside the nanos range
+// on date-mapped shards yield cursors that either format to null or never advance
+// (the same docs match again every page); callers stop paging instead of failing or looping
+export const getUnusableCursorWarning = (
+  sortIds: estypes.SortResults | undefined,
+  prevSortIds: estypes.SortResults | undefined
+): string | undefined => {
+  if (sortIds == null) {
+    return undefined;
+  }
+  const unusable =
+    sortIds.some((val) => val == null || val === '') || isEqual(sortIds, prevSortIds);
+  if (!unusable) {
+    return undefined;
+  }
+  return `Pagination stopped: the last document's sort values ${JSON.stringify(
+    sortIds
+  )} cannot be used as a search_after cursor, because a timestamp is missing or outside the date_nanos supported range on an index where it is not mapped as date_nanos. Remaining documents were not evaluated.`;
 };
 
 export const isWrappedEventHit = (event: SimpleHit): event is WrappedEventHit => {
@@ -801,6 +958,14 @@ export const getSuppressionMaxSignalsWarning = (): string => {
   return `This rule reached the maximum alert limit for the rule execution. Some alerts were not created or suppressed.`;
 };
 
+export const getMissingIdFieldWarning = (): string => {
+  return `ES|QL query does not return _id metadata field for a non-aggregating query. This may result in duplicate alerts. Consider adding "METADATA _id" to the FROM command and make sure _id is not excluded by KEEP or DROP commands.`;
+};
+
+export const getMetadataIdInjectionFailedWarning = (reason: string): string => {
+  return `Failed to automatically inject METADATA _id into ES|QL query: ${reason}. This may result in duplicate alerts. Try manually adding "METADATA _id" to the FROM command and ensure _id is returned in the query results.`;
+};
+
 export const getDisabledActionsWarningText = ({
   alertsCreated,
   disabledActions,
@@ -831,16 +996,16 @@ export type RuleWithInMemorySuppression =
 
 export interface SequenceSuppressionTermsAndFieldsParams {
   sharedParams: SecuritySharedParams<EqlRuleParams>;
-  shellAlert: WrappedFieldsLatest<EqlShellFieldsLatest>;
-  buildingBlockAlerts: Array<WrappedFieldsLatest<EqlBuildingBlockFieldsLatest>>;
+  shellAlert: WrappedAlert<EqlShellAlertLatest>;
+  buildingBlockAlerts: Array<WrappedAlert<EqlBuildingBlockAlertLatest>>;
 }
 
 export type SequenceSuppressionTermsAndFieldsFactory = (
   shellAlert: WrappedEqlShellOptionalSubAlertsType,
-  buildingBlockAlerts: Array<WrappedFieldsLatest<EqlBuildingBlockFieldsLatest>>,
+  buildingBlockAlerts: Array<WrappedAlert<EqlBuildingBlockAlertLatest>>,
   buildReasonMessage: BuildReasonMessage
-) => WrappedFieldsLatest<EqlShellFieldsLatest & SuppressionFieldsLatest> & {
-  subAlerts: Array<WrappedFieldsLatest<EqlBuildingBlockFieldsLatest>>;
+) => WrappedAlert<EqlShellAlertLatest & SuppressionFieldsLatest> & {
+  subAlerts: Array<WrappedAlert<EqlBuildingBlockAlertLatest>>;
 };
 
 /**
@@ -861,10 +1026,10 @@ export const buildShellAlertSuppressionTermsAndFields = ({
   sharedParams,
   shellAlert,
   buildingBlockAlerts,
-}: SequenceSuppressionTermsAndFieldsParams): WrappedFieldsLatest<
-  EqlShellFieldsLatest & SuppressionFieldsLatest
+}: SequenceSuppressionTermsAndFieldsParams): WrappedAlert<
+  EqlShellAlertLatest & SuppressionFieldsLatest
 > & {
-  subAlerts: Array<WrappedFieldsLatest<EqlBuildingBlockFieldsLatest>>;
+  subAlerts: Array<WrappedAlert<EqlBuildingBlockAlertLatest>>;
 } => {
   const { alertTimestampOverride, primaryTimestamp, secondaryTimestamp, completeRule, spaceId } =
     sharedParams;
@@ -901,12 +1066,12 @@ export const buildShellAlertSuppressionTermsAndFields = ({
     [ALERT_SUPPRESSION_DOCS_COUNT]: 0,
   };
 
-  merge<EqlShellFieldsLatest, SuppressionFieldsLatest>(shellAlert._source, suppressionFields);
+  merge<EqlShellAlertLatest, SuppressionFieldsLatest>(shellAlert._source, suppressionFields);
 
   return {
     _id: shellAlert._id,
     _index: shellAlert._index,
-    _source: shellAlert._source as EqlShellFieldsLatest & SuppressionFieldsLatest,
+    _source: shellAlert._source as EqlShellAlertLatest & SuppressionFieldsLatest,
     subAlerts: buildingBlockAlerts,
   };
 };

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { AuthenticatedUser, ElasticsearchClient, Logger } from '@kbn/core/server';
-import { KnowledgeBaseEntryResponse } from '@kbn/elastic-assistant-common';
-import { EsKnowledgeBaseEntrySchema } from './types';
+import type { AuthenticatedUser, ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { KnowledgeBaseEntryResponse } from '@kbn/elastic-assistant-common';
+import type { EsKnowledgeBaseEntrySchema } from './types';
 import { transformESSearchToKnowledgeBaseEntry } from './transforms';
 
 export interface GetKnowledgeBaseEntryParams {
@@ -27,23 +27,25 @@ export const getKnowledgeBaseEntry = async ({
 }: GetKnowledgeBaseEntryParams): Promise<KnowledgeBaseEntryResponse | null> => {
   const userFilter = {
     should: [
-      {
-        nested: {
-          path: 'users',
-          query: {
-            bool: {
-              minimum_should_match: 1,
-              should: [
-                {
-                  match: user.profile_uid
-                    ? { 'users.id': user.profile_uid }
-                    : { 'users.name': user.username },
+      ...(user.profile_uid
+        ? [
+            {
+              nested: {
+                path: 'users',
+                query: {
+                  bool: {
+                    minimum_should_match: 1,
+                    should: [
+                      {
+                        match: { 'users.id': user.profile_uid },
+                      },
+                    ],
+                  },
                 },
-              ],
+              },
             },
-          },
-        },
-      },
+          ]
+        : []),
       {
         bool: {
           must_not: [

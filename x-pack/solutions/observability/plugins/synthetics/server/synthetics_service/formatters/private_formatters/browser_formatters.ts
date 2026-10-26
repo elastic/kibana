@@ -6,15 +6,18 @@
  */
 
 import { DEFAULT_THROTTLING_VALUE } from '../../../../common/constants/monitor_defaults';
-import { Formatter, commonFormatters } from './common_formatters';
+import type { Formatter } from './common_formatters';
+import { commonFormatters } from './common_formatters';
 import {
   arrayToJsonFormatter,
-  objectToJsonFormatter,
   stringToJsonFormatter,
+  omitDefaultFormatter,
+  omitFieldFormatter,
 } from './formatting_utils';
 
 import { tlsFormatters } from './tls_formatters';
-import { BrowserFields, ConfigKey } from '../../../../common/runtime_types';
+import type { BrowserFields } from '../../../../common/runtime_types';
+import { ConfigKey } from '../../../../common/runtime_types';
 
 export type BrowserFormatMap = Record<keyof BrowserFields, Formatter>;
 
@@ -34,14 +37,21 @@ export const throttlingFormatter: Formatter = (fields) => {
 
 export const browserFormatters: BrowserFormatMap = {
   [ConfigKey.SOURCE_PROJECT_CONTENT]: null,
-  [ConfigKey.SCREENSHOTS]: null,
+  // 'on' matches Heartbeat's default (elastic/kibana#241818).
+  [ConfigKey.SCREENSHOTS]: omitDefaultFormatter('on'),
+  // ignore_https_errors (default false) is dropped by the template's {{#if}} guard.
   [ConfigKey.IGNORE_HTTPS_ERRORS]: null,
+  [ConfigKey.CERTIFICATE_ERROR_SPKI_ALLOWLIST]: arrayToJsonFormatter,
   [ConfigKey.PLAYWRIGHT_OPTIONS]: null,
   [ConfigKey.TEXT_ASSERTION]: stringToJsonFormatter,
   [ConfigKey.PORT]: stringToJsonFormatter,
   [ConfigKey.URLS]: stringToJsonFormatter,
-  [ConfigKey.METADATA]: objectToJsonFormatter,
-  [ConfigKey.SOURCE_INLINE]: stringToJsonFormatter,
+  // __ui is UI-only metadata that Heartbeat ignores; drop it from the policy.
+  [ConfigKey.METADATA]: omitFieldFormatter,
+  // Private browser monitors encode SOURCE_INLINE in formatSyntheticsPolicy and set
+  // source.inline.encoding=base64. Keep this null so the generic string formatter
+  // does not JSON-stringify the script before that private-location encoding step.
+  [ConfigKey.SOURCE_INLINE]: null,
   [ConfigKey.SYNTHETICS_ARGS]: arrayToJsonFormatter,
   [ConfigKey.JOURNEY_FILTERS_MATCH]: stringToJsonFormatter,
   [ConfigKey.JOURNEY_FILTERS_TAGS]: arrayToJsonFormatter,

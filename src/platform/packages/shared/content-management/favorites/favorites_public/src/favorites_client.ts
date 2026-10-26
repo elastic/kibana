@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { HttpStart } from '@kbn/core-http-browser';
+import { buildPath, type HttpStart } from '@kbn/core-http-browser';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import type { UserProfileServiceStart } from '@kbn/core-user-profile-browser';
 import type {
@@ -19,7 +19,12 @@ import { firstValueFrom } from 'rxjs';
 
 export interface GetFavoritesResponse<Metadata extends object | void = void>
   extends GetFavoritesResponseServer {
-  favoriteMetadata: Metadata extends object ? Record<string, Metadata> : never;
+  /**
+   * When the client is instantiated without metadata (`Metadata = void`), we still return an empty
+   * record for `favoriteMetadata` so callers can treat the response shape consistently, while
+   * preventing access to values.
+   */
+  favoriteMetadata: Metadata extends object ? Record<string, Metadata> : Record<string, never>;
 }
 
 type AddFavoriteRequest<Metadata extends object | void> = Metadata extends object
@@ -54,28 +59,46 @@ export class FavoritesClient<Metadata extends object | void = void>
     return firstValueFrom(this.deps.userProfile.getEnabled$());
   }
 
-  private async ifAvailablePreCheck() {
-    if (!(await this.isAvailable()))
-      throw new Error('Favorites service is not available for current user');
+  private async ifAvailablePreCheck(): Promise<boolean> {
+    return await this.isAvailable();
+  }
+
+  private getUnavailableFavoritesResponse(): GetFavoritesResponse<Metadata> {
+    const favoriteMetadata = {} as GetFavoritesResponse<Metadata>['favoriteMetadata'];
+    return { favoriteIds: [], favoriteMetadata };
   }
 
   public async getFavorites(): Promise<GetFavoritesResponse<Metadata>> {
-    await this.ifAvailablePreCheck();
-    return this.deps.http.get(`/internal/content_management/favorites/${this.favoriteObjectType}`);
+    if (!(await this.ifAvailablePreCheck())) {
+      return this.getUnavailableFavoritesResponse();
+    }
+    return this.deps.http.get(
+      buildPath('/internal/content_management/favorites/{type}', { type: this.favoriteObjectType })
+    );
   }
 
   public async addFavorite(params: AddFavoriteRequest<Metadata>): Promise<AddFavoriteResponse> {
-    await this.ifAvailablePreCheck();
+    if (!(await this.ifAvailablePreCheck())) {
+      return { favoriteIds: [] };
+    }
     return this.deps.http.post(
-      `/internal/content_management/favorites/${this.favoriteObjectType}/${params.id}/favorite`,
+      buildPath('/internal/content_management/favorites/{type}/{id}/favorite', {
+        type: this.favoriteObjectType,
+        id: params.id,
+      }),
       { body: 'metadata' in params ? JSON.stringify({ metadata: params.metadata }) : undefined }
     );
   }
 
   public async removeFavorite({ id }: { id: string }): Promise<RemoveFavoriteResponse> {
-    await this.ifAvailablePreCheck();
+    if (!(await this.ifAvailablePreCheck())) {
+      return { favoriteIds: [] };
+    }
     return this.deps.http.post(
-      `/internal/content_management/favorites/${this.favoriteObjectType}/${id}/unfavorite`
+      buildPath('/internal/content_management/favorites/{type}/{id}/unfavorite', {
+        type: this.favoriteObjectType,
+        id,
+      })
     );
   }
 

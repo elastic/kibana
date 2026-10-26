@@ -8,15 +8,13 @@
  */
 
 import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/public';
-import { Vis } from '@kbn/visualizations-plugin/public';
-import { VegaExpressionFunctionDefinition, VisParams } from './vega_fn';
+import type { Vis } from '@kbn/visualizations-plugin/public';
+import type { VegaExpressionFunctionDefinition, VisParams } from './vega_fn';
 
 export const toExpressionAst = (vis: Vis<VisParams>) => {
   const vega = buildExpressionFunction<VegaExpressionFunctionDefinition>('vega', {
     spec: vis.params.spec,
   });
 
-  const ast = buildExpression([vega]);
-
-  return ast.toAst();
+  return buildExpression([vega]).toAst();
 };

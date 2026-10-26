@@ -13,15 +13,15 @@ import {
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIllustration,
   EuiLink,
+  useEuiTheme,
 } from '@elastic/eui';
+import { dashboard as dashboardIllustration } from '@elastic/eui-illustrations';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useMemo } from 'react';
-
-import {
-  DASHBOARD_PANELS_UNSAVED_ID,
-  getDashboardBackupService,
-} from '../services/dashboard_backup_service';
+import { DASHBOARD_PANELS_UNSAVED_ID } from '../services/dashboard_backup_service';
+import { getDashboardBackupService } from '../services/dashboard_api_services';
 import { coreServices } from '../services/kibana_services';
 import { getDashboardCapabilities } from '../utils/get_dashboard_capabilities';
 import {
@@ -30,7 +30,7 @@ import {
   noItemsStrings,
 } from './_dashboard_listing_strings';
 import { confirmDiscardUnsavedChanges } from './confirm_overlays';
-import { DashboardListingProps } from './types';
+import type { DashboardListingProps } from './types';
 
 export interface DashboardListingEmptyPromptProps {
   createItem: () => void;
@@ -49,6 +49,12 @@ export const DashboardListingEmptyPrompt = ({
   createItem,
   disableCreateDashboardButton,
 }: DashboardListingEmptyPromptProps) => {
+  const { euiTheme } = useEuiTheme();
+  // Same size as the visualization and annotation tab illustrations
+  const listingIllustrationSize = euiTheme.base * 8;
+  // This artwork is wide and short, so it's drawn 1.2x larger to look the same size as the others.
+  // The negative block margins trim its extra empty space so the heading stays aligned across tabs.
+  const illustrationSize = listingIllustrationSize * 1.2;
   const isEditingFirstDashboard = useMemo(
     () => useSessionStorageIntegration && unsavedDashboardIds.length === 1,
     [unsavedDashboardIds.length, useSessionStorageIntegration]
@@ -59,8 +65,8 @@ export const DashboardListingEmptyPrompt = ({
       return (
         <EuiButton
           onClick={createItem}
-          fill
-          iconType="plusInCircle"
+          color="text"
+          iconType="plusCircle"
           data-test-subj="newItemButton"
           disabled={disableCreateDashboardButton}
         >
@@ -112,7 +118,7 @@ export const DashboardListingEmptyPrompt = ({
   if (!getDashboardCapabilities().showWriteControls) {
     return (
       <EuiEmptyPrompt
-        iconType="glasses"
+        iconType="readOnly"
         title={
           <h1 id="dashboardListingHeading" data-test-subj="emptyListPrompt">
             {noItemsStrings.getReadonlyTitle()}
@@ -125,7 +131,17 @@ export const DashboardListingEmptyPrompt = ({
 
   return (
     <EuiEmptyPrompt
-      iconType="dashboardApp"
+      icon={
+        <EuiIllustration
+          type={dashboardIllustration}
+          alt=""
+          fullWidth={false}
+          css={{
+            inlineSize: illustrationSize,
+            marginBlock: (listingIllustrationSize - illustrationSize) / 2,
+          }}
+        />
+      }
       title={
         <h1 id="dashboardListingHeading" data-test-subj="emptyListPrompt">
           {isEditingFirstDashboard

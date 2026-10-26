@@ -5,20 +5,22 @@
  * 2.0.
  */
 
-import { createReducer } from '@reduxjs/toolkit';
-import { DynamicSettings } from '../../../../../common/runtime_types';
-import { IHttpSerializedFetchError } from '..';
+import { createReducer } from 'redux-toolkit-v1';
+import type { DynamicSettings } from '../../../../../common/runtime_types';
+import type { IHttpSerializedFetchError } from '..';
 import {
   getConnectorsAction,
   getDynamicSettingsAction,
   getLocationMonitorsAction,
   setDynamicSettingsAction,
 } from './actions';
-import { ActionConnector } from './api';
+import type { ActionConnector } from './api';
 
 export interface LocationMonitor {
   id: string;
   count: number;
+  /** Browser monitors at this location. They run only on elastic-agent-complete. */
+  browserCount: number;
 }
 
 export interface DynamicSettingsState {

@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { LayerAction } from '../../../../types';
+import type { LayerAction } from '@kbn/lens-common';
 import type { Visualization } from '../../../..';
 import { FIRST_ACTION_ORDER } from './order_bounds';
 
@@ -14,7 +14,6 @@ interface CloneLayerAction {
   execute: () => void;
   layerIndex: number;
   activeVisualization: Visualization;
-  isTextBasedLanguage?: boolean;
 }
 
 export const getCloneLayerAction = (props: CloneLayerAction): LayerAction => {
@@ -25,7 +24,7 @@ export const getCloneLayerAction = (props: CloneLayerAction): LayerAction => {
   return {
     execute: props.execute,
     displayName,
-    isCompatible: Boolean(props.activeVisualization.cloneLayer && !props.isTextBasedLanguage),
+    isCompatible: Boolean(props.activeVisualization.cloneLayer),
     icon: 'copy',
     'data-test-subj': `lnsLayerClone--${props.layerIndex}`,
     order: FIRST_ACTION_ORDER + 1,

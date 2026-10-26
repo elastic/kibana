@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DeeplyMockedKeys } from '@kbn/utility-types-jest';
+import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 import { of, delay, merge, tap, mergeMap } from 'rxjs';
 import { TestScheduler } from 'rxjs/testing';
 import type {
@@ -16,7 +16,7 @@ import type {
   BaseFilesClient as FilesClient,
 } from '@kbn/shared-ux-file-types';
 import { createMockFilesClient } from '@kbn/shared-ux-file-mocks';
-import { ImageMetadataFactory } from '@kbn/shared-ux-file-util';
+import type { ImageMetadataFactory } from '@kbn/shared-ux-file-util';
 
 import { UploadState } from './upload_state';
 
@@ -45,6 +45,27 @@ describe('UploadState', () => {
       imageMetadataFactory
     );
     testScheduler = getTestScheduler();
+  });
+
+  it('throws for empty files', () => {
+    testScheduler.run(({ expectObservable }) => {
+      const file = {
+        name: 'empty',
+        size: 0,
+      } as File;
+
+      uploadState.setFiles([file]);
+
+      expectObservable(uploadState.files$).toBe('a', {
+        a: [
+          {
+            file,
+            status: 'idle',
+            error: new Error('File is empty. Please provide a file with content.'),
+          },
+        ],
+      });
+    });
   });
 
   it('calls file client with expected arguments', async () => {
@@ -126,8 +147,8 @@ describe('UploadState', () => {
       filesClient.upload.mockReturnValue(of(undefined).pipe(delay(10)) as any);
       filesClient.delete.mockReturnValue(of(undefined) as any);
 
-      const file1 = { name: 'test', type: 'text/plain' } as File;
-      const file2 = { name: 'test 2.png', type: 'image/png' } as File;
+      const file1 = { name: 'test', size: 1, type: 'text/plain' } as File;
+      const file2 = { name: 'test 2.png', size: 1, type: 'image/png' } as File;
 
       uploadState.setFiles([file1, file2]);
 
@@ -191,9 +212,59 @@ describe('UploadState', () => {
           {
             file,
             status: 'idle',
-            error: new Error('File is too large. Maximum size is 1,000 bytes.'),
+            error: new Error('File is too large. Maximum size is 1000.00 B.'),
           },
         ],
+      });
+    });
+  });
+
+  it('clears a previous error when a valid file is picked', () => {
+    const tooLarge = { name: 'big', size: 1001 } as File;
+    const valid = { name: 'small', size: 1, type: 'text/plain' } as File;
+
+    uploadState.setFiles([tooLarge]);
+    expect(uploadState.error$.getValue()).toEqual(
+      new Error('File is too large. Maximum size is 1000.00 B.')
+    );
+
+    // re-picking a valid file must not retain the previous oversize error
+    uploadState.setFiles([valid]);
+    expect(uploadState.error$.getValue()).toBeUndefined();
+  });
+
+  it('supports a per-file callback for maxSizeBytes', () => {
+    const callbackUploadState = new UploadState(
+      {
+        id: 'test',
+        http: {},
+        maxSizeBytes: (file) => (file.type === 'image/png' ? 500 : 5000),
+      } as FileKindBrowser,
+      filesClient,
+      {},
+      imageMetadataFactory
+    );
+
+    getTestScheduler().run(({ expectObservable }) => {
+      const image = { name: 'image', size: 1000, type: 'image/png' } as File;
+      callbackUploadState.setFiles([image]);
+      expectObservable(callbackUploadState.files$).toBe('a', {
+        a: [
+          {
+            file: image,
+            status: 'idle',
+            error: new Error('File is too large. Maximum size is 500.00 B.'),
+          },
+        ],
+      });
+    });
+
+    getTestScheduler().run(({ expectObservable }) => {
+      // same size passes under the larger non-image limit
+      const doc = { name: 'doc', size: 1000, type: 'text/plain' } as File;
+      callbackUploadState.setFiles([doc]);
+      expectObservable(callbackUploadState.files$).toBe('a', {
+        a: [{ file: doc, status: 'idle' }],
       });
     });
   });
@@ -220,6 +291,45 @@ describe('UploadState', () => {
     });
   });
 
+  it('omits the allowed mime type list when listAllowedMimeTypesInError is false', () => {
+    const conciseUploadState = new UploadState(
+      {
+        id: 'test',
+        http: {},
+        allowedMimeTypes: ['text/plain', 'image/png'],
+        listAllowedMimeTypesInError: false,
+      } as FileKindBrowser,
+      filesClient,
+      {},
+      imageMetadataFactory
+    );
+
+    getTestScheduler().run(({ expectObservable }) => {
+      const file = { name: 'script.sh', size: 123, type: 'text/x-sh' } as File;
+      conciseUploadState.setFiles([file]);
+      expectObservable(conciseUploadState.files$).toBe('a', {
+        a: [
+          {
+            file,
+            status: 'idle',
+            error: new Error('File type "text/x-sh" is not supported.'),
+          },
+        ],
+      });
+    });
+  });
+
+  it('tags validation errors with a stable code', () => {
+    uploadState.setFiles([{ name: 'empty', size: 0 } as File]);
+    expect((uploadState.error$.getValue() as { code?: string }).code).toBe('fileEmpty');
+
+    uploadState.setFiles([{ name: 'big', size: 1001 } as File]);
+    expect((uploadState.error$.getValue() as { code?: string }).code).toBe('fileTooLarge');
+
+    uploadState.setFiles([{ name: 'script.sh', size: 1, type: 'text/x-sh' } as File]);
+    expect((uploadState.error$.getValue() as { code?: string }).code).toBe('mimeTypeNotSupported');
+  });
+
   it('option "allowRepeatedUploads" calls clear after upload is done', () => {
     testScheduler.run(({ expectObservable, cold }) => {
       uploadState = new UploadState(
@@ -228,8 +338,8 @@ describe('UploadState', () => {
         { allowRepeatedUploads: true },
         imageMetadataFactory
       );
-      const file1 = { name: 'test' } as File;
-      const file2 = { name: 'test 2.png' } as File;
+      const file1 = { name: 'test', size: 1 } as File;
+      const file2 = { name: 'test 2.png', size: 1 } as File;
 
       uploadState.setFiles([file1, file2]);
 
@@ -240,8 +350,8 @@ describe('UploadState', () => {
   });
 
   it('correctly detects when files are ready for upload', () => {
-    const file1 = { name: 'test' } as File;
-    const file2 = { name: 'test 2.png' } as File;
+    const file1 = { name: 'test', size: 1 } as File;
+    const file2 = { name: 'test 2.png', size: 1 } as File;
     expect(uploadState.hasFiles()).toBe(false);
     uploadState.setFiles([file1, file2]);
     expect(uploadState.hasFiles()).toBe(true);

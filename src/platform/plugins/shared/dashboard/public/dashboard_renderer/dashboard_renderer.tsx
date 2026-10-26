@@ -7,65 +7,144 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import './_dashboard_container.scss';
-
 import classNames from 'classnames';
-import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 
-import { EuiLoadingElastic, EuiLoadingSpinner } from '@elastic/eui';
+import type { EuiFlyoutProps } from '@elastic/eui';
+import {
+  EuiEmptyPrompt,
+  EuiLoadingElastic,
+  EuiLoadingSpinner,
+  useEuiPaddingSize,
+} from '@elastic/eui';
+import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
+import { apm } from '@elastic/apm-rum';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
-import { LocatorPublic } from '@kbn/share-plugin/common';
-
+import type { LocatorPublic } from '@kbn/share-plugin/common';
 import { ExitFullScreenButtonKibanaProvider } from '@kbn/shared-ux-button-exit-full-screen';
-import { DashboardApi, DashboardInternalApi, DashboardLocatorParams } from '../dashboard_api/types';
-import { coreServices, screenshotModeService } from '../services/kibana_services';
-import type { DashboardCreationOptions } from '..';
-import { Dashboard404Page } from './dashboard_404';
-import { DashboardContext } from '../dashboard_api/use_dashboard_api';
-import { DashboardViewport } from './viewport/dashboard_viewport';
-import { loadDashboardApi } from '../dashboard_api/load_dashboard_api';
-import { DashboardInternalContext } from '../dashboard_api/use_dashboard_internal_api';
-import { DashboardRedirect } from '../dashboard_app/types';
 
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import type { DashboardLocatorParams } from '../../common';
+import type { DashboardApi, DashboardInternalApi } from '../dashboard_api/types';
+import type { DashboardCreationOptions } from '..';
+import { loadDashboardApi } from '../dashboard_api/load_dashboard_api';
+import { DashboardContext } from '../dashboard_api/use_dashboard_api';
+import { DashboardInternalContext } from '../dashboard_api/use_dashboard_internal_api';
+import type { DashboardRedirect } from '../dashboard_app/types';
+import { publishDashboardAppClientApi } from '../services/dashboard_app_client_api';
+import { getDashboardRecentlyAccessedService } from '../services/dashboard_recently_accessed_service';
+import { coreServices, uiActionsService } from '../services/kibana_services';
+
+import { Dashboard404Page } from './dashboard_404';
+import { DashboardViewport } from './viewport/dashboard_viewport';
+import { GlobalPrintStyles } from './print_styles';
+import { DashboardControlsRenderer } from '../dashboard_controls_renderer';
+
+/**
+ * Props for the {@link DashboardRenderer} component.
+ */
 export interface DashboardRendererProps {
-  onApiAvailable?: (api: DashboardApi) => void;
-  savedObjectId?: string;
-  showPlainSpinner?: boolean;
-  dashboardRedirect?: DashboardRedirect;
-  getCreationOptions?: () => Promise<DashboardCreationOptions>;
+  /** Optional locator for dashboard navigation and URL generation. */
   locator?: Pick<LocatorPublic<DashboardLocatorParams>, 'navigate' | 'getRedirectUrl'>;
+  /** The ID of the saved dashboard to load. If not provided, creates a new dashboard. */
+  savedObjectId?: string;
+  /** Whether to show a plain spinner instead of the Elastic loading animation. */
+  showPlainSpinner?: boolean;
+  /**
+   * Flyout type for panel flyouts (Settings, Lens config, etc.) opened from this dashboard.
+   * Use `overlay` when the dashboard is embedded in a host that already uses a push flyout
+   * (e.g. Agent Builder canvas).
+   */
+  panelFlyoutType?: EuiFlyoutProps['type'];
+  /** Callback for redirecting within the dashboard application. */
+  dashboardRedirect?: DashboardRedirect;
+  /** Function that returns the creation options for the dashboard. */
+  getCreationOptions?: () => Promise<DashboardCreationOptions>;
+  /**
+   * Callback invoked when the dashboard API becomes available.
+   *
+   * @param api - The {@link DashboardApi} instance.
+   * @param internalApi - The {@link DashboardInternalApi} instance.
+   */
+  onApiAvailable?: (api: DashboardApi, internalApi: DashboardInternalApi) => void;
+  /**
+   * Callback invoked when the dashboard API is destroyed.
+   */
+  onApiCleanup?: () => void;
+  /**
+   * Publishes this dashboard's API on the Dashboard start contract's `dashboardAppClientApi$`
+   * while it is loaded, so app-level integrations such as the Agent Builder chat can attach to it.
+   * Set it only on a page's primary dashboard, never on embedded or preview renderers.
+   */
+  publishAsAppClientApi?: boolean;
 }
 
 export function DashboardRenderer({
-  savedObjectId,
-  getCreationOptions,
-  dashboardRedirect,
-  showPlainSpinner,
   locator,
+  savedObjectId,
+  showPlainSpinner,
+  panelFlyoutType,
+  dashboardRedirect,
+  getCreationOptions,
   onApiAvailable,
+  onApiCleanup,
+  publishAsAppClientApi,
 }: DashboardRendererProps) {
   const dashboardViewport = useRef(null);
   const dashboardContainerRef = useRef<HTMLElement | null>(null);
-  const [dashboardApi, setDashboardApi] = useState<DashboardApi | undefined>();
-  const [dashboardInternalApi, setDashboardInternalApi] = useState<
-    DashboardInternalApi | undefined
+  const [dashboard, setDashboard] = useState<
+    | {
+        api: DashboardApi;
+        internalApi: DashboardInternalApi;
+        showControlGroup: boolean;
+      }
+    | undefined
   >();
   const [error, setError] = useState<Error | undefined>();
 
+  const euiPaddingS = useEuiPaddingSize('s');
+  const styles = useMemo(
+    () => ({
+      renderer: css({
+        display: 'flex',
+        flex: 'auto',
+        width: '100%',
+        flexDirection: 'column',
+        '&.dashboardViewport--loading': {
+          justifyContent: 'center',
+          alignItems: 'center',
+        },
+        '& .controlGroup': {
+          padding: `0 ${euiPaddingS}`,
+        },
+      }),
+    }),
+    [euiPaddingS]
+  );
+
   useEffect(() => {
     /* In case the locator prop changes, we need to reassign the value in the container */
-    if (dashboardApi) dashboardApi.locator = locator;
-  }, [dashboardApi, locator]);
+    if (dashboard?.api) dashboard.api.locator = locator;
+  }, [dashboard?.api, locator]);
+
+  useEffect(() => {
+    if (
+      dashboard &&
+      dashboard?.internalApi.dashboardContainerRef$.value !== dashboardContainerRef.current
+    ) {
+      dashboard.internalApi.setDashboardContainerRef(dashboardContainerRef.current);
+    }
+  }, [dashboard]);
 
   useEffect(() => {
     if (error) setError(undefined);
-    if (dashboardApi) setDashboardApi(undefined);
-    if (dashboardInternalApi) setDashboardInternalApi(undefined);
+    if (dashboard) setDashboard(undefined);
 
     let canceled = false;
     let cleanupDashboardApi: (() => void) | undefined;
-    loadDashboardApi({ getCreationOptions, savedObjectId })
+    loadDashboardApi({ getCreationOptions, onApiCleanup, savedObjectId, panelFlyoutType })
       .then((results) => {
         if (!results) return;
         if (canceled) {
@@ -73,13 +152,33 @@ export function DashboardRenderer({
           return;
         }
 
-        cleanupDashboardApi = results.cleanup;
-        setDashboardApi(results.api);
-        setDashboardInternalApi(results.internalApi);
-        onApiAvailable?.(results.api);
+        setDashboard({
+          api: results.api,
+          internalApi: results.internalApi,
+          showControlGroup: results.useControlsIntegration ?? true,
+        });
+        const unpublishAppClientApi = publishAsAppClientApi
+          ? publishDashboardAppClientApi(results.api)
+          : undefined;
+        cleanupDashboardApi = () => {
+          unpublishAppClientApi?.();
+          results.cleanup();
+        };
+        onApiAvailable?.(results.api, results.internalApi);
       })
       .catch((err) => {
-        if (!canceled) setError(err);
+        if (err instanceof SavedObjectNotFound && savedObjectId) {
+          getDashboardRecentlyAccessedService().remove(savedObjectId);
+          coreServices.chrome.recentlyAccessed.remove(savedObjectId);
+        }
+        if (!canceled) {
+          apm.captureError(err, {
+            labels: {
+              error_type: 'LoadDashboardFailure',
+            },
+          });
+          setError(err);
+        }
       });
 
     return () => {
@@ -90,11 +189,11 @@ export function DashboardRenderer({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [savedObjectId]);
 
-  const viewportClasses = classNames(
-    'dashboardViewport',
-    { 'dashboardViewport--screenshotMode': screenshotModeService.isScreenshotMode() },
-    { 'dashboardViewport--loading': !error && !dashboardApi }
-  );
+  const isDashboardViewportLoading = !dashboard && !error;
+
+  const viewportClasses = classNames('dashboardViewport', {
+    'dashboardViewport--loading': isDashboardViewportLoading,
+  });
 
   const loadingSpinner = showPlainSpinner ? (
     <EuiLoadingSpinner size="xxl" />
@@ -107,20 +206,44 @@ export function DashboardRenderer({
       return error instanceof SavedObjectNotFound ? (
         <Dashboard404Page dashboardRedirect={dashboardRedirect} />
       ) : (
-        error.message
+        <EuiEmptyPrompt
+          iconType="error"
+          iconColor="danger"
+          title={
+            <h2>
+              {i18n.translate('dashboard.dashboardRenderer.loadDashboardErrorTitle', {
+                defaultMessage: 'Unable to load dashboard',
+              })}
+            </h2>
+          }
+          body={<p>{error.message}</p>}
+        />
       );
     }
 
-    return dashboardApi && dashboardInternalApi ? (
-      <div className="dashboardContainer" ref={(e) => (dashboardContainerRef.current = e)}>
+    return dashboard ? (
+      <div
+        data-test-subj="dashboardContainer"
+        css={styles.renderer}
+        ref={(e) => {
+          if (dashboard.internalApi.dashboardContainerRef$.value !== e) {
+            dashboard.internalApi.setDashboardContainerRef(e);
+          }
+          dashboardContainerRef.current = e;
+        }}
+      >
+        <GlobalPrintStyles />
         <ExitFullScreenButtonKibanaProvider
           coreStart={{ chrome: coreServices.chrome, customBranding: coreServices.customBranding }}
         >
-          <DashboardContext.Provider value={dashboardApi}>
-            <DashboardInternalContext.Provider value={dashboardInternalApi}>
-              <DashboardViewport dashboardContainerRef={dashboardContainerRef} />
-            </DashboardInternalContext.Provider>
-          </DashboardContext.Provider>
+          <KibanaContextProvider services={{ uiActions: uiActionsService }}>
+            <DashboardContext.Provider value={dashboard.api}>
+              <DashboardInternalContext.Provider value={dashboard.internalApi}>
+                {dashboard.showControlGroup && <DashboardControlsRenderer />}
+                <DashboardViewport />
+              </DashboardInternalContext.Provider>
+            </DashboardContext.Provider>
+          </KibanaContextProvider>
         </ExitFullScreenButtonKibanaProvider>
       </div>
     ) : (
@@ -129,11 +252,11 @@ export function DashboardRenderer({
   };
 
   return (
-    <div ref={dashboardViewport} className={viewportClasses}>
-      {dashboardViewport?.current && dashboardApi && (
+    <div ref={dashboardViewport} className={viewportClasses} css={styles.renderer}>
+      {dashboardViewport?.current && dashboard && (
         <ParentClassController
           viewportRef={dashboardViewport.current}
-          dashboardApi={dashboardApi}
+          dashboardApi={dashboard.api}
         />
       )}
       {renderDashboardContents()}

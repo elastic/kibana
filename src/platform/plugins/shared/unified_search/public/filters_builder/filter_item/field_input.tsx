@@ -11,10 +11,11 @@ import React, { useCallback, useContext, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import { comboBoxFieldOptionMatcher } from '@kbn/field-utils';
 import { FieldIcon } from '@kbn/react-field';
-import { KBN_FIELD_TYPES } from '@kbn/field-types';
-import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
+import type { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { calculateWidthFromEntries } from '@kbn/calculate-width-from-char-count';
-import { useGeneratedHtmlId, EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { useGeneratedHtmlId, EuiComboBox } from '@elastic/eui';
+import type { FilterableField, FilterableSource } from '@kbn/data-source';
 import { getFilterableFields } from '../../filter_bar/filter_editor';
 import { FiltersBuilderContextType } from '../context';
 import {
@@ -30,9 +31,9 @@ export const strings = {
 };
 
 interface FieldInputProps {
-  dataView: DataView;
-  onHandleField: (field: DataViewField) => void;
-  field?: DataViewField;
+  dataView: FilterableSource;
+  onHandleField: (field: FilterableField) => void;
+  field?: FilterableField;
 }
 
 export function FieldInput({ field, dataView, onHandleField }: FieldInputProps) {
@@ -42,14 +43,14 @@ export function FieldInput({ field, dataView, onHandleField }: FieldInputProps) 
   const inputRef = useRef<HTMLInputElement | null>(null);
 
   const onFieldChange = useCallback(
-    ([selectedField]: DataViewField[]) => {
+    ([selectedField]: FilterableField[]) => {
       onHandleField(selectedField);
     },
     [onHandleField]
   );
 
   const getLabel = useCallback(
-    (dataViewField: DataViewField) => {
+    (dataViewField: FilterableField) => {
       let label = dataViewField.customLabel || dataViewField.name;
       if (suggestionsAbstraction?.fields[dataViewField.name]) {
         label = suggestionsAbstraction?.fields[dataViewField.name]?.displayField ?? label;
@@ -59,6 +60,7 @@ export function FieldInput({ field, dataView, onHandleField }: FieldInputProps) 
         name: dataViewField.name,
         value: dataViewField.type as KBN_FIELD_TYPES,
         prepend: <FieldIcon type={dataViewField.type} fill="none" className="eui-alignMiddle" />,
+        'data-test-subj': `filterFieldOption-${dataViewField.name}`,
       };
     },
     [suggestionsAbstraction]

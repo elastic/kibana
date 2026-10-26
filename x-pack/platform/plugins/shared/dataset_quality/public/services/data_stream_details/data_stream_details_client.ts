@@ -5,30 +5,37 @@
  * 2.0.
  */
 
-import { HttpStart } from '@kbn/core/public';
+import type { HttpStart } from '@kbn/core/public';
+import { buildPath } from '@kbn/core-http-browser';
 import { decodeOrThrow } from '@kbn/io-ts-utils';
-import {
+import type {
   CheckAndLoadIntegrationResponse,
-  checkAndLoadIntegrationResponseRt,
   DataStreamRolloverResponse,
-  dataStreamRolloverResponseRt,
   DegradedFieldAnalysis,
-  degradedFieldAnalysisRt,
   DegradedFieldValues,
-  degradedFieldValuesRt,
   FailedDocsDetails,
   FailedDocsErrorsResponse,
+  IntegrationDashboardsResponse,
+  UpdateFieldLimitResponse,
+  UpdateFailureStoreResponse,
+  NonAggregatableDatasets,
+} from '../../../common/api_types';
+import {
+  checkAndLoadIntegrationResponseRt,
+  dataStreamRolloverResponseRt,
+  degradedFieldAnalysisRt,
+  degradedFieldValuesRt,
   failedDocsErrorsRt,
   getDataStreamDegradedFieldsResponseRt,
   getDataStreamsDetailsResponseRt,
   getDataStreamsSettingsResponseRt,
-  IntegrationDashboardsResponse,
   integrationDashboardsRT,
   qualityIssueBaseRT,
-  UpdateFieldLimitResponse,
   updateFieldLimitResponseRt,
+  updateFailureStoreResponseRt,
+  getNonAggregatableDatasetsRt,
 } from '../../../common/api_types';
-import {
+import type {
   DataStreamDetails,
   DataStreamSettings,
   DegradedFieldResponse,
@@ -38,26 +45,31 @@ import {
   GetDataStreamDetailsResponse,
   GetDataStreamFailedDocsDetailsParams,
   GetDataStreamFailedDocsErrorsParams,
+  GetDataStreamNonAggregatableParams,
   GetDataStreamSettingsParams,
   GetDataStreamSettingsResponse,
   GetIntegrationDashboardsParams,
 } from '../../../common/data_streams_stats';
-import { IDataStreamDetailsClient } from './types';
+import type { IDataStreamDetailsClient } from './types';
 import { Integration } from '../../../common/data_streams_stats/integration';
-import {
+import type {
   AnalyzeDegradedFieldsParams,
   CheckAndLoadIntegrationParams,
   UpdateFieldLimitParams,
 } from '../../../common/data_stream_details/types';
 import { DatasetQualityError } from '../../../common/errors';
+import type { ITelemetryClient } from '../telemetry';
 
 export class DataStreamDetailsClient implements IDataStreamDetailsClient {
-  constructor(private readonly http: HttpStart) {}
+  constructor(
+    private readonly http: HttpStart,
+    private readonly telemetryClient: ITelemetryClient
+  ) {}
 
   public async getDataStreamSettings({ dataStream }: GetDataStreamSettingsParams) {
     const response = await this.http
       .get<GetDataStreamSettingsResponse>(
-        `/internal/dataset_quality/data_streams/${dataStream}/settings`
+        buildPath('/internal/dataset_quality/data_streams/{dataStream}/settings', { dataStream })
       )
       .catch((error) => {
         throw new DatasetQualityError(`Failed to fetch data stream settings": ${error}`, error);
@@ -75,7 +87,7 @@ export class DataStreamDetailsClient implements IDataStreamDetailsClient {
   public async getDataStreamDetails({ dataStream, start, end }: GetDataStreamDetailsParams) {
     const response = await this.http
       .get<GetDataStreamDetailsResponse>(
-        `/internal/dataset_quality/data_streams/${dataStream}/details`,
+        buildPath('/internal/dataset_quality/data_streams/{dataStream}/details', { dataStream }),
         {
           query: { start, end },
         }
@@ -99,9 +111,14 @@ export class DataStreamDetailsClient implements IDataStreamDetailsClient {
     end,
   }: GetDataStreamFailedDocsDetailsParams) {
     const response = await this.http
-      .get<FailedDocsDetails>(`/internal/dataset_quality/data_streams/${dataStream}/failed_docs`, {
-        query: { start, end },
-      })
+      .get<FailedDocsDetails>(
+        buildPath('/internal/dataset_quality/data_streams/{dataStream}/failed_docs', {
+          dataStream,
+        }),
+        {
+          query: { start, end },
+        }
+      )
       .catch((error) => {
         throw new DatasetQualityError(
           `Failed to fetch data stream failed docs details": ${error}`,
@@ -125,7 +142,9 @@ export class DataStreamDetailsClient implements IDataStreamDetailsClient {
   }: GetDataStreamFailedDocsErrorsParams): Promise<FailedDocsErrorsResponse> {
     const response = await this.http
       .get<FailedDocsDetails>(
-        `/internal/dataset_quality/data_streams/${dataStream}/failed_docs/errors`,
+        buildPath('/internal/dataset_quality/data_streams/{dataStream}/failed_docs/errors', {
+          dataStream,
+        }),
         {
           query: { start, end },
         }
@@ -153,7 +172,9 @@ export class DataStreamDetailsClient implements IDataStreamDetailsClient {
   }: GetDataStreamDegradedFieldsParams) {
     const response = await this.http
       .get<DegradedFieldResponse>(
-        `/internal/dataset_quality/data_streams/${dataStream}/degraded_fields`,
+        buildPath('/internal/dataset_quality/data_streams/{dataStream}/degraded_fields', {
+          dataStream,
+        }),
         {
           query: { start, end },
         }
@@ -180,7 +201,10 @@ export class DataStreamDetailsClient implements IDataStreamDetailsClient {
   }: GetDataStreamDegradedFieldValuesPathParams): Promise<DegradedFieldValues> {
     const response = await this.http
       .get<DegradedFieldValues>(
-        `/internal/dataset_quality/data_streams/${dataStream}/degraded_field/${degradedField}/values`
+        buildPath(
+          '/internal/dataset_quality/data_streams/{dataStream}/degraded_field/{degradedField}/values',
+          { dataStream, degradedField }
+        )
       )
       .catch((error) => {
         throw new DatasetQualityError(
@@ -201,7 +225,9 @@ export class DataStreamDetailsClient implements IDataStreamDetailsClient {
   public async checkAndLoadIntegration({ dataStream }: CheckAndLoadIntegrationParams) {
     const response = await this.http
       .get<CheckAndLoadIntegrationResponse>(
-        `/internal/dataset_quality/data_streams/${dataStream}/integration/check`
+        buildPath('/internal/dataset_quality/data_streams/{dataStream}/integration/check', {
+          dataStream,
+        })
       )
       .catch((error) => {
         throw new DatasetQualityError(
@@ -227,7 +253,9 @@ export class DataStreamDetailsClient implements IDataStreamDetailsClient {
   public async getIntegrationDashboards({ integration }: GetIntegrationDashboardsParams) {
     const response = await this.http
       .get<IntegrationDashboardsResponse>(
-        `/internal/dataset_quality/integrations/${integration}/dashboards`
+        buildPath('/internal/dataset_quality/integrations/{integration}/dashboards', {
+          integration,
+        })
       )
       .catch((error) => {
         throw new DatasetQualityError(`Failed to fetch integration dashboards": ${error}`, error);
@@ -249,7 +277,10 @@ export class DataStreamDetailsClient implements IDataStreamDetailsClient {
   }: AnalyzeDegradedFieldsParams): Promise<DegradedFieldAnalysis> {
     const response = await this.http
       .get<DegradedFieldAnalysis>(
-        `/internal/dataset_quality/data_streams/${dataStream}/degraded_field/${degradedField}/analyze`,
+        buildPath(
+          '/internal/dataset_quality/data_streams/{dataStream}/degraded_field/{degradedField}/analyze',
+          { dataStream, degradedField }
+        ),
         { query: { lastBackingIndex } }
       )
       .catch((error) => {
@@ -272,7 +303,9 @@ export class DataStreamDetailsClient implements IDataStreamDetailsClient {
   }: UpdateFieldLimitParams): Promise<UpdateFieldLimitResponse> {
     const response = await this.http
       .put<UpdateFieldLimitResponse>(
-        `/internal/dataset_quality/data_streams/${dataStream}/update_field_limit`,
+        buildPath('/internal/dataset_quality/data_streams/{dataStream}/update_field_limit', {
+          dataStream,
+        }),
         { body: JSON.stringify({ newFieldLimit }) }
       )
       .catch((error) => {
@@ -295,7 +328,7 @@ export class DataStreamDetailsClient implements IDataStreamDetailsClient {
   }): Promise<DataStreamRolloverResponse> {
     const response = await this.http
       .post<DataStreamRolloverResponse>(
-        `/internal/dataset_quality/data_streams/${dataStream}/rollover`
+        buildPath('/internal/dataset_quality/data_streams/{dataStream}/rollover', { dataStream })
       )
       .catch((error) => {
         throw new DatasetQualityError(`Failed to rollover datastream": ${error}`, error);
@@ -305,6 +338,65 @@ export class DataStreamDetailsClient implements IDataStreamDetailsClient {
       dataStreamRolloverResponseRt,
       (message: string) =>
         new DatasetQualityError(`Failed to decode rollover response: ${message}"`)
+    )(response);
+  }
+
+  public async updateFailureStore({
+    dataStream,
+    failureStoreEnabled,
+    customRetentionPeriod,
+  }: {
+    dataStream: string;
+    failureStoreEnabled: boolean;
+    customRetentionPeriod?: string;
+  }): Promise<UpdateFailureStoreResponse> {
+    const response = await this.http
+      .put<UpdateFailureStoreResponse>(
+        buildPath('/internal/dataset_quality/data_streams/{dataStream}/update_failure_store', {
+          dataStream,
+        }),
+        {
+          body: JSON.stringify({
+            failureStoreEnabled,
+            customRetentionPeriod,
+          }),
+        }
+      )
+      .catch((error) => {
+        throw new DatasetQualityError(`Failed to update failure store": ${error}`, error);
+      });
+
+    this.telemetryClient.trackFailureStoreUpdated({
+      data_stream_name: dataStream,
+      failure_store_enabled: failureStoreEnabled,
+      custom_retention_period: customRetentionPeriod,
+    });
+
+    return decodeOrThrow(
+      updateFailureStoreResponseRt,
+      (message: string) =>
+        new DatasetQualityError(`Failed to decode update failure store response: ${message}"`)
+    )(response);
+  }
+
+  public async getNonAggregatableDatasets(
+    params: GetDataStreamNonAggregatableParams
+  ): Promise<NonAggregatableDatasets> {
+    const response = await this.http
+      .get<NonAggregatableDatasets>(
+        buildPath('/internal/dataset_quality/data_streams/{dataStream}/non_aggregatable', {
+          dataStream: params.dataStream,
+        }),
+        { query: { start: params.start, end: params.end } }
+      )
+      .catch((error) => {
+        throw new DatasetQualityError(`Failed to fetch non-aggregatable datasets: ${error}`, error);
+      });
+
+    return decodeOrThrow(
+      getNonAggregatableDatasetsRt,
+      (message: string) =>
+        new DatasetQualityError(`Failed to decode non-aggregatable datasets response: ${message}`)
     )(response);
   }
 }

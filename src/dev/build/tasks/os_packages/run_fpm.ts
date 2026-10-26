@@ -9,24 +9,24 @@
 
 import { resolve } from 'path';
 
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 
-import { exec, Config, Build } from '../../lib';
+import type { Config, Build, Platform } from '../../lib';
+import { exec } from '../../lib';
 
 export async function runFpm(
   config: Config,
   log: ToolingLog,
   build: Build,
   type: 'rpm' | 'deb',
-  architecture: 'arm64' | 'x64',
+  platform: Platform,
   pkgSpecificFlags: string[]
 ) {
-  const linux = config.getPlatform('linux', architecture);
   const version = config.getBuildVersion();
 
   const resolveWithTrailingSlash = (...paths: string[]) => `${resolve(...paths)}/`;
 
-  const fromBuild = (...paths: string[]) => build.resolvePathForPlatform(linux, ...paths);
+  const fromBuild = (...paths: string[]) => build.resolvePathForPlatform(platform, ...paths);
 
   const pickLicense = () => {
     return type === 'rpm' ? 'Elastic License' : 'Elastic-License';
@@ -87,6 +87,8 @@ export async function runFpm(
     // tell fpm about the config file so that it is called out in the package definition
     '--config-files',
     `/etc/kibana`,
+    '--config-files',
+    `/etc/${envFolder}/kibana`,
 
     // define template values that will be injected into the install/uninstall
     // scripts, also causes scripts to be processed with erb
@@ -148,5 +150,6 @@ export async function runFpm(
   await exec(log, 'fpm', args, {
     cwd: config.resolveFromRepo('.'),
     level: 'info',
+    build,
   });
 }

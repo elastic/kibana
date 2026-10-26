@@ -4,14 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiButtonEmpty, EuiConfirmModal } from '@elastic/eui';
+import { EuiButtonEmpty, EuiConfirmModal, useGeneratedHtmlId } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import type { MergedServiceDashboard } from '..';
 import { fromQuery, toQuery } from '../../../shared/links/url_helpers';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
-import { callApmApi } from '../../../../services/rest/create_call_apm_api';
+import { getApmInternalServices } from '../../../../plugin';
 
 export function UnlinkDashboard({
   currentDashboard,
@@ -22,11 +22,13 @@ export function UnlinkDashboard({
   defaultDashboard: MergedServiceDashboard;
   onRefresh: () => void;
 }) {
+  const { callApmApi } = getApmInternalServices();
   const [isModalVisible, setIsModalVisible] = useState(false);
   const {
     core: { notifications },
   } = useApmPluginContext();
   const history = useHistory();
+  const modalTitleId = useGeneratedHtmlId();
 
   const onConfirm = useCallback(
     async function () {
@@ -71,6 +73,7 @@ export function UnlinkDashboard({
       isModalVisible,
       history,
       defaultDashboard,
+      callApmApi,
     ]
   );
   return (
@@ -78,7 +81,7 @@ export function UnlinkDashboard({
       <EuiButtonEmpty
         color="danger"
         size="s"
-        iconType="unlink"
+        iconType="linkSlash"
         data-test-subj="apmUnLinkServiceDashboardMenu"
         onClick={() => setIsModalVisible(true)}
       >
@@ -88,12 +91,14 @@ export function UnlinkDashboard({
       </EuiButtonEmpty>
       {isModalVisible && (
         <EuiConfirmModal
+          aria-labelledby={modalTitleId}
           title={i18n.translate(
             'xpack.apm.serviceDashboards.unlinkEmptyButtonLabel.confirm.title',
             {
               defaultMessage: 'Unlink Dashboard',
             }
           )}
+          titleProps={{ id: modalTitleId }}
           onCancel={() => setIsModalVisible(false)}
           onConfirm={onConfirm}
           confirmButtonText={i18n.translate(

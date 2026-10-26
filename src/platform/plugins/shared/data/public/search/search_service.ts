@@ -10,26 +10,25 @@
 import { i18n } from '@kbn/i18n';
 import type { estypes } from '@elastic/elasticsearch';
 import { handleWarnings } from '@kbn/search-response-warnings';
-import {
+import type {
   CoreSetup,
   CoreStart,
   Plugin,
   PluginInitializerContext,
   StartServicesAccessor,
 } from '@kbn/core/public';
+import type { CPSPluginStart } from '@kbn/cps/public';
 import type { ISearchGeneric } from '@kbn/search-types';
 import { RequestAdapter } from '@kbn/inspector-plugin/common/adapters/request';
-import { DataViewsContract } from '@kbn/data-views-plugin/common';
-import { ExpressionsSetup } from '@kbn/expressions-plugin/public';
-import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { toMountPoint } from '@kbn/react-kibana-mount';
-import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { ManagementSetup } from '@kbn/management-plugin/public';
-import { ScreenshotModePluginStart } from '@kbn/screenshot-mode-plugin/public';
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import type { DataViewsContract } from '@kbn/data-views-plugin/common';
+import type { ExpressionsSetup } from '@kbn/expressions-plugin/public';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { ScreenshotModePluginStart } from '@kbn/screenshot-mode-plugin/public';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { Start as InspectorStartContract } from '@kbn/inspector-plugin/public';
-import React from 'react';
 import { BehaviorSubject } from 'rxjs';
+import type { ICPSManager } from '@kbn/cps-utils';
+import type { SearchSourceDependencies } from '../../common/search';
 import {
   cidrFunction,
   dateRangeFunction,
@@ -53,7 +52,6 @@ import {
   rangeFilterFunction,
   rangeFunction,
   removeFilterFunction,
-  SearchSourceDependencies,
   SearchSourceService,
   selectFilterFunction,
 } from '../../common/search';
@@ -63,59 +61,75 @@ import {
 } from '../../common/search/aggs/buckets/shard_delay';
 import { aggShardDelay } from '../../common/search/aggs/buckets/shard_delay_fn';
 import type { ConfigSchema } from '../../server/config';
-import { NowProviderInternalContract } from '../now_provider';
-import { DataPublicPluginStart, DataStartDependencies } from '../types';
+import type { NowProviderInternalContract } from '../now_provider';
+import type { DataPublicPluginStart, DataStartDependencies } from '../types';
 import { AggsService } from './aggs';
-import { createUsageCollector, SearchUsageCollector } from './collectors';
+import type { SearchUsageCollector } from './collectors';
+import { createUsageCollector } from './collectors';
 import { getEql, getEsaggs, getEsdsl, getEssql, getEsql } from './expressions';
-
-import { ISearchInterceptor, SearchInterceptor } from './search_interceptor';
-import { ISessionsClient, ISessionService, SessionsClient, SessionService } from './session';
-import { registerSearchSessionsMgmt } from './session/sessions_mgmt';
-import { createConnectedSearchSessionIndicator } from './session/session_indicator';
-import { ISearchSetup, ISearchStart } from './types';
+import type { ISearchInterceptor } from './search_interceptor';
+import { SearchInterceptor } from './search_interceptor';
+import { SearchMethodsService } from '../../common/search';
+import type { ISearchSessionEBTManager, ISessionsClient, ISessionService } from './session';
+import {
+  SessionsClient,
+  SessionService,
+  SearchSessionEBTManager,
+  registerSearchSessionEBTManagerAnalytics,
+} from './session';
+import type { ISearchSetup, ISearchStart } from './types';
 
 /** @internal */
 export interface SearchServiceSetupDependencies {
   expressions: ExpressionsSetup;
   usageCollection?: UsageCollectionSetup;
-  management: ManagementSetup;
   nowProvider: NowProviderInternalContract;
 }
 
 /** @internal */
 export interface SearchServiceStartDependencies {
   fieldFormats: FieldFormatsStart;
-  indexPatterns: DataViewsContract;
+  dataViews: DataViewsContract;
   inspector: InspectorStartContract;
   screenshotMode: ScreenshotModePluginStart;
   scriptedFieldsEnabled: boolean;
+  cps?: CPSPluginStart;
 }
 
 export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   private readonly aggsService = new AggsService();
   private readonly searchSourceService = new SearchSourceService();
   private searchInterceptor!: ISearchInterceptor;
-  private usageCollector?: SearchUsageCollector;
+  private searchMethodsService!: SearchMethodsService;
+  private usageCollector!: SearchUsageCollector;
   private sessionService!: ISessionService;
   private sessionsClient!: ISessionsClient;
+  private searchSessionEBTManager!: ISearchSessionEBTManager;
+  private cpsManager?: ICPSManager;
 
   constructor(private initializerContext: PluginInitializerContext<ConfigSchema>) {}
 
   public setup(
     core: CoreSetup,
-    { expressions, usageCollection, nowProvider, management }: SearchServiceSetupDependencies
+    { expressions, usageCollection, nowProvider }: SearchServiceSetupDependencies
   ): ISearchSetup {
     const { http, getStartServices, notifications, uiSettings, executionContext } = core;
     this.usageCollector = createUsageCollector(getStartServices, usageCollection);
 
     this.sessionsClient = new SessionsClient({ http });
+
+    registerSearchSessionEBTManagerAnalytics(core);
+    this.searchSessionEBTManager = new SearchSessionEBTManager({
+      core,
+      logger: this.initializerContext.logger.get(),
+    });
+
     this.sessionService = new SessionService(
       this.initializerContext,
       getStartServices,
+      this.searchSessionEBTManager,
       this.sessionsClient,
-      nowProvider,
-      this.usageCollector
+      nowProvider
     );
     /**
      * A global object that intercepts all searches and provides convenience methods for cancelling
@@ -127,9 +141,10 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       http,
       uiSettings,
       startServices: getStartServices(),
-      usageCollector: this.usageCollector!,
+      usageCollector: this.usageCollector,
       session: this.sessionService,
       searchConfig: this.initializerContext.config.get().search,
+      getCPSManager: () => this.cpsManager,
     });
 
     expressions.registerFunction(
@@ -193,47 +208,40 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       expressions.registerFunction(aggShardDelay);
     }
 
-    const config = this.initializerContext.config.get<ConfigSchema>();
-    if (config.search.sessions.enabled) {
-      const sessionsConfig = config.search.sessions;
-      registerSearchSessionsMgmt(
-        core as CoreSetup<DataStartDependencies>,
-        {
-          searchUsageCollector: this.usageCollector!,
-          sessionsClient: this.sessionsClient,
-          management,
-        },
-        sessionsConfig,
-        this.initializerContext.env.packageInfo.version
-      );
-    }
-
     return {
       aggs,
-      usageCollector: this.usageCollector!,
+      usageCollector: this.usageCollector,
       session: this.sessionService,
       sessionsClient: this.sessionsClient,
+      sessionsConfig: this.initializerContext.config.get<ConfigSchema>().search.sessions,
+      ebtManager: this.searchSessionEBTManager,
     };
   }
 
   public start(
-    { http, uiSettings, chrome, application, notifications, ...startServices }: CoreStart,
+    coreStart: CoreStart,
     {
       fieldFormats,
-      indexPatterns,
+      dataViews,
       inspector,
-      screenshotMode,
       scriptedFieldsEnabled,
+      cps,
     }: SearchServiceStartDependencies
   ): ISearchStart {
+    const { http, uiSettings, chrome, application, notifications, ...startServices } = coreStart;
+
     const search = ((request, options = {}) => {
       return this.searchInterceptor.search(request, options);
     }) as ISearchGeneric;
 
+    this.searchMethodsService = new SearchMethodsService(
+      this.searchInterceptor.search.bind(this.searchInterceptor) as ISearchGeneric
+    );
+
     const loadingCount$ = new BehaviorSubject(0);
     http.addLoadingCountSource(loadingCount$);
 
-    const aggs = this.aggsService.start({ fieldFormats, indexPatterns });
+    const aggs = this.aggsService.start({ fieldFormats, dataViews });
 
     const warningsServices = {
       inspector,
@@ -241,11 +249,13 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       ...startServices,
     };
 
+    this.cpsManager = cps?.cpsManager;
+
     const searchSourceDependencies: SearchSourceDependencies = {
       aggs,
       getConfig: uiSettings.get.bind(uiSettings),
       search,
-      dataViews: indexPatterns,
+      dataViews,
       onResponse: (request, response, options) => {
         if (!options.disableWarningToasts) {
           const { rawResponse } = response;
@@ -279,29 +289,16 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       },
       scriptedFieldsEnabled,
     };
-
     const config = this.initializerContext.config.get();
-    if (config.search.sessions.enabled) {
-      chrome.setBreadcrumbsAppendExtension({
-        content: toMountPoint(
-          React.createElement(
-            createConnectedSearchSessionIndicator({
-              sessionService: this.sessionService,
-              application,
-              basePath: http.basePath,
-              storage: new Storage(window.localStorage),
-              usageCollector: this.usageCollector,
-              tourDisabled: screenshotMode.isScreenshotMode(),
-            })
-          ),
-          startServices
-        ),
-      });
-    }
 
     return {
       aggs,
       search,
+      dsl: (params, options) => this.searchMethodsService.dsl(params, options),
+      dslPaginated: (params, options) => this.searchMethodsService.dslPaginated(params, options),
+      esql: (params, options) => this.searchMethodsService.esql(params, options),
+      eql: (params, options) => this.searchMethodsService.eql(params, options),
+      sql: (params, options) => this.searchMethodsService.sql(params, options),
       showError: (e) => {
         this.searchInterceptor.showError(e);
       },
@@ -325,9 +322,10 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
           });
         });
       },
+      isBackgroundSearchEnabled: config.search.sessions.enabled,
       session: this.sessionService,
       sessionsClient: this.sessionsClient,
-      searchSource: this.searchSourceService.start(indexPatterns, searchSourceDependencies),
+      searchSource: this.searchSourceService.start(dataViews, searchSourceDependencies),
     };
   }
 

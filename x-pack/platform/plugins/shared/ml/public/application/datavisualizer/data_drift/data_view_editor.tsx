@@ -14,13 +14,13 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
   EuiBasicTable,
-  EuiCallOut,
   EuiFieldText,
   EuiFlexItem,
   EuiFormRow,
   EuiFlexGrid,
   useEuiTheme,
 } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import type { DataViewEditorService } from '@kbn/data-view-editor-plugin/public';
 import type { MatchedItem } from '@kbn/data-views-plugin/public';
 import { useTableSettings } from '../../data_frame_analytics/pages/analytics_management/components/analytics_list/use_table_settings';
@@ -40,6 +40,13 @@ const mustMatchError = i18n.translate(
   'xpack.ml.dataDrift.indexPatternsEditor.createIndex.noMatch',
   {
     defaultMessage: 'Name must match one or more data streams, indices, or index aliases.',
+  }
+);
+
+const matchedIndicesTableCaption = i18n.translate(
+  'xpack.ml.dataDrift.indexPatternsEditor.matchedIndicesTableCaption',
+  {
+    defaultMessage: 'Matched indices for the selected index pattern',
   }
 );
 
@@ -136,6 +143,7 @@ export function DataViewEditor({
           data-test-subj={`mlDataDriftIndexPatternFormRow-${id ?? ''}`}
         >
           <EuiFieldText
+            isInvalid={errorMessage !== undefined}
             value={indexPattern}
             onChange={(e: ChangeEvent<HTMLInputElement>) => {
               let query = e.target.value;
@@ -159,33 +167,37 @@ export function DataViewEditor({
       </EuiFlexItem>
       <EuiFlexItem css={{ paddingLeft: euiTheme.size.base, paddingRight: euiTheme.size.base }}>
         {errorMessage === mustMatchError ? (
-          <EuiCallOut color="warning">
-            <FormattedMessage
-              id="xpack.ml.dataDrift.indexPatternsEditor.notMatchDetail"
-              defaultMessage="The index pattern you entered doesn't match any data streams, indices, or index aliases.
+          <KbnWarningCallout
+            announceOnMount
+            title={
+              <FormattedMessage
+                id="xpack.ml.dataDrift.indexPatternsEditor.notMatchDetail"
+                defaultMessage="The index pattern you entered doesn't match any data streams, indices, or index aliases.
          You can match {strongIndices}."
-              values={{
-                strongIndices: (
-                  <strong>
-                    <FormattedMessage
-                      id="xpack.ml.dataDrift.indexPatternsEditor.allIndicesLabel"
-                      defaultMessage="{indicesLength, plural,
+                values={{
+                  strongIndices: (
+                    <strong>
+                      <FormattedMessage
+                        id="xpack.ml.dataDrift.indexPatternsEditor.allIndicesLabel"
+                        defaultMessage="{indicesLength, plural,
                 one {# source}
                 other {# sources}
               }"
-                      values={{ indicesLength: matchedIndices.allIndices.length }}
-                    />
-                  </strong>
-                ),
-              }}
-            />
-          </EuiCallOut>
+                        values={{ indicesLength: matchedIndices.allIndices.length }}
+                      />
+                    </strong>
+                  ),
+                }}
+              />
+            }
+          />
         ) : null}
         <EuiBasicTable<MatchedItem>
           items={pageOfItems}
           columns={columns}
           pagination={pagination}
           onChange={onTableChange}
+          tableCaption={matchedIndicesTableCaption}
           data-test-subject={`mlDataDriftIndexPatternTable-${id ?? ''}`}
           rowProps={(item) => {
             return {

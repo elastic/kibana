@@ -11,13 +11,6 @@ import { EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-export const getConnectedBadgeAriaLabel = (connectedCount: number) =>
-  i18n.translate('xpack.enterpriseSearch.connectorStats.connectedBadgeAriaLabel', {
-    defaultMessage: '{number} Connected connectors',
-    values: {
-      number: connectedCount,
-    },
-  });
 export const getConnectedConnectorsBadgeLabel = (connectedCount: number) => (
   <FormattedMessage
     id="xpack.enterpriseSearch.connectorStats.connectedBadgeLabel"
@@ -109,13 +102,6 @@ export const getIncompleteConnectorsBadgeLabel = (incompleteCount: number) => (
     }}
   />
 );
-export const getIncompleteConnectorBadgeAriaLabel = (incompleteCount: number) =>
-  i18n.translate('xpack.enterpriseSearch.connectorStats.incompleteBadgeAriaLabel', {
-    defaultMessage: '{incompleteCount} Incomplete connectors',
-    values: {
-      incompleteCount,
-    },
-  });
 export const getRunningJobsLabel = (inProgressCount: number, isCrawler: boolean) =>
   !isCrawler
     ? i18n.translate('xpack.enterpriseSearch.connectorStats.runningSyncsTextLabel', {
@@ -165,20 +151,6 @@ export const getRunningJobsTooltip = (inProgressCount: number, isCrawler: boolea
     )}
   </EuiText>
 );
-export const getRunningJobsBadgeAriaLabel = (inProgressCount: number, isCrawler: boolean) =>
-  !isCrawler
-    ? i18n.translate('xpack.enterpriseSearch.connectorStats.runningBadgeAriaLabel', {
-        defaultMessage: '{number} Running syncs.',
-        values: {
-          number: inProgressCount,
-        },
-      })
-    : i18n.translate('xpack.enterpriseSearch.connectorStats.runningCrawlerBadgeAriaLabel', {
-        defaultMessage: '{number} Running crawls.',
-        values: {
-          number: inProgressCount,
-        },
-      });
 export const getRunningJobsBadgeLabel = (inProgressCount: number, isCrawler: boolean) =>
   !isCrawler
     ? i18n.translate('xpack.enterpriseSearch.connectorStats.runningBadgeLabel', {

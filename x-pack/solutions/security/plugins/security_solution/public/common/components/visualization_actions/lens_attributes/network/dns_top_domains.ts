@@ -8,10 +8,10 @@ import { v4 as uuidv4 } from 'uuid';
 import { TOP_VALUE, UNIQUE_COUNT } from '../../translations';
 import type { LensAttributes, GetLensAttributes } from '../../types';
 
-const layerId = uuidv4();
-const columnTopValue = uuidv4();
-const columnTimestamp = uuidv4();
-const columnDNSQuestionName = uuidv4();
+const layerId = `layer-id-${uuidv4()}`;
+const columnTopValue = `column-top-value-id-${uuidv4()}`;
+const columnTimestamp = `column-timestamp-id-${uuidv4()}`;
+const columnDNSQuestionName = `column-dns-question-name-id-${uuidv4()}`;
 
 /* Exported from Kibana Saved Object */
 export const getDnsTopDomainsLensAttributes: GetLensAttributes = ({
@@ -67,7 +67,7 @@ export const getDnsTopDomainsLensAttributes: GetLensAttributes = ({
             showGridlines: false,
             layerType: 'data',
             xAccessor: columnTimestamp,
-            splitAccessor: columnTopValue,
+            splitAccessors: [columnTopValue],
           },
         ],
       },
@@ -89,7 +89,6 @@ export const getDnsTopDomainsLensAttributes: GetLensAttributes = ({
                 params: {
                   query: 'PTR',
                 },
-                // @ts-expect-error upgrade typescript v4.9.5
                 indexRefName: 'filter-index-pattern-0',
               },
               query: {
@@ -168,4 +167,4 @@ export const getDnsTopDomainsLensAttributes: GetLensAttributes = ({
         name: `indexpattern-datasource-layer-${layerId}`,
       },
     ],
-  } as LensAttributes);
+  } as unknown as LensAttributes);

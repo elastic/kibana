@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
-import { KibanaServerError } from '@kbn/kibana-utils-plugin/common';
+import type { KibanaServerError } from '@kbn/kibana-utils-plugin/common';
 import { SYNONYMS_SETS_QUERY_KEY } from '../../common/constants';
 import { useKibana } from './use_kibana';
 
@@ -24,7 +24,7 @@ export const useDeleteSynonymsSet = (onSuccess?: () => void, onError?: (error: s
   return useMutation(
     async ({ synonymsSetId }: MutationArgs) => {
       return await http.delete<{ acknowledged: boolean }>(
-        `/internal/search_synonyms/synonyms/${synonymsSetId}`
+        `/internal/search_synonyms/synonyms/${encodeURIComponent(synonymsSetId)}`
       );
     },
     {

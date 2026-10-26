@@ -22,9 +22,12 @@ import {
   SOURCE_TYPES,
   VECTOR_STYLES,
 } from '../../../../common/constants';
-import { ESTermSourceDescriptor, VectorStyleDescriptor } from '../../../../common/descriptor_types';
+import type {
+  ESTermSourceDescriptor,
+  VectorStyleDescriptor,
+} from '../../../../common/descriptor_types';
 import { getDefaultDynamicProperties } from '../../styles/vector/vector_style_defaults';
-import { IVectorSource } from '../../sources/vector_source';
+import type { IVectorSource } from '../../sources/vector_source';
 import { mockVectorLayer } from '../__fixtures__/mock_vector_layer';
 import { AbstractVectorLayer, isVectorLayer, hasVectorLayerMethod } from './vector_layer';
 import type { ILayer } from '../layer';

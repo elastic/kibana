@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { ReactNode } from 'react';
-import PropTypes from 'prop-types';
+import type { ReactNode } from 'react';
+import React from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -112,7 +112,11 @@ export const AutoRefreshControls = ({ refreshInterval, setRefresh, disableInterv
             <EuiFlexGroup justifyContent="flexEnd" gutterSize="xs">
               {refreshInterval > 0 ? (
                 <EuiFlexItem grow={false}>
-                  <EuiToolTip position="bottom" content={strings.getDisableTooltip()}>
+                  <EuiToolTip
+                    position="bottom"
+                    content={strings.getDisableTooltip()}
+                    disableScreenReaderOutput
+                  >
                     <EuiButtonIcon
                       iconType="cross"
                       onClick={disableInterval}
@@ -176,10 +180,4 @@ export const AutoRefreshControls = ({ refreshInterval, setRefresh, disableInterv
       </EuiFlexItem>
     </EuiFlexGroup>
   );
-};
-
-AutoRefreshControls.propTypes = {
-  refreshInterval: PropTypes.number,
-  setRefresh: PropTypes.func.isRequired,
-  disableInterval: PropTypes.func.isRequired,
 };

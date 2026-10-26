@@ -7,25 +7,28 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { FC, MouseEvent } from 'react';
-import { css } from '@emotion/react';
+import type { FC, MouseEvent } from 'react';
+import React from 'react';
 import {
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiSpacer,
   EuiTitle,
   EuiFlexItem,
-  UseEuiTheme,
+  useEuiTheme,
 } from '@elastic/eui';
+import { layoutAutoGridCss } from '@kbn/css-utils/public/layout_css';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { METRIC_TYPE } from '@kbn/analytics';
-import { ApplicationStart } from '@kbn/core/public';
-import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
-import { FeatureCatalogueEntry } from '../../../services';
+import { AppStatus, type ApplicationStart } from '@kbn/core/public';
+import useObservable from 'react-use/lib/useObservable';
+import type { FeatureCatalogueEntry } from '../../../services';
 import { createAppNavigationHandler } from '../app_navigation_handler';
 import { Synopsis } from '../synopsis';
 import { getServices } from '../../kibana_services';
+
+const MANAGEMENT_APP_ID = 'management';
 
 interface Props {
   addBasePath: (path: string) => string;
@@ -35,16 +38,21 @@ interface Props {
 
 export const ManageData: FC<Props> = ({ addBasePath, application, features }) => {
   const { share, trackUiMetric } = getServices();
+  const { euiTheme } = useEuiTheme();
 
   const consoleHref = share.url.locators.get('CONSOLE_APP_LOCATOR')?.useUrl({});
   const managementHref = share.url.locators
     .get('MANAGEMENT_APP_LOCATOR')
     ?.useUrl({ sectionId: '' });
+  const { management: isManagementEnabled, dev_tools: isDevToolsEnabled } =
+    application.capabilities.navLinks;
+  const applications = useObservable(application.applications$);
+  const managementApp = applications?.get(MANAGEMENT_APP_ID);
+  const isManagementAppAccessible = Boolean(
+    isManagementEnabled && managementApp?.status === AppStatus.accessible
+  );
 
   if (features.length) {
-    const { management: isManagementEnabled, dev_tools: isDevToolsEnabled } =
-      application.capabilities.navLinks;
-
     return (
       <KibanaPageTemplate.Section
         bottomBorder
@@ -61,51 +69,39 @@ export const ManageData: FC<Props> = ({ addBasePath, application, features }) =>
             </EuiTitle>
           </EuiFlexItem>
 
-          {isDevToolsEnabled || isManagementEnabled ? (
+          {isDevToolsEnabled || isManagementAppAccessible ? (
             <EuiFlexItem grow={false}>
               <EuiFlexGroup alignItems="center" responsive={false} wrap>
                 {/* Check if both the Dev Tools UI and the Console UI are enabled. */}
                 {isDevToolsEnabled && consoleHref !== undefined ? (
                   <EuiFlexItem grow={false}>
-                    <RedirectAppLinks
-                      coreStart={{
-                        application,
-                      }}
+                    <EuiButtonEmpty
+                      data-test-subj="homeDevTools"
+                      flush="both"
+                      iconType="wrench"
+                      href={consoleHref}
                     >
-                      <EuiButtonEmpty
-                        data-test-subj="homeDevTools"
-                        flush="both"
-                        iconType="wrench"
-                        href={consoleHref}
-                      >
-                        <FormattedMessage
-                          id="home.manageData.devToolsButtonLabel"
-                          defaultMessage="Dev Tools"
-                        />
-                      </EuiButtonEmpty>
-                    </RedirectAppLinks>
+                      <FormattedMessage
+                        id="home.manageData.devToolsButtonLabel"
+                        defaultMessage="Dev Tools"
+                      />
+                    </EuiButtonEmpty>
                   </EuiFlexItem>
                 ) : null}
 
-                {isManagementEnabled ? (
+                {isManagementAppAccessible ? (
                   <EuiFlexItem grow={false}>
-                    <RedirectAppLinks
-                      coreStart={{
-                        application,
-                      }}
+                    <EuiButtonEmpty
+                      data-test-subj="homeManage"
+                      flush="both"
+                      iconType="gear"
+                      href={managementHref}
                     >
-                      <EuiButtonEmpty
-                        data-test-subj="homeManage"
-                        flush="both"
-                        iconType="gear"
-                        href={managementHref}
-                      >
-                        <FormattedMessage
-                          id="home.manageData.stackManagementButtonLabel"
-                          defaultMessage="Stack Management"
-                        />
-                      </EuiButtonEmpty>
-                    </RedirectAppLinks>
+                      <FormattedMessage
+                        id="home.manageData.stackManagementButtonLabel"
+                        defaultMessage="Stack Management"
+                      />
+                    </EuiButtonEmpty>
                   </EuiFlexItem>
                 ) : null}
               </EuiFlexGroup>
@@ -115,32 +111,22 @@ export const ManageData: FC<Props> = ({ addBasePath, application, features }) =>
 
         <EuiSpacer />
 
-        <EuiFlexGroup>
+        <div css={layoutAutoGridCss({ minItemWidth: '15rem', gap: euiTheme.size.l })}>
           {features.map((feature) => (
-            <EuiFlexItem
-              css={({ euiTheme }: UseEuiTheme) =>
-                css({
-                  [`@media (min-width: ${euiTheme.breakpoint.l}px)`]: {
-                    maxWidth: `calc(33.33% - ${euiTheme.size.l})`,
-                  },
-                })
-              }
+            <Synopsis
+              description={feature.description}
+              iconType={feature.icon}
+              id={feature.id}
               key={feature.id}
-            >
-              <Synopsis
-                description={feature.description}
-                iconType={feature.icon}
-                id={feature.id}
-                onClick={(event: MouseEvent) => {
-                  trackUiMetric(METRIC_TYPE.CLICK, `manage_data_card_${feature.id}`);
-                  createAppNavigationHandler(feature.path)(event);
-                }}
-                title={feature.title}
-                url={addBasePath(feature.path)}
-              />
-            </EuiFlexItem>
+              onClick={(event: MouseEvent) => {
+                trackUiMetric(METRIC_TYPE.CLICK, `manage_data_card_${feature.id}`);
+                createAppNavigationHandler(feature.path)(event);
+              }}
+              title={feature.title}
+              url={addBasePath(feature.path)}
+            />
           ))}
-        </EuiFlexGroup>
+        </div>
       </KibanaPageTemplate.Section>
     );
   } else {

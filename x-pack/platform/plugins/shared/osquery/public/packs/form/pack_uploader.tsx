@@ -7,10 +7,7 @@
 
 import { kebabCase } from 'lodash';
 import { EuiLink, EuiFormRow, EuiFilePicker, EuiSpacer } from '@elastic/eui';
-import type {
-  EuiFilePickerClass,
-  EuiFilePickerProps,
-} from '@elastic/eui/src/components/form/file_picker/file_picker';
+import type { EuiFilePickerRef } from '@elastic/eui';
 import React, { useCallback, useState, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -34,7 +31,7 @@ interface OsqueryPackUploaderProps {
 
 const OsqueryPackUploaderComponent: React.FC<OsqueryPackUploaderProps> = ({ onChange }) => {
   const packName = useRef('');
-  const filePickerRef = useRef<EuiFilePickerClass>(null);
+  const filePickerRef = useRef<EuiFilePickerRef>(null);
   const [isInvalid, setIsInvalid] = useState<string | null>(null);
   // @ts-expect-error update types
   let fileReader;
@@ -117,6 +114,10 @@ const OsqueryPackUploaderComponent: React.FC<OsqueryPackUploaderProps> = ({ onCh
     [handleFileChosen]
   );
 
+  const filePickerLabel = i18n.translate('xpack.osquery.packUploader.initialPromptTextLabel', {
+    defaultMessage: 'Select or drag and drop osquery pack config file',
+  });
+
   return (
     <>
       <EuiSpacer size="xl" />
@@ -127,11 +128,10 @@ const OsqueryPackUploaderComponent: React.FC<OsqueryPackUploaderProps> = ({ onCh
         error={<>{`${isInvalid}`}</>}
       >
         <EuiFilePicker
-          ref={filePickerRef as React.Ref<Omit<EuiFilePickerProps, 'stylesMemoizer'>>}
+          ref={filePickerRef}
           id="osquery_pack_picker"
-          initialPromptText={i18n.translate('xpack.osquery.packUploader.initialPromptTextLabel', {
-            defaultMessage: 'Select or drag and drop osquery pack config file',
-          })}
+          initialPromptText={filePickerLabel}
+          aria-label={filePickerLabel}
           onChange={handleInputChange}
           display="large"
           fullWidth

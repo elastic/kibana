@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import path from 'path';
 import { createHash } from 'crypto';
 import type {
   Entry,
@@ -13,22 +12,23 @@ import type {
   ExceptionListItemSchema,
   FoundExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
-import type { OperatingSystem } from '@kbn/securitysolution-utils';
-import { EntryFieldType, hasSimpleExecutableName } from '@kbn/securitysolution-utils';
+import { EntryFieldType } from '@kbn/securitysolution-utils';
 
-import {
-  ENDPOINT_ARTIFACT_LISTS,
-  type ENDPOINT_BLOCKLISTS_LIST_ID,
-  type ENDPOINT_EVENT_FILTERS_LIST_ID,
-  type ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID,
-  type ENDPOINT_LIST_ID,
-  type ENDPOINT_TRUSTED_APPS_LIST_ID,
-} from '@kbn/securitysolution-list-constants';
+import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 import { validate } from '@kbn/securitysolution-io-ts-utils';
-import { PROCESS_DESCENDANT_EVENT_FILTER_EXTRA_ENTRY } from '../../../../common/endpoint/service/artifacts/constants';
+import type { Logger } from '@kbn/logging';
+import {
+  DISABLED_ARTIFACT_TAG,
+  PROCESS_DESCENDANT_EXTRA_ENTRY,
+  TRUSTED_PROCESS_DESCENDANTS_TAG,
+} from '../../../../common/endpoint/service/artifacts/constants';
 import type { ExperimentalFeatures } from '../../../../common';
-import { isFilterProcessDescendantsEnabled } from '../../../../common/endpoint/service/artifacts/utils';
+import { isProcessDescendantsEnabled } from '../../../../common/endpoint/service/artifacts/utils';
+import { MetaArchValue, EndpointArtifactScanContext } from '../../../../common/endpoint/types';
+import type { YaraCompiledRule } from '../libyara';
+import { YaraEngineUnavailableError } from '../libyara';
+import { validateCustomYaraRule } from '../custom_yara_signatures';
 import type {
   InternalArtifactCompleteSchema,
   TranslatedEntry,
@@ -38,8 +38,11 @@ import type {
   TranslatedEntryMatchWildcardMatcher,
   TranslatedEntryNestedEntry,
   TranslatedExceptionListItem,
+  TranslatedYaraRule,
   WrappedTranslatedExceptionList,
-  TranslatedEntriesOfDescendantOf,
+  WrappedTranslatedYaraRulesList,
+  TranslatedEntriesOfProcessDescendants,
+  TranslatedEntryTrustDescendants,
 } from '../../schemas';
 import {
   translatedPerformantEntries as translatedPerformantEntriesType,
@@ -49,10 +52,11 @@ import {
   translatedEntryMatchWildcardMatcher,
   translatedEntryNestedEntry,
   wrappedTranslatedExceptionList,
+  wrappedTranslatedYaraRulesList,
 } from '../../schemas';
 
 export async function buildArtifact(
-  exceptions: WrappedTranslatedExceptionList,
+  exceptions: WrappedTranslatedExceptionList | WrappedTranslatedYaraRulesList,
   schemaVersion: string,
   os: string,
   name: string
@@ -74,17 +78,19 @@ export async function buildArtifact(
 }
 
 export type ArtifactListId =
-  | typeof ENDPOINT_LIST_ID
-  | typeof ENDPOINT_TRUSTED_APPS_LIST_ID
-  | typeof ENDPOINT_EVENT_FILTERS_LIST_ID
-  | typeof ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID
-  | typeof ENDPOINT_BLOCKLISTS_LIST_ID;
+  | typeof ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id
+  | typeof ENDPOINT_ARTIFACT_LISTS.trustedApps.id
+  | typeof ENDPOINT_ARTIFACT_LISTS.trustedDevices.id
+  | typeof ENDPOINT_ARTIFACT_LISTS.eventFilters.id
+  | typeof ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.id
+  | typeof ENDPOINT_ARTIFACT_LISTS.blocklists.id
+  | typeof ENDPOINT_ARTIFACT_LISTS.customYaraSignatures.id;
 
 export function convertExceptionsToEndpointFormat(
   exceptions: ExceptionListItemSchema[],
   schemaVersion: string,
   experimentalFeatures: ExperimentalFeatures
-) {
+): WrappedTranslatedExceptionList {
   const translatedExceptions = {
     entries: translateToEndpointExceptions(exceptions, schemaVersion, experimentalFeatures),
   };
@@ -94,6 +100,22 @@ export function convertExceptionsToEndpointFormat(
   }
 
   return validated as WrappedTranslatedExceptionList;
+}
+
+export async function convertYaraRulesToEndpointFormat(
+  exceptions: ExceptionListItemSchema[],
+  schemaVersion: string,
+  logger?: Logger
+): Promise<WrappedTranslatedYaraRulesList> {
+  const translatedYaraRules = {
+    entries: await translateToYaraRules(exceptions, schemaVersion, logger),
+  };
+  const [validated, errors] = validate(translatedYaraRules, wrappedTranslatedYaraRulesList);
+  if (errors != null) {
+    throw new Error(errors);
+  }
+
+  return validated as WrappedTranslatedYaraRulesList;
 }
 
 export async function getFilteredEndpointExceptionListRaw({
@@ -152,6 +174,134 @@ export async function getAllItemsFromEndpointExceptionList({
   });
 }
 
+const DEFAULT_YARA_ARCH_CONTEXT: TranslatedYaraRule['arch_context'] = [
+  MetaArchValue.X86,
+  MetaArchValue.ARM64,
+];
+
+const DEFAULT_YARA_SCAN_CONTEXT: TranslatedYaraRule['scan_context'] = [
+  EndpointArtifactScanContext.MEMORY,
+];
+
+/** Retries per item for transient libyara engine failures while packing artifacts. */
+const YARA_ITEM_VALIDATE_MAX_ATTEMPTS = 3;
+
+/**
+ * Reads `arch_context` from rules that already passed `validateCustomYaraRule`.
+ * Product validation guarantees a non-empty rule list and that `meta.arch` is either
+ * omitted on every rule or set to the same allowed value(s) on every rule.
+ */
+function getArchContextFromCompiledRules(
+  rules: YaraCompiledRule[]
+): TranslatedYaraRule['arch_context'] {
+  const originalArch = rules[0]?.meta.arch;
+  if (originalArch === undefined) {
+    return [...DEFAULT_YARA_ARCH_CONTEXT];
+  }
+
+  return originalArch.split(/, ?/) as TranslatedYaraRule['arch_context'];
+}
+
+const skipYaraItem = (logger: Logger | undefined, itemId: string, reason: string): void => {
+  logger?.warn(
+    `Skipping Custom YARA Signature [${itemId}] while building the endpoint artifact: ${reason}`
+  );
+};
+
+async function validateCustomYaraRuleWithRetries(
+  ruleText: string,
+  osTypes: ExceptionListItemSchema['os_types'],
+  itemId: string,
+  logger?: Logger
+): Promise<Awaited<ReturnType<typeof validateCustomYaraRule>>> {
+  for (let attempt = 1; ; attempt++) {
+    try {
+      return await validateCustomYaraRule(ruleText, osTypes);
+    } catch (error) {
+      if (!(error instanceof YaraEngineUnavailableError)) {
+        throw error;
+      }
+
+      if (attempt >= YARA_ITEM_VALIDATE_MAX_ATTEMPTS) {
+        logger?.error(
+          `libyara engine failed validating Custom YARA Signature [${itemId}] after ${YARA_ITEM_VALIDATE_MAX_ATTEMPTS} attempts; aborting artifact build. ${error.message}`
+        );
+        throw error;
+      }
+
+      logger?.warn(
+        `libyara engine failed validating Custom YARA Signature [${itemId}] on attempt ${attempt}/${YARA_ITEM_VALIDATE_MAX_ATTEMPTS}; retrying. ${error.message}`
+      );
+    }
+  }
+}
+
+async function translateOneYaraException(
+  exception: ExceptionListItemSchema,
+  logger?: Logger
+): Promise<TranslatedYaraRule | undefined> {
+  if ((exception.tags ?? []).includes(DISABLED_ARTIFACT_TAG)) {
+    return undefined;
+  }
+
+  const [entry] = exception.entries;
+  if (entry?.type !== 'match' || typeof entry.value !== 'string') {
+    return undefined;
+  }
+
+  // Full product validation (compile + meta constraints) so invalid arch/scan_type/etc.
+  // are skipped here instead of aborting later schema validation of the whole artifact.
+  // Engine failures are retried per item; exhausted retries propagate so the packager
+  // cannot publish a partial or empty YARA artifact from a flaky/unavailable engine.
+  const result = await validateCustomYaraRuleWithRetries(
+    entry.value,
+    exception.os_types,
+    exception.item_id,
+    logger
+  );
+
+  if (result.errorCount > 0) {
+    skipYaraItem(logger, exception.item_id, `validation reported ${result.errorCount} error(s)`);
+    return undefined;
+  }
+
+  return {
+    yara_rule_data: entry.value,
+    arch_context: getArchContextFromCompiledRules(result.rules),
+    scan_context: [...DEFAULT_YARA_SCAN_CONTEXT],
+    entry_id: exception.id,
+    entry_name: exception.name,
+  };
+}
+
+/**
+ * Translates Custom YARA Signature exception items into the endpoint YARA artifact format.
+ * Items that fail product validation are omitted so one bad entry cannot fail the packager.
+ * Exhausted per-item `YaraEngineUnavailableError` retries propagate so the packager aborts
+ * the manifest build and keeps the previous committed manifest.
+ */
+async function translateToYaraRules(
+  exceptions: ExceptionListItemSchema[],
+  schemaVersion: string,
+  logger?: Logger
+): Promise<TranslatedYaraRule[]> {
+  if (schemaVersion !== 'v1') {
+    throw new Error('unsupported schemaVersion');
+  }
+
+  const translatedItems: TranslatedYaraRule[] = [];
+
+  for (const exception of exceptions) {
+    // Sequential: libyara WASM is a process singleton and is not safe for concurrent ccall.
+    const translatedItem = await translateOneYaraException(exception, logger);
+    if (translatedItem !== undefined) {
+      translatedItems.push(translatedItem);
+    }
+  }
+
+  return translatedItems;
+}
+
 /**
  * Translates Exception list items to Exceptions the endpoint can understand
  * @param exceptions
@@ -192,11 +342,17 @@ export function translateToEndpointExceptions(
           storeUniqueItem(translatedItem);
         });
       } else if (
-        experimentalFeatures.filterProcessDescendantsForEventFiltersEnabled &&
         entry.list_id === ENDPOINT_ARTIFACT_LISTS.eventFilters.id &&
-        isFilterProcessDescendantsEnabled(entry)
+        isProcessDescendantsEnabled(entry)
       ) {
         const translatedItem = translateProcessDescendantEventFilter(schemaVersion, entry);
+        storeUniqueItem(translatedItem);
+      } else if (
+        experimentalFeatures.filterProcessDescendantsForTrustedAppsEnabled &&
+        entry.list_id === ENDPOINT_ARTIFACT_LISTS.trustedApps.id &&
+        isProcessDescendantsEnabled(entry, TRUSTED_PROCESS_DESCENDANTS_TAG)
+      ) {
+        const translatedItem = translateProcessDescendantTrustedApp(schemaVersion, entry);
         storeUniqueItem(translatedItem);
       } else {
         const translatedItem = translateItem(schemaVersion, entry);
@@ -214,10 +370,10 @@ function translateProcessDescendantEventFilter(
   schemaVersion: string,
   entry: ExceptionListItemSchema
 ): TranslatedExceptionListItem {
-  const translatedEntries: TranslatedEntriesOfDescendantOf = translateItem(schemaVersion, {
+  const translatedEntries: TranslatedEntriesOfProcessDescendants = translateItem(schemaVersion, {
     ...entry,
-    entries: [...entry.entries, PROCESS_DESCENDANT_EVENT_FILTER_EXTRA_ENTRY],
-  }) as TranslatedEntriesOfDescendantOf;
+    entries: [...entry.entries, PROCESS_DESCENDANT_EXTRA_ENTRY],
+  }) as TranslatedEntriesOfProcessDescendants;
 
   return {
     type: entry.type,
@@ -230,6 +386,22 @@ function translateProcessDescendantEventFilter(
         },
       },
     ],
+  };
+}
+
+function translateProcessDescendantTrustedApp(
+  schemaVersion: string,
+  entry: ExceptionListItemSchema
+): TranslatedEntryTrustDescendants {
+  const translatedEntries: TranslatedEntriesOfProcessDescendants = translateItem(schemaVersion, {
+    ...entry,
+    entries: [...entry.entries, PROCESS_DESCENDANT_EXTRA_ENTRY],
+  }) as TranslatedEntriesOfProcessDescendants;
+
+  return {
+    type: entry.type,
+    trust_descendants: true,
+    entries: translatedEntries.entries,
   };
 }
 
@@ -320,42 +492,6 @@ function translateItem(
   };
 }
 
-function appendOptimizedEntryForEndpoint({
-  entry,
-  os,
-  wildcardProcessEntry,
-}: {
-  entry: {
-    field: string;
-    operator: 'excluded' | 'included';
-    type: 'wildcard';
-    value: string;
-  };
-  os: ExceptionListItemSchema['os_types'][number];
-  wildcardProcessEntry: TranslatedEntryMatchWildcard;
-}): TranslatedPerformantEntries {
-  const entries: TranslatedPerformantEntries = [
-    wildcardProcessEntry,
-    {
-      field:
-        entry.field === 'file.path.text'
-          ? normalizeFieldName('file.name')
-          : normalizeFieldName('process.name'),
-      operator: entry.operator,
-      type: (os === 'linux' ? 'exact_cased' : 'exact_caseless') as Extract<
-        TranslatedEntryMatcher,
-        'exact_caseless' | 'exact_cased'
-      >,
-      value: os === 'windows' ? path.win32.basename(entry.value) : path.posix.basename(entry.value),
-    },
-  ].reduce<TranslatedPerformantEntries>((p, c) => {
-    p.push(c);
-    return p;
-  }, []);
-
-  return entries;
-}
-
 function translateEntry(
   schemaVersion: string,
   exceptionListItemEntries: ExceptionListItemSchema['entries'],
@@ -422,29 +558,7 @@ function translateEntry(
             value: entry.value,
           };
 
-          const hasExecutableName = hasSimpleExecutableName({
-            os: os as OperatingSystem,
-            type: entry.type,
-            value: entry.value,
-          });
-
-          const existingFields = exceptionListItemEntries.map((e) => e.field);
-          const doAddPerformantEntries = !(
-            existingFields.includes('process.name') || existingFields.includes('file.name')
-          );
-
-          if (hasExecutableName && doAddPerformantEntries) {
-            // when path has a full executable name
-            // append a process.name entry based on os
-            // `exact_cased` for linux and `exact_caseless` for others
-            return appendOptimizedEntryForEndpoint({
-              entry,
-              os,
-              wildcardProcessEntry,
-            });
-          } else {
-            return wildcardProcessEntry;
-          }
+          return wildcardProcessEntry;
         }
       };
 

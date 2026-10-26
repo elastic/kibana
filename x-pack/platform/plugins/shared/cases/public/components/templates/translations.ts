@@ -9,6 +9,10 @@ import { i18n } from '@kbn/i18n';
 
 export * from '../../common/translations';
 
+export const ADD_TEMPLATE = i18n.translate('xpack.cases.templates.addTemplate', {
+  defaultMessage: 'Add template',
+});
+
 export const TEMPLATE_TITLE = i18n.translate('xpack.cases.templates.title', {
   defaultMessage: 'Templates',
 });
@@ -21,13 +25,22 @@ export const NO_TEMPLATES = i18n.translate('xpack.cases.templates.noTemplates', 
   defaultMessage: 'You do not have any templates yet',
 });
 
-export const ADD_TEMPLATE = i18n.translate('xpack.cases.templates.addTemplate', {
-  defaultMessage: 'Add template',
-});
-
 export const CREATE_TEMPLATE = i18n.translate('xpack.cases.templates.createTemplate', {
   defaultMessage: 'Create template',
 });
+
+export const CREATE_NEW_TEMPLATE_DESCRIPTION = i18n.translate(
+  'xpack.cases.templates.createNewTemplateDescription',
+  {
+    defaultMessage: 'Create a new template',
+  }
+);
+
+export const EDITING_TEMPLATE = (templateId: string) =>
+  i18n.translate('xpack.cases.templates.editingTemplate', {
+    values: { templateId },
+    defaultMessage: 'Editing template: {templateId}',
+  });
 
 export const REQUIRED = i18n.translate('xpack.cases.templates.required', {
   defaultMessage: 'Required',

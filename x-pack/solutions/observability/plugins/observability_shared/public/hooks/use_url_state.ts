@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { parse, stringify } from 'query-string';
-import { Location } from 'history';
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { decode, encode, RisonValue } from '@kbn/rison';
+import qs from 'query-string';
+import type { Location } from 'history';
+import { useCallback, useEffect, useMemo } from 'react';
+import type { RisonValue } from '@kbn/rison';
+import { decode, encode } from '@kbn/rison';
 import { useHistory } from 'react-router-dom';
 import { url } from '@kbn/kibana-utils-plugin/common';
 
@@ -54,16 +55,13 @@ export const useUrlState = <State>({
 
       const currentLocation = history.location;
 
-      const newState =
-        patch instanceof Function
-          ? patch(
-              decodeUrlState(
-                decodeRisonUrlState(
-                  getParamFromQueryString(getQueryStringFromLocation(currentLocation), urlStateKey)
-                )
-              ) ?? defaultState
-            )
-          : patch;
+      const decodedUrlState = decodeUrlState(
+        decodeRisonUrlState(
+          getParamFromQueryString(getQueryStringFromLocation(currentLocation), urlStateKey)
+        )
+      );
+
+      const newState = patch instanceof Function ? patch(decodedUrlState ?? ({} as State)) : patch;
 
       const newLocation = replaceQueryStringInLocation(
         currentLocation,
@@ -77,19 +75,14 @@ export const useUrlState = <State>({
         history.replace(newLocation);
       }
     },
-    [decodeUrlState, defaultState, encodeUrlState, history, urlStateKey]
-  );
-
-  const [shouldInitialize, setShouldInitialize] = useState(
-    writeDefaultState && typeof decodedState === 'undefined'
+    [decodeUrlState, encodeUrlState, history, urlStateKey]
   );
 
   useEffect(() => {
-    if (shouldInitialize) {
-      setShouldInitialize(false);
+    if (writeDefaultState && decodedState === undefined) {
       setState(defaultState);
     }
-  }, [shouldInitialize, setState, defaultState]);
+  }, [writeDefaultState, decodedState, defaultState, setState]);
 
   return [state, setState] as [typeof state, typeof setState];
 };
@@ -108,7 +101,7 @@ export const decodeRisonUrlState = (value: string | undefined | null): RisonValu
 const getQueryStringFromLocation = (location: Location) => location.search.substring(1);
 
 const getParamFromQueryString = (queryString: string, key: string) => {
-  const parsedQueryString = parse(queryString, { sort: false });
+  const parsedQueryString = qs.parse(queryString, { sort: false });
   const queryParam = parsedQueryString[key];
 
   return Array.isArray(queryParam) ? queryParam[0] : queryParam;
@@ -130,7 +123,7 @@ const encodeRisonUrlState = (state: any) => encode(state);
 const replaceStateKeyInQueryString =
   <UrlState extends any>(stateKey: string, urlState: UrlState | undefined) =>
   (queryString: string) => {
-    const previousQueryValues = parse(queryString, { sort: false });
+    const previousQueryValues = qs.parse(queryString, { sort: false });
     const newValue =
       typeof urlState === 'undefined'
         ? previousQueryValues
@@ -138,5 +131,5 @@ const replaceStateKeyInQueryString =
             ...previousQueryValues,
             [stateKey]: encodeRisonUrlState(urlState),
           };
-    return stringify(url.encodeQuery(newValue), { sort: false, encode: false });
+    return qs.stringify(url.encodeQuery(newValue), { sort: false, encode: false });
   };

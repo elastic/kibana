@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import type { Agent as HttpsAgent } from 'https';
+import type { Agent as HttpAgent } from 'http';
+
 import fetch, { FetchError } from 'node-fetch';
 import type { RequestInit, Response } from 'node-fetch';
 import pRetry from 'p-retry';
@@ -12,6 +15,7 @@ import pRetry from 'p-retry';
 import { streamToString } from '../streams';
 import { appContextService } from '../../app_context';
 import { RegistryError, RegistryConnectionError, RegistryResponseError } from '../../../errors';
+import type { RegistryConnectionErrorType } from '../../../../common/types';
 
 import { airGappedUtils } from '../airgapped';
 
@@ -33,6 +37,10 @@ async function registryFetch(url: string) {
     }`;
     const responseError = new RegistryResponseError(message, status);
 
+    // retry 5xx errors
+    if (status >= 500) {
+      throw responseError;
+    }
     throw new pRetry.AbortError(responseError);
   }
 }
@@ -59,7 +67,7 @@ export async function getResponse(url: string, retries: number = 5): Promise<Res
         //
         // throwing in onFailedAttempt will abandon all retries & fail the request
         // we only want to retry system errors, so re-throw for everything else
-        if (!isSystemError(error)) {
+        if (!isSystemError(error) && !isRegistry5xxError(error)) {
           throw error;
         }
       },
@@ -68,7 +76,13 @@ export async function getResponse(url: string, retries: number = 5): Promise<Res
   } catch (error) {
     // isSystemError here means we didn't succeed after max retries
     if (isSystemError(error)) {
-      throw new RegistryConnectionError(`Error connecting to package registry: ${error.message}`);
+      const { type, reason } = categorizeRegistryConnectionError(error);
+      throw new RegistryConnectionError(
+        `Error connecting to package registry: ${error.message} (type: ${type}${
+          reason ? `, reason: ${reason}` : ''
+        })`,
+        { type, reason }
+      );
     }
     // don't wrap our own errors
     if (error instanceof RegistryError) {
@@ -83,28 +97,40 @@ export async function getResponseStream(
   url: string,
   retries?: number
 ): Promise<NodeJS.ReadableStream> {
+  const logger = appContextService.getLogger();
   const res = await getResponse(url, retries);
-  if (res) {
-    return res?.body;
+  try {
+    if (res) {
+      return res?.body;
+    }
+    throw new RegistryResponseError('getResponseStream - Error connecting to the registry');
+  } catch (error) {
+    logger.error(`getResponseStream error: ${error}`);
+    throw error;
   }
-  throw new RegistryResponseError('isAirGapped config enabled, registry not reacheable');
 }
 
 export async function getResponseStreamWithSize(
   url: string,
   retries?: number
 ): Promise<{ stream: NodeJS.ReadableStream; size?: number }> {
-  const res = await getResponse(url, retries);
-  if (res) {
-    const contentLengthHeader = res.headers.get('Content-Length');
-    const contentLength = contentLengthHeader ? parseInt(contentLengthHeader, 10) : undefined;
+  const logger = appContextService.getLogger();
+  try {
+    const res = await getResponse(url, retries);
+    if (res) {
+      const contentLengthHeader = res.headers.get('Content-Length');
+      const contentLength = contentLengthHeader ? parseInt(contentLengthHeader, 10) : undefined;
 
-    return {
-      stream: res.body,
-      size: contentLength && !isNaN(contentLength) ? contentLength : undefined,
-    };
+      return {
+        stream: res.body,
+        size: contentLength && !isNaN(contentLength) ? contentLength : undefined,
+      };
+    }
+    throw new RegistryResponseError('getResponseStreamWithSize - Error connecting to the registry');
+  } catch (error) {
+    logger.error(`getResponseStream error: ${error}`);
+    throw error;
   }
-  throw new RegistryResponseError('isAirGapped config enabled, registry not reacheable');
 }
 
 export async function fetchUrl(url: string, retries?: number): Promise<string> {
@@ -112,7 +138,7 @@ export async function fetchUrl(url: string, retries?: number): Promise<string> {
   try {
     return getResponseStream(url, retries).then(streamToString);
   } catch (error) {
-    logger.warn(`getResponseStream failed with error: ${error}`);
+    logger.warn(`fetchUrl - failed with error: ${error}`);
     throw error;
   }
 }
@@ -126,6 +152,48 @@ function isFetchError(error: FailedAttemptErrors): error is FetchError {
 
 function isSystemError(error: FailedAttemptErrors): boolean {
   return isFetchError(error) && error.type === 'system';
+}
+
+// Node system error codes grouped into operator-facing categories. The Elasticsearch
+// client in Kibana applies similar categorization to its connection failures.
+const REGISTRY_ERROR_CODES_BY_TYPE: Record<
+  Exclude<RegistryConnectionErrorType, 'unknown'>,
+  readonly string[]
+> = {
+  timeout: ['ETIMEDOUT', 'ESOCKETTIMEDOUT', 'ECONNABORTED'],
+  dns: ['ENOTFOUND', 'EAI_AGAIN'],
+  connection: ['ECONNREFUSED', 'ECONNRESET', 'EHOSTUNREACH', 'ENETUNREACH', 'EPIPE', 'EPROTO'],
+};
+
+// Maps a system `FetchError` to a failure `type` (timeout/dns/connection/unknown) and a
+// `reason` (the raw Node error code) so operators can distinguish EPR failure modes.
+// NOTE: node-fetch only emits its own `request-timeout` error when a `timeout` fetch option
+// is set (we don't set one), so socket-level timeouts arrive here as the system code
+// `ETIMEDOUT`. If a fetch `timeout` is ever introduced, `request-timeout` typed errors would
+// bypass `isSystemError` and fall through to the generic `RegistryError`, and this
+// categorization would need to account for them.
+export function categorizeRegistryConnectionError(error: FailedAttemptErrors): {
+  type: RegistryConnectionErrorType;
+  reason?: string;
+} {
+  const code = isFetchError(error) ? error.code : undefined;
+
+  if (!code) {
+    return { type: 'unknown' };
+  }
+
+  const matchedType = (
+    Object.keys(REGISTRY_ERROR_CODES_BY_TYPE) as Array<keyof typeof REGISTRY_ERROR_CODES_BY_TYPE>
+  ).find((type) => REGISTRY_ERROR_CODES_BY_TYPE[type].includes(code));
+
+  return { type: matchedType ?? 'unknown', reason: code };
+}
+
+function isRegistry5xxError(error: FailedAttemptErrors): boolean {
+  return (
+    (error instanceof RegistryResponseError || error.name === 'RegistryResponseError') &&
+    ((error as RegistryResponseError)?.status ?? 0) >= 500
+  );
 }
 
 export function getFetchOptions(targetUrl: string): RequestInit | undefined {
@@ -142,6 +210,6 @@ export function getFetchOptions(targetUrl: string): RequestInit | undefined {
   const logger = appContextService.getLogger();
   logger.debug(`Using ${proxyUrl} as proxy for ${targetUrl}`);
 
-  options.agent = getProxyAgent({ proxyUrl, targetUrl });
+  options.agent = getProxyAgent({ proxyUrl, targetUrl }) as unknown as HttpAgent | HttpsAgent;
   return options;
 }

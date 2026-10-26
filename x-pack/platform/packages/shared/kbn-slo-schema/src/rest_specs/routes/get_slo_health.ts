@@ -4,32 +4,30 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as t from 'io-ts';
-import { healthStatusSchema, sloIdSchema, stateSchema } from '../../schema';
-import { allOrAnyString } from '../../schema/common';
+import { z } from '@kbn/zod';
 
-const fetchSLOHealthResponseSchema = t.array(
-  t.type({
-    sloId: sloIdSchema,
-    sloInstanceId: allOrAnyString,
-    sloRevision: t.number,
-    state: stateSchema,
-    health: t.type({
-      overall: healthStatusSchema,
-      rollup: healthStatusSchema,
-      summary: healthStatusSchema,
-    }),
+import { sloIdSchema } from '../../schema/zod/slo';
+import { sloHealthSchema } from '../../schema/zod/health';
+import { allOrAnyString } from '../../schema/zod/common';
+
+const fetchSLOHealthResponseSchema = z.array(
+  z.object({
+    id: sloIdSchema,
+    instanceId: allOrAnyString,
+    revision: z.number(),
+    name: z.string(),
+    health: sloHealthSchema,
   })
 );
 
-const fetchSLOHealthParamsSchema = t.type({
-  body: t.type({
-    list: t.array(t.type({ sloId: sloIdSchema, sloInstanceId: allOrAnyString })),
+const fetchSLOHealthParamsSchema = z.object({
+  body: z.object({
+    list: z.array(z.object({ id: sloIdSchema, instanceId: allOrAnyString })),
   }),
 });
 
-type FetchSLOHealthResponse = t.OutputOf<typeof fetchSLOHealthResponseSchema>;
-type FetchSLOHealthParams = t.TypeOf<typeof fetchSLOHealthParamsSchema.props.body>;
+type FetchSLOHealthResponse = z.input<typeof fetchSLOHealthResponseSchema>;
+type FetchSLOHealthParams = z.output<typeof fetchSLOHealthParamsSchema.shape.body>;
 
 export { fetchSLOHealthParamsSchema, fetchSLOHealthResponseSchema };
-export type { FetchSLOHealthResponse, FetchSLOHealthParams };
+export type { FetchSLOHealthParams, FetchSLOHealthResponse };

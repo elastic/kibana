@@ -33,10 +33,10 @@ import {
   setupAuthorizeAndRedactMultiNamespaceReferenencesSuccess,
 } from '../../../test_helpers/repository.test.common';
 import { savedObjectsExtensionsMock } from '../../../mocks/saved_objects_extensions.mock';
+import type { WithAuditName } from '@kbn/core-saved-objects-server';
 import {
   type ISavedObjectsSecurityExtension,
   SavedObjectsErrorHelpers,
-  WithAuditName,
 } from '@kbn/core-saved-objects-server';
 
 const SPACES = ['default', 'another-space'];
@@ -317,7 +317,7 @@ describe('collectMultiNamespaceReferences', () => {
         {}
       )
     );
-    await expect(() => collectMultiNamespaceReferences(params)).rejects.toThrowError(
+    await expect(() => collectMultiNamespaceReferences(params)).rejects.toThrow(
       createEsUnavailableNotFoundError()
     );
   });
@@ -597,7 +597,7 @@ describe('collectMultiNamespaceReferences', () => {
           enforceError
         );
         expect(mockSecurityExt.authorizeAndRedactMultiNamespaceReferences).toHaveBeenCalledTimes(1);
-        expect(mockSecurityExt.authorizeAndRedactMultiNamespaceReferences).toBeCalledWith(
+        expect(mockSecurityExt.authorizeAndRedactMultiNamespaceReferences).toHaveBeenCalledWith(
           expect.objectContaining({
             options: { purpose: 'collectMultiNamespaceReferences' },
           })
@@ -613,7 +613,7 @@ describe('collectMultiNamespaceReferences', () => {
           enforceError
         );
         expect(mockSecurityExt.authorizeAndRedactMultiNamespaceReferences).toHaveBeenCalledTimes(1);
-        expect(mockSecurityExt.authorizeAndRedactMultiNamespaceReferences).toBeCalledWith(
+        expect(mockSecurityExt.authorizeAndRedactMultiNamespaceReferences).toHaveBeenCalledWith(
           expect.objectContaining({
             options: { purpose: 'updateObjectsSpaces' },
           })

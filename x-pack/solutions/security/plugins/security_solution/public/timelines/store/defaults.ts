@@ -7,9 +7,9 @@
 
 import { TimelineTabs } from '../../../common/types/timeline';
 import {
-  TimelineTypeEnum,
-  TimelineStatusEnum,
   RowRendererIdEnum,
+  TimelineStatusEnum,
+  TimelineTypeEnum,
 } from '../../../common/api/timeline';
 
 import { normalizeTimeRange } from '../../common/utils/normalize_time_range';
@@ -82,7 +82,6 @@ export const timelineDefaults: SubsetTimelineModel &
   pinnedEventsSaveObject: {},
   savedObjectId: null,
   selectAll: false,
-  sessionViewConfig: null,
   show: false,
   sort: [
     {
@@ -103,6 +102,10 @@ export const timelineDefaults: SubsetTimelineModel &
   isDataProviderVisible: false,
   sampleSize: 500,
   rowHeight: 3,
+  isSuperTimeline: false,
+  superTimelineSourceIds: [],
+  superTimelineSourceTitles: [],
+  superTimelineDescriptions: [],
 };
 
 export const getTimelineManageDefaults = (id: string) => ({
@@ -113,5 +116,4 @@ export const getTimelineManageDefaults = (id: string) => ({
   isLoading: false,
   queryFields: [],
   title: '',
-  graphEventId: '',
 });

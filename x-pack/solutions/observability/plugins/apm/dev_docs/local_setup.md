@@ -3,8 +3,8 @@
 ```
 git clone git@github.com:elastic/kibana.git
 cd kibana/
-yarn kbn bootstrap
-yarn start
+pnpm kbn bootstrap
+pnpm start
 ```
 
 # Elasticsearch, APM Server and data generators
@@ -18,13 +18,13 @@ To access an Elasticsearch instance that has live data you have three options:
 Elasticsearch:
 
 ```
-yarn es snapshot
+pnpm es snapshot
 ```
 
 Kibana:
 
 ```
-yarn start
+pnpm start
 ```
 
 **Run Synthtrace**
@@ -44,7 +44,7 @@ elasticsearch.username: kibana_system
 elasticsearch.password: changeme
 ```
 
-Documentation for [Synthtrace](https://github.com/elastic/kibana/blob/main/src/platform/packages/shared/kbn-apm-synthtrace/README.md)
+Documentation for [Synthtrace](https://github.com/elastic/kibana/blob/main/src/platform/packages/shared/kbn-synthtrace/README.md)
 
 ## 2. Cloud-based ES Cluster (internal devs only)
 

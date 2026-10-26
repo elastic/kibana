@@ -9,7 +9,7 @@ import React, { Component } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButton, EuiPopover, EuiExpression, EuiFormHelpText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { DataView, Query } from '@kbn/data-plugin/common';
+import type { DataView, Query } from '@kbn/data-plugin/common';
 import { APP_ID } from '../../../../../common/constants';
 import { getData, getSearchBar } from '../../../../kibana_services';
 
@@ -77,6 +77,9 @@ export class WhereExpression extends Component<Props, State> {
           />
         }
         repositionOnScroll={true}
+        aria-label={i18n.translate('xpack.maps.layerPanel.whereExpression.popoverAriaLabel', {
+          defaultMessage: 'Where filter',
+        })}
       >
         <div className="mapFilterEditor" data-test-subj="mapJoinWhereFilterEditor">
           <EuiFormHelpText className="mapJoinExpressionHelpText">

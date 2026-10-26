@@ -3,30 +3,32 @@
 exports[`getAlertsByStatusAttributes should render without extra options 1`] = `
 Object {
   "description": "",
-  "references": Array [
-    Object {
-      "id": "security-solution-my-test",
-      "name": "indexpattern-datasource-layer-b9b43606-7ff7-46ae-a47c-85bed80fab9a",
-      "type": "index-pattern",
-    },
-    Object {
-      "id": "security-solution-my-test",
-      "name": "a1aaa83b-5026-444e-9465-50e0afade01c",
-      "type": "index-pattern",
-    },
-  ],
+  "references": Array [],
   "state": Object {
-    "adHocDataViews": Object {},
+    "adHocDataViews": Object {
+      "security-solution-my-test": Object {
+        "allowHidden": false,
+        "allowNoIndex": false,
+        "fieldAttrs": Object {},
+        "fieldFormats": Object {},
+        "id": "security-solution-my-test",
+        "managed": false,
+        "name": "Default Security Data View",
+        "runtimeFieldMap": Object {},
+        "sourceFilters": Array [],
+        "title": "signal-index",
+      },
+    },
     "datasourceStates": Object {
       "formBased": Object {
         "layers": Object {
-          "b9b43606-7ff7-46ae-a47c-85bed80fab9a": Object {
+          "layer-id-generated-uuid": Object {
             "columnOrder": Array [
-              "a9b43606-7ff7-46ae-a47c-85bed80fab9a",
-              "21cc4a49-3780-4b1a-be28-f02fa5303d24",
+              "column-severity-id-generated-uuid",
+              "column-record-id-generated-uuid",
             ],
             "columns": Object {
-              "21cc4a49-3780-4b1a-be28-f02fa5303d24": Object {
+              "column-record-id-generated-uuid": Object {
                 "dataType": "number",
                 "filter": Object {
                   "language": "kuery",
@@ -41,7 +43,7 @@ Object {
                 "scale": "ratio",
                 "sourceField": "___records___",
               },
-              "a9b43606-7ff7-46ae-a47c-85bed80fab9a": Object {
+              "column-severity-id-generated-uuid": Object {
                 "dataType": "string",
                 "isBucketed": true,
                 "label": "Filters",
@@ -99,6 +101,7 @@ Object {
           "negate": false,
           "params": Array [
             "signal-index",
+            "*:signal-index",
           ],
           "type": "phrases",
         },
@@ -109,6 +112,11 @@ Object {
               Object {
                 "match_phrase": Object {
                   "_index": "signal-index",
+                },
+              },
+              Object {
+                "match_phrase": Object {
+                  "_index": "*:signal-index",
                 },
               },
             ],
@@ -133,7 +141,18 @@ Object {
         },
       },
     ],
-    "internalReferences": Array [],
+    "internalReferences": Array [
+      Object {
+        "id": "security-solution-my-test",
+        "name": "indexpattern-datasource-layer-layer-id-generated-uuid",
+        "type": "index-pattern",
+      },
+      Object {
+        "id": "security-solution-my-test",
+        "name": "a1aaa83b-5026-444e-9465-50e0afade01c",
+        "type": "index-pattern",
+      },
+    ],
     "query": Object {
       "language": "kql",
       "query": "host.name: *",
@@ -143,17 +162,17 @@ Object {
         Object {
           "categoryDisplay": "hide",
           "emptySizeRatio": 0.85,
-          "layerId": "b9b43606-7ff7-46ae-a47c-85bed80fab9a",
+          "layerId": "layer-id-generated-uuid",
           "layerType": "data",
           "legendDisplay": "hide",
           "metrics": Array [
-            "21cc4a49-3780-4b1a-be28-f02fa5303d24",
+            "column-record-id-generated-uuid",
           ],
           "nestedLegend": true,
           "numberDisplay": "value",
           "percentDecimals": 2,
           "primaryGroups": Array [
-            "a9b43606-7ff7-46ae-a47c-85bed80fab9a",
+            "column-severity-id-generated-uuid",
           ],
         },
       ],

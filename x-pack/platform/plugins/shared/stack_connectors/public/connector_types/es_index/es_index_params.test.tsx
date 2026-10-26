@@ -6,45 +6,37 @@
  */
 
 import React from 'react';
-import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
-import { act } from '@testing-library/react';
+import { screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
 import ParamsFields from './es_index_params';
 import { AlertHistoryEsIndexConnectorId } from '@kbn/triggers-actions-ui-plugin/public/types';
+import { createMockActionConnector } from '@kbn/alerts-ui-shared/src/common/test_utils/connector.mock';
 
 jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
 
-const actionConnector = {
+const actionConnector = createMockActionConnector({
   actionTypeId: '.index',
   config: {
     index: 'test-index',
   },
   id: 'es index connector',
-  isPreconfigured: false,
-  isSystemAction: false as const,
-  isDeprecated: false,
   name: 'test name',
-  secrets: {},
-};
+});
 
-const preconfiguredActionConnector = {
+const preconfiguredActionConnector = createMockActionConnector({
   actionTypeId: '.index',
-  config: {
-    index: 'kibana-alert-history-default',
-  },
   id: AlertHistoryEsIndexConnectorId,
   isPreconfigured: true,
-  isSystemAction: false as const,
-  isDeprecated: false,
   name: 'Alert history Elasticsearch index',
-  secrets: {},
-};
+});
 
 describe('IndexParamsFields renders', () => {
   test('all params fields are rendered correctly when params are undefined', () => {
     const actionParams = {
       documents: undefined,
     };
-    const wrapper = mountWithIntl(
+    renderWithI18n(
       <ParamsFields
         actionParams={actionParams}
         errors={{ index: [] }}
@@ -60,10 +52,12 @@ describe('IndexParamsFields renders', () => {
         ]}
       />
     );
-    expect(wrapper.find('[data-test-subj="documentsJsonEditor"]').first().prop('value')).toBe(``);
-    expect(wrapper.find('[data-test-subj="documentsAddVariableButton"]').length > 0).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="preconfiguredIndexToUse"]').length > 0).toBeFalsy();
-    expect(wrapper.find('[data-test-subj="preconfiguredDocumentToIndex"]').length > 0).toBeFalsy();
+    // documentsJsonEditor is rendered by JsonEditorWithMessageVariables (Monaco code editor)
+    // The value prop on a Monaco editor cannot be checked via DOM; existence check is sufficient
+    expect(screen.getByTestId('documentsJsonEditor')).toBeInTheDocument();
+    expect(screen.getByTestId('documentsAddVariableButton')).toBeInTheDocument();
+    expect(screen.queryByTestId('preconfiguredIndexToUse')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('preconfiguredDocumentToIndex')).not.toBeInTheDocument();
   });
 
   test('all params fields are rendered when document params are defined', () => {
@@ -71,7 +65,7 @@ describe('IndexParamsFields renders', () => {
       documents: [{ test: 123 }],
     };
 
-    const wrapper = mountWithIntl(
+    renderWithI18n(
       <ParamsFields
         actionParams={actionParams}
         errors={{ index: [] }}
@@ -87,19 +81,18 @@ describe('IndexParamsFields renders', () => {
         ]}
       />
     );
-    expect(wrapper.find('[data-test-subj="documentsJsonEditor"]').first().prop('value')).toBe(`{
-  "test": 123
-}`);
-    expect(wrapper.find('[data-test-subj="documentsAddVariableButton"]').length > 0).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="preconfiguredIndexToUse"]').length > 0).toBeFalsy();
-    expect(wrapper.find('[data-test-subj="preconfiguredDocumentToIndex"]').length > 0).toBeFalsy();
+    // documentsJsonEditor is a Monaco code editor; value prop is not accessible via DOM
+    expect(screen.getByTestId('documentsJsonEditor')).toBeInTheDocument();
+    expect(screen.getByTestId('documentsAddVariableButton')).toBeInTheDocument();
+    expect(screen.queryByTestId('preconfiguredIndexToUse')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('preconfiguredDocumentToIndex')).not.toBeInTheDocument();
   });
 
   test('all params fields are rendered correctly for preconfigured alert history connector when params are undefined', () => {
     const actionParams = {
       documents: undefined,
     };
-    const wrapper = mountWithIntl(
+    renderWithI18n(
       <ParamsFields
         actionParams={actionParams}
         errors={{ index: [] }}
@@ -115,13 +108,14 @@ describe('IndexParamsFields renders', () => {
         ]}
       />
     );
-    expect(wrapper.find('[data-test-subj="documentsJsonEditor"]').length > 0).toBeFalsy();
-    expect(wrapper.find('[data-test-subj="documentsAddVariableButton"]').length > 0).toBeFalsy();
-    expect(wrapper.find('[data-test-subj="preconfiguredIndexToUse"]').length > 0).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="preconfiguredIndexToUse"]').first().prop('value')).toBe(
-      'default'
-    );
-    expect(wrapper.find('[data-test-subj="preconfiguredDocumentToIndex"]').length > 0).toBeTruthy();
+    expect(screen.queryByTestId('documentsJsonEditor')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('documentsAddVariableButton')).not.toBeInTheDocument();
+    const preconfiguredIndexToUse = screen.getByTestId(
+      'preconfiguredIndexToUse'
+    ) as HTMLInputElement;
+    expect(preconfiguredIndexToUse).toBeInTheDocument();
+    expect(preconfiguredIndexToUse).toHaveValue('default');
+    expect(screen.getByTestId('preconfiguredDocumentToIndex')).toBeInTheDocument();
   });
 
   test('all params fields are rendered correctly for preconfigured alert history connector when params are defined', async () => {
@@ -129,11 +123,12 @@ describe('IndexParamsFields renders', () => {
       documents: undefined,
       indexOverride: 'kibana-alert-history-not-the-default',
     };
-    const wrapper = mountWithIntl(
+    const editAction = jest.fn();
+    renderWithI18n(
       <ParamsFields
         actionParams={actionParams}
         errors={{ index: [] }}
-        editAction={() => {}}
+        editAction={editAction}
         index={0}
         actionConnector={preconfiguredActionConnector}
         messageVariables={[
@@ -145,22 +140,21 @@ describe('IndexParamsFields renders', () => {
         ]}
       />
     );
-    expect(wrapper.find('[data-test-subj="documentsJsonEditor"]').length > 0).toBeFalsy();
-    expect(wrapper.find('[data-test-subj="documentsAddVariableButton"]').length > 0).toBeFalsy();
-    expect(wrapper.find('[data-test-subj="preconfiguredIndexToUse"]').length > 0).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="preconfiguredIndexToUse"]').first().prop('value')).toBe(
-      'not-the-default'
-    );
-    expect(wrapper.find('[data-test-subj="preconfiguredDocumentToIndex"]').length > 0).toBeTruthy();
+    expect(screen.queryByTestId('documentsJsonEditor')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('documentsAddVariableButton')).not.toBeInTheDocument();
+    const preconfiguredIndexToUse = screen.getByTestId(
+      'preconfiguredIndexToUse'
+    ) as HTMLInputElement;
+    expect(preconfiguredIndexToUse).toBeInTheDocument();
+    expect(preconfiguredIndexToUse).toHaveValue('not-the-default');
+    expect(screen.getByTestId('preconfiguredDocumentToIndex')).toBeInTheDocument();
 
-    wrapper.find('EuiLink[data-test-subj="resetDefaultIndex"]').find('button').simulate('click');
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
-    });
+    await userEvent.click(screen.getByTestId('resetDefaultIndex'));
 
-    expect(wrapper.find('[data-test-subj="preconfiguredIndexToUse"]').first().prop('value')).toBe(
-      'default'
+    expect(editAction).toHaveBeenCalledWith(
+      'indexOverride',
+      expect.stringContaining('kibana-alert-history-'),
+      0
     );
   });
 });

@@ -9,9 +9,13 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { noop } from 'lodash/fp';
 
 import { EuiPanel } from '@elastic/eui';
-import { EMPTY_SEVERITY_COUNT, EntityType } from '../../../common/search_strategy';
-import { useRiskScoreKpi } from '../api/hooks/use_risk_score_kpi';
-import { useRiskScore } from '../api/hooks/use_risk_score';
+import {
+  EMPTY_SEVERITY_COUNT,
+  EntityType,
+  type RiskScoreSortField,
+} from '../../../common/search_strategy';
+import { useEntityStoreRiskScoreKpi } from '../api/hooks/use_entity_store_risk_score_kpi';
+import { useEntityStoreRiskScore } from '../api/hooks/use_entity_store_risk_score';
 import { UserRiskScoreQueryId } from '../common/utils';
 import { EnableRiskScore } from './enable_risk_score';
 import type { UsersComponentsQueryProps } from '../../explore/users/pages/navigation/types';
@@ -25,8 +29,65 @@ import { useMissingRiskEnginePrivileges } from '../hooks/use_missing_risk_engine
 import { RiskEnginePrivilegesCallOut } from './risk_engine_privileges_callout';
 import { useUpsellingComponent } from '../../common/hooks/use_upselling';
 import { RiskScoresNoDataDetected } from './risk_score_no_data_detected';
+import {
+  buildExecutionContext,
+  EA_EXECUTION_CONTEXT_NAMES,
+} from '../../common/utils/execution_context';
+
+const USERS_RISK_TAB_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.EXPLORE_USERS_PAGE,
+  'users_risk_score'
+);
+const USERS_RISK_TAB_KPI_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.EXPLORE_USERS_PAGE,
+  'users_risk_score_kpi'
+);
+// Shared by both hooks so the tab sends a single risk-engine-status request.
+const USERS_RISK_TAB_STATUS_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.EXPLORE_USERS_PAGE,
+  'users_risk_score_status'
+);
 
 const UserRiskScoreTableManage = manageQuery(UserRiskScoreTable);
+
+const useUserRiskScoreTabData = ({
+  filterQuery,
+  pagination,
+  querySkip,
+  sort,
+  timerange,
+}: {
+  filterQuery?: UsersComponentsQueryProps['filterQuery'];
+  pagination: { cursorStart: number; querySize: number };
+  querySkip: boolean;
+  sort: RiskScoreSortField;
+  timerange: { from: string; to: string };
+}) => {
+  const entityStoreRiskScore = useEntityStoreRiskScore({
+    filterQuery,
+    pagination,
+    riskEntity: EntityType.user,
+    skip: querySkip,
+    sort,
+    timerange,
+    executionContext: USERS_RISK_TAB_CONTEXT,
+    statusExecutionContext: USERS_RISK_TAB_STATUS_CONTEXT,
+  });
+
+  const entityStoreKpi = useEntityStoreRiskScoreKpi({
+    filterQuery,
+    skip: querySkip,
+    riskEntity: EntityType.user,
+    executionContext: USERS_RISK_TAB_KPI_CONTEXT,
+    statusExecutionContext: USERS_RISK_TAB_STATUS_CONTEXT,
+  });
+
+  return {
+    ...entityStoreRiskScore,
+    isKpiLoading: entityStoreKpi.loading,
+    severityCount: entityStoreKpi.severityCount,
+  };
+};
 
 export const UserRiskScoreQueryTabBody = ({
   deleteQuery,
@@ -66,20 +127,22 @@ export const UserRiskScoreQueryTabBody = ({
 
   const privileges = useMissingRiskEnginePrivileges({ readonly: true });
 
-  const { data, inspect, isInspected, hasEngineBeenInstalled, loading, refetch, totalCount } =
-    useRiskScore({
-      filterQuery,
-      pagination,
-      riskEntity: EntityType.user,
-      skip: querySkip,
-      sort,
-      timerange,
-    });
-
-  const { severityCount, loading: isKpiLoading } = useRiskScoreKpi({
+  const {
+    data,
+    inspect,
+    isInspected,
+    hasEngineBeenInstalled,
+    loading,
+    refetch,
+    totalCount,
+    isKpiLoading,
+    severityCount,
+  } = useUserRiskScoreTabData({
     filterQuery,
-    riskEntity: EntityType.user,
-    skip: querySkip,
+    pagination,
+    querySkip,
+    sort,
+    timerange,
   });
 
   const isDisabled = !hasEngineBeenInstalled && !loading;
@@ -100,12 +163,13 @@ export const UserRiskScoreQueryTabBody = ({
   if (isDisabled) {
     return (
       <EuiPanel hasBorder>
-        <EnableRiskScore isDisabled={isDisabled} entityType={EntityType.host} />
+        <EnableRiskScore isDisabled={isDisabled} entityType={EntityType.user} />
       </EuiPanel>
     );
   }
 
   if (
+    !loading &&
     hasEngineBeenInstalled &&
     userSeveritySelectionRedux.length === 0 &&
     data &&

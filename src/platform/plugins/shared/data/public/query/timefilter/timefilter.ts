@@ -10,22 +10,19 @@
 import _ from 'lodash';
 import { Subject, BehaviorSubject } from 'rxjs';
 import moment from 'moment';
-import { PublicMethodsOf } from '@kbn/utility-types';
-import { TimeRange } from '@kbn/es-query';
-import type { DataView } from '@kbn/data-views-plugin/common';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import type { TimeRange } from '@kbn/es-query';
+import type { RefreshInterval } from '@kbn/data-service-server';
 import { areRefreshIntervalsDifferent, areTimeRangesDifferent } from './lib/diff_time_picker_vals';
 import type { TimefilterConfig, InputTimeRange, TimeRangeBounds } from './types';
-import { NowProviderInternalContract } from '../../now_provider';
-import {
-  calculateBounds,
-  getAbsoluteTimeRange,
-  getTime,
-  getRelativeTime,
-  RefreshInterval,
-} from '../../../common';
-import { TimeHistoryContract } from './time_history';
-import { createAutoRefreshLoop, AutoRefreshDoneFn } from './lib/auto_refresh_loop';
-import { TimefilterHook, createUseTimefilterHook } from './use_timefilter';
+import type { NowProviderInternalContract } from '../../now_provider';
+import { calculateBounds, getAbsoluteTimeRange, getTime, getRelativeTime } from '../../../common';
+import type { TimeFilterable } from '../../../common/query/timefilter/get_time';
+import type { TimeHistoryContract } from './time_history';
+import type { AutoRefreshDoneFn } from './lib/auto_refresh_loop';
+import { createAutoRefreshLoop } from './lib/auto_refresh_loop';
+import type { TimefilterHook } from './use_timefilter';
+import { createUseTimefilterHook } from './use_timefilter';
 
 export type { AutoRefreshDoneFn };
 
@@ -77,7 +74,7 @@ export class Timefilter {
     this._time = config.timeDefaults;
     this.setRefreshInterval(config.refreshIntervalDefaults);
 
-    this.useTimefilter = createUseTimefilterHook(this);
+    this.useTimefilter = createUseTimefilterHook(this, nowProvider);
   }
 
   public isTimeRangeSelectorEnabled() {
@@ -116,17 +113,16 @@ export class Timefilter {
    */
   public getAutoRefreshFetch$ = () => this.autoRefreshLoop.loop$;
 
+  public triggerFetch = () => {
+    this.fetch$.next();
+  };
+
   public getFetch$ = () => {
     return this.fetch$.asObservable();
   };
 
   public getTime = (): TimeRange => {
-    const { from, to } = this._time;
-    return {
-      ...this._time,
-      from: moment.isMoment(from) ? from.toISOString() : from,
-      to: moment.isMoment(to) ? to.toISOString() : to,
-    };
+    return { ...this._time };
   };
 
   /**
@@ -136,23 +132,16 @@ export class Timefilter {
     return getAbsoluteTimeRange(this._time, { forceNow: this.nowProvider.get() });
   }
 
-  /**
-   * Updates timefilter time.
-   * Emits 'timeUpdate' and 'fetch' events when time changes
-   * @param {Object} time
-   * @property {string|moment} time.from
-   * @property {string|moment} time.to
-   */
-  public setTime = (time: InputTimeRange) => {
-    // Object.assign used for partially composed updates
-    const newTime = Object.assign(this.getTime(), time);
-    if (areTimeRangesDifferent(this.getTime(), newTime)) {
-      this._time = {
-        from: newTime.from,
-        to: newTime.to,
-      };
+  /** Sets the time (moment input is stored as ISO strings) and emits when it changes. */
+  public setTime = (time: Partial<InputTimeRange>) => {
+    const current = this.getTime();
+    const from = moment.isMoment(time.from) ? time.from.toISOString() : time.from ?? current.from;
+    const to = moment.isMoment(time.to) ? time.to.toISOString() : time.to ?? current.to;
+    const timeRange: TimeRange = { from, to };
+    if (areTimeRangesDifferent(current, timeRange)) {
+      this._time = timeRange;
       this._isTimeTouched = true;
-      this._history.add(this._time);
+      this._history.add(timeRange);
       this.timeUpdate$.next();
       this.fetch$.next();
     }
@@ -232,7 +221,7 @@ export class Timefilter {
    *
    * One use case is keeping different elements embedded in the same UI in sync.
    */
-  public createFilter = (indexPattern: DataView, timeRange?: TimeRange) => {
+  public createFilter = (indexPattern: TimeFilterable, timeRange?: TimeRange) => {
     return getTime(indexPattern, timeRange ? timeRange : this._time, {
       forceNow: this.nowProvider.get(),
     });
@@ -246,7 +235,7 @@ export class Timefilter {
    *
    * @note Consumers of this function need to ensure that the ES endpoint supports datemath.
    */
-  public createRelativeFilter = (indexPattern: DataView, timeRange?: TimeRange) => {
+  public createRelativeFilter = (indexPattern: TimeFilterable, timeRange?: TimeRange) => {
     return getRelativeTime(indexPattern, timeRange ? timeRange : this._time, {
       forceNow: this.nowProvider.get(),
     });

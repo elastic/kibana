@@ -13,11 +13,17 @@ import type { EntityType } from '@kbn/timelines-plugin/common';
 import type { SessionsComponentsProps } from './types';
 import { TableId } from '@kbn/securitysolution-data-table';
 import { licenseService } from '../../hooks/use_license';
-import { mount } from 'enzyme';
 import type { EventsViewerProps } from '../events_viewer';
 
 jest.mock('../../lib/kibana');
 jest.mock('../../utils/normalize_time_range');
+
+jest.mock(
+  '../../../detections/components/alerts_table/timeline_actions/use_add_bulk_to_timeline',
+  () => ({
+    useAddBulkToTimelineAction: jest.fn().mockReturnValue([]),
+  })
+);
 
 const startDate = '2022-03-22T22:10:56.794Z';
 const endDate = '2022-03-21T22:10:56.791Z';
@@ -106,14 +112,14 @@ mockGetDefaultControlColumn.mockReturnValue([
 
 describe('SessionsView', () => {
   it('renders the session view', async () => {
-    const wrapper = mount(
+    const { getByTestId } = render(
       <TestProviders>
         <SessionsView {...testProps} />
       </TestProviders>
     );
 
     await waitFor(() => {
-      expect(wrapper.find(`[data-test-subj="${TEST_ID}"]`).exists()).toBeTruthy();
+      expect(getByTestId(TEST_ID)).toBeTruthy();
     });
   });
 

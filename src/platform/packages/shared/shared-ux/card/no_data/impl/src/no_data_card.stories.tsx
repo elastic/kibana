@@ -40,4 +40,44 @@ export const Card = {
   },
 
   argTypes,
+  args: {
+    buttonText: 'Browse integrations',
+    href: '/app/integrations/browse',
+  },
+};
+
+export const NoPermission = {
+  render: (params: NoDataCardStorybookParams) => {
+    return (
+      <NoDataCardProvider {...mock.getServices(params)}>
+        <NoDataCard {...params} />
+      </NoDataCardProvider>
+    );
+  },
+
+  argTypes,
+  args: {
+    canAccessFleet: false,
+    buttonText: 'Browse integrations',
+    href: '/app/integrations/browse',
+  },
+};
+
+export const DisabledButtonWithTooltip = {
+  render: (params: NoDataCardStorybookParams) => {
+    return (
+      <NoDataCardProvider {...mock.getServices(params)}>
+        <NoDataCard {...params} />
+      </NoDataCardProvider>
+    );
+  },
+
+  argTypes,
+  args: {
+    canAccessFleet: false,
+    buttonText: 'Browse integrations',
+    disabledButtonTooltipText:
+      'This feature is currently unavailable. Please contact your administrator for access.',
+    href: '/app/integrations/browse',
+  },
 };

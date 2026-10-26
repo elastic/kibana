@@ -6,9 +6,11 @@
  */
 
 import React, { useState } from 'react';
-import { EuiBasicTable, EuiSpacer, Criteria, Pagination } from '@elastic/eui';
+import type { Criteria, Pagination } from '@elastic/eui';
+import { EuiBasicTable, EuiSpacer } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { StatusTag } from './location_status_tags';
+import type { StatusTag } from './location_status_tags';
 import { TagLabel } from './tag_label';
 import { AvailabilityLabel, LastCheckLabel, LocationLabel } from '../translations';
 
@@ -80,6 +82,9 @@ export const AvailabilityReporting: React.FC<Props> = ({ allLocations }) => {
         columns={cols}
         items={allLocations.slice(pageIndex * pageSize, pageIndex * pageSize + pageSize)}
         onChange={onTableChange}
+        tableCaption={i18n.translate('xpack.uptime.availabilityReporting.tableCaption', {
+          defaultMessage: 'Availability overview',
+        })}
         {...paginationProps}
       />
     </>

@@ -6,20 +6,20 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { IScopedClusterClient } from '@kbn/core/server';
+import type { IScopedClusterClient } from '@kbn/core/server';
 import { get } from 'lodash';
 import { fetchAllFromScroll } from '../../../lib/fetch_all_from_scroll';
 import { INDEX_NAMES, ES_SCROLL_SETTINGS } from '../../../../common/constants';
-import { RouteDependencies } from '../../../types';
+import type { RouteDependencies } from '../../../types';
 // @ts-ignore
 import { WatchHistoryItem } from '../../../models/watch_history_item';
 
 const paramsSchema = schema.object({
-  watchId: schema.string(),
+  watchId: schema.string({ maxLength: 1000 }),
 });
 
 const querySchema = schema.object({
-  startTime: schema.string(),
+  startTime: schema.string({ maxLength: 64 }),
 });
 
 function fetchHistoryItems(dataClient: IScopedClusterClient, watchId: any, startTime: any) {

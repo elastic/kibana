@@ -8,9 +8,9 @@
  */
 
 import { subj } from '@kbn/test-subj-selector';
-import { ToolingLog } from '@kbn/tooling-log';
-import { ElementHandle, Page } from 'playwright';
-import { Retry } from '..';
+import type { ToolingLog } from '@kbn/tooling-log';
+import type { ElementHandle, Page } from 'playwright';
+import type { Retry } from '..';
 
 interface WaitForRenderArgs {
   expectedItemsCount: number;
@@ -105,7 +105,7 @@ export class KibanaPage {
   }) {
     await this.waitForRender({
       expectedItemsCount: count,
-      itemLocator: '[data-rendering-count]',
+      itemLocator: '[data-test-subj="embeddablePanel"]',
       checkAttribute: 'data-render-complete',
       timeout,
     });

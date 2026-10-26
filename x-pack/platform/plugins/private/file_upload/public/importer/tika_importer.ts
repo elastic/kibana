@@ -5,44 +5,15 @@
  * 2.0.
  */
 
-import { fromByteArray } from 'base64-js';
-import type { ImportDocTika } from '../../common/types';
+import { TikaReader } from '@kbn/file-upload-common';
 import { Importer } from './importer';
-import type { CreateDocsResponse } from './types';
 
 export class TikaImporter extends Importer {
+  protected _reader: TikaReader;
+
   constructor() {
     super();
-  }
-
-  public read(data: ArrayBuffer) {
+    this._reader = new TikaReader();
     this._chunkSize = 0;
-    const pdfBase64 = fromByteArray(new Uint8Array(data));
-    const { success, docs } = this._createDocs(pdfBase64);
-    if (success) {
-      this._docArray = this._docArray.concat(docs);
-    } else {
-      return { success: false };
-    }
-    return { success: true };
-  }
-
-  protected _createDocs(base64String: string): CreateDocsResponse<ImportDocTika> {
-    const remainder = 0;
-    try {
-      const docs = [{ data: base64String }];
-      return {
-        success: true,
-        docs,
-        remainder,
-      };
-    } catch (error) {
-      return {
-        success: false,
-        docs: [],
-        remainder,
-        error,
-      };
-    }
   }
 }

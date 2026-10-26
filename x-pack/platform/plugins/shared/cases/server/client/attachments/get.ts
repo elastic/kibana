@@ -5,45 +5,55 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
 import type { SavedObject } from '@kbn/core/server';
 
 import type {
-  AlertAttachmentAttributes,
-  Attachment,
-  Attachments,
+  AttachmentsV2,
+  UnifiedAttachment,
+  DocumentAttachmentAttributesV2,
 } from '../../../common/types/domain';
-import { AttachmentType } from '../../../common';
-import type { AlertResponse, AttachmentsFindResponse } from '../../../common/types/api';
+import type { DocumentResponse, UnifiedAttachmentsFindResponse } from '../../../common/types/api';
 import {
-  AlertResponseRt,
-  FindAttachmentsQueryParamsRt,
-  AttachmentsFindResponseRt,
+  DocumentResponseSchema,
+  UnifiedAttachmentsFindQueryParamsSchema,
+  UnifiedAttachmentsFindResponseSchema,
 } from '../../../common/types/api';
+import {
+  UnifiedAttachmentSchema,
+  AttachmentsSchemaV2,
+} from '../../../common/types/domain/attachment/v2';
 import type { CasesClient } from '../client';
 import type { CasesClientArgs } from '../types';
 
-import type { FindCommentsArgs, GetAllAlertsAttachToCase, GetAllArgs, GetArgs } from './types';
+import type {
+  FindAttachmentsArgs,
+  GetAllDocumentsAttachedToCase,
+  GetAllArgs,
+  GetArgs,
+} from './types';
 
-import { CASE_COMMENT_SAVED_OBJECT, CASE_SAVED_OBJECT } from '../../../common/constants';
-import { decodeOrThrow, decodeWithExcessOrThrow } from '../../common/runtime_types';
+import { CASE_SAVED_OBJECT } from '../../../common/constants';
+import { getAttachmentAuthorizationFilter } from '../../authorization/utils';
+import { decodeOrThrowZod, decodeWithExcessOrThrowZod } from '../../common/runtime_types';
 import {
   defaultSortField,
-  transformComments,
-  flattenCommentSavedObject,
-  flattenCommentSavedObjects,
+  flattenAttachmentSavedObject,
+  flattenAttachmentSavedObjects,
   getIDsAndIndicesAsArrays,
 } from '../../common/utils';
 import { createCaseError } from '../../common/error';
+import { getCaseReferenceId } from '../../common/references';
 import { DEFAULT_PAGE, DEFAULT_PER_PAGE } from '../../routes/api';
-import { buildFilter, combineFilters } from '../utils';
+import { combineFilters } from '../utils';
 import { Operations } from '../../authorization';
-import { AttachmentRt, AttachmentsRt } from '../../../common/types/domain';
+import { buildAttachmentTypeFilter } from './type_filter';
 
-const normalizeAlertResponse = (
-  alerts: Array<SavedObject<AlertAttachmentAttributes>>
-): AlertResponse =>
-  alerts.reduce((acc: AlertResponse, alert) => {
-    const { ids, indices } = getIDsAndIndicesAsArrays(alert.attributes);
+const normalizeDocumentResponse = (
+  documents: Array<SavedObject<DocumentAttachmentAttributesV2>>
+): DocumentResponse =>
+  documents.reduce((acc: DocumentResponse, document) => {
+    const { ids, indices } = getIDsAndIndicesAsArrays(document.attributes);
 
     if (ids.length !== indices.length) {
       return acc;
@@ -53,20 +63,32 @@ const normalizeAlertResponse = (
       ...ids.map((id, index) => ({
         id,
         index: indices[index],
-        attached_at: alert.attributes.created_at,
+        attached_at: document.attributes.created_at,
       }))
     );
     return acc;
   }, []);
 
+const decodeUnifiedAttachment = (
+  attachment: { id: string },
+  logger: CasesClientArgs['logger']
+): UnifiedAttachment | undefined => {
+  try {
+    return decodeOrThrowZod(UnifiedAttachmentSchema)(attachment);
+  } catch (error) {
+    logger.warn(`Failed to decode attachment id ${attachment.id} as unified: ${error}`);
+    return undefined;
+  }
+};
+
 /**
- * Retrieves all alerts attached to a specific case.
+ * Retrieves all documents attached to a specific case.
  */
-export const getAllAlertsAttachToCase = async (
-  { caseId }: GetAllAlertsAttachToCase,
+export const getAllDocumentsAttachedToCase = async (
+  { caseId, filter, attachmentTypes, unifiedAttachmentTypes }: GetAllDocumentsAttachedToCase,
   clientArgs: CasesClientArgs,
   casesClient: CasesClient
-): Promise<AlertResponse> => {
+): Promise<DocumentResponse> => {
   const {
     authorization,
     services: { attachmentService },
@@ -81,26 +103,32 @@ export const getAllAlertsAttachToCase = async (
     });
 
     const { filter: authorizationFilter, ensureSavedObjectsAreAuthorized } =
-      await authorization.getAuthorizationFilter(Operations.getAlertsAttachedToCase);
+      await getAttachmentAuthorizationFilter(authorization, Operations.getAlertsAttachedToCase);
 
-    const alerts = await attachmentService.getter.getAllAlertsAttachToCase({
+    const filterArray = authorizationFilter ? [authorizationFilter] : [];
+    if (filter) filterArray.push(filter);
+
+    const documents = await attachmentService.getter.getAllDocumentsAttachedToCase({
+      attachmentTypes,
+      unifiedAttachmentTypes,
       caseId: theCase.id,
-      filter: authorizationFilter,
+      filter: combineFilters(filterArray),
+      owner: theCase.owner,
     });
 
     ensureSavedObjectsAreAuthorized(
-      alerts.map((alert) => ({
-        owner: alert.attributes.owner,
-        id: alert.id,
+      documents.map((document) => ({
+        owner: document.attributes.owner,
+        id: document.id,
       }))
     );
 
-    const res = normalizeAlertResponse(alerts);
+    const res = normalizeDocumentResponse(documents);
 
-    return decodeOrThrow(AlertResponseRt)(res);
+    return decodeOrThrowZod(DocumentResponseSchema)(res);
   } catch (error) {
     throw createCaseError({
-      message: `Failed to get alerts attached to case id: ${caseId}: ${error}`,
+      message: `Failed to get documents attached to case id: ${caseId}: ${error}`,
       error,
       logger,
     });
@@ -108,12 +136,13 @@ export const getAllAlertsAttachToCase = async (
 };
 
 /**
- * Retrieves the attachments for a case entity. This support pagination.
+ * Retrieves the attachments for a case entity, optionally filtered by `type`.
+ * Omitting `type` returns every attachment type across both storage models.
  */
 export async function find(
-  { caseID, findQueryParams }: FindCommentsArgs,
+  { caseID, findQueryParams }: FindAttachmentsArgs,
   clientArgs: CasesClientArgs
-): Promise<AttachmentsFindResponse> {
+): Promise<UnifiedAttachmentsFindResponse> {
   const {
     services: { attachmentService },
     logger,
@@ -121,22 +150,23 @@ export async function find(
   } = clientArgs;
 
   try {
-    const queryParams = decodeWithExcessOrThrow(FindAttachmentsQueryParamsRt)(findQueryParams);
+    const queryParams = decodeWithExcessOrThrowZod(UnifiedAttachmentsFindQueryParamsSchema)(
+      findQueryParams
+    );
 
     const { filter: authorizationFilter, ensureSavedObjectsAreAuthorized } =
-      await authorization.getAuthorizationFilter(Operations.findComments);
+      await getAttachmentAuthorizationFilter(authorization, Operations.findComments);
 
-    const filter = combineFilters([
-      buildFilter({
-        filters: [AttachmentType.user],
-        field: 'type',
-        operator: 'or',
-        type: CASE_COMMENT_SAVED_OBJECT,
-      }),
-      authorizationFilter,
-    ]);
+    const requestedTypes =
+      queryParams?.type == null
+        ? undefined
+        : Array.isArray(queryParams.type)
+        ? queryParams.type
+        : [queryParams.type];
 
-    const theComments = await attachmentService.find({
+    const filter = combineFilters([buildAttachmentTypeFilter(requestedTypes), authorizationFilter]);
+
+    const theAttachments = await attachmentService.find({
       options: {
         page: queryParams?.page ?? DEFAULT_PAGE,
         perPage: queryParams?.perPage ?? DEFAULT_PER_PAGE,
@@ -148,18 +178,27 @@ export async function find(
     });
 
     ensureSavedObjectsAreAuthorized(
-      theComments.saved_objects.map((comment) => ({
-        owner: comment.attributes.owner,
-        id: comment.id,
+      theAttachments.saved_objects.map((attachment) => ({
+        owner: attachment.attributes.owner,
+        id: attachment.id,
       }))
     );
 
-    const res = transformComments(theComments);
+    const data = flattenAttachmentSavedObjects(theAttachments.saved_objects).flatMap(
+      (attachment) => decodeUnifiedAttachment(attachment, logger) ?? []
+    );
 
-    return decodeOrThrow(AttachmentsFindResponseRt)(res);
+    const res = {
+      data,
+      page: theAttachments.page,
+      per_page: theAttachments.per_page,
+      total: theAttachments.total,
+    };
+
+    return decodeOrThrowZod(UnifiedAttachmentsFindResponseSchema)(res);
   } catch (error) {
     throw createCaseError({
-      message: `Failed to find comments case id: ${caseID}: ${error}`,
+      message: `Failed to find attachments case id: ${caseID}: ${error}`,
       error,
       logger,
     });
@@ -167,12 +206,14 @@ export async function find(
 }
 
 /**
- * Retrieves a single attachment by its ID.
+ * Retrieves a single attachment by its saved object id. `AttachmentGetter.get`
+ * already normalizes legacy-stored rows via `toUnifiedAttributes`, so this decodes
+ * against the unified-only shape rather than the legacy-tolerant union.
  */
 export async function get(
-  { attachmentID, caseID }: GetArgs,
+  { savedObjectId, caseID }: GetArgs,
   clientArgs: CasesClientArgs
-): Promise<Attachment> {
+): Promise<UnifiedAttachment> {
   const {
     services: { attachmentService },
     logger,
@@ -180,21 +221,28 @@ export async function get(
   } = clientArgs;
 
   try {
-    const comment = await attachmentService.getter.get({
-      attachmentId: attachmentID,
+    const attachment = await attachmentService.getter.get({
+      savedObjectId,
     });
 
     await authorization.ensureAuthorized({
-      entities: [{ owner: comment.attributes.owner, id: comment.id }],
+      entities: [{ owner: attachment.attributes.owner, id: attachment.id }],
       operation: Operations.getComment,
     });
 
-    const res = flattenCommentSavedObject(comment);
+    if (getCaseReferenceId(attachment.references) !== caseID) {
+      throw Boom.notFound(`This attachment ${savedObjectId} does not exist in case ${caseID}.`);
+    }
 
-    return decodeOrThrow(AttachmentRt)(res);
+    const decoded = decodeUnifiedAttachment(flattenAttachmentSavedObject(attachment), logger);
+    if (decoded == null) {
+      throw Boom.notFound(`Attachment ${savedObjectId} could not be read.`);
+    }
+
+    return decoded;
   } catch (error) {
     throw createCaseError({
-      message: `Failed to get comment case id: ${caseID} attachment id: ${attachmentID}: ${error}`,
+      message: `Failed to get attachment case id: ${caseID} attachment id: ${savedObjectId}: ${error}`,
       error,
       logger,
     });
@@ -207,7 +255,7 @@ export async function get(
 export async function getAll(
   { caseID }: GetAllArgs,
   clientArgs: CasesClientArgs
-): Promise<Attachments> {
+): Promise<AttachmentsV2> {
   const {
     services: { caseService },
     logger,
@@ -215,7 +263,8 @@ export async function getAll(
   } = clientArgs;
 
   try {
-    const { filter, ensureSavedObjectsAreAuthorized } = await authorization.getAuthorizationFilter(
+    const { filter, ensureSavedObjectsAreAuthorized } = await getAttachmentAuthorizationFilter(
+      authorization,
       Operations.getAllComments
     );
 
@@ -231,9 +280,9 @@ export async function getAll(
       comments.saved_objects.map((comment) => ({ id: comment.id, owner: comment.attributes.owner }))
     );
 
-    const res = flattenCommentSavedObjects(comments.saved_objects);
+    const res = flattenAttachmentSavedObjects(comments.saved_objects);
 
-    return decodeOrThrow(AttachmentsRt)(res);
+    return decodeOrThrowZod(AttachmentsSchemaV2)(res);
   } catch (error) {
     throw createCaseError({
       message: `Failed to get all comments case id: ${caseID}: ${error}`,

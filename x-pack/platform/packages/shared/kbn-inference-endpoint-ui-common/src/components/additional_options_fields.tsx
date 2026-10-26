@@ -6,22 +6,15 @@
  */
 
 import React, { useMemo } from 'react';
-import { css } from '@emotion/react';
 
 import {
+  EuiFieldNumber,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormControlLayout,
   EuiFormRow,
+  EuiHorizontalRule,
   EuiSpacer,
-  EuiTitle,
-  EuiAccordion,
-  EuiFieldText,
-  useEuiTheme,
-  EuiTextColor,
-  EuiButtonGroup,
-  EuiPanel,
-  EuiButtonEmpty,
-  EuiCopy,
-  EuiButton,
-  useEuiFontSize,
   EuiText,
 } from '@elastic/eui';
 import {
@@ -31,266 +24,217 @@ import {
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
-import { ConfigurationFormItems } from './configuration/configuration_form_items';
 import * as LABELS from '../translations';
-import { DEFAULT_TASK_TYPE } from '../constants';
-import { Config, ConfigEntryView } from '../types/types';
-import { TaskTypeOption } from '../utils/helpers';
-
-// Custom trigger button CSS
-const buttonCss = css`
-  &:hover {
-    text-decoration: none;
-  }
-`;
+import { CHAT_COMPLETION_TASK_TYPE, DEFAULT_TASK_TYPE } from '../constants';
+import type { Config } from '../types/types';
+import type { TaskTypeOption } from '../utils/helpers';
 
 interface AdditionalOptionsFieldsProps {
   config: Config;
-  optionalProviderFormFields: ConfigEntryView[];
-  onSetProviderConfigEntry: (key: string, value: unknown) => Promise<void>;
-  onTaskTypeOptionsSelect: (taskType: string, provider?: string) => void;
   selectedTaskType?: string;
   taskTypeOptions: TaskTypeOption[];
   isEdit?: boolean;
+  allowContextWindowLength?: boolean;
+  allowTemperature?: boolean;
 }
 
 export const AdditionalOptionsFields: React.FC<AdditionalOptionsFieldsProps> = ({
   config,
-  taskTypeOptions,
-  optionalProviderFormFields,
   selectedTaskType,
-  onSetProviderConfigEntry,
-  onTaskTypeOptionsSelect,
+  taskTypeOptions,
   isEdit,
+  allowContextWindowLength,
+  allowTemperature,
 }) => {
-  const xsFontSize = useEuiFontSize('xs').fontSize;
-  const { euiTheme } = useEuiTheme();
   const { setFieldValue } = useFormContext();
 
-  const taskTypeSettings = useMemo(
+  const showContextWindow =
+    (taskTypeOptions?.some((option) => option.id === CHAT_COMPLETION_TASK_TYPE) ||
+      (isEdit && selectedTaskType === CHAT_COMPLETION_TASK_TYPE)) &&
+    allowContextWindowLength;
+  const showTemperature =
+    (selectedTaskType === CHAT_COMPLETION_TASK_TYPE || selectedTaskType === DEFAULT_TASK_TYPE) &&
+    allowTemperature;
+
+  const contextWindowLengthSettings = useMemo(
     () =>
-      selectedTaskType || config.taskType?.length ? (
-        <>
-          <EuiTitle size="xxs" data-test-subj="task-type-details-label">
-            <h4>
-              <FormattedMessage
-                id="xpack.inferenceEndpointUICommon.components.additionalInfo.taskTypeLabel"
-                defaultMessage="Task type"
-              />
-            </h4>
-          </EuiTitle>
-          <EuiText
-            css={css`
-              font-size: ${xsFontSize};
-              color: ${euiTheme.colors.textSubdued};
-            `}
-          >
-            <FormattedMessage
-              id="xpack.inferenceEndpointUICommon.components.additionalInfo.taskTypeHelpInfo"
-              defaultMessage="Configure the inference task. Task types are specific to the service and model selected."
-            />
-          </EuiText>
-          <EuiSpacer size="m" />
-          <UseField
-            path="config.taskType"
-            config={{
-              validations: [
-                {
-                  validator: fieldValidators.emptyField(LABELS.getRequiredMessage('Task type')),
-                  isBlocking: true,
+      showContextWindow ? (
+        <UseField
+          path="config.contextWindowLength"
+          config={{
+            validations: [
+              {
+                validator: ({ value, path }) => {
+                  if (value !== undefined && value !== null && value !== '') {
+                    const numValue = Number(value);
+                    if (!Number.isInteger(numValue) || numValue < 0) {
+                      return {
+                        code: 'ERR_FIELD_INVALID',
+                        path,
+                        message: LABELS.CONTEXT_WINDOW_VALIDATION_MESSAGE,
+                      };
+                    }
+                  }
                 },
-              ],
-            }}
-          >
-            {(field) => {
-              const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
-
-              return (
-                <EuiFormRow id="taskType" fullWidth isInvalid={isInvalid} error={errorMessage}>
-                  {isEdit ? (
-                    <EuiButton data-test-subj="taskTypeSelectDisabled" isDisabled>
-                      {config.taskType}
-                    </EuiButton>
-                  ) : taskTypeOptions.length === 1 ? (
-                    <EuiButton
-                      data-test-subj="taskTypeSelectSingle"
-                      isDisabled
-                      onClick={() => onTaskTypeOptionsSelect(config.taskType)}
-                    >
-                      {config.taskType}
-                    </EuiButton>
-                  ) : (
-                    <EuiButtonGroup
-                      data-test-subj="taskTypeSelect"
-                      buttonSize="m"
-                      legend="Task type"
-                      defaultValue={DEFAULT_TASK_TYPE}
-                      idSelected={config.taskType}
-                      onChange={(id) => onTaskTypeOptionsSelect(id)}
-                      options={taskTypeOptions}
-                      color="text"
-                      type="single"
-                    />
-                  )}
-                </EuiFormRow>
-              );
-            }}
-          </UseField>
-        </>
-      ) : null,
-    [
-      selectedTaskType,
-      config.taskType,
-      xsFontSize,
-      euiTheme.colors.textSubdued,
-      isEdit,
-      taskTypeOptions,
-      onTaskTypeOptionsSelect,
-    ]
-  );
-
-  const inferenceUri = useMemo(() => `_inference/${selectedTaskType}/`, [selectedTaskType]);
-
-  return (
-    <EuiAccordion
-      id="inferenceAdditionalOptions"
-      data-test-subj="inference-endpoint-additional-options"
-      buttonProps={{ css: buttonCss }}
-      css={css`
-        .euiAccordion__triggerWrapper {
-          display: inline-flex;
-        }
-      `}
-      element="fieldset"
-      arrowDisplay="right"
-      arrowProps={{
-        color: 'primary',
-      }}
-      buttonElement="button"
-      borders="none"
-      buttonContent={
-        <EuiTextColor color={euiTheme.colors.primary}>
-          <FormattedMessage
-            id="xpack.inferenceEndpointUICommon.components.additionalInfo.additionalOptionsLabel"
-            defaultMessage="Additional options"
-          />
-        </EuiTextColor>
-      }
-      initialIsOpen={true}
-    >
-      <EuiSpacer size="m" />
-      <EuiPanel hasBorder={true}>
-        {optionalProviderFormFields.length > 0 ? (
-          <>
-            <EuiTitle size="xxs" data-test-subj="provider-optional-settings-label">
-              <h4>
-                <FormattedMessage
-                  id="xpack.inferenceEndpointUICommon.components.additionalInfo.providerOptionalSettingsLabel"
-                  defaultMessage="Service settings"
-                />
-              </h4>
-            </EuiTitle>
-            <EuiText
-              css={css`
-                font-size: ${xsFontSize};
-                color: ${euiTheme.colors.textSubdued};
-              `}
-            >
-              <FormattedMessage
-                id="xpack.inferenceEndpointUICommon.components.additionalInfo.providerOptionalSettingsHelpLabel"
-                defaultMessage="Configure the inference provider. These settings are optional provider settings."
-              />
-            </EuiText>
-            <EuiSpacer size="m" />
-            <ConfigurationFormItems
-              isLoading={false}
-              direction="column"
-              items={optionalProviderFormFields}
-              setConfigEntry={onSetProviderConfigEntry}
-              isEdit={isEdit}
-            />
-            <EuiSpacer size="m" />
-          </>
-        ) : null}
-
-        {taskTypeSettings}
-        <EuiSpacer size="m" />
-        <EuiTitle size="xxs" data-test-subj="task-type-details-label">
-          <h4>
-            <FormattedMessage
-              id="xpack.inferenceEndpointUICommon.components.additionalInfo.inferenceEndpointLabel"
-              defaultMessage="Inference Endpoint"
-            />
-          </h4>
-        </EuiTitle>
-        <EuiText
-          css={css`
-            font-size: ${xsFontSize};
-            color: ${euiTheme.colors.textSubdued};
-          `}
+                isBlocking: false,
+              },
+            ],
+          }}
         >
-          <FormattedMessage
-            id="xpack.inferenceEndpointUICommon.components.additionalInfo.inferenceEndpointHelpLabel"
-            defaultMessage="Inference endpoints provide a simplified method for using this configuration, ecpecially from the API"
-          />
-        </EuiText>
-        <EuiSpacer size="s" />
-
-        <UseField path="config.inferenceId">
           {(field) => {
             const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
-
             return (
               <EuiFormRow
-                id="inferenceId"
+                id="contextWindowLength"
+                fullWidth
                 isInvalid={isInvalid}
                 error={errorMessage}
-                fullWidth
+                label={
+                  <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
+                    <EuiFlexItem grow={false}>
+                      <FormattedMessage
+                        id="xpack.inferenceEndpointUICommon.components.additionalInfo.contextWindowLengthLabel"
+                        defaultMessage="Context window length"
+                      />
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiText color="subdued" size="xs">
+                        {LABELS.OPTIONALTEXT}
+                      </EuiText>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                }
                 helpText={
                   <FormattedMessage
-                    id="xpack.inferenceEndpointUICommon.components.additionalInfo.inferenceIdHelpLabel"
-                    defaultMessage="This ID cannot be changed once created."
+                    id="xpack.inferenceEndpointUICommon.components.additionalInfo.contextWindowLengthHelpInfo"
+                    defaultMessage="Can be set to manually define the context length of the default model used by the connector. Useful for open source or more recent models."
                   />
                 }
+                data-test-subj={'configuration-formrow-contextWindowLength'}
               >
-                <EuiFieldText
-                  data-test-subj="inference-endpoint-input-field"
+                <EuiFormControlLayout
                   fullWidth
-                  disabled={isEdit}
-                  value={config.inferenceId}
-                  onChange={(e) => {
-                    setFieldValue('config.inferenceId', e.target.value);
+                  isInvalid={isInvalid}
+                  clear={{
+                    onClick: () => {
+                      setFieldValue('config.contextWindowLength', '');
+                    },
                   }}
-                  prepend={inferenceUri}
-                  append={
-                    <EuiCopy
-                      beforeMessage={LABELS.COPY_TOOLTIP}
-                      afterMessage={LABELS.COPIED_TOOLTIP}
-                      textToCopy={`${inferenceUri}${config.inferenceId}`}
-                    >
-                      {(copy) => (
-                        <EuiButtonEmpty
-                          iconType="copy"
-                          size="xs"
-                          iconSide="right"
-                          onClick={copy}
-                          data-test-subj="copyInferenceUriToClipboard"
-                        >
-                          <FormattedMessage
-                            id="xpack.inferenceEndpointUICommon.components.additionalInfo.copyLabel"
-                            defaultMessage="Copy"
-                          />
-                        </EuiButtonEmpty>
-                      )}
-                    </EuiCopy>
-                  }
-                />
+                >
+                  <EuiFieldNumber
+                    min={0}
+                    fullWidth
+                    data-test-subj={'contextWindowLengthNumber'}
+                    value={config.contextWindowLength ?? ''}
+                    isInvalid={isInvalid}
+                    onChange={(e) => {
+                      setFieldValue('config.contextWindowLength', e.target.value);
+                    }}
+                  />
+                </EuiFormControlLayout>
               </EuiFormRow>
             );
           }}
         </UseField>
-      </EuiPanel>
-    </EuiAccordion>
+      ) : null,
+    [showContextWindow, setFieldValue, config.contextWindowLength]
+  );
+
+  const temperatureSettings = useMemo(
+    () =>
+      showTemperature ? (
+        <UseField
+          path="config.temperature"
+          config={{
+            validations: [
+              {
+                validator: ({ value, path }) => {
+                  if (value !== undefined && value !== null && value !== '') {
+                    const numValue = Number(value);
+                    if (isNaN(numValue) || numValue < 0 || numValue > 1) {
+                      return {
+                        code: 'ERR_FIELD_INVALID',
+                        path,
+                        message: LABELS.TEMPERATURE_VALIDATION_MESSAGE,
+                      };
+                    }
+                  }
+                },
+                isBlocking: false,
+              },
+            ],
+          }}
+        >
+          {(field) => {
+            const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
+            return (
+              <EuiFormRow
+                id="temperatureSettings"
+                fullWidth
+                isInvalid={isInvalid}
+                error={errorMessage}
+                label={
+                  <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
+                    <EuiFlexItem grow={false}>
+                      <FormattedMessage
+                        id="xpack.inferenceEndpointUICommon.components.additionalInfo.temperatureLabel"
+                        defaultMessage="Temperature"
+                      />
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiText color="subdued" size="xs">
+                        {LABELS.OPTIONALTEXT}
+                      </EuiText>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                }
+                helpText={
+                  <FormattedMessage
+                    id="xpack.inferenceEndpointUICommon.components.additionalInfo.temperatureHelpInfo"
+                    defaultMessage="Controls the randomness of the model's output. Changing the temperature can affect the general performance of AI Assistant and AI-driven features in Kibana, and we recommend keeping the default value."
+                  />
+                }
+                data-test-subj={'configuration-formrow-temperatureSettings'}
+              >
+                <EuiFormControlLayout
+                  fullWidth
+                  isInvalid={isInvalid}
+                  clear={{
+                    onClick: () => {
+                      setFieldValue('config.temperature', undefined);
+                    },
+                  }}
+                >
+                  <EuiFieldNumber
+                    min={0}
+                    max={1}
+                    step={0.1}
+                    fullWidth
+                    data-test-subj={'temperatureSettingsNumber'}
+                    value={config.temperature ?? ''}
+                    isInvalid={isInvalid}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      setFieldValue('config.temperature', value === '' ? undefined : value);
+                    }}
+                  />
+                </EuiFormControlLayout>
+              </EuiFormRow>
+            );
+          }}
+        </UseField>
+      ) : null,
+    [showTemperature, setFieldValue, config.temperature]
+  );
+
+  if (!contextWindowLengthSettings && !temperatureSettings) return null;
+
+  return (
+    <>
+      <EuiHorizontalRule margin="l" />
+      {contextWindowLengthSettings}
+      {temperatureSettings && contextWindowLengthSettings && <EuiSpacer size="m" />}
+      {temperatureSettings}
+    </>
   );
 };

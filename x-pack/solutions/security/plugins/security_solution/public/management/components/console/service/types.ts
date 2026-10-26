@@ -7,16 +7,23 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-export type PossibleArgDataTypes = string | boolean;
+export type PossibleArgDataTypes = string | number | boolean;
 export type ParsedArgData<T = PossibleArgDataTypes> = Array<
   T extends PossibleArgDataTypes ? T : never
 >;
 
 export interface ParsedCommandInput<TArgs extends object = any> {
+  /** Command name */
   name: string;
+  /** Named arguments */
   args: {
     [key in keyof TArgs]: ParsedArgData<Required<TArgs>[key]>;
   };
+  /**
+   * Positional parameters (not currently supported).
+   * May contain entries if user entered un-prefixed argument right after the command name
+   */
+  params: string[];
 }
 
 export interface ParsedCommandInterface<TArgs extends object = any>
@@ -30,7 +37,7 @@ export interface ParsedCommandInterface<TArgs extends object = any>
   hasArg(argName: string): boolean;
 
   /**
-   * if any argument was entered
+   * if any named argument was entered
    */
   hasArgs: boolean;
 }

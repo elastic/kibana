@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { EuiSelectOption } from '@elastic/eui';
 import {
   EuiButtonEmpty,
   EuiButtonIcon,
@@ -12,10 +13,11 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
-  EuiIconTip,
   EuiHealth,
+  EuiIconTip,
   EuiSpacer,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
@@ -26,24 +28,30 @@ import type {
   RuleTypeParamsExpressionProps,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { ForLastExpression, ThresholdExpression } from '@kbn/triggers-actions-ui-plugin/public';
-import { debounce, omit } from 'lodash';
-import type { ChangeEvent, FC, PropsWithChildren } from 'react';
+import { builtInComparatorsWithInclusive } from '@kbn/observability-plugin/public';
+import { omit } from 'lodash';
+import type { ChangeEvent, PropsWithChildren } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import useToggle from 'react-use/lib/useToggle';
-import type { InventoryItemType, SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
+import type {
+  InventoryItemType,
+  SnapshotMetricType,
+  DataSchemaFormat,
+} from '@kbn/metrics-data-access-plugin/common';
 import {
+  DataSchemaFormatEnum,
   findInventoryModel,
-  awsEC2SnapshotMetricTypes,
-  awsRDSSnapshotMetricTypes,
-  awsS3SnapshotMetricTypes,
-  awsSQSSnapshotMetricTypes,
-  containerSnapshotMetricTypes,
-  hostSnapshotMetricTypes,
-  podSnapshotMetricTypes,
   SnapshotMetricTypeRT,
 } from '@kbn/metrics-data-access-plugin/common';
 import { COMPARATORS } from '@kbn/alerting-comparators';
 import { convertToBuiltInComparators } from '@kbn/observability-plugin/common';
+import useAsync from 'react-use/lib/useAsync';
+import type { Query } from '@kbn/es-query';
+import { DEFAULT_SCHEMA } from '../../../../common/constants';
+import { getInventoryRuleSchema } from '../../../../common/inventory/get_inventory_rule_schema';
+import { isSchemaSelectableForInventoryRule } from '../is_schema_selectable_for_inventory_rule';
+import { schemaTranslationMap } from '../../../components/schema_selector';
+import { UnifiedSearchBar } from '../../../components/shared/unified_search_bar';
 import type { SnapshotCustomMetricInput } from '../../../../common/http_api';
 import { SnapshotCustomMetricInputRT } from '../../../../common/http_api';
 import type { FilterQuery, InventoryMetricConditions } from '../../../../common/alerting/metrics';
@@ -55,13 +63,11 @@ import {
   withSourceProvider,
 } from '../../../containers/metrics_source';
 import type { InfraWaffleMapOptions } from '../../../common/inventory/types';
-import { MetricsExplorerKueryBar } from '../../../pages/metrics/metrics_explorer/components/kuery_bar';
 import { convertKueryToElasticSearchQuery } from '../../../utils/kuery';
 import { ExpressionChart } from './expression_chart';
-import { MetricExpression } from './metric';
-import { NodeTypeExpression } from './node_type';
-
-const FILTER_TYPING_DEBOUNCE_MS = 500;
+import { MetricExpression } from './metrics_expression';
+import { ExpressionDropDown } from './expression_dropdown';
+import { SupportedDataTooltipLink } from '../../../components/supported_data_tooltip_link';
 
 export interface AlertContextMeta {
   accountId?: string;
@@ -70,20 +76,27 @@ export interface AlertContextMeta {
   nodeType?: InventoryItemType;
   filter?: string;
   customMetrics?: SnapshotCustomMetricInput[];
+  schema?: DataSchemaFormat;
 }
 
-type Criteria = InventoryMetricConditions[];
-type Props = Omit<
+type Criteria = Array<
+  Omit<InventoryMetricConditions, 'metric'> & { metric?: InventoryMetricConditions['metric'] }
+>;
+
+export type ExpressionsProps = Omit<
   RuleTypeParamsExpressionProps<
     {
       criteria: Criteria;
       nodeType: InventoryItemType;
+      // query DSL
       filterQuery?: FilterQuery;
+      // kuery
       filterQueryText?: string;
       sourceId: string;
       alertOnNoData?: boolean;
       accountId?: string;
       region?: string;
+      schema?: DataSchemaFormat | null;
     },
     AlertContextMeta
   >,
@@ -91,7 +104,7 @@ type Props = Omit<
 >;
 
 export const defaultExpression = {
-  metric: 'cpuV2' as SnapshotMetricType,
+  metric: 'cpuV2',
   comparator: COMPARATORS.GREATER_THAN,
   threshold: [],
   timeSize: 1,
@@ -104,10 +117,10 @@ export const defaultExpression = {
   },
 } as InventoryMetricConditions;
 
-export const Expressions: React.FC<Props> = (props) => {
-  const { setRuleParams, ruleParams, errors, metadata } = props;
+export const Expressions: React.FC<ExpressionsProps> = (props) => {
+  const { id: ruleId, setRuleParams, ruleParams, errors, metadata } = props;
+  const isExistingRule = Boolean(ruleId);
   const { source } = useSourceContext();
-
   const [timeSize, setTimeSize] = useState<number | undefined>(1);
   const [timeUnit, setTimeUnit] = useState<TimeUnitChar>('m');
 
@@ -126,11 +139,12 @@ export const Expressions: React.FC<Props> = (props) => {
     const exp = ruleParams.criteria?.slice() || [];
     exp.push({
       ...defaultExpression,
+      metric: (ruleParams.nodeType ?? 'host') === 'host' ? defaultExpression.metric : undefined,
       timeSize: timeSize ?? defaultExpression.timeSize,
       timeUnit: timeUnit ?? defaultExpression.timeUnit,
     });
     setRuleParams('criteria', exp);
-  }, [setRuleParams, ruleParams.criteria, timeSize, timeUnit]);
+  }, [setRuleParams, ruleParams.criteria, ruleParams.nodeType, timeSize, timeUnit]);
 
   const removeExpression = useCallback(
     (id: number) => {
@@ -144,12 +158,13 @@ export const Expressions: React.FC<Props> = (props) => {
   );
 
   const onFilterChange = useCallback(
-    (filter: string) => {
-      setRuleParams('filterQueryText', filter ?? '');
+    (payload: { query?: Query }) => {
+      const kuery = payload.query?.query as string;
+      setRuleParams('filterQueryText', kuery ?? '');
       try {
         setRuleParams(
           'filterQuery',
-          convertKueryToElasticSearchQuery(filter, metricsView?.dataViewReference, false) || ''
+          convertKueryToElasticSearchQuery(kuery, metricsView?.dataViewReference, false) || ''
         );
       } catch (e) {
         setRuleParams('filterQuery', QUERY_INVALID);
@@ -157,11 +172,6 @@ export const Expressions: React.FC<Props> = (props) => {
     },
     [metricsView?.dataViewReference, setRuleParams]
   );
-
-  /* eslint-disable-next-line react-hooks/exhaustive-deps */
-  const debouncedOnFilterChange = useCallback(debounce(onFilterChange, FILTER_TYPING_DEBOUNCE_MS), [
-    onFilterChange,
-  ]);
 
   const emptyError = useMemo(() => {
     return {
@@ -196,14 +206,36 @@ export const Expressions: React.FC<Props> = (props) => {
   );
 
   const updateNodeType = useCallback(
-    (nt: any) => {
+    (nt: InventoryItemType) => {
       setRuleParams('nodeType', nt);
+
+      if (!isSchemaSelectableForInventoryRule(nt)) {
+        setRuleParams('schema', undefined);
+      } else if (!ruleParams.schema && !isExistingRule) {
+        setRuleParams('schema', DEFAULT_SCHEMA);
+      }
+
+      setRuleParams(
+        'criteria',
+        ruleParams.criteria.map((c) => ({
+          ...c,
+          metric: undefined,
+        }))
+      );
+    },
+    [setRuleParams, ruleParams.criteria, ruleParams.schema, isExistingRule]
+  );
+
+  const updateSchema = useCallback(
+    (nt: DataSchemaFormat) => {
+      setRuleParams('schema', nt);
     },
     [setRuleParams]
   );
 
   const handleFieldSearchChange = useCallback(
-    (e: ChangeEvent<HTMLInputElement>) => onFilterChange(e.target.value),
+    (e: ChangeEvent<HTMLInputElement>) =>
+      onFilterChange({ query: { query: e.target.value, language: 'kuery' } }),
     [onFilterChange]
   );
 
@@ -237,12 +269,18 @@ export const Expressions: React.FC<Props> = (props) => {
 
   useEffect(() => {
     const md = metadata;
+    const canSelectSchema = isSchemaSelectableForInventoryRule(ruleParams.nodeType ?? md?.nodeType);
+
     if (!ruleParams.nodeType) {
       if (md && md.nodeType) {
         setRuleParams('nodeType', md.nodeType);
       } else {
         setRuleParams('nodeType', 'host');
       }
+    }
+
+    if (!ruleParams.schema && canSelectSchema && !isExistingRule) {
+      setRuleParams('schema', md?.schema ?? DEFAULT_SCHEMA);
     }
 
     if (ruleParams.criteria && ruleParams.criteria.length) {
@@ -259,7 +297,13 @@ export const Expressions: React.FC<Props> = (props) => {
     if (!ruleParams.sourceId) {
       setRuleParams('sourceId', source?.id || 'default');
     }
-  }, [metadata, metricsView?.dataViewReference, defaultExpression, source]); // eslint-disable-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [metadata, metricsView?.dataViewReference, defaultExpression, source]);
+
+  const nodeType = ruleParams.nodeType || 'host';
+  const schemaSelectionEnabled = isSchemaSelectableForInventoryRule(nodeType);
+
+  const effectiveSchema = getInventoryRuleSchema(ruleParams.schema);
 
   return (
     <>
@@ -273,16 +317,73 @@ export const Expressions: React.FC<Props> = (props) => {
         </h4>
       </EuiText>
       <div css={StyledExpressionCss}>
-        <EuiFlexGroup css={StyledExpressionRowCss}>
+        <EuiFlexGroup css={StyledExpressionRowCss} gutterSize="s">
           <div css={NonCollapsibleExpressionCss}>
-            <NodeTypeExpression
-              options={nodeTypes}
+            <ExpressionDropDown
+              options={nodeTypeOptions}
               value={ruleParams.nodeType || 'host'}
               onChange={updateNodeType}
+              description={i18n.translate(
+                'xpack.infra.metrics.alertFlyout.expression.for.descriptionLabel',
+                {
+                  defaultMessage: 'For',
+                }
+              )}
+              popoverTitle={i18n.translate(
+                'xpack.infra.metrics.alertFlyout.expression.for.popoverTitle',
+                {
+                  defaultMessage: 'Node type',
+                }
+              )}
+              data-test-subj="forExpressionSelect"
+              aria-label={i18n.translate(
+                'xpack.infra.metrics.alertFlyout.expression.for.ariaLabel',
+                {
+                  defaultMessage: 'Select a node type',
+                }
+              )}
             />
           </div>
+          <SupportedDataTooltipLink nodeType={ruleParams.nodeType} isAlertUI />
         </EuiFlexGroup>
       </div>
+      {schemaSelectionEnabled && (
+        <div css={StyledExpressionCss}>
+          <EuiFlexGroup css={StyledExpressionRowCss} gutterSize="xs">
+            <div css={NonCollapsibleExpressionCss}>
+              <ExpressionDropDown
+                options={schemaOptions}
+                // A saved rule without a schema evaluates on ECS fields and aggregations,
+                // so show ECS without writing it to the rule params.
+                value={
+                  ruleParams.schema ?? (isExistingRule ? DataSchemaFormatEnum.ECS : DEFAULT_SCHEMA)
+                }
+                onChange={updateSchema}
+                description={i18n.translate(
+                  'xpack.infra.metrics.alertFlyout.expression.schema.descriptionLabel',
+                  {
+                    defaultMessage: 'Schema',
+                  }
+                )}
+                popoverTitle={i18n.translate(
+                  'xpack.infra.metrics.alertFlyout.expression.schema.popoverTitle',
+                  {
+                    defaultMessage: 'Schema',
+                  }
+                )}
+                data-test-subj="schemaExpressionSelect"
+                aria-label={i18n.translate(
+                  'xpack.infra.metrics.alertFlyout.expression.schema.ariaLabel',
+                  {
+                    defaultMessage: 'Select a schema',
+                  }
+                )}
+              />
+            </div>
+          </EuiFlexGroup>
+        </div>
+      )}
+
       <EuiSpacer size="xs" />
       {ruleParams.criteria &&
         ruleParams.criteria.map((e, idx) => {
@@ -298,15 +399,18 @@ export const Expressions: React.FC<Props> = (props) => {
               errors={(errors[idx] as IErrorObject) || emptyError}
               expression={e || {}}
             >
-              <ExpressionChart
-                expression={e}
-                filterQuery={ruleParams.filterQuery}
-                nodeType={ruleParams.nodeType}
-                sourceId={ruleParams.sourceId}
-                accountId={ruleParams.accountId}
-                region={ruleParams.region}
-                data-test-subj="preview-chart"
-              />
+              {e.metric && (
+                <ExpressionChart
+                  expression={{ ...e, metric: e.metric }}
+                  kuery={ruleParams.filterQueryText}
+                  nodeType={ruleParams.nodeType}
+                  sourceId={ruleParams.sourceId}
+                  accountId={ruleParams.accountId}
+                  region={ruleParams.region}
+                  schema={effectiveSchema}
+                  data-test-subj="preview-chart"
+                />
+              )}
             </ExpressionRow>
           );
         })}
@@ -323,11 +427,14 @@ export const Expressions: React.FC<Props> = (props) => {
 
       <div>
         <EuiButtonEmpty
+          aria-label={i18n.translate('xpack.infra.expressions.addconditionButton.ariaLabel', {
+            defaultMessage: 'Add condition',
+          })}
           data-test-subj="infraExpressionsAddConditionButton"
           color="primary"
           iconSide="left"
           flush="left"
-          iconType="plusInCircleFilled"
+          iconType="plusCircle"
           onClick={addExpression}
         >
           <FormattedMessage
@@ -346,7 +453,7 @@ export const Expressions: React.FC<Props> = (props) => {
               defaultMessage: "Alert me if there's no data",
             })}{' '}
             <EuiIconTip
-              type="questionInCircle"
+              type="question"
               color="subdued"
               content={i18n.translate('xpack.infra.metrics.alertFlyout.noDataHelpText', {
                 defaultMessage:
@@ -372,10 +479,13 @@ export const Expressions: React.FC<Props> = (props) => {
         display="rowCompressed"
       >
         {metadata ? (
-          <MetricsExplorerKueryBar
-            onSubmit={onFilterChange}
-            onChange={debouncedOnFilterChange}
-            value={ruleParams.filterQueryText}
+          <UnifiedSearchBar
+            onQuerySubmit={onFilterChange}
+            useDefaultBehaviors={false}
+            query={{
+              query: ruleParams.filterQueryText || '',
+              language: 'kuery',
+            }}
           />
         ) : (
           <EuiFieldSearch
@@ -394,7 +504,7 @@ export const Expressions: React.FC<Props> = (props) => {
 
 // required for dynamic import
 // eslint-disable-next-line import/no-default-export
-export default withSourceProvider<Props>(Expressions)('default');
+export default withSourceProvider<ExpressionsProps>(Expressions)('default');
 
 interface ExpressionRowProps {
   nodeType: InventoryItemType;
@@ -427,7 +537,7 @@ const StyledHealthCss = css`
   margin-left: 4px;
 `;
 
-export const ExpressionRow: FC<PropsWithChildren<ExpressionRowProps>> = (props) => {
+export const ExpressionRow = (props: PropsWithChildren<ExpressionRowProps>) => {
   const [isExpanded, toggle] = useToggle(true);
 
   const { children, setRuleParams, expression, errors, expressionId, remove, canDelete, nodeType } =
@@ -538,59 +648,49 @@ export const ExpressionRow: FC<PropsWithChildren<ExpressionRowProps>> = (props) 
     />
   );
 
-  const ofFields = useMemo(() => {
-    let myMetrics: SnapshotMetricType[] = hostSnapshotMetricTypes;
+  const inventoryModels = findInventoryModel(nodeType);
+  const { value: aggregations } = useAsync(
+    () => inventoryModels.metrics.getAggregations(),
+    [inventoryModels]
+  );
 
-    switch (nodeType) {
-      case 'awsEC2':
-        myMetrics = awsEC2SnapshotMetricTypes;
-        break;
-      case 'awsRDS':
-        myMetrics = awsRDSSnapshotMetricTypes;
-        break;
-      case 'awsS3':
-        myMetrics = awsS3SnapshotMetricTypes;
-        break;
-      case 'awsSQS':
-        myMetrics = awsSQSSnapshotMetricTypes;
-        break;
-      case 'host':
-        myMetrics = hostSnapshotMetricTypes;
-        break;
-      case 'pod':
-        myMetrics = podSnapshotMetricTypes;
-        break;
-      case 'container':
-        myMetrics = containerSnapshotMetricTypes;
-        break;
-    }
-    return myMetrics.map((myMetric) => toMetricOpt(myMetric, nodeType));
-  }, [nodeType]);
+  const ofFields = useMemo(() => {
+    return (Object.keys(aggregations?.getAll() ?? {}) as SnapshotMetricType[]).map((key) =>
+      toMetricOpt(key, nodeType)
+    );
+  }, [aggregations, nodeType]);
 
   return (
     <>
       <EuiFlexGroup gutterSize="xs">
         <EuiFlexItem grow={false}>
-          <EuiButtonIcon
-            data-test-subj="infraExpressionRowButton"
-            iconType={isExpanded ? 'arrowDown' : 'arrowRight'}
-            onClick={toggle}
-            aria-label={i18n.translate('xpack.infra.metrics.alertFlyout.expandRowLabel', {
+          <EuiToolTip
+            content={i18n.translate('xpack.infra.metrics.alertFlyout.expandRowLabel', {
               defaultMessage: 'Expand row.',
             })}
-          />
+            disableScreenReaderOutput
+          >
+            <EuiButtonIcon
+              data-test-subj="infraExpressionRowButton"
+              iconType={isExpanded ? 'chevronSingleDown' : 'chevronSingleRight'}
+              onClick={toggle}
+              aria-label={i18n.translate('xpack.infra.metrics.alertFlyout.expandRowLabel', {
+                defaultMessage: 'Expand row.',
+              })}
+            />
+          </EuiToolTip>
         </EuiFlexItem>
 
         <EuiFlexItem grow>
-          <EuiFlexGroup css={StyledExpressionRowCss}>
+          <EuiFlexGroup css={StyledExpressionRowCss} gutterSize="xs">
             <div css={StyledExpressionCss}>
               <MetricExpression
                 metric={{
                   value: metric!,
-                  text: ofFields.find((v) => v?.value === metric)?.text || '',
+                  text: ofFields?.find((v) => v?.value === metric)?.text || '',
                 }}
                 metrics={
-                  ofFields.filter((m) => m !== undefined && m.value !== undefined) as Array<{
+                  ofFields?.filter((m) => m !== undefined && m.value !== undefined) as Array<{
                     value: SnapshotMetricType;
                     text: string;
                   }>
@@ -606,7 +706,7 @@ export const ExpressionRow: FC<PropsWithChildren<ExpressionRowProps>> = (props) 
           </EuiFlexGroup>
           {displayWarningThreshold && (
             <>
-              <EuiFlexGroup css={StyledExpressionRowCss}>
+              <EuiFlexGroup css={StyledExpressionRowCss} alignItems="center" gutterSize="xs">
                 {criticalThresholdExpression}
                 <EuiHealth css={StyledHealthCss} color="danger">
                   <FormattedMessage
@@ -615,7 +715,7 @@ export const ExpressionRow: FC<PropsWithChildren<ExpressionRowProps>> = (props) 
                   />
                 </EuiHealth>
               </EuiFlexGroup>
-              <EuiFlexGroup css={StyledExpressionRowCss}>
+              <EuiFlexGroup css={StyledExpressionRowCss} alignItems="center" gutterSize="xs">
                 {warningThresholdExpression}
                 <EuiHealth css={StyledHealthCss} color="warning">
                   <FormattedMessage
@@ -623,19 +723,29 @@ export const ExpressionRow: FC<PropsWithChildren<ExpressionRowProps>> = (props) 
                     defaultMessage="Warning"
                   />
                 </EuiHealth>
-                <EuiButtonIcon
-                  data-test-subj="infraExpressionRowButton"
-                  aria-label={i18n.translate(
+                <EuiToolTip
+                  content={i18n.translate(
                     'xpack.infra.metrics.alertFlyout.removeWarningThreshold',
                     {
                       defaultMessage: 'Remove warningThreshold',
                     }
                   )}
-                  iconSize="s"
-                  color="text"
-                  iconType="minusInCircleFilled"
-                  onClick={toggleWarningThreshold}
-                />
+                  disableScreenReaderOutput
+                >
+                  <EuiButtonIcon
+                    data-test-subj="infraExpressionRowButton"
+                    aria-label={i18n.translate(
+                      'xpack.infra.metrics.alertFlyout.removeWarningThreshold',
+                      {
+                        defaultMessage: 'Remove warningThreshold',
+                      }
+                    )}
+                    iconSize="s"
+                    color="text"
+                    iconType="minusCircle"
+                    onClick={toggleWarningThreshold}
+                  />
+                </EuiToolTip>
               </EuiFlexGroup>
             </>
           )}
@@ -643,13 +753,17 @@ export const ExpressionRow: FC<PropsWithChildren<ExpressionRowProps>> = (props) 
             <>
               {' '}
               <EuiSpacer size="xs" />
-              <EuiFlexGroup css={StyledExpressionRowCss}>
+              <EuiFlexGroup css={StyledExpressionRowCss} gutterSize="xs">
                 <EuiButtonEmpty
+                  aria-label={i18n.translate(
+                    'xpack.infra.expressionRow.addwarningthresholdButton.ariaLabel',
+                    { defaultMessage: 'Add warning threshold' }
+                  )}
                   data-test-subj="infraExpressionRowAddWarningThresholdButton"
                   color="primary"
                   flush="left"
                   size="xs"
-                  iconType="plusInCircleFilled"
+                  iconType="plusCircle"
                   onClick={toggleWarningThreshold}
                 >
                   <FormattedMessage
@@ -663,15 +777,22 @@ export const ExpressionRow: FC<PropsWithChildren<ExpressionRowProps>> = (props) 
         </EuiFlexItem>
         {canDelete && (
           <EuiFlexItem grow={false}>
-            <EuiButtonIcon
-              data-test-subj="infraExpressionRowButton"
-              aria-label={i18n.translate('xpack.infra.metrics.alertFlyout.removeCondition', {
+            <EuiToolTip
+              content={i18n.translate('xpack.infra.metrics.alertFlyout.removeCondition', {
                 defaultMessage: 'Remove condition',
               })}
-              color="danger"
-              iconType="trash"
-              onClick={() => remove(expressionId)}
-            />
+              disableScreenReaderOutput
+            >
+              <EuiButtonIcon
+                data-test-subj="infraExpressionRowButton"
+                aria-label={i18n.translate('xpack.infra.metrics.alertFlyout.removeCondition', {
+                  defaultMessage: 'Remove condition',
+                })}
+                color="danger"
+                iconType="trash"
+                onClick={() => remove(expressionId)}
+              />
+            </EuiToolTip>
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
@@ -701,6 +822,7 @@ const ThresholdElement: React.FC<{
     <>
       <div css={StyledExpressionCss}>
         <ThresholdExpression
+          customComparators={builtInComparatorsWithInclusive}
           thresholdComparator={convertToBuiltInComparators(comparator) || COMPARATORS.GREATER_THAN}
           threshold={threshold}
           onChangeSelectedThresholdComparator={updateComparator}
@@ -726,7 +848,7 @@ const getDisplayNameForType = (type: InventoryItemType) => {
   return inventoryModel.displayName;
 };
 
-export const nodeTypes: { [key: string]: any } = {
+const nodeTypeOptions: Record<InventoryItemType, EuiSelectOption> = {
   host: {
     text: getDisplayNameForType('host'),
     value: 'host',
@@ -754,6 +876,17 @@ export const nodeTypes: { [key: string]: any } = {
   awsSQS: {
     text: getDisplayNameForType('awsSQS'),
     value: 'awsSQS',
+  },
+};
+
+const schemaOptions: Record<DataSchemaFormat, EuiSelectOption> = {
+  ecs: {
+    text: schemaTranslationMap.ecs,
+    value: DataSchemaFormatEnum.ECS,
+  },
+  semconv: {
+    text: schemaTranslationMap.semconv,
+    value: DataSchemaFormatEnum.SEMCONV,
   },
 };
 

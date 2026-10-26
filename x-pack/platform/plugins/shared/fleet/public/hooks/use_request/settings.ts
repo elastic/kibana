@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@kbn/react-query';
 
 import { settingsRoutesService } from '../../services';
 import type {
@@ -71,6 +71,22 @@ export function usePutSettingsMutation() {
     mutationFn: sendPutSettings,
     onSuccess: () => {
       queryClient.invalidateQueries(['settings']);
+    },
+  });
+}
+
+export function useMigrateSpaceAwarenessMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: () =>
+      sendRequestForRq({
+        method: 'post',
+        path: settingsRoutesService.postSpaceAwarenessMigrationPath(),
+        version: API_VERSIONS.internal.v1,
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries(['fleetStatus']);
     },
   });
 }

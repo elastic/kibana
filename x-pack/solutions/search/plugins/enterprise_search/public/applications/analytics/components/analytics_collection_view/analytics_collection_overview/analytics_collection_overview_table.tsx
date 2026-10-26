@@ -9,9 +9,9 @@ import React, { useEffect, useMemo } from 'react';
 
 import { useActions, useValues } from 'kea';
 
+import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiBasicTable,
-  EuiBasicTableColumn,
   EuiButton,
   EuiFlexGroup,
   EuiTab,
@@ -20,11 +20,11 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 
-import {
+import type {
   EuiTableFieldDataColumnType,
   EuiTableSortingType,
 } from '@elastic/eui/src/components/basic_table/table_types';
-import { UseEuiTheme } from '@elastic/eui/src/services/theme/hooks';
+import type { UseEuiTheme } from '@elastic/eui/src/services/theme/hooks';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -37,16 +37,15 @@ import { getFlag } from '../../../utils/get_flag';
 import { FilterBy } from '../../../utils/get_formula_by_filter';
 
 import { AnalyticsCollectionExploreTableLogic } from '../analytics_collection_explore_table_logic';
-import {
-  ExploreTableColumns,
+import type {
   ExploreTableItem,
-  ExploreTables,
   SearchTermsTable,
   ClickedTable,
   ReferrersTable,
   WorsePerformersTable,
   LocationsTable,
 } from '../analytics_collection_explore_table_types';
+import { ExploreTableColumns, ExploreTables } from '../analytics_collection_explore_table_types';
 import { FetchAnalyticsCollectionLogic } from '../fetch_analytics_collection_logic';
 
 const tabsByFilter: Record<FilterBy, Array<{ id: ExploreTables; name: string }>> = {
@@ -325,27 +324,42 @@ export const AnalyticsCollectionOverviewTable: React.FC<AnalyticsCollectionOverv
 
       {useMemo(() => {
         const table = selectedTable !== null && (tableSettings[selectedTable] as TableSetting);
+        if (!table) {
+          return null;
+        }
+        const selectedTab = tabs?.find((tab) => tab.id === selectedTable);
+        const tableCaption = selectedTab?.name
+          ? i18n.translate(
+              'xpack.enterpriseSearch.analytics.collections.collectionsView.exploreTable.tableCaption',
+              {
+                defaultMessage: '{tableName} table',
+                values: { tableName: selectedTab.name },
+              }
+            )
+          : i18n.translate(
+              'xpack.enterpriseSearch.analytics.collections.collectionsView.exploreTable.genericTableCaption',
+              { defaultMessage: 'Analytics explore table' }
+            );
 
         return (
-          table && (
-            <EuiBasicTable
-              columns={
-                table.columns.map((column) => ({
-                  ...column,
-                  render: column.render?.(euiTheme),
-                })) as TableSetting['columns']
-              }
-              itemId={selectedTable}
-              items={items}
-              loading={isLoading}
-              sorting={table.sorting}
-              onChange={({ sort }) => {
-                onTableChange({ sort });
-              }}
-            />
-          )
+          <EuiBasicTable
+            tableCaption={tableCaption}
+            columns={
+              table.columns.map((column) => ({
+                ...column,
+                render: column.render?.(euiTheme),
+              })) as TableSetting['columns']
+            }
+            itemId={selectedTable}
+            items={items}
+            loading={isLoading}
+            sorting={table.sorting}
+            onChange={({ sort }) => {
+              onTableChange({ sort });
+            }}
+          />
         );
-      }, [selectedTable, sorting, items, isLoading])}
+      }, [selectedTable, sorting, items, isLoading, tabs])}
 
       <EuiFlexGroup>
         <EuiButton

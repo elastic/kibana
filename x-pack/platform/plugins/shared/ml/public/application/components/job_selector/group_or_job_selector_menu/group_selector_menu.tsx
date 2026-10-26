@@ -78,7 +78,7 @@ export const GroupSelectorMenu = ({
               defaultMessage: 'Remove group from {page}',
               values: { page },
             }),
-            icon: 'minusInCircle',
+            icon: 'minusCircle',
             disabled: removeGroupDisabled,
             onClick: () => {
               onRemoveJobId([groupId, ...jobIds]);
@@ -129,6 +129,9 @@ export const GroupSelectorMenu = ({
   return (
     <EuiPopover
       id={popoverId}
+      aria-label={i18n.translate('xpack.ml.groupSelectorMenu.popoverAriaLabel', {
+        defaultMessage: 'Group selector',
+      })}
       button={button}
       isOpen={isPopoverOpen}
       closePopover={closePopover}

@@ -7,50 +7,37 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import './filter_item.scss';
-
+import type { EuiPopoverProps, UseEuiTheme } from '@elastic/eui';
+import { EuiContextMenu, EuiContextMenuPanel, EuiPopover, euiShadowMedium } from '@elastic/eui';
+import type { InjectedIntl } from '@kbn/i18n-react';
+import type { Filter } from '@kbn/es-query';
 import {
-  EuiContextMenu,
-  EuiContextMenuPanel,
-  EuiPopover,
-  EuiPopoverProps,
-  euiShadowMedium,
-  useEuiTheme,
-} from '@elastic/eui';
-import { InjectedIntl } from '@kbn/i18n-react';
-import {
-  Filter,
   isFilterPinned,
   toggleFilterNegated,
   toggleFilterPinned,
   toggleFilterDisabled,
 } from '@kbn/es-query';
 import classNames from 'classnames';
-import React, {
-  MouseEvent,
-  useState,
-  useEffect,
-  HTMLAttributes,
-  useMemo,
-  useCallback,
-} from 'react';
-import type { DocLinksStart, IUiSettingsClient } from '@kbn/core/public';
-import { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
+import type { MouseEvent, HTMLAttributes } from 'react';
+import type { SuggestionsAbstraction } from '@kbn/kql/public';
+import React, { useState, useEffect, useCallback } from 'react';
+import { type DocLinksStart, type IUiSettingsClient } from '@kbn/core/public';
+import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import { css } from '@emotion/react';
-import { getIndexPatternFromFilter, getDisplayValueFromFilter } from '@kbn/data-plugin/public';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import { getDisplayValueFromFilter } from '@kbn/data-plugin/public';
+import type { FilterableSource } from '@kbn/data-source';
 import { FilterEditor } from '../filter_editor/filter_editor';
 import { FilterView } from '../filter_view';
-import { FilterPanelOption } from '../../types';
-import {
-  withCloseFilterEditorConfirmModal,
-  WithCloseFilterEditorConfirmModalProps,
-} from '../filter_editor';
-import { SuggestionsAbstraction } from '../../typeahead/suggestions_component';
+import type { FilterPanelOption } from '../../types';
+import type { WithCloseFilterEditorConfirmModalProps } from '../filter_editor';
+import { withCloseFilterEditorConfirmModal } from '../filter_editor';
+import { getFilterKeys, isFilterApplicable } from './is_filter_applicable';
 
 export interface FilterItemProps extends WithCloseFilterEditorConfirmModalProps {
   id: string;
   filter: Filter;
-  indexPatterns: DataView[];
+  indexPatterns: FilterableSource[];
   className?: string;
   onUpdate: (filter: Filter) => void;
   onRemove: () => void;
@@ -83,37 +70,30 @@ export type FilterLabelStatus =
   | typeof FILTER_ITEM_WARNING
   | typeof FILTER_ITEM_ERROR;
 
-export const FILTER_EDITOR_WIDTH = 1200;
+const FILTER_ITEM_MENU = 'menu';
+const FILTER_ITEM_EDITOR = 'editFilter';
 
-function FilterItemComponent(props: FilterItemProps) {
+// exported for testing only
+export function FilterItemComponent(props: FilterItemProps) {
   const { onCloseFilterPopover, onLocalFilterCreate, onLocalFilterUpdate } = props;
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
 
-  const [renderedComponent, setRenderedComponent] = useState('menu');
+  const [renderedComponent, setRenderedComponent] = useState(FILTER_ITEM_MENU);
   const { id, filter, indexPatterns, hiddenPanelOptions, readOnly = false, docLinks } = props;
 
+  const styles = useMemoCss(filterItemStyles);
+
   const closePopover = useCallback(() => {
-    onCloseFilterPopover([() => setIsPopoverOpen(false)]);
-  }, [onCloseFilterPopover]);
-
-  const euiTheme = useEuiTheme();
-
-  /** @todo important style should be remove after fixing elastic/eui/issues/6314. */
-  const popoverDragAndDropStyle = useMemo(
-    () =>
-      css`
-        // Always needed for popover with drag & drop in them
-        transform: none !important;
-        transition: none !important;
-        filter: none !important;
-        ${euiShadowMedium(euiTheme)}
-      `,
-    [euiTheme]
-  );
+    if (renderedComponent === FILTER_ITEM_EDITOR) {
+      onCloseFilterPopover([() => setIsPopoverOpen(false)]);
+    } else {
+      setIsPopoverOpen(false);
+    }
+  }, [onCloseFilterPopover, renderedComponent]);
 
   useEffect(() => {
     if (isPopoverOpen) {
-      setRenderedComponent('menu');
+      setRenderedComponent(FILTER_ITEM_MENU);
     }
   }, [isPopoverOpen]);
 
@@ -220,7 +200,7 @@ function FilterItemComponent(props: FilterItemProps) {
         icon: 'pencil',
         'data-test-subj': 'editFilter',
         onClick: () => {
-          setRenderedComponent('editFilter');
+          setRenderedComponent(FILTER_ITEM_EDITOR);
         },
       },
       {
@@ -233,7 +213,7 @@ function FilterItemComponent(props: FilterItemProps) {
               id: 'unifiedSearch.filter.filterBar.excludeFilterButtonLabel',
               defaultMessage: 'Exclude results',
             }),
-        icon: negate ? 'plusInCircle' : 'minusInCircle',
+        icon: negate ? 'plusCircle' : 'minusCircle',
         onClick: () => {
           setIsPopoverOpen(false);
           onToggleNegated();
@@ -250,7 +230,7 @@ function FilterItemComponent(props: FilterItemProps) {
               id: 'unifiedSearch.filter.filterBar.disableFilterButtonLabel',
               defaultMessage: 'Temporarily disable',
             }),
-        icon: `${disabled ? 'eye' : 'eyeClosed'}`,
+        icon: `${disabled ? 'eye' : 'eyeSlash'}`,
         onClick: () => {
           setIsPopoverOpen(false);
           onToggleDisabled();
@@ -284,25 +264,6 @@ function FilterItemComponent(props: FilterItemProps) {
     ];
   }
 
-  /**
-   * Checks if filter field exists in any of the index patterns provided,
-   * Because if so, a filter for the wrong index pattern may still be applied.
-   * This function makes this behavior explicit, but it needs to be revised.
-   */
-  function isFilterApplicable() {
-    // Any filter is applicable if no index patterns were provided to FilterBar.
-    if (!props.indexPatterns.length) return true;
-
-    const ip = getIndexPatternFromFilter(filter, indexPatterns);
-    if (ip) return true;
-
-    const allFields = indexPatterns.map((indexPattern) => {
-      return indexPattern.fields.map((field) => field.name);
-    });
-    const flatFields = allFields.reduce((acc: string[], it: string[]) => [...acc, ...it], []);
-    return flatFields.includes(filter.meta?.key || '');
-  }
-
   function getValueLabel(): LabelOptions {
     const label: LabelOptions = {
       title: '',
@@ -314,7 +275,7 @@ function FilterItemComponent(props: FilterItemProps) {
       return label;
     }
 
-    if (isFilterApplicable()) {
+    if (isFilterApplicable(filter, indexPatterns)) {
       try {
         label.title = getDisplayValueFromFilter(filter, indexPatterns);
       } catch (e) {
@@ -331,13 +292,16 @@ function FilterItemComponent(props: FilterItemProps) {
         id: 'unifiedSearch.filter.filterBar.labelWarningText',
         defaultMessage: `Warning`,
       });
+      const fieldNames = getFilterKeys(filter);
       label.message = props.intl.formatMessage(
         {
-          id: 'unifiedSearch.filter.filterBar.labelWarningInfo',
-          defaultMessage: 'Field {fieldName} does not exist in current view',
+          id: 'unifiedSearch.filter.filterBar.labelWarningFieldDoesNotExistInCurrentView',
+          defaultMessage:
+            '{fieldCount, plural, =0 {This filter does not exist in the current view} one {Field {fieldNames} does not exist in the current view} other {Fields {fieldNames} do not exist in the current view}}',
         },
         {
-          fieldName: filter.meta.key,
+          fieldCount: fieldNames.length,
+          fieldNames: fieldNames.join(', '),
         }
       );
     }
@@ -361,6 +325,7 @@ function FilterItemComponent(props: FilterItemProps) {
     filterLabelStatus: valueLabelConfig.status,
     errorMessage: valueLabelConfig.message,
     className: getClasses(!!filter.meta.negate, valueLabelConfig),
+    css: styles.filterItem,
     dataViews: indexPatterns,
     iconOnClick: handleIconClick,
     onClick: handleBadgeClick,
@@ -375,20 +340,21 @@ function FilterItemComponent(props: FilterItemProps) {
     button: <FilterView {...filterViewProps} />,
     panelPaddingSize: 'none',
     panelProps: {
-      css: popoverDragAndDropStyle,
+      css: styles.popoverDragAndDrop,
     },
+    focusTrapProps: { clickOutsideDisables: false },
   };
 
   return readOnly ? (
     <FilterView {...filterViewProps} />
   ) : (
     <EuiPopover anchorPosition="downLeft" {...popoverProps}>
-      {renderedComponent === 'menu' ? (
+      {renderedComponent === FILTER_ITEM_MENU ? (
         <EuiContextMenu initialPanelId={0} panels={getPanels()} />
       ) : (
         <EuiContextMenuPanel
           items={[
-            <div css={{ width: FILTER_EDITOR_WIDTH, maxWidth: '100%' }} key="filter-editor">
+            <div css={styles.filterItemEditorContainer} key="filter-editor">
               <FilterEditor
                 filter={filter}
                 indexPatterns={indexPatterns}
@@ -412,3 +378,74 @@ function FilterItemComponent(props: FilterItemProps) {
 }
 
 export const FilterItem = withCloseFilterEditorConfirmModal(FilterItemComponent);
+
+export const getFilterItemEditorContainerStyle = ({ euiTheme }: UseEuiTheme) =>
+  css({
+    width: 1200,
+    maxWidth: '100%',
+  });
+
+const filterItemStyles = {
+  /** @todo important style should be remove after fixing elastic/eui/issues/6314. */
+  popoverDragAndDrop: (euiThemeContext: UseEuiTheme) =>
+    css`
+      // Always needed for popover with drag & drop in them
+      transform: none !important;
+      transition: none !important;
+      filter: none !important;
+      ${euiShadowMedium(euiThemeContext)}
+    `,
+  filterItemEditorContainer: getFilterItemEditorContainerStyle,
+  filterItem: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      lineHeight: euiTheme.size.base,
+      color: euiTheme.colors.text,
+      paddingBlock: `calc(${euiTheme.size.m} / 2)`,
+      whiteSpace: 'normal',
+      borderColor: euiTheme.colors.borderBasePlain,
+      '&:not(.globalFilterItem-isDisabled)': {
+        borderColor: euiTheme.colors.borderBasePlain,
+      },
+      '&.globalFilterItem-isExcluded': {
+        borderColor: euiTheme.colors.borderBaseDanger,
+        '&::before': {
+          backgroundColor: euiTheme.colors.backgroundFilledDanger,
+        },
+      },
+      '&.globalFilterItem-isDisabled': {
+        color: euiTheme.colors.darkShade,
+        backgroundColor: euiTheme.colors.disabled,
+        borderColor: 'transparent',
+        textDecoration: 'line-through',
+        fontWeight: euiTheme.font.weight.regular,
+      },
+      '&.globalFilterItem-isError, &.globalFilterItem-isWarning': {
+        '.globalFilterLabel__value': {
+          fontWeight: euiTheme.font.weight.bold,
+        },
+      },
+      '&.globalFilterItem-isError': {
+        '.globalFilterLabel__value': {
+          color: euiTheme.colors.dangerText,
+        },
+      },
+      '&.globalFilterItem-isWarning': {
+        '.globalFilterLabel__value': {
+          color: euiTheme.colors.warningText,
+        },
+      },
+      '&.globalFilterItem-isPinned': {
+        position: 'relative',
+        overflow: 'hidden',
+        '&::before': {
+          content: "''",
+          position: 'absolute',
+          top: 0,
+          bottom: 0,
+          left: 0,
+          width: euiTheme.size.xs,
+          backgroundColor: euiTheme.colors.mediumShade,
+        },
+      },
+    }),
+};

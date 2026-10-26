@@ -27,6 +27,7 @@ export const getIndexAliasPerSpace = async ({
   const response = await esClient.indices.getAlias(
     {
       name: signalsAliasAllSpaces,
+      expand_wildcards: ['open', 'hidden'],
     },
     { meta: true }
   );

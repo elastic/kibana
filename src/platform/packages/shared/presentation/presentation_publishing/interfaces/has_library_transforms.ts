@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SerializedPanelState } from './has_serializable_state';
-
 /**
  * APIs that inherit this interface can be linked to and unlinked from the library.
  */
@@ -16,11 +14,10 @@ export interface HasLibraryTransforms<
   ByReferenceSerializedState extends object = object,
   ByValueSerializedState extends object = object
 > {
-  checkForDuplicateTitle: (
-    newTitle: string,
-    isTitleDuplicateConfirmed: boolean,
-    onTitleDuplicate: () => void
-  ) => Promise<void>;
+  /**
+   * @returns {Promise<boolean>}
+   */
+  hasLibraryItemWithTitle: (title: string) => Promise<boolean>;
 
   /**
    *
@@ -48,16 +45,14 @@ export interface HasLibraryTransforms<
    * @returns {ByReferenceSerializedState}
    * get by-reference serialized state from this API.
    */
-  getSerializedStateByReference: (
-    newId: string
-  ) => SerializedPanelState<ByReferenceSerializedState>;
+  getSerializedStateByReference: (newId: string) => ByReferenceSerializedState;
 
   /**
    *
    * @returns {ByValueSerializedState}
    * get by-value serialized state from this API
    */
-  getSerializedStateByValue: () => SerializedPanelState<ByValueSerializedState>;
+  getSerializedStateByValue: () => ByValueSerializedState;
 }
 
 export const apiHasLibraryTransforms = <StateT extends object = object>(
@@ -72,6 +67,6 @@ export const apiHasLibraryTransforms = <StateT extends object = object>(
         'function' &&
       typeof (unknownApi as HasLibraryTransforms<StateT>).getSerializedStateByValue ===
         'function' &&
-      typeof (unknownApi as HasLibraryTransforms<StateT>).checkForDuplicateTitle === 'function'
+      typeof (unknownApi as HasLibraryTransforms<StateT>).hasLibraryItemWithTitle === 'function'
   );
 };

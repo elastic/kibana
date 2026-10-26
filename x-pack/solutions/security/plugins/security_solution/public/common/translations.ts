@@ -18,17 +18,12 @@ export const SOLUTION_NAME = i18n.translate('xpack.securitySolution.pages.common
 export const ASSISTANT_MANAGEMENT_TITLE = i18n.translate(
   'xpack.securitySolution.securityAiAssistantManagement.app.title',
   {
-    defaultMessage: 'AI Assistant for Security',
+    defaultMessage: 'AI Assistant',
   }
 );
 
 export const BETA = i18n.translate('xpack.securitySolution.pages.common.beta', {
   defaultMessage: 'Beta',
-});
-
-export const BETA_TOOLTIP = i18n.translate('xpack.securitySolution.pages.common.beta.tooltip', {
-  defaultMessage:
-    'This functionality is in beta and is subject to change. The design and code is less mature than official GA features and is being provided as-is with no warranties. Beta features are not subject to the support SLA of official GA features.',
 });
 
 export const TECHNICAL_PREVIEW = i18n.translate(

@@ -5,25 +5,32 @@
  * 2.0.
  */
 
-import React, { useLayoutEffect } from 'react';
+import React, { cloneElement, isValidElement, useLayoutEffect, useState } from 'react';
 
 import classNames from 'classnames';
 import { useValues } from 'kea';
 
-import { EuiCallOut, EuiSpacer } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
 
+import type { AppHeaderMenu } from '@kbn/app-header';
 import { i18n } from '@kbn/i18n';
 
-import { KibanaPageTemplate, KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template';
+import type { KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template';
+import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 
 import { FlashMessages } from '../flash_messages';
 import { HttpLogic } from '../http';
 import { KibanaLogic } from '../kibana';
-import { BreadcrumbTrail } from '../kibana_chrome/generate_breadcrumbs';
+import type { BreadcrumbTrail } from '../kibana_chrome/generate_breadcrumbs';
 import { Loading } from '../loading';
 
-import './page_template.scss';
-import { EndpointsHeaderAction } from './endpoints_header_action';
+import {
+  createEndpointsAppHeaderMenuItem,
+  EndpointsApiKeysFlyout,
+  EndpointsHeaderAction,
+} from './endpoints_header_action';
+import * as Styles from './styles';
 
 /*
  * EnterpriseSearchPageTemplateWrapper is a light wrapper for KibanaPageTemplate (which
@@ -37,6 +44,7 @@ import { EndpointsHeaderAction } from './endpoints_header_action';
  */
 
 export type PageTemplateProps = KibanaPageTemplateProps & {
+  appHeader?: React.ReactNode;
   customPageSections?: boolean; // If false, automatically wraps children in an EuiPageSection
   emptyState?: React.ReactNode;
   hideFlashMessages?: boolean;
@@ -50,7 +58,22 @@ export type PageTemplateProps = KibanaPageTemplateProps & {
   hideEmbeddedConsole?: boolean;
 };
 
+const mergeEndpointsMenuItem = (
+  menu: AppHeaderMenu | undefined,
+  item: NonNullable<AppHeaderMenu['items']>[number]
+): AppHeaderMenu => {
+  const items = menu?.items ?? [];
+  if (items.some((existing) => existing.id === item.id)) {
+    return menu ?? { items: [item] };
+  }
+  return {
+    ...menu,
+    items: [...items, item],
+  };
+};
+
 export const EnterpriseSearchPageTemplateWrapper: React.FC<PageTemplateProps> = ({
+  appHeader,
   children,
   className,
   customPageSections,
@@ -66,25 +89,49 @@ export const EnterpriseSearchPageTemplateWrapper: React.FC<PageTemplateProps> = 
   ...pageTemplateProps
 }) => {
   const { readOnlyMode } = useValues(HttpLogic);
-  const { renderHeaderActions, consolePlugin } = useValues(KibanaLogic);
+  const { renderHeaderActions, consolePlugin, capabilities, notifications, spaces } =
+    useValues(KibanaLogic);
 
   const hasCustomEmptyState = !!emptyState;
   const showCustomEmptyState = hasCustomEmptyState && isEmptyState;
 
   const navIcon = solutionNavIcon ?? 'logoElasticsearch';
 
+  const SolutionViewSwitchCallout = spaces?.ui?.components?.getSolutionViewSwitchCallout;
+  const solutionNavFooter =
+    notifications.tours.isEnabled() && capabilities.spaces?.manage && SolutionViewSwitchCallout ? (
+      <SolutionViewSwitchCallout currentSolution="es" />
+    ) : undefined;
+
+  const [isEndpointsFlyoutOpen, setIsEndpointsFlyoutOpen] = useState(false);
+  const showEndpointsInAppHeader = Boolean(appHeader) && useEndpointHeaderActions;
+
   useLayoutEffect(() => {
-    if (useEndpointHeaderActions) {
+    if (useEndpointHeaderActions && !appHeader) {
       renderHeaderActions(EndpointsHeaderAction);
     }
     return () => {
       renderHeaderActions(undefined);
     };
-  }, []);
+  }, [appHeader, renderHeaderActions, useEndpointHeaderActions]);
+
+  const resolvedAppHeader =
+    showEndpointsInAppHeader && isValidElement<{ menu?: AppHeaderMenu }>(appHeader)
+      ? cloneElement(appHeader, {
+          menu: mergeEndpointsMenuItem(
+            appHeader.props.menu,
+            createEndpointsAppHeaderMenuItem({
+              isSelected: isEndpointsFlyoutOpen,
+              onToggle: () => setIsEndpointsFlyoutOpen((open) => !open),
+            })
+          ),
+        })
+      : appHeader;
+
   return (
     <KibanaPageTemplate
       {...pageTemplateProps}
-      className={classNames('enterpriseSearchPageTemplate', className)}
+      className={classNames(Styles.enterpriseSearchPageTemplate, className)}
       mainProps={{
         ...pageTemplateProps.mainProps,
         className: classNames(
@@ -93,14 +140,18 @@ export const EnterpriseSearchPageTemplateWrapper: React.FC<PageTemplateProps> = 
         ),
       }}
       isEmptyState={isEmptyState && !isLoading}
-      solutionNav={solutionNav && solutionNav.items ? { icon: navIcon, ...solutionNav } : undefined}
+      solutionNav={
+        solutionNav && solutionNav.items
+          ? { icon: navIcon, ...solutionNav, footer: solutionNavFooter }
+          : undefined
+      }
     >
       {setPageChrome}
+      {resolvedAppHeader}
       {readOnlyMode && (
         <>
-          <EuiCallOut
-            color="warning"
-            iconType="lock"
+          <KbnWarningCallout
+            announceOnMount
             title={i18n.translate('xpack.enterpriseSearch.readOnlyMode.warning', {
               defaultMessage:
                 'Enterprise Search is in read-only mode. You will be unable to make changes such as creating, editing, or deleting.',
@@ -123,6 +174,9 @@ export const EnterpriseSearchPageTemplateWrapper: React.FC<PageTemplateProps> = 
         <consolePlugin.EmbeddableConsole />
       ) : (
         <></>
+      )}
+      {showEndpointsInAppHeader && isEndpointsFlyoutOpen && (
+        <EndpointsApiKeysFlyout onClose={() => setIsEndpointsFlyoutOpen(false)} />
       )}
     </KibanaPageTemplate>
   );

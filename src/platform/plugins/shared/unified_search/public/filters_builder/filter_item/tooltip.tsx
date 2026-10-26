@@ -8,7 +8,8 @@
  */
 
 import React from 'react';
-import { EuiToolTip, EuiToolTipProps } from '@elastic/eui';
+import type { EuiToolTipProps } from '@elastic/eui';
+import { EuiToolTip } from '@elastic/eui';
 
 export type TooltipProps = Partial<Omit<EuiToolTipProps, 'content'>> & {
   content: string;
@@ -18,7 +19,7 @@ export type TooltipProps = Partial<Omit<EuiToolTipProps, 'content'>> & {
 export const Tooltip: React.FC<TooltipProps> = ({ children, show, content, ...tooltipProps }) => (
   <>
     {show ? (
-      <EuiToolTip content={content} delay="long" {...tooltipProps}>
+      <EuiToolTip content={content} {...tooltipProps}>
         <>{children}</>
       </EuiToolTip>
     ) : (

@@ -25,11 +25,11 @@ const sparklineTooltipStyle = (theme) => css`
 `;
 
 const tooltipXValueStyle = ({ euiTheme }) => css`
-  color: ${transparentize(0.3, euiTheme.colors.ghost)};
+  color: ${transparentize(0.3, euiTheme.colors.textGhost)};
 `;
 
 const tooltipYValueStyle = ({ euiTheme }) => css`
-  color: ${euiTheme.colors.ghost};
+  color: ${euiTheme.colors.textGhost};
 `;
 
 const tooltipContainerStyle = ({ euiTheme }) => css`

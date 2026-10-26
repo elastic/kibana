@@ -5,15 +5,13 @@
  * 2.0.
  */
 
-import { EuiIcon, EuiLink, EuiText, EuiToolTip } from '@elastic/eui';
+import { EuiLink, EuiText } from '@elastic/eui';
 import React from 'react';
+import type { SyntheticEvent } from 'react';
+import { SECURITY_CELL_ACTIONS_DEFAULT } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { CriticalityLevelWithUnassigned } from '../../../../../common/entity_analytics/asset_criticality/types';
 import { AssetCriticalityBadge } from '../../../../entity_analytics/components/asset_criticality';
-import {
-  SecurityCellActions,
-  CellActionsMode,
-  SecurityCellActionsTrigger,
-} from '../../../../common/components/cell_actions';
+import { SecurityCellActions, CellActionsMode } from '../../../../common/components/cell_actions';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import { HostDetailsLink } from '../../../../common/components/links';
 import { FormattedRelativePreferenceDate } from '../../../../common/components/formatted_date';
@@ -27,7 +25,8 @@ import { ENTITY_RISK_LEVEL } from '../../../../entity_analytics/components/risk_
 
 export const getHostsColumns = (
   showRiskColumn: boolean,
-  dispatchSeverityUpdate: (s: RiskSeverity) => void
+  dispatchSeverityUpdate: (s: RiskSeverity) => void,
+  openHostFlyout: (hostName: string, entityId: string) => void
 ): HostsTableColumns => {
   const columns: HostsTableColumns = [
     {
@@ -36,36 +35,40 @@ export const getHostsColumns = (
       truncateText: false,
       mobileOptions: { show: true },
       sortable: true,
-      render: (hostName) => {
-        if (hostName != null && hostName.length > 0) {
-          return (
-            <SecurityCellActions
-              mode={CellActionsMode.HOVER_DOWN}
-              visibleCellActions={5}
-              showActionTooltips
-              triggerId={SecurityCellActionsTrigger.DEFAULT}
-              data={{
-                value: hostName[0],
-                field: 'host.name',
-              }}
-            >
-              <HostDetailsLink hostName={hostName[0]} />
-            </SecurityCellActions>
-          );
-        }
-        return getEmptyTagValue();
+      render: (hostName, hostEdge) => {
+        if (hostName == null || hostName.length === 0) return getEmptyTagValue();
+        const name = hostName[0];
+        const entityId = hostEdge.node.entityId ?? undefined;
+        const onClick = entityId
+          ? (e: SyntheticEvent) => {
+              e.preventDefault();
+              openHostFlyout(name, entityId);
+            }
+          : undefined;
+        return (
+          <SecurityCellActions
+            mode={CellActionsMode.HOVER_DOWN}
+            visibleCellActions={5}
+            showActionTooltips
+            triggerId={SECURITY_CELL_ACTIONS_DEFAULT}
+            data={{
+              value: name,
+              field: 'host.name',
+            }}
+          >
+            <HostDetailsLink hostName={name} entityId={entityId} onClick={onClick} />
+          </SecurityCellActions>
+        );
       },
       width: '35%',
     },
     {
       field: 'node.lastSeen',
-      name: (
-        <EuiToolTip content={i18n.FIRST_LAST_SEEN_TOOLTIP}>
-          <>
-            {i18n.LAST_SEEN} <EuiIcon color="subdued" type="iInCircle" className="eui-alignTop" />
-          </>
-        </EuiToolTip>
-      ),
+      name: i18n.LAST_SEEN,
+      nameTooltip: {
+        content: i18n.FIRST_LAST_SEEN_TOOLTIP,
+        icon: 'info',
+      },
       truncateText: false,
       mobileOptions: { show: true },
       sortable: true,
@@ -82,13 +85,12 @@ export const getHostsColumns = (
     },
     {
       field: 'node.host.os.name',
-      name: (
-        <EuiToolTip content={i18n.OS_LAST_SEEN_TOOLTIP}>
-          <>
-            {i18n.OS} <EuiIcon color="subdued" type="iInCircle" className="eui-alignTop" />
-          </>
-        </EuiToolTip>
-      ),
+      name: i18n.OS,
+      nameTooltip: {
+        content: i18n.OS_LAST_SEEN_TOOLTIP,
+        icon: 'info',
+        iconProps: { 'aria-label': i18n.OS_TOOLTIP_ARIA_LABEL },
+      },
       truncateText: false,
       mobileOptions: { show: true },
       sortable: false,
@@ -99,7 +101,7 @@ export const getHostsColumns = (
               mode={CellActionsMode.HOVER_DOWN}
               visibleCellActions={5}
               showActionTooltips
-              triggerId={SecurityCellActionsTrigger.DEFAULT}
+              triggerId={SECURITY_CELL_ACTIONS_DEFAULT}
               data={{
                 value: hostOsName[0],
                 field: 'host.os.name',
@@ -125,7 +127,7 @@ export const getHostsColumns = (
               mode={CellActionsMode.HOVER_DOWN}
               visibleCellActions={5}
               showActionTooltips
-              triggerId={SecurityCellActionsTrigger.DEFAULT}
+              triggerId={SECURITY_CELL_ACTIONS_DEFAULT}
               data={{
                 value: hostOsVersion[0],
                 field: 'host.os.version',

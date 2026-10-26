@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { AlertsGroupingProps } from '../types';
+import type { AlertsGroupingProps } from '../types';
 
 export const mockGroupingId = 'test';
 

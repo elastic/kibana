@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { shallow } from 'enzyme';
 import { render } from '@testing-library/react';
 import React from 'react';
+// Necessary until components being tested are migrated of styled-components https://github.com/elastic/kibana/issues/219037
+import 'jest-styled-components';
 import { TestProviders } from '../../../common/mock';
 
 import { HostOverview } from '.';
@@ -42,6 +43,8 @@ describe('Host Summary Component', () => {
     startDate: '2019-06-15T06:00:00.000Z',
     hostName: 'testHostName',
     jobNameById: {},
+    scopeId: 'default',
+    isFlyoutOpen: false,
   };
 
   beforeEach(() => {
@@ -50,13 +53,13 @@ describe('Host Summary Component', () => {
   });
 
   test('it renders the default Host Summary', () => {
-    const wrapper = shallow(
+    const { container } = render(
       <TestProviders>
         <HostOverview {...mockProps} />
       </TestProviders>
     );
 
-    expect(wrapper.find('HostOverview')).toMatchSnapshot();
+    expect(container.children[0]).toMatchSnapshot();
   });
 
   test('it renders the panel view Host Summary', () => {
@@ -65,13 +68,13 @@ describe('Host Summary Component', () => {
       isInDetailsSidePanel: true,
     };
 
-    const wrapper = shallow(
+    const { container } = render(
       <TestProviders>
         <HostOverview {...panelViewProps} />
       </TestProviders>
     );
 
-    expect(wrapper.find('HostOverview')).toMatchSnapshot();
+    expect(container.children[0]).toMatchSnapshot();
   });
 
   test('it renders host risk score and level', () => {
@@ -106,5 +109,14 @@ describe('Host Summary Component', () => {
 
     expect(getByTestId('host-risk-overview')).toHaveTextContent(risk);
     expect(getByTestId('host-risk-overview')).toHaveTextContent(riskScore.toString());
+  });
+
+  test('it renders host id', () => {
+    const { container } = render(
+      <TestProviders>
+        <HostOverview {...mockProps} data={mockData.Hosts.edges[0].node} />
+      </TestProviders>
+    );
+    expect(container).toHaveTextContent('aa7ca589f1b8220002f2fc61c64cfbf1');
   });
 });

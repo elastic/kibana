@@ -6,12 +6,11 @@
  */
 
 import { lastValueFrom, of } from 'rxjs';
-import {
-  ToolChoiceType,
+import type {
   ChatCompletionChunkEvent,
-  ChatCompletionEventType,
   ChatCompletionTokenCountEvent,
 } from '@kbn/inference-common';
+import { ToolChoiceType, ChatCompletionEventType } from '@kbn/inference-common';
 import { chunksIntoMessage } from './chunks_into_message';
 import type { Logger } from '@kbn/logging';
 
@@ -88,7 +87,7 @@ describe('chunksIntoMessage', () => {
                   arguments: '',
                 },
                 index: 0,
-                toolCallId: '0',
+                toolCallId: '001',
               },
             ],
           },
@@ -102,7 +101,7 @@ describe('chunksIntoMessage', () => {
                   arguments: '{',
                 },
                 index: 0,
-                toolCallId: '0',
+                toolCallId: '',
               },
             ],
           },
@@ -116,7 +115,7 @@ describe('chunksIntoMessage', () => {
                   arguments: '"foo": "bar" }',
                 },
                 index: 0,
-                toolCallId: '1',
+                toolCallId: '',
               },
             ],
           }
@@ -174,7 +173,7 @@ describe('chunksIntoMessage', () => {
                   arguments: '',
                 },
                 index: 1,
-                toolCallId: '0',
+                toolCallId: '001',
               },
             ],
           },
@@ -188,7 +187,7 @@ describe('chunksIntoMessage', () => {
                   arguments: '{',
                 },
                 index: 1,
-                toolCallId: '0',
+                toolCallId: '',
               },
             ],
           },
@@ -202,7 +201,7 @@ describe('chunksIntoMessage', () => {
                   arguments: '"foo": "bar" }',
                 },
                 index: 1,
-                toolCallId: '1',
+                toolCallId: '',
               },
             ],
           }

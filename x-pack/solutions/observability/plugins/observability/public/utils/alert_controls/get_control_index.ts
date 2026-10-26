@@ -8,5 +8,5 @@
 import type { FilterControlConfig } from '@kbn/alerts-ui-shared';
 
 export function getControlIndex(fieldName: string, controlConfigs: FilterControlConfig[]): number {
-  return controlConfigs.findIndex((control) => control.fieldName === fieldName);
+  return controlConfigs.findIndex((control) => control.field_name === fieldName);
 }

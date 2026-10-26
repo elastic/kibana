@@ -1,0 +1,76 @@
+---
+# This file is used to generate "Reporting background job settings" page in the product docs
+# For the schema and an example refer to the automated settings reference: 
+# https://github.com/elastic/docs-builder/blob/main/docs/syntax/automated_settings.md
+
+product: Kibana
+collection: Reporting background job settings in Kibana
+id: reporting-job-queue-settings
+page_description: |
+  Reporting generates reports on the {{kib}} server as background tasks, and jobs are coordinated using documents in {{es}}. Depending on how often you generate reports and the overall number of reports, you might need to change the following settings.
+
+groups:
+  - group: Background job settings
+    id: reporting-job-queue-settings
+    settings:
+
+      - setting: xpack.reporting.capture.maxAttempts
+        description: |
+          If capturing a report fails for any reason, {{kib}} will re-queue the report job for retry, as many times as this setting.
+        datatype: int
+        default: 3
+        applies_to:
+          stack: ga
+          ech: ga
+          self: ga
+
+      - setting: xpack.reporting.queue.indexInterval
+        description: |
+          How often Reporting creates a new index to store report jobs and file contents. Valid values are `year`, `month`, `week`, `day`, and `hour`.
+        note: "This setting exists for backwards compatibility, but is unused. Use the built-in ILM policy provided for the reporting plugin to customize the rollover of Reporting data."
+        datatype: enum
+        default: week
+        options:
+          - option: year
+          - option: month
+          - option: week
+          - option: day
+          - option: hour
+        applies_to:
+          - "stack: deprecated 8.15+"
+          - "ech: unavailable"
+          - "self: ga"
+        deprecation_details: "This setting was deprecated in 8.15.0."
+
+      - setting: xpack.reporting.queue.pollEnabled
+        id: xpack-reportingQueue-pollEnabled
+        description: |
+          When `true`, enables the {{kib}} instance to poll {{es}} for pending jobs and claim them for execution. When `false`, allows the {{kib}} instance to only add new jobs to the reporting queue, list jobs, and provide the downloads to completed reports through the UI. This requires a deployment where at least one other {{kib}} instance in the Elastic cluster has this setting to `true`.
+        note: "Running multiple instances of {{kib}} in a cluster for load balancing of reporting requires identical values for [`xpack.reporting.encryptionKey`](/reference/configuration-reference/reporting-settings.md#xpack-reporting-encryptionkey) and, if security is enabled, [`xpack.security.encryptionKey`](/reference/configuration-reference/security-settings.md#xpack-security-encryptionkey)."
+        datatype: bool
+        default: true
+        applies_to:
+          stack: ga
+          ech: unavailable
+          self: ga
+
+      - setting: xpack.reporting.queue.pollInterval
+        description: |
+          Specifies the [time](elasticsearch://reference/elasticsearch/rest-apis/api-conventions.md#time-units) that the reporting poller waits between polling the index for any pending Reporting jobs. Can be specified as a number of milliseconds.
+        datatype: string
+        default: 3s
+        applies_to:
+          stack: ga
+          ech: unavailable
+          self: ga
+
+      - setting: xpack.reporting.queue.timeout
+        id: xpack-reporting-q-timeout
+        description: |
+          [How long](elasticsearch://reference/elasticsearch/rest-apis/api-conventions.md#time-units) each worker has to produce a report. If your machine is slow or under heavy load, you might need to increase this timeout. If a Reporting job execution goes over this time limit, the job is marked as a failure and no download will be available. Can be specified as a number of milliseconds.
+        datatype: string
+        default: 4m
+        applies_to:
+          stack: ga
+          ech: ga
+          self: ga

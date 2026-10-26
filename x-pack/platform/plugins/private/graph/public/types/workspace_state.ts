@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { JsonObject } from '@kbn/utility-types';
-import d3 from 'd3';
-import { TargetOptions } from '../components/control_panel';
-import { GenericIcon } from '../helpers/style_choices';
-import { WorkspaceField, AdvancedSettings } from './app_state';
+import type { JsonObject } from '@kbn/utility-types';
+import type d3 from 'd3';
+import type { TargetOptions } from '../components/control_panel';
+import type { GenericIcon } from '../helpers/style_choices';
+import type { WorkspaceField, AdvancedSettings } from './app_state';
 
 export interface WorkspaceNode {
   id: string;
@@ -33,6 +33,7 @@ export interface WorkspaceNode {
 export type BlockListedNode = Omit<WorkspaceNode, 'numChildren' | 'kx' | 'ky' | 'id'>;
 
 export interface WorkspaceEdge {
+  id?: string;
   weight: number;
   width: number;
   label: string;
@@ -96,12 +97,8 @@ export interface Workspace {
   expandSelecteds: (targetOptions: TargetOptions) => {};
   deleteSelection: () => void;
   blocklistSelection: () => void;
-  selectAll: () => void;
   selectNone: () => void;
-  selectInvert: () => void;
-  selectNeighbours: () => void;
   deselectNode: (node: WorkspaceNode) => void;
-  colorSelected: (color: string) => void;
   groupSelections: (node: WorkspaceNode | undefined) => void;
   ungroup: (node: WorkspaceNode | undefined) => void;
   callElasticsearch: (request: any) => void;
@@ -165,6 +162,7 @@ export type WorkspaceOptions = Partial<{
   vertex_fields: WorkspaceField[];
   nodeLabeller: (newNodes: WorkspaceNode[]) => void;
   changeHandler: () => void;
+  topologyChangeHandler: () => void;
   graphExploreProxy: (
     indexPattern: string,
     request: ExploreRequest,

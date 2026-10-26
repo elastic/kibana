@@ -44,7 +44,7 @@ export function EditRuleSettingButtonLink({
       <SecuritySolutionLinkButton
         data-test-subj="editRuleSettingsLink"
         onClick={goToEditRule}
-        iconType="controlsHorizontal"
+        iconType="controls"
         isDisabled={disabled}
         deepLinkId={SecurityPageName.rules}
         path={getEditRuleUrl(ruleId)}

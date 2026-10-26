@@ -8,7 +8,7 @@
  */
 
 import { createContext, useContext } from 'react';
-import { SharedUXRoutesContextType } from './types';
+import type { SharedUXRoutesContextType } from './types';
 
 const defaultContextValue = {};
 

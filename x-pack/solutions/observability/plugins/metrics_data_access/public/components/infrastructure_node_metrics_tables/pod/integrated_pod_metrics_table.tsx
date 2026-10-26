@@ -13,26 +13,35 @@ import { usePodMetricsTable } from './use_pod_metrics_table';
 
 function HookedPodMetricsTable({
   timerange,
-  filterClauseDsl,
+  kuery,
   metricsClient,
+  isOtel,
 }: UseNodeMetricsTableOptions) {
-  const podMetricsTableProps = usePodMetricsTable({ timerange, filterClauseDsl, metricsClient });
-  return <PodMetricsTable {...podMetricsTableProps} />;
+  const podMetricsTableProps = usePodMetricsTable({ timerange, kuery, metricsClient, isOtel });
+  return (
+    <PodMetricsTable
+      {...podMetricsTableProps}
+      isOtel={isOtel}
+      metricIndices={podMetricsTableProps.metricIndices}
+    />
+  );
 }
 
 function PodMetricsTableWithProviders({
   timerange,
-  filterClauseDsl,
+  kuery,
   sourceId,
   metricsClient,
+  isOtel,
   ...coreProvidersProps
 }: IntegratedNodeMetricsTableProps) {
   return (
     <CoreProviders {...coreProvidersProps}>
       <HookedPodMetricsTable
         timerange={timerange}
-        filterClauseDsl={filterClauseDsl}
+        kuery={kuery}
         metricsClient={metricsClient}
+        isOtel={isOtel}
       />
     </CoreProviders>
   );

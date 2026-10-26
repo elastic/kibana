@@ -97,11 +97,7 @@ export const RecentCasesComp = React.memo<RecentCasesProps>(
                     </LocalizedDateTooltip>
                   </EuiText>
                 </EuiFlexItem>
-                <IconWithCount
-                  count={c.totalComment}
-                  icon={'editorComment'}
-                  tooltip={i18n.COMMENTS}
-                />
+                <IconWithCount count={c.totalComment} icon={'comment'} tooltip={i18n.COMMENTS} />
               </EuiFlexGroup>
               {i !== data.cases.length - 1 && <EuiSpacer size="l" />}
             </EuiFlexItem>

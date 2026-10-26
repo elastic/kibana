@@ -4,23 +4,26 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { schema } from '@kbn/config-schema';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { z } from '@kbn/zod';
 import { isEmpty } from 'lodash';
-import { PrivateLocationAttributes } from '../../runtime_types/private_locations';
+import { routeId } from '../zod_query';
+import { createMonitorRequestBody } from '../monitor_cruds/monitor_request_body';
+import type { PrivateLocationAttributes } from '../../runtime_types/private_locations';
 import { getPrivateLocationsForMonitor } from '../monitor_cruds/add_monitor/utils';
-import { SyntheticsRestApiRouteFactory } from '../types';
-import { ConfigKey, MonitorFields } from '../../../common/runtime_types';
+import type { SyntheticsRestApiRouteFactory } from '../types';
+import type { MonitorFields } from '../../../common/runtime_types';
+import { ConfigKey } from '../../../common/runtime_types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { validateMonitor } from '../monitor_cruds/monitor_validation';
+import { isSecretConnectionsEnabled } from '../../config';
 
 export const runOnceSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'POST',
   path: SYNTHETICS_API_URLS.RUN_ONCE_MONITOR + '/{monitorId}',
   validate: {
-    body: schema.any(),
-    params: schema.object({
-      monitorId: schema.string({ minLength: 1, maxLength: 1024 }),
+    body: createMonitorRequestBody,
+    params: z.strictObject({
+      monitorId: routeId,
     }),
   },
   handler: async ({
@@ -29,6 +32,7 @@ export const runOnceSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () =
     server,
     syntheticsMonitorClient,
     savedObjectsClient,
+    spaceId,
   }): Promise<any> => {
     const monitor = request.body as MonitorFields;
     const { monitorId } = request.params;
@@ -36,9 +40,12 @@ export const runOnceSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () =
       return response.badRequest({ body: { message: 'Monitor data is empty.' } });
     }
 
-    const validationResult = validateMonitor(monitor);
-
-    const spaceId = server.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
+    const validationResult = validateMonitor(
+      monitor,
+      spaceId,
+      server.cloud?.isServerlessEnabled,
+      isSecretConnectionsEnabled(server.config)
+    );
 
     const decodedMonitor = validationResult.decodedMonitor;
     if (!validationResult.valid || !decodedMonitor) {

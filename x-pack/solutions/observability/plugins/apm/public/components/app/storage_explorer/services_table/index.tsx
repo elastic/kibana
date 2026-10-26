@@ -22,16 +22,15 @@ import {
   EuiButton,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { apmServiceInventoryOptimizedSorting } from '@kbn/observability-plugin/common';
 import moment from 'moment';
 import { isEmpty } from 'lodash';
+import type { APIReturnType } from '@kbn/apm-api-shared';
+import { TruncateWithTooltip } from '@kbn/apm-ui-shared';
 import { downloadJson } from '../../../../utils/download_json';
 import type { AgentName } from '../../../../../typings/es_schemas/ui/fields/agent';
 import { EnvironmentBadge } from '../../../shared/environment_badge';
 import { asPercent, asTransactionRate } from '../../../../../common/utils/formatters';
 import { ServiceLink } from '../../../shared/links/apm/service_link';
-import { TruncateWithTooltip } from '../../../shared/truncate_with_tooltip';
 import { StorageDetailsPerService } from './storage_details_per_service';
 import { getComparisonEnabled } from '../../../shared/time_comparison/get_comparison_enabled';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
@@ -43,7 +42,6 @@ import { useProgressiveFetcher } from '../../../../hooks/use_progressive_fetcher
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import { SizeLabel } from './size_label';
 import { joinByKey } from '../../../../../common/utils/join_by_key';
-import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 
 interface StorageExplorerItem {
   serviceName: string;
@@ -63,6 +61,9 @@ interface Props {
   summaryStatsData?: APIReturnType<'GET /internal/apm/storage_explorer_summary_stats'>;
   loadingSummaryStats: boolean;
 }
+
+const initialSortField = StorageExplorerFieldName.ServiceName;
+const initialSortDirection = 'asc';
 
 export function ServicesTable({ summaryStatsData, loadingSummaryStats }: Props) {
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<Record<string, ReactNode>>(
@@ -104,26 +105,21 @@ export function ServicesTable({ summaryStatsData, loadingSummaryStats }: Props) 
     setItemIdToExpandedRowMap(expandedRowMapValues);
   };
 
-  const useOptimizedSorting =
-    useKibana().services.uiSettings?.get<boolean>(apmServiceInventoryOptimizedSorting) || false;
-
   const sortedAndFilteredServicesFetch = useFetcher(
     (callApmApi) => {
-      if (useOptimizedSorting) {
-        return callApmApi('GET /internal/apm/storage_explorer/get_services', {
-          params: {
-            query: {
-              environment,
-              kuery,
-              indexLifecyclePhase,
-              start,
-              end,
-            },
+      return callApmApi('GET /internal/apm/storage_explorer/get_services', {
+        params: {
+          query: {
+            environment,
+            kuery,
+            indexLifecyclePhase,
+            start,
+            end,
           },
-        });
-      }
+        },
+      });
     },
-    [useOptimizedSorting, environment, kuery, indexLifecyclePhase, start, end]
+    [environment, kuery, indexLifecyclePhase, start, end]
   );
 
   const serviceStatisticsFetch = useProgressiveFetcher(
@@ -146,21 +142,11 @@ export function ServicesTable({ summaryStatsData, loadingSummaryStats }: Props) 
   const serviceStatisticsItems = serviceStatisticsFetch.data?.serviceStatistics ?? [];
   const preloadedServices = sortedAndFilteredServicesFetch.data?.services || [];
 
-  const initialSortField = useOptimizedSorting
-    ? StorageExplorerFieldName.ServiceName
-    : StorageExplorerFieldName.Size;
-
-  const initialSortDirection =
-    initialSortField === StorageExplorerFieldName.ServiceName ? 'asc' : 'desc';
-
   const loading = serviceStatisticsFetch.status === FETCH_STATUS.LOADING;
 
   const items = joinByKey(
-    [
-      ...(initialSortField === StorageExplorerFieldName.ServiceName ? preloadedServices : []),
-      ...serviceStatisticsItems,
-    ],
-    'serviceName'
+    [...preloadedServices, ...serviceStatisticsItems],
+    StorageExplorerFieldName.ServiceName
   );
 
   const columns: Array<EuiBasicTableColumn<StorageExplorerItem>> = [
@@ -216,7 +202,13 @@ export function ServicesTable({ summaryStatsData, loadingSummaryStats }: Props) 
             {i18n.translate('xpack.apm.storageExplorer.table.samplingColumnName', {
               defaultMessage: 'Sampling rate',
             })}{' '}
-            <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
+            <EuiIcon
+              size="s"
+              color="subdued"
+              type="question"
+              className="eui-alignTop"
+              aria-hidden={true}
+            />
           </>
         </EuiToolTip>
       ),
@@ -243,21 +235,24 @@ export function ServicesTable({ summaryStatsData, loadingSummaryStats }: Props) 
         </EuiScreenReaderOnly>
       ),
       render: ({ serviceName }: { serviceName: string }) => {
+        const isExpanded = Boolean(itemIdToExpandedRowMap[serviceName]);
+        const toggleLabel = isExpanded
+          ? i18n.translate('xpack.apm.storageExplorer.table.collapse', {
+              defaultMessage: 'Collapse',
+            })
+          : i18n.translate('xpack.apm.storageExplorer.table.expand', {
+              defaultMessage: 'Expand',
+            });
+
         return (
-          <EuiButtonIcon
-            data-test-subj={`storageDetailsButton_${serviceName}`}
-            onClick={() => toggleRowDetails(serviceName)}
-            aria-label={
-              itemIdToExpandedRowMap[serviceName]
-                ? i18n.translate('xpack.apm.storageExplorer.table.collapse', {
-                    defaultMessage: 'Collapse',
-                  })
-                : i18n.translate('xpack.apm.storageExplorer.table.expand', {
-                    defaultMessage: 'Expand',
-                  })
-            }
-            iconType={itemIdToExpandedRowMap[serviceName] ? 'arrowUp' : 'arrowDown'}
-          />
+          <EuiToolTip content={toggleLabel} disableScreenReaderOutput>
+            <EuiButtonIcon
+              data-test-subj={`storageDetailsButton_${serviceName}`}
+              onClick={() => toggleRowDetails(serviceName)}
+              aria-label={toggleLabel}
+              iconType={isExpanded ? 'chevronSingleUp' : 'chevronSingleDown'}
+            />
+          </EuiToolTip>
         );
       },
     },
@@ -266,7 +261,13 @@ export function ServicesTable({ summaryStatsData, loadingSummaryStats }: Props) 
   const isDownloadButtonDisable = isEmpty(serviceStatisticsItems) || loadingSummaryStats;
 
   return (
-    <EuiPanel hasShadow={false} paddingSize="none" style={{ position: 'relative' }}>
+    <EuiPanel
+      hasShadow={false}
+      hasBorder={false}
+      borderRadius="none"
+      paddingSize="none"
+      css={{ position: 'relative' }}
+    >
       {loading && <EuiProgress size="xs" color="accent" position="absolute" />}
       <EuiFlexGroup justifyContent="flexEnd">
         <EuiFlexItem grow={false}>
@@ -314,7 +315,7 @@ export function ServicesTable({ summaryStatsData, loadingSummaryStats }: Props) 
 
       <EuiInMemoryTable
         tableCaption={i18n.translate('xpack.apm.storageExplorer.table.caption', {
-          defaultMessage: 'Storage Explorer',
+          defaultMessage: 'Storage explorer',
         })}
         items={items ?? []}
         columns={columns}
@@ -327,7 +328,7 @@ export function ServicesTable({ summaryStatsData, loadingSummaryStats }: Props) 
         }}
         itemId="serviceName"
         itemIdToExpandedRowMap={itemIdToExpandedRowMap}
-        data-test-subj="storageExplorerServicesTable"
+        data-test-subj={`storageExplorerServicesTable-${loading ? 'loading' : 'loaded'}`}
         error={
           status === FETCH_STATUS.FAILURE
             ? i18n.translate('xpack.apm.storageExplorer.table.errorMessage', {
@@ -335,7 +336,7 @@ export function ServicesTable({ summaryStatsData, loadingSummaryStats }: Props) 
               })
             : ''
         }
-        message={
+        noItemsMessage={
           loading
             ? i18n.translate('xpack.apm.storageExplorer.table.loading', {
                 defaultMessage: 'Loading...',

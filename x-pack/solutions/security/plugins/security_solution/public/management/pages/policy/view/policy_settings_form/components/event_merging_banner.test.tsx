@@ -32,12 +32,12 @@ describe('EventMergingBanner component', () => {
     const docLink = renderResult.getByTestId('eventMergingDocLink');
 
     expect(docLink).toBeInTheDocument();
-    expect(docLink.getAttribute('href')).toContain('endpoint-data-volume.html');
+    expect(docLink.getAttribute('href')).toContain('configure-data-volume-for-elastic-endpoint');
   });
 
   it('should call `onDismiss` callback when user clicks dismiss', () => {
     renderResult.getByTestId('euiDismissCalloutButton').click();
 
-    expect(formProps.onDismiss).toBeCalled();
+    expect(formProps.onDismiss).toHaveBeenCalled();
   });
 });

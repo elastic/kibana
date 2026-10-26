@@ -9,10 +9,11 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
 import type { TimeRange } from '@kbn/es-query';
-import { Subject } from 'rxjs';
+import type { Subject } from 'rxjs';
 import { css } from '@emotion/react';
+import { ALL_VALUE } from '@kbn/slo-schema';
 import { observabilityPaths } from '@kbn/observability-plugin/common';
-import { FetchContext } from '@kbn/presentation-publishing';
+import type { FetchContext } from '@kbn/presentation-publishing';
 import { SloIncludedCount } from './components/slo_included_count';
 import { SloAlertsSummary } from './components/slo_alerts_summary';
 import { SloAlertsTable } from './components/slo_alerts_table';
@@ -24,8 +25,8 @@ interface Props {
   timeRange: TimeRange;
   onRenderComplete?: () => void;
   reloadSubject: Subject<FetchContext>;
-  showAllGroupByInstances?: boolean;
   onEdit: () => void;
+  isInteractive?: boolean;
 }
 
 export function SloAlertsWrapper({
@@ -34,8 +35,8 @@ export function SloAlertsWrapper({
   timeRange: initialTimeRange,
   onRenderComplete,
   reloadSubject,
-  showAllGroupByInstances,
   onEdit,
+  isInteractive = true,
 }: Props) {
   const {
     application: { navigateToUrl },
@@ -71,9 +72,21 @@ export function SloAlertsWrapper({
       onRenderComplete();
     }
   }, [isSummaryLoaded, isTableLoaded, onRenderComplete]);
+  /**
+   * When every selected row is all-instances (*), show SloIncludedCount: "N SLOs (M Instances) included"
+   * (fetches total instance count from the SLO API). If any row is a specific instance id, show only
+   * "N SLOs included" (row count, no parenthetical) so mixed * + specific selections are not mislabeled.
+   */
+  const showInstanceCountBreakdown =
+    slos.length > 0 && slos.every((s) => s.slo_instance_id === ALL_VALUE);
+
   const handleGoToAlertsClick = () => {
     const kuery = slos
-      .map((slo) => `(slo.id:"${slo.id}" and slo.instanceId:"${slo.instanceId}")`)
+      .map((slo) =>
+        slo.slo_instance_id !== ALL_VALUE
+          ? `(slo.id:"${slo.slo_id}" and slo.instanceId:"${slo.slo_instance_id}")`
+          : `(slo.id:"${slo.slo_id}")`
+      )
       .join(' or ');
 
     navigateToUrl(
@@ -90,7 +103,6 @@ export function SloAlertsWrapper({
       `}
     >
       <EuiFlexGroup
-        data-shared-item=""
         justifyContent="flexEnd"
         wrap
         css={css`
@@ -103,8 +115,9 @@ export function SloAlertsWrapper({
               onEdit();
             }}
             data-test-subj="o11ySloAlertsWrapperSlOsIncludedLink"
+            disabled={!isInteractive}
           >
-            {showAllGroupByInstances ? (
+            {showInstanceCountBreakdown ? (
               <SloIncludedCount slos={slos} />
             ) : (
               i18n.translate('xpack.slo.sloAlertsWrapper.sLOsIncludedFlexItemLabel', {
@@ -117,17 +130,19 @@ export function SloAlertsWrapper({
             )}
           </EuiLink>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiLink
-            data-test-subj="o11ySloAlertsWrapperGoToAlertsLink"
-            onClick={handleGoToAlertsClick}
-          >
-            <FormattedMessage
-              id="xpack.slo.sloAlertsWrapper.goToAlertsFlexItemLabel"
-              defaultMessage="Go to alerts"
-            />
-          </EuiLink>
-        </EuiFlexItem>
+        {isInteractive && (
+          <EuiFlexItem grow={false}>
+            <EuiLink
+              data-test-subj="o11ySloAlertsWrapperGoToAlertsLink"
+              onClick={handleGoToAlertsClick}
+            >
+              <FormattedMessage
+                id="xpack.slo.sloAlertsWrapper.goToAlertsFlexItemLabel"
+                defaultMessage="Go to alerts"
+              />
+            </EuiLink>
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
 
       <EuiFlexGroup direction="column" style={{ margin: '10px' }} responsive={true}>
@@ -137,7 +152,6 @@ export function SloAlertsWrapper({
             deps={deps}
             timeRange={timeRange}
             onLoaded={() => setIsSummaryLoaded(true)}
-            showAllGroupByInstances={showAllGroupByInstances}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={true}>
@@ -147,7 +161,7 @@ export function SloAlertsWrapper({
             timeRange={timeRange}
             onLoaded={() => setIsTableLoaded(true)}
             lastReloadRequestTime={lastRefreshTime}
-            showAllGroupByInstances={showAllGroupByInstances}
+            isInteractive={isInteractive}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

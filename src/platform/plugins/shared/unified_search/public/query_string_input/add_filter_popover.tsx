@@ -8,23 +8,15 @@
  */
 
 import React, { useState, useCallback } from 'react';
-import { css } from '@emotion/react';
-import {
-  EuiFlexItem,
-  EuiButtonIcon,
-  EuiPopover,
-  EuiButtonIconProps,
-  EuiToolTip,
-} from '@elastic/eui';
+import type { EuiButtonIconProps } from '@elastic/eui';
+import { EuiFlexItem, EuiButtonIcon, EuiPopover, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Filter } from '@kbn/es-query';
-import type { DataView } from '@kbn/data-views-plugin/public';
+import type { Filter } from '@kbn/es-query';
+import type { SuggestionsAbstraction } from '@kbn/kql/public';
+import type { FilterableSource } from '@kbn/data-source';
 import { FilterEditorWrapper } from './filter_editor_wrapper';
-import {
-  withCloseFilterEditorConfirmModal,
-  WithCloseFilterEditorConfirmModalProps,
-} from '../filter_bar/filter_editor';
-import { SuggestionsAbstraction } from '../typeahead/suggestions_component';
+import type { WithCloseFilterEditorConfirmModalProps } from '../filter_bar/filter_editor';
+import { withCloseFilterEditorConfirmModal } from '../filter_bar/filter_editor';
 
 export const strings = {
   getAddFilterButtonLabel: () =>
@@ -34,7 +26,7 @@ export const strings = {
 };
 
 interface AddFilterPopoverProps extends WithCloseFilterEditorConfirmModalProps {
-  indexPatterns?: Array<DataView | string>;
+  indexPatterns?: Array<FilterableSource | string>;
   filters: Filter[];
   timeRangeForSuggestionsOverride?: boolean;
   filtersForSuggestions?: Filter[];
@@ -43,11 +35,6 @@ interface AddFilterPopoverProps extends WithCloseFilterEditorConfirmModalProps {
   buttonProps?: Partial<EuiButtonIconProps>;
   suggestionsAbstraction?: SuggestionsAbstraction;
 }
-
-const customButtonStyles = css({
-  borderTopLeftRadius: 0,
-  borderBottomLeftRadius: 0,
-});
 
 const AddFilterPopoverComponent = React.memo(function AddFilterPopover({
   indexPatterns,
@@ -65,17 +52,17 @@ const AddFilterPopoverComponent = React.memo(function AddFilterPopover({
   const [showAddFilterPopover, setShowAddFilterPopover] = useState(false);
 
   const button = (
-    <EuiToolTip delay="long" content={strings.getAddFilterButtonLabel()}>
+    <EuiToolTip content={strings.getAddFilterButtonLabel()} disableScreenReaderOutput>
       <EuiButtonIcon
         display="base"
-        iconType="plusInCircleFilled"
+        iconType="plusCircle"
+        color="text"
         aria-label={strings.getAddFilterButtonLabel()}
         data-test-subj="addFilter"
         onClick={() => setShowAddFilterPopover((isOpen) => !isOpen)}
-        size="m"
+        size="s"
         disabled={isDisabled}
         {...buttonProps}
-        css={[buttonProps?.css, customButtonStyles]}
       />
     </EuiToolTip>
   );
@@ -99,6 +86,8 @@ const AddFilterPopoverComponent = React.memo(function AddFilterPopover({
         initialFocus=".filterEditor__hiddenItem"
         ownFocus
         repositionOnScroll
+        aria-label={strings.getAddFilterButtonLabel()}
+        focusTrapProps={{ clickOutsideDisables: false }}
       >
         <FilterEditorWrapper
           indexPatterns={indexPatterns}

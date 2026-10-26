@@ -8,31 +8,33 @@
 import {
   EuiBadge,
   type EuiBasicTableColumn,
-  EuiButton,
   EuiCallOut,
   EuiFlexGrid,
   EuiFlexItem,
   EuiInMemoryTable,
   EuiLink,
   EuiLoadingSpinner,
-  EuiPageHeader,
   EuiPageSection,
+  type EuiSearchBarOnChangeArgs,
   EuiSpacer,
 } from '@elastic/eui';
+import { debounce } from 'lodash';
 import React, { Component, lazy, Suspense } from 'react';
 
+import { AppHeader, type AppHeaderMenu } from '@kbn/app-header';
 import type {
   ApplicationStart,
   Capabilities,
   NotificationsStart,
   ScopedHistory,
 } from '@kbn/core/public';
+import { addSpaceIdToPath } from '@kbn/core-spaces-common';
 import type { FeaturesPluginStart, KibanaFeature } from '@kbn/features-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 
-import { addSpaceIdToPath, type Space } from '../../../common';
+import type { Space } from '../../../common';
 import { isReservedSpace } from '../../../common';
 import { ENTER_SPACE_PATH } from '../../../common/constants';
 import { getSpacesFeatureDescription } from '../../constants';
@@ -44,6 +46,15 @@ import { ConfirmDeleteModal, UnauthorizedPrompt } from '../components';
 // No need to wrap LazySpaceAvatar in an error boundary, because it is one of the first chunks loaded when opening Kibana.
 const LazySpaceAvatar = lazy(() =>
   getSpaceAvatarComponent().then((component) => ({ default: component }))
+);
+
+const spacesTitle = i18n.translate('xpack.spaces.management.spacesGridPage.spacesTitle', {
+  defaultMessage: 'Spaces',
+});
+
+const createSpaceButtonLabel = i18n.translate(
+  'xpack.spaces.management.spacesGridPage.createSpaceButtonLabel',
+  { defaultMessage: 'Create space' }
 );
 
 interface Props {
@@ -61,6 +72,8 @@ interface Props {
 
 interface State {
   spaces: Space[];
+  spacesFiltered: Space[];
+  queryText: string;
   activeSpace: Space | null;
   features: KibanaFeature[];
   loading: boolean;
@@ -73,6 +86,8 @@ export class SpacesGridPage extends Component<Props, State> {
     super(props);
     this.state = {
       spaces: [],
+      spacesFiltered: [],
+      queryText: '',
       activeSpace: null,
       features: [],
       loading: true,
@@ -85,32 +100,68 @@ export class SpacesGridPage extends Component<Props, State> {
     if (this.props.capabilities.spaces.manage) {
       this.loadGrid();
     }
+
+    this.debouncedOnQueryChange?.cancel();
   }
 
   public render() {
     return (
       <div className="spcGridPage" data-test-subj="spaces-grid-page">
-        <EuiPageHeader
-          bottomBorder
-          pageTitle={
-            <FormattedMessage
-              id="xpack.spaces.management.spacesGridPage.spacesTitle"
-              defaultMessage="Spaces"
-            />
-          }
-          description={getSpacesFeatureDescription()}
-          rightSideItems={
-            !this.state.loading && this.canCreateSpaces()
-              ? [this.getPrimaryActionButton()]
-              : undefined
-          }
-        />
+        {this.renderHeader()}
         <EuiSpacer size="l" />
-        {this.getPageContent()}
+        <div>{this.getPageContent()}</div>
         {this.getConfirmDeleteModal()}
       </div>
     );
   }
+
+  private renderHeader() {
+    const showCreate = !this.state.loading && this.canCreateSpaces();
+    const menu: AppHeaderMenu | undefined = showCreate
+      ? {
+          primaryActionItem: {
+            id: 'createSpace',
+            label: createSpaceButtonLabel,
+            iconType: 'plusCircle',
+            testId: 'createSpace',
+            href: this.props.history.createHref({ pathname: '/create' }),
+            run: () => this.props.history.push('/create'),
+          },
+        }
+      : undefined;
+
+    return (
+      <AppHeader
+        title={spacesTitle}
+        description={getSpacesFeatureDescription()}
+        menu={menu}
+        spacing="bleed"
+      />
+    );
+  }
+
+  private filterSpacesByQuery = (spaces: Space[], queryText: string): Space[] => {
+    if (!queryText) {
+      return spaces;
+    }
+
+    return spaces.filter(
+      (space) =>
+        space.name.toLowerCase().includes(queryText) ||
+        space.description?.toLowerCase().includes(queryText)
+    );
+  };
+
+  public onQueryChange = ({ query }: EuiSearchBarOnChangeArgs) => {
+    const queryText = query?.text?.toLowerCase() || '';
+
+    this.setState({
+      queryText,
+      spacesFiltered: this.filterSpacesByQuery(this.state.spaces, queryText),
+    });
+  };
+
+  public debouncedOnQueryChange = debounce(this.onQueryChange, 200);
 
   public getPageContent() {
     if (!this.props.capabilities.spaces.manage) {
@@ -125,14 +176,17 @@ export class SpacesGridPage extends Component<Props, State> {
       <>
         {!this.state.loading && !this.canCreateSpaces() ? (
           <>
-            <EuiCallOut title="You have reached the maximum number of allowed spaces." />
+            <EuiCallOut
+              announceOnMount
+              title="You have reached the maximum number of allowed spaces."
+            />
             <EuiSpacer />
           </>
         ) : undefined}
         <EuiInMemoryTable
           itemId={'id'}
           data-test-subj="spacesListTable"
-          items={this.state.spaces}
+          items={this.state.spacesFiltered}
           tableCaption={i18n.translate('xpack.spaces.management.spacesGridPage.tableCaption', {
             defaultMessage: 'Kibana spaces',
           })}
@@ -144,15 +198,18 @@ export class SpacesGridPage extends Component<Props, State> {
           pagination={true}
           sorting={true}
           search={{
+            onChange: this.debouncedOnQueryChange,
             box: {
+              incremental: true,
               placeholder: i18n.translate(
                 'xpack.spaces.management.spacesGridPage.searchPlaceholder',
                 { defaultMessage: 'Search' }
               ),
+              'data-test-subj': 'spacesListTableSearchBox',
             },
           }}
           loading={this.state.loading}
-          message={
+          noItemsMessage={
             this.state.loading ? (
               <FormattedMessage
                 id="xpack.spaces.management.spacesGridPage.loadingTitle"
@@ -167,22 +224,6 @@ export class SpacesGridPage extends Component<Props, State> {
 
   private canCreateSpaces() {
     return this.props.maxSpaces > this.state.spaces.length;
-  }
-
-  public getPrimaryActionButton() {
-    return (
-      <EuiButton
-        fill
-        iconType="plusInCircleFilled"
-        {...reactRouterNavigate(this.props.history, '/create')}
-        data-test-subj="createSpace"
-      >
-        <FormattedMessage
-          id="xpack.spaces.management.spacesGridPage.createSpaceButtonLabel"
-          defaultMessage="Create space"
-        />
-      </EuiButton>
-    );
   }
 
   public getConfirmDeleteModal = () => {
@@ -217,6 +258,7 @@ export class SpacesGridPage extends Component<Props, State> {
     this.setState({
       loading: true,
       spaces: [],
+      spacesFiltered: [],
       features: [],
     });
 
@@ -229,12 +271,16 @@ export class SpacesGridPage extends Component<Props, State> {
         getActiveSpace,
         getFeatures(),
       ]);
-      this.setState({
+      // Re-apply any query typed while load was in flight; otherwise an early
+      // filter is wiped when this resolves and the table shows every space
+      // while the search box still shows the query text.
+      this.setState((state) => ({
         loading: false,
         spaces,
+        spacesFiltered: this.filterSpacesByQuery(spaces, state.queryText),
         activeSpace,
         features,
-      });
+      }));
     } catch (error) {
       this.setState({
         loading: false,

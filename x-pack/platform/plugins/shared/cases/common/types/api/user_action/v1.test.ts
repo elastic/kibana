@@ -8,15 +8,22 @@
 import { AttachmentType } from '../../domain/attachment/v1';
 import { UserActionTypes } from '../../domain/user_action/action/v1';
 import {
-  CaseUserActionStatsResponseRt,
-  CaseUserActionStatsRt,
-  UserActionFindRequestRt,
-  UserActionFindResponseRt,
+  MAX_USER_ACTION_AUTHOR_LENGTH,
+  MAX_USER_ACTION_AUTHORS_FILTER_LENGTH,
+  MAX_USER_ACTION_SEARCH_LENGTH,
+} from '../../../constants';
+import { parseErrors } from '../../../test_helpers/zod_schema_test_utils';
+import {
+  type CaseUserActionStatsResponse,
+  CaseUserActionStatsSchema,
+  UserActionFindRequestSchema,
+  UserActionInternalFindRequestSchema,
+  UserActionFindResponseSchema,
 } from './v1';
 
 describe('User actions APIs', () => {
   describe('Find API', () => {
-    describe('UserActionFindRequestRt', () => {
+    describe('UserActionFindRequestSchema', () => {
       const defaultRequest = {
         types: [UserActionTypes.comment],
         sortOrder: 'desc',
@@ -25,33 +32,124 @@ describe('User actions APIs', () => {
       };
 
       it('has expected attributes in request', () => {
-        const query = UserActionFindRequestRt.decode(defaultRequest);
-
-        expect(query).toStrictEqual({
-          _tag: 'Right',
-          right: {
-            ...defaultRequest,
-            page: 1,
-            perPage: 10,
-          },
-        });
+        const result = UserActionFindRequestSchema.safeParse(defaultRequest);
+        expect(result.success).toBe(true);
+        expect(result.data).toStrictEqual({ ...defaultRequest, page: 1, perPage: 10 });
       });
 
-      it('removes foo:bar attributes from request', () => {
-        const query = UserActionFindRequestRt.decode({ ...defaultRequest, foo: 'bar' });
+      it('strips unknown fields', () => {
+        const result = UserActionFindRequestSchema.safeParse({ ...defaultRequest, foo: 'bar' });
+        expect(result.success).toBe(true);
+        expect(result.data).toStrictEqual({ ...defaultRequest, page: 1, perPage: 10 });
+      });
 
-        expect(query).toStrictEqual({
-          _tag: 'Right',
-          right: {
-            ...defaultRequest,
-            page: 1,
-            perPage: 10,
-          },
+      it('strips search and author params (internal-only)', () => {
+        const result = UserActionFindRequestSchema.safeParse({
+          ...defaultRequest,
+          search: 'test',
+          author: 'elastic',
         });
+        expect(result.success).toBe(true);
+        expect(result.data).toStrictEqual({ ...defaultRequest, page: 1, perPage: 10 });
       });
     });
 
-    describe('UserActionFindResponseRt', () => {
+    describe('UserActionInternalFindRequestSchema', () => {
+      const defaultRequest = {
+        types: [UserActionTypes.comment],
+        sortOrder: 'desc',
+        page: '1',
+        perPage: '10',
+      };
+      const parsedDefaults = { ...defaultRequest, page: 1, perPage: 10 };
+
+      it('has expected attributes in request', () => {
+        const result = UserActionInternalFindRequestSchema.safeParse({
+          ...defaultRequest,
+          search: 'test',
+          authors: ['elastic'],
+        });
+        expect(result.success).toBe(true);
+        expect(result.data).toStrictEqual({
+          ...parsedDefaults,
+          search: 'test',
+          authors: ['elastic'],
+        });
+      });
+
+      it('accepts multiple authors', () => {
+        const result = UserActionInternalFindRequestSchema.safeParse({
+          ...defaultRequest,
+          authors: ['elastic', 'other'],
+        });
+        expect(result.success).toBe(true);
+        expect(result.data).toStrictEqual({ ...parsedDefaults, authors: ['elastic', 'other'] });
+      });
+
+      it('accepts sources including none', () => {
+        const result = UserActionInternalFindRequestSchema.safeParse({
+          ...defaultRequest,
+          sources: ['agent', 'none'],
+        });
+        expect(result.success).toBe(true);
+        expect(result.data).toStrictEqual({ ...parsedDefaults, sources: ['agent', 'none'] });
+      });
+
+      it('strips unknown fields', () => {
+        const result = UserActionInternalFindRequestSchema.safeParse({
+          ...defaultRequest,
+          foo: 'bar',
+        });
+        expect(result.success).toBe(true);
+        expect(result.data).toStrictEqual(parsedDefaults);
+      });
+
+      it(`throws an error when the search is more than ${MAX_USER_ACTION_SEARCH_LENGTH} characters`, () => {
+        const search = 'a'.repeat(MAX_USER_ACTION_SEARCH_LENGTH + 1);
+
+        expect(
+          parseErrors(UserActionInternalFindRequestSchema, { ...defaultRequest, search })
+        ).toContain(
+          `The length of the search is too long. The maximum length is ${MAX_USER_ACTION_SEARCH_LENGTH}.`
+        );
+      });
+
+      it('throws an error when the search is an empty string', () => {
+        expect(
+          parseErrors(UserActionInternalFindRequestSchema, { ...defaultRequest, search: '' })
+        ).toContain('The search field cannot be an empty string.');
+      });
+
+      it(`throws an error when an author is more than ${MAX_USER_ACTION_AUTHOR_LENGTH} characters`, () => {
+        const author = 'a'.repeat(MAX_USER_ACTION_AUTHOR_LENGTH + 1);
+
+        expect(
+          parseErrors(UserActionInternalFindRequestSchema, { ...defaultRequest, authors: [author] })
+        ).toContain(
+          `The length of the authors is too long. The maximum length is ${MAX_USER_ACTION_AUTHOR_LENGTH}.`
+        );
+      });
+
+      it(`throws an error when the authors array has more than ${MAX_USER_ACTION_AUTHORS_FILTER_LENGTH} items`, () => {
+        const authors = Array(MAX_USER_ACTION_AUTHORS_FILTER_LENGTH + 1).fill('elastic');
+
+        expect(
+          parseErrors(UserActionInternalFindRequestSchema, { ...defaultRequest, authors })
+        ).toContain(
+          `The length of the field authors is too long. Array must be of length <= ${MAX_USER_ACTION_AUTHORS_FILTER_LENGTH}.`
+        );
+      });
+
+      it(`accepts exactly ${MAX_USER_ACTION_AUTHORS_FILTER_LENGTH} authors`, () => {
+        const authors = Array(MAX_USER_ACTION_AUTHORS_FILTER_LENGTH).fill('elastic');
+
+        expect(
+          UserActionInternalFindRequestSchema.safeParse({ ...defaultRequest, authors }).success
+        ).toBe(true);
+      });
+    });
+
+    describe('UserActionFindResponseSchema', () => {
       const defaultRequest = {
         userActions: [
           {
@@ -82,87 +180,42 @@ describe('User actions APIs', () => {
       };
 
       it('has expected attributes in request', () => {
-        const query = UserActionFindResponseRt.decode(defaultRequest);
-
-        expect(query).toStrictEqual({
-          _tag: 'Right',
-          right: defaultRequest,
-        });
+        const result = UserActionFindResponseSchema.safeParse(defaultRequest);
+        expect(result.success).toBe(true);
+        expect(result.data).toStrictEqual(defaultRequest);
       });
 
-      it('removes foo:bar attributes from request', () => {
-        const query = UserActionFindResponseRt.decode({ ...defaultRequest, foo: 'bar' });
-
-        expect(query).toStrictEqual({
-          _tag: 'Right',
-          right: defaultRequest,
-        });
-      });
-
-      it('removes foo:bar attributes from userActions', () => {
-        const query = UserActionFindResponseRt.decode({
-          ...defaultRequest,
-          userActions: [{ ...defaultRequest.userActions[0], foo: 'bar' }],
-        });
-
-        expect(query).toStrictEqual({
-          _tag: 'Right',
-          right: defaultRequest,
-        });
+      it('strips unknown fields', () => {
+        const result = UserActionFindResponseSchema.safeParse({ ...defaultRequest, foo: 'bar' });
+        expect(result.success).toBe(true);
+        expect(result.data).toStrictEqual(defaultRequest);
       });
     });
   });
 
   describe('User actions stats API', () => {
-    describe('CaseUserActionStatsResponseRt', () => {
-      const defaultRequest = {
-        total: 15,
-        total_comments: 10,
-        total_other_actions: 5,
-      };
-
-      it('has expected attributes in request', () => {
-        const query = CaseUserActionStatsResponseRt.decode(defaultRequest);
-
-        expect(query).toStrictEqual({
-          _tag: 'Right',
-          right: defaultRequest,
-        });
-      });
-
-      it('removes foo:bar attributes from request', () => {
-        const query = CaseUserActionStatsResponseRt.decode({ ...defaultRequest, foo: 'bar' });
-
-        expect(query).toStrictEqual({
-          _tag: 'Right',
-          right: defaultRequest,
-        });
-      });
-    });
-
-    describe('CaseUserActionStatsRt', () => {
-      const defaultRequest = {
+    describe('CaseUserActionStatsSchema', () => {
+      const defaultRequest: CaseUserActionStatsResponse = {
         total: 100,
+        total_deletions: 0,
         total_comments: 60,
+        total_comment_deletions: 0,
+        total_comment_creations: 0,
+        total_hidden_comment_updates: 0,
         total_other_actions: 40,
+        total_other_action_deletions: 0,
       };
 
       it('has expected attributes in request', () => {
-        const query = CaseUserActionStatsRt.decode(defaultRequest);
-
-        expect(query).toStrictEqual({
-          _tag: 'Right',
-          right: defaultRequest,
-        });
+        const result = CaseUserActionStatsSchema.safeParse(defaultRequest);
+        expect(result.success).toBe(true);
+        expect(result.data).toStrictEqual(defaultRequest);
       });
 
-      it('removes foo:bar attributes from request', () => {
-        const query = CaseUserActionStatsRt.decode({ ...defaultRequest, foo: 'bar' });
-
-        expect(query).toStrictEqual({
-          _tag: 'Right',
-          right: defaultRequest,
-        });
+      it('strips unknown fields', () => {
+        const result = CaseUserActionStatsSchema.safeParse({ ...defaultRequest, foo: 'bar' });
+        expect(result.success).toBe(true);
+        expect(result.data).toStrictEqual(defaultRequest);
       });
     });
   });

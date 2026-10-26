@@ -8,15 +8,15 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { Ast } from '@kbn/interpreter';
-import { buildExpressionFunction, DatatableRow } from '@kbn/expressions-plugin/common';
+import type { Ast } from '@kbn/interpreter';
+import type { DatatableRow } from '@kbn/expressions-plugin/common';
+import { buildExpressionFunction } from '@kbn/expressions-plugin/common';
+import type { PaletteRegistry, CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
 import {
-  PaletteRegistry,
-  CustomPaletteParams,
   CUSTOM_PALETTE,
   applyPaletteParams,
-  getOverridePaletteStops,
-  PaletteOutput,
+  getOverridePaletteColors,
+  isValueBasedPalette,
 } from '@kbn/coloring';
 import type {
   GaugeExpressionFunctionDefinition,
@@ -31,21 +31,21 @@ import {
 } from '@kbn/expression-gauge-plugin/public';
 import { IconChartGauge } from '@kbn/chart-icons';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
-import type { FormBasedPersistedState } from '../../datasources/form_based/types';
 import type {
+  FormBasedPersistedState,
   DatasourceLayers,
   FramePublicAPI,
   OperationMetadata,
   Suggestion,
   UserMessage,
   Visualization,
-} from '../../types';
+} from '@kbn/lens-common';
 import { getSuggestions } from './suggestions';
-import { GROUP_ID, LENS_GAUGE_ID, GaugeVisualizationState } from './constants';
-import { GaugeToolbar } from './toolbar_component';
+import type { GaugeVisualizationState } from './constants';
+import { GROUP_ID, LENS_GAUGE_ID } from './constants';
 import { GaugeDimensionEditor } from './dimension_editor';
 import { generateId } from '../../id_generator';
-import { getAccessorsFromState } from './utils';
+import { getAccessorsFromState, getDefaultPalette } from './utils';
 import {
   GAUGE_GOAL_GT_MAX,
   GAUGE_METRIC_GT_MAX,
@@ -54,6 +54,8 @@ import {
   GAUGE_MIN_GT_METRIC,
   GAUGE_MIN_NE_MAX,
 } from '../../user_messages_ids';
+import { FlyoutToolbar } from '../../shared_components/flyout_toolbar';
+import { GaugeStyleSettings } from './toolbar_component';
 
 interface GaugeVisualizationDeps {
   paletteService: PaletteRegistry;
@@ -69,13 +71,14 @@ function computePaletteParams(
   paletteService: PaletteRegistry,
   palette: PaletteOutput<CustomPaletteParams>
 ) {
-  const stops = getOverridePaletteStops(paletteService, palette);
+  const colors = getOverridePaletteColors(paletteService, palette);
+  const stops = palette.params?.stops?.map(({ stop }) => stop) ?? [];
 
   return {
     ...palette.params,
-    // rewrite colors and stops as two distinct arguments
-    colors: stops?.map(({ color }) => color),
-    stops: palette.params?.name === 'custom' ? stops?.map(({ stop }) => stop) : [],
+    colors,
+    // Positions are a custom-palette concept only; named palettes distribute uniformly at render.
+    stops: palette.params?.name === CUSTOM_PALETTE ? stops : [],
     reverse: false, // managed at UI level
   };
 }
@@ -145,17 +148,25 @@ const toExpression = (
     return null;
   }
 
+  const colorMode = state?.colorMode ?? 'none';
+  const palette =
+    colorMode === 'palette'
+      ? state.palette?.params
+        ? state.palette
+        : getDefaultPalette(paletteService)
+      : undefined;
+
   const gaugeFn = buildExpressionFunction<GaugeExpressionFunctionDefinition>('gauge', {
     metric: state.metricAccessor,
     min: state.minAccessor,
     max: state.maxAccessor,
     goal: state.goalAccessor,
     shape: state.shape ?? GaugeShapes.HORIZONTAL_BULLET,
-    colorMode: state?.colorMode ?? 'none',
-    palette: state.palette?.params
+    colorMode,
+    palette: palette?.params
       ? paletteService
           .get(CUSTOM_PALETTE)
-          .toExpression(computePaletteParams(paletteService, state.palette))
+          .toExpression(computePaletteParams(paletteService, palette))
       : undefined,
     ticksPosition: state.ticksPosition ?? 'auto',
     labelMinor: state.labelMinor,
@@ -232,13 +243,17 @@ export const getGaugeVisualization = ({
         layerId: addNewLayer(),
         layerType: LayerTypes.DATA,
         shape: GaugeShapes.HORIZONTAL_BULLET,
-        palette: mainPalette?.type === 'legacyPalette' ? mainPalette.value : undefined,
-        ticksPosition: 'auto',
+        colorMode: 'palette',
+        palette:
+          mainPalette?.type === 'legacyPalette'
+            ? mainPalette.value
+            : getDefaultPalette(paletteService),
+        ticksPosition: 'bands',
         labelMajorMode: 'auto',
       }
     );
   },
-  getSuggestions,
+  getSuggestions: (params) => getSuggestions({ ...params, paletteService }),
 
   getConfiguration({ state, frame }) {
     const row = state?.layerId ? frame?.activeData?.[state?.layerId]?.rows?.[0] : undefined;
@@ -416,8 +431,8 @@ export const getGaugeVisualization = ({
     return <GaugeDimensionEditor {...props} paletteService={paletteService} />;
   },
 
-  ToolbarComponent(props) {
-    return <GaugeToolbar {...props} />;
+  FlyoutToolbarComponent(props) {
+    return <FlyoutToolbar {...props} contentMap={{ style: GaugeStyleSettings }} />;
   },
 
   getSupportedLayers(state, frame) {
@@ -671,7 +686,12 @@ function getConfigurationAccessorsAndPalette(
   paletteService: PaletteRegistry,
   activeData?: FramePublicAPI['activeData']
 ) {
-  const hasColoring = Boolean(state.colorMode !== 'none' && state.palette?.params?.stops);
+  const effectivePalette =
+    state.colorMode === 'palette'
+      ? isValueBasedPalette(state.palette)
+        ? state.palette
+        : getDefaultPalette(paletteService)
+      : undefined;
 
   const row = getActiveDataForLayer(state?.layerId, activeData)?.rows?.[0];
   const { metricAccessor } = state ?? {};
@@ -679,12 +699,12 @@ function getConfigurationAccessorsAndPalette(
   const accessors = getAccessorsFromState(state);
 
   let palette;
-  if (row != null && metricAccessor != null && state?.palette != null && hasColoring) {
+  if (row != null && metricAccessor != null && effectivePalette != null) {
     const currentMinMax = {
       min: getMinValue(row, accessors),
       max: getMaxValue(row, accessors),
     };
-    const displayStops = applyPaletteParams(paletteService, state?.palette, currentMinMax);
+    const displayStops = applyPaletteParams(paletteService, effectivePalette, currentMinMax);
     palette = displayStops.map(({ color }) => color);
   }
   return { metricAccessor, accessors, palette };

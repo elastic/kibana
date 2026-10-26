@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { fireEvent, waitFor } from '@testing-library/react';
-import { renderReactTestingLibraryWithI18n } from '@kbn/test-jest-helpers';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
 
 import { useUpdateTags } from '../hooks';
 
@@ -32,7 +32,7 @@ describe('TagOptions', () => {
   });
 
   const renderComponent = () => {
-    return renderReactTestingLibraryWithI18n(
+    return renderWithI18n(
       <div>
         <TagOptions tagName={'agent'} isTagHovered={isTagHovered} onTagsUpdated={onTagsUpdated} />
       </div>
@@ -62,6 +62,7 @@ describe('TagOptions', () => {
       [],
       ['agent'],
       expect.anything(),
+      undefined,
       'Tag deleted',
       'Tag delete failed'
     );
@@ -85,6 +86,29 @@ describe('TagOptions', () => {
       ['newName'],
       ['agent'],
       expect.anything(),
+      undefined,
+      'Tag renamed',
+      'Tag rename failed'
+    );
+  });
+
+  it('should rename tag when save button is clicked', () => {
+    const result = renderComponent();
+
+    fireEvent.click(result.getByRole('button'));
+
+    const nameInput = result.getByDisplayValue('agent');
+    fireEvent.input(nameInput, {
+      target: { value: 'newName' },
+    });
+    fireEvent.click(result.getByText('Save'));
+
+    expect(mockBulkUpdateTags).toHaveBeenCalledWith(
+      'tags:"agent"',
+      ['newName'],
+      ['agent'],
+      expect.anything(),
+      undefined,
       'Tag renamed',
       'Tag rename failed'
     );

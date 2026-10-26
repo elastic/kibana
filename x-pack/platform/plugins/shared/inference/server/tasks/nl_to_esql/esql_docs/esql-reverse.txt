@@ -1,6 +1,6 @@
 # REVERSE
 
-The REVERSE function returns a reversed form of the input string.
+Returns a new string with the characters of the input string in reverse order. Unicode grapheme clusters are kept together during reversal.
 
 ## Syntax
 
@@ -10,20 +10,16 @@ The REVERSE function returns a reversed form of the input string.
 
 #### str
 
-The string you want to reverse. If the string is `null`, the function will also return `null`.
+String expression to be reversed. If the value is `null`, the function returns `null`.
 
 ## Examples
 
-Here's an example of how to reverse a string:
-
+Reverses the characters in the string "Some Text".
 ```esql
-ROW message = "Some Text"
-| EVAL message_reversed = REVERSE(message);
+ROW message = "Some Text" | EVAL message_reversed = REVERSE(message);
 ```
 
-REVERSE also works with unicode characters, keeping unicode grapheme clusters intact during reversal:
-
+Reverses the order of the emoji grapheme clusters in the string "💧🪨🔥💨", keeping each cluster intact.
 ```esql
-ROW bending_arts = "💧🪨🔥💨"
-| EVAL bending_arts_reversed = REVERSE(bending_arts);
+ROW bending_arts = "💧🪨🔥💨" | EVAL bending_arts_reversed = REVERSE(bending_arts);
 ```

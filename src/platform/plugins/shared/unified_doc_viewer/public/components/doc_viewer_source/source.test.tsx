@@ -7,60 +7,72 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
+import '@testing-library/jest-dom';
 import '@kbn/code-editor-mock/jest_helper';
-import { DocViewerSource } from './source';
-import * as hooks from '../../hooks/use_es_doc_search';
-import * as useUiSettingHook from '@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting';
-import { EuiButton, EuiEmptyPrompt, EuiLoadingSpinner } from '@elastic/eui';
-import { JsonCodeEditorCommon } from '../json_code_editor';
+import React from 'react';
 import { buildDataTableRecord } from '@kbn/discover-utils';
+import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
+import { DocViewerSource } from './source';
+import { ElasticRequestState } from '@kbn/unified-doc-viewer';
+import { JSONCodeEditorCommonMemoized } from '../json_code_editor';
 import { mockUnifiedDocViewerServices } from '../../__mocks__';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
+import { screen } from '@testing-library/react';
 import { setUnifiedDocViewerServices } from '../../plugin';
+import { useEsDocSearch } from '../../hooks/use_es_doc_search';
+
+jest.mock('../../hooks/use_es_doc_search', () => ({
+  useEsDocSearch: jest.fn(),
+}));
+
+jest.mock('../json_code_editor', () => ({
+  JSONCodeEditorCommonMemoized: jest.fn(() => <div>JSON code editor</div>),
+}));
 
 setUnifiedDocViewerServices(mockUnifiedDocViewerServices);
 
-const mockDataView = {
-  getComputedFields: () => [],
-} as never;
+const mockUseEsDocSearch = jest.mocked(useEsDocSearch);
+
+const mockJSONCodeEditorCommonMemoized = jest.mocked(JSONCodeEditorCommonMemoized);
+
+const getJsonCodeEditorProps = () => mockJSONCodeEditorCommonMemoized.mock.calls[0][0];
+
+const defaultProps = {
+  dataView: dataViewMock,
+  id: '1',
+  index: 'index1',
+  onRefresh: () => {},
+  width: 123,
+};
 
 describe('Source Viewer component', () => {
-  test('renders loading state', () => {
-    jest.spyOn(hooks, 'useEsDocSearch').mockImplementation(() => [0, null, () => {}]);
-
-    const comp = mountWithIntl(
-      <DocViewerSource
-        id={'1'}
-        index={'index1'}
-        dataView={mockDataView}
-        width={123}
-        onRefresh={() => {}}
-      />
-    );
-    const loadingIndicator = comp.find(EuiLoadingSpinner);
-    expect(loadingIndicator).not.toBe(null);
+  beforeEach(() => {
+    mockUseEsDocSearch.mockReset();
+    mockJSONCodeEditorCommonMemoized.mockClear();
   });
 
-  test('renders error state', () => {
-    jest.spyOn(hooks, 'useEsDocSearch').mockImplementation(() => [3, null, () => {}]);
+  it('renders loading state', () => {
+    mockUseEsDocSearch.mockReturnValue([ElasticRequestState.Loading, null, () => {}]);
 
-    const comp = mountWithIntl(
-      <DocViewerSource
-        id={'1'}
-        index={'index1'}
-        dataView={mockDataView}
-        width={123}
-        onRefresh={() => {}}
-      />
-    );
-    const errorPrompt = comp.find(EuiEmptyPrompt);
-    expect(errorPrompt.length).toBe(1);
-    const refreshButton = comp.find(EuiButton);
-    expect(refreshButton.length).toBe(1);
+    renderWithI18n(<DocViewerSource {...defaultProps} />);
+
+    expect(screen.getByText('Loading JSON')).toBeVisible();
+    expect(screen.getByRole('progressbar')).toBeVisible();
   });
 
-  test('renders json code editor', () => {
+  it('renders error state', () => {
+    mockUseEsDocSearch.mockReturnValue([ElasticRequestState.Error, null, () => {}]);
+
+    renderWithI18n(<DocViewerSource {...defaultProps} />);
+
+    expect(screen.getByText('An Error Occurred')).toBeVisible();
+    expect(
+      screen.getByText('Could not fetch data at this time. Refresh the tab to try again.')
+    ).toBeVisible();
+    expect(screen.getByText('Refresh')).toBeVisible();
+  });
+
+  it('renders json code editor', async () => {
     const mockHit = buildDataTableRecord({
       _index: 'logstash-2014.09.09',
       _id: 'id123',
@@ -78,28 +90,21 @@ describe('Source Viewer component', () => {
         _underscore: 123,
       },
     });
-    jest.spyOn(hooks, 'useEsDocSearch').mockImplementation(() => [2, mockHit, () => {}]);
-    jest.spyOn(useUiSettingHook, 'useUiSetting').mockImplementation(() => {
-      return false;
-    });
-    const comp = mountWithIntl(
-      <DocViewerSource
-        id={'1'}
-        index={'index1'}
-        dataView={mockDataView}
-        width={123}
-        onRefresh={() => {}}
-      />
-    );
-    const jsonCodeEditor = comp.find(JsonCodeEditorCommon);
-    expect(jsonCodeEditor).not.toBe(null);
-    expect(jsonCodeEditor.props().jsonValue).toContain('_source');
-    expect(jsonCodeEditor.props().jsonValue).not.toContain('_score');
-    expect(jsonCodeEditor.props().hasLineNumbers).toBe(true);
-    expect(jsonCodeEditor.props().enableFindAction).toBe(true);
+    mockUseEsDocSearch.mockReturnValue([ElasticRequestState.Found, mockHit, () => {}]);
+
+    renderWithI18n(<DocViewerSource {...defaultProps} />);
+
+    expect(await screen.findByText('JSON code editor')).toBeVisible();
+
+    const { enableFindAction, hasLineNumbers, jsonValue } = getJsonCodeEditorProps();
+
+    expect(hasLineNumbers).toBe(true);
+    expect(enableFindAction).toBe(true);
+    expect(jsonValue).toContain('_source');
+    expect(jsonValue).not.toContain('_score');
   });
 
-  test('renders json code editor for ES|QL record', () => {
+  it('renders json code editor for ES|QL record', async () => {
     const record = {
       _index: 'logstash-2014.09.09',
       _id: 'id123',
@@ -111,22 +116,15 @@ describe('Source Viewer component', () => {
       raw: record,
       flattened: record,
     };
-    jest.spyOn(useUiSettingHook, 'useUiSetting').mockImplementation(() => {
-      return false;
-    });
-    const comp = mountWithIntl(
-      <DocViewerSource
-        id={mockHit.id}
-        index={'index1'}
-        dataView={mockDataView}
-        esqlHit={mockHit}
-        width={123}
-        onRefresh={() => {}}
-      />
-    );
-    const jsonCodeEditor = comp.find(JsonCodeEditorCommon);
-    expect(jsonCodeEditor).not.toBe(null);
-    expect(jsonCodeEditor.props().jsonValue).toContain('message');
-    expect(jsonCodeEditor.props().jsonValue).toContain('_id');
+
+    mockUseEsDocSearch.mockReturnValue([ElasticRequestState.Found, mockHit, () => {}]);
+
+    renderWithI18n(<DocViewerSource {...defaultProps} id={mockHit.id} esqlHit={mockHit} />);
+
+    expect(await screen.findByText('JSON code editor')).toBeVisible();
+
+    const { jsonValue } = getJsonCodeEditorProps();
+    expect(jsonValue).toContain('message');
+    expect(jsonValue).toContain('_id');
   });
 });

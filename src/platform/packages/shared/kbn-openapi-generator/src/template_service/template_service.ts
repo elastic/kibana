@@ -7,13 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+// eslint-disable-next-line @kbn/imports/no_direct_handlebars_import
 import Handlebars from 'handlebars';
 import { resolve } from 'path';
-import { BundleGenerationContext, GenerationContext } from '../parser/get_generation_context';
+import type { BundleGenerationContext, GenerationContext } from '../parser/get_generation_context';
 import { registerHelpers } from './register_helpers';
 import { registerTemplates } from './register_templates';
 
-export const AVAILABLE_TEMPLATES = ['zod_operation_schema'] as const;
+export const AVAILABLE_TEMPLATES = [
+  'zod_operation_schema',
+  'api_client_supertest',
+  'api_client_quickstart',
+  'api_client_scout',
+] as const;
 
 export type TemplateName = (typeof AVAILABLE_TEMPLATES)[number];
 

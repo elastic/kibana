@@ -4,14 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ElementFactory } from '../../../types';
+import type { ElementFactory } from '../../../types';
 
 export const pieVis: ElementFactory = () => ({
   name: 'pieVis',
   displayName: '(New) Pie Vis',
   type: 'chart',
   help: 'Pie visualization',
-  icon: 'visPie',
+  icon: 'chartPie',
   expression: `kibana
 | selectFilter
 | demodata

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { MappingRuntimeFieldType } from '@elastic/elasticsearch/lib/api/types';
 import { flatten } from 'lodash';
 import type { FieldSpec } from '@kbn/data-views-plugin/common';
 import type { BrowserFields } from '../../../../common/search_strategy/index_fields';
@@ -300,6 +299,14 @@ export const mockBrowserFields: BrowserFields = {
         aggregatable: true,
         format: { id: 'string' },
       },
+      'host.id': {
+        name: 'host.id',
+        type: 'string',
+        esTypes: ['keyword'],
+        searchable: true,
+        aggregatable: true,
+        format: { id: 'string' },
+      },
     },
   },
   source: {
@@ -317,6 +324,34 @@ export const mockBrowserFields: BrowserFields = {
         searchable: true,
         type: 'number',
         esTypes: ['long'],
+      },
+      'source.geo.city_name': {
+        aggregatable: true,
+        name: 'source.geo.city_name',
+        searchable: true,
+        type: 'string',
+        esTypes: ['keyword'],
+      },
+      'source.geo.region_name': {
+        aggregatable: true,
+        name: 'source.geo.region_name',
+        searchable: true,
+        type: 'string',
+        esTypes: ['keyword'],
+      },
+      'source.as.number': {
+        aggregatable: true,
+        name: 'source.as.number',
+        searchable: true,
+        type: 'number',
+        esTypes: ['long'],
+      },
+      'source.as.organization.name': {
+        aggregatable: true,
+        name: 'source.as.organization.name',
+        searchable: true,
+        type: 'string',
+        esTypes: ['keyword'],
       },
     },
   },
@@ -369,6 +404,17 @@ export const mockBrowserFields: BrowserFields = {
       },
     },
   },
+  mock: {
+    fields: {
+      'mock.attr': {
+        name: 'mock.attr',
+        aggregatable: false,
+        type: 'string',
+        esTypes: ['keyword'],
+        searchable: true,
+      },
+    },
+  },
 
   process: {
     fields: {
@@ -394,14 +440,3 @@ export const mockIndexFieldsByName = mockIndexFields.reduce((acc, indexFieldObj)
   }
   return acc;
 }, {} as { [fieldName: string]: Partial<FieldSpec> });
-
-const runTimeType: MappingRuntimeFieldType = 'keyword' as const;
-
-export const mockRuntimeMappings = {
-  '@a.runtime.field': {
-    script: {
-      source: 'emit("Radical dude: " + doc[\'host.name\'].value)',
-    },
-    type: runTimeType,
-  },
-};

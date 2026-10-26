@@ -8,15 +8,13 @@
 import { ALERT_RULE_CONSUMER, ALERT_RULE_PRODUCER, ALERT_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { BASE_RAC_ALERTS_API_PATH } from '@kbn/rule-registry-plugin/common/constants';
 import type { CaseCustomField, User } from '../../common/types/domain';
-import { AttachmentType } from '../../common/types/domain';
 import type { Case, Cases } from '../../common';
 import type {
-  AttachmentRequest,
-  BulkCreateAttachmentsRequest,
+  BulkCreateUnifiedAttachmentsRequest,
   CasePatchRequest,
   CasePostRequest,
   CaseResolveResponse,
-  CasesFindResponse,
+  CasesSearchResponse,
   CaseUserActionStatsResponse,
   GetCaseConnectorsResponse,
   SingleCaseMetricsResponse,
@@ -25,6 +23,12 @@ import type {
   AddObservableRequest,
   UpdateObservableRequest,
   UserActionInternalFindResponse,
+  UserActionFindRequestSources,
+  FindCasesContainingAllAlertsResponse,
+  FindCasesContainingAllDocumentsRequest,
+  UpdateSummary,
+  CasesPatchResponse,
+  BulkDeleteAttachmentsRequest,
 } from '../../common/types/api';
 import type {
   CaseConnectors,
@@ -44,13 +48,12 @@ import type {
 } from '../../common/ui/types';
 import { SortFieldCase } from '../../common/ui/types';
 import {
-  getCaseCommentsUrl,
+  getCaseAttachmentDetailsUrl,
   getCasesDeleteFileAttachmentsUrl,
   getCaseDetailsUrl,
   getCaseDetailsMetricsUrl,
   getCasePushUrl,
   getCaseFindUserActionsUrl,
-  getCaseCommentDeleteUrl,
   getCaseConnectorsUrl,
   getCaseUsersUrl,
   getCaseUserActionStatsUrl,
@@ -58,15 +61,19 @@ import {
   getCaseCreateObservableUrl,
   getCaseUpdateObservableUrl,
   getCaseDeleteObservableUrl,
+  getCaseBulkDeleteObservablesUrl,
   getCaseSimilarCasesUrl,
+  getCaseBulkDeleteAttachmentsUrl,
 } from '../../common/api';
 import {
   CASE_REPORTERS_URL,
   CASE_TAGS_URL,
   CASES_URL,
+  COMMENT_ATTACHMENT_TYPE,
   INTERNAL_BULK_CREATE_ATTACHMENTS_URL,
   INTERNAL_GET_CASE_CATEGORIES_URL,
   CASES_INTERNAL_URL,
+  INTERNAL_CASE_GET_CASES_BY_ATTACHMENT_URL,
 } from '../../common/constants';
 import { getAllConnectorTypesUrl } from '../../common/utils/connectors_api';
 
@@ -99,12 +106,15 @@ import {
   decodeCaseUserActionsResponse,
   decodeCaseResolveResponse,
   decodeSingleCaseMetricsResponse,
+  decodeCasesWithUpdateSummaryResponse,
   constructAssigneesFilter,
   constructReportersFilter,
   decodeCaseUserActionStatsResponse,
   constructCustomFieldsFilter,
+  decodeFindAllAttachedAlertsResponse,
 } from './utils';
-import { decodeCasesFindResponse, decodeCasesSimilarResponse } from '../api/decoders';
+import { decodeCasesSearchResponse, decodeCasesSimilarResponse } from '../api/decoders';
+import { DEFAULT_FROM_DATE, DEFAULT_TO_DATE } from './constants';
 
 export const resolveCase = async ({
   caseId,
@@ -122,6 +132,21 @@ export const resolveCase = async ({
     }
   );
   return convertCaseResolveToCamelCase(decodeCaseResolveResponse(response));
+};
+
+export const getCase = async ({
+  caseId,
+  signal,
+}: {
+  caseId: string;
+  signal?: AbortSignal;
+}): Promise<CaseUI> => {
+  const response = await KibanaServices.get().http.fetch<Case>(getCaseDetailsUrl(caseId), {
+    method: 'GET',
+    signal,
+  });
+
+  return convertCaseToCamelCase(decodeCaseResponse(response));
 };
 
 export const getTags = async ({
@@ -184,6 +209,20 @@ export const getSingleCaseMetrics = async (
   );
 };
 
+export const findCasesByAttachmentId = async (documentIds: string[], caseIds: string[]) => {
+  const response = await KibanaServices.get().http.fetch<FindCasesContainingAllAlertsResponse>(
+    `${INTERNAL_CASE_GET_CASES_BY_ATTACHMENT_URL}`,
+    {
+      method: 'POST',
+      body: JSON.stringify({
+        documentIds,
+        caseIds,
+      } as FindCasesContainingAllDocumentsRequest),
+    }
+  );
+  return decodeFindAllAttachedAlertsResponse(response);
+};
+
 export const findCaseUserActions = async (
   caseId: string,
   params: {
@@ -191,6 +230,9 @@ export const findCaseUserActions = async (
     sortOrder: 'asc' | 'desc';
     page: number;
     perPage: number;
+    search?: string;
+    authors?: string[];
+    sources?: UserActionFindRequestSources[];
   },
   signal?: AbortSignal
 ): Promise<InternalFindCaseUserActions> => {
@@ -199,6 +241,9 @@ export const findCaseUserActions = async (
     sortOrder: params.sortOrder,
     page: params.page,
     perPage: params.perPage,
+    ...(params.search ? { search: params.search } : {}),
+    ...(params.authors?.length ? { authors: params.authors } : {}),
+    ...(params.sources?.length ? { sources: params.sources } : {}),
   };
 
   const response = await KibanaServices.get().http.fetch<UserActionInternalFindResponse>(
@@ -259,6 +304,9 @@ export const getCases = async ({
     owner: [],
     category: [],
     customFields: {},
+    extendedFieldFilters: [],
+    from: DEFAULT_FROM_DATE,
+    to: DEFAULT_TO_DATE,
   },
   queryParams = {
     page: 1,
@@ -287,10 +335,15 @@ export const getCases = async ({
     ...(filterOptions.owner.length > 0 ? { owner: filterOptions.owner } : {}),
     ...(filterOptions.category.length > 0 ? { category: filterOptions.category } : {}),
     ...constructCustomFieldsFilter(filterOptions.customFields),
+    ...(filterOptions.extendedFieldFilters && filterOptions.extendedFieldFilters.length > 0
+      ? { extendedFieldFilters: filterOptions.extendedFieldFilters }
+      : {}),
+    ...(filterOptions.from ? { from: filterOptions.from } : {}),
+    ...(filterOptions.to ? { to: filterOptions.to } : {}),
     ...queryParams,
   };
 
-  const response = await KibanaServices.get().http.fetch<CasesFindResponse>(
+  const response = await KibanaServices.get().http.fetch<CasesSearchResponse>(
     `${CASES_INTERNAL_URL}/_search`,
     {
       method: 'POST',
@@ -299,7 +352,7 @@ export const getCases = async ({
     }
   );
 
-  return convertAllCasesToCamel(decodeCasesFindResponse(response));
+  return convertAllCasesToCamel(decodeCasesSearchResponse(response));
 };
 
 export const postCase = async ({
@@ -330,7 +383,18 @@ export const patchCase = async ({
   caseId: string;
   updatedCase: Pick<
     CasePatchRequest,
-    'description' | 'status' | 'tags' | 'title' | 'settings' | 'connector'
+    | 'description'
+    | 'status'
+    | 'tags'
+    | 'title'
+    | 'settings'
+    | 'connector'
+    | 'severity'
+    | 'assignees'
+    | 'category'
+    | 'customFields'
+    | 'extended_fields'
+    | 'template'
   >;
   version: string;
   signal?: AbortSignal;
@@ -349,18 +413,22 @@ export const updateCases = async ({
 }: {
   cases: CaseUpdateRequest[];
   signal?: AbortSignal;
-}): Promise<CasesUI> => {
+}): Promise<Array<CaseUI & { updateSummary?: UpdateSummary }>> => {
   if (cases.length === 0) {
     return [];
   }
 
-  const response = await KibanaServices.get().http.fetch<Cases>(CASES_URL, {
+  const response = await KibanaServices.get().http.fetch<CasesPatchResponse>(CASES_URL, {
     method: 'PATCH',
     body: JSON.stringify({ cases }),
     signal,
   });
 
-  return convertCasesToCamelCase(decodeCasesResponse(response));
+  const decodedResponse = decodeCasesWithUpdateSummaryResponse(response);
+  return decodedResponse.map(({ updateSummary, ...theCase }) => ({
+    ...convertCaseToCamelCase(theCase),
+    ...(updateSummary != null ? { updateSummary } : {}),
+  }));
 };
 
 export const replaceCustomField = async ({
@@ -386,19 +454,6 @@ export const replaceCustomField = async ({
   return convertToCamelCase<CaseCustomField, CaseUICustomField>(response);
 };
 
-export const postComment = async (
-  newComment: AttachmentRequest,
-  caseId: string,
-  signal: AbortSignal
-): Promise<CaseUI> => {
-  const response = await KibanaServices.get().http.fetch<Case>(`${CASES_URL}/${caseId}/comments`, {
-    method: 'POST',
-    body: JSON.stringify(newComment),
-    signal,
-  });
-  return convertCaseToCamelCase(decodeCaseResponse(response));
-};
-
 export const patchComment = async ({
   caseId,
   commentId,
@@ -413,19 +468,17 @@ export const patchComment = async ({
   version: string;
   owner: string;
   signal?: AbortSignal;
-}): Promise<CaseUI> => {
-  const response = await KibanaServices.get().http.fetch<Case>(getCaseCommentsUrl(caseId), {
-    method: 'PATCH',
+}): Promise<void> => {
+  await KibanaServices.get().http.fetch(getCaseAttachmentDetailsUrl(caseId, commentId), {
+    method: 'PUT',
     body: JSON.stringify({
-      comment: commentUpdate,
-      type: AttachmentType.user,
-      id: commentId,
-      version,
+      type: COMMENT_ATTACHMENT_TYPE,
+      data: { content: commentUpdate },
       owner,
+      version,
     }),
     signal,
   });
-  return convertCaseToCamelCase(decodeCaseResponse(response));
 };
 
 export const deleteComment = async ({
@@ -437,7 +490,7 @@ export const deleteComment = async ({
   commentId: string;
   signal?: AbortSignal;
 }): Promise<void> => {
-  await KibanaServices.get().http.fetch<Case>(getCaseCommentDeleteUrl(caseId, commentId), {
+  await KibanaServices.get().http.fetch(getCaseAttachmentDetailsUrl(caseId, commentId), {
     method: 'DELETE',
     signal,
   });
@@ -496,7 +549,7 @@ export const createAttachments = async ({
   caseId,
   signal,
 }: {
-  attachments: BulkCreateAttachmentsRequest;
+  attachments: BulkCreateUnifiedAttachmentsRequest;
   caseId: string;
   signal?: AbortSignal;
 }): Promise<CaseUI> => {
@@ -523,6 +576,27 @@ export const deleteFileAttachments = async ({
   await KibanaServices.get().http.fetch(getCasesDeleteFileAttachmentsUrl(caseId), {
     method: 'POST',
     body: JSON.stringify({ ids: fileIds }),
+    signal,
+  });
+};
+
+export const bulkDeleteAttachments = async ({
+  caseId,
+  request,
+  includeRelated,
+  signal,
+}: {
+  caseId: string;
+  request: BulkDeleteAttachmentsRequest;
+  /** Whether the related attachments go too; the server defaults to `true`. */
+  includeRelated?: boolean;
+  signal?: AbortSignal;
+}): Promise<void> => {
+  await KibanaServices.get().http.fetch(getCaseBulkDeleteAttachmentsUrl(caseId), {
+    method: 'POST',
+    body: JSON.stringify(
+      includeRelated == null ? request : { ...request, include_related: includeRelated }
+    ),
     signal,
   });
 };
@@ -643,17 +717,35 @@ export const deleteObservable = async (
   });
 };
 
+export const bulkDeleteObservables = async (
+  caseId: string,
+  observableIds: string[],
+  signal?: AbortSignal
+): Promise<CaseUI> => {
+  const response = await KibanaServices.get().http.fetch<Case>(
+    getCaseBulkDeleteObservablesUrl(caseId),
+    {
+      method: 'POST',
+      body: JSON.stringify({ observableIds }),
+      signal,
+    }
+  );
+  return convertCaseToCamelCase(decodeCaseResponse(response));
+};
+
 export const getSimilarCases = async ({
   caseId,
   signal,
   perPage,
   page,
+  sortField,
+  sortOrder,
 }: SimilarCasesProps): Promise<CasesSimilarResponseUI> => {
   const response = await KibanaServices.get().http.fetch<CasesSimilarResponse>(
     getCaseSimilarCasesUrl(caseId),
     {
       method: 'POST',
-      body: JSON.stringify({ page, perPage }),
+      body: JSON.stringify({ page, perPage, sortField, sortOrder }),
       signal,
     }
   );

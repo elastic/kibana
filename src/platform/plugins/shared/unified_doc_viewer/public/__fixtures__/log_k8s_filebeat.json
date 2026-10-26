@@ -1,0 +1,244 @@
+{
+  "_index": ".ds-logs-kubernetes.container_logs-default-2025.07.26-000252",
+  "_id": "7kMxSpgBkLM-IwclCLv5",
+  "_version": 1,
+  "_source": {
+    "container": {
+      "image": {
+        "name": "docker.elastic.co/beats/elastic-agent:8.7.0"
+      },
+      "runtime": "docker",
+      "id": "9fa1b780eddf464f6cf133e44bc647c1261a0915807b309f7ead956416e45c0b"
+    },
+    "kubernetes": {
+      "container": {
+        "name": "elastic-agent"
+      },
+      "node": {
+        "uid": "f2fa4210-a18e-4836-a050-76c1be278a47",
+        "hostname": "ip-192-168-36-30.ec2.internal",
+        "name": "ip-192-168-36-30.ec2.internal",
+        "labels": {
+          "alpha_eksctl_io/nodegroup-name": "ng-81d86389",
+          "kubernetes_io/hostname": "ip-192-168-36-30.ec2.internal",
+          "topology_kubernetes_io/zone": "us-east-1f",
+          "topology_kubernetes_io/region": "us-east-1",
+          "kubernetes_io/arch": "amd64",
+          "failure-domain_beta_kubernetes_io/region": "us-east-1",
+          "k8s_io/cloud-provider-aws": "a40524700e5713fb51e9ecc8ebd8b56f",
+          "eks_amazonaws_com/sourceLaunchTemplateVersion": "1",
+          "beta_kubernetes_io/instance-type": "t2.xlarge",
+          "eks_amazonaws_com/nodegroup-image": "ami-065e0db5b710c2eae",
+          "eks_amazonaws_com/capacityType": "ON_DEMAND",
+          "eks_amazonaws_com/nodegroup": "ng-81d86389",
+          "failure-domain_beta_kubernetes_io/zone": "us-east-1f",
+          "node_kubernetes_io/instance-type": "t2.xlarge",
+          "eks_amazonaws_com/sourceLaunchTemplateId": "lt-0328c05cd52fe4783",
+          "alpha_eksctl_io/cluster-name": "demo-prod-1",
+          "beta_kubernetes_io/os": "linux",
+          "kubernetes_io/os": "linux",
+          "beta_kubernetes_io/arch": "amd64"
+        }
+      },
+      "pod": {
+        "uid": "6249fa7c-7bf9-4814-943e-fd9ab30b5a65",
+        "ip": "192.168.36.30",
+        "name": "elastic-agent-xtjjz"
+      },
+      "namespace": "kube-system",
+      "daemonset": {
+        "name": "elastic-agent"
+      },
+      "namespace_uid": "95de7a6b-72bc-43b2-a523-0c1007866d8d",
+      "namespace_labels": {
+        "kubernetes_io/metadata_name": "kube-system"
+      },
+      "labels": {
+        "app": "elastic-agent",
+        "controller-revision-hash": "67b966464b",
+        "pod-template-generation": "1"
+      }
+    },
+    "agent": {
+      "name": "ip-192-168-36-30.ec2.internal",
+      "id": "7fb711f9-5674-45d8-8d2a-47b58e88ce2d",
+      "type": "filebeat",
+      "ephemeral_id": "d101df05-1644-4ca5-86e7-2fc8e4f19dd4",
+      "version": "8.7.0"
+    },
+    "log": {
+      "file": {
+        "path": "/var/log/containers/elastic-agent-xtjjz_kube-system_elastic-agent-9fa1b780eddf464f6cf133e44bc647c1261a0915807b309f7ead956416e45c0b.log"
+      },
+      "offset": 2935553
+    },
+    "elastic_agent": {
+      "id": "7fb711f9-5674-45d8-8d2a-47b58e88ce2d",
+      "version": "8.7.0",
+      "snapshot": false
+    },
+    "message": "{\"log.level\":\"error\",\"@timestamp\":\"2025-07-27T04:43:03.084Z\",\"message\":\"E0727 04:43:03.084597   13437 reflector.go:138] k8s.io/client-go@v0.23.4/tools/cache/reflector.go:167: Failed to watch *v1.Namespace: failed to list *v1.Namespace: Get \\\"https://10.100.0.1:443/api/v1/namespaces?resourceVersion=264266691\\\": dial tcp 10.100.0.1:443: i/o timeout\",\"component\":{\"binary\":\"filebeat\",\"dataset\":\"elastic_agent.filebeat\",\"id\":\"filestream-monitoring\",\"type\":\"filestream\"},\"log\":{\"source\":\"filestream-monitoring\"},\"ecs.version\":\"1.6.0\"}\n",
+    "cloud": {
+      "image": {
+        "id": "ami-065e0db5b710c2eae"
+      },
+      "availability_zone": "us-east-1f",
+      "instance": {
+        "id": "i-09247ad0b3ba1d193"
+      },
+      "provider": "aws",
+      "service": {
+        "name": "EC2"
+      },
+      "machine": {
+        "type": "t2.xlarge"
+      },
+      "region": "us-east-1",
+      "account": {
+        "id": "644184947617"
+      }
+    },
+    "input": {
+      "type": "filestream"
+    },
+    "@timestamp": "2025-07-27T04:43:03.084Z",
+    "ecs": {
+      "version": "8.0.0"
+    },
+    "stream": "stderr",
+    "data_stream": {
+      "namespace": "default",
+      "type": "logs",
+      "dataset": "kubernetes.container_logs"
+    },
+    "host": {
+      "hostname": "ip-192-168-36-30.ec2.internal",
+      "os": {
+        "kernel": "5.4.219-126.411.amzn2.x86_64",
+        "codename": "focal",
+        "name": "Ubuntu",
+        "family": "debian",
+        "type": "linux",
+        "version": "20.04.5 LTS (Focal Fossa)",
+        "platform": "ubuntu"
+      },
+      "containerized": false,
+      "ip": [
+        "192.168.36.30",
+        "fe80::142a:41ff:fe88:8b13",
+        "fe80::30ca:24ff:fee0:a43f",
+        "192.168.58.77",
+        "fe80::1420:b4ff:fedd:ddc5",
+        "fe80::388b:bbff:fe35:4099"
+      ],
+      "name": "ip-192-168-36-30.ec2.internal",
+      "id": "88dc761b076149b3b3bd72a7ff9514f6",
+      "mac": ["16-20-B4-DD-DD-C5", "16-2A-41-88-8B-13", "32-CA-24-E0-A4-3F", "3A-8B-BB-35-40-99"],
+      "architecture": "x86_64"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "ingested": "2025-07-27T04:43:04Z",
+      "dataset": "kubernetes.container_logs"
+    }
+  },
+  "fields": {
+    "kubernetes.node.uid": ["f2fa4210-a18e-4836-a050-76c1be278a47"],
+    "kubernetes.daemonset.name": ["elastic-agent"],
+    "elastic_agent.version": ["8.7.0"],
+    "kubernetes.namespace_uid": ["95de7a6b-72bc-43b2-a523-0c1007866d8d"],
+    "host.os.name.text": ["Ubuntu"],
+    "kubernetes.node.labels.topology_kubernetes_io/zone": ["us-east-1f"],
+    "host.hostname": ["ip-192-168-36-30.ec2.internal"],
+    "host.mac": [
+      "16-20-B4-DD-DD-C5",
+      "16-2A-41-88-8B-13",
+      "32-CA-24-E0-A4-3F",
+      "3A-8B-BB-35-40-99"
+    ],
+    "kubernetes.node.labels.kubernetes_io/os": ["linux"],
+    "cloud.availability_zone": ["us-east-1f"],
+    "container.id": ["9fa1b780eddf464f6cf133e44bc647c1261a0915807b309f7ead956416e45c0b"],
+    "container.image.name": ["docker.elastic.co/beats/elastic-agent:8.7.0"],
+    "host.os.version": ["20.04.5 LTS (Focal Fossa)"],
+    "kubernetes.labels.app": ["elastic-agent"],
+    "cloud.service.name.text": ["EC2"],
+    "kubernetes.namespace": ["kube-system"],
+    "kubernetes.node.labels.beta_kubernetes_io/os": ["linux"],
+    "host.os.name": ["Ubuntu"],
+    "kubernetes.node.labels.eks_amazonaws_com/nodegroup-image": ["ami-065e0db5b710c2eae"],
+    "agent.name": ["ip-192-168-36-30.ec2.internal"],
+    "host.name": ["ip-192-168-36-30.ec2.internal"],
+    "event.agent_id_status": ["verified"],
+    "kubernetes.node.labels.alpha_eksctl_io/nodegroup-name": ["ng-81d86389"],
+    "kubernetes.node.labels.topology_kubernetes_io/region": ["us-east-1"],
+    "cloud.region": ["us-east-1"],
+    "host.os.type": ["linux"],
+    "kubernetes.node.labels.failure-domain_beta_kubernetes_io/zone": ["us-east-1f"],
+    "input.type": ["filestream"],
+    "log.offset": [2935553],
+    "data_stream.type": ["logs"],
+    "host.architecture": ["x86_64"],
+    "cloud.machine.type": ["t2.xlarge"],
+    "cloud.provider": ["aws"],
+    "container.runtime": ["docker"],
+    "kubernetes.node.labels.eks_amazonaws_com/nodegroup": ["ng-81d86389"],
+    "agent.id": ["7fb711f9-5674-45d8-8d2a-47b58e88ce2d"],
+    "cloud.service.name": ["EC2"],
+    "ecs.version": ["8.0.0"],
+    "host.containerized": [false],
+    "kubernetes.node.labels.beta_kubernetes_io/instance-type": ["t2.xlarge"],
+    "agent.version": ["8.7.0"],
+    "host.os.family": ["debian"],
+    "kubernetes.node.name": ["ip-192-168-36-30.ec2.internal"],
+    "kubernetes.node.labels.failure-domain_beta_kubernetes_io/region": ["us-east-1"],
+    "kubernetes.node.hostname": ["ip-192-168-36-30.ec2.internal"],
+    "kubernetes.node.labels.node_kubernetes_io/instance-type": ["t2.xlarge"],
+    "kubernetes.pod.uid": ["6249fa7c-7bf9-4814-943e-fd9ab30b5a65"],
+    "cloud.instance.id": ["i-09247ad0b3ba1d193"],
+    "host.ip": [
+      "192.168.36.30",
+      "fe80::142a:41ff:fe88:8b13",
+      "fe80::30ca:24ff:fee0:a43f",
+      "192.168.58.77",
+      "fe80::1420:b4ff:fedd:ddc5",
+      "fe80::388b:bbff:fe35:4099"
+    ],
+    "agent.type": ["filebeat"],
+    "kubernetes.node.labels.alpha_eksctl_io/cluster-name": ["demo-prod-1"],
+    "stream": ["stderr"],
+    "host.os.kernel": ["5.4.219-126.411.amzn2.x86_64"],
+    "kubernetes.pod.name": ["elastic-agent-xtjjz"],
+    "elastic_agent.snapshot": [false],
+    "host.id": ["88dc761b076149b3b3bd72a7ff9514f6"],
+    "kubernetes.node.labels.eks_amazonaws_com/sourceLaunchTemplateId": ["lt-0328c05cd52fe4783"],
+    "kubernetes.pod.ip": ["192.168.36.30"],
+    "kubernetes.node.labels.k8s_io/cloud-provider-aws": ["a40524700e5713fb51e9ecc8ebd8b56f"],
+    "kubernetes.container.name": ["elastic-agent"],
+    "elastic_agent.id": ["7fb711f9-5674-45d8-8d2a-47b58e88ce2d"],
+    "data_stream.namespace": ["default"],
+    "host.os.codename": ["focal"],
+    "kubernetes.node.labels.eks_amazonaws_com/sourceLaunchTemplateVersion": ["1"],
+    "kubernetes.namespace_labels.kubernetes_io/metadata_name": ["kube-system"],
+    "kubernetes.labels.pod-template-generation": ["1"],
+    "message": [
+      "{\"log.level\":\"error\",\"@timestamp\":\"2025-07-27T04:43:03.084Z\",\"message\":\"E0727 04:43:03.084597   13437 reflector.go:138] k8s.io/client-go@v0.23.4/tools/cache/reflector.go:167: Failed to watch *v1.Namespace: failed to list *v1.Namespace: Get \\\"https://10.100.0.1:443/api/v1/namespaces?resourceVersion=264266691\\\": dial tcp 10.100.0.1:443: i/o timeout\",\"component\":{\"binary\":\"filebeat\",\"dataset\":\"elastic_agent.filebeat\",\"id\":\"filestream-monitoring\",\"type\":\"filestream\"},\"log\":{\"source\":\"filestream-monitoring\"},\"ecs.version\":\"1.6.0\"}\n"
+    ],
+    "kubernetes.node.labels.kubernetes_io/hostname": ["ip-192-168-36-30.ec2.internal"],
+    "cloud.image.id": ["ami-065e0db5b710c2eae"],
+    "kubernetes.node.labels.beta_kubernetes_io/arch": ["amd64"],
+    "event.ingested": ["2025-07-27T04:43:04.000Z"],
+    "@timestamp": ["2025-07-27T04:43:03.084Z"],
+    "cloud.account.id": ["644184947617"],
+    "host.os.platform": ["ubuntu"],
+    "kubernetes.labels.controller-revision-hash": ["67b966464b"],
+    "data_stream.dataset": ["kubernetes.container_logs"],
+    "log.file.path": [
+      "/var/log/containers/elastic-agent-xtjjz_kube-system_elastic-agent-9fa1b780eddf464f6cf133e44bc647c1261a0915807b309f7ead956416e45c0b.log"
+    ],
+    "agent.ephemeral_id": ["d101df05-1644-4ca5-86e7-2fc8e4f19dd4"],
+    "kubernetes.node.labels.kubernetes_io/arch": ["amd64"],
+    "kubernetes.node.labels.eks_amazonaws_com/capacityType": ["ON_DEMAND"],
+    "event.dataset": ["kubernetes.container_logs"]
+  }
+}

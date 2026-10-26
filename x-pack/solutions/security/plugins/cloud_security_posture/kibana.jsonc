@@ -2,7 +2,7 @@
   "type": "plugin",
   "id": "@kbn/cloud-security-posture-plugin",
   "owner": [
-    "@elastic/kibana-cloud-security-posture"
+    "@elastic/contextual-security-apps"
   ],
   "group": "security",
   "visibility": "private",
@@ -25,6 +25,7 @@
       "security",
       "charts",
       "discover",
+      "entityStore",
       "cloud",
       "licensing",
       "share",

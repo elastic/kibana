@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { css } from '@emotion/react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -13,18 +14,18 @@ import {
   EuiOutsideClickDetector,
   EuiPanel,
   EuiSpacer,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { TrainedModelStat } from '@kbn/ml-plugin/common/types/trained_models';
-import { MlPluginStart } from '@kbn/ml-plugin/public';
-import classNames from 'classnames';
+import type { TrainedModelStat } from '@kbn/ml-common-types/trained_models';
+import type { MlPluginStart } from '@kbn/ml-plugin/public';
 import React, { useEffect, useRef } from 'react';
 import { TYPE_DEFINITION } from '../../../../constants';
 import { fieldSerializer } from '../../../../lib';
-import { getFieldByPathName, isSemanticTextField } from '../../../../lib/utils';
+import { getFieldByPathName, isSemanticTextField, isSemanticField } from '../../../../lib/utils';
 import { useDispatch, useMappingsState } from '../../../../mappings_state_context';
 import { Form, useForm, useFormData } from '../../../../shared_imports';
-import { Field, MainType, NormalizedFields } from '../../../../types';
+import type { Field, MainType, NormalizedFields } from '../../../../types';
 import { NameParameter, SubTypeParameter, TypeParameter } from '../../field_parameters';
 import { ReferenceFieldSelects } from '../../field_parameters/reference_field_selects';
 import { SelectInferenceId } from '../../field_parameters/select_inference_id';
@@ -32,6 +33,21 @@ import { FieldBetaBadge } from '../field_beta_badge';
 import { getRequiredParametersFormForType } from './required_parameters_forms';
 
 const formWrapper = (props: any) => <form {...props} />;
+
+const useStyles = () => {
+  const { euiTheme } = useEuiTheme();
+
+  return {
+    createFieldRequiredProps: css`
+      margin-top: ${euiTheme.size.l};
+      padding-top: ${euiTheme.size.base};
+      border-top: 1px solid ${euiTheme.colors.lightShade};
+    `,
+    createFieldContent: css`
+      position: relative;
+    `,
+  };
+};
 
 export interface ModelIdMapEntry {
   trainedModelId: string;
@@ -56,9 +72,7 @@ interface Props {
   allFields: NormalizedFields['byId'];
   isRootLevelField: boolean;
   isMultiField?: boolean;
-  paddingLeft?: number;
   isCancelable?: boolean;
-  maxNestedDepth?: number;
   onCancelAddingNewFields?: () => void;
   isAddingFields?: boolean;
   semanticTextInfo?: SemanticTextInfo;
@@ -69,9 +83,7 @@ export const CreateField = React.memo(function CreateFieldComponent({
   allFields,
   isRootLevelField,
   isMultiField,
-  paddingLeft,
   isCancelable,
-  maxNestedDepth,
   onCancelAddingNewFields,
   isAddingFields,
   semanticTextInfo,
@@ -81,6 +93,7 @@ export const CreateField = React.memo(function CreateFieldComponent({
   const dispatch = useDispatch();
   const { fields, mappingViewFields } = useMappingsState();
   const fieldTypeInputRef = useRef<HTMLInputElement>(null);
+  const styles = useStyles();
 
   const { form } = useForm<Field>({
     serializer: fieldSerializer,
@@ -88,7 +101,10 @@ export const CreateField = React.memo(function CreateFieldComponent({
     id: 'create-field',
   });
 
-  const [{ type, subType }] = useFormData({ form, watch: ['type', 'subType'] });
+  const [{ type, subType }] = useFormData({
+    form,
+    watch: ['type', 'subType'],
+  });
 
   const { subscribe } = form;
 
@@ -107,14 +123,17 @@ export const CreateField = React.memo(function CreateFieldComponent({
     }
   };
 
-  const isSemanticText = form.getFormData().type === 'semantic_text';
+  const isSemanticText = type?.[0]?.value === 'semantic_text';
+  const isSemantic = type?.[0]?.value === 'semantic';
+  const isAddDisabled = form.getErrors().length > 0;
 
   useEffect(() => {
     if (createFieldFormRef?.current) createFieldFormRef?.current.focus();
   }, [createFieldFormRef]);
 
   useEffect(() => {
-    if (isSemanticText) {
+    if (isSemanticText || isSemantic) {
+      const fieldTypeName = isSemanticText ? 'semantic_text' : 'semantic';
       const allSemanticFields = {
         byId: {
           ...fields.byId,
@@ -124,18 +143,16 @@ export const CreateField = React.memo(function CreateFieldComponent({
         aliases: {},
         maxNestedDepth: 0,
       };
-      const defaultName = getFieldByPathName(allSemanticFields, 'semantic_text')
-        ? ''
-        : 'semantic_text';
+      const defaultName = getFieldByPathName(allSemanticFields, fieldTypeName) ? '' : fieldTypeName;
       if (!form.getFormData().name) {
         form.setFieldValue('name', defaultName);
       }
-      if (!form.getFormData().reference_field) {
+      if (isSemanticText && !form.getFormData().reference_field) {
         form.setFieldValue('reference_field', '');
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isSemanticText]);
+  }, [type?.[0]?.value]);
 
   const submitForm = async (
     e?: React.FormEvent,
@@ -149,8 +166,8 @@ export const CreateField = React.memo(function CreateFieldComponent({
     const { isValid, data } = await form.submit();
 
     if (isValid && !clickOutside) {
-      if (isSemanticTextField(data) && !data.inference_id) {
-        const { inference_id: inferenceId, ...rest } = data;
+      if ((isSemanticTextField(data) || isSemanticField(data)) && !data.inference_id) {
+        const { inference_id: _dismissInferenceId, ...rest } = data;
         dispatch({ type: 'field.add', value: rest });
       } else {
         dispatch({ type: 'field.add', value: data });
@@ -162,7 +179,7 @@ export const CreateField = React.memo(function CreateFieldComponent({
       form.reset();
     }
 
-    if (fieldTypeInputRef.current) {
+    if (isValid && !clickOutside && fieldTypeInputRef.current) {
       fieldTypeInputRef.current.focus();
     }
   };
@@ -202,7 +219,7 @@ export const CreateField = React.memo(function CreateFieldComponent({
         />
       )}
 
-      {/* Field reference_field for semantic_text field type */}
+      {/* Field reference_field for semantic_text field type (not for semantic) */}
       {isSemanticText && (
         <EuiFlexItem grow={false}>
           <ReferenceFieldSelects />
@@ -231,7 +248,7 @@ export const CreateField = React.memo(function CreateFieldComponent({
     const typeDefinition = TYPE_DEFINITION[type?.[0].value as MainType];
 
     return (
-      <div className="mappingsEditor__createFieldRequiredProps">
+      <div css={styles.createFieldRequiredProps}>
         {typeDefinition?.isBeta ? (
           <>
             <FieldBetaBadge />
@@ -262,7 +279,7 @@ export const CreateField = React.memo(function CreateFieldComponent({
           onClick={submitForm}
           type="submit"
           data-test-subj="addButton"
-          isDisabled={form.getErrors().length > 0}
+          isDisabled={isAddDisabled}
         >
           {isMultiField
             ? i18n.translate('xpack.idxMgmt.mappingsEditor.createField.addMultiFieldButtonLabel', {
@@ -286,23 +303,14 @@ export const CreateField = React.memo(function CreateFieldComponent({
           onSubmit={submitForm}
           data-test-subj="createFieldForm"
         >
-          <EuiPanel
-            color="subdued"
-            paddingSize="m"
-            className={classNames('mappingsEditor__createFieldWrapper', {
-              'mappingsEditor__createFieldWrapper--toggle':
-                Boolean(maxNestedDepth) && maxNestedDepth! > 0,
-              'mappingsEditor__createFieldWrapper--multiField': isMultiField,
-            })}
-            panelRef={createFieldFormRef}
-            tabIndex={0}
-          >
-            <div className="mappingsEditor__createFieldContent">
+          <EuiPanel color="subdued" paddingSize="m" panelRef={createFieldFormRef} tabIndex={0}>
+            <div css={styles.createFieldContent}>
               {renderFormFields()}
 
               {renderRequiredParametersForm()}
 
-              {isSemanticText && <SelectInferenceId />}
+              {isSemanticText && <SelectInferenceId fieldType="semantic_text" />}
+              {isSemantic && <SelectInferenceId fieldType="semantic" />}
               {renderFormActions()}
             </div>
           </EuiPanel>

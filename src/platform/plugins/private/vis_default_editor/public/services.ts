@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { AnalyticsServiceStart, CoreStart, ThemeServiceStart } from '@kbn/core/public';
+import type { AnalyticsServiceStart, CoreStart, ThemeServiceStart } from '@kbn/core/public';
 import { createGetterSetter } from '@kbn/kibana-utils-plugin/common';
 
 export const [getAnalytics, setAnalytics] =

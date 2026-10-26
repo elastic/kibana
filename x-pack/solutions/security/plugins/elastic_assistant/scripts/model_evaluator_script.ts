@@ -8,13 +8,13 @@
 import yargs from 'yargs/yargs';
 import { ToolingLog } from '@kbn/tooling-log';
 
-export const AVAILABLE_MODELS = ['gpt-3.5', 'gpt-4', 'gpt-4o'] as const;
+export const AVAILABLE_MODELS = ['gpt-4', 'gpt-4o', 'gpt-4.1'] as const;
 
 /**
  * Work in progress developer script for evaluating models against datasets.
  *
  * Companion to the `elastic_assistant/evaluate` endpoint for running evaluations
- * in the CLI using `yarn evaluate-model`.
+ * in the CLI using `pnpm evaluate-model`.
  *
  * TODO: Finalize inputs and call to `performEvaluation`
  */

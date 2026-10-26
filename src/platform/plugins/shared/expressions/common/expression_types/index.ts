@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './types';
+export type * from './types';
 export * from './get_type';
 export * from './serialize_provider';
 export * from './expression_type';

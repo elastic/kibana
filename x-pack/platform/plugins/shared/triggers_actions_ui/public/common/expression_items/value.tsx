@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import React, { ReactNode, useState } from 'react';
+import type { ReactNode } from 'react';
+import React, { useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import {
   EuiExpression,
   EuiPopover,
@@ -15,7 +17,7 @@ import {
   EuiFormRow,
 } from '@elastic/eui';
 import { ClosablePopoverTitle } from './components';
-import { IErrorObject } from '../../types';
+import type { IErrorObject } from '../../types';
 
 export interface ValueExpressionProps {
   description: string;
@@ -51,6 +53,10 @@ export const ValueExpression = ({
   const [valuePopoverOpen, setValuePopoverOpen] = useState(false);
   return (
     <EuiPopover
+      aria-label={i18n.translate(
+        'xpack.triggersActionsUI.common.expressionItems.value.popoverAriaLabel',
+        { defaultMessage: 'Value' }
+      )}
       button={
         <EuiExpression
           data-test-subj="valueExpression"
@@ -75,7 +81,7 @@ export const ValueExpression = ({
     >
       <div>
         <ClosablePopoverTitle
-          data-test-subj="valueFieldTitle"
+          dataTestSubj="valueFieldTitle"
           onClose={() => setValuePopoverOpen(false)}
         >
           <>{description}</>
@@ -92,8 +98,8 @@ export const ValueExpression = ({
                 min={0}
                 value={value}
                 isInvalid={Number(errors.length) > 0 && value !== undefined}
-                onChange={(e: any) => {
-                  onChangeSelectedValue(e.target.value as number);
+                onChange={(e) => {
+                  onChangeSelectedValue(+e.target.value);
                 }}
               />
             </EuiFormRow>

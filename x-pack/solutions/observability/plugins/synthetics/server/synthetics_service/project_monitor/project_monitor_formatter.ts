@@ -4,38 +4,39 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { SavedObjectsUpdateResponse, SavedObjectsClientContract } from '@kbn/core/server';
+import type { SavedObjectsUpdateResponse, SavedObjectsClientContract } from '@kbn/core/server';
+import { isSavedObjectErrorResult } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
+import type { MaintenanceWindow } from '@kbn/maintenance-windows-plugin/common';
+import { syntheticsMonitorSavedObjectType } from '../../../common/types/saved_objects';
 import { getSavedObjectKqlFilter } from '../../routes/common';
 import { InvalidLocationError } from './normalizers/common_fields';
-import { SyntheticsServerSetup } from '../../types';
-import { RouteContext } from '../../routes/types';
-import { syntheticsMonitorType } from '../../../common/types/saved_objects';
+import { InvalidMaintenanceWindowError } from '../maintenance_windows/resolve_maintenance_windows';
+import type { SyntheticsServerSetup } from '../../types';
+import type { RouteContext } from '../../routes/types';
 import { getAllLocations } from '../get_all_locations';
 import { syncNewMonitorBulk } from '../../routes/monitor_cruds/bulk_cruds/add_monitor_bulk';
-import { SyntheticsMonitorClient } from '../synthetics_monitor/synthetics_monitor_client';
-import {
-  MonitorConfigUpdate,
-  syncEditedMonitorBulk,
-} from '../../routes/monitor_cruds/bulk_cruds/edit_monitor_bulk';
-import {
-  ConfigKey,
+import type { SyntheticsMonitorClient } from '../synthetics_monitor/synthetics_monitor_client';
+import type { MonitorConfigUpdate } from '../../routes/monitor_cruds/bulk_cruds/edit_monitor_bulk';
+import { syncEditedMonitorBulk } from '../../routes/monitor_cruds/bulk_cruds/edit_monitor_bulk';
+import type {
   EncryptedSyntheticsMonitorAttributes,
   ServiceLocationErrors,
   ProjectMonitor,
   Locations,
   SyntheticsMonitor,
   MonitorFields,
-  type SyntheticsPrivateLocations,
 } from '../../../common/runtime_types';
+import { ConfigKey, type SyntheticsPrivateLocations } from '../../../common/runtime_types';
 import { formatSecrets, normalizeSecrets } from '../utils/secrets';
+import type { ValidationResult } from '../../routes/monitor_cruds/monitor_validation';
 import {
   validateProjectMonitor,
   validateMonitor,
-  ValidationResult,
   INVALID_CONFIGURATION_ERROR,
 } from '../../routes/monitor_cruds/monitor_validation';
 import { normalizeProjectMonitor } from './normalizers';
+import { isSecretConnectionsEnabled } from '../../config';
 
 type FailedError = Array<{ id?: string; reason: string; details: string; payload?: object }>;
 
@@ -69,6 +70,7 @@ export class ProjectMonitorFormatter {
   private spaceId: string;
   private publicLocations: Locations;
   private privateLocations: SyntheticsPrivateLocations;
+  private maintenanceWindows: MaintenanceWindow[];
   private savedObjectsClient: SavedObjectsClientContract;
   private monitors: ProjectMonitor[] = [];
   public createdMonitors: string[] = [];
@@ -97,9 +99,10 @@ export class ProjectMonitorFormatter {
     this.syntheticsMonitorClient = routeContext.syntheticsMonitorClient;
     this.monitors = monitors;
     this.server = routeContext.server;
-    this.projectFilter = `${syntheticsMonitorType}.attributes.${ConfigKey.PROJECT_ID}: "${this.projectId}"`;
+    this.projectFilter = `${syntheticsMonitorSavedObjectType}.attributes.${ConfigKey.PROJECT_ID}: "${this.projectId}"`;
     this.publicLocations = [];
     this.privateLocations = [];
+    this.maintenanceWindows = [];
   }
 
   init = async () => {
@@ -110,16 +113,26 @@ export class ProjectMonitorFormatter {
       excludeAgentPolicies: true,
     });
     const existingMonitorsPromise = this.getProjectMonitorsForProject();
+    // Only fetch maintenance windows when a monitor actually references one, so
+    // pushes that don't use them avoid the extra alerting lookup.
+    const needsMaintenanceWindows = this.monitors.some(
+      (monitor) => (monitor.maintenanceWindows?.length ?? 0) > 0
+    );
+    const maintenanceWindowsPromise = needsMaintenanceWindows
+      ? this.syntheticsMonitorClient.getMaintenanceWindows(this.spaceId)
+      : Promise.resolve([]);
 
-    const [locations, existingMonitors] = await Promise.all([
+    const [locations, existingMonitors, maintenanceWindows] = await Promise.all([
       locationsPromise,
       existingMonitorsPromise,
+      maintenanceWindowsPromise,
     ]);
 
     const { publicLocations, privateLocations } = locations;
 
     this.publicLocations = publicLocations;
     this.privateLocations = privateLocations;
+    this.maintenanceWindows = maintenanceWindows ?? [];
 
     return existingMonitors;
   };
@@ -142,6 +155,7 @@ export class ProjectMonitorFormatter {
         monitor,
         publicLocations: this.publicLocations,
         privateLocations: this.privateLocations,
+        isNewMonitor: !previousMonitor,
       });
       if (normM) {
         if (
@@ -183,10 +197,12 @@ export class ProjectMonitorFormatter {
     monitor,
     publicLocations,
     privateLocations,
+    isNewMonitor,
   }: {
     monitor: ProjectMonitor;
     publicLocations: Locations;
     privateLocations: SyntheticsPrivateLocations;
+    isNewMonitor: boolean;
   }) => {
     try {
       const { normalizedFields: normalizedMonitor, errors } = normalizeProjectMonitor({
@@ -196,12 +212,18 @@ export class ProjectMonitorFormatter {
         projectId: this.projectId,
         namespace: this.spaceId,
         version: this.server.stackVersion,
+        maintenanceWindows: this.maintenanceWindows,
       });
 
       if (errors.length) {
         this.failedMonitors.push(...errors);
         return null;
       }
+
+      // Only gate brand-new API Journey monitors on Serverless; re-pushing an
+      // already-existing project monitor (e.g. one grandfathered in before
+      // this restriction) must not fail just because it's unchanged.
+      const isServerless = Boolean(this.server.cloud?.isServerlessEnabled) && isNewMonitor;
 
       /* Validates that the payload sent from the synthetics agent is valid */
       const { valid: isMonitorPayloadValid } = this.validateMonitor({
@@ -211,7 +233,8 @@ export class ProjectMonitorFormatter {
             type: normalizedMonitor[ConfigKey.MONITOR_TYPE],
           },
           publicLocations,
-          privateLocations
+          privateLocations,
+          isServerless
         ),
         monitorId: monitor.id,
       });
@@ -222,7 +245,12 @@ export class ProjectMonitorFormatter {
 
       /* Validates that the normalized monitor is a valid monitor saved object type */
       const { valid: isNormalizedMonitorValid, decodedMonitor } = this.validateMonitor({
-        validationResult: validateMonitor(normalizedMonitor as MonitorFields),
+        validationResult: validateMonitor(
+          normalizedMonitor as MonitorFields,
+          this.spaceId,
+          isServerless,
+          isSecretConnectionsEnabled(this.server.config)
+        ),
         monitorId: monitor.id,
       });
 
@@ -232,10 +260,16 @@ export class ProjectMonitorFormatter {
 
       return decodedMonitor;
     } catch (e) {
-      this.server.logger.error(e);
+      const isUserInputError =
+        e instanceof InvalidLocationError || e instanceof InvalidMaintenanceWindowError;
 
-      const reason =
-        e instanceof InvalidLocationError ? INVALID_CONFIGURATION_ERROR : FAILED_TO_UPDATE_MONITOR;
+      // User input errors (e.g. invalid locations or maintenance windows) are surfaced in
+      // the API response via `failedMonitors`; don't log them as a server error (see #221378).
+      if (!isUserInputError) {
+        this.server.logger.error(e);
+      }
+
+      const reason = isUserInputError ? INVALID_CONFIGURATION_ERROR : FAILED_TO_UPDATE_MONITOR;
 
       this.failedMonitors.push({
         reason,
@@ -280,26 +314,29 @@ export class ProjectMonitorFormatter {
           privateLocations: this.privateLocations,
           spaceId: this.spaceId,
         });
+        const failedMonitorIds = new Set(failedMonitors.map(({ monitor }) => monitor.id));
 
         if (newMonitors.length > 0) {
           newMonitors.forEach((monitor) => {
-            const journeyId = monitor.attributes[ConfigKey.JOURNEY_ID];
-            if (journeyId && !monitor.error) {
-              this.createdMonitors.push(journeyId);
-            } else if (monitor.error) {
+            if (isSavedObjectErrorResult(monitor)) {
               this.failedMonitors.push({
                 reason: i18n.translate(
                   'xpack.synthetics.service.projectMonitors.failedToCreateMonitors',
                   {
-                    defaultMessage: 'Failed to create monitor: {journeyId}',
-                    values: {
-                      journeyId,
-                    },
+                    defaultMessage: 'Failed to create monitor',
                   }
                 ),
                 details: monitor.error.message,
                 payload: monitor,
               });
+              return;
+            }
+            if (failedMonitorIds.has(monitor.id)) {
+              return;
+            }
+            const journeyId = monitor.attributes[ConfigKey.JOURNEY_ID];
+            if (journeyId) {
+              this.createdMonitors.push(journeyId);
             }
           });
         }
@@ -435,10 +472,25 @@ export class ProjectMonitorFormatter {
         );
       }
 
+      const successfulMonitors = (editedMonitors ?? []).reduce<
+        Array<SavedObjectsUpdateResponse<EncryptedSyntheticsMonitorAttributes>>
+      >((acc, monitor) => {
+        if (isSavedObjectErrorResult(monitor)) {
+          this.failedMonitors.push({
+            reason: FAILED_TO_UPDATE_MONITOR,
+            details: monitor.error.message,
+            payload: monitor,
+          });
+        } else {
+          acc.push(monitor);
+        }
+        return acc;
+      }, []);
+
       return {
         errors: [],
-        editedMonitors: editedMonitors ?? [],
-        updatedCount: monitorsToUpdate.length,
+        editedMonitors: successfulMonitors,
+        updatedCount: successfulMonitors.length,
       };
     } catch (e) {
       this.server.logger.error(e);

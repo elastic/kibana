@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SyntheticsRestApiRouteFactory } from '../types';
+import type { SyntheticsRestApiRouteFactory } from '../types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 
 export const getServiceAllowedRoute: SyntheticsRestApiRouteFactory = () => ({
@@ -16,8 +16,8 @@ export const getServiceAllowedRoute: SyntheticsRestApiRouteFactory = () => ({
     const isESS = Boolean(server.cloud?.isCloudEnabled) && server.config.service?.manifestUrl;
 
     return {
-      serviceAllowed: isESS ? syntheticsMonitorClient.syntheticsService.isAllowed : true,
-      signupUrl: syntheticsMonitorClient.syntheticsService.signupUrl,
+      serviceAllowed: isESS ? syntheticsMonitorClient.serviceManagedLocations.isAllowed : true,
+      signupUrl: syntheticsMonitorClient.serviceManagedLocations.signupUrl,
     };
   },
 });

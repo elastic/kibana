@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { Actions, createApiLogic } from '../../../shared/api_logic/create_api_logic';
+import type { Actions } from '../../../shared/api_logic/create_api_logic';
+import { createApiLogic } from '../../../shared/api_logic/create_api_logic';
 import { HttpLogic } from '../../../shared/http';
 
 export interface StartModelArgs {
@@ -17,7 +18,7 @@ export interface StartModelResponse {
 }
 
 export const startModel = async ({ modelId }: StartModelArgs): Promise<StartModelResponse> => {
-  const route = `/internal/enterprise_search/ml/models/${modelId}/deploy`;
+  const route = `/internal/enterprise_search/ml/models/${encodeURIComponent(modelId)}/deploy`;
   return await HttpLogic.values.http.post<StartModelResponse>(route);
 };
 

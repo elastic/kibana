@@ -10,19 +10,22 @@
 import { getFieldSubtypeNested } from '@kbn/data-views-plugin/common';
 import { get, isEmpty } from 'lodash';
 
-import {
-  getSelectionAsFieldType,
-  OptionsListSelection,
-} from '../../common/options_list/options_list_selections';
-import { OptionsListRequestBody } from '../../common/options_list/types';
-import { OptionsListValidationAggregationBuilder } from './types';
+import type { OptionsListSelection } from '@kbn/controls-schemas';
+import { getSelectionAsFieldType } from '../../common/options_list/options_list_selections';
+import type { OptionsListRequestBody } from '../../common/options_list/types';
+import type { OptionsListValidationAggregationBuilder } from './types';
 
 /**
  * Validation aggregations
  */
 export const getValidationAggregationBuilder: () => OptionsListValidationAggregationBuilder =
   () => ({
-    buildAggregation: ({ selectedOptions, fieldName, fieldSpec }: OptionsListRequestBody) => {
+    buildAggregation: ({
+      selectedOptions,
+      fieldName,
+      fieldSpec,
+      filters,
+    }: OptionsListRequestBody) => {
       let selectedOptionsFilters;
       if (selectedOptions) {
         selectedOptionsFilters = selectedOptions.reduce((acc, currentOption) => {
@@ -57,7 +60,19 @@ export const getValidationAggregationBuilder: () => OptionsListValidationAggrega
         };
       }
 
-      return validationAggregation;
+      // wrap in global so validation always checks all docs regardless of the outer query's
+      // search string filter, then re-apply dashboard filters inside
+      return {
+        globalValidation: {
+          global: {},
+          aggs: {
+            filteredValidation: {
+              filter: { bool: { filter: filters ?? [] } },
+              aggs: validationAggregation,
+            },
+          },
+        },
+      };
     },
     parse: (rawEsResult, { fieldSpec }) => {
       if (!fieldSpec) return [];
@@ -66,8 +81,8 @@ export const getValidationAggregationBuilder: () => OptionsListValidationAggrega
       const rawInvalidSuggestions = get(
         rawEsResult,
         isNested
-          ? 'aggregations.nestedValidation.validation.buckets'
-          : 'aggregations.validation.buckets'
+          ? 'aggregations.globalValidation.filteredValidation.nestedValidation.validation.buckets'
+          : 'aggregations.globalValidation.filteredValidation.validation.buckets'
       );
       return rawInvalidSuggestions && !isEmpty(rawInvalidSuggestions)
         ? Object.keys(rawInvalidSuggestions)

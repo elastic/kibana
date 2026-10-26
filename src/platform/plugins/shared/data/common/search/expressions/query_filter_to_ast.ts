@@ -8,7 +8,7 @@
  */
 
 import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/common';
-import { ExpressionFunctionQueryFilter, QueryFilter } from './query_filter';
+import type { ExpressionFunctionQueryFilter, QueryFilter } from './query_filter';
 import { queryToAst } from './query_to_ast';
 
 export const queryFilterToAst = ({ input, label }: QueryFilter) => {

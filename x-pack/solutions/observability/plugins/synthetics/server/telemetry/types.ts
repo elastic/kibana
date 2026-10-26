@@ -4,18 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ServiceLocationErrors } from '../../common/runtime_types/monitor_management';
-import { MONITOR_ERROR_EVENTS_CHANNEL } from './constants';
-
-export interface MonitorSyncEvent {
-  total: number;
-  totalTests: number;
-  browserTests24h: number;
-  httpTests24h: number;
-  icmpTests24h: number;
-  tcpTests24h: number;
-  [key: string]: number;
-}
 
 export interface MonitorUpdateEvent {
   updatedAt?: string;
@@ -30,8 +18,9 @@ export interface MonitorUpdateEvent {
   locationsCount: number;
   scriptType?: 'inline' | 'recorder' | 'zip' | 'project';
   revision?: number;
-  errors?: ServiceLocationErrors;
+  errors?: Array<{ locationId: string; error: { status?: number; reason?: string } }>;
   configId: string;
+  issuedTo?: string;
 }
 
 export interface MonitorErrorEvent {
@@ -42,15 +31,62 @@ export interface MonitorErrorEvent {
   status?: number;
   url?: string;
   stackVersion: string;
+  issuedTo?: string;
 }
 
-export interface MonitorUpdateTelemetryChannelEvents {
-  // channel name => event type
-  'synthetics-monitor-update': MonitorUpdateEvent;
-  'synthetics-monitor-current': MonitorUpdateEvent;
-  [MONITOR_ERROR_EVENTS_CHANNEL]: MonitorErrorEvent;
-  'synthetics-monitor-sync-state': MonitorSyncEvent;
-  'synthetics-monitor-sync-events': MonitorSyncEvent;
+export type PrivateLocationRebalanceReason =
+  | 'failover'
+  | 'recovery'
+  | 'rebalance'
+  | 'move_failed'
+  | 'no_healthy_agents'
+  | 'error';
+
+export interface PrivateLocationRebalanceEvent {
+  locationHash: string;
+  reason: PrivateLocationRebalanceReason;
+  agentsTotal: number;
+  agentsHealthy: number;
+  agentsStale: number;
+  agentsEvicted: number;
+  agentsRecovered: number;
+  agentsRecoveryEligible: number;
+  livenessVetoSavedAgents: number;
+  monitorsTotal: number;
+  monitorsMoved: number;
+  monitorsFailedOver: number;
+  monitorsUnpinned: number;
+  moveFailures: number;
+  durationMs: number;
+  stackVersion: string;
+  issuedTo?: string;
 }
 
-export type MonitorUpdateTelemetryChannel = keyof MonitorUpdateTelemetryChannelEvents;
+export interface PrivateLocationShardingSnapshotEvent {
+  locationHash: string;
+  agentsTotal: number;
+  agentsHealthy: number;
+  agentsWithCapacity: number;
+  monitorsTotal: number;
+  browserMonitors: number;
+  monitorsPerAgentMin: number;
+  monitorsPerAgentMedian: number;
+  monitorsPerAgentMax: number;
+  /** max / mean monitors per healthy agent; 1 is perfectly even. */
+  skewRatio: number;
+  stackVersion: string;
+  issuedTo?: string;
+}
+
+export type PrivateLocationShardingMode = 'active' | 'switch_off' | 'unlicensed';
+
+export interface PrivateLocationShardingStateEvent {
+  event: 'mode_changed' | 'pin_drain';
+  mode: PrivateLocationShardingMode;
+  previousMode?: PrivateLocationShardingMode;
+  pinsCleared: number;
+  pinsFailed: number;
+  drainAttempt: number;
+  stackVersion: string;
+  issuedTo?: string;
+}

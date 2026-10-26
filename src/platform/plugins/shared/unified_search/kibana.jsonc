@@ -2,7 +2,7 @@
   "type": "plugin",
   "id": "@kbn/unified-search-plugin",
   "owner": [
-    "@elastic/kibana-presentation"
+    "@elastic/kibana-dashboards"
   ],
   "group": "platform",
   "visibility": "shared",
@@ -13,19 +13,24 @@
   "plugin": {
     "id": "unifiedSearch",
     "browser": true,
-    "server": true,
+    "server": false,
     "configPath": [
-      "unifiedSearch"
+      "unifiedSearchDeprecatedSettings"
     ],
     "requiredPlugins": [
       "dataViews",
       "data",
       "uiActions",
       "screenshotMode",
-      "savedObjectsManagement"
+      "savedObjectsManagement",
+      "cps",
+      "kql"
     ],
     "optionalPlugins": [
-      "usageCollection"
+      "usageCollection",
+      "esql",
+      "licensing",
+      "searchSessionsManagement"
     ],
     "requiredBundles": [
       "kibanaUtils",

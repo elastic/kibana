@@ -27,23 +27,27 @@ export interface UnifiedFieldListItemStatsProps {
   dataView: DataView;
   multiFields?: Array<{ field: DataViewField; isSelected: boolean }>;
   onAddFilter: FieldStatsProps['onAddFilter'];
+  onAddOtherFilter?: FieldStatsProps['onAddOtherFilter'];
   additionalFilters?: FieldStatsProps['filters'];
 }
 
 export const UnifiedFieldListItemStats: React.FC<UnifiedFieldListItemStatsProps> = React.memo(
-  ({ stateService, services, field, dataView, multiFields, onAddFilter, additionalFilters }) => {
+  ({
+    stateService,
+    services,
+    field,
+    dataView,
+    multiFields,
+    onAddFilter,
+    onAddOtherFilter,
+    additionalFilters,
+  }) => {
     const querySubscriberResult = useQuerySubscriber({
       data: services.data,
       timeRangeUpdatesType: stateService.creationOptions.timeRangeUpdatesType,
     });
-    // prioritize an aggregatable multi field if available or take the parent field
-    const fieldForStats = useMemo(
-      () =>
-        (multiFields?.length &&
-          multiFields.find((multiField) => multiField.field.aggregatable)?.field) ||
-        field,
-      [field, multiFields]
-    );
+
+    const fieldForStats = useMemo(() => getFieldForStats(field, multiFields), [field, multiFields]);
 
     const statsServices: FieldStatsServices = useMemo(
       () => ({
@@ -76,7 +80,23 @@ export const UnifiedFieldListItemStats: React.FC<UnifiedFieldListItemStatsProps>
         field={fieldForStats}
         data-test-subj={stateService.creationOptions.dataTestSubj?.fieldListItemStatsDataTestSubj}
         onAddFilter={onAddFilter}
+        onAddOtherFilter={onAddOtherFilter}
       />
     );
   }
 );
+
+export const getFieldForStats = (
+  field: DataViewField,
+  multiFields: Array<{ field: DataViewField; isSelected: boolean }> | undefined
+): DataViewField => {
+  if (field.aggregatable) {
+    return field;
+  }
+  // prioritize an aggregatable multi field if available or take the parent field
+  return (
+    (multiFields?.length &&
+      multiFields.find((multiField) => multiField.field.aggregatable)?.field) ||
+    field
+  );
+};

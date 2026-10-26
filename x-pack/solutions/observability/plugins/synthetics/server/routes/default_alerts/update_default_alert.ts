@@ -5,25 +5,27 @@
  * 2.0.
  */
 
-import { DefaultAlertService } from './default_alert_service';
-import { SyntheticsRestApiRouteFactory } from '../types';
+import { getSyntheticsDynamicSettings } from '../../saved_objects/synthetics_settings';
+import { DefaultRuleService } from './default_alert_service';
+import type { SyntheticsRestApiRouteFactory } from '../types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
-import { savedObjectsAdapter } from '../../saved_objects';
-import { DEFAULT_ALERT_RESPONSE } from '../../../common/types/default_alerts';
+import type { DEFAULT_ALERT_RESPONSE } from '../../../common/types/default_alerts';
+import { WRITE_SYNTHETICS_DEFAULT_RULES_API } from '../../feature';
 
 export const updateDefaultAlertingRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'PUT',
   path: SYNTHETICS_API_URLS.ENABLE_DEFAULT_ALERTING,
   validate: {},
-  handler: async ({
-    request,
-    context,
-    server,
-    savedObjectsClient,
-  }): Promise<DEFAULT_ALERT_RESPONSE> => {
-    const defaultAlertService = new DefaultAlertService(context, server, savedObjectsClient);
-    const { defaultTLSRuleEnabled, defaultStatusRuleEnabled } =
-      await savedObjectsAdapter.getSyntheticsDynamicSettings(savedObjectsClient);
+  // Updating default rules is rule management, not monitor mutation, so it does
+  // not require `uptime-write`. Either `uptime-write` (existing roles) or the
+  // `write_synthetics_default_rules` sub-feature is enough.
+  writeAccess: false,
+  anyRequiredPrivileges: ['uptime-write', WRITE_SYNTHETICS_DEFAULT_RULES_API],
+  handler: async ({ context, server, savedObjectsClient }): Promise<DEFAULT_ALERT_RESPONSE> => {
+    const defaultAlertService = new DefaultRuleService(context, server, savedObjectsClient);
+    const { defaultTLSRuleEnabled, defaultStatusRuleEnabled } = await getSyntheticsDynamicSettings(
+      savedObjectsClient
+    );
 
     const updateStatusRulePromise = defaultAlertService.updateStatusRule(defaultStatusRuleEnabled);
     const updateTLSRulePromise = defaultAlertService.updateTlsRule(defaultTLSRuleEnabled);
@@ -37,8 +39,10 @@ export const updateDefaultAlertingRoute: SyntheticsRestApiRouteFactory = () => (
         statusRule: statusRule || null,
         tlsRule: tlsRule || null,
       };
-    } catch (e) {
-      server.logger.error(`Error updating default alerting rules: ${e}`);
+    } catch (error) {
+      server.logger.error(`Error updating default alerting rules, Error: ${error.message}`, {
+        error,
+      });
       return {
         statusRule: null,
         tlsRule: null,

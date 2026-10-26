@@ -11,4 +11,4 @@ export const API_STATUS = {
   UPDATING: 'updating',
   SAVING: 'saving',
   DELETING: 'deleting',
-};
+} as const;

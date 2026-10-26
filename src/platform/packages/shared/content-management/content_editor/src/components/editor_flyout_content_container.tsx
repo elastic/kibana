@@ -20,8 +20,9 @@ type CommonProps = Pick<
   | 'readonlyReason'
   | 'services'
   | 'onSave'
-  | 'onCancel'
   | 'entityName'
+  | 'flyoutTitle'
+  | 'flyoutTitleId'
   | 'customValidators'
   | 'appendRows'
 >;

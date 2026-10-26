@@ -14,7 +14,7 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 
 import { appActions } from '../../../../common/store/app';
 import type { Note } from '../../../../common/lib/note';
@@ -94,7 +94,7 @@ export const AddNote = React.memo<{
 
   return (
     <AddNotesContainer onKeyDown={onKeyDown} role="dialog">
-      <div style={{ width: '100%' }}>
+      <div css={{ width: '100%' }}>
         <EuiScreenReaderOnly data-test-subj="screenReaderOnly">
           <p>{i18n.YOU_ARE_EDITING_A_NOTE}</p>
         </EuiScreenReaderOnly>

@@ -5,31 +5,44 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
-import PropTypes from 'prop-types';
+import type { FC } from 'react';
+import React, { useMemo } from 'react';
+import { css } from '@emotion/react';
+import { useEuiTheme } from '@elastic/eui';
 import { matrixToCSS } from '../../lib/dom';
-import { TransformMatrix3d } from '../../lib/aeroelastic';
+import type { TransformMatrix3d } from '../../lib/aeroelastic';
 
 interface Props {
   transformMatrix: TransformMatrix3d;
   zoomScale?: number;
 }
 
-export const RotationHandle: FC<Props> = ({ transformMatrix, zoomScale = 1 }) => (
-  <div
-    className="canvasRotationHandle canvasLayoutAnnotation"
-    style={{
-      transform: matrixToCSS(transformMatrix),
-    }}
-  >
-    <div
-      className="canvasRotationHandle__handle"
-      style={{ transform: `scale3d(${1 / zoomScale},${1 / zoomScale},1)` }}
-    />
-  </div>
-);
+export const RotationHandle: FC<Props> = ({ transformMatrix, zoomScale = 1 }) => {
+  const { euiTheme } = useEuiTheme();
+  const styles = useMemo(
+    () => css`
+      border-top: 1px dashed ${euiTheme.colors.lightShade};
+      border-left: 1px dashed ${euiTheme.colors.lightShade};
 
-RotationHandle.propTypes = {
-  transformMatrix: PropTypes.arrayOf(PropTypes.number).isRequired,
-  zoomScale: PropTypes.number,
+      .canvasRotationHandle__handle {
+        background-color: ${euiTheme.colors.mediumShade};
+      }
+    `,
+    [euiTheme]
+  );
+
+  return (
+    <div
+      className="canvasRotationHandle canvasLayoutAnnotation"
+      css={styles}
+      style={{
+        transform: matrixToCSS(transformMatrix),
+      }}
+    >
+      <div
+        className="canvasRotationHandle__handle"
+        style={{ transform: `scale3d(${1 / zoomScale},${1 / zoomScale},1)` }}
+      />
+    </div>
+  );
 };

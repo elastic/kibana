@@ -6,8 +6,14 @@
  */
 
 import { createDatatableUtilitiesMock } from '@kbn/data-plugin/common/mocks';
-import { Datatable } from '@kbn/expressions-plugin/public';
-import { getUniqueLabelGenerator, inferTimeField, isLensRange, renewIDs } from './utils';
+import type { Datatable } from '@kbn/expressions-plugin/public';
+import type { LensDocument } from '@kbn/lens-common';
+import {
+  getActiveDatasourceIdFromDoc,
+  getUniqueLabelGenerator,
+  inferTimeField,
+  renewIDs,
+} from './utils';
 
 const datatableUtilities = createDatatableUtilitiesMock();
 
@@ -52,6 +58,64 @@ const tableWithoutAppliedTimeRange = {
 };
 
 describe('utils', () => {
+  describe('getActiveDatasourceIdFromDoc', () => {
+    const docWithDatasourceStates = (datasourceStates: Record<string, unknown>): LensDocument =>
+      ({
+        state: { datasourceStates },
+      } as unknown as LensDocument);
+
+    it('prefers textBased over formBased when both hold data', () => {
+      expect(
+        getActiveDatasourceIdFromDoc(
+          docWithDatasourceStates({
+            formBased: { layers: { a: {} } },
+            textBased: { layers: { b: {} } },
+          })
+        )
+      ).toBe('textBased');
+    });
+
+    it('ignores empty datasource states when another one holds data', () => {
+      expect(
+        getActiveDatasourceIdFromDoc(
+          docWithDatasourceStates({
+            textBased: { layers: {} },
+            formBased: { layers: { a: {} } },
+          })
+        )
+      ).toBe('formBased');
+    });
+
+    it('falls back to known datasource keys when all states are empty', () => {
+      expect(
+        getActiveDatasourceIdFromDoc(
+          docWithDatasourceStates({
+            textBased: { layers: {} },
+            formBased: { layers: {} },
+          })
+        )
+      ).toBe('formBased');
+    });
+
+    it('returns null when the only non-empty state belongs to an unknown datasource', () => {
+      // corrupted doc or forward-incompatible export: the panel config lives under
+      // an unknown id, so it must surface as "no datasource" instead of resolving
+      // to an empty known datasource
+      expect(
+        getActiveDatasourceIdFromDoc(
+          docWithDatasourceStates({
+            UNKNOWN: { layers: { a: {} } },
+            textBased: { layers: {} },
+          })
+        )
+      ).toBeNull();
+    });
+
+    it('returns null when no known datasource key exists', () => {
+      expect(getActiveDatasourceIdFromDoc(docWithDatasourceStates({ UNKNOWN: {} }))).toBeNull();
+    });
+  });
+
   describe('inferTimeField', () => {
     test('infer time field for brush event', () => {
       expect(
@@ -185,26 +249,6 @@ describe('utils', () => {
     it('should add a counter for multiple empty labels', () => {
       const labelGenerator = getUniqueLabelGenerator();
       expect([' ', ' '].map(labelGenerator)).toEqual(['[Untitled]', '[Untitled] [1]']);
-    });
-  });
-
-  describe('isRange', () => {
-    it.each<[expected: boolean, input: unknown]>([
-      [true, { from: 0, to: 100, label: '' }],
-      [true, { from: 0, to: null, label: '' }],
-      [true, { from: null, to: 100, label: '' }],
-      [false, { from: 0, to: 100 }],
-      [false, { from: 0, to: null }],
-      [false, { from: null, to: 100 }],
-      [false, { from: 0 }],
-      [false, { to: 100 }],
-      [false, null],
-      [false, undefined],
-      [false, 123],
-      [false, 'string'],
-      [false, {}],
-    ])('should return %s for %j', (expected, input) => {
-      expect(isLensRange(input)).toBe(expected);
     });
   });
 });

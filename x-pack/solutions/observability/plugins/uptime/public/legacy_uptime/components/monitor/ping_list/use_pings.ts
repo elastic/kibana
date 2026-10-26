@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import { useCallback, useContext, useEffect } from 'react';
 import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import { selectPingList } from '../../../state/selectors';
-import { GetPingsParams, Ping } from '../../../../../common/runtime_types/ping';
+import type { GetPingsParams, Ping } from '../../../../../common/runtime_types/ping';
 import { getPings as getPingsAction } from '../../../state/actions';
 import { useGetUrlParams, useMonitorId } from '../../../hooks';
 import { UptimeRefreshContext, UptimeSettingsContext } from '../../../contexts';

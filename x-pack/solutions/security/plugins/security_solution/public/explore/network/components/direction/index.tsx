@@ -23,12 +23,12 @@ export const OUTGOING = 'outgoing';
 export const LISTENING = 'listening';
 export const UNKNOWN = 'unknown';
 
-export const DEFAULT_ICON = 'questionInCircle';
+export const DEFAULT_ICON = 'question';
 
 /** Returns an icon representing the value of `network.direction` */
 export const getDirectionIcon = (
   networkDirection?: string | null
-): 'arrowUp' | 'arrowDown' | 'globe' | 'bullseye' | 'questionInCircle' => {
+): 'chevronSingleUp' | 'chevronSingleDown' | 'globe' | 'bullseye' | 'question' => {
   if (networkDirection == null) {
     return DEFAULT_ICON;
   }
@@ -38,11 +38,11 @@ export const getDirectionIcon = (
   switch (direction) {
     case NetworkDirectionEcs.outbound:
     case NetworkDirectionEcs.outgoing:
-      return 'arrowUp';
+      return 'chevronSingleUp';
     case NetworkDirectionEcs.inbound:
     case NetworkDirectionEcs.incoming:
     case NetworkDirectionEcs.listening:
-      return 'arrowDown';
+      return 'chevronSingleDown';
     case NetworkDirectionEcs.external:
       return 'globe';
     case NetworkDirectionEcs.internal:

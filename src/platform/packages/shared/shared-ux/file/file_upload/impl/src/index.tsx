@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { lazy, Suspense, ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import React, { lazy, Suspense } from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import type { Props } from './file_upload';
 

@@ -10,6 +10,13 @@
 export const OBSERVABILITY_THRESHOLD_RULE_TYPE_ID = 'observability.rules.custom_threshold';
 
 /**
+ * Feature ID for the Observability Alerts feature. Like the Stack Alerts feature,
+ * it grants read access to alerts without requiring rule-read privileges, so its
+ * capabilities can be used to gate access to shared alerts pages.
+ */
+export const OBSERVABILITY_ALERTS_FEATURE_ID = 'observabilityAlerts';
+
+/**
  * APM rule types
  */
 

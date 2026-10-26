@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { PublicMethodsOf } from '@kbn/utility-types';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import { getDocLinks, getDocLinksMeta } from '@kbn/doc-links';
 import type { DocLinksServiceStart, DocLinksServiceSetup } from '@kbn/core-doc-links-server';
 import type { DocLinksService } from '@kbn/core-doc-links-server-internal';

@@ -11,30 +11,10 @@ import type { UseLegacyUrlRedirectParams } from './use_redirect_legacy_url';
 // eslint-disable-next-line no-restricted-imports
 import { useLegacyUrlRedirect } from './use_redirect_legacy_url';
 import type { Rule } from '../../../rule_management/logic';
-import type { SpacesApi } from '@kbn/spaces-plugin/public';
+import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
 
-const mockRedirectLegacyUrl = jest.fn();
-const mockGetLegacyUrlConflict = jest.fn();
-
-const mockSpacesApi: SpacesApi = {
-  getActiveSpace$: jest.fn(),
-  getActiveSpace: jest.fn(),
-  ui: {
-    components: {
-      getSpacesContextProvider: jest.fn(),
-      getShareToSpaceFlyout: jest.fn(),
-      getCopyToSpaceFlyout: jest.fn(),
-      getSpaceList: jest.fn(),
-      getEmbeddableLegacyUrlConflict: jest.fn(),
-      getSpaceAvatar: jest.fn(),
-      getLegacyUrlConflict: mockGetLegacyUrlConflict,
-    },
-    redirectLegacyUrl: mockRedirectLegacyUrl,
-    useSpaces: jest.fn(),
-  },
-  hasOnlyDefaultSpace: false,
-  isSolutionViewEnabled: true,
-};
+const mockSpacesApi = spacesPluginMock.createStartContract();
+const mockRedirectLegacyUrl = jest.mocked(mockSpacesApi.ui.redirectLegacyUrl);
 
 describe('useLegacyUrlRedirect', () => {
   beforeEach(() => {

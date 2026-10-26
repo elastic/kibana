@@ -12,12 +12,14 @@ import {
   EuiFlexItem,
   EuiSplitPanel,
   EuiText,
+  EuiToolTip,
   transparentize,
   useEuiTheme,
 } from '@elastic/eui';
 import React, { memo, useMemo } from 'react';
 import { css } from '@emotion/react';
 import { has } from 'lodash';
+import { i18n } from '@kbn/i18n';
 import {
   selectDefaultWidths,
   selectPushVsOverlay,
@@ -31,7 +33,19 @@ import {
   PREVIEW_SECTION_TEST_ID,
 } from './test_ids';
 import { useExpandableFlyoutApi } from '../..';
-import { BACK_BUTTON, CLOSE_BUTTON } from './translations';
+
+const BACK_BUTTON = i18n.translate(
+  'securitySolutionPackages.expandableFlyout.previewSection.backButton',
+  {
+    defaultMessage: 'Back',
+  }
+);
+const CLOSE_BUTTON = i18n.translate(
+  'securitySolutionPackages.expandableFlyout.previewSection.closeButton',
+  {
+    defaultMessage: 'Close',
+  }
+);
 
 export interface PreviewBanner {
   /**
@@ -106,12 +120,14 @@ export const PreviewSection: React.FC<PreviewSectionProps> = memo(
 
     const closeButton = (
       <EuiFlexItem grow={false}>
-        <EuiButtonIcon
-          iconType="cross"
-          onClick={() => closePreviewPanel()}
-          data-test-subj={PREVIEW_SECTION_CLOSE_BUTTON_TEST_ID}
-          aria-label={CLOSE_BUTTON}
-        />
+        <EuiToolTip content={CLOSE_BUTTON} disableScreenReaderOutput>
+          <EuiButtonIcon
+            iconType="cross"
+            onClick={closePreviewPanel}
+            data-test-subj={PREVIEW_SECTION_CLOSE_BUTTON_TEST_ID}
+            aria-label={CLOSE_BUTTON}
+          />
+        </EuiToolTip>
       </EuiFlexItem>
     );
     const header = (
@@ -119,9 +135,9 @@ export const PreviewSection: React.FC<PreviewSectionProps> = memo(
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
             size="xs"
-            iconType="arrowLeft"
+            iconType="chevronSingleLeft"
             iconSide="left"
-            onClick={() => previousPreviewPanel()}
+            onClick={previousPreviewPanel}
             data-test-subj={PREVIEW_SECTION_BACK_BUTTON_TEST_ID}
             aria-label={BACK_BUTTON}
           >

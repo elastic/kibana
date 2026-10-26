@@ -5,15 +5,12 @@
  * 2.0.
  */
 
-import { CoreStart } from '@kbn/core/public';
-import {
-  createKibanaReactContext,
-  KibanaReactContextValue,
-  useKibana,
-} from '@kbn/kibana-react-plugin/public';
-import { ManagementAppMountParams } from '@kbn/management-plugin/public';
+import type { CoreStart } from '@kbn/core/public';
+import type { KibanaReactContextValue } from '@kbn/kibana-react-plugin/public';
+import { createKibanaReactContext, useKibana } from '@kbn/kibana-react-plugin/public';
+import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { useMemo } from 'react';
-import { AppPluginStartDependencies, DataQualityPluginStart } from '../types';
+import type { AppPluginStartDependencies, DataQualityPluginStart } from '../types';
 
 export type PluginKibanaContextValue = CoreStart &
   AppPluginStartDependencies &

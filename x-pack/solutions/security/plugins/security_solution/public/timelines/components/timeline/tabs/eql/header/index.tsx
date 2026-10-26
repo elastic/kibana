@@ -8,16 +8,16 @@
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { memo } from 'react';
 
+import { PageScope } from '../../../../../../data_view_manager/constants';
 import { InputsModelId } from '../../../../../../common/store/inputs/constants';
 import { TimelineTabs } from '../../../../../../../common/types/timeline';
 import { ExitFullScreen } from '../../../../../../common/components/exit_full_screen';
 import { SuperDatePicker } from '../../../../../../common/components/super_date_picker';
-import { SourcererScopeName } from '../../../../../../sourcerer/store/model';
 import { TimelineDatePickerLock } from '../../../date_picker_lock';
 import type { TimelineFullScreen } from '../../../../../../common/containers/use_full_screen';
 import { EqlQueryBarTimeline } from '../../../query_bar/eql';
-import { Sourcerer } from '../../../../../../sourcerer/components';
 import { StyledEuiFlyoutHeader, TabHeaderContainer } from '../../shared/layout';
+import { DataViewPicker } from '../../../../../../data_view_manager/components/data_view_picker';
 
 export type EqlTabHeaderProps = {
   activeTab: TimelineTabs;
@@ -43,10 +43,15 @@ export const EqlTabHeader = memo(
               />
             )}
             <EuiFlexItem grow={false}>
-              {activeTab === TimelineTabs.eql && <Sourcerer scope={SourcererScopeName.timeline} />}
+              {activeTab === TimelineTabs.eql && <DataViewPicker scope={PageScope.timeline} />}
             </EuiFlexItem>
             <EuiFlexItem>
-              <SuperDatePicker width="auto" id={InputsModelId.timeline} timelineId={timelineId} />
+              <SuperDatePicker
+                compressed={true}
+                id={InputsModelId.timeline}
+                timelineId={timelineId}
+                width="auto"
+              />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <TimelineDatePickerLock />

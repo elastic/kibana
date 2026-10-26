@@ -7,7 +7,7 @@
 
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { KbnClient } from '@kbn/test';
-import { MICROSOFT_DEFENDER_ENDPOINT_CONNECTOR_ID } from '@kbn/stack-connectors-plugin/common/microsoft_defender_endpoint/constants';
+import { CONNECTOR_ID as MICROSOFT_DEFENDER_ENDPOINT_CONNECTOR_ID } from '@kbn/connector-schemas/microsoft_defender_endpoint/constants';
 import { dump } from '../../common/utils';
 import { fetchActiveSpace } from '../../common/spaces';
 import { createConnector, fetchConnectorByType } from '../../common/connectors_services';

@@ -8,7 +8,7 @@
  */
 
 import React, { useCallback, useState } from 'react';
-import { EventEmitter } from 'events';
+import type { EventEmitter } from 'events';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -21,14 +21,40 @@ import {
   EuiText,
   EuiTitle,
   EuiToolTip,
+  type UseEuiTheme,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
-import { Vis } from '@kbn/visualizations-plugin/public';
-import { SavedSearch, getSavedSearchUrl } from '@kbn/saved-search-plugin/public';
-import { ApplicationStart } from '@kbn/core/public';
+import type { Vis } from '@kbn/visualizations-plugin/public';
+import type { SavedSearch } from '@kbn/saved-search-plugin/public';
+import { getSavedSearchUrl } from '@kbn/saved-search-plugin/public';
+import type { ApplicationStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { css } from '@emotion/react';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+
+const titleContainerStyle = ({ euiTheme }: UseEuiTheme) =>
+  css({
+    padding: `${euiTheme.size.s} ${euiTheme.size.xl} ${euiTheme.size.s} ${euiTheme.size.s}`, // Extra padding on the right for the collapse button
+  });
+
+const sideBarTitleStyles = {
+  titleContainer: titleContainerStyle,
+  indexPatternPlaceholder: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      minHeight: euiTheme.size.xxl,
+      borderBottom: euiTheme.border.thin,
+    }),
+};
+
+const linkedSearchStyles = {
+  titleContainer: titleContainerStyle,
+  linkedSearch: css({
+    flexGrow: 0,
+  }),
+};
 
 interface LinkedSearchProps {
   savedSearch: SavedSearch;
@@ -43,7 +69,9 @@ interface SidebarTitleProps {
 }
 
 export function LinkedSearch({ savedSearch, eventEmitter }: LinkedSearchProps) {
+  const styles = useMemoCss(linkedSearchStyles);
   const [showPopover, setShowPopover] = useState(false);
+  const popoverTitleId = useGeneratedHtmlId();
   const {
     services: { application },
   } = useKibana<{ application: ApplicationStart }>();
@@ -73,9 +101,10 @@ export function LinkedSearch({ savedSearch, eventEmitter }: LinkedSearchProps) {
       className="visEditorSidebar__titleContainer visEditorSidebar__linkedSearch"
       gutterSize="xs"
       responsive={false}
+      css={[styles.titleContainer, styles.linkedSearch]}
     >
       <EuiFlexItem grow={false}>
-        <EuiIcon type="search" />
+        <EuiIcon type="magnify" aria-hidden={true} />
       </EuiFlexItem>
 
       <EuiFlexItem grow={false} className="eui-textTruncate">
@@ -95,9 +124,10 @@ export function LinkedSearch({ savedSearch, eventEmitter }: LinkedSearchProps) {
 
       <EuiFlexItem grow={false}>
         <EuiPopover
+          aria-labelledby={popoverTitleId}
           anchorPosition="downRight"
           button={
-            <EuiToolTip content={linkButtonAriaLabel}>
+            <EuiToolTip content={linkButtonAriaLabel} disableScreenReaderOutput>
               <EuiButtonIcon
                 aria-label={linkButtonAriaLabel}
                 data-test-subj="showUnlinkSavedSearchPopover"
@@ -110,7 +140,7 @@ export function LinkedSearch({ savedSearch, eventEmitter }: LinkedSearchProps) {
           closePopover={closePopover}
           panelPaddingSize="s"
         >
-          <EuiPopoverTitle>
+          <EuiPopoverTitle id={popoverTitleId}>
             <FormattedMessage
               id="visDefaultEditor.sidebar.savedSearch.popoverTitle"
               defaultMessage="Linked to Discover session"
@@ -160,10 +190,15 @@ export function LinkedSearch({ savedSearch, eventEmitter }: LinkedSearchProps) {
 }
 
 function SidebarTitle({ savedSearch, vis, isLinkedSearch, eventEmitter }: SidebarTitleProps) {
+  const styles = useMemoCss(sideBarTitleStyles);
   return isLinkedSearch && savedSearch ? (
     <LinkedSearch savedSearch={savedSearch} eventEmitter={eventEmitter} />
   ) : vis.type.options.showIndexSelection ? (
-    <EuiTitle size="xs" className="visEditorSidebar__titleContainer eui-textTruncate">
+    <EuiTitle
+      size="xs"
+      className="visEditorSidebar__titleContainer eui-textTruncate"
+      css={styles.titleContainer}
+    >
       <h2
         title={i18n.translate('visDefaultEditor.sidebar.indexPatternAriaLabel', {
           defaultMessage: 'Index pattern: {title}',
@@ -176,7 +211,10 @@ function SidebarTitle({ savedSearch, vis, isLinkedSearch, eventEmitter }: Sideba
       </h2>
     </EuiTitle>
   ) : (
-    <div className="visEditorSidebar__indexPatternPlaceholder" />
+    <div
+      className="visEditorSidebar__indexPatternPlaceholder"
+      css={styles.indexPatternPlaceholder}
+    />
   );
 }
 

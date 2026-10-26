@@ -7,8 +7,9 @@
 
 import React from 'react';
 import { render, waitFor } from '@testing-library/react';
-import { QueryClient, QueryClientProvider, type UseQueryResult } from '@tanstack/react-query';
-import * as ReactQuery from '@tanstack/react-query';
+import '@kbn/react-query/mock';
+import { QueryClient, QueryClientProvider, type UseQueryResult } from '@kbn/react-query';
+import * as ReactQuery from '@kbn/react-query';
 
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
@@ -26,6 +27,9 @@ const useQueryMock = jest.spyOn(ReactQuery, 'useQuery').mockImplementation((quer
 const queryClient = new QueryClient();
 
 jest.mock('../../../../app_dependencies');
+jest.mock('../../../../hooks/use_get_transform_cps_enabled', () => ({
+  useGetTransformCpsEnabled: () => ({ data: true }),
+}));
 
 describe('Transform: Transform List <TransformList />', () => {
   test('Minimal initialization', async () => {

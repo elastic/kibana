@@ -22,6 +22,9 @@ export interface FleetStatusProviderProps {
   missingOptionalFeatures?: GetFleetStatusResponse['missing_optional_features'];
   isSecretsStorageEnabled?: GetFleetStatusResponse['is_secrets_storage_enabled'];
   isSpaceAwarenessEnabled?: GetFleetStatusResponse['is_space_awareness_enabled'];
+  isSSLSecretsStorageEnabled?: GetFleetStatusResponse['is_ssl_secrets_storage_enabled'];
+  isActionSecretsStorageEnabled?: GetFleetStatusResponse['is_action_secrets_storage_enabled'];
+  isFipsEnabled?: GetFleetStatusResponse['is_fips_enabled'];
   spaceId?: string;
 }
 
@@ -66,6 +69,9 @@ export const FleetStatusProvider: React.FC<{
     missingOptionalFeatures: data?.missing_optional_features,
     isSecretsStorageEnabled: data?.is_secrets_storage_enabled,
     isSpaceAwarenessEnabled: data?.is_space_awareness_enabled,
+    isSSLSecretsStorageEnabled: data?.is_ssl_secrets_storage_enabled,
+    isActionSecretsStorageEnabled: data?.is_action_secrets_storage_enabled,
+    isFipsEnabled: data?.is_fips_enabled,
     spaceId,
   };
 

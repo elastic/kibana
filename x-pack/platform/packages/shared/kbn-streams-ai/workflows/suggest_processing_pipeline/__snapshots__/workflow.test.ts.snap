@@ -1,0 +1,97 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`suggestProcessingPipeline workflow no longer rejects pipelines based on aggregate 80% parse rate gate 1`] = `
+Object {
+  "errors": Array [
+    "Processor \\"root.steps[0]\\" has a failure rate of 50.00% (maximum allowed: 20%). Review the processor configuration.",
+    "[root.steps[0]] generic_processor_failure: could not parse",
+  ],
+  "metrics": Object {
+    "fields": Array [
+      "message (unmapped) - 1 distinct value (\`partial\`)",
+    ],
+    "parse_rate": 50,
+    "sampled": 1,
+  },
+  "processors": Object {
+    "root.steps[0]": Object {
+      "failure_rate": 50,
+      "top_errors": Array [
+        "root.steps[0]: generic_processor_failure: could not parse",
+      ],
+    },
+  },
+  "temporary_fields": Array [],
+  "valid": false,
+}
+`;
+
+exports[`suggestProcessingPipeline workflow returns only agent-committed steps (orchestrator merges seed parsing separately) 1`] = `
+Object {
+  "metadata": Object {
+    "maxSteps": 2,
+    "stepsUsed": 1,
+  },
+  "pipeline": Object {
+    "steps": Array [
+      Object {
+        "action": "date",
+        "customIdentifier": "root.steps[0]",
+        "formats": Array [
+          "ISO8601",
+        ],
+        "from": "@timestamp",
+      },
+    ],
+  },
+}
+`;
+
+exports[`suggestProcessingPipeline workflow simulate_pipeline callback returns formatted Zod errors for invalid pipeline 1`] = `
+Object {
+  "errors": Array [
+    "Step 0 (date): from: Invalid input: expected string, received number",
+    "Step 0 (date): formats: Invalid input: expected array, received undefined",
+  ],
+  "metrics": undefined,
+  "processors": Object {},
+  "temporary_fields": Array [],
+  "valid": false,
+}
+`;
+
+exports[`suggestProcessingPipeline workflow simulate_pipeline callback returns processors and temporary_fields in response 1`] = `
+Object {
+  "errors": Array [],
+  "metrics": Object {
+    "fields": Array [
+      "message (unmapped) - 1 distinct value (\`ok\`)",
+      "custom.timestamp (unmapped) - 1 distinct value (\`2024-01-01\`)",
+    ],
+    "parse_rate": 100,
+    "sampled": 1,
+  },
+  "processors": Object {
+    "root.steps[0]": Object {
+      "failure_rate": 0,
+      "top_errors": Array [],
+    },
+  },
+  "temporary_fields": Array [
+    "custom.timestamp",
+  ],
+  "valid": true,
+}
+`;
+
+exports[`suggestProcessingPipeline workflow uses full processor schema when agentPipelineSchema is the default 1`] = `
+Object {
+  "metadata": Object {
+    "maxSteps": 2,
+    "stepsUsed": 1,
+  },
+  "pipeline": Object {
+    "steps": Array [],
+  },
+}
+`;

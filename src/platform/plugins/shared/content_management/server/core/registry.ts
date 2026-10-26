@@ -11,7 +11,7 @@ import { validateVersion } from '@kbn/object-versioning/lib/utils';
 
 import { getContentClientFactory } from '../content_client';
 import { ContentType } from './content_type';
-import { EventBus } from './event_bus';
+import type { EventBus } from './event_bus';
 import type { ContentStorage, ContentTypeDefinition, MSearchConfig } from './types';
 import type { ContentCrud } from './crud';
 

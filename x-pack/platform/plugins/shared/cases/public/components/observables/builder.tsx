@@ -23,9 +23,9 @@ import * as i18n from './translations';
 const sharedProps = {
   path: 'value',
   componentProps: {
-    placeholder: i18n.VALUE_PLACEHOLDER,
     euiFieldProps: {
       'data-test-subj': 'observable-value-field',
+      placeholder: i18n.SELECT_OBSERVABLE_VALUE_PLACEHOLDER,
     },
   },
   component: TextField,

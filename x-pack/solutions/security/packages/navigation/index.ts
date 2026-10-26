@@ -5,18 +5,14 @@
  * 2.0.
  */
 
-export {
-  useGetAppUrl,
-  useNavigateTo,
-  useNavigation,
-  getNavigationPropsFromId,
-} from './src/navigation';
+export { useGetAppUrl, useNavigateTo, useNavigation } from './src/navigation';
 export type { GetAppUrl, NavigateTo } from './src/navigation';
 export { NavigationProvider } from './src/context';
 export {
-  SecurityPageName,
-  ExternalPageName,
+  ENABLE_ATTACK_DISCOVERY_WORKFLOWS_SETTING,
   LinkCategoryType,
   SECURITY_UI_APP_ID,
+  SecurityGroupName,
+  SecurityPageName,
 } from './src/constants';
 export * from './src/types';

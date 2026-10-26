@@ -1,0 +1,7 @@
+{
+  "type": "shared-server",
+  "id": "@kbn/ai-security-labs-content",
+  "owner": "@elastic/security-threat-hunting",
+  "group": "security",
+  "visibility": "private"
+}

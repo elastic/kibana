@@ -9,7 +9,7 @@ import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import userEvent from '@testing-library/user-event';
 import { EmbeddableFeatureBadge } from './info_badges';
-import { UserMessage } from '../../types';
+import type { UserMessage } from '@kbn/lens-common';
 
 describe('EmbeddableFeatureBadge', () => {
   async function renderPopup(messages: UserMessage[], count: number = messages.length) {
@@ -40,6 +40,24 @@ describe('EmbeddableFeatureBadge', () => {
     expect(screen.getByText('1')).toBeInTheDocument();
     await userEvent.click(screen.getByText('1'));
     expect(await screen.findByText('Long text')).toBeInTheDocument();
+  });
+
+  it('should have an accessible label describing the badge', () => {
+    render(
+      <EmbeddableFeatureBadge
+        messages={[
+          {
+            uniqueId: 'unique_id',
+            shortMessage: 'Short message',
+            longMessage: 'Long text',
+            severity: 'info',
+            fixableInEditor: false,
+            displayLocations: [],
+          },
+        ]}
+      />
+    );
+    expect(screen.getByLabelText('1 visualization modifier')).toBeInTheDocument();
   });
 
   it('should render a description of the badge in a tooltip on hover', async () => {

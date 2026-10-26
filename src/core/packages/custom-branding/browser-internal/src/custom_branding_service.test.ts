@@ -8,7 +8,7 @@
  */
 
 import { take } from 'rxjs';
-import { CustomBrandingSetupDeps } from '@kbn/core-custom-branding-browser';
+import type { CustomBrandingSetupDeps } from '@kbn/core-custom-branding-browser';
 import { CustomBrandingService } from './custom_branding_service';
 
 describe('custom branding service', () => {
@@ -60,7 +60,7 @@ describe('custom branding service', () => {
   describe('#stop', () => {
     it('runs fine if service never set up', () => {
       const service = new CustomBrandingService();
-      expect(() => service.stop()).not.toThrowError();
+      expect(() => service.stop()).not.toThrow();
     });
 
     it('stops customBranding$ and hasCustomBranding$', async () => {

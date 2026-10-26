@@ -52,7 +52,7 @@ export const Navigation = ({
   const previousStepButton = (
     <EuiFlexItem grow={false}>
       <EuiButtonEmpty
-        iconType="arrowLeft"
+        iconType="chevronSingleLeft"
         onClick={goToPreviousStep}
         data-test-subj="rollupJobBackButton"
       >
@@ -64,7 +64,7 @@ export const Navigation = ({
   const nextStepButton = (
     <EuiFlexItem grow={false}>
       <EuiButton
-        iconType="arrowRight"
+        iconType="chevronSingleRight"
         iconSide="right"
         onClick={goToNextStep}
         disabled={!canGoToNextStep}

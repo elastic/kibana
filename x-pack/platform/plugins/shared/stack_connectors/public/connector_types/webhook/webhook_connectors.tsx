@@ -7,21 +7,36 @@
 
 import React from 'react';
 
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
 import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { Field, SelectField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
-import type { ActionConnectorFieldsProps } from '@kbn/triggers-actions-ui-plugin/public';
+import {
+  useConnectorContext,
+  type ActionConnectorFieldsProps,
+} from '@kbn/triggers-actions-ui-plugin/public';
 
+import { WebhookMethods } from '@kbn/connector-schemas/common/auth/constants';
 import * as i18n from './translations';
-import { AuthConfig } from '../../common/auth/auth_config';
 
-const HTTP_VERBS = ['post', 'put'];
-const { emptyField, urlField } = fieldValidators;
+const HTTP_VERBS = [
+  WebhookMethods.POST,
+  WebhookMethods.PUT,
+  WebhookMethods.PATCH,
+  WebhookMethods.GET,
+  WebhookMethods.DELETE,
+];
+const { emptyField } = fieldValidators;
+
+const LazyLoadedAuthConfig = React.lazy(() => import('../../common/auth/auth_config'));
 
 const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsProps> = ({
   readOnly,
+  isEdit,
 }) => {
+  const {
+    services: { isWebhookSslWithPfxEnabled: isPfxEnabled },
+  } = useConnectorContext();
   return (
     <>
       <EuiFlexGroup justifyContent="spaceBetween">
@@ -31,7 +46,7 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
             component={SelectField}
             config={{
               label: i18n.METHOD_LABEL,
-              defaultValue: 'post',
+              defaultValue: WebhookMethods.POST,
               validations: [
                 {
                   validator: emptyField(i18n.METHOD_REQUIRED),
@@ -55,7 +70,17 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
               label: i18n.URL_LABEL,
               validations: [
                 {
-                  validator: urlField(i18n.URL_INVALID),
+                  validator: ({ value }) => {
+                    if (typeof value === 'string' && /^https?:\/\/\S+$/i.test(value)) {
+                      return;
+                    }
+
+                    return {
+                      code: 'ERR_FIELD_FORMAT',
+                      formatType: 'URL',
+                      message: i18n.URL_INVALID,
+                    };
+                  },
                 },
               ],
             }}
@@ -67,7 +92,14 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
-      <AuthConfig readOnly={readOnly} />
+      <React.Suspense fallback={<EuiLoadingSpinner size="m" />}>
+        <LazyLoadedAuthConfig
+          readOnly={readOnly}
+          isEdit={isEdit}
+          isPfxEnabled={isPfxEnabled}
+          isOAuth2Enabled={true}
+        />
+      </React.Suspense>
     </>
   );
 };

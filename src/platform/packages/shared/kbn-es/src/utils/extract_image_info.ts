@@ -8,7 +8,7 @@
  */
 
 import execa from 'execa';
-import memoize from 'lodash/memoize';
+import { memoize } from 'lodash';
 
 export const extractImageInfo = memoize(async (image: string) => {
   try {

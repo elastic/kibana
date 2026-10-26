@@ -7,16 +7,36 @@
 
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
-import { EuiBasicTable, EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiBasicTable,
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIconTip,
+  EuiToolTip,
+} from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { useAuthz, useLink } from '../../../../hooks';
+import { licenseService, useAuthz, useLink, useStartServices } from '../../../../hooks';
 import type { Output } from '../../../../types';
+import { SERVERLESS_PRIVATE_OUTPUT_ID } from '../../../../../../../common/constants';
+import { isBeatsOutput } from '../../../../../../../common/services/output_helpers';
+
+function getPrivateLinkProvider(urls: string[]): string {
+  const url = urls[0] ?? '';
+  if (url.includes('.azure.')) return 'Azure Private Link';
+  if (url.includes('.gcp.')) return 'GCP Private Service Connect';
+  return 'AWS PrivateLink';
+}
 
 import { OutputHealth } from '../edit_output_flyout/output_health';
 
+import { ExperimentalFeaturesService } from '../../../../services';
+
 import { DefaultBadges } from './badges';
+import { IntegrationSyncStatus } from './integration_sync_status';
 
 export interface OutputsTableProps {
   outputs: Output[];
@@ -53,12 +73,16 @@ export const OutputsTable: React.FunctionComponent<OutputsTableProps> = ({
 }) => {
   const authz = useAuthz();
   const { getHref } = useLink();
+  const { enableSyncIntegrationsOnRemote } = ExperimentalFeaturesService.get();
+  const { cloud } = useStartServices();
+  const enableSyncIntegrations =
+    enableSyncIntegrationsOnRemote && licenseService.isEnterprise() && !cloud?.isServerlessEnabled;
 
   const columns = useMemo((): Array<EuiBasicTableColumn<Output>> => {
     return [
       {
         render: (output: Output) => (
-          <EuiFlexGroup alignItems="center" gutterSize="xs">
+          <EuiFlexGroup alignItems="center" gutterSize="xs" wrap={false}>
             <NameFlexItemWithMaxWidth grow={false}>
               <p title={output.name} className={`eui-textTruncate`}>
                 {output.name}
@@ -76,9 +100,31 @@ export const OutputsTable: React.FunctionComponent<OutputsTableProps> = ({
                 />
               </EuiFlexItem>
             )}
+            {output.id === SERVERLESS_PRIVATE_OUTPUT_ID && (
+              <EuiFlexItem grow={false}>
+                <EuiToolTip
+                  content={i18n.translate(
+                    'xpack.fleet.settings.outputsTable.privateLinkBadgeTooltip',
+                    {
+                      defaultMessage:
+                        'This output uses {provider} for private network connectivity.',
+                      values: {
+                        provider: getPrivateLinkProvider(
+                          isBeatsOutput(output) ? output.hosts ?? [] : []
+                        ),
+                      },
+                    }
+                  )}
+                >
+                  <EuiBadge tabIndex={0}>
+                    {getPrivateLinkProvider(isBeatsOutput(output) ? output.hosts ?? [] : [])}
+                  </EuiBadge>
+                </EuiToolTip>
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
         ),
-        width: '288px',
+        width: '380px',
         name: i18n.translate('xpack.fleet.settings.outputsTable.nameColumnTitle', {
           defaultMessage: 'Name',
         }),
@@ -94,7 +140,7 @@ export const OutputsTable: React.FunctionComponent<OutputsTableProps> = ({
         truncateText: true,
         render: (output: Output) => (
           <FlexGroupWithMinWidth direction="column" gutterSize="xs">
-            {(output.hosts || []).map((host) => (
+            {(isBeatsOutput(output) ? output.hosts ?? [] : []).map((host) => (
               <EuiFlexItem key={host}>
                 <p title={host} className={`eui-textTruncate`}>
                   {host}
@@ -117,6 +163,16 @@ export const OutputsTable: React.FunctionComponent<OutputsTableProps> = ({
           defaultMessage: 'Status',
         }),
       },
+      ...(enableSyncIntegrations
+        ? [
+            {
+              render: (output: Output) => <IntegrationSyncStatus output={output} />,
+              name: i18n.translate('xpack.fleet.settings.outputsTable.integrationSyncColumnTitle', {
+                defaultMessage: 'Integration syncing',
+              }),
+            },
+          ]
+        : []),
       {
         render: (output: Output) => <DefaultBadges output={output} />,
         width: '200px',
@@ -137,26 +193,50 @@ export const OutputsTable: React.FunctionComponent<OutputsTableProps> = ({
             <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
               <EuiFlexItem grow={false}>
                 {isDeleteVisible && (
-                  <EuiButtonIcon
-                    color="text"
-                    iconType="trash"
-                    onClick={() => deleteOutput(output)}
-                    title={i18n.translate('xpack.fleet.settings.outputSection.deleteButtonTitle', {
-                      defaultMessage: 'Delete',
-                    })}
-                  />
+                  <EuiToolTip
+                    content={i18n.translate(
+                      'xpack.fleet.settings.outputSection.deleteButtonTitle',
+                      {
+                        defaultMessage: 'Delete',
+                      }
+                    )}
+                    disableScreenReaderOutput
+                  >
+                    <EuiButtonIcon
+                      color="text"
+                      iconType="trash"
+                      onClick={() => deleteOutput(output)}
+                      aria-label={i18n.translate(
+                        'xpack.fleet.settings.outputSection.deleteButtonTitle',
+                        {
+                          defaultMessage: 'Delete',
+                        }
+                      )}
+                      data-test-subj="deleteOutputBtn"
+                    />
+                  </EuiToolTip>
                 )}
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiButtonIcon
-                  color="text"
-                  iconType="pencil"
-                  href={getHref('settings_edit_outputs', { outputId: output.id })}
-                  title={i18n.translate('xpack.fleet.settings.outputSection.editButtonTitle', {
+                <EuiToolTip
+                  content={i18n.translate('xpack.fleet.settings.outputSection.editButtonTitle', {
                     defaultMessage: 'Edit',
                   })}
-                  data-test-subj="editOutputBtn"
-                />
+                  disableScreenReaderOutput
+                >
+                  <EuiButtonIcon
+                    color="text"
+                    iconType="pencil"
+                    href={getHref('settings_edit_outputs', { outputId: output.id })}
+                    aria-label={i18n.translate(
+                      'xpack.fleet.settings.outputSection.editButtonTitle',
+                      {
+                        defaultMessage: 'Edit',
+                      }
+                    )}
+                    data-test-subj="editOutputBtn"
+                  />
+                </EuiToolTip>
               </EuiFlexItem>
             </EuiFlexGroup>
           );
@@ -166,7 +246,16 @@ export const OutputsTable: React.FunctionComponent<OutputsTableProps> = ({
         }),
       },
     ];
-  }, [deleteOutput, getHref, authz.fleet.allSettings]);
+  }, [deleteOutput, getHref, authz.fleet.allSettings, enableSyncIntegrations]);
 
-  return <EuiBasicTable columns={columns} items={outputs} data-test-subj="settingsOutputsTable" />;
+  return (
+    <EuiBasicTable
+      columns={columns}
+      items={outputs}
+      data-test-subj="settingsOutputsTable"
+      tableCaption={i18n.translate('xpack.fleet.settings.outputsTable.tableCaption', {
+        defaultMessage: 'Fleet outputs',
+      })}
+    />
+  );
 };

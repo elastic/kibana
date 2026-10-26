@@ -5,8 +5,12 @@
  * 2.0.
  */
 import React from 'react';
-import { render, screen } from '@testing-library/react';
-import { RuleDefinitionSection } from './rule_definition_section';
+import { fireEvent, render, screen } from '@testing-library/react';
+import {
+  RequiredFields,
+  RuleDefinitionSection,
+  constructThreatMappingDescription,
+} from './rule_definition_section';
 import type {
   AlertSuppressionMissingFieldsStrategy,
   RuleResponse,
@@ -154,6 +158,138 @@ describe('RuleDefinitionSection', () => {
       expect(
         screen.queryByTestId('alertSuppressionMissingFieldPropertyTitle')
       ).not.toBeInTheDocument();
+    });
+  });
+
+  describe('RequiredFields', () => {
+    const createRequiredFields = (count: number) =>
+      Array.from({ length: count }, (_, i) => ({ name: `field${i}`, type: 'keyword', ecs: false }));
+
+    it('shows duplicated required fields once', () => {
+      const requiredFields = [...createRequiredFields(2), ...createRequiredFields(2)];
+
+      render(<RequiredFields requiredFields={requiredFields} />);
+
+      expect(screen.getAllByTestId('requiredFieldsPropertyValueItem')).toHaveLength(2);
+    });
+
+    it('shows all required fields for short lists', () => {
+      render(<RequiredFields requiredFields={createRequiredFields(15)} />);
+
+      expect(screen.getAllByTestId('requiredFieldsPropertyValueItem')).toHaveLength(15);
+      expect(
+        screen.queryByTestId('toggleRequiredFieldsPropertyValueFoldButton')
+      ).not.toBeInTheDocument();
+    });
+
+    it('shows only the first 15 required fields for long lists', () => {
+      render(<RequiredFields requiredFields={createRequiredFields(20)} />);
+
+      expect(screen.getAllByTestId('requiredFieldsPropertyValueItem')).toHaveLength(15);
+      expect(screen.getAllByTestId('requiredFieldsPropertyValueItem')[14].textContent).toBe(
+        ' field14'
+      );
+      expect(screen.getByTestId('toggleRequiredFieldsPropertyValueFoldButton')).toHaveTextContent(
+        'Show 5 more'
+      );
+    });
+
+    it('shows and hides the folded required fields', () => {
+      render(<RequiredFields requiredFields={createRequiredFields(20)} />);
+
+      fireEvent.click(screen.getByTestId('toggleRequiredFieldsPropertyValueFoldButton'));
+
+      expect(screen.getAllByTestId('requiredFieldsPropertyValueItem')).toHaveLength(20);
+      expect(screen.getByTestId('toggleRequiredFieldsPropertyValueFoldButton')).toHaveTextContent(
+        'Show less'
+      );
+
+      fireEvent.click(screen.getByTestId('toggleRequiredFieldsPropertyValueFoldButton'));
+
+      expect(screen.getAllByTestId('requiredFieldsPropertyValueItem')).toHaveLength(15);
+    });
+  });
+
+  describe('constructThreatMappingDescription', () => {
+    it('returns correct description for single entry, negate undefined', () => {
+      const result = constructThreatMappingDescription([
+        {
+          entries: [
+            {
+              field: 'host.name',
+              value: 'threat.indicator.host.name',
+              type: 'mapping' as const,
+            },
+          ],
+        },
+      ]);
+      expect(result).toBe('host.name MATCHES threat.indicator.host.name');
+    });
+
+    it('returns correct description for single entry, negate=false', () => {
+      const result = constructThreatMappingDescription([
+        {
+          entries: [
+            {
+              field: 'host.name',
+              value: 'threat.indicator.host.name',
+              negate: false,
+              type: 'mapping' as const,
+            },
+          ],
+        },
+      ]);
+      expect(result).toBe('host.name MATCHES threat.indicator.host.name');
+    });
+
+    it('returns correct description for single entry, negate=true', () => {
+      const result = constructThreatMappingDescription([
+        {
+          entries: [
+            {
+              field: 'host.name',
+              value: 'threat.indicator.host.name',
+              negate: true,
+              type: 'mapping' as const,
+            },
+          ],
+        },
+      ]);
+      expect(result).toBe('host.name DOES NOT MATCH threat.indicator.host.name');
+    });
+
+    it('returns correct description for multiple AND and OR entries', () => {
+      const result = constructThreatMappingDescription([
+        {
+          entries: [
+            {
+              field: 'host.name',
+              value: 'threat.indicator.host.name',
+              negate: true,
+              type: 'mapping' as const,
+            },
+            {
+              field: 'user.name',
+              value: 'threat.indicator.user.name',
+              negate: false,
+              type: 'mapping' as const,
+            },
+          ],
+        },
+        {
+          entries: [
+            {
+              field: 'process.name',
+              value: 'threat.indicator.process.name',
+              negate: false,
+              type: 'mapping' as const,
+            },
+          ],
+        },
+      ]);
+      expect(result).toBe(
+        '((host.name DOES NOT MATCH threat.indicator.host.name) AND (user.name MATCHES threat.indicator.user.name)) OR (process.name MATCHES threat.indicator.process.name)'
+      );
     });
   });
 });

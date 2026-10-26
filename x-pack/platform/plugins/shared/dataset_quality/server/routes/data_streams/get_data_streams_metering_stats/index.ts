@@ -6,10 +6,10 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { reduceAsyncChunks } from '../../../utils/reduce_async_chunks';
+import { processAsyncInChunks } from '../../../utils/process_async_in_chunks';
 
 export interface MeteringStatsResponse {
-  datastreams: Array<{
+  datastreams?: Array<{
     name: string;
     num_docs: number;
     size_in_bytes: number;
@@ -27,7 +27,7 @@ export async function getDataStreamsMeteringStats({
     return {};
   }
 
-  const { datastreams: dataStreamsStats } = await reduceAsyncChunks(
+  const { datastreams: dataStreamsStats } = await processAsyncInChunks(
     dataStreams,
     (dataStreamsChunk) =>
       esClient.transport.request<MeteringStatsResponse>({
@@ -36,14 +36,12 @@ export async function getDataStreamsMeteringStats({
       })
   );
 
-  return dataStreamsStats.reduce(
-    (acc, dataStream) => ({
-      ...acc,
-      [dataStream.name]: {
-        sizeBytes: dataStream.size_in_bytes,
-        totalDocs: dataStream.num_docs,
-      },
-    }),
-    {}
-  );
+  // Mutate one record so the cost stays linear in the number of data streams.
+  const statsByName: Record<string, { size?: string; sizeBytes: number; totalDocs: number }> = {};
+
+  for (const { name, size_in_bytes: sizeBytes, num_docs: totalDocs } of dataStreamsStats ?? []) {
+    statsByName[name] = { sizeBytes, totalDocs };
+  }
+
+  return statsByName;
 }

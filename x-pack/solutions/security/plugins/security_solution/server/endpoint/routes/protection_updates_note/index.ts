@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { IRouter } from '@kbn/core/server';
 import { getProtectionUpdatesNoteHandler, postProtectionUpdatesNoteHandler } from './handlers';
 import {
   GetProtectionUpdatesNoteSchema,
@@ -13,10 +12,11 @@ import {
 } from '../../../../common/api/endpoint/protection_updates_note';
 import { withEndpointAuthz } from '../with_endpoint_authz';
 import { PROTECTION_UPDATES_NOTE_ROUTE } from '../../../../common/endpoint/constants';
+import type { SecuritySolutionPluginRouter } from '../../../types';
 import type { EndpointAppContext } from '../../types';
 
 export function registerProtectionUpdatesNoteRoutes(
-  router: IRouter,
+  router: SecuritySolutionPluginRouter,
   endpointAppContext: EndpointAppContext
 ) {
   const logger = endpointAppContext.logFactory.get('protectionUpdatesNote');
@@ -30,7 +30,6 @@ export function registerProtectionUpdatesNoteRoutes(
           requiredPrivileges: ['securitySolution'],
         },
       },
-      options: { authRequired: true },
     })
     .addVersion(
       {
@@ -42,7 +41,7 @@ export function registerProtectionUpdatesNoteRoutes(
       withEndpointAuthz(
         { all: ['canWritePolicyManagement'] },
         logger,
-        postProtectionUpdatesNoteHandler()
+        postProtectionUpdatesNoteHandler(endpointAppContext)
       )
     );
 
@@ -55,7 +54,6 @@ export function registerProtectionUpdatesNoteRoutes(
           requiredPrivileges: ['securitySolution'],
         },
       },
-      options: { authRequired: true },
     })
     .addVersion(
       {
@@ -67,7 +65,7 @@ export function registerProtectionUpdatesNoteRoutes(
       withEndpointAuthz(
         { all: ['canReadPolicyManagement'] },
         logger,
-        getProtectionUpdatesNoteHandler()
+        getProtectionUpdatesNoteHandler(endpointAppContext)
       )
     );
 }

@@ -9,7 +9,7 @@
 
 import React, { useEffect, useState, useCallback } from 'react';
 
-import { VisEditorOptionsProps } from '@kbn/visualizations-plugin/public';
+import type { VisEditorOptionsProps } from '@kbn/visualizations-plugin/public';
 
 export interface ValidationVisOptionsProps<T> extends VisEditorOptionsProps<T> {
   setMultipleValidity(paramName: string, isValid: boolean): void;

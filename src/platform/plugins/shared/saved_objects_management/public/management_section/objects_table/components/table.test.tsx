@@ -14,7 +14,8 @@ import { keys } from '@elastic/eui';
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import { actionServiceMock } from '../../../services/action_service.mock';
 import { columnServiceMock } from '../../../services/column_service.mock';
-import { Table, TableProps } from './table';
+import type { TableProps } from './table';
+import { Table } from './table';
 import { render, screen, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 
@@ -161,7 +162,7 @@ describe('Table', () => {
         id: 'someAction',
         render: () => <div>action!</div>,
         refreshOnFinish: () => true,
-        euiAction: { name: 'foo', description: 'bar', icon: 'beaker', type: 'icon' },
+        euiAction: { name: 'foo', description: 'bar', icon: 'flask', type: 'icon' },
         registerOnFinishCallback: (callback: Function) => callback(), // call the callback immediately for this test
         setActionContext: () => null,
       } as any,

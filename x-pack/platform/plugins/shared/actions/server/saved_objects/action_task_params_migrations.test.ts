@@ -12,21 +12,18 @@ import type { SavedObjectReference, SavedObjectUnsanitizedDoc } from '@kbn/core/
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { migrationMocks } from '@kbn/core/server/mocks';
 import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
+import { createMockInMemoryConnector } from '../application/connector/mocks';
 
 const context = migrationMocks.createContext();
 const encryptedSavedObjectsSetup = encryptedSavedObjectsMock.createSetup();
 
 const inMemoryConnectors = [
-  {
+  createMockInMemoryConnector({
     actionTypeId: 'foo',
-    config: {},
     id: 'my-slack1',
     name: 'Slack #xyz',
-    secrets: {},
     isPreconfigured: true,
-    isDeprecated: false,
-    isSystemAction: false,
-  },
+  }),
 ];
 
 describe('successful migrations', () => {
@@ -375,7 +372,7 @@ describe('handles errors during migrations', () => {
       const actionTaskParam = getMockData();
       expect(() => {
         migration716(actionTaskParam, context);
-      }).toThrowError(`Can't migrate!`);
+      }).toThrow(`Can't migrate!`);
       expect(context.log.error).toHaveBeenCalledWith(
         `encryptedSavedObject 7.16.0 migration failed for action task param ${actionTaskParam.id} with error: Can't migrate!`,
         {

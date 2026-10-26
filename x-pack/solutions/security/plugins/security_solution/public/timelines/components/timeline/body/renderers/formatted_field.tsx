@@ -11,8 +11,10 @@ import type { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { isEmpty, isNumber } from 'lodash/fp';
 import React from 'react';
-import { css } from '@emotion/css';
+import { css } from '@emotion/react';
 import type { FieldSpec } from '@kbn/data-plugin/common';
+import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
+import type { TimelineNonEcsData } from '@kbn/timelines-plugin/common';
 import { EntityTypeToIdentifierField } from '../../../../../../common/entity_analytics/types';
 import { getAgentTypeForAgentIdField } from '../../../../../common/lib/endpoint/utils/get_agent_type_for_agent_id_field';
 import {
@@ -43,6 +45,7 @@ import {
   SIGNAL_STATUS_FIELD_NAME,
 } from './constants';
 import { renderEventModule, RenderRuleName, renderUrl } from './formatted_field_helpers';
+import type { FlyoutOrigin } from '../../../../../common/lib/telemetry';
 import { RuleStatus } from './rule_status';
 import { HostName } from './host_name';
 import { UserName } from './user_name';
@@ -76,6 +79,12 @@ const FormattedFieldValueComponent: React.FC<{
   truncate?: boolean;
   value: string | number | undefined | null;
   linkValue?: string | null | undefined;
+  data?: TimelineNonEcsData[];
+  /**
+   * Which UI surface this is rendered in, for telemetry on fields that open a flyout (e.g. rule
+   * name). Forwarded to `RenderRuleName`; defaults to `table_field_link` there.
+   */
+  origin?: FlyoutOrigin;
 }> = ({
   asPlainText,
   Component,
@@ -95,7 +104,11 @@ const FormattedFieldValueComponent: React.FC<{
   truncate = true,
   value,
   linkValue,
+  data,
+  origin,
 }) => {
+  const euidApi = useEntityStoreEuidApi();
+
   if (isObjectArray || asPlainText) {
     return <span data-test-subj={`formatted-field-${fieldName}`}>{value}</span>;
   } else if (fieldType === IP_FIELD_TYPE) {
@@ -119,7 +132,7 @@ const FormattedFieldValueComponent: React.FC<{
         fieldName={fieldName}
         value={value}
         tooltipProps={
-          isUnifiedDataTable ? undefined : { position: 'bottom', className: dataGridToolTipOffset }
+          isUnifiedDataTable ? undefined : { position: 'bottom', css: dataGridToolTipOffset }
         }
       />
     );
@@ -130,6 +143,13 @@ const FormattedFieldValueComponent: React.FC<{
   } else if (fieldName === EVENT_DURATION_FIELD_NAME) {
     return <Duration fieldName={fieldName} value={`${value}`} />;
   } else if (fieldName === EntityTypeToIdentifierField.host) {
+    const entityId =
+      data && euidApi?.euid
+        ? euidApi.euid.getEuidFromTimelineNonEcsData(
+            euidApi.getBuiltInEntityDefinition('host'),
+            data
+          )
+        : undefined;
     return (
       <HostName
         Component={Component}
@@ -138,9 +158,17 @@ const FormattedFieldValueComponent: React.FC<{
         onClick={onClick}
         title={title}
         value={value}
+        entityId={entityId}
       />
     );
   } else if (fieldName === EntityTypeToIdentifierField.user) {
+    const entityId =
+      data && euidApi?.euid
+        ? euidApi.euid.getEuidFromTimelineNonEcsData(
+            euidApi.getBuiltInEntityDefinition('user'),
+            data
+          )
+        : undefined;
     return (
       <UserName
         Component={Component}
@@ -149,9 +177,17 @@ const FormattedFieldValueComponent: React.FC<{
         onClick={onClick}
         title={title}
         value={value}
+        entityId={entityId}
       />
     );
   } else if (fieldName === EntityTypeToIdentifierField.service) {
+    const entityId =
+      data && euidApi?.euid
+        ? euidApi.euid.getEuidFromTimelineNonEcsData(
+            euidApi.getBuiltInEntityDefinition('service'),
+            data
+          )
+        : undefined;
     return (
       <ServiceName
         Component={Component}
@@ -160,6 +196,7 @@ const FormattedFieldValueComponent: React.FC<{
         onClick={onClick}
         title={title}
         value={value}
+        entityId={entityId}
       />
     );
   } else if (fieldFormat === BYTES_FORMAT) {
@@ -175,6 +212,7 @@ const FormattedFieldValueComponent: React.FC<{
         title={title}
         truncate={truncate}
         value={value}
+        origin={origin}
       />
     );
   } else if (fieldName === EVENT_MODULE_FIELD_NAME) {
@@ -189,7 +227,7 @@ const FormattedFieldValueComponent: React.FC<{
         value={value}
         onClick={onClick}
         onClickAriaLabel={onClickAriaLabel}
-        iconType={isButton ? 'arrowDown' : undefined}
+        iconType={isButton ? 'chevronSingleDown' : undefined}
         iconSide={isButton ? 'right' : undefined}
       />
     );
@@ -227,7 +265,7 @@ const FormattedFieldValueComponent: React.FC<{
         <EuiToolTip
           data-test-subj="message-tool-tip"
           position="bottom"
-          className={dataGridToolTipOffset}
+          css={dataGridToolTipOffset}
           content={
             <EuiFlexGroup direction="column" gutterSize="none">
               <EuiFlexItem grow={false}>
@@ -239,7 +277,9 @@ const FormattedFieldValueComponent: React.FC<{
             </EuiFlexGroup>
           }
         >
-          <span data-test-subj={`formatted-field-${fieldName}`}>{value}</span>
+          <span tabIndex={0} data-test-subj={`formatted-field-${fieldName}`}>
+            {value}
+          </span>
         </EuiToolTip>
       </TruncatableText>
     ) : (

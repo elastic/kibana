@@ -11,14 +11,13 @@ const Path = require('path');
 const webpack = require('webpack');
 const { NodeLibsBrowserPlugin } = require('@kbn/node-libs-browser-webpack-plugin');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
-const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
 const UiSharedDepsNpm = require('.');
 
 const MOMENT_SRC = require.resolve('moment/min/moment-with-locales.js');
 const WEBPACK_SRC = require.resolve('webpack');
 
-const REPO_ROOT = Path.resolve(__dirname, '..', '..', '..', '..', '..');
+const { REPO_ROOT } = require('@kbn/repo-info');
 
 /** @returns {import('webpack').Configuration} */
 module.exports = (_, argv) => {
@@ -33,19 +32,22 @@ module.exports = (_, argv) => {
       'kbn-ui-shared-deps-npm': [
         // polyfill code
         'core-js/stable',
-        'whatwg-fetch',
         'symbol-observable',
         // Parts of node-libs-browser that are used in many places across Kibana
         'buffer',
         'punycode',
         'util',
+        'url',
+        'qs',
 
         /**
-         * babel runtime helpers referenced from entry chunks
-         * determined by running:
+         * babel runtime helpers referenced from entry chunks, derived from
+         * bundle stats:
          *
-         *  node scripts/build_kibana_platform_plugins --dist --profile
-         *  node scripts/find_babel_runtime_helpers_in_use.js
+         *  node scripts/build_kibana_platform_plugins --dist --profile-stats-only
+         *
+         * then inspect target/public/bundles/stats.json for
+         * @babel/runtime/helpers modules.
          */
         '@babel/runtime/helpers/assertThisInitialized',
         '@babel/runtime/helpers/classPrivateFieldGet',
@@ -59,30 +61,35 @@ module.exports = (_, argv) => {
         // modules from npm
         '@elastic/apm-rum-core',
         '@elastic/charts',
+        '@elastic/esql',
+        '@elastic/esql/types',
         '@elastic/eui',
         '@elastic/eui/optimize/es/components/provider/nested',
         '@elastic/eui/optimize/es/services/theme/warning',
-        '@elastic/eui/dist/eui_theme_amsterdam_light.json',
-        '@elastic/eui/dist/eui_theme_amsterdam_dark.json',
-        '@elastic/eui/dist/eui_theme_borealis_light.json',
-        '@elastic/eui/dist/eui_theme_borealis_dark.json',
+        '@elastic/eui-theme-borealis/lib/eui_theme_borealis_light.json',
+        '@elastic/eui-theme-borealis/lib/eui_theme_borealis_dark.json',
         '@elastic/eui-theme-borealis',
         '@elastic/numeral',
         '@emotion/cache',
         '@emotion/react',
+        '@emotion/react/jsx-runtime',
+        '@emotion/react/jsx-dev-runtime',
         '@hello-pangea/dnd/dist/dnd.js',
         '@reduxjs/toolkit',
         'redux',
         'react-redux',
         'immer',
+        'redux-toolkit-v1',
+        'redux-v4',
+        'react-redux-v7',
+        'reselect-v4',
         '@tanstack/react-query',
         '@tanstack/react-query-devtools',
         'classnames',
-        'fflate',
         'fastest-levenshtein',
         'history',
+        'fp-ts',
         'io-ts',
-        'jquery',
         'lodash',
         'lodash/fp',
         'moment-timezone/moment-timezone',
@@ -91,7 +98,6 @@ module.exports = (_, argv) => {
         'react-dom',
         'react-dom/server',
         'react-router-dom',
-        'react-router-dom-v5-compat',
         'react-router',
         'react',
         'reselect',
@@ -99,6 +105,7 @@ module.exports = (_, argv) => {
         'styled-components',
         'tslib',
         'uuid',
+        'zod/v4',
       ],
     },
     context: __dirname,
@@ -115,23 +122,6 @@ module.exports = (_, argv) => {
 
     module: {
       noParse: [MOMENT_SRC, WEBPACK_SRC],
-      rules: [
-        {
-          include: [require.resolve('jquery')],
-          use: [
-            {
-              loader: UiSharedDepsNpm.publicPathLoader,
-              options: {
-                key: 'kbn-ui-shared-deps-npm',
-              },
-            },
-          ],
-        },
-        {
-          test: /\.css$/,
-          use: [MiniCssExtractPlugin.loader, 'css-loader'],
-        },
-      ],
     },
 
     resolve: {
@@ -142,6 +132,16 @@ module.exports = (_, argv) => {
         // https://gist.github.com/bvaughn/25e6233aeb1b4f0cdb8d8366e54a3977#webpack-4
         'react-dom$': 'react-dom/profiling',
         'scheduler/tracing': 'scheduler/tracing-profiling',
+        // NOTE: We use this to make sure that buffer and punycode bundled are the ones
+        // installed from node-stdlib-browser and are in sync in between shared deps and plugins bundles
+        buffer: [
+          Path.resolve(REPO_ROOT, 'node_modules/node-stdlib-browser/node_modules/buffer'),
+          require.resolve('buffer'),
+        ],
+        punycode: [
+          Path.resolve(REPO_ROOT, 'node_modules/node-stdlib-browser/node_modules/punycode'),
+          require.resolve('punycode'),
+        ],
       },
       extensions: ['.js', '.ts'],
       mainFields: ['browser', 'module', 'main'],
@@ -162,23 +162,28 @@ module.exports = (_, argv) => {
       hints: false,
     },
 
+    // make Webpack listen to `node_modules/@elastic/eui*` changes
+    watchOptions: {
+      ignored: /[\\/]node_modules[\\/](?!@elastic[\\/]eui)/,
+    },
+
+    // disabling cache doesn't impact performance for regular Kibana users
+    // but it's needed for when running the watcher to watch for changes in `node_modules/@elastic/eui*`
+    cache: false,
+
     plugins: [
       new NodeLibsBrowserPlugin(),
-      new CleanWebpackPlugin({
-        protectWebpackAssets: false,
-        cleanAfterEveryBuildPatterns: [
-          'kbn-ui-shared-deps-npm.v8.{dark,light}.{dll.js,dll.js.map}',
-          'kbn-ui-shared-deps-npm.v8.{dark,light}-manifest.json',
-        ],
-      }),
-      new MiniCssExtractPlugin({
-        filename: '[name].css',
-      }),
+      new CleanWebpackPlugin(),
       new webpack.DllPlugin({
         context: REPO_ROOT,
         entryOnly: false,
         path: Path.resolve(outputPath, '[name]-manifest.json'),
         name: '__kbnSharedDeps_npm__',
+      }),
+      // adds a useful comment at the top of the DLL for debugging
+      new webpack.BannerPlugin({
+        banner: `/* Build: ${new Date().toLocaleString()} */`,
+        raw: true,
       }),
     ],
   };

@@ -6,13 +6,14 @@
  */
 
 import React, { useState } from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 
 import { canUserWrite as canUserWriteSelector } from '../../../state/selectors/app';
 import type { State } from '../../../../types';
 
 import { useImportWorkpad } from '../hooks';
-import { WorkpadImport as Component, Props as ComponentProps } from './workpad_import.component';
+import type { Props as ComponentProps } from './workpad_import.component';
+import { WorkpadImport as Component } from './workpad_import.component';
 
 type Props = Omit<ComponentProps, 'canUserWrite' | 'onImportWorkpad'>;
 

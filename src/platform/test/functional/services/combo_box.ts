@@ -8,7 +8,7 @@
  */
 
 import expect from '@kbn/expect';
-import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
+import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrService } from '../ftr_provider_context';
 
 /**
@@ -30,12 +30,30 @@ export class ComboBoxService extends FtrService {
    *
    * @param comboBoxSelector data-test-subj selector
    * @param value option text
+   * @param options optional configuration
+   * @param options.timeout optional timeout for retrying the selection
    */
 
-  public async set(comboBoxSelector: string, value: string): Promise<void> {
-    this.log.debug(`comboBox.set, comboBoxSelector: ${comboBoxSelector}`);
-    const comboBox = await this.testSubjects.find(comboBoxSelector);
-    await this.setElement(comboBox, value);
+  public async set(
+    comboBoxSelector: string,
+    value: string,
+    options: { timeout?: number } = {}
+  ): Promise<void> {
+    const { timeout } = options;
+    this.log.debug(`comboBox.set, comboBoxSelector: ${comboBoxSelector}, timeout: ${timeout}`);
+    if (timeout === undefined) {
+      const comboBox = await this.testSubjects.find(comboBoxSelector);
+      await this.setElement(comboBox, value);
+    } else {
+      await this.retry.tryForTime(
+        timeout,
+        async () => {
+          const comboBox = await this.testSubjects.find(comboBoxSelector);
+          await this.setElement(comboBox, value);
+        },
+        { description: `comboBox.set, comboBoxSelector: ${comboBoxSelector}`, retryDelay: 1000 }
+      );
+    }
   }
 
   public async setForLastInput(comboBoxSelector: string, value: string): Promise<void> {
@@ -47,16 +65,63 @@ export class ComboBoxService extends FtrService {
   }
 
   /**
-   * Clicks option in combobox dropdown
+   * Clicks the option matching `trimmedValue` in the combobox dropdown
    *
    * @param isMouseClick if 'true', click will be done with mouse
-   * @param element element that wraps up option
+   * @param trimmedValue normalized option text to match; when undefined, the first option is clicked
    */
-  private async clickOption(isMouseClick: boolean, element: WebElementWrapper): Promise<void> {
-    // element.click causes scrollIntoView which causes combobox to close, using _webElement.click instead
+  private async clickOption(isMouseClick: boolean, trimmedValue?: string): Promise<void> {
+    // Re-resolve the option element on each attempt: dynamic-options comboboxes re-render their
+    // option list, staling a captured element handle so that re-clicking a fixed reference can
+    // never recover. Finding the option inside the retry turns a stale element into a retryable error.
     await this.retry.try(async () => {
+      const element = await this.findOption(trimmedValue);
+      // element.click causes scrollIntoView which causes combobox to close, using _webElement.click instead
       return isMouseClick ? await element.clickMouseButton() : await element._webElement.click();
     });
+  }
+
+  /**
+   * Finds the option element matching `trimmedValue` in the currently open combobox dropdown
+   *
+   * @param trimmedValue normalized option text to match; when undefined, the first option is returned
+   */
+  private async findOption(trimmedValue?: string): Promise<WebElementWrapper> {
+    if (trimmedValue === undefined) {
+      return await this.find.byCssSelector('.euiComboBoxOption');
+    }
+
+    // Find options by visible text content.
+    const optionsWithText = await Promise.all(
+      (
+        await this.find.allByCssSelector(`.euiComboBoxOption`, this.WAIT_FOR_EXISTS_TIME)
+      ).map(async (e) => {
+        const text = (await e.getVisibleText()) ?? '';
+        return { element: e, text, formattedText: text.toLowerCase().trim() };
+      })
+    );
+
+    const exactMatch = optionsWithText.find(({ formattedText }) => formattedText === trimmedValue);
+    if (exactMatch) {
+      return exactMatch.element;
+    }
+
+    // Fall back to a case-insensitive match (any option whose text equals
+    // the requested value when normalized).
+    const alternate = optionsWithText.find(
+      ({ formattedText }) =>
+        formattedText.toLowerCase() === trimmedValue.toLowerCase() && formattedText !== ''
+    );
+    if (alternate) {
+      this.log.warning(
+        `comboBox.setElement - Found similar option [${alternate.text}] not [${trimmedValue}]`
+      );
+      return alternate.element;
+    }
+
+    // if it doesn't find the item which text starts with value, it will choose the first option
+    this.log.warning(`comboBox.setElement - Could not find option [${trimmedValue}], using first`);
+    return await this.find.byCssSelector('.euiComboBoxOption', 5000);
   }
 
   /**
@@ -67,7 +132,7 @@ export class ComboBoxService extends FtrService {
   public async getOptions(comboBoxSelector: string) {
     const comboBoxElement = await this.testSubjects.find(comboBoxSelector);
     await this.openOptionsList(comboBoxElement);
-    return await this.find.allByCssSelector('.euiFilterSelectItem', this.WAIT_FOR_EXISTS_TIME);
+    return await this.find.allByCssSelector('.euiComboBoxOption', this.WAIT_FOR_EXISTS_TIME);
   }
 
   /**
@@ -94,54 +159,7 @@ export class ComboBoxService extends FtrService {
     await this.setFilterValue(comboBoxElement, value);
     await this.openOptionsList(comboBoxElement);
 
-    if (trimmedValue !== undefined) {
-      const selectOptions = await this.find.allByCssSelector(
-        `.euiFilterSelectItem[title="${trimmedValue}"]`,
-        this.WAIT_FOR_EXISTS_TIME
-      );
-
-      if (selectOptions.length > 0) {
-        await this.clickOption(options.clickWithMouse, selectOptions[0]);
-      } else {
-        // Try to find alternate title casing
-        const alternateTitle = (
-          await Promise.all(
-            (
-              await this.find.allByCssSelector(`.euiFilterSelectItem`, this.WAIT_FOR_EXISTS_TIME)
-            ).map(async (e) => {
-              const title = (await e.getAttribute('title')) ?? '';
-              return { title, formattedTitle: title.toLowerCase().trim() };
-            })
-          )
-        ).find(({ formattedTitle }) => {
-          return formattedTitle === trimmedValue;
-        })?.title;
-
-        const [alternate] = alternateTitle
-          ? await this.find.allByCssSelector(
-              `.euiFilterSelectItem[title="${alternateTitle}" i]`,
-              this.WAIT_FOR_EXISTS_TIME
-            )
-          : [];
-
-        if (alternate) {
-          this.log.warning(
-            `comboBox.setElement - Found similar option [${alternateTitle}] not [${trimmedValue}]`
-          );
-          await this.clickOption(options.clickWithMouse, alternate);
-        } else {
-          // if it doesn't find the item which text starts with value, it will choose the first option
-          this.log.warning(
-            `comboBox.setElement - Could not find option [${trimmedValue}], using first`
-          );
-          const firstOption = await this.find.byCssSelector('.euiFilterSelectItem', 5000);
-          await this.clickOption(options.clickWithMouse, firstOption);
-        }
-      }
-    } else {
-      const firstOption = await this.find.byCssSelector('.euiFilterSelectItem');
-      await this.clickOption(options.clickWithMouse, firstOption);
-    }
+    await this.clickOption(options.clickWithMouse, trimmedValue);
     await this.closeOptionsList(comboBoxElement);
   }
 
@@ -184,11 +202,10 @@ export class ComboBoxService extends FtrService {
     comboBoxElement: WebElementWrapper,
     filterValue: string
   ): Promise<void> {
-    const input = await comboBoxElement.findByTagName('input');
-
+    // Re-resolve the input on each attempt: combobox re-renders, staling a captured
+    // handle so that retrying type on a fixed reference cannot recover.
     await this.retry.try(async () => {
-      // Wait for the input to not be disabled before typing into it (otherwise
-      // typing will sometimes trigger the global search bar instead)
+      const input = await comboBoxElement.findByTagName('input');
       expect(await input.isEnabled()).to.equal(true);
 
       // Some Kibana comboboxes force state to not be clearable, so we can't use `input.clearValue()`.
@@ -329,12 +346,31 @@ export class ComboBoxService extends FtrService {
    */
   public async closeOptionsList(comboBoxElement: WebElementWrapper): Promise<void> {
     this.log.debug('comboBox.closeOptionsList');
-    const isOptionsListOpen = await this.testSubjects.exists('~comboBoxOptionsList', {
-      timeout: 50,
-    });
-    if (isOptionsListOpen) {
-      const input = await comboBoxElement.findByTagName('input');
-      await input.pressKeys(this.browser.keys.ESCAPE);
+
+    // wait for potential other animations to finish (e.g. due to closing on selection)
+    const isOptionListClosed = await this.retry.tryForTime(
+      5000,
+      async () => {
+        // Unlike the options list panel, the input is not remounted while the list re-renders.
+        const input = await comboBoxElement.findByTagName('input');
+        const isOpen = (await input.getAttribute('aria-expanded')) === 'true';
+
+        return !isOpen;
+      },
+      {
+        description: 'wait for possible ongoing closing of the combobox listbox',
+        initialDelay: 500,
+      }
+    );
+
+    if (!isOptionListClosed) {
+      // The input may be temporarily disabled or re-rendered (e.g. an auto-save triggered by a
+      // just-committed value), so re-resolve it on each attempt and verify the list is gone.
+      await this.retry.try(async () => {
+        const input = await comboBoxElement.findByTagName('input');
+        await input.pressKeys(this.browser.keys.ESCAPE);
+        await this.testSubjects.missingOrFail('~comboBoxOptionsList', { timeout: 1000 });
+      });
     }
   }
 
@@ -345,9 +381,7 @@ export class ComboBoxService extends FtrService {
    */
   public async openOptionsList(comboBoxElement: WebElementWrapper): Promise<void> {
     this.log.debug('comboBox.openOptionsList');
-    const isOptionsListOpen = await this.testSubjects.exists('~comboBoxOptionsList', {
-      timeout: 50,
-    });
+    const isOptionsListOpen = await this.testSubjects.exists('~comboBoxOptionsList');
 
     if (!isOptionsListOpen) {
       await this.retry.try(async () => {

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Stream } from 'stream';
+import type { Stream } from 'stream';
 import type {
   IKibanaResponse,
   HttpResponsePayload,
@@ -24,7 +24,7 @@ import type {
   KibanaResponseFactory,
   LifecycleResponseFactory,
 } from '@kbn/core-http-server';
-import mime from 'mime';
+import mime from 'mime-types';
 
 /**
  * A response data object, expected to returned as a result of {@link RequestHandler} execution
@@ -103,7 +103,7 @@ export const fileResponseFactory = {
     }
 
     const responseContentType =
-      fileContentType ?? mime.getType(filename) ?? 'application/octet-stream';
+      fileContentType ?? (mime.lookup(filename) || 'application/octet-stream');
     const responseContentLength =
       typeof fileContentSize === 'number'
         ? fileContentSize

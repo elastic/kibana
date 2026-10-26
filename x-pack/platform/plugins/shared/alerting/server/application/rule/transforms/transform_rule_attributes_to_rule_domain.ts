@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { isEmpty } from 'lodash';
 import type { Logger } from '@kbn/core/server';
 import type { SavedObjectReference } from '@kbn/core/server';
+import { migrateLegacyLastRunOutcomeMsg } from '../../../rules_client/lib';
 import { ruleExecutionStatusValues } from '../constants';
 import { getRuleSnoozeEndTime } from '../../../lib';
 import type { RuleDomain, Monitoring, RuleParams } from '../types';
@@ -18,6 +18,7 @@ import {
   transformRawActionsToDomainActions,
   transformRawActionsToDomainSystemActions,
 } from './transform_raw_actions_to_domain_actions';
+import { transformRawArtifactsToDomainArtifacts } from './transform_raw_artifacts_to_domain_artifacts';
 
 const INITIAL_LAST_RUN_METRICS = {
   duration: 0,
@@ -116,8 +117,6 @@ interface TransformEsToRuleParams {
   logger: Logger;
   ruleType: UntypedNormalizedRuleType;
   references?: SavedObjectReference[];
-  includeSnoozeData?: boolean;
-  omitGeneratedValues?: boolean;
 }
 
 export const transformRuleAttributesToRuleDomain = <Params extends RuleParams = never>(
@@ -127,14 +126,7 @@ export const transformRuleAttributesToRuleDomain = <Params extends RuleParams = 
 ): RuleDomain<Params> => {
   const { scheduledTaskId, executionStatus, monitoring, snoozeSchedule, lastRun } = esRule;
 
-  const {
-    id,
-    logger,
-    ruleType,
-    references,
-    includeSnoozeData = false,
-    omitGeneratedValues = true,
-  } = transformParams;
+  const { id, logger, ruleType, references } = transformParams;
 
   const snoozeScheduleDates = snoozeSchedule?.map((s) => ({
     ...s,
@@ -145,20 +137,16 @@ export const transformRuleAttributesToRuleDomain = <Params extends RuleParams = 
     },
   }));
 
-  const includeSnoozeSchedule = snoozeSchedule !== undefined && !isEmpty(snoozeSchedule);
-  const isSnoozedUntil = includeSnoozeSchedule
-    ? getRuleSnoozeEndTime({
-        muteAll: esRule.muteAll ?? false,
-        snoozeSchedule: snoozeSchedule as SanitizedRule<Params>['snoozeSchedule'],
-      })?.toISOString()
-    : null;
+  const isSnoozedUntil = getRuleSnoozeEndTime({
+    muteAll: esRule.muteAll ?? false,
+    snoozeSchedule: snoozeSchedule as SanitizedRule<Params>['snoozeSchedule'],
+  });
 
   const ruleDomainActions: RuleDomain['actions'] = transformRawActionsToDomainActions({
     ruleId: id,
     actions: esRule.actions,
     references,
     isSystemAction,
-    omitGeneratedValues,
   });
   const ruleDomainSystemActions: RuleDomain['systemActions'] =
     transformRawActionsToDomainSystemActions({
@@ -166,9 +154,13 @@ export const transformRuleAttributesToRuleDomain = <Params extends RuleParams = 
       actions: esRule.actions,
       references,
       isSystemAction,
-      omitGeneratedValues,
     });
 
+  const ruleDomainArtifacts = transformRawArtifactsToDomainArtifacts(
+    id,
+    esRule.artifacts,
+    references
+  );
   const params = injectReferencesIntoParams<Params, RuleParams>(
     id,
     ruleType,
@@ -196,44 +188,45 @@ export const transformRuleAttributesToRuleDomain = <Params extends RuleParams = 
     ...(scheduledTaskId ? { scheduledTaskId } : {}),
     createdBy: esRule.createdBy,
     updatedBy: esRule.updatedBy,
+    ...(esRule.createdByProfileUid !== undefined
+      ? { createdByProfileUid: esRule.createdByProfileUid }
+      : {}),
+    ...(esRule.updatedByProfileUid !== undefined
+      ? { updatedByProfileUid: esRule.updatedByProfileUid }
+      : {}),
+    ...(esRule.apiKeyOwnerProfileUid !== undefined
+      ? { apiKeyOwnerProfileUid: esRule.apiKeyOwnerProfileUid }
+      : {}),
     createdAt: new Date(esRule.createdAt),
     updatedAt: new Date(esRule.updatedAt),
     apiKey: esRule.apiKey,
     apiKeyOwner: esRule.apiKeyOwner,
     apiKeyCreatedByUser: esRule.apiKeyCreatedByUser,
+    ...(esRule.uiamApiKey !== undefined ? { uiamApiKey: esRule.uiamApiKey } : {}),
+    ...(esRule.uiamApiKeyExternal !== undefined
+      ? { uiamApiKeyExternal: esRule.uiamApiKeyExternal }
+      : {}),
     throttle: esRule.throttle,
     muteAll: esRule.muteAll,
     notifyWhen: esRule.notifyWhen,
     mutedInstanceIds: esRule.mutedInstanceIds,
+    ...(esRule.snoozedInstances !== undefined ? { snoozedInstances: esRule.snoozedInstances } : {}),
     ...(executionStatus
       ? { executionStatus: transformEsExecutionStatus(logger, id, executionStatus) }
       : {}),
     ...(monitoring ? { monitoring: transformEsMonitoring(logger, id, monitoring) } : {}),
     snoozeSchedule: snoozeScheduleDates ?? [],
-    ...(includeSnoozeData
-      ? {
-          activeSnoozes,
-          ...(isSnoozedUntil !== undefined
-            ? { isSnoozedUntil: isSnoozedUntil ? new Date(isSnoozedUntil) : null }
-            : {}),
-        }
-      : {}),
-    ...(lastRun
-      ? {
-          lastRun: {
-            ...lastRun,
-            ...(lastRun.outcomeMsg && !Array.isArray(lastRun.outcomeMsg)
-              ? { outcomeMsg: lastRun.outcomeMsg ? [lastRun.outcomeMsg] : null }
-              : { outcomeMsg: lastRun.outcomeMsg }),
-          },
-        }
-      : {}),
+    activeSnoozes,
+    isSnoozedUntil,
+    ...(lastRun ? { lastRun: migrateLegacyLastRunOutcomeMsg(lastRun) } : {}),
     ...(esRule.nextRun ? { nextRun: new Date(esRule.nextRun) } : {}),
+    ...(esRule.lastEnabledAt ? { lastEnabledAt: new Date(esRule.lastEnabledAt) } : {}),
     revision: esRule.revision,
     running: esRule.running,
     ...(esRule.alertDelay ? { alertDelay: esRule.alertDelay } : {}),
     ...(esRule.legacyId !== undefined ? { legacyId: esRule.legacyId } : {}),
     ...(esRule.flapping !== undefined ? { flapping: esRule.flapping } : {}),
+    artifacts: ruleDomainArtifacts,
   };
 
   // Bad casts, but will fix once we fix all rule types

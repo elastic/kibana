@@ -4,15 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { sha256 } from 'js-sha256';
 import { i18n } from '@kbn/i18n';
 import type { CoreSetup } from '@kbn/core/server';
-import { getEcsGroups } from '@kbn/alerting-rule-utils';
-import { isGroupAggregation, UngroupedGroupId } from '@kbn/triggers-actions-ui-plugin/common';
+import { getEcsGroupsFromFlattenGrouping } from '@kbn/alerting-rule-utils';
+import {
+  isGroupAggregation,
+  isPerRowAggregation,
+  UngroupedGroupId,
+} from '@kbn/triggers-actions-ui-plugin/common';
 import {
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
+  ALERT_GROUPING,
   ALERT_REASON,
   ALERT_URL,
 } from '@kbn/rule-data-utils';
@@ -21,6 +24,7 @@ import { AlertsClientError } from '@kbn/alerting-plugin/server';
 import type { EsQueryRuleParams } from '@kbn/response-ops-rule-params/es_query';
 
 import { ComparatorFns } from '@kbn/response-ops-rule-params/common';
+import { unflattenObject } from '@kbn/object-utils';
 import type { EsQueryRuleActionContext } from './action_context';
 import { addMessages, getContextConditionsDescription } from './action_context';
 import type {
@@ -28,15 +32,20 @@ import type {
   OnlyEsQueryRuleParams,
   OnlySearchSourceRuleParams,
   OnlyEsqlQueryRuleParams,
+  EsQuerySourceFields,
 } from './types';
-import { ActionGroupId, ConditionMetAlertInstanceId } from './constants';
+import { ActionGroupId, ConditionMetAlertInstanceId } from '../../../common/es_query';
 import { fetchEsQuery } from './lib/fetch_es_query';
 import { fetchSearchSourceQuery } from './lib/fetch_search_source_query';
-import { isEsqlQueryRule, isSearchSourceRule } from './util';
+import { isEsqlQueryRule, isSearchSourceRule, getSourceFieldsFromHit } from './util';
 import { fetchEsqlQuery } from './lib/fetch_esql_query';
 import { ALERT_EVALUATION_CONDITIONS, ALERT_TITLE } from '..';
 
-export async function executor(core: CoreSetup, options: ExecutorOptions<EsQueryRuleParams>) {
+export async function executor(
+  core: CoreSetup,
+  options: ExecutorOptions<EsQueryRuleParams>,
+  sourceFields: EsQuerySourceFields
+) {
   const searchSourceRule = isSearchSourceRule(options.params.searchType);
   const esqlQueryRule = isEsqlQueryRule(options.params.searchType);
   const {
@@ -60,7 +69,8 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
   if (compareFn == null) {
     throw new Error(getInvalidComparatorError(params.thresholdComparator));
   }
-  const isGroupAgg = isGroupAggregation(params.termField);
+  const isGroupAgg =
+    isGroupAggregation(params.termField) || (esqlQueryRule && isPerRowAggregation(params.groupBy));
   // For ungrouped queries, we run the configured query during each rule run, get a hit count
   // and retrieve up to params.size hits. We evaluate the threshold condition using the
   // value of the hit count. If the threshold condition is met, the hits are counted
@@ -87,6 +97,7 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
         },
         dateStart,
         dateEnd,
+        sourceFields,
       })
     : esqlQueryRule
     ? await fetchEsqlQuery({
@@ -98,9 +109,11 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
           share,
           scopedClusterClient,
           logger,
+          ruleResultService,
         },
         dateStart,
         dateEnd,
+        sourceFields,
       })
     : await fetchEsQuery({
         ruleId,
@@ -117,9 +130,14 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
         },
         dateStart,
         dateEnd,
+        sourceFields,
       });
+
   const unmetGroupValues: Record<string, number> = {};
   for (const result of parsedResults.results) {
+    const groupingObject = result.groupingObject
+      ? unflattenObject(result.groupingObject)
+      : undefined;
     const alertId = result.group;
     const value = result.value ?? result.count;
 
@@ -138,6 +156,7 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
       hits: result.hits,
       link,
       sourceFields: result.sourceFields,
+      grouping: groupingObject,
     };
     const baseActiveContext: EsQueryRuleActionContext = {
       ...baseContext,
@@ -160,7 +179,7 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
     });
 
     const id = alertId === UngroupedGroupId && !isGroupAgg ? ConditionMetAlertInstanceId : alertId;
-    const ecsGroups = getEcsGroups(result.groups);
+    const ecsGroups = getEcsGroupsFromFlattenGrouping(result.groupingObject);
 
     alertsClient.report({
       id,
@@ -174,6 +193,7 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
         [ALERT_EVALUATION_CONDITIONS]: actionContext.conditions,
         [ALERT_EVALUATION_VALUE]: `${actionContext.value}`,
         [ALERT_EVALUATION_THRESHOLD]: params.threshold?.length === 1 ? params.threshold[0] : null,
+        [ALERT_GROUPING]: groupingObject,
         ...ecsGroups,
         ...actionContext.sourceFields,
       },
@@ -192,8 +212,12 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
   alertsClient.setAlertLimitReached(parsedResults.truncated);
 
   const { getRecoveredAlerts } = alertsClient;
-  for (const recoveredAlert of getRecoveredAlerts()) {
+
+  const recoveredAlerts = getRecoveredAlerts() ?? [];
+
+  for (const recoveredAlert of recoveredAlerts) {
     const alertId = recoveredAlert.alert.getId();
+
     const baseRecoveryContext: EsQueryRuleActionContext = {
       title: name,
       date: currentTimestamp,
@@ -209,7 +233,8 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
         aggField: params.aggField,
         ...(isGroupAgg ? { group: alertId } : {}),
       }),
-      sourceFields: [],
+      sourceFields: getSourceFieldsFromHit(recoveredAlert.hit, sourceFields),
+      grouping: recoveredAlert.hit?.[ALERT_GROUPING],
     } as EsQueryRuleActionContext;
     const recoveryContext = addMessages({
       ruleName: name,
@@ -251,10 +276,6 @@ export function tryToParseAsDate(sortValue?: string | number | null): undefined 
   if (sortDate && !isNaN(sortDate)) {
     return new Date(sortDate).toISOString();
   }
-}
-
-export function getChecksum(params: OnlyEsQueryRuleParams) {
-  return sha256.create().update(JSON.stringify(params));
 }
 
 export function getInvalidComparatorError(comparator: string) {

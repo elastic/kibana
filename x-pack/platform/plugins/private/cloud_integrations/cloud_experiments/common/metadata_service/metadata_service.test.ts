@@ -46,6 +46,7 @@ describe('MetadataService', () => {
     build_sha: 'abcdefghijklmnopqrstux',
     build_sha_short: 'abcde',
     project_type: 'project-type',
+    product_tier: 'my-product-tier',
     organizationKey: 'organization-id',
     is_elastic_staff: true,
   };
@@ -60,6 +61,7 @@ describe('MetadataService', () => {
       build_sha: 'abcdefghijklmnopqrstux',
       build_sha_short: 'abcde',
       project_type: 'project-type',
+      product_tier: 'my-product-tier',
     },
     organization: {
       key: 'organization-id',
@@ -102,6 +104,20 @@ describe('MetadataService', () => {
         });
       })
     );
+
+    test('accepts inTrial from cloud serverless config', async () => {
+      metadataService.setup({
+        ...initialMetadata,
+        in_trial: true,
+      });
+      await expect(firstValueFrom(metadataService.userMetadata$)).resolves.toStrictEqual({
+        ...multiContextFormat,
+        organization: {
+          ...multiContextFormat.organization,
+          in_trial: true,
+        },
+      });
+    });
   });
 
   describe('start', () => {
@@ -110,7 +126,7 @@ describe('MetadataService', () => {
     });
 
     test(
-      'emits hasData after resolving the `hasUserDataView`',
+      'emits hasData after resolving the `hasDataView`',
       fakeSchedulers(async (advance) => {
         metadataService.start({ hasDataFetcher: async () => ({ has_data: true }) });
 

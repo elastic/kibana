@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Observable } from 'rxjs';
-import { Type } from '@kbn/config-schema';
+import type { Observable } from 'rxjs';
+import type { Type } from '@kbn/config-schema';
 import type { RecursiveReadonly, MaybePromise } from '@kbn/utility-types';
 import type { PathConfigType } from '@kbn/utils';
 import type { LoggerFactory } from '@kbn/logging';
@@ -23,7 +23,7 @@ import type { NodeInfo } from '@kbn/core-node-server';
 import type { ElasticsearchConfigType } from '@kbn/core-elasticsearch-server-internal';
 import type { SavedObjectsConfigType } from '@kbn/core-saved-objects-base-server-internal';
 import type { CorePreboot, CoreSetup, CoreStart } from '@kbn/core-lifecycle-server';
-import { SharedGlobalConfigKeys } from './shared_global_config';
+import type { SharedGlobalConfigKeys } from './shared_global_config';
 type Maybe<T> = T | undefined;
 
 /**
@@ -203,7 +203,7 @@ export interface PluginManifest {
    *
    * @remarks
    * The plugins listed here will be loaded in the browser, even if the plugin is
-   * disabled. Required by `@kbn/optimizer` to support cross-plugin imports.
+   * disabled. Required by `@kbn/rspack-optimizer` to support cross-plugin imports.
    * "core" and plugins already listed in `requiredPlugins` do not need to be
    * duplicated here.
    */
@@ -235,7 +235,7 @@ export interface PluginManifest {
 
   /**
    * Specifies directory names that can be imported by other ui-plugins built
-   * using the same instance of the @kbn/optimizer. A temporary measure we plan
+   * using the same instance of the @kbn/rspack-optimizer. A temporary measure we plan
    * to replace with better mechanisms for sharing static code between plugins
    * @deprecated To be deleted when https://github.com/elastic/kibana/issues/101948 is done.
    */
@@ -325,6 +325,7 @@ export interface PluginInitializerContext<ConfigSchema = unknown> {
     packageInfo: Readonly<PackageInfo>;
     instanceUuid: string;
     configs: readonly string[];
+    airgapped: boolean;
   };
   /**
    * Access the configuration for this particular Kibana node.

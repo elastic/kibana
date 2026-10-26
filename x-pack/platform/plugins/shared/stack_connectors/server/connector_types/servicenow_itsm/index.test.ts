@@ -8,10 +8,11 @@
 import type { Logger } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
-import type { ExecutorParams, ServiceNowPublicConfigurationType } from '../lib/servicenow/types';
+import type { ExecutorParams } from '../lib/servicenow/types';
 import type { ServiceNowConnectorType, ServiceNowConnectorTypeExecutorOptions } from '.';
 import { getServiceNowITSMConnectorType } from '.';
 import { api } from './api';
+import type { ServiceNowPublicConfigurationType } from '@kbn/connector-schemas/servicenow';
 
 jest.mock('./api', () => ({
   api: {
@@ -99,6 +100,30 @@ describe('ServiceNow', () => {
         expect(
           (api.closeIncident as jest.Mock).mock.calls[0][0].params.incident.correlationId
         ).toBe('custom_correlation_id');
+      });
+
+      test('calls getIncident sub action correctly', async () => {
+        const actionId = 'some-action-id';
+        const executorOptions = {
+          actionId,
+          config,
+          secrets,
+          params: {
+            subAction: 'getIncident',
+            subActionParams: {
+              externalId: 'incident-1',
+            },
+          },
+          services,
+          logger: mockedLogger,
+        } as unknown as ServiceNowConnectorTypeExecutorOptions<
+          ServiceNowPublicConfigurationType,
+          ExecutorParams
+        >;
+        await connectorType.executor(executorOptions);
+        expect((api.getIncident as jest.Mock).mock.calls[0][0].params.externalId).toBe(
+          'incident-1'
+        );
       });
     });
   });

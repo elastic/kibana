@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { EuiHorizontalRule } from '@elastic/eui';
 import { Table } from './table';
 import { getAllFields } from './utils';
@@ -21,8 +21,8 @@ export interface MetadataSearchUrlState {
 }
 
 export const Metadata = () => {
-  const [urlState, setUrlState] = useAssetDetailsUrlState();
-  const { overrides, asset } = useAssetDetailsRenderPropsContext();
+  const [urlState] = useAssetDetailsUrlState();
+  const { overrides, entity, schema } = useAssetDetailsRenderPropsContext();
   const {
     metadata,
     loading: metadataLoading,
@@ -30,14 +30,7 @@ export const Metadata = () => {
   } = useMetadataStateContext();
   const { showActionsColumn = false } = overrides?.metadata ?? {};
 
-  const fields = useMemo(() => getAllFields(metadata), [metadata]);
-
-  const onSearchChange = useCallback(
-    (newQuery: string) => {
-      setUrlState({ metadataSearch: newQuery });
-    },
-    [setUrlState]
-  );
+  const fields = useMemo(() => getAllFields(metadata, schema), [metadata, schema]);
 
   if (fetchMetadataError && !metadataLoading) {
     return <MetadataErrorCallout />;
@@ -45,11 +38,10 @@ export const Metadata = () => {
 
   return (
     <>
-      <MetadataExplanationMessage assetType={asset.type} />
+      <MetadataExplanationMessage entityType={entity.type} schema={schema} />
       <EuiHorizontalRule margin="m" />
       <Table
         search={urlState?.metadataSearch}
-        onSearchChange={onSearchChange}
         showActionsColumn={showActionsColumn}
         rows={fields}
         loading={metadataLoading}

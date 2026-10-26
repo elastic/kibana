@@ -12,50 +12,56 @@ export const expectCasesToHaveTheCorrectAlertsAttachedWithGrouping = (
 ) => {
   expect(casesClientMock.attachments.bulkCreate).toHaveBeenCalledTimes(3);
 
-  expect(casesClientMock.attachments.bulkCreate).nthCalledWith(1, {
+  expect(casesClientMock.attachments.bulkCreate).toHaveBeenNthCalledWith(1, {
     caseId: 'mock-id-1',
     attachments: [
       {
-        alertId: ['alert-id-0', 'alert-id-2'],
-        index: ['alert-index-0', 'alert-index-2'],
-        owner: 'securitySolution',
-        rule: {
-          id: 'rule-test-id',
-          name: 'Test rule',
+        attachmentId: ['alert-id-0', 'alert-id-2'],
+        metadata: {
+          index: ['alert-index-0', 'alert-index-2'],
+          rule: {
+            id: 'rule-test-id',
+            name: 'Test rule',
+          },
         },
-        type: 'alert',
+        owner: 'securitySolution',
+        type: 'security.alert',
       },
     ],
   });
 
-  expect(casesClientMock.attachments.bulkCreate).nthCalledWith(2, {
+  expect(casesClientMock.attachments.bulkCreate).toHaveBeenNthCalledWith(2, {
     caseId: 'mock-id-2',
     attachments: [
       {
-        alertId: ['alert-id-1'],
-        index: ['alert-index-1'],
-        owner: 'securitySolution',
-        rule: {
-          id: 'rule-test-id',
-          name: 'Test rule',
+        attachmentId: ['alert-id-1'],
+        metadata: {
+          index: ['alert-index-1'],
+          rule: {
+            id: 'rule-test-id',
+            name: 'Test rule',
+          },
         },
-        type: 'alert',
+        owner: 'securitySolution',
+        type: 'security.alert',
       },
     ],
   });
 
-  expect(casesClientMock.attachments.bulkCreate).nthCalledWith(3, {
+  expect(casesClientMock.attachments.bulkCreate).toHaveBeenNthCalledWith(3, {
     caseId: 'mock-id-3',
     attachments: [
       {
-        alertId: ['alert-id-3'],
-        index: ['alert-index-3'],
-        owner: 'securitySolution',
-        rule: {
-          id: 'rule-test-id',
-          name: 'Test rule',
+        attachmentId: ['alert-id-3'],
+        metadata: {
+          index: ['alert-index-3'],
+          rule: {
+            id: 'rule-test-id',
+            name: 'Test rule',
+          },
         },
-        type: 'alert',
+        owner: 'securitySolution',
+        type: 'security.alert',
       },
     ],
   });
@@ -66,50 +72,110 @@ export const expectCasesToHaveTheCorrectAlertsAttachedWithGroupingAndIncreasedCo
 ) => {
   expect(casesClientMock.attachments.bulkCreate).toHaveBeenCalledTimes(3);
 
-  expect(casesClientMock.attachments.bulkCreate).nthCalledWith(1, {
+  expect(casesClientMock.attachments.bulkCreate).toHaveBeenNthCalledWith(1, {
     caseId: 'mock-id-1',
     attachments: [
       {
-        alertId: ['alert-id-1'],
-        index: ['alert-index-1'],
-        owner: 'securitySolution',
-        rule: {
-          id: 'rule-test-id',
-          name: 'Test rule',
+        attachmentId: ['alert-id-1'],
+        metadata: {
+          index: ['alert-index-1'],
+          rule: {
+            id: 'rule-test-id',
+            name: 'Test rule',
+          },
         },
-        type: 'alert',
+        owner: 'securitySolution',
+        type: 'security.alert',
       },
     ],
   });
 
-  expect(casesClientMock.attachments.bulkCreate).nthCalledWith(2, {
+  expect(casesClientMock.attachments.bulkCreate).toHaveBeenNthCalledWith(2, {
     caseId: 'mock-id-2',
     attachments: [
       {
-        alertId: ['alert-id-3'],
-        index: ['alert-index-3'],
-        owner: 'securitySolution',
-        rule: {
-          id: 'rule-test-id',
-          name: 'Test rule',
+        attachmentId: ['alert-id-3'],
+        metadata: {
+          index: ['alert-index-3'],
+          rule: {
+            id: 'rule-test-id',
+            name: 'Test rule',
+          },
         },
-        type: 'alert',
+        owner: 'securitySolution',
+        type: 'security.alert',
       },
     ],
   });
 
-  expect(casesClientMock.attachments.bulkCreate).nthCalledWith(3, {
+  expect(casesClientMock.attachments.bulkCreate).toHaveBeenNthCalledWith(3, {
     caseId: 'mock-id-4',
     attachments: [
       {
-        alertId: ['alert-id-0', 'alert-id-2'],
-        index: ['alert-index-0', 'alert-index-2'],
-        owner: 'securitySolution',
-        rule: {
-          id: 'rule-test-id',
-          name: 'Test rule',
+        attachmentId: ['alert-id-0', 'alert-id-2'],
+        metadata: {
+          index: ['alert-index-0', 'alert-index-2'],
+          rule: {
+            id: 'rule-test-id',
+            name: 'Test rule',
+          },
         },
-        type: 'alert',
+        owner: 'securitySolution',
+        type: 'security.alert',
+      },
+    ],
+  });
+};
+
+export const expectCasesToHaveTheCorrectAlertsAttachedWithPredefinedGrouping = (
+  casesClientMock: CasesClientMock
+) => {
+  expect(casesClientMock.attachments.bulkCreate).toHaveBeenCalledTimes(3);
+
+  expect(casesClientMock.attachments.bulkCreate).toHaveBeenNthCalledWith(1, {
+    caseId: 'mock-id-1',
+    attachments: [
+      { data: { content: 'comment-1' }, owner: 'securitySolution', type: 'comment' },
+      {
+        attachmentId: ['alert-id-1', 'alert-id-2'],
+        metadata: {
+          index: ['alert-index-1', 'alert-index-1'],
+          rule: { id: null, name: null },
+        },
+        owner: 'securitySolution',
+        type: 'security.alert',
+      },
+    ],
+  });
+
+  expect(casesClientMock.attachments.bulkCreate).toHaveBeenNthCalledWith(2, {
+    caseId: 'mock-id-2',
+    attachments: [
+      { data: { content: 'comment-2' }, owner: 'securitySolution', type: 'comment' },
+      { data: { content: 'comment-3' }, owner: 'securitySolution', type: 'comment' },
+      {
+        attachmentId: ['alert-id-3', 'alert-id-4'],
+        metadata: {
+          index: ['alert-index-2', 'alert-index-2'],
+          rule: { id: null, name: null },
+        },
+        owner: 'securitySolution',
+        type: 'security.alert',
+      },
+    ],
+  });
+
+  expect(casesClientMock.attachments.bulkCreate).toHaveBeenNthCalledWith(3, {
+    caseId: 'mock-id-3',
+    attachments: [
+      {
+        attachmentId: ['alert-id-5'],
+        metadata: {
+          index: ['alert-index-3'],
+          rule: { id: null, name: null },
+        },
+        owner: 'securitySolution',
+        type: 'security.alert',
       },
     ],
   });

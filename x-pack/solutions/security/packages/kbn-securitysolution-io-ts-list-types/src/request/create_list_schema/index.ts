@@ -6,12 +6,10 @@
  */
 
 import * as t from 'io-ts';
-import {
-  DefaultVersionNumber,
-  DefaultVersionNumberDecoded,
-} from '@kbn/securitysolution-io-ts-types';
+import type { DefaultVersionNumberDecoded } from '@kbn/securitysolution-io-ts-types';
+import { DefaultVersionNumber } from '@kbn/securitysolution-io-ts-types';
 
-import { RequiredKeepUndefined } from '../../common/required_keep_undefined';
+import type { RequiredKeepUndefined } from '../../common/required_keep_undefined';
 import { name } from '../../common/name';
 import { description } from '../../common/description';
 import { type } from '../../common/type';

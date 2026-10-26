@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { readFileSync } from 'fs';
+import Fs from 'fs';
 import Path from 'path';
 
 import { REPO_ROOT } from '@kbn/repo-info';
@@ -19,13 +19,13 @@ import { ExtractNodeBuilds } from './extract_node_builds_task';
 jest.mock('../../lib/fs');
 jest.mock('../../lib/get_build_number');
 
-const Fs = jest.requireMock('../../lib/fs');
+const BuildFs = jest.requireMock('../../lib/fs');
 
 const log = new ToolingLog();
 const testWriter = new ToolingLogCollectingWriter();
 log.setWriters([testWriter]);
 
-const nodeVersion = readFileSync(Path.resolve(REPO_ROOT, '.node-version'), 'utf8').trim();
+const nodeVersion = Fs.readFileSync(Path.resolve(REPO_ROOT, '.nvmrc'), 'utf8').trim();
 
 // The node variant may be overriden by an environment variable,
 // to provide test coverage against pointer-compression
@@ -41,6 +41,7 @@ expect.addSnapshotSerializer({
           .replaceAll(nodeVersion, '<node version>')
           .replace('<node version>/glibc-217', '<node version>/<node variant>')
           .replace('<node version>/pointer-compression', '<node version>/<node variant>')
+          .replace('<node version>/default', '<node version>/<node variant>')
           .replace(REPO_ROOT, '<absolute path>')
           .replace(/\\/g, '/')
       : '',
@@ -51,6 +52,8 @@ async function setup() {
     isRelease: true,
     targetAllPlatforms: true,
     targetServerlessPlatforms: false,
+    targetCloudPlatforms: false,
+    skipServerless: false,
     dockerContextUseLocalArtifact: false,
     dockerCrossCompile: false,
     dockerNamespace: null,
@@ -65,18 +68,43 @@ async function setup() {
   return { config };
 }
 
+let originalGlibc217: string | undefined;
+
+beforeAll(() => {
+  originalGlibc217 = process.env.CI_FORCE_NODE_GLIBC_217;
+});
+
 beforeEach(() => {
   testWriter.messages.length = 0;
   jest.clearAllMocks();
+  // Extraction is skipped if folder already exists
+  jest.spyOn(Fs, 'existsSync').mockImplementation(() => false);
+
+  delete process.env.CI_FORCE_NODE_GLIBC_217;
 });
 
-it('runs expected fs operations', async () => {
+afterEach(() => {
+  jest.restoreAllMocks();
+});
+
+afterAll(() => {
+  if (originalGlibc217 === undefined) {
+    delete process.env.CI_FORCE_NODE_GLIBC_217;
+  } else {
+    process.env.CI_FORCE_NODE_GLIBC_217 = originalGlibc217;
+  }
+});
+
+async function runExtractNodeBuildsTask(forceNodePointerCompression = false) {
   const { config } = await setup();
+  jest
+    .spyOn(config, 'shouldForceNodePointerCompression')
+    .mockReturnValue(forceNodePointerCompression);
 
-  await ExtractNodeBuilds.run(config, log, []);
+  await ExtractNodeBuilds.run(config, log);
 
-  const usedMethods = Object.fromEntries(
-    Object.entries(Fs)
+  return Object.fromEntries(
+    Object.entries(BuildFs)
       .filter((entry): entry is [string, jest.Mock] => {
         const [, mock] = entry;
 
@@ -88,69 +116,22 @@ it('runs expected fs operations', async () => {
       })
       .map(([name, mock]) => [name, mock.mock.calls])
   );
+}
 
-  expect(usedMethods).toMatchInlineSnapshot(`
-    Object {
-      "copy": Array [
-        Array [
-          <absolute path>/.node_binaries/<node version>/default/win32-x64/download/node.exe,
-          <absolute path>/.node_binaries/<node version>/default/win32-x64/extract/node.exe,
-          Object {
-            "clone": true,
-          },
-        ],
-        Array [
-          <absolute path>/.node_binaries/<node version>/default/win32-arm64/download/node.exe,
-          <absolute path>/.node_binaries/<node version>/default/win32-arm64/extract/node.exe,
-          Object {
-            "clone": true,
-          },
-        ],
-      ],
-      "untar": Array [
-        Array [
-          <absolute path>/.node_binaries/<node version>/<node variant>/linux-x64/download/node-v<node version>-linux-x64.tar.gz,
-          <absolute path>/.node_binaries/<node version>/<node variant>/linux-x64/extract,
-          Object {
-            "strip": 1,
-          },
-        ],
-        Array [
-          <absolute path>/.node_binaries/<node version>/<node variant>/linux-arm64/download/node-v<node version>-linux-arm64.tar.gz,
-          <absolute path>/.node_binaries/<node version>/<node variant>/linux-arm64/extract,
-          Object {
-            "strip": 1,
-          },
-        ],
-        Array [
-          <absolute path>/.node_binaries/<node version>/default/darwin-x64/download/node-v<node version>-darwin-x64.tar.gz,
-          <absolute path>/.node_binaries/<node version>/default/darwin-x64/extract,
-          Object {
-            "strip": 1,
-          },
-        ],
-        Array [
-          <absolute path>/.node_binaries/<node version>/default/darwin-arm64/download/node-v<node version>-darwin-arm64.tar.gz,
-          <absolute path>/.node_binaries/<node version>/default/darwin-arm64/extract,
-          Object {
-            "strip": 1,
-          },
-        ],
-        Array [
-          <absolute path>/.node_binaries/<node version>/<node variant>/linux-x64/download/node-v<node version>-linux-x64.tar.gz,
-          <absolute path>/.node_binaries/<node version>/<node variant>/linux-x64/extract,
-          Object {
-            "strip": 1,
-          },
-        ],
-        Array [
-          <absolute path>/.node_binaries/<node version>/<node variant>/linux-arm64/download/node-v<node version>-linux-arm64.tar.gz,
-          <absolute path>/.node_binaries/<node version>/<node variant>/linux-arm64/extract,
-          Object {
-            "strip": 1,
-          },
-        ],
-      ],
-    }
-  `);
+describe('runs expected fs operations', () => {
+  it('default variant', async () => {
+    const usedMethods = await runExtractNodeBuildsTask();
+    expect(usedMethods).toMatchSnapshot();
+  });
+
+  it('glibc-217 variant (CI_FORCE_NODE_GLIBC_217)', async () => {
+    process.env.CI_FORCE_NODE_GLIBC_217 = 'true';
+    const usedMethods = await runExtractNodeBuildsTask();
+    expect(usedMethods).toMatchSnapshot();
+  });
+
+  it('pointer-compression variant (--force-node-pointer-compression)', async () => {
+    const usedMethods = await runExtractNodeBuildsTask(true);
+    expect(usedMethods).toMatchSnapshot();
+  });
 });

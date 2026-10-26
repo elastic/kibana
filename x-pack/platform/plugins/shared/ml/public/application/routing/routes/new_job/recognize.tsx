@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { parse } from 'query-string';
+import queryString from 'query-string';
 import type { FC } from 'react';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { dynamic } from '@kbn/shared-ux-utility';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import { basicResolvers } from '../../resolvers';
-import { ML_PAGES } from '../../../../locator';
 import { useMlApi, useMlKibana, useNavigateToPath } from '../../../contexts/kibana';
 import type { MlRoute, PageProps } from '../../router';
 import { createPath, PageLoader } from '../../router';
@@ -50,7 +50,7 @@ export const checkViewOrCreateRouteFactory = (): MlRoute => ({
 });
 
 const PageWrapper: FC<PageProps> = ({ location }) => {
-  const { id } = parse(location.search, { sort: false });
+  const { id } = queryString.parse(location.search, { sort: false });
   const mlApi = useMlApi();
 
   const { context, results } = useRouteResolver('full', ['canGetJobs'], {
@@ -77,9 +77,12 @@ const CheckViewOrCreateWrapper: FC<PageProps> = ({ location }) => {
     },
   } = useMlKibana();
 
-  const { id: moduleId, index: dataViewId }: Record<string, any> = parse(location.search, {
-    sort: false,
-  });
+  const { id: moduleId, index: dataViewId }: Record<string, any> = queryString.parse(
+    location.search,
+    {
+      sort: false,
+    }
+  );
 
   const { createLinkWithUserDefaults } = useCreateADLinks();
 

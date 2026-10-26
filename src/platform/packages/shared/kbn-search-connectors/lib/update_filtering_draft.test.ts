@@ -12,7 +12,8 @@ import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { errors } from '@elastic/elasticsearch';
 
 import { updateFilteringDraft } from './update_filtering_draft';
-import { FilteringRule, FilteringRules, FilteringValidationState } from '../types/connectors';
+import type { FilteringRule, FilteringRules } from '../types/connectors';
+import { FilteringValidationState } from '../types/connectors';
 
 describe('updateFilteringDraft lib function', () => {
   const mockClient = {
@@ -58,7 +59,10 @@ describe('updateFilteringDraft lib function', () => {
     };
 
     mockClient.transport.request.mockImplementationOnce(() => ({ result: 'updated' }));
-    mockClient.transport.request.mockImplementationOnce(() => ({ filtering: [{ draft }] }));
+    mockClient.transport.request.mockImplementationOnce(() => ({
+      id: 'connectorId',
+      filtering: [{ draft }],
+    }));
 
     await expect(
       updateFilteringDraft(mockClient as unknown as ElasticsearchClient, 'connectorId', {

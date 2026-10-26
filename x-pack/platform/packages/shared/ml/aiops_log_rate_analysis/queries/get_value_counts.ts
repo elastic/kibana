@@ -7,18 +7,23 @@
 
 import type { ItemSet } from '@kbn/ml-agg-utils';
 
-export function getValueCounts(df: ItemSet[], field: string) {
-  return df.reduce<Record<string, number>>((p, c) => {
-    const fieldItems = c.set.filter((d) => d.fieldName === field);
+export function getValueCountsForItemSetIndexes(
+  itemSets: ItemSet[],
+  itemSetIndexes: number[],
+  field: string
+) {
+  return itemSetIndexes.reduce<Record<string, number>>((counts, itemSetIndex) => {
+    const fieldItems = itemSets[itemSetIndex].set.filter((item) => item.fieldName === field);
 
     if (fieldItems.length === 0) {
-      return p;
+      return counts;
     }
 
     for (const { fieldValue } of fieldItems) {
-      p[fieldValue] = p[fieldValue] ? p[fieldValue] + 1 : 1;
+      const fieldValueKey = String(fieldValue);
+      counts[fieldValueKey] = counts[fieldValueKey] ? counts[fieldValueKey] + 1 : 1;
     }
 
-    return p;
+    return counts;
   }, {});
 }

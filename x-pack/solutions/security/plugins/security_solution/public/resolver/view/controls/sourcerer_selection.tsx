@@ -4,13 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback, memo } from 'react';
+import React, { memo, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiPopover } from '@elastic/eui';
+import { PageScope } from '../../../data_view_manager/constants';
 import { StyledEuiButtonIcon } from './styles';
 import { useColors } from '../use_colors';
-import { Sourcerer } from '../../../sourcerer/components';
-import { SourcererScopeName } from '../../../sourcerer/store/model';
+import { DataViewPicker } from '../../../data_view_manager/components/data_view_picker';
 
 const nodeLegendButtonTitle = i18n.translate(
   'xpack.securitySolution.resolver.graphControls.sourcererButtonTitle',
@@ -31,10 +31,9 @@ export const SourcererButton = memo(
     setActivePopover: (value: 'sourcererSelection') => void;
     isOpen: boolean;
   }) => {
-    const setAsActivePopover = useCallback(
-      () => setActivePopover('sourcererSelection'),
-      [setActivePopover]
-    );
+    const setAsActivePopover = useCallback(() => {
+      setActivePopover('sourcererSelection');
+    }, [setActivePopover]);
     const colorMap = useColors();
 
     return (
@@ -55,8 +54,9 @@ export const SourcererButton = memo(
         isOpen={isOpen}
         closePopover={closePopover}
         anchorPosition="leftCenter"
+        aria-label={nodeLegendButtonTitle}
       >
-        <Sourcerer scope={SourcererScopeName.analyzer} />
+        <DataViewPicker scope={PageScope.analyzer} onClosePopover={closePopover} />
       </EuiPopover>
     );
   }

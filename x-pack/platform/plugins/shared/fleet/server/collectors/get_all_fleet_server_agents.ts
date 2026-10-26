@@ -12,12 +12,14 @@ import { getAgentsByKuery } from '../services/agents';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE, AGENTS_PREFIX } from '../constants';
 
 import { packagePolicyService } from '../services/package_policy';
+import { buildPolicyBaseIdsWithFallbackKuery } from '../../common/services/version_specific_policies_utils';
 
 export const getAllFleetServerAgents = async (
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient
 ) => {
   let packagePolicyData;
+
   try {
     packagePolicyData = await packagePolicyService.list(soClient, {
       perPage: SO_SEARCH_LIMIT,
@@ -26,7 +28,7 @@ export const getAllFleetServerAgents = async (
   } catch (error) {
     throw new Error(error.message);
   }
-  const agentPoliciesIds = packagePolicyData?.items.flatMap((item) => item.policy_id);
+  const agentPoliciesIds = packagePolicyData?.items.flatMap((item) => item.policy_ids);
 
   if (agentPoliciesIds.length === 0) {
     return [];
@@ -37,7 +39,11 @@ export const getAllFleetServerAgents = async (
     agentsResponse = await getAgentsByKuery(esClient, soClient, {
       showInactive: false,
       perPage: SO_SEARCH_LIMIT,
-      kuery: `${AGENTS_PREFIX}.policy_id:${agentPoliciesIds.map((id) => `"${id}"`).join(' or ')}`,
+      kuery: buildPolicyBaseIdsWithFallbackKuery(
+        agentPoliciesIds,
+        `${AGENTS_PREFIX}.policy_base_id`,
+        `${AGENTS_PREFIX}.policy_id`
+      ),
     });
   } catch (error) {
     throw new Error(error.message);

@@ -23,7 +23,7 @@ export const securityWorkflowInsightsFieldMap: FieldMap = {
     array: false,
     required: true,
   },
-  // incompatible_virus, noisy_process_tree, etc
+  // incompatible_antivirus, policy_response_failure, etc
   type: {
     type: 'keyword',
     array: false,

@@ -11,8 +11,10 @@ import type { CloudStart } from '@kbn/cloud-plugin/public';
 import type { SecurityPluginStart, UserMenuLink } from '@kbn/security-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import { AppearanceSelector } from './appearance_selector';
+import { LanguageSelector } from './language_selector';
+import { SpaceConfigurationSelector } from './space_preference_selector';
 
-export const createUserMenuLinks = ({
+export const createUserMenuLinks = async ({
   core,
   cloud,
   security,
@@ -22,8 +24,8 @@ export const createUserMenuLinks = ({
   cloud: CloudStart;
   security: SecurityPluginStart;
   isServerless: boolean;
-}): UserMenuLink[] => {
-  const { profileUrl, billingUrl, organizationUrl } = cloud;
+}): Promise<UserMenuLink[]> => {
+  const { profileUrl, organizationUrl } = cloud;
 
   const userMenuLinks = [] as UserMenuLink[];
 
@@ -34,18 +36,23 @@ export const createUserMenuLinks = ({
       }),
       iconType: 'user',
       href: profileUrl,
+      isExternal: true,
+      dataTestSubj: 'userMenuLink__profile',
       order: 100,
       setAsProfile: true,
     });
   }
 
+  const { billingUrl } = await cloud.getPrivilegedUrls();
   if (billingUrl) {
     userMenuLinks.push({
       label: i18n.translate('xpack.cloudLinks.userMenuLinks.billingLinkText', {
-        defaultMessage: 'Billing',
+        defaultMessage: 'Billing and subscription',
       }),
-      iconType: 'visGauge',
+      iconType: 'money',
       href: billingUrl,
+      isExternal: true,
+      dataTestSubj: 'userMenuLink__billing',
       order: 200,
     });
   }
@@ -55,8 +62,10 @@ export const createUserMenuLinks = ({
       label: i18n.translate('xpack.cloudLinks.userMenuLinks.organizationLinkText', {
         defaultMessage: 'Organization',
       }),
-      iconType: 'gear',
+      iconType: 'users',
       href: organizationUrl,
+      isExternal: true,
+      dataTestSubj: 'userMenuLink__organization',
       order: 300,
     });
   }
@@ -71,6 +80,26 @@ export const createUserMenuLinks = ({
       />
     ),
     order: 400,
+    label: '',
+    iconType: '',
+    href: '',
+  });
+
+  userMenuLinks.push({
+    content: ({ closePopover }) => (
+      <LanguageSelector core={core} security={security} closePopover={closePopover} />
+    ),
+    order: 500,
+    label: '',
+    iconType: '',
+    href: '',
+  });
+
+  userMenuLinks.push({
+    content: ({ closePopover }) => (
+      <SpaceConfigurationSelector core={core} security={security} closePopover={closePopover} />
+    ),
+    order: 600,
     label: '',
     iconType: '',
     href: '',

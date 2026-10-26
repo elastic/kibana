@@ -8,10 +8,14 @@
  */
 
 import React, { useEffect } from 'react';
+import { css } from '@emotion/react';
+import type { UseEuiTheme } from '@elastic/eui';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 
 import { useFlyoutPanelContext } from './flyout_panel';
 
 export const PanelContent: React.FC<{ children: React.ReactNode }> = (props) => {
+  const styles = useMemoCss(componentStyles);
   const { registerContent } = useFlyoutPanelContext();
 
   useEffect(() => {
@@ -19,7 +23,15 @@ export const PanelContent: React.FC<{ children: React.ReactNode }> = (props) => 
   }, [registerContent]);
 
   // Adding a tabIndex prop to the div as it is the body of the flyout which is scrollable.
-  return (
-    <div className="fieldEditor__flyoutPanel__content eui-scrollBar" tabIndex={0} {...props} />
-  );
+  return <div css={styles.content} className="eui-scrollBar" tabIndex={0} {...props} />;
+};
+
+const componentStyles = {
+  content: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      flex: 1,
+      overflowY: 'auto',
+      overflowX: 'hidden',
+      padding: euiTheme.size.l,
+    }),
 };

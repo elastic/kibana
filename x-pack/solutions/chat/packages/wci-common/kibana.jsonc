@@ -1,9 +1,0 @@
-{
-  "type": "shared-common",
-  "id": "@kbn/wci-common",
-  "owner": [
-    "@elastic/search-kibana"
-  ],
-  "group": "chat",
-  "visibility": "private"
-}

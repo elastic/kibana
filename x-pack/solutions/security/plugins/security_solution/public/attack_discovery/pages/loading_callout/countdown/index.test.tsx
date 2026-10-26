@@ -6,7 +6,6 @@
  */
 
 import moment from 'moment';
-import type { GenerationInterval } from '@kbn/elastic-assistant-common';
 import { act, render, screen } from '@testing-library/react';
 import React from 'react';
 
@@ -16,21 +15,6 @@ import { INFORMATION } from '../translations';
 import { APPROXIMATE_TIME_REMAINING } from './translations';
 
 describe('Countdown', () => {
-  const connectorIntervals: GenerationInterval[] = [
-    {
-      date: '2024-05-16T14:13:09.838Z',
-      durationMs: 173648,
-    },
-    {
-      date: '2024-05-16T13:59:49.620Z',
-      durationMs: 146605,
-    },
-    {
-      date: '2024-05-16T13:47:00.629Z',
-      durationMs: 255163,
-    },
-  ];
-
   beforeAll(() => {
     jest.useFakeTimers();
   });
@@ -43,20 +27,12 @@ describe('Countdown', () => {
     jest.useRealTimers();
   });
 
-  it('returns null when connectorIntervals is empty', () => {
-    const { container } = render(
-      <TestProviders>
-        <Countdown approximateFutureTime={null} connectorIntervals={[]} />
-      </TestProviders>
-    );
-
-    expect(container.innerHTML).toEqual('');
-  });
-
   it('renders the expected prefix', () => {
+    const approximateFutureTime = moment().add(1, 'minute').toDate();
+
     render(
       <TestProviders>
-        <Countdown approximateFutureTime={null} connectorIntervals={connectorIntervals} />
+        <Countdown approximateFutureTime={approximateFutureTime} />
       </TestProviders>
     );
 
@@ -68,10 +44,7 @@ describe('Countdown', () => {
 
     render(
       <TestProviders>
-        <Countdown
-          approximateFutureTime={approximateFutureTime}
-          connectorIntervals={connectorIntervals}
-        />
+        <Countdown approximateFutureTime={approximateFutureTime} />
       </TestProviders>
     );
 
@@ -82,13 +55,27 @@ describe('Countdown', () => {
     expect(screen.getByTestId('timerText')).toHaveTextContent('00:59');
   });
 
-  it('renders an accessible information button icon', () => {
-    render(
+  it('renders an accessible information button icon', async () => {
+    const approximateFutureTime = moment().add(1, 'minute').toDate();
+
+    await act(async () => {
+      render(
+        <TestProviders>
+          <Countdown approximateFutureTime={approximateFutureTime} />
+        </TestProviders>
+      );
+    });
+
+    expect(screen.getByRole('button', { name: INFORMATION })).toBeInTheDocument();
+  });
+
+  it('returns null when approximateFutureTime is null', () => {
+    const { container } = render(
       <TestProviders>
-        <Countdown approximateFutureTime={null} connectorIntervals={connectorIntervals} />
+        <Countdown approximateFutureTime={null} />
       </TestProviders>
     );
 
-    expect(screen.getByRole('button', { name: INFORMATION })).toBeInTheDocument();
+    expect(container.innerHTML).toEqual('');
   });
 });

@@ -6,12 +6,15 @@
  */
 
 import React from 'react';
+import { useDispatch } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonEmpty, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { Workspace, WorkspaceNode } from '../../types';
+import { setNodeLabel, type GraphDispatch } from '../../state_management';
+import type { Workspace, WorkspaceNode } from '../../types';
 import { IconRenderer } from '../icon_renderer';
 import { gphSidebarHeaderStyles, gphSidebarPanelStyles } from '../../styles';
+import { gphFormGroupSmallStyles } from './control_plane.styles';
 
 interface SelectedNodeEditorProps {
   workspace: Workspace;
@@ -20,6 +23,7 @@ interface SelectedNodeEditorProps {
 
 export const SelectedNodeEditor = ({ workspace, selectedNode }: SelectedNodeEditorProps) => {
   const { euiTheme } = useEuiTheme();
+  const dispatch = useDispatch<GraphDispatch>();
   const groupButtonMsg = i18n.translate('xpack.graph.sidebar.groupButtonTooltip', {
     defaultMessage: 'group the currently selected items into {latestSelectionLabel}',
     values: { latestSelectionLabel: selectedNode.label },
@@ -36,8 +40,7 @@ export const SelectedNodeEditor = ({ workspace, selectedNode }: SelectedNodeEdit
     workspace.ungroup(selectedNode);
   };
   const onChangeSelectedVertexLabel = (event: React.ChangeEvent<HTMLInputElement>) => {
-    selectedNode.label = event.target.value;
-    workspace.changeHandler();
+    dispatch(setNodeLabel({ nodeId: selectedNode.id, label: event.target.value }));
   };
 
   return (
@@ -50,7 +53,11 @@ export const SelectedNodeEditor = ({ workspace, selectedNode }: SelectedNodeEdit
       {(workspace.selectedNodes.length > 1 ||
         (workspace.selectedNodes.length > 0 && workspace.selectedNodes[0] !== selectedNode)) && (
         <EuiToolTip content={groupButtonMsg}>
-          <EuiButtonEmpty iconType="fold" onClick={onGroupButtonClick}>
+          <EuiButtonEmpty
+            data-test-subj="graphGroupSelection"
+            iconType="fold"
+            onClick={onGroupButtonClick}
+          >
             <FormattedMessage id="xpack.graph.sidebar.groupButtonLabel" defaultMessage="group" />
           </EuiButtonEmpty>
         </EuiToolTip>
@@ -58,7 +65,11 @@ export const SelectedNodeEditor = ({ workspace, selectedNode }: SelectedNodeEdit
 
       {selectedNode.numChildren > 0 && (
         <EuiToolTip content={ungroupButtonMsg}>
-          <EuiButtonEmpty iconType="unfold" onClick={onClickUngroup}>
+          <EuiButtonEmpty
+            data-test-subj="graphUngroupSelection"
+            iconType="unfold"
+            onClick={onClickUngroup}
+          >
             <FormattedMessage
               id="xpack.graph.sidebar.ungroupButtonLabel"
               defaultMessage="ungroup"
@@ -68,7 +79,7 @@ export const SelectedNodeEditor = ({ workspace, selectedNode }: SelectedNodeEdit
       )}
 
       <form className="form-horizontal">
-        <div className="form-group form-group-sm gphFormGroup--small">
+        <div className="form-group form-group-sm" css={gphFormGroupSmallStyles}>
           <label htmlFor="labelEdit" className="col-sm-3 control-label">
             {i18n.translate('xpack.graph.sidebar.displayLabelLabel', {
               defaultMessage: 'Display label',
@@ -79,6 +90,7 @@ export const SelectedNodeEditor = ({ workspace, selectedNode }: SelectedNodeEdit
               ref={(element) => element && (element.value = selectedNode.label)}
               type="text"
               id="labelEdit"
+              data-test-subj="graphNodeLabelInput"
               className="form-control input-sm"
               onChange={onChangeSelectedVertexLabel}
             />

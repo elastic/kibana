@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { Connector } from '@kbn/search-connectors';
+import type { Connector } from '@kbn/search-connectors';
 
-import { createApiLogic, Actions } from '../../../shared/api_logic/create_api_logic';
+import type { Actions } from '../../../shared/api_logic/create_api_logic';
+import { createApiLogic } from '../../../shared/api_logic/create_api_logic';
 import { HttpLogic } from '../../../shared/http';
 
 export interface FetchConnectorByIdApiLogicArgs {
@@ -20,7 +21,7 @@ export interface FetchConnectorByIdApiLogicResponse {
 export const fetchConnectorById = async ({
   connectorId,
 }: FetchConnectorByIdApiLogicArgs): Promise<FetchConnectorByIdApiLogicResponse> => {
-  const route = `/internal/enterprise_search/connectors/${connectorId}`;
+  const route = `/internal/enterprise_search/connectors/${encodeURIComponent(connectorId)}`;
   const response = await HttpLogic.values.http.get<FetchConnectorByIdApiLogicResponse>(route);
   return response;
 };

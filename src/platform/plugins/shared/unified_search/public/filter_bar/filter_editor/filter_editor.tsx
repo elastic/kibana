@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { EuiFormRowProps } from '@elastic/eui';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -15,7 +16,6 @@ import {
   EuiFlexItem,
   EuiForm,
   EuiFormRow,
-  EuiFormRowProps,
   EuiIcon,
   EuiPopoverFooter,
   EuiPopoverTitle,
@@ -25,7 +25,7 @@ import {
   withEuiTheme,
   EuiTextColor,
   EuiLink,
-  EuiLoadingSpinner,
+  EuiSkeletonText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -43,12 +43,17 @@ import { merge } from 'lodash';
 import React, { Component } from 'react';
 import { i18n } from '@kbn/i18n';
 import { XJsonLang } from '@kbn/monaco';
-import { DataView } from '@kbn/data-views-plugin/common';
-import { DataViewsContract, getIndexPatternFromFilter } from '@kbn/data-plugin/public';
+import type { DataViewsContract } from '@kbn/data-views-plugin/public';
+import { getIndexPatternFromFilter } from '@kbn/data-plugin/public';
 import { CodeEditor } from '@kbn/code-editor';
 import { cx } from '@emotion/css';
-import { WithEuiThemeProps } from '@elastic/eui/src/services/theme';
+import type { WithEuiThemeProps } from '@elastic/eui/src/services/theme';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
+import { css } from '@emotion/react';
+import { euiThemeVars } from '@kbn/ui-theme';
+import type { SuggestionsAbstraction } from '@kbn/kql/public';
+import { Subject } from 'rxjs';
+import type { FilterableSource } from '@kbn/data-source';
 import { GenericComboBox } from './generic_combo_box';
 import {
   getFieldFromFilter,
@@ -57,17 +62,12 @@ import {
 } from './lib/filter_editor_utils';
 import { FiltersBuilder } from '../../filters_builder';
 import { FilterBadgeGroup } from '../../filter_badge/filter_badge_group';
-import {
-  MIDDLE_TRUNCATION_PROPS,
-  SINGLE_SELECTION_AS_TEXT_PROPS,
-  flattenFilters,
-} from './lib/helpers';
-import {
-  filterBadgeStyle,
-  filterPreviewLabelStyle,
-  filtersBuilderMaxHeightCss,
-} from './filter_editor.styles';
-import { SuggestionsAbstraction } from '../../typeahead/suggestions_component';
+import { MIDDLE_TRUNCATION_PROPS, SINGLE_SELECTION_AS_TEXT_PROPS } from './lib/helpers';
+import { flattenFilters } from '../lib/flatten_filters';
+import { filterBadgeStyle, filterPreviewLabelStyle } from './filter_editor.styles';
+import { ScrollableContainer } from './scrollable_container';
+
+const editorFormStyle = css({ padding: euiThemeVars.euiSizeM });
 
 export const strings = {
   getPanelTitleAdd: () =>
@@ -133,7 +133,7 @@ interface QueryDslFilter {
 
 export interface FilterEditorComponentProps {
   filter: Filter;
-  indexPatterns: DataView[];
+  indexPatterns: FilterableSource[];
   onSubmit: (filter: Filter) => void;
   onCancel: () => void;
   onLocalFilterCreate?: (initialState: { filter: Filter; queryDslFilter: QueryDslFilter }) => void;
@@ -150,13 +150,14 @@ export interface FilterEditorComponentProps {
 export type FilterEditorProps = WithEuiThemeProps & FilterEditorComponentProps;
 
 interface State {
-  indexPatterns: DataView[];
-  selectedDataView?: DataView;
+  indexPatterns: FilterableSource[];
+  selectedDataView?: FilterableSource;
   customLabel: string | null;
   queryDsl: string;
   isCustomEditorOpen: boolean;
   localFilter: Filter;
   isLoadingDataView?: boolean;
+  resetVisibleHeight$: Subject<void>;
 }
 
 class FilterEditorComponent extends Component<FilterEditorProps, State> {
@@ -171,6 +172,7 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
       isCustomEditorOpen: this.isUnknownFilterType() || !!this.props.filter?.meta.isMultiIndex,
       localFilter: dataView ? merge({}, props.filter) : buildEmptyFilter(false),
       isLoadingDataView: !Boolean(dataView),
+      resetVisibleHeight$: new Subject(),
     };
   }
 
@@ -197,7 +199,7 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
    * Than the currently selected data view need to load the data view from the id to display the filter
    * correctly
    * @param dataViewId
-   * @private
+   * @internal
    */
   private async loadDataView(dataViewId: string, dataViews: DataViewsContract) {
     try {
@@ -216,7 +218,7 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
     }
   }
 
-  private parseFilterToQueryDsl(filter: Filter, indexPatterns: DataView[]) {
+  private parseFilterToQueryDsl(filter: Filter, indexPatterns: FilterableSource[]) {
     const dsl = filterToQueryDsl(filter, indexPatterns);
     return JSON.stringify(dsl, null, 2);
   }
@@ -239,8 +241,9 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
         </EuiButtonEmpty>
       </EuiFlexItem>
     );
+
     return (
-      <div>
+      <ScrollableContainer resetVisibleHeight$={this.state.resetVisibleHeight$}>
         <EuiPopoverTitle paddingSize="s">
           <EuiFlexGroup alignItems="baseline" responsive={false}>
             <EuiFlexItem>
@@ -251,13 +254,9 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
           </EuiFlexGroup>
         </EuiPopoverTitle>
 
-        {this.state.isLoadingDataView ? (
-          <div className="globalFilterItem__editorForm">
-            <EuiLoadingSpinner />
-          </div>
-        ) : (
+        <EuiSkeletonText lines={3} isLoading={this.state.isLoadingDataView}>
           <EuiForm>
-            <div className="globalFilterItem__editorForm">
+            <div css={editorFormStyle}>
               {this.renderIndexPatternInput()}
 
               {this.state.isCustomEditorOpen
@@ -271,48 +270,51 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
                   onChange={this.onCustomLabelChange}
                   placeholder={strings.getAddCustomLabel()}
                   fullWidth
+                  compressed
                 />
               </EuiFormRow>
             </div>
-
-            <EuiPopoverFooter paddingSize="s">
-              {/* Adding isolation here fixes this bug https://github.com/elastic/kibana/issues/142211 */}
-              <EuiFlexGroup
-                direction="rowReverse"
-                alignItems="center"
-                css={{ isolation: 'isolate' }}
-                responsive={false}
-              >
-                <EuiFlexItem grow={false}>
-                  <EuiButton
-                    fill
-                    onClick={this.onSubmit}
-                    isDisabled={!this.isFilterValid()}
-                    data-test-subj="saveFilter"
-                  >
-                    {this.props.mode === 'add'
-                      ? strings.getAddButtonLabel()
-                      : strings.getUpdateButtonLabel()}
-                  </EuiButton>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty
-                    flush="right"
-                    onClick={this.props.onCancel}
-                    data-test-subj="cancelSaveFilter"
-                  >
-                    <FormattedMessage
-                      id="unifiedSearch.filter.filterEditor.cancelButtonLabel"
-                      defaultMessage="Cancel"
-                    />
-                  </EuiButtonEmpty>
-                </EuiFlexItem>
-                <EuiFlexItem />
-              </EuiFlexGroup>
-            </EuiPopoverFooter>
           </EuiForm>
-        )}
-      </div>
+        </EuiSkeletonText>
+
+        <EuiPopoverFooter paddingSize="s">
+          {/* Adding isolation here fixes this bug https://github.com/elastic/kibana/issues/142211 */}
+          <EuiFlexGroup
+            direction="rowReverse"
+            alignItems="center"
+            css={{ isolation: 'isolate' }}
+            responsive={false}
+          >
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                fill
+                onClick={this.onSubmit}
+                isDisabled={!this.isFilterValid() || this.state.isLoadingDataView}
+                data-test-subj="saveFilter"
+                size="s"
+              >
+                {this.props.mode === 'add'
+                  ? strings.getAddButtonLabel()
+                  : strings.getUpdateButtonLabel()}
+              </EuiButton>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                flush="right"
+                onClick={this.props.onCancel}
+                data-test-subj="cancelSaveFilter"
+                size="s"
+              >
+                <FormattedMessage
+                  id="unifiedSearch.filter.filterEditor.cancelButtonLabel"
+                  defaultMessage="Cancel"
+                />
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem />
+          </EuiFlexGroup>
+        </EuiPopoverFooter>
+      </ScrollableContainer>
     );
   }
 
@@ -345,7 +347,9 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
             placeholder={strings.getSelectDataView()}
             options={this.state.indexPatterns}
             selectedOptions={selectedDataView ? [selectedDataView] : []}
-            getLabel={(indexPattern) => indexPattern?.getName()}
+            getLabel={(indexPattern) =>
+              indexPattern?.getName?.() ?? indexPattern?.name ?? indexPattern?.title ?? ''
+            }
             onChange={this.onIndexPatternChange}
             isClearable={false}
             data-test-subj="filterIndexPatternsSelect"
@@ -379,11 +383,7 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
 
     return (
       <>
-        <div
-          role="region"
-          aria-label=""
-          className={cx(filtersBuilderMaxHeightCss(this.props.theme.euiTheme), 'eui-yScroll')}
-        >
+        <div role="region" aria-label="">
           <EuiToolTip
             position="top"
             content={selectedDataView ? '' : strings.getSelectDataViewToolTip()}
@@ -413,7 +413,7 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
                   id="unifiedSearch.filter.filterBar.preview"
                   defaultMessage="{icon} Preview"
                   values={{
-                    icon: <EuiIcon type="inspect" size="s" />,
+                    icon: <EuiIcon type="inspect" size="s" aria-hidden={true} />,
                   }}
                 />
               </strong>
@@ -476,6 +476,8 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
         this.props.onLocalFilterUpdate(localFilter);
       }
     }
+    // re-calculate visible height when switching between editors
+    this.state.resetVisibleHeight$.next();
   };
 
   private isUnknownFilterType() {
@@ -521,7 +523,7 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
     );
   }
 
-  private onIndexPatternChange = ([selectedDataView]: DataView[]) => {
+  private onIndexPatternChange = ([selectedDataView]: FilterableSource[]) => {
     this.setState({
       selectedDataView,
       localFilter: buildEmptyFilter(false, selectedDataView.id),
@@ -567,7 +569,7 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
       return;
     }
 
-    const newIndex = index || this.state.indexPatterns[0].id!;
+    const newIndex = index || this.state.indexPatterns[0]?.id || this.state.indexPatterns[0]?.title;
     try {
       const body = JSON.parse(queryDsl);
       return buildCustomFilter(newIndex, body, disabled, negate, customLabel || null, $state.store);
@@ -619,6 +621,8 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
 
     this.setState({ localFilter: newFilter });
     this.props.onLocalFilterUpdate?.(newFilter);
+    // re-calculate visible height on filter changes to allow height to grow when new filters added
+    this.state.resetVisibleHeight$.next();
   };
 
   private onSubmit = () => {

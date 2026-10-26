@@ -10,12 +10,18 @@
 import type { MgetResponseItem } from '@elastic/elasticsearch/lib/api/types';
 
 import { isNotFoundFromUnsupportedServer } from '@kbn/core-elasticsearch-server-internal';
-import type {
-  SavedObjectsBulkResolveObject,
-  SavedObjectsResolveOptions,
-  SavedObjectsResolveResponse,
-  SavedObjectsIncrementCounterField,
-  SavedObjectsIncrementCounterOptions,
+import type { Right } from '@kbn/core-saved-objects-api-server';
+import {
+  type SavedObjectsBulkResolveObject,
+  type SavedObjectsResolveOptions,
+  type SavedObjectsResolveResponse,
+  type SavedObjectsIncrementCounterField,
+  type SavedObjectsIncrementCounterOptions,
+  type Either,
+  isLeft,
+  left,
+  right,
+  isRight,
 } from '@kbn/core-saved-objects-api-server';
 import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 import {
@@ -25,6 +31,7 @@ import {
   type ISavedObjectsSerializer,
   type WithAuditName,
   SavedObjectsErrorHelpers,
+  isSavedObjectErrorResult,
 } from '@kbn/core-saved-objects-server';
 import {
   LEGACY_URL_ALIAS_TYPE,
@@ -41,12 +48,6 @@ import {
   getSavedObjectFromSource,
   normalizeNamespace,
   rawDocExistsInNamespace,
-  type Either,
-  type Right,
-  isLeft,
-  isRight,
-  left,
-  right,
 } from '../utils';
 import type { ApiExecutionContext } from '../types';
 import type { RepositoryEsClient } from '../../repository_es_client';
@@ -76,13 +77,6 @@ export interface InternalBulkResolveParams {
  */
 export interface InternalSavedObjectsBulkResolveResponse<T = unknown> {
   resolved_objects: Array<SavedObjectsResolveResponse<T> | BulkResolveError>;
-}
-
-/** Type guard used in the repository. */
-export function isBulkResolveError<T>(
-  result: SavedObjectsResolveResponse<T> | BulkResolveError
-): result is BulkResolveError {
-  return !!(result as BulkResolveError).error;
 }
 
 type AliasInfo = Pick<LegacyUrlAlias, 'targetId' | 'purpose'>;
@@ -225,7 +219,9 @@ export async function internalBulkResolve<T>(
         resolveCounter.recordOutcome(REPOSITORY_RESOLVE_OUTCOME_STATS.ALIAS_MATCH);
       }
 
-      if (result && securityExtension) {
+      // `saved_object` is always successful here; guard is required because
+      // `SavedObjectsResolveResponse.saved_object` is typed as `SavedObjectBulkResult`.
+      if (result && securityExtension && !isSavedObjectErrorResult(result.saved_object)) {
         (result.saved_object as WithAuditName<SavedObject>).name = SavedObjectsUtils.getName(
           registry.getNameAttribute(type),
           result.saved_object

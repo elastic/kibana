@@ -15,6 +15,7 @@ import type {
   CommandDefinition,
   CommandExecutionComponent,
   CommandArgDefinition,
+  ConsoleApi,
 } from '../../types';
 
 export interface ConsoleDataState {
@@ -34,6 +35,9 @@ export interface ConsoleDataState {
    * List of commands entered by the user and being shown in the UI
    */
   commandHistory: CommandHistoryItem[];
+
+  /** The console external API */
+  consoleApi: ConsoleApi;
 
   sidePanel: {
     show: null | 'help'; // will have other values in the future
@@ -80,10 +84,21 @@ export interface ConsoleDataState {
     history: InputHistoryItem[];
 
     /** Show the input area popover */
-    showPopover: 'input-history' | undefined; // Other values will exist in the future
+    showPopover: 'input-history' | 'command-selector' | undefined; // Other values will exist in the future
 
     /** The state of the input area. Set to `error` if wanting to show it as being in error state */
     visibleState: 'error' | undefined;
+
+    /**
+     * The Suggestion to be presented to the user
+     */
+    suggestion: {
+      /**
+       * Suggestion value to display in the UI. It likely will be a subset (the ending) to
+       * whatever the user already typed
+       */
+      value: string;
+    };
   };
 }
 
@@ -98,6 +113,9 @@ export interface ArgSelectorState<TState = any> {
   store?: TState;
 }
 
+/**
+ * Manages internal state for Argument Value Selectors
+ */
 export interface EnteredCommand {
   commandDefinition: CommandDefinition;
 
@@ -117,6 +135,8 @@ export interface InputHistoryItem {
   input: string;
   /** The display value in the UI's input history popup */
   display: string;
+  /** The state of arguments that utilize a value selector component */
+  argState: Record<string, ArgSelectorState[]>;
 }
 
 export interface CommandHistoryItem {
@@ -128,7 +148,14 @@ export interface CommandHistoryItem {
 }
 
 export interface CommandExecutionState {
-  status: 'pending' | 'success' | 'error';
+  /**
+   * The overall status of the Command execution.
+   * - creating: The command request is being created
+   * - pending: The command request has been created and is still being executed.
+   * - success: The command was executed successfully.
+   * - error: The command execution failed.
+   */
+  status: 'creating' | 'pending' | 'success' | 'error';
   store: Record<string, unknown>;
 }
 
@@ -189,6 +216,12 @@ export type ConsoleDataAction =
       };
     }
   | {
+      type: 'updateInputSuggestionState';
+      payload: {
+        suggestion: ConsoleDataState['input']['suggestion'];
+      };
+    }
+  | {
       type: 'setInputState';
       payload: {
         value: ConsoleDataState['input']['visibleState'];
@@ -201,6 +234,8 @@ export type ConsoleDataAction =
         command: string;
         /** The display value in the UI's input history popup. Defaults to `command` */
         display?: string;
+        /** Any state for arguments that utilize a value selector component */
+        argState?: Record<string, ArgSelectorState[]>;
       };
     }
   | {

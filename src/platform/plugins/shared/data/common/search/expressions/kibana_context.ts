@@ -7,9 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ExpressionFunctionDefinition, ExecutionContext } from '@kbn/expressions-plugin/common';
-import { Adapters } from '@kbn/inspector-plugin/common';
-import { KibanaTimerangeOutput, KibanaContext, KibanaFilter, KibanaQueryOutput } from '../..';
+import type {
+  ExpressionFunctionDefinition,
+  ExecutionContext,
+} from '@kbn/expressions-plugin/common';
+import type { Adapters } from '@kbn/inspector-plugin/common';
+import type { KibanaTimerangeOutput, KibanaContext, KibanaFilter, KibanaQueryOutput } from '../..';
 
 interface Arguments {
   q?: KibanaQueryOutput[] | null;

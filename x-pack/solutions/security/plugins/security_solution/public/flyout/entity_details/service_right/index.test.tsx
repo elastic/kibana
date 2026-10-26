@@ -21,10 +21,11 @@ import {
   useExpandableFlyoutState,
 } from '@kbn/expandable-flyout';
 import { mockObservedService } from './mocks';
-import { mockServiceRiskScoreState } from '../mocks';
+import { mockServiceRiskScoreState, mockServiceEntityRiskScores } from '../mocks';
 
 const mockProps: ServicePanelProps = {
   serviceName: 'test',
+  entityId: 'test-entity-id',
   contextID: 'test-service-panel',
   scopeId: 'test-scope-id',
 };
@@ -33,7 +34,12 @@ jest.mock('../../../common/components/visualization_actions/visualization_embedd
 
 const mockedUseRiskScore = jest.fn().mockReturnValue(mockServiceRiskScoreState);
 jest.mock('../../../entity_analytics/api/hooks/use_risk_score', () => ({
-  useRiskScore: () => mockedUseRiskScore(),
+  useRiskScore: (params: unknown) => mockedUseRiskScore(params),
+}));
+
+const mockedUseEntityRiskScores = jest.fn();
+jest.mock('../../../entity_analytics/api/hooks/use_entity_risk_scores', () => ({
+  useEntityRiskScores: () => mockedUseEntityRiskScores(),
 }));
 
 const mockedUseObservedService = jest.fn().mockReturnValue(mockObservedService);
@@ -60,10 +66,15 @@ jest.mock('@kbn/expandable-flyout', () => ({
   useExpandableFlyoutState: jest.fn(),
 }));
 
+jest.mock('../../../common/utils/timeline/use_show_timeline', () => ({
+  useShowTimeline: jest.fn(() => [true]),
+}));
+
 describe('ServicePanel', () => {
   beforeEach(() => {
     mockedUseRiskScore.mockReturnValue(mockServiceRiskScoreState);
     mockedUseObservedService.mockReturnValue(mockObservedService);
+    mockedUseEntityRiskScores.mockReturnValue(mockServiceEntityRiskScores);
     jest.mocked(useExpandableFlyoutHistory).mockReturnValue(flyoutHistory);
     jest.mocked(useExpandableFlyoutState).mockReturnValue({} as unknown as ExpandableFlyoutState);
     jest.mocked(useExpandableFlyoutApi).mockReturnValue(flyoutContextValue);
@@ -79,6 +90,26 @@ describe('ServicePanel', () => {
     expect(getByTestId('service-panel-header')).toBeInTheDocument();
     expect(queryByTestId('securitySolutionFlyoutLoading')).not.toBeInTheDocument();
     expect(getByTestId('securitySolutionFlyoutNavigationExpandDetailButton')).toBeInTheDocument();
+  });
+
+  it('labels the risk score request with the entity details flyout execution context', () => {
+    render(
+      <TestProviders>
+        <ServicePanel {...mockProps} />
+      </TestProviders>
+    );
+
+    expect(mockedUseRiskScore).toHaveBeenCalledWith(
+      expect.objectContaining({
+        executionContext: {
+          child: {
+            type: 'security_solution',
+            name: 'entity_analytics:entity_details_flyout',
+            id: 'service_risk_score',
+          },
+        },
+      })
+    );
   });
 
   it('renders loading state when observed service is loading', () => {

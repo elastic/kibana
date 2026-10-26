@@ -5,17 +5,19 @@
  * 2.0.
  */
 
-import { rangeQuery, termQuery } from '@kbn/observability-plugin/server';
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import { SERVICE_ENVIRONMENT, SERVICE_NAME } from '../../../common/es_fields/apm';
+import { uniq } from 'lodash';
 import { ENVIRONMENT_NOT_DEFINED } from '../../../common/environment_filter_values';
-import { getProcessorEventForTransactions } from '../../lib/helpers/transactions';
 import type { Environment } from '../../../common/environment_rt';
+import { ENVIRONMENT_FIELDS } from '../../../common/utils/environment_query';
 import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
+import { hasUnsetValueForFields } from './has_unset_value_for_fields';
+import { getSuggestionsWithTermsAggregation } from '../suggestions/get_suggestions_with_terms_aggregation';
 
 /**
  * This is used for getting the list of environments for the environment selector,
- * filtered by range.
+ * filtered by range. Environments are collected from every field in
+ * `ENVIRONMENT_FIELDS` so OTel documents that only carry
+ * `deployment.environment.name` are included.
  */
 export async function getEnvironments({
   searchAggregatedTransactions,
@@ -32,42 +34,34 @@ export async function getEnvironments({
   start: number;
   end: number;
 }): Promise<Environment[]> {
-  const operationName = serviceName ? 'get_environments_for_service' : 'get_environments';
+  const [hasUnsetEnvironments, ...suggestions] = await Promise.all([
+    hasUnsetValueForFields({
+      apmEventClient,
+      searchAggregatedTransactions,
+      serviceName,
+      fieldNames: ENVIRONMENT_FIELDS,
+      start,
+      end,
+    }),
+    ...ENVIRONMENT_FIELDS.map((fieldName) =>
+      getSuggestionsWithTermsAggregation({
+        fieldName,
+        fieldValue: '',
+        searchAggregatedTransactions,
+        serviceName,
+        apmEventClient,
+        size,
+        start,
+        end,
+      })
+    ),
+  ]);
 
-  const params = {
-    apm: {
-      events: [
-        getProcessorEventForTransactions(searchAggregatedTransactions),
-        ProcessorEvent.metric,
-        ProcessorEvent.error,
-      ],
-    },
-    track_total_hits: false,
-    size: 0,
-    query: {
-      bool: {
-        filter: [...rangeQuery(start, end), ...termQuery(SERVICE_NAME, serviceName)],
-      },
-    },
-    aggs: {
-      environments: {
-        terms: {
-          field: SERVICE_ENVIRONMENT,
-          missing: ENVIRONMENT_NOT_DEFINED.value,
-          order: { _key: 'asc' as const },
-          size,
-        },
-      },
-    },
-  };
+  const environments = uniq(suggestions.flatMap(({ terms }) => terms)).sort();
 
-  const resp = await apmEventClient.search(operationName, params);
-  const aggs = resp.aggregations;
-  const environmentsBuckets = aggs?.environments.buckets || [];
-
-  const environments = environmentsBuckets.map(
-    (environmentBucket) => environmentBucket.key as string
-  );
+  if (hasUnsetEnvironments) {
+    environments.push(ENVIRONMENT_NOT_DEFINED.value);
+  }
 
   return environments as Environment[];
 }

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ObservableInput } from 'rxjs';
+import type { ObservableInput } from 'rxjs';
 
 export type IterableInput<T> = Iterable<T> | ObservableInput<T>;
 export type AsyncMapResult<T> = Promise<T> | ObservableInput<T>;

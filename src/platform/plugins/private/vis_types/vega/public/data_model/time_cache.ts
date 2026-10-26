@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { TimefilterContract } from '@kbn/data-plugin/public';
+import type { TimefilterContract } from '@kbn/data-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
-import { CacheBounds } from './types';
+import type { CacheBounds } from './types';
 
 /**
  * Optimization caching - always return the same value if queried within this time
@@ -76,17 +76,18 @@ export class TimeCache {
     return this._cachedBounds;
   }
 
-  setTimeRange(timeRange: TimeRange): void {
+  setTimeRange(timeRange: TimeRange | undefined): void {
     this._timeRange = timeRange;
   }
 
   /**
    * Get parsed min/max values
    * @returns {{min: number, max: number}}
-   * @private
+   * @internal
    */
   _getBounds(): CacheBounds {
-    const bounds = this._timefilter.calculateBounds(this._timeRange!);
+    const timeRange = this._timeRange ?? this._timefilter.getTime();
+    const bounds = this._timefilter.calculateBounds(timeRange);
     return {
       min: bounds.min!.valueOf(),
       max: bounds.max!.valueOf(),

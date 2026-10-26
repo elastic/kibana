@@ -7,7 +7,6 @@
 
 import { mount, shallow } from 'enzyme';
 import React from 'react';
-import { ThemeProvider } from 'styled-components';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 
 import {
@@ -18,11 +17,8 @@ import {
   getEmptyValue,
   getOrEmptyTag,
 } from '.';
-import { getMockTheme } from '../../lib/kibana/kibana_react.mock';
 
 describe('EmptyValue', () => {
-  const mockTheme = getMockTheme({ eui: { euiColorDarkShade: '#69707D' } });
-
   test('it renders against snapshot', () => {
     const wrapper = shallow(<p>{getEmptyString()}</p>);
     expect(wrapper).toMatchSnapshot();
@@ -34,60 +30,36 @@ describe('EmptyValue', () => {
 
   describe('#getEmptyString', () => {
     test('should turn into an empty string place holder', () => {
-      const wrapper = mountWithIntl(
-        <ThemeProvider theme={mockTheme}>
-          <p>{getEmptyString()}</p>
-        </ThemeProvider>
-      );
+      const wrapper = mountWithIntl(<p>{getEmptyString()}</p>);
       expect(wrapper.text()).toBe('(Empty string)');
     });
   });
 
   describe('#getEmptyTagValue', () => {
-    const wrapper = mount(
-      <ThemeProvider theme={mockTheme}>
-        <p>{getEmptyTagValue()}</p>
-      </ThemeProvider>
-    );
+    const wrapper = mount(<p>{getEmptyTagValue()}</p>);
     test('should return an empty tag value', () => expect(wrapper.text()).toBe('—'));
   });
 
   describe('#getEmptyStringTag', () => {
     test('should turn into an span that has length of 1', () => {
-      const wrapper = mountWithIntl(
-        <ThemeProvider theme={mockTheme}>
-          <p>{getEmptyStringTag()}</p>
-        </ThemeProvider>
-      );
+      const wrapper = mountWithIntl(<p>{getEmptyStringTag()}</p>);
       expect(wrapper.find('span')).toHaveLength(1);
     });
 
     test('should turn into an empty string tag place holder', () => {
-      const wrapper = mountWithIntl(
-        <ThemeProvider theme={mockTheme}>
-          <p>{getEmptyStringTag()}</p>
-        </ThemeProvider>
-      );
+      const wrapper = mountWithIntl(<p>{getEmptyStringTag()}</p>);
       expect(wrapper.text()).toBe(getEmptyString());
     });
   });
 
   describe('#defaultToEmptyTag', () => {
     test('should default to an empty value when a value is null', () => {
-      const wrapper = mount(
-        <ThemeProvider theme={mockTheme}>
-          <p>{defaultToEmptyTag(null)}</p>
-        </ThemeProvider>
-      );
+      const wrapper = mount(<p>{defaultToEmptyTag(null)}</p>);
       expect(wrapper.text()).toBe(getEmptyValue());
     });
 
     test('should default to an empty value when a value is undefined', () => {
-      const wrapper = mount(
-        <ThemeProvider theme={mockTheme}>
-          <p>{defaultToEmptyTag(undefined)}</p>
-        </ThemeProvider>
-      );
+      const wrapper = mount(<p>{defaultToEmptyTag(undefined)}</p>);
       expect(wrapper.text()).toBe(getEmptyValue());
     });
 
@@ -113,11 +85,7 @@ describe('EmptyValue', () => {
           },
         },
       };
-      const wrapper = mount(
-        <ThemeProvider theme={mockTheme}>
-          <p>{getOrEmptyTag('a.b.c', test)}</p>
-        </ThemeProvider>
-      );
+      const wrapper = mount(<p>{getOrEmptyTag('a.b.c', test)}</p>);
       expect(wrapper.text()).toBe(getEmptyValue());
     });
 
@@ -129,11 +97,7 @@ describe('EmptyValue', () => {
           },
         },
       };
-      const wrapper = mount(
-        <ThemeProvider theme={mockTheme}>
-          <p>{getOrEmptyTag('a.b.c', test)}</p>
-        </ThemeProvider>
-      );
+      const wrapper = mount(<p>{getOrEmptyTag('a.b.c', test)}</p>);
       expect(wrapper.text()).toBe(getEmptyValue());
     });
 
@@ -143,11 +107,7 @@ describe('EmptyValue', () => {
           b: {},
         },
       };
-      const wrapper = mount(
-        <ThemeProvider theme={mockTheme}>
-          <p>{getOrEmptyTag('a.b.c', test)}</p>
-        </ThemeProvider>
-      );
+      const wrapper = mount(<p>{getOrEmptyTag('a.b.c', test)}</p>);
       expect(wrapper.text()).toBe(getEmptyValue());
     });
 

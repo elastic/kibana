@@ -7,17 +7,23 @@
 
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import type { ComponentType, ReactNode } from 'react';
-import { UiActionsSetup } from '@kbn/ui-actions-plugin/public';
+import type { UiActionsSetup } from '@kbn/ui-actions-plugin/public';
 import type { DataPublicPluginSetup } from '@kbn/data-plugin/public';
-import { CoreStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import type { FleetSetup } from '@kbn/fleet-plugin/public';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
-import { ExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import {
+import type { ExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import type {
+  FindingMisconfigurationFlyoutContentProps,
   FindingMisconfigurationFlyoutFooterProps,
-  FindingMisconfigurationFlyoutProps,
+  FindingsVulnerabilityFlyoutContentProps,
+  FindingsVulnerabilityFlyoutFooterProps,
+  FindingsVulnerabilityFlyoutHeaderProps,
   FindingsMisconfigurationFlyoutContentProps,
   FindingsMisconfigurationFlyoutHeaderProps,
+  FindingsMisconfigurationPanelExpandableFlyoutProps,
+  FindingsVulnerabilityPanelExpandableFlyoutProps,
+  FindingVulnerabilityFullFlyoutContentProps,
 } from '@kbn/cloud-security-posture';
 import type { CspRouterProps } from './application/csp_router';
 import type { CloudSecurityPosturePageId } from './common/navigation/types';
@@ -41,12 +47,29 @@ export interface CspClientPluginSetup {}
 export interface CspClientPluginStart {
   /** Gets the cloud security posture router component for embedding in the security solution. */
   getCloudSecurityPostureRouter(): ComponentType<CspRouterProps>;
-  // getCloudSecurityPostureMisconfigurationFlyout: () => React.JSX.Element;
   getCloudSecurityPostureMisconfigurationFlyout: () => {
-    Component: React.FC<FindingMisconfigurationFlyoutProps>;
+    Component: React.FC<
+      FindingsMisconfigurationPanelExpandableFlyoutProps['params'] & {
+        children?: (props: FindingMisconfigurationFlyoutContentProps) => ReactNode;
+      }
+    >;
     Header: React.FC<FindingsMisconfigurationFlyoutHeaderProps>;
     Body: React.FC<FindingsMisconfigurationFlyoutContentProps>;
     Footer: React.FC<FindingMisconfigurationFlyoutFooterProps>;
+    /** The "take action" control (create detection rule) without any flyout footer chrome. */
+    TakeAction: React.FC<FindingMisconfigurationFlyoutFooterProps>;
+  };
+  getCloudSecurityPostureVulnerabilityFlyout: () => {
+    Component: React.FC<
+      FindingsVulnerabilityPanelExpandableFlyoutProps['params'] & {
+        children?: (props: FindingVulnerabilityFullFlyoutContentProps) => ReactNode;
+      }
+    >;
+    Header: React.FC<FindingsVulnerabilityFlyoutHeaderProps>;
+    Body: React.FC<FindingsVulnerabilityFlyoutContentProps>;
+    Footer: React.FC<FindingsVulnerabilityFlyoutFooterProps>;
+    /** The "take action" control (create detection rule) without any flyout footer chrome. */
+    TakeAction: React.FC<FindingsVulnerabilityFlyoutFooterProps>;
   };
 }
 
@@ -73,6 +96,42 @@ export interface CspSecuritySolutionContext {
   }>;
   useExpandableFlyoutApi?: () => ExpandableFlyoutApi;
   useOnExpandableFlyoutClose?: ({ callback }: UseOnCloseParams) => void;
+  /**
+   * Returns openers that render a finding as a primary "system flyout" (the security solution's
+   * v2 flyout), or `undefined` when the new flyout system is disabled. When available, the
+   * findings pages open these instead of the legacy expandable-flyout panels.
+   */
+  useOpenFindingInSystemFlyout?: () => OpenFindingInSystemFlyout | undefined;
+}
+
+/**
+ * Handle to a finding opened via {@link OpenFindingInSystemFlyout}, allowing the caller to close it
+ * (e.g. when the underlying table row is deselected or another finding is opened) and to react
+ * when it gets closed some other way (e.g. the user dismissing it directly).
+ */
+export interface OpenFindingInSystemFlyoutHandle {
+  /** Closes the opened system flyout. Does nothing if it is already closed. */
+  close: () => void;
+  /** Resolves once the system flyout is closed, whether via `close()` or user interaction. */
+  onClose: Promise<void>;
+}
+
+/**
+ * Openers that render a CSP finding as a primary security solution system flyout.
+ * Params mirror the query inputs accepted by the misconfiguration / vulnerability findings queries.
+ */
+export interface OpenFindingInSystemFlyout {
+  openMisconfigurationFinding: (params: {
+    resourceId: string;
+    ruleId: string;
+  }) => OpenFindingInSystemFlyoutHandle;
+  openVulnerabilityFinding: (params: {
+    vulnerabilityId?: string | string[];
+    resourceId?: string;
+    packageName?: string | string[];
+    packageVersion?: string | string[];
+    eventId?: string;
+  }) => OpenFindingInSystemFlyoutHandle;
 }
 
 export type CloudSecurityPostureStartServices = Pick<

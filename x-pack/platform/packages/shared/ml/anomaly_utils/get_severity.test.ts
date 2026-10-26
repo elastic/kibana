@@ -8,9 +8,15 @@
 import { getSeverity } from './get_severity';
 
 describe('getSeverity', () => {
-  test('returns warning for 0 <= score < 25', () => {
-    expect(getSeverity(0).id).toBe('warning');
-    expect(getSeverity(0.001).id).toBe('warning');
+  test('returns low for 0 <= score < 3', () => {
+    expect(getSeverity(0).id).toBe('low');
+    expect(getSeverity(0.001).id).toBe('low');
+    expect(getSeverity(2.99).id).toBe('low');
+  });
+
+  test('returns warning for 3 <= score < 25', () => {
+    expect(getSeverity(3).id).toBe('warning');
+    expect(getSeverity(3.001).id).toBe('warning');
     expect(getSeverity(24.99).id).toBe('warning');
   });
 

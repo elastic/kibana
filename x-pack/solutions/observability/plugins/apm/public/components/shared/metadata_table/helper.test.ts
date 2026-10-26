@@ -40,6 +40,58 @@ describe('MetadataTable Helper', () => {
     ]);
   });
 
+  it('normalizes non-array values to arrays', () => {
+    const nonArrayFields = {
+      'host.name': 'my-host',
+      'service.version': 42,
+      'agent.name': ['nodejs'],
+    };
+    const result = getSectionsFromFields(nonArrayFields);
+    expect(result).toEqual([
+      {
+        key: 'agent',
+        label: 'agent',
+        properties: [{ field: 'agent.name', value: ['nodejs'] }],
+      },
+      {
+        key: 'host',
+        label: 'host',
+        properties: [{ field: 'host.name', value: ['my-host'] }],
+      },
+      {
+        key: 'service',
+        label: 'service',
+        properties: [{ field: 'service.version', value: [42] }],
+      },
+    ]);
+  });
+
+  it('filters out null and undefined values during normalization', () => {
+    const fieldsWithNulls = {
+      'host.name': null,
+      'service.version': undefined,
+      'agent.name': ['nodejs'],
+    };
+    const result = getSectionsFromFields(fieldsWithNulls);
+    expect(result).toEqual([
+      {
+        key: 'agent',
+        label: 'agent',
+        properties: [{ field: 'agent.name', value: ['nodejs'] }],
+      },
+      {
+        key: 'host',
+        label: 'host',
+        properties: [{ field: 'host.name', value: [] }],
+      },
+      {
+        key: 'service',
+        label: 'service',
+        properties: [{ field: 'service.version', value: [] }],
+      },
+    ]);
+  });
+
   describe('filter', () => {
     it('items by key', () => {
       const filteredItems = filterSectionsByTerm(metadataItems, 'http');
@@ -70,6 +122,42 @@ describe('MetadataTable Helper', () => {
     it('returns empty when no item matches', () => {
       const filteredItems = filterSectionsByTerm(metadataItems, 'post');
       expect(filteredItems).toEqual([]);
+    });
+
+    it('does not throw when value is a non-array primitive', () => {
+      const sectionsWithPrimitive = [
+        {
+          key: 'host',
+          label: 'host',
+          properties: [{ field: 'host.name', value: 'my-host' as unknown as string[] }],
+        },
+      ];
+      expect(() => filterSectionsByTerm(sectionsWithPrimitive, 'my')).not.toThrow();
+      expect(filterSectionsByTerm(sectionsWithPrimitive, 'my')).toEqual([
+        {
+          key: 'host',
+          label: 'host',
+          properties: [{ field: 'host.name', value: 'my-host' }],
+        },
+      ]);
+    });
+
+    it('does not throw when value is undefined', () => {
+      const sectionsWithUndefined = [
+        {
+          key: 'host',
+          label: 'host',
+          properties: [{ field: 'host.name', value: undefined as unknown as string[] }],
+        },
+      ];
+      expect(() => filterSectionsByTerm(sectionsWithUndefined, 'host')).not.toThrow();
+      expect(filterSectionsByTerm(sectionsWithUndefined, 'host')).toEqual([
+        {
+          key: 'host',
+          label: 'host',
+          properties: [{ field: 'host.name', value: undefined }],
+        },
+      ]);
     });
   });
 });

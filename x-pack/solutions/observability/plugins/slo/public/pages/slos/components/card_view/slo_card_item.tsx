@@ -10,23 +10,14 @@ import { EuiIcon, EuiPanel, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  LazySavedObjectSaveModalDashboard,
-  withSuspense,
-} from '@kbn/presentation-util-plugin/public';
-import { ALL_VALUE, HistoricalSummaryResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
-import { Rule } from '@kbn/triggers-actions-ui-plugin/public';
+import { SavedObjectSaveModalDashboard } from '@kbn/presentation-util-plugin/public';
+import type { HistoricalSummaryResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { ALL_VALUE } from '@kbn/slo-schema';
+import type { Rule } from '@kbn/triggers-actions-ui-plugin/public';
 import moment from 'moment';
 import React, { useState } from 'react';
-import { SloDeleteModal } from '../../../../components/slo/delete_confirmation_modal/slo_delete_confirmation_modal';
-import { SloDisableConfirmationModal } from '../../../../components/slo/disable_confirmation_modal/slo_disable_confirmation_modal';
-import { SloEnableConfirmationModal } from '../../../../components/slo/enable_confirmation_modal/slo_enable_confirmation_modal';
-import { SloResetConfirmationModal } from '../../../../components/slo/reset_confirmation_modal/slo_reset_confirmation_modal';
-import { useDisableSlo } from '../../../../hooks/use_disable_slo';
-import { useEnableSlo } from '../../../../hooks/use_enable_slo';
 import { useKibana } from '../../../../hooks/use_kibana';
-import { useResetSlo } from '../../../../hooks/use_reset_slo';
-import { BurnRateRuleParams } from '../../../../typings';
+import type { BurnRateRuleParams } from '../../../../typings';
 import { formatHistoricalData } from '../../../../utils/slo/chart_data_formatter';
 import { useSloListActions } from '../../hooks/use_slo_list_actions';
 import { useSloFormattedSummary } from '../../hooks/use_slo_summary';
@@ -35,7 +26,6 @@ import { EditBurnRateRuleFlyout } from '../common/edit_burn_rate_rule_flyout';
 import { SloCardItemActions } from './slo_card_item_actions';
 import { SloCardItemBadges } from './slo_card_item_badges';
 
-const SavedObjectSaveModalDashboard = withSuspense(LazySavedObjectSaveModalDashboard);
 export interface Props {
   slo: SLOWithSummaryResponse;
   rules: Array<Rule<BurnRateRuleParams>> | undefined;
@@ -45,6 +35,7 @@ export interface Props {
   loading: boolean;
   error: boolean;
   refetchRules: () => void;
+  isInteractive?: boolean;
 }
 
 export const useSloCardColor = (status?: SLOWithSummaryResponse['summary']['status']) => {
@@ -69,16 +60,19 @@ const getFirstGroupBy = (slo: SLOWithSummaryResponse) => {
   return slo.groupBy && ![slo.groupBy].flat().includes(ALL_VALUE) ? firstGroupBy : '';
 };
 
-export function SloCardItem({ slo, rules, activeAlerts, historicalSummary, refetchRules }: Props) {
+export function SloCardItem({
+  slo,
+  rules,
+  activeAlerts,
+  historicalSummary,
+  refetchRules,
+  isInteractive = true,
+}: Props) {
   const containerRef = React.useRef<HTMLDivElement>(null);
 
   const [isActionsPopoverOpen, setIsActionsPopoverOpen] = useState(false);
   const [isAddRuleFlyoutOpen, setIsAddRuleFlyoutOpen] = useState(false);
   const [isEditRuleFlyoutOpen, setIsEditRuleFlyoutOpen] = useState(false);
-  const [isDeleteConfirmationModalOpen, setDeleteConfirmationModalOpen] = useState(false);
-  const [isResetConfirmationModalOpen, setResetConfirmationModalOpen] = useState(false);
-  const [isEnableConfirmationModalOpen, setEnableConfirmationModalOpen] = useState(false);
-  const [isDisableConfirmationModalOpen, setDisableConfirmationModalOpen] = useState(false);
   const [isDashboardAttachmentReady, setDashboardAttachmentReady] = useState(false);
 
   const historicalSliData = formatHistoricalData(historicalSummary, 'sli_value');
@@ -88,39 +82,6 @@ export function SloCardItem({ slo, rules, activeAlerts, historicalSummary, refet
     setIsActionsPopoverOpen,
     setIsAddRuleFlyoutOpen,
   });
-
-  const closeDeleteModal = () => {
-    setDeleteConfirmationModalOpen(false);
-  };
-
-  const { mutate: resetSlo, isLoading: isResetLoading } = useResetSlo();
-  const { mutate: enableSlo, isLoading: isEnableLoading } = useEnableSlo();
-  const { mutate: disableSlo, isLoading: isDisableLoading } = useDisableSlo();
-
-  const handleResetConfirm = () => {
-    resetSlo({ id: slo.id, name: slo.name });
-    setResetConfirmationModalOpen(false);
-  };
-
-  const handleResetCancel = () => {
-    setResetConfirmationModalOpen(false);
-  };
-
-  const handleEnableCancel = () => {
-    setEnableConfirmationModalOpen(false);
-  };
-  const handleEnableConfirm = () => {
-    enableSlo({ id: slo.id, name: slo.name });
-    setEnableConfirmationModalOpen(false);
-  };
-
-  const handleDisableCancel = () => {
-    setDisableConfirmationModalOpen(false);
-  };
-  const handleDisableConfirm = () => {
-    disableSlo({ id: slo.id, name: slo.name });
-    setDisableConfirmationModalOpen(false);
-  };
 
   return (
     <>
@@ -168,24 +129,24 @@ export function SloCardItem({ slo, rules, activeAlerts, historicalSummary, refet
               rules={rules}
               activeAlerts={activeAlerts}
               handleCreateRule={handleCreateRule}
+              isInteractive={isInteractive}
             />
           }
+          isInteractive={isInteractive}
         />
-        <div className={isActionsPopoverOpen ? '' : 'sloCardItemActions_hover'}>
-          <SloCardItemActions
-            slo={slo}
-            rules={rules}
-            isActionsPopoverOpen={isActionsPopoverOpen}
-            setIsActionsPopoverOpen={setIsActionsPopoverOpen}
-            setIsAddRuleFlyoutOpen={setIsAddRuleFlyoutOpen}
-            setDeleteConfirmationModalOpen={setDeleteConfirmationModalOpen}
-            setIsEditRuleFlyoutOpen={setIsEditRuleFlyoutOpen}
-            setDashboardAttachmentReady={setDashboardAttachmentReady}
-            setResetConfirmationModalOpen={setResetConfirmationModalOpen}
-            setEnableConfirmationModalOpen={setEnableConfirmationModalOpen}
-            setDisableConfirmationModalOpen={setDisableConfirmationModalOpen}
-          />
-        </div>
+        {isInteractive && (
+          <div className={isActionsPopoverOpen ? '' : 'sloCardItemActions_hover'}>
+            <SloCardItemActions
+              slo={slo}
+              rules={rules}
+              isActionsPopoverOpen={isActionsPopoverOpen}
+              setIsActionsPopoverOpen={setIsActionsPopoverOpen}
+              setIsAddRuleFlyoutOpen={setIsAddRuleFlyoutOpen}
+              setIsEditRuleFlyoutOpen={setIsEditRuleFlyoutOpen}
+              setDashboardAttachmentReady={setDashboardAttachmentReady}
+            />
+          </div>
+        )}
       </EuiPanel>
 
       <BurnRateRuleFlyout
@@ -200,37 +161,6 @@ export function SloCardItem({ slo, rules, activeAlerts, historicalSummary, refet
         setIsEditRuleFlyoutOpen={setIsEditRuleFlyoutOpen}
         refetchRules={refetchRules}
       />
-
-      {isDeleteConfirmationModalOpen ? (
-        <SloDeleteModal slo={slo} onCancel={closeDeleteModal} onSuccess={closeDeleteModal} />
-      ) : null}
-
-      {isResetConfirmationModalOpen ? (
-        <SloResetConfirmationModal
-          slo={slo}
-          onCancel={handleResetCancel}
-          onConfirm={handleResetConfirm}
-          isLoading={isResetLoading}
-        />
-      ) : null}
-
-      {isEnableConfirmationModalOpen ? (
-        <SloEnableConfirmationModal
-          slo={slo}
-          onCancel={handleEnableCancel}
-          onConfirm={handleEnableConfirm}
-          isLoading={isEnableLoading}
-        />
-      ) : null}
-
-      {isDisableConfirmationModalOpen ? (
-        <SloDisableConfirmationModal
-          slo={slo}
-          onCancel={handleDisableCancel}
-          onConfirm={handleDisableConfirm}
-          isLoading={isDisableLoading}
-        />
-      ) : null}
 
       {isDashboardAttachmentReady ? (
         <SavedObjectSaveModalDashboard
@@ -258,11 +188,13 @@ export function SloCardChart({
   badges,
   onClick,
   historicalSliData,
+  isInteractive = true,
 }: {
   badges: React.ReactNode;
   slo: SLOWithSummaryResponse;
   historicalSliData?: Array<{ key?: number; value?: number }>;
   onClick?: () => void;
+  isInteractive?: boolean;
 }) {
   const {
     application: { navigateToUrl },
@@ -283,15 +215,17 @@ export function SloCardChart({
             iconAlign: 'right',
           },
         }}
-        onElementClick={([d]) => {
-          if (onClick) {
-            onClick();
-          } else {
-            if (isMetricElementEvent(d)) {
-              navigateToUrl(sloDetailsUrl);
+        {...(isInteractive && {
+          onElementClick: ([d]) => {
+            if (onClick) {
+              onClick();
+            } else {
+              if (isMetricElementEvent(d)) {
+                navigateToUrl(sloDetailsUrl);
+              }
             }
-          }
-        }}
+          },
+        })}
         locale={i18n.getLocale()}
       />
       <Metric
@@ -322,7 +256,7 @@ export function SloCardChart({
                   }}
                 />
               ),
-              icon: () => <EuiIcon type="visGauge" size="l" />,
+              icon: () => <EuiIcon type="chartGauge" size="l" aria-hidden={true} />,
               color: cardColor,
               body: badges,
             },

@@ -14,16 +14,22 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod/v4';
 
-export type ActionStateSuccessResponse = z.infer<typeof ActionStateSuccessResponse>;
-export const ActionStateSuccessResponse = z.object({
-  body: z.object({
+export const ActionStateSuccessResponse = lazySchema(() =>
+  z.object({
     data: z.object({
-      canEncrypt: z.boolean().optional(),
+      /**
+       * Whether the Kibana instance has encryption enabled for response actions.
+       */
+      canEncrypt: z
+        .boolean()
+        .optional()
+        .describe('Whether the Kibana instance has encryption enabled for response actions.'),
     }),
-  }),
-});
+  })
+);
+export type ActionStateSuccessResponse = z.infer<typeof ActionStateSuccessResponse>;
 
+export const EndpointGetActionsStateResponse = lazySchema(() => ActionStateSuccessResponse);
 export type EndpointGetActionsStateResponse = z.infer<typeof EndpointGetActionsStateResponse>;
-export const EndpointGetActionsStateResponse = ActionStateSuccessResponse;

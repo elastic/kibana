@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { ElementFactory } from '../../../types';
+import type { ElementFactory } from '../../../types';
 
 export const horizontalBarChart: ElementFactory = () => ({
   name: 'horizontalBarChart',
   displayName: 'Bar horizontal',
   type: 'chart',
   help: 'A customizable horizontal bar chart',
-  icon: 'visBarHorizontal',
+  icon: 'chartBarHorizontal',
   expression: `kibana
 | selectFilter
 | demodata

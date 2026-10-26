@@ -11,14 +11,17 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React, { useState } from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { ComparisonControls, ComparisonControlsProps } from './comparison_controls';
-import { DocumentDiffMode } from './types';
+import { EuiThemeProvider } from '@elastic/eui';
+import type { ComparisonControlsProps } from './comparison_controls';
+import { ComparisonControls } from './comparison_controls';
+import type { DocumentDiffMode } from './types';
+import { createMockEsqlSource } from '@kbn/data-source/src/__mocks__/esql_source.mock';
 
 const renderComparisonControls = ({
-  isPlainRecord = false,
+  isEsql = false,
   forceShowAllFields = false,
 }: {
-  isPlainRecord?: ComparisonControlsProps['isPlainRecord'];
+  isEsql?: boolean;
   forceShowAllFields?: ComparisonControlsProps['forceShowAllFields'];
 } = {}) => {
   const selectedDocIds = ['0', '1', '2'];
@@ -32,30 +35,32 @@ const renderComparisonControls = ({
     return (
       <>
         {isCompareActive && <span>Comparison active</span>}
-        <IntlProvider locale="en">
-          <ComparisonControls
-            isPlainRecord={isPlainRecord}
-            selectedDocIds={selectedDocIds}
-            showDiff={showDiff}
-            diffMode={diffMode}
-            showDiffDecorations={showDiffDecorations}
-            showMatchingValues={showMatchingValues}
-            showAllFields={showAllFields}
-            forceShowAllFields={forceShowAllFields}
-            setIsCompareActive={setIsCompareActive}
-            setShowDiff={setShowDiff}
-            setDiffMode={setDiffMode}
-            setShowDiffDecorations={setShowDiffDecorations}
-            setShowMatchingValues={setShowMatchingValues}
-            setShowAllFields={setShowAllFields}
-          />
-        </IntlProvider>
+        <EuiThemeProvider>
+          <IntlProvider locale="en">
+            <ComparisonControls
+              dataSource={isEsql ? createMockEsqlSource() : undefined}
+              selectedDocIds={selectedDocIds}
+              showDiff={showDiff}
+              diffMode={diffMode}
+              showDiffDecorations={showDiffDecorations}
+              showMatchingValues={showMatchingValues}
+              showAllFields={showAllFields}
+              forceShowAllFields={forceShowAllFields}
+              setIsCompareActive={setIsCompareActive}
+              setShowDiff={setShowDiff}
+              setDiffMode={setDiffMode}
+              setShowDiffDecorations={setShowDiffDecorations}
+              setShowMatchingValues={setShowMatchingValues}
+              setShowAllFields={setShowAllFields}
+            />
+          </IntlProvider>
+        </EuiThemeProvider>
       </>
     );
   };
   render(<Wrapper />);
   const getComparisonSettingsButton = () =>
-    screen.getByRole('button', { name: 'Comparison settings' });
+    screen.getByTestId('unifiedDataTableComparisonSettings');
   const getShowDiffSwitch = () => screen.getByTestId('unifiedDataTableShowDiffSwitch');
   const getDiffModeEntry = (mode: DocumentDiffMode) =>
     screen.getByTestId(`unifiedDataTableDiffMode-${mode}`);
@@ -67,28 +72,26 @@ const renderComparisonControls = ({
     screen.getByTestId('unifiedDataTableDiffOptionSwitch-showDiffDecorations');
   return {
     getComparisonCountDisplay: () =>
-      screen.getByText(
-        `Comparing ${selectedDocIds.length} ${isPlainRecord ? 'results' : 'documents'}`
-      ),
+      screen.getByText(`Comparing ${selectedDocIds.length} ${isEsql ? 'results' : 'documents'}`),
     getComparisonSettingsButton,
     clickComparisonSettingsButton: async () => await userEvent.click(getComparisonSettingsButton()),
     getShowDiffSwitch,
     clickShowDiffSwitch: async () =>
       await userEvent.click(getShowDiffSwitch(), { pointerEventsCheck: 0 }),
     clickDiffModeFullValueButton: async () =>
-      await userEvent.click(screen.getByRole('button', { name: 'Full value' }), {
+      await userEvent.click(getDiffModeEntry('basic'), {
         pointerEventsCheck: 0,
       }),
     clickDiffModeByCharacterButton: async () =>
-      await userEvent.click(screen.getByRole('button', { name: 'By character' }), {
+      await userEvent.click(getDiffModeEntry('chars'), {
         pointerEventsCheck: 0,
       }),
     clickDiffModeByWordButton: async () =>
-      await userEvent.click(screen.getByRole('button', { name: 'By word' }), {
+      await userEvent.click(getDiffModeEntry('words'), {
         pointerEventsCheck: 0,
       }),
     clickDiffModeByLineButton: async () =>
-      await userEvent.click(screen.getByRole('button', { name: 'By line' }), {
+      await userEvent.click(getDiffModeEntry('lines'), {
         pointerEventsCheck: 0,
       }),
     getDiffModeEntry,
@@ -107,7 +110,7 @@ const renderComparisonControls = ({
     getShowDiffDecorationsSwitch,
     clickShowDiffDecorationsSwitch: async () =>
       await userEvent.click(getShowDiffDecorationsSwitch(), { pointerEventsCheck: 0 }),
-    getExitComparisonButton: () => screen.getByRole('button', { name: 'Exit comparison mode' }),
+    getExitComparisonButton: () => screen.getByTestId('unifiedDataTableExitDocumentComparison'),
     isCompareActive: () => screen.queryByText('Comparison active') !== null,
   };
 };
@@ -120,8 +123,8 @@ describe('ComparisonControls', () => {
     expect(result.getExitComparisonButton()).toBeInTheDocument();
   });
 
-  it('should render with isPlainRecord = true', () => {
-    const result = renderComparisonControls({ isPlainRecord: true });
+  it('should render results wording for an ES|QL source', () => {
+    const result = renderComparisonControls({ isEsql: true });
     expect(result.getComparisonCountDisplay()).toBeInTheDocument();
     expect(result.getComparisonSettingsButton()).toBeInTheDocument();
     expect(result.getExitComparisonButton()).toBeInTheDocument();

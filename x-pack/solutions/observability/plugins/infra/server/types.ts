@@ -13,7 +13,6 @@ import type {
 } from '@kbn/core/server';
 import type { SearchRequestHandlerContext } from '@kbn/data-plugin/server';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
-import type { EntityManagerServerPluginStart } from '@kbn/entityManager-plugin/server';
 import type { InfraServerPluginStartDeps } from './lib/adapters/framework';
 import type {
   InventoryViewsServiceSetup,
@@ -42,6 +41,11 @@ export interface InfraPluginStart {
 export type MlSystem = ReturnType<MlPluginSetup['mlSystemProvider']>;
 export type MlAnomalyDetectors = ReturnType<MlPluginSetup['anomalyDetectorsProvider']>;
 
+export interface ServerlessInfo {
+  isServerless: boolean;
+  cpsEnabled: boolean;
+}
+
 export interface InfraRequestHandlerContext {
   mlAnomalyDetectors?: MlAnomalyDetectors;
   mlSystem?: MlSystem;
@@ -49,7 +53,6 @@ export interface InfraRequestHandlerContext {
   savedObjectsClient: SavedObjectsClientContract;
   uiSettingsClient: IUiSettingsClient;
   getMetricsIndices: () => Promise<string>;
-  entityManager: EntityManagerServerPluginStart;
 }
 
 /**

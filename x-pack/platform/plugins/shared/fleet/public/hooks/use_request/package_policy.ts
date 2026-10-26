@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@kbn/react-query';
 
 import { packagePolicyRouteService } from '../../services';
 import type {
@@ -26,28 +26,77 @@ import type {
 
 import { API_VERSIONS } from '../../../common/constants';
 
+import {
+  type CloudConnectorIacPersistOptions,
+  persistPendingCloudConnectorIac,
+} from './pending_cloud_connector_iac';
+
 import type { RequestError } from './use_request';
 import { sendRequest, sendRequestForRq, useRequest } from './use_request';
 
-export const sendCreatePackagePolicy = (body: CreatePackagePolicyRequest['body']) => {
-  return sendRequest<CreatePackagePolicyResponse>({
+/**
+ * @deprecated use sendCreatePackagePolicyForRq instead
+ */
+export const sendCreatePackagePolicy = async (
+  body: CreatePackagePolicyRequest['body'],
+  // Optional: surfaces a failed template-details write after the save; see CloudConnectorIacPersistOptions.
+  { onIacPersistError }: CloudConnectorIacPersistOptions = {}
+) => {
+  const response = await sendRequest<CreatePackagePolicyResponse>({
     path: packagePolicyRouteService.getCreatePath(),
     method: 'post',
     version: API_VERSIONS.public.v1,
     body: JSON.stringify(body),
   });
+  if (!response.error) {
+    await persistPendingCloudConnectorIac({
+      policyName: body.name,
+      cloudConnectorId: response.data?.item.cloud_connector_id,
+      onError: onIacPersistError,
+    });
+  }
+  return response;
 };
 
-export const sendUpdatePackagePolicy = (
-  packagePolicyId: string,
-  body: UpdatePackagePolicyRequest['body']
+export const sendCreatePackagePolicyForRq = async (
+  body: CreatePackagePolicyRequest['body'],
+  // Optional: surfaces a failed template-details write after the save; see CloudConnectorIacPersistOptions.
+  { onIacPersistError }: CloudConnectorIacPersistOptions = {}
 ) => {
-  return sendRequest<UpdatePackagePolicyResponse>({
+  const result = await sendRequestForRq<CreatePackagePolicyResponse>({
+    path: packagePolicyRouteService.getCreatePath(),
+    method: 'post',
+    version: API_VERSIONS.public.v1,
+    body: JSON.stringify(body),
+  });
+  await persistPendingCloudConnectorIac({
+    policyName: body.name,
+    cloudConnectorId: result.item.cloud_connector_id,
+    onError: onIacPersistError,
+  });
+  return result;
+};
+
+export const sendUpdatePackagePolicy = async (
+  packagePolicyId: string,
+  body: UpdatePackagePolicyRequest['body'],
+  // Optional: surfaces a failed template-details write after the save; see CloudConnectorIacPersistOptions.
+  { onIacPersistError }: CloudConnectorIacPersistOptions = {}
+) => {
+  const response = await sendRequest<UpdatePackagePolicyResponse>({
     path: packagePolicyRouteService.getUpdatePath(packagePolicyId),
     method: 'put',
     version: API_VERSIONS.public.v1,
     body: JSON.stringify(body),
   });
+  if (!response.error) {
+    await persistPendingCloudConnectorIac({
+      policyName: body.name,
+      cloudConnectorId: response.data?.item.cloud_connector_id ?? body.cloud_connector_id,
+      onError: onIacPersistError,
+    });
+  }
+  return response;
 };
 
 export const sendDeletePackagePolicy = (body: DeletePackagePoliciesRequest['body']) => {
@@ -114,7 +163,10 @@ export const sendGetPackagePolicies = (query: GetPackagePoliciesRequest['query']
   });
 };
 
-export const useGetOnePackagePolicyQuery = (packagePolicyId: string) => {
+export const useGetOnePackagePolicyQuery = (
+  packagePolicyId: string,
+  options?: { enabled?: boolean }
+) => {
   return useQuery<GetOnePackagePolicyResponse, RequestError>(
     ['packagePolicy', packagePolicyId],
     () =>
@@ -122,7 +174,8 @@ export const useGetOnePackagePolicyQuery = (packagePolicyId: string) => {
         method: 'get',
         version: API_VERSIONS.public.v1,
         path: packagePolicyRouteService.getInfoPath(packagePolicyId),
-      })
+      }),
+    { enabled: options?.enabled }
   );
 };
 
@@ -156,7 +209,9 @@ export function useUpgradePackagePolicyDryRunQuery(
   }
 
   return useQuery<UpgradePackagePolicyDryRunResponse, RequestError>(
-    ['upgradePackagePolicyDryRun', packagePolicyIds, packageVersion],
+    // Sorted ids + no focus refetching, for the same reasons as
+    // `useUpgradeAgentlessPoliciesDryRunQuery`: each spurious refetch is another dry-run POST.
+    ['upgradePackagePolicyDryRun', [...packagePolicyIds].sort(), packageVersion],
     () =>
       sendRequestForRq<UpgradePackagePolicyDryRunResponse>({
         path: packagePolicyRouteService.getDryRunPath(),
@@ -164,7 +219,10 @@ export function useUpgradePackagePolicyDryRunQuery(
         version: API_VERSIONS.public.v1,
         body: JSON.stringify(body),
       }),
-    { enabled }
+    {
+      enabled,
+      refetchOnWindowFocus: false,
+    }
   );
 }
 

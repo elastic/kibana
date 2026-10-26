@@ -4,12 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { ComponentType } from 'react';
+import type { ComponentType } from 'react';
+import React from 'react';
 import { action } from '@storybook/addon-actions';
 import { createKibanaReactContext, type KibanaServices } from '@kbn/kibana-react-plugin/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
-import { of } from 'rxjs';
+import { EMPTY, of } from 'rxjs';
 import {
   WEB_STORAGE_CLEAR_ACTION,
   WEB_STORAGE_GET_ITEM_ACTION,
@@ -44,7 +45,13 @@ const createMockStorage = () => ({
   set: action(STORAGE_SET_ACTION),
   remove: action(STORAGE_REMOVE_ACTION),
   clear: action(STORAGE_CLEAR_ACTION),
-  get: () => true,
+  get: (name: string) => {
+    if (name === 'typeahead:test-kuery') {
+      return [];
+    }
+
+    return true;
+  },
 });
 
 const uiSettings: Record<string, unknown> = {
@@ -111,7 +118,24 @@ const uiSettings: Record<string, unknown> = {
 };
 
 const services: Partial<KibanaServices> = {
+  appName: 'test',
   application: applicationServiceMock.createStartContract(),
+  featureFlags: {
+    appendContext: () => Promise.resolve(),
+    getBooleanValue$: (_flagName, fallback) => of(fallback),
+    getStringValue$: (_flagName, fallback) => of(fallback),
+    getNumberValue$: (_flagName, fallback) => of(fallback),
+    useBooleanValue: (_flagName, fallback) => fallback,
+    useStringValue: (_flagName, fallback) => fallback,
+    useNumberValue: (_flagName, fallback) => fallback,
+  },
+  kql: {
+    autocomplete: {
+      getQuerySuggestions: () => [],
+      getAutocompleteSettings: () => {},
+      hasQuerySuggestions: () => false,
+    },
+  },
   uiSettings: {
     // @ts-ignore
     get: (key: string) => uiSettings[key],
@@ -145,6 +169,11 @@ const services: Partial<KibanaServices> = {
             queries: [],
           }),
       },
+      timefilter: {
+        timefilter: {
+          getAutoRefreshFetch$: () => EMPTY,
+        },
+      },
     },
     autocomplete: {
       hasQuerySuggestions: () => Promise.resolve(false),
@@ -152,6 +181,18 @@ const services: Partial<KibanaServices> = {
     },
     dataViews: {
       getIdsWithTitle: () => [],
+    },
+    search: {
+      session: {
+        state$: of({}),
+      },
+    },
+    dateRangePickerPresets: {
+      getDefaultPresets: () => [],
+      getPresets$: () => of([]),
+      canPersist: () => false,
+      savePreset: () => Promise.resolve('saved'),
+      deletePreset: () => Promise.resolve(),
     },
   },
   dataViewEditor: {

@@ -19,7 +19,8 @@ import {
 import { NO_CA_PATH, NO_CERT_PATH, NO_KEY_PATH, TWO_CAS_PATH, TWO_KEYS_PATH } from './__fixtures__';
 import { readFileSync } from 'fs';
 
-import { readPkcs12Keystore, Pkcs12ReadResult, readPkcs12Truststore } from './pkcs12';
+import type { Pkcs12ReadResult } from './pkcs12';
+import { readPkcs12Keystore, readPkcs12Truststore } from './pkcs12';
 
 const reformatPem = (pem: string) => {
   // ensure consistency in line endings when comparing two PEM files
@@ -154,7 +155,7 @@ describe('#readPkcs12Keystore', () => {
 
   describe('Throws errors', () => {
     const expectError = (password?: string) => {
-      expect(() => readPkcs12Keystore(ES_P12_PATH, password)).toThrowError(
+      expect(() => readPkcs12Keystore(ES_P12_PATH, password)).toThrow(
         'PKCS#12 MAC could not be verified. Invalid password?'
       );
     };
@@ -173,13 +174,13 @@ describe('#readPkcs12Keystore', () => {
 
     it('When an invalid file path is used', () => {
       const path = 'invalid-filepath';
-      expect(() => readPkcs12Keystore(path)).toThrowError(
+      expect(() => readPkcs12Keystore(path)).toThrow(
         `ENOENT: no such file or directory, open '${path}'`
       );
     });
 
     it('When two keys are present', () => {
-      expect(() => readPkcs12Keystore(TWO_KEYS_PATH, '')).toThrowError(
+      expect(() => readPkcs12Keystore(TWO_KEYS_PATH, '')).toThrow(
         'Keystore contains multiple private keys.'
       );
     });

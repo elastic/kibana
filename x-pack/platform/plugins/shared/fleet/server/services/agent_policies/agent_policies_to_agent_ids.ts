@@ -8,6 +8,7 @@
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 
 import { AGENTS_INDEX } from '../../../common';
+import { buildPolicyBaseIdsWithFallbackEsFilter } from '../../../common/services/version_specific_policies_utils';
 
 /**
  * Given a list of Agent Policy IDs, an array will be returned with
@@ -30,13 +31,8 @@ export const getAgentIdsForAgentPolicies = async (
     _source: false,
     query: {
       bool: {
-        filter: [
-          {
-            terms: {
-              policy_id: agentPolicyIds,
-            },
-          },
-        ],
+        // Agents on `<id>#sentinel` or a version specific policy count for the base policy
+        filter: [buildPolicyBaseIdsWithFallbackEsFilter(agentPolicyIds)],
       },
     },
   });

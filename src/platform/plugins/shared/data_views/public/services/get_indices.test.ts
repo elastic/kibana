@@ -9,7 +9,7 @@
 
 import { getIndices, getIndicesViaResolve, responseToItemArray } from './get_indices';
 import { httpServiceMock } from '@kbn/core/public/mocks';
-import { ResolveIndexResponseItemIndexAttrs } from '../types';
+import type { ResolveIndexResponseItemIndexAttrs } from '../types';
 
 export const successfulResolveResponse = {
   indices: [
@@ -142,6 +142,13 @@ describe('getIndices', () => {
       });
       const result = await getIndices({ http, pattern: 'kibana', isRollupIndex });
       expect(result.length).toBe(0);
+    });
+
+    it('should rethrow errors when throwOnError is set', async () => {
+      http.get.mockRejectedValueOnce(new Error('Test error'));
+      await expect(
+        getIndices({ http, pattern: 'kibana', isRollupIndex, throwOnError: true })
+      ).rejects.toThrow('Test error');
     });
   });
 });

@@ -7,20 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import './timeseries_visualization.scss';
+import { omit } from 'lodash';
 
 import React, { Suspense, useCallback, useEffect, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingChart } from '@elastic/eui';
-import { XYChartSeriesIdentifier, GeometryValue } from '@elastic/charts';
-import { IUiSettingsClient } from '@kbn/core/public';
-import { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/common';
-import { PersistedState } from '@kbn/visualizations-plugin/public';
+import type { XYChartSeriesIdentifier, GeometryValue } from '@elastic/charts';
+import type { IUiSettingsClient } from '@kbn/core/public';
+import type { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/common';
+import type { PersistedState } from '@kbn/visualizations-plugin/public';
+import { visContainerStyle } from '@kbn/visualizations-common';
 import type { PaletteRegistry } from '@kbn/coloring';
+import { css } from '@emotion/react';
 import { TimeseriesLoading } from './timeseries_loading';
 import { TimeseriesVisTypes } from './vis_types';
 import type { FetchedIndexPattern, PanelData, TimeseriesVisData } from '../../../common/types';
 import { isVisTableData } from '../../../common/vis_data_utils';
-import { TimeseriesVisParams } from '../../types';
+import type { TimeseriesVisParams } from '../../types';
 import { convertSeriesToDataTable } from './lib/convert_series_to_datatable';
 import { getClickFilterData } from './lib/get_click_filter_data';
 import { X_ACCESSOR_INDEX } from '../visualizations/constants';
@@ -56,6 +58,7 @@ function TimeseriesVisualization({
 }: TimeseriesVisualizationProps) {
   const [indexPattern, setIndexPattern] = useState<FetchedIndexPattern['indexPattern']>(null);
   const [palettesService, setPalettesService] = useState<PaletteRegistry | null>(null);
+  const interactive = handlers.isInteractive();
 
   useEffect(() => {
     getCharts()
@@ -169,7 +172,13 @@ function TimeseriesVisualization({
   return (
     <EuiFlexGroup direction="column" gutterSize="none" responsive={false}>
       {shouldDisplayLastValueIndicator && (
-        <EuiFlexItem className="tvbLastValueIndicator" grow={false}>
+        <EuiFlexItem
+          className="tvbLastValueIndicator"
+          css={css`
+            align-self: flex-end;
+          `}
+          grow={false}
+        >
           <LastValueModeIndicator
             seriesData={firstSeries?.data}
             ignoreDaylightTime={model.ignore_daylight_time}
@@ -181,26 +190,29 @@ function TimeseriesVisualization({
       <EuiFlexItem>
         <Suspense
           fallback={
-            <div className="visChart__spinner">
+            <div className="visChart__spinner" css={visContainerStyle}>
               <EuiLoadingChart size="l" />
             </div>
           }
         >
           <VisComponent
             getConfig={getConfig}
-            model={model}
+            model={interactive ? model : omit(model, 'drilldown_url')}
             visData={visData}
             uiState={uiState}
-            onBrush={onBrush}
             initialRender={initialRender}
-            onFilterClick={handleFilterClick}
-            onUiState={handleUiState}
             syncColors={syncColors}
             syncTooltips={syncTooltips}
             syncCursor={syncCursor}
             palettesService={palettesService}
             indexPattern={indexPattern}
+            isInteractive={interactive}
             fieldFormatMap={indexPattern?.fieldFormatMap}
+            {...(interactive && {
+              onUiState: handleUiState,
+              onBrush,
+              onFilterClick: handleFilterClick,
+            })}
           />
         </Suspense>
       </EuiFlexItem>

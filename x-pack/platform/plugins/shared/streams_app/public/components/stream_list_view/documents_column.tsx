@@ -5,9 +5,15 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiI18nNumber, EuiSkeletonRectangle } from '@elastic/eui';
-import { euiThemeVars } from '@kbn/ui-theme';
+import React, { useEffect } from 'react';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiI18nNumber,
+  EuiLoadingChart,
+  EuiIcon,
+  useEuiTheme,
+} from '@elastic/eui';
 import { css } from '@emotion/css';
 import {
   BarSeries,
@@ -20,122 +26,222 @@ import {
 } from '@elastic/charts';
 import { useElasticChartsTheme } from '@kbn/charts-theme';
 import { i18n } from '@kbn/i18n';
-import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
-import { useKibana } from '../../hooks/use_kibana';
+import { FormattedMessage } from '@kbn/i18n-react';
+import useAsync from 'react-use/lib/useAsync';
+import type { UnparsedEsqlResponse } from '@kbn/traced-es-client';
 import { esqlResultToTimeseries } from '../../util/esql_result_to_timeseries';
-import { useTimeFilter } from '../../hooks/use_timefilter';
+import { getMeaningfulBucketMs } from '../../util/stream_overview_esql';
+import type { useTimefilter } from '../../hooks/use_timefilter';
+import { TooltipOrPopoverIcon } from '../tooltip_popover_icon/tooltip_popover_icon';
+import { getFormattedError } from '../../util/errors';
 
 export function DocumentsColumn({
   indexPattern,
+  histogramQueryFetch,
+  retainHistogramQueryFetch,
+  timeState,
   numDataPoints,
+  layout = 'horizontal',
 }: {
   indexPattern: string;
+  histogramQueryFetch: Promise<UnparsedEsqlResponse>;
+  /** Called on mount with the histogram request, returns a release callback for unmount. */
+  retainHistogramQueryFetch?: (histogramFetch: Promise<UnparsedEsqlResponse>) => () => void;
+  timeState: ReturnType<typeof useTimefilter>['timeState'];
   numDataPoints: number;
+  /** `stacked` puts the sparkline above the count (destinations indices list). */
+  layout?: 'horizontal' | 'stacked';
 }) {
-  const {
-    dependencies: {
-      start: {
-        streams: { streamsRepositoryClient },
-      },
-    },
-  } = useKibana();
   const chartBaseTheme = useElasticChartsTheme();
+  const { euiTheme } = useEuiTheme();
 
-  const { absoluteTimeRange } = useTimeFilter();
-  const minInterval = Math.floor((absoluteTimeRange.end - absoluteTimeRange.start) / numDataPoints);
+  const histogramQueryResult = useAsync(() => histogramQueryFetch, [histogramQueryFetch]);
 
-  const histogramQueryFetch = useStreamsAppFetch(
-    async ({ signal }) => {
-      return streamsRepositoryClient.fetch('POST /internal/streams/esql', {
-        params: {
-          body: {
-            operationName: 'get_doc_count_for_stream',
-            query: `FROM ${indexPattern} | STATS doc_count = COUNT(*) BY @timestamp = BUCKET(@timestamp, ${minInterval} ms)`,
-            start: absoluteTimeRange.start,
-            end: absoluteTimeRange.end,
-          },
-        },
-        signal,
-      });
-    },
-    [streamsRepositoryClient, indexPattern, absoluteTimeRange, minInterval]
+  useEffect(
+    () => retainHistogramQueryFetch?.(histogramQueryFetch),
+    [retainHistogramQueryFetch, histogramQueryFetch]
   );
 
   const allTimeseries = React.useMemo(
     () =>
       esqlResultToTimeseries({
-        result: histogramQueryFetch,
+        result: histogramQueryResult,
         metricNames: ['doc_count'],
       }),
-    [histogramQueryFetch]
+    [histogramQueryResult]
   );
 
-  const docCount = allTimeseries.reduce(
-    (acc, series) => acc + series.data.reduce((acc2, item) => acc2 + (item.doc_count || 0), 0),
-    0
+  const docCount = React.useMemo(
+    () =>
+      allTimeseries.reduce(
+        (acc, series) => acc + series.data.reduce((acc2, item) => acc2 + (item.doc_count || 0), 0),
+        0
+      ),
+    [allTimeseries]
   );
 
-  const xFormatter = niceTimeFormatter([absoluteTimeRange.start, absoluteTimeRange.end]);
+  const hasData = docCount > 0;
+
+  const xFormatter = niceTimeFormatter([timeState.start, timeState.end]);
+  const minInterval = getMeaningfulBucketMs(timeState.end - timeState.start, numDataPoints);
+
+  const noDocCountData = histogramQueryResult.error ? '' : '-';
+
+  const noHistogramData = histogramQueryResult.error ? (
+    <TooltipOrPopoverIcon
+      dataTestSubj="streamsDocCount-error"
+      icon="warning"
+      title={getFormattedError(histogramQueryResult.error).message}
+      mode="popover"
+      iconColor="danger"
+    />
+  ) : (
+    <EuiIcon type="chartLine" size="m" aria-hidden={true} />
+  );
+
+  const cellAriaLabel = hasData
+    ? i18n.translate('xpack.streams.documentsColumn.cellDocCountLabel', {
+        defaultMessage: '{docCount} documents in {indexPattern}',
+        values: { docCount, indexPattern },
+      })
+    : i18n.translate('xpack.streams.documentsColumn.cellNoDataLabel', {
+        defaultMessage: 'No documents found in {indexPattern}',
+        values: { indexPattern },
+      });
+
+  const isStacked = layout === 'stacked';
+  const stackedSparklineWidth = `calc(${euiTheme.size.xxl} + ${euiTheme.size.xl})`;
+  const count = (
+    <EuiFlexItem
+      grow={isStacked ? false : 2}
+      aria-hidden="true"
+      className={css`
+        text-align: ${isStacked ? 'center' : 'right'};
+        font-family: 'Roboto mono', sans-serif;
+      `}
+      data-test-subj={`streamsDocCount-${indexPattern}`}
+    >
+      {hasData ? (
+        isStacked ? (
+          <FormattedMessage
+            id="xpack.streams.documentsColumn.stackedCountLabel"
+            defaultMessage="{docCount} docs"
+            values={{ docCount: <EuiI18nNumber value={docCount} /> }}
+          />
+        ) : (
+          <EuiI18nNumber value={docCount} />
+        )
+      ) : (
+        noDocCountData
+      )}
+    </EuiFlexItem>
+  );
+  const sparkline = (
+    <EuiFlexItem
+      grow={isStacked ? false : 3}
+      aria-hidden="true"
+      className={css`
+        border-bottom: ${hasData ? '1px solid' : 'none'} ${euiTheme.colors.lightShade};
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        inline-size: ${isStacked ? stackedSparklineWidth : 'auto'};
+      `}
+    >
+      {hasData ? (
+        <Chart size={{ width: '100%', height: euiTheme.size.l }}>
+          <Settings
+            locale={i18n.getLocale()}
+            baseTheme={chartBaseTheme}
+            theme={{ background: { color: 'transparent' } }}
+            xDomain={{ min: timeState.start, max: timeState.end, minInterval }}
+            noResults={<div />}
+          />
+          <Tooltip
+            stickTo={TooltipStickTo.Middle}
+            headerFormatter={({ value }) => xFormatter(value)}
+          />
+          {allTimeseries.map((serie) => (
+            <BarSeries
+              key={serie.id}
+              id={serie.id}
+              xScaleType={ScaleType.Time}
+              yScaleType={ScaleType.Linear}
+              xAccessor="x"
+              yAccessors={['doc_count']}
+              data={serie.data}
+              enableHistogramMode
+            />
+          ))}
+        </Chart>
+      ) : (
+        noHistogramData
+      )}
+    </EuiFlexItem>
+  );
 
   return (
     <EuiFlexGroup
       alignItems="center"
-      gutterSize="m"
+      direction={isStacked ? 'column' : 'row'}
+      gutterSize={isStacked ? 'xs' : 'm'}
       className={css`
-        height: ${euiThemeVars.euiSizeXL};
+        height: ${isStacked ? 'auto' : euiTheme.size.xl};
+        min-block-size: ${euiTheme.size.xl};
         white-space: nowrap;
       `}
+      role="group"
+      aria-label={cellAriaLabel}
     >
-      {histogramQueryFetch.loading ? (
+      {histogramQueryResult.loading ? (
+        <LoadingPlaceholder />
+      ) : isStacked ? (
         <>
-          <EuiFlexItem>
-            <EuiSkeletonRectangle isLoading width="100%" height={euiThemeVars.euiSizeL} />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiSkeletonRectangle isLoading width="100%" height={euiThemeVars.euiSizeL} />
-          </EuiFlexItem>
+          {sparkline}
+          {count}
         </>
       ) : (
         <>
-          <EuiFlexItem
-            className={css`
-              text-align: right;
-            `}
-          >
-            <EuiI18nNumber value={docCount} />
-          </EuiFlexItem>
-          <EuiFlexItem
-            className={css`
-              border-bottom: 1px solid ${euiThemeVars.euiColorLightestShade};
-            `}
-          >
-            <Chart size={{ width: '100%', height: euiThemeVars.euiSizeL }}>
-              <Settings
-                locale={i18n.getLocale()}
-                baseTheme={chartBaseTheme}
-                theme={{ background: { color: 'transparent' } }}
-                xDomain={{ min: absoluteTimeRange.start, max: absoluteTimeRange.end, minInterval }}
-                noResults={<div />}
-              />
-              <Tooltip
-                stickTo={TooltipStickTo.Middle}
-                headerFormatter={({ value }) => xFormatter(value)}
-              />
-              {allTimeseries.map((serie) => (
-                <BarSeries
-                  key={serie.id}
-                  id={serie.id}
-                  xScaleType={ScaleType.Time}
-                  yScaleType={ScaleType.Linear}
-                  xAccessor="x"
-                  yAccessors={['doc_count']}
-                  data={serie.data}
-                />
-              ))}
-            </Chart>
-          </EuiFlexItem>
+          {count}
+          {sparkline}
         </>
       )}
     </EuiFlexGroup>
   );
 }
+
+const LoadingPlaceholder = () => {
+  const { euiTheme } = useEuiTheme();
+  return (
+    <EuiFlexGroup
+      alignItems="center"
+      justifyContent="flexEnd"
+      gutterSize="m"
+      className={css`
+        height: ${euiTheme.size.xl};
+        white-space: nowrap;
+        padding-right: ${euiTheme.size.xl};
+      `}
+    >
+      <EuiFlexGroup>
+        <EuiFlexItem
+          className={css`
+            text-align: center;
+          `}
+        >
+          -
+        </EuiFlexItem>
+        <EuiFlexItem
+          grow={false}
+          className={css`
+            display: flex;
+            padding-right: ${euiTheme.size.xl};
+            justify-content: center;
+          `}
+        >
+          <EuiLoadingChart size="m" />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiFlexGroup>
+  );
+};

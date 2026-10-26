@@ -17,7 +17,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useHistory } from 'react-router-dom';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
-import { SyntheticsJourneyApiResponse } from '../../../../common/runtime_types/ping';
+import type { SyntheticsJourneyApiResponse } from '../../../../common/runtime_types/ping';
 import { getShortTimeStamp } from '../../components/overview/monitor_list/columns/monitor_status_column';
 
 interface Props {
@@ -36,7 +36,7 @@ export const ChecksNavigation = ({ timestamp, details }: Props) => {
         <EuiButtonEmpty
           data-test-subj="syntheticsChecksNavigationPreviousCheckButton"
           size={isMobile ? 'xs' : 'm'}
-          iconType="arrowLeft"
+          iconType="chevronSingleLeft"
           isDisabled={!details?.previous}
           onClick={() => {
             history.push(`/journey/${details?.previous?.checkGroup}/steps`);
@@ -66,7 +66,7 @@ export const ChecksNavigation = ({ timestamp, details }: Props) => {
         <EuiButtonEmpty
           data-test-subj="syntheticsChecksNavigationNextCheckButton"
           size={isMobile ? 'xs' : 'm'}
-          iconType="arrowRight"
+          iconType="chevronSingleRight"
           iconSide="right"
           isDisabled={!details?.next}
           onClick={() => {

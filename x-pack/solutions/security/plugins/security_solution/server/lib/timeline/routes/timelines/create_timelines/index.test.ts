@@ -31,11 +31,12 @@ import {
   CREATE_TEMPLATE_TIMELINE_ERROR_MESSAGE,
   CREATE_TIMELINE_ERROR_MESSAGE,
 } from '../../../utils/failure_cases';
+import type { SecuritySolutionRequestHandlerContextMock } from '../../../../detection_engine/routes/__mocks__/request_context';
 
 describe('create timelines', () => {
   let server: ReturnType<typeof serverMock.create>;
   let securitySetup: SecurityPluginSetup;
-  let { context } = requestContextMock.createTools();
+  let context: SecuritySolutionRequestHandlerContextMock;
   let mockGetTimeline: jest.Mock;
   let mockGetTemplateTimeline: jest.Mock;
   let mockPersistTimeline: jest.Mock;
@@ -44,7 +45,6 @@ describe('create timelines', () => {
 
   beforeEach(() => {
     jest.resetModules();
-    jest.resetAllMocks();
     jest.clearAllMocks();
 
     server = serverMock.create();
@@ -62,6 +62,11 @@ describe('create timelines', () => {
     mockPersistTimeline = jest.fn();
     mockPersistPinnedEventOnTimeline = jest.fn();
     mockPersistNote = jest.fn();
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+    jest.restoreAllMocks();
   });
 
   describe('Manipulate timeline', () => {
@@ -112,11 +117,11 @@ describe('create timelines', () => {
       });
 
       test('should NOT Create new pinned events', async () => {
-        expect(mockPersistPinnedEventOnTimeline).not.toBeCalled();
+        expect(mockPersistPinnedEventOnTimeline).not.toHaveBeenCalled();
       });
 
       test('should NOT Create notes', async () => {
-        expect(mockPersistNote).not.toBeCalled();
+        expect(mockPersistNote).not.toHaveBeenCalled();
       });
 
       test('returns 200 when create timeline successfully', async () => {
@@ -217,11 +222,11 @@ describe('create timelines', () => {
       });
 
       test('should NOT Create new pinned events', async () => {
-        expect(mockPersistPinnedEventOnTimeline).not.toBeCalled();
+        expect(mockPersistPinnedEventOnTimeline).not.toHaveBeenCalled();
       });
 
       test('should NOT Create notes', async () => {
-        expect(mockPersistNote).not.toBeCalled();
+        expect(mockPersistNote).not.toHaveBeenCalled();
       });
 
       test('returns 200 when create timeline successfully', async () => {

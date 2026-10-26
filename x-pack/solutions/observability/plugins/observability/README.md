@@ -13,12 +13,12 @@ xpack.ruleRegistry.write.enabled: true
 
 When this is set to `true`, your alerts should show on the alerts page.
 
-
 ## Shared navigation
 
 The Observability plugin maintains a navigation registry for Observability solutions, and exposes a shared page template component. Please refer to the docs in [the component directory](public/components/shared/page_template) for more information on registering your solution's navigation structure, and rendering the navigation via the shared component.
 
 ## Exploratory view component
+
 A shared component for visualizing observability data types via lens embeddable. [For further details.](./public/components/shared/exploratory_view/README.md)
 
 ## Unit testing
@@ -47,38 +47,26 @@ open target/coverage/jest/index.html
 
 ## API integration testing
 
-API tests are separated in two suites:
+API tests run under a trial license (the equivalent of gold+) and have been migrated to Scout. Basic-license behavior is covered by unit tests (see `server/lib/annotations/create_annotations_client.test.ts`).
 
-- a basic license test suite
-- a trial license test suite (the equivalent of gold+)
+### Scout API tests
 
-This requires separate test servers and test runners.
-
-### Basic
+The API tests are located in `test/scout/api/tests`. For fast iteration, start a server once and run Playwright directly against it:
 
 ```
-# Start server
-node scripts/functional_tests_server --config x-pack/test/observability_api_integration/basic/config.ts
+# Start a stateful server once (in a separate terminal)
+node scripts/scout.js start-server --arch stateful --domain classic
 
-# Run tests
-node scripts/functional_test_runner --config x-pack/test/observability_api_integration/basic/config.ts
+# Run the API tests against the running server
+node scripts/playwright test --config x-pack/solutions/observability/plugins/observability/test/scout/api/playwright.config.ts --project=local
 ```
 
-The API tests for "basic" are located in `x-pack/test/observability_api_integration/basic/tests`.
-
-### Trial
+Alternatively, let Scout start and stop its own servers:
 
 ```
-# Start server
-node scripts/functional_tests_server --config x-pack/test/observability_api_integration/trial/config.ts
-
-# Run tests
-node scripts/functional_test_runner --config x-pack/test/observability_api_integration/trial/config.ts
+node scripts/scout.js run-tests --arch stateful --domain classic --config x-pack/solutions/observability/plugins/observability/test/scout/api/playwright.config.ts
 ```
-
-The API tests for "trial" are located in `x-pack/test/observability_api_integration/trial/tests`.
 
 ### API test tips
 
-- For debugging access Elasticsearch on `http://localhost:9220` (elastic/changeme)
-- To update snapshots append `--updateSnapshots` to the functional_test_runner command
+- For debugging, access Elasticsearch on `http://localhost:9220` (elastic/changeme).

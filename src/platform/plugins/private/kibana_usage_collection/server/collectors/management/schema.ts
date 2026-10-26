@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { MakeSchemaFrom } from '@kbn/usage-collection-plugin/server';
-import { UsageStats } from './types';
+import type { MakeSchemaFrom } from '@kbn/usage-collection-plugin/server';
+import type { UsageStats } from './types';
 
 export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
   'securitySolution:defaultIndex': {
@@ -20,6 +20,13 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     items: {
       type: 'keyword',
       _meta: { description: 'Non-default value of setting.' },
+    },
+  },
+  'securitySolution:includedDataStreamNamespacesForRuleExecution': {
+    type: 'array',
+    items: {
+      type: 'keyword',
+      _meta: { description: 'Data stream namespace(s) to be included in rule execution.' },
     },
   },
   'securitySolution:maxUnassociatedNotes': {
@@ -34,9 +41,36 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'keyword',
     _meta: { description: 'Default value of the setting was changed.' },
   },
+  'securitySolution:detectionsCloseReasons': {
+    type: 'keyword',
+    _meta: { description: 'Default value of the setting was changed.' },
+  },
+  'securitySolution:excludedGapReasons': {
+    type: 'array',
+    items: {
+      type: 'keyword',
+      _meta: { description: 'Array of excluded gap reasons.' },
+    },
+  },
   'securitySolution:newsFeedUrl': {
     type: 'keyword',
     _meta: { description: 'Default value of the setting was changed.' },
+  },
+  'securitySolution:suppressionBehaviorOnAlertClosure': {
+    type: 'keyword',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'securitySolution:defaultValueReportMinutes': {
+    type: 'keyword',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'securitySolution:defaultValueReportRate': {
+    type: 'keyword',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'securitySolution:defaultValueReportTitle': {
+    type: 'keyword',
+    _meta: { description: 'Non-default value of setting.' },
   },
   'xpackReporting:customPdfLogo': {
     type: 'keyword',
@@ -60,10 +94,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
   },
   'visualization:heatmap:maxBuckets': {
     type: 'long',
-    _meta: { description: 'Non-default value of setting.' },
-  },
-  'visualization:useLegacyTimeAxis': {
-    type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
   'visualization:regionmap:showWarnings': {
@@ -118,29 +148,47 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'securitySolution:enableNewFlyout': {
+    type: 'boolean',
+    _meta: { description: 'Allows users to enable/disable the new flyout system.' },
+  },
   'securitySolution:enableAssetCriticality': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
   'securitySolution:excludeColdAndFrozenTiersInAnalyzer': {
     type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
+    _meta: {
+      description:
+        'Allows users to enable/disable querying cold and frozen data tiers in analyzer.',
+    },
   },
-  'securitySolution:enableCcsWarning': {
+  'securitySolution:excludeColdAndFrozenTiersInPrevalence': {
     type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
-  'securitySolution:enableVisualizationsInFlyout': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
-  'securitySolution:enableGraphVisualization': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
+    _meta: {
+      description:
+        'Allows users to enable/disable querying cold and frozen data tiers in alert prevalence.',
+    },
   },
   'securitySolution:enableAssetInventory': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
+  },
+  'securitySolution:enableSiemReadiness': {
+    type: 'boolean',
+    _meta: { description: 'Allows users to enable/disable the SIEM Readiness feature.' },
+  },
+  'securitySolution:enableCloudConnector': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'securitySolution:enableAttackDiscoveryWorkflows': {
+    type: 'boolean',
+    _meta: { description: 'Enables Attack Discovery Workflows for this space.' },
+  },
+  'securitySolution:enableRuleChangesHistory': {
+    type: 'boolean',
+    _meta: { description: 'Allows users to enable/disable Rule Changes History.' },
   },
   'search:includeFrozen': {
     type: 'boolean',
@@ -208,6 +256,13 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
   'discover:sampleRowsPerPage': {
     type: 'long',
     _meta: { description: 'Non-default value of setting.' },
+  },
+  'discover:defaultEsqlQuery': {
+    type: 'keyword',
+    _meta: {
+      description:
+        'The default ES|QL query Discover opens with in ES|QL mode. Redacted as it may contain sensitive user data.',
+    },
   },
   'discover:maxDocFieldsDisplayed': {
     type: 'long',
@@ -456,18 +511,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'observability:apmEnableServiceMetrics': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
-  'observability:apmEnableContinuousRollups': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
-  'observability:apmAgentExplorerView': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
   'observability:apmEnableTableSearchBar': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
@@ -476,9 +519,15 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'observability:entityCentricExperience': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
+  'observability:apmTraceLogsDefaultColumns': {
+    type: 'array',
+    items: {
+      type: 'keyword',
+      _meta: {
+        description:
+          'Field names configured as default columns for the Logs tab in APM trace samples.',
+      },
+    },
   },
   'observability:apmAWSLambdaPriceFactor': {
     type: 'text',
@@ -486,10 +535,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
   },
   'observability:apmAWSLambdaRequestCostPerMillion': {
     type: 'integer',
-    _meta: { description: 'Non-default value of setting.' },
-  },
-  'observability:apmEnableServiceMapApiV2': {
-    type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
   'observability:aiAssistantSimulatedFunctionCalling': {
@@ -500,11 +545,132 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'text',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'ai:anonymizationSettings': {
+    type: 'text',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'alerting:v2:experimentalFeatures': {
+    type: 'boolean',
+    _meta: { description: 'Enables experimental features in Alerting v2 when true.' },
+  },
   'observability:logSources': {
     type: 'array',
     items: {
       type: 'keyword',
       _meta: { description: 'Non-default value of setting.' },
+    },
+  },
+  'agentBuilder:navEnabled': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'agentBuilder:externalMcp': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'agentBuilder:experimentalFeatures': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'agentBuilder:bashSupport': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'agentBuilder:apiDiscovery': {
+    type: 'boolean',
+    _meta: {
+      description:
+        'Whether the agent can browse the full Elasticsearch and Kibana API surface to discover operations.',
+    },
+  },
+  'agentBuilder:includeFrozenByDefault': {
+    type: 'boolean',
+    _meta: {
+      description: 'Whether built-in Agent Builder tools include frozen tier data by default.',
+    },
+  },
+  'agentBuilder:deductiveEnabled': {
+    type: 'boolean',
+    _meta: { description: 'Whether the external Deductive AI agent execution path is enabled.' },
+  },
+  'agentBuilder:deductiveEndpoint': {
+    type: 'keyword',
+    _meta: { description: 'Base URL of the external Deductive backend.' },
+  },
+  'agentBuilder:deductiveApiKey': {
+    type: 'keyword',
+    _meta: { description: 'API key for the external Deductive backend (redacted from telemetry).' },
+  },
+  'contextEngine:enabled': {
+    type: 'boolean',
+    _meta: { description: 'Whether the Context Engine is enabled.' },
+  },
+  'agentBuilder:tracing:enabled': {
+    type: 'boolean',
+    _meta: {
+      description: 'Whether Agent Builder tracing is enabled.',
+    },
+  },
+  'agentBuilder:tracing:includeLlmResponses': {
+    type: 'boolean',
+    _meta: {
+      description: 'Whether to include LLM response content in traces.',
+    },
+  },
+  'agentBuilder:tracing:includeRealIds': {
+    type: 'boolean',
+    _meta: {
+      description: 'Whether to include real conversation and workflow IDs in traces.',
+    },
+  },
+  'agentBuilder:tracing:includeRealNames': {
+    type: 'boolean',
+    _meta: {
+      description: 'Whether to include real agent and tool names in traces.',
+    },
+  },
+  'agentBuilder:tracing:includeSystemPrompt': {
+    type: 'boolean',
+    _meta: {
+      description: 'Whether to include system prompts in traces.',
+    },
+  },
+  'agentBuilder:tracing:includeToolDetails': {
+    type: 'boolean',
+    _meta: {
+      description: 'Whether to include tool call arguments and results in traces.',
+    },
+  },
+  'agentBuilder:tracing:includeUserData': {
+    type: 'boolean',
+    _meta: {
+      description: 'Whether to include real user IDs and usernames in traces.',
+    },
+  },
+  'agentBuilder:tracing:includeUserPrompts': {
+    type: 'boolean',
+    _meta: {
+      description: 'Whether to include user prompts in traces.',
+    },
+  },
+  'workflows:experimentalFeatures': {
+    type: 'boolean',
+    _meta: {
+      description: 'Whether experimental features for Elastic Workflows are enabled.',
+    },
+  },
+  'workflows:ui:enabled': {
+    type: 'boolean',
+    _meta: { description: 'Whether Elastic Workflows and related experiences are enabled.' },
+  },
+  'workflows:ui:showManagedWorkflows': {
+    type: 'boolean',
+    _meta: { description: 'Whether managed workflows are visible in workflow experiences.' },
+  },
+  'workflows:executionFlyout:aiDiagnose:enabled': {
+    type: 'boolean',
+    _meta: {
+      description: 'Whether the Diagnose with AI action is enabled on failed-step error panels.',
     },
   },
   'banners:placement': {
@@ -523,29 +689,16 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'text',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'labs:presentation:timeToPresent': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
-  'labs:canvas:enable_ui': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
-  'labs:canvas:byValueEmbeddable': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
-  'labs:canvas:useDataService': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
-  'labs:dashboard:enable_ui': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
   'labs:dashboard:deferBelowFold': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
+  },
+  'discover:enableSolutionProfilesInClassic': {
+    type: 'boolean',
+    _meta: {
+      description:
+        'Whether Discover loads Observability and Security contextual profiles in Classic navigation.',
+    },
   },
   'discover:showFieldStatistics': {
     type: 'boolean',
@@ -575,14 +728,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'keyword',
     _meta: { description: 'Default value of the setting was changed.' },
   },
-  'observability:apmLabsButton': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
-  'observability:enableAwsLambdaMetrics': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
   'observability:apmProgressiveLoading': {
     type: 'keyword',
     _meta: { description: 'Non-default value of setting.' },
@@ -591,17 +736,9 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'long',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'observability:apmServiceInventoryOptimizedSorting': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
-  'observability:apmTraceExplorerTab': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
-  'observability:apmEnableProfilingIntegration': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
+  'observability:apmMaxNumberOfServices': {
+    type: 'long',
+    _meta: { description: 'Maximum number of services shown in the APM Services Inventory.' },
   },
   'observability:apmEnableTransactionProfiling': {
     type: 'boolean',
@@ -625,14 +762,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
   },
   'observability:profilingDatacenterPUE': {
     type: 'integer',
-    _meta: { description: 'Non-default value of setting.' },
-  },
-  'observability:apmEnableCriticalPath': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
-  'observability:enableInfrastructureProfilingIntegration': {
-    type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
   'observability:enableInfrastructureAssetCustomDashboards': {
@@ -679,8 +808,8 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'keyword',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'observability:profilingFetchTopNFunctionsFromStacktraces': {
-    type: 'boolean',
+  'aiAssistant:preferredChatExperience': {
+    type: 'keyword',
     _meta: { description: 'Non-default value of setting.' },
   },
   'observability:searchExcludedDataTiers': {
@@ -694,6 +823,280 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: {
       description: 'Enable the new logs overview component.',
+    },
+  },
+  'cases:incrementalIdDisplay:enabled': {
+    type: 'boolean',
+    _meta: {
+      description: 'Display the incremental id of a case in the relevant pages',
+    },
+  },
+  'cases:maxOpenCasesPerRuleRun': {
+    type: 'integer',
+    _meta: {
+      description: 'Maximum number of cases the Cases connector can open during a single rule run.',
+    },
+  },
+  'observability:streamsEnableContentPacks': {
+    type: 'boolean',
+    _meta: {
+      description: 'Enable Content packs in Streams',
+    },
+  },
+  'observability:streamsEnableQueryStreams': {
+    type: 'boolean',
+    _meta: {
+      description: 'Enable Query streams in Streams',
+    },
+  },
+  'observability:streamsEnableWiredStreamViews': {
+    type: 'boolean',
+    _meta: {
+      description: 'Enable ES|QL views for wired streams',
+    },
+  },
+  'observability:streamsEnableDraftStreams': {
+    type: 'boolean',
+    _meta: {
+      description: 'Enable draft streams with read-time ES|QL views',
+    },
+  },
+  'observability:streamsEnableCanvas': {
+    type: 'boolean',
+    _meta: {
+      description: 'Enable Streams Canvas',
+    },
+  },
+  'observability:nightshiftContinuousOnboardingEnabled': {
+    type: 'boolean',
+    _meta: {
+      description:
+        'Non-default value of whether continuous knowledge indicator onboarding is enabled.',
+    },
+  },
+  'observability:nightshiftContinuousOnboardingIntervalHours': {
+    type: 'long',
+    _meta: {
+      description:
+        'Non-default value of the minimum hours between continuous knowledge indicator onboarding runs per source.',
+    },
+  },
+  'observability:streamsSigEventsScheduledDiscoveryEnabled': {
+    type: 'boolean',
+    _meta: {
+      description:
+        'Non-default value of whether scheduled Significant Events discovery is enabled.',
+    },
+  },
+  'observability:streamsSigEventsScheduledDiscoveryDetectionIntervalMinutes': {
+    type: 'long',
+    _meta: {
+      description:
+        'Non-default value of the scheduled Significant Events detection interval (minutes).',
+    },
+  },
+  'observability:streamsSigEventsScheduledDiscoveryDetectionBucketIntervalMinutes': {
+    type: 'long',
+    _meta: {
+      description:
+        'Non-default value of the scheduled Significant Events detection bucket interval (minutes).',
+    },
+  },
+  'observability:streamsSigEventsScheduledDiscoveryDetectionLookbackMinutes': {
+    type: 'long',
+    _meta: {
+      description:
+        'Non-default value of the scheduled Significant Events detection lookback window (minutes).',
+    },
+  },
+  'observability:streamsSigEventsScheduledDiscoveryTargetCoverageMinutes': {
+    type: 'long',
+    _meta: {
+      description:
+        'Non-default value of the scheduled Significant Events target coverage window (minutes).',
+    },
+  },
+  'observability:streamsSigEventsScheduledDiscoveryReviewIntervalMinutes': {
+    type: 'long',
+    _meta: {
+      description:
+        'Non-default value of the scheduled Significant Events review interval (minutes).',
+    },
+  },
+  'observability:streamsSigEventsScheduledDiscoveryDiscoveryBatchSize': {
+    type: 'long',
+    _meta: {
+      description: 'Non-default value of the scheduled Significant Events discovery batch size.',
+    },
+  },
+  'observability:streamsSigEventsScheduledDiscoveryTriageBatchSize': {
+    type: 'long',
+    _meta: {
+      description: 'Non-default value of the scheduled Significant Events triage batch size.',
+    },
+  },
+  'observability:streamsSigEventsScheduledDiscoveryMaxReviewPasses': {
+    type: 'long',
+    _meta: {
+      description: 'Non-default value of the scheduled Significant Events maximum review passes.',
+    },
+  },
+  'observability:streamsSigEventsScheduledDiscoveryFlakyRuleDetectionThreshold': {
+    type: 'long',
+    _meta: {
+      description:
+        'Non-default value of the scheduled Significant Events flaky rule detection threshold.',
+    },
+  },
+  'observability:streamsSigEventsScheduledDiscoveryFlakyRuleProbeAfterMinutes': {
+    type: 'long',
+    _meta: {
+      description:
+        'Non-default value of the scheduled Significant Events flaky rule probe interval (minutes).',
+    },
+  },
+  'observability:streamsSigEventsScheduledDiscoveryFlakyRuleExemptSeverityScore': {
+    type: 'long',
+    _meta: {
+      description:
+        'Non-default value of the scheduled Significant Events flaky rule severity exemption.',
+    },
+  },
+  'observability:enableDiagnosticMode': {
+    type: 'boolean',
+    _meta: {
+      description: 'Enable diagnostic mode',
+    },
+  },
+  'observability:nightshiftDeveloperMode': {
+    type: 'boolean',
+    _meta: {
+      description: 'Non-default value of whether Nightshift developer mode is enabled.',
+    },
+  },
+  'genAiSettings:defaultAIConnector': {
+    type: 'keyword',
+    _meta: {
+      description: 'Default AI connector',
+    },
+  },
+  'genAiSettings:defaultAIConnectorOnly': {
+    type: 'boolean',
+    _meta: {
+      description: 'Restrict to default AI connector only',
+    },
+  },
+  'agentBuilder:prePromptWorkflowIds': {
+    type: 'array',
+    items: {
+      type: 'keyword',
+      _meta: {
+        description: 'Pre-prompt workflow IDs',
+      },
+    },
+  },
+  'securitySolution:entityStoreEnableV2': {
+    type: 'boolean',
+    _meta: {
+      description: 'Switches the Entity Store Engine to v2',
+    },
+  },
+  'securitySolution:alertAnalysisWorkflowEnabled': {
+    type: 'boolean',
+    _meta: { description: 'Whether the managed alert analysis workflow is enabled' },
+  },
+  'securitySolution:alertAnalysisWorkflowAutoCloseEnabled': {
+    type: 'boolean',
+    _meta: {
+      description: 'Auto-close alerts validated as false positives by the alert analysis workflow',
+    },
+  },
+  'securitySolution:alertAnalysisWorkflowAutoCloseConfidenceScoreMinThreshold': {
+    type: 'float',
+    _meta: {
+      description: 'Minimum false positive confidence score for auto-closing alerts',
+    },
+  },
+  'securitySolution:alertAnalysisWorkflowAutoCloseConfidenceScoreMaxThreshold': {
+    type: 'float',
+    _meta: {
+      description: 'Maximum false positive confidence score for auto-closing alerts',
+    },
+  },
+  'securitySolution:alertAnalysisWorkflowConnectorId': {
+    type: 'keyword',
+    _meta: { description: 'AI connector used by the alert analysis workflow' },
+  },
+  'securitySolution:alertAnalysisWorkflowAgentId': {
+    type: 'keyword',
+    _meta: {
+      description:
+        'Agent used by the alert analysis workflow (value is redacted; the setting is sensitive)',
+    },
+  },
+  'securitySolution:alertAnalysisWorkflowCreateConversation': {
+    type: 'boolean',
+    _meta: {
+      description: 'Whether the AI agent creates a new conversation per alert analysis',
+    },
+  },
+  'securitySolution:alertAnalysisWorkflowUsePrompt': {
+    type: 'boolean',
+    _meta: {
+      description:
+        'Whether the alert analysis workflow classifies with a single prompt instead of an AI agent',
+    },
+  },
+  'securitySolution:alertAnalysisWorkflowTagPrefix': {
+    type: 'keyword',
+    _meta: {
+      description: 'Prefix for the tags the alert analysis workflow adds to analyzed alerts',
+    },
+  },
+  'cloudSecurityPosture:graphRuntimeEvaluationsEnabled': {
+    type: 'boolean',
+    _meta: {
+      description:
+        'Enables integration-specific entity enrichment in the Security graph (actor sub-type, target identity, display names).',
+    },
+  },
+  'cloudSecurityPosture:graphShowUnknownTargetEnabled': {
+    type: 'boolean',
+    _meta: {
+      description:
+        'Enables displaying nodes whose target entity is unknown or unresolved in the Security graph.',
+    },
+  },
+  'elasticRamen:enabled': {
+    type: 'boolean',
+    _meta: {
+      description: 'Non-default value of setting.',
+    },
+  },
+  'query_activity:minRunningTime': {
+    type: 'long',
+    _meta: {
+      description: 'Non-default value of setting.',
+    },
+  },
+  'genAiSettings:tokenUsageTracking': {
+    type: 'boolean',
+    _meta: {
+      description: 'Enable token usage tracking in Kibana',
+    },
+  },
+  'genAiSettings:inferenceStreaming': {
+    type: 'boolean',
+    _meta: {
+      description:
+        'Enables streaming of LLM interactions in Kibana. When disabled, forces Kibana to use non-streaming inference requests.',
+    },
+  },
+  'alerting:v1:showV1ObservabilityAlertsTable': {
+    type: 'boolean',
+    _meta: {
+      description:
+        'Whether the V1 Observability alerts table is shown when Alerting v2 is enabled.',
     },
   },
 };

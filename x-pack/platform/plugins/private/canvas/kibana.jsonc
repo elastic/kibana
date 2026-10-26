@@ -2,7 +2,7 @@
   "type": "plugin",
   "id": "@kbn/canvas-plugin",
   "owner": [
-    "@elastic/kibana-presentation"
+    "@elastic/kibana-dashboards"
   ],
   "group": "platform",
   "visibility": "private",
@@ -20,16 +20,9 @@
       "data",
       "dataViews",
       "embeddable",
-      "expressionError",
-      "expressionImage",
-      "expressionMetric",
-      "expressionRepeatImage",
-      "expressionRevealImage",
-      "expressionShape",
       "expressions",
       "features",
       "inspector",
-      "presentationUtil",
       "uiActions",
       "share",
       "contentManagement",
@@ -44,10 +37,10 @@
     "requiredBundles": [
       "kibanaReact",
       "kibanaUtils",
-      "lens",
       "maps",
-      "visualizations",
-      "fieldFormats"
+      "fieldFormats",
+      "savedSearch",
+      "presentationUtil"
     ]
   }
 }

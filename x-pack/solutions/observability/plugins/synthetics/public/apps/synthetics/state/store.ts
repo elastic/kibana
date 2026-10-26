@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { configureStore } from '@reduxjs/toolkit';
+import { configureStore } from 'redux-toolkit-v1';
 import createSagaMiddleware from 'redux-saga';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { rootEffect } from './root_effect';

@@ -9,9 +9,9 @@ import React, { useMemo } from 'react';
 import type { PropsWithChildren } from 'react';
 import type { HttpHandler } from '@kbn/core-http-browser';
 import type { IToasts } from '@kbn/core-notifications-browser';
-import { PartialTheme, Theme } from '@elastic/charts';
+import type { PartialTheme, Theme } from '@elastic/charts';
 
-import { EuiComboBoxOptionOption } from '@elastic/eui';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import type { TelemetryEvents } from '../types';
 
 export interface DataQualityProviderProps {

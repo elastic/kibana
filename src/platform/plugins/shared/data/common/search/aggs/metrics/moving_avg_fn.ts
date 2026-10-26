@@ -8,9 +8,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Assign } from '@kbn/utility-types';
-import { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
-import { AggExpressionType, AggExpressionFunctionArgs, METRIC_TYPES } from '..';
+import type { Assign } from '@kbn/utility-types';
+import type { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
+import type { AggExpressionType, AggExpressionFunctionArgs } from '..';
+import { METRIC_TYPES } from '..';
 
 export const aggMovingAvgFnName = 'aggMovingAvg';
 

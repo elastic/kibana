@@ -20,6 +20,7 @@ import type { ConnectorFieldsProps } from '../types';
 import { useGetIssueTypes } from './use_get_issue_types';
 import { useGetFieldsByIssueType } from './use_get_fields_by_issue_type';
 import { SearchIssues } from './search_issues';
+import { JsonEditorField } from '../json_editor_field';
 
 const { emptyField } = fieldValidators;
 
@@ -134,6 +135,27 @@ const JiraFieldsComponent: React.FunctionComponent<ConnectorFieldsProps> = ({ co
             </EuiFlexItem>
           </EuiFlexGroup>
         </div>
+        <EuiSpacer size="m" />
+        <UseField
+          path="fields.otherFields"
+          component={JsonEditorField}
+          config={{
+            label: i18n.OTHER_FIELDS,
+          }}
+          componentProps={{
+            euiCodeEditorProps: {
+              fullWidth: true,
+              height: '200px',
+              disabled: isLoadingIssueTypes,
+              isLoading: isLoadingIssueTypes,
+              options: {
+                fontSize: '12px',
+                renderValidationDecorations: 'off',
+              },
+            },
+            dataTestSubj: 'otherFieldsEditor',
+          }}
+        />
       </EuiSkeletonText>
     </div>
   );

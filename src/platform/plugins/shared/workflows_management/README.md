@@ -1,0 +1,508 @@
+# Workflows Management Plugin
+
+This plugin contains the Workflows management application and APIs.
+
+The workflows management plugin provides the user interface and management capabilities for creating, editing, scheduling, and monitoring workflows. It serves as the primary interface for workflow operations and integrates with the workflows execution engine.
+
+---
+
+## Table of Contents
+
+- [Requirements](#requirements)
+- [Enable the Feature Flag](#enable-the-feature-flag)
+- [Overview](#overview)
+- [Features](#features)
+- [Architecture](#architecture)
+- [Dependencies](#dependencies)
+- [API versioning, compatibility, and stability](#api-versioning-compatibility-and-stability)
+- [API Endpoints](#api-endpoints)
+- [UI Application](#ui-application)
+- [Development](#development)
+
+---
+
+## Requirements
+
+To use workflows, you need an **active Enterprise license**. Workflows are not available on Basic or Standard licenses.
+
+---
+
+## The Feature Flag
+
+The workflows feature UI setting is enabled by default, it can be disabled via Kibana config with:
+
+```yml
+uiSettings.overrides:
+  workflows:ui:enabled: false
+```
+
+Experimental Workflows features are gated behind a separate Advanced Setting:
+
+```yml
+uiSettings.overrides:
+  workflows:experimentalFeatures: true
+  workflows:ui:executionGraph:enabled: true
+  workflows:ui:showExecutor:enabled: true
+```
+
+If running in Serverless or Cloud dev environments, you can disable it via API:
+
+```bash
+POST kbn://internal/kibana/settings
+{
+   "changes": {
+      "workflows:ui:enabled": false
+   }
+}
+```
+
+### Workflow graph viewer
+
+The read-only graph viewer is disabled by default.
+
+Enable the Workflow Experimental flag in Advanced Settings, then enable in `kibana.yml` the following flag:
+
+```yml
+uiSettings.overrides:
+  workflows:ui:visualEditor:enabled: true
+```
+
+Restart Kibana after changing this value. In the workflow editor, open the actions menu (⌘K / Ctrl+K) and look under **Commands** for **Toggle graph editor** (or search for `graph`).
+
+---
+
+## Overview
+
+The workflows management plugin provides:
+
+- **Workflow Designer**: Visual interface for creating and editing workflows
+- **Workflow Library**: Browse and manage existing workflows
+- **Execution Monitoring**: Track workflow runs and performance
+- **Scheduling**: Configure automated workflow execution
+- **Connector Integration**: Manage workflow connectors and actions
+
+---
+
+## Features
+
+### Workflow Creation
+- Drag-and-drop workflow designer
+- Step configuration and validation
+- Variable and context management
+- Template support
+- YAML-based workflow definition
+
+### Workflow Management
+- Workflow versioning and history
+- Import/export capabilities
+- Workflow cloning
+- Bulk operations
+
+### Execution & Monitoring
+- Real-time execution tracking
+- Execution history and logs
+- Performance metrics
+- Error handling and debugging
+- Step-level execution details
+
+### Testing & Validation
+- Workflow validation before execution
+- Test individual steps
+- Test complete workflows without saving
+- JSON schema validation
+
+---
+
+## Architecture
+
+The management plugin follows a layered architecture:
+
+```
+┌─────────────────────────────────────────┐
+│          Public UI Layer                │
+│  (React components, forms, visualizer)  │
+└─────────────────────────────────────────┘
+                  ↓
+┌─────────────────────────────────────────┐
+│         Server API Layer                │
+│      (REST endpoints, validation)       │
+└─────────────────────────────────────────┘
+                  ↓
+┌─────────────────────────────────────────┐
+│       Service Layer                     │
+│  (Business logic, workflow management)  │
+└─────────────────────────────────────────┘
+                  ↓
+┌─────────────────────────────────────────┐
+│    Storage & Execution Layer            │
+│ (Saved Objects, Task Manager, Engine)   │
+└─────────────────────────────────────────┘
+```
+
+### Key Components
+
+- **Workflows Management Service**: Core service for workflow CRUD operations and execution management
+- **Workflows API**: RESTful API endpoints for all workflow operations
+- **Saved Objects**: Workflow definitions persisted as Kibana saved objects
+- **Task Manager Integration**: Handles scheduled workflow execution
+- **Connector Integration**: Interfaces with Kibana Actions framework
+
+---
+
+## Dependencies
+
+### Required Plugins
+
+| Plugin | Purpose |
+|--------|---------|
+| `workflowsExecutionEngine` | Core execution runtime for workflows |
+| `taskManager` | Scheduled execution management |
+| `actions` | Connector and action support |
+| `features` | Feature registration and capabilities |
+| `security` | Access control and authentication |
+| `triggersActionsUi` | Action configuration UI |
+| `spaces` | Multi-tenancy support |
+| `navigation` | UI navigation |
+| `data`, `dataViews` | Data layer and index patterns |
+| `esUiShared` | Shared Elasticsearch UI components |
+| `stackConnectors` | Built-in connector types |
+| `fieldFormats` | Field formatting utilities |
+| `unifiedSearch` | Search capabilities |
+| `embeddable` | Workflow visualization |
+
+### Optional Plugins
+
+| Plugin | Purpose |
+|--------|---------|
+| `alerting` | Integration with alerting framework |
+| `serverless` | Serverless-specific features |
+
+---
+
+## API versioning, compatibility, and stability
+
+This section summarizes how public Workflows HTTP APIs are versioned and how that appears in documentation. For authoritative paths, parameters, and examples, use the generated OpenAPI surface.
+
+### Version compatibility
+
+| Topic | Detail |
+|--------|--------|
+| **API date version** | Public routes use version `2023-10-31` (see `API_VERSION` in [`server/api/routes/utils/route_constants.ts`](./server/api/routes/utils/route_constants.ts)). |
+| **Version header** | Send `elastic-api-version: 2023-10-31` on requests to public endpoints, consistent with [Kibana HTTP API versioning](https://github.com/elastic/kibana/blob/main/dev_docs/contributing/kibana_http_api_design_guidelines.mdx#versioning). |
+| **Stack introduction** | Public Workflows REST APIs are annotated with `since: 9.4.0` for stack deployments. |
+| **License** | An **Enterprise** license is required (see [Requirements](#requirements)). |
+| **Privileges** | Access is enforced via `workflowsManagement` feature privileges (see route `security` blocks under [`server/api/routes/`](./server/api/routes/)). |
+| **UI setting `workflows:ui:enabled`** | Controls whether the **Workflows management application and related UI** are registered in the browser. It does **not** remove public REST routes under `/api/workflows`; those routes remain subject to license and authorization checks. |
+| **Spaces** | Public URLs are space-aware (for example `/s/{space_id}/api/workflows` in documentation); see [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces). |
+
+---
+
+## API Endpoints
+
+Public HTTP APIs live under `/api/workflows` (space-aware in docs as `/s/{space_id}/api/workflows/...`). Send `elastic-api-version: 2023-10-31` on requests.
+
+**OpenAPI (OAS) documentation for these endpoints:** use the generated bundles—[`kibana.yaml`](../../../../../oas_docs/output/kibana.yaml) (stateful) and [`kibana.serverless.yaml`](../../../../../oas_docs/output/kibana.serverless.yaml) (serverless)—or the published [Workflows API group (stateful)](https://www.elastic.co/docs/api/doc/kibana/group/endpoint-workflows) and [Workflows API group (serverless)](https://www.elastic.co/docs/api/doc/serverless/group/endpoint-workflows). Each public operation lists parameters, request bodies, responses, and examples.
+
+### Public routes
+
+| Method | Path | Summary |
+|--------|------|---------|
+| GET | `/api/workflows` | List workflows (pagination and filters via query string). |
+| POST | `/api/workflows` | Bulk create workflows. |
+| DELETE | `/api/workflows` | Bulk delete workflows. |
+| POST | `/api/workflows/mget` | Get multiple workflows by ID. |
+| POST | `/api/workflows/export` | Export workflows. |
+| GET | `/api/workflows/stats` | Workflow statistics. |
+| GET | `/api/workflows/aggs` | Workflow aggregations. |
+| GET | `/api/workflows/connectors` | Available connector types. |
+| GET | `/api/workflows/schema` | Workflow JSON schema. |
+| POST | `/api/workflows/workflow` | Create a workflow. |
+| GET | `/api/workflows/workflow/{id}` | Get a workflow by ID. |
+| PUT | `/api/workflows/workflow/{id}` | Update a workflow. |
+| DELETE | `/api/workflows/workflow/{id}` | Delete a workflow. |
+| POST | `/api/workflows/workflow/{id}/clone` | Clone a workflow. |
+| POST | `/api/workflows/workflow/{id}/run` | Run a workflow. |
+| GET | `/api/workflows/workflow/{workflowId}/executions` | List executions for a workflow. |
+| GET | `/api/workflows/workflow/{workflowId}/executions/steps` | List step executions for a workflow. |
+| POST | `/api/workflows/workflow/{workflowId}/executions/cancel` | Cancel all active executions for a workflow. |
+| POST | `/api/workflows/test` | Test a workflow without persisting it. |
+| POST | `/api/workflows/step/test` | Test a single workflow step. |
+| GET | `/api/workflows/executions/{executionId}` | Get an execution by ID. |
+| GET | `/api/workflows/executions/{executionId}/children` | List child executions. |
+| GET | `/api/workflows/executions/{executionId}/logs` | Execution logs. |
+| GET | `/api/workflows/executions/{executionId}/step/{stepExecutionId}` | Get a step execution. |
+| POST | `/api/workflows/executions/{executionId}/cancel` | Cancel an execution. |
+| POST | `/api/workflows/executions/{executionId}/resume` | Resume an execution. |
+| GET | `/api/workflows/executions/{executionId}/trigger_event_trace` | Trigger event trace for an execution. |
+
+### Internal routes
+
+These routes use `access: internal` and are **not** included in the public OpenAPI bundles above. They use a numeric `elastic-api-version` (see `INTERNAL_API_VERSION` in [`server/api/routes/utils/route_constants.ts`](./server/api/routes/utils/route_constants.ts)). For validate, example payloads live in [`validate_workflow.yaml`](./server/api/routes/examples/validate_workflow.yaml).
+
+| Method | Path | Purpose |
+|--------|------|---------|
+| GET | `/internal/workflows/config` | Execution engine feature flags for the plugin. |
+| POST | `/internal/workflows/disable` | Disable all workflows (administrative). |
+| POST | `/api/workflows/validate` | Validate a workflow YAML definition without saving. |
+| GET | `/internal/workflows/library/templates` | List Workflow Template library catalog rows (optional `solution` / `category` / `search` filters). Gated by the `workflowsManagement:library:enabled` global uiSetting; returns `503` when off. |
+| GET | `/internal/workflows/library/templates/{slug}` | Get the parsed template body (metadata + workflow body + raw YAML) for a catalog slug. `404` when the slug is missing, `503` when the library is disabled. |
+| GET | `/internal/workflows/library/health` | Diagnostic — returns the cache's `sourceMode`, `lastRefreshAt`, and `lastError`. Not gated by the library toggle so admins can reach it while the feature is off. |
+
+---
+
+## UI Application
+
+The workflows management UI is available at `/app/workflows` when the feature flag is enabled.
+
+### Features
+
+- **Workflow Designer**: Visual workflow builder with drag-and-drop interface
+- **Workflow Library**: Browse, search, and filter workflows
+- **Execution Dashboard**: Monitor workflow executions in real-time
+- **Execution History**: View past executions with filtering and sorting
+- **Step-by-step Debugging**: Detailed step execution information
+- **Connector Management**: View and configure available connectors
+
+### Routes
+
+- `/app/workflows` - Workflow library (home page)
+- `/app/workflows/new` - Create new workflow
+- `/app/workflows/edit/{id}` - Edit existing workflow
+- `/app/workflows/{id}` - View workflow details
+- `/app/workflows/{id}/executions` - View workflow execution history
+- `/app/workflows/executions/{executionId}` - View execution details
+
+### Pagination (HTTP APIs)
+
+Many list endpoints accept `page` and `size` (or route-specific defaults) as **query parameters** on `GET` requests. Exact fields and response envelopes differ by route—use the OpenAPI entries for each operation.
+
+**Examples** (add `elastic-api-version: 2023-10-31` and auth headers as for any public Kibana API):
+
+List workflows (free-text `query` plus pagination):
+
+```http
+GET /api/workflows?page=1&size=20&query=sales
+```
+
+List executions for a workflow:
+
+```http
+GET /api/workflows/workflow/{workflowId}/executions?page=1&size=20
+```
+
+Execution logs (see the **workflows** OpenAPI operation for required vs optional query fields such as `size`, `page`, and `stepExecutionId`):
+
+```http
+GET /api/workflows/executions/{executionId}/logs
+```
+
+---
+
+## Development
+
+### Plugin Structure
+
+```
+workflows_management/
+├── common/              # Shared code (types, schemas, utilities)
+├── public/              # Browser-side code
+│   ├── application.tsx  # Main application entry
+│   ├── components/      # React components
+│   ├── features/        # Feature modules
+│   ├── pages/          # Page components
+│   └── ...
+├── server/             # Server-side code
+│   ├── workflows_management/  # Core service and API
+│   │   ├── routes/           # API route handlers
+│   │   └── ...
+│   ├── storage/        # Data persistence layer
+│   ├── tasks/          # Task manager integration
+│   └── ...
+└── README.md          # This file
+```
+
+### Local Development
+
+1. Enable the feature flag in `kibana.dev.yml`
+2. Start Elasticsearch: `pnpm es snapshot`
+3. Start Kibana: `pnpm start`
+4. Navigate to `/app/workflows`
+
+### Event-driven custom trigger `on` options
+
+Registered (non-built-in) triggers may set optional flags under `triggers[].on` in YAML:
+
+- **`workflowEvents`**: One of **`ignore`**, **`avoid-loop`**, or **`allow-all`** (string). Controls how the workflow is scheduled when the trigger event was emitted from a workflow-attributed chain:
+  - **`ignore`**: Do not schedule when the emit is workflow-attributed; user or domain-originated emits (no chain context) still run the workflow.
+  - **`avoid-loop`**: Schedule on workflow-attributed emits, but skip if this workflow id is already on the event chain (cycle guard). **Omitted defaults to `avoid-loop`** at runtime.
+  - **`allow-all`**: Schedule without the cycle guard; **`maxEventChainDepth`** from the execution engine config still applies.
+
+### Testing
+
+```bash
+# Run unit tests
+pnpm test:jest src/platform/plugins/shared/workflows_management
+# Running a specific test
+pnpm test:jest -- $path # (e.g. src/platform/plugins/shared/workflows_management/public/widgets/workflow_yaml_editor/lib/snippets/insert_trigger_snippet.test.ts)
+
+# Run integration tests
+pnpm test:jest_integration src/platform/plugins/shared/workflows_management
+
+# Run FTR tests (if available)
+pnpm test:ftr --config x-pack/test/workflows_management_api_integration/config.ts
+```
+
+### Authentication & Authorization
+
+All API endpoints require authentication. The plugin integrates with Kibana's security framework:
+
+- **Read operations**: Require `read` privilege on workflows
+- **Write operations**: Require `write` privilege on workflows
+- **Execute operations**: Require `execute` privilege on workflows
+- **Delete operations**: Require `delete` privilege on workflows
+
+Workflows are space-aware and respect Kibana Spaces boundaries.
+
+### Queryable execution data
+
+The managed data views for `.workflows-executions*` and `.workflows-step-executions*` (plain indexes and the `.workflows-executions-data-stream` / `.workflows-step-executions-data-stream` hidden data streams) use the Workflows feature privileges to provide space-scoped access with DLS and FLS.
+
+Elasticsearch index privileges are additive. A role or API key with unrestricted `read` or `all` on `*` or either execution index pattern is not limited by the Workflows DLS and FLS grant:
+
+- `read` can access execution documents from all spaces and all fields.
+- `all` can also modify or delete execution data.
+
+For least-privilege access, grant the Workflows feature privilege for the required spaces without a direct Elasticsearch index privilege on `*` or `.workflows-*`.
+
+---
+
+## Additional Resources
+
+- [Workflows Execution Engine Plugin](../workflows_execution_engine/README.md)
+- [Kibana Plugin Development Guide](https://www.elastic.co/guide/en/kibana/current/development.html)
+
+---
+
+**Plugin Owner**: `@elastic/workflows-eng`
+
+## Workflow access control
+
+Workflow access control is in **technical preview**. It may change or be removed
+in a future release and is not covered by the support SLA.
+
+### Known limitation: queryable execution data
+
+Workflow ACLs apply to the Workflows UI and APIs. They do not restrict direct
+Elasticsearch queries of `.workflows-executions*` or `.workflows-step-executions*`
+when those indices are available as queryable hidden indices. This includes
+the plain indexes, the `.workflows-executions-data-stream` /
+`.workflows-step-executions-data-stream` hidden data streams, and queries
+from Discover, Lens, ES|QL, and the Elasticsearch API.
+
+The Read Workflow Execution privilege, included in Workflows Read, can grant
+access to this data within a space. Those Elasticsearch grants filter by space,
+managed status, and allowed fields, but do not check the workflow owner or ACL.
+No separate index grant is needed for this path. Explicit index grants can
+provide broader access under Elasticsearch authorization rules.
+
+For example, Alice makes workflow X private and does not grant Bob access. Bob
+cannot open X or its execution history through the Workflows UI or APIs. If Bob
+has Read Workflow Execution in that space, he can still query the permitted
+execution and step fields through Elasticsearch. Marking an index as hidden does
+not enforce the workflow ACL.
+
+This is a known technical preview limitation. Enforcing workflow ACLs for
+queryable execution data is planned follow-up work. Until then, do not rely on
+private workflow access to keep execution data confidential from users who can
+query these indices.
+
+See the queryable execution data changes in
+[Kibana #284860](https://github.com/elastic/kibana/pull/284860) and
+[Elasticsearch #156669](https://github.com/elastic/elasticsearch/pull/156669).
+
+### Access model
+
+The workflow Access control dialog uses `@kbn/entity-access-control` and
+`@kbn/entity-access-control-ui`. Its ACL has the same field structure as Agent
+Builder conversations: `access_mode` and `entries` with `type`, profile `id`,
+`role`, and server-assigned `added_at`. The workflow stores the owner in `owner_id`.
+Save a new workflow before you change its access controls. Access controls are stored on the workflow document.
+Open Access control from the workflow header.
+
+| Role | View | Run | Edit and soft-delete | Change access |
+| --- | --- | --- | --- | --- |
+| Administrator | Yes | Requires owner or ACL access | Requires owner or Editor access | Yes |
+| Owner | Yes | Yes | Yes | Yes |
+| Editor | Yes | Yes | Yes | No |
+| Executor | Yes | Yes | No | No |
+| Viewer | Yes | No | No | No |
+
+These permissions also require the corresponding feature privileges in the space.
+The shared `@kbn/entity-access-control` administrator check uses wildcard
+application privileges, including those in the Stack `superuser` and Serverless project `admin` roles.
+Custom roles with those wildcard grants also qualify. Workflows All does not.
+API keys continue to use the normal ACL checks.
+Administrators can view private workflows and recover access after an owner is
+offboarded. Updating access preserves the existing owner. An administrator who
+makes an ownerless legacy workflow private becomes its owner. Keeping it public
+does not assign ownership.
+Administrators must add themselves as Executor to run a private workflow, or
+Editor to edit it or test draft YAML and steps. The access dialog shows a notice
+when an administrator edits another user's ACL. Background execution keeps its
+normal ACL checks.
+
+With Kibana audit logging enabled, `workflow_access_control_update` records a
+summary of each access update and one event per added, removed, or changed user.
+It records visibility and owner changes without repeating unchanged grants.
+`workflow_access_control_denied` records failed ACL checks, including execution
+checks. `workflow_access_control_admin_override` records administrative access
+when viewing a workflow, managing its ACL, or hard-deleting it.
+Searches, lists, batch lookups, filters, and result mapping do not emit ACL events.
+Write prechecks audit denials. The check on the stored document audits overrides.
+A rejected scheduled run emits a denial on each tick until access is restored or
+the schedule is disabled.
+Override events confirm authorization only. Existing operation events report the
+operation outcome. ACL events do not contain workflow YAML or execution data.
+
+The owner and administrators can request user suggestions, which require
+Workflows Read in that space. New grants and permission increases require the recipient's current RBAC:
+Viewer requires Read, Executor also requires Execute, and Editor also requires
+Update. Removals, unchanged entries, and permission decreases can be saved even
+if a recipient has lost RBAC. A write conflict repeats validation against the
+latest ACL. Runtime access still requires RBAC. A rejected grant leaves the
+access settings unchanged.
+Public workflows use the existing RBAC permissions for viewing, running, editing,
+and deletion. ACL entries apply only to private workflows. The owner and
+administrators control visibility and sharing. Managed workflows keep their existing plugin access rules.
+
+The detail page tests workflows even when disabled. Executors test the saved YAML;
+Editors and owners can test draft YAML. Test runs do not enable the workflow.
+Normal runs and scheduled runs still require an enabled workflow.
+
+Workflows without an ACL keep their existing access. New workflows with a user
+profile record the creator as owner and start with public access under RBAC.
+For older workflows, the recorded creator or an administrator can set the first
+ACL. Keeping an ownerless workflow public does not assign an owner. Making it
+private assigns the caller as owner. Subsequent checks use profile IDs.
+
+Workflow searches apply ACL filters before pagination and aggregation. Execution
+and Inbox searches exclude inaccessible workflow IDs, including soft-deleted
+workflows. This requires a search of inaccessible workflows in the space before
+querying execution data. Writes retain the ACL during YAML updates and imports.
+Execution checks use the current ACL and the execution identity.
+
+Soft deletion retains the workflow document and its ACL for execution and change
+history reads.
+The owner or an administrator can hard-delete a private workflow. Administrator
+overrides are audited. The request must
+include `force=true&acknowledgeAclLoss=true`. Public workflows retain feature RBAC and
+require no ACL acknowledgment. Their documents are removed before best-effort
+history cleanup, and cleanup failures do not fail deletion.
+Hard deletion of a private workflow first marks it as deleted and disabled, then
+removes its steps and executions before removing the workflow document. If history
+cleanup fails or is incomplete, the API returns an error and retains the
+soft-deleted workflow and its ACL. The caller can retry force deletion after the
+error is resolved.
+Direct Elasticsearch document deletion bypasses these checks. Private workflows
+are excluded from Agent Builder's search index, which currently supports feature
+privileges only.

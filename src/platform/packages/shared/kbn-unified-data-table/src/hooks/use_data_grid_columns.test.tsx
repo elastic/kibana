@@ -12,7 +12,7 @@ import { useColumns } from './use_data_grid_columns';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { configMock } from '../../__mocks__/config';
 import { dataViewsMock } from '../../__mocks__/data_views';
-import { Capabilities } from '@kbn/core/types';
+import type { Capabilities } from '@kbn/core/types';
 
 describe('useColumns', () => {
   const defaultProps = {
@@ -32,11 +32,12 @@ describe('useColumns', () => {
     expect(result.current.columns).toEqual(['Time', 'message']);
     expect(result.current.onAddColumn).toBeInstanceOf(Function);
     expect(result.current.onRemoveColumn).toBeInstanceOf(Function);
+    expect(result.current.onRemoveColumns).toBeInstanceOf(Function);
     expect(result.current.onMoveColumn).toBeInstanceOf(Function);
     expect(result.current.onSetColumns).toBeInstanceOf(Function);
   });
 
-  test('should skip _source column', () => {
+  test('should keep _source column when other columns exist', () => {
     const { result } = renderHook(() => {
       return useColumns({
         ...defaultProps,
@@ -44,7 +45,7 @@ describe('useColumns', () => {
       });
     });
 
-    expect(result.current.columns).toEqual(['Time']);
+    expect(result.current.columns).toEqual(['Time', '_source']);
   });
 
   test('should return empty columns array', () => {

@@ -7,63 +7,63 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo } from 'react';
 import { EuiListGroupItem } from '@elastic/eui';
 import { METRIC_TYPE } from '@kbn/analytics';
-import {
-  DEFAULT_URL_DRILLDOWN_OPTIONS,
-  UrlDrilldownOptions,
-} from '@kbn/ui-actions-enhanced-plugin/public';
+import type { ViewMode } from '@kbn/presentation-publishing';
+import React, { useMemo } from 'react';
 
 import {
+  DEFAULT_EXTERNAL_LINK_OPTIONS,
   EXTERNAL_LINK_TYPE,
-  LinksLayoutType,
   LINKS_VERTICAL_LAYOUT,
-} from '../../../common/content_management';
+} from '../../../common/constants';
+import type { LinksLayoutType } from '../../../common/types';
+import type { ExternalLinkOptions } from '../../../server';
 import { coreServices, trackUiMetric } from '../../services/kibana_services';
-import { ResolvedLink } from '../../types';
+import type { ResolvedLink } from '../../types';
 
 export const ExternalLinkComponent = ({
   link,
   layout,
+  viewMode,
 }: {
   link: ResolvedLink;
   layout: LinksLayoutType;
+  viewMode: ViewMode;
 }) => {
   const linkOptions = useMemo(() => {
     return {
-      ...DEFAULT_URL_DRILLDOWN_OPTIONS,
+      ...DEFAULT_EXTERNAL_LINK_OPTIONS,
       ...link.options,
-    } as UrlDrilldownOptions;
+    } as ExternalLinkOptions;
   }, [link.options]);
 
   const destination = useMemo(() => {
-    return link.destination && linkOptions.encodeUrl
+    return link.destination && linkOptions.encode_url
       ? encodeURI(link.destination)
       : link.destination;
   }, [linkOptions, link.destination]);
 
   const id = `externalLink--${link.id}`;
+  const testId = `externalLink--${link.title}`;
 
   return (
     <EuiListGroupItem
-      size="s"
       external
       color="text"
-      isDisabled={Boolean(link.error)}
+      isDisabled={viewMode === 'non-interactive' || Boolean(link.error)}
       className={'linksPanelLink'}
       showToolTip={Boolean(link.error)}
       toolTipProps={{
         content: link.error?.message,
         position: layout === LINKS_VERTICAL_LAYOUT ? 'right' : 'bottom',
         repositionOnScroll: true,
-        delay: 'long',
-        'data-test-subj': `${id}--tooltip`,
+        'data-test-subj': `${testId}--tooltip`,
       }}
       iconType={link.error ? 'warning' : undefined}
       id={id}
       label={link.label || link.destination}
-      data-test-subj={link.error ? `${id}--error` : `${id}`}
+      data-test-subj={link.error ? `${testId}--error` : `${testId}`}
       href={destination}
       onClick={async (event) => {
         if (!destination) return;
@@ -74,7 +74,7 @@ export const ExternalLinkComponent = ({
         const modifiedClick = event.ctrlKey || event.metaKey || event.shiftKey;
         if (!modifiedClick) {
           event.preventDefault();
-          if (linkOptions.openInNewTab) {
+          if (linkOptions.open_in_new_tab) {
             window.open(destination, '_blank');
           } else {
             await coreServices.application.navigateToUrl(destination);

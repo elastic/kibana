@@ -11,23 +11,25 @@ import React, { useContext, useState } from 'react';
 
 import {
   EuiAccordion,
-  EuiFieldText,
+  EuiButtonIcon,
   EuiFieldPassword,
+  EuiFieldText,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIconTip,
   EuiRadioGroup,
   EuiSelect,
   EuiSwitch,
   EuiTextArea,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiButtonIcon,
-  EuiIconTip,
+  EuiToolTip,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
 import { DisplayType } from '../..';
 
-import { ConfigEntryView, LicenseContext } from './connector_configuration';
+import type { ConfigEntryView } from './connector_configuration';
+import { LicenseContext } from './connector_configuration';
 import { DocumentLevelSecurityPanel } from './document_level_security_panel';
 import {
   ensureBooleanType,
@@ -239,16 +241,26 @@ export const ConnectorConfigurationField: React.FC<ConnectorConfigurationFieldPr
                   <EuiFlexItem grow={false}>
                     <PlatinumLicensePopover
                       button={
-                        <EuiButtonIcon
-                          aria-label={i18n.translate(
+                        <EuiToolTip
+                          content={i18n.translate(
                             'searchConnectors.configuration.openPopoverLabel',
                             {
                               defaultMessage: 'Open licensing popover',
                             }
                           )}
-                          iconType="questionInCircle"
-                          onClick={() => setIsPopoverOpen(!isPopoverOpen)}
-                        />
+                          disableScreenReaderOutput
+                        >
+                          <EuiButtonIcon
+                            aria-label={i18n.translate(
+                              'searchConnectors.configuration.openPopoverLabel',
+                              {
+                                defaultMessage: 'Open licensing popover',
+                              }
+                            )}
+                            iconType="question"
+                            onClick={() => setIsPopoverOpen(!isPopoverOpen)}
+                          />
+                        </EuiToolTip>
                       }
                       closePopover={() => setIsPopoverOpen(false)}
                       isPopoverOpen={isPopoverOpen}

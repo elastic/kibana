@@ -7,21 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { TimeBuckets, TimeRange, UI_SETTINGS } from '@kbn/data-plugin/common';
-import { Datatable, DatatableColumn, DatatableRow } from '@kbn/expressions-plugin/common';
+import type { TimeRange } from '@kbn/data-plugin/common';
+import { TimeBuckets, UI_SETTINGS } from '@kbn/data-plugin/common';
+import type { Datatable, DatatableColumn, DatatableRow } from '@kbn/expressions-plugin/common';
 import { omit, pick } from 'lodash';
 import dateMath from '@kbn/datemath';
 import moment from 'moment';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type { LineStyle } from '@kbn/visualization-ui-components';
 import type { AvailableAnnotationIcon, PointStyleProps } from '@kbn/event-annotation-common';
-import {
+import type {
   ManualEventAnnotationOutput,
   ManualPointEventAnnotationOutput,
   ManualRangeEventAnnotationOutput,
 } from '../manual_event_annotation/types';
-import { QueryPointEventAnnotationOutput } from '../query_point_event_annotation/types';
-import { annotationColumns, EventAnnotationOutput } from '../types';
+import type { QueryPointEventAnnotationOutput } from '../query_point_event_annotation/types';
+import type { EventAnnotationOutput } from '../types';
+import { annotationColumns } from '../types';
 
 export const isRangeAnnotation = (
   annotation: EventAnnotationOutput
@@ -127,6 +129,7 @@ export const postprocessAnnotations = (
   esaggsResponses: Array<{
     response: Datatable;
     fieldsColIdMap: Record<string, string>;
+    fieldDisplayNames?: Record<string, string>;
   }>,
   queryAnnotationConfigs: QueryPointEventAnnotationOutput[],
   manualAnnotationDatatableRows: Array<{
@@ -144,17 +147,19 @@ export const postprocessAnnotations = (
   }> // todo: simplify types
 ) => {
   const datatableColumns: DatatableColumn[] = esaggsResponses
-    .flatMap(({ response, fieldsColIdMap }) => {
+    .flatMap(({ response, fieldsColIdMap, fieldDisplayNames }) => {
       const swappedFieldsColIdMap = Object.fromEntries(
         Object.entries(fieldsColIdMap).map(([k, v]) => [v, k])
       );
       return response.columns
         .filter((col) => swappedFieldsColIdMap[col.id])
         .map((col) => {
+          const fieldName = swappedFieldsColIdMap[col.id];
           return {
             ...col,
-            name: swappedFieldsColIdMap[col.id], // we need to overwrite the name because esaggs column name is per bucket and not per row (eg. "First 10 fields...")
-            id: `field:${swappedFieldsColIdMap[col.id]}`,
+            // esaggs labels buckets ("First 10 …"); id stays the field, name is the data-view label
+            name: fieldDisplayNames?.[fieldName] ?? fieldName,
+            id: `field:${fieldName}`,
           };
         });
     })

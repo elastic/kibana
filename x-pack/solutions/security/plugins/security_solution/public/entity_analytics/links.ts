@@ -9,50 +9,23 @@ import { i18n } from '@kbn/i18n';
 import {
   SecurityPageName,
   SECURITY_FEATURE_ID,
-  ENTITY_ANALYTICS_LANDING_PATH,
-  ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_PATH,
+  ENTITY_ANALYTICS_HOME_PAGE_PATH,
 } from '../../common/constants';
 import type { LinkItem } from '../common/links/types';
-import { ENTITY_ANALYTICS, ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING } from '../app/translations';
-import privilegedUserMonitoringPageImg from '../common/images/privileged_user_monitoring_page.png';
-
-const privMonLinks: LinkItem = {
-  id: SecurityPageName.privilegedUserMonitoring,
-  title: ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING,
-  landingImage: privilegedUserMonitoringPageImg,
-  description: i18n.translate(
-    'xpack.securitySolution.appLinks.privilegedUserMonitoring.Description',
-    {
-      defaultMessage: '???????????????????', // TODO
-    }
-  ),
-  path: ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_PATH,
-  globalSearchKeywords: [
-    i18n.translate('xpack.securitySolution.appLinks.privilegedUserMonitoring', {
-      defaultMessage: 'Privileged User Monitoring',
-    }),
-  ],
-  experimentalKey: 'privilegeMonitoringEnabled',
-  hideTimeline: true,
-  skipUrlState: true,
-  capabilities: [`${SECURITY_FEATURE_ID}.entity-analytics`],
-  licenseType: 'platinum',
-};
+import { ENTITY_ANALYTICS } from '../app/translations';
 
 export const entityAnalyticsLinks: LinkItem = {
-  id: SecurityPageName.entityAnalyticsLanding,
+  id: SecurityPageName.entityAnalyticsHomePage,
   title: ENTITY_ANALYTICS,
-  path: ENTITY_ANALYTICS_LANDING_PATH,
-  globalNavPosition: 10,
+  path: ENTITY_ANALYTICS_HOME_PAGE_PATH,
+  globalNavPosition: 7,
   globalSearchKeywords: [
     i18n.translate('xpack.securitySolution.appLinks.entityAnalytics.landing', {
-      defaultMessage: 'Entity Analytics',
+      defaultMessage: 'Entity analytics',
     }),
   ],
-  links: [privMonLinks],
-  hideTimeline: true,
-  skipUrlState: true,
-  experimentalKey: 'privilegeMonitoringEnabled',
+  hideTimeline: false,
+  skipUrlState: false,
   capabilities: [`${SECURITY_FEATURE_ID}.entity-analytics`],
   licenseType: 'platinum',
 };

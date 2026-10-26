@@ -24,6 +24,8 @@ export interface UseFirstLastSeen {
   order: Direction.asc | Direction.desc;
   defaultIndex: string[];
   filterQuery?: ESQuery | string;
+  /** When true, the search is not executed. Default: false. */
+  skip?: boolean;
 }
 
 export const useFirstLastSeen = ({
@@ -32,6 +34,7 @@ export const useFirstLastSeen = ({
   order,
   defaultIndex,
   filterQuery,
+  skip = false,
 }: UseFirstLastSeen): [boolean, FirstLastSeenArgs] => {
   const { loading, result, search, error } = useSearchStrategy<typeof FirstLastSeenQuery>({
     factoryQueryType: FirstLastSeenQuery,
@@ -43,6 +46,7 @@ export const useFirstLastSeen = ({
   });
 
   useEffect(() => {
+    if (skip) return;
     search({
       defaultIndex,
       field,
@@ -50,7 +54,7 @@ export const useFirstLastSeen = ({
       order,
       filterQuery,
     });
-  }, [defaultIndex, field, value, order, search, filterQuery]);
+  }, [defaultIndex, field, value, order, search, filterQuery, skip]);
 
   const setFirstLastSeenResponse: FirstLastSeenArgs = useMemo(
     () => ({

@@ -7,13 +7,15 @@
 
 import type { FC } from 'react';
 import React from 'react';
-import { EuiButton, EuiButtonEmpty, EuiTitle } from '@elastic/eui';
+import type { EuiEmptyPromptProps } from '@elastic/eui';
+import { EuiButton, EuiText, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import dfaImage from './data_frame_analytics_kibana.png';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
+import type { SerializedStyles } from '@emotion/serialize';
+import dfaImage from './analysis_monitors.svg';
 import { mlNodesAvailable } from '../../../../../ml_nodes_check';
 import { useMlKibana, useMlManagementLocator } from '../../../../../contexts/kibana';
-import { ML_PAGES } from '../../../../../../../common/constants/locator';
 import { usePermissionCheck } from '../../../../../capabilities/check_capabilities';
 import { MLEmptyPromptCard } from '../../../../../components/overview/ml_empty_prompt_card';
 
@@ -28,7 +30,13 @@ export const TrainedAnalysisTitle = () => (
   </EuiTitle>
 );
 
-export const AnalyticsEmptyPrompt: FC<{ showDocsLink?: boolean }> = ({ showDocsLink = false }) => {
+export const AnalyticsEmptyPrompt: FC<{
+  showDocsLink?: boolean;
+  centered?: boolean;
+  customCss?: SerializedStyles;
+  iconSize?: 'fullWidth' | 'original' | 's' | 'm' | 'l' | 'xl';
+  titleSize?: EuiEmptyPromptProps['titleSize'];
+}> = ({ showDocsLink = false, centered = false, customCss, iconSize, titleSize }) => {
   const {
     services: { docLinks },
   } = useMlKibana();
@@ -54,51 +62,42 @@ export const AnalyticsEmptyPrompt: FC<{ showDocsLink?: boolean }> = ({ showDocsL
 
   return (
     <MLEmptyPromptCard
+      customCss={customCss}
       iconSrc={dfaImage}
       iconAlt={i18n.translate('xpack.ml.dataFrame.analyticsList.emptyPromptTitle', {
-        defaultMessage: 'Trained analysis of your data',
+        defaultMessage: 'Tailored predictive models',
       })}
+      iconSize={iconSize}
+      titleSize={titleSize}
       title={i18n.translate('xpack.ml.dataFrame.analyticsList.emptyPromptTitle', {
-        defaultMessage: 'Trained analysis of your data',
+        defaultMessage: 'Tailored predictive models',
       })}
       body={
-        <FormattedMessage
-          id="xpack.ml.overview.analyticsList.emptyPromptText"
-          defaultMessage="Train outlier detection, regression, or classification machine learning models using data frame analytics."
-        />
+        <EuiText size="s">
+          <FormattedMessage
+            id="xpack.ml.overview.analyticsList.emptyPromptText"
+            defaultMessage="Categorize data, predict values, and detect outliers using supervised and unsupervised machine learning in data frame analytics."
+          />
+        </EuiText>
       }
-      actions={[
-        ...[
-          <EuiButton
-            onClick={navigateToSourceSelection}
-            isDisabled={disabled}
-            fill
-            color="primary"
-            data-test-subj="mlAnalyticsCreateFirstButton"
-          >
-            <FormattedMessage
-              id="xpack.ml.dataFrame.analyticsList.emptyPromptButtonText"
-              defaultMessage="Create Data Frame Analytics job"
-            />
-          </EuiButton>,
-        ],
-        ...(showDocsLink
-          ? [
-              <EuiButtonEmpty
-                target="_blank"
-                href={docLinks.links.ml.dataFrameAnalytics}
-                data-test-subj="mlAnalyticsReadDocumentationButton"
-                iconType="popout"
-                iconSide="left"
-              >
-                <FormattedMessage
-                  id="xpack.ml.common.readDocumentationLink"
-                  defaultMessage="Read documentation"
-                />
-              </EuiButtonEmpty>,
-            ]
-          : []),
-      ]}
+      actions={
+        <EuiButton
+          onClick={navigateToSourceSelection}
+          isDisabled={disabled}
+          color="primary"
+          fill
+          iconType="plusCircle"
+          data-test-subj="mlAnalyticsCreateFirstButton"
+        >
+          <FormattedMessage
+            id="xpack.ml.dataFrame.analyticsList.emptyPromptButtonText"
+            defaultMessage="Create data frame analytics job"
+          />
+        </EuiButton>
+      }
+      docsLink={showDocsLink ? docLinks.links.ml.dataFrameAnalytics : undefined}
+      docsLinkDataTestSubj="mlAnalyticsReadDocumentationButton"
+      centered={centered}
       data-test-subj="mlNoDataFrameAnalyticsFound"
     />
   );

@@ -14,46 +14,100 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod';
-import { BooleanFromString } from '@kbn/zod-helpers';
+import { z, lazySchema } from '@kbn/zod/v4';
+import { BooleanFromString } from '@kbn/zod-helpers/v4';
 
 import { ErrorSchema } from '../../model/error_schema.gen';
 import { WarningSchema } from '../../model/warning_schema.gen';
 
+export const ImportRulesRequestQuery = lazySchema(() =>
+  z.object({
+    /**
+     * Determines whether existing rules with the same `rule_id` are overwritten. If an imported rule matches the existing rule's settings, including whether it's enabled, the existing rule isn't updated. It keeps its `revision`, `updated_at` timestamp, and API key, and is counted in `rules_summary.skipped`.
+     */
+    overwrite: BooleanFromString.optional()
+      .default(false)
+      .describe(
+        "Determines whether existing rules with the same `rule_id` are overwritten. If an imported rule matches the existing rule's settings, including whether it's enabled, the existing rule isn't updated. It keeps its `revision`, `updated_at` timestamp, and API key, and is counted in `rules_summary.skipped`."
+      ),
+    /**
+     * Determines whether existing exception lists with the same `list_id` are overwritten. Both the exception list container and its items are overwritten.
+     */
+    overwrite_exceptions: BooleanFromString.optional()
+      .default(false)
+      .describe(
+        'Determines whether existing exception lists with the same `list_id` are overwritten. Both the exception list container and its items are overwritten.'
+      ),
+    /**
+     * Determines whether existing actions with the same `kibana.alert.rule.actions.id` are overwritten.
+     */
+    overwrite_action_connectors: BooleanFromString.optional()
+      .default(false)
+      .describe(
+        'Determines whether existing actions with the same `kibana.alert.rule.actions.id` are overwritten.'
+      ),
+    /**
+     * Generates a new list ID for each imported exception list.
+     */
+    as_new_list: BooleanFromString.optional()
+      .default(false)
+      .describe('Generates a new list ID for each imported exception list.'),
+  })
+);
 export type ImportRulesRequestQuery = z.infer<typeof ImportRulesRequestQuery>;
-export const ImportRulesRequestQuery = z.object({
-  /**
-   * Determines whether existing rules with the same `rule_id` are overwritten.
-   */
-  overwrite: BooleanFromString.optional().default(false),
-  /**
-   * Determines whether existing exception lists with the same `list_id` are overwritten. Both the exception list container and its items are overwritten.
-   */
-  overwrite_exceptions: BooleanFromString.optional().default(false),
-  /**
-   * Determines whether existing actions with the same `kibana.alert.rule.actions.id` are overwritten.
-   */
-  overwrite_action_connectors: BooleanFromString.optional().default(false),
-  /**
-   * Generates a new list ID for each imported exception list.
-   */
-  as_new_list: BooleanFromString.optional().default(false),
-});
 export type ImportRulesRequestQueryInput = z.input<typeof ImportRulesRequestQuery>;
 
+export const ImportRulesResponse = lazySchema(() =>
+  z
+    .object({
+      exceptions_success: z.boolean(),
+      exceptions_success_count: z.number().int().min(0),
+      exceptions_errors: z.array(ErrorSchema),
+      rules_count: z.number().int().min(0),
+      success: z.boolean(),
+      success_count: z.number().int().min(0),
+      /**
+       * Counts of imported rules by outcome. `created`, `updated`, and `skipped` are included in `success_count`. `failed` did not import successfully.
+       */
+      rules_summary: z
+        .object({
+          /**
+           * Rules created by this import.
+           */
+          created: z.number().int().min(0).describe('Rules created by this import.'),
+          /**
+           * Existing rules overwritten because the payload changed.
+           */
+          updated: z
+            .number()
+            .int()
+            .min(0)
+            .describe('Existing rules overwritten because the payload changed.'),
+          /**
+           * Existing rules skipped because nothing changed. Included in `success_count`.
+           */
+          skipped: z
+            .number()
+            .int()
+            .min(0)
+            .describe(
+              'Existing rules skipped because nothing changed. Included in `success_count`.'
+            ),
+          /**
+           * Rules that did not import successfully.
+           */
+          failed: z.number().int().min(0).describe('Rules that did not import successfully.'),
+        })
+        .strict()
+        .describe(
+          'Counts of imported rules by outcome. `created`, `updated`, and `skipped` are included in `success_count`. `failed` did not import successfully.'
+        ),
+      errors: z.array(ErrorSchema),
+      action_connectors_errors: z.array(ErrorSchema),
+      action_connectors_warnings: z.array(WarningSchema),
+      action_connectors_success: z.boolean(),
+      action_connectors_success_count: z.number().int().min(0),
+    })
+    .strict()
+);
 export type ImportRulesResponse = z.infer<typeof ImportRulesResponse>;
-export const ImportRulesResponse = z
-  .object({
-    exceptions_success: z.boolean(),
-    exceptions_success_count: z.number().int().min(0),
-    exceptions_errors: z.array(ErrorSchema),
-    rules_count: z.number().int().min(0),
-    success: z.boolean(),
-    success_count: z.number().int().min(0),
-    errors: z.array(ErrorSchema),
-    action_connectors_errors: z.array(ErrorSchema),
-    action_connectors_warnings: z.array(WarningSchema),
-    action_connectors_success: z.boolean(),
-    action_connectors_success_count: z.number().int().min(0),
-  })
-  .strict();

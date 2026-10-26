@@ -9,26 +9,26 @@ import React from 'react';
 
 import { Routes, Route } from '@kbn/shared-ux-router';
 import { Redirect } from 'react-router-dom';
-import { BasicRules } from '../tabs/basic_rules';
-import { AiSettings } from '../tabs/ai_settings';
-import { Integrations } from '../tabs/integrations';
+import { PromotionRules } from '../tabs/promotion_rules';
 import { CONFIGURATIONS_PATH } from '../../../common/constants';
 import { ConfigurationTabs } from '../constants';
+import { LazyConfigurationsIntegrationsHome } from '../tabs/integrations';
+import { AISettingsRouteGuard } from './ai_settings_route_guard';
 
 export const ConfigurationsRouter = React.memo(() => {
   return (
     <Routes>
       <Route
         path={`${CONFIGURATIONS_PATH}/:tab(${ConfigurationTabs.integrations})`}
-        component={Integrations}
+        component={LazyConfigurationsIntegrationsHome}
       />
       <Route
         path={`${CONFIGURATIONS_PATH}/:tab(${ConfigurationTabs.aiSettings})`}
-        component={AiSettings}
+        component={AISettingsRouteGuard}
       />
       <Route
         path={`${CONFIGURATIONS_PATH}/:tab(${ConfigurationTabs.basicRules})`}
-        component={BasicRules}
+        component={PromotionRules}
       />
       <Route
         path={`${CONFIGURATIONS_PATH}`}

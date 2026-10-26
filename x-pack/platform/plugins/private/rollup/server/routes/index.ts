@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RouteDependencies } from '../types';
+import type { RouteDependencies } from '../types';
 
 import { registerIndicesRoutes } from './api/indices';
 import { registerJobsRoutes } from './api/jobs';

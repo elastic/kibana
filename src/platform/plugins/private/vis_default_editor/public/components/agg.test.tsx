@@ -11,14 +11,16 @@ import React from 'react';
 import { mount, shallow } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 
-import { IAggType, AggGroupNames } from '@kbn/data-plugin/public';
+import type { IAggType } from '@kbn/data-plugin/public';
+import { AggGroupNames } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { Schema } from '@kbn/visualizations-plugin/public';
 
-import { DefaultEditorAgg, DefaultEditorAggProps } from './agg';
+import type { DefaultEditorAggProps } from './agg';
+import { DefaultEditorAgg } from './agg';
 import { DefaultEditorAggParams } from './agg_params';
 import { AGGS_ACTION_KEYS } from './agg_group_state';
-import { EditorVisState } from './sidebar/state/reducers';
+import type { EditorVisState } from './sidebar/state/reducers';
 
 jest.mock('./agg_params', () => ({
   DefaultEditorAggParams: () => null,
@@ -93,7 +95,7 @@ describe('DefaultEditorAgg component', () => {
       comp.find(DefaultEditorAggParams).props().setValidity(false);
     });
     comp.update();
-    expect(setAggsState).toBeCalledWith({
+    expect(setAggsState).toHaveBeenCalledWith({
       type: AGGS_ACTION_KEYS.VALID,
       payload: false,
       aggId: defaultProps.agg.id,
@@ -115,7 +117,7 @@ describe('DefaultEditorAgg component', () => {
       comp.find(DefaultEditorAggParams).props().setValidity(true);
     });
     comp.update();
-    expect(setAggsState).toBeCalledWith({
+    expect(setAggsState).toHaveBeenCalledWith({
       type: AGGS_ACTION_KEYS.VALID,
       payload: true,
       aggId: defaultProps.agg.id,
@@ -128,13 +130,13 @@ describe('DefaultEditorAgg component', () => {
 
   it('should call setTouched when accordion is collapsed', () => {
     const comp = mount(<DefaultEditorAgg {...defaultProps} />);
-    expect(defaultProps.setAggsState).toBeCalledTimes(0);
+    expect(defaultProps.setAggsState).toHaveBeenCalledTimes(0);
 
     comp.find('.euiAccordion__button').last().simulate('click');
     // make sure that the accordion is collapsed
     expect(comp.find('.euiAccordion-isOpen').exists()).toBeFalsy();
 
-    expect(defaultProps.setAggsState).toBeCalledWith({
+    expect(defaultProps.setAggsState).toHaveBeenCalledWith({
       type: AGGS_ACTION_KEYS.TOUCHED,
       payload: true,
       aggId: defaultProps.agg.id,
@@ -148,7 +150,7 @@ describe('DefaultEditorAgg component', () => {
       comp.find(DefaultEditorAggParams).props().setValidity(false);
     });
 
-    expect(setAggsState).toBeCalledWith({
+    expect(setAggsState).toHaveBeenCalledWith({
       type: AGGS_ACTION_KEYS.VALID,
       payload: false,
       aggId: defaultProps.agg.id,
@@ -200,7 +202,7 @@ describe('DefaultEditorAgg component', () => {
       const comp = mount(<DefaultEditorAgg {...defaultProps} />);
       comp.find('[data-test-subj="toggleDisableAggregationBtn disable"] button').simulate('click');
 
-      expect(defaultProps.onToggleEnableAgg).toBeCalledWith(defaultProps.agg.id, false);
+      expect(defaultProps.onToggleEnableAgg).toHaveBeenCalledWith(defaultProps.agg.id, false);
     });
 
     it('should disable the disableAggregation button', () => {
@@ -220,7 +222,7 @@ describe('DefaultEditorAgg component', () => {
       const comp = mount(<DefaultEditorAgg {...defaultProps} />);
       comp.find('[data-test-subj="toggleDisableAggregationBtn enable"] button').simulate('click');
 
-      expect(defaultProps.onToggleEnableAgg).toBeCalledWith(defaultProps.agg.id, true);
+      expect(defaultProps.onToggleEnableAgg).toHaveBeenCalledWith(defaultProps.agg.id, true);
     });
 
     it('should call removeAgg', () => {
@@ -228,7 +230,7 @@ describe('DefaultEditorAgg component', () => {
       const comp = mount(<DefaultEditorAgg {...defaultProps} />);
       comp.find('[data-test-subj="removeDimensionBtn"] button').simulate('click');
 
-      expect(defaultProps.removeAgg).toBeCalledWith(defaultProps.agg.id);
+      expect(defaultProps.removeAgg).toHaveBeenCalledWith(defaultProps.agg.id);
     });
   });
 

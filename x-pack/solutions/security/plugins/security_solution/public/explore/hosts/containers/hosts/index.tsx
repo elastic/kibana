@@ -9,35 +9,32 @@ import deepEqual from 'fast-deep-equal';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import type { HostsRequestOptionsInput } from '../../../../../common/api/search_strategy';
-import type { inputsModel, State } from '../../../../common/store';
+import type { State } from '../../../../common/store';
 import { createFilter } from '../../../../common/containers/helpers';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import type { hostsModel } from '../../store';
 import { hostsSelectors } from '../../store';
 import { generateTablePaginationOptions } from '../../../components/paginated_table/helpers';
-import type { HostsEdges, PageInfoPaginated } from '../../../../../common/search_strategy';
 import { HostsQueries } from '../../../../../common/search_strategy';
 import type { ESTermQuery } from '../../../../../common/typed_json';
 
 import * as i18n from './translations';
-import type { InspectResponse } from '../../../../types';
 import { useSearchStrategy } from '../../../../common/containers/use_search_strategy';
+import {
+  buildExecutionContext,
+  EA_EXECUTION_CONTEXT_NAMES,
+} from '../../../../common/utils/execution_context';
+import type { HostsArgs } from './hosts_table_query_types';
+import { HOSTS_ALL_TABLE_QUERY_ID } from './hosts_table_query_types';
 
-export const ID = 'hostsAllQuery';
+const HOSTS_ALL_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.EXPLORE_HOSTS_PAGE,
+  'hosts_all'
+);
 
-type LoadPage = (newActivePage: number) => void;
-export interface HostsArgs {
-  endDate: string;
-  hosts: HostsEdges[];
-  id: string;
-  inspect: InspectResponse;
-  isInspected: boolean;
-  loadPage: LoadPage;
-  pageInfo: PageInfoPaginated;
-  refetch: inputsModel.Refetch;
-  startDate: string;
-  totalCount: number;
-}
+export const ID = HOSTS_ALL_TABLE_QUERY_ID;
+
+export type { HostsArgs } from './hosts_table_query_types';
 
 interface UseAllHost {
   endDate: string;
@@ -98,13 +95,14 @@ export const useAllHost = ({
     },
     errorMessage: i18n.FAIL_ALL_HOST,
     abort: skip,
+    executionContext: HOSTS_ALL_CONTEXT,
   });
 
   const hostsResponse = useMemo(
     () => ({
       endDate,
       hosts: response.edges,
-      id: ID,
+      id: HOSTS_ALL_TABLE_QUERY_ID,
       inspect,
       isInspected: false,
       loadPage: wrappedLoadMore,
@@ -158,3 +156,5 @@ export const useAllHost = ({
 
   return [loading, hostsResponse];
 };
+
+export { useAllEntityStoreHosts } from './use_all_entity_store_hosts';

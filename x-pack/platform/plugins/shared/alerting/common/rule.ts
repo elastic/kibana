@@ -6,7 +6,6 @@
  */
 
 import type { SavedObjectAttributes } from '@kbn/core/server';
-
 import type {
   SanitizedRule,
   RuleLastRunOutcomes,
@@ -14,6 +13,7 @@ import type {
   RuleAction,
   RuleSystemAction,
   RuleActionParam,
+  AlertsFilter,
 } from '@kbn/alerting-types';
 
 export type {
@@ -45,6 +45,7 @@ export type {
   AlertsHealth,
   AlertingFrameworkHealth,
   ResolvedSanitizedRule,
+  Artifacts,
 } from '@kbn/alerting-types';
 
 export {
@@ -69,7 +70,10 @@ export const RuleLastRunOutcomeOrderMap: Record<RuleLastRunOutcomes, number> = {
 
 export type RuleAlertingOutcome = 'failure' | 'success' | 'unknown' | 'warning';
 
-export type RuleActionAlertsFilterProperty = AlertsFilterTimeframe | RuleActionParam;
+export type RuleActionAlertsFilterProperty =
+  | AlertsFilterTimeframe
+  | RuleActionParam
+  | AlertsFilter['query'];
 
 export type RuleActionKey = keyof RuleAction;
 export type RuleSystemActionKey = keyof RuleSystemAction;
@@ -93,6 +97,7 @@ export type SanitizedRuleConfig = Pick<
   | 'revision'
   | 'snoozeSchedule'
   | 'alertDelay'
+  | 'lastEnabledAt'
 > & {
   producer: string;
   ruleTypeId: string;
@@ -110,4 +115,5 @@ export interface RuleMonitoringLastRunMetrics extends SavedObjectAttributes {
     lte: string;
     gte: string;
   } | null;
+  gap_reason?: { type: string } | null;
 }

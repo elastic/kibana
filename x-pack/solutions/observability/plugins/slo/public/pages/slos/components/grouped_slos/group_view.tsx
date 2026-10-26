@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { EuiEmptyPrompt, EuiFlexItem, EuiLoadingSpinner, EuiTablePagination } from '@elastic/eui';
-import { Filter } from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
 import React, { useEffect } from 'react';
 import { useFetchSloGroups } from '../../../../hooks/use_fetch_slo_groups';
 import { useUrlSearchState } from '../../hooks/use_url_search_state';
@@ -23,6 +23,7 @@ interface Props {
   filters?: Filter[];
   lastRefreshTime?: number;
   groupsFilter?: string[];
+  isInteractive?: boolean;
 }
 
 export function GroupView({
@@ -34,6 +35,7 @@ export function GroupView({
   groupsFilter,
   filters,
   lastRefreshTime,
+  isInteractive = true,
 }: Props) {
   const { state, onStateChange } = useUrlSearchState();
   const { tagsFilter, statusFilter, page, perPage, lastRefresh } = state;
@@ -88,6 +90,7 @@ export function GroupView({
             direction={direction}
             summary={result.summary}
             filters={filters}
+            isInteractive={isInteractive}
           />
         ))}
 

@@ -10,10 +10,11 @@ import { MODEL_STATE } from '@kbn/ml-trained-models-utils';
 import { EuiProgress, EuiFlexItem, EuiFlexGroup, EuiText } from '@elastic/eui';
 
 import useObservable from 'react-use/lib/useObservable';
-import { isBaseNLPModelItem } from '../../../common/types/trained_models';
+import { isBaseNLPModelItem } from '@kbn/ml-common-types/trained_models';
 import type { NameOverrides } from './get_model_state';
 import { getModelStateColor } from './get_model_state';
 import { useMlKibana } from '../contexts/kibana';
+import { usePermissionCheck } from '../capabilities/check_capabilities';
 
 export const ModelStatusIndicator = ({
   modelId,
@@ -31,6 +32,8 @@ export const ModelStatusIndicator = ({
     },
   } = useMlKibana();
 
+  const [canStartStopTrainedModels] = usePermissionCheck(['canStartStopTrainedModels']);
+
   const currentModel = useObservable(
     trainedModelsService.getModel$(modelId),
     trainedModelsService.getModel(modelId)
@@ -41,7 +44,7 @@ export const ModelStatusIndicator = ({
   }
 
   const { state, downloadState } = currentModel;
-  const config = getModelStateColor(state, configOverrides?.names);
+  const config = getModelStateColor(state, canStartStopTrainedModels, configOverrides?.names);
 
   if (!config) {
     return null;

@@ -52,7 +52,7 @@ const AddFilter: FC<EntityCellProps> = ({ entityName, entityValue, filter }) => 
         onClick={blurButtonOnClick(() => {
           filter(entityName, entityValue, ML_ENTITY_FIELD_OPERATIONS.ADD);
         })}
-        iconType="plusInCircle"
+        iconType="plusCircle"
         aria-label={i18n.translate('xpack.ml.anomaliesTable.entityCell.addFilterAriaLabel', {
           defaultMessage: 'Add filter',
         })}
@@ -84,7 +84,7 @@ const RemoveFilter: FC<EntityCellProps> = ({ entityName, entityValue, filter }) 
         onClick={blurButtonOnClick(() => {
           filter(entityName, entityValue, ML_ENTITY_FIELD_OPERATIONS.REMOVE);
         })}
-        iconType="minusInCircle"
+        iconType="minusCircle"
         aria-label={i18n.translate('xpack.ml.anomaliesTable.entityCell.removeFilterAriaLabel', {
           defaultMessage: 'Remove filter',
         })}

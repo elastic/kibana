@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { FileKindBase } from '@kbn/shared-ux-file-types';
+import type { FileKindBase } from '@kbn/shared-ux-file-types';
 
 export const id = 'defaultImage' as const;
 export const tag = 'files:defaultImage' as const;

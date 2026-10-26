@@ -8,16 +8,16 @@
 // Mock the mlJobService that is imported for saving rules.
 jest.mock('../../services/job_service', () => 'mlJobService');
 
-import { shallowWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
 
 import { ML_DETECTOR_RULE_APPLIES_TO, ML_DETECTOR_RULE_OPERATOR } from '@kbn/ml-anomaly-utils';
 
 import { ConditionExpression } from './condition_expression';
 
 describe('ConditionExpression', () => {
-  const updateCondition = jest.fn(() => {});
-  const deleteCondition = jest.fn(() => {});
+  const updateCondition = jest.fn();
+  const deleteCondition = jest.fn();
 
   const requiredProps = {
     index: 0,
@@ -31,9 +31,9 @@ describe('ConditionExpression', () => {
       value: 123,
     };
 
-    const component = shallowWithIntl(<ConditionExpression {...props} />);
+    const { container } = renderWithI18n(<ConditionExpression {...props} />);
 
-    expect(component).toMatchSnapshot();
+    expect(container.firstChild).toMatchSnapshot();
   });
 
   test('renders with appliesTo, operator and value supplied', () => {
@@ -44,8 +44,8 @@ describe('ConditionExpression', () => {
       value: 123,
     };
 
-    const component = shallowWithIntl(<ConditionExpression {...props} />);
+    const { container } = renderWithI18n(<ConditionExpression {...props} />);
 
-    expect(component).toMatchSnapshot();
+    expect(container.firstChild).toMatchSnapshot();
   });
 });

@@ -73,7 +73,7 @@ describe('useBulkAlertAssigneesItems', () => {
       isLoading: false,
       data: mockUserProfiles,
     });
-    (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasIndexWrite: true });
+    (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasAlertsUpdate: true });
     (useLicense as jest.Mock).mockReturnValue({ isPlatinumPlus: () => true });
   });
 
@@ -95,6 +95,14 @@ describe('useBulkAlertAssigneesItems', () => {
     expect(result.current.alertAssigneesItems[1]['data-test-subj']).toEqual(
       'remove-alert-assignees-menu-item'
     );
+    expect(result.current.alertAssigneesItems[0]).toMatchObject({
+      icon: 'users',
+      groupId: 'assignees',
+    });
+    expect(result.current.alertAssigneesItems[1]).toMatchObject({
+      icon: 'users',
+      groupId: 'assignees',
+    });
     expect(result.current.alertAssigneesPanels[0]['data-test-subj']).toEqual(
       'alert-assignees-context-menu-panel'
     );
@@ -231,7 +239,7 @@ describe('useBulkAlertAssigneesItems', () => {
   });
 
   it('should return 0 items for the VIEWER role', () => {
-    (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasIndexWrite: false });
+    (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasAlertsUpdate: false });
 
     const { result } = renderHook(() => useBulkAlertAssigneesItems(defaultProps), {
       wrapper: TestProviders,

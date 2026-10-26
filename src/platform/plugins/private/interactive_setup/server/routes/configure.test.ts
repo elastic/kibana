@@ -53,7 +53,13 @@ describe('Configure routes', () => {
     });
 
     it('correctly defines route.', () => {
-      expect(routeConfig.options).toEqual({ authRequired: false });
+      expect(routeConfig.options).toBeUndefined();
+      expect(routeConfig.security?.authc).toEqual(
+        expect.objectContaining({
+          enabled: false,
+          reason: expect.any(String),
+        })
+      );
 
       const bodySchema = (routeConfig.validate as any).body as ObjectType;
       expect(() => bodySchema.validate({})).toThrowErrorMatchingInlineSnapshot(

@@ -8,8 +8,8 @@
 import { i18n } from '@kbn/i18n';
 import type { Map as MbMap } from '@kbn/mapbox-gl';
 import { DynamicStyleProperty } from './dynamic_style_property';
-import { LabelDynamicOptions } from '../../../../../common/descriptor_types';
-import { RawValue } from '../../../../../common/constants';
+import type { LabelDynamicOptions } from '../../../../../common/descriptor_types';
+import type { RawValue } from '../../../../../common/constants';
 
 export class DynamicTextProperty extends DynamicStyleProperty<LabelDynamicOptions> {
   syncTextFieldWithMb(mbLayerId: string, mbMap: MbMap) {

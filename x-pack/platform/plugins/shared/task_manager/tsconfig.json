@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -7,10 +7,15 @@
     "server/**/*",
     // have to declare *.json explicitly due to https://github.com/microsoft/TypeScript/issues/25636
     "server/**/*.json",
-    "common/**/*"
+    "common/**/*",
+    "test/scout/**/*",
+    "test/scout_service_accounts/**/*",
+    "test/scout_uiam_local/**/*",
+    "test/scout_task_manager_claim_nudge/**/*"
   ],
   "kbn_references": [
     "@kbn/core",
+    "@kbn/tracing-utils",
     "@kbn/usage-collection-plugin",
     "@kbn/config-schema",
     "@kbn/config",
@@ -31,10 +36,27 @@
     "@kbn/core-elasticsearch-server",
     "@kbn/es-query",
     "@kbn/core-http-server-mocks",
-    "@kbn/spaces-plugin",
     "@kbn/encrypted-saved-objects-shared",
     "@kbn/core-saved-objects-api-server-mocks",
     "@kbn/core-http-server-utils",
+    "@kbn/licensing-plugin",
+    "@kbn/rrule",
+    "@kbn/response-ops-scheduling-types",
+    "@kbn/logging-mocks",
+    "@kbn/core-spaces-common",
+    "@kbn/licensing-types",
+    "@kbn/lazy-object",
+    "@kbn/security-plugin-types-server",
+    "@kbn/connector-specs",
+    "@kbn/es-errors",
+    "@kbn/core-execution-context-server-mocks",
+    "@kbn/core-execution-context-common",
+    "@kbn/core-http-server",
+    "@kbn/core-security-server",
+    "@kbn/core-security-common",
+    "@kbn/scout",
+    "@kbn/std",
+    "@kbn/mock-idp-utils",
   ],
   "exclude": ["target/**/*"]
 }

@@ -23,6 +23,7 @@ import {
   createIncident,
   dedupAssignees,
   getClosedInfoForUpdate,
+  getCloseReasonIfValid,
   getDurationForUpdate,
   getEntity,
   getLatestPushInfo,
@@ -31,20 +32,37 @@ import {
   addKibanaInformationToDescription,
   fillMissingCustomFields,
   normalizeCreateCaseRequest,
+  getInProgressInfoForUpdate,
+  getTimingMetricsForUpdate,
+  isObservable,
+  processObservables,
+  enrichCasesWithFieldLabels,
 } from './utils';
-import type { CaseCustomFields, CustomFieldsConfiguration } from '../../../common/types/domain';
+
+import type {
+  AttachmentV2,
+  CaseCustomFields,
+  CustomFieldsConfiguration,
+  Observable,
+  CaseConnector,
+  JiraFieldsType,
+} from '../../../common/types/domain';
 import {
   CaseStatuses,
   CustomFieldTypes,
   UserActionActions,
+  UserActionTypes,
   CaseSeverity,
   ConnectorTypes,
 } from '../../../common/types/domain';
+import { FieldType } from '../../../common/types/domain/template/fields';
 import { flattenCaseSavedObject } from '../../common/utils';
 import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import { casesConnectors } from '../../connectors';
 import { userProfiles, userProfilesMap } from '../user_profiles.mock';
 import { mappings, mockCases } from '../../mocks';
+import type { ObservablePost, CaseUserActionsDeprecatedResponse } from '../../../common/types/api';
+import { createMockConnector } from '@kbn/actions-plugin/server/application/connector/mocks';
 
 const allComments = [
   commentObj,
@@ -56,6 +74,13 @@ const allComments = [
   commentExternalReference,
   commentPersistableState,
 ];
+
+const alertAttachmentIds = new Set([commentAlert.id, commentAlertMultipleIds.id]);
+const userActionsWithoutAlerts = userActions.filter(
+  ({ comment_id: commentId }) => commentId == null || !alertAttachmentIds.has(commentId)
+);
+
+const userActionsWithoutPushes = userActions.filter(({ type }) => type !== UserActionTypes.pushed);
 
 describe('utils', () => {
   describe('dedupAssignees', () => {
@@ -78,6 +103,20 @@ describe('utils', () => {
     });
   });
 
+  describe('getCloseReasonIfValid', () => {
+    it('returns any non-empty close reason', () => {
+      expect(getCloseReasonIfValid('false_positive')).toBe('false_positive');
+      expect(getCloseReasonIfValid('automated_closure')).toBe('automated_closure');
+      expect(getCloseReasonIfValid('my custom reason')).toBe('my custom reason');
+    });
+
+    it('returns undefined for empty values', () => {
+      expect(getCloseReasonIfValid('')).toBeUndefined();
+      expect(getCloseReasonIfValid('   ')).toBeUndefined();
+      expect(getCloseReasonIfValid()).toBeUndefined();
+    });
+  });
+
   describe('createIncident', () => {
     const theCase = {
       ...flattenCaseSavedObject({
@@ -87,17 +126,40 @@ describe('utils', () => {
       totalComments: 1,
     };
 
-    const connector = {
+    const connector = createMockConnector({
       id: '456',
       actionTypeId: '.jira',
       name: 'Connector without isCaseOwned',
       config: {
         apiUrl: 'https://elastic.jira.com',
       },
-      isPreconfigured: false,
-      isDeprecated: false,
-      isSystemAction: false,
-    };
+    });
+
+    type UserAction = CaseUserActionsDeprecatedResponse[number];
+
+    const [createCaseUserAction, pushUserAction, commentUserActionTemplate] = userActions;
+
+    const buildCommentUserAction = (
+      attachment: AttachmentV2,
+      action: UserAction['action'] = UserActionActions.create
+    ): UserAction =>
+      ({
+        ...commentUserActionTemplate,
+        action,
+        comment_id: attachment.id,
+        payload: { comment: attachment },
+      } as unknown as UserAction);
+
+    const buildUnifiedAlert = (id: string, attachmentId: string | string[]): AttachmentV2 =>
+      ({
+        ...omit(commentAlert, ['alertId', 'index', 'rule']),
+        id,
+        type: 'security.alert',
+        attachmentId,
+      } as unknown as AttachmentV2);
+
+    const unifiedAlertSingle = buildUnifiedAlert('unified-alert-1', 'alert-id-3');
+    const unifiedAlertMulti = buildUnifiedAlert('unified-alert-2', ['alert-id-4', 'alert-id-5']);
 
     it('creates an external incident correctly for Jira', async () => {
       const res = await createIncident({
@@ -115,6 +177,7 @@ describe('utils', () => {
           labels: ['defacement'],
           issueType: null,
           parent: null,
+          otherFields: null,
           summary: 'Super Bad Security Issue',
           description:
             'This is a brand new case of a bad meanie defacing data\n\nAdded by elastic.',
@@ -217,6 +280,7 @@ describe('utils', () => {
           description:
             'This is a brand new case of a bad meanie defacing data\n\nAdded by elastic.',
           externalId: null,
+          additionalFields: null,
         },
         comments: [],
       });
@@ -302,6 +366,52 @@ describe('utils', () => {
           labels: ['LOLBins'],
           issueType: 'Task',
           parent: null,
+          otherFields: null,
+          summary: 'Another bad one',
+          description: 'Oh no, a bad meanie going LOLBins all over the place!\n\nAdded by elastic.',
+          externalId: null,
+        },
+        comments: [],
+      });
+    });
+
+    it('includes Jira otherFields in the incident payload', async () => {
+      const caseWithOtherFields = {
+        ...flattenCaseSavedObject({
+          savedObject: {
+            ...mockCases[2],
+            attributes: {
+              ...mockCases[2].attributes,
+              connector: {
+                ...mockCases[2].attributes.connector,
+                fields: {
+                  ...(mockCases[2].attributes.connector.fields as JiraFieldsType),
+                  otherFields: '{"customfield_123456":"Blue team"}',
+                },
+              } as CaseConnector,
+            },
+          },
+        }),
+        comments: [],
+        totalComments: 0,
+      };
+
+      const res = await createIncident({
+        theCase: caseWithOtherFields,
+        userActions: [],
+        connector,
+        alerts: [],
+        casesConnectors,
+        spaceId: 'default',
+      });
+
+      expect(res).toEqual({
+        incident: {
+          priority: 'High',
+          labels: ['LOLBins'],
+          issueType: 'Task',
+          parent: null,
+          otherFields: '{"customfield_123456":"Blue team"}',
           summary: 'Another bad one',
           description: 'Oh no, a bad meanie going LOLBins all over the place!\n\nAdded by elastic.',
           externalId: null,
@@ -316,7 +426,7 @@ describe('utils', () => {
           ...theCase,
           comments: [commentObj],
         },
-        userActions,
+        userActions: userActionsWithoutAlerts,
         connector,
         alerts: [],
         casesConnectors,
@@ -331,7 +441,57 @@ describe('utils', () => {
       ]);
     });
 
-    it('adds the total alert comments correctly', async () => {
+    it('adds the alerts summary when the case was never pushed to the connector', async () => {
+      const res = await createIncident({
+        theCase: {
+          ...theCase,
+          comments: [commentObj, commentAlert, commentAlertMultipleIds],
+        },
+        userActions: userActionsWithoutPushes,
+        connector,
+        alerts: [],
+        casesConnectors,
+        spaceId: 'default',
+      });
+
+      expect(res.comments).toEqual([
+        {
+          comment: 'Wow, good luck catching that bad meanie!\n\nAdded by elastic.',
+          commentId: 'comment-user-1',
+        },
+        {
+          comment: 'Elastic Alerts attached to the case: 2 added (2 total)',
+          commentId: 'mock-id-1-total-alerts',
+        },
+      ]);
+    });
+
+    it('filters out the alerts from the comments correctly', async () => {
+      const res = await createIncident({
+        theCase: {
+          ...theCase,
+          comments: [{ ...commentObj, id: 'comment-user-1' }, commentAlertMultipleIds],
+        },
+        userActions: userActionsWithoutPushes,
+        connector,
+        alerts: [],
+        casesConnectors,
+        spaceId: 'default',
+      });
+
+      expect(res.comments).toEqual([
+        {
+          comment: 'Wow, good luck catching that bad meanie!\n\nAdded by elastic.',
+          commentId: 'comment-user-1',
+        },
+        {
+          comment: 'Elastic Alerts attached to the case: 2 added (2 total)',
+          commentId: 'mock-id-1-total-alerts',
+        },
+      ]);
+    });
+
+    it('does not add the alerts summary when no alert changed since the last push', async () => {
       const res = await createIncident({
         theCase: {
           ...theCase,
@@ -349,20 +509,17 @@ describe('utils', () => {
           comment: 'Wow, good luck catching that bad meanie!\n\nAdded by elastic.',
           commentId: 'comment-user-1',
         },
-        {
-          comment: 'Elastic Alerts attached to the case: 3',
-          commentId: 'mock-id-1-total-alerts',
-        },
       ]);
     });
 
-    it('filters out the alerts from the comments correctly', async () => {
+    it('counts unified alert attachments toward the alerts total', async () => {
       const res = await createIncident({
         theCase: {
           ...theCase,
-          comments: [{ ...commentObj, id: 'comment-user-1' }, commentAlertMultipleIds],
+          // 1 legacy alert (1 id) + 2 unified alerts (1 + 2 ids) = 4 alerts total
+          comments: [commentAlert, unifiedAlertSingle, unifiedAlertMulti],
         },
-        userActions,
+        userActions: userActionsWithoutPushes,
         connector,
         alerts: [],
         casesConnectors,
@@ -371,26 +528,21 @@ describe('utils', () => {
 
       expect(res.comments).toEqual([
         {
-          comment: 'Wow, good luck catching that bad meanie!\n\nAdded by elastic.',
-          commentId: 'comment-user-1',
-        },
-        {
-          comment: 'Elastic Alerts attached to the case: 2',
+          comment: 'Elastic Alerts attached to the case: 4 added (4 total)',
           commentId: 'mock-id-1-total-alerts',
         },
       ]);
     });
 
-    it('does not add the alerts count comment if all alerts have been pushed', async () => {
+    it('reports only the alerts added since the last push', async () => {
       const res = await createIncident({
-        theCase: {
-          ...theCase,
-          comments: [
-            { ...commentObj, id: 'comment-user-1', pushed_at: '2019-11-25T21:55:00.177Z' },
-            { ...commentAlertMultipleIds, pushed_at: '2019-11-25T21:55:00.177Z' },
-          ],
-        },
-        userActions,
+        theCase: { ...theCase, comments: [commentAlert, unifiedAlertMulti] },
+        userActions: [
+          createCaseUserAction,
+          buildCommentUserAction(commentAlert),
+          pushUserAction,
+          buildCommentUserAction(unifiedAlertMulti),
+        ],
         connector,
         alerts: [],
         casesConnectors,
@@ -399,7 +551,174 @@ describe('utils', () => {
 
       expect(res.comments).toEqual([
         {
-          comment: 'Wow, good luck catching that bad meanie!\n\nAdded by elastic.',
+          comment: 'Elastic Alerts attached to the case: 2 added (3 total)',
+          commentId: 'mock-id-1-total-alerts',
+        },
+      ]);
+    });
+
+    it('reports alerts removed from an attachment since the last push', async () => {
+      const threeAlerts = buildUnifiedAlert('unified-alert-3', [
+        'alert-id-3',
+        'alert-id-4',
+        'alert-id-5',
+      ]);
+      const twoAlerts = buildUnifiedAlert('unified-alert-3', ['alert-id-3', 'alert-id-4']);
+
+      const res = await createIncident({
+        theCase: { ...theCase, comments: [twoAlerts] },
+        userActions: [
+          createCaseUserAction,
+          buildCommentUserAction(threeAlerts),
+          pushUserAction,
+          buildCommentUserAction(twoAlerts, UserActionActions.update),
+        ],
+        connector,
+        alerts: [],
+        casesConnectors,
+        spaceId: 'default',
+      });
+
+      expect(res.comments).toEqual([
+        {
+          comment: 'Elastic Alerts attached to the case: 0 added, 1 removed (2 total)',
+          commentId: 'mock-id-1-total-alerts',
+        },
+      ]);
+    });
+
+    it('reports the alerts of a deleted attachment as removed', async () => {
+      const res = await createIncident({
+        theCase: { ...theCase, comments: [commentAlert] },
+        userActions: [
+          createCaseUserAction,
+          buildCommentUserAction(commentAlert),
+          buildCommentUserAction(unifiedAlertSingle),
+          pushUserAction,
+          buildCommentUserAction(unifiedAlertSingle, UserActionActions.delete),
+        ],
+        connector,
+        alerts: [],
+        casesConnectors,
+        spaceId: 'default',
+      });
+
+      expect(res.comments).toEqual([
+        {
+          comment: 'Elastic Alerts attached to the case: 0 added, 1 removed (1 total)',
+          commentId: 'mock-id-1-total-alerts',
+        },
+      ]);
+    });
+
+    it('skips the alerts summary when an alert is added and removed between pushes', async () => {
+      const res = await createIncident({
+        theCase: { ...theCase, comments: [commentAlert] },
+        userActions: [
+          createCaseUserAction,
+          buildCommentUserAction(commentAlert),
+          pushUserAction,
+          buildCommentUserAction(unifiedAlertSingle),
+          buildCommentUserAction(unifiedAlertSingle, UserActionActions.delete),
+        ],
+        connector,
+        alerts: [],
+        casesConnectors,
+        spaceId: 'default',
+      });
+
+      expect(res.comments).toEqual([]);
+    });
+
+    it('matches a unified alert against its legacy-shaped user action', async () => {
+      const legacyPayload = {
+        ...commentAlertMultipleIds,
+        id: unifiedAlertMulti.id,
+        alertId: ['alert-id-4', 'alert-id-5'],
+      };
+
+      const res = await createIncident({
+        theCase: { ...theCase, comments: [unifiedAlertMulti] },
+        userActions: [createCaseUserAction, buildCommentUserAction(legacyPayload), pushUserAction],
+        connector,
+        alerts: [],
+        casesConnectors,
+        spaceId: 'default',
+      });
+
+      expect(res.comments).toEqual([]);
+    });
+
+    it('ignores alert ids that bulk create deduped when the original attachment is deleted', async () => {
+      const alertA = buildUnifiedAlert('unified-alert-a', 'alert-id-a');
+      const bulkCreateRequest = buildUnifiedAlert('unified-alert-bc', [
+        'alert-id-a',
+        'alert-id-b',
+        'alert-id-c',
+      ]);
+      const dedupedAttachment = buildUnifiedAlert('unified-alert-bc', ['alert-id-b', 'alert-id-c']);
+
+      const res = await createIncident({
+        theCase: { ...theCase, comments: [dedupedAttachment] },
+        userActions: [
+          createCaseUserAction,
+          buildCommentUserAction(alertA),
+          buildCommentUserAction(bulkCreateRequest),
+          buildCommentUserAction(alertA, UserActionActions.delete),
+          pushUserAction,
+        ],
+        connector,
+        alerts: [],
+        casesConnectors,
+        spaceId: 'default',
+      });
+
+      expect(res.comments).toEqual([]);
+    });
+
+    it('reports every alert on the first push to another connector', async () => {
+      const res = await createIncident({
+        theCase: { ...theCase, comments: [commentAlert, commentAlertMultipleIds] },
+        userActions,
+        connector: createMockConnector({
+          id: '789',
+          actionTypeId: '.jira',
+          name: 'Another connector',
+          config: { apiUrl: 'https://elastic.jira.com' },
+        }),
+        alerts: [],
+        casesConnectors,
+        spaceId: 'default',
+      });
+
+      expect(res.comments).toEqual([
+        {
+          comment: 'Elastic Alerts attached to the case: 2 added (2 total)',
+          commentId: 'mock-id-1-total-alerts',
+        },
+      ]);
+    });
+
+    it('pushes a comment edited after the last push with its latest content', async () => {
+      const editedComment = { ...commentObj, comment: 'Edited comment' };
+
+      const res = await createIncident({
+        theCase: { ...theCase, comments: [editedComment] },
+        userActions: [
+          createCaseUserAction,
+          buildCommentUserAction(commentObj),
+          pushUserAction,
+          buildCommentUserAction(editedComment, UserActionActions.update),
+        ],
+        connector,
+        alerts: [],
+        casesConnectors,
+        spaceId: 'default',
+      });
+
+      expect(res.comments).toEqual([
+        {
+          comment: 'Edited comment\n\nAdded by elastic.',
           commentId: 'comment-user-1',
         },
       ]);
@@ -422,6 +741,7 @@ describe('utils', () => {
           labels: ['defacement'],
           issueType: null,
           parent: null,
+          otherFields: null,
           summary: 'Super Bad Security Issue',
           description:
             'This is a brand new case of a bad meanie defacing data\n\nAdded by elastic.\nFor more details, view this case in Kibana.\nCase URL: https://example.com/app/security/cases/mock-id-1',
@@ -448,6 +768,7 @@ describe('utils', () => {
           labels: ['defacement'],
           issueType: null,
           parent: null,
+          otherFields: null,
           summary: 'Super Bad Security Issue',
           description:
             'This is a brand new case of a bad meanie defacing data\n\nAdded by elastic.\nFor more details, view this case in Kibana.\nCase URL: https://example.com/s/test-space/app/security/cases/mock-id-1',
@@ -478,6 +799,7 @@ describe('utils', () => {
           labels: ['defacement'],
           issueType: null,
           parent: null,
+          otherFields: null,
           summary: 'Super Bad Security Issue',
           description:
             'This is a brand new case of a bad meanie defacing data\n\nAdded by Damaged Raccoon.',
@@ -502,7 +824,7 @@ describe('utils', () => {
           ],
           totalComment: 1,
         },
-        userActions,
+        userActions: userActionsWithoutAlerts,
         connector,
         alerts: [],
         casesConnectors,
@@ -516,6 +838,7 @@ describe('utils', () => {
           labels: ['defacement'],
           issueType: null,
           parent: null,
+          otherFields: null,
           summary: 'Super Bad Security Issue',
           description:
             'This is a brand new case of a bad meanie defacing data\n\nAdded by Damaged Raccoon.',
@@ -554,7 +877,7 @@ describe('utils', () => {
           ...theCase,
           comments: [commentObj, commentAlert, commentAlertMultipleIds],
         },
-        userActions,
+        userActions: userActionsWithoutPushes,
         connector,
         alerts: [],
         casesConnectors,
@@ -569,7 +892,7 @@ describe('utils', () => {
         },
         {
           comment:
-            'Elastic Alerts attached to the case: 3\n\nFor more details, view the alerts in Kibana\nAlerts URL: https://example.com/app/security/cases/mock-id-1/?tabId=alerts',
+            'Elastic Alerts attached to the case: 2 added (2 total)\n\nFor more details, view the alerts in Kibana\nAlerts URL: https://example.com/app/security/cases/mock-id-1/?tabId=alerts',
           commentId: 'mock-id-1-total-alerts',
         },
       ]);
@@ -581,7 +904,7 @@ describe('utils', () => {
           ...theCase,
           comments: [commentObj, commentAlert, commentAlertMultipleIds],
         },
-        userActions,
+        userActions: userActionsWithoutPushes,
         connector,
         alerts: [],
         casesConnectors,
@@ -596,7 +919,7 @@ describe('utils', () => {
         },
         {
           comment:
-            'Elastic Alerts attached to the case: 3\n\nFor more details, view the alerts in Kibana\nAlerts URL: https://example.com/s/test-space/app/security/cases/mock-id-1/?tabId=alerts',
+            'Elastic Alerts attached to the case: 2 added (2 total)\n\nFor more details, view the alerts in Kibana\nAlerts URL: https://example.com/s/test-space/app/security/cases/mock-id-1/?tabId=alerts',
           commentId: 'mock-id-1-total-alerts',
         },
       ]);
@@ -669,23 +992,13 @@ describe('utils', () => {
           comment: 'Wow, good luck catching that bad meanie!\n\nAdded by elastic.',
           commentId: 'comment-user-1',
         },
+        // Legacy `actions` host-isolation comments are no longer pushed: they
+        // are folded into the unified `security.endpoint` shape on read and
+        // the registry-hook redesign tracked in
+        // https://github.com/elastic/kibana/issues/262574 will own per-type
+        // connector formatting.
         {
-          comment:
-            'Isolated host windows-host-1 with comment: Isolating this for investigation\n\nAdded by elastic.',
-          commentId: 'mock-action-comment-1',
-        },
-        {
-          comment:
-            'Released host windows-host-1 with comment: Releasing this for investigation\n\nAdded by elastic.',
-          commentId: 'mock-action-comment-2',
-        },
-        {
-          comment:
-            'Isolated host windows-host-1 and 1 more with comment: Isolating this for investigation\n\nAdded by elastic.',
-          commentId: 'mock-action-comment-3',
-        },
-        {
-          comment: 'Elastic Alerts attached to the case: 3',
+          comment: 'Elastic Alerts attached to the case: 2 added (2 total)',
           commentId: 'mock-id-1-total-alerts',
         },
       ]);
@@ -720,28 +1033,7 @@ describe('utils', () => {
           commentId: 'comment-user-1',
         },
         {
-          comment:
-            'Isolated host windows-host-1 with comment: Isolating this for investigation\n' +
-            '\n' +
-            'Added by Damaged Raccoon.',
-          commentId: 'mock-action-comment-1',
-        },
-        {
-          comment:
-            'Released host windows-host-1 with comment: Releasing this for investigation\n' +
-            '\n' +
-            'Added by Damaged Raccoon.',
-          commentId: 'mock-action-comment-2',
-        },
-        {
-          comment:
-            'Isolated host windows-host-1 and 1 more with comment: Isolating this for investigation\n' +
-            '\n' +
-            'Added by Damaged Raccoon.',
-          commentId: 'mock-action-comment-3',
-        },
-        {
-          comment: 'Elastic Alerts attached to the case: 3',
+          comment: 'Elastic Alerts attached to the case: 2 added (2 total)',
           commentId: 'mock-id-1-total-alerts',
         },
       ]);
@@ -770,10 +1062,6 @@ describe('utils', () => {
           comment: 'Wow, good luck catching that bad meanie!\n\nAdded by elastic.',
           commentId: 'comment-user-1',
         },
-        {
-          comment: 'Elastic Alerts attached to the case: 3',
-          commentId: 'mock-id-1-total-alerts',
-        },
       ]);
     });
 
@@ -798,7 +1086,7 @@ describe('utils', () => {
         })
       ).toEqual([
         {
-          comment: 'Elastic Alerts attached to the case: 1',
+          comment: 'Elastic Alerts attached to the case: 1 added (1 total)',
           commentId: 'mock-id-1-total-alerts',
         },
       ]);
@@ -813,11 +1101,11 @@ describe('utils', () => {
         totalComments: 0,
       };
 
-      const latestPushInfo = getLatestPushInfo('456', userActions);
+      const latestPushInfo = getLatestPushInfo('456', userActionsWithoutAlerts);
 
       expect(
         formatComments({
-          userActions,
+          userActions: userActionsWithoutAlerts,
           theCase,
           latestPushInfo,
           userProfiles: userProfilesMap,
@@ -831,8 +1119,8 @@ describe('utils', () => {
         ...flattenCaseSavedObject({
           savedObject: mockCases[0],
         }),
-        comments: [isolateCommentActions],
-        totalComments: 1,
+        comments: [isolateCommentActions, commentAlert, commentAlertMultipleIds],
+        totalComments: 3,
       };
 
       const latestPushInfo = getLatestPushInfo('456', userActions);
@@ -871,7 +1159,7 @@ describe('utils', () => {
       ).toEqual([
         {
           comment:
-            'Elastic Alerts attached to the case: 1\n\nFor more details, view the alerts in Kibana\nAlerts URL: https://example.com/app/security/cases/mock-id-1/?tabId=alerts',
+            'Elastic Alerts attached to the case: 1 added (1 total)\n\nFor more details, view the alerts in Kibana\nAlerts URL: https://example.com/app/security/cases/mock-id-1/?tabId=alerts',
           commentId: 'mock-id-1-total-alerts',
         },
       ]);
@@ -900,8 +1188,48 @@ describe('utils', () => {
       ).toEqual([
         {
           comment:
-            'Elastic Alerts attached to the case: 1\n\nFor more details, view the alerts in Kibana\nAlerts URL: https://example.com/s/test-space/app/security/cases/mock-id-1/?tabId=alerts',
+            'Elastic Alerts attached to the case: 1 added (1 total)\n\nFor more details, view the alerts in Kibana\nAlerts URL: https://example.com/s/test-space/app/security/cases/mock-id-1/?tabId=alerts',
           commentId: 'mock-id-1-total-alerts',
+        },
+      ]);
+    });
+
+    it('formats unified `comment` attachments using data.content', () => {
+      const unifiedComment = {
+        ...omit(commentObj, ['comment']),
+        id: 'comment-unified-1',
+        type: 'comment',
+        data: { content: 'Unified comment body' },
+      } as unknown as AttachmentV2;
+
+      const userActionsWithUnified = [
+        ...userActions,
+        {
+          ...userActions.find((action) => action.type === UserActionTypes.comment)!,
+          comment_id: unifiedComment.id,
+        },
+      ] as CaseUserActionsDeprecatedResponse;
+
+      const theCase = {
+        ...flattenCaseSavedObject({ savedObject: mockCases[0] }),
+        comments: [unifiedComment],
+        totalComments: 1,
+      };
+
+      const latestPushInfo = getLatestPushInfo('not-exists', userActionsWithUnified);
+
+      expect(
+        formatComments({
+          userActions: userActionsWithUnified,
+          theCase,
+          latestPushInfo,
+          userProfiles: userProfilesMap,
+          spaceId: 'default',
+        })
+      ).toEqual([
+        {
+          comment: 'Unified comment body\n\nAdded by elastic.',
+          commentId: 'comment-unified-1',
         },
       ]);
     });
@@ -1073,6 +1401,349 @@ describe('utils', () => {
     });
   });
 
+  describe('getInProgressInfoForUpdate', () => {
+    const date = '2021-02-03T17:41:26.108Z';
+
+    it('returns the correct in_progress_at info when the case is marked as in-progress and the in_progress_at is not set', async () => {
+      expect(
+        getInProgressInfoForUpdate({
+          status: CaseStatuses['in-progress'],
+          stateTransitionTimestamp: date,
+        })
+      ).toEqual({
+        in_progress_at: date,
+      });
+    });
+
+    it('should not set the in_progress_at when the status is not in-progress', async () => {
+      expect(
+        getInProgressInfoForUpdate({ status: CaseStatuses.open, stateTransitionTimestamp: date })
+      ).toBeUndefined();
+    });
+
+    it('does not change the in_progress_at if it is already set', async () => {
+      expect(
+        getInProgressInfoForUpdate({
+          status: CaseStatuses['in-progress'],
+          stateTransitionTimestamp: date,
+          inProgressAt: date,
+        })
+      ).toBeUndefined();
+    });
+
+    it('returns undefined if the status is not provided', async () => {
+      expect(getInProgressInfoForUpdate({ stateTransitionTimestamp: date })).toBeUndefined();
+    });
+  });
+
+  describe('getTimingMetricsForUpdate', () => {
+    const createdAt = '2021-11-23T19:00:00Z';
+    const inProgressAt = '2021-11-23T19:00:10Z';
+    const stateTransitionTimestamp = '2021-11-23T19:00:20Z';
+
+    describe('changing status to in-progress', () => {
+      it('should return the correct metrics', () => {
+        expect(
+          getTimingMetricsForUpdate({
+            status: CaseStatuses['in-progress'],
+            createdAt,
+            stateTransitionTimestamp,
+          })
+        ).toEqual({
+          time_to_acknowledge: 20,
+          time_to_investigate: null,
+          time_to_resolve: null,
+        });
+      });
+
+      it('setting inProgressAt does not affect the metrics', () => {
+        expect(
+          getTimingMetricsForUpdate({
+            status: CaseStatuses['in-progress'],
+            createdAt,
+            inProgressAt,
+            stateTransitionTimestamp,
+          })
+        ).toEqual({
+          time_to_acknowledge: 20,
+          time_to_investigate: null,
+          time_to_resolve: null,
+        });
+      });
+
+      it.each([['invalid'], [null]])(
+        'returns undefined if the createdAt date is %s',
+        (createdAtInvalid) => {
+          expect(
+            getTimingMetricsForUpdate({
+              status: CaseStatuses['in-progress'],
+              // @ts-expect-error
+              createdAt: createdAtInvalid,
+              stateTransitionTimestamp,
+            })
+          ).toBeUndefined();
+        }
+      );
+
+      it.each([['invalid'], [null]])(
+        'returns undefined if the stateTransitionTimestamp date is %s',
+        (stateTransitionTimestampInvalid) => {
+          expect(
+            getTimingMetricsForUpdate({
+              status: CaseStatuses['in-progress'],
+              createdAt,
+              // @ts-expect-error
+              stateTransitionTimestamp: stateTransitionTimestampInvalid,
+            })
+          ).toBeUndefined();
+        }
+      );
+
+      it('returns undefined if createdAt > stateTransitionTimestamp', async () => {
+        expect(
+          getTimingMetricsForUpdate({
+            status: CaseStatuses['in-progress'],
+            createdAt: '2021-11-23T19:05:00Z',
+            stateTransitionTimestamp: '2021-11-23T19:00:00Z',
+          })
+        ).toBeUndefined();
+      });
+
+      it('rounds the seconds correctly', () => {
+        expect(
+          getTimingMetricsForUpdate({
+            status: CaseStatuses['in-progress'],
+            createdAt: '2022-04-11T15:56:00.087Z',
+            stateTransitionTimestamp: '2022-04-11T16:00:00.056Z',
+          })
+        ).toEqual({
+          time_to_acknowledge: 239,
+          time_to_investigate: null,
+          time_to_resolve: null,
+        });
+      });
+
+      it('rounds the zero correctly', () => {
+        expect(
+          getTimingMetricsForUpdate({
+            status: CaseStatuses['in-progress'],
+            createdAt: '2022-04-11T15:56:00.087Z',
+            stateTransitionTimestamp: '2022-04-11T15:56:00.287Z',
+          })
+        ).toEqual({
+          time_to_acknowledge: 0,
+          time_to_investigate: null,
+          time_to_resolve: null,
+        });
+      });
+    });
+
+    describe('changing status to closed', () => {
+      it('should return the correct metrics when inProgressAt is not set', () => {
+        expect(
+          getTimingMetricsForUpdate({
+            status: CaseStatuses.closed,
+            createdAt,
+            stateTransitionTimestamp,
+          })
+        ).toEqual({
+          time_to_acknowledge: 20,
+          time_to_investigate: 0,
+          time_to_resolve: 20,
+        });
+      });
+
+      it('should return the correct metrics when inProgressAt is set', () => {
+        expect(
+          getTimingMetricsForUpdate({
+            status: CaseStatuses.closed,
+            createdAt,
+            inProgressAt,
+            stateTransitionTimestamp,
+          })
+        ).toEqual({
+          time_to_acknowledge: 10,
+          time_to_investigate: 10,
+          time_to_resolve: 20,
+        });
+      });
+
+      it.each([['invalid'], [null]])(
+        'returns undefined if the createdAt date is %s',
+        (createdAtInvalid) => {
+          expect(
+            getTimingMetricsForUpdate({
+              status: CaseStatuses.closed,
+              // @ts-expect-error
+              createdAt: createdAtInvalid,
+              stateTransitionTimestamp,
+            })
+          ).toBeUndefined();
+        }
+      );
+
+      it.each([['invalid']])(
+        'returns undefined if the inProgressAt date is %s',
+        (inProgressAtInvalid) => {
+          expect(
+            getTimingMetricsForUpdate({
+              status: CaseStatuses.closed,
+              createdAt,
+              inProgressAt: inProgressAtInvalid,
+              stateTransitionTimestamp,
+            })
+          ).toBeUndefined();
+        }
+      );
+
+      it.each([['invalid'], [null]])(
+        'returns undefined if the stateTransitionTimestamp date is %s',
+        (stateTransitionTimestampInvalid) => {
+          expect(
+            getTimingMetricsForUpdate({
+              status: CaseStatuses.closed,
+              createdAt,
+              // @ts-expect-error
+              stateTransitionTimestamp: stateTransitionTimestampInvalid,
+            })
+          ).toBeUndefined();
+        }
+      );
+
+      it('returns undefined if createdAt > stateTransitionTimestamp', async () => {
+        expect(
+          getTimingMetricsForUpdate({
+            status: CaseStatuses.closed,
+            createdAt: '2021-11-23T19:05:00Z',
+            stateTransitionTimestamp: '2021-11-23T19:00:00Z',
+          })
+        ).toBeUndefined();
+      });
+
+      it('returns undefined if inProgressAt > stateTransitionTimestamp', async () => {
+        expect(
+          getTimingMetricsForUpdate({
+            status: CaseStatuses.closed,
+            createdAt: '2021-11-23T19:05:00Z',
+            inProgressAt: '2021-11-23T19:06:00Z',
+            stateTransitionTimestamp: '2021-11-23T19:00:00Z',
+          })
+        ).toBeUndefined();
+      });
+
+      it('returns undefined if inProgressAt > createdAt', async () => {
+        expect(
+          getTimingMetricsForUpdate({
+            status: CaseStatuses.closed,
+            createdAt: '2021-11-23T19:05:00Z',
+            inProgressAt: '2021-11-23T19:06:00Z',
+            stateTransitionTimestamp: '2021-11-23T19:00:00Z',
+          })
+        ).toBeUndefined();
+      });
+
+      it('rounds the seconds correctly', () => {
+        expect(
+          getTimingMetricsForUpdate({
+            status: CaseStatuses.closed,
+            createdAt: '2022-04-11T15:56:00.087Z',
+            inProgressAt: '2022-04-11T15:58:00.043Z',
+            stateTransitionTimestamp: '2022-04-11T16:00:00.056Z',
+          })
+        ).toEqual({
+          time_to_acknowledge: 119,
+          time_to_investigate: 120,
+          time_to_resolve: 239,
+        });
+      });
+
+      it('rounds the zero correctly', () => {
+        expect(
+          getTimingMetricsForUpdate({
+            status: CaseStatuses.closed,
+            createdAt: '2022-04-11T15:56:00.087Z',
+            inProgressAt: '2022-04-11T15:56:00.187Z',
+            stateTransitionTimestamp: '2022-04-11T15:56:00.287Z',
+          })
+        ).toEqual({
+          time_to_acknowledge: 0,
+          time_to_investigate: 0,
+          time_to_resolve: 0,
+        });
+      });
+    });
+
+    describe('changing status to open', () => {
+      it('should return the correct metrics', () => {
+        expect(
+          getTimingMetricsForUpdate({
+            status: CaseStatuses.open,
+            createdAt,
+            stateTransitionTimestamp,
+          })
+        ).toEqual({
+          time_to_acknowledge: null,
+          time_to_investigate: null,
+          time_to_resolve: null,
+        });
+      });
+
+      it('setting inProgressAt does not affect the metrics', () => {
+        expect(
+          getTimingMetricsForUpdate({
+            status: CaseStatuses.open,
+            createdAt,
+            inProgressAt,
+            stateTransitionTimestamp,
+          })
+        ).toEqual({
+          time_to_acknowledge: null,
+          time_to_investigate: null,
+          time_to_resolve: null,
+        });
+      });
+    });
+
+    it('should return the correct metrics when the case is marked as closed', () => {
+      expect(
+        getTimingMetricsForUpdate({
+          status: CaseStatuses.closed,
+          createdAt,
+          inProgressAt,
+          stateTransitionTimestamp,
+        })
+      ).toEqual({
+        time_to_acknowledge: 10,
+        time_to_investigate: 10,
+        time_to_resolve: 20,
+      });
+    });
+
+    it('should return the correct metrics when the case transitions from open to closed', () => {
+      expect(
+        getTimingMetricsForUpdate({
+          status: CaseStatuses.closed,
+          createdAt,
+          stateTransitionTimestamp,
+        })
+      ).toEqual({
+        time_to_acknowledge: 20,
+        time_to_investigate: 0,
+        time_to_resolve: 20,
+      });
+    });
+
+    it('returns undefined if the status is not provided', async () => {
+      expect(
+        getTimingMetricsForUpdate({
+          createdAt,
+          inProgressAt,
+          stateTransitionTimestamp,
+        })
+      ).toBe(undefined);
+    });
+  });
+
   describe('getDurationForUpdate', () => {
     const createdAt = '2021-11-23T19:00:00Z';
     const closedAt = '2021-11-23T19:02:00Z';
@@ -1124,7 +1795,7 @@ describe('utils', () => {
       }
     );
 
-    it('returns undefined if created_at > closed_at', async () => {
+    it('returns undefined if createdAt > closedAt', async () => {
       expect(
         getDurationForUpdate({
           status: CaseStatuses.closed,
@@ -1569,7 +2240,7 @@ describe('normalizeCreateCaseRequest', () => {
       type: ConnectorTypes.none,
       fields: null,
     },
-    settings: { syncAlerts: true },
+    settings: { syncAlerts: true, extractObservables: true },
     severity: CaseSeverity.LOW,
     owner: SECURITY_SOLUTION_OWNER,
     assignees: [{ uid: '1' }],
@@ -1647,6 +2318,295 @@ describe('normalizeCreateCaseRequest', () => {
     expect(normalizeCreateCaseRequest(omit(theCase, 'customFields'))).toEqual({
       ...theCase,
       customFields: [],
+    });
+  });
+});
+
+describe('isObservable', () => {
+  it('should return true if the observable is an Observable', () => {
+    expect(
+      isObservable({
+        id: '1',
+        typeKey: 'ip',
+        value: '127.0.0.1',
+        description: null,
+        createdAt: '2021-01-01',
+        updatedAt: '2021-01-01',
+      })
+    ).toBe(true);
+  });
+
+  it('should return false if the observable is not an Observable', () => {
+    expect(isObservable({ typeKey: 'ip', value: '127.0.0.1', description: null })).toBe(false);
+  });
+});
+
+describe('processObservables', () => {
+  const mockObservablePost: ObservablePost = {
+    typeKey: 'ip',
+    value: '127.0.0.1',
+    description: null,
+  };
+
+  const mockObservable: Observable = {
+    ...mockObservablePost,
+    id: '1',
+    createdAt: '2021-01-01',
+    updatedAt: '2021-01-01',
+  };
+
+  it('should process the current observable', () => {
+    const observablesMap = new Map<string, Observable>();
+    processObservables(observablesMap, mockObservable);
+    expect(observablesMap.get('ip-127.0.0.1')).toBeDefined();
+  });
+
+  it('should process the new observable post', () => {
+    const observablesMap = new Map<string, Observable>();
+    processObservables(observablesMap, mockObservablePost);
+    expect(observablesMap.get('ip-127.0.0.1')).toBeDefined();
+  });
+
+  it('should not add the observable if it already exists', () => {
+    const observablesMap = new Map<string, Observable>();
+    processObservables(observablesMap, mockObservable);
+    processObservables(observablesMap, mockObservable);
+    expect(observablesMap.get('ip-127.0.0.1')).toBeDefined();
+    expect(observablesMap.size).toBe(1);
+
+    processObservables(observablesMap, mockObservablePost);
+    expect(observablesMap.size).toBe(1);
+  });
+
+  it('should add a new observable if the key-value pair does not exist', () => {
+    const observablesMap = new Map<string, Observable>();
+    processObservables(observablesMap, mockObservablePost);
+    processObservables(observablesMap, { ...mockObservablePost, typeKey: 'ip2' });
+    expect(observablesMap.get('ip-127.0.0.1')).toBeDefined();
+    expect(observablesMap.get('ip2-127.0.0.1')).toBeDefined();
+    expect(observablesMap.size).toBe(2);
+  });
+
+  it('should not override the existing observable if the key-value pair already exists', () => {
+    const observablesMap = new Map<string, Observable>();
+    processObservables(observablesMap, mockObservable);
+    processObservables(observablesMap, {
+      ...mockObservable,
+      id: '2',
+      createdAt: '2021-01-02',
+      updatedAt: '2021-01-02',
+    });
+    expect(observablesMap.get('ip-127.0.0.1')).toBeDefined();
+    expect(observablesMap.get('ip-127.0.0.1')).toEqual(mockObservable);
+    expect(observablesMap.size).toBe(1);
+  });
+});
+
+describe('enrichCasesWithFieldLabels', () => {
+  const baseCase = flattenCaseSavedObject({ savedObject: mockCases[0], totalComment: 0 });
+
+  const caseWithTemplate = {
+    ...baseCase,
+    template: { id: 'template-id-1', version: 1 },
+    extended_fields: { priority_as_keyword: 'high', effort_as_integer: '3' },
+  };
+
+  const templateSO = {
+    id: 'so-id',
+    type: 'cases-template' as const,
+    references: [],
+    attributes: {
+      templateId: 'template-id-1',
+      name: 'My Template',
+      owner: 'cases',
+      definition: '',
+      templateVersion: 1,
+      deletedAt: null,
+      fieldDefinitions: [
+        { name: 'priority', label: 'Priority Level', type: 'keyword', control: 'INPUT_TEXT' },
+        { name: 'effort', label: 'Effort Points', type: 'integer', control: 'INPUT_NUMBER' },
+      ],
+    },
+  };
+
+  it('populates extended_fields_labels from the matched template fieldDefinitions', () => {
+    const result = enrichCasesWithFieldLabels([caseWithTemplate], [templateSO]);
+
+    expect(result[0].extended_fields_labels).toEqual({
+      priority_as_keyword: 'Priority Level',
+      effort_as_integer: 'Effort Points',
+    });
+  });
+
+  it('returns case unchanged when it has no template reference', () => {
+    const result = enrichCasesWithFieldLabels([baseCase], [templateSO]);
+
+    expect(result[0]).toEqual(baseCase);
+  });
+
+  it('populates labels for a template-less case from global field definitions', () => {
+    const caseWithGlobalOnly = {
+      ...baseCase,
+      extended_fields: { team_as_keyword: 'soc' },
+    };
+    const globalFields = [
+      { name: 'team', label: 'Team', control: 'INPUT_TEXT' as const, type: 'keyword' as const },
+    ];
+
+    const result = enrichCasesWithFieldLabels([caseWithGlobalOnly], [], globalFields);
+
+    expect(result[0].extended_fields_labels).toEqual({
+      team_as_keyword: 'Team',
+    });
+  });
+
+  it('merges global and template labels with template winning on key collision', () => {
+    const globalFields = [
+      {
+        name: 'priority',
+        label: 'Global Priority',
+        control: 'INPUT_TEXT' as const,
+        type: 'keyword' as const,
+      },
+      { name: 'team', label: 'Team', control: 'INPUT_TEXT' as const, type: 'keyword' as const },
+    ];
+
+    const result = enrichCasesWithFieldLabels([caseWithTemplate], [templateSO], globalFields);
+
+    expect(result[0].extended_fields_labels).toEqual({
+      priority_as_keyword: 'Priority Level',
+      effort_as_integer: 'Effort Points',
+      team_as_keyword: 'Team',
+    });
+  });
+
+  it('returns case unchanged when it has no extended_fields', () => {
+    const caseNoExtFields = { ...baseCase, template: { id: 'template-id-1', version: 1 } };
+
+    const result = enrichCasesWithFieldLabels([caseNoExtFields], [templateSO]);
+
+    expect(result[0]).toEqual(caseNoExtFields);
+  });
+
+  it('omits extended_fields_labels when the referenced template is not in the provided list', () => {
+    const result = enrichCasesWithFieldLabels([caseWithTemplate], []);
+
+    expect(result[0].extended_fields_labels).toBeUndefined();
+  });
+
+  it('uses the same template SO for multiple cases with the same templateId+version', () => {
+    const secondCase = {
+      ...caseWithTemplate,
+      id: 'mock-id-2',
+    };
+
+    const result = enrichCasesWithFieldLabels([caseWithTemplate, secondCase], [templateSO]);
+
+    expect(result[0].extended_fields_labels).toEqual({
+      priority_as_keyword: 'Priority Level',
+      effort_as_integer: 'Effort Points',
+    });
+    expect(result[1].extended_fields_labels).toEqual({
+      priority_as_keyword: 'Priority Level',
+      effort_as_integer: 'Effort Points',
+    });
+  });
+
+  it('resolves different template versions separately for the same templateId', () => {
+    const templateSOv2 = {
+      ...templateSO,
+      id: 'so-id-v2',
+      attributes: {
+        ...templateSO.attributes,
+        templateVersion: 2,
+        fieldDefinitions: [
+          { name: 'priority', label: 'Priority Level v2', type: 'keyword', control: 'INPUT_TEXT' },
+        ],
+      },
+    };
+
+    const caseV2 = {
+      ...caseWithTemplate,
+      id: 'mock-id-2',
+      template: { id: 'template-id-1', version: 2 },
+    };
+
+    const result = enrichCasesWithFieldLabels(
+      [caseWithTemplate, caseV2],
+      [templateSO, templateSOv2]
+    );
+
+    expect(result[0].extended_fields_labels).toEqual({
+      priority_as_keyword: 'Priority Level',
+      effort_as_integer: 'Effort Points',
+    });
+    expect(result[1].extended_fields_labels).toEqual({
+      priority_as_keyword: 'Priority Level v2',
+    });
+  });
+
+  it('handles multiple cases with different templateIds independently', () => {
+    const templateSO2 = {
+      ...templateSO,
+      id: 'so-id-2',
+      attributes: {
+        ...templateSO.attributes,
+        templateId: 'template-id-2',
+        templateVersion: 1,
+        fieldDefinitions: [
+          { name: 'severity', label: 'Severity Label', type: 'keyword', control: 'SELECT_BASIC' },
+        ],
+      },
+    };
+
+    const caseTwo = {
+      ...caseWithTemplate,
+      id: 'mock-id-2',
+      template: { id: 'template-id-2', version: 1 },
+      extended_fields: { severity_as_keyword: 'critical' },
+    };
+
+    const result = enrichCasesWithFieldLabels(
+      [caseWithTemplate, caseTwo],
+      [templateSO, templateSO2]
+    );
+
+    expect(result[0].extended_fields_labels).toEqual({
+      priority_as_keyword: 'Priority Level',
+      effort_as_integer: 'Effort Points',
+    });
+    expect(result[1].extended_fields_labels).toEqual({
+      severity_as_keyword: 'Severity Label',
+    });
+  });
+
+  it('populates extended_fields_controls alongside extended_fields_labels', () => {
+    const result = enrichCasesWithFieldLabels([caseWithTemplate], [templateSO]);
+
+    expect(result[0].extended_fields_controls).toEqual({
+      priority_as_keyword: 'INPUT_TEXT',
+      effort_as_integer: 'INPUT_NUMBER',
+    });
+  });
+
+  it('merges global and template controls with template winning on key collision', () => {
+    const globalFields = [
+      {
+        name: 'priority',
+        label: 'Global Priority',
+        control: FieldType.USER_PICKER,
+        type: 'keyword' as const,
+      },
+      { name: 'team', label: 'Team', control: FieldType.USER_PICKER, type: 'keyword' as const },
+    ];
+
+    const result = enrichCasesWithFieldLabels([caseWithTemplate], [templateSO], globalFields);
+
+    expect(result[0].extended_fields_controls).toEqual({
+      // template wins over the global definition for the same key
+      priority_as_keyword: 'INPUT_TEXT',
+      effort_as_integer: 'INPUT_NUMBER',
+      team_as_keyword: 'USER_PICKER',
     });
   });
 });

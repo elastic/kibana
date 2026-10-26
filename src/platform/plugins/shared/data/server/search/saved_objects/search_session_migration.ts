@@ -7,11 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SavedObjectMigrationMap, SavedObjectUnsanitizedDoc } from '@kbn/core/server';
-import {
-  SearchSessionSavedObjectAttributes as SearchSessionSavedObjectAttributesLatest,
-  SearchSessionStatus,
-} from '../../../common';
+import type { SavedObjectMigrationMap, SavedObjectUnsanitizedDoc } from '@kbn/core/server';
+import type { SearchSessionSavedObjectAttributes as SearchSessionSavedObjectAttributesLatest } from '../../../common';
+import { SearchSessionStatus } from '../../../common';
 
 /**
  * Search sessions were released in 7.12.0
@@ -98,7 +96,7 @@ export const searchSessionSavedObjectMigrations: SavedObjectMigrationMap = {
   },
   '7.14.0': (
     doc: SavedObjectUnsanitizedDoc<SearchSessionSavedObjectAttributesPre$7$14$0>
-  ): SavedObjectUnsanitizedDoc<SearchSessionSavedObjectAttributesLatest> => {
+  ): SavedObjectUnsanitizedDoc<SearchSessionSavedObjectAttributesPre$8$0$0> => {
     return {
       ...doc,
       attributes: {
@@ -109,7 +107,7 @@ export const searchSessionSavedObjectMigrations: SavedObjectMigrationMap = {
   },
   '8.0.0': (
     doc: SavedObjectUnsanitizedDoc<SearchSessionSavedObjectAttributesPre$8$0$0>
-  ): SavedObjectUnsanitizedDoc<SearchSessionSavedObjectAttributesLatest> => {
+  ): SavedObjectUnsanitizedDoc<SearchSessionSavedObjectAttributesPre$8$6$0> => {
     const {
       attributes: { urlGeneratorId, ...otherAttrs },
     } = doc;

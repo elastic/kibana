@@ -11,10 +11,10 @@ const Path = require('path');
 
 const { REPO_ROOT } = require('@kbn/repo-info');
 
-require('@kbn/babel-register').install({
+require('@kbn/swc-register').install({
   only: [
     'test',
-    'x-pack/test',
+    'x-pack/platform/test',
     'examples',
     'x-pack/examples',
     // TODO: should should probably remove this link back to the source

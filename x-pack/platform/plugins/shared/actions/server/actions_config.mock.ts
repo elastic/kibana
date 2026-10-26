@@ -9,6 +9,7 @@ import {
   DEFAULT_MICROSOFT_EXCHANGE_URL,
   DEFAULT_MICROSOFT_GRAPH_API_SCOPE,
   DEFAULT_MICROSOFT_GRAPH_API_URL,
+  DEFAULT_EMAIL_BODY_LENGTH,
 } from '../common';
 import type { ActionsConfigurationUtilities } from './actions_config';
 
@@ -21,6 +22,12 @@ const createActionsConfigMock = () => {
     ensureUriAllowed: jest.fn().mockReturnValue({}),
     ensureActionTypeEnabled: jest.fn().mockReturnValue({}),
     getSSLSettings: jest.fn().mockReturnValue({
+      verificationMode: 'full',
+    }),
+    getEARSSSLSettings: jest.fn().mockReturnValue({
+      verificationMode: 'full',
+    }),
+    getRelaySSLSettings: jest.fn().mockReturnValue({
       verificationMode: 'full',
     }),
     getProxySettings: jest.fn().mockReturnValue(undefined),
@@ -36,6 +43,34 @@ const createActionsConfigMock = () => {
     getMaxAttempts: jest.fn().mockReturnValue(3),
     enableFooterInEmail: jest.fn().mockReturnValue(true),
     getMaxQueued: jest.fn().mockReturnValue(1000),
+    getWebhookSettings: jest.fn().mockReturnValue({
+      ssl: {
+        pfx: {
+          enabled: true,
+        },
+      },
+    }),
+    getAwsSesConfig: jest.fn().mockReturnValue(null),
+    getEnabledEmailServices: jest.fn().mockReturnValue(['*']),
+    getMaxEmailBodyLength: jest.fn().mockReturnValue(DEFAULT_EMAIL_BODY_LENGTH),
+    getEarsUrl: jest.fn().mockReturnValue(undefined),
+    isEarsEnabled: jest.fn().mockReturnValue(false),
+    isInboundEventsEnabled: jest.fn().mockReturnValue(false),
+    getInboundEventsMaxBodyBytes: jest.fn().mockReturnValue(1024 * 1024),
+    getInboundEventsMaxEmitted: jest.fn().mockReturnValue(25),
+    getInboundEventsAdmission: jest.fn().mockReturnValue({
+      enabled: false,
+      maxInFlight: 50,
+      maxInFlightPerConnector: 10,
+    }),
+    getInboundEventsRateLimit: jest.fn().mockReturnValue({
+      enabled: false,
+      maxKeys: 10000,
+      remoteAddress: { limit: 10, windowMs: 60_000 },
+      connector: { limit: 300, windowMs: 60_000 },
+    }),
+    isConnectorSigningKeysEnabled: jest.fn().mockReturnValue(false),
+    isEarsExperimentalEnabled: jest.fn().mockReturnValue(false),
   };
   return mocked;
 };

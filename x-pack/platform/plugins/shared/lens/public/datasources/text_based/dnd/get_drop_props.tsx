@@ -5,18 +5,25 @@
  * 2.0.
  */
 
-import { DropType } from '@kbn/dom-drag-drop';
-import { isOperation } from '../../../types';
-import type { TextBasedPrivateState } from '../types';
-import type { GetDropPropsArgs } from '../../../types';
+import type { DropType } from '@kbn/dom-drag-drop';
+import type {
+  TextBasedPrivateState,
+  TextBasedLayerColumn,
+  GetDropPropsArgs,
+} from '@kbn/lens-common';
+import { isOperation } from '../../../types_guards';
 import { isDraggedField, isOperationFromTheSameGroup } from '../../../utils';
-import { canColumnBeDroppedInMetricDimension, isNotNumeric } from '../utils';
+import {
+  canColumnBeDroppedInMetricDimension,
+  hasNumericColumn,
+  resolveTextBasedColumnType,
+} from '../utils';
 import { retrieveLayerColumnsFromCache } from '../fieldlist_cache';
 
 export const getDropProps = (
   props: GetDropPropsArgs<TextBasedPrivateState>
 ): { dropTypes: DropType[]; nextLabel?: string } | undefined => {
-  const { source, target, state } = props;
+  const { source, target, state, activeData } = props;
   if (!source || source.id === target.columnId) {
     return;
   }
@@ -26,9 +33,18 @@ export const getDropProps = (
   const targetField = allColumns.find((f) => f.columnId === target.columnId);
   const sourceField = allColumns.find((f) => f.columnId === source.id);
 
+  // Resolve column types against the Query Result Type overlay (inspector table) when available,
+  // falling back to the persisted/cache column type otherwise.
+  const activeColumns = activeData?.[target.layerId]?.columns;
+  const resolveType = (column: TextBasedLayerColumn) =>
+    resolveTextBasedColumnType(
+      column,
+      activeColumns?.find((activeColumn) => activeColumn.id === column.columnId)
+    );
+
   if (isDraggedField(source)) {
     const nextLabel = source.humanData.label;
-    if (target?.isMetricDimension && sourceField && isNotNumeric(sourceField)) {
+    if (target?.isMetricDimension && sourceField && resolveType(sourceField) !== 'number') {
       return;
     }
     return {
@@ -47,14 +63,16 @@ export const getDropProps = (
       return { dropTypes: ['reorder'], nextLabel };
     }
 
+    const hasNumberColumn = hasNumericColumn(allColumns, activeColumns);
+
     const sourceFieldCanMoveToMetricDimension = canColumnBeDroppedInMetricDimension(
-      allColumns,
-      sourceField?.meta?.type
+      hasNumberColumn,
+      sourceField && resolveType(sourceField)
     );
 
     const targetFieldCanMoveToMetricDimension = canColumnBeDroppedInMetricDimension(
-      allColumns,
-      targetField?.meta?.type
+      hasNumberColumn,
+      targetField && resolveType(targetField)
     );
 
     const isMoveable =

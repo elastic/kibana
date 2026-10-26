@@ -2,12 +2,18 @@
 
 set -euo pipefail
 
+# Release artifacts must not hydrate the shared webpack bundles from the remote cache
+export KBN_BOOTSTRAP_NO_PREBUILT=true
+
 .buildkite/scripts/bootstrap.sh
 
 source "$(dirname "$0")/../../common/util.sh"
 source .buildkite/scripts/steps/artifacts/env.sh
 
 KIBANA_DOCKER_CONTEXT="${KIBANA_DOCKER_CONTEXT:="default"}"
+
+echo "--- Clean up cached images to free up space"
+clean_cached_images
 
 echo "--- Create contexts"
 mkdir -p target

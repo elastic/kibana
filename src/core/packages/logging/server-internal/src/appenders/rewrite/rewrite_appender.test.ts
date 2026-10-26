@@ -10,7 +10,8 @@
 import type { MockedKeys } from '@kbn/utility-types-jest';
 import { createRewritePolicyMock, resetAllMocks } from './rewrite_appender.test.mocks';
 import { rewriteAppenderMocks } from './mocks';
-import { LogLevel, LogRecord, LogMeta, DisposableAppender } from '@kbn/logging';
+import type { LogRecord, LogMeta, DisposableAppender } from '@kbn/logging';
+import { LogLevel } from '@kbn/logging';
 import type { RewriteAppenderConfig } from '@kbn/core-logging-server';
 import { RewriteAppender } from './rewrite_appender';
 
@@ -75,7 +76,7 @@ describe('RewriteAppender', () => {
       appender.addAppender(...createAppenderMock('mock1'));
       expect(() => {
         appender.append(createLogRecord());
-      }).not.toThrowError();
+      }).not.toThrow();
     });
   });
 

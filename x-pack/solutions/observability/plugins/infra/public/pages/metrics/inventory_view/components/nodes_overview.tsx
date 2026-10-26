@@ -8,9 +8,17 @@
 import { i18n } from '@kbn/i18n';
 import { usePerformanceContext } from '@kbn/ebt-tools';
 import React, { useCallback, useMemo } from 'react';
-import { useCurrentEuiBreakpoint } from '@elastic/eui';
+import { EuiLink, EuiPanel, useCurrentEuiBreakpoint } from '@elastic/eui';
 import styled from '@emotion/styled';
-import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
+import {
+  type DataSchemaFormat,
+  type InventoryItemType,
+} from '@kbn/metrics-data-access-plugin/common';
+import moment from 'moment';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { isSchemaAwareNodeType } from '../../../../../common/inventory/schema_aware_node_types';
+import { SwitchSchemaMessage } from '../../../../components/shared/switch_schema_message';
+import { useTimeRangeMetadataContext } from '../../../../hooks/use_time_range_metadata';
 import type {
   InfraWaffleMapBounds,
   InfraWaffleMapOptions,
@@ -25,6 +33,9 @@ import { calculateBoundsFromNodes } from '../lib/calculate_bounds_from_nodes';
 import { Legend } from './waffle/legend';
 import { useAssetDetailsFlyoutState } from '../hooks/use_asset_details_flyout_url_state';
 import { AssetDetailsFlyout } from './waffle/asset_details_flyout';
+import { useWaffleOptionsContext } from '../hooks/use_waffle_options';
+import { useWaffleTimeContext } from '../hooks/use_waffle_time';
+import { INTEGRATIONS } from '../../../../components/supported_data_tooltip_link';
 
 export interface KueryFilterQuery {
   kind: 'kuery';
@@ -36,8 +47,7 @@ interface Props {
   nodeType: InventoryItemType;
   nodes: SnapshotNode[];
   loading: boolean;
-  reload: () => void;
-  onDrilldown: (filter: KueryFilterQuery) => void;
+  onDrilldown: (filter: string) => void;
   currentTime: number;
   view: string;
   boundsOverride: InfraWaffleMapBounds;
@@ -55,7 +65,6 @@ export const NodesOverview = ({
   loading,
   nodes,
   nodeType,
-  reload,
   view,
   currentTime,
   options,
@@ -67,11 +76,18 @@ export const NodesOverview = ({
   isAutoReloading,
 }: Props) => {
   const currentBreakpoint = useCurrentEuiBreakpoint();
-  const [{ detailsItemId, assetType }, setFlyoutUrlState] = useAssetDetailsFlyoutState();
+  const [{ detailsItemId, entityType }, setFlyoutUrlState] = useAssetDetailsFlyoutState();
   const { onPageReady } = usePerformanceContext();
+  const { jumpToTime } = useWaffleTimeContext();
+  const { data: timeRangeMetadata } = useTimeRangeMetadataContext();
+  const { preferredSchema, changePreferredSchema } = useWaffleOptionsContext();
+  const schemas: DataSchemaFormat[] = useMemo(
+    () => timeRangeMetadata?.schemas || [],
+    [timeRangeMetadata?.schemas]
+  );
 
   const nodeName = useMemo(
-    () => nodes.find((node) => node.path[0].value === detailsItemId)?.name,
+    () => nodes?.find((node) => node.path[0].value === detailsItemId)?.name,
     [detailsItemId, nodes]
   );
 
@@ -79,23 +95,35 @@ export const NodesOverview = ({
     () =>
       setFlyoutUrlState({
         detailsItemId: null,
-        assetType: null,
+        entityType: null,
       }),
     [setFlyoutUrlState]
   );
 
   const handleDrilldown = useCallback(
     (filter: string) => {
-      onDrilldown({
-        kind: 'kuery',
-        expression: filter,
-      });
+      onDrilldown(filter);
       return;
     },
     [onDrilldown]
   );
 
   const noData = !loading && nodes && nodes.length === 0;
+
+  const hasDataOnAnotherSchema =
+    schemas.length === 1 && preferredSchema !== schemas[0] && isSchemaAwareNodeType(nodeType);
+
+  const refetchProps = hasDataOnAnotherSchema
+    ? {}
+    : {
+        refetchText: i18n.translate('xpack.infra.waffle.checkNewDataButtonLabel', {
+          defaultMessage: 'Check for new data',
+        }),
+        onRefetch: () => {
+          jumpToTime(moment().valueOf());
+        },
+      };
+
   if (loading && showLoading) {
     // Don't show loading screen when we're auto-reloading
     return (
@@ -105,6 +133,7 @@ export const NodesOverview = ({
         text={i18n.translate('xpack.infra.waffle.loadingDataText', {
           defaultMessage: 'Loading data',
         })}
+        data-test-subj="infraNodesOverviewLoadingPanel"
       />
     );
   } else if (noData) {
@@ -113,15 +142,35 @@ export const NodesOverview = ({
         titleText={i18n.translate('xpack.infra.waffle.noDataTitle', {
           defaultMessage: 'There is no data to display.',
         })}
-        bodyText={i18n.translate('xpack.infra.waffle.noDataDescription', {
-          defaultMessage: 'Try adjusting your time or filter.',
-        })}
-        refetchText={i18n.translate('xpack.infra.waffle.checkNewDataButtonLabel', {
-          defaultMessage: 'Check for new data',
-        })}
-        onRefetch={() => {
-          reload();
-        }}
+        bodyText={
+          hasDataOnAnotherSchema && isSchemaAwareNodeType(nodeType) ? (
+            <SwitchSchemaMessage
+              dataTestSubj="infraInventoryViewNoDataInSelectedSchema"
+              nodeType={nodeType}
+              targetSchema={schemas[0]}
+              onSwitchSchema={changePreferredSchema}
+            />
+          ) : (
+            <FormattedMessage
+              id="xpack.infra.waffle.noDataSupportedIntegrationDescription"
+              defaultMessage="Try modifying your filter and ensure that you are sending data from the {supportedIntegration} for this view."
+              values={{
+                supportedIntegration: (
+                  <EuiLink
+                    data-test-subj="infraNodesOverviewNoDataSupportedIntegrationLink"
+                    href={INTEGRATIONS[nodeType].documentation}
+                    target="_blank"
+                  >
+                    {i18n.translate('xpack.infra.waffle.noData.supportedIntegration', {
+                      defaultMessage: 'supported integration',
+                    })}
+                  </EuiLink>
+                ),
+              }}
+            />
+          )
+        }
+        {...refetchProps}
         testString="noMetricsDataPrompt"
       />
     );
@@ -136,20 +185,27 @@ export const NodesOverview = ({
 
   if (view === 'table') {
     return (
-      <TableContainer>
-        <TableView
-          nodeType={nodeType}
-          nodes={nodes}
-          options={options}
-          formatter={formatter}
-          currentTime={currentTime}
-          onFilter={handleDrilldown}
-        />
-        {nodeType === assetType && detailsItemId && (
+      <TableContainer data-test-subj="infraNodesOverviewTable">
+        <EuiPanel
+          hasShadow={false}
+          borderRadius="m"
+          paddingSize="none"
+          css={{ overflow: 'hidden' }}
+        >
+          <TableView
+            nodeType={nodeType}
+            nodes={nodes}
+            options={options}
+            formatter={formatter}
+            currentTime={currentTime}
+            onFilter={handleDrilldown}
+          />
+        </EuiPanel>
+        {nodeType === entityType && detailsItemId && (
           <AssetDetailsFlyout
-            assetId={detailsItemId}
-            assetName={nodeName}
-            assetType={nodeType}
+            entityId={detailsItemId}
+            entityName={nodeName}
+            entityType={nodeType}
             closeFlyout={closeFlyout}
             currentTime={currentTime}
             isAutoReloading={isAutoReloading}
@@ -174,11 +230,11 @@ export const NodesOverview = ({
         bottomMargin={bottomMargin}
         staticHeight={isStatic}
       />
-      {nodeType === assetType && detailsItemId && (
+      {nodeType === entityType && detailsItemId && (
         <AssetDetailsFlyout
-          assetId={detailsItemId}
-          assetName={nodeName}
-          assetType={nodeType}
+          entityId={detailsItemId}
+          entityName={nodeName}
+          entityType={nodeType}
           closeFlyout={closeFlyout}
           currentTime={currentTime}
           isAutoReloading={isAutoReloading}

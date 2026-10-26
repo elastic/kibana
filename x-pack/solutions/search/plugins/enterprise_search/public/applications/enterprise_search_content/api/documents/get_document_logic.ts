@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { GetResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { GetResponse } from '@elastic/elasticsearch/lib/api/types';
 
 import { createApiLogic } from '../../../shared/api_logic/create_api_logic';
 import { HttpLogic } from '../../../shared/http';
@@ -18,7 +18,9 @@ export interface GetDocumentsArgs {
 export type GetDocumentsResponse = GetResponse<unknown>;
 
 export const getDocument = async ({ indexName, documentId }: GetDocumentsArgs) => {
-  const route = `/internal/enterprise_search/indices/${indexName}/document/${documentId}`;
+  const route = `/internal/enterprise_search/indices/${encodeURIComponent(
+    indexName
+  )}/document/${encodeURIComponent(documentId)}`;
 
   return await HttpLogic.values.http.get<GetDocumentsResponse>(route);
 };

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { HttpSetup } from '@kbn/core-http-browser';
+import type { HttpSetup } from '@kbn/core-http-browser';
 
-import { getKnowledgeBaseIndices, getKnowledgeBaseStatus, postKnowledgeBase } from './api';
+import { getKnowledgeBaseStatus, postKnowledgeBase } from './api';
 import { API_VERSIONS } from '@kbn/spaces-plugin/common';
 
 jest.mock('@kbn/core-http-browser');
@@ -45,9 +45,7 @@ describe('API tests', () => {
         throw new Error(error);
       });
 
-      await expect(getKnowledgeBaseStatus(knowledgeBaseArgs)).resolves.toThrowError(
-        'simulated error'
-      );
+      await expect(getKnowledgeBaseStatus(knowledgeBaseArgs)).resolves.toThrow('simulated error');
     });
   });
 
@@ -70,32 +68,7 @@ describe('API tests', () => {
         throw new Error(error);
       });
 
-      await expect(postKnowledgeBase(knowledgeBaseArgs)).rejects.toThrowError('simulated error');
-    });
-  });
-
-  describe('getKnowledgeBaseIndices', () => {
-    it('calls the knowledge base API when correct resource path', async () => {
-      await getKnowledgeBaseIndices({ http: mockHttp });
-
-      expect(mockHttp.fetch).toHaveBeenCalledWith(
-        '/internal/elastic_assistant/knowledge_base/_indices',
-        {
-          method: 'GET',
-          signal: undefined,
-          version: '1',
-        }
-      );
-    });
-    it('returns error when error is an error', async () => {
-      const error = 'simulated error';
-      (mockHttp.fetch as jest.Mock).mockImplementation(() => {
-        throw new Error(error);
-      });
-
-      await expect(getKnowledgeBaseIndices({ http: mockHttp })).resolves.toThrowError(
-        'simulated error'
-      );
+      await expect(postKnowledgeBase(knowledgeBaseArgs)).rejects.toThrow('simulated error');
     });
   });
 });

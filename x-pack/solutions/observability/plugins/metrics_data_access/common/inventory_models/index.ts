@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { estypes } from '@elastic/elasticsearch';
-import { POD_FIELD, HOST_FIELD, CONTAINER_FIELD } from '../constants';
+import { KUBERNETES_POD_UID, HOST_NAME, CONTAINER_ID } from '../constants';
 import { host } from './host';
 import { pod } from './kubernetes/pod';
 import { awsEC2 } from './aws_ec2';
@@ -15,7 +15,7 @@ import { awsS3 } from './aws_s3';
 import { awsRDS } from './aws_rds';
 import { awsSQS } from './aws_sqs';
 import { container } from './container';
-import type { InventoryItemType } from './types';
+import type { DataSchemaFormat, InventoryItemType, InventoryModelFields } from './types';
 export { metrics } from './metrics';
 
 const catalog = {
@@ -27,13 +27,13 @@ const catalog = {
   awsRDS,
   awsSQS,
 } as const;
-
 export const inventoryModels = Object.values(catalog);
+export type InventoryModels = typeof catalog;
 
-export type InventoryModels<T extends InventoryItemType> = (typeof catalog)[T];
-
-export const findInventoryModel = <T extends InventoryItemType>(type: T): InventoryModels<T> => {
-  const model = inventoryModels.find((m) => m.id === type);
+export const findInventoryModel = <TType extends keyof InventoryModels>(
+  type: TType
+): InventoryModels[TType] => {
+  const model = catalog[type];
   if (!model) {
     throw new Error(
       i18n.translate('xpack.metricsData.inventoryModels.findInventoryModel.error', {
@@ -42,7 +42,7 @@ export const findInventoryModel = <T extends InventoryItemType>(type: T): Invent
     );
   }
 
-  return model as InventoryModels<T>;
+  return model;
 };
 
 const LEGACY_TYPES = ['host', 'pod', 'container'];
@@ -50,25 +50,31 @@ const LEGACY_TYPES = ['host', 'pod', 'container'];
 export const getFieldByType = (type: InventoryItemType) => {
   switch (type) {
     case 'pod':
-      return POD_FIELD;
+      return KUBERNETES_POD_UID;
     case 'host':
-      return HOST_FIELD;
+      return HOST_NAME;
     case 'container':
-      return CONTAINER_FIELD;
+      return CONTAINER_ID;
   }
 };
 
-export const findInventoryFields = (type: InventoryItemType) => {
+export const findInventoryFields = (
+  type: InventoryItemType,
+  schema?: DataSchemaFormat
+): InventoryModelFields => {
   const inventoryModel = findInventoryModel(type);
+  const schemaSpecific = schema ? inventoryModel.schemaFields?.[schema] : undefined;
+  if (schemaSpecific) {
+    return schemaSpecific;
+  }
   if (LEGACY_TYPES.includes(type)) {
     const id = getFieldByType(type) || inventoryModel.fields.id;
     return {
       ...inventoryModel.fields,
       id,
     };
-  } else {
-    return inventoryModel.fields;
   }
+  return inventoryModel.fields;
 };
 
 export const isBasicMetricAgg = (
@@ -100,4 +106,11 @@ export const isTermsWithAggregation = (
 ): agg is Pick<estypes.AggregationsAggregationContainer, 'terms' | 'aggregations'> => {
   const aggContainer = agg as estypes.AggregationsAggregationContainer;
   return !!(aggContainer.aggregations && aggContainer.terms);
+};
+
+export const isFilterWithAggregations = (
+  agg: unknown
+): agg is Pick<estypes.AggregationsAggregationContainer, 'filter' | 'aggs'> => {
+  const aggContainer = agg as estypes.AggregationsAggregationContainer;
+  return !!(aggContainer.filter && aggContainer.aggs);
 };

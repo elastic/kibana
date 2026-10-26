@@ -8,27 +8,25 @@
  */
 
 import { LegendValue, Position, ScaleType as ECScaleType } from '@elastic/charts';
-import {
-  SeriesTypes,
-  Column,
-  XYConfiguration,
+import type { Column } from '@kbn/visualizations-plugin/common/convert_to_lens';
+import type {
+  XYVisualizationState as XYConfiguration,
   XYDataLayerConfig,
   XYReferenceLineLayerConfig,
-} from '@kbn/visualizations-plugin/common/convert_to_lens';
-import { Vis } from '@kbn/visualizations-plugin/public';
-import { Layer } from '..';
-import { ChartType } from '../../../common';
-import {
+} from '@kbn/lens-common';
+import { SeriesTypes } from '@kbn/lens-common';
+import type { Vis } from '@kbn/visualizations-plugin/public';
+import type { Layer } from '..';
+import type { ChartType } from '../../../common';
+import type {
   CategoryAxis,
   ChartMode,
-  InterpolationMode,
   Scale,
-  ScaleType,
   SeriesParam,
-  ThresholdLineStyle,
   ValueAxis,
   VisParams,
 } from '../../types';
+import { InterpolationMode, ScaleType, ThresholdLineStyle } from '../../types';
 import { getCurveType, getMode, getYAxisPosition } from '../../utils/common';
 
 function getYScaleType(scale?: Scale): XYConfiguration['yLeftScale'] | undefined {
@@ -144,7 +142,7 @@ function getDataLayers(
       seriesType,
       xAccessor: xColumn?.columnId,
       simpleView: false,
-      splitAccessor,
+      splitAccessors: splitAccessor ? [splitAccessor] : undefined,
       palette: vis.params.palette ?? vis.type.visConfig.defaults.palette,
       yConfig: layer.metrics.map((metricId) => {
         const serie = series.find((s) => s.data.id === layer.seriesIdsMap[metricId]);
@@ -216,13 +214,15 @@ export const getConfiguration = (
   const xColumn = layers[0].columns.find((c) => c.isBucketed && !c.isSplit);
   const isTimeChart = xColumn?.operationType === 'date_histogram';
   const fittingFunction = vis.params.fittingFunction ?? vis.type.visConfig.defaults.fittingFunction;
+  const dataLayers = getDataLayers(
+    layers.filter((l) => !l.isReferenceLineLayer),
+    series,
+    vis
+  );
+  const hasAreaLayer = dataLayers.some(({ seriesType }) => seriesType.includes('area'));
   return {
     layers: [
-      ...getDataLayers(
-        layers.filter((l) => !l.isReferenceLineLayer),
-        series,
-        vis
-      ),
+      ...dataLayers,
       ...getReferenceLineLayers(
         layers.filter((l) => l.isReferenceLineLayer),
         vis
@@ -244,6 +244,7 @@ export const getConfiguration = (
       ? fittingFunction[0].toUpperCase() + fittingFunction.slice(1)
       : undefined,
     fillOpacity: vis.params.fillOpacity ?? vis.type.visConfig.defaults.fillOpacity,
+    ...(hasAreaLayer ? { areaFill: 'solid' as const } : {}),
     gridlinesVisibilitySettings: {
       x: vis.params.grid.categoryLines ?? vis.type.visConfig.defaults.grid?.categoryLines,
       yLeft:
@@ -281,5 +282,6 @@ export const getConfiguration = (
         ? InterpolationMode.Linear
         : series[0]?.interpolate
     ),
+    preferredSeriesType: 'bar',
   };
 };

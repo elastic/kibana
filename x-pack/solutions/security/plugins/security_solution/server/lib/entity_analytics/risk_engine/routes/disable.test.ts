@@ -24,8 +24,6 @@ describe('risk score disable route', () => {
   let getStartServicesMock: jest.Mock;
 
   beforeEach(() => {
-    jest.resetAllMocks();
-
     server = serverMock.create();
     const { clients } = requestContextMock.createTools();
     mockRiskEngineDataClient = riskEngineDataClientMock.create();
@@ -55,7 +53,7 @@ describe('risk score disable route', () => {
           security: riskEnginePrivilegesMock.createMockSecurityStartWithFullRiskEngineAccess(),
         },
       ]);
-      riskEngineDisableRoute(server.router, getStartServicesMock);
+      riskEngineDisableRoute(server.router, getStartServicesMock, false);
     });
 
     it('invokes the risk score data client', async () => {
@@ -95,7 +93,7 @@ describe('risk score disable route', () => {
           security: riskEnginePrivilegesMock.createMockSecurityStartWithFullRiskEngineAccess(),
         },
       ]);
-      riskEngineDisableRoute(server.router, getStartServicesMock);
+      riskEngineDisableRoute(server.router, getStartServicesMock, false);
     });
 
     it('returns a 400 response', async () => {

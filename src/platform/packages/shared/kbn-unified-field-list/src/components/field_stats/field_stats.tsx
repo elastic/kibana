@@ -28,6 +28,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { PartialTheme } from '@elastic/charts';
 import {
   Axis,
   Chart,
@@ -38,18 +39,18 @@ import {
   Settings,
   TooltipType,
   Tooltip,
-  PartialTheme,
 } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
-import { buildEsQuery, Query, Filter, AggregateQuery } from '@kbn/es-query';
-import { OverrideFieldTopValueBarCallback } from './field_top_values_bucket';
+import type { Query, Filter, AggregateQuery } from '@kbn/es-query';
+import { buildEsQuery } from '@kbn/es-query';
+import type { OverrideFieldTopValueBarCallback } from './field_top_values_bucket';
 import type { BucketedAggregation, NumberSummary } from '../../types';
 import {
   canProvideStatsForField,
   canProvideNumberSummaryForField,
 } from '../../utils/can_provide_stats';
 import { loadFieldStats } from '../../services/field_stats';
-import type { AddFieldFilterHandler } from '../../types';
+import type { AddFieldFilterHandler, AddOtherFilterHandler } from '../../types';
 import {
   FieldTopValues,
   getOtherCount,
@@ -98,6 +99,7 @@ interface FieldStatsPropsBase {
     sampledDocuments?: number;
   }) => JSX.Element;
   onAddFilter?: AddFieldFilterHandler;
+  onAddOtherFilter?: AddOtherFilterHandler;
   overrideFieldTopValueBar?: OverrideFieldTopValueBarCallback;
   onStateChange?: (s: FieldStatsState) => void;
 }
@@ -132,6 +134,7 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
   overrideMissingContent,
   overrideFooter,
   onAddFilter,
+  onAddOtherFilter,
   overrideFieldTopValueBar,
   onStateChange,
 }) => {
@@ -371,7 +374,7 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
               sampledDocuments,
               sampledDocumentsFormatted: fieldFormats
                 .getDefaultInstance(KBN_FIELD_TYPES.NUMBER, [ES_FIELD_TYPES.INTEGER])
-                .convert(sampledDocuments),
+                .convertToText(sampledDocuments),
             },
           })}
         />
@@ -495,6 +498,7 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
                 id={specId}
                 xAccessor={'key'}
                 yAccessors={['count']}
+                // Defaults to multi layer time axis as of Elastic Charts v70
                 xScaleType={ScaleType.Time}
                 yScaleType={ScaleType.Linear}
                 timeZone={getTimeZone(uiSettings)}
@@ -524,7 +528,7 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
               id="key"
               position={Position.Left}
               showOverlappingTicks={true}
-              tickFormat={(d) => formatter.convert(d)}
+              tickFormat={(d) => formatter.convertToText(d)}
             />
 
             <HistogramBarSeries
@@ -552,6 +556,7 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
         color={color}
         data-test-subj={dataTestSubject}
         onAddFilter={onAddFilter}
+        onAddOtherFilter={onAddOtherFilter}
         overrideFieldTopValueBar={overrideFieldTopValueBar}
       />
     );
@@ -585,7 +590,7 @@ function getCountsElement(
             <strong data-test-subj={dataTestSubjDocsCount}>
               {fieldFormats
                 .getDefaultInstance(KBN_FIELD_TYPES.NUMBER, [ES_FIELD_TYPES.INTEGER])
-                .convert(sampledDocuments)}
+                .convertToText(sampledDocuments)}
             </strong>
           ),
         }}
@@ -600,7 +605,7 @@ function getCountsElement(
             <strong data-test-subj={dataTestSubjDocsCount}>
               {fieldFormats
                 .getDefaultInstance(KBN_FIELD_TYPES.NUMBER, [ES_FIELD_TYPES.INTEGER])
-                .convert(totalDocuments)}
+                .convertToText(totalDocuments)}
             </strong>
           ),
         }}

@@ -10,7 +10,8 @@
 import Path from 'path';
 import Fs from 'fs';
 
-import { CiStatsReporter, CiStatsMetric } from '@kbn/ci-stats-reporter';
+import type { CiStatsMetric } from '@kbn/ci-stats-reporter';
+import { CiStatsReporter } from '@kbn/ci-stats-reporter';
 
 import { createFailError } from '@kbn/dev-cli-errors';
 import { run } from '@kbn/dev-cli-runner';
@@ -31,10 +32,13 @@ run(
     const reporter = CiStatsReporter.fromEnv(log);
 
     if (!reporter.isEnabled()) {
-      throw maybeFail('unable to initilize the CI Stats reporter');
+      throw maybeFail('unable to initialize the CI Stats reporter');
     }
 
     const overLimit: string[] = [];
+
+    const updateLimitPrompt = 'To update the limit, run the following command locally:';
+    const updateCommand = `node scripts/build_kibana_platform_plugins --update-limits`;
 
     for (const path of metricPaths) {
       // resolve path from CLI relative to CWD
@@ -50,14 +54,21 @@ run(
       for (const metric of metrics) {
         if (metric.limit !== undefined && metric.limit < metric.value) {
           overLimit.push(
-            `${metric.group} > ${metric.id} with value of ${metric.value} is greater than the limit of ${metric.limit}`
+            `${metric.group} for ${metric.id} plugin is greater than the limit of ${metric.limit}. The current value is ${metric.value}.`
           );
         }
       }
     }
 
+    if (overLimit.length) {
+      // One shared update command; append prompt + command once after all overages.
+      overLimit.push('', updateLimitPrompt, updateCommand);
+    }
+
     if (validate && overLimit.length) {
-      throw maybeFail(`Metric overages:\n${overLimit.map((l) => `  ${l}`).join('\n')}`);
+      throw maybeFail(
+        `Metric overages:\n${overLimit.map((line) => (line === '' ? '' : `  ${line}`)).join('\n')}`
+      );
     }
   },
   {

@@ -62,3 +62,10 @@ export const EDIT_MODE = i18n.translate(
     defaultMessage: 'Field editing view',
   }
 );
+
+export const FINAL_UPDATE_HELP_ARIA_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.upgradeRules.finalUpdateHelpAriaLabel',
+  {
+    defaultMessage: 'Final update help',
+  }
+);

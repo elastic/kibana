@@ -10,7 +10,7 @@
 import { getCoreStart } from '../../../../services';
 import { getMetricsField } from '../../lib/get_metrics_field';
 import { createTickFormatter } from '../../lib/tick_formatter';
-import { createFieldFormatter } from '../../lib/create_field_formatter';
+import { createReactFieldFormatter } from '../../lib/create_field_formatter';
 import { TopN } from '../../../visualizations/views/top_n';
 import { getLastValue } from '../../../../../common/last_value_utils';
 import { isBackgroundInverted } from '../../../lib/set_is_reversed';
@@ -22,6 +22,7 @@ import { DATA_FORMATTERS } from '../../../../../common/enums';
 import { getOperator, shouldOperate } from '../../../../../common/operators_utils';
 import { ExternalUrlErrorModal } from '../../lib/external_url_error_modal';
 import { SERIES_SEPARATOR } from '../../../../../common/constants';
+import { visStyles } from '../_vis_types';
 
 function sortByDirection(data, direction, fn) {
   if (direction === 'desc') {
@@ -46,7 +47,7 @@ function sortSeries(visData, model) {
 function TopNVisualization(props) {
   const [accessDeniedDrilldownUrl, setAccessDeniedDrilldownUrl] = useState(null);
   const coreStart = getCoreStart();
-  const { backgroundColor, model, visData, fieldFormatMap, getConfig } = props;
+  const { backgroundColor, model, visData, fieldFormatMap, getConfig, isInteractive } = props;
 
   const series = sortSeries(visData, model).map((item) => {
     const id = first(item.id.split(SERIES_SEPARATOR));
@@ -54,7 +55,13 @@ function TopNVisualization(props) {
     if (seriesConfig) {
       const tickFormatter =
         seriesConfig.formatter === DATA_FORMATTERS.DEFAULT
-          ? createFieldFormatter(getMetricsField(seriesConfig.metrics), fieldFormatMap, 'html')
+          ? createReactFieldFormatter(
+              getMetricsField(seriesConfig.metrics),
+              fieldFormatMap,
+              false,
+              undefined,
+              isInteractive
+            )
           : createTickFormatter(seriesConfig.formatter, seriesConfig.value_template, getConfig);
 
       const value = getLastValue(item.data);
@@ -101,7 +108,7 @@ function TopNVisualization(props) {
   const closeExternalUrlErrorModal = useCallback(() => setAccessDeniedDrilldownUrl(null), []);
 
   return (
-    <div className="tvbVis" style={style}>
+    <div className="tvbVis" style={style} css={visStyles}>
       <TopN {...params} initialRender={props.initialRender} />
       {accessDeniedDrilldownUrl && (
         <ExternalUrlErrorModal
@@ -114,6 +121,7 @@ function TopNVisualization(props) {
 }
 
 TopNVisualization.propTypes = {
+  isInteractive: PropTypes.bool,
   backgroundColor: PropTypes.string,
   className: PropTypes.string,
   model: PropTypes.object,

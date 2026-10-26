@@ -11,7 +11,13 @@ import React, { useCallback, useEffect, useMemo, useReducer, useRef, useState } 
 import type { UiCounterMetricType } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import { EuiFlexGroup, EuiFlexItem, EuiHideFor, useEuiTheme } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHideFor,
+  useEuiTheme,
+  useIsWithinBreakpoints,
+} from '@elastic/eui';
 import useObservable from 'react-use/lib/useObservable';
 import type { BehaviorSubject } from 'rxjs';
 import { of } from 'rxjs';
@@ -21,10 +27,13 @@ import {
   UnifiedFieldListSidebarContainer,
   type UnifiedFieldListSidebarContainerProps,
   type UnifiedFieldListSidebarContainerApi,
+  type UnifiedFieldListRestorableState,
+  type AddOtherFilterHandler,
   FieldsGroupNames,
 } from '@kbn/unified-field-list';
 import { calcFieldCounts } from '@kbn/discover-utils/src/utils/calc_field_counts';
 import type { Filter } from '@kbn/es-query';
+import { useProfileAccessor } from '../../../../context_awareness';
 import { PLUGIN_ID } from '../../../../../common';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import type { DataDocuments$ } from '../../state_management/discover_data_state_container';
@@ -37,9 +46,14 @@ import {
   DiscoverSidebarReducerStatus,
 } from './lib/sidebar_reducer';
 import { useDiscoverCustomization } from '../../../../customizations';
-import { useAdditionalFieldGroups } from '../../hooks/sidebar/use_additional_field_groups';
-import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
-import { useDataViewsForPicker } from '../../state_management/redux';
+import {
+  internalStateActions,
+  useAppStateSelector,
+  useCurrentTabAction,
+  useCurrentTabSelector,
+  useDataViewsForPicker,
+  useInternalStateDispatch,
+} from '../../state_management/redux';
 
 const EMPTY_FIELD_COUNTS = {};
 
@@ -48,8 +62,12 @@ const getCreationOptions: UnifiedFieldListSidebarContainerProps['getCreationOpti
     originatingApp: PLUGIN_ID,
     localStorageKeyPrefix: 'discover',
     compressed: true,
-    showSidebarToggleButton: true,
+    showSidebarToggleButton: false,
     disableFieldsExistenceAutoFetching: true,
+    shouldKeepAdHocDataViewImmutable: true,
+    buttonPropsToTriggerFlyout: {
+      'data-test-subj': 'discover-sidebar-fields-button',
+    },
     buttonAddFieldVariant: 'toolbar',
     buttonAddFieldToWorkspaceProps: {
       'aria-label': i18n.translate('discover.fieldChooser.discoverField.addFieldTooltip', {
@@ -103,14 +121,27 @@ export interface DiscoverSidebarResponsiveProps {
    */
   onAddFilter?: (field: DataViewField | string, value: unknown, type: '+' | '-') => void;
   /**
+   * Callback function when adding a filter for the "Other" top values bucket from sidebar
+   */
+  onAddOtherFilter?: AddOtherFilterHandler;
+  /**
    * Callback function when changing an data view
    */
   onChangeDataView: (id: string) => void;
+  /**
+   * Callback to move a field column to `targetIndex` within `columns` (remove, then insert).
+   * When omitted, the selected fields can't be reordered in the sidebar.
+   */
+  onMoveField?: (fieldName: string, targetIndex: number) => void;
   /**
    * Callback to remove a field column from the table
    * @param fieldName
    */
   onRemoveField: (fieldName: string) => void;
+  /**
+   * Callback to remove multiple field columns from the table in a single update
+   */
+  onRemoveFields: (fieldNames: string[]) => void;
   /**
    * Currently selected data view
    */
@@ -124,7 +155,10 @@ export interface DiscoverSidebarResponsiveProps {
   /**
    * callback to execute on edit runtime field
    */
-  onFieldEdited: (options?: { removedFieldName?: string }) => Promise<void>;
+  onFieldEdited: (options: {
+    editedDataView: DataView;
+    removedFieldName?: string;
+  }) => Promise<void>;
   /**
    * callback to execute on create dataview
    */
@@ -152,7 +186,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
     useState<UnifiedFieldListSidebarContainerApi | null>(null);
   const { euiTheme } = useEuiTheme();
   const services = useDiscoverServices();
-  const isEsqlMode = useIsEsqlMode();
+  const chromeStyle = useObservable(services.core.chrome.getChromeStyle$(), 'classic');
   const {
     fieldListVariant,
     selectedDataView,
@@ -160,22 +194,24 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
     trackUiMetric,
     onAddBreakdownField,
     onAddFilter,
+    onAddOtherFilter,
     onFieldEdited,
     onDataViewCreated,
     onChangeDataView,
     onAddField,
+    onMoveField,
     onRemoveField,
+    onRemoveFields,
     sidebarToggleState$,
     additionalFilters,
   } = props;
   const [sidebarState, dispatchSidebarStateAction] = useReducer(
     discoverSidebarReducer,
-    selectedDataView,
-    getInitialState
+    getInitialState()
   );
   const selectedDataViewRef = useRef<DataView | null | undefined>(selectedDataView);
   const showFieldList = sidebarState.status !== DiscoverSidebarReducerStatus.INITIAL;
-  const { savedDataViews, managedDataViews, adHocDataViews } = useDataViewsForPicker();
+  const { savedDataViews, adHocDataViews } = useDataViewsForPicker();
 
   useEffect(() => {
     const subscription = props.documents$.subscribe((documentState) => {
@@ -183,16 +219,13 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
         case FetchStatus.UNINITIALIZED:
           dispatchSidebarStateAction({
             type: DiscoverSidebarReducerActionType.RESET,
-            payload: {
-              dataView: selectedDataViewRef.current,
-            },
           });
           break;
         case FetchStatus.LOADING:
           dispatchSidebarStateAction({
             type: DiscoverSidebarReducerActionType.DOCUMENTS_LOADING,
             payload: {
-              isEsqlMode,
+              dataSource: documentState.dataSource,
             },
           });
           break;
@@ -200,10 +233,12 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
           dispatchSidebarStateAction({
             type: DiscoverSidebarReducerActionType.DOCUMENTS_LOADED,
             payload: {
-              dataView: selectedDataViewRef.current,
-              fieldCounts: isEsqlMode ? EMPTY_FIELD_COUNTS : calcFieldCounts(documentState.result),
-              esqlQueryColumns: documentState.esqlQueryColumns,
-              isEsqlMode,
+              dataSource: documentState.dataSource,
+              fieldCounts:
+                documentState.dataSource?.kind === 'esql'
+                  ? EMPTY_FIELD_COUNTS
+                  : calcFieldCounts(documentState.result),
+              fallbackDataView: selectedDataViewRef.current,
             },
           });
           break;
@@ -211,9 +246,9 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
           dispatchSidebarStateAction({
             type: DiscoverSidebarReducerActionType.DOCUMENTS_LOADED,
             payload: {
-              dataView: selectedDataViewRef.current,
+              dataSource: documentState.dataSource,
               fieldCounts: EMPTY_FIELD_COUNTS,
-              isEsqlMode,
+              fallbackDataView: selectedDataViewRef.current,
             },
           });
           break;
@@ -222,7 +257,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
       }
     });
     return () => subscription.unsubscribe();
-  }, [props.documents$, dispatchSidebarStateAction, selectedDataViewRef, isEsqlMode]);
+  }, [props.documents$, dispatchSidebarStateAction, selectedDataViewRef]);
 
   useEffect(() => {
     if (selectedDataView !== selectedDataViewRef.current) {
@@ -276,24 +311,6 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
     [setUnifiedFieldListSidebarContainerApi, scheduleFieldsExistenceInfoFetchRef]
   );
 
-  const closeDataViewEditor = useRef<() => void | undefined>();
-
-  useEffect(() => {
-    const cleanup = () => {
-      if (closeDataViewEditor?.current) {
-        closeDataViewEditor?.current();
-      }
-    };
-    return () => {
-      // Make sure to close the editor when unmounting
-      cleanup();
-    };
-  }, []);
-
-  const setDataViewEditorRef = useCallback((ref: () => void | undefined) => {
-    closeDataViewEditor.current = ref;
-  }, []);
-
   const { dataViewEditor } = services;
 
   const canEditDataView =
@@ -303,23 +320,20 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
   const createNewDataView = useMemo(
     () =>
       canEditDataView
-        ? () => {
-            const ref = dataViewEditor.openEditor({
-              onSave: async (dataView) => {
-                onDataViewCreated(dataView);
-              },
-            });
-            if (setDataViewEditorRef) {
-              setDataViewEditorRef(ref);
-            }
+        ? (dataView: DataView) => {
+            onDataViewCreated(dataView);
             closeFieldListFlyout?.();
           }
         : undefined,
-    [canEditDataView, dataViewEditor, setDataViewEditorRef, onDataViewCreated, closeFieldListFlyout]
+    [canEditDataView, onDataViewCreated, closeFieldListFlyout]
   );
 
   const searchBarCustomization = useDiscoverCustomization('search_bar');
-  const additionalFieldGroups = useAdditionalFieldGroups();
+  const getRecommendedFieldsAccessor = useProfileAccessor('getRecommendedFields');
+  const additionalFieldGroups = useMemo(() => {
+    return getRecommendedFieldsAccessor(() => ({ recommendedFields: [] }))();
+  }, [getRecommendedFieldsAccessor]);
+
   const CustomDataViewPicker = searchBarCustomization?.CustomDataViewPicker;
 
   const createField = unifiedFieldListSidebarContainerApi?.createField;
@@ -331,7 +345,6 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
         <DataViewPicker
           currentDataViewId={selectedDataView.id}
           adHocDataViews={adHocDataViews}
-          managedDataViews={managedDataViews}
           savedDataViews={savedDataViews}
           onChangeDataView={onChangeDataView}
           onAddField={createField}
@@ -349,7 +362,6 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
     selectedDataView,
     CustomDataViewPicker,
     adHocDataViews,
-    managedDataViews,
     savedDataViews,
     onChangeDataView,
     createField,
@@ -370,6 +382,24 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
     [onRemoveField]
   );
 
+  const onRemoveFieldsFromWorkspace = useCallback(
+    (fields: DataViewField[]) => {
+      onRemoveFields(fields.map((field) => field.name));
+    },
+    [onRemoveFields]
+  );
+
+  const onMoveFieldInWorkspace = useMemo(
+    () =>
+      onMoveField
+        ? (field: DataViewField, targetIndex: number) => {
+            onMoveField(field.name, targetIndex);
+          }
+        : undefined,
+    [onMoveField]
+  );
+
+  const isMobile = useIsWithinBreakpoints(['xs', 's']);
   const isSidebarCollapsed = useObservable(
     unifiedFieldListSidebarContainerApi?.sidebarVisibility.isCollapsed$ ?? of(false),
     false
@@ -382,13 +412,56 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
     });
   }, [isSidebarCollapsed, unifiedFieldListSidebarContainerApi, sidebarToggleState$]);
 
+  const dispatch = useInternalStateDispatch();
+  const hideSidebar = useAppStateSelector((state) => state.hideSidebar ?? false);
+
+  useEffect(() => {
+    const visibility = unifiedFieldListSidebarContainerApi?.sidebarVisibility;
+    if (visibility && visibility.isCollapsed$.getValue() !== hideSidebar) {
+      visibility.toggle(hideSidebar, false);
+    }
+  }, [hideSidebar, unifiedFieldListSidebarContainerApi]);
+
+  const fieldListUiState = useCurrentTabSelector((state) => state.uiState.fieldList);
+  const setFieldListUiState = useCurrentTabAction(internalStateActions.setFieldListUiState);
+  const onInitialStateChange = useCallback(
+    (newFieldListUiState: Partial<UnifiedFieldListRestorableState>) => {
+      dispatch(
+        setFieldListUiState({
+          fieldListUiState: newFieldListUiState,
+        })
+      );
+    },
+    [dispatch, setFieldListUiState]
+  );
+
+  const fieldListExistingFieldsInfoUiState = useCurrentTabSelector(
+    (state) => state.uiState.fieldListExistingFieldsInfo
+  );
+  const setFieldListExistingFieldsInfoUiState = useCurrentTabAction(
+    internalStateActions.setFieldListExistingFieldsInfoUiState
+  );
+  const onInitialExistingFieldsInfoChange = useCallback(
+    (newUiState: UnifiedFieldListSidebarContainerProps['initialExistingFieldsInfo']) => {
+      dispatch(
+        setFieldListExistingFieldsInfoUiState({
+          fieldListExistingFieldsInfo: newUiState,
+        })
+      );
+    },
+    [dispatch, setFieldListExistingFieldsInfoUiState]
+  );
+
   return (
     <EuiFlexGroup
       gutterSize="none"
       css={css`
         height: 100%;
-        display: ${isSidebarCollapsed ? 'none' : 'flex'};
-        background-color: ${euiTheme.colors.body};
+        display: ${isSidebarCollapsed && !isMobile ? 'none' : 'flex'};
+        // Make Discover's field list background distinguished for the "new chrome"
+        background-color: ${chromeStyle === 'project'
+          ? euiTheme.colors.backgroundBasePlain
+          : euiTheme.colors.body};
       `}
     >
       <EuiFlexItem>
@@ -403,8 +476,11 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
             onAddBreakdownField={onAddBreakdownField}
             onAddFieldToWorkspace={onAddFieldToWorkspace}
             onAddFilter={onAddFilter}
+            onAddOtherFilter={onAddOtherFilter}
             onFieldEdited={onFieldEdited}
+            onMoveFieldInWorkspace={onMoveFieldInWorkspace}
             onRemoveFieldFromWorkspace={onRemoveFieldFromWorkspace}
+            onRemoveFieldsFromWorkspace={onRemoveFieldsFromWorkspace}
             prependInFlyout={prependDataViewPickerForMobile}
             ref={initializeUnifiedFieldListSidebarContainerApi}
             services={services}
@@ -412,6 +488,10 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
             trackUiMetric={trackUiMetric}
             variant={fieldListVariant}
             workspaceSelectedFieldNames={columns}
+            initialState={fieldListUiState}
+            onInitialStateChange={onInitialStateChange}
+            initialExistingFieldsInfo={fieldListExistingFieldsInfoUiState}
+            onInitialExistingFieldsInfoChange={onInitialExistingFieldsInfoChange}
           />
         ) : null}
       </EuiFlexItem>

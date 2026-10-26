@@ -2,12 +2,15 @@
 
 set -euo pipefail
 
+# node scripts/build rebuilds the shared webpack bundles without the remote cache
+export KBN_BOOTSTRAP_NO_PREBUILT=true
+
 .buildkite/scripts/bootstrap.sh
 
 source .buildkite/scripts/steps/artifacts/env.sh
 
 echo "--- Build Kibana artifacts"
-node scripts/build --all-platforms --debug --docker-cross-compile --skip-docker-fips --skip-docker-serverless --skip-cdn-assets "${BUILD_ARGS[@]}"
+node scripts/build --all-platforms --debug --docker-cross-compile --skip-docker-fips --skip-serverless --skip-cdn-assets "${BUILD_ARGS[@]}"
 
 echo "--- Extract default i18n messages"
 mkdir -p target/i18n

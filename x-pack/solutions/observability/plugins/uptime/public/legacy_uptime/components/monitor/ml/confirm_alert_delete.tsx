@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiConfirmModal } from '@elastic/eui';
+import { EuiConfirmModal, useGeneratedHtmlId } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import * as labels from './translations';
 
@@ -16,9 +16,13 @@ interface Props {
 }
 
 export const ConfirmAlertDeletion: React.FC<Props> = ({ onConfirm, onCancel }) => {
+  const modalTitleId = useGeneratedHtmlId();
+
   return (
     <EuiConfirmModal
+      aria-labelledby={modalTitleId}
       title={labels.DISABLE_ANOMALY_ALERT}
+      titleProps={{ id: modalTitleId }}
       onCancel={onCancel}
       onConfirm={onConfirm}
       cancelButtonText="Cancel"

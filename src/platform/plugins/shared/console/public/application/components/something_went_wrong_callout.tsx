@@ -7,10 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { FunctionComponent, useEffect } from 'react';
+import type { FunctionComponent } from 'react';
+import React, { useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { EuiCallOut, EuiText, EuiButton, EuiSpacer } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 
 interface Props {
   error: Error;
@@ -24,25 +25,29 @@ export const SomethingWentWrongCallout: FunctionComponent<Props> = ({ error, onB
   }, [error]);
 
   return (
-    <EuiCallOut
-      iconType="warning"
-      color="danger"
+    <KbnDangerCallout
       title={i18n.translate('console.loadingError.title', {
         defaultMessage: 'Cannot load Console',
       })}
-    >
-      <EuiText>
+      text={
         <p>
           <FormattedMessage
             id="console.loadingError.message"
             defaultMessage="Try reloading to get the latest data."
           />
         </p>
-      </EuiText>
-      <EuiSpacer size="m" />
-      <EuiButton color="danger" onClick={() => onButtonClick()}>
-        <FormattedMessage id="console.loadingError.buttonLabel" defaultMessage="Reload Console" />
-      </EuiButton>
-    </EuiCallOut>
+      }
+      actionProps={{
+        primary: {
+          children: (
+            <FormattedMessage
+              id="console.loadingError.buttonLabel"
+              defaultMessage="Reload Console"
+            />
+          ),
+          onClick: () => onButtonClick(),
+        },
+      }}
+    />
   );
 };

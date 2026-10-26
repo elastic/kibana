@@ -7,8 +7,8 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiIcon } from '@elastic/eui';
-import { UrlTemplate } from '../../types';
+import { EuiButtonEmpty, EuiIcon } from '@elastic/eui';
+import type { UrlTemplate } from '../../types';
 import { IconRenderer } from '../icon_renderer';
 import { gphSidebarHeaderStyles, gphSidebarPanelStyles, noUserSelectStyles } from '../../styles';
 
@@ -21,13 +21,13 @@ export const DrillDowns = ({ urlTemplates, openUrlTemplate }: DrillDownsProps) =
   return (
     <div>
       <div css={gphSidebarHeaderStyles}>
-        <EuiIcon type="iInCircle" />{' '}
+        <EuiIcon type="info" aria-hidden={true} />{' '}
         {i18n.translate('xpack.graph.sidebar.drillDownsTitle', {
           defaultMessage: 'Drill-downs',
         })}
       </div>
 
-      <div css={gphSidebarPanelStyles}>
+      <div css={gphSidebarPanelStyles} data-test-subj="graphDrilldowns">
         {urlTemplates.length === 0 && (
           <p className="help-block">
             {i18n.translate('xpack.graph.sidebar.drillDowns.noDrillDownsHelpText', {
@@ -41,15 +41,20 @@ export const DrillDowns = ({ urlTemplates, openUrlTemplate }: DrillDownsProps) =
             const onOpenUrlTemplate = () => openUrlTemplate(urlTemplate);
 
             return (
-              <li className="list-group-item">
+              <li key={urlTemplate.url} className="list-group-item">
                 {urlTemplate.icon && (
                   <>
                     <IconRenderer icon={urlTemplate.icon} css={noUserSelectStyles} />{' '}
                   </>
                 )}
-                <a aria-hidden="true" onClick={onOpenUrlTemplate}>
+                <EuiButtonEmpty
+                  size="xs"
+                  flush="both"
+                  data-test-subj={urlTemplate.isDefault ? 'graphRawDocumentsDrilldown' : undefined}
+                  onClick={onOpenUrlTemplate}
+                >
                   {urlTemplate.description}
-                </a>
+                </EuiButtonEmpty>
               </li>
             );
           })}

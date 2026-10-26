@@ -5,87 +5,147 @@
  * 2.0.
  */
 
-import { act } from 'react-dom/test-utils';
-import { TestBed } from '@kbn/test-jest-helpers';
-import { createFormToggleAction } from './form_toggle_action';
-import { createFormSetValueAction } from './form_set_value_action';
+import {
+  screen,
+  fireEvent,
+  within,
+  waitFor,
+  waitForElementToBeRemoved,
+} from '@testing-library/react';
 
-const createSetPrimaryShardSizeAction =
-  (testBed: TestBed) => async (value: string, units?: string) => {
-    const { find, component } = testBed;
-
-    await act(async () => {
-      find('hot-selectedMaxPrimaryShardSize').simulate('change', { target: { value } });
-    });
-    component.update();
-
-    if (units) {
-      act(() => {
-        find('hot-selectedMaxPrimaryShardSize.show-filters-button').simulate('click');
-      });
-      component.update();
-
-      act(() => {
-        find(`hot-selectedMaxPrimaryShardSize.filter-option-${units}`).simulate('click');
-      });
-      component.update();
-    }
-  };
-
-const createSetMaxAgeAction = (testBed: TestBed) => async (value: string, units?: string) => {
-  const { find, component } = testBed;
-
-  await act(async () => {
-    find('hot-selectedMaxAge').simulate('change', { target: { value } });
+const addRolloverField = async (buttonTestSubj: string, field: string) => {
+  fireEvent.click(screen.getByTestId(buttonTestSubj));
+  const option = await screen.findByTestId(`rolloverAddField-${field}`);
+  fireEvent.click(option);
+  await waitFor(() => {
+    expect(screen.queryByTestId(`rolloverAddField-${field}`)).not.toBeInTheDocument();
   });
-  component.update();
+};
 
-  if (units) {
-    act(() => {
-      find('hot-selectedMaxAgeUnits.show-filters-button').simulate('click');
-    });
-    component.update();
-
-    act(() => {
-      find(`hot-selectedMaxAgeUnits.filter-option-${units}`).simulate('click');
-    });
-    component.update();
+const ensureRolloverField = async (
+  inputTestSubj: string,
+  buttonTestSubj: string,
+  field: string
+) => {
+  if (!screen.queryByTestId(inputTestSubj)) {
+    await addRolloverField(buttonTestSubj, field);
   }
 };
 
-const createSetMaxSizeAction = (testBed: TestBed) => async (value: string, units?: string) => {
-  const { find, component } = testBed;
+const setValue = (inputTestSubj: string, value: string) => {
+  const input = screen.getByTestId<HTMLInputElement>(inputTestSubj);
+  fireEvent.change(input, { target: { value } });
+  fireEvent.blur(input);
+};
 
-  await act(async () => {
-    find('hot-selectedMaxSizeStored').simulate('change', { target: { value } });
-  });
-  component.update();
-
+const setUnits = async (unitTestSubj: string, units?: string) => {
   if (units) {
-    act(() => {
-      find('hot-selectedMaxSizeStoredUnits.show-filters-button').simulate('click');
-    });
-    component.update();
+    const popover = screen.getByTestId(unitTestSubj);
+    const filterButton = within(popover).getByTestId('show-filters-button');
+    fireEvent.click(filterButton);
 
-    act(() => {
-      find(`hot-selectedMaxSizeStoredUnits.filter-option-${units}`).simulate('click');
-    });
-    component.update();
+    const filterOption = await screen.findByTestId(`filter-option-${units}`);
+    fireEvent.click(filterOption);
+    await waitForElementToBeRemoved(filterOption);
   }
 };
 
-export const createRolloverActions = (testBed: TestBed) => {
-  const { exists } = testBed;
+const setMaxPrimaryShardSize = async (value: string, units?: string) => {
+  await ensureRolloverField(
+    'hot-selectedMaxPrimaryShardSize',
+    'rolloverAddTriggerButton',
+    'max_primary_shard_size'
+  );
+  setValue('hot-selectedMaxPrimaryShardSize', value);
+  await setUnits('hot-selectedMaxPrimaryShardSizeUnits', units);
+};
+
+const setMaxAge = async (value: string, units?: string) => {
+  await ensureRolloverField('hot-selectedMaxAge', 'rolloverAddTriggerButton', 'max_age');
+  setValue('hot-selectedMaxAge', value);
+  await setUnits('hot-selectedMaxAgeUnits', units);
+};
+
+const setMaxPrimaryShardDocs = async (value: string) => {
+  await ensureRolloverField(
+    'hot-selectedMaxPrimaryShardDocs',
+    'rolloverAddTriggerButton',
+    'max_primary_shard_docs'
+  );
+  setValue('hot-selectedMaxPrimaryShardDocs', value);
+};
+
+const setMaxDocs = async (value: string) => {
+  await ensureRolloverField('hot-selectedMaxDocuments', 'rolloverAddTriggerButton', 'max_docs');
+  setValue('hot-selectedMaxDocuments', value);
+};
+
+const setMaxSize = async (value: string, units?: string) => {
+  await ensureRolloverField('hot-selectedMaxSizeStored', 'rolloverAddTriggerButton', 'max_size');
+  setValue('hot-selectedMaxSizeStored', value);
+  await setUnits('hot-selectedMaxSizeStoredUnits', units);
+};
+
+const setMinPrimaryShardSize = async (value: string, units?: string) => {
+  await ensureRolloverField(
+    'hot-selectedMinPrimaryShardSize',
+    'rolloverAddRestrictionButton',
+    'min_primary_shard_size'
+  );
+  setValue('hot-selectedMinPrimaryShardSize', value);
+  await setUnits('hot-selectedMinPrimaryShardSizeUnits', units);
+};
+
+const setMinAge = async (value: string, units?: string) => {
+  await ensureRolloverField('hot-selectedMinAge', 'rolloverAddRestrictionButton', 'min_age');
+  setValue('hot-selectedMinAge', value);
+  await setUnits('hot-selectedMinAgeUnits', units);
+};
+
+const setMinPrimaryShardDocs = async (value: string) => {
+  await ensureRolloverField(
+    'hot-selectedMinPrimaryShardDocs',
+    'rolloverAddRestrictionButton',
+    'min_primary_shard_docs'
+  );
+  setValue('hot-selectedMinPrimaryShardDocs', value);
+};
+
+const setMinDocs = async (value: string) => {
+  await ensureRolloverField('hot-selectedMinDocuments', 'rolloverAddRestrictionButton', 'min_docs');
+  setValue('hot-selectedMinDocuments', value);
+};
+
+const setMinSize = async (value: string, units?: string) => {
+  await ensureRolloverField(
+    'hot-selectedMinSizeStored',
+    'rolloverAddRestrictionButton',
+    'min_size'
+  );
+  setValue('hot-selectedMinSizeStored', value);
+  await setUnits('hot-selectedMinSizeStoredUnits', units);
+};
+
+export const createRolloverActions = () => {
   return {
     rollover: {
-      toggle: createFormToggleAction(testBed, 'rolloverSwitch'),
-      toggleDefault: createFormToggleAction(testBed, 'useDefaultRolloverSwitch'),
-      setMaxPrimaryShardSize: createSetPrimaryShardSizeAction(testBed),
-      setMaxPrimaryShardDocs: createFormSetValueAction(testBed, 'hot-selectedMaxPrimaryShardDocs'),
-      setMaxDocs: createFormSetValueAction(testBed, 'hot-selectedMaxDocuments'),
-      setMaxAge: createSetMaxAgeAction(testBed),
-      setMaxSize: createSetMaxSizeAction(testBed),
-      hasSettingRequiredCallout: (): boolean => exists('rolloverSettingsRequired'),
+      toggle: () => fireEvent.click(screen.getByTestId('rolloverSwitch')),
+      addTrigger: (field: string) => addRolloverField('rolloverAddTriggerButton', field),
+      addRestriction: (field: string) => addRolloverField('rolloverAddRestrictionButton', field),
+      restoreRecommendedDefaults: () =>
+        fireEvent.click(screen.getByTestId('rolloverRestoreRecommendedDefaults')),
+      setMaxPrimaryShardSize,
+      setMaxPrimaryShardDocs,
+      setMaxDocs,
+      setMaxAge,
+      setMaxSize,
+      setMinPrimaryShardSize,
+      setMinPrimaryShardDocs,
+      setMinDocs,
+      setMinAge,
+      setMinSize,
+      hasSettingRequiredCallout: (): boolean =>
+        Boolean(screen.queryByTestId('rolloverSettingsRequired')),
     },
   };
 };

@@ -7,7 +7,8 @@
 
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
-
+import type { SecurityRuleChangeTracking } from '../../../../../../../common/detection_engine/rule_management/rule_change_tracking';
+import { SecurityRuleChangeTrackingAction } from '../../../../../../../common/detection_engine/rule_management/rule_change_tracking';
 import type { RuleResponse } from '../../../../../../../common/api/detection_engine/model/rule_schema';
 import type { MlAuthz } from '../../../../../machine_learning/authz';
 import type { PrebuiltRuleAsset } from '../../../../prebuilt_rules';
@@ -15,7 +16,7 @@ import type { IPrebuiltRuleAssetsClient } from '../../../../prebuilt_rules/logic
 import { convertAlertingRuleToRuleResponse } from '../converters/convert_alerting_rule_to_rule_response';
 import { convertRuleResponseToAlertingRule } from '../converters/convert_rule_response_to_alerting_rule';
 import { applyRuleUpdate } from '../mergers/apply_rule_update';
-import { ClientError, validateMlAuth } from '../utils';
+import { ClientError, validateMlAuth, mergeExceptionLists } from '../utils';
 import { createRule } from './create_rule';
 import { getRuleByRuleId } from './get_rule_by_rule_id';
 
@@ -25,12 +26,14 @@ export const upgradePrebuiltRule = async ({
   ruleAsset,
   mlAuthz,
   prebuiltRuleAssetClient,
+  changeTracking,
 }: {
   actionsClient: ActionsClient;
   rulesClient: RulesClient;
   ruleAsset: PrebuiltRuleAsset;
   mlAuthz: MlAuthz;
   prebuiltRuleAssetClient: IPrebuiltRuleAssetsClient;
+  changeTracking?: SecurityRuleChangeTracking<never>;
 }): Promise<RuleResponse> => {
   await validateMlAuth(mlAuthz, ruleAsset.type);
 
@@ -63,6 +66,11 @@ export const upgradePrebuiltRule = async ({
         timeline_title: existingRule.timeline_title,
       },
       id: existingRule.id,
+      // Preserve the revision counter: the same-type upgrade path (rulesClient.update)
+      // increments revision automatically when content changes. To keep both paths
+      // consistent, bump the revision by 1 here as well.
+      initialRevision: existingRule.revision + 1,
+      changeTracking: { action: SecurityRuleChangeTrackingAction.ruleUpgrade, ...changeTracking },
     });
 
     return createdRule;
@@ -75,9 +83,20 @@ export const upgradePrebuiltRule = async ({
     ruleUpdate: ruleAsset,
   });
 
+  // We want to preserve existing actions from existing rule on upgrade
+  if (existingRule.actions.length) {
+    updatedRule.actions = existingRule.actions;
+  }
+
+  const updatedRuleWithMergedExceptions = mergeExceptionLists(updatedRule, existingRule);
+
   const updatedInternalRule = await rulesClient.update({
     id: existingRule.id,
-    data: convertRuleResponseToAlertingRule(updatedRule, actionsClient),
+    data: convertRuleResponseToAlertingRule(updatedRuleWithMergedExceptions, actionsClient),
+    changeTracking: {
+      action: SecurityRuleChangeTrackingAction.ruleUpgrade,
+      ...changeTracking,
+    },
   });
 
   return convertAlertingRuleToRuleResponse(updatedInternalRule);

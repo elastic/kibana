@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { SavedObjectsClient } from '@kbn/core/server';
+import { type SavedObjectsClientContract } from '@kbn/core/server';
 import type { CoreSetup, ElasticsearchClient } from '@kbn/core/server';
 import type {
   ConcreteTaskInstance,
@@ -24,6 +24,10 @@ import { RequestDiagnosticsActionRunner } from './request_diagnostics_action_run
 import type { RetryParams } from './retry_helper';
 import { getRetryParams } from './retry_helper';
 import { BulkActionTaskType } from './bulk_action_types';
+import { MigrateActionRunner } from './migrate_action_runner';
+import { ChangePrivilegeActionRunner } from './change_privilege_runner';
+import { RollbackActionRunner } from './rollback_action_runner';
+import { RestartActionRunner } from './restart_action_runner';
 
 /**
  * Create and run retry tasks of agent bulk actions
@@ -37,7 +41,7 @@ export class BulkActionsResolver {
         const [coreStart] = await core.getStartServices();
         return {
           esClient: coreStart.elasticsearch.client.asInternalUser,
-          soClient: new SavedObjectsClient(coreStart.savedObjects.createInternalRepository()),
+          soClient: appContextService.getInternalUserSOClientWithoutSpaceExtension(),
         };
       };
 
@@ -47,6 +51,10 @@ export class BulkActionsResolver {
         [BulkActionTaskType.UPDATE_AGENT_TAGS_RETRY]: UpdateAgentTagsActionRunner,
         [BulkActionTaskType.UPGRADE_RETRY]: UpgradeActionRunner,
         [BulkActionTaskType.REQUEST_DIAGNOSTICS_RETRY]: RequestDiagnosticsActionRunner,
+        [BulkActionTaskType.MIGRATE_RETRY]: MigrateActionRunner,
+        [BulkActionTaskType.PRIVILEGE_LEVEL_CHANGE_RETRY]: ChangePrivilegeActionRunner,
+        [BulkActionTaskType.ROLLBACK_RETRY]: RollbackActionRunner,
+        [BulkActionTaskType.RESTART_RETRY]: RestartActionRunner,
       };
 
       return createRetryTask(
@@ -54,7 +62,7 @@ export class BulkActionsResolver {
         getDeps,
         async (
           esClient: ElasticsearchClient,
-          soClient: SavedObjectsClient,
+          soClient: SavedObjectsClientContract,
           actionParams: ActionParams,
           retryParams: RetryParams
         ) =>
@@ -123,10 +131,10 @@ export class BulkActionsResolver {
 
 export function createRetryTask(
   taskInstance: ConcreteTaskInstance,
-  getDeps: () => Promise<{ esClient: ElasticsearchClient; soClient: SavedObjectsClient }>,
+  getDeps: () => Promise<{ esClient: ElasticsearchClient; soClient: SavedObjectsClientContract }>,
   doRetry: (
     esClient: ElasticsearchClient,
-    soClient: SavedObjectsClient,
+    soClient: SavedObjectsClientContract,
     actionParams: ActionParams,
     retryParams: RetryParams
   ) => void
@@ -141,7 +149,6 @@ export function createRetryTask(
         taskInstance.taskType,
         taskInstance.params.retryParams
       );
-
       appContextService
         .getLogger()
         .debug(

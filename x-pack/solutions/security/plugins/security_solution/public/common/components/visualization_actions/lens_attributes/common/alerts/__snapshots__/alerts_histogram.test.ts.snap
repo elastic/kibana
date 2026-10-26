@@ -3,26 +3,56 @@
 exports[`getAlertsHistogramLensAttributes should render with extra options - filters 1`] = `
 Object {
   "description": "",
-  "references": Array [
-    Object {
-      "id": "security-solution-my-test",
-      "name": "indexpattern-datasource-layer-0039eb0c-9a1a-4687-ae54-0f4e239bec75",
-      "type": "index-pattern",
-    },
-  ],
+  "references": Array [],
   "state": Object {
-    "adHocDataViews": Object {},
+    "adHocDataViews": Object {
+      "security-solution-my-test": Object {
+        "allowHidden": false,
+        "allowNoIndex": false,
+        "fieldAttrs": Object {},
+        "fieldFormats": Object {},
+        "id": "security-solution-my-test",
+        "managed": false,
+        "name": "Default Security Data View",
+        "runtimeFieldMap": Object {},
+        "sourceFilters": Array [],
+        "title": "signal-index",
+      },
+    },
     "datasourceStates": Object {
       "formBased": Object {
         "layers": Object {
-          "0039eb0c-9a1a-4687-ae54-0f4e239bec75": Object {
+          "layer-id-generated-uuid": Object {
             "columnOrder": Array [
-              "34919782-4546-43a5-b668-06ac934d3acd",
-              "aac9d7d0-13a3-480a-892b-08207a787926",
-              "e09e0380-0740-4105-becc-0a4ca12e3944",
+              "column-top-values-id-generated-uuid",
+              "column-timestamp-id-generated-uuid",
+              "column-count-of-records-id-generated-uuid",
             ],
             "columns": Object {
-              "34919782-4546-43a5-b668-06ac934d3acd": Object {
+              "column-count-of-records-id-generated-uuid": Object {
+                "dataType": "number",
+                "isBucketed": false,
+                "label": "Count of records",
+                "operationType": "count",
+                "params": Object {
+                  "emptyAsNull": true,
+                },
+                "scale": "ratio",
+                "sourceField": "___records___",
+              },
+              "column-timestamp-id-generated-uuid": Object {
+                "dataType": "date",
+                "isBucketed": true,
+                "label": "@timestamp",
+                "operationType": "date_histogram",
+                "params": Object {
+                  "includeEmptyRows": true,
+                  "interval": "auto",
+                },
+                "scale": "interval",
+                "sourceField": "@timestamp",
+              },
+              "column-top-values-id-generated-uuid": Object {
                 "dataType": "string",
                 "isBucketed": true,
                 "label": "Top values of event.category",
@@ -30,7 +60,7 @@ Object {
                 "params": Object {
                   "missingBucket": false,
                   "orderBy": Object {
-                    "columnId": "e09e0380-0740-4105-becc-0a4ca12e3944",
+                    "columnId": "column-count-of-records-id-generated-uuid",
                     "type": "column",
                   },
                   "orderDirection": "desc",
@@ -43,29 +73,6 @@ Object {
                 },
                 "scale": "ordinal",
                 "sourceField": "event.category",
-              },
-              "aac9d7d0-13a3-480a-892b-08207a787926": Object {
-                "dataType": "date",
-                "isBucketed": true,
-                "label": "@timestamp",
-                "operationType": "date_histogram",
-                "params": Object {
-                  "includeEmptyRows": true,
-                  "interval": "auto",
-                },
-                "scale": "interval",
-                "sourceField": "@timestamp",
-              },
-              "e09e0380-0740-4105-becc-0a4ca12e3944": Object {
-                "dataType": "number",
-                "isBucketed": false,
-                "label": "Count of records",
-                "operationType": "count",
-                "params": Object {
-                  "emptyAsNull": true,
-                },
-                "scale": "ratio",
-                "sourceField": "___records___",
               },
             },
             "incompleteColumns": Object {},
@@ -106,6 +113,7 @@ Object {
           "negate": false,
           "params": Array [
             "signal-index",
+            "*:signal-index",
           ],
           "type": "phrases",
         },
@@ -116,6 +124,11 @@ Object {
               Object {
                 "match_phrase": Object {
                   "_index": "signal-index",
+                },
+              },
+              Object {
+                "match_phrase": Object {
+                  "_index": "*:signal-index",
                 },
               },
             ],
@@ -140,7 +153,13 @@ Object {
         },
       },
     ],
-    "internalReferences": Array [],
+    "internalReferences": Array [
+      Object {
+        "id": "security-solution-my-test",
+        "name": "indexpattern-datasource-layer-layer-id-generated-uuid",
+        "type": "index-pattern",
+      },
+    ],
     "query": Object {
       "language": "kql",
       "query": "host.name: *",
@@ -154,15 +173,17 @@ Object {
       "layers": Array [
         Object {
           "accessors": Array [
-            "e09e0380-0740-4105-becc-0a4ca12e3944",
+            "column-count-of-records-id-generated-uuid",
           ],
-          "layerId": "0039eb0c-9a1a-4687-ae54-0f4e239bec75",
+          "layerId": "layer-id-generated-uuid",
           "layerType": "data",
           "position": "top",
           "seriesType": "bar_stacked",
           "showGridlines": false,
-          "splitAccessor": "34919782-4546-43a5-b668-06ac934d3acd",
-          "xAccessor": "aac9d7d0-13a3-480a-892b-08207a787926",
+          "splitAccessors": Array [
+            "column-top-values-id-generated-uuid",
+          ],
+          "xAccessor": "column-timestamp-id-generated-uuid",
         },
       ],
       "legend": Object {
@@ -192,26 +213,56 @@ Object {
 exports[`getAlertsHistogramLensAttributes should render without extra options 1`] = `
 Object {
   "description": "",
-  "references": Array [
-    Object {
-      "id": "security-solution-my-test",
-      "name": "indexpattern-datasource-layer-0039eb0c-9a1a-4687-ae54-0f4e239bec75",
-      "type": "index-pattern",
-    },
-  ],
+  "references": Array [],
   "state": Object {
-    "adHocDataViews": Object {},
+    "adHocDataViews": Object {
+      "security-solution-my-test": Object {
+        "allowHidden": false,
+        "allowNoIndex": false,
+        "fieldAttrs": Object {},
+        "fieldFormats": Object {},
+        "id": "security-solution-my-test",
+        "managed": false,
+        "name": "Default Security Data View",
+        "runtimeFieldMap": Object {},
+        "sourceFilters": Array [],
+        "title": "signal-index",
+      },
+    },
     "datasourceStates": Object {
       "formBased": Object {
         "layers": Object {
-          "0039eb0c-9a1a-4687-ae54-0f4e239bec75": Object {
+          "layer-id-generated-uuid": Object {
             "columnOrder": Array [
-              "34919782-4546-43a5-b668-06ac934d3acd",
-              "aac9d7d0-13a3-480a-892b-08207a787926",
-              "e09e0380-0740-4105-becc-0a4ca12e3944",
+              "column-top-values-id-generated-uuid",
+              "column-timestamp-id-generated-uuid",
+              "column-count-of-records-id-generated-uuid",
             ],
             "columns": Object {
-              "34919782-4546-43a5-b668-06ac934d3acd": Object {
+              "column-count-of-records-id-generated-uuid": Object {
+                "dataType": "number",
+                "isBucketed": false,
+                "label": "Count of records",
+                "operationType": "count",
+                "params": Object {
+                  "emptyAsNull": true,
+                },
+                "scale": "ratio",
+                "sourceField": "___records___",
+              },
+              "column-timestamp-id-generated-uuid": Object {
+                "dataType": "date",
+                "isBucketed": true,
+                "label": "@timestamp",
+                "operationType": "date_histogram",
+                "params": Object {
+                  "includeEmptyRows": true,
+                  "interval": "auto",
+                },
+                "scale": "interval",
+                "sourceField": "@timestamp",
+              },
+              "column-top-values-id-generated-uuid": Object {
                 "dataType": "string",
                 "isBucketed": true,
                 "label": "Top values of event.category",
@@ -219,7 +270,7 @@ Object {
                 "params": Object {
                   "missingBucket": false,
                   "orderBy": Object {
-                    "columnId": "e09e0380-0740-4105-becc-0a4ca12e3944",
+                    "columnId": "column-count-of-records-id-generated-uuid",
                     "type": "column",
                   },
                   "orderDirection": "desc",
@@ -232,29 +283,6 @@ Object {
                 },
                 "scale": "ordinal",
                 "sourceField": "event.category",
-              },
-              "aac9d7d0-13a3-480a-892b-08207a787926": Object {
-                "dataType": "date",
-                "isBucketed": true,
-                "label": "@timestamp",
-                "operationType": "date_histogram",
-                "params": Object {
-                  "includeEmptyRows": true,
-                  "interval": "auto",
-                },
-                "scale": "interval",
-                "sourceField": "@timestamp",
-              },
-              "e09e0380-0740-4105-becc-0a4ca12e3944": Object {
-                "dataType": "number",
-                "isBucketed": false,
-                "label": "Count of records",
-                "operationType": "count",
-                "params": Object {
-                  "emptyAsNull": true,
-                },
-                "scale": "ratio",
-                "sourceField": "___records___",
               },
             },
             "incompleteColumns": Object {},
@@ -271,6 +299,7 @@ Object {
           "negate": false,
           "params": Array [
             "signal-index",
+            "*:signal-index",
           ],
           "type": "phrases",
         },
@@ -281,6 +310,11 @@ Object {
               Object {
                 "match_phrase": Object {
                   "_index": "signal-index",
+                },
+              },
+              Object {
+                "match_phrase": Object {
+                  "_index": "*:signal-index",
                 },
               },
             ],
@@ -305,7 +339,13 @@ Object {
         },
       },
     ],
-    "internalReferences": Array [],
+    "internalReferences": Array [
+      Object {
+        "id": "security-solution-my-test",
+        "name": "indexpattern-datasource-layer-layer-id-generated-uuid",
+        "type": "index-pattern",
+      },
+    ],
     "query": Object {
       "language": "kql",
       "query": "host.name: *",
@@ -319,15 +359,17 @@ Object {
       "layers": Array [
         Object {
           "accessors": Array [
-            "e09e0380-0740-4105-becc-0a4ca12e3944",
+            "column-count-of-records-id-generated-uuid",
           ],
-          "layerId": "0039eb0c-9a1a-4687-ae54-0f4e239bec75",
+          "layerId": "layer-id-generated-uuid",
           "layerType": "data",
           "position": "top",
           "seriesType": "bar_stacked",
           "showGridlines": false,
-          "splitAccessor": "34919782-4546-43a5-b668-06ac934d3acd",
-          "xAccessor": "aac9d7d0-13a3-480a-892b-08207a787926",
+          "splitAccessors": Array [
+            "column-top-values-id-generated-uuid",
+          ],
+          "xAccessor": "column-timestamp-id-generated-uuid",
         },
       ],
       "legend": Object {

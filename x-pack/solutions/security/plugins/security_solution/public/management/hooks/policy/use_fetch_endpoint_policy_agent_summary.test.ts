@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useQuery as _useQuery } from '@tanstack/react-query';
+import { useQuery as _useQuery } from '@kbn/react-query';
 import type { AppContextTestRender, ReactQueryHookRenderer } from '../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
 import type { PolicyData } from '../../../../common/endpoint/types';
@@ -17,8 +17,8 @@ import { agentRouteService, API_VERSIONS } from '@kbn/fleet-plugin/common';
 
 const useQueryMock = _useQuery as jest.Mock;
 
-jest.mock('@tanstack/react-query', () => {
-  const actualReactQueryModule = jest.requireActual('@tanstack/react-query');
+jest.mock('@kbn/react-query', () => {
+  const actualReactQueryModule = jest.requireActual('@kbn/react-query');
 
   return {
     ...actualReactQueryModule,
@@ -90,7 +90,12 @@ describe('When using the `useFetchEndpointPolicyAgentSummary()` hook', () => {
 
     expect(apiMocks.responseProvider.agentStatus).toHaveBeenCalledWith({
       path: agentRouteService.getStatusPath(),
-      query: { kuery: 'policy_id:1 OR policy_id:2 OR policy_id:3' },
+      // by the base policy id, which the agents on a version specific or the sentinel policy have, with
+      // the exact policy id for the agents that do not have it
+      query: {
+        kuery:
+          '(policy_base_id:(1 or 2 or 3) or (policy_id:(1 or 2 or 3) and not policy_base_id:*))',
+      },
       version: API_VERSIONS.public.v1,
     });
   });

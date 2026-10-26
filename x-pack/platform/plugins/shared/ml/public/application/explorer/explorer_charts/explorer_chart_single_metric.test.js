@@ -8,9 +8,11 @@
 import { chartData as mockChartData } from './__mocks__/mock_chart_data';
 import seriesConfig from './__mocks__/mock_series_config_filebeat.json';
 
-import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import React from 'react';
+import { render } from '@testing-library/react';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { EuiThemeProvider } from '@elastic/eui';
 
 import { ExplorerChartSingleMetric } from './explorer_chart_single_metric';
 import { timeBucketsMock } from '../../util/__mocks__/time_buckets';
@@ -22,6 +24,11 @@ const utilityProps = {
   chartTheme: kibanaContextMock.services.charts.theme.useChartsBaseTheme(),
   onPointerUpdate: jest.fn(),
   cursor$: new BehaviorSubject({ isDataHistorgram: true, cursor: { x: 10432423 } }),
+  euiTheme: {
+    colors: {
+      lightestShade: '#F5F7FA',
+    },
+  },
 };
 
 describe('ExplorerChart', () => {
@@ -44,22 +51,26 @@ describe('ExplorerChart', () => {
       hide: jest.fn(),
     };
 
-    const wrapper = mountWithIntl(
-      <KibanaContextProvider services={kibanaContextMock.services}>
-        <ExplorerChartSingleMetric
-          mlSelectSeverityService={mlSelectSeverityServiceMock}
-          tooltipService={mockTooltipService}
-          severity={0}
-          {...utilityProps}
-        />
-      </KibanaContextProvider>
+    const { container } = render(
+      <IntlProvider>
+        <EuiThemeProvider>
+          <KibanaContextProvider services={kibanaContextMock.services}>
+            <ExplorerChartSingleMetric
+              mlSelectSeverityService={mlSelectSeverityServiceMock}
+              tooltipService={mockTooltipService}
+              severity={[{ min: 0, max: 100 }]}
+              {...utilityProps}
+            />
+          </KibanaContextProvider>
+        </EuiThemeProvider>
+      </IntlProvider>
     );
 
     // without setting any attributes and corresponding data
     // the directive just ends up being empty.
-    expect(wrapper.isEmptyRender()).toBeTruthy();
-    expect(wrapper.find('.content-wrapper')).toHaveLength(0);
-    expect(wrapper.find('.euiLoadingChart')).toHaveLength(0);
+    expect(container.firstChild).toBeNull();
+    expect(container.querySelector('.content-wrapper')).toBeNull();
+    expect(container.querySelector('.euiLoadingChart')).toBeNull();
   });
 
   test('Loading status active, no chart', () => {
@@ -72,21 +83,25 @@ describe('ExplorerChart', () => {
       hide: jest.fn(),
     };
 
-    const wrapper = mountWithIntl(
-      <KibanaContextProvider services={kibanaContextMock.services}>
-        <ExplorerChartSingleMetric
-          seriesConfig={config}
-          mlSelectSeverityService={mlSelectSeverityServiceMock}
-          tooltipService={mockTooltipService}
-          severity={0}
-          {...utilityProps}
-        />
-      </KibanaContextProvider>
+    const { container } = render(
+      <IntlProvider>
+        <EuiThemeProvider>
+          <KibanaContextProvider services={kibanaContextMock.services}>
+            <ExplorerChartSingleMetric
+              seriesConfig={config}
+              mlSelectSeverityService={mlSelectSeverityServiceMock}
+              tooltipService={mockTooltipService}
+              severity={[{ min: 0, max: 100 }]}
+              {...utilityProps}
+            />
+          </KibanaContextProvider>
+        </EuiThemeProvider>
+      </IntlProvider>
     );
 
     // test if the loading indicator is shown
     // Added span because class appears twice with classNames and Emotion
-    expect(wrapper.find('span.euiLoadingChart')).toHaveLength(1);
+    expect(container.querySelector('span.euiLoadingChart')).toBeInTheDocument();
   });
 
   // For the following tests the directive needs to be rendered in the actual DOM,
@@ -108,30 +123,34 @@ describe('ExplorerChart', () => {
     };
 
     // We create the element including a wrapper which sets the width:
-    return mountWithIntl(
-      <KibanaContextProvider services={kibanaContextMock.services}>
-        <div style={{ width: '500px' }}>
-          <ExplorerChartSingleMetric
-            seriesConfig={config}
-            mlSelectSeverityService={mlSelectSeverityServiceMock}
-            tooltipService={mockTooltipService}
-            severity={0}
-            {...utilityProps}
-          />
-        </div>
-      </KibanaContextProvider>
+    return render(
+      <IntlProvider>
+        <EuiThemeProvider>
+          <KibanaContextProvider services={kibanaContextMock.services}>
+            <div style={{ width: '500px' }}>
+              <ExplorerChartSingleMetric
+                seriesConfig={config}
+                mlSelectSeverityService={mlSelectSeverityServiceMock}
+                tooltipService={mockTooltipService}
+                severity={[{ min: 0, max: 100 }]}
+                {...utilityProps}
+              />
+            </div>
+          </KibanaContextProvider>
+        </EuiThemeProvider>
+      </IntlProvider>
     );
   }
 
   it('Anomaly Explorer Chart with multiple data points', () => {
-    const wrapper = init(mockChartData);
+    const { container } = init(mockChartData);
 
     // the loading indicator should not be shown
-    expect(wrapper.find('.euiLoadingChart')).toHaveLength(0);
+    expect(container.querySelector('.euiLoadingChart')).toBeNull();
 
     // test if all expected elements are present
-    // need to use getDOMNode() because the chart is not rendered via react itself
-    const svg = wrapper.getDOMNode().getElementsByTagName('svg');
+    // chart is not rendered via react itself, so we need to query the DOM directly
+    const svg = container.getElementsByTagName('svg');
     expect(svg).toHaveLength(1);
 
     const lineChart = svg[0].getElementsByClassName('line-chart');
@@ -150,12 +169,12 @@ describe('ExplorerChart', () => {
     expect(+selectedInterval.getAttribute('y')).toBe(2);
     expect(+selectedInterval.getAttribute('height')).toBe(166);
 
-    const xAxisTicks = wrapper.getDOMNode().querySelector('.x').querySelectorAll('.tick');
+    const xAxisTicks = container.querySelector('.x').querySelectorAll('.tick');
     expect([...xAxisTicks]).toHaveLength(8);
-    const yAxisTicks = wrapper.getDOMNode().querySelector('.y').querySelectorAll('.tick');
+    const yAxisTicks = container.querySelector('.y').querySelectorAll('.tick');
     expect([...yAxisTicks]).toHaveLength(10);
 
-    const paths = wrapper.getDOMNode().querySelectorAll('path');
+    const paths = container.querySelectorAll('path');
     expect(paths[0].getAttribute('class')).toBe('domain');
     expect(paths[1].getAttribute('class')).toBe('domain');
     expect(paths[2].getAttribute('class')).toBe('values-line');
@@ -163,14 +182,11 @@ describe('ExplorerChart', () => {
       'M-19.090909090909093,159.33024504444444ZM-20,9.166257955555556L-20.22727272727273,169.60736875555557'
     );
 
-    const dots = wrapper.getDOMNode().querySelector('.values-dots').querySelectorAll('circle');
+    const dots = container.querySelector('.values-dots').querySelectorAll('circle');
     expect([...dots]).toHaveLength(1);
     expect(dots[0].getAttribute('r')).toBe('1.5');
 
-    const chartMarkers = wrapper
-      .getDOMNode()
-      .querySelector('.chart-markers')
-      .querySelectorAll('circle');
+    const chartMarkers = container.querySelector('.chart-markers').querySelectorAll('circle');
     expect([...chartMarkers]).toHaveLength(4);
     expect([...chartMarkers].map((d) => +d.getAttribute('r'))).toEqual([7, 7, 7, 7]);
   });
@@ -188,9 +204,9 @@ describe('ExplorerChart', () => {
       },
     ];
 
-    const wrapper = init(chartData);
+    const { container } = init(chartData);
 
-    const yAxisTicks = wrapper.getDOMNode().querySelector('.y').querySelectorAll('.tick');
+    const yAxisTicks = container.querySelector('.y').querySelectorAll('.tick');
     expect([...yAxisTicks]).toHaveLength(13);
   });
 });

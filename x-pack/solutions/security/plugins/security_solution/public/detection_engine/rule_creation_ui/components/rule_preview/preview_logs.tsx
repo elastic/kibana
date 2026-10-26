@@ -143,6 +143,7 @@ export const CalloutGroup: React.FC<{
       {logs.map((log, i) => (
         <Fragment key={i}>
           <EuiCallOut
+            announceOnMount
             color={isError ? 'danger' : 'warning'}
             iconType="warning"
             data-test-subj={isError ? 'preview-error' : 'preview-warning'}

@@ -11,7 +11,7 @@ import { getESAssetMetadata } from '../services/epm/elasticsearch/meta';
 
 const meta = getESAssetMetadata();
 
-export const FLEET_INSTALL_FORMAT_VERSION = '1.4.1';
+export const FLEET_INSTALL_FORMAT_VERSION = '1.5.0';
 
 export const FLEET_AGENT_POLICIES_SCHEMA_VERSION = '1.1.1';
 
@@ -117,6 +117,8 @@ export const STACK_COMPONENT_TEMPLATE_LOGS_MAPPINGS = `logs@mappings`;
 export const STACK_COMPONENT_TEMPLATE_METRICS_SETTINGS = `metrics@settings`;
 export const STACK_COMPONENT_TEMPLATE_METRICS_TSDB_SETTINGS = `metrics@tsdb-settings`;
 export const STACK_COMPONENT_TEMPLATE_ECS_MAPPINGS = 'ecs@mappings';
+export const STACK_COMPONENT_TEMPLATE_TRACES_SETTINGS = `traces@settings`;
+export const STACK_COMPONENT_TEMPLATE_TRACES_MAPPINGS = `traces@mappings`;
 
 export const STACK_COMPONENT_TEMPLATES = [
   STACK_COMPONENT_TEMPLATE_LOGS_MAPPINGS,
@@ -124,6 +126,48 @@ export const STACK_COMPONENT_TEMPLATES = [
   STACK_COMPONENT_TEMPLATE_METRICS_SETTINGS,
   STACK_COMPONENT_TEMPLATE_METRICS_TSDB_SETTINGS,
   STACK_COMPONENT_TEMPLATE_ECS_MAPPINGS,
+];
+
+export const OTEL_COMPONENT_TEMPLATE_MAPPINGS = 'otel@mappings';
+export const OTEL_COMPONENT_TEMPLATE_SETTINGS = 'otel@settings';
+
+export const OTEL_COMPONENT_TEMPLATE_METRICS_MAPPINGS = 'metrics-otel@mappings';
+export const OTEL_COMPONENT_TEMPLATE_METRICS_CUSTOM_MAPPINGS = 'metrics-otel@custom';
+export const OTEL_COMPONENT_TEMPLATE_LOGS_MAPPINGS = 'logs-otel@mappings';
+export const OTEL_COMPONENT_TEMPLATE_LOGS_CUSTOM_MAPPINGS = 'logs-otel@custom';
+export const OTEL_COMPONENT_TEMPLATE_TRACES_MAPPINGS = 'traces-otel@mappings';
+export const OTEL_COMPONENT_TEMPLATE_TRACES_CUSTOM_MAPPINGS = 'traces-otel@custom';
+export const OTEL_COMPONENT_SEMCONV_RESOURCE_TO_ECS_MAPPINGS = 'semconv-resource-to-ecs@mappings';
+
+export const OTEL_METRICS_COMPONENT_TEMPLATES = [
+  OTEL_COMPONENT_TEMPLATE_MAPPINGS,
+  OTEL_COMPONENT_TEMPLATE_SETTINGS,
+  OTEL_COMPONENT_TEMPLATE_METRICS_MAPPINGS,
+  OTEL_COMPONENT_SEMCONV_RESOURCE_TO_ECS_MAPPINGS,
+];
+
+export const OTEL_LOGS_COMPONENT_TEMPLATES = [
+  OTEL_COMPONENT_TEMPLATE_MAPPINGS,
+  OTEL_COMPONENT_TEMPLATE_SETTINGS,
+  OTEL_COMPONENT_TEMPLATE_LOGS_MAPPINGS,
+  OTEL_COMPONENT_SEMCONV_RESOURCE_TO_ECS_MAPPINGS,
+];
+export const OTEL_TRACES_COMPONENT_TEMPLATES = [
+  OTEL_COMPONENT_TEMPLATE_MAPPINGS,
+  OTEL_COMPONENT_TEMPLATE_SETTINGS,
+  OTEL_COMPONENT_SEMCONV_RESOURCE_TO_ECS_MAPPINGS,
+  OTEL_COMPONENT_TEMPLATE_TRACES_MAPPINGS,
+];
+
+export const OTEL_COMPONENT_TEMPLATES = [
+  OTEL_COMPONENT_TEMPLATE_MAPPINGS,
+  OTEL_COMPONENT_TEMPLATE_SETTINGS,
+  OTEL_COMPONENT_SEMCONV_RESOURCE_TO_ECS_MAPPINGS,
+  OTEL_COMPONENT_TEMPLATE_METRICS_MAPPINGS,
+  OTEL_COMPONENT_TEMPLATE_LOGS_MAPPINGS,
+  OTEL_COMPONENT_TEMPLATE_TRACES_MAPPINGS,
+  STACK_COMPONENT_TEMPLATE_TRACES_MAPPINGS,
+  STACK_COMPONENT_TEMPLATE_TRACES_SETTINGS,
 ];
 
 export const FLEET_EVENT_INGESTED_PIPELINE_VERSION = 1;
@@ -179,7 +223,7 @@ on_failure:
       value:
         - 'failed in Fleet agent event_ingested_pipeline: {{ _ingest.on_failure_message }}'`;
 
-export const FLEET_FINAL_PIPELINE_VERSION = 4;
+export const FLEET_FINAL_PIPELINE_VERSION = 5;
 
 // If the content is updated you probably need to update the FLEET_FINAL_PIPELINE_VERSION too to allow upgrade of the pipeline
 export const FLEET_FINAL_PIPELINE_CONTENT = `---
@@ -255,6 +299,15 @@ processors:
             return "missing";
           }
 
+          // Some datasets are written by Kibana rather than agents.
+          // Kibana is trusted to accurately report agent.id for these datasets.
+          if (ctx?._security?.authentication_type != null
+              && params?.kibana_user_allowed_datasets != null
+              && params.kibana_user_allowed_datasets.contains(ctx?.data_stream?.dataset)
+              && is_user_trusted(ctx, params.kibana_trusted_users)) {
+            return "verified";
+          }
+
           // Check auth metadata from API key.
           if (ctx?._security?.authentication_type == null
               // Agents only use API keys.
@@ -289,6 +342,14 @@ processors:
             realm: found
           - username: elastic
             realm: reserved
+        kibana_trusted_users:
+          - username: elastic/kibana
+            realm: _service_account
+          - username: kibana_system
+            realm: reserved
+        # Datasets written by Kibana (elastic/kibana user) that are allowed to bypass API key verification.
+        kibana_user_allowed_datasets:
+          - elastic_agent.status_change
   - remove:
       field: _security
       ignore_missing: true

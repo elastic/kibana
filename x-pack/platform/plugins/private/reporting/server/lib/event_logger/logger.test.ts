@@ -6,11 +6,12 @@
  */
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
+import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import type { BasePayload } from '@kbn/reporting-common/types';
 
 import { Report } from '../store';
-import { ReportingEventLogger, reportingEventLoggerFactory } from './logger';
+import type { ReportingEventLogger } from './logger';
+import { reportingEventLoggerFactory } from './logger';
 
 describe('Event Logger', () => {
   const mockReport = new Report({
@@ -107,8 +108,8 @@ describe('Event Logger', () => {
       ]
     `);
     expect(result.message).toMatchInlineSnapshot(`"starting csv execution"`);
-    expect(logger.completionLogger.startTiming).toBeCalled();
-    expect(logger.completionLogger.stopTiming).not.toBeCalled();
+    expect(logger.completionLogger.startTiming).toHaveBeenCalled();
+    expect(logger.completionLogger.stopTiming).not.toHaveBeenCalled();
   });
 
   it(`logExecutionComplete`, () => {
@@ -147,8 +148,8 @@ describe('Event Logger', () => {
       ]
     `);
     expect(result.message).toMatchInlineSnapshot(`"completed csv execution"`);
-    expect(logger.completionLogger.startTiming).toBeCalled();
-    expect(logger.completionLogger.stopTiming).toBeCalled();
+    expect(logger.completionLogger.startTiming).toHaveBeenCalled();
+    expect(logger.completionLogger.stopTiming).toHaveBeenCalled();
   });
 
   it(`logError`, () => {

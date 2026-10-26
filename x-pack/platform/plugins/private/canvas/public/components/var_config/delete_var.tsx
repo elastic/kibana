@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 import {
   EuiIcon,
   EuiFlexGroup,
@@ -17,7 +18,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { CanvasVariable } from '../../../types';
+import type { CanvasVariable } from '../../../types';
 
 const strings = {
   getCancelButtonLabel: () =>
@@ -51,7 +52,7 @@ export const DeleteVar: FC<Props> = ({ selectedVar, onCancel, onDelete }) => {
       <div className="canvasVarHeader__triggerWrapper">
         <button className="canvasVarHeader__button" type="button" onClick={() => onCancel()}>
           <span className="canvasVarHeader__iconWrapper">
-            <EuiIcon type="sortLeft" style={{ verticalAlign: 'top' }} />
+            <EuiIcon type="sortLeft" style={{ verticalAlign: 'top' }} aria-hidden={true} />
           </span>
           <span>
             <span className="canvasVarHeader__anchor">{strings.getTitle()}</span>

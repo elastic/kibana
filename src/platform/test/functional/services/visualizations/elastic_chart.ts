@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DebugState } from '@elastic/charts';
+import type { DebugState } from '@elastic/charts';
 
 import expect from '@kbn/expect';
-import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
+import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrService } from '../../ftr_provider_context';
 
 declare global {
@@ -65,9 +65,13 @@ export class ElasticChartService extends FtrService {
     });
   }
 
+  /**
+   * Checks immediately for a named chart; `timeout` only applies to the unnamed lookup. To wait
+   * for a chart to render, use `getChart`.
+   */
   public async hasChart(dataTestSubj?: string, timeout?: number): Promise<boolean> {
     if (dataTestSubj) {
-      return await this.testSubjects.exists(dataTestSubj, { timeout });
+      return await this.testSubjects.exists(dataTestSubj);
     } else {
       const charts = await this.getAllCharts(timeout);
 
@@ -81,7 +85,7 @@ export class ElasticChartService extends FtrService {
     match: number = 0
   ): Promise<WebElementWrapper> {
     if (dataTestSubj) {
-      if (!(await this.testSubjects.exists(dataTestSubj, { timeout }))) {
+      if (!(await this.testSubjects.waitForExists(dataTestSubj, { timeout }))) {
         throw Error(`Failed to find an elastic-chart with testSubject '${dataTestSubj}'`);
       }
 

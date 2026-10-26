@@ -24,11 +24,11 @@ import {
   EuiBadge,
 } from '@elastic/eui';
 
-import { EuiContainedStepProps } from '@elastic/eui/src/components/steps/steps';
+import type { EuiContainedStepProps } from '@elastic/eui/src/components/steps/steps';
 
 import { i18n } from '@kbn/i18n';
 
-import { AnalyticsCollection } from '../../../../../../common/types/analytics';
+import type { AnalyticsCollection } from '../../../../../../common/types/analytics';
 import { useCloudDetails } from '../../../../shared/cloud_details/cloud_details';
 import { docLinks } from '../../../../shared/doc_links';
 
@@ -154,7 +154,7 @@ const apiKeyStep = (
           <EuiButton
             data-test-subj="enterpriseSearchApiKeyStepCreateApiKeyButton"
             iconSide="left"
-            iconType="plusInCircleFilled"
+            iconType="plusCircle"
             onClick={openApiKeyModal}
             data-telemetry-id="entSearchContent-analytics-apiKey-createApiKeyButton"
           >
@@ -170,7 +170,7 @@ const apiKeyStep = (
           <EuiButton
             data-test-subj="enterpriseSearchApiKeyStepViewKeysButton"
             iconSide="left"
-            iconType="popout"
+            iconType="external"
             data-telemetry-id="entSearchContent-analytics-apiKey-viewKeysButton"
             onClick={() =>
               navigateToUrl('/app/management/security/api_keys', {

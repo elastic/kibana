@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { Connector } from '@kbn/search-connectors';
+import type { Connector } from '@kbn/search-connectors';
 
 import { createApiLogic } from '../../../shared/api_logic/create_api_logic';
 import { HttpLogic } from '../../../shared/http';
@@ -25,7 +25,9 @@ export const putConnectorNameAndDescription = async ({
   description = null,
   name = '',
 }: PutConnectorNameAndDescriptionArgs) => {
-  const route = `/internal/enterprise_search/connectors/${connectorId}/name_and_description`;
+  const route = `/internal/enterprise_search/connectors/${encodeURIComponent(
+    connectorId
+  )}/name_and_description`;
 
   await HttpLogic.values.http.put(route, {
     body: JSON.stringify({ description, name }),

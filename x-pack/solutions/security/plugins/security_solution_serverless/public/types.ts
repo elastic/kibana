@@ -5,17 +5,19 @@
  * 2.0.
  */
 
+import type { AlertZeroPublicStart } from '@kbn/alertzero-plugin/public';
 import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
 import type {
   PluginSetup as SecuritySolutionPluginSetup,
   PluginStart as SecuritySolutionPluginStart,
 } from '@kbn/security-solution-plugin/public';
 import type { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverless/public';
+import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import type { ManagementSetup, ManagementStart } from '@kbn/management-plugin/public';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
 import type { DiscoverSetup } from '@kbn/discover-plugin/public';
 import type { AutomaticImportPluginStart } from '@kbn/automatic-import-plugin/public';
-import type { ServerlessSecurityConfigSchema } from '../common/config';
+import type { WorkflowsPublicPluginStart } from '@kbn/workflows-management-plugin/public';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SecuritySolutionServerlessPluginSetup {}
@@ -35,12 +37,10 @@ export interface SecuritySolutionServerlessPluginStartDeps {
   security: SecurityPluginStart;
   securitySolution: SecuritySolutionPluginStart;
   serverless: ServerlessPluginStart;
+  navigation: NavigationPublicPluginStart;
   management: ManagementStart;
   cloud: CloudStart;
   automaticImport?: AutomaticImportPluginStart;
+  workflowsManagement?: WorkflowsPublicPluginStart;
+  alertzero?: AlertZeroPublicStart;
 }
-
-export type ServerlessSecurityPublicConfig = Pick<
-  ServerlessSecurityConfigSchema,
-  'productTypes' | 'enableExperimental'
->;

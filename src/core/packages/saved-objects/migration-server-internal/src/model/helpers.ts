@@ -13,15 +13,16 @@ import type {
   QueryDslBoolQuery,
   QueryDslQueryContainer,
 } from '@elastic/elasticsearch/lib/api/types';
-import * as Either from 'fp-ts/lib/Either';
+import * as Either from 'fp-ts/Either';
 import type { SavedObjectsRawDoc } from '@kbn/core-saved-objects-server';
 import type { IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
 import type { AliasAction, FetchIndexResponse } from '../actions';
 import type { BulkIndexOperationTuple } from './create_batches';
-import type { BaseState, OutdatedDocumentsSearchRead, ReindexSourceToTempRead } from '../state';
-
-/** @internal */
-export const REINDEX_TEMP_SUFFIX = '_reindex_temp';
+import type {
+  CleanupUnknownAndExcluded,
+  CleanupUnknownAndExcludedWaitForTaskState,
+  OutdatedDocumentsSearchRead,
+} from '../state';
 
 /** @internal */
 export type Aliases = Partial<Record<string, string>>;
@@ -42,6 +43,32 @@ export function throwBadResponse(state: { controlState: string }, res: unknown):
   throw new Error(
     `${state.controlState} received unexpected action response: ` + JSON.stringify(res)
   );
+}
+
+/**
+ * A helper function used by CLEANUP_UNKNOWN_AND_EXCLUDED and CLEANUP_UNKNOWN_AND_EXCLUDED_WAIT_FOR_TASK
+ * to pass some needed properties to PREPARE_COMPATIBLE_MIGRATION
+ */
+export function getPrepareCompatibleMigrationStateProperties(
+  state: CleanupUnknownAndExcluded | CleanupUnknownAndExcludedWaitForTaskState
+) {
+  const source = state.sourceIndex.value;
+  return {
+    targetIndexMappings: mergeMappingMeta(
+      state.targetIndexMappings,
+      state.sourceIndexMappings.value
+    ),
+    preTransformDocsActions: [
+      // Point the version alias to the source index. This let's other Kibana
+      // instances know that a migration for the current version is "done"
+      // even though we may be waiting for document transformations to finish.
+      { add: { index: source!, alias: state.versionAlias } },
+      ...buildRemoveAliasActions(source!, Object.keys(state.aliases), [
+        state.currentAlias,
+        state.versionAlias,
+      ]),
+    ],
+  };
 }
 
 /**
@@ -247,21 +274,17 @@ export function buildRemoveAliasActions(
 /**
  * Given a document, creates a valid body to index the document using the Bulk API.
  */
-export const createBulkIndexOperationTuple = (
-  doc: SavedObjectsRawDoc,
-  typeIndexMap: Record<string, string> = {}
-): BulkIndexOperationTuple => {
+export const createBulkIndexOperationTuple = (doc: SavedObjectsRawDoc): BulkIndexOperationTuple => {
+  const idChanged = doc._source.originId && doc._source.originId !== doc._id;
   return [
     {
       index: {
         _id: doc._id,
-        ...(typeIndexMap[doc._source.type] && {
-          _index: typeIndexMap[doc._source.type],
-        }),
         // use optimistic concurrency control to ensure that outdated
         // documents are only overwritten once with the latest version
-        ...(typeof doc._seq_no !== 'undefined' && { if_seq_no: doc._seq_no }),
-        ...(typeof doc._primary_term !== 'undefined' && { if_primary_term: doc._primary_term }),
+        ...(typeof doc._seq_no !== 'undefined' && !idChanged && { if_seq_no: doc._seq_no }),
+        ...(typeof doc._primary_term !== 'undefined' &&
+          !idChanged && { if_primary_term: doc._primary_term }),
       },
     },
     doc._source,
@@ -307,23 +330,8 @@ export function getMigrationType({
   return MigrationType.Invalid;
 }
 
-/**
- * Generate a temporary index name, to reindex documents into it
- * @param index The name of the SO index
- * @param kibanaVersion The current kibana version
- * @returns A temporary index name to reindex documents
- */
-export const getTempIndexName = (indexPrefix: string, kibanaVersion: string): string =>
-  `${indexPrefix}_${kibanaVersion}${REINDEX_TEMP_SUFFIX}`;
-
 /** Increase batchSize by 20% until a maximum of maxBatchSize */
-export const increaseBatchSize = (
-  stateP: OutdatedDocumentsSearchRead | ReindexSourceToTempRead
-) => {
+export const increaseBatchSize = (stateP: OutdatedDocumentsSearchRead) => {
   const increasedBatchSize = Math.floor(stateP.batchSize * 1.2);
   return increasedBatchSize > stateP.maxBatchSize ? stateP.maxBatchSize : increasedBatchSize;
-};
-
-export const getIndexTypes = (state: BaseState): string[] => {
-  return state.indexTypesMap[state.indexPrefix];
 };

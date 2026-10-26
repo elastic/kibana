@@ -1,0 +1,261 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React, { memo, useCallback, useMemo, useRef, useState } from 'react';
+import { Handle, Position } from '@xyflow/react';
+import { css } from '@emotion/react';
+import {
+  EuiButtonIcon,
+  EuiText,
+  EuiTextTruncate,
+  EuiToolTip,
+  transparentize,
+  useEuiShadow,
+  useEuiTheme,
+} from '@elastic/eui';
+import {
+  LabelNodeContainer,
+  LabelShape,
+  LabelStackedShape,
+  HandleStyleOverride,
+  NodeButton,
+  ACTUAL_LABEL_HEIGHT,
+  NODE_LABEL_WIDTH,
+  LABEL_BORDER_RADIUS,
+  getLabelColors,
+} from '../styles';
+import type { LabelNodeViewModel, NodeProps, NodeToolbarItem } from '../../types';
+import { NodeExpandButton } from '../node_expand_button';
+import { useGraphDisplayOptions } from '../../graph/graph_display_options_context';
+import { GRAPH_LABEL_NODE_ID } from '../../test_ids';
+import { analyzeDocuments } from './analyze_documents';
+import { LabelNodeBadges } from './label_node_badges';
+import { LabelNodeDetails } from './label_node_details';
+import { showStackedShape } from '../../utils';
+
+export const TEST_SUBJ_SHAPE = 'label-node-shape';
+export const TEST_SUBJ_STACKED_SHAPE = 'label-node-stacked-shape';
+export const TEST_SUBJ_HANDLE = 'label-node-handle';
+export const TEST_SUBJ_EXPAND_BTN = 'label-node-expand-btn';
+export const TEST_SUBJ_LABEL_TEXT = 'label-node-text';
+export const TEST_SUBJ_ORIGIN_HIGHLIGHT = 'label-node-origin-highlight';
+
+export const LabelNode = memo<NodeProps>((props: NodeProps) => {
+  const {
+    id,
+    color,
+    uniqueEventsCount,
+    uniqueAlertsCount,
+    label,
+    interactive,
+    ips,
+    countryCodes,
+    nodeClick,
+    expandButtonClick,
+    toolbarItemsFn,
+    ipClickHandler,
+    countryClickHandler,
+    eventClickHandler,
+    isOrigin,
+    isOriginAlert,
+  } = props.data as LabelNodeViewModel;
+
+  const { euiTheme } = useEuiTheme();
+  const shadow = useEuiShadow('m', { property: 'filter' });
+  const { event: eventDisplayOpts, highlightOrigin } = useGraphDisplayOptions();
+  const showOriginHighlight = highlightOrigin && Boolean(isOrigin || isOriginAlert);
+
+  const text = label ? label : id;
+
+  const { backgroundColor, borderColor, textColor } = useMemo(
+    () => getLabelColors(color, euiTheme),
+    [color, euiTheme]
+  );
+
+  const numEvents = uniqueEventsCount ?? 0;
+  const numAlerts = uniqueAlertsCount ?? 0;
+
+  const analysis = analyzeDocuments({ uniqueEventsCount: numEvents, uniqueAlertsCount: numAlerts });
+
+  // Hover state for the floating NodeToolbar — generous delay so the mouse
+  // can travel from the label card into the toolbar without it dismissing.
+  const [isHovered, setIsHovered] = useState(false);
+  const hideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const showToolbar = useCallback(() => {
+    if (hideTimerRef.current) {
+      clearTimeout(hideTimerRef.current);
+      hideTimerRef.current = null;
+    }
+    setIsHovered(true);
+  }, []);
+  const hideToolbar = useCallback(() => {
+    hideTimerRef.current = setTimeout(() => setIsHovered(false), 300);
+  }, []);
+
+  // No useMemo: toolbarItemsFn reads filter-active state imperatively at call time.
+  // The node only re-renders (and this runs) when nodes = useMemo in GraphInvestigation
+  // recomputes — on graph-data or filter changes via the searchFilters dep.
+  const toolbarItems: NodeToolbarItem[] = toolbarItemsFn ? toolbarItemsFn(props) : [];
+
+  return (
+    <>
+      <LabelNodeContainer
+        data-test-subj={GRAPH_LABEL_NODE_ID}
+        onMouseEnter={showToolbar}
+        onMouseLeave={hideToolbar}
+      >
+        {/* Floating action toolbar — always in DOM when toolbar items exist so FTR
+            tests can find buttons by data-test-subj without relying on hover state.
+            Opacity controls visual show/hide; WebDriver ignores opacity for
+            interactability checks so FTR can always click the buttons. */}
+        {interactive && toolbarItems.length > 0 && (
+          <div
+            onMouseEnter={showToolbar}
+            onMouseLeave={hideToolbar}
+            css={css`
+              display: flex;
+              align-items: center;
+              gap: 2px;
+              position: absolute;
+              bottom: calc(100% + 4px);
+              left: 50%;
+              transform: translateX(-50%);
+              z-index: ${euiTheme.levels.content};
+              opacity: ${isHovered ? 1 : 0};
+              pointer-events: ${isHovered ? 'auto' : 'none'};
+              transition: opacity 150ms ease;
+            `}
+          >
+            {toolbarItems.map((item, idx) => (
+              <EuiToolTip key={idx} content={item.label} disableScreenReaderOutput>
+                <EuiButtonIcon
+                  data-test-subj={item.testSubject}
+                  iconType={item.iconType}
+                  iconSize="m"
+                  color="text"
+                  size="s"
+                  aria-label={item.label}
+                  disabled={item.disabled}
+                  onClick={item.onClick}
+                />
+              </EuiToolTip>
+            ))}
+          </div>
+        )}
+        <LabelShape
+          data-test-subj={TEST_SUBJ_SHAPE}
+          backgroundColor={backgroundColor}
+          borderColor={borderColor}
+          textAlign="center"
+          shadow={shadow}
+        >
+          <div
+            css={css`
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              width: 100%;
+              gap: 4px;
+            `}
+          >
+            <LabelNodeBadges analysis={analysis} onEventClick={eventClickHandler} />
+            <EuiText
+              color={textColor}
+              css={css`
+                flex: 1;
+                min-width: 0;
+                text-overflow: ellipsis;
+                font-weight: ${euiTheme.font.weight.semiBold};
+                font-size: ${euiTheme.font.scale.xs * 10.5}px;
+                text-align: center;
+              `}
+            >
+              <EuiTextTruncate
+                data-test-subj={TEST_SUBJ_LABEL_TEXT}
+                truncation="middle"
+                text={text}
+              />
+            </EuiText>
+          </div>
+        </LabelShape>
+        {showOriginHighlight && (
+          <div
+            aria-hidden="true"
+            data-test-subj={TEST_SUBJ_ORIGIN_HIGHLIGHT}
+            css={css`
+              position: absolute;
+              inset: -${euiTheme.size.s};
+              border-radius: ${LABEL_BORDER_RADIUS}px;
+              border: ${euiTheme.border.width.thin} solid ${euiTheme.colors.primary};
+              pointer-events: none;
+            `}
+          />
+        )}
+        {showStackedShape(numEvents + numAlerts) && (
+          <LabelStackedShape
+            data-test-subj={TEST_SUBJ_STACKED_SHAPE}
+            backgroundColor={backgroundColor}
+            borderColor={transparentize(borderColor, 0.5)}
+          />
+        )}
+        {interactive && (
+          <>
+            <NodeButton
+              css={css`
+                margin-top: -${ACTUAL_LABEL_HEIGHT}px;
+                pointer-events: none;
+              `}
+              height={ACTUAL_LABEL_HEIGHT}
+              width={NODE_LABEL_WIDTH}
+              onClick={(e) => nodeClick?.(e, props)}
+            />
+            {/* Expand button — hidden visually when the NodeToolbar is wired, but always
+                 present in the DOM so that tests can click it to open the popover. */}
+            {/* Hidden when the NodeToolbar is shown; FTR tests use the toolbar items directly. */}
+            {toolbarItems.length === 0 && (
+              <NodeExpandButton
+                data-test-subj={TEST_SUBJ_EXPAND_BTN}
+                color={'primary'}
+                onClick={(e, unToggleCallback) => expandButtonClick?.(e, props, unToggleCallback)}
+                x={`${NODE_LABEL_WIDTH - 3}px`}
+                y={`${
+                  -ACTUAL_LABEL_HEIGHT +
+                  (ACTUAL_LABEL_HEIGHT - NodeExpandButton.ExpandButtonSize) / 2
+                }px`}
+              />
+            )}
+          </>
+        )}
+        <Handle
+          data-test-subj={TEST_SUBJ_HANDLE}
+          type="target"
+          isConnectable={false}
+          position={Position.Left}
+          id="in"
+          style={HandleStyleOverride}
+        />
+        <Handle
+          data-test-subj={TEST_SUBJ_HANDLE}
+          type="source"
+          isConnectable={false}
+          position={Position.Right}
+          id="out"
+          style={HandleStyleOverride}
+        />
+      </LabelNodeContainer>
+      <LabelNodeDetails
+        ips={eventDisplayOpts.sourceIpAddress ? ips : undefined}
+        countryCodes={eventDisplayOpts.sourceGeolocation ? countryCodes : undefined}
+        onIpClick={ipClickHandler}
+        onCountryClick={countryClickHandler}
+        hasOriginHighlight={showOriginHighlight}
+      />
+    </>
+  );
+});
+
+LabelNode.displayName = 'LabelNode';

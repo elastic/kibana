@@ -9,7 +9,7 @@ import { EuiSpacer, EuiAccordion, EuiTextColor, EuiTitle, useEuiTheme } from '@e
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { css } from '@emotion/react';
-import { AdvancedOption } from '../operations/definitions';
+import type { AdvancedOption } from '../operations/definitions';
 
 export function AdvancedOptions(props: { options: AdvancedOption[] }) {
   const { euiTheme } = useEuiTheme();

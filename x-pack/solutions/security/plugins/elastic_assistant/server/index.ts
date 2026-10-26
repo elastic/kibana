@@ -5,8 +5,12 @@
  * 2.0.
  */
 
-import { PluginInitializerContext } from '@kbn/core/server';
+import type { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
+import { configSchema } from './config_schema';
 
+export const config: PluginConfigDescriptor = {
+  schema: configSchema,
+};
 export async function plugin(initializerContext: PluginInitializerContext) {
   const { ElasticAssistantPlugin } = await import('./plugin');
   return new ElasticAssistantPlugin(initializerContext);

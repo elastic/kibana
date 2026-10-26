@@ -8,8 +8,9 @@
 import { useCallback, useEffect, useMemo } from 'react';
 
 import { i18n } from '@kbn/i18n';
+import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 import { EntityRiskQueries } from '../../../../common/api/search_strategy';
-import { useMlCapabilities } from '../../../common/components/ml/hooks/use_ml_capabilities';
+import { useLicense } from '../../../common/hooks/use_license';
 import { createFilter } from '../../../common/containers/helpers';
 import type {
   EntityType,
@@ -20,7 +21,7 @@ import type {
 import type { ESQuery } from '../../../../common/typed_json';
 import type { InspectResponse } from '../../../types';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
-import { isIndexNotFoundError } from '../../../common/utils/exceptions';
+import { isIndexNotFoundError, isAbortError } from '../../../common/utils/exceptions';
 import type { inputsModel } from '../../../common/store';
 import { useSearchStrategy } from '../../../common/containers/use_search_strategy';
 import { useGetDefaultRiskIndex } from '../../hooks/use_get_default_risk_index';
@@ -52,6 +53,11 @@ export interface UseRiskScoreParams {
   skip?: boolean;
   sort?: RiskScoreSortField;
   timerange?: { to: string; from: string };
+  /**
+   * Optional Kibana execution context forwarded to the underlying search strategy so slow logs
+   * and APM traces can attribute the query to the calling page/panel.
+   */
+  executionContext?: KibanaExecutionContext;
 }
 
 interface UseRiskScore<T> extends UseRiskScoreParams {
@@ -72,19 +78,21 @@ export const useRiskScore = <T extends EntityType>({
   pagination,
   riskEntity,
   includeAlertsCount = false,
+  executionContext,
 }: UseRiskScore<T>): RiskScoreState<T> => {
-  const defaultIndex = useGetDefaultRiskIndex(riskEntity, onlyLatest);
+  const defaultIndex = useGetDefaultRiskIndex(onlyLatest);
   const {
     data: riskEngineStatus,
     isFetching: isStatusLoading,
     refetch: refetchEngineStatus,
-  } = useRiskEngineStatus();
+  } = useRiskEngineStatus({}, { executionContext });
   const factoryQueryType = EntityRiskQueries.list;
   const { querySize, cursorStart } = pagination || {};
   const { addError } = useAppToasts();
-  const { isPlatinumOrTrialLicense } = useMlCapabilities();
+  const license = useLicense();
+  const hasRequiredLicense = license.isPlatinumPlus();
   const hasEntityAnalyticsCapability = useHasSecurityCapability('entity-analytics');
-  const isAuthorized = isPlatinumOrTrialLicense && hasEntityAnalyticsCapability;
+  const isAuthorized = hasRequiredLicense && hasEntityAnalyticsCapability;
   const hasEngineBeenInstalled = riskEngineStatus?.risk_engine_status !== 'NOT_INSTALLED';
   const {
     loading,
@@ -96,8 +104,9 @@ export const useRiskScore = <T extends EntityType>({
   } = useSearchStrategy<EntityRiskQueries.list>({
     factoryQueryType,
     initialResult,
-    abort: skip || !hasEngineBeenInstalled || isStatusLoading || !isAuthorized,
+    abort: skip,
     showErrorToast: false,
+    executionContext,
   });
 
   const refetchAll = useCallback(() => {
@@ -170,7 +179,7 @@ export const useRiskScore = <T extends EntityType>({
 
   useEffect(() => {
     if (error) {
-      if (!isIndexNotFoundError(error)) {
+      if (!isIndexNotFoundError(error) && !isAbortError(error)) {
         addError(error, {
           title: i18n.translate('xpack.securitySolution.riskScore.failSearchDescription', {
             defaultMessage: `Failed to run search on risk score`,

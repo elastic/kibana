@@ -15,6 +15,7 @@ import type {
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { UiSettingsParams } from '@kbn/core-ui-settings-common';
 import type { Logger } from '@kbn/logging';
+import type { NamespacedCache } from './namespaced_cache';
 
 /** @internal */
 export interface InternalUiSettingsServicePreboot {
@@ -39,4 +40,8 @@ export interface UiSettingsServiceOptions {
   overrides?: Record<string, any>;
   defaults?: Record<string, UiSettingsParams>;
   log: Logger;
+  /** Shared getUserProvided cache instance (injected from service) */
+  sharedUserProvidedCache?: NamespacedCache<Record<string, any>>;
+  /** Namespace for cache keys (typically space ID) */
+  namespace: string;
 }

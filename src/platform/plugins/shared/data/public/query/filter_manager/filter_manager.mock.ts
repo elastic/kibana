@@ -8,7 +8,7 @@
  */
 
 import { Observable } from 'rxjs';
-import { FilterManager } from './filter_manager';
+import type { FilterManager } from './filter_manager';
 
 export const createFilterManagerMock = () => {
   const filterManager = {

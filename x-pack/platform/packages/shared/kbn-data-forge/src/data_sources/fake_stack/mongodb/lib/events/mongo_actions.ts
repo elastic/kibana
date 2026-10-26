@@ -8,10 +8,10 @@
 import { memoize, sample } from 'lodash';
 import { faker } from '@faker-js/faker';
 import { v4 } from 'uuid';
-import { Moment } from 'moment';
+import type { Moment } from 'moment';
 import { createBaseEvent } from './create_base_event';
 import { MONGODB_HOSTS } from '../../../common/constants';
-import { Doc } from '../../../../../types';
+import type { Doc } from '../../../../../types';
 
 const getIpAddressAndPort = memoize((_source: string) => {
   const ip = faker.internet.ip();

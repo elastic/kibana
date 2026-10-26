@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import React, { ElementType, ReactElement } from 'react';
+import type { ElementType, ReactElement } from 'react';
+import React from 'react';
 import styled from '@emotion/styled';
-import { EuiContextMenuItem, EuiFlexGroup, EuiFlexItem, EuiIcon, IconType } from '@elastic/eui';
-import { Rule } from '../types';
+import type { IconType } from '@elastic/eui';
+import { EuiContextMenuItem, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
+import type { Rule } from '../types';
 
 interface MenuItemLinkedRulesProps {
   leftIcon?: IconType;
@@ -35,7 +37,7 @@ export const generateLinkedRulesMenuItems = ({
         <EuiFlexGroup gutterSize="s">
           {leftIcon ? (
             <EuiFlexItem data-test-subj={`${dataTestSubj || ''}LeftIcon`} grow={false}>
-              <EuiIcon type={leftIcon} />
+              <EuiIcon type={leftIcon} aria-hidden={true} />
             </EuiFlexItem>
           ) : null}
           <EuiFlexItem>

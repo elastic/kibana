@@ -7,16 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import Fs from 'fs';
 import Path from 'path';
 
 import Resolve from 'resolve';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { getPackages, type Package } from '@kbn/repo-packages';
-
-import { safeStat, readFileSync } from './helpers/fs';
-import { ResolveResult } from './resolve_result';
+import { exports as resolvePackageExports } from 'resolve.exports';
+import type { ResolveResult } from './resolve_result';
 import { getRelativeImportReq } from './helpers/import_req';
 import { memoize } from './helpers/memoize';
+
+// Use lightweight resolver for "exports" maps
 
 const NODE_MODULE_SEG = Path.sep + 'node_modules' + Path.sep;
 
@@ -25,14 +27,24 @@ export class ImportResolver {
     return new ImportResolver(repoRoot, new Map(packages.map((p) => [p.id, p])));
   }
 
-  private safeStat = memoize(safeStat);
+  // `throwIfNoEntry: false` returns `undefined` for missing paths, which is much cheaper than throwing ENOENT
+  private safeStat = memoize((path: string) => Fs.statSync(path, { throwIfNoEntry: false }));
+  private readPackageJson = memoize((path: string): Record<string, unknown> | undefined => {
+    const body = Fs.readFileSync(path, 'utf8');
+    try {
+      return JSON.parse(body);
+    } catch {
+      return undefined;
+    }
+  });
 
   private baseResolveOpts = {
     extensions: ['.js', '.json', '.ts', '.tsx', '.d.ts'],
     isFile: (path: string) => !!this.safeStat(path)?.isFile(),
     isDirectory: (path: string) => !!this.safeStat(path)?.isDirectory(),
-    readFileSync: memoize(readFileSync),
-    packageFilter(pkg: Record<string, unknown>) {
+    // `resolve` reads the closest package.json for every request, so parse each one only once
+    readPackageSync: (_readFileSync, pkgfile) => this.readPackageJson(pkgfile),
+    packageFilter(pkg) {
       if (!pkg.main && pkg.types) {
         // for the purpose of resolving files, a "types" file is adequate
         return {
@@ -43,7 +55,7 @@ export class ImportResolver {
 
       return pkg;
     },
-  };
+  } satisfies Resolve.SyncOpts;
 
   constructor(
     /**
@@ -118,7 +130,7 @@ export class ImportResolver {
     }
 
     // these are special webpack-aliases only used in storybooks, ignore them
-    if (req === 'core_styles' || req === 'core_app_image_assets') {
+    if (req === 'core_styles') {
       return true;
     }
 
@@ -136,15 +148,37 @@ export class ImportResolver {
   private adaptReq(req: string, dirname: string): string | undefined {
     // handle typescript aliases
     if (req === 'kibana/public') {
-      return this.adaptReq('src/core/public', dirname);
+      return this.adaptReq('src/core/packages/core/public', dirname);
     }
     if (req === 'kibana/server') {
-      return this.adaptReq('src/core/server', dirname);
+      return this.adaptReq('src/core/packages/core/server', dirname);
     }
 
     if (req.startsWith('@modelcontextprotocol/sdk')) {
       const relPath = req.split('@modelcontextprotocol/sdk')[1];
       return Path.resolve(REPO_ROOT, `node_modules/@modelcontextprotocol/sdk/dist/esm/${relPath}`);
+    }
+
+    // We need this "hack" because our current import-resolver doesn't support "exports" in package.json.
+    // We should be able to remove this once we support cjs/esm interop.
+    if (req.startsWith('@elastic/opentelemetry-node/sdk')) {
+      return Path.resolve(REPO_ROOT, `node_modules/@elastic/opentelemetry-node/lib/sdk.js`);
+    }
+
+    if (req.startsWith('@typescript-eslint/parser')) {
+      return Path.resolve(REPO_ROOT, `node_modules/@typescript-eslint/parser/dist/index.js`);
+    }
+
+    if (req === 'zod' || req.startsWith('zod/v4')) {
+      return Path.resolve(REPO_ROOT, `node_modules/zod/v4/index.cjs`);
+    }
+
+    if (req.startsWith('vega-lite')) {
+      return Path.resolve(REPO_ROOT, `node_modules/vega-lite/build`);
+    }
+
+    if (req.startsWith('vega-tooltip')) {
+      return Path.resolve(REPO_ROOT, `node_modules/vega-tooltip/build`);
     }
 
     // turn root-relative paths into relative paths
@@ -202,6 +236,14 @@ export class ImportResolver {
       };
     } catch (error) {
       if (error && error.code === 'MODULE_NOT_FOUND') {
+        // fallback: attempt to resolve using the "exports" map in package.json
+        //
+        // TODO: Kibana operations team to look again into this once working on https://github.com/elastic/kibana-operations/issues/309 . Resolve library should have added native support for exports by then.
+        const expRes = this.tryExportsResolve(req, dirname);
+        if (expRes) {
+          return expRes;
+        }
+
         if (req === 'fsevents') {
           return {
             type: 'optional-and-missing',
@@ -230,10 +272,83 @@ export class ImportResolver {
     return null;
   }
 
+  private tryExportsResolve(req: string, dirname: string): ResolveResult | null {
+    // Ignore relative or absolute requests – only handle bare specifiers
+    if (req.startsWith('.') || Path.isAbsolute(req)) {
+      return null;
+    }
+
+    // Split into <packageName> and sub-path segments
+    const parts = req.split('/');
+    const pkgName = parts[0].startsWith('@') ? `${parts[0]}/${parts[1]}` : parts[0];
+    const subPathParts = parts.slice(pkgName.startsWith('@') ? 2 : 1);
+
+    // Locate the dependency's package.json
+    let manifestPath: string | undefined;
+    try {
+      manifestPath = Resolve.sync(`${pkgName}/package.json`, {
+        basedir: dirname,
+        ...this.baseResolveOpts,
+      });
+    } catch {
+      return null;
+    }
+
+    const pkgDir = Path.dirname(manifestPath);
+    const pkgJson = this.readPackageJson(manifestPath);
+    if (!pkgJson) {
+      return null;
+    }
+
+    // Use resolve.exports to determine the correct file for the sub-path
+    const entry = subPathParts.length ? `./${subPathParts.join('/')}` : '.';
+
+    const targets = resolvePackageExports(pkgJson as any, entry) as string[] | undefined;
+
+    if (!targets || targets.length === 0) {
+      return null;
+    }
+
+    // Prefer the first resolved target
+    const absolute = Path.resolve(pkgDir, targets[0]);
+    const stat = this.safeStat(absolute);
+    if (!stat || !stat.isFile()) {
+      return null;
+    }
+
+    return {
+      type: 'file',
+      absolute,
+      nodeModule: pkgName,
+    };
+  }
+
+  /**
+   * Results of `resolve()`, by dirname and request. Like the file system lookups behind them,
+   * they are kept for the lifetime of this resolver.
+   */
+  private readonly resolveCache = new Map<string, Map<string, ResolveResult | null>>();
+
   /**
    * Resolve an import request from a file in the given dirname
    */
   resolve(req: string, dirname: string): ResolveResult | null {
+    let dirCache = this.resolveCache.get(dirname);
+    if (!dirCache) {
+      dirCache = new Map();
+      this.resolveCache.set(dirname, dirCache);
+    }
+
+    let result = dirCache.get(req);
+    if (result === undefined) {
+      result = this.resolveUncached(req, dirname);
+      dirCache.set(req, result);
+    }
+
+    return result;
+  }
+
+  private resolveUncached(req: string, dirname: string): ResolveResult | null {
     // transform webpack loader requests and focus on the actual file selected
     const lastExI = req.lastIndexOf('!');
     const quesI = req.lastIndexOf('?');

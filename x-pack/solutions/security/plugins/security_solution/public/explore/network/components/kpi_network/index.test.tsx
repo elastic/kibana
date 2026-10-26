@@ -5,12 +5,15 @@
  * 2.0.
  */
 
-import { shallow } from 'enzyme';
+import { render } from '@testing-library/react';
 import React from 'react';
-import { Provider as ReduxStoreProvider } from 'react-redux';
 
-import { createMockStore } from '../../../../common/mock';
+import { TestProviders, createMockStore } from '../../../../common/mock';
 import { NetworkKpiComponent } from '.';
+
+jest.mock('../../../../common/components/visualization_actions/lens_embeddable', () => ({
+  LensEmbeddable: jest.fn(() => <div data-test-subj="mock-lens-embeddable" />),
+}));
 
 describe('NetworkKpiComponent', () => {
   const props = {
@@ -25,13 +28,13 @@ describe('NetworkKpiComponent', () => {
 
   describe('rendering', () => {
     test('it renders the default widget', () => {
-      const wrapper = shallow(
-        <ReduxStoreProvider store={createMockStore()}>
+      const { container } = render(
+        <TestProviders store={createMockStore()}>
           <NetworkKpiComponent {...props} />
-        </ReduxStoreProvider>
+        </TestProviders>
       );
 
-      expect(wrapper.find('NetworkKpiComponent')).toMatchSnapshot();
+      expect(container.children[0]).toMatchSnapshot();
     });
   });
 });

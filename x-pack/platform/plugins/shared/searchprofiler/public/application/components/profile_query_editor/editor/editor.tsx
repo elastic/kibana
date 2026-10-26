@@ -9,7 +9,8 @@ import React, { memo, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiScreenReaderOnly, EuiSpacer } from '@elastic/eui';
 import { CodeEditor } from '@kbn/code-editor';
-import { monaco, XJsonLang } from '@kbn/monaco';
+import type { monaco } from '@kbn/monaco';
+import { XJsonLang } from '@kbn/monaco';
 
 export interface Props {
   licenseEnabled: boolean;
@@ -22,6 +23,7 @@ const EDITOR_INPUT_ID = 'SearchProfilerTextArea';
 
 export interface EditorProps {
   focus: () => void;
+  setValue: (value: string) => void;
 }
 
 export const Editor = memo(
@@ -31,6 +33,9 @@ export const Editor = memo(
         onEditorReady({
           focus: () => {
             editor.focus();
+          },
+          setValue: (value: string) => {
+            editor.setValue(value);
           },
         } as EditorProps);
       },

@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
   },
@@ -21,6 +21,12 @@
     "@kbn/react-kibana-mount",
     "@kbn/code-editor",
     "@kbn/rollup",
+    "@kbn/css-utils",
+    "@kbn/cps-utils",
+    "@kbn/cps",
+    "@kbn/ui-callout",
+    "@kbn/core-http-browser",
+    "@kbn/core-http-browser-mocks",
   ],
   "exclude": [
     "target/**/*",

@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { IAggConfig, METRIC_TYPES } from '@kbn/data-plugin/common';
+import type { IAggConfig } from '@kbn/data-plugin/common';
+import { METRIC_TYPES } from '@kbn/data-plugin/common';
 import { stubLogstashDataView } from '@kbn/data-views-plugin/common/data_view.stub';
-import { SchemaConfig } from '../../..';
+import type { SchemaConfig } from '../../..';
 import { convertToSiblingPipelineColumns } from './sibling_pipeline';
 
 const mockConvertMetricToColumns = jest.fn();
@@ -55,7 +56,7 @@ describe('convertToSiblingPipelineColumns', () => {
         visType,
       })
     ).toBeNull();
-    expect(mockConvertMetricToColumns).toBeCalledTimes(0);
+    expect(mockConvertMetricToColumns).toHaveBeenCalledTimes(0);
   });
 
   test('should return null if customMetric is not defined', () => {
@@ -67,21 +68,21 @@ describe('convertToSiblingPipelineColumns', () => {
         visType,
       })
     ).toBeNull();
-    expect(mockConvertMetricToColumns).toBeCalledTimes(0);
+    expect(mockConvertMetricToColumns).toHaveBeenCalledTimes(0);
   });
 
   test('should return null if sibling agg is not supported', () => {
     mockConvertMetricToColumns.mockReturnValue(null);
     expect(convertToSiblingPipelineColumns({ agg, aggs: [], dataView, visType })).toBeNull();
-    expect(mockConvertToSchemaConfig).toBeCalledTimes(1);
-    expect(mockConvertMetricToColumns).toBeCalledTimes(1);
+    expect(mockConvertToSchemaConfig).toHaveBeenCalledTimes(1);
+    expect(mockConvertMetricToColumns).toHaveBeenCalledTimes(1);
   });
 
   test('should return column', () => {
     const column = { operationType: 'formula' };
     mockConvertMetricToColumns.mockReturnValue([column]);
     expect(convertToSiblingPipelineColumns({ agg, aggs: [], dataView, visType })).toEqual(column);
-    expect(mockConvertToSchemaConfig).toBeCalledTimes(1);
-    expect(mockConvertMetricToColumns).toBeCalledTimes(1);
+    expect(mockConvertToSchemaConfig).toHaveBeenCalledTimes(1);
+    expect(mockConvertMetricToColumns).toHaveBeenCalledTimes(1);
   });
 });

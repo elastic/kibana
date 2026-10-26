@@ -18,6 +18,7 @@ import {
   getRules,
   getRulesCount,
 } from './get_existing_prepackaged_rules';
+import { requestContextMock } from '../../../routes/__mocks__';
 
 describe('get_existing_prepackaged_rules', () => {
   afterEach(() => {
@@ -25,10 +26,12 @@ describe('get_existing_prepackaged_rules', () => {
   });
 
   describe('getExistingPrepackagedRules', () => {
+    const { clients } = requestContextMock.createTools();
+
     test('should return a single item in a single page', async () => {
       const rulesClient = rulesClientMock.create();
       rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
-      const rules = await getExistingPrepackagedRules({ rulesClient });
+      const rules = await getExistingPrepackagedRules({ rulesClient, logger: clients.logger });
       expect(rules).toEqual([getRuleMock(getQueryRuleParams())]);
     });
 
@@ -57,7 +60,7 @@ describe('get_existing_prepackaged_rules', () => {
         })
       );
 
-      const rules = await getExistingPrepackagedRules({ rulesClient });
+      const rules = await getExistingPrepackagedRules({ rulesClient, logger: clients.logger });
       expect(rules).toEqual([result1, result2, result3]);
     });
   });

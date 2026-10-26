@@ -7,16 +7,22 @@
 
 import * as rt from 'io-ts';
 import { ItemTypeRT } from '@kbn/metrics-data-access-plugin/common';
+import { DataSchemaFormatRT } from './shared/data_schema_format';
 
-export const InfraMetadataRequestRT = rt.type({
-  nodeId: rt.string,
-  nodeType: ItemTypeRT,
-  sourceId: rt.string,
-  timeRange: rt.type({
-    from: rt.number,
-    to: rt.number,
+export const InfraMetadataRequestRT = rt.intersection([
+  rt.type({
+    nodeId: rt.string,
+    nodeType: ItemTypeRT,
+    sourceId: rt.string,
+    timeRange: rt.type({
+      from: rt.number,
+      to: rt.number,
+    }),
   }),
-});
+  rt.partial({
+    schema: DataSchemaFormatRT,
+  }),
+]);
 
 export const InfraMetadataFeatureRT = rt.type({
   name: rt.string,
@@ -42,6 +48,8 @@ export const InfraMetadataHostRT = rt.partial({
   os: InfraMetadataOSRT,
   architecture: rt.string,
   containerized: rt.boolean,
+  // OpenTelemetry `host.type` reaches the root through the `resource.attributes` passthrough object.
+  type: rt.string,
 });
 
 export const InfraMetadataContainerRT = rt.partial({
@@ -79,12 +87,36 @@ export const InfraMetadataCloudRT = rt.partial({
   machine: InfraMetadataMachineRT,
   region: rt.string,
   imageId: rt.string,
+  // OpenTelemetry `cloud.resource_id` reaches the root through the `resource.attributes` passthrough object.
+  resource_id: rt.string,
 });
 
 export const InfraMetadataAgentRT = rt.partial({
   id: rt.string,
   version: rt.string,
   policy: rt.string,
+});
+
+export const InfraMetadataResourceRT = rt.partial({
+  attributes: rt.partial({
+    host: rt.partial({
+      ip: rt.union([rt.array(rt.string), rt.string]),
+      name: rt.string,
+      mac: rt.union([rt.array(rt.string), rt.string]),
+      type: rt.string,
+    }),
+    agent: rt.partial({}),
+    cloud: rt.partial({
+      provider: rt.string,
+      resource_id: rt.string,
+      availability_zone: rt.string,
+    }),
+    os: rt.partial({
+      name: rt.string,
+      version: rt.string,
+      type: rt.string,
+    }),
+  }),
 });
 
 export const InfraMetadataInfoRT = rt.partial({
@@ -95,11 +127,17 @@ export const InfraMetadataInfoRT = rt.partial({
   '@timestamp': rt.string,
 });
 
+export const InfraMetadataFieldsRT = rt.partial({
+  fields: rt.record(rt.string, rt.union([rt.string, rt.array(rt.string), rt.null, rt.undefined])),
+  ignored_field_values: rt.record(rt.string, rt.union([rt.string, rt.array(rt.string)])),
+});
+
 export const InfraMetadataInfoResponseRT = rt.partial({
   cloud: InfraMetadataCloudRT,
   host: InfraMetadataHostRT,
   container: InfraMetadataContainerRT,
   agent: InfraMetadataAgentRT,
+  resource: InfraMetadataResourceRT,
   timestamp: rt.string,
 });
 
@@ -117,6 +155,8 @@ const InfraMetadataOptionalRT = rt.partial({
 export const InfraMetadataRT = rt.intersection([InfraMetadataRequiredRT, InfraMetadataOptionalRT]);
 
 export type InfraMetadata = rt.TypeOf<typeof InfraMetadataRT>;
+
+export type InfraMetadataFields = rt.TypeOf<typeof InfraMetadataFieldsRT>;
 
 export type InfraMetadataRequest = rt.TypeOf<typeof InfraMetadataRequestRT>;
 

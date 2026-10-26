@@ -8,15 +8,27 @@
 import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
-import { ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
-import { setStubKibanaServices } from '@kbn/presentation-panel-plugin/public/mocks';
 import { render, waitFor, screen } from '@testing-library/react';
 import React from 'react';
-import { of } from 'rxjs';
-import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '../constants';
+import { BehaviorSubject, of } from 'rxjs';
+import type { AnomalySwimLaneEmbeddableState } from '@kbn/ml-server-schemas/embeddables/anomaly_swimlane';
+import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '@kbn/ml-common-types/embeddables/anomaly_swimlane';
 import { getAnomalySwimLaneEmbeddableFactory } from './anomaly_swimlane_embeddable_factory';
-import type { AnomalySwimLaneEmbeddableApi, AnomalySwimLaneEmbeddableState } from './types';
-import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
+import type { AnomalySwimLaneEmbeddableApi } from './types';
+
+const mockSwimlaneContainer = jest.fn();
+jest.mock('../../application/explorer/swimlane_container', () => ({
+  isViewBySwimLaneData: jest.fn(() => false),
+  SwimlaneContainer: (props: Record<string, unknown>) => {
+    mockSwimlaneContainer(props);
+    // The real SwimlaneContainer calls onResize on mount, which triggers the chartWidth$
+    // observable that the data fetcher subscribes to. Simulate that here.
+    React.useEffect(() => {
+      (props.onResize as (size: number) => void)?.(800);
+    }, [props.onResize]);
+    return <div data-test-subj={props['data-test-subj'] as string} />;
+  },
+}));
 
 // Mock dependencies
 const pluginStartDeps = {
@@ -34,6 +46,12 @@ const mockResponse = of([
     analysis_config: { bucket_span: '15m' },
   },
 ]);
+
+jest.mock('../../application/capabilities/check_capabilities', () => {
+  return {
+    checkPermissionAsync: jest.fn().mockResolvedValue(true),
+  };
+});
 
 jest.mock('../../application/services/anomaly_detector_service', () => {
   return {
@@ -81,48 +99,80 @@ jest.mock('../../application/services/anomaly_timeline_service', () => {
 describe('getAnomalySwimLaneEmbeddableFactory', () => {
   const factory = getAnomalySwimLaneEmbeddableFactory(getStartServices);
 
-  beforeAll(() => {
-    const embeddable = embeddablePluginMock.createSetupContract();
-    embeddable.registerReactEmbeddableFactory(ANOMALY_SWIMLANE_EMBEDDABLE_TYPE, async () => {
-      return factory;
-    });
-    setStubKibanaServices();
-  });
-
   it('should init embeddable api based on provided state', async () => {
-    const rawState = { jobIds: ['my-job'], viewBy: 'overall' } as AnomalySwimLaneEmbeddableState;
+    const uuid = '1234';
+    const parentApi = {
+      executionContext: {
+        type: 'dashboard',
+        id: 'dashboard-id',
+      },
+    };
+    const { api, Component } = await factory.buildEmbeddable({
+      initializeDrilldownsManager: jest.fn(),
+      initialState: {
+        swimlane_type: 'viewBy',
+        job_ids: ['my-job'],
+        view_by: 'overall',
+      } satisfies AnomalySwimLaneEmbeddableState,
+      finalizeApi: (preFinalizeApi) => {
+        return {
+          ...preFinalizeApi,
+          uuid,
+          parentApi,
+          type: ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
+        } as AnomalySwimLaneEmbeddableApi;
+      },
+      parentApi,
+      uuid,
+    });
 
-    const onApiAvailable = jest.fn() as jest.MockedFunction<
-      (api: AnomalySwimLaneEmbeddableApi) => void
-    >;
-
-    render(
-      <ReactEmbeddableRenderer<
-        AnomalySwimLaneEmbeddableState,
-        AnomalySwimLaneEmbeddableState,
-        AnomalySwimLaneEmbeddableApi
-      >
-        maybeId={'maybe_id'}
-        type={ANOMALY_SWIMLANE_EMBEDDABLE_TYPE}
-        onApiAvailable={onApiAvailable}
-        getParentApi={() => ({
-          getSerializedStateForChild: () => ({ rawState }),
-          executionContext: {
-            type: 'dashboard',
-            id: 'dashboard-id',
-          },
-        })}
-      />
-    );
+    render(<Component />);
 
     await waitFor(() => {
-      const resultApi = onApiAvailable.mock.calls[0][0];
+      expect(api.dataLoading$?.value).toEqual(false);
+      expect(api.jobIds.value).toEqual(['my-job']);
+      expect(api.viewBy.value).toEqual('overall');
 
-      expect(resultApi.dataLoading$?.value).toEqual(false);
-      expect(resultApi.jobIds.value).toEqual(['my-job']);
-      expect(resultApi.viewBy.value).toEqual('overall');
+      expect(screen.getByTestId<HTMLElement>('mlSwimLaneEmbeddable_1234')).toBeInTheDocument();
+    });
+  });
 
-      expect(screen.getByTestId<HTMLElement>('mlSwimLaneEmbeddable_maybe_id')).toBeInTheDocument();
+  describe('non-interactive mode', () => {
+    it('passes undefined onCellsSelection and onPaginationChange when viewMode is non-interactive', async () => {
+      const uuid = 'preview-uuid';
+      const viewMode$ = new BehaviorSubject<'non-interactive'>('non-interactive');
+      const parentApi = {
+        executionContext: { type: 'dashboard', id: 'dashboard-id' },
+        viewMode$,
+      };
+
+      const { Component } = await factory.buildEmbeddable({
+        initializeDrilldownsManager: jest.fn(),
+        initialState: {
+          swimlane_type: 'viewBy',
+          job_ids: ['my-job'],
+          view_by: 'overall',
+        } satisfies AnomalySwimLaneEmbeddableState,
+        finalizeApi: (preFinalizeApi) => {
+          return {
+            ...preFinalizeApi,
+            uuid,
+            parentApi,
+            type: ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
+          } as AnomalySwimLaneEmbeddableApi;
+        },
+        parentApi,
+        uuid,
+      });
+
+      mockSwimlaneContainer.mockClear();
+      render(<Component />);
+
+      await waitFor(() => {
+        expect(mockSwimlaneContainer).toHaveBeenCalled();
+        const lastProps = mockSwimlaneContainer.mock.calls.at(-1)?.[0];
+        expect(lastProps?.onCellsSelection).toBeUndefined();
+      });
     });
   });
 });

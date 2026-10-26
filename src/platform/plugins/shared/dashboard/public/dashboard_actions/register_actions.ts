@@ -7,70 +7,83 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CONTEXT_MENU_TRIGGER, PANEL_NOTIFICATION_TRIGGER } from '@kbn/embeddable-plugin/public';
-import { DashboardStartDependencies } from '../plugin';
+import { ADD_PANEL_TRIGGER, ON_OPEN_PANEL_MENU } from '@kbn/ui-actions-plugin/common/trigger_ids';
+import type { DashboardStartDependencies } from '../plugin';
 import {
+  ACTION_ADD_SECTION,
   ACTION_ADD_TO_LIBRARY,
   ACTION_CLONE_PANEL,
   ACTION_COPY_TO_DASHBOARD,
   ACTION_EXPAND_PANEL,
   ACTION_EXPORT_CSV,
+  ACTION_EXPORT_JSON,
   ACTION_UNLINK_FROM_LIBRARY,
-  BADGE_FILTERS_NOTIFICATION,
+  ACTION_FILTERS_NOTIFICATION,
+  ACTION_ESQL_NOTIFICATION,
 } from './constants';
 
-export const registerActions = async ({
-  plugins,
-  allowByValueEmbeddables,
-}: {
-  allowByValueEmbeddables?: boolean;
-  plugins: DashboardStartDependencies;
-}) => {
+export const registerActions = async (plugins: DashboardStartDependencies) => {
   const { uiActions, share } = plugins;
 
   uiActions.registerActionAsync(ACTION_CLONE_PANEL, async () => {
     const { ClonePanelAction } = await import('../dashboard_renderer/dashboard_module');
     return new ClonePanelAction();
   });
-  uiActions.attachAction(CONTEXT_MENU_TRIGGER, ACTION_CLONE_PANEL);
+  uiActions.attachAction(ON_OPEN_PANEL_MENU, ACTION_CLONE_PANEL);
 
   uiActions.registerActionAsync(ACTION_EXPAND_PANEL, async () => {
     const { ExpandPanelAction } = await import('../dashboard_renderer/dashboard_module');
     return new ExpandPanelAction();
   });
-  uiActions.attachAction(CONTEXT_MENU_TRIGGER, ACTION_EXPAND_PANEL);
+  uiActions.attachAction(ON_OPEN_PANEL_MENU, ACTION_EXPAND_PANEL);
 
-  uiActions.registerActionAsync(BADGE_FILTERS_NOTIFICATION, async () => {
+  uiActions.registerActionAsync(ACTION_FILTERS_NOTIFICATION, async () => {
     const { FiltersNotificationAction } = await import('../dashboard_renderer/dashboard_module');
     return new FiltersNotificationAction();
   });
-  uiActions.attachAction(PANEL_NOTIFICATION_TRIGGER, BADGE_FILTERS_NOTIFICATION);
+  uiActions.attachAction(ON_OPEN_PANEL_MENU, ACTION_FILTERS_NOTIFICATION);
+
+  uiActions.registerActionAsync(ACTION_ESQL_NOTIFICATION, async () => {
+    const { esqlNotificationAction } = await import('../dashboard_renderer/dashboard_module');
+    return esqlNotificationAction;
+  });
+  uiActions.attachAction(ON_OPEN_PANEL_MENU, ACTION_ESQL_NOTIFICATION);
+
+  uiActions.registerActionAsync(ACTION_ADD_SECTION, async () => {
+    const { AddSectionAction } = await import('../dashboard_renderer/dashboard_module');
+    return new AddSectionAction();
+  });
+  uiActions.attachAction(ADD_PANEL_TRIGGER, ACTION_ADD_SECTION);
 
   if (share) {
     uiActions.registerActionAsync(ACTION_EXPORT_CSV, async () => {
       const { ExportCSVAction } = await import('../dashboard_renderer/dashboard_module');
       return new ExportCSVAction();
     });
-    uiActions.attachAction(CONTEXT_MENU_TRIGGER, ACTION_EXPORT_CSV);
+    uiActions.attachAction(ON_OPEN_PANEL_MENU, ACTION_EXPORT_CSV);
   }
 
-  if (allowByValueEmbeddables) {
-    uiActions.registerActionAsync(ACTION_ADD_TO_LIBRARY, async () => {
-      const { AddToLibraryAction } = await import('../dashboard_renderer/dashboard_module');
-      return new AddToLibraryAction();
-    });
-    uiActions.attachAction(CONTEXT_MENU_TRIGGER, ACTION_ADD_TO_LIBRARY);
+  uiActions.registerActionAsync(ACTION_EXPORT_JSON, async () => {
+    const { ExportJSONAction } = await import('../dashboard_renderer/dashboard_module');
+    return new ExportJSONAction();
+  });
+  uiActions.attachAction(ON_OPEN_PANEL_MENU, ACTION_EXPORT_JSON);
 
-    uiActions.registerActionAsync(ACTION_UNLINK_FROM_LIBRARY, async () => {
-      const { UnlinkFromLibraryAction } = await import('../dashboard_renderer/dashboard_module');
-      return new UnlinkFromLibraryAction();
-    });
-    uiActions.attachAction(CONTEXT_MENU_TRIGGER, ACTION_UNLINK_FROM_LIBRARY);
+  uiActions.registerActionAsync(ACTION_ADD_TO_LIBRARY, async () => {
+    const { AddToLibraryAction } = await import('../dashboard_renderer/dashboard_module');
+    return new AddToLibraryAction();
+  });
+  uiActions.attachAction(ON_OPEN_PANEL_MENU, ACTION_ADD_TO_LIBRARY);
 
-    uiActions.registerActionAsync(ACTION_COPY_TO_DASHBOARD, async () => {
-      const { CopyToDashboardAction } = await import('../dashboard_renderer/dashboard_module');
-      return new CopyToDashboardAction();
-    });
-    uiActions.attachAction(CONTEXT_MENU_TRIGGER, ACTION_COPY_TO_DASHBOARD);
-  }
+  uiActions.registerActionAsync(ACTION_UNLINK_FROM_LIBRARY, async () => {
+    const { UnlinkFromLibraryAction } = await import('../dashboard_renderer/dashboard_module');
+    return new UnlinkFromLibraryAction();
+  });
+  uiActions.attachAction(ON_OPEN_PANEL_MENU, ACTION_UNLINK_FROM_LIBRARY);
+
+  uiActions.registerActionAsync(ACTION_COPY_TO_DASHBOARD, async () => {
+    const { CopyToDashboardAction } = await import('../dashboard_renderer/dashboard_module');
+    return new CopyToDashboardAction();
+  });
+  uiActions.attachAction(ON_OPEN_PANEL_MENU, ACTION_COPY_TO_DASHBOARD);
 };

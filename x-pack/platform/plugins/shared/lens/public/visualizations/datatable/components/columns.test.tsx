@@ -5,18 +5,19 @@
  * 2.0.
  */
 import React from 'react';
-import {
+import type {
   EuiButtonEmptyProps,
   EuiDataGridColumnCellAction,
   EuiDataGridColumnCellActionProps,
-  EuiButtonEmpty,
 } from '@elastic/eui';
+import { EuiButtonEmpty } from '@elastic/eui';
 import type { Datatable } from '@kbn/expressions-plugin/public';
+import { ESQL_TABLE_TYPE } from '@kbn/data-plugin/common';
+import { FILTER_CELL_ACTION_TYPE } from '@kbn/cell-actions/constants';
 import { render, screen } from '@testing-library/react';
-import { ReactNode } from 'react';
-import { RowHeightMode } from '../../../../common/types';
+import type { ReactNode } from 'react';
 import type { FormatFactory } from '../../../../common/types';
-import type { LensCellValueAction } from '../../../types';
+import { LENS_ROW_HEIGHT_MODE, type LensCellValueAction } from '@kbn/lens-common';
 import { createGridColumns } from './columns';
 
 const table: Datatable = {
@@ -53,18 +54,17 @@ const callCreateGridColumns = (
     table: CreateGridColumnsParams[1];
     handleFilterClick: CreateGridColumnsParams[2];
     handleTransposedColumnClick: CreateGridColumnsParams[3];
-    isReadOnly: CreateGridColumnsParams[4];
-    columnConfig: CreateGridColumnsParams[5];
-    visibleColumns: CreateGridColumnsParams[6];
-    formatFactory: CreateGridColumnsParams[7];
-    onColumnResize: CreateGridColumnsParams[8];
-    onColumnHide: CreateGridColumnsParams[9];
-    alignments: CreateGridColumnsParams[10];
-    headerRowHeight: CreateGridColumnsParams[11];
-    headerRowLines: CreateGridColumnsParams[12];
-    columnCellValueActions: CreateGridColumnsParams[13];
-    closeCellPopover: CreateGridColumnsParams[14];
-    columnFilterable: CreateGridColumnsParams[15];
+    columnConfig: CreateGridColumnsParams[4];
+    visibleColumns: CreateGridColumnsParams[5];
+    formatFactory: CreateGridColumnsParams[6];
+    onColumnResize: CreateGridColumnsParams[7];
+    onColumnHide: CreateGridColumnsParams[8];
+    alignments: CreateGridColumnsParams[9];
+    headerRowHeight: CreateGridColumnsParams[10];
+    headerRowLines: CreateGridColumnsParams[11];
+    columnCellValueActions: CreateGridColumnsParams[12];
+    closeCellPopover: CreateGridColumnsParams[13];
+    columnFilterable: CreateGridColumnsParams[14];
   }> = {}
 ) =>
   createGridColumns(
@@ -72,14 +72,14 @@ const callCreateGridColumns = (
     params.table ?? table,
     params.handleFilterClick,
     params.handleTransposedColumnClick,
-    params.isReadOnly ?? false,
     params.columnConfig ?? { columns: [], sortingColumnId: undefined, sortingDirection: 'none' },
     params.visibleColumns ?? visibleColumns,
-    params.formatFactory ?? (((x: unknown) => ({ convert: () => x })) as unknown as FormatFactory),
+    params.formatFactory ??
+      (((x: unknown) => ({ convertToText: () => x })) as unknown as FormatFactory),
     params.onColumnResize ?? jest.fn(),
     params.onColumnHide ?? jest.fn(),
     params.alignments ?? new Map(),
-    params.headerRowHeight ?? RowHeightMode.auto,
+    params.headerRowHeight ?? LENS_ROW_HEIGHT_MODE.auto,
     params.headerRowLines ?? 1,
     params.columnCellValueActions ?? [],
     params.closeCellPopover ?? jest.fn(),
@@ -115,10 +115,80 @@ describe('getContentData', () => {
       expect(cellActions).toHaveLength(2);
     });
 
-    it('should not include filter actions if column not filterable', () => {
+    it('should include disabled filter actions when column is not filterable', () => {
       const [{ cellActions }] = callCreateGridColumns({
         handleFilterClick: () => {},
         columnFilterable: [false],
+      });
+      expect(cellActions).toHaveLength(2);
+
+      renderCellAction(cellActions, 0);
+      expect(screen.getByTestId('lensDatatableFilterFor')).toBeDisabled();
+      expect(screen.getByTestId('lensDatatableFilterFor')).toHaveAttribute(
+        'title',
+        `You can't apply a filter or drill down from this value.`
+      );
+
+      renderCellAction(cellActions, 1);
+      expect(screen.getByTestId('lensDatatableFilterOut')).toBeDisabled();
+      expect(screen.getByTestId('lensDatatableFilterOut')).toHaveAttribute(
+        'title',
+        `You can't apply a filter or drill down from this value.`
+      );
+    });
+
+    it('should use the ES|QL computed column disabled message when filtering is not allowed', () => {
+      const esqlTable: Datatable = {
+        ...table,
+        meta: { type: ESQL_TABLE_TYPE },
+        columns: [{ ...table.columns[0], isComputedColumn: true }],
+      };
+      const [{ cellActions }] = callCreateGridColumns({
+        table: esqlTable,
+        handleFilterClick: () => {},
+        columnFilterable: [false],
+      });
+
+      renderCellAction(cellActions, 0);
+      expect(screen.getByTestId('lensDatatableFilterFor')).toHaveAttribute(
+        'title',
+        `You can't apply a filter or drill down from this value because it relies on a field created at query time.`
+      );
+    });
+
+    it('should not disable filter actions when column is filterable', () => {
+      const [{ cellActions }] = callCreateGridColumns({
+        handleFilterClick: () => {},
+        columnFilterable: [true],
+      });
+
+      renderCellAction(cellActions, 0);
+      expect(screen.getByTestId('lensDatatableFilterFor')).toBeEnabled();
+      expect(screen.getByTestId('lensDatatableFilterFor')).not.toHaveAttribute('title');
+    });
+
+    it('should not include built-in filter actions when a compatible filter cell action exists', () => {
+      const filterCellAction: LensCellValueAction = {
+        ...cellValueAction,
+        type: FILTER_CELL_ACTION_TYPE,
+      };
+      const [{ cellActions }] = callCreateGridColumns({
+        handleFilterClick: () => {},
+        columnFilterable: [true],
+        columnCellValueActions: [[filterCellAction]],
+      });
+      expect(cellActions).toHaveLength(1);
+    });
+
+    it('should not include filter actions when oneClickFilter is enabled', () => {
+      const [{ cellActions }] = callCreateGridColumns({
+        handleFilterClick: () => {},
+        columnFilterable: [true],
+        columnConfig: {
+          columns: [{ columnId: 'a', type: 'lens_datatable_column', oneClickFilter: true }],
+          sortingColumnId: undefined,
+          sortingDirection: 'none',
+        },
       });
       expect(cellActions).toHaveLength(0);
     });

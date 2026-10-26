@@ -3,6 +3,7 @@
 exports[`SolutionPanel renders the solution panel for the given solution 1`] = `
 <EuiCard
   className="homeSolutionPanel homeSolutionPanel--kibana"
+  data-test-subj="homeSolutionPanel homeSolutionPanel_kibana"
   description="Explore and analyze your data"
   href="kibana_landing_page"
   icon={

@@ -8,17 +8,19 @@
 import { act } from 'react-dom/test-utils';
 
 /**
- * These helpers are intended to be used in conjunction with jest.useFakeTimers({ legacyFakeTimers: true }).
+ * Timer-runtime helpers for suites that opt into MODERN fake timers (jest.useFakeTimers()).
  */
-
-const flushPromiseJobQueue = async () => {
-  // See https://stackoverflow.com/questions/52177631/jest-timer-and-promise-dont-work-well-settimeout-and-async-function
-  await Promise.resolve();
-};
 
 export const advanceTime = async (ms: number) => {
   await act(async () => {
-    jest.advanceTimersByTime(ms);
-    await flushPromiseJobQueue();
+    await jest.advanceTimersByTimeAsync(ms);
   });
+
+  // Some code schedules follow-up work on 0ms timers (e.g. http mock resolution).
+  // Flush those pending timers so call sites can assert immediately after advanceTime.
+  if (jest.getTimerCount() > 0) {
+    await act(async () => {
+      await jest.runOnlyPendingTimersAsync();
+    });
+  }
 };

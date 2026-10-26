@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import type { InventoryItemType, InventoryMetric } from '@kbn/metrics-data-access-plugin/common';
+import type {
+  InventoryItemType,
+  InventoryTsvbType,
+  DataSchemaFormat,
+} from '@kbn/metrics-data-access-plugin/common';
 import type { BehaviorSubject } from 'rxjs';
 import { decodeOrThrow } from '@kbn/io-ts-utils';
 import { isPending, useFetcher } from '../../../hooks/use_fetcher';
@@ -13,47 +17,65 @@ import { InfraMetadataRT } from '../../../../common/http_api/metadata_api';
 import { getFilteredMetrics } from '../../../pages/metrics/metric_detail/lib/get_filtered_metrics';
 
 interface UseMetadataProps {
-  assetId: string;
-  assetType: InventoryItemType;
-  requiredMetrics?: InventoryMetric[];
+  entityId: string;
+  entityType: InventoryItemType;
+  requiredTsvb?: InventoryTsvbType[];
   sourceId: string;
   timeRange: {
     from: number;
     to: number;
   };
+  schema?: DataSchemaFormat;
+  /** When false, wait for schema detection before posting metadata. */
+  enabled?: boolean;
   request$?: BehaviorSubject<(() => Promise<unknown>) | undefined>;
 }
 export function useMetadata({
-  assetId,
-  assetType,
+  entityId,
+  entityType,
   sourceId,
   timeRange,
-  requiredMetrics = [],
+  requiredTsvb = [],
+  schema,
+  enabled = true,
   request$,
 }: UseMetadataProps) {
   const { data, status, error, refetch } = useFetcher(
-    async (callApi) => {
-      const response = await callApi('/api/infra/metadata', {
-        method: 'POST',
-        body: JSON.stringify({
-          nodeId: assetId,
-          nodeType: assetType,
-          sourceId,
-          timeRange,
-        }),
-      });
-      return decodeOrThrow(InfraMetadataRT)(response);
+    (callApi) => {
+      // Synchronous `undefined` tells useFetcher not to start a request.
+      // `enabled` is also a dependency so detection finishing (schema still
+      // omitted) recreates this callback and the fetch actually runs.
+      if (!enabled) {
+        return undefined;
+      }
+
+      return (async () => {
+        const response = await callApi('/api/infra/metadata', {
+          method: 'POST',
+          body: JSON.stringify({
+            nodeId: entityId,
+            nodeType: entityType,
+            sourceId,
+            timeRange,
+            ...(schema === 'semconv' ? { schema } : {}),
+          }),
+        });
+        return decodeOrThrow(InfraMetadataRT)(response);
+      })();
     },
-    [assetId, assetType, sourceId, timeRange],
+    [enabled, entityId, entityType, schema, sourceId, timeRange],
     {
       requestObservable$: request$,
+      autoFetch: enabled,
     }
   );
 
   return {
     name: (data && data.name) || '',
     filteredRequiredMetrics:
-      data && requiredMetrics.length > 0 ? getFilteredMetrics(requiredMetrics, data.features) : [],
+      data && requiredTsvb.length > 0
+        ? getFilteredMetrics(requiredTsvb, data.features, schema)
+        : [],
     error: (error && error.message) || null,
     loading: isPending(status),
     metadata: data,

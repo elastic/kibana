@@ -4,13 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
-import { SavedObjectUnsanitizedDoc } from '@kbn/core/server';
-import {
-  ConfigKey,
-  SyntheticsMonitorWithSecretsAttributes,
-} from '../../../../common/runtime_types';
-import { SYNTHETICS_MONITOR_ENCRYPTED_TYPE } from '../../synthetics_monitor';
+import type { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
+import type { SavedObjectUnsanitizedDoc } from '@kbn/core/server';
+import { LEGACY_SYNTHETICS_MONITOR_ENCRYPTED_TYPE_SINGLE } from '../../synthetics_monitor/legacy_synthetics_monitor';
+import type { SyntheticsMonitorWithSecretsAttributes } from '../../../../common/runtime_types';
+import { ConfigKey } from '../../../../common/runtime_types';
 
 export type SyntheticsMonitor890 = Omit<
   SyntheticsMonitorWithSecretsAttributes,
@@ -51,7 +49,7 @@ export const migration890 = (encryptedSavedObjects: EncryptedSavedObjectsPluginS
 
       return migrated;
     },
-    inputType: SYNTHETICS_MONITOR_ENCRYPTED_TYPE,
-    migratedType: SYNTHETICS_MONITOR_ENCRYPTED_TYPE,
+    inputType: LEGACY_SYNTHETICS_MONITOR_ENCRYPTED_TYPE_SINGLE,
+    migratedType: LEGACY_SYNTHETICS_MONITOR_ENCRYPTED_TYPE_SINGLE,
   });
 };

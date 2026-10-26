@@ -6,9 +6,9 @@
  */
 import React from 'react';
 import type { FC } from 'react';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 
-import { EuiIcon, EuiToolTip } from '@elastic/eui';
+import { EuiIconTip } from '@elastic/eui';
 import { useValueWithSpaceWarning } from './use_value_with_space_warning';
 interface ValueWithSpaceWarningProps {
   value: string[] | string;
@@ -17,11 +17,11 @@ interface ValueWithSpaceWarningProps {
 }
 const Container = styled.div`
   display: inline;
-  margin-left: ${({ theme }) => `${theme.eui.euiSizeXS}`};
+  margin-left: ${({ theme }) => `${theme.euiTheme.size.xs}`};
 `;
 export const ValueWithSpaceWarning: FC<ValueWithSpaceWarningProps> = ({
   value,
-  tooltipIconType = 'iInCircle',
+  tooltipIconType = 'info',
   tooltipIconText,
 }) => {
   const { showSpaceWarningIcon, warningText } = useValueWithSpaceWarning({
@@ -31,13 +31,15 @@ export const ValueWithSpaceWarning: FC<ValueWithSpaceWarningProps> = ({
   if (!showSpaceWarningIcon || !value) return null;
   return (
     <Container>
-      <EuiToolTip position="top" content={warningText}>
-        <EuiIcon
-          data-test-subj="value_with_space_warning_tooltip"
-          type={tooltipIconType}
-          color="warning"
-        />
-      </EuiToolTip>
+      <EuiIconTip
+        content={warningText}
+        position="top"
+        iconProps={{
+          'data-test-subj': 'value_with_space_warning_tooltip',
+        }}
+        type={tooltipIconType}
+        color="warning"
+      />
     </Container>
   );
 };

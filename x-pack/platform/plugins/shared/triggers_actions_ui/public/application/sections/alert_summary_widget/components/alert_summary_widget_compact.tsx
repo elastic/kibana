@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { MouseEvent } from 'react';
+import type { MouseEvent } from 'react';
+import React from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -26,11 +27,11 @@ import {
   TooltipType,
   Tooltip,
 } from '@elastic/charts';
-import { AlertStatus } from '@kbn/rule-data-utils';
+import type { PublicAlertStatus } from '@kbn/rule-data-utils';
 import { i18n } from '@kbn/i18n';
 import { AlertCounts } from './alert_counts';
 import { WIDGET_TITLE } from './constants';
-import { Alert, ChartProps, DependencyProps } from '../types';
+import type { Alert, ChartProps, DependencyProps } from '../types';
 
 export interface AlertSummaryWidgetCompactProps {
   activeAlertCount: number;
@@ -38,7 +39,7 @@ export interface AlertSummaryWidgetCompactProps {
   chartProps?: ChartProps;
   recoveredAlertCount: number;
   timeRangeTitle?: JSX.Element | string;
-  onClick: (status?: AlertStatus) => void;
+  onClick: (status?: PublicAlertStatus) => void;
   dependencyProps: DependencyProps;
 }
 
@@ -55,7 +56,7 @@ export const AlertSummaryWidgetCompact = ({
 
   const handleClick = (
     event: MouseEvent<HTMLAnchorElement | HTMLDivElement>,
-    status?: AlertStatus
+    status?: PublicAlertStatus
   ) => {
     event.preventDefault();
     event.stopPropagation();
@@ -121,6 +122,7 @@ export const AlertSummaryWidgetCompact = ({
                 />
                 <LineSeries
                   id={'activeAlertsChart'}
+                  // Defaults to multi layer time axis as of Elastic Charts v70
                   xScaleType={ScaleType.Time}
                   yScaleType={ScaleType.Linear}
                   xAccessor="key"

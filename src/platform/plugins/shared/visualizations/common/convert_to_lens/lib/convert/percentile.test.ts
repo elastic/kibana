@@ -9,9 +9,9 @@
 
 import { METRIC_TYPES } from '@kbn/data-plugin/common';
 import { stubLogstashDataView } from '@kbn/data-views-plugin/common/data_view.stub';
-import { SchemaConfig } from '../../..';
+import type { SchemaConfig } from '../../..';
 import { convertToPercentileColumn } from './percentile';
-import { PercentileColumn } from './types';
+import type { PercentileColumn } from './types';
 
 const mockGetFieldNameFromField = jest.fn();
 const mockGetFieldByName = jest.fn();
@@ -107,8 +107,8 @@ describe('convertToPercentileColumn', () => {
   test('should return null if field is not specified', () => {
     mockGetFieldNameFromField.mockReturnValue(null);
     expect(convertToPercentileColumn({ agg, dataView, visType })).toBeNull();
-    expect(mockGetFieldNameFromField).toBeCalledTimes(1);
-    expect(dataView.getFieldByName).toBeCalledTimes(0);
+    expect(mockGetFieldNameFromField).toHaveBeenCalledTimes(1);
+    expect(dataView.getFieldByName).toHaveBeenCalledTimes(0);
   });
 
   test('should return null if field absent at the index pattern', () => {
@@ -116,8 +116,8 @@ describe('convertToPercentileColumn', () => {
     dataView.getFieldByName = mockGetFieldByName;
 
     expect(convertToPercentileColumn({ agg, dataView, visType })).toBeNull();
-    expect(mockGetFieldNameFromField).toBeCalledTimes(1);
-    expect(dataView.getFieldByName).toBeCalledTimes(1);
+    expect(mockGetFieldNameFromField).toHaveBeenCalledTimes(1);
+    expect(dataView.getFieldByName).toHaveBeenCalledTimes(1);
   });
 
   test('should return percentile rank column for percentiles', () => {
@@ -131,8 +131,8 @@ describe('convertToPercentileColumn', () => {
         sourceField: 'bytes',
       })
     );
-    expect(mockGetFieldNameFromField).toBeCalledTimes(1);
-    expect(dataView.getFieldByName).toBeCalledTimes(1);
+    expect(mockGetFieldNameFromField).toHaveBeenCalledTimes(1);
+    expect(dataView.getFieldByName).toHaveBeenCalledTimes(1);
   });
 
   test('should return percentile rank column for single percentile', () => {
@@ -146,7 +146,7 @@ describe('convertToPercentileColumn', () => {
         sourceField: 'bytes',
       })
     );
-    expect(mockGetFieldNameFromField).toBeCalledTimes(1);
-    expect(dataView.getFieldByName).toBeCalledTimes(1);
+    expect(mockGetFieldNameFromField).toHaveBeenCalledTimes(1);
+    expect(dataView.getFieldByName).toHaveBeenCalledTimes(1);
   });
 });

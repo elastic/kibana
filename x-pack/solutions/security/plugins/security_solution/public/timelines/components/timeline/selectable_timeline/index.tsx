@@ -7,20 +7,20 @@
 
 import type { EuiSelectableOption, EuiSelectableProps } from '@elastic/eui';
 import {
-  EuiSelectable,
-  EuiHighlight,
+  EuiFilterButton,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHighlight,
   EuiIcon,
+  EuiSelectable,
   EuiTextColor,
-  EuiFilterButton,
   EuiToolTip,
 } from '@elastic/eui';
-import { isEmpty, debounce } from 'lodash/fp';
-import React, { memo, useCallback, useMemo, useState, useEffect, useRef } from 'react';
+import { debounce, isEmpty } from 'lodash/fp';
+import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import styled from 'styled-components';
 
-import { type TimelineType, SortFieldTimelineEnum } from '../../../../../common/api/timeline';
+import { SortFieldTimelineEnum, type TimelineType } from '../../../../../common/api/timeline';
 
 import { useGetAllTimeline } from '../../../containers/all';
 import { isUntitled } from '../../open_timeline/helpers';
@@ -52,9 +52,7 @@ const TIMELINE_ITEM_HEIGHT = 50;
  */
 const replaceTitleInOptions = (
   options: EuiSelectableOption[]
-): Array<
-  EuiSelectableOption<{ timelineTitle: string; description?: string; graphEveId?: string }>
-> =>
+): Array<EuiSelectableOption<{ timelineTitle: string; description?: string }>> =>
   options.map(({ title, ...props }) => ({
     ...props,
     title: undefined,
@@ -77,11 +75,7 @@ export interface SelectableTimelineProps {
     searchTimelineValue,
   }: GetSelectableOptions) => EuiSelectableOption[];
   onClosePopover: () => void;
-  onTimelineChange: (
-    timelineTitle: string,
-    timelineId: string | null,
-    graphEventId?: string
-  ) => void;
+  onTimelineChange: (timelineTitle: string, timelineId: string | null) => void;
   timelineType: TimelineType;
   placeholder?: string;
 }
@@ -143,7 +137,6 @@ const SelectableTimelineComponent: React.FC<SelectableTimelineProps> = ({
       EuiSelectableProps<{
         timelineTitle: string;
         description?: string;
-        graphEventId?: string;
         favorite?: FavoriteTimelineResult[];
       }>['renderOption']
     >
@@ -164,7 +157,11 @@ const SelectableTimelineComponent: React.FC<SelectableTimelineProps> = ({
         responsive={false}
       >
         <EuiFlexItem grow={false}>
-          <EuiIcon type={`${option.checked === 'on' ? 'check' : 'empty'}`} color="primary" />
+          <EuiIcon
+            type={`${option.checked === 'on' ? 'check' : 'empty'}`}
+            color="primary"
+            aria-hidden={true}
+          />
         </EuiFlexItem>
         <TimelineContentItem grow={true}>
           <EuiFlexGroup gutterSize="none" direction="column" responsive={false}>
@@ -184,9 +181,8 @@ const SelectableTimelineComponent: React.FC<SelectableTimelineProps> = ({
         </TimelineContentItem>
         <EuiFlexItem grow={false}>
           <EuiIcon
-            type={`${
-              option.favorite != null && isEmpty(option.favorite) ? 'starEmpty' : 'starFilled'
-            }`}
+            type={`${option.favorite != null && isEmpty(option.favorite) ? 'star' : 'starFill'}`}
+            aria-hidden={true}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -198,7 +194,6 @@ const SelectableTimelineComponent: React.FC<SelectableTimelineProps> = ({
       EuiSelectableProps<{
         timelineTitle: string;
         description?: string;
-        graphEventId?: string;
       }>['onChange']
     >
   >(
@@ -211,8 +206,7 @@ const SelectableTimelineComponent: React.FC<SelectableTimelineProps> = ({
             : selectedTimeline[0].timelineTitle,
           selectedTimeline[0].id === '-1'
             ? null
-            : (selectedTimeline[0].id as unknown as string | null),
-          selectedTimeline[0].graphEventId ?? ''
+            : (selectedTimeline[0].id as unknown as string | null)
         );
       }
       onClosePopover();
@@ -288,7 +282,6 @@ const SelectableTimelineComponent: React.FC<SelectableTimelineProps> = ({
     <EuiSelectable<{
       timelineTitle: string;
       description?: string;
-      graphEventId?: string;
       favorite?: FavoriteTimelineResult[];
     }>
       data-test-subj="selectable-input"

@@ -8,21 +8,26 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import {
+import type {
   EuiDataGridColumn,
   EuiDataGridColumnCellActionProps,
   EuiListGroupItemProps,
 } from '@elastic/eui';
 import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
-import { EuiDataGridColumnCellAction } from '@elastic/eui/src/components/datagrid/data_grid_types';
+import type { EuiDataGridColumnCellAction } from '@elastic/eui/src/components/datagrid/data_grid_types';
 import { FILTER_CELL_ACTION_TYPE } from '@kbn/cell-actions/constants';
+import { LENS_ROW_HEIGHT_MODE, DEFAULT_HEADER_ROW_HEIGHT } from '@kbn/lens-common';
+import type { LensCellValueAction, RowHeightMode } from '@kbn/lens-common';
 import type { FormatFactory } from '../../../../common/types';
-import { RowHeightMode } from '../../../../common/types';
 import type { DatatableColumnConfig } from '../../../../common/expressions';
 import { nonNullable } from '../../../utils';
-import { LensCellValueAction } from '../../../types';
-import { buildColumnsMetaLookup } from './helpers';
-import { DEFAULT_HEADER_ROW_HEIGHT } from './constants';
+import {
+  buildColumnsMetaLookup,
+  getEsqlComputedColumnFilterDisabledMessage,
+  getGenericFilterDisabledMessage,
+  isEsqlTableComputedColumn,
+} from './helpers';
+import { isEmptyValue } from './cell_value_helpers';
 
 const hasFilterCellAction = (actions: LensCellValueAction[]) => {
   return actions.some(({ type }) => type === FILTER_CELL_ACTION_TYPE);
@@ -46,7 +51,6 @@ export const createGridColumns = (
         negate?: boolean
       ) => void)
     | undefined,
-  isReadOnly: boolean,
   columnConfig: DatatableColumnConfig,
   visibleColumns: string[],
   formatFactory: FormatFactory,
@@ -57,7 +61,8 @@ export const createGridColumns = (
   headerRowLines: number,
   columnCellValueActions: LensCellValueAction[][] | undefined,
   closeCellPopover?: Function,
-  columnFilterable?: boolean[]
+  columnFilterable?: boolean[],
+  isInteractive?: boolean
 ) => {
   const columnsReverseLookup = buildColumnsMetaLookup(table);
 
@@ -68,9 +73,9 @@ export const createGridColumns = (
     // incoming data might change and put the current page out of bounds - check whether row actually exists
     const rowValue = table.rows[rowIndex]?.[columnId];
     const column = columnsReverseLookup?.[columnId];
-    const contentsIsDefined = rowValue != null;
+    const contentsIsDefined = !isEmptyValue(rowValue);
 
-    const cellContent = formatFactory(column?.meta?.params).convert(rowValue);
+    const cellContent = formatFactory(column?.meta?.params).convertToText(rowValue);
     return { rowValue, contentsIsDefined, cellContent };
   };
 
@@ -90,12 +95,20 @@ export const createGridColumns = (
       // compatible cell actions from actions registry
       const compatibleCellActions = columnCellValueActions?.[colIndex] ?? [];
 
-      if (
+      // Actions are still added when the column is not filterable (`columnFilterable`);
+      // they render disabled with an explanatory `title` instead of being hidden.
+      const showFilterActions =
         !hasFilterCellAction(compatibleCellActions) &&
-        filterable &&
         handleFilterClick &&
-        !columnArgs?.oneClickFilter
-      ) {
+        !columnArgs?.oneClickFilter;
+
+      const disabledFilterActionMessage = !filterable
+        ? isEsqlTableComputedColumn(table, field)
+          ? getEsqlComputedColumnFilterDisabledMessage
+          : getGenericFilterDisabledMessage
+        : undefined;
+
+      if (showFilterActions) {
         cellActions.push(
           ({ rowIndex, columnId, Component }: EuiDataGridColumnCellActionProps) => {
             const { rowValue, contentsIsDefined, cellContent } = getContentData({
@@ -125,13 +138,15 @@ export const createGridColumns = (
 
             return (
               <Component
-                aria-label={filterForAriaLabel}
                 data-test-subj="lensDatatableFilterFor"
+                aria-label={filterForAriaLabel}
+                disabled={!filterable}
                 onClick={() => {
                   handleFilterClick(field, rowValue, colIndex, rowIndex);
                   closeCellPopover?.();
                 }}
-                iconType="plusInCircle"
+                title={disabledFilterActionMessage}
+                iconType="plusCircle"
               >
                 {filterForText}
               </Component>
@@ -167,11 +182,13 @@ export const createGridColumns = (
               <Component
                 data-test-subj="lensDatatableFilterOut"
                 aria-label={filterOutAriaLabel}
+                disabled={!filterable}
                 onClick={() => {
                   handleFilterClick(field, rowValue, colIndex, rowIndex, true);
                   closeCellPopover?.();
                 }}
-                iconType="minusInCircle"
+                title={disabledFilterActionMessage}
+                iconType="minusCircle"
               >
                 {filterOutText}
               </Component>
@@ -218,7 +235,6 @@ export const createGridColumns = (
 
       additionalActions.push({
         color: 'text',
-        size: 'xs',
         onClick: () => onColumnResize({ columnId: originalColumnId || field, width: undefined }),
         iconType: 'empty',
         label: i18n.translate('xpack.lens.table.resize.reset', {
@@ -227,12 +243,12 @@ export const createGridColumns = (
         'data-test-subj': 'lensDatatableResetWidth',
         isDisabled: initialWidth == null,
       });
+
       if (!isTransposed && onColumnHide) {
         additionalActions.push({
           color: 'text',
-          size: 'xs',
           onClick: () => onColumnHide({ columnId: originalColumnId || field }),
-          iconType: 'eyeClosed',
+          iconType: 'eyeSlash',
           label: i18n.translate('xpack.lens.table.hide.hideLabel', {
             defaultMessage: 'Hide',
           }),
@@ -241,36 +257,35 @@ export const createGridColumns = (
         });
       }
 
-      if (!isReadOnly) {
-        if (isTransposed && columnArgs?.bucketValues && handleTransposedColumnClick) {
-          const bucketValues = columnArgs?.bucketValues;
-          additionalActions.push({
-            color: 'text',
-            size: 'xs',
-            onClick: () => handleTransposedColumnClick(bucketValues, false),
-            iconType: 'plusInCircle',
-            label: i18n.translate('xpack.lens.table.columnFilter.filterForValueText', {
-              defaultMessage: 'Filter for',
-            }),
-            'data-test-subj': 'lensDatatableHide',
-          });
+      if (isTransposed && columnArgs?.bucketValues && handleTransposedColumnClick) {
+        const bucketValues = columnArgs?.bucketValues;
+        additionalActions.push({
+          color: 'text',
+          onClick: () => handleTransposedColumnClick(bucketValues, false),
+          iconType: 'plusCircle',
+          label: i18n.translate('xpack.lens.table.columnFilter.filterForValueText', {
+            defaultMessage: 'Filter for',
+          }),
+          'data-test-subj': 'lensDatatableHide',
+        });
 
-          additionalActions.push({
-            color: 'text',
-            size: 'xs',
-            onClick: () => handleTransposedColumnClick(bucketValues, true),
-            iconType: 'minusInCircle',
-            label: i18n.translate('xpack.lens.table.columnFilter.filterOutValueText', {
-              defaultMessage: 'Filter out',
-            }),
-            'data-test-subj': 'lensDatatableHide',
-          });
-        }
+        additionalActions.push({
+          color: 'text',
+          onClick: () => handleTransposedColumnClick(bucketValues, true),
+          iconType: 'minusCircle',
+          label: i18n.translate('xpack.lens.table.columnFilter.filterOutValueText', {
+            defaultMessage: 'Filter out',
+          }),
+          'data-test-subj': 'lensDatatableHide',
+        });
       }
+
       const currentAlignment = alignments && alignments.get(field);
-      const hasMultipleRows = [RowHeightMode.auto, RowHeightMode.custom, undefined].includes(
-        headerRowHeight
-      );
+      const hasMultipleRows = [
+        LENS_ROW_HEIGHT_MODE.auto,
+        LENS_ROW_HEIGHT_MODE.custom,
+        undefined,
+      ].includes(headerRowHeight);
 
       const columnStyle = css({
         ...((headerRowHeight === DEFAULT_HEADER_ROW_HEIGHT || headerRowHeight === undefined) && {
@@ -291,22 +306,25 @@ export const createGridColumns = (
         display: <div css={columnStyle}>{name}</div>,
         displayAsText: name,
         schema: field,
-        actions: {
-          showHide: false,
-          showMoveLeft: false,
-          showMoveRight: false,
-          showSortAsc: {
-            label: i18n.translate('xpack.lens.table.sort.ascLabel', {
-              defaultMessage: 'Sort ascending',
-            }),
-          },
-          showSortDesc: {
-            label: i18n.translate('xpack.lens.table.sort.descLabel', {
-              defaultMessage: 'Sort descending',
-            }),
-          },
-          additional: additionalActions,
-        },
+        isResizable: isInteractive,
+        actions: !isInteractive
+          ? false
+          : {
+              showHide: false,
+              showMoveLeft: false,
+              showMoveRight: false,
+              showSortAsc: {
+                label: i18n.translate('xpack.lens.table.sort.ascLabel', {
+                  defaultMessage: 'Sort ascending',
+                }),
+              },
+              showSortDesc: {
+                label: i18n.translate('xpack.lens.table.sort.descLabel', {
+                  defaultMessage: 'Sort descending',
+                }),
+              },
+              additional: additionalActions,
+            },
       };
 
       if (initialWidth) {

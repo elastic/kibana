@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { PublicMethodsOf } from '@kbn/utility-types';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import { FieldFormatsRegistry } from './field_formats_registry';
 
 /** @public */
@@ -34,7 +34,7 @@ export {
   HistogramFormat,
 } from './converters';
 
-export { getHighlightRequest, geoUtils } from './utils';
+export { getHighlightRequest, geoUtils, highlightTags } from './utils';
 
 export { DEFAULT_CONVERTER_COLOR } from './constants/color_default';
 export { FORMATS_UI_SETTINGS } from './constants/ui_settings';
@@ -43,13 +43,13 @@ export {
   DEFAULT_DURATION_OUTPUT_FORMAT,
   DURATION_INPUT_FORMATS,
   DURATION_OUTPUT_FORMATS,
+  getDurationUnitFromOutputFormat,
+  getDurationUnitInSeconds,
 } from './constants/duration_formats';
 export { FIELD_FORMAT_IDS } from './types';
-export { HTML_CONTEXT_TYPE, TEXT_CONTEXT_TYPE } from './content_types';
 
 export type {
   FieldFormatsGetConfigFn,
-  FieldFormatsContentType,
   FieldFormatConfig,
   FieldFormatId,
   SerializedFieldFormat,
@@ -59,10 +59,9 @@ export type {
   FieldFormatsStartCommon,
   FieldFormatParams,
   FieldFormatMetaParams,
-  FieldFormatConvert,
-  FieldFormatConvertFunction,
-  HtmlContextTypeConvert,
-  HtmlContextTypeOptions,
+  ReactContextTypeConvert,
+  ReactConvertFunction,
+  ReactContextTypeOptions,
   TextContextTypeConvert,
   TextContextTypeOptions,
 } from './types';

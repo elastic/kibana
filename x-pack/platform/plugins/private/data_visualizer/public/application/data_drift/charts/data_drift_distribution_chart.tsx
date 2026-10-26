@@ -53,12 +53,12 @@ const visualizeComparisonChartIcons = [
   {
     id: DATA_DRIFT_COMPARISON_CHART_TYPE.AREA,
     label: showAsAreaChartOption,
-    iconType: 'visArea',
+    iconType: 'chartArea',
   },
   {
     id: DATA_DRIFT_COMPARISON_CHART_TYPE.BAR,
     label: showAsBarChartOption,
-    iconType: 'visBarVertical',
+    iconType: 'chartBarVertical',
   },
 ];
 

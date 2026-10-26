@@ -42,7 +42,7 @@ export const StepNav = ({ stepIndex, totalSteps, handleStepHref }: Props) => {
       data-test-subj="syntheticsStepNavStepStepIndexOfTotalStepsButton"
       size="s"
       flush="left"
-      iconType={hasMoreThanOneStep ? 'arrowDown' : undefined}
+      iconType={hasMoreThanOneStep ? 'chevronSingleDown' : undefined}
       iconSide="right"
       onClick={onButtonClick}
       style={{ height: 20 }}
@@ -79,8 +79,11 @@ export const StepNav = ({ stepIndex, totalSteps, handleStepHref }: Props) => {
       closePopover={closePopover}
       panelPaddingSize="none"
       anchorPosition="downLeft"
+      aria-label={i18n.translate('xpack.synthetics.stepNav.popoverAriaLabel', {
+        defaultMessage: 'Step navigation menu',
+      })}
     >
-      <EuiContextMenuPanel size="s" items={items} />
+      <EuiContextMenuPanel items={items} />
     </EuiPopover>
   );
 };

@@ -1,0 +1,52 @@
+name: Summarize Hackernews
+description: Summarizes the top 10 Hackernews posts from the last 24 hours and sends them to Slack.
+enabled: true
+
+triggers:
+  - type: manual
+  - type: scheduled
+    with:
+      rrule:
+        freq: DAILY
+        interval: 1
+        tzid: Etc/GMT+2
+        dtstart: 2025-01-01T09:00:00.000Z
+
+consts:
+  firecrawlApiKey: secret
+
+steps:
+  - name: getHackernewsPosts
+    type: http
+    with:
+      url: https://api.firecrawl.dev/v2/scrape
+      method: POST
+      headers:
+        Authorization: Bearer {{consts.firecrawlApiKey}}
+      body:
+        url: https://news.ycombinator.com/news
+        formats:
+          - type: json
+            prompt: >-
+              Extract the top 10 results from Hackernews, with the title of the post, score, URL, and a summary of what
+              this post speaks about.
+
+  - name: formatMessage
+    type: inference.completion
+    connector-id: openai
+    with:
+      input: >-
+        Take this JSON output of the top 10 HackerNews posts from today and format it nicely so it can be sent as a Slack message.
+        Order by the score of the post, higher score first.
+
+        ```json
+        {{ steps.getHackernewsPosts.output.data.data.json.results | json }}
+        ```
+
+        Your response should include ONLY the message to be sent to Slack and nothing else besides that.
+
+  - name: sendSlack
+    type: slack
+    connector-id: slacky
+    with:
+      message: '{{steps.formatMessage.output[0].result}}'

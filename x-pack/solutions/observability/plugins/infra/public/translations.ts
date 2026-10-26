@@ -35,7 +35,7 @@ export const metricsTitle = i18n.translate('xpack.infra.header.infrastructureTit
 });
 
 export const inventoryTitle = i18n.translate('xpack.infra.metrics.infrastructureInventoryTitle', {
-  defaultMessage: 'Infrastructure Inventory',
+  defaultMessage: 'Infrastructure inventory',
 });
 
 export const metricsExplorerTitle = i18n.translate('xpack.infra.metrics.metricsExplorerTitle', {
@@ -48,4 +48,13 @@ export const hostsTitle = i18n.translate('xpack.infra.metrics.hostsTitle', {
 
 export const errorTitle = i18n.translate('xpack.infra.metricDetailPage.documentTitleError', {
   defaultMessage: 'Uh oh',
+});
+
+export const entityInventoryToggleLabel = i18n.translate(
+  'xpack.infra.metrics.entityInventoryToggleLabel',
+  { defaultMessage: 'Infrastructure entities inventory experience' }
+);
+
+export const entityInventoryTitle = i18n.translate('xpack.infra.metrics.entityInventoryTitle', {
+  defaultMessage: 'Entity Inventory (placeholder)',
 });

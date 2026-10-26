@@ -13,7 +13,10 @@ import type { OnboardingRouteParams } from '../../types';
  * Hook that returns the topic id from the URL, or the default topic id if none is present
  * This is the Single Source of Truth for the topic id
  */
-export const useTopicId = (): OnboardingTopicId => {
-  const { topicId = OnboardingTopicId.default } = useParams<OnboardingRouteParams>();
-  return topicId;
+export const useTopicId = (topicId?: OnboardingTopicId): OnboardingTopicId => {
+  const { topicId: urlTopicId = OnboardingTopicId.default } = useParams<OnboardingRouteParams>();
+  if (topicId) {
+    return topicId;
+  }
+  return urlTopicId;
 };

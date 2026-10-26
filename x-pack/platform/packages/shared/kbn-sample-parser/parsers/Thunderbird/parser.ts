@@ -5,22 +5,35 @@
  * 2.0.
  */
 
-const TIMESTAMP_REGEX = /^- (\d+) (\d{4}\.\d{2}\.\d{2} .*)/;
+const TIMESTAMP_REGEX = /^-\s(\d{10})/;
 
 export function getTimestamp(logLine: string): number {
   const match = logLine.match(TIMESTAMP_REGEX);
   if (match) {
-    const timestamp = parseInt(match[1], 10);
-    return timestamp * 1000; // Convert to milliseconds
+    const epochSeconds = parseInt(match[1], 10);
+    return epochSeconds * 1000; // Convert to milliseconds
   }
   throw new Error('Timestamp not found');
 }
 
 export function replaceTimestamp(logLine: string, timestamp: number): string {
-  const match = logLine.match(TIMESTAMP_REGEX);
-  if (match) {
-    const newTimestamp = Math.floor(timestamp / 1000); // Convert to seconds
-    return `- ${newTimestamp} ${match[2]}`;
-  }
-  throw new Error('Timestamp not found');
+  const epochSeconds = Math.floor(timestamp / 1000); // Convert milliseconds to seconds
+  return logLine.replace(TIMESTAMP_REGEX, `- ${epochSeconds}`);
+}
+
+export function getFakeMetadata(logLine: string): object {
+  const randomHostSuffix = Math.floor(Math.random() * 1000);
+  const randomProcessId = Math.floor(Math.random() * 10000);
+  return {
+    host: {
+      name: `host-${randomHostSuffix}`,
+    },
+    process: {
+      pid: randomProcessId,
+      name: 'fakeProcess',
+    },
+    user: {
+      name: 'fakeUser',
+    },
+  };
 }

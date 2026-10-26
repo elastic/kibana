@@ -7,6 +7,7 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import type { Writable } from '@kbn/utility-types';
+import { asSpaceId } from '@kbn/core-spaces-common';
 import type { RuleExecutorServices } from '@kbn/alerting-plugin/server';
 import type { RuleExecutorServicesMock } from '@kbn/alerting-plugin/server/mocks';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
@@ -19,7 +20,7 @@ import type { ActionContext } from './action_context';
 import type { ESSearchResponse, ESSearchRequest } from '@kbn/es-types';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { coreMock } from '@kbn/core/server/mocks';
-import { ActionGroupId, ConditionMetAlertInstanceId } from './constants';
+import { ActionGroupId, ConditionMetAlertInstanceId } from '../../../common/es_query';
 import type {
   OnlyEsqlQueryRuleParams,
   OnlyEsQueryRuleParams,
@@ -87,6 +88,10 @@ describe('ruleType', () => {
              the alert when the rule is created in Discover. Otherwise, navigate to the status page for the rule.",
             "name": "link",
             "usesPublicBaseUrl": true,
+          },
+          Object {
+            "description": "The object containing groups that are reporting data",
+            "name": "grouping",
           },
         ],
         "params": Array [
@@ -817,9 +822,7 @@ describe('ruleType', () => {
         ],
         values: [],
       };
-      ruleServices.scopedClusterClient.asCurrentUser.transport.request.mockResolvedValueOnce(
-        searchResult
-      );
+      ruleServices.scopedClusterClient.asCurrentUser.esql.query.mockResolvedValueOnce(searchResult);
 
       await invokeExecutor({ params, ruleServices });
       expect(ruleServices.alertsClient.report).not.toHaveBeenCalled();
@@ -839,9 +842,7 @@ describe('ruleType', () => {
           ['timestamp', 'message'],
         ],
       };
-      ruleServices.scopedClusterClient.asCurrentUser.transport.request.mockResolvedValueOnce(
-        searchResult
-      );
+      ruleServices.scopedClusterClient.asCurrentUser.esql.query.mockResolvedValueOnce(searchResult);
 
       await invokeExecutor({ params, ruleServices });
 
@@ -929,7 +930,7 @@ async function invokeExecutor({
       latestTimestamp: undefined,
       ...state,
     },
-    spaceId: uuidv4(),
+    spaceId: asSpaceId(uuidv4()),
     rule: {
       id: uuidv4(),
       name: 'rule-name',

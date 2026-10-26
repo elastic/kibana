@@ -20,7 +20,7 @@ A headless browser is a browser simulation program that does not have a user int
 
 #### FTR (CI)
 
-This is the configuration used by CI. It uses the FTR to spawn both a Kibana instance (http://localhost:5620) and an Elasticsearch instance (http://localhost:9220) with a preloaded minimum set of data (see preceding "Test data" section), and then executes cypress against this stack. You can find this configuration in `x-pack/test/fleet_cypress`
+This is the configuration used by CI. It uses the FTR to spawn both a Kibana instance (http://localhost:5620) and an Elasticsearch instance (http://localhost:9220) with a preloaded minimum set of data (see preceding "Test data" section), and then executes cypress against this stack. You can find this configuration in `x-pack/platform/test/fleet_cypress`
 
 ## Test Artifacts
 
@@ -45,14 +45,14 @@ Since this is how tests are run on CI, this will likely be the configuration you
 
 ```shell
 # bootstrap kibana from the project root
-yarn kbn bootstrap
+pnpm kbn bootstrap
 
 # build the plugins/assets that cypress will execute against
 node scripts/build_kibana_platform_plugins
 
 # launch the cypress test runner
 cd x-pack/platform/plugins/shared/fleet
-yarn cypress:run
+pnpm cypress:run
 ```
 
 #### FTR + Interactive
@@ -61,14 +61,14 @@ This is the preferred mode for developing new tests.
 
 ```shell
 # bootstrap kibana from the project root
-yarn kbn bootstrap
+pnpm kbn bootstrap
 
 # build the plugins/assets that cypress will execute against
 node scripts/build_kibana_platform_plugins
 
 # launch the cypress test runner
 cd x-pack/platform/plugins/shared/fleet
-yarn cypress:open
+pnpm cypress:open
 ```
 
 Note that you can select the browser you want to use on the top right side of the interactive runner.
@@ -153,7 +153,7 @@ Remember that minimizing the number of times the web page is loaded, we minimize
 
 ### Accessibility
 
-The `checkA11y({ skipFailures: false });` call uses [axe-core](https://github.com/dequelabs/axe-core) to perform a full page check for accessibility violations.
+The `checkA11y();` call uses [axe-core](https://github.com/dequelabs/axe-core) to perform a full page check for accessibility violations.
 
 See [axe-core](https://github.com/dequelabs/axe-core)'s documentation for details on what is checked for.
 

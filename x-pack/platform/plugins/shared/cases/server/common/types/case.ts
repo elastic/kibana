@@ -6,10 +6,9 @@
  */
 
 import type { SavedObject } from '@kbn/core-saved-objects-server';
-import type { Type } from 'io-ts';
-import { exact, partial, strict, string } from 'io-ts';
+import { z } from '@kbn/zod/v4';
 import type { CaseAttributes, Observable } from '../../../common/types/domain';
-import { CaseAttributesRt } from '../../../common/types/domain';
+import { CaseAttributesSchema } from '../../../common/types/domain';
 import type { ConnectorPersisted } from './connectors';
 import type { ExternalServicePersisted } from './external_service';
 import type { User, UserProfile } from './user';
@@ -33,23 +32,35 @@ export interface CasePersistedAttributes {
   closed_by: User | null;
   created_at: string;
   created_by: User;
+  in_progress_at?: string | null;
   connector: ConnectorPersisted;
   description: string;
   duration: number | null;
   external_service: ExternalServicePersisted | null;
   owner: string;
-  settings: { syncAlerts: boolean };
+  settings: { syncAlerts: boolean; extractObservables?: boolean };
   severity: CasePersistedSeverity;
   status: CasePersistedStatus;
   tags: string[];
   title: string;
   total_alerts: number;
   total_comments: number;
+  total_events?: number;
+  total_observables?: number;
   updated_at: string | null;
   updated_by: User | null;
   category?: string | null;
   customFields?: CasePersistedCustomFields;
   observables?: Observable[];
+  incremental_id?: number | null;
+  time_to_acknowledge?: number | null;
+  time_to_investigate?: number | null;
+  time_to_resolve?: number | null;
+  template?: {
+    id: string;
+    version: number;
+  } | null;
+  extended_fields?: Record<string, unknown> | null;
 }
 
 type CasePersistedCustomFields = Array<{
@@ -59,19 +70,26 @@ type CasePersistedCustomFields = Array<{
 }>;
 
 export type CaseTransformedAttributes = CaseAttributes;
-
-export const CaseTransformedAttributesRt = CaseAttributesRt;
-
-export const getPartialCaseTransformedAttributesRt = (): Type<Partial<CaseAttributes>> => {
-  const caseTransformedAttributesProps = CaseAttributesRt.types.reduce(
-    (acc, type) => Object.assign(acc, type.type.props),
-    {}
-  );
-
-  return exact(partial({ ...caseTransformedAttributesProps }));
+export type CaseTransformedAttributesWithAttachmentStats = CaseAttributes & {
+  total_comments: number;
+  total_alerts: number;
+  total_events: number;
 };
+
+export const CaseTransformedAttributesSchema = CaseAttributesSchema;
+
+/**
+ * We add the `total_comments`, `total_alerts`, and `total_events` properties to allow the
+ * attachments stats to be updated.
+ */
+export const getPartialCaseTransformedAttributesSchema = () =>
+  CaseAttributesSchema.partial().extend({
+    total_comments: z.number().optional(),
+    total_alerts: z.number().optional(),
+    total_events: z.number().optional(),
+  });
 
 export type CaseSavedObject = SavedObject<CasePersistedAttributes>;
 export type CaseSavedObjectTransformed = SavedObject<CaseTransformedAttributes>;
 
-export const OwnerRt = strict({ owner: string });
+export const OwnerSchema = z.object({ owner: z.string() });

@@ -17,3 +17,4 @@ export {
 export { deserializePolicy, serializePolicy } from './policy_serialization';
 export { csvToArray } from './utils';
 export { isDataStreamBackingIndex } from './is_data_stream_backing_index';
+export { isRepositoryReadOnly } from './is_repository_readonly';

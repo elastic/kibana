@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
+import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 
 export interface AppPluginDependencies {
   navigation: NavigationPublicPluginStart;

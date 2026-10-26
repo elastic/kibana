@@ -39,7 +39,6 @@ describe('GET /internal/spaces/{spaceId}/content_summary', () => {
   const spacesSavedObjects = createSpaces();
 
   const setup = async (params?: SetupParams) => {
-    const httpService = httpServiceMock.createSetupContract();
     const router = httpServiceMock.createRouter();
 
     const coreStart = coreMock.createStart();
@@ -78,14 +77,15 @@ describe('GET /internal/spaces/{spaceId}/content_summary', () => {
     );
 
     const service = new SpacesService();
-    service.setup({
-      basePath: httpService.basePath,
-    });
+    service.setup();
 
-    const clientServiceStart = clientService.start(coreStart, featuresPluginMock.createStart());
+    const clientServiceStart = clientService.start(
+      coreStart,
+      featuresPluginMock.createStart(),
+      undefined
+    );
 
     const spacesServiceStart = service.start({
-      basePath: coreStart.http.basePath,
       spacesClientService: clientServiceStart,
     });
 
@@ -226,7 +226,7 @@ describe('GET /internal/spaces/{spaceId}/content_summary', () => {
 
     const response = await routeHandler(routeContext, request, kibanaResponseFactory);
 
-    expect(findMock).toBeCalledWith({
+    expect(findMock).toHaveBeenCalledWith({
       type: ['dashboard', 'query'],
       namespaces: ['a-space'],
       perPage: 0,
@@ -298,7 +298,7 @@ describe('GET /internal/spaces/{spaceId}/content_summary', () => {
 
     const response = await routeHandler(routeContext, request, kibanaResponseFactory);
 
-    expect(findMock).toBeCalledWith({
+    expect(findMock).toHaveBeenCalledWith({
       type: ['dashboard', 'query'],
       namespaces: ['a-space'],
       perPage: 0,
@@ -391,7 +391,7 @@ describe('GET /internal/spaces/{spaceId}/content_summary', () => {
 
     const response = await routeHandler(routeContext, request, kibanaResponseFactory);
 
-    expect(findMock).toBeCalledWith({
+    expect(findMock).toHaveBeenCalledWith({
       type: ['dashboard', 'query', 'search'],
       namespaces: ['a-space'],
       perPage: 0,

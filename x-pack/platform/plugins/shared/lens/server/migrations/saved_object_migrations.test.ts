@@ -7,14 +7,15 @@
 
 import { cloneDeep } from 'lodash';
 import type { PaletteOutput, CustomPaletteParams } from '@kbn/coloring';
-import { getAllMigrations, LensDocShape } from './saved_object_migrations';
-import {
+import type { LensDocShape } from './saved_object_migrations';
+import { getAllMigrations } from './saved_object_migrations';
+import type {
   SavedObjectMigrationContext,
   SavedObjectMigrationFn,
   SavedObjectUnsanitizedDoc,
 } from '@kbn/core/server';
 import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
-import {
+import type {
   LensDocShape715,
   LensDocShape810,
   VisState716,
@@ -28,9 +29,9 @@ import {
   VisState850,
 } from './types';
 import { LayerTypes } from '@kbn/expression-xy-plugin/common';
-import { LegacyMetricState } from '../../common/types';
-import { Filter } from '@kbn/es-query';
-import { DataViewSpec } from '@kbn/data-views-plugin/common';
+import type { LegacyMetricState } from '@kbn/lens-common';
+import type { Filter } from '@kbn/es-query';
+import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 
 describe('Lens migrations', () => {
   const migrations = getAllMigrations({}, {}, {});
@@ -1220,9 +1221,9 @@ describe('Lens migrations', () => {
     } as unknown as SavedObjectUnsanitizedDoc<LensDocShape715<unknown>>;
 
     it('should just return the same document for XY, partition and metric visualization types', () => {
-      for (const vizType of ['lnsXY', 'lnsPie', 'lnsMetric']) {
+      for (const visType of ['lnsXY', 'lnsPie', 'lnsMetric']) {
         const exampleCopy = cloneDeep(example);
-        exampleCopy.attributes.visualizationType = vizType;
+        exampleCopy.attributes.visualizationType = visType;
         // add datatable state here, even with another viz (manual change?)
         (exampleCopy.attributes as LensDocShape715<VisState716>).state.visualization = {
           columns: [

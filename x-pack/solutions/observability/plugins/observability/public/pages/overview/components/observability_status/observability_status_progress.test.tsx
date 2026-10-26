@@ -6,7 +6,7 @@
  */
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { HasDataContextValue } from '../../../../context/has_data_context/has_data_context';
+import type { HasDataContextValue } from '../../../../context/has_data_context/has_data_context';
 import * as hasDataHook from '../../../../hooks/use_has_data';
 import { ObservabilityStatusProgress } from './observability_status_progress';
 import { I18nProvider } from '@kbn/i18n-react';

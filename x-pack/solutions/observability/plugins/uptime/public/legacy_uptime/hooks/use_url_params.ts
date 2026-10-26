@@ -6,10 +6,11 @@
  */
 
 import { useCallback, useEffect } from 'react';
-import { stringify } from 'query-string';
+import queryString from 'query-string';
 import { useLocation, useHistory } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
-import { UptimeUrlParams, getSupportedUrlParams } from '../lib/helper';
+import { useDispatch, useSelector } from 'react-redux-v7';
+import type { UptimeUrlParams } from '../lib/helper';
+import { getSupportedUrlParams } from '../lib/helper';
 import { selectedFiltersSelector } from '../state/selectors';
 import { setSelectedFilters } from '../state/actions/selected_filters';
 import { getFiltersFromMap } from './use_selected_filters';
@@ -60,7 +61,7 @@ export const useUrlParams: UptimeUrlParamsHook = () => {
         ...updatedParams,
       };
 
-      const updatedSearch = stringify(
+      const updatedSearch = queryString.stringify(
         // drop any parameters that have no value
         Object.keys(mergedParams).reduce((params, key) => {
           const value = mergedParams[key];

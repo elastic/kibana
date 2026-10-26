@@ -17,18 +17,38 @@ import { MOCK_IDP_REALM_NAME } from '@kbn/mock-idp-utils';
 import { basename } from 'path';
 import { SERVERLESS_RESOURCES_PATHS } from '../paths';
 import { Cluster } from '../cluster';
+import type { ServerlessOptions } from '../utils';
 import {
   ES_SERVERLESS_REPO_ELASTICSEARCH,
   ES_SERVERLESS_DEFAULT_IMAGE,
   DEFAULT_PORT,
-  ServerlessOptions,
-  isServerlessProjectType,
-  serverlessProjectTypes,
+  isEsServerlessProjectType,
+  esServerlessProjectTypes,
+  isServerlessProjectTier,
+  serverlessProductTiers,
+  kbnProjectTypeFromEs,
+  ELASTIC_SERVERLESS_SUPERUSER,
+  ELASTIC_SERVERLESS_SUPERUSER_PASSWORD,
 } from '../utils';
-import { Command } from './types';
+import type { ServerlessProjectType } from '../utils';
+import type { Command } from './types';
 import { createCliError } from '../errors';
+import {
+  assertCcmApiKeyResolved,
+  mergeEisEsArgs,
+  resolveCcmApiKey,
+  setCcmApiKey,
+} from '../eis/eis_setup';
 
-const supportedProjectTypesStr = Array.from(serverlessProjectTypes).join(' | ').trim();
+const supportedProjectTypesStr = Array.from(esServerlessProjectTypes).join(' | ').trim();
+const supportedProductTiersStr = Array.from(serverlessProductTiers).join(' | ').trim();
+
+/**
+ * `--eis` is a CLI-only flag: it's consumed entirely in this file (to build
+ * `esArgs`/`onReady`) before the options are handed to `runServerlessCluster`,
+ * so it isn't part of the shared `ServerlessOptions` type.
+ */
+type ServerlessCliOptions = ServerlessOptions & { eis?: boolean };
 
 export const serverless: Command = {
   description: 'Run Serverless Elasticsearch through Docker',
@@ -37,7 +57,8 @@ export const serverless: Command = {
     return dedent`
     Options:
 
-      --projectType       Serverless project type: ${supportedProjectTypesStr}
+      --esProjectType     Serverless project type: ${supportedProjectTypesStr}
+      --productTier       Serverless product tier: ${supportedProductTiersStr}
       --tag               Image tag of ES serverless to run from ${ES_SERVERLESS_REPO_ELASTICSEARCH}
       --image             Full path of ES serverless image to run, has precedence over tag. [default: ${ES_SERVERLESS_DEFAULT_IMAGE}]
       --background        Start ES serverless without attaching to the first node's logs
@@ -48,7 +69,6 @@ export const serverless: Command = {
       --host              Publish ES docker container on additional host IP
       --port              The port to bind to on 127.0.0.1 [default: ${DEFAULT_PORT}]
       --ssl               Enable HTTP SSL on the ES cluster [default: true]
-      --kibanaUrl         Fully qualified URL where Kibana is hosted (including base path). [default: http://localhost:5601/]
       --skipTeardown      If this process exits, leave the ES cluster running in the background
       --waitForReady      Wait for the ES cluster to be ready to serve requests
       --resources         Overrides resources under ES 'config/' directory, which are by default
@@ -58,14 +78,21 @@ export const serverless: Command = {
                           ${SERVERLESS_RESOURCES_PATHS.map((filePath) => basename(filePath)).join(
                             ' | '
                           )}
+      --uiam              Configure ES serverless with Universal Identity and Access Management (UIAM) support [default: true].
+      --uiam-oauth        Start an additional UIAM OAuth container for OAuth flow support [default: false].
+      --uiam-ephemeral-token-expiration
+                          ISO-8601 lifetime of UIAM ephemeral tokens, such as service account exchange tokens.
+                          UIAM accepts PT1M to PT5M [UIAM default: PT5M].
+      --eis               Enable EIS mode: sets the EIS inference URL, resolves and sets the CCM API key (implies --waitForReady)
 
       -E                  Additional key=value settings to pass to ES
       -F                  Absolute paths for files to mount into containers
 
     Examples:
 
-      es serverless --projectType es --tag git-fec36430fba2-x86_64 # loads ${ES_SERVERLESS_REPO_ELASTICSEARCH}:git-fec36430fba2-x86_64
-      es serverless --projectType oblt --image docker.elastic.co/kibana-ci/elasticsearch-serverless:latest-verified
+      es serverless --projectType elasticsearch_general_purpose --tag git-fec36430fba2-x86_64 # loads ${ES_SERVERLESS_REPO_ELASTICSEARCH}:git-fec36430fba2-x86_64
+      es serverless --projectType observability --image docker.elastic.co/kibana-ci/elasticsearch-serverless:latest-verified
+      es serverless --projectType observability --productTier complete --eis
     `;
   },
   run: async (defaults = {}) => {
@@ -90,41 +117,75 @@ export const serverless: Command = {
         basePath: 'base-path',
         esArgs: 'E',
         files: 'F',
-        projectType: 'project-type',
+        esProjectType: ['projectType', 'project-type'], // ensure BWC: can still run with `--projectType`
         dataPath: 'data-path',
+        uiamOAuth: 'uiam-oauth',
+        uiamEphemeralTokenExpiration: 'uiam-ephemeral-token-expiration',
       },
 
       string: [
-        'projectType',
+        'esProjectType',
         'tag',
         'image',
         'basePath',
         'resources',
         'host',
-        'kibanaUrl',
         'dataPath',
+        'uiamEphemeralTokenExpiration',
       ],
-      boolean: ['clean', 'ssl', 'kill', 'background', 'skipTeardown', 'waitForReady'],
+      boolean: [
+        'clean',
+        'ssl',
+        'kill',
+        'background',
+        'skipTeardown',
+        'waitForReady',
+        'uiam',
+        'uiamOAuth',
+        'eis',
+      ],
 
       default: {
         ...defaults,
-        kibanaUrl: 'http://localhost:5601/',
         dataPath: 'stateless',
         ssl: true,
+        uiam: true,
+        uiamOAuth: false,
       },
-    }) as unknown as ServerlessOptions;
+    }) as unknown as ServerlessCliOptions;
 
-    if (!options.projectType) {
+    if (!options.esProjectType) {
       throw createCliError(
         `--projectType flag is required and must be a string: ${supportedProjectTypesStr}`
       );
     }
 
-    if (!isServerlessProjectType(options.projectType)) {
+    if (options.productTier) {
+      if (options.productTier === 'search_ai_lake' && options.esProjectType !== 'security') {
+        throw createCliError(
+          `--productTier flag 'search_ai_lake' can only be used with projectType 'security'`
+        );
+      }
+      if (!isServerlessProjectTier(options.productTier)) {
+        throw createCliError(
+          `--productTier flag and must be a string: ${supportedProductTiersStr}`
+        );
+      }
+    }
+
+    if (!isEsServerlessProjectType(options.esProjectType)) {
       throw createCliError(
-        `Invalid projectType '${options.projectType}', supported values: ${supportedProjectTypesStr}`
+        `Invalid projectType '${options.esProjectType}', supported values: ${supportedProjectTypesStr}`
       );
     }
+
+    // Normalize 'elasticsearch' alias to 'elasticsearch_general_purpose'
+    if (options.esProjectType === 'elasticsearch') {
+      options.esProjectType = 'elasticsearch_general_purpose' as typeof options.esProjectType;
+    }
+
+    // also provide the Kibana project type, e.g. for role file selection
+    options.projectType = kbnProjectTypeFromEs.get(options.esProjectType) as ServerlessProjectType;
 
     // In case `--no-ssl` CLI argument is provided.
     if (!options.ssl) {
@@ -144,6 +205,38 @@ export const serverless: Command = {
     if (options.background && !options.skipTeardown) {
       options.skipTeardown = true;
     }
+
+    // --eis implies the EIS inference URL and CCM setup after the cluster is
+    // ready. Resolve the CCM API key up front so any Vault login prompt appears
+    // before Docker pull / ES startup, not buried after them.
+    const eisEnabled = Boolean(options.eis);
+    let eisApiKey: string | undefined;
+
+    if (eisEnabled) {
+      options.esArgs = mergeEisEsArgs(options.esArgs);
+      options.waitForReady = true;
+      eisApiKey = await resolveCcmApiKey(log);
+      options.onReady = async () => {
+        const protocol = options.ssl ? 'https' : 'http';
+        await setCcmApiKey(
+          assertCcmApiKeyResolved(eisApiKey),
+          {
+            baseUrl: `${protocol}://localhost:${options.port || DEFAULT_PORT}`,
+            credentials: {
+              username: ELASTIC_SERVERLESS_SUPERUSER,
+              password: ELASTIC_SERVERLESS_SUPERUSER_PASSWORD,
+            },
+            ssl: !!options.ssl,
+          },
+          log
+        );
+        log.success('EIS: CCM API key set in Elasticsearch');
+      };
+    }
+
+    // `eis` is CLI-only (see `ServerlessCliOptions`) — strip it before handing
+    // options to `runServerlessCluster`, which has no use for it.
+    delete options.eis;
 
     const cluster = new Cluster();
     await cluster.runServerless({

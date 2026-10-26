@@ -11,8 +11,8 @@ import { get } from 'lodash';
 import { isNestedField } from '@kbn/data-views-plugin/common';
 import { KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
 import { getIndexPatterns } from './plugin_services';
-import { TimelionFunctionArgs } from '../../common/types';
-import { TimelionExpressionFunction, TimelionExpressionArgument } from '../../common/parser';
+import type { TimelionFunctionArgs } from '../../common/types';
+import type { TimelionExpressionFunction, TimelionExpressionArgument } from '../../common/parser';
 
 export function getArgValueSuggestions() {
   const indexPatterns = getIndexPatterns();
@@ -25,9 +25,11 @@ export function getArgValueSuggestions() {
     }
     const indexPatternTitle = get(indexPatternArg, 'value.text', '');
 
-    return (await indexPatterns.find(indexPatternTitle, 1)).find(
-      (index) => index.title === indexPatternTitle
-    );
+    const dataViewId = (await indexPatterns.getIdsWithTitle()).find(
+      ({ title }) => title === indexPatternTitle
+    )?.id;
+
+    return dataViewId ? await indexPatterns.get(dataViewId) : undefined;
   }
 
   function containsFieldName(partial: string, field: { name: string }) {

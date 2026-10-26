@@ -21,14 +21,14 @@ import type {
   ConnectorUserAction,
   PushedUserAction,
   UserActionType,
-  CaseSettings,
   CaseSeverity,
   CaseStatuses,
   User,
   CaseAssignees,
   CaseCustomFields,
+  ActionSource,
 } from '../../../common/types/domain';
-import type { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
+import type { CasesActivityV2WriterContract } from '../../cases_analytics_v2';
 import type {
   UserActionPersistedAttributes,
   UserActionSavedObjectTransformed,
@@ -36,10 +36,21 @@ import type {
 import type { IndexRefresh } from '../types';
 import type { PatchCasesArgs } from '../cases/types';
 import type {
-  AttachmentRequest,
+  AttachmentRequestV2,
   CasePostRequest,
-  UserActionFindRequest,
+  UserActionInternalFindRequest,
 } from '../../../common/types/api';
+import type { ObservablesActionType } from '../../../common/types/domain/user_action/observables/v1';
+import type { WorkflowUserActionPayload } from '../../../common/types/domain/user_action/workflow/v1';
+import type { BulkAttachmentsPayload } from '../../../common/types/domain/user_action/bulk_attachments/v1';
+import type {
+  CASE_ATTACHMENT_SAVED_OBJECT,
+  CASE_COMMENT_SAVED_OBJECT,
+} from '../../../common/constants';
+
+export type AttachmentSavedObjectType =
+  | typeof CASE_COMMENT_SAVED_OBJECT
+  | typeof CASE_ATTACHMENT_SAVED_OBJECT;
 
 export interface BuilderParameters {
   title: {
@@ -49,7 +60,14 @@ export interface BuilderParameters {
     parameters: { payload: { description: string } };
   };
   status: {
-    parameters: { payload: { status: CaseStatuses } };
+    parameters: {
+      payload: {
+        status: CaseStatuses;
+        closeReason?: string;
+        syncAlerts?: boolean;
+        syncedAlertCount?: number;
+      };
+    };
   };
   severity: {
     parameters: { payload: { severity: CaseSeverity } };
@@ -68,7 +86,7 @@ export interface BuilderParameters {
     };
   };
   settings: {
-    parameters: { payload: { settings: CaseSettings } };
+    parameters: { payload: { settings: { syncAlerts?: boolean; extractObservables?: boolean } } };
   };
   comment: {
     parameters: {
@@ -96,6 +114,27 @@ export interface BuilderParameters {
   customFields: {
     parameters: { payload: { customFields: CaseCustomFields } };
   };
+  observables: {
+    parameters: {
+      payload: {
+        observables: { actionType: ObservablesActionType; count: number };
+      };
+    };
+  };
+  extended_fields: {
+    parameters: { payload: { extended_fields: Record<string, string> } };
+  };
+  template: {
+    parameters: { payload: { template: { id: string; version: number } | null } };
+  };
+  workflow: {
+    parameters: { payload: WorkflowUserActionPayload };
+  };
+  bulkAttachments: {
+    parameters: {
+      payload: { bulkAttachments: BulkAttachmentsPayload };
+    };
+  };
 }
 
 export interface CreateUserAction<T extends keyof BuilderParameters> {
@@ -110,7 +149,8 @@ export interface CommonArguments {
   user: User;
   caseId: string;
   owner: string;
-  attachmentId?: string;
+  savedObjectId?: string;
+  savedObjectType?: AttachmentSavedObjectType;
   connectorId?: string;
   action?: UserActionAction;
 }
@@ -149,16 +189,19 @@ export type CommonBuilderArguments = CommonArguments & {
   valueKey: string;
 };
 
-export interface BuilderDeps {
-  persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
-}
-
 export interface ServiceContext {
   log: Logger;
-  persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
   unsecuredSavedObjectsClient: SavedObjectsClientContract;
   savedObjectsSerializer: ISavedObjectsSerializer;
   auditLogger: AuditLogger;
+  /**
+   * Cases-analytics v2 activity writer. Real implementation when v2 is
+   * enabled, `V2_NOOP_ACTIVITY_WRITER` otherwise — every call site stays
+   * unconditional (no `if (writer)` guards). Captured at factory time so
+   * the user-actions service is oblivious to v2's start lifecycle.
+   */
+  analyticsV2ActivityWriter: CasesActivityV2WriterContract;
+  actionSource?: ActionSource;
 }
 
 export interface PushTimeFrameInfo {
@@ -237,6 +280,56 @@ export interface UserActionsStatsAggsResult {
       doc_count: number;
     }>;
   };
+  deletions: {
+    doc_count: number;
+    deletions: {
+      buckets: Array<{
+        key: string;
+        doc_count: number;
+      }>;
+    };
+  };
+  creations: {
+    doc_count: number;
+    creations: {
+      buckets: Array<{
+        key: string;
+        doc_count: number;
+      }>;
+    };
+  };
+  nonDeletedCommentUpdates: {
+    doc_count: number;
+    comments: {
+      buckets: Record<
+        string,
+        {
+          doc_count: number;
+          byCommentId: {
+            buckets: Array<{
+              key: string;
+              doc_count: number;
+              reverse: {
+                doc_count: number;
+                hasDelete: {
+                  doc_count: number;
+                };
+                updates: {
+                  doc_count: number;
+                  byCommentType: {
+                    buckets: Array<{
+                      key: string;
+                      doc_count: number;
+                    }>;
+                  };
+                };
+              };
+            }>;
+          };
+        }
+      >;
+    };
+  };
 }
 
 export interface MultipleCasesUserActionsTotalAggsResult {
@@ -273,7 +366,7 @@ export interface GetUsersResponse {
   assignedAndUnassignedUsers: Set<string>;
 }
 
-export interface FindOptions extends UserActionFindRequest {
+export interface FindOptions extends UserActionInternalFindRequest {
   caseId: string;
   filter?: KueryNode;
 }
@@ -284,11 +377,24 @@ export interface GetUserActionItemByDifference extends CommonUserActionArgs {
   field: string;
   originalValue: unknown;
   newValue: unknown;
+  /** Resolved name of a newly-applied template, recorded on the template user-action payload. */
+  templateName?: string;
+  /**
+   * customFields keys whose edit is already recorded by the canonical
+   * `extended_fields` user action of the same update — their duplicate legacy
+   * `customFields` user actions are suppressed (#282474).
+   */
+  suppressedCustomFieldKeys?: Set<string>;
 }
 
 export interface TypedUserActionDiffedItems<T> extends GetUserActionItemByDifference {
   originalValue: T[];
   newValue: T[];
+}
+
+export interface TypedUserActionItem<T> extends GetUserActionItemByDifference {
+  originalValue: T;
+  newValue: T;
 }
 
 export type CreatePayloadFunction<Item, ActionType extends UserActionType> = (
@@ -298,9 +404,20 @@ export type CreatePayloadFunction<Item, ActionType extends UserActionType> = (
 export interface BuildUserActionsDictParams {
   updatedCases: PatchCasesArgs;
   user: User;
+  /**
+   * Map of applied-template `id@version` → name, used to record the template name on its user
+   * action. Keyed by version (not just id) so the recorded name matches the exact version applied,
+   * since template names can change across versions.
+   */
+  templateNamesByKey?: Map<string, string>;
 }
 
 export type UserActionsDict = Record<string, UserActionEvent[]>;
+
+export interface AddSyncedAlertsCountToUserActionsParams {
+  userActionsDict: UserActionsDict;
+  syncedAlertCountCountByCaseId: Map<string, number>;
+}
 
 export interface BulkCreateBulkUpdateCaseUserActions extends IndexRefresh {
   builtUserActions: UserActionEvent[];
@@ -309,7 +426,23 @@ export interface BulkCreateBulkUpdateCaseUserActions extends IndexRefresh {
 export interface BulkCreateAttachmentUserAction
   extends Omit<CommonUserActionArgs, 'owner'>,
     IndexRefresh {
-  attachments: Array<{ id: string; owner: string; attachment: AttachmentRequest }>;
+  attachments: Array<{
+    id: string;
+    owner: string;
+    attachment: AttachmentRequestV2;
+    savedObjectType?: AttachmentSavedObjectType;
+  }>;
+}
+
+export interface BulkCreateAttachmentBulkDeletionUserAction
+  extends CommonUserActionArgs,
+    IndexRefresh {
+  deletions: Array<{
+    attachmentType: string;
+    count: number;
+    /** The deleted attachments, audited one by one like a single attachment deletion. */
+    attachments: Array<{ id: string; savedObjectType: string }>;
+  }>;
 }
 
 export type CreateUserActionArgs<T extends keyof BuilderParameters> = {
@@ -318,6 +451,11 @@ export type CreateUserActionArgs<T extends keyof BuilderParameters> = {
 
 export type BulkCreateUserActionArgs<T extends keyof BuilderParameters> = {
   userActions: Array<CreateUserAction<T> & CommonUserActionArgs>;
+  /**
+   * Throw when Saved Objects returns an error for any individual user action.
+   * Successful items are not rolled back.
+   */
+  throwOnItemError?: boolean;
 } & IndexRefresh;
 
 export interface CreateUserActionES<T> extends IndexRefresh {

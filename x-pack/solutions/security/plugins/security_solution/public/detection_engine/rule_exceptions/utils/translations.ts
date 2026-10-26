@@ -7,18 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const COMMENTS_SHOW = (comments: number) =>
-  i18n.translate('xpack.securitySolution.exceptions.showCommentsLabel', {
-    values: { comments },
-    defaultMessage: 'Show ({comments}) {comments, plural, =1 {Comment} other {Comments}}',
-  });
-
-export const COMMENTS_HIDE = (comments: number) =>
-  i18n.translate('xpack.securitySolution.exceptions.hideCommentsLabel', {
-    values: { comments },
-    defaultMessage: 'Hide ({comments}) {comments, plural, =1 {Comment} other {Comments}}',
-  });
-
 export const COMMENT_EVENT = i18n.translate('xpack.securitySolution.exceptions.commentEventLabel', {
   defaultMessage: 'added a comment',
 });
@@ -27,27 +15,6 @@ export const OPERATING_SYSTEM_LABEL = i18n.translate(
   'xpack.securitySolution.exceptions.operatingSystemFullLabel',
   {
     defaultMessage: 'Operating System',
-  }
-);
-
-export const ADD_TO_ENDPOINT_LIST = i18n.translate(
-  'xpack.securitySolution.exceptions.viewer.addToEndpointListLabel',
-  {
-    defaultMessage: 'Add endpoint exception',
-  }
-);
-
-export const ADD_TO_DETECTIONS_LIST = i18n.translate(
-  'xpack.securitySolution.exceptions.viewer.addToDetectionsListLabel',
-  {
-    defaultMessage: 'Add rule exception',
-  }
-);
-
-export const ADD_COMMENT_PLACEHOLDER = i18n.translate(
-  'xpack.securitySolution.exceptions.viewer.addCommentPlaceholder',
-  {
-    defaultMessage: 'Add a new comment...',
   }
 );
 
@@ -91,19 +58,6 @@ export const MODAL_ERROR_ACCORDION_TEXT = i18n.translate(
   'xpack.securitySolution.exceptions.modalErrorAccordionText',
   {
     defaultMessage: 'Show rule reference information:',
-  }
-);
-
-export const DISASSOCIATE_LIST_SUCCESS = (id: string) =>
-  i18n.translate('xpack.securitySolution.exceptions.disassociateListSuccessText', {
-    values: { id },
-    defaultMessage: 'Exception list ({id}) has successfully been removed',
-  });
-
-export const DISASSOCIATE_EXCEPTION_LIST_ERROR = i18n.translate(
-  'xpack.securitySolution.exceptions.disassociateExceptionListError',
-  {
-    defaultMessage: 'Failed to remove exception list',
   }
 );
 

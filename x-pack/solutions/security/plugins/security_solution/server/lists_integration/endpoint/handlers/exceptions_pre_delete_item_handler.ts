@@ -14,6 +14,8 @@ import {
   EventFilterValidator,
   HostIsolationExceptionsValidator,
   TrustedAppValidator,
+  TrustedDeviceValidator,
+  CustomYaraSignaturesValidator,
 } from '../validators';
 
 export const getExceptionsPreDeleteItemHandler = (
@@ -45,6 +47,14 @@ export const getExceptionsPreDeleteItemHandler = (
       return data;
     }
 
+    // Validate Trusted Devices
+    if (TrustedDeviceValidator.isTrustedDevice({ listId })) {
+      await new TrustedDeviceValidator(endpointAppContextService, request).validatePreDeleteItem(
+        exceptionItem
+      );
+      return data;
+    }
+
     // Host Isolation Exception
     if (HostIsolationExceptionsValidator.isHostIsolationException({ listId })) {
       await new HostIsolationExceptionsValidator(
@@ -67,6 +77,15 @@ export const getExceptionsPreDeleteItemHandler = (
       await new BlocklistValidator(endpointAppContextService, request).validatePreDeleteItem(
         exceptionItem
       );
+      return data;
+    }
+
+    // Validate YARA signatures
+    if (CustomYaraSignaturesValidator.isCustomYaraSignature({ listId })) {
+      await new CustomYaraSignaturesValidator(
+        endpointAppContextService,
+        request
+      ).validatePreDeleteItem(exceptionItem);
       return data;
     }
 

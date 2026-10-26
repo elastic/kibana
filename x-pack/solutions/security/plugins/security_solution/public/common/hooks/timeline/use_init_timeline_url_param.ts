@@ -7,7 +7,7 @@
 
 import { useCallback, useEffect } from 'react';
 import { safeDecode } from '@kbn/rison';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 
 import type { State } from '../../store';
 import { TimelineId } from '../../../../common/types';
@@ -29,10 +29,10 @@ export const useInitTimelineFromUrlParam = () => {
         queryTimelineById({
           activeTimelineTab: initialState.activeTab,
           duplicate: false,
-          graphEventId: initialState.graphEventId,
           timelineId: initialState.id,
           openTimeline: initialState.isOpen,
           savedSearchId: initialState.savedSearchId,
+          query: initialState.query,
         });
       }
     },
@@ -49,9 +49,11 @@ export const useInitTimelineFromUrlParam = () => {
 
       const parsedState = safeDecode(timelineState) as TimelineUrl | null;
 
-      // Make sure we only re-initialize the timeline if there are siginificant changes to the active timeline.
-      // Without this check, we could potentially overwrite the timeline.
-      if (!hasTimelineStateChanged(activeTimeline, parsedState)) {
+      // Only re-initialize when the URL state differs from the active timeline.
+      // Without this guard a popstate event carrying the same timeline param would silently
+      // re-load the timeline and discard in-progress edits (filters, data providers, etc.).
+      // When there is no active timeline yet, always initialize.
+      if (!activeTimeline || hasTimelineStateChanged(activeTimeline, parsedState)) {
         onInitialize(parsedState);
       }
     };
@@ -64,15 +66,14 @@ export const useInitTimelineFromUrlParam = () => {
   useInitializeUrlParam(URL_PARAM_KEY.timeline, onInitialize);
 };
 
-function hasTimelineStateChanged(
+export function hasTimelineStateChanged(
   activeTimeline: TimelineModel | null,
   newState: TimelineUrl | null
 ) {
   return (
     activeTimeline &&
     newState &&
-    (activeTimeline.id !== newState.id ||
-      activeTimeline.savedSearchId !== newState.savedSearchId ||
-      activeTimeline.graphEventId !== newState.graphEventId)
+    ((activeTimeline.savedObjectId ?? null) !== (newState.id ?? null) ||
+      (activeTimeline.savedSearchId ?? null) !== (newState.savedSearchId ?? null))
   );
 }

@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 // NOTE: This is the configuration to apply the typescript eslint parser
 // in order to lint typescript files with eslint.
 // Some IDEs could not be running eslint with the correct extensions yet
@@ -5,18 +24,15 @@
 
 const eslintConfigPrettierRules = require('eslint-config-prettier').rules;
 
-// The current implementation excluded all the variables matching the regexp.
-// We should remove it as soon as multiple underscores are supported by the linter.
-// https://github.com/typescript-eslint/typescript-eslint/issues/1712
-// Due to the same reason we have to duplicate the "filter" option for "default" and other "selectors".
-const allowedNameRegexp = '^(UNSAFE_|_{1,3})|_{1,3}$';
 module.exports = {
   overrides: [
     {
       files: ['**/*.{ts,tsx}'],
       parser: '@typescript-eslint/parser',
 
-      plugins: ['@typescript-eslint', 'ban', 'import', 'eslint-comments'],
+      // `ban/*` and `@eslint-community/eslint-comments/*` rules run in oxlint (.oxlint/ban.mts,
+      // .oxlint/eslint_comments.mts); registered so `eslint-disable` directives naming them resolve.
+      plugins: ['@typescript-eslint', 'ban', 'import', '@eslint-community/eslint-comments'],
 
       env: {
         es6: true,
@@ -54,81 +70,57 @@ module.exports = {
           // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/ROADMAP.md
           //
           // Old recommended tslint rules
-          '@typescript-eslint/adjacent-overload-signatures': 'error',
-          '@typescript-eslint/array-type': [
-            'error',
-            { default: 'array-simple', readonly: 'array-simple' },
-          ],
-          '@typescript-eslint/ban-types': [
-            'error',
-            {
-              types: {
-                SFC: {
-                  message: 'Use FC or FunctionComponent instead.',
-                  fixWith: 'FC',
-                },
-                'React.SFC': {
-                  message: 'Use FC or FunctionComponent instead.',
-                  fixWith: 'React.FC',
-                },
-                StatelessComponent: {
-                  message: 'Use FunctionComponent instead.',
-                  fixWith: 'FunctionComponent',
-                },
-                'React.StatelessComponent': {
-                  message: 'Use FunctionComponent instead.',
-                  fixWith: 'React.FunctionComponent',
-                },
-                // used in the codebase in the wild
-                '{}': false,
-                object: false,
-                Function: false,
-              },
-            },
-          ],
+          '@typescript-eslint/array-type': 'off',
+          // ##
+          // Replacing old @typescript-eslint/ban-types
+          '@typescript-eslint/no-unsafe-function-type': 'off',
+          '@typescript-eslint/no-empty-object-type': 'off',
+          // ##
           camelcase: 'off',
           '@typescript-eslint/naming-convention': [
             'error',
             {
               selector: 'default',
-              format: ['camelCase'],
+              format: ['camelCase', 'PascalCase', 'UPPER_CASE', 'snake_case'],
+              leadingUnderscore: 'allowSingleOrDouble',
+              trailingUnderscore: 'allowSingleOrDouble',
+            },
+            {
+              selector: 'classMethod',
               filter: {
-                regex: allowedNameRegexp,
-                match: false,
+                regex: '^UNSAFE_',
+                match: true,
               },
+              prefix: ['UNSAFE_'],
+              format: ['camelCase'],
             },
             {
               selector: 'variable',
               format: [
                 'camelCase',
-                'UPPER_CASE', // const SOMETHING = ...
-                'PascalCase', // React.FunctionComponent =
+                'UPPER_CASE', // e.g. const SOMETHING = ...
+                'PascalCase', // e.g. React.FunctionComponent =
               ],
-              filter: {
-                regex: allowedNameRegexp,
-                match: false,
-              },
+              leadingUnderscore: 'allowSingleOrDouble',
+              trailingUnderscore: 'allowSingleOrDouble',
+            },
+            {
+              selector: 'variable',
+              modifiers: ['destructured'],
+              format: [
+                'camelCase',
+                'snake_case', // e.g. properties from ES response objects
+                'UPPER_CASE', // e.g. const SOMETHING = ...
+                'PascalCase', // e.g. React.FunctionComponent =
+              ],
+              leadingUnderscore: 'allowSingleOrDouble',
+              trailingUnderscore: 'allowSingleOrDouble',
             },
             {
               selector: 'parameter',
-              format: ['camelCase', 'PascalCase'],
-              filter: {
-                regex: allowedNameRegexp,
-                match: false,
-              },
-            },
-            {
-              selector: 'memberLike',
-              format: [
-                'camelCase',
-                'PascalCase',
-                'snake_case', // keys in elasticsearch requests / responses
-                'UPPER_CASE',
-              ],
-              filter: {
-                regex: allowedNameRegexp,
-                match: false,
-              },
+              format: ['camelCase', 'PascalCase', 'snake_case'],
+              leadingUnderscore: 'allowSingleOrDouble',
+              trailingUnderscore: 'allowSingleOrDouble',
             },
             {
               selector: 'function',
@@ -136,10 +128,8 @@ module.exports = {
                 'camelCase',
                 'PascalCase', // React.FunctionComponent =
               ],
-              filter: {
-                regex: allowedNameRegexp,
-                match: false,
-              },
+              leadingUnderscore: 'allowSingleOrDouble',
+              trailingUnderscore: 'allowSingleOrDouble',
             },
             {
               selector: 'typeLike',
@@ -168,79 +158,25 @@ module.exports = {
               modifiers: ['requiresQuotes'],
             },
           ],
-          '@typescript-eslint/explicit-member-accessibility': [
-            'error',
-            {
-              accessibility: 'off',
-              overrides: {
-                accessors: 'explicit',
-                constructors: 'no-public',
-                parameterProperties: 'explicit',
-              },
-            },
-          ],
-          '@typescript-eslint/prefer-function-type': 'error',
-          '@typescript-eslint/consistent-type-definitions': ['error', 'interface'],
           '@typescript-eslint/member-ordering': [
             'error',
             {
               default: ['public-static-field', 'static-field', 'instance-field'],
             },
           ],
-          '@typescript-eslint/consistent-type-assertions': 'error',
-          '@typescript-eslint/no-empty-interface': 'error',
-          '@typescript-eslint/no-extra-non-null-assertion': 'error',
-          '@typescript-eslint/no-misused-new': 'error',
-          '@typescript-eslint/no-namespace': 'error',
-          '@typescript-eslint/no-shadow': 'error',
           // rely on typescript
-          '@typescript-eslint/no-undef': 'off',
           'no-undef': 'off',
 
-          '@typescript-eslint/triple-slash-reference': [
-            'error',
-            {
-              path: 'never',
-              types: 'never',
-              lib: 'never',
-            },
-          ],
           '@typescript-eslint/no-var-requires': 'error',
-          '@typescript-eslint/unified-signatures': 'error',
-          'constructor-super': 'error',
-          'dot-notation': 'error',
-          eqeqeq: ['error', 'always', { null: 'ignore' }],
-          'guard-for-in': 'error',
           'import/order': [
             'error',
             {
               groups: [['external', 'builtin'], 'internal', ['parent', 'sibling', 'index']],
             },
           ],
-          'max-classes-per-file': ['error', 1],
-          'no-bitwise': 'error',
-          'no-caller': 'error',
-          'no-cond-assign': 'error',
-          'no-console': 'error',
-          'no-debugger': 'error',
-          'no-empty': 'error',
-          'no-extend-native': 'error',
-          'no-eval': 'error',
-          'no-new-wrappers': 'error',
-          'no-script-url': 'error',
-          'no-throw-literal': 'error',
           'no-undef-init': 'error',
-          'no-unsafe-finally': 'error',
           'no-unsanitized/property': 'error',
           'no-unused-expressions': 'off',
-          '@typescript-eslint/no-unused-expressions': 'error',
-          'no-unused-labels': 'error',
-          'no-var': 'error',
-          'object-shorthand': 'error',
-          'one-var': ['error', 'never'],
-          'prefer-const': 'error',
-          'prefer-rest-params': 'error',
-          radix: 'error',
           'spaced-comment': [
             'error',
             'always',
@@ -248,21 +184,7 @@ module.exports = {
               exceptions: ['/'],
             },
           ],
-          'use-isnan': 'error',
-
           // Old tslint yml override or defined rules
-          'ban/ban': [
-            2,
-            { name: ['describe', 'only'], message: 'No exclusive suites.' },
-            { name: ['it', 'only'], message: 'No exclusive tests.' },
-            { name: ['test', 'only'], message: 'No exclusive tests.' },
-            { name: ['testSuggestions', 'only'], message: 'No exclusive tests.' },
-            { name: ['testErrorsAndWarnings', 'only'], message: 'No exclusive tests.' },
-          ],
-          'import/no-default-export': 'error',
-
-          'eslint-comments/no-unused-disable': 'error',
-          'eslint-comments/no-unused-enable': 'error',
           'no-restricted-syntax': [
             'error',
             {

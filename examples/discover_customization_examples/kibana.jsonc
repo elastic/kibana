@@ -1,7 +1,9 @@
 {
   "type": "plugin",
   "id": "@kbn/discover-customization-examples-plugin",
-  "owner": "@elastic/kibana-data-discovery",
+  "owner": "@elastic/kibana-discover",
+  "group": "platform",
+  "visibility": "private",
   "plugin": {
     "id": "discoverCustomizationExamples",
     "server": false,
@@ -12,7 +14,10 @@
       "discover",
       "embeddable",
       "kibanaUtils",
-      "data"
-    ]
+      "data",
+      "savedSearch",
+      "uiActions"
+    ],
+    "requiredBundles": ["kibanaReact"]
   }
 }

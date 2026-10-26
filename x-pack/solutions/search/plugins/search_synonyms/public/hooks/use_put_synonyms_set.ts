@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { SynonymsPutSynonymResponse } from '@elastic/elasticsearch/lib/api/types';
+import { useMutation, useQueryClient } from '@kbn/react-query';
+import type { SynonymsPutSynonymResponse } from '@elastic/elasticsearch/lib/api/types';
 import { i18n } from '@kbn/i18n';
-import { KibanaServerError } from '@kbn/kibana-utils-plugin/common';
+import type { KibanaServerError } from '@kbn/kibana-utils-plugin/common';
 import { SYNONYMS_RULE_FETCH_QUERY_KEY, SYNONYMS_SETS_QUERY_KEY } from '../../common/constants';
 import { PLUGIN_ROUTE_ROOT } from '../../common/api_routes';
 import { useKibana } from './use_kibana';
@@ -30,7 +30,7 @@ export const usePutSynonymsSet = (
   return useMutation(
     async ({ synonymsSetId, forceWrite }: MutationArgs) => {
       return await http.put<SynonymsPutSynonymResponse>(
-        `/internal/search_synonyms/synonyms/${synonymsSetId}`,
+        `/internal/search_synonyms/synonyms/${encodeURIComponent(synonymsSetId)}`,
         {
           query: { forceWrite },
         }

@@ -14,26 +14,65 @@ export interface ActionsPublicPluginSetup {
     emails: string[],
     options?: ValidateEmailAddressesOptions
   ): ValidatedEmail[];
+  enabledEmailServices: string[];
+  isWebhookSslWithPfxEnabled?: boolean;
+  isEarsEnabled: boolean;
+  isEarsExperimentalEnabled: boolean;
+  isInboundEventsEnabled: boolean;
 }
 
 export interface Config {
   email: {
     domain_allowlist: string[];
+    services: {
+      enabled: string[];
+    };
+  };
+  webhook: {
+    ssl: {
+      pfx: {
+        enabled: boolean;
+      };
+    };
+  };
+  auth?: {
+    ears?: {
+      enabled: boolean;
+      enableExperimental: boolean;
+    };
+  };
+  inboundEvents?: {
+    enabled: boolean;
   };
 }
 
 export class Plugin implements CorePlugin<ActionsPublicPluginSetup> {
   private readonly allowedEmailDomains: string[] | null = null;
+  private readonly enabledEmailServices: string[];
+  private readonly webhookSslWithPfxEnabled: boolean;
+  private readonly earsEnabled: boolean;
+  private readonly earsExperimentalEnabled: boolean;
+  private readonly inboundEventsEnabled: boolean;
 
   constructor(ctx: PluginInitializerContext<Config>) {
     const config = ctx.config.get();
     this.allowedEmailDomains = config.email?.domain_allowlist || null;
+    this.enabledEmailServices = Array.from(new Set(config.email?.services?.enabled || ['*']));
+    this.webhookSslWithPfxEnabled = config.webhook?.ssl.pfx.enabled ?? true;
+    this.earsEnabled = config.auth?.ears?.enabled ?? true;
+    this.earsExperimentalEnabled = config.auth?.ears?.enableExperimental ?? false;
+    this.inboundEventsEnabled = config.inboundEvents?.enabled ?? true;
   }
 
   public setup(): ActionsPublicPluginSetup {
     return {
       validateEmailAddresses: (emails: string[], options: ValidateEmailAddressesOptions) =>
         validateEmails(this.allowedEmailDomains, emails, options),
+      enabledEmailServices: this.enabledEmailServices,
+      isWebhookSslWithPfxEnabled: this.webhookSslWithPfxEnabled,
+      isEarsEnabled: this.earsEnabled,
+      isEarsExperimentalEnabled: this.earsExperimentalEnabled,
+      isInboundEventsEnabled: this.inboundEventsEnabled,
     };
   }
 

@@ -10,17 +10,18 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import useAsync from 'react-use/lib/useAsync';
-import { v4 as uuidv4 } from 'uuid';
 import {
   getESQLAdHocDataview,
   getESQLQueryColumns,
   getIndexForESQLQuery,
   getInitialESQLQuery,
 } from '@kbn/esql-utils';
+import { DATASETS_ROUTE, type EsqlDatasetsResult } from '@kbn/esql-types';
 import { withSuspense } from '@kbn/shared-ux-utility';
-import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
+import type { LensSerializedState } from '@kbn/lens-plugin/public';
 import { getLensAttributesFromSuggestion } from '@kbn/visualization-utils';
-
+import { AbortReason } from '@kbn/kibana-utils-plugin/common';
+import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import {
   coreServices,
   dataService,
@@ -30,12 +31,8 @@ import {
   shareService,
   lensService,
 } from '../../services/kibana_services';
-import { getDashboardBackupService } from '../../services/dashboard_backup_service';
-import { getDashboardContentManagementService } from '../../services/dashboard_content_management_service';
-
-function generateId() {
-  return uuidv4();
-}
+import { getDashboardBackupService } from '../../services/dashboard_api_services';
+import { dashboardClient } from '../../dashboard_client';
 
 export const DashboardAppNoDataPage = ({
   onDataViewCreated,
@@ -65,17 +62,20 @@ export const DashboardAppNoDataPage = ({
 
   useEffect(() => {
     return () => {
-      abortController?.abort();
+      abortController?.abort(AbortReason.CLEANUP);
     };
   }, [abortController]);
 
   const onTryESQL = useCallback(async () => {
-    abortController?.abort();
+    abortController?.abort(AbortReason.REPLACED);
     if (lensHelpersAsync.value) {
       const abc = new AbortController();
-      const { dataViews } = dataService;
-      const indexName = (await getIndexForESQLQuery({ dataViews })) ?? '*';
-      const dataView = await getESQLAdHocDataview(`from ${indexName}`, dataViews);
+      const indexName = (await getIndexForESQLQuery({ http: coreServices.http })) ?? '*';
+      const dataView = await getESQLAdHocDataview({
+        dataViewsService: dataService.dataViews,
+        query: `FROM ${indexName}`,
+        http: coreServices.http,
+      });
       const esqlQuery = getInitialESQLQuery(dataView);
 
       try {
@@ -100,27 +100,26 @@ export const DashboardAppNoDataPage = ({
         if (chartSuggestions?.length) {
           const [suggestion] = chartSuggestions;
 
-          const attrs = getLensAttributesFromSuggestion({
-            filters: [],
-            query: {
-              esql: esqlQuery,
-            },
-            suggestion,
-            dataView,
-          }) as TypedLensByValueInput['attributes'];
-
-          const lensEmbeddableInput = {
-            attributes: attrs,
-            id: generateId(),
-          };
-
-          await embeddableService.getStateTransfer().navigateToWithEmbeddablePackage('dashboards', {
-            state: {
-              type: 'lens',
-              input: lensEmbeddableInput,
-            },
-            path: '#/create',
-          });
+          await embeddableService
+            .getStateTransfer()
+            .navigateToWithEmbeddablePackages<LensSerializedState>('dashboards', {
+              state: [
+                {
+                  type: LENS_EMBEDDABLE_TYPE,
+                  serializedState: {
+                    attributes: getLensAttributesFromSuggestion({
+                      filters: [],
+                      query: {
+                        esql: esqlQuery,
+                      },
+                      suggestion,
+                      dataView,
+                    }),
+                  },
+                },
+              ],
+              path: '#/create',
+            });
         }
       } catch (error) {
         if (error.name !== 'AbortError') {
@@ -145,21 +144,40 @@ export const DashboardAppNoDataPage = ({
 
   return (
     <AnalyticsNoDataPageKibanaProvider {...analyticsServices}>
-      <AnalyticsNoDataPage onDataViewCreated={onDataViewCreated} onTryESQL={onTryESQL} />
+      <span
+        data-test-subj={
+          lensHelpersAsync.loading ? 'dashboardNoDataPageLoading' : 'dashboardNoDataPageLoaded'
+        }
+        hidden
+      />
+      <AnalyticsNoDataPage
+        onDataViewCreated={onDataViewCreated}
+        onTryESQL={onTryESQL}
+        // the handler needs the Lens state helpers, so keep the button disabled until they resolve
+        isTryESQLDisabled={!lensHelpersAsync.value}
+      />
     </AnalyticsNoDataPageKibanaProvider>
   );
 };
 
 export const isDashboardAppInNoDataState = async () => {
-  const hasUserDataView = await dataService.dataViews.hasData.hasUserDataView().catch(() => false);
-  if (hasUserDataView) return false;
+  const hasDataView = await dataService.dataViews.hasData.hasDataView().catch(() => false);
+  if (hasDataView) return false;
+
+  // consider has data if there is at least one dataset
+  const hasDatasets = await coreServices.http
+    .get<EsqlDatasetsResult>(DATASETS_ROUTE)
+    .then((res) => res.datasets.length > 0)
+    .catch(() => false);
+  if (hasDatasets) return false;
 
   // consider has data if there is unsaved dashboard with edits
   if (getDashboardBackupService().dashboardHasUnsavedEdits()) return false;
 
   // consider has data if there is at least one dashboard
-  const { total } = await getDashboardContentManagementService()
-    .findDashboards.search({ search: '', size: 1 })
+  const { total } = await dashboardClient
+    .search({ query: '', per_page: 1 })
+    .then(({ meta }) => meta)
     .catch(() => ({ total: 0 }));
   if (total > 0) return false;
 

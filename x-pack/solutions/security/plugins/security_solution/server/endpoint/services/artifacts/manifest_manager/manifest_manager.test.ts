@@ -6,7 +6,7 @@
  */
 
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
-import { ENDPOINT_LIST_ID, ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
+import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common/types/models';
 import { getEmptyInternalArtifactMock } from '../../../schemas/artifacts/saved_objects.mock';
@@ -30,6 +30,7 @@ import {
 
 import {
   buildManifestManagerContextMock,
+  createExceptionListResponse,
   mockFindExceptionListItemResponses,
 } from './manifest_manager.mock';
 
@@ -38,7 +39,7 @@ import { ManifestManager } from './manifest_manager';
 import type { EndpointArtifactClientInterface } from '../artifact_client';
 import { EndpointError } from '../../../../../common/endpoint/errors';
 import type { Artifact } from '@kbn/fleet-plugin/server';
-import { ProductFeatureSecurityKey } from '@kbn/security-solution-features/keys';
+import { ProductFeatureKey } from '@kbn/security-solution-features/keys';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types/src/response/exception_list_item_schema';
 import {
   createFetchAllArtifactsIterableMock,
@@ -46,9 +47,44 @@ import {
 } from '@kbn/fleet-plugin/server/services/artifacts/mocks';
 import type { ExperimentalFeatures } from '../../../../../common';
 import { allowedExperimentalValues } from '../../../../../common';
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
+import { createLicenseServiceMock } from '../../../../../common/license/mocks';
+import { GLOBAL_ARTIFACT_TAG } from '../../../../../common/endpoint/service/artifacts';
+import { CUSTOM_YARA_SIGNATURE_FIELD_TYPE } from '../../../../../common/endpoint/service/artifacts/constants';
+import { buildPerPolicyTag } from '../../../../../common/endpoint/service/artifacts/utils';
+import { getIsEndpointExceptionsPerPolicyEnabled } from '../../../lib/reference_data';
+import { MetaArchValue, EndpointArtifactScanContext } from '../../../../../common/endpoint/types';
+import { validateYaraRule, YaraEngineUnavailableError } from '../../../lib/libyara';
+
+jest.mock('../../../lib/reference_data');
+jest.mock('../../../lib/libyara', () => ({
+  validateYaraRule: jest.fn(async () => ({
+    errors: [],
+    warnings: [],
+    errorCount: 0,
+    warningCount: 0,
+    rules: [{ identifier: 'test', meta: {}, duplicateMeta: [] }],
+  })),
+  YaraEngineUnavailableError: jest.requireActual('../../../lib/libyara/errors')
+    .YaraEngineUnavailableError,
+}));
+
+const mockValidateYaraRule = validateYaraRule as jest.MockedFunction<typeof validateYaraRule>;
+
+const mockedGetIsEndpointExceptionsPerPolicyEnabled =
+  getIsEndpointExceptionsPerPolicyEnabled as jest.MockedFunction<
+    typeof getIsEndpointExceptionsPerPolicyEnabled
+  >;
 
 const getArtifactObject = (artifact: InternalArtifactSchema) =>
   JSON.parse(Buffer.from(artifact.body!, 'base64').toString());
+
+const disableCustomYaraSignaturesFF = (context: ManifestManagerContext) => {
+  context.experimentalFeatures = {
+    ...context.experimentalFeatures,
+    customYaraSignaturesEnabled: false,
+  };
+};
 
 describe('ManifestManager', () => {
   const TEST_POLICY_ID_1 = 'c6d16e42-c32d-4dce-8a88-113cfe276ad1';
@@ -63,6 +99,10 @@ describe('ManifestManager', () => {
     'endpoint-trustlist-macos-v1-96b76a1a911662053a1562ac14c4ff1e87c2ff550d6fe52e1e0b3790526597d3';
   const ARTIFACT_ID_TRUSTED_APPS_WINDOWS =
     'endpoint-trustlist-windows-v1-96b76a1a911662053a1562ac14c4ff1e87c2ff550d6fe52e1e0b3790526597d3';
+  const ARTIFACT_ID_TRUSTED_DEVICES_MACOS =
+    'endpoint-trusteddevicelist-macos-v1-96b76a1a911662053a1562ac14c4ff1e87c2ff550d6fe52e1e0b3790526597d3';
+  const ARTIFACT_ID_TRUSTED_DEVICES_WINDOWS =
+    'endpoint-trusteddevicelist-windows-v1-96b76a1a911662053a1562ac14c4ff1e87c2ff550d6fe52e1e0b3790526597d3';
 
   const ARTIFACT_NAME_EXCEPTIONS_LINUX = 'endpoint-exceptionlist-linux-v1';
   const ARTIFACT_NAME_EXCEPTIONS_MACOS = 'endpoint-exceptionlist-macos-v1';
@@ -82,6 +122,11 @@ describe('ManifestManager', () => {
   const ARTIFACT_NAME_BLOCKLISTS_MACOS = 'endpoint-blocklist-macos-v1';
   const ARTIFACT_NAME_BLOCKLISTS_WINDOWS = 'endpoint-blocklist-windows-v1';
   const ARTIFACT_NAME_BLOCKLISTS_LINUX = 'endpoint-blocklist-linux-v1';
+  const ARTIFACT_NAME_TRUSTED_DEVICES_MACOS = 'endpoint-trusteddevicelist-macos-v1';
+  const ARTIFACT_NAME_TRUSTED_DEVICES_WINDOWS = 'endpoint-trusteddevicelist-windows-v1';
+  const ARTIFACT_NAME_CUSTOM_YARA_SIGNATURES_MACOS = 'endpoint-yararules-macos-v1';
+  const ARTIFACT_NAME_CUSTOM_YARA_SIGNATURES_WINDOWS = 'endpoint-yararules-windows-v1';
+  const ARTIFACT_NAME_CUSTOM_YARA_SIGNATURES_LINUX = 'endpoint-yararules-linux-v1';
 
   const getMockPolicyFetchAllItemIds = (items: string[]) =>
     jest.fn(async () =>
@@ -96,6 +141,8 @@ describe('ManifestManager', () => {
   let ARTIFACT_EXCEPTIONS_WINDOWS: InternalArtifactCompleteSchema;
   let ARTIFACT_TRUSTED_APPS_MACOS: InternalArtifactCompleteSchema;
   let ARTIFACT_TRUSTED_APPS_WINDOWS: InternalArtifactCompleteSchema;
+  let ARTIFACT_TRUSTED_DEVICES_MACOS: InternalArtifactCompleteSchema;
+  let ARTIFACT_TRUSTED_DEVICES_WINDOWS: InternalArtifactCompleteSchema;
 
   let defaultFeatures: ExperimentalFeatures;
 
@@ -107,12 +154,21 @@ describe('ManifestManager', () => {
       [ARTIFACT_ID_EXCEPTIONS_LINUX]: ARTIFACTS[2],
       [ARTIFACT_ID_TRUSTED_APPS_MACOS]: ARTIFACTS[3],
       [ARTIFACT_ID_TRUSTED_APPS_WINDOWS]: ARTIFACTS[4],
+      [ARTIFACT_ID_TRUSTED_DEVICES_MACOS]: ARTIFACTS[6],
+      [ARTIFACT_ID_TRUSTED_DEVICES_WINDOWS]: ARTIFACTS[7],
     };
     ARTIFACT_EXCEPTIONS_MACOS = ARTIFACTS[0];
     ARTIFACT_EXCEPTIONS_WINDOWS = ARTIFACTS[1];
     ARTIFACT_TRUSTED_APPS_MACOS = ARTIFACTS[3];
     ARTIFACT_TRUSTED_APPS_WINDOWS = ARTIFACTS[4];
+    ARTIFACT_TRUSTED_DEVICES_MACOS = ARTIFACTS[6];
+    ARTIFACT_TRUSTED_DEVICES_WINDOWS = ARTIFACTS[7];
     defaultFeatures = allowedExperimentalValues;
+  });
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockedGetIsEndpointExceptionsPerPolicyEnabled.mockResolvedValue(false);
   });
 
   describe('getLastComputedManifest from Unified Manifest SO', () => {
@@ -205,7 +261,6 @@ describe('ManifestManager', () => {
       const savedObjectsClient = savedObjectsClientMock.create();
       const manifestManagerContext = buildManifestManagerContextMock({
         savedObjectsClient,
-        experimentalFeatures: ['unifiedManifestEnabled'],
       });
       const manifestManager = new ManifestManager(manifestManagerContext);
 
@@ -379,6 +434,8 @@ describe('ManifestManager', () => {
       ARTIFACT_NAME_BLOCKLISTS_MACOS,
       ARTIFACT_NAME_BLOCKLISTS_WINDOWS,
       ARTIFACT_NAME_BLOCKLISTS_LINUX,
+      ARTIFACT_NAME_TRUSTED_DEVICES_MACOS,
+      ARTIFACT_NAME_TRUSTED_DEVICES_WINDOWS,
     ];
 
     const getArtifactIds = (artifacts: InternalArtifactSchema[]) => [
@@ -396,6 +453,7 @@ describe('ManifestManager', () => {
 
     test(`Builds fully new manifest if no baseline parameter passed and no exception list items`, async () => {
       const context = buildManifestManagerContextMock({});
+      disableCustomYaraSignaturesFF(context);
       const manifestManager = new ManifestManager(context);
 
       context.exceptionListClient.findExceptionListItem = mockFindExceptionListItemResponses({});
@@ -411,7 +469,7 @@ describe('ManifestManager', () => {
 
       const artifacts = manifest.getAllArtifacts();
 
-      expect(artifacts.length).toBe(15);
+      expect(artifacts.length).toBe(17);
       expect(getArtifactIds(artifacts)).toStrictEqual(SUPPORTED_ARTIFACT_NAMES);
 
       for (const artifact of artifacts) {
@@ -427,25 +485,26 @@ describe('ManifestManager', () => {
       const exceptionListItem = getExceptionListItemSchemaMock({ os_types: ['macos'] });
       const trustedAppListItem = getExceptionListItemSchemaMock({
         os_types: ['linux'],
-        tags: ['policy:all'],
+        tags: [GLOBAL_ARTIFACT_TAG],
       });
       const eventFiltersListItem = getExceptionListItemSchemaMock({
         os_types: ['windows'],
-        tags: ['policy:all'],
+        tags: [GLOBAL_ARTIFACT_TAG],
       });
       const hostIsolationExceptionsItem = getExceptionListItemSchemaMock({
         os_types: ['linux'],
-        tags: ['policy:all'],
+        tags: [GLOBAL_ARTIFACT_TAG],
       });
       const blocklistsListItem = getExceptionListItemSchemaMock({
         os_types: ['macos'],
-        tags: ['policy:all'],
+        tags: [GLOBAL_ARTIFACT_TAG],
       });
       const context = buildManifestManagerContextMock({});
+      disableCustomYaraSignaturesFF(context);
       const manifestManager = new ManifestManager(context);
 
       context.exceptionListClient.findExceptionListItem = mockFindExceptionListItemResponses({
-        [ENDPOINT_LIST_ID]: { macos: [exceptionListItem] },
+        [ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id]: { macos: [exceptionListItem] },
         [ENDPOINT_ARTIFACT_LISTS.trustedApps.id]: { linux: [trustedAppListItem] },
         [ENDPOINT_ARTIFACT_LISTS.eventFilters.id]: { linux: [eventFiltersListItem] },
         [ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.id]: {
@@ -466,7 +525,7 @@ describe('ManifestManager', () => {
 
       const artifacts = manifest.getAllArtifacts();
 
-      expect(artifacts.length).toBe(15);
+      expect(artifacts.length).toBe(17);
       expect(getArtifactIds(artifacts)).toStrictEqual(SUPPORTED_ARTIFACT_NAMES);
 
       expect(getArtifactObject(artifacts[0])).toStrictEqual({
@@ -511,25 +570,26 @@ describe('ManifestManager', () => {
       const exceptionListItem = getExceptionListItemSchemaMock({ os_types: ['macos'] });
       const trustedAppListItem = getExceptionListItemSchemaMock({
         os_types: ['linux'],
-        tags: ['policy:all'],
+        tags: [GLOBAL_ARTIFACT_TAG],
       });
       const eventFiltersListItem = getExceptionListItemSchemaMock({
         os_types: ['windows'],
-        tags: ['policy:all'],
+        tags: [GLOBAL_ARTIFACT_TAG],
       });
       const hostIsolationExceptionsItem = getExceptionListItemSchemaMock({
         os_types: ['linux'],
-        tags: ['policy:all'],
+        tags: [GLOBAL_ARTIFACT_TAG],
       });
       const blocklistsListItem = getExceptionListItemSchemaMock({
         os_types: ['macos'],
-        tags: ['policy:all'],
+        tags: [GLOBAL_ARTIFACT_TAG],
       });
       const context = buildManifestManagerContextMock({});
+      disableCustomYaraSignaturesFF(context);
       const manifestManager = new ManifestManager(context);
 
       context.exceptionListClient.findExceptionListItem = mockFindExceptionListItemResponses({
-        [ENDPOINT_LIST_ID]: { macos: [exceptionListItem] },
+        [ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id]: { macos: [exceptionListItem] },
       });
       context.packagePolicyService.fetchAllItemIds = getMockPolicyFetchAllItemIds([
         TEST_POLICY_ID_1,
@@ -538,7 +598,7 @@ describe('ManifestManager', () => {
       const oldManifest = await manifestManager.buildNewManifest();
 
       context.exceptionListClient.findExceptionListItem = mockFindExceptionListItemResponses({
-        [ENDPOINT_LIST_ID]: { macos: [exceptionListItem] },
+        [ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id]: { macos: [exceptionListItem] },
         [ENDPOINT_ARTIFACT_LISTS.trustedApps.id]: { linux: [trustedAppListItem] },
         [ENDPOINT_ARTIFACT_LISTS.eventFilters.id]: { linux: [eventFiltersListItem] },
         [ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.id]: {
@@ -555,7 +615,7 @@ describe('ManifestManager', () => {
 
       const artifacts = manifest.getAllArtifacts();
 
-      expect(artifacts.length).toBe(15);
+      expect(artifacts.length).toBe(17);
       expect(getArtifactIds(artifacts)).toStrictEqual(SUPPORTED_ARTIFACT_NAMES);
 
       expect(artifacts[0]).toStrictEqual(oldManifest.getAllArtifacts()[0]);
@@ -598,33 +658,34 @@ describe('ManifestManager', () => {
       const exceptionListItem = getExceptionListItemSchemaMock({ os_types: ['macos'] });
       const trustedAppListItem = getExceptionListItemSchemaMock({
         os_types: ['linux'],
-        tags: ['policy:all'],
+        tags: [GLOBAL_ARTIFACT_TAG],
       });
       const eventFiltersListItem = getExceptionListItemSchemaMock({
         os_types: ['windows'],
-        tags: [`policy:${TEST_POLICY_ID_1}`],
+        tags: [buildPerPolicyTag(TEST_POLICY_ID_1)],
       });
       const hostIsolationExceptionsItem = getExceptionListItemSchemaMock({
         os_types: ['linux'],
-        tags: ['policy:all'],
+        tags: [GLOBAL_ARTIFACT_TAG],
       });
       const blocklistsListItem = getExceptionListItemSchemaMock({
         os_types: ['macos'],
-        tags: ['policy:all'],
+        tags: [GLOBAL_ARTIFACT_TAG],
       });
       const context = buildManifestManagerContextMock({});
+      disableCustomYaraSignaturesFF(context);
       const manifestManager = new ManifestManager(context);
 
       const duplicatedEventFilterInDifferentPolicy = {
         ...eventFiltersListItem,
-        tags: [`policy:${TEST_POLICY_ID_2}`],
+        tags: [buildPerPolicyTag(TEST_POLICY_ID_2)],
       };
       const duplicatedEndpointExceptionInDifferentOS: ExceptionListItemSchema = {
         ...exceptionListItem,
         os_types: ['windows'],
       };
       context.exceptionListClient.findExceptionListItem = mockFindExceptionListItemResponses({
-        [ENDPOINT_LIST_ID]: {
+        [ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id]: {
           macos: [exceptionListItem, exceptionListItem],
           windows: [duplicatedEndpointExceptionInDifferentOS],
         },
@@ -637,7 +698,7 @@ describe('ManifestManager', () => {
         [ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.id]: {
           linux: [
             hostIsolationExceptionsItem,
-            { ...hostIsolationExceptionsItem, tags: [`policy:${TEST_POLICY_ID_2}`] },
+            { ...hostIsolationExceptionsItem, tags: [buildPerPolicyTag(TEST_POLICY_ID_2)] },
           ],
         },
         [ENDPOINT_ARTIFACT_LISTS.blocklists.id]: {
@@ -658,7 +719,7 @@ describe('ManifestManager', () => {
 
       const artifacts = manifest.getAllArtifacts();
 
-      expect(artifacts.length).toBe(16);
+      expect(artifacts.length).toBe(18);
       expect(getArtifactIds(artifacts)).toStrictEqual(SUPPORTED_ARTIFACT_NAMES);
 
       expect(getArtifactObject(artifacts[0])).toStrictEqual({
@@ -739,20 +800,21 @@ describe('ManifestManager', () => {
       const exceptionListItem = getExceptionListItemSchemaMock({ os_types: ['macos'] });
       const trustedAppListItem = getExceptionListItemSchemaMock({
         os_types: ['linux'],
-        tags: ['policy:all'],
+        tags: [GLOBAL_ARTIFACT_TAG],
       });
       const trustedAppListItemPolicy2 = getExceptionListItemSchemaMock({
         os_types: ['linux'],
         entries: [
           { field: 'other.field', operator: 'included', type: 'match', value: 'other value' },
         ],
-        tags: [`policy:${TEST_POLICY_ID_2}`],
+        tags: [buildPerPolicyTag(TEST_POLICY_ID_2)],
       });
       const context = buildManifestManagerContextMock({});
+      disableCustomYaraSignaturesFF(context);
       const manifestManager = new ManifestManager(context);
 
       context.exceptionListClient.findExceptionListItem = mockFindExceptionListItemResponses({
-        [ENDPOINT_LIST_ID]: { macos: [exceptionListItem] },
+        [ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id]: { macos: [exceptionListItem] },
         [ENDPOINT_ARTIFACT_LISTS.trustedApps.id]: {
           linux: [trustedAppListItem, trustedAppListItemPolicy2],
         },
@@ -770,7 +832,7 @@ describe('ManifestManager', () => {
 
       const artifacts = manifest.getAllArtifacts();
 
-      expect(artifacts.length).toBe(16);
+      expect(artifacts.length).toBe(18);
       expect(getArtifactIds(artifacts)).toStrictEqual(SUPPORTED_ARTIFACT_NAMES);
 
       expect(getArtifactObject(artifacts[0])).toStrictEqual({
@@ -825,6 +887,8 @@ describe('ManifestManager', () => {
       ARTIFACT_NAME_BLOCKLISTS_MACOS,
       ARTIFACT_NAME_BLOCKLISTS_WINDOWS,
       ARTIFACT_NAME_BLOCKLISTS_LINUX,
+      ARTIFACT_NAME_TRUSTED_DEVICES_MACOS,
+      ARTIFACT_NAME_TRUSTED_DEVICES_WINDOWS,
     ];
 
     const getArtifactIds = (artifacts: InternalArtifactSchema[]) => [
@@ -835,27 +899,28 @@ describe('ManifestManager', () => {
       const exceptionListItem = getExceptionListItemSchemaMock({ os_types: ['macos'] });
       const trustedAppListItem = getExceptionListItemSchemaMock({
         os_types: ['linux'],
-        tags: ['policy:all'],
+        tags: [GLOBAL_ARTIFACT_TAG],
       });
       const eventFiltersListItem = getExceptionListItemSchemaMock({
         os_types: ['windows'],
-        tags: ['policy:all'],
+        tags: [GLOBAL_ARTIFACT_TAG],
       });
       const hostIsolationExceptionsItem = getExceptionListItemSchemaMock({
         os_types: ['linux'],
-        tags: ['policy:all'],
+        tags: [GLOBAL_ARTIFACT_TAG],
       });
       const blocklistsListItem = getExceptionListItemSchemaMock({
         os_types: ['macos'],
-        tags: ['policy:all'],
+        tags: [GLOBAL_ARTIFACT_TAG],
       });
       const context = buildManifestManagerContextMock({}, [
-        ProductFeatureSecurityKey.endpointArtifactManagement,
+        ProductFeatureKey.endpointArtifactManagement,
       ]);
+      disableCustomYaraSignaturesFF(context);
       const manifestManager = new ManifestManager(context);
 
       context.exceptionListClient.findExceptionListItem = mockFindExceptionListItemResponses({
-        [ENDPOINT_LIST_ID]: { macos: [exceptionListItem] },
+        [ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id]: { macos: [exceptionListItem] },
         [ENDPOINT_ARTIFACT_LISTS.trustedApps.id]: { linux: [trustedAppListItem] },
         [ENDPOINT_ARTIFACT_LISTS.eventFilters.id]: { linux: [eventFiltersListItem] },
         [ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.id]: {
@@ -876,7 +941,7 @@ describe('ManifestManager', () => {
 
       const artifacts = manifest.getAllArtifacts();
 
-      expect(artifacts.length).toBe(15);
+      expect(artifacts.length).toBe(17);
       expect(getArtifactIds(artifacts)).toStrictEqual(SUPPORTED_ARTIFACT_NAMES);
 
       expect(getArtifactObject(artifacts[0])).toStrictEqual({
@@ -915,28 +980,29 @@ describe('ManifestManager', () => {
       const exceptionListItem = getExceptionListItemSchemaMock({ os_types: ['macos'] });
       const trustedAppListItem = getExceptionListItemSchemaMock({
         os_types: ['linux'],
-        tags: ['policy:all'],
+        tags: [GLOBAL_ARTIFACT_TAG],
       });
       const eventFiltersListItem = getExceptionListItemSchemaMock({
         os_types: ['windows'],
-        tags: ['policy:all'],
+        tags: [GLOBAL_ARTIFACT_TAG],
       });
       const hostIsolationExceptionsItem = getExceptionListItemSchemaMock({
         os_types: ['linux'],
-        tags: ['policy:all'],
+        tags: [GLOBAL_ARTIFACT_TAG],
       });
       const blocklistsListItem = getExceptionListItemSchemaMock({
         os_types: ['macos'],
-        tags: ['policy:all'],
+        tags: [GLOBAL_ARTIFACT_TAG],
       });
       const context = buildManifestManagerContextMock({}, [
-        ProductFeatureSecurityKey.endpointArtifactManagement,
-        ProductFeatureSecurityKey.endpointHostIsolationExceptions,
+        ProductFeatureKey.endpointArtifactManagement,
+        ProductFeatureKey.endpointHostIsolationExceptions,
       ]);
+      disableCustomYaraSignaturesFF(context);
       const manifestManager = new ManifestManager(context);
 
       context.exceptionListClient.findExceptionListItem = mockFindExceptionListItemResponses({
-        [ENDPOINT_LIST_ID]: { macos: [exceptionListItem] },
+        [ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id]: { macos: [exceptionListItem] },
         [ENDPOINT_ARTIFACT_LISTS.trustedApps.id]: { linux: [trustedAppListItem] },
         [ENDPOINT_ARTIFACT_LISTS.eventFilters.id]: { linux: [eventFiltersListItem] },
         [ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.id]: {
@@ -957,7 +1023,7 @@ describe('ManifestManager', () => {
 
       const artifacts = manifest.getAllArtifacts();
 
-      expect(artifacts.length).toBe(15);
+      expect(artifacts.length).toBe(17);
       expect(getArtifactIds(artifacts)).toStrictEqual(SUPPORTED_ARTIFACT_NAMES);
 
       expect(getArtifactObject(artifacts[0])).toStrictEqual({
@@ -1002,25 +1068,26 @@ describe('ManifestManager', () => {
       const exceptionListItem = getExceptionListItemSchemaMock({ os_types: ['macos'] });
       const trustedAppListItem = getExceptionListItemSchemaMock({
         os_types: ['linux'],
-        tags: ['policy:all'],
+        tags: [GLOBAL_ARTIFACT_TAG],
       });
       const eventFiltersListItem = getExceptionListItemSchemaMock({
         os_types: ['windows'],
-        tags: ['policy:all'],
+        tags: [GLOBAL_ARTIFACT_TAG],
       });
       const hostIsolationExceptionsItem = getExceptionListItemSchemaMock({
         os_types: ['linux'],
-        tags: ['policy:all'],
+        tags: [GLOBAL_ARTIFACT_TAG],
       });
       const blocklistsListItem = getExceptionListItemSchemaMock({
         os_types: ['macos'],
-        tags: ['policy:all'],
+        tags: [GLOBAL_ARTIFACT_TAG],
       });
       const context = buildManifestManagerContextMock({}, []);
+      disableCustomYaraSignaturesFF(context);
       const manifestManager = new ManifestManager(context);
 
       context.exceptionListClient.findExceptionListItem = mockFindExceptionListItemResponses({
-        [ENDPOINT_LIST_ID]: { macos: [exceptionListItem] },
+        [ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id]: { macos: [exceptionListItem] },
         [ENDPOINT_ARTIFACT_LISTS.trustedApps.id]: { linux: [trustedAppListItem] },
         [ENDPOINT_ARTIFACT_LISTS.eventFilters.id]: { linux: [eventFiltersListItem] },
         [ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.id]: {
@@ -1041,7 +1108,7 @@ describe('ManifestManager', () => {
 
       const artifacts = manifest.getAllArtifacts();
 
-      expect(artifacts.length).toBe(15);
+      expect(artifacts.length).toBe(17);
       expect(getArtifactIds(artifacts)).toStrictEqual(SUPPORTED_ARTIFACT_NAMES);
 
       expect(getArtifactObject(artifacts[0])).toStrictEqual({ entries: [] });
@@ -1069,30 +1136,37 @@ describe('ManifestManager', () => {
     });
   });
 
-  describe('buildNewManifest when Endpoint Exceptions contain `matches`', () => {
-    test(`when contains only \`wildcard\`, \`event.module=endpoint\` is added `, async () => {
-      const exceptionListItem = getExceptionListItemSchemaMock({
-        os_types: ['macos'],
-        entries: [
-          { type: 'wildcard', operator: 'included', field: 'path', value: '*match_me*' },
-          { type: 'wildcard', operator: 'excluded', field: 'not_path', value: '*dont_match_me*' },
-        ],
-      });
-      const expectedExceptionListItem = getExceptionListItemSchemaMock({
-        os_types: ['macos'],
-        entries: [
-          ...exceptionListItem.entries,
-          { type: 'match', operator: 'included', field: 'event.module', value: 'endpoint' },
-        ],
-      });
+  describe('buildNewManifest with trustedDevices', () => {
+    const SUPPORTED_ARTIFACT_NAMES_WITH_TRUSTED_DEVICES = [
+      ARTIFACT_NAME_EXCEPTIONS_MACOS,
+      ARTIFACT_NAME_EXCEPTIONS_WINDOWS,
+      ARTIFACT_NAME_EXCEPTIONS_LINUX,
+      ARTIFACT_NAME_TRUSTED_APPS_MACOS,
+      ARTIFACT_NAME_TRUSTED_APPS_WINDOWS,
+      ARTIFACT_NAME_TRUSTED_APPS_LINUX,
+      ARTIFACT_NAME_EVENT_FILTERS_MACOS,
+      ARTIFACT_NAME_EVENT_FILTERS_WINDOWS,
+      ARTIFACT_NAME_EVENT_FILTERS_LINUX,
+      ARTIFACT_NAME_HOST_ISOLATION_EXCEPTIONS_MACOS,
+      ARTIFACT_NAME_HOST_ISOLATION_EXCEPTIONS_WINDOWS,
+      ARTIFACT_NAME_HOST_ISOLATION_EXCEPTIONS_LINUX,
+      ARTIFACT_NAME_BLOCKLISTS_MACOS,
+      ARTIFACT_NAME_BLOCKLISTS_WINDOWS,
+      ARTIFACT_NAME_BLOCKLISTS_LINUX,
+      ARTIFACT_NAME_TRUSTED_DEVICES_MACOS,
+      ARTIFACT_NAME_TRUSTED_DEVICES_WINDOWS,
+    ];
 
+    const getArtifactIds = (artifacts: InternalArtifactSchema[]) => [
+      ...new Set(artifacts.map((artifact) => artifact.identifier)).values(),
+    ];
+
+    test('builds manifest with trusted devices', async () => {
       const context = buildManifestManagerContextMock({});
+      disableCustomYaraSignaturesFF(context);
       const manifestManager = new ManifestManager(context);
 
-      context.exceptionListClient.findExceptionListItem = mockFindExceptionListItemResponses({
-        [ENDPOINT_LIST_ID]: { macos: [exceptionListItem] },
-      });
-
+      context.exceptionListClient.findExceptionListItem = mockFindExceptionListItemResponses({});
       context.packagePolicyService.fetchAllItemIds = getMockPolicyFetchAllItemIds([
         TEST_POLICY_ID_1,
       ]);
@@ -1105,50 +1179,825 @@ describe('ManifestManager', () => {
 
       const artifacts = manifest.getAllArtifacts();
 
-      expect(artifacts.length).toBe(15);
+      expect(artifacts.length).toBe(17); // 15 standard + 2 trusted devices (macos, windows)
+      expect(getArtifactIds(artifacts)).toStrictEqual(
+        SUPPORTED_ARTIFACT_NAMES_WITH_TRUSTED_DEVICES
+      );
 
-      expect(getArtifactObject(artifacts[0])).toStrictEqual({
-        entries: translateToEndpointExceptions([expectedExceptionListItem], 'v1', defaultFeatures),
+      // Verify trusted devices artifacts are present
+      const trustedDevicesMacosArtifact = artifacts.find(
+        (a) => a.identifier === ARTIFACT_NAME_TRUSTED_DEVICES_MACOS
+      );
+      const trustedDevicesWindowsArtifact = artifacts.find(
+        (a) => a.identifier === ARTIFACT_NAME_TRUSTED_DEVICES_WINDOWS
+      );
+
+      expect(trustedDevicesMacosArtifact).toBeDefined();
+      expect(trustedDevicesWindowsArtifact).toBeDefined();
+
+      // Verify trusted devices artifacts have empty entries (no test data)
+      expect(getArtifactObject(trustedDevicesMacosArtifact!)).toStrictEqual({ entries: [] });
+      expect(getArtifactObject(trustedDevicesWindowsArtifact!)).toStrictEqual({ entries: [] });
+
+      for (const artifact of artifacts) {
+        expect(manifest.isDefaultArtifact(artifact)).toBe(true);
+        expect(manifest.getArtifactTargetPolicies(artifact)).toStrictEqual(
+          new Set([TEST_POLICY_ID_1])
+        );
+      }
+    });
+
+    test('builds manifest with trusted devices entries when trusted devices data present', async () => {
+      const trustedDeviceListItem = getExceptionListItemSchemaMock({
+        os_types: ['windows'],
+        tags: [GLOBAL_ARTIFACT_TAG],
+      });
+
+      const context = buildManifestManagerContextMock({});
+      disableCustomYaraSignaturesFF(context);
+      const manifestManager = new ManifestManager(context);
+
+      context.exceptionListClient.findExceptionListItem = mockFindExceptionListItemResponses({
+        [ENDPOINT_ARTIFACT_LISTS.trustedDevices.id]: { windows: [trustedDeviceListItem] },
+      });
+      context.packagePolicyService.fetchAllItemIds = getMockPolicyFetchAllItemIds([
+        TEST_POLICY_ID_1,
+      ]);
+
+      const manifest = await manifestManager.buildNewManifest();
+
+      const artifacts = manifest.getAllArtifacts();
+      expect(artifacts.length).toBe(17);
+
+      // Find trusted devices artifacts
+      const trustedDevicesMacosArtifact = artifacts.find(
+        (a) => a.identifier === ARTIFACT_NAME_TRUSTED_DEVICES_MACOS
+      );
+      const trustedDevicesWindowsArtifact = artifacts.find(
+        (a) => a.identifier === ARTIFACT_NAME_TRUSTED_DEVICES_WINDOWS
+      );
+
+      expect(trustedDevicesMacosArtifact).toBeDefined();
+      expect(trustedDevicesWindowsArtifact).toBeDefined();
+
+      // Verify trusted devices artifacts content
+      expect(getArtifactObject(trustedDevicesMacosArtifact!)).toStrictEqual({ entries: [] }); // No macOS data
+      expect(getArtifactObject(trustedDevicesWindowsArtifact!)).toStrictEqual({
+        entries: translateToEndpointExceptions([trustedDeviceListItem], 'v1', {
+          ...defaultFeatures,
+          trustedDevices: true,
+        }),
+      });
+    });
+  });
+
+  describe('buildNewManifest with customYaraSignaturesEnabled', () => {
+    const SUPPORTED_ARTIFACT_NAMES_WITH_CUSTOM_YARA_SIGNATURES = [
+      ARTIFACT_NAME_EXCEPTIONS_MACOS,
+      ARTIFACT_NAME_EXCEPTIONS_WINDOWS,
+      ARTIFACT_NAME_EXCEPTIONS_LINUX,
+      ARTIFACT_NAME_TRUSTED_APPS_MACOS,
+      ARTIFACT_NAME_TRUSTED_APPS_WINDOWS,
+      ARTIFACT_NAME_TRUSTED_APPS_LINUX,
+      ARTIFACT_NAME_EVENT_FILTERS_MACOS,
+      ARTIFACT_NAME_EVENT_FILTERS_WINDOWS,
+      ARTIFACT_NAME_EVENT_FILTERS_LINUX,
+      ARTIFACT_NAME_HOST_ISOLATION_EXCEPTIONS_MACOS,
+      ARTIFACT_NAME_HOST_ISOLATION_EXCEPTIONS_WINDOWS,
+      ARTIFACT_NAME_HOST_ISOLATION_EXCEPTIONS_LINUX,
+      ARTIFACT_NAME_BLOCKLISTS_MACOS,
+      ARTIFACT_NAME_BLOCKLISTS_WINDOWS,
+      ARTIFACT_NAME_BLOCKLISTS_LINUX,
+      ARTIFACT_NAME_TRUSTED_DEVICES_MACOS,
+      ARTIFACT_NAME_TRUSTED_DEVICES_WINDOWS,
+      ARTIFACT_NAME_CUSTOM_YARA_SIGNATURES_MACOS,
+      ARTIFACT_NAME_CUSTOM_YARA_SIGNATURES_WINDOWS,
+      ARTIFACT_NAME_CUSTOM_YARA_SIGNATURES_LINUX,
+    ];
+
+    const getArtifactIds = (artifacts: InternalArtifactSchema[]) => [
+      ...new Set(artifacts.map((artifact) => artifact.identifier)).values(),
+    ];
+
+    beforeEach(() => {
+      mockValidateYaraRule.mockResolvedValue({
+        errors: [],
+        warnings: [],
+        errorCount: 0,
+        warningCount: 0,
+        rules: [{ identifier: 'test', meta: {}, duplicateMeta: [] }],
       });
     });
 
-    test(`when contains anything next to \`wildcard\`, nothing is added `, async () => {
-      const exceptionListItem = getExceptionListItemSchemaMock({
-        os_types: ['macos'],
-        entries: [
-          { type: 'wildcard', operator: 'included', field: 'path', value: '*match_me*' },
-          { type: 'wildcard', operator: 'excluded', field: 'path', value: '*dont_match_me*' },
-          { type: 'match', operator: 'included', field: 'path', value: 'something' },
-        ],
-      });
-      const expectedExceptionListItem = getExceptionListItemSchemaMock({
-        os_types: ['macos'],
-        entries: [...exceptionListItem.entries],
-      });
-
+    test('does not build custom YARA signature artifacts when the feature flag is disabled', async () => {
       const context = buildManifestManagerContextMock({});
+      disableCustomYaraSignaturesFF(context);
       const manifestManager = new ManifestManager(context);
 
-      context.exceptionListClient.findExceptionListItem = mockFindExceptionListItemResponses({
-        [ENDPOINT_LIST_ID]: { macos: [exceptionListItem] },
-      });
-
+      context.exceptionListClient.findExceptionListItem = mockFindExceptionListItemResponses({});
       context.packagePolicyService.fetchAllItemIds = getMockPolicyFetchAllItemIds([
         TEST_POLICY_ID_1,
       ]);
 
       const manifest = await manifestManager.buildNewManifest();
+      const artifactIds = getArtifactIds(manifest.getAllArtifacts());
 
-      expect(manifest?.getSchemaVersion()).toStrictEqual('v1');
-      expect(manifest?.getSemanticVersion()).toStrictEqual('1.0.0');
-      expect(manifest?.getSavedObjectVersion()).toBeUndefined();
+      expect(artifactIds).not.toContain(ARTIFACT_NAME_CUSTOM_YARA_SIGNATURES_MACOS);
+      expect(artifactIds).not.toContain(ARTIFACT_NAME_CUSTOM_YARA_SIGNATURES_WINDOWS);
+      expect(artifactIds).not.toContain(ARTIFACT_NAME_CUSTOM_YARA_SIGNATURES_LINUX);
+    });
 
+    test('builds empty custom YARA signature artifacts when the feature flag is enabled', async () => {
+      const context = buildManifestManagerContextMock({
+        experimentalFeatures: ['customYaraSignaturesEnabled'],
+      });
+      const manifestManager = new ManifestManager(context);
+
+      context.exceptionListClient.findExceptionListItem = mockFindExceptionListItemResponses({});
+      context.packagePolicyService.fetchAllItemIds = getMockPolicyFetchAllItemIds([
+        TEST_POLICY_ID_1,
+      ]);
+
+      const manifest = await manifestManager.buildNewManifest();
       const artifacts = manifest.getAllArtifacts();
 
-      expect(artifacts.length).toBe(15);
+      expect(artifacts.length).toBe(20); // 17 standard + 3 custom YARA (macos, windows, linux)
+      expect(getArtifactIds(artifacts)).toStrictEqual(
+        SUPPORTED_ARTIFACT_NAMES_WITH_CUSTOM_YARA_SIGNATURES
+      );
 
-      expect(getArtifactObject(artifacts[0])).toStrictEqual({
-        entries: translateToEndpointExceptions([expectedExceptionListItem], 'v1', defaultFeatures),
+      const yaraMacosArtifact = artifacts.find(
+        (a) => a.identifier === ARTIFACT_NAME_CUSTOM_YARA_SIGNATURES_MACOS
+      );
+      const yaraWindowsArtifact = artifacts.find(
+        (a) => a.identifier === ARTIFACT_NAME_CUSTOM_YARA_SIGNATURES_WINDOWS
+      );
+      const yaraLinuxArtifact = artifacts.find(
+        (a) => a.identifier === ARTIFACT_NAME_CUSTOM_YARA_SIGNATURES_LINUX
+      );
+
+      expect(yaraMacosArtifact).toBeDefined();
+      expect(yaraWindowsArtifact).toBeDefined();
+      expect(yaraLinuxArtifact).toBeDefined();
+
+      expect(getArtifactObject(yaraMacosArtifact!)).toStrictEqual({ entries: [] });
+      expect(getArtifactObject(yaraWindowsArtifact!)).toStrictEqual({ entries: [] });
+      expect(getArtifactObject(yaraLinuxArtifact!)).toStrictEqual({ entries: [] });
+
+      for (const artifact of artifacts) {
+        expect(manifest.isDefaultArtifact(artifact)).toBe(true);
+        expect(manifest.getArtifactTargetPolicies(artifact)).toStrictEqual(
+          new Set([TEST_POLICY_ID_1])
+        );
+      }
+    });
+
+    test('builds custom YARA signature artifacts from the exception item value', async () => {
+      const yaraRuleText = 'rule Example { condition: true }';
+      const yaraListItem = getExceptionListItemSchemaMock({
+        list_id: ENDPOINT_ARTIFACT_LISTS.customYaraSignatures.id,
+        os_types: ['windows'],
+        tags: [GLOBAL_ARTIFACT_TAG],
+        entries: [
+          {
+            field: CUSTOM_YARA_SIGNATURE_FIELD_TYPE,
+            operator: 'included',
+            type: 'match',
+            value: yaraRuleText,
+          },
+        ],
+      });
+
+      const context = buildManifestManagerContextMock({
+        experimentalFeatures: ['customYaraSignaturesEnabled'],
+      });
+      const manifestManager = new ManifestManager(context);
+
+      context.exceptionListClient.findExceptionListItem = mockFindExceptionListItemResponses({
+        [ENDPOINT_ARTIFACT_LISTS.customYaraSignatures.id]: { windows: [yaraListItem] },
+      });
+      context.packagePolicyService.fetchAllItemIds = getMockPolicyFetchAllItemIds([
+        TEST_POLICY_ID_1,
+      ]);
+
+      const manifest = await manifestManager.buildNewManifest();
+      const artifacts = manifest.getAllArtifacts();
+
+      expect(artifacts.length).toBe(20);
+
+      const yaraMacosArtifact = artifacts.find(
+        (a) => a.identifier === ARTIFACT_NAME_CUSTOM_YARA_SIGNATURES_MACOS
+      );
+      const yaraWindowsArtifact = artifacts.find(
+        (a) => a.identifier === ARTIFACT_NAME_CUSTOM_YARA_SIGNATURES_WINDOWS
+      );
+      const yaraLinuxArtifact = artifacts.find(
+        (a) => a.identifier === ARTIFACT_NAME_CUSTOM_YARA_SIGNATURES_LINUX
+      );
+
+      expect(yaraMacosArtifact).toBeDefined();
+      expect(yaraWindowsArtifact).toBeDefined();
+      expect(yaraLinuxArtifact).toBeDefined();
+
+      expect(getArtifactObject(yaraMacosArtifact!)).toStrictEqual({ entries: [] });
+      expect(getArtifactObject(yaraLinuxArtifact!)).toStrictEqual({ entries: [] });
+      expect(getArtifactObject(yaraWindowsArtifact!)).toStrictEqual({
+        entries: [
+          {
+            yara_rule_data: yaraRuleText,
+            arch_context: [MetaArchValue.X86, MetaArchValue.ARM64],
+            scan_context: [EndpointArtifactScanContext.MEMORY],
+            entry_id: yaraListItem.id,
+            entry_name: yaraListItem.name,
+          },
+        ],
+      });
+    });
+
+    test('builds policy-specific custom YARA signature artifacts and omits them from other policies', async () => {
+      const globalYaraRuleText = 'rule GlobalExample { condition: true }';
+      const policy2YaraRuleText = 'rule Policy2Example { condition: true }';
+      const globalYaraListItem = getExceptionListItemSchemaMock({
+        id: 'yara-global',
+        item_id: 'yara-global',
+        name: 'Global YARA rule',
+        list_id: ENDPOINT_ARTIFACT_LISTS.customYaraSignatures.id,
+        os_types: ['windows'],
+        tags: [GLOBAL_ARTIFACT_TAG],
+        entries: [
+          {
+            field: CUSTOM_YARA_SIGNATURE_FIELD_TYPE,
+            operator: 'included',
+            type: 'match',
+            value: globalYaraRuleText,
+          },
+        ],
+      });
+      const policy2YaraListItem = getExceptionListItemSchemaMock({
+        id: 'yara-policy-2',
+        item_id: 'yara-policy-2',
+        name: 'Policy 2 YARA rule',
+        list_id: ENDPOINT_ARTIFACT_LISTS.customYaraSignatures.id,
+        os_types: ['windows'],
+        tags: [buildPerPolicyTag(TEST_POLICY_ID_2)],
+        entries: [
+          {
+            field: CUSTOM_YARA_SIGNATURE_FIELD_TYPE,
+            operator: 'included',
+            type: 'match',
+            value: policy2YaraRuleText,
+          },
+        ],
+      });
+
+      const context = buildManifestManagerContextMock({
+        experimentalFeatures: ['customYaraSignaturesEnabled'],
+      });
+      const manifestManager = new ManifestManager(context);
+
+      context.exceptionListClient.findExceptionListItem = mockFindExceptionListItemResponses({
+        [ENDPOINT_ARTIFACT_LISTS.customYaraSignatures.id]: {
+          windows: [globalYaraListItem, policy2YaraListItem],
+        },
+      });
+      context.packagePolicyService.fetchAllItemIds = getMockPolicyFetchAllItemIds([
+        TEST_POLICY_ID_1,
+        TEST_POLICY_ID_2,
+      ]);
+
+      const manifest = await manifestManager.buildNewManifest();
+      const windowsYaraArtifacts = manifest
+        .getAllArtifacts()
+        .filter((artifact) => artifact.identifier === ARTIFACT_NAME_CUSTOM_YARA_SIGNATURES_WINDOWS);
+
+      expect(windowsYaraArtifacts.length).toBe(2);
+
+      const defaultWindowsYaraArtifact = windowsYaraArtifacts.find((artifact) =>
+        manifest.isDefaultArtifact(artifact)
+      );
+      const policy2WindowsYaraArtifact = windowsYaraArtifacts.find(
+        (artifact) => !manifest.isDefaultArtifact(artifact)
+      );
+
+      expect(defaultWindowsYaraArtifact).toBeDefined();
+      expect(policy2WindowsYaraArtifact).toBeDefined();
+
+      // Default artifact: global rule only — policy-scoped rule must not leak here
+      expect(getArtifactObject(defaultWindowsYaraArtifact!)).toStrictEqual({
+        entries: [
+          {
+            yara_rule_data: globalYaraRuleText,
+            arch_context: [MetaArchValue.X86, MetaArchValue.ARM64],
+            scan_context: [EndpointArtifactScanContext.MEMORY],
+            entry_id: globalYaraListItem.id,
+            entry_name: globalYaraListItem.name,
+          },
+        ],
+      });
+      // Policy 1 has no policy-specific YARA rules, so it uses the default artifact
+      expect(manifest.getArtifactTargetPolicies(defaultWindowsYaraArtifact!)).toStrictEqual(
+        new Set([TEST_POLICY_ID_1])
+      );
+
+      // Policy 2 artifact: global + policy-2 rule
+      expect(getArtifactObject(policy2WindowsYaraArtifact!)).toStrictEqual({
+        entries: [
+          {
+            yara_rule_data: globalYaraRuleText,
+            arch_context: [MetaArchValue.X86, MetaArchValue.ARM64],
+            scan_context: [EndpointArtifactScanContext.MEMORY],
+            entry_id: globalYaraListItem.id,
+            entry_name: globalYaraListItem.name,
+          },
+          {
+            yara_rule_data: policy2YaraRuleText,
+            arch_context: [MetaArchValue.X86, MetaArchValue.ARM64],
+            scan_context: [EndpointArtifactScanContext.MEMORY],
+            entry_id: policy2YaraListItem.id,
+            entry_name: policy2YaraListItem.name,
+          },
+        ],
+      });
+      expect(manifest.getArtifactTargetPolicies(policy2WindowsYaraArtifact!)).toStrictEqual(
+        new Set([TEST_POLICY_ID_2])
+      );
+    });
+
+    test('retries per-item libyara validation after a transient engine failure', async () => {
+      const yaraRuleText = 'rule Example { condition: true }';
+      const yaraListItem = getExceptionListItemSchemaMock({
+        list_id: ENDPOINT_ARTIFACT_LISTS.customYaraSignatures.id,
+        os_types: ['windows'],
+        tags: [GLOBAL_ARTIFACT_TAG],
+        entries: [
+          {
+            field: CUSTOM_YARA_SIGNATURE_FIELD_TYPE,
+            operator: 'included',
+            type: 'match',
+            value: yaraRuleText,
+          },
+        ],
+      });
+
+      const context = buildManifestManagerContextMock({
+        experimentalFeatures: ['customYaraSignaturesEnabled'],
+      });
+      const manifestManager = new ManifestManager(context);
+
+      context.exceptionListClient.findExceptionListItem = mockFindExceptionListItemResponses({
+        [ENDPOINT_ARTIFACT_LISTS.customYaraSignatures.id]: { windows: [yaraListItem] },
+      });
+      context.packagePolicyService.fetchAllItemIds = getMockPolicyFetchAllItemIds([
+        TEST_POLICY_ID_1,
+      ]);
+
+      mockValidateYaraRule.mockRejectedValueOnce(
+        new YaraEngineUnavailableError('libyara WASM trap')
+      );
+
+      const manifest = await manifestManager.buildNewManifest();
+      const yaraWindowsArtifact = manifest
+        .getAllArtifacts()
+        .find((a) => a.identifier === ARTIFACT_NAME_CUSTOM_YARA_SIGNATURES_WINDOWS);
+
+      expect(getArtifactObject(yaraWindowsArtifact!)).toStrictEqual({
+        entries: [
+          {
+            yara_rule_data: yaraRuleText,
+            arch_context: [MetaArchValue.X86, MetaArchValue.ARM64],
+            scan_context: [EndpointArtifactScanContext.MEMORY],
+            entry_id: yaraListItem.id,
+            entry_name: yaraListItem.name,
+          },
+        ],
+      });
+      expect(context.logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('libyara engine failed validating Custom YARA Signature')
+      );
+    });
+
+    test('aborts manifest build when per-item libyara retries are exhausted', async () => {
+      const yaraRuleText = 'rule Example { condition: true }';
+      const yaraListItem = getExceptionListItemSchemaMock({
+        list_id: ENDPOINT_ARTIFACT_LISTS.customYaraSignatures.id,
+        os_types: ['windows'],
+        tags: [GLOBAL_ARTIFACT_TAG],
+        entries: [
+          {
+            field: CUSTOM_YARA_SIGNATURE_FIELD_TYPE,
+            operator: 'included',
+            type: 'match',
+            value: yaraRuleText,
+          },
+        ],
+      });
+
+      const context = buildManifestManagerContextMock({
+        experimentalFeatures: ['customYaraSignaturesEnabled'],
+      });
+      const manifestManager = new ManifestManager(context);
+
+      context.exceptionListClient.findExceptionListItem = mockFindExceptionListItemResponses({
+        [ENDPOINT_ARTIFACT_LISTS.customYaraSignatures.id]: { windows: [yaraListItem] },
+      });
+      context.packagePolicyService.fetchAllItemIds = getMockPolicyFetchAllItemIds([
+        TEST_POLICY_ID_1,
+      ]);
+
+      mockValidateYaraRule.mockRejectedValue(
+        new YaraEngineUnavailableError('libyara WASM allocation failed')
+      );
+
+      await expect(manifestManager.buildNewManifest()).rejects.toBeInstanceOf(
+        YaraEngineUnavailableError
+      );
+      expect(context.logger.error).toHaveBeenCalledWith(
+        expect.stringContaining('aborting artifact build')
+      );
+      expect(mockValidateYaraRule).toHaveBeenCalledTimes(3);
+    });
+
+    test('does not republish cached YARA signatures after a libyara failure aborts the build', async () => {
+      const yaraRuleText = 'rule Example { condition: true }';
+      const yaraListItem = getExceptionListItemSchemaMock({
+        list_id: ENDPOINT_ARTIFACT_LISTS.customYaraSignatures.id,
+        os_types: ['windows'],
+        tags: [GLOBAL_ARTIFACT_TAG],
+        entries: [
+          {
+            field: CUSTOM_YARA_SIGNATURE_FIELD_TYPE,
+            operator: 'included',
+            type: 'match',
+            value: yaraRuleText,
+          },
+        ],
+      });
+
+      const context = buildManifestManagerContextMock({
+        experimentalFeatures: ['customYaraSignaturesEnabled'],
+      });
+      const manifestManager = new ManifestManager(context);
+
+      context.exceptionListClient.findExceptionListItem = mockFindExceptionListItemResponses({
+        [ENDPOINT_ARTIFACT_LISTS.customYaraSignatures.id]: { windows: [yaraListItem] },
+      });
+      context.packagePolicyService.fetchAllItemIds = getMockPolicyFetchAllItemIds([
+        TEST_POLICY_ID_1,
+      ]);
+
+      mockValidateYaraRule.mockRejectedValue(
+        new YaraEngineUnavailableError('libyara WASM allocation failed')
+      );
+
+      await expect(manifestManager.buildNewManifest()).rejects.toBeInstanceOf(
+        YaraEngineUnavailableError
+      );
+
+      // License downgrade while the failed build's snapshot is still the last thing fetched.
+      // The list client still returns the signature; a cache hit would ship it once the engine recovers.
+      context.licenseService.isEnterprise = jest.fn().mockReturnValue(false);
+      mockValidateYaraRule.mockResolvedValue({
+        errors: [],
+        warnings: [],
+        errorCount: 0,
+        warningCount: 0,
+        rules: [{ identifier: 'test', meta: {}, duplicateMeta: [] }],
+      });
+
+      const manifest = await manifestManager.buildNewManifest();
+      const yaraWindowsArtifact = manifest
+        .getAllArtifacts()
+        .find((artifact) => artifact.identifier === ARTIFACT_NAME_CUSTOM_YARA_SIGNATURES_WINDOWS);
+
+      expect(getArtifactObject(yaraWindowsArtifact!)).toStrictEqual({ entries: [] });
+      expect(mockValidateYaraRule).toHaveBeenCalledTimes(3);
+    });
+
+    test('does not keep exception lists that finish loading after a sibling builder fails', async () => {
+      const yaraRuleText = 'rule Example { condition: true }';
+      const yaraListItem = getExceptionListItemSchemaMock({
+        list_id: ENDPOINT_ARTIFACT_LISTS.customYaraSignatures.id,
+        os_types: ['windows'],
+        tags: [GLOBAL_ARTIFACT_TAG],
+        entries: [
+          {
+            field: CUSTOM_YARA_SIGNATURE_FIELD_TYPE,
+            operator: 'included',
+            type: 'match',
+            value: yaraRuleText,
+          },
+        ],
+      });
+      const staleTrustedApp = getExceptionListItemSchemaMock({
+        list_id: ENDPOINT_ARTIFACT_LISTS.trustedApps.id,
+        os_types: ['windows'],
+        tags: [GLOBAL_ARTIFACT_TAG],
+        entries: [
+          { type: 'match', operator: 'included', field: 'path', value: 'stale-trusted-app' },
+        ],
+      });
+
+      let releaseTrustedAppsFetch: () => void = () => {};
+      const trustedAppsGate = new Promise<void>((resolve) => {
+        releaseTrustedAppsFetch = resolve;
+      });
+      let resolveTrustedAppsFetchDoneCallback: () => void = () => {};
+      const trustedAppsFetchDoneCallback = new Promise<void>((resolve) => {
+        resolveTrustedAppsFetchDoneCallback = resolve;
+      });
+      const findExceptionListItem = mockFindExceptionListItemResponses({
+        [ENDPOINT_ARTIFACT_LISTS.customYaraSignatures.id]: { windows: [yaraListItem] },
+      });
+
+      const context = buildManifestManagerContextMock({
+        experimentalFeatures: ['customYaraSignaturesEnabled'],
+      });
+      const manifestManager = new ManifestManager(context);
+
+      context.exceptionListClient.findExceptionListItem = jest.fn(async (...args) => {
+        const options = args[0] as { listId?: string };
+        if (options?.listId === ENDPOINT_ARTIFACT_LISTS.trustedApps.id) {
+          // gated fetch for Trusted Apps
+          await trustedAppsGate;
+          resolveTrustedAppsFetchDoneCallback();
+          return createExceptionListResponse([staleTrustedApp]);
+        }
+        return findExceptionListItem(...args);
+      });
+      context.packagePolicyService.fetchAllItemIds = getMockPolicyFetchAllItemIds([
+        TEST_POLICY_ID_1,
+      ]);
+
+      mockValidateYaraRule.mockRejectedValue(
+        new YaraEngineUnavailableError('libyara WASM allocation failed')
+      );
+
+      const yieldToEventLoop = () => new Promise<void>((resolve) => setImmediate(resolve));
+      const failedBuild = manifestManager.buildNewManifest();
+
+      // Hold trusted apps until YARA has exhausted retries. With Promise.all + finally,
+      // rejection clears the cache while this fetch is still gated; releasing afterward
+      // can refill the map. allSettled waits for this sibling before clearing.
+      for (
+        let safetyCap = 0;
+        safetyCap < 50 && mockValidateYaraRule.mock.calls.length < 3;
+        safetyCap++
+      ) {
+        await yieldToEventLoop();
+      }
+      expect(mockValidateYaraRule).toHaveBeenCalledTimes(3);
+      // Let Promise.all's rejection + finally run (no-op yet under allSettled).
+      await yieldToEventLoop();
+
+      releaseTrustedAppsFetch();
+      await trustedAppsFetchDoneCallback;
+      // Allow getCachedExceptions to .set() after the awaited list fetch returns.
+      await yieldToEventLoop();
+
+      await expect(failedBuild).rejects.toBeInstanceOf(YaraEngineUnavailableError);
+
+      context.exceptionListClient.findExceptionListItem = mockFindExceptionListItemResponses({});
+      mockValidateYaraRule.mockResolvedValue({
+        errors: [],
+        warnings: [],
+        errorCount: 0,
+        warningCount: 0,
+        rules: [{ identifier: 'test', meta: {}, duplicateMeta: [] }],
+      });
+
+      const manifest = await manifestManager.buildNewManifest();
+      const trustedAppsWindowsArtifact = manifest
+        .getAllArtifacts()
+        .find((artifact) => artifact.identifier === ARTIFACT_NAME_TRUSTED_APPS_WINDOWS);
+
+      expect(getArtifactObject(trustedAppsWindowsArtifact!)).toStrictEqual({ entries: [] });
+    });
+  });
+
+  describe('buildNewManifest with Endpoint Exceptions', () => {
+    let manifestManager: ManifestManager;
+    let context: ManifestManagerContext;
+
+    let globalEndpointException: ExceptionListItemSchema;
+    let endpointExceptionAssignedToNowhere: ExceptionListItemSchema;
+    let endpointExceptionAssignedToPolicy1: ExceptionListItemSchema;
+    let endpointExceptionAssignedToPolicy2: ExceptionListItemSchema;
+
+    beforeEach(() => {
+      context = buildManifestManagerContextMock({});
+      disableCustomYaraSignaturesFF(context);
+
+      globalEndpointException = getExceptionListItemSchemaMock({
+        os_types: ['windows'],
+        entries: [{ type: 'match', operator: 'included', field: 'path', value: 'global' }],
+        tags: [GLOBAL_ARTIFACT_TAG],
+      });
+      endpointExceptionAssignedToNowhere = getExceptionListItemSchemaMock({
+        os_types: ['windows'],
+        entries: [
+          { type: 'match', operator: 'included', field: 'path', value: 'assigned_to_nowhere' },
+        ],
+        tags: [],
+      });
+      endpointExceptionAssignedToPolicy1 = getExceptionListItemSchemaMock({
+        os_types: ['windows'],
+        entries: [
+          { type: 'match', operator: 'included', field: 'path', value: 'assigned_to_policy_1' },
+        ],
+        tags: [buildPerPolicyTag(TEST_POLICY_ID_1)],
+      });
+      endpointExceptionAssignedToPolicy2 = getExceptionListItemSchemaMock({
+        os_types: ['windows'],
+        entries: [
+          { type: 'match', operator: 'included', field: 'path', value: 'assigned_to_policy_2' },
+        ],
+        tags: [buildPerPolicyTag(TEST_POLICY_ID_2)],
+      });
+
+      context.exceptionListClient.findExceptionListItem = mockFindExceptionListItemResponses({
+        [ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id]: {
+          windows: [
+            globalEndpointException,
+            endpointExceptionAssignedToNowhere,
+            endpointExceptionAssignedToPolicy1,
+            endpointExceptionAssignedToPolicy2,
+          ],
+        },
+      });
+
+      context.licenseService = createLicenseServiceMock();
+      context.packagePolicyService.fetchAllItemIds = getMockPolicyFetchAllItemIds([
+        TEST_POLICY_ID_1,
+        TEST_POLICY_ID_2,
+      ]);
+    });
+
+    describe('when Endpoint Exceptions can only be global - user has not opted in', () => {
+      beforeEach(() => {
+        mockedGetIsEndpointExceptionsPerPolicyEnabled.mockResolvedValue(false);
+
+        manifestManager = new ManifestManager(context);
+      });
+
+      test('applies all endpoint exception artifacts to all policies', async () => {
+        const manifest = await manifestManager.buildNewManifest();
+        const artifacts = manifest.getAllArtifacts();
+
+        expect(artifacts.length).toBe(17);
+
+        const windowsEndpointExceptionsArtifact = artifacts.find(
+          (a) => a.identifier === ARTIFACT_NAME_EXCEPTIONS_WINDOWS
+        );
+        expect(windowsEndpointExceptionsArtifact).toBeDefined();
+        expect(getArtifactObject(windowsEndpointExceptionsArtifact!)).toStrictEqual({
+          entries: translateToEndpointExceptions(
+            [
+              globalEndpointException,
+              endpointExceptionAssignedToNowhere,
+              endpointExceptionAssignedToPolicy1,
+              endpointExceptionAssignedToPolicy2,
+            ],
+            'v1',
+            defaultFeatures
+          ),
+        });
+
+        expect(mockedGetIsEndpointExceptionsPerPolicyEnabled).toHaveBeenCalledTimes(1);
+      });
+    });
+
+    describe('when Endpoint Exceptions can be per-policy - feature flag is enabled', () => {
+      beforeEach(() => {
+        mockedGetIsEndpointExceptionsPerPolicyEnabled.mockResolvedValue(true);
+
+        manifestManager = new ManifestManager(context);
+      });
+
+      test('skips unassigned per-policy endpoint exceptions', async () => {
+        const manifest = await manifestManager.buildNewManifest();
+        const artifacts = manifest.getAllArtifacts();
+
+        expect(artifacts.length).toBe(17 + 2); // +2 for the per-policy artifacts
+
+        const windowsEndpointExceptionsArtifacts = artifacts.filter(
+          (a) => a.identifier === ARTIFACT_NAME_EXCEPTIONS_WINDOWS
+        );
+        expect(windowsEndpointExceptionsArtifacts.length).toBe(3); // 1 global + 2 per-policy
+
+        // global artifact: only global endpoint exception
+        expect(getArtifactObject(windowsEndpointExceptionsArtifacts[0])).toStrictEqual({
+          entries: translateToEndpointExceptions([globalEndpointException], 'v1', defaultFeatures),
+        });
+
+        // policy 1 artifact: global + policy 1 endpoint exceptions
+        expect(getArtifactObject(windowsEndpointExceptionsArtifacts[1])).toStrictEqual({
+          entries: translateToEndpointExceptions(
+            [globalEndpointException, endpointExceptionAssignedToPolicy1],
+            'v1',
+            defaultFeatures
+          ),
+        });
+
+        // policy 2 artifact: global + policy 2 endpoint exceptions
+        expect(getArtifactObject(windowsEndpointExceptionsArtifacts[2])).toStrictEqual({
+          entries: translateToEndpointExceptions(
+            [globalEndpointException, endpointExceptionAssignedToPolicy2],
+            'v1',
+            defaultFeatures
+          ),
+        });
+
+        expect(mockedGetIsEndpointExceptionsPerPolicyEnabled).toHaveBeenCalledTimes(1);
+      });
+    });
+
+    describe('when Endpoint Exceptions contain `matches`', () => {
+      beforeEach(() => {
+        manifestManager = new ManifestManager(context);
+      });
+
+      test(`when contains only \`wildcard\`, \`event.module=endpoint\` is added `, async () => {
+        const exceptionListItem = getExceptionListItemSchemaMock({
+          os_types: ['macos'],
+          entries: [
+            { type: 'wildcard', operator: 'included', field: 'path', value: '*match_me*' },
+            { type: 'wildcard', operator: 'excluded', field: 'not_path', value: '*dont_match_me*' },
+          ],
+        });
+        const expectedExceptionListItem = getExceptionListItemSchemaMock({
+          os_types: ['macos'],
+          entries: [
+            ...exceptionListItem.entries,
+            { type: 'match', operator: 'included', field: 'event.module', value: 'endpoint' },
+          ],
+        });
+
+        context.exceptionListClient.findExceptionListItem = mockFindExceptionListItemResponses({
+          [ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id]: { macos: [exceptionListItem] },
+        });
+
+        context.packagePolicyService.fetchAllItemIds = getMockPolicyFetchAllItemIds([
+          TEST_POLICY_ID_1,
+        ]);
+
+        const manifest = await manifestManager.buildNewManifest();
+
+        expect(manifest?.getSchemaVersion()).toStrictEqual('v1');
+        expect(manifest?.getSemanticVersion()).toStrictEqual('1.0.0');
+        expect(manifest?.getSavedObjectVersion()).toBeUndefined();
+
+        const artifacts = manifest.getAllArtifacts();
+
+        expect(artifacts.length).toBe(17);
+
+        expect(getArtifactObject(artifacts[0])).toStrictEqual({
+          entries: translateToEndpointExceptions(
+            [expectedExceptionListItem],
+            'v1',
+            defaultFeatures
+          ),
+        });
+      });
+
+      test(`when contains anything next to \`wildcard\`, nothing is added `, async () => {
+        const exceptionListItem = getExceptionListItemSchemaMock({
+          os_types: ['macos'],
+          entries: [
+            { type: 'wildcard', operator: 'included', field: 'path', value: '*match_me*' },
+            { type: 'wildcard', operator: 'excluded', field: 'path', value: '*dont_match_me*' },
+            { type: 'match', operator: 'included', field: 'path', value: 'something' },
+          ],
+        });
+        const expectedExceptionListItem = getExceptionListItemSchemaMock({
+          os_types: ['macos'],
+          entries: [...exceptionListItem.entries],
+        });
+
+        context.exceptionListClient.findExceptionListItem = mockFindExceptionListItemResponses({
+          [ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id]: { macos: [exceptionListItem] },
+        });
+
+        context.packagePolicyService.fetchAllItemIds = getMockPolicyFetchAllItemIds([
+          TEST_POLICY_ID_1,
+        ]);
+
+        const manifest = await manifestManager.buildNewManifest();
+
+        expect(manifest?.getSchemaVersion()).toStrictEqual('v1');
+        expect(manifest?.getSemanticVersion()).toStrictEqual('1.0.0');
+        expect(manifest?.getSavedObjectVersion()).toBeUndefined();
+
+        const artifacts = manifest.getAllArtifacts();
+
+        expect(artifacts.length).toBe(17);
+
+        expect(getArtifactObject(artifacts[0])).toStrictEqual({
+          entries: translateToEndpointExceptions(
+            [expectedExceptionListItem],
+            'v1',
+            defaultFeatures
+          ),
+        });
       });
     });
   });
@@ -1168,6 +2017,23 @@ describe('ManifestManager', () => {
       expect(context.artifactClient.bulkDeleteArtifacts).toHaveBeenCalledWith([
         ARTIFACT_ID_EXCEPTIONS_MACOS,
         ARTIFACT_ID_EXCEPTIONS_WINDOWS,
+      ]);
+    });
+
+    test(`Successfully deletes trusted devices artifacts`, async () => {
+      const context = buildManifestManagerContextMock({});
+      const manifestManager = new ManifestManager(context);
+
+      await expect(
+        manifestManager.deleteArtifacts([
+          ARTIFACT_ID_TRUSTED_DEVICES_MACOS,
+          ARTIFACT_ID_TRUSTED_DEVICES_WINDOWS,
+        ])
+      ).resolves.toStrictEqual([]);
+
+      expect(context.artifactClient.bulkDeleteArtifacts).toHaveBeenCalledWith([
+        ARTIFACT_ID_TRUSTED_DEVICES_MACOS,
+        ARTIFACT_ID_TRUSTED_DEVICES_WINDOWS,
       ]);
     });
 
@@ -1197,6 +2063,33 @@ describe('ManifestManager', () => {
         ARTIFACT_ID_EXCEPTIONS_WINDOWS,
       ]);
     });
+
+    test(`Returns errors for trusted devices deletion failures`, async () => {
+      const context = buildManifestManagerContextMock({});
+      const artifactClient = context.artifactClient as jest.Mocked<EndpointArtifactClientInterface>;
+      const manifestManager = new ManifestManager(context);
+      const error = new Error();
+
+      artifactClient.bulkDeleteArtifacts.mockImplementation(async (ids): Promise<Error[]> => {
+        if (ids[0] === ARTIFACT_ID_TRUSTED_DEVICES_MACOS) {
+          return [error];
+        }
+        return [];
+      });
+
+      await expect(
+        manifestManager.deleteArtifacts([
+          ARTIFACT_ID_TRUSTED_DEVICES_MACOS,
+          ARTIFACT_ID_TRUSTED_DEVICES_WINDOWS,
+        ])
+      ).resolves.toStrictEqual([error]);
+
+      expect(artifactClient.bulkDeleteArtifacts).toHaveBeenCalledTimes(1);
+      expect(context.artifactClient.bulkDeleteArtifacts).toHaveBeenCalledWith([
+        ARTIFACT_ID_TRUSTED_DEVICES_MACOS,
+        ARTIFACT_ID_TRUSTED_DEVICES_WINDOWS,
+      ]);
+    });
   });
 
   describe('pushArtifacts', () => {
@@ -1219,6 +2112,29 @@ describe('ManifestManager', () => {
         },
         {
           ...ARTIFACT_EXCEPTIONS_WINDOWS,
+        },
+      ]);
+    });
+
+    test(`Successfully pushes trusted devices artifacts`, async () => {
+      const context = buildManifestManagerContextMock({});
+      const artifactClient = context.artifactClient as jest.Mocked<EndpointArtifactClientInterface>;
+      const manifestManager = new ManifestManager(context);
+      const newManifest = ManifestManager.createDefaultManifest();
+
+      await expect(
+        manifestManager.pushArtifacts(
+          [ARTIFACT_TRUSTED_DEVICES_MACOS, ARTIFACT_TRUSTED_DEVICES_WINDOWS],
+          newManifest
+        )
+      ).resolves.toStrictEqual([]);
+
+      expect(artifactClient.bulkCreateArtifacts).toHaveBeenCalledWith([
+        {
+          ...ARTIFACT_TRUSTED_DEVICES_MACOS,
+        },
+        {
+          ...ARTIFACT_TRUSTED_DEVICES_WINDOWS,
         },
       ]);
     });
@@ -1263,6 +2179,47 @@ describe('ManifestManager', () => {
         },
       ]);
     });
+
+    test(`Returns errors for trusted devices artifact failures`, async () => {
+      const context = buildManifestManagerContextMock({});
+      const artifactClient = context.artifactClient as jest.Mocked<EndpointArtifactClientInterface>;
+      const manifestManager = new ManifestManager(context);
+      const newManifest = ManifestManager.createDefaultManifest();
+      const error = new Error();
+      const { body, ...incompleteArtifact } = ARTIFACT_TRUSTED_DEVICES_MACOS;
+
+      artifactClient.bulkCreateArtifacts.mockImplementation(
+        async (artifacts: InternalArtifactCompleteSchema[]) => {
+          return { artifacts: [artifacts[0]], errors: [error] };
+        }
+      );
+
+      await expect(
+        manifestManager.pushArtifacts(
+          [
+            ARTIFACT_TRUSTED_DEVICES_MACOS,
+            ARTIFACT_TRUSTED_DEVICES_WINDOWS,
+            incompleteArtifact as InternalArtifactCompleteSchema,
+          ],
+          newManifest
+        )
+      ).resolves.toStrictEqual([
+        new EndpointError(
+          `Incomplete artifact: ${ARTIFACT_ID_TRUSTED_DEVICES_MACOS}`,
+          ARTIFACTS_BY_ID[ARTIFACT_ID_TRUSTED_DEVICES_MACOS]
+        ),
+        error,
+      ]);
+
+      expect(artifactClient.bulkCreateArtifacts).toHaveBeenCalledWith([
+        {
+          ...ARTIFACT_TRUSTED_DEVICES_MACOS,
+        },
+        {
+          ...ARTIFACT_TRUSTED_DEVICES_WINDOWS,
+        },
+      ]);
+    });
   });
 
   describe('tryDispatch', () => {
@@ -1286,6 +2243,20 @@ describe('ManifestManager', () => {
       expect(context.packagePolicyService.bulkUpdate).toHaveBeenCalledTimes(0);
     });
 
+    test(`Should not dispatch trusted devices if no policies`, async () => {
+      const context = buildManifestManagerContextMock({});
+      const manifestManager = new ManifestManager(context);
+      const manifest = new Manifest({ soVersion: '1.0.0' });
+
+      manifest.addEntry(ARTIFACT_TRUSTED_DEVICES_MACOS);
+      manifest.addEntry(ARTIFACT_TRUSTED_DEVICES_WINDOWS);
+      context.packagePolicyService.fetchAllItems = getMockPolicyFetchAllItems([]);
+
+      await expect(manifestManager.tryDispatch(manifest)).resolves.toStrictEqual([]);
+
+      expect(context.packagePolicyService.bulkUpdate).toHaveBeenCalledTimes(0);
+    });
+
     test(`Should return errors if invalid config for package policy`, async () => {
       const context = buildManifestManagerContextMock({});
       const manifestManager = new ManifestManager(context);
@@ -1298,7 +2269,9 @@ describe('ManifestManager', () => {
       ]);
 
       await expect(manifestManager.tryDispatch(manifest)).resolves.toStrictEqual([
-        new EndpointError(`Package Policy ${TEST_POLICY_ID_1} has no 'inputs[0].config'`),
+        new EndpointError(
+          `Policy [${TEST_POLICY_ID_1}][endpoint-1] in space(s) [default] has no 'inputs[0].config'!`
+        ),
       ]);
 
       expect(context.packagePolicyService.bulkUpdate).toHaveBeenCalledTimes(0);
@@ -1374,7 +2347,10 @@ describe('ManifestManager', () => {
           },
         }),
       ]);
-      context.packagePolicyService.bulkUpdate = jest.fn().mockResolvedValue({});
+      context.packagePolicyService.bulkUpdate = jest.fn().mockResolvedValue({
+        updatedPolicies: [],
+        failedPolicies: [],
+      });
 
       await expect(manifestManager.tryDispatch(manifest)).resolves.toStrictEqual([]);
 
@@ -1445,7 +2421,10 @@ describe('ManifestManager', () => {
           },
         }),
       ]);
-      context.packagePolicyService.bulkUpdate = jest.fn().mockResolvedValue({});
+      context.packagePolicyService.bulkUpdate = jest.fn().mockResolvedValue({
+        updatedPolicies: [],
+        failedPolicies: [],
+      });
 
       await expect(manifestManager.tryDispatch(manifest)).resolves.toStrictEqual([]);
 
@@ -1473,17 +2452,19 @@ describe('ManifestManager', () => {
       );
     });
 
-    test(`Should return partial errors`, async () => {
+    test(`should dispatch bulkUpdate per-space when space awareness is enabled`, async () => {
       const context = buildManifestManagerContextMock({});
       const manifestManager = new ManifestManager(context);
-      const error = new Error();
 
       const manifest = new Manifest({ soVersion: '1.0.0', semanticVersion: '1.0.1' });
-      manifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS);
+      manifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS, TEST_POLICY_ID_1);
+      manifest.addEntry(ARTIFACT_EXCEPTIONS_WINDOWS, TEST_POLICY_ID_2);
+      manifest.addEntry(ARTIFACT_TRUSTED_APPS_MACOS, TEST_POLICY_ID_2);
 
       context.packagePolicyService.fetchAllItems = getMockPolicyFetchAllItems([
         createPackagePolicyWithConfigMock({
           id: TEST_POLICY_ID_1,
+          spaceIds: ['bar'],
           config: {
             artifact_manifest: {
               value: {
@@ -1494,6 +2475,72 @@ describe('ManifestManager', () => {
             },
           },
         }),
+        createPackagePolicyWithConfigMock({
+          id: TEST_POLICY_ID_2,
+          spaceIds: ['foo'],
+          config: {
+            artifact_manifest: {
+              value: {
+                artifacts: {},
+                manifest_version: '1.0.0',
+                schema_version: 'v1',
+              },
+            },
+          },
+        }),
+      ]);
+      context.packagePolicyService.bulkUpdate = jest.fn().mockResolvedValue({
+        updatedPolicies: [],
+        failedPolicies: [],
+      });
+
+      await expect(manifestManager.tryDispatch(manifest)).resolves.toStrictEqual([]);
+
+      expect(context.packagePolicyService.bulkUpdate).toHaveBeenCalledTimes(2);
+      expect(context.packagePolicyService.bulkUpdate).toHaveBeenNthCalledWith(
+        1,
+        expect.anything(),
+        context.esClient,
+        [
+          expect.objectContaining({
+            spaceIds: ['bar'],
+          }),
+        ]
+      );
+      expect(context.packagePolicyService.bulkUpdate).toHaveBeenNthCalledWith(
+        2,
+        expect.anything(),
+        context.esClient,
+        [
+          expect.objectContaining({
+            spaceIds: ['foo'],
+          }),
+        ]
+      );
+    });
+
+    test(`Should return partial errors`, async () => {
+      const context = buildManifestManagerContextMock({});
+      const manifestManager = new ManifestManager(context);
+      const error = new Error('foo');
+
+      const manifest = new Manifest({ soVersion: '1.0.0', semanticVersion: '1.0.1' });
+      manifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS);
+
+      const policy1 = createPackagePolicyWithConfigMock({
+        id: TEST_POLICY_ID_1,
+        config: {
+          artifact_manifest: {
+            value: {
+              artifacts: {},
+              manifest_version: '1.0.0',
+              schema_version: 'v1',
+            },
+          },
+        },
+      });
+      context.packagePolicyService.fetchAllItems = getMockPolicyFetchAllItems([
+        policy1,
         createPackagePolicyWithConfigMock({
           id: TEST_POLICY_ID_2,
           config: {
@@ -1507,13 +2554,139 @@ describe('ManifestManager', () => {
           },
         }),
       ]);
-      context.packagePolicyService.bulkUpdate = jest
-        .fn()
-        .mockResolvedValue({ updatedPolicies: [{}], failedPolicies: [{ error }] });
+      context.packagePolicyService.bulkUpdate = jest.fn().mockResolvedValue({
+        updatedPolicies: [{}],
+        failedPolicies: [{ packagePolicy: policy1, error }],
+      });
 
-      await expect(manifestManager.tryDispatch(manifest)).resolves.toStrictEqual([error]);
+      await expect(manifestManager.tryDispatch(manifest)).resolves.toStrictEqual([
+        new EndpointError(`Update of policy [${policy1.id}][endpoint-1] failed with: foo`),
+      ]);
 
       expect(context.packagePolicyService.bulkUpdate).toHaveBeenCalledTimes(1);
+    });
+
+    test('Should retry policy update if a Conflict error is encountered', async () => {
+      const context = buildManifestManagerContextMock({});
+      const manifestManager = new ManifestManager(context);
+      const error = SavedObjectsErrorHelpers.createConflictError('update failed', TEST_POLICY_ID_1);
+      const policy = createPackagePolicyWithConfigMock({
+        id: TEST_POLICY_ID_1,
+        config: {
+          artifact_manifest: {
+            value: {
+              artifacts: {},
+              manifest_version: '1.0.0',
+              schema_version: 'v1',
+            },
+          },
+        },
+      });
+      const latestPolicy = createPackagePolicyWithConfigMock({
+        id: TEST_POLICY_ID_1,
+        description: 'updated policy',
+        config: {
+          artifact_manifest: {
+            value: {
+              artifacts: {},
+              manifest_version: '1.0.0',
+              schema_version: 'v1',
+            },
+          },
+        },
+      });
+
+      const manifest = new Manifest({ soVersion: '1.0.0', semanticVersion: '1.0.1' });
+      manifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS);
+
+      context.packagePolicyService.get = jest.fn().mockResolvedValue(latestPolicy);
+      context.packagePolicyService.fetchAllItems = getMockPolicyFetchAllItems([policy]);
+      context.packagePolicyService.bulkUpdate = jest
+        .fn()
+        .mockResolvedValueOnce({
+          updatedPolicies: [],
+          failedPolicies: [{ error, packagePolicy: policy }],
+        })
+        .mockResolvedValueOnce({ updatedPolicies: [policy], failedPolicies: [] });
+
+      await expect(manifestManager.tryDispatch(manifest)).resolves.toStrictEqual([]);
+
+      expect(context.packagePolicyService.bulkUpdate).toHaveBeenCalledTimes(2);
+      expect(context.packagePolicyService.get).toHaveBeenCalledTimes(1);
+      expect(context.packagePolicyService.bulkUpdate).toHaveBeenLastCalledWith(
+        expect.anything(),
+        expect.anything(),
+        [
+          {
+            ...latestPolicy,
+            inputs: [
+              {
+                config: {
+                  artifact_manifest: {
+                    value: {
+                      artifacts: {
+                        'endpoint-exceptionlist-macos-v1': {
+                          compression_algorithm: 'none',
+                          decoded_sha256:
+                            '96b76a1a911662053a1562ac14c4ff1e87c2ff550d6fe52e1e0b3790526597d3',
+                          decoded_size: 432,
+                          encoded_sha256:
+                            '96b76a1a911662053a1562ac14c4ff1e87c2ff550d6fe52e1e0b3790526597d3',
+                          encoded_size: 432,
+                          encryption_algorithm: 'none',
+                          relative_url:
+                            '/api/fleet/artifacts/endpoint-exceptionlist-macos-v1/96b76a1a911662053a1562ac14c4ff1e87c2ff550d6fe52e1e0b3790526597d3',
+                        },
+                      },
+                      manifest_version: '1.0.1',
+                      schema_version: 'v1',
+                    },
+                  },
+                },
+                enabled: true,
+                streams: [],
+                type: 'endpoint',
+              },
+            ],
+          },
+        ]
+      );
+    });
+
+    test('Should only attempt a retry of conflict error once', async () => {
+      const context = buildManifestManagerContextMock({});
+      const manifestManager = new ManifestManager(context);
+      const error = SavedObjectsErrorHelpers.createConflictError('update failed', TEST_POLICY_ID_1);
+      const policy = createPackagePolicyWithConfigMock({
+        id: TEST_POLICY_ID_1,
+        config: {
+          artifact_manifest: {
+            value: {
+              artifacts: {},
+              manifest_version: '1.0.0',
+              schema_version: 'v1',
+            },
+          },
+        },
+      });
+
+      const manifest = new Manifest({ soVersion: '1.0.0', semanticVersion: '1.0.1' });
+      manifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS);
+
+      context.packagePolicyService.get = jest.fn().mockResolvedValue(policy);
+      context.packagePolicyService.fetchAllItems = getMockPolicyFetchAllItems([policy]);
+      context.packagePolicyService.bulkUpdate = jest.fn().mockResolvedValue({
+        updatedPolicies: [],
+        failedPolicies: [{ error, packagePolicy: policy }],
+      });
+
+      await expect(manifestManager.tryDispatch(manifest)).resolves.toEqual([
+        expect.objectContaining({
+          meta: error,
+        }),
+      ]);
+
+      expect(context.packagePolicyService.bulkUpdate).toHaveBeenCalledTimes(2);
     });
   });
 
@@ -1915,6 +3088,259 @@ describe('ManifestManager', () => {
         context.savedObjectsClient.bulkUpdate = jest.fn();
         await manifestManager.bumpGlobalUnifiedManifestVersion();
         expect(context.savedObjectsClient.bulkUpdate).toHaveBeenCalledTimes(0);
+      });
+    });
+  });
+
+  describe('shouldRetrieveExceptions for trusted devices licensing logic', () => {
+    let manifestManager: ManifestManager;
+    let context: ManifestManagerContext;
+
+    beforeEach(() => {
+      context = buildManifestManagerContextMock({});
+    });
+
+    interface ManifestManagerWithPrivateMethods {
+      shouldRetrieveExceptions: (listId: string) => boolean;
+    }
+
+    describe('when trustedDevices feature flag is disabled', () => {
+      beforeEach(() => {
+        context = buildManifestManagerContextMock({
+          experimentalFeatures: [], // No trustedDevices feature
+        });
+        context.licenseService = createLicenseServiceMock();
+        manifestManager = new ManifestManager(context);
+      });
+
+      test('should return true for other artifact types regardless of feature flag', () => {
+        const shouldRetrieveExceptions = (
+          manifestManager as unknown as ManifestManagerWithPrivateMethods
+        ).shouldRetrieveExceptions(ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id);
+        const shouldRetrieveTrustedApps = (
+          manifestManager as unknown as ManifestManagerWithPrivateMethods
+        ).shouldRetrieveExceptions(ENDPOINT_ARTIFACT_LISTS.trustedApps.id);
+
+        expect(shouldRetrieveExceptions).toBe(true);
+        expect(shouldRetrieveTrustedApps).toBe(true);
+      });
+    });
+
+    describe('when trustedDevices feature flag is enabled', () => {
+      beforeEach(() => {
+        context = buildManifestManagerContextMock({
+          experimentalFeatures: ['trustedDevices'],
+        });
+        context.licenseService = createLicenseServiceMock();
+      });
+
+      test('should return false when only PLI is enabled (enterprise required)', () => {
+        context.productFeaturesService.isEnabled = jest.fn().mockImplementation((key) => {
+          return key === ProductFeatureKey.endpointTrustedDevices;
+        });
+        context.licenseService.isEnterprise = jest.fn().mockReturnValue(false);
+        manifestManager = new ManifestManager(context);
+
+        const shouldRetrieve = (
+          manifestManager as unknown as ManifestManagerWithPrivateMethods
+        ).shouldRetrieveExceptions(ENDPOINT_ARTIFACT_LISTS.trustedDevices.id);
+
+        expect(shouldRetrieve).toBe(false);
+        expect(context.productFeaturesService.isEnabled).toHaveBeenCalledWith(
+          ProductFeatureKey.endpointTrustedDevices
+        );
+      });
+
+      test('should return false when only enterprise license is present (PLI required)', () => {
+        context.productFeaturesService.isEnabled = jest.fn().mockReturnValue(false);
+        context.licenseService.isEnterprise = jest.fn().mockReturnValue(true);
+        manifestManager = new ManifestManager(context);
+
+        const shouldRetrieve = (
+          manifestManager as unknown as ManifestManagerWithPrivateMethods
+        ).shouldRetrieveExceptions(ENDPOINT_ARTIFACT_LISTS.trustedDevices.id);
+
+        expect(shouldRetrieve).toBe(false);
+      });
+
+      test('should return true when both PLI and enterprise license are enabled', () => {
+        context.productFeaturesService.isEnabled = jest.fn().mockImplementation((key) => {
+          return key === ProductFeatureKey.endpointTrustedDevices;
+        });
+        context.licenseService.isEnterprise = jest.fn().mockReturnValue(true);
+        manifestManager = new ManifestManager(context);
+
+        const shouldRetrieve = (
+          manifestManager as unknown as ManifestManagerWithPrivateMethods
+        ).shouldRetrieveExceptions(ENDPOINT_ARTIFACT_LISTS.trustedDevices.id);
+
+        expect(shouldRetrieve).toBe(true);
+        expect(context.productFeaturesService.isEnabled).toHaveBeenCalledWith(
+          ProductFeatureKey.endpointTrustedDevices
+        );
+        expect(context.licenseService.isEnterprise).toHaveBeenCalled();
+      });
+
+      test('should return false when neither PLI nor enterprise license are enabled', () => {
+        context.productFeaturesService.isEnabled = jest.fn().mockReturnValue(false);
+        context.licenseService.isEnterprise = jest.fn().mockReturnValue(false);
+        manifestManager = new ManifestManager(context);
+
+        const shouldRetrieve = (
+          manifestManager as unknown as ManifestManagerWithPrivateMethods
+        ).shouldRetrieveExceptions(ENDPOINT_ARTIFACT_LISTS.trustedDevices.id);
+
+        expect(shouldRetrieve).toBe(false);
+        expect(context.productFeaturesService.isEnabled).toHaveBeenCalledWith(
+          ProductFeatureKey.endpointTrustedDevices
+        );
+      });
+    });
+
+    describe('when customYaraSignaturesEnabled feature flag is disabled', () => {
+      beforeEach(() => {
+        context = buildManifestManagerContextMock({});
+        disableCustomYaraSignaturesFF(context);
+        context.licenseService = createLicenseServiceMock();
+        manifestManager = new ManifestManager(context);
+      });
+
+      test('should return false for custom YARA signatures', () => {
+        const shouldRetrieve = (
+          manifestManager as unknown as ManifestManagerWithPrivateMethods
+        ).shouldRetrieveExceptions(ENDPOINT_ARTIFACT_LISTS.customYaraSignatures.id);
+
+        expect(shouldRetrieve).toBe(false);
+      });
+    });
+
+    describe('when customYaraSignaturesEnabled feature flag is enabled', () => {
+      beforeEach(() => {
+        context = buildManifestManagerContextMock({
+          experimentalFeatures: ['customYaraSignaturesEnabled'],
+        });
+        context.licenseService = createLicenseServiceMock();
+      });
+
+      test('should return false when only PLI is enabled (enterprise required)', () => {
+        context.productFeaturesService.isEnabled = jest.fn().mockImplementation((key) => {
+          return key === ProductFeatureKey.endpointCustomYaraSignatures;
+        });
+        context.licenseService.isEnterprise = jest.fn().mockReturnValue(false);
+        manifestManager = new ManifestManager(context);
+
+        const shouldRetrieve = (
+          manifestManager as unknown as ManifestManagerWithPrivateMethods
+        ).shouldRetrieveExceptions(ENDPOINT_ARTIFACT_LISTS.customYaraSignatures.id);
+
+        expect(shouldRetrieve).toBe(false);
+        expect(context.productFeaturesService.isEnabled).toHaveBeenCalledWith(
+          ProductFeatureKey.endpointCustomYaraSignatures
+        );
+      });
+
+      test('should return false when only enterprise license is present (PLI required)', () => {
+        context.productFeaturesService.isEnabled = jest.fn().mockReturnValue(false);
+        context.licenseService.isEnterprise = jest.fn().mockReturnValue(true);
+        manifestManager = new ManifestManager(context);
+
+        const shouldRetrieve = (
+          manifestManager as unknown as ManifestManagerWithPrivateMethods
+        ).shouldRetrieveExceptions(ENDPOINT_ARTIFACT_LISTS.customYaraSignatures.id);
+
+        expect(shouldRetrieve).toBe(false);
+      });
+
+      test('should return true when both PLI and enterprise license are enabled', () => {
+        context.productFeaturesService.isEnabled = jest.fn().mockImplementation((key) => {
+          return key === ProductFeatureKey.endpointCustomYaraSignatures;
+        });
+        context.licenseService.isEnterprise = jest.fn().mockReturnValue(true);
+        manifestManager = new ManifestManager(context);
+
+        const shouldRetrieve = (
+          manifestManager as unknown as ManifestManagerWithPrivateMethods
+        ).shouldRetrieveExceptions(ENDPOINT_ARTIFACT_LISTS.customYaraSignatures.id);
+
+        expect(shouldRetrieve).toBe(true);
+        expect(context.productFeaturesService.isEnabled).toHaveBeenCalledWith(
+          ProductFeatureKey.endpointCustomYaraSignatures
+        );
+        expect(context.licenseService.isEnterprise).toHaveBeenCalled();
+      });
+
+      test('should return false when neither PLI nor enterprise license are enabled', () => {
+        context.productFeaturesService.isEnabled = jest.fn().mockReturnValue(false);
+        context.licenseService.isEnterprise = jest.fn().mockReturnValue(false);
+        manifestManager = new ManifestManager(context);
+
+        const shouldRetrieve = (
+          manifestManager as unknown as ManifestManagerWithPrivateMethods
+        ).shouldRetrieveExceptions(ENDPOINT_ARTIFACT_LISTS.customYaraSignatures.id);
+
+        expect(shouldRetrieve).toBe(false);
+        expect(context.productFeaturesService.isEnabled).toHaveBeenCalledWith(
+          ProductFeatureKey.endpointCustomYaraSignatures
+        );
+      });
+    });
+
+    describe('host isolation exceptions licensing logic', () => {
+      beforeEach(() => {
+        context = buildManifestManagerContextMock({});
+        context.licenseService = createLicenseServiceMock();
+      });
+
+      test('should return true for host isolation exceptions when product feature is enabled', () => {
+        context.productFeaturesService.isEnabled = jest.fn().mockImplementation((key) => {
+          return key === ProductFeatureKey.endpointHostIsolationExceptions;
+        });
+        manifestManager = new ManifestManager(context);
+
+        const shouldRetrieve = (
+          manifestManager as unknown as ManifestManagerWithPrivateMethods
+        ).shouldRetrieveExceptions(ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.id);
+
+        expect(shouldRetrieve).toBe(true);
+        expect(context.productFeaturesService.isEnabled).toHaveBeenCalledWith(
+          ProductFeatureKey.endpointHostIsolationExceptions
+        );
+      });
+
+      test('should return false for host isolation exceptions when product feature is disabled', () => {
+        context.productFeaturesService.isEnabled = jest.fn().mockReturnValue(false);
+        manifestManager = new ManifestManager(context);
+
+        const shouldRetrieve = (
+          manifestManager as unknown as ManifestManagerWithPrivateMethods
+        ).shouldRetrieveExceptions(ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.id);
+
+        expect(shouldRetrieve).toBe(false);
+        expect(context.productFeaturesService.isEnabled).toHaveBeenCalledWith(
+          ProductFeatureKey.endpointHostIsolationExceptions
+        );
+      });
+    });
+
+    describe('default behavior for non-licensed artifacts', () => {
+      beforeEach(() => {
+        context = buildManifestManagerContextMock({});
+        context.licenseService = createLicenseServiceMock();
+        manifestManager = new ManifestManager(context);
+      });
+
+      const nonLicensedArtifacts = [
+        { name: 'exceptions', id: ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id },
+        { name: 'trusted apps', id: ENDPOINT_ARTIFACT_LISTS.trustedApps.id },
+        { name: 'event filters', id: ENDPOINT_ARTIFACT_LISTS.eventFilters.id },
+        { name: 'blocklists', id: ENDPOINT_ARTIFACT_LISTS.blocklists.id },
+      ];
+
+      test.each(nonLicensedArtifacts)('should return true for $name artifacts', ({ id }) => {
+        const shouldRetrieve = (
+          manifestManager as unknown as ManifestManagerWithPrivateMethods
+        ).shouldRetrieveExceptions(id);
+        expect(shouldRetrieve).toBe(true);
       });
     });
   });

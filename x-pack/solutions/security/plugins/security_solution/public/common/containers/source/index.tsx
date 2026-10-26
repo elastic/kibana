@@ -12,10 +12,9 @@ import type { DataViewBase } from '@kbn/es-query';
 import type { BrowserFields } from '@kbn/timelines-plugin/common';
 import type { FieldSpec, IIndexPatternFieldList } from '@kbn/data-views-plugin/common';
 import type { DataViewSpec } from '@kbn/data-views-plugin/public';
-
+import { buildBrowserFields } from '../../../data_view_manager/utils/build_browser_fields';
 import { useKibana } from '../../lib/kibana';
 import * as i18n from './translations';
-import { getDataViewStateFromIndexFields } from './use_data_view';
 import { useAppToasts } from '../../hooks/use_app_toasts';
 import type { ENDPOINT_FIELDS_SEARCH_STRATEGY } from '../../../../common/endpoint/constants';
 
@@ -94,8 +93,11 @@ export const useFetchIndex = (
   strategy: 'indexFields' | 'dataView' | typeof ENDPOINT_FIELDS_SEARCH_STRATEGY = 'indexFields'
 ): [boolean, FetchIndexReturn] => {
   const { data } = useKibana().services;
-  const abortCtrl = useRef(new AbortController());
   const previousIndexesName = useRef<string[]>([]);
+  // Only the response of the latest request may update the state. Responses can arrive out of
+  // order, for example a slow request for many index patterns started before a faster one for
+  // fewer, and an older response must not overwrite the result of a newer request.
+  const latestRequestId = useRef(0);
 
   const [state, setState] = useState<FetchIndexReturn & { loading: boolean }>({
     browserFields: DEFAULT_BROWSER_FIELDS,
@@ -110,15 +112,19 @@ export const useFetchIndex = (
   const indexFieldsSearch = useCallback(
     (iNames: string[]) => {
       const asyncSearch = async () => {
+        latestRequestId.current += 1;
+        const requestId = latestRequestId.current;
+
         try {
           setState({ ...state, loading: true });
-          abortCtrl.current = new AbortController();
           const dv = await data.dataViews.create({ title: iNames.join(','), allowNoIndex: true });
+
+          if (requestId !== latestRequestId.current) {
+            return;
+          }
+
           const dataView = dv.toSpec();
-          const { browserFields } = getDataViewStateFromIndexFields(
-            iNames.join(','),
-            dataView.fields
-          );
+          const browserFields = buildBrowserFields(dv?.fields);
 
           previousIndexesName.current = dv.getIndexPattern().split(',');
 
@@ -131,6 +137,10 @@ export const useFetchIndex = (
             indexPatterns: getIndexFields(dv.getIndexPattern(), dv.fields),
           });
         } catch (exc) {
+          if (requestId !== latestRequestId.current) {
+            return;
+          }
+
           setState({
             browserFields: DEFAULT_BROWSER_FIELDS,
             indexes: indexNames,
@@ -152,9 +162,6 @@ export const useFetchIndex = (
     if (!isEmpty(indexNames) && !isEqual(previousIndexesName.current, indexNames)) {
       indexFieldsSearch(indexNames);
     }
-    return () => {
-      abortCtrl.current.abort();
-    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [indexNames, previousIndexesName]);
 

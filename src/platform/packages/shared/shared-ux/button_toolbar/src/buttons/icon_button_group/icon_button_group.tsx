@@ -7,17 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
-import {
-  EuiButtonGroup,
-  htmlIdGenerator,
-  EuiButtonGroupOptionProps,
-  useEuiTheme,
-  IconType,
-  EuiButtonGroupProps,
-} from '@elastic/eui';
-
-import { IconButtonGroupStyles } from './icon_button_group.styles';
+import React, { useMemo } from 'react';
+import type { EuiButtonGroupOptionProps, IconType, EuiButtonGroupProps } from '@elastic/eui';
+import { EuiButtonGroup, EuiButtonIcon, EuiToolTip, htmlIdGenerator } from '@elastic/eui';
 
 /**
  * An interface representing a single icon button in the `IconButtonGroup`.
@@ -29,12 +21,26 @@ export interface IconButton {
   iconType: IconType;
   /** Handler for button click. */
   onClick: () => void;
-  /** HTML `title` attribute for tooltips if different from `label` */
+  /**
+   * HTML `title` attribute for the native browser tooltip. Defaults to `label`.
+   * Ignored when `toolTipContent` is provided — the native tooltip is suppressed
+   * so only the `EuiToolTip` is shown.
+   */
   title?: string;
   /** Test subject for button */
   'data-test-subj'?: string;
+  /** EBT click action */
+  'data-ebt-action'?: string;
+  /** EBT click element */
+  'data-ebt-element'?: string;
+  /** Optional EBT click detail */
+  'data-ebt-detail'?: string;
   /** To disable the action **/
   isDisabled?: boolean;
+  /** Tooltip content */
+  toolTipContent?: EuiButtonGroupOptionProps['toolTipContent'];
+  /** Tooltip props */
+  toolTipProps?: EuiButtonGroupOptionProps['toolTipProps'];
   /** A11y for button */
   'aria-expanded'?: boolean;
   /** A11y for button */
@@ -55,8 +61,6 @@ export interface Props {
   'data-test-subj'?: string;
 }
 
-type Option = EuiButtonGroupOptionProps & Omit<IconButton, 'label'>;
-
 /**
  * A group of buttons each performing an action, represented by an icon.
  */
@@ -66,35 +70,39 @@ export const IconButtonGroup = ({
   buttonSize = 'm',
   'data-test-subj': dataTestSubj,
 }: Props) => {
-  const euiTheme = useEuiTheme();
-  const iconButtonGroupStyles = IconButtonGroupStyles(euiTheme);
+  const size = buttonSize === 'compressed' ? 's' : buttonSize;
 
-  const buttonGroupOptions: Option[] = buttons.map((button: IconButton, index) => {
-    const { label, title = label, ...rest } = button;
-    return {
-      ...rest,
-      'aria-label': title ?? label,
-      id: `${htmlIdGenerator()()}${index}`,
-      label,
-      title,
-      css: [iconButtonGroupStyles.button],
-    };
-  });
-
-  const onChangeIconsMulti = (optionId: string) => {
-    buttonGroupOptions.find((x) => x.id === optionId)?.onClick();
-  };
+  const buttonIds = useMemo(
+    () => buttons.map((_, index) => htmlIdGenerator()(`${index}`)),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [buttons.length]
+  );
 
   return (
     <EuiButtonGroup
       data-test-subj={dataTestSubj}
-      buttonSize={buttonSize}
+      buttonSize={size}
       legend={legend}
-      options={buttonGroupOptions}
-      onChange={onChangeIconsMulti}
-      type="multi"
-      isIconOnly
-      css={iconButtonGroupStyles.buttonGroup}
-    />
+      variant="segmented"
+      wrap={false}
+    >
+      {buttons.map((button, index) => {
+        const { label, title, toolTipContent, toolTipProps, ...rest } = button;
+        const id = buttonIds[index];
+        const titleProp = { title: toolTipContent !== undefined ? '' : title ?? label };
+
+        const element = (
+          <EuiButtonIcon {...rest} key={id} id={id} aria-label={title ?? label} {...titleProp} />
+        );
+
+        return toolTipContent ? (
+          <EuiToolTip key={id} content={toolTipContent} {...toolTipProps}>
+            {element}
+          </EuiToolTip>
+        ) : (
+          element
+        );
+      })}
+    </EuiButtonGroup>
   );
 };

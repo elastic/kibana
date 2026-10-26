@@ -1,6 +1,6 @@
 # POW
 
-The POW function calculates the value of a base number raised to the power of an exponent number.
+The POW function returns the value of a base raised to the power of an exponent. If the result overflows the double type, null will be returned.
 
 ## Syntax
 
@@ -10,20 +10,28 @@ The POW function calculates the value of a base number raised to the power of an
 
 #### base
 
-This is a numeric expression for the base.
+Numeric expression for the base. If the value is null, the function returns null.
 
 #### exponent
 
-This is a numeric expression for the exponent.
+Numeric expression for the exponent. If the value is null, the function returns null.
 
 ## Examples
+
+Calculates 2 raised to the power of 2 and returns the result.
 
 ```esql
 ROW base = 2.0, exponent = 2
 | EVAL result = POW(base, exponent)
 ```
 
+Calculates the square root of 4 by raising it to the power of 0.5.
+
 ```esql
 ROW base = 4, exponent = 0.5
 | EVAL s = POW(base, exponent)
 ```
+
+## Limitations
+
+It is possible to overflow a double result; in that case, null will be returned.

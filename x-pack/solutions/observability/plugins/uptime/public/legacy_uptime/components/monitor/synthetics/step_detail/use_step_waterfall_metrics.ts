@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import { createEsParams, useEsSearch } from '@kbn/observability-shared-plugin/public';
 import { selectDynamicSettings } from '../../../../state/selectors';
-import { MarkerItems } from '../waterfall/context/waterfall_chart';
+import type { MarkerItems } from '../waterfall/context/waterfall_chart';
 
 export interface Props {
   checkGroup: string;

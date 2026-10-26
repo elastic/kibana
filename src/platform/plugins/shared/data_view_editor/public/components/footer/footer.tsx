@@ -26,12 +26,16 @@ export enum SubmittingType {
 interface FooterProps {
   onCancel: () => void;
   onSubmit: (isAdHoc?: boolean) => void;
+  onDuplicate?: () => void;
   submittingType: SubmittingType | undefined;
   submitDisabled: boolean;
-  isEdit: boolean;
+  hasEditData: boolean;
   isPersisted: boolean;
   allowAdHoc: boolean;
   canSave: boolean;
+  isManaged: boolean;
+  isDuplicating: boolean;
+  hasCustomId: boolean;
 }
 
 const closeButtonLabel = i18n.translate('indexPatternEditor.editor.flyoutCloseButtonLabel', {
@@ -46,6 +50,13 @@ const editButtonLabel = i18n.translate('indexPatternEditor.editor.flyoutEditButt
   defaultMessage: 'Save',
 });
 
+const duplicateButtonLabel = i18n.translate(
+  'indexPatternEditor.editor.flyoutDuplicateButtonLabel',
+  {
+    defaultMessage: 'Duplicate',
+  }
+);
+
 const editUnpersistedButtonLabel = i18n.translate(
   'indexPatternEditor.editor.flyoutEditUnpersistedButtonLabel',
   {
@@ -57,17 +68,37 @@ const exploreButtonLabel = i18n.translate('indexPatternEditor.editor.flyoutExplo
   defaultMessage: 'Use without saving',
 });
 
+const exploreButtonTitle = i18n.translate('indexPatternEditor.editor.flyoutExploreButtonTitle', {
+  defaultMessage: 'Use this data view without creating a saved object',
+});
+
+const exploreButtonCustomIdTitle = i18n.translate(
+  'indexPatternEditor.editor.flyoutExploreButtonCustomIdTitle',
+  {
+    defaultMessage:
+      'A custom data view ID is not supported without saving, as it is not guaranteed to be unique. Clear the ID to continue.',
+  }
+);
+
 export const Footer = ({
   onCancel,
   onSubmit,
   submittingType,
   submitDisabled,
-  isEdit,
+  hasEditData,
   allowAdHoc,
   isPersisted,
   canSave,
+  onDuplicate,
+  isManaged,
+  isDuplicating,
+  hasCustomId,
 }: FooterProps) => {
-  const isEditingAdHoc = isEdit && !isPersisted;
+  const isEditingAdHoc = hasEditData && !isPersisted;
+
+  const isEditing = (canSave || isEditingAdHoc) && !isManaged;
+  const showDuplicateButton = (canSave || isEditingAdHoc) && onDuplicate;
+
   const submitPersisted = () => {
     onSubmit(false);
   };
@@ -76,7 +107,7 @@ export const Footer = ({
   };
 
   return (
-    <EuiFlyoutFooter className="indexPatternEditor__footer">
+    <EuiFlyoutFooter>
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
@@ -90,25 +121,31 @@ export const Footer = ({
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+          <EuiFlexGroup justifyContent="spaceBetween" gutterSize="s" alignItems="center" wrap>
+            {showDuplicateButton && (
+              <EuiFlexItem grow={false}>
+                <EuiButton color="primary" onClick={onDuplicate} data-test-subj="duplicateButton">
+                  {duplicateButtonLabel}
+                </EuiButton>
+              </EuiFlexItem>
+            )}
+
             {allowAdHoc && (
               <EuiFlexItem grow={false}>
                 <EuiButton
                   color="primary"
                   onClick={submitAdHoc}
                   data-test-subj="exploreIndexPatternButton"
-                  disabled={submitDisabled}
+                  disabled={submitDisabled || hasCustomId}
                   isLoading={submittingType === SubmittingType.savingAsAdHoc}
-                  title={i18n.translate('indexPatternEditor.editor.flyoutExploreButtonTitle', {
-                    defaultMessage: 'Use this data view without creating a saved object',
-                  })}
+                  title={hasCustomId ? exploreButtonCustomIdTitle : exploreButtonTitle}
                 >
                   {exploreButtonLabel}
                 </EuiButton>
               </EuiFlexItem>
             )}
 
-            {(canSave || isEditingAdHoc) && (
+            {isEditing && (
               <EuiFlexItem grow={false}>
                 <EuiButton
                   color="primary"
@@ -121,7 +158,7 @@ export const Footer = ({
                     (submittingType === SubmittingType.savingAsAdHoc && isEditingAdHoc)
                   }
                 >
-                  {isEdit
+                  {hasEditData && !isDuplicating
                     ? isPersisted
                       ? editButtonLabel
                       : editUnpersistedButtonLabel

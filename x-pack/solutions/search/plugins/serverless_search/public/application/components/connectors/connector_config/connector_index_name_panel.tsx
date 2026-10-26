@@ -6,8 +6,8 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiButton, EuiSpacer } from '@elastic/eui';
-import { Connector } from '@kbn/search-connectors';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import type { Connector } from '@kbn/search-connectors';
+import { useMutation, useQueryClient } from '@kbn/react-query';
 import React, { useEffect, useState } from 'react';
 import { isValidIndexName } from '../../../../utils/validate_index_name';
 import { UPDATE_LABEL } from '../../../../../common/i18n_string';
@@ -29,9 +29,12 @@ export const ConnectorIndexnamePanel: React.FC<ConnectorIndexNamePanelProps> = (
     mutationFn: async (inputName: string) => {
       if (inputName && inputName !== connector.index_name) {
         const body = { index_name: inputName };
-        await http.post(`/internal/serverless_search/connectors/${connector.id}/index_name`, {
-          body: JSON.stringify(body),
-        });
+        await http.post(
+          `/internal/serverless_search/connectors/${encodeURIComponent(connector.id)}/index_name`,
+          {
+            body: JSON.stringify(body),
+          }
+        );
       }
       return inputName;
     },

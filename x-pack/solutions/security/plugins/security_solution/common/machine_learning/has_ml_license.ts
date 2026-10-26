@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { MlCapabilitiesResponse } from '@kbn/ml-plugin/common/types/capabilities';
+import type { MlCapabilitiesResponse } from '@kbn/ml-common-types/capabilities';
 
 export const hasMlLicense = (capabilities: MlCapabilitiesResponse): boolean =>
   capabilities.isPlatinumOrTrialLicense;

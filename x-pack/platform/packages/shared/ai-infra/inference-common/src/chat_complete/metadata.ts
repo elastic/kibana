@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Attributes } from '@opentelemetry/api';
+
 /**
  * Set of metadata that can be used then calling the inference APIs
  *
@@ -12,12 +14,35 @@
  */
 export interface ChatCompleteMetadata {
   connectorTelemetry?: ConnectorTelemetryMetadata;
+  anonymization?: ChatCompleteAnonymizationMetadata;
+  attributes?: Attributes;
 }
 
 /**
  * Pass through for the connector telemetry
  */
 export interface ConnectorTelemetryMetadata {
+  /** Sent as the X-Elastic-Product-Use-Case header on inference endpoint requests. */
   pluginId?: string;
   aggregateBy?: string;
+  /** Sent as the X-Elastic-Product-Solution header on inference endpoint requests. */
+  productSolution?: string;
+  /** Sent as the X-Elastic-Product-Feature header on inference endpoint requests. */
+  productFeature?: string;
+  /** Sent as the X-Elastic-Inference-Interaction-Id header on inference endpoint requests. */
+  interactionId?: string;
+  /** Sent as the X-Elastic-Trace-Id header on inference endpoint requests. */
+  traceId?: string;
+  /** Sent as the X-Elastic-User-Id header on inference endpoint requests. */
+  userId?: string;
+  /** Sent as the X-Elastic-Space-Id header on inference endpoint requests. */
+  spaceId?: string;
+}
+
+/**
+ * Optional anonymization metadata consumers can pass to inference.
+ */
+export interface ChatCompleteAnonymizationMetadata {
+  profileId?: string;
+  replacementsId?: string;
 }

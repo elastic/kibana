@@ -9,12 +9,14 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { EuiFormRow, EuiCallOut, EuiSpacer } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { monaco, XJsonLang } from '@kbn/monaco';
+import type { monaco } from '@kbn/monaco';
+import { XJsonLang } from '@kbn/monaco';
 
 import { XJson } from '@kbn/es-ui-shared-plugin/public';
 import { CodeEditor } from '@kbn/code-editor';
 
-import { ActionVariable } from '@kbn/alerting-plugin/common';
+import type { ActionVariable } from '@kbn/alerting-plugin/common';
+import { hasMustacheTemplate } from '@kbn/actions-plugin/common';
 import { AddMessageVariablesOptional } from './add_message_variables_optional';
 import { templateActionVariable } from '../lib';
 
@@ -47,6 +49,7 @@ interface Props {
   dataTestSubj?: string;
   euiCodeEditorProps?: { [key: string]: any };
   isOptionalField?: boolean;
+  readOnly?: boolean;
 }
 
 const { useXJsonMode } = XJson;
@@ -71,6 +74,7 @@ export const JsonEditorWithMessageVariables: React.FunctionComponent<Props> = ({
   dataTestSubj,
   euiCodeEditorProps = {},
   isOptionalField = false,
+  readOnly = false,
 }) => {
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor>();
   const editorDisposables = useRef<monaco.IDisposable[]>([]);
@@ -86,6 +90,10 @@ export const JsonEditorWithMessageVariables: React.FunctionComponent<Props> = ({
   }, [inputTargetValue]);
 
   const onSelectMessageVariable = (variable: ActionVariable) => {
+    if (readOnly) {
+      return;
+    }
+
     const editor = editorRef.current;
     if (!editor) {
       setShowErrorMessage(true);
@@ -180,7 +188,8 @@ export const JsonEditorWithMessageVariables: React.FunctionComponent<Props> = ({
         <CodeEditor
           languageId={XJsonLang.ID}
           options={{
-            renderValidationDecorations: xJson ? 'on' : 'off', // Disable error underline when empty
+            // Disable the error underline when empty or when the content contains templates
+            renderValidationDecorations: xJson && !hasMustacheTemplate(xJson) ? 'on' : 'off',
             lineNumbers: 'on',
             fontSize: 14,
             minimap: {
@@ -191,11 +200,12 @@ export const JsonEditorWithMessageVariables: React.FunctionComponent<Props> = ({
             wordWrap: 'on',
             wrappingIndent: 'indent',
             automaticLayout: true,
+            readOnly,
           }}
           value={xJson}
           width="100%"
           height="200px"
-          data-test-subj={`${paramsProperty}JsonEditor`}
+          data-test-subj={`${paramsProperty}JsonEditor${readOnly ? 'ReadOnly' : ''}`}
           aria-label={ariaLabel}
           {...euiCodeEditorProps}
           editorDidMount={onEditorMount}

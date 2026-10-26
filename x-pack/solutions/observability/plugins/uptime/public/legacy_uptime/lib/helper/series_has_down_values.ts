@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { HistogramPoint } from '../../../../common/runtime_types';
+import type { HistogramPoint } from '../../../../common/runtime_types';
 
 export const seriesHasDownValues = (series: HistogramPoint[] | null): boolean => {
   return series ? series.some((point) => !!point.down) : false;

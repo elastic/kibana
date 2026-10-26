@@ -13,6 +13,7 @@ import type { NodeID } from '../utils';
 import { validIDs } from '../utils';
 import type { ResolverQueryParams } from './base';
 import { BaseResolverQuery } from './base';
+import { createEventKindFilter } from '../../utils/event_kind_filters';
 
 /**
  * Builds a query for retrieving descendants of a node.
@@ -78,9 +79,7 @@ export class DescendantsQuery extends BaseResolverQuery {
             {
               terms: { 'event.category': ['process'] },
             },
-            {
-              terms: { 'event.kind': ['event', 'alert'] },
-            },
+            createEventKindFilter(),
           ],
         },
       },
@@ -137,6 +136,7 @@ export class DescendantsQuery extends BaseResolverQuery {
         bool: {
           filter: [
             ...this.getRangeFilter(),
+            ...this.getColdAndFrozenTierFilter(),
             {
               terms: {
                 [ancestryField]: nodes,
@@ -170,9 +170,7 @@ export class DescendantsQuery extends BaseResolverQuery {
             {
               term: { 'event.category': 'process' },
             },
-            {
-              term: { 'event.kind': 'event' },
-            },
+            createEventKindFilter(),
           ],
         },
       },
@@ -220,7 +218,9 @@ export class DescendantsQuery extends BaseResolverQuery {
      *
      * So the schema fields are flattened ('process.parent.entity_id')
      */
-    // @ts-expect-error @elastic/elasticsearch _source is optional
-    return response.hits.hits.map((hit) => hit.fields);
+    return response.hits.hits.map((hit) => ({
+      ...(hit.fields ?? {}),
+      ...(hit._index ? { _index: hit._index } : {}),
+    }));
   }
 }

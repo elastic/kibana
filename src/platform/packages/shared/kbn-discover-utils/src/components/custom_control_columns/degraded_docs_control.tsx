@@ -11,7 +11,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiCode, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
+import type {
   RowControlColumn,
   RowControlComponent,
   RowControlProps,
@@ -30,8 +30,7 @@ interface DegradedDocsControlProps extends Partial<RowControlProps> {
  */
 export const createDegradedDocsControl = (props?: DegradedDocsControlProps): RowControlColumn => ({
   id: 'connectedDegradedDocs',
-  headerAriaLabel: actionsHeaderAriaLabelDegradedAction,
-  renderControl: (Control, rowProps) => {
+  render: (Control, rowProps) => {
     return <DegradedDocs Control={Control} rowProps={rowProps} {...props} />;
   },
 });

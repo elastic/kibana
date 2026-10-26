@@ -14,7 +14,7 @@ import type {
   ThemeServiceStart,
   UserProfileService,
 } from '@kbn/core/public';
-import type { IHttpFetchError } from '@kbn/core-http-browser';
+import { buildPath, type IHttpFetchError } from '@kbn/core-http-browser';
 import {
   RANDOM_NUMBER_ROUTE_PATH,
   RANDOM_NUMBER_BETWEEN_ROUTE_PATH,
@@ -66,7 +66,7 @@ export function getServices(core: CoreStart): Services {
     },
     postMessage: async (message: string, id: string) => {
       try {
-        await core.http.post(`${POST_MESSAGE_ROUTE_PATH}/${id}`, {
+        await core.http.post(buildPath(`${POST_MESSAGE_ROUTE_PATH}/{id}`, { id }), {
           body: JSON.stringify({ message }),
         });
       } catch (e) {

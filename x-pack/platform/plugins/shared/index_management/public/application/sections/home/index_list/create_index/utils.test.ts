@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isValidIndexName } from './utils';
+import { isValidIndexName, generateRandomIndexName } from './utils';
 
 describe('create index utilities', () => {
   describe('isValidIndexName', () => {
@@ -57,6 +57,36 @@ describe('create index utilities', () => {
       )}`;
 
       expect(isValidIndexName(indexName)).toBe(false);
+    });
+  });
+
+  describe('generateRandomIndexName', () => {
+    it('uses the default prefix and suffix length', () => {
+      const name = generateRandomIndexName();
+      expect(name).toMatch(/^search-[a-z0-9]{4}$/);
+    });
+
+    it('uses a custom prefix', () => {
+      const name = generateRandomIndexName('logs-');
+      expect(name).toMatch(/^logs-[a-z0-9]{4}$/);
+    });
+
+    it('uses a custom suffix length', () => {
+      const name = generateRandomIndexName('search-', 8);
+      expect(name).toMatch(/^search-[a-z0-9]{8}$/);
+    });
+
+    it('only contains lowercase alphanumeric characters in the suffix', () => {
+      for (let i = 0; i < 20; i++) {
+        const name = generateRandomIndexName('', 10);
+        expect(name).toMatch(/^[a-z0-9]{10}$/);
+      }
+    });
+
+    it('generates a valid index name', () => {
+      for (let i = 0; i < 20; i++) {
+        expect(isValidIndexName(generateRandomIndexName())).toBe(true);
+      }
     });
   });
 });

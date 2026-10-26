@@ -7,27 +7,29 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
+import { useParams, useHistory } from 'react-router-dom';
+import { i18n } from '@kbn/i18n';
 
-import { FavoritesClient } from '@kbn/content-management-favorites-public';
-import { TableListView } from '@kbn/content-management-table-list-view';
-import { TableListViewKibanaProvider } from '@kbn/content-management-table-list-view-table';
-import { FormattedRelative, I18nProvider } from '@kbn/i18n-react';
+import { TabbedTableListView } from '@kbn/content-management-tabbed-table-list-view';
+import { I18nProvider } from '@kbn/i18n-react';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
-import { QueryClientProvider } from '@tanstack/react-query';
+import { QueryClientProvider } from '@kbn/react-query';
+import type { EmbeddableEditorBreadcrumb } from '@kbn/embeddable-plugin/public';
 
-import { DASHBOARD_APP_ID } from '../plugin_constants';
-import { DASHBOARD_CONTENT_ID } from '../utils/telemetry_constants';
-import {
-  coreServices,
-  savedObjectsTaggingService,
-  serverlessService,
-  usageCollectionService,
-} from '../services/kibana_services';
+import { AppHeader } from '@kbn/app-header';
+import type { AppHeaderTab } from '@kbn/app-header';
+import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
+import { coreServices } from '../services/kibana_services';
 import { dashboardQueryClient } from '../services/dashboard_query_client';
-import { DashboardUnsavedListing } from './dashboard_unsaved_listing';
-import { useDashboardListingTable } from './hooks/use_dashboard_listing_table';
-import { DashboardListingProps, DashboardSavedObjectUserContent } from './types';
+import { DASHBOARD_APP_ID, LANDING_PAGE_PATH } from '../../common/page_bundle_constants';
+import { getDashboardListingTabs } from './get_dashboard_listing_tabs';
+import type { DashboardListingProps } from './types';
+import { openImportDashboardJsonFlyout } from './import_json/open_import_dashboard_json_flyout';
+import { importDashboardJsonStrings } from './import_json/_import_dashboard_json_strings';
+import { getDashboardCapabilities } from '../utils/get_dashboard_capabilities';
+import { confirmCreateWithUnsaved } from './confirm_overlays';
+import { getDashboardBackupService } from '../services/dashboard_api_services';
 
 export const DashboardListing = ({
   children,
@@ -35,56 +37,187 @@ export const DashboardListing = ({
   goToDashboard,
   getDashboardUrl,
   useSessionStorageIntegration,
+  getTabs,
 }: DashboardListingProps) => {
   useExecutionContext(coreServices.executionContext, {
     type: 'application',
     page: 'list',
   });
 
-  const {
-    unsavedDashboardIds,
-    refreshUnsavedDashboards,
-    tableListViewTableProps,
-    contentInsightsClient,
-  } = useDashboardListingTable({
-    goToDashboard,
-    getDashboardUrl,
-    useSessionStorageIntegration,
-    initialFilter,
-  });
+  const history = useHistory();
+  const { activeTab: activeTabParam } = useParams<{ activeTab?: string }>();
 
-  const dashboardFavoritesClient = useMemo(() => {
-    return new FavoritesClient(DASHBOARD_APP_ID, DASHBOARD_CONTENT_ID, {
-      http: coreServices.http,
-      usageCollection: usageCollectionService,
-      userProfile: coreServices.userProfile,
-    });
+  const [refreshListBouncer, setRefreshListBouncer] = useState(false);
+
+  const tabs = useMemo(
+    () =>
+      getDashboardListingTabs({
+        goToDashboard,
+        getDashboardUrl,
+        useSessionStorageIntegration,
+        initialFilter,
+        getTabs,
+        refreshListBouncer,
+      }),
+    [
+      goToDashboard,
+      getDashboardUrl,
+      useSessionStorageIntegration,
+      initialFilter,
+      getTabs,
+      refreshListBouncer,
+    ]
+  );
+
+  const activeTabId = useMemo(() => {
+    return tabs.find((tab) => tab.id === activeTabParam)?.id ?? 'dashboards';
+  }, [tabs, activeTabParam]);
+
+  const changeActiveTab = useCallback(
+    (tabId: string) => {
+      history.push(`/list/${tabId}`);
+    },
+    [history]
+  );
+
+  const headerTabs = useMemo<AppHeaderTab[]>(
+    () =>
+      tabs.map((tab) => ({
+        id: tab.id,
+        label: tab.title,
+        isSelected: tab.id === activeTabId,
+        onClick: () => changeActiveTab(tab.id),
+      })),
+    [tabs, activeTabId, changeActiveTab]
+  );
+
+  const getBreadcrumbs = useCallback(
+    (appId: string): EmbeddableEditorBreadcrumb[] => {
+      const activeTabTitle = tabs.find((tab) => tab.id === activeTabId)?.title;
+      const dashboardBreadcrumb = {
+        text: i18n.translate('dashboard.listing.title', {
+          defaultMessage: 'Dashboards',
+        }),
+        href: coreServices.application.getUrlForApp(appId, {
+          path: `#${LANDING_PAGE_PATH}`,
+        }),
+      };
+
+      if (!activeTabTitle || activeTabId === DASHBOARD_APP_ID) {
+        return [dashboardBreadcrumb];
+      }
+
+      return [
+        dashboardBreadcrumb,
+        {
+          text: activeTabTitle,
+          href: coreServices.application.getUrlForApp(appId, {
+            path: `#${LANDING_PAGE_PATH}/${activeTabId}`,
+          }),
+        },
+      ];
+    },
+    [tabs, activeTabId]
+  );
+
+  const onImportSuccess = useCallback((id: string, title: string) => {
+    setRefreshListBouncer((b) => !b);
+    coreServices.notifications.toasts.addSuccess(importDashboardJsonStrings.getSuccessToast(title));
   }, []);
+
+  const createDashboardAction = useCallback(() => {
+    if (useSessionStorageIntegration && getDashboardBackupService().dashboardHasUnsavedEdits()) {
+      confirmCreateWithUnsaved(() => {
+        getDashboardBackupService().clearState();
+        goToDashboard();
+      }, goToDashboard);
+      return;
+    }
+    goToDashboard();
+  }, [goToDashboard, useSessionStorageIntegration]);
+
+  const appMenu = useMemo<AppMenuConfig | undefined>(() => {
+    const { createNew } = getDashboardCapabilities();
+    const secondaryCreateActions = getTabs
+      ? getTabs()
+          .filter((tab) => Boolean(tab.createAction))
+          .map((tab) => ({
+            id: `create_${tab.id}`,
+            order: tab.createAction!.order,
+            label: tab.createAction!.label,
+            iconType: tab.createAction!.iconType,
+            testId: `create_${tab.id}_button`,
+            run: () => tab.createAction!.create(`#${LANDING_PAGE_PATH}/${tab.id}`),
+          }))
+      : [];
+
+    return {
+      primaryActionItem: createNew
+        ? {
+            id: 'createDashboard',
+            testId: 'dashboardListingCreateButton',
+            iconType: 'plus',
+            label: i18n.translate('dashboard.listing.createButtonLabel', {
+              defaultMessage: 'Create dashboard',
+            }),
+            run: () => createDashboardAction(),
+            popoverWidth: 200,
+            splitButtonProps:
+              secondaryCreateActions.length > 0
+                ? {
+                    secondaryButtonAriaLabel: i18n.translate(
+                      'dashboard.listing.createMoreActionsButtonAriaLabel',
+                      {
+                        defaultMessage: 'Create more dashboard content',
+                      }
+                    ),
+                    items: secondaryCreateActions,
+                  }
+                : undefined,
+          }
+        : undefined,
+      items: createNew
+        ? [
+            {
+              id: 'importDashboardJson',
+              order: 0,
+              label: i18n.translate('dashboard.listing.importDashboardButtonLabel', {
+                defaultMessage: 'Import dashboard',
+              }),
+              iconType: 'upload',
+              testId: 'dashboardListingImportButton',
+              run: (params) => {
+                openImportDashboardJsonFlyout({
+                  onImportSuccess,
+                  returnFocus: params?.returnFocus,
+                });
+              },
+            },
+          ]
+        : [],
+    };
+  }, [onImportSuccess, createDashboardAction, getTabs]);
 
   return (
     <I18nProvider>
       <QueryClientProvider client={dashboardQueryClient}>
-        <TableListViewKibanaProvider
-          {...{
-            core: coreServices,
-            savedObjectsTagging: savedObjectsTaggingService?.getTaggingApi(),
-            FormattedRelative,
-            favorites: dashboardFavoritesClient,
-            contentInsightsClient,
-            isKibanaVersioningEnabled: !serverlessService,
-          }}
-        >
-          <TableListView<DashboardSavedObjectUserContent> {...tableListViewTableProps}>
-            <>
-              {children}
-              <DashboardUnsavedListing
-                goToDashboard={goToDashboard}
-                unsavedDashboardIds={unsavedDashboardIds}
-                refreshUnsavedDashboards={refreshUnsavedDashboards}
-              />
-            </>
-          </TableListView>
-        </TableListViewKibanaProvider>
+        {children}
+        <AppHeader
+          title={i18n.translate('dashboard.listing.title', {
+            defaultMessage: 'Dashboards',
+          })}
+          tabs={headerTabs}
+          menu={appMenu}
+        />
+        <TabbedTableListView
+          headingId="dashboardListingHeading"
+          getBreadcrumbs={getBreadcrumbs}
+          tabs={tabs}
+          activeTabId={activeTabId}
+          changeActiveTab={changeActiveTab}
+          showCreateButton={false}
+          hideTabs
+        />
       </QueryClientProvider>
     </I18nProvider>
   );

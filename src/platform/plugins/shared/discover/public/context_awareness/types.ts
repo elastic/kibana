@@ -7,25 +7,34 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
+import type { DataView, DataViewField, DataViewSpec } from '@kbn/data-views-plugin/common';
+import type { DataSource } from '@kbn/data-source';
+import type { ESQLControlVariable } from '@kbn/esql-types';
+import type { Datatable } from '@kbn/expressions-plugin/common';
 import type {
   CustomCellRenderer,
   DataGridDensity,
   UnifiedDataTableProps,
   DataGridPaginationMode,
+  CustomGridColumnsConfiguration,
 } from '@kbn/unified-data-table';
 import type { DocViewsRegistry } from '@kbn/unified-doc-viewer';
 import type { AppMenuRegistry, DataTableRecord } from '@kbn/discover-utils';
 import type { CellAction, CellActionExecutionContext, CellActionsData } from '@kbn/cell-actions';
 import type { EuiIconType } from '@elastic/eui/src/components/icon/icon';
-import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
+import type { AggregateQuery, Filter, ProjectRouting, Query, TimeRange } from '@kbn/es-query';
 import type { OmitIndexSignature } from 'type-fest';
-import type { Trigger } from '@kbn/ui-actions-plugin/public';
-import type { FunctionComponent, PropsWithChildren } from 'react';
-import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
+import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
+import type {
+  ChartSectionProps,
+  UnifiedHistogramTopPanelHeightContext,
+} from '@kbn/unified-histogram/types';
+import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
+import type { RestorableStateProviderProps } from '@kbn/restorable-state';
 import type { DiscoverDataSource } from '../../common/data_sources';
-import type { DiscoverAppState } from '../application/main/state_management/discover_app_state_container';
-import type { DiscoverStateContainer } from '../application/main/state_management/discover_state';
+import type { DiscoverAppState } from '../application/main/state_management/redux';
+
+export type UpdateESQLQueryFn = (queryOrUpdater: string | ((prevQuery: string) => string)) => void;
 
 /**
  * Supports extending the Discover app menu
@@ -51,14 +60,89 @@ export interface PaginationConfigExtension {
 }
 
 /**
+ * Support exposing additional fields for the Field List API
+ */
+
+export interface FieldListExtension {
+  /**
+   * Adds additional fields to the field list
+   * @param recommendedFields The field list
+   * @returns The updated field list
+   */
+  recommendedFields: Array<DataViewField['name']>;
+}
+
+/**
  * Parameters passed to the app menu extension
  */
 export interface AppMenuExtensionParams {
+  /**
+   * True if Discover is in ESQL mode
+   */
   isEsqlMode: boolean;
+  /**
+   * The current data view
+   */
   dataView: DataView | undefined;
+  /**
+   * The available ad hoc data views
+   */
   adHocDataViews: DataView[];
-  onUpdateAdHocDataViews: (adHocDataViews: DataView[]) => Promise<void>;
+  /**
+   * The authorized alerting rule type IDs for the current user
+   */
+  authorizedRuleTypeIds: string[];
 }
+
+/**
+ * Parameters passed to the open in new tab action
+ */
+export interface OpenInNewTabParams {
+  /**
+   * The query to open in the new tab
+   */
+  query?: Query | AggregateQuery;
+  /**
+   * The label of the new tab
+   */
+  tabLabel?: string;
+  /**
+   * The time range to open in the new tab
+   */
+  timeRange?: TimeRange;
+  /**
+   * Whether the new tab should use approximate ES|QL execution
+   */
+  esqlApproximation?: boolean;
+}
+
+/**
+ * Supports customizing the chart (UnifiedHistogram) section in Discover
+ */
+export type ChartSectionConfiguration<T extends object = object> =
+  | {
+      /**
+       * The render function for the chart section
+       */
+      renderChartSection: (
+        props: ChartSectionProps & RestorableStateProviderProps<T>
+      ) => React.ReactElement;
+      /**
+       * Controls whether or not to replace the default histogram and activate the custom chart
+       */
+      replaceDefaultChart: true;
+      /**
+       * Prefix for the local storage key used to store the chart section state, when not set, it will use the default Discover key
+       */
+      localStorageKeyPrefix?: string;
+      /**
+       * The default chart section height
+       */
+      defaultTopPanelHeight?: UnifiedHistogramTopPanelHeightContext;
+    }
+  | {
+      replaceDefaultChart: false;
+    };
 
 /**
  * Supports customizing the Discover document viewer flyout
@@ -74,6 +158,19 @@ export interface DocViewerExtension {
    * @returns The updated doc views registry
    */
   docViewsRegistry: (prevRegistry: DocViewsRegistry) => DocViewsRegistry;
+  /**
+   * Optional render function to display a custom header section above the tabs
+   * @param props The doc view render props
+   * @returns A React element to render above the tabs
+   */
+  renderHeader?: (props: DocViewRenderProps) => React.ReactElement;
+  /**
+   * Optional render function to display a custom footer section at the bottom of the flyout.
+   * The footer is always visible while scrolling through the flyout content.
+   * @param props The doc view render props
+   * @returns A React element to render at the bottom of the flyout
+   */
+  renderFooter?: (props: DocViewRenderProps) => React.ReactElement;
 }
 
 /**
@@ -94,6 +191,11 @@ export interface RowIndicatorExtensionParams {
    * The current data view
    */
   dataView: DataView;
+  /**
+   * The current data source. Prefer this over `dataView` for column presence
+   * (ES|QL shims may only expose a time field on the DataView).
+   */
+  dataSource?: DataSource;
 }
 
 /**
@@ -101,7 +203,8 @@ export interface RowIndicatorExtensionParams {
  */
 export interface DefaultAppStateColumn {
   /**
-   * The field name of the column
+   * The field name of the column.
+   * Use `'_source'` for the Summary column - it is always treated as a valid profile column.
    */
   name: string;
   /**
@@ -125,7 +228,9 @@ export interface DefaultAppStateExtensionParams {
  */
 export interface DefaultAppStateExtension {
   /**
-   * The columns to display in the data grid
+   * The columns to display in the data grid.
+   * Include `{ name: '_source' }` (usually last; omit `width` for auto-width) to show Summary
+   * alongside other default fields. Users can still pin or unpin Summary from the Columns popover.
    */
   columns?: DefaultAppStateColumn[];
   /**
@@ -139,18 +244,71 @@ export interface DefaultAppStateExtension {
    * The field to apply for the histogram breakdown
    */
   breakdownField?: string;
+  /**
+   * The state for chart visibility toggle
+   */
+  hideChart?: boolean;
+  /**
+   * The state for data table visibility toggle
+   */
+  hideTable?: boolean;
+  /**
+   * The state for field list sidebar visibility toggle
+   */
+  hideSidebar?: boolean;
+}
+
+/**
+ * Supports setting a default ES|QL query when Discover starts in ES|QL mode
+ */
+export interface DefaultEsqlQueryConfig {
+  /**
+   * The ES|QL query string to use as the default
+   */
+  query: string;
+}
+
+/**
+ * Parameters passed to the modified vis attributes extension
+ */
+export interface ModifiedVisAttributesExtensionParams {
+  /**
+   * The vis attributes to modify
+   */
+  attributes: TypedLensByValueInput['attributes'];
+}
+
+/**
+ * Grid search result context for cell renderers that issue follow-up searches
+ * (e.g. change-point Summary sparklines). Independent of the Discover chart section.
+ */
+export interface CellRenderersSearchContext {
+  query?: Query | AggregateQuery;
+  /**
+   * Dashboard / parent KQL or lucene query, distinct from the saved ES|QL `query`.
+   */
+  filterQuery?: Query | AggregateQuery;
+  table?: Datatable;
+  filters?: Filter[];
+  timeRange?: TimeRange;
+  esqlVariables?: ESQLControlVariable[];
+  searchSessionId?: string;
+  projectRouting?: ProjectRouting;
+  isApproximate?: boolean;
+  /**
+   * Stable per completed grid-result identity; changes on refresh so series caches invalidate.
+   */
+  requestId?: number;
+  /**
+   * Lifetime of the grid search that produced this context.
+   */
+  abortSignal?: AbortSignal;
 }
 
 /**
  * Parameters passed to the cell renderers extension
  */
 export interface CellRenderersExtensionParams {
-  /**
-   * Available actions for cell renderers
-   */
-  actions: {
-    addFilter?: DocViewFilterFn;
-  };
   /**
    * The current data view
    */
@@ -163,6 +321,14 @@ export interface CellRenderersExtensionParams {
    * The current row height mode applied to the data grid component
    */
   rowHeight: number | undefined;
+  /**
+   * Completed (or last) grid search inputs used by follow-up cell fetches.
+   */
+  searchContext?: CellRenderersSearchContext;
+  /**
+   * True while the grid's primary search is in flight.
+   */
+  isDataLoading?: boolean;
 }
 
 /**
@@ -176,17 +342,8 @@ export interface RowControlsExtensionParams {
   /**
    * The current query
    */
-  updateESQLQuery?: DiscoverStateContainer['actions']['updateESQLQuery'];
-  /**
-   * The current query
-   */
   query?: DiscoverAppState['query'];
 }
-
-/**
- * The Discover cell actions trigger
- */
-export const DISCOVER_CELL_ACTIONS_TRIGGER: Trigger = { id: 'DISCOVER_CELL_ACTIONS_TRIGGER_ID' };
 
 /**
  * Metadata passed to Discover cell actions
@@ -266,6 +423,55 @@ export interface AdditionalCellAction {
 }
 
 /**
+ * Parameters passed to the deep-analysis playbook extension
+ */
+export interface DeepAnalysisPlaybookExtensionParams {
+  /**
+   * The current data view, if any
+   */
+  dataView: DataView | undefined;
+  /**
+   * The current query
+   */
+  query: AggregateQuery | Query | undefined;
+  /**
+   * The columns of the current ES|QL query result, if any
+   */
+  columns?: Array<{ name: string; type?: string }>;
+}
+
+/**
+ * A per-shape contribution to the agent-builder deep-analysis playbook.
+ * Returning `undefined` means "no contribution" — the server playbook
+ * falls back to inferring analysis strategy from column names and types.
+ */
+export interface DeepAnalysisPlaybookExtension {
+  /**
+   * Stable shape identifier, e.g. 'logs' | 'traces' | 'metrics'
+   */
+  shapeId: string;
+  /**
+   * Human-readable shape label, e.g. "Application & infrastructure logs"
+   */
+  shapeLabel: string;
+  /**
+   * Field names that characterize this shape. Intersected against the
+   * actual attachment columns server-side so the agent never sees
+   * fields that don't exist in the result.
+   */
+  characteristicFields: string[];
+  /**
+   * Short guidance (≤600 chars) describing what "deep analysis" means for
+   * this shape — what to group by, what to avoid, what's interesting.
+   */
+  guidance: string;
+  /**
+   * Optional short bullets (≤5 entries) to seed the Drill-Down Queries section.
+   */
+  interestingSignals?: string[];
+}
+
+/**
  * The core profile interface for Discover context awareness.
  * Each of the available methods map to a specific extension point in the Discover application.
  */
@@ -273,14 +479,6 @@ export interface Profile {
   /**
    * Lifecycle
    */
-
-  /**
-   * Render a custom wrapper component around the Discover application,
-   * e.g. to allow using profile specific context providers
-   * @param props The app wrapper props
-   * @returns The custom app wrapper component
-   */
-  getRenderAppWrapper: FunctionComponent<PropsWithChildren<{}>>;
 
   /**
    * Gets default Discover app state that should be used when the profile is resolved
@@ -297,6 +495,35 @@ export interface Profile {
   getDefaultAdHocDataViews: () => Array<
     Omit<DataViewSpec, 'id'> & { id: NonNullable<DataViewSpec['id']> }
   >;
+
+  /**
+   * Gets the default ES|QL query that should be used when Discover starts in ES|QL mode.
+   *
+   * This extension point is evaluated on Discover app initialization and is resolved from the
+   * root profile only.
+   *
+   * @returns The default ES|QL query config, or `undefined` to fall back to Discover defaults.
+   */
+  getDefaultEsqlQuery: () => DefaultEsqlQueryConfig | undefined;
+
+  /**
+   * Chart
+   */
+
+  /**
+   * Allows modifying the default vis attributes used in the Discover chart
+   * @returns The modified vis attributes to use in the chart
+   */
+  getModifiedVisAttributes: (
+    params: ModifiedVisAttributesExtensionParams
+  ) => TypedLensByValueInput['attributes'];
+
+  /**
+   * Gets configuration for the Discover chart (UnifiedHistogram) section
+   * This allows modifying the chart section with a custom component
+   * @returns The custom configuration for the chart
+   */
+  getChartSectionConfiguration: () => ChartSectionConfiguration;
 
   /**
    * Data grid
@@ -342,16 +569,51 @@ export interface Profile {
   getPaginationConfig: () => PaginationConfigExtension;
 
   /**
+   * Allows overwriting the default columns configuration used in the data grid.customGridColumnsConfiguration
+   * Example use case is to overwrite the column header display name or to add icons to the column headers.
+   */
+  getColumnsConfiguration: () => CustomGridColumnsConfiguration;
+
+  /**
+   * Field list
+   */
+
+  /**
+   * Allows passing additional fields (recommended fields) to the field list area.
+   * @returns The additional fields to display in the Field List under Recommended fields section
+   */
+  getRecommendedFields: () => FieldListExtension;
+
+  /**
    * Document viewer flyout
    */
 
   /**
    * Supports customizing the behaviour of the Discover document
-   * viewer flyout, such as the flyout title and available tabs
+   * viewer flyout, such as the flyout title and available tabs.
+   *
+   * To add restorable state to your custom doc viewer tabs, see:
+   * {@link /src/platform/plugins/shared/unified_doc_viewer/README.md#using-restorable-state-in-doc-viewer-tabs}
+   *
    * @param params The doc viewer extension parameters
    * @returns The doc viewer extension
    */
   getDocViewer: (params: DocViewerExtensionParams) => DocViewerExtension;
+
+  /**
+   * Deep analysis (agent-builder)
+   */
+
+  /**
+   * Contributes per-shape guidance to the Discover deep-analysis agent-builder skill.
+   * The contribution is attached to the ES|QL query results sent to the agent so
+   * the playbook can prioritise shape-relevant fields and aggregations.
+   * @param params The deep-analysis playbook extension parameters
+   * @returns The shape-specific playbook contribution, or `undefined` for the default behaviour
+   */
+  getDeepAnalysisPlaybook: (
+    params: DeepAnalysisPlaybookExtensionParams
+  ) => DeepAnalysisPlaybookExtension | undefined;
 
   /**
    * App Menu (Top Nav actions)

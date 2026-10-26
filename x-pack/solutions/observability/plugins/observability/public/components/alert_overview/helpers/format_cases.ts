@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { CaseTooltipContentProps } from '@kbn/cases-components';
-import { Case } from '@kbn/cases-plugin/common';
+import type { CaseTooltipContentProps } from '@kbn/cases-components';
+import type { Case } from '@kbn/cases-plugin/common';
 
 export const formatCase = (theCase: Case): CaseTooltipContentProps => ({
   title: theCase.title,

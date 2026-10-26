@@ -5,36 +5,34 @@
  * 2.0.
  */
 import { EuiFlexItem } from '@elastic/eui';
-import { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React from 'react';
 import { useFetchHistoricalSummary } from '../../../hooks/use_fetch_historical_summary';
 import { formatHistoricalData } from '../../../utils/slo/chart_data_formatter';
-import { TimeBounds } from '../types';
+import type { TimeBounds } from '../types';
 import { ErrorBudgetChartPanel } from './error_budget_chart_panel';
 import { SliChartPanel } from './sli_chart_panel';
-import { SloTabId } from './slo_details';
 
 export interface Props {
   slo: SLOWithSummaryResponse;
   isAutoRefreshing: boolean;
-  selectedTabId: SloTabId;
   range?: { from: Date; to: Date };
   onBrushed?: (timeBounds: TimeBounds) => void;
+  hideHeaderDurationLabel?: boolean;
 }
 
 export function HistoricalDataCharts({
   slo,
   range,
   isAutoRefreshing,
-  selectedTabId,
   onBrushed,
+  hideHeaderDurationLabel = false,
 }: Props) {
-  const { data: historicalSummaries = [], isLoading: historicalSummaryLoading } =
-    useFetchHistoricalSummary({
-      sloList: [slo],
-      shouldRefetch: isAutoRefreshing,
-      range,
-    });
+  const { data: historicalSummaries = [], isLoading } = useFetchHistoricalSummary({
+    sloList: [slo],
+    shouldRefetch: isAutoRefreshing,
+    range,
+  });
 
   const sloHistoricalSummary = historicalSummaries.find(
     (historicalSummary) =>
@@ -47,23 +45,28 @@ export function HistoricalDataCharts({
   );
   const historicalSliData = formatHistoricalData(sloHistoricalSummary?.data, 'sli_value');
 
+  const timeRange = range
+    ? { from: range.from.toISOString(), to: range.to.toISOString() }
+    : undefined;
+
   return (
     <>
       <EuiFlexItem>
         <SliChartPanel
-          data={historicalSliData}
-          isLoading={historicalSummaryLoading}
           slo={slo}
-          selectedTabId={selectedTabId}
+          data={historicalSliData}
+          isLoading={isLoading}
+          timeRange={timeRange}
+          hideHeaderDurationLabel={hideHeaderDurationLabel}
           onBrushed={onBrushed}
         />
       </EuiFlexItem>
       <EuiFlexItem>
         <ErrorBudgetChartPanel
-          data={errorBudgetBurnDownData}
-          isLoading={historicalSummaryLoading}
           slo={slo}
-          selectedTabId={selectedTabId}
+          isLoading={isLoading}
+          data={errorBudgetBurnDownData}
+          hideHeaderDurationLabel={hideHeaderDurationLabel}
           onBrushed={onBrushed}
         />
       </EuiFlexItem>

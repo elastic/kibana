@@ -5,26 +5,136 @@
  * 2.0.
  */
 
+import type { FlattenRecord } from '@kbn/streams-schema';
 import {
-  FlattenRecord,
-  flattenRecord,
-  namedFieldDefinitionConfigSchema,
-  processorWithIdDefinitionSchema,
+  MAX_STREAM_NAME_LENGTH,
+  boundedFlattenRecord,
+  boundedJsonValue,
+  boundedNamedFieldDefinitionSchema,
+  isEnabledFailureStore,
 } from '@kbn/streams-schema';
-import { z } from '@kbn/zod';
-import { checkAccess } from '../../../../lib/streams/stream_crud';
+import type { DataStreamWithFailureStore } from '@kbn/streams-schema/src/models/ingest/failure_store';
+import { z } from '@kbn/zod/v4';
+import { streamlangDSLSchema, isConditionBlock } from '@kbn/streamlang';
+import type { StreamlangDSL } from '@kbn/streamlang';
+import { from, map } from 'rxjs';
+import type { ServerSentEventBase } from '@kbn/sse-utils';
+import type { Observable } from 'rxjs';
+import { FailureStoreNotEnabledError } from '../../../../lib/streams/errors/failure_store_not_enabled_error';
+import { STREAMS_API_PRIVILEGES, STREAMS_TIERED_ML_FEATURE } from '../../../../../common/constants';
+import { SecurityError } from '../../../../lib/streams/errors/security_error';
+import { checkAccess, getFailureStore } from '../../../../lib/streams/stream_crud';
 import { createServerRoute } from '../../../create_server_route';
-import { DefinitionNotFoundError } from '../../../../lib/streams/errors/definition_not_found_error';
-import { ProcessingSimulationParams, simulateProcessing } from './simulation_handler';
-import { handleProcessingSuggestion } from './suggestions_handler';
+import type { ProcessingSimulationParams } from './simulation_handler';
+import { simulateProcessing } from './simulation_handler';
+import {
+  handleProcessingDateSuggestions,
+  processingDateSuggestionsSchema,
+} from './date_suggestions_handler';
+import {
+  handleProcessingGrokSuggestions,
+  processingGrokSuggestionsSchema,
+} from './grok_suggestions_handler';
+import {
+  handleProcessingDissectSuggestions,
+  processingDissectSuggestionsSchema,
+} from './dissect_suggestions_handler';
+import { getRequestAbortSignal } from '../../../utils/get_request_abort_signal';
+import type { FailureStoreSamplesResponse } from './failure_store_samples_handler';
+import { getFailureStoreSamples } from './failure_store_samples_handler';
+import { isNoLLMSuggestionsError } from './no_llm_suggestions_error';
+
+type StreamlangStep = StreamlangDSL['steps'][number];
+
+const simulationBaseBodySchema = {
+  documents: z.array(boundedFlattenRecord).max(1000),
+  detected_fields: z.array(boundedNamedFieldDefinitionSchema).max(1000).optional(),
+};
+
+const PROCESSOR_TYPE_NAME_MAX_LENGTH = 128;
+const MAX_DSL_STEPS_TOTAL = 500;
+// Depth cap runs on the raw (pre-parse) value so deeply nested payloads are rejected
+// before streamlangDSLSchema's recursive z.lazy() evaluation begins.
+const MAX_DSL_NESTING_DEPTH = 30;
+
+function rawNestingDepthOk(val: unknown, depth: number): boolean {
+  if (depth > MAX_DSL_NESTING_DEPTH) return false;
+  if (Array.isArray(val)) return val.every((item) => rawNestingDepthOk(item, depth + 1));
+  if (val !== null && typeof val === 'object')
+    return Object.values(val as Record<string, unknown>).every((v) =>
+      rawNestingDepthOk(v, depth + 1)
+    );
+  return true;
+}
+
+function countDSLSteps(steps: StreamlangStep[], acc: number): number {
+  for (const step of steps) {
+    if (++acc > MAX_DSL_STEPS_TOTAL) return acc;
+    if (isConditionBlock(step)) {
+      acc = countDSLSteps(step.condition.steps, acc);
+      if (step.condition.else) acc = countDSLSteps(step.condition.else, acc);
+    }
+  }
+  return acc;
+}
+
+// z.preprocess throws bubble past safeParse in Zod v4. Use superRefine + pipe instead
+// so depth failures produce a proper 400 ZodIssue, not an uncaught 500.
+const boundedStreamlangDSLSchema = z
+  .unknown()
+  .superRefine((val, ctx) => {
+    if (!rawNestingDepthOk(val, 0)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: `Processing DSL exceeds maximum nesting depth of ${MAX_DSL_NESTING_DEPTH}`,
+      });
+    }
+  })
+  .pipe(
+    streamlangDSLSchema.superRefine((val, ctx) => {
+      if (countDSLSteps(val.steps, 0) > MAX_DSL_STEPS_TOTAL) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: `Processing DSL exceeds maximum of ${MAX_DSL_STEPS_TOTAL} total steps`,
+        });
+      }
+    })
+  ) as z.ZodType<StreamlangDSL>;
 
 const paramsSchema = z.object({
-  path: z.object({ name: z.string() }),
-  body: z.object({
-    processing: z.array(processorWithIdDefinitionSchema),
-    documents: z.array(flattenRecord),
-    detected_fields: z.array(namedFieldDefinitionConfigSchema).optional(),
-  }),
+  path: z.object({ name: z.string().max(MAX_STREAM_NAME_LENGTH) }),
+  body: z.union([
+    z.object({
+      ...simulationBaseBodySchema,
+      processing: boundedStreamlangDSLSchema,
+    }),
+    z.object({
+      ...simulationBaseBodySchema,
+      processors: z
+        .array(
+          z
+            .record(z.string().max(PROCESSOR_TYPE_NAME_MAX_LENGTH), z.any())
+            .superRefine((val, ctx) => {
+              // Ingest processor objects normally have exactly one key (the processor type).
+              if (Object.keys(val).length !== 1) {
+                ctx.addIssue({
+                  code: z.ZodIssueCode.custom,
+                  message: 'A processor object must have exactly one key (the processor type)',
+                });
+              }
+              for (const [key, value] of Object.entries(val)) {
+                const result = boundedJsonValue.safeParse(value);
+                if (!result.success) {
+                  result.error.issues.forEach((issue) =>
+                    ctx.addIssue({ ...issue, path: [key, ...(issue.path ?? [])] })
+                  );
+                }
+              }
+            })
+        )
+        .max(100),
+    }),
+  ]),
 }) satisfies z.Schema<ProcessingSimulationParams>;
 
 export const simulateProcessorRoute = createServerRoute({
@@ -34,21 +144,31 @@ export const simulateProcessorRoute = createServerRoute({
   },
   security: {
     authz: {
-      enabled: false,
-      reason:
-        'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
   params: paramsSchema,
   handler: async ({ params, request, getScopedClients }) => {
-    const { scopedClusterClient, streamsClient } = await getScopedClients({ request });
+    const { scopedClusterClient, streamsClient, fieldsMetadataClient, isSecurityEnabled } =
+      await getScopedClients({
+        request,
+      });
 
-    const { read } = await checkAccess({ name: params.path.name, scopedClusterClient });
+    const { read } = await checkAccess({
+      name: params.path.name,
+      esClient: scopedClusterClient.asCurrentUser,
+      isSecurityEnabled,
+    });
     if (!read) {
-      throw new DefinitionNotFoundError(`Stream definition for ${params.path.name} not found.`);
+      throw new SecurityError(`Cannot read stream ${params.path.name}, insufficient privileges`);
     }
 
-    return simulateProcessing({ params, scopedClusterClient, streamsClient });
+    return simulateProcessing({
+      params,
+      esClient: scopedClusterClient.asCurrentUser,
+      streamsClient,
+      fieldsMetadataClient,
+    });
   },
 });
 
@@ -58,45 +178,252 @@ export interface ProcessingSuggestionBody {
   samples: FlattenRecord[];
 }
 
-const processingSuggestionSchema = z.object({
-  field: z.string(),
-  connectorId: z.string(),
-  samples: z.array(flattenRecord),
-});
+type GrokSuggestionResponse = Observable<
+  ServerSentEventBase<
+    'grok_suggestion',
+    { grokProcessor: Awaited<ReturnType<typeof handleProcessingGrokSuggestions>> | null }
+  >
+>;
 
-const suggestionsParamsSchema = z.object({
-  path: z.object({ name: z.string() }),
-  body: processingSuggestionSchema,
-});
-
-export const processingSuggestionRoute = createServerRoute({
-  endpoint: 'POST /internal/streams/{name}/processing/_suggestions',
+export const processingGrokSuggestionRoute = createServerRoute({
+  endpoint: 'POST /internal/streams/{name}/processing/_suggestions/grok',
   options: {
     access: 'internal',
   },
   security: {
     authz: {
-      enabled: false,
-      reason:
-        'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
-  params: suggestionsParamsSchema,
-  handler: async ({ params, request, logger, getScopedClients }) => {
-    const { inferenceClient, scopedClusterClient, streamsClient } = await getScopedClients({
+  params: processingGrokSuggestionsSchema,
+  handler: async ({
+    params,
+    request,
+    getScopedClients,
+    patternExtractionService,
+    server,
+    logger,
+  }): Promise<GrokSuggestionResponse> => {
+    const log = logger.get('suggestGrokProcessor');
+    const isAvailableForTier = server.core.pricing.isFeatureAvailable(STREAMS_TIERED_ML_FEATURE.id);
+    if (!isAvailableForTier) {
+      throw new SecurityError('Cannot access API on the current pricing tier');
+    }
+
+    const { inferenceClient, scopedClusterClient, streamsClient, fieldsMetadataClient } =
+      await getScopedClients({
+        request,
+      });
+
+    const { connector_id: connectorId } = params.body;
+
+    // Wrap in Observable SSE to avoid timeout issues with long-running LLM requests
+    return from(
+      handleProcessingGrokSuggestions({
+        params,
+        connectorId,
+        inferenceClient,
+        streamsClient,
+        scopedClusterClient,
+        fieldsMetadataClient,
+        patternExtractionService,
+        signal: getRequestAbortSignal(request),
+        logger: log,
+      }).catch((error) => {
+        if (isNoLLMSuggestionsError(error)) {
+          log.debug('No LLM suggestions available for grok processing');
+          return null;
+        }
+        throw error;
+      })
+    ).pipe(
+      map((grokProcessor) => ({
+        grokProcessor,
+        type: 'grok_suggestion' as const,
+      }))
+    );
+  },
+});
+
+type DissectSuggestionResponse = Observable<
+  ServerSentEventBase<
+    'dissect_suggestion',
+    { dissectProcessor: Awaited<ReturnType<typeof handleProcessingDissectSuggestions>> | null }
+  >
+>;
+
+export const processingDissectSuggestionRoute = createServerRoute({
+  endpoint: 'POST /internal/streams/{name}/processing/_suggestions/dissect',
+  options: {
+    access: 'internal',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+    },
+  },
+  params: processingDissectSuggestionsSchema,
+  handler: async ({
+    params,
+    request,
+    getScopedClients,
+    patternExtractionService,
+    server,
+    logger,
+  }): Promise<DissectSuggestionResponse> => {
+    const log = logger.get('suggestDissectProcessor');
+    const isAvailableForTier = server.core.pricing.isFeatureAvailable(STREAMS_TIERED_ML_FEATURE.id);
+    if (!isAvailableForTier) {
+      throw new SecurityError('Cannot access API on the current pricing tier');
+    }
+
+    const { inferenceClient, scopedClusterClient, streamsClient, fieldsMetadataClient } =
+      await getScopedClients({
+        request,
+      });
+
+    const { connector_id: connectorId } = params.body;
+
+    // Wrap in Observable SSE to avoid timeout issues with long-running LLM requests
+    return from(
+      handleProcessingDissectSuggestions({
+        params,
+        connectorId,
+        inferenceClient,
+        streamsClient,
+        scopedClusterClient,
+        fieldsMetadataClient,
+        patternExtractionService,
+        signal: getRequestAbortSignal(request),
+        logger: log,
+      }).catch((error) => {
+        if (isNoLLMSuggestionsError(error)) {
+          log.debug('No LLM suggestions available for dissect processing');
+          return null;
+        }
+        throw error;
+      })
+    ).pipe(
+      map((dissectProcessor) => ({
+        dissectProcessor,
+        type: 'dissect_suggestion' as const,
+      }))
+    );
+  },
+});
+
+export const processingDateSuggestionsRoute = createServerRoute({
+  endpoint: 'POST /internal/streams/{name}/processing/_suggestions/date',
+  options: {
+    access: 'internal',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+    },
+  },
+  params: processingDateSuggestionsSchema,
+  handler: async ({ params, request, getScopedClients, server }) => {
+    const isAvailableForTier = server.core.pricing.isFeatureAvailable(STREAMS_TIERED_ML_FEATURE.id);
+    if (!isAvailableForTier) {
+      throw new SecurityError('Cannot access API on the current pricing tier');
+    }
+
+    const { scopedClusterClient, streamsClient, isSecurityEnabled } = await getScopedClients({
       request,
     });
-    return handleProcessingSuggestion(
-      params.path.name,
-      params.body,
-      inferenceClient,
-      scopedClusterClient,
-      streamsClient
+    const { name } = params.path;
+
+    const { read } = await checkAccess({
+      name,
+      esClient: scopedClusterClient.asCurrentUser,
+      isSecurityEnabled,
+    });
+    if (!read) {
+      throw new SecurityError(`Cannot read stream ${name}, insufficient privileges`);
+    }
+    const { text_structure: hasTextStructurePrivileges } = await streamsClient.getPrivileges(name);
+    if (!hasTextStructurePrivileges) {
+      throw new SecurityError(`Cannot access text structure capabilities, insufficient privileges`);
+    }
+
+    return handleProcessingDateSuggestions({ params, scopedClusterClient });
+  },
+});
+
+const failureStoreSamplesParamsSchema = z.object({
+  path: z.object({ name: z.string().max(MAX_STREAM_NAME_LENGTH) }),
+  query: z
+    .object({
+      size: z.coerce.number().optional(),
+      start: z.string().max(64).optional(),
+      end: z.string().max(64).optional(),
+    })
+    .optional(),
+});
+
+export const failureStoreSamplesRoute = createServerRoute({
+  endpoint: 'GET /internal/streams/{name}/processing/_failure_store_samples',
+  options: {
+    access: 'internal',
+    summary: 'Get failure store samples with parent processors applied',
+    description:
+      'Fetches documents from the failure store and applies all configured processors from parent streams',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+    },
+  },
+  params: failureStoreSamplesParamsSchema,
+  handler: async ({ params, request, getScopedClients }): Promise<FailureStoreSamplesResponse> => {
+    const { scopedClusterClient, streamsClient, fieldsMetadataClient, isSecurityEnabled } =
+      await getScopedClients({
+        request,
+      });
+
+    const { read } = await checkAccess({
+      name: params.path.name,
+      esClient: scopedClusterClient.asCurrentUser,
+      isSecurityEnabled,
+    });
+    if (!read) {
+      throw new SecurityError(`Cannot read stream ${params.path.name}, insufficient privileges`);
+    }
+
+    const { read_failure_store: readFailureStore } = await streamsClient.getPrivileges(
+      params.path.name
     );
+    if (!readFailureStore) {
+      throw new SecurityError(
+        `Cannot read failure store for stream ${params.path.name}, insufficient privileges`
+      );
+    }
+
+    // Check if failure store is enabled for this stream
+    const dataStream = await streamsClient.getDataStream(params.path.name);
+    const effectiveFailureStore = getFailureStore({
+      dataStream: dataStream as DataStreamWithFailureStore,
+    });
+    if (!isEnabledFailureStore(effectiveFailureStore)) {
+      throw new FailureStoreNotEnabledError(
+        `Failure store is not enabled for stream ${params.path.name}`
+      );
+    }
+
+    return getFailureStoreSamples({
+      params,
+      esClient: scopedClusterClient.asCurrentUser,
+      streamsClient,
+      fieldsMetadataClient,
+    });
   },
 });
 
 export const internalProcessingRoutes = {
   ...simulateProcessorRoute,
-  ...processingSuggestionRoute,
+  ...processingGrokSuggestionRoute,
+  ...processingDissectSuggestionRoute,
+  ...processingDateSuggestionsRoute,
+  ...failureStoreSamplesRoute,
 };

@@ -7,36 +7,41 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { BarSeriesProps } from '@elastic/charts';
 import {
   AreaSeries,
   BarSeries,
-  BarSeriesProps,
   CurveType,
   LabelOverflowConstraint,
   LineSeries,
 } from '@elastic/charts';
-import React, { FC } from 'react';
-import { PaletteRegistry } from '@kbn/coloring';
-import { FormatFactory } from '@kbn/field-formats-plugin/common';
-import { getAccessorByDimension } from '@kbn/visualizations-plugin/common/utils';
-import { PersistedState } from '@kbn/visualizations-plugin/public';
-import { KbnPalettes } from '@kbn/palettes';
-import {
+import type { FC } from 'react';
+import React from 'react';
+import type { PaletteRegistry } from '@kbn/coloring';
+import type { FormatFactory } from '@kbn/field-formats-plugin/common';
+import { getAccessorByDimension } from '@kbn/chart-expressions-common';
+import type { PersistedState } from '@kbn/visualizations-common';
+import type { KbnPalettes } from '@kbn/palettes';
+import type {
   CommonXYDataLayerConfig,
   EndValue,
   FittingFunction,
   ValueLabelMode,
   XScaleType,
+  PointVisibility,
+  AreaFillOption,
 } from '../../common';
 import { SeriesTypes, ValueLabelModes, AxisModes } from '../../common/constants';
-import {
-  getColorAssignments,
-  getFitOptions,
+import type {
   GroupsConfiguration,
-  getSeriesProps,
   DatatablesWithFormatInfo,
   LayersAccessorsTitles,
   LayersFieldFormats,
+} from '../helpers';
+import {
+  getColorAssignments,
+  getFitOptions,
+  getSeriesProps,
   hasMultipleLayersWithSplits,
 } from '../helpers';
 
@@ -56,6 +61,7 @@ interface Props {
   timeZone: string;
   emphasizeFitting?: boolean;
   fillOpacity?: number;
+  areaFill?: AreaFillOption;
   minBarHeight: number;
   shouldShowValueLabels?: boolean;
   valueLabels: ValueLabelMode;
@@ -64,6 +70,7 @@ interface Props {
   uiState?: PersistedState;
   singleTable?: boolean;
   isDarkMode: boolean;
+  pointVisibility?: PointVisibility;
 }
 
 export const DataLayers: FC<Props> = ({
@@ -74,6 +81,7 @@ export const DataLayers: FC<Props> = ({
   syncColors,
   valueLabels,
   fillOpacity,
+  areaFill,
   minBarHeight,
   formatFactory,
   paletteService,
@@ -90,6 +98,7 @@ export const DataLayers: FC<Props> = ({
   uiState,
   singleTable,
   isDarkMode,
+  pointVisibility,
 }) => {
   // for singleTable mode we should use y accessors from all layers for creating correct series name and getting color
   const allYAccessors = layers.flatMap((layer) => layer.accessors);
@@ -144,9 +153,6 @@ export const DataLayers: FC<Props> = ({
             ? JSON.parse(columnToLabel)
             : {};
 
-          // what if row values are not primitive? That is the case of, for instance, Ranges
-          // remaps them to their serialized version with the formatHint metadata
-          // In order to do it we need to make a copy of the table as the raw one is required for more features (filters, etc...) later on
           const formattedDatatableInfo = formattedDatatables[layerId];
 
           const yAxis = yAxesConfiguration.find((axisConfiguration) =>
@@ -174,6 +180,7 @@ export const DataLayers: FC<Props> = ({
             timeZone,
             emphasizeFitting,
             fillOpacity,
+            areaFill,
             defaultXScaleType,
             fieldFormats,
             uiState,
@@ -181,6 +188,7 @@ export const DataLayers: FC<Props> = ({
             singleTable,
             multipleLayersWithSplits,
             isDarkMode,
+            pointVisibility,
           });
 
           const index = `${layer.layerId}-${accessorIndex}`;
@@ -203,7 +211,7 @@ export const DataLayers: FC<Props> = ({
                   // This format double fixes two issues in elastic-chart
                   // * when rotating the chart, the formatter is not correctly picked
                   // * in some scenarios value labels are not strings, and this breaks the elastic-chart lib
-                  valueFormatter: (d: unknown) => yAxis?.formatter?.convert(d) || '',
+                  valueFormatter: (d: unknown) => yAxis?.formatter?.convertToText(d) || '',
                   showValueLabel: shouldShowValueLabels && valueLabels !== ValueLabelModes.HIDE,
                   isAlternatingValueLabel: false,
                   overflowConstraints: [

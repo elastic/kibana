@@ -7,22 +7,28 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
+import type { EuiButtonIconProps, EuiPopoverProps } from '@elastic/eui';
 import {
   EuiButtonIcon,
-  EuiButtonIconProps,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPopoverProps,
   EuiToolTip,
   EuiTitle,
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FieldDescription } from '@kbn/field-utils';
+import {
+  EBT_CLICK_ACTIONS,
+  getEbtProps,
+  NON_ECS_FIELD_EBT_DETAIL,
+  useEcsFieldNames,
+} from '@kbn/ebt-click';
+import { FieldDescription, FieldIcon, getFieldIconProps } from '@kbn/field-utils';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
-import type { AddFieldFilterHandler } from '../../types';
+import type { AddFieldFilterHandler, GetCustomFieldType } from '../../types';
+import { EBT_FIELD_POPOVER_BREAKDOWN_ELEMENT } from './ebt_constants';
 
 export interface FieldPopoverHeaderProps {
   field: DataViewField;
@@ -31,6 +37,7 @@ export interface FieldPopoverHeaderProps {
   buttonAddFilterProps?: Partial<EuiButtonIconProps>;
   buttonEditFieldProps?: Partial<EuiButtonIconProps>;
   buttonDeleteFieldProps?: Partial<EuiButtonIconProps>;
+  getCustomFieldType?: GetCustomFieldType<DataViewField>;
   onAddBreakdownField?: (field: DataViewField | undefined) => void;
   onAddFieldToWorkspace?: (field: DataViewField) => unknown;
   onAddFilter?: AddFieldFilterHandler;
@@ -39,6 +46,7 @@ export interface FieldPopoverHeaderProps {
   services?: {
     fieldsMetadata?: FieldsMetadataPublicStart;
   };
+  streamNames?: string[];
 }
 
 export const FieldPopoverHeader: React.FC<FieldPopoverHeaderProps> = ({
@@ -48,13 +56,25 @@ export const FieldPopoverHeader: React.FC<FieldPopoverHeaderProps> = ({
   buttonAddFilterProps,
   buttonEditFieldProps,
   buttonDeleteFieldProps,
+  getCustomFieldType,
   onAddBreakdownField,
   onAddFieldToWorkspace,
   onAddFilter,
   onEditField,
   onDeleteField,
   services,
+  streamNames,
 }) => {
+  const { fieldsMetadata } = services ?? {};
+  const fieldNames = useMemo(() => (field ? [field.name] : []), [field]);
+  const ecsFieldNames = useEcsFieldNames(fieldNames, fieldsMetadata);
+  const ecsDetail =
+    ecsFieldNames !== null && field
+      ? ecsFieldNames.has(field.name)
+        ? field.name
+        : NON_ECS_FIELD_EBT_DETAIL
+      : null;
+
   if (!field) {
     return null;
   }
@@ -91,9 +111,16 @@ export const FieldPopoverHeader: React.FC<FieldPopoverHeaderProps> = ({
     }
   );
 
+  const iconProps = getCustomFieldType
+    ? { type: getCustomFieldType(field) }
+    : getFieldIconProps(field);
+
   return (
     <>
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <FieldIcon {...iconProps} data-test-subj={`fieldPopoverHeader_icon-${field.name}`} />
+        </EuiFlexItem>
         <EuiFlexItem grow={true}>
           <EuiTitle size="xxs" data-test-subj="fieldPopoverHeader_fieldDisplayName">
             <h5 className="eui-textBreakWord">{field.displayName}</h5>
@@ -108,7 +135,7 @@ export const FieldPopoverHeader: React.FC<FieldPopoverHeaderProps> = ({
                 data-test-subj={`fieldPopoverHeader_addField-${field.name}`}
                 aria-label={addFieldToWorkspaceTooltip}
                 {...(buttonAddFieldToWorkspaceProps || {})}
-                iconType="plusInCircle"
+                iconType="plusCircle"
                 onClick={() => {
                   closePopover();
                   onAddFieldToWorkspace(field);
@@ -119,15 +146,20 @@ export const FieldPopoverHeader: React.FC<FieldPopoverHeaderProps> = ({
         )}
         {onAddBreakdownField && (
           <EuiFlexItem grow={false} data-test-subj="fieldPopoverHeader_addBreakdownField">
-            <EuiToolTip content={addBreakdownFieldTooltip}>
+            <EuiToolTip content={addBreakdownFieldTooltip} disableScreenReaderOutput>
               <EuiButtonIcon
                 data-test-subj={`fieldPopoverHeader_addBreakdownField-${field.name}`}
                 aria-label={addBreakdownFieldTooltip}
-                iconType="visBarVerticalStacked"
+                iconType="chartBarVerticalStack"
                 onClick={() => {
                   closePopover();
                   onAddBreakdownField(field);
                 }}
+                {...getEbtProps({
+                  action: EBT_CLICK_ACTIONS.SET_BREAKDOWN,
+                  element: EBT_FIELD_POPOVER_BREAKDOWN_ELEMENT,
+                  detail: ecsDetail ?? undefined,
+                })}
               />
             </EuiToolTip>
           </EuiFlexItem>
@@ -187,6 +219,7 @@ export const FieldPopoverHeader: React.FC<FieldPopoverHeaderProps> = ({
         field={field}
         Wrapper={FieldDescriptionWrapper}
         fieldsMetadataService={services?.fieldsMetadata}
+        streamNames={streamNames}
       />
     </>
   );
@@ -195,7 +228,7 @@ export const FieldPopoverHeader: React.FC<FieldPopoverHeaderProps> = ({
 const FieldDescriptionWrapper: React.FC<React.PropsWithChildren<{}>> = ({ children }) => {
   return (
     <>
-      <EuiSpacer size="xs" />
+      <EuiSpacer size="s" />
       {children}
     </>
   );

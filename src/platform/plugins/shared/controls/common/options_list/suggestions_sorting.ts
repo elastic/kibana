@@ -7,21 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Direction } from '@elastic/eui';
+import type { OptionsListSortingType } from '@kbn/controls-schemas';
+import { ControlValuesSource } from '@kbn/controls-constants';
 
-export type OptionsListSortBy = '_count' | '_key';
+export const getCompatibleSortingTypes = (
+  type?: string,
+  valuesSource?: ControlValuesSource
+): OptionsListSortingType['by'][] => {
+  // TODO Remove when we're able to get accurate document counts for ES|QL-source controls
+  if (valuesSource === ControlValuesSource.ESQL) {
+    return ['_key'];
+  }
 
-export const OPTIONS_LIST_DEFAULT_SORT: OptionsListSortingType = {
-  by: '_count',
-  direction: 'desc',
-};
-
-export interface OptionsListSortingType {
-  by: OptionsListSortBy;
-  direction: Direction;
-}
-
-export const getCompatibleSortingTypes = (type?: string): OptionsListSortBy[] => {
   switch (type) {
     case 'ip': {
       return ['_count'];

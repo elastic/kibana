@@ -7,4 +7,4 @@
 
 export { test } from './single_thread_fixtures';
 export { spaceTest } from './parallel_run_fixtures';
-export * from './types';
+export type * from './types';

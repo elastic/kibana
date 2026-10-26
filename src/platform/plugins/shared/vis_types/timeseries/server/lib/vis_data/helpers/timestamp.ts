@@ -8,7 +8,7 @@
  */
 
 import { last } from 'lodash';
-import { PanelSeries } from '../../../../common/types/vis_data';
+import type { PanelSeries } from '../../../../common/types/vis_data';
 
 /**
  * @param {Array} seriesGroup

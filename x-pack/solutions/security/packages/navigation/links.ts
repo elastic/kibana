@@ -12,7 +12,8 @@ export {
   withLink,
   LinkButton,
   LinkAnchor,
-  isSecurityId,
   securityLink,
+  alertZeroLink,
 } from './src/links';
+export { SecurityLinkGroup } from './src/link_groups';
 export type { GetLinkUrl, GetLinkProps, LinkProps } from './src/links';

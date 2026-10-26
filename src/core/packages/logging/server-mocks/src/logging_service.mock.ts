@@ -14,30 +14,31 @@ import type {
   InternalLoggingServiceSetup,
   InternalLoggingServicePreboot,
 } from '@kbn/core-logging-server-internal';
+import { lazyObject } from '@kbn/lazy-object';
 
-const createInternalPrebootMock = (): jest.Mocked<InternalLoggingServicePreboot> => ({
-  configure: jest.fn(),
-});
+const createInternalPrebootMock = (): jest.Mocked<InternalLoggingServicePreboot> =>
+  lazyObject({
+    configure: jest.fn(),
+  });
 
-const createInternalSetupMock = (): jest.Mocked<InternalLoggingServiceSetup> => ({
-  configure: jest.fn(),
-});
+const createInternalSetupMock = (): jest.Mocked<InternalLoggingServiceSetup> =>
+  lazyObject({
+    configure: jest.fn(),
+  });
 
-const createSetupMock = (): jest.Mocked<LoggingServiceSetup> => ({
-  configure: jest.fn(),
-});
+const createSetupMock = (): jest.Mocked<LoggingServiceSetup> =>
+  lazyObject({
+    configure: jest.fn(),
+  });
 
 type LoggingServiceContract = PublicMethodsOf<LoggingService>;
 const createMock = (): jest.Mocked<LoggingServiceContract> => {
-  const service: jest.Mocked<LoggingServiceContract> = {
-    preboot: jest.fn(),
-    setup: jest.fn(),
+  const service: jest.Mocked<LoggingServiceContract> = lazyObject({
+    preboot: jest.fn().mockReturnValue(createInternalPrebootMock()),
+    setup: jest.fn().mockReturnValue(createInternalSetupMock()),
     start: jest.fn(),
     stop: jest.fn(),
-  };
-
-  service.preboot.mockReturnValue(createInternalPrebootMock());
-  service.setup.mockReturnValue(createInternalSetupMock());
+  });
 
   return service;
 };

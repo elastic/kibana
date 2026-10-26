@@ -9,10 +9,17 @@
 
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { cellHasFormulas, createEscapeValue } from '@kbn/data-plugin/common';
-import { getDataViewFieldOrCreateFromColumnMeta } from '@kbn/data-view-utils';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import type { DataTableRecord, DataTableColumnsMeta } from '@kbn/discover-utils/types';
-import { formatFieldValue } from '@kbn/discover-utils';
+import type { DataTableRecord, ShouldShowFieldInTableHandler } from '@kbn/discover-utils/types';
+import {
+  convertSourceToString,
+  convertValueToString as commonConvertValueToString,
+} from '@kbn/discover-utils';
+import type { DataSource } from '@kbn/data-source';
+import { getDataViewFieldFromDataSource } from '@kbn/discover-utils';
+import type { DocumentsDisplayMode } from '../types';
+import { SOURCE_COLUMN } from './columns';
+import { sourceDocumentToJsonString } from './build_document_tree';
 
 interface ConvertedResult {
   formattedString: string;
@@ -27,72 +34,62 @@ export const convertValueToString = ({
   columnId,
   dataView,
   fieldFormats,
-  columnsMeta,
+  dataSource,
   options,
+  documentsDisplayMode,
+  shouldShowFieldHandler,
+  selectedColumns,
 }: {
   rowIndex: number;
   rows: DataTableRecord[];
   columnId: string;
   dataView: DataView;
   fieldFormats: FieldFormatsStart;
-  columnsMeta: DataTableColumnsMeta | undefined;
+  dataSource: DataSource | undefined;
   options?: {
     compatibleWithCSV?: boolean; // values as one-liner + escaping formulas + adding wrapping quotes
+    compatibleWithMarkdown?: boolean; // values as one-liner
   };
+  documentsDisplayMode?: DocumentsDisplayMode;
+  shouldShowFieldHandler?: ShouldShowFieldInTableHandler;
+  selectedColumns?: string[];
 }): ConvertedResult => {
-  if (!rows[rowIndex]) {
+  const row = rows[rowIndex];
+  if (!row) {
     return {
       formattedString: '',
       withFormula: false,
     };
   }
-  const rowFlattened = rows[rowIndex].flattened;
-  const value = rowFlattened?.[columnId];
-  const field = getDataViewFieldOrCreateFromColumnMeta({
-    fieldName: columnId,
-    dataView,
-    columnMeta: columnsMeta?.[columnId],
-  });
-  const valuesArray = Array.isArray(value) ? value : [value];
-  const disableMultiline = options?.compatibleWithCSV ?? false;
-  const enableEscapingForValue = options?.compatibleWithCSV ?? false;
 
-  if (field?.type === '_source') {
+  if (documentsDisplayMode === 'json' && columnId === SOURCE_COLUMN && shouldShowFieldHandler) {
+    const multiline = !(options?.compatibleWithCSV || options?.compatibleWithMarkdown);
     return {
-      formattedString: stringify(rowFlattened, disableMultiline),
+      formattedString: sourceDocumentToJsonString(
+        { row, dataView, shouldShowFieldHandler, selectedColumns },
+        { multiline }
+      ),
       withFormula: false,
     };
   }
 
-  let withFormula = false;
+  const value = row.flattened?.[columnId];
+  const field = getDataViewFieldFromDataSource({ dataView, dataSource, fieldName: columnId });
 
-  const formatted = valuesArray
-    .map((subValue) => {
-      const formattedValue = formatFieldValue(
-        subValue,
-        rows[rowIndex].raw,
-        fieldFormats,
-        dataView,
-        field,
-        'text',
-        {
-          skipFormattingInStringifiedJSON: disableMultiline,
-        }
-      );
+  // The summary column represents the whole document, also when the data view, e.g. a temporary
+  // or ES|QL one, has no _source field.
+  if (columnId === SOURCE_COLUMN && !field) {
+    return convertSourceToString({ dataTableRecord: row, options });
+  }
 
-      if (typeof formattedValue === 'string') {
-        withFormula = withFormula || cellHasFormulas(formattedValue);
-        return enableEscapingForValue ? escapeFormattedValue(formattedValue) : formattedValue;
-      }
-
-      return stringify(formattedValue, disableMultiline) || '';
-    })
-    .join(`${separator} `);
-
-  return {
-    formattedString: formatted,
-    withFormula,
-  };
+  return commonConvertValueToString({
+    dataView,
+    dataViewField: field,
+    flattenedValue: value,
+    dataTableRecord: row,
+    fieldFormats,
+    options,
+  });
 };
 
 export const convertNameToString = (name: string): ConvertedResult => {
@@ -100,11 +97,6 @@ export const convertNameToString = (name: string): ConvertedResult => {
     formattedString: escapeFormattedValue(name),
     withFormula: cellHasFormulas(name),
   };
-};
-
-const stringify = (val: object | string, disableMultiline: boolean) => {
-  // it can wrap "strings" with quotes
-  return disableMultiline ? JSON.stringify(val) : JSON.stringify(val, null, 2);
 };
 
 const escapeValueFn = createEscapeValue({

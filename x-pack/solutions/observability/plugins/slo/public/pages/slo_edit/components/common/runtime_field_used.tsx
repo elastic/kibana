@@ -8,11 +8,12 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 
-import { FieldPath } from 'react-hook-form';
-import { EuiCallOut, EuiSpacer } from '@elastic/eui';
-import { DataView } from '@kbn/data-views-plugin/common';
+import type { FieldPath } from 'react-hook-form';
+import { EuiSpacer } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { useRunTimeFieldBeingUsed } from '../../hooks/use_find_runtime_usage';
-import { CreateSLOForm } from '../../types';
+import type { CreateSLOForm } from '../../types';
 
 export function RunTimeFieldUsed({
   dataView,
@@ -30,14 +31,11 @@ export function RunTimeFieldUsed({
   return (
     <>
       <EuiSpacer size="s" />
-      <EuiCallOut
+      <KbnWarningCallout
         title={i18n.translate('xpack.slo.runTimeFieldUsed.euiCallOut.runtimeFieldsBeingUsedLabel', {
           defaultMessage: 'Runtime fields being used',
         })}
-        color="warning"
-        iconType="warning"
-      >
-        <p>
+        text={
           <FormattedMessage
             id="xpack.slo.runTimeFieldUsed.p.theRuntimeFieldLabel"
             defaultMessage="The runtime field(s) {fields} from kibana dataview are being used in the query. If you update the runtime field, the query will not be updated automatically. You must save the slo definition again to update the underlying transform query."
@@ -45,8 +43,8 @@ export function RunTimeFieldUsed({
               fields: <strong>{fieldNames.join(', ')}</strong>,
             }}
           />
-        </p>
-      </EuiCallOut>
+        }
+      />
     </>
   );
 }

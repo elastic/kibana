@@ -8,7 +8,7 @@
  */
 
 import React, { useEffect, useRef, useState } from 'react';
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 import type { OverlayBanner } from './banners_service';
 
 interface Props {
@@ -51,7 +51,8 @@ const BannerItem: React.FunctionComponent<{ banner: OverlayBanner }> = ({ banner
     <div
       data-test-priority={banner.priority}
       css={({ euiTheme }) => ({
-        '& + &': { marginTop: euiTheme.size.s },
+        margin: euiTheme.size.s,
+        '& + &': { marginTop: 0 },
       })}
       ref={element}
       data-test-subj="global-banner-item"

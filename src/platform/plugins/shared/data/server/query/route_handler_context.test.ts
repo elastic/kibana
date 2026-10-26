@@ -8,14 +8,13 @@
  */
 
 import { coreMock } from '@kbn/core/server/mocks';
-import { FilterStateStore, Query } from '@kbn/es-query';
+import type { Query } from '@kbn/es-query';
+import { FilterStateStore } from '@kbn/es-query';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '../../common';
 import type { SavedObject, SavedQueryAttributes } from '../../common';
-import {
-  InternalSavedQueryAttributes,
-  registerSavedQueryRouteHandlerContext,
-} from './route_handler_context';
-import { SavedObjectsFindResponse, SavedObjectsUpdateResponse } from '@kbn/core/server';
+import type { InternalSavedQueryAttributes } from './route_handler_context';
+import { registerSavedQueryRouteHandlerContext } from './route_handler_context';
+import type { SavedObjectsFindResponse } from '@kbn/core/server';
 
 const mockContext = {
   core: coreMock.createRequestHandlerContext(),
@@ -192,19 +191,14 @@ describe('saved query route handler context', () => {
       expect(timefilter).toEqual(savedQueryAttributesWithFilters.timefilter);
     });
 
-    it('should throw an error when saved objects client returns error', async () => {
+    it('should throw an error when saved objects client throws', async () => {
       mockSavedObjectsClient.find.mockResolvedValue({
         total: 0,
         page: 0,
         per_page: 0,
         saved_objects: [],
       });
-      mockSavedObjectsClient.create.mockResolvedValue({
-        error: {
-          error: '123',
-          message: 'An Error',
-        },
-      } as SavedObject);
+      mockSavedObjectsClient.create.mockRejectedValue(new Error('An Error'));
 
       const response = context.create(savedQueryAttributes);
 
@@ -220,50 +214,85 @@ describe('saved query route handler context', () => {
   });
 
   describe('update', function () {
-    it('should update a saved object for the given attributes', async () => {
-      const mockResponse: SavedObject<InternalSavedQueryAttributes> = {
-        id: 'foo',
-        type: 'query',
-        attributes: internalSavedQueryAttributes,
-        references: [],
-      };
+    beforeEach(() => {
       mockSavedObjectsClient.find.mockResolvedValue({
         total: 0,
         page: 0,
         per_page: 0,
         saved_objects: [],
-      });
-      mockSavedObjectsClient.update.mockResolvedValue(mockResponse);
-
-      const response = await context.update('foo', savedQueryAttributes);
-
-      expect(mockSavedObjectsClient.update).toHaveBeenCalledWith(
-        'query',
-        'foo',
-        { ...internalSavedQueryAttributes, timefilter: null },
-        {
-          references: [],
-        }
-      );
-      expect(response).toEqual({
-        id: 'foo',
-        attributes: savedQueryAttributes,
       });
     });
 
-    it('should throw an error when saved objects client returns error', async () => {
+    describe('when the saved query does not have namespaces', () => {
+      it('should update a saved object for the given attributes', async () => {
+        // Given
+        const mockResponse: SavedObject<InternalSavedQueryAttributes> = {
+          id: 'foo',
+          type: 'query',
+          attributes: internalSavedQueryAttributes,
+          references: [],
+        };
+        mockSavedObjectsClient.update.mockResolvedValue(mockResponse);
+
+        // When
+        const response = await context.update('foo', savedQueryAttributes);
+
+        // Then
+        expect(mockSavedObjectsClient.update).toHaveBeenCalledWith(
+          'query',
+          'foo',
+          { ...internalSavedQueryAttributes, timefilter: null },
+          {
+            references: [],
+          }
+        );
+        expect(response).toEqual({
+          id: 'foo',
+          attributes: savedQueryAttributes,
+        });
+      });
+    });
+
+    describe('when the saved query has namespaces', () => {
+      it('should update a saved object for the given attributes', async () => {
+        // Given
+        const mockResponse: SavedObject<InternalSavedQueryAttributes> = {
+          id: 'foo',
+          type: 'query',
+          attributes: internalSavedQueryAttributes,
+          references: [],
+          namespaces: ['default'],
+        };
+        mockSavedObjectsClient.update.mockResolvedValue(mockResponse);
+
+        // When
+        const response = await context.update('foo', savedQueryAttributes);
+
+        // Then
+        expect(mockSavedObjectsClient.update).toHaveBeenCalledWith(
+          'query',
+          'foo',
+          { ...internalSavedQueryAttributes, timefilter: null },
+          {
+            references: [],
+          }
+        );
+        expect(response).toEqual({
+          id: 'foo',
+          attributes: savedQueryAttributes,
+          namespaces: ['default'],
+        });
+      });
+    });
+
+    it('should throw an error when saved objects client throws', async () => {
       mockSavedObjectsClient.find.mockResolvedValue({
         total: 0,
         page: 0,
         per_page: 0,
         saved_objects: [],
       });
-      mockSavedObjectsClient.update.mockResolvedValue({
-        error: {
-          error: '123',
-          message: 'An Error',
-        },
-      } as SavedObjectsUpdateResponse);
+      mockSavedObjectsClient.update.mockRejectedValue(new Error('An Error'));
 
       const response = context.update('foo', savedQueryAttributes);
 

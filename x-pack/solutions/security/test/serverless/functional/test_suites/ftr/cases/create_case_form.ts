@@ -1,0 +1,123 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import expect from '@kbn/expect';
+import { v4 as uuidv4 } from 'uuid';
+import { CaseSeverity, CustomFieldTypes } from '@kbn/cases-plugin/common/types/domain';
+import { SECURITY_SOLUTION_OWNER } from '@kbn/cases-plugin/common';
+import { navigateToCasesApp } from '@kbn/test-suites-xpack-platform/serverless/shared/lib/cases';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
+
+const owner = SECURITY_SOLUTION_OWNER;
+
+export default ({ getService, getPageObject }: FtrProviderContext) => {
+  describe('Create Case', function () {
+    const cases = getService('cases');
+    const svlCases = getService('svlCases');
+    const testSubjects = getService('testSubjects');
+    const svlCommonPage = getPageObject('svlCommonPage');
+    const header = getPageObject('header');
+
+    before(async () => {
+      await svlCommonPage.loginWithPrivilegedRole();
+    });
+
+    beforeEach(async () => {
+      await navigateToCasesApp(getPageObject, getService, owner);
+      await header.waitUntilLoadingHasFinished();
+    });
+
+    after(async () => {
+      await svlCases.api.deleteAllCaseItems();
+    });
+
+    it('creates a case', async () => {
+      const caseTitle = 'test-' + uuidv4();
+      await cases.create.openCreateCasePage();
+      await cases.create.createCase({
+        title: caseTitle,
+        description: 'test description',
+        tag: 'tagme',
+        severity: CaseSeverity.HIGH,
+        category: 'new',
+      });
+
+      await cases.common.waitForCaseViewToLoad();
+
+      const title = await testSubjects.find('appHeaderTitle');
+      expect(await title.getVisibleText()).to.contain(caseTitle);
+
+      const description = await testSubjects.find('description');
+      expect(await description.getVisibleText()).to.contain('test description');
+
+      await testSubjects.existOrFail('case-tags');
+      await testSubjects.existOrFail('cases-categories');
+      await testSubjects.existOrFail('case-view-sidebar-attributes');
+    });
+
+    describe('customFields', () => {
+      it('creates a case with custom fields', async function () {
+        // Templates v2 hides the legacy inline custom fields on Create behind a switch;
+        // reveal it so this legacy flow is exercised whether or not templates is on.
+        await cases.common.showLegacyCustomFields(owner);
+
+        const customFields = [
+          {
+            key: 'valid_key_1',
+            label: 'Summary',
+            type: CustomFieldTypes.TEXT as const,
+            required: false,
+          },
+          {
+            key: 'valid_key_2',
+            label: 'Sync',
+            type: CustomFieldTypes.TOGGLE as const,
+            required: false,
+          },
+        ];
+
+        await cases.api.createConfigWithCustomFields({ customFields, owner });
+
+        const caseTitle = 'test-' + uuidv4();
+        await cases.create.openCreateCasePage();
+
+        // verify custom fields on create case page
+        await testSubjects.existOrFail('caseCustomFields');
+
+        await cases.create.setTitle(caseTitle);
+        await cases.create.setDescription('this is a test description');
+
+        // set custom field values
+        const textCustomField = await testSubjects.find(
+          `${customFields[0].key}-text-create-custom-field`
+        );
+        await textCustomField.type('This is a sample text!');
+
+        const toggleCustomField = await testSubjects.find(
+          `${customFields[1].key}-toggle-create-custom-field`
+        );
+        await toggleCustomField.click();
+
+        // Pre-open the accordion so it is ready when the case view loads after submission.
+        await cases.common.openLegacyCustomFieldsAccordion(owner);
+        await cases.create.submitCase();
+
+        await header.waitUntilLoadingHasFinished();
+
+        await testSubjects.existOrFail('appHeaderTitle');
+
+        // validate custom fields (accordion is in view mode; use the view-mode selectors)
+        const summary = await testSubjects.find(`text-custom-field-view-${customFields[0].key}`);
+
+        expect(await summary.getVisibleText()).equal('This is a sample text!');
+
+        const sync = await testSubjects.find(`toggle-custom-field-view-${customFields[1].key}`);
+        expect(await sync.getAttribute('aria-label')).equal('On');
+      });
+    });
+  });
+};

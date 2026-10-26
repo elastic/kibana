@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 
 import type {
   GetActionStatusRequest,
@@ -19,6 +19,22 @@ import type {
   PostRequestDiagnosticsResponse,
   DeleteAgentUploadResponse,
   UpdateAgentRequest,
+  MigrateSingleAgentRequest,
+  MigrateSingleAgentResponse,
+  BulkMigrateAgentsRequest,
+  BulkMigrateAgentsResponse,
+  ChangeAgentPrivilegeLevelRequest,
+  ChangeAgentPrivilegeLevelResponse,
+  BulkChangeAgentPrivilegeLevelRequest,
+  BulkChangeAgentPrivilegeLevelResponse,
+  PostAgentRollbackResponse,
+  PostBulkAgentRollbackRequest,
+  PostBulkAgentRollbackResponse,
+  PostAgentRestartResponse,
+  PostBulkAgentRestartRequest,
+  PostBulkAgentRestartResponse,
+  PostGenerateAgentsReportRequest,
+  PostGenerateAgentsReportResponse,
 } from '../../../common/types';
 
 import { API_VERSIONS } from '../../../common/constants';
@@ -31,6 +47,9 @@ import type {
   PostBulkAgentUnenrollRequest,
   PostBulkAgentUnenrollResponse,
   PostAgentUnenrollResponse,
+  PostBulkRemoveCollectorsRequest,
+  PostBulkRemoveCollectorsResponse,
+  PostRemoveCollectorResponse,
   PostAgentReassignRequest,
   PostAgentReassignResponse,
   PostBulkAgentReassignRequest,
@@ -83,15 +102,44 @@ export function useGetAgents(query: GetAgentsRequest['query'], options?: Request
 }
 export function useGetAgentsQuery(
   query: GetAgentsRequest['query'],
-  options: Partial<{ enabled: boolean }> = {}
+  options: Partial<{
+    enabled: boolean;
+    refetchInterval: number | false;
+    keepPreviousData: boolean;
+  }> = {}
 ) {
   return useQuery(['agents', query], () => sendGetAgents(query), {
     enabled: options.enabled,
+    refetchInterval: options.refetchInterval,
+    refetchIntervalInBackground: false,
+    keepPreviousData: options.keepPreviousData,
   });
 }
 
+export function useGetAgentEffectiveConfigQuery(agentId: string) {
+  return useQuery(['agent-effective-config', agentId], () =>
+    sendRequestForRq({
+      path: agentRouteService.getAgentEffectiveConfig(agentId),
+      method: 'get',
+    })
+  );
+}
+
+/**
+ * @deprecated use sendGetAgentsForRq or useGetAgentsQuery instead
+ */
 export function sendGetAgents(query: GetAgentsRequest['query'], options?: RequestOptions) {
   return sendRequest<GetAgentsResponse>({
+    method: 'get',
+    path: agentRouteService.getListPath(),
+    version: API_VERSIONS.public.v1,
+    query,
+    ...options,
+  });
+}
+
+export function sendGetAgentsForRq(query: GetAgentsRequest['query'], options?: RequestOptions) {
+  return sendRequestForRq<GetAgentsResponse>({
     method: 'get',
     path: agentRouteService.getListPath(),
     version: API_VERSIONS.public.v1,
@@ -109,6 +157,25 @@ export function useGetAgentStatus(query: GetAgentStatusRequest['query'], options
     ...options,
   });
 }
+
+export function useGetAgentStatusQuery(
+  query: GetAgentStatusRequest['query'],
+  options: { enabled?: boolean; refetchInterval?: number | false } = {}
+) {
+  const { enabled, refetchInterval } = options;
+  return useQuery(
+    ['agent-status', query],
+    () =>
+      sendRequestForRq<GetAgentStatusResponse>({
+        method: 'get',
+        path: agentRouteService.getStatusPath(),
+        version: API_VERSIONS.public.v1,
+        query,
+      }),
+    { enabled, refetchInterval, refetchIntervalInBackground: false }
+  );
+}
+
 export function sendGetAgentIncomingData(query: GetAgentIncomingDataRequest['query']) {
   return sendRequest<GetAgentIncomingDataResponse>({
     method: 'get',
@@ -131,8 +198,8 @@ export function sendGetAgentStatus(
   });
 }
 
-export function sendGetAgentTags(query: GetAgentsRequest['query'], options?: RequestOptions) {
-  return sendRequest<GetAgentTagsResponse>({
+export function sendGetAgentTagsForRq(query: GetAgentsRequest['query'], options?: RequestOptions) {
+  return sendRequestForRq<GetAgentTagsResponse>({
     method: 'get',
     path: agentRouteService.getListTagsPath(),
     query,
@@ -192,6 +259,23 @@ export function sendPostBulkAgentUnenroll(
     body,
     version: API_VERSIONS.public.v1,
     ...options,
+  });
+}
+
+export function sendPostRemoveCollector(agentId: string) {
+  return sendRequestForRq<PostRemoveCollectorResponse>({
+    path: agentRouteService.getRemoveCollectorPath(agentId),
+    method: 'post',
+    version: API_VERSIONS.public.v1,
+  });
+}
+
+export function sendPostBulkRemoveCollectors(body: PostBulkRemoveCollectorsRequest['body']) {
+  return sendRequestForRq<PostBulkRemoveCollectorsResponse>({
+    path: agentRouteService.getBulkRemoveCollectorsPath(),
+    method: 'post',
+    body,
+    version: API_VERSIONS.public.v1,
   });
 }
 
@@ -377,5 +461,92 @@ export function sendGetAgentStatusRuntimeField() {
 export function useGetAgentStatusRuntimeFieldQuery(options: Partial<{ enabled: boolean }> = {}) {
   return useQuery(['status_runtime_field'], () => sendGetAgentStatusRuntimeField(), {
     enabled: options.enabled,
+  });
+}
+export function sendMigrateSingleAgent(options: MigrateSingleAgentRequest['body']) {
+  return sendRequestForRq<MigrateSingleAgentResponse>({
+    path: agentRouteService.postMigrateSingleAgent(options.id),
+    method: 'post',
+    version: API_VERSIONS.public.v1,
+    body: {
+      enrollment_token: options.enrollment_token,
+      uri: options.uri,
+      settings: options.settings ?? {},
+    },
+  });
+}
+
+export function sendBulkMigrateAgents(options: BulkMigrateAgentsRequest['body']) {
+  return sendRequestForRq<BulkMigrateAgentsResponse>({
+    path: agentRouteService.postBulkMigrateAgents(),
+    method: 'post',
+    version: API_VERSIONS.public.v1,
+    body: {
+      agents: options.agents,
+      uri: options.uri,
+      enrollment_token: options.enrollment_token,
+      settings: options.settings ?? {},
+    },
+  });
+}
+
+export function sendChangeAgentPrivilegeLevel(request: ChangeAgentPrivilegeLevelRequest) {
+  return sendRequestForRq<ChangeAgentPrivilegeLevelResponse>({
+    path: agentRouteService.postChangeAgentPrivilegeLevel(request.agentId),
+    method: 'post',
+    version: API_VERSIONS.public.v1,
+    body: request.body,
+  });
+}
+
+export function sendBulkChangeAgentPrivilegeLevel(request: BulkChangeAgentPrivilegeLevelRequest) {
+  return sendRequestForRq<BulkChangeAgentPrivilegeLevelResponse>({
+    path: agentRouteService.postBulkChangeAgentPrivilegeLevel(),
+    method: 'post',
+    version: API_VERSIONS.public.v1,
+    body: request.body,
+  });
+}
+
+export function sendPostAgentRollback(agentId: string) {
+  return sendRequestForRq<PostAgentRollbackResponse>({
+    path: agentRouteService.postAgentRollback(agentId),
+    method: 'post',
+    version: API_VERSIONS.public.v1,
+  });
+}
+
+export function sendPostBulkAgentRollback(body: PostBulkAgentRollbackRequest['body']) {
+  return sendRequestForRq<PostBulkAgentRollbackResponse>({
+    path: agentRouteService.postBulkAgentRollback(),
+    method: 'post',
+    version: API_VERSIONS.public.v1,
+    body,
+  });
+}
+
+export function sendPostAgentRestart(agentId: string) {
+  return sendRequestForRq<PostAgentRestartResponse>({
+    path: agentRouteService.postAgentRestart(agentId),
+    method: 'post',
+    version: API_VERSIONS.public.v1,
+  });
+}
+
+export function sendPostBulkAgentRestart(body: PostBulkAgentRestartRequest['body']) {
+  return sendRequestForRq<PostBulkAgentRestartResponse>({
+    path: agentRouteService.postBulkAgentRestart(),
+    method: 'post',
+    version: API_VERSIONS.public.v1,
+    body,
+  });
+}
+
+export function sendPostGenerateAgentsReport(body: PostGenerateAgentsReportRequest['body']) {
+  return sendRequestForRq<PostGenerateAgentsReportResponse>({
+    path: agentRouteService.postGenerateAgentsReport(),
+    method: 'post',
+    version: API_VERSIONS.internal.v1,
+    body,
   });
 }

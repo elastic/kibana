@@ -8,12 +8,19 @@
  */
 
 import type { Observable } from 'rxjs';
+import type { SpaceId } from '@kbn/core-spaces-common';
 import type { MaybePromise } from '@kbn/utility-types';
 import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 import type { ApiVersion } from '@kbn/core-http-common';
 
 /** @public */
 export interface HttpSetup {
+  /**
+   * The active space ID for this page. Always populated — defaults to `'default'`.
+   * Static for the page lifetime; space changes trigger a full page navigation.
+   */
+  readonly spaceId: SpaceId;
+
   /**
    * APIs for manipulating the basePath on URL segments.
    * See {@link IBasePath}
@@ -440,6 +447,18 @@ export interface HttpInterceptor {
     httpErrorRequest: HttpInterceptorRequestError,
     controller: IHttpInterceptController
   ): MaybePromise<Partial<HttpFetchOptionsWithPath>> | void;
+
+  /**
+   * Define an interceptor to be executed at the fetch call.
+   * @param next {@link HttpSetup.fetch}
+   * @param fetchOptions {@link HttpFetchOptionsWithPath}
+   * @param controller {@link IHttpInterceptController}
+   */
+  fetch?(
+    next: (fetchOptions: HttpFetchOptionsWithPath) => Promise<HttpResponse>,
+    fetchOptions: Readonly<HttpFetchOptionsWithPath>,
+    controller: IHttpInterceptController
+  ): Promise<HttpResponse>;
 
   /**
    * Define an interceptor to be executed after a response is received.

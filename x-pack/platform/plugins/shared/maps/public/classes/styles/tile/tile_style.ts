@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { IStyle } from '../style';
-import { StyleDescriptor } from '../../../../common/descriptor_types';
+import type { IStyle } from '../style';
+import type { StyleDescriptor } from '../../../../common/descriptor_types';
 import { LAYER_STYLE_TYPE } from '../../../../common/constants';
 
 export class TileStyle implements IStyle {

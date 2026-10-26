@@ -9,7 +9,7 @@
 
 import React from 'react';
 
-import { EuiText } from '@elastic/eui';
+import { EuiText, EuiLiveAnnouncer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useFormStyles } from '../form.styles';
 
@@ -26,22 +26,29 @@ interface UnsavedCountProps {
  */
 export const UnsavedCount = ({ unsavedCount, hiddenCount }: UnsavedCountProps) => {
   const { cssFormUnsavedCountMessage } = useFormStyles();
-  return (
-    <EuiText size="s" css={cssFormUnsavedCountMessage}>
-      <FormattedMessage
-        id="management.settings.form.countOfSettingsChanged"
-        defaultMessage="{unsavedCount} unsaved {unsavedCount, plural,
+  const unsavedCountText = (
+    <FormattedMessage
+      id="management.settings.form.countOfSettingsChanged"
+      defaultMessage="{unsavedCount} unsaved {unsavedCount, plural,
               one {setting}
               other {settings}
             }{hiddenCount, plural,
               =0 {}
               other {, # hidden}
             }"
-        values={{
-          unsavedCount,
-          hiddenCount,
-        }}
-      />
-    </EuiText>
+      values={{
+        unsavedCount,
+        hiddenCount,
+      }}
+    />
+  );
+
+  return (
+    <>
+      <EuiText size="s" css={cssFormUnsavedCountMessage}>
+        {unsavedCountText}
+      </EuiText>
+      <EuiLiveAnnouncer>{unsavedCountText}</EuiLiveAnnouncer>
+    </>
   );
 };

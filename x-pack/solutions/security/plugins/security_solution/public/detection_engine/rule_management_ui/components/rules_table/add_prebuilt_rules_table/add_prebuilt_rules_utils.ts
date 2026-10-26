@@ -8,25 +8,25 @@
 import type { PrebuiltRulesStatusStats } from '../../../../../../common/api/detection_engine';
 
 interface UpgradeReviewEnabledProps {
-  canUserCRUD: boolean | null;
-  isUpgradingSecurityPackages: boolean;
+  canEditRules: boolean | null;
+  isInitializingPrebuiltRulesPackage: boolean;
   prebuiltRulesStatus?: PrebuiltRulesStatusStats;
 }
 
 export const isUpgradeReviewRequestEnabled = ({
-  canUserCRUD,
-  isUpgradingSecurityPackages,
+  canEditRules,
+  isInitializingPrebuiltRulesPackage,
   prebuiltRulesStatus,
 }: UpgradeReviewEnabledProps) => {
   // Wait until security package is updated
-  if (isUpgradingSecurityPackages) {
+  if (isInitializingPrebuiltRulesPackage) {
     return false;
   }
 
   // If user is read-only, allow request to proceed even though the Prebuilt
   // Rules might not be installed. For these users, the Fleet endpoint quickly
-  // fails with 403 so isUpgradingSecurityPackages is false
-  if (canUserCRUD === false) {
+  // fails with 403 so isInitializingPrebuiltRulesPackage is false
+  if (canEditRules === false) {
     return true;
   }
 

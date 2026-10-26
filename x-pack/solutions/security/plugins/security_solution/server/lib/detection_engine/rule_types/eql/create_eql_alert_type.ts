@@ -40,7 +40,10 @@ export const createEqlAlertType = (): SecurityAlertType<EqlRuleParams, {}> => {
       },
     },
     schemas: {
-      params: { type: 'zod', schema: EqlRuleParams },
+      params: {
+        type: 'zod',
+        schema: EqlRuleParams,
+      },
     },
     actionGroups: [
       {

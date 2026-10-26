@@ -22,15 +22,23 @@ const useUserPrivilegesMock = useUserPrivileges as jest.Mock;
 
 describe('When displaying the EndpointPolicyEditExtension fleet UI extension', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;
+  let mockedTestContext: AppContextTestRender;
   const artifactCards = Object.freeze([
     'trustedApps-fleet-integration-card',
     'eventFilters-fleet-integration-card',
+    'endpointExceptions-fleet-integration-card',
     'hostIsolationExceptions-fleet-integration-card',
     'blocklists-fleet-integration-card',
   ]);
 
   beforeEach(() => {
-    const mockedTestContext = createFleetContextRendererMock();
+    mockedTestContext = createFleetContextRendererMock();
+
+    // Enable endpoint exceptions feature
+    mockedTestContext.setExperimentalFlag({
+      endpointExceptionsMovedUnderManagement: true,
+    });
+
     const policy = new FleetPackagePolicyGenerator('seed').generateEndpointPackagePolicy({
       id: 'someid',
     });
@@ -65,6 +73,7 @@ describe('When displaying the EndpointPolicyEditExtension fleet UI extension', (
           canReadEventFilters: false,
           canReadBlocklist: false,
           canReadHostIsolationExceptions: false,
+          canReadEndpointExceptions: false,
         }),
       });
       const renderResult = render();
@@ -76,6 +85,7 @@ describe('When displaying the EndpointPolicyEditExtension fleet UI extension', (
   it.each([
     ['trustedApps', 'trusted_apps'],
     ['eventFilters', 'event_filters'],
+    ['endpointExceptions', 'endpoint_exceptions'],
     ['hostIsolationExceptions', 'host_isolation_exceptions'],
     ['blocklists', 'blocklist'],
   ])(
@@ -94,4 +104,99 @@ describe('When displaying the EndpointPolicyEditExtension fleet UI extension', (
       ).toEqual(`/app/security/administration/${pageUrlName}?includedPolicies=someid%2Cglobal`);
     }
   );
+
+  it('should not display endpoint exceptions card when feature flag is disabled', () => {
+    mockedTestContext.setExperimentalFlag({
+      endpointExceptionsMovedUnderManagement: false,
+    });
+
+    const renderResult = render();
+
+    // Endpoint exceptions card should not be present
+    expect(
+      renderResult.queryByTestId('endpointExceptions-fleet-integration-card')
+    ).not.toBeInTheDocument();
+
+    // Other cards should still be visible
+    expect(renderResult.getByTestId('trustedApps-fleet-integration-card')).toBeInTheDocument();
+    expect(renderResult.getByTestId('eventFilters-fleet-integration-card')).toBeInTheDocument();
+    expect(
+      renderResult.getByTestId('hostIsolationExceptions-fleet-integration-card')
+    ).toBeInTheDocument();
+    expect(renderResult.getByTestId('blocklists-fleet-integration-card')).toBeInTheDocument();
+  });
+
+  it('should display yara signatures card when feature flag is enabled', () => {
+    mockedTestContext.setExperimentalFlag({
+      customYaraSignaturesEnabled: true,
+    });
+
+    const renderResult = render();
+
+    expect(
+      renderResult.getByTestId('customYaraSignatures-fleet-integration-card')
+    ).toBeInTheDocument();
+    expect(
+      renderResult.getByTestId('customYaraSignatures-link-to-exceptions').getAttribute('href')
+    ).toEqual('/app/security/administration/policy/someid/customYaraSignatures');
+
+    // Other cards should still be visible
+    expect(renderResult.getByTestId('trustedApps-fleet-integration-card')).toBeInTheDocument();
+    expect(renderResult.getByTestId('eventFilters-fleet-integration-card')).toBeInTheDocument();
+    expect(
+      renderResult.getByTestId('endpointExceptions-fleet-integration-card')
+    ).toBeInTheDocument();
+    expect(
+      renderResult.getByTestId('hostIsolationExceptions-fleet-integration-card')
+    ).toBeInTheDocument();
+    expect(renderResult.getByTestId('blocklists-fleet-integration-card')).toBeInTheDocument();
+  });
+
+  it('should link yara signatures card to the artifact list when user cannot read policy management', () => {
+    mockedTestContext.setExperimentalFlag({
+      customYaraSignaturesEnabled: true,
+    });
+    useUserPrivilegesMock.mockReturnValue({
+      endpointPrivileges: getEndpointPrivilegesInitialStateMock({
+        canReadPolicyManagement: false,
+      }),
+    });
+
+    const renderResult = render();
+
+    expect(
+      renderResult.getByTestId('customYaraSignatures-link-to-exceptions').getAttribute('href')
+    ).toEqual(
+      '/app/security/administration/custom_yara_signatures?includedPolicies=someid%2Cglobal'
+    );
+  });
+
+  it('should not display yara signatures card when feature flag is disabled', () => {
+    mockedTestContext.setExperimentalFlag({
+      customYaraSignaturesEnabled: false,
+    });
+
+    const renderResult = render();
+
+    expect(
+      renderResult.queryByTestId('customYaraSignatures-fleet-integration-card')
+    ).not.toBeInTheDocument();
+  });
+
+  it('should not display yara signatures card when user lacks privilege', () => {
+    mockedTestContext.setExperimentalFlag({
+      customYaraSignaturesEnabled: true,
+    });
+    useUserPrivilegesMock.mockReturnValue({
+      endpointPrivileges: getEndpointPrivilegesInitialStateMock({
+        canReadCustomYaraSignatures: false,
+      }),
+    });
+
+    const renderResult = render();
+
+    expect(
+      renderResult.queryByTestId('customYaraSignatures-fleet-integration-card')
+    ).not.toBeInTheDocument();
+  });
 });

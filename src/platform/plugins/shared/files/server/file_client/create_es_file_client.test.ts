@@ -12,12 +12,12 @@ import {
   elasticsearchServiceMock,
   loggingSystemMock,
 } from '@kbn/core/server/mocks';
-import { MockedLogger } from '@kbn/logging-mocks';
+import type { MockedLogger } from '@kbn/logging-mocks';
 import { createEsFileClient } from './create_es_file_client';
-import { FileClient } from './types';
+import type { FileClient } from './types';
 import { ElasticsearchBlobStorageClient } from '../blob_storage_service';
 import type { estypes } from '@elastic/elasticsearch';
-import { FileDocument } from './file_metadata_client/adapters/es_index';
+import type { FileDocument } from './file_metadata_client/adapters/es_index';
 
 describe('When initializing file client via createESFileClient()', () => {
   let esClient: ElasticsearchClientMock;
@@ -27,6 +27,37 @@ describe('When initializing file client via createESFileClient()', () => {
     ElasticsearchBlobStorageClient.configureConcurrentTransfers(Infinity);
     esClient = elasticsearchServiceMock.createElasticsearchClient();
     logger = loggingSystemMock.createLogger();
+  });
+
+  it.each([
+    ['image/png', 'png'],
+    ['image/jpeg', 'jpeg'],
+    ['application/pdf', 'pdf'],
+    ['text/plain; charset=utf-8', 'txt'],
+    ['application/x-unknown', undefined],
+    [undefined, undefined],
+  ])('derives the file extension from MIME type %s', async (mime, extension) => {
+    const fileClient = createEsFileClient({
+      logger,
+      metadataIndex: 'file-meta',
+      blobStorageIndex: 'file-data',
+      elasticsearchClient: esClient,
+      indexIsAlias: true,
+    });
+
+    const file = await fileClient.create({
+      id: '123',
+      metadata: { name: 'myfile', mime },
+    });
+
+    expect(esClient.index).toHaveBeenCalledWith(
+      expect.objectContaining({
+        document: expect.objectContaining({
+          file: expect.objectContaining({ extension }),
+        }),
+      })
+    );
+    expect(file.toJSON().extension).toBe(extension);
   });
 
   describe('and `indexIsAlias` argument is used', () => {

@@ -9,7 +9,7 @@
 
 import { xyVisFunction } from '.';
 import { createMockExecutionContext } from '@kbn/expressions-plugin/common/mocks';
-import { sampleArgs, sampleLayer } from '../__mocks__';
+import { sampleArgs, sampleLayer } from '../test_utils';
 import { XY_VIS } from '../constants';
 import { createDefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
 
@@ -33,6 +33,7 @@ describe('xyVis', () => {
       value: {
         args: {
           ...rest,
+          axisFormatPolicies: expect.any(Array),
           layers: [
             {
               layerType,
@@ -127,6 +128,7 @@ describe('xyVis', () => {
         {
           ...rest,
           ...restLayerArgs,
+          xScaleType: 'ordinal',
           addTimeMarker: true,
           referenceLines: [],
         },
@@ -311,8 +313,8 @@ describe('xyVis', () => {
       {
         ...rest,
         ...restLayerArgs,
+        xScaleType: 'ordinal',
         referenceLines: [],
-
         isHistogram: true,
         xAxisConfig: {
           type: 'xAxisConfig',
@@ -333,6 +335,7 @@ describe('xyVis', () => {
       value: {
         args: {
           ...rest,
+          axisFormatPolicies: expect.any(Array),
           xAxisConfig: {
             type: 'xAxisConfig',
             extent: {
@@ -350,6 +353,7 @@ describe('xyVis', () => {
               type,
               ...restLayerArgs,
               isHistogram: true,
+              xScaleType: 'ordinal',
             },
           ],
         },
@@ -391,6 +395,7 @@ describe('xyVis', () => {
       value: {
         args: {
           ...rest,
+          axisFormatPolicies: expect.any(Array),
           layers: [
             {
               layerType,

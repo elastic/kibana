@@ -23,13 +23,35 @@
         "0"
       ]
     },
+    "data_autocomplete_rules": {
+      "data_retention": "",
+      "downsampling": [
+        {
+          "after": "",
+          "fixed_interval": ""
+        }
+      ],
+      "downsampling_method": {
+        "__one_of": [
+          "aggregate",
+          "last_value"
+        ]
+      },
+      "enabled": {
+        "__one_of": [
+          true,
+          false
+        ]
+      }
+    },
     "methods": [
       "PUT"
     ],
     "patterns": [
       "_data_stream/{name}/_lifecycle"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/data-streams-put-lifecycle.html",
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-put-data-lifecycle",
+    "documentation_serverless": "https://www.elastic.co/docs/api/doc/elasticsearch-serverless/operation/operation-indices-put-data-lifecycle",
     "availability": {
       "stack": true,
       "serverless": true

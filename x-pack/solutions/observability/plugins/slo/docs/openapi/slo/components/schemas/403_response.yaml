@@ -1,4 +1,4 @@
-title: Unauthorized
+title: Forbidden
 type: object
 required:
   - statusCode
@@ -10,7 +10,7 @@ properties:
     example: 403
   error:
     type: string
-    example: Unauthorized
+    example: Forbidden
   message:
     type: string
-    example: "[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastics] for REST request [/_security/_authenticate]]: unable to authenticate user [elastics] for REST request [/_security/_authenticate]"
+    example: "[security_exception\n\tRoot causes:\n\t\tsecurity_exception: action [slo_write] is unauthorized for user [limited_user] for REST request [/api/observability/slos]]: action [slo_write] is unauthorized for user [limited_user]"

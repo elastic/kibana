@@ -6,10 +6,8 @@
  */
 
 import type { ToolingLog } from '@kbn/tooling-log';
-import type { AxiosRequestConfig } from 'axios';
-import axios from 'axios';
 import type { KbnClient } from '@kbn/test';
-import { SENTINELONE_CONNECTOR_ID } from '@kbn/stack-connectors-plugin/common/sentinelone/constants';
+import { CONNECTOR_ID as SENTINELONE_CONNECTOR_ID } from '@kbn/connector-schemas/sentinelone/constants';
 import pRetry from 'p-retry';
 import { fetchActiveSpace } from '../common/spaces';
 import { dump } from '../common/utils';
@@ -20,7 +18,7 @@ import type {
   S1AgentPackage,
   S1AgentPackageListApiResponse,
 } from './types';
-import { catchAxiosErrorFormatAndThrow } from '../../../common/endpoint/format_axios_error';
+import { EndpointError } from '../../../common/endpoint/errors';
 import type { HostVm } from '../common/types';
 import { createConnector, fetchConnectorByType } from '../common/connectors_services';
 import { createRule, findRules } from '../common/detection_rules_services';
@@ -72,30 +70,36 @@ export class S1Client {
   protected async request<T = unknown>({
     url = '',
     params = {},
-    ...options
-  }: AxiosRequestConfig): Promise<T> {
-    const apiFullUrl = this.buildUrl(url);
+  }: {
+    url?: string;
+    params?: Record<string, string | number | boolean>;
+  }): Promise<T> {
+    const search = new URLSearchParams({ APIToken: this.options.apiToken });
+    for (const [key, value] of Object.entries(params)) {
+      search.set(key, String(value));
+    }
 
-    const requestOptions: AxiosRequestConfig = {
-      ...options,
-      url: apiFullUrl,
-      params: {
-        APIToken: this.options.apiToken,
-        ...params,
-      },
-    };
+    const apiFullUrl = new URL(this.buildUrl(url));
+    apiFullUrl.search = String(search);
 
-    this.log.debug(`Request: `, requestOptions);
+    const redactedUrl = new URL(apiFullUrl);
+    redactedUrl.searchParams.set('APIToken', '[REDACTED]');
+    this.log.debug(`Request: `, redactedUrl.toString());
 
     return pRetry(
       async () => {
-        return axios
-          .request<T>(requestOptions)
-          .then((response) => {
-            this.log.verbose(`Response: `, response);
-            return response.data;
-          })
-          .catch(catchAxiosErrorFormatAndThrow);
+        const response = await fetch(apiFullUrl);
+        if (!response.ok) {
+          throw new EndpointError(
+            `[GET ${apiFullUrl.pathname}] ${response.status} ${
+              response.statusText
+            }: ${await response.text()}`
+          );
+        }
+
+        const data = (await response.json()) as T;
+        this.log.verbose(`Response: `, data);
+        return data;
       },
       { maxTimeout: 10000 }
     );
@@ -211,10 +215,24 @@ export const installSentinelOneAgent = async ({
     await hostVm.exec(`sudo ${installPath} management token set ${siteToken}`);
     await hostVm.exec(`sudo ${installPath} control start`);
 
-    const status = (await hostVm.exec(`sudo ${installPath} control status`)).stdout;
+    const status = (
+      await pRetry(
+        async () => {
+          return hostVm.exec(`sudo ${installPath} control status`, { silent: true });
+        },
+        {
+          onFailedAttempt: (error) => {
+            log.debug(
+              `Attempt ${error.attemptNumber} to get S1 agent status failed. There are ${error.retriesLeft} retries left.`
+            );
+          },
+        }
+      )
+    ).stdout;
 
     try {
-      // Generate an alert in SentinelOne
+      // Generate an alert in SentinelOne (NOTE: this only works because there is a custom
+      // rule setup in S1 to trigger alert on `nslookup`)
       const command = 'nslookup elastic.co';
 
       log?.info(`Triggering alert using command: ${command}`);

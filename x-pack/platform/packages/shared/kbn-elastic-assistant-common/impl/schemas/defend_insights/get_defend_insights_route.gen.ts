@@ -14,8 +14,8 @@
  *   version: 1
  */
 
-import { z } from '@kbn/zod';
-import { ArrayFromString } from '@kbn/zod-helpers';
+import { z, lazySchema } from '@kbn/zod/v4';
+import { ArrayFromString } from '@kbn/zod-helpers/v4';
 
 import { NonEmptyString } from '../common_attributes.gen';
 import {
@@ -24,36 +24,48 @@ import {
   DefendInsightsResponse,
 } from './common_attributes.gen';
 
+export const DefendInsightsGetRequestQuery = lazySchema(() =>
+  z.object({
+    /**
+     * The insight ids for which to get Defend insights.
+     */
+    ids: ArrayFromString(NonEmptyString)
+      .optional()
+      .describe('The insight ids for which to get Defend insights.'),
+    /**
+     * The connector id for which to get Defend insights.
+     */
+    connector_id: NonEmptyString.optional().describe(
+      'The connector id for which to get Defend insights.'
+    ),
+    /**
+     * The insight type for which to get Defend insights.
+     */
+    type: DefendInsightType.optional().describe(
+      'The insight type for which to get Defend insights.'
+    ),
+    /**
+     * The status for which to get Defend insights.
+     */
+    status: DefendInsightStatus.optional().describe('The status for which to get Defend insights.'),
+    /**
+     * The endpoint ids for which to get Defend insights.
+     */
+    endpoint_ids: ArrayFromString(NonEmptyString)
+      .optional()
+      .describe('The endpoint ids for which to get Defend insights.'),
+    /**
+     * The number of Defend insights to return.
+     */
+    size: z.coerce.number().optional().describe('The number of Defend insights to return.'),
+  })
+);
 export type DefendInsightsGetRequestQuery = z.infer<typeof DefendInsightsGetRequestQuery>;
-export const DefendInsightsGetRequestQuery = z.object({
-  /**
-   * The insight ids for which to get Defend insights
-   */
-  ids: ArrayFromString(NonEmptyString).optional(),
-  /**
-   * The connector id for which to get Defend insights
-   */
-  connector_id: NonEmptyString.optional(),
-  /**
-   * The insight type for which to get Defend insights
-   */
-  type: DefendInsightType.optional(),
-  /**
-   * The status for which to get Defend insights
-   */
-  status: DefendInsightStatus.optional(),
-  /**
-   * The endpoint ids for which to get Defend insights
-   */
-  endpoint_ids: ArrayFromString(NonEmptyString).optional(),
-  /**
-   * The number of Defend insights to return
-   */
-  size: z.coerce.number().optional(),
-});
 export type DefendInsightsGetRequestQueryInput = z.input<typeof DefendInsightsGetRequestQuery>;
 
+export const DefendInsightsGetResponse = lazySchema(() =>
+  z.object({
+    data: z.array(DefendInsightsResponse),
+  })
+);
 export type DefendInsightsGetResponse = z.infer<typeof DefendInsightsGetResponse>;
-export const DefendInsightsGetResponse = z.object({
-  data: z.array(DefendInsightsResponse),
-});

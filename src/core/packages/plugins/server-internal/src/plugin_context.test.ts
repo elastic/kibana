@@ -15,21 +15,27 @@ import type { CoreContext } from '@kbn/core-base-server-internal';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { NodeInfo } from '@kbn/core-node-server';
 import { nodeServiceMock } from '@kbn/core-node-server-mocks';
+import { securityServiceMock } from '@kbn/core-security-server-mocks';
+import type { InstanceInfo } from './plugin_context';
 import {
   createPluginInitializerContext,
   createPluginPrebootSetupContext,
-  InstanceInfo,
+  createPluginSetupContext,
+  createPluginStartContext,
 } from './plugin_context';
 
 import { PluginType } from '@kbn/core-base-common';
-import { PluginManifest } from '@kbn/core-plugins-server';
+import type { PluginManifest } from '@kbn/core-plugins-server';
 import { schema, ByteSizeValue } from '@kbn/config-schema';
 import { ConfigService, Env } from '@kbn/config';
 import { PluginWrapper } from './plugin';
 
 import { coreInternalLifecycleMock } from '@kbn/core-lifecycle-server-mocks';
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
-import { createCoreContextConfigServiceMock } from './test_helpers';
+import {
+  createCoreContextConfigServiceMock,
+  createRuntimePluginContractResolverMock,
+} from './test_helpers';
 
 function createPluginManifest(manifestProps: Partial<PluginManifest> = {}): PluginManifest {
   return {
@@ -67,6 +73,7 @@ describe('createPluginInitializerContext', () => {
     opaqueId = Symbol();
     instanceInfo = {
       uuid: 'instance-uuid',
+      airgapped: false,
     };
     nodeInfo = nodeServiceMock.createInternalPrebootContract();
     env = Env.createDefault(REPO_ROOT, getEnvOptions());
@@ -142,7 +149,6 @@ describe('createPluginInitializerContext', () => {
         elasticsearch: {
           shardTimeout: duration(30, 's'),
           requestTimeout: duration(30, 's'),
-          pingTimeout: duration(30, 's'),
         },
         path: { data: fromRoot('data') },
         savedObjects: { maxImportPayloadBytes: new ByteSizeValue(26214400) },
@@ -155,6 +161,7 @@ describe('createPluginInitializerContext', () => {
       const manifest = createPluginManifest();
       instanceInfo = {
         uuid: 'kibana-uuid',
+        airgapped: false,
       };
       const pluginInitializerContext = createPluginInitializerContext({
         coreContext,
@@ -233,6 +240,7 @@ describe('createPluginPrebootSetupContext', () => {
         manifest,
         instanceInfo: {
           uuid: 'instance-uuid',
+          airgapped: false,
         },
         nodeInfo,
       }),
@@ -250,5 +258,69 @@ describe('createPluginPrebootSetupContext', () => {
       'some-reason',
       holdSetupPromise
     );
+  });
+});
+
+describe('plugin context service accounts', () => {
+  let plugin: PluginWrapper;
+  let runtimeResolver: ReturnType<typeof createRuntimePluginContractResolverMock>;
+
+  beforeEach(() => {
+    const manifest = createPluginManifest();
+    const opaqueId = Symbol();
+    plugin = new PluginWrapper({
+      path: 'some-path',
+      manifest,
+      opaqueId,
+      initializerContext: createPluginInitializerContext({
+        coreContext: mockCoreContext.create(),
+        opaqueId,
+        manifest,
+        instanceInfo: { uuid: 'instance-uuid', airgapped: false },
+        nodeInfo: nodeServiceMock.createInternalPrebootContract(),
+      }),
+    });
+    runtimeResolver = createRuntimePluginContractResolverMock();
+  });
+
+  it('registers workload types with plugin.name during setup', () => {
+    const coreSetup = coreInternalLifecycleMock.createInternalSetup();
+    const setupContext = createPluginSetupContext({ deps: coreSetup, plugin, runtimeResolver });
+    const registration = { type: 'rule', name: 'Alerting rule', description: 'Runs a rule' };
+
+    setupContext.security.serviceAccounts.registerWorkloadType(registration);
+
+    expect(coreSetup.security.serviceAccounts.registerWorkloadType).toHaveBeenCalledTimes(1);
+    expect(coreSetup.security.serviceAccounts.registerWorkloadType).toHaveBeenCalledWith(
+      'some-plugin-id',
+      registration
+    );
+  });
+
+  it('hands back what Core returns when the security delegate registers', () => {
+    const coreSetup = coreInternalLifecycleMock.createInternalSetup();
+    const handle = securityServiceMock.createDelegateHandle();
+    coreSetup.security.registerSecurityDelegate.mockReturnValue(handle);
+    const setupContext = createPluginSetupContext({ deps: coreSetup, plugin, runtimeResolver });
+    const api = Symbol('api') as unknown as Parameters<
+      typeof setupContext.security.registerSecurityDelegate
+    >[0];
+
+    expect(setupContext.security.registerSecurityDelegate(api)).toBe(handle);
+    expect(coreSetup.security.registerSecurityDelegate).toHaveBeenCalledWith(api);
+  });
+
+  it('exposes the service accounts contract scoped to plugin.name at start', () => {
+    const coreStart = coreInternalLifecycleMock.createInternalStart();
+    const scopedServiceAccounts = securityServiceMock.createServiceAccounts();
+    coreStart.security.serviceAccounts.asScopedToPlugin.mockReturnValue(scopedServiceAccounts);
+
+    const startContext = createPluginStartContext({ deps: coreStart, plugin, runtimeResolver });
+
+    expect(coreStart.security.serviceAccounts.asScopedToPlugin).toHaveBeenCalledTimes(1);
+    expect(coreStart.security.serviceAccounts.asScopedToPlugin).toHaveBeenCalledWith(
+      'some-plugin-id'
+    );
+    expect(startContext.security.serviceAccounts).toBe(scopedServiceAccounts);
   });
 });

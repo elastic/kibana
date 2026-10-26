@@ -5,67 +5,81 @@
  * 2.0.
  */
 
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import { termQuery, rangeQuery, wildcardQuery } from '@kbn/observability-plugin/server';
 import {
-  kqlQuery,
-  termQuery,
-  rangeQuery,
-  wildcardQuery,
-  termsQuery,
-} from '@kbn/observability-plugin/server';
-import {
-  ALERT_RULE_PRODUCER,
+  ALERT_RULE_TYPE_ID,
   ALERT_STATUS,
   ALERT_STATUS_ACTIVE,
+  ALERT_TIME_RANGE,
   ALERT_UUID,
+  SLO_BURN_RATE_RULE_TYPE_ID,
 } from '@kbn/rule-data-utils';
-import { APM_ALERTING_CONSUMERS } from '../../../../common/alerting/config/apm_alerting_feature_ids';
-import { SERVICE_NAME } from '../../../../common/es_fields/apm';
+import { ALL_VALUE } from '@kbn/slo-constants';
+import type { ServiceAlertsResponse } from '@kbn/apm-api-shared';
+import { SERVICE_ENVIRONMENT, SERVICE_NAME } from '../../../../common/es_fields/apm';
 import type { ServiceGroup } from '../../../../common/service_groups';
 import type { ApmAlertsClient } from '../../../lib/helpers/get_apm_alerts_client';
 import { environmentQuery } from '../../../../common/utils/environment_query';
+import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
+import { getAlertsBadgeEndMs } from '../../../utils/get_alerts_badge_end';
 import { MAX_NUMBER_OF_SERVICES } from './get_services_items';
 import { serviceGroupWithOverflowQuery } from '../../../lib/service_group_query_with_overflow';
 
-export type ServiceAlertsResponse = Array<{
-  serviceName: string;
-  alertsCount: number;
-}>;
-
 export async function getServicesAlerts({
   apmAlertsClient,
-  kuery,
   maxNumServices = MAX_NUMBER_OF_SERVICES,
   serviceGroup,
   serviceName,
+  serviceNames,
   start,
   end,
   environment,
   searchQuery,
 }: {
   apmAlertsClient: ApmAlertsClient;
-  kuery?: string;
   maxNumServices?: number;
   serviceGroup?: ServiceGroup | null;
   serviceName?: string;
+  /** When set, restricts results to these service names (e.g. service map nodes). */
+  serviceNames?: string[];
   start: number;
   end: number;
   environment?: string;
   searchQuery?: string;
 }): Promise<ServiceAlertsResponse> {
+  if (serviceNames && serviceNames.length === 0) {
+    return [];
+  }
+
+  const termsAggregationSize =
+    serviceNames && serviceNames.length > 0
+      ? Math.min(serviceNames.length, maxNumServices)
+      : maxNumServices;
+
+  // Badge counts mean currently active alerts: extend a past picker end to now so
+  // inventory, alerts_count, and service-map badges share the same window.
+  // Use alert lifetime (kibana.alert.time_range), not @timestamp write time.
+  // Kuery is intentionally omitted — badges are entity health (service/env), not search-bar scoped.
+  const badgesEnd = getAlertsBadgeEndMs(end);
+
   const params = {
     size: 0,
     track_total_hits: false,
     query: {
       bool: {
         filter: [
-          ...termsQuery(ALERT_RULE_PRODUCER, ...APM_ALERTING_CONSUMERS),
           ...termQuery(ALERT_STATUS, ALERT_STATUS_ACTIVE),
-          ...rangeQuery(start, end),
-          ...kqlQuery(kuery),
+          ...rangeQuery(start, badgesEnd, ALERT_TIME_RANGE),
           ...serviceGroupWithOverflowQuery(serviceGroup),
-          ...termQuery(SERVICE_NAME, serviceName),
+          // Either a bounded list (e.g. service map) or a single service — not both. When
+          // neither is set, we aggregate across services (up to maxNumServices). `termQuery`
+          // is a no-op when `serviceName` is undefined.
+          ...(serviceNames && serviceNames.length > 0
+            ? [{ terms: { [SERVICE_NAME]: serviceNames } }]
+            : termQuery(SERVICE_NAME, serviceName)),
           ...wildcardQuery(SERVICE_NAME, searchQuery),
-          ...environmentQuery(environment),
+          ...alertsEnvironmentQuery(environment),
         ],
       },
     },
@@ -73,7 +87,7 @@ export async function getServicesAlerts({
       services: {
         terms: {
           field: SERVICE_NAME,
-          size: maxNumServices,
+          size: termsAggregationSize,
         },
         aggs: {
           alerts_count: {
@@ -99,4 +113,36 @@ export async function getServicesAlerts({
   }));
 
   return servicesAlertsCount;
+}
+
+/**
+ * Extends the standard environmentQuery to also include SLO burn rate alerts
+ * from SLOs created with the wildcard (*) environment. Those alerts have
+ * service.environment set to '*' (temp summary) or missing (real summary).
+ */
+function alertsEnvironmentQuery(environment?: string): QueryDslQueryContainer[] {
+  if (!environment || environment === ENVIRONMENT_ALL.value) {
+    return environmentQuery(environment);
+  }
+
+  return [
+    {
+      bool: {
+        should: [
+          ...environmentQuery(environment),
+          {
+            bool: {
+              filter: [{ term: { [ALERT_RULE_TYPE_ID]: SLO_BURN_RATE_RULE_TYPE_ID } }],
+              should: [
+                { term: { [SERVICE_ENVIRONMENT]: ALL_VALUE } },
+                { bool: { must_not: { exists: { field: SERVICE_ENVIRONMENT } } } },
+              ],
+              minimum_should_match: 1,
+            },
+          },
+        ],
+        minimum_should_match: 1,
+      },
+    },
+  ];
 }

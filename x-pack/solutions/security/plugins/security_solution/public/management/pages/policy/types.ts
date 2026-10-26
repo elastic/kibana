@@ -6,7 +6,7 @@
  */
 
 import type { CoreStart } from '@kbn/core/public';
-import type { ILicense } from '@kbn/licensing-plugin/common/types';
+import type { ILicense } from '@kbn/licensing-types';
 import type {
   GetAgentStatusResponse,
   GetOnePackagePolicyResponse,
@@ -20,6 +20,8 @@ import type {
   PolicyData,
   UIPolicyConfig,
   MaybeImmutable,
+  DeviceControlFields,
+  AiDataCollectionFields,
 } from '../../../../common/endpoint/types';
 import type { ServerApiError } from '../../../common/types';
 import type { ImmutableMiddlewareAPI } from '../../../common/store';
@@ -130,10 +132,23 @@ export type BehaviorProtectionOSes = KeysByValueCriteria<
   { behavior_protection: ProtectionFields }
 >;
 
-/** Returns an array of the policy OSes that have a ransomware protection field */
+export type DeviceControlOSes = KeysByValueCriteria<
+  UIPolicyConfig,
+  { device_control?: DeviceControlFields }
+>;
+
+export type AiDataCollectionOSes = KeysByValueCriteria<
+  UIPolicyConfig,
+  { ai_data_collection?: AiDataCollectionFields }
+>;
+
+/**
+ * Returns an array of the policy OSes that have a ransomware protection field. The criteria field
+ * is optional so that Linux, where the field is optional, is included.
+ */
 export type RansomwareProtectionOSes = KeysByValueCriteria<
   UIPolicyConfig,
-  { ransomware: ProtectionFields }
+  { ransomware?: ProtectionFields }
 >;
 
 export type PolicyProtection =
@@ -141,12 +156,21 @@ export type PolicyProtection =
       UIPolicyConfig['windows'],
       'malware' | 'ransomware' | 'memory_protection' | 'behavior_protection'
     >
-  | keyof Pick<UIPolicyConfig['mac'], 'malware' | 'behavior_protection' | 'memory_protection'>
+  | keyof Pick<
+      UIPolicyConfig['mac'],
+      'malware' | 'ransomware' | 'behavior_protection' | 'memory_protection'
+    >
   | keyof Pick<UIPolicyConfig['linux'], 'malware' | 'behavior_protection' | 'memory_protection'>;
 
-export type MacPolicyProtection = keyof Pick<UIPolicyConfig['mac'], 'malware'>;
+export type MacPolicyProtection = keyof Pick<
+  UIPolicyConfig['mac'],
+  'malware' | 'ransomware' | 'behavior_protection' | 'memory_protection'
+>;
 
-export type LinuxPolicyProtection = keyof Pick<UIPolicyConfig['linux'], 'malware'>;
+export type LinuxPolicyProtection = keyof Pick<
+  UIPolicyConfig['linux'],
+  'malware' | 'ransomware' | 'behavior_protection' | 'memory_protection'
+>;
 
 export interface GetPolicyListResponse extends GetPackagePoliciesResponse {
   items: PolicyData[];

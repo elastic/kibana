@@ -1,0 +1,75 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+import React from 'react';
+import { EuiSpacer, EuiText } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import type { SyntheticsMaintenanceWindow } from '../../../hooks';
+import { MaintenanceWindowsLink } from '../../monitor_add_edit/fields/maintenance_windows/create_maintenance_windows_btn';
+import { SyncNowLink } from './sync_now_link';
+import { MwsSyncOverdueNote } from './mws_sync_overdue_note';
+import { MwsAgentVersionWarningLine } from './mws_agent_version_warning_line';
+
+export const MwsCalloutContent = ({
+  activeMWs,
+  hasOutdatedAgent = false,
+  isSyncOverdue = false,
+}: {
+  activeMWs: SyntheticsMaintenanceWindow[];
+  /** Adds a line noting that an outdated agent may keep running through this monitor's active window, instead of a separate callout — keeps this surface to one box. */
+  hasOutdatedAgent?: boolean;
+  /** Swaps the "will update shortly" note for a warning that the private location sync is late. */
+  isSyncOverdue?: boolean;
+}) => {
+  if (activeMWs.length) {
+    return (
+      <>
+        <KbnWarningCallout
+          announceOnMount
+          title={i18n.translate(
+            'xpack.synthetics.maintenanceWindowCallout.maintenanceWindowActive.monitors',
+            {
+              defaultMessage: 'Maintenance windows are active',
+            }
+          )}
+          data-test-subj="maintenanceWindowCallout"
+        >
+          {i18n.translate(
+            'xpack.synthetics.maintenanceWindowCallout.maintenanceWindowActiveDescription.monitors',
+            {
+              defaultMessage:
+                'Monitors are stopped while maintenance windows are running. Active maintenance windows are ',
+            }
+          )}
+          {activeMWs.map((mws, index) => (
+            <span key={mws.id}>
+              <MaintenanceWindowsLink id={mws.id} label={mws.title} />
+              {index !== activeMWs.length - 1 ? <span>, </span> : <span>.</span>}
+            </span>
+          ))}
+          <EuiSpacer size="s" />
+          {isSyncOverdue ? (
+            <MwsSyncOverdueNote />
+          ) : (
+            <EuiText size="xs" color="subdued">
+              <FormattedMessage
+                id="xpack.synthetics.maintenanceWindowCallout.nextSyncNote"
+                defaultMessage="Private location monitors will update shortly. {syncNowLink}"
+                values={{ syncNowLink: <SyncNowLink /> }}
+              />
+            </EuiText>
+          )}
+          {hasOutdatedAgent && <MwsAgentVersionWarningLine />}
+        </KbnWarningCallout>
+        <EuiSpacer size="s" />
+      </>
+    );
+  } else {
+    return null;
+  }
+};

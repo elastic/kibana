@@ -4,11 +4,12 @@
 # Note: inconsistency between these roles definition and the same roles of serverless project may break FTR deployment-agnostic tests
 # -----
 viewer:
-  cluster: []
+  cluster: ['monitor_inference']
   indices:
     - names:
         - '.alerts*'
         - '.preview.alerts*'
+        - '.adhoc.alerts*'
       privileges:
         - 'read'
         - 'view_index_metadata'
@@ -43,7 +44,7 @@ viewer:
   run_as: []
 
 editor:
-  cluster: []
+  cluster: ['monitor_inference']
   indices:
     - names:
         - 'observability-annotations'
@@ -80,6 +81,8 @@ editor:
         - '.internal.alerts*'
         - '.internal.preview.alerts*'
         - '.preview.alerts*'
+        - '.internal.adhoc.alerts*'
+        - '.adhoc.alerts*'
       privileges:
         - 'maintenance'
         - 'read'

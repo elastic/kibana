@@ -7,7 +7,7 @@
 
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { APP_ID } from './application';
-import type { Owner } from './types';
+import type { ServerlessProjectType, Owner } from './types';
 
 /**
  * Owner
@@ -16,7 +16,19 @@ export const SECURITY_SOLUTION_OWNER = 'securitySolution' as const;
 export const OBSERVABILITY_OWNER = 'observability' as const;
 export const GENERAL_CASES_OWNER = APP_ID;
 
+export const SECURITY_PROJECT_TYPE_ID = 'security';
+export const OBSERVABILITY_PROJECT_TYPE_ID = 'observability';
+
 export const OWNERS = [GENERAL_CASES_OWNER, OBSERVABILITY_OWNER, SECURITY_SOLUTION_OWNER] as const;
+export const SERVERLESS_PROJECT_TYPES = [
+  SECURITY_PROJECT_TYPE_ID,
+  OBSERVABILITY_PROJECT_TYPE_ID,
+] as const;
+
+export interface OwnerCaseFeatures {
+  alerts: { sync: boolean };
+  observables: { enabled: boolean; autoExtractDefault: boolean };
+}
 
 interface RouteInfo {
   id: Owner;
@@ -24,7 +36,13 @@ interface RouteInfo {
   label: string;
   iconType: string;
   appRoute: string;
+  /** Kibana-registered base path for the app (what `getUrlForApp(appId)` prepends). */
+  appBasePath: string;
+  /** Path within the app where the cases section lives, passed as `path` to `getUrlForApp`. */
+  casesBasePath: string;
+  features: OwnerCaseFeatures;
   validRuleConsumers?: readonly AlertConsumers[];
+  serverlessProjectType?: ServerlessProjectType;
 }
 
 export const OWNER_INFO: Record<Owner, RouteInfo> = {
@@ -34,7 +52,14 @@ export const OWNER_INFO: Record<Owner, RouteInfo> = {
     label: 'Security',
     iconType: 'logoSecurity',
     appRoute: '/app/security',
+    appBasePath: '/app/security',
+    casesBasePath: '/cases',
+    features: {
+      alerts: { sync: true },
+      observables: { enabled: true, autoExtractDefault: true },
+    },
     validRuleConsumers: [AlertConsumers.SIEM],
+    serverlessProjectType: SECURITY_PROJECT_TYPE_ID,
   },
   [OBSERVABILITY_OWNER]: {
     id: OBSERVABILITY_OWNER,
@@ -42,6 +67,12 @@ export const OWNER_INFO: Record<Owner, RouteInfo> = {
     label: 'Observability',
     iconType: 'logoObservability',
     appRoute: '/app/observability',
+    appBasePath: '/app/observability',
+    casesBasePath: '/cases',
+    features: {
+      alerts: { sync: false },
+      observables: { enabled: false, autoExtractDefault: false },
+    },
     validRuleConsumers: [
       // only valid in serverless
       AlertConsumers.OBSERVABILITY,
@@ -51,7 +82,9 @@ export const OWNER_INFO: Record<Owner, RouteInfo> = {
       AlertConsumers.SLO,
       AlertConsumers.UPTIME,
       AlertConsumers.MONITORING,
+      AlertConsumers.STREAMS,
     ],
+    serverlessProjectType: OBSERVABILITY_PROJECT_TYPE_ID,
   },
   [GENERAL_CASES_OWNER]: {
     id: GENERAL_CASES_OWNER,
@@ -59,6 +92,12 @@ export const OWNER_INFO: Record<Owner, RouteInfo> = {
     label: 'Management',
     iconType: 'managementApp',
     appRoute: '/app/management/insightsAndAlerting',
+    appBasePath: '/app/management',
+    casesBasePath: '/insightsAndAlerting/cases',
+    features: {
+      alerts: { sync: false },
+      observables: { enabled: true, autoExtractDefault: false },
+    },
     validRuleConsumers: [
       AlertConsumers.ML,
       AlertConsumers.STACK_ALERTS,

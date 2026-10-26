@@ -7,7 +7,7 @@
 import React from 'react';
 import Chance from 'chance';
 import { render, screen } from '@testing-library/react';
-import type { UseQueryResult } from '@tanstack/react-query';
+import type { UseQueryResult } from '@kbn/react-query';
 import { createCspBenchmarkIntegrationFixture } from '../../test/fixtures/csp_benchmark_integration';
 import { createReactQueryResponse } from '../../test/fixtures/react_query';
 import { TestProvider } from '../../test/test_provider';
@@ -19,12 +19,15 @@ import { useCspIntegrationLink } from '../../common/navigation/use_csp_integrati
 import { ERROR_STATE_TEST_SUBJECT } from './benchmarks_table';
 import { useLicenseManagementLocatorApi } from '../../common/api/use_license_management_locator_api';
 import { NO_FINDINGS_STATUS_TEST_SUBJ } from '../../components/test_subjects';
+import { useKibana } from '../../common/hooks/use_kibana';
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 
 jest.mock('./use_csp_benchmark_integrations');
 jest.mock('@kbn/cloud-security-posture/src/hooks/use_csp_setup_status_api');
 jest.mock('../../common/api/use_license_management_locator_api');
 jest.mock('../../common/hooks/use_is_subscription_status_valid');
 jest.mock('../../common/navigation/use_csp_integration_link');
+jest.mock('../../common/hooks/use_kibana');
 
 const chance = new Chance();
 
@@ -38,13 +41,35 @@ describe('<Benchmarks />', () => {
           cspm: { status: 'indexed' },
           kspm: { status: 'indexed' },
           indicesDetails: [
-            { index: 'logs-cloud_security_posture.findings_latest-default', status: 'not-empty' },
+            {
+              index: 'security_solution-cloud_security_posture.misconfiguration_latest',
+              status: 'not-empty',
+            },
             { index: 'logs-cloud_security_posture.findings-default*', status: 'not-empty' },
           ],
         },
       })
     );
 
+    (useKibana as jest.Mock).mockReturnValue({
+      services: {
+        cloudSecurityPosture: {
+          isPrivileged: true,
+        },
+        application: {
+          capabilities: {},
+          getUrlForApp: jest.fn(),
+        },
+        docLinks: {
+          links: { securitySolution: {} },
+        },
+        http: {
+          basePath: {
+            prepend: (path: string) => path,
+          },
+        },
+      },
+    });
     (useLicenseManagementLocatorApi as jest.Mock).mockImplementation(() =>
       createReactQueryResponse({
         status: 'success',
@@ -70,13 +95,7 @@ describe('<Benchmarks />', () => {
   it('renders the page header', () => {
     renderBenchmarks();
 
-    expect(screen.getByTestId(TEST_SUBJ.BENCHMARKS_PAGE_HEADER)).toBeInTheDocument();
-  });
-
-  it('renders the "add integration" button', () => {
-    renderBenchmarks();
-
-    expect(screen.getByTestId(TEST_SUBJ.ADD_INTEGRATION_TEST_SUBJ)).toBeInTheDocument();
+    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('Benchmarks');
   });
 
   it('renders error state while there is an error', () => {

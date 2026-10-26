@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Column } from '@kbn/visualizations-plugin/common/convert_to_lens';
+import type { Column } from '@kbn/visualizations-plugin/common/convert_to_lens';
 import { getConfiguration } from '.';
-import { Layer } from '..';
+import type { Layer } from '..';
 import { ChartType } from '../../../common';
 import { sampleAreaVis } from '../../sample_vis.test.mocks';
 import { ChartMode, InterpolationMode } from '../../types';
@@ -93,9 +93,11 @@ describe('getConfiguration', () => {
       axisTitlesVisibilitySettings: { x: true, yLeft: true, yRight: true },
       curveType: 'LINEAR',
       fillOpacity: 0.5,
+      areaFill: 'solid',
       fittingFunction: undefined,
       gridlinesVisibilitySettings: { x: false, yLeft: false, yRight: true },
       labelsOrientation: { x: -0, yLeft: -0, yRight: -90 },
+      preferredSeriesType: 'bar',
       layers: [
         {
           accessors: ['1'],
@@ -106,7 +108,7 @@ describe('getConfiguration', () => {
           palette: { name: 'default' },
           seriesType: 'area_stacked',
           simpleView: false,
-          splitAccessor: '3',
+          splitAccessors: ['3'],
           xAccessor: '2',
           xScaleType: 'ordinal',
           yConfig: [{ axisMode: 'left', forAccessor: '1' }],
@@ -120,7 +122,7 @@ describe('getConfiguration', () => {
           palette: { name: 'default' },
           seriesType: 'area_stacked',
           simpleView: false,
-          splitAccessor: undefined,
+          splitAccessors: undefined,
           xAccessor: '5',
           xScaleType: 'ordinal',
           yConfig: [{ axisMode: 'left', forAccessor: '4' }],
@@ -159,5 +161,17 @@ describe('getConfiguration', () => {
       yTitle: 'Sum of total_quantity',
       showCurrentTimeMarker: false,
     });
+  });
+
+  test('should not set an area fill when there are no area layers', () => {
+    const barSeries = series.map((serie) => ({
+      ...serie,
+      type: ChartType.Histogram,
+      mode: ChartMode.Normal,
+    }));
+
+    expect(getConfiguration(layers, barSeries, sampleAreaVis as any)).not.toHaveProperty(
+      'areaFill'
+    );
   });
 });

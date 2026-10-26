@@ -1,0 +1,78 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { RuleResponse } from '@kbn/alerting-v2-schemas';
+import type {
+  AlertEpisodeStatus,
+  AlertEventStatus,
+} from '../../resources/datastreams/alert_events';
+import { createAlertEvent } from '../rule_executor/test_utils';
+import { createRuleResponse } from '../test_utils';
+import type { StateTransitionContext } from './strategies/types';
+import type { LastLifecycleActionType, LatestAlertEventState } from './queries';
+
+export const DEFAULT_TIMESTAMP = '2025-01-01T00:00:00.000Z';
+const DEFAULT_EPISODE_ID = 'episode-1';
+const DEFAULT_GROUP_HASH = 'hash-1';
+
+export const buildLatestAlertEvent = ({
+  episodeStatus,
+  eventStatus,
+  statusCount,
+  previousTimestamp,
+  phaseStartedAt,
+  episodeId = DEFAULT_EPISODE_ID,
+  groupHash = DEFAULT_GROUP_HASH,
+  lifecycleActionType = null,
+}: {
+  episodeStatus: AlertEpisodeStatus | null;
+  eventStatus: AlertEventStatus;
+  statusCount?: number | null;
+  previousTimestamp?: string | null;
+  phaseStartedAt?: string | null;
+  episodeId?: string;
+  groupHash?: string;
+  lifecycleActionType?: LastLifecycleActionType;
+}): LatestAlertEventState => ({
+  last_status: eventStatus,
+  last_episode_id: episodeId,
+  last_episode_status: episodeStatus,
+  last_episode_status_count: statusCount ?? null,
+  last_episode_timestamp: previousTimestamp ?? DEFAULT_TIMESTAMP,
+  last_episode_phase_started_at:
+    phaseStartedAt !== undefined ? phaseStartedAt : previousTimestamp ?? DEFAULT_TIMESTAMP,
+  last_lifecycle_action_type: lifecycleActionType,
+  group_hash: groupHash,
+});
+
+export const buildStrategyStateTransitionContext = ({
+  eventStatus,
+  stateTransition,
+  noDataStrategy,
+  evaluatedAt = DEFAULT_TIMESTAMP,
+  previousEpisode,
+}: {
+  eventStatus: AlertEventStatus;
+  stateTransition?: RuleResponse['state_transition'];
+  noDataStrategy?: NonNullable<RuleResponse['no_data']>['strategy'];
+  evaluatedAt?: string;
+  previousEpisode?: LatestAlertEventState;
+}): StateTransitionContext => {
+  const { '@timestamp': ignoredTimestamp, ...alertEvent } = createAlertEvent({
+    status: eventStatus,
+  });
+
+  return {
+    rule: createRuleResponse({
+      state_transition: stateTransition,
+      ...(noDataStrategy ? { no_data: { strategy: noDataStrategy } } : {}),
+    }),
+    alertEvent,
+    evaluatedAt,
+    ...(previousEpisode ? { previousEpisode } : {}),
+  };
+};

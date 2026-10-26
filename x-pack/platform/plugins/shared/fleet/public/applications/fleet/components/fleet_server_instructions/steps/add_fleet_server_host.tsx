@@ -11,7 +11,6 @@ import { EuiIconTip } from '@elastic/eui';
 import {
   EuiSwitch,
   EuiButton,
-  EuiCallOut,
   EuiCode,
   EuiForm,
   EuiFormErrorText,
@@ -21,6 +20,7 @@ import {
   EuiFormRow,
   EuiFieldText,
 } from '@elastic/eui';
+import { KbnSuccessCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -74,37 +74,33 @@ export const AddFleetServerHostStepContent = ({
   const { getHref } = useLink();
   const { enableSSLSecrets } = ExperimentalFeaturesService.get();
 
-  const [isFirstLoad, setIsFirstLoad] = React.useState(true);
   const [isConvertedToSecret, setIsConvertedToSecret] = React.useState({
     sslKey: false,
     sslESKey: false,
+    sslAgentKey: false,
   });
-  const [secretsToggleState, setSecretsToggleState] = useState<'disabled' | true | false>(true);
-  const useSecretsStorage = secretsToggleState === true;
 
   const fleetStatus = useFleetStatus();
-  if (fleetStatus.isSecretsStorageEnabled !== undefined && secretsToggleState === 'disabled') {
-    setSecretsToggleState(fleetStatus.isSecretsStorageEnabled);
-  }
-
-  const onToggleSecretStorage = (secretEnabled: boolean) => {
-    if (secretsToggleState === 'disabled') {
-      return;
-    }
-
-    setSecretsToggleState(secretEnabled);
-  };
+  const useOutputSecretsStorage = fleetStatus.isSecretsStorageEnabled ?? false;
+  const useSSLSecretsStorage = enableSSLSecrets
+    ? fleetStatus.isSSLSecretsStorageEnabled ?? false
+    : false;
 
   useEffect(() => {
-    if (!isFirstLoad) return;
-    setIsFirstLoad(false);
     // populate the secret input with the value of the plain input in order to re-save the key with secret storage
-    if (useSecretsStorage && enableSSLSecrets) {
+    if (useSSLSecretsStorage && enableSSLSecrets) {
       if (inputs.sslKeyInput.value && !inputs.sslKeySecretInput.value) {
         inputs.sslKeySecretInput.setValue(inputs.sslKeyInput.value);
         inputs.sslKeyInput.clear();
         setIsConvertedToSecret({ ...isConvertedToSecret, sslKey: true });
       }
+      if (inputs.sslAgentKeyInput.value && !inputs.sslAgentKeySecretInput.value) {
+        inputs.sslAgentKeySecretInput.setValue(inputs.sslAgentKeyInput.value);
+        inputs.sslAgentKeyInput.clear();
+        setIsConvertedToSecret({ ...isConvertedToSecret, sslAgentKey: true });
+      }
+    }
+    if (useOutputSecretsStorage) {
       if (inputs.sslESKeyInput.value && !inputs.sslESKeySecretInput.value) {
         inputs.sslESKeySecretInput.setValue(inputs.sslESKeyInput.value);
         inputs.sslESKeyInput.clear();
@@ -114,27 +110,15 @@ export const AddFleetServerHostStepContent = ({
   }, [
     inputs.sslKeyInput,
     inputs.sslKeySecretInput,
-    isFirstLoad,
-    setIsFirstLoad,
     isConvertedToSecret,
     inputs.sslESKeyInput,
     inputs.sslESKeySecretInput,
-    secretsToggleState,
-    useSecretsStorage,
+    inputs.sslAgentKeyInput,
+    inputs.sslAgentKeySecretInput,
+    useSSLSecretsStorage,
+    useOutputSecretsStorage,
     enableSSLSecrets,
   ]);
-
-  const onToggleSecretAndClearValue = (secretEnabled: boolean) => {
-    if (secretEnabled) {
-      inputs.sslKeyInput.clear();
-      inputs.sslESKeyInput.clear();
-    } else {
-      inputs.sslKeySecretInput.setValue('');
-      inputs.sslESKeySecretInput.setValue('');
-    }
-    setIsConvertedToSecret({ ...isConvertedToSecret, sslKey: false, sslESKey: false });
-    onToggleSecretStorage(secretEnabled);
-  };
 
   const onSubmit = useCallback(async () => {
     try {
@@ -238,8 +222,8 @@ export const AddFleetServerHostStepContent = ({
           <EuiSpacer size="m" />
           <SSLFormSection
             inputs={inputs}
-            useSecretsStorage={enableSSLSecrets && useSecretsStorage}
-            onToggleSecretAndClearValue={onToggleSecretAndClearValue}
+            useSSLSecretsStorage={enableSSLSecrets && useSSLSecretsStorage}
+            useOutputSecretsStorage={useOutputSecretsStorage}
             isConvertedToSecret={isConvertedToSecret}
           />
           <EuiSpacer size="m" />
@@ -273,33 +257,32 @@ export const AddFleetServerHostStepContent = ({
       {submittedFleetServerHost && (
         <>
           <EuiSpacer size="m" />
-          <EuiCallOut
-            iconType="check"
-            color="success"
+          <KbnSuccessCallout
+            announceOnMount
             title={
               <FormattedMessage
                 id="xpack.fleet.fleetServerSetup.addFleetServerHostSuccessTitle"
                 defaultMessage="Added Fleet Server host"
               />
             }
-          >
-            <FormattedMessage
-              id="xpack.fleet.fleetServerSetup.addFleetServerHostSuccessText"
-              defaultMessage="Added {host}. You can edit your Fleet Server hosts in {fleetSettingsLink}."
-              values={{
-                host: submittedFleetServerHost.host_urls[0],
-                fleetSettingsLink: (
-                  // eslint-disable-next-line @elastic/eui/href-or-on-click
-                  <EuiLink href={getHref('settings')} onClick={onClose}>
-                    <FormattedMessage
-                      id="xpack.fleet.fleetServerSetup.fleetSettingsLink"
-                      defaultMessage="Fleet Settings"
-                    />
-                  </EuiLink>
-                ),
-              }}
-            />
-          </EuiCallOut>
+            text={
+              <FormattedMessage
+                id="xpack.fleet.fleetServerSetup.addFleetServerHostSuccessText"
+                defaultMessage="Added {host}. You can edit your Fleet Server hosts in {fleetSettingsLink}."
+                values={{
+                  host: submittedFleetServerHost.host_urls[0],
+                  fleetSettingsLink: (
+                    <EuiLink href={getHref('settings')} onClick={onClose}>
+                      <FormattedMessage
+                        id="xpack.fleet.fleetServerSetup.fleetSettingsLink"
+                        defaultMessage="Fleet Settings"
+                      />
+                    </EuiLink>
+                  ),
+                }}
+              />
+            }
+          />
         </>
       )}
     </EuiForm>

@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { capitalize } from 'lodash';
 import { type ExistsFilter, type Query, type Filter, isExistsFilter } from '@kbn/es-query';
-import {
+import type {
   AvgIndexPatternColumn,
   CardinalityIndexPatternColumn,
   CountIndexPatternColumn,
@@ -22,7 +22,6 @@ import {
   MaxIndexPatternColumn,
   MedianIndexPatternColumn,
   MinIndexPatternColumn,
-  OperationMetadata,
   OperationType,
   PercentileIndexPatternColumn,
   PersistedIndexPatternLayer,
@@ -32,16 +31,18 @@ import {
   TermsIndexPatternColumn,
   TypedLensByValueInput,
   XYCurveType,
-  XYState,
+  XYVisualizationState,
+  XYAnnotationLayerConfig,
   YAxisMode,
   HeatmapVisualizationState,
   MetricState,
 } from '@kbn/lens-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { PersistableFilter } from '@kbn/lens-plugin/common';
-import { DataViewSpec } from '@kbn/data-views-plugin/common';
-import { LegendSize } from '@kbn/visualizations-plugin/common/constants';
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { PersistableFilter } from '@kbn/lens-plugin/common';
+import type { DataViewSpec } from '@kbn/data-views-plugin/common';
+import { LegendSize } from '@kbn/chart-expressions-common';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { EventAnnotationConfig } from '@kbn/event-annotation-common';
 import { urlFiltersToKueryString } from '../utils/stringify_kueries';
 import {
   FILTER_RECORDS,
@@ -56,7 +57,7 @@ import {
   TERMS_COLUMN,
   USE_BREAK_DOWN_COLUMN,
 } from './constants';
-import {
+import type {
   ColumnFilter,
   MetricOption,
   ParamFilter,
@@ -78,7 +79,6 @@ export function buildNumberColumn(sourceField: string) {
     sourceField,
     dataType: 'number' as DataType,
     isBucketed: false,
-    scale: 'ratio' as OperationMetadata['scale'],
   };
 }
 
@@ -154,19 +154,30 @@ export interface LayerConfig {
   showPercentileAnnotations?: boolean;
 }
 
+// A query-driven annotation layer (e.g. vertical markers for alert start times).
+// Unlike data/reference-line layers, this carries its own `dataView` — Lens
+// resolves annotation layers' index patterns independently of the chart's
+// main data layers, so this can point at a completely different index.
+export interface AnnotationLayerConfig {
+  dataView: DataView;
+  annotations: EventAnnotationConfig[];
+  ignoreGlobalFilters?: boolean;
+}
+
 export class LensAttributes {
   layers: Record<string, PersistedIndexPatternLayer>;
-  visualization?: XYState | HeatmapVisualizationState | MetricState;
+  visualization?: XYVisualizationState | HeatmapVisualizationState | MetricState;
   layerConfigs: LayerConfig[] = [];
   isMultiSeries?: boolean;
   seriesReferenceLines: Record<
     string,
     {
       layerData: PersistedIndexPatternLayer;
-      layerState: XYState['layers'];
+      layerState: XYVisualizationState['layers'];
       dataView: DataView;
     }
   >;
+  annotationLayers: AnnotationLayerConfig[];
   globalFilter?: { query: string; language: string };
   reportType: string;
   lensFormulaHelper?: FormulaPublicApi;
@@ -175,13 +186,13 @@ export class LensAttributes {
   constructor(
     layerConfigs: LayerConfig[],
     reportType: string,
-    lensFormulaHelper?: FormulaPublicApi,
-    dslFilters?: QueryDslQueryContainer[]
+    dslFilters?: QueryDslQueryContainer[],
+    annotationLayers: AnnotationLayerConfig[] = []
   ) {
     this.layers = {};
+    this.annotationLayers = annotationLayers;
     this.seriesReferenceLines = {};
     this.reportType = reportType;
-    this.lensFormulaHelper = lensFormulaHelper;
     this.isMultiSeries = layerConfigs.length > 1;
     this.dslFilters = dslFilters;
 
@@ -266,7 +277,6 @@ export class LensAttributes {
       label: labels[sourceField],
       dataType: fieldMeta?.type as DataType,
       operationType: 'terms',
-      scale: 'ordinal',
       isBucketed: true,
       params: {
         orderBy,
@@ -281,7 +291,6 @@ export class LensAttributes {
                 dataType: 'number',
                 operationType: 'count',
                 isBucketed: false,
-                scale: 'ratio',
                 sourceField: '___records___',
               },
             }
@@ -301,7 +310,6 @@ export class LensAttributes {
       dataType: 'number',
       operationType: 'range',
       isBucketed: true,
-      scale: 'interval',
       params: {
         type: 'histogram',
         ranges: [{ from: 0, to: 1000, label: '' }],
@@ -321,7 +329,6 @@ export class LensAttributes {
       label: label ?? 'Filters',
       dataType: 'string',
       operationType: 'filters',
-      scale: 'ordinal',
       isBucketed: true,
       params: {
         filters: paramFilters,
@@ -495,7 +502,6 @@ export class LensAttributes {
       label: '@timestamp',
       operationType: 'date_histogram',
       params: { interval: 'auto', includeEmptyRows: true },
-      scale: 'interval',
     };
   }
 
@@ -506,7 +512,6 @@ export class LensAttributes {
       label: 'Top values of ' + label || sourceField,
       dataType: 'string',
       isBucketed: true,
-      scale: 'ordinal',
       params: {
         size: 10,
         orderBy: {
@@ -601,8 +606,7 @@ export class LensAttributes {
         format,
         label: columnLabel ?? label,
         dataView: layerConfig.dataView,
-        lensFormulaHelper: this.lensFormulaHelper!,
-      }).main;
+      });
     }
 
     if (showPercentileAnnotations) {
@@ -747,8 +751,7 @@ export class LensAttributes {
           layerId,
           columnFilter,
           dataView: layerConfig.dataView,
-          lensFormulaHelper: this.lensFormulaHelper!,
-        }).main,
+        }),
       ];
     }
 
@@ -803,29 +806,17 @@ export class LensAttributes {
       FieldBasedIndexPatternColumn | SumIndexPatternColumn | FormulaIndexPatternColumn
     > = {};
     const yAxisColumns = layerConfig.seriesConfig.yAxisColumns;
-    const { sourceField: mainSourceField, label: mainLabel } = yAxisColumns[0];
+    const { sourceField: mainSourceField } = yAxisColumns[0];
 
     if (mainSourceField === RECORDS_PERCENTAGE_FIELD && layerId && !forAccessorsKeys) {
-      return getDistributionInPercentageColumn({
-        label: mainLabel,
-        layerId,
-        columnFilter,
-        dataView: layerConfig.dataView,
-        lensFormulaHelper: this.lensFormulaHelper!,
-      }).supportingColumns;
+      return {};
     }
 
     if (mainSourceField && !forAccessorsKeys) {
-      const { columnLabel, formula, columnType } = this.getFieldMeta(mainSourceField, layerConfig);
+      const { columnType } = this.getFieldMeta(mainSourceField, layerConfig);
 
       if (columnType === FORMULA_COLUMN) {
-        return getDistributionInPercentageColumn({
-          label: columnLabel,
-          layerId,
-          formula,
-          dataView: layerConfig.dataView,
-          lensFormulaHelper: this.lensFormulaHelper!,
-        }).supportingColumns;
+        return {};
       }
     }
 
@@ -864,7 +855,6 @@ export class LensAttributes {
       label: label || 'Count of records',
       customLabel: true,
       operationType: 'count',
-      scale: 'ratio',
       sourceField: RECORDS_FIELD,
       filter: columnFilter,
       ...(timeScale ? { timeScale } : {}),
@@ -1078,7 +1068,7 @@ export class LensAttributes {
     };
   }
 
-  getXyState(): XYState {
+  getXyState(): XYVisualizationState {
     return {
       legend: {
         isVisible: true,
@@ -1090,6 +1080,7 @@ export class LensAttributes {
       valueLabels: 'hide',
       fittingFunction: 'Linear',
       curveType: 'CURVE_MONOTONE_X' as XYCurveType,
+      areaFill: 'solid',
       axisTitlesVisibilitySettings: {
         x: false,
         yLeft: !this.isMultiSeries,
@@ -1105,7 +1096,7 @@ export class LensAttributes {
     };
   }
 
-  getDataLayers(): XYState['layers'] {
+  getDataLayers(): XYVisualizationState['layers'] {
     const dataLayers = this.layerConfigs.map((layerConfig, index) => {
       const { sourceField } = layerConfig.seriesConfig.yAxisColumns[0];
 
@@ -1151,7 +1142,7 @@ export class LensAttributes {
         ...(layerConfig.breakdown &&
         layerConfig.breakdown !== PERCENTILE &&
         layerConfig.seriesConfig.xAxisColumn.sourceField !== USE_BREAK_DOWN_COLUMN
-          ? { splitAccessor: `breakdown-column-layer${index}` }
+          ? { splitAccessors: [`breakdown-column-layer${index}`] }
           : {}),
         ...(this.layerConfigs[0].seriesConfig.yTitle
           ? { yTitle: this.layerConfigs[0].seriesConfig.yTitle }
@@ -1159,13 +1150,25 @@ export class LensAttributes {
       };
     });
 
-    const referenceLineLayers: XYState['layers'] = [];
+    const referenceLineLayers: XYVisualizationState['layers'] = [];
 
     Object.entries(this.seriesReferenceLines).forEach(([_id, { layerState }]) => {
       referenceLineLayers.push(layerState[0]);
     });
 
-    return [...dataLayers, ...referenceLineLayers];
+    return [...dataLayers, ...referenceLineLayers, ...this.getAnnotationLayers()];
+  }
+
+  getAnnotationLayers(): XYVisualizationState['layers'] {
+    return this.annotationLayers.map(
+      (layer, index): XYAnnotationLayerConfig => ({
+        layerId: `annotation-layer-${index}`,
+        layerType: 'annotations',
+        annotations: layer.annotations,
+        indexPatternId: layer.dataView.id!,
+        ignoreGlobalFilters: layer.ignoreGlobalFilters ?? true,
+      })
+    );
   }
 
   addThresholdLayer(fieldName: string, layerId: string, { seriesConfig, dataView }: LayerConfig) {
@@ -1192,7 +1195,7 @@ export class LensAttributes {
     fieldName: string,
     referenceLineLayerId: string,
     seriesConfig: SeriesConfig
-  ): XYState['layers'] {
+  ): XYVisualizationState['layers'] {
     const columns = this.getThresholdColumns(fieldName, referenceLineLayerId, seriesConfig);
 
     return [
@@ -1244,6 +1247,15 @@ export class LensAttributes {
       }
     );
 
+    const annotationIndexReferences = this.annotationLayers.map(({ dataView }, index) => {
+      adHocDataViews[dataView.id!] = dataView.toSpec(false);
+      return {
+        id: dataView.id!,
+        name: getLayerReferenceName(`annotation-layer-${index}`),
+        type: 'index-pattern',
+      };
+    });
+
     const internalReferences = [
       ...uniqueIndexPatternsIds.map((dataViewId) => ({
         id: dataViewId,
@@ -1260,6 +1272,7 @@ export class LensAttributes {
         };
       }),
       ...referenceLineIndexReferences,
+      ...annotationIndexReferences,
     ];
 
     Object.entries(this.seriesReferenceLines).map(([id, { dataView }]) => ({

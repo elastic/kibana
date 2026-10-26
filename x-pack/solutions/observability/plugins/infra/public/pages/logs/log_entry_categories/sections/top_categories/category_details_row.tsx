@@ -11,7 +11,7 @@ import { logEntryCategoriesJobType } from '../../../../../../common/log_analysis
 import { useLogEntryCategoryExamples } from '../../use_log_entry_category_examples';
 import { LogEntryExampleMessages } from '../../../../../components/logging/log_entry_examples/log_entry_examples';
 import type { TimeRange } from '../../../../../../common/time/time_range';
-import { CategoryExampleMessage } from './category_example_message';
+import { CategoryExampleMessageTable } from './category_example_message';
 import { useLogMlJobIdFormatsShimContext } from '../../../shared/use_log_ml_job_id_formats_shim';
 
 const exampleCount = 5;
@@ -41,6 +41,15 @@ export const CategoryDetailsRow: React.FunctionComponent<{
     getLogEntryCategoryExamples();
   }, [getLogEntryCategoryExamples]);
 
+  const formattedExamples = logEntryCategoryExamples.map((example) => ({
+    id: example.id,
+    dataset: example.dataset,
+    message: example.message,
+    timestamp: example.timestamp,
+    tiebreaker: example.tiebreaker,
+    context: example.context,
+  }));
+
   return (
     <LogEntryExampleMessages
       isLoading={isLoadingLogEntryCategoryExamples}
@@ -49,18 +58,11 @@ export const CategoryDetailsRow: React.FunctionComponent<{
       exampleCount={exampleCount}
       onReload={getLogEntryCategoryExamples}
     >
-      {logEntryCategoryExamples.map((example, exampleIndex) => (
-        <CategoryExampleMessage
-          key={exampleIndex}
-          id={example.id}
-          dataset={example.dataset}
-          message={example.message}
-          timeRange={timeRange}
-          timestamp={example.timestamp}
-          tiebreaker={example.tiebreaker}
-          context={example.context}
-        />
-      ))}
+      <CategoryExampleMessageTable
+        key={categoryId}
+        examples={formattedExamples}
+        timeRange={timeRange}
+      />
     </LogEntryExampleMessages>
   );
 };

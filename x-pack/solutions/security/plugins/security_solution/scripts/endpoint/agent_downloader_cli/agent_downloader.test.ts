@@ -29,10 +29,11 @@ describe('agentDownloaderRunner', () => {
   const version = '8.15.0';
   let closestMatch = false;
   const url = 'http://example.com/agent.tar.gz';
+  const shaUrl = 'http://example.com/agent.tar.gz.sha512';
   const fileName = 'elastic-agent-8.15.0.tar.gz';
 
   it('downloads and stores the specified version', async () => {
-    (getAgentDownloadUrl as jest.Mock).mockResolvedValue({ url });
+    (getAgentDownloadUrl as jest.Mock).mockResolvedValue({ url, shaUrl });
     (getAgentFileName as jest.Mock).mockReturnValue('elastic-agent-8.15.0');
     (downloadAndStoreAgent as jest.Mock).mockResolvedValue(undefined);
 
@@ -43,12 +44,12 @@ describe('agentDownloaderRunner', () => {
 
     expect(getAgentDownloadUrl).toHaveBeenCalledWith(version, closestMatch, log);
     expect(getAgentFileName).toHaveBeenCalledWith(version);
-    expect(downloadAndStoreAgent).toHaveBeenCalledWith(url, fileName);
+    expect(downloadAndStoreAgent).toHaveBeenCalledWith(url, fileName, shaUrl);
     expect(log.info).toHaveBeenCalledWith('Successfully downloaded and stored version 8.15.0');
   });
 
   it('logs an error if the download fails', async () => {
-    (getAgentDownloadUrl as jest.Mock).mockResolvedValue({ url });
+    (getAgentDownloadUrl as jest.Mock).mockResolvedValue({ url, shaUrl });
     (getAgentFileName as jest.Mock).mockReturnValue('elastic-agent-8.15.0');
     (downloadAndStoreAgent as jest.Mock).mockRejectedValue(new Error('Download failed'));
 
@@ -59,7 +60,7 @@ describe('agentDownloaderRunner', () => {
 
     expect(getAgentDownloadUrl).toHaveBeenCalledWith(version, closestMatch, log);
     expect(getAgentFileName).toHaveBeenCalledWith(version);
-    expect(downloadAndStoreAgent).toHaveBeenCalledWith(url, fileName);
+    expect(downloadAndStoreAgent).toHaveBeenCalledWith(url, fileName, shaUrl);
     expect(log.error).toHaveBeenCalledWith(
       'Failed to download or store version 8.15.0: Download failed'
     );
@@ -70,8 +71,8 @@ describe('agentDownloaderRunner', () => {
     const fallbackFileName = 'elastic-agent-8.15.0.tar.gz';
 
     (getAgentDownloadUrl as jest.Mock)
-      .mockResolvedValueOnce({ url })
-      .mockResolvedValueOnce({ url });
+      .mockResolvedValueOnce({ url, shaUrl })
+      .mockResolvedValueOnce({ url, shaUrl });
     (getAgentFileName as jest.Mock)
       .mockReturnValueOnce('elastic-agent-8.15.1')
       .mockReturnValueOnce('elastic-agent-8.15.0');
@@ -88,8 +89,8 @@ describe('agentDownloaderRunner', () => {
     expect(getAgentDownloadUrl).toHaveBeenCalledWith(fallbackVersion, closestMatch, log);
     expect(getAgentFileName).toHaveBeenCalledWith('8.15.1');
     expect(getAgentFileName).toHaveBeenCalledWith(fallbackVersion);
-    expect(downloadAndStoreAgent).toHaveBeenCalledWith(url, 'elastic-agent-8.15.1.tar.gz');
-    expect(downloadAndStoreAgent).toHaveBeenCalledWith(url, fallbackFileName);
+    expect(downloadAndStoreAgent).toHaveBeenCalledWith(url, 'elastic-agent-8.15.1.tar.gz', shaUrl);
+    expect(downloadAndStoreAgent).toHaveBeenCalledWith(url, fallbackFileName, shaUrl);
     expect(log.error).toHaveBeenCalledWith(
       'Failed to download or store version 8.15.1: Download failed'
     );
@@ -97,7 +98,7 @@ describe('agentDownloaderRunner', () => {
   });
 
   it('logs an error if all downloads fail', async () => {
-    (getAgentDownloadUrl as jest.Mock).mockResolvedValue({ url });
+    (getAgentDownloadUrl as jest.Mock).mockResolvedValue({ url, shaUrl });
     (getAgentFileName as jest.Mock)
       .mockReturnValueOnce('elastic-agent-8.15.1')
       .mockReturnValueOnce('elastic-agent-8.15.0');
@@ -114,8 +115,8 @@ describe('agentDownloaderRunner', () => {
     expect(getAgentDownloadUrl).toHaveBeenCalledWith('8.15.0', closestMatch, log);
     expect(getAgentFileName).toHaveBeenCalledWith('8.15.1');
     expect(getAgentFileName).toHaveBeenCalledWith('8.15.0');
-    expect(downloadAndStoreAgent).toHaveBeenCalledWith(url, 'elastic-agent-8.15.1.tar.gz');
-    expect(downloadAndStoreAgent).toHaveBeenCalledWith(url, 'elastic-agent-8.15.0.tar.gz');
+    expect(downloadAndStoreAgent).toHaveBeenCalledWith(url, 'elastic-agent-8.15.1.tar.gz', shaUrl);
+    expect(downloadAndStoreAgent).toHaveBeenCalledWith(url, 'elastic-agent-8.15.0.tar.gz', shaUrl);
     expect(log.error).toHaveBeenCalledWith(
       'Failed to download or store version 8.15.1: Download failed'
     );
@@ -125,7 +126,7 @@ describe('agentDownloaderRunner', () => {
   });
 
   it('does not attempt fallback when patch version is 0', async () => {
-    (getAgentDownloadUrl as jest.Mock).mockResolvedValue({ url });
+    (getAgentDownloadUrl as jest.Mock).mockResolvedValue({ url, shaUrl });
     (getAgentFileName as jest.Mock).mockReturnValue('elastic-agent-8.15.0');
     (downloadAndStoreAgent as jest.Mock).mockResolvedValue(undefined);
 
@@ -136,7 +137,7 @@ describe('agentDownloaderRunner', () => {
 
     expect(getAgentDownloadUrl).toHaveBeenCalledTimes(1); // Only one call for 8.15.0
     expect(getAgentFileName).toHaveBeenCalledTimes(1);
-    expect(downloadAndStoreAgent).toHaveBeenCalledWith(url, fileName);
+    expect(downloadAndStoreAgent).toHaveBeenCalledWith(url, fileName, shaUrl);
     expect(log.info).toHaveBeenCalledWith('Successfully downloaded and stored version 8.15.0');
   });
 
@@ -154,7 +155,7 @@ describe('agentDownloaderRunner', () => {
   it('passes the closestMatch flag correctly', async () => {
     closestMatch = true;
 
-    (getAgentDownloadUrl as jest.Mock).mockResolvedValue({ url });
+    (getAgentDownloadUrl as jest.Mock).mockResolvedValue({ url, shaUrl });
     (getAgentFileName as jest.Mock).mockReturnValue('elastic-agent-8.15.0');
     (downloadAndStoreAgent as jest.Mock).mockResolvedValue(undefined);
 
@@ -179,8 +180,8 @@ describe('agentDownloaderRunner', () => {
     const primaryVersion = '8.15.1';
 
     (getAgentDownloadUrl as jest.Mock)
-      .mockResolvedValueOnce({ url })
-      .mockResolvedValueOnce({ url });
+      .mockResolvedValueOnce({ url, shaUrl })
+      .mockResolvedValueOnce({ url, shaUrl });
 
     (getAgentFileName as jest.Mock)
       .mockReturnValueOnce('elastic-agent-8.15.1')

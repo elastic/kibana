@@ -13,7 +13,6 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
-import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
 import type { ReportingStart } from '@kbn/reporting-plugin/public';
 import type { SpacesApi } from '@kbn/spaces-plugin/public';
 import type { UiActionsPublicStart } from '@kbn/ui-actions-plugin/public/plugin';
@@ -28,7 +27,6 @@ export let dataService: DataPublicPluginStart;
 export let dataViewsService: DataViewsPublicPluginStart;
 export let embeddableService: EmbeddableStart;
 export let expressionsService: ExpressionsStart;
-export let presentationUtilService: PresentationUtilPluginStart;
 export let reportingService: ReportingStart | undefined;
 export let spacesService: SpacesApi | undefined;
 export let uiActionsService: UiActionsPublicStart;
@@ -43,13 +41,16 @@ export const setKibanaServices = (
   kibanaVersion = initContext.env.packageInfo.version;
 
   coreServices = kibanaCore;
+  const capabilities = kibanaCore.application.capabilities;
   contentManagementService = deps.contentManagement;
   dataService = deps.data;
   dataViewsService = deps.dataViews;
   embeddableService = deps.embeddable;
   expressionsService = deps.expressions;
-  presentationUtilService = deps.presentationUtil;
-  reportingService = Boolean(kibanaCore.application.capabilities.canvas?.generatePdf)
+  reportingService = Boolean(
+    capabilities.canvas?.generatePdf === true ||
+      capabilities.reportingLegacy?.generateReport === true
+  )
     ? deps.reporting
     : undefined;
   spacesService = deps.spaces;

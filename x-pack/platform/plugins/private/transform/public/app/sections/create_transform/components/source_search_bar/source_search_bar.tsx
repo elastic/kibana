@@ -26,9 +26,7 @@ export const SourceSearchBar: FC<SourceSearchBarProps> = ({ dataView, searchBar 
   } = searchBar;
 
   const {
-    unifiedSearch: {
-      ui: { QueryStringInput },
-    },
+    kql: { QueryStringInput },
   } = useAppDependencies();
 
   return (

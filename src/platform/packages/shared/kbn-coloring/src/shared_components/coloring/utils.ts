@@ -7,10 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
+import type {
   DataBounds,
   PaletteOutput,
   PaletteRegistry,
+  CustomPaletteParams,
+} from '../../palettes';
+import {
   checkIsMinContinuity,
   reversePalette,
   checkIsMaxContinuity,
@@ -18,7 +21,6 @@ import {
   roundValue,
   getPaletteStops,
   getDataMinMax,
-  CustomPaletteParams,
   CUSTOM_PALETTE,
   DEFAULT_RANGE_TYPE,
   DEFAULT_COLOR_STEPS,
@@ -107,7 +109,8 @@ export function changeColorPalette(
   activePalette: PaletteConfigurationState['activePalette'],
   palettes: PaletteRegistry,
   dataBounds: DataBounds,
-  disableSwitchingContinuity: boolean
+  disableSwitchingContinuity: boolean,
+  defaultBandCount?: number
 ) {
   const isNewPaletteCustom = newPalette.name === CUSTOM_PALETTE;
   const newParams: CustomPaletteParams = {
@@ -118,6 +121,8 @@ export function changeColorPalette(
       ? activePalette.params?.continuity ?? DEFAULT_CONTINUITY
       : DEFAULT_CONTINUITY,
     reverse: false, // restore the reverse flag
+    // a named palette's band count is not user-editable, so don't inherit the previous palette's `steps`
+    ...(!isNewPaletteCustom && defaultBandCount ? { steps: defaultBandCount } : {}),
   };
 
   // we should pass colorStops so that correct calculate new color stops (if there was before) for custom palette

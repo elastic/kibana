@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
+import type { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
 
 import { ConfigSchema } from './config';
 import type { ListPlugin } from './plugin';
@@ -31,6 +31,8 @@ export type {
   ExceptionsListPreMultiListFindServerExtension,
   ExceptionsListPreSingleListFindServerExtension,
   ExceptionsListPreDeleteItemServerExtension,
+  ExceptionsListPreDeleteListServerExtension,
+  ExceptionListPreDeleteListBlocker,
 } from './types';
 export type { ExportExceptionListAndItemsReturn } from './services/exception_lists/export_exception_list_and_items';
 

@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { getQueryFromSavedSearchObject, getEsQueryFromSavedSearch } from './saved_search_utils';
-import type { SavedSearchSavedObject } from '../../../../common/types';
+import { filtersNotAlreadyPresent, getEsQueryFromSavedSearch } from './saved_search_utils';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { FilterStateStore } from '@kbn/es-query';
 import { stubbedSavedObjectIndexPattern } from '@kbn/data-views-plugin/common/data_view.stub';
@@ -120,108 +119,6 @@ const luceneSavedSearch: SavedSearch = {
     ],
   }),
 } as unknown as SavedSearch;
-
-// @ts-expect-error We don't need the full object here
-const luceneSavedSearchObj: SavedSearchSavedObject = {
-  attributes: {
-    title: 'farequote_filter_and_lucene',
-    columns: ['_source'],
-    sort: ['@timestamp', 'desc'],
-    kibanaSavedObjectMeta: {
-      searchSourceJSON:
-        '{"highlightAll":true,"version":true,"query":{"query":"responsetime:>50","language":"lucene"},"filter":[{"meta":{"index":"90a978e0-1c80-11ec-b1d7-f7e5cf21b9e0","negate":false,"disabled":false,"alias":null,"type":"phrase","key":"airline","value":"ASA","params":{"query":"ASA","type":"phrase"}},"query":{"match":{"airline":{"query":"ASA","type":"phrase"}}},"$state":{"store":"appState"}}],"indexRefName":"kibanaSavedObjectMeta.searchSourceJSON.index"}',
-    },
-  },
-  id: '93fc4d60-1c80-11ec-b1d7-f7e5cf21b9e0',
-  type: 'search',
-};
-
-// @ts-expect-error We don't need the full object here
-const luceneInvalidSavedSearchObj: SavedSearchSavedObject = {
-  attributes: {
-    kibanaSavedObjectMeta: {
-      searchSourceJSON: null,
-    },
-  },
-  id: '93fc4d60-1c80-11ec-b1d7-f7e5cf21b9e0',
-  type: 'search',
-};
-
-const kqlSavedSearch: SavedSearch = {
-  title: 'farequote_filter_and_kuery',
-  description: '',
-  columns: ['_source'],
-  searchSource: createSearchSourceMock({
-    index: mockDataView,
-    query: { query: 'responsetime > 49', language: 'kuery' } as Query,
-    filter: [
-      {
-        meta: {
-          index: '90a978e0-1c80-11ec-b1d7-f7e5cf21b9e0',
-          negate: false,
-          disabled: false,
-          alias: null,
-          type: 'phrase',
-          key: 'airline',
-          value: 'ASA',
-          params: { query: 'ASA', type: 'phrase' },
-        },
-        query: { match: { airline: { query: 'ASA', type: 'phrase' } } },
-        $state: { store: FilterStateStore.APP_STATE },
-      },
-    ],
-  }),
-} as unknown as SavedSearch;
-
-describe('getQueryFromSavedSearchObject()', () => {
-  it('should return parsed searchSourceJSON with query and filter', () => {
-    expect(getQueryFromSavedSearchObject(luceneSavedSearchObj)).toEqual({
-      filter: [
-        {
-          $state: { store: 'appState' },
-          meta: {
-            alias: null,
-            disabled: false,
-            index: '90a978e0-1c80-11ec-b1d7-f7e5cf21b9e0',
-            key: 'airline',
-            negate: false,
-            params: { query: 'ASA', type: 'phrase' },
-            type: 'phrase',
-            value: 'ASA',
-          },
-          query: { match: { airline: { query: 'ASA', type: 'phrase' } } },
-        },
-      ],
-      highlightAll: true,
-      indexRefName: 'kibanaSavedObjectMeta.searchSourceJSON.index',
-      query: { language: 'lucene', query: 'responsetime:>50' },
-      version: true,
-    });
-    expect(getQueryFromSavedSearchObject(kqlSavedSearch)).toEqual({
-      query: { query: 'responsetime > 49', language: 'kuery' },
-      index: 'test-mock-data-view',
-      filter: [
-        {
-          meta: {
-            index: '90a978e0-1c80-11ec-b1d7-f7e5cf21b9e0',
-            negate: false,
-            disabled: false,
-            alias: null,
-            type: 'phrase',
-            key: 'airline',
-            value: 'ASA',
-            params: { query: 'ASA', type: 'phrase' },
-          },
-          query: { match: { airline: { query: 'ASA', type: 'phrase' } } },
-          $state: { store: 'appState' },
-        },
-      ],
-    });
-  });
-  it('should return undefined if invalid searchSourceJSON', () => {
-    expect(getQueryFromSavedSearchObject(luceneInvalidSavedSearchObj)).toEqual(undefined);
-  });
-});
 
 describe('getEsQueryFromSavedSearch()', () => {
   it('return undefined if saved search is not provided', () => {
@@ -405,5 +302,272 @@ describe('getEsQueryFromSavedSearch()', () => {
       },
       searchString: 'responsetime:>100',
     });
+  });
+
+  it('should not throw an exception on receiving malformed input', () => {
+    const queryTestFn = () =>
+      getEsQueryFromSavedSearch({
+        dataView: mockDataView,
+        savedSearch: null,
+        uiSettings: mockUiSettings,
+        query: { query: 'agent.name : "nodejs', language: 'kuery' },
+      });
+
+    expect(queryTestFn).not.toThrow();
+    expect(queryTestFn()).toBeUndefined();
+  });
+
+  it('should apply a negated filter-manager copy of a saved keyed filter without stacking both', () => {
+    const phraseFilter = (negate: boolean, disabled = false): Filter => ({
+      meta: {
+        alias: null,
+        disabled,
+        negate,
+        type: 'phrase',
+        key: 'airline',
+        params: { query: 'ACA' },
+        index: mockDataView.id,
+      },
+      query: { match_phrase: { airline: 'ACA' } },
+      $state: { store: FilterStateStore.APP_STATE },
+    });
+
+    const savedSearch: SavedSearch = {
+      title: 'keyed_phrase',
+      searchSource: createSearchSourceMock({
+        index: mockDataView,
+        query: { query: '*', language: 'kuery' } as Query,
+        filter: [phraseFilter(false)],
+      }),
+    } as unknown as SavedSearch;
+
+    const filterManager = createMockFilterManager();
+    filterManager.addFilters([phraseFilter(true)]);
+
+    expect(
+      getEsQueryFromSavedSearch({
+        dataView: mockDataView,
+        savedSearch,
+        uiSettings: mockUiSettings,
+        filterManager,
+      })
+    ).toEqual({
+      queryLanguage: 'kuery',
+      queryOrAggregateQuery: { language: 'kuery', query: '*' },
+      searchQuery: {
+        bool: {
+          filter: [{ query_string: { query: '*' } }],
+          must: [],
+          must_not: [{ match_phrase: { airline: 'ACA' } }],
+          should: [],
+        },
+      },
+      searchString: '*',
+    });
+  });
+
+  it('should drop a saved keyed filter when the filter-manager copy is disabled', () => {
+    const phraseFilter = (disabled: boolean): Filter => ({
+      meta: {
+        alias: null,
+        disabled,
+        negate: false,
+        type: 'phrase',
+        key: 'airline',
+        params: { query: 'ACA' },
+        index: mockDataView.id,
+      },
+      query: { match_phrase: { airline: 'ACA' } },
+      $state: { store: FilterStateStore.APP_STATE },
+    });
+
+    const savedSearch: SavedSearch = {
+      title: 'keyed_phrase_disabled',
+      searchSource: createSearchSourceMock({
+        index: mockDataView,
+        query: { query: '*', language: 'kuery' } as Query,
+        filter: [phraseFilter(false)],
+      }),
+    } as unknown as SavedSearch;
+
+    const filterManager = createMockFilterManager();
+    filterManager.addFilters([phraseFilter(true)]);
+
+    expect(
+      getEsQueryFromSavedSearch({
+        dataView: mockDataView,
+        savedSearch,
+        uiSettings: mockUiSettings,
+        filterManager,
+      })
+    ).toEqual({
+      queryLanguage: 'kuery',
+      queryOrAggregateQuery: { language: 'kuery', query: '*' },
+      searchQuery: {
+        bool: {
+          filter: [{ query_string: { query: '*' } }],
+          must: [],
+          must_not: [],
+          should: [],
+        },
+      },
+      searchString: '*',
+    });
+  });
+
+  it('should not double a saved keyed filter that was hydrated into the filter manager', () => {
+    const phraseFilter: Filter = {
+      meta: {
+        alias: null,
+        disabled: false,
+        negate: false,
+        type: 'phrase',
+        key: 'airline',
+        params: { query: 'ACA' },
+        index: mockDataView.id,
+      },
+      query: { match_phrase: { airline: 'ACA' } },
+      $state: { store: FilterStateStore.APP_STATE },
+    };
+
+    const savedSearch: SavedSearch = {
+      title: 'keyed_phrase_hydrated',
+      searchSource: createSearchSourceMock({
+        index: mockDataView,
+        query: { query: '*', language: 'kuery' } as Query,
+        filter: [phraseFilter],
+      }),
+    } as unknown as SavedSearch;
+
+    const filterManager = createMockFilterManager();
+    filterManager.addFilters([phraseFilter]);
+
+    expect(
+      getEsQueryFromSavedSearch({
+        dataView: mockDataView,
+        savedSearch,
+        uiSettings: mockUiSettings,
+        filterManager,
+      })
+    ).toEqual({
+      queryLanguage: 'kuery',
+      queryOrAggregateQuery: { language: 'kuery', query: '*' },
+      searchQuery: {
+        bool: {
+          filter: [{ query_string: { query: '*' } }, { match_phrase: { airline: 'ACA' } }],
+          must: [],
+          must_not: [],
+          should: [],
+        },
+      },
+      searchString: '*',
+    });
+  });
+
+  it('should apply a negated filter-manager copy of a saved keyless filter without stacking both', () => {
+    const customFilter = (negate: boolean): Filter => ({
+      meta: {
+        alias: null,
+        disabled: false,
+        negate,
+        type: 'custom',
+        index: mockDataView.id,
+      },
+      query: { match: { message: 'error' } },
+      $state: { store: FilterStateStore.APP_STATE },
+    });
+
+    const savedSearch: SavedSearch = {
+      title: 'keyless_custom',
+      searchSource: createSearchSourceMock({
+        index: mockDataView,
+        query: { query: '*', language: 'kuery' } as Query,
+        filter: [customFilter(false)],
+      }),
+    } as unknown as SavedSearch;
+
+    const filterManager = createMockFilterManager();
+    filterManager.addFilters([customFilter(true)]);
+
+    expect(
+      getEsQueryFromSavedSearch({
+        dataView: mockDataView,
+        savedSearch,
+        uiSettings: mockUiSettings,
+        filterManager,
+      })
+    ).toEqual({
+      queryLanguage: 'kuery',
+      queryOrAggregateQuery: { language: 'kuery', query: '*' },
+      searchQuery: {
+        bool: {
+          filter: [{ query_string: { query: '*' } }],
+          must: [],
+          must_not: [{ match: { message: 'error' } }],
+          should: [],
+        },
+      },
+      searchString: '*',
+    });
+  });
+});
+
+describe('filtersNotAlreadyPresent()', () => {
+  const keyedFilter = (overrides: Partial<Filter['meta']> = {}): Filter => ({
+    meta: {
+      alias: null,
+      disabled: false,
+      negate: false,
+      type: 'phrase',
+      key: 'airline',
+      params: { query: 'ACA' },
+      index: 'test-index',
+      ...overrides,
+    },
+    query: { match_phrase: { airline: 'ACA' } },
+  });
+
+  const keylessFilter = (overrides: Partial<Filter['meta']> = {}): Filter => ({
+    meta: {
+      alias: null,
+      disabled: false,
+      negate: false,
+      type: 'custom',
+      index: 'test-index',
+      ...overrides,
+    },
+    query: { bool: { must: [{ match: { message: 'error' } }] } },
+  });
+
+  it('treats keyed filters with the same key/params as duplicates', () => {
+    expect(filtersNotAlreadyPresent([keyedFilter()], [keyedFilter()])).toEqual([]);
+  });
+
+  it('does not treat a negated keyed filter as a duplicate of the original', () => {
+    expect(filtersNotAlreadyPresent([keyedFilter()], [keyedFilter({ negate: true })])).toEqual([
+      keyedFilter({ negate: true }),
+    ]);
+  });
+
+  it('does not treat a disabled keyed filter as a duplicate of the original', () => {
+    expect(filtersNotAlreadyPresent([keyedFilter()], [keyedFilter({ disabled: true })])).toEqual([
+      keyedFilter({ disabled: true }),
+    ]);
+  });
+
+  it('treats keyless filters with the same query as duplicates', () => {
+    expect(filtersNotAlreadyPresent([keylessFilter()], [keylessFilter()])).toEqual([]);
+  });
+
+  it('does not treat a negated keyless filter as a duplicate of the original', () => {
+    expect(filtersNotAlreadyPresent([keylessFilter()], [keylessFilter({ negate: true })])).toEqual([
+      keylessFilter({ negate: true }),
+    ]);
+  });
+
+  it('does not treat a disabled keyless filter as a duplicate of the original', () => {
+    expect(
+      filtersNotAlreadyPresent([keylessFilter()], [keylessFilter({ disabled: true })])
+    ).toEqual([keylessFilter({ disabled: true })]);
   });
 });

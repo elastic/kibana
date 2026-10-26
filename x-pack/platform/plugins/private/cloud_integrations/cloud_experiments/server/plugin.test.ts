@@ -5,14 +5,9 @@
  * 2.0.
  */
 
-import { coreMock } from '@kbn/core/server/mocks';
+import { coreMock, savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
 import { cloudMock } from '@kbn/cloud-plugin/server/mocks';
 import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/server/mocks';
-import {
-  createIndexPatternsStartMock,
-  dataViewsService,
-} from '@kbn/data-views-plugin/server/mocks';
-import { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import { config } from './config';
 import { CloudExperimentsPlugin } from './plugin';
 
@@ -37,7 +32,7 @@ describe('Cloud Experiments server plugin', () => {
     test('fails if launch_darkly is not provided in the config and it is a non-dev environment', () => {
       const initializerContext = coreMock.createPluginInitializerContext();
       initializerContext.env.mode.dev = false;
-      expect(() => new CloudExperimentsPlugin(initializerContext)).toThrowError(
+      expect(() => new CloudExperimentsPlugin(initializerContext)).toThrow(
         'xpack.cloud_integrations.experiments.launch_darkly configuration should exist'
       );
     });
@@ -102,11 +97,19 @@ describe('Cloud Experiments server plugin', () => {
         },
       });
     });
+
+    test('registers the initial feature flags getter to enable bootstrapping', async () => {
+      const coreSetupMock = coreMock.createSetup();
+      plugin.setup(coreSetupMock, {
+        cloud: cloudMock.createSetup(),
+        usageCollection: usageCollectionPluginMock.createSetupContract(),
+      });
+      expect(coreSetupMock.featureFlags.setInitialFeatureFlagsGetter).toHaveBeenCalledTimes(1);
+    });
   });
 
   describe('start', () => {
     let plugin: CloudExperimentsPlugin;
-    let dataViews: jest.Mocked<DataViewsServerPluginStart>;
 
     beforeEach(() => {
       const initializerContext = coreMock.createPluginInitializerContext(
@@ -118,7 +121,6 @@ describe('Cloud Experiments server plugin', () => {
         )
       );
       plugin = new CloudExperimentsPlugin(initializerContext);
-      dataViews = createIndexPatternsStartMock();
     });
 
     afterEach(() => {
@@ -130,7 +132,12 @@ describe('Cloud Experiments server plugin', () => {
         cloud: cloudMock.createSetup(),
         usageCollection: usageCollectionPluginMock.createSetupContract(),
       });
-      expect(plugin.start(coreMock.createStart(), { dataViews })).toBeUndefined();
+      const coreStart = coreMock.createStart();
+      expect(plugin.start(coreStart)).toBeUndefined();
+      expect(coreStart.featureFlags.getBooleanValue$).toHaveBeenCalledWith(
+        'cloudExperiments.rolloutEvaluationProbe',
+        false
+      );
     });
 
     test('triggers a userMetadataUpdate for `hasData`', async () => {
@@ -139,9 +146,11 @@ describe('Cloud Experiments server plugin', () => {
         cloud: { ...cloudMock.createSetup(), isCloudEnabled: true },
         usageCollection: usageCollectionPluginMock.createSetupContract(),
       });
-      dataViews.dataViewsServiceFactory.mockResolvedValue(dataViewsService);
-      dataViewsService.hasUserDataView.mockResolvedValue(true);
-      plugin.start(coreMock.createStart(), { dataViews });
+      const coreStart = coreMock.createStart();
+      const repository = savedObjectsRepositoryMock.create();
+      repository.find.mockResolvedValue({ total: 1, saved_objects: [], per_page: 0, page: 1 });
+      coreStart.savedObjects.createInternalRepository.mockReturnValue(repository);
+      plugin.start(coreStart);
 
       // After scheduler kicks in...
       await jest.advanceTimersByTimeAsync(100);
@@ -169,12 +178,11 @@ describe('Cloud Experiments server plugin', () => {
         )
       );
       plugin = new CloudExperimentsPlugin(initializerContext);
-      const dataViews = createIndexPatternsStartMock();
       plugin.setup(coreMock.createSetup(), {
         cloud: { ...cloudMock.createSetup(), isCloudEnabled: true },
         usageCollection: usageCollectionPluginMock.createSetupContract(),
       });
-      plugin.start(coreMock.createStart(), { dataViews });
+      plugin.start(coreMock.createStart());
     });
 
     test('stops the Metadata Service', () => {
@@ -182,6 +190,19 @@ describe('Cloud Experiments server plugin', () => {
       const metadataServiceStopSpy = jest.spyOn(plugin['metadataService'], 'stop');
       plugin.stop();
       expect(metadataServiceStopSpy).toHaveBeenCalledTimes(1);
+    });
+
+    test('stops rollout evaluation probe subscriptions', () => {
+      const unsubscribe = jest.fn();
+      const coreStart = coreMock.createStart();
+      coreStart.featureFlags.getBooleanValue$ = jest.fn().mockReturnValue({
+        subscribe: jest.fn().mockReturnValue({ unsubscribe }),
+      });
+
+      plugin.start(coreStart);
+      plugin.stop();
+
+      expect(unsubscribe).toHaveBeenCalledTimes(1);
     });
   });
 });

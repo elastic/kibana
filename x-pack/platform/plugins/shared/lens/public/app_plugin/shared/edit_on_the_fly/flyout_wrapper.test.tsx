@@ -6,12 +6,13 @@
  */
 
 import React from 'react';
-import { screen } from '@testing-library/react';
+import { fireEvent, screen } from '@testing-library/react';
 import { renderWithReduxStore } from '../../../mocks';
 import { FlyoutWrapper } from './flyout_wrapper';
 import type { FlyoutWrapperProps } from './types';
 
 function mountFlyoutWrapper(propsOverrides: Partial<FlyoutWrapperProps> = {}) {
+  const onCancel = propsOverrides.onCancel ?? jest.fn();
   const result = renderWithReduxStore(
     <FlyoutWrapper
       isInlineFlyoutVisible
@@ -19,8 +20,7 @@ function mountFlyoutWrapper(propsOverrides: Partial<FlyoutWrapperProps> = {}) {
       isScrollable
       isNewPanel
       isSaveable
-      language={'Lens'}
-      onCancel={jest.fn()}
+      onCancel={onCancel}
       navigateToLensEditor={jest.fn()}
       onApply={jest.fn()}
       {...propsOverrides}
@@ -30,6 +30,7 @@ function mountFlyoutWrapper(propsOverrides: Partial<FlyoutWrapperProps> = {}) {
   );
   return {
     ...result,
+    onCancel,
     // rewrite the rerender function to work with the store wrapper
     rerender: (props: Partial<FlyoutWrapperProps>) =>
       result.rerender(
@@ -39,8 +40,7 @@ function mountFlyoutWrapper(propsOverrides: Partial<FlyoutWrapperProps> = {}) {
           isScrollable
           isNewPanel
           isSaveable
-          language={'Lens'}
-          onCancel={jest.fn()}
+          onCancel={onCancel}
           navigateToLensEditor={jest.fn()}
           onApply={jest.fn()}
           {...propsOverrides}
@@ -83,6 +83,14 @@ describe('Flyout wrapper', () => {
       expect(screen.getByText('Configuration')).toBeInTheDocument();
       component.rerender({ isNewPanel: false, isReadOnly: true });
       expect(screen.getByText('Configuration')).toBeInTheDocument();
+    });
+
+    it('should call onCancel when the header close button is clicked', async () => {
+      const { onCancel } = mountFlyoutWrapper();
+
+      fireEvent.click(screen.getByTestId('euiFlyoutCloseButton'));
+
+      expect(onCancel).toHaveBeenCalledTimes(1);
     });
   });
 

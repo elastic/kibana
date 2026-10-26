@@ -13,6 +13,10 @@ import { createStartServicesAccessorMock, createMetricsClientMock } from '../tes
 import { ContainerMetricsTable } from './container_metrics_table';
 import { createLazyContainerMetricsTable } from './create_lazy_container_metrics_table';
 import IntegratedContainerMetricsTable from './integrated_container_metrics_table';
+import {
+  ECS_CONTAINER_CPU_USAGE_LIMIT_PCT,
+  ECS_CONTAINER_MEMORY_USAGE_BYTES,
+} from '../shared/constants';
 import { metricByField } from './use_container_metrics_table';
 
 jest.mock('../../../pages/link_to/use_asset_details_redirect', () => ({
@@ -31,18 +35,7 @@ describe('ContainerMetricsTable', () => {
     to: 'now',
   };
 
-  const filterClauseDsl = {
-    bool: {
-      should: [
-        {
-          match: {
-            'host.name': 'gke-edge-oblt-pool-1-9a60016d-lgg9',
-          },
-        },
-      ],
-      minimum_should_match: 1,
-    },
-  };
+  const kuery = 'container.id: "gke-edge-oblt-pool-1-9a60016d-lgg9"';
 
   const mockData = {
     series: [
@@ -63,7 +56,7 @@ describe('ContainerMetricsTable', () => {
         metricsClient
       );
 
-      render(<LazyContainerMetricsTable timerange={timerange} filterClauseDsl={filterClauseDsl} />);
+      render(<LazyContainerMetricsTable timerange={timerange} kuery={kuery} />);
 
       expect(screen.queryByTestId(loadingIndicatorTestId)).not.toBeInTheDocument();
       expect(screen.queryByTestId('containerMetricsTable')).not.toBeInTheDocument();
@@ -93,7 +86,7 @@ describe('ContainerMetricsTable', () => {
       const { findByText } = render(
         <IntegratedContainerMetricsTable
           timerange={timerange}
-          filterClauseDsl={filterClauseDsl}
+          kuery={kuery}
           sourceId="default"
           metricsClient={metricsClient}
           {...coreProvidersPropsMock}
@@ -157,8 +150,8 @@ function createContainer(
     id: name,
     rows: [
       {
-        [metricByField['kubernetes.container.cpu.usage.limit.pct']]: cpuUsagePct,
-        [metricByField['kubernetes.container.memory.usage.bytes']]: memoryUsageBytes,
+        [metricByField[ECS_CONTAINER_CPU_USAGE_LIMIT_PCT]]: cpuUsagePct,
+        [metricByField[ECS_CONTAINER_MEMORY_USAGE_BYTES]]: memoryUsageBytes,
       } as MetricsExplorerSeries['rows'][number],
     ],
   };

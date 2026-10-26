@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CoreSetup, CoreStart } from '@kbn/core/public';
+import type { CoreSetup, CoreStart } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
-import { Action, FrequentCompatibilityChangeAction } from '.';
-import { UiActionsPublicSetup, UiActionsPublicStart } from './plugin';
+import type { Action, FrequentCompatibilityChangeAction } from '.';
+import type { UiActionsPublicSetup, UiActionsPublicStart } from './plugin';
 import { plugin as pluginInitializer } from '.';
 
 export type Setup = jest.Mocked<UiActionsPublicSetup>;
@@ -18,13 +18,10 @@ export type Start = jest.Mocked<UiActionsPublicStart>;
 
 const createSetupContract = (): Setup => {
   const setupContract: Setup = {
-    addTriggerAction: jest.fn(),
     addTriggerActionAsync: jest.fn(),
     attachAction: jest.fn(),
     detachAction: jest.fn(),
-    registerAction: jest.fn(),
     registerActionAsync: jest.fn(),
-    registerTrigger: jest.fn(),
     unregisterAction: jest.fn(),
   };
   return setupContract;
@@ -34,7 +31,6 @@ const createStartContract = (): Start => {
   const startContract: Start = {
     attachAction: jest.fn(),
     unregisterAction: jest.fn(),
-    addTriggerAction: jest.fn(),
     addTriggerActionAsync: jest.fn(),
     clear: jest.fn(),
     detachAction: jest.fn(),
@@ -43,7 +39,6 @@ const createStartContract = (): Start => {
     getAction: jest.fn(),
     hasAction: jest.fn(),
     getTrigger: jest.fn(),
-    hasTrigger: jest.fn(),
     getTriggerActions: jest.fn(async (id: string) => []),
     getTriggerCompatibleActions: jest.fn((triggerId: string, context: object) =>
       Promise.resolve([] as Array<Action<object>>)
@@ -52,9 +47,7 @@ const createStartContract = (): Start => {
       async (triggerId: string, context: object) =>
         [] as Array<FrequentCompatibilityChangeAction<object>>
     ),
-    registerAction: jest.fn(),
     registerActionAsync: jest.fn(),
-    registerTrigger: jest.fn(),
   };
 
   return startContract;

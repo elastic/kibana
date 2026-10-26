@@ -9,9 +9,9 @@
 
 import { asyncForEachWithLimit } from '@kbn/std';
 import { snakeToCamel } from '../utils';
-import { PluginApi, ApiDeclaration } from '../types';
+import type { PluginApi, ApiDeclaration } from '../types';
 import { writePluginDoc } from './write_plugin_mdx_docs';
-import { WritePluginDocsOpts } from './types';
+import type { WritePluginDocsOpts } from './types';
 
 // There is no science behind this 10.
 // When it was first introduced, it was using synchronous APIs, so the concurrency was 1.

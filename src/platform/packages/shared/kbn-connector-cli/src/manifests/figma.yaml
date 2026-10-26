@@ -1,0 +1,16 @@
+spec_id: .figma
+name: "Figma (testing)"
+auth_type: oauth_authorization_code
+secrets:
+  authorizationUrl:
+    value: "https://www.figma.com/oauth"
+  tokenUrl:
+    value: "https://api.figma.com/v1/oauth/token"
+  scope:
+    value: "current_user:read file_content:read projects:read"
+  clientId:
+    vault: secret/ent-search-team/connectors-sources/figma
+    field: client-id
+  clientSecret:
+    vault: secret/ent-search-team/connectors-sources/figma
+    field: client-secret

@@ -16,9 +16,10 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import { SlmPolicyPayload } from '../../../../common/types';
+import type { SlmPolicyPayload } from '../../../../common/types';
 import { TIME_UNITS } from '../../../../common/constants';
-import { PolicyValidation, validatePolicy } from '../../services/validation';
+import type { PolicyValidation } from '../../services/validation';
+import { validatePolicy } from '../../services/validation';
 import {
   PolicyStepLogistics,
   PolicyStepSettings,
@@ -169,7 +170,7 @@ export const PolicyForm: React.FunctionComponent<Props> = ({
               {currentStep > 1 ? (
                 <EuiFlexItem grow={false}>
                   <EuiButtonEmpty
-                    iconType="arrowLeft"
+                    iconType="chevronSingleLeft"
                     onClick={() => onBack()}
                     disabled={!validation.isValid}
                   >
@@ -184,7 +185,7 @@ export const PolicyForm: React.FunctionComponent<Props> = ({
                 <EuiFlexItem grow={false}>
                   <EuiButton
                     fill
-                    iconType="arrowRight"
+                    iconType="chevronSingleRight"
                     onClick={() => onNext()}
                     iconSide="right"
                     disabled={!validation.isValid}

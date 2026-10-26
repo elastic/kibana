@@ -19,6 +19,7 @@ export function getKibanaInstructionsForDisablingInternalCollection(product, met
       <Fragment>
         <EuiSpacer size="s" />
         <EuiCallOut
+          announceOnMount
           title={i18n.translate(
             'xpack.monitoring.metricbeatMigration.kibanaInstructions.disableInternalCollection.restartWarningTitle',
             {
@@ -26,7 +27,7 @@ export function getKibanaInstructionsForDisablingInternalCollection(product, met
             }
           )}
           color="warning"
-          iconType="help"
+          iconType="question"
         >
           <EuiText>
             <p>

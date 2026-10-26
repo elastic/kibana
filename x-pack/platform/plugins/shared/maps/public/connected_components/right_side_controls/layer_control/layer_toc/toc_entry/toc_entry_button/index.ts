@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { connect } from 'react-redux';
-import { MapStoreState } from '../../../../../../reducers/store';
+import { connect } from 'react-redux-v7';
+import type { MapStoreState } from '../../../../../../reducers/store';
 import { getMapZoom, isUsingSearch } from '../../../../../../selectors/map_selectors';
 import { getInspectorAdapters } from '../../../../../../reducers/non_serializable_instances';
-import { TOCEntryButton, ReduxStateProps, OwnProps } from './toc_entry_button';
+import type { ReduxStateProps, OwnProps } from './toc_entry_button';
+import { TOCEntryButton } from './toc_entry_button';
 
 function mapStateToProps(state: MapStoreState, ownProps: OwnProps): ReduxStateProps {
   return {

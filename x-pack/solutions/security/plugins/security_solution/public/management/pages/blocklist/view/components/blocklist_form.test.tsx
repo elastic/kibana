@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { screen } from '@testing-library/react';
+import { screen, fireEvent } from '@testing-library/react';
 import userEvent, { type UserEvent } from '@testing-library/user-event';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import type { BlocklistConditionEntryField } from '@kbn/securitysolution-utils';
@@ -27,6 +27,8 @@ import { ListOperatorEnum, ListOperatorTypeEnum } from '@kbn/securitysolution-io
 import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import type { IHttpFetchError } from '@kbn/core/public';
 
+jest.mock('../../../../../common/components/user_privileges');
+
 jest.mock('../../../../../common/hooks/use_license', () => {
   const licenseServiceInstance = {
     isPlatinumPlus: jest.fn(),
@@ -43,51 +45,72 @@ const blocklistOperatorFieldTestCases = [
   {
     os: OperatingSystem.LINUX,
     field: 'file.path',
-    fieldText: 'Path, ',
-    osText: 'Linux, ',
-    isMulti: false,
+    fieldText: 'Path',
+    osText: 'Linux',
+    isMulti: true,
   },
   {
     os: OperatingSystem.LINUX,
     field: 'file.hash.*',
-    fieldText: 'Hash, ',
-    osText: 'Linux, ',
+    fieldText: 'Hash',
+    osText: 'Linux',
     isMulti: false,
+  },
+  {
+    os: OperatingSystem.LINUX,
+    field: 'file.name',
+    fieldText: 'File name',
+    osText: 'Linux',
+    isMulti: true,
   },
   {
     os: OperatingSystem.WINDOWS,
     field: 'file.path.caseless',
-    fieldText: 'Path, ',
-    osText: 'Windows, ',
-    isMulti: false,
+    fieldText: 'Path',
+    osText: 'Windows',
+    isMulti: true,
   },
   {
     os: OperatingSystem.WINDOWS,
     field: 'file.hash.*',
-    fieldText: 'Hash, ',
-    osText: 'Windows, ',
+    fieldText: 'Hash',
+    osText: 'Windows',
     isMulti: false,
   },
   {
     os: OperatingSystem.WINDOWS,
     field: 'file.Ext.code_signature',
-    fieldText: 'Signature, ',
-    osText: 'Windows, ',
+    fieldText: 'Signature',
+    osText: 'Windows',
+    isMulti: true,
+  },
+  {
+    os: OperatingSystem.WINDOWS,
+    field: 'file.name',
+    fieldText: 'File name',
+    osText: 'Windows',
     isMulti: true,
   },
   {
     os: OperatingSystem.MAC,
     field: 'file.path.caseless',
-    fieldText: 'Path, ',
-    osText: 'Mac, ',
-    isMulti: false,
+    fieldText: 'Path',
+    osText: 'Mac',
+    isMulti: true,
   },
   {
     os: OperatingSystem.MAC,
     field: 'file.hash.*',
-    fieldText: 'Hash, ',
-    osText: 'Mac, ',
+    fieldText: 'Hash',
+    osText: 'Mac',
     isMulti: false,
+  },
+  {
+    os: OperatingSystem.MAC,
+    field: 'file.name',
+    fieldText: 'File name',
+    osText: 'Mac',
+    isMulti: true,
   },
 ];
 
@@ -216,8 +239,7 @@ describe('blocklist form', () => {
 
   it('should correctly default OS to windows', () => {
     render();
-    // Note: the trailing `, ` comes from screen-reader-only text
-    expect(screen.getByTestId('blocklist-form-os-select').textContent).toEqual('Windows, ');
+    expect(screen.getByTestId('blocklist-form-os-select').textContent).toEqual('Windows');
   });
 
   it('should allow user to select between 3 OSs', async () => {
@@ -245,7 +267,7 @@ describe('blocklist form', () => {
 
   it('should correctly default field to hash', () => {
     render();
-    expect(screen.getByTestId('blocklist-form-field-select').textContent).toEqual('Hash, ');
+    expect(screen.getByTestId('blocklist-form-field-select').textContent).toEqual('Hash');
   });
 
   describe.each(blocklistOperatorFieldTestCases)(
@@ -270,7 +292,7 @@ describe('blocklist form', () => {
           expect(screen.queryByTestId('blocklist-form-operator-select-single')).toBeNull();
           const element = screen.getByTestId('blocklist-form-operator-select-multi');
           expect(element).toBeTruthy();
-          expect(element.textContent).toEqual('is one of, ');
+          expect(element.textContent).toEqual('is one of');
           expect(element).not.toHaveAttribute('readonly');
         } else {
           expect(screen.queryByTestId('blocklist-form-operator-select-multi')).toBeNull();
@@ -283,36 +305,39 @@ describe('blocklist form', () => {
     }
   );
 
-  it('should allow all 3 fields when Windows OS is selected', async () => {
+  it('should allow all 4 fields when Windows OS is selected', async () => {
     render();
-    expect(screen.getByTestId('blocklist-form-os-select').textContent).toEqual('Windows, ');
+    expect(screen.getByTestId('blocklist-form-os-select').textContent).toEqual('Windows');
+
+    await user.click(screen.getByTestId('blocklist-form-field-select'));
+    expect(screen.queryAllByRole('option').length).toEqual(4);
+    expect(screen.queryByRole('option', { name: /hash/i })).toBeTruthy();
+    expect(screen.queryByRole('option', { name: /path/i })).toBeTruthy();
+    expect(screen.queryByRole('option', { name: /signature/i })).toBeTruthy();
+    expect(screen.queryByRole('option', { name: /file name/i })).toBeTruthy();
+  });
+
+  it('should only allow hash, path, and file name fields when Linux OS is selected', async () => {
+    render(createProps({ item: createItem({ os_types: [OperatingSystem.LINUX] }) }));
+    expect(screen.getByTestId('blocklist-form-os-select').textContent).toEqual('Linux');
 
     await user.click(screen.getByTestId('blocklist-form-field-select'));
     expect(screen.queryAllByRole('option').length).toEqual(3);
     expect(screen.queryByRole('option', { name: /hash/i })).toBeTruthy();
     expect(screen.queryByRole('option', { name: /path/i })).toBeTruthy();
-    expect(screen.queryByRole('option', { name: /signature/i })).toBeTruthy();
-  });
-
-  it('should only allow hash and path fields when Linux OS is selected', async () => {
-    render(createProps({ item: createItem({ os_types: [OperatingSystem.LINUX] }) }));
-    expect(screen.getByTestId('blocklist-form-os-select').textContent).toEqual('Linux, ');
-
-    await user.click(screen.getByTestId('blocklist-form-field-select'));
-    expect(screen.queryAllByRole('option').length).toEqual(2);
-    expect(screen.queryByRole('option', { name: /hash/i })).toBeTruthy();
-    expect(screen.queryByRole('option', { name: /path/i })).toBeTruthy();
+    expect(screen.queryByRole('option', { name: /file name/i })).toBeTruthy();
     expect(screen.queryByRole('option', { name: /signature/i })).toBeNull();
   });
 
-  it('should only allow hash and path fields when Mac OS is selected', async () => {
+  it('should only allow hash, path, and file name fields when Mac OS is selected', async () => {
     render(createProps({ item: createItem({ os_types: [OperatingSystem.MAC] }) }));
-    expect(screen.getByTestId('blocklist-form-os-select').textContent).toEqual('Mac, ');
+    expect(screen.getByTestId('blocklist-form-os-select').textContent).toEqual('Mac');
 
     await user.click(screen.getByTestId('blocklist-form-field-select'));
-    expect(screen.queryAllByRole('option').length).toEqual(2);
+    expect(screen.queryAllByRole('option').length).toEqual(3);
     expect(screen.queryByRole('option', { name: /hash/i })).toBeTruthy();
     expect(screen.queryByRole('option', { name: /path/i })).toBeTruthy();
+    expect(screen.queryByRole('option', { name: /file name/i })).toBeTruthy();
     expect(screen.queryByRole('option', { name: /signature/i })).toBeNull();
   });
 
@@ -329,9 +354,50 @@ describe('blocklist form', () => {
     expect(onChangeSpy).toHaveBeenCalledWith(expected);
   });
 
+  it('should convert an entered signature value when switching operator then field', async () => {
+    const signatureValues = ['signer-a', 'signer-b'];
+    const { rerender } = render(
+      createProps({
+        item: createItem({
+          os_types: [OperatingSystem.WINDOWS],
+          entries: [createEntry('file.Ext.code_signature', signatureValues)],
+        }),
+      })
+    );
+
+    await user.click(screen.getByTestId('blocklist-form-operator-select-multi'));
+    await waitForEuiPopoverOpen();
+    await user.click(screen.getByRole('option', { name: /^is$/i }));
+
+    const afterOperatorChange = onChangeSpy.mock.calls.at(-1)?.[0] as
+      | ArtifactFormComponentOnChangeCallbackProps
+      | undefined;
+    expect(afterOperatorChange?.item.entries).toEqual([
+      {
+        field: 'file.Ext.code_signature',
+        operator: ListOperatorEnum.INCLUDED,
+        type: ListOperatorTypeEnum.MATCH,
+        value: signatureValues.join(','),
+      },
+    ]);
+
+    rerender(<BlockListForm {...createProps({ item: afterOperatorChange?.item })} />);
+
+    await user.click(screen.getByTestId('blocklist-form-field-select'));
+    await waitForEuiPopoverOpen();
+    await user.click(screen.getByRole('option', { name: /path/i }));
+
+    const afterFieldChange = onChangeSpy.mock.calls.at(-1)?.[0] as
+      | ArtifactFormComponentOnChangeCallbackProps
+      | undefined;
+    expect(afterFieldChange?.item.entries).toEqual([
+      createEntry('file.path.caseless', signatureValues),
+    ]);
+  });
+
   it('should correctly create `file.path.caseless` when Mac OS is selected', async () => {
     render(createProps({ item: createItem({ os_types: [OperatingSystem.MAC] }) }));
-    expect(screen.getByTestId('blocklist-form-os-select').textContent).toEqual('Mac, ');
+    expect(screen.getByTestId('blocklist-form-os-select').textContent).toEqual('Mac');
 
     await user.click(screen.getByTestId('blocklist-form-field-select'));
     await waitForEuiPopoverOpen();
@@ -347,7 +413,7 @@ describe('blocklist form', () => {
 
   it('should correctly create `file.path` when Linux is selected', async () => {
     render(createProps({ item: createItem({ os_types: [OperatingSystem.LINUX] }) }));
-    expect(screen.getByTestId('blocklist-form-os-select').textContent).toEqual('Linux, ');
+    expect(screen.getByTestId('blocklist-form-os-select').textContent).toEqual('Linux');
 
     await user.click(screen.getByTestId('blocklist-form-field-select'));
     await waitForEuiPopoverOpen();
@@ -359,6 +425,213 @@ describe('blocklist form', () => {
       }),
     });
     expect(onChangeSpy).toHaveBeenCalledWith(expected);
+  });
+
+  describe('Match (wildcard) operator', () => {
+    const buildPathItem = (
+      entries: ArtifactFormComponentProps['item']['entries'] = [
+        createEntry('file.path.caseless', []),
+      ]
+    ): ArtifactFormComponentProps['item'] =>
+      createItem({
+        os_types: [OperatingSystem.WINDOWS],
+        entries,
+      });
+
+    it('should offer the Match operator for the Path field', async () => {
+      render(createProps({ item: buildPathItem() }));
+      await user.click(screen.getByTestId('blocklist-form-operator-select-multi'));
+      await waitForEuiPopoverOpen();
+      expect(screen.queryByRole('option', { name: /^matches$/i })).toBeTruthy();
+    });
+
+    it('should not offer the Match operator for the Signer field', async () => {
+      const item = createItem({
+        os_types: [OperatingSystem.WINDOWS],
+        entries: [createEntry('file.Ext.code_signature', [])],
+      });
+      render(createProps({ item }));
+      await user.click(screen.getByTestId('blocklist-form-operator-select-multi'));
+      await waitForEuiPopoverOpen();
+      expect(screen.queryByRole('option', { name: /^matches$/i })).toBeNull();
+      expect(screen.queryByRole('option', { name: /^is$/i })).toBeTruthy();
+    });
+
+    it('should switch the entry to a single wildcard value when the Match operator is selected', async () => {
+      const item = buildPathItem([createEntry('file.path.caseless', ['C:\\foo\\notepad.exe'])]);
+      render(createProps({ item }));
+      await user.click(screen.getByTestId('blocklist-form-operator-select-multi'));
+      await waitForEuiPopoverOpen();
+      await user.click(screen.getByRole('option', { name: /^matches$/i }));
+
+      const lastCall = onChangeSpy.mock.calls.at(-1)?.[0] as
+        | ArtifactFormComponentOnChangeCallbackProps
+        | undefined;
+      expect(lastCall?.item.entries).toEqual([
+        {
+          field: 'file.path.caseless',
+          operator: ListOperatorEnum.INCLUDED,
+          type: ListOperatorTypeEnum.WILDCARD,
+          value: 'C:\\foo\\notepad.exe',
+        },
+      ]);
+    });
+
+    describe('File Name field case-sensitivity', () => {
+      const selectMatchOperator = async () => {
+        await user.click(screen.getByTestId('blocklist-form-operator-select-multi'));
+        await waitForEuiPopoverOpen();
+        await user.click(screen.getByRole('option', { name: /^matches$/i }));
+      };
+
+      const lastEntries = () => {
+        const lastCall = onChangeSpy.mock.calls.at(-1)?.[0] as
+          | ArtifactFormComponentOnChangeCallbackProps
+          | undefined;
+        return lastCall?.item.entries;
+      };
+
+      it.each([[OperatingSystem.WINDOWS], [OperatingSystem.MAC]])(
+        'should use the caseless field when Match is selected on %s',
+        async (os) => {
+          const item = createItem({
+            os_types: [os],
+            entries: [createEntry('file.name', ['notepad.exe'])],
+          });
+          render(createProps({ item }));
+
+          await selectMatchOperator();
+
+          expect(lastEntries()).toEqual([
+            {
+              field: 'file.name.caseless',
+              operator: ListOperatorEnum.INCLUDED,
+              type: ListOperatorTypeEnum.WILDCARD,
+              value: 'notepad.exe',
+            },
+          ]);
+        }
+      );
+
+      it('should keep the cased field when Match is selected on Linux', async () => {
+        const item = createItem({
+          os_types: [OperatingSystem.LINUX],
+          entries: [createEntry('file.name', ['notepad'])],
+        });
+        render(createProps({ item }));
+
+        await selectMatchOperator();
+
+        expect(lastEntries()).toEqual([
+          {
+            field: 'file.name',
+            operator: ListOperatorEnum.INCLUDED,
+            type: ListOperatorTypeEnum.WILDCARD,
+            value: 'notepad',
+          },
+        ]);
+      });
+
+      it('should still show "File Name" selected in the field dropdown when the field is caseless', () => {
+        const item = createItem({
+          os_types: [OperatingSystem.WINDOWS],
+          entries: [
+            {
+              field: 'file.name.caseless',
+              operator: ListOperatorEnum.INCLUDED,
+              type: ListOperatorTypeEnum.WILDCARD,
+              value: '*.exe',
+            },
+          ],
+        });
+        render(createProps({ item }));
+
+        expect(screen.getByTestId('blocklist-form-field-select').textContent).toEqual('File name');
+      });
+
+      it('should reset to the cased field when switching back to "is one of"', async () => {
+        const item = createItem({
+          os_types: [OperatingSystem.WINDOWS],
+          entries: [
+            {
+              field: 'file.name.caseless',
+              operator: ListOperatorEnum.INCLUDED,
+              type: ListOperatorTypeEnum.WILDCARD,
+              value: 'notepad.exe',
+            },
+          ],
+        });
+        render(createProps({ item }));
+
+        await user.click(screen.getByTestId('blocklist-form-operator-select-multi'));
+        await waitForEuiPopoverOpen();
+        await user.click(screen.getByRole('option', { name: /is one of/i }));
+
+        expect(lastEntries()).toEqual([createEntry('file.name', ['notepad.exe'])]);
+      });
+
+      it('should reset to the cased field when the OS changes', async () => {
+        const item = createItem({
+          os_types: [OperatingSystem.WINDOWS],
+          entries: [
+            {
+              field: 'file.name.caseless',
+              operator: ListOperatorEnum.INCLUDED,
+              type: ListOperatorTypeEnum.WILDCARD,
+              value: 'notepad.exe',
+            },
+          ],
+        });
+        render(createProps({ item }));
+
+        await user.click(screen.getByTestId('blocklist-form-os-select'));
+        await waitForEuiPopoverOpen();
+        await user.click(screen.getByRole('option', { name: 'Linux' }));
+
+        expect(lastEntries()).toEqual([createEntry('file.name', ['notepad.exe'])]);
+      });
+    });
+
+    it('should warn when a wildcard character is used without the Match operator', async () => {
+      render(createProps({ item: buildPathItem() }));
+      await user.type(screen.getByRole('combobox'), 'C:\\foo\\*.exe{enter}');
+      expect(screen.queryByText(ERRORS.WILDCARD_WRONG_OPERATOR)).toBeTruthy();
+    });
+
+    it('should warn about the performance impact of a wildcard value with the Match operator', async () => {
+      const item = buildPathItem([
+        {
+          field: 'file.path.caseless',
+          operator: ListOperatorEnum.INCLUDED,
+          type: ListOperatorTypeEnum.WILDCARD,
+          value: '',
+        },
+      ]);
+      const { rerender } = render(createProps({ item }));
+      fireEvent.change(screen.getByTestId('blocklist-form-value-input'), {
+        target: { value: 'C:\\foo\\*.exe' },
+      });
+      rerender(<BlockListForm {...createProps({ item })} />);
+      expect(screen.queryByText(ERRORS.WILDCARD_PRESENT)).toBeTruthy();
+    });
+
+    it('should warn about unnecessary escaping when using the Match operator', async () => {
+      const item = buildPathItem([
+        {
+          field: 'file.path.caseless',
+          operator: ListOperatorEnum.INCLUDED,
+          type: ListOperatorTypeEnum.WILDCARD,
+          value: '',
+        },
+      ]);
+      const { rerender } = render(createProps({ item }));
+      // On Windows paths only a doubled backslash is considered unnecessary escaping
+      fireEvent.change(screen.getByTestId('blocklist-form-value-input'), {
+        target: { value: 'C:\\\\foo\\\\*.exe' },
+      });
+      rerender(<BlockListForm {...createProps({ item })} />);
+      expect(screen.queryByText(ERRORS.UNNECESSARY_ESCAPING)).toBeTruthy();
+    });
   });
 
   it('should correctly edit single value', async () => {

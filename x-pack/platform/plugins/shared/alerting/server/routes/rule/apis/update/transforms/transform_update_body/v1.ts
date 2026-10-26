@@ -77,6 +77,7 @@ const transformUpdateBodyFlapping = <Params extends RuleParams = never>(
     return flapping;
   }
   return {
+    enabled: flapping.enabled,
     lookBackWindow: flapping.look_back_window,
     statusChangeThreshold: flapping.status_change_threshold,
   };
@@ -104,5 +105,6 @@ export const transformUpdateBody = <Params extends RuleParams = never>({
     ...(updateBody.flapping !== undefined
       ? { flapping: transformUpdateBodyFlapping(updateBody.flapping) }
       : {}),
+    ...(updateBody.artifacts ? { artifacts: updateBody.artifacts } : {}),
   };
 };

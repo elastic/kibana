@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
+import type { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
 import {
   getSLOSummaryPipelineId,
   getSLOSummaryTransformId,
@@ -13,7 +13,8 @@ import {
   SLO_RESOURCES_VERSION,
   SUMMARY_DESTINATION_INDEX_NAME,
 } from '../../../../common/constants';
-import { DurationUnit, SLODefinition } from '../../../domain/models';
+import type { SLODefinition } from '../../../domain/models';
+import { DurationUnit } from '../../../domain/models';
 import { getGroupBy } from './common';
 import { buildBurnRateAgg } from './utils';
 
@@ -148,7 +149,9 @@ export function generateSummaryTransformForTimeslicesAndCalendarAligned(
         ...buildBurnRateAgg('oneDayBurnRate', slo),
       },
     },
-    description: `Summarise the rollup data of SLO: ${slo.name} [id: ${slo.id}, revision: ${slo.revision}].`,
+    description: `Summarise the rollup data of SLO: ${slo.name.slice(0, 850)} [id: ${
+      slo.id
+    }, revision: ${slo.revision}].`,
     frequency: '1m',
     sync: {
       time: {
@@ -165,6 +168,7 @@ export function generateSummaryTransformForTimeslicesAndCalendarAligned(
       version: SLO_RESOURCES_VERSION,
       managed: true,
       managed_by: 'observability',
+      deletion_protected: true,
     },
   };
 }

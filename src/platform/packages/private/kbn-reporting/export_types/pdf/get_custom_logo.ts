@@ -7,12 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Headers, IUiSettingsClient } from '@kbn/core/server';
+import type { IUiSettingsClient } from '@kbn/core/server';
 import { UI_SETTINGS_CUSTOM_PDF_LOGO } from '@kbn/reporting-common';
 
-export const getCustomLogo = async (uiSettingsClient: IUiSettingsClient, headers: Headers) => {
-  const logo: string = await uiSettingsClient.get(UI_SETTINGS_CUSTOM_PDF_LOGO);
-
-  // continue the pipeline
-  return { headers, logo };
+export const getCustomLogo = async (uiSettingsClient: IUiSettingsClient) => {
+  return await uiSettingsClient.get(UI_SETTINGS_CUSTOM_PDF_LOGO);
 };

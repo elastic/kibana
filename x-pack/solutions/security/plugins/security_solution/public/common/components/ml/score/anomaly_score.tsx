@@ -7,6 +7,7 @@
 
 import React, { useState } from 'react';
 import { EuiPopover, EuiDescriptionList, EuiFlexItem, EuiIcon } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
 import type { NarrowDateRange, Anomaly } from '../types';
 import { Score } from './score';
@@ -46,12 +47,15 @@ export const AnomalyScoreComponent = ({
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiPopover
+          aria-label={i18n.translate('xpack.securitySolution.anomalyScore.popover.ariaLabel', {
+            defaultMessage: 'Anomaly score details',
+          })}
           data-test-subj="anomaly-score-popover"
           id="anomaly-score-popover"
           isOpen={isOpen}
           onClick={() => setIsOpen(!isOpen)}
           closePopover={() => setIsOpen(!isOpen)}
-          button={<Icon type="iInCircle" />}
+          button={<Icon type="info" />}
           repositionOnScroll
         >
           <EuiDescriptionList

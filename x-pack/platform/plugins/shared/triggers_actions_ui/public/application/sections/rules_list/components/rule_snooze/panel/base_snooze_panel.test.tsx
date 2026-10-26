@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { screen } from '@testing-library/react';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
 import React from 'react';
 import { BaseSnoozePanel } from './base_snooze_panel';
 
 describe('BaseSnoozePanel', () => {
   test('should render', () => {
-    const wrapper = mountWithIntl(
+    renderWithI18n(
       <BaseSnoozePanel
         hasTitle
         interval="5d"
@@ -25,19 +26,16 @@ describe('BaseSnoozePanel', () => {
         onRemoveAllSchedules={jest.fn()}
       />
     );
-    expect(wrapper.find('[data-test-subj="snoozePanel"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="snoozePanelTitle"]').exists()).toBeTruthy();
-    expect(
-      wrapper.find('[data-test-subj="ruleSnoozeIntervalValue"]').first().props().value
-    ).toEqual(5);
-    expect(wrapper.find('[data-test-subj="ruleSnoozeIntervalUnit"]').first().props().value).toEqual(
-      'd'
-    );
-    expect(wrapper.find('[data-test-subj="ruleSnoozeCancel"]').exists()).toBeFalsy();
-    expect(wrapper.find('[data-test-subj="ruleAddSchedule"]').exists()).toBeTruthy();
+    expect(screen.getByTestId('snoozePanel')).toBeInTheDocument();
+    expect(screen.getByTestId('snoozePanelTitle')).toBeInTheDocument();
+    expect(screen.getByTestId('ruleSnoozeIntervalValue')).toHaveValue(5);
+    expect(screen.getByTestId('ruleSnoozeIntervalUnit')).toHaveValue('d');
+    expect(screen.queryByTestId('ruleSnoozeCancel')).not.toBeInTheDocument();
+    expect(screen.getByTestId('ruleAddSchedule')).toBeInTheDocument();
   });
+
   test('should render without title', () => {
-    const wrapper = mountWithIntl(
+    renderWithI18n(
       <BaseSnoozePanel
         hasTitle={false}
         isLoading={false}
@@ -50,11 +48,12 @@ describe('BaseSnoozePanel', () => {
         onRemoveAllSchedules={jest.fn()}
       />
     );
-    expect(wrapper.find('[data-test-subj="snoozePanel"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="snoozePanelTitle"]').exists()).toBeFalsy();
+    expect(screen.getByTestId('snoozePanel')).toBeInTheDocument();
+    expect(screen.queryByTestId('snoozePanelTitle')).not.toBeInTheDocument();
   });
+
   test('should render with cancel button', () => {
-    const wrapper = mountWithIntl(
+    renderWithI18n(
       <BaseSnoozePanel
         hasTitle
         isLoading={false}
@@ -67,11 +66,12 @@ describe('BaseSnoozePanel', () => {
         onRemoveAllSchedules={jest.fn()}
       />
     );
-    expect(wrapper.find('[data-test-subj="snoozePanel"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="ruleSnoozeCancel"]').exists()).toBeTruthy();
+    expect(screen.getByTestId('snoozePanel')).toBeInTheDocument();
+    expect(screen.getByTestId('ruleSnoozeCancel')).toBeInTheDocument();
   });
+
   test('should render a list of scheduled snoozes', () => {
-    const wrapper = mountWithIntl(
+    renderWithI18n(
       <BaseSnoozePanel
         hasTitle
         isLoading={false}
@@ -101,24 +101,18 @@ describe('BaseSnoozePanel', () => {
         onRemoveAllSchedules={jest.fn()}
       />
     );
-    expect(wrapper.find('[data-test-subj="snoozePanel"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="ruleAddSchedule"]').exists()).toBeFalsy();
-    expect(wrapper.find('[data-test-subj="ruleRemoveAllSchedules"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="ruleSchedulesListAddButton"]').exists()).toBeTruthy();
-    expect(
-      wrapper.find('[data-test-subj="ruleSchedulesListAddButton"]').first().prop('isDisabled')
-    ).toBeFalsy();
+    expect(screen.getByTestId('snoozePanel')).toBeInTheDocument();
+    expect(screen.queryByTestId('ruleAddSchedule')).not.toBeInTheDocument();
+    expect(screen.getByTestId('ruleRemoveAllSchedules')).toBeInTheDocument();
+    const ruleSchedulesListAddButton = screen.getByTestId('ruleSchedulesListAddButton');
+    expect(ruleSchedulesListAddButton).toBeInTheDocument();
+    expect(ruleSchedulesListAddButton).not.toBeDisabled();
 
-    expect(
-      wrapper
-        .find('[data-test-subj="ruleSchedulesList"]')
-        .children()
-        .getElements()
-        .filter((e) => Boolean(e.key)).length
-    ).toEqual(2);
+    expect(screen.getByTestId('ruleSchedulesList').children.length).toEqual(2);
   });
+
   test('should disable add snooze schedule button if rule has more than 5 schedules', () => {
-    const wrapper = mountWithIntl(
+    renderWithI18n(
       <BaseSnoozePanel
         hasTitle
         isLoading={false}
@@ -173,9 +167,8 @@ describe('BaseSnoozePanel', () => {
       />
     );
 
-    expect(wrapper.find('[data-test-subj="ruleSchedulesListAddButton"]').exists()).toBeTruthy();
-    expect(
-      wrapper.find('[data-test-subj="ruleSchedulesListAddButton"]').first().prop('isDisabled')
-    ).toBeTruthy();
+    const ruleSchedulesListAddButton = screen.getByTestId('ruleSchedulesListAddButton');
+    expect(ruleSchedulesListAddButton).toBeInTheDocument();
+    expect(ruleSchedulesListAddButton).toBeDisabled();
   });
 });

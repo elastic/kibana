@@ -6,136 +6,61 @@
  */
 
 import { renderHook } from '@testing-library/react';
-import type { Integration } from '../../../../../common/api/detection_engine';
-import { TestProviders } from '../../../../common/mock';
-import { ENTRA_ID_PACKAGE_NAME } from '../constants';
 import { useManagedUser } from './use_managed_user';
-
-const makeIntegration = (pkgName = 'testPkg', isEnabled = false): Integration => ({
-  package_name: pkgName,
-  package_title: '',
-  latest_package_version: '',
-  installed_package_version: '',
-  integration_name: '',
-  integration_title: '',
-  is_installed: true,
-  is_enabled: isEnabled,
-});
-
-const mockUseIntegrations = jest.fn().mockReturnValue({
-  data: [],
-});
-
-jest.mock('../../../../detections/components/rules/related_integrations/use_integrations', () => ({
-  useIntegrations: () => mockUseIntegrations(),
-}));
-
-jest.mock('../../../../common/hooks/use_space_id', () => ({
-  useSpaceId: () => 'test-space-id',
-}));
-
-const mockUseIsExperimentalFeatureEnabled = jest.fn().mockReturnValue(true);
-
-jest.mock('../../../../common/hooks/use_experimental_features', () => ({
-  useIsExperimentalFeatureEnabled: () => mockUseIsExperimentalFeatureEnabled(),
-}));
-
-const mockSearch = jest.fn().mockReturnValue({
-  data: [],
-});
-
-const useSearchStrategyDefaultResponse = {
-  loading: false,
-  result: { users: [] },
-  search: (...params: unknown[]) => mockSearch(...params),
-  refetch: () => {},
-  inspect: {},
-};
-
-const mockUseSearchStrategy = jest.fn().mockReturnValue(useSearchStrategyDefaultResponse);
+import { useSearchStrategy } from '../../../../common/containers/use_search_strategy';
+import {
+  buildExecutionContext,
+  EA_EXECUTION_CONTEXT_NAMES,
+} from '../../../../common/utils/execution_context';
 
 jest.mock('../../../../common/containers/use_search_strategy', () => ({
-  useSearchStrategy: () => mockUseSearchStrategy(),
+  useSearchStrategy: jest.fn(),
 }));
+jest.mock('../../../../common/containers/use_global_time', () => ({
+  useGlobalTime: () => ({ deleteQuery: jest.fn(), setQuery: jest.fn() }),
+}));
+jest.mock('../../../../common/components/page/manage_query', () => ({
+  useQueryInspector: jest.fn(),
+}));
+
+const mockUseSearchStrategy = useSearchStrategy as jest.Mock;
 
 describe('useManagedUser', () => {
   beforeEach(() => {
-    mockSearch.mockClear();
-  });
-  it('returns isIntegrationEnabled:true when it finds an enabled integration with the given name', () => {
-    mockUseIntegrations.mockReturnValue({
-      data: [makeIntegration(ENTRA_ID_PACKAGE_NAME, true)],
+    jest.clearAllMocks();
+    mockUseSearchStrategy.mockReturnValue({
+      loading: false,
+      result: { users: {} },
+      refetch: jest.fn(),
+      inspect: {},
     });
-
-    const { result } = renderHook(() => useManagedUser('test-userName', undefined, false), {
-      wrapper: TestProviders,
-    });
-
-    expect(result.current.isIntegrationEnabled).toBeTruthy();
   });
 
-  it('returns isIntegrationEnabled:false when it does not find an enabled integration with the given name', () => {
-    mockUseIntegrations.mockReturnValue({
-      data: [makeIntegration('fake-name', true)],
-    });
+  it('forwards the caller-supplied executionContext to useSearchStrategy', () => {
+    const executionContext = buildExecutionContext(
+      EA_EXECUTION_CONTEXT_NAMES.ENTITY_DETAILS_FLYOUT,
+      'user_managed_details'
+    );
 
-    const { result } = renderHook(() => useManagedUser('test-userName', undefined, false), {
-      wrapper: TestProviders,
-    });
+    renderHook(() => useManagedUser({ executionContext }));
 
-    expect(result.current.isIntegrationEnabled).toBeFalsy();
-  });
-
-  it('should search', () => {
-    renderHook(() => useManagedUser('test-userName', undefined, false), {
-      wrapper: TestProviders,
-    });
-
-    expect(mockSearch).toHaveBeenCalled();
-  });
-
-  it('should not search while observed user is loading', () => {
-    renderHook(() => useManagedUser('test-userName', undefined, true), {
-      wrapper: TestProviders,
-    });
-
-    expect(mockSearch).not.toHaveBeenCalled();
-  });
-
-  it('should search by email if the field is available', () => {
-    const email = ['test@email.com'];
-    renderHook(() => useManagedUser('test-userName', email, false), {
-      wrapper: TestProviders,
-    });
-
-    expect(mockSearch).toBeCalledWith(
+    expect(mockUseSearchStrategy).toHaveBeenCalledWith(
       expect.objectContaining({
-        userEmail: email,
+        executionContext: {
+          child: {
+            type: 'security_solution',
+            name: 'entity_analytics:entity_details_flyout',
+            id: 'user_managed_details',
+          },
+        },
       })
     );
   });
 
-  it('should not search if the feature is disabled', () => {
-    mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
-    renderHook(() => useManagedUser('test-userName', undefined, false), {
-      wrapper: TestProviders,
-    });
+  it('passes no executionContext when the caller does not supply one', () => {
+    renderHook(() => useManagedUser());
 
-    expect(mockSearch).not.toHaveBeenCalled();
-  });
-
-  it('should return loading false when the feature is disabled', () => {
-    mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
-    mockUseIntegrations.mockReturnValue({
-      data: [],
-      isLoading: true,
-    });
-    mockUseSearchStrategy.mockReturnValue({ ...useSearchStrategyDefaultResponse, loading: true });
-
-    const { result } = renderHook(() => useManagedUser('test-userName', undefined, false), {
-      wrapper: TestProviders,
-    });
-
-    expect(result.current.isLoading).toBeFalsy();
+    const [searchArgs] = mockUseSearchStrategy.mock.calls[0];
+    expect(searchArgs.executionContext).toBeUndefined();
   });
 });

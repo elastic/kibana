@@ -18,12 +18,11 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { CoreStart } from '@kbn/core/public';
-import { cloneDeep } from 'lodash';
-import { OverlayRef } from '@kbn/core-mount-utils-browser';
-import { IToasts } from '@kbn/core-notifications-browser';
-import type { LayerAction, StateSetter } from '../../../../types';
-import type { XYState, XYByReferenceAnnotationLayerConfig } from '../../types';
+import type { CoreStart } from '@kbn/core/public';
+import type { OverlayRef } from '@kbn/core-mount-utils-browser';
+import type { IToasts } from '@kbn/core-notifications-browser';
+import type { LayerAction, StateSetter } from '@kbn/lens-common';
+import type { XYVisualizationState, XYByReferenceAnnotationLayerConfig } from '../../types';
 import { annotationLayerHasUnsavedChanges } from '../../state_helpers';
 import { getAnnotationLayerTitle } from '../../visualization_helpers';
 
@@ -33,9 +32,9 @@ export const getRevertChangesAction = ({
   setState,
   core,
 }: {
-  state: XYState;
+  state: XYVisualizationState;
   layer: XYByReferenceAnnotationLayerConfig;
-  setState: StateSetter<XYState, unknown>;
+  setState: StateSetter<XYVisualizationState, unknown>;
   core: Pick<
     CoreStart,
     'overlays' | 'analytics' | 'i18n' | 'theme' | 'notifications' | 'userProfile'
@@ -70,7 +69,7 @@ export const getRevertChangesAction = ({
       );
       await modal.onClose;
     },
-    icon: 'editorUndo',
+    icon: 'undo',
     isCompatible: true,
     disabled: !annotationLayerHasUnsavedChanges(layer),
     'data-test-subj': 'lnsXY_annotationLayer_revertChanges',
@@ -85,9 +84,9 @@ export const revert = ({
   modal,
   toasts,
 }: {
-  setState: StateSetter<XYState>;
+  setState: StateSetter<XYVisualizationState>;
   layer: XYByReferenceAnnotationLayerConfig;
-  state: XYState;
+  state: XYVisualizationState;
   modal: OverlayRef;
   toasts: IToasts;
 }) => {
@@ -98,7 +97,7 @@ export const revert = ({
 
     indexPatternId: layer.__lastSaved.indexPatternId,
     ignoreGlobalFilters: layer.__lastSaved.ignoreGlobalFilters,
-    annotations: cloneDeep(layer.__lastSaved.annotations),
+    annotations: structuredClone(layer.__lastSaved.annotations),
     __lastSaved: layer.__lastSaved,
   };
   setState({
@@ -159,7 +158,7 @@ const RevertChangesConfirmModal = ({
                   data-test-subj="lnsLayerRevertChangesButton"
                   onClick={onConfirm}
                   color="warning"
-                  iconType="returnKey"
+                  iconType="return"
                   fill
                 >
                   {i18n.translate('xpack.lens.layer.unlinkConfirm', {

@@ -9,8 +9,6 @@
 
 import { ImageEmbeddablePlugin } from './plugin';
 
-export { IMAGE_CLICK_TRIGGER } from './actions';
-
 export function plugin() {
   return new ImageEmbeddablePlugin();
 }

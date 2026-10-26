@@ -39,7 +39,7 @@ describe('OpenAPI Merger - with security requirements overrides', () => {
             },
           }
         )
-      ).rejects.toThrowError(
+      ).rejects.toThrow(
         `Prototype document must contain ${chalk.bold(
           'components.securitySchemes'
         )} when security requirements are specified`
@@ -75,7 +75,7 @@ describe('OpenAPI Merger - with security requirements overrides', () => {
             },
           }
         )
-      ).rejects.toThrowError(
+      ).rejects.toThrow(
         `Prototype document must have ${chalk.bold('security')} defined ${chalk.bold(
           'components.securitySchemes'
         )} are specified`

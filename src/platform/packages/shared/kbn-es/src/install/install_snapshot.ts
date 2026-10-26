@@ -14,7 +14,11 @@ import { BASE_PATH } from '../paths';
 import { installArchive } from './install_archive';
 import { log as defaultLog } from '../utils/log';
 import { Artifact } from '../artifact';
-import { DownloadSnapshotOptions, InstallSnapshotOptions } from './types';
+import {
+  findLocalCachedSnapshot,
+  shouldPreferCachedSnapshot,
+} from '../utils/find_local_cached_snapshot';
+import type { DownloadSnapshotOptions, InstallSnapshotOptions } from './types';
 
 /**
  * Download an ES snapshot
@@ -30,6 +34,21 @@ export async function downloadSnapshot({
   log.info('version: %s', chalk.bold(version));
   log.info('install path: %s', chalk.bold(installPath));
   log.info('license: %s', chalk.bold(license));
+
+  if (shouldPreferCachedSnapshot(useCached)) {
+    const localCachedSnapshot = findLocalCachedSnapshot(basePath, version);
+    if (localCachedSnapshot) {
+      log.info('using locally cached snapshot %s', chalk.bold(localCachedSnapshot));
+      return {
+        downloadPath: localCachedSnapshot,
+      };
+    }
+
+    log.info(
+      'prefer-cached enabled but no local snapshot found for version %s',
+      chalk.bold(version)
+    );
+  }
 
   const artifact = await Artifact.getSnapshot(license, version, log);
   const dest = path.resolve(basePath, 'cache', artifact.spec.filename);

@@ -10,6 +10,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { isString } from 'lodash';
 import { EuiButtonEmpty } from '@elastic/eui';
+import { useApmRouter } from '../../../../../../hooks/use_apm_router';
 import type { AgentConfigurationIntake } from '../../../../../../../common/agent_configuration/configuration_types';
 import {
   omitAllOption,
@@ -18,10 +19,13 @@ import {
 } from '../../../../../../../common/agent_configuration/all_option';
 import { useFetcher, FETCH_STATUS } from '../../../../../../hooks/use_fetcher';
 import { FormRowSelect } from './form_row_select';
-import { LegacyAPMLink } from '../../../../../shared/links/apm/apm_link';
 import { FormRowSuggestionsSelect } from './form_row_suggestions_select';
 import { SERVICE_NAME } from '../../../../../../../common/es_fields/apm';
-import { isOpenTelemetryAgentName, isEDOTAgentName } from '../../../../../../../common/agent_name';
+import {
+  isOpenTelemetryAgentName,
+  isEDOTAgentName,
+  isOTELAgentName,
+} from '../../../../../../../common/agent_name';
 import type { AgentName } from '../../../../../../../typings/es_schemas/ui/fields/agent';
 
 interface Props {
@@ -44,6 +48,8 @@ export function ServicePage({ newConfig, setNewConfig, onClickNext }: Props) {
     [newConfig.service.name],
     { preservePreviousData: false }
   );
+
+  const { link } = useApmRouter();
 
   const environments = environmentsData?.environments ?? [];
 
@@ -83,6 +89,7 @@ export function ServicePage({ newConfig, setNewConfig, onClickNext }: Props) {
   const isAgentConfigurationSupported =
     !newConfig.agent_name ||
     (newConfig.agent_name && isEDOTAgentName(newConfig.agent_name as AgentName)) ||
+    (newConfig.agent_name && isOTELAgentName(newConfig.agent_name as AgentName)) ||
     (newConfig.agent_name && !isOpenTelemetryAgentName(newConfig.agent_name as AgentName));
 
   const INCORRECT_SERVICE_NAME_TRANSLATED = i18n.translate(
@@ -127,6 +134,7 @@ export function ServicePage({ newConfig, setNewConfig, onClickNext }: Props) {
       />
       {isAllOptionSelected && (
         <EuiCallOut
+          announceOnMount
           color="warning"
           iconType="warning"
           title={i18n.translate('xpack.apm.settings.agentConfiguration.all.option.calloutTitle', {
@@ -156,19 +164,24 @@ export function ServicePage({ newConfig, setNewConfig, onClickNext }: Props) {
             service: { name: prev.service.name, environment },
           }));
         }}
-        dataTestSubj="serviceEnviromentComboBox"
+        dataTestSubj="serviceEnvironmentComboBox"
       />
       <EuiSpacer />
       <EuiFlexGroup justifyContent="flexEnd">
         {/* Cancel button */}
         <EuiFlexItem grow={false}>
-          <LegacyAPMLink path="/settings/agent-configuration">
-            <EuiButtonEmpty data-test-subj="apmServicePageCancelButton" color="primary">
-              {i18n.translate('xpack.apm.agentConfig.servicePage.cancelButton', {
-                defaultMessage: 'Cancel',
-              })}
-            </EuiButtonEmpty>
-          </LegacyAPMLink>
+          <EuiButtonEmpty
+            aria-label={i18n.translate('xpack.apm.servicePage.cancelButton.ariaLabel', {
+              defaultMessage: 'Cancel',
+            })}
+            data-test-subj="apmServicePageCancelButton"
+            color="primary"
+            href={link('/settings/agent-configuration')}
+          >
+            {i18n.translate('xpack.apm.agentConfig.servicePage.cancelButton', {
+              defaultMessage: 'Cancel',
+            })}
+          </EuiButtonEmpty>
         </EuiFlexItem>
 
         {/* Next button */}

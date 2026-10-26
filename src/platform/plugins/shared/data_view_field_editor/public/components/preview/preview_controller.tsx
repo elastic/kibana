@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ReactNode } from 'react';
 import { i18n } from '@kbn/i18n';
 import type {
   DataView,
@@ -14,7 +15,7 @@ import type {
   DataViewField,
   DataViewsPublicPluginStart,
 } from '@kbn/data-views-plugin/public';
-import { NotificationsStart } from '@kbn/core/public';
+import type { NotificationsStart } from '@kbn/core/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import type { ISearchStart } from '@kbn/data-plugin/public';
 import { METRIC_TYPE } from '@kbn/analytics';
@@ -22,20 +23,24 @@ import { BehaviorSubject } from 'rxjs';
 import { castEsToKbnFieldTypeName } from '@kbn/field-types';
 import { renderToString } from 'react-dom/server';
 import React from 'react';
-import debounce from 'lodash/debounce';
-import { PreviewState, FetchDocError } from './types';
-import { BehaviorObservable } from '../../state_utils';
-import { EsDocument, ScriptErrorCodes, Params, FieldPreview } from './types';
+import { debounce } from 'lodash';
+import type { PreviewState, FetchDocError } from './types';
+import type { BehaviorObservable } from '../../state_utils';
+import type { EsDocument, ScriptErrorCodes, Params, FieldPreview } from './types';
 import type { FieldFormatsStart, RuntimeType } from '../../shared_imports';
 import { valueTypeToSelectedType } from './field_preview_context';
-import { Field } from '../../types';
+import type { Field } from '../../types';
 import { pluginName } from '../../constants';
-import { InternalFieldType } from '../../types';
+import type { InternalFieldType } from '../../types';
 
 export const defaultValueFormatter = (value: unknown) => {
   const content = typeof value === 'object' ? JSON.stringify(value) : String(value) ?? '-';
   return renderToString(<>{content}</>);
 };
+
+// Only multiple values are kept as an array. A single value is unwrapped and an empty
+// result stays undefined.
+const toPreviewValue = (values: unknown[]): unknown => (values.length > 1 ? values : values[0]);
 
 interface PreviewControllerArgs {
   dataView: DataViewLazy;
@@ -46,7 +51,7 @@ interface PreviewControllerArgs {
   deps: PreviewControllerDependencies;
 }
 
-interface PreviewControllerDependencies {
+export interface PreviewControllerDependencies {
   search: ISearchStart;
   fieldFormats: FieldFormatsStart;
   usageCollection: UsageCollectionStart;
@@ -138,6 +143,9 @@ export class PreviewController {
   state$: BehaviorObservable<PreviewState>;
 
   private previewCount = 0;
+
+  /** Id (see previewCount) of the _execute request whose response will still be accepted, if any */
+  private inFlightPreviewId: number | null = null;
 
   private updateState = (newState: Partial<PreviewState>) => {
     this.internalState$.next({ ...this.state$.getValue(), ...newState });
@@ -292,7 +300,7 @@ export class PreviewController {
       const afterSave = () => {
         const message = i18n.translate('indexPatternFieldEditor.deleteField.savedHeader', {
           defaultMessage: "Saved ''{fieldName}''",
-          values: { fieldName: updatedField.name },
+          values: { fieldName: updatedField.customLabel || updatedField.name },
         });
         this.deps.notifications.toasts.addSuccess(message);
         this.setIsSaving(false);
@@ -326,9 +334,13 @@ export class PreviewController {
     this.updateState({ pinnedFields });
   };
 
-  private setDocuments = (documents: EsDocument[]) => {
+  private setDocuments = (
+    documents: EsDocument[],
+    documentSource: PreviewState['documentSource']
+  ) => {
     this.updateState({
       documents,
+      documentSource,
       currentIdx: 0,
       isLoadingDocuments: false,
       isPreviewAvailable: this.getIsPreviewAvailable({ documents }),
@@ -370,15 +382,30 @@ export class PreviewController {
   };
 
   setCustomDocIdToLoad = (customDocIdToLoad: string | null) => {
+    // A blank ID (e.g. only whitespace) cannot be loaded, treat it like leaving custom mode
+    const idToLoad = customDocIdToLoad?.trim() ? customDocIdToLoad : null;
+    const { isFetchingDocument: wasFetchingDocument } = this.internalState$.getValue();
+
     this.updateState({
       customDocIdToLoad,
-      customId: customDocIdToLoad || undefined,
-      isPreviewAvailable: this.getIsPreviewAvailable({ customDocIdToLoad }),
+      customId: customDocIdToLoad ?? undefined,
+      isPreviewAvailable: this.getIsPreviewAvailable({ customDocIdToLoad: idToLoad }),
     });
     // load document if id is present
-    this.setIsFetchingDocument(!!customDocIdToLoad);
-    if (customDocIdToLoad) {
-      this.debouncedLoadDocument(customDocIdToLoad);
+    this.setIsFetchingDocument(idToLoad !== null);
+    if (idToLoad !== null) {
+      this.debouncedLoadDocument(idToLoad);
+    } else {
+      // Clearing the ID: cancel any pending document load so it cannot report an error for a
+      // document the user is no longer asking for, and clear a possible previous fetch error.
+      this.debouncedLoadDocument.cancel();
+      this.setFetchDocError(null);
+      // The discarded lookup raised the preview-loading flag for a preview that will no longer
+      // run, so reset it — unless an in-flight _execute request still owns the flag, in which
+      // case its response will settle it.
+      if (wasFetchingDocument && this.inFlightPreviewId === null) {
+        this.setIsLoadingPreview(false);
+      }
     }
   };
 
@@ -392,17 +419,11 @@ export class PreviewController {
     customDocIdToLoad?: string | null;
     documents?: EsDocument[];
   }) => {
-    const {
-      isFetchingDocument: existingIsFetchingDocument,
-      customDocIdToLoad: existingCustomDocIdToLoad,
-      documents: existingDocuments,
-    } = this.internalState$.getValue();
+    const { isFetchingDocument, customDocIdToLoad, documents } = this.internalState$.getValue();
 
-    const existing = { existingIsFetchingDocument, existingCustomDocIdToLoad, existingDocuments };
+    const merged = { isFetchingDocument, customDocIdToLoad, documents, ...update };
 
-    const merged = { ...existing, ...update };
-
-    if (!merged.isFetchingDocument && !merged.customDocIdToLoad && merged.documents?.length === 0) {
+    if (!merged.isFetchingDocument && !merged.customDocIdToLoad && merged.documents.length === 0) {
       return false;
     } else {
       return true;
@@ -491,11 +512,11 @@ export class PreviewController {
     value: unknown;
     format: Params['format'];
     type: Params['type'];
-  }) => {
+  }): ReactNode => {
     if (format?.id) {
       const formatter = this.deps.fieldFormats.getInstance(format.id, format.params);
       if (formatter) {
-        return formatter.getConverterFor('html')(value) ?? JSON.stringify(value);
+        return formatter.convertToReact(value) ?? JSON.stringify(value);
       }
     }
 
@@ -503,7 +524,7 @@ export class PreviewController {
       const fieldType = castEsToKbnFieldTypeName(type);
       const defaultFormatterForType = this.deps.fieldFormats.getDefaultInstance(fieldType);
       if (defaultFormatterForType) {
-        return defaultFormatterForType.getConverterFor('html')(value) ?? JSON.stringify(value);
+        return defaultFormatterForType.convertToReact(value) ?? JSON.stringify(value);
       }
     }
 
@@ -516,9 +537,12 @@ export class PreviewController {
       throw new Error('The "limit" option must be a number');
     }
 
+    // Leave "custom document" mode before fetching: this cancels any pending single document
+    // load and clears a possible fetch error. The current preview fields are kept while the
+    // documents are being fetched so the previewed field row does not disappear.
+    this.setCustomDocIdToLoad(null);
     this.setLastExecutePainlessRequestParams({ documentId: undefined });
     this.setIsFetchingDocument(true);
-    this.setPreviewResponse({ fields: [], error: null });
 
     const [response, searchError] = await this.deps.search
       .search({
@@ -532,8 +556,14 @@ export class PreviewController {
       .then((res) => [res, null])
       .catch((err) => [null, err]);
 
+    // A custom document ID was entered while the sample documents were being fetched:
+    // discard this response, the single document load owns the state now. A cleared (empty)
+    // ID keeps the sample documents as they are the fallback the user returns to.
+    if (Boolean(this.internalState$.getValue().customDocIdToLoad?.trim())) {
+      return;
+    }
+
     this.setIsFetchingDocument(false);
-    this.setCustomDocIdToLoad(null);
 
     const error: FetchDocError | null = Boolean(searchError)
       ? {
@@ -553,7 +583,7 @@ export class PreviewController {
     this.setFetchDocError(error);
 
     if (error === null) {
-      this.setDocuments(response ? response.rawResponse.hits.hits : []);
+      this.setDocuments(response ? response.rawResponse.hits.hits : [], 'cluster');
     }
   };
 
@@ -581,6 +611,12 @@ export class PreviewController {
       .toPromise()
       .then((res) => [res, null])
       .catch((err) => [null, err]);
+
+    // The document ID changed (or custom mode was left) while this request was in flight:
+    // discard the response, it no longer reflects the requested document.
+    if (this.internalState$.getValue().customDocIdToLoad !== id) {
+      return;
+    }
 
     this.setIsFetchingDocument(false);
 
@@ -616,7 +652,7 @@ export class PreviewController {
     this.setFetchDocError(error);
 
     if (error === null) {
-      this.setDocuments(loadedDocuments);
+      this.setDocuments(loadedDocuments, 'custom');
     } else {
       // Make sure we disable the "Updating..." indicator as we have an error
       // and we won't fetch the preview
@@ -628,6 +664,7 @@ export class PreviewController {
 
   reset = () => {
     this.previewCount = 0;
+    this.inFlightPreviewId = null;
     this.updateState({
       documents: [],
       previewResponse: { fields: [], error: null },
@@ -650,7 +687,36 @@ export class PreviewController {
 
   getPreviewCount = () => this.previewCount;
 
-  incrementPreviewCount = () => ++this.previewCount;
+  incrementPreviewCount = () => {
+    this.inFlightPreviewId = ++this.previewCount;
+    return this.inFlightPreviewId;
+  };
+
+  /** Marks the _execute request with the given id as settled, whether its response is used or not. */
+  completePreviewRequest = (previewId: number) => {
+    if (this.inFlightPreviewId === previewId) {
+      this.inFlightPreviewId = null;
+    }
+  };
+
+  /**
+   * Makes the response of the in-flight _execute request, if any, be discarded when it arrives.
+   * As the discarded request will never update the preview, the params cache is invalidated so
+   * that the next updatePreview() issues a new request, even if the form went back to the params
+   * of the discarded request. Without an in-flight request the cache is still accurate: no-op.
+   */
+  discardInFlightPreview = () => {
+    if (this.inFlightPreviewId === null) {
+      return;
+    }
+    ++this.previewCount;
+    this.inFlightPreviewId = null;
+    this.lastExecutePainlessRequestParams = {
+      type: null,
+      script: undefined,
+      documentId: undefined,
+    };
+  };
 
   allParamsDefined = (
     type: Params['type'],
@@ -669,7 +735,7 @@ export class PreviewController {
     type: Params['type'],
     format: Params['format']
   ) => {
-    const [value] = values;
+    const value = toPreviewValue(values);
     const formattedValue = this.valueFormatter({ value, type, format });
 
     this.setPreviewResponse({
@@ -698,7 +764,7 @@ export class PreviewController {
         const { 1: fieldName } = key.split('composite_field.');
         updatedFieldsInScript.push(fieldName);
 
-        const [value] = values;
+        const value = toPreviewValue(values);
         const formattedValue = this.valueFormatter({ value, type, format });
 
         return {
@@ -707,7 +773,7 @@ export class PreviewController {
             : `${fieldName$Value ?? ''}.${fieldName}`,
           value,
           formattedValue,
-          type: valueTypeToSelectedType(value),
+          type: valueTypeToSelectedType(values[0]),
         };
       })
       .filter(filterSubfield)

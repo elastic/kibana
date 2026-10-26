@@ -10,21 +10,24 @@ import type { ILicenseState } from '../../../lib';
 import { BASE_ACTION_API_PATH } from '../../../../common';
 import type { ActionsRequestHandlerContext } from '../../../types';
 import { verifyAccessAndContext } from '../../verify_access_and_context';
-import { connectorResponseSchemaV1 } from '../../../../common/routes/connector/response';
+import { getConnectorResponseSchemaV1 } from '../../../../common/routes/connector/response';
+import { transformConnectorResponseV1 } from '../common_transforms';
 import type {
   UpdateConnectorBodyV1,
   UpdateConnectorParamsV1,
 } from '../../../../common/routes/connector/apis/update';
 import {
-  updateConnectorBodySchemaV1,
+  getUpdateConnectorBodySchemaV1,
   updateConnectorParamsSchemaV1,
 } from '../../../../common/routes/connector/apis/update';
-import { transformUpdateConnectorResponseV1 } from './transforms';
 import { DEFAULT_ACTION_ROUTE_SECURITY } from '../../constants';
+import { errorHandler } from '../error_handler';
+import type { ActionsConfigurationUtilities } from '../../../actions_config';
 
 export const updateConnectorRoute = (
   router: IRouter<ActionsRequestHandlerContext>,
-  licenseState: ILicenseState
+  licenseState: ILicenseState,
+  actionsConfigUtils: ActionsConfigurationUtilities
 ) => {
   router.put(
     {
@@ -35,33 +38,54 @@ export const updateConnectorRoute = (
         summary: `Update a connector`,
         tags: ['oas-tag:connectors'],
       },
-      validate: {
-        request: {
-          body: updateConnectorBodySchemaV1,
-          params: updateConnectorParamsSchemaV1,
-        },
-        response: {
-          200: {
-            description: 'Indicates a successful call.',
-            body: () => connectorResponseSchemaV1,
+      validate: () => {
+        const includeInboundEventsField = actionsConfigUtils.isInboundEventsEnabled();
+        return {
+          request: {
+            body: getUpdateConnectorBodySchemaV1(includeInboundEventsField),
+            params: updateConnectorParamsSchemaV1,
           },
-        },
+          response: {
+            200: {
+              description: 'Indicates a successful call.',
+              body: () => getConnectorResponseSchemaV1(includeInboundEventsField),
+            },
+            403: {
+              description: 'Indicates that this call is forbidden.',
+            },
+          },
+        };
       },
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
-        const actionsClient = (await context.actions).getActionsClient();
-        const { id }: UpdateConnectorParamsV1 = req.params;
-        const { name, config, secrets }: UpdateConnectorBodyV1 = req.body;
+        try {
+          const actionsClient = (await context.actions).getActionsClient();
+          const { id }: UpdateConnectorParamsV1 = req.params;
+          const {
+            name,
+            config,
+            secrets,
+            is_inbound_events_enabled: isInboundEventsEnabled,
+          }: UpdateConnectorBodyV1 = req.body;
 
-        return res.ok({
-          body: transformUpdateConnectorResponseV1(
-            await actionsClient.update({
-              id,
-              action: { name, config, secrets },
-            })
-          ),
-        });
+          return res.ok({
+            body: transformConnectorResponseV1(
+              await actionsClient.update({
+                id,
+                action: {
+                  name,
+                  config,
+                  secrets,
+                  ...(isInboundEventsEnabled !== undefined ? { isInboundEventsEnabled } : {}),
+                },
+              }),
+              { includeInboundEventsField: actionsConfigUtils.isInboundEventsEnabled() }
+            ),
+          });
+        } catch (error) {
+          return errorHandler(res, error);
+        }
       })
     )
   );

@@ -10,7 +10,7 @@
 jest.mock('node-fetch');
 import fetch from 'node-fetch';
 import { sendTelemetryOptInStatus } from './telemetry_opt_in_stats';
-import { StatsGetterConfig } from '@kbn/telemetry-collection-manager-plugin/server';
+import type { StatsGetterConfig } from '@kbn/telemetry-collection-manager-plugin/server';
 
 describe('sendTelemetryOptInStatus', () => {
   const mockClusterUuid = 'mk_uuid';
@@ -39,7 +39,7 @@ describe('sendTelemetryOptInStatus', () => {
       mockStatsGetterConfig
     );
     expect(result).toBeUndefined();
-    expect(fetch).toBeCalledTimes(1);
+    expect(fetch).toHaveBeenCalledTimes(1);
     expect((fetch as jest.MockedFunction<typeof fetch>).mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         "https://telemetry.elastic.co/v3/send/kibana-opt-in-reports",
@@ -71,7 +71,7 @@ describe('sendTelemetryOptInStatus', () => {
       mockStatsGetterConfig
     );
 
-    expect(fetch).toBeCalledTimes(1);
+    expect(fetch).toHaveBeenCalledTimes(1);
     expect((fetch as jest.MockedFunction<typeof fetch>).mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         "https://telemetry-staging.elastic.co/v3/send/kibana-opt-in-reports",

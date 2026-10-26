@@ -6,17 +6,16 @@
  */
 
 import { isObject } from 'lodash';
-import { DOCUMENT_FIELD_NAME } from '../../../../../../common/constants';
-import {
+import type {
+  BaseIndexPatternColumn,
+  ColumnBuildHints,
   FieldBasedIndexPatternColumn,
-  GenericOperationDefinition,
-  GenericIndexPatternColumn,
-} from '..';
-import { BaseIndexPatternColumn, ReferenceBasedIndexPatternColumn } from '../column_types';
-import { FormBasedLayer } from '../../../types';
+  FormBasedLayer,
+} from '@kbn/lens-common';
+import { DOCUMENT_FIELD_NAME } from '../../../../../../common/constants';
+import type { GenericOperationDefinition } from '..';
 import { unquotedStringRegex } from './util';
-import { isColumnOfType } from '../helpers';
-import { StaticValueIndexPatternColumn } from '../static_value';
+import { hasOperationType } from '../helpers';
 
 // Just handle two levels for now
 type OperationParams = Record<string, string | number | Record<string, string | number>>;
@@ -35,37 +34,45 @@ export function getSafeFieldName({
   return fieldName;
 }
 
+/**
+ * Generates a formula string from a previous column's configuration.
+ * Used when transitioning from another operation type to a formula operation.
+ */
 export function generateFormula(
-  previousColumn: ReferenceBasedIndexPatternColumn | GenericIndexPatternColumn,
+  previousColumn: ColumnBuildHints,
   layer: FormBasedLayer,
   previousFormula: string,
   operationDefinitionMap: Record<string, GenericOperationDefinition> | undefined
 ) {
-  if (isColumnOfType<StaticValueIndexPatternColumn>('static_value', previousColumn)) {
-    if (previousColumn.params && 'value' in previousColumn.params) {
-      return String(previousColumn.params.value); // make sure it's a string
-    }
+  if (
+    hasOperationType(previousColumn, 'static_value') &&
+    previousColumn.params &&
+    'value' in previousColumn.params
+  ) {
+    return String(previousColumn.params.value);
   }
-  if ('references' in previousColumn) {
+  if (previousColumn.references && previousColumn.references.length > 0) {
     const metric = layer.columns[previousColumn.references[0]];
     if (metric && 'sourceField' in metric && metric.dataType === 'number') {
       const fieldName = getSafeFieldName(metric);
       // TODO need to check the input type from the definition
       previousFormula += `${previousColumn.operationType}(${metric.operationType}(${fieldName})`;
     }
+  } else if (
+    previousColumn.sourceField &&
+    (previousColumn.dataType === 'number' || previousColumn.dataType === 'date')
+  ) {
+    previousFormula += `${previousColumn.operationType}(${getSafeFieldName(
+      previousColumn as FieldBasedIndexPatternColumn
+    )}`;
   } else {
-    if (
-      previousColumn &&
-      'sourceField' in previousColumn &&
-      (previousColumn.dataType === 'number' || previousColumn.dataType === 'date')
-    ) {
-      previousFormula += `${previousColumn.operationType}(${getSafeFieldName(previousColumn)}`;
-    } else {
-      // couldn't find formula function to call, exit early because adding args is going to fail anyway
-      return '';
-    }
+    // couldn't find formula function to call, exit early because adding args is going to fail anyway
+    return '';
   }
-  const formulaNamedArgs = extractParamsForFormula(previousColumn, operationDefinitionMap);
+  const formulaNamedArgs =
+    'isBucketed' in previousColumn
+      ? extractParamsForFormula(previousColumn, operationDefinitionMap)
+      : [];
   if (formulaNamedArgs.length) {
     previousFormula +=
       ', ' + formulaNamedArgs.map(({ name, value }) => `${name}=${value}`).join(', ');
@@ -112,15 +119,19 @@ interface ParameterizedColumn extends BaseIndexPatternColumn {
   params: OperationParams;
 }
 
-function isParameterizedColumn(col: GenericIndexPatternColumn): col is ParameterizedColumn {
+function isParameterizedColumn(col: ColumnBuildHints): col is ParameterizedColumn {
   return Boolean('params' in col && col.params);
 }
 
 function extractParamsForFormula(
-  column: GenericIndexPatternColumn,
+  column: ColumnBuildHints,
   operationDefinitionMap: Record<string, GenericOperationDefinition> | undefined
 ) {
-  if (!operationDefinitionMap) {
+  if (
+    !operationDefinitionMap ||
+    !column.operationType ||
+    !operationDefinitionMap[column.operationType]
+  ) {
     return [];
   }
   const def = operationDefinitionMap[column.operationType];

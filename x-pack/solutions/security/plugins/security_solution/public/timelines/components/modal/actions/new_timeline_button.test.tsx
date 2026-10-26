@@ -6,6 +6,7 @@
  */
 
 import { render, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { NewTimelineButton } from './new_timeline_button';
 import { TimelineId } from '../../../../../common/types';
@@ -13,10 +14,12 @@ import { timelineActions } from '../../../store';
 import { TestProviders } from '../../../../common/mock';
 import { RowRendererValues } from '../../../../../common/api/timeline';
 import { defaultUdtHeaders } from '../../timeline/body/column_headers/default_headers';
+import { useSecurityDefaultPatterns } from '../../../../data_view_manager/hooks/use_security_default_patterns';
 
 jest.mock('../../../../common/components/discover_in_timeline/use_discover_in_timeline_context');
-jest.mock('react-redux', () => {
-  const original = jest.requireActual('react-redux');
+jest.mock('../../../../data_view_manager/hooks/use_security_default_patterns');
+jest.mock('react-redux-v7', () => {
+  const original = jest.requireActual('react-redux-v7');
 
   return {
     ...original,
@@ -24,13 +27,16 @@ jest.mock('react-redux', () => {
   };
 });
 
-jest.mock('../../../../common/hooks/use_experimental_features');
-
 const renderNewTimelineButton = () =>
   render(<NewTimelineButton timelineId={TimelineId.test} />, { wrapper: TestProviders });
 
 describe('NewTimelineButton', () => {
   it('should render 2 options in the popover when clicking on the button', async () => {
+    (useSecurityDefaultPatterns as jest.Mock).mockReturnValue({
+      id: '',
+      indexPatterns: [],
+    });
+
     const { getByTestId, getByText } = renderNewTimelineButton();
 
     const button = getByTestId('timeline-modal-new-timeline-dropdown-button');
@@ -38,7 +44,7 @@ describe('NewTimelineButton', () => {
     expect(button).toBeInTheDocument();
     expect(getByText('New')).toBeInTheDocument();
 
-    button.click();
+    await userEvent.click(button);
 
     expect(getByTestId('timeline-modal-new-timeline')).toBeInTheDocument();
     expect(getByTestId('timeline-modal-new-timeline')).toHaveTextContent('New Timeline');
@@ -64,12 +70,17 @@ describe('NewTimelineButton', () => {
       '.siem-signals-spacename',
     ];
 
+    (useSecurityDefaultPatterns as jest.Mock).mockReturnValue({
+      id: dataViewId,
+      indexPatterns: selectedPatterns,
+    });
+
     const spy = jest.spyOn(timelineActions, 'createTimeline');
 
     const { getByTestId } = renderNewTimelineButton();
 
-    getByTestId('timeline-modal-new-timeline-dropdown-button').click();
-    getByTestId('timeline-modal-new-timeline').click();
+    await userEvent.click(getByTestId('timeline-modal-new-timeline-dropdown-button'));
+    await userEvent.click(getByTestId('timeline-modal-new-timeline'));
 
     await waitFor(() => {
       expect(spy).toHaveBeenCalledWith({

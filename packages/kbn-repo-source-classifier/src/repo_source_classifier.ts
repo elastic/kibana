@@ -17,7 +17,7 @@ import { RepoPath } from './repo_path';
 import { inferGroupAttrsFromPath } from './group';
 
 const STATIC_EXTS = new Set(
-  'json|woff|woff2|ttf|eot|svg|ico|png|jpg|gif|jpeg|html|md|txt|tmpl|xml'
+  'json|woff|woff2|ttf|eot|svg|ico|png|jpg|gif|jpeg|html|md|txt|tmpl|xml|yaml|yml'
     .split('|')
     .map((e) => `.${e}`)
 );
@@ -87,7 +87,7 @@ export class RepoSourceClassifier {
       return true;
     }
 
-    if (path.getFilename() === 'webpack.config' && path.getPkgInfo()?.pkgId !== '@kbn/optimizer') {
+    if (path.getFilename() === 'webpack.config') {
       return true;
     }
 
@@ -119,10 +119,6 @@ export class RepoSourceClassifier {
 
     if (root === 'i18n') {
       return 'common package';
-    }
-
-    if (root === 'shareable_runtime') {
-      return 'non-package';
     }
 
     if (root === 'tasks') {
@@ -166,7 +162,14 @@ export class RepoSourceClassifier {
 
     const { pkgId, rel } = pkgInfo;
 
-    if (pkgId === '@kbn/test' || pkgId === '@kbn/test-subj-selector') {
+    if (
+      pkgId === '@kbn/test' ||
+      pkgId === '@kbn/test-docker-servers' ||
+      pkgId === '@kbn/test-es-server' ||
+      pkgId === '@kbn/test-kibana-server' ||
+      pkgId === '@kbn/test-saml-auth' ||
+      pkgId === '@kbn/test-subj-selector'
+    ) {
       return 'common package';
     }
 
@@ -193,6 +196,8 @@ export class RepoSourceClassifier {
           return 'static';
         case 'shared-common':
           return 'common package';
+        case 'tooling':
+          return 'tooling';
         case 'core':
         case 'plugin':
           // classification in plugins is more complicated, fall through to remaining logic

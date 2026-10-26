@@ -9,18 +9,19 @@
 
 import { i18n } from '@kbn/i18n';
 import type { History } from 'history';
+import type { AppHeaderBadge } from '@kbn/app-header';
 import type { ChromeStart, DocLinksStart } from '@kbn/core/public';
 import type { Filter, Query } from '@kbn/es-query';
 import { redirectWhenMissing } from '@kbn/kibana-utils-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { VisualizeConstants } from '../../../common/constants';
+import { VisualizeConstants } from '@kbn/visualizations-common';
 import { convertFromSerializedVis } from '../../utils/saved_visualize_utils';
 import type { VisualizeServices, VisualizeEditorVisInstance } from '../types';
 
 export const addHelpMenuToAppChrome = (chrome: ChromeStart, docLinks: DocLinksStart) => {
   chrome.setHelpExtension({
     appName: i18n.translate('visualizations.helpMenu.appName', {
-      defaultMessage: 'Visualize Library',
+      defaultMessage: 'Visualize library',
     }),
     links: [
       {
@@ -31,17 +32,21 @@ export const addHelpMenuToAppChrome = (chrome: ChromeStart, docLinks: DocLinksSt
   });
 };
 
-export const addBadgeToAppChrome = (chrome: ChromeStart) => {
-  chrome.setBadge({
-    text: i18n.translate('visualizations.badge.readOnly.text', {
-      defaultMessage: 'Read only',
-    }),
-    tooltip: i18n.translate('visualizations.badge.readOnly.tooltip', {
-      defaultMessage: 'Unable to save visualizations to the library',
-    }),
-    iconType: 'glasses',
+const getReadOnlyBadgeText = () =>
+  i18n.translate('visualizations.badge.readOnly.text', {
+    defaultMessage: 'Read only',
   });
-};
+
+const getReadOnlyBadgeTooltip = () =>
+  i18n.translate('visualizations.badge.readOnly.tooltip', {
+    defaultMessage: 'Unable to save visualizations to the library',
+  });
+
+export const getReadOnlyBadge = (): AppHeaderBadge => ({
+  label: getReadOnlyBadgeText(),
+  tooltip: getReadOnlyBadgeTooltip(),
+  color: 'hollow',
+});
 
 export const getDefaultQuery = ({ data }: VisualizeServices) => {
   return data.query.queryString.getDefaultQuery();
@@ -94,7 +99,7 @@ export const redirectToSavedObjectPage = (
   })(error);
 };
 
-export function getVizEditorOriginatingAppUrl(history: History) {
+export function getVisEditorOriginatingAppUrl(history: History) {
   return `#/${history.location.pathname}${history.location.search}`;
 }
 

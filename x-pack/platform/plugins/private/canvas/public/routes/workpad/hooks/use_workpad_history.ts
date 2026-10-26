@@ -6,12 +6,12 @@
  */
 
 import { useEffect, useRef } from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import { useHistory } from 'react-router-dom';
 import { isEqual } from 'lodash';
 import { createPath } from 'history';
 import { encode, decode } from '../route_state';
-import { State } from '../../../../types';
+import type { State } from '../../../../types';
 
 export const useWorkpadHistory = () => {
   const history = useHistory<string>();

@@ -1,0 +1,71 @@
+---
+# This file is used to generate "Telemetry settings in Kibana" page in the product docs
+# For the schema and an example refer to the automated settings reference: 
+# https://github.com/elastic/docs-builder/blob/main/docs/syntax/automated_settings.md
+
+product: Kibana
+collection: Telemetry settings in Kibana
+id: telemetry-settings-kbn
+
+groups:
+  - group: General telemetry settings
+    id: telemetry-general-settings
+    settings:
+
+      - setting: telemetry.optIn
+        id: telemetry-optin
+        description: |
+          Set to `false` to stop sending any telemetry data to Elastic. Reporting your cluster statistics helps us improve your user experience.
+
+          This setting can be changed at any time in [Advanced Settings](/reference/advanced-settings.md). To prevent users from changing it, set [`telemetry.allowChangingOptInStatus`](/reference/configuration-reference/general-settings.md#telemetry-allowChangingOptInStatus) to `false`.
+        datatype: bool
+        default: true
+        applies_to:
+          stack: ga
+          ech: unavailable
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: unavailable
+
+      - setting: telemetry.allowChangingOptInStatus
+        description: |
+          Set to `false` to disallow overwriting the [`telemetry.optIn`](#telemetry-optin) setting via the [Advanced Settings](/reference/advanced-settings.md) in {{kib}}.
+        datatype: bool
+        default: true
+        applies_to:
+          stack: ga
+          ech: unavailable
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: unavailable
+
+      - setting: telemetry.sendUsageFrom
+        description: |
+          Set to `'server'` to report the cluster statistics from the {{kib}} server. If the server fails to connect to our endpoint at [https://telemetry.elastic.co/](https://telemetry.elastic.co/), it assumes it is behind a firewall and falls back to `'browser'` to send it from users' browsers when they are navigating through {{kib}}.
+        datatype: enum
+        default: server
+        options:
+          - option: browser
+          - option: server
+        applies_to:
+          stack: ga
+          ech: unavailable
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: unavailable
+
+      - setting: xpack.apm.telemetryCollectionEnabled
+        description: |
+          Collects information about APM data and API performance. Set this to `false` to specifically disable APM's collector.
+        datatype: bool
+        default: true
+        applies_to:
+          stack: ga
+          ech: unavailable
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: unavailable

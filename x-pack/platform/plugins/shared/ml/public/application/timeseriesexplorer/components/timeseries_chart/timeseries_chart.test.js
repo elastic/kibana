@@ -6,9 +6,9 @@
  */
 
 import moment from 'moment-timezone';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import React from 'react';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
+import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 
 import { TimeseriesChart } from './timeseries_chart';
 
@@ -74,12 +74,14 @@ describe('TimeseriesChart', () => {
   test('Minimal initialization', () => {
     const props = getTimeseriesChartPropsMock();
 
-    const wrapper = mountWithIntl(
+    const { container } = renderWithI18n(
       <kibanaReactContextMock.Provider>
         <TimeseriesChart {...props} />
       </kibanaReactContextMock.Provider>
     );
 
-    expect(wrapper.html()).toBe('<div class="ml-timeseries-chart-react"></div>');
+    // Verify the chart container is rendered with the correct class
+    expect(container.querySelector('.ml-timeseries-chart-react')).toBeInTheDocument();
+    expect(container.innerHTML).toBe('<div class="ml-timeseries-chart-react"></div>');
   });
 });

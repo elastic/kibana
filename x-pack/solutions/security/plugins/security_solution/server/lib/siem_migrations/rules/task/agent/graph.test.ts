@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import type { ActionsClientChatOpenAI } from '@kbn/langchain/server/language_models';
+import type { InferenceChatModel } from '@kbn/inference-langchain';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { NodeResponse } from '../__mocks__/mocks';
 import { SiemMigrationFakeLLM, MockSiemMigrationTelemetryClient } from '../__mocks__/mocks';
-import { MockEsqlKnowledgeBase } from '../util/__mocks__/mocks';
+import { MockEsqlKnowledgeBase } from '../../../common/task/util/__mocks__/mocks';
 import { MockRuleMigrationsRetriever } from '../retrievers/__mocks__/mocks';
 import { getRuleMigrationAgent } from './graph';
+import { getRulesMigrationTools } from './tools';
+import { createRuleMigrationsDataClientMock } from '../../data/__mocks__/mocks';
 
 const mockOriginalRule = {
   id: 'b12c89bc-9d06-11eb-a592-acde48001122',
@@ -94,17 +96,24 @@ let mockTelemetryClient = new MockSiemMigrationTelemetryClient();
 
 const setupAgent = async (responses: NodeResponse[]) => {
   fakeLLM = new SiemMigrationFakeLLM({ nodeResponses: responses });
-  const model = fakeLLM as unknown as ActionsClientChatOpenAI;
+  const model = fakeLLM as unknown as InferenceChatModel;
   const graph = getRuleMigrationAgent({
     model,
     esqlKnowledgeBase: mockEsqlKnowledgeBase,
     ruleMigrationsRetriever: mockRetriever,
     logger,
     telemetryClient: mockTelemetryClient,
+    tools: getRulesMigrationTools('test-migration', {
+      rulesClient: createRuleMigrationsDataClientMock(),
+      ruleMigrationsRetriever: mockRetriever,
+    }),
   });
   return graph;
 };
 
+// This tests the v1 one-shot `matchPrebuiltRule` node path, used when the
+// `ruleMigrationGraphv2` experimental feature is disabled (default). See `./graph_v2.test.ts`
+// for the v2 `matchPrebuiltRule` subgraph path (security-team#18589).
 describe('getRuleMigrationAgent', () => {
   beforeEach(() => {
     mockRetriever = new MockRuleMigrationsRetriever();
@@ -112,12 +121,16 @@ describe('getRuleMigrationAgent', () => {
     mockEsqlKnowledgeBase = new MockEsqlKnowledgeBase();
     jest.clearAllMocks();
   });
+
   describe('graph compilation', () => {
     it('ensures that the graph compiles', async () => {
       await setupAgent([{ nodeId: '', response: '' }]);
     });
   });
+
   describe('prebuilt rules', () => {
+    // Eval note (security-team#18589): compare prebuilt match rates for Splunk, QRadar, and
+    // Sentinel via kbn-evals-suite-security-automatic-migrations prebuilt_rule_match evaluator.
     it('successful match', async () => {
       mockRetriever.prebuiltRules.search.mockResolvedValue([mockPrebuiltRule]);
       const graph = await setupAgent([
@@ -137,6 +150,7 @@ describe('getRuleMigrationAgent', () => {
       expect(response.translation_result).toEqual('full');
       expect(fakeLLM.getNodeCallCount('matchPrebuiltRule')).toBe(1);
     });
+
     it('llm respond with non existing integration name', async () => {
       mockRetriever.prebuiltRules.search.mockResolvedValue([mockIncorrectRuleName]);
       const graph = await setupAgent([
@@ -150,12 +164,17 @@ describe('getRuleMigrationAgent', () => {
         },
       ]);
 
-      const response = await graph.invoke({ original_rule: mockOriginalRule });
+      const response = await graph.invoke({
+        id: 'test',
+        original_rule: mockOriginalRule,
+        resources: {},
+      });
       expect(response.elastic_rule?.prebuilt_rule_id).toEqual(undefined);
       expect(mockRetriever.prebuiltRules.search).toHaveBeenCalledTimes(1);
       expect(response.translation_result).toEqual('untranslatable');
       expect(fakeLLM.getNodeCallCount('matchPrebuiltRule')).toBe(1);
     });
+
     it('no prebuilt rule matches', async () => {
       mockRetriever.prebuiltRules.search.mockResolvedValue([]);
       const graph = await setupAgent([
@@ -168,11 +187,45 @@ describe('getRuleMigrationAgent', () => {
           response: mockPrebuiltRuleNoMatchResponse,
         },
       ]);
-      const response = await graph.invoke({ original_rule: mockOriginalRule });
+      const response = await graph.invoke({
+        id: 'test',
+        original_rule: mockOriginalRule,
+        resources: {},
+      });
       expect(mockRetriever.prebuiltRules.search).toHaveBeenCalledTimes(1);
       expect(response.translation_result).toEqual('untranslatable');
     });
+
+    it('skipPrebuiltRulesMatching bypasses the match node', async () => {
+      mockEsqlKnowledgeBase.translate.mockResolvedValue(mockPartialNlToEsqlResponse);
+      mockRetriever.integrations.search.mockResolvedValue([]);
+      const graph = await setupAgent([
+        {
+          nodeId: 'createSemanticQuery',
+          response: mockSemanticQueryResponse,
+        },
+        {
+          nodeId: 'retrieveIntegrations',
+          response: mockIntegrationNoMatchResponse,
+        },
+      ]);
+
+      const response = await graph.invoke(
+        {
+          id: 'test',
+          original_rule: mockOriginalRule,
+          resources: {},
+        },
+        { configurable: { skipPrebuiltRulesMatching: true } }
+      );
+
+      expect(fakeLLM.getNodeCallCount('matchPrebuiltRule')).toBe(0);
+      expect(mockRetriever.prebuiltRules.search).not.toHaveBeenCalled();
+      expect(response.elastic_rule?.prebuilt_rule_id).toBeUndefined();
+      expect(response.translation_result).toEqual('partial');
+    });
   });
+
   describe('custom translation', () => {
     it('unsupported query', async () => {
       mockRetriever.prebuiltRules.search.mockResolvedValue([mockPrebuiltRule]);
@@ -187,12 +240,17 @@ describe('getRuleMigrationAgent', () => {
         },
       ]);
 
-      const response = await graph.invoke({ original_rule: mockOriginalInputLookup });
+      const response = await graph.invoke({
+        id: 'test',
+        original_rule: mockOriginalInputLookup,
+        resources: {},
+      });
       expect(mockRetriever.prebuiltRules.search).toHaveBeenCalledTimes(1);
       expect(response.translation_result).toEqual('untranslatable');
       // Because of the inputlookup in the query, we expect it to end before calling the LLM
       expect(fakeLLM.getNodeCallCount('inlineQuery')).toBe(0);
     });
+
     it('no integrations found in RAG and partial results', async () => {
       mockEsqlKnowledgeBase.translate.mockResolvedValue(mockPartialNlToEsqlResponse);
       mockRetriever.prebuiltRules.search.mockResolvedValue([mockPrebuiltRule]);
@@ -210,16 +268,21 @@ describe('getRuleMigrationAgent', () => {
           response: mockIntegrationNoMatchResponse,
         },
       ]);
-      const response = await graph.invoke({ original_rule: mockOriginalRule });
+      const response = await graph.invoke({
+        id: 'test',
+        original_rule: mockOriginalRule,
+        resources: {},
+      });
       expect(mockRetriever.prebuiltRules.search).toHaveBeenCalledTimes(1);
       expect(mockEsqlKnowledgeBase.translate).toHaveBeenCalledTimes(2);
       expect(response.translation_result).toEqual('partial');
       expect(fakeLLM.getNodeCallCount('retrieveIntegrations')).toBe(0);
     });
+
     it('integration found and full translation results', async () => {
       mockEsqlKnowledgeBase.translate.mockResolvedValue(mockFullNlToEsqlResponse);
       mockRetriever.prebuiltRules.search.mockResolvedValue([mockPrebuiltRule]);
-      mockRetriever.integrations.getIntegrations.mockResolvedValue([mockIntegrationResult]);
+      mockRetriever.integrations.search.mockResolvedValue([mockIntegrationResult]);
       const graph = await setupAgent([
         {
           nodeId: 'createSemanticQuery',
@@ -234,7 +297,11 @@ describe('getRuleMigrationAgent', () => {
           response: mockIntegrationMatchResponse,
         },
       ]);
-      const response = await graph.invoke({ original_rule: mockOriginalRule });
+      const response = await graph.invoke({
+        id: 'test',
+        original_rule: mockOriginalRule,
+        resources: {},
+      });
       expect(mockRetriever.prebuiltRules.search).toHaveBeenCalledTimes(1);
       expect(mockEsqlKnowledgeBase.translate).toHaveBeenCalledTimes(2);
       expect(fakeLLM.getNodeCallCount('retrieveIntegrations')).toBe(1);

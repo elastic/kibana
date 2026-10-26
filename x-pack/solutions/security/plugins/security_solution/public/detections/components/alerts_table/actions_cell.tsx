@@ -7,9 +7,10 @@
 
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import React, { memo, useCallback, useContext, useMemo } from 'react';
-import { useSelector } from 'react-redux';
-import { TableId, getTableByIdSelector } from '@kbn/securitysolution-data-table';
+import { useSelector } from 'react-redux-v7';
+import { getTableByIdSelector, TableId } from '@kbn/securitysolution-data-table';
 import { noop } from 'lodash';
+import type { EsHitRecord } from '@kbn/discover-utils';
 import type { SetEventsLoading } from '../../../../common/types';
 import { StatefulEventContext } from '../../../common/components/events_viewer/stateful_event_context';
 import { useLicense } from '../../../common/hooks/use_license';
@@ -18,6 +19,9 @@ import { getAlertsDefaultModel } from './default_config';
 import type { State } from '../../../common/store';
 import { RowAction } from '../../../common/components/control_columns/row_action';
 import type { GetSecurityAlertsTableProp } from './types';
+import { expandDottedObject } from '../../../../common/utils/expand_dotted';
+import { useIsNewFlyoutEnabled } from '../../../common/hooks/use_is_new_flyout_enabled';
+import { useAlertsContext } from './alerts_context';
 
 const onRowSelected = () => {};
 
@@ -29,14 +33,16 @@ export const ActionsCellComponent: GetSecurityAlertsTableProp<'renderActionsCell
   isExpandable,
   colIndex,
   setCellProps,
-  ecsAlert: alert,
-  legacyAlert,
+  alert,
   setIsActionLoading,
   refresh: alertsTableRefresh,
   clearSelection,
   leadingControlColumn,
+  openDocumentFlyout: contextOpenDocumentFlyout,
+  onRemoveFromCase,
 }) => {
   const license = useLicense();
+  const { alertsTableRef } = useAlertsContext();
   const defaults = useMemo(() => getAlertsDefaultModel(license), [license]);
   const selectTableById = useMemo(() => getTableByIdSelector(), []);
   const {
@@ -46,15 +52,48 @@ export const ActionsCellComponent: GetSecurityAlertsTableProp<'renderActionsCell
     loadingEventIds,
   } = useSelector((state: State) => selectTableById(state, tableType) ?? defaults);
   const eventContext = useContext(StatefulEventContext);
+  const isNewFlyoutEnabled = useIsNewFlyoutEnabled();
+
+  // `rowIndex` is absolute (it crosses page boundaries), which is also what
+  // the pagination slice expects (`flyoutDocumentIndex`). See `ActionsCellHost`
+  // in `@kbn/response-ops-alerts-table` for where the page-relative index is
+  // computed back from this absolute one.
+  const onExpandFlyout = useCallback(() => {
+    contextOpenDocumentFlyout(rowIndex);
+  }, [contextOpenDocumentFlyout, rowIndex]);
+
+  // Derive ecsAlert (nested) from alert
+  const ecsAlert = useMemo(() => expandDottedObject(alert) as Ecs, [alert]);
+
+  // Derive legacyAlert (flat {field, value[]} array) from alert
+  const legacyData = useMemo<TimelineItem['data']>(
+    () =>
+      Object.entries(alert).map(([field, value]) => ({
+        field,
+        value: (Array.isArray(value) ? value : [value]) as string[],
+      })),
+    [alert]
+  );
 
   const timelineItem = useMemo<TimelineItem>(
     () => ({
-      _id: (alert as Ecs)._id,
-      _index: (alert as Ecs)._index,
-      ecs: alert as Ecs,
-      data: legacyAlert as TimelineItem['data'],
+      _id: alert._id,
+      _index: alert._index,
+      ecs: ecsAlert,
+      data: legacyData,
     }),
-    [alert, legacyAlert]
+    [alert._id, alert._index, ecsAlert, legacyData]
+  );
+
+  // We are creating this object here so we can pass it to the cell action, which will then pass it to the flyout.
+  // This way we can use the same flyout content code between Security Solution and Discover.
+  const esHitRecord: EsHitRecord = useMemo(
+    () => ({
+      _id: alert._id,
+      _index: alert._index,
+      _source: alert,
+    }),
+    [alert]
   );
 
   const setEventsLoading = useCallback<SetEventsLoading>(
@@ -73,6 +112,7 @@ export const ActionsCellComponent: GetSecurityAlertsTableProp<'renderActionsCell
       columnId={`actions-${rowIndex}`}
       columnHeaders={columnHeaders}
       controlColumn={leadingControlColumn}
+      esHitRecord={esHitRecord}
       data={timelineItem}
       disabled={false}
       index={rowIndex}
@@ -81,6 +121,7 @@ export const ActionsCellComponent: GetSecurityAlertsTableProp<'renderActionsCell
       isEventViewer={false}
       isExpandable={isExpandable}
       loadingEventIds={loadingEventIds}
+      onRemoveFromCase={onRemoveFromCase}
       onRowSelected={onRowSelected}
       rowIndex={rowIndex}
       colIndex={colIndex}
@@ -91,10 +132,12 @@ export const ActionsCellComponent: GetSecurityAlertsTableProp<'renderActionsCell
       onRuleChange={eventContext?.onRuleChange}
       tabType={'query'}
       tableId={tableType}
+      alertsTableRef={alertsTableRef}
       width={0}
       setEventsLoading={setEventsLoading}
       setEventsDeleted={noop}
       refetch={alertsTableRefresh}
+      onExpandFlyout={isNewFlyoutEnabled ? onExpandFlyout : undefined}
     />
   );
 };

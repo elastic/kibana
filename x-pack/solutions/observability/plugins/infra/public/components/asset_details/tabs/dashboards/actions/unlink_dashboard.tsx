@@ -4,10 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiButtonEmpty, EuiConfirmModal, EuiToolTip } from '@elastic/eui';
+import { EuiButtonEmpty, EuiConfirmModal, EuiToolTip, useGeneratedHtmlId } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useState } from 'react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
 import type {
   DashboardItemWithTitle,
   InfraCustomDashboardAssetType,
@@ -27,7 +27,10 @@ export function UnlinkDashboard({
   assetType: InfraCustomDashboardAssetType;
 }) {
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const { notifications } = useKibana();
+  const confirmModalTitleId = useGeneratedHtmlId();
+  const {
+    services: { notifications },
+  } = useKibanaContextForPlugin();
 
   const [, setUrlState] = useAssetDetailsUrlState();
   const { deleteCustomDashboard, isDeleteLoading } = useDeleteCustomDashboard();
@@ -52,7 +55,7 @@ export function UnlinkDashboard({
         setUrlState({ dashboardId: linkedDashboards[0]?.dashboardSavedObjectId });
 
         if (result) {
-          notifications.toasts.success({
+          notifications.toasts.addSuccess({
             title: i18n.translate('xpack.infra.customDashboards.unlinkSuccess.toast.title', {
               defaultMessage: 'Unlinked "{dashboardName}" dashboard',
               values: { dashboardName: currentDashboard?.title },
@@ -61,12 +64,12 @@ export function UnlinkDashboard({
           onRefresh();
         }
       } catch (error) {
-        notifications.toasts.danger({
+        notifications.toasts.addDanger({
           title: i18n.translate('xpack.infra.customDashboards.unlinkFailure.toast.title', {
             defaultMessage: 'Error while unlinking "{dashboardName}" dashboard',
             values: { dashboardName: currentDashboard?.title },
           }),
-          body: error.body.message,
+          text: error.body.message,
         });
       }
       onError();
@@ -104,7 +107,7 @@ export function UnlinkDashboard({
         <EuiButtonEmpty
           color="danger"
           size="s"
-          iconType="unlink"
+          iconType="linkSlash"
           data-test-subj="infraUnLinkDashboardMenu"
           onClick={onClick}
           disabled={!canDelete}
@@ -116,12 +119,14 @@ export function UnlinkDashboard({
       </EuiToolTip>
       {isModalVisible && (
         <EuiConfirmModal
+          aria-labelledby={confirmModalTitleId}
           title={i18n.translate(
             'xpack.infra.customDashboards.unlinkEmptyButtonLabel.confirm.title',
             {
               defaultMessage: 'Unlink Dashboard',
             }
           )}
+          titleProps={{ id: confirmModalTitleId }}
           onCancel={onCancel}
           onConfirm={onConfirm}
           confirmButtonText={i18n.translate(

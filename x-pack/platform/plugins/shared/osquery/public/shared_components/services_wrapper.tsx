@@ -6,9 +6,11 @@
  */
 
 import React from 'react';
-import { QueryClientProvider } from '@tanstack/react-query';
+import { QueryClientProvider } from '@kbn/react-query';
 import type { CoreStart } from '@kbn/core/public';
 import { KibanaContextProvider } from '../common/lib/kibana';
+import { ExperimentalFeaturesProvider } from '../common/experimental_features_context';
+import { ExperimentalFeaturesService } from '../common/experimental_features_service';
 
 import { queryClient } from '../query_client';
 import { KibanaRenderContextProvider } from '../shared_imports';
@@ -22,7 +24,9 @@ export interface ServicesWrapperProps {
 const ServicesWrapperComponent: React.FC<ServicesWrapperProps> = ({ services, children }) => (
   <KibanaRenderContextProvider {...services}>
     <KibanaContextProvider services={services}>
-      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+      <ExperimentalFeaturesProvider value={ExperimentalFeaturesService.get()}>
+        <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+      </ExperimentalFeaturesProvider>
     </KibanaContextProvider>
   </KibanaRenderContextProvider>
 );

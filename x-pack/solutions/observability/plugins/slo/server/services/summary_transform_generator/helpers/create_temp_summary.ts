@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { IBasePath } from '@kbn/core-http-server';
-import { ALL_VALUE, BudgetingMethod, Objective, timeWindowSchema } from '@kbn/slo-schema';
-import * as t from 'io-ts';
-import { Indicator, IndicatorTypes, SLODefinition, Status } from '../../../domain/models';
+import type { IBasePath } from '@kbn/core-http-server';
+import type { BudgetingMethod, Objective, timeWindowSchemaZod } from '@kbn/slo-schema';
+import { ALL_VALUE } from '@kbn/slo-schema';
+import type { z } from '@kbn/zod';
+import type { Indicator, IndicatorTypes, SLODefinition, Status } from '../../../domain/models';
 
 export interface EsSummaryDocument {
   // apm specific fields
@@ -35,7 +36,7 @@ export interface EsSummaryDocument {
   slo: {
     // >= 8.14: Add indicator.params on the temporary summary as well as real summary through summary pipeline
     indicator: { type: IndicatorTypes } | Indicator;
-    timeWindow: t.OutputOf<typeof timeWindowSchema>;
+    timeWindow: z.input<typeof timeWindowSchemaZod>;
     groupBy: string | string[];
     groupings: Record<string, unknown>;
     instanceId: string;
@@ -135,8 +136,8 @@ export function createTempSummaryDocument(
       createdAt: slo.createdAt.toISOString(), // added in 8.14, i.e. might be undefined
       updatedAt: slo.updatedAt.toISOString(), // added in 8.14, i.e. might be undefined
       // Added in 8.18
-      createdBy: slo.createdBy,
-      updatedBy: slo.updatedBy,
+      createdBy: slo.createdBy ?? '',
+      updatedBy: slo.updatedBy ?? '',
     },
     goodEvents: 0,
     totalEvents: 0,

@@ -10,7 +10,7 @@ import type { FtrConfigProviderContext } from '@kbn/test';
 // eslint-disable-next-line import/no-default-export
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const xpackFunctionalConfig = await readConfigFile(
-    require.resolve('@kbn/test-suites-xpack/functional/config.base')
+    require.resolve('@kbn/test-suites-xpack-platform/functional/config.base')
   );
 
   return {
@@ -27,7 +27,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
          * 2. locally checkout the kibana version that matches the new package
          * 3. update the package version below to use the new package version
          * 4. run tests with NODE_EXTRA_CA_CERTS pointing to the elastic-package certificate. example:
-         *  NODE_EXTRA_CA_CERTS=HOME/.elastic-package/profiles/default/certs/kibana/ca-cert.pem  yarn start
+         *  NODE_EXTRA_CA_CERTS=HOME/.elastic-package/profiles/default/certs/kibana/ca-cert.pem  pnpm start
          * 5. when test pass:
          *   1. release a new package to EPR
          *   2. merge the updated version number change to kibana

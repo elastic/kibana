@@ -89,7 +89,7 @@ export const ExceptionItemCardMetaInfo = memo<ExceptionItemCardMetaInfoProps>(
             button={
               <EuiButtonEmpty
                 onClick={onAffectedRulesClick}
-                iconType="list"
+                iconType="listBullet"
                 data-test-subj={`${dataTestSubj}-affectedRulesButton`}
               >
                 {i18n.AFFECTED_RULES(listAndReferences?.referenced_rules.length ?? 0)}
@@ -100,8 +100,9 @@ export const ExceptionItemCardMetaInfo = memo<ExceptionItemCardMetaInfoProps>(
             closePopover={onCloseRulesPopover}
             data-test-subj={`${dataTestSubj}-rulesPopover`}
             id={'rulesPopover'}
+            aria-label={i18n.AFFECTED_RULES_POPOVER_ARIA_LABEL}
           >
-            <EuiContextMenuPanel size="s" css={referenceLinksContainerStyles} items={itemActions} />
+            <EuiContextMenuPanel css={referenceLinksContainerStyles} items={itemActions} />
           </EuiPopover>
         </EuiFlexItem>
       );
@@ -124,7 +125,7 @@ export const ExceptionItemCardMetaInfo = memo<ExceptionItemCardMetaInfoProps>(
               button={
                 <EuiButtonEmpty
                   onClick={onAffectedListsClick}
-                  iconType="list"
+                  iconType="listBullet"
                   data-test-subj={`${dataTestSubj}-affectedListsButton`}
                 >
                   {i18n.AFFECTED_LIST}
@@ -135,9 +136,9 @@ export const ExceptionItemCardMetaInfo = memo<ExceptionItemCardMetaInfoProps>(
               closePopover={onClosListsPopover}
               data-test-subj={`${dataTestSubj}-listsPopover`}
               id={'listsPopover'}
+              aria-label={i18n.AFFECTED_LIST_POPOVER_ARIA_LABEL}
             >
               <EuiContextMenuPanel
-                size="s"
                 css={referenceLinksContainerStyles}
                 items={[
                   <EuiContextMenuItem
@@ -226,26 +227,26 @@ const MetaInfoDetails = memo<MetaInfoDetailsProps>(({ label, value1, value2, dat
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s" wrap={false} responsive={false}>
       <EuiFlexItem grow={false}>
-        <EuiText size="xs" style={{ fontFamily: 'Inter' }}>
+        <EuiText size="xs" css={{ fontFamily: 'Inter' }}>
           {label}
         </EuiText>
       </EuiFlexItem>
       <EuiFlexItem grow={false} data-test-subj={`${dataTestSubj}-value1`}>
-        <EuiBadge color="default" style={{ fontFamily: 'Inter' }}>
+        <EuiBadge color="default" css={{ fontFamily: 'Inter' }}>
           {value1}
         </EuiBadge>
       </EuiFlexItem>
       {value2 != null && (
         <>
           <EuiFlexItem grow={false}>
-            <EuiText size="xs" style={{ fontFamily: 'Inter' }}>
+            <EuiText size="xs" css={{ fontFamily: 'Inter' }}>
               {i18n.EXCEPTION_ITEM_META_BY}
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false} data-test-subj={`${dataTestSubj}-value2`}>
             <EuiFlexGroup responsive={false} gutterSize="xs" alignItems="center" wrap={false}>
               <EuiFlexItem grow={false}>
-                <EuiBadge color="hollow" style={{ fontFamily: 'Inter' }}>
+                <EuiBadge color="hollow" css={{ fontFamily: 'Inter' }}>
                   {value2}
                 </EuiBadge>
               </EuiFlexItem>

@@ -15,6 +15,7 @@ import {
   EuiFormRow,
   EuiPanel,
   EuiSpacer,
+  EuiToolTip,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { Fragment, useCallback } from 'react';
@@ -55,6 +56,7 @@ export const RemoteClusterPrivilegesForm: React.FunctionComponent<Props> = ({
 }) => {
   const onCreateClusterOption = useCallback(
     (option: string) => {
+      // @ts-expect-error upgrade typescript v5.9.3
       const nextClusters = ([...remoteClusterPrivilege.clusters] ?? []).concat([option]);
 
       onChange({
@@ -117,6 +119,7 @@ export const RemoteClusterPrivilegesForm: React.FunctionComponent<Props> = ({
                 >
                   <RemoteClusterComboBox
                     data-test-subj={`remoteClusterClustersInput${formIndex}`}
+                    // @ts-expect-error upgrade typescript v5.9.3
                     selectedOptions={([...remoteClusterPrivilege.clusters] ?? []).map(toOption)}
                     onCreateOption={onCreateClusterOption}
                     onChange={onClustersChange}
@@ -152,7 +155,7 @@ export const RemoteClusterPrivilegesForm: React.FunctionComponent<Props> = ({
                     isDisabled={isRoleReadOnly}
                     placeholder={i18n.translate(
                       'xpack.security.management.editRole.remoteClusterPrivilegeForm.privilegesPlaceholder',
-                      { defaultMessage: 'Add an action…' }
+                      { defaultMessage: 'Add a privilege…' }
                     )}
                     fullWidth
                   />
@@ -163,16 +166,24 @@ export const RemoteClusterPrivilegesForm: React.FunctionComponent<Props> = ({
         </EuiFlexItem>
         {!isRoleReadOnly && (
           <EuiFlexItem grow={false}>
-            <EuiButtonIcon
-              aria-label={i18n.translate(
+            <EuiToolTip
+              content={i18n.translate(
                 'xpack.security.management.editRole.remoteClusterPrivilegeForm.deleteRemoteClusterPrivilegeAriaLabel',
                 { defaultMessage: 'Delete remote cluster privilege' }
               )}
-              color="danger"
-              onClick={onDelete}
-              iconType="trash"
-              data-test-subj={`deleteRemoteClusterPrivilegesButton${formIndex}`}
-            />
+              disableScreenReaderOutput
+            >
+              <EuiButtonIcon
+                aria-label={i18n.translate(
+                  'xpack.security.management.editRole.remoteClusterPrivilegeForm.deleteRemoteClusterPrivilegeAriaLabel',
+                  { defaultMessage: 'Delete remote cluster privilege' }
+                )}
+                color="danger"
+                onClick={onDelete}
+                iconType="trash"
+                data-test-subj={`deleteRemoteClusterPrivilegesButton${formIndex}`}
+              />
+            </EuiToolTip>
           </EuiFlexItem>
         )}
       </EuiFlexGroup>

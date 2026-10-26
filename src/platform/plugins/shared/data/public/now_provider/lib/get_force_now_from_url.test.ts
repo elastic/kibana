@@ -10,6 +10,7 @@
 import { getForceNowFromUrl } from './get_force_now_from_url';
 const originalLocation = window.location;
 afterAll(() => {
+  // @ts-ignore
   window.location = originalLocation;
 });
 
@@ -31,7 +32,7 @@ test('should throw if force now is invalid', () => {
   const dateString = 'invalid-date';
   mockLocation(`https://elastic.co/?forceNow=${dateString}`);
 
-  expect(() => getForceNowFromUrl()).toThrowError();
+  expect(() => getForceNowFromUrl()).toThrow();
 });
 
 test('should return undefined if no forceNow', () => {

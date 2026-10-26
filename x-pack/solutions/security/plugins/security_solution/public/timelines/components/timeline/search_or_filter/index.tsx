@@ -6,24 +6,19 @@
  */
 
 import { getOr } from 'lodash/fp';
-import React, { useCallback, useState, useEffect, useMemo } from 'react';
-import type { ConnectedProps } from 'react-redux';
-import { useDispatch, connect } from 'react-redux';
-import type { Dispatch } from 'redux';
+import React, { useCallback, useEffect, useMemo } from 'react';
+import type { ConnectedProps } from 'react-redux-v7';
+import { connect, useDispatch } from 'react-redux-v7';
+import type { Dispatch } from 'redux-v4';
 import deepEqual from 'fast-deep-equal';
 import type { Filter } from '@kbn/es-query';
-
 import type { FilterManager } from '@kbn/data-plugin/public';
-import type { DataView } from '@kbn/data-views-plugin/common';
 import { FilterItems } from '@kbn/unified-search-plugin/public';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { useEnableExperimental } from '../../../../common/hooks/use_experimental_features';
-import { useDataViewSpec } from '../../../../data_view_manager/hooks/use_data_view_spec';
-import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
+import { PageScope } from '../../../../data_view_manager/constants';
+import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
-import { useKibana } from '../../../../common/lib/kibana';
-import { SourcererScopeName } from '../../../../sourcerer/store/model';
-import type { State, inputsModel } from '../../../../common/store';
+import type { inputsModel, State } from '../../../../common/store';
 import { inputsSelectors } from '../../../../common/store';
 import { timelineActions, timelineSelectors } from '../../../store';
 import type { KqlMode, TimelineModel } from '../../../store/model';
@@ -32,8 +27,6 @@ import { dispatchUpdateReduxTime } from '../../../../common/components/super_dat
 import { SearchOrFilter } from './search_or_filter';
 import { setDataProviderVisibility } from '../../../store/actions';
 import { getNonDropAreaFilters } from '../helpers';
-import * as i18n from './translations';
-import { useSourcererDataView } from '../../../../sourcerer/containers';
 
 interface OwnProps {
   filterManager: FilterManager;
@@ -41,9 +34,6 @@ interface OwnProps {
 }
 
 type Props = OwnProps & PropsFromRedux;
-
-export const isDataView = (obj: unknown): obj is DataView =>
-  obj != null && typeof obj === 'object' && Object.hasOwn(obj, 'getName');
 
 const StatefulSearchOrFilterComponent = React.memo<Props>(
   ({
@@ -68,21 +58,7 @@ const StatefulSearchOrFilterComponent = React.memo<Props>(
   }) => {
     const dispatch = useDispatch();
 
-    const { addError } = useAppToasts();
-
-    const [dataView, setDataView] = useState<DataView>();
-    const {
-      services: { data },
-    } = useKibana();
-
-    let { sourcererDataView } = useSourcererDataView(SourcererScopeName.timeline);
-
-    const { dataViewSpec: experimentalDataView } = useDataViewSpec(SourcererScopeName.timeline);
-    const { newDataViewPickerEnabled } = useEnableExperimental();
-
-    if (newDataViewPickerEnabled) {
-      sourcererDataView = experimentalDataView;
-    }
+    const { dataView: experimentalDataView } = useDataView(PageScope.timeline);
 
     const getIsDataProviderVisible = useMemo(
       () => timelineSelectors.dataProviderVisibilitySelector(),
@@ -93,26 +69,11 @@ const StatefulSearchOrFilterComponent = React.memo<Props>(
       getIsDataProviderVisible(state, timelineId)
     );
 
-    useEffect(() => {
-      let dv: DataView;
-      const createDataView = async () => {
-        try {
-          dv = await data.dataViews.create(sourcererDataView);
-          setDataView(dv);
-        } catch (error) {
-          addError(error, { title: i18n.ERROR_PROCESSING_INDEX_PATTERNS });
-        }
-      };
-      createDataView();
-
-      return () => {
-        if (dv?.id) {
-          data.dataViews.clearInstanceCache(dv?.id);
-        }
-      };
-    }, [data.dataViews, filterQuery, addError, sourcererDataView]);
-
-    const arrDataView = useMemo(() => (dataView != null ? [dataView] : []), [dataView]);
+    // NOTE: re-using data view that is already created and available through data view manager
+    const arrDataView = useMemo(
+      () => (experimentalDataView ? [experimentalDataView] : []),
+      [experimentalDataView]
+    );
 
     // Keep filter manager in sync with redux filters
     useEffect(() => {
@@ -299,7 +260,12 @@ const mapDispatchToProps = (dispatch: Dispatch) => ({
   updateReduxTime: dispatchUpdateReduxTime(dispatch),
 });
 
-const connector = connect(makeMapStateToProps, mapDispatchToProps);
+type StateProps = ReturnType<ReturnType<typeof makeMapStateToProps>>;
+type DispatchProps = ReturnType<typeof mapDispatchToProps>;
+const connector = connect<StateProps, DispatchProps, OwnProps, State>(
+  makeMapStateToProps,
+  mapDispatchToProps
+);
 
 type PropsFromRedux = ConnectedProps<typeof connector>;
 

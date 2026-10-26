@@ -1,0 +1,14 @@
+spec_id: .zoom
+name: "Zoom (testing)"
+auth_type: oauth_authorization_code
+secrets:
+  authorizationUrl:
+    value: "https://zoom.us/oauth/authorize"
+  tokenUrl:
+    value: "https://zoom.us/oauth/token"
+  clientId:
+    vault: secret/ent-search-team/connectors-sources/zoom
+    field: auth_code_client_id
+  clientSecret:
+    vault: secret/ent-search-team/connectors-sources/zoom
+    field: auth_code_client_secret

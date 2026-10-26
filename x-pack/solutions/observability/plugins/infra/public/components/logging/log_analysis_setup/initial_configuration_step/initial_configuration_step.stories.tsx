@@ -10,14 +10,12 @@ import type { Meta } from '@storybook/react';
 import React from 'react';
 import { decorateWithGlobalStorybookThemeProviders } from '../../../../test_utils/use_global_storybook_theme';
 import { InitialConfigurationStep } from './initial_configuration_step';
+import { DecorateWithKibanaContext } from '../../../asset_details/__stories__/decorator';
 
 export default {
   title: 'infra/logAnalysis/SetupInitialConfigurationStep',
 
-  decorators: [
-    (renderStory) => <div style={{ maxWidth: 800 }}>{renderStory()}</div>,
-    decorateWithGlobalStorybookThemeProviders,
-  ],
+  decorators: [decorateWithGlobalStorybookThemeProviders, DecorateWithKibanaContext],
 } as Meta;
 
 export const ReconfigurationWithPartitionedWarnings = {
@@ -60,6 +58,12 @@ export const ReconfigurationWithPartitionedWarnings = {
             reasons: [{ type: 'singleCategory' }],
           },
         ]}
+        projectScope={{
+          isCpsEnabled: false,
+          isCpsManagerReady: false,
+          projectRouting: '',
+          onOpenProjectScope: () => {},
+        }}
       />
     );
   },
@@ -86,27 +90,18 @@ export const ReconfigurationWithUnpartitionedWarnings = {
           },
           {
             name: 'index-2-*',
-            validity: 'invalid',
-            errors: [{ index: 'index-2-*', error: 'INDEX_NOT_FOUND' }],
+            validity: 'valid',
+            isSelected: false,
+            datasetFilter: { type: 'includeAll' },
+            availableDatasets: ['first', 'second', 'third'],
           },
         ]}
-        previousQualityWarnings={[
-          {
-            type: 'categoryQualityWarning',
-            jobId: 'job-1',
-            dataset: '',
-            reasons: [
-              { type: 'noFrequentCategories' },
-              { type: 'manyDeadCategories', deadCategoriesRatio: 0.9 },
-            ],
-          },
-          {
-            type: 'categoryQualityWarning',
-            jobId: 'job-1',
-            dataset: '',
-            reasons: [{ type: 'singleCategory' }],
-          },
-        ]}
+        projectScope={{
+          isCpsEnabled: false,
+          isCpsManagerReady: false,
+          projectRouting: '',
+          onOpenProjectScope: () => {},
+        }}
       />
     );
   },

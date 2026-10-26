@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { EuiButton } from '@elastic/eui';
+import { EuiButton, EuiSpacer } from '@elastic/eui';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import useObservable from 'react-use/lib/useObservable';
 
 import type { AppMountParameters, CustomBrandingStart, IBasePath } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { parseNextURL } from '@kbn/std';
 
 import type { StartServices } from '../..';
-import { AuthenticationStatePage } from '../components';
-
+import { LOGOUT_REASON_QUERY_STRING_PARAMETER } from '../../../common/constants';
+import type { LogoutReason } from '../../../common/types';
+import { AuthenticationStatePage, formMessages, renderMessage } from '../components';
 interface Props {
   basePath: IBasePath;
   customBranding: CustomBrandingStart;
@@ -25,6 +25,11 @@ interface Props {
 
 export function LoggedOutPage({ basePath, customBranding }: Props) {
   const customBrandingValue = useObservable(customBranding.customBranding$);
+  const searchParams = new URLSearchParams(window.location.search);
+
+  const message =
+    formMessages[searchParams.get(LOGOUT_REASON_QUERY_STRING_PARAMETER) as LogoutReason];
+
   return (
     <AuthenticationStatePage
       title={
@@ -35,6 +40,8 @@ export function LoggedOutPage({ basePath, customBranding }: Props) {
       }
       logo={customBrandingValue?.logo}
     >
+      {message && renderMessage(message)}
+      <EuiSpacer size="l" />
       <EuiButton href={parseNextURL(window.location.href, basePath.serverBasePath)}>
         <FormattedMessage id="xpack.security.loggedOut.login" defaultMessage="Log in" />
       </EuiButton>
@@ -47,12 +54,7 @@ export function renderLoggedOutPage(
   { element }: Pick<AppMountParameters, 'element'>,
   props: Props
 ) {
-  ReactDOM.render(
-    <KibanaRenderContextProvider {...services}>
-      <LoggedOutPage {...props} />
-    </KibanaRenderContextProvider>,
-    element
-  );
+  ReactDOM.render(services.rendering.addContext(<LoggedOutPage {...props} />), element);
 
   return () => ReactDOM.unmountComponentAtNode(element);
 }

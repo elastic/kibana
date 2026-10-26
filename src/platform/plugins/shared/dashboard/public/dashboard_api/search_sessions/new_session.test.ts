@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DataViewFieldBase, DataViewBase, TimeRange, Filter } from '@kbn/es-query';
+import type { DataViewBase, DataViewFieldBase, Filter, TimeRange } from '@kbn/es-query';
 import { buildExistsFilter, disableFilter, pinFilter, toggleFilterNegated } from '@kbn/es-query';
-import { BehaviorSubject } from 'rxjs';
+import { waitFor } from '@testing-library/dom';
+import { BehaviorSubject, Observable, skip } from 'rxjs';
 import { newSession$ } from './new_session';
 
 describe('newSession$', () => {
@@ -24,9 +25,11 @@ describe('newSession$', () => {
 
   test('should not fire on subscribe', async () => {
     let count = 0;
-    const subscription = newSession$(api).subscribe(() => {
-      count++;
-    });
+    const subscription = newSession$(api)
+      .pipe(skip(1))
+      .subscribe(() => {
+        count++;
+      });
     await new Promise((resolve) => setTimeout(resolve, 0));
     expect(count).toBe(0);
     subscription.unsubscribe();
@@ -46,13 +49,34 @@ describe('newSession$', () => {
       filters$.next([existsFilter]);
 
       let count = 0;
-      const subscription = newSession$(api).subscribe(() => {
-        count++;
-      });
+      const subscription = newSession$(api)
+        .pipe(skip(1))
+        .subscribe(() => {
+          count++;
+        });
 
       filters$.next([toggleFilterNegated(existsFilter)]);
-      await new Promise((resolve) => setTimeout(resolve, 0));
-      expect(count).toBe(1);
+      await waitFor(() => {
+        expect(count).toBe(1);
+      });
+      subscription.unsubscribe();
+    });
+
+    test('should fire on filter change when reload has not yet been called', async () => {
+      const reloadApi = { ...api, reload$: new Observable<void>() };
+      filters$.next([existsFilter]);
+
+      let count = 0;
+      const subscription = newSession$(reloadApi)
+        .pipe(skip(1))
+        .subscribe(() => {
+          count++;
+        });
+
+      filters$.next([toggleFilterNegated(existsFilter)]);
+      await waitFor(() => {
+        expect(count).toBe(1);
+      });
       subscription.unsubscribe();
     });
 
@@ -61,9 +85,11 @@ describe('newSession$', () => {
       filters$.next([disabledFilter]);
 
       let count = 0;
-      const subscription = newSession$(api).subscribe(() => {
-        count++;
-      });
+      const subscription = newSession$(api)
+        .pipe(skip(1))
+        .subscribe(() => {
+          count++;
+        });
 
       filters$.next([toggleFilterNegated(disabledFilter)]);
       await new Promise((resolve) => setTimeout(resolve, 0));
@@ -75,9 +101,11 @@ describe('newSession$', () => {
       filters$.next([existsFilter]);
 
       let count = 0;
-      const subscription = newSession$(api).subscribe(() => {
-        count++;
-      });
+      const subscription = newSession$(api)
+        .pipe(skip(1))
+        .subscribe(() => {
+          count++;
+        });
 
       filters$.next([pinFilter(existsFilter)]);
       await new Promise((resolve) => setTimeout(resolve, 0));
@@ -89,9 +117,11 @@ describe('newSession$', () => {
       filters$.next([pinFilter(existsFilter)]);
 
       let count = 0;
-      const subscription = newSession$(api).subscribe(() => {
-        count++;
-      });
+      const subscription = newSession$(api)
+        .pipe(skip(1))
+        .subscribe(() => {
+          count++;
+        });
 
       filters$.next([existsFilter]);
       await new Promise((resolve) => setTimeout(resolve, 0));
@@ -105,13 +135,16 @@ describe('newSession$', () => {
       timeRange$.next({ from: 'now-15m', to: 'now' });
 
       let count = 0;
-      const subscription = newSession$(api).subscribe(() => {
-        count++;
-      });
+      const subscription = newSession$(api)
+        .pipe(skip(1))
+        .subscribe(() => {
+          count++;
+        });
 
       timeRange$.next({ from: 'now-30m', to: 'now' });
-      await new Promise((resolve) => setTimeout(resolve, 0));
-      expect(count).toBe(1);
+      await waitFor(() => {
+        expect(count).toBe(1);
+      });
       subscription.unsubscribe();
     });
   });

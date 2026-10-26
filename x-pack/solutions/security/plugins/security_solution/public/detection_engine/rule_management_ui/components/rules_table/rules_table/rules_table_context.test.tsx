@@ -29,6 +29,19 @@ jest.mock('../../../../rule_management/logic/use_find_rules');
 jest.mock('../../../../rule_management/logic/prebuilt_rules/use_prebuilt_rules_install_review');
 jest.mock('../../../../rule_management/api/hooks/use_fetch_rules_snooze_settings_query');
 jest.mock('../../../../rule_gaps/api/hooks/use_get_gaps_summary_by_rule_id');
+jest.mock('../../../../rule_gaps/context/gap_auto_fill_scheduler_context', () => ({
+  useGapAutoFillSchedulerContext: jest.fn().mockReturnValue({
+    canAccessGapAutoFill: false,
+    canEditGapAutoFill: false,
+    hasEnterpriseLicense: false,
+    scheduler: undefined,
+    isSchedulerLoading: false,
+    isSchedulerFetching: false,
+    hasErrors: false,
+    latestErrorTimestamp: undefined,
+    totalErrors: 0,
+  }),
+}));
 jest.mock('./use_rules_table_saved_state');
 
 function renderUseRulesTableContext({
@@ -119,8 +132,6 @@ describe('RulesTableContextProvider', () => {
         showCustomRules: true,
         showElasticRules: false,
         enabled: true,
-        gapSearchRange: 'last_24_h',
-        showRulesWithGaps: false,
       });
       expect(state.sortingOptions).toEqual({
         field: 'name',
@@ -142,8 +153,6 @@ describe('RulesTableContextProvider', () => {
         tags: DEFAULT_FILTER_OPTIONS.tags,
         showCustomRules: DEFAULT_FILTER_OPTIONS.showCustomRules,
         showElasticRules: DEFAULT_FILTER_OPTIONS.showElasticRules,
-        gapSearchRange: 'last_24_h',
-        showRulesWithGaps: false,
       });
       expect(state.sortingOptions).toEqual({
         field: DEFAULT_SORTING_OPTIONS.field,

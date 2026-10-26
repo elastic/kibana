@@ -1,0 +1,161 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+import Fs from 'fs';
+import Os from 'os';
+import Path from 'path';
+import { pipeline } from 'stream/promises';
+import { REPO_ROOT } from '@kbn/repo-info';
+import type { SomeDevLog } from '@kbn/some-dev-log';
+import execa from 'execa';
+import { GCS_BUCKET_URI } from '../constants';
+import { createArchiveExtractor, getTarCreateArgs, resolveTarEnvironment } from './utils';
+import { AbstractFileSystem } from './abstract_file_system';
+import type { ArchiveMetadata } from './types';
+import { join } from './utils';
+
+export class GcsFileSystem extends AbstractFileSystem {
+  constructor(log: SomeDevLog) {
+    super(log);
+  }
+
+  protected getPath(archiveId: string): string {
+    return join(GCS_BUCKET_URI, archiveId);
+  }
+
+  protected async archive(archivePath: string, fileListPath: string): Promise<void> {
+    const tarProcess = execa('tar', getTarCreateArgs('-', fileListPath), {
+      cwd: REPO_ROOT,
+      stdout: 'pipe',
+      stderr: 'inherit',
+      env: resolveTarEnvironment(),
+      buffer: false,
+    });
+
+    const uploadProcess = execa('gcloud', ['storage', 'cp', '-', archivePath], {
+      cwd: REPO_ROOT,
+      stdin: 'pipe',
+      stdout: 'inherit',
+      stderr: 'inherit',
+    });
+
+    await pipeAndWait(tarProcess, uploadProcess);
+  }
+
+  protected async extract(archivePath: string): Promise<void> {
+    this.log.info(`Streaming TypeScript build artifacts from ${archivePath}`);
+
+    const catProcess = execa('gcloud', ['storage', 'cat', archivePath], {
+      cwd: REPO_ROOT,
+      stdout: 'pipe',
+      stderr: 'inherit',
+      buffer: false,
+    });
+
+    if (!catProcess.stdout) {
+      killChild(catProcess);
+      throw new Error('Failed to stream TypeScript cache archive from GCS.');
+    }
+
+    try {
+      await Promise.all([
+        pipeline(catProcess.stdout, createArchiveExtractor(this.log)),
+        catProcess,
+      ]);
+    } catch (error) {
+      killChild(catProcess);
+      throw error;
+    }
+  }
+
+  protected async hasArchive(archivePath: string): Promise<boolean> {
+    try {
+      await execa('gcloud', ['storage', 'ls', archivePath], {
+        cwd: REPO_ROOT,
+        stdio: 'ignore',
+      });
+      return true;
+    } catch (error) {
+      this.log.debug(`Unable to find TypeScript cache archive at ${archivePath}: ${String(error)}`);
+      return false;
+    }
+  }
+
+  protected async readMetadata(metadataPath: string): Promise<ArchiveMetadata | undefined> {
+    try {
+      const { stdout } = await execa('gcloud', ['storage', 'cat', metadataPath], {
+        cwd: REPO_ROOT,
+        stderr: 'ignore',
+      });
+      return JSON.parse(stdout) as ArchiveMetadata;
+    } catch (error) {
+      this.log.debug(
+        `Unable to read TypeScript cache metadata at ${metadataPath}: ${String(error)}`
+      );
+      return undefined;
+    }
+  }
+
+  protected async writeMetadata(metadataPath: string, data: ArchiveMetadata): Promise<void> {
+    const tempDir = await Fs.promises.mkdtemp(Path.join(Os.tmpdir(), 'kbn-ts-metadata-'));
+    const tempFilePath = Path.join(tempDir, 'metadata.json');
+
+    try {
+      await Fs.promises.writeFile(tempFilePath, JSON.stringify(data), 'utf8');
+
+      await execa('gcloud', ['storage', 'cp', tempFilePath, metadataPath], {
+        cwd: REPO_ROOT,
+        stdout: 'inherit',
+        stderr: 'inherit',
+      });
+    } finally {
+      await Fs.promises.rm(tempDir, { recursive: true, force: true });
+    }
+  }
+
+  async clean(): Promise<void> {
+    // do nothing
+  }
+}
+
+async function pipeAndWait(source: execa.ExecaChildProcess, destination: execa.ExecaChildProcess) {
+  if (!source.stdout || !destination.stdin) {
+    killChild(source);
+    killChild(destination);
+    throw new Error('Failed to stream TypeScript cache archive to GCS.');
+  }
+
+  source.stdout.on('error', () => undefined);
+  destination.stdin.on('error', () => undefined);
+  source.stdout.pipe(destination.stdin);
+
+  try {
+    await Promise.all([source, destination]);
+  } catch (error) {
+    killChild(source);
+    killChild(destination);
+    throw error;
+  }
+}
+
+function killChild(child: execa.ExecaChildProcess) {
+  child.stdin?.destroy();
+  child.stdout?.destroy();
+  if (child.killed || child.exitCode !== null) {
+    return;
+  }
+
+  try {
+    child.kill('SIGKILL');
+  } catch (error) {
+    const code = (error as NodeJS.ErrnoException).code;
+    if (code !== 'ESRCH') {
+      throw error;
+    }
+  }
+}

@@ -4,75 +4,41 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { jsonRt, toBooleanRt, toNumberRt } from '@kbn/io-ts-utils';
-import * as t from 'io-ts';
-import { offsetRt } from '../../../common/comparison_rt';
-import type { LatencyAggregationType } from '../../../common/latency_aggregation_types';
-import { latencyAggregationTypeRt } from '../../../common/latency_aggregation_types';
-import { joinByKey } from '../../../common/utils/join_by_key';
+import type { LatencyAggregationType } from '@kbn/apm-types';
+import {
+  routeDefinitions,
+  type MergedServiceTransactionGroupsResponse,
+  type ServiceTransactionGroupDetailedStatisticsResponse,
+  type TransactionLatencyResponse,
+  type TransactionTraceSamplesResponse,
+  type TransactionBreakdownResponse,
+  type FailedTransactionRateResponse,
+  type ColdstartRateResponse,
+} from '@kbn/apm-api-shared';
 import { getApmAlertsClient } from '../../lib/helpers/get_apm_alerts_client';
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 import { getSearchTransactionsEvents } from '../../lib/helpers/transactions';
-import type { ColdstartRateResponse } from '../../lib/transaction_groups/get_coldstart_rate';
 import { getColdstartRatePeriods } from '../../lib/transaction_groups/get_coldstart_rate';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
-import {
-  environmentRt,
-  filtersRt,
-  kueryRt,
-  rangeRt,
-  serviceTransactionDataSourceRt,
-  transactionDataSourceRt,
-} from '../default_api_types';
-import type { ServiceTransactionGroupsResponse } from '../services/get_service_transaction_groups';
 import { getServiceTransactionGroups } from '../services/get_service_transaction_groups';
 import { getServiceTransactionGroupsAlerts } from '../services/get_service_transaction_groups_alerts';
-import type { ServiceTransactionGroupDetailedStatisticsResponse } from '../services/get_service_transaction_group_detailed_statistics';
 import { getServiceTransactionGroupDetailedStatisticsPeriods } from '../services/get_service_transaction_group_detailed_statistics';
-import type { TransactionBreakdownResponse } from './breakdown';
 import { getTransactionBreakdown } from './breakdown';
-import type { FailedTransactionRateResponse } from './get_failed_transaction_rate_periods';
 import { getFailedTransactionRatePeriods } from './get_failed_transaction_rate_periods';
-import type { TransactionLatencyResponse } from './get_latency_charts';
 import { getLatencyPeriods } from './get_latency_charts';
-import type { TransactionTraceSamplesResponse } from './trace_samples';
+import { mergeTransactionGroupsWithAlerts } from './merge_transaction_groups_with_alerts';
 import { getTraceSamples } from './trace_samples';
 
-export interface MergedServiceTransactionGroupsResponse
-  extends Omit<ServiceTransactionGroupsResponse, 'transactionGroups'> {
-  transactionGroups: Array<{
-    alertsCount: number;
-    name: string;
-    transactionType?: string;
-    latency?: number | null;
-    throughput?: number;
-    errorRate?: number;
-    impact?: number;
-  }>;
-}
-
 const transactionGroupsMainStatisticsRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/services/{serviceName}/transactions/groups/main_statistics',
-  params: t.type({
-    path: t.type({ serviceName: t.string }),
-    query: t.intersection([
-      t.partial({ searchQuery: t.string }),
-      environmentRt,
-      rangeRt,
-      t.type({
-        kuery: t.string,
-        useDurationSummary: toBooleanRt,
-        transactionType: t.string,
-        latencyAggregationType: latencyAggregationTypeRt,
-      }),
-      transactionDataSourceRt,
-    ]),
-  }),
+  endpoint: routeDefinitions.transactions.groupsMainStatistics.endpoint,
+  params: routeDefinitions.transactions.groupsMainStatistics.params,
   security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<MergedServiceTransactionGroupsResponse> => {
     const { params } = resources;
-    const apmEventClient = await getApmEventClient(resources);
-    const apmAlertsClient = await getApmAlertsClient(resources);
+    const [apmEventClient, apmAlertsClient] = await Promise.all([
+      getApmEventClient(resources),
+      getApmAlertsClient(resources),
+    ]);
 
     const {
       path: { serviceName },
@@ -111,50 +77,38 @@ const transactionGroupsMainStatisticsRoute = createApmServerRoute({
       }),
       getServiceTransactionGroupsAlerts({
         apmAlertsClient,
-        ...commonProps,
+        serviceName,
+        transactionType,
+        start,
+        end,
+        environment,
+        searchQuery,
+        // Page kuery and latency aggregation mode are intentionally omitted —
+        // badge counts are scoped by service/env/transaction type only.
       }),
     ]);
 
     const { transactionGroups, maxCountExceeded, transactionOverflowCount } =
       serviceTransactionGroups;
 
-    const transactionGroupsWithAlerts = joinByKey(
-      [...transactionGroups, ...serviceTransactionGroupsAlerts],
-      'name'
-    );
+    const { transactionGroups: transactionGroupsWithAlerts, hasActiveAlerts } =
+      mergeTransactionGroupsWithAlerts({
+        transactionGroups,
+        alerts: serviceTransactionGroupsAlerts,
+      });
 
     return {
       transactionGroups: transactionGroupsWithAlerts,
       maxCountExceeded,
       transactionOverflowCount,
-      hasActiveAlerts: !!serviceTransactionGroupsAlerts.length,
+      hasActiveAlerts,
     };
   },
 });
 
 const transactionGroupsDetailedStatisticsRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/services/{serviceName}/transactions/groups/detailed_statistics',
-  params: t.type({
-    path: t.type({ serviceName: t.string }),
-    query: t.intersection([
-      environmentRt,
-      kueryRt,
-      rangeRt,
-      t.intersection([
-        offsetRt,
-        transactionDataSourceRt,
-        t.type({
-          bucketSizeInSeconds: toNumberRt,
-          useDurationSummary: toBooleanRt,
-        }),
-      ]),
-      t.type({
-        transactionNames: jsonRt.pipe(t.array(t.string)),
-        transactionType: t.string,
-        latencyAggregationType: latencyAggregationTypeRt,
-      }),
-    ]),
-  }),
+  endpoint: routeDefinitions.transactions.groupsDetailedStatistics.endpoint,
+  params: routeDefinitions.transactions.groupsDetailedStatistics.params,
   security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<ServiceTransactionGroupDetailedStatisticsResponse> => {
     const apmEventClient = await getApmEventClient(resources);
@@ -198,23 +152,8 @@ const transactionGroupsDetailedStatisticsRoute = createApmServerRoute({
 });
 
 const transactionLatencyChartsRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/services/{serviceName}/transactions/charts/latency',
-  params: t.type({
-    path: t.type({
-      serviceName: t.string,
-    }),
-    query: t.intersection([
-      t.type({
-        transactionType: t.string,
-        latencyAggregationType: latencyAggregationTypeRt,
-        bucketSizeInSeconds: toNumberRt,
-        useDurationSummary: toBooleanRt,
-      }),
-      t.partial({ transactionName: t.string, filters: filtersRt }),
-      t.intersection([environmentRt, kueryRt, rangeRt, offsetRt]),
-      serviceTransactionDataSourceRt,
-    ]),
-  }),
+  endpoint: routeDefinitions.transactions.latencyCharts.endpoint,
+  params: routeDefinitions.transactions.latencyCharts.params,
   security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<TransactionLatencyResponse> => {
     const apmEventClient = await getApmEventClient(resources);
@@ -263,27 +202,8 @@ const transactionLatencyChartsRoute = createApmServerRoute({
 });
 
 const transactionTraceSamplesRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/services/{serviceName}/transactions/traces/samples',
-  params: t.type({
-    path: t.type({
-      serviceName: t.string,
-    }),
-    query: t.intersection([
-      t.type({
-        transactionType: t.string,
-        transactionName: t.string,
-      }),
-      t.partial({
-        transactionId: t.string,
-        traceId: t.string,
-        sampleRangeFrom: toNumberRt,
-        sampleRangeTo: toNumberRt,
-      }),
-      environmentRt,
-      kueryRt,
-      rangeRt,
-    ]),
-  }),
+  endpoint: routeDefinitions.transactions.traceSamples.endpoint,
+  params: routeDefinitions.transactions.traceSamples.params,
   security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<TransactionTraceSamplesResponse> => {
     const apmEventClient = await getApmEventClient(resources);
@@ -320,19 +240,8 @@ const transactionTraceSamplesRoute = createApmServerRoute({
 });
 
 const transactionChartsBreakdownRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/services/{serviceName}/transaction/charts/breakdown',
-  params: t.type({
-    path: t.type({
-      serviceName: t.string,
-    }),
-    query: t.intersection([
-      t.type({ transactionType: t.string }),
-      t.partial({ transactionName: t.string }),
-      environmentRt,
-      kueryRt,
-      rangeRt,
-    ]),
-  }),
+  endpoint: routeDefinitions.transactions.chartsBreakdown.endpoint,
+  params: routeDefinitions.transactions.chartsBreakdown.params,
   security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<TransactionBreakdownResponse> => {
     const apmEventClient = await getApmEventClient(resources);
@@ -356,17 +265,8 @@ const transactionChartsBreakdownRoute = createApmServerRoute({
 });
 
 const transactionChartsErrorRateRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/services/{serviceName}/transactions/charts/error_rate',
-  params: t.type({
-    path: t.type({
-      serviceName: t.string,
-    }),
-    query: t.intersection([
-      t.type({ transactionType: t.string, bucketSizeInSeconds: toNumberRt }),
-      t.partial({ transactionName: t.string, filters: filtersRt }),
-      t.intersection([environmentRt, kueryRt, rangeRt, offsetRt, serviceTransactionDataSourceRt]),
-    ]),
-  }),
+  endpoint: routeDefinitions.transactions.chartsErrorRate.endpoint,
+  params: routeDefinitions.transactions.chartsErrorRate.params,
   security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<FailedTransactionRateResponse> => {
     const apmEventClient = await getApmEventClient(resources);
@@ -406,16 +306,8 @@ const transactionChartsErrorRateRoute = createApmServerRoute({
 });
 
 const transactionChartsColdstartRateRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/services/{serviceName}/transactions/charts/coldstart_rate',
-  params: t.type({
-    path: t.type({
-      serviceName: t.string,
-    }),
-    query: t.intersection([
-      t.type({ transactionType: t.string }),
-      t.intersection([environmentRt, kueryRt, rangeRt, offsetRt]),
-    ]),
-  }),
+  endpoint: routeDefinitions.transactions.chartsColdstartRate.endpoint,
+  params: routeDefinitions.transactions.chartsColdstartRate.params,
   security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<ColdstartRateResponse> => {
     const apmEventClient = await getApmEventClient(resources);
@@ -447,17 +339,8 @@ const transactionChartsColdstartRateRoute = createApmServerRoute({
 });
 
 const transactionChartsColdstartRateByTransactionNameRoute = createApmServerRoute({
-  endpoint:
-    'GET /internal/apm/services/{serviceName}/transactions/charts/coldstart_rate_by_transaction_name',
-  params: t.type({
-    path: t.type({
-      serviceName: t.string,
-    }),
-    query: t.intersection([
-      t.type({ transactionType: t.string, transactionName: t.string }),
-      t.intersection([environmentRt, kueryRt, rangeRt, offsetRt]),
-    ]),
-  }),
+  endpoint: routeDefinitions.transactions.chartsColdstartRateByTransactionName.endpoint,
+  params: routeDefinitions.transactions.chartsColdstartRateByTransactionName.params,
   security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<ColdstartRateResponse> => {
     const apmEventClient = await getApmEventClient(resources);

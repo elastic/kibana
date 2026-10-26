@@ -6,10 +6,10 @@
  */
 
 import type { FC } from 'react';
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import moment from 'moment-timezone';
 
-import { EuiButtonEmpty } from '@elastic/eui';
+import { EuiButtonEmpty, EuiBadge, EuiPopover, EuiText } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { formatHumanReadableDateTimeSeconds } from '@kbn/ml-date-utils';
@@ -20,9 +20,11 @@ import { isTransformStats } from '../../../../../../common/types/transform_stats
 import type { TransformHealthAlertRule } from '../../../../../../common/types/alerting';
 
 import type { TransformListRow } from '../../../../common';
+import { useAppDependencies } from '../../../../app_dependencies';
 import { useEnabledFeatures } from '../../../../serverless_context';
 import { isTransformListRowWithStats } from '../../../../common/transform_list';
 import { useGetTransformStats } from '../../../../hooks';
+import { useTransformHasLinkedProjects } from '../../../../hooks/use_transform_has_linked_projects';
 
 import { TransformHealthColoredDot } from './transform_health_colored_dot';
 import type { SectionConfig, SectionItem } from './expanded_row_column_view';
@@ -40,8 +42,70 @@ interface ExpandedRowDetailsPaneProps {
   onAlertEdit: (alertRule: TransformHealthAlertRule) => void;
 }
 
+export const SourceIndexDescription: FC<{ index: string | string[] }> = ({ index }) => {
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+
+  if (!Array.isArray(index)) {
+    return index;
+  }
+  if (Array.isArray(index) && index.length === 1) {
+    return index[0];
+  }
+
+  return (
+    <>
+      {index[0]}{' '}
+      <EuiPopover
+        isOpen={isPopoverOpen}
+        closePopover={() => setIsPopoverOpen(false)}
+        aria-label={i18n.translate(
+          'xpack.transform.transformList.transformDetails.sourceIndex.popoverLabel',
+          { defaultMessage: 'Source indices' }
+        )}
+        anchorPosition="downLeft"
+        panelPaddingSize="s"
+        button={
+          <EuiBadge
+            data-test-subj="transformSourceIndexBadge"
+            onClick={() => setIsPopoverOpen(!isPopoverOpen)}
+            onClickAriaLabel={i18n.translate(
+              'xpack.transform.transformList.transformDetails.sourceIndex.showAllLabel',
+              { defaultMessage: 'Show all source indices' }
+            )}
+            css={{
+              verticalAlign: 'top',
+            }}
+          >
+            +{index.length - 1}
+          </EuiBadge>
+        }
+      >
+        <EuiText
+          size="s"
+          data-test-subj="transformSourceIndexPopover"
+          css={{ overflowY: 'scroll' }}
+        >
+          <ul
+            css={{
+              maxWidth: '600px',
+              maxHeight: '600px',
+              overflowWrap: 'break-word',
+            }}
+          >
+            {index.map((sourceIndex, i) => (
+              <li key={`${sourceIndex}-${i}`}>{sourceIndex}</li>
+            ))}
+          </ul>
+        </EuiText>
+      </EuiPopover>
+    </>
+  );
+};
+
 export const ExpandedRowDetailsPane: FC<ExpandedRowDetailsPaneProps> = ({ item, onAlertEdit }) => {
   const { data: fullStats, isError, isLoading } = useGetTransformStats(item.id, false, true);
+  const { cps } = useAppDependencies();
+  const { hasLinkedProjects } = useTransformHasLinkedProjects(cps?.cpsManager);
 
   let displayStats = {};
 
@@ -81,10 +145,16 @@ export const ExpandedRowDetailsPane: FC<ExpandedRowDetailsPaneProps> = ({ item, 
       },
       {
         title: 'source_index',
-        description: Array.isArray(item.config.source.index)
-          ? item.config.source.index[0]
-          : item.config.source.index,
+        description: <SourceIndexDescription index={item.config.source.index} />,
       },
+      ...(hasLinkedProjects !== false && isDefined(item.config.source.project_routing)
+        ? [
+            {
+              title: 'project_routing',
+              description: item.config.source.project_routing,
+            },
+          ]
+        : []),
       {
         title: 'destination_index',
         description: item.config.dest.index,
@@ -103,7 +173,7 @@ export const ExpandedRowDetailsPane: FC<ExpandedRowDetailsPaneProps> = ({ item, 
     return configs;
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [item?.config]);
+  }, [item?.config, hasLinkedProjects]);
 
   const checkpointingItems: SectionItem[] = [];
   if (isTransformStats(displayStats)) {
@@ -222,7 +292,7 @@ export const ExpandedRowDetailsPane: FC<ExpandedRowDetailsPaneProps> = ({ item, 
     return {
       title: (
         <EuiButtonEmpty
-          iconType={'documentEdit'}
+          iconType={'pencil'}
           iconSide={'left'}
           onClick={() => {
             onAlertEdit(rule);

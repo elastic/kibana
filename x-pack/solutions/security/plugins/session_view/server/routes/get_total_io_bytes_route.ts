@@ -4,7 +4,7 @@
  */
 import { schema } from '@kbn/config-schema';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { IRouter, Logger } from '@kbn/core/server';
+import type { IRouter, Logger } from '@kbn/core/server';
 import { EVENT_ACTION } from '@kbn/rule-data-utils';
 import {
   GET_TOTAL_IO_BYTES_ROUTE,
@@ -12,6 +12,11 @@ import {
   ENTRY_SESSION_ENTITY_ID_PROPERTY,
   TIMESTAMP_PROPERTY,
 } from '../../common/constants';
+import {
+  sessionEntityIdSchema,
+  sessionTimestampSchema,
+  sessionViewIndexPatternSchema,
+} from './validation';
 
 export const registerGetTotalIOBytesRoute = (router: IRouter, logger: Logger) => {
   router.versioned
@@ -31,9 +36,9 @@ export const registerGetTotalIOBytesRoute = (router: IRouter, logger: Logger) =>
         validate: {
           request: {
             query: schema.object({
-              index: schema.string(),
-              sessionEntityId: schema.string(),
-              sessionStartTime: schema.string(),
+              index: sessionViewIndexPatternSchema,
+              sessionEntityId: sessionEntityIdSchema,
+              sessionStartTime: sessionTimestampSchema,
             }),
           },
         },

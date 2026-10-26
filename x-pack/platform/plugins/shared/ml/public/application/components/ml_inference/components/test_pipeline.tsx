@@ -15,7 +15,6 @@ import {
   EuiAccordion,
   EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
   EuiCode,
   EuiCodeBlock,
   EuiFlexGroup,
@@ -29,6 +28,7 @@ import {
   EuiPanel,
   htmlIdGenerator,
 } from '@elastic/eui';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 
 import type { IngestDocument } from '@elastic/elasticsearch/lib/api/types';
 import { extractErrorProperties } from '@kbn/ml-error-utils';
@@ -70,9 +70,9 @@ export const TestPipeline: FC<Props> = memo(({ state, sourceIndex, mode }) => {
   const [showCallOut, setShowCallOut] = useState<boolean>(true);
   const mlApi = useMlApi();
   const {
-    notifications: { toasts },
     services: {
       docLinks: { links },
+      notifications: { toasts },
     },
   } = useMlKibana();
 
@@ -99,14 +99,14 @@ export const TestPipeline: FC<Props> = memo(({ state, sourceIndex, mode }) => {
       console.error(error);
       const errorProperties = extractErrorProperties(error);
       setSimulatePipelineError(error);
-      toasts.danger({
+      toasts.addDanger({
         title: i18n.translate(
           'xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.test.errorSimulatingPipeline',
           {
             defaultMessage: 'Unable to simulate pipeline.',
           }
         ),
-        body: errorProperties.message,
+        text: errorProperties.message,
         toastLifeTimeMs: 5000,
       });
     }
@@ -271,13 +271,13 @@ export const TestPipeline: FC<Props> = memo(({ state, sourceIndex, mode }) => {
         <EuiSpacer size="m" />
         {sourceIndexMissingError && showCallOut ? (
           <EuiFlexItem>
-            <EuiCallOut
+            <KbnInfoCallout
+              size="s"
+              announceOnMount
               onDismiss={() => {
                 setShowCallOut(false);
               }}
-              size="s"
               title={sourceIndexMissingError}
-              iconType="warning"
             />
             <EuiSpacer size="s" />
           </EuiFlexItem>

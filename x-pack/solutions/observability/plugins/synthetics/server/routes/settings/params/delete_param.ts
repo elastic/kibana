@@ -5,79 +5,106 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
-import { i18n } from '@kbn/i18n';
-import { syncSpaceGlobalParams } from '../../../synthetics_service/sync_global_params';
-import { SyntheticsRestApiRouteFactory } from '../../types';
+import path from 'path';
+import { z } from '@kbn/zod';
+import type { SavedObject, SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import { isSavedObjectErrorResult } from '@kbn/core-saved-objects-server';
+import { MAX_PARAM_BULK_SIZE, routeId } from '../../zod_query';
+import type { RouteContext, SyntheticsRestApiRouteFactory } from '../../types';
 import { syntheticsParamType } from '../../../../common/types/saved_objects';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
-import { DeleteParamsResponse } from '../../../../common/runtime_types';
+import type { DeleteParamsResponse, SyntheticsParams } from '../../../../common/runtime_types';
+import { asyncGlobalParamsPropagation } from '../../../tasks/sync_global_params_task';
 
-export const deleteSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
+const deleteParams = async (
+  { savedObjectsClient, server }: RouteContext,
+  idsToDelete: string[]
+): Promise<DeleteParamsResponse[]> => {
+  const { spaces: existingParamsSpaces, keys: modifiedParamKeys } = await getExistingParamsInfo(
+    savedObjectsClient,
+    idsToDelete
+  );
+
+  const result = await savedObjectsClient.bulkDelete(
+    idsToDelete.map((id) => ({ type: syntheticsParamType, id })),
+    { force: true }
+  );
+  await asyncGlobalParamsPropagation({
+    server,
+    paramsSpacesToSync: existingParamsSpaces,
+    modifiedParamKeys,
+  });
+
+  return result.statuses.map(({ id, success }) => ({ id, deleted: success }));
+};
+
+export const deleteSyntheticsParamRoute: SyntheticsRestApiRouteFactory<
   DeleteParamsResponse[],
-  { id?: string },
-  unknown,
-  { ids: string[] }
+  { id: string }
 > = () => ({
   method: 'DELETE',
-  path: SYNTHETICS_API_URLS.PARAMS + '/{id?}',
+  path: SYNTHETICS_API_URLS.PARAMS + '/{id}',
+  options: {
+    summary: 'Delete a parameter',
+    description:
+      'Delete a parameter from the Synthetics app.\n\nYou must have `all` privileges for the Synthetics feature in the Observability section of the Kibana feature privileges.',
+    operationId: 'delete-parameter',
+    oasOperationObject: () => path.join(__dirname, 'examples/delete_parameter.yaml'),
+  },
   validate: {},
   validation: {
     request: {
-      body: schema.nullable(
-        schema.object({
-          ids: schema.arrayOf(schema.string(), {
-            minSize: 1,
-          }),
-        })
-      ),
-      params: schema.object({
-        id: schema.maybe(schema.string()),
+      params: z.strictObject({
+        id: routeId.describe('The ID for the parameter to delete.'),
       }),
     },
   },
-  handler: async ({
-    savedObjectsClient,
-    request,
-    response,
-    server,
-    spaceId,
-    syntheticsMonitorClient,
-  }) => {
-    const { ids } = request.body ?? {};
-    const { id: paramId } = request.params ?? {};
-
-    if (ids && paramId) {
-      return response.badRequest({
-        body: i18n.translate('xpack.synthetics.deleteParam.errorMultipleIdsProvided', {
-          defaultMessage: `Both param id  and body parameters cannot be provided`,
-        }),
-      });
-    }
-
-    const idsToDelete = ids ?? [paramId];
-
-    if (idsToDelete.length === 0) {
-      return response.badRequest({
-        body: i18n.translate('xpack.synthetics.deleteParam.errorNoIdsProvided', {
-          defaultMessage: `No param ids provided`,
-        }),
-      });
-    }
-
-    const result = await savedObjectsClient.bulkDelete(
-      idsToDelete.map((id) => ({ type: syntheticsParamType, id })),
-      { force: true }
-    );
-
-    void syncSpaceGlobalParams({
-      spaceId,
-      logger: server.logger,
-      encryptedSavedObjects: server.encryptedSavedObjects,
-      savedObjects: server.coreStart.savedObjects,
-      syntheticsMonitorClient,
-    });
-
-    return result.statuses.map(({ id, success }) => ({ id, deleted: success }));
-  },
+  handler: async (routeContext) => deleteParams(routeContext, [routeContext.request.params.id]),
 });
+
+/** Superseded by `POST /params/_bulk_delete`; kept for existing clients. */
+export const deleteSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
+  DeleteParamsResponse[],
+  Record<string, string>,
+  Record<string, string>,
+  { ids: string[] }
+> = () => ({
+  method: 'DELETE',
+  path: SYNTHETICS_API_URLS.PARAMS,
+  options: { excludeFromOAS: true },
+  validate: {},
+  validation: {
+    request: {
+      body: z.strictObject({
+        ids: z.array(routeId).min(1).max(MAX_PARAM_BULK_SIZE),
+      }),
+    },
+  },
+  handler: async (routeContext) => deleteParams(routeContext, routeContext.request.body.ids),
+});
+
+export async function getExistingParamsInfo(
+  savedObjectsClient: SavedObjectsClientContract,
+  paramIds: string[]
+) {
+  const existingParam = await savedObjectsClient.bulkGet<SyntheticsParams>(
+    paramIds.map((id) => ({ type: syntheticsParamType, id }))
+  );
+
+  const spaces = Array.from(
+    new Set(
+      existingParam.saved_objects.reduce((acc, obj) => {
+        return acc.concat(isSavedObjectErrorResult(obj) ? [] : obj.namespaces ?? []);
+      }, [] as string[])
+    )
+  );
+
+  const keys = existingParam.saved_objects
+    .filter(
+      (obj): obj is SavedObject<SyntheticsParams> =>
+        !isSavedObjectErrorResult(obj) && !!obj.attributes?.key
+    )
+    .map((obj) => obj.attributes.key);
+
+  return { spaces, keys };
+}

@@ -66,7 +66,7 @@ export const AnalyticsCollectionView: React.FC = () => {
   return (
     <EnterpriseSearchAnalyticsPageTemplate pageChrome={[]} restrictWidth isLoading={isLoading}>
       <EuiEmptyPrompt
-        iconType="search"
+        iconType="magnify"
         title={
           <h2>
             {i18n.translate(

@@ -5,37 +5,61 @@
  * 2.0.
  */
 
-import type { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
-import { apiPublishesUnifiedSearch, fetch$ } from '@kbn/presentation-publishing';
-import type { ESQLControlVariable } from '@kbn/esql-types';
 import { type KibanaExecutionContext } from '@kbn/core/public';
+import { apiPublishesESQLVariables } from '@kbn/esql-types';
+import type {
+  GetStateType,
+  LensInternalApi,
+  LensPublicCallbacks,
+  SharingSavedObjectProps,
+  TextBasedPersistedState,
+  UserMessagesDisplayLocationId,
+} from '@kbn/lens-common';
+import type { LensApi } from '@kbn/lens-common-2';
 import {
-  BehaviorSubject,
-  type Subscription,
-  distinctUntilChanged,
-  debounceTime,
-  skip,
-  pipe,
-  merge,
-  tap,
-  map,
-} from 'rxjs';
+  apiPublishesApproximation,
+  apiPublishesProjectRouting,
+  apiPublishesUnifiedSearch,
+  fetch$,
+  type FetchContext,
+} from '@kbn/presentation-publishing';
 import fastIsEqual from 'fast-deep-equal';
 import { pick } from 'lodash';
+import {
+  BehaviorSubject,
+  debounceTime,
+  distinctUntilChanged,
+  filter,
+  map,
+  merge,
+  pipe,
+  skip,
+  tap,
+  type Subscription,
+} from 'rxjs';
+import { apm } from '@elastic/apm-rum';
 import { getEditPath } from '../../common/constants';
-import type { GetStateType, LensApi, LensInternalApi, LensPublicCallbacks } from './types';
-import { getExpressionRendererParams } from './expressions/expression_params';
-import type { LensEmbeddableStartServices } from './types';
 import { prepareCallbacks } from './expressions/callbacks';
-import { buildUserMessagesHelpers } from './user_messages/api';
-import { getLogError } from './expressions/telemetry';
-import type { SharingSavedObjectProps, UserMessagesDisplayLocationId } from '../types';
-import { apiHasLensComponentCallbacks } from './type_guards';
-import { getRenderMode, getParentContext, buildObservableVariable } from './helper';
-import { addLog } from './logger';
-import { getUsedDataViews } from './expressions/update_data_views';
+import { getExpressionRendererParams } from './expressions/expression_params';
 import { getMergedSearchContext } from './expressions/merged_search_context';
-import { getEmbeddableVariables } from './initializers/utils';
+import { getLogError } from './expressions/telemetry';
+import { getUsedDataViews } from './expressions/update_data_views';
+import {
+  getParentContext,
+  getRenderMode,
+  hasAnnotationGroupReference,
+  updateAttributesWithAnnotation,
+} from './helper';
+import { addLog } from './logger';
+import {
+  apiHasLensComponentCallbacks,
+  apiHasUserMessages,
+  hasTablesAdapter,
+  isPartialInspectorAdapters,
+  type OnDataCallback,
+} from './type_guards';
+import type { LensEmbeddableStartServices } from './types';
+import { buildUserMessagesHelpers } from './user_messages/api';
 
 const blockingMessageDisplayLocations: UserMessagesDisplayLocationId[] = [
   'visualization',
@@ -45,13 +69,14 @@ const blockingMessageDisplayLocations: UserMessagesDisplayLocationId[] = [
 export type ReloadReason =
   | 'ESQLvariables'
   | 'attributes'
-  | 'savedObjectId'
+  | 'refId'
   | 'overrides'
   | 'disableTriggers'
   | 'viewMode'
-  | 'searchContext';
+  | 'searchContext'
+  | 'theme';
 
-function getSearchContext(parentApi: unknown, esqlVariables: ESQLControlVariable[] = []) {
+function getSearchContext(parentApi: unknown) {
   const unifiedSearch$ = apiPublishesUnifiedSearch(parentApi)
     ? pick(parentApi, 'filters$', 'query$', 'timeslice$', 'timeRange$')
     : {
@@ -61,12 +86,24 @@ function getSearchContext(parentApi: unknown, esqlVariables: ESQLControlVariable
         timeRange$: new BehaviorSubject(undefined),
       };
 
+  const { projectRouting$ } = apiPublishesProjectRouting(parentApi)
+    ? parentApi
+    : { projectRouting$: undefined };
+
+  const { isApproximate$ } = apiPublishesApproximation(parentApi)
+    ? parentApi
+    : { isApproximate$: new BehaviorSubject(false) };
+
   return {
-    esqlVariables,
     filters: unifiedSearch$.filters$.getValue(),
     query: unifiedSearch$.query$.getValue(),
     timeRange: unifiedSearch$.timeRange$.getValue(),
     timeslice: unifiedSearch$.timeslice$?.getValue(),
+    esqlVariables: apiPublishesESQLVariables(parentApi)
+      ? parentApi.esqlVariables$.getValue()
+      : undefined,
+    projectRouting: projectRouting$?.getValue(),
+    isApproximate: isApproximate$.getValue(),
   };
 }
 
@@ -82,11 +119,41 @@ export function loadEmbeddableData(
   parentApi: unknown,
   internalApi: LensInternalApi,
   services: LensEmbeddableStartServices,
-  metaInfo?: SharingSavedObjectProps
+  metaInfo?: SharingSavedObjectProps,
+  setApproximationApplied?: (value: boolean | undefined) => void
 ) {
   const { onLoad, onBeforeBadgesRender, ...callbacks } = apiHasLensComponentCallbacks(parentApi)
     ? parentApi
     : ({} as LensPublicCallbacks);
+
+  const getConsumerMessages = () =>
+    apiHasUserMessages(parentApi) ? parentApi.userMessages ?? [] : [];
+
+  const getExecutionContext = () => {
+    const parentContext = getParentContext(parentApi);
+    const lastState = getState();
+    if (lastState.attributes) {
+      const child: KibanaExecutionContext = {
+        type: 'lens',
+        name: lastState.attributes.visualizationType ?? '',
+        id: uuid || 'new',
+        // Prefer the panel-level title when it is set, falling back to the
+        // chart's own title. With the `lens.apiFormat` path the chart title is
+        // stripped from the wire format, so the panel title is the source of truth.
+        description: lastState.title ?? lastState.attributes.title ?? '',
+        url: `${services.coreStart.application.getUrlForApp('lens')}${getEditPath(
+          lastState.ref_id
+        )}`,
+      };
+
+      return parentContext
+        ? {
+            ...parentContext,
+            child,
+          }
+        : child;
+    }
+  };
 
   // Some convenience api for the user messaging
   const {
@@ -95,9 +162,16 @@ export function loadEmbeddableData(
     updateBlockingErrors,
     updateValidationErrors,
     updateWarnings,
-    resetMessages,
+    discardRuntimeMessages,
     updateMessages,
-  } = buildUserMessagesHelpers(api, internalApi, services, onBeforeBadgesRender, metaInfo);
+  } = buildUserMessagesHelpers(
+    api,
+    internalApi,
+    services,
+    onBeforeBadgesRender,
+    metaInfo,
+    getConsumerMessages
+  );
 
   const dispatchBlockingErrorIfAny = () => {
     const blockingErrors = getUserMessages(blockingMessageDisplayLocations, {
@@ -119,17 +193,35 @@ export function loadEmbeddableData(
     }
   };
 
-  const [controlESQLVariables$] = buildObservableVariable<ESQLControlVariable[]>([]);
+  // Declared outside of `reload` to keep a stable identity: this ends up in the expression
+  // renderer params, where a new reference makes the renderer rebuild its loader on each reload.
+  const onRuntimeError = (error: Error) => {
+    updateBlockingErrors(error);
+    getLogError(getExecutionContext)('runtime');
+  };
 
   async function reload(
     // make reload easier to debug
-    sourceId: ReloadReason
+    sourceId: ReloadReason,
+    fetchContext?: FetchContext
   ) {
     addLog(`Embeddable reload reason: ${sourceId}`);
-    resetMessages();
+
+    const currentAbortController = internalApi.expressionAbortController$.getValue();
+
+    // If the current controller is already aborted, create a fresh one for this reload
+    // This happens when cancelRequests() was called before this reload started
+    let activeController = currentAbortController;
+    if (currentAbortController.signal.aborted) {
+      activeController = new AbortController();
+      internalApi.updateAbortController(activeController);
+    }
 
     // reset the render on reload
     internalApi.dispatchRenderStart();
+
+    // Hide badges while reloading. `onRenderComplete` republishes them.
+    updateMessages([]);
 
     // notify about data loading
     internalApi.updateDataLoading(true);
@@ -139,39 +231,27 @@ export function loadEmbeddableData(
 
     const currentState = getState();
 
-    const getExecutionContext = () => {
-      const parentContext = getParentContext(parentApi);
-      const lastState = getState();
-      if (lastState.attributes) {
-        const child: KibanaExecutionContext = {
-          type: 'lens',
-          name: lastState.attributes.visualizationType ?? '',
-          id: uuid || 'new',
-          description: lastState.attributes.title || lastState.title || '',
-          url: `${services.coreStart.application.getUrlForApp('lens')}${getEditPath(
-            lastState.savedObjectId
-          )}`,
-        };
-
-        return parentContext
-          ? {
-              ...parentContext,
-              child,
-            }
-          : child;
+    // _data (expression result) is unused — Lens only needs the inspector adapters.
+    // The signature OnDataCallback is used for consistency with the expressions plugin.
+    const onDataCallback: OnDataCallback = (_data, adapters) => {
+      const tables = hasTablesAdapter(adapters) ? adapters.tables?.tables : undefined;
+      internalApi.updateVisualizationContext({ activeData: tables });
+      if (setApproximationApplied) {
+        const approximationApplied = tables
+          ? Object.values(tables).some((t) => t.meta?.approximationApplied)
+          : undefined;
+        setApproximationApplied(approximationApplied || undefined);
       }
-    };
-
-    const onDataCallback = (adapters: Partial<DefaultInspectorAdapters> | undefined) => {
-      internalApi.updateVisualizationContext({
-        activeData: adapters?.tables?.tables,
-      });
 
       // data has loaded
       internalApi.updateDataLoading(false);
       // The third argument here is an observable to let the
       // consumer to be notified on data change
-      onLoad?.(false, adapters, api.dataLoading$);
+      onLoad?.(
+        false,
+        isPartialInspectorAdapters(adapters) ? adapters : undefined,
+        api.dataLoading$
+      );
 
       api.loadViewUnderlyingData();
 
@@ -194,13 +274,12 @@ export function loadEmbeddableData(
 
     const searchContext = getMergedSearchContext(
       currentState,
-      getSearchContext(parentApi, controlESQLVariables$?.getValue()),
+      fetchContext ? fetchContext : getSearchContext(parentApi),
       api.timeRange$,
       parentApi,
       services
     );
 
-    // Go concurrently: build the expression and fetch the dataViews
     const [{ params, abortController, ...rest }, dataViewIds] = await Promise.all([
       getExpressionRendererParams(currentState, {
         searchContext,
@@ -213,24 +292,36 @@ export function loadEmbeddableData(
         renderMode: getRenderMode(parentApi),
         services,
         searchSessionId: api.searchSessionId$.getValue(),
-        abortController: internalApi.expressionAbortController$.getValue(),
+        abortController: activeController,
         getExecutionContext,
-        logError: getLogError(getExecutionContext),
+        onRuntimeError,
         addUserMessages,
         onRender,
         onData,
         handleEvent,
         disableTriggers,
-        updateBlockingErrors,
         forceDSL: (parentApi as { forceDSL?: boolean }).forceDSL,
         getDisplayOptions: internalApi.getDisplayOptions,
       }),
       getUsedDataViews(
         currentState.attributes.references,
         currentState.attributes.state?.adHocDataViews,
-        services.dataViews
+        services.dataViews,
+        {
+          layers: (
+            currentState.attributes.state?.datasourceStates?.textBased as
+              | TextBasedPersistedState
+              | undefined
+          )?.layers,
+          http: services.coreStart.http,
+          projectRouting: searchContext.projectRouting,
+        }
       ),
     ]);
+
+    // Drop runtime errors from the old expression that can arrive during `await`.
+    // (`dispatchBlockingErrorIfAny` reads these, so stale errors would skip rendering)
+    discardRuntimeMessages();
 
     // update the visualization context before anything else
     // as it will be used to compute blocking errors also in case of issues
@@ -249,8 +340,6 @@ export function loadEmbeddableData(
     if (params?.expression != null && !hasBlockingErrors) {
       internalApi.updateExpressionParams(params);
     }
-
-    internalApi.updateAbortController(abortController);
   }
 
   // Build a custom operator to be resused for various observables
@@ -259,12 +348,6 @@ export function loadEmbeddableData(
   }
 
   const mergedSubscriptions = merge(
-    // on search context change, reload
-    fetch$(api).pipe(map(() => 'searchContext' as ReloadReason)),
-    controlESQLVariables$.pipe(
-      waitUntilChanged(),
-      map(() => 'ESQLvariables' as ReloadReason)
-    ),
     // On state change, reload
     // this is used to refresh the chart on inline editing
     // just make sure to avoid to rerender if there's no substantial change
@@ -281,7 +364,7 @@ export function loadEmbeddableData(
     ),
     api.savedObjectId$.pipe(
       waitUntilChanged(),
-      map(() => 'savedObjectId' as ReloadReason)
+      map(() => 'refId' as ReloadReason)
     ),
     internalApi.overrides$.pipe(
       waitUntilChanged(),
@@ -290,24 +373,70 @@ export function loadEmbeddableData(
     internalApi.disableTriggers$.pipe(
       waitUntilChanged(),
       map(() => 'disableTriggers' as ReloadReason)
+    ),
+    // Visualizations resolve theme colors when the expression is built, so a live theme
+    // switch needs a fresh expression.
+    services.coreStart.theme.theme$.pipe(
+      map(({ darkMode }) => darkMode),
+      waitUntilChanged(),
+      map(() => 'theme' as ReloadReason)
     )
   );
 
   const subscriptions: Subscription[] = [
+    // on search context change, reload
+    fetch$(api)
+      .pipe(debounceTime(0))
+      .subscribe((fetchContext) => reload('searchContext' as ReloadReason, fetchContext)),
     mergedSubscriptions.pipe(debounceTime(0)).subscribe(reload),
-    // In case of changes to the dashboard ES|QL controls, re-map them
-    internalApi.esqlVariables$.subscribe((newVariables: ESQLControlVariable[]) => {
-      const query = internalApi.attributes$.getValue().state?.query;
-      const esqlVariables = getEmbeddableVariables(query, newVariables) ?? [];
-      controlESQLVariables$.next(esqlVariables);
-    }),
+    // Capture blocking errors in APM for observability
+    internalApi.blockingError$
+      .pipe(filter((error): error is Error => error != null))
+      .subscribe((error) => {
+        const currentState = getState();
+        const parentContext = getParentContext(parentApi);
+        const meta = parentContext?.meta as Record<string, string | undefined> | undefined;
+        const transaction = apm.getCurrentTransaction();
+        if (transaction) {
+          const span = transaction.startSpan('lens-chart-error', 'lens-embeddable');
+
+          if (span) {
+            span.addLabels({
+              kibana_meta_metric_type: currentState.attributes?.visualizationType ?? 'unknown',
+              kibana_meta_profile_id: meta?.profile_id ?? 'unknown',
+              kibana_meta_metric_id: meta?.metric_id ?? 'unknown',
+            });
+            apm.captureError(error);
+            // @ts-expect-error RUM types don't include outcome
+            span.outcome = 'failure';
+            span.end();
+          }
+        }
+      }),
     // make sure to reload on viewMode change
     api.viewMode$.subscribe(() => {
       // only reload if drilldowns are set
-      if (getState().enhancements?.dynamicActions?.events.length) {
+      if (getState().drilldowns?.length) {
         reload('viewMode');
       }
     }),
+    // When a library annotation group is updated, fetch the latest data and push it
+    // into attributes$ so the chart re-renders.
+    services.eventAnnotationService.annotationGroupUpdated$
+      .pipe(filter((updatedGroupId) => hasAnnotationGroupReference(getState(), updatedGroupId)))
+      .subscribe(async (updatedGroupId) => {
+        try {
+          const libraryGroup = await services.eventAnnotationService.loadAnnotationGroup(
+            updatedGroupId
+          );
+          const updated = updateAttributesWithAnnotation(getState(), updatedGroupId, libraryGroup);
+          if (updated) {
+            internalApi.updateAttributes(updated.attributes);
+          }
+        } catch (err) {
+          addLog(`Failed to fetch annotation group ${updatedGroupId}: ${err}`);
+        }
+      }),
   ];
   // There are few key moments when errors are checked and displayed:
   // * at setup time (here) before the first expression evaluation

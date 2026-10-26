@@ -7,8 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import numeral from '@elastic/numeral';
 import * as Rx from 'rxjs';
-import { ImageMetadataFactory, getImageMetadata, isImage } from '@kbn/shared-ux-file-util';
+import type { ImageMetadataFactory } from '@kbn/shared-ux-file-util';
+import { getImageMetadata, isImage } from '@kbn/shared-ux-file-util';
 import type {
   FileKindBrowser,
   FileJSON,
@@ -18,7 +20,7 @@ import { i18nTexts } from './i18n_texts';
 
 import { createStateSubject, type SimpleStateSubject, parseFileName } from './util';
 
-interface FileState {
+export interface FileState {
   file: File;
   status: 'idle' | 'uploading' | 'uploaded' | 'upload_failed';
   id?: string;
@@ -37,6 +39,14 @@ export interface DoneNotification<Meta = unknown> {
 interface UploadOptions {
   allowRepeatedUploads?: boolean;
 }
+
+export type FileUploadErrorCode = 'fileEmpty' | 'fileTooLarge' | 'mimeTypeNotSupported';
+
+const createValidationError = (code: FileUploadErrorCode, message: string): Error => {
+  const error = new Error(message);
+  Object.defineProperty(error, 'code', { value: code });
+  return error;
+};
 
 export class UploadState {
   private readonly abort$ = new Rx.Subject<void>();
@@ -101,17 +111,26 @@ export class UploadState {
   private readonly validateFile = (file: File): void => {
     const fileKind = this.fileKind;
 
-    if (fileKind.maxSizeBytes != null && file.size > this.fileKind.maxSizeBytes!) {
-      const message = i18nTexts.fileTooLarge(String(this.fileKind.maxSizeBytes));
-      throw new Error(message);
+    if (!file.size) {
+      throw createValidationError('fileEmpty', i18nTexts.fileEmpty);
+    }
+
+    const maxSizeBytes =
+      typeof fileKind.maxSizeBytes === 'function'
+        ? fileKind.maxSizeBytes(file)
+        : fileKind.maxSizeBytes;
+
+    if (maxSizeBytes != null && file.size > maxSizeBytes) {
+      const message = i18nTexts.fileTooLarge(numeral(maxSizeBytes).format('0.00 b'));
+      throw createValidationError('fileTooLarge', message);
     }
 
     if (fileKind.allowedMimeTypes != null && !fileKind.allowedMimeTypes.includes(file.type)) {
-      const message = i18nTexts.mimeTypeNotSupported(
-        file.type,
-        fileKind.allowedMimeTypes.join(', ')
-      );
-      throw new Error(message);
+      const message =
+        fileKind.listAllowedMimeTypesInError === false
+          ? i18nTexts.mimeTypeNotSupportedConcise(file.type)
+          : i18nTexts.mimeTypeNotSupported(file.type, fileKind.allowedMimeTypes.join(', '));
+      throw createValidationError('mimeTypeNotSupported', message);
     }
   };
 
@@ -120,10 +139,9 @@ export class UploadState {
       throw new Error('Cannot update files while uploading');
     }
 
-    if (!files.length) {
-      this.done$.next(undefined);
-      this.error$.next(undefined);
-    }
+    // Reset any previous outcome so re-picking does not retain a stale error/done state
+    this.done$.next(undefined);
+    this.error$.next(undefined);
 
     let error: undefined | Error;
     try {

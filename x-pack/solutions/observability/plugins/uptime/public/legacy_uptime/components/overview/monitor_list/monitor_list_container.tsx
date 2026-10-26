@@ -6,7 +6,7 @@
  */
 
 import React, { useContext, useEffect, useState } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux-v7';
 import { usePageReady } from '@kbn/ebt-tools';
 import { getMonitorList } from '../../../state/actions';
 import { esKuerySelector, monitorListSelector } from '../../../state/selectors';
@@ -47,7 +47,10 @@ export const MonitorList: React.FC<MonitorListProps> = (props) => {
   const monitorList = useSelector(monitorListSelector);
   useMappingCheck(monitorList.error);
 
-  usePageReady({ isReady: Boolean(monitorList.isLoaded) });
+  usePageReady({
+    isReady: Boolean(monitorList.isLoaded),
+    isRefreshing: false,
+  });
 
   useEffect(() => {
     filterCheck(() =>

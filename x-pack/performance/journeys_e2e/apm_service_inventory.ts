@@ -21,13 +21,13 @@ export const journey = new Journey({
 
   ftrConfigPath: 'x-pack/performance/configs/apm_config.ts',
 })
-  .step('Navigate to Service Inventory Page', async ({ page, kbnUrl }) => {
+  .step('Navigate to Service inventory Page', async ({ page, kbnUrl }) => {
     await page.goto(kbnUrl.get(`app/apm/services`));
     await page.waitForSelector(`[data-test-subj="serviceLink_nodejs"]`);
   })
   .step('Navigate to Service Overview Page', async ({ page }) => {
     await page.click(subj('serviceLink_nodejs'));
-    await page.waitForSelector(subj('apmMainTemplateHeaderServiceName'));
+    await page.waitForSelector(subj('appHeaderTitle'));
   })
   .step('Navigate to Transactions tabs', async ({ page }) => {
     await page.click(subj('transactionsTab'));
@@ -35,5 +35,5 @@ export const journey = new Journey({
   })
   .step('Wait for Trace Waterfall on the page to load', async ({ page }) => {
     await page.click(subj('apmTransactionDetailLinkLink'));
-    await page.waitForSelector(subj('apmWaterfallButton'));
+    await page.waitForSelector(subj('traceWaterfallAccordionButton'));
   });

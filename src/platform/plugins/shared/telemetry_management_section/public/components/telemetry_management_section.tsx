@@ -25,9 +25,9 @@ import type { DocLinksStart, ToastsStart } from '@kbn/core/public';
 import { withSuspense } from '@kbn/shared-ux-utility';
 import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 import { getFieldDefinition } from '@kbn/management-settings-field-definition';
-import { UiSettingMetadata } from '@kbn/management-settings-types';
+import type { UiSettingMetadata } from '@kbn/management-settings-types';
 import { FieldRowProvider } from '@kbn/management-settings-components-field-row';
-import { ValueValidation } from '@kbn/core-ui-settings-browser/src/types';
+import type { ValueValidation } from '@kbn/core-ui-settings-browser/src/types';
 import { OptInExampleFlyout } from './opt_in_example_flyout';
 
 type TelemetryService = TelemetryPluginSetup['telemetryService'];
@@ -182,7 +182,7 @@ export class TelemetryManagementSection extends Component<Props, State> {
 
     const securityDataLink = (
       <EuiLink
-        href="https://www.elastic.co/guide/en/security/current/advanced-settings.html#telemetry-settings"
+        href={docLinks.telemetry.securityData}
         data-test-id="endpoint_security_example"
         target="_blank"
       >

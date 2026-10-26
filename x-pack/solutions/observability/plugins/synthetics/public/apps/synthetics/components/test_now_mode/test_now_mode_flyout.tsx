@@ -9,8 +9,8 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiButtonEmpty,
-  EuiCallOut,
-  EuiErrorBoundary,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutFooter,
@@ -18,9 +18,11 @@ import {
   EuiLoadingSpinner,
   EuiTitle,
 } from '@elastic/eui';
+import { KbnInfoCallout } from '@kbn/ui-callout';
+import { KibanaSectionErrorBoundary } from '@kbn/shared-ux-error-boundary';
 
 import { LoadingState } from '../monitors_page/overview/overview/monitor_detail_flyout';
-import { ServiceLocationErrors, SyntheticsMonitor } from '../../../../../common/runtime_types';
+import type { ServiceLocationErrors, SyntheticsMonitor } from '../../../../../common/runtime_types';
 import { TestNowMode } from './test_now_mode';
 
 export interface TestRun {
@@ -65,11 +67,17 @@ export function TestNowModeFlyout({
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        <EuiErrorBoundary>
+        <KibanaSectionErrorBoundary sectionName="xpack.synthetics.monitorManagement.testNowFlyout.body">
           {isPushing && (
-            <EuiCallOut color="primary">
-              {PushingLabel} <EuiLoadingSpinner />
-            </EuiCallOut>
+            <KbnInfoCallout
+              announceOnMount
+              title={
+                <EuiFlexGroup css={{ display: 'inline-flex' }} alignItems="center" gutterSize="s">
+                  <EuiFlexItem grow={false}>{PushingLabel}</EuiFlexItem>
+                  <EuiLoadingSpinner />
+                </EuiFlexGroup>
+              }
+            />
           )}
           {testRun ? (
             <TestNowMode
@@ -82,7 +90,7 @@ export function TestNowModeFlyout({
           ) : (
             !isPushing && <LoadingState />
           )}
-        </EuiErrorBoundary>
+        </KibanaSectionErrorBoundary>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiButtonEmpty
@@ -97,7 +105,7 @@ export function TestNowModeFlyout({
     </EuiFlyout>
   );
 
-  return <>{(testRun || inProgress) && <EuiErrorBoundary>{flyout}</EuiErrorBoundary>}</>;
+  return testRun || inProgress ? flyout : null;
 }
 
 const TEST_RESULT = i18n.translate('xpack.synthetics.monitorManagement.testResult', {

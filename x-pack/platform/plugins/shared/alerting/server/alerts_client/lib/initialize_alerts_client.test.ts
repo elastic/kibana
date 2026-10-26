@@ -6,6 +6,7 @@
  */
 
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { asSpaceId } from '@kbn/core-spaces-common';
 import {
   mockTaskInstance,
   ruleType,
@@ -71,6 +72,8 @@ const ruleTypeWithAlerts: jest.Mocked<UntypedNormalizedRuleType> = {
 };
 
 const mockedRule: RuleData<Record<string, unknown>> = {
+  muteAll: false,
+  mutedInstanceIds: [],
   id: '1',
   name: 'rule-name',
   tags: ['rule-', '-tags'],
@@ -96,11 +99,12 @@ describe('initializeAlertsClient', () => {
         alertingEventLogger,
         flappingSettings: DEFAULT_FLAPPING_SETTINGS,
         maintenanceWindowsService,
+        logger,
         request: fakeRequest,
         ruleId: RULE_ID,
         ruleLogPrefix: `${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}'`,
         ruleRunMetricsStore,
-        spaceId: 'default',
+        spaceId: asSpaceId('default'),
         isServerless: false,
       },
       executionId: 'abc',
@@ -125,6 +129,9 @@ describe('initializeAlertsClient', () => {
         consumer: 'bar',
         executionId: 'abc',
         id: '1',
+        muteAll: false,
+        mutedInstanceIds: [],
+        snoozedInstances: undefined,
         name: 'rule-name',
         parameters: {
           bar: true,
@@ -155,12 +162,13 @@ describe('initializeAlertsClient', () => {
       alertsService,
       context: {
         alertingEventLogger,
+        logger,
         maintenanceWindowsService,
         request: fakeRequest,
         ruleId: RULE_ID,
         ruleLogPrefix: `${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}'`,
         ruleRunMetricsStore,
-        spaceId: 'default',
+        spaceId: asSpaceId('default'),
         isServerless: false,
       },
       executionId: 'abc',
@@ -185,6 +193,9 @@ describe('initializeAlertsClient', () => {
         consumer: 'bar',
         executionId: 'abc',
         id: '1',
+        muteAll: false,
+        mutedInstanceIds: [],
+        snoozedInstances: undefined,
         name: 'rule-name',
         parameters: {
           bar: true,
@@ -217,11 +228,12 @@ describe('initializeAlertsClient', () => {
         alertingEventLogger,
         flappingSettings: DEFAULT_FLAPPING_SETTINGS,
         maintenanceWindowsService,
+        logger,
         request: fakeRequest,
         ruleId: RULE_ID,
         ruleLogPrefix: `${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}'`,
         ruleRunMetricsStore,
-        spaceId: 'default',
+        spaceId: asSpaceId('default'),
         isServerless: false,
       },
       executionId: 'abc',
@@ -246,6 +258,9 @@ describe('initializeAlertsClient', () => {
         consumer: 'bar',
         executionId: 'abc',
         id: '1',
+        muteAll: false,
+        mutedInstanceIds: [],
+        snoozedInstances: undefined,
         name: 'rule-name',
         parameters: {
           bar: true,
@@ -286,12 +301,13 @@ describe('initializeAlertsClient', () => {
       context: {
         alertingEventLogger,
         flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+        logger,
         maintenanceWindowsService,
         request: fakeRequest,
         ruleId: RULE_ID,
         ruleLogPrefix: `${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}'`,
         ruleRunMetricsStore,
-        spaceId: 'default',
+        spaceId: asSpaceId('default'),
         isServerless: false,
       },
       executionId: 'abc',
@@ -317,6 +333,9 @@ describe('initializeAlertsClient', () => {
         executionId: 'abc',
         id: '1',
         name: 'rule-name',
+        muteAll: false,
+        mutedInstanceIds: [],
+        snoozedInstances: undefined,
         parameters: {
           bar: true,
         },
@@ -344,6 +363,55 @@ describe('initializeAlertsClient', () => {
       ruleLabel: `test:1: 'rule-name'`,
       startedAt: expect.any(Date),
     });
+    spy1.mockRestore();
+  });
+
+  test('should pass snoozedInstances to createAlertsClient when provided', async () => {
+    const startedAt = new Date(Date.now() + 5 * 60 * 1000);
+    const snoozedInstances = [
+      { instanceId: 'alert-1', snoozedAt: '2026-01-01T00:00:00.000Z', snoozedBy: 'user1' },
+      {
+        instanceId: 'alert-2',
+        snoozedAt: '2026-01-01T00:00:00.000Z',
+        snoozedBy: 'user1',
+        expiresAt: '2026-12-31T00:00:00.000Z',
+      },
+    ];
+    const spy1 = jest
+      .spyOn(LegacyAlertsClientModule, 'LegacyAlertsClient')
+      .mockImplementation(() => legacyAlertsClient);
+    alertsService.createAlertsClient.mockImplementationOnce(() => alertsClient);
+    await initializeAlertsClient({
+      alertsService,
+      context: {
+        alertingEventLogger,
+        flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+        maintenanceWindowsService,
+        logger,
+        request: fakeRequest,
+        ruleId: RULE_ID,
+        ruleLogPrefix: `${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}'`,
+        ruleRunMetricsStore,
+        spaceId: asSpaceId('default'),
+        isServerless: false,
+      },
+      executionId: 'abc',
+      logger,
+      maxAlerts: 100,
+      rule: { ...mockedRule, snoozedInstances },
+      ruleType: ruleTypeWithAlerts,
+      startedAt,
+      taskInstance: mockedTaskInstance,
+    });
+
+    expect(alertsService.createAlertsClient).toHaveBeenCalledWith(
+      expect.objectContaining({
+        rule: expect.objectContaining({ snoozedInstances }),
+      })
+    );
+    expect(alertsClient.initializeExecution).toHaveBeenCalledWith(
+      expect.objectContaining({ snoozedInstances })
+    );
     spy1.mockRestore();
   });
 });

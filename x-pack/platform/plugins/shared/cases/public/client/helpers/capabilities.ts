@@ -17,6 +17,7 @@ import {
   CASES_REOPEN_CAPABILITY,
   CREATE_COMMENT_CAPABILITY,
   ASSIGN_CASE_CAPABILITY,
+  MANAGE_TEMPLATES_CAPABILITY,
 } from '../../../common/constants';
 
 export const getUICapabilities = (
@@ -32,6 +33,7 @@ export const getUICapabilities = (
   const reopenCase = !!featureCapabilities?.[CASES_REOPEN_CAPABILITY];
   const createComment = !!featureCapabilities?.[CREATE_COMMENT_CAPABILITY];
   const assignCases = !!featureCapabilities?.[ASSIGN_CASE_CAPABILITY];
+  const manageTemplates = !!featureCapabilities?.[MANAGE_TEMPLATES_CAPABILITY];
 
   const all =
     create &&
@@ -43,7 +45,8 @@ export const getUICapabilities = (
     settings &&
     reopenCase &&
     createComment &&
-    assignCases;
+    assignCases &&
+    manageTemplates;
 
   return {
     all,
@@ -57,5 +60,6 @@ export const getUICapabilities = (
     reopenCase,
     createComment,
     assign: assignCases,
+    manageTemplates,
   };
 };

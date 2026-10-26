@@ -20,8 +20,8 @@ export const OnboardingSuccessCallout = () => {
 
   return isOnboardingSuccessCalloutVisible ? (
     <>
-      <EuiSpacer size="l" />
       <EuiCallOut
+        announceOnMount
         onDismiss={hideOnboardingSuccessCallout}
         title={
           <FormattedMessage

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IngestPipeline } from '@elastic/elasticsearch/lib/api/types';
+import type { IngestPipeline } from '@elastic/elasticsearch/lib/api/types';
 import { i18n } from '@kbn/i18n';
 
 import { createApiLogic } from '../../../shared/api_logic/create_api_logic';
@@ -20,7 +20,7 @@ export type CreateCustomPipelineApiLogicResponse = Record<string, IngestPipeline
 export const createCustomPipeline = async ({
   indexName,
 }: CreateCustomPipelineApiLogicArgs): Promise<CreateCustomPipelineApiLogicResponse> => {
-  const route = `/internal/enterprise_search/indices/${indexName}/pipelines`;
+  const route = `/internal/enterprise_search/indices/${encodeURIComponent(indexName)}/pipelines`;
   const result = await HttpLogic.values.http.post<CreateCustomPipelineApiLogicResponse>(route);
   return result;
 };

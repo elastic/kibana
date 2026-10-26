@@ -5,11 +5,15 @@
  * 2.0.
  */
 
+import type { Overwrite } from 'utility-types';
 import type { Observable } from 'rxjs';
-import type { ToolCallsOf, ToolOptions } from './tools';
+import type { ToolChoiceType, ToolOptions } from './tools';
 import type { Message } from './messages';
 import type { ChatCompletionEvent, ChatCompletionTokenCount } from './events';
 import type { ChatCompleteMetadata } from './metadata';
+import type { ToolCallOfToolOptions } from './tools_of';
+import type { AnonymizationResponseMetadata } from './anonymization';
+import type { ChatCompletionReasoning } from './reasoning';
 
 /**
  * Request a completion from the LLM based on a prompt or conversation.
@@ -55,46 +59,79 @@ import type { ChatCompleteMetadata } from './metadata';
  * });
  * ```
  */
-export type ChatCompleteAPI = <
-  TToolOptions extends ToolOptions = ToolOptions,
-  TStream extends boolean = false
->(
-  options: ChatCompleteOptions<TToolOptions, TStream>
-) => ChatCompleteCompositeResponse<TToolOptions, TStream>;
+
+export interface DefaultChatCompleteOptions {
+  stream: false;
+  tools: {};
+  toolChoice: ToolChoiceType.auto;
+}
+
+type ChatCompleteCompositeResponseOptions = Pick<
+  ChatCompleteOptions,
+  'stream' | 'tools' | 'toolChoice'
+>;
+
+type ChatCompleteResponseOptions = Pick<ChatCompleteOptions, 'tools' | 'toolChoice'>;
+
+export type ChatCompleteAPIResponse<TOptions extends ChatCompleteOptions = ChatCompleteOptions> =
+  ChatCompleteCompositeResponse<Overwrite<DefaultChatCompleteOptions, TOptions>>;
+
+export type ChatCompleteAPI = <TOptions extends ChatCompleteOptions>(
+  options: TOptions
+) => ChatCompleteAPIResponse<TOptions>;
 
 /**
- * Options used to call the {@link ChatCompleteAPI}
+ * EIS prompt template. Elasticsearch forwards `id`, `version`, and `variables`
+ * unchanged. The id starts with a dot.
  */
-export type ChatCompleteOptions<
-  TToolOptions extends ToolOptions = ToolOptions,
-  TStream extends boolean = false
-> = {
+export interface ChatCompleteTemplate {
+  id: string;
+  version: number;
+  variables: Record<string, unknown>;
+}
+
+/**
+ * Options used to call the {@link ChatCompleteAPI}.
+ *
+ * `connectorId` accepts both Kibana stack connector IDs (OpenAI, Bedrock, Gemini, etc.)
+ * and Elasticsearch inference endpoint IDs. The system automatically resolves which
+ * pipeline to use based on the provided identifier.
+ */
+export type ChatCompleteOptions = {
   /**
-   * The ID of the connector to use.
-   * Must be an inference connector, or an error will be thrown.
+   * The ID of the connector or inference endpoint to use.
+   * Accepts both Kibana stack connector IDs and Elasticsearch inference endpoint IDs.
    */
   connectorId: string;
-  /**
-   * Set to true to enable streaming, which will change the API response type from
-   * a single {@link ChatCompleteResponse} promise
-   * to a {@link ChatCompleteStreamResponse} event observable.
-   *
-   * Defaults to false.
-   */
-  stream?: TStream;
   /**
    * Optional system message for the LLM.
    */
   system?: string;
   /**
-   * The list of messages for the current conversation
+   * The list of messages for the current conversation.
+   *
+   * Ignored on the wire when `template` is set. A template-only endpoint rejects
+   * messages, so pass an empty list together with `template`.
    */
   messages: Message[];
+  /**
+   * When set, the inference endpoint adapter sends this template and omits
+   * `messages` and `tools`.
+   */
+  template?: ChatCompleteTemplate;
   /**
    * LLM temperature. All models support the 0-1 range (some supports more).
    * Defaults to 0;
    */
   temperature?: number;
+  /**
+   * Optional reasoning configuration for the Elasticsearch unified chat completion API.
+   *
+   * When native function tools are present and this is omitted, the Inference adapter
+   * defaults to `{ effort: 'none' }` so OpenAI Chat Completions accepts tool-calling
+   * requests on newer reasoning models.
+   */
+  reasoning?: ChatCompletionReasoning;
   /**
    * The model name identifier to use. Can be defined to use another model than the
    * default one, when using connectors / providers exposing multiple models.
@@ -126,7 +163,47 @@ export type ChatCompleteOptions<
    * Note that defaults are very fine, so only use this if you really have a reason to do so.
    */
   retryConfiguration?: ChatCompleteRetryConfiguration;
-} & TToolOptions;
+  /**
+   * Set to true to enable streaming, which will change the API response type from
+   * a single {@link ChatCompleteResponse} promise
+   * to a {@link ChatCompleteStreamResponse} event observable.
+   *
+   * Defaults to false.
+   */
+  stream?: boolean;
+  /**
+   * The timeout for the chat completion request.
+   */
+  timeout?: number;
+  /**
+   * Optional response content length override for connectors that support it.
+   */
+  maxContentLength?: number;
+  /**
+   * Optional prompt-cache directive. Only honored by Elastic-managed (EIS) inference
+   * endpoints;
+   */
+  cacheControl?: ChatCompleteCacheControl;
+  /**
+   * Optional session identifier used by EIS to scope prompt caching across calls.
+   */
+  sessionId?: string;
+} & ToolOptions;
+
+/**
+ * Cache-control directive for EIS prompt caching.
+ */
+export interface ChatCompleteCacheControl {
+  /**
+   * Cache entry type. Currently only `'ephemeral'` is supported.
+   */
+  type: 'ephemeral';
+  /**
+   * Optional time-to-live as an Elasticsearch TimeValue string.
+   * EIS currently supports `'5m'` and `'1h'`.
+   */
+  ttl?: '5m' | '1h';
+}
 
 export interface ChatCompleteRetryConfiguration {
   /**
@@ -160,37 +237,50 @@ export interface ChatCompleteRetryConfiguration {
  * whether API was called with stream mode enabled or not.
  */
 export type ChatCompleteCompositeResponse<
-  TToolOptions extends ToolOptions = ToolOptions,
-  TStream extends boolean = false
-> = TStream extends true
-  ? ChatCompleteStreamResponse<TToolOptions>
-  : Promise<ChatCompleteResponse<TToolOptions>>;
+  TOptions extends ChatCompleteCompositeResponseOptions = ChatCompleteCompositeResponseOptions
+> =
+  | (true extends TOptions['stream'] ? ChatCompleteStreamResponse<TOptions> : never)
+  | (false extends TOptions['stream'] ? Promise<ChatCompleteResponse<TOptions>> : never);
 
 /**
  * Response from the {@link ChatCompleteAPI} when streaming is enabled.
  *
  * Observable of {@link ChatCompletionEvent}
  */
-export type ChatCompleteStreamResponse<TToolOptions extends ToolOptions = ToolOptions> = Observable<
-  ChatCompletionEvent<TToolOptions>
->;
+export type ChatCompleteStreamResponse<
+  TOptions extends ChatCompleteResponseOptions = ChatCompleteResponseOptions
+> = Observable<ChatCompletionEvent<TOptions>>;
 
 /**
  * Response from the {@link ChatCompleteAPI} when streaming is not enabled.
  */
-export interface ChatCompleteResponse<TToolOptions extends ToolOptions = ToolOptions> {
+export interface ChatCompleteResponse<
+  TOptions extends ChatCompleteResponseOptions = ChatCompleteResponseOptions
+> {
   /**
    * The text content of the LLM response.
    */
   content: string;
   /**
+   * Optional refusal reason returned by the model when content is filtered.
+   */
+  refusal?: string;
+  /**
    * The eventual tool calls performed by the LLM.
    */
-  toolCalls: ToolCallsOf<TToolOptions>['toolCalls'];
+  toolCalls: ToolCallOfToolOptions<TOptions>[];
   /**
    * Token counts
    */
   tokens?: ChatCompletionTokenCount;
+  /**
+   * Model effectively used, as specified by the response
+   */
+  model?: string;
+  /**
+   * Optional metadata attached by inference runtime.
+   */
+  metadata?: AnonymizationResponseMetadata;
 }
 
 /**

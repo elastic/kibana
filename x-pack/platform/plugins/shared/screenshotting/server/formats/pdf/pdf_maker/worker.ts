@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { Ensure, SerializableRecord } from '@kbn/utility-types';
+import type { Ensure, SerializableRecord } from '@kbn/utility-types';
 
-import { isMainThread, MessagePort, workerData } from 'worker_threads';
+import type { MessagePort } from 'worker_threads';
+import { isMainThread, workerData } from 'worker_threads';
 import path from 'path';
 
 import { getTemplate } from './get_template';
@@ -169,7 +170,14 @@ async function execute({ data: { layout, logo, title, content } }: GeneratePdfRe
         buffers.push(data);
       });
       pdfDoc.on('end', () => {
-        resolve(Buffer.concat(buffers));
+        const output = Buffer.allocUnsafeSlow(
+          buffers.reduce((length, chunk) => length + chunk.length, 0)
+        );
+        let offset = 0;
+        for (const chunk of buffers) {
+          offset += chunk.copy(output, offset);
+        }
+        resolve(output);
       });
       pdfDoc.end();
     });
@@ -188,7 +196,7 @@ async function execute({ data: { layout, logo, title, content } }: GeneratePdfRe
         },
       },
     };
-    port.postMessage(successResponse, [buffer.buffer /* Transfer buffer instead of copying */]);
+    port.postMessage(successResponse, [buffer.buffer as ArrayBuffer]);
   } catch (error) {
     const errorResponse: GeneratePdfResponse = {
       type: GeneratePdfResponseType.Error,

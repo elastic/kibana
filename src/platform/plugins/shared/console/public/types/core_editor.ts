@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ResultTerm } from '../lib/autocomplete/types';
-import { TokensProvider } from './tokens_provider';
-import { Token } from './token';
+import type { ResultTerm } from '../lib/autocomplete/types';
+import type { TokensProvider } from './tokens_provider';
+import type { Token } from './token';
 
 type MarkerRef = any;
 

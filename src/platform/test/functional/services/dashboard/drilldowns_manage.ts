@@ -7,8 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Key } from 'selenium-webdriver';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type {
+  ON_CLICK_IMAGE,
+  ON_CLICK_VALUE,
+  ON_OPEN_PANEL_MENU,
+  ON_SELECT_RANGE,
+} from '@kbn/ui-actions-plugin/common/trigger_ids';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 const CREATE_DRILLDOWN_FLYOUT_DATA_TEST_SUBJ = 'createDrilldownFlyout';
 const MANAGE_DRILLDOWNS_FLYOUT_DATA_TEST_SUBJ = 'editDrilldownFlyout';
@@ -20,9 +25,8 @@ export function DashboardDrilldownsManageProvider({ getService }: FtrProviderCon
   const testSubjects = getService('testSubjects');
   const flyout = getService('flyout');
   const comboBox = getService('comboBox');
-  const find = getService('find');
-  const browser = getService('browser');
   const kibanaServer = getService('kibanaServer');
+  const monacoEditor = getService('monacoEditor');
   return new (class DashboardDrilldownsManage {
     readonly DASHBOARD_WITH_PIE_CHART_NAME = 'Dashboard with Pie Chart';
     readonly DASHBOARD_WITH_AREA_CHART_NAME = 'Dashboard With Area Chart';
@@ -31,7 +35,7 @@ export function DashboardDrilldownsManageProvider({ getService }: FtrProviderCon
       log.debug('loadData');
       await kibanaServer.savedObjects.cleanStandardList();
       await kibanaServer.importExport.load(
-        'x-pack/test/functional/fixtures/kbn_archiver/dashboard_drilldowns/drilldowns'
+        'x-pack/platform/test/functional/fixtures/kbn_archives/dashboard_drilldowns/drilldowns'
       );
     }
 
@@ -79,10 +83,10 @@ export function DashboardDrilldownsManageProvider({ getService }: FtrProviderCon
       drilldownName: string;
       destinationURLTemplate: string;
       trigger:
-        | 'VALUE_CLICK_TRIGGER'
-        | 'SELECT_RANGE_TRIGGER'
-        | 'IMAGE_CLICK_TRIGGER'
-        | 'CONTEXT_MENU_TRIGGER';
+        | typeof ON_CLICK_VALUE
+        | typeof ON_SELECT_RANGE
+        | typeof ON_CLICK_IMAGE
+        | typeof ON_OPEN_PANEL_MENU;
     }) {
       await this.fillInDrilldownName(drilldownName);
       await this.selectTriggerIfNeeded(trigger);
@@ -99,10 +103,10 @@ export function DashboardDrilldownsManageProvider({ getService }: FtrProviderCon
 
     async selectTriggerIfNeeded(
       trigger:
-        | 'VALUE_CLICK_TRIGGER'
-        | 'SELECT_RANGE_TRIGGER'
-        | 'IMAGE_CLICK_TRIGGER'
-        | 'CONTEXT_MENU_TRIGGER'
+        | typeof ON_CLICK_VALUE
+        | typeof ON_SELECT_RANGE
+        | typeof ON_CLICK_IMAGE
+        | typeof ON_OPEN_PANEL_MENU
     ) {
       if (await testSubjects.exists(`triggerPicker`)) {
         const container = await testSubjects.find(`triggerPicker-${trigger}`);
@@ -111,24 +115,13 @@ export function DashboardDrilldownsManageProvider({ getService }: FtrProviderCon
       }
     }
 
-    async eraseInput(maxChars: number) {
-      const keys = [
-        ...Array(maxChars).fill(Key.ARROW_RIGHT),
-        ...Array(maxChars).fill(Key.BACK_SPACE),
-      ];
-      await browser
-        .getActions()
-        .sendKeys(...keys)
-        .perform();
-    }
-
     async fillInURLTemplate(destinationURLTemplate: string) {
-      const monaco = await find.byCssSelector(
-        '[data-test-subj="url-template-editor-container"] .monaco-editor'
+      // Use Monaco API instead of Selenium keyboard (Monaco 0.54.0 has aria-hidden textarea)
+      await monacoEditor.typeCodeEditorValue(
+        destinationURLTemplate,
+        'url-template-editor-container',
+        false
       );
-      await monaco.clickMouseButton();
-      await this.eraseInput(300);
-      await browser.pressKeys(destinationURLTemplate);
     }
 
     async saveChanges() {

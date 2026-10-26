@@ -15,6 +15,9 @@ const REQUIRED_EXCLUDES = ['target/**/*'];
 
 export const requiredExcludes = TsProjectRule.create('requiredExcludes', {
   check({ tsProject }) {
+    if (tsProject.pkg?.id === '@kbn/tsconfig-base') {
+      return undefined;
+    }
     const existing = tsProject.config.exclude;
     if (!existing) {
       return {

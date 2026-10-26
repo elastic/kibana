@@ -6,7 +6,7 @@
  */
 
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
-import type { ErrorType, MLErrorObject } from './types';
+import type { ErrorType, MLErrorObject } from '@kbn/ml-common-types/errors';
 import {
   isBoomError,
   isErrorString,
@@ -75,7 +75,8 @@ export const extractErrorProperties = (error: ErrorType): MLErrorObject => {
       ) {
         errObj.causedBy =
           error.body.attributes.body.error.caused_by?.caused_by?.reason ||
-          error.body.attributes.body.error.caused_by?.reason;
+          error.body.attributes.body.error.caused_by?.reason ||
+          undefined; // Remove 'null' option from the types
       }
       if (
         Array.isArray(error.body.attributes.body.error.root_cause) &&

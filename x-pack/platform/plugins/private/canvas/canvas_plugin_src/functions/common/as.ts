@@ -5,12 +5,8 @@
  * 2.0.
  */
 
-import {
-  Datatable,
-  DatatableColumnType,
-  ExpressionFunctionDefinition,
-  getType,
-} from '../../../types';
+import type { Datatable, DatatableColumnType, ExpressionFunctionDefinition } from '../../../types';
+import { getType } from '../../../types';
 import { getFunctionHelp } from '../../../i18n';
 
 interface Arguments {

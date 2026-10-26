@@ -32,6 +32,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import type { FunctionComponent } from 'react';
 import React, { useState } from 'react';
@@ -41,7 +42,6 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { euiThemeVars } from '@kbn/ui-theme';
 
-import { DocLink } from './doc_link';
 import { getCommandLineSnippet } from './get_command_line_snippet';
 import { SubmitErrorCallout } from './submit_error_callout';
 import { TextTruncate } from './text_truncate';
@@ -80,7 +80,7 @@ export const ClusterConfigurationForm: FunctionComponent<ClusterConfigurationFor
   onCancel,
   onSuccess,
 }) => {
-  const { http } = useKibana();
+  const { http, docLinks } = useKibana();
   const { status, getCode } = useVerification();
   const [form, eventHandlers] = useForm({
     defaultValues,
@@ -189,6 +189,7 @@ export const ClusterConfigurationForm: FunctionComponent<ClusterConfigurationFor
             fullWidth
           >
             <EuiFieldText
+              data-test-subj="interactiveSetupUsernameInput"
               icon="user"
               name="username"
               value={form.values.username}
@@ -210,6 +211,7 @@ export const ClusterConfigurationForm: FunctionComponent<ClusterConfigurationFor
             fullWidth
           >
             <EuiFieldPassword
+              data-test-subj="interactiveSetupPasswordInput"
               type="dual"
               name="password"
               value={form.values.password}
@@ -222,6 +224,7 @@ export const ClusterConfigurationForm: FunctionComponent<ClusterConfigurationFor
       ) : (
         <>
           <EuiCallOut
+            announceOnMount
             color="warning"
             iconType="warning"
             title={i18n.translate(
@@ -238,12 +241,16 @@ export const ClusterConfigurationForm: FunctionComponent<ClusterConfigurationFor
               defaultMessage="Anyone with the address can access your data."
             />
             <EuiSpacer size="xs" />
-            <DocLink app="elasticsearch" doc="configuring-stack-security.html">
+            <EuiLink
+              href={docLinks.links.security.enableElasticSearchSecurityFeatures}
+              target="_blank"
+              external
+            >
               <FormattedMessage
                 id="interactiveSetup.clusterConfigurationForm.insecureClusterLink"
                 defaultMessage="Learn how to enable security features."
               />
-            </DocLink>
+            </EuiLink>
           </EuiCallOut>
           <EuiSpacer />
         </>
@@ -259,6 +266,7 @@ export const ClusterConfigurationForm: FunctionComponent<ClusterConfigurationFor
             fullWidth
           >
             <EuiCheckableCard
+              data-test-subj="interactiveSetupTrustCaCertCheckbox"
               id={trustCaCertId}
               label={i18n.translate('interactiveSetup.clusterConfigurationForm.trustCaCertLabel', {
                 defaultMessage: 'I recognize and trust this certificate:',
@@ -280,7 +288,7 @@ export const ClusterConfigurationForm: FunctionComponent<ClusterConfigurationFor
       )}
       <EuiFlexGroup responsive={false} justifyContent="flexEnd">
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty flush="right" iconType="arrowLeft" onClick={onCancel}>
+          <EuiButtonEmpty flush="right" iconType="chevronSingleLeft" onClick={onCancel}>
             <FormattedMessage
               id="interactiveSetup.clusterConfigurationForm.cancelButton"
               defaultMessage="Back"
@@ -289,6 +297,7 @@ export const ClusterConfigurationForm: FunctionComponent<ClusterConfigurationFor
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButton
+            data-test-subj="interactiveSetupSubmitConfigurationButton"
             buttonRef={buttonRef}
             type="submit"
             isLoading={form.isSubmitting}
@@ -325,7 +334,7 @@ export const CertificatePanel: FunctionComponent<CertificatePanelProps> = ({
     <EuiPanel color={compressed ? 'subdued' : undefined} hasBorder={!compressed}>
       <EuiFlexGroup responsive={false} alignItems="center" gutterSize="m">
         <EuiFlexItem grow={false}>
-          <EuiIcon type="document" size="l" />
+          <EuiIcon type="document" size="l" aria-hidden={true} />
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiFlexGroup responsive={false} gutterSize="none" justifyContent="spaceBetween">
@@ -414,6 +423,7 @@ export interface CertificateChainProps {
 }
 const CertificateChain: FunctionComponent<CertificateChainProps> = ({ certificateChain }) => {
   const [showModal, setShowModal] = useState(false);
+  const modalTitleId = useGeneratedHtmlId();
 
   return (
     <>
@@ -423,9 +433,13 @@ const CertificateChain: FunctionComponent<CertificateChainProps> = ({ certificat
         compressed
       />
       {showModal && (
-        <EuiModal onClose={() => setShowModal(false)} maxWidth={euiThemeVars.euiBreakpoints.s}>
+        <EuiModal
+          aria-labelledby={modalTitleId}
+          onClose={() => setShowModal(false)}
+          maxWidth={euiThemeVars.euiBreakpoints.s}
+        >
           <EuiModalHeader>
-            <EuiModalHeaderTitle>
+            <EuiModalHeaderTitle id={modalTitleId}>
               <FormattedMessage
                 id="interactiveSetup.certificateChain.title"
                 defaultMessage="Certificate chain"
@@ -443,7 +457,7 @@ const CertificateChain: FunctionComponent<CertificateChainProps> = ({ certificat
                       <EuiSpacer size="s" />
                       <EuiFlexGroup responsive={false} justifyContent="center">
                         <EuiFlexItem grow={false}>
-                          <EuiIcon type="sortDown" color="subdued" />
+                          <EuiIcon type="sortDown" color="subdued" aria-hidden={true} />
                         </EuiFlexItem>
                       </EuiFlexGroup>
                       <EuiSpacer size="s" />
@@ -500,6 +514,9 @@ export const ForgotPasswordPopover: FunctionComponent<ForgotPasswordPopoverProps
       anchorPosition="rightCenter"
       isOpen={isPopoverOpen}
       closePopover={() => setIsPopoverOpen(false)}
+      aria-label={i18n.translate('interactiveSetup.forgotPasswordPopover.ariaLabel', {
+        defaultMessage: 'Forgot password',
+      })}
     >
       <EuiText size="s" grow={false}>
         <p>

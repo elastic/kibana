@@ -8,11 +8,12 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import { Assign } from '@kbn/utility-types';
-import { Spec } from 'vega';
-import { EsQueryParser } from './es_query_parser';
-import { EmsFileParser } from './ems_file_parser';
-import { UrlParser } from './url_parser';
+import type { Assign } from '@kbn/utility-types';
+import type { Spec } from 'vega';
+import type { EsQueryParser } from './es_query_parser';
+import type { EsqlQueryParser } from './esql_query_parser';
+import type { EmsFileParser } from './ems_file_parser';
+import type { UrlParser } from './url_parser';
 
 interface Body {
   aggs?: Record<string, estypes.AggregationsAggregationContainer>;
@@ -54,9 +55,10 @@ interface Padding {
 interface Mark {
   color?: string;
   fill?: string;
+  stroke?: string;
 }
 
-type Renderer = 'svg' | 'canvas';
+export type Renderer = 'svg' | 'canvas';
 
 interface VegaSpecConfig extends KibanaConfig {
   kibana?: KibanaConfig;
@@ -167,6 +169,13 @@ export interface UrlObject {
   timeout?: string;
 }
 
+export interface EsqlUrlObject extends UrlObject {
+  query: string;
+  filter?: unknown;
+  dropNullColumns?: boolean;
+  params?: Array<Record<string, unknown>>;
+}
+
 export interface Data {
   [index: string]: any;
   url?: UrlObject;
@@ -186,6 +195,7 @@ interface Requests<TUrlData = UrlObject, TRequestDataObject = RequestDataObject<
 }
 
 export type EsQueryRequest = Requests;
+export type EsqlQueryRequest = Requests<EsqlUrlObject, RequestDataObject<EsqlUrlObject>>;
 export type EmsQueryRequest = Requests & {
   obj: UrlObject;
 };
@@ -228,9 +238,34 @@ export interface VegaConfig extends DstObj {
   controlsDirection?: ControlsDirection;
 }
 
+/** The structured-cloneable state a Vega view needs to render an already parsed and resolved spec. */
+export interface VegaRenderDescriptor {
+  readonly spec: VegaSpec;
+  readonly vlspec?: VegaSpec;
+  readonly isVegaLite?: boolean;
+  readonly useMap?: boolean;
+  readonly useResize?: boolean;
+  readonly useHover?: boolean;
+  readonly renderer?: Renderer;
+  readonly tooltips?: boolean | TooltipConfig;
+  readonly mapConfig?: VegaConfig;
+  /** Named Vega color schemes the spec relies on, such as Kibana's `elastic` palette. */
+  readonly colorSchemes?: Readonly<Record<string, string[]>>;
+  readonly containerDir?: ControlsLocation | ControlsDirection;
+  readonly controlsDir?: ControlsLocation;
+  readonly hideWarnings: boolean;
+  readonly restoreSignalValuesOnRefresh: boolean;
+  readonly warnings: readonly string[];
+  readonly error?: string;
+  readonly approximationApplied?: boolean;
+  /** Data URLs Kibana resolved on the spec's behalf (EMS files) that skip the external URL check. */
+  readonly trustedDataUrls: readonly string[];
+}
+
 export interface UrlParserConfig {
   [index: string]: any;
   elasticsearch: EsQueryParser;
+  esql: EsqlQueryParser;
   emsfile: EmsFileParser;
   url: UrlParser;
 }

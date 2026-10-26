@@ -8,9 +8,9 @@
 import React, { useState, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSpacer, EuiText, EuiLink } from '@elastic/eui';
-import { RouteComponentProps } from 'react-router-dom';
-import { Location } from 'history';
-import { parse } from 'query-string';
+import type { RouteComponentProps } from 'react-router-dom';
+import type { Location } from 'history';
+import queryString from 'query-string';
 
 import type { SerializedEnrichPolicy } from '@kbn/index-management-shared-types';
 import { APP_WRAPPER_CLASS, useExecutionContext } from '../../../../shared_imports';
@@ -26,7 +26,7 @@ import { LoadingState, ErrorState, EmptyState } from './empty_states';
 import { PolicyDetailsFlyout } from './details_flyout';
 
 const getEnrichPolicyNameFromLocation = (location: Location) => {
-  const { policy } = parse(location.search.substring(1));
+  const { policy } = queryString.parse(location.search.substring(1));
   return policy;
 };
 

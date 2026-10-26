@@ -7,28 +7,54 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
-import { StateComparators, ViewMode } from '@kbn/presentation-publishing';
+import type { EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
+import type { ViewMode } from '@kbn/presentation-publishing';
 import { BehaviorSubject } from 'rxjs';
-import { LoadDashboardReturn } from '../services/dashboard_content_management_service/types';
-import { getDashboardBackupService } from '../services/dashboard_backup_service';
+import type { SavedObjectAccessControl } from '@kbn/core-saved-objects-common';
+import type { DashboardUser } from './types';
+import { getAccessControlClient } from '../services/access_control_service';
+import { getDashboardBackupService } from '../services/dashboard_api_services';
 import { getDashboardCapabilities } from '../utils/get_dashboard_capabilities';
-import { DashboardState } from './types';
+import { getDashboardAccessControlState } from '../utils/get_dashboard_access_control_state';
 
-export function initializeViewModeManager(
-  incomingEmbeddable?: EmbeddablePackageState,
-  savedObjectResult?: LoadDashboardReturn
-) {
+export function initializeViewModeManager({
+  incomingEmbeddables,
+  isManaged,
+  savedObjectId,
+  accessControl,
+  createdBy,
+  user,
+  viewMode: creationOptionsViewMode,
+}: {
+  incomingEmbeddables?: EmbeddablePackageState[];
+  isManaged: boolean;
+  savedObjectId?: string;
+  accessControl?: Partial<SavedObjectAccessControl>;
+  createdBy?: string;
+  user?: DashboardUser;
+  viewMode?: ViewMode;
+}) {
   const dashboardBackupService = getDashboardBackupService();
+  const accessControlClient = getAccessControlClient();
+
+  const { canEditDashboard: canUserEditDashboard } = getDashboardAccessControlState({
+    accessControlClient,
+    accessControl,
+    createdBy,
+    user,
+  });
+
   function getInitialViewMode() {
-    if (savedObjectResult?.managed || !getDashboardCapabilities().showWriteControls) {
+    if (creationOptionsViewMode === 'non-interactive') return creationOptionsViewMode;
+
+    if (isManaged || !getDashboardCapabilities().showWriteControls || !canUserEditDashboard) {
       return 'view';
     }
 
     if (
-      incomingEmbeddable ||
-      savedObjectResult?.newDashboardCreated ||
-      dashboardBackupService.dashboardHasUnsavedEdits(savedObjectResult?.dashboardId)
+      incomingEmbeddables?.length ||
+      !Boolean(savedObjectId) ||
+      dashboardBackupService.dashboardHasUnsavedEdits(savedObjectId)
     )
       return 'edit';
 
@@ -36,10 +62,15 @@ export function initializeViewModeManager(
   }
 
   const viewMode$ = new BehaviorSubject<ViewMode>(getInitialViewMode());
+  const disableTriggers$ = new BehaviorSubject<boolean>(viewMode$.getValue() === 'non-interactive');
+
+  const disableTriggersSubscription = viewMode$.subscribe((viewMode) => {
+    disableTriggers$.next(viewMode === 'non-interactive');
+  });
 
   function setViewMode(viewMode: ViewMode) {
     // block the Dashboard from entering edit mode if this Dashboard is managed.
-    if (savedObjectResult?.managed && viewMode?.toLowerCase() === 'edit') {
+    if (isManaged && viewMode?.toLowerCase() === 'edit') {
       return;
     }
     viewMode$.next(viewMode);
@@ -49,15 +80,11 @@ export function initializeViewModeManager(
     api: {
       viewMode$,
       setViewMode,
+      disableTriggers$,
+      isEditableByUser: canUserEditDashboard,
     },
-    comparators: {
-      viewMode: [
-        viewMode$,
-        setViewMode,
-        // When compared view mode is always considered unequal so that it gets backed up.
-        // view mode unsaved changes do not show unsaved badge
-        () => false,
-      ],
-    } as StateComparators<Pick<DashboardState, 'viewMode'>>,
+    cleanup: () => {
+      disableTriggersSubscription.unsubscribe();
+    },
   };
 }

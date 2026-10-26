@@ -41,6 +41,7 @@ import {
   UPGRADE_AGENT_FOR_RESPONDER,
 } from '../../../../../common/translations';
 import { endpointActionResponseCodes } from '../../lib/endpoint_action_response_codes';
+import { EndpointActionGenerator } from '../../../../../../common/endpoint/data_generators/endpoint_action_generator';
 
 jest.mock('../../../../../common/components/user_privileges');
 
@@ -179,14 +180,34 @@ describe('When using scan action from response actions console', () => {
   });
 
   it('should work with a single `--comment` argument', async () => {
+    apiMocks.responseProvider.actionDetails.mockReturnValue({
+      data: new EndpointActionGenerator('seed').generateActionDetails({
+        command: 'scan',
+        agents: ['a.b.c'],
+        isCompleted: false,
+        wasSuccessful: false,
+        agentState: {
+          'a.b.c': { isCompleted: false, wasSuccessful: false },
+        },
+      }),
+    });
     await render();
     await enterConsoleCommand(renderResult, user, 'scan --path="one/two" --comment "Scan folder"');
 
     await waitFor(() => {
-      expect(renderResult.getByTestId('scan-pending').textContent).toEqual(
-        'File path scan is in progress.'
+      expect(apiMocks.responseProvider.scan).toHaveBeenCalledWith(
+        expect.objectContaining({
+          body: expect.stringContaining('"comment":"Scan folder"'),
+        })
       );
     });
+
+    await waitFor(() => {
+      expect(renderResult.getByTestId('scan-actionResult-hostStatus').textContent).toEqual(
+        'scan is pending'
+      );
+    });
+    expect(renderResult.getByTestId('scan-pending')).toBeTruthy();
   });
 
   it('should work with `--help argument`', async () => {
@@ -194,19 +215,42 @@ describe('When using scan action from response actions console', () => {
     await enterConsoleCommand(renderResult, user, 'scan --help');
 
     expect(renderResult.getByTestId('test-helpOutput').textContent).toEqual(
-      'AboutScan the host for malwareUsagescan --path [--comment]Examplescan --path "/full/path/to/folder" --comment "Scan folder for malware"Required parameters--path - The absolute path to a file or directory to be scannedOptional parameters--comment - A comment to go along with the action'
+      'About' +
+        'Scan the host for malware' +
+        'Usage' +
+        'scan --path [--comment]' +
+        'Required parameters--path - The absolute path to a file or directory to be scanned' +
+        'Optional parameters--comment - A comment to go along with the action' +
+        'Examples' +
+        'can --path "/full/path/to/folder" --comment "Scan folder for malware"'
     );
   });
 
   it('should display pending message', async () => {
+    apiMocks.responseProvider.actionDetails.mockReturnValue({
+      data: new EndpointActionGenerator('seed').generateActionDetails({
+        command: 'scan',
+        agents: ['a.b.c'],
+        isCompleted: false,
+        wasSuccessful: false,
+        agentState: {
+          'a.b.c': { isCompleted: false, wasSuccessful: false },
+        },
+      }),
+    });
     await render();
     await enterConsoleCommand(renderResult, user, 'scan --path="one/two"');
 
     await waitFor(() => {
-      expect(renderResult.getByTestId('scan-pending').textContent).toEqual(
-        'File path scan is in progress.'
+      expect(apiMocks.responseProvider.actionDetails).toHaveBeenCalled();
+    });
+
+    await waitFor(() => {
+      expect(renderResult.getByTestId('scan-actionResult-hostStatus').textContent).toEqual(
+        'scan is pending'
       );
     });
+    expect(renderResult.getByTestId('scan-pending')).toBeTruthy();
   });
 
   it('should display action completion info', async () => {
@@ -239,20 +283,30 @@ describe('When using scan action from response actions console', () => {
     });
 
     await waitFor(() => {
-      expect(renderResult.getByTestId('scan-success').textContent).toEqual('Scan complete');
+      expect(renderResult.getByTestId('scan-success')).toBeTruthy();
     });
+
+    expect(renderResult.getByTestId('scan-actionResult-hostStatus').textContent).toEqual(
+      'scan completed successfully'
+    );
+    expect(renderResult.getByTestId('scan-actionResult-scanResults')).toBeTruthy();
   });
 
-  it.each(['ra_scan_error_not-found', 'ra_scan_error_invalid-input', 'ra_scan_error_queue-quota'])(
-    'should show detailed error if `scan` failure returned code: %s',
-    async (outputCode) => {
-      const mockData = apiMocks.responseProvider.actionDetails({
-        path: '/api/endpoint/action/agent-a',
-      }).data;
+  it.each([
+    'ra_scan_error_canceled',
+    'ra_scan_error_disabled',
+    'ra_scan_error_not-found',
+    'ra_scan_error_invalid-input',
+    'ra_scan_error_queue-quota',
+    'ra_scan_error_processing',
+    'ra_scan_error_processing-interrupted',
+  ])('should show detailed error if `scan` failure returned code: %s', async (outputCode) => {
+    const mockData = apiMocks.responseProvider.actionDetails({
+      path: '/api/endpoint/action/agent-a',
+    }).data;
 
-      const actionDetailsApiResponseMock: ReturnType<
-        typeof apiMocks.responseProvider.actionDetails
-      > = {
+    const actionDetailsApiResponseMock: ReturnType<typeof apiMocks.responseProvider.actionDetails> =
+      {
         data: {
           ...mockData,
           id: '123',
@@ -282,16 +336,22 @@ describe('When using scan action from response actions console', () => {
         },
       };
 
-      apiMocks.responseProvider.actionDetails.mockReturnValue(actionDetailsApiResponseMock);
-      await render();
-      await enterConsoleCommand(renderResult, user, 'scan --path="/error/path"');
+    apiMocks.responseProvider.actionDetails.mockReturnValue(actionDetailsApiResponseMock);
+    await render();
+    await enterConsoleCommand(renderResult, user, 'scan --path="/error/path"');
 
-      await waitFor(() => {
-        expect(renderResult.getByTestId('scan-actionFailure').textContent).toMatch(
-          // RegExp below taken from: https://github.com/sindresorhus/escape-string-regexp/blob/main/index.js
-          new RegExp(endpointActionResponseCodes[outputCode].replace(/[|\\{}()[\]^$+*?.]/g, '\\$&'))
-        );
-      });
-    }
-  );
+    await waitFor(() => {
+      expect(renderResult.getByTestId('scan-actionFailure').textContent).toMatch(
+        // RegExp below taken from: https://github.com/sindresorhus/escape-string-regexp/blob/main/index.js
+        new RegExp(endpointActionResponseCodes[outputCode].replace(/[|\\{}()[\]^$+*?.]/g, '\\$&'))
+      );
+    });
+
+    expect(renderResult.getByTestId('scan-actionResult-hostStatus').textContent).toEqual(
+      'scan failed'
+    );
+    expect(
+      renderResult.getByTestId('scan-actionResult-scanResults-failure-response-action-failure-info')
+    ).toHaveTextContent(endpointActionResponseCodes[outputCode]);
+  });
 });

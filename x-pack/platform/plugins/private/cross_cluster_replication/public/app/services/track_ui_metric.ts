@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
-import { UiCounterMetricType, METRIC_TYPE } from '@kbn/analytics';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import type { UiCounterMetricType } from '@kbn/analytics';
+import { METRIC_TYPE } from '@kbn/analytics';
 
 import { UIM_APP_NAME } from '../constants';
 
 export { METRIC_TYPE };
 
 // usageCollection is an optional dependency, so we default to a no-op.
-export let trackUiMetric = (metricType: UiCounterMetricType, eventName: string) => {};
+export let trackUiMetric = (metricType: UiCounterMetricType, eventName: string | string[]) => {};
 
 export function init(usageCollection: UsageCollectionSetup): void {
   trackUiMetric = usageCollection.reportUiCounter.bind(usageCollection, UIM_APP_NAME);
@@ -23,7 +24,10 @@ export function init(usageCollection: UsageCollectionSetup): void {
  * Transparently return provided request Promise, while allowing us to track
  * a successful completion of the request.
  */
-export function trackUserRequest(request: Promise<any>, actionType: string) {
+export function trackUserRequest<T>(
+  request: Promise<T>,
+  actionType: string | string[]
+): Promise<T> {
   // Only track successful actions.
   return request.then((response) => {
     // It looks like we're using the wrong type here, added via

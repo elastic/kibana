@@ -1,0 +1,106 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { ApplicationStart } from '@kbn/core-application-browser';
+import type { HttpStart } from '@kbn/core-http-browser';
+import type { CoreStart } from '@kbn/core-lifecycle-browser';
+import type { NotificationsStart } from '@kbn/core-notifications-browser';
+import type { OverlayStart } from '@kbn/core-overlays-browser';
+import type { UserProfileService } from '@kbn/core-user-profile-browser';
+import type { DocLinksStart } from '@kbn/core-doc-links-browser';
+import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import type { QueryClient } from '@kbn/react-query';
+import type { EpisodeActionExtension, EpisodeDataSource } from '../types/episode_data_source';
+import type { EpisodeAction } from './types';
+import { createAckAction } from './ack';
+import { createUnackAction } from './unack';
+import { createSnoozeAction } from './snooze';
+import { createUnsnoozeAction } from './unsnooze';
+import { createResolveAction } from './resolve';
+import { createUnresolveAction } from './unresolve';
+import { createEditTagsAction } from './edit_tags';
+import { createEditAssigneeAction } from './edit_assignee';
+import { createOpenInDiscoverAction } from './open_in_discover';
+import { createOpenAlertEventsHistoryAction } from './open_alert_events_history';
+
+export interface EpisodeActionsDeps {
+  http: HttpStart;
+  overlays: OverlayStart;
+  notifications: NotificationsStart;
+  rendering: CoreStart['rendering'];
+  application: ApplicationStart;
+  userProfile: UserProfileService;
+  docLinks: DocLinksStart;
+  expressions: ExpressionsStart;
+  spaces: SpacesPluginStart;
+  queryClient: QueryClient;
+  /** Returns whether the referenced rule was successfully resolved. */
+  isRuleAvailable: (ruleId: string) => boolean;
+  /** Resolver for "Open in Discover" URL; may be sync or async. Return undefined when not applicable. */
+  getDiscoverHref: (args: {
+    episodeIsoTimestamp: string;
+    ruleId: string;
+  }) => string | undefined | Promise<string | undefined>;
+  /** Resolver for the Discover URL containing all rule events for one episode. */
+  getAlertEventsHistoryHref?: (args: {
+    episodeId: string;
+    episodeStart: string;
+    spaceId: string;
+  }) => string | undefined | Promise<string | undefined>;
+  /**
+   * Whether Discover can open an episode's rule-events history. Required with
+   * `getAlertEventsHistoryHref`; omitted or false hides the action.
+   */
+  isAlertEventsHistoryAvailable?: () => boolean;
+  additionalDataSource?: EpisodeDataSource;
+}
+
+export const createEpisodeActions = (deps: EpisodeActionsDeps): EpisodeAction[] => {
+  const { additionalDataSource } = deps;
+  const ext = (id: string) =>
+    additionalDataSource?.actionExtensions?.find((e) => e.actionId === id);
+  const actionDeps = { http: deps.http, notifications: deps.notifications };
+
+  return [
+    createAckAction(actionDeps, ext('ALERTING_V2_ACK_EPISODE')),
+    createUnackAction(actionDeps, ext('ALERTING_V2_UNACK_EPISODE')),
+    createSnoozeAction(
+      deps,
+      ext('ALERTING_V2_SNOOZE_EPISODE') as
+        | EpisodeActionExtension<{ snoozedUntil: string | null }>
+        | undefined
+    ),
+    createUnsnoozeAction(actionDeps, ext('ALERTING_V2_UNSNOOZE_EPISODE')),
+    createResolveAction(actionDeps, ext('ALERTING_V2_RESOLVE_EPISODE')),
+    createUnresolveAction(deps),
+    createEditTagsAction(
+      {
+        ...deps,
+        fetchAdditionalTagSuggestions: additionalDataSource?.fetchTagOptions
+          ? () =>
+              additionalDataSource.fetchTagOptions!({
+                services: { http: deps.http },
+              })
+          : undefined,
+      },
+      ext('ALERTING_V2_EDIT_EPISODE_TAGS') as EpisodeActionExtension<{ tags: string[] }> | undefined
+    ),
+    createEditAssigneeAction(deps),
+    createOpenInDiscoverAction(deps),
+    ...(deps.getAlertEventsHistoryHref
+      ? [
+          createOpenAlertEventsHistoryAction({
+            spaces: deps.spaces,
+            getAlertEventsHistoryHref: deps.getAlertEventsHistoryHref,
+            isAvailable: deps.isAlertEventsHistoryAvailable ?? (() => false),
+          }),
+        ]
+      : []),
+    ...(additionalDataSource?.createActions?.(deps) ?? []),
+  ].sort((a, b) => a.order - b.order);
+};

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { CSSProperties, PureComponent } from 'react';
+import type { CSSProperties } from 'react';
+import React, { PureComponent } from 'react';
 import { WORKPAD_CONTAINER_ID } from '../../workpad_app';
 
 interface State {
@@ -37,9 +38,12 @@ export class InteractionBoundary extends PureComponent<void, State, void> {
   }
 
   componentDidMount() {
-    const container = $('#' + WORKPAD_CONTAINER_ID);
-    const height = container.height();
-    const width = container.width();
+    const container = document.getElementById(WORKPAD_CONTAINER_ID);
+    if (!container) {
+      return;
+    }
+
+    const { clientHeight: height, clientWidth: width } = container;
 
     if (height && width) {
       this.setState({

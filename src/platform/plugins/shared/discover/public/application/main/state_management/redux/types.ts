@@ -7,70 +7,308 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ControlPanelsState } from '@kbn/control-group-renderer';
+import type { RefreshInterval, SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import type { DataViewListItem } from '@kbn/data-views-plugin/public';
 import type { DataTableRecord } from '@kbn/discover-utils';
-import type { TimeRange } from '@kbn/es-query';
-import type { UnifiedHistogramVisContext } from '@kbn/unified-histogram-plugin/public';
+import type { DiscoverTabType } from '@kbn/discover-session-constants';
+import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
+import type { ESQLEditorRestorableState, QuickSearchVisorRestorableState } from '@kbn/esql-editor';
+import type { ESQLControlVariable } from '@kbn/esql-types';
+import type {
+  DiscoverGridSettings,
+  DiscoverSession,
+  VIEW_MODE,
+} from '@kbn/saved-search-plugin/common';
+import type {
+  DataGridDensity,
+  JsonModeSettings,
+  DocumentsDisplayMode,
+  UnifiedDataTableRestorableState,
+} from '@kbn/unified-data-table';
+import type {
+  UnifiedFieldListRestorableState,
+  UnifiedFieldListSidebarContainerProps,
+} from '@kbn/unified-field-list';
+import type { UnifiedHistogramVisContext } from '@kbn/unified-histogram';
+import type { RenderDocumentViewMeta } from '@kbn/unified-data-table';
+import type { UnifiedMetricsGridRestorableState } from '@kbn/unified-chart-section-viewer';
+import type { UnifiedSearchDraft } from '@kbn/unified-search-plugin/public';
 import type { TabItem } from '@kbn/unified-tabs';
+import type { DocViewerRestorableState, DocViewerShareableState } from '@kbn/unified-doc-viewer';
+import type { SerializedError } from '@reduxjs/toolkit';
+import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
+import type { DataCascadeRestorableState } from '@kbn/shared-ux-document-data-cascade';
+import type { DiscoverDataSource } from '../../../../../common/data_sources';
+import type { ExpandedDocRef } from '../../utils/expanded_doc';
+import type { DiscoverLayoutRestorableState } from '../../components/layout/discover_layout_restorable_state';
+import type { ProfileStateMap } from '../../../../../common/context_awareness';
+import type { DefaultEsqlQueryConfig } from '../../../../context_awareness';
+import type { CascadedDocumentsDataGridUiStateMap } from '../../components/layout/cascaded_documents';
 
-export enum LoadingStatus {
-  Uninitialized = 'uninitialized',
-  Loading = 'loading',
-  LoadingMore = 'loading_more',
-  Complete = 'complete',
-  Error = 'error',
+/** Group path used to reconstruct a cascade leaf query for a nested-grid flyout. */
+export interface ExpandedDocCascadePath {
+  nodePath: string[];
+  nodePathMap: Record<string, string>;
 }
-
-type RequestState<
-  TResult extends {},
-  TLoadingStatus extends LoadingStatus = Exclude<LoadingStatus, LoadingStatus.LoadingMore>
-> =
-  | {
-      loadingStatus: Exclude<TLoadingStatus, LoadingStatus.Error>;
-      result: TResult;
-    }
-  | {
-      loadingStatus: LoadingStatus.Error;
-      error: Error;
-    };
-
-export type DocumentsRequest = RequestState<DataTableRecord[], LoadingStatus>;
-export type TotalHitsRequest = RequestState<number>;
-export type ChartRequest = RequestState<{}>;
 
 export interface InternalStateDataRequestParams {
-  timeRangeAbsolute?: TimeRange;
-  timeRangeRelative?: TimeRange;
-  searchSessionId?: string;
+  timeRangeAbsolute: TimeRange | undefined;
+  timeRangeRelative: TimeRange | undefined;
+  searchSessionId: string | undefined;
+  isSearchSessionRestored: boolean;
 }
 
+export interface TabStateGlobalState {
+  timeRange?: TimeRange;
+  refreshInterval?: RefreshInterval;
+  filters?: Filter[];
+}
+
+export interface DiscoverAppState {
+  /**
+   * Columns displayed in the table
+   */
+  columns?: string[];
+  /**
+   * Array of applied filters
+   */
+  filters?: Filter[];
+  /**
+   * Data Grid related state
+   */
+  grid?: DiscoverGridSettings;
+  /**
+   * Hide chart
+   */
+  hideChart?: boolean;
+  /**
+   * Hide table
+   */
+  hideTable?: boolean;
+  /**
+   * Hide the field list sidebar (collapsed state)
+   */
+  hideSidebar?: boolean;
+  /**
+   * The current data source
+   */
+  dataSource?: DiscoverDataSource;
+  /**
+   * Used interval of the histogram
+   */
+  interval?: string;
+  /**
+   * Lucence or KQL query
+   */
+  query?: Query | AggregateQuery;
+  /**
+   * Array of the used sorting [[field,direction],...]
+   */
+  sort?: string[][];
+  /**
+   * id of the used saved query
+   */
+  savedQuery?: string;
+  /**
+   * Table view: Documents vs Field Statistics
+   */
+  viewMode?: VIEW_MODE;
+  /**
+   * Hide mini distribution/preview charts when in Field Statistics mode
+   */
+  hideAggregatedPreview?: boolean;
+  /**
+   * Document explorer row height option
+   */
+  rowHeight?: number;
+  /**
+   * Document explorer header row height option
+   */
+  headerRowHeight?: number;
+  /**
+   * Number of rows in the grid per page
+   */
+  rowsPerPage?: number;
+  /**
+   * Custom sample size
+   */
+  sampleSize?: number;
+  /**
+   * Breakdown field of chart
+   */
+  breakdownField?: string;
+  /**
+   * Density of table
+   */
+  density?: DataGridDensity;
+  /**
+   * Documents display mode: 'table' or 'json'
+   */
+  documentsDisplayMode?: DocumentsDisplayMode;
+  /**
+   * Settings that only apply while the source column is rendered in JSON mode
+   */
+  jsonModeSettings?: JsonModeSettings;
+  /**
+   * When true, ES|QL queries use approximate execution for faster, estimated results.
+   */
+  esqlApproximation?: boolean;
+  /**
+   * The expanded document reference
+   */
+  expandedDoc?: ExpandedDocRef;
+  /**
+   * The URL-shareable doc viewer state (selected tab + per-tab shareable slices) restored alongside
+   * the expanded document from a shared link.
+   */
+  docViewerState?: DocViewerShareableState;
+}
+
+export interface CascadedDocumentsState {
+  availableCascadeGroups: string[];
+  selectedCascadeGroups: string[];
+  cascadedDocumentsMap: Record<string, DataTableRecord[] | undefined>;
+}
+
+export enum TabInitializationStatus {
+  NotStarted = 'NotStarted',
+  InProgress = 'InProgress',
+  Complete = 'Complete',
+  NoData = 'NoData',
+  Disconnected = 'Disconnected',
+  Error = 'Error',
+}
+
+export const PROFILE_APP_STATE_DEFAULT_FIELDS = [
+  'columns',
+  'rowHeight',
+  'breakdownField',
+  'hideChart',
+  'hideTable',
+  'hideSidebar',
+] as const;
+
+export type ProfileAppStateDefaultField = (typeof PROFILE_APP_STATE_DEFAULT_FIELDS)[number];
+
+type NonEmptyProfileAppStateDefaultFields = [
+  ProfileAppStateDefaultField,
+  ...ProfileAppStateDefaultField[]
+];
+
+export type ProfileAppStateDefaultFields = 'all' | 'none' | NonEmptyProfileAppStateDefaultFields;
+
+export type ProfileAppStateSnapshot = Partial<Pick<DiscoverAppState, ProfileAppStateDefaultField>>;
+
+export type ProfileAppStateSnapshotsByProfileId = Record<
+  string,
+  ProfileAppStateSnapshot | undefined
+>;
+
+export interface ProfileAppStateDefaults {
+  resetId: string;
+  fieldsToReset: ProfileAppStateDefaultFields;
+  snapshotsByProfileId: ProfileAppStateSnapshotsByProfileId;
+}
+
+// This is used to identify heavy state values (e.g. long lists of nested objects)
+// that should be excluded from the Redux serializable/immutable checks to avoid
+// rendering delays when using Discover in dev builds
+export const HEAVY_STATE_KEYS = [
+  'cascadedDocumentsState',
+  'fieldListExistingFieldsInfo',
+  'renderDocumentViewMeta',
+];
+
 export interface TabState extends TabItem {
-  globalState?: Record<string, unknown>;
-  appState?: Record<string, unknown>;
-  dataViewId: string | undefined;
-  isDataViewLoading: boolean;
-  dataRequestParams: InternalStateDataRequestParams;
-  overriddenVisContextAfterInvalidation: UnifiedHistogramVisContext | {} | undefined; // it will be used during saved search saving
-  resetDefaultProfileState: {
-    resetId: string;
-    columns: boolean;
-    rowHeight: boolean;
-    breakdownField: boolean;
+  initializationState:
+    | { initializationStatus: Exclude<TabInitializationStatus, TabInitializationStatus.Error> }
+    | { initializationStatus: TabInitializationStatus.Error; error: Error | SerializedError };
+
+  // Indicates the tab was created via "+" and should not auto-fetch on init.
+  skipInitialFetch?: boolean;
+
+  // Initial state for the tab (provided before the tab is initialized).
+  initialInternalState?: {
+    serializedSearchSource?: SerializedSearchSourceFields;
+    searchSessionId?: string;
+    tabType?: DiscoverTabType;
   };
-  documentsRequest: DocumentsRequest;
-  totalHitsRequest: TotalHitsRequest;
-  chartRequest: ChartRequest;
+
+  // Persistable attributes of the tab (stored in Discover Session and in local storage).
+  attributes: {
+    visContext: UnifiedHistogramVisContext | {} | undefined;
+    controlGroupState: ControlPanelsState<OptionsListESQLControlState> | undefined;
+    timeRestore: boolean;
+  };
+
+  // The following properties are used to manage the tab's state after it has been initialized.
+  globalState: TabStateGlobalState;
+  appState: DiscoverAppState;
+  previousAppState: DiscoverAppState;
+  cascadedDocumentsState: CascadedDocumentsState;
+  esqlVariables: ESQLControlVariable[] | undefined;
+  forceFetchOnSelect: boolean;
+  isDataViewLoading: boolean;
+  isWarningCalloutDismissed: boolean;
+  dataRequestParams: InternalStateDataRequestParams;
+  overriddenVisContextAfterInvalidation: UnifiedHistogramVisContext | {} | undefined; // it will be used during saving of the Discover Session
+  profileAppStateDefaults: ProfileAppStateDefaults;
+  profileState: ProfileStateMap;
+  uiState: {
+    esqlEditor?: Partial<ESQLEditorRestorableState>;
+    // Unlike the editor state, the visor mode is also persisted locally
+    visor?: Partial<QuickSearchVisorRestorableState>;
+    dataGrid?: Partial<UnifiedDataTableRestorableState>;
+    fieldList?: Partial<UnifiedFieldListRestorableState>;
+    fieldListExistingFieldsInfo?: UnifiedFieldListSidebarContainerProps['initialExistingFieldsInfo'];
+    layout?: Partial<DiscoverLayoutRestorableState>;
+    searchDraft?: Partial<UnifiedSearchDraft>;
+    metricsGrid?: Partial<UnifiedMetricsGridRestorableState>;
+    docViewer?: Partial<DocViewerRestorableState>;
+    dataCascade?: DataCascadeRestorableState;
+    cascadedDocumentsDataGridMap?: CascadedDocumentsDataGridUiStateMap;
+  };
+  expandedDoc: DataTableRecord | undefined;
+  expandedDocOwner: string | undefined;
+  expandedDocCascadePath: ExpandedDocCascadePath | undefined;
+  renderDocumentViewMeta: RenderDocumentViewMeta | undefined;
+  initialDocViewerTabId?: string;
+}
+
+export interface RecentlyClosedTabState extends TabState {
+  closedAt: number;
+}
+
+export enum TabsBarVisibility {
+  default = 'default',
+  hidden = 'hidden',
+}
+
+export interface SaveSessionModalState {
+  isOpen: boolean;
+  initialTitle: string | undefined;
+  initialCopyOnSave: boolean;
 }
 
 export interface DiscoverInternalState {
-  initializationState: { hasESData: boolean; hasUserDataView: boolean };
+  initializationState: { hasESData: boolean; hasDataView: boolean };
+  userId: string | undefined;
+  spaceId: string | undefined;
+  persistedDiscoverSession: DiscoverSession | undefined;
+  saveSessionModal: SaveSessionModalState;
+  hasUnsavedChanges: boolean;
   savedDataViews: DataViewListItem[];
   defaultProfileAdHocDataViewIds: string[];
-  expandedDoc: DataTableRecord | undefined;
-  isESQLToDataViewTransitionModalVisible: boolean;
+  defaultProfileEsqlQuery: DefaultEsqlQueryConfig | undefined;
+  tabsBarVisibility: TabsBarVisibility;
   tabs: {
+    areInitializing: boolean;
     byId: Record<string, TabState>;
     allIds: string[];
+    unsavedIds: string[];
+    recentlyClosedTabsById: Record<string, RecentlyClosedTabState>;
+    recentlyClosedTabIds: string[];
     /**
      * WARNING: You probably don't want to use this property.
      * This is used high in the component tree for managing tabs,
@@ -80,4 +318,9 @@ export interface DiscoverInternalState {
      */
     unsafeCurrentId: string;
   };
+}
+
+export interface UpdateESQLQueryActionPayload {
+  tabId: string;
+  queryOrUpdater: string | ((prevQuery: string) => string);
 }

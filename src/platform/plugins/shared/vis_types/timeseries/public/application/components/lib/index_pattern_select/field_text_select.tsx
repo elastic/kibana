@@ -10,7 +10,8 @@
 import React, { useCallback, useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { EuiFieldText, EuiFieldTextProps, EuiButtonIcon } from '@elastic/eui';
+import type { EuiFieldTextProps } from '@elastic/eui';
+import { EuiButtonIcon, EuiFieldText, EuiToolTip } from '@elastic/eui';
 import { SwitchModePopover } from './switch_mode_popover';
 import type { SelectIndexComponentProps } from './types';
 
@@ -47,12 +48,14 @@ export const FieldTextSelect = ({
   }, [onIndexChange, inputValue, indexPatternString]);
 
   const appends = [
-    <EuiButtonIcon
-      aria-label={updateIndexText}
-      iconType="play"
-      onClick={updateIndex}
-      disabled={inputValue === indexPatternString}
-    />,
+    <EuiToolTip content={updateIndexText} disableScreenReaderOutput>
+      <EuiButtonIcon
+        aria-label={updateIndexText}
+        iconType="play"
+        onClick={updateIndex}
+        disabled={inputValue === indexPatternString}
+      />
+    </EuiToolTip>,
   ];
 
   if (allowSwitchMode) {

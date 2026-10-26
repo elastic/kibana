@@ -7,6 +7,8 @@
 
 import { render, screen } from '@testing-library/react';
 import React from 'react';
+import { matchers as emotionMatchers } from '@emotion/jest';
+expect.extend(emotionMatchers);
 
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { TestProviders } from '../../../../../../../common/mock';

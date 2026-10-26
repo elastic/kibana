@@ -113,9 +113,11 @@ $ bin/kibana-plugin install x-pack
 
 You can download official Elastic plugins simply by specifying their name. You can alternatively specify a URL or file path to a specific plugin, as in the following examples:
 
-```shell
-$ bin/kibana-plugin install https://artifacts.elastic.co/downloads/packs/x-pack/x-pack-9.0.0-beta1.zip
+```shell subs=true
+$ bin/kibana-plugin install https://artifacts.elastic.co/downloads/packs/x-pack/x-pack-{{version.stack}}.zip <1>
 ```
+
+1. Replace the version with your installed {{kib}} version if it differs.
 
 or
 
@@ -135,7 +137,7 @@ It also respects the `no_proxy` environment variable to exclude specific URLs fr
 You can specify the environment variable directly when installing plugins:
 
 ```shell
-$ http_proxy="http://proxy.local:4242" bin/kibana-plugin install <package name or URL>
+$ http_proxy="<LOCAL_PROXY_URL>:4242" bin/kibana-plugin install <package name or URL>
 ```
 
 

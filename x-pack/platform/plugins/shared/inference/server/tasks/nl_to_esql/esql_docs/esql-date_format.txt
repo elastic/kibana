@@ -1,6 +1,6 @@
 # DATE_FORMAT
 
-The DATE_FORMAT function returns a string representation of a date, formatted according to the provided format.
+The DATE_FORMAT function returns a string representation of a date using the specified format. If no format is provided, it defaults to `yyyy-MM-dd'T'HH:mm:ss.SSSZ`.
 
 ## Syntax
 
@@ -10,19 +10,18 @@ The DATE_FORMAT function returns a string representation of a date, formatted ac
 
 #### dateFormat
 
-This is an optional parameter that specifies the desired date format.
-If no format is provided, the function defaults to the `yyyy-MM-dd'T'HH:mm:ss.SSSZ` format.
+Optional. Specifies the date format to use. If not provided, the default format is `yyyy-MM-dd'T'HH:mm:ss.SSSZ`. If set to `null`, the function returns `null`.
 
 #### date
 
-This is the date expression that you want to format.
+The date expression to format. If set to `null`, the function returns `null`.
 
 ## Examples
 
-In this example, the `hire_date` field is formatted according to the "YYYY-MM-dd" format, and the result is stored in the `hired` field:
+Formats the `hire_date` column as a string in the `yyyy-MM-dd` format and adds it as a new column called `hired`:
 
 ```esql
 FROM employees
 | KEEP first_name, last_name, hire_date
-| EVAL hired = DATE_FORMAT("YYYY-MM-dd", hire_date)
+| EVAL hired = DATE_FORMAT("yyyy-MM-dd", hire_date)
 ```

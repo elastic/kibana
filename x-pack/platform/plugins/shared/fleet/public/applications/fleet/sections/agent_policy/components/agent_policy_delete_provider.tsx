@@ -6,7 +6,16 @@
  */
 
 import React, { Fragment, useCallback, useMemo, useRef, useState } from 'react';
-import { EuiConfirmModal, EuiCallOut, EuiSpacer } from '@elastic/eui';
+import {
+  EuiConfirmModal,
+  EuiSpacer,
+  EuiForm,
+  EuiFormRow,
+  EuiFieldText,
+  EuiText,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
+import { KbnDangerCallout, KbnInfoCallout, KbnWarningCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -23,12 +32,14 @@ import {
   sendGetAgents,
 } from '../../../hooks';
 
-import type { AgentPolicy, PackagePolicy } from '../../../types';
+import type { AgentPolicy, AgentPolicyPackagePoliciesSummary, PackagePolicy } from '../../../types';
+import { buildPolicyBaseIdWithFallbackKuery } from '../../../../../../common/services/version_specific_policies_utils';
 
 interface Props {
   children: (deleteAgentPolicy: DeleteAgentPolicy) => React.ReactElement;
   hasFleetServer: boolean;
   packagePolicies?: PackagePolicy[];
+  packagePoliciesSummary?: AgentPolicyPackagePoliciesSummary;
   agentPolicy: AgentPolicy;
 }
 
@@ -40,8 +51,11 @@ export const AgentPolicyDeleteProvider: React.FunctionComponent<Props> = ({
   children,
   hasFleetServer,
   packagePolicies,
+  packagePoliciesSummary,
   agentPolicy,
 }) => {
+  const confirmModalTitleId = useGeneratedHtmlId();
+
   const { notifications } = useStartServices();
   const {
     agents: { enabled: isFleetEnabled },
@@ -50,6 +64,7 @@ export const AgentPolicyDeleteProvider: React.FunctionComponent<Props> = ({
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [isLoadingAgentsCount, setIsLoadingAgentsCount] = useState<boolean>(false);
   const [agentsCount, setAgentsCount] = useState<number>(0);
+  const [confirmName, setConfirmName] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const onSuccessCallback = useRef<OnSuccessCallback | null>(null);
   const { getPath } = useLink();
@@ -66,12 +81,14 @@ export const AgentPolicyDeleteProvider: React.FunctionComponent<Props> = ({
     }
     setIsModalOpen(true);
     setAgentPolicyId(agentPolicyIdToDelete);
+    setConfirmName('');
     fetchAgentsCount(agentPolicyIdToDelete);
     onSuccessCallback.current = onSuccess;
   };
 
   const closeModal = () => {
     setAgentPolicyId(undefined);
+    setConfirmName('');
     setIsLoading(false);
     setIsLoadingAgentsCount(false);
     setIsModalOpen(false);
@@ -123,7 +140,9 @@ export const AgentPolicyDeleteProvider: React.FunctionComponent<Props> = ({
       // filtering out the unenrolled agents assigned to this policy
       const agents = await sendGetAgents({
         showInactive: true,
-        kuery: `policy_id:"${agentPolicyToCheck}" and not status: unenrolled`,
+        kuery: `${buildPolicyBaseIdWithFallbackKuery(
+          agentPolicyToCheck
+        )} and not status: unenrolled`,
         perPage: SO_SEARCH_LIMIT,
       });
       setAgentsCount(agents.data?.total ?? 0);
@@ -134,11 +153,28 @@ export const AgentPolicyDeleteProvider: React.FunctionComponent<Props> = ({
 
   const packagePoliciesWithMultiplePolicies = useMemo(() => {
     // Find if there are package policies that have multiple agent policies
-    if (packagePolicies && canUseMultipleAgentPolicies) {
+    if (!canUseMultipleAgentPolicies) {
+      return false;
+    }
+    if (packagePolicies) {
       return packagePolicies.some((policy) => policy?.policy_ids.length > 1);
     }
-    return false;
-  }, [canUseMultipleAgentPolicies, packagePolicies]);
+    return packagePoliciesSummary?.has_shared ?? false;
+  }, [canUseMultipleAgentPolicies, packagePolicies, packagePoliciesSummary]);
+
+  // Deleting a non-agentless policy that still has active agents assigned is blocked
+  // (matching the server-side guard); the user must unassign those agents first.
+  const isDeleteBlockedByAgents = !agentPolicy?.supports_agentless && !!agentsCount;
+
+  const hasPackagePolicies = (packagePolicies?.length ?? packagePoliciesSummary?.count ?? 0) > 0;
+
+  // Require typing the policy name to confirm for non-trivial policies (those with
+  // integration policies and/or assigned agents). Trivial, empty policies can be
+  // deleted with a plain confirmation.
+  const requiresNameConfirmation =
+    !isDeleteBlockedByAgents && (hasPackagePolicies || agentsCount > 0);
+
+  const isNameConfirmed = confirmName.trim() === agentPolicy?.name;
 
   const renderModal = () => {
     if (!isModalOpen) {
@@ -147,10 +183,13 @@ export const AgentPolicyDeleteProvider: React.FunctionComponent<Props> = ({
 
     return (
       <EuiConfirmModal
+        aria-labelledby={confirmModalTitleId}
+        titleProps={{ id: confirmModalTitleId }}
         title={
           <FormattedMessage
             id="xpack.fleet.deleteAgentPolicy.confirmModal.deletePolicyTitle"
-            defaultMessage="Delete this agent policy?"
+            defaultMessage="Delete {name}?"
+            values={{ name: agentPolicy?.name }}
           />
         }
         onCancel={closeModal}
@@ -176,14 +215,17 @@ export const AgentPolicyDeleteProvider: React.FunctionComponent<Props> = ({
         }
         buttonColor="danger"
         confirmButtonDisabled={
-          isLoading || isLoadingAgentsCount || (!agentPolicy?.supports_agentless && !!agentsCount)
+          isLoading ||
+          isLoadingAgentsCount ||
+          isDeleteBlockedByAgents ||
+          (requiresNameConfirmation && !isNameConfirmed)
         }
       >
         {packagePoliciesWithMultiplePolicies && (
           <>
-            <EuiCallOut
-              color="primary"
-              iconType="iInCircle"
+            <KbnInfoCallout
+              announceOnMount
+              data-test-subj="deleteAgentPolicySharedIntegrationPoliciesCallout"
               title={
                 <FormattedMessage
                   id="xpack.fleet.deleteAgentPolicy.confirmModal.warningSharedIntegrationPolicies"
@@ -199,45 +241,82 @@ export const AgentPolicyDeleteProvider: React.FunctionComponent<Props> = ({
             id="xpack.fleet.deleteAgentPolicy.confirmModal.loadingAgentsCountMessage"
             defaultMessage="Checking amount of affected agents…"
           />
-        ) : agentsCount ? (
-          <EuiCallOut
-            color="danger"
-            iconType="warning"
+        ) : isDeleteBlockedByAgents ? (
+          <KbnDangerCallout
+            announceOnMount
+            data-test-subj="deleteAgentPolicyAgentsInUseCallout"
             title={i18n.translate(
               'xpack.fleet.deleteAgentPolicy.confirmModal.affectedAgentsTitle',
               {
                 defaultMessage: 'Policy in use',
               }
             )}
-          >
-            {agentPolicy?.supports_agentless ? (
-              <FormattedMessage
-                id="xpack.fleet.deleteAgentPolicy.confirmModal.affectedAgentlessMessage"
-                defaultMessage="Deleting this agent policy will automatically delete integrations assign to {name} and unenroll elastic agent."
-                values={{
-                  name: <strong>{agentPolicy.name}</strong>,
-                }}
-              />
-            ) : (
+            text={
               <FormattedMessage
                 id="xpack.fleet.deleteAgentPolicy.confirmModal.affectedAgentsMessage"
                 defaultMessage="{agentsCount, plural, one {# agent is} other {# agents are}} assigned to this agent policy. Unassign these agents before deleting this policy. This might include inactive agents."
-                values={{
-                  agentsCount,
-                }}
+                values={{ agentsCount }}
               />
-            )}
-          </EuiCallOut>
-        ) : hasFleetServer ? (
-          <FormattedMessage
-            id="xpack.fleet.deleteAgentPolicy.confirmModal.fleetServerMessage"
-            defaultMessage="NOTE: This policy has Fleet Server integration, it is required for using Fleet."
+            }
           />
         ) : (
-          <FormattedMessage
-            id="xpack.fleet.deleteAgentPolicy.confirmModal.irreversibleMessage"
-            defaultMessage="This action cannot be undone."
-          />
+          <>
+            <KbnWarningCallout
+              announceOnMount
+              data-test-subj="deleteAgentPolicyWarningCallout"
+              title={
+                agentPolicy?.supports_agentless ? (
+                  <FormattedMessage
+                    id="xpack.fleet.deleteAgentPolicy.confirmModal.agentlessWarningMessage"
+                    defaultMessage="This action cannot be undone. Deleting {name} will permanently remove its integrations and unenroll its Elastic Agent."
+                    values={{ name: <strong>{agentPolicy?.name}</strong> }}
+                  />
+                ) : (
+                  <FormattedMessage
+                    id="xpack.fleet.deleteAgentPolicy.confirmModal.warningMessage"
+                    defaultMessage="This action cannot be undone and permanently deletes {name} and all of its related data."
+                    values={{ name: <strong>{agentPolicy?.name}</strong> }}
+                  />
+                )
+              }
+            />
+            {hasFleetServer && (
+              <>
+                <EuiSpacer size="m" />
+                <EuiText size="s" data-test-subj="deleteAgentPolicyFleetServerNote">
+                  <p>
+                    <FormattedMessage
+                      id="xpack.fleet.deleteAgentPolicy.confirmModal.fleetServerMessage"
+                      defaultMessage="NOTE: This policy has Fleet Server integration, it is required for using Fleet."
+                    />
+                  </p>
+                </EuiText>
+              </>
+            )}
+            {requiresNameConfirmation && (
+              <>
+                <EuiSpacer size="m" />
+                <EuiForm>
+                  <EuiFormRow
+                    fullWidth
+                    label={
+                      <FormattedMessage
+                        id="xpack.fleet.deleteAgentPolicy.confirmModal.typeNameLabel"
+                        defaultMessage="Type the policy name to confirm"
+                      />
+                    }
+                  >
+                    <EuiFieldText
+                      fullWidth
+                      data-test-subj="deleteAgentPolicyNameConfirmationInput"
+                      value={confirmName}
+                      onChange={(e) => setConfirmName(e.target.value)}
+                    />
+                  </EuiFormRow>
+                </EuiForm>
+              </>
+            )}
+          </>
         )}
       </EuiConfirmModal>
     );

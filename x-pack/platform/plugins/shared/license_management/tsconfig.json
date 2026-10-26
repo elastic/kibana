@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
   },
@@ -11,6 +11,7 @@
     "__mocks__/*",
   ],
   "kbn_references": [
+    "@kbn/app-header",
     "@kbn/core",
     "@kbn/kibana-react-plugin",
     "@kbn/telemetry-management-section-plugin",
@@ -23,11 +24,11 @@
     "@kbn/i18n-react",
     "@kbn/i18n",
     "@kbn/config-schema",
-    "@kbn/test-jest-helpers",
     "@kbn/shared-ux-router",
     "@kbn/utility-types",
     "@kbn/share-plugin",
     "@kbn/react-kibana-context-render",
+    "@kbn/licensing-types",
   ],
   "exclude": [
     "target/**/*",

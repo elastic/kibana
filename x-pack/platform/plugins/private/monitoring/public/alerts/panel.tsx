@@ -15,7 +15,7 @@ import {
   EuiCodeBlock,
 } from '@elastic/eui';
 
-import { CommonAlert, CommonAlertState, AlertMessage } from '../../common/types/alerts';
+import type { CommonAlert, CommonAlertState, AlertMessage } from '../../common/types/alerts';
 import { replaceTokens } from './lib/replace_tokens';
 import { isInSetupMode } from '../lib/setup_mode';
 import { SetupModeContext } from '../components/setup_mode/setup_mode_context';
@@ -45,7 +45,7 @@ export const AlertPanel: React.FC<Props> = (props: Props) => {
     alertState.state.ui.message.nextSteps && alertState.state.ui.message.nextSteps.length ? (
       <EuiListGroup>
         {alertState.state.ui.message.nextSteps.map((step: AlertMessage, index: number) => (
-          <EuiListGroupItem size="s" key={index} label={replaceTokens(step)} />
+          <EuiListGroupItem key={index} label={replaceTokens(step)} />
         ))}
       </EuiListGroup>
     ) : null;

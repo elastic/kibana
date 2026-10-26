@@ -6,10 +6,20 @@
  */
 
 import React, { useCallback, useContext, useMemo } from 'react';
-import { AttachmentType, ExternalReferenceStorageType } from '@kbn/cases-plugin/common';
-import { EuiButtonEmpty, EuiButtonIcon, EuiFlexItem, EuiToolTip } from '@elastic/eui';
+import {
+  buildAlertCaseAttachment,
+  OSQUERY_ATTACHMENT_TYPE,
+  SECURITY_SOLUTION_OWNER,
+} from '@kbn/cases-plugin/common';
+import {
+  EuiButtonEmpty,
+  EuiButtonIcon,
+  EuiContextMenuItem,
+  EuiFlexItem,
+  EuiToolTip,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
+import type { JsonValue } from '@kbn/utility-types';
 import { useKibana } from '../common/lib/kibana';
 import { AlertAttachmentContext } from '../common/contexts';
 
@@ -27,6 +37,11 @@ export interface AddToCaseButtonProps {
   isIcon?: boolean;
   isDisabled?: boolean;
   iconProps?: Record<string, string>;
+  scheduleId?: string;
+  executionCount?: number;
+  displayAsMenuItem?: boolean;
+  onMenuItemClick?: () => void;
+  size?: 'xs' | 's' | 'm';
 }
 
 export const AddToCaseButton: React.FC<AddToCaseButtonProps> = ({
@@ -36,24 +51,16 @@ export const AddToCaseButton: React.FC<AddToCaseButtonProps> = ({
   isIcon = false,
   isDisabled,
   iconProps,
+  scheduleId,
+  executionCount,
+  displayAsMenuItem = false,
+  onMenuItemClick,
+  size = 'xs',
 }) => {
   const { cases } = useKibana().services;
   const ecsData = useContext(AlertAttachmentContext);
-  const alertAttachments = useMemo(
-    () =>
-      ecsData?._id
-        ? [
-            {
-              alertId: ecsData?._id ?? '',
-              index: ecsData?._index ?? '',
-              rule: cases.helpers.getRuleIdFromEvent({
-                ecs: ecsData,
-                data: [],
-              }),
-              type: AttachmentType.alert as const,
-            },
-          ]
-        : [],
+  const rule = useMemo(
+    () => (ecsData ? cases.helpers.getRuleIdFromEvent({ ecs: ecsData, data: [] }) : null),
     [cases.helpers, ecsData]
   );
 
@@ -63,22 +70,67 @@ export const AddToCaseButton: React.FC<AddToCaseButtonProps> = ({
   const selectCaseModal = cases.hooks.useCasesAddToExistingCaseModal();
 
   const handleClick = useCallback(() => {
-    const attachments: CaseAttachmentsWithoutOwner = [
-      ...alertAttachments,
-      {
-        type: AttachmentType.externalReference,
-        externalReferenceId: actionId,
-        externalReferenceStorage: {
-          type: ExternalReferenceStorageType.elasticSearchDoc,
-        },
-        externalReferenceAttachmentTypeId: 'osquery',
-        externalReferenceMetadata: { actionId, agentIds, queryId },
-      },
-    ];
-    if (hasCasesPermissions) {
-      selectCaseModal.open({ getAttachments: () => attachments });
+    const metadata: Record<string, JsonValue> = { actionId, agentIds, queryId };
+    if (scheduleId) {
+      metadata.scheduleId = scheduleId;
     }
-  }, [actionId, agentIds, alertAttachments, hasCasesPermissions, queryId, selectCaseModal]);
+
+    if (executionCount != null) {
+      metadata.executionCount = executionCount;
+    }
+
+    if (hasCasesPermissions) {
+      selectCaseModal.open({
+        getAttachments: ({ theCase }) => {
+          const alertAttachment = ecsData?._id
+            ? [
+                buildAlertCaseAttachment(theCase?.owner ?? SECURITY_SOLUTION_OWNER, {
+                  alertId: ecsData._id,
+                  index: ecsData._index ?? '',
+                  rule,
+                }),
+              ]
+            : [];
+
+          return [
+            ...alertAttachment,
+            {
+              type: OSQUERY_ATTACHMENT_TYPE,
+              attachmentId: actionId,
+              metadata,
+            },
+          ];
+        },
+      });
+    }
+  }, [
+    actionId,
+    agentIds,
+    ecsData,
+    executionCount,
+    hasCasesPermissions,
+    queryId,
+    rule,
+    scheduleId,
+    selectCaseModal,
+  ]);
+
+  const handleMenuItemClick = useCallback(() => {
+    onMenuItemClick?.();
+    handleClick();
+  }, [onMenuItemClick, handleClick]);
+
+  if (displayAsMenuItem) {
+    return (
+      <EuiContextMenuItem
+        icon="casesApp"
+        disabled={isDisabled || !hasCasesPermissions}
+        onClick={handleMenuItemClick}
+      >
+        {ADD_TO_CASE}
+      </EuiContextMenuItem>
+    );
+  }
 
   if (isIcon) {
     return (
@@ -96,7 +148,7 @@ export const AddToCaseButton: React.FC<AddToCaseButtonProps> = ({
 
   return (
     <EuiButtonEmpty
-      size="xs"
+      size={size}
       iconType="casesApp"
       onClick={handleClick}
       isDisabled={isDisabled || !hasCasesPermissions}

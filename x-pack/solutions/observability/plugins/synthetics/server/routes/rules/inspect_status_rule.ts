@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import {
-  SyntheticsMonitorStatusRuleParams,
-  syntheticsMonitorStatusRuleParamsSchema,
-} from '@kbn/response-ops-rule-params/synthetics_monitor_status';
-import { StatusRuleExecutorOptions } from '../../alert_rules/status_rule/types';
+import type { SyntheticsMonitorStatusRuleParams } from '@kbn/response-ops-rule-params/synthetics_monitor_status';
+import { syntheticsMonitorStatusRuleParamsSchema } from '@kbn/response-ops-rule-params/synthetics_monitor_status';
+import type { StatusRuleExecutorOptions } from '../../alert_rules/status_rule/types';
 import { StatusRuleExecutor } from '../../alert_rules/status_rule/status_rule_executor';
-import { SyntheticsRestApiRouteFactory } from '../types';
+import type { SyntheticsRestApiRouteFactory } from '../types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
+import { WRITE_SYNTHETICS_DEFAULT_RULES_API } from '../../feature';
 
 export const syntheticsInspectStatusRuleRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'POST',
@@ -20,6 +19,9 @@ export const syntheticsInspectStatusRuleRoute: SyntheticsRestApiRouteFactory = (
   validate: {
     body: syntheticsMonitorStatusRuleParamsSchema,
   },
+  // Inspecting rule params is a read-only preview, not a monitor mutation.
+  writeAccess: false,
+  anyRequiredPrivileges: ['uptime-write', WRITE_SYNTHETICS_DEFAULT_RULES_API],
   handler: async ({
     request,
     server,

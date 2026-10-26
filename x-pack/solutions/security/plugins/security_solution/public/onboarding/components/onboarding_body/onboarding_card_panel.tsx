@@ -8,16 +8,17 @@
 import React, { useMemo, type PropsWithChildren } from 'react';
 import type { IconType } from '@elastic/eui';
 import {
-  EuiPanel,
   EuiBadge,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiPanel,
   EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
 import classnames from 'classnames';
-import { useDarkMode } from '@kbn/kibana-react-plugin/public';
+import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 import type { OnboardingCardId } from '../../constants';
 import type { CheckCompleteResult, CardBadge } from '../../types';
 import { CARD_COMPLETE_BADGE, EXPAND_CARD_BUTTON_LABEL } from './translations';
@@ -55,7 +56,7 @@ export const OnboardingCardPanel = React.memo<PropsWithChildren<OnboardingCardPa
       'onboardingCardPanel-expanded': isExpanded,
       'onboardingCardPanel-completed': isComplete,
     });
-    const isDarkMode = useDarkMode();
+    const isDarkMode = useKibanaIsDarkMode();
     const iconType = useMemo(
       () => (iconDark && isDarkMode ? iconDark : icon),
       [isDarkMode, iconDark, icon]
@@ -82,7 +83,7 @@ export const OnboardingCardPanel = React.memo<PropsWithChildren<OnboardingCardPa
         >
           <EuiFlexItem grow={false}>
             <span className="onboardingCardIcon">
-              <EuiIcon type={iconType} size="l" />
+              <EuiIcon type={iconType} size="l" aria-hidden={true} />
             </span>
           </EuiFlexItem>
           <EuiFlexItem>
@@ -115,13 +116,15 @@ export const OnboardingCardPanel = React.memo<PropsWithChildren<OnboardingCardPa
           )}
 
           <EuiFlexItem grow={false}>
-            <EuiButtonIcon
-              color="primary"
-              size="xs"
-              iconType={isExpanded ? 'arrowUp' : 'arrowDown'}
-              aria-label={EXPAND_CARD_BUTTON_LABEL(title)}
-              aria-expanded={isExpanded}
-            />
+            <EuiToolTip content={EXPAND_CARD_BUTTON_LABEL(title)} disableScreenReaderOutput>
+              <EuiButtonIcon
+                color="primary"
+                size="xs"
+                iconType={isExpanded ? 'chevronSingleUp' : 'chevronSingleDown'}
+                aria-label={EXPAND_CARD_BUTTON_LABEL(title)}
+                aria-expanded={isExpanded}
+              />
+            </EuiToolTip>
           </EuiFlexItem>
         </EuiFlexGroup>
         <div className="onboardingCardContentWrapper">

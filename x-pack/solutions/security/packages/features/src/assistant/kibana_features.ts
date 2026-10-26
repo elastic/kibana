@@ -8,7 +8,6 @@
 import { i18n } from '@kbn/i18n';
 
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
-import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import { type BaseKibanaFeatureConfig } from '../types';
 import { APP_ID, ASSISTANT_FEATURE_ID } from '../constants';
 
@@ -22,12 +21,11 @@ export const getAssistantBaseKibanaFeature = (): BaseKibanaFeatureConfig => ({
   ),
   order: 1300,
   category: DEFAULT_APP_CATEGORIES.security,
-  scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
   app: [ASSISTANT_FEATURE_ID, 'kibana'],
   catalogue: [APP_ID],
   minimumLicense: 'enterprise',
   management: {
-    kibana: ['securityAiAssistantManagement'],
+    ai: ['securityAiAssistantManagement'],
   },
   privileges: {
     all: {
@@ -40,7 +38,7 @@ export const getAssistantBaseKibanaFeature = (): BaseKibanaFeatureConfig => ({
       },
       ui: [],
       management: {
-        kibana: ['securityAiAssistantManagement'],
+        ai: ['securityAiAssistantManagement'],
       },
     },
     read: {

@@ -5,17 +5,19 @@
  * 2.0.
  */
 
-/* eslint-disable @typescript-eslint/naming-convention */
-
 import type { SavedObjectsClientContract } from '@kbn/core/server';
-import { load } from 'js-yaml';
+import { parse } from 'yaml';
 import deepMerge from 'deepmerge';
 import { set } from '@kbn/safer-lodash-set';
+import { PrivilegeType } from '@kbn/apm-types';
 
 import {
   getDefaultPresetForEsOutput,
+  isBeatsOutput,
+  isOtlpOutput,
   outputTypeSupportPresets,
 } from '../../../common/services/output_helpers';
+import { isManagedOtlpEndpoint } from '../utils/managed_otlp';
 
 import type {
   FullAgentPolicy,
@@ -33,25 +35,34 @@ import type {
   FullAgentPolicyInput,
   FullAgentPolicyMonitoring,
   FullAgentPolicyOutputPermissions,
+  KafkaOutput,
   PackageInfo,
 } from '../../../common/types';
 import { agentPolicyService } from '../agent_policy';
+
 import {
   dataTypes,
-  DEFAULT_OUTPUT,
+  kafkaAuthType,
   kafkaCompressionType,
+  OTEL_COLLECTOR_INPUT_TYPE,
   outputType,
+  PACKAGE_POLICY_DEFAULT_INDEX_PRIVILEGES,
 } from '../../../common/constants';
+import { createManagedBulkOutputMatcher } from '../preconfiguration/outputs';
+import { buildKafkaAuthData, buildKafkaSecrets } from '../outputs/kafka_auth';
 import { getSettingsValuesForAgentPolicy } from '../form_settings';
 import { getPackageInfo } from '../epm/packages';
 import { pkgToPkgKey, splitPkgKey } from '../epm/registry';
 import { appContextService } from '../app_context';
 
 import {
+  collectCompiledSecretRefIds,
   getFleetServerHostsSecretReferences,
   getOutputSecretReferences,
   getDownloadSourceSecretReferences,
 } from '../secrets';
+
+import { getOutputIdForAgentPolicy } from '../../../common/services/output_helpers';
 
 import { getMonitoringPermissions } from './monitoring_permissions';
 import { storedPackagePoliciesToAgentInputs } from '.';
@@ -60,10 +71,15 @@ import {
   DEFAULT_CLUSTER_PERMISSIONS,
 } from './package_policies_to_agent_permissions';
 import { fetchRelatedSavedObjects } from './related_saved_objects';
+import { generateOtelcolConfig } from './otel_collector';
 
-async function fetchAgentPolicy(soClient: SavedObjectsClientContract, id: string) {
+async function fetchAgentPolicy(
+  soClient: SavedObjectsClientContract,
+  id: string,
+  options?: { spaceId?: string }
+) {
   try {
-    return await agentPolicyService.get(soClient, id);
+    return await agentPolicyService.get(soClient, id, true, { spaceId: options?.spaceId });
   } catch (err) {
     if (!err.isBoom || err.output.statusCode !== 404) {
       throw err;
@@ -75,20 +91,45 @@ async function fetchAgentPolicy(soClient: SavedObjectsClientContract, id: string
 export async function getFullAgentPolicy(
   soClient: SavedObjectsClientContract,
   id: string,
-  options?: { standalone?: boolean; agentPolicy?: AgentPolicy }
+  options?: {
+    standalone?: boolean;
+    agentPolicy?: AgentPolicy;
+    agentVersion?: string;
+    /** When true, redact proxy_headers and ssl.key from all proxy references in the response */
+    redactProxySecrets?: boolean;
+    spaceId?: string;
+  }
 ): Promise<FullAgentPolicy | null> {
+  const logger = appContextService.getLogger().get('getFullAgentPolicy');
+
+  const experimentalFeature = appContextService.getExperimentalFeatures();
+
+  logger.debug(
+    `Getting full policy for agent policy [${id}] using so scoped to [${soClient.getCurrentNamespace()}]`
+  );
+
   const standalone = options?.standalone ?? false;
+  const redactProxySecrets = options?.redactProxySecrets ?? false;
 
   let agentPolicy: AgentPolicy | null;
   if (options?.agentPolicy?.package_policies) {
+    logger.debug(`agent policy [${id}] was provided via options.agentPolicy - no need to fetch it`);
     agentPolicy = options.agentPolicy;
   } else {
-    agentPolicy = await fetchAgentPolicy(soClient, id);
+    logger.debug(`Fetching agent policy doc for [${id}]`);
+    agentPolicy = await fetchAgentPolicy(
+      soClient,
+      id,
+      options?.spaceId ? { spaceId: options.spaceId } : {}
+    );
   }
 
   if (!agentPolicy) {
+    logger.debug(`Agent policy [${id}] was not found. Exiting.`);
     return null;
   }
+
+  logger.debug(`fetching related saved objects for agent policy [${id}]`);
 
   const {
     outputs,
@@ -96,9 +137,10 @@ export async function getFullAgentPolicy(
     dataOutput,
     fleetServerHost,
     monitoringOutput,
-    downloadSource,
-    downloadSourceProxyUri,
+    downloadSources,
+    downloadSourceProxy,
   } = await fetchRelatedSavedObjects(soClient, agentPolicy);
+
   // Build up an in-memory object for looking up Package Info, so we don't have
   // call `getPackageInfo` for every single policy, which incurs performance costs
   const packageInfoCache = new Map<string, PackageInfo>();
@@ -111,6 +153,10 @@ export async function getFullAgentPolicy(
     // info concurrently below
     packageInfoCache.set(pkgToPkgKey(policy.package), {} as PackageInfo);
   }
+
+  logger.debug(
+    () => `fetching info for packages:${JSON.stringify(Array.from(packageInfoCache.keys()))}`
+  );
 
   // Fetch all package info concurrently
   await Promise.all(
@@ -128,34 +174,85 @@ export async function getFullAgentPolicy(
   );
   const bootstrapOutputConfig = generateFleetServerOutputSSLConfig(fleetServerHost);
 
-  const inputs = (
-    await storedPackagePoliciesToAgentInputs(
-      agentPolicy.package_policies as PackagePolicy[],
-      packageInfoCache,
-      getOutputIdForAgentPolicy(dataOutput),
-      agentPolicy.namespace,
-      agentPolicy.global_data_tags
-    )
-  ).map((input) => {
-    // fix output id for default output
-    const output = outputs.find(({ id: outputId }) => input.use_output === outputId);
-    if (output) {
-      input.use_output = getOutputIdForAgentPolicy(output);
-    }
-    if (input.type === 'fleet-server' && fleetServerHost) {
-      const sslInputConfig = generateSSLConfigForFleetServerInput(fleetServerHost);
-      if (sslInputConfig) {
-        input = {
-          ...input,
-          ...sslInputConfig,
-          ...(bootstrapOutputConfig
-            ? { use_output: `fleetserver-output-${fleetServerHost.id}` }
-            : {}),
-        };
+  logger.debug(() => `Fetching agent inputs for policy [${id}]`);
+
+  // For cross-space callers (spaceId '*'), derive the actual SO namespace from the policy's
+  // own space_ids so that package-policy reads/writes are scoped to the right namespace.
+  // When space_ids[0] is '*' (policy shared to all spaces), pass undefined: shared-policy
+  // package policies are accessible from any namespace and soClient.get rejects '*' as a namespace.
+  const packagePoliciesNamespace =
+    options?.spaceId === '*'
+      ? agentPolicy.space_ids?.[0] === '*'
+        ? undefined
+        : agentPolicy.space_ids?.[0]
+      : options?.spaceId;
+
+  const agentInputs = await storedPackagePoliciesToAgentInputs(
+    agentPolicy.package_policies as PackagePolicy[],
+    packageInfoCache,
+    getOutputIdForAgentPolicy(dataOutput),
+    agentPolicy.namespace,
+    agentPolicy.global_data_tags,
+    options?.agentVersion,
+    soClient,
+    agentPolicy.has_agent_version_conditions,
+    packagePoliciesNamespace
+  );
+
+  let otelcolConfig;
+  if (experimentalFeature.enableOtelIntegrations) {
+    const dataOutputProxy =
+      dataOutput && isBeatsOutput(dataOutput) && dataOutput.proxy_id
+        ? proxies.find((p) => p.id === dataOutput.proxy_id)
+        : undefined;
+
+    const packageOutputs = new Map<string, Output>();
+    for (const pkgPolicy of (agentPolicy.package_policies ?? []) as PackagePolicy[]) {
+      if (!pkgPolicy.output_id) continue;
+      const override = outputs.find((o) => o.id === pkgPolicy.output_id);
+      if (override) {
+        packageOutputs.set(pkgPolicy.id, override);
+      } else {
+        logger.warn(
+          `Output override [${pkgPolicy.output_id}] for package policy [${pkgPolicy.id}] not found, falling back to data output`
+        );
       }
     }
-    return input;
-  });
+
+    otelcolConfig = generateOtelcolConfig({
+      inputs: agentInputs,
+      dataOutput,
+      packageOutputs,
+      packageInfoCache,
+      proxy: dataOutputProxy,
+      logger,
+    });
+  }
+
+  const inputs = agentInputs
+    // filter out the otelcol inputs, they will be added at the root of the policy
+    .filter((input) => input.type !== OTEL_COLLECTOR_INPUT_TYPE)
+    .map((input) => {
+      // fix output id for default output
+      const output = outputs.find(({ id: outputId }) => input.use_output === outputId);
+      if (output) {
+        input.use_output = getOutputIdForAgentPolicy(output);
+      }
+      if (input.type === 'fleet-server' && fleetServerHost) {
+        const sslInputConfig = generateSSLConfigForFleetServerInput(fleetServerHost);
+        if (sslInputConfig) {
+          input = {
+            ...input,
+            ...sslInputConfig,
+            ...(bootstrapOutputConfig
+              ? { use_output: `fleetserver-output-${fleetServerHost.id}` }
+              : {}),
+          };
+        }
+      }
+      return input;
+    });
+
   const features = (agentPolicy.agent_features || []).reduce((acc, { name, ...featureConfig }) => {
     acc[name] = featureConfig;
     return acc;
@@ -165,12 +262,53 @@ export async function getFullAgentPolicy(
   const fleetserverHostSecretReferences = fleetServerHost
     ? getFleetServerHostsSecretReferences(fleetServerHost)
     : [];
-  const downloadSourceSecretReferences = downloadSource
-    ? getDownloadSourceSecretReferences(downloadSource)
+  const downloadSourceSecretReferences = downloadSources[0]
+    ? getDownloadSourceSecretReferences(downloadSources[0])
     : [];
-  const packagePolicySecretReferences = (agentPolicy?.package_policies || []).flatMap(
+  // Only include package policy secret refs that appear inline as `$co.elastic.secret{<id>}`
+  // placeholders in the compiled policy. Disabled inputs/policies, never-rendered secret vars,
+  // and stale SO entries would otherwise make Fleet Server fetch ids nothing references.
+  //
+  // Scan `agentInputs` (pre-OTel-filter) PLUS `otelcolConfig`: OTel inputs are removed from
+  // `inputs` below and re-emitted at the policy root, so their placeholders only appear there.
+  //
+  // Fail open: if the scan cannot serialize, keep every reference rather than dropping valid ones.
+  const rawPackagePolicySecretReferences = (agentPolicy?.package_policies || []).flatMap(
     (policy) => policy.secret_references || []
   );
+  const compiledSecretIds =
+    rawPackagePolicySecretReferences.length > 0
+      ? collectCompiledSecretRefIds([agentInputs, otelcolConfig])
+      : new Set<string>();
+  let packagePolicySecretReferences = compiledSecretIds
+    ? rawPackagePolicySecretReferences.filter(({ id: refId }) => compiledSecretIds.has(refId))
+    : rawPackagePolicySecretReferences;
+
+  if (
+    compiledSecretIds &&
+    packagePolicySecretReferences.length < rawPackagePolicySecretReferences.length
+  ) {
+    const droppedIds = rawPackagePolicySecretReferences
+      .filter(({ id: refId }) => !compiledSecretIds.has(refId))
+      .map(({ id: refId }) => refId);
+    appContextService
+      .getLogger()
+      .info(
+        `Pruned ${
+          droppedIds.length
+        } package policy secret reference(s) not present in the compiled agent policy (agent policy: ${
+          agentPolicy.id
+        }): ${droppedIds.join(', ')}`
+      );
+  }
+
+  // Deduplicate: two package policies on one agent policy can legitimately share a secret id.
+  const seenSecretIds = new Set<string>();
+  packagePolicySecretReferences = packagePolicySecretReferences.filter(({ id: refId }) => {
+    if (seenSecretIds.has(refId)) return false;
+    seenSecretIds.add(refId);
+    return true;
+  });
 
   const fullAgentPolicy: FullAgentPolicy = {
     id: agentPolicy.id,
@@ -179,13 +317,17 @@ export async function getFullAgentPolicy(
       ...outputs.reduce<FullAgentPolicy['outputs']>((acc, output) => {
         acc[getOutputIdForAgentPolicy(output)] = transformOutputToFullPolicyOutput(
           output,
-          output.proxy_id ? proxies.find((proxy) => output.proxy_id === proxy.id) : undefined,
-          standalone
+          isBeatsOutput(output) && output.proxy_id
+            ? proxies.find((proxy) => output.proxy_id === proxy.id)
+            : undefined,
+          standalone,
+          redactProxySecrets
         );
         return acc;
       }, {}),
     },
     inputs,
+    ...(otelcolConfig ? otelcolConfig : {}),
     secret_references: [
       ...outputSecretReferences,
       ...fleetserverHostSecretReferences,
@@ -194,7 +336,7 @@ export async function getFullAgentPolicy(
     ],
     revision: agentPolicy.revision,
     agent: {
-      download: getBinarySourceSettings(downloadSource, downloadSourceProxyUri),
+      download: getBinarySourceSettings(downloadSources, downloadSourceProxy, redactProxySecrets),
       monitoring: getFullMonitoringSettings(agentPolicy, monitoringOutput),
       features,
       protection: {
@@ -229,6 +371,11 @@ export async function getFullAgentPolicy(
         packagePolicy
       );
     } else {
+      if (packagePolicy.output_id) {
+        logger.warn(
+          `Output override [${packagePolicy.output_id}] for package policy [${packagePolicy.id}] not found, falling back to data output`
+        );
+      }
       packagePoliciesByOutputId[getOutputIdForAgentPolicy(dataOutput)].push(packagePolicy);
     }
   });
@@ -241,10 +388,11 @@ export async function getFullAgentPolicy(
     {}
   );
   for (const [outputId, packagePolicies] of Object.entries(packagePoliciesByOutputId)) {
-    const dataPermissions = await storedPackagePoliciesToAgentPermissions(
+    const dataPermissions = storedPackagePoliciesToAgentPermissions(
       packageInfoCache,
       agentPolicy.namespace,
-      packagePolicies
+      packagePolicies,
+      agentInputs
     );
     dataPermissionsByOutputId[outputId] = {
       _elastic_agent_checks: {
@@ -267,15 +415,30 @@ export async function getFullAgentPolicy(
     cluster: DEFAULT_CLUSTER_PERMISSIONS,
   };
 
+  const isManagedBulkOutput = createManagedBulkOutputMatcher(appContextService.getConfig());
+
   // Only add permissions if output.type is "elasticsearch"
   fullAgentPolicy.output_permissions = Object.keys(fullAgentPolicy.outputs).reduce<
     NonNullable<FullAgentPolicy['output_permissions']>
   >((outputPermissions, outputId) => {
     const output = fullAgentPolicy.outputs[outputId];
+    const originalOutput = outputs.find((o) => getOutputIdForAgentPolicy(o) === outputId);
+
     if (
       output &&
       (output.type === outputType.Elasticsearch || output.type === outputType.RemoteElasticsearch)
     ) {
+      if (agentPolicy.supports_agentless && originalOutput && isManagedBulkOutput(originalOutput)) {
+        outputPermissions[outputId] = {
+          _managed_bulk_apm: {
+            applications: [
+              { application: 'apm', privileges: [PrivilegeType.EVENT], resources: ['*'] },
+            ],
+          },
+        };
+        return outputPermissions;
+      }
+
       const permissions: FullAgentPolicyOutputPermissions = {};
       if (outputId === getOutputIdForAgentPolicy(monitoringOutput)) {
         Object.assign(permissions, monitoringPermissions);
@@ -288,14 +451,43 @@ export async function getFullAgentPolicy(
         Object.assign(permissions, dataPermissionsByOutputId[outputId]);
       }
 
+      // Add logs-* permissions for outputs with write_to_streams enabled
+      if (originalOutput && isBeatsOutput(originalOutput) && originalOutput.write_to_logs_streams) {
+        const streamsPermissions = {
+          _write_to_logs_streams: {
+            indices: [
+              {
+                names: ['logs', 'logs.*'],
+                privileges: PACKAGE_POLICY_DEFAULT_INDEX_PRIVILEGES,
+              },
+            ],
+          },
+        };
+        Object.assign(permissions, streamsPermissions);
+      }
+
       outputPermissions[outputId] = permissions;
+    } else if (
+      agentPolicy.supports_agentless &&
+      originalOutput &&
+      isOtlpOutput(originalOutput) &&
+      isManagedOtlpEndpoint(originalOutput.otlp_exporter.endpoint)
+    ) {
+      outputPermissions[outputId] = {
+        _managed_otlp_apm: {
+          applications: [
+            { application: 'apm', privileges: [PrivilegeType.EVENT], resources: ['*'] },
+          ],
+        },
+      };
     }
+
     return outputPermissions;
   }, {});
 
   // only add fleet server hosts if not in standalone
   if (!standalone && fleetServerHost) {
-    fullAgentPolicy.fleet = generateFleetConfig(agentPolicy, fleetServerHost, proxies, outputs);
+    fullAgentPolicy.fleet = generateFleetConfig(fleetServerHost, proxies, redactProxySecrets);
   }
 
   const settingsValues = getSettingsValuesForAgentPolicy(
@@ -309,10 +501,13 @@ export async function getFullAgentPolicy(
   // populate protection and signed properties
   const messageSigningService = appContextService.getMessageSigningService();
   if (options?.standalone !== true && messageSigningService && fullAgentPolicy.agent) {
+    logger.debug(`Retrieving message signing service and signing policy data`);
+
     const publicKey = await messageSigningService.getPublicKey();
     const tokenHash =
       (await appContextService
         .getUninstallTokenService()
+        ?.scoped(soClient.getCurrentNamespace())
         ?.getHashedTokenForPolicyId(fullAgentPolicy.id)) ?? '';
 
     fullAgentPolicy.agent.protection = {
@@ -340,6 +535,8 @@ export async function getFullAgentPolicy(
       data: signedData.toString('base64'),
       signature,
     };
+
+    logger.debug(`Policy [${fullAgentPolicy.id}] was signed`);
   }
 
   if (agentPolicy.overrides) {
@@ -350,50 +547,45 @@ export async function getFullAgentPolicy(
     delete fullAgentPolicy.signed;
   }
 
+  logger.debug(`Building of full agent policy for [${id}] done.`);
+
   return fullAgentPolicy;
 }
 
 export function generateFleetConfig(
-  agentPolicy: AgentPolicy,
   fleetServerHost: FleetServerHost,
   proxies: FleetProxy[],
-  outputs: Output[]
+  redactProxySecrets = false
 ): FullAgentPolicy['fleet'] {
   const config: FullAgentPolicy['fleet'] = {
     hosts: fleetServerHost.host_urls,
   };
 
   // generating the ssl configs for checking into Fleet
-  // These are set in ES or remote ES outputs and correspond to --certificate-authorities, --elastic-agent-cert and --elastic-agent-cert-key cli options
-  const output =
-    agentPolicy?.data_output_id || agentPolicy?.monitoring_output_id
-      ? outputs.find((o) => o.id === agentPolicy.data_output_id)
-      : outputs.find((o) => o.is_default);
-
+  // These correspond to --certificate-authorities, --elastic-agent-cert and --elastic-agent-cert-key cli options
   if (
-    output &&
-    (output.type === outputType.Elasticsearch || output.type === outputType.RemoteElasticsearch)
+    fleetServerHost.ssl?.agent_certificate_authorities ||
+    fleetServerHost.ssl?.agent_certificate ||
+    fleetServerHost.ssl?.agent_key
   ) {
-    if (output?.ssl) {
-      config.ssl = {
-        ...(output.ssl?.certificate_authorities && {
-          certificate_authorities: output.ssl.certificate_authorities,
+    config.ssl = {
+      ...(fleetServerHost.ssl.agent_certificate_authorities && {
+        certificate_authorities: fleetServerHost.ssl.agent_certificate_authorities,
+      }),
+      ...(fleetServerHost.ssl?.agent_certificate && {
+        certificate: fleetServerHost.ssl.agent_certificate,
+      }),
+      ...(fleetServerHost.ssl?.agent_key &&
+        !fleetServerHost.secrets?.ssl?.agent_key && {
+          key: fleetServerHost.ssl.agent_key,
         }),
-        ...(output.ssl?.certificate && {
-          certificate: output.ssl.certificate,
-        }),
-        ...(output.ssl?.key &&
-          !output?.secrets?.ssl?.key && {
-            key: output.ssl.key,
-          }),
-      };
-    }
-    // if both ssl.es_key and secrets.ssl.es_key are present, prefer the secrets'
-    if (output?.secrets) {
-      config.secrets = {
-        ...output?.secrets,
-      };
-    }
+    };
+  }
+  // if both ssl.agent_key and secrets.ssl.agent_key are present, prefer the secrets'
+  if (fleetServerHost.secrets?.ssl?.agent_key) {
+    config.secrets = {
+      ssl: { key: fleetServerHost.secrets?.ssl?.agent_key },
+    };
   }
 
   const fleetServerHostproxy = fleetServerHost.proxy_id
@@ -401,7 +593,7 @@ export function generateFleetConfig(
     : null;
   if (fleetServerHostproxy) {
     config.proxy_url = fleetServerHostproxy.url;
-    if (fleetServerHostproxy.proxy_headers) {
+    if (!redactProxySecrets && fleetServerHostproxy.proxy_headers) {
       config.proxy_headers = fleetServerHostproxy.proxy_headers;
     }
     if (
@@ -416,7 +608,8 @@ export function generateFleetConfig(
           certificate_authorities: [fleetServerHostproxy.certificate_authorities],
         }),
         ...(fleetServerHostproxy.certificate && { certificate: fleetServerHostproxy.certificate }),
-        ...(fleetServerHostproxy.certificate_key && { key: fleetServerHostproxy.certificate_key }),
+        ...(!redactProxySecrets &&
+          fleetServerHostproxy.certificate_key && { key: fleetServerHostproxy.certificate_key }),
       };
     }
   }
@@ -460,8 +653,14 @@ function generateSSLConfigForFleetServerInput(fleetServerHost: FleetServerHost) 
 export function transformOutputToFullPolicyOutput(
   output: Output,
   proxy?: FleetProxy,
-  standalone = false
+  standalone = false,
+  redactProxySecrets = false
 ): FullAgentPolicyOutput {
+  if (isOtlpOutput(output)) {
+    // otlp_exporter config and secrets are compiled into the OTel collector block by generateOtelcolExporter.
+    return { type: output.type };
+  }
+
   const {
     config_yaml,
     type,
@@ -474,7 +673,15 @@ export function transformOutputToFullPolicyOutput(
     preset,
   } = output;
 
-  const configJs = config_yaml ? load(config_yaml) : {};
+  const configJs = config_yaml ? parse(config_yaml) : {};
+
+  const outputSecrets =
+    type === outputType.Kafka
+      ? buildKafkaSecrets({
+          auth_type: (output as KafkaOutput).auth_type,
+          secrets: (output as KafkaOutput).secrets,
+        })
+      : secrets;
 
   // build logic to read config_yaml and transform it with the new shipper data
   const isShipperDisabled = !configJs?.shipper || configJs?.shipper?.enabled === false;
@@ -489,9 +696,12 @@ export function transformOutputToFullPolicyOutput(
       key,
       compression,
       compression_level,
+      auth_type,
       username,
       password,
       sasl,
+      oauth2,
+      kerberos,
       partition,
       random,
       round_robin,
@@ -528,20 +738,19 @@ export function transformOutputToFullPolicyOutput(
       }
     };
 
-    /* eslint-enable @typescript-eslint/naming-convention */
     kafkaData = {
       client_id,
       version,
       key,
       compression,
       ...(compression === kafkaCompressionType.Gzip ? { compression_level } : {}),
-      ...(username ? { username } : {}),
-      ...(password ? { password } : {}),
-      ...(sasl ? { sasl } : {}),
+      ...buildKafkaAuthData({ auth_type, username, password, sasl, oauth2, kerberos }),
       partition: transformPartition(),
       topic,
       headers: (headers ?? []).filter((item) => item.key !== '' || item.value !== ''),
-      timeout,
+      // the agent runs a Kafka output with OAuth2 in the OTel collector, which does not support
+      // this setting: it would fall back to the Beats runtime, that cannot do OAuth2
+      ...(auth_type === kafkaAuthType.OAuth2 ? {} : { timeout }),
       broker_timeout,
       required_acks,
     };
@@ -551,7 +760,6 @@ export function transformOutputToFullPolicyOutput(
     if (!isShipperDisabled) {
       shipperDiskQueueData = buildShipperQueueData(shipper);
     }
-    /* eslint-disable @typescript-eslint/naming-convention */
     const {
       loadbalance,
       compression_level,
@@ -559,7 +767,6 @@ export function transformOutputToFullPolicyOutput(
       max_batch_bytes,
       mem_queue_events,
     } = shipper;
-    /* eslint-enable @typescript-eslint/naming-convention */
 
     generalShipperData = {
       loadbalance,
@@ -579,15 +786,18 @@ export function transformOutputToFullPolicyOutput(
     ...(!isShipperDisabled ? generalShipperData : {}),
     ...(ca_sha256 ? { ca_sha256 } : {}),
     ...(ca_trusted_fingerprint ? { 'ssl.ca_trusted_fingerprint': ca_trusted_fingerprint } : {}),
-    ...((output.type === outputType.Kafka || output.type === outputType.Logstash) && ssl
-      ? { ssl }
-      : {}),
-    ...(secrets ? { secrets } : {}),
+    ...(outputSecrets ? { secrets: outputSecrets } : {}),
   };
+  if (ssl) {
+    newOutput.ssl = {
+      ...ssl, // ssl coming from preconfig
+      ...newOutput.ssl, // ssl coming from config_yaml
+    };
+  }
 
-  if (proxy) {
+  if (proxy && type !== outputType.Kafka) {
     newOutput.proxy_url = proxy.url;
-    if (proxy.proxy_headers) {
+    if (!redactProxySecrets && proxy.proxy_headers) {
       newOutput.proxy_headers = proxy.proxy_headers;
     }
 
@@ -606,7 +816,7 @@ export function transformOutputToFullPolicyOutput(
       }
       newOutput.ssl.certificate = proxy.certificate;
     }
-    if (proxy.certificate_key) {
+    if (!redactProxySecrets && proxy.certificate_key) {
       if (!newOutput.ssl) {
         newOutput.ssl = {};
       }
@@ -625,8 +835,8 @@ export function transformOutputToFullPolicyOutput(
     newOutput.sync_uninstalled_integrations = output.sync_uninstalled_integrations;
   }
 
-  if (outputTypeSupportPresets(output.type)) {
-    newOutput.preset = preset ?? getDefaultPresetForEsOutput(config_yaml ?? '', load);
+  if (outputTypeSupportPresets(output)) {
+    newOutput.preset = preset ?? getDefaultPresetForEsOutput(config_yaml ?? '', parse);
   }
 
   return newOutput;
@@ -658,11 +868,9 @@ export function generateFleetServerOutputSSLConfig(fleetServerHost: FleetServerH
     };
   }
   // if both ssl.es_key and secrets.ssl.es_key are present, prefer the secrets'
-  if (fleetServerHost?.secrets) {
+  if (fleetServerHost?.secrets?.ssl?.es_key) {
     outputConfig.secrets = {
-      ...(fleetServerHost?.secrets?.ssl?.es_key && {
-        ssl: { key: fleetServerHost.secrets?.ssl?.es_key },
-      }),
+      ssl: { key: fleetServerHost.secrets?.ssl?.es_key },
     };
   }
 
@@ -762,18 +970,6 @@ export function getFullMonitoringSettings(
   return monitoring;
 }
 
-/**
- * Get id used in full agent policy (sent to the agents)
- * we use "default" for the default policy to avoid breaking changes
- */
-function getOutputIdForAgentPolicy(output: Pick<Output, 'id' | 'is_default' | 'type'>) {
-  if (output.is_default && output.type === outputType.Elasticsearch) {
-    return DEFAULT_OUTPUT.name;
-  }
-  return output.id;
-}
-
-/* eslint-disable @typescript-eslint/naming-convention */
 function buildShipperQueueData(shipper: ShipperOutput) {
   const {
     disk_queue_enabled,
@@ -795,39 +991,157 @@ function buildShipperQueueData(shipper: ShipperOutput) {
     },
   };
 }
-/* eslint-enable @typescript-eslint/naming-convention */
 
 export function getBinarySourceSettings(
-  downloadSource: DownloadSource,
-  downloadSourceProxyUri: string | null
+  downloadSources: DownloadSource[],
+  downloadSourceProxy: FleetProxy | undefined,
+  redactProxySecrets = false
 ) {
+  const primarySource = downloadSources[0];
+
+  // sourceURI kept for backwards compat with agents older than 9.6.0 that do not read `sources`
   const config: FullAgentPolicyDownload = {
-    sourceURI: downloadSource.host,
-    ...(downloadSourceProxyUri ? { proxy_url: downloadSourceProxyUri } : {}),
+    sourceURI: primarySource.host,
+    sources: downloadSources.map((ds) => ds.host),
   };
-  if (downloadSource?.ssl) {
+
+  if (primarySource?.ssl) {
     config.ssl = {
-      ...(downloadSource.ssl?.certificate_authorities && {
-        certificate_authorities: downloadSource.ssl.certificate_authorities,
+      ...(primarySource.ssl?.certificate_authorities && {
+        certificate_authorities: primarySource.ssl.certificate_authorities,
       }),
-      ...(downloadSource.ssl?.certificate && {
-        certificate: downloadSource.ssl.certificate,
+      ...(primarySource.ssl?.certificate && {
+        certificate: primarySource.ssl.certificate,
       }),
-      ...(downloadSource.ssl?.key &&
-        !downloadSource?.secrets?.ssl?.key && {
-          key: downloadSource.ssl.key,
+      ...(primarySource.ssl?.key &&
+        !primarySource?.secrets?.ssl?.key && {
+          key: primarySource.ssl.key,
         }),
     };
   }
-  // if both ssl.es_key and secrets.ssl.key are present, prefer the secrets'
-  if (downloadSource?.secrets) {
-    config.secrets = {
-      ssl: {
-        ...(downloadSource.secrets?.ssl?.key && {
-          key: downloadSource.secrets.ssl.key,
+
+  if (primarySource?.auth) {
+    const authConfig: FullAgentPolicyDownload['auth'] = {};
+    if (primarySource.auth.username) {
+      authConfig.username = primarySource.auth.username;
+    }
+    if (primarySource.auth.password && typeof primarySource?.secrets?.auth?.password !== 'object') {
+      authConfig.password = primarySource.auth.password;
+    }
+    if (primarySource.auth.api_key && typeof primarySource?.secrets?.auth?.api_key !== 'object') {
+      authConfig.api_key = primarySource.auth.api_key;
+    }
+    // Filter out empty headers (both key and value are empty)
+    if (primarySource.auth.headers && primarySource.auth.headers.length > 0) {
+      const filteredHeaders = primarySource.auth.headers.filter(
+        (header) => header.key !== '' || header.value !== ''
+      );
+      if (filteredHeaders.length > 0) {
+        authConfig.headers = filteredHeaders;
+      }
+    }
+    if (Object.keys(authConfig).length > 0) {
+      config.auth = authConfig;
+    }
+  }
+
+  if (primarySource?.secrets) {
+    const secretsConfig: FullAgentPolicyDownload['secrets'] = {};
+
+    if (primarySource.secrets?.ssl?.key) {
+      secretsConfig.ssl = {
+        key: primarySource.secrets.ssl.key,
+      };
+    }
+
+    if (primarySource.secrets?.auth) {
+      const authSecretsConfig: NonNullable<FullAgentPolicyDownload['secrets']>['auth'] = {};
+      if (typeof primarySource.secrets.auth.password === 'object') {
+        authSecretsConfig.password = primarySource.secrets.auth.password;
+      }
+      if (typeof primarySource.secrets.auth.api_key === 'object') {
+        authSecretsConfig.api_key = primarySource.secrets.auth.api_key;
+      }
+      if (Object.keys(authSecretsConfig).length > 0) {
+        secretsConfig.auth = authSecretsConfig;
+      }
+    }
+
+    if (Object.keys(secretsConfig).length > 0) {
+      config.secrets = secretsConfig;
+    }
+  }
+
+  if (downloadSourceProxy) {
+    if (downloadSourceProxy.url) {
+      config.proxy_url = downloadSourceProxy.url;
+    }
+    if (!redactProxySecrets && downloadSourceProxy.proxy_headers) {
+      config.proxy_headers = downloadSourceProxy.proxy_headers;
+    }
+    // if the proxy is configured, get the ssl settings from it
+    config.ssl = {
+      ...(downloadSourceProxy?.certificate_authorities && {
+        certificate_authorities: [downloadSourceProxy.certificate_authorities],
+      }),
+      ...(downloadSourceProxy?.certificate && {
+        certificate: downloadSourceProxy.certificate,
+      }),
+      ...(!redactProxySecrets &&
+        downloadSourceProxy?.certificate_key && {
+          key: downloadSourceProxy?.certificate_key,
         }),
-      },
     };
   }
+
   return config;
+}
+
+/**
+ * Strip proxy_headers and proxy-derived ssl.key from a FullAgentPolicy that was already
+ * composed (e.g. retrieved verbatim from the .fleet-policies index via ?revision=N).
+ * Mutates in place and returns the policy for convenience.
+ *
+ * proxyUrlsWithCertKey: URLs of proxies that have a certificate_key. When provided,
+ * ssl.key is redacted on fleet/agent.download sections only if their proxy_url is in this
+ * set — distinguishing proxy-derived keys from the entity's own TLS keys. Without this
+ * set, ssl.key on fleet/agent.download is left untouched (conservative: avoids
+ * over-redaction but may miss proxy keys).
+ */
+export function redactProxySecretsFromPolicy(
+  policy: FullAgentPolicy,
+  proxyUrlsWithCertKey?: Set<string>
+): FullAgentPolicy {
+  if (policy.outputs) {
+    for (const output of Object.values(policy.outputs)) {
+      delete output.proxy_headers;
+      // Output ssl.key is always proxy-derived; safe to redact whenever proxy_url is present
+      if (output.proxy_url && output.ssl) {
+        delete output.ssl.key;
+      }
+    }
+  }
+  if (policy.fleet && 'hosts' in policy.fleet) {
+    delete policy.fleet.proxy_headers;
+    // Only redact ssl.key if we can confirm it came from a proxy with a certificate_key
+    if (
+      policy.fleet.proxy_url &&
+      proxyUrlsWithCertKey?.has(policy.fleet.proxy_url) &&
+      policy.fleet.ssl
+    ) {
+      delete policy.fleet.ssl.key;
+    }
+  }
+  if (policy.agent?.download) {
+    delete policy.agent.download.proxy_headers;
+    // Only redact ssl.key if we can confirm it came from a proxy with a certificate_key
+    if (
+      policy.agent.download.proxy_url &&
+      proxyUrlsWithCertKey?.has(policy.agent.download.proxy_url) &&
+      policy.agent.download.ssl
+    ) {
+      delete (policy.agent.download.ssl as Record<string, unknown>).key;
+    }
+  }
+  return policy;
 }

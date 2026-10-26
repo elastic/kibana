@@ -12,11 +12,14 @@ import type { ManifestSchema } from '../schema/manifest';
 export * from './actions';
 export * from './os';
 export * from './trusted_apps';
-export * from './utility_types';
-export * from './agents';
-export * from './sentinel_one';
-export * from './microsoft_defender_endpoint';
+export type * from './trusted_devices';
+export type * from './utility_types';
+export type * from './agents';
+export type * from './sentinel_one';
+export type * from './microsoft_defender_endpoint';
 export type { ConditionEntriesMap, ConditionEntry } from './exception_list_items';
+export type * from './scripts_library';
+export * from './libyara';
 
 /**
  * Supported React-Router state for the Policy Details page
@@ -395,6 +398,12 @@ export type AlertEvent = Partial<{
   rule: Partial<{
     id: ECSField<string>;
     description: ECSField<string>;
+    name: ECSField<string>;
+    custom_yara_signature: Partial<{
+      entry_name: ECSField<string>;
+      rule_identifier: ECSField<string>;
+      entry_id: ECSField<string>;
+    }>;
   }>;
   file: Partial<{
     owner: ECSField<string>;
@@ -815,6 +824,18 @@ export type SafeEndpointEvent = Partial<{
   }>;
   file: Partial<{ path: ECSField<string> }>;
   registry: Partial<{ path: ECSField<string>; key: ECSField<string> }>;
+  device: Partial<{
+    serial_number: ECSField<string>;
+    vendor: Partial<{
+      name: ECSField<string>;
+      id: ECSField<string>;
+    }>;
+    product: Partial<{
+      name: ECSField<string>;
+      id: ECSField<string>;
+    }>;
+    type: ECSField<string>;
+  }>;
 }>;
 
 export interface SafeLegacyEndpointEvent {
@@ -996,9 +1017,10 @@ export interface PolicyConfig {
       security: boolean;
     };
     malware: ProtectionFields & BlocklistFields & OnWriteScanFields;
-    memory_protection: ProtectionFields & SupportedFields;
+    memory_protection: ProtectionFields & SupportedFields & CustomYaraSignaturesFields;
     behavior_protection: BehaviorProtectionFields & SupportedFields;
     ransomware: ProtectionFields & SupportedFields;
+    device_control?: DeviceControlFields;
     logging: {
       file: string;
     };
@@ -1019,6 +1041,10 @@ export interface PolicyConfig {
         message: string;
         enabled: boolean;
       };
+      device_control?: {
+        message: string;
+        enabled: boolean;
+      };
     };
     antivirus_registration: {
       mode: AntivirusRegistrationModes;
@@ -1028,20 +1054,33 @@ export interface PolicyConfig {
       credential_hardening: {
         enabled: boolean;
       };
+      /** Absent means never configured and is treated as disabled. */
+      registry_credential_hardening?: {
+        enabled: boolean;
+      };
     };
+    ai_data_collection?: AiDataCollectionFields;
   };
   mac: {
     advanced?: {};
     events: {
+      dns: boolean;
       file: boolean;
       process: boolean;
       network: boolean;
+      security: boolean;
     };
     malware: ProtectionFields & BlocklistFields & OnWriteScanFields;
+    ransomware: ProtectionFields & SupportedFields;
     behavior_protection: BehaviorProtectionFields & SupportedFields;
-    memory_protection: ProtectionFields & SupportedFields;
+    memory_protection: ProtectionFields & SupportedFields & CustomYaraSignaturesFields;
+    device_control?: DeviceControlFields;
     popup: {
       malware: {
+        message: string;
+        enabled: boolean;
+      };
+      ransomware: {
         message: string;
         enabled: boolean;
       };
@@ -1053,14 +1092,20 @@ export interface PolicyConfig {
         message: string;
         enabled: boolean;
       };
+      device_control?: {
+        message: string;
+        enabled: boolean;
+      };
     };
     logging: {
       file: string;
     };
+    ai_data_collection?: AiDataCollectionFields;
   };
   linux: {
     advanced?: {};
     events: {
+      dns?: boolean;
       file: boolean;
       process: boolean;
       network: boolean;
@@ -1069,7 +1114,12 @@ export interface PolicyConfig {
     };
     malware: ProtectionFields & BlocklistFields & OnWriteScanFields;
     behavior_protection: BehaviorProtectionFields & SupportedFields;
-    memory_protection: ProtectionFields & SupportedFields;
+    memory_protection: ProtectionFields & SupportedFields & CustomYaraSignaturesFields;
+    /**
+     * Absent on policies created before Linux ransomware existed and wherever
+     * `linuxRansomwareProtection` is off; absent means off.
+     */
+    ransomware?: ProtectionFields & SupportedFields;
     popup: {
       malware: {
         message: string;
@@ -1083,10 +1133,16 @@ export interface PolicyConfig {
         message: string;
         enabled: boolean;
       };
+      /** Present alongside `ransomware`; absent wherever that is absent. */
+      ransomware?: {
+        message: string;
+        enabled: boolean;
+      };
     };
     logging: {
       file: string;
     };
+    ai_data_collection?: AiDataCollectionFields;
   };
 }
 
@@ -1108,20 +1164,37 @@ export interface UIPolicyConfig {
     | 'memory_protection'
     | 'behavior_protection'
     | 'attack_surface_reduction'
+    | 'device_control'
+    | 'ai_data_collection'
   >;
   /**
    * Mac-specific policy configuration that is supported via the UI
    */
   mac: Pick<
     PolicyConfig['mac'],
-    'malware' | 'events' | 'popup' | 'advanced' | 'behavior_protection' | 'memory_protection'
+    | 'malware'
+    | 'ransomware'
+    | 'events'
+    | 'popup'
+    | 'advanced'
+    | 'behavior_protection'
+    | 'memory_protection'
+    | 'device_control'
+    | 'ai_data_collection'
   >;
   /**
    * Linux-specific policy configuration that is supported via the UI
    */
   linux: Pick<
     PolicyConfig['linux'],
-    'malware' | 'events' | 'popup' | 'advanced' | 'behavior_protection' | 'memory_protection'
+    | 'malware'
+    | 'ransomware'
+    | 'events'
+    | 'popup'
+    | 'advanced'
+    | 'behavior_protection'
+    | 'memory_protection'
+    | 'ai_data_collection'
   >;
 }
 
@@ -1147,6 +1220,11 @@ export interface OnWriteScanFields {
   on_write_scan: boolean;
 }
 
+export interface CustomYaraSignaturesFields {
+  /** Absent means never configured and is treated as disabled. */
+  custom_yara_signatures?: boolean;
+}
+
 /** Policy protection mode options */
 export enum ProtectionModes {
   detect = 'detect',
@@ -1158,6 +1236,26 @@ export enum AntivirusRegistrationModes {
   enabled = 'enabled',
   disabled = 'disabled',
   sync = 'sync_with_malware_prevent',
+}
+
+export const DeviceControlAccessLevel = {
+  audit: 'audit', // read and write
+  read_only: 'read_only',
+  no_execute: 'no_execute',
+  deny_all: 'deny_all',
+} as const;
+
+export type DeviceControlAccessLevel =
+  (typeof DeviceControlAccessLevel)[keyof typeof DeviceControlAccessLevel];
+
+export interface DeviceControlFields {
+  enabled: boolean;
+  usb_storage: DeviceControlAccessLevel;
+}
+
+/** Endpoint AI event enrichment. An absent block means never configured and is treated as disabled. */
+export interface AiDataCollectionFields {
+  enabled: boolean;
 }
 
 /**
@@ -1312,13 +1410,21 @@ export interface HostPolicyResponse {
           };
         };
         artifacts: {
+          /**
+           * The Global artifacts applied to the host. Object could be empty if download of
+           * artifacts failed on the host.
+           */
           global: {
-            version: string;
-            identifiers: HostPolicyResponseAppliedArtifact[];
+            version?: string;
+            identifiers?: HostPolicyResponseAppliedArtifact[];
           };
+          /**
+           * The user defined artifacts (Kibana) applied to the host. Object could be empty if download of
+           * artifacts failed on the host.
+           */
           user: {
-            version: string;
-            identifiers: HostPolicyResponseAppliedArtifact[];
+            version?: string;
+            identifiers?: HostPolicyResponseAppliedArtifact[];
           };
         };
       };

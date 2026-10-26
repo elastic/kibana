@@ -14,6 +14,7 @@ import {
   JAVA_AGENT_NAMES,
   OPEN_TELEMETRY_AGENT_NAMES,
   EDOT_AGENT_NAMES,
+  OTEL_AGENT_NAMES,
   RUM_AGENT_NAMES,
 } from './agent_names';
 
@@ -67,6 +68,10 @@ export const isElasticAgentName = (agentName: string): agentName is ElasticAgent
 
 export function isEDOTAgentName(agentName: string): agentName is OpenTelemetryAgentName {
   return EDOT_AGENT_NAMES.includes(agentName as OpenTelemetryAgentName);
+}
+
+export function isOTELAgentName(agentName: string): agentName is OpenTelemetryAgentName {
+  return OTEL_AGENT_NAMES.includes(agentName as OpenTelemetryAgentName);
 }
 
 export function isJavaAgentName(agentName?: string): agentName is JavaAgentName {

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { Actions, createApiLogic } from '../../../shared/api_logic/create_api_logic';
+import type { Actions } from '../../../shared/api_logic/create_api_logic';
+import { createApiLogic } from '../../../shared/api_logic/create_api_logic';
 import { HttpLogic } from '../../../shared/http';
 
 export interface RevertConnectorPipelineArgs {
@@ -13,7 +14,7 @@ export interface RevertConnectorPipelineArgs {
 }
 
 export const revertConnectorPipeline = async ({ indexName }: RevertConnectorPipelineArgs) => {
-  const route = `/internal/enterprise_search/indices/${indexName}/pipelines`;
+  const route = `/internal/enterprise_search/indices/${encodeURIComponent(indexName)}/pipelines`;
 
   return await HttpLogic.values.http.delete(route);
 };

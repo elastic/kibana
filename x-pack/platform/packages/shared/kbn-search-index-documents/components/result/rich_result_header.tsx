@@ -1,0 +1,303 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React, { useState } from 'react';
+
+import {
+  EuiButton,
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiLink,
+  EuiPanel,
+  EuiPopover,
+  EuiPopoverFooter,
+  EuiText,
+  EuiTextColor,
+  EuiTitle,
+  useEuiTheme,
+  EuiToolTip,
+  copyToClipboard,
+} from '@elastic/eui';
+
+import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import type { MetaDataProps } from './result_types';
+import { definitionStyle } from './styles';
+
+interface Props {
+  metaData: MetaDataProps;
+  title: string;
+  rightSideActions?: React.ReactNode;
+  showScore?: boolean;
+  onTitleClick?: () => void;
+}
+
+interface TermDef {
+  label: string | number;
+}
+
+const Term: React.FC<TermDef> = ({ label }) => (
+  <EuiFlexItem grow={false}>
+    <strong>
+      <EuiTextColor color="subdued">{label}:</EuiTextColor>
+    </strong>
+  </EuiFlexItem>
+);
+
+const Definition: React.FC<TermDef> = ({ label }) => (
+  <EuiFlexItem>
+    <EuiToolTip position="top" content={label}>
+      <EuiTextColor component="div" css={definitionStyle} color="subdued">
+        {label}
+      </EuiTextColor>
+    </EuiToolTip>
+  </EuiFlexItem>
+);
+const CopyButton: React.FC<{ textToCopy: string }> = ({ textToCopy }) => {
+  const [isTextCopied, setTextCopied] = useState(false);
+
+  const onClick = () => {
+    copyToClipboard(textToCopy);
+    setTextCopied(true);
+  };
+  const onBlur = () => {
+    setTextCopied(false);
+  };
+  return (
+    <EuiToolTip
+      content={
+        isTextCopied
+          ? i18n.translate(
+              'xpack.searchIndexDocuments.result.header.compactCard.metadata.copiedTextToClipboard',
+              {
+                defaultMessage: 'Copied to clipboard',
+              }
+            )
+          : i18n.translate(
+              'xpack.searchIndexDocuments.result.header.compactCard.metadata.copyTextToClipboard',
+              {
+                defaultMessage: 'Copy text to clipboard',
+              }
+            )
+      }
+      data-test-subj="copyTextToClipboardButtonTooltip"
+    >
+      <EuiButtonIcon
+        aria-label={i18n.translate(
+          'xpack.searchIndexDocuments.result.header.compactCard.metadata.copyTextToClipboard',
+          {
+            defaultMessage: 'Copy text to clipboard',
+          }
+        )}
+        data-test-subj="copyTextToClipboardButton"
+        color="text"
+        iconType={isTextCopied ? 'check' : 'copy'}
+        onClick={onClick}
+        onBlur={onBlur}
+      />
+    </EuiToolTip>
+  );
+};
+const MetadataPopover: React.FC<MetaDataProps> = ({
+  id,
+  onDocumentDelete,
+  score,
+  showScore = false,
+  hasDeleteDocumentsPrivilege,
+}) => {
+  const [popoverIsOpen, setPopoverIsOpen] = useState(false);
+  const closePopover = () => setPopoverIsOpen(false);
+  const metaDataLabel = i18n.translate(
+    'xpack.searchIndexDocuments.result.richHeader.metadata.icon.ariaLabel',
+    { defaultMessage: 'Document metadata for {id}', values: { id } }
+  );
+
+  const metaDataIcon = (
+    <EuiToolTip content={popoverIsOpen ? undefined : metaDataLabel} disableScreenReaderOutput>
+      <EuiButtonIcon
+        iconType="info"
+        color="text"
+        data-test-subj="documentMetadataButton"
+        onClick={(e: React.MouseEvent<HTMLElement>) => {
+          e.stopPropagation();
+          setPopoverIsOpen(!popoverIsOpen);
+        }}
+        aria-label={metaDataLabel}
+      />
+    </EuiToolTip>
+  );
+
+  return (
+    <EuiPopover
+      button={metaDataIcon}
+      isOpen={popoverIsOpen}
+      closePopover={closePopover}
+      aria-label={metaDataLabel}
+    >
+      <EuiFlexGroup
+        gutterSize="s"
+        direction="column"
+        css={css`
+          width: 20rem;
+        `}
+      >
+        <EuiFlexItem>
+          <EuiFlexGroup justifyContent="spaceBetween" gutterSize="s" alignItems="center">
+            <Term label="ID" />
+            <Definition label={id} />
+            <CopyButton textToCopy={id} />
+          </EuiFlexGroup>
+        </EuiFlexItem>
+
+        {score && showScore && (
+          <EuiFlexItem>
+            <EuiFlexGroup justifyContent="spaceBetween" gutterSize="s">
+              <Term
+                label={i18n.translate(
+                  'xpack.searchIndexDocuments.result.header.compactCard.metadata.score',
+                  {
+                    defaultMessage: 'Score',
+                  }
+                )}
+              />
+              <Definition label={score?.toString()} />
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
+      {onDocumentDelete && (
+        <EuiPopoverFooter>
+          <EuiToolTip
+            content={
+              /* for serverless search users hasDeleteDocumentsPrivilege flag indicates if user has privilege to delete documents, for stack hasDeleteDocumentsPrivilege would be undefined */
+              hasDeleteDocumentsPrivilege === false
+                ? i18n.translate(
+                    'xpack.searchIndexDocuments.result.header.compactCard.metadata.deleteDocumentToolTip',
+                    {
+                      defaultMessage: 'You do not have permission to delete documents',
+                    }
+                  )
+                : undefined
+            }
+            position="bottom"
+            data-test-subj="deleteDocumentButtonToolTip"
+          >
+            <EuiButton
+              iconType="trash"
+              color="danger"
+              size="s"
+              isDisabled={hasDeleteDocumentsPrivilege === false}
+              data-test-subj="deleteDocumentButton"
+              onClick={(e: React.MouseEvent<HTMLElement>) => {
+                e.stopPropagation();
+                onDocumentDelete();
+                closePopover();
+              }}
+              fullWidth
+            >
+              <FormattedMessage
+                id="xpack.searchIndexDocuments.result.header.compactCard.metadata.deleteDocument"
+                defaultMessage="Delete document"
+              />
+            </EuiButton>
+          </EuiToolTip>
+        </EuiPopoverFooter>
+      )}
+    </EuiPopover>
+  );
+};
+
+const Score: React.FC<{ score: MetaDataProps['score'] }> = ({ score }) => {
+  return (
+    <EuiPanel paddingSize="xs" hasShadow={false} color="subdued" grow>
+      <EuiFlexGroup
+        direction="column"
+        responsive={false}
+        alignItems="center"
+        justifyContent="center"
+        gutterSize="s"
+      >
+        <EuiFlexItem grow>
+          <EuiIcon type="chartGauge" size="m" aria-hidden={true} />
+        </EuiFlexItem>
+        <EuiFlexItem grow>
+          <EuiPanel
+            hasShadow={false}
+            hasBorder={false}
+            css={css`
+              inline-size: 5ch;
+              max-inline-size: 100%;
+            `}
+            paddingSize="none"
+            color="subdued"
+          >
+            <EuiText textAlign="center" size="xs">
+              {score ? score.toString().substring(0, 5) : '-'}
+            </EuiText>
+          </EuiPanel>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiPanel>
+  );
+};
+
+export const RichResultHeader: React.FC<Props> = ({
+  title,
+  metaData,
+  rightSideActions = null,
+  showScore = false,
+  onTitleClick,
+}) => {
+  const { euiTheme } = useEuiTheme();
+  return (
+    <EuiFlexItem
+      grow
+      css={css`
+        min-height: ${euiTheme.base * 1}px;
+        max-height: ${euiTheme.base * 8}px;
+      `}
+    >
+      <EuiFlexGroup gutterSize="m" alignItems="center">
+        {showScore && (
+          <EuiFlexItem grow={false}>
+            <Score score={metaData.score} />
+          </EuiFlexItem>
+        )}
+        <EuiFlexItem>
+          <EuiFlexGroup alignItems="center">
+            <EuiFlexItem>
+              <EuiFlexGroup alignItems="center" gutterSize="l" responsive={false}>
+                <EuiFlexItem>
+                  {onTitleClick ? (
+                    <EuiLink onClick={onTitleClick} color="text">
+                      <EuiTitle size="xxs">
+                        <h4>{title}</h4>
+                      </EuiTitle>
+                    </EuiLink>
+                  ) : (
+                    <EuiTitle size="xxs">
+                      <h4>{title}</h4>
+                    </EuiTitle>
+                  )}
+                </EuiFlexItem>
+                {!!metaData && (
+                  <EuiFlexItem grow={false}>
+                    <MetadataPopover {...metaData} showScore={showScore} />
+                  </EuiFlexItem>
+                )}
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>{rightSideActions}</EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiFlexItem>
+  );
+};

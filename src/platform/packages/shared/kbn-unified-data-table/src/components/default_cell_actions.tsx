@@ -7,64 +7,85 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { MutableRefObject } from 'react';
 import React, { useContext } from 'react';
-import { EuiDataGridColumnCellActionProps } from '@elastic/eui';
+import type { EuiDataGridColumnCellActionProps, EuiDataGridRefProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { DataViewField } from '@kbn/data-views-plugin/public';
-import { ToastsStart } from '@kbn/core/public';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
+import type { ToastsStart } from '@kbn/core/public';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
-import { UnifiedDataTableContext, DataTableContext } from '../table_context';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { shouldShowFieldFilterInOutActions } from '@kbn/unified-doc-viewer/utils/should_show_field_filter_actions';
+import {
+  getDataViewFieldFromDataSource,
+  getIgnoredReason,
+  getMessageFieldWithFallbacks,
+} from '@kbn/discover-utils';
+import { useFindSimilarValues } from '../hooks/use_find_similar_values';
+import type { DataTableContext } from '../table_context';
+import { UnifiedDataTableContext } from '../table_context';
+import { SOURCE_COLUMN } from '../utils/columns';
 import { copyValueToClipboard } from '../utils/copy_value_to_clipboard';
-import { ValueToStringConverter } from '../types';
+import type { DocumentsDisplayMode, ValueToStringConverter } from '../types';
 
 function onFilterCell(
   context: DataTableContext,
   rowIndex: EuiDataGridColumnCellActionProps['rowIndex'],
   columnId: EuiDataGridColumnCellActionProps['columnId'],
   mode: '+' | '-',
-  field: DataViewField
+  field: DataViewField,
+  dataGridRef?: MutableRefObject<EuiDataGridRefProps | null>
 ) {
   const row = context.getRowByIndex(rowIndex);
 
   if (row && field && context.onFilter) {
     const value = row.flattened[columnId];
     context.onFilter(field, value, mode);
+    dataGridRef?.current?.closeCellPopover();
   }
 }
 
-const esqlMultivalueFilteringDisabled = i18n.translate(
-  'unifiedDataTable.grid.esqlMultivalueFilteringDisabled',
-  {
-    defaultMessage: 'Multivalue filtering is not supported in ES|QL',
-  }
-);
+/**
+ * Elasticsearch did not index this value, so a filter built from it would never
+ * match. Whether that happened is per document, not per column, so it cannot be
+ * decided in `buildCellActions` alongside the other filter checks.
+ */
+function isCellValueIgnored(
+  context: DataTableContext,
+  rowIndex: EuiDataGridColumnCellActionProps['rowIndex'],
+  field: DataViewField
+): boolean {
+  const row = context.getRowByIndex(rowIndex);
+  return Boolean(row && getIgnoredReason(field, row.raw._ignored));
+}
 
 export const FilterInBtn = ({
   cellActionProps: { Component, rowIndex, columnId },
   field,
-  isPlainRecord,
+  dataGridRef,
 }: {
   cellActionProps: EuiDataGridColumnCellActionProps;
   field: DataViewField;
-  isPlainRecord: boolean | undefined;
+  dataGridRef?: MutableRefObject<EuiDataGridRefProps | null>;
 }) => {
   const context = useContext(UnifiedDataTableContext);
-  const filteringDisabled =
-    isPlainRecord && Array.isArray(context.getRowByIndex(rowIndex)?.flattened[columnId]);
   const buttonTitle = i18n.translate('unifiedDataTable.grid.filterForAria', {
     defaultMessage: 'Filter for this {value}',
-    values: { value: columnId },
+    values: { value: field.displayName },
   });
+
+  if (isCellValueIgnored(context, rowIndex, field)) {
+    return null;
+  }
 
   return (
     <Component
       onClick={() => {
-        onFilterCell(context, rowIndex, columnId, '+', field);
+        onFilterCell(context, rowIndex, columnId, '+', field, dataGridRef);
       }}
-      iconType="plusInCircle"
+      iconType="plusCircle"
       aria-label={buttonTitle}
-      title={filteringDisabled ? esqlMultivalueFilteringDisabled : buttonTitle}
-      disabled={filteringDisabled}
+      title={buttonTitle}
       data-test-subj="filterForButton"
     >
       {i18n.translate('unifiedDataTable.grid.filterFor', {
@@ -77,29 +98,30 @@ export const FilterInBtn = ({
 export const FilterOutBtn = ({
   cellActionProps: { Component, rowIndex, columnId },
   field,
-  isPlainRecord,
+  dataGridRef,
 }: {
   cellActionProps: EuiDataGridColumnCellActionProps;
   field: DataViewField;
-  isPlainRecord: boolean | undefined;
+  dataGridRef?: MutableRefObject<EuiDataGridRefProps | null>;
 }) => {
   const context = useContext(UnifiedDataTableContext);
-  const filteringDisabled =
-    isPlainRecord && Array.isArray(context.getRowByIndex(rowIndex)?.flattened[columnId]);
   const buttonTitle = i18n.translate('unifiedDataTable.grid.filterOutAria', {
     defaultMessage: 'Filter out this {value}',
-    values: { value: columnId },
+    values: { value: field.displayName },
   });
+
+  if (isCellValueIgnored(context, rowIndex, field)) {
+    return null;
+  }
 
   return (
     <Component
       onClick={() => {
-        onFilterCell(context, rowIndex, columnId, '-', field);
+        onFilterCell(context, rowIndex, columnId, '-', field, dataGridRef);
       }}
-      iconType="minusInCircle"
+      iconType="minusCircle"
       aria-label={buttonTitle}
-      title={filteringDisabled ? esqlMultivalueFilteringDisabled : buttonTitle}
-      disabled={filteringDisabled}
+      title={buttonTitle}
       data-test-subj="filterOutButton"
     >
       {i18n.translate('unifiedDataTable.grid.filterOut', {
@@ -109,14 +131,81 @@ export const FilterOutBtn = ({
   );
 };
 
+export const ReverseCategorizeBtn = ({
+  cellActionProps: { Component, columnId, rowIndex },
+  field,
+  dataGridRef,
+  uiActions,
+}: {
+  cellActionProps: EuiDataGridColumnCellActionProps;
+  /** The field of the column. Not needed for the summary column, which uses its message field. */
+  field?: DataViewField;
+  dataGridRef?: MutableRefObject<EuiDataGridRefProps | null>;
+  uiActions?: UiActionsStart;
+}) => {
+  const context = useContext(UnifiedDataTableContext);
+  const row = context.getRowByIndex(rowIndex);
+
+  // The summary (_source) column shows the message of the document, so analyse the value of
+  // its message field rather than the column itself.
+  const { targetField, rawValue } = (() => {
+    if (columnId !== SOURCE_COLUMN) {
+      return { targetField: field, rawValue: row?.flattened[columnId] };
+    }
+    const { field: messageFieldName, value } = getMessageFieldWithFallbacks(row?.flattened ?? {});
+    return {
+      targetField: messageFieldName
+        ? getDataViewFieldFromDataSource({
+            dataView: context.dataView,
+            dataSource: context.dataSource,
+            fieldName: messageFieldName,
+          })
+        : undefined,
+      rawValue: value,
+    };
+  })();
+
+  const { isAvailable, findSimilarValues } = useFindSimilarValues({
+    uiActions,
+    dataView: context.dataView,
+    field: targetField,
+  });
+  const buttonTitle = i18n.translate('unifiedDataTable.grid.reverseCategorize', {
+    defaultMessage: 'Find similar values',
+  });
+
+  if (!isAvailable) {
+    return null;
+  }
+
+  return (
+    <Component
+      onClick={() => {
+        // Use the indexed/flattened value so category regex matching is not broken by
+        // field formatting or clipboard escaping from valueToStringConverter.
+        findSimilarValues(rawValue == null ? '' : String(rawValue));
+        dataGridRef?.current?.closeCellPopover();
+      }}
+      iconType="search"
+      aria-label={buttonTitle}
+      title={buttonTitle}
+      data-test-subj="reverseCategorizeButton"
+    >
+      {buttonTitle}
+    </Component>
+  );
+};
+
 export function buildCopyValueButton(
   { Component, rowIndex, columnId }: EuiDataGridColumnCellActionProps,
   toastNotifications: ToastsStart,
-  valueToStringConverter: ValueToStringConverter
+  valueToStringConverter: ValueToStringConverter,
+  documentsDisplayMode: DocumentsDisplayMode,
+  columnDisplayName?: string
 ) {
   const buttonTitle = i18n.translate('unifiedDataTable.grid.copyClipboardButtonTitle', {
     defaultMessage: 'Copy value of {column}',
-    values: { column: columnId },
+    values: { column: columnDisplayName ?? columnId },
   });
 
   return (
@@ -129,7 +218,7 @@ export function buildCopyValueButton(
           toastNotifications,
         });
       }}
-      iconType="copyClipboard"
+      iconType="copy"
       aria-label={buttonTitle}
       title={buttonTitle}
       data-test-subj="copyClipboardButton"
@@ -141,27 +230,71 @@ export function buildCopyValueButton(
   );
 }
 
-export function buildCellActions(
-  field: DataViewField,
-  isPlainRecord: boolean | undefined,
+export function buildSummaryColumnCellActions(
   toastNotifications: ToastsStart,
   valueToStringConverter: ValueToStringConverter,
-  onFilter?: DocViewFilterFn
+  documentsDisplayMode: DocumentsDisplayMode,
+  dataGridRef?: MutableRefObject<EuiDataGridRefProps | null>,
+  uiActions?: UiActionsStart,
+  dataView?: DataView
 ) {
+  const showReverseCategorize =
+    uiActions?.hasAction('ACTION_REVERSE_CATEGORIZE_FIELD') === true &&
+    dataView?.isTimeBased() === true;
+
   return [
-    ...(onFilter && field.filterable
+    ({ Component, rowIndex, columnId }: EuiDataGridColumnCellActionProps) =>
+      buildCopyValueButton(
+        { Component, rowIndex, columnId } as EuiDataGridColumnCellActionProps,
+        toastNotifications,
+        valueToStringConverter,
+        documentsDisplayMode
+      ),
+    ...(showReverseCategorize
+      ? [
+          (cellActionProps: EuiDataGridColumnCellActionProps) =>
+            ReverseCategorizeBtn({ cellActionProps, dataGridRef, uiActions }),
+        ]
+      : []),
+  ];
+}
+
+export function buildCellActions(
+  field: DataViewField,
+  toastNotifications: ToastsStart,
+  valueToStringConverter: ValueToStringConverter,
+  documentsDisplayMode: DocumentsDisplayMode,
+  onFilter?: DocViewFilterFn,
+  dataGridRef?: MutableRefObject<EuiDataGridRefProps | null>,
+  hideFilteringOnComputedColumns?: boolean,
+  uiActions?: UiActionsStart,
+  dataView?: DataView
+) {
+  const shouldShowFilters = shouldShowFieldFilterInOutActions({
+    dataViewField: field,
+    hideFilteringOnComputedColumns,
+    onFilter,
+  });
+
+  const showReverseCategorize =
+    field.esTypes?.includes('text') === true &&
+    uiActions?.hasAction('ACTION_REVERSE_CATEGORIZE_FIELD') === true &&
+    dataView?.isTimeBased() === true;
+
+  return [
+    ...(shouldShowFilters
       ? [
           (cellActionProps: EuiDataGridColumnCellActionProps) =>
             FilterInBtn({
               cellActionProps,
               field,
-              isPlainRecord,
+              dataGridRef,
             }),
           (cellActionProps: EuiDataGridColumnCellActionProps) =>
             FilterOutBtn({
               cellActionProps,
               field,
-              isPlainRecord,
+              dataGridRef,
             }),
         ]
       : []),
@@ -169,7 +302,20 @@ export function buildCellActions(
       buildCopyValueButton(
         { Component, rowIndex, columnId } as EuiDataGridColumnCellActionProps,
         toastNotifications,
-        valueToStringConverter
+        valueToStringConverter,
+        documentsDisplayMode,
+        field.displayName
       ),
+    ...(showReverseCategorize
+      ? [
+          (cellActionProps: EuiDataGridColumnCellActionProps) =>
+            ReverseCategorizeBtn({
+              cellActionProps,
+              field,
+              dataGridRef,
+              uiActions,
+            }),
+        ]
+      : []),
   ];
 }

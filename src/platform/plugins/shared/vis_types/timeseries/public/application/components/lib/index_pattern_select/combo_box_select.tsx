@@ -9,7 +9,8 @@
 
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useState, useEffect } from 'react';
-import { EuiComboBox, EuiComboBoxProps } from '@elastic/eui';
+import type { EuiComboBoxProps } from '@elastic/eui';
+import { EuiComboBox } from '@elastic/eui';
 import type { DataViewsService } from '@kbn/data-views-plugin/public';
 import { getDataViewsStart } from '../../../../services';
 

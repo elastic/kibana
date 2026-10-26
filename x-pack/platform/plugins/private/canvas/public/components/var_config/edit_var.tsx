@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { useState, FC } from 'react';
+import type { FC } from 'react';
+import React, { useState } from 'react';
 import {
   EuiIcon,
   EuiFlexGroup,
@@ -18,11 +19,11 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiSpacer,
-  EuiCallOut,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 
-import { CanvasVariable } from '../../../types';
+import type { CanvasVariable } from '../../../types';
 import { VarValueField } from './var_value_field';
 
 const strings = {
@@ -141,7 +142,7 @@ export const EditVar: FC<Props> = ({ variables, selectedVar, onCancel, onSave })
       <div className="canvasVarHeader__triggerWrapper">
         <button className="canvasVarHeader__button" type="button" onClick={() => onCancel()}>
           <span className="canvasVarHeader__iconWrapper">
-            <EuiIcon type="sortLeft" style={{ verticalAlign: 'top' }} />
+            <EuiIcon type="sortLeft" style={{ verticalAlign: 'top' }} aria-hidden={true} />
           </span>
           <span>
             <span className="canvasVarHeader__anchor">
@@ -153,12 +154,7 @@ export const EditVar: FC<Props> = ({ variables, selectedVar, onCancel, onSave })
       <div className="canvasSidebar__accordionContent">
         {!isNew && (
           <div>
-            <EuiCallOut
-              title={strings.getEditWarning()}
-              color="warning"
-              iconType="warning"
-              size="s"
-            />
+            <KbnWarningCallout announceOnMount={false} title={strings.getEditWarning()} size="s" />
             <EuiSpacer size="m" />
           </div>
         )}

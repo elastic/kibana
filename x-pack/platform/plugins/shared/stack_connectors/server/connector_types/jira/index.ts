@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import type { TypeOf } from '@kbn/config-schema';
-
 import type {
-  ActionType as ConnectorType,
+  ClassicActionType as ConnectorType,
   ActionTypeExecutorOptions as ConnectorTypeExecutorOptions,
   ActionTypeExecutorResult as ConnectorTypeExecutorResult,
 } from '@kbn/actions-plugin/server/types';
@@ -17,15 +15,16 @@ import {
   CasesConnectorFeatureId,
   UptimeConnectorFeatureId,
   SecurityConnectorFeatureId,
+  WorkflowsConnectorFeatureId,
+  AgentBuilderConnectorFeatureId,
 } from '@kbn/actions-plugin/common';
-import { validate } from './validators';
 import {
+  CONNECTOR_ID,
+  CONNECTOR_NAME,
   ExternalIncidentServiceConfigurationSchema,
   ExternalIncidentServiceSecretConfigurationSchema,
   ExecutorParamsSchema,
-} from './schema';
-import { createExternalService } from './service';
-import { api } from './api';
+} from '@kbn/connector-schemas/jira';
 import type {
   ExecutorParams,
   ExecutorSubActionPushParams,
@@ -37,10 +36,12 @@ import type {
   ExecutorSubActionGetIssuesParams,
   ExecutorSubActionGetIssueParams,
   ExecutorSubActionGetIncidentParams,
-} from './types';
-import * as i18n from './translations';
-
-export type ActionParamsType = TypeOf<typeof ExecutorParamsSchema>;
+} from '@kbn/connector-schemas/jira';
+import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
+import { validate } from './validators';
+import { createExternalService } from './service';
+import { isUserError } from './utils';
+import { api } from './api';
 
 const supportedSubActions: string[] = [
   'getFields',
@@ -52,7 +53,6 @@ const supportedSubActions: string[] = [
   'issue',
 ];
 
-export const ConnectorTypeId = '.jira';
 // connector type definition
 export function getConnectorType(): ConnectorType<
   JiraPublicConfigurationType,
@@ -61,14 +61,16 @@ export function getConnectorType(): ConnectorType<
   JiraExecutorResultData | {}
 > {
   return {
-    id: ConnectorTypeId,
+    id: CONNECTOR_ID,
     minimumLicenseRequired: 'gold',
-    name: i18n.NAME,
+    name: CONNECTOR_NAME,
     supportedFeatureIds: [
       AlertingConnectorFeatureId,
       CasesConnectorFeatureId,
       UptimeConnectorFeatureId,
       SecurityConnectorFeatureId,
+      WorkflowsConnectorFeatureId,
+      AgentBuilderConnectorFeatureId,
     ],
     validate: {
       config: {
@@ -95,101 +97,108 @@ async function executor(
     ExecutorParams
   >
 ): Promise<ConnectorTypeExecutorResult<JiraExecutorResultData | {}>> {
-  const {
-    actionId,
-    config,
-    params,
-    secrets,
-    configurationUtilities,
-    logger,
-    connectorUsageCollector,
-  } = execOptions;
-  const { subAction, subActionParams } = params as ExecutorParams;
-  let data: JiraExecutorResultData | null = null;
-
-  const externalService = createExternalService(
-    {
+  try {
+    const {
+      actionId,
       config,
+      params,
       secrets,
-    },
-    logger,
-    configurationUtilities,
-    connectorUsageCollector
-  );
-
-  if (!api[subAction]) {
-    const errorMessage = `[Action][ExternalService] Unsupported subAction type ${subAction}.`;
-    logger.error(errorMessage);
-    throw new Error(errorMessage);
-  }
-
-  if (!supportedSubActions.includes(subAction)) {
-    const errorMessage = `[Action][ExternalService] subAction ${subAction} not implemented.`;
-    logger.error(errorMessage);
-    throw new Error(errorMessage);
-  }
-
-  if (subAction === 'getIncident') {
-    const getIncidentParams = subActionParams as ExecutorSubActionGetIncidentParams;
-    const res = await api.getIncident({
-      externalService,
-      params: getIncidentParams,
-    });
-    if (res != null) {
-      data = res;
-    }
-  }
-  if (subAction === 'pushToService') {
-    const pushToServiceParams = subActionParams as ExecutorSubActionPushParams;
-
-    data = await api.pushToService({
-      externalService,
-      params: pushToServiceParams,
+      configurationUtilities,
       logger,
-    });
+      connectorUsageCollector,
+    } = execOptions;
+    const { subAction, subActionParams } = params as ExecutorParams;
+    let data: JiraExecutorResultData | null = null;
 
-    logger.debug(`response push to service for incident id: ${data.id}`);
+    const externalService = createExternalService(
+      {
+        config,
+        secrets,
+      },
+      logger,
+      configurationUtilities,
+      connectorUsageCollector
+    );
+
+    if (!api[subAction]) {
+      const errorMessage = `[Action][ExternalService] Unsupported subAction type ${subAction}.`;
+      logger.error(errorMessage);
+      throw new Error(errorMessage);
+    }
+
+    if (!supportedSubActions.includes(subAction)) {
+      const errorMessage = `[Action][ExternalService] subAction ${subAction} not implemented.`;
+      logger.error(errorMessage);
+      throw new Error(errorMessage);
+    }
+
+    if (subAction === 'getIncident') {
+      const getIncidentParams = subActionParams as ExecutorSubActionGetIncidentParams;
+      const res = await api.getIncident({
+        externalService,
+        params: getIncidentParams,
+      });
+      if (res != null) {
+        data = res;
+      }
+    }
+    if (subAction === 'pushToService') {
+      const pushToServiceParams = subActionParams as ExecutorSubActionPushParams;
+
+      data = await api.pushToService({
+        externalService,
+        params: pushToServiceParams,
+        logger,
+      });
+
+      logger.debug(`response push to service for incident id: ${data.id}`);
+    }
+
+    if (subAction === 'issueTypes') {
+      const getIssueTypesParams = subActionParams as ExecutorSubActionCommonFieldsParams;
+      data = await api.issueTypes({
+        externalService,
+        params: getIssueTypesParams,
+      });
+    }
+
+    if (subAction === 'fieldsByIssueType') {
+      const getFieldsByIssueTypeParams =
+        subActionParams as ExecutorSubActionGetFieldsByIssueTypeParams;
+      data = await api.fieldsByIssueType({
+        externalService,
+        params: getFieldsByIssueTypeParams,
+      });
+    }
+
+    if (subAction === 'getFields') {
+      data = await api.getFields({
+        externalService,
+        params: subActionParams,
+      });
+    }
+
+    if (subAction === 'issues') {
+      const getIssuesParams = subActionParams as ExecutorSubActionGetIssuesParams;
+      data = await api.issues({
+        externalService,
+        params: getIssuesParams,
+      });
+    }
+
+    if (subAction === 'issue') {
+      const getIssueParams = subActionParams as ExecutorSubActionGetIssueParams;
+      data = await api.issue({
+        externalService,
+        params: getIssueParams,
+      });
+    }
+
+    return { status: 'ok', data: data ?? {}, actionId };
+  } catch (error) {
+    if (isUserError(error)) {
+      throw createTaskRunError(error, TaskErrorSource.USER);
+    }
+    throw error;
   }
-
-  if (subAction === 'issueTypes') {
-    const getIssueTypesParams = subActionParams as ExecutorSubActionCommonFieldsParams;
-    data = await api.issueTypes({
-      externalService,
-      params: getIssueTypesParams,
-    });
-  }
-
-  if (subAction === 'fieldsByIssueType') {
-    const getFieldsByIssueTypeParams =
-      subActionParams as ExecutorSubActionGetFieldsByIssueTypeParams;
-    data = await api.fieldsByIssueType({
-      externalService,
-      params: getFieldsByIssueTypeParams,
-    });
-  }
-
-  if (subAction === 'getFields') {
-    data = await api.getFields({
-      externalService,
-      params: subActionParams,
-    });
-  }
-
-  if (subAction === 'issues') {
-    const getIssuesParams = subActionParams as ExecutorSubActionGetIssuesParams;
-    data = await api.issues({
-      externalService,
-      params: getIssuesParams,
-    });
-  }
-
-  if (subAction === 'issue') {
-    const getIssueParams = subActionParams as ExecutorSubActionGetIssueParams;
-    data = await api.issue({
-      externalService,
-      params: getIssueParams,
-    });
-  }
-
-  return { status: 'ok', data: data ?? {}, actionId };
 }

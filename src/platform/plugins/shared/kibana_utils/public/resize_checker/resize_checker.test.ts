@@ -10,11 +10,6 @@
 import { ResizeChecker } from './resize_checker';
 import { EventEmitter } from 'events';
 
-// If you want to know why these mocks are created,
-// please check: https://github.com/elastic/kibana/pull/44750
-jest.mock('resize-observer-polyfill');
-import ResizeObserver from 'resize-observer-polyfill';
-
 class MockElement {
   public clientWidth: number;
   public clientHeight: number;
@@ -40,16 +35,6 @@ class MockElement {
     this.onResize = null;
   }
 }
-
-(ResizeObserver as any).mockImplementation(function (this: any, callback: any) {
-  this.observe = function (el: MockElement) {
-    el.addEventListener('resize', callback);
-  };
-  this.disconnect = function () {};
-  this.unobserve = function (el: MockElement) {
-    el.removeEventListener('resize', callback);
-  };
-});
 
 describe('Resize Checker', () => {
   describe('events', () => {
@@ -82,11 +67,11 @@ describe('Resize Checker', () => {
       const listener = jest.fn();
       checker.on('resize', listener);
 
-      expect(listener).not.toBeCalled();
+      expect(listener).not.toHaveBeenCalled();
       el.clientHeight = 100;
       el.dispatchEvent('resize');
       setTimeout(() => {
-        expect(listener).not.toBeCalled();
+        expect(listener).not.toHaveBeenCalled();
         done();
       }, 100);
     });
@@ -97,12 +82,12 @@ describe('Resize Checker', () => {
       const listener = jest.fn();
       checker.on('resize', listener);
 
-      expect(listener).not.toBeCalled();
+      expect(listener).not.toHaveBeenCalled();
       checker.enable();
       el.clientHeight = 100;
       el.dispatchEvent('resize');
       setTimeout(() => {
-        expect(listener).toBeCalled();
+        expect(listener).toHaveBeenCalled();
         done();
       }, 100);
     });
@@ -113,12 +98,12 @@ describe('Resize Checker', () => {
       const listener = jest.fn();
       checker.on('resize', listener);
 
-      expect(listener).not.toBeCalled();
+      expect(listener).not.toHaveBeenCalled();
       el.clientHeight = 100;
       checker.enable();
       el.clientHeight = 100;
       setTimeout(() => {
-        expect(listener).not.toBeCalled();
+        expect(listener).not.toHaveBeenCalled();
         done();
       }, 100);
     });
@@ -136,7 +121,7 @@ describe('Resize Checker', () => {
       });
       el.dispatchEvent('resize');
       setTimeout(() => {
-        expect(listener).not.toBeCalled();
+        expect(listener).not.toHaveBeenCalled();
         done();
       }, 1000);
     });
@@ -151,12 +136,12 @@ describe('Resize Checker', () => {
         el.clientHeight = 100;
       });
       el.dispatchEvent('resize');
-      expect(listener).not.toBeCalled();
+      expect(listener).not.toHaveBeenCalled();
 
       el.clientHeight = 200;
       el.dispatchEvent('resize');
       setTimeout(() => {
-        expect(listener).not.toBeCalled();
+        expect(listener).not.toHaveBeenCalled();
         done();
       }, 100);
     });
@@ -182,7 +167,7 @@ describe('Resize Checker', () => {
       el.clientHeight = 100;
       el.dispatchEvent('resize');
       setTimeout(() => {
-        expect(listener).not.toBeCalled();
+        expect(listener).not.toHaveBeenCalled();
         done();
       }, 100);
     });

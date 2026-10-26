@@ -6,18 +6,61 @@
  */
 
 import React from 'react';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
+import { useLoadConnectors } from '@kbn/inference-connectors';
 
 import { CreateFlyout } from '.';
 import * as i18n from './translations';
 
 import { useKibana } from '../../../../../common/lib/kibana';
-import { TestProviders } from '../../../../../common/mock';
-import { useSourcererDataView } from '../../../../../sourcerer/containers';
+import { TestProviders } from '../../../../../common/mock/test_providers';
+import { useScheduleApi } from '../logic/use_schedule_api';
+import { useConnectors } from '../../../../../common/hooks/use_connectors';
+import { useListWorkflows } from '../../workflow_configuration/hooks/use_list_workflows';
+import { useGenerateWorkflow } from '../../workflow_configuration/hooks/use_generate_workflow';
 
+jest.mock('@kbn/inference-connectors');
+jest.mock('../logic/use_schedule_api');
 jest.mock('../../../../../common/lib/kibana');
-jest.mock('../../../../../sourcerer/containers');
+jest.mock('../../../../../common/hooks/use_connectors');
+jest.mock('../../workflow_configuration/hooks/use_list_workflows');
+jest.mock('../../workflow_configuration/hooks/use_generate_workflow');
+jest.mock('../../../../../data_view_manager/hooks/use_data_view', () => ({
+  useDataView: jest.fn().mockReturnValue({
+    dataView: undefined,
+    status: 'ready',
+  }),
+}));
+// Stub the heavy RuleActionsField subtree. It renders the triggers_actions_ui
+// `ActionForm` via `React.lazy`/`Suspense` (`getActionFormLazy`), whose first
+// mount pays a large one-time lazy-import cost and whose connector/action-type
+// loads never settle under jsdom. That subtree — not `AlertSelection` — is the
+// dominant cost and the source of the "not wrapped in act(...)" churn that
+// tripped Jest's 5s per-test timeout in CI.
+jest.mock('../../../../../common/components/rule_actions_field', () => ({
+  RuleActionsField: () => <div data-test-subj="mockRuleActionsField" />,
+}));
+// Stub the heavy AlertSelection subtree (lens embeddable, unified-search bar,
+// alert-preview tabs) that otherwise blows the 5s render budget under jsdom. The
+// stub keeps the `alertSelection` marker and an `alertsRange` control wired to
+// `onSettingsChanged` so the unsaved-changes assertions still exercise it.
+jest.mock('../../alert_selection', () => ({
+  AlertSelection: ({
+    settings,
+    onSettingsChanged,
+  }: {
+    settings: Record<string, unknown>;
+    onSettingsChanged?: (settings: Record<string, unknown>) => void;
+  }) => (
+    <div data-test-subj="alertSelection">
+      <input
+        data-test-subj="alertsRange"
+        onChange={(e) => onSettingsChanged?.({ ...settings, size: e.target.value })}
+      />
+    </div>
+  ),
+}));
 jest.mock('react-router-dom', () => ({
   matchPath: jest.fn(),
   useLocation: jest.fn().mockReturnValue({
@@ -26,13 +69,42 @@ jest.mock('react-router-dom', () => ({
   withRouter: jest.fn(),
 }));
 
+const mockConnectors: unknown[] = [
+  {
+    id: 'test-id',
+    name: 'OpenAI connector',
+    actionTypeId: '.gen-ai',
+    config: {
+      apiProvider: 'OpenAI',
+    },
+  },
+];
+
 const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
-const mockUseSourcererDataView = useSourcererDataView as jest.MockedFunction<
-  typeof useSourcererDataView
->;
+const mockUseScheduleApi = useScheduleApi as jest.MockedFunction<typeof useScheduleApi>;
+
+const setMockCreateSchedule = ({ mutateAsync }: { mutateAsync: jest.Mock }) => {
+  mockUseScheduleApi.mockReturnValue({
+    isWorkflowsEnabled: false,
+    useCreateSchedule: () =>
+      ({ isLoading: false, mutateAsync } as unknown as ReturnType<
+        ReturnType<typeof useScheduleApi>['useCreateSchedule']
+      >),
+  } as unknown as ReturnType<typeof useScheduleApi>);
+};
 
 const defaultProps = {
   onClose: jest.fn(),
+};
+
+const renderComponent = async () => {
+  await act(() => {
+    render(
+      <TestProviders>
+        <CreateFlyout {...defaultProps} />
+      </TestProviders>
+    );
+  });
 };
 
 describe('CreateFlyout', () => {
@@ -41,6 +113,9 @@ describe('CreateFlyout', () => {
 
     mockUseKibana.mockReturnValue({
       services: {
+        featureFlags: {
+          useBooleanValue: jest.fn().mockReturnValue(false),
+        },
         lens: {
           EmbeddableComponent: () => <div data-test-subj="mockEmbeddableComponent" />,
         },
@@ -58,56 +133,177 @@ describe('CreateFlyout', () => {
       },
     } as unknown as jest.Mocked<ReturnType<typeof useKibana>>);
 
-    mockUseSourcererDataView.mockReturnValue({
-      sourcererDataView: {},
-      loading: false,
-    } as unknown as jest.Mocked<ReturnType<typeof useSourcererDataView>>);
+    (useLoadConnectors as jest.Mock).mockReturnValue({
+      isLoading: false,
+      data: mockConnectors,
+    });
 
-    render(
-      <TestProviders>
-        <CreateFlyout {...defaultProps} />
-      </TestProviders>
-    );
+    (useConnectors as jest.Mock).mockReturnValue({
+      connectors: mockConnectors,
+      setCurrentConnector: jest.fn(),
+    });
+
+    (useListWorkflows as jest.Mock).mockReturnValue({
+      data: [],
+      isLoading: false,
+      isSuccess: true,
+      status: 'success' as const,
+    });
+
+    (useGenerateWorkflow as jest.Mock).mockReturnValue({
+      cancelGeneration: jest.fn(),
+      generatedWorkflow: null,
+      isGenerating: false,
+      startGeneration: jest.fn(),
+    });
+
+    setMockCreateSchedule({ mutateAsync: jest.fn() });
   });
 
-  it('should render the flyout title', () => {
-    expect(screen.getAllByTestId('title')[0]).toHaveTextContent(i18n.SCHEDULE_CREATE_TITLE);
+  it('should render the flyout title', async () => {
+    await renderComponent();
+    await waitFor(() => {
+      expect(screen.getAllByTestId('title')[0]).toHaveTextContent(i18n.SCHEDULE_CREATE_TITLE);
+    });
   });
 
   it('should invoke onClose when the close button is clicked', async () => {
-    const closeButton = screen.getByTestId('euiFlyoutCloseButton');
-    fireEvent.click(closeButton);
+    await renderComponent();
 
-    expect(defaultProps.onClose).toHaveBeenCalled();
+    const closeButton = screen.getByTestId('euiFlyoutCloseButton');
+    act(() => {
+      fireEvent.click(closeButton);
+    });
+
+    await waitFor(() => {
+      expect(defaultProps.onClose).toHaveBeenCalled();
+    });
+  });
+
+  describe('confirmation modal', () => {
+    beforeEach(() => {
+      render(
+        <TestProviders>
+          <CreateFlyout {...defaultProps} />
+        </TestProviders>
+      );
+
+      // Simulate unsaved changes:
+      const input = screen.getByTestId('alertsRange');
+      fireEvent.change(input, { target: { value: 'changed' } });
+
+      // Click the close button to trigger the confirmation modal
+      fireEvent.click(screen.getByTestId('euiFlyoutCloseButton'));
+    });
+
+    it('renders the confirmation modal when there are unsaved changes and close is clicked', () => {
+      expect(screen.getByTestId('confirmationModal')).toBeInTheDocument();
+    });
+
+    it('calls onClose when discard is clicked in confirmation modal', () => {
+      fireEvent.click(screen.getByTestId('discardChanges'));
+
+      expect(defaultProps.onClose).toHaveBeenCalled();
+    });
+
+    it('closes the confirmation modal when cancel is clicked', () => {
+      fireEvent.click(screen.getByTestId('cancel'));
+
+      expect(screen.queryByTestId('confirmationModal')).not.toBeInTheDocument();
+    });
+
+    it('renders the confirmation modal when there are unsaved changes and escape key is pressed', () => {
+      // First, close the modal that was opened in beforeEach
+      fireEvent.click(screen.getByTestId('cancel'));
+
+      // Verify modal is closed
+      expect(screen.queryByTestId('confirmationModal')).not.toBeInTheDocument();
+
+      // Now press escape key on the flyout
+      const flyout = screen.getByTestId('scheduleCreateFlyout');
+      fireEvent.keyDown(flyout, { key: 'Escape' });
+
+      // Verify the confirmation modal is shown
+      expect(screen.getByTestId('confirmationModal')).toBeInTheDocument();
+    });
+  });
+
+  it('does not call createAttackDiscoverySchedule if a connector is not found', async () => {
+    (useLoadConnectors as jest.Mock).mockReturnValue({
+      isLoading: false,
+      data: [],
+    });
+    const mutateAsync = jest.fn();
+    setMockCreateSchedule({ mutateAsync });
+    await act(async () => {
+      render(
+        <TestProviders>
+          <CreateFlyout {...defaultProps} />
+        </TestProviders>
+      );
+    });
+
+    // Simulate save
+    fireEvent.click(screen.getByTestId('save'));
+
+    expect(mutateAsync).not.toHaveBeenCalled();
   });
 
   describe('schedule form', () => {
-    it('should render schedule form', () => {
-      expect(screen.getByTestId('attackDiscoveryScheduleForm')).toBeInTheDocument();
+    it('should render schedule form', async () => {
+      await renderComponent();
+
+      await waitFor(() => {
+        expect(screen.getByTestId('attackDiscoveryScheduleForm')).toBeInTheDocument();
+      });
     });
 
-    it('should render schedule name field component', () => {
-      expect(screen.getByTestId('attackDiscoveryFormNameField')).toBeInTheDocument();
+    it('should render schedule name field component', async () => {
+      await renderComponent();
+
+      await waitFor(() => {
+        expect(screen.getByTestId('attackDiscoveryFormNameField')).toBeInTheDocument();
+      });
     });
 
-    it('should render connector selector component', () => {
-      expect(screen.getByTestId('attackDiscoveryConnectorSelectorField')).toBeInTheDocument();
+    it('should render connector selector component', async () => {
+      await renderComponent();
+
+      await waitFor(() => {
+        expect(screen.getByTestId('attackDiscoveryConnectorSelectorField')).toBeInTheDocument();
+      });
     });
 
-    it('should render `alertSelection` component', () => {
-      expect(screen.getByTestId('alertSelection')).toBeInTheDocument();
+    it('should render `alertSelection` component', async () => {
+      await renderComponent();
+
+      await waitFor(() => {
+        expect(screen.getByTestId('alertSelection')).toBeInTheDocument();
+      });
     });
 
-    it('should render schedule (`run every`) component', () => {
-      expect(screen.getByTestId('attackDiscoveryScheduleField')).toBeInTheDocument();
+    it('should render schedule (`run every`) component', async () => {
+      await renderComponent();
+
+      await waitFor(() => {
+        expect(screen.getByTestId('attackDiscoveryScheduleField')).toBeInTheDocument();
+      });
     });
 
-    it('should render actions component', () => {
-      expect(screen.getByText('Select a connector type')).toBeInTheDocument();
+    it('should render actions component', async () => {
+      await renderComponent();
+
+      await waitFor(() => {
+        expect(screen.getByTestId('mockRuleActionsField')).toBeInTheDocument();
+      });
     });
 
-    it('should render "Create and enable" button', () => {
-      expect(screen.getByTestId('save')).toHaveTextContent(i18n.SCHEDULE_CREATE_BUTTON_TITLE);
+    it('should render "Create and enable" button', async () => {
+      await renderComponent();
+
+      await waitFor(() => {
+        expect(screen.getByTestId('save')).toHaveTextContent(i18n.SCHEDULE_CREATE_BUTTON_TITLE);
+      });
     });
   });
 });

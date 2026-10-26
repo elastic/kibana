@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { WebDriver, logging } from 'selenium-webdriver';
+import type { WebDriver } from 'selenium-webdriver';
+import { logging } from 'selenium-webdriver';
 import * as Rx from 'rxjs';
 import { mergeMap, catchError, delay, repeat } from 'rxjs';
 import { NoSuchSessionError, NoSuchWindowError } from 'selenium-webdriver/lib/error';
@@ -41,8 +42,7 @@ export function pollForLogEntry$(driver: WebDriver, type: string, ms: number) {
     ),
 
     // resubscribe when parent completes with delay by `ms` milliseconds
-    repeat(),
-    delay(ms),
+    repeat({ delay: ms }),
 
     catchError((error, resubscribe) => {
       if (

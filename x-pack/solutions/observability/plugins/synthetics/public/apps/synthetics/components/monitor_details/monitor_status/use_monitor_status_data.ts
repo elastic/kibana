@@ -6,21 +6,20 @@
  */
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux-v7';
 import useDebounce from 'react-use/lib/useDebounce';
 import { useLocation } from 'react-router-dom';
 
 import { useSyntheticsRefreshContext } from '../../../contexts/synthetics_refresh_context';
 
 import { useSelectedMonitor } from '../hooks/use_selected_monitor';
+import type { MonitorStatusPanelProps, MonitorStatusTimeBin } from './monitor_status_data';
 import {
   dateToMilli,
   createTimeBuckets,
   CHART_CELL_WIDTH,
   indexBinsByEndTime,
-  MonitorStatusPanelProps,
   createStatusTimeBins,
-  MonitorStatusTimeBin,
 } from './monitor_status_data';
 import { useSelectedLocation } from '../hooks/use_selected_location';
 import {
@@ -32,13 +31,26 @@ import type { MonitorStatusHeatmapBucket } from '../../../../../../common/runtim
 
 type Props = Pick<MonitorStatusPanelProps, 'from' | 'to'> & {
   initialSizeRef?: React.MutableRefObject<HTMLDivElement | null>;
+  monitorId?: string;
+  locationLabel?: string;
+  remoteName?: string;
 };
 
-export const useMonitorStatusData = ({ from, to, initialSizeRef }: Props) => {
+export const useMonitorStatusData = ({
+  from,
+  to,
+  initialSizeRef,
+  monitorId: monitorIdOverride,
+  locationLabel: locationLabelOverride,
+  remoteName,
+}: Props) => {
   const { lastRefresh } = useSyntheticsRefreshContext();
-  const { monitor } = useSelectedMonitor();
-  const location = useSelectedLocation();
+  const { monitor } = useSelectedMonitor({ refetchMonitorEnabled: !monitorIdOverride });
+  const location = useSelectedLocation({ refetchMonitorEnabled: !monitorIdOverride });
   const pageLocation = useLocation();
+
+  const resolvedMonitorId = monitorIdOverride ?? monitor?.id;
+  const resolvedLocationLabel = locationLabelOverride ?? location?.label;
 
   const fromMillis = dateToMilli(from);
   const toMillis = dateToMilli(to);
@@ -53,21 +65,31 @@ export const useMonitorStatusData = ({ from, to, initialSizeRef }: Props) => {
   const dispatch = useDispatch();
   const { heatmap: dateHistogram, loading } = useSelector(selectHeatmap);
 
-  useEffect(() => {
-    if (binsAvailableByWidth === null && initialSizeRef?.current) {
-      setBinsAvailableByWidth(Math.floor(initialSizeRef?.current?.clientWidth / CHART_CELL_WIDTH));
-    }
-  }, [binsAvailableByWidth, initialSizeRef]);
+  const getBinsNo = useCallback(
+    (maxNoOfBins: number) => {
+      return Math.min(maxNoOfBins, totalMinutes);
+    },
+    [totalMinutes]
+  );
 
   useEffect(() => {
-    if (monitor?.id && location?.label && debouncedBinsCount !== null && !!minsPerBin) {
+    if (binsAvailableByWidth === null && initialSizeRef?.current) {
+      setBinsAvailableByWidth(
+        getBinsNo(Math.floor(initialSizeRef?.current?.clientWidth / CHART_CELL_WIDTH))
+      );
+    }
+  }, [binsAvailableByWidth, initialSizeRef, getBinsNo]);
+
+  useEffect(() => {
+    if (resolvedMonitorId && resolvedLocationLabel && debouncedBinsCount !== null && !!minsPerBin) {
       dispatch(
         quietGetMonitorStatusHeatmapAction.get({
-          monitorId: monitor.id,
-          location: location.label,
+          monitorId: resolvedMonitorId,
+          location: resolvedLocationLabel,
           from,
           to,
           interval: minsPerBin,
+          remoteName,
         })
       );
     }
@@ -76,8 +98,9 @@ export const useMonitorStatusData = ({ from, to, initialSizeRef }: Props) => {
     from,
     to,
     minsPerBin,
-    location?.label,
-    monitor?.id,
+    resolvedLocationLabel,
+    resolvedMonitorId,
+    remoteName,
     lastRefresh,
     debouncedBinsCount,
   ]);
@@ -88,8 +111,8 @@ export const useMonitorStatusData = ({ from, to, initialSizeRef }: Props) => {
 
   const handleResize = useCallback(
     (e: { width: number; height: number }) =>
-      setBinsAvailableByWidth(Math.floor(e.width / CHART_CELL_WIDTH)),
-    []
+      setBinsAvailableByWidth(getBinsNo(Math.floor(e.width / CHART_CELL_WIDTH))),
+    [getBinsNo]
   );
 
   useDebounce(

@@ -5,21 +5,26 @@
  * 2.0.
  */
 
-import { groupBy } from 'lodash';
+import { chunk, groupBy } from 'lodash';
 import type { estypes } from '@elastic/elasticsearch';
 import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 import type { SavedObjectsClientContract, ElasticsearchClient } from '@kbn/core/server';
 import type { KueryNode } from '@kbn/es-query';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/types';
 
 import type { AgentSOAttributes, Agent, ListWithKuery } from '../../types';
 import { appContextService, agentPolicyService } from '..';
+import { getAgentPolicySavedObjectType } from '../agent_policy';
 import type { AgentStatus, FleetServerAgent } from '../../../common/types';
-import { SO_SEARCH_LIMIT } from '../../../common/constants';
+import { ALL_SPACES_ID, SO_SEARCH_LIMIT } from '../../../common/constants';
 import { getSortConfig } from '../../../common';
 import { isAgentUpgradeAvailable } from '../../../common/services';
+import {
+  removeVersionSuffixFromPolicyId,
+  buildPolicyBaseIdsWithFallbackEsFilter,
+} from '../../../common/services/version_specific_policies_utils';
 import { AGENTS_INDEX } from '../../constants';
 import {
   FleetError,
@@ -30,20 +35,44 @@ import {
 import { auditLoggingService } from '../audit_logging';
 import { getCurrentNamespace } from '../spaces/get_current_namespace';
 import { isSpaceAwarenessEnabled } from '../spaces/helpers';
-import { isAgentInNamespace } from '../spaces/agent_namespaces';
+import { DEFAULT_NAMESPACES_FILTER, isAgentInNamespace } from '../spaces/agent_namespaces';
 import { addNamespaceFilteringToQuery } from '../spaces/query_namespaces_filtering';
 import { createEsSearchIterable } from '../utils/create_es_search_iterable';
+import { retryTransientEsErrors } from '../epm/elasticsearch/retry';
 
 import { searchHitToAgent, agentSOAttributesToFleetServerAgentDoc } from './helpers';
 import { buildAgentStatusRuntimeField } from './build_status_runtime_field';
+import { PIPELINE_CONFIG_RUNTIME_FIELD } from './build_pipeline_config_runtime_field';
+import { SIGNALS_RUNTIME_FIELD } from './build_signals_runtime_field';
 import { getLatestAvailableAgentVersion } from './versions';
 
 const INACTIVE_AGENT_CONDITION = `status:inactive`;
-const ACTIVE_AGENT_CONDITION = `NOT (${INACTIVE_AGENT_CONDITION})`;
-const ENROLLED_AGENT_CONDITION = `NOT status:unenrolled`;
 
-const includeUnenrolled = (kuery?: string) =>
+export const ACTIVE_AGENT_CONDITION = `NOT (${INACTIVE_AGENT_CONDITION})`;
+export const ENROLLED_AGENT_CONDITION = `NOT status:unenrolled`;
+
+export const includeUnenrolled = (kuery?: string) =>
   kuery?.toLowerCase().includes('status:*') || kuery?.toLowerCase().includes('status:unenrolled');
+
+/**
+ * Whether the kuery filters on the `status` field, which only exists as a runtime field. Parsed from the
+ * KQL with the same prefixes removed as in the query (`fleet-agents.status`), so that `status : inactive` is
+ * found too. Falls back to a text search for a kuery that does not parse.
+ */
+function kueryReferencesStatusField(kuery?: string): boolean {
+  if (!kuery) {
+    return false;
+  }
+  const referencesStatus = (node?: KueryNode): boolean =>
+    node?.type === 'function' &&
+    ((node.arguments?.[0]?.type === 'literal' && node.arguments[0].value === 'status') ||
+      (node.arguments ?? []).some(referencesStatus));
+  try {
+    return referencesStatus(fromKueryExpression(removeSOAttributes(kuery)));
+  } catch (error) {
+    return kuery.toLowerCase().includes('status:');
+  }
+}
 
 export function _joinFilters(
   filters: Array<string | undefined | KueryNode>
@@ -51,7 +80,7 @@ export function _joinFilters(
   try {
     return filters
       .filter((filter) => filter !== undefined)
-      .reduce(
+      .reduce<KueryNode | undefined>(
         (
           acc: KueryNode | undefined,
           kuery: string | KueryNode | undefined
@@ -72,7 +101,7 @@ export function _joinFilters(
             arguments: [acc, kueryNode],
           };
         },
-        undefined as KueryNode | undefined
+        undefined
       );
   } catch (err) {
     throw new FleetError(`Kuery is malformed: ${err.message}`);
@@ -80,7 +109,7 @@ export function _joinFilters(
 }
 
 export function removeSOAttributes(kuery: string) {
-  return kuery.replace(/attributes\./g, '').replace(/fleet-agents\./g, '');
+  return kuery.replace(/\.attributes\./g, '.').replace(/fleet-agents\./g, '');
 }
 
 export type GetAgentsOptions =
@@ -89,6 +118,7 @@ export type GetAgentsOptions =
     }
   | {
       kuery: string;
+      showAgentless?: boolean;
       showInactive?: boolean;
       perPage?: number;
     };
@@ -107,6 +137,7 @@ export async function getAgents(
     agents = (
       await getAllAgentsByKuery(esClient, soClient, {
         kuery: options.kuery,
+        showAgentless: options.showAgentless,
         showInactive: options.showInactive ?? false,
       })
     ).agents;
@@ -121,10 +152,12 @@ export async function openPointInTime(
   keepAlive: string = '10m',
   index: string = AGENTS_INDEX
 ): Promise<string> {
-  const pitRes = await esClient.openPointInTime({
-    index,
-    keep_alive: keepAlive,
-  });
+  const pitRes = await retryTransientEsErrors(() =>
+    esClient.openPointInTime({
+      index,
+      keep_alive: keepAlive,
+    })
+  );
 
   auditLoggingService.writeCustomAuditLog({
     message: `User opened point in time query [index=${index}] [keepAlive=${keepAlive}] [pitId=${pitRes.id}]`,
@@ -139,7 +172,7 @@ export async function closePointInTime(esClient: ElasticsearchClient, pitId: str
   });
 
   try {
-    await esClient.closePointInTime({ id: pitId });
+    await retryTransientEsErrors(() => esClient.closePointInTime({ id: pitId }));
   } catch (error) {
     appContextService
       .getLogger()
@@ -152,10 +185,12 @@ export async function getAgentTags(
   esClient: ElasticsearchClient,
   options: ListWithKuery & {
     showInactive: boolean;
+    spaceId?: string;
   }
 ): Promise<string[]> {
-  const { kuery, showInactive = false } = options;
-  const filters = [];
+  const { kuery, showInactive = false, spaceId } = options;
+  const namespaceFilters = await getSpaceAwarenessFilterForAgents(spaceId);
+  const filters = [...namespaceFilters];
 
   if (kuery && kuery !== '') {
     filters.push(kuery);
@@ -170,22 +205,31 @@ export async function getAgentTags(
 
   const kueryNode = _joinFilters(filters);
   const query = kueryNode ? { query: toElasticsearchQuery(kueryNode) } : {};
-  const runtimeFields = await buildAgentStatusRuntimeField(soClient);
+  const runtimeFields = {
+    ...(await buildAgentStatusRuntimeField(soClient)),
+    ...(appContextService.getExperimentalFeatures().enableOpAMP
+      ? PIPELINE_CONFIG_RUNTIME_FIELD
+      : {}),
+  };
   try {
-    const result = await esClient.search<{}, { tags: { buckets: Array<{ key: string }> } }>({
-      index: AGENTS_INDEX,
-      size: 0,
-      ...query,
-      fields: Object.keys(runtimeFields),
-      runtime_mappings: runtimeFields,
-      aggs: {
-        tags: {
-          terms: { field: 'tags', size: SO_SEARCH_LIMIT },
+    const result = await retryTransientEsErrors(() =>
+      esClient.search<{}, { tags: { buckets: Array<{ key: string }> } }>({
+        index: AGENTS_INDEX,
+        size: 0,
+        ...query,
+        fields: Object.keys(runtimeFields),
+        runtime_mappings: runtimeFields,
+        aggs: {
+          tags: {
+            terms: { field: 'tags', size: SO_SEARCH_LIMIT },
+          },
         },
-      },
-    });
+      })
+    );
     const buckets = result.aggregations?.tags.buckets;
-    return buckets?.map((bucket) => bucket.key) ?? [];
+    return (buckets?.map((bucket) => bucket.key) ?? []).sort((a, b) =>
+      a.toLowerCase().localeCompare(b.toLowerCase())
+    );
   } catch (err) {
     if (isESClientError(err) && err.meta.statusCode === 404) {
       return [];
@@ -198,6 +242,7 @@ export async function getAgentsByKuery(
   esClient: ElasticsearchClient,
   soClient: SavedObjectsClientContract,
   options: ListWithKuery & {
+    showAgentless?: boolean;
     showInactive: boolean;
     spaceId?: string;
     getStatusSummary?: boolean;
@@ -208,12 +253,23 @@ export async function getAgentsByKuery(
     pitId?: string;
     pitKeepAlive?: string;
     aggregations?: Record<string, AggregationsAggregationContainer>;
+    /**
+     * When false, skip the agent-status runtime field and the inactivity-timeout SO scan it
+     * requires. Defaults to true. Forced on when `getStatusSummary` is true or the kuery
+     * references `status`.
+     *
+     * Opting out replaces `NOT status:unenrolled` with the stored `active:true` field, so
+     * unenrolled agents stay excluded. `showInactive: false` cannot exclude `status:inactive`
+     * without the runtime field (inactivity is policy-timeout based).
+     */
+    includeStatusRuntimeField?: boolean;
   }
 ): Promise<{
   agents: Agent[];
   total: number;
   page: number;
   perPage: number;
+  pit?: string;
   statusSummary?: Record<AgentStatus, number>;
   aggregations?: Record<string, estypes.AggregationsAggregate>;
 }> {
@@ -223,6 +279,7 @@ export async function getAgentsByKuery(
     sortField = options.sortField ?? 'enrolled_at',
     sortOrder = options.sortOrder ?? 'desc',
     kuery,
+    showAgentless = true,
     showInactive = false,
     getStatusSummary = false,
     showUpgradeable,
@@ -232,23 +289,104 @@ export async function getAgentsByKuery(
     pitKeepAlive = '1m',
     aggregations,
     spaceId,
+    includeStatusRuntimeField = true,
   } = options;
-  const filters = await _getSpaceAwarenessFilter(spaceId);
+  const filters = await getSpaceAwarenessFilterForAgents(spaceId);
 
   if (kuery && kuery !== '') {
     filters.push(kuery);
   }
 
-  if (showInactive === false) {
-    filters.push(ACTIVE_AGENT_CONDITION);
+  // Hides agents enrolled in agentless policies by excluding their policy IDs from the search.
+  // The exclusion is built as an ES DSL `must_not` (using `terms` queries) rather than a KQL
+  // string so that the clause count stays constant (~4 clauses) regardless of how many policy
+  // IDs are in the list.
+  //
+  // The lookup must use an unscoped SO client with spaceId '*' because .fleet-agents is not
+  // space-partitioned: an agent enrolled against a policy in space-a is still returned by
+  // space-b's agents query. Using a space-scoped client would miss agentless policies created
+  // in other spaces, leaving their agents in the list. Without spaceId '*', the namespaces
+  // filter defaults to the caller's space and excludes cross-space policies.
+  //
+  // fetchAllAgentPolicyIds paginates through all results so deployments with more than
+  // SO_SEARCH_LIMIT agentless policies across spaces are not silently truncated. Collection
+  // is capped at ES_MAX_TERMS_COUNT (the Elasticsearch index.max_terms_count default) because
+  // buildPolicyBaseIdsWithFallbackEsFilter puts the array in a terms query; exceeding the limit
+  // would make showAgentless=false requests fail with an ES error. If the cap is hit the
+  // remaining agentless agents will not be filtered — the warning log makes this observable.
+  const ES_MAX_TERMS_COUNT = 65536;
+  let agentlessExcludeFilter: ReturnType<typeof buildPolicyBaseIdsWithFallbackEsFilter> | null =
+    null;
+  if (showAgentless === false) {
+    const internalSoClientWithoutSpaceExtension =
+      appContextService.getInternalUserSOClientWithoutSpaceExtension();
+    const agentlessPolicyIdPages = await agentPolicyService.fetchAllAgentPolicyIds(
+      internalSoClientWithoutSpaceExtension,
+      {
+        spaceId: '*',
+        kuery: `${await getAgentPolicySavedObjectType()}.supports_agentless:true`,
+      }
+    );
+    const agentlessPolicyIds: string[] = [];
+    let truncated = false;
+    for await (const pageOfIds of agentlessPolicyIdPages) {
+      const remaining = ES_MAX_TERMS_COUNT - agentlessPolicyIds.length;
+      if (remaining <= 0) {
+        truncated = true;
+        break;
+      }
+      agentlessPolicyIds.push(...pageOfIds.slice(0, remaining));
+      if (agentlessPolicyIds.length >= ES_MAX_TERMS_COUNT) {
+        truncated = true;
+        break;
+      }
+    }
+    if (truncated) {
+      appContextService
+        .getLogger()
+        .warn(
+          `showAgentless=false: found more than ${ES_MAX_TERMS_COUNT} agentless policies across all spaces. ` +
+            `Only the first ${ES_MAX_TERMS_COUNT} are excluded from the agents list; agentless agents ` +
+            `enrolled against the remaining policies will not be filtered.`
+        );
+    }
+    if (agentlessPolicyIds.length > 0) {
+      // Use the policy_base_id-with-fallback ES DSL filter so agents whose policy_id carries a
+      // version suffix (e.g. "<uuid>#9.6") are still excluded. The fallback branch covers
+      // agents enrolled by an older fleet-server that did not yet write policy_base_id.
+      // Using buildPolicyBaseIdsWithFallbackEsFilter (terms queries) rather than the KQL
+      // equivalent keeps the clause count at ~4 instead of ~2N.
+      agentlessExcludeFilter = buildPolicyBaseIdsWithFallbackEsFilter(agentlessPolicyIds);
+    }
   }
-  if (!includeUnenrolled(kuery)) {
-    filters.push(ENROLLED_AGENT_CONDITION);
+
+  // Status kuery (`status:inactive`, `status:unenrolled`, …) is only queryable with the
+  // runtime field. Force it on when the caller already referenced `status`.
+  const kueryReferencesStatus = kueryReferencesStatusField(kuery);
+  const shouldIncludeStatusRuntimeField =
+    includeStatusRuntimeField || getStatusSummary || kueryReferencesStatus;
+
+  if (shouldIncludeStatusRuntimeField) {
+    if (showInactive === false) {
+      filters.push(ACTIVE_AGENT_CONDITION);
+    }
+    if (!includeUnenrolled(kuery)) {
+      filters.push(ENROLLED_AGENT_CONDITION);
+    }
+  } else {
+    // `status` is unmapped without the runtime field, so `NOT status:unenrolled` would
+    // match everything. The runtime script treats missing/false `active` as unenrolled.
+    filters.push('active:true');
   }
 
   const kueryNode = _joinFilters(filters);
-
-  const runtimeFields = await buildAgentStatusRuntimeField(soClient);
+  const runtimeFields = {
+    ...(shouldIncludeStatusRuntimeField ? await buildAgentStatusRuntimeField(soClient) : {}),
+    ...SIGNALS_RUNTIME_FIELD,
+    ...(appContextService.getExperimentalFeatures().enableOpAMP
+      ? PIPELINE_CONFIG_RUNTIME_FIELD
+      : {}),
+  };
 
   const sort = getSortConfig(sortField, sortOrder);
 
@@ -266,7 +404,9 @@ export async function getAgentsByKuery(
     uninstalled: 0,
   };
 
-  const pitIdToUse = pitId || (openPit ? await openPointInTime(esClient, pitKeepAlive) : undefined);
+  const initialPitId =
+    pitId || (openPit ? await openPointInTime(esClient, pitKeepAlive) : undefined);
+  let currentPitId = initialPitId;
 
   const queryAgents = async (
     queryOptions: { from: number; size: number } | { searchAfter: SortResults; size: number }
@@ -305,11 +445,20 @@ export async function getAgentsByKuery(
       runtime_mappings: runtimeFields,
       fields: Object.keys(runtimeFields),
       sort,
-      query: kueryNode ? toElasticsearchQuery(kueryNode) : undefined,
-      ...(pitIdToUse
+      query: (() => {
+        const baseQuery = kueryNode ? toElasticsearchQuery(kueryNode) : undefined;
+        if (!agentlessExcludeFilter) return baseQuery;
+        return {
+          bool: {
+            ...(baseQuery ? { filter: [baseQuery] } : {}),
+            must_not: [agentlessExcludeFilter],
+          },
+        };
+      })(),
+      ...(currentPitId
         ? {
             pit: {
-              id: pitIdToUse,
+              id: currentPitId,
               keep_alive: pitKeepAlive,
             },
           }
@@ -323,15 +472,22 @@ export async function getAgentsByKuery(
   let res;
 
   try {
-    res = await queryAgents(
-      searchAfter ? { searchAfter, size: perPage } : { from: (page - 1) * perPage, size: perPage }
+    res = await retryTransientEsErrors(() =>
+      queryAgents(
+        searchAfter ? { searchAfter, size: perPage } : { from: (page - 1) * perPage, size: perPage }
+      )
     );
   } catch (err) {
     appContextService.getLogger().error(`Error getting agents by kuery: ${JSON.stringify(err)}`);
     throw err;
   }
 
-  let agents = res.hits.hits.map(searchHitToAgent);
+  currentPitId = res.pit_id ?? currentPitId;
+
+  const toAgent = (hit: (typeof res.hits.hits)[number]) =>
+    searchHitToAgent(hit, { requireStatusRuntimeField: shouldIncludeStatusRuntimeField });
+
+  let agents = res.hits.hits.map(toAgent);
   let total = res.hits.total as number;
   // filtering for a range on the version string will not work,
   // nor does filtering on a flattened field (local_metadata), so filter here
@@ -342,8 +498,9 @@ export async function getAgentsByKuery(
     // if there are more than SO_SEARCH_LIMIT agents, the logic falls back to same as before
     if (total < SO_SEARCH_LIMIT) {
       const response = await queryAgents({ from: 0, size: SO_SEARCH_LIMIT });
+      currentPitId = response.pit_id ?? currentPitId;
       agents = response.hits.hits
-        .map(searchHitToAgent)
+        .map(toAgent)
         .filter((agent) => isAgentUpgradeAvailable(agent, latestAgentVersion));
       total = agents.length;
       const start = (page - 1) * perPage;
@@ -374,7 +531,7 @@ export async function getAgentsByKuery(
     total,
     ...(searchAfter ? { page: 0 } : { page }),
     perPage,
-    ...(pitIdToUse ? { pit: pitIdToUse } : {}),
+    ...(initialPitId ? { pit: currentPitId } : {}),
     ...(aggregations ? { aggregations: res.aggregations } : {}),
     ...(getStatusSummary ? { statusSummary } : {}),
   };
@@ -384,6 +541,7 @@ export async function getAllAgentsByKuery(
   esClient: ElasticsearchClient,
   soClient: SavedObjectsClientContract,
   options: Omit<ListWithKuery, 'page' | 'perPage'> & {
+    showAgentless?: boolean;
     showInactive: boolean;
   }
 ): Promise<{
@@ -411,7 +569,29 @@ export async function getAllAgentsByKuery(
 export async function fetchAllAgentsByKuery(
   esClient: ElasticsearchClient,
   soClient: SavedObjectsClientContract,
-  options: ListWithKuery & { spaceId?: string }
+  options: ListWithKuery & {
+    spaceId?: string;
+    runtimeFields?: estypes.SearchRequest['runtime_mappings'];
+    showInactive?: boolean;
+    /**
+     * Optional ES `_source` filtering, passed through verbatim.
+     * WARNING: when set, `searchHitToAgent` can only populate the requested fields, so every
+     * other `Agent` property is `undefined` despite its non-optional type. Only use this when
+     * you know exactly which fields the caller reads.
+     */
+    _source?: estypes.SearchRequest['_source'];
+    /** Overrides the ES `fields` param. Defaults to all runtime field keys. */
+    fetchFields?: string[];
+    /**
+     * When false, skip the agent-status runtime field and the inactivity-timeout SO scan it
+     * requires. Defaults to true. Forced on when the kuery references `status`.
+     *
+     * Opting out replaces the `NOT status:inactive` filter of `showInactive: false` with the
+     * stored `active:true` filter, so agents that are inactive by timeout are no longer excluded
+     * (unenrolled agents are). `Agent.status` is not populated.
+     */
+    includeStatusRuntimeField?: boolean;
+  }
 ): Promise<AsyncIterable<Agent[]>> {
   const {
     kuery = '',
@@ -419,15 +599,29 @@ export async function fetchAllAgentsByKuery(
     sortField = 'enrolled_at',
     sortOrder = 'desc',
     spaceId,
+    showInactive = true,
+    includeStatusRuntimeField = true,
   } = options;
+  const shouldIncludeStatusRuntimeField =
+    includeStatusRuntimeField || kueryReferencesStatusField(kuery);
 
-  const filters = await _getSpaceAwarenessFilter(spaceId);
+  const filters = await getSpaceAwarenessFilterForAgents(spaceId);
   if (kuery && kuery !== '') {
     filters.push(kuery);
   }
+  if (showInactive === false) {
+    filters.push(shouldIncludeStatusRuntimeField ? ACTIVE_AGENT_CONDITION : 'active:true');
+  }
   const kueryNode = _joinFilters(filters);
   const query = kueryNode ? { query: toElasticsearchQuery(kueryNode) } : {};
-  const runtimeFields = await buildAgentStatusRuntimeField(soClient);
+  const runtimeFields = {
+    ...(shouldIncludeStatusRuntimeField ? await buildAgentStatusRuntimeField(soClient) : {}),
+    ...(appContextService.getExperimentalFeatures().enableOpAMP
+      ? PIPELINE_CONFIG_RUNTIME_FIELD
+      : {}),
+    ...options.runtimeFields,
+  };
+
   const sort = getSortConfig(sortField, sortOrder);
 
   try {
@@ -439,12 +633,15 @@ export async function fetchAllAgentsByKuery(
         rest_total_hits_as_int: true,
         track_total_hits: true,
         runtime_mappings: runtimeFields,
-        fields: Object.keys(runtimeFields),
+        fields: options.fetchFields ?? Object.keys(runtimeFields),
+        ...(options._source !== undefined ? { _source: options._source } : {}),
         sort,
         ...query,
       },
       resultsMapper: (data): Agent[] => {
-        return data.hits.hits.map(searchHitToAgent);
+        return data.hits.hits.map((hit) =>
+          searchHitToAgent(hit, { requireStatusRuntimeField: shouldIncludeStatusRuntimeField })
+        );
       },
     });
   } catch (err) {
@@ -491,23 +688,28 @@ export const getByIds = async (
   const agentsHits = await getAgentsById(esClient, soClient, agentIds);
   const currentNamespace = getCurrentNamespace(soClient);
   const response: Agent[] = [];
+  const throwNotFoundError = (agentId: string): never => {
+    throw new AgentNotFoundError(`Agent ${agentId} not found`, { agentId });
+  };
 
   for (const agentHit of agentsHits) {
-    let throwError = false;
-
-    if ('notFound' in agentHit && !options?.ignoreMissing) {
-      throwError = true;
-    } else if ((await isAgentInNamespace(agentHit as Agent, currentNamespace)) !== true) {
-      throwError = true;
+    const wasFound = !('notFound' in agentHit);
+    if (!wasFound) {
+      if (!options?.ignoreMissing) {
+        throwNotFoundError(agentHit.id);
+      }
+      continue;
     }
 
-    if (throwError) {
-      throw new AgentNotFoundError(`Agent ${agentHit.id} not found`, { agentId: agentHit.id });
+    const isAccessible = await isAgentInNamespace(agentHit as Agent, currentNamespace);
+    if (!isAccessible) {
+      if (!options?.ignoreMissing) {
+        throwNotFoundError(agentHit.id);
+      }
+      continue;
     }
 
-    if (!(`notFound` in agentHit)) {
-      response.push(agentHit);
-    }
+    response.push(agentHit);
   }
 
   return response;
@@ -522,6 +724,8 @@ async function _filterAgents(
     perPage?: number;
     sortField?: string;
     sortOrder?: 'asc' | 'desc';
+    /** When true, omit namespace filtering so agents from all spaces are matched. */
+    skipNamespaceFilter?: boolean;
   } = {}
 ): Promise<{
   agents: Agent[];
@@ -529,29 +733,43 @@ async function _filterAgents(
   page: number;
   perPage: number;
 }> {
-  const { page = 1, perPage = 20, sortField = 'enrolled_at', sortOrder = 'desc' } = options;
-  const runtimeFields = await buildAgentStatusRuntimeField(soClient);
-  const currentSpaceId = getCurrentNamespace(soClient);
+  const {
+    page = 1,
+    perPage = 20,
+    sortField = 'enrolled_at',
+    sortOrder = 'desc',
+    skipNamespaceFilter,
+  } = options;
+  const runtimeFields = {
+    ...(await buildAgentStatusRuntimeField(soClient)),
+    ...(appContextService.getExperimentalFeatures().enableOpAMP
+      ? PIPELINE_CONFIG_RUNTIME_FIELD
+      : {}),
+  };
+  // Pass undefined when skipNamespaceFilter is set so addNamespaceFilteringToQuery skips the filter.
+  const currentSpaceId = skipNamespaceFilter ? undefined : getCurrentNamespace(soClient);
 
   let res;
   try {
-    res = await esClient.search<FleetServerAgent, {}>({
-      from: (page - 1) * perPage,
-      size: perPage,
-      track_total_hits: true,
-      rest_total_hits_as_int: true,
-      runtime_mappings: runtimeFields,
-      fields: Object.keys(runtimeFields),
-      sort: [{ [sortField]: { order: sortOrder } }],
-      query: await addNamespaceFilteringToQuery({ bool: { filter: [query] } }, currentSpaceId),
-      index: AGENTS_INDEX,
-      ignore_unavailable: true,
-    });
+    res = await retryTransientEsErrors(async () =>
+      esClient.search<FleetServerAgent, {}>({
+        from: (page - 1) * perPage,
+        size: perPage,
+        track_total_hits: true,
+        rest_total_hits_as_int: true,
+        runtime_mappings: runtimeFields,
+        fields: Object.keys(runtimeFields),
+        sort: [{ [sortField]: { order: sortOrder } }],
+        query: await addNamespaceFilteringToQuery({ bool: { filter: [query] } }, currentSpaceId),
+        index: AGENTS_INDEX,
+        ignore_unavailable: true,
+      })
+    );
   } catch (err) {
     appContextService.getLogger().error(`Error querying agents: ${JSON.stringify(err)}`);
     throw err;
   }
-  const agents = res.hits.hits.map(searchHitToAgent);
+  const agents = res.hits.hits.map((hit) => searchHitToAgent(hit));
   const total = res.hits.total as number;
 
   return {
@@ -565,25 +783,41 @@ async function _filterAgents(
 export async function getAgentsById(
   esClient: ElasticsearchClient,
   soClient: SavedObjectsClientContract,
-  agentIds: string[]
+  agentIds: string[],
+  options?: { skipNamespaceFilter?: boolean }
 ): Promise<Array<Agent | { id: string; notFound: true }>> {
   if (!agentIds.length) {
     return [];
   }
 
-  const idsQuery = {
-    terms: {
-      _id: agentIds,
-    },
-  };
-  const { agents } = await _filterAgents(esClient, soClient, idsQuery, {
-    perPage: agentIds.length,
-  });
+  // Each search must keep from + size <= index.max_result_window (default 10_000).
+  // _filterAgents uses from: (page - 1) * perPage with page 1, so perPage must not exceed SO_SEARCH_LIMIT.
+  const idBatches = chunk(agentIds, SO_SEARCH_LIMIT);
+  const agentsById = new Map<string, Agent>();
+
+  if (idBatches.length > 1) {
+    appContextService
+      .getLogger()
+      .debug(`Querying agents in ${idBatches.length} batches because agentIds.length is > 10k`);
+  }
+
+  for (const batch of idBatches) {
+    const idsQuery = {
+      terms: {
+        _id: batch,
+      },
+    };
+    const { agents } = await _filterAgents(esClient, soClient, idsQuery, {
+      perPage: batch.length,
+      skipNamespaceFilter: options?.skipNamespaceFilter,
+    });
+    for (const agent of agents) {
+      agentsById.set(agent.id, agent);
+    }
+  }
 
   // return agents in the same order as agentIds
-  return agentIds.map(
-    (agentId) => agents.find((agent) => agent.id === agentId) || { id: agentId, notFound: true }
-  );
+  return agentIds.map((agentId) => agentsById.get(agentId) || { id: agentId, notFound: true });
 }
 
 // given a list of agentPolicyIds, return a map of agent version => count of agents
@@ -602,26 +836,29 @@ export async function getAgentVersionsForAgentPolicyIds(
   try {
     const {
       hits: { hits },
-    } = await esClient.search<
-      FleetServerAgent,
-      Record<'agent_versions', { buckets: Array<{ key: string; doc_count: number }> }>
-    >({
-      query: {
-        bool: {
-          filter: [
-            {
-              terms: {
-                policy_id: agentPolicyIds,
-              },
-            },
-          ],
+    } = await retryTransientEsErrors(() =>
+      esClient.search<
+        FleetServerAgent,
+        Record<'agent_versions', { buckets: Array<{ key: string; doc_count: number }> }>
+      >({
+        query: {
+          bool: {
+            filter: [buildPolicyBaseIdsWithFallbackEsFilter(agentPolicyIds)],
+          },
         },
-      },
-      index: AGENTS_INDEX,
-      ignore_unavailable: true,
-    });
+        index: AGENTS_INDEX,
+        ignore_unavailable: true,
+      })
+    );
 
-    const groupedHits = groupBy(hits, (hit) => hit._source?.policy_id);
+    const groupedHits = groupBy(
+      hits,
+      (hit) =>
+        hit._source?.policy_base_id ??
+        (hit._source?.policy_id
+          ? removeVersionSuffixFromPolicyId(hit._source.policy_id)
+          : undefined)
+    );
 
     for (const [policyId, policyHits] of Object.entries(groupedHits)) {
       const versionCounts: Record<string, number> = {};
@@ -683,12 +920,15 @@ export async function updateAgent(
     message: `User updated agent [id=${agentId}]`,
   });
 
-  await esClient.update({
-    id: agentId,
-    index: AGENTS_INDEX,
-    doc: agentSOAttributesToFleetServerAgentDoc(data),
-    refresh: 'wait_for',
-  });
+  await retryTransientEsErrors(() =>
+    esClient.update({
+      id: agentId,
+      index: AGENTS_INDEX,
+      doc: agentSOAttributesToFleetServerAgentDoc(data),
+      refresh: 'wait_for',
+      retry_on_conflict: 5,
+    })
+  );
 }
 
 export async function bulkUpdateAgents(
@@ -715,11 +955,13 @@ export async function bulkUpdateAgents(
     },
   ]);
 
-  const res = await esClient.bulk({
-    operations,
-    index: AGENTS_INDEX,
-    refresh: 'wait_for',
-  });
+  const res = await retryTransientEsErrors(() =>
+    esClient.bulk({
+      operations,
+      index: AGENTS_INDEX,
+      refresh: 'wait_for',
+    })
+  );
 
   res.items
     .filter((item) => item.update!.error)
@@ -731,11 +973,13 @@ export async function bulkUpdateAgents(
 
 export async function deleteAgent(esClient: ElasticsearchClient, agentId: string) {
   try {
-    await esClient.update({
-      id: agentId,
-      index: AGENTS_INDEX,
-      doc: { active: false },
-    });
+    await retryTransientEsErrors(() =>
+      esClient.update({
+        id: agentId,
+        index: AGENTS_INDEX,
+        doc: { active: false },
+      })
+    );
   } catch (err) {
     if (isESClientError(err) && err.meta.statusCode === 404) {
       throw new AgentNotFoundError('Agent not found');
@@ -746,10 +990,12 @@ export async function deleteAgent(esClient: ElasticsearchClient, agentId: string
 
 async function _getAgentDocById(esClient: ElasticsearchClient, agentId: string) {
   try {
-    const res = await esClient.get<FleetServerAgent>({
-      id: agentId,
-      index: AGENTS_INDEX,
-    });
+    const res = await retryTransientEsErrors(() =>
+      esClient.get<FleetServerAgent>({
+        id: agentId,
+        index: AGENTS_INDEX,
+      })
+    );
 
     if (!res._source) {
       throw new AgentNotFoundError(`Agent ${agentId} not found`);
@@ -778,15 +1024,59 @@ export async function getAgentPolicyForAgent(
     return agentPolicy;
   }
 }
+// Get all the policies for a list of agents
+export async function getAgentPolicyForAgents(
+  soClient: SavedObjectsClientContract,
+  agents: Agent[]
+) {
+  const policyIds = new Set(agents.map((agent) => agent.policy_id));
+  const agentPolicies = await agentPolicyService.getByIds(
+    soClient,
+    Array.from(policyIds).filter((id) => id !== undefined) as string[]
+  );
+  return agentPolicies;
+}
 
-async function _getSpaceAwarenessFilter(spaceId: string | undefined) {
+export async function getSpaceAwarenessFilterForAgents(spaceId: string | undefined) {
   const useSpaceAwareness = await isSpaceAwarenessEnabled();
   if (!useSpaceAwareness || !spaceId) {
     return [];
   }
   if (spaceId === DEFAULT_SPACE_ID) {
-    return [`namespaces:"${DEFAULT_SPACE_ID}" or not namespaces:*`];
+    return [DEFAULT_NAMESPACES_FILTER];
   } else {
-    return [`namespaces:"${spaceId}"`];
+    return [`namespaces:"${spaceId}" or namespaces:"${ALL_SPACES_ID}"`];
   }
+}
+
+export async function filterAgentIdsByNamespace(
+  esClient: ElasticsearchClient,
+  soClient: SavedObjectsClientContract,
+  agentIds: string[]
+): Promise<string[]> {
+  if (agentIds.length === 0) {
+    return [];
+  }
+  const spaceId = getCurrentNamespace(soClient);
+  const namespaceFilters = await getSpaceAwarenessFilterForAgents(spaceId);
+  if (namespaceFilters.length === 0) {
+    return agentIds;
+  }
+  const namespaceKueryNode = _joinFilters(namespaceFilters);
+  const result = await retryTransientEsErrors(() =>
+    esClient.search({
+      index: AGENTS_INDEX,
+      query: {
+        bool: {
+          filter: [
+            { terms: { _id: agentIds } },
+            ...(namespaceKueryNode ? [toElasticsearchQuery(namespaceKueryNode)] : []),
+          ],
+        },
+      },
+      _source: false,
+      size: agentIds.length,
+    })
+  );
+  return result.hits.hits.map((hit) => hit._id!);
 }

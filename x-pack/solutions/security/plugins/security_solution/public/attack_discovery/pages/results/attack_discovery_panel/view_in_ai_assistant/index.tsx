@@ -24,16 +24,20 @@ const ViewInAiAssistantComponent: React.FC<Props> = ({
   compact = false,
   replacements,
 }) => {
-  const { showAssistantOverlay, disabled } = useViewInAiAssistant({
+  const { showAssistantOverlay, disabled, isAssistantVisible } = useViewInAiAssistant({
     attackDiscovery,
     replacements,
   });
+
+  if (!isAssistantVisible) {
+    return null;
+  }
 
   return compact ? (
     <EuiButtonEmpty
       data-test-subj="viewInAiAssistantCompact"
       disabled={disabled}
-      iconType="expand"
+      iconType="maximize"
       onClick={showAssistantOverlay}
       size="xs"
     >
@@ -46,7 +50,7 @@ const ViewInAiAssistantComponent: React.FC<Props> = ({
       onClick={showAssistantOverlay}
       size="s"
     >
-      <EuiFlexGroup alignItems="center" gutterSize="xs">
+      <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false} wrap={false}>
         <EuiFlexItem data-test-subj="assistantAvatar" grow={false}>
           <AssistantIcon size="m" />
         </EuiFlexItem>

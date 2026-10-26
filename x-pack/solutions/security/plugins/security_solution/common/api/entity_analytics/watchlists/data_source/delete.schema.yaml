@@ -1,0 +1,26 @@
+openapi: 3.0.0
+info:
+  title: Watchlists Entity Source Delete Schema
+  description: Schema for deleting entity source configurations in the watchlists system.
+  version: "2023-10-31"
+
+paths:
+  /api/entity_analytics/watchlists/{watchlist_id}/entity_source/{id}:
+    delete:
+      operationId: DeleteWatchlistEntitySource
+      x-codegen-enabled: true
+      summary: Delete an entity source configuration
+      parameters:
+        - name: watchlist_id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Entity source deleted successfully

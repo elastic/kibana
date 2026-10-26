@@ -6,7 +6,7 @@
  */
 
 module.exports = {
-  preset: '@kbn/test',
+  preset: '@kbn/jest',
   rootDir: '../../../../../..',
   /** all nested directories have their own Jest config file */
   testMatch: [
@@ -20,4 +20,6 @@ module.exports = {
     '<rootDir>/x-pack/solutions/security/plugins/security_solution/server/**/*.{ts,tsx}',
   ],
   moduleNameMapper: require('./__mocks__/module_name_map'),
+  clearMocks: true,
+  restoreMocks: true,
 };

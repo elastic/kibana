@@ -7,13 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { NotificationsStart, DocLinksStart, ThemeServiceStart } from '@kbn/core/public';
+import type {
+  NotificationsStart,
+  DocLinksStart,
+  ThemeServiceStart,
+  HttpStart,
+} from '@kbn/core/public';
 
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { createGetterSetter } from '@kbn/kibana-utils-plugin/public';
 import type { MapsEmsPluginPublicStart } from '@kbn/maps-ems-plugin/public';
-import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
+import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 
 export const [getData, setData] = createGetterSetter<DataPublicPluginStart>('Data');
 
@@ -22,6 +27,8 @@ export const [getDataViews, setDataViews] =
 
 export const [getNotifications, setNotifications] =
   createGetterSetter<NotificationsStart>('Notifications');
+
+export const [getHttp, setHttp] = createGetterSetter<HttpStart>('Http');
 
 export const [getMapsEms, setMapsEms] = createGetterSetter<MapsEmsPluginPublicStart>('mapsEms');
 

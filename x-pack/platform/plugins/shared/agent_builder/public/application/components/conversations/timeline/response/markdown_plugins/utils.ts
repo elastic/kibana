@@ -1,0 +1,96 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+import type { Parent } from 'mdast';
+import type { Node } from 'unist';
+import type { ConversationRoundStep } from '@kbn/agent-builder-common';
+import type { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
+import {
+  getCustomElementAttribute,
+  splitCustomElements,
+} from '@kbn/agent-builder-common/tools/custom_rendering';
+
+export type MutableNode = Node & {
+  value?: string;
+  toolResultId?: string;
+  chartType?: string;
+  attachmentId?: string;
+  version?: string;
+  path?: string;
+  renderType?: string;
+};
+
+export const createTagParser = <T extends Record<string, string | undefined>>(config: {
+  tagName: string;
+  getAttributes: (
+    value: string,
+    extractAttr: (value: string, attr: string) => string | undefined
+  ) => T;
+  createNode: (attributes: T, position: MutableNode['position']) => MutableNode;
+}) => {
+  return () => {
+    const visitParent = (parent: Parent) => {
+      for (let index = 0; index < parent.children.length; index++) {
+        const child = parent.children[index] as MutableNode;
+
+        if ('children' in child) {
+          visitParent(child as Parent);
+        }
+
+        if (child.type !== 'html' && child.type !== 'text') {
+          continue; // only html/text nodes can contain the raw tag markup
+        }
+
+        const rawValue = child.value;
+        if (!rawValue) {
+          continue; // nothing to scan
+        }
+
+        // Match tags wherever they appear in the node, not just at the start.
+        // remark cannot tokenize tag names containing underscores into their own
+        // html nodes, so the tag is frequently embedded inside a text node along
+        // with surrounding prose (e.g. "Rule:\n<render_attachment .../>").
+        const segments = splitCustomElements(rawValue, config.tagName);
+        if (!segments.some(({ type }) => type === 'element')) {
+          continue;
+        }
+
+        // Rebuild the node as a sequence of [leading text, tag, text, tag, ...]
+        // preserving any prose around the tag(s). Whitespace-only gaps are dropped, so
+        // stacked tags don't get empty paragraphs between them.
+        const replacementNodes: Node[] = segments.map((segment) =>
+          segment.type === 'text'
+            ? ({ type: 'text', value: segment.text, position: child.position } as MutableNode)
+            : config.createNode(
+                config.getAttributes(segment.tag, getCustomElementAttribute),
+                child.position
+              )
+        );
+
+        const siblings = parent.children as Node[];
+        siblings.splice(index, 1, ...replacementNodes);
+        index += replacementNodes.length - 1;
+      }
+    };
+
+    return (tree: Node) => {
+      if ('children' in tree) {
+        visitParent(tree as Parent);
+      }
+    };
+  };
+};
+
+export const findToolResult = <T>(
+  steps: ConversationRoundStep[],
+  toolResultId: string,
+  resultType: ToolResultType
+): T | undefined => {
+  return steps
+    .filter((s) => s.type === 'tool_call')
+    .flatMap((s) => (s.type === 'tool_call' && s.results) || [])
+    .find((r) => r.type === resultType && r.tool_result_id === toolResultId) as T | undefined;
+};

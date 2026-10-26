@@ -30,6 +30,25 @@ export const FIELDS_TO_EXCLUDE_AS_CANDIDATE = new Set([
   'processor.name',
   'transaction.sampled',
   'transaction.span_count.dropped',
+  // OTel-style / semconv paths (ECS equivalents above do not match these)
+  'trace_id',
+  'span_id',
+  'parent_span_id',
+  'name',
+  'kind',
+  'status.code',
+  'status.message',
+  'trace_state',
+  'links.trace_id',
+  'links.span_id',
+  'attributes.transaction.id',
+  'attributes.transaction.name',
+  'attributes.transaction.type',
+  'attributes.transaction.sampled',
+  'attributes.processor.event',
+  'attributes.event.outcome',
+  'resource.attributes.service.name',
+  'resource.attributes.agent.name',
   // Exclude for correlation on a Single Service
   'agent.name',
   'http.request.method',
@@ -76,6 +95,12 @@ export const CORRELATION_THRESHOLD = 0.3;
 export const KS_TEST_THRESHOLD = 0.1;
 
 export const ERROR_CORRELATION_THRESHOLD = 0.02;
+
+export {
+  THROUGHPUT_CORRELATION_THRESHOLD,
+  THROUGHPUT_BUCKET_COUNT,
+  THROUGHPUT_TOP_VALUES_PER_FIELD,
+} from '@kbn/apm-types';
 
 export const DEFAULT_PERCENTILE_THRESHOLD = 95;
 export const DEBOUNCE_INTERVAL = 100;

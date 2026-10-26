@@ -5,18 +5,19 @@
  * 2.0.
  */
 
-import { createReducer } from '@reduxjs/toolkit';
+import { createReducer } from 'redux-toolkit-v1';
 import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
 
-import {
+import type {
   MonitorManagementListResult,
   MonitorFiltersResult,
   EncryptedSyntheticsSavedMonitor,
 } from '../../../../../common/runtime_types';
 
-import { IHttpSerializedFetchError } from '../utils/http_error';
+import type { IHttpSerializedFetchError } from '../utils/http_error';
+import { isPageStateSlotEqual } from '../utils/page_state_equality';
 
-import { MonitorListPageState } from './models';
+import type { MonitorListPageState } from './models';
 import { getMonitorListPageStateWithDefaults } from './helpers';
 
 import {
@@ -57,7 +58,16 @@ const initialState: MonitorListState = {
 export const monitorListReducer = createReducer(initialState, (builder) => {
   builder
     .addCase(updateManagementPageStateAction, (state, action) => {
-      state.pageState = { ...state.pageState, ...action.payload };
+      // Property-by-property with deep equality so no-op dispatches (e.g.
+      // ShowAllSpaces re-sending the same value, or [] filter arrays from
+      // mount effects) don't create a new pageState reference and re-trigger
+      // the useDebounce fetch in useMonitorList.
+      for (const key of Object.keys(action.payload) as Array<keyof typeof action.payload>) {
+        const value = action.payload[key];
+        if (!isPageStateSlotEqual((state.pageState as Record<string, unknown>)[key], value)) {
+          (state.pageState as Record<string, unknown>)[key] = value;
+        }
+      }
     })
     .addCase(fetchMonitorListAction.get, (state) => {
       state.loading = true;
@@ -132,9 +142,14 @@ export const monitorListReducer = createReducer(initialState, (builder) => {
 });
 
 export * from './api';
-export * from './models';
+export type * from './models';
 export * from './actions';
 export * from './effects';
 export * from './selectors';
 export * from './helpers';
-export { fetchDeleteMonitor, fetchUpsertMonitor, createGettingStartedMonitor } from './api';
+export {
+  fetchDeleteMonitor,
+  fetchBulkUpdateMonitors,
+  fetchUpsertMonitor,
+  createGettingStartedMonitor,
+} from './api';

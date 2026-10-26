@@ -7,16 +7,21 @@
 
 import React, { useCallback } from 'react';
 import { EuiWrappingPopover } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { useLocation } from 'react-router-dom';
 import useObservable from 'react-use/lib/useObservable';
 import { StatefulTopN } from '../../../common/components/top_n';
-import { getScopeFromPath } from '../../../sourcerer/containers/sourcerer_paths';
-import { useSourcererDataView } from '../../../sourcerer/containers';
+import { getScopeFromPath } from '../../../data_view_manager/utils/paths';
 import { useKibana } from '../../../common/lib/kibana';
+import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
+import { useBrowserFields } from '../../../data_view_manager/hooks/use_browser_fields';
 
 export const TopValuesPopover = React.memo(() => {
   const { pathname } = useLocation();
-  const { browserFields, sourcererDataView } = useSourcererDataView(getScopeFromPath(pathname));
+  const scope = getScopeFromPath(pathname);
+  const { dataView } = useDataView(scope);
+  const browserFields = useBrowserFields(dataView);
+
   const {
     services: { topValuesPopover },
   } = useKibana();
@@ -38,13 +43,15 @@ export const TopValuesPopover = React.memo(() => {
       repositionOnScroll
       ownFocus
       attachToAnchor={false}
+      aria-label={i18n.translate('xpack.securitySolution.topValuesPopover.ariaLabel', {
+        defaultMessage: 'Top values',
+      })}
     >
       <StatefulTopN
         field={data.fieldName}
-        showLegend
         scopeId={data.scopeId}
         toggleTopN={onClose}
-        dataViewSpec={sourcererDataView}
+        dataView={dataView}
         browserFields={browserFields}
       />
     </EuiWrappingPopover>

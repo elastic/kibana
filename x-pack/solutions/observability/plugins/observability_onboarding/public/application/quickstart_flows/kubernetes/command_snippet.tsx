@@ -9,39 +9,50 @@ import React from 'react';
 import { EuiCodeBlock, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { ElasticAgentVersionInfo } from '../../../../common/types';
-import { buildKubectlCommand } from './build_kubectl_command';
+import { buildHelmCommand } from './build_helm_command';
 import { CopyToClipboardButton } from '../shared/copy_to_clipboard_button';
+import { usePricingFeature } from '../shared/use_pricing_feature';
+import { ObservabilityOnboardingPricingFeature } from '../../../../common/pricing_features';
+import type { ElasticAgentVersionInfo } from '../../../../common/types';
 
 interface Props {
   encodedApiKey: string;
   onboardingId: string;
   elasticsearchUrl: string;
-  elasticAgentVersionInfo: ElasticAgentVersionInfo;
   isCopyPrimaryAction: boolean;
+  elasticAgentVersionInfo: ElasticAgentVersionInfo;
+  useInlineCopyOnly?: boolean;
+  useColoredSyntax?: boolean;
 }
 
 export function CommandSnippet({
   encodedApiKey,
   onboardingId,
   elasticsearchUrl,
-  elasticAgentVersionInfo,
   isCopyPrimaryAction,
+  elasticAgentVersionInfo,
+  useInlineCopyOnly = false,
+  useColoredSyntax = false,
 }: Props) {
-  const command = buildKubectlCommand({
+  const metricsEnabled = usePricingFeature(
+    ObservabilityOnboardingPricingFeature.METRICS_ONBOARDING
+  );
+
+  const command = buildHelmCommand({
     encodedApiKey,
     onboardingId,
     elasticsearchUrl,
+    metricsEnabled,
     elasticAgentVersionInfo,
   });
 
   return (
     <>
-      <EuiText>
+      <EuiText size={useColoredSyntax ? 's' : 'm'}>
         <p>
           <FormattedMessage
             id="xpack.observability_onboarding.kubernetesPanel.installElasticAgentDescription"
-            defaultMessage="Copy and run the install command. Note that the following manifest contains resource limits that may not be appropriate for a production environment, review our guide on {scalingLink} before deploying this manifest."
+            defaultMessage="Copy and run the install command. Note that the following manifest contains resource limits that may not be appropriate for a production environment, review our guide on {scalingLink} before deploying this manifest. Refer to the {docsLink} for information on supported Helm versions."
             values={{
               scalingLink: (
                 <EuiLink
@@ -56,6 +67,19 @@ export function CommandSnippet({
                   )}
                 </EuiLink>
               ),
+              docsLink: (
+                <EuiLink
+                  data-test-subj="observabilityOnboardingKubernetesPanelQuickstartDocsLink"
+                  href="https://www.elastic.co/docs/solutions/observability/get-started/quickstart-monitor-kubernetes-cluster-with-elastic-agent"
+                  external
+                  target="_blank"
+                >
+                  {i18n.translate(
+                    'xpack.observability_onboarding.kubernetesPanel.quickstartDocsLinkLabel',
+                    { defaultMessage: 'quickstart guide' }
+                  )}
+                </EuiLink>
+              ),
             }}
           />
         </p>
@@ -64,17 +88,22 @@ export function CommandSnippet({
       <EuiSpacer />
 
       <EuiCodeBlock
-        language="text"
+        language={useColoredSyntax ? 'bash' : 'text'}
         paddingSize="m"
-        fontSize="m"
+        fontSize={useColoredSyntax ? 's' : 'm'}
+        isCopyable={useInlineCopyOnly}
+        overflowHeight={useInlineCopyOnly ? 300 : undefined}
         data-test-subj="observabilityOnboardingKubernetesPanelCodeSnippet"
       >
         {command}
       </EuiCodeBlock>
+      {!useInlineCopyOnly ? (
+        <>
+          <EuiSpacer />
 
-      <EuiSpacer />
-
-      <CopyToClipboardButton textToCopy={command} fill={isCopyPrimaryAction} />
+          <CopyToClipboardButton textToCopy={command} fill={isCopyPrimaryAction} />
+        </>
+      ) : null}
     </>
   );
 }

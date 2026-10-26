@@ -5,32 +5,87 @@
  * 2.0.
  */
 
-import { Page } from '@playwright/test';
+import { expect, type Page, type BrowserContext, type Locator } from '@playwright/test';
 
 export class OtelKubernetesFlowPage {
   page: Page;
+  context: BrowserContext;
 
-  constructor(page: Page) {
+  private readonly exploreLogsButton: Locator;
+
+  constructor(page: Page, context: BrowserContext) {
     this.page = page;
+    this.context = context;
+
+    this.exploreLogsButton = this.page.getByTestId(
+      'observabilityOnboardingDataIngestStatusActionLink-logs'
+    );
   }
 
-  public async copyHelmRepositorySnippetToClipboard() {
-    await this.page
-      .getByTestId('observabilityOnboardingOtelKubernetesPanelAddRepositoryCopyToClipboard')
-      .click();
+  public async getHelmRepositorySnippet() {
+    return await this.page
+      .getByTestId('observabilityOnboardingOtelKubernetesAddRepositorySnippet')
+      .textContent();
   }
 
   public async copyInstallStackSnippetToClipboard() {
     await this.page
-      .getByTestId('observabilityOnboardingOtelKubernetesPanelInstallStackCopyToClipboard')
+      .getByTestId('observabilityOnboardingOtelKubernetesInstallStackSnippetCopyButtonIcon')
       .click();
   }
 
-  public async clickClusterOverviewDashboardCTA() {
+  public async switchInstrumentationInstructions(language: 'nodejs' | 'java' | 'python' | 'go') {
     await this.page
-      .getByTestId(
-        'observabilityOnboardingDataIngestStatusActionLink-kubernetes_otel-cluster-overview'
-      )
+      .getByTestId('observabilityOnboardingKubernetesOtelInstrumentationSwitch')
       .click();
+    await this.page.getByRole('button', { name: language === 'java' ? 'Java' : language }).click();
+  }
+
+  public async selectNamespaceInstrumentationInstructions() {
+    await this.page
+      .getByTestId('observabilityOnboardingKubernetesOtelAnnotationMode-namespace')
+      .getByRole('radio')
+      .click();
+  }
+
+  public async getAnnotateAllResourceSnippet() {
+    return await this.page
+      .getByTestId('observabilityOnboardingKubernetesOtelInstrumentationNamespaceSnippet')
+      .textContent();
+  }
+
+  public async getRestartDeploymentSnippet() {
+    return await this.page
+      .getByTestId('observabilityOnboardingKubernetesOtelInstrumentationRestartCommand')
+      .textContent();
+  }
+
+  public async openClusterOverviewDashboardInNewTab(): Promise<Page> {
+    const dashboardURL = await this.page
+      .getByTestId(
+        'observabilityOnboardingDataIngestStatusActionLink-kubernetes_otel-fe68e0e9-0506-4ad7-96be-070cf7592a7e'
+      )
+      .getAttribute('href');
+
+    if (dashboardURL) {
+      const newPage = await this.context.newPage();
+
+      await newPage.goto(dashboardURL);
+
+      return newPage;
+    } else {
+      throw new Error('Dashboard URL not found');
+    }
+  }
+
+  public async assertDataReceivedIndicator(timeout = 15 * 60_000): Promise<void> {
+    await expect(
+      this.exploreLogsButton,
+      'Explore logs action link should be visible after data is detected'
+    ).toBeVisible({ timeout });
+  }
+
+  public async clickExploreLogsCTA() {
+    await this.exploreLogsButton.click();
   }
 }

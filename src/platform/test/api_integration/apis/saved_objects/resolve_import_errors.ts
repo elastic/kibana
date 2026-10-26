@@ -9,7 +9,7 @@
 
 import expect from '@kbn/expect';
 import { join } from 'path';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -20,17 +20,17 @@ export default function ({ getService }: FtrProviderContext) {
     const indexPattern = {
       type: 'index-pattern',
       id: '91200a00-9efd-11e7-acb3-3dab96693fab',
-      meta: { title: 'logstash-*', icon: 'indexPatternApp' },
+      meta: { title: 'logstash-*', icon: 'table' },
     };
     const visualization = {
       type: 'visualization',
       id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
-      meta: { title: 'Count of requests', icon: 'visualizeApp' },
+      meta: { title: 'Count of requests', icon: 'chartMix' },
     };
     const dashboard = {
       type: 'dashboard',
       id: 'be3733a0-9efe-11e7-acb3-3dab96693fab',
-      meta: { title: 'Requests', icon: 'dashboardApp' },
+      meta: { title: 'Requests', icon: 'productDashboard' },
     };
     const SPACE_ID = 'ftr-so-resolve_import_errors';
 
@@ -163,7 +163,7 @@ export default function ({ getService }: FtrProviderContext) {
                 {
                   type: 'visualization',
                   id: '1',
-                  meta: { title: 'My favorite vis', icon: 'visualizeApp' },
+                  meta: { title: 'My favorite vis', icon: 'chartMix' },
                   managed: false,
                 },
               ],

@@ -1,0 +1,395 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import React, { useCallback, useRef, useState } from 'react';
+
+import {
+  EuiButton,
+  EuiCode,
+  EuiDescriptionList,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPanel,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
+} from '@elastic/eui';
+import { useBooleanUrlState } from '@kbn/shared-url-state';
+import { FlyoutTemplate } from '@kbn/flyout-template';
+import {
+  bodyCallouts,
+  createChildFlyoutDescriptionItems,
+  createMainFlyoutDescriptionItems,
+  FLYOUT_MIN_WIDTH,
+  FlyoutOwnFocusSwitch,
+  FOOTER_MENU_PANELS,
+  headerBlocks,
+  FlyoutTypeSwitch,
+  returnFocusToTrigger,
+} from '../utils';
+
+interface SessionFlyoutProps {
+  historyKey: symbol;
+  title: string;
+  mainSize: 's' | 'm' | 'l' | 'fill';
+  mainMaxWidth?: number;
+  childSize: 's' | 'm' | 'fill';
+  childMaxWidth?: number;
+}
+
+interface FlyoutFromComponentsProps {
+  historyKey: symbol;
+}
+
+const SessionFlyout: React.FC<SessionFlyoutProps> = React.memo((props) => {
+  const { title, mainSize, childSize, mainMaxWidth, childMaxWidth, historyKey } = props;
+  // Create a selector-safe string for use in test subjects
+  const titleKey = title.replace(/\s+/g, '');
+
+  const [isFlyoutOpen, setIsFlyoutOpen] = useBooleanUrlState(`flyoutOpen-${title}`);
+  const [flyoutType, setFlyoutType] = useState<'overlay' | 'push'>('overlay');
+  const [flyoutOwnFocus, setFlyoutOwnFocus] = useState<boolean>(false);
+  const [isChildFlyoutAOpen, setIsChildFlyoutAOpen] = useState(false);
+  const [isChildFlyoutBOpen, setIsChildFlyoutBOpen] = useState(false);
+
+  // Refs for manual focus management
+  const mainTriggerRef = useRef<HTMLButtonElement>(null);
+  const childTriggerARef = useRef<HTMLButtonElement>(null);
+  const childTriggerBRef = useRef<HTMLButtonElement>(null);
+
+  // Handlers for "Open" buttons
+
+  const handleOpenMainFlyout = () => {
+    setIsFlyoutOpen(true);
+  };
+
+  const handleOpenChildFlyoutA = () => {
+    setIsChildFlyoutAOpen(true);
+  };
+
+  const handleOpenChildFlyoutB = () => {
+    setIsChildFlyoutBOpen(true);
+  };
+
+  // Callbacks for state synchronization
+
+  const mainFlyoutOnActive = useCallback(() => {
+    console.log('activate main flyout', title); // eslint-disable-line no-console
+  }, [title]);
+
+  const childFlyoutAOnActive = useCallback(() => {
+    console.log('activate child flyout A', title); // eslint-disable-line no-console
+  }, [title]);
+
+  const childFlyoutBOnActive = useCallback(() => {
+    console.log('activate child flyout B', title); // eslint-disable-line no-console
+  }, [title]);
+
+  const handleCloseFlyout = useCallback(() => {
+    console.log('close main flyout', title); // eslint-disable-line no-console
+    setIsFlyoutOpen(false);
+    returnFocusToTrigger(mainTriggerRef);
+  }, [title, setIsFlyoutOpen]);
+
+  const handleSave = useCallback(() => {
+    console.log('save main flyout', title); // eslint-disable-line no-console
+  }, [title]);
+
+  const handleCloseChildFlyoutA = useCallback(() => {
+    console.log('close child flyout A', title); // eslint-disable-line no-console
+    setIsChildFlyoutAOpen(false);
+    returnFocusToTrigger(childTriggerARef);
+  }, [title]);
+
+  const handleCloseChildFlyoutB = useCallback(() => {
+    console.log('close child flyout B', title); // eslint-disable-line no-console
+    setIsChildFlyoutBOpen(false);
+    returnFocusToTrigger(childTriggerBRef);
+  }, [title]);
+
+  // Render
+
+  return (
+    <>
+      <EuiFlexGroup alignItems="center" gutterSize="s">
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup gutterSize="s">
+            <EuiFlexItem grow={false}>
+              {/* switch for flyout type (overlay vs push) */}
+              <FlyoutTypeSwitch title={title} flyoutType={flyoutType} onChange={setFlyoutType} />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              {/* switch for ownFocus behavior */}
+              <FlyoutOwnFocusSwitch
+                title={title}
+                flyoutOwnFocus={flyoutOwnFocus}
+                onChange={setFlyoutOwnFocus}
+                disabled={flyoutType === 'push'}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiText>
+            <EuiButton
+              buttonRef={mainTriggerRef}
+              disabled={isFlyoutOpen}
+              onClick={handleOpenMainFlyout}
+              data-test-subj={`openMainFlyoutComponentButton-${title}`}
+            >
+              Open {title}
+            </EuiButton>
+          </EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      {isFlyoutOpen && (
+        <FlyoutTemplate
+          id={`mainFlyout-${title}`}
+          session="start"
+          historyKey={historyKey}
+          size={mainSize}
+          maxWidth={mainMaxWidth}
+          minWidth={FLYOUT_MIN_WIDTH}
+          resizable
+          type={flyoutType}
+          ownFocus={flyoutOwnFocus}
+          onActive={mainFlyoutOnActive}
+          onClose={handleCloseFlyout}
+          data-test-subj={`flyoutComponent${titleKey}`}
+        >
+          <FlyoutTemplate.Header
+            title={title}
+            titleTooltip="This flyout demonstrates the flyout template."
+            description="Rendered with @kbn/flyout-template"
+          >
+            {headerBlocks()}
+          </FlyoutTemplate.Header>
+          <FlyoutTemplate.Body>
+            {bodyCallouts()}
+            <FlyoutTemplate.Body.Section title="Flyout properties">
+              <EuiDescriptionList
+                type="column"
+                listItems={createMainFlyoutDescriptionItems(
+                  flyoutType,
+                  flyoutOwnFocus,
+                  mainSize,
+                  mainMaxWidth,
+                  <EuiCode>{'@kbn/flyout-template'}</EuiCode>
+                )}
+              />
+            </FlyoutTemplate.Body.Section>
+            <FlyoutTemplate.Body.Section id="details" title="Details" hasBorder>
+              <FlyoutTemplate.Body.Section.Subsection id="host" title="Host">
+                <EuiText size="s">
+                  <p>A subsection adds a second level of titling inside a section.</p>
+                </EuiText>
+              </FlyoutTemplate.Body.Section.Subsection>
+              <FlyoutTemplate.Body.Section.Subsection id="service" title="Service">
+                <EuiText size="s">
+                  <p>With subsections present, each one carries the border the section drops.</p>
+                </EuiText>
+              </FlyoutTemplate.Body.Section.Subsection>
+            </FlyoutTemplate.Body.Section>
+            <FlyoutTemplate.Body.Section title="Child flyouts">
+              <EuiText>
+                <p>
+                  Below is some filler content to demonstrate scrolling behavior. Scroll down to see
+                  the button to <strong>open the child flyout</strong>.
+                </p>
+                <p>
+                  Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque nisl eros,
+                  pulvinar facilisis justo mollis, auctor consequat urna. Morbi a bibendum metus.
+                  Donec scelerisque sollicitudin enim eu venenatis. Duis tincidunt laoreet ex, in
+                  pretium orci vestibulum eget. Class aptent taciti sociosqu ad litora torquent per
+                  conubia nostra, per inceptos himenaeos. Duis pharetra luctus lacus ut vestibulum.
+                  Maecenas ipsum lacus, lacinia quis posuere ut, pulvinar vitae dolor. Integer eu
+                  nibh at nisi ullamcorper sagittis id vel leo. Integer feugiat faucibus libero, at
+                  maximus nisl suscipit posuere. Morbi nec enim nunc. Phasellus bibendum turpis ut
+                  ipsum egestas, sed sollicitudin elit convallis. Cras pharetra mi tristique sapien
+                  vestibulum lobortis. Nam eget bibendum metus, non dictum mauris. Nulla at tellus
+                  sagittis, viverra est a, bibendum metus.
+                </p>
+                <p>
+                  Sed non neque elit. Sed ut imperdiet nisi. Proin condimentum fermentum nunc. Etiam
+                  pharetra, erat sed fermentum feugiat, velit mauris egestas quam, ut aliquam massa
+                  nisl quis neque. Suspendisse in orci enim.
+                </p>
+                <p>
+                  Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque nisl eros,
+                  pulvinar facilisis justo mollis, auctor consequat urna. Morbi a bibendum metus.
+                  Donec scelerisque sollicitudin enim eu venenatis. Duis tincidunt laoreet ex, in
+                  pretium orci vestibulum eget. Class aptent taciti sociosqu ad litora torquent per
+                  conubia nostra, per inceptos himenaeos. Duis pharetra luctus lacus ut vestibulum.
+                  Maecenas ipsum lacus, lacinia quis posuere ut, pulvinar vitae dolor. Integer eu
+                  nibh at nisi ullamcorper sagittis id vel leo. Integer feugiat faucibus libero, at
+                  maximus nisl suscipit posuere. Morbi nec enim nunc. Phasellus bibendum turpis ut
+                  ipsum egestas, sed sollicitudin elit convallis. Cras pharetra mi tristique sapien
+                  vestibulum lobortis. Nam eget bibendum metus, non dictum mauris. Nulla at tellus
+                  sagittis, viverra est a, bibendum metus.
+                </p>
+              </EuiText>
+              <EuiSpacer size="m" />
+              <EuiButton
+                buttonRef={childTriggerARef}
+                onClick={handleOpenChildFlyoutA}
+                disabled={isChildFlyoutAOpen}
+                data-test-subj={`openChildFlyoutComponentAButton-${title}`}
+              >
+                Open child flyout A
+              </EuiButton>{' '}
+              <EuiButton
+                buttonRef={childTriggerBRef}
+                onClick={handleOpenChildFlyoutB}
+                disabled={isChildFlyoutBOpen}
+                data-test-subj={`openChildFlyoutComponentBButton-${title}`}
+              >
+                Open child flyout B
+              </EuiButton>
+            </FlyoutTemplate.Body.Section>
+          </FlyoutTemplate.Body>
+          <FlyoutTemplate.Footer>
+            <FlyoutTemplate.Footer.SecondaryAction
+              label="Close"
+              onClick={handleCloseFlyout}
+              data-test-subj={`closeMainFlyoutComponentButton-${title}`}
+            />
+            <FlyoutTemplate.Footer.PrimaryAction
+              label="Save"
+              onClick={handleSave}
+              data-test-subj={`saveMainFlyoutComponentButton-${title}`}
+            />
+          </FlyoutTemplate.Footer>
+        </FlyoutTemplate>
+      )}
+      {isChildFlyoutAOpen && (
+        <FlyoutTemplate
+          id={`childFlyout-${title}-a`}
+          session="inherit"
+          historyKey={historyKey}
+          size={childSize}
+          hasChildBackground
+          maxWidth={childMaxWidth}
+          minWidth={FLYOUT_MIN_WIDTH}
+          onActive={childFlyoutAOnActive}
+          onClose={handleCloseChildFlyoutA}
+          data-test-subj={`flyoutComponent${titleKey}ChildA`}
+        >
+          <FlyoutTemplate.Header title={`${title} - Child A`} collapsed />
+          <FlyoutTemplate.Body>
+            <EuiText>
+              <p>This is child flyout A.</p>
+            </EuiText>
+            <EuiSpacer size="m" />
+            <EuiDescriptionList
+              type="column"
+              listItems={createChildFlyoutDescriptionItems(
+                childSize,
+                childMaxWidth,
+                <EuiCode>{'@kbn/flyout-template'}</EuiCode>
+              )}
+            />
+          </FlyoutTemplate.Body>
+          <FlyoutTemplate.Footer>
+            <FlyoutTemplate.Footer.SecondaryAction
+              label="Close"
+              onClick={handleCloseChildFlyoutA}
+              data-test-subj={`closeChildFlyoutComponentAButton-${title}`}
+            />
+          </FlyoutTemplate.Footer>
+        </FlyoutTemplate>
+      )}
+      {isChildFlyoutBOpen && (
+        <FlyoutTemplate
+          id={`childFlyout-${title}-b`}
+          session="inherit"
+          historyKey={historyKey}
+          size={childSize}
+          hasChildBackground
+          maxWidth={childMaxWidth}
+          minWidth={FLYOUT_MIN_WIDTH}
+          onActive={childFlyoutBOnActive}
+          onClose={handleCloseChildFlyoutB}
+          data-test-subj={`flyoutComponent${titleKey}ChildB`}
+        >
+          <FlyoutTemplate.Header title={`${title} - Child B`} collapsed />
+          <FlyoutTemplate.Body>
+            <EuiText>
+              <p>This is child flyout B.</p>
+            </EuiText>
+            <EuiSpacer size="m" />
+            <EuiDescriptionList
+              type="column"
+              listItems={createChildFlyoutDescriptionItems(
+                childSize,
+                childMaxWidth,
+                <EuiCode>{'@kbn/flyout-template'}</EuiCode>
+              )}
+            />
+          </FlyoutTemplate.Body>
+          <FlyoutTemplate.Footer>
+            <FlyoutTemplate.Footer.SecondaryAction
+              label="Close"
+              onClick={handleCloseChildFlyoutB}
+              data-test-subj={`closeChildFlyoutComponentBButton-${title}`}
+            />
+            <FlyoutTemplate.Footer.PrimaryActionMenu
+              label="Take action"
+              panels={FOOTER_MENU_PANELS}
+              data-test-subj={`menuChildFlyoutComponentBButton-${title}`}
+            />
+          </FlyoutTemplate.Footer>
+        </FlyoutTemplate>
+      )}
+    </>
+  );
+});
+
+SessionFlyout.displayName = 'SessionFlyoutFromComponents';
+
+export const FlyoutWithComponent: React.FC<FlyoutFromComponentsProps> = ({ historyKey }) => (
+  <>
+    <EuiTitle size="s">
+      <h2>
+        <EuiCode>{'@kbn/flyout-template'}</EuiCode>
+      </h2>
+    </EuiTitle>
+    <EuiSpacer size="s" />
+    <EuiPanel>
+      <EuiSpacer size="s" />
+      <EuiDescriptionList
+        type="column"
+        listItems={[
+          {
+            title: 'Session J: main size = s, child size = s',
+            description: (
+              <SessionFlyout title="Session J" mainSize="s" childSize="s" historyKey={historyKey} />
+            ),
+          },
+          {
+            title: 'Session K: main size = m, child size = s',
+            description: (
+              <SessionFlyout title="Session K" mainSize="m" childSize="s" historyKey={historyKey} />
+            ),
+          },
+          {
+            title: 'Session L: main size = m, child size = fill',
+            description: (
+              <SessionFlyout
+                title="Session L"
+                mainSize="m"
+                childSize="fill"
+                historyKey={historyKey}
+              />
+            ),
+          },
+        ]}
+      />
+    </EuiPanel>
+  </>
+);

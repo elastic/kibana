@@ -28,7 +28,6 @@ import { createDetectionEngineHealthClient } from './detection_engine_health/det
 import { createEventLogHealthClient } from './detection_engine_health/event_log/event_log_health_client';
 import { createRuleObjectsHealthClient } from './detection_engine_health/rule_objects/rule_objects_health_client';
 import { createRuleSpacesClient } from './detection_engine_health/rule_spaces/rule_spaces_client';
-import { createEventLogReader } from './rule_execution_log/event_log/event_log_reader';
 import { createEventLogWriter } from './rule_execution_log/event_log/event_log_writer';
 import { fetchRuleExecutionSettings } from './rule_execution_log/execution_settings/fetch_rule_execution_settings';
 import type {
@@ -117,8 +116,7 @@ export const createRuleMonitoringService = (
       params: RuleExecutionLogClientForRoutesParams
     ): IRuleExecutionLogForRoutes => {
       const { eventLogClient } = params;
-      const eventLogReader = createEventLogReader(eventLogClient);
-      return createRuleExecutionLogClientForRoutes(eventLogReader, logger);
+      return createRuleExecutionLogClientForRoutes(eventLogClient, logger);
     },
 
     createRuleExecutionLogClientForExecutors: (

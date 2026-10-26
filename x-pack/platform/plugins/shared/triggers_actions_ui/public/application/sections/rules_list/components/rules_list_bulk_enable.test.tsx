@@ -4,29 +4,30 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as React from 'react';
+import type { IToasts } from '@kbn/core/public';
+import { usePerformanceContext } from '@kbn/ebt-tools';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import {
   act,
+  cleanup,
+  fireEvent,
   render,
   screen,
-  cleanup,
   waitForElementToBeRemoved,
-  fireEvent,
 } from '@testing-library/react';
-import { IToasts } from '@kbn/core/public';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import * as React from 'react';
+import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
+import { useKibana } from '../../../../common/lib/kibana';
 import { actionTypeRegistryMock } from '../../../action_type_registry.mock';
 import { ruleTypeRegistryMock } from '../../../rule_type_registry.mock';
 import { RulesList } from './rules_list';
-import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
-import { useKibana } from '../../../../common/lib/kibana';
 import {
-  mockedRulesData,
-  ruleTypeFromApi,
   getDisabledByLicenseRuleTypeFromApi,
+  mockedRulesData,
   ruleType,
-} from './test_helpers';
+  ruleTypeFromApi,
+} from './test_helper';
 
 jest.mock('../../../../common/lib/kibana');
 jest.mock('@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting', () => ({
@@ -71,14 +72,18 @@ jest.mock('@kbn/response-ops-rule-form/src/common/apis/fetch_ui_config', () => (
     .fn()
     .mockResolvedValue({ minimumScheduleInterval: { value: '1m', enforce: false } }),
 }));
-jest.mock('react-router-dom', () => ({
-  useHistory: () => ({
+jest.mock('react-router-dom', () => {
+  const history = {
     push: jest.fn(),
-  }),
-  useLocation: () => ({
-    pathname: '/triggersActions/rules/',
-  }),
-}));
+    createHref: jest.fn(({ pathname }: { pathname: string }) => pathname),
+  };
+  return {
+    useHistory: () => history,
+    useLocation: () => ({
+      pathname: '/triggersActions/rules/',
+    }),
+  };
+});
 jest.mock('../../../lib/capabilities', () => ({
   hasAllPrivilege: jest.fn(() => true),
   hasSaveRulesCapability: jest.fn(() => true),
@@ -106,6 +111,14 @@ jest.mock('@kbn/kibana-utils-plugin/public', () => {
   };
 });
 jest.mock('react-use/lib/useLocalStorage', () => jest.fn(() => [null, () => null]));
+jest.mock('@kbn/ebt-tools');
+jest.mock('@kbn/cps-utils', () => ({
+  ...jest.requireActual('@kbn/cps-utils'),
+  useRouteBasedCpsPickerAccess: jest.fn(),
+}));
+
+const usePerformanceContextMock = usePerformanceContext as jest.Mock;
+usePerformanceContextMock.mockReturnValue({ onPageReady: jest.fn() });
 
 const { loadRuleAggregationsWithKueryFilter } = jest.requireMock(
   '../../../lib/rule_api/aggregate_kuery_filter'

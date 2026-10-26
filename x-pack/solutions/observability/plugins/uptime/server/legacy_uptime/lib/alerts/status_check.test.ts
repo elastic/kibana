@@ -13,10 +13,10 @@ import {
   getUniqueIdsByLoc,
   getInstanceId,
 } from './status_check';
-import { GetMonitorStatusResult } from '../requests/get_monitor_status';
+import type { GetMonitorStatusResult } from '../requests/get_monitor_status';
 import { makePing } from '../../../../common/runtime_types/ping';
-import { GetMonitorAvailabilityResult } from '../requests/get_monitor_availability';
-import { DefaultUptimeAlertInstance } from './types';
+import type { GetMonitorAvailabilityResult } from '../requests/get_monitor_availability';
+import type { DefaultUptimeAlertInstance } from './types';
 import { createRuleTypeMocks, bootstrapDependencies } from './test_utils';
 import moment from 'moment';
 
@@ -288,7 +288,7 @@ describe('status check alert', () => {
       expect(mockGetter).toHaveBeenCalledTimes(1);
       expect(alertsClient.report).toHaveBeenCalledTimes(2);
       mockMonitors.forEach((monitor) => {
-        expect(alertsClient.report).toBeCalledWith(
+        expect(alertsClient.report).toHaveBeenCalledWith(
           mockStatusAlertDocument(
             monitor,
             false,
@@ -403,7 +403,7 @@ describe('status check alert', () => {
       expect(mockGetter).toHaveBeenCalledTimes(1);
       expect(alertsClient.report).toHaveBeenCalledTimes(2);
       mockMonitors.forEach((monitor) => {
-        expect(alertsClient.report).toBeCalledWith(
+        expect(alertsClient.report).toHaveBeenCalledWith(
           mockStatusAlertDocument(
             monitor,
             true,
@@ -519,7 +519,7 @@ describe('status check alert', () => {
       );
 
       mockMonitors.forEach((monitor) => {
-        expect(alertsClient.report).toBeCalledWith(
+        expect(alertsClient.report).toHaveBeenCalledWith(
           mockStatusAlertDocument(
             monitor,
             false,
@@ -597,7 +597,7 @@ describe('status check alert', () => {
       } = options;
 
       mockMonitors.forEach((monitor) => {
-        expect(alertsClient.report).toBeCalledWith(
+        expect(alertsClient.report).toHaveBeenCalledWith(
           mockStatusAlertDocument(
             monitor,
             false,
@@ -947,7 +947,7 @@ describe('status check alert', () => {
       } = options;
       const executorResult = await alert.executor(options);
       mockAvailabilityMonitors.forEach((monitor) => {
-        expect(alertsClient.report).toBeCalledWith(mockAvailabilityAlertDocument(monitor));
+        expect(alertsClient.report).toHaveBeenCalledWith(mockAvailabilityAlertDocument(monitor));
       });
       expect(alertsClient.report).toHaveBeenCalledTimes(4);
       expect(alertsClient.report).toHaveBeenNthCalledWith(

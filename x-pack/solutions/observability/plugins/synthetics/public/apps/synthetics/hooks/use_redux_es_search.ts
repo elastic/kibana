@@ -7,8 +7,8 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import type { ESSearchResponse } from '@kbn/es-types';
-import { IInspectorInfo } from '@kbn/data-plugin/common';
-import { useDispatch, useSelector } from 'react-redux';
+import type { IInspectorInfo } from '@kbn/data-plugin/common';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import { useEffect, useMemo } from 'react';
 import {
   executeEsQueryAction,
@@ -42,7 +42,7 @@ export const useReduxEsSearch = <
 
   return useMemo(() => {
     return {
-      data: results[name] as ESSearchResponse<DocumentSource, TParams>,
+      data: results[name] as unknown as ESSearchResponse<DocumentSource, TParams> | undefined,
       loading: loadings[name],
       error: errors[name],
     };

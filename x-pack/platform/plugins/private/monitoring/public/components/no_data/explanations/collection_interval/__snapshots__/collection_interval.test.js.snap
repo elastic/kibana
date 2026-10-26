@@ -8,17 +8,17 @@ Array [
     Success! Wait a moment please.
   </h2>,
   <hr
-    class="euiHorizontalRule emotion-euiHorizontalRule-half-l"
+    class="euiHorizontalRule emotion-euiHorizontalRule-half-m"
   />,
   <div
-    class="euiText emotion-euiText-m"
+    class="euiText emotion-euiText-s"
   >
     <p>
       As soon as monitoring data appears in your cluster the page will automatically refresh with your monitoring dashboard. This only takes only a few seconds.
     </p>
   </div>,
   <div
-    class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
+    class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
   />,
   <span
     aria-label="Loading"
@@ -39,7 +39,7 @@ Array [
     class="emotion-euiTextColor-subdued"
   >
     <div
-      class="euiText emotion-euiText-m"
+      class="euiText emotion-euiText-s"
     >
       <p>
         Monitoring provides insight to your hardware performance and load.
@@ -47,10 +47,10 @@ Array [
     </div>
   </span>,
   <hr
-    class="euiHorizontalRule emotion-euiHorizontalRule-half-l"
+    class="euiHorizontalRule emotion-euiHorizontalRule-half-m"
   />,
   <div
-    class="euiText emotion-euiText-m"
+    class="euiText emotion-euiText-s"
   >
     <p>
       We checked the cluster settings and found that 
@@ -71,7 +71,7 @@ Array [
     </p>
   </div>,
   <div
-    class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
+    class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
   />,
   <div
     class="euiFlexGroup emotion-euiFlexGroup-responsive-s-spaceAround-center-row"
@@ -80,7 +80,7 @@ Array [
       class="euiFlexItem emotion-euiFlexItem-growZero"
     >
       <button
-        class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-isDisabled-fill-disabled"
+        class="euiButton emotion-euiButtonDisplay-m-isDisabled-fill-disabled"
         data-test-subj="enableCollectionInterval"
         disabled=""
         type="button"
@@ -92,7 +92,7 @@ Array [
             aria-label="Loading"
             class="euiLoadingSpinner emotion-euiLoadingSpinner-m"
             role="progressbar"
-            style="border-color: #1750ba currentcolor currentcolor currentcolor;"
+            style="border-color: #0b64dd currentcolor currentcolor currentcolor;"
           />
           Turn on monitoring
         </span>
@@ -113,7 +113,7 @@ Array [
     class="emotion-euiTextColor-subdued"
   >
     <div
-      class="euiText emotion-euiText-m"
+      class="euiText emotion-euiText-s"
     >
       <p>
         Monitoring provides insight to your hardware performance and load.
@@ -121,10 +121,10 @@ Array [
     </div>
   </span>,
   <hr
-    class="euiHorizontalRule emotion-euiHorizontalRule-half-l"
+    class="euiHorizontalRule emotion-euiHorizontalRule-half-m"
   />,
   <div
-    class="euiText emotion-euiText-m"
+    class="euiText emotion-euiText-s"
   >
     <p>
       We checked the cluster settings and found that 
@@ -145,7 +145,7 @@ Array [
     </p>
   </div>,
   <div
-    class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
+    class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
   />,
   <div
     class="euiFlexGroup emotion-euiFlexGroup-responsive-s-spaceAround-center-row"
@@ -154,7 +154,7 @@ Array [
       class="euiFlexItem emotion-euiFlexItem-growZero"
     >
       <button
-        class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-fill-primary"
+        class="euiButton emotion-euiButtonDisplay-m-fill-primary"
         data-test-subj="enableCollectionInterval"
         type="button"
       >

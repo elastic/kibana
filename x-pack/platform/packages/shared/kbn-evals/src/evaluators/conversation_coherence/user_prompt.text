@@ -1,0 +1,7 @@
+Here is the conversation to evaluate:
+
+```
+{{{conversation}}}
+```
+
+Please evaluate the conversation across all four coherence dimensions and call the `score_coherence` tool with your scores.

@@ -4,12 +4,23 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiExpression, EuiPopover, EuiPopoverTitle, EuiSelectable } from '@elastic/eui';
+import {
+  EuiExpression,
+  EuiPopover,
+  EuiPopoverTitle,
+  EuiSelectable,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { StatusRuleCondition } from '@kbn/response-ops-rule-params/synthetics_monitor_status';
-import { getConditionType } from '../../../../../../common/rules/status_rule';
-import { StatusRuleParamsProps } from '../status_rule_ui';
+import type { StatusRuleCondition } from '@kbn/response-ops-rule-params/synthetics_monitor_status';
+import {
+  DEFAULT_PENDING_THRESHOLD,
+  DEFAULT_DOWN_THRESHOLD,
+  DEFAULT_LOCATIONS_THRESHOLD,
+  getConditionType,
+} from '../../../../../../common/rules/status_rule';
+import type { StatusRuleParamsProps } from '../status_rule_ui';
 
 interface Props {
   ruleParams: StatusRuleParamsProps['ruleParams'];
@@ -60,11 +71,13 @@ const OPTIONS: Option[] = [
   },
 ];
 
-export const DEFAULT_CONDITION = {
+export const DEFAULT_CONDITION: StatusRuleCondition = {
   window: { numberOfChecks: 5 },
   groupBy: 'locationId',
-  downThreshold: 3,
-  locationsThreshold: 1,
+  downThreshold: DEFAULT_DOWN_THRESHOLD,
+  locationsThreshold: DEFAULT_LOCATIONS_THRESHOLD,
+  pendingThreshold: DEFAULT_PENDING_THRESHOLD,
+  recoveryStrategy: 'firstUp',
 };
 const getCheckedOption = (option: Option, condition?: StatusRuleCondition) => {
   const { useTimeWindow, isLocationBased } = getConditionType(condition);
@@ -89,6 +102,7 @@ export const ForTheLastExpression = ({ ruleParams, setRuleParams }: Props) => {
   const { useTimeWindow } = getConditionType(condition);
 
   const [isOpen, setIsOpen] = useState(false);
+  const forTheLastPopoverTitleId = useGeneratedHtmlId();
 
   const [options, setOptions] = useState<Option[]>(OPTIONS);
 
@@ -129,6 +143,7 @@ export const ForTheLastExpression = ({ ruleParams, setRuleParams }: Props) => {
       isOpen={isOpen}
       closePopover={() => setIsOpen(false)}
       anchorPosition="downLeft"
+      aria-labelledby={forTheLastPopoverTitleId}
     >
       <EuiSelectable<Option>
         singleSelection="always"
@@ -139,16 +154,12 @@ export const ForTheLastExpression = ({ ruleParams, setRuleParams }: Props) => {
             case 'checksWindow':
               setRuleParams('condition', {
                 ...ruleParams.condition,
-                downThreshold: 5,
-                locationsThreshold: 1,
                 window: { numberOfChecks: 5 },
               });
               break;
             case 'timeWindow':
               setRuleParams('condition', {
                 ...ruleParams.condition,
-                downThreshold: 5,
-                locationsThreshold: 1,
                 window: { time: { unit: 'm', size: 5 } },
               });
               break;
@@ -159,7 +170,7 @@ export const ForTheLastExpression = ({ ruleParams, setRuleParams }: Props) => {
       >
         {(list) => (
           <div style={{ width: 240 }}>
-            <EuiPopoverTitle>
+            <EuiPopoverTitle id={forTheLastPopoverTitleId}>
               {i18n.translate('xpack.synthetics.forTheLastExpression.whenPopoverTitleLabel', {
                 defaultMessage: 'When',
               })}

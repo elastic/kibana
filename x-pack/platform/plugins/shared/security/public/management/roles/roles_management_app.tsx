@@ -14,7 +14,6 @@ import type { FatalErrorsSetup, StartServicesAccessor } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { RegisterManagementAppArgs } from '@kbn/management-plugin/public';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { Route, Router } from '@kbn/shared-ux-router';
 
 import type { SecurityLicense } from '../../../common';
@@ -106,6 +105,7 @@ export const rolesManagementApp = Object.freeze({
                 uiCapabilities={application.capabilities}
                 dataViews={dataViews}
                 history={history}
+                navigateToUrl={application.navigateToUrl}
                 spacesApiUi={spacesApiUi}
                 buildFlavor={buildFlavor}
                 cloudOrgUrl={cloud?.organizationUrl}
@@ -116,7 +116,7 @@ export const rolesManagementApp = Object.freeze({
         };
 
         render(
-          <KibanaRenderContextProvider {...startServices}>
+          startServices.rendering.addContext(
             <KibanaContextProvider services={startServices}>
               <Router history={history}>
                 <ReadonlyBadge
@@ -149,7 +149,7 @@ export const rolesManagementApp = Object.freeze({
                 </BreadcrumbsProvider>
               </Router>
             </KibanaContextProvider>
-          </KibanaRenderContextProvider>,
+          ),
           element
         );
 

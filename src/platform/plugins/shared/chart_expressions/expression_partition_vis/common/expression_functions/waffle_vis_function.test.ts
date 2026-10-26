@@ -8,18 +8,14 @@
  */
 
 import { functionWrapper } from '@kbn/expressions-plugin/common/expression_functions/specs/tests/utils';
-import {
-  WaffleVisConfig,
-  LabelPositions,
-  ValueFormats,
-  LegendDisplay,
-} from '../types/expression_renderers';
-import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
-import { Datatable } from '@kbn/expressions-plugin/common/expression_types/specs';
+import type { WaffleVisConfig } from '../types/expression_renderers';
+import { LabelPositions, ValueFormats, LegendDisplay } from '../types/expression_renderers';
+import type { ExpressionValueVisDimension } from '@kbn/chart-expressions-common';
+import type { Datatable } from '@kbn/expressions-plugin/common/expression_types/specs';
 import { waffleVisFunction } from './waffle_vis_function';
 import { PARTITION_LABELS_VALUE, PARTITION_VIS_RENDERER_NAME } from '../constants';
-import { ExecutionContext } from '@kbn/expressions-plugin/common';
-import { LegendValue } from '@elastic/charts';
+import type { ExecutionContext } from '@kbn/expressions-plugin/common';
+import { ChartLegendValue } from '@kbn/chart-expressions-common';
 
 describe('interpreter/functions#waffleVis', () => {
   const fn = functionWrapper(waffleVisFunction());
@@ -36,7 +32,7 @@ describe('interpreter/functions#waffleVis', () => {
 
   const visConfig: WaffleVisConfig = {
     addTooltip: true,
-    legendStats: [LegendValue.Value],
+    legendStats: [ChartLegendValue.Value],
     metricsToLabels: JSON.stringify({}),
     legendDisplay: LegendDisplay.SHOW,
     legendPosition: 'right',

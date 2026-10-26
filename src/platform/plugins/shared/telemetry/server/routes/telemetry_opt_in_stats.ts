@@ -17,7 +17,7 @@ import type {
 } from '@kbn/telemetry-collection-manager-plugin/server';
 import { GetOptInStatsRoutePathBasedV2 } from '../../common/routes';
 import type { v2 } from '../../common/types';
-import { EncryptedTelemetryPayload, UnencryptedTelemetryPayload } from '../../common/types';
+import type { EncryptedTelemetryPayload, UnencryptedTelemetryPayload } from '../../common/types';
 import { getTelemetryChannelEndpoint } from '../../common/telemetry_config';
 import { PAYLOAD_CONTENT_ENCODING } from '../../common/constants';
 
@@ -88,6 +88,7 @@ export function registerTelemetryOptInStatsRoutes(
           response: {
             200: {
               body: () =>
+                // codeql[js/kibana/unbounded-array-in-schema] Response body populated server-side by getOptInStats, not user input
                 schema.arrayOf(
                   schema.object({
                     clusterUuid: schema.string(),

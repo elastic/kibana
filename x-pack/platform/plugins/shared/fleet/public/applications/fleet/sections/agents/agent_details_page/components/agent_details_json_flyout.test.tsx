@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { renderReactTestingLibraryWithI18n } from '@kbn/test-jest-helpers';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
+
 import type { Agent } from '../../../../types';
 import { useStartServices } from '../../../../hooks';
 
@@ -34,9 +35,7 @@ describe('AgentDetailsJsonFlyout', () => {
   });
 
   const renderComponent = () => {
-    return renderReactTestingLibraryWithI18n(
-      <AgentDetailsJsonFlyout agent={agent} onClose={jest.fn()} />
-    );
+    return renderWithI18n(<AgentDetailsJsonFlyout agent={agent} onClose={jest.fn()} />);
   };
 
   it('renders a title with the agent id if host name is not defined', () => {
@@ -68,7 +67,7 @@ describe('AgentDetailsJsonFlyout', () => {
       .mockReturnValueOnce(anchorMocked);
 
     downloadButton.click();
-    expect(createElementSpyOn).toBeCalledWith('a');
+    expect(createElementSpyOn).toHaveBeenCalledWith('a');
     expect(result.queryAllByRole('link')).toHaveLength(1); // The only link is the one from the flyout's description.
     expect(result.getByRole('link')).toHaveAttribute('href', 'https://elastic.co');
   });

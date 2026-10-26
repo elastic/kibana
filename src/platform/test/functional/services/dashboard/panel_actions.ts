@@ -7,7 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
+import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
+import expect from '@kbn/expect';
+import { asyncMap } from '@kbn/std';
 import { FtrService } from '../../ftr_provider_context';
 
 const ACTION_SHOW_CONFIG_PANEL_SUBJ = 'embeddablePanelAction-ACTION_SHOW_CONFIG_PANEL';
@@ -32,18 +34,43 @@ export class DashboardPanelActionsService extends FtrService {
   private readonly find = this.ctx.getService('find');
   private readonly inspector = this.ctx.getService('inspector');
   private readonly testSubjects = this.ctx.getService('testSubjects');
-  private readonly browser = this.ctx.getService('browser');
 
   private readonly header = this.ctx.getPageObject('header');
   private readonly common = this.ctx.getPageObject('common');
   private readonly dashboard = this.ctx.getPageObject('dashboard');
 
   async getContainerTopOffset() {
-    const containerSelector = (await this.find.existsByCssSelector('.dashboardContainer'))
-      ? '.dashboardContainer'
-      : '.canvasContainer';
+    const existsDashboardContainer = await this.testSubjects.exists('dashboardContainer');
+    if (existsDashboardContainer) {
+      return this.getDashboardContainerTopOffset();
+    }
+    return this.getCanvasContainerTopOffset();
+  }
+
+  async getDashboardContainerTopOffset() {
+    const fixedHeaders = (
+      await Promise.all([
+        // global fixed eui headers, TODO: remove when Kibana switched to grid layout
+        this.find.allByCssSelector('[data-fixed-header="true"]', 500),
+        // sticky unified search bar
+        this.find.allByCssSelector('[data-test-subj="globalQueryBar"]', 500),
+      ])
+    ).flat();
+
+    let fixedHeaderHeight = 0;
+    await asyncMap(fixedHeaders, async (header) => {
+      const headerHeight = (await header.getSize()).height;
+      fixedHeaderHeight += headerHeight;
+    });
+
+    const additionalOffsetForFloatingHoverActions = 32;
+
+    return fixedHeaderHeight + DASHBOARD_MARGIN_SIZE + additionalOffsetForFloatingHoverActions;
+  }
+
+  async getCanvasContainerTopOffset() {
     return (
-      (await (await this.find.byCssSelector(containerSelector)).getPosition()).y +
+      (await (await this.find.byCssSelector('.canvasContainer')).getPosition()).y +
       DASHBOARD_MARGIN_SIZE
     );
   }
@@ -58,17 +85,10 @@ export class DashboardPanelActionsService extends FtrService {
   async scrollPanelIntoView(wrapper?: WebElementWrapper) {
     this.log.debug(`scrollPanelIntoView`);
     wrapper = wrapper || (await this.getPanelWrapper());
-    const yOffset = (await wrapper.getPosition()).y;
-    await this.browser.execute(`
-        const scrollY = window.scrollY;
-        window.scrollBy(0, scrollY - ${yOffset});
-      `);
 
     const containerTop = await this.getContainerTopOffset();
 
-    await wrapper.moveMouseTo({
-      topOffset: containerTop,
-    });
+    await wrapper.moveMouseTo({ topOffset: containerTop });
   }
 
   async toggleContextMenu(wrapper?: WebElementWrapper) {
@@ -248,8 +268,11 @@ export class DashboardPanelActionsService extends FtrService {
   async saveToLibrary(newTitle = '', oldTitle = '') {
     this.log.debug(`saveToLibraryByTitle(${newTitle},${oldTitle})`);
     await this.clickPanelActionByTitle(SAVE_TO_LIBRARY_TEST_SUBJ, oldTitle);
-    await this.testSubjects.setValue('savedObjectTitle', newTitle, {
-      clearWithKeyboard: true,
+    await this.retry.try(async () => {
+      await this.testSubjects.setValue('savedObjectTitle', newTitle, {
+        clearWithKeyboard: true,
+      });
+      expect(await this.testSubjects.getAttribute('savedObjectTitle', 'value')).to.be(newTitle);
     });
     await this.testSubjects.clickWhenNotDisabledWithoutRetry('confirmSaveSavedObjectButton');
     await this.testSubjects.existOrFail('addPanelToLibrarySuccess');
@@ -376,7 +399,9 @@ export class DashboardPanelActionsService extends FtrService {
   async canConvertToLens(wrapper?: WebElementWrapper) {
     this.log.debug('canConvertToLens');
     await this.openContextMenu(wrapper);
-    return await this.testSubjects.exists(CONVERT_TO_LENS_TEST_SUBJ, { timeout: 500 });
+    // The panel menu renders only after its compatible actions are computed, so once it is
+    // open the action list is final.
+    return await this.testSubjects.exists(CONVERT_TO_LENS_TEST_SUBJ);
   }
 
   async canConvertToLensByTitle(title = '') {

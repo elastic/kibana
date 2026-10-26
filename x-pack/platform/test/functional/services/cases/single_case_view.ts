@@ -1,0 +1,158 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import expect from '@kbn/expect';
+import type { FtrProviderContext } from '../../ftr_provider_context';
+
+const replaceNewLinesWithSpace = (str: string) => str.replace(/\n/g, ' ');
+
+const REPORTED_BY_PREFIX = 'Reported by:';
+
+export function CasesSingleViewServiceProvider({ getService, getPageObject }: FtrProviderContext) {
+  const common = getPageObject('common');
+  const testSubjects = getService('testSubjects');
+  const header = getPageObject('header');
+  const find = getService('find');
+  const lensPage = getPageObject('lens');
+  const appMenu = getPageObject('appMenu');
+  const retry = getService('retry');
+
+  return {
+    async deleteCase() {
+      await appMenu.clickMenuItem('case-action-delete', { isInOverflowMenu: true });
+      await testSubjects.click('confirmModalConfirmButton');
+      await header.waitUntilLoadingHasFinished();
+    },
+
+    async assertDeleteCaseAbsent() {
+      expect(await appMenu.menuItemExists('case-action-delete')).to.be(false);
+    },
+
+    async verifyUserAction(dataTestSubj: string, contentToMatch: string) {
+      const userAction = await find.byCssSelector(
+        `[data-test-subj^="${dataTestSubj}"] .euiCommentEvent`
+      );
+
+      const userActionText = replaceNewLinesWithSpace(await userAction.getVisibleText());
+
+      expect(userActionText).contain(contentToMatch);
+    },
+
+    async getCommentCount(): Promise<number> {
+      const commentsContainer = await testSubjects.find('user-actions-list');
+      const comments = await commentsContainer.findAllByClassName('euiComment');
+      return comments.length - 1; // don't count the element for adding a new comment
+    },
+
+    async submitComment() {
+      const commentCountBefore = await this.getCommentCount();
+      await testSubjects.click('submit-comment');
+      await retry.tryForTime(10 * 1000, async () => {
+        const commentCountAfter = await this.getCommentCount();
+        expect(commentCountAfter).to.eql(
+          commentCountBefore + 1,
+          `Number of comments should increase by 1`
+        );
+      });
+    },
+
+    async addComment(comment: string) {
+      const addCommentElement = await find.byCssSelector(
+        '[data-test-subj="add-comment"] textarea.euiMarkdownEditorTextArea'
+      );
+
+      await addCommentElement.focus();
+      await addCommentElement.type(comment);
+
+      await this.submitComment();
+    },
+
+    async addVisualizationToNewComment(visName: string) {
+      // open saved object finder
+      const addCommentElement = await testSubjects.find('add-comment');
+      const addVisualizationButton = await addCommentElement.findByCssSelector(
+        '[data-test-subj="euiMarkdownEditorToolbarButton"][aria-label="Visualization"]'
+      );
+      await addVisualizationButton.click();
+
+      await this.findAndSaveVisualization(visName);
+
+      await testSubjects.existOrFail('cases-app', { timeout: 10 * 1000 });
+
+      await this.submitComment();
+    },
+
+    async findAndSaveVisualization(visName: string) {
+      await testSubjects.existOrFail('savedObjectsFinderTable', { timeout: 10 * 1000 });
+
+      // select visualization
+      await testSubjects.setValue('savedObjectFinderSearchInput', visName, {
+        clearWithKeyboard: true,
+      });
+      const sourceSubj = `savedObjectTitle${visName.replaceAll(' ', '-')}`;
+      await testSubjects.click(sourceSubj);
+      await header.waitUntilLoadingHasFinished();
+      await lensPage.isLensPageOrFail();
+
+      // save and return to cases app, add comment
+      await lensPage.saveAndReturn();
+    },
+
+    async openVisualizationButtonTooltip() {
+      const addCommentElement = await testSubjects.find('add-comment');
+      const addVisualizationButton = await addCommentElement.findByCssSelector(
+        '[data-test-subj="euiMarkdownEditorToolbarButton"][aria-label="Visualization"]'
+      );
+      await addVisualizationButton.moveMouseTo();
+      await common.sleep(500); // give tooltip time to open
+    },
+
+    async assertCaseTitle(expectedTitle: string) {
+      const actionTitle = await testSubjects.getVisibleText('appHeaderTitle');
+      expect(actionTitle).to.eql(
+        expectedTitle,
+        `Expected case title to be '${expectedTitle}' (got '${actionTitle}')`
+      );
+    },
+
+    async assertCaseDescription(expectedDescription: string) {
+      const desc = await find.byCssSelector(
+        '[data-test-subj="description"] [data-test-subj="scrollable-markdown"]'
+      );
+
+      const actualDescription = await desc.getVisibleText();
+
+      expect(expectedDescription).to.eql(
+        actualDescription,
+        `Expected case description to be '${expectedDescription}' (got '${actualDescription}')`
+      );
+    },
+
+    async openAssigneesPopover() {
+      await common.clickAndValidate('case-view-assign-users-link', 'euiSelectableList');
+      await header.waitUntilLoadingHasFinished();
+    },
+
+    async closeAssigneesPopover() {
+      await retry.try(async () => {
+        // Click the app header title to dismiss the popover
+        await testSubjects.click('appHeaderTitle');
+        await header.waitUntilLoadingHasFinished();
+        await testSubjects.missingOrFail('euiSelectableList');
+      });
+    },
+
+    async refresh() {
+      await testSubjects.click('case-refresh');
+    },
+
+    async getReporterName(): Promise<string> {
+      const reportedBy = await testSubjects.getVisibleText('case-view-reported-by');
+      return reportedBy.replace(REPORTED_BY_PREFIX, '').trim();
+    },
+  };
+}

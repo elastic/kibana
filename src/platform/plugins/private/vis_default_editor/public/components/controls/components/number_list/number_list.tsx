@@ -11,7 +11,8 @@ import React, { Fragment, useState, useEffect, useMemo, useCallback } from 'reac
 
 import { EuiSpacer, EuiButtonEmpty, EuiFlexItem, EuiFormErrorText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { NumberRow, NumberRowModel } from './number_row';
+import type { NumberRowModel } from './number_row';
+import { NumberRow } from './number_row';
 import {
   parse,
   EMPTY_STRING,
@@ -139,7 +140,7 @@ function NumberList({
       ))}
       <EuiSpacer size="s" />
       <EuiFlexItem>
-        <EuiButtonEmpty iconType="plusInCircleFilled" onClick={onAdd} size="xs">
+        <EuiButtonEmpty iconType="plusCircle" onClick={onAdd} size="xs">
           <FormattedMessage
             id="visDefaultEditor.controls.numberList.addUnitButtonLabel"
             defaultMessage="Add {unitName}"

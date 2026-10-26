@@ -10,15 +10,16 @@
 import React from 'react';
 import { act, fireEvent, render, waitFor } from '@testing-library/react';
 
-import { FieldDefinition, SettingType } from '@kbn/management-settings-types';
+import type { FieldDefinition, SettingType } from '@kbn/management-settings-types';
 import { getFieldDefinitions } from '@kbn/management-settings-field-definition';
 import { getSettingsMock } from '@kbn/management-settings-utilities/mocks/settings.mock';
 import { TEST_SUBJ_PREFIX_FIELD } from '@kbn/management-settings-components-field-input/input';
 
-import { Form, FormProps } from './form';
+import type { FormProps } from './form';
+import { Form } from './form';
 import { wrap, createFormServicesMock, uiSettingsClientMock } from './mocks';
 import { DATA_TEST_SUBJ_SAVE_BUTTON, DATA_TEST_SUBJ_CANCEL_BUTTON } from './bottom_bar/bottom_bar';
-import { FormServices } from './types';
+import type { FormServices } from './types';
 
 const settingsMock = getSettingsMock();
 const fields: FieldDefinition[] = getFieldDefinitions(settingsMock, uiSettingsClientMock);
@@ -71,7 +72,7 @@ describe('Form', () => {
     });
   });
 
-  it('renders bottom bar when a field is changed', () => {
+  it('renders bottom bar when a field is changed', async () => {
     const { getByTestId, queryByTestId } = render(wrap(<Form {...defaultFormParams} />));
 
     expect(queryByTestId(DATA_TEST_SUBJ_SAVE_BUTTON)).not.toBeInTheDocument();
@@ -81,41 +82,38 @@ describe('Form', () => {
     const input = getByTestId(`${TEST_SUBJ_PREFIX_FIELD}-${testFieldType}`);
     fireEvent.change(input, { target: { value: 'test' } });
 
-    expect(getByTestId(DATA_TEST_SUBJ_SAVE_BUTTON)).toBeInTheDocument();
+    await waitFor(() => expect(getByTestId(DATA_TEST_SUBJ_SAVE_BUTTON)).toBeInTheDocument());
     expect(getByTestId(DATA_TEST_SUBJ_CANCEL_BUTTON)).toBeInTheDocument();
   });
 
   it('fires saveChanges when Save button is clicked', async () => {
     const services: FormServices = createFormServicesMock();
-    const { getByTestId } = render(wrap(<Form {...defaultFormParams} />, services));
+    const { getByTestId, findByTestId } = render(wrap(<Form {...defaultFormParams} />, services));
 
     const testFieldType = 'string';
     const input = getByTestId(`${TEST_SUBJ_PREFIX_FIELD}-${testFieldType}`);
     fireEvent.change(input, { target: { value: 'test' } });
 
-    const saveButton = getByTestId(DATA_TEST_SUBJ_SAVE_BUTTON);
+    const saveButton = await findByTestId(DATA_TEST_SUBJ_SAVE_BUTTON);
     act(() => {
       fireEvent.click(saveButton);
     });
 
     await waitFor(() => {
-      expect(services.saveChanges).toHaveBeenCalledWith(
-        {
-          string: { type: 'string', unsavedValue: 'test' },
-        },
-        'namespace'
-      );
+      expect(services.saveChanges).toHaveBeenCalledWith({
+        string: { type: 'string', unsavedValue: 'test', needsReload: false, scope: 'namespace' },
+      });
     });
   });
 
   it('clears changes when Cancel button is clicked', async () => {
-    const { getByTestId } = render(wrap(<Form {...defaultFormParams} />));
+    const { getByTestId, findByTestId } = render(wrap(<Form {...defaultFormParams} />));
 
     const testFieldType = 'string';
     const input = getByTestId(`${TEST_SUBJ_PREFIX_FIELD}-${testFieldType}`);
     fireEvent.change(input, { target: { value: 'test' } });
 
-    const cancelButton = getByTestId(DATA_TEST_SUBJ_CANCEL_BUTTON);
+    const cancelButton = await findByTestId(DATA_TEST_SUBJ_CANCEL_BUTTON);
     act(() => {
       fireEvent.click(cancelButton);
     });
@@ -132,13 +130,15 @@ describe('Form', () => {
     });
     const testServices = { ...services, saveChanges: saveChangesWithError };
 
-    const { getByTestId } = render(wrap(<Form {...defaultFormParams} />, testServices));
+    const { getByTestId, findByTestId } = render(
+      wrap(<Form {...defaultFormParams} />, testServices)
+    );
 
     const testFieldType = 'string';
     const input = getByTestId(`${TEST_SUBJ_PREFIX_FIELD}-${testFieldType}`);
     fireEvent.change(input, { target: { value: 'test' } });
 
-    const saveButton = getByTestId(DATA_TEST_SUBJ_SAVE_BUTTON);
+    const saveButton = await findByTestId(DATA_TEST_SUBJ_SAVE_BUTTON);
     act(() => {
       fireEvent.click(saveButton);
     });
@@ -148,6 +148,39 @@ describe('Form', () => {
     });
   });
 
+  it('does not let a slow validation clobber a change made to another field', async () => {
+    jest.useFakeTimers();
+    const services: FormServices = createFormServicesMock();
+    services.validateChange = jest.fn().mockResolvedValue({
+      successfulValidation: true,
+      valid: false,
+      errorMessage: 'Invalid value',
+    });
+    const { getByTestId } = render(wrap(<Form {...defaultFormParams} />, services));
+
+    // Edit the (debounced, async-validated) string field first: its pending validation
+    // captures the current unsaved-changes snapshot.
+    fireEvent.change(getByTestId(`${TEST_SUBJ_PREFIX_FIELD}-string`), {
+      target: { value: 'new string' },
+    });
+    // Then toggle the boolean field, adding a second unsaved change in the meantime.
+    const booleanSwitch = getByTestId(`${TEST_SUBJ_PREFIX_FIELD}-boolean`);
+    expect(booleanSwitch).toBeChecked();
+    fireEvent.click(booleanSwitch);
+    expect(booleanSwitch).not.toBeChecked();
+
+    // Let the string field's debounced validation resolve and report its (invalid) result.
+    await act(async () => {
+      jest.advanceTimersByTime(500);
+    });
+
+    // The string validation result must not overwrite the concurrent boolean change: the
+    // boolean switch still reflects its toggled (unsaved) value rather than reverting.
+    expect(booleanSwitch).not.toBeChecked();
+
+    jest.useRealTimers();
+  });
+
   it('fires showReloadPagePrompt when changing a reloadPageRequired setting', async () => {
     const services: FormServices = createFormServicesMock();
     // Make all settings require a page reload
@@ -155,7 +188,7 @@ describe('Form', () => {
       getSettingsMock(true),
       uiSettingsClientMock
     );
-    const { getByTestId } = render(
+    const { getByTestId, findByTestId } = render(
       wrap(
         <Form
           {...{
@@ -174,7 +207,7 @@ describe('Form', () => {
     const input = getByTestId(`${TEST_SUBJ_PREFIX_FIELD}-${testFieldType}`);
     fireEvent.change(input, { target: { value: 'test' } });
 
-    const saveButton = getByTestId(DATA_TEST_SUBJ_SAVE_BUTTON);
+    const saveButton = await findByTestId(DATA_TEST_SUBJ_SAVE_BUTTON);
     act(() => {
       fireEvent.click(saveButton);
     });

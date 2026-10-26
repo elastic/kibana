@@ -6,14 +6,23 @@
  */
 
 import type { ElasticsearchClient, SavedObjectsClientContract, Logger } from '@kbn/core/server';
+import { createPrebuiltRuleAssetsClient } from '../../../lib/detection_engine/prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
+import type { RuleVersionSpecifier } from '../../../lib/detection_engine/prebuilt_rules/logic/rule_versions/rule_version_specifier';
 import type { RuleAdoption } from './types';
 
 import { updateRuleUsage } from './update_usage';
 import { getDetectionRules } from '../../queries/get_detection_rules';
 import { getAlerts } from '../../queries/get_alerts';
+import { getChangesHistoryUsage } from '../../queries/get_changes_history_usage';
+import { getInstalledPrebuiltRuleAssets } from '../../queries/get_installed_prebuilt_rule_assets';
 import { MAX_PER_PAGE, MAX_RESULTS_WINDOW } from '../../constants';
 import {
+  getInitialAiCreatedRulesUsage,
+  getInitialChangesHistoryUsage,
   getInitialEventLogUsage,
+  getInitialRuleCustomizationStatus,
+  getInitialRuleDeprecatedStatus,
+  getInitialRuleUpgradeStatus,
   getInitialRulesUsage,
   getInitialSpacesUsage,
 } from './get_initial_usage';
@@ -27,6 +36,13 @@ import { getEventLogByTypeAndStatus } from '../../queries/get_event_log_by_type_
 
 // eslint-disable-next-line no-restricted-imports
 import { legacyGetRuleActions } from '../../queries/legacy_get_rule_actions';
+import { calculateRuleUpgradeStatus } from './calculate_rules_upgrade_status';
+import type { ExternalRuleSourceInfo } from './get_rule_customization_status';
+import {
+  getRuleCustomizationStatus,
+  getRuleCustomizationMissingBaseVersionStatus,
+} from './get_rule_customization_status';
+import { getRuleVersionKey } from './transform_utils/get_rule_version_key';
 
 export interface GetRuleMetricsOptions {
   signalsIndex: string;
@@ -44,6 +60,9 @@ export const getRuleMetrics = async ({
   eventLogIndex,
 }: GetRuleMetricsOptions): Promise<RuleAdoption> => {
   try {
+    // gets the changes-history usage; independent of ruleResults so kick it off first
+    const changesHistoryUsagePromise = getChangesHistoryUsage({ esClient, logger });
+
     // gets rule saved objects
     const ruleResults = await getDetectionRules({
       savedObjectsClient,
@@ -58,7 +77,14 @@ export const getRuleMetrics = async ({
         detection_rule_detail: [],
         detection_rule_usage: getInitialRulesUsage(),
         detection_rule_status: getInitialEventLogUsage(),
+        elastic_detection_rule_upgrade_status: getInitialRuleUpgradeStatus(),
+        elastic_detection_rule_customization_status: getInitialRuleCustomizationStatus(),
+        elastic_detection_rule_customization_status_missing_base_version:
+          getInitialRuleCustomizationStatus(),
+        elastic_detection_rule_deprecated_status: getInitialRuleDeprecatedStatus(),
+        ai_created_rules: getInitialAiCreatedRulesUsage(),
         spaces_usage: getInitialSpacesUsage(),
+        changes_history_usage: await changesHistoryUsagePromise,
       };
     }
 
@@ -95,13 +121,36 @@ export const getRuleMetrics = async ({
       ruleResults,
     });
 
-    const [detectionAlertsResp, caseComments, legacyRuleActions, eventLogMetricsTypeStatus] =
-      await Promise.all([
-        detectionAlertsRespPromise,
-        caseCommentsPromise,
-        legacyRuleActionsPromise,
-        eventLogMetricsTypeStatusPromise,
-      ]);
+    // checks which installed prebuilt rules still have their base version asset available
+    const installedBaseVersionsPromise = getInstalledPrebuiltRuleAssets({
+      versions: getInstalledPrebuiltRuleVersions(ruleResults),
+      logger,
+      savedObjectsClient,
+    });
+
+    const [
+      detectionAlertsResp,
+      caseComments,
+      legacyRuleActions,
+      eventLogMetricsTypeStatus,
+      changesHistoryUsage,
+      installedBaseVersionsList,
+    ] = await Promise.all([
+      detectionAlertsRespPromise,
+      caseCommentsPromise,
+      legacyRuleActionsPromise,
+      eventLogMetricsTypeStatusPromise,
+      changesHistoryUsagePromise,
+      installedBaseVersionsPromise,
+    ]);
+
+    const installedBaseVersions = new Set(
+      installedBaseVersionsList.map((version) =>
+        getRuleVersionKey(version.rule_id, version.version)
+      )
+    );
+
+    const ruleAssetsClient = createPrebuiltRuleAssetsClient(savedObjectsClient);
 
     // create in-memory maps for correlation
     const legacyNotificationRuleIds = getRuleIdToEnabledMap(legacyRuleActions);
@@ -114,10 +163,27 @@ export const getRuleMetrics = async ({
       legacyNotificationRuleIds,
       casesRuleIds,
       alertsCounts,
+      installedBaseVersions,
+    });
+
+    const latestRuleVersions = await ruleAssetsClient.fetchLatestVersions();
+    const latestRuleVersionsMap = new Map(latestRuleVersions.map((rule) => [rule.rule_id, rule]));
+
+    const upgradeableRules = rulesCorrelated.filter((rule) => {
+      const latestVersion = latestRuleVersionsMap.get(rule.rule_id);
+      return (
+        latestVersion != null && rule.elastic_rule && rule.rule_version < latestVersion.version
+      );
     });
 
     // Only bring back rule detail on elastic prepackaged detection rules
     const elasticRuleObjects = rulesCorrelated.filter((hit) => hit.elastic_rule === true);
+
+    const installedElasticRuleIds = new Set(elasticRuleObjects.map((rule) => rule.rule_id));
+    const deprecatedAssets = await ruleAssetsClient.fetchDeprecatedRules();
+    const numDeprecated = deprecatedAssets.filter((asset) =>
+      installedElasticRuleIds.has(asset.rule_id)
+    ).length;
 
     // calculate the rule usage
     const rulesUsage = rulesCorrelated.reduce(
@@ -125,11 +191,32 @@ export const getRuleMetrics = async ({
       getInitialRulesUsage()
     );
 
+    const aiCreatedRulesUsage = rulesCorrelated.reduce((acc, rule) => {
+      if (rule.ai_created) {
+        acc.total += 1;
+        if (rule.enabled) {
+          acc.enabled += 1;
+        } else {
+          acc.disabled += 1;
+        }
+      }
+      return acc;
+    }, getInitialAiCreatedRulesUsage());
+
+    const externalRuleSources = getExternalRuleSourceInfoList(ruleResults, installedBaseVersions);
+
     return {
       detection_rule_detail: elasticRuleObjects,
       detection_rule_usage: rulesUsage,
       detection_rule_status: eventLogMetricsTypeStatus,
+      elastic_detection_rule_upgrade_status: calculateRuleUpgradeStatus(upgradeableRules),
+      elastic_detection_rule_customization_status: getRuleCustomizationStatus(externalRuleSources),
+      elastic_detection_rule_customization_status_missing_base_version:
+        getRuleCustomizationMissingBaseVersionStatus(externalRuleSources),
+      elastic_detection_rule_deprecated_status: { total: numDeprecated },
+      ai_created_rules: aiCreatedRulesUsage,
       spaces_usage: getSpacesUsage(ruleResults),
+      changes_history_usage: changesHistoryUsage,
     };
   } catch (e) {
     // ignore failure, usage will be zeroed. We use debug mode to not unnecessarily worry users as this will not effect them.
@@ -140,7 +227,54 @@ export const getRuleMetrics = async ({
       detection_rule_detail: [],
       detection_rule_usage: getInitialRulesUsage(),
       detection_rule_status: getInitialEventLogUsage(),
+      elastic_detection_rule_upgrade_status: getInitialRuleUpgradeStatus(),
+      elastic_detection_rule_customization_status: getInitialRuleCustomizationStatus(),
+      elastic_detection_rule_customization_status_missing_base_version:
+        getInitialRuleCustomizationStatus(),
+      elastic_detection_rule_deprecated_status: getInitialRuleDeprecatedStatus(),
+      ai_created_rules: getInitialAiCreatedRulesUsage(),
       spaces_usage: getInitialSpacesUsage(),
+      changes_history_usage: getInitialChangesHistoryUsage(),
     };
   }
 };
+
+function getInstalledPrebuiltRuleVersions(
+  ruleResults: Awaited<ReturnType<typeof getDetectionRules>>
+): RuleVersionSpecifier[] {
+  return ruleResults.flatMap((ruleResult): RuleVersionSpecifier[] => {
+    const params = ruleResult.attributes?.params;
+    if (params?.immutable !== true) {
+      return [];
+    }
+
+    return [{ rule_id: params.ruleId, version: params.version }];
+  });
+}
+
+function getExternalRuleSourceInfoList(
+  ruleResults: Awaited<ReturnType<typeof getDetectionRules>>,
+  installedBaseVersions: ReadonlySet<string>
+): ExternalRuleSourceInfo[] {
+  return ruleResults.flatMap((ruleResult): ExternalRuleSourceInfo[] => {
+    const params = ruleResult.attributes?.params;
+    const ruleSource = params?.ruleSource;
+    if (
+      !ruleSource ||
+      ruleSource?.type !== 'external' ||
+      typeof ruleSource.isCustomized !== 'boolean'
+    ) {
+      return [];
+    }
+
+    return [
+      {
+        is_customized: ruleSource.isCustomized,
+        customized_fields: ruleSource.customizedFields ?? [],
+        has_base_version: installedBaseVersions.has(
+          getRuleVersionKey(params.ruleId, params.version)
+        ),
+      },
+    ];
+  });
+}

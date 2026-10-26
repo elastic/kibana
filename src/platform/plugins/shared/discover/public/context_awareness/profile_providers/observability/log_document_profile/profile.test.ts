@@ -14,13 +14,15 @@ import type {
   DocumentProfileProviderParams,
   RootContext,
 } from '../../../profiles';
-import { DataSourceCategory, DocumentType, SolutionType } from '../../../profiles';
-import { createContextAwarenessMocks } from '../../../__mocks__';
+import { DataSourceCategory, SolutionType } from '../../../profiles';
+import { createProfileProviderSharedServicesMock } from '../../../__mocks__';
 import { createObservabilityLogDocumentProfileProvider } from './profile';
 import type { ContextWithProfileId } from '../../../profile_service';
+import { EMPTY_CONTEXT_AWARENESS_TOOLKIT } from '../../../toolkit';
 import { OBSERVABILITY_ROOT_PROFILE_ID } from '../consts';
+import { RESOLUTION_MATCH } from './__mocks__/log_document_resolution_match';
 
-const mockServices = createContextAwarenessMocks().profileProviderServices;
+const mockServices = createProfileProviderSharedServicesMock();
 
 describe('logDocumentProfileProvider', () => {
   const logDocumentProfileProvider = createObservabilityLogDocumentProfileProvider(mockServices);
@@ -31,12 +33,6 @@ describe('logDocumentProfileProvider', () => {
   const DATA_SOURCE_CONTEXT: ContextWithProfileId<DataSourceContext> = {
     profileId: 'data-source-profile',
     category: DataSourceCategory.Logs,
-  };
-  const RESOLUTION_MATCH = {
-    isMatch: true,
-    context: {
-      type: DocumentType.Log,
-    },
   };
   const RESOLUTION_MISMATCH = {
     isMatch: false,
@@ -64,6 +60,30 @@ describe('logDocumentProfileProvider', () => {
         }),
       })
     ).toEqual(RESOLUTION_MATCH);
+  });
+
+  it('matches records which have a stream.name set to logs', () => {
+    expect(
+      logDocumentProfileProvider.resolve({
+        rootContext: ROOT_CONTEXT,
+        dataSourceContext: DATA_SOURCE_CONTEXT,
+        record: buildMockRecord('another-index', {
+          'stream.name': 'logs.abc.def',
+        }),
+      })
+    ).toEqual(RESOLUTION_MATCH);
+  });
+
+  it('does not match records which have a different stream.name', () => {
+    expect(
+      logDocumentProfileProvider.resolve({
+        rootContext: ROOT_CONTEXT,
+        dataSourceContext: DATA_SOURCE_CONTEXT,
+        record: buildMockRecord('another-index', {
+          'stream.name': 'metrics',
+        }),
+      })
+    ).toEqual(RESOLUTION_MISMATCH);
   });
 
   it('does not match records where fields prefixed with "log." are null', () => {
@@ -106,7 +126,7 @@ describe('logDocumentProfileProvider', () => {
     ).toEqual(RESOLUTION_MISMATCH);
   });
 
-  it('does not match records when solution type is not Observability', () => {
+  it('matches records in Classic but not other solution views', () => {
     const params: Omit<DocumentProfileProviderParams, 'rootContext'> = {
       dataSourceContext: DATA_SOURCE_CONTEXT,
       record: buildMockRecord('another-index', {
@@ -122,7 +142,14 @@ describe('logDocumentProfileProvider', () => {
     expect(
       logDocumentProfileProvider.resolve({
         ...params,
-        rootContext: { profileId: 'other-data-source-profile', solutionType: SolutionType.Default },
+        rootContext: { profileId: 'classic-nav-root-profile', solutionType: SolutionType.Default },
+      })
+    ).toEqual(RESOLUTION_MATCH);
+    // Solution views without a root profile fall back to SolutionType.Default but are not Classic.
+    expect(
+      logDocumentProfileProvider.resolve({
+        ...params,
+        rootContext: { profileId: 'default-root-profile', solutionType: SolutionType.Default },
       })
     ).toEqual(RESOLUTION_MISMATCH);
     expect(
@@ -142,6 +169,61 @@ describe('logDocumentProfileProvider', () => {
     ).toEqual(RESOLUTION_MISMATCH);
   });
 
+  it('in Classic, only matches when the data source is recognized as logs', () => {
+    const record = buildMockRecord('another-index', {
+      'data_stream.type': ['logs'],
+    });
+    const classicRootContext: ContextWithProfileId<RootContext> = {
+      profileId: 'classic-nav-root-profile',
+      solutionType: SolutionType.Default,
+    };
+    const nonLogsDataSourceContext: ContextWithProfileId<DataSourceContext> = {
+      profileId: 'data-source-profile',
+      category: DataSourceCategory.Default,
+    };
+
+    // Claimed only when the logs data source profile set the Logs category (the curated integrations).
+    expect(
+      logDocumentProfileProvider.resolve({
+        rootContext: classicRootContext,
+        dataSourceContext: DATA_SOURCE_CONTEXT,
+        record,
+      })
+    ).toEqual(RESOLUTION_MATCH);
+    expect(
+      logDocumentProfileProvider.resolve({
+        rootContext: classicRootContext,
+        dataSourceContext: nonLogsDataSourceContext,
+        record,
+      })
+    ).toEqual(RESOLUTION_MISMATCH);
+
+    // Observability navigation is unaffected by the data source category.
+    expect(
+      logDocumentProfileProvider.resolve({
+        rootContext: ROOT_CONTEXT,
+        dataSourceContext: nonLogsDataSourceContext,
+        record,
+      })
+    ).toEqual(RESOLUTION_MATCH);
+  });
+
+  it('does not match in Classic when solution profiles are disabled', () => {
+    jest.spyOn(mockServices.uiSettings, 'get').mockReturnValueOnce(false);
+    expect(
+      logDocumentProfileProvider.resolve({
+        rootContext: {
+          profileId: 'classic-nav-root-profile',
+          solutionType: SolutionType.Default,
+        },
+        dataSourceContext: DATA_SOURCE_CONTEXT,
+        record: buildMockRecord('another-index', {
+          'data_stream.type': ['logs'],
+        }),
+      })
+    ).toEqual(RESOLUTION_MISMATCH);
+  });
+
   describe('getDocViewer', () => {
     it('adds a log overview doc view to the registry', () => {
       const getDocViewer = logDocumentProfileProvider.profile.getDocViewer!(
@@ -149,7 +231,7 @@ describe('logDocumentProfileProvider', () => {
           title: 'test title',
           docViewsRegistry: (registry) => registry,
         }),
-        { context: { type: DocumentType.Log } }
+        { context: RESOLUTION_MATCH.context, toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT }
       );
       const docViewer = getDocViewer({
         record: buildDataTableRecord({}),
@@ -165,7 +247,7 @@ describe('logDocumentProfileProvider', () => {
           id: 'doc_view_logs_overview',
           title: 'Log overview',
           order: 0,
-          component: expect.any(Function),
+          render: expect.any(Function),
         })
       );
     });

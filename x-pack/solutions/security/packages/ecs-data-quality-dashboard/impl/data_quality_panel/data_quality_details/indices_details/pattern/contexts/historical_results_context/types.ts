@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { HistoricalResult } from '../../../../../types';
-import { UseHistoricalResultsFetch } from '../../index_check_flyout/types';
+import type { HistoricalResult } from '../../../../../types';
+import type { UseHistoricalResultsFetch } from '../../index_check_flyout/types';
 
 export interface HistoricalResultsValue {
   historicalResultsState: {

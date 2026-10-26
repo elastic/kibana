@@ -12,16 +12,23 @@ import { buildEsQuery } from '@kbn/es-query';
 import type { GroupingAggregation, NamedAggregation } from '@kbn/grouping';
 import { isNoneGroup } from '@kbn/grouping';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
-import type { DynamicGroupingProps } from '@kbn/grouping/src';
+import type {
+  DynamicGroupingProps,
+  GroupChildComponentRenderer,
+  GroupingSort,
+  GroupingBucket,
+  ParsedGroupingAggregation,
+} from '@kbn/grouping/src';
 import { parseGroupingQuery } from '@kbn/grouping/src';
+import type { estypes } from '@elastic/elasticsearch';
+import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
 import type { TableIdLiteral } from '@kbn/securitysolution-data-table';
-import type { RunTimeMappings } from '../../../sourcerer/store/model';
-import { SourcererScopeName } from '../../../sourcerer/store/model';
+import { PageScope } from '../../../data_view_manager/constants';
+import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
+import type { GroupTakeActionItems } from './types';
 import { combineQueries } from '../../../common/lib/kuery';
 import type { AlertsGroupingAggregation } from './grouping_settings/types';
-import type { Status } from '../../../../common/api/detection_engine';
 import { InspectButton } from '../../../common/components/inspect';
-import { useSourcererDataView } from '../../../sourcerer/containers';
 import { useKibana } from '../../../common/lib/kibana';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_query';
@@ -31,13 +38,17 @@ import { buildTimeRangeFilter } from './helpers';
 import * as i18n from './translations';
 import { useQueryAlerts } from '../../containers/detection_engine/alerts/use_query';
 import { ALERTS_QUERY_NAMES } from '../../containers/detection_engine/alerts/constants';
-import { getAlertsGroupingQuery, useGroupTakeActionsItems } from './grouping_settings';
+import { getAlertsGroupingQuery } from './grouping_settings';
+import { useBrowserFields } from '../../../data_view_manager/hooks/use_browser_fields';
+import {
+  fetchQueryAlerts,
+  fetchQueryUnifiedAlerts,
+} from '../../containers/detection_engine/alerts/api';
 
 const ALERTS_GROUPING_ID = 'alerts-grouping';
 const DEFAULT_FILTERS: Filter[] = [];
 
 interface OwnProps {
-  currentAlertStatusFilterValue?: Status[];
   defaultFilters?: Filter[];
   from: string;
   getGrouping: (
@@ -47,40 +58,82 @@ interface OwnProps {
   globalQuery: Query;
   groupingLevel?: number;
   /**
+   * Sort order for the grouping results.
+   */
+  sort?: GroupingSort;
+  /**
    * Function that returns the group aggregations by field.
    * This is then used to render values in the EuiAccordion `extraAction` section.
    */
   groupStatsAggregations: (field: string) => NamedAggregation[];
-  hasIndexMaintenance: boolean;
-  hasIndexWrite: boolean;
+  /**
+   * Allows to customize the content of the Take actions button rendered at the group level.
+   * If no value is provided, the Take actins button is not displayed.
+   */
+  groupTakeActionItems?: GroupTakeActionItems;
   loading: boolean;
   onGroupClose: () => void;
   pageIndex: number;
   pageSize: number;
   parentGroupingFilter?: string;
-  renderChildComponent: (groupingFilters: Filter[]) => React.ReactElement;
-  runtimeMappings: RunTimeMappings;
+  renderChildComponent: GroupChildComponentRenderer<AlertsGroupingAggregation>;
+  runtimeMappings?: RunTimeMappings;
   selectedGroup: string;
   setPageIndex: (newIndex: number) => void;
   setPageSize: (newSize: number) => void;
-  signalIndexName: string | null;
+  signalIndexName: string | undefined;
   tableId: TableIdLiteral;
   to: string;
+
+  /** Optional array of custom controls to display in the toolbar alongside the group selector */
+  additionalToolbarControls?: JSX.Element[];
+
+  /**
+   * If you're not using this property, multi-value fields will be transformed into a string
+   * and grouped by that value. For instance, if an object has a property
+   * called "mac" with value ['mac1', 'mac2'], the query will stringify that value
+   * to "mac1, mac2" and then group by it.
+   *
+   * Using this property will create a bucket for each value of the multi-value fields in question.
+   * Following the example above, a field with the ['mac1', 'mac2'] value will be grouped
+   * in 2 groups: one for mac1 and a second for mac2.
+   */
+  multiValueFieldsToFlatten?: string[];
+
+  /**
+   * Data view scope
+   */
+  pageScope?: PageScope;
+
+  /**
+   * A callback function that is invoked whenever the grouping aggregations are updated.
+   * It receives the parsed aggregation data as its only argument. This can be used to
+   * react to changes in the grouped data, for example, to extract information from
+   * the aggregation results.
+   */
+  onAggregationsChange?: (
+    aggs: ParsedGroupingAggregation<AlertsGroupingAggregation>,
+    groupingLevel?: number
+  ) => void;
+
+  /**
+   * Filter specifically for the unitsCount aggregation
+   */
+  unitsCountFilter?: estypes.QueryDslQueryContainer;
 }
 
 export type AlertsTableComponentProps = OwnProps;
 
 export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
-  currentAlertStatusFilterValue,
   defaultFilters = DEFAULT_FILTERS,
   from,
   getGrouping,
   globalFilters,
   globalQuery,
   groupingLevel,
+  sort,
   groupStatsAggregations,
-  hasIndexMaintenance,
-  hasIndexWrite,
+  groupTakeActionItems,
   loading,
   onGroupClose,
   pageIndex,
@@ -94,22 +147,28 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
   signalIndexName,
   tableId,
   to,
+  additionalToolbarControls = [],
+  multiValueFieldsToFlatten,
+  pageScope = PageScope.alerts,
+  onAggregationsChange,
+  unitsCountFilter,
 }) => {
   const {
     services: { uiSettings },
   } = useKibana();
-  const { browserFields, sourcererDataView } = useSourcererDataView(SourcererScopeName.detections);
+  const { dataView } = useDataView(pageScope);
+  const browserFields = useBrowserFields(dataView);
 
   const getGlobalQuery = useCallback(
     (customFilters: Filter[]) => {
-      if (browserFields != null && sourcererDataView) {
+      if (browserFields != null) {
         return combineQueries({
           config: getEsQueryConfig(uiSettings),
           dataProviders: [],
-          dataViewSpec: sourcererDataView,
+          dataView,
           browserFields,
           filters: [
-            ...(defaultFilters ?? []),
+            ...defaultFilters,
             ...globalFilters,
             ...customFilters,
             ...(parentGroupingFilter ? JSON.parse(parentGroupingFilter) : []),
@@ -123,14 +182,14 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
     },
     [
       browserFields,
-      defaultFilters,
-      from,
-      globalFilters,
-      globalQuery,
-      parentGroupingFilter,
-      to,
       uiSettings,
-      sourcererDataView,
+      dataView,
+      defaultFilters,
+      globalFilters,
+      parentGroupingFilter,
+      from,
+      to,
+      globalQuery,
     ]
   );
 
@@ -154,6 +213,7 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
   const queryGroups = useMemo(() => {
     return getAlertsGroupingQuery({
       groupStatsAggregations,
+      sort,
       additionalFilters,
       selectedGroup,
       uniqueValue,
@@ -162,6 +222,8 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
       to,
       pageSize,
       pageIndex,
+      multiValueFieldsToFlatten,
+      unitsCountFilter,
     });
   }, [
     additionalFilters,
@@ -173,6 +235,9 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
     selectedGroup,
     to,
     uniqueValue,
+    multiValueFieldsToFlatten,
+    sort,
+    unitsCountFilter,
   ]);
 
   const emptyGlobalQuery = useMemo(() => getGlobalQuery([]), [getGlobalQuery]);
@@ -186,6 +251,10 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
     endDate: to,
   });
 
+  const fetchMethod = useMemo(() => {
+    return pageScope === PageScope.attacks ? fetchQueryUnifiedAlerts : fetchQueryAlerts;
+  }, [pageScope]);
+
   const {
     data: alertsGroupsData,
     loading: isLoadingGroups,
@@ -194,6 +263,7 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
     response,
     setQuery: setAlertsQuery,
   } = useQueryAlerts<{}, GroupingAggregation<AlertsGroupingAggregation>>({
+    fetchMethod,
     query: queryGroups,
     indexName: signalIndexName,
     queryName: ALERTS_QUERY_NAMES.ALERTS_GROUPING,
@@ -213,6 +283,12 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
       ),
     [alertsGroupsData?.aggregations, selectedGroup, uniqueValue]
   );
+
+  useEffect(() => {
+    if (!isLoadingGroups) {
+      onAggregationsChange?.(aggs, groupingLevel);
+    }
+  }, [aggs, groupingLevel, isLoadingGroups, onAggregationsChange]);
 
   useEffect(() => {
     if (!isNoneGroup([selectedGroup])) {
@@ -243,20 +319,28 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
     [uniqueQueryId]
   );
 
-  const takeActionItems = useGroupTakeActionsItems({
-    currentStatus: currentAlertStatusFilterValue,
-    showAlertStatusActions: hasIndexWrite && hasIndexMaintenance,
-  });
-
   const getTakeActionItems = useCallback(
-    (groupFilters: Filter[], groupNumber: number) =>
-      takeActionItems({
+    (
+      groupFilters: Filter[],
+      groupNumber: number,
+      groupBucket: GroupingBucket<AlertsGroupingAggregation>,
+      closePopover: () => void
+    ) => {
+      const takeActionParams = {
         groupNumber,
         query: getGlobalQuery([...(defaultFilters ?? []), ...groupFilters])?.filterQuery,
         selectedGroup,
         tableId,
-      }),
-    [defaultFilters, getGlobalQuery, selectedGroup, tableId, takeActionItems]
+        groupBucket,
+        closePopover,
+        // Forward the page-scoped data view runtime mappings so the group-level
+        // status update can resolve fields not natively mapped on the alerts index.
+        runtimeMappings,
+      };
+
+      return groupTakeActionItems?.(takeActionParams);
+    },
+    [defaultFilters, getGlobalQuery, groupTakeActionItems, selectedGroup, tableId, runtimeMappings]
   );
 
   const onChangeGroupsItemsPerPage = useCallback(
@@ -272,7 +356,7 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
         activePage: pageIndex,
         data: aggs,
         groupingLevel,
-        inspectButton: inspect,
+        additionalToolbarControls: [...additionalToolbarControls, inspect],
         isLoading: loading || isLoadingGroups,
         itemsPerPage: pageSize,
         onChangeGroupsItemsPerPage,
@@ -280,13 +364,14 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
         onGroupClose,
         renderChildComponent,
         selectedGroup,
-        takeActionItems: getTakeActionItems,
+        ...(groupTakeActionItems && { takeActionItems: getTakeActionItems }),
       }),
     [
       aggs,
       getGrouping,
       getTakeActionItems,
       groupingLevel,
+      groupTakeActionItems,
       inspect,
       isLoadingGroups,
       loading,
@@ -297,6 +382,7 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
       pageSize,
       renderChildComponent,
       selectedGroup,
+      additionalToolbarControls,
     ]
   );
 };

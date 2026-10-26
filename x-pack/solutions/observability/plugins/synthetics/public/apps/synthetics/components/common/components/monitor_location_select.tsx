@@ -18,8 +18,9 @@ import {
 import { i18n } from '@kbn/i18n';
 import React, { useMemo, useState, useCallback } from 'react';
 
-import {
+import type {
   EncryptedSyntheticsSavedMonitor,
+  MonitorOrigin,
   ServiceLocation,
 } from '../../../../../../common/runtime_types';
 import { useStatusByLocation } from '../../../hooks';
@@ -31,6 +32,7 @@ export const MonitorLocationSelect = ({
   compressed,
   onChange,
   isDisabled,
+  origin,
 }: {
   compressed?: boolean;
   isDisabled?: boolean;
@@ -38,11 +40,13 @@ export const MonitorLocationSelect = ({
   onChange: (label: string, id: string) => void;
   selectedLocation?: ServiceLocation | null;
   monitorLocations?: EncryptedSyntheticsSavedMonitor['locations'];
+  origin?: MonitorOrigin;
 }) => {
   const theme = useEuiTheme();
   const { locations: locationsStatus, loading: loadingLocationsStatus } = useStatusByLocation({
     configId,
     monitorLocations,
+    origin,
   });
 
   const [isLocationListOpen, setIsLocationListOpen] = useState(false);
@@ -64,13 +68,20 @@ export const MonitorLocationSelect = ({
           onClick={openLocationList}
           disabled={isDisabled}
         >
-          {selectedLocation.label} {!isDisabled ? <EuiIcon type="arrowDown" /> : null}
+          {selectedLocation.label}{' '}
+          {!isDisabled ? <EuiIcon type="chevronSingleDown" aria-hidden={true} /> : null}
         </EuiLink>
       );
 
       const menuItems =
         loadingLocationsStatus && !locationsStatus
-          ? [<span key="loading">Loading...</span>]
+          ? [
+              <span key="loading">
+                {i18n.translate('xpack.synthetics.locationList.span.loadingLabel', {
+                  defaultMessage: 'Loading...',
+                })}
+              </span>,
+            ]
           : locationsStatus
               .map((location) => {
                 return (
@@ -107,10 +118,12 @@ export const MonitorLocationSelect = ({
           isOpen={isLocationListOpen}
           closePopover={closeLocationList}
           panelPaddingSize="none"
+          aria-label={i18n.translate('xpack.synthetics.monitorLocationSelect.popoverAriaLabel', {
+            defaultMessage: 'Location selection menu',
+          })}
         >
           <EuiContextMenuPanel
             items={menuItems}
-            size="s"
             title={i18n.translate(
               'xpack.synthetics.monitorLocation.locationContextMenuTitleLabel',
               { defaultMessage: 'Go to location' }

@@ -2,7 +2,8 @@
   "type": "shared-server",
   "id": "@kbn/storage-adapter",
   "owner": [
-    "@elastic/observability-ui"
+    "@elastic/observability-ui",
+    "@elastic/kibana-core"
   ],
   "group": "platform",
   "visibility": "shared"

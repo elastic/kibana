@@ -7,7 +7,7 @@
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import {
-  EXCEPTION_LIST_NAMESPACE,
+  EXCEPTION_LIST_NAMESPACE_AWARE,
   EXCEPTION_LIST_NAMESPACE_AGNOSTIC,
 } from '@kbn/securitysolution-list-constants';
 
@@ -40,7 +40,7 @@ describe('extract_exceptions_list', () => {
       logger,
       exceptionsList: undefined as unknown as RuleParams['exceptionsList'],
     });
-    expect(logger.error).toBeCalledWith(
+    expect(logger.error).toHaveBeenCalledWith(
       'Exception list is null when it never should be. This indicates potentially that saved object migrations did not run correctly. Returning empty saved object reference'
     );
   });
@@ -71,7 +71,7 @@ describe('extract_exceptions_list', () => {
       {
         id: '976',
         name: `${EXCEPTIONS_SAVED_OBJECT_REFERENCE_NAME}_1`,
-        type: EXCEPTION_LIST_NAMESPACE,
+        type: EXCEPTION_LIST_NAMESPACE_AWARE,
       },
     ]);
   });

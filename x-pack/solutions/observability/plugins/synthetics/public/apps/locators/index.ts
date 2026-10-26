@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { LocatorPublic } from '@kbn/share-plugin/public';
-import { SerializableRecord } from '@kbn/utility-types';
+import type { LocatorPublic } from '@kbn/share-plugin/public';
+import type { SerializableRecord } from '@kbn/utility-types';
 import { monitorDetailNavigatorParams } from './monitor_detail';
 import { editMonitorNavigatorParams } from './edit_monitor';
 import { syntheticsSettingsNavigatorParams } from './settings';

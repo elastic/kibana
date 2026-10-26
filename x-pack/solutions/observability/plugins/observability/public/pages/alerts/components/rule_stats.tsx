@@ -8,10 +8,9 @@
 import React from 'react';
 import { EuiButtonEmpty, EuiStat } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { LocatorPublic } from '@kbn/share-plugin/common';
-import { euiThemeVars } from '@kbn/ui-theme';
+import type { LocatorPublic } from '@kbn/share-plugin/common';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import { RulesParams } from '../../../locators/rules';
+import type { RulesLocatorParams } from '@kbn/rule-data-utils';
 
 export interface RuleStatsState {
   total: number;
@@ -21,11 +20,6 @@ export interface RuleStatsState {
   snoozed: number;
 }
 type Status = 'disabled' | 'snoozed' | 'error';
-
-const Divider = euiStyled.div`
-  border-right: 1px solid ${euiThemeVars.euiColorLightShade};
-  height: 100%;
-`;
 
 const StyledStat = euiStyled(EuiStat)`
   .euiText {
@@ -60,9 +54,8 @@ const errorsLabel = i18n.translate('xpack.observability.alerts.ruleStats.errors'
 
 export const renderRuleStats = (
   ruleStats: RuleStatsState,
-  manageRulesHref: string,
   ruleStatsLoading: boolean,
-  rulesLocator?: LocatorPublic<RulesParams>
+  rulesLocator?: LocatorPublic<RulesLocatorParams>
 ) => {
   const handleNavigateToRules = async (stats: RuleStatsState, status: Status) => {
     const count = getStatCount(stats, status);
@@ -169,11 +162,5 @@ export const renderRuleStats = (
     disabledStatsComponent,
     snoozedStatsComponent,
     errorStatsComponent,
-    <Divider />,
-    <EuiButtonEmpty data-test-subj="manageRulesPageButton" href={manageRulesHref}>
-      {i18n.translate('xpack.observability.alerts.manageRulesButtonLabel', {
-        defaultMessage: 'Manage Rules',
-      })}
-    </EuiButtonEmpty>,
-  ].reverse();
+  ];
 };

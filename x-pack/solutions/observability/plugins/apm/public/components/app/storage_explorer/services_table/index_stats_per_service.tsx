@@ -10,11 +10,11 @@ import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiInMemoryTable, EuiPanel, EuiTitle, EuiSpacer, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { ValuesType } from 'utility-types';
+import type { APIReturnType } from '@kbn/apm-api-shared';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import { asDynamicBytes, asInteger } from '../../../../../common/utils/formatters';
 import { FETCH_STATUS, isPending } from '../../../../hooks/use_fetcher';
-import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { SizeLabel } from './size_label';
 import { getIndexManagementHref } from '../get_storage_explorer_links';
 
@@ -74,6 +74,7 @@ export function IndexStatsPerService({ indicesStats, status }: Props) {
       }),
       render: (_, { dataStream }) =>
         (
+          // @ts-expect-error upgrade typescript v5.9.3
           <EuiLink
             data-test-subj="storageExplorerIndexManagementDataStreamLink"
             href={getIndexManagementHref(core, dataStream)}
@@ -108,7 +109,7 @@ export function IndexStatsPerService({ indicesStats, status }: Props) {
       <EuiPanel>
         <EuiInMemoryTable
           tableCaption={i18n.translate('xpack.apm.storageExplorer.indicesStats.table.caption', {
-            defaultMessage: 'Storage Explorer indices breakdown',
+            defaultMessage: 'Storage explorer indices breakdown',
           })}
           items={indicesStats}
           columns={columns}
@@ -123,7 +124,7 @@ export function IndexStatsPerService({ indicesStats, status }: Props) {
                 })
               : ''
           }
-          message={
+          noItemsMessage={
             loading
               ? i18n.translate('xpack.apm.storageExplorer.indicesStats.table.loading', {
                   defaultMessage: 'Loading...',

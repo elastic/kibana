@@ -6,11 +6,8 @@
  */
 
 import { from } from 'rxjs';
-import type {
-  DataViewsServerPluginStart,
-  ISearchStrategy,
-  SearchStrategyDependencies,
-} from '@kbn/data-plugin/server';
+import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
+import type { ISearchStrategy, SearchStrategyDependencies } from '@kbn/data-plugin/server';
 
 import { requestIndexFieldSearch } from '@kbn/timelines-plugin/server/search_strategy/index_fields';
 
@@ -23,9 +20,11 @@ import type {
 import type { EndpointAppContextService } from '../../endpoint/endpoint_app_context_services';
 import { EndpointAuthorizationError } from '../../endpoint/errors';
 import { parseRequest } from './parse_request';
+import { buildIndexNameWithNamespace } from '../../../common/endpoint/utils/index_name_utilities';
+import { prefixIndexPatternsWithCcs } from '../../endpoint/utils/ccs_utils';
 
 /**
- * EndpointFieldProvider mimics indexField provider from timeline plugin: x-pack/platform/plugins/shared/timelines/server/search_strategy/index_fields/index.ts
+ * EndpointFieldProvider mimics indexField provider from timeline plugin: x-pack/solutions/security/plugins/timelines/server/search_strategy/index_fields/index.ts
  * but it uses ES internalUser instead to avoid adding extra index privileges for users with event filters permissions.
  * It is used to retrieve index patterns for event filters form.
  */
@@ -52,7 +51,9 @@ export const requestEndpointFieldsSearch = async (
   beatFields: BeatFields,
   indexPatterns: DataViewsServerPluginStart
 ): Promise<IndexFieldsStrategyResponse> => {
-  const parsedRequest = parseRequest(request);
+  const isTAAdvancedModeFeatureFlagEnabled = context.experimentalFeatures.trustedAppsAdvancedMode;
+  const ccsEnabled = await context.isCcsEnabled();
+  let parsedRequest = parseRequest(request);
 
   if (
     parsedRequest.indices.length > 1 ||
@@ -62,16 +63,48 @@ export const requestEndpointFieldsSearch = async (
     throw new Error(`Invalid indices request ${request.indices.join(', ')}`);
   }
 
-  const { canWriteEventFilters, canReadEndpointList } = await context.getEndpointAuthz(
-    deps.request
-  );
+  if (parsedRequest.indices[0] === eventsIndexPattern) {
+    const { id: spaceId } = await context.getActiveSpace(deps.request);
+    const integrationNamespaces = await context
+      .getInternalFleetServices(spaceId)
+      .getIntegrationNamespaces(['endpoint']);
+
+    const namespaces = integrationNamespaces.endpoint;
+    if (namespaces && namespaces.length > 0) {
+      const combinedPatterns = namespaces.map((namespace) =>
+        buildIndexNameWithNamespace(eventsIndexPattern, namespace, { preserveWildcard: true })
+      );
+      parsedRequest = {
+        ...parsedRequest,
+        indices: [combinedPatterns.join(',')],
+      };
+    }
+  }
+
+  const { canWriteEventFilters, canReadEndpointList, canWriteTrustedApplications } =
+    await context.getEndpointAuthz(deps.request);
 
   if (
     (!canWriteEventFilters && parsedRequest.indices[0] === eventsIndexPattern) ||
+    (isTAAdvancedModeFeatureFlagEnabled &&
+      !canWriteTrustedApplications &&
+      parsedRequest.indices[0] === eventsIndexPattern) ||
     (!canReadEndpointList && parsedRequest.indices[0] === METADATA_UNITED_INDEX)
   ) {
     throw new EndpointAuthorizationError();
   }
+
+  const ccsIndexPattern = prefixIndexPatternsWithCcs(parsedRequest.indices[0], ccsEnabled);
+
+  parsedRequest = {
+    ...parsedRequest,
+    // CCS prefixing yields `local,*:local`. The downstream existence check
+    // (`findExistingIndices`) runs `field_caps` with `allow_no_indices: false`, which
+    // errors on the local entry when all endpoint data lives on the remote cluster
+    // (remote-output topology). Passing each pattern separately lets the remote (`*:`)
+    // entry resolve on its own instead of the empty local entry failing the whole call.
+    indices: ccsEnabled ? ccsIndexPattern.split(',') : [ccsIndexPattern],
+  };
 
   return requestIndexFieldSearch(parsedRequest, deps, beatFields, indexPatterns, true);
 };

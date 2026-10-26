@@ -6,38 +6,26 @@
  */
 
 import React from 'react';
-import { screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { fireEvent, screen } from '@testing-library/react';
 
 import { connectorsMock } from '../../containers/mock';
 import { Connector } from './connector';
-import { useGetIncidentTypes } from '../connectors/resilient/use_get_incident_types';
-import { useGetSeverity } from '../connectors/resilient/use_get_severity';
 import { useGetChoices } from '../connectors/servicenow/use_get_choices';
-import { incidentTypes, severity, choices } from '../connectors/mock';
+import { choices } from '../connectors/mock';
 import { noConnectorsCasePermission, renderWithTestingProviders } from '../../common/mock';
 
 import { FormTestComponent } from '../../common/test_utils';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { coreMock } from '@kbn/core/public/mocks';
 
-jest.mock('../connectors/resilient/use_get_incident_types');
-jest.mock('../connectors/resilient/use_get_severity');
+// Warm Jest's module cache for the React.lazy connector fields at module load (not governed by
+// testTimeout), so tests don't race the dynamic import under CI load.
+import '../connectors/jira/case_fields';
+import '../connectors/resilient/case_fields';
+
 jest.mock('../connectors/servicenow/use_get_choices');
 
-const useGetIncidentTypesMock = useGetIncidentTypes as jest.Mock;
-const useGetSeverityMock = useGetSeverity as jest.Mock;
 const useGetChoicesMock = useGetChoices as jest.Mock;
-
-const useGetIncidentTypesResponse = {
-  isLoading: false,
-  incidentTypes,
-};
-
-const useGetSeverityResponse = {
-  isLoading: false,
-  severity,
-};
 
 const useGetChoicesResponse = {
   isLoading: false,
@@ -53,9 +41,6 @@ const defaultProps = {
 describe('Connector', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-
-    useGetIncidentTypesMock.mockReturnValue(useGetIncidentTypesResponse);
-    useGetSeverityMock.mockReturnValue(useGetSeverityResponse);
     useGetChoicesMock.mockReturnValue(useGetChoicesResponse);
   });
 
@@ -103,7 +88,7 @@ describe('Connector', () => {
     );
 
     expect(await screen.findByTestId('caseConnectors')).toBeInTheDocument();
-    await userEvent.click(await screen.findByTestId('dropdown-connectors'));
+    fireEvent.click(await screen.findByTestId('dropdown-connectors'));
 
     await waitForEuiPopoverOpen();
 
@@ -123,11 +108,11 @@ describe('Connector', () => {
     );
 
     expect(await screen.findByTestId('caseConnectors')).toBeInTheDocument();
-    await userEvent.click(await screen.findByTestId('dropdown-connectors'));
+    fireEvent.click(await screen.findByTestId('dropdown-connectors'));
 
     await waitForEuiPopoverOpen();
 
-    await userEvent.click(await screen.findByTestId('dropdown-connector-resilient-2'));
+    fireEvent.click(await screen.findByTestId('dropdown-connector-resilient-2'));
 
     expect(await screen.findByTestId('connector-fields-resilient')).toBeInTheDocument();
   });

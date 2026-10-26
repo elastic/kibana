@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { OpenAPIV3 } from 'openapi-types';
+import type { OpenAPIV3 } from 'openapi-types';
 import { bundleSpecs } from './bundle_specs';
 import { createOASDocument } from '../create_oas_document';
 
@@ -337,7 +337,7 @@ describe('OpenAPI Bundler - bundle references', () => {
         common_a: commonSpecA,
         common_b: commonSpecB,
       })
-    ).rejects.toThrowError(/\/components\/schemas\/ConflictTestSchema/);
+    ).rejects.toThrow(/\/components\/schemas\/ConflictTestSchema/);
   });
 
   it('DOES NOT bundle conflicting references encountered in separate specs', async () => {
@@ -403,6 +403,6 @@ describe('OpenAPI Bundler - bundle references', () => {
         1: spec1,
         2: spec2,
       })
-    ).rejects.toThrowError(/\/components\/schemas\/ConflictTestSchema/);
+    ).rejects.toThrow(/\/components\/schemas\/ConflictTestSchema/);
   });
 });

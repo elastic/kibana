@@ -17,7 +17,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { useEuiTheme } from '@elastic/eui';
 import { useSeriesStorage } from '../hooks/use_series_storage';
-import { SeriesUrl } from '../types';
+import type { SeriesUrl } from '../types';
 
 export function SeriesColorPicker({ seriesId, series }: { seriesId: number; series: SeriesUrl }) {
   const { euiTheme } = useEuiTheme();
@@ -42,13 +42,20 @@ export function SeriesColorPicker({ seriesId, series }: { seriesId: number; seri
         onClick={() => setIsOpen((prevState) => !prevState)}
         flush="both"
       >
-        <EuiIcon type="stopFilled" size="l" color={color} />
+        <EuiIcon type="stopFill" size="l" color={color} aria-hidden={true} />
       </EuiButtonEmpty>
     </EuiToolTip>
   );
 
   return (
-    <EuiPopover button={button} isOpen={isOpen} closePopover={() => setIsOpen(false)}>
+    <EuiPopover
+      aria-label={i18n.translate('xpack.exploratoryView.seriesColorPicker.popoverAriaLabel', {
+        defaultMessage: 'Pick a color',
+      })}
+      button={button}
+      isOpen={isOpen}
+      closePopover={() => setIsOpen(false)}
+    >
       <EuiFormRow label={PICK_A_COLOR_LABEL}>
         <EuiColorPicker onChange={onChange} color={color} />
       </EuiFormRow>

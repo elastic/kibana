@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { SecurityApiKey } from '@elastic/elasticsearch/lib/api/types';
+
 import { schema } from '@kbn/config-schema';
 import type { QueryApiKeyResult } from '@kbn/security-plugin-types-common';
 
@@ -15,6 +17,18 @@ import { createLicensedRouteHandler } from '../licensed_route_handler';
 interface QueryClause {
   [key: string]: any;
 }
+
+const transformAPIKeyNames = (keys: SecurityApiKey[]) => {
+  return keys.map((key) => {
+    if (!key.name) {
+      key.name = key.id;
+    }
+    return key;
+  });
+};
+
+// `search_after` needs an order identical across requests, which index order (`_doc`) is not.
+const SORT_TIEBREAKER_FIELDS = ['name', 'creation'] as const;
 
 export function defineQueryApiKeysAndAggregationsRoute({
   router,
@@ -34,7 +48,6 @@ export function defineQueryApiKeysAndAggregationsRoute({
       validate: {
         body: schema.object({
           query: schema.maybe(schema.object({}, { unknowns: 'allow' })),
-          from: schema.maybe(schema.number()),
           size: schema.maybe(schema.number()),
           sort: schema.maybe(
             schema.object({
@@ -44,7 +57,7 @@ export function defineQueryApiKeysAndAggregationsRoute({
           ),
           filters: schema.maybe(
             schema.object({
-              usernames: schema.maybe(schema.arrayOf(schema.string())),
+              usernames: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
               type: schema.maybe(
                 schema.oneOf([
                   schema.literal('rest'),
@@ -53,6 +66,11 @@ export function defineQueryApiKeysAndAggregationsRoute({
                 ])
               ),
               expired: schema.maybe(schema.boolean()),
+            })
+          ),
+          searchAfter: schema.maybe(
+            schema.arrayOf(schema.nullable(schema.oneOf([schema.string(), schema.number()])), {
+              maxSize: 10,
             })
           ),
         }),
@@ -87,7 +105,7 @@ export function defineQueryApiKeysAndAggregationsRoute({
         const alertingPrefixFilter = { prefix: { name: { value: 'Alerting: ' } } };
         const managedMetadataFilter = { term: { 'metadata.managed': true } };
 
-        const { query, size, from, sort, filters } = request.body;
+        const { query, size, sort, filters, searchAfter } = request.body;
 
         const queryPayload: {
           bool: { must: QueryClause[]; should: QueryClause[]; must_not: QueryClause[] };
@@ -153,21 +171,32 @@ export function defineQueryApiKeysAndAggregationsRoute({
           }
         }
 
-        const transformedSort = sort && [{ [sort.field]: { order: sort.direction } }];
+        const transformedSort = sort && [
+          { [sort.field]: { order: sort.direction } },
+          ...SORT_TIEBREAKER_FIELDS.filter((field) => field !== sort.field).map((field) => ({
+            [field]: { order: 'asc' as const },
+          })),
+        ];
         let queryResult: Partial<QueryApiKeyResult>;
         try {
           const queryResponse = await esClient.asCurrentUser.security.queryApiKeys({
             query: queryPayload,
             sort: transformedSort,
             size,
-            from,
+            search_after: searchAfter,
           });
+
+          // Extract the sort values from the last API key for cursor-based pagination
+          // ES returns sort values in `_sort` field when sorting is used
+          const lastApiKey = queryResponse.api_keys[queryResponse.api_keys.length - 1];
+          const nextSearchAfter = lastApiKey?._sort;
 
           queryResult = {
             // @ts-expect-error Elasticsearch client types do not know about Cross-Cluster API keys yet.
-            apiKeys: queryResponse.api_keys,
+            apiKeys: transformAPIKeyNames(queryResponse.api_keys),
             total: queryResponse.total,
             count: queryResponse.api_keys.length,
+            searchAfter: nextSearchAfter,
           };
         } catch ({ name, message }) {
           queryResult = { queryError: { name, message } };

@@ -12,7 +12,7 @@ import Path from 'path';
 import { getRepoFiles } from '@kbn/get-repo-files';
 import { REPO_ROOT } from '@kbn/repo-info';
 
-import { PluginOrPackage as Package } from './types';
+import type { PluginOrPackage as Package } from './types';
 
 export async function getPathsByPackage(packages: Package[]) {
   /**

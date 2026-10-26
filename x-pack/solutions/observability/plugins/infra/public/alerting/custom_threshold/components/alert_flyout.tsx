@@ -11,14 +11,16 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { RuleFormFlyout } from '@kbn/response-ops-rule-form/flyout';
 import { useContext, useMemo } from 'react';
+import type { EuiFlyoutResizableProps } from '@elastic/eui';
 import type { InfraClientStartDeps } from '../../../types';
 import { TriggerActionsContext } from '../../../containers/triggers_actions_context';
 
 interface Props {
   onClose: () => void;
+  focusTrapProps?: EuiFlyoutResizableProps['focusTrapProps'];
 }
 
-export function AlertFlyout({ onClose }: Props) {
+export function AlertFlyout({ onClose, focusTrapProps }: Props) {
   const { services } = useKibana<CoreStart & InfraClientStartDeps>();
   const { triggersActionsUI } = useContext(TriggerActionsContext);
 
@@ -45,9 +47,10 @@ export function AlertFlyout({ onClose }: Props) {
             groupBy: 'host.name',
           },
         }}
+        focusTrapProps={focusTrapProps}
       />
     );
-  }, [onClose, triggersActionsUI, services]);
+  }, [onClose, triggersActionsUI, services, focusTrapProps]);
 
   return addAlertFlyout;
 }

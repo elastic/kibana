@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import type { ExpandWildcard, MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
-import { QueryDslQueryContainer } from '../../../common/types';
+import type { QueryDslQueryContainer } from '../../../common/types';
 import { convertEsError } from './errors';
 
 /**
@@ -52,6 +52,7 @@ interface FieldCapsApiParams {
   includeEmptyFields?: boolean;
   runtimeMappings?: MappingRuntimeFields;
   abortSignal?: AbortSignal;
+  projectRouting?: string;
 }
 
 /**
@@ -81,6 +82,7 @@ export async function callFieldCapsApi(params: FieldCapsApiParams) {
     includeEmptyFields,
     runtimeMappings,
     abortSignal,
+    projectRouting,
   } = params;
   try {
     return await callCluster.fieldCaps(
@@ -93,6 +95,7 @@ export async function callFieldCapsApi(params: FieldCapsApiParams) {
         types: fieldTypes,
         include_empty_fields: includeEmptyFields ?? true,
         runtime_mappings: runtimeMappings,
+        ...(projectRouting ? { project_routing: projectRouting } : {}),
         ...fieldCapsOptions,
       },
       { meta: true, signal: abortSignal }

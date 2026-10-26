@@ -12,7 +12,7 @@ import type {
   DataView,
   DataViewSpec,
 } from '@kbn/data-views-plugin/public';
-import { RuntimeField } from '@kbn/data-views-plugin/public';
+import type { RuntimeField } from '@kbn/data-views-plugin/public';
 import { DataViewMissingIndices } from '@kbn/data-views-plugin/common';
 import { getDataHandler } from '../../data_handler';
 import { DataTypesLabels } from '../../components/shared/exploratory_view/labels';
@@ -20,13 +20,14 @@ import { syntheticsRuntimeFields } from '../../components/shared/exploratory_vie
 import { getApmDataViewTitle } from '../../components/shared/exploratory_view/utils/utils';
 import { rumFieldFormats } from '../../components/shared/exploratory_view/configurations/rum/field_formats';
 import { syntheticsFieldFormats } from '../../components/shared/exploratory_view/configurations/synthetics/field_formats';
-import {
+import type {
   AppDataType,
   FieldFormat,
   FieldFormatParams,
 } from '../../components/shared/exploratory_view/types';
 import { apmFieldFormats } from '../../components/shared/exploratory_view/configurations/apm/field_formats';
 import { infraMetricsFieldFormats } from '../../components/shared/exploratory_view/configurations/infra_metrics/field_formats';
+import { alertsFieldFormats } from '../../components/shared/exploratory_view/configurations/alerts/field_formats';
 
 const appFieldFormats: Record<AppDataType, FieldFormat[] | null> = {
   infra_logs: null,
@@ -36,7 +37,7 @@ const appFieldFormats: Record<AppDataType, FieldFormat[] | null> = {
   uptime: syntheticsFieldFormats,
   synthetics: syntheticsFieldFormats,
   mobile: apmFieldFormats,
-  alerts: null,
+  alerts: alertsFieldFormats,
 };
 
 const appRuntimeFields: Record<AppDataType, Array<{ name: string; field: RuntimeField }> | null> = {

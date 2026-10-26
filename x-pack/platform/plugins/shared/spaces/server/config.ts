@@ -10,6 +10,13 @@ import type { Observable } from 'rxjs';
 import type { TypeOf } from '@kbn/config-schema';
 import { offeringBasedSchema, schema } from '@kbn/config-schema';
 import type { PluginInitializerContext } from '@kbn/core/server';
+import type { SolutionId } from '@kbn/core-chrome-browser';
+
+const solutions = ['es', 'oblt', 'security'] as const;
+
+const solutionSchemaLiterals = [...solutions].map((s) => schema.literal(s)) as [
+  ReturnType<typeof schema.literal<Exclude<SolutionId, 'vectordb'>>>
+];
 
 export const ConfigSchema = schema.object({
   enabled: schema.conditional(
@@ -54,6 +61,28 @@ export const ConfigSchema = schema.object({
       defaultValue: true,
     }),
   }),
+  initialSolutionSetup: offeringBasedSchema({
+    serverless: schema.object({
+      enabled: schema.boolean({
+        defaultValue: false,
+        validate: (rawValue) => {
+          if (rawValue) {
+            return 'Initial solution setup is unavailable on serverless';
+          }
+        },
+      }),
+    }),
+    traditional: schema.object({
+      enabled: schema.conditional(
+        schema.contextRef('dev'),
+        true,
+        schema.boolean(),
+        schema.literal(false),
+        { defaultValue: schema.contextRef('dev') }
+      ),
+    }),
+  }),
+  defaultSolution: schema.maybe(schema.oneOf(solutionSchemaLiterals)),
 });
 
 export function createConfig$(context: PluginInitializerContext) {

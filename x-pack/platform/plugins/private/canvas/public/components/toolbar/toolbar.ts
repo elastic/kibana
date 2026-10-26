@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { connect } from 'react-redux';
+import { connect } from 'react-redux-v7';
 import { canUserWrite } from '../../state/selectors/app';
 
 import {
@@ -17,7 +17,7 @@ import {
 } from '../../state/selectors/workpad';
 
 import { Toolbar as ToolbarComponent } from './toolbar.component';
-import { State } from '../../../types';
+import type { State } from '../../../types';
 
 export const Toolbar = connect((state: State) => ({
   workpadName: getWorkpadName(state),

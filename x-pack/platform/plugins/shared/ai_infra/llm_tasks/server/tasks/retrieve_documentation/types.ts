@@ -7,7 +7,7 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import type { FunctionCallingMode } from '@kbn/inference-common';
-import type { ProductName } from '@kbn/product-doc-common';
+import type { ProductName, ResourceType } from '@kbn/product-doc-common';
 
 /**
  * Parameters for {@link RetrieveDocumentationAPI}
@@ -27,6 +27,11 @@ export interface RetrieveDocumentationParams {
    * Optional list of products to restrict the search to.
    */
   products?: ProductName[];
+  /**
+   * Optional resource types to include in the search.
+   * Defaults to product documentation.
+   */
+  resourceTypes?: ResourceType[];
   /**
    * The maximum number of tokens to return *per document*.
    * Documents exceeding this limit will go through token reduction.
@@ -58,6 +63,10 @@ export interface RetrieveDocumentationParams {
    * Optional functionCalling parameter to pass down to the inference APIs.
    */
   functionCalling?: FunctionCallingMode;
+  /**
+   * Inferece ID to route the request to the right index to perform the search.
+   */
+  inferenceId: string;
 }
 
 /**

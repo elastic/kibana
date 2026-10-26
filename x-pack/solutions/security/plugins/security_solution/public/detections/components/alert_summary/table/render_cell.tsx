@@ -5,60 +5,62 @@
  * 2.0.
  */
 
-import React, { memo, useMemo } from 'react';
-import type { Alert } from '@kbn/alerting-types';
-import type { JsonValue } from '@kbn/utility-types';
-import { getOrEmptyTagFromValue } from '../../../../common/components/empty_value';
+import React, { type ComponentProps, memo } from 'react';
+import { ALERT_SEVERITY } from '@kbn/rule-data-utils';
+import { RELATED_INTEGRATION } from '../../../constants';
+import type { GetTableProp } from './types';
+import { DatetimeSchemaCellRenderer } from './datetime_schema_cell_renderer';
+import { BasicCellRenderer } from './basic_cell_renderer';
+import { KibanaAlertSeverityCellRenderer } from './kibana_alert_severity_cell_renderer';
+import { KibanaAlertRelatedIntegrationsCellRenderer } from './kibana_alert_related_integrations_cell_renderer';
 
-const styles = { display: 'flex', alignItems: 'center', height: '100%' };
+const DATETIME_SCHEMA = 'datetime';
 
-export interface CellValueProps {
+export type CellValueProps = Pick<
+  ComponentProps<GetTableProp<'renderCellValue'>>,
   /**
-   * Alert data passed from the renderCellValue callback via the AlertWithLegacyFormats interface
+   * Alert data passed from the renderCellValue callback
    */
-  alert: Alert;
+  | 'alert'
   /**
    * Column id passed from the renderCellValue callback via EuiDataGridProps['renderCellValue'] interface
    */
-  columnId: string;
-}
+  | 'columnId'
+  /**
+   * List of installed EASE integrations.
+   * This comes from the additionalContext property on the table.
+   */
+  | 'packages'
+  /**
+   * Type of field used to drive how we render the value in the BasicCellRenderer.
+   * This comes from EuiDataGrid.
+   */
+  | 'schema'
+>;
 
 /**
- * Component used in the AI for SOC alert summary table.
- * It renders all the values currently as simply as possible (see code comments below).
- * It will be soon improved to support custom renders for specific fields (like kibana.alert.rule.parameters and kibana.alert.severity).
+ * Component used in EASE alert summary table.
+ * It renders some of the value with custom renderers for some specific columns:
+ *  - kibana.alert.rule.parameters
+ *  - kibana.alert.severity
+ * It also renders some schema types specifically (this property come from EuiDataGrid):
+ *  - datetime
+ * Finally it renders the rest as basic strings.
  */
-export const CellValue = memo(({ alert, columnId }: CellValueProps) => {
-  const displayValue: string | null = useMemo(() => {
-    const cellValues: string | number | JsonValue[] = alert[columnId];
+export const CellValue = memo(({ alert, columnId, packages, schema }: CellValueProps) => {
+  let component;
 
-    // Displays string as is.
-    // Joins values of array with more than one element.
-    // Returns null if the value is null.
-    // Return the string of the value otherwise.
-    if (typeof cellValues === 'string') {
-      return cellValues;
-    } else if (typeof cellValues === 'number') {
-      return cellValues.toString();
-    } else if (Array.isArray(cellValues)) {
-      if (cellValues.length > 1) {
-        return cellValues.join(', ');
-      } else {
-        const value: JsonValue = cellValues[0];
-        if (typeof value === 'string') {
-          return value;
-        } else if (value == null) {
-          return null;
-        } else {
-          return value.toString();
-        }
-      }
-    } else {
-      return null;
-    }
-  }, [alert, columnId]);
+  if (columnId === RELATED_INTEGRATION) {
+    component = <KibanaAlertRelatedIntegrationsCellRenderer alert={alert} packages={packages} />;
+  } else if (columnId === ALERT_SEVERITY) {
+    component = <KibanaAlertSeverityCellRenderer alert={alert} />;
+  } else if (schema === DATETIME_SCHEMA) {
+    component = <DatetimeSchemaCellRenderer alert={alert} field={columnId} />;
+  } else {
+    component = <BasicCellRenderer alert={alert} field={columnId} />;
+  }
 
-  return <div style={styles}>{getOrEmptyTagFromValue(displayValue)}</div>;
+  return <>{component}</>;
 });
 
 CellValue.displayName = 'CellValue';

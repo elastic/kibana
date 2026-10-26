@@ -6,12 +6,14 @@
  */
 
 import React from 'react';
+import { ProfilingSchemaStateProvider } from '@kbn/observability-shared-plugin/public';
 import { ReloadRequestTimeProvider } from '../../hooks/use_reload_request_time';
 import { AssetDetailsRenderPropsProvider } from './hooks/use_asset_details_render_props';
 import { DatePickerProvider } from './hooks/use_date_picker';
 import { LoadingStateProvider } from './hooks/use_loading_state';
 import { MetadataStateProvider } from './hooks/use_metadata_state';
 import type { AssetDetailsProps, RenderMode } from './types';
+import { EntityDetailsTimeRangeMetadataProvider } from './entity_details_metadata_provider';
 
 const RenderWithOptionalSearchSessionProvider = ({
   renderMode,
@@ -34,29 +36,33 @@ export const ContextProviders = ({
   children: React.ReactNode;
 }) => {
   const {
-    assetId,
-    assetName,
+    entityId,
+    entityName,
     autoRefresh,
     dateRange,
     overrides,
-    assetType = 'host',
+    entityType = 'host',
     renderMode,
+    preferredSchema,
   } = props;
 
   return (
     <RenderWithOptionalSearchSessionProvider renderMode={renderMode}>
       <DatePickerProvider dateRange={dateRange} autoRefresh={autoRefresh}>
         <LoadingStateProvider>
-          <MetadataStateProvider assetId={assetId} assetType={assetType}>
-            <AssetDetailsRenderPropsProvider
-              assetId={assetId}
-              assetName={assetName}
-              assetType={assetType}
-              overrides={overrides}
-              renderMode={renderMode}
-            >
-              {children}
-            </AssetDetailsRenderPropsProvider>
+          <MetadataStateProvider entityId={entityId} entityType={entityType}>
+            <EntityDetailsTimeRangeMetadataProvider entityType={entityType} entityId={entityId}>
+              <AssetDetailsRenderPropsProvider
+                entityId={entityId}
+                entityName={entityName}
+                entityType={entityType}
+                overrides={overrides}
+                renderMode={renderMode}
+                preferredSchema={preferredSchema}
+              >
+                <ProfilingSchemaStateProvider>{children}</ProfilingSchemaStateProvider>
+              </AssetDetailsRenderPropsProvider>
+            </EntityDetailsTimeRangeMetadataProvider>
           </MetadataStateProvider>
         </LoadingStateProvider>
       </DatePickerProvider>

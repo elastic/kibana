@@ -6,6 +6,20 @@
  */
 
 export { OSQUERY_INTEGRATION_NAME, BASE_PATH } from './constants';
+export {
+  allowedExperimentalValues,
+  parseExperimentalConfigValue,
+  getExperimentalAllowedValues,
+} from './experimental_features';
+export type { ExperimentalFeatures } from './experimental_features';
+export type { ScheduleType, RRuleScheduleConfig } from './schedule';
+export { MAX_SPLAY_SECONDS } from './schedule';
+export { PREBUILT_PACK_RESOLVE_REASON, PREBUILT_PACK_UNAVAILABLE_REASON } from './prebuilt_packs';
+export type {
+  PrebuiltPackListItem,
+  PrebuiltPackResolveReason,
+  PrebuiltPackUnavailableReason,
+} from './prebuilt_packs';
 
 export const PLUGIN_ID = 'osquery';
 export const PLUGIN_NAME = 'Osquery';

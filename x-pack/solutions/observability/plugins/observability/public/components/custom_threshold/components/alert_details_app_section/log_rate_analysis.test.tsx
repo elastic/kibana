@@ -17,7 +17,7 @@ import {
   buildCustomThresholdRule,
 } from '../../mocks/custom_threshold_rule';
 import { kibanaStartMock } from '../../../../utils/kibana_react.mock';
-import { CustomThresholdAlert } from '../types';
+import type { CustomThresholdAlert } from '../types';
 import { LogRateAnalysis } from './log_rate_analysis';
 
 describe('AlertDetailsAppSection', () => {
@@ -64,6 +64,6 @@ describe('AlertDetailsAppSection', () => {
 
   // To avoid https://github.com/elastic/kibana/issues/206588
   it('should render LogRateAnalysis without throwing error', async () => {
-    expect(renderComponent).not.toThrowError();
+    expect(renderComponent).not.toThrow();
   });
 });

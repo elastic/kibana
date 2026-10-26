@@ -11,24 +11,41 @@ import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrService } from '../ftr_provider_context';
 
 export class TimelionPageObject extends FtrService {
-  private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly retry = this.ctx.getService('retry');
+  private readonly monacoEditor = this.ctx.getService('monacoEditor');
+  private readonly browser = this.ctx.getService('browser');
+  private readonly log = this.ctx.getService('log');
 
   public async getSuggestionItemsText() {
     let lists: WebElementWrapper[] = [];
+    let manuallyTriggered = false;
     await this.retry.try(async () => {
-      const timelionCodeEditor = await this.testSubjects.find('timelionCodeEditor');
-      lists = await timelionCodeEditor.findAllByClassName('monaco-list-row');
+      const editorSuggestions = await this.monacoEditor.getCodeEditorSuggestWidget();
+      lists = await editorSuggestions.findAllByClassName('monaco-list-row');
       if (lists.length === 0) {
-        throw new Error('suggestion list not populated');
+        // A manually triggered suggest shows "No suggestions." or "Loading..." instead of hiding,
+        // so the next attempt reveals whether the provider returned an empty list.
+        const widgetText = await editorSuggestions.getVisibleText();
+        await this.browser.execute(() => {
+          window.MonacoEnvironment?.monaco?.editor
+            ?.getEditors()?.[0]
+            ?.trigger('ftr', 'editor.action.triggerSuggest', {});
+        });
+        manuallyTriggered = true;
+        throw new Error(`suggestion list not populated (widget text: "${widgetText}")`);
       }
     });
+    if (manuallyTriggered) {
+      this.log.warning(
+        'Suggestions appeared only after manually triggering suggest; the original suggest session was cancelled'
+      );
+    }
     return await Promise.all(lists.map(async (element) => await element.getVisibleText()));
   }
 
   public async clickSuggestion(suggestionIndex = 0) {
-    const timelionCodeEditor = await this.testSubjects.find('timelionCodeEditor');
-    const lists = await timelionCodeEditor.findAllByCssSelector('.monaco-list-row');
+    const editorSuggestions = await this.monacoEditor.getCodeEditorSuggestWidget();
+    const lists = await editorSuggestions.findAllByCssSelector('.monaco-list-row');
     if (suggestionIndex > lists.length) {
       throw new Error(
         `Unable to select suggestion ${suggestionIndex}, only ${lists.length} suggestions available.`

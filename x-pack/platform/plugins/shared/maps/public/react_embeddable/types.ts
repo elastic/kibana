@@ -5,61 +5,46 @@
  * 2.0.
  */
 
-import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
-import type { TimeRange } from '@kbn/es-query';
+import type { DefaultEmbeddableApi, HasDrilldowns } from '@kbn/embeddable-plugin/public';
 import type { HasInspectorAdapters } from '@kbn/inspector-plugin/public';
 import type {
+  CanCancelRequests,
   HasEditCapabilities,
   HasLibraryTransforms,
   HasSupportedTriggers,
   HasType,
   PublishesDataLoading,
   PublishesDataViews,
+  PublishesEsql,
+  PublishesProjectRoutingOverrides,
   PublishesUnifiedSearch,
-  SerializedTitles,
+  PublishesWritableTitle,
+  PublishesRendered,
 } from '@kbn/presentation-publishing';
-import type { HasDynamicActions } from '@kbn/embeddable-enhanced-plugin/public';
-import type { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public/plugin';
 import type { Observable } from 'rxjs';
-import type { MapAttributes } from '../../common/content_management';
-import type {
-  LayerDescriptor,
-  MapCenterAndZoom,
-  MapExtent,
-  MapSettings,
-} from '../../common/descriptor_types';
+import type { LayerDescriptor } from '../../common/descriptor_types';
 import type { ILayer } from '../classes/layers/layer';
 import type { EventHandlers } from '../reducers/non_serializable_instances';
+import type {
+  MapByReferenceState,
+  MapByValueState,
+  MapEmbeddableState,
+} from '../../common/embeddable/types';
 
-export type MapSerializedState = SerializedTitles &
-  Partial<DynamicActionsSerializedState> & {
-    // by-value
-    attributes?: MapAttributes;
-    // by-reference
-    savedObjectId?: string;
-
-    isLayerTOCOpen?: boolean;
-    openTOCDetails?: string[];
-    mapCenter?: MapCenterAndZoom;
-    mapBuffer?: MapExtent;
-    mapSettings?: Partial<MapSettings>;
-    hiddenLayers?: string[];
-    timeRange?: TimeRange;
-    filterByMapExtent?: boolean;
-    isMovementSynchronized?: boolean;
-  };
-
-export type MapRuntimeState = MapSerializedState;
-
-export type MapApi = DefaultEmbeddableApi<MapSerializedState> &
-  HasDynamicActions &
+export type MapApi = DefaultEmbeddableApi<MapEmbeddableState> &
+  CanCancelRequests &
+  HasDrilldowns &
   Partial<HasEditCapabilities> &
   HasInspectorAdapters &
   HasSupportedTriggers &
   PublishesDataLoading &
   PublishesDataViews &
+  PublishesEsql &
+  PublishesProjectRoutingOverrides &
+  PublishesWritableTitle &
   PublishesUnifiedSearch &
-  HasLibraryTransforms<MapSerializedState, MapSerializedState> & {
+  HasLibraryTransforms<MapByReferenceState, MapByValueState> &
+  PublishesRendered & {
     getLayerList: () => ILayer[];
     reload: () => void;
     setEventHandlers: (eventHandlers: EventHandlers) => void;

@@ -13,15 +13,15 @@ import os from 'os';
 import crypto from 'crypto';
 
 import chalk from 'chalk';
-import simpleGit from 'simple-git';
-import { ToolingLog } from '@kbn/tooling-log';
+import { simpleGit } from 'simple-git';
+import type { ToolingLog } from '@kbn/tooling-log';
 
 import { installArchive } from './install_archive';
 import { log as defaultLog } from '../utils/log';
 import { cache } from '../utils/cache';
 import { buildSnapshot, archiveForPlatform } from '../utils/build_snapshot';
 import { BASE_PATH } from '../paths';
-import { InstallSourceOptions } from './types';
+import type { InstallSourceOptions } from './types';
 
 /**
  * Installs ES from source

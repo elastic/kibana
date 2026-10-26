@@ -9,27 +9,28 @@ import type { ComponentProps, FC, PropsWithChildren } from 'react';
 import React, { useEffect } from 'react';
 import type QueryTabContent from '.';
 import { UnifiedTimeline } from '.';
-import { TimelineId } from '../../../../../common/types/timeline';
+import { TimelineId, TimelineTabs } from '../../../../../common/types/timeline';
 import { useTimelineEvents } from '../../../containers';
 import { useTimelineEventsDetails } from '../../../containers/details';
-import { useSourcererDataView } from '../../../../sourcerer/containers';
-import { mockSourcererScope } from '../../../../sourcerer/containers/mocks';
+import {
+  mockBrowserFieldsWithId,
+  mockDataViewSpec,
+} from '../../../../data_view_manager/mocks/timeline_data_view';
 import {
   createSecuritySolutionStorageMock,
   mockTimelineData,
   TestProviders,
 } from '../../../../common/mock';
 import { createMockStore } from '../../../../common/mock/create_store';
-import { render, screen, fireEvent, cleanup, waitFor, within } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { createStartServicesMock } from '../../../../common/lib/kibana/kibana_react.mock';
 import type { StartServices } from '../../../../types';
 import { useKibana } from '../../../../common/lib/kibana';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 import { timelineActions } from '../../../store';
 import type { ExperimentalFeatures } from '../../../../../common';
 import { allowedExperimentalValues } from '../../../../../common';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import { TimelineTabs } from '@kbn/securitysolution-data-table';
 import { DataLoadingState } from '@kbn/unified-data-table';
 import { getColumnHeaders } from '../body/column_headers/helpers';
 import { defaultUdtHeaders } from '../body/column_headers/default_headers';
@@ -45,11 +46,6 @@ jest.mock('../../../containers/details');
 
 jest.mock('../../fields_browser', () => ({
   useFieldBrowserOptions: jest.fn(),
-}));
-
-jest.mock('../../../../sourcerer/containers');
-jest.mock('../../../../sourcerer/containers/use_signal_helpers', () => ({
-  useSignalHelpers: () => ({ signalIndexNeedsInit: false }),
 }));
 
 jest.mock('../../../../common/lib/kuery');
@@ -82,13 +78,13 @@ const columnsToDisplay = [
 ];
 
 // These tests can take more than standard timeout of 5s
-// that is why we are increasing the timeout
-const SPECIAL_TEST_TIMEOUT = 50000;
+// that is why we are increasing the timeout (higher under parallel Jest workers)
+const SPECIAL_TEST_TIMEOUT = 90000;
 
 const localMockedTimelineData = structuredClone(mockTimelineData);
 
 const mockDataView = new DataView({
-  spec: mockSourcererScope.sourcererDataView,
+  spec: mockDataViewSpec,
   fieldFormats: fieldFormatsMock,
 });
 
@@ -97,7 +93,7 @@ const TestComponent = (
 ) => {
   const { show, ...restProps } = props;
   const testComponentDefaultProps: ComponentProps<typeof QueryTabContent> = {
-    columns: getColumnHeaders(columnsToDisplay, mockSourcererScope.browserFields),
+    columns: getColumnHeaders(columnsToDisplay, mockBrowserFieldsWithId),
     activeTab: TimelineTabs.query,
     dataView: mockDataView,
     rowRenderers: [],
@@ -181,10 +177,6 @@ const useTimelineEventsMock = jest.fn(() => [
   },
 ]);
 
-const useSourcererDataViewMocked = jest.fn().mockReturnValue({
-  ...mockSourcererScope,
-});
-
 const { storage: storageMock } = createSecuritySolutionStorageMock();
 
 describe('unified timeline', () => {
@@ -219,8 +211,6 @@ describe('unified timeline', () => {
     (useTimelineEvents as jest.Mock).mockImplementation(useTimelineEventsMock);
 
     (useTimelineEventsDetails as jest.Mock).mockImplementation(() => [false, {}]);
-
-    (useSourcererDataView as jest.Mock).mockImplementation(useSourcererDataViewMocked);
 
     (useIsExperimentalFeatureEnabled as jest.Mock).mockImplementation(
       useIsExperimentalFeatureEnabledMock

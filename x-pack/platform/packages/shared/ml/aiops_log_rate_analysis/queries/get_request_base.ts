@@ -7,7 +7,8 @@
 
 import type { AiopsLogRateAnalysisSchema } from '../api/schema';
 
-export const getRequestBase = ({ index }: AiopsLogRateAnalysisSchema) => ({
+export const getRequestBase = ({ index, projectRouting }: AiopsLogRateAnalysisSchema) => ({
   index,
   ignore_unavailable: true,
+  ...(projectRouting ? { project_routing: projectRouting } : {}),
 });

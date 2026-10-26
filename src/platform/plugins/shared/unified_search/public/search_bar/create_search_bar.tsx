@@ -13,9 +13,14 @@ import type { CoreStart } from '@kbn/core/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { QueryStart, SavedQuery, DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { KqlPluginStart } from '@kbn/kql/public';
 import type { Query, AggregateQuery } from '@kbn/es-query';
 import type { Filter, TimeRange } from '@kbn/es-query';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import type { CPSPluginStart } from '@kbn/cps/public';
+import type { EsqlPluginStart } from '@kbn/esql/public';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import type { SearchSessionsManagementPluginStart } from '@kbn/search-sessions-management-plugin/public';
 import { SearchBar } from '.';
 import type { SearchBarOwnProps } from '.';
 import { useFilterManager } from './lib/use_filter_manager';
@@ -23,7 +28,6 @@ import { useTimefilter } from './lib/use_timefilter';
 import { useSavedQuery } from './lib/use_saved_query';
 import { useQueryStringManager } from './lib/use_query_string_manager';
 import { canShowSavedQuery } from './lib/can_show_saved_query';
-import type { UnifiedSearchPublicPluginStart } from '../types';
 
 export interface StatefulSearchBarDeps {
   core: CoreStart;
@@ -31,7 +35,11 @@ export interface StatefulSearchBarDeps {
   storage: IStorageWrapper;
   usageCollection?: UsageCollectionSetup;
   isScreenshotMode?: boolean;
-  unifiedSearch: Omit<UnifiedSearchPublicPluginStart, 'ui'>;
+  kql: { autocomplete: KqlPluginStart['autocomplete'] };
+  cps: CPSPluginStart;
+  esql?: EsqlPluginStart;
+  licensing?: LicensingPluginStart;
+  searchSessionsManagement?: SearchSessionsManagementPluginStart;
 }
 
 export type StatefulSearchBarProps<QT extends Query | AggregateQuery = Query> = Omit<
@@ -40,6 +48,7 @@ export type StatefulSearchBarProps<QT extends Query | AggregateQuery = Query> = 
 > & {
   appName: string;
   useDefaultBehaviors?: boolean;
+  disableSubscribingToGlobalDataServices?: boolean;
   savedQueryId?: string;
   /**
    * Determines if saving queries is allowed within the saved query management popover (still requires privileges).
@@ -96,8 +105,13 @@ const defaultOnQuerySubmit = <QT extends AggregateQuery | Query = Query>(
   const { timefilter } = queryService.timefilter;
 
   return (payload: { dateRange: TimeRange; query?: QT | Query }) => {
+    const currentTime = timefilter.getTime();
     const isUpdate =
-      !isEqual(timefilter.getTime(), payload.dateRange) || !isEqual(payload.query, currentQuery);
+      !isEqual(currentTime, payload.dateRange) || !isEqual(payload.query, currentQuery);
+
+    let submittedTime = currentTime;
+    let submittedQuery = currentQuery;
+
     if (isUpdate) {
       timefilter.setTime(payload.dateRange);
       if (payload.query) {
@@ -105,16 +119,19 @@ const defaultOnQuerySubmit = <QT extends AggregateQuery | Query = Query>(
       } else {
         queryService.queryString.clearQuery();
       }
-    } else {
+      submittedTime = timefilter.getTime();
+      submittedQuery = queryService.queryString.getQuery() as QT | Query;
+    }
+
+    if ((!isUpdate || props.disableSubscribingToGlobalDataServices) && props.onQuerySubmit) {
       // Refresh button triggered for an update
-      if (props.onQuerySubmit)
-        props.onQuerySubmit(
-          {
-            dateRange: timefilter.getTime(),
-            query: currentQuery,
-          },
-          false
-        );
+      props.onQuerySubmit(
+        {
+          dateRange: submittedTime,
+          query: submittedQuery,
+        },
+        isUpdate
+      );
     }
   };
 };
@@ -155,12 +172,17 @@ export function createSearchBar({
   data,
   usageCollection,
   isScreenshotMode = false,
-  unifiedSearch,
+  kql,
+  cps,
+  esql,
+  licensing,
+  searchSessionsManagement,
 }: StatefulSearchBarDeps) {
   // App name should come from the core application service.
   // Until it's available, we'll ask the user to provide it for the pre-wired component.
   return <QT extends AggregateQuery | Query = Query>(props: StatefulSearchBarProps<QT>) => {
-    const { useDefaultBehaviors, allowSavingQueries } = props;
+    const { useDefaultBehaviors, allowSavingQueries, disableSubscribingToGlobalDataServices } =
+      props;
     // Handle queries
     const onQuerySubmitRef = useRef(props.onQuerySubmit);
 
@@ -170,14 +192,17 @@ export function createSearchBar({
     // handle service state updates.
     // i.e. filters being added from a visualization directly to filterManager.
     const { filters } = useFilterManager({
+      disabled: disableSubscribingToGlobalDataServices,
       filters: props.filters,
       filterManager: data.query.filterManager,
     });
     const { query } = useQueryStringManager({
+      disabled: disableSubscribingToGlobalDataServices,
       query: props.query,
       queryStringManager: data.query.queryString,
     }) as { query: QT };
     const { timeRange, refreshInterval, minRefreshInterval } = useTimefilter({
+      disabled: disableSubscribingToGlobalDataServices,
       dateRangeFrom: props.dateRangeFrom,
       dateRangeTo: props.dateRangeTo,
       refreshInterval: props.refreshInterval,
@@ -194,7 +219,13 @@ export function createSearchBar({
 
     // Fire onQuerySubmit on query or timerange change
     useEffect(() => {
-      if (!useDefaultBehaviors || !onQuerySubmitRef.current) return;
+      if (
+        !useDefaultBehaviors ||
+        disableSubscribingToGlobalDataServices ||
+        !onQuerySubmitRef.current
+      ) {
+        return;
+      }
       onQuerySubmitRef.current(
         {
           dateRange: timeRange,
@@ -202,7 +233,7 @@ export function createSearchBar({
         },
         true
       );
-    }, [query, timeRange, useDefaultBehaviors]);
+    }, [query, timeRange, useDefaultBehaviors, disableSubscribingToGlobalDataServices]);
 
     const showSaveQuery = canShowSavedQuery({
       allowSavingQueries,
@@ -217,7 +248,11 @@ export function createSearchBar({
           data,
           storage,
           usageCollection,
-          unifiedSearch,
+          kql,
+          cps,
+          esql,
+          licensing,
+          searchSessionsManagement,
           ...core,
         }}
       >
@@ -232,6 +267,7 @@ export function createSearchBar({
             showSubmitButton={props.showSubmitButton}
             submitButtonStyle={props.submitButtonStyle}
             isDisabled={props.isDisabled}
+            disableSubmitAction={props.disableSubmitAction}
             screenTitle={props.screenTitle}
             indexPatterns={props.indexPatterns}
             indicateNoData={props.indicateNoData}
@@ -245,6 +281,8 @@ export function createSearchBar({
             onCancel={props.onCancel}
             filters={filters}
             query={query}
+            draft={props.draft}
+            onDraftChange={props.onDraftChange}
             onFiltersUpdated={defaultFiltersUpdated(data.query, props.onFiltersUpdated)}
             onRefreshChange={
               !props.isAutoRefreshDisabled
@@ -253,6 +291,7 @@ export function createSearchBar({
             }
             savedQuery={savedQuery}
             onQuerySubmit={defaultOnQuerySubmit(props, data.query, query)}
+            onQueryChange={props.onQueryChange}
             onRefresh={props.onRefresh}
             onClearSavedQuery={defaultOnClearSavedQuery(props, clearSavedQuery)}
             onSavedQueryUpdated={defaultOnSavedQueryUpdated(props, setSavedQuery)}
@@ -274,6 +313,20 @@ export function createSearchBar({
             filtersForSuggestions={props.filtersForSuggestions}
             prependFilterBar={props.prependFilterBar}
             onESQLDocsFlyoutVisibilityChanged={props.onESQLDocsFlyoutVisibilityChanged}
+            esqlEditorInitialState={props.esqlEditorInitialState}
+            onEsqlEditorInitialStateChange={props.onEsqlEditorInitialStateChange}
+            visorInitialState={props.visorInitialState}
+            onVisorInitialStateChange={props.onVisorInitialStateChange}
+            hasDirtyState={props.hasDirtyState}
+            esqlVariablesConfig={props.esqlVariablesConfig}
+            onOpenQueryInNewTab={props.onOpenQueryInNewTab}
+            useBackgroundSearchButton={props.useBackgroundSearchButton}
+            esqlQueryStats={props.esqlQueryStats}
+            enableResourceBrowser={props.enableResourceBrowser}
+            enableCreateView={props.enableCreateView}
+            enableDateRangePicker={props.enableDateRangePicker}
+            showTimeWindowButtons={props.showTimeWindowButtons}
+            esqlApproximation={props.esqlApproximation}
           />
         </core.i18n.Context>
       </KibanaContextProvider>

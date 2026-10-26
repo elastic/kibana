@@ -60,6 +60,25 @@ export const SERVERLESS_JWKS_PATH = resolve(__dirname, './serverless_resources/j
 
 export const SERVERLESS_IDP_METADATA_PATH = resolve(REPO_ROOT, '.es', 'idp_metadata.xml');
 
+/**
+ * Owner-only parent of the generated operator directories, whose `settings.json` carries the
+ * cluster secrets (including any `secureFiles` contents). Elasticsearch reads them through a bind
+ * mount, which does not traverse this directory, so it can be closed to other host users.
+ */
+export const SERVERLESS_SECRETS_DIR = resolve(REPO_ROOT, '.es', 'secrets');
+
+export const SERVERLESS_OPERATOR_PATH = resolve(SERVERLESS_SECRETS_DIR, 'operator');
+
+export const SERVERLESS_UIAM_ENTRYPOINT_PATH = resolve(
+  __dirname,
+  './serverless_resources/run_java_with_custom_ca.sh'
+);
+
+export const SERVERLESS_UIAM_CERTIFICATE_BUNDLE_PATH = resolve(
+  __dirname,
+  './serverless_resources/uiam_cosmosdb.pfx'
+);
+
 export const SERVERLESS_RESOURCES_PATHS = [
   SERVERLESS_OPERATOR_USERS_PATH,
   SERVERLESS_ROLE_MAPPING_PATH,

@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { SchedulingConfiguraton } from '@kbn/search-connectors';
+import type { SchedulingConfiguraton } from '@kbn/search-connectors';
 
 import { createApiLogic } from '../../../shared/api_logic/create_api_logic';
 import { HttpLogic } from '../../../shared/http';
@@ -21,7 +21,9 @@ export const updateConnectorScheduling = async ({
   connectorId,
   scheduling,
 }: UpdateConnectorSchedulingArgs) => {
-  const route = `/internal/enterprise_search/connectors/${connectorId}/scheduling`;
+  const route = `/internal/enterprise_search/connectors/${encodeURIComponent(
+    connectorId
+  )}/scheduling`;
 
   await HttpLogic.values.http.post<undefined>(route, {
     body: JSON.stringify(scheduling),

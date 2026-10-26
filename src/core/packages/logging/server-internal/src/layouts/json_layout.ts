@@ -7,11 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import moment from 'moment-timezone';
-import { merge } from '@kbn/std';
 import { schema } from '@kbn/config-schema';
-import { Ecs, EcsVersion } from '@elastic/ecs';
-import { LogRecord, Layout } from '@kbn/logging';
+import type { Ecs } from '@elastic/ecs';
+import type { LogRecord, Layout } from '@kbn/logging';
+import { toEcsLog } from '@kbn/logging-ecs';
 
 const { literal, object } = schema;
 
@@ -26,47 +25,12 @@ const jsonLayoutSchema = object({
 export class JsonLayout implements Layout {
   public static configSchema = jsonLayoutSchema;
 
-  private static errorToSerializableObject(error: Error | undefined) {
-    if (error === undefined) {
-      return error;
-    }
-
-    return {
-      message: error.message,
-      type: error.name,
-      stack_trace: error.stack,
-    };
+  public static ecsRecord(record: LogRecord): Ecs {
+    return toEcsLog(record, process.uptime());
   }
 
   public format(record: LogRecord): string {
-    const spanId = record.meta?.span?.id ?? record.spanId;
-    const traceId = record.meta?.trace?.id ?? record.traceId;
-    const transactionId = record.meta?.transaction?.id ?? record.transactionId;
-
-    const log: Ecs = {
-      ecs: { version: EcsVersion },
-      '@timestamp': moment(record.timestamp).format('YYYY-MM-DDTHH:mm:ss.SSSZ'),
-      message: record.message,
-      error: JsonLayout.errorToSerializableObject(record.error),
-      log: {
-        level: record.level.id.toUpperCase(),
-        logger: record.context,
-      },
-      process: {
-        pid: record.pid,
-        uptime: process.uptime(),
-      },
-      span: spanId ? { id: spanId } : undefined,
-      trace: traceId ? { id: traceId } : undefined,
-      transaction: transactionId ? { id: transactionId } : undefined,
-    };
-
-    let output = log;
-    if (record.meta) {
-      // @ts-expect-error toJSON not defined on `LogMeta`, but some structured meta can have it defined
-      const serializedMeta = record.meta.toJSON ? record.meta.toJSON() : { ...record.meta };
-      output = merge(serializedMeta, log);
-    }
+    const output = JsonLayout.ecsRecord(record);
 
     return JSON.stringify(output);
   }

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { fold } from 'fp-ts/lib/Either';
-import { pipe } from 'fp-ts/lib/pipeable';
+import { fold } from 'fp-ts/Either';
+import { pipe } from 'fp-ts/pipeable';
 import type { SavedObject, SavedObjectsType } from '@kbn/core/server';
 import { metricsExplorerViewSavedObjectRT } from './types';
 
@@ -29,7 +29,7 @@ export const metricsExplorerViewSavedObjectType: SavedObjectsType = {
     defaultSearchField: 'name',
     displayName: 'metrics explorer view',
     getTitle: getMetricsExplorerViewTitle,
-    icon: 'metricsApp',
+    icon: 'chartMix',
     importableAndExportable: true,
   },
   mappings: {

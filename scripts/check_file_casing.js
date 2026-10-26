@@ -7,5 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-require('../src/setup_node_env');
-require('../src/dev/run_check_file_casing');
+require('@kbn/setup-node-env');
+require('@kbn/dev/run_check_file_casing');

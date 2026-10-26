@@ -16,7 +16,6 @@ import {
   config as loggingConfigDef,
   type LoggingConfigWithBrowserType,
 } from '@kbn/core-logging-server-internal';
-import type { DarkModeValue } from '@kbn/core-ui-settings-common';
 
 export const getSettingValue = <T>(
   settingName: string,
@@ -31,20 +30,6 @@ export const getSettingValue = <T>(
 };
 
 export const getBundlesHref = (baseHref: string): string => `${baseHref}/bundles`;
-
-export const getScriptPaths = ({
-  baseHref,
-  darkMode,
-}: {
-  baseHref: string;
-  darkMode: DarkModeValue;
-}) => {
-  if (darkMode === 'system') {
-    return [`${baseHref}/ui/legacy_theme.js`];
-  } else {
-    return [];
-  }
-};
 
 export const getCommonStylesheetPaths = ({ baseHref }: { baseHref: string }) => {
   const bundlesHref = getBundlesHref(baseHref);
@@ -63,8 +48,14 @@ export const getThemeStylesheetPaths = ({
 }) => {
   return [
     ...(darkMode
-      ? [`${baseHref}/ui/legacy_dark_theme.min.css`]
-      : [`${baseHref}/ui/legacy_light_theme.min.css`]),
+      ? [
+          `${baseHref}/ui/legacy_dark_theme.min.css`,
+          `${baseHref}/ui/charts/theme_only_dark.css`, // Elastic Charts' CSS (dark theme)
+        ]
+      : [
+          `${baseHref}/ui/legacy_light_theme.min.css`,
+          `${baseHref}/ui/charts/theme_only_light.css`, // Elastic Charts' CSS (light theme)
+        ]),
   ];
 };
 

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { createSelector } from 'reselect';
+import { createSelector } from 'reselect-v4';
 import { get, isEmpty } from 'lodash/fp';
-import type { Query } from '@kbn/es-query';
+import { isFilterDisabled, type Query } from '@kbn/es-query';
 import {
   UNTITLED_TEMPLATE,
   UNTITLED_TIMELINE,
@@ -16,7 +16,7 @@ import { timelineSelectors } from '.';
 import { TimelineTabs } from '../../../common/types';
 import type { State } from '../../common/store/types';
 import type { TimelineModel } from './model';
-import type { InsertTimeline, TimelineById } from './types';
+import type { InsertTimeline } from './types';
 import { TimelineStatusEnum, TimelineTypeEnum } from '../../../common/api/timeline';
 
 export const getTimelineShowStatusByIdSelector = () =>
@@ -27,11 +27,6 @@ export const getTimelineShowStatusByIdSelector = () =>
     updated: timeline?.updated ?? undefined,
     changed: timeline?.changed ?? false,
   }));
-
-/**
- * @deprecated
- */
-const timelineByIdState = (state: State): TimelineById => state.timeline.timelineById;
 
 const selectCallOutUnauthorizedMsg = (state: State): boolean =>
   state.timeline.showCallOutUnauthorizedMsg;
@@ -44,14 +39,6 @@ export const selectTimeline = (state: State, timelineId: string): TimelineModel 
 
 export const selectInsertTimeline = (state: State): InsertTimeline | null =>
   state.timeline.insertTimeline;
-
-/**
- * @deprecated prefer using selectTimelineById below
- */
-export const timelineByIdSelector = createSelector(
-  timelineByIdState,
-  (timelineById) => timelineById
-);
 
 export const getShowCallOutUnauthorizedMsg = () =>
   createSelector(
@@ -117,6 +104,11 @@ const selectTimelineType = createSelector(selectTimelineById, (timeline) => time
 const selectTimelineKqlQuery = createSelector(selectTimelineById, (timeline) => timeline?.kqlQuery);
 
 /**
+ * Selector that returns the timeline filters.
+ */
+const selectTimelineFilters = createSelector(selectTimelineById, (timeline) => timeline?.filters);
+
+/**
  * Selector that returns the timeline esql saved search id.
  */
 export const selectTimelineESQLSavedSearchId = createSelector(
@@ -136,7 +128,7 @@ export const selectKqlFilterQueryExpression = createSelector(
  * Selector that returns the title of a timeline.
  * If the timeline has been saved, it will return the saved title.
  * If timeline is in template mode, it will return the default 'Untitled template' value;
- * If none of the above, it will return the default 'Untitled timeline' value.
+ * If none of the above, it will return the default 'Untitled Timeline' value.
  */
 export const selectTitleByTimelineById = createSelector(
   selectTimelineTitle,
@@ -169,17 +161,42 @@ export const selectKqlQuery = createSelector(
 );
 
 /**
- * Selector that returns true if the timeline has data providers or a kqlQuery filterQuery expression.
+ * Selector that returns true if the timeline has data providers, a kqlQuery filterQuery
+ * expression, or at least one enabled filter.
  */
 export const selectDataInTimeline = createSelector(
   selectTimelineDataProviders,
   selectTimelineKqlQuery,
-  (dataProviders, kqlQuery): boolean => {
-    return !isEmpty(dataProviders) || !isEmpty(get('filterQuery.kuery.expression', kqlQuery));
+  selectTimelineFilters,
+  (dataProviders, kqlQuery, filters): boolean => {
+    const hasEnabledFilters = (filters ?? []).some((filter) => !isFilterDisabled(filter));
+    return (
+      !isEmpty(dataProviders) ||
+      !isEmpty(get('filterQuery.kuery.expression', kqlQuery)) ||
+      hasEnabledFilters
+    );
   }
 );
 
 export const selectExcludedRowRendererIds = createSelector(
   selectTimelineById,
   (timeline) => timeline?.excludedRowRendererIds
+);
+
+/**
+ * Selector that returns if an event has been pinned in a timeline
+ */
+export const selectIsPinnedEventInTimeline = () =>
+  createSelector(
+    selectTimelineById,
+    (_: State, __: string, pinnedEventId: string) => pinnedEventId,
+    (timeline, pinnedEventId): boolean => !!timeline?.pinnedEventIds?.[pinnedEventId]
+  );
+
+/**
+ * Selector that returns true when the active timeline is a transient, read-only Super Timeline.
+ */
+export const selectIsSuperTimeline = createSelector(
+  selectTimelineById,
+  (timeline): boolean => !!timeline?.isSuperTimeline
 );

@@ -20,7 +20,7 @@ export function setReadonlyBadge({ application, chrome }: CoreStart) {
           tooltip: i18n.translate('xpack.apm.header.badge.readOnly.tooltip', {
             defaultMessage: 'Unable to save',
           }),
-          iconType: 'glasses',
+          iconType: 'readOnly',
         }
       : undefined
   );

@@ -9,7 +9,8 @@
 
 import _ from 'lodash';
 import type { SavedObjectUnsanitizedDoc } from '@kbn/core-saved-objects-server';
-import { Transform, TransformType, TypeTransforms, TransformFn, TypeVersionSchema } from '../types';
+import type { Transform, TypeTransforms, TransformFn, TypeVersionSchema } from '../types';
+import { TransformType } from '../types';
 import { DocumentDowngradePipeline } from './downgrade_pipeline';
 
 // snake case is way better for migration function names in this very specific scenario.

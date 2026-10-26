@@ -6,11 +6,12 @@
  */
 import moment from 'moment';
 import { tlsAlertFactory, getCertSummary } from './tls';
-import { CertResult } from '../../../../common/runtime_types';
+import type { CertResult } from '../../../../common/runtime_types';
 import { createRuleTypeMocks, bootstrapDependencies } from './test_utils';
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../common/constants';
 
-import { savedObjectsAdapter, UMSavedObjectsAdapter } from '../saved_objects/saved_objects';
+import type { UMSavedObjectsAdapter } from '../saved_objects/saved_objects';
+import { savedObjectsAdapter } from '../saved_objects/saved_objects';
 
 /**
  * This function aims to provide an easy way to give mock props that will
@@ -149,13 +150,13 @@ describe('tls alert', () => {
           status: 'expired',
         };
 
-        expect(alertsClient.report).toBeCalledWith({
+        expect(alertsClient.report).toHaveBeenCalledWith({
           id: `${cert.common_name}-${cert.issuer?.replace(/\s/g, '_')}-${cert.sha256}`,
           actionGroup: 'xpack.uptime.alerts.actionGroups.tlsCertificate',
           state: expect.objectContaining(context),
         });
 
-        expect(alertsClient.setAlertData).toBeCalledWith({
+        expect(alertsClient.setAlertData).toHaveBeenCalledWith({
           id: `${cert.common_name}-${cert.issuer?.replace(/\s/g, '_')}-${cert.sha256}`,
           context: expect.objectContaining(context),
           payload: expect.objectContaining({
@@ -171,7 +172,7 @@ describe('tls alert', () => {
       expect(alertsClient.report).toHaveBeenCalledTimes(4);
       expect(alertsClient.setAlertData).toHaveBeenCalledTimes(4);
 
-      expect(mockGetter).toBeCalledWith(
+      expect(mockGetter).toHaveBeenCalledWith(
         expect.objectContaining({
           pageIndex: 0,
           size: 1000,
@@ -233,7 +234,7 @@ describe('tls alert', () => {
       await alert.executor(options);
       expect(mockGetter).toHaveBeenCalledTimes(1);
       expect(alertsClient.report).toHaveBeenCalledTimes(0);
-      expect(mockGetter).toBeCalledWith(
+      expect(mockGetter).toHaveBeenCalledWith(
         expect.objectContaining({
           pageIndex: 0,
           size: 1000,
@@ -262,7 +263,7 @@ describe('tls alert', () => {
       const options = mockOptions();
       await alert.executor(options);
       expect(mockGetter).toHaveBeenCalledTimes(1);
-      expect(mockGetter).toBeCalledWith(
+      expect(mockGetter).toHaveBeenCalledWith(
         expect.objectContaining({
           notValidAfter: `now+${certSettings.certExpirationThreshold}d`,
           notValidBefore: `now-${certSettings.certAgeThreshold}d`,

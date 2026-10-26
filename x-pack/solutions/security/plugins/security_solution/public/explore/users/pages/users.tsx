@@ -14,22 +14,22 @@ import type { Filter } from '@kbn/es-query';
 import { isTab } from '@kbn/timelines-plugin/public';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { LastEventIndexKey } from '@kbn/timelines-plugin/common';
-import { InputsModelId } from '../../../common/store/inputs/constants';
+import { PageScope } from '../../../data_view_manager/constants';
 import { SecurityPageName } from '../../../app/types';
-import { FiltersGlobal } from '../../../common/components/filters_global';
-import { HeaderPage } from '../../../common/components/header_page';
 import { TabNavigation } from '../../../common/components/navigation/tab_navigation';
-
-import { SiemSearchBar } from '../../../common/components/search_bar';
+import { SearchWithDataView } from '../../../common/components/search_with_data_view';
 import { SecuritySolutionPageWrapper } from '../../../common/components/page_wrapper';
-import { LastEventTime } from '../../../common/components/last_event_time';
-import { useGlobalFullScreen } from '../../../common/containers/use_full_screen';
+import { LastEventTimeHeader } from '../../components/last_event_time_header';
+import { Display } from '../../hosts/pages/display';
+import {
+  useGlobalFullScreen,
+  useHasFullScreenContent,
+} from '../../../common/containers/use_full_screen';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { useKibana } from '../../../common/lib/kibana';
 import { convertToBuildEsQuery } from '../../../common/lib/kuery';
 import type { State } from '../../../common/store';
 import { inputsSelectors } from '../../../common/store';
-
 import { SpyRoute } from '../../../common/utils/route/spy_routes';
 import { UsersTabs } from './users_tabs';
 import { navTabsUsers } from './nav_tabs';
@@ -39,7 +39,6 @@ import {
   onTimelineTabKeyPressed,
   resetKeyboardFocus,
 } from '../../../timelines/components/timeline/helpers';
-import { useSourcererDataView } from '../../../sourcerer/containers';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_query';
 import { UsersKpiComponent } from '../components/kpi_users';
@@ -50,6 +49,9 @@ import { hasMlUserPermissions } from '../../../../common/machine_learning/has_ml
 import { useMlCapabilities } from '../../../common/components/ml/hooks/use_ml_capabilities';
 import { EmptyPrompt } from '../../../common/components/empty_prompt';
 import { userNameExistsFilter } from './details/helpers';
+import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
+import { useSelectedPatterns } from '../../../data_view_manager/hooks/use_selected_patterns';
+import { PageLoader } from '../../../common/components/page_loader';
 
 const ID = 'UsersQueryId';
 
@@ -83,7 +85,8 @@ const UsersComponent = () => {
 
   const { to, from, deleteQuery, setQuery, isInitializing } = useGlobalTime();
   const { globalFullScreen } = useGlobalFullScreen();
-  const { uiSettings } = useKibana().services;
+  const hasFullScreenContent = useHasFullScreenContent();
+  const { uiSettings, docLinks } = useKibana().services;
 
   const { tabName } = useParams<{ tabName: string }>();
   const tabsFilters: Filter[] = React.useMemo(() => {
@@ -99,26 +102,29 @@ const UsersComponent = () => {
     return globalFilters;
   }, [severitySelection, tabName, globalFilters]);
 
-  const { indicesExist, selectedPatterns, sourcererDataView } = useSourcererDataView();
+  const { dataView, status } = useDataView(PageScope.explore);
+  const selectedPatterns = useSelectedPatterns(dataView);
+  const indicesExist = dataView.hasMatchedIndices();
+
   const [globalFiltersQuery, kqlError] = useMemo(
     () =>
       convertToBuildEsQuery({
         config: getEsQueryConfig(uiSettings),
-        dataViewSpec: sourcererDataView,
+        dataView,
         queries: [query],
         filters: globalFilters,
       }),
-    [globalFilters, sourcererDataView, uiSettings, query]
+    [uiSettings, dataView, query, globalFilters]
   );
   const [tabsFilterQuery] = useMemo(
     () =>
       convertToBuildEsQuery({
         config: getEsQueryConfig(uiSettings),
-        dataViewSpec: sourcererDataView,
+        dataView,
         queries: [query],
         filters: tabsFilters,
       }),
-    [sourcererDataView, query, tabsFilters, uiSettings]
+    [dataView, query, tabsFilters, uiSettings]
   );
 
   useInvalidFilterQuery({
@@ -157,31 +163,39 @@ const UsersComponent = () => {
   const capabilities = useMlCapabilities();
   const navTabs = useMemo(() => navTabsUsers(hasMlUserPermissions(capabilities)), [capabilities]);
 
+  if (status === 'pristine') {
+    return <PageLoader />;
+  }
+
   return (
     <>
       {indicesExist ? (
         <StyledFullHeightContainer onKeyDown={onKeyDown} ref={containerElement}>
           <EuiWindowEvent event="resize" handler={noop} />
-          <FiltersGlobal>
-            <SiemSearchBar sourcererDataView={sourcererDataView} id={InputsModelId.global} />
-          </FiltersGlobal>
 
           <SecuritySolutionPageWrapper noPadding={globalFullScreen}>
-            <HeaderPage
-              subtitle={
-                <LastEventTime indexKey={LastEventIndexKey.users} indexNames={selectedPatterns} />
-              }
-              border
-              title={i18n.PAGE_TITLE}
-            />
+            {/* Must stay a direct child of the page wrapper: CSS sticky is confined to its parent's height. */}
+            {!hasFullScreenContent && (
+              <LastEventTimeHeader
+                title={i18n.PAGE_TITLE}
+                docLink={docLinks.links.securitySolution.entityAnalytics.explore.usersPage}
+                indexKey={LastEventIndexKey.users}
+                indexNames={selectedPatterns}
+              />
+            )}
+            <Display show={!hasFullScreenContent}>
+              <SearchWithDataView dataView={dataView} scope={PageScope.explore} />
 
-            <UsersKpiComponent from={from} to={to} />
+              <EuiSpacer size="l" />
 
-            <EuiSpacer />
+              <UsersKpiComponent from={from} to={to} />
 
-            <TabNavigation navTabs={navTabs} />
+              <EuiSpacer />
 
-            <EuiSpacer />
+              <TabNavigation navTabs={navTabs} />
+
+              <EuiSpacer />
+            </Display>
 
             <UsersTabs
               deleteQuery={deleteQuery}

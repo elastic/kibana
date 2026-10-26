@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 import { apmConfigSchema } from '@kbn/apm-config-loader';
 import type { ServiceConfigDescriptor } from '@kbn/core-base-server-internal';
 
@@ -20,4 +21,19 @@ export type ElasticConfigType = TypeOf<typeof elasticConfig>;
 export const elasticApmConfig: ServiceConfigDescriptor<ElasticConfigType> = {
   path: 'elastic',
   schema: elasticConfig,
+  deprecations: ({ deprecate }) => [
+    deprecate('apm', '10.0.0', {
+      level: 'critical',
+      message:
+        'Elastic APM is deprecated in favor of OpenTelemetry instrumentation and will be removed in 10.0.0. Please migrate to OpenTelemetry.',
+      documentationUrl:
+        'https://www.elastic.co/docs/extend/kibana/kibana-debugging#_instrumenting_with_otel_traces',
+      correctiveActions: {
+        manualSteps: [
+          'Remove the `elastic.apm` configuration.',
+          'Use `telemetry.tracing` and `telemetry.metrics` to configure OpenTelemetry tracing and metrics.',
+        ],
+      },
+    }),
+  ],
 };

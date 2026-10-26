@@ -7,10 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import crypto from 'crypto';
+import fs from 'fs';
+import os from 'os';
+import path from 'path';
+import { Readable } from 'stream';
+
 import { ToolingLog } from '@kbn/tooling-log';
+jest.mock('timers/promises', () => ({
+  setTimeout: jest.fn().mockResolvedValue(undefined),
+}));
 jest.mock('node-fetch');
 import fetch from 'node-fetch';
-const { Response } = jest.requireActual('node-fetch');
+const { Headers, Response } = jest.requireActual('node-fetch');
 
 import { Artifact } from './artifact';
 
@@ -20,12 +29,13 @@ let MOCKS;
 const PLATFORM = process.platform === 'win32' ? 'windows' : process.platform;
 const ARCHITECTURE = process.arch === 'arm64' ? 'aarch64' : 'x86_64';
 const MOCK_VERSION = 'test-version';
-const MOCK_URL = 'http://127.0.0.1:12345';
 const MOCK_FILENAME = 'test-filename';
 
 const DAILY_SNAPSHOT_BASE_URL = 'https://storage.googleapis.com/kibana-ci-es-snapshots-daily';
 const PERMANENT_SNAPSHOT_BASE_URL =
   'https://storage.googleapis.com/kibana-ci-es-snapshots-permanent';
+const MOCK_URL = `${DAILY_SNAPSHOT_BASE_URL}/${MOCK_VERSION}/archives/test-id`;
+const TEMP_DIRS = [];
 
 const createArchive = (params = {}) => {
   const license = params.license || 'default';
@@ -45,8 +55,46 @@ const createArchive = (params = {}) => {
 const mockFetch = (mock) =>
   fetch.mockReturnValue(Promise.resolve(new Response(JSON.stringify(mock))));
 
+const getChecksum = (contents) => crypto.createHash('sha512').update(contents).digest('hex');
+
+const createArtifactResponse = ({ contents, headers = {}, status = 200 }) => ({
+  status,
+  ok: status >= 200 && status < 300,
+  body: Readable.from([contents]),
+  headers: new Headers(headers),
+});
+
+const createArtifactDest = () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'artifact-test-'));
+  TEMP_DIRS.push(dir);
+
+  return path.join(dir, MOCK_FILENAME);
+};
+
+const createCachedArtifact = ({ contents, etag = 'etag' }) => {
+  const dest = createArtifactDest();
+  fs.writeFileSync(dest, contents);
+  fs.writeFileSync(
+    `${dest}.meta`,
+    JSON.stringify(
+      {
+        ts: new Date().toISOString(),
+        etag,
+      },
+      null,
+      2
+    )
+  );
+
+  return dest;
+};
+
 const previousEnvVars = {};
-const ENV_VARS_TO_RESET = ['ES_SNAPSHOT_MANIFEST', 'KBN_ES_SNAPSHOT_USE_UNVERIFIED'];
+const ENV_VARS_TO_RESET = [
+  'ES_SNAPSHOT_MANIFEST',
+  'KBN_ES_SNAPSHOT_USE_UNVERIFIED',
+  'KBN_ES_SNAPSHOT_USE_CACHED',
+];
 
 beforeAll(() => {
   ENV_VARS_TO_RESET.forEach((key) => {
@@ -85,6 +133,12 @@ beforeEach(() => {
   };
 });
 
+afterEach(() => {
+  TEMP_DIRS.splice(0).forEach((dir) => {
+    fs.rmSync(dir, { recursive: true, force: true });
+  });
+});
+
 const artifactTest = (requestedLicense, expectedLicense, fetchTimesCalled = 1) => {
   return async () => {
     const artifact = await Artifact.getSnapshot(requestedLicense, MOCK_VERSION, log);
@@ -105,6 +159,121 @@ const artifactTest = (requestedLicense, expectedLicense, fetchTimesCalled = 1) =
 };
 
 describe('Artifact', () => {
+  describe('download()', () => {
+    it('redownloads a corrupt cached artifact after a 304 response', async () => {
+      const artifact = new Artifact(log, {
+        url: MOCK_URL,
+        filename: MOCK_FILENAME,
+        checksumUrl: `${MOCK_URL}.sha512`,
+        checksumType: 'sha512',
+      });
+      const validContents = Buffer.from('valid artifact');
+      const dest = createCachedArtifact({
+        contents: Buffer.from('corrupt artifact'),
+      });
+
+      fetch
+        .mockReturnValueOnce(Promise.resolve(new Response('', { status: 304 })))
+        .mockReturnValueOnce(
+          Promise.resolve(new Response(`${getChecksum(validContents)}  ${MOCK_FILENAME}`))
+        )
+        .mockReturnValueOnce(
+          Promise.resolve(
+            createArtifactResponse({
+              contents: validContents,
+              headers: { etag: 'fresh-etag' },
+            })
+          )
+        )
+        .mockReturnValueOnce(
+          Promise.resolve(new Response(`${getChecksum(validContents)}  ${MOCK_FILENAME}`))
+        );
+
+      await artifact.download(dest);
+
+      expect(fs.readFileSync(dest)).toEqual(validContents);
+      expect(JSON.parse(fs.readFileSync(`${dest}.meta`, 'utf8')).etag).toBe('fresh-etag');
+      expect(fetch).toHaveBeenCalledTimes(4);
+    });
+
+    it('reuses a cached artifact when the checksum endpoint is unavailable', async () => {
+      const artifact = new Artifact(log, {
+        url: MOCK_URL,
+        filename: MOCK_FILENAME,
+        checksumUrl: `${MOCK_URL}.sha512`,
+        checksumType: 'sha512',
+      });
+      const cachedContents = Buffer.from('cached artifact');
+      const dest = createCachedArtifact({
+        contents: cachedContents,
+      });
+
+      fetch
+        .mockReturnValueOnce(Promise.resolve(new Response('', { status: 304 })))
+        .mockReturnValueOnce(
+          Promise.resolve(new Response('', { status: 503, statusText: 'Service Unavailable' }))
+        );
+
+      await artifact.download(dest);
+
+      expect(fs.readFileSync(dest)).toEqual(cachedContents);
+      expect(fetch).toHaveBeenCalledTimes(2);
+    });
+
+    it('reuses a cached artifact without a meta file when prefer-cached is enabled', async () => {
+      process.env.KBN_ES_SNAPSHOT_USE_CACHED = 'true';
+
+      const artifact = new Artifact(log, {
+        url: MOCK_URL,
+        filename: MOCK_FILENAME,
+        checksumUrl: `${MOCK_URL}.sha512`,
+        checksumType: 'sha512',
+      });
+      const cachedContents = Buffer.from('cached artifact without meta');
+      const dest = createArtifactDest();
+      fs.writeFileSync(dest, cachedContents);
+
+      await artifact.download(dest);
+
+      expect(fs.readFileSync(dest)).toEqual(cachedContents);
+      expect(fetch).not.toHaveBeenCalled();
+    });
+
+    it('skips the truncation guard for content-encoded responses', async () => {
+      const artifact = new Artifact(log, {
+        url: MOCK_URL,
+        filename: MOCK_FILENAME,
+        checksumUrl: `${MOCK_URL}.sha512`,
+        checksumType: 'sha512',
+      });
+      const validContents = Buffer.from('valid artifact');
+      const dest = createArtifactDest();
+
+      fetch
+        .mockReturnValueOnce(
+          Promise.resolve(
+            createArtifactResponse({
+              contents: validContents,
+              headers: {
+                etag: 'fresh-etag',
+                'content-encoding': 'gzip',
+                'content-length': '1',
+              },
+            })
+          )
+        )
+        .mockReturnValueOnce(
+          Promise.resolve(new Response(`${getChecksum(validContents)}  ${MOCK_FILENAME}`))
+        );
+
+      await artifact.download(dest);
+
+      expect(fs.readFileSync(dest)).toEqual(validContents);
+      expect(JSON.parse(fs.readFileSync(`${dest}.meta`, 'utf8')).etag).toBe('fresh-etag');
+      expect(fetch).toHaveBeenCalledTimes(2);
+    });
+  });
+
   describe('getSnapshot()', () => {
     describe('with default snapshot', () => {
       beforeEach(() => {
@@ -175,7 +344,7 @@ describe('Artifact', () => {
     });
 
     describe('with custom snapshot manifest URL', () => {
-      const CUSTOM_URL = 'http://www.creedthoughts.gov.www/creedthoughts';
+      const CUSTOM_URL = `${DAILY_SNAPSHOT_BASE_URL}/${MOCK_VERSION}/archives/test-id/manifest.json`;
 
       beforeEach(() => {
         process.env.ES_SNAPSHOT_MANIFEST = CUSTOM_URL;
@@ -187,8 +356,46 @@ describe('Artifact', () => {
         expect(fetch.mock.calls[0][0]).toEqual(CUSTOM_URL);
       });
 
+      it.each([
+        'http://www.creedthoughts.gov.www/creedthoughts',
+        'https://storage.googleapis.com/another-bucket/manifest.json',
+        `${DAILY_SNAPSHOT_BASE_URL}/../another-bucket/manifest.json`,
+      ])('should refuse a manifest outside the snapshot buckets: %s', async (url) => {
+        process.env.ES_SNAPSHOT_MANIFEST = url;
+        await expect(Artifact.getSnapshot('default', MOCK_VERSION, log)).rejects.toThrow(
+          'ES_SNAPSHOT_MANIFEST must start with'
+        );
+        expect(fetch).not.toHaveBeenCalled();
+      });
+
       afterEach(() => {
         delete process.env.ES_SNAPSHOT_MANIFEST;
+      });
+    });
+
+    describe('with an archive outside the snapshot buckets', () => {
+      it('should refuse the archive', async () => {
+        mockFetch({
+          archives: [createArchive({ url: 'https://attacker.example/elasticsearch.tar.gz' })],
+        });
+        await expect(Artifact.getSnapshot('default', MOCK_VERSION, log)).rejects.toThrow(
+          'unexpected archive url'
+        );
+      });
+    });
+
+    describe('with a transient server error', () => {
+      it('retries the manifest fetch on a 500 response and succeeds', async () => {
+        fetch
+          .mockReturnValueOnce(
+            Promise.resolve(new Response('', { status: 500, statusText: 'Internal Server Error' }))
+          )
+          .mockReturnValueOnce(Promise.resolve(new Response(JSON.stringify(MOCKS.valid))));
+
+        const artifact = await Artifact.getSnapshot('default', MOCK_VERSION, log);
+
+        expect(fetch).toHaveBeenCalledTimes(2);
+        expect(artifact.spec.url).toEqual(MOCK_URL + '/default');
       });
     });
 

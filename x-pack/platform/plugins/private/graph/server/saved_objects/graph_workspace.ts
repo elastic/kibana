@@ -6,7 +6,7 @@
  */
 
 import { ANALYTICS_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
-import { SavedObjectsType } from '@kbn/core/server';
+import type { SavedObjectsType } from '@kbn/core/server';
 import { graphMigrations } from './migrations';
 
 export const graphWorkspace: SavedObjectsType = {
@@ -16,7 +16,7 @@ export const graphWorkspace: SavedObjectsType = {
   convertToMultiNamespaceTypeVersion: '8.0.0',
   hidden: false,
   management: {
-    icon: 'graphApp',
+    icon: 'cluster',
     defaultSearchField: 'title',
     importableAndExportable: true,
     getTitle(obj) {

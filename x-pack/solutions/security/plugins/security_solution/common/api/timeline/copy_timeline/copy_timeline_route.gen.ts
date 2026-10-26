@@ -14,16 +14,23 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import { SavedTimeline, PersistTimelineResponse } from '../model/components.gen';
 
+export const CopyTimelineRequestBody = lazySchema(() =>
+  z.object({
+    timeline: SavedTimeline,
+    /**
+     * The `savedObjectId` of the timeline or template to duplicate.
+     */
+    timelineIdToCopy: z
+      .string()
+      .describe('The `savedObjectId` of the timeline or template to duplicate.'),
+  })
+);
 export type CopyTimelineRequestBody = z.infer<typeof CopyTimelineRequestBody>;
-export const CopyTimelineRequestBody = z.object({
-  timeline: SavedTimeline,
-  timelineIdToCopy: z.string(),
-});
 export type CopyTimelineRequestBodyInput = z.input<typeof CopyTimelineRequestBody>;
 
+export const CopyTimelineResponse = lazySchema(() => PersistTimelineResponse);
 export type CopyTimelineResponse = z.infer<typeof CopyTimelineResponse>;
-export const CopyTimelineResponse = PersistTimelineResponse;

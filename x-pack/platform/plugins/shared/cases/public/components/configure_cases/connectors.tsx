@@ -14,6 +14,7 @@ import {
   EuiLink,
   EuiText,
   EuiButtonEmpty,
+  EuiSpacer,
 } from '@elastic/eui';
 
 import { ConnectorsDropdown } from './connectors_dropdown';
@@ -33,6 +34,7 @@ export interface Props {
   connectors: ActionConnector[];
   disabled: boolean;
   handleShowEditFlyout: () => void;
+  hideTitle?: boolean;
   isLoading: boolean;
   mappings: CaseConnectorMapping[];
   onChangeConnector: (id: string) => void;
@@ -45,6 +47,7 @@ const ConnectorsComponent: React.FC<Props> = ({
   connectors,
   disabled,
   handleShowEditFlyout,
+  hideTitle = false,
   isLoading,
   mappings,
   onChangeConnector,
@@ -87,66 +90,73 @@ const ConnectorsComponent: React.FC<Props> = ({
     ),
     [connectorsName, handleShowEditFlyout, updateConnectorDisabled]
   );
-  return (
+  const connectorContent = (
     <>
-      <EuiDescribedFormGroup
+      <EuiFormRow
         fullWidth
-        title={<h2>{i18n.INCIDENT_MANAGEMENT_SYSTEM_TITLE}</h2>}
-        description={i18n.INCIDENT_MANAGEMENT_SYSTEM_DESC}
-        data-test-subj="case-connectors-form-group"
+        label={dropDownLabel}
+        data-test-subj="case-connectors-form-row"
+        labelAppend={
+          canSave ? (
+            <EuiButtonEmpty
+              size="xs"
+              data-test-subj="add-new-connector"
+              onClick={onAddNewConnector}
+            >
+              {i18n.ADD_CONNECTOR}
+            </EuiButtonEmpty>
+          ) : null
+        }
       >
-        <EuiFormRow
-          fullWidth
-          label={dropDownLabel}
-          data-test-subj="case-connectors-form-row"
-          labelAppend={
-            canSave ? (
-              <EuiButtonEmpty
-                size="xs"
-                data-test-subj="add-new-connector"
-                onClick={onAddNewConnector}
-              >
-                {i18n.ADD_CONNECTOR}
-              </EuiButtonEmpty>
-            ) : null
-          }
-        >
-          <EuiFlexGroup direction="column">
-            <EuiFlexItem grow={false}>
-              {canUseConnectors ? (
-                <ConnectorsDropdown
-                  connectors={connectors}
-                  disabled={disabled}
-                  selectedConnector={selectedConnector.id}
-                  isLoading={isLoading}
-                  onChange={onChangeConnector}
-                />
-              ) : (
-                <EuiText data-test-subj="configure-case-connector-permissions-error-msg" size="s">
-                  <span>{i18n.READ_ACTIONS_PERMISSIONS_ERROR_MSG}</span>
-                </EuiText>
-              )}
-            </EuiFlexItem>
-            {selectedConnector.type !== ConnectorTypes.none && isDeprecatedConnector(connector) && (
-              <EuiFlexItem grow={false}>
-                <DeprecatedCallout />
-              </EuiFlexItem>
-            )}
-            {selectedConnector.type !== ConnectorTypes.none ? (
-              <EuiFlexItem grow={false}>
-                <Mapping
-                  actionTypeName={actionTypeName}
-                  connectorType={selectedConnector.type}
-                  isLoading={isLoading}
-                  mappings={mappings}
-                />
-              </EuiFlexItem>
-            ) : null}
-          </EuiFlexGroup>
-        </EuiFormRow>
-      </EuiDescribedFormGroup>
+        {canUseConnectors ? (
+          <ConnectorsDropdown
+            connectors={connectors}
+            disabled={disabled}
+            selectedConnector={selectedConnector.id}
+            isLoading={isLoading}
+            onChange={onChangeConnector}
+          />
+        ) : (
+          <EuiText data-test-subj="configure-case-connector-permissions-error-msg" size="s">
+            <span>{i18n.READ_ACTIONS_PERMISSIONS_ERROR_MSG}</span>
+          </EuiText>
+        )}
+      </EuiFormRow>
+      {selectedConnector.type !== ConnectorTypes.none && isDeprecatedConnector(connector) && (
+        <>
+          <EuiSpacer size="m" />
+          <DeprecatedCallout />
+        </>
+      )}
+      {selectedConnector.type !== ConnectorTypes.none && (
+        <>
+          <EuiSpacer size="m" />
+          <Mapping
+            actionTypeName={actionTypeName}
+            connectorType={selectedConnector.type}
+            isLoading={isLoading}
+            mappings={mappings}
+          />
+        </>
+      )}
     </>
   );
+
+  // Always render the same outer `<div>` for `case-connectors-form-group` regardless of
+  // `hideTitle`, so the container element's structure doesn't depend on the caller.
+  const content = hideTitle ? (
+    connectorContent
+  ) : (
+    <EuiDescribedFormGroup
+      fullWidth
+      title={<h2>{i18n.INCIDENT_MANAGEMENT_SYSTEM_TITLE}</h2>}
+      description={i18n.INCIDENT_MANAGEMENT_SYSTEM_DESC}
+    >
+      {connectorContent}
+    </EuiDescribedFormGroup>
+  );
+
+  return <div data-test-subj="case-connectors-form-group">{content}</div>;
 };
 ConnectorsComponent.displayName = 'Connectors';
 

@@ -21,6 +21,7 @@ import { SessionCookie } from './session_cookie';
 import { SessionIndex } from './session_index';
 import type { ConfigType } from '../config';
 import type { OnlineStatusRetryScheduler } from '../elasticsearch';
+import { createOnlineStatusTaskRunner } from '../elasticsearch';
 
 export interface SessionManagementServiceSetupParams {
   readonly http: Pick<HttpServiceSetup, 'basePath' | 'createCookieSessionStorageFactory'>;
@@ -93,16 +94,17 @@ export class SessionManagementService {
 
     this.statusSubscription = online$
       .pipe(
-        switchMap(async ({ scheduleRetry }) => {
-          try {
-            await Promise.all([
-              this.sessionIndex.initialize(),
-              this.scheduleCleanupTask(taskManager),
-            ]);
-          } catch (err) {
-            scheduleRetry();
-          }
-        })
+        switchMap(
+          createOnlineStatusTaskRunner(async () => {
+            // Initialize the index first so the session index and its shards are fully ready
+            // before the cleanup task is registered. Task Manager fires newly created tasks
+            // immediately, so registering before initialization completes would cause the
+            // cleanup task to open a PIT on an index whose shards may not yet be available,
+            // resulting in 503 errors on first-ever project bootstrap.
+            await this.sessionIndex.initialize();
+            await this.scheduleCleanupTask(taskManager);
+          })
+        )
       )
       .subscribe();
 

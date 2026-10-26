@@ -1,23 +1,29 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`FilterStatusButton renders without errors for valid props 1`] = `
-<button
-  class="euiButtonEmpty euiFilterButton euiFilterButton-hasActiveFilters emotion-euiButtonDisplay-euiButtonEmpty-m-empty-text-euiFilterButton-withNext-hasActiveFilters"
-  data-test-subj="foo"
-  type="button"
+<div
+  class="euiFilterButton__wrapper css-gf1zx3-wrapper-withNext"
 >
-  <span
-    class="euiButtonEmpty__content emotion-euiButtonDisplayContent-euiFilterButton__content"
+  <button
+    aria-pressed="true"
+    class="euiButton euiFilterButton euiFilterButton-isSelected euiFilterButton-hasActiveFilters euiFilterButton-isToggle emotion-euiButtonDisplay-s-base-text-euiFilterButton-hasActiveFilters-toggle-isSelected"
+    data-test-subj="foo"
+    id="filter-button_generated-id"
+    type="button"
   >
     <span
-      class="euiFilterButton__text emotion-euiFilterButton__text"
-      data-text="Up"
-      title="Up"
+      class="emotion-euiButtonDisplayContent-euiFilterButton__content"
     >
-      Up
+      <span
+        class="euiFilterButton__text emotion-euiFilterButton__text"
+        data-text="Up"
+        title="Up"
+      >
+        Up
+      </span>
     </span>
-  </span>
-</button>
+  </button>
+</div>
 `;
 
 exports[`FilterStatusButton shallow renders without errors for valid props 1`] = `

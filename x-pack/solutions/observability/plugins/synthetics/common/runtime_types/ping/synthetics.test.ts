@@ -5,16 +5,19 @@
  * 2.0.
  */
 
-import {
-  isRefResult,
-  isFullScreenshot,
-  isScreenshotRef,
-  isScreenshotImageBlob,
+import type {
   RefResult,
   FullScreenshot,
   ScreenshotImageBlob,
   ScreenshotRefImageData,
 } from './synthetics';
+
+import {
+  isRefResult,
+  isFullScreenshot,
+  isScreenshotRef,
+  isScreenshotImageBlob,
+} from '../schemas/ping_guards';
 
 describe('synthetics runtime types', () => {
   let refResult: RefResult;

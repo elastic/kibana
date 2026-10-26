@@ -45,7 +45,8 @@ import {
   ANNOTATION_EVENT_USER,
   ANNOTATION_EVENT_DELAYED_DATA,
 } from '../../../../../common/constants/annotations';
-import { ML_APP_LOCATOR, ML_PAGES } from '../../../../../common/constants/locator';
+import { ML_APP_LOCATOR } from '@kbn/ml-common-types/locator_app_locator';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import { timeFormatter } from '@kbn/ml-date-utils';
 import { MlAnnotationUpdatesContext } from '../../../contexts/ml/ml_annotation_updates_context';
 import { DatafeedChartFlyout } from '../../../jobs/jobs_list/components/datafeed_chart_flyout';
@@ -358,7 +359,14 @@ class AnnotationsTableUI extends Component {
       }
 
       if (this.state.errorMessage !== undefined) {
-        return <EuiCallOut title={this.state.errorMessage} color="danger" iconType="cross" />;
+        return (
+          <EuiCallOut
+            announceOnMount
+            title={this.state.errorMessage}
+            color="danger"
+            iconType="cross"
+          />
+        );
       }
     }
 
@@ -367,13 +375,14 @@ class AnnotationsTableUI extends Component {
     if (annotations.length === 0) {
       return (
         <EuiCallOut
+          announceOnMount={false}
           title={
             <FormattedMessage
               id="xpack.ml.annotationsTable.annotationsNotCreatedTitle"
               defaultMessage="No annotations created for this job"
             />
           }
-          iconType="iInCircle"
+          iconType="info"
           role="alert"
         >
           {this.state.jobId && isTimeSeriesViewJob(this.getJob(this.state.jobId)) && (
@@ -506,7 +515,7 @@ class AnnotationsTableUI extends Component {
         actions.push({
           name: viewDataFeedText,
           description: viewDataFeedText,
-          icon: 'visAreaStacked',
+          icon: 'chartAreaStack',
           type: 'icon',
           onClick: (annotation) => {
             this.setState({
@@ -720,6 +729,9 @@ class AnnotationsTableUI extends Component {
       <Fragment>
         <EuiInMemoryTable
           data-test-subj={'mlAnnotationsTable'}
+          tableCaption={i18n.translate('xpack.ml.annotationsTable.annotation.tableCaption', {
+            defaultMessage: 'Annotations',
+          })}
           error={searchError}
           className="eui-textBreakWord"
           compressed={true}

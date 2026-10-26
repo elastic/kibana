@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Octokit, RestEndpointMethodTypes } from '@octokit/rest';
+import type { RestEndpointMethodTypes } from '@octokit/rest';
+import { Octokit } from '@octokit/rest';
 
 export const KIBANA_COMMENT_SIGIL = 'kbn-message-context';
 
@@ -78,6 +79,25 @@ export const areChangesSkippable = async (
   return !someFilesNotSkippable;
 };
 
+export const doAllChangesMatch = async (
+  path: RegExp,
+  changes: null | RestEndpointMethodTypes['pulls']['listFiles']['response']['data'] = null
+) => {
+  const prChanges = changes || (await getPrChangesCached());
+
+  if (prChanges.length >= 3000) {
+    return false;
+  }
+
+  const allChangesMatch = prChanges.every(
+    (change) =>
+      change.filename.match(path) &&
+      (!change.previous_filename || change.previous_filename.match(path))
+  );
+
+  return allChangesMatch;
+};
+
 export const doAnyChangesMatch = async (
   requiredPaths: RegExp[],
   changes: null | RestEndpointMethodTypes['pulls']['listFiles']['response']['data'] = null
@@ -120,12 +140,14 @@ export async function upsertComment(
     commentBody: string;
     commentContext: string;
     clearPrevious: boolean;
+    // When false, only an existing comment is updated; nothing is posted if there is none.
+    createIfMissing?: boolean;
   },
   owner = process.env.GITHUB_PR_BASE_OWNER,
   repo = process.env.GITHUB_PR_BASE_REPO,
   prNumber: undefined | string | number = process.env.GITHUB_PR_NUMBER
 ) {
-  const { commentBody, commentContext, clearPrevious } = messageOpts;
+  const { commentBody, commentContext, clearPrevious, createIfMissing = true } = messageOpts;
   if (!owner || !repo || !prNumber) {
     throw Error(
       "Couldn't retrieve Github PR info from environment variables in order to add a comment"
@@ -147,7 +169,7 @@ export async function upsertComment(
   ).find((comment) => comment.body?.includes(commentMarker));
 
   if (!existingComment) {
-    return addComment(body, owner, repo, prNumber);
+    return createIfMissing ? addComment(body, owner, repo, prNumber) : undefined;
   } else if (clearPrevious) {
     await github.issues.deleteComment({
       owner,

@@ -19,10 +19,18 @@ export interface CategoryComponentProps {
   availableCategories: string[];
   category?: string | null;
   isInvalid?: boolean;
+  isDisabled?: boolean;
 }
 
 export const CategoryComponent: React.FC<CategoryComponentProps> = React.memo(
-  ({ isLoading, onChange, category, availableCategories, isInvalid = false }) => {
+  ({
+    isLoading,
+    onChange,
+    category,
+    availableCategories,
+    isInvalid = false,
+    isDisabled = false,
+  }) => {
     const options = useMemo(() => {
       return availableCategories.map((label: string) => ({
         label,
@@ -54,7 +62,7 @@ export const CategoryComponent: React.FC<CategoryComponentProps> = React.memo(
         fullWidth
         singleSelection={{ asPlainText: true }}
         isLoading={isLoading}
-        isDisabled={isLoading}
+        isDisabled={isLoading || isDisabled}
         isInvalid={isInvalid}
         options={options}
         data-test-subj="categories-list"

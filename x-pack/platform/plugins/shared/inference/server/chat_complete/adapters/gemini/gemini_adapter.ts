@@ -7,19 +7,25 @@
 
 import * as Gemini from '@google/generative-ai';
 import { defer, map } from 'rxjs';
-import {
-  Message,
-  MessageRole,
-  ToolChoiceType,
-  ToolOptions,
-  ToolSchema,
-  ToolSchemaType,
-} from '@kbn/inference-common';
+import type { Message, ToolOptions } from '@kbn/inference-common';
+import { MessageRole, ToolChoiceType } from '@kbn/inference-common';
 import type { InferenceConnectorAdapter } from '../../types';
-import { handleConnectorResponse } from '../../utils';
+import {
+  handleConnectorDataResponse,
+  handleConnectorStreamResponse,
+  pickConnectorTelemetryForConnector,
+} from '../../utils';
 import { eventSourceStreamIntoObservable } from '../../../util/event_source_stream_into_observable';
-import { processVertexStream } from './process_vertex_stream';
-import type { GenerateContentResponseChunk, GeminiMessage, GeminiToolConfig } from './types';
+import { processVertexStream, processVertexResponse } from './process_vertex_stream';
+import type {
+  GenerateContentResponseChunk,
+  GeminiMessage,
+  GeminiToolConfig,
+  GenerateContentResponse,
+} from './types';
+import { getTemperatureIfValid } from '../../utils/get_temperature';
+import { sanitizeToolSchemasForVertex } from '../../utils/sanitize_tool_schemas_for_vertex';
+import { mustUseThoughtSignature } from './utils';
 
 export const geminiAdapter: InferenceConnectorAdapter = {
   chatComplete: ({
@@ -32,31 +38,54 @@ export const geminiAdapter: InferenceConnectorAdapter = {
     modelName,
     abortSignal,
     metadata,
+    timeout,
+    maxContentLength,
+    stream = false,
   }) => {
-    return defer(() => {
+    const connector = executor.getConnector();
+    const useThoughtSignature = mustUseThoughtSignature(
+      modelName ?? connector.config?.defaultModel
+    );
+
+    const connectorResult$ = defer(() => {
       return executor.invoke({
-        subAction: 'invokeStream',
+        subAction: stream ? 'invokeStream' : 'invokeAIRaw',
         subActionParams: {
-          messages: messagesToGemini({ messages }),
+          messages: messagesToGemini({ messages, useThoughtSignature }),
           systemInstruction: system,
           tools: toolsToGemini(tools),
           toolConfig: toolChoiceToConfig(toolChoice),
-          temperature,
+          ...getTemperatureIfValid(temperature, { connector, modelName }),
           model: modelName,
           signal: abortSignal,
           stopSequences: ['\n\nHuman:'],
           ...(metadata?.connectorTelemetry
-            ? { telemetryMetadata: metadata.connectorTelemetry }
+            ? {
+                telemetryMetadata: pickConnectorTelemetryForConnector(metadata.connectorTelemetry),
+              }
+            : {}),
+          ...(typeof timeout === 'number' && isFinite(timeout) ? { timeout } : {}),
+          ...(typeof maxContentLength === 'number' && isFinite(maxContentLength)
+            ? { maxContentLength }
             : {}),
         },
       });
-    }).pipe(
-      handleConnectorResponse({ processStream: eventSourceStreamIntoObservable }),
-      map((line) => {
-        return JSON.parse(line) as GenerateContentResponseChunk;
-      }),
-      processVertexStream()
-    );
+    });
+
+    if (stream) {
+      return connectorResult$.pipe(
+        handleConnectorStreamResponse({ processStream: eventSourceStreamIntoObservable }),
+        map((line) => JSON.parse(line) as GenerateContentResponseChunk),
+        processVertexStream(modelName)
+      );
+    } else {
+      return connectorResult$.pipe(
+        handleConnectorDataResponse({
+          parseData: (data) => data as GenerateContentResponse,
+        }),
+        processVertexResponse(modelName)
+      );
+    }
   },
 };
 
@@ -86,17 +115,16 @@ function toolsToGemini(tools: ToolOptions['tools']): Gemini.Tool[] {
   return tools
     ? [
         {
-          functionDeclarations: Object.entries(tools ?? {}).map(
+          functionDeclarations: Object.entries(sanitizeToolSchemasForVertex(tools) ?? {}).map(
             ([toolName, { description, schema }]) => {
               return {
                 name: toolName,
                 description,
-                parameters: schema
-                  ? toolSchemaToGemini({ schema })
-                  : {
-                      type: Gemini.SchemaType.OBJECT,
-                      properties: {},
-                    },
+                parameters: {
+                  type: Gemini.SchemaType.OBJECT,
+                  properties: {},
+                  ...(schema as Gemini.FunctionDeclarationSchema | undefined),
+                },
               };
             }
           ),
@@ -105,71 +133,10 @@ function toolsToGemini(tools: ToolOptions['tools']): Gemini.Tool[] {
     : [];
 }
 
-function toolSchemaToGemini({ schema }: { schema: ToolSchema }): Gemini.FunctionDeclarationSchema {
-  const convertSchemaType = ({
-    def,
-  }: {
-    def: ToolSchemaType;
-  }): Gemini.FunctionDeclarationSchemaProperty => {
-    switch (def.type) {
-      case 'array':
-        return {
-          type: Gemini.SchemaType.ARRAY,
-          description: def.description,
-          items: convertSchemaType({ def: def.items }) as Gemini.FunctionDeclarationSchema,
-        };
-      case 'object':
-        return {
-          type: Gemini.SchemaType.OBJECT,
-          description: def.description,
-          required: def.required as string[],
-          properties: def.properties
-            ? Object.entries(def.properties).reduce<
-                Record<string, Gemini.FunctionDeclarationSchema>
-              >((properties, [key, prop]) => {
-                properties[key] = convertSchemaType({
-                  def: prop,
-                }) as Gemini.FunctionDeclarationSchema;
-                return properties;
-              }, {})
-            : undefined,
-        };
-      case 'string':
-        return {
-          type: Gemini.SchemaType.STRING,
-          description: def.description,
-          enum: def.enum ? (def.enum as string[]) : def.const ? [def.const] : undefined,
-        };
-      case 'boolean':
-        return {
-          type: Gemini.SchemaType.BOOLEAN,
-          description: def.description,
-          enum: def.enum ? (def.enum as string[]) : def.const ? [def.const] : undefined,
-        };
-      case 'number':
-        return {
-          type: Gemini.SchemaType.NUMBER,
-          description: def.description,
-          enum: def.enum ? (def.enum as string[]) : def.const ? [def.const] : undefined,
-        };
-    }
-  };
+const skipThoughtSignatureHash = 'skip_thought_signature_validator';
 
-  return {
-    type: Gemini.SchemaType.OBJECT,
-    required: schema.required as string[],
-    properties: Object.entries(schema.properties ?? {}).reduce<
-      Record<string, Gemini.FunctionDeclarationSchemaProperty>
-    >((properties, [key, def]) => {
-      properties[key] = convertSchemaType({ def });
-      return properties;
-    }, {}),
-  };
-}
-
-function messagesToGemini({ messages }: { messages: Message[] }): GeminiMessage[] {
-  return messages.map(messageToGeminiMapper()).reduce<GeminiMessage[]>((output, message) => {
-    // merging consecutive messages from the same user, as Gemini requires multi-turn messages
+function mergeConsecutiveSameRole(messages: GeminiMessage[]): GeminiMessage[] {
+  return messages.reduce<GeminiMessage[]>((output, message) => {
     const previousMessage = output.length ? output[output.length - 1] : undefined;
     if (previousMessage?.role === message.role) {
       previousMessage.parts.push(...message.parts);
@@ -179,6 +146,39 @@ function messagesToGemini({ messages }: { messages: Message[] }): GeminiMessage[
     return output;
   }, []);
 }
+
+function messagesToGemini({
+  messages,
+  useThoughtSignature,
+}: {
+  messages: Message[];
+  useThoughtSignature: boolean;
+}): GeminiMessage[] {
+  // Filter empty-part messages first, then merge so roles always alternate.
+  const mapped = mergeConsecutiveSameRole(
+    messages.map(messageToGeminiMapper()).filter((message) => message.parts.length > 0)
+  );
+
+  if (useThoughtSignature) {
+    mapped.forEach((message, index) => {
+      if (index < mapped.length - 1) {
+        addThoughtSignatureToFirstFunctionCall(message);
+      }
+    });
+  }
+
+  return mapped;
+}
+
+const addThoughtSignatureToFirstFunctionCall = (message: GeminiMessage) => {
+  for (const part of message.parts) {
+    if (part.functionCall) {
+      // @ts-expect-error - Gemini types are not up to date, this is a valid property
+      part.thoughtSignature = skipThoughtSignatureHash;
+      break;
+    }
+  }
+};
 
 function messageToGeminiMapper() {
   return (message: Message): GeminiMessage => {
@@ -234,9 +234,10 @@ function messageToGeminiMapper() {
               functionResponse: {
                 name: message.toolCallId,
                 // gemini expects a structured response shape, making sure we're not sending a string
-                response: (typeof message.response === 'string'
-                  ? { response: message.response }
-                  : (message.response as string)) as object,
+                response:
+                  typeof message.response === 'string'
+                    ? { response: message.response }
+                    : message.response,
               },
             },
           ],

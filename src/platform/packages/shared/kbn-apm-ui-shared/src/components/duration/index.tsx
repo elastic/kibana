@@ -8,25 +8,34 @@
  */
 
 import React from 'react';
-import { EuiLoadingSpinner, EuiText } from '@elastic/eui';
+import { EuiLoadingSpinner, EuiText, EuiToolTip } from '@elastic/eui';
+import type { EuiInlineEditTextSizes } from '@elastic/eui/src/components/inline_edit/inline_edit_text';
+import { i18n } from '@kbn/i18n';
 import { asDuration } from '../../utils';
 import { PercentOfParent } from './percent_of_parent';
+
+export { PercentOfParent };
 
 export interface DurationProps {
   duration: number;
   parent?: {
     duration?: number;
     type: 'trace' | 'transaction';
-    loading: boolean;
+    loading?: boolean;
   };
+  size?: EuiInlineEditTextSizes;
+  showTooltip?: boolean;
 }
 
-export function Duration({ duration, parent }: DurationProps) {
-  if (!parent) {
-    <EuiText size="xs">{asDuration(duration)}</EuiText>;
-  }
-  return (
-    <EuiText size="xs">
+export function Duration({ duration, parent, size = 's', showTooltip = false }: DurationProps) {
+  const label = i18n.translate('apmUiShared.duration.label', {
+    defaultMessage: 'Duration',
+  });
+
+  const content = !parent ? (
+    <EuiText size={size}>{asDuration(duration)}</EuiText>
+  ) : (
+    <EuiText size={size}>
       {asDuration(duration)} &nbsp;
       {parent?.loading && <EuiLoadingSpinner data-test-subj="DurationLoadingSpinner" />}
       {!parent?.loading && parent?.duration && (
@@ -38,4 +47,6 @@ export function Duration({ duration, parent }: DurationProps) {
       )}
     </EuiText>
   );
+
+  return showTooltip ? <EuiToolTip content={label}>{content}</EuiToolTip> : <>{content}</>;
 }

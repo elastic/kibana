@@ -43,8 +43,13 @@ import type { DataVisualizerPluginStart } from '@kbn/data-visualizer-plugin/publ
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import type { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/public';
 import type { DiscoverSharedPublicStart } from '@kbn/discover-shared-plugin/public';
-import type { EmbeddableEnhancedPluginStart } from '@kbn/embeddable-enhanced-plugin/public';
 import type { ApmSourceAccessPluginStart } from '@kbn/apm-sources-access-plugin/public';
+import type { Setup as InspectorPublicPluginSetup } from '@kbn/inspector-plugin/public/plugin';
+import type { FileUploadPluginStart } from '@kbn/file-upload-plugin/public';
+import type { CPSPluginStart } from '@kbn/cps/public';
+import type { AlertingV2PublicStart } from '@kbn/alerting-v2-plugin/public';
+import type { SearchSessionsManagementPluginStart } from '@kbn/search-sessions-management-plugin/public';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { DiscoverAppLocator } from '../common';
 import type { DiscoverContainerProps } from './components/discover_container';
 
@@ -135,6 +140,7 @@ export interface DiscoverSetupPlugins {
   expressions: ExpressionsSetup;
   globalSearch?: GlobalSearchPluginSetup;
   home?: HomePublicPluginSetup;
+  inspector: InspectorPublicPluginSetup;
   observabilityAIAssistant?: ObservabilityAIAssistantPublicSetup;
   share?: SharePluginSetup;
   uiActions: UiActionsSetup;
@@ -145,7 +151,9 @@ export interface DiscoverSetupPlugins {
  * @internal
  */
 export interface DiscoverStartPlugins {
+  agentBuilder?: AgentBuilderPluginStart;
   aiops?: AiopsPluginStart;
+  alertingVTwo?: AlertingV2PublicStart;
   charts: ChartsPluginStart;
   contentManagement: ContentManagementPublicStart;
   data: DataPublicPluginStart;
@@ -167,6 +175,7 @@ export interface DiscoverStartPlugins {
   savedObjectsManagement: SavedObjectsManagementPluginStart;
   savedObjectsTaggingOss?: SavedObjectTaggingOssPluginStart;
   savedSearch: SavedSearchPublicPluginStart;
+  searchSessionsManagement?: SearchSessionsManagementPluginStart;
   share?: SharePluginStart;
   spaces?: SpacesPluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
@@ -175,6 +184,14 @@ export interface DiscoverStartPlugins {
   unifiedSearch: UnifiedSearchPublicPluginStart;
   urlForwarding: UrlForwardingStart;
   usageCollection?: UsageCollectionSetup;
-  embeddableEnhanced?: EmbeddableEnhancedPluginStart;
   apmSourcesAccess?: ApmSourceAccessPluginStart;
+  fileUpload?: FileUploadPluginStart;
+  cps?: CPSPluginStart;
+  feedback?: {
+    setContext: (
+      appId: string,
+      context: Record<string, string | boolean | number>,
+      options?: { title?: string }
+    ) => () => void;
+  };
 }

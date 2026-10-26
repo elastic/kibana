@@ -14,7 +14,7 @@ import type {
   PluginInitializerContext,
 } from '@kbn/core/server';
 
-import type { LicenseType } from '@kbn/licensing-plugin/common/types';
+import type { LicenseType } from '@kbn/licensing-types';
 
 import { registerCollector } from './usage';
 import { setupCapabilities } from './capabilities';

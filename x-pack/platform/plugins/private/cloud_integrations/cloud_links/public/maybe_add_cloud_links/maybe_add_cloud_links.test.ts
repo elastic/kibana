@@ -35,11 +35,16 @@ describe('maybeAddCloudLinks', () => {
     );
     const core = coreMock.createStart();
     const { chrome } = core;
+    const cloud = {
+      ...cloudMock.createStart(),
+      isCloudEnabled: true,
+      getPrivilegedUrls: jest.fn().mockResolvedValue({ billingUrl: 'billing-url' }),
+    };
     maybeAddCloudLinks({
       security,
       core,
       share: sharePluginMock.createStartContract(),
-      cloud: { ...cloudMock.createStart(), isCloudEnabled: true },
+      cloud,
       isServerless: false,
     });
     // Since there's a promise, let's wait for the next tick
@@ -63,20 +68,34 @@ describe('maybeAddCloudLinks', () => {
         label: 'Profile',
         order: 100,
         setAsProfile: true,
+        isExternal: true,
+        dataTestSubj: 'userMenuLink__profile',
       },
       {
         href: 'billing-url',
-        iconType: 'visGauge',
-        label: 'Billing',
+        iconType: 'money',
+        label: 'Billing and subscription',
         order: 200,
+        isExternal: true,
+        dataTestSubj: 'userMenuLink__billing',
       },
       {
         href: 'organization-url',
-        iconType: 'gear',
+        iconType: 'users',
         label: 'Organization',
         order: 300,
+        isExternal: true,
+        dataTestSubj: 'userMenuLink__organization',
       },
       expect.any(Object),
+      expect.any(Object),
+      {
+        content: expect.any(Function),
+        href: '',
+        iconType: '',
+        label: '',
+        order: 600,
+      },
     ]);
 
     expect(chrome.setHelpMenuLinks).toHaveBeenCalledTimes(1);
@@ -85,18 +104,17 @@ describe('maybeAddCloudLinks', () => {
         Array [
           Object {
             "href": "https://www.elastic.co/docs/get-started",
-            "title": "Documentation",
+            "iconType": "documentation",
+            "title": "Kibana documentation",
           },
           Object {
             "href": "https://www.elastic.co/support",
-            "title": "Support",
-          },
-          Object {
-            "href": "https://www.elastic.co/products/kibana/feedback?blade=kibanafeedback",
-            "title": "Give feedback",
+            "iconType": "question",
+            "title": "Ask support",
           },
           Object {
             "dataTestSubj": "connectionDetailsHelpLink",
+            "iconType": "plugs",
             "onClick": [Function],
             "title": "Connection details",
           },
@@ -110,11 +128,16 @@ describe('maybeAddCloudLinks', () => {
     security.authc.getCurrentUser.mockRejectedValue(new Error('Something went terribly wrong'));
     const core = coreMock.createStart();
     const { chrome } = core;
+    const cloud = {
+      ...cloudMock.createStart(),
+      isCloudEnabled: true,
+      getPrivilegedUrls: jest.fn().mockResolvedValue({ billingUrl: 'billing-url' }),
+    };
     maybeAddCloudLinks({
       security,
       core,
       share: sharePluginMock.createStartContract(),
-      cloud: { ...cloudMock.createStart(), isCloudEnabled: true },
+      cloud,
       isServerless: false,
     });
     // Since there's a promise, let's wait for the next tick
@@ -138,20 +161,34 @@ describe('maybeAddCloudLinks', () => {
         label: 'Profile',
         order: 100,
         setAsProfile: true,
+        isExternal: true,
+        dataTestSubj: 'userMenuLink__profile',
       },
       {
         href: 'billing-url',
-        iconType: 'visGauge',
-        label: 'Billing',
+        iconType: 'money',
+        label: 'Billing and subscription',
         order: 200,
+        isExternal: true,
+        dataTestSubj: 'userMenuLink__billing',
       },
       {
         href: 'organization-url',
-        iconType: 'gear',
+        iconType: 'users',
         label: 'Organization',
         order: 300,
+        isExternal: true,
+        dataTestSubj: 'userMenuLink__organization',
       },
       expect.any(Object),
+      expect.any(Object),
+      {
+        content: expect.any(Function),
+        href: '',
+        iconType: '',
+        label: '',
+        order: 600,
+      },
     ]);
     expect(chrome.setHelpMenuLinks).toHaveBeenCalledTimes(1);
     expect(chrome.setHelpMenuLinks.mock.calls[0]).toMatchInlineSnapshot(`
@@ -159,18 +196,17 @@ describe('maybeAddCloudLinks', () => {
         Array [
           Object {
             "href": "https://www.elastic.co/docs/get-started",
-            "title": "Documentation",
+            "iconType": "documentation",
+            "title": "Kibana documentation",
           },
           Object {
             "href": "https://www.elastic.co/support",
-            "title": "Support",
-          },
-          Object {
-            "href": "https://www.elastic.co/products/kibana/feedback?blade=kibanafeedback",
-            "title": "Give feedback",
+            "iconType": "question",
+            "title": "Ask support",
           },
           Object {
             "dataTestSubj": "connectionDetailsHelpLink",
+            "iconType": "plugs",
             "onClick": [Function],
             "title": "Connection details",
           },

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DocumentNodeProcessor } from './types/document_node_processor';
+import type { DocumentNodeProcessor } from './types/document_node_processor';
 
 /**
  * Creates a node processor to skip paths starting with `/internal` and omit them from the result document.

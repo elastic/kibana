@@ -6,38 +6,44 @@
  */
 
 import React from 'react';
+import { useDispatch } from 'react-redux';
 import { i18n } from '@kbn/i18n';
+import type { UseEuiTheme } from '@elastic/eui';
 import { EuiIcon } from '@elastic/eui';
-import { Workspace } from '../../types';
+import { css } from '@emotion/react';
 import { gphSidebarHeaderStyles, gphSidebarPanelStyles } from '../../styles';
+import { colorSelectedNodes, type GraphDispatch } from '../../state_management';
+import { gphFormGroupSmallStyles } from './control_plane.styles';
 
 interface SelectStyleProps {
-  workspace: Workspace;
   colors: string[];
 }
 
-export const SelectStyle = ({ colors, workspace }: SelectStyleProps) => {
+export const SelectStyle = ({ colors }: SelectStyleProps) => {
+  const dispatch = useDispatch<GraphDispatch>();
+
   return (
     <div css={gphSidebarPanelStyles}>
       <div css={gphSidebarHeaderStyles}>
-        <EuiIcon type="brush" size="s" />{' '}
+        <EuiIcon type="brush" size="s" aria-hidden={true} />{' '}
         {i18n.translate('xpack.graph.sidebar.styleVerticesTitle', {
           defaultMessage: 'Style selected vertices',
         })}
       </div>
 
-      <div className="form-group form-group-sm gphFormGroup--small">
+      <div className="form-group form-group-sm" css={gphFormGroupSmallStyles}>
         {colors.map((c) => {
-          const onSelectColor = () => {
-            workspace.colorSelected(c);
-            workspace.changeHandler();
-          };
+          const onSelectColor = () => dispatch(colorSelectedNodes(c));
           return (
             <EuiIcon
-              type="stopFilled"
+              type="stopFill"
               color={c}
-              className="gphColorPicker__color"
-              aria-hidden="true"
+              css={colorPickerIconStyles}
+              aria-label={i18n.translate('xpack.graph.sidebar.selectVertexColorAriaLabel', {
+                defaultMessage: 'Set selected vertices color to {color}',
+                values: { color: c },
+              })}
+              data-test-subj={`graphColorPicker-${c}`}
               onClick={onSelectColor}
             />
           );
@@ -46,3 +52,13 @@ export const SelectStyle = ({ colors, workspace }: SelectStyleProps) => {
     </div>
   );
 };
+
+const colorPickerIconStyles = ({ euiTheme }: UseEuiTheme) =>
+  css({
+    margin: euiTheme.size.xs,
+    cursor: 'pointer',
+
+    '&:hover, &:focus': {
+      transform: 'scale(1.4)',
+    },
+  });

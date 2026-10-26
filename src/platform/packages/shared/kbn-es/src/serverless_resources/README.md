@@ -4,7 +4,9 @@ The resources in this directory are used for seeding Elasticsearch Serverless im
 
 ## Roles
 
-Roles are defined in `roles.yml` for each project under 'es' | 'oblt' | 'security' | 'chat' folder respectively and intended to mock a Serverless deployment. It must be in sync with `elasticsearch-controller` defined roles and used in real (MKI) environments. In case of some differences tests may pass against Serverless snapshot environment but fail against MKI environments creating confusion.
+Roles are defined in `roles.yml` for each project under 'es' | 'oblt' | 'security' | 'vectordb' folder respectively and intended to mock a Serverless deployment. It must be in sync with `elasticsearch-controller` defined roles and used in real (MKI) environments. In case of some differences tests may pass against Serverless snapshot environment but fail against MKI environments creating confusion.
+
+As in `elasticsearch-controller`, every customer-facing predefined role carries `_public: true` and `_reserved: true` metadata. Elasticsearch exposes only `_public` roles through the Query Role API, which Kibana uses to list them. Elasticsearch rejects these reserved metadata keys in role descriptors passed to its APIs (for example, API key creation), so test tooling reads the descriptors with `readRolesDescriptorsFromResource`, which drops them.
 
 ### Why `security_roles.json` is here?
 
@@ -61,11 +63,21 @@ curl -H "Authorization: Bearer AAEAAWVsYXN0aWMva2liYW5hL2tpYmFuYS1kZXY6VVVVVVVVT
 
 The name of the token (`kibana-dev`) is important because the `operator_users.yml` file designates that token as an operator and allows us to seed a serverless cluster with this token.
 
+## Universal Identity and Access Management (UIAM) resources
+
+The UIAM CosmosDB Emulator certificates used for its HTTPS endpoints (`uiam_cosmosdb.pfx`) are generated using the following commands from the root directory of Elasticsearch and are valid for 50 years:
+```shell
+bin/elasticsearch-certutil ca --out uiam_cosmosdb_ca.pfx -days 18250 --pass secret
+bin/elasticsearch-certutil cert --out uiam_cosmosdb.pfx -days 18250 --ca uiam_cosmosdb_ca.pfx --ca-pass secret --name uiam --dns localhost,host.docker.internal,127.0.0.1,uiam,uiam-cosmosdb --pass secret
+```
+
+The custom UIAM service entrypoint shell script (`run_java_with_custom_ca.sh`) is used to import the CosmosDB Emulator certificates bundle into the trust store, as explained in the [Azure CosmosDB Emulator guide](https://learn.microsoft.com/en-us/azure/cosmos-db/emulator-linux#installing-certificates-for-java-sdk).
+
 ## Overriding resources
 
-The files found in this directory can be overwritten with customized versions by using the `--resources` option of the `yarn es serverless` command.
+The files found in this directory can be overwritten with customized versions by using the `--resources` option of the `pnpm es serverless` command.
 Assuming a customized `users` and `users_roles` are located in `/tmp/my_es/` directory and executing the below command from the root of Kibana, here is an example:
 
 ```shell
-yarn es serverless --resources=/tmp/my_es/users --resources=/tmp/my_es/users_roles
+pnpm es serverless --resources=/tmp/my_es/users --resources=/tmp/my_es/users_roles
 ```

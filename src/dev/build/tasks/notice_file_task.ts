@@ -10,7 +10,8 @@
 import { getInstalledPackages } from '../../npm';
 import { LICENSE_OVERRIDES } from '../../license_checker';
 
-import { write, Task } from '../lib';
+import type { Task } from '../lib';
+import { write } from '../lib';
 import { getNodeDownloadInfo } from './nodejs';
 import { generateNoticeFromSource, generateBuildNoticeText } from '../../notice';
 
@@ -37,9 +38,13 @@ export const CreateNoticeFile: Task = {
     });
 
     log.info('Generating build notice');
+    const linuxPlatform = config.getNodePlatforms().find((platform) => platform.isLinux());
+    if (!linuxPlatform) {
+      throw new Error('Unable to find a Linux Node.js build for the notice file');
+    }
     const [{ extractDir: nodeDir, version: nodeVersion }] = getNodeDownloadInfo(
       config,
-      config.getPlatform('linux', 'x64')
+      linuxPlatform
     );
 
     const notice = await generateBuildNoticeText({

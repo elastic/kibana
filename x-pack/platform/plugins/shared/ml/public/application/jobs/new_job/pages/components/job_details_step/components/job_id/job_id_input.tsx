@@ -7,14 +7,15 @@
 
 import type { FC } from 'react';
 import React, { useState, useContext, useEffect, useMemo } from 'react';
-import { EuiFieldText } from '@elastic/eui';
+import { EuiFieldText, useGeneratedHtmlId } from '@elastic/eui';
 import { JobCreatorContext } from '../../../job_creator_context';
 import { Description } from './description';
 
 export const JobIdInput: FC = () => {
-  const { jobCreator, jobCreatorUpdate, jobValidator, jobValidatorUpdated } =
+  const { jobCreator, jobCreatorUpdate, jobCreatorUpdated, jobValidator, jobValidatorUpdated } =
     useContext(JobCreatorContext);
   const [jobId, setJobId] = useState(jobCreator.jobId);
+  const titleId = useGeneratedHtmlId({ prefix: 'jobIdInput' });
 
   const validation = useMemo(() => {
     const isEmptyId = jobId === '';
@@ -39,13 +40,21 @@ export const JobIdInput: FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobId]);
 
+  useEffect(() => {
+    if (jobCreator.jobId !== jobId) {
+      setJobId(jobCreator.jobId);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [jobCreatorUpdated]);
+
   return (
-    <Description validation={validation}>
+    <Description validation={validation} titleId={titleId}>
       <EuiFieldText
         value={jobId}
         onChange={(e) => setJobId(e.target.value)}
         isInvalid={validation.valid === false}
         data-test-subj="mlJobWizardInputJobId"
+        aria-labelledby={titleId}
       />
     </Description>
   );

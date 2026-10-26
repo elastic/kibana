@@ -1,0 +1,116 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import type { FC, ReactNode } from 'react';
+import React, { Children } from 'react';
+import classNames from 'classnames';
+import type { UseEuiTheme } from '@elastic/eui';
+import { EuiButtonGroup, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import { i18n } from '@kbn/i18n';
+
+interface Props {
+  items: ReactNode[];
+  /**
+   * Displays the last item without a border radius as if attached to the next DOM node
+   */
+  attached?: boolean;
+  /**
+   * Matches overall height with standard form/button sizes
+   */
+  size?: 'm' | 's';
+}
+
+export const FilterButtonGroup: FC<Props> = ({ items, attached, size = 's', ...rest }: Props) => {
+  const styles = useMemoCss(filterButtonStyles);
+
+  if (attached) {
+    return (
+      <EuiFlexGroup
+        className={classNames('kbnFilterButtonGroup', {
+          'kbnFilterButtonGroup--attached': attached,
+          [`kbnFilterButtonGroup--${size}`]: size,
+        })}
+        gutterSize="none"
+        responsive={false}
+        css={styles.wrapper}
+        {...rest}
+      >
+        {items.map((item, i) =>
+          !item ? null : (
+            <EuiFlexItem key={i} grow={false}>
+              {item}
+            </EuiFlexItem>
+          )
+        )}
+      </EuiFlexGroup>
+    );
+  }
+
+  return (
+    <EuiButtonGroup
+      className="kbnFilterButtonGroup"
+      variant="segmented"
+      legend={i18n.translate('kql.query.queryBar.filterButtonGroupTitle', {
+        defaultMessage: 'Filter options',
+      })}
+      buttonSize={size}
+      wrap={false}
+      {...rest}
+    >
+      {Children.toArray(items)}
+    </EuiButtonGroup>
+  );
+};
+
+const filterButtonStyles = {
+  wrapper: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      position: 'relative',
+      height: euiTheme.size.xl,
+      overflow: 'hidden',
+      borderRadius: euiTheme.border.radius.control,
+      '&::after': {
+        content: "''",
+        position: 'absolute',
+        inset: 0,
+        border: `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBasePlain}`,
+        borderRadius: 'inherit',
+        pointerEvents: 'none',
+      },
+      // Targets any interactable elements
+      '*:enabled': {
+        transform: 'none !important',
+      },
+      '&.kbnFilterButtonGroup--s': {
+        height: euiTheme.size.xl,
+      },
+      '&.kbnFilterButtonGroup--attached': {
+        borderTopRightRadius: 0,
+        borderBottomRightRadius: 0,
+        '> .euiFlexItem:last-child *:enabled': {
+          borderTopRightRadius: 0,
+          borderBottomRightRadius: 0,
+        },
+      },
+      // Square inner corners so sibling fills meet at the divider; keep EUI radius on the outer edges.
+      '> .euiFlexItem:first-child:not(:last-child) *:enabled': {
+        borderTopRightRadius: 0,
+        borderBottomRightRadius: 0,
+      },
+      '> .euiFlexItem:last-child:not(:first-child) *:enabled': {
+        borderTopLeftRadius: 0,
+        borderBottomLeftRadius: 0,
+      },
+      '> *:not(:last-of-type)': {
+        borderRight: `1px solid ${euiTheme.colors.borderBasePlain}`,
+      },
+    }),
+};

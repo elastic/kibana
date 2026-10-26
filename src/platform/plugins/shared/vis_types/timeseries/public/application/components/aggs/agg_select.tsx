@@ -8,7 +8,8 @@
  */
 
 import React, { useContext } from 'react';
-import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiComboBox } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { isMetricEnabled } from '../../../../common/check_ui_restrictions';
@@ -107,6 +108,7 @@ export function AggSelect(props: AggSelectUiProps) {
   return (
     <div data-test-subj="aggSelector">
       <EuiComboBox
+        data-test-subj="aggSelectorComboBox"
         isClearable={false}
         placeholder={i18n.translate('visTypeTimeseries.aggSelect.selectAggPlaceholder', {
           defaultMessage: 'Select aggregation',

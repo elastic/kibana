@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/// <reference path="./emotion.d.ts" />
+
 declare module '*.html' {
   const template: string;
   // eslint-disable-next-line import/no-default-export
@@ -25,6 +27,24 @@ declare module '*.svg' {
   export default content;
 }
 
+declare module '*.jpeg' {
+  const content: string;
+  // eslint-disable-next-line import/no-default-export
+  export default content;
+}
+
+declare module '*.jpg' {
+  const content: string;
+  // eslint-disable-next-line import/no-default-export
+  export default content;
+}
+
+declare module '*.webp' {
+  const content: string;
+  // eslint-disable-next-line import/no-default-export
+  export default content;
+}
+
 declare module '*.gif' {
   const content: string;
   // eslint-disable-next-line import/no-default-export
@@ -37,6 +57,19 @@ declare module '*.mdx' {
   export default MDXComponent;
 }
 
+// Side-effect CSS/SCSS imports are routed through webpack/rspack loaders at
+// build time and have no JS exports. The empty `declare module` keeps TS 6's
+// `noUncheckedSideEffectImports` happy without falsely typing a default export.
+declare module '*.scss';
+declare module '*.css';
+declare module '*.sass';
+
+// `reflect-metadata/lite` ships types under its `exports` map; classic
+// (`moduleResolution: "node"`) resolution does not read `exports`. Declare it
+// as a side-effect-only module until A3 lands and we can switch to
+// `moduleResolution: "bundler"`.
+declare module 'reflect-metadata/lite';
+
 declare module '*?asUrl' {
   const content: string;
   // eslint-disable-next-line import/no-default-export
@@ -47,4 +80,21 @@ declare module '*?raw' {
   const content: string;
   // eslint-disable-next-line import/no-default-export
   export default string;
+}
+
+// EUI icon assets are SVGR modules loaded lazily by workflow step definitions
+// (`@elastic/eui/es/components/icon/assets/<name>`); EUI ships no declaration for the wildcard.
+declare module '@elastic/eui/es/components/icon/assets/*' {
+  import type * as React from 'react';
+
+  interface SVGRProps {
+    title?: string;
+    titleId?: string;
+  }
+  export const icon: ({
+    title,
+    titleId,
+    ...props
+  }: React.SVGProps<SVGSVGElement> & SVGRProps) => React.JSX.Element;
+  export {};
 }

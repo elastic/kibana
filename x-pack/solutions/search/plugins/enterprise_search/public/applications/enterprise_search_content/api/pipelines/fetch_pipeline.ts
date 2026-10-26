@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { MlInferencePipeline } from '../../../../../common/types/pipelines';
-import { Actions, createApiLogic } from '../../../shared/api_logic/create_api_logic';
+import type { MlInferencePipeline } from '../../../../../common/types/pipelines';
+import type { Actions } from '../../../shared/api_logic/create_api_logic';
+import { createApiLogic } from '../../../shared/api_logic/create_api_logic';
 import { HttpLogic } from '../../../shared/http';
 
 export interface FetchPipelineArgs {
@@ -15,7 +16,7 @@ export interface FetchPipelineArgs {
 export type FetchPipelineResponse = Record<string, MlInferencePipeline | undefined>;
 
 export const fetchPipeline = async ({ pipelineName }: FetchPipelineArgs) => {
-  const route = `/internal/enterprise_search/pipelines/${pipelineName}`;
+  const route = `/internal/enterprise_search/pipelines/${encodeURIComponent(pipelineName)}`;
 
   return await HttpLogic.values.http.get<FetchPipelineResponse>(route);
 };

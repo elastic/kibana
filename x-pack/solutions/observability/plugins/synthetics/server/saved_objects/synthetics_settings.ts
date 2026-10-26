@@ -6,7 +6,11 @@
  */
 import { i18n } from '@kbn/i18n';
 
-import { SavedObjectsType } from '@kbn/core-saved-objects-server';
+import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import type { DynamicSettingsAttributes } from '../runtime_types/settings';
+import { DYNAMIC_SETTINGS_DEFAULT_ATTRIBUTES } from '../constants/settings';
 
 export const uptimeSettingsObjectType = 'uptime-dynamic-settings';
 export const uptimeSettingsObjectId = 'uptime-dynamic-settings-singleton';
@@ -24,10 +28,68 @@ export const syntheticsSettings: SavedObjectsType = {
   },
   management: {
     importableAndExportable: true,
-    icon: 'uptimeApp',
+    icon: 'gear',
     getTitle: () =>
       i18n.translate('xpack.synthetics.settings.index', {
         defaultMessage: 'Synthetics settings',
       }),
   },
+};
+
+export const getSyntheticsDynamicSettings = async (
+  client: SavedObjectsClientContract
+): Promise<DynamicSettingsAttributes> => {
+  try {
+    const obj = await client.get<DynamicSettingsAttributes>(
+      syntheticsSettingsObjectType,
+      syntheticsSettingsObjectId
+    );
+    return fromSettingsAttribute(obj?.attributes ?? DYNAMIC_SETTINGS_DEFAULT_ATTRIBUTES);
+  } catch (getErr) {
+    if (SavedObjectsErrorHelpers.isNotFoundError(getErr)) {
+      // If the object doesn't exist, check to see if uptime settings exist
+      return getUptimeDynamicSettings(client);
+    }
+    throw getErr;
+  }
+};
+export const setSyntheticsDynamicSettings = async (
+  client: SavedObjectsClientContract,
+  settings: DynamicSettingsAttributes
+) => {
+  const settingsObject = await client.create<DynamicSettingsAttributes>(
+    syntheticsSettingsObjectType,
+    settings,
+    {
+      id: syntheticsSettingsObjectId,
+      overwrite: true,
+    }
+  );
+
+  return settingsObject.attributes;
+};
+
+const getUptimeDynamicSettings = async (client: SavedObjectsClientContract) => {
+  try {
+    const obj = await client.get<DynamicSettingsAttributes>(
+      uptimeSettingsObjectType,
+      uptimeSettingsObjectId
+    );
+    return obj?.attributes ?? DYNAMIC_SETTINGS_DEFAULT_ATTRIBUTES;
+  } catch (getErr) {
+    return DYNAMIC_SETTINGS_DEFAULT_ATTRIBUTES;
+  }
+};
+
+export const fromSettingsAttribute = (
+  attr: DynamicSettingsAttributes
+): DynamicSettingsAttributes => {
+  return {
+    certExpirationThreshold: attr.certExpirationThreshold,
+    certAgeThreshold: attr.certAgeThreshold,
+    defaultConnectors: attr.defaultConnectors,
+    defaultEmail: attr.defaultEmail,
+    defaultStatusRuleEnabled: attr.defaultStatusRuleEnabled ?? true,
+    defaultTLSRuleEnabled: attr.defaultTLSRuleEnabled ?? true,
+  };
 };

@@ -7,18 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CoreStart, IUiSettingsClient } from '@kbn/core/public';
+import type { CoreStart, IUiSettingsClient } from '@kbn/core/public';
 
-import {
+import type {
   AggsStart,
   DataViewsContract,
   ExpressionValueSearchContext,
 } from '@kbn/data-plugin/common';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import { EventAnnotationService } from '..';
+import type { EventAnnotationService } from '..';
 import { getFetchEventAnnotations } from '.';
-import { FetchEventAnnotationsArgs, QueryPointEventAnnotationOutput } from '../../common';
-import { EventAnnotationStartDependencies } from '../plugin';
+import type { FetchEventAnnotationsArgs, QueryPointEventAnnotationOutput } from '../../common';
+import type { EventAnnotationStartDependencies } from '../plugin';
 import { of as mockOf } from 'rxjs';
 import { handleRequest } from '../../common/fetch_event_annotations/handle_request';
 jest.mock('../../common/fetch_event_annotations/handle_request', () => {
@@ -360,8 +360,8 @@ describe('getFetchEventAnnotations', () => {
         ],
       } as unknown as FetchEventAnnotationsArgs;
       await runGetFetchEventAnnotations(sampleArgs);
-      expect(startServices[1].data.dataViews.create).toBeCalledTimes(2);
-      expect(handleRequest).toBeCalledTimes(2);
+      expect(startServices[1].data.dataViews.create).toHaveBeenCalledTimes(2);
+      expect(handleRequest).toHaveBeenCalledTimes(2);
       expect((handleRequest as jest.Mock).mock.calls[0][0]!.aggs).toMatchSnapshot();
       expect((handleRequest as jest.Mock).mock.calls[1][0]!.aggs).toMatchSnapshot();
     });
@@ -382,9 +382,65 @@ describe('getFetchEventAnnotations', () => {
         ],
       } as unknown as FetchEventAnnotationsArgs;
       await runGetFetchEventAnnotations(sampleArgs);
-      expect(startServices[1].data.dataViews.create).toBeCalledTimes(1);
-      expect(handleRequest).toBeCalledTimes(1);
+      expect(startServices[1].data.dataViews.create).toHaveBeenCalledTimes(1);
+      expect(handleRequest).toHaveBeenCalledTimes(1);
       expect((handleRequest as jest.Mock).mock.calls[0][0]!.aggs).toMatchSnapshot();
+    });
+    test('labels extra field columns with data-view custom labels', async () => {
+      (startServices[1].data.dataViews.create as jest.Mock).mockResolvedValueOnce({
+        id: dataView1.value.id,
+        getFieldByName: (name: string) =>
+          name === 'price'
+            ? { customLabel: 'Price', displayName: 'Price' }
+            : { displayName: 'c.currency' },
+      });
+      (handleRequest as jest.Mock).mockReturnValueOnce(
+        mockOf({
+          type: 'datatable',
+          columns: [
+            {
+              id: 'col-4-5',
+              name: 'First 10 price',
+              meta: { type: 'number' },
+            },
+            {
+              id: 'col-5-6',
+              name: 'First 10 currency',
+              meta: { type: 'string' },
+            },
+            {
+              id: 'col-6-7',
+              name: 'First 10 total_quantity',
+              meta: { type: 'number' },
+            },
+          ],
+          rows: [
+            {
+              'col-0-1': 'ann2',
+              'col-1-2': 1657922400000,
+              'col-2-3': 1,
+              'col-3-4': '2022-07-16T15:27:22.000Z',
+              'col-4-5': 100,
+              'col-5-6': 'EUR',
+              'col-6-7': 2,
+            },
+          ],
+        })
+      );
+
+      const result = await runGetFetchEventAnnotations({
+        interval: '3d',
+        groups: [
+          {
+            type: 'event_annotation_group',
+            annotations: [queryAnnotationSamples.extraFields],
+            dataView: dataView1,
+          },
+        ],
+      } as unknown as FetchEventAnnotationsArgs);
+
+      expect(result!.columns.find((col) => col.id === 'field:price')?.name).toBe('Price');
+      expect(result!.columns.find((col) => col.id === 'field:currency')?.name).toBe('currency');
     });
     test('runs two separate handleRequests if timeField is different', async () => {
       const sampleArgs = {
@@ -403,8 +459,8 @@ describe('getFetchEventAnnotations', () => {
         ],
       } as unknown as FetchEventAnnotationsArgs;
       await runGetFetchEventAnnotations(sampleArgs);
-      expect(startServices[1].data.dataViews.create).toBeCalledTimes(1);
-      expect(handleRequest).toBeCalledTimes(2); // how many times and with what params
+      expect(startServices[1].data.dataViews.create).toHaveBeenCalledTimes(1);
+      expect(handleRequest).toHaveBeenCalledTimes(2); // how many times and with what params
       expect((handleRequest as jest.Mock).mock.calls[0][0]!.aggs).toMatchSnapshot();
       expect((handleRequest as jest.Mock).mock.calls[1][0]!.aggs).toMatchSnapshot();
     });

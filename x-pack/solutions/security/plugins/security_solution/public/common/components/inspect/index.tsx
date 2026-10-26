@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
+import { EuiButtonEmpty, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import React from 'react';
 
 import { InputsModelId } from '../../store/inputs/constants';
@@ -57,6 +57,7 @@ const InspectButtonComponent: React.FC<InspectButtonProps> = ({
   const {
     additionalRequests,
     additionalResponses,
+    adHocDataViews,
     handleClick,
     handleCloseModal,
     isButtonDisabled,
@@ -88,21 +89,23 @@ const InspectButtonComponent: React.FC<InspectButtonProps> = ({
         </EuiButtonEmpty>
       )}
       {(inputId === InputsModelId.global || compact) && showInspectButton && (
-        <EuiButtonIcon
-          className={BUTTON_CLASS}
-          aria-label={i18n.INSPECT}
-          data-test-subj="inspect-icon-button"
-          iconSize="m"
-          iconType="inspect"
-          isDisabled={isButtonDisabled}
-          title={i18n.INSPECT}
-          onClick={handleClick}
-        />
+        <EuiToolTip content={i18n.INSPECT} disableScreenReaderOutput>
+          <EuiButtonIcon
+            className={BUTTON_CLASS}
+            aria-label={i18n.INSPECT}
+            data-test-subj="inspect-icon-button"
+            iconSize="m"
+            iconType="inspect"
+            isDisabled={isButtonDisabled}
+            onClick={handleClick}
+          />
+        </EuiToolTip>
       )}
       {isShowingModal && request !== null && response !== null && (
         <ModalInspectQuery
           additionalRequests={additionalRequests}
           additionalResponses={additionalResponses}
+          adHocDataViews={adHocDataViews}
           closeModal={handleCloseModal}
           data-test-subj="inspect-modal"
           inputId={inputId}

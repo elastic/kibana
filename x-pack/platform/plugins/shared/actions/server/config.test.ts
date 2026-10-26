@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { MAX_EMAIL_BODY_LENGTH } from '../common';
 import type { ActionsConfig } from './config';
 import { configSchema, getValidatedConfig } from './config';
 import type { Logger } from '@kbn/core/server';
@@ -24,10 +25,51 @@ describe('config validation', () => {
         "allowedHosts": Array [
           "*",
         ],
+        "auth": Object {
+          "oauth_authorization_code": Object {
+            "rate_limits": Object {
+              "authorize": Object {
+                "limit": 100,
+                "lookbackWindow": "1h",
+              },
+              "callback": Object {
+                "limit": 100,
+                "lookbackWindow": "1h",
+              },
+            },
+          },
+        },
+        "connectorSigningKeys": Object {
+          "enabled": false,
+        },
         "enableFooterInEmail": true,
         "enabledActionTypes": Array [
           "*",
         ],
+        "inboundEvents": Object {
+          "admission": Object {
+            "enabled": true,
+            "maxInFlight": 50,
+            "maxInFlightPerConnector": 10,
+          },
+          "enabled": true,
+          "maxBodyBytes": ByteSizeValue {
+            "valueInBytes": 1048576,
+          },
+          "maxEmitted": 25,
+          "rateLimit": Object {
+            "connector": Object {
+              "limit": 300,
+              "window": "1m",
+            },
+            "enabled": true,
+            "maxKeys": 10000,
+            "remoteAddress": Object {
+              "limit": 10,
+              "window": "1m",
+            },
+          },
+        },
         "maxResponseContentLength": ByteSizeValue {
           "valueInBytes": 1048576,
         },
@@ -37,9 +79,6 @@ describe('config validation', () => {
         "preconfigured": Object {},
         "preconfiguredAlertHistoryEsIndex": false,
         "responseTimeout": "PT1M",
-        "usage": Object {
-          "url": "https://usage-api.usage-api/api/v1/usage",
-        },
       }
     `);
   });
@@ -61,10 +100,51 @@ describe('config validation', () => {
         "allowedHosts": Array [
           "*",
         ],
+        "auth": Object {
+          "oauth_authorization_code": Object {
+            "rate_limits": Object {
+              "authorize": Object {
+                "limit": 100,
+                "lookbackWindow": "1h",
+              },
+              "callback": Object {
+                "limit": 100,
+                "lookbackWindow": "1h",
+              },
+            },
+          },
+        },
+        "connectorSigningKeys": Object {
+          "enabled": false,
+        },
         "enableFooterInEmail": true,
         "enabledActionTypes": Array [
           "*",
         ],
+        "inboundEvents": Object {
+          "admission": Object {
+            "enabled": true,
+            "maxInFlight": 50,
+            "maxInFlightPerConnector": 10,
+          },
+          "enabled": true,
+          "maxBodyBytes": ByteSizeValue {
+            "valueInBytes": 1048576,
+          },
+          "maxEmitted": 25,
+          "rateLimit": Object {
+            "connector": Object {
+              "limit": 300,
+              "window": "1m",
+            },
+            "enabled": true,
+            "maxKeys": 10000,
+            "remoteAddress": Object {
+              "limit": 10,
+              "window": "1m",
+            },
+          },
+        },
         "maxResponseContentLength": ByteSizeValue {
           "valueInBytes": 1048576,
         },
@@ -83,9 +163,6 @@ describe('config validation', () => {
         },
         "preconfiguredAlertHistoryEsIndex": false,
         "responseTimeout": "PT1M",
-        "usage": Object {
-          "url": "https://usage-api.usage-api/api/v1/usage",
-        },
       }
     `);
   });
@@ -207,10 +284,51 @@ describe('config validation', () => {
         "allowedHosts": Array [
           "*",
         ],
+        "auth": Object {
+          "oauth_authorization_code": Object {
+            "rate_limits": Object {
+              "authorize": Object {
+                "limit": 100,
+                "lookbackWindow": "1h",
+              },
+              "callback": Object {
+                "limit": 100,
+                "lookbackWindow": "1h",
+              },
+            },
+          },
+        },
+        "connectorSigningKeys": Object {
+          "enabled": false,
+        },
         "enableFooterInEmail": true,
         "enabledActionTypes": Array [
           "*",
         ],
+        "inboundEvents": Object {
+          "admission": Object {
+            "enabled": true,
+            "maxInFlight": 50,
+            "maxInFlightPerConnector": 10,
+          },
+          "enabled": true,
+          "maxBodyBytes": ByteSizeValue {
+            "valueInBytes": 1048576,
+          },
+          "maxEmitted": 25,
+          "rateLimit": Object {
+            "connector": Object {
+              "limit": 300,
+              "window": "1m",
+            },
+            "enabled": true,
+            "maxKeys": 10000,
+            "remoteAddress": Object {
+              "limit": 10,
+              "window": "1m",
+            },
+          },
+        },
         "maxResponseContentLength": ByteSizeValue {
           "valueInBytes": 1048576,
         },
@@ -224,9 +342,6 @@ describe('config validation', () => {
           "proxyVerificationMode": "none",
           "verificationMode": "none",
         },
-        "usage": Object {
-          "url": "https://usage-api.usage-api/api/v1/usage",
-        },
       }
     `);
   });
@@ -236,11 +351,6 @@ describe('config validation', () => {
     let result = configSchema.validate(config);
     expect(result.email === undefined);
 
-    config.email = {};
-    expect(() => configSchema.validate(config)).toThrowErrorMatchingInlineSnapshot(
-      `"[email.domain_allowlist]: expected value of type [array] but got [undefined]"`
-    );
-
     config.email = { domain_allowlist: [] };
     result = configSchema.validate(config);
     expect(result.email?.domain_allowlist).toEqual([]);
@@ -248,6 +358,594 @@ describe('config validation', () => {
     config.email = { domain_allowlist: ['a.com', 'b.c.com', 'd.e.f.com'] };
     result = configSchema.validate(config);
     expect(result.email?.domain_allowlist).toEqual(['a.com', 'b.c.com', 'd.e.f.com']);
+  });
+
+  describe('email.recipient_allowlist', () => {
+    const config: Record<string, unknown> = {};
+    test('validates no email config at all', () => {
+      const result = configSchema.validate(config);
+      expect(result.email === undefined);
+    });
+
+    test('validates email config with recipient_allowlist = null', () => {
+      config.email = { recipient_allowlist: null };
+      expect(() => configSchema.validate(config)).toThrowErrorMatchingInlineSnapshot(
+        `"[email.recipient_allowlist]: expected value of type [array] but got [null]"`
+      );
+    });
+
+    test('validates email config with recipient_allowlist = []', () => {
+      config.email = { recipient_allowlist: [] };
+      expect(() => configSchema.validate(config)).toThrowErrorMatchingInlineSnapshot(
+        `"[email.recipient_allowlist]: array size is [0], but cannot be smaller than [1]"`
+      );
+    });
+
+    test('validates email config with recipient_allowlist', () => {
+      config.email = {
+        recipient_allowlist: ['*.bar@a.com', 'foo.*@b.com', '*@d.e.f.com'],
+      };
+
+      const result = configSchema.validate(config);
+      expect(result.email?.recipient_allowlist).toEqual([
+        '*.bar@a.com',
+        'foo.*@b.com',
+        '*@d.e.f.com',
+      ]);
+    });
+  });
+
+  describe('email.maximum_body_length', () => {
+    // note, this just tests the current behavior, but if we change so the
+    // default was ALWAYS the defined default, it's fine to change it.
+    test('validates that the value is undefined with no email parent', () => {
+      const validatedConfig = configSchema.validate({});
+      expect(validatedConfig.email?.maximum_body_length).toBe(undefined);
+    });
+
+    test('validates with value 0', () => {
+      const validatedConfig = configSchema.validate({
+        email: {
+          maximum_body_length: 0,
+        },
+      });
+      expect(validatedConfig.email?.maximum_body_length).toBe(0);
+    });
+
+    test('validates valid value set', () => {
+      const validatedConfig = configSchema.validate({
+        email: {
+          maximum_body_length: 42,
+        },
+      });
+      expect(validatedConfig.email?.maximum_body_length).toBe(42);
+    });
+
+    test('throws error on negative value', () => {
+      const config = {
+        email: {
+          maximum_body_length: -42,
+        },
+      };
+
+      expect(() => configSchema.validate(config)).toThrowErrorMatchingInlineSnapshot(
+        `"[email.maximum_body_length]: Value must be equal to or greater than [0]."`
+      );
+    });
+
+    test('logs warning when value is greater than max', () => {
+      const config = {
+        email: {
+          maximum_body_length: MAX_EMAIL_BODY_LENGTH + 1,
+        },
+      };
+      const validatedConfig = getValidatedConfig(mockLogger, configSchema.validate(config));
+
+      // value is still > max here, fixed in actionConfigUtils getMaxEmailBodyLength()
+      expect(validatedConfig.email?.maximum_body_length).toBe(MAX_EMAIL_BODY_LENGTH + 1);
+      expect(mockLogger.warn.mock.calls[0][0]).toBe(
+        'The configuration xpack.actions.email.maximum_body_length value 25000001 is larger than the maximum setting of 25000000 and the maximum value will be used instead'
+      );
+    });
+
+    test('logs warning on zero value', () => {
+      const config = {
+        email: {
+          maximum_body_length: 0,
+        },
+      };
+      const validatedConfig = getValidatedConfig(mockLogger, configSchema.validate(config));
+
+      expect(validatedConfig.email?.maximum_body_length).toBe(0);
+      expect(mockLogger.warn.mock.calls[0][0]).toBe(
+        'The configuration xpack.actions.email.maximum_body_length is set to 0 and will result in sending empty emails'
+      );
+    });
+  });
+
+  test('throws when domain_allowlist and recipient_allowlist are used at the same time', () => {
+    const config: Record<string, unknown> = {};
+    const result = configSchema.validate(config);
+    expect(result.email === undefined);
+
+    config.email = {
+      domain_allowlist: ['a.com'],
+      recipient_allowlist: ['*.bar@a.com'],
+    };
+    expect(() => configSchema.validate(config)).toThrowErrorMatchingInlineSnapshot(
+      `"[email]: email.domain_allowlist and email.recipient_allowlist can not be used at the same time"`
+    );
+  });
+
+  test('validates rate limiter connector name', () => {
+    let config: Record<string, unknown> = {
+      rateLimiter: { slack: { limit: 10, lookbackWindow: '1m' } },
+    };
+
+    expect(() => configSchema.validate(config)).toThrow(
+      'Rate limiter configuration for connector type "slack" is not supported. Supported types: email'
+    );
+
+    config = {
+      rateLimiter: { email: { limit: 10, lookbackWindow: '1m' } },
+    };
+
+    expect(configSchema.validate(config)).toMatchInlineSnapshot(`
+      Object {
+        "allowedHosts": Array [
+          "*",
+        ],
+        "auth": Object {
+          "oauth_authorization_code": Object {
+            "rate_limits": Object {
+              "authorize": Object {
+                "limit": 100,
+                "lookbackWindow": "1h",
+              },
+              "callback": Object {
+                "limit": 100,
+                "lookbackWindow": "1h",
+              },
+            },
+          },
+        },
+        "connectorSigningKeys": Object {
+          "enabled": false,
+        },
+        "enableFooterInEmail": true,
+        "enabledActionTypes": Array [
+          "*",
+        ],
+        "inboundEvents": Object {
+          "admission": Object {
+            "enabled": true,
+            "maxInFlight": 50,
+            "maxInFlightPerConnector": 10,
+          },
+          "enabled": true,
+          "maxBodyBytes": ByteSizeValue {
+            "valueInBytes": 1048576,
+          },
+          "maxEmitted": 25,
+          "rateLimit": Object {
+            "connector": Object {
+              "limit": 300,
+              "window": "1m",
+            },
+            "enabled": true,
+            "maxKeys": 10000,
+            "remoteAddress": Object {
+              "limit": 10,
+              "window": "1m",
+            },
+          },
+        },
+        "maxResponseContentLength": ByteSizeValue {
+          "valueInBytes": 1048576,
+        },
+        "microsoftExchangeUrl": "https://login.microsoftonline.com",
+        "microsoftGraphApiScope": "https://graph.microsoft.com/.default",
+        "microsoftGraphApiUrl": "https://graph.microsoft.com/v1.0",
+        "preconfigured": Object {},
+        "preconfiguredAlertHistoryEsIndex": false,
+        "rateLimiter": Object {
+          "email": Object {
+            "limit": 10,
+            "lookbackWindow": "1m",
+          },
+        },
+        "responseTimeout": "PT1M",
+      }
+    `);
+  });
+
+  test('validates xpack.actions.webhook', () => {
+    const config: Record<string, unknown> = {};
+    let result = configSchema.validate(config);
+    expect(result.webhook === undefined);
+
+    config.webhook = {};
+    result = configSchema.validate(config);
+    expect(result.webhook?.ssl.pfx.enabled).toEqual(true);
+
+    config.webhook = { ssl: {} };
+    result = configSchema.validate(config);
+    expect(result.webhook?.ssl.pfx.enabled).toEqual(true);
+
+    config.webhook = { ssl: { pfx: {} } };
+    result = configSchema.validate(config);
+    expect(result.webhook?.ssl.pfx.enabled).toEqual(true);
+
+    config.webhook = { ssl: { pfx: { enabled: false } } };
+    result = configSchema.validate(config);
+    expect(result.webhook?.ssl.pfx.enabled).toEqual(false);
+
+    config.webhook = { ssl: { pfx: { enabled: true } } };
+    result = configSchema.validate(config);
+    expect(result.webhook?.ssl.pfx.enabled).toEqual(true);
+  });
+
+  test('validates xpack.actions.inboundEvents', () => {
+    const empty = configSchema.validate({});
+    expect(empty.inboundEvents.enabled).toBe(true);
+    expect(empty.inboundEvents.maxBodyBytes.getValueInBytes()).toBe(1024 * 1024);
+    expect(empty.inboundEvents.maxEmitted).toBe(25);
+
+    const enabled = configSchema.validate({ inboundEvents: { enabled: true } });
+    expect(enabled.inboundEvents.enabled).toBe(true);
+    expect(enabled.inboundEvents.maxBodyBytes.getValueInBytes()).toBe(1024 * 1024);
+    expect(enabled.inboundEvents.maxEmitted).toBe(25);
+
+    const customSize = configSchema.validate({ inboundEvents: { maxBodyBytes: '512kb' } });
+    expect(customSize.inboundEvents.enabled).toBe(true);
+
+    const disabled = configSchema.validate({ inboundEvents: { enabled: false } });
+    expect(disabled.inboundEvents.enabled).toBe(false);
+    expect(customSize.inboundEvents.maxBodyBytes.getValueInBytes()).toBe(512 * 1024);
+
+    const customMax = configSchema.validate({ inboundEvents: { maxEmitted: 100 } });
+    expect(customMax.inboundEvents.maxEmitted).toBe(100);
+
+    expect(() =>
+      configSchema.validate({ inboundEvents: { maxEmitted: 0 } })
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"[inboundEvents.maxEmitted]: Value must be equal to or greater than [1]."`
+    );
+    expect(() =>
+      configSchema.validate({ inboundEvents: { maxEmitted: 251 } })
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"[inboundEvents.maxEmitted]: Value must be equal to or lower than [250]."`
+    );
+
+    expect(empty.inboundEvents.admission).toEqual({
+      enabled: true,
+      maxInFlight: 50,
+      maxInFlightPerConnector: 10,
+    });
+    expect(empty.inboundEvents.rateLimit).toEqual({
+      enabled: true,
+      maxKeys: 10000,
+      remoteAddress: { limit: 10, window: '1m' },
+      connector: { limit: 300, window: '1m' },
+    });
+
+    expect(() =>
+      configSchema.validate({
+        inboundEvents: { rateLimit: { remoteAddress: { window: 'nope' } } },
+      })
+    ).toThrow(/string is not a valid duration/);
+
+    expect(() =>
+      configSchema.validate({
+        inboundEvents: { rateLimit: { remoteAddress: { limit: 0 } } },
+      })
+    ).toThrow(/greater than \[1\]/);
+
+    expect(() =>
+      configSchema.validate({
+        inboundEvents: { rateLimit: { connector: { limit: 1501 } } },
+      })
+    ).toThrow(/lower than \[1500\]/);
+
+    expect(() =>
+      configSchema.validate({
+        inboundEvents: { rateLimit: { maxKeys: 10001 } },
+      })
+    ).toThrow(/lower than \[10000\]/);
+
+    expect(() =>
+      configSchema.validate({
+        inboundEvents: { admission: { maxInFlight: 0 } },
+      })
+    ).toThrow(/greater than \[1\]/);
+
+    expect(() =>
+      configSchema.validate({
+        inboundEvents: { admission: { maxInFlight: 101 } },
+      })
+    ).toThrow(/lower than \[100\]/);
+
+    expect(() =>
+      configSchema.validate({
+        inboundEvents: { admission: { maxInFlight: 5, maxInFlightPerConnector: 10 } },
+      })
+    ).toThrow(/maxInFlightPerConnector/);
+  });
+
+  describe('email.services.ses', () => {
+    const config: Record<string, unknown> = {};
+    test('validates no email config at all', () => {
+      expect(configSchema.validate(config).email).toBe(undefined);
+    });
+
+    test('validates email config with empty services', () => {
+      config.email = { services: {} };
+      expect(() => configSchema.validate(config)).toThrowErrorMatchingInlineSnapshot(
+        `"[email.services]: email.services.enabled or email.services.ses must be defined"`
+      );
+    });
+
+    test('validates email config with empty ses service', () => {
+      config.email = { services: { ses: {} } };
+      expect(() => configSchema.validate(config)).toThrowErrorMatchingInlineSnapshot(
+        `"[email.services.ses.host]: expected value of type [string] but got [undefined]"`
+      );
+    });
+
+    test('validates ses config with host only', () => {
+      config.email = { services: { ses: { host: 'ses.host.com' } } };
+      expect(() => configSchema.validate(config)).toThrowErrorMatchingInlineSnapshot(
+        `"[email.services.ses.port]: expected value of type [number] but got [undefined]"`
+      );
+    });
+
+    test('validates ses config with port only', () => {
+      config.email = { services: { ses: { port: 1 } } };
+      expect(() => configSchema.validate(config)).toThrowErrorMatchingInlineSnapshot(
+        `"[email.services.ses.host]: expected value of type [string] but got [undefined]"`
+      );
+    });
+
+    test('validates ses service', () => {
+      config.email = { services: { ses: { host: 'ses.host.com', port: 1 } } };
+      const result = configSchema.validate(config);
+      expect(result.email?.services?.ses).toEqual({ host: 'ses.host.com', port: 1 });
+    });
+  });
+
+  describe('email.services.enabled', () => {
+    const config: Record<string, unknown> = {};
+    test('validates email config with empty enabled services', () => {
+      config.email = { services: { enabled: [] } };
+      expect(() => configSchema.validate(config)).toThrowErrorMatchingInlineSnapshot(
+        `"[email.services.enabled]: array size is [0], but cannot be smaller than [1]"`
+      );
+    });
+
+    test('validates email config with enabled services', () => {
+      config.email = { services: { enabled: ['elastic-cloud', 'amazon-ses'] } };
+      const result = configSchema.validate(config);
+      expect(result.email?.services?.enabled).toEqual(['elastic-cloud', 'amazon-ses']);
+    });
+
+    test('validates email config with unexistend service', () => {
+      config.email = { services: { enabled: ['fake-service'] } };
+      expect(() => configSchema.validate(config)).toThrowErrorMatchingInlineSnapshot(`
+        "[email.services.enabled.0]: types that failed validation:
+        - [email.services.enabled.0.0]: expected value to equal [google-mail]
+        - [email.services.enabled.0.1]: expected value to equal [microsoft-exchange]
+        - [email.services.enabled.0.2]: expected value to equal [microsoft-outlook]
+        - [email.services.enabled.0.3]: expected value to equal [amazon-ses]
+        - [email.services.enabled.0.4]: expected value to equal [elastic-cloud]
+        - [email.services.enabled.0.5]: expected value to equal [other]
+        - [email.services.enabled.0.6]: expected value to equal [*]"
+      `);
+    });
+
+    test('validates enabled services but no ses service', () => {
+      config.email = { services: { enabled: ['google-mail', 'amazon-ses'] } };
+      const result = configSchema.validate(config);
+      expect(result.email?.services?.enabled).toEqual(['google-mail', 'amazon-ses']);
+      expect(result.email?.services?.ses).toBeUndefined();
+    });
+  });
+
+  describe('auth.ears.enabled default', () => {
+    test('defaults enabled to true when ears.url is set but enabled is omitted', () => {
+      const result = configSchema.validate({
+        auth: { ears: { url: 'https://ears.example.com' } },
+      });
+      expect(result.auth?.ears?.enabled).toBe(true);
+    });
+
+    test('respects explicit enabled: false when ears.url is set', () => {
+      const result = configSchema.validate({
+        auth: { ears: { url: 'https://ears.example.com', enabled: false } },
+      });
+      expect(result.auth?.ears?.enabled).toBe(false);
+    });
+  });
+
+  describe('auth.ears.ssl', () => {
+    test('accepts certificate and key together', () => {
+      const result = configSchema.validate({
+        auth: {
+          ears: {
+            ssl: {
+              verificationMode: 'full',
+              certificate: '/path/to/cert.pem',
+              key: '/path/to/key.pem',
+            },
+          },
+        },
+      });
+      expect(result.auth?.ears?.ssl?.certificate).toBe('/path/to/cert.pem');
+      expect(result.auth?.ears?.ssl?.key).toBe('/path/to/key.pem');
+    });
+
+    test('throws when certificate is specified without key', () => {
+      expect(() =>
+        configSchema.validate({
+          auth: {
+            ears: {
+              ssl: {
+                certificate: '/path/to/cert.pem',
+              },
+            },
+          },
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[auth.ears.ssl]: must specify [auth.ears.ssl.key] when [auth.ears.ssl.certificate] is specified"`
+      );
+    });
+
+    test('throws when key is specified without certificate', () => {
+      expect(() =>
+        configSchema.validate({
+          auth: {
+            ears: {
+              ssl: {
+                key: '/path/to/key.pem',
+              },
+            },
+          },
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[auth.ears.ssl]: must specify [auth.ears.ssl.certificate] when [auth.ears.ssl.key] is specified"`
+      );
+    });
+  });
+
+  describe('relay.url', () => {
+    test('accepts an https URL in production mode', () => {
+      const result = configSchema.validate(
+        { relay: { url: 'https://relay.test' } },
+        { dev: false }
+      );
+
+      expect(result.relay?.url).toEqual('https://relay.test');
+    });
+
+    test('rejects an http URL in production mode', () => {
+      expect(() =>
+        configSchema.validate({ relay: { url: 'http://relay.test' } }, { dev: false })
+      ).toThrow(/expected URI with scheme \[https\]/);
+    });
+
+    test('accepts an http URL in development mode', () => {
+      const result = configSchema.validate({ relay: { url: 'http://relay.test' } }, { dev: true });
+
+      expect(result.relay?.url).toEqual('http://relay.test');
+    });
+  });
+
+  describe('relay.uiam', () => {
+    test('defaults to disabled on serverless', () => {
+      const result = configSchema.validate(
+        { relay: { url: 'https://relay.test' } },
+        { serverless: true }
+      );
+
+      expect(result.relay?.uiam).toEqual({ enabled: false });
+    });
+
+    test('can be enabled on serverless when mTLS is configured', () => {
+      const result = configSchema.validate(
+        {
+          relay: {
+            url: 'https://relay.test',
+            ssl: { certificate: '/path/to/cert.pem', key: '/path/to/key.pem' },
+            uiam: { enabled: true },
+          },
+        },
+        { serverless: true }
+      );
+
+      expect(result.relay?.uiam).toEqual({ enabled: true });
+    });
+
+    test('rejects being enabled without mTLS configured', () => {
+      expect(() =>
+        configSchema.validate(
+          { relay: { url: 'https://relay.test', uiam: { enabled: true } } },
+          { serverless: true }
+        )
+      ).toThrow(
+        '[relay]: must specify [relay.ssl.certificate] and [relay.ssl.key] when [relay.uiam.enabled] is set'
+      );
+    });
+
+    test('rejects being enabled with only a certificate configured', () => {
+      expect(() =>
+        configSchema.validate(
+          {
+            relay: {
+              url: 'https://relay.test',
+              ssl: { certificate: '/path/to/cert.pem' },
+              uiam: { enabled: true },
+            },
+          },
+          { serverless: true }
+        )
+      ).toThrow('[relay.ssl]: must specify [relay.ssl.key]');
+    });
+
+    test('is rejected outside serverless', () => {
+      expect(() =>
+        configSchema.validate(
+          { relay: { url: 'https://relay.test', uiam: { enabled: true } } },
+          { serverless: false }
+        )
+      ).toThrow(/\[relay\.uiam\]/);
+    });
+
+    test('is absent outside serverless when not specified', () => {
+      const result = configSchema.validate(
+        { relay: { url: 'https://relay.test' } },
+        { serverless: false }
+      );
+
+      expect(result.relay?.uiam).toBeUndefined();
+    });
+  });
+
+  describe('relay.ssl', () => {
+    test('accepts the Relay URL and complete SSL configuration', () => {
+      const result = configSchema.validate({
+        relay: {
+          url: 'https://relay.test',
+          ssl: {
+            verificationMode: 'full',
+            certificateAuthorities: ['/path/to/ca.pem'],
+            certificate: '/path/to/cert.pem',
+            key: '/path/to/key.pem',
+          },
+        },
+      });
+
+      expect(result.relay).toEqual({
+        url: 'https://relay.test',
+        ssl: {
+          verificationMode: 'full',
+          certificateAuthorities: ['/path/to/ca.pem'],
+          certificate: '/path/to/cert.pem',
+          key: '/path/to/key.pem',
+        },
+      });
+    });
+
+    test('throws when certificate is specified without key', () => {
+      expect(() =>
+        configSchema.validate({
+          relay: {
+            url: 'https://relay.test',
+            ssl: {
+              certificate: '/path/to/cert.pem',
+            },
+          },
+        })
+      ).toThrow('[relay.ssl]: must specify [relay.ssl.key]');
+    });
   });
 });
 

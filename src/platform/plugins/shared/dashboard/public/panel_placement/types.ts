@@ -7,28 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { MaybePromise } from '@kbn/utility-types';
-import { DashboardPanelState } from '../../common';
-import type { GridData } from '../../server/content_management';
-import { PanelPlacementStrategy } from '../plugin_constants';
+import type { DashboardLayout, DashboardLayoutPanel } from '../dashboard_api/layout_manager';
 
-export interface PanelPlacementSettings {
-  strategy?: PanelPlacementStrategy;
-  height?: number;
-  width?: number;
-}
-
-export interface PanelPlacementReturn {
-  newPanelPlacement: Omit<GridData, 'i'>;
-  otherPanels: { [key: string]: DashboardPanelState };
-}
+export type PanelPlacementReturn = DashboardLayout;
 
 export interface PanelPlacementProps {
-  width: number;
-  height: number;
-  currentPanels: { [key: string]: DashboardPanelState };
+  newPanel: {
+    uuid: string;
+    type: DashboardLayoutPanel['type'];
+    grid: Pick<DashboardLayoutPanel['grid'], 'sectionId' | 'w' | 'h'>;
+  };
+  currentLayout: DashboardLayout;
+  beside?: string; // the ID of the panel to place the new panel relative to
 }
-
-export type GetPanelPlacementSettings<SerializedState extends object = object> = (
-  serializedState?: SerializedState
-) => MaybePromise<PanelPlacementSettings>;

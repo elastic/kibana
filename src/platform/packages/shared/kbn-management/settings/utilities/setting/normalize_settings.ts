@@ -7,7 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SettingType, UiSetting, UiSettingMetadata, Value } from '@kbn/management-settings-types';
+import type {
+  SettingType,
+  UiSetting,
+  UiSettingMetadata,
+  Value,
+} from '@kbn/management-settings-types';
 
 type RawSettings = Record<string, UiSetting<SettingType>>;
 
@@ -18,9 +23,9 @@ type RawSettings = Record<string, UiSetting<SettingType>>;
  * from the `value` or `userValue` fields of the setting.
  *
  * @param setting The setting from which to derive the type.
- * @returns The derived {@link SettingType}.
+ * @returns The derived {@link SettingType}, or `undefined` if the value is incompatible.
  */
-const deriveType = (setting: UiSetting<SettingType>): SettingType => {
+const deriveType = (setting: UiSetting<SettingType>): SettingType | undefined => {
   const { type, value: defaultValue, userValue: savedValue } = setting;
 
   if (type) {
@@ -42,9 +47,7 @@ const deriveType = (setting: UiSetting<SettingType>): SettingType => {
   }
 
   if (typeofVal === 'symbol' || typeofVal === 'object' || typeofVal === 'function') {
-    throw new Error(
-      `incompatible SettingType: '${setting.name}' type ${typeofVal} | ${JSON.stringify(setting)}`
-    );
+    return undefined;
   }
 
   return typeofVal;
@@ -80,7 +83,7 @@ const deriveValue = (type: SettingType, value: unknown): Value => {
     case 'boolean':
       return Boolean(value);
     case 'array':
-      return Array.isArray(value) ? value : [value];
+      return (Array.isArray(value) ? value : [value]) as Value;
     default:
       return value as string;
   }
@@ -104,6 +107,12 @@ export const normalizeSettings = (rawSettings: RawSettings): Record<string, UiSe
 
   entries.forEach(([id, rawSetting]) => {
     const type = deriveType(rawSetting);
+    if (!type) {
+      // eslint-disable-next-line no-console
+      console.warn(`Ignoring incompatible UiSetting '${id}'.`);
+      return;
+    }
+
     const value = deriveValue(type, rawSetting.value);
 
     const setting = {

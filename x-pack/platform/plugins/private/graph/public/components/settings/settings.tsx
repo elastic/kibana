@@ -8,15 +8,15 @@
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
 import { EuiFlyoutHeader, EuiTitle, EuiTabs, EuiFlyoutBody, EuiTab } from '@elastic/eui';
-import * as Rx from 'rxjs';
+import type * as Rx from 'rxjs';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { AdvancedSettingsForm } from './advanced_settings_form';
 import { BlocklistForm } from './blocklist_form';
 import { UrlTemplateList } from './url_template_list';
-import { AdvancedSettings, BlockListedNode, UrlTemplate, WorkspaceField } from '../../types';
+import type { AdvancedSettings, BlockListedNode, UrlTemplate, WorkspaceField } from '../../types';
+import type { GraphState } from '../../state_management';
 import {
-  GraphState,
   settingsSelector,
   templatesSelector,
   fieldsSelector,

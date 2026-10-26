@@ -1,6 +1,0 @@
-{
-  "type": "shared-server",
-  "id": "@kbn/optimizer",
-  "devOnly": true,
-  "owner": "@elastic/kibana-operations"
-}

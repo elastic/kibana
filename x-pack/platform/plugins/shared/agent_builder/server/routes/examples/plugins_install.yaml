@@ -1,0 +1,66 @@
+requestBody:
+  content:
+    application/json:
+      examples:
+        installPluginFromGithubExample:
+          description: "Example request for installing a plugin from a GitHub URL"
+          value:
+            url: https://github.com/anthropics/financial-services-plugins/tree/main/financial-analysis
+        installPluginFromZipExample:
+          description: "Example request for installing a plugin from a direct zip URL"
+          value:
+            url: https://my-server.example.com/my-plugin.zip
+        installPluginWithNameOverrideExample:
+          description: "Example request for installing a plugin with a custom name"
+          value:
+            url: https://github.com/anthropics/financial-services-plugins/tree/main/financial-analysis
+            plugin_name: my-custom-plugin-name
+responses:
+  200:
+    description: "Indicates a successful response"
+    content:
+      application/json:
+        examples:
+          installPluginResponseExample:
+            description: "Example response returning the definition of the installed plugin"
+            value:
+              id: financial-analysis
+              name: financial-analysis
+              version: "1.0.0"
+              description: Financial analysis tools and skills for Claude
+              manifest:
+                author:
+                  name: Anthropic
+                  url: https://www.anthropic.com
+                repository: https://github.com/anthropics/financial-services-plugins
+                keywords:
+                - finance
+                - analysis
+              source_url: https://github.com/anthropics/financial-services-plugins/tree/main/financial-analysis
+              skill_ids:
+              - financial-analysis-analyze-portfolio
+              unmanaged_assets:
+                agents: []
+                hooks: []
+                mcp_servers: []
+                output_styles: []
+                lsp_servers: []
+              created_at: "2025-01-01T00:00:00.000Z"
+              updated_at: "2025-01-01T00:00:00.000Z"
+x-codeSamples:
+- lang: curl
+  source: |
+    curl \
+      -X POST "${KIBANA_URL}/api/agent_builder/plugins/install" \
+      -H "Authorization: ApiKey ${API_KEY}" \
+      -H "kbn-xsrf: true" \
+      -H "Content-Type: application/json" \
+      -d '{
+        "url": "https://github.com/anthropics/financial-services-plugins/tree/main/financial-analysis"
+    }'
+- lang: Console
+  source: |
+    POST kbn://api/agent_builder/plugins/install
+    {
+      "url": "https://github.com/anthropics/financial-services-plugins/tree/main/financial-analysis"
+    }

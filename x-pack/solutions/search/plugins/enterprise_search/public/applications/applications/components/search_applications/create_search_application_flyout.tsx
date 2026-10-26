@@ -11,6 +11,7 @@ import { useLocation } from 'react-router-dom';
 
 import { useActions, useValues } from 'kea';
 
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -24,17 +25,18 @@ import {
   EuiSteps,
   EuiText,
   EuiTitle,
-  EuiComboBoxOptionOption,
-  EuiCallOut,
   EuiButton,
   EuiButtonEmpty,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { KbnDangerCallout, KbnWarningCallout } from '@kbn/ui-callout';
+
 import { Status } from '../../../../../common/types/api';
-import { ElasticsearchIndexWithIngestion } from '../../../../../common/types/indices';
+import type { ElasticsearchIndexWithIngestion } from '../../../../../common/types/indices';
 
 import { CANCEL_BUTTON_LABEL, ESINDEX_QUERY_PARAMETER } from '../../../shared/constants';
 import { docLinks } from '../../../shared/doc_links';
@@ -50,6 +52,8 @@ export interface CreateSearchApplicationFlyoutProps {
 }
 
 export const CreateSearchApplication = ({ onClose }: CreateSearchApplicationFlyoutProps) => {
+  const modalTitleId = useGeneratedHtmlId();
+
   const { createSearchApplication, setName, setSelectedIndices } = useActions(
     CreateSearchApplicationLogic
   );
@@ -78,14 +82,14 @@ export const CreateSearchApplication = ({ onClose }: CreateSearchApplicationFlyo
   }, []);
 
   return (
-    <EuiFlyout onClose={onClose} size="m">
+    <EuiFlyout onClose={onClose} size="m" aria-labelledby={modalTitleId}>
       <EuiFlyoutHeader>
         <EuiTitle size="m">
-          <h3>
+          <h3 id={modalTitleId}>
             {i18n.translate(
               'xpack.enterpriseSearch.searchApplications.createSearchApplication.headerTitle',
               {
-                defaultMessage: 'Create a Search Application',
+                defaultMessage: 'Create a search application',
               }
             )}
           </h3>
@@ -106,7 +110,7 @@ export const CreateSearchApplication = ({ onClose }: CreateSearchApplicationFlyo
                   >
                     {i18n.translate(
                       'xpack.enterpriseSearch.searchApplications.createSearchApplication.header.docsLink',
-                      { defaultMessage: 'Search Applications documentation' }
+                      { defaultMessage: 'Search applications documentation' }
                     )}
                   </EuiLink>
                 ),
@@ -117,8 +121,8 @@ export const CreateSearchApplication = ({ onClose }: CreateSearchApplicationFlyo
         {createSearchApplicationStatus === Status.ERROR && createSearchApplicationError && (
           <>
             <EuiSpacer />
-            <EuiCallOut
-              color="danger"
+            <KbnDangerCallout
+              announceOnMount
               title={i18n.translate(
                 'xpack.enterpriseSearch.searchApplications.createSearchApplication.header.createError.title',
                 { defaultMessage: 'Error creating search application' }
@@ -127,26 +131,25 @@ export const CreateSearchApplication = ({ onClose }: CreateSearchApplicationFlyo
               {getErrorsFromHttpResponse(createSearchApplicationError).map((errMessage, i) => (
                 <p id={`createErrorMsg.${i}`}>{errMessage}</p>
               ))}
-            </EuiCallOut>
+            </KbnDangerCallout>
           </>
         )}
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <EuiFlexGroup direction="column">
           <EuiFlexItem grow>
-            <EuiCallOut
+            <KbnWarningCallout
               title={i18n.translate(
                 'xpack.enterpriseSearch.searchApplications.createSearchApplication.featureCallOut.title',
                 { defaultMessage: 'Beta feature' }
               )}
-              color="warning"
-              iconType="beaker"
-            >
-              <FormattedMessage
-                id="xpack.enterpriseSearch.searchApplications.createSearchApplication.featureCallOut.description"
-                defaultMessage="This functionality is in beta and is subject to change. The design and code is less mature than official GA features and is being provided as-is with no warranties. Beta features are not subject to the support SLA of official GA features."
-              />
-            </EuiCallOut>
+              text={
+                <FormattedMessage
+                  id="xpack.enterpriseSearch.searchApplications.createSearchApplication.featureCallOut.description"
+                  defaultMessage="This functionality is in beta and is subject to change. The design and code is less mature than official GA features and is being provided as-is with no warranties. Beta features are not subject to the support SLA of official GA features."
+                />
+              }
+            />
           </EuiFlexItem>
           <EuiFlexItem grow>
             <EuiSteps
@@ -207,7 +210,7 @@ export const CreateSearchApplication = ({ onClose }: CreateSearchApplicationFlyo
               isDisabled={createDisabled || formDisabled}
               data-telemetry-id="entSearchApplications-createSearchApplication-submit"
               fill
-              iconType="plusInCircle"
+              iconType="plusCircle"
               onClick={() => createSearchApplication()}
             >
               {i18n.translate(

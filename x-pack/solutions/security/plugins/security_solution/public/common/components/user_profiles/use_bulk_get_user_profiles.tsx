@@ -8,7 +8,7 @@
 import type { SecurityPluginStart } from '@kbn/security-plugin/public';
 import type { UserProfile } from '@kbn/security-plugin/common';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 import { useKibana } from '../../lib/kibana';
 import { useAppToasts } from '../../hooks/use_app_toasts';
 import { USER_PROFILES_FAILURE } from './translations';

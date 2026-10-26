@@ -32,7 +32,7 @@ describe('Saved Objects type validation schema', () => {
   it('should validate attributes based on provided spec', () => {
     const objectSchema = createSavedObjectSanitizedDocSchema(validationMap['1.0.0']);
     const data = createMockObject({ foo: 'heya' });
-    expect(() => objectSchema.validate(data)).not.toThrowError();
+    expect(() => objectSchema.validate(data)).not.toThrow();
   });
 
   it('should fail if invalid attributes are provided', () => {
@@ -77,8 +77,12 @@ describe('Saved Objects type validation schema', () => {
         updated_at: '2022-01-05T03:17:07.183Z',
         version: '2',
         originId: 'def-456',
+        accessControl: {
+          accessMode: 'default',
+          owner: 'user1',
+        },
       })
-    ).not.toThrowError();
+    ).not.toThrow();
   });
 
   it('should fail if top-level properties are invalid', () => {
@@ -94,7 +98,7 @@ describe('Saved Objects type validation schema', () => {
       const objectSchema = createSavedObjectSanitizedDocSchema(undefined);
       const data = createMockObject({ foo: 'heya' });
 
-      expect(() => objectSchema.validate(data)).not.toThrowError();
+      expect(() => objectSchema.validate(data)).not.toThrow();
     });
 
     it('fails validation on undefined attributes', () => {
@@ -112,6 +116,25 @@ describe('Saved Objects type validation schema', () => {
 
       expect(() => objectSchema.validate(data)).toThrowErrorMatchingInlineSnapshot(
         `"[attributes]: expected value of type [object] but got [number]"`
+      );
+    });
+
+    it('fails validation on incorrect access control', () => {
+      const objectSchema = createSavedObjectSanitizedDocSchema(undefined);
+      const data = createMockObject({ foo: 'heya' });
+
+      expect(() =>
+        objectSchema.validate({
+          ...data,
+          accessControl: {
+            owner: 'user1',
+            accessMode: 'invalid_mode',
+          },
+        })
+      ).toThrow(
+        `[accessControl.accessMode]: types that failed validation:
+- [accessControl.accessMode.0]: expected value to equal [write_restricted]
+- [accessControl.accessMode.1]: expected value to equal [default]`
       );
     });
   });

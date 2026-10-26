@@ -9,11 +9,16 @@ import dateMath from '@kbn/datemath';
 import moment from 'moment';
 import { CasesConnectorExecutor } from './cases_connector_executor';
 import {
+  CASE_EXTENDED_FIELDS,
   CASE_RULES_SAVED_OBJECT,
+  MAX_OPEN_CASES_DEFAULT_MAXIMUM,
   MAX_ALERTS_PER_CASE,
   MAX_LENGTH_PER_TAG,
   MAX_TAGS_PER_CASE,
   MAX_TITLE_LENGTH,
+  MAX_SUFFIX_LENGTH,
+  SECURITY_SOLUTION_OWNER,
+  OBSERVABILITY_OWNER,
 } from '../../../common/constants';
 import { CasesOracleService } from './cases_oracle_service';
 import { CasesService } from './cases_service';
@@ -25,6 +30,7 @@ import {
   cases,
   createdOracleRecord,
   groupedAlertsWithOracleKey,
+  groupedAlerts,
   groupingBy,
   oracleRecords,
   rule,
@@ -38,11 +44,13 @@ import {
 import {
   expectCasesToHaveTheCorrectAlertsAttachedWithGrouping,
   expectCasesToHaveTheCorrectAlertsAttachedWithGroupingAndIncreasedCounter,
+  expectCasesToHaveTheCorrectAlertsAttachedWithPredefinedGrouping,
 } from './test_helpers';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { Logger } from '@kbn/core/server';
+import { actionsClientMock } from '@kbn/actions-plugin/server/actions_client/actions_client.mock';
 import type { CasesConnectorRunParams } from './types';
-import { INITIAL_ORACLE_RECORD_COUNTER, MAX_OPEN_CASES } from './constants';
+import { INITIAL_ORACLE_RECORD_COUNTER } from './constants';
 import { CaseSeverity, ConnectorTypes, CustomFieldTypes } from '../../../common/types/domain';
 
 jest.mock('./cases_oracle_service');
@@ -63,6 +71,7 @@ describe('CasesConnectorExecutor', () => {
   const getCasesClient = jest.fn();
   const casesClientMock = createCasesClientMock();
   const mockLogger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
+  const actionsClient = actionsClientMock.create();
 
   let connectorExecutor: CasesConnectorExecutor;
   let oracleIdCounter = 0;
@@ -75,13 +84,17 @@ describe('CasesConnectorExecutor', () => {
 
   const params: CasesConnectorRunParams = {
     alerts,
+    autoPushCase: null,
+    groupedAlerts: null,
     groupingBy,
     owner,
     rule,
     timeWindow,
+    source: 'rule',
     reopenClosedCases,
     maximumCasesToOpen: 5,
     templateId: null,
+    templateVersion: null,
   };
 
   beforeEach(() => {
@@ -112,15 +125,28 @@ describe('CasesConnectorExecutor', () => {
     casesClientMock.cases.bulkUpdate.mockResolvedValue([]);
     casesClientMock.attachments.bulkCreate.mockResolvedValue(cases[0]);
     casesClientMock.configure.get = jest.fn().mockResolvedValue([]);
+    casesClientMock.fieldDefinitions.getFieldDefinitions.mockResolvedValue({
+      fieldDefinitions: [],
+      total: 0,
+    });
+    casesClientMock.templates.getAllTemplates.mockResolvedValue({
+      templates: [],
+      page: 1,
+      perPage: 10000,
+      total: 0,
+    });
 
     getCasesClient.mockReturnValue(casesClientMock);
+    actionsClient.get.mockRejectedValue(new Error('not found'));
 
     connectorExecutor = new CasesConnectorExecutor({
       logger: mockLogger,
       casesOracleService: new CasesOracleServiceMock(),
       casesService: new CasesServiceMock(),
       casesClient: casesClientMock,
+      actionsClient,
       spaceId: 'default',
+      isTemplatesEnabled: true,
     });
 
     dateMathMock.parse.mockImplementation(() => moment('2023-10-09T10:23:42.769Z'));
@@ -257,6 +283,7 @@ describe('CasesConnectorExecutor', () => {
                       "id": "mock-id-1",
                       "owner": "cases",
                       "settings": Object {
+                        "extractObservables": false,
                         "syncAlerts": false,
                       },
                       "tags": Array [
@@ -283,6 +310,7 @@ describe('CasesConnectorExecutor', () => {
                       "id": "mock-id-2",
                       "owner": "cases",
                       "settings": Object {
+                        "extractObservables": false,
                         "syncAlerts": false,
                       },
                       "tags": Array [
@@ -309,6 +337,7 @@ describe('CasesConnectorExecutor', () => {
                       "id": "mock-id-3",
                       "owner": "cases",
                       "settings": Object {
+                        "extractObservables": false,
                         "syncAlerts": false,
                       },
                       "tags": Array [
@@ -324,6 +353,9 @@ describe('CasesConnectorExecutor', () => {
                       "title": "Test rule - Grouping by B & 0.0.0.3 (Auto-created)",
                     },
                   ],
+                },
+                Object {
+                  "relaxRequiredFields": true,
                 },
               ],
             ]
@@ -342,14 +374,14 @@ describe('CasesConnectorExecutor', () => {
 
           expect(mockGetRecordId).toHaveBeenCalledTimes(2);
 
-          expect(mockGetRecordId).nthCalledWith(1, {
+          expect(mockGetRecordId).toHaveBeenNthCalledWith(1, {
             ruleId: rule.id,
             grouping: { 'host.name': 'A' },
             owner,
             spaceId: 'default',
           });
 
-          expect(mockGetRecordId).nthCalledWith(2, {
+          expect(mockGetRecordId).toHaveBeenNthCalledWith(2, {
             ruleId: rule.id,
             grouping: { 'host.name': 'B' },
             owner,
@@ -363,7 +395,7 @@ describe('CasesConnectorExecutor', () => {
           expect(mockGetRecordId).toHaveBeenCalledTimes(3);
 
           for (const [index, { grouping }] of groupedAlertsWithOracleKey.entries()) {
-            expect(mockGetRecordId).nthCalledWith(index + 1, {
+            expect(mockGetRecordId).toHaveBeenNthCalledWith(index + 1, {
               ruleId: rule.id,
               grouping,
               owner,
@@ -471,7 +503,7 @@ describe('CasesConnectorExecutor', () => {
           expect(mockGetCaseId).toHaveBeenCalledTimes(3);
 
           for (const [index, { grouping }] of groupedAlertsWithOracleKey.entries()) {
-            expect(mockGetCaseId).nthCalledWith(index + 1, {
+            expect(mockGetCaseId).toHaveBeenNthCalledWith(index + 1, {
               ruleId: rule.id,
               grouping,
               owner,
@@ -488,13 +520,13 @@ describe('CasesConnectorExecutor', () => {
 
           await connectorExecutor.execute(params);
 
-          expect(mockGetCaseId).toBeCalledTimes(3);
+          expect(mockGetCaseId).toHaveBeenCalledTimes(3);
 
           /**
            * Oracle record index: 0
            * Should update the counter
            */
-          expect(mockGetCaseId).nthCalledWith(1, {
+          expect(mockGetCaseId).toHaveBeenNthCalledWith(1, {
             counter: 2,
             grouping: { 'dest.ip': '0.0.0.1', 'host.name': 'A' },
             owner: 'cases',
@@ -506,7 +538,7 @@ describe('CasesConnectorExecutor', () => {
            * Oracle record index: 1
            * Should not update the counter
            */
-          expect(mockGetCaseId).nthCalledWith(2, {
+          expect(mockGetCaseId).toHaveBeenNthCalledWith(2, {
             counter: 1,
             grouping: { 'dest.ip': '0.0.0.1', 'host.name': 'B' },
             owner: 'cases',
@@ -518,7 +550,7 @@ describe('CasesConnectorExecutor', () => {
            * Oracle record index: 3
            * Not found. Created.
            */
-          expect(mockGetCaseId).nthCalledWith(3, {
+          expect(mockGetCaseId).toHaveBeenNthCalledWith(3, {
             counter: 1,
             grouping: { 'dest.ip': '0.0.0.3', 'host.name': 'B' },
             owner: 'cases',
@@ -566,6 +598,7 @@ describe('CasesConnectorExecutor', () => {
                   "id": "mock-id-3",
                   "owner": "cases",
                   "settings": Object {
+                    "extractObservables": false,
                     "syncAlerts": false,
                   },
                   "tags": Array [
@@ -693,11 +726,70 @@ describe('CasesConnectorExecutor', () => {
           });
 
           const title = casesClientMock.cases.bulkCreate.mock.calls[0][0].cases[0].title;
-
           expect(title.length).toBeLessThanOrEqual(MAX_TITLE_LENGTH);
           expect(title).toMatchInlineSnapshot(
-            `"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa... (2) (Auto-created)"`
+            `"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa... (2) (Auto-created)"`
           );
+        });
+
+        it(`trims the grouping description correctly if the cases title is bigger than ${MAX_TITLE_LENGTH}`, async () => {
+          mockBulkGetRecords.mockResolvedValue([{ ...oracleRecords[0], counter: 2 }]);
+          casesClientMock.cases.bulkCreate.mockResolvedValue({ cases: [cases[0]] });
+          casesClientMock.cases.bulkGet.mockResolvedValue({
+            cases: [],
+            errors: [
+              {
+                error: 'Not found',
+                message: 'Not found',
+                status: 404,
+                caseId: 'mock-id-1',
+              },
+            ],
+          });
+
+          const ruleName = 'a'.repeat(120);
+
+          await connectorExecutor.execute({
+            ...params,
+            rule: { ...params.rule, name: ruleName },
+            groupingBy: ['rule.name'],
+          });
+
+          const title = casesClientMock.cases.bulkCreate.mock.calls[0][0].cases[0].title;
+
+          const index = title.indexOf(' - Grouping by');
+          const suffix = title.slice(index);
+
+          expect(title.length).toBeLessThanOrEqual(MAX_TITLE_LENGTH);
+          expect(suffix.length).toBeLessThanOrEqual(MAX_SUFFIX_LENGTH);
+        });
+
+        it(`does not trim the title if it is shorter than ${MAX_TITLE_LENGTH}`, async () => {
+          mockBulkGetRecords.mockResolvedValue([{ ...oracleRecords[0], counter: 2 }]);
+          casesClientMock.cases.bulkCreate.mockResolvedValue({ cases: [cases[0]] });
+          casesClientMock.cases.bulkGet.mockResolvedValue({
+            cases: [],
+            errors: [
+              {
+                error: 'Not found',
+                message: 'Not found',
+                status: 404,
+                caseId: 'mock-id-1',
+              },
+            ],
+          });
+
+          const ruleName = 'a'.repeat(15);
+          await connectorExecutor.execute({
+            ...params,
+            rule: { ...params.rule, name: ruleName },
+            groupingBy: ['rule.name'],
+          });
+
+          const title = casesClientMock.cases.bulkCreate.mock.calls[0][0].cases[0].title;
+
+          expect(title.length).toBeLessThanOrEqual(MAX_TITLE_LENGTH);
+          expect(title).not.toContain('...');
         });
 
         it(`trims tags that are bigger than ${MAX_LENGTH_PER_TAG} characters`, async () => {
@@ -881,6 +973,7 @@ describe('CasesConnectorExecutor', () => {
                   "id": "mock-id-4",
                   "owner": "cases",
                   "settings": Object {
+                    "extractObservables": false,
                     "syncAlerts": false,
                   },
                   "tags": Array [
@@ -1130,6 +1223,7 @@ describe('CasesConnectorExecutor', () => {
                     "id": "mock-id-4",
                     "owner": "cases",
                     "settings": Object {
+                      "extractObservables": false,
                       "syncAlerts": false,
                     },
                     "tags": Array [
@@ -1147,6 +1241,1273 @@ describe('CasesConnectorExecutor', () => {
                 ],
               }
             `);
+          });
+        });
+
+        describe('Templates v2', () => {
+          const v2TemplateSO = {
+            id: 'tmpl-v2-id',
+            type: 'cases-templates',
+            references: [],
+            attributes: {
+              templateId: 'tmpl-v2-id',
+              name: 'V2 Template',
+              owner: 'cases',
+              definition: `
+name: "V2 Template"
+description: "Created from v2 template"
+tags:
+  - v2-tag
+severity: medium
+category: "Phishing"
+fields: []
+`,
+              templateVersion: 1,
+              deletedAt: null,
+              isEnabled: true,
+              isLatest: true,
+            },
+          };
+
+          beforeEach(() => {
+            casesClientMock.templates.getTemplate = jest.fn().mockResolvedValue(v2TemplateSO);
+          });
+
+          it('creates a new case using v2 template fields when templateVersion is set', async () => {
+            casesClientMock.cases.bulkGet.mockResolvedValue({
+              cases: [],
+              errors: [
+                { caseId: 'mock-id-1', error: 'Not found', message: 'Not found', status: 404 },
+              ],
+            });
+
+            await connectorExecutor.execute({
+              ...params,
+              templateId: 'tmpl-v2-id',
+              templateVersion: '1',
+            });
+
+            const bulkCreateCall = casesClientMock.cases.bulkCreate.mock.calls[0][0];
+            const createdCase = bulkCreateCall.cases[0];
+
+            expect(createdCase.description).toBe('Created from v2 template');
+            expect(createdCase.tags).toContain('v2-tag');
+            expect(createdCase.severity).toBe('medium');
+            expect(createdCase.category).toBe('Phishing');
+            expect(createdCase.connector.type).toBe('.none');
+            expect(createdCase.settings).toEqual({
+              syncAlerts: false,
+              extractObservables: false,
+            });
+            expect(createdCase.assignees).toBeUndefined();
+            expect(createdCase.customFields).toEqual([]);
+          });
+
+          it('applies the template connector, settings, and assignees from the v2 definition', async () => {
+            const v2TemplateWithConnectorSettingsAssignees = {
+              ...v2TemplateSO,
+              attributes: {
+                ...v2TemplateSO.attributes,
+                definition: `
+name: "V2 Template"
+description: "Created from v2 template"
+tags:
+  - v2-tag
+severity: medium
+category: "Phishing"
+connector:
+  type: .jira
+  id: jira-1
+  fields:
+    issueType: "10001"
+    priority: "High"
+    parent: null
+settings:
+  syncAlerts: true
+  extractObservables: true
+assignees:
+  - uid: assignee-uid-1
+fields: []
+`,
+              },
+            };
+            casesClientMock.templates.getTemplate = jest
+              .fn()
+              .mockResolvedValue(v2TemplateWithConnectorSettingsAssignees);
+            actionsClient.get.mockResolvedValue({ name: 'My Jira' } as Awaited<
+              ReturnType<typeof actionsClient.get>
+            >);
+
+            casesClientMock.cases.bulkGet.mockResolvedValue({
+              cases: [],
+              errors: [
+                { caseId: 'mock-id-1', error: 'Not found', message: 'Not found', status: 404 },
+              ],
+            });
+
+            await connectorExecutor.execute({
+              ...params,
+              templateId: 'tmpl-v2-id',
+              templateVersion: '1',
+            });
+
+            const createdCase = casesClientMock.cases.bulkCreate.mock.calls[0][0].cases[0];
+
+            expect(createdCase.connector).toEqual({
+              id: 'jira-1',
+              type: '.jira',
+              name: 'My Jira',
+              fields: {
+                issueType: '10001',
+                priority: 'High',
+                parent: null,
+              },
+            });
+            expect(createdCase.settings).toEqual({
+              syncAlerts: true,
+              extractObservables: true,
+            });
+            expect(createdCase.assignees).toEqual([{ uid: 'assignee-uid-1' }]);
+            expect(actionsClient.get).toHaveBeenCalledWith({ id: 'jira-1' });
+          });
+
+          describe('extractObservables override', () => {
+            const v2TemplateWithExtractObservables = {
+              ...v2TemplateSO,
+              attributes: {
+                ...v2TemplateSO.attributes,
+                definition: `
+name: "V2 Template"
+description: "Created from v2 template"
+settings:
+  syncAlerts: true
+  extractObservables: true
+fields: []
+`,
+              },
+            };
+
+            beforeEach(() => {
+              casesClientMock.templates.getTemplate = jest
+                .fn()
+                .mockResolvedValue(v2TemplateWithExtractObservables);
+              casesClientMock.cases.bulkGet.mockResolvedValue({
+                cases: [],
+                errors: [
+                  { caseId: 'mock-id-1', error: 'Not found', message: 'Not found', status: 404 },
+                ],
+              });
+            });
+
+            it('wins over the template settings value', async () => {
+              await connectorExecutor.execute({
+                ...params,
+                owner: SECURITY_SOLUTION_OWNER,
+                templateId: 'tmpl-v2-id',
+                templateVersion: '1',
+                extractObservables: false,
+              });
+
+              expect(casesClientMock.cases.bulkCreate.mock.calls[0][0].cases[0].settings).toEqual({
+                syncAlerts: true,
+                extractObservables: false,
+              });
+            });
+
+            it('falls back to the template settings value when the override is null', async () => {
+              await connectorExecutor.execute({
+                ...params,
+                templateId: 'tmpl-v2-id',
+                templateVersion: '1',
+                extractObservables: null,
+              });
+
+              expect(casesClientMock.cases.bulkCreate.mock.calls[0][0].cases[0].settings).toEqual({
+                syncAlerts: true,
+                extractObservables: true,
+              });
+            });
+          });
+
+          it('skips template assignees without a Platinum license so case creation still succeeds', async () => {
+            const v2TemplateWithAssignees = {
+              ...v2TemplateSO,
+              attributes: {
+                ...v2TemplateSO.attributes,
+                definition: `
+name: "V2 Template"
+assignees:
+  - uid: assignee-uid-1
+fields: []
+`,
+              },
+            };
+            casesClientMock.templates.getTemplate = jest
+              .fn()
+              .mockResolvedValue(v2TemplateWithAssignees);
+
+            const connectorExecutorWithoutPlatinum = new CasesConnectorExecutor({
+              logger: mockLogger,
+              casesOracleService: new CasesOracleServiceMock(),
+              casesService: new CasesServiceMock(),
+              casesClient: casesClientMock,
+              actionsClient,
+              spaceId: 'default',
+              isTemplatesEnabled: true,
+              isAtLeastPlatinum: async () => false,
+            });
+
+            casesClientMock.cases.bulkGet.mockResolvedValue({
+              cases: [],
+              errors: [
+                { caseId: 'mock-id-1', error: 'Not found', message: 'Not found', status: 404 },
+              ],
+            });
+
+            await connectorExecutorWithoutPlatinum.execute({
+              ...params,
+              templateId: 'tmpl-v2-id',
+              templateVersion: '1',
+            });
+
+            const createdCase = casesClientMock.cases.bulkCreate.mock.calls[0][0].cases[0];
+            expect(createdCase.assignees).toBeUndefined();
+          });
+
+          it('drops empty-uid template assignees', async () => {
+            const v2TemplateWithEmptyUid = {
+              ...v2TemplateSO,
+              attributes: {
+                ...v2TemplateSO.attributes,
+                definition: `
+name: "V2 Template"
+assignees:
+  - uid: assignee-uid-1
+  - uid: ""
+fields: []
+`,
+              },
+            };
+            casesClientMock.templates.getTemplate = jest
+              .fn()
+              .mockResolvedValue(v2TemplateWithEmptyUid);
+
+            casesClientMock.cases.bulkGet.mockResolvedValue({
+              cases: [],
+              errors: [
+                { caseId: 'mock-id-1', error: 'Not found', message: 'Not found', status: 404 },
+              ],
+            });
+
+            await connectorExecutor.execute({
+              ...params,
+              templateId: 'tmpl-v2-id',
+              templateVersion: '1',
+            });
+
+            const createdCase = casesClientMock.cases.bulkCreate.mock.calls[0][0].cases[0];
+            expect(createdCase.assignees).toEqual([{ uid: 'assignee-uid-1' }]);
+          });
+
+          it('merges partial template settings over defaults so syncAlerts is always set', async () => {
+            const v2TemplateWithPartialSettings = {
+              ...v2TemplateSO,
+              attributes: {
+                ...v2TemplateSO.attributes,
+                definition: `
+name: "V2 Template"
+settings:
+  extractObservables: true
+fields: []
+`,
+              },
+            };
+            casesClientMock.templates.getTemplate = jest
+              .fn()
+              .mockResolvedValue(v2TemplateWithPartialSettings);
+
+            casesClientMock.cases.bulkGet.mockResolvedValue({
+              cases: [],
+              errors: [
+                { caseId: 'mock-id-1', error: 'Not found', message: 'Not found', status: 404 },
+              ],
+            });
+
+            await connectorExecutor.execute({
+              ...params,
+              templateId: 'tmpl-v2-id',
+              templateVersion: '1',
+            });
+
+            const createdCase = casesClientMock.cases.bulkCreate.mock.calls[0][0].cases[0];
+            expect(createdCase.settings).toEqual({
+              syncAlerts: false,
+              extractObservables: true,
+            });
+          });
+
+          it('falls back to .none when the template connector cannot be resolved', async () => {
+            const v2TemplateWithDeletedConnector = {
+              ...v2TemplateSO,
+              attributes: {
+                ...v2TemplateSO.attributes,
+                definition: `
+name: "V2 Template"
+connector:
+  type: .jira
+  id: deleted-connector
+  fields: null
+fields: []
+`,
+              },
+            };
+            casesClientMock.templates.getTemplate = jest
+              .fn()
+              .mockResolvedValue(v2TemplateWithDeletedConnector);
+            // actionsClient.get rejects by default (see beforeEach).
+
+            casesClientMock.cases.bulkGet.mockResolvedValue({
+              cases: [],
+              errors: [
+                { caseId: 'mock-id-1', error: 'Not found', message: 'Not found', status: 404 },
+              ],
+            });
+
+            await connectorExecutor.execute({
+              ...params,
+              templateId: 'tmpl-v2-id',
+              templateVersion: '1',
+            });
+
+            const createdCase = casesClientMock.cases.bulkCreate.mock.calls[0][0].cases[0];
+            expect(createdCase.connector).toEqual({
+              id: 'none',
+              name: 'none',
+              type: ConnectorTypes.none,
+              fields: null,
+            });
+            expect(mockLogger.warn).toHaveBeenCalledWith(
+              expect.stringContaining('Dropping template connector default "deleted-connector"')
+            );
+          });
+
+          it('applies connector, settings, and assignees when bridging a legacy template key to v2', async () => {
+            const migratedV2Template = {
+              templateId: 'migrated-v2-id',
+              name: 'Migrated Template',
+              owner: params.owner,
+              legacyKey: 'legacy-template-key',
+              templateVersion: 2,
+              definition: `
+name: "Migrated Template"
+connector:
+  type: .jira
+  id: jira-legacy-1
+  fields:
+    issueType: "10001"
+    priority: null
+    parent: null
+settings:
+  syncAlerts: true
+  extractObservables: false
+assignees:
+  - uid: legacy-assignee
+fields: []
+`,
+              deletedAt: null,
+              isEnabled: true,
+              isLatest: true,
+              fieldSearchMatches: false,
+            };
+            casesClientMock.templates.getAllTemplates.mockResolvedValue({
+              templates: [migratedV2Template],
+              page: 1,
+              perPage: 10000,
+              total: 1,
+            });
+            actionsClient.get.mockResolvedValue({ name: 'Legacy Jira' } as Awaited<
+              ReturnType<typeof actionsClient.get>
+            >);
+
+            casesClientMock.cases.bulkGet.mockResolvedValue({
+              cases: [],
+              errors: [
+                { caseId: 'mock-id-1', error: 'Not found', message: 'Not found', status: 404 },
+              ],
+            });
+
+            await connectorExecutor.execute({
+              ...params,
+              templateId: 'legacy-template-key',
+              templateVersion: null,
+            });
+
+            const createdCase = casesClientMock.cases.bulkCreate.mock.calls[0][0].cases[0];
+            expect(createdCase.connector).toEqual({
+              id: 'jira-legacy-1',
+              type: '.jira',
+              name: 'Legacy Jira',
+              fields: {
+                issueType: '10001',
+                priority: null,
+                parent: null,
+              },
+            });
+            expect(createdCase.settings).toEqual({
+              syncAlerts: true,
+              extractObservables: false,
+            });
+            expect(createdCase.assignees).toEqual([{ uid: 'legacy-assignee' }]);
+            expect(createdCase.template).toEqual({ id: 'migrated-v2-id', version: 2 });
+          });
+
+          it('does not use the v2 template name as the title, letting the Oracle-generated title win', async () => {
+            casesClientMock.cases.bulkGet.mockResolvedValue({
+              cases: [],
+              errors: [
+                { caseId: 'mock-id-1', error: 'Not found', message: 'Not found', status: 404 },
+              ],
+            });
+
+            await connectorExecutor.execute({
+              ...params,
+              templateId: 'tmpl-v2-id',
+              templateVersion: '1',
+            });
+
+            const bulkCreateCall = casesClientMock.cases.bulkCreate.mock.calls[0][0];
+            expect(bulkCreateCall.cases[0].title).not.toBe('V2 Template');
+            expect(bulkCreateCall.cases[0].title).toBe(
+              'Test rule - Grouping by A & 0.0.0.1 (Auto-created)'
+            );
+          });
+
+          it('uses the explicit groupedAlerts title over the Oracle-generated title when provided', async () => {
+            casesClientMock.cases.bulkGet.mockResolvedValue({
+              cases: [],
+              errors: [
+                { caseId: 'mock-id-1', error: 'Not found', message: 'Not found', status: 404 },
+              ],
+            });
+
+            await connectorExecutor.execute({
+              ...params,
+              templateId: 'tmpl-v2-id',
+              templateVersion: '1',
+              groupedAlerts: [{ alerts: params.alerts, grouping: {}, title: 'Explicit title' }],
+            });
+
+            const bulkCreateCall = casesClientMock.cases.bulkCreate.mock.calls[0][0];
+            expect(bulkCreateCall.cases[0].title).toBe('Explicit title');
+          });
+
+          it('sets the template reference on the created case', async () => {
+            casesClientMock.cases.bulkGet.mockResolvedValue({
+              cases: [],
+              errors: [
+                { caseId: 'mock-id-1', error: 'Not found', message: 'Not found', status: 404 },
+              ],
+            });
+
+            await connectorExecutor.execute({
+              ...params,
+              templateId: 'tmpl-v2-id',
+              templateVersion: '1',
+            });
+
+            const bulkCreateCall = casesClientMock.cases.bulkCreate.mock.calls[0][0];
+            const createdCase = bulkCreateCall.cases[0];
+
+            expect(createdCase.template).toEqual({ id: 'tmpl-v2-id', version: 1 });
+          });
+
+          it('does not gate the v1 path on the templates feature flag but does not set a template reference', async () => {
+            const connectorExecutorWithTemplatesDisabled = new CasesConnectorExecutor({
+              logger: mockLogger,
+              casesOracleService: new CasesOracleServiceMock(),
+              casesService: new CasesServiceMock(),
+              casesClient: casesClientMock,
+              actionsClient,
+              spaceId: 'default',
+              isTemplatesEnabled: false,
+            });
+
+            casesClientMock.configure.get = jest.fn().mockResolvedValue([
+              {
+                owner: params.owner,
+                customFields: [],
+                templates: [],
+              },
+            ]);
+
+            casesClientMock.cases.bulkGet.mockResolvedValue({
+              cases: [],
+              errors: [
+                { caseId: 'mock-id-1', error: 'Not found', message: 'Not found', status: 404 },
+              ],
+            });
+
+            await connectorExecutorWithTemplatesDisabled.execute({
+              ...params,
+              templateId: null,
+              templateVersion: null,
+            });
+
+            expect(casesClientMock.templates.getTemplate).not.toHaveBeenCalled();
+
+            const bulkCreateCall = casesClientMock.cases.bulkCreate.mock.calls[0][0];
+            expect(bulkCreateCall.cases[0].template).toBeUndefined();
+          });
+
+          it('does not use the v2 template path when isTemplatesEnabled is false, even if templateVersion and templateId are set', async () => {
+            const connectorExecutorWithTemplatesDisabled = new CasesConnectorExecutor({
+              logger: mockLogger,
+              casesOracleService: new CasesOracleServiceMock(),
+              casesService: new CasesServiceMock(),
+              casesClient: casesClientMock,
+              actionsClient,
+              spaceId: 'default',
+              isTemplatesEnabled: false,
+            });
+
+            casesClientMock.cases.bulkGet.mockResolvedValue({
+              cases: [],
+              errors: [
+                { caseId: 'mock-id-1', error: 'Not found', message: 'Not found', status: 404 },
+              ],
+            });
+
+            await connectorExecutorWithTemplatesDisabled.execute({
+              ...params,
+              templateId: 'tmpl-v2-id',
+              templateVersion: '1',
+            });
+
+            expect(casesClientMock.templates.getTemplate).not.toHaveBeenCalled();
+
+            const bulkCreateCall = casesClientMock.cases.bulkCreate.mock.calls[0][0];
+            const createdCase = bulkCreateCall.cases[0];
+
+            // Falls back to the v1 path defaults instead of throwing when the SO type is unregistered
+            expect(createdCase.description).toContain('Test rule');
+            expect(createdCase.template).toBeUndefined();
+          });
+
+          it('falls back to default fields when v2 template is not found, logs warn', async () => {
+            casesClientMock.templates.getTemplate = jest.fn().mockResolvedValue(undefined);
+
+            casesClientMock.cases.bulkGet.mockResolvedValue({
+              cases: [],
+              errors: [
+                { caseId: 'mock-id-1', error: 'Not found', message: 'Not found', status: 404 },
+              ],
+            });
+
+            await connectorExecutor.execute({
+              ...params,
+              templateId: 'tmpl-v2-id',
+              templateVersion: '1',
+            });
+
+            const bulkCreateCall = casesClientMock.cases.bulkCreate.mock.calls[0][0];
+            // falls back to generated description
+            expect(bulkCreateCall.cases[0].description).toContain('Test rule');
+          });
+
+          it('does not call templates.getTemplate when templateVersion is null (v1 path)', async () => {
+            casesClientMock.configure.get = jest.fn().mockResolvedValue([
+              {
+                owner: params.owner,
+                customFields: [],
+                templates: [],
+              },
+            ]);
+
+            casesClientMock.cases.bulkGet.mockResolvedValue({
+              cases: [],
+              errors: [
+                { caseId: 'mock-id-1', error: 'Not found', message: 'Not found', status: 404 },
+              ],
+            });
+
+            await connectorExecutor.execute({
+              ...params,
+              templateId: null,
+              templateVersion: null,
+            });
+
+            expect(casesClientMock.templates.getTemplate).not.toHaveBeenCalled();
+          });
+
+          it('populates required custom fields with defaults on the v2 path', async () => {
+            casesClientMock.configure.get = jest.fn().mockResolvedValue([
+              {
+                owner: params.owner,
+                customFields: [
+                  {
+                    key: 'req-text-key',
+                    type: CustomFieldTypes.TEXT,
+                    label: 'Required text',
+                    required: true,
+                    defaultValue: 'default-text',
+                  },
+                  {
+                    key: 'req-toggle-key',
+                    type: CustomFieldTypes.TOGGLE,
+                    label: 'Required toggle',
+                    required: true,
+                    defaultValue: null,
+                  },
+                ],
+                templates: [],
+              },
+            ]);
+
+            casesClientMock.cases.bulkGet.mockResolvedValue({
+              cases: [],
+              errors: [
+                { caseId: 'mock-id-1', error: 'Not found', message: 'Not found', status: 404 },
+              ],
+            });
+
+            await connectorExecutor.execute({
+              ...params,
+              templateId: 'tmpl-v2-id',
+              templateVersion: '1',
+            });
+
+            const bulkCreateCall = casesClientMock.cases.bulkCreate.mock.calls[0][0];
+            const createdCase = bulkCreateCall.cases[0];
+
+            expect(createdCase.customFields).toEqual([
+              { key: 'req-text-key', type: CustomFieldTypes.TEXT, value: 'default-text' },
+              { key: 'req-toggle-key', type: CustomFieldTypes.TOGGLE, value: false },
+            ]);
+          });
+
+          it('populates extended_fields from inline template field defaults on the v2 path', async () => {
+            const v2TemplateWithInlineFields = {
+              ...v2TemplateSO,
+              attributes: {
+                ...v2TemplateSO.attributes,
+                definition: `
+name: "V2 Template"
+description: "Created from v2 template"
+fields:
+  - name: my_text
+    type: keyword
+    control: INPUT_TEXT
+    label: My text
+    metadata:
+      default: "hello world"
+  - name: my_number
+    type: long
+    control: INPUT_NUMBER
+    label: My number
+    metadata:
+      default: 42
+`,
+              },
+            };
+            casesClientMock.templates.getTemplate = jest
+              .fn()
+              .mockResolvedValue(v2TemplateWithInlineFields);
+
+            casesClientMock.cases.bulkGet.mockResolvedValue({
+              cases: [],
+              errors: [
+                { caseId: 'mock-id-1', error: 'Not found', message: 'Not found', status: 404 },
+              ],
+            });
+
+            await connectorExecutor.execute({
+              ...params,
+              templateId: 'tmpl-v2-id',
+              templateVersion: '1',
+            });
+
+            const bulkCreateCall = casesClientMock.cases.bulkCreate.mock.calls[0][0];
+            const createdCase = bulkCreateCall.cases[0];
+
+            expect(createdCase[CASE_EXTENDED_FIELDS]).toEqual({
+              my_text_as_keyword: 'hello world',
+              my_number_as_long: '42',
+            });
+          });
+
+          it('populates extended_fields by resolving $ref fields from the library on the v2 path', async () => {
+            const v2TemplateWithRefField = {
+              ...v2TemplateSO,
+              attributes: {
+                ...v2TemplateSO.attributes,
+                definition: `
+name: "V2 Template"
+fields:
+  - $ref: "library-field"
+`,
+              },
+            };
+            casesClientMock.templates.getTemplate = jest
+              .fn()
+              .mockResolvedValue(v2TemplateWithRefField);
+
+            casesClientMock.fieldDefinitions.getFieldDefinitions.mockResolvedValue({
+              fieldDefinitions: [
+                {
+                  fieldDefinitionId: 'fd-1',
+                  name: 'library-field',
+                  owner: params.owner,
+                  definition: `
+name: library_field
+type: keyword
+control: INPUT_TEXT
+label: Library field
+metadata:
+  default: "from-library"
+`,
+                },
+              ],
+              total: 1,
+            });
+
+            casesClientMock.cases.bulkGet.mockResolvedValue({
+              cases: [],
+              errors: [
+                { caseId: 'mock-id-1', error: 'Not found', message: 'Not found', status: 404 },
+              ],
+            });
+
+            await connectorExecutor.execute({
+              ...params,
+              templateId: 'tmpl-v2-id',
+              templateVersion: '1',
+            });
+
+            const bulkCreateCall = casesClientMock.cases.bulkCreate.mock.calls[0][0];
+            const createdCase = bulkCreateCall.cases[0];
+
+            expect(createdCase[CASE_EXTENDED_FIELDS]).toEqual({
+              library_field_as_keyword: 'from-library',
+            });
+          });
+
+          it('does not set extended_fields when the template has no fields', async () => {
+            casesClientMock.cases.bulkGet.mockResolvedValue({
+              cases: [],
+              errors: [
+                { caseId: 'mock-id-1', error: 'Not found', message: 'Not found', status: 404 },
+              ],
+            });
+
+            await connectorExecutor.execute({
+              ...params,
+              templateId: 'tmpl-v2-id',
+              templateVersion: '1',
+            });
+
+            const bulkCreateCall = casesClientMock.cases.bulkCreate.mock.calls[0][0];
+            const createdCase = bulkCreateCall.cases[0];
+
+            expect(createdCase[CASE_EXTENDED_FIELDS]).toBeUndefined();
+          });
+
+          describe('linked-field representation provenance', () => {
+            // A legacy required field linked (via legacyKey) to a global definition whose Field
+            // Library default legitimately diverged from the legacy configuration default.
+            const linkedLegacyField = {
+              key: 'req-text-key',
+              type: CustomFieldTypes.TEXT,
+              label: 'Required text',
+              required: true,
+              defaultValue: 'legacy',
+            };
+            const unlinkedLegacyField = {
+              key: 'unlinked-key',
+              type: CustomFieldTypes.TEXT,
+              label: 'Unlinked required text',
+              required: true,
+              defaultValue: 'unlinked-default',
+            };
+            const linkedGlobalDefinition = {
+              fieldDefinitionId: 'fd-priority',
+              name: 'priority',
+              owner: params.owner,
+              isGlobal: true,
+              legacyKey: 'req-text-key',
+              definition: `
+name: priority
+type: keyword
+control: INPUT_TEXT
+label: Priority
+metadata:
+  default: "field-library"
+`,
+            };
+
+            beforeEach(() => {
+              casesClientMock.configure.get = jest.fn().mockResolvedValue([
+                {
+                  owner: params.owner,
+                  customFields: [linkedLegacyField, unlinkedLegacyField],
+                  templates: [],
+                },
+              ]);
+            });
+
+            it('sends only the v2 value for a linked field whose v1/v2 defaults diverge (no dual-input conflict)', async () => {
+              // REGRESSION (the bug this guards): the connector generated BOTH the required
+              // legacy default ("legacy") and the linked Field Library default ("field-library")
+              // as explicit values. Pairing rejected the whole bulk request as a dual-input
+              // conflict, so alert rules created no cases.
+              casesClientMock.fieldDefinitions.getFieldDefinitions.mockResolvedValue({
+                fieldDefinitions: [linkedGlobalDefinition],
+                total: 1,
+              });
+              casesClientMock.cases.bulkGet.mockResolvedValue({
+                cases: [],
+                errors: [
+                  { caseId: 'mock-id-1', error: 'Not found', message: 'Not found', status: 404 },
+                ],
+              });
+
+              await connectorExecutor.execute({
+                ...params,
+                templateId: 'tmpl-v2-id',
+                templateVersion: '1',
+              });
+
+              const bulkCreateCall = casesClientMock.cases.bulkCreate.mock.calls[0][0];
+              const createdCase = bulkCreateCall.cases[0];
+
+              // The linked legacy key is dropped from raw customFields (pairing derives v1 from
+              // the v2 value); the unlinked required field keeps its legacy fallback.
+              expect(createdCase.customFields).toEqual([
+                { key: 'unlinked-key', type: CustomFieldTypes.TEXT, value: 'unlinked-default' },
+              ]);
+              expect(createdCase[CASE_EXTENDED_FIELDS]).toEqual({
+                priority_as_keyword: 'field-library',
+              });
+            });
+
+            it('keeps the required legacy fallback when the linked definition has no v2 value', async () => {
+              const linkedDefinitionWithoutDefault = {
+                ...linkedGlobalDefinition,
+                definition: `
+name: priority
+type: keyword
+control: INPUT_TEXT
+label: Priority
+`,
+              };
+              casesClientMock.fieldDefinitions.getFieldDefinitions.mockResolvedValue({
+                fieldDefinitions: [linkedDefinitionWithoutDefault],
+                total: 1,
+              });
+              casesClientMock.cases.bulkGet.mockResolvedValue({
+                cases: [],
+                errors: [
+                  { caseId: 'mock-id-1', error: 'Not found', message: 'Not found', status: 404 },
+                ],
+              });
+
+              await connectorExecutor.execute({
+                ...params,
+                templateId: 'tmpl-v2-id',
+                templateVersion: '1',
+              });
+
+              const bulkCreateCall = casesClientMock.cases.bulkCreate.mock.calls[0][0];
+              const createdCase = bulkCreateCall.cases[0];
+
+              // No v2 value was generated for the linked field — its required legacy fallback
+              // must remain (pairing then derives the v2 side from it).
+              expect(createdCase.customFields).toEqual([
+                { key: 'req-text-key', type: CustomFieldTypes.TEXT, value: 'legacy' },
+                { key: 'unlinked-key', type: CustomFieldTypes.TEXT, value: 'unlinked-default' },
+              ]);
+              expect(createdCase[CASE_EXTENDED_FIELDS]).toBeUndefined();
+            });
+
+            it('applies the same filtering on the createNewCasesOutOfClosedCases path', async () => {
+              casesClientMock.fieldDefinitions.getFieldDefinitions.mockResolvedValue({
+                fieldDefinitions: [linkedGlobalDefinition],
+                total: 1,
+              });
+              casesClientMock.cases.bulkGet.mockResolvedValue({
+                cases: [{ ...cases[0], status: CaseStatuses.closed }, cases[1]],
+                errors: [],
+              });
+              mockBulkUpdateRecord.mockResolvedValue([{ ...oracleRecords[0], counter: 2 }]);
+
+              await connectorExecutor.execute({
+                ...params,
+                templateId: 'tmpl-v2-id',
+                templateVersion: '1',
+                reopenClosedCases: false,
+              });
+
+              const bulkCreateCall = casesClientMock.cases.bulkCreate.mock.calls[0][0];
+              const createdCase = bulkCreateCall.cases[0];
+
+              expect(createdCase.customFields).toEqual([
+                { key: 'unlinked-key', type: CustomFieldTypes.TEXT, value: 'unlinked-default' },
+              ]);
+              expect(createdCase[CASE_EXTENDED_FIELDS]).toEqual({
+                priority_as_keyword: 'field-library',
+              });
+            });
+          });
+
+          it('uses v2 template when creating cases from closed cases (createNewCasesOutOfClosedCases path)', async () => {
+            casesClientMock.cases.bulkGet.mockResolvedValue({
+              cases: [{ ...cases[0], status: CaseStatuses.closed }, cases[1]],
+              errors: [],
+            });
+
+            mockBulkUpdateRecord.mockResolvedValue([{ ...oracleRecords[0], counter: 2 }]);
+
+            await connectorExecutor.execute({
+              ...params,
+              templateId: 'tmpl-v2-id',
+              templateVersion: '1',
+              reopenClosedCases: false,
+            });
+
+            expect(casesClientMock.templates.getTemplate).toHaveBeenCalledWith(
+              'tmpl-v2-id',
+              '1',
+              expect.any(Object)
+            );
+
+            const bulkCreateCall = casesClientMock.cases.bulkCreate.mock.calls[0][0];
+            const createdCase = bulkCreateCall.cases[0];
+
+            expect(createdCase.description).toBe('Created from v2 template');
+            expect(createdCase.severity).toBe('medium');
+          });
+
+          describe('Legacy template key bridge (v1 -> v2)', () => {
+            const migratedV2Template = {
+              templateId: 'migrated-v2-id',
+              name: 'TestTemplateOne',
+              owner: params.owner,
+              templateVersion: 3,
+              deletedAt: null,
+              legacyKey: 'legacy-template-key',
+              fieldSearchMatches: false,
+              definition: `
+name: "TestTemplateOne"
+description: "Migrated from v1"
+severity: medium
+fields:
+  - name: my_text
+    type: keyword
+    control: INPUT_TEXT
+    label: My text
+    metadata:
+      default: "bridged value"
+`,
+            };
+
+            beforeEach(() => {
+              casesClientMock.configure.get = jest.fn().mockResolvedValue([
+                {
+                  owner: params.owner,
+                  customFields: [],
+                  templates: [
+                    { key: 'legacy-template-key', name: 'TestTemplateOne', caseFields: null },
+                  ],
+                },
+              ]);
+
+              casesClientMock.cases.bulkGet.mockResolvedValue({
+                cases: [],
+                errors: [
+                  { caseId: 'mock-id-1', error: 'Not found', message: 'Not found', status: 404 },
+                ],
+              });
+            });
+
+            it('bridges a stored legacy template key to the migrated v2 template', async () => {
+              casesClientMock.templates.getAllTemplates.mockResolvedValue({
+                templates: [migratedV2Template],
+                page: 1,
+                perPage: 10000,
+                total: 1,
+              });
+
+              await connectorExecutor.execute({
+                ...params,
+                templateId: 'legacy-template-key',
+                templateVersion: null,
+              });
+
+              // Legacy keys are bridged by name via getAllTemplates, not the id+version getTemplate lookup.
+              expect(casesClientMock.templates.getTemplate).not.toHaveBeenCalled();
+
+              const createdCase = casesClientMock.cases.bulkCreate.mock.calls[0][0].cases[0];
+
+              expect(createdCase.description).toBe('Migrated from v1');
+              expect(createdCase.severity).toBe('medium');
+              expect(createdCase.template).toEqual({ id: 'migrated-v2-id', version: 3 });
+              expect(createdCase[CASE_EXTENDED_FIELDS]).toEqual({
+                my_text_as_keyword: 'bridged value',
+              });
+            });
+
+            it('resolves the correct migrated template by legacyKey when two v1 templates shared a name', async () => {
+              casesClientMock.templates.getAllTemplates.mockResolvedValue({
+                templates: [
+                  {
+                    ...migratedV2Template,
+                    templateId: 'migrated-v2-id-other',
+                    legacyKey: 'some-other-key',
+                    definition: `
+name: "TestTemplateOne"
+description: "Wrong sibling"
+fields: []
+`,
+                  },
+                  migratedV2Template,
+                ],
+                page: 1,
+                perPage: 10000,
+                total: 2,
+              });
+
+              await connectorExecutor.execute({
+                ...params,
+                templateId: 'legacy-template-key',
+                templateVersion: null,
+              });
+
+              const createdCase = casesClientMock.cases.bulkCreate.mock.calls[0][0].cases[0];
+
+              expect(createdCase.template).toEqual({ id: 'migrated-v2-id', version: 3 });
+              expect(createdCase.description).toBe('Migrated from v1');
+            });
+
+            it('falls back to the v1 path when the legacy key has no migrated v2 template', async () => {
+              casesClientMock.templates.getAllTemplates.mockResolvedValue({
+                templates: [],
+                page: 1,
+                perPage: 10000,
+                total: 0,
+              });
+
+              await connectorExecutor.execute({
+                ...params,
+                templateId: 'legacy-template-key',
+                templateVersion: null,
+              });
+
+              const createdCase = casesClientMock.cases.bulkCreate.mock.calls[0][0].cases[0];
+
+              expect(createdCase.template).toBeUndefined();
+              expect(createdCase[CASE_EXTENDED_FIELDS]).toBeUndefined();
+            });
+          });
+        });
+
+        describe('Owner default settings', () => {
+          const mockCaseNotFound = () => {
+            casesClientMock.cases.bulkGet.mockResolvedValue({
+              cases: [],
+              errors: [
+                { caseId: 'mock-id-1', error: 'Not found', message: 'Not found', status: 404 },
+              ],
+            });
+          };
+
+          it('uses extractObservables from the space configuration', async () => {
+            mockCaseNotFound();
+            casesClientMock.configure.get = jest.fn().mockResolvedValue([
+              {
+                owner: SECURITY_SOLUTION_OWNER,
+                customFields: [],
+                templates: [],
+                extractObservables: true,
+              },
+            ]);
+
+            await connectorExecutor.execute({
+              ...params,
+              owner: SECURITY_SOLUTION_OWNER,
+              templateId: null,
+            });
+
+            expect(casesClientMock.cases.bulkCreate.mock.calls[0][0].cases[0].settings).toEqual({
+              syncAlerts: true,
+              extractObservables: true,
+            });
+          });
+
+          it('falls back to the owner default when no space configuration exists', async () => {
+            mockCaseNotFound();
+            casesClientMock.configure.get = jest.fn().mockResolvedValue([]);
+
+            await connectorExecutor.execute({
+              ...params,
+              owner: OBSERVABILITY_OWNER,
+              templateId: null,
+            });
+
+            expect(casesClientMock.cases.bulkCreate.mock.calls[0][0].cases[0].settings).toEqual({
+              syncAlerts: false,
+              extractObservables: false,
+            });
+          });
+
+          it('falls back to true for securitySolution when no space configuration exists', async () => {
+            mockCaseNotFound();
+            casesClientMock.configure.get = jest.fn().mockResolvedValue([]);
+
+            await connectorExecutor.execute({
+              ...params,
+              owner: SECURITY_SOLUTION_OWNER,
+              templateId: null,
+            });
+
+            expect(casesClientMock.cases.bulkCreate.mock.calls[0][0].cases[0].settings).toEqual({
+              syncAlerts: true,
+              extractObservables: true,
+            });
+          });
+
+          it('uses space config extractObservables: false when explicitly set', async () => {
+            mockCaseNotFound();
+            casesClientMock.configure.get = jest.fn().mockResolvedValue([
+              {
+                owner: SECURITY_SOLUTION_OWNER,
+                customFields: [],
+                templates: [],
+                extractObservables: false,
+              },
+            ]);
+
+            await connectorExecutor.execute({
+              ...params,
+              owner: SECURITY_SOLUTION_OWNER,
+              templateId: null,
+            });
+
+            expect(casesClientMock.cases.bulkCreate.mock.calls[0][0].cases[0].settings).toEqual({
+              syncAlerts: true,
+              extractObservables: false,
+            });
+          });
+
+          it('per-rule extractObservables override wins over space config default', async () => {
+            mockCaseNotFound();
+            casesClientMock.configure.get = jest.fn().mockResolvedValue([
+              {
+                owner: SECURITY_SOLUTION_OWNER,
+                customFields: [],
+                templates: [],
+                extractObservables: true,
+              },
+            ]);
+
+            await connectorExecutor.execute({
+              ...params,
+              owner: SECURITY_SOLUTION_OWNER,
+              templateId: null,
+              extractObservables: false,
+            });
+
+            expect(casesClientMock.cases.bulkCreate.mock.calls[0][0].cases[0].settings).toEqual({
+              syncAlerts: true,
+              extractObservables: false,
+            });
+          });
+
+          it('per-rule extractObservables: true overrides space config false', async () => {
+            mockCaseNotFound();
+            casesClientMock.configure.get = jest.fn().mockResolvedValue([
+              {
+                owner: SECURITY_SOLUTION_OWNER,
+                customFields: [],
+                templates: [],
+                extractObservables: false,
+              },
+            ]);
+
+            await connectorExecutor.execute({
+              ...params,
+              owner: SECURITY_SOLUTION_OWNER,
+              templateId: null,
+              extractObservables: true,
+            });
+
+            expect(casesClientMock.cases.bulkCreate.mock.calls[0][0].cases[0].settings).toEqual({
+              syncAlerts: true,
+              extractObservables: true,
+            });
+          });
+
+          it('per-rule extractObservables: null inherits space config', async () => {
+            mockCaseNotFound();
+            casesClientMock.configure.get = jest.fn().mockResolvedValue([
+              {
+                owner: SECURITY_SOLUTION_OWNER,
+                customFields: [],
+                templates: [],
+                extractObservables: true,
+              },
+            ]);
+
+            await connectorExecutor.execute({
+              ...params,
+              owner: SECURITY_SOLUTION_OWNER,
+              templateId: null,
+              extractObservables: null,
+            });
+
+            expect(casesClientMock.cases.bulkCreate.mock.calls[0][0].cases[0].settings).toEqual({
+              syncAlerts: true,
+              extractObservables: true,
+            });
+          });
+
+          it('ignores the per-rule override for an owner that disables observables', async () => {
+            mockCaseNotFound();
+            casesClientMock.configure.get = jest.fn().mockResolvedValue([]);
+
+            await connectorExecutor.execute({
+              ...params,
+              owner: OBSERVABILITY_OWNER,
+              templateId: null,
+              extractObservables: true,
+            });
+
+            expect(casesClientMock.cases.bulkCreate.mock.calls[0][0].cases[0].settings).toEqual({
+              syncAlerts: false,
+              extractObservables: false,
+            });
+          });
+
+          it('ignores the per-rule override for an owner that does not auto-extract by default (Stack)', async () => {
+            mockCaseNotFound();
+            casesClientMock.configure.get = jest.fn().mockResolvedValue([
+              {
+                owner: 'cases',
+                customFields: [],
+                templates: [],
+                extractObservables: false,
+              },
+            ]);
+
+            await connectorExecutor.execute({
+              ...params,
+              owner: 'cases',
+              templateId: null,
+              extractObservables: true,
+            });
+
+            expect(casesClientMock.cases.bulkCreate.mock.calls[0][0].cases[0].settings).toEqual({
+              syncAlerts: false,
+              extractObservables: false,
+            });
           });
         });
 
@@ -1242,6 +2603,7 @@ describe('CasesConnectorExecutor', () => {
                     "id": "mock-id-3",
                     "owner": "cases",
                     "settings": Object {
+                      "extractObservables": false,
                       "syncAlerts": false,
                     },
                     "tags": Array [
@@ -1280,6 +2642,12 @@ describe('CasesConnectorExecutor', () => {
               { payload: { counter: 2 }, recordId: 'so-oracle-record-0', version: 'so-version-0' },
             ]);
 
+            // The connector is an automated caller: required-field enforcement must be relaxed
+            // on this create path too, not only on upsertCases.
+            expect(casesClientMock.cases.bulkCreate.mock.calls[0][1]).toEqual({
+              relaxRequiredFields: true,
+            });
+
             expect(casesClientMock.cases.bulkCreate.mock.calls[0][0]).toMatchInlineSnapshot(`
               Object {
                 "cases": Array [
@@ -1316,6 +2684,7 @@ describe('CasesConnectorExecutor', () => {
                     "id": "mock-id-4",
                     "owner": "cases",
                     "settings": Object {
+                      "extractObservables": false,
                       "syncAlerts": false,
                     },
                     "tags": Array [
@@ -1357,7 +2726,10 @@ describe('CasesConnectorExecutor', () => {
           });
 
           casesClientMock.cases.bulkUpdate.mockResolvedValue([
-            { ...cases[0], status: CaseStatuses.open },
+            {
+              ...cases[0],
+              status: CaseStatuses.open,
+            },
           ]);
 
           await connectorExecutor.execute({
@@ -1366,18 +2738,20 @@ describe('CasesConnectorExecutor', () => {
           });
 
           expect(casesClientMock.attachments.bulkCreate).toHaveBeenCalledTimes(1);
-          expect(casesClientMock.attachments.bulkCreate).nthCalledWith(1, {
+          expect(casesClientMock.attachments.bulkCreate).toHaveBeenNthCalledWith(1, {
             caseId: 'mock-id-1',
             attachments: [
               {
-                alertId: ['alert-id-0', 'alert-id-2'],
-                index: ['alert-index-0', 'alert-index-2'],
-                owner: 'securitySolution',
-                rule: {
-                  id: 'rule-test-id',
-                  name: 'Test rule',
+                attachmentId: ['alert-id-0', 'alert-id-2'],
+                metadata: {
+                  index: ['alert-index-0', 'alert-index-2'],
+                  rule: {
+                    id: 'rule-test-id',
+                    name: 'Test rule',
+                  },
                 },
-                type: 'alert',
+                owner: 'securitySolution',
+                type: 'security.alert',
               },
             ],
           });
@@ -1400,18 +2774,20 @@ describe('CasesConnectorExecutor', () => {
           });
 
           expect(casesClientMock.attachments.bulkCreate).toHaveBeenCalledTimes(1);
-          expect(casesClientMock.attachments.bulkCreate).nthCalledWith(1, {
+          expect(casesClientMock.attachments.bulkCreate).toHaveBeenNthCalledWith(1, {
             caseId: 'mock-id-4',
             attachments: [
               {
-                alertId: ['alert-id-0', 'alert-id-2'],
-                index: ['alert-index-0', 'alert-index-2'],
-                owner: 'securitySolution',
-                rule: {
-                  id: 'rule-test-id',
-                  name: 'Test rule',
+                attachmentId: ['alert-id-0', 'alert-id-2'],
+                metadata: {
+                  index: ['alert-index-0', 'alert-index-2'],
+                  rule: {
+                    id: 'rule-test-id',
+                    name: 'Test rule',
+                  },
                 },
-                type: 'alert',
+                owner: 'securitySolution',
+                type: 'security.alert',
               },
             ],
           });
@@ -1466,6 +2842,50 @@ describe('CasesConnectorExecutor', () => {
           await connectorExecutor.execute(params);
 
           expect(casesClientMock.attachments.bulkCreate).toHaveBeenCalledTimes(1);
+        });
+
+        it('sets rule info to null when `source` is `attack`', async () => {
+          await connectorExecutor.execute({ ...params, source: 'attack' });
+
+          expect(casesClientMock.attachments.bulkCreate).toHaveBeenCalledTimes(3);
+          expect(casesClientMock.attachments.bulkCreate).toHaveBeenNthCalledWith(1, {
+            caseId: 'mock-id-1',
+            attachments: [
+              {
+                attachmentId: ['alert-id-0', 'alert-id-2'],
+                metadata: {
+                  index: ['alert-index-0', 'alert-index-2'],
+                  rule: { id: null, name: null },
+                },
+                owner: 'securitySolution',
+                type: 'security.alert',
+              },
+            ],
+          });
+
+          expect(casesClientMock.attachments.bulkCreate).toHaveBeenNthCalledWith(2, {
+            caseId: 'mock-id-2',
+            attachments: [
+              {
+                attachmentId: ['alert-id-1'],
+                metadata: { index: ['alert-index-1'], rule: { id: null, name: null } },
+                owner: 'securitySolution',
+                type: 'security.alert',
+              },
+            ],
+          });
+
+          expect(casesClientMock.attachments.bulkCreate).toHaveBeenNthCalledWith(3, {
+            caseId: 'mock-id-3',
+            attachments: [
+              {
+                attachmentId: ['alert-id-3'],
+                metadata: { index: ['alert-index-3'], rule: { id: null, name: null } },
+                owner: 'securitySolution',
+                type: 'security.alert',
+              },
+            ],
+          });
         });
       });
 
@@ -1749,18 +3169,20 @@ describe('CasesConnectorExecutor', () => {
 
           expect(casesClientMock.attachments.bulkCreate).toHaveBeenCalledTimes(1);
 
-          expect(casesClientMock.attachments.bulkCreate).nthCalledWith(1, {
+          expect(casesClientMock.attachments.bulkCreate).toHaveBeenNthCalledWith(1, {
             caseId: 'mock-id-1',
             attachments: [
               {
-                alertId: alerts.map((alert) => alert._id),
-                index: alerts.map((alert) => alert._index),
-                owner: 'securitySolution',
-                rule: {
-                  id: 'rule-test-id',
-                  name: 'Test rule',
+                attachmentId: alerts.map((alert) => alert._id),
+                metadata: {
+                  index: alerts.map((alert) => alert._index),
+                  rule: {
+                    id: 'rule-test-id',
+                    name: 'Test rule',
+                  },
                 },
-                type: 'alert',
+                owner: 'securitySolution',
+                type: 'security.alert',
               },
             ],
           });
@@ -1792,7 +3214,7 @@ describe('CasesConnectorExecutor', () => {
           });
 
           expect(mockGetRecordId).toHaveBeenCalledTimes(4);
-          expect(mockGetRecordId).nthCalledWith(4, {
+          expect(mockGetRecordId).toHaveBeenNthCalledWith(4, {
             ruleId: rule.id,
             grouping: {
               'dest.ip': 'unknown',
@@ -1810,7 +3232,7 @@ describe('CasesConnectorExecutor', () => {
           ]);
 
           expect(mockGetCaseId).toHaveBeenCalledTimes(4);
-          expect(mockGetCaseId).nthCalledWith(3, {
+          expect(mockGetCaseId).toHaveBeenNthCalledWith(3, {
             ruleId: rule.id,
             grouping: {
               'dest.ip': 'unknown',
@@ -1826,18 +3248,20 @@ describe('CasesConnectorExecutor', () => {
           });
 
           expect(casesClientMock.attachments.bulkCreate).toHaveBeenCalledTimes(4);
-          expect(casesClientMock.attachments.bulkCreate).nthCalledWith(3, {
+          expect(casesClientMock.attachments.bulkCreate).toHaveBeenNthCalledWith(3, {
             caseId: 'mock-id-3',
             attachments: [
               {
-                type: 'alert',
-                rule: {
-                  id: 'rule-test-id',
-                  name: 'Test rule',
+                attachmentId: ['alert-id-4', 'alert-id-5'],
+                metadata: {
+                  index: ['alert-index-4', 'alert-index-5'],
+                  rule: {
+                    id: 'rule-test-id',
+                    name: 'Test rule',
+                  },
                 },
-                alertId: ['alert-id-4', 'alert-id-5'],
-                index: ['alert-index-4', 'alert-index-5'],
                 owner: 'securitySolution',
+                type: 'security.alert',
               },
             ],
           });
@@ -1883,6 +3307,7 @@ describe('CasesConnectorExecutor', () => {
         casesOracleService: new CasesOracleServiceMock(),
         casesService: new CasesServiceMock(),
         casesClient: casesClientMock,
+        actionsClient,
         spaceId: 'default',
       });
     });
@@ -1893,7 +3318,7 @@ describe('CasesConnectorExecutor', () => {
 
         expect(mockGetRecordId).toHaveBeenCalledTimes(1);
 
-        expect(mockGetRecordId).nthCalledWith(1, {
+        expect(mockGetRecordId).toHaveBeenNthCalledWith(1, {
           ruleId: rule.id,
           grouping: {},
           owner,
@@ -1914,7 +3339,7 @@ describe('CasesConnectorExecutor', () => {
 
         expect(mockGetCaseId).toHaveBeenCalledTimes(1);
 
-        expect(mockGetCaseId).nthCalledWith(1, {
+        expect(mockGetCaseId).toHaveBeenNthCalledWith(1, {
           ruleId: rule.id,
           grouping: {},
           owner,
@@ -1938,18 +3363,20 @@ describe('CasesConnectorExecutor', () => {
 
         expect(casesClientMock.attachments.bulkCreate).toHaveBeenCalledTimes(1);
 
-        expect(casesClientMock.attachments.bulkCreate).nthCalledWith(1, {
+        expect(casesClientMock.attachments.bulkCreate).toHaveBeenNthCalledWith(1, {
           caseId: 'mock-id-1',
           attachments: [
             {
-              alertId: alerts.map((alert) => alert._id),
-              index: alerts.map((alert) => alert._index),
-              owner: 'securitySolution',
-              rule: {
-                id: 'rule-test-id',
-                name: 'Test rule',
+              attachmentId: alerts.map((alert) => alert._id),
+              metadata: {
+                index: alerts.map((alert) => alert._index),
+                rule: {
+                  id: 'rule-test-id',
+                  name: 'Test rule',
+                },
               },
-              type: 'alert',
+              owner: 'securitySolution',
+              type: 'security.alert',
             },
           ],
         });
@@ -2156,7 +3583,7 @@ describe('CasesConnectorExecutor', () => {
 
       expect(mockGetCaseId).toHaveBeenCalledTimes(2);
       // case ID is constructed with the new counter and the correct grouping
-      expect(mockGetCaseId).nthCalledWith(1, {
+      expect(mockGetCaseId).toHaveBeenNthCalledWith(1, {
         ruleId: rule.id,
         grouping: groupedAlertsWithOracleKey[0].grouping,
         owner,
@@ -2164,7 +3591,7 @@ describe('CasesConnectorExecutor', () => {
         counter: 2,
       });
 
-      expect(mockGetCaseId).nthCalledWith(2, {
+      expect(mockGetCaseId).toHaveBeenNthCalledWith(2, {
         ruleId: rule.id,
         grouping: groupedAlertsWithOracleKey[1].grouping,
         owner,
@@ -2175,34 +3602,38 @@ describe('CasesConnectorExecutor', () => {
       // called only once when the conflict occurs
       expect(mockBulkUpdateRecord).toHaveBeenCalledTimes(1);
       expect(casesClientMock.attachments.bulkCreate).toHaveBeenCalledTimes(2);
-      expect(casesClientMock.attachments.bulkCreate).nthCalledWith(1, {
+      expect(casesClientMock.attachments.bulkCreate).toHaveBeenNthCalledWith(1, {
         caseId: 'mock-id-2',
         attachments: [
           {
-            alertId: ['alert-id-1'],
-            index: ['alert-index-1'],
-            owner: 'securitySolution',
-            rule: {
-              id: 'rule-test-id',
-              name: 'Test rule',
+            attachmentId: ['alert-id-1'],
+            metadata: {
+              index: ['alert-index-1'],
+              rule: {
+                id: 'rule-test-id',
+                name: 'Test rule',
+              },
             },
-            type: 'alert',
+            owner: 'securitySolution',
+            type: 'security.alert',
           },
         ],
       });
 
-      expect(casesClientMock.attachments.bulkCreate).nthCalledWith(2, {
+      expect(casesClientMock.attachments.bulkCreate).toHaveBeenNthCalledWith(2, {
         caseId: 'mock-id-4',
         attachments: [
           {
-            alertId: ['alert-id-0', 'alert-id-2'],
-            index: ['alert-index-0', 'alert-index-2'],
-            owner: 'securitySolution',
-            rule: {
-              id: 'rule-test-id',
-              name: 'Test rule',
+            attachmentId: ['alert-id-0', 'alert-id-2'],
+            metadata: {
+              index: ['alert-index-0', 'alert-index-2'],
+              rule: {
+                id: 'rule-test-id',
+                name: 'Test rule',
+              },
             },
-            type: 'alert',
+            owner: 'securitySolution',
+            type: 'security.alert',
           },
         ],
       });
@@ -2287,34 +3718,38 @@ describe('CasesConnectorExecutor', () => {
       expect(casesClientMock.cases.bulkUpdate).toHaveBeenCalledTimes(1);
       expect(casesClientMock.attachments.bulkCreate).toHaveBeenCalledTimes(2);
 
-      expect(casesClientMock.attachments.bulkCreate).nthCalledWith(1, {
+      expect(casesClientMock.attachments.bulkCreate).toHaveBeenNthCalledWith(1, {
         caseId: 'mock-id-1',
         attachments: [
           {
-            alertId: ['alert-id-0', 'alert-id-2'],
-            index: ['alert-index-0', 'alert-index-2'],
-            owner: 'securitySolution',
-            rule: {
-              id: 'rule-test-id',
-              name: 'Test rule',
+            attachmentId: ['alert-id-0', 'alert-id-2'],
+            metadata: {
+              index: ['alert-index-0', 'alert-index-2'],
+              rule: {
+                id: 'rule-test-id',
+                name: 'Test rule',
+              },
             },
-            type: 'alert',
+            owner: 'securitySolution',
+            type: 'security.alert',
           },
         ],
       });
 
-      expect(casesClientMock.attachments.bulkCreate).nthCalledWith(2, {
+      expect(casesClientMock.attachments.bulkCreate).toHaveBeenNthCalledWith(2, {
         caseId: 'mock-id-2',
         attachments: [
           {
-            alertId: ['alert-id-1'],
-            index: ['alert-index-1'],
-            owner: 'securitySolution',
-            rule: {
-              id: 'rule-test-id',
-              name: 'Test rule',
+            attachmentId: ['alert-id-1'],
+            metadata: {
+              index: ['alert-index-1'],
+              rule: {
+                id: 'rule-test-id',
+                name: 'Test rule',
+              },
             },
-            type: 'alert',
+            owner: 'securitySolution',
+            type: 'security.alert',
           },
         ],
       });
@@ -2368,34 +3803,38 @@ describe('CasesConnectorExecutor', () => {
       // called only once when the conflict occurs
       expect(mockBulkUpdateRecord).toHaveBeenCalledTimes(1);
       expect(casesClientMock.attachments.bulkCreate).toHaveBeenCalledTimes(2);
-      expect(casesClientMock.attachments.bulkCreate).nthCalledWith(1, {
+      expect(casesClientMock.attachments.bulkCreate).toHaveBeenNthCalledWith(1, {
         caseId: 'mock-id-4',
         attachments: [
           {
-            alertId: ['alert-id-0', 'alert-id-2'],
-            index: ['alert-index-0', 'alert-index-2'],
-            owner: 'securitySolution',
-            rule: {
-              id: 'rule-test-id',
-              name: 'Test rule',
+            attachmentId: ['alert-id-0', 'alert-id-2'],
+            metadata: {
+              index: ['alert-index-0', 'alert-index-2'],
+              rule: {
+                id: 'rule-test-id',
+                name: 'Test rule',
+              },
             },
-            type: 'alert',
+            owner: 'securitySolution',
+            type: 'security.alert',
           },
         ],
       });
 
-      expect(casesClientMock.attachments.bulkCreate).nthCalledWith(2, {
+      expect(casesClientMock.attachments.bulkCreate).toHaveBeenNthCalledWith(2, {
         caseId: 'mock-id-2',
         attachments: [
           {
-            alertId: ['alert-id-1'],
-            index: ['alert-index-1'],
-            owner: 'securitySolution',
-            rule: {
-              id: 'rule-test-id',
-              name: 'Test rule',
+            attachmentId: ['alert-id-1'],
+            metadata: {
+              index: ['alert-index-1'],
+              rule: {
+                id: 'rule-test-id',
+                name: 'Test rule',
+              },
             },
-            type: 'alert',
+            owner: 'securitySolution',
+            type: 'security.alert',
           },
         ],
       });
@@ -2444,34 +3883,38 @@ describe('CasesConnectorExecutor', () => {
       // called only once when the conflict occurs
       expect(casesClientMock.cases.bulkCreate).toHaveBeenCalledTimes(1);
       expect(casesClientMock.attachments.bulkCreate).toHaveBeenCalledTimes(2);
-      expect(casesClientMock.attachments.bulkCreate).nthCalledWith(1, {
+      expect(casesClientMock.attachments.bulkCreate).toHaveBeenNthCalledWith(1, {
         caseId: 'mock-id-4',
         attachments: [
           {
-            alertId: ['alert-id-0', 'alert-id-2'],
-            index: ['alert-index-0', 'alert-index-2'],
-            owner: 'securitySolution',
-            rule: {
-              id: 'rule-test-id',
-              name: 'Test rule',
+            attachmentId: ['alert-id-0', 'alert-id-2'],
+            metadata: {
+              index: ['alert-index-0', 'alert-index-2'],
+              rule: {
+                id: 'rule-test-id',
+                name: 'Test rule',
+              },
             },
-            type: 'alert',
+            owner: 'securitySolution',
+            type: 'security.alert',
           },
         ],
       });
 
-      expect(casesClientMock.attachments.bulkCreate).nthCalledWith(2, {
+      expect(casesClientMock.attachments.bulkCreate).toHaveBeenNthCalledWith(2, {
         caseId: 'mock-id-2',
         attachments: [
           {
-            alertId: ['alert-id-1'],
-            index: ['alert-index-1'],
-            owner: 'securitySolution',
-            rule: {
-              id: 'rule-test-id',
-              name: 'Test rule',
+            attachmentId: ['alert-id-1'],
+            metadata: {
+              index: ['alert-index-1'],
+              rule: {
+                id: 'rule-test-id',
+                name: 'Test rule',
+              },
             },
-            type: 'alert',
+            owner: 'securitySolution',
+            type: 'security.alert',
           },
         ],
       });
@@ -2498,98 +3941,110 @@ describe('CasesConnectorExecutor', () => {
       });
 
       expect(casesClientMock.attachments.bulkCreate).toHaveBeenCalledTimes(6);
-      expect(casesClientMock.attachments.bulkCreate).nthCalledWith(1, {
+      expect(casesClientMock.attachments.bulkCreate).toHaveBeenNthCalledWith(1, {
         caseId: 'mock-id-1',
         attachments: [
           {
-            alertId: ['alert-id-0', 'alert-id-2'],
-            index: ['alert-index-0', 'alert-index-2'],
-            owner: 'securitySolution',
-            rule: {
-              id: 'rule-test-id',
-              name: 'Test rule',
+            attachmentId: ['alert-id-0', 'alert-id-2'],
+            metadata: {
+              index: ['alert-index-0', 'alert-index-2'],
+              rule: {
+                id: 'rule-test-id',
+                name: 'Test rule',
+              },
             },
-            type: 'alert',
+            owner: 'securitySolution',
+            type: 'security.alert',
           },
         ],
       });
 
-      expect(casesClientMock.attachments.bulkCreate).nthCalledWith(4, {
+      expect(casesClientMock.attachments.bulkCreate).toHaveBeenNthCalledWith(4, {
         caseId: 'mock-id-1',
         attachments: [
           {
-            alertId: ['alert-id-0', 'alert-id-2'],
-            index: ['alert-index-0', 'alert-index-2'],
-            owner: 'securitySolution',
-            rule: {
-              id: 'rule-test-id',
-              name: 'Test rule',
+            attachmentId: ['alert-id-0', 'alert-id-2'],
+            metadata: {
+              index: ['alert-index-0', 'alert-index-2'],
+              rule: {
+                id: 'rule-test-id',
+                name: 'Test rule',
+              },
             },
-            type: 'alert',
+            owner: 'securitySolution',
+            type: 'security.alert',
           },
         ],
       });
 
-      expect(casesClientMock.attachments.bulkCreate).nthCalledWith(2, {
+      expect(casesClientMock.attachments.bulkCreate).toHaveBeenNthCalledWith(2, {
         caseId: 'mock-id-2',
         attachments: [
           {
-            alertId: ['alert-id-1'],
-            index: ['alert-index-1'],
-            owner: 'securitySolution',
-            rule: {
-              id: 'rule-test-id',
-              name: 'Test rule',
+            attachmentId: ['alert-id-1'],
+            metadata: {
+              index: ['alert-index-1'],
+              rule: {
+                id: 'rule-test-id',
+                name: 'Test rule',
+              },
             },
-            type: 'alert',
+            owner: 'securitySolution',
+            type: 'security.alert',
           },
         ],
       });
 
-      expect(casesClientMock.attachments.bulkCreate).nthCalledWith(5, {
+      expect(casesClientMock.attachments.bulkCreate).toHaveBeenNthCalledWith(5, {
         caseId: 'mock-id-2',
         attachments: [
           {
-            alertId: ['alert-id-1'],
-            index: ['alert-index-1'],
-            owner: 'securitySolution',
-            rule: {
-              id: 'rule-test-id',
-              name: 'Test rule',
+            attachmentId: ['alert-id-1'],
+            metadata: {
+              index: ['alert-index-1'],
+              rule: {
+                id: 'rule-test-id',
+                name: 'Test rule',
+              },
             },
-            type: 'alert',
+            owner: 'securitySolution',
+            type: 'security.alert',
           },
         ],
       });
 
-      expect(casesClientMock.attachments.bulkCreate).nthCalledWith(3, {
+      expect(casesClientMock.attachments.bulkCreate).toHaveBeenNthCalledWith(3, {
         caseId: 'mock-id-3',
         attachments: [
           {
-            alertId: ['alert-id-3'],
-            index: ['alert-index-3'],
-            owner: 'securitySolution',
-            rule: {
-              id: 'rule-test-id',
-              name: 'Test rule',
+            attachmentId: ['alert-id-3'],
+            metadata: {
+              index: ['alert-index-3'],
+              rule: {
+                id: 'rule-test-id',
+                name: 'Test rule',
+              },
             },
-            type: 'alert',
+            owner: 'securitySolution',
+            type: 'security.alert',
           },
         ],
       });
 
-      expect(casesClientMock.attachments.bulkCreate).nthCalledWith(6, {
+      expect(casesClientMock.attachments.bulkCreate).toHaveBeenNthCalledWith(6, {
         caseId: 'mock-id-3',
         attachments: [
           {
-            alertId: ['alert-id-3'],
-            index: ['alert-index-3'],
-            owner: 'securitySolution',
-            rule: {
-              id: 'rule-test-id',
-              name: 'Test rule',
+            attachmentId: ['alert-id-3'],
+            metadata: {
+              index: ['alert-index-3'],
+              rule: {
+                id: 'rule-test-id',
+                name: 'Test rule',
+              },
             },
-            type: 'alert',
+            owner: 'securitySolution',
+            type: 'security.alert',
           },
         ],
       });
@@ -2633,7 +4088,7 @@ describe('CasesConnectorExecutor', () => {
         });
 
         expect(mockGetRecordId).toHaveBeenCalledTimes(1);
-        expect(mockGetRecordId).nthCalledWith(1, {
+        expect(mockGetRecordId).toHaveBeenNthCalledWith(1, {
           ruleId: rule.id,
           grouping: {},
           owner,
@@ -2648,7 +4103,7 @@ describe('CasesConnectorExecutor', () => {
         });
 
         expect(mockGetCaseId).toHaveBeenCalledTimes(1);
-        expect(mockGetCaseId).nthCalledWith(1, {
+        expect(mockGetCaseId).toHaveBeenNthCalledWith(1, {
           ruleId: rule.id,
           grouping: {},
           owner,
@@ -2664,15 +4119,17 @@ describe('CasesConnectorExecutor', () => {
         });
 
         expect(casesClientMock.attachments.bulkCreate).toHaveBeenCalledTimes(1);
-        expect(casesClientMock.attachments.bulkCreate).nthCalledWith(1, {
+        expect(casesClientMock.attachments.bulkCreate).toHaveBeenNthCalledWith(1, {
           caseId: 'mock-id-1',
           attachments: [
             {
-              type: 'alert',
-              alertId: ['alert-id-0', 'alert-id-2', 'alert-id-1', 'alert-id-3'],
-              index: ['alert-index-0', 'alert-index-2', 'alert-index-1', 'alert-index-3'],
-              rule: { id: 'rule-test-id', name: 'Test rule' },
+              attachmentId: ['alert-id-0', 'alert-id-2', 'alert-id-1', 'alert-id-3'],
+              metadata: {
+                index: ['alert-index-0', 'alert-index-2', 'alert-index-1', 'alert-index-3'],
+                rule: { id: 'rule-test-id', name: 'Test rule' },
+              },
               owner: 'securitySolution',
+              type: 'security.alert',
             },
           ],
         });
@@ -2685,30 +4142,31 @@ describe('CasesConnectorExecutor', () => {
         });
 
         expect(mockLogger.warn).toHaveBeenCalledWith(
-          `[CasesConnector][CasesConnectorExecutor][applyCircuitBreakers] Circuit breaker: Grouping definition would create more than the maximum number of allowed cases 1. Falling back to one case.`,
+          `[CasesConnector][CasesConnectorExecutor][applyCircuitBreakers] Circuit breaker: Grouping definition would create more (3) than the maximum number of allowed cases (1). Falling back to one case.`,
           { labels: {}, tags: ['cases-connector', 'rule:rule-test-id'] }
         );
       });
     });
 
-    describe('hard limits', () => {
-      const allAlerts = Array.from({ length: MAX_OPEN_CASES + 1 }).map((_, index) => ({
-        _id: `alert-id-${index}`,
-        _index: `alert-index-${index}`,
-        'host.name': `host-${index}`,
-      }));
+    describe('effective maximum', () => {
+      const allAlerts = Array.from({ length: MAX_OPEN_CASES_DEFAULT_MAXIMUM + 1 }).map(
+        (_, index) => ({
+          _id: `alert-id-${index}`,
+          _index: `alert-index-${index}`,
+          'host.name': `host-${index}`,
+        })
+      );
 
-      it('generates the oracle keys correctly when the total cases to be open is more than MAX_OPEN_CASES', async () => {
+      it('generates the oracle keys correctly when the total cases to be open is more than the effective maximum', async () => {
         await connectorExecutor.execute({
           ...params,
           alerts: allAlerts,
           groupingBy: ['host.name'],
-          // MAX_OPEN_CASES < maximumCasesToOpen
-          maximumCasesToOpen: 20,
+          maximumCasesToOpen: MAX_OPEN_CASES_DEFAULT_MAXIMUM,
         });
 
         expect(mockGetRecordId).toHaveBeenCalledTimes(1);
-        expect(mockGetRecordId).nthCalledWith(1, {
+        expect(mockGetRecordId).toHaveBeenNthCalledWith(1, {
           ruleId: rule.id,
           grouping: {},
           owner,
@@ -2716,17 +4174,16 @@ describe('CasesConnectorExecutor', () => {
         });
       });
 
-      it('generates the case ids correctly when the total cases to be open is more than MAX_OPEN_CASES', async () => {
+      it('generates the case ids correctly when the total cases to be open is more than the effective maximum', async () => {
         await connectorExecutor.execute({
           ...params,
           alerts: allAlerts,
           groupingBy: ['host.name'],
-          // MAX_OPEN_CASES < maximumCasesToOpen
-          maximumCasesToOpen: 20,
+          maximumCasesToOpen: MAX_OPEN_CASES_DEFAULT_MAXIMUM,
         });
 
         expect(mockGetCaseId).toHaveBeenCalledTimes(1);
-        expect(mockGetCaseId).nthCalledWith(1, {
+        expect(mockGetCaseId).toHaveBeenNthCalledWith(1, {
           ruleId: rule.id,
           grouping: {},
           owner,
@@ -2735,28 +4192,29 @@ describe('CasesConnectorExecutor', () => {
         });
       });
 
-      it('attach all alerts to the same case when the grouping generates more than MAX_OPEN_CASES', async () => {
+      it('attach all alerts to the same case when the grouping generates more than the effective maximum', async () => {
         await connectorExecutor.execute({
           ...params,
           alerts: allAlerts,
           groupingBy: ['host.name'],
-          // MAX_OPEN_CASES < maximumCasesToOpen
-          maximumCasesToOpen: 20,
+          maximumCasesToOpen: MAX_OPEN_CASES_DEFAULT_MAXIMUM,
         });
 
         expect(casesClientMock.attachments.bulkCreate).toHaveBeenCalledTimes(1);
-        expect(casesClientMock.attachments.bulkCreate).nthCalledWith(1, {
+        expect(casesClientMock.attachments.bulkCreate).toHaveBeenNthCalledWith(1, {
           caseId: 'mock-id-1',
           attachments: [
             {
-              alertId: allAlerts.map((alert) => alert._id),
-              index: allAlerts.map((alert) => alert._index),
-              owner: 'securitySolution',
-              rule: {
-                id: 'rule-test-id',
-                name: 'Test rule',
+              attachmentId: allAlerts.map((alert) => alert._id),
+              metadata: {
+                index: allAlerts.map((alert) => alert._index),
+                rule: {
+                  id: 'rule-test-id',
+                  name: 'Test rule',
+                },
               },
-              type: 'alert',
+              owner: 'securitySolution',
+              type: 'security.alert',
             },
           ],
         });
@@ -2767,12 +4225,11 @@ describe('CasesConnectorExecutor', () => {
           ...params,
           alerts: allAlerts,
           groupingBy: ['host.name'],
-          // MAX_OPEN_CASES < maximumCasesToOpen
-          maximumCasesToOpen: 20,
+          maximumCasesToOpen: MAX_OPEN_CASES_DEFAULT_MAXIMUM,
         });
 
         expect(mockLogger.warn).toHaveBeenCalledWith(
-          `[CasesConnector][CasesConnectorExecutor][applyCircuitBreakers] Circuit breaker: Grouping definition would create more than the maximum number of allowed cases 10. Falling back to one case.`,
+          `[CasesConnector][CasesConnectorExecutor][applyCircuitBreakers] Circuit breaker: Grouping definition would create more (21) than the maximum number of allowed cases (20). Falling back to one case.`,
           { labels: {}, tags: ['cases-connector', 'rule:rule-test-id'] }
         );
       });
@@ -2833,41 +4290,38 @@ describe('CasesConnectorExecutor', () => {
 
       expect(casesClientMock.attachments.bulkCreate).toHaveBeenCalledTimes(3);
 
-      expect(casesClientMock.attachments.bulkCreate).nthCalledWith(1, {
+      expect(casesClientMock.attachments.bulkCreate).toHaveBeenNthCalledWith(1, {
         caseId: 'mock-id-1',
         attachments: [
           {
-            type: 'alert',
-            alertId: ['test-id'],
-            index: ['test-index'],
-            rule: { id: 'rule-test-id', name: 'Test rule' },
+            attachmentId: ['test-id'],
+            metadata: { index: ['test-index'], rule: { id: 'rule-test-id', name: 'Test rule' } },
             owner: 'securitySolution',
+            type: 'security.alert',
           },
         ],
       });
 
-      expect(casesClientMock.attachments.bulkCreate).nthCalledWith(2, {
+      expect(casesClientMock.attachments.bulkCreate).toHaveBeenNthCalledWith(2, {
         caseId: 'mock-id-2',
         attachments: [
           {
-            type: 'alert',
-            alertId: ['test-id'],
-            index: ['test-index'],
-            rule: { id: 'rule-test-id', name: 'Test rule' },
+            attachmentId: ['test-id'],
+            metadata: { index: ['test-index'], rule: { id: 'rule-test-id', name: 'Test rule' } },
             owner: 'securitySolution',
+            type: 'security.alert',
           },
         ],
       });
 
-      expect(casesClientMock.attachments.bulkCreate).nthCalledWith(3, {
+      expect(casesClientMock.attachments.bulkCreate).toHaveBeenNthCalledWith(3, {
         caseId: 'mock-id-3',
         attachments: [
           {
-            type: 'alert',
-            alertId: ['test-id'],
-            index: ['test-index'],
-            rule: { id: 'rule-test-id', name: 'Test rule' },
+            attachmentId: ['test-id'],
+            metadata: { index: ['test-index'], rule: { id: 'rule-test-id', name: 'Test rule' } },
             owner: 'securitySolution',
+            type: 'security.alert',
           },
         ],
       });
@@ -2933,41 +4387,38 @@ describe('CasesConnectorExecutor', () => {
 
       expect(casesClientMock.attachments.bulkCreate).toHaveBeenCalledTimes(3);
 
-      expect(casesClientMock.attachments.bulkCreate).nthCalledWith(1, {
+      expect(casesClientMock.attachments.bulkCreate).toHaveBeenNthCalledWith(1, {
         caseId: 'mock-id-1',
         attachments: [
           {
-            type: 'alert',
-            alertId: ['test-id'],
-            index: ['test-index'],
-            rule: { id: 'rule-test-id', name: 'Test rule' },
+            attachmentId: ['test-id'],
+            metadata: { index: ['test-index'], rule: { id: 'rule-test-id', name: 'Test rule' } },
             owner: 'securitySolution',
+            type: 'security.alert',
           },
         ],
       });
 
-      expect(casesClientMock.attachments.bulkCreate).nthCalledWith(2, {
+      expect(casesClientMock.attachments.bulkCreate).toHaveBeenNthCalledWith(2, {
         caseId: 'mock-id-2',
         attachments: [
           {
-            type: 'alert',
-            alertId: ['test-id'],
-            index: ['test-index'],
-            rule: { id: 'rule-test-id', name: 'Test rule' },
+            attachmentId: ['test-id'],
+            metadata: { index: ['test-index'], rule: { id: 'rule-test-id', name: 'Test rule' } },
             owner: 'securitySolution',
+            type: 'security.alert',
           },
         ],
       });
 
-      expect(casesClientMock.attachments.bulkCreate).nthCalledWith(3, {
+      expect(casesClientMock.attachments.bulkCreate).toHaveBeenNthCalledWith(3, {
         caseId: 'mock-id-3',
         attachments: [
           {
-            type: 'alert',
-            alertId: ['test-id'],
-            index: ['test-index'],
-            rule: { id: 'rule-test-id', name: 'Test rule' },
+            attachmentId: ['test-id'],
+            metadata: { index: ['test-index'], rule: { id: 'rule-test-id', name: 'Test rule' } },
             owner: 'securitySolution',
+            type: 'security.alert',
           },
         ],
       });
@@ -3006,12 +4457,12 @@ describe('CasesConnectorExecutor', () => {
       await connectorExecutor.execute(missingDataParams);
       await connectorExecutor.execute(missingDataParams);
 
-      expect(mockBulkUpdateRecord).toBeCalledTimes(1);
+      expect(mockBulkUpdateRecord).toHaveBeenCalledTimes(1);
       expect(mockBulkUpdateRecord).toHaveBeenCalledWith([
         { payload: { counter: 2 }, recordId: 'so-oracle-record-0', version: 'so-version-0' },
       ]);
 
-      expect(mockBulkCreateRecords).toBeCalledTimes(1);
+      expect(mockBulkCreateRecords).toHaveBeenCalledTimes(1);
       expect(mockBulkCreateRecords).toHaveBeenCalledWith([
         {
           payload: {
@@ -3033,13 +4484,509 @@ describe('CasesConnectorExecutor', () => {
         caseId: 'mock-id-1',
         attachments: [
           {
-            type: 'alert',
-            alertId: ['test-id'],
-            index: ['test-index'],
-            rule: { id: 'rule-test-id', name: 'Test rule' },
+            attachmentId: ['test-id'],
+            metadata: { index: ['test-index'], rule: { id: 'rule-test-id', name: 'Test rule' } },
             owner: 'securitySolution',
+            type: 'security.alert',
           },
         ],
+      });
+    });
+  });
+
+  describe('With predefined grouping via `groupedAlerts`', () => {
+    const paramsWithGroupedAlerts: CasesConnectorRunParams = {
+      alerts,
+      groupedAlerts,
+      groupingBy,
+      owner,
+      rule,
+      timeWindow,
+      source: 'attack',
+      reopenClosedCases,
+      maximumCasesToOpen: 5,
+      templateId: null,
+      templateVersion: null,
+      autoPushCase: null,
+    };
+
+    describe('run', () => {
+      describe('Initial state', () => {
+        beforeEach(() => {
+          mockBulkGetRecords.mockResolvedValue([
+            {
+              id: groupedAlertsWithOracleKey[0].oracleKey,
+              type: CASE_RULES_SAVED_OBJECT,
+              message: 'Not found',
+              statusCode: 404,
+              error: 'Not found',
+            },
+            {
+              id: groupedAlertsWithOracleKey[1].oracleKey,
+              type: CASE_RULES_SAVED_OBJECT,
+              message: 'Not found',
+              statusCode: 404,
+              error: 'Not found',
+            },
+            {
+              id: groupedAlertsWithOracleKey[2].oracleKey,
+              type: CASE_RULES_SAVED_OBJECT,
+              message: 'Not found',
+              statusCode: 404,
+              error: 'Not found',
+            },
+          ]);
+
+          mockBulkCreateRecords.mockResolvedValue([
+            oracleRecords[0],
+            oracleRecords[1],
+            createdOracleRecord,
+          ]);
+
+          casesClientMock.cases.bulkGet.mockResolvedValue({
+            cases: [],
+            errors: [
+              {
+                error: 'Not found',
+                message: 'Not found',
+                status: 404,
+                caseId: 'mock-id-1',
+              },
+              {
+                error: 'Not found',
+                message: 'Not found',
+                status: 404,
+                caseId: 'mock-id-2',
+              },
+              {
+                error: 'Not found',
+                message: 'Not found',
+                status: 404,
+                caseId: 'mock-id-3',
+              },
+            ],
+          });
+
+          casesClientMock.cases.bulkCreate.mockResolvedValue({ cases });
+        });
+
+        it('attach the alerts correctly when the rule runs for the first time', async () => {
+          await connectorExecutor.execute(paramsWithGroupedAlerts);
+
+          expect(mockBulkCreateRecords).toHaveBeenCalledTimes(1);
+          expect(mockBulkCreateRecords).toHaveBeenCalledWith([
+            expect.objectContaining({
+              payload: expect.objectContaining({ grouping: { field_name_1: 'field_value_1' } }),
+            }),
+            expect.objectContaining({
+              payload: expect.objectContaining({ grouping: { field_name_2: 'field_value_2' } }),
+            }),
+            expect.objectContaining({
+              payload: expect.objectContaining({ grouping: { field_name_1: 'field_value_3' } }),
+            }),
+          ]);
+
+          expect(casesClientMock.cases.bulkCreate).toHaveBeenCalledTimes(1);
+          expect(casesClientMock.cases.bulkCreate.mock.calls).toMatchInlineSnapshot(`
+            Array [
+              Array [
+                Object {
+                  "cases": Array [
+                    Object {
+                      "connector": Object {
+                        "fields": null,
+                        "id": "none",
+                        "name": "none",
+                        "type": ".none",
+                      },
+                      "customFields": Array [],
+                      "description": "This case was created by the rule ['Test rule'](https://example.com/rules/rule-test-id). The assigned alerts are grouped by \`field_name_1: field_value_1\`.",
+                      "id": "mock-id-1",
+                      "owner": "cases",
+                      "settings": Object {
+                        "extractObservables": false,
+                        "syncAlerts": false,
+                      },
+                      "tags": Array [
+                        "auto-generated",
+                        "rule:rule-test-id",
+                        "field_name_1",
+                        "field_name_1:field_value_1",
+                        "rule",
+                        "test",
+                      ],
+                      "title": "custom-title",
+                    },
+                    Object {
+                      "connector": Object {
+                        "fields": null,
+                        "id": "none",
+                        "name": "none",
+                        "type": ".none",
+                      },
+                      "customFields": Array [],
+                      "description": "This case was created by the rule ['Test rule'](https://example.com/rules/rule-test-id). The assigned alerts are grouped by \`field_name_2: field_value_2\`.",
+                      "id": "mock-id-2",
+                      "owner": "cases",
+                      "settings": Object {
+                        "extractObservables": false,
+                        "syncAlerts": false,
+                      },
+                      "tags": Array [
+                        "auto-generated",
+                        "rule:rule-test-id",
+                        "field_name_2",
+                        "field_name_2:field_value_2",
+                        "rule",
+                        "test",
+                      ],
+                      "title": "Test rule - Grouping by field_value_2 (Auto-created)",
+                    },
+                    Object {
+                      "connector": Object {
+                        "fields": null,
+                        "id": "none",
+                        "name": "none",
+                        "type": ".none",
+                      },
+                      "customFields": Array [],
+                      "description": "This case was created by the rule ['Test rule'](https://example.com/rules/rule-test-id). The assigned alerts are grouped by \`field_name_1: field_value_3\`.",
+                      "id": "mock-id-3",
+                      "owner": "cases",
+                      "settings": Object {
+                        "extractObservables": false,
+                        "syncAlerts": false,
+                      },
+                      "tags": Array [
+                        "auto-generated",
+                        "rule:rule-test-id",
+                        "field_name_1",
+                        "field_name_1:field_value_3",
+                        "rule",
+                        "test",
+                      ],
+                      "title": "Test rule - Grouping by field_value_3 (Auto-created)",
+                    },
+                  ],
+                },
+                Object {
+                  "relaxRequiredFields": true,
+                },
+              ],
+            ]
+          `);
+
+          expectCasesToHaveTheCorrectAlertsAttachedWithPredefinedGrouping(casesClientMock);
+        });
+      });
+
+      describe('Oracle records', () => {
+        it('generates the oracle keys correctly with predefined grouping by field', async () => {
+          await connectorExecutor.execute({
+            ...paramsWithGroupedAlerts,
+            groupingBy: ['host.name'],
+          });
+
+          expect(mockGetRecordId).toHaveBeenCalledTimes(3);
+
+          expect(mockGetRecordId).toHaveBeenNthCalledWith(1, {
+            ruleId: rule.id,
+            grouping: { field_name_1: 'field_value_1' },
+            owner,
+            spaceId: 'default',
+          });
+
+          expect(mockGetRecordId).toHaveBeenNthCalledWith(2, {
+            ruleId: rule.id,
+            grouping: { field_name_2: 'field_value_2' },
+            owner,
+            spaceId: 'default',
+          });
+
+          expect(mockGetRecordId).toHaveBeenNthCalledWith(3, {
+            ruleId: rule.id,
+            grouping: { field_name_1: 'field_value_3' },
+            owner,
+            spaceId: 'default',
+          });
+        });
+      });
+
+      describe('Cases', () => {
+        it('generates the case ids correctly', async () => {
+          await connectorExecutor.execute(paramsWithGroupedAlerts);
+
+          expect(mockGetCaseId).toHaveBeenCalledTimes(3);
+
+          expect(mockGetCaseId).toHaveBeenNthCalledWith(1, {
+            ruleId: rule.id,
+            grouping: { field_name_1: 'field_value_1' },
+            owner,
+            spaceId: 'default',
+            counter: 1,
+          });
+          expect(mockGetCaseId).toHaveBeenNthCalledWith(2, {
+            ruleId: rule.id,
+            grouping: { field_name_2: 'field_value_2' },
+            owner,
+            spaceId: 'default',
+            counter: 1,
+          });
+          expect(mockGetCaseId).toHaveBeenNthCalledWith(3, {
+            ruleId: rule.id,
+            grouping: { field_name_1: 'field_value_3' },
+            owner,
+            spaceId: 'default',
+            counter: 1,
+          });
+        });
+
+        it('converts grouping values in the description correctly', async () => {
+          mockBulkGetRecords.mockResolvedValue([oracleRecords[0]]);
+          casesClientMock.cases.bulkCreate.mockResolvedValue({ cases: [cases[0]] });
+          casesClientMock.cases.bulkGet.mockResolvedValue({
+            cases: [],
+            errors: [
+              {
+                error: 'Not found',
+                message: 'Not found',
+                status: 404,
+                caseId: 'mock-id-1',
+              },
+            ],
+          });
+
+          await connectorExecutor.execute(paramsWithGroupedAlerts);
+
+          const description =
+            casesClientMock.cases.bulkCreate.mock.calls[0][0].cases[0].description;
+
+          expect(description).toMatchInlineSnapshot(
+            `"This case was created by the rule ['Test rule'](https://example.com/rules/rule-test-id). The assigned alerts are grouped by \`field_name_1: field_value_1\`."`
+          );
+        });
+
+        it('adds predefined title', async () => {
+          mockBulkGetRecords.mockResolvedValue([{ ...oracleRecords[0], counter: 2 }]);
+          casesClientMock.cases.bulkCreate.mockResolvedValue({ cases: [cases[0]] });
+          casesClientMock.cases.bulkGet.mockResolvedValue({
+            cases: [],
+            errors: [
+              {
+                error: 'Not found',
+                message: 'Not found',
+                status: 404,
+                caseId: 'mock-id-1',
+              },
+            ],
+          });
+
+          await connectorExecutor.execute(paramsWithGroupedAlerts);
+          const title = casesClientMock.cases.bulkCreate.mock.calls[0][0].cases[0].title;
+
+          expect(title).toMatchInlineSnapshot(`"custom-title"`);
+        });
+
+        it('converts grouping values in tags correctly', async () => {
+          mockBulkGetRecords.mockResolvedValue([oracleRecords[0]]);
+          casesClientMock.cases.bulkCreate.mockResolvedValue({ cases: [cases[0]] });
+          casesClientMock.cases.bulkGet.mockResolvedValue({
+            cases: [],
+            errors: [
+              {
+                error: 'Not found',
+                message: 'Not found',
+                status: 404,
+                caseId: 'mock-id-1',
+              },
+            ],
+          });
+
+          await connectorExecutor.execute({
+            ...paramsWithGroupedAlerts,
+            alerts: [
+              {
+                _id: 'test-id',
+                _index: 'test-index',
+                foo: ['bar', 1, true, {}],
+                bar: { foo: 'test' },
+                baz: 'my value',
+              },
+            ],
+            groupingBy: ['foo', 'bar', 'baz'],
+          });
+
+          const tags = casesClientMock.cases.bulkCreate.mock.calls[0][0].cases[0].tags;
+
+          expect(tags).toEqual([
+            'auto-generated',
+            'rule:rule-test-id',
+            'field_name_1',
+            'field_name_1:field_value_1',
+            'rule',
+            'test',
+          ]);
+        });
+      });
+
+      describe('Alerts', () => {
+        it('attach the alerts to the correct cases correctly', async () => {
+          await connectorExecutor.execute(paramsWithGroupedAlerts);
+
+          expectCasesToHaveTheCorrectAlertsAttachedWithPredefinedGrouping(casesClientMock);
+        });
+
+        it('attaches grouped comments using unified shape when attachments feature flag is enabled', async () => {
+          const connectorExecutorWithFlagOn = new CasesConnectorExecutor({
+            logger: mockLogger,
+            casesOracleService: new CasesOracleServiceMock(),
+            casesService: new CasesServiceMock(),
+            casesClient: casesClientMock,
+            actionsClient,
+            spaceId: 'default',
+          });
+
+          await connectorExecutorWithFlagOn.execute(paramsWithGroupedAlerts);
+
+          expect(casesClientMock.attachments.bulkCreate).toHaveBeenCalledTimes(3);
+          expect(casesClientMock.attachments.bulkCreate).toHaveBeenNthCalledWith(
+            1,
+            expect.objectContaining({
+              caseId: 'mock-id-1',
+              attachments: expect.arrayContaining([
+                expect.objectContaining({
+                  type: 'comment',
+                  data: { content: 'comment-1' },
+                  owner: 'securitySolution',
+                }),
+              ]),
+            })
+          );
+        });
+
+        it('attaches alerts to reopened cases', async () => {
+          casesClientMock.cases.bulkGet.mockResolvedValue({
+            cases: [{ ...cases[0], status: CaseStatuses.closed }],
+            errors: [],
+          });
+
+          casesClientMock.cases.bulkUpdate.mockResolvedValue([
+            {
+              ...cases[0],
+              status: CaseStatuses.open,
+            },
+          ]);
+
+          await connectorExecutor.execute({
+            ...paramsWithGroupedAlerts,
+            reopenClosedCases: true,
+          });
+
+          expect(casesClientMock.attachments.bulkCreate).toHaveBeenCalledTimes(1);
+          expect(casesClientMock.attachments.bulkCreate).toHaveBeenNthCalledWith(1, {
+            caseId: 'mock-id-1',
+            attachments: [
+              {
+                data: { content: 'comment-1' },
+                owner: 'securitySolution',
+                type: 'comment',
+              },
+              {
+                attachmentId: ['alert-id-1', 'alert-id-2'],
+                metadata: {
+                  index: ['alert-index-1', 'alert-index-1'],
+                  rule: { id: null, name: null },
+                },
+                owner: 'securitySolution',
+                type: 'security.alert',
+              },
+            ],
+          });
+        });
+
+        it('attaches alerts to new created cases if they were closed', async () => {
+          casesClientMock.cases.bulkGet.mockResolvedValue({
+            cases: [{ ...cases[0], status: CaseStatuses.closed }],
+            errors: [],
+          });
+
+          mockBulkUpdateRecord.mockResolvedValue([{ ...oracleRecords[0], counter: 2 }]);
+          casesClientMock.cases.bulkCreate.mockResolvedValue({
+            cases: [{ ...cases[0], id: 'mock-id-4' }],
+          });
+
+          await connectorExecutor.execute({
+            ...paramsWithGroupedAlerts,
+            reopenClosedCases: false,
+          });
+
+          expect(casesClientMock.attachments.bulkCreate).toHaveBeenCalledTimes(1);
+          expect(casesClientMock.attachments.bulkCreate).toHaveBeenNthCalledWith(1, {
+            caseId: 'mock-id-4',
+            attachments: [
+              {
+                attachmentId: ['alert-id-1', 'alert-id-2'],
+                metadata: {
+                  index: ['alert-index-1', 'alert-index-1'],
+                  rule: { id: null, name: null },
+                },
+                owner: 'securitySolution',
+                type: 'security.alert',
+              },
+            ],
+          });
+        });
+
+        it('does not attach alerts to cases that have surpass the limit', async () => {
+          casesClientMock.cases.bulkGet.mockResolvedValue({
+            cases: [{ ...cases[0], totalAlerts: MAX_ALERTS_PER_CASE }],
+            errors: [],
+          });
+
+          await connectorExecutor.execute(paramsWithGroupedAlerts);
+
+          expect(casesClientMock.attachments.bulkCreate).toHaveBeenCalledTimes(0);
+          expect(mockLogger.warn).toHaveBeenCalledWith(
+            'Cases with ids "mock-id-1" contain more than 1000 alerts. The new alerts will not be attached to the cases. Total new alerts: 1',
+            { tags: ['cases-connector', 'rule:rule-test-id'], labels: {} }
+          );
+        });
+
+        it('does not attach alerts to cases when attaching the new alerts will surpass the limit', async () => {
+          casesClientMock.cases.bulkGet.mockResolvedValue({
+            cases: [
+              {
+                ...cases[0],
+                totalAlerts: MAX_ALERTS_PER_CASE - groupedAlertsWithOracleKey[0].alerts.length + 1,
+              },
+            ],
+            errors: [],
+          });
+
+          await connectorExecutor.execute(paramsWithGroupedAlerts);
+
+          expect(casesClientMock.attachments.bulkCreate).toHaveBeenCalledTimes(0);
+          expect(mockLogger.warn).toHaveBeenCalledWith(
+            'Cases with ids "mock-id-1" contain more than 1000 alerts. The new alerts will not be attached to the cases. Total new alerts: 1',
+            { tags: ['cases-connector', 'rule:rule-test-id'], labels: {} }
+          );
+        });
+
+        it('attach alerts to cases when attaching the new alerts will be equal to the limit', async () => {
+          casesClientMock.cases.bulkGet.mockResolvedValue({
+            cases: [
+              {
+                ...cases[0],
+                totalAlerts: MAX_ALERTS_PER_CASE - groupedAlertsWithOracleKey[0].alerts.length,
+              },
+            ],
+            errors: [],
+          });
+
+          await connectorExecutor.execute(paramsWithGroupedAlerts);
+
+          expect(casesClientMock.attachments.bulkCreate).toHaveBeenCalledTimes(1);
+        });
       });
     });
   });

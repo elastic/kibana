@@ -5,20 +5,17 @@
  * 2.0.
  */
 import { EuiButtonGroup, EuiFormRow, htmlIdGenerator } from '@elastic/eui';
-import {
-  PaletteRegistry,
-  CustomizablePalette,
-  CUSTOM_PALETTE,
-  applyPaletteParams,
-} from '@kbn/coloring';
+import type { CustomPaletteParams, PaletteOutput, PaletteRegistry } from '@kbn/coloring';
+import { CustomizablePalette, applyPaletteParams } from '@kbn/coloring';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { ColorMode } from '@kbn/charts-plugin/common';
 import { css } from '@emotion/react';
-import type { LegacyMetricState } from '../../../common/types';
+import type { LegacyMetricState, VisualizationDimensionEditorProps } from '@kbn/lens-common';
+import { LENS_LEGACY_METRIC_DEFAULT_COLOR_STEPS } from '@kbn/lens-common';
+import { getLegacyMetricDataBounds } from '@kbn/expression-legacy-metric-vis-plugin/public';
 import { isNumericFieldForDatatable } from '../../../common/expressions/impl/datatable/utils';
-import { PalettePanelContainer } from '../../shared_components';
-import type { VisualizationDimensionEditorProps } from '../../types';
+import { PalettePanelContainer, LENS_PALETTE_MAX_COLOR_RANGES } from '../../shared_components';
 import { defaultPaletteParams } from './palette_config';
 
 const idPrefix = htmlIdGenerator()();
@@ -39,29 +36,24 @@ export function MetricDimensionEditor(
   const currentColorMode = state?.colorMode || ColorMode.None;
   const hasDynamicColoring = currentColorMode !== ColorMode.None;
 
-  const currentMinMax = {
-    min: Math.min(firstRow[accessor] * 2, firstRow[accessor] === 0 ? -50 : 0),
-    // if value is 0, then fallback to 100 as last resort
-    max: Math.max(firstRow[accessor] * 2, firstRow[accessor] === 0 ? 100 : 0),
-  };
+  const currentMinMax = getLegacyMetricDataBounds(accessor, currentData);
 
-  const activePalette = state?.palette || {
-    type: 'palette',
-    name: defaultPaletteParams.name,
-    params: {
-      ...defaultPaletteParams,
-      stops: undefined,
-      colorStops: undefined,
-      rangeMin: currentMinMax.min,
-      rangeMax: (currentMinMax.max * 3) / 4,
-    },
-  };
+  const activePalette =
+    state?.palette ||
+    ({
+      type: 'palette',
+      name: defaultPaletteParams.name,
+      params: {
+        ...defaultPaletteParams,
+        stops: undefined,
+        colorStops: undefined,
+      },
+    } satisfies PaletteOutput<CustomPaletteParams>);
 
-  // need to tell the helper that the colorStops are required to display
   const stops = applyPaletteParams(props.paletteService, activePalette, currentMinMax);
 
   return (
-    <>
+    <div className="lnsIndexPatternDimensionEditor--padded">
       <EuiFormRow
         display="columnCompressed"
         fullWidth
@@ -110,13 +102,7 @@ export function MetricDimensionEditor(
                 ...activePalette,
                 params: {
                   ...activePalette.params,
-                  // align this initial computation with same format for default
-                  // palettes in the panel. This to avoid custom computation issue with metric
-                  // fake data range
-                  stops: stops.map((v, i, array) => ({
-                    ...v,
-                    stop: currentMinMax.min + (i === 0 ? 0 : array[i - 1].stop),
-                  })),
+                  stops,
                 },
               };
             }
@@ -154,15 +140,9 @@ export function MetricDimensionEditor(
               palettes={props.paletteService}
               activePalette={activePalette}
               dataBounds={currentMinMax}
+              maxSteps={LENS_PALETTE_MAX_COLOR_RANGES}
+              defaultBandCount={LENS_LEGACY_METRIC_DEFAULT_COLOR_STEPS}
               setPalette={(newPalette) => {
-                // if the new palette is not custom, replace the rangeMin with the artificial one
-                if (
-                  newPalette.name !== CUSTOM_PALETTE &&
-                  newPalette.params &&
-                  newPalette.params.rangeMin !== currentMinMax.min
-                ) {
-                  newPalette.params.rangeMin = currentMinMax.min;
-                }
                 setState({
                   ...state,
                   palette: newPalette,
@@ -173,6 +153,6 @@ export function MetricDimensionEditor(
           </PalettePanelContainer>
         </EuiFormRow>
       )}
-    </>
+    </div>
   );
 }

@@ -7,6 +7,8 @@
 
 import { mount } from 'enzyme';
 import React from 'react';
+// Necessary until components being tested are migrated of styled-components https://github.com/elastic/kibana/issues/219037
+import 'jest-styled-components';
 
 import { TruncatableText } from '.';
 
@@ -32,6 +34,13 @@ describe('TruncatableText', () => {
     const wrapper = mount(<TruncatableText>{'Who stopped the beats?'}</TruncatableText>);
 
     expect(wrapper).toHaveStyleRule('white-space', 'nowrap');
+  });
+
+  test('it inherits link decoration from its parent', () => {
+    const wrapper = mount(<TruncatableText>{'A truncated link'}</TruncatableText>);
+
+    expect(wrapper).toHaveStyleRule('text-decoration', 'inherit');
+    expect(wrapper).toHaveStyleRule('text-decoration-thickness', 'inherit');
   });
 
   test('it can add tooltip', () => {

@@ -11,9 +11,14 @@ import { render } from '../../utils/testing/rtl_helpers';
 import { GettingStartedPage } from './getting_started_page';
 import * as privateLocationsHooks from '../settings/private_locations/hooks/use_locations_api';
 import * as settingsHooks from '../../contexts/synthetics_settings_context';
-import { SyntheticsSettingsContextValues } from '../../contexts/synthetics_settings_context';
+import type { SyntheticsSettingsContextValues } from '../../contexts/synthetics_settings_context';
 import { fireEvent } from '@testing-library/react';
 import { kibanaService } from '../../../../utils/kibana_service';
+
+jest.mock('@elastic/eui', () => ({
+  ...jest.requireActual('@elastic/eui'),
+  useGeneratedHtmlId: () => 'mocked-id',
+}));
 
 describe('GettingStartedPage', () => {
   beforeEach(() => {
@@ -21,14 +26,15 @@ describe('GettingStartedPage', () => {
       loading: false,
       privateLocations: [],
       deleteLoading: false,
-      onSubmit: jest.fn(),
-      onDelete: jest.fn(),
+      onCreateLocationAPI: jest.fn(),
+      onDeleteLocationAPI: jest.fn(),
+      onEditLocationAPI: jest.fn(),
       createLoading: false,
     });
     jest.spyOn(permissionsHooks, 'useCanManagePrivateLocation').mockReturnValue(true);
   });
   it('works with cloud locations', () => {
-    const { getByText } = render(<GettingStartedPage />, {
+    const { getByText, getByTestId } = render(<GettingStartedPage />, {
       state: {
         serviceLocations: {
           locations: [
@@ -51,7 +57,11 @@ describe('GettingStartedPage', () => {
     });
 
     // page is loaded
-    expect(getByText('Create a single page browser monitor')).toBeInTheDocument();
+    expect(getByText('Create your first monitor')).toBeInTheDocument();
+    expect(getByText('Monitor a single page')).toBeInTheDocument();
+    expect(getByTestId('syntheticsGettingStartedPageLink')).toHaveTextContent(
+      'Choose a monitor type'
+    );
   });
 
   it('serves on prem getting started experience when locations are not available', () => {
@@ -82,7 +92,7 @@ describe('GettingStartedPage', () => {
           loading: false,
         },
         privateLocations: {
-          isCreatePrivateLocationFlyoutVisible: true,
+          isPrivateLocationFlyoutVisible: true,
         },
         agentPolicies: {
           data: [],
@@ -112,7 +122,7 @@ describe('GettingStartedPage', () => {
           data: [{}],
         },
         privateLocations: {
-          isCreatePrivateLocationFlyoutVisible: true,
+          isPrivateLocationFlyoutVisible: true,
         },
       },
     });
@@ -151,7 +161,7 @@ describe('GettingStartedPage', () => {
             data: [{}],
           },
           privateLocations: {
-            isCreatePrivateLocationFlyoutVisible: true,
+            isPrivateLocationFlyoutVisible: true,
           },
         },
       }

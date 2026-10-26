@@ -10,7 +10,7 @@
 // this file was generated, and should not be edited by hand
 // ---------------------------------- WARNING ----------------------------------
 import * as rt from 'io-ts';
-import type { Either } from 'fp-ts/lib/Either';
+import type { Either } from 'fp-ts/Either';
 import { AlertSchema } from './alert_schema';
 import { LegacyAlertSchema } from './legacy_alert_schema';
 const ISO_DATE_PATTERN = /^d{4}-d{2}-d{2}Td{2}:d{2}:d{2}.d{3}Z$/;
@@ -73,12 +73,15 @@ const ObservabilityApmAlertRequired = rt.type({
 // prettier-ignore
 const ObservabilityApmAlertOptional = rt.partial({
   'agent.name': schemaString,
+  'anomaly.detector_type': schemaString,
+  'anomaly.timestamp': schemaDate,
   'container.id': schemaString,
   'error.grouping_key': schemaString,
   'error.grouping_name': schemaString,
   'host.name': schemaString,
   'kibana.alert.context': schemaUnknown,
   'kibana.alert.evaluation.threshold': schemaStringOrNumber,
+  'kibana.alert.evaluation.time_range': schemaDateRange,
   'kibana.alert.evaluation.value': schemaStringOrNumber,
   'kibana.alert.evaluation.values': schemaStringOrNumberArray,
   'kibana.alert.group': rt.array(
@@ -87,6 +90,7 @@ const ObservabilityApmAlertOptional = rt.partial({
       value: schemaStringArray,
     })
   ),
+  'kibana.alert.grouping': schemaUnknown,
   labels: schemaUnknown,
   'processor.event': schemaString,
   'service.environment': schemaString,

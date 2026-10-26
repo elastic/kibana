@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ObservabilityOnboardingLocator } from './onboarding_locator/types';
+import type { ObservabilityOnboardingLocator } from './onboarding_locator/types';
 
 export interface ObservabilityOnboardingPluginLocators {
   onboarding: ObservabilityOnboardingLocator;

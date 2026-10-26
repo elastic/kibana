@@ -8,7 +8,7 @@
 import { schema } from '@kbn/config-schema';
 
 import { addBasePath } from '../../../services';
-import { RouteDependencies } from '../../../types';
+import type { RouteDependencies } from '../../../types';
 
 /**
  * Delete an auto-follow pattern
@@ -19,7 +19,7 @@ export const registerDeleteRoute = ({
   lib: { handleEsError },
 }: RouteDependencies) => {
   const paramsSchema = schema.object({
-    id: schema.string(),
+    id: schema.string({ maxLength: 1000 }),
   });
 
   router.delete(

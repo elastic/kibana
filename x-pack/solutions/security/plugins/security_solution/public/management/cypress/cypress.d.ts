@@ -11,18 +11,16 @@
 
 import type { CasePostRequest } from '@kbn/cases-plugin/common/api';
 import type { UsageRecord } from '@kbn/security-solution-serverless/server/types';
-import type { HostVmTransferResponse } from '../../../scripts/endpoint/common/types';
+import type {
+  HostVmExecResponse,
+  HostVmTransferResponse,
+} from '../../../scripts/endpoint/common/types';
 import type {
   DeletedEndpointHeartbeats,
   IndexedEndpointHeartbeats,
 } from '../../../common/endpoint/data_loaders/index_endpoint_hearbeats';
 import type { SecuritySolutionDescribeBlockFtrConfig } from '../../../scripts/run_cypress/utils';
 import type { DeleteAllEndpointDataResponse } from '../../../scripts/endpoint/common/delete_all_endpoint_data';
-import type { IndexedEndpointPolicyResponse } from '../../../common/endpoint/data_loaders/index_endpoint_policy_response';
-import type {
-  HostPolicyResponse,
-  LogsEndpointActionResponse,
-} from '../../../common/endpoint/types';
 import type {
   HostActionResponse,
   IndexEndpointHostsCyTaskOptions,
@@ -32,6 +30,7 @@ import type {
   IsAgentAndEndpointUninstalledFromHostTaskOptions,
   LogItTaskOptions,
   CaptureHostVmAgentDiagnosticsOptions,
+  ExecuteCommandOnHostOptions,
 } from './types';
 import type {
   DeleteIndexedFleetEndpointPoliciesResponse,
@@ -187,22 +186,10 @@ declare global {
       ): Chainable<DeletedIndexedEndpointRuleAlerts>;
 
       task(
-        name: 'indexEndpointPolicyResponse',
-        arg: HostPolicyResponse,
-        options?: Partial<Loggable & Timeoutable>
-      ): Chainable<IndexedEndpointPolicyResponse>;
-
-      task(
-        name: 'deleteIndexedEndpointPolicyResponse',
-        arg: IndexedEndpointPolicyResponse,
-        options?: Partial<Loggable & Timeoutable>
-      ): Chainable<null>;
-
-      task(
         name: 'sendHostActionResponse',
         arg: HostActionResponse,
         options?: Partial<Loggable & Timeoutable>
-      ): Chainable<LogsEndpointActionResponse>;
+      ): Chainable<null>;
 
       task(
         name: 'deleteAllEndpointData',
@@ -275,6 +262,12 @@ declare global {
         arg: CaptureHostVmAgentDiagnosticsOptions,
         options?: Partial<Loggable & Timeoutable>
       ): Chainable<Omit<HostVmTransferResponse, 'delete'>>;
+
+      task(
+        name: 'executeCommandOnHost',
+        arg: ExecuteCommandOnHostOptions,
+        options?: Partial<Loggable & Timeoutable>
+      ): Chainable<HostVmExecResponse>;
     }
   }
 }

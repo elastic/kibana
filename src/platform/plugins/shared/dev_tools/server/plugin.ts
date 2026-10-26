@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { PluginInitializerContext, Plugin, CoreSetup } from '@kbn/core/server';
+import type { PluginInitializerContext, Plugin, CoreSetup } from '@kbn/core/server';
 
 import { uiSettings } from './ui_settings';
 export class DevToolsServerPlugin implements Plugin<object, object> {

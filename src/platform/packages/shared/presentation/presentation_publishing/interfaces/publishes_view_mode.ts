@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { PublishingSubject } from '../publishing_subject';
+import type { PublishingSubject } from '../publishing_subject';
 
-export type ViewMode = 'view' | 'edit' | 'print' | 'preview';
+export type ViewMode = 'view' | 'edit' | 'print' | 'non-interactive';
 
 /**
  * This API publishes a universal view mode which can change compatibility of actions and the

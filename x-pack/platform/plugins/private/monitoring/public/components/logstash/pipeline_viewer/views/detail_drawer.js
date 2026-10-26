@@ -24,6 +24,7 @@ import {
   EuiTableRowCell,
   EuiText,
   EuiTitle,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -37,7 +38,7 @@ const lspvDetailDrawerSparklineContainerStyle = css`
 `;
 
 function renderIcon(vertex) {
-  return <EuiIcon type={vertex.iconType} />;
+  return <EuiIcon type={vertex.iconType} aria-hidden={true} />;
 }
 
 function renderPluginBasicStats(vertex, timeseriesTooltipXValueFormatter) {
@@ -301,14 +302,16 @@ function renderTitle(vertex) {
 }
 
 export function DetailDrawer({ vertex, onHide, timeseriesTooltipXValueFormatter }) {
+  const detailDrawerTitleId = useGeneratedHtmlId();
+
   return (
-    <EuiFlyout size="s" onClose={onHide}>
+    <EuiFlyout size="s" onClose={onHide} aria-labelledby={detailDrawerTitleId}>
       <EuiFlyoutHeader>
         <EuiFlexGroup alignItems="baseline" gutterSize="s">
           <EuiFlexItem grow={false}>{renderIcon(vertex)}</EuiFlexItem>
           <EuiFlexItem>
             <EuiTitle>
-              <h2>{renderTitle(vertex)}</h2>
+              <h2 id={detailDrawerTitleId}>{renderTitle(vertex)}</h2>
             </EuiTitle>
           </EuiFlexItem>
         </EuiFlexGroup>

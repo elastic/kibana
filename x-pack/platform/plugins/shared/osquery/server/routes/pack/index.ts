@@ -9,15 +9,27 @@ import type { IRouter } from '@kbn/core/server';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 
 import { createPackRoute } from './create_pack_route';
+import { copyPackRoute } from './copy_pack_route';
 import { deletePackRoute } from './delete_pack_route';
 import { findPackRoute } from './find_pack_route';
 import { readPackRoute } from './read_pack_route';
+import { resolvePrebuiltPackRoute } from './resolve_prebuilt_pack_route';
+import { listPrebuiltPacksRoute } from './list_prebuilt_packs_route';
 import { updatePackRoute } from './update_pack_route';
+import { getPackUsersRoute } from '../get_users_route';
 
 export const initPackRoutes = (router: IRouter, context: OsqueryAppContext) => {
   createPackRoute(router, context);
+  copyPackRoute(router, context);
+  getPackUsersRoute(router, context);
   deletePackRoute(router, context);
-  findPackRoute(router);
-  readPackRoute(router);
+  findPackRoute(router, context);
+  readPackRoute(router, context);
   updatePackRoute(router, context);
+
+  // The `osquery.runPack` workflow step and its editor picker call these.
+  if (context.experimentalFeatures.workflowsExtensionsEnabled) {
+    resolvePrebuiltPackRoute(router, context);
+    listPrebuiltPacksRoute(router, context);
+  }
 };

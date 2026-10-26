@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import React, { ChangeEvent, useMemo } from 'react';
-import { EuiFormRow, EuiSelect, EuiSwitch, EuiSwitchEvent, EuiToolTip } from '@elastic/eui';
+import type { ChangeEvent } from 'react';
+import React, { useMemo } from 'react';
+import type { EuiSwitchEvent } from '@elastic/eui';
+import { EuiFormRow, EuiSelect, EuiSwitch, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import { ES_GEO_FIELD_TYPE } from '../../../../common/constants';

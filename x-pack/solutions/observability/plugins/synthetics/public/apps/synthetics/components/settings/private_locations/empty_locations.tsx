@@ -9,22 +9,22 @@ import React from 'react';
 import { useHistory } from 'react-router-dom';
 import { EuiEmptyPrompt, EuiButton, EuiLink, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 import { NoPermissionsTooltip } from '../../common/components/permissions';
 import { useSyntheticsSettingsContext } from '../../../contexts';
-import { PRIVATE_LOCATIOSN_ROUTE } from '../../../../../../common/constants';
+import { PRIVATE_LOCATIONS_ROUTE } from '../../../../../../common/constants';
 import {
-  setIsCreatePrivateLocationFlyoutVisible,
+  setIsPrivateLocationFlyoutVisible,
   setManageFlyoutOpen,
 } from '../../../state/private_locations/actions';
 
 export const EmptyLocations = ({
   inFlyout = true,
-  setIsAddingNew,
+  setIsFlyoutOpen,
   redirectToSettings,
 }: {
   inFlyout?: boolean;
-  setIsAddingNew?: (val: boolean) => void;
+  setIsFlyoutOpen?: (val: boolean) => void;
   redirectToSettings?: boolean;
 }) => {
   const dispatch = useDispatch();
@@ -37,22 +37,18 @@ export const EmptyLocations = ({
       hasBorder
       title={<h2>{ADD_FIRST_LOCATION}</h2>}
       titleSize="s"
-      body={
-        <EuiText size="s">
-          {!inFlyout ? FIRST_MONITOR : ''} {START_ADDING_LOCATIONS_DESCRIPTION}
-        </EuiText>
-      }
+      body={!inFlyout ? <EuiText size="s">{FIRST_MONITOR}</EuiText> : undefined}
       actions={
         <NoPermissionsTooltip canEditSynthetics={canSave}>
           {redirectToSettings ? (
             <EuiButton
               data-test-subj="syntheticsEmptyLocationsButton"
-              iconType="plusInCircle"
+              iconType="plusCircle"
               color="primary"
               fill
               isDisabled={!canSave}
               href={history.createHref({
-                pathname: PRIVATE_LOCATIOSN_ROUTE,
+                pathname: PRIVATE_LOCATIONS_ROUTE,
               })}
             >
               {ADD_LOCATION}
@@ -60,14 +56,14 @@ export const EmptyLocations = ({
           ) : (
             <EuiButton
               data-test-subj="syntheticsEmptyLocationsButton"
-              iconType="plusInCircle"
+              iconType="plusCircle"
               isDisabled={!canSave}
               color="primary"
               fill
               onClick={() => {
-                setIsAddingNew?.(true);
+                setIsFlyoutOpen?.(true);
                 dispatch(setManageFlyoutOpen(true));
-                dispatch(setIsCreatePrivateLocationFlyoutVisible(true));
+                dispatch(setIsPrivateLocationFlyoutVisible(true));
               }}
             >
               {ADD_LOCATION}

@@ -5,64 +5,150 @@
  * 2.0.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
-import { SavedObjectsFindResponse } from '@kbn/core/server';
+import { z } from '@kbn/zod';
 import { isEmpty } from 'lodash';
 import { escapeQuotes } from '@kbn/es-query';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
-import { RouteContext } from './types';
-import { MonitorSortFieldSchema } from '../../common/runtime_types/monitor_management/sort_field';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import { useLogicalAndFields } from '../../common/constants';
+import type { RouteContext } from './types';
+import {
+  MonitorSortFieldSchema,
+  OverviewStatusSortFieldSchema,
+} from '../../common/runtime_types/schemas/sort_field';
+import {
+  MONITOR_STATUS_ENUM,
+  OVERVIEW_STATUS_MAX_PER_PAGE,
+} from '../../common/constants/monitor_management';
 import { getAllLocations } from '../synthetics_service/get_all_locations';
-import { EncryptedSyntheticsMonitorAttributes } from '../../common/runtime_types';
-import { PrivateLocation, ServiceLocation } from '../../common/runtime_types';
-import { monitorAttributes } from '../../common/types/saved_objects';
+import type { PrivateLocation, ServiceLocation } from '../../common/runtime_types';
+import { syntheticsMonitorAttributes } from '../../common/types/saved_objects';
+import {
+  jsonArrayFromString,
+  MAX_DATE_RANGE_LENGTH,
+  MAX_ROUTE_STRING_LENGTH,
+  queryBoolean,
+  queryNumber,
+  queryNumberFrom,
+} from './zod_query';
 
-const StringOrArraySchema = schema.maybe(
-  schema.oneOf([schema.string(), schema.arrayOf(schema.string())])
-);
+const MAX_MONITOR_QUERY_IDS_IN_BODY = 10000;
+const MAX_MONITOR_QUERY_ID_LENGTH = 256;
+const MAX_FILTER_ITEM_LENGTH = MAX_ROUTE_STRING_LENGTH;
+const MAX_FILTER_ARRAY_SIZE = 1000;
+const MAX_SEARCH_AFTER_SIZE = 50;
 
-export const QuerySchema = schema.object({
-  page: schema.maybe(schema.number()),
-  perPage: schema.maybe(schema.number()),
-  sortField: MonitorSortFieldSchema,
-  sortOrder: schema.maybe(schema.oneOf([schema.literal('desc'), schema.literal('asc')])),
-  query: schema.maybe(schema.string()),
-  filter: schema.maybe(schema.string()),
-  tags: StringOrArraySchema,
-  monitorTypes: StringOrArraySchema,
-  locations: StringOrArraySchema,
-  projects: StringOrArraySchema,
-  schedules: StringOrArraySchema,
-  status: StringOrArraySchema,
-  searchAfter: schema.maybe(schema.arrayOf(schema.string())),
-  monitorQueryIds: StringOrArraySchema,
-  internal: schema.maybe(
-    schema.boolean({
-      defaultValue: false,
-    })
-  ),
-  showFromAllSpaces: schema.maybe(schema.boolean()),
+const stringOrArray = z
+  .union([
+    z.string().max(MAX_FILTER_ITEM_LENGTH),
+    z.array(z.string().max(MAX_FILTER_ITEM_LENGTH)).max(MAX_FILTER_ARRAY_SIZE),
+  ])
+  .optional()
+  .describe('A string or an array of strings.');
+
+const stringOrArrayFilter = (description: string) =>
+  stringOrArray.describe(`${description} Accepts a string or an array of strings.`);
+
+const CommonQuerySchema = {
+  query: z.string().max(MAX_ROUTE_STRING_LENGTH).optional().describe('A free-text query string.'),
+  filter: z
+    .string()
+    .max(MAX_ROUTE_STRING_LENGTH)
+    .optional()
+    .describe('Additional KQL filtering criteria.'),
+  tags: stringOrArrayFilter('Tags to filter monitors.'),
+  monitorTypes: stringOrArrayFilter('The monitor types to filter by, such as `http`.'),
+  locations: stringOrArrayFilter('The location IDs to filter by.'),
+  projects: stringOrArrayFilter('The projects to filter by.'),
+  schedules: stringOrArrayFilter('The schedules to filter by.'),
+  // Remote cluster aliases. Only honoured by the overview status route, where
+  // it scopes pings to documents whose `_index` is prefixed by one of the
+  // selected aliases (CCS pattern `<alias>:<index>`). Saved-object-backed
+  // routes ignore it because remote monitors have no local saved object.
+  remoteNames: stringOrArray,
+  status: stringOrArrayFilter('The monitor statuses to filter by.'),
+  monitorQueryIds: stringOrArrayFilter('The monitor query IDs to filter by.'),
+  configIds: stringOrArrayFilter('The monitor config IDs to filter by.'),
+  showFromAllSpaces: queryBoolean
+    .optional()
+    .describe('If `true`, return monitors from all spaces the user can access.'),
+  useLogicalAndFor: z
+    .union([
+      z.string().max(MAX_FILTER_ITEM_LENGTH),
+      z.array(z.enum(useLogicalAndFields)).max(MAX_FILTER_ARRAY_SIZE),
+    ])
+    .optional()
+    .describe('Apply logical AND for `tags` and/or `locations`. Accepts a string or an array.'),
+  // Date-range window for the overview list (see runtime type docs). The
+  // overview page always sends these; their presence scopes each monitor's
+  // status to the window instead of the default "current status" look-back.
+  // Bounded length: these only ever carry a short datemath expression
+  // (`now-15m`) or an ISO-8601 timestamp, so cap the input to avoid unbounded
+  // strings reaching `datemath.parse` (CodeQL: unbounded string DoS).
+  dateRangeStart: z
+    .string()
+    .max(MAX_DATE_RANGE_LENGTH)
+    .optional()
+    .describe('The start of the status window, as datemath (`now-15m`) or an ISO-8601 timestamp.'),
+  dateRangeEnd: z
+    .string()
+    .max(MAX_DATE_RANGE_LENGTH)
+    .optional()
+    .describe('The end of the status window, as datemath (`now`) or an ISO-8601 timestamp.'),
+};
+
+export const QuerySchema = z.strictObject({
+  ...CommonQuerySchema,
+  page: queryNumber.optional().describe('The page number for paginated results.'),
+  perPage: queryNumber.optional().describe('The number of items to return per page.'),
+  sortField: MonitorSortFieldSchema.describe('The field to sort the results by.'),
+  sortOrder: z.enum(['desc', 'asc']).optional().describe('The sort order.'),
+  searchAfter: jsonArrayFromString(
+    z.string().max(MAX_FILTER_ITEM_LENGTH),
+    MAX_SEARCH_AFTER_SIZE,
+    MAX_FILTER_ITEM_LENGTH
+  )
+    .optional()
+    .describe('A JSON array of sort values from the previous page, for cursor-based paging.'),
+  internal: queryBoolean.optional().default(false).describe('For internal use only.'),
 });
 
-export type MonitorsQuery = TypeOf<typeof QuerySchema>;
+export type MonitorsQuery = z.infer<typeof QuerySchema>;
 
-export const OverviewStatusSchema = schema.object({
-  query: schema.maybe(schema.string()),
-  filter: schema.maybe(schema.string()),
-  tags: StringOrArraySchema,
-  monitorTypes: StringOrArraySchema,
-  locations: StringOrArraySchema,
-  projects: StringOrArraySchema,
-  monitorQueryIds: StringOrArraySchema,
-  schedules: StringOrArraySchema,
-  status: StringOrArraySchema,
-  scopeStatusByLocation: schema.maybe(schema.boolean()),
-  showFromAllSpaces: schema.maybe(schema.boolean()),
+export const OverviewStatusSchema = z.strictObject({
+  ...CommonQuerySchema,
+  scopeStatusByLocation: queryBoolean.optional(),
+  groupByMonitor: queryBoolean.optional(),
+  // When explicitly `false`, read-only Heartbeat / Elastic Agent managed
+  // monitors (no saved object, `origin: 'heartbeat'`) are excluded from the
+  // overview. Defaults to showing them; remote (CCS) monitors are unaffected.
+  includeHeartbeatMonitors: queryBoolean.optional(),
+  page: queryNumberFrom(1).optional(),
+  perPage: queryNumberFrom(1, OVERVIEW_STATUS_MAX_PER_PAGE).optional(),
+  sortField: OverviewStatusSortFieldSchema,
+  sortOrder: z.enum(['asc', 'desc']).optional(),
+  statusFilter: z
+    .enum([
+      MONITOR_STATUS_ENUM.UP,
+      MONITOR_STATUS_ENUM.DOWN,
+      MONITOR_STATUS_ENUM.PENDING,
+      MONITOR_STATUS_ENUM.STALE,
+      MONITOR_STATUS_ENUM.DISABLED,
+    ])
+    .optional(),
 });
 
-export type OverviewStatusQuery = TypeOf<typeof OverviewStatusSchema>;
+export type OverviewStatusQuery = z.infer<typeof OverviewStatusSchema>;
 
-export const SEARCH_FIELDS = [
+export const OverviewStatusStaleBodySchema = z.strictObject({
+  monitorQueryIds: z
+    .array(z.string().max(MAX_MONITOR_QUERY_ID_LENGTH))
+    .min(1)
+    .max(MAX_MONITOR_QUERY_IDS_IN_BODY),
+});
+
+export type OverviewStatusStaleBody = z.infer<typeof OverviewStatusStaleBodySchema>;
+
+export const MONITOR_SEARCH_FIELDS = [
   'name',
   'tags.text',
   'locations.id.text',
@@ -72,35 +158,29 @@ export const SEARCH_FIELDS = [
   'project_id.text',
 ];
 
-export const getMonitors = async (
-  context: RouteContext<MonitorsQuery>,
-  { fields }: { fields?: string[] } = {}
-): Promise<SavedObjectsFindResponse<EncryptedSyntheticsMonitorAttributes>> => {
-  const {
-    perPage = 50,
-    page,
-    sortField,
-    sortOrder,
-    query,
-    searchAfter,
-    showFromAllSpaces,
-  } = context.request.query;
-
-  const { filtersStr } = await getMonitorFilters(context);
-
-  return context.monitorConfigRepository.find({
-    perPage,
-    page,
-    sortField: parseMappingKey(sortField),
-    sortOrder,
-    searchFields: SEARCH_FIELDS,
-    search: query,
-    filter: filtersStr,
-    searchAfter,
-    fields,
-    ...(showFromAllSpaces && { namespaces: ['*'] }),
-  });
-};
+/**
+ * Ping-document equivalents of `MONITOR_SEARCH_FIELDS`, used to scope the
+ * overview status aggregation by the search box query.
+ *
+ * These MUST stay aligned with the saved-object search fields above: the
+ * overview lists monitors via the saved-object search but derives each
+ * monitor's status from ping data matched by these fields. A field that lists a
+ * monitor (e.g. by location or host) but is not matched here would strip that
+ * monitor's status data, misclassifying it — e.g. a `stale` monitor would read
+ * as `pending`.
+ */
+export const MONITOR_STATUS_PING_SEARCH_FIELDS = [
+  'monitor.name',
+  'monitor.name.text',
+  'tags',
+  'observer.name',
+  'observer.geo.name',
+  'urls',
+  'hosts',
+  'url.full',
+  'url.domain',
+  'monitor.project.id',
+];
 
 interface Filters {
   filter?: string;
@@ -113,7 +193,10 @@ interface Filters {
   configIds?: string | string[];
 }
 
-export const getMonitorFilters = async (context: RouteContext) => {
+export const getMonitorFilters = async (
+  context: RouteContext,
+  attr: string = syntheticsMonitorAttributes
+) => {
   const {
     tags,
     monitorTypes,
@@ -121,40 +204,61 @@ export const getMonitorFilters = async (context: RouteContext) => {
     projects,
     schedules,
     monitorQueryIds,
+    configIds,
     locations: queryLocations,
+    useLogicalAndFor,
   } = context.request.query;
   const locations = await parseLocationFilter(context, queryLocations);
 
-  return parseArrayFilters({
-    filter,
+  return parseArrayFilters(
+    {
+      filter,
+      tags,
+      monitorTypes,
+      projects,
+      schedules,
+      monitorQueryIds,
+      configIds,
+      locations,
+    },
+    useLogicalAndFor,
+    attr
+  );
+};
+
+export const parseArrayFilters = (
+  {
     tags,
-    monitorTypes,
+    filter,
+    configIds,
     projects,
+    monitorTypes,
     schedules,
     monitorQueryIds,
     locations,
-  });
-};
-
-export const parseArrayFilters = ({
-  tags,
-  filter,
-  configIds,
-  projects,
-  monitorTypes,
-  schedules,
-  monitorQueryIds,
-  locations,
-}: Filters) => {
+  }: Filters,
+  useLogicalAndFor: MonitorsQuery['useLogicalAndFor'] = [],
+  attributes: string = syntheticsMonitorAttributes
+) => {
   const filtersStr = [
     filter,
-    getSavedObjectKqlFilter({ field: 'tags', values: tags }),
-    getSavedObjectKqlFilter({ field: 'project_id', values: projects }),
-    getSavedObjectKqlFilter({ field: 'type', values: monitorTypes }),
-    getSavedObjectKqlFilter({ field: 'locations.id', values: locations }),
-    getSavedObjectKqlFilter({ field: 'schedule.number', values: schedules }),
-    getSavedObjectKqlFilter({ field: 'id', values: monitorQueryIds }),
-    getSavedObjectKqlFilter({ field: 'config_id', values: configIds }),
+    getSavedObjectKqlFilter({
+      field: 'tags',
+      values: tags,
+      operator: useLogicalAndFor.includes('tags') ? 'AND' : 'OR',
+      attributes,
+    }),
+    getSavedObjectKqlFilter({ field: 'project_id', values: projects, attributes }),
+    getSavedObjectKqlFilter({ field: 'type', values: monitorTypes, attributes }),
+    getSavedObjectKqlFilter({
+      field: 'locations.id',
+      values: locations,
+      operator: useLogicalAndFor.includes('locations') ? 'AND' : 'OR',
+      attributes,
+    }),
+    getSavedObjectKqlFilter({ field: 'schedule.number', values: schedules, attributes }),
+    getSavedObjectKqlFilter({ field: 'id', values: monitorQueryIds, attributes }),
+    getSavedObjectKqlFilter({ field: 'config_id', values: configIds, attributes }),
   ]
     .filter((f) => !!f)
     .join(' AND ');
@@ -167,11 +271,13 @@ export const getSavedObjectKqlFilter = ({
   values,
   operator = 'OR',
   searchAtRoot = false,
+  attributes = syntheticsMonitorAttributes,
 }: {
   field: string;
   values?: string | string[];
   operator?: string;
   searchAtRoot?: boolean;
+  attributes?: string;
 }) => {
   if (values === 'All' || (Array.isArray(values) && values?.includes('All'))) {
     return undefined;
@@ -184,7 +290,7 @@ export const getSavedObjectKqlFilter = ({
   if (searchAtRoot) {
     fieldKey = `${field}`;
   } else {
-    fieldKey = `${monitorAttributes}.${field}`;
+    fieldKey = `${attributes}.${field}`;
   }
 
   if (Array.isArray(values)) {
@@ -246,7 +352,9 @@ export const isMonitorsQueryFiltered = (monitorQuery: MonitorsQuery) => {
     filter,
     projects,
     schedules,
+    remoteNames,
     monitorQueryIds,
+    configIds,
   } = monitorQuery;
 
   return (
@@ -258,16 +366,24 @@ export const isMonitorsQueryFiltered = (monitorQuery: MonitorsQuery) => {
     !!status?.length ||
     !!projects?.length ||
     !!schedules?.length ||
-    !!monitorQueryIds?.length
+    !!remoteNames?.length ||
+    !!monitorQueryIds?.length ||
+    !!configIds?.length
   );
 };
 
 export function parseMappingKey(key: string | undefined) {
   switch (key) {
+    case 'schedule':
     case 'schedule.keyword':
       return 'schedule.number';
     case 'project_id.keyword':
       return 'project_id';
+    case 'tags.keyword':
+      return 'tags';
+    case 'name':
+    case 'type':
+      return `${key}.keyword`;
     default:
       return key;
   }

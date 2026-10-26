@@ -9,6 +9,7 @@ import type { MappingProperty } from '@elastic/elasticsearch/lib/api/types';
 import { get } from 'lodash/fp';
 import { CriticalityModifiers } from '../../../../common/entity_analytics/asset_criticality';
 import type {
+  AssetCriticalityRecord,
   AssetCriticalityUpsert,
   CriticalityLevel,
 } from '../../../../common/entity_analytics/asset_criticality/types';
@@ -21,7 +22,9 @@ import { type CriticalityValues } from './constants';
  * @param criticalityLevel The criticality level for which to get the modifier.
  * @returns The associated criticality modifier for the given criticality level.
  */
-export const getCriticalityModifier = (criticalityLevel?: CriticalityLevel): number | undefined => {
+export const getCriticalityModifier = (
+  criticalityLevel?: CriticalityLevel | null
+): number | undefined => {
   if (criticalityLevel == null) {
     return;
   }
@@ -59,14 +62,20 @@ export const applyCriticalityToScore = ({
  * @returns The updated score with modifiers applied
  */
 export const bayesianUpdate = ({
-  max,
+  max = RISK_SCORING_NORMALIZATION_MAX,
   modifier,
   score,
 }: {
-  max: number;
+  max?: number;
   modifier: number;
   score: number;
 }) => {
+  // At the maximum the prior odds are infinite and the update would evaluate Infinity / Infinity.
+  // Its limit is the maximum itself, whatever positive modifier is applied.
+  if (score >= max) {
+    return max;
+  }
+
   const priorProbability = score / (max - score);
   const newProbability = priorProbability * modifier;
   return (max * newProbability) / (1 + newProbability);
@@ -78,6 +87,12 @@ type AssetCriticalityUpsertWithDeleted = {
     : AssetCriticalityUpsert[K];
 };
 
+type AssetCriticalityRecordWithDeleted = {
+  [K in keyof AssetCriticalityRecord]: K extends 'criticality_level'
+    ? CriticalityValues
+    : AssetCriticalityRecord[K];
+};
+
 const entityTypeByIdField = {
   'host.name': 'host',
   'user.name': 'user',
@@ -85,8 +100,26 @@ const entityTypeByIdField = {
   'entity.id': 'generic',
 } as const;
 
-export const getImplicitEntityFields = (record: AssetCriticalityUpsertWithDeleted) => {
+/**
+ * Returns the implicit Asset Criticality fields for the given entity according to the identifier field.
+ */
+export const getImplicitEntityFields = (
+  record: AssetCriticalityUpsert
+): Partial<AssetCriticalityRecord> => {
   const entityType = entityTypeByIdField[record.idField];
+
+  // Generic entity has a different treatment since it uses entity.id as identifier
+  if (entityType === 'generic') {
+    return {
+      entity: {
+        asset: {
+          criticality: record.criticalityLevel,
+        },
+        id: record.idValue,
+      },
+    };
+  }
+
   return {
     [entityType]: {
       asset: {
@@ -95,6 +128,15 @@ export const getImplicitEntityFields = (record: AssetCriticalityUpsertWithDelete
       name: record.idValue,
     },
   };
+};
+
+export const getImplicitEntityFieldsWithDeleted = (
+  record: AssetCriticalityUpsertWithDeleted
+): Partial<AssetCriticalityRecordWithDeleted> => {
+  // Type assertion to satisfy the compiler as we know the deleted criticality handling is done correctly in the appropriate context
+  return getImplicitEntityFields(
+    record as AssetCriticalityUpsert
+  ) as Partial<AssetCriticalityRecordWithDeleted>;
 };
 
 /**

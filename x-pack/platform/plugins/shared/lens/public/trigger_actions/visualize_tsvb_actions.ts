@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { createAction } from '@kbn/ui-actions-plugin/public';
 import { ACTION_CONVERT_TO_LENS } from '@kbn/visualizations-plugin/public';
 import type { ApplicationStart } from '@kbn/core/public';
-import type { VisualizeEditorContext } from '../types';
+import type { VisualizeEditorContext } from '@kbn/lens-common';
 
 export const visualizeTSVBAction = (application: ApplicationStart) =>
   createAction<{ [key: string]: VisualizeEditorContext }>({

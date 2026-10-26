@@ -17,7 +17,15 @@ import { SecurityPlugin } from './plugin';
 
 export type { SecurityPluginStart, SecurityPluginSetup };
 export type { AuthenticatedUser, SecurityLicenseFeatures, SecurityLicense } from '../common';
-export type { UiApi, ChangePasswordProps, PersonalInfoProps } from './ui_api';
+export type {
+  UiApi,
+  ChangePasswordProps,
+  CreateServiceAccountProps,
+  ServiceAccountPickerProps,
+  ServiceAccountPickerDirectory,
+  ServiceAccountPickerStatus,
+  PersonalInfoProps,
+} from './ui_api';
 
 export { ALL_SPACES_ID } from '../common/constants';
 
@@ -42,4 +50,7 @@ export const plugin: PluginInitializer<
 > = (initializerContext: PluginInitializerContext) => new SecurityPlugin(initializerContext);
 
 // services needed for rendering React using shared modules
-export type StartServices = Pick<CoreStart, 'analytics' | 'i18n' | 'theme' | 'userProfile'>;
+export type StartServices = Pick<
+  CoreStart,
+  'analytics' | 'i18n' | 'theme' | 'userProfile' | 'rendering'
+>;

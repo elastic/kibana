@@ -6,10 +6,14 @@
  */
 
 import { isEmpty } from 'lodash';
-import { useMemo, useEffect, useState } from 'react';
-import type { SetStateAction } from 'react';
-import type React from 'react';
-import type { fetchQueryRuleRegistryAlerts } from './api';
+import type { Dispatch, SetStateAction } from 'react';
+import { useMemo, useEffect, useState, useRef } from 'react';
+import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
+import type {
+  fetchQueryAttacks,
+  fetchQueryUnifiedAlerts,
+  fetchQueryRuleRegistryAlerts,
+} from './api';
 import { fetchQueryAlerts } from './api';
 import type { AlertSearchResponse, QueryAlerts } from './types';
 import { useTrackHttpRequest } from '../../../../common/lib/apm/use_track_http_request';
@@ -20,15 +24,19 @@ type Func = () => Promise<void>;
 export interface ReturnQueryAlerts<Hit, Aggs> {
   loading: boolean;
   data: AlertSearchResponse<Hit, Aggs> | null;
-  setQuery: React.Dispatch<SetStateAction<object>>;
+  setQuery: Dispatch<SetStateAction<object>>;
   response: string;
   request: string;
   refetch: Func | null;
 }
 
-type AlertsQueryName = (typeof ALERTS_QUERY_NAMES)[keyof typeof ALERTS_QUERY_NAMES];
+export type AlertsQueryName = (typeof ALERTS_QUERY_NAMES)[keyof typeof ALERTS_QUERY_NAMES];
 
-type FetchMethod = typeof fetchQueryAlerts | typeof fetchQueryRuleRegistryAlerts;
+type FetchMethod =
+  | typeof fetchQueryAlerts
+  | typeof fetchQueryRuleRegistryAlerts
+  | typeof fetchQueryUnifiedAlerts
+  | typeof fetchQueryAttacks;
 export interface AlertsQueryParams {
   fetchMethod?: FetchMethod;
   query: object;
@@ -38,6 +46,12 @@ export interface AlertsQueryParams {
    * The query name is used for performance monitoring with APM
    */
   queryName: AlertsQueryName;
+  /**
+   * Optional Kibana execution context forwarded to `http.fetch` (surfaced as `x-opaque-id` in ES
+   * slow logs and as APM trace labels) so the alert query can be attributed to the calling
+   * page/panel.
+   */
+  executionContext?: KibanaExecutionContext;
 }
 
 /**
@@ -77,6 +91,7 @@ export const useQueryAlerts = <Hit, Aggs>({
   indexName,
   skip,
   queryName,
+  executionContext,
 }: AlertsQueryParams): ReturnQueryAlerts<Hit, Aggs> => {
   const [query, setQuery] = useState(initialQuery);
   const [alerts, setAlerts] = useState<
@@ -92,6 +107,16 @@ export const useQueryAlerts = <Hit, Aggs>({
 
   const fetchAlerts = useTrackedFetchMethod(fetchMethod, queryName);
 
+  // Hold the latest executionContext in a ref so re-renders that pass a fresh
+  // literal (e.g. `executionContext: buildExecutionContext(...)` inline) don't
+  // change the effect dependency identity, which would abort the in-flight
+  // request and re-fetch on every render — an unbounded loop when the effect's
+  // own setState updates feed back into the same render cycle. The values here
+  // are pure trace labels; reading them at invocation time (not close-over
+  // time) is functionally equivalent.
+  const executionContextRef = useRef(executionContext);
+  executionContextRef.current = executionContext;
+
   useEffect(() => {
     let isSubscribed = true;
     const abortCtrl = new AbortController();
@@ -103,13 +128,18 @@ export const useQueryAlerts = <Hit, Aggs>({
         const alertResponse = await fetchAlerts<Hit, Aggs>({
           query,
           signal: abortCtrl.signal,
+          context: executionContextRef.current,
         });
 
         if (isSubscribed) {
           setAlerts({
             data: alertResponse,
             response: JSON.stringify(alertResponse, null, 2),
-            request: JSON.stringify({ index: [indexName] ?? [''], body: query }, null, 2),
+            request: JSON.stringify(
+              { index: indexName ? [indexName] : [''], body: query },
+              null,
+              2
+            ),
             setQuery,
             refetch: fetchData,
           });

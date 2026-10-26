@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { schema, ObjectType } from '@kbn/config-schema';
+import type { ObjectType } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 
 export const apiError = schema.object({
   error: schema.string(),
@@ -18,16 +19,16 @@ export const apiError = schema.object({
 
 export const referenceSchema = schema.object(
   {
-    name: schema.maybe(schema.string()),
+    name: schema.string(),
     type: schema.string(),
     id: schema.string(),
   },
-  { unknowns: 'forbid' }
+  { unknowns: 'forbid', meta: { id: 'kbn-content-management-utils-referenceSchema' } }
 );
 
-export const referencesSchema = schema.arrayOf(referenceSchema);
+export const referencesSchema = schema.arrayOf(referenceSchema, { maxSize: 10_000 });
 
-export const savedObjectSchema = (attributesSchema: ObjectType<any>) =>
+export const savedObjectSchema = <T extends ObjectType<any>>(attributesSchema: T) =>
   schema.object(
     {
       id: schema.string(),
@@ -35,16 +36,19 @@ export const savedObjectSchema = (attributesSchema: ObjectType<any>) =>
       version: schema.maybe(schema.string()),
       createdAt: schema.maybe(schema.string()),
       updatedAt: schema.maybe(schema.string()),
+      createdBy: schema.maybe(schema.string()),
+      updatedBy: schema.maybe(schema.string()),
       error: schema.maybe(apiError),
       attributes: attributesSchema,
       references: referencesSchema,
-      namespaces: schema.maybe(schema.arrayOf(schema.string())),
+      namespaces: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
       originId: schema.maybe(schema.string()),
+      managed: schema.maybe(schema.boolean()),
     },
     { unknowns: 'allow' }
   );
 
-export const objectTypeToGetResultSchema = (soSchema: ObjectType<any>) =>
+export const objectTypeToGetResultSchema = <T extends ObjectType<any>>(soSchema: T) =>
   schema.object(
     {
       item: soSchema,
@@ -76,7 +80,8 @@ export const createOptionsSchemas = {
   overwrite: schema.maybe(schema.boolean()),
   version: schema.maybe(schema.string()),
   refresh: schema.maybe(schema.boolean()),
-  initialNamespaces: schema.maybe(schema.arrayOf(schema.string())),
+  initialNamespaces: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
+  managed: schema.maybe(schema.boolean()),
 };
 
 export const schemaAndOr = schema.oneOf([schema.literal('AND'), schema.literal('OR')]);
@@ -87,17 +92,23 @@ export const searchOptionsSchemas = {
   perPage: schema.maybe(schema.number()),
   sortField: schema.maybe(schema.string()),
   sortOrder: schema.maybe(schema.oneOf([schema.literal('asc'), schema.literal('desc')])),
-  fields: schema.maybe(schema.arrayOf(schema.string())),
+  fields: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
   search: schema.maybe(schema.string()),
-  searchFields: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
-  rootSearchFields: schema.maybe(schema.arrayOf(schema.string())),
+  searchFields: schema.maybe(
+    schema.oneOf([schema.string(), schema.arrayOf(schema.string(), { maxSize: 100 })])
+  ),
+  rootSearchFields: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
 
-  hasReference: schema.maybe(schema.oneOf([referenceSchema, schema.arrayOf(referenceSchema)])),
+  hasReference: schema.maybe(
+    schema.oneOf([referenceSchema, schema.arrayOf(referenceSchema, { maxSize: 100 })])
+  ),
   hasReferenceOperator: schema.maybe(schemaAndOr),
-  hasNoReference: schema.maybe(schema.oneOf([referenceSchema, schema.arrayOf(referenceSchema)])),
+  hasNoReference: schema.maybe(
+    schema.oneOf([referenceSchema, schema.arrayOf(referenceSchema, { maxSize: 100 })])
+  ),
   hasNoReferenceOperator: schema.maybe(schemaAndOr),
   defaultSearchOperator: schema.maybe(schemaAndOr),
-  namespaces: schema.maybe(schema.arrayOf(schema.string())),
+  namespaces: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
   type: schema.maybe(schema.string()),
 
   filter: schema.maybe(schema.string()),
@@ -111,15 +122,34 @@ export const updateOptionsSchema = {
   references: schema.maybe(referencesSchema),
   version: schema.maybe(schema.string()),
   refresh: schema.maybe(schema.oneOf([schema.boolean(), schema.literal('wait_for')])),
-  upsert: (attributesSchema: ObjectType<any>) => schema.maybe(savedObjectSchema(attributesSchema)),
+  upsert: <T extends ObjectType<any>>(attributesSchema: T) =>
+    schema.maybe(savedObjectSchema(attributesSchema)),
   retryOnConflict: schema.maybe(schema.number()),
   mergeAttributes: schema.maybe(schema.boolean()),
 };
 
-export const createResultSchema = (soSchema: ObjectType<any>) =>
+export const createResultSchema = <T extends ObjectType<any>>(soSchema: T) =>
   schema.object(
     {
       item: soSchema,
+    },
+    { unknowns: 'forbid' }
+  );
+
+export const searchResultSchema = <T extends ObjectType<any>, M extends ObjectType<any> = never>(
+  soSchema: T,
+  meta?: M
+) =>
+  schema.object(
+    {
+      hits: schema.arrayOf(soSchema, { maxSize: 10_000 }),
+      pagination: schema.object({
+        total: schema.number(),
+        cursor: schema.maybe(schema.string()),
+      }),
+      ...(meta && {
+        meta,
+      }),
     },
     { unknowns: 'forbid' }
   );

@@ -304,7 +304,7 @@ export const UserProfilesSelectable = <Option extends UserProfileWithAvatar | nu
 
         onChange(values);
       }}
-      style={{ maxHeight: height }}
+      css={{ maxHeight: height }}
       singleSelection={singleSelection}
       searchable
       searchProps={{
@@ -323,7 +323,7 @@ export const UserProfilesSelectable = <Option extends UserProfileWithAvatar | nu
         id: searchInputId,
       }}
       isPreFiltered
-      listProps={{ onFocusBadge: false, rowHeight: 48 }}
+      listProps={{ onFocusBadge: false, rowHeight: 48, paddingSize: 's' }}
       loadingMessage={loadingMessage}
       noMatchesMessage={noMatchesMessage}
       emptyMessage={emptyMessage}
@@ -357,7 +357,7 @@ export const UserProfilesSelectable = <Option extends UserProfileWithAvatar | nu
     >
       {(list, search) => (
         <>
-          <EuiPanel hasShadow={false} paddingSize="s">
+          <EuiPanel hasShadow={false} hasBorder={false} paddingSize="s">
             {search}
             {!singleSelection ? (
               <>
@@ -383,12 +383,7 @@ export const UserProfilesSelectable = <Option extends UserProfileWithAvatar | nu
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
                     {selectedCount ? (
-                      <EuiButtonEmpty
-                        size="xs"
-                        flush="right"
-                        onClick={() => onChange?.([])}
-                        style={{ height: '1rem' }}
-                      >
+                      <EuiButtonEmpty size="xs" flush="right" onClick={() => onChange?.([])}>
                         {clearButtonLabel ?? (
                           <FormattedMessage
                             id="userProfileComponents.userProfilesSelectable.clearButtonLabel"
@@ -406,6 +401,7 @@ export const UserProfilesSelectable = <Option extends UserProfileWithAvatar | nu
             <>
               <EuiHorizontalRule margin="none" />
               <EuiCallOut
+                announceOnMount
                 title={
                   limitReachedMessage ? (
                     limitReachedMessage(limit)

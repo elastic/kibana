@@ -15,11 +15,15 @@ import type { ReactNode } from 'react';
 import React from 'react';
 import { Observable } from 'rxjs';
 import { RouterProvider } from '@kbn/typed-react-router-config';
+import { notificationServiceMock } from '@kbn/core/public/mocks';
+import { PerformanceContextProvider } from '@kbn/ebt-tools';
 import type { ProfilingDependencies } from './profiling_dependencies_context';
 import { ProfilingDependenciesContextProvider } from './profiling_dependencies_context';
 import { profilingRouter } from '../../../routing';
 import { TimeRangeContextProvider } from '../time_range_context';
 import { getServices } from '../../../services';
+import type { ProfilingSchemaContextValue } from '../profiling_schema/profiling_schema_context';
+import { ProfilingSchemaContext } from '../profiling_schema/profiling_schema_context';
 
 const urlService = new UrlService({
   navigate: async () => {},
@@ -68,13 +72,7 @@ const mockCore = {
   i18n: {
     Context: ({ children }: { children: ReactNode }) => children,
   },
-  notifications: {
-    toasts: {
-      addWarning: () => {},
-      addDanger: () => {},
-      add: () => {},
-    },
-  },
+  notifications: notificationServiceMock.createStartContract(),
 };
 
 const mockProfilingDependenciesContext = {
@@ -87,11 +85,14 @@ export function MockProfilingDependenciesStorybook({
   profilingContext,
   routePath,
   mockServices = {},
+  profilingSchemaContext,
 }: {
   children?: ReactNode;
   profilingContext?: Partial<ProfilingDependencies['start']>;
   mockServices?: Partial<ProfilingDependencies['services']>;
   routePath?: string;
+  /** Provides the profiling schema like the page template does, for stories of views that read it. */
+  profilingSchemaContext?: ProfilingSchemaContextValue;
 }) {
   const contextMock = merge({}, mockProfilingDependenciesContext, profilingContext);
 
@@ -109,18 +110,26 @@ export function MockProfilingDependenciesStorybook({
     <EuiThemeProvider darkMode={false}>
       <KibanaReactContext.Provider>
         <RouterProvider router={profilingRouter as any} history={history}>
-          <TimeRangeContextProvider>
-            <ProfilingDependenciesContextProvider
-              // We should keep adding more stuff to the mock object as we need
-              value={{
-                start: contextMock,
-                setup: {} as any,
-                services: merge({}, services, mockServices),
-              }}
-            >
-              {children}
-            </ProfilingDependenciesContextProvider>
-          </TimeRangeContextProvider>
+          <PerformanceContextProvider>
+            <TimeRangeContextProvider>
+              <ProfilingDependenciesContextProvider
+                // We should keep adding more stuff to the mock object as we need
+                value={{
+                  start: contextMock,
+                  setup: {} as any,
+                  services: merge({}, services, mockServices),
+                }}
+              >
+                {profilingSchemaContext ? (
+                  <ProfilingSchemaContext.Provider value={profilingSchemaContext}>
+                    {children}
+                  </ProfilingSchemaContext.Provider>
+                ) : (
+                  children
+                )}
+              </ProfilingDependenciesContextProvider>
+            </TimeRangeContextProvider>
+          </PerformanceContextProvider>
         </RouterProvider>
       </KibanaReactContext.Provider>
     </EuiThemeProvider>

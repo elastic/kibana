@@ -1,0 +1,23 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { schema } from '@kbn/config-schema';
+
+export const inferenceSettingsSchemaV1 = schema.object({
+  features: schema.arrayOf(
+    schema.object({
+      feature_id: schema.string({ minLength: 1, maxLength: 256 }),
+      endpoints: schema.arrayOf(
+        schema.object({
+          id: schema.string({ minLength: 1, maxLength: 256 }),
+        }),
+        { minSize: 0, maxSize: 30 }
+      ),
+    }),
+    { maxSize: 30 }
+  ),
+});

@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { EuiButtonIcon, EuiSuperSelect, useEuiTheme } from '@elastic/eui';
+import { EuiButtonIcon, EuiSuperSelect, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 
 import type { Filter, Query } from '@kbn/es-query';
-import type { DataViewSpec } from '@kbn/data-plugin/common';
+import type { DataView } from '@kbn/data-plugin/common';
 import type { GlobalTimeArgs } from '../../containers/use_global_time';
 import { EventsByDataset } from '../../../overview/components/events_by_dataset';
 import { SignalsByCategory } from '../../../overview/components/signals_by_category';
 import type { InputsModelId } from '../../store/inputs/constants';
 import type { TimelineEventsType } from '../../../../common/types/timeline';
 import type { TopNOption } from './helpers';
-import { getSourcererScopeName, removeIgnoredAlertFilters } from './helpers';
+import { getPageScope, removeIgnoredAlertFilters } from './helpers';
 import * as i18n from './translations';
 import type { AlertsStackByField } from '../../../detections/components/alerts_kpis/common/types';
 
@@ -47,19 +47,19 @@ const useStyles = () => {
   };
 };
 
-export interface Props extends Pick<GlobalTimeArgs, 'from' | 'to' | 'deleteQuery' | 'setQuery'> {
+export interface Props extends Pick<GlobalTimeArgs, 'from' | 'to' | 'deleteQuery'> {
   filterQuery?: string;
   defaultView: TimelineEventsType;
   field: AlertsStackByField;
   filters: Filter[];
-  dataViewSpec?: DataViewSpec;
+  dataView: DataView;
   options: TopNOption[];
   paddingSize?: 's' | 'm' | 'l' | 'none';
   query: Query;
   setAbsoluteRangeDatePickerTarget: InputsModelId;
   scopeId?: string;
   toggleTopN: () => void;
-  onFilterAdded?: () => void; // eslint-disable-line react/no-unused-prop-types
+  onFilterAdded?: () => void;
   applyGlobalQueriesAndFilters?: boolean;
 }
 
@@ -70,12 +70,11 @@ const TopNComponent: React.FC<Props> = ({
   filters,
   field,
   from,
-  dataViewSpec,
+  dataView,
   options,
   paddingSize,
   query,
   setAbsoluteRangeDatePickerTarget,
-  setQuery,
   scopeId,
   to,
   toggleTopN,
@@ -87,7 +86,7 @@ const TopNComponent: React.FC<Props> = ({
     (value: string) => setView(value as TimelineEventsType),
     [setView]
   );
-  const sourcererScopeId = getSourcererScopeName({ scopeId, view });
+  const sourcererScopeId = getPageScope({ scopeId, view });
 
   useEffect(() => {
     setView(defaultView);
@@ -102,6 +101,7 @@ const TopNComponent: React.FC<Props> = ({
         onChange={onViewSelected}
         options={options}
         valueOfSelected={view}
+        aria-label={i18n.VIEW_SELECT_ARIA_LABEL}
       />
     ),
     [onViewSelected, options, styles.viewSelect, view]
@@ -124,14 +124,12 @@ const TopNComponent: React.FC<Props> = ({
             filters={applicableFilters}
             from={from}
             headerChildren={headerChildren}
-            dataViewSpec={dataViewSpec}
+            dataView={dataView}
             onlyField={field}
             paddingSize={paddingSize}
             query={query}
             queryType="topN"
-            setQuery={setQuery}
             showSpacer={false}
-            toggleTopN={toggleTopN}
             sourcererScopeId={sourcererScopeId}
             to={to}
             hideQueryToggle
@@ -149,13 +147,18 @@ const TopNComponent: React.FC<Props> = ({
         )}
       </div>
 
-      <EuiButtonIcon
-        css={styles.closeButton}
-        aria-label={i18n.CLOSE}
-        data-test-subj="close"
-        iconType="cross"
-        onClick={toggleTopN}
-      />
+      <EuiToolTip
+        content={i18n.CLOSE}
+        disableScreenReaderOutput
+        anchorProps={{ css: styles.closeButton }}
+      >
+        <EuiButtonIcon
+          aria-label={i18n.CLOSE}
+          data-test-subj="close"
+          iconType="cross"
+          onClick={toggleTopN}
+        />
+      </EuiToolTip>
     </div>
   );
 };

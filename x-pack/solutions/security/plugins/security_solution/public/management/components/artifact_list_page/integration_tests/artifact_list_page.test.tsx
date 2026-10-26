@@ -12,10 +12,16 @@ import type { ArtifactListPageProps } from '../artifact_list_page';
 import { act, fireEvent, waitFor, waitForElementToBeRemoved } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { ArtifactListPageRenderingSetup } from '../mocks';
-import { getArtifactListPageRenderingSetup } from '../mocks';
+import {
+  getArtifactImportFlyoutUiMocks,
+  getArtifactImportExportUiMocks,
+  getArtifactListPageRenderingSetup,
+} from '../mocks';
 import { getDeferred } from '../../../mocks/utils';
 import { useGetEndpointSpecificPolicies } from '../../../services/policies/hooks';
 import type { ArtifactEntryCardDecoratorProps } from '../../artifact_entry_card';
+import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
+import { DISABLED_ARTIFACT_TAG } from '../../../../../common/endpoint/service/artifacts';
 
 jest.mock('../../../services/policies/hooks', () => ({
   useGetEndpointSpecificPolicies: jest.fn(),
@@ -30,19 +36,29 @@ describe('When using the ArtifactListPage component', () => {
   ) => ReturnType<AppContextTestRender['render']>;
   let renderResult: ReturnType<typeof render>;
   let history: AppContextTestRender['history'];
+  let coreStart: AppContextTestRender['coreStart'];
   let mockedApi: ReturnType<typeof trustedAppsAllHttpMocks>;
   let getFirstCard: ArtifactListPageRenderingSetup['getFirstCard'];
+  let importExportUi: ReturnType<typeof getArtifactImportExportUiMocks>;
+  let importFlyoutUi: ReturnType<typeof getArtifactImportFlyoutUiMocks>;
+  let setExperimentalFlag: ArtifactListPageRenderingSetup['setExperimentalFlag'];
 
   beforeEach(() => {
     const renderSetup = getArtifactListPageRenderingSetup();
 
-    ({ history, mockedApi, getFirstCard } = renderSetup);
+    ({ history, coreStart, mockedApi, getFirstCard, setExperimentalFlag } = renderSetup);
 
     mockUseGetEndpointSpecificPolicies.mockReturnValue({
       data: mockedApi.responseProvider.endpointPackagePolicyList(),
     });
 
-    render = (props = {}) => (renderResult = renderSetup.renderArtifactListPage(props));
+    render = (props = {}) => {
+      renderResult = renderSetup.renderArtifactListPage(props);
+      importExportUi = getArtifactImportExportUiMocks(renderResult, 'testPage');
+      importFlyoutUi = getArtifactImportFlyoutUiMocks(renderResult);
+
+      return renderResult;
+    };
   });
 
   it('should display a loader while determining which view to show', async () => {
@@ -73,7 +89,11 @@ describe('When using the ArtifactListPage component', () => {
         render(props);
 
         await waitFor(() => {
-          expect(renderResult.getByTestId('testPage-list')).toBeTruthy();
+          if (props?.showAsSimpleTable) {
+            expect(renderResult.getByTestId('testPage-simpleTable')).toBeInTheDocument();
+          } else {
+            expect(renderResult.getByTestId('testPage-list')).toBeInTheDocument();
+          }
           expect(mockedApi.responseProvider.trustedAppsList).toHaveBeenCalled();
         });
 
@@ -98,11 +118,345 @@ describe('When using the ArtifactListPage component', () => {
       expect(getByTestId('testPage-list-loader')).toBeTruthy();
     });
 
+    it('should not open flyout when show=view is present in the URL', async () => {
+      history.push('somepage?show=view&itemId=123');
+
+      const { queryByTestId } = await renderWithListData();
+
+      expect(queryByTestId('testPage-flyout')).not.toBeInTheDocument();
+      expect(queryByTestId('testPage-viewFlyout')).not.toBeInTheDocument();
+    });
+
     it(`should show cards with results`, async () => {
       const { findAllByTestId, getByTestId } = await renderWithListData();
 
       await expect(findAllByTestId('testPage-card')).resolves.toHaveLength(10);
       expect(getByTestId('testPage-showCount').textContent).toBe('Showing 20 artifacts');
+    });
+
+    describe('and showAsSimpleTable is enabled', () => {
+      it('should render a table instead of cards', async () => {
+        const { getByTestId, queryByTestId, queryAllByTestId, getAllByRole } =
+          await renderWithListData({
+            showAsSimpleTable: true,
+          });
+
+        expect(queryAllByTestId('testPage-card')).toHaveLength(0);
+        expect(queryByTestId('testPage-list')).not.toBeInTheDocument();
+        expect(getByTestId('testPage-simpleTable')).toBeInTheDocument();
+        expect(getAllByRole('row')).toHaveLength(11); // header + 10 items
+      });
+
+      it('should not show the Enabled column by default', async () => {
+        const { queryByTestId } = await renderWithListData({
+          showAsSimpleTable: true,
+        });
+
+        expect(queryByTestId('testPage-simpleTable-columnEnabled')).not.toBeInTheDocument();
+      });
+
+      it('should show the Enabled column when showEnabledColumn is true', async () => {
+        const { getAllByTestId } = await renderWithListData({
+          showAsSimpleTable: true,
+          showEnabledColumn: true,
+        });
+
+        expect(getAllByTestId('testPage-simpleTable-columnEnabled').length).toBeGreaterThan(0);
+      });
+
+      it('should update the full artifact with the disabled tag when the switch is turned off', async () => {
+        const { getAllByTestId } = await renderWithListData({
+          showAsSimpleTable: true,
+          showEnabledColumn: true,
+        });
+
+        await userEvent.click(getAllByTestId('testPage-simpleTable-columnEnabled')[0]);
+
+        await waitFor(() => {
+          expect(mockedApi.responseProvider.trustedAppUpdate).toHaveBeenCalled();
+        });
+
+        const updateRequest = mockedApi.responseProvider.trustedAppUpdate.mock.calls[0][0];
+        const updateBody = JSON.parse(updateRequest.body as string);
+
+        expect(updateBody.tags).toEqual(expect.arrayContaining([DISABLED_ARTIFACT_TAG]));
+        expect(updateBody).toEqual(
+          expect.objectContaining({
+            id: expect.any(String),
+            item_id: expect.any(String),
+            name: expect.any(String),
+            entries: expect.any(Array),
+            os_types: expect.any(Array),
+            type: expect.any(String),
+          })
+        );
+        expect(coreStart.notifications.toasts.addSuccess).toHaveBeenCalledWith(
+          expect.stringContaining('disabled')
+        );
+      });
+
+      it('should show table row actions that open edit and delete', async () => {
+        const { getByTestId, getAllByTestId } = await renderWithListData({
+          showAsSimpleTable: true,
+        });
+
+        await userEvent.click(getAllByTestId('testPage-simpleTable-rowActions-button')[0]);
+
+        expect(getByTestId('testPage-simpleTable-cardEditAction')).toBeInTheDocument();
+        expect(getByTestId('testPage-simpleTable-cardDeleteAction')).toBeInTheDocument();
+      });
+
+      it('should open the view flyout when the name is clicked', async () => {
+        const { getAllByTestId, getByTestId, queryByTestId } = await renderWithListData({
+          showAsSimpleTable: true,
+          allowCardEditAction: false,
+          allowCardCreateAction: false,
+          allowCardDeleteAction: false,
+        });
+
+        await userEvent.click(getAllByTestId('testPage-simpleTable-columnName')[0]);
+
+        expect(getByTestId('testPage-viewFlyout')).toBeInTheDocument();
+        expect(queryByTestId('testPage-flyout')).not.toBeInTheDocument();
+        expect(queryByTestId('formMock')).not.toBeInTheDocument();
+        expect(history.location.search).toMatch(/show=view/);
+        expect(history.location.search).toMatch(/itemId=/);
+
+        await waitFor(() => {
+          expect(getByTestId('testPage-viewFlyout-title')).toHaveTextContent(/Generated Exception/);
+        });
+        expect(getByTestId('testPage-viewFlyout-lastUpdated')).toHaveTextContent(
+          /Last updated: Apr 20, 2020 @ 15:25:31/
+        );
+        expect(getByTestId('testPage-viewFlyout-os-osBadge-windows')).toHaveTextContent('Windows');
+        expect(getByTestId('testPage-viewFlyout-updatedByAvatar')).toBeInTheDocument();
+        expect(getByTestId('testPage-viewFlyout-description')).toHaveTextContent(
+          'created by ExceptionListItemGenerator'
+        );
+        expect(getByTestId('testPage-viewFlyout-definitionTitle')).toHaveTextContent('Definition');
+        expect(getByTestId('viewModeComponent')).toBeInTheDocument();
+        expect(getByTestId('testPage-viewFlyout-policyAssignmentTitle')).toHaveTextContent(
+          'Policy assignment'
+        );
+        expect(getByTestId('testPage-viewFlyout-policyAssignment-global')).toHaveTextContent(
+          'Applied globally.'
+        );
+      });
+
+      it('should open the view flyout from the show=view URL without the edit form', async () => {
+        history.push('somepage?show=view&itemId=123');
+
+        const { getByTestId, queryByTestId } = await renderWithListData({
+          showAsSimpleTable: true,
+        });
+
+        expect(getByTestId('testPage-viewFlyout')).toBeInTheDocument();
+        expect(queryByTestId('testPage-flyout')).not.toBeInTheDocument();
+        expect(queryByTestId('formMock')).not.toBeInTheDocument();
+      });
+
+      it('should not open the view flyout when show=view has no itemId', async () => {
+        history.push('somepage?show=view');
+
+        const { queryByTestId } = await renderWithListData({
+          showAsSimpleTable: true,
+        });
+
+        expect(queryByTestId('testPage-viewFlyout')).not.toBeInTheDocument();
+        expect(queryByTestId('testPage-viewFlyout-loader')).not.toBeInTheDocument();
+      });
+
+      it('should disable the artifact from the view flyout and refresh the list', async () => {
+        const { getAllByTestId, getByTestId } = await renderWithListData({
+          showAsSimpleTable: true,
+          showEnabledColumn: true,
+        });
+
+        await userEvent.click(getAllByTestId('testPage-simpleTable-columnName')[0]);
+
+        await waitFor(() => {
+          expect(getByTestId('testPage-viewFlyout-enabledSwitch')).toBeEnabled();
+        });
+
+        const listCallsBeforeToggle = mockedApi.responseProvider.trustedAppsList.mock.calls.length;
+
+        await userEvent.click(getByTestId('testPage-viewFlyout-enabledSwitch'));
+
+        await waitFor(() => {
+          expect(mockedApi.responseProvider.trustedAppUpdate).toHaveBeenCalled();
+          expect(mockedApi.responseProvider.trustedAppsList.mock.calls.length).toBeGreaterThan(
+            listCallsBeforeToggle
+          );
+        });
+
+        const updateRequest = mockedApi.responseProvider.trustedAppUpdate.mock.calls[0][0];
+        const updateBody = JSON.parse(updateRequest.body as string);
+
+        expect(updateBody.tags).toEqual(expect.arrayContaining([DISABLED_ARTIFACT_TAG]));
+      });
+
+      it('should show a read-only enabled switch in the view flyout without write privilege', async () => {
+        const { getAllByTestId, getByTestId } = await renderWithListData({
+          showAsSimpleTable: true,
+          showEnabledColumn: true,
+          allowCardEditAction: false,
+        });
+
+        await userEvent.click(getAllByTestId('testPage-simpleTable-columnName')[0]);
+
+        await waitFor(() => {
+          expect(getByTestId('testPage-viewFlyout-enabledSwitch')).toBeDisabled();
+        });
+      });
+
+      it('should close the view flyout and clear the view URL params', async () => {
+        history.push('somepage?show=view&itemId=123');
+
+        const { getByTestId, queryByTestId } = await renderWithListData({
+          showAsSimpleTable: true,
+        });
+
+        await userEvent.click(getByTestId('euiFlyoutCloseButton'));
+
+        await waitFor(() => {
+          expect(queryByTestId('testPage-viewFlyout')).not.toBeInTheDocument();
+        });
+        expect(history.location.search).not.toMatch(/show=view/);
+        expect(history.location.search).not.toMatch(/itemId=/);
+      });
+
+      it('should display the Edit flyout when table edit action is clicked', async () => {
+        const { getByTestId, getAllByTestId } = await renderWithListData({
+          showAsSimpleTable: true,
+        });
+
+        await userEvent.click(getAllByTestId('testPage-simpleTable-rowActions-button')[0]);
+        await userEvent.click(getByTestId('testPage-simpleTable-cardEditAction'));
+
+        expect(getByTestId('testPage-flyout')).toBeTruthy();
+      });
+
+      it('should close the view flyout when delete succeeds', async () => {
+        const { getAllByTestId, getByTestId, queryByTestId } = await renderWithListData({
+          showAsSimpleTable: true,
+        });
+
+        await userEvent.click(getAllByTestId('testPage-simpleTable-columnName')[0]);
+
+        await waitFor(() => {
+          expect(getByTestId('testPage-viewFlyout')).toBeInTheDocument();
+        });
+
+        await userEvent.click(getByTestId('testPage-viewFlyout-takeActionButton'));
+        await userEvent.click(getByTestId('testPage-viewFlyout-cardDeleteAction'));
+
+        await waitFor(() => {
+          expect(getByTestId('testPage-deleteModal')).toBeInTheDocument();
+        });
+
+        await userEvent.click(getByTestId('testPage-deleteModal-submitButton'));
+
+        await waitFor(() => {
+          expect(queryByTestId('testPage-viewFlyout')).not.toBeInTheDocument();
+          expect(queryByTestId('testPage-deleteModal')).not.toBeInTheDocument();
+        });
+        expect(history.location.search).not.toMatch(/show=view/);
+        expect(history.location.search).not.toMatch(/itemId=/);
+      });
+
+      it('should display the Delete modal when table delete action is clicked', async () => {
+        const { getByTestId, getAllByTestId } = await renderWithListData({
+          showAsSimpleTable: true,
+        });
+
+        await userEvent.click(getAllByTestId('testPage-simpleTable-rowActions-button')[0]);
+        await userEvent.click(getByTestId('testPage-simpleTable-cardDeleteAction'), {
+          pointerEventsCheck: 0,
+        });
+
+        await waitFor(() => {
+          expect(getByTestId('testPage-deleteModal')).toBeTruthy();
+        });
+      });
+
+      it('should request list data with the default sort when the URL has no sort params', async () => {
+        await renderWithListData({ showAsSimpleTable: true });
+
+        expect(mockedApi.responseProvider.trustedAppsList).toHaveBeenCalledWith(
+          expect.objectContaining({
+            query: expect.objectContaining({
+              sort_field: 'created_at',
+              sort_order: 'desc',
+            }),
+          })
+        );
+      });
+
+      it('should request list data with the default sort field when the URL sortField is not sortable', async () => {
+        history.push('somepage?sortField=invalid_field&sortOrder=desc');
+
+        await renderWithListData({ showAsSimpleTable: true });
+
+        expect(mockedApi.responseProvider.trustedAppsList).toHaveBeenCalledWith(
+          expect.objectContaining({
+            query: expect.objectContaining({
+              sort_field: 'created_at',
+            }),
+          })
+        );
+      });
+
+      it('should request list data with a valid URL sortField', async () => {
+        history.push('somepage?sortField=name&sortOrder=asc');
+
+        await renderWithListData({ showAsSimpleTable: true });
+
+        expect(mockedApi.responseProvider.trustedAppsList).toHaveBeenCalledWith(
+          expect.objectContaining({
+            query: expect.objectContaining({
+              sort_field: 'name',
+              sort_order: 'asc',
+            }),
+          })
+        );
+      });
+
+      it('should request list data with the default sort order when the URL sortOrder is invalid', async () => {
+        history.push('somepage?sortField=name&sortOrder=ascending');
+
+        await renderWithListData({ showAsSimpleTable: true });
+
+        expect(mockedApi.responseProvider.trustedAppsList).toHaveBeenCalledWith(
+          expect.objectContaining({
+            query: expect.objectContaining({
+              sort_field: 'name',
+              sort_order: 'desc',
+            }),
+          })
+        );
+      });
+
+      it('should persist table sort to the URL and refetch with that sortField', async () => {
+        const { getByText } = await renderWithListData({ showAsSimpleTable: true });
+
+        await userEvent.click(getByText('Name'));
+
+        await waitFor(() => {
+          expect(history.location.search).toMatch(/sortField=name/);
+          expect(history.location.search).toMatch(/sortOrder=asc/);
+        });
+
+        await waitFor(() => {
+          expect(mockedApi.responseProvider.trustedAppsList).toHaveBeenLastCalledWith(
+            expect.objectContaining({
+              query: expect.objectContaining({
+                sort_field: 'name',
+                sort_order: 'asc',
+              }),
+            })
+          );
+        });
+      });
     });
 
     it('should show card actions', async () => {
@@ -111,6 +465,20 @@ describe('When using the ArtifactListPage component', () => {
 
       expect(getByTestId('testPage-card-cardEditAction')).toBeTruthy();
       expect(getByTestId('testPage-card-cardDeleteAction')).toBeTruthy();
+    });
+
+    it('should not clamp an invalid URL sortField when the list is shown as cards', async () => {
+      history.push('somepage?sortField=invalid_field&sortOrder=desc');
+
+      await renderWithListData();
+
+      expect(mockedApi.responseProvider.trustedAppsList).toHaveBeenCalledWith(
+        expect.objectContaining({
+          query: expect.objectContaining({
+            sort_field: 'invalid_field',
+          }),
+        })
+      );
     });
 
     it('should persist pagination `page` changes to the URL', async () => {
@@ -147,6 +515,89 @@ describe('When using the ArtifactListPage component', () => {
       });
 
       expect(getAllByText('mock decorator')).toHaveLength(10);
+    });
+
+    describe('Import and export', () => {
+      beforeEach(() => {
+        setExperimentalFlag({ endpointExceptionsMovedUnderManagement: true });
+      });
+
+      it('should not show import and export actions with feature flag disabled', async () => {
+        setExperimentalFlag({ endpointExceptionsMovedUnderManagement: false });
+
+        await renderWithListData();
+
+        expect(importExportUi.queryMenuButton()).not.toBeInTheDocument();
+      });
+
+      it('should show import and export actions', async () => {
+        await renderWithListData();
+
+        expect(importExportUi.getMenuButton()).toBeInTheDocument();
+
+        await userEvent.click(importExportUi.getMenuButton());
+        expect(importExportUi.getImportButton()).toBeInTheDocument();
+        expect(importExportUi.getExportButton()).toBeInTheDocument();
+      });
+
+      it('should enable import and export buttons when user can create artifacts', async () => {
+        await renderWithListData({ allowCardCreateAction: true });
+
+        await userEvent.click(importExportUi.getMenuButton());
+        expect(importExportUi.getImportButton()).toBeEnabled();
+        expect(importExportUi.getExportButton()).toBeEnabled();
+      });
+
+      it('should disable import button when user cannot create artifacts', async () => {
+        await renderWithListData({ allowCardCreateAction: false });
+
+        await userEvent.click(importExportUi.getMenuButton());
+        expect(importExportUi.getImportButton()).toBeDisabled();
+        expect(importExportUi.getExportButton()).toBeEnabled();
+      });
+
+      it('should display the import flyout when import is clicked', async () => {
+        await renderWithListData();
+
+        await userEvent.click(importExportUi.getMenuButton());
+        await userEvent.click(importExportUi.getImportButton());
+
+        expect(importFlyoutUi.queryImportFlyout()).toBeInTheDocument();
+      });
+
+      it('should display the import flyout if it is requested via URL param', async () => {
+        history.push('somepage?show=import');
+        await renderWithListData();
+
+        expect(importFlyoutUi.queryImportFlyout()).toBeInTheDocument();
+      });
+
+      it('should not display the import flyout if it is requested via URL param without FF enabled', async () => {
+        setExperimentalFlag({ endpointExceptionsMovedUnderManagement: false });
+        history.push('somepage?show=import');
+        await renderWithListData();
+
+        expect(importFlyoutUi.queryImportFlyout()).not.toBeInTheDocument();
+      });
+
+      it('should refetch list data after a successful import', async () => {
+        await renderWithListData();
+
+        await userEvent.click(importExportUi.getMenuButton());
+        await userEvent.click(importExportUi.getImportButton());
+
+        await importFlyoutUi.uploadFile([ENDPOINT_ARTIFACT_LISTS.trustedApps.id]);
+        const currentApiCallCount = mockedApi.responseProvider.trustedAppsList.mock.calls.length;
+
+        await userEvent.click(importFlyoutUi.getImportButton());
+        await userEvent.click(importFlyoutUi.getConfirmModalConfirmButton());
+
+        await waitFor(() => {
+          expect(mockedApi.responseProvider.trustedAppsList).toHaveBeenCalledTimes(
+            currentApiCallCount + 1
+          );
+        });
+      });
     });
 
     describe('and interacting with card actions', () => {
@@ -198,16 +649,19 @@ describe('When using the ArtifactListPage component', () => {
       it.each([
         ['create', 'show=create'],
         ['edit', 'show=edit&itemId=123'],
+        ['import', 'show=import'],
       ])(
         'should NOT show flyout if url has a show param of %s but the action is not allowed',
         async (_, urlParam) => {
+          setExperimentalFlag({ endpointExceptionsMovedUnderManagement: true });
           history.push(`somepage?${urlParam}`);
           const { queryByTestId } = await renderWithListData({
             allowCardCreateAction: false,
             allowCardEditAction: false,
           });
 
-          expect(queryByTestId('testPage-flyout')).toBeNull();
+          expect(queryByTestId('testPage-flyout')).not.toBeInTheDocument();
+          expect(importFlyoutUi.queryImportFlyout()).not.toBeInTheDocument();
         }
       );
     });

@@ -214,7 +214,7 @@ describe('Response actions history page', () => {
 
       expect(history.location.search).toEqual('?page=3&pageSize=20');
       expect(getByTestId('tablePaginationPopoverButton').textContent).toContain('20');
-      expect(getByTestId('pagination-button-2').getAttribute('aria-current')).toStrictEqual('true');
+      expect(getByTestId('pagination-button-2').getAttribute('aria-current')).toStrictEqual('page');
     });
 
     it('should read and set command filter values from URL params', async () => {
@@ -237,8 +237,8 @@ describe('Response actions history page', () => {
 
       expect(selectedFilterOptions.length).toEqual(2);
       expect(selectedFilterOptions).toEqual([
-        'release. Checked option. To uncheck this option, press Enter.',
-        'processes. Checked option. To uncheck this option, press Enter.',
+        'release. To uncheck this option, press Enter.',
+        'processes. To uncheck this option, press Enter.',
       ]);
       expect(history.location.search).toEqual('?commands=release,processes');
     });
@@ -279,10 +279,10 @@ describe('Response actions history page', () => {
 
       expect(selectedFilterOptions.length).toEqual(4);
       expect(selectedFilterOptions).toEqual([
-        'Host-name-0. Checked option. To uncheck this option, press Enter.',
-        'Host-name-1. Checked option. To uncheck this option, press Enter.',
-        'Host-name-3. Checked option. To uncheck this option, press Enter.',
-        'Host-name-5. Checked option. To uncheck this option, press Enter.',
+        'Host-name-0. To uncheck this option, press Enter.',
+        'Host-name-1. To uncheck this option, press Enter.',
+        'Host-name-3. To uncheck this option, press Enter.',
+        'Host-name-5. To uncheck this option, press Enter.',
       ]);
       expect(history.location.search).toEqual('?hosts=agent-id-1,agent-id-2,agent-id-4,agent-id-5');
     });
@@ -306,10 +306,7 @@ describe('Response actions history page', () => {
       }, []);
 
       expect(selectedFilterOptions.length).toEqual(2);
-      expect(selectedFilterOptions).toEqual([
-        'Failed. Checked option.',
-        'Pending. Checked option.',
-      ]);
+      expect(selectedFilterOptions).toEqual(['Failed', 'Pending']);
       expect(history.location.search).toEqual('?statuses=pending,failed');
     });
 
@@ -421,17 +418,11 @@ describe('Response actions history page', () => {
       }, []);
 
       expect(selectedFilterOptions.length).toEqual(2);
-      expect(selectedFilterOptions).toEqual([
-        'Triggered by rule. Checked option.',
-        'Triggered manually. Checked option.',
-      ]);
+      expect(selectedFilterOptions).toEqual(['Triggered by rule', 'Triggered manually']);
       expect(history.location.search).toEqual('?types=automated,manual');
     });
 
     it('should read and set agent type filter values using `agentTypes` URL params', async () => {
-      mockedContext.setExperimentalFlag({
-        responseActionsSentinelOneV1Enabled: true,
-      });
       const filterPrefix = 'types-filter';
       reactTestingLibrary.act(() => {
         history.push(`${MANAGEMENT_PATH}/response_actions_history?agentTypes=endpoint`);
@@ -450,7 +441,7 @@ describe('Response actions history page', () => {
       }, []);
 
       expect(selectedFilterOptions.length).toEqual(1);
-      expect(selectedFilterOptions).toEqual(['Elastic Defend. Checked option.']);
+      expect(selectedFilterOptions).toEqual(['Elastic Defend']);
       expect(history.location.search).toEqual('?agentTypes=endpoint');
     });
   });
@@ -596,9 +587,6 @@ describe('Response actions history page', () => {
     });
 
     it('should set selected agent type filter options to URL params using `agentTypes`', async () => {
-      mockedContext.setExperimentalFlag({
-        responseActionsSentinelOneV1Enabled: true,
-      });
       const filterPrefix = 'types-filter';
       render();
       const { getAllByTestId, getByTestId } = renderResult;
@@ -611,7 +599,9 @@ describe('Response actions history page', () => {
         }
       }
 
-      expect(history.location.search).toEqual('?agentTypes=endpoint%2Csentinel_one%2Ccrowdstrike');
+      expect(history.location.search).toEqual(
+        '?agentTypes=endpoint%2Csentinel_one%2Ccrowdstrike%2Cmicrosoft_defender_endpoint'
+      );
     });
   });
 
@@ -677,9 +667,6 @@ describe('Response actions history page', () => {
     });
 
     it('should clear `agentTypes` and `actionTypes` selected options on `types` filter', async () => {
-      mockedContext.setExperimentalFlag({
-        responseActionsSentinelOneV1Enabled: true,
-      });
       const filterPrefix = 'types-filter';
       render();
       const { getAllByTestId, getByTestId } = renderResult;
@@ -693,7 +680,7 @@ describe('Response actions history page', () => {
       }
 
       expect(history.location.search).toEqual(
-        '?agentTypes=endpoint%2Csentinel_one%2Ccrowdstrike&types=automated%2Cmanual'
+        '?agentTypes=endpoint%2Csentinel_one%2Ccrowdstrike%2Cmicrosoft_defender_endpoint&types=automated%2Cmanual'
       );
 
       const clearAllButton = getByTestId(`${testPrefix}-${filterPrefix}-clearAllButton`);

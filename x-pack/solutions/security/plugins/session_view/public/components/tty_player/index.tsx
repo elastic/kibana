@@ -4,17 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useRef, useState, useCallback, useMemo, useEffect } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
-  EuiPanel,
+  EuiButton,
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButtonIcon,
-  EuiButton,
+  EuiPanel,
   EuiThemeProvider,
+  EuiToolTip,
 } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { CoreStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import useResizeObserver from 'use-resize-observer';
 import { throttle } from 'lodash';
 import type { ProcessEvent } from '../../../common';
@@ -22,27 +23,30 @@ import { TTYSearchBar } from '../tty_search_bar';
 import { TTYTextSizer } from '../tty_text_sizer';
 import { useStyles } from './styles';
 import {
-  DEFAULT_TTY_ROWS,
   DEFAULT_TTY_COLS,
   DEFAULT_TTY_FONT_SIZE,
+  DEFAULT_TTY_ROWS,
   POLICIES_PAGE_PATH,
   SECURITY_APP_ID,
 } from '../../../common/constants';
-import { SessionViewTelemetryKey } from '../../types';
+import type { SessionViewTelemetryKey } from '../../types';
 import { useFetchIOEvents, useIOLines, useXtermPlayer } from './hooks';
 import { TTYPlayerControls } from '../tty_player_controls';
-import { TOGGLE_TTY_PLAYER, DETAIL_PANEL } from '../session_view/translations';
+import { DETAIL_PANEL, TOGGLE_TTY_PLAYER } from '../session_view/translations';
 
 export interface TTYPlayerDeps {
   index: string;
   sessionEntityId: string;
   sessionStartTime: string;
   show: boolean;
+
   onClose(): void;
-  isFullscreen: boolean;
+
   onJumpToEvent(event: ProcessEvent): void;
+
   autoSeekToEntityId?: string;
   canReadPolicyManagement?: boolean;
+
   trackEvent(name: SessionViewTelemetryKey): void;
 }
 
@@ -52,7 +56,6 @@ export const TTYPlayer = ({
   sessionStartTime,
   show,
   onClose,
-  isFullscreen,
   onJumpToEvent,
   autoSeekToEntityId,
   canReadPolicyManagement,
@@ -186,34 +189,40 @@ export const TTYPlayer = ({
           </EuiFlexItem>
 
           <EuiFlexItem grow={false}>
-            <EuiButtonIcon
-              isSelected={true}
-              display="fill"
-              isLoading={isFetching}
-              iconType="apmTrace"
-              onClick={onClose}
-              size="m"
-              aria-label={TOGGLE_TTY_PLAYER}
-              data-test-subj="sessionView:TTYPlayerClose"
-            />
+            <EuiToolTip content={TOGGLE_TTY_PLAYER} disableScreenReaderOutput>
+              <EuiButtonIcon
+                isSelected={true}
+                display="fill"
+                isLoading={isFetching}
+                iconType="chartWaterfall"
+                onClick={onClose}
+                size="m"
+                aria-label={TOGGLE_TTY_PLAYER}
+                data-test-subj="sessionView:TTYPlayerClose"
+              />
+            </EuiToolTip>
           </EuiFlexItem>
 
           <EuiFlexItem grow={false}>
-            <EuiButtonIcon
-              iconType="refresh"
-              display="empty"
-              size="m"
-              disabled={true}
-              aria-label="disabled"
-            />
+            <EuiToolTip content="disabled" disableScreenReaderOutput>
+              <EuiButtonIcon
+                iconType="refresh"
+                display="empty"
+                size="m"
+                disabled={true}
+                aria-label="disabled"
+              />
+            </EuiToolTip>
           </EuiFlexItem>
 
           <EuiFlexItem grow={false}>
-            <EuiButtonIcon iconType="eye" disabled={true} size="m" aria-label="disabled" />
+            <EuiToolTip content="disabled" disableScreenReaderOutput>
+              <EuiButtonIcon iconType="eye" disabled={true} size="m" aria-label="disabled" />
+            </EuiToolTip>
           </EuiFlexItem>
 
           <EuiFlexItem grow={false}>
-            <EuiButton iconType="list" disabled={true}>
+            <EuiButton iconType="listBullet" disabled={true}>
               {DETAIL_PANEL}
             </EuiButton>
           </EuiFlexItem>
@@ -241,7 +250,6 @@ export const TTYPlayer = ({
               containerHeight={containerHeight}
               fontSize={fontSize}
               onFontSizeChanged={setFontSize}
-              isFullscreen={isFullscreen}
             />
           }
         />

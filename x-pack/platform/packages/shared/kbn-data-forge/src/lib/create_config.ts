@@ -8,13 +8,14 @@
 import { isLeft } from 'fp-ts/Either';
 import { PathReporter } from 'io-ts/lib/PathReporter';
 import { promises } from 'fs';
-import yaml from 'js-yaml';
-import { Config, ConfigRT, DatasetRT, Schedule, PartialConfig, PartialConfigRT } from '../types';
+import { parse } from 'yaml';
+import type { Config, Schedule, PartialConfig } from '../types';
+import { ConfigRT, DatasetRT, PartialConfigRT } from '../types';
 import { DEFAULTS } from '../constants';
 
 export async function readConfig(filePath: string): Promise<PartialConfig> {
   const data = await promises.readFile(filePath);
-  const decodedPartialConfig = PartialConfigRT.decode(yaml.load(data.toString()));
+  const decodedPartialConfig = PartialConfigRT.decode(parse(data.toString()));
   if (isLeft(decodedPartialConfig)) {
     throw new Error(
       `Could not validate config: ${PathReporter.report(decodedPartialConfig).join('\n')}`
@@ -64,9 +65,11 @@ export function createConfig(partialConfig: PartialConfig = {}) {
       ephemeralProjectIds: DEFAULTS.EPHEMERAL_PROJECT_IDS,
       alignEventsToInterval: DEFAULTS.ALIGN_EVENTS_TO_INTERVAL,
       artificialIndexDelay: 0,
+      slashLogs: DEFAULTS.SLASH_LOGS,
       ...(partialConfig.indexing ?? {}),
     },
     schedule: partialConfig.schedule ?? [schedule],
+    destination: partialConfig.destination ?? { type: 'elasticsearch' },
   };
 
   const decodedConfig = ConfigRT.decode(config);

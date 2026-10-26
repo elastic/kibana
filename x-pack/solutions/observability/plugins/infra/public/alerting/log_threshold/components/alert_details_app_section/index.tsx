@@ -19,7 +19,9 @@ import { i18n } from '@kbn/i18n';
 import { getPaddedAlertTimeRange } from '@kbn/observability-get-padded-alert-time-range-util';
 import { get, identity } from 'lodash';
 import { useElasticChartsTheme } from '@kbn/charts-theme';
+import { escapeQuotes } from '@kbn/es-query';
 import { useLogView } from '@kbn/logs-shared-plugin/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import {
   Comparator,
@@ -32,11 +34,13 @@ import type { AlertDetailsAppSectionProps } from './types';
 import { Threshold } from '../../../common/components/threshold';
 import { LogRateAnalysis } from './components/log_rate_analysis';
 import { LogThresholdCountChart, LogThresholdRatioChart } from './components/threhsold_chart';
-import { useLicense } from '../../../../hooks/use_license';
 
 const formatThreshold = (threshold: number) => String(threshold);
 
 const AlertDetailsAppSection = ({ rule, alert }: AlertDetailsAppSectionProps) => {
+  const {
+    services: { application },
+  } = useKibana();
   const { logsShared } = useKibanaContextForPlugin().services;
   const baseTheme = useElasticChartsTheme();
   const timeRange = getPaddedAlertTimeRange(alert.fields[ALERT_START]!, alert.fields[ALERT_END]);
@@ -62,8 +66,7 @@ const AlertDetailsAppSection = ({ rule, alert }: AlertDetailsAppSectionProps) =>
     logViews: logsShared.logViews.client,
   });
 
-  const { hasAtLeast } = useLicense();
-  const hasLicenseForLogRateAnalysis = hasAtLeast('platinum');
+  const aiopsEnabled = application?.capabilities.aiops?.enabled ?? false;
 
   const getLogRatioChart = () => {
     if (isRatioRule(rule.params.criteria)) {
@@ -88,7 +91,7 @@ const AlertDetailsAppSection = ({ rule, alert }: AlertDetailsAppSectionProps) =>
             </EuiFlexItem>
           </EuiFlexGroup>
           <EuiFlexGroup>
-            <EuiFlexItem style={{ maxHeight: 120 }} grow={1}>
+            <EuiFlexItem css={{ maxHeight: 120 }} grow={1}>
               <EuiSpacer size="s" />
               <Threshold
                 title={`Threshold breached`}
@@ -155,7 +158,7 @@ const AlertDetailsAppSection = ({ rule, alert }: AlertDetailsAppSectionProps) =>
           </EuiFlexGroup>
           <EuiSpacer size="l" />
           <EuiFlexGroup>
-            <EuiFlexItem style={{ maxHeight: 120 }} grow={1}>
+            <EuiFlexItem css={{ maxHeight: 120 }} grow={1}>
               <EuiSpacer size="s" />
               <Threshold
                 title={`Threshold breached`}
@@ -191,7 +194,7 @@ const AlertDetailsAppSection = ({ rule, alert }: AlertDetailsAppSectionProps) =>
   };
 
   const getLogRateAnalysisSection = () => {
-    return hasLicenseForLogRateAnalysis ? <LogRateAnalysis rule={rule} alert={alert} /> : null;
+    return aiopsEnabled ? <LogRateAnalysis rule={rule} alert={alert} /> : null;
   };
 
   return (
@@ -213,22 +216,26 @@ function convertComparatorToFill(comparator: Comparator) {
   }
 }
 
-function convertCriteriaToKQL(criteria: PartialCriterion) {
+// Exported for unit testing.
+export function convertCriteriaToKQL(criteria: PartialCriterion) {
   if (!criteria.value || !criteria.comparator || !criteria.field) {
     return '';
   }
 
+  // Phrase / equality / match values are interpolated into a quoted KQL string,
+  // so any embedded backslashes or double quotes need to be escaped to keep the
+  // resulting expression parseable. See https://github.com/elastic/kibana/issues/203071.
+  const quotedValue = `"${escapeQuotes(String(criteria.value))}"`;
+
   switch (criteria.comparator) {
     case Comparator.MATCH:
     case Comparator.EQ:
-      return `${criteria.field} : "${criteria.value}"`;
+    case Comparator.MATCH_PHRASE:
+      return `${criteria.field} : ${quotedValue}`;
     case Comparator.NOT_MATCH:
     case Comparator.NOT_EQ:
-      return `NOT ${criteria.field} : "${criteria.value}"`;
-    case Comparator.MATCH_PHRASE:
-      return `${criteria.field} : ${criteria.value}`;
     case Comparator.NOT_MATCH_PHRASE:
-      return `NOT ${criteria.field} : ${criteria.value}`;
+      return `NOT ${criteria.field} : ${quotedValue}`;
     case Comparator.GT:
       return `${criteria.field} > ${criteria.value}`;
     case Comparator.GT_OR_EQ:

@@ -5,48 +5,178 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useMemo, useRef, useState } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { SearchBar } from '@kbn/unified-search-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { getDisplayValueFromFilter } from '@kbn/data-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { buildEsQuery, isCombinedFilter } from '@kbn/es-query';
+import {
+  buildEsQuery,
+  escapeQuotes,
+  isCombinedFilter,
+  FilterStateStore,
+  BooleanRelation,
+  buildCombinedFilter,
+  buildCustomFilter,
+} from '@kbn/es-query';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
+import type { ProjectRouting } from '@kbn/cloud-security-posture-common/schema/graph/v1';
 import { css } from '@emotion/react';
 import { Panel } from '@xyflow/react';
 import { getEsQueryConfig } from '@kbn/data-service';
-import { EuiFlexGroup, EuiFlexItem, EuiProgress } from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiProgress, EuiTextColor } from '@elastic/eui';
+import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
 import { Graph, isEntityNode } from '../../..';
 import { type UseFetchGraphDataParams, useFetchGraphData } from '../../hooks/use_fetch_graph_data';
 import { GRAPH_INVESTIGATION_TEST_ID } from '../test_ids';
-import { EVENT_ID, GRAPH_NODES_LIMIT, TOGGLE_SEARCH_BAR_STORAGE_KEY } from '../../common/constants';
+import { useIpPopover } from '../node/ips/ips';
+import { useCountryFlagsPopover } from '../node/country_flags/country_flags';
+import { useEventDetailsPopover } from '../popovers/details/use_event_details_popover';
+import type { DocumentAnalysisOutput } from '../node/label_node/analyze_documents';
+import { analyzeDocuments } from '../node/label_node/analyze_documents';
+import {
+  ENTITY_ID,
+  EVENT_ID,
+  GRAPH_NODES_LIMIT,
+  TOGGLE_SEARCH_BAR_STORAGE_KEY,
+} from '../../common/constants';
 import { Actions } from '../controls/actions';
 import { AnimatedSearchBarContainer, useBorder } from './styles';
-import { CONTROLLED_BY_GRAPH_INVESTIGATION_FILTER, addFilter } from './search_filters';
-import { useEntityNodeExpandPopover } from './use_entity_node_expand_popover';
-import { useLabelNodeExpandPopover } from './use_label_node_expand_popover';
+import {
+  CONTROLLED_BY_GRAPH_INVESTIGATION_FILTER,
+  CONTROLLED_BY_GRAPH_INVESTIGATION_DEFAULT_FILTER,
+  addFilter,
+} from '../filters/search_filters';
+import { useEntityNodeExpandPopover } from '../popovers/node_expand/use_entity_node_expand_popover';
+import { useLabelNodeExpandPopover } from '../popovers/node_expand/use_label_node_expand_popover';
+import type {
+  ItemExpandPopoverListItemProps,
+  SeparatorExpandPopoverListItemProps,
+} from '../popovers/primitives/list_graph_popover';
+import type { NodeProps, NodeViewModel } from '../types';
+import { isLabelNode, isRelationshipNode, showErrorToast } from '../utils';
+import { GRAPH_SCOPE_ID } from '../constants';
+import { useGraphFilters } from '../filters/use_graph_filters';
+import { getEntityTimelineFilter } from './entity_timeline_filters';
+import type { GraphTelemetryHandler } from '../graph_telemetry';
+import { getFiltersChangedEvent, getSearchSubmittedEvent } from '../graph_telemetry';
 
-const useGraphPopovers = (
-  dataViewId: string,
-  setSearchFilters: React.Dispatch<React.SetStateAction<Filter[]>>,
-  searchFilters: Filter[]
-) => {
-  const nodeExpandPopover = useEntityNodeExpandPopover(setSearchFilters, dataViewId, searchFilters);
-  const labelExpandPopover = useLabelNodeExpandPopover(setSearchFilters, dataViewId, searchFilters);
+const useGraphPopovers = ({
+  scopeId,
+  onOpenEventPreview,
+  onOpenNetworkPreview,
+  onTelemetryEvent,
+}: {
+  scopeId: string;
+  onOpenEventPreview?: (node: NodeViewModel) => void;
+  onOpenNetworkPreview?: (ip: string, scopeId: string) => void;
+  onTelemetryEvent?: GraphTelemetryHandler;
+}) => {
+  const [currentIps, setCurrentIps] = useState<string[]>([]);
+  const [currentCountryCodes, setCurrentCountryCodes] = useState<string[]>([]);
+  const [currentEventAnalysis, setCurrentEventAnalysis] = useState<DocumentAnalysisOutput | null>(
+    null
+  );
+  const [currentEventText, setCurrentEventText] = useState<string>('');
+  // Async-hydrated: `null` until the EUID chunk loads, in which case entity filters fall back to
+  // the unnarrowed sourceFields (see getIdentityFilterFields).
+  const euidApi = useEntityStoreEuidApi() ?? undefined;
+  const nodeExpandPopover = useEntityNodeExpandPopover(
+    scopeId,
+    onOpenEventPreview,
+    euidApi,
+    onTelemetryEvent
+  );
+  const labelExpandPopover = useLabelNodeExpandPopover(
+    scopeId,
+    onOpenEventPreview,
+    onTelemetryEvent
+  );
+  // Pass onOpenNetworkPreview so popover items call it directly instead of relying on PreviewLink.
+  const onNetworkPreviewForPopover = useMemo(
+    () =>
+      onOpenNetworkPreview ? (ip: string) => onOpenNetworkPreview(ip, GRAPH_SCOPE_ID) : undefined,
+    [onOpenNetworkPreview]
+  );
+  const ipPopover = useIpPopover(currentIps, GRAPH_SCOPE_ID, onNetworkPreviewForPopover);
+  const countryFlagsPopover = useCountryFlagsPopover(currentCountryCodes);
+  const eventPopover = useEventDetailsPopover(currentEventAnalysis, currentEventText);
 
   const openPopoverCallback = useCallback(
     (cb: Function, ...args: unknown[]) => {
-      [nodeExpandPopover, labelExpandPopover].forEach(({ actions: { closePopover } }) => {
-        closePopover();
-      });
+      [nodeExpandPopover, labelExpandPopover, ipPopover, countryFlagsPopover, eventPopover].forEach(
+        ({ actions: { closePopover } }) => {
+          closePopover();
+        }
+      );
       cb(...args);
     },
-    [nodeExpandPopover, labelExpandPopover]
+    [nodeExpandPopover, labelExpandPopover, ipPopover, countryFlagsPopover, eventPopover]
   );
 
-  return { nodeExpandPopover, labelExpandPopover, openPopoverCallback };
+  const createIpClickHandler = useCallback(
+    (ips: string[]) => (e: React.MouseEvent<HTMLElement>) => {
+      if (!onOpenNetworkPreview) return;
+
+      // For single IP, open preview panel directly
+      if (ips.length === 1) {
+        onOpenNetworkPreview(ips[0], GRAPH_SCOPE_ID);
+      } else {
+        // For multiple IPs, show popover
+        setCurrentIps(ips);
+        openPopoverCallback(ipPopover.onIpClick, e);
+      }
+    },
+    [setCurrentIps, openPopoverCallback, ipPopover.onIpClick, onOpenNetworkPreview]
+  );
+
+  const createCountryClickHandler = useCallback(
+    (countryCodes: string[]) => (e: React.MouseEvent<HTMLElement>) => {
+      setCurrentCountryCodes(countryCodes);
+      openPopoverCallback(countryFlagsPopover.onCountryClick, e);
+    },
+    [setCurrentCountryCodes, openPopoverCallback, countryFlagsPopover.onCountryClick]
+  );
+
+  const createEventClickHandler = useCallback(
+    (analysis: DocumentAnalysisOutput, text: string) =>
+      (e: React.MouseEvent<HTMLButtonElement>) => {
+        setCurrentEventAnalysis(analysis);
+        setCurrentEventText(text);
+        openPopoverCallback(eventPopover.onEventClick, e);
+      },
+    [setCurrentEventAnalysis, setCurrentEventText, openPopoverCallback, eventPopover.onEventClick]
+  );
+
+  return {
+    nodeExpandPopover,
+    labelExpandPopover,
+    ipPopover,
+    countryFlagsPopover,
+    eventPopover,
+    openPopoverCallback,
+    createIpClickHandler,
+    createCountryClickHandler,
+    createEventClickHandler,
+  };
 };
+
+const DefaultFilterItems = ({ filters, dataView }: { filters: Filter[]; dataView: DataView }) => (
+  <>
+    {filters.map((filter) => (
+      <EuiFlexItem grow={false} key={`${filter.meta.key}-${filter.meta.type}`}>
+        <EuiBadge color="hollow" title="" data-test-subj="graphDefaultFilter">
+          {`${filter.meta.key}: `}
+          <EuiTextColor color="success">
+            {getDisplayValueFromFilter(filter, [dataView])}
+          </EuiTextColor>
+        </EuiBadge>
+      </EuiFlexItem>
+    ))}
+  </>
+);
 
 const NEGATED_FILTER_SEARCH_WARNING_MESSAGE = {
   title: i18n.translate(
@@ -65,9 +195,20 @@ const NEGATED_FILTER_SEARCH_WARNING_MESSAGE = {
 
 export interface GraphInvestigationProps {
   /**
+   * Unique identifier for this graph instance, used to scope filter state.
+   * When multiple graphs are open simultaneously, each should have a distinct scopeId.
+   */
+  scopeId: string;
+
+  /**
    * The initial state to use for the graph investigation view.
    */
   initialState: {
+    /**
+     * The index patterns to use for the graph investigation view.
+     */
+    indexPatterns?: string[];
+
     /**
      * The data view to use for the graph investigation view.
      */
@@ -75,8 +216,9 @@ export interface GraphInvestigationProps {
 
     /**
      * The origin events for the graph investigation view.
+     * Optional - may be empty when opening from entity flyout.
      */
-    originEventIds: Array<{
+    originEventIds?: Array<{
       /**
        * The ID of the origin event.
        */
@@ -89,10 +231,44 @@ export interface GraphInvestigationProps {
     }>;
 
     /**
+     * Entity IDs for fetching relationships from entity store.
+     * isOrigin indicates whether this entity is the center/origin of the graph.
+     */
+    entityIds?: Array<{
+      /**
+       * The ID of the entity.
+       */
+      id: string;
+
+      /**
+       * Whether this entity is the origin of the graph (for centering).
+       */
+      isOrigin: boolean;
+    }>;
+
+    /**
      * The initial timerange for the graph investigation view.
      */
     timeRange: TimeRange;
+
+    /**
+     * CPS project routing for the logs/events query. Forwarded as-is to the Graph API.
+     * Alerts and entity-store enrichment are always fetched from the origin project,
+     * regardless of this value. Leave undefined for non-CPS environments.
+     */
+    projectRouting?: ProjectRouting;
   };
+
+  /**
+   * Callback when "show entity/event preview" is clicked.
+   */
+  onOpenEventPreview?: (node: NodeViewModel) => void;
+
+  /**
+   * Callback when IP address is clicked to open network preview panel.
+   * If not provided, multi-IP popover will be shown.
+   */
+  onOpenNetworkPreview?: (ip: string, scopeId: string) => void;
 
   /**
    * Whether to show investigate in timeline action button. Defaults value is false.
@@ -112,6 +288,12 @@ export interface GraphInvestigationProps {
    * Whether to show toggle search action button. Defaults value is false.
    */
   showToggleSearch?: boolean;
+
+  /**
+   * Optional callback invoked with semantic engagement events (popover actions, filter and
+   * search changes). Events carry enums and booleans only. When omitted, nothing is reported.
+   */
+  onTelemetryEvent?: GraphTelemetryHandler;
 }
 
 const EMPTY_QUERY: Query = { query: '', language: 'kuery' } as const;
@@ -122,12 +304,115 @@ type EsQuery = UseFetchGraphDataParams['req']['query']['esQuery'];
  */
 export const GraphInvestigation = memo<GraphInvestigationProps>(
   ({
-    initialState: { dataView, originEventIds, timeRange: initialTimeRange },
+    scopeId,
+    initialState: {
+      indexPatterns,
+      dataView,
+      originEventIds,
+      entityIds,
+      timeRange: initialTimeRange,
+      projectRouting,
+    },
     showInvestigateInTimeline = false,
     showToggleSearch = false,
     onInvestigateInTimeline,
+    onOpenEventPreview,
+    onOpenNetworkPreview,
+    onTelemetryEvent,
   }: GraphInvestigationProps) => {
-    const [searchFilters, setSearchFilters] = useState<Filter[]>(() => []);
+    const emptyEntityIds = useMemo(() => [], []);
+
+    const { searchFilters, setSearchFilters, entityIdsForApi, pinnedEuids } = useGraphFilters(
+      scopeId,
+      entityIds ?? emptyEntityIds,
+      dataView?.id ?? ''
+    );
+    const defaultFilters = useMemo<Filter[]>(() => {
+      if (!dataView?.id) return [];
+
+      // Event mode: show origin event/alert IDs as non-interactive filter pills.
+      if (originEventIds && originEventIds.length > 0) {
+        const eventIds = originEventIds.map(({ id }) => id);
+
+        if (eventIds.length === 1) {
+          return [
+            {
+              $state: { store: FilterStateStore.APP_STATE },
+              meta: {
+                key: EVENT_ID,
+                index: dataView.id,
+                negate: false,
+                disabled: false,
+                type: 'phrase' as const,
+                field: EVENT_ID,
+                controlledBy: CONTROLLED_BY_GRAPH_INVESTIGATION_DEFAULT_FILTER,
+                params: { query: eventIds[0] },
+              },
+              query: { match_phrase: { [EVENT_ID]: eventIds[0] } },
+            },
+          ];
+        }
+
+        return [
+          {
+            $state: { store: FilterStateStore.APP_STATE },
+            meta: {
+              key: EVENT_ID,
+              index: dataView.id,
+              negate: false,
+              disabled: false,
+              type: 'phrases' as const,
+              field: EVENT_ID,
+              controlledBy: CONTROLLED_BY_GRAPH_INVESTIGATION_DEFAULT_FILTER,
+              params: eventIds,
+            },
+            query: { terms: { [EVENT_ID]: eventIds } },
+          },
+        ];
+      }
+
+      // Entity mode: show origin entity IDs as non-interactive filter pills.
+      const originEntityIds =
+        entityIds?.filter(({ isOrigin }) => isOrigin).map(({ id }) => id) ?? [];
+      if (originEntityIds.length === 0) return [];
+
+      if (originEntityIds.length === 1) {
+        return [
+          {
+            $state: { store: FilterStateStore.APP_STATE },
+            meta: {
+              key: ENTITY_ID,
+              index: dataView.id,
+              negate: false,
+              disabled: false,
+              type: 'phrase' as const,
+              field: ENTITY_ID,
+              controlledBy: CONTROLLED_BY_GRAPH_INVESTIGATION_DEFAULT_FILTER,
+              params: { query: originEntityIds[0] },
+            },
+            query: { match_phrase: { [ENTITY_ID]: originEntityIds[0] } },
+          },
+        ];
+      }
+
+      return [
+        {
+          $state: { store: FilterStateStore.APP_STATE },
+          meta: {
+            key: ENTITY_ID,
+            index: dataView.id,
+            negate: false,
+            disabled: false,
+            type: 'phrases' as const,
+            field: ENTITY_ID,
+            controlledBy: CONTROLLED_BY_GRAPH_INVESTIGATION_DEFAULT_FILTER,
+            params: originEntityIds,
+          },
+          query: { terms: { [ENTITY_ID]: originEntityIds } },
+        },
+      ];
+    }, [originEventIds, entityIds, dataView?.id]);
+
     const [timeRange, setTimeRange] = useState<TimeRange>(initialTimeRange);
     const [searchToggled, setSearchToggled] = useSessionStorage(
       TOGGLE_SEARCH_BAR_STORAGE_KEY,
@@ -136,20 +421,14 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
     const lastValidEsQuery = useRef<EsQuery | undefined>();
     const [kquery, setKQuery] = useState<Query>(EMPTY_QUERY);
 
-    const onInvestigateInTimelineCallback = useCallback(() => {
-      const query = { ...kquery };
-      const filters = originEventIds.reduce<Filter[]>((acc, { id }) => {
-        return addFilter(dataView?.id ?? '', acc, EVENT_ID, id);
-      }, searchFilters);
-
-      if (query.query.trim() !== '' && originEventIds.length > 0) {
-        query.query = `(${query.query})${originEventIds
-          .map(({ id }) => ` OR ${EVENT_ID}: "${id}"`)
-          .join('')}`;
-      }
-
-      onInvestigateInTimeline?.(query, filters, timeRange);
-    }, [dataView?.id, onInvestigateInTimeline, originEventIds, kquery, searchFilters, timeRange]);
+    const onFiltersUpdated = useCallback(
+      (filters: Filter[]) => {
+        const event = getFiltersChangedEvent(searchFilters, filters);
+        if (event) onTelemetryEvent?.(event);
+        setSearchFilters(filters);
+      },
+      [searchFilters, setSearchFilters, onTelemetryEvent]
+    );
 
     const {
       services: { uiSettings, notifications },
@@ -161,7 +440,7 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
           [kquery],
           [...searchFilters],
           getEsQueryConfig(uiSettings as Parameters<typeof getEsQueryConfig>[0])
-        );
+        ) as EsQuery;
       } catch (err) {
         notifications?.toasts.addError(err, {
           title: i18n.translate(
@@ -175,25 +454,17 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
       return lastValidEsQuery.current;
     }, [dataView, kquery, notifications, searchFilters, uiSettings]);
 
-    const { nodeExpandPopover, labelExpandPopover, openPopoverCallback } = useGraphPopovers(
-      dataView?.id ?? '',
-      setSearchFilters,
-      searchFilters
-    );
-    const nodeExpandButtonClickHandler = (...args: unknown[]) =>
-      openPopoverCallback(nodeExpandPopover.onNodeExpandButtonClick, ...args);
-    const labelExpandButtonClickHandler = (...args: unknown[]) =>
-      openPopoverCallback(labelExpandPopover.onNodeExpandButtonClick, ...args);
-    const isPopoverOpen = [nodeExpandPopover, labelExpandPopover].some(
-      ({ state: { isOpen } }) => isOpen
-    );
-    const { data, refresh, isFetching } = useFetchGraphData({
+    const { data, refresh, isFetching, isError, error } = useFetchGraphData({
       req: {
         query: {
           originEventIds,
+          indexPatterns,
           esQuery,
           start: timeRange.from,
           end: timeRange.to,
+          entityIds: entityIdsForApi,
+          pinnedIds: pinnedEuids,
+          projectRouting,
         },
         nodesLimit: GRAPH_NODES_LIMIT,
       },
@@ -203,30 +474,323 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
       },
     });
 
+    const euidApi = useEntityStoreEuidApi() ?? undefined;
+    const entityTimelineFilters = useMemo(() => {
+      if (originEventIds?.length) return [];
+      const filters: Filter[] = [];
+      for (const { id } of entityIds?.filter(({ isOrigin }) => isOrigin) ?? []) {
+        const node = data?.nodes.find((candidate) => candidate.id === id);
+        if (!node || !isEntityNode(node)) return undefined;
+        const filter = getEntityTimelineFilter(node, dataView.id ?? '', euidApi);
+        if (!filter) return undefined;
+        filters.push(filter);
+      }
+      return filters;
+    }, [data?.nodes, dataView.id, entityIds, euidApi, originEventIds]);
+
+    const onInvestigateInTimelineCallback = useCallback(() => {
+      const query = { ...kquery };
+
+      let filters = [...searchFilters];
+
+      const hasKqlQuery = query.query.trim() !== '';
+      const originIds = originEventIds?.map(({ id }) => id) ?? [];
+
+      // Timeline cannot recover the origin constraints passed separately to the Graph API.
+      if (originIds.length > 0) {
+        if (!hasKqlQuery || searchFilters.length > 0) {
+          filters = originIds.reduce<Filter[]>((acc, id) => {
+            return addFilter(dataView?.id ?? '', acc, EVENT_ID, id);
+          }, searchFilters);
+        }
+
+        if (hasKqlQuery) {
+          query.query = `(${query.query})${originIds
+            .map((id) => ` OR ${EVENT_ID}: "${escapeQuotes(id)}"`)
+            .join('')}`;
+        }
+      }
+      if (entityTimelineFilters === undefined) return;
+      if (entityTimelineFilters.length > 0) {
+        const alternatives = [...entityTimelineFilters];
+        const activeFilters = searchFilters.filter((filter) => !filter.meta.disabled);
+        if (hasKqlQuery && esQuery) {
+          alternatives.push(
+            buildCustomFilter(
+              dataView.id ?? '',
+              esQuery,
+              false,
+              false,
+              typeof query.query === 'string' ? query.query : null,
+              FilterStateStore.APP_STATE
+            )
+          );
+        } else if (activeFilters.length > 0) {
+          alternatives.push(buildCombinedFilter(BooleanRelation.AND, activeFilters, dataView));
+        }
+        // Entity origins and the event search are separate branches of the graph request.
+        query.query = '';
+        filters = [
+          buildCombinedFilter(BooleanRelation.OR, alternatives, dataView),
+          ...searchFilters.filter((filter) => filter.meta.disabled),
+        ];
+      }
+      onInvestigateInTimeline?.(query, filters, timeRange);
+    }, [
+      dataView,
+      onInvestigateInTimeline,
+      originEventIds,
+      entityTimelineFilters,
+      esQuery,
+      kquery,
+      searchFilters,
+      timeRange,
+    ]);
+
+    useEffect(() => {
+      const toasts = notifications?.toasts;
+      if (isError && error && toasts) {
+        showErrorToast(toasts, error);
+      }
+    }, [error, isError, notifications]);
+
+    const {
+      nodeExpandPopover,
+      labelExpandPopover,
+      ipPopover,
+      countryFlagsPopover,
+      eventPopover,
+      openPopoverCallback,
+      createIpClickHandler,
+      createCountryClickHandler,
+      createEventClickHandler,
+    } = useGraphPopovers({
+      scopeId,
+      onOpenEventPreview,
+      onOpenNetworkPreview,
+      onTelemetryEvent,
+    });
+
+    const nodeExpandButtonClickHandler = (...args: unknown[]) =>
+      openPopoverCallback(nodeExpandPopover.onNodeExpandButtonClick, ...args);
+    const labelExpandButtonClickHandler = (...args: unknown[]) =>
+      openPopoverCallback(labelExpandPopover.onNodeExpandButtonClick, ...args);
+
+    // Converts a raw expand-popover itemsFn into the minimal NodeToolbarItem shape:
+    // filters out separators and maps iconType + label + onClick + disabled + testSubject.
+    // testSubject is forwarded so FTR tests can locate toolbar buttons by the same IDs
+    // they previously used to find popover items.
+    // toolTipText and toolTipTestSubj are forwarded so disabled-action explanations
+    // (e.g. "Details not available") are preserved in the toolbar tooltip.
+    // Stable via useCallback (no deps) — the returned function reads item properties at call time.
+    const toToolbarItemsFn = useCallback(
+      (
+          itemsFn: (
+            node: NodeProps
+          ) => Array<ItemExpandPopoverListItemProps | SeparatorExpandPopoverListItemProps>
+        ) =>
+        (node: NodeProps) =>
+          (itemsFn(node) ?? []).flatMap((item) =>
+            item.type === 'item'
+              ? [
+                  {
+                    iconType: item.iconType,
+                    label: item.label,
+                    onClick: item.onClick,
+                    disabled: item.disabled,
+                    testSubject: item.testSubject,
+                    toolTipText: item.toolTipText,
+                    toolTipTestSubj: item.toolTipProps?.['data-test-subj'] as string | undefined,
+                  },
+                ]
+              : []
+          ),
+      []
+    );
+
+    const { itemsFn: nodeItemsFn } = nodeExpandPopover;
+    // Stable when nodeItemsFn is stable (useCallback([scopeId, onOpenEventPreview, euidApi])).
+    const nodeToolbarItemsFn = useMemo(
+      () => (nodeItemsFn ? toToolbarItemsFn(nodeItemsFn) : undefined),
+      [nodeItemsFn, toToolbarItemsFn]
+    );
+
+    const { itemsFn: labelItemsFn } = labelExpandPopover;
+    const labelToolbarItemsFn = useMemo(
+      () => (labelItemsFn ? toToolbarItemsFn(labelItemsFn) : undefined),
+      [labelItemsFn, toToolbarItemsFn]
+    );
+    const isPopoverOpen = [
+      nodeExpandPopover,
+      labelExpandPopover,
+      ipPopover,
+      countryFlagsPopover,
+      eventPopover,
+    ].some(({ state: { isOpen } }) => isOpen);
+
+    // d3-zoom suppresses native `mousedown`/`mouseup` on the ReactFlow pane,
+    // so `react-focus-on` (EuiPopover) and `EuiOutsideClickDetector` (KQL
+    // autocomplete) never see the click. Synthesize both events on the
+    // graph container in capture phase (before d3-zoom) so they reach those
+    // detectors but stay "inside" the parent EuiFlyout. Graph-internal
+    // popovers own their own dismissal and are mutually exclusive with
+    // external ones — when any is open, every `.euiPopover__panel` is ours.
+    const isExternalOverlayOpen = useCallback(
+      () =>
+        (!isPopoverOpen && document.querySelector('.euiPopover__panel') !== null) ||
+        document.querySelector('#kbnTypeahead__items') !== null,
+      [isPopoverOpen]
+    );
+
+    const handlePointerDownCapture = useCallback(
+      (event: React.PointerEvent<HTMLDivElement>) => {
+        const eventTarget = event.target as HTMLElement | null;
+        if (!eventTarget?.closest?.('.react-flow__pane')) return;
+
+        // The KQL search input grows to fit a long query while it is focused.
+        // d3-zoom calls `preventDefault()` on the pane's pointer events, which
+        // suppresses the browser's native focus change — so clicking the graph
+        // would otherwise leave the input focused and expanded. Blur it
+        // explicitly so it collapses back to a single line, matching what
+        // happens when clicking any other DOM node outside the input.
+        const activeElement = document.activeElement as HTMLElement | null;
+        const isSearchInputFocused = Boolean(activeElement?.closest?.('.kbnQueryBar__wrap'));
+        if (isSearchInputFocused) {
+          activeElement?.blur();
+        }
+
+        // Synthesize the suppressed `mousedown`/`mouseup` on the graph container
+        // in capture phase (before d3-zoom) so `EuiOutsideClickDetector` (which
+        // collapses the search input and closes KQL autocomplete) and
+        // `react-focus-on` (EuiPopover) react to the click while it stays
+        // "inside" the parent EuiFlyout.
+        if (!isSearchInputFocused && !isExternalOverlayOpen()) return;
+
+        const opts = { bubbles: true, cancelable: true, view: window, button: 0 };
+        event.currentTarget.dispatchEvent(new MouseEvent('mousedown', opts));
+        event.currentTarget.dispatchEvent(new MouseEvent('mouseup', opts));
+      },
+      [isExternalOverlayOpen]
+    );
+
+    const { originEventIdsSet, originAlertIdsSet, originEntityIdsSet } = useMemo(() => {
+      const eventIds = new Set<string>();
+      const alertIds = new Set<string>();
+      const entityIdsWithOrigin = new Set<string>();
+
+      // Add origin event IDs (for centering when opening from events flyout)
+      originEventIds?.forEach(({ id, isAlert }) => {
+        if (isAlert) {
+          alertIds.add(id);
+        } else {
+          eventIds.add(id);
+        }
+      });
+
+      // Add entity IDs that are marked as origin (for centering when opening from entity flyout)
+      entityIds?.forEach(({ id, isOrigin }) => {
+        if (isOrigin) {
+          entityIdsWithOrigin.add(id);
+        }
+      });
+
+      return {
+        originEventIdsSet: eventIds,
+        originAlertIdsSet: alertIds,
+        originEntityIdsSet: entityIdsWithOrigin,
+      };
+    }, [originEventIds, entityIds]);
+
+    // Build a map of relationship node IDs to their source entities (from edges)
+    // This allows us to determine if a relationship node is connected to an origin entity
+    const relationshipNodeSources = useMemo(() => {
+      const sourcesMap = new Map<string, string[]>();
+      data?.edges?.forEach((edge) => {
+        // Check if target is a relationship node by checking if it starts with 'rel('
+        if (edge.target.startsWith('rel(')) {
+          const sources = sourcesMap.get(edge.target) || [];
+          sources.push(edge.source);
+          sourcesMap.set(edge.target, sources);
+        }
+      });
+      return sourcesMap;
+    }, [data?.edges]);
+
     const nodes = useMemo(() => {
       return (
         data?.nodes.map((node) => {
           if (isEntityNode(node)) {
+            const nodeIps = node.ips || [];
+            const nodeCountryCodes = node.countryCodes || [];
+            const isOrigin = originEntityIdsSet.has(node.id);
             return {
               ...node,
+              ...(isOrigin && { isOrigin }),
               expandButtonClick: nodeExpandButtonClickHandler,
+              toolbarItemsFn: nodeToolbarItemsFn,
+              ipClickHandler: createIpClickHandler(nodeIps),
+              countryClickHandler: createCountryClickHandler(nodeCountryCodes),
             };
-          } else if (node.shape === 'label') {
+          } else if (isLabelNode(node)) {
+            const nodeIps = node.ips || [];
+            const nodeCountryCodes = node.countryCodes || [];
+            const numEvents = node.uniqueEventsCount ?? 0;
+            const numAlerts = node.uniqueAlertsCount ?? 0;
+            const analysis = analyzeDocuments({
+              uniqueEventsCount: numEvents,
+              uniqueAlertsCount: numAlerts,
+            });
+            const text = node.label ? node.label : node.id;
+            const docEventIds: string[] =
+              'documentsData' in node && Array.isArray(node.documentsData)
+                ? node.documentsData.flatMap((d) => (d.event ? d.event.id : []))
+                : [];
             return {
               ...node,
+              isOrigin: docEventIds.some((id) => originEventIdsSet.has(id)),
+              isOriginAlert: docEventIds.some((id) => originAlertIdsSet.has(id)),
               expandButtonClick: labelExpandButtonClickHandler,
+              toolbarItemsFn: labelToolbarItemsFn,
+              ipClickHandler: createIpClickHandler(nodeIps),
+              countryClickHandler: createCountryClickHandler(nodeCountryCodes),
+              eventClickHandler: createEventClickHandler(analysis, text),
+            };
+          } else if (isRelationshipNode(node)) {
+            // Check if any source entity connected to this relationship node is an origin
+            const sources = relationshipNodeSources.get(node.id) || [];
+            const isOrigin = sources.some((sourceId) => originEntityIdsSet.has(sourceId));
+            return {
+              ...node,
+              ...(isOrigin && { isOrigin }),
             };
           }
 
           return { ...node };
         }) ?? []
       );
+      // Callbacks (expandButtonClick, ipClickHandler, etc.) are excluded from deps intentionally —
+      // they are stable or recreated from memoized state and do not affect layout or node keys.
+      // nodeToolbarItemsFn and labelToolbarItemsFn ARE included: they capture euidApi which
+      // hydrates asynchronously; excluding them would leave nodes with a stale factory until an
+      // unrelated dep (e.g. searchFilters) triggers a rebuild.
+      // searchFilters IS included: when a filter is toggled the node list recomputes so
+      // that toolbarItemsFn(props) — called without its own useMemo inside the node component —
+      // reads the updated filter-active state and reflects the correct "Show" ↔ "Hide" label.
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [data?.nodes]);
+    }, [
+      data?.nodes,
+      originEventIdsSet,
+      originAlertIdsSet,
+      originEntityIdsSet,
+      relationshipNodeSources,
+      searchFilters,
+      nodeToolbarItemsFn,
+      labelToolbarItemsFn,
+    ]);
 
     const searchFilterCounter = useMemo(() => {
       const filtersCount = searchFilters
-        .filter((filter) => !filter.meta.disabled)
+        .filter((filter) => filter.meta && !filter.meta.disabled)
         .reduce((sum, filter) => {
           if (isCombinedFilter(filter)) {
             return sum + filter.meta.params.length;
@@ -242,12 +806,17 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
     const searchWarningMessage =
       searchFilters.filter(
         (filter) =>
+          filter.meta &&
           !filter.meta.disabled &&
           filter.meta.negate &&
-          filter.meta.controlledBy === CONTROLLED_BY_GRAPH_INVESTIGATION_FILTER
+          filter.meta.controlledBy?.startsWith(CONTROLLED_BY_GRAPH_INVESTIGATION_FILTER)
       ).length > 0
         ? NEGATED_FILTER_SEARCH_WARNING_MESSAGE
         : undefined;
+
+    const defaultFilterItems = dataView && defaultFilters.length > 0 && (
+      <DefaultFilterItems filters={defaultFilters} dataView={dataView} />
+    );
 
     return (
       <>
@@ -255,6 +824,7 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
           data-test-subj={GRAPH_INVESTIGATION_TEST_ID}
           direction="column"
           gutterSize="none"
+          onPointerDownCapture={handlePointerDownCapture}
           css={css`
             height: 100%;
 
@@ -268,33 +838,65 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
               <AnimatedSearchBarContainer
                 className={!searchToggled && showToggleSearch ? 'toggled-off' : undefined}
               >
-                <SearchBar<Query>
-                  showFilterBar={true}
-                  showDatePicker={true}
-                  showAutoRefreshOnly={false}
-                  showSaveQuery={false}
-                  showQueryInput={true}
-                  disableQueryLanguageSwitcher={true}
-                  isLoading={isFetching}
-                  isAutoRefreshDisabled={true}
-                  dateRangeFrom={timeRange.from}
-                  dateRangeTo={timeRange.to}
-                  query={kquery}
-                  indexPatterns={[dataView]}
-                  filters={searchFilters}
-                  submitButtonStyle={'iconOnly'}
-                  onFiltersUpdated={(newFilters) => {
-                    setSearchFilters(newFilters);
-                  }}
-                  onQuerySubmit={(payload, isUpdate) => {
-                    if (isUpdate) {
-                      setTimeRange({ ...payload.dateRange });
-                      setKQuery(payload.query || EMPTY_QUERY);
-                    } else {
-                      refresh();
+                <div>
+                  <SearchBar<Query>
+                    showFilterBar={true}
+                    showDatePicker={true}
+                    showAutoRefreshOnly={false}
+                    showSaveQuery={false}
+                    showQueryInput={true}
+                    disableQueryLanguageSwitcher={true}
+                    isLoading={isFetching}
+                    isAutoRefreshDisabled={true}
+                    dateRangeFrom={timeRange.from}
+                    dateRangeTo={timeRange.to}
+                    query={kquery}
+                    indexPatterns={[dataView]}
+                    filters={searchFilters}
+                    prependFilterBar={
+                      defaultFilters.length > 0 ? (
+                        <>
+                          {defaultFilterItems}
+                          {searchFilters.length > 0 && (
+                            <EuiFlexItem grow={false}>
+                              <EuiTextColor color="subdued" data-test-subj="graphDefaultFilterOr">
+                                {BooleanRelation.OR}
+                              </EuiTextColor>
+                            </EuiFlexItem>
+                          )}
+                        </>
+                      ) : undefined
                     }
-                  }}
-                />
+                    submitButtonStyle={'iconOnly'}
+                    onFiltersUpdated={onFiltersUpdated}
+                    onQuerySubmit={(payload, isUpdate) => {
+                      if (isUpdate) {
+                        const event = getSearchSubmittedEvent(
+                          { timeRange, query: kquery },
+                          payload
+                        );
+                        if (event) onTelemetryEvent?.(event);
+                        setTimeRange({ ...payload.dateRange });
+                        setKQuery(payload.query || EMPTY_QUERY);
+                      } else {
+                        refresh();
+                      }
+                    }}
+                  />
+                  {defaultFilters.length > 0 && searchFilters.length === 0 && (
+                    <EuiFlexGroup
+                      gutterSize="xs"
+                      wrap={true}
+                      responsive={false}
+                      alignItems="center"
+                      css={css`
+                        padding-top: 4px;
+                      `}
+                    >
+                      {defaultFilterItems}
+                    </EuiFlexGroup>
+                  )}
+                </div>
               </AnimatedSearchBarContainer>
             </EuiFlexItem>
           )}
@@ -314,10 +916,12 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
               edges={data?.edges ?? []}
               interactive={true}
               isLocked={isPopoverOpen}
+              showMinimap={true}
             >
               <Panel position="top-right">
                 <Actions
                   showInvestigateInTimeline={showInvestigateInTimeline}
+                  investigateInTimelineDisabled={entityTimelineFilters === undefined}
                   showToggleSearch={showToggleSearch}
                   onInvestigateInTimeline={onInvestigateInTimelineCallback}
                   onSearchToggle={(isSearchToggle) => setSearchToggled(isSearchToggle)}
@@ -331,6 +935,9 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
         </EuiFlexGroup>
         <nodeExpandPopover.PopoverComponent />
         <labelExpandPopover.PopoverComponent />
+        <ipPopover.PopoverComponent />
+        <countryFlagsPopover.PopoverComponent />
+        <eventPopover.PopoverComponent />
       </>
     );
   }

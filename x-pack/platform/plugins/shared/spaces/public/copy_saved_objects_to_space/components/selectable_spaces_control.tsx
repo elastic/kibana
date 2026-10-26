@@ -46,7 +46,7 @@ export const SelectableSpacesControl = (props: Props) => {
         />
       }
       position="left"
-      type="iInCircle"
+      type="info"
     />
   );
 
@@ -81,6 +81,7 @@ export const SelectableSpacesControl = (props: Props) => {
         listProps={{
           bordered: true,
           rowHeight: 40,
+          paddingSize: 's',
           css: css`
             margin-top: ${euiTheme.size.xs};
           `,

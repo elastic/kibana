@@ -17,8 +17,9 @@ import {
   type RouterRoute,
   type RouteValidatorConfig,
 } from '@kbn/core-http-server';
-import { CustomOperationObject, KnownParameters } from './type';
+import type { CustomOperationObject, KnownParameters } from './type';
 import type { GenerateOpenApiDocumentOptionsFilters } from './generate_oas';
+import type { Env } from './generate_oas';
 
 const tagPrefix = 'oas-tag:';
 const extractTag = (tag: string) => {
@@ -111,14 +112,22 @@ export const getVersionedHeaderParam = (
 });
 
 export const prepareRoutes = <
-  R extends { path: string; options: { access?: 'public' | 'internal'; excludeFromOAS?: boolean } }
+  R extends {
+    path: string;
+    options: {
+      access?: 'public' | 'internal';
+      excludeFromOAS?: boolean;
+      options?: { excludeFromOAS?: boolean };
+    };
+  }
 >(
   routes: R[],
   filters: GenerateOpenApiDocumentOptionsFilters
 ): R[] => {
   if (Object.getOwnPropertyNames(filters).length === 0) return routes;
   return routes.filter((route) => {
-    if (route.options.excludeFromOAS) return false;
+    // Versioned routes nest route options one level down.
+    if (route.options.excludeFromOAS || route.options.options?.excludeFromOAS) return false;
     if (
       filters.excludePathsMatching &&
       filters.excludePathsMatching.some((ex) => route.path.startsWith(ex))
@@ -183,30 +192,68 @@ export const getXsrfHeaderForMethod = (
 
 export const setXState = (
   availability: RouteConfigOptions<RouteMethod>['availability'],
-  operation: CustomOperationObject
+  operation: CustomOperationObject,
+  env: Env
 ): void => {
-  if (availability) {
-    if (availability.stability === 'experimental') {
-      operation['x-state'] = 'Technical Preview';
-    }
-    if (availability.stability === 'beta') {
-      operation['x-state'] = 'Beta';
-    }
+  const state = getXState(availability, env);
+  if (state !== undefined) {
+    operation['x-state'] = state;
   }
 };
 
-export type GetOpId = (input: { path: string; method: string }) => string;
+export const getXState = (
+  availability:
+    | {
+        stability?: 'experimental' | 'stable' | 'tech_preview';
+        since?: string;
+      }
+    | undefined,
+  env: Env
+): string | undefined => {
+  if (!availability) return undefined;
+
+  let state = '';
+  if (availability.stability === 'stable') {
+    state = 'Generally available';
+  } else if (availability.stability === 'tech_preview') {
+    state = 'Technical Preview';
+  } else if (availability.stability === 'experimental') {
+    state = 'Experimental';
+  }
+  if (!env.serverless && availability.since) {
+    state = state ? `${state}; added in ${availability.since}` : `Added in ${availability.since}`;
+  }
+
+  return state;
+};
+
+export type GetOpId = (input: { path: string; method: string; operationId?: string }) => string;
 
 /**
- * Best effort to generate operation IDs from route values
+ * Best effort to generate operation IDs from route values, unless the route
+ * declares an explicit `operationId`.
  */
 export const createOpIdGenerator = (): GetOpId => {
   const idMap = new Map<string, number>();
-  return function getOpId({ path, method }) {
+  return function getOpId({ path, method, operationId }) {
     if (!method || !path) {
       throw new Error(
         `Must provide method and path, received: method: "${method}", path: "${path}"`
       );
+    }
+
+    // An explicit ID is used verbatim. It still registers in the map so that a
+    // collision with another explicit ID, or with a generated one, fails loudly
+    // instead of silently producing a duplicate.
+    if (operationId) {
+      const explicitCount = idMap.get(operationId) ?? 0;
+      idMap.set(operationId, explicitCount + 1);
+      if (explicitCount > 0) {
+        throw new Error(
+          `Duplicate operationId "${operationId}" for route "${method.toUpperCase()} ${path}". Operation IDs must be unique. Prefer kebab-case verb-resource names such as "create-dashboard".`
+        );
+      }
+      return operationId;
     }
 
     path = path

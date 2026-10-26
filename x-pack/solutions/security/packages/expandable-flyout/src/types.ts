@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import type React from 'react';
 
 export interface ExpandableFlyoutApi {
   /**
@@ -85,6 +85,10 @@ export interface Panel {
    * Component to be rendered
    */
   component: (props: FlyoutPanelProps) => React.ReactElement;
+  /**
+   * Human-readable label for the panel
+   */
+  'aria-label'?: string;
 }
 
 export interface FlyoutPanelHistory {

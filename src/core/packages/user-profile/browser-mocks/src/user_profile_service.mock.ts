@@ -16,57 +16,60 @@ import type {
   InternalUserProfileServiceSetup,
   InternalUserProfileServiceStart,
 } from '@kbn/core-user-profile-browser-internal';
+import { lazyObject } from '@kbn/lazy-object';
 
 const createSetupMock = () => {
-  const mock: jest.Mocked<UserProfileServiceSetup> = {
+  const mock: jest.Mocked<UserProfileServiceSetup> = lazyObject({
     registerUserProfileDelegate: jest.fn(),
-  };
+  });
 
   return mock;
 };
 
 const createStartMock = () => {
-  const mock: jest.Mocked<UserProfileServiceStart> = {
+  const mock: jest.Mocked<UserProfileServiceStart> = lazyObject({
     getUserProfile$: jest.fn().mockReturnValue(of(null)),
     getEnabled$: jest.fn().mockReturnValue(of(false)),
+    getDataUpdates$: jest.fn().mockReturnValue(of({})),
     getCurrent: jest.fn(),
     bulkGet: jest.fn(),
     suggest: jest.fn(),
     update: jest.fn(),
     partialUpdate: jest.fn(),
-  };
+  });
 
   return mock;
 };
 
 const createInternalSetupMock = () => {
-  const mock: jest.Mocked<InternalUserProfileServiceSetup> = {
+  const mock: jest.Mocked<InternalUserProfileServiceSetup> = lazyObject({
     registerUserProfileDelegate: jest.fn(),
-  };
+  });
 
   return mock;
 };
 
 const createInternalStartMock = () => {
-  const mock: jest.Mocked<InternalUserProfileServiceStart> = {
+  const mock: jest.Mocked<InternalUserProfileServiceStart> = lazyObject({
     getUserProfile$: jest.fn().mockReturnValue(of(null)),
     getEnabled$: jest.fn().mockReturnValue(of(false)),
+    getDataUpdates$: jest.fn().mockReturnValue(of({})),
     getCurrent: jest.fn(),
     bulkGet: jest.fn(),
     suggest: jest.fn(),
     update: jest.fn(),
     partialUpdate: jest.fn(),
-  };
+  });
 
   return mock;
 };
 
 const createServiceMock = () => {
-  const mock = {
+  const mock = lazyObject({
     setup: jest.fn().mockReturnValue(createSetupMock()),
     start: jest.fn().mockReturnValue(createStartMock()),
     stop: jest.fn(),
-  };
+  });
 
   return mock;
 };

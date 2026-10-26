@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import { AwaitedProperties } from '@kbn/utility-types';
+import type { AwaitedProperties } from '@kbn/utility-types';
 import { savedObjectsClientMock, httpServerMock, coreMock } from '@kbn/core/server/mocks';
-import { workpadRouteContextMock, MockWorkpadRouteContext } from '../../mocks';
+import type { MockWorkpadRouteContext } from '../../mocks';
+import { workpadRouteContextMock } from '../../mocks';
 import { initializeCreateWorkpadRoute } from './create';
-import { kibanaResponseFactory, RequestHandler, SavedObjectsErrorHelpers } from '@kbn/core/server';
+import type { RequestHandler } from '@kbn/core/server';
+import { kibanaResponseFactory, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { getMockedRouterDeps } from '../test_helpers';
 
 let mockRouteContext = {
@@ -69,7 +71,7 @@ describe('POST workpad', () => {
 
     expect(response.status).toBe(200);
     expect(response.payload).toEqual({ ok: true, id });
-    expect(mockRouteContext.canvas.workpad.create).toBeCalledWith(mockWorkpad);
+    expect(mockRouteContext.canvas.workpad.create).toHaveBeenCalledWith(mockWorkpad);
   });
 
   it(`returns bad request if create is unsuccessful`, async () => {
@@ -129,7 +131,7 @@ describe('POST workpad', () => {
 
     expect(response.status).toBe(200);
     expect(response.payload).toEqual({ ok: true, id });
-    expect(mockRouteContext.canvas.workpad.create).toBeCalledWith(
+    expect(mockRouteContext.canvas.workpad.create).toHaveBeenCalledWith(
       mockTemplateResponse.attributes.template
     );
   });

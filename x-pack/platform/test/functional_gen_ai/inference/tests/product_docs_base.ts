@@ -1,0 +1,361 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import expect from '@kbn/expect';
+import {
+  ELASTIC_HTTP_VERSION_HEADER,
+  X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
+} from '@kbn/core-http-common';
+import type SuperTest from 'supertest';
+import { defaultInferenceEndpoints } from '@kbn/inference-common';
+import type { FtrProviderContext } from '../ftr_provider_context';
+import { ensureEisEndpoints } from '../artifacts/ensure_eis';
+
+const getProductDocStatus = async (supertest: SuperTest.Agent, inferenceId: string) => {
+  return supertest
+    .get('/internal/product_doc_base/status?inferenceId=' + inferenceId)
+    .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+    .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+    .set('kbn-xsrf', 'foo')
+    .expect(200);
+};
+const installProductDoc = async (supertest: SuperTest.Agent, inferenceId: string) => {
+  return supertest
+    .post('/internal/product_doc_base/install')
+    .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+    .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+    .set('kbn-xsrf', 'foo')
+    .send({
+      inferenceId,
+    })
+    .expect(200);
+};
+
+const uninstallProductDoc = async (supertest: SuperTest.Agent, inferenceId: string) => {
+  return supertest
+    .post('/internal/product_doc_base/uninstall')
+    .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+    .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+    .set('kbn-xsrf', 'foo')
+    .send({
+      inferenceId,
+    })
+    .expect(200);
+};
+const products = ['kibana', 'security', 'observability', 'elasticsearch'] as const;
+type DocumentationProduct = (typeof products)[number];
+
+const getIndexName = (productName: string, optionalInferenceId?: string) => {
+  let indexName = `.kibana_ai_product_doc_${productName}`;
+  if (optionalInferenceId) {
+    indexName += `-${optionalInferenceId}`;
+  }
+  return indexName;
+};
+
+export const productDocsBaseInstallationSuite = ({}: {}, { getService }: FtrProviderContext) => {
+  const supertest = getService('supertest');
+  const es = getService('es');
+  const retry = getService('retry');
+  const kibanaServer = getService('kibanaServer');
+  const log = getService('log');
+
+  const deleteProductDocIndex = async ({
+    productName,
+    optionalInferenceId,
+  }: {
+    productName: string;
+    optionalInferenceId?: string;
+  }) => {
+    const indexName = getIndexName(productName, optionalInferenceId);
+    const deletedIndices = await es.indices.delete(
+      {
+        index: indexName,
+      },
+      { ignore: [404] }
+    );
+    return deletedIndices;
+  };
+
+  const assertProducDocIndex = async ({
+    productName,
+    shouldExist,
+    optionalInferenceId,
+  }: {
+    productName: string;
+    shouldExist: boolean;
+    optionalInferenceId?: string;
+  }) => {
+    const indexName = getIndexName(productName, optionalInferenceId);
+    await retry.waitForWithTimeout(
+      `Elasticsearch index [${indexName}] should ${shouldExist ? 'exist' : 'not exist'}`,
+      240 * 1000,
+      async () => {
+        if ((await es.indices.exists({ index: indexName })) === shouldExist) {
+          return true;
+        } else {
+          throw new Error(
+            `Expected Elasticsearch index '[${indexName}]' ${
+              shouldExist ? 'to exist' : 'not to exist'
+            }.`
+          );
+        }
+      }
+    );
+  };
+
+  // Update requests return before their task finishes, and that task holds the install lock.
+  // Uninstall (and the next suite) must not start while one is still pending.
+  const waitForProductDocTasksToFinish = async () => {
+    await retry.waitForWithTimeout(
+      'product documentation tasks to finish',
+      40 * 60 * 1000,
+      async () => {
+        const response = await es.search(
+          {
+            index: '.kibana_task_manager',
+            ignore_unavailable: true,
+            size: 20,
+            _source: ['task.taskType', 'task.status'],
+            query: {
+              bool: {
+                filter: [
+                  { term: { type: 'task' } },
+                  { prefix: { 'task.taskType': 'ProductDocBase:' } },
+                  { terms: { 'task.status': ['idle', 'claiming', 'running'] } },
+                ],
+              },
+            },
+          },
+          { ignore: [404] }
+        );
+        const pending = response.hits.hits.map((hit) => {
+          const task = (
+            hit._source as { task?: { taskType?: string; status?: string } } | undefined
+          )?.task;
+          return `${task?.taskType ?? 'unknown'}:${task?.status ?? 'unknown'}`;
+        });
+        if (pending.length > 0) {
+          throw new Error(`still pending: ${pending.join(', ')}`);
+        }
+        return true;
+      }
+    );
+  };
+
+  const resetProductDocInstallStatus = async () => {
+    // Drop install-status docs directly. The uninstall API waits on a task that can hold the
+    // install lock for minutes, which blows the suite hook timeout before any test runs.
+    await es.deleteByQuery(
+      {
+        index: '.kibana',
+        refresh: true,
+        conflicts: 'proceed',
+        query: {
+          term: { type: 'product-doc-install-status' },
+        },
+      },
+      { ignore: [404] }
+    );
+  };
+
+  const deleteAllProductDocIndices = async () => {
+    await Promise.all(products.map((product) => deleteProductDocIndex({ productName: product })));
+    await Promise.all(
+      products.map((product) =>
+        deleteProductDocIndex({
+          productName: product,
+          optionalInferenceId: defaultInferenceEndpoints.JINAv5,
+        })
+      )
+    );
+  };
+
+  describe('product docs base', () => {
+    before(async () => {
+      await waitForProductDocTasksToFinish();
+      await kibanaServer.savedObjects.cleanStandardList();
+      await deleteAllProductDocIndices();
+      await resetProductDocInstallStatus();
+    });
+    after(async () => {
+      await waitForProductDocTasksToFinish();
+      await kibanaServer.savedObjects.cleanStandardList();
+    });
+
+    it('installs the ELSER product docs', async () => {
+      const elserProductDocs = await installProductDoc(supertest, defaultInferenceEndpoints.ELSER);
+      expect(elserProductDocs.status).to.be(200);
+      expect(elserProductDocs.body.installed).to.be(true);
+
+      const statusResponse = await getProductDocStatus(supertest, defaultInferenceEndpoints.ELSER);
+      const statusBody = statusResponse.body;
+      expect(statusBody.overall).to.eql(
+        'installed',
+        `Expected overall product doc installation status to be 'installed', got ${JSON.stringify(
+          statusBody,
+          null,
+          2
+        )}`
+      );
+    });
+    // Jina is hosted on EIS and needs KIBANA_EIS_CCM_API_KEY (set in CI). Skip locally when it is absent.
+    (process.env.KIBANA_EIS_CCM_API_KEY ? describe : describe.skip)('Jina (via EIS)', () => {
+      before(async () => {
+        await ensureEisEndpoints({
+          es,
+          log,
+          requiredInferenceIds: [defaultInferenceEndpoints.JINAv5],
+        });
+      });
+
+      it('installs the Jina product docs', async () => {
+        const jinaProductDocs = await installProductDoc(
+          supertest,
+          defaultInferenceEndpoints.JINAv5
+        );
+        expect(jinaProductDocs.status).to.be(200);
+        expect(jinaProductDocs.body.installed).to.equal(
+          true,
+          `Jina product docs install failed: ${JSON.stringify(jinaProductDocs.body)}`
+        );
+
+        const statusResponse = await getProductDocStatus(
+          supertest,
+          defaultInferenceEndpoints.JINAv5
+        );
+        const statusBody = statusResponse.body;
+        expect(statusBody.overall).to.eql(
+          'installed',
+          `Expected overall product doc installation status to be 'installed', got ${JSON.stringify(
+            statusBody,
+            null,
+            2
+          )}`
+        );
+        expect(statusBody.inferenceId).to.be(defaultInferenceEndpoints.JINAv5);
+        products.forEach((product) => {
+          expect(statusBody.perProducts[product as DocumentationProduct].status).to.eql(
+            'installed',
+            `Expected product doc installation status for [${product}] to be installed, got ${JSON.stringify(
+              statusBody.perProducts[product as DocumentationProduct],
+              null,
+              2
+            )}`
+          );
+        });
+        for (const product of products) {
+          await assertProducDocIndex({
+            productName: product,
+            shouldExist: true,
+            optionalInferenceId: defaultInferenceEndpoints.JINAv5,
+          });
+        }
+      });
+
+      it('updates the product docs for all previously installed Inference IDs if inferenceIds is omitted', async () => {
+        const updatedResponse = await supertest
+          .post('/internal/product_doc_base/update_all')
+          .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+          .send({
+            forceUpdate: false,
+          })
+          .set('kbn-xsrf', 'foo')
+          .expect(200);
+        const updatedBody = updatedResponse.body;
+        expect(updatedBody[defaultInferenceEndpoints.ELSER].installed).to.be(true);
+        expect(updatedBody[defaultInferenceEndpoints.JINAv5].installed).to.be(true);
+      });
+
+      it('uninstalls the Jina product docs', async () => {
+        await waitForProductDocTasksToFinish();
+        const uninstalledResponse = await uninstallProductDoc(
+          supertest,
+          defaultInferenceEndpoints.JINAv5
+        );
+
+        expect(uninstalledResponse.status).to.be(200);
+
+        const statusResponse = await getProductDocStatus(
+          supertest,
+          defaultInferenceEndpoints.JINAv5
+        );
+        const statusBody = statusResponse.body;
+        expect(statusBody.overall).to.eql(
+          'uninstalled',
+          `Expected overall product doc installation status to be 'uninstalled', got ${JSON.stringify(
+            statusBody,
+            null,
+            2
+          )}`
+        );
+        expect(statusBody.inferenceId).to.be(defaultInferenceEndpoints.JINAv5);
+        products.forEach((product) => {
+          expect(statusBody.perProducts[product as DocumentationProduct].status).to.eql(
+            'uninstalled',
+            `Expected product doc installation status for [${product}] to be 'uninstalled', got ${JSON.stringify(
+              statusBody.perProducts[product as DocumentationProduct],
+              null,
+              2
+            )}`
+          );
+        });
+        await assertProducDocIndex({
+          productName: 'kibana',
+          shouldExist: false,
+          optionalInferenceId: defaultInferenceEndpoints.JINAv5,
+        });
+      });
+
+      it('still retains the ELSER product docs after Jina uninstall', async () => {
+        const statusResponse = await getProductDocStatus(
+          supertest,
+          defaultInferenceEndpoints.ELSER
+        );
+        const statusBody = statusResponse.body;
+        expect(statusBody.overall).to.eql(
+          'installed',
+          `Expected overall product doc installation status for inferenceId [${
+            defaultInferenceEndpoints.ELSER
+          }] to be 'installed', got ${JSON.stringify(statusBody, null, 2)}`
+        );
+        expect(statusBody.inferenceId).to.be(defaultInferenceEndpoints.ELSER);
+        products.forEach((product) => {
+          expect(statusBody.perProducts[product as DocumentationProduct].status).to.eql(
+            'installed',
+            `Expected product doc installation status for inferenceId [${
+              defaultInferenceEndpoints.ELSER
+            }] for [${product}] to be 'installed', got ${JSON.stringify(
+              statusBody.perProducts[product as DocumentationProduct],
+              null,
+              2
+            )}`
+          );
+        });
+      });
+
+      // After uninstall. forceUpdate reinstalls ELSER and holds the install lock; running it
+      // before uninstall made the Jina uninstall wait until the suite timed out.
+      it('updates the product docs for a specific inferenceId', async () => {
+        const updatedResponse = await supertest
+          .post('/internal/product_doc_base/update_all')
+          .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+          .send({
+            forceUpdate: true,
+            inferenceIds: [defaultInferenceEndpoints.ELSER],
+          })
+          .set('kbn-xsrf', 'foo')
+          .expect(200);
+        const updatedBody = updatedResponse.body;
+        expect(updatedBody[defaultInferenceEndpoints.ELSER].installed).to.be(true);
+        expect(updatedBody[defaultInferenceEndpoints.JINAv5]).to.be(undefined);
+      });
+    });
+  });
+};

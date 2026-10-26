@@ -9,50 +9,76 @@ import React from 'react';
 import { AlertConsumers, SYNTHETICS_RULE_TYPE_IDS } from '@kbn/rule-data-utils';
 import { useParams } from 'react-router-dom';
 import { ObservabilityAlertsTable, AlertActions } from '@kbn/observability-plugin/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { ClientPluginsStart } from '../../../../../plugin';
 import { useRefreshedRangeFromUrl } from '../../../hooks';
 import { SyntheticsDatePicker } from '../../common/date_picker/synthetics_date_picker';
 import { useSelectedLocation } from '../hooks/use_selected_location';
+import { useMonitorAttachmentConfig } from '../hooks/use_monitor_attachment_config';
+import { MonitorDetailsPage } from '../../common/app_header';
 
-export const MONITOR_ALERTS_TABLE_ID = 'xpack.observability.slo.sloDetails.alertTable';
+export const MONITOR_ALERTS_TABLE_ID = 'xpack.synthetics.monitor.alertTable';
 
 export function MonitorDetailsAlerts() {
   const { monitorId: configId } = useParams<{ monitorId: string }>();
 
+  const { data, http, notifications, fieldFormats, application, licensing, cases, settings } =
+    useKibana<ClientPluginsStart>().services;
+
   const selectedLocation = useSelectedLocation();
   const { from, to } = useRefreshedRangeFromUrl();
 
-  if (!selectedLocation) {
-    return <EuiLoadingSpinner size="xl" />;
-  }
+  // Configure the agent builder flyout with the monitor details
+  useMonitorAttachmentConfig();
 
   return (
-    <>
-      <EuiSpacer size="m" />
-      <EuiFlexGroup direction="column" gutterSize="xl">
-        <EuiFlexItem>
-          <SyntheticsDatePicker fullWidth={true} />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <ObservabilityAlertsTable
-            id={MONITOR_ALERTS_TABLE_ID}
-            ruleTypeIds={SYNTHETICS_RULE_TYPE_IDS}
-            consumers={[AlertConsumers.UPTIME, AlertConsumers.ALERTS, AlertConsumers.OBSERVABILITY]}
-            query={{
-              bool: {
-                filter: [
-                  { term: { configId } },
-                  { term: { 'location.id': selectedLocation?.id } },
-                  { range: { '@timestamp': { gte: from, lte: to } } },
-                ],
-              },
-            }}
-            initialPageSize={100}
-            data-test-subj="monitorAlertsTable"
-            renderActionsCell={AlertActions}
-            showInspectButton
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </>
+    <MonitorDetailsPage selectedTab="alerts">
+      {!selectedLocation ? (
+        <EuiLoadingSpinner size="xl" />
+      ) : (
+        <>
+          <EuiSpacer size="m" />
+          <EuiFlexGroup direction="column" gutterSize="xl">
+            <EuiFlexItem>
+              <SyntheticsDatePicker fullWidth={true} />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <ObservabilityAlertsTable
+                services={{
+                  data,
+                  http,
+                  notifications,
+                  fieldFormats,
+                  application,
+                  licensing,
+                  cases,
+                  settings,
+                }}
+                id={MONITOR_ALERTS_TABLE_ID}
+                ruleTypeIds={SYNTHETICS_RULE_TYPE_IDS}
+                consumers={[
+                  AlertConsumers.UPTIME,
+                  AlertConsumers.ALERTS,
+                  AlertConsumers.OBSERVABILITY,
+                ]}
+                query={{
+                  bool: {
+                    filter: [
+                      { term: { configId } },
+                      { term: { 'location.id': selectedLocation?.id } },
+                      { range: { '@timestamp': { gte: from, lte: to } } },
+                    ],
+                  },
+                }}
+                pageSize={100}
+                data-test-subj="monitorAlertsTable"
+                renderActionsCell={AlertActions}
+                showInspectButton
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </>
+      )}
+    </MonitorDetailsPage>
   );
 }

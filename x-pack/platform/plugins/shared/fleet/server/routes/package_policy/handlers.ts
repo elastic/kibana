@@ -7,12 +7,10 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 
+import type { RequestHandler, SavedObjectsClientContract } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
-import type { RequestHandler } from '@kbn/core/server';
 
-import { groupBy, isEmpty, isEqual, keyBy } from 'lodash';
-
-import { HTTPAuthorizationHeader } from '../../../common/http_authorization_header';
+import { groupBy, isEmpty, isEqual, keyBy, uniq } from 'lodash';
 
 import { populatePackagePolicyAssignedAgentsCount } from '../../services/package_policies/populate_package_policy_assigned_agents_count';
 
@@ -23,27 +21,34 @@ import {
   packagePolicyService,
 } from '../../services';
 import type {
-  GetPackagePoliciesRequestSchema,
-  GetOnePackagePolicyRequestSchema,
+  BulkGetPackagePoliciesRequestSchema,
   CreatePackagePolicyRequestSchema,
-  UpdatePackagePolicyRequestSchema,
+  DeleteOnePackagePolicyRequestSchema,
   DeletePackagePoliciesRequestSchema,
-  UpgradePackagePoliciesRequestSchema,
   DryRunPackagePoliciesRequestSchema,
   FleetRequestHandler,
+  GetOnePackagePolicyRequestSchema,
+  GetPackagePoliciesRequestSchema,
   PackagePolicy,
-  DeleteOnePackagePolicyRequestSchema,
-  BulkGetPackagePoliciesRequestSchema,
   UpdatePackagePolicyRequestBodySchema,
+  UpdatePackagePolicyRequestSchema,
+  UpgradePackagePoliciesRequestSchema,
 } from '../../types';
 import type {
-  PostDeletePackagePoliciesResponse,
   NewPackagePolicy,
+  PostDeletePackagePoliciesResponse,
   UpgradePackagePolicyDryRunResponse,
   UpgradePackagePolicyResponse,
 } from '../../../common/types';
-import { installationStatuses, inputsFormat } from '../../../common/constants';
-import { PackagePolicyNotFoundError, PackagePolicyRequestError } from '../../errors';
+import { isOnlyAgentlessIntegration } from '../../../common/services/agentless_policy_helper';
+import { logLegacyAgentlessWriteDeprecation } from '../../services/utils/agentless';
+import { inputsFormat, installationStatuses } from '../../../common/constants';
+import {
+  CustomPackagePolicyNotAllowedForAgentlessError,
+  FleetError,
+  PackagePolicyNotFoundError,
+  PackagePolicyRequestError,
+} from '../../errors';
 import {
   getInstallation,
   getInstallations,
@@ -51,26 +56,25 @@ import {
   removeInstallation,
 } from '../../services/epm/packages';
 import { PACKAGES_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../../constants';
+import type { SimplifiedPackagePolicy } from '../../../common/services/simplified_package_policy_helper';
 import {
-  simplifiedPackagePolicytoNewPackagePolicy,
   packagePolicyToSimplifiedPackagePolicy,
-} from '../../../common/services/simplified_package_policy_helper';
-
-import type {
-  SimplifiedInputs,
-  SimplifiedPackagePolicy,
+  simplifiedPackagePolicytoNewPackagePolicy,
 } from '../../../common/services/simplified_package_policy_helper';
 import { runWithCache } from '../../services/epm/packages/cache';
-import { validateAgentlessInputs } from '../../../common/services/agentless_policy_helper';
 
 import {
+  alignInputsAndStreams,
+  getAgentlessAgentPolicyIds,
+  haveAgentlessAgentPolicies,
   isSimplifiedCreatePackagePolicyRequest,
   removeFieldsFromInputSchema,
   renameAgentlessAgentPolicy,
-  alignInputsAndStreams,
 } from './utils';
 
 export const isNotNull = <T>(value: T | null): value is T => value !== null;
+
+const deduplicateIds = (ids: string[]) => uniq(ids);
 
 export const getPackagePoliciesHandler: FleetRequestHandler<
   undefined,
@@ -111,7 +115,8 @@ export const bulkGetPackagePoliciesHandler: FleetRequestHandler<
   const fleetContext = await context.fleet;
   const soClient = fleetContext.internalSoClient;
   const limitedToPackages = fleetContext.limitedToPackages;
-  const { ids, ignoreMissing } = request.body;
+  const ignoreMissing = request.body.ignoreMissing;
+  const ids = deduplicateIds(request.body.ids);
 
   try {
     const items = await packagePolicyService.getByIDs(soClient, ids, {
@@ -226,12 +231,62 @@ export const createPackagePolicyHandler: FleetRequestHandler<
   const fleetContext = await context.fleet;
   const soClient = fleetContext.internalSoClient;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
-  const user = appContextService.getSecurityCore().authc.getCurrentUser(request) || undefined;
-  const { force, id, package: pkg, ...newPolicy } = request.body;
-  const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request, user?.username);
+
+  const { force, id, package: pkg, create_dataset_templates, ...newPolicy } = request.body;
+  if ('spaceIds' in newPolicy) {
+    delete newPolicy.spaceIds;
+  }
+
   let wasPackageAlreadyInstalled = false;
 
   const spaceId = fleetContext.spaceId;
+
+  // These checks run before the try block on purpose: its catch treats errors as
+  // creation failures (error log + package installation rollback), which must not
+  // run for these pure validation rejections.
+  const legacyAgentlessApiDisabled =
+    appContextService.getExperimentalFeatures().disableAgentlessLegacyAPI;
+
+  // The cheap `supports_agentless` detection runs regardless of the flag so legacy
+  // agentless usage is measurable (deprecation warn) before the flag is flipped
+  // fleet-wide — the flip is what starts rejecting these callers.
+  if (request.body.supports_agentless) {
+    if (legacyAgentlessApiDisabled) {
+      throw new FleetError('To create managed integrations, use the managed integrations API.');
+    }
+    logLegacyAgentlessWriteDeprecation('create package policy');
+  }
+
+  // The remaining detections need extra SO/registry lookups, so they stay
+  // flag-gated to avoid adding cost to normal (flag-off) traffic.
+  if (legacyAgentlessApiDisabled) {
+    if (pkg) {
+      // skipArchive: only deployment_modes is needed here, avoid the archive download.
+      const pkgInfo = await getPackageInfo({
+        savedObjectsClient: soClient,
+        pkgName: pkg.name,
+        pkgVersion: pkg.version,
+        ignoreUnverified: force,
+        prerelease: true,
+        skipArchive: true,
+      });
+      if (isOnlyAgentlessIntegration(pkgInfo)) {
+        throw new FleetError(
+          `Package ${pkg.name} can only be used as a managed integration. To create managed integrations, use the managed integrations API.`
+        );
+      }
+    }
+    const parentPolicyIds = [
+      ...(newPolicy.policy_ids ?? []),
+      ...(newPolicy.policy_id ? [newPolicy.policy_id] : []),
+    ];
+    if (await haveAgentlessAgentPolicies(soClient, parentPolicyIds)) {
+      throw new FleetError(
+        'To add integrations to a managed integration, use the managed integrations API.'
+      );
+    }
+  }
+
   try {
     let newPackagePolicy: NewPackagePolicy;
     if (isSimplifiedCreatePackagePolicyRequest(newPolicy)) {
@@ -260,6 +315,7 @@ export const createPackagePolicyHandler: FleetRequestHandler<
       savedObjectsClient: soClient,
       pkgName: pkg!.name,
     });
+
     wasPackageAlreadyInstalled = installation?.install_status === 'installed';
 
     // Create package policy
@@ -271,7 +327,7 @@ export const createPackagePolicyHandler: FleetRequestHandler<
         id,
         force,
         spaceId,
-        authorizationHeader,
+        createDatasetTemplates: create_dataset_templates,
       },
       context,
       request
@@ -288,7 +344,7 @@ export const createPackagePolicyHandler: FleetRequestHandler<
   } catch (error) {
     appContextService
       .getLogger()
-      .error(`Error while creating package policy due to error: ${error.message}`);
+      .error(`Error while creating package policy due to error: ${error.message}`, { error });
     if (!wasPackageAlreadyInstalled) {
       const installation = await getInstallation({
         savedObjectsClient: soClient,
@@ -305,6 +361,29 @@ export const createPackagePolicyHandler: FleetRequestHandler<
           esClient,
         });
       }
+    }
+
+    if (error instanceof CustomPackagePolicyNotAllowedForAgentlessError) {
+      // Agentless deployments have 1:1 agent to integration policies
+      // We delete the associated agent policy previously created.
+      const agentPolicyId = newPolicy.policy_ids?.[0];
+
+      if (agentPolicyId) {
+        appContextService
+          .getLogger()
+          .info(
+            `Deleting agent policy ${agentPolicyId}, associated with custom integration not allowed for agentless deployment`
+          );
+
+        await agentPolicyService.delete(soClient, esClient, agentPolicyId).catch(() => {
+          appContextService
+            .getLogger()
+            .error(
+              `Failed to delete agent policy ${agentPolicyId}, associated with custom integration not allowed for agentless deployment`
+            );
+        });
+      }
+      throw error;
     }
 
     if (error.statusCode) {
@@ -335,11 +414,57 @@ export const updatePackagePolicyHandler: FleetRequestHandler<
   }
 
   if (limitedToPackages && limitedToPackages.length) {
-    const packageName = packagePolicy?.package?.name;
-    if (packageName && !limitedToPackages.includes(packageName)) {
-      return response.forbidden({
-        body: { message: `Update for package name ${packageName} is not authorized.` },
-      });
+    // Enforce the package scope against both the existing package policy and the
+    // package supplied in the update body. Checking only the saved package would
+    // allow a scoped caller to retarget the policy to a package outside its scope.
+    const existingPackageName = packagePolicy?.package?.name;
+    const requestedPackageName = request.body.package?.name;
+    for (const packageName of [existingPackageName, requestedPackageName]) {
+      if (packageName && !limitedToPackages.includes(packageName)) {
+        return response.forbidden({
+          body: { message: `Update for package name ${packageName} is not authorized.` },
+        });
+      }
+    }
+  }
+
+  const legacyAgentlessApiDisabled =
+    appContextService.getExperimentalFeatures().disableAgentlessLegacyAPI;
+
+  // The cheap own/body-flag detection runs regardless of the flag so legacy
+  // agentless usage is measurable before the flip. The body flag is checked to
+  // prevent converting a regular package policy into an agentless one.
+  const { packagePolicyId } = request.params;
+  const isAgentless = Boolean(packagePolicy.supports_agentless || request.body.supports_agentless);
+  if (isAgentless) {
+    if (legacyAgentlessApiDisabled) {
+      throw new FleetError(
+        `To update managed integrations, use the managed integrations API. Offending ID: ${packagePolicyId}.`
+      );
+    }
+    logLegacyAgentlessWriteDeprecation('update package policy');
+  }
+
+  // The parent-agent-policy detections need extra SO lookups, so they stay flag-gated to avoid
+  // adding cost to normal (flag-off) traffic.
+  if (legacyAgentlessApiDisabled) {
+    const targetParentPolicyIds = [
+      ...(request.body.policy_ids ?? []),
+      ...(request.body.policy_id ? [request.body.policy_id] : []),
+    ];
+    const agentlessTargetIds = await getAgentlessAgentPolicyIds(soClient, targetParentPolicyIds);
+    if (agentlessTargetIds.length > 0) {
+      throw new FleetError(
+        `To add integrations to a managed integration, use the managed integrations API. Offending IDs: ${agentlessTargetIds.join(
+          ', '
+        )}.`
+      );
+    }
+
+    if (await haveAgentlessAgentPolicies(soClient, packagePolicy.policy_ids ?? [])) {
+      throw new FleetError(
+        `To update managed integrations, use the managed integrations API. Offending ID: ${packagePolicyId}.`
+      );
     }
   }
 
@@ -366,10 +491,6 @@ export const updatePackagePolicyHandler: FleetRequestHandler<
         pkgInfo,
         { experimental_data_stream_features: pkg.experimental_data_stream_features }
       );
-      validateAgentlessInputs(
-        body?.inputs as SimplifiedInputs,
-        body?.supports_agentless || newData.supports_agentless
-      );
     } else {
       // complete request
       const { overrides, ...restOfBody } = body as TypeOf<
@@ -392,17 +513,18 @@ export const updatePackagePolicyHandler: FleetRequestHandler<
         package: pkg ?? packagePolicy.package,
         inputs: restOfBody.inputs ?? packagePolicyInputs,
         vars: restOfBody.vars ?? packagePolicy.vars,
+        var_group_selections: restOfBody.var_group_selections ?? packagePolicy.var_group_selections,
         supports_agentless: restOfBody.supports_agentless ?? packagePolicy.supports_agentless,
+        supports_cloud_connector:
+          restOfBody.supports_cloud_connector ?? packagePolicy.supports_cloud_connector,
+        cloud_connector_id: restOfBody.cloud_connector_id ?? packagePolicy.cloud_connector_id,
       } as NewPackagePolicy;
 
       if (overrides) {
         newData.overrides = overrides;
       }
     }
-    validateAgentlessInputs(
-      newData.inputs,
-      newData.supports_agentless || packagePolicy.supports_agentless
-    );
+
     newData.inputs = alignInputsAndStreams(newData.inputs);
 
     if (
@@ -418,6 +540,23 @@ export const updatePackagePolicyHandler: FleetRequestHandler<
       }
     }
 
+    if (
+      newData.output_id !== undefined &&
+      newData.output_id !== packagePolicy.output_id &&
+      !isEmpty(packagePolicy.policy_ids)
+    ) {
+      const parentAgentPolicies = await agentPolicyService.getByIds(
+        soClient,
+        packagePolicy.policy_ids!,
+        { ignoreMissing: true }
+      );
+      if (parentAgentPolicies.some((ap) => ap.is_managed)) {
+        throw new PackagePolicyRequestError(
+          'Cannot change the output of a package policy belonging to a managed agent policy'
+        );
+      }
+    }
+
     await renameAgentlessAgentPolicy(soClient, esClient, packagePolicy, newData.name);
 
     const updatedPackagePolicy = await packagePolicyService.update(
@@ -426,7 +565,7 @@ export const updatePackagePolicyHandler: FleetRequestHandler<
       request.params.packagePolicyId,
       newData,
       { user, force },
-      packagePolicy.package?.version
+      context
     );
     return response.ok({
       body: {
@@ -456,11 +595,12 @@ export const deletePackagePolicyHandler: RequestHandler<
   const soClient = coreContext.savedObjects.client;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const user = appContextService.getSecurityCore().authc.getCurrentUser(request) || undefined;
+  const packagePolicyIds = deduplicateIds(request.body.packagePolicyIds);
 
   const body: PostDeletePackagePoliciesResponse = await packagePolicyService.delete(
     soClient,
     esClient,
-    request.body.packagePolicyIds,
+    packagePolicyIds,
     { user, force: request.body.force, skipUnassignFromAgentPolicies: request.body.force },
     context,
     request
@@ -506,6 +646,42 @@ export const deleteOnePackagePolicyHandler: RequestHandler<
   });
 };
 
+// Missing policies are skipped here (ignoreMissing) so the upgrade/dry-run
+// handlers keep reporting them as per-item 404s.
+const throwIfTargetsAgentlessPolicies = async (
+  soClient: SavedObjectsClientContract,
+  packagePolicyIds: string[]
+): Promise<void> => {
+  if (!appContextService.getExperimentalFeatures().disableAgentlessLegacyAPI) {
+    return;
+  }
+  const packagePolicies =
+    (await packagePolicyService.getByIDs(soClient, packagePolicyIds, { ignoreMissing: true })) ??
+    [];
+  // Older agentless package policies may not carry the flag themselves — check parents too.
+  const agentlessParentIds = new Set(
+    await getAgentlessAgentPolicyIds(
+      soClient,
+      packagePolicies.flatMap((packagePolicy) => packagePolicy.policy_ids)
+    )
+  );
+  const offendingIds = packagePolicies
+    .filter(
+      (packagePolicy) =>
+        packagePolicy.supports_agentless ||
+        packagePolicy.policy_ids.some((id) => agentlessParentIds.has(id))
+    )
+    .map(({ id }) => id);
+  if (offendingIds.length > 0) {
+    // The whole batch is rejected, so name the offenders for self-remediation.
+    throw new FleetError(
+      `To upgrade managed integrations, use the managed integrations API. Offending IDs: ${offendingIds.join(
+        ', '
+      )}.`
+    );
+  }
+};
+
 export const upgradePackagePolicyHandler: RequestHandler<
   unknown,
   unknown,
@@ -515,10 +691,14 @@ export const upgradePackagePolicyHandler: RequestHandler<
   const soClient = coreContext.savedObjects.client;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const user = appContextService.getSecurityCore().authc.getCurrentUser(request) || undefined;
+  const packagePolicyIds = deduplicateIds(request.body.packagePolicyIds);
+
+  await throwIfTargetsAgentlessPolicies(soClient, packagePolicyIds);
+
   const body: UpgradePackagePolicyResponse = await packagePolicyService.bulkUpgrade(
     soClient,
     esClient,
-    request.body.packagePolicyIds,
+    packagePolicyIds,
     { user }
   );
 
@@ -543,7 +723,10 @@ export const dryRunUpgradePackagePolicyHandler: RequestHandler<
   const soClient = (await context.core).savedObjects.client;
 
   const body: UpgradePackagePolicyDryRunResponse = [];
-  const { packagePolicyIds } = request.body;
+  const packagePolicyIds = deduplicateIds(request.body.packagePolicyIds);
+
+  await throwIfTargetsAgentlessPolicies(soClient, packagePolicyIds);
+
   await runWithCache(async () => {
     for (const id of packagePolicyIds) {
       const result = await packagePolicyService.getUpgradeDryRunDiff(soClient, id);

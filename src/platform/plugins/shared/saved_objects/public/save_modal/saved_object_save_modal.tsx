@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { EuiSwitchEvent, WithEuiThemeProps } from '@elastic/eui';
 import {
   htmlIdGenerator,
   EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
@@ -24,30 +24,43 @@ import {
   EuiModalHeaderTitle,
   EuiSpacer,
   EuiSwitch,
-  EuiSwitchEvent,
   EuiTextArea,
   EuiIconTip,
   EuiText,
   withEuiTheme,
-  WithEuiThemeProps,
   mathWithUnits,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { css } from '@emotion/react';
+import type { SaveResult } from './show_saved_object_save_modal';
 
 export interface OnSaveProps {
   newTitle: string;
   newCopyOnSave: boolean;
-  isTitleDuplicateConfirmed: boolean;
-  onTitleDuplicate: () => void;
   newDescription: string;
 }
 
-interface Props {
-  onSave: (props: OnSaveProps) => void;
+export interface Reference {
+  type: string;
+  id: string;
+  name: string;
+}
+
+export interface SaveDashboardReturn {
+  id?: string;
+  error?: string;
+  references?: Reference[];
+  redirectRequired?: boolean;
+}
+
+interface Props<T = void> {
+  hasLibraryItemWithTitle: (title: string) => Promise<boolean>;
+  onSave: (props: OnSaveProps) => Promise<T>;
   onClose: () => void;
+  lastSavedTitle: string;
   title: string;
   showCopyOnSave: boolean;
   mustCopyOnSaveMessage?: string;
@@ -60,8 +73,17 @@ interface Props {
   description?: string;
   showDescription: boolean;
   isValid?: boolean;
-  customModalTitle?: string;
+  customModalTitle?: string | React.ReactNode;
   theme: WithEuiThemeProps['theme'];
+  /** When true, renders content without wrapping in EuiModal */
+  disableModal?: boolean;
+  /**
+   * The `id` to set on `EuiModalHeaderTitle`. When `disableModal` is true, the caller owns the
+   * `EuiModal` shell and must pass this id so it can set `aria-labelledby` pointing to this title,
+   * satisfying EUI's accessibility requirement. When `disableModal` is false, the id is generated
+   * internally and applied to both the title and the modal.
+   */
+  modalTitleId?: string;
 }
 
 export interface SaveModalState {
@@ -69,7 +91,7 @@ export interface SaveModalState {
   copyOnSave: boolean;
   isTitleDuplicateConfirmed: boolean;
   hasTitleDuplicate: boolean;
-  isLoading: boolean;
+  isSaving: boolean;
   visualizationDescription: string;
   hasAttemptedSubmit: boolean;
 }
@@ -80,37 +102,29 @@ const generateId = htmlIdGenerator();
  * @deprecated
  * @removeBy 8.8.0
  */
-class SavedObjectSaveModalComponent extends React.Component<
-  Props,
+class SavedObjectSaveModalComponent<T = void> extends React.Component<
+  Props<T>,
   SaveModalState,
   WithEuiThemeProps
 > {
   private warning = React.createRef<HTMLDivElement>();
   private formId = generateId('form');
-  private savedObjectTitleInputRef = React.createRef<HTMLInputElement>();
 
   public readonly state = {
     title: this.props.title,
     copyOnSave: Boolean(this.props.initialCopyOnSave),
     isTitleDuplicateConfirmed: false,
     hasTitleDuplicate: false,
-    isLoading: false,
+    isSaving: false,
     visualizationDescription: this.props.description ? this.props.description : '',
     hasAttemptedSubmit: false,
   };
-
-  public componentDidMount() {
-    setTimeout(() => {
-      // defer so input focus ref value has been populated
-      this.savedObjectTitleInputRef.current?.focus();
-    }, 0);
-  }
 
   public render() {
     const { theme } = this.props;
     const { isTitleDuplicateConfirmed, hasTitleDuplicate, title, hasAttemptedSubmit } = this.state;
     const duplicateWarningId = generateId();
-
+    const modalTitleId = this.props.modalTitleId ?? generateId('saveModal');
     const hasColumns = !!this.props.rightOptions;
 
     const titleInputValid =
@@ -129,7 +143,6 @@ class SavedObjectSaveModalComponent extends React.Component<
         >
           <EuiFieldText
             fullWidth
-            inputRef={this.savedObjectTitleInputRef}
             data-test-subj="savedObjectTitle"
             value={title}
             onChange={this.onTitleChange}
@@ -163,10 +176,11 @@ class SavedObjectSaveModalComponent extends React.Component<
         ? mathWithUnits(theme.euiTheme.size.xxl, (x) => x * 20)
         : mathWithUnits(theme.euiTheme.size.xxl, (x) => x * 15),
     });
-    return (
-      <EuiModal data-test-subj="savedObjectSaveModal" onClose={this.props.onClose} css={styles}>
+
+    const content = (
+      <>
         <EuiModalHeader>
-          <EuiModalHeaderTitle>
+          <EuiModalHeaderTitle id={modalTitleId}>
             {this.props.customModalTitle ? (
               this.props.customModalTitle
             ) : (
@@ -182,7 +196,7 @@ class SavedObjectSaveModalComponent extends React.Component<
         <EuiModalBody>
           {this.renderDuplicateTitleCallout(duplicateWarningId)}
 
-          <EuiForm component="form" onSubmit={this.onFormSubmit} id={this.formId}>
+          <EuiForm component="form" onSubmit={this.onFormSubmit} id={this.formId} noValidate>
             {!this.props.showDescription && this.props.description && (
               <EuiText size="s" color="subdued">
                 {this.props.description}
@@ -206,6 +220,26 @@ class SavedObjectSaveModalComponent extends React.Component<
             <EuiFlexItem grow={false}>{this.renderConfirmButton()}</EuiFlexItem>
           </EuiFlexGroup>
         </EuiModalFooter>
+      </>
+    );
+
+    return this.props.disableModal ? (
+      // The caller owns the `EuiModal` shell, so this wrapper must be a flex column that can
+      // shrink; otherwise `EuiModalBody` never bounds its height and tall content clips the footer.
+      <div
+        data-test-subj="savedObjectSaveModal"
+        css={[styles, { display: 'flex', flexDirection: 'column', minBlockSize: 0 }]}
+      >
+        {content}
+      </div>
+    ) : (
+      <EuiModal
+        data-test-subj="savedObjectSaveModal"
+        onClose={this.props.onClose}
+        css={styles}
+        aria-labelledby={modalTitleId}
+      >
+        {content}
       </EuiModal>
     );
   }
@@ -246,35 +280,49 @@ class SavedObjectSaveModalComponent extends React.Component<
     });
   };
 
-  private onTitleDuplicate = () => {
-    this.setState({
-      isLoading: false,
-      isTitleDuplicateConfirmed: true,
-      hasTitleDuplicate: true,
-    });
-
-    if (this.warning.current) {
-      this.warning.current.focus();
-    }
-  };
-
   private saveSavedObject = async () => {
-    if (this.state.isLoading) {
-      // ignore extra clicks
-      return;
-    }
+    if (this.state.isSaving) return;
 
     this.setState({
-      isLoading: true,
+      isSaving: true,
     });
 
-    await this.props.onSave({
-      newTitle: this.state.title,
-      newCopyOnSave: Boolean(this.props.mustCopyOnSaveMessage) || this.state.copyOnSave,
-      isTitleDuplicateConfirmed: this.state.isTitleDuplicateConfirmed,
-      onTitleDuplicate: this.onTitleDuplicate,
-      newDescription: this.state.visualizationDescription,
-    });
+    const newCopyOnSave = Boolean(this.props.mustCopyOnSaveMessage) || this.state.copyOnSave;
+    const isUpdateWithSameTitle =
+      !newCopyOnSave && this.state.title.toLowerCase() === this.props.lastSavedTitle.toLowerCase();
+    const checkForDuplicateTitle = this.state.isTitleDuplicateConfirmed
+      ? false
+      : !isUpdateWithSameTitle;
+    if (checkForDuplicateTitle) {
+      try {
+        const hasTitleDuplicate = await this.props.hasLibraryItemWithTitle(this.state.title);
+        if (hasTitleDuplicate) {
+          this.setState({
+            isSaving: false,
+            isTitleDuplicateConfirmed: true,
+            hasTitleDuplicate: true,
+          });
+
+          if (this.warning.current) {
+            this.warning.current.focus();
+          }
+          return;
+        }
+      } catch (error) {
+        // Unable to determine if there is a duplicate title
+        // ignore error and proceed with save
+      }
+    }
+
+    try {
+      await this.props.onSave({
+        newTitle: this.state.title,
+        newCopyOnSave,
+        newDescription: this.state.visualizationDescription,
+      });
+    } finally {
+      this.setState({ isSaving: false });
+    }
   };
 
   private onTitleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -333,7 +381,7 @@ class SavedObjectSaveModalComponent extends React.Component<
   };
 
   private renderConfirmButton = () => {
-    const { isLoading } = this.state;
+    const { isSaving } = this.state;
 
     let confirmLabel: string | React.ReactNode = i18n.translate(
       'savedObjects.saveModal.saveButtonLabel',
@@ -350,7 +398,7 @@ class SavedObjectSaveModalComponent extends React.Component<
       <EuiButton
         fill
         data-test-subj="confirmSaveSavedObjectButton"
-        isLoading={isLoading}
+        isLoading={isSaving}
         type="submit"
         form={this.formId}
       >
@@ -367,7 +415,7 @@ class SavedObjectSaveModalComponent extends React.Component<
     return (
       <>
         <div ref={this.warning} tabIndex={-1}>
-          <EuiCallOut
+          <KbnWarningCallout
             title={
               <FormattedMessage
                 id="savedObjects.saveModal.duplicateTitleLabel"
@@ -375,11 +423,7 @@ class SavedObjectSaveModalComponent extends React.Component<
                 values={{ objectType: this.props.objectType }}
               />
             }
-            color="warning"
-            data-test-subj="titleDuplicateWarnMsg"
-            id={duplicateWarningId}
-          >
-            <p>
+            text={
               <FormattedMessage
                 id="savedObjects.saveModal.duplicateTitleDescription"
                 defaultMessage="Saving ''{title}'' creates a duplicate title."
@@ -387,8 +431,10 @@ class SavedObjectSaveModalComponent extends React.Component<
                   title: this.state.title,
                 }}
               />
-            </p>
-          </EuiCallOut>
+            }
+            data-test-subj="titleDuplicateWarnMsg"
+            id={duplicateWarningId}
+          />
         </div>
         <EuiSpacer />
       </>
@@ -418,7 +464,7 @@ class SavedObjectSaveModalComponent extends React.Component<
             css={({ euiTheme }) => ({ marginLeft: `-${euiTheme.size.base}` })}
             grow={false}
           >
-            <EuiIconTip type="iInCircle" content={this.props.mustCopyOnSaveMessage} />
+            <EuiIconTip type="info" content={this.props.mustCopyOnSaveMessage} />
           </EuiFlexItem>
         )}
         <EuiFlexItem grow={true} />
@@ -427,4 +473,19 @@ class SavedObjectSaveModalComponent extends React.Component<
   };
 }
 
-export const SavedObjectSaveModal = withEuiTheme(SavedObjectSaveModalComponent);
+/**
+ * @deprecated
+ */
+export const SavedObjectSaveModal = withEuiTheme(SavedObjectSaveModalComponent<void>);
+
+/**
+ * This is a workaround for using this directly with the `showSaveModal` method.
+ *
+ * The `showSaveModal` method wraps and calls these props from outside but this modal
+ * does not require the `SaveResult` to be returned from `onSave`.
+ *
+ * @deprecated
+ */
+export const SavedObjectSaveModalWithSaveResult = withEuiTheme(
+  SavedObjectSaveModalComponent<SaveResult>
+);

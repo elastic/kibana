@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { MonoTypeOperatorFunction, queueScheduler, scheduled, from } from 'rxjs';
+import type { MonoTypeOperatorFunction } from 'rxjs';
+import { queueScheduler, scheduled, from } from 'rxjs';
 import { concatAll, distinctUntilChanged, skip } from 'rxjs';
 
 export function distinctUntilChangedWithInitialValue<T>(

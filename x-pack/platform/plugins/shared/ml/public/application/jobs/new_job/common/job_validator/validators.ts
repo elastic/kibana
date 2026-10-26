@@ -9,12 +9,12 @@ import { i18n } from '@kbn/i18n';
 import { distinctUntilChanged, filter, map, pluck, switchMap, startWith } from 'rxjs';
 import type { Observable, Subject } from 'rxjs';
 import { combineLatest } from 'rxjs';
+import type { CombinedJob } from '@kbn/ml-common-types/anomaly_detection_jobs/combined_job';
 import type {
   CardinalityModelPlotHigh,
   CardinalityValidationResult,
 } from '../../../../services/ml_api_service';
 import type { JobCreator } from '../job_creator';
-import type { CombinedJob } from '../../../../../../common/types/anomaly_detection_jobs';
 import type { BasicValidations } from './job_validator';
 
 export enum VALIDATOR_SEVERITY {
@@ -113,6 +113,8 @@ export function cardinalityValidator(
 
 export function jobIdValidator(jobCreator$: Subject<JobCreator>): Observable<JobExistsResult> {
   return jobCreator$.pipe(
+    // Emit a fresh { jobId, mlApi } snapshot to catch jobId changes
+    map((jc) => ({ jobId: jc.jobId, mlApi: jc.mlApi })),
     // No need to perform an API call if the analysis configuration hasn't been changed
     distinctUntilChanged(
       (prevJobCreator, currJobCreator) => prevJobCreator.jobId === currJobCreator.jobId

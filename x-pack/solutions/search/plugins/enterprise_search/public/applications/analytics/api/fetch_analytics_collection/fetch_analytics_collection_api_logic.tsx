@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AnalyticsCollection } from '../../../../../common/types/analytics';
+import type { AnalyticsCollection } from '../../../../../common/types/analytics';
 
 import { createApiLogic } from '../../../shared/api_logic/create_api_logic';
 import { HttpLogic } from '../../../shared/http';
@@ -14,7 +14,7 @@ export type FetchAnalyticsCollectionApiLogicResponse = AnalyticsCollection;
 
 export const fetchAnalyticsCollection = async ({ name }: { name: string }) => {
   const { http } = HttpLogic.values;
-  const route = `/internal/elasticsearch/analytics/collections/${name}`;
+  const route = `/internal/elasticsearch/analytics/collections/${encodeURIComponent(name)}`;
   const response = await http.get<AnalyticsCollection>(route);
 
   return response;

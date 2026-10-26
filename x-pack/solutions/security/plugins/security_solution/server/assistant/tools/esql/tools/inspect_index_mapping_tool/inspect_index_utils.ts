@@ -11,7 +11,8 @@ import { get } from 'lodash';
  * Gets the entries at a given key in an index mapping
  */
 export const getNestedValue = (obj: unknown, keyPath: string) => {
-  return keyPath ? get(obj, keyPath) : obj;
+  const normalizedKeyPath = keyPath.trim() === '.' ? '' : keyPath.trim();
+  return normalizedKeyPath ? get(obj, normalizedKeyPath) : obj;
 };
 
 /**

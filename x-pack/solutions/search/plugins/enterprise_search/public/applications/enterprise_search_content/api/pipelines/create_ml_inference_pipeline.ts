@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { FieldMapping } from '../../../../../common/ml_inference_pipeline';
+import type { FieldMapping } from '../../../../../common/ml_inference_pipeline';
 
-import {
+import type {
   CreateMLInferencePipeline,
   MlInferencePipeline,
 } from '../../../../../common/types/pipelines';
@@ -28,7 +28,9 @@ export interface CreateMlInferencePipelineResponse {
 export const createMlInferencePipeline = async (
   args: CreateMlInferencePipelineApiLogicArgs
 ): Promise<CreateMlInferencePipelineResponse> => {
-  const route = `/internal/enterprise_search/indices/${args.indexName}/ml_inference/pipeline_processors`;
+  const route = `/internal/enterprise_search/indices/${encodeURIComponent(
+    args.indexName
+  )}/ml_inference/pipeline_processors`;
   const params: CreateMLInferencePipeline = {
     field_mappings: args.fieldMappings,
     model_id: args.modelId,

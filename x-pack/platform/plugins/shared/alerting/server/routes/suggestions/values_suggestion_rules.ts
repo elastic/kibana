@@ -10,8 +10,8 @@ import type { IRouter } from '@kbn/core/server';
 import type { Observable } from 'rxjs';
 import { firstValueFrom } from 'rxjs';
 import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
-import { termsAggSuggestions } from '@kbn/unified-search-plugin/server/autocomplete/terms_agg';
-import type { ConfigSchema } from '@kbn/unified-search-plugin/server/config';
+import { termsAggSuggestions } from '@kbn/kql/server/autocomplete/terms_agg';
+import type { ConfigSchema } from '@kbn/kql/server/config';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { getKbnServerError, reportServerError } from '@kbn/kibana-utils-plugin/server';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server/src/saved_objects_index_pattern';
@@ -24,6 +24,7 @@ import type { AlertingAuthorizationFilterOpts } from '../../authorization';
 import { AlertingAuthorizationEntity, AlertingAuthorizationFilterType } from '../../authorization';
 import { RuleAuditAction, ruleAuditEvent } from '../../rules_client/common/audit_events';
 import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../constants';
+import { MAX_SUGGESTION_TEXT_LENGTH } from '../../../common/constants';
 
 const alertingAuthorizationFilterOpts: AlertingAuthorizationFilterOpts = {
   type: AlertingAuthorizationFilterType.ESDSL,
@@ -32,8 +33,8 @@ const alertingAuthorizationFilterOpts: AlertingAuthorizationFilterOpts = {
 
 export const RulesSuggestionsSchema = {
   body: schema.object({
-    field: schema.string(),
-    query: schema.string(),
+    field: schema.string({ maxLength: MAX_SUGGESTION_TEXT_LENGTH }),
+    query: schema.string({ maxLength: MAX_SUGGESTION_TEXT_LENGTH }),
     filters: schema.maybe(schema.any()),
     fieldMeta: schema.maybe(schema.any()),
   }),

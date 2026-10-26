@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { EnterpriseSearchApplicationUpsertResponse } from '../../../../../common/types/search_applications';
-import { Actions, createApiLogic } from '../../../shared/api_logic/create_api_logic';
+import type { EnterpriseSearchApplicationUpsertResponse } from '../../../../../common/types/search_applications';
+import type { Actions } from '../../../shared/api_logic/create_api_logic';
+import { createApiLogic } from '../../../shared/api_logic/create_api_logic';
 import { HttpLogic } from '../../../shared/http';
 
 export interface CreateSearchApplicationApiParams {
@@ -25,7 +26,7 @@ export const createSearchApplication = async ({
   name,
   indices,
 }: CreateSearchApplicationApiParams): Promise<CreateSearchApplicationApiResponse> => {
-  const route = `/internal/enterprise_search/search_applications/${name}`;
+  const route = `/internal/enterprise_search/search_applications/${encodeURIComponent(name)}`;
 
   return await HttpLogic.values.http.put<EnterpriseSearchApplicationUpsertResponse>(route, {
     body: JSON.stringify({ indices, name }),

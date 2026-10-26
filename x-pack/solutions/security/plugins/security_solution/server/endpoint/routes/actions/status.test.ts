@@ -8,6 +8,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { KibanaResponseFactory } from '@kbn/core/server';
+import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
 import {
   elasticsearchServiceMock,
   httpServerMock,
@@ -19,11 +20,9 @@ import {
   ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN,
   ENDPOINT_ACTIONS_INDEX,
 } from '../../../../common/endpoint/constants';
-import { EndpointAppContextService } from '../../endpoint_app_context_services';
+import type { EndpointAppContextService } from '../../endpoint_app_context_services';
 import {
   createMockEndpointAppContext,
-  createMockEndpointAppContextServiceSetupContract,
-  createMockEndpointAppContextServiceStartContract,
   createRouteHandlerContext,
   getRegisteredVersionedRouteMock,
 } from '../../mocks';
@@ -37,6 +36,7 @@ import type {
 import { EndpointActionGenerator } from '../../../../common/endpoint/data_generators/endpoint_action_generator';
 import { ActionStatusRequestSchema } from '../../../../common/api/endpoint';
 import { AGENT_ACTIONS_RESULTS_INDEX } from '@kbn/fleet-plugin/common';
+import { AgentNotFoundError } from '@kbn/fleet-plugin/server';
 
 describe('Endpoint Pending Action Summary API', () => {
   let endpointAppContextService: EndpointAppContextService;
@@ -52,29 +52,21 @@ describe('Endpoint Pending Action Summary API', () => {
   ) => void;
 
   const setupRouteHandler = (): void => {
-    const esClientMock = elasticsearchServiceMock.createScopedClusterClient();
     const routerMock = httpServiceMock.createRouter();
+    const endpointContextMock = createMockEndpointAppContext();
+    const esClientMock = elasticsearchServiceMock.createScopedClusterClient();
+
+    esClientMock.asInternalUser =
+      endpointContextMock.service.getInternalEsClient() as ElasticsearchClientMock;
 
     endpointActionGenerator = new EndpointActionGenerator('seed');
-    endpointAppContextService = new EndpointAppContextService();
-    (endpointAppContextService.getEndpointMetadataService as jest.Mock) = jest
-      .fn()
-      .mockReturnValue({
-        findHostMetadataForFleetAgents: jest.fn().mockResolvedValue([]),
-      });
+    endpointAppContextService = endpointContextMock.service;
 
-    endpointAppContextService.setup(createMockEndpointAppContextServiceSetupContract());
-    endpointAppContextService.start(createMockEndpointAppContextServiceStartContract());
-
-    const endpointContextMock = createMockEndpointAppContext();
-
-    registerActionStatusRoutes(routerMock, {
-      ...endpointContextMock,
-      service: endpointAppContextService,
-      experimentalFeatures: {
-        ...endpointContextMock.experimentalFeatures,
-      },
+    (endpointAppContextService.getEndpointMetadataService as jest.Mock).mockReturnValue({
+      findHostMetadataForFleetAgents: jest.fn().mockResolvedValue([]),
     });
+
+    registerActionStatusRoutes(routerMock, endpointContextMock);
 
     getPendingStatus = async (reqParams?: any): Promise<jest.Mocked<KibanaResponseFactory>> => {
       const req = httpServerMock.createKibanaRequest(reqParams);
@@ -86,7 +78,9 @@ describe('Endpoint Pending Action Summary API', () => {
         '2023-10-31'
       );
       await routeHandler(
-        createRouteHandlerContext(esClientMock, savedObjectsClientMock.create()),
+        createRouteHandlerContext(esClientMock, savedObjectsClientMock.create(), {
+          endpointAppServices: endpointContextMock.service,
+        }),
         req,
         mockResponse
       );
@@ -174,7 +168,7 @@ describe('Endpoint Pending Action Summary API', () => {
         agent_ids: [mockID],
       },
     });
-    expect(response.ok).toBeCalled();
+    expect(response.ok).toHaveBeenCalled();
     expect((response.ok.mock.calls[0][0]?.body as any)?.data).toHaveLength(1);
     expect((response.ok.mock.calls[0][0]?.body as any)?.data[0].agent_id).toEqual(mockID);
   });
@@ -195,7 +189,7 @@ describe('Endpoint Pending Action Summary API', () => {
       },
     });
 
-    expect(response.ok).toBeCalled();
+    expect(response.ok).toHaveBeenCalled();
     expect((response.ok.mock.calls[0][0]?.body as any)?.data).toHaveLength(1);
     expect((response.ok.mock.calls[0][0]?.body as any)?.data[0].agent_id).toEqual(mockID);
     expect((response.ok.mock.calls[0][0]?.body as any)?.data[0].pending_actions.isolate).toEqual(
@@ -218,7 +212,7 @@ describe('Endpoint Pending Action Summary API', () => {
         agent_ids: [mockID],
       },
     });
-    expect(response.ok).toBeCalled();
+    expect(response.ok).toHaveBeenCalled();
     expect((response.ok.mock.calls[0][0]?.body as any)?.data).toHaveLength(1);
     expect((response.ok.mock.calls[0][0]?.body as any)?.data[0].agent_id).toEqual(mockID);
   });
@@ -242,7 +236,7 @@ describe('Endpoint Pending Action Summary API', () => {
         agent_ids: [mockID],
       },
     });
-    expect(response.ok).toBeCalled();
+    expect(response.ok).toHaveBeenCalled();
     expect((response.ok.mock.calls[0][0]?.body as any)?.data).toHaveLength(1);
     expect((response.ok.mock.calls[0][0]?.body as any)?.data[0].agent_id).toEqual(mockID);
     expect((response.ok.mock.calls[0][0]?.body as any)?.data[0].pending_actions.isolate).toEqual(2);
@@ -265,7 +259,7 @@ describe('Endpoint Pending Action Summary API', () => {
         agent_ids: [mockID],
       },
     });
-    expect(response.ok).toBeCalled();
+    expect(response.ok).toHaveBeenCalled();
     expect((response.ok.mock.calls[0][0]?.body as any)?.data).toHaveLength(1);
     expect((response.ok.mock.calls[0][0]?.body as any)?.data[0].agent_id).toEqual(mockID);
     expect((response.ok.mock.calls[0][0]?.body as any)?.data[0].pending_actions.isolate).toEqual(3);
@@ -297,7 +291,7 @@ describe('Endpoint Pending Action Summary API', () => {
         agent_ids: [mockID],
       },
     });
-    expect(response.ok).toBeCalled();
+    expect(response.ok).toHaveBeenCalled();
     expect((response.ok.mock.calls[0][0]?.body as any)?.data).toHaveLength(1);
     expect((response.ok.mock.calls[0][0]?.body as any)?.data[0].agent_id).toEqual(mockID);
     expect((response.ok.mock.calls[0][0]?.body as any)?.data[0].pending_actions.isolate).toEqual(2);
@@ -334,7 +328,7 @@ describe('Endpoint Pending Action Summary API', () => {
         agent_ids: [mockAgentID],
       },
     });
-    expect(response.ok).toBeCalled();
+    expect(response.ok).toHaveBeenCalled();
     expect((response.ok.mock.calls[0][0]?.body as any)?.data).toHaveLength(1);
     expect((response.ok.mock.calls[0][0]?.body as any)?.data[0].agent_id).toEqual(mockAgentID);
     expect((response.ok.mock.calls[0][0]?.body as any)?.data[0].pending_actions.isolate).toEqual(1);
@@ -381,7 +375,7 @@ describe('Endpoint Pending Action Summary API', () => {
         agent_ids: [agentOne, agentTwo, agentThree],
       },
     });
-    expect(response.ok).toBeCalled();
+    expect(response.ok).toHaveBeenCalled();
     expect((response.ok.mock.calls[0][0]?.body as any)?.data).toHaveLength(3);
     expect((response.ok.mock.calls[0][0]?.body as any)?.data).toContainEqual({
       agent_id: agentOne,
@@ -401,5 +395,16 @@ describe('Endpoint Pending Action Summary API', () => {
         isolate: 2, // present in all three actions, but second one has a response, therefore not pending
       },
     });
+  });
+
+  it('should return 404 when spaces is enabled and agent id is not accessible in space', async () => {
+    (
+      endpointAppContextService.getInternalFleetServices().agent.getByIds as jest.Mock
+    ).mockRejectedValue(new AgentNotFoundError('agent not found'));
+    const response = await getPendingStatus({
+      query: { agent_ids: ['123'] },
+    });
+
+    expect(response.notFound).toHaveBeenCalled();
   });
 });

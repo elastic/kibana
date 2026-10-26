@@ -128,6 +128,29 @@ const optOutKibanaFeature = new KibanaFeature({
   privileges: null,
 });
 
+const reservedKibanaFeature = new KibanaFeature({
+  id: 'reservedFeature',
+  name: 'Feature with reserved privileges',
+  app: ['reservedApp'],
+  category: { id: 'reserved', label: 'reserved' },
+  privileges: null,
+  reserved: {
+    description: 'Reserved privilege for reserved feature',
+    privileges: [
+      {
+        id: 'reservedPrivilege',
+        privilege: {
+          ui: ['reservedUI1', 'reservedUI2'],
+          savedObject: {
+            all: ['reservedSO'],
+            read: [],
+          },
+        },
+      },
+    ],
+  },
+});
+
 const esManagementFeature = new ElasticsearchFeature({
   id: 'esManagementFeature',
   management: {
@@ -213,7 +236,7 @@ describe('usingPrivileges', () => {
 
       const { usingPrivileges } = disableUICapabilitiesFactory(
         mockRequest,
-        [kibanaFeature2, optOutKibanaFeature],
+        [kibanaFeature2, optOutKibanaFeature, reservedKibanaFeature],
         [esManagementFeature],
         mockLoggers.get(),
         mockAuthz,
@@ -360,6 +383,8 @@ describe('usingPrivileges', () => {
             { privilege: actions.ui.get('kibanaFeature1', 'bar'), authorized: false },
             { privilege: actions.ui.get('kibanaFeature2', 'foo'), authorized: true },
             { privilege: actions.ui.get('kibanaFeature2', 'bar'), authorized: false },
+            { privilege: actions.ui.get('reservedFeature', 'reservedUI1'), authorized: false },
+            { privilege: actions.ui.get('reservedFeature', 'reservedUI2'), authorized: false },
             { privilege: actions.ui.get('optOutFeature', 'foo'), authorized: false },
             { privilege: actions.ui.get('optOutFeature', 'bar'), authorized: false },
             { privilege: actions.ui.get('spaces', 'manage'), authorized: false },
@@ -379,7 +404,7 @@ describe('usingPrivileges', () => {
 
     const { usingPrivileges } = disableUICapabilitiesFactory(
       mockRequest,
-      [kibanaFeature1, kibanaFeature2, optOutKibanaFeature],
+      [kibanaFeature1, kibanaFeature2, optOutKibanaFeature, reservedKibanaFeature],
       esFeatures,
       loggingSystemMock.create().get(),
       mockAuthz,
@@ -408,6 +433,10 @@ describe('usingPrivileges', () => {
         kibanaFeature2: {
           foo: true,
           bar: true,
+        },
+        reservedFeature: {
+          reservedUI1: false,
+          reservedUI2: false,
         },
         optOutFeature: {
           foo: true,
@@ -451,6 +480,10 @@ describe('usingPrivileges', () => {
       kibanaFeature2: {
         foo: true,
         bar: false,
+      },
+      reservedFeature: {
+        reservedUI1: false,
+        reservedUI2: false,
       },
       optOutFeature: {
         // these stay enabled because they opt out of Kibana security
@@ -506,7 +539,7 @@ describe('usingPrivileges', () => {
 
     const { usingPrivileges } = disableUICapabilitiesFactory(
       mockRequest,
-      [kibanaFeature1, kibanaFeature2, optOutKibanaFeature],
+      [kibanaFeature1, kibanaFeature2, optOutKibanaFeature, reservedKibanaFeature],
       esFeatures,
       loggingSystemMock.create().get(),
       mockAuthz,
@@ -563,7 +596,7 @@ describe('all', () => {
 
     const { all } = disableUICapabilitiesFactory(
       mockRequest,
-      [kibanaFeature1, optOutKibanaFeature],
+      [kibanaFeature1, optOutKibanaFeature, reservedKibanaFeature],
       [
         new ElasticsearchFeature({
           id: 'esFeature1',
@@ -601,6 +634,10 @@ describe('all', () => {
           foo: true,
           bar: true,
         },
+        reservedFeature: {
+          reservedUI1: true,
+          reservedUI2: true,
+        },
         optOutFeature: {
           foo: true,
           bar: true,
@@ -625,7 +662,7 @@ describe('all', () => {
       },
       catalogue: {},
       kibanaFeature1: {
-        // registered kibana features with privileges get diabled
+        // registered kibana features with privileges get disabled
         foo: false,
         bar: false,
       },
@@ -633,6 +670,11 @@ describe('all', () => {
         // does NOT disable because it is not a registered Kibana feature
         foo: true,
         bar: true,
+      },
+      reservedFeature: {
+        // registered kibana features with reserved privileges get disabled
+        reservedUI1: false,
+        reservedUI2: false,
       },
       optOutFeature: {
         // does NOT disable because it opts out (does not define privileges)

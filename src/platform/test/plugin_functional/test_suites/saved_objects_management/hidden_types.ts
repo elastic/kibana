@@ -10,7 +10,7 @@
 import path from 'path';
 import expect from '@kbn/expect';
 import { byIdAscComparator } from '@kbn/core-saved-objects-import-export-server-internal/src/export/utils';
-import { PluginFunctionalProviderContext } from '../../services';
+import type { PluginFunctionalProviderContext } from '../../services';
 
 const fixturePaths = {
   hiddenImportable: path.join(__dirname, 'exports', '_import_hidden_importable.ndjson'),
@@ -79,7 +79,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
         await PageObjects.savedObjects.clickCheckboxByTitle('hidden object 1');
 
         await PageObjects.savedObjects.clickDelete({ confirmDelete: false });
-        expect(await testSubjects.exists('cannotDeleteObjectsConfirmWarning')).to.eql(true);
+        await testSubjects.existOrFail('cannotDeleteObjectsConfirmWarning', { timeout: 5000 });
       });
 
       it('should not delete the hidden objects when performing the operation', async () => {

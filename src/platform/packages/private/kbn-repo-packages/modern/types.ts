@@ -11,10 +11,18 @@ import type { KibanaGroup, ModuleVisibility } from '@kbn/projects-solutions-grou
 import type { Package } from './package';
 import type { PLUGIN_CATEGORY } from './plugin_category_info';
 
-/**
- * Simple parsed representation of a package.json file, validated
- * by `assertParsedPackageJson()` and extensible as needed in the future
- */
+type ExportTarget = string | ConditionalExports | Array<string | ConditionalExports>;
+
+interface ConditionalExports {
+  [condition: string]: ExportTarget;
+}
+
+interface SubpathExports {
+  [subpath: string]: ExportTarget;
+}
+
+export type PackageExports = ExportTarget | SubpathExports | null;
+
 export interface ParsedPackageJson {
   /** The name of the package, usually `@kbn/`+something */
   name: string;
@@ -31,6 +39,7 @@ export interface ParsedPackageJson {
   scripts?: {
     [key: string]: string | undefined;
   };
+  exports?: PackageExports;
   /** All other fields in the package.json are typed as unknown as we don't care what they are */
   [key: string]: unknown;
 }
@@ -38,6 +47,7 @@ export interface ParsedPackageJson {
 export type KibanaPackageType =
   | 'core'
   | 'plugin'
+  | 'tooling'
   | 'shared-browser'
   | 'shared-server'
   | 'shared-common'
@@ -136,7 +146,7 @@ export interface SharedBrowserPackageManifest extends PackageManifestBaseFields 
 }
 
 export interface BasePackageManifest extends PackageManifestBaseFields {
-  type: 'shared-server' | 'functional-tests' | 'test-helper' | 'shared-scss' | 'core';
+  type: 'shared-server' | 'functional-tests' | 'test-helper' | 'shared-scss' | 'core' | 'tooling';
 }
 
 export type KibanaPackageManifest =
@@ -162,11 +172,17 @@ export interface PluginSelector {
    */
   testPlugins?: boolean;
   /**
-   * Absolute paths to specific plugin package which will always be included, regardless of the other settings
+   * Set to `true` to include `devOnly` plugins
+   */
+  devOnly?: boolean;
+  /**
+   * Absolute paths to specific plugin packages which will be included even when
+   * `examples` / `testPlugins` are off. `devOnly` plugins still require `devOnly: true`.
    */
   paths?: readonly string[];
   /**
-   * Absolute paths to parent directories of plugin packages which will always be included, regardless of the other settings
+   * Absolute paths to parent directories of plugin packages which will be included
+   * even when `examples` / `testPlugins` are off. `devOnly` plugins still require `devOnly: true`.
    */
   parentDirs?: readonly string[];
   /**
@@ -181,6 +197,10 @@ export interface PluginSelector {
    * When set to true, only select plugins which have browser-side components
    */
   browser?: boolean;
+  /**
+   * When defined, only select plugins that belong to the specified groups
+   */
+  allowlistPluginGroups?: readonly KibanaGroup[];
 }
 
 export interface KbnImportReq {

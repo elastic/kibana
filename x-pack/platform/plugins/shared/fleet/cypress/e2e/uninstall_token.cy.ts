@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type { UninstallToken } from '../../common/types/models/uninstall_token';
+import type { UninstallToken } from '@kbn/fleet-plugin/common/types/models/uninstall_token';
 
 import { cleanupAgentPolicies } from '../tasks/cleanup';
 import { UNINSTALL_TOKENS } from '../screens/fleet';
-import type { GetUninstallTokenResponse } from '../../common/types/rest_spec/uninstall_token';
+import type { GetUninstallTokenResponse } from '@kbn/fleet-plugin/common/types/rest_spec/uninstall_token';
 
-import { API_VERSIONS } from '../../common/constants';
+import { API_VERSIONS } from '@kbn/fleet-plugin/common/constants';
 import { request } from '../tasks/common';
 import { login } from '../tasks/login';
 
@@ -50,7 +50,7 @@ describe('Uninstall token page', () => {
       it('should show token by clicking on the eye button', () => {
         // tokens are hidden by default
         cy.getBySel(UNINSTALL_TOKENS.TOKEN_FIELD).each(($tokenField) => {
-          expect($tokenField).to.contain.text('••••••••••••••••••••••••••••••••');
+          expect($tokenField).to.contain.text('••••••••••••••••••••••••');
         });
 
         // token is reveiled when clicking on eye button
@@ -62,7 +62,7 @@ describe('Uninstall token page', () => {
 
           cy.getBySel(UNINSTALL_TOKENS.TOKEN_FIELD)
             .first()
-            .should('not.contain.text', '••••••••••••••••••••••••••••••••')
+            .should('not.contain.text', '••••••••••••••••••••••••')
             .should('contain.text', fetchedToken.token);
         });
       });

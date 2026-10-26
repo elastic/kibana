@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { Mappings } from '../../../utils/create_or_update_index';
+import type { Mappings } from '../../../utils/create_or_update_index';
 
 export const ANNOTATION_MAPPINGS: Mappings = {
   dynamic: 'strict',

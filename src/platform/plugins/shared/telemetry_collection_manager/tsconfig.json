@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
     "isolatedModules": true
@@ -10,7 +10,9 @@
   ],
   "kbn_references": [
     "@kbn/core",
-    "@kbn/usage-collection-plugin"
+    "@kbn/usage-collection-plugin",
+    "@kbn/tracing-utils",
+    "@kbn/apm-utils"
   ],
   "exclude": [
     "target/**/*",

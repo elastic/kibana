@@ -1,0 +1,1799 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import Boom from '@hapi/boom';
+import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
+import { asSpaceId, DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { actionsAuthorizationMock } from '../../../../authorization/actions_authorization.mock';
+import type { ActionsAuthorization } from '../../../../authorization/actions_authorization';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
+import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import type { Logger } from '@kbn/logging';
+import type { ActionTypeRegistry } from '../../../../action_type_registry';
+import type { AuthTypeRegistry } from '../../../../auth_types/auth_type_registry';
+import { create } from './create';
+import { connectorCreateCounter } from '../../../../lib/connector_metrics';
+import { getConnectorType } from '../../../../fixtures';
+import type { ActionsClientContext } from '../../../../actions_client';
+import { actionExecutorMock } from '../../../../lib/action_executor.mock';
+import { connectorTokenClientMock } from '../../../../lib/connector_token_client.mock';
+import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
+import { z } from '@kbn/zod';
+import { z as z4 } from '@kbn/zod/v4';
+import {
+  connectorTypeHasInboundEvents,
+  connectorTypeIsDual,
+  getConnectorSpec,
+} from '@kbn/connector-specs';
+import { authTypeRegistryMock } from '../../../../auth_types/auth_type_registry.mock';
+import { generateConfigSchema } from '../../../../lib/single_file_connectors/generate_config_schema';
+import { securityServiceMock } from '@kbn/core/server/mocks';
+import { encodeApiKey } from '../../../../inbound/event_identity/encode_api_key';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+
+jest.mock('@kbn/connector-specs', () => {
+  const actual = jest.requireActual('@kbn/connector-specs');
+  return {
+    ...actual,
+    connectorTypeHasInboundEvents: jest.fn((actionTypeId: string) =>
+      actual.connectorTypeHasInboundEvents(actionTypeId)
+    ),
+    connectorTypeIsDual: jest.fn((actionTypeId: string) =>
+      actual.connectorTypeIsDual(actionTypeId)
+    ),
+  };
+});
+
+jest.mock('@kbn/core-saved-objects-utils-server', () => {
+  const actual = jest.requireActual('@kbn/core-saved-objects-utils-server');
+  return {
+    ...actual,
+    SavedObjectsUtils: {
+      generateId: () => 'mock-saved-object-id',
+    },
+  };
+});
+
+const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
+const scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+const authorization = actionsAuthorizationMock.create();
+const request = httpServerMock.createKibanaRequest();
+const auditLogger = auditLoggerMock.create();
+const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
+const preSaveHook = jest.fn();
+const postSaveHook = jest.fn();
+const actionExecutor = actionExecutorMock.create();
+const connectorTokenClient = connectorTokenClientMock.create();
+const encryptedSavedObjectsClient = encryptedSavedObjectsMock.createClient();
+const bulkExecutionEnqueuer = jest.fn();
+const getEventLogClient = jest.fn();
+const getAxiosInstanceWithAuth = jest.fn();
+
+const actionTypeRegistry: ActionTypeRegistry = {
+  get: jest.fn(),
+  has: jest.fn(),
+  isSystemActionType: jest.fn().mockReturnValue(false),
+  ensureActionTypeEnabled: jest.fn(),
+  isDeprecated: jest.fn().mockReturnValue(false),
+  getUtils: jest.fn().mockReturnValue({
+    isHostnameAllowed: jest.fn().mockReturnValue(true),
+    isUriAllowed: jest.fn().mockReturnValue(true),
+    getMicrosoftGraphApiUrl: jest.fn(),
+    getProxySettings: jest.fn(),
+  }),
+} as unknown as ActionTypeRegistry;
+
+const authTypeRegistry = authTypeRegistryMock.create() as unknown as AuthTypeRegistry;
+const mockContext: ActionsClientContext = {
+  actionTypeRegistry,
+  authTypeRegistry,
+  authorization: authorization as unknown as ActionsAuthorization,
+  unsecuredSavedObjectsClient,
+  scopedClusterClient,
+  request,
+  auditLogger,
+  logger,
+  inMemoryConnectors: [],
+  kibanaIndices: ['.kibana'],
+  actionExecutor,
+  bulkExecutionEnqueuer,
+  connectorTokenClient,
+  getEventLogClient,
+  encryptedSavedObjectsClient,
+  isESOCanEncrypt: true,
+  getAxiosInstanceWithAuth,
+};
+
+describe('create()', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    unsecuredSavedObjectsClient.create.mockReset();
+    // Set up default action type with schemas that accept any properties
+    (actionTypeRegistry.get as jest.Mock).mockReturnValue(
+      getConnectorType({
+        id: 'my-connector-type',
+        validate: {
+          config: { schema: z.any() },
+          secrets: { schema: z.any() },
+          params: { schema: z.object({}) },
+        },
+      })
+    );
+    (actionTypeRegistry.isDeprecated as jest.Mock).mockReturnValue(false);
+    (actionTypeRegistry.isSystemActionType as jest.Mock).mockReturnValue(false);
+    authorization.ensureAuthorized.mockResolvedValue(undefined);
+  });
+
+  describe('authorization', () => {
+    test('ensures user is authorised to create this type of action', async () => {
+      const savedObjectCreateResult = {
+        id: '1',
+        type: 'action',
+        attributes: {
+          name: 'my name',
+          actionTypeId: 'my-connector-type',
+          isMissingSecrets: false,
+          config: {},
+        },
+        references: [],
+      };
+      unsecuredSavedObjectsClient.create.mockResolvedValueOnce(savedObjectCreateResult);
+
+      await create({
+        context: mockContext,
+        action: {
+          name: 'my name',
+          actionTypeId: 'my-connector-type',
+          config: {},
+          secrets: {},
+        },
+      });
+
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
+        operation: 'create',
+        actionTypeId: 'my-connector-type',
+      });
+    });
+
+    test('throws when user is not authorised to create this type of action', async () => {
+      const savedObjectCreateResult = {
+        id: '1',
+        type: 'action',
+        attributes: {
+          name: 'my name',
+          actionTypeId: 'my-connector-type',
+          isMissingSecrets: false,
+          config: {},
+        },
+        references: [],
+      };
+      unsecuredSavedObjectsClient.create.mockResolvedValueOnce(savedObjectCreateResult);
+
+      authorization.ensureAuthorized.mockRejectedValue(
+        new Error(`Unauthorized to create a "my-connector-type" action`)
+      );
+
+      await expect(
+        create({
+          context: mockContext,
+          action: {
+            name: 'my name',
+            actionTypeId: 'my-connector-type',
+            config: {},
+            secrets: {},
+          },
+        })
+      ).rejects.toMatchInlineSnapshot(
+        `[Error: Unauthorized to create a "my-connector-type" action]`
+      );
+
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
+        operation: 'create',
+        actionTypeId: 'my-connector-type',
+      });
+    });
+  });
+
+  describe('auditLogger', () => {
+    test('logs audit event when creating a connector', async () => {
+      const savedObjectCreateResult = {
+        id: '1',
+        type: 'action',
+        attributes: {
+          name: 'my name',
+          actionTypeId: 'my-connector-type',
+          isMissingSecrets: false,
+          config: {},
+        },
+        references: [],
+      };
+      unsecuredSavedObjectsClient.create.mockResolvedValueOnce(savedObjectCreateResult);
+
+      await create({
+        context: mockContext,
+        action: {
+          name: 'my name',
+          actionTypeId: 'my-connector-type',
+          config: {},
+          secrets: {},
+        },
+      });
+
+      expect(auditLogger.log).toHaveBeenCalledWith(
+        expect.objectContaining({
+          event: expect.objectContaining({
+            action: 'connector_create',
+            outcome: 'unknown',
+          }),
+          kibana: { saved_object: { id: 'mock-saved-object-id', type: 'action' } },
+        })
+      );
+    });
+
+    test('logs audit event when not authorised to create a connector', async () => {
+      const savedObjectCreateResult = {
+        id: '1',
+        type: 'action',
+        attributes: {
+          name: 'my name',
+          actionTypeId: 'my-connector-type',
+          isMissingSecrets: false,
+          config: {},
+        },
+        references: [],
+      };
+      unsecuredSavedObjectsClient.create.mockResolvedValueOnce(savedObjectCreateResult);
+
+      authorization.ensureAuthorized.mockRejectedValue(new Error('Unauthorized'));
+
+      await expect(
+        create({
+          context: mockContext,
+          action: {
+            name: 'my name',
+            actionTypeId: 'my-connector-type',
+            config: {},
+            secrets: {},
+          },
+        })
+      ).rejects.toThrow();
+
+      expect(auditLogger.log).toHaveBeenCalledWith(
+        expect.objectContaining({
+          event: expect.objectContaining({
+            action: 'connector_create',
+          }),
+          kibana: { saved_object: { id: 'mock-saved-object-id', type: 'action' } },
+          error: { code: 'Error', message: 'Unauthorized' },
+        })
+      );
+    });
+  });
+
+  describe('system actions', () => {
+    test('throws an error when creating a system action', async () => {
+      (actionTypeRegistry.isSystemActionType as jest.Mock).mockReturnValue(true);
+
+      await expect(
+        create({
+          context: mockContext,
+          action: {
+            name: 'my name',
+            actionTypeId: '.cases',
+            config: {},
+            secrets: {},
+          },
+        })
+      ).rejects.toThrow('System action creation is forbidden. Action type: .cases.');
+    });
+
+    test('throws an error when creating a connector with an ID that matches a system action', async () => {
+      const contextWithSystemAction = {
+        ...mockContext,
+        inMemoryConnectors: [
+          {
+            id: 'system-connector-id',
+            actionTypeId: '.cases',
+            name: 'System Action',
+            isSystemAction: true,
+            config: {},
+            secrets: {},
+            isPreconfigured: false,
+            isDeprecated: false,
+            isConnectorTypeDeprecated: false,
+          },
+        ],
+      };
+
+      await expect(
+        create({
+          context: contextWithSystemAction,
+          action: {
+            name: 'my name',
+            actionTypeId: 'my-connector-type',
+            config: {},
+            secrets: {},
+          },
+          options: { id: 'system-connector-id' },
+        })
+      ).rejects.toThrow('System action creation is forbidden. Action type: my-connector-type.');
+    });
+  });
+
+  describe('preconfigured connectors', () => {
+    test('throws an error when creating a connector with an ID that matches a preconfigured connector', async () => {
+      const contextWithPreconfigured = {
+        ...mockContext,
+        inMemoryConnectors: [
+          {
+            id: 'preconfigured-connector-id',
+            actionTypeId: 'my-connector-type',
+            name: 'Preconfigured Connector',
+            isPreconfigured: true,
+            isSystemAction: false,
+            config: {},
+            secrets: {},
+            isDeprecated: false,
+            isConnectorTypeDeprecated: false,
+          },
+        ],
+      };
+
+      await expect(
+        create({
+          context: contextWithPreconfigured,
+          action: {
+            name: 'my name',
+            actionTypeId: 'my-connector-type',
+            config: {},
+            secrets: {},
+          },
+          options: { id: 'preconfigured-connector-id' },
+        })
+      ).rejects.toThrow(
+        'This preconfigured-connector-id already exists in a preconfigured action.'
+      );
+    });
+  });
+
+  describe('Kibana managed auth types', () => {
+    test('throws an error when creating a connector with a Kibana managed auth type', async () => {
+      await expect(
+        create({
+          context: mockContext,
+          action: {
+            name: 'my name',
+            actionTypeId: '.slack2',
+            config: {},
+            secrets: { authType: 'relay', tenantKey: 'tenant-A' },
+          },
+        })
+      ).rejects.toThrow(
+        'Authentication type relay is set by Kibana and cannot be configured on a connector. Action type: .slack2.'
+      );
+    });
+
+    test('throws when the Kibana managed auth type is only present in config', async () => {
+      await expect(
+        create({
+          context: mockContext,
+          action: {
+            name: 'my name',
+            actionTypeId: '.slack2',
+            config: { authType: 'relay' },
+            secrets: {},
+          },
+        })
+      ).rejects.toThrow(
+        'Authentication type relay is set by Kibana and cannot be configured on a connector. Action type: .slack2.'
+      );
+    });
+
+    test('throws for a connector type whose spec does not offer the Kibana managed auth type', async () => {
+      await expect(
+        create({
+          context: mockContext,
+          action: {
+            name: 'my name',
+            actionTypeId: '.notion',
+            config: {},
+            secrets: { authType: 'relay', tenantKey: 'tenant-A' },
+          },
+        })
+      ).rejects.toThrow(
+        'Authentication type relay is set by Kibana and cannot be configured on a connector. Action type: .notion.'
+      );
+    });
+
+    test('allows a user-facing auth type on the same connector type', async () => {
+      unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+        id: '1',
+        type: 'action',
+        attributes: {
+          name: 'my name',
+          actionTypeId: '.slack2',
+          isMissingSecrets: false,
+          config: {},
+        },
+        references: [],
+      });
+
+      await expect(
+        create({
+          context: mockContext,
+          action: {
+            name: 'my name',
+            actionTypeId: '.slack2',
+            config: {},
+            secrets: { authType: 'bearer', token: 'xoxb-token' },
+          },
+        })
+      ).resolves.toEqual(expect.objectContaining({ actionTypeId: '.slack2' }));
+    });
+  });
+
+  describe('basic connector creation', () => {
+    test('creates an action with all given properties', async () => {
+      const savedObjectCreateResult = {
+        id: '1',
+        type: 'action',
+        attributes: {
+          name: 'my name',
+          actionTypeId: 'my-connector-type',
+          isMissingSecrets: false,
+          config: { foo: 'bar' },
+        },
+        references: [],
+      };
+      unsecuredSavedObjectsClient.create.mockResolvedValueOnce(savedObjectCreateResult);
+
+      const result = await create({
+        context: mockContext,
+        action: {
+          name: 'my name',
+          actionTypeId: 'my-connector-type',
+          config: { foo: 'bar' },
+          secrets: { apiKey: 'secret' },
+        },
+      });
+
+      expect(result).toEqual({
+        id: '1',
+        actionTypeId: 'my-connector-type',
+        isMissingSecrets: false,
+        name: 'my name',
+        config: { foo: 'bar' },
+        isPreconfigured: false,
+        isSystemAction: false,
+        isDeprecated: false,
+        isConnectorTypeDeprecated: false,
+      });
+
+      expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
+        'action',
+        {
+          actionTypeId: 'my-connector-type',
+          name: 'my name',
+          isMissingSecrets: false,
+          config: { foo: 'bar' },
+          secrets: { apiKey: 'secret' },
+          hasInboundEventIdentity: false,
+        },
+        { id: 'mock-saved-object-id' }
+      );
+    });
+
+    test('creates an action with a custom ID when provided', async () => {
+      const savedObjectCreateResult = {
+        id: 'custom-id',
+        type: 'action',
+        attributes: {
+          name: 'my name',
+          actionTypeId: 'my-connector-type',
+          isMissingSecrets: false,
+          config: {},
+        },
+        references: [],
+      };
+      unsecuredSavedObjectsClient.create.mockResolvedValueOnce(savedObjectCreateResult);
+
+      const result = await create({
+        context: mockContext,
+        action: {
+          name: 'my name',
+          actionTypeId: 'my-connector-type',
+          config: {},
+          secrets: {},
+        },
+        options: { id: 'custom-id' },
+      });
+
+      expect(result.id).toBe('custom-id');
+      expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith('action', expect.anything(), {
+        id: 'custom-id',
+      });
+    });
+
+    test('validates config and secrets', async () => {
+      const savedObjectCreateResult = {
+        id: '1',
+        type: 'action',
+        attributes: {
+          name: 'my name',
+          actionTypeId: 'my-connector-type',
+          isMissingSecrets: false,
+          config: { validated: true },
+        },
+        references: [],
+      };
+      unsecuredSavedObjectsClient.create.mockResolvedValueOnce(savedObjectCreateResult);
+
+      const actionType = getConnectorType({
+        id: 'my-connector-type',
+        validate: {
+          config: {
+            schema: z.any().transform(() => ({ validated: true })),
+          },
+          secrets: {
+            schema: z.any().transform(() => ({ validatedSecret: true })),
+          },
+        },
+      });
+
+      (actionTypeRegistry.get as jest.Mock).mockReturnValue(actionType);
+
+      await create({
+        context: mockContext,
+        action: {
+          name: 'my name',
+          actionTypeId: 'my-connector-type',
+          config: { foo: 'bar' },
+          secrets: { apiKey: 'secret' },
+        },
+      });
+
+      expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
+        'action',
+        expect.objectContaining({
+          config: { validated: true },
+          secrets: { validatedSecret: true },
+        }),
+        expect.anything()
+      );
+    });
+
+    test('ensures action type is enabled', async () => {
+      const savedObjectCreateResult = {
+        id: '1',
+        type: 'action',
+        attributes: {
+          name: 'my name',
+          actionTypeId: 'my-connector-type',
+          isMissingSecrets: false,
+          config: {},
+        },
+        references: [],
+      };
+      unsecuredSavedObjectsClient.create.mockResolvedValueOnce(savedObjectCreateResult);
+
+      await create({
+        context: mockContext,
+        action: {
+          name: 'my name',
+          actionTypeId: 'my-connector-type',
+          config: {},
+          secrets: {},
+        },
+      });
+
+      expect(actionTypeRegistry.ensureActionTypeEnabled).toHaveBeenCalledWith('my-connector-type');
+    });
+  });
+
+  describe('authMode', () => {
+    test('creates an action with authMode "shared"', async () => {
+      // Mock authTypeRegistry to return an auth type with authMode 'shared'
+      (authTypeRegistry.get as jest.Mock).mockReturnValue({
+        id: 'basic',
+      });
+
+      const savedObjectCreateResult = {
+        id: '1',
+        type: 'action',
+        attributes: {
+          name: 'my name',
+          actionTypeId: 'my-connector-type',
+          isMissingSecrets: false,
+          config: {
+            authType: 'basic',
+          },
+          authMode: 'shared' as const,
+        },
+        references: [],
+      };
+      unsecuredSavedObjectsClient.create.mockResolvedValueOnce(savedObjectCreateResult);
+
+      const result = await create({
+        context: mockContext,
+        action: {
+          name: 'my name',
+          actionTypeId: 'my-connector-type',
+          config: { authType: 'basic' },
+          secrets: {},
+        },
+      });
+
+      expect(result).toEqual({
+        id: '1',
+        actionTypeId: 'my-connector-type',
+        isMissingSecrets: false,
+        name: 'my name',
+        config: {
+          authType: 'basic',
+        },
+        authMode: 'shared',
+        isPreconfigured: false,
+        isSystemAction: false,
+        isDeprecated: false,
+        isConnectorTypeDeprecated: false,
+      });
+
+      expect(authTypeRegistry.get).toHaveBeenCalledWith('basic');
+      expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
+        'action',
+        {
+          actionTypeId: 'my-connector-type',
+          name: 'my name',
+          isMissingSecrets: false,
+          config: {
+            authType: 'basic',
+          },
+          secrets: {},
+          authMode: 'shared',
+          hasInboundEventIdentity: false,
+        },
+        { id: 'mock-saved-object-id' }
+      );
+    });
+
+    test('creates an action with authMode "per-user"', async () => {
+      // Mock authTypeRegistry to return an auth type with authMode 'per-user'
+      (authTypeRegistry.get as jest.Mock).mockReturnValue({
+        id: 'oauth2',
+        authMode: 'per-user',
+      });
+
+      const savedObjectCreateResult = {
+        id: '1',
+        type: 'action',
+        attributes: {
+          name: 'my name',
+          actionTypeId: 'my-connector-type',
+          isMissingSecrets: false,
+          config: {},
+          secrets: { authType: 'oauth_authorization_code' },
+          authMode: 'per-user' as const,
+        },
+        references: [],
+      };
+      unsecuredSavedObjectsClient.create.mockResolvedValueOnce(savedObjectCreateResult);
+
+      const result = await create({
+        context: mockContext,
+        action: {
+          name: 'my name',
+          actionTypeId: 'my-connector-type',
+          config: {},
+          secrets: { authType: 'oauth_authorization_code' },
+        },
+      });
+
+      expect(result).toEqual({
+        id: '1',
+        actionTypeId: 'my-connector-type',
+        isMissingSecrets: false,
+        name: 'my name',
+        config: {},
+        isPreconfigured: false,
+        isSystemAction: false,
+        isDeprecated: false,
+        isConnectorTypeDeprecated: false,
+        authMode: 'per-user',
+      });
+
+      expect(authTypeRegistry.get).toHaveBeenCalledWith('oauth_authorization_code');
+      expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
+        'action',
+        {
+          actionTypeId: 'my-connector-type',
+          name: 'my name',
+          isMissingSecrets: false,
+          config: {},
+          secrets: { authType: 'oauth_authorization_code' },
+          authMode: 'per-user',
+          hasInboundEventIdentity: false,
+        },
+        { id: 'mock-saved-object-id' }
+      );
+    });
+
+    test('creates an action without authMode when no authType is provided', async () => {
+      const savedObjectCreateResult = {
+        id: '1',
+        type: 'action',
+        attributes: {
+          name: 'my name',
+          actionTypeId: 'my-connector-type',
+          isMissingSecrets: false,
+          config: {},
+        },
+        references: [],
+      };
+      unsecuredSavedObjectsClient.create.mockResolvedValueOnce(savedObjectCreateResult);
+
+      const result = await create({
+        context: mockContext,
+        action: {
+          name: 'my name',
+          actionTypeId: 'my-connector-type',
+          config: {},
+          secrets: {},
+        },
+      });
+
+      expect(result).toEqual({
+        id: '1',
+        actionTypeId: 'my-connector-type',
+        isMissingSecrets: false,
+        name: 'my name',
+        config: {},
+        isPreconfigured: false,
+        isSystemAction: false,
+        isDeprecated: false,
+        isConnectorTypeDeprecated: false,
+      });
+
+      expect(authTypeRegistry.get).not.toHaveBeenCalled();
+      expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
+        'action',
+        {
+          actionTypeId: 'my-connector-type',
+          name: 'my name',
+          isMissingSecrets: false,
+          config: {},
+          secrets: {},
+          hasInboundEventIdentity: false,
+        },
+        { id: 'mock-saved-object-id' }
+      );
+    });
+  });
+
+  describe('spec connector config.authType', () => {
+    test('persists config.authType from secrets when config is empty (spec source)', async () => {
+      (authTypeRegistry.get as jest.Mock).mockReturnValue({
+        id: 'bearer',
+        authMode: 'shared',
+      });
+
+      const actionType = getConnectorType({
+        source: ACTION_TYPE_SOURCES.spec,
+        validate: {
+          config: { schema: z.any() },
+          secrets: { schema: z.any() },
+          params: { schema: z.object({}) },
+        },
+      });
+      (actionTypeRegistry.get as jest.Mock).mockReturnValue(actionType);
+
+      const savedObjectCreateResult = {
+        id: '1',
+        type: 'action',
+        attributes: {
+          name: 'my name',
+          actionTypeId: 'my-connector-type',
+          isMissingSecrets: false,
+          config: { authType: 'bearer' },
+          secrets: { authType: 'bearer', token: 'secret' },
+          authMode: 'shared' as const,
+        },
+        references: [],
+      };
+      unsecuredSavedObjectsClient.create.mockResolvedValueOnce(savedObjectCreateResult);
+
+      await create({
+        context: mockContext,
+        action: {
+          name: 'my name',
+          actionTypeId: 'my-connector-type',
+          config: {},
+          secrets: { authType: 'bearer', token: 'secret' },
+        },
+      });
+
+      expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
+        'action',
+        expect.objectContaining({
+          config: { authType: 'bearer' },
+          secrets: { authType: 'bearer', token: 'secret' },
+        }),
+        { id: 'mock-saved-object-id' }
+      );
+    });
+
+    test('does not inject config.authType for stack source when secrets include authType', async () => {
+      (authTypeRegistry.get as jest.Mock).mockReturnValue({
+        id: 'bearer',
+        authMode: 'shared',
+      });
+
+      const actionType = getConnectorType({
+        source: ACTION_TYPE_SOURCES.stack,
+        validate: {
+          config: { schema: z.any() },
+          secrets: { schema: z.any() },
+          params: { schema: z.object({}) },
+        },
+      });
+      (actionTypeRegistry.get as jest.Mock).mockReturnValue(actionType);
+
+      const savedObjectCreateResult = {
+        id: '1',
+        type: 'action',
+        attributes: {
+          name: 'my name',
+          actionTypeId: 'my-connector-type',
+          isMissingSecrets: false,
+          config: {},
+          secrets: { authType: 'bearer', token: 'secret' },
+          authMode: 'shared' as const,
+        },
+        references: [],
+      };
+      unsecuredSavedObjectsClient.create.mockResolvedValueOnce(savedObjectCreateResult);
+
+      await create({
+        context: mockContext,
+        action: {
+          name: 'my name',
+          actionTypeId: 'my-connector-type',
+          config: {},
+          secrets: { authType: 'bearer', token: 'secret' },
+        },
+      });
+
+      expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
+        'action',
+        expect.objectContaining({
+          config: {},
+          secrets: { authType: 'bearer', token: 'secret' },
+        }),
+        { id: 'mock-saved-object-id' }
+      );
+    });
+  });
+
+  describe('hooks', () => {
+    test('calls preSaveHook if defined', async () => {
+      const savedObjectCreateResult = {
+        id: '1',
+        type: 'action',
+        attributes: {
+          name: 'my name',
+          actionTypeId: 'my-connector-type',
+          isMissingSecrets: false,
+          config: {},
+        },
+        references: [],
+      };
+      unsecuredSavedObjectsClient.create.mockResolvedValueOnce(savedObjectCreateResult);
+
+      const actionType = getConnectorType({
+        id: 'my-connector-type',
+        preSaveHook,
+      });
+
+      (actionTypeRegistry.get as jest.Mock).mockReturnValue(actionType);
+
+      await create({
+        context: mockContext,
+        action: {
+          name: 'my name',
+          actionTypeId: 'my-connector-type',
+          config: { foo: 'bar' },
+          secrets: { apiKey: 'secret' },
+        },
+      });
+
+      expect(preSaveHook).toHaveBeenCalledWith({
+        connectorId: 'mock-saved-object-id',
+        config: { foo: 'bar' },
+        secrets: { apiKey: 'secret' },
+        logger,
+        request,
+        services: { scopedClusterClient },
+        isUpdate: false,
+      });
+    });
+
+    test('logs audit event and throws when preSaveHook fails', async () => {
+      const actionType = getConnectorType({
+        id: 'my-connector-type',
+        preSaveHook,
+      });
+
+      (actionTypeRegistry.get as jest.Mock).mockReturnValue(actionType);
+      preSaveHook.mockRejectedValueOnce(new Error('preSaveHook failed'));
+
+      await expect(
+        create({
+          context: mockContext,
+          action: {
+            name: 'my name',
+            actionTypeId: 'my-connector-type',
+            config: {},
+            secrets: {},
+          },
+        })
+      ).rejects.toThrow('preSaveHook failed');
+
+      expect(auditLogger.log).toHaveBeenCalledWith(
+        expect.objectContaining({
+          event: expect.objectContaining({
+            action: 'connector_create',
+          }),
+          error: expect.objectContaining({
+            message: 'preSaveHook failed',
+          }),
+        })
+      );
+    });
+
+    test('calls postSaveHook if defined and connector created successfully', async () => {
+      const savedObjectCreateResult = {
+        id: '1',
+        type: 'action',
+        attributes: {
+          name: 'my name',
+          actionTypeId: 'my-connector-type',
+          isMissingSecrets: false,
+          config: {},
+        },
+        references: [],
+      };
+      unsecuredSavedObjectsClient.create.mockResolvedValueOnce(savedObjectCreateResult);
+
+      const actionType = getConnectorType({
+        id: 'my-connector-type',
+        postSaveHook,
+      });
+
+      (actionTypeRegistry.get as jest.Mock).mockReturnValue(actionType);
+
+      await create({
+        context: mockContext,
+        action: {
+          name: 'my name',
+          actionTypeId: 'my-connector-type',
+          config: { foo: 'bar' },
+          secrets: { apiKey: 'secret' },
+        },
+      });
+
+      expect(postSaveHook).toHaveBeenCalledWith({
+        connectorId: 'mock-saved-object-id',
+        config: { foo: 'bar' },
+        secrets: { apiKey: 'secret' },
+        logger,
+        request,
+        services: { scopedClusterClient },
+        isUpdate: false,
+        wasSuccessful: true,
+      });
+    });
+
+    test('calls postSaveHook with wasSuccessful false when connector creation fails', async () => {
+      unsecuredSavedObjectsClient.create.mockRejectedValueOnce(new Error('Save failed'));
+
+      const actionType = getConnectorType({
+        id: 'my-connector-type',
+        postSaveHook,
+      });
+
+      (actionTypeRegistry.get as jest.Mock).mockReturnValue(actionType);
+
+      await expect(
+        create({
+          context: mockContext,
+          action: {
+            name: 'my name',
+            actionTypeId: 'my-connector-type',
+            config: { foo: 'bar' },
+            secrets: { apiKey: 'secret' },
+          },
+        })
+      ).rejects.toThrow('Save failed');
+
+      expect(postSaveHook).toHaveBeenCalledWith({
+        connectorId: 'mock-saved-object-id',
+        config: { foo: 'bar' },
+        secrets: { apiKey: 'secret' },
+        logger,
+        request,
+        services: { scopedClusterClient },
+        isUpdate: false,
+        wasSuccessful: false,
+      });
+    });
+
+    test('logs error but does not throw when postSaveHook fails', async () => {
+      const savedObjectCreateResult = {
+        id: '1',
+        type: 'action',
+        attributes: {
+          name: 'my name',
+          actionTypeId: 'my-connector-type',
+          isMissingSecrets: false,
+          config: {},
+        },
+        references: [],
+      };
+      unsecuredSavedObjectsClient.create.mockResolvedValueOnce(savedObjectCreateResult);
+
+      const actionType = getConnectorType({
+        id: 'my-connector-type',
+        postSaveHook,
+      });
+
+      (actionTypeRegistry.get as jest.Mock).mockReturnValue(actionType);
+      postSaveHook.mockRejectedValueOnce(new Error('postSaveHook failed'));
+
+      const result = await create({
+        context: mockContext,
+        action: {
+          name: 'my name',
+          actionTypeId: 'my-connector-type',
+          config: {},
+          secrets: {},
+        },
+      });
+
+      expect(result.id).toBe('1');
+      expect(logger.error).toHaveBeenCalledWith(
+        expect.stringContaining('postSaveHook create error'),
+        expect.objectContaining({
+          tags: ['post-save-hook', 'mock-saved-object-id'],
+        })
+      );
+    });
+  });
+
+  describe('metrics', () => {
+    const createParams = {
+      context: mockContext,
+      action: {
+        name: 'my name',
+        actionTypeId: 'my-connector-type',
+        config: {},
+        secrets: { authType: 'ears' },
+      },
+    };
+
+    beforeEach(() => {
+      jest.spyOn(connectorCreateCounter, 'add').mockImplementation(() => {});
+      (actionTypeRegistry.has as jest.Mock).mockReturnValue(true);
+      (authTypeRegistry.has as jest.Mock).mockReturnValue(true);
+    });
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    test('records a successful creation by connector type and auth type', async () => {
+      unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+        id: '1',
+        type: 'action',
+        attributes: {
+          name: 'my name',
+          actionTypeId: 'my-connector-type',
+          isMissingSecrets: false,
+          config: {},
+        },
+        references: [],
+      });
+
+      await create(createParams);
+
+      expect(connectorCreateCounter.add).toHaveBeenCalledTimes(1);
+      expect(connectorCreateCounter.add).toHaveBeenCalledWith(1, {
+        'connector.type': 'my-connector-type',
+        'connector.auth_type': 'ears',
+        success: true,
+      });
+    });
+
+    test('records an unauthorized creation', async () => {
+      authorization.ensureAuthorized.mockRejectedValueOnce(Boom.forbidden('Unauthorized'));
+
+      await expect(create(createParams)).rejects.toThrow('Unauthorized');
+
+      expect(connectorCreateCounter.add).toHaveBeenCalledWith(1, {
+        'connector.type': 'my-connector-type',
+        'connector.auth_type': 'ears',
+        success: false,
+        'error.type': 'unauthorized',
+      });
+    });
+
+    test('does not use unregistered connector or auth types as labels on a failed creation', async () => {
+      (actionTypeRegistry.has as jest.Mock).mockReturnValue(false);
+      (authTypeRegistry.has as jest.Mock).mockReturnValue(false);
+      authorization.ensureAuthorized.mockRejectedValueOnce(Boom.forbidden('Unauthorized'));
+
+      await expect(
+        create({
+          context: mockContext,
+          action: {
+            name: 'my name',
+            actionTypeId: 'attacker-chosen-type-123',
+            config: {},
+            secrets: { authType: 'attacker-chosen-auth-456' },
+          },
+        })
+      ).rejects.toThrow('Unauthorized');
+
+      expect(connectorCreateCounter.add).toHaveBeenCalledWith(1, {
+        'connector.type': 'unknown',
+        'connector.auth_type': 'unknown',
+        success: false,
+        'error.type': 'unauthorized',
+      });
+    });
+
+    test('keeps the "none" auth type for a failed creation without auth', async () => {
+      authorization.ensureAuthorized.mockRejectedValueOnce(Boom.forbidden('Unauthorized'));
+      (authTypeRegistry.has as jest.Mock).mockReturnValue(false);
+
+      await expect(
+        create({
+          context: mockContext,
+          action: {
+            name: 'my name',
+            actionTypeId: 'my-connector-type',
+            config: {},
+            secrets: {},
+          },
+        })
+      ).rejects.toThrow('Unauthorized');
+
+      expect(connectorCreateCounter.add).toHaveBeenCalledWith(1, {
+        'connector.type': 'my-connector-type',
+        'connector.auth_type': 'none',
+        success: false,
+        'error.type': 'unauthorized',
+      });
+    });
+
+    test('records a creation that conflicts with an existing connector id', async () => {
+      unsecuredSavedObjectsClient.create.mockRejectedValueOnce(
+        SavedObjectsErrorHelpers.createConflictError('action', 'mock-saved-object-id')
+      );
+
+      await expect(create(createParams)).rejects.toThrow();
+
+      expect(connectorCreateCounter.add).toHaveBeenCalledWith(1, {
+        'connector.type': 'my-connector-type',
+        'connector.auth_type': 'ears',
+        success: false,
+        'error.type': 'conflict',
+      });
+    });
+  });
+
+  describe('error handling', () => {
+    test('throws when saved object client fails', async () => {
+      unsecuredSavedObjectsClient.create.mockRejectedValueOnce(
+        new Error('Failed to create saved object')
+      );
+
+      await expect(
+        create({
+          context: mockContext,
+          action: {
+            name: 'my name',
+            actionTypeId: 'my-connector-type',
+            config: {},
+            secrets: {},
+          },
+        })
+      ).rejects.toThrow('Failed to create saved object');
+    });
+
+    test('throws when action type does not exist', async () => {
+      (actionTypeRegistry.get as jest.Mock).mockImplementation(() => {
+        throw new Error('Action type not found');
+      });
+
+      await expect(
+        create({
+          context: mockContext,
+          action: {
+            name: 'my name',
+            actionTypeId: 'non-existent-type',
+            config: {},
+            secrets: {},
+          },
+        })
+      ).rejects.toThrow('Action type not found');
+    });
+
+    test('throws when config validation fails', async () => {
+      const actionType = getConnectorType({
+        id: 'my-connector-type',
+        validate: {
+          config: {
+            schema: z.any().refine(() => {
+              throw new Error('Config validation failed');
+            }),
+          },
+        },
+      });
+
+      (actionTypeRegistry.get as jest.Mock).mockReturnValue(actionType);
+
+      await expect(
+        create({
+          context: mockContext,
+          action: {
+            name: 'my name',
+            actionTypeId: 'my-connector-type',
+            config: { invalid: 'config' },
+            secrets: {},
+          },
+        })
+      ).rejects.toThrow('Config validation failed');
+    });
+
+    test('throws when secrets validation fails', async () => {
+      const actionType = getConnectorType({
+        validate: {
+          secrets: {
+            schema: z.any().refine(() => {
+              throw new Error('Secrets validation failed');
+            }),
+          },
+        },
+      });
+
+      (actionTypeRegistry.get as jest.Mock).mockReturnValue(actionType);
+
+      await expect(
+        create({
+          context: mockContext,
+          action: {
+            name: 'my name',
+            actionTypeId: 'my-connector-type',
+            config: {},
+            secrets: { invalid: 'secret' },
+          },
+        })
+      ).rejects.toThrow('Secrets validation failed');
+    });
+
+    test('throws when config fails Zod object schema validation', async () => {
+      const actionType = getConnectorType({
+        validate: {
+          config: { schema: z.object({ requiredField: z.string() }) },
+          secrets: { schema: z.any() },
+          params: { schema: z.object({}) },
+        },
+      });
+      (actionTypeRegistry.get as jest.Mock).mockReturnValue(actionType);
+
+      await expect(
+        create({
+          context: mockContext,
+          action: {
+            name: 'my name',
+            actionTypeId: 'my-connector-type',
+            config: {},
+            secrets: {},
+          },
+        })
+      ).rejects.toThrow(/error validating connector type config/);
+    });
+
+    test('throws when secrets fail Zod object schema validation', async () => {
+      const actionType = getConnectorType({
+        validate: {
+          config: { schema: z.any() },
+          secrets: { schema: z.object({ apiKey: z.string() }) },
+          params: { schema: z.object({}) },
+        },
+      });
+      (actionTypeRegistry.get as jest.Mock).mockReturnValue(actionType);
+
+      await expect(
+        create({
+          context: mockContext,
+          action: {
+            name: 'my name',
+            actionTypeId: 'my-connector-type',
+            config: {},
+            secrets: {},
+          },
+        })
+      ).rejects.toThrow(/error validating connector type secrets/);
+    });
+
+    test('throws when config has wrong type for Zod schema', async () => {
+      const actionType = getConnectorType({
+        validate: {
+          config: { schema: z.object({ port: z.number() }) },
+          secrets: { schema: z.any() },
+          params: { schema: z.object({}) },
+        },
+      });
+      (actionTypeRegistry.get as jest.Mock).mockReturnValue(actionType);
+
+      await expect(
+        create({
+          context: mockContext,
+          action: {
+            name: 'my name',
+            actionTypeId: 'my-connector-type',
+            config: { port: 'not-a-number' },
+            secrets: {},
+          },
+        })
+      ).rejects.toThrow(/error validating connector type config/);
+    });
+
+    test('throws when secrets have wrong type for Zod schema', async () => {
+      const actionType = getConnectorType({
+        validate: {
+          config: { schema: z.any() },
+          secrets: { schema: z.object({ apiKey: z.string() }) },
+          params: { schema: z.object({}) },
+        },
+      });
+      (actionTypeRegistry.get as jest.Mock).mockReturnValue(actionType);
+
+      await expect(
+        create({
+          context: mockContext,
+          action: {
+            name: 'my name',
+            actionTypeId: 'my-connector-type',
+            config: {},
+            secrets: { apiKey: 12345 },
+          },
+        })
+      ).rejects.toThrow(/error validating connector type secrets/);
+    });
+  });
+
+  describe('deprecated connectors', () => {
+    test('marks connector as deprecated when action type is deprecated', async () => {
+      const savedObjectCreateResult = {
+        id: '1',
+        type: 'action',
+        attributes: {
+          name: 'my name',
+          actionTypeId: 'my-connector-type',
+          isMissingSecrets: false,
+          config: {},
+        },
+        references: [],
+      };
+      unsecuredSavedObjectsClient.create.mockResolvedValueOnce(savedObjectCreateResult);
+      (actionTypeRegistry.isDeprecated as jest.Mock).mockReturnValue(true);
+
+      const result = await create({
+        context: mockContext,
+        action: {
+          name: 'my name',
+          actionTypeId: 'my-connector-type',
+          config: {},
+          secrets: {},
+        },
+      });
+
+      expect(result.isConnectorTypeDeprecated).toBe(true);
+    });
+
+    test('marks connector as deprecated when attributes indicate deprecation', async () => {
+      const savedObjectCreateResult = {
+        id: '1',
+        type: 'action',
+        attributes: {
+          name: 'my name',
+          actionTypeId: '.servicenow',
+          isMissingSecrets: false,
+          config: {
+            usesTableApi: true,
+          },
+        },
+        references: [],
+      };
+      unsecuredSavedObjectsClient.create.mockResolvedValueOnce(savedObjectCreateResult);
+
+      const result = await create({
+        context: mockContext,
+        action: {
+          name: 'my name',
+          actionTypeId: '.servicenow',
+          config: {
+            usesTableApi: true,
+          },
+          secrets: {},
+        },
+      });
+
+      expect(result.isDeprecated).toBe(true);
+    });
+  });
+
+  describe('inbound ingress credentials', () => {
+    const inboundSpec = getConnectorSpec('.inboundWebhook');
+    if (inboundSpec === undefined) {
+      throw new Error('Expected .inboundWebhook spec');
+    }
+
+    const securityService = securityServiceMock.createStart();
+    const inboundContext: ActionsClientContext = {
+      ...mockContext,
+      spaceId: DEFAULT_SPACE_ID,
+      securityService,
+    };
+
+    beforeEach(() => {
+      (securityService.authc.apiKeys as { uiam?: unknown }).uiam = undefined;
+      securityService.authc.apiKeys.grantAsInternalUser.mockResolvedValue({
+        id: 'es-id',
+        name: 'Actions: connector event identity mock-saved-object-id',
+        api_key: 'es-secret',
+      });
+      (actionTypeRegistry.get as jest.Mock).mockReturnValue(
+        getConnectorType({
+          id: '.inboundWebhook',
+          source: ACTION_TYPE_SOURCES.spec,
+          validate: {
+            config: generateConfigSchema(inboundSpec.schema),
+            secrets: { schema: z4.object({}) },
+            params: { schema: z.object({}) },
+          },
+        })
+      );
+      unsecuredSavedObjectsClient.create.mockImplementation(async (_type, attributes, options) => ({
+        id: options?.id ?? 'mock-saved-object-id',
+        type: 'action',
+        attributes,
+        references: [],
+      }));
+    });
+
+    test('does not mint credentials or return secrets', async () => {
+      const result = await create({
+        context: inboundContext,
+        action: {
+          name: 'Sales ingress',
+          actionTypeId: '.inboundWebhook',
+          config: {},
+          secrets: {},
+        },
+      });
+
+      expect(result).not.toHaveProperty('secrets');
+      expect(result.isInboundEventsEnabled).toBe(true);
+    });
+
+    test('stores a last-saver API key and leaves spoke secrets unchanged', async () => {
+      await create({
+        context: inboundContext,
+        action: {
+          name: 'Sales ingress',
+          actionTypeId: '.inboundWebhook',
+          config: {},
+          secrets: {},
+        },
+      });
+
+      const saved = unsecuredSavedObjectsClient.create.mock.calls[0][1] as {
+        apiKey?: string;
+        uiamApiKey?: string;
+        hasInboundEventIdentity?: boolean;
+        secrets: Record<string, unknown>;
+      };
+
+      expect(saved.apiKey).toBe(encodeApiKey('es-id', 'es-secret'));
+      expect(saved.hasInboundEventIdentity).toBe(true);
+      expect(saved.uiamApiKey).toBeUndefined();
+      expect(saved.secrets).toEqual({});
+      expect(securityService.authc.apiKeys.grantAsInternalUser).toHaveBeenCalled();
+    });
+
+    test('does not return last-saver identity on the public create result', async () => {
+      const result = await create({
+        context: inboundContext,
+        action: {
+          name: 'Sales ingress',
+          actionTypeId: '.inboundWebhook',
+          config: {},
+          secrets: {},
+        },
+      });
+
+      expect(result).not.toHaveProperty('apiKey');
+      expect(result).not.toHaveProperty('uiamApiKey');
+      expect(result).not.toHaveProperty('secrets');
+    });
+
+    test('ignores a client-supplied apiKey', async () => {
+      await create({
+        context: inboundContext,
+        action: {
+          name: 'Sales ingress',
+          actionTypeId: '.inboundWebhook',
+          config: {},
+          secrets: {},
+          apiKey: 'from-client',
+        } as never,
+      });
+
+      const saved = unsecuredSavedObjectsClient.create.mock.calls[0][1] as {
+        apiKey?: string;
+      };
+      expect(saved.apiKey).toBe(encodeApiKey('es-id', 'es-secret'));
+    });
+
+    test('returns 400 when encryption is unavailable', async () => {
+      await expect(
+        create({
+          context: { ...inboundContext, isESOCanEncrypt: false },
+          action: {
+            name: 'Sales ingress',
+            actionTypeId: '.inboundWebhook',
+            config: {},
+            secrets: {},
+          },
+        })
+      ).rejects.toThrow('encrypted saved objects are not available');
+      expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+    });
+  });
+
+  test('does not mint last-saver identity for non-inbound connectors', async () => {
+    const securityService = securityServiceMock.createStart();
+    unsecuredSavedObjectsClient.create.mockImplementation(async (_type, attributes, options) => ({
+      id: options?.id ?? '1',
+      type: 'action',
+      attributes,
+      references: [],
+    }));
+
+    await create({
+      context: { ...mockContext, securityService },
+      action: {
+        name: 'my name',
+        actionTypeId: 'my-connector-type',
+        config: {},
+        secrets: {},
+      },
+    });
+
+    const saved = unsecuredSavedObjectsClient.create.mock.calls[0][1] as {
+      apiKey?: string;
+    };
+    expect(saved.apiKey).toBeUndefined();
+    expect(securityService.authc.apiKeys.grantAsInternalUser).not.toHaveBeenCalled();
+  });
+
+  describe('dual connector inbound events', () => {
+    const securityService = securityServiceMock.createStart();
+    const dualContext: ActionsClientContext = {
+      ...mockContext,
+      spaceId: DEFAULT_SPACE_ID,
+      securityService,
+    };
+
+    beforeEach(() => {
+      (connectorTypeIsDual as jest.Mock).mockImplementation(
+        (actionTypeId: string) => actionTypeId === '.dual'
+      );
+      (connectorTypeHasInboundEvents as jest.Mock).mockImplementation(
+        (actionTypeId: string) => actionTypeId === '.dual' || actionTypeId === '.inboundWebhook'
+      );
+      (securityService.authc.apiKeys as { uiam?: unknown }).uiam = undefined;
+      securityService.authc.apiKeys.grantAsInternalUser.mockResolvedValue({
+        id: 'es-id',
+        name: 'Actions: connector event identity mock-saved-object-id',
+        api_key: 'es-secret',
+      });
+      (actionTypeRegistry.get as jest.Mock).mockReturnValue(
+        getConnectorType({
+          id: '.dual',
+          source: ACTION_TYPE_SOURCES.spec,
+          validate: {
+            config: { schema: z.any() },
+            secrets: { schema: z.any() },
+            params: { schema: z.object({}) },
+          },
+        })
+      );
+      unsecuredSavedObjectsClient.create.mockImplementation(async (type, attributes, options) => ({
+        id: options?.id ?? 'mock-saved-object-id',
+        type,
+        attributes,
+        references: options?.references ?? [],
+      }));
+    });
+
+    test('does not mint identity when the flag is omitted', async () => {
+      const result = await create({
+        context: dualContext,
+        action: {
+          name: 'Datadog prod',
+          actionTypeId: '.dual',
+          config: {},
+          secrets: {},
+        },
+      });
+
+      const actionCreates = unsecuredSavedObjectsClient.create.mock.calls.filter(
+        (call) => call[0] === 'action'
+      );
+      const saved = actionCreates[0][1] as {
+        apiKey?: string;
+        hasInboundEventIdentity?: boolean;
+      };
+      expect(saved.apiKey).toBeUndefined();
+      expect(saved.hasInboundEventIdentity).toBe(false);
+      expect(securityService.authc.apiKeys.grantAsInternalUser).not.toHaveBeenCalled();
+      expect(result.isInboundEventsEnabled).toBe(false);
+    });
+
+    test('mints identity only when enabled', async () => {
+      const result = await create({
+        context: dualContext,
+        action: {
+          name: 'Datadog prod',
+          actionTypeId: '.dual',
+          config: {},
+          secrets: {},
+          isInboundEventsEnabled: true,
+        },
+      });
+
+      expect(result.isInboundEventsEnabled).toBe(true);
+      expect(securityService.authc.apiKeys.grantAsInternalUser).toHaveBeenCalled();
+      const saved = unsecuredSavedObjectsClient.create.mock.calls.find(
+        (call) => call[0] === 'action'
+      )?.[1] as { apiKey?: string; hasInboundEventIdentity?: boolean };
+      expect(saved.apiKey).toBe(encodeApiKey('es-id', 'es-secret'));
+      expect(saved.hasInboundEventIdentity).toBe(true);
+      expect(
+        unsecuredSavedObjectsClient.create.mock.calls.every((call) => call[0] === 'action')
+      ).toBe(true);
+    });
+
+    test('rejects the flag on a non-dual type', async () => {
+      (actionTypeRegistry.get as jest.Mock).mockReturnValue(
+        getConnectorType({
+          id: '.slack',
+          preSaveHook,
+          validate: {
+            config: { schema: z.any() },
+            secrets: { schema: z.any() },
+            params: { schema: z.object({}) },
+          },
+        })
+      );
+
+      await expect(
+        create({
+          context: dualContext,
+          action: {
+            name: 'Slack',
+            actionTypeId: '.slack',
+            config: {},
+            secrets: {},
+            isInboundEventsEnabled: true,
+          },
+        })
+      ).rejects.toThrow(
+        'Inbound events can only be turned on for connectors that both send and receive.'
+      );
+      expect(preSaveHook).not.toHaveBeenCalled();
+      expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('connectors that publish keys', () => {
+    const keyContext: ActionsClientContext = {
+      ...mockContext,
+      spaceId: asSpaceId('security'),
+      publicBaseUrl: 'https://kibana.example.com',
+    };
+    const action = { name: 'SSF', actionTypeId: '.ssf', config: {}, secrets: {} };
+
+    beforeEach(() => {
+      (actionTypeRegistry.get as jest.Mock).mockReturnValue(
+        getConnectorType({
+          id: '.ssf',
+          preSaveHook,
+          validate: {
+            config: { schema: z.any() },
+            secrets: { schema: z.any() },
+            params: { schema: z.object({}) },
+          },
+        })
+      );
+      unsecuredSavedObjectsClient.create.mockImplementation(async (type, attributes, options) => ({
+        id: options?.id ?? 'mock-saved-object-id',
+        type,
+        attributes,
+        references: [],
+      }));
+    });
+
+    test.each([undefined, 'http://kibana.example.com', 'https://kibana.example.com/kibana'])(
+      'returns 400 before the pre-save hook when the public base URL is %s',
+      async (publicBaseUrl) => {
+        await expect(
+          create({ context: { ...keyContext, publicBaseUrl }, action })
+        ).rejects.toMatchObject({ output: { statusCode: 400 } });
+        expect(preSaveHook).not.toHaveBeenCalled();
+        expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+      }
+    );
+
+    test('creates the key record after the connector, outside the connector attributes', async () => {
+      await create({ context: keyContext, action });
+
+      const [[connectorType, connector], [keyType, key, keyOptions]] =
+        unsecuredSavedObjectsClient.create.mock.calls;
+      expect(connectorType).toBe('action');
+      expect(connector).toMatchObject({ config: {}, secrets: {} });
+      expect(keyType).toBe('connector_signing_key');
+      expect(key).toMatchObject({
+        connectorId: 'mock-saved-object-id',
+        issuer:
+          'https://kibana.example.com/s/security/api/actions/public/.ssf/mock-saved-object-id',
+      });
+      expect(keyOptions).toMatchObject({ id: 'mock-saved-object-id', overwrite: true });
+    });
+
+    test('does not write a key record when the connector ID is already used', async () => {
+      unsecuredSavedObjectsClient.create.mockRejectedValueOnce(
+        SavedObjectsErrorHelpers.createConflictError('action', 'mock-saved-object-id')
+      );
+
+      await expect(create({ context: keyContext, action })).rejects.toThrow(
+        'A connector is already using this ID'
+      );
+      expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledTimes(1);
+      expect(unsecuredSavedObjectsClient.delete).not.toHaveBeenCalled();
+    });
+
+    test('deletes the connector when the key record cannot be written', async () => {
+      unsecuredSavedObjectsClient.create.mockImplementation(async (type, attributes, options) => {
+        if (type === 'connector_signing_key') throw new Error('key write failed');
+        return { id: options?.id ?? 'mock-saved-object-id', type, attributes, references: [] };
+      });
+
+      await expect(create({ context: keyContext, action })).rejects.toThrow('key write failed');
+      expect(unsecuredSavedObjectsClient.delete).toHaveBeenCalledWith(
+        'action',
+        'mock-saved-object-id'
+      );
+    });
+  });
+});

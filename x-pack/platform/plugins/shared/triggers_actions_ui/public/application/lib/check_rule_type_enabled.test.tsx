@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RuleType } from '../../types';
+import type { RuleType } from '../../types';
 import { checkRuleTypeEnabled } from './check_rule_type_enabled';
 
 describe('checkRuleTypeEnabled', () => {
@@ -35,6 +35,7 @@ describe('checkRuleTypeEnabled', () => {
       enabledInLicense: true,
       category: 'my-category',
       isExportable: true,
+      isInternallyManaged: false,
     };
     expect(checkRuleTypeEnabled(alertType)).toMatchInlineSnapshot(`
           Object {
@@ -61,6 +62,7 @@ describe('checkRuleTypeEnabled', () => {
       enabledInLicense: false,
       category: 'my-category',
       isExportable: true,
+      isInternallyManaged: false,
     };
     expect(checkRuleTypeEnabled(alertType)).toMatchInlineSnapshot(`
       Object {
@@ -68,5 +70,31 @@ describe('checkRuleTypeEnabled', () => {
         "message": "This rule type requires a Gold license.",
       }
     `);
+  });
+
+  test('uses an before Enterprise in license disabled messages', async () => {
+    const alertType: RuleType = {
+      id: 'test',
+      name: 'Test',
+      actionVariables: {
+        context: [{ name: 'var1', description: 'val1' }],
+        state: [{ name: 'var2', description: 'val2' }],
+        params: [{ name: 'var3', description: 'val3' }],
+      },
+      producer: 'test',
+      actionGroups: [{ id: 'default', name: 'Default' }],
+      recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
+      defaultActionGroupId: 'default',
+      authorizedConsumers: {},
+      minimumLicenseRequired: 'enterprise',
+      enabledInLicense: false,
+      category: 'my-category',
+      isExportable: true,
+      isInternallyManaged: false,
+    };
+    expect(checkRuleTypeEnabled(alertType)).toEqual({
+      isEnabled: false,
+      message: 'This rule type requires an Enterprise license.',
+    });
   });
 });

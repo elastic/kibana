@@ -50,7 +50,11 @@ export const riskEngineSettingsRoute = (router: EntityAnalyticsRoutesDeps['route
           });
 
           if (!result) {
-            throw new Error('Unable to get risk engine configuration');
+            return siemResponse.error({
+              statusCode: 404,
+              body: { message: 'Risk score configuration is not initialized' },
+              bypassErrorFormat: true,
+            });
           }
           return response.ok({
             body: {
@@ -58,6 +62,11 @@ export const riskEngineSettingsRoute = (router: EntityAnalyticsRoutesDeps['route
               includeClosedAlerts:
                 Array.isArray(result?.excludeAlertStatuses) &&
                 !result.excludeAlertStatuses.includes('closed'),
+              enableResetToZero: result.enableResetToZero,
+              filters: (result.filters || []).map((f) => ({
+                entity_types: f.entity_types as Array<'host' | 'user' | 'service'>,
+                filter: f.filter,
+              })),
             },
           });
         } catch (e) {

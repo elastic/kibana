@@ -6,7 +6,8 @@
  */
 
 import _ from 'lodash';
-import React, { Component, RefObject } from 'react';
+import type { RefObject } from 'react';
+import React, { Component } from 'react';
 import { EuiPopover, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { Map as MbMap } from '@kbn/mapbox-gl';
@@ -123,6 +124,9 @@ export class DrawTooltip extends Component<Props, State> {
           pointerEvents: 'none',
           transform: `translate(${this.state.x - 13}px, ${this.state.y - 13}px)`,
         }}
+        aria-label={i18n.translate('xpack.maps.drawTooltip.popoverAriaLabel', {
+          defaultMessage: 'Draw instructions',
+        })}
       >
         <EuiText color="subdued" size="xs">
           {instructions}

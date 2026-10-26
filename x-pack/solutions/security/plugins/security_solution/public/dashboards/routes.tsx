@@ -5,24 +5,39 @@
  * 2.0.
  */
 import React from 'react';
-import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 
 import { DASHBOARDS_PATH, SecurityPageName } from '../../common/constants';
 import type { SecuritySubPluginRoutes } from '../app/types';
 import { PluginTemplateWrapper } from '../common/components/plugin_template_wrapper';
-import { DashboardsContainer } from './pages';
+import { withSecurityRoutePageWrapper } from '../common/components/security_route_page_wrapper';
+import { DashboardContextProvider } from './context/dashboard_context';
+import { DashboardsLandingPage } from './pages/landing_page';
+import { DashboardsViewContainer } from './pages';
 
-export const DashboardRoutes = () => (
+const DashboardLandingRoutes = () => (
   <PluginTemplateWrapper>
-    <TrackApplicationView viewId={SecurityPageName.dashboards}>
-      <DashboardsContainer />
-    </TrackApplicationView>
+    <DashboardContextProvider>
+      <DashboardsLandingPage />
+    </DashboardContextProvider>
+  </PluginTemplateWrapper>
+);
+
+const DashboardViewRoutes = () => (
+  <PluginTemplateWrapper paddingSize="none">
+    <DashboardContextProvider>
+      <DashboardsViewContainer />
+    </DashboardContextProvider>
   </PluginTemplateWrapper>
 );
 
 export const routes: SecuritySubPluginRoutes = [
   {
     path: DASHBOARDS_PATH,
-    component: DashboardRoutes,
+    exact: true,
+    component: withSecurityRoutePageWrapper(DashboardLandingRoutes, SecurityPageName.dashboards),
+  },
+  {
+    path: DASHBOARDS_PATH,
+    component: withSecurityRoutePageWrapper(DashboardViewRoutes, SecurityPageName.dashboards),
   },
 ];

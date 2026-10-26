@@ -145,7 +145,7 @@ describe('getCaseMetrics', () => {
       );
     } catch (error) {
       expect(error.message).toMatchInlineSnapshot(
-        `"Failed to retrieve metrics within client for case id: 1: Error: Invalid value \\"bananas\\" supplied to \\"features\\""`
+        `"Failed to retrieve metrics within client for case id: 1: Error: Invalid input: expected \\"alerts.count\\", Invalid input: expected \\"alerts.users\\", Invalid input: expected \\"alerts.hosts\\", Invalid input: expected \\"connectors\\", Invalid input: expected \\"lifespan\\""`
       );
     }
   });
@@ -159,7 +159,7 @@ describe('getCaseMetrics', () => {
       clientArgs
     );
 
-    expect(mockServices.services.alertsService.executeAggregations).toBeCalledTimes(1);
+    expect(mockServices.services.alertsService.executeAggregations).toHaveBeenCalledTimes(1);
   });
 });
 
@@ -173,7 +173,7 @@ function createMockClient() {
     } as unknown as Case;
   });
 
-  client.attachments.getAllAlertsAttachToCase.mockImplementation(async () => {
+  client.attachments.getAllDocumentsAttachedToCase.mockImplementation(async () => {
     return [{ id: '1', index: '2', attached_at: '3' }];
   });
 
@@ -221,6 +221,7 @@ function createMockClientArgs() {
       alertsService,
       userActionService,
     },
+    config: { attachments: { enabled: false } },
   };
 
   return { mockServices: clientArgs, clientArgs: clientArgs as unknown as CasesClientArgs };

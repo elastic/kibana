@@ -5,12 +5,16 @@
  * 2.0.
  */
 
-import { mount, shallow } from 'enzyme';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { clone } from 'lodash/fp';
 import React from 'react';
-import { FlowDirection, FlowTarget } from '../../../../../common/search_strategy';
 
+import { FlowDirection, FlowTarget } from '../../../../../common/search_strategy';
 import { FlowTargetSelect } from './flow_target_select';
+
+beforeEach(() => {
+  jest.clearAllMocks();
+});
 
 describe('FlowTargetSelect Component', () => {
   const TestFlowTargetId = 'TestFlowTargetId';
@@ -23,73 +27,61 @@ describe('FlowTargetSelect Component', () => {
     updateFlowTargetAction: jest.fn(),
   };
 
-  describe('rendering', () => {
-    test('it renders the FlowTargetSelect', () => {
-      const wrapper = shallow(<FlowTargetSelect {...mockProps} />);
-
-      expect(wrapper).toMatchSnapshot();
-    });
+  test('it renders the FlowTargetSelect', () => {
+    const { container } = render(<FlowTargetSelect {...mockProps} />);
+    expect(container.children[0]).toMatchSnapshot();
   });
 
-  test('selecting destination from the type drop down', () => {
-    const wrapper = mount(<FlowTargetSelect {...mockProps} />);
+  test('selecting destination from the type drop down', async () => {
+    render(<FlowTargetSelect {...mockProps} />);
 
-    wrapper.find('button').first().simulate('click');
+    fireEvent.click(screen.getByText('Source'));
 
-    wrapper.update();
-
-    wrapper
-      .find(`button#${TestFlowTargetId}-select-flow-target-destination`)
-      .first()
-      .simulate('click');
-
-    wrapper.update();
+    fireEvent.click(
+      document.querySelector(`button#${TestFlowTargetId}-select-flow-target-destination`)!
+    );
 
     expect(mockProps.updateFlowTargetAction.mock.calls[0][0]).toEqual('destination');
   });
 
   test('when selectedDirection=unidirectional only source/destination are options', () => {
-    const wrapper = mount(<FlowTargetSelect {...mockProps} />);
+    render(<FlowTargetSelect {...mockProps} />);
 
-    wrapper.find('button').first().simulate('click');
-
-    wrapper.update();
+    fireEvent.click(screen.getByText('Source'));
 
     expect(
-      wrapper.find(`button#${TestFlowTargetId}-select-flow-target-source`).exists()
-    ).toBeTruthy();
+      document.querySelector(`button#${TestFlowTargetId}-select-flow-target-source`)
+    ).toBeInTheDocument();
     expect(
-      wrapper.find(`button#${TestFlowTargetId}-select-flow-target-destination`).exists()
-    ).toBeTruthy();
+      document.querySelector(`button#${TestFlowTargetId}-select-flow-target-destination`)
+    ).toBeInTheDocument();
     expect(
-      wrapper.find(`button#${TestFlowTargetId}-select-flow-target-client`).exists()
-    ).toBeFalsy();
+      document.querySelector(`button#${TestFlowTargetId}-select-flow-target-client`)
+    ).not.toBeInTheDocument();
     expect(
-      wrapper.find(`button#${TestFlowTargetId}-select-flow-target-server`).exists()
-    ).toBeFalsy();
+      document.querySelector(`button#${TestFlowTargetId}-select-flow-target-server`)
+    ).not.toBeInTheDocument();
   });
 
   test('when selectedDirection=bidirectional source/destination/client/server are options', () => {
     const bidirectionalMock = clone(mockProps);
     bidirectionalMock.selectedDirection = FlowDirection.biDirectional;
 
-    const wrapper = mount(<FlowTargetSelect {...bidirectionalMock} />);
+    render(<FlowTargetSelect {...bidirectionalMock} />);
 
-    wrapper.find('button').first().simulate('click');
-
-    wrapper.update();
+    fireEvent.click(screen.getByText('Source'));
 
     expect(
-      wrapper.find(`button#${TestFlowTargetId}-select-flow-target-source`).exists()
-    ).toBeTruthy();
+      document.querySelector(`button#${TestFlowTargetId}-select-flow-target-source`)
+    ).toBeInTheDocument();
     expect(
-      wrapper.find(`button#${TestFlowTargetId}-select-flow-target-destination`).exists()
-    ).toBeTruthy();
+      document.querySelector(`button#${TestFlowTargetId}-select-flow-target-destination`)
+    ).toBeInTheDocument();
     expect(
-      wrapper.find(`button#${TestFlowTargetId}-select-flow-target-client`).exists()
-    ).toBeTruthy();
+      document.querySelector(`button#${TestFlowTargetId}-select-flow-target-client`)
+    ).toBeInTheDocument();
     expect(
-      wrapper.find(`button#${TestFlowTargetId}-select-flow-target-server`).exists()
-    ).toBeTruthy();
+      document.querySelector(`button#${TestFlowTargetId}-select-flow-target-server`)
+    ).toBeInTheDocument();
   });
 });

@@ -1,0 +1,60 @@
+{
+  "sha1": "3d4da94b4653ab3a9649f7d103e79b5390d0d59c",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "eaf60c81c85e1bd-06ab3bc7be1259d",
+      "title": "Ingest ES data for Dashboard search session tests",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/dashboard/test/scout_test_plugins/ui/parallel_tests/global.setup.ts",
+        "line": 7,
+        "column": 1
+      }
+    },
+    {
+      "id": "16f0e27c4238fed-636cf0c88e0ea66",
+      "title": "Dashboard search session lifecycle on load there is a single session",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/dashboard/test/scout_test_plugins/ui/parallel_tests/dashboard_session.spec.ts",
+        "line": 32,
+        "column": 23
+      }
+    },
+    {
+      "id": "16f0e27c4238fed-a861acb01f44833",
+      "title": "Dashboard search session lifecycle starts a session on refresh",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/dashboard/test/scout_test_plugins/ui/parallel_tests/dashboard_session.spec.ts",
+        "line": 36,
+        "column": 68
+      }
+    },
+    {
+      "id": "16f0e27c4238fed-0d377ecb5b4d979",
+      "title": "Dashboard search session lifecycle starts a session on filter change",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/dashboard/test/scout_test_plugins/ui/parallel_tests/dashboard_session.spec.ts",
+        "line": 45,
+        "column": 59
+      }
+    }
+  ]
+}

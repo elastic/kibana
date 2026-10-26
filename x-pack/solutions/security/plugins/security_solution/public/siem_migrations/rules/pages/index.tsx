@@ -8,29 +8,31 @@
 import React, { useCallback, useEffect, useMemo } from 'react';
 
 import { EuiSkeletonLoading, EuiSkeletonText, EuiSkeletonTitle, EuiSpacer } from '@elastic/eui';
+import { AppHeader } from '@kbn/app-header';
 import type { RouteComponentProps } from 'react-router-dom';
 import type { RelatedIntegration } from '../../../../common/api/detection_engine';
 import { SiemMigrationTaskStatus } from '../../../../common/siem_migrations/constants';
 import { useNavigation } from '../../../common/lib/kibana';
-import { HeaderPage } from '../../../common/components/header_page';
 import { SecuritySolutionPageWrapper } from '../../../common/components/page_wrapper';
 import { SecurityPageName } from '../../../app/types';
 
 import { MigrationRulesTable } from '../components/rules_table';
-import { NeedAdminForUpdateRulesCallOut } from '../../../detections/components/callouts/need_admin_for_update_callout';
+import { NeedAdminForUpdateRulesCallOut } from '../../../detection_engine/rule_management/components/callouts/need_admin_for_update_rules_callout';
 import { MissingPrivilegesCallOut } from './missing_privileges_callout';
-import { HeaderButtons } from '../components/header_buttons';
-import { UnknownMigration } from '../components/unknown_migration';
+import { UnknownMigration } from '../../common/components';
 import { useLatestStats } from '../service/hooks/use_latest_stats';
 import { RuleMigrationDataInputWrapper } from '../components/data_input_flyout/data_input_wrapper';
 import { MigrationReadyPanel } from '../components/migration_status_panels/migration_ready_panel';
-import { MigrationProgressPanel } from '../components/migration_status_panels/migration_progress_panel';
+import { MigrationProgressPanel } from '../../common/components/migration_panels/migration_progress_panel';
 import { useInvalidateGetMigrationRules } from '../logic/use_get_migration_rules';
+import { useInvalidateGetMigrationPrebuiltRules } from '../logic/use_get_migration_prebuilt_rules';
 import { useInvalidateGetMigrationTranslationStats } from '../logic/use_get_migration_translation_stats';
 import { useGetIntegrations } from '../service/hooks/use_get_integrations';
-import { PageTitle } from './page_title';
 import { RuleMigrationsUploadMissingPanel } from '../components/migration_status_panels/upload_missing_panel';
+import { useMigrationAppHeaderProps } from '../../common/hooks/use_migration_app_header_props';
+import { MigrationSelectorRow } from '../../common/components/migration_selector';
 import { EmptyMigrationRulesPage } from './empty';
+import * as i18n from './translations';
 
 export type MigrationRulesPageProps = RouteComponentProps<{ migrationId?: string }>;
 
@@ -68,11 +70,20 @@ export const MigrationRulesPage: React.FC<MigrationRulesPageProps> = React.memo(
       }
     }, [isLoading, migrationId, navigateTo, ruleMigrationsStats]);
 
-    const onMigrationIdChange = (selectedId?: string) => {
-      navigateTo({ deepLinkId: SecurityPageName.siemMigrationsRules, path: selectedId });
-    };
+    const onMigrationIdChange = useCallback(
+      (selectedId?: string) => {
+        navigateTo({ deepLinkId: SecurityPageName.siemMigrationsRules, path: selectedId });
+      },
+      [navigateTo]
+    );
+
+    const { menu, docLink } = useMigrationAppHeaderProps({
+      migrationType: 'rule',
+      migrationsStats: ruleMigrationsStats,
+    });
 
     const invalidateGetRuleMigrations = useInvalidateGetMigrationRules();
+    const invalidateGetMigrationPrebuiltRules = useInvalidateGetMigrationPrebuiltRules();
     const invalidateGetMigrationTranslationStats = useInvalidateGetMigrationTranslationStats();
     const refetchData = useCallback(() => {
       if (!migrationId) {
@@ -80,21 +91,26 @@ export const MigrationRulesPage: React.FC<MigrationRulesPageProps> = React.memo(
       }
       refreshStats();
       invalidateGetRuleMigrations(migrationId);
+      invalidateGetMigrationPrebuiltRules(migrationId);
       invalidateGetMigrationTranslationStats(migrationId);
     }, [
+      invalidateGetMigrationPrebuiltRules,
       invalidateGetMigrationTranslationStats,
       invalidateGetRuleMigrations,
       migrationId,
       refreshStats,
     ]);
 
-    const pageTitle = useMemo(() => <PageTitle />, []);
+    const selectedMigrationStats = useMemo(
+      () => ruleMigrationsStats.find((stats) => stats.id === migrationId),
+      [ruleMigrationsStats, migrationId]
+    );
 
     const content = useMemo(() => {
       if (ruleMigrationsStats.length === 0 && !migrationId) {
         return <EmptyMigrationRulesPage />;
       }
-      const migrationStats = ruleMigrationsStats.find((stats) => stats.id === migrationId);
+      const migrationStats = selectedMigrationStats;
       if (!migrationId || !migrationStats) {
         return <UnknownMigration />;
       }
@@ -109,36 +125,53 @@ export const MigrationRulesPage: React.FC<MigrationRulesPageProps> = React.memo(
                 />
                 <EuiSpacer size="m" />
                 <MigrationRulesTable
-                  migrationId={migrationId}
                   refetchData={refetchData}
                   integrations={integrations}
                   isIntegrationsLoading={isIntegrationsLoading}
+                  migrationStats={migrationStats}
                 />
               </>
             )}
-            {migrationStats.status === SiemMigrationTaskStatus.READY && (
-              <MigrationReadyPanel migrationStats={migrationStats} />
+            {[
+              SiemMigrationTaskStatus.READY,
+              SiemMigrationTaskStatus.INTERRUPTED,
+              SiemMigrationTaskStatus.STOPPED,
+            ].includes(migrationStats.status) && (
+              <>
+                <EuiSpacer size="m" />
+                <MigrationReadyPanel migrationStats={migrationStats} />
+              </>
             )}
             {migrationStats.status === SiemMigrationTaskStatus.RUNNING && (
-              <MigrationProgressPanel migrationStats={migrationStats} />
+              <>
+                <EuiSpacer size="m" />
+                <MigrationProgressPanel migrationStats={migrationStats} migrationType="rule" />
+              </>
             )}
           </>
         </RuleMigrationDataInputWrapper>
       );
-    }, [migrationId, refetchData, ruleMigrationsStats, integrations, isIntegrationsLoading]);
+    }, [
+      migrationId,
+      refetchData,
+      ruleMigrationsStats,
+      selectedMigrationStats,
+      integrations,
+      isIntegrationsLoading,
+    ]);
 
     return (
       <SecuritySolutionPageWrapper>
-        <HeaderPage title={pageTitle} border>
-          <HeaderButtons
-            ruleMigrationsStats={ruleMigrationsStats}
-            selectedMigrationId={migrationId}
-            onMigrationIdChange={onMigrationIdChange}
-          />
-        </HeaderPage>
+        <AppHeader title={i18n.PAGE_TITLE} menu={menu} docLink={docLink} spacing="bleed" />
+        <MigrationSelectorRow
+          migrationsStats={ruleMigrationsStats}
+          selectedMigrationId={migrationId}
+          onMigrationIdChange={onMigrationIdChange}
+        />
         <NeedAdminForUpdateRulesCallOut />
         <MissingPrivilegesCallOut />
         <EuiSkeletonLoading
+          key={migrationId}
           data-test-subj="migrationRulesPageLoading"
           isLoading={isLoading}
           loadingContent={

@@ -14,7 +14,7 @@ import type { AnalyticsServiceSetup } from '@kbn/core-analytics-browser';
  * Registers the Analytics context provider to enrich events with the page title.
  * @param analytics Analytics service.
  * @param pageTitle$ Observable emitting the page title.
- * @private
+ * @internal
  */
 export function registerAnalyticsContextProvider(
   analytics: AnalyticsServiceSetup,

@@ -15,11 +15,14 @@ import {
   readRolesDescriptorsFromResource,
 } from '@kbn/es';
 import { REPO_ROOT } from '@kbn/repo-info';
-import { HostOptions, SamlSessionManager } from '@kbn/test';
-import { ScoutTestConfig } from '../../types';
-import { Protocol } from '../../playwright/types';
-import { ScoutLogger } from './logger';
+import type { HostOptions } from '@kbn/test-saml-auth';
+import { SamlSessionManager } from '@kbn/test-saml-auth';
+import type { ScoutTestConfig } from '../../types';
+import type { Protocol } from '../../playwright/types';
+import type { ScoutLogger } from './logger';
 
+// TODO: Add support for serverless projects with different tiers
+// ref https://github.com/elastic/kibana/pull/229919
 const getResourceDirPath = (config: ScoutTestConfig) => {
   return config.serverless
     ? path.resolve(SERVERLESS_ROLES_ROOT_PATH, config.projectType!)
@@ -65,6 +68,17 @@ export const createSamlSessionManager = (
       sourcePath: rolesDefinitionPath,
     },
     cloudUsersFilePath: config.cloudUsersFilePath,
+    customSamlRealm:
+      config.customSamlProviderName && customRoleName
+        ? { providerName: config.customSamlProviderName, roles: [customRoleName] }
+        : undefined,
+    serverless: config.projectType
+      ? {
+          uiam: config.uiam,
+          projectType: config.projectType,
+          organizationId: config.organizationId!,
+        }
+      : undefined,
   });
 
   log.serviceLoaded('samlAuth');

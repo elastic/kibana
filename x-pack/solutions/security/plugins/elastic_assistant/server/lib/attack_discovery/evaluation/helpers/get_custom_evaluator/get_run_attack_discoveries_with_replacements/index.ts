@@ -11,7 +11,8 @@ import type { Run } from 'langsmith/schemas';
 import { getDiscoveriesWithOriginalValues } from '../../get_discoveries_with_original_values';
 
 export const getRunAttackDiscoveriesWithReplacements = (run: Run): AttackDiscoveries => {
-  const runAttackDiscoveries = run.outputs?.attackDiscoveries;
+  // fallback to the legacy `attackDiscoveries` property for backwards compatibility
+  const runAttackDiscoveries = run.outputs?.insights ?? run.outputs?.attackDiscoveries;
   const runReplacements = run.outputs?.replacements ?? {};
 
   // NOTE: calls to `parse` throw an error if the Run Input is invalid

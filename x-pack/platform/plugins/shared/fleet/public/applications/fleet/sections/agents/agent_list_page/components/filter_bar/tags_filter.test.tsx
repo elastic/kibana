@@ -6,12 +6,14 @@
  */
 
 import React from 'react';
+import { userEvent } from '@testing-library/user-event';
 
 import { createFleetTestRendererMock } from '../../../../../../../mock';
 
 import { TagsFilter } from './tags_filter';
 
-describe('TagsFilter', () => {
+// Failing: See https://github.com/elastic/kibana/issues/224155
+describe.skip('TagsFilter', () => {
   function render(props: any) {
     const renderer = createFleetTestRendererMock();
 
@@ -29,9 +31,9 @@ describe('TagsFilter', () => {
     };
     const { getByText, getByTestId } = render(props);
     const filterButton = getByTestId('agentList.tagsFilter');
-    filterButton.click();
+    await userEvent.click(filterButton);
     const tag = getByText('tag1');
-    tag.click();
+    await userEvent.click(tag);
     expect(onSelectedTagsChange).toHaveBeenCalledWith(['tag2', 'tag3']);
   });
 });

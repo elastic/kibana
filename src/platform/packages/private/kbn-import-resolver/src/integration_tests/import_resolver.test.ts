@@ -12,6 +12,7 @@ import { Package } from '@kbn/repo-packages';
 import { createAbsolutePathSerializer } from '@kbn/jest-serializers';
 
 import { ImportResolver } from '../import_resolver';
+import { getRelativeImportReq } from '../helpers/import_req';
 
 const FIXTURES_DIR = Path.resolve(__dirname, '../__fixtures__');
 
@@ -55,9 +56,9 @@ describe('#resolve()', () => {
   });
 
   it('resolves requests to src/', () => {
-    expect(resolver.resolve('src/core/public', FIXTURES_DIR)).toMatchInlineSnapshot(`
+    expect(resolver.resolve('src/core/packages/core/public', FIXTURES_DIR)).toMatchInlineSnapshot(`
       Object {
-        "absolute": <absolute path>/src/core/public/index.ts,
+        "absolute": <absolute path>/src/core/packages/core/public/index.ts,
         "type": "file",
       }
     `);
@@ -68,6 +69,27 @@ describe('#resolve()', () => {
       Object {
         "absolute": <absolute path>/src/platform/packages/private/kbn-import-resolver/src/__fixtures__/src/bar/bar.js,
         "pkgId": "@kbn/bar",
+        "type": "file",
+      }
+    `);
+  });
+
+  it('resolves sub-path exports (exact match)', () => {
+    expect(resolver.resolve('exports-pkg/my_module', FIXTURES_DIR)).toMatchInlineSnapshot(`
+      Object {
+        "absolute": <absolute path>/src/platform/packages/private/kbn-import-resolver/src/__fixtures__/node_modules/exports-pkg/dist/my_module.js,
+        "nodeModule": "exports-pkg",
+        "type": "file",
+      }
+    `);
+  });
+
+  it('resolves sub-path exports (wildcard match)', () => {
+    expect(resolver.resolve('exports-pkg/sub/my_other_module', FIXTURES_DIR))
+      .toMatchInlineSnapshot(`
+      Object {
+        "absolute": <absolute path>/src/platform/packages/private/kbn-import-resolver/src/__fixtures__/node_modules/exports-pkg/dist/sub/my_other_module.js,
+        "nodeModule": "exports-pkg",
         "type": "file",
       }
     `);
@@ -90,12 +112,6 @@ describe('#resolve()', () => {
     `);
 
     expect(resolver.resolve('core_styles', FIXTURES_DIR)).toMatchInlineSnapshot(`
-      Object {
-        "type": "ignore",
-      }
-    `);
-
-    expect(resolver.resolve('core_app_image_assets', FIXTURES_DIR)).toMatchInlineSnapshot(`
       Object {
         "type": "ignore",
       }
@@ -148,5 +164,32 @@ describe('#getAbsolutePackageDir()', () => {
   });
   it('returns null for unknown packages', () => {
     expect(resolver.getAbsolutePackageDir('@kbn/invalid')).toMatchInlineSnapshot(`null`);
+  });
+});
+
+describe('getRelativeImportReq()', () => {
+  it('prefixes requests into dot-prefixed directories with ./', () => {
+    expect(
+      getRelativeImportReq({
+        dirname: '/repo',
+        absolute: '/repo/.oxlint/index.mts',
+        type: 'esm',
+        preserveFileExtensions: true,
+      })
+    ).toBe('./.oxlint/index.mts');
+  });
+
+  it('keeps parent-directory requests unprefixed', () => {
+    expect(
+      getRelativeImportReq({
+        dirname: '/repo/src',
+        absolute: '/repo/.oxlint/index.mts',
+        type: 'esm',
+        preserveFileExtensions: true,
+      })
+    ).toBe('../.oxlint/index.mts');
+    expect(
+      getRelativeImportReq({ dirname: '/repo/src/a', absolute: '/repo/src', type: 'esm' })
+    ).toBe('..');
   });
 });

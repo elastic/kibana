@@ -6,6 +6,7 @@
  */
 
 import { DEFAULT_SIGNALS_INDEX, SIGNALS_INDEX_KEY } from '../common/constants';
+import { DEFAULT_ALERT_SAMPLE_SIZE } from './lib/entity_analytics/risk_score/constants';
 import type { ExperimentalFeatures } from '../common/experimental_features';
 import { parseExperimentalConfigValue } from '../common/experimental_features';
 import { getDefaultConfigSettings } from '../common/config_settings';
@@ -13,7 +14,7 @@ import type { ConfigType } from './config';
 import { duration } from 'moment';
 
 export const createMockConfig = (): ConfigType => {
-  const enableExperimental: Array<keyof ExperimentalFeatures> = ['responseActionUploadEnabled'];
+  const enableExperimental: Array<keyof ExperimentalFeatures> = [];
 
   return {
     [SIGNALS_INDEX_KEY]: DEFAULT_SIGNALS_INDEX,
@@ -31,13 +32,15 @@ export const createMockConfig = (): ConfigType => {
     alertMergeStrategy: 'missingFields',
     alertIgnoreFields: [],
     maxUploadResponseActionFileBytes: 26214400,
+    maxEndpointScriptFileSize: 26214400,
+    disableEndpointRuleAutoInstall: false,
     settings: getDefaultConfigSettings(),
     experimentalFeatures: parseExperimentalConfigValue(enableExperimental).features,
     enabled: true,
     enableUiSettingsValidations: false,
     entityAnalytics: {
       riskEngine: {
-        alertSampleSizePerShard: 10_000,
+        alertSampleSizePerShard: DEFAULT_ALERT_SAMPLE_SIZE,
       },
       assetCriticality: {
         csvUpload: {
@@ -45,11 +48,25 @@ export const createMockConfig = (): ConfigType => {
           maxBulkRequestBodySizeBytes: 10_485_760,
         },
       },
+      alertEntityIdBackfill: {
+        enabled: true,
+      },
       entityStore: {
         frequency: duration('1m'),
         syncDelay: duration('5m'),
         developer: {
           pipelineDebugMode: false,
+        },
+      },
+      monitoring: {
+        privileges: {
+          users: {
+            maxPrivilegedUsersAllowed: 10000,
+            csvUpload: {
+              errorRetries: 3,
+              maxBulkRequestBodySizeBytes: 10_485_760,
+            },
+          },
         },
       },
     },

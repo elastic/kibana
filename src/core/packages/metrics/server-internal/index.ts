@@ -8,6 +8,7 @@
  */
 
 export {
+  EluTerm,
   type MetricsServiceSetupDeps,
   type InternalMetricsServiceStart,
   type InternalMetricsServiceSetup,

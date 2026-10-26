@@ -10,9 +10,9 @@ import React from 'react';
 // @ts-ignore
 import { CreateSourceEditor } from './create_source_editor';
 import { ESGeoGridSource, clustersTitle } from './es_geo_grid_source';
-import { LayerWizard, RenderWizardArguments } from '../../layers';
+import type { LayerWizard, RenderWizardArguments } from '../../layers';
 import { GeoJsonVectorLayer, MvtVectorLayer } from '../../layers/vector_layer';
-import {
+import type {
   ESGeoGridSourceDescriptor,
   ColorDynamicOptions,
   SizeDynamicOptions,

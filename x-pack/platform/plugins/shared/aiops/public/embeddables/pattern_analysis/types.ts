@@ -11,24 +11,16 @@ import type {
   PublishesDataViews,
   PublishesTimeRange,
   PublishingSubject,
-  SerializedTimeRange,
-  SerializedTitles,
 } from '@kbn/presentation-publishing';
-import type { MinimumTimeRangeOption } from '../../components/log_categorization/log_categorization_for_embeddable/minimum_time_range';
-import type {
-  RandomSamplerOption,
-  RandomSamplerProbability,
-} from '../../components/log_categorization/sampling_menu/random_sampler';
+import type { PatternAnalysisEmbeddableState } from '@kbn/aiops-server-schemas/embeddables/pattern_analysis';
 
 export interface PatternAnalysisComponentApi {
-  dataViewId: PublishingSubject<PatternAnalysisEmbeddableState['dataViewId']>;
-  fieldName: PublishingSubject<PatternAnalysisEmbeddableState['fieldName']>;
-  minimumTimeRangeOption: PublishingSubject<
-    PatternAnalysisEmbeddableState['minimumTimeRangeOption']
-  >;
-  randomSamplerMode: PublishingSubject<PatternAnalysisEmbeddableState['randomSamplerMode']>;
+  dataViewId: PublishingSubject<PatternAnalysisEmbeddableState['data_view_id']>;
+  fieldName: PublishingSubject<PatternAnalysisEmbeddableState['field_name']>;
+  minimumTimeRangeOption: PublishingSubject<PatternAnalysisEmbeddableState['minimum_time_range']>;
+  randomSamplerMode: PublishingSubject<PatternAnalysisEmbeddableState['random_sampler_mode']>;
   randomSamplerProbability: PublishingSubject<
-    PatternAnalysisEmbeddableState['randomSamplerProbability']
+    PatternAnalysisEmbeddableState['random_sampler_probability']
   >;
   updateUserInput: (update: PatternAnalysisEmbeddableState) => void;
 }
@@ -38,19 +30,3 @@ export type PatternAnalysisEmbeddableApi = DefaultEmbeddableApi<PatternAnalysisE
   PublishesDataViews &
   PublishesTimeRange &
   PatternAnalysisComponentApi;
-
-export interface PatternAnalysisEmbeddableState extends SerializedTitles, SerializedTimeRange {
-  dataViewId: string;
-  fieldName: string | undefined;
-  minimumTimeRangeOption: MinimumTimeRangeOption;
-  randomSamplerMode: RandomSamplerOption;
-  randomSamplerProbability: RandomSamplerProbability;
-}
-
-export interface PatternAnalysisEmbeddableInitialState
-  extends SerializedTitles,
-    SerializedTimeRange {
-  dataViewId?: string;
-}
-
-export type PatternAnalysisEmbeddableRuntimeState = PatternAnalysisEmbeddableState;

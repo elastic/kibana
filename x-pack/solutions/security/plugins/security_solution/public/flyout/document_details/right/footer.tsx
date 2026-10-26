@@ -6,28 +6,41 @@
  */
 
 import type { FC } from 'react';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiFlyoutFooter, EuiPanel } from '@elastic/eui';
+import type { EsHitRecord } from '@kbn/discover-utils';
+import { buildDataTableRecord } from '@kbn/discover-utils';
+import { useDocumentDetailsContext } from '../shared/context';
 import { FLYOUT_FOOTER_TEST_ID } from './test_ids';
 import { TakeActionButton } from '../shared/components/take_action_button';
+import { FooterAiActions } from '../../../flyout_v2/document/main/components/footer_ai_actions';
 
 interface PanelFooterProps {
   /**
    * Boolean that indicates whether flyout is in preview and action should be hidden
    */
-  isPreview: boolean;
+  isRulePreview: boolean;
 }
 
 /**
  * Bottom section of the flyout that contains the take action button
  */
-export const PanelFooter: FC<PanelFooterProps> = ({ isPreview }) => {
-  if (isPreview) return null;
+export const PanelFooter: FC<PanelFooterProps> = ({ isRulePreview }) => {
+  const { searchHit, dataFormattedForFieldBrowser } = useDocumentDetailsContext();
+  const hit = useMemo(() => buildDataTableRecord(searchHit as EsHitRecord), [searchHit]);
+
+  if (isRulePreview) return null;
 
   return (
     <EuiFlyoutFooter data-test-subj={FLYOUT_FOOTER_TEST_ID}>
       <EuiPanel color="transparent">
         <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
+          <EuiFlexItem grow={false}>
+            <FooterAiActions
+              hit={hit}
+              dataFormattedForFieldBrowser={dataFormattedForFieldBrowser}
+            />
+          </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <TakeActionButton />
           </EuiFlexItem>

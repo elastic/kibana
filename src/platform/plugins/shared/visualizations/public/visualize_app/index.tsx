@@ -11,14 +11,14 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { Router } from '@kbn/shared-ux-router';
 
-import { AppMountParameters } from '@kbn/core/public';
+import type { AppMountParameters } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { FormattedRelative } from '@kbn/i18n-react';
 import { TableListViewKibanaProvider } from '@kbn/content-management-table-list-view-table';
 import { VisualizeApp } from './app';
-import { VisualizeServices } from './types';
-import { addHelpMenuToAppChrome, addBadgeToAppChrome } from './utils';
+import type { VisualizeServices } from './types';
+import { addHelpMenuToAppChrome } from './utils';
 
 export const renderApp = (
   { element, onAppLeave }: AppMountParameters,
@@ -26,10 +26,6 @@ export const renderApp = (
 ) => {
   // add help link to visualize docs into app chrome menu
   addHelpMenuToAppChrome(services.chrome, services.docLinks);
-  // add readonly badge if saving restricted
-  if (!services.visualizeCapabilities.save) {
-    addBadgeToAppChrome(services.chrome);
-  }
 
   const app = (
     <KibanaRenderContextProvider {...services.core}>

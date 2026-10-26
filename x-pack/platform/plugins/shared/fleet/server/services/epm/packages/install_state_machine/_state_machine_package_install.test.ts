@@ -12,7 +12,7 @@ import type {
 } from '@kbn/core/server';
 import { savedObjectsClientMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 
 import { PackageSavedObjectConflictError } from '../../../../errors';
 
@@ -41,7 +41,11 @@ import { installIndexTemplatesAndPipelines } from '../install_index_template_pip
 import { createArchiveIteratorFromMap } from '../../archive/archive_iterator';
 
 import { handleState } from './state_machine';
-import { _stateMachineInstallPackage } from './_state_machine_package_install';
+import {
+  _stateMachineInstallPackage,
+  regularStatesDefinition,
+  streamingStatesDefinition,
+} from './_state_machine_package_install';
 import { cleanupLatestExecutedState } from './steps';
 
 jest.mock('./state_machine');
@@ -193,8 +197,8 @@ describe('_stateMachineInstallPackage', () => {
         spaceId: DEFAULT_SPACE_ID,
         retryFromLastState: true,
       });
-      expect(mockCleanupLatestExecutedState).not.toBeCalled();
-      expect(mockHandleState).toBeCalledWith(
+      expect(mockCleanupLatestExecutedState).not.toHaveBeenCalled();
+      expect(mockHandleState).toHaveBeenCalledWith(
         'create_restart_installation',
         expect.any(Object),
         expect.any(Object)
@@ -242,8 +246,8 @@ describe('_stateMachineInstallPackage', () => {
           },
         },
       });
-      expect(mockCleanupLatestExecutedState).not.toBeCalled();
-      expect(mockHandleState).toBeCalledWith(
+      expect(mockCleanupLatestExecutedState).not.toHaveBeenCalled();
+      expect(mockHandleState).toHaveBeenCalledWith(
         'create_restart_installation',
         expect.any(Object),
         expect.any(Object)
@@ -290,8 +294,8 @@ describe('_stateMachineInstallPackage', () => {
           },
         },
       });
-      expect(mockCleanupLatestExecutedState).toBeCalled();
-      expect(mockHandleState).toBeCalledWith(
+      expect(mockCleanupLatestExecutedState).toHaveBeenCalled();
+      expect(mockHandleState).toHaveBeenCalledWith(
         'remove_legacy_templates',
         expect.any(Object),
         expect.any(Object)
@@ -344,6 +348,27 @@ describe('_stateMachineInstallPackage', () => {
       installSource: 'registry',
       spaceId: DEFAULT_SPACE_ID,
     });
-    await expect(installPromise).rejects.toThrowError(PackageSavedObjectConflictError);
+    await expect(installPromise).rejects.toThrow(PackageSavedObjectConflictError);
+  });
+});
+
+describe('State machine parity', () => {
+  it('should have matching isAsync flags for common states in both regularStatesDefinition and streamingStatesDefinition', () => {
+    const commonStates = [
+      'create_restart_installation',
+      'install_kibana_assets',
+      'save_archive_entries_from_assets_map',
+      'save_knowledge_base',
+      'update_so',
+    ] as const;
+
+    commonStates.forEach((stateName) => {
+      const regularState = regularStatesDefinition[stateName];
+      const streamingState = streamingStatesDefinition[stateName];
+
+      if (regularState && streamingState) {
+        expect(regularState.isAsync).toEqual(streamingState.isAsync);
+      }
+    });
   });
 });

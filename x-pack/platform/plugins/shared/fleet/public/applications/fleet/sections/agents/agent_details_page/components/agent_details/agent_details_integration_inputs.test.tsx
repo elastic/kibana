@@ -6,21 +6,18 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 
-import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-
-import { ThemeProvider } from 'styled-components';
+import { fireEvent, render } from '@testing-library/react';
+import { EuiThemeProvider } from '@elastic/eui';
+import { I18nProvider } from '@kbn/i18n-react';
+import { coreMock } from '@kbn/core/public/mocks';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
 import type { Agent } from '../../../../../types';
-import { useLink } from '../../../../../hooks';
+
 import { createPackagePolicyMock } from '../../../../../../../../common/mocks';
 
 import { AgentDetailsIntegrationInputs } from './agent_details_integration_inputs';
-
-jest.mock('../../../../../hooks');
-const mockUseLink = useLink as jest.Mock;
 
 describe('AgentDetailsIntegrationInputs', () => {
   const agent: Agent = {
@@ -35,29 +32,30 @@ describe('AgentDetailsIntegrationInputs', () => {
 
   const packageMock = createPackagePolicyMock();
 
-  beforeEach(() => {
-    mockUseLink.mockReturnValue({ getHref: jest.fn() });
-  });
+  const startServices = coreMock.createStart();
 
-  const renderComponent = () => {
-    return render(
-      <IntlProvider locale="en">
-        <ThemeProvider theme={() => ({ eui: { euiSizeS: '15px' } })}>
-          <AgentDetailsIntegrationInputs agent={agent} packagePolicy={packageMock} />
-        </ThemeProvider>
-      </IntlProvider>
-    );
-  };
+  const Wrapper: React.FC<React.PropsWithChildren> = ({ children }) => (
+    <EuiThemeProvider>
+      <I18nProvider>
+        <KibanaContextProvider services={startServices}>{children}</KibanaContextProvider>
+      </I18nProvider>
+    </EuiThemeProvider>
+  );
 
-  it('renders a default health icon when the agent has no components at all', async () => {
+  const renderComponent = () =>
+    render(<AgentDetailsIntegrationInputs agent={agent} packagePolicy={packageMock} />, {
+      wrapper: Wrapper,
+    });
+
+  it('renders a default health icon when the agent has no components at all', () => {
     const component = renderComponent();
-    await userEvent.click(component.getByTestId('agentIntegrationsInputsTitle'));
+    fireEvent.click(component.getByTestId('agentIntegrationsInputsTitle'));
     expect(
       component.getByTestId('agentDetailsIntegrationsInputStatusHealthDefault')
     ).toBeInTheDocument();
   });
 
-  it('renders a default health icon when the package input has no match in the agent component units', async () => {
+  it('renders a default health icon when the package input has no match in the agent component units', () => {
     agent.components = [
       {
         id: 'endpoint-default',
@@ -76,13 +74,13 @@ describe('AgentDetailsIntegrationInputs', () => {
     ];
 
     const component = renderComponent();
-    await userEvent.click(component.getByTestId('agentIntegrationsInputsTitle'));
+    fireEvent.click(component.getByTestId('agentIntegrationsInputsTitle'));
     expect(
       component.getByTestId('agentDetailsIntegrationsInputStatusHealthDefault')
     ).toBeInTheDocument();
   });
 
-  it('renders a success health icon when the package input has a match in the agent component units', async () => {
+  it('renders a success health icon when the package input has a match in the agent component units', () => {
     agent.components = [
       {
         id: 'endpoint-default',
@@ -101,13 +99,13 @@ describe('AgentDetailsIntegrationInputs', () => {
     ];
 
     const component = renderComponent();
-    await userEvent.click(component.getByTestId('agentIntegrationsInputsTitle'));
+    fireEvent.click(component.getByTestId('agentIntegrationsInputsTitle'));
     expect(
       component.getByTestId('agentDetailsIntegrationsInputStatusHealthSuccess')
     ).toBeInTheDocument();
   });
 
-  it('does not render when there is no units array', async () => {
+  it('does not render when there is no units array', () => {
     agent.components = [
       {
         id: 'endpoint-default',
@@ -118,18 +116,46 @@ describe('AgentDetailsIntegrationInputs', () => {
     ];
 
     const component = renderComponent();
-    await userEvent.click(component.getByTestId('agentIntegrationsInputsTitle'));
+    fireEvent.click(component.getByTestId('agentIntegrationsInputsTitle'));
     expect(
       component.queryByTestId('agentDetailsIntegrationsInputStatusHealthSuccess')
     ).not.toBeInTheDocument();
   });
 
-  it('should not throw error when there is no components', async () => {
+  it('should not throw error when there is no components', () => {
     agent.components = undefined;
 
     const component = renderComponent();
-    await userEvent.click(component.container.querySelector('#agentIntegrationsInputs')!);
-    await userEvent.click(component.container.querySelector('#endpoint')!);
+    fireEvent.click(component.container.querySelector('#agentIntegrationsItems')!);
+    fireEvent.click(component.container.querySelector('#endpoint')!);
     expect(component.getByText('Endpoint')).toBeInTheDocument();
+  });
+
+  it('should render input type using input id for otelcol inputs', () => {
+    packageMock.inputs.push({
+      type: 'otelcol',
+      enabled: true,
+      streams: [],
+      id: 'otelcol/my-otelcol-input',
+    });
+
+    const component = renderComponent();
+    fireEvent.click(component.container.querySelector('#agentIntegrationsItems')!);
+    fireEvent.click(component.container.querySelector('#otelcol')!);
+    expect(component.getByText('otelcol/my-otelcol-input')).toBeInTheDocument();
+  });
+
+  it('should render input type using input type for non-otelcol inputs', () => {
+    packageMock.inputs.push({
+      type: 'logfile',
+      enabled: true,
+      streams: [],
+      id: 'logfile/my-logfile-input',
+    });
+
+    const component = renderComponent();
+    fireEvent.click(component.container.querySelector('#agentIntegrationsItems')!);
+    fireEvent.click(component.container.querySelector('#logfile')!);
+    expect(component.getByText('Logs')).toBeInTheDocument();
   });
 });

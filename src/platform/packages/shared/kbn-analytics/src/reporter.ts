@@ -9,9 +9,12 @@
 
 import type { Logger } from '@kbn/logging';
 import { wrapArray } from './util';
-import { Metric, createUiCounterMetric, trackUsageAgent, ApplicationUsageMetric } from './metrics';
-import { Storage, ReportStorageManager } from './storage';
-import { Report, ReportManager } from './report';
+import type { Metric, ApplicationUsageMetric } from './metrics';
+import { createUiCounterMetric, trackUsageAgent } from './metrics';
+import type { Storage } from './storage';
+import { ReportStorageManager } from './storage';
+import type { Report } from './report';
+import { ReportManager } from './report';
 
 export interface ReporterConfig {
   http: ReportHTTP;

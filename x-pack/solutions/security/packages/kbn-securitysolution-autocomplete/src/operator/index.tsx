@@ -5,16 +5,15 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
-import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
-import { OperatorOption } from '@kbn/securitysolution-list-utils';
-import { DataViewFieldBase } from '@kbn/es-query';
+import React, { useCallback, useMemo, useState } from 'react';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiComboBox } from '@elastic/eui';
+import type { OperatorOption } from '@kbn/securitysolution-list-utils';
+import type { DataViewFieldBase } from '@kbn/es-query';
 
 import { getOperators } from '../get_operators';
-import {
-  getGenericComboBoxProps,
-  GetGenericComboBoxPropsReturn,
-} from '../get_generic_combo_box_props';
+import type { GetGenericComboBoxPropsReturn } from '../get_generic_combo_box_props';
+import { getGenericComboBoxProps } from '../get_generic_combo_box_props';
 
 const AS_PLAIN_TEXT = { asPlainText: true };
 
@@ -51,18 +50,19 @@ export const OperatorComponent: React.FC<OperatorState> = ({
         : getOperators(selectedField),
     [operatorOptions, selectedField]
   );
-  const selectedOptionsMemo = useMemo(
+  const selectedOptionsFromProps = useMemo(
     (): OperatorOption[] => (operator ? [operator] : []),
     [operator]
   );
+  const [selectedOptions, setSelectedOptions] = useState([operator]);
   const { comboOptions, labels, selectedComboOptions } = useMemo(
     (): GetGenericComboBoxPropsReturn =>
       getGenericComboBoxProps<OperatorOption>({
         getLabel,
         options: optionsMemo,
-        selectedOptions: selectedOptionsMemo,
+        selectedOptions,
       }),
-    [optionsMemo, selectedOptionsMemo, getLabel]
+    [optionsMemo, selectedOptions, getLabel]
   );
 
   const handleValuesChange = useCallback(
@@ -70,10 +70,20 @@ export const OperatorComponent: React.FC<OperatorState> = ({
       const newValues: OperatorOption[] = newOptions.map(
         ({ label }) => optionsMemo[labels.indexOf(label)]
       );
-      onChange(newValues);
+      setSelectedOptions(newValues);
+
+      if (newValues.length > 0) {
+        onChange(newValues);
+      }
     },
     [labels, onChange, optionsMemo]
   );
+
+  const handleOnBlur = useCallback(() => {
+    if (selectedOptions.length === 0) {
+      setSelectedOptions(selectedOptionsFromProps);
+    }
+  }, [selectedOptions, selectedOptionsFromProps]);
 
   const inputWidth = useMemo(() => {
     return { width: `${operatorInputWidth}px` };
@@ -85,6 +95,7 @@ export const OperatorComponent: React.FC<OperatorState> = ({
       options={comboOptions}
       selectedOptions={selectedComboOptions}
       onChange={handleValuesChange}
+      onBlur={handleOnBlur}
       isLoading={isLoading}
       isDisabled={isDisabled}
       isClearable={isClearable}

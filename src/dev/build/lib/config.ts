@@ -10,29 +10,32 @@
 import Path from 'path';
 import os from 'os';
 
-import { REPO_ROOT, kibanaPackageJson, KibanaPackageJson } from '@kbn/repo-info';
+import { REPO_ROOT, kibanaPackageJson, type KibanaPackageJson } from '@kbn/repo-info';
 import {
-  Package,
+  type Package,
   getPackages,
-  PluginSelector,
-  PluginPackage,
+  type PluginSelector,
+  type PluginPackage,
   getPluginPackagesFilter,
 } from '@kbn/repo-packages';
-import { type KibanaProject } from '@kbn/projects-solutions-groups';
-
-import { getVersionInfo, VersionInfo } from './version_info';
+import type { KibanaSolution } from '@kbn/projects-solutions-groups';
+import type { VersionInfo } from './version_info';
+import { getVersionInfo } from './version_info';
+import type { PlatformName, PlatformArchitecture, Variant } from './platform';
 import {
-  PlatformName,
-  PlatformArchitecture,
   ALL_PLATFORMS,
+  CLOUD_PLATFORMS,
   SERVERLESS_PLATFORMS,
+  DOWNLOAD_PLATFORMS,
 } from './platform';
-import { BuildOptions } from '../build_distributables';
+import type { BuildOptions } from '../build_distributables';
 
 interface Options {
   isRelease: boolean;
   targetAllPlatforms: boolean;
   targetServerlessPlatforms: boolean;
+  targetCloudPlatforms: boolean;
+  skipServerless: boolean;
   versionQualifier?: string;
   dockerContextUseLocalArtifact: boolean | null;
   dockerCrossCompile: boolean;
@@ -55,6 +58,8 @@ export class Config {
     return new Config(
       opts.targetAllPlatforms,
       opts.targetServerlessPlatforms,
+      opts.targetCloudPlatforms,
+      opts.skipServerless,
       kibanaPackageJson,
       nodeVersion,
       REPO_ROOT,
@@ -84,6 +89,8 @@ export class Config {
   constructor(
     private readonly targetAllPlatforms: boolean,
     private readonly targetServerlessPlatforms: boolean,
+    private readonly targetCloudPlatforms: boolean,
+    private readonly skipServerless: boolean,
     private readonly pkg: KibanaPackageJson,
     private readonly nodeVersion: string,
     private readonly repoRoot: string,
@@ -172,16 +179,18 @@ export class Config {
     return Path.resolve(this.repoRoot, ...subPaths);
   }
 
-  /**
-   * Return the list of Platforms we are targeting, if --this-platform flag is
-   * specified only the platform for this OS will be returned
-   */
   getTargetPlatforms() {
-    if (this.targetServerlessPlatforms) {
-      return SERVERLESS_PLATFORMS;
+    if (this.targetServerlessPlatforms || this.targetCloudPlatforms) {
+      const platforms = this.targetServerlessPlatforms ? SERVERLESS_PLATFORMS : CLOUD_PLATFORMS;
+      if (this.dockerCrossCompile || this.targetAllPlatforms) {
+        return platforms;
+      }
+
+      const architecture = this.getPlatformForThisOs().getArchitecture();
+      return platforms.filter((platform) => platform.getArchitecture() === architecture);
     }
     if (this.targetAllPlatforms) {
-      return ALL_PLATFORMS;
+      return this.skipServerless ? [...DOWNLOAD_PLATFORMS, ...CLOUD_PLATFORMS] : ALL_PLATFORMS;
     }
 
     return [this.getPlatformForThisOs()];
@@ -193,11 +202,11 @@ export class Config {
    * reliably get the LICENSE file, which isn't included in the windows version
    */
   getNodePlatforms() {
-    if (this.targetServerlessPlatforms) {
-      return SERVERLESS_PLATFORMS;
+    if (this.targetServerlessPlatforms || this.targetCloudPlatforms) {
+      return this.getTargetPlatforms();
     }
     if (this.targetAllPlatforms) {
-      return ALL_PLATFORMS;
+      return this.skipServerless ? [...DOWNLOAD_PLATFORMS, ...CLOUD_PLATFORMS] : ALL_PLATFORMS;
     }
 
     if (process.platform === 'linux' && process.arch === 'x64') {
@@ -207,9 +216,9 @@ export class Config {
     return [this.getPlatformForThisOs(), this.getPlatform('linux', 'x64')];
   }
 
-  getPlatform(name: PlatformName, arch: PlatformArchitecture) {
+  getPlatform(name: PlatformName, arch: PlatformArchitecture, variant?: Variant) {
     const selected = ALL_PLATFORMS.find((p) => {
-      return name === p.getName() && arch === p.getArchitecture();
+      return name === p.getName() && arch === p.getArchitecture() && variant === p.getVariant();
     });
 
     if (!selected) {
@@ -276,11 +285,19 @@ export class Config {
     );
   }
 
+  getTarZstd() {
+    return Boolean(this.buildOptions.tarZstd);
+  }
+
+  shouldForceNodePointerCompression() {
+    return Boolean(this.buildOptions.forceNodePointerCompression);
+  }
+
   getDistPluginsFromRepo() {
     return getPackages(this.repoRoot).filter((p) => !p.isDevOnly() && this.pluginFilter(p));
   }
 
-  getPrivateSolutionPackagesFromRepo(project: KibanaProject) {
+  getPrivateSolutionPackagesFromRepo(project: KibanaSolution) {
     return getPackages(this.repoRoot).filter(
       (p) => p.group === project && p.visibility === 'private'
     );

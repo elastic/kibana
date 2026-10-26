@@ -115,6 +115,10 @@ export function StorageDetailsTable({ data = [] }: Props) {
         </EuiText>
       </EuiTitle>
       <EuiInMemoryTable
+        tableCaption={i18n.translate(
+          'xpack.profiling.storageExplorer.dataBreakdown.storageDetailsTable.caption',
+          { defaultMessage: 'Indices breakdown' }
+        )}
         items={data}
         columns={columns}
         sorting={sorting}

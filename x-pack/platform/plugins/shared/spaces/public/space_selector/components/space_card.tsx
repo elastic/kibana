@@ -5,13 +5,16 @@
  * 2.0.
  */
 
-import { EuiCard, EuiLoadingSpinner, EuiTextColor, useEuiTheme } from '@elastic/eui';
+import { EuiCard, EuiLoadingSpinner, EuiTextColor, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { lazy, Suspense } from 'react';
 
+import { addSpaceIdToPath } from '@kbn/core-spaces-common';
+
 import type { Space } from '../../../common';
-import { addSpaceIdToPath, ENTER_SPACE_PATH } from '../../../common';
+import { ENTER_SPACE_PATH } from '../../../common';
 import { getSpaceAvatarComponent } from '../../space_avatar';
+import { SpaceSolutionBadge } from '../../space_solution_badge';
 
 // No need to wrap LazySpaceAvatar in an error boundary, because it is one of the first chunks loaded when opening Kibana.
 const LazySpaceAvatar = lazy(() =>
@@ -40,6 +43,7 @@ export const SpaceCard = (props: Props) => {
       icon={renderSpaceAvatar(space)}
       title={space.name}
       description={renderSpaceDescription(space)}
+      footer={renderSpaceFooter(space)}
       href={addSpaceIdToPath(serverBasePath, space.id, ENTER_SPACE_PATH)}
     />
   );
@@ -63,8 +67,18 @@ function renderSpaceDescription(space: Space) {
   }
 
   return (
-    <EuiTextColor color="subdued" title={description} className="eui-textBreakWord">
-      {description}
-    </EuiTextColor>
+    <EuiToolTip content={space.description}>
+      <EuiTextColor color="subdued" className="eui-textBreakWord">
+        {description}
+      </EuiTextColor>
+    </EuiToolTip>
   );
+}
+
+function renderSpaceFooter(space: Space) {
+  if (!space.solution) {
+    return undefined;
+  }
+
+  return <SpaceSolutionBadge solution={space.solution} />;
 }

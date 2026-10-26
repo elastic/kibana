@@ -15,7 +15,9 @@ import type { MockAuthenticationProviderOptions } from './base.mock';
 import { mockAuthenticationProviderOptions } from './base.mock';
 import { TokenAuthenticationProvider } from './token';
 import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
+import { InvalidGrantError } from '../../errors';
 import { securityMock } from '../../mocks';
+import { sessionMock } from '../../session_management/session.mock';
 import { AuthenticationResult } from '../authentication_result';
 import { DeauthenticationResult } from '../deauthentication_result';
 
@@ -121,7 +123,12 @@ describe('TokenAuthenticationProvider', () => {
       });
 
       await expect(
-        provider.authenticate(request, { accessToken: 'foo', refreshToken: 'bar' })
+        provider.authenticate(
+          request,
+          sessionMock.createValue({
+            state: { accessToken: 'foo', refreshToken: 'bar' },
+          })
+        )
       ).resolves.toEqual(AuthenticationResult.notHandled());
 
       expect(mockOptions.client.asScoped).not.toHaveBeenCalled();
@@ -170,7 +177,9 @@ describe('TokenAuthenticationProvider', () => {
       mockScopedClusterClient.asCurrentUser.security.authenticate.mockResponse(user);
       mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
 
-      await expect(provider.authenticate(request, tokenPair)).resolves.toEqual(
+      await expect(
+        provider.authenticate(request, sessionMock.createValue({ state: tokenPair }))
+      ).resolves.toEqual(
         AuthenticationResult.succeeded(
           { ...user, authentication_provider: { type: 'token', name: 'token' } },
           { authHeaders: { authorization } }
@@ -199,7 +208,9 @@ describe('TokenAuthenticationProvider', () => {
         authenticationInfo: user,
       });
 
-      await expect(provider.authenticate(request, tokenPair)).resolves.toEqual(
+      await expect(
+        provider.authenticate(request, sessionMock.createValue({ state: tokenPair }))
+      ).resolves.toEqual(
         AuthenticationResult.succeeded(
           { ...user, authentication_provider: { type: 'token', name: 'token' } },
           {
@@ -229,9 +240,9 @@ describe('TokenAuthenticationProvider', () => {
       );
       mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
 
-      await expect(provider.authenticate(request, tokenPair)).resolves.toEqual(
-        AuthenticationResult.failed(authenticationError)
-      );
+      await expect(
+        provider.authenticate(request, sessionMock.createValue({ state: tokenPair }))
+      ).resolves.toEqual(AuthenticationResult.failed(authenticationError));
 
       expectAuthenticateCall(mockOptions.client, { headers: { authorization } });
 
@@ -254,9 +265,9 @@ describe('TokenAuthenticationProvider', () => {
       );
       mockOptions.tokens.refresh.mockRejectedValue(refreshError);
 
-      await expect(provider.authenticate(request, tokenPair)).resolves.toEqual(
-        AuthenticationResult.failed(refreshError)
-      );
+      await expect(
+        provider.authenticate(request, sessionMock.createValue({ state: tokenPair }))
+      ).resolves.toEqual(AuthenticationResult.failed(refreshError));
 
       expect(mockOptions.tokens.refresh).toHaveBeenCalledTimes(1);
       expect(mockOptions.tokens.refresh).toHaveBeenCalledWith(tokenPair.refreshToken);
@@ -277,9 +288,13 @@ describe('TokenAuthenticationProvider', () => {
       );
       mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
 
-      mockOptions.tokens.refresh.mockResolvedValue(null);
+      mockOptions.tokens.refresh.mockRejectedValue(
+        InvalidGrantError.expiredOrInvalidRefreshToken()
+      );
 
-      await expect(provider.authenticate(request, tokenPair)).resolves.toEqual(
+      await expect(
+        provider.authenticate(request, sessionMock.createValue({ state: tokenPair }))
+      ).resolves.toEqual(
         AuthenticationResult.redirectTo(
           '/mock-server-basepath/login?next=%2Fmock-server-basepath%2Fsome-path',
           { state: null }
@@ -308,10 +323,18 @@ describe('TokenAuthenticationProvider', () => {
       );
       mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
 
-      mockOptions.tokens.refresh.mockResolvedValue(null);
+      mockOptions.tokens.refresh.mockRejectedValue(
+        InvalidGrantError.expiredOrInvalidRefreshToken()
+      );
 
-      await expect(provider.authenticate(request, tokenPair)).resolves.toEqual(
-        AuthenticationResult.failed(Boom.badRequest('Both access and refresh tokens are expired.'))
+      await expect(
+        provider.authenticate(request, sessionMock.createValue({ state: tokenPair }))
+      ).resolves.toEqual(
+        AuthenticationResult.failed(
+          Boom.badRequest(
+            'Your session has expired because your refresh token is no longer valid. Please log in again.'
+          )
+        )
       );
 
       expect(mockOptions.tokens.refresh).toHaveBeenCalledTimes(1);
@@ -339,10 +362,17 @@ describe('TokenAuthenticationProvider', () => {
       );
       mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
 
-      mockOptions.tokens.refresh.mockResolvedValue(null);
-
-      await expect(provider.authenticate(request, tokenPair)).resolves.toEqual(
-        AuthenticationResult.failed(Boom.badRequest('Both access and refresh tokens are expired.'))
+      mockOptions.tokens.refresh.mockRejectedValue(
+        InvalidGrantError.expiredOrInvalidRefreshToken()
+      );
+      await expect(
+        provider.authenticate(request, sessionMock.createValue({ state: tokenPair }))
+      ).resolves.toEqual(
+        AuthenticationResult.failed(
+          Boom.badRequest(
+            'Your session has expired because your refresh token is no longer valid. Please log in again.'
+          )
+        )
       );
 
       expect(mockOptions.tokens.refresh).toHaveBeenCalledTimes(1);
@@ -355,7 +385,7 @@ describe('TokenAuthenticationProvider', () => {
   });
 
   describe('`logout` method', () => {
-    it('returns `notHandled` if state is not presented.', async () => {
+    it('returns `notHandled` if session is not presented.', async () => {
       const request = httpServerMock.createKibanaRequest();
 
       await expect(provider.logout(request)).resolves.toEqual(DeauthenticationResult.notHandled());
@@ -363,7 +393,7 @@ describe('TokenAuthenticationProvider', () => {
       expect(mockOptions.tokens.invalidate).not.toHaveBeenCalled();
     });
 
-    it('redirects to the logged out URL if state is `null`.', async () => {
+    it('redirects to the logged out URL if session is `null`.', async () => {
       await expect(provider.logout(httpServerMock.createKibanaRequest(), null)).resolves.toEqual(
         DeauthenticationResult.redirectTo('/some-logged-out-page')
       );
@@ -378,9 +408,9 @@ describe('TokenAuthenticationProvider', () => {
       const failureReason = new Error('failed to delete token');
       mockOptions.tokens.invalidate.mockRejectedValue(failureReason);
 
-      await expect(provider.logout(request, tokenPair)).resolves.toEqual(
-        DeauthenticationResult.failed(failureReason)
-      );
+      await expect(
+        provider.logout(request, sessionMock.createValue({ state: tokenPair }))
+      ).resolves.toEqual(DeauthenticationResult.failed(failureReason));
 
       expect(mockOptions.tokens.invalidate).toHaveBeenCalledTimes(1);
       expect(mockOptions.tokens.invalidate).toHaveBeenCalledWith(tokenPair);
@@ -392,9 +422,9 @@ describe('TokenAuthenticationProvider', () => {
 
       mockOptions.tokens.invalidate.mockResolvedValue(undefined);
 
-      await expect(provider.logout(request, tokenPair)).resolves.toEqual(
-        DeauthenticationResult.redirectTo('/some-logged-out-page')
-      );
+      await expect(
+        provider.logout(request, sessionMock.createValue({ state: tokenPair }))
+      ).resolves.toEqual(DeauthenticationResult.redirectTo('/some-logged-out-page'));
 
       expect(mockOptions.tokens.invalidate).toHaveBeenCalledTimes(1);
       expect(mockOptions.tokens.invalidate).toHaveBeenCalledWith(tokenPair);

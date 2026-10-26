@@ -1,0 +1,34 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": [
+      "jest",
+      "node",
+      "react",
+      "@kbn/ambient-ui-types",
+      "@kbn/ambient-common-types",
+    ]
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+  ],
+  "exclude": [
+    "target/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/zod",
+    "@kbn/logging",
+    "@kbn/licensing-types",
+    "@kbn/actions-utils",
+    "@kbn/i18n",
+    "@kbn/mcp-client",
+    "@kbn/std",
+    "@kbn/logging-mocks",
+    "@kbn/repo-info",
+    "@kbn/connector-emulate",
+    "@kbn/dev-cli-runner",
+    "@kbn/dev-cli-errors",
+  ]
+}

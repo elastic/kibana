@@ -7,20 +7,25 @@
 
 import React from 'react';
 
-import { CoreStart } from '@kbn/core/public';
-import { Visualization } from '..';
-import { DataViewsState } from '../state_management';
-import { Datasource, UserMessage } from '../types';
+import type { CoreStart } from '@kbn/core/public';
+import type { Visualization } from '..';
+import type {
+  DataViewsState,
+  Datasource,
+  UserMessage,
+  LensPublicCallbacks,
+} from '@kbn/lens-common';
+import type { UserMessageGetterProps } from './get_application_user_messages';
 import {
-  UserMessageGetterProps,
   filterAndSortUserMessages,
   getApplicationUserMessages,
+  getLoadErrorMessage,
   handleMessageOverwriteFromConsumer,
 } from './get_application_user_messages';
 import { cleanup, render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
-import { FIELD_NOT_FOUND, FIELD_WRONG_TYPE } from '../user_messages_ids';
-import { LensPublicCallbacks } from '../react_embeddable/types';
+import { LENS_ERROR_CODES, LENS_ERROR_TYPE } from '@kbn/lens-embeddable-utils';
+import { EDITOR_LOAD_ERROR, FIELD_NOT_FOUND, FIELD_WRONG_TYPE } from '../user_messages_ids';
 import { getLongMessage } from '../user_messages_utils';
 
 jest.mock('@kbn/shared-ux-link-redirect-app', () => {
@@ -31,6 +36,42 @@ jest.mock('@kbn/shared-ux-link-redirect-app', () => {
   };
 });
 
+describe('getLoadErrorMessage', () => {
+  const httpError = (code: string) =>
+    Object.assign(new Error('Internal Server Error'), {
+      body: { attributes: { type: LENS_ERROR_TYPE, code } },
+    });
+
+  it.each(Object.values(LENS_ERROR_CODES))(
+    'replaces the raw error message with a translated one for "%s"',
+    (code) => {
+      const message = getLoadErrorMessage(httpError(code));
+      expect(message).toEqual(
+        expect.objectContaining({
+          uniqueId: EDITOR_LOAD_ERROR,
+          severity: 'error',
+          displayLocations: [{ id: 'visualizationOnEmbeddable' }],
+        })
+      );
+      expect(message.longMessage).toEqual(expect.any(String));
+      expect(message.longMessage).not.toBe('Internal Server Error');
+    }
+  );
+
+  it('uses the datasource message for a missing datasource', () => {
+    expect(getLoadErrorMessage(httpError(LENS_ERROR_CODES.DATASOURCE_NOT_FOUND)).longMessage).toBe(
+      'Could not find datasource for the visualization'
+    );
+  });
+
+  it('falls back to the error message for unknown or missing codes', () => {
+    expect(getLoadErrorMessage(httpError('not_a_lens_code')).longMessage).toBe(
+      'Internal Server Error'
+    );
+    expect(getLoadErrorMessage(new Error('boom')).longMessage).toBe('boom');
+  });
+});
+
 describe('application-level user messages', () => {
   it('should generate error if vis type is not provided', () => {
     expect(
@@ -38,7 +79,7 @@ describe('application-level user messages', () => {
         visualizationType: undefined,
 
         visualization: undefined,
-        visualizationState: { activeId: '', state: {} },
+        visualizationState: { activeId: '', state: {}, selectedLayerId: null },
         activeDatasource: {} as Datasource,
         activeDatasourceState: null,
         dataViews: {} as DataViewsState,
@@ -67,7 +108,11 @@ describe('application-level user messages', () => {
       getApplicationUserMessages({
         visualizationType: '123',
         visualization: undefined,
-        visualizationState: { activeId: 'id_for_type_that_doesnt_exist', state: {} },
+        visualizationState: {
+          activeId: 'id_for_type_that_doesnt_exist',
+          state: {},
+          selectedLayerId: null,
+        },
 
         activeDatasource: {} as Datasource,
         activeDatasourceState: null,
@@ -99,7 +144,7 @@ describe('application-level user messages', () => {
 
         visualizationType: '123',
         visualization: {} as Visualization,
-        visualizationState: { activeId: 'some-id', state: {} },
+        visualizationState: { activeId: 'some-id', state: {}, selectedLayerId: null },
         activeDatasourceState: null,
         dataViews: {} as DataViewsState,
         core: {} as CoreStart,
@@ -166,7 +211,7 @@ describe('application-level user messages', () => {
         // irrelevantProps
         dataViews: {} as DataViewsState,
         visualization: {} as Visualization,
-        visualizationState: { activeId: 'foo', state: {} },
+        visualizationState: { activeId: 'foo', state: {}, selectedLayerId: null },
       };
       const firstMessage = getApplicationUserMessages({ ...props, ...propsOverrides }).at(0);
       const rtlRender = render(

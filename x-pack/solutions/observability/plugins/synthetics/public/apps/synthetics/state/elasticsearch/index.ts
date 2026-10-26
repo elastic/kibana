@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { createReducer } from '@reduxjs/toolkit';
-import { ESSearchResponse } from '@kbn/es-types';
+import { createReducer } from 'redux-toolkit-v1';
+import type { ESSearchResponse } from '@kbn/es-types';
 
-import { IHttpSerializedFetchError } from '..';
+import type { IHttpSerializedFetchError } from '..';
 import { executeEsQueryAction } from './actions';
 
 export interface QueriesState {
@@ -35,7 +35,7 @@ export const elasticsearchReducer = createReducer(initialState, (builder) => {
       state.results = { ...state.results, [name]: action.payload.result };
     })
     .addCase(executeEsQueryAction.fail, (state, action) => {
-      const name = action.payload.name;
+      const name = action.payload.getPayload?.name!;
       state.loading = { ...state.loading, [name]: false };
       state.error = { ...state.error, [name]: action.payload };
     });

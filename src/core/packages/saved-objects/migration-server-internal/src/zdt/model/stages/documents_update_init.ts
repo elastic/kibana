@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import * as Either from 'fp-ts/lib/Either';
+import * as Either from 'fp-ts/Either';
 import { throwBadResponse } from '../../../model/helpers';
 import type { MigrationLog } from '../../../types';
-import { excludeUnusedTypesQuery } from '../../../core';
+import { buildExcludeUnusedTypesQuery } from '../../../core';
 import type { ModelStage } from '../types';
 import {
   getOutdatedDocumentsQuery,
@@ -41,7 +41,7 @@ export const documentsUpdateInit: ModelStage<
   });
   const commonState = {
     logs,
-    excludeOnUpgradeQuery: excludeUnusedTypesQuery,
+    excludeOnUpgradeQuery: buildExcludeUnusedTypesQuery(context.typeRegistry.getLegacyTypes()),
     excludeFromUpgradeFilterHooks: excludeFilterHooks,
     outdatedDocumentsQuery,
     transformRawDocs,

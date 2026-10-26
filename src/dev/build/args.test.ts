@@ -28,7 +28,6 @@ it('build default and oss dist for current platform, without packages, by defaul
   expect(readCliArgs(['node', 'scripts/build'])).toMatchInlineSnapshot(`
     Object {
       "buildOptions": Object {
-        "buildCanvasShareableRuntime": true,
         "createArchives": true,
         "createCdnAssets": true,
         "createDebPackage": false,
@@ -51,9 +50,14 @@ it('build default and oss dist for current platform, without packages, by defaul
         "downloadCloudDependencies": true,
         "downloadFreshNode": true,
         "eprRegistry": "snapshot",
+        "forceNodePointerCompression": false,
         "initialize": true,
         "isRelease": false,
+        "skipFipsProvider": false,
+        "skipServerless": false,
+        "tarZstd": false,
         "targetAllPlatforms": false,
+        "targetCloudPlatforms": false,
         "targetServerlessPlatforms": false,
         "versionQualifier": "",
         "withExamplePlugins": false,
@@ -70,7 +74,6 @@ it('builds packages if --all-platforms is passed', () => {
   expect(readCliArgs(['node', 'scripts/build', '--all-platforms'])).toMatchInlineSnapshot(`
     Object {
       "buildOptions": Object {
-        "buildCanvasShareableRuntime": true,
         "createArchives": true,
         "createCdnAssets": true,
         "createDebPackage": true,
@@ -93,9 +96,14 @@ it('builds packages if --all-platforms is passed', () => {
         "downloadCloudDependencies": true,
         "downloadFreshNode": true,
         "eprRegistry": "snapshot",
+        "forceNodePointerCompression": false,
         "initialize": true,
         "isRelease": false,
+        "skipFipsProvider": false,
+        "skipServerless": false,
+        "tarZstd": false,
         "targetAllPlatforms": true,
+        "targetCloudPlatforms": false,
         "targetServerlessPlatforms": false,
         "versionQualifier": "",
         "withExamplePlugins": false,
@@ -112,7 +120,6 @@ it('limits packages if --rpm passed with --all-platforms', () => {
   expect(readCliArgs(['node', 'scripts/build', '--all-platforms', '--rpm'])).toMatchInlineSnapshot(`
     Object {
       "buildOptions": Object {
-        "buildCanvasShareableRuntime": true,
         "createArchives": true,
         "createCdnAssets": true,
         "createDebPackage": false,
@@ -135,9 +142,14 @@ it('limits packages if --rpm passed with --all-platforms', () => {
         "downloadCloudDependencies": true,
         "downloadFreshNode": true,
         "eprRegistry": "snapshot",
+        "forceNodePointerCompression": false,
         "initialize": true,
         "isRelease": false,
+        "skipFipsProvider": false,
+        "skipServerless": false,
+        "tarZstd": false,
         "targetAllPlatforms": true,
+        "targetCloudPlatforms": false,
         "targetServerlessPlatforms": false,
         "versionQualifier": "",
         "withExamplePlugins": false,
@@ -154,7 +166,6 @@ it('limits packages if --deb passed with --all-platforms', () => {
   expect(readCliArgs(['node', 'scripts/build', '--all-platforms', '--deb'])).toMatchInlineSnapshot(`
     Object {
       "buildOptions": Object {
-        "buildCanvasShareableRuntime": true,
         "createArchives": true,
         "createCdnAssets": true,
         "createDebPackage": true,
@@ -177,9 +188,14 @@ it('limits packages if --deb passed with --all-platforms', () => {
         "downloadCloudDependencies": true,
         "downloadFreshNode": true,
         "eprRegistry": "snapshot",
+        "forceNodePointerCompression": false,
         "initialize": true,
         "isRelease": false,
+        "skipFipsProvider": false,
+        "skipServerless": false,
+        "tarZstd": false,
         "targetAllPlatforms": true,
+        "targetCloudPlatforms": false,
         "targetServerlessPlatforms": false,
         "versionQualifier": "",
         "withExamplePlugins": false,
@@ -197,7 +213,6 @@ it('limits packages if --docker passed with --all-platforms', () => {
     .toMatchInlineSnapshot(`
     Object {
       "buildOptions": Object {
-        "buildCanvasShareableRuntime": true,
         "createArchives": true,
         "createCdnAssets": true,
         "createDebPackage": false,
@@ -220,9 +235,14 @@ it('limits packages if --docker passed with --all-platforms', () => {
         "downloadCloudDependencies": true,
         "downloadFreshNode": true,
         "eprRegistry": "snapshot",
+        "forceNodePointerCompression": false,
         "initialize": true,
         "isRelease": false,
+        "skipFipsProvider": false,
+        "skipServerless": false,
+        "tarZstd": false,
         "targetAllPlatforms": true,
+        "targetCloudPlatforms": false,
         "targetServerlessPlatforms": false,
         "versionQualifier": "",
         "withExamplePlugins": false,
@@ -247,7 +267,6 @@ it('limits packages if --docker passed with --skip-docker-ubi and --all-platform
   ).toMatchInlineSnapshot(`
     Object {
       "buildOptions": Object {
-        "buildCanvasShareableRuntime": true,
         "createArchives": true,
         "createCdnAssets": true,
         "createDebPackage": false,
@@ -270,9 +289,14 @@ it('limits packages if --docker passed with --skip-docker-ubi and --all-platform
         "downloadCloudDependencies": true,
         "downloadFreshNode": true,
         "eprRegistry": "snapshot",
+        "forceNodePointerCompression": false,
         "initialize": true,
         "isRelease": false,
+        "skipFipsProvider": false,
+        "skipServerless": false,
+        "tarZstd": false,
         "targetAllPlatforms": true,
+        "targetCloudPlatforms": false,
         "targetServerlessPlatforms": false,
         "versionQualifier": "",
         "withExamplePlugins": false,
@@ -290,7 +314,6 @@ it('limits packages if --all-platforms passed with --skip-docker-fips', () => {
     .toMatchInlineSnapshot(`
     Object {
       "buildOptions": Object {
-        "buildCanvasShareableRuntime": true,
         "createArchives": true,
         "createCdnAssets": true,
         "createDebPackage": true,
@@ -313,9 +336,14 @@ it('limits packages if --all-platforms passed with --skip-docker-fips', () => {
         "downloadCloudDependencies": true,
         "downloadFreshNode": true,
         "eprRegistry": "snapshot",
+        "forceNodePointerCompression": false,
         "initialize": true,
         "isRelease": false,
+        "skipFipsProvider": false,
+        "skipServerless": false,
+        "tarZstd": false,
         "targetAllPlatforms": true,
+        "targetCloudPlatforms": false,
         "targetServerlessPlatforms": false,
         "versionQualifier": "",
         "withExamplePlugins": false,
@@ -333,7 +361,6 @@ it('limits packages if --all-platforms passed with --skip-docker-cloud-fips', ()
     .toMatchInlineSnapshot(`
     Object {
       "buildOptions": Object {
-        "buildCanvasShareableRuntime": true,
         "createArchives": true,
         "createCdnAssets": true,
         "createDebPackage": true,
@@ -356,9 +383,14 @@ it('limits packages if --all-platforms passed with --skip-docker-cloud-fips', ()
         "downloadCloudDependencies": true,
         "downloadFreshNode": true,
         "eprRegistry": "snapshot",
+        "forceNodePointerCompression": false,
         "initialize": true,
         "isRelease": false,
+        "skipFipsProvider": false,
+        "skipServerless": false,
+        "tarZstd": false,
         "targetAllPlatforms": true,
+        "targetCloudPlatforms": false,
         "targetServerlessPlatforms": false,
         "versionQualifier": "",
         "withExamplePlugins": false,
@@ -369,4 +401,96 @@ it('limits packages if --all-platforms passed with --skip-docker-cloud-fips', ()
       "unknownFlags": Array [],
     }
   `);
+});
+
+it('skips the FIPS provider without skipping platform preparation or archives', () => {
+  expect(
+    readCliArgs([
+      'node',
+      'scripts/build',
+      '--all-platforms',
+      '--skip-os-packages',
+      '--skip-fips-provider',
+    ])
+  ).toMatchObject({
+    showHelp: false,
+    unknownFlags: [],
+    buildOptions: {
+      skipFipsProvider: true,
+      createPlatformFolders: true,
+      createArchives: true,
+      createDockerFIPS: false,
+      targetAllPlatforms: true,
+    },
+  });
+});
+
+it('only builds cloud packages if --cloud is passed', () => {
+  expect(readCliArgs(['node', 'scripts/build', '--cloud'])).toMatchInlineSnapshot(`
+    Object {
+      "buildOptions": Object {
+        "createArchives": true,
+        "createCdnAssets": true,
+        "createDebPackage": false,
+        "createDockerCloud": true,
+        "createDockerCloudFIPS": false,
+        "createDockerContexts": false,
+        "createDockerFIPS": false,
+        "createDockerServerless": false,
+        "createDockerUBI": false,
+        "createDockerWolfi": false,
+        "createGenericFolders": true,
+        "createPlatformFolders": true,
+        "createRpmPackage": false,
+        "dockerContextUseLocalArtifact": null,
+        "dockerCrossCompile": false,
+        "dockerNamespace": null,
+        "dockerPush": false,
+        "dockerTag": null,
+        "dockerTagQualifier": null,
+        "downloadCloudDependencies": true,
+        "downloadFreshNode": true,
+        "eprRegistry": "snapshot",
+        "forceNodePointerCompression": false,
+        "initialize": true,
+        "isRelease": false,
+        "skipFipsProvider": false,
+        "skipServerless": false,
+        "tarZstd": false,
+        "targetAllPlatforms": false,
+        "targetCloudPlatforms": true,
+        "targetServerlessPlatforms": false,
+        "versionQualifier": "",
+        "withExamplePlugins": false,
+        "withTestPlugins": false,
+      },
+      "log": <ToolingLog>,
+      "showHelp": false,
+      "unknownFlags": Array [],
+    }
+  `);
+});
+
+it.each([
+  { flags: ['--all-platforms'] },
+  { flags: ['--all-platforms', '--docker-cross-compile'] },
+  { flags: ['--all-platforms', '--docker-images'] },
+])('only builds cloud artifacts with --cloud $flags', ({ flags }) => {
+  const { buildOptions } = readCliArgs(['node', 'scripts/build', '--cloud', ...flags]);
+
+  expect(buildOptions).toMatchObject({
+    createArchives: true,
+    createDebPackage: false,
+    createRpmPackage: false,
+    createDockerCloud: true,
+    createDockerCloudFIPS: false,
+    createDockerContexts: false,
+    createDockerFIPS: false,
+    createDockerServerless: false,
+    createDockerUBI: false,
+    createDockerWolfi: false,
+    targetAllPlatforms: true,
+    targetCloudPlatforms: true,
+    targetServerlessPlatforms: false,
+  });
 });

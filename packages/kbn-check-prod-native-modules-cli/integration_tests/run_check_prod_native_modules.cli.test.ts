@@ -9,7 +9,7 @@
 
 import path from 'path';
 import fs from 'fs';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 import { checkProdNativeModules } from '../check_prod_native_modules';
 
 describe('checkProdNativeModules', () => {
@@ -147,6 +147,36 @@ describe('checkProdNativeModules', () => {
     );
     expect(mockLog.error).toHaveBeenCalledWith(
       'Production native modules were detected and logged above'
+    );
+  });
+
+  it('should ignore optional dependencies when checking for native modules', async () => {
+    // Use a fixture with optional dependencies
+    const withOptionalNativeModulesDir = path.join(fixturesDir, 'with_optional_native_modules');
+    const withOptionalNativeModulesPkgJsonPath = path.join(
+      withOptionalNativeModulesDir,
+      'package.json'
+    );
+    jest.spyOn(process, 'cwd').mockReturnValue(withOptionalNativeModulesDir);
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    jest.replaceProperty(require('@kbn/repo-info'), 'REPO_ROOT', withOptionalNativeModulesDir);
+
+    const withOptionalNativeModulesPkgJson = JSON.parse(
+      fs.readFileSync(withOptionalNativeModulesPkgJsonPath, 'utf8')
+    );
+
+    jest.replaceProperty(
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      require('@kbn/repo-info'),
+      'kibanaPackageJson',
+      withOptionalNativeModulesPkgJson
+    );
+
+    const result = await checkProdNativeModules(mockLog);
+
+    expect(result).toBe(false);
+    expect(mockLog.success).toHaveBeenCalledWith(
+      'No production native modules installed were found'
     );
   });
 });

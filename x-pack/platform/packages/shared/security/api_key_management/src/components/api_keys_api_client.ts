@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { estypes } from '@elastic/elasticsearch';
 import type { Criteria } from '@elastic/eui';
 import type { QueryContainer } from '@elastic/eui/src/components/search_bar/query/ast_to_es_query_dsl';
 
@@ -37,37 +38,37 @@ export type QueryApiKeySortOptions = Required<Criteria<CategorizedApiKey>>['sort
 
 export interface QueryApiKeyParams {
   query: QueryContainer;
-  from: number;
   size: number;
   sort: QueryApiKeySortOptions;
   filters: QueryFilters;
+  searchAfter?: estypes.SortResults;
 }
 
-const apiKeysUrl = '/internal/security/api_key';
+const API_KEYS_URL = '/internal/security/api_key';
 
 export class APIKeysAPIClient {
   constructor(private readonly http: HttpStart) {}
 
   public async queryApiKeys(params?: QueryApiKeyParams) {
-    return await this.http.post<QueryApiKeyResult>(`${apiKeysUrl}/_query`, {
+    return await this.http.post<QueryApiKeyResult>(`${API_KEYS_URL}/_query`, {
       body: JSON.stringify(params || {}),
     });
   }
 
   public async invalidateApiKeys(apiKeys: ApiKeyToInvalidate[], isAdmin = false) {
-    return await this.http.post<InvalidateApiKeysResponse>(`${apiKeysUrl}/invalidate`, {
+    return await this.http.post<InvalidateApiKeysResponse>(`${API_KEYS_URL}/invalidate`, {
       body: JSON.stringify({ apiKeys, isAdmin }),
     });
   }
 
   public async createApiKey(apiKey: CreateAPIKeyParams) {
-    return await this.http.post<CreateAPIKeyResult>(apiKeysUrl, {
+    return await this.http.post<CreateAPIKeyResult>(API_KEYS_URL, {
       body: JSON.stringify(apiKey),
     });
   }
 
   public async updateApiKey(apiKey: UpdateAPIKeyParams) {
-    return await this.http.put<UpdateAPIKeyResult>(apiKeysUrl, {
+    return await this.http.put<UpdateAPIKeyResult>(API_KEYS_URL, {
       body: JSON.stringify(apiKey),
     });
   }

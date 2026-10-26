@@ -9,38 +9,49 @@ import type {
   CoreSetup,
   Logger,
   SavedObject,
-  SavedObjectsClientContract,
   SavedObjectsExportTransformContext,
 } from '@kbn/core/server';
 import type {
   CaseUserActionWithoutReferenceIds,
   AttachmentAttributesWithoutRefs,
 } from '../../../common/types/domain';
-import {
-  CASE_COMMENT_SAVED_OBJECT,
-  CASE_SAVED_OBJECT,
-  CASE_USER_ACTION_SAVED_OBJECT,
-  MAX_DOCS_PER_PAGE,
-  SAVED_OBJECT_TYPES,
-} from '../../../common/constants';
-import { defaultSortField } from '../../common/utils';
+import type { AttachmentAttributesV2 } from '../../../common/types/domain/attachment/v2';
+import type { Template } from '../../../common/types/domain/template/latest';
+import type { FieldDefinition } from '../../../common/types/domain/field_definition/latest';
 import { createCaseError } from '../../common/error';
 import type { CasePersistedAttributes } from '../../common/types/case';
+import type { ConfigType } from '../../config';
+import {
+  getAttachmentsAndUserActionsForCases,
+  getTemplatesAndFieldDefinitionsForCases,
+} from './utils';
+import { getSavedObjectsTypes } from '../../../common';
+import {
+  CASE_FIELD_DEFINITION_SAVED_OBJECT,
+  CASE_TEMPLATE_SAVED_OBJECT,
+} from '../../../common/constants';
 
 export async function handleExport({
   context,
   objects,
   coreSetup,
   logger,
+  config,
 }: {
   context: SavedObjectsExportTransformContext;
   objects: Array<SavedObject<CasePersistedAttributes>>;
   coreSetup: CoreSetup;
   logger: Logger;
+  config: ConfigType;
 }): Promise<
   Array<
     SavedObject<
-      CasePersistedAttributes | AttachmentAttributesWithoutRefs | CaseUserActionWithoutReferenceIds
+      | CasePersistedAttributes
+      | AttachmentAttributesWithoutRefs
+      | AttachmentAttributesV2
+      | CaseUserActionWithoutReferenceIds
+      | Template
+      | FieldDefinition
     >
   >
 > {
@@ -49,18 +60,40 @@ export async function handleExport({
       return [];
     }
 
+    const cleanedObjects: Array<SavedObject<CasePersistedAttributes>> = objects.map((obj) => ({
+      ...obj,
+      attributes: {
+        ...obj.attributes,
+        incremental_id: undefined,
+      },
+    }));
+
     const [{ savedObjects }] = await coreSetup.getStartServices();
+    // Include both new template SO types unconditionally — they are always registered and their
+    // importableAndExportable flag is static, so bundling must not depend on the feature flag.
+    // This mirrors how cases-attachments is always included regardless of xpack.cases.attachments.enabled.
+    const includedHiddenTypes = [
+      ...new Set([
+        ...getSavedObjectsTypes(config),
+        CASE_TEMPLATE_SAVED_OBJECT,
+        CASE_FIELD_DEFINITION_SAVED_OBJECT,
+      ]),
+    ];
     const savedObjectsClient = savedObjects.getScopedClient(context.request, {
-      includedHiddenTypes: SAVED_OBJECT_TYPES,
+      includedHiddenTypes,
     });
 
-    const caseIds = objects.map((caseObject) => caseObject.id);
-    const attachmentsAndUserActionsForCases = await getAttachmentsAndUserActionsForCases(
-      savedObjectsClient,
-      caseIds
-    );
+    const caseIds = cleanedObjects.map((caseObject) => caseObject.id);
+    const [attachmentsAndUserActionsForCases, templatesAndFieldDefinitions] = await Promise.all([
+      getAttachmentsAndUserActionsForCases(savedObjectsClient, caseIds),
+      getTemplatesAndFieldDefinitionsForCases(savedObjectsClient, cleanedObjects, logger),
+    ]);
 
-    return [...objects, ...attachmentsAndUserActionsForCases.flat()];
+    return [
+      ...cleanedObjects,
+      ...attachmentsAndUserActionsForCases,
+      ...templatesAndFieldDefinitions,
+    ];
   } catch (error) {
     throw createCaseError({
       message: `Failed to retrieve associated objects for exporting of cases: ${error}`,
@@ -68,58 +101,4 @@ export async function handleExport({
       logger,
     });
   }
-}
-
-async function getAttachmentsAndUserActionsForCases(
-  savedObjectsClient: SavedObjectsClientContract,
-  caseIds: string[]
-): Promise<
-  Array<SavedObject<AttachmentAttributesWithoutRefs | CaseUserActionWithoutReferenceIds>>
-> {
-  const [attachments, userActions] = await Promise.all([
-    getAssociatedObjects<AttachmentAttributesWithoutRefs>({
-      savedObjectsClient,
-      caseIds,
-      sortField: defaultSortField,
-      type: CASE_COMMENT_SAVED_OBJECT,
-    }),
-    getAssociatedObjects<CaseUserActionWithoutReferenceIds>({
-      savedObjectsClient,
-      caseIds,
-      sortField: defaultSortField,
-      type: CASE_USER_ACTION_SAVED_OBJECT,
-    }),
-  ]);
-
-  return [...attachments, ...userActions];
-}
-
-async function getAssociatedObjects<T>({
-  savedObjectsClient,
-  caseIds,
-  sortField,
-  type,
-}: {
-  savedObjectsClient: SavedObjectsClientContract;
-  caseIds: string[];
-  sortField: string;
-  type: string;
-}): Promise<Array<SavedObject<T>>> {
-  const references = caseIds.map((id) => ({ type: CASE_SAVED_OBJECT, id }));
-
-  const finder = savedObjectsClient.createPointInTimeFinder<T>({
-    type,
-    hasReferenceOperator: 'OR',
-    hasReference: references,
-    perPage: MAX_DOCS_PER_PAGE,
-    sortField,
-    sortOrder: 'asc',
-  });
-
-  let result: Array<SavedObject<T>> = [];
-  for await (const findResults of finder.find()) {
-    result = result.concat(findResults.saved_objects);
-  }
-
-  return result;
 }

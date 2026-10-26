@@ -6,17 +6,22 @@
  */
 
 import type { IRouter } from '@kbn/core/server';
-import type { AllConnectorsResponseV1 } from '../../../../common/routes/connector/response';
+import {
+  getGetAllConnectorsResponseSchemaV1,
+  type GetAllConnectorsResponseV1,
+} from '../../../../common/routes/connector/response';
 import { transformGetAllConnectorsResponseV1 } from './transforms';
 import type { ActionsRequestHandlerContext } from '../../../types';
 import { BASE_ACTION_API_PATH } from '../../../../common';
 import type { ILicenseState } from '../../../lib';
 import { verifyAccessAndContext } from '../../verify_access_and_context';
 import { DEFAULT_ACTION_ROUTE_SECURITY } from '../../constants';
+import type { ActionsConfigurationUtilities } from '../../../actions_config';
 
 export const getAllConnectorsRoute = (
   router: IRouter<ActionsRequestHandlerContext>,
-  licenseState: ILicenseState
+  licenseState: ILicenseState,
+  actionsConfigUtils: ActionsConfigurationUtilities
 ) => {
   router.get(
     {
@@ -26,17 +31,32 @@ export const getAllConnectorsRoute = (
         access: 'public',
         summary: `Get all connectors`,
         tags: ['oas-tag:connectors'],
-        // description:
-        //   'You must have `read` privileges for the **Actions and Connectors** feature in the **Management** section of the Kibana feature privileges.',
       },
-      validate: {},
+      validate: () => {
+        const includeInboundEventsField = actionsConfigUtils.isInboundEventsEnabled();
+        return {
+          request: {},
+          response: {
+            200: {
+              body: () => getGetAllConnectorsResponseSchemaV1(includeInboundEventsField),
+              description: 'Indicates a successful call.',
+            },
+            403: {
+              description: 'Indicates that this call is forbidden.',
+            },
+          },
+        };
+      },
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
         const actionsClient = (await context.actions).getActionsClient();
         const result = await actionsClient.getAll();
 
-        const responseBody: AllConnectorsResponseV1[] = transformGetAllConnectorsResponseV1(result);
+        const responseBody: GetAllConnectorsResponseV1 = transformGetAllConnectorsResponseV1(
+          result,
+          { includeInboundEventsField: actionsConfigUtils.isInboundEventsEnabled() }
+        );
         return res.ok({ body: responseBody });
       })
     )

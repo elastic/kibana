@@ -17,6 +17,7 @@ export const IconWithCount = React.memo<{
   <EuiFlexGroup alignItems="center" gutterSize="none" css={{ marginLeft: 'auto', flexGrow: 0 }}>
     <EuiFlexItem grow={false}>
       <EuiIcon
+        aria-hidden={true}
         css={{ marginRight: '4px' }}
         size="s"
         type={icon}

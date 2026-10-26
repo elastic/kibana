@@ -5,26 +5,37 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
-import PropTypes from 'prop-types';
+import type { FC } from 'react';
+import React, { useMemo } from 'react';
+import { css } from '@emotion/react';
+import { useEuiShadow, useEuiTheme } from '@elastic/eui';
 import { matrixToCSS } from '../../lib/dom';
-import { TransformMatrix3d } from '../../lib/aeroelastic';
+import type { TransformMatrix3d } from '../../lib/aeroelastic';
 
 interface Props {
   transformMatrix: TransformMatrix3d;
   zoomScale?: number;
 }
 
-export const BorderResizeHandle: FC<Props> = ({ transformMatrix, zoomScale = 1 }) => (
-  <div
-    className="canvasBorderResizeHandle canvasLayoutAnnotation"
-    style={{
-      transform: `${matrixToCSS(transformMatrix)} scale3d(${1 / zoomScale},${1 / zoomScale}, 1)`,
-    }}
-  />
-);
+export const BorderResizeHandle: FC<Props> = ({ transformMatrix, zoomScale = 1 }) => {
+  const { euiTheme } = useEuiTheme();
+  const slightShadow = useEuiShadow('xs');
+  const styles = useMemo(
+    () => css`
+      ${slightShadow}
+      background-color: ${euiTheme.colors.emptyShade};
+      border: 1px solid ${euiTheme.colors.darkShade};
+    `,
+    [euiTheme, slightShadow]
+  );
 
-BorderResizeHandle.propTypes = {
-  transformMatrix: PropTypes.arrayOf(PropTypes.number).isRequired,
-  zoomScale: PropTypes.number,
+  return (
+    <div
+      className="canvasBorderResizeHandle canvasLayoutAnnotation"
+      css={styles}
+      style={{
+        transform: `${matrixToCSS(transformMatrix)} scale3d(${1 / zoomScale},${1 / zoomScale}, 1)`,
+      }}
+    />
+  );
 };

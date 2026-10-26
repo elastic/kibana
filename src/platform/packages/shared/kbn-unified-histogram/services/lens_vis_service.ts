@@ -1,0 +1,930 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import { BehaviorSubject } from 'rxjs';
+import { isEqual } from 'lodash';
+import {
+  removeDropCommandsFromESQLQuery,
+  appendToESQLQuery,
+  isESQLColumnSortable,
+  hasTransformationalCommand,
+  getCategorizeField,
+  convertTimeseriesCommandToFrom,
+  hasTimeseriesInfoCommand,
+} from '@kbn/esql-utils';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
+import type {
+  CountIndexPatternColumn,
+  DateHistogramIndexPatternColumn,
+  GenericIndexPatternColumn,
+  LensSuggestionsApi,
+  Suggestion,
+  TermsIndexPatternColumn,
+  TypedLensByValueInput,
+  XYVisualizationState,
+} from '@kbn/lens-plugin/public';
+import type { AggregateQuery, TimeRange } from '@kbn/es-query';
+import { getAggregateQueryMode, isOfAggregateQueryType } from '@kbn/es-query';
+import { i18n } from '@kbn/i18n';
+import {
+  getLensAttributesFromSuggestion,
+  ChartType,
+  mapVisToChartType,
+  computeInterval,
+} from '@kbn/visualization-utils';
+import type { LegendSize } from '@kbn/chart-expressions-common';
+import { getRepresentativeQuery } from '@kbn/lens-common';
+import type {
+  DefaultVisualizationOverrides,
+  XYVisualizationState as XYConfiguration,
+} from '@kbn/lens-common';
+import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { fieldSupportsBreakdown } from '@kbn/field-utils';
+import { getRegisteredEsqlDataView, type DataSource } from '@kbn/data-source';
+import type {
+  UnifiedHistogramSuggestionContext,
+  UnifiedHistogramVisContext,
+  LensVisServiceState,
+} from '../types';
+import {
+  UnifiedHistogramExternalVisContextStatus,
+  UnifiedHistogramSuggestionType,
+  LensVisServiceStatus,
+} from '../types';
+import {
+  isSuggestionShapeAndVisContextCompatible,
+  deriveLensSuggestionFromLensAttributes,
+  type QueryParams,
+  injectESQLQueryIntoLensLayers,
+  isPreferredEsqlVisCompatibleWithCurrentQuery,
+  TIMESTAMP_COLUMN,
+} from '../utils/external_vis_context';
+import { enrichLensAttributesWithTablesData } from '../utils/lens_vis_from_table';
+
+const UNIFIED_HISTOGRAM_LAYER_ID = 'unifiedHistogram';
+const ESQL_HISTOGRAM_RESULT_LIMIT = 10000;
+// The unified histogram has little vertical space, so its charts keep the legend on the right.
+const UNIFIED_HISTOGRAM_DEFAULT_LEGEND: XYConfiguration['legend'] = {
+  isVisible: true,
+  position: 'right',
+};
+const UNIFIED_HISTOGRAM_VISUALIZATION_OVERRIDES: DefaultVisualizationOverrides = {
+  lnsXY: { legend: UNIFIED_HISTOGRAM_DEFAULT_LEGEND },
+};
+
+/** Lens suggestions still take a DataView. Classic unwraps it; ES|QL uses the registered shim. */
+function resolveLensDataView(dataSource: DataSource): DataView | undefined {
+  return dataSource.kind === 'index-pattern'
+    ? dataSource.getDataView()
+    : getRegisteredEsqlDataView(dataSource);
+}
+
+interface Services {
+  data: DataPublicPluginStart;
+}
+
+interface LensVisServiceParams {
+  services: Services;
+  lensSuggestionsApi: LensSuggestionsApi;
+}
+
+export class LensVisService {
+  state$: BehaviorSubject<LensVisServiceState>;
+  private services: Services;
+  private lensSuggestionsApi: LensSuggestionsApi;
+  prevUpdateContext:
+    | {
+        queryParams: QueryParams;
+        // Resolved on update: the ES|QL shim is unregistered as soon as the query changes,
+        // while the chart (and edits made on it) can still be based on the previous source.
+        dataView: DataView | undefined;
+        timeInterval: string | undefined;
+        breakdownField: DataViewField | undefined;
+        table: Datatable | undefined;
+        onSuggestionContextChange?: (
+          suggestionContext: UnifiedHistogramSuggestionContext | undefined
+        ) => void;
+        onVisContextChanged?: (
+          visContext: UnifiedHistogramVisContext | undefined,
+          externalVisContextStatus: UnifiedHistogramExternalVisContextStatus
+        ) => void;
+      }
+    | undefined;
+
+  constructor({ services, lensSuggestionsApi }: LensVisServiceParams) {
+    this.services = services;
+    this.lensSuggestionsApi = lensSuggestionsApi;
+
+    const initialState = {
+      status: LensVisServiceStatus.initial,
+      currentSuggestionContext: {
+        suggestion: undefined,
+        type: UnifiedHistogramSuggestionType.unsupported,
+      },
+      visContext: undefined,
+    };
+    this.state$ = new BehaviorSubject<LensVisServiceState>(initialState);
+
+    this.prevUpdateContext = undefined;
+  }
+
+  update = ({
+    externalVisContext,
+    queryParams,
+    timeInterval,
+    breakdownField,
+    table,
+    onSuggestionContextChange,
+    onVisContextChanged,
+    getModifiedVisAttributes,
+  }: {
+    externalVisContext: UnifiedHistogramVisContext | undefined;
+    queryParams: QueryParams;
+    timeInterval: string | undefined;
+    breakdownField: DataViewField | undefined;
+    table?: Datatable;
+    onSuggestionContextChange?: (
+      suggestionContext: UnifiedHistogramSuggestionContext | undefined
+    ) => void;
+    onVisContextChanged?: (
+      visContext: UnifiedHistogramVisContext | undefined,
+      externalVisContextStatus: UnifiedHistogramExternalVisContextStatus
+    ) => void;
+    getModifiedVisAttributes?: (
+      attributes: TypedLensByValueInput['attributes']
+    ) => TypedLensByValueInput['attributes'];
+  }): LensVisServiceState => {
+    const dataView = resolveLensDataView(queryParams.dataSource);
+    const suggestionState = this.getCurrentSuggestionState({
+      externalVisContext,
+      queryParams,
+      timeInterval,
+      breakdownField,
+    });
+
+    const lensAttributesState = this.getLensAttributesState({
+      currentSuggestionContext: suggestionState.currentSuggestionContext,
+      externalVisContext,
+      queryParams,
+      dataView,
+      timeInterval,
+      breakdownField,
+      table,
+      getModifiedVisAttributes,
+    });
+
+    onSuggestionContextChange?.(suggestionState.currentSuggestionContext);
+    onVisContextChanged?.(
+      lensAttributesState.visContext,
+      lensAttributesState.externalVisContextStatus
+    );
+
+    const nextState = {
+      status: LensVisServiceStatus.completed,
+      currentSuggestionContext: suggestionState.currentSuggestionContext,
+      visContext: lensAttributesState.visContext,
+    };
+
+    this.state$.next(nextState);
+
+    this.prevUpdateContext = {
+      queryParams,
+      dataView,
+      timeInterval,
+      breakdownField,
+      table,
+      onSuggestionContextChange,
+      onVisContextChanged,
+    };
+
+    return nextState;
+  };
+
+  onSuggestionEdited = ({
+    editedSuggestionContext,
+  }: {
+    editedSuggestionContext: UnifiedHistogramSuggestionContext | undefined;
+  }): UnifiedHistogramVisContext | undefined => {
+    if (!editedSuggestionContext || !this.prevUpdateContext) {
+      return;
+    }
+
+    const { queryParams, dataView, timeInterval, breakdownField, table, onVisContextChanged } =
+      this.prevUpdateContext;
+
+    const lensAttributesState = this.getLensAttributesState({
+      currentSuggestionContext: editedSuggestionContext,
+      externalVisContext: undefined,
+      queryParams,
+      dataView,
+      timeInterval,
+      breakdownField,
+      table,
+    });
+
+    onVisContextChanged?.(
+      lensAttributesState.visContext,
+      UnifiedHistogramExternalVisContextStatus.manuallyCustomized
+    );
+  };
+
+  private getCurrentSuggestionState = ({
+    externalVisContext,
+    queryParams,
+    timeInterval,
+    breakdownField,
+  }: {
+    externalVisContext: UnifiedHistogramVisContext | undefined;
+    queryParams: QueryParams;
+    timeInterval: string | undefined;
+    breakdownField: DataViewField | undefined;
+  }): {
+    currentSuggestionContext: UnifiedHistogramSuggestionContext;
+  } => {
+    let type = UnifiedHistogramSuggestionType.unsupported;
+    let currentSuggestion: Suggestion | undefined;
+
+    const availableSuggestionsWithType: Array<{
+      suggestion: UnifiedHistogramSuggestionContext['suggestion'];
+      type: UnifiedHistogramSuggestionType;
+    }> = [];
+
+    if (queryParams.dataSource.kind === 'esql') {
+      if (isOfAggregateQueryType(queryParams.query)) {
+        if (getCategorizeField(queryParams.query.esql).length) {
+          // query uses categorize, override the chart to be a simple doc count histogram
+          const histogramSuggestionForESQL = this.getHistogramSuggestionForESQL({
+            queryParams: {
+              ...queryParams,
+              query: {
+                esql: `FROM ${queryParams.dataSource.title}`,
+              },
+            },
+            breakdownField,
+            preferredVisAttributes: externalVisContext?.attributes,
+          });
+
+          if (histogramSuggestionForESQL) {
+            availableSuggestionsWithType.push({
+              suggestion: histogramSuggestionForESQL,
+              type: UnifiedHistogramSuggestionType.histogramForESQL,
+            });
+          }
+        } else if (hasTransformationalCommand(queryParams.query.esql)) {
+          // appends the first lens suggestion if available
+          const allSuggestions = this.getAllSuggestions({
+            queryParams,
+            preferredVisAttributes: externalVisContext?.attributes,
+          });
+
+          if (allSuggestions.length) {
+            availableSuggestionsWithType.push({
+              suggestion: allSuggestions[0],
+              type: UnifiedHistogramSuggestionType.lensSuggestion,
+            });
+          }
+        } else if (hasTimeseriesInfoCommand(queryParams.query.esql)) {
+          // skip chart suggestions for info commands
+          return {
+            currentSuggestionContext: {
+              type: UnifiedHistogramSuggestionType.unsupported,
+              suggestion: undefined,
+            },
+          };
+        } else {
+          // appends an ES|QL histogram if available
+          const histogramSuggestionForESQL = this.getHistogramSuggestionForESQL({
+            queryParams,
+            breakdownField,
+            preferredVisAttributes: externalVisContext?.attributes,
+          });
+
+          if (histogramSuggestionForESQL) {
+            availableSuggestionsWithType.push({
+              suggestion: histogramSuggestionForESQL,
+              type: UnifiedHistogramSuggestionType.histogramForESQL,
+            });
+          }
+        }
+      }
+    } else {
+      // appends histogram for the data view mode
+      const histogramSuggestionForDataView = this.getDefaultHistogramSuggestion({
+        queryParams,
+        timeInterval,
+        breakdownField,
+      });
+      if (histogramSuggestionForDataView) {
+        availableSuggestionsWithType.push({
+          suggestion: histogramSuggestionForDataView,
+          type: UnifiedHistogramSuggestionType.histogramForDataView,
+        });
+      }
+    }
+
+    if (externalVisContext && queryParams.dataSource.kind === 'esql') {
+      // externalVisContext can be based on an unfamiliar suggestion (not a part of allSuggestions), but it was saved before, so we try to restore it too
+      const derivedSuggestion = deriveLensSuggestionFromLensAttributes({
+        externalVisContext,
+        queryParams,
+      });
+
+      if (derivedSuggestion) {
+        availableSuggestionsWithType.push({
+          suggestion: derivedSuggestion,
+          type: UnifiedHistogramSuggestionType.lensSuggestion,
+        });
+      }
+    }
+
+    if (externalVisContext) {
+      // try to find a suggestion that is compatible with the external vis context
+      const matchingItem = availableSuggestionsWithType.find((item) =>
+        isSuggestionShapeAndVisContextCompatible(item.suggestion, externalVisContext)
+      );
+
+      if (matchingItem) {
+        currentSuggestion = matchingItem.suggestion;
+        type = matchingItem.type;
+      }
+    }
+
+    if (!currentSuggestion && availableSuggestionsWithType.length) {
+      // otherwise pick any first available suggestion
+      currentSuggestion = availableSuggestionsWithType[0].suggestion;
+      type = availableSuggestionsWithType[0].type;
+    }
+
+    return {
+      currentSuggestionContext: {
+        type: Boolean(currentSuggestion) ? type : UnifiedHistogramSuggestionType.unsupported,
+        suggestion: currentSuggestion,
+      },
+    };
+  };
+
+  private getDefaultHistogramSuggestion = ({
+    queryParams,
+    timeInterval,
+    breakdownField,
+  }: {
+    queryParams: QueryParams;
+    timeInterval: string | undefined;
+    breakdownField: DataViewField | undefined;
+  }): Suggestion | undefined => {
+    const { dataSource } = queryParams;
+
+    if (!dataSource.isTimeBased() || !dataSource.timeFieldName) {
+      return undefined;
+    }
+
+    const showBreakdown = breakdownField && fieldSupportsBreakdown(breakdownField);
+
+    let columnOrder = ['date_column', 'count_column'];
+
+    if (showBreakdown) {
+      columnOrder = ['breakdown_column', ...columnOrder];
+    }
+
+    let columns: Record<string, GenericIndexPatternColumn> = {
+      date_column: {
+        dataType: 'date',
+        isBucketed: true,
+        label: dataSource.timeFieldName,
+        operationType: 'date_histogram',
+        scale: 'interval',
+        sourceField: dataSource.timeFieldName,
+        params: {
+          interval: timeInterval ?? 'auto',
+        },
+      } as DateHistogramIndexPatternColumn,
+      count_column: {
+        dataType: 'number',
+        isBucketed: false,
+        label: i18n.translate('unifiedHistogram.countColumnLabel', {
+          defaultMessage: 'Count of records',
+        }),
+        operationType: 'count',
+        scale: 'ratio',
+        sourceField: '___records___',
+        params: {
+          format: {
+            id: 'number',
+            params: {
+              decimals: 0,
+            },
+          },
+        },
+      } as CountIndexPatternColumn,
+    };
+
+    if (showBreakdown) {
+      columns = {
+        ...columns,
+        breakdown_column: {
+          dataType: 'string',
+          isBucketed: true,
+          label: i18n.translate('unifiedHistogram.breakdownColumnLabel', {
+            defaultMessage: 'Top 9 values of {fieldName}',
+            values: { fieldName: breakdownField?.displayName },
+          }),
+          operationType: 'terms',
+          scale: 'ordinal',
+          sourceField: breakdownField.name,
+          params: {
+            size: 9,
+            orderBy: {
+              type: 'column',
+              columnId: 'count_column',
+            },
+            orderDirection: 'desc',
+            otherBucket: true,
+            missingBucket: true,
+            parentFormat: {
+              id: 'terms',
+            },
+          },
+        } as TermsIndexPatternColumn,
+      };
+    }
+
+    const datasourceState = {
+      layers: {
+        [UNIFIED_HISTOGRAM_LAYER_ID]: { columnOrder, columns, indexPatternId: dataSource.id },
+      },
+    };
+
+    const legendSize: `${LegendSize.EXTRA_LARGE}` = 'xlarge';
+    const visualizationState = {
+      layers: [
+        {
+          accessors: ['count_column'],
+          layerId: UNIFIED_HISTOGRAM_LAYER_ID,
+          layerType: 'data',
+          seriesType: 'bar_stacked',
+          xAccessor: 'date_column',
+          ...(showBreakdown
+            ? { splitAccessors: ['breakdown_column'] }
+            : {
+                yConfig: [
+                  {
+                    forAccessor: 'count_column',
+                  },
+                ],
+              }),
+        },
+      ],
+      legend: {
+        ...UNIFIED_HISTOGRAM_DEFAULT_LEGEND,
+        legendSize,
+        shouldTruncate: false,
+      },
+      preferredSeriesType: 'bar_stacked',
+      valueLabels: 'hide',
+      fittingFunction: 'None',
+      minBarHeight: 2,
+      showCurrentTimeMarker: true,
+      axisTitlesVisibilitySettings: {
+        x: false,
+        yLeft: false,
+        yRight: false,
+      },
+      gridlinesVisibilitySettings: {
+        x: true,
+        yLeft: true,
+        yRight: false,
+      },
+      tickLabelsVisibilitySettings: {
+        x: true,
+        yLeft: true,
+        yRight: false,
+      },
+    } as XYConfiguration;
+
+    return {
+      visualizationId: 'lnsXY',
+      visualizationState,
+      datasourceState,
+      datasourceId: 'formBased',
+      columns: Object.keys(columns).length,
+    } as Suggestion;
+  };
+
+  private getHistogramSuggestionForESQL = ({
+    queryParams,
+    breakdownField,
+    preferredVisAttributes: originalPreferredVisAttributes,
+  }: {
+    queryParams: QueryParams;
+    breakdownField?: DataViewField;
+    preferredVisAttributes?: UnifiedHistogramVisContext['attributes'];
+  }): Suggestion | undefined => {
+    const { query, timeRange, columns, dataSource } = queryParams;
+    const dataView = resolveLensDataView(dataSource);
+    if (!dataView) {
+      return undefined;
+    }
+    const timeFieldName = dataSource.timeFieldName;
+    const breakdownColumn = breakdownField?.name
+      ? columns?.find((column) => column.name === breakdownField.name)
+      : undefined;
+    let preferredVisAttributes = originalPreferredVisAttributes;
+
+    if (preferredVisAttributes && breakdownColumn) {
+      const visualization = preferredVisAttributes?.state?.visualization as
+        | XYVisualizationState
+        | undefined;
+      const layers = Array.isArray(visualization?.layers) ? visualization.layers : [];
+      if (
+        !layers.some(
+          (layer) =>
+            'splitAccessors' in layer && layer.splitAccessors?.includes(breakdownColumn.name)
+        )
+      ) {
+        // the preferred vis attributes don't contain the breakdown column, so we discard it to avoid issues
+        preferredVisAttributes = undefined;
+      }
+    }
+
+    if (
+      preferredVisAttributes &&
+      !isPreferredEsqlVisCompatibleWithCurrentQuery(preferredVisAttributes, query, timeFieldName)
+    ) {
+      preferredVisAttributes = undefined;
+    }
+
+    if (
+      timeFieldName &&
+      timeRange &&
+      isOfAggregateQueryType(query) &&
+      !hasTransformationalCommand(query.esql)
+    ) {
+      const interval = computeInterval(timeRange, this.services.data);
+      const esqlQuery = this.getESQLHistogramQuery({
+        timeFieldName,
+        query,
+        timeRange,
+        interval,
+        breakdownColumn,
+      });
+      const dateFieldLabel = `${timeFieldName} every ${interval}`;
+      const context = {
+        dataViewSpec: dataView?.toSpec(),
+        fieldName: '',
+        textBasedColumns: [
+          {
+            id: TIMESTAMP_COLUMN,
+            name: dateFieldLabel,
+            meta: {
+              type: 'date',
+            },
+          },
+          {
+            id: 'results',
+            name: 'results',
+            meta: {
+              type: 'number',
+            },
+          },
+        ] as DatatableColumn[],
+        query: {
+          esql: esqlQuery,
+        },
+      };
+
+      if (breakdownColumn) {
+        context.textBasedColumns.push(breakdownColumn);
+      }
+
+      // here the attributes contain the main query and not the histogram one
+      const updatedAttributesWithQuery = preferredVisAttributes
+        ? injectESQLQueryIntoLensLayers(
+            preferredVisAttributes,
+            {
+              esql: esqlQuery,
+            },
+            dateFieldLabel,
+            dataView.id
+          )
+        : undefined;
+
+      const suggestions =
+        this.lensSuggestionsApi(
+          context,
+          dataView,
+          ['lnsDatatable'],
+          ChartType.XY,
+          updatedAttributesWithQuery,
+          UNIFIED_HISTOGRAM_VISUALIZATION_OVERRIDES
+        ) ?? [];
+      if (suggestions.length) {
+        const suggestion = suggestions[0];
+        const suggestionVisualizationState = Object.assign({}, suggestion?.visualizationState);
+        // the suggestions api will suggest a numeric column as a metric and not as a breakdown,
+        // so we need to adjust it here
+        if (
+          breakdownColumn &&
+          breakdownColumn.meta?.type === 'number' &&
+          suggestion &&
+          'layers' in suggestionVisualizationState &&
+          Array.isArray(suggestionVisualizationState.layers)
+        ) {
+          return {
+            ...suggestion,
+            visualizationState: {
+              ...(suggestionVisualizationState ?? {}),
+              layers: suggestionVisualizationState.layers.map((layer) => {
+                return {
+                  ...layer,
+                  accessors: ['results'],
+                  splitAccessors: [breakdownColumn.name],
+                };
+              }),
+            },
+          };
+        }
+        return suggestion;
+      }
+    }
+
+    return undefined;
+  };
+
+  private getESQLHistogramQuery = ({
+    timeFieldName,
+    timeRange,
+    query,
+    interval,
+    breakdownColumn,
+  }: {
+    timeFieldName: string;
+    timeRange: TimeRange;
+    query: AggregateQuery;
+    interval?: string;
+    breakdownColumn?: DatatableColumn;
+  }): string => {
+    const queryInterval = interval ?? computeInterval(timeRange, this.services.data);
+    const language = getAggregateQueryMode(query);
+    const safeQuery = removeDropCommandsFromESQLQuery(query[language]);
+    const normalizedQuery = convertTimeseriesCommandToFrom(safeQuery);
+    const breakdown = breakdownColumn ? `\`${breakdownColumn.name}\`, ` : '';
+
+    const sortBy =
+      breakdownColumn && isESQLColumnSortable(breakdownColumn)
+        ? ` | sort \`${breakdownColumn.name}\` asc`
+        : '';
+
+    const timeBuckets = `${TIMESTAMP_COLUMN} = BUCKET(${timeFieldName}, ${queryInterval})`;
+    return appendToESQLQuery(
+      normalizedQuery,
+      `| STATS results = COUNT(*) BY ${breakdown}${timeBuckets}${sortBy}
+| LIMIT ${ESQL_HISTOGRAM_RESULT_LIMIT}`
+    );
+  };
+
+  private getAllSuggestions = ({
+    queryParams,
+    preferredVisAttributes,
+  }: {
+    queryParams: QueryParams;
+    preferredVisAttributes?: UnifiedHistogramVisContext['attributes'];
+  }): Suggestion[] => {
+    const { columns, query, dataSource } = queryParams;
+    const dataView = resolveLensDataView(dataSource);
+
+    if (dataSource.kind !== 'esql' || !isOfAggregateQueryType(query) || !dataView) {
+      return [];
+    }
+
+    const preferredChartType = preferredVisAttributes
+      ? mapVisToChartType(preferredVisAttributes.visualizationType)
+      : undefined;
+
+    let visAttributes = preferredVisAttributes;
+
+    if (preferredVisAttributes) {
+      visAttributes = injectESQLQueryIntoLensLayers(
+        preferredVisAttributes,
+        query,
+        undefined,
+        dataView.id
+      );
+    }
+
+    const context = {
+      dataViewSpec: dataView?.toSpec(),
+      fieldName: '',
+      textBasedColumns: columns as DatatableColumn[] | undefined,
+      query,
+    };
+
+    return (
+      this.lensSuggestionsApi(
+        context,
+        dataView,
+        ['lnsDatatable'],
+        preferredChartType,
+        visAttributes,
+        UNIFIED_HISTOGRAM_VISUALIZATION_OVERRIDES
+      ) ?? []
+    );
+  };
+
+  private getLensAttributesState = ({
+    currentSuggestionContext,
+    externalVisContext,
+    queryParams,
+    dataView,
+    timeInterval,
+    breakdownField,
+    table,
+    getModifiedVisAttributes,
+  }: {
+    currentSuggestionContext: UnifiedHistogramSuggestionContext;
+    externalVisContext: UnifiedHistogramVisContext | undefined;
+    queryParams: QueryParams;
+    dataView: DataView | undefined;
+    timeInterval: string | undefined;
+    breakdownField: DataViewField | undefined;
+    table: Datatable | undefined;
+    getModifiedVisAttributes?: (
+      attributes: TypedLensByValueInput['attributes']
+    ) => TypedLensByValueInput['attributes'];
+  }): {
+    externalVisContextStatus: UnifiedHistogramExternalVisContextStatus;
+    visContext: UnifiedHistogramVisContext | undefined;
+  } => {
+    const { query, filters, timeRange, columns, dataSource } = queryParams;
+    const timeFieldName = dataSource.timeFieldName;
+    const { type: suggestionType, suggestion } = currentSuggestionContext;
+
+    if (!suggestion || !suggestion.datasourceId || !query || !filters) {
+      return {
+        externalVisContextStatus: UnifiedHistogramExternalVisContextStatus.unknown,
+        visContext: undefined,
+      };
+    }
+
+    const isTextBased = isOfAggregateQueryType(query);
+    const requestData = {
+      // The chart's data view, which is also the Lens layer index the session API derives it from.
+      dataViewId: dataView?.id ?? dataSource.id,
+      timeField: timeFieldName,
+      timeInterval: isTextBased ? undefined : timeInterval,
+      breakdownField: breakdownField?.name,
+    };
+
+    const currentQuery =
+      suggestionType === UnifiedHistogramSuggestionType.histogramForESQL &&
+      isTextBased &&
+      timeRange &&
+      timeFieldName
+        ? {
+            esql: this.getESQLHistogramQuery({
+              timeFieldName,
+              query,
+              timeRange,
+              breakdownColumn: breakdownField?.name
+                ? columns?.find((column) => column.name === breakdownField.name)
+                : undefined,
+            }),
+          }
+        : query;
+
+    let externalVisContextStatus: UnifiedHistogramExternalVisContextStatus;
+    let visContext: UnifiedHistogramVisContext | undefined;
+
+    if (externalVisContext?.attributes) {
+      const savedQuery = isTextBased
+        ? getRepresentativeQuery(externalVisContext.attributes)
+        : externalVisContext.attributes.state.query;
+
+      if (
+        isEqual(currentQuery, savedQuery) &&
+        areSuggestionAndVisContextAndQueryParamsStillCompatible({
+          suggestionType,
+          suggestion,
+          externalVisContext,
+          queryParams,
+          requestData,
+        })
+      ) {
+        // using the external lens attributes
+        visContext = externalVisContext;
+        externalVisContextStatus = UnifiedHistogramExternalVisContextStatus.applied;
+      } else {
+        // external vis is not compatible with the current suggestion
+        externalVisContextStatus = UnifiedHistogramExternalVisContextStatus.automaticallyOverridden;
+      }
+    } else {
+      externalVisContextStatus = UnifiedHistogramExternalVisContextStatus.automaticallyCreated;
+    }
+
+    if (!visContext) {
+      if (!dataView) {
+        return {
+          externalVisContextStatus,
+          visContext: undefined,
+        };
+      }
+      const attributes = getLensAttributesFromSuggestion({
+        query: currentQuery,
+        filters,
+        suggestion,
+        dataView,
+      }) as TypedLensByValueInput['attributes'];
+
+      if (suggestionType === UnifiedHistogramSuggestionType.histogramForDataView) {
+        attributes.title = i18n.translate('unifiedHistogram.lensTitle', {
+          defaultMessage: 'Edit visualization',
+        });
+        attributes.references = [
+          {
+            id: dataSource.id,
+            name: `indexpattern-datasource-layer-${UNIFIED_HISTOGRAM_LAYER_ID}`,
+            type: 'index-pattern',
+          },
+        ];
+      }
+
+      visContext = {
+        attributes,
+        requestData,
+        suggestionType,
+      };
+    }
+
+    if (
+      table && // already fetched data
+      query &&
+      isTextBased &&
+      suggestionType === UnifiedHistogramSuggestionType.lensSuggestion &&
+      visContext?.attributes
+    ) {
+      visContext = {
+        ...visContext,
+        attributes: enrichLensAttributesWithTablesData({
+          attributes: visContext.attributes,
+          table,
+        }),
+      };
+    }
+
+    if (
+      externalVisContextStatus !== UnifiedHistogramExternalVisContextStatus.applied &&
+      getModifiedVisAttributes
+    ) {
+      visContext.attributes = getModifiedVisAttributes(visContext.attributes);
+    }
+
+    return {
+      externalVisContextStatus,
+      visContext,
+    };
+  };
+}
+
+function areSuggestionAndVisContextAndQueryParamsStillCompatible({
+  suggestionType,
+  suggestion,
+  externalVisContext,
+  queryParams,
+  requestData,
+}: {
+  suggestionType: UnifiedHistogramSuggestionType;
+  suggestion: Suggestion;
+  externalVisContext: UnifiedHistogramVisContext;
+  queryParams: QueryParams;
+  requestData: UnifiedHistogramVisContext['requestData'];
+}): boolean {
+  // requestData should match
+  if (
+    (Object.keys(requestData) as Array<keyof UnifiedHistogramVisContext['requestData']>).some(
+      (key) => !isEqual(requestData[key], externalVisContext.requestData[key])
+    )
+  ) {
+    return false;
+  }
+
+  if (
+    queryParams.dataSource.kind === 'esql' &&
+    suggestionType === UnifiedHistogramSuggestionType.lensSuggestion &&
+    !deriveLensSuggestionFromLensAttributes({ externalVisContext, queryParams })
+  ) {
+    // can't retrieve back a suggestion with matching query and known columns
+    return false;
+  }
+
+  return (
+    suggestionType === externalVisContext.suggestionType &&
+    // vis shape should match
+    isSuggestionShapeAndVisContextCompatible(suggestion, externalVisContext)
+  );
+}

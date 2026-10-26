@@ -6,9 +6,10 @@
  */
 
 import React, { memo, useCallback, useMemo } from 'react';
-import { Interpolation, Theme } from '@emotion/react';
-import { EuiFlyoutProps, EuiFlyoutResizable } from '@elastic/eui';
-import { EuiFlyoutResizableProps } from '@elastic/eui/src/components/flyout/flyout_resizable';
+import type { Interpolation, Theme } from '@emotion/react';
+import type { EuiFlyoutProps } from '@elastic/eui';
+import { EuiFlyoutResizable } from '@elastic/eui';
+import type { EuiFlyoutResizableProps } from '@elastic/eui/src/components/flyout/flyout_resizable';
 import { changeUserCollapsedWidthAction, changeUserExpandedWidthAction } from '../store/actions';
 import {
   selectDefaultWidths,
@@ -169,6 +170,11 @@ export const Container: React.FC<ContainerProps> = memo(
       type,
     ]);
 
+    const flyoutAriaLabel = useMemo(() => {
+      const registeredPanel = registeredPanels.find((panel) => panel.key === right?.id);
+      return registeredPanel?.['aria-label'];
+    }, [registeredPanels, right?.id]);
+
     // callback function called when user changes the flyout's width
     const onResize = useCallback(
       (width: number) => {
@@ -191,6 +197,16 @@ export const Container: React.FC<ContainerProps> = memo(
       [dispatch, showCollapsed, showExpanded]
     );
 
+    const onClose = useCallback(
+      (e: MouseEvent | TouchEvent | KeyboardEvent) => {
+        closeFlyout();
+        if (flyoutProps.onClose) {
+          flyoutProps.onClose(e);
+        }
+      },
+      [closeFlyout, flyoutProps]
+    );
+
     // don't need to render if the windowWidth is 0 or if nothing needs to be rendered
     if (!showExpanded && !showCollapsed && !showPreview) {
       return null;
@@ -204,15 +220,11 @@ export const Container: React.FC<ContainerProps> = memo(
         type={flyoutType}
         size={flyoutWidth}
         ownFocus={false}
-        onClose={(e) => {
-          closeFlyout();
-          if (flyoutProps.onClose) {
-            flyoutProps.onClose(e);
-          }
-        }}
+        onClose={onClose}
         css={customStyles}
         onResize={onResize}
         minWidth={minFlyoutWidth}
+        aria-label={flyoutAriaLabel}
       >
         <ResizableContainer
           leftComponent={leftComponent as React.ReactElement}

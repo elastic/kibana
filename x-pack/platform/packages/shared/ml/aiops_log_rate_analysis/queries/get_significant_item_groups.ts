@@ -12,11 +12,14 @@ import type { ItemSet, SignificantItem, SignificantItemGroup } from '@kbn/ml-agg
 import { duplicateIdentifier } from './duplicate_identifier';
 import { groupDuplicates } from './fetch_frequent_item_sets';
 import { getFieldValuePairCounts } from './get_field_value_pair_counts';
+import { getFieldValuePairKey } from './get_field_value_pair_key';
 import { getMarkedDuplicates } from './get_marked_duplicates';
 import { getSimpleHierarchicalTree } from './get_simple_hierarchical_tree';
 import { getSimpleHierarchicalTreeLeaves } from './get_simple_hierarchical_tree_leaves';
-import { getMissingSignificantItems } from './get_missing_significant_items';
-import { transformSignificantItemToGroup } from './transform_significant_item_to_group';
+import {
+  getGroupedSignificantItemsByPairKey,
+  transformSignificantItemToGroup,
+} from './transform_significant_item_to_group';
 
 export function getSignificantItemGroups(
   itemsets: ItemSet[],
@@ -29,6 +32,8 @@ export function getSignificantItemGroups(
     (g) => g.group.length > 1
   );
 
+  const groupedSignificantItemsByPairKey =
+    getGroupedSignificantItemsByPairKey(groupedSignificantItems);
   // `frequent_item_sets` returns lots of different small groups of field/value pairs that co-occur.
   // The following steps analyse these small groups, identify overlap between these groups,
   // and then summarize them in larger groups where possible.
@@ -47,17 +52,51 @@ export function getSignificantItemGroups(
 
   // Some field/value pairs might not be part of the `frequent_item_sets` result set, for example
   // because they don't co-occur with other field/value pairs or because of the limits we set on the query.
-  // In this next part we identify those missing pairs and add them as individual groups.
-  const missingSignificantItems = getMissingSignificantItems(
-    significantItems,
-    significantItemGroups
-  );
+  // Treat item pairs represented via duplicates in an existing group as already present.
+  const presentPairKeys = new Set<string>();
+  for (const significantItemGroup of significantItemGroups) {
+    for (const groupItem of significantItemGroup.group) {
+      const pairKey = getFieldValuePairKey(groupItem.fieldName, groupItem.fieldValue);
+      presentPairKeys.add(pairKey);
 
-  significantItemGroups.push(
-    ...missingSignificantItems.map((significantItem) =>
-      transformSignificantItemToGroup(significantItem, groupedSignificantItems)
-    )
-  );
+      const duplicateGroup = groupedSignificantItemsByPairKey.get(pairKey);
+      if (duplicateGroup === undefined) {
+        continue;
+      }
+
+      for (const duplicateItem of duplicateGroup.group) {
+        presentPairKeys.add(
+          getFieldValuePairKey(duplicateItem.fieldName, duplicateItem.fieldValue)
+        );
+      }
+    }
+  }
+
+  // During missing-item backfill, multiple missing items can resolve to the same duplicate group.
+  // De-duplicate by group ID to avoid creating large transient arrays.
+  const addedMissingGroupIds = new Set<string>();
+  for (const significantItem of significantItems) {
+    if (
+      presentPairKeys.has(
+        getFieldValuePairKey(significantItem.fieldName, significantItem.fieldValue)
+      )
+    ) {
+      continue;
+    }
+
+    const transformedGroup = transformSignificantItemToGroup(
+      significantItem,
+      groupedSignificantItems,
+      groupedSignificantItemsByPairKey
+    );
+
+    if (addedMissingGroupIds.has(transformedGroup.id)) {
+      continue;
+    }
+
+    addedMissingGroupIds.add(transformedGroup.id);
+    significantItemGroups.push(transformedGroup);
+  }
 
   return uniqBy(significantItemGroups, 'id');
 }

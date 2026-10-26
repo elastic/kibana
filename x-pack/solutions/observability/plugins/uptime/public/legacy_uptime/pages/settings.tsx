@@ -6,19 +6,17 @@
  */
 
 import React, { useCallback, useEffect, useState } from 'react';
-import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiForm, EuiSpacer } from '@elastic/eui';
-import { useDispatch, useSelector } from 'react-redux';
+import { EuiFlexGroup, EuiFlexItem, EuiForm, EuiSpacer } from '@elastic/eui';
+import { KbnInfoCallout } from '@kbn/ui-callout';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { selectDynamicSettings } from '../state/selectors';
 import { getDynamicSettings, setDynamicSettings } from '../state/actions/dynamic_settings';
-import { DynamicSettings } from '../../../common/runtime_types';
+import type { DynamicSettings } from '../../../common/runtime_types';
 import { useBreadcrumbs } from '../hooks/use_breadcrumbs';
 import { IndicesForm } from '../components/settings/indices_form';
-import {
-  CertificateExpirationForm,
-  OnFieldChangeType,
-  PartialSettings,
-} from '../components/settings/certificate_form';
+import type { OnFieldChangeType, PartialSettings } from '../components/settings/certificate_form';
+import { CertificateExpirationForm } from '../components/settings/certificate_form';
 import * as Translations from './translations';
 import {
   VALUE_MUST_BE_GREATER_THAN_ZERO,
@@ -109,9 +107,11 @@ export const SettingsPage: React.FC = () => {
 
   const cannotEditNotice = canEdit ? null : (
     <>
-      <EuiCallOut title={Translations.settings.editNoticeTitle}>
-        {Translations.settings.editNoticeText}
-      </EuiCallOut>
+      <KbnInfoCallout
+        announceOnMount
+        title={Translations.settings.editNoticeTitle}
+        text={Translations.settings.editNoticeText}
+      />
       <EuiSpacer size="s" />
     </>
   );

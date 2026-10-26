@@ -16,18 +16,17 @@ test('returns rule settings feature with query delay subfeature if serverless', 
       label: 'Management',
       order: 5000,
     },
-    scope: ['spaces', 'security'],
     id: 'rulesSettings',
     management: {
-      insightsAndAlerting: ['triggersActions'],
+      insightsAndAlerting: ['triggersActionsRules', 'triggersActionsAlerts'],
     },
-    name: 'Rules Settings',
+    name: 'Classic Rules Settings',
     privileges: {
       all: {
         api: [],
         app: [],
         management: {
-          insightsAndAlerting: ['triggersActions'],
+          insightsAndAlerting: ['triggersActionsRules', 'triggersActionsAlerts'],
         },
         savedObject: {
           all: ['rules-settings'],
@@ -39,7 +38,7 @@ test('returns rule settings feature with query delay subfeature if serverless', 
         api: [],
         app: [],
         management: {
-          insightsAndAlerting: ['triggersActions'],
+          insightsAndAlerting: ['triggersActionsRules', 'triggersActionsAlerts'],
         },
         savedObject: {
           all: [],
@@ -76,6 +75,38 @@ test('returns rule settings feature with query delay subfeature if serverless', 
                   read: ['rules-settings'],
                 },
                 ui: ['readFlappingSettingsUI'],
+              },
+            ],
+          },
+        ],
+      },
+      {
+        name: 'Alert deletion',
+        privilegeGroups: [
+          {
+            groupType: 'mutually_exclusive',
+            privileges: [
+              {
+                api: ['read-alert-delete-settings', 'write-alert-deletion-settings'],
+                id: 'allAlertDeleteSettings',
+                includeIn: 'all',
+                name: 'All',
+                savedObject: {
+                  all: ['rules-settings'],
+                  read: [],
+                },
+                ui: ['writeAlertDeleteSettingsUI', 'readAlertDeleteSettingsUI'],
+              },
+              {
+                api: ['read-alert-delete-settings'],
+                id: 'readAlertDeleteSettings',
+                includeIn: 'read',
+                name: 'Read',
+                savedObject: {
+                  all: [],
+                  read: ['rules-settings'],
+                },
+                ui: ['readAlertDeleteSettingsUI'],
               },
             ],
           },
@@ -126,18 +157,17 @@ test('returns rule settings feature without query delay subfeature if not server
       label: 'Management',
       order: 5000,
     },
-    scope: ['spaces', 'security'],
     id: 'rulesSettings',
     management: {
-      insightsAndAlerting: ['triggersActions'],
+      insightsAndAlerting: ['triggersActionsRules', 'triggersActionsAlerts'],
     },
-    name: 'Rules Settings',
+    name: 'Classic Rules Settings',
     privileges: {
       all: {
         api: [],
         app: [],
         management: {
-          insightsAndAlerting: ['triggersActions'],
+          insightsAndAlerting: ['triggersActionsRules', 'triggersActionsAlerts'],
         },
         savedObject: {
           all: ['rules-settings'],
@@ -149,7 +179,7 @@ test('returns rule settings feature without query delay subfeature if not server
         api: [],
         app: [],
         management: {
-          insightsAndAlerting: ['triggersActions'],
+          insightsAndAlerting: ['triggersActionsRules', 'triggersActionsAlerts'],
         },
         savedObject: {
           all: [],
@@ -186,6 +216,38 @@ test('returns rule settings feature without query delay subfeature if not server
                   read: ['rules-settings'],
                 },
                 ui: ['readFlappingSettingsUI'],
+              },
+            ],
+          },
+        ],
+      },
+      {
+        name: 'Alert deletion',
+        privilegeGroups: [
+          {
+            groupType: 'mutually_exclusive',
+            privileges: [
+              {
+                api: ['read-alert-delete-settings', 'write-alert-deletion-settings'],
+                id: 'allAlertDeleteSettings',
+                includeIn: 'all',
+                name: 'All',
+                savedObject: {
+                  all: ['rules-settings'],
+                  read: [],
+                },
+                ui: ['writeAlertDeleteSettingsUI', 'readAlertDeleteSettingsUI'],
+              },
+              {
+                api: ['read-alert-delete-settings'],
+                id: 'readAlertDeleteSettings',
+                includeIn: 'read',
+                name: 'Read',
+                savedObject: {
+                  all: [],
+                  read: ['rules-settings'],
+                },
+                ui: ['readAlertDeleteSettingsUI'],
               },
             ],
           },

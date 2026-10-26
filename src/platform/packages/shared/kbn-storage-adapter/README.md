@@ -36,7 +36,7 @@ Storage adapters should largely adhere to the following principles:
 
 Currently, we only have the StorageIndexAdapter which writes to plain indices. In the future, we'll want more:
 
-- A StorageDataStreamAdapter or StorageSavedObjectAdapter
+- A StorageDataStreamAdapter
 - Federated search
 - Data/Index Lifecycle Management
 - Migration scripts
@@ -74,3 +74,8 @@ To use the storage index adapter, instantiate it with an authenticated Elasticse
   });
 
 ```
+
+
+# Development
+
+To run integration tests locally, run `node scripts/jest_integration.js --config src/platform/packages/shared/kbn-storage-adapter/jest.integration.config.js`

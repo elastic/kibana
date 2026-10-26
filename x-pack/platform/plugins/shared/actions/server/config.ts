@@ -6,13 +6,22 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
-import { schema } from '@kbn/config-schema';
+import { offeringBasedSchema, schema } from '@kbn/config-schema';
 import type { Logger } from '@kbn/core/server';
+import { customHostSettingsSchema } from '@kbn/actions-utils';
 import {
   DEFAULT_MICROSOFT_EXCHANGE_URL,
   DEFAULT_MICROSOFT_GRAPH_API_SCOPE,
   DEFAULT_MICROSOFT_GRAPH_API_URL,
+  DEFAULT_EMAIL_BODY_LENGTH,
+  MAX_EMAIL_BODY_LENGTH,
 } from '../common';
+
+import { validateDuration } from './lib/parse_date';
+import {
+  INBOUND_EVENTS_MAX_EMITTED_DEFAULT,
+  INBOUND_EVENTS_MAX_EMITTED_LIMIT,
+} from './inbound/constants';
 
 export enum AllowedHosts {
   Any = '*',
@@ -25,8 +34,131 @@ export enum EnabledActionTypes {
 const MAX_MAX_ATTEMPTS = 10;
 const MIN_MAX_ATTEMPTS = 1;
 
+function tlsCertRequiresKeyValidator(configPath: string) {
+  return function validate(rawConfig: { certificate?: string; key?: string }): string | undefined {
+    if (rawConfig.certificate && !rawConfig.key) {
+      return `must specify [${configPath}.key] when [${configPath}.certificate] is specified`;
+    }
+    if (rawConfig.key && !rawConfig.certificate) {
+      return `must specify [${configPath}.certificate] when [${configPath}.key] is specified`;
+    }
+  };
+}
+
+const tlsVerificationModeSchema = schema.oneOf(
+  [schema.literal('none'), schema.literal('certificate'), schema.literal('full')],
+  { defaultValue: 'full' }
+);
+
+const relaySSLConfigSchema = schema.object(
+  {
+    verificationMode: tlsVerificationModeSchema,
+    certificateAuthorities: schema.maybe(
+      schema.oneOf([schema.string(), schema.arrayOf(schema.string(), { minSize: 1 })])
+    ),
+    certificate: schema.maybe(schema.string()),
+    key: schema.maybe(schema.string()),
+  },
+  { validate: tlsCertRequiresKeyValidator('relay.ssl') }
+);
+
+function relayUiamRequiresMtlsValidator(rawConfig: {
+  ssl?: { certificate?: string; key?: string };
+  uiam?: { enabled?: boolean };
+}): string | undefined {
+  if (rawConfig.uiam?.enabled && !(rawConfig.ssl?.certificate && rawConfig.ssl?.key)) {
+    return 'must specify [relay.ssl.certificate] and [relay.ssl.key] when [relay.uiam.enabled] is set';
+  }
+}
+
 const MIN_QUEUED_MAX = 1;
 export const DEFAULT_QUEUED_MAX = 1000000;
+
+const INBOUND_EVENTS_LIMIT_MIN = 1;
+const INBOUND_EVENTS_IN_FLIGHT_MAX = 100;
+// 50 slots at the same 2s point where 10 slots sustain 300/min: 50 / 2 * 60.
+const INBOUND_EVENTS_PER_MINUTE_MAX = 1500;
+const INBOUND_EVENTS_MAX_KEYS = 10000;
+
+export const defaultInboundEventsAdmissionConfig = {
+  enabled: true,
+  maxInFlight: 50,
+  maxInFlightPerConnector: 10,
+};
+
+export const defaultInboundEventsRateLimitConfig = {
+  enabled: true,
+  maxKeys: INBOUND_EVENTS_MAX_KEYS,
+  remoteAddress: {
+    limit: 10,
+    window: '1m',
+  },
+  connector: {
+    limit: 300,
+    window: '1m',
+  },
+};
+
+export const defaultInboundEventsLimitConfigs = {
+  admission: defaultInboundEventsAdmissionConfig,
+  rateLimit: defaultInboundEventsRateLimitConfig,
+};
+
+const inboundEventsAdmissionSchema = schema.object(
+  {
+    enabled: schema.boolean({ defaultValue: defaultInboundEventsAdmissionConfig.enabled }),
+    maxInFlight: schema.number({
+      defaultValue: defaultInboundEventsAdmissionConfig.maxInFlight,
+      min: INBOUND_EVENTS_LIMIT_MIN,
+      max: INBOUND_EVENTS_IN_FLIGHT_MAX,
+    }),
+    maxInFlightPerConnector: schema.number({
+      defaultValue: defaultInboundEventsAdmissionConfig.maxInFlightPerConnector,
+      min: INBOUND_EVENTS_LIMIT_MIN,
+      max: INBOUND_EVENTS_IN_FLIGHT_MAX,
+    }),
+  },
+  {
+    validate(value) {
+      if (value.maxInFlightPerConnector > value.maxInFlight) {
+        return '[maxInFlightPerConnector] must be less than or equal to [maxInFlight]';
+      }
+    },
+  }
+);
+
+const inboundEventsRateLimitSchema = schema.object({
+  enabled: schema.boolean({ defaultValue: defaultInboundEventsRateLimitConfig.enabled }),
+  maxKeys: schema.number({
+    defaultValue: defaultInboundEventsRateLimitConfig.maxKeys,
+    min: INBOUND_EVENTS_LIMIT_MIN,
+    max: INBOUND_EVENTS_MAX_KEYS,
+  }),
+  remoteAddress: schema.object({
+    limit: schema.number({
+      defaultValue: defaultInboundEventsRateLimitConfig.remoteAddress.limit,
+      min: INBOUND_EVENTS_LIMIT_MIN,
+      max: INBOUND_EVENTS_PER_MINUTE_MAX,
+    }),
+    window: schema.string({
+      defaultValue: defaultInboundEventsRateLimitConfig.remoteAddress.window,
+      validate: validateDuration,
+    }),
+  }),
+  connector: schema.object({
+    limit: schema.number({
+      defaultValue: defaultInboundEventsRateLimitConfig.connector.limit,
+      min: INBOUND_EVENTS_LIMIT_MIN,
+      max: INBOUND_EVENTS_PER_MINUTE_MAX,
+    }),
+    window: schema.string({
+      defaultValue: defaultInboundEventsRateLimitConfig.connector.window,
+      validate: validateDuration,
+    }),
+  }),
+});
+
+const validRateLimiterConnectorTypeIds = new Set(['email']);
 
 const preconfiguredActionSchema = schema.object({
   name: schema.string({ minLength: 1 }),
@@ -36,50 +168,46 @@ const preconfiguredActionSchema = schema.object({
   exposeConfig: schema.maybe(schema.boolean({ defaultValue: false })),
 });
 
-const customHostSettingsSchema = schema.object({
-  url: schema.string({ minLength: 1 }),
-  smtp: schema.maybe(
-    schema.object({
-      ignoreTLS: schema.maybe(schema.boolean()),
-      requireTLS: schema.maybe(schema.boolean()),
-    })
-  ),
-  ssl: schema.maybe(
-    schema.object({
-      verificationMode: schema.maybe(
-        schema.oneOf(
-          [schema.literal('none'), schema.literal('certificate'), schema.literal('full')],
-          { defaultValue: 'full' }
-        )
-      ),
-      certificateAuthoritiesFiles: schema.maybe(
-        schema.oneOf([
-          schema.string({ minLength: 1 }),
-          schema.arrayOf(schema.string({ minLength: 1 }), { minSize: 1 }),
-        ])
-      ),
-      certificateAuthoritiesData: schema.maybe(schema.string({ minLength: 1 })),
-    })
-  ),
-});
-
-export type CustomHostSettings = TypeOf<typeof customHostSettingsSchema>;
-
 const connectorTypeSchema = schema.object({
   id: schema.string(),
   maxAttempts: schema.maybe(schema.number({ min: MIN_MAX_ATTEMPTS, max: MAX_MAX_ATTEMPTS })),
 });
 
-export const DEFAULT_USAGE_API_URL = 'https://usage-api.usage-api/api/v1/usage';
-
-// We leverage enabledActionTypes list by allowing the other plugins to overwrite it by using "setEnabledConnectorTypes" in the plugin setup.
-// The list can be overwritten only if it's not already been set in the config.
+// We leverage the enabledActionTypes list by allowing the other plugins to overwrite it by using "setEnabledConnectorTypes" in the plugin setup.
+// The list can be overwritten only if it has not already been set in the config.
 const enabledConnectorTypesSchema = schema.arrayOf(
   schema.oneOf([schema.string(), schema.literal(EnabledActionTypes.Any)]),
   {
     defaultValue: [AllowedHosts.Any],
   }
 );
+
+const rateLimiterSchema = schema.recordOf(
+  schema.string({
+    validate: (value) => {
+      if (!validRateLimiterConnectorTypeIds.has(value)) {
+        return `Rate limiter configuration for connector type "${value}" is not supported. Supported types: ${Array.from(
+          validRateLimiterConnectorTypeIds
+        ).join(', ')}`;
+      }
+    },
+  }),
+  schema.object({
+    lookbackWindow: schema.string({ defaultValue: '15m', validate: validateDuration }),
+    limit: schema.number({ defaultValue: 500, min: 1, max: 5000 }),
+  })
+);
+
+const oauthAuthorizationCodeRateLimitsSchema = schema.object({
+  authorize: schema.object({
+    lookbackWindow: schema.string({ defaultValue: '1h', validate: validateDuration }),
+    limit: schema.number({ defaultValue: 100, min: 1, max: 1000 }),
+  }),
+  callback: schema.object({
+    lookbackWindow: schema.string({ defaultValue: '1h', validate: validateDuration }),
+    limit: schema.number({ defaultValue: 100, min: 1, max: 1000 }),
+  }),
+});
 
 export const configSchema = schema.object({
   allowedHosts: schema.arrayOf(
@@ -117,13 +245,84 @@ export const configSchema = schema.object({
   maxResponseContentLength: schema.byteSize({ defaultValue: '1mb' }),
   responseTimeout: schema.duration({ defaultValue: '60s' }),
   customHostSettings: schema.maybe(schema.arrayOf(customHostSettingsSchema)),
+  relay: schema.maybe(
+    schema.object(
+      {
+        url: schema.conditional(
+          schema.contextRef('dev'),
+          true,
+          schema.uri({ scheme: ['https', 'http'] }),
+          schema.uri({ scheme: ['https'] })
+        ),
+        ssl: schema.maybe(relaySSLConfigSchema),
+        // Serverless only: authenticate Relay requests with a per-request ephemeral UIAM token for
+        // Kibana's own identity, on top of mTLS. Requires `xpack.security.uiam` to be configured.
+        uiam: schema.maybe(
+          offeringBasedSchema({
+            serverless: schema.object({ enabled: schema.boolean({ defaultValue: false }) }),
+          })
+        ),
+      },
+      { validate: relayUiamRequiresMtlsValidator }
+    )
+  ),
   microsoftGraphApiUrl: schema.string({ defaultValue: DEFAULT_MICROSOFT_GRAPH_API_URL }),
   microsoftGraphApiScope: schema.string({ defaultValue: DEFAULT_MICROSOFT_GRAPH_API_SCOPE }),
   microsoftExchangeUrl: schema.string({ defaultValue: DEFAULT_MICROSOFT_EXCHANGE_URL }),
   email: schema.maybe(
-    schema.object({
-      domain_allowlist: schema.arrayOf(schema.string()),
-    })
+    schema.object(
+      {
+        domain_allowlist: schema.maybe(schema.arrayOf(schema.string())),
+        recipient_allowlist: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1 })),
+        maximum_body_length: schema.maybe(
+          schema.number({ min: 0, defaultValue: DEFAULT_EMAIL_BODY_LENGTH })
+        ),
+        services: schema.maybe(
+          schema.object(
+            {
+              enabled: schema.maybe(
+                schema.arrayOf(
+                  schema.oneOf([
+                    schema.literal('google-mail'),
+                    schema.literal('microsoft-exchange'),
+                    schema.literal('microsoft-outlook'),
+                    schema.literal('amazon-ses'),
+                    schema.literal('elastic-cloud'),
+                    schema.literal('other'),
+                    schema.literal('*'),
+                  ]),
+                  { minSize: 1 }
+                )
+              ),
+              ses: schema.maybe(
+                schema.object({
+                  host: schema.string({ minLength: 1 }),
+                  port: schema.number({ min: 1, max: 65535 }),
+                })
+              ),
+            },
+            {
+              validate: (obj) => {
+                if (obj && Object.keys(obj).length === 0) {
+                  return 'email.services.enabled or email.services.ses must be defined';
+                }
+              },
+            }
+          )
+        ),
+      },
+      {
+        validate: (obj) => {
+          if (obj && Object.keys(obj).length === 0) {
+            return 'email.domain_allowlist, email.recipient_allowlist, or email.services must be defined';
+          }
+
+          if (obj?.domain_allowlist && obj?.recipient_allowlist) {
+            return 'email.domain_allowlist and email.recipient_allowlist can not be used at the same time';
+          }
+        },
+      }
+    )
   ),
   run: schema.maybe(
     schema.object({
@@ -137,18 +336,71 @@ export const configSchema = schema.object({
       max: schema.maybe(schema.number({ min: MIN_QUEUED_MAX, defaultValue: DEFAULT_QUEUED_MAX })),
     })
   ),
-  usage: schema.object({
-    url: schema.string({ defaultValue: DEFAULT_USAGE_API_URL }),
-    ca: schema.maybe(
+  // @deprecated: This config is deprecated and will be removed in the future in favor of the new Usage API plugin.
+  usage: schema.maybe(
+    schema.object({
+      url: schema.maybe(schema.string()),
+      enabled: schema.maybe(schema.boolean()),
+      ca: schema.maybe(
+        schema.object({
+          path: schema.string(),
+        })
+      ),
+    })
+  ),
+  webhook: schema.maybe(
+    schema.object({
+      ssl: schema.object({
+        pfx: schema.object({
+          enabled: schema.boolean({ defaultValue: true }),
+        }),
+      }),
+    })
+  ),
+  rateLimiter: schema.maybe(rateLimiterSchema),
+  auth: schema.object({
+    oauth_authorization_code: schema.object({
+      rate_limits: oauthAuthorizationCodeRateLimitsSchema,
+    }),
+    ears: schema.maybe(
       schema.object({
-        path: schema.string(),
+        enabled: schema.boolean({ defaultValue: true }),
+        enableExperimental: schema.boolean({ defaultValue: false }),
+        url: schema.maybe(schema.uri({ scheme: ['https'] })),
+        ssl: schema.maybe(
+          schema.object(
+            {
+              verificationMode: tlsVerificationModeSchema,
+              certificate: schema.maybe(schema.string()),
+              key: schema.maybe(schema.string()),
+            },
+            { validate: tlsCertRequiresKeyValidator('auth.ears.ssl') }
+          )
+        ),
       })
     ),
+  }),
+  inboundEvents: schema.object({
+    enabled: schema.boolean({ defaultValue: true }),
+    maxBodyBytes: schema.byteSize({ defaultValue: '1mb' }),
+    maxEmitted: schema.number({
+      defaultValue: INBOUND_EVENTS_MAX_EMITTED_DEFAULT,
+      min: 1,
+      max: INBOUND_EVENTS_MAX_EMITTED_LIMIT,
+    }),
+    // maxInFlight * maxBodyBytes is the raw-body budget for this route.
+    admission: inboundEventsAdmissionSchema,
+    rateLimit: inboundEventsRateLimitSchema,
+  }),
+  connectorSigningKeys: schema.object({
+    enabled: schema.boolean({ defaultValue: false }),
   }),
 });
 
 export type ActionsConfig = TypeOf<typeof configSchema>;
 export type EnabledConnectorTypes = TypeOf<typeof enabledConnectorTypesSchema>;
+export type ConnectorRateLimiterConfig = TypeOf<typeof rateLimiterSchema>;
+export type OAuthRateLimiterConfig = TypeOf<typeof oauthAuthorizationCodeRateLimitsSchema>;
 
 // It would be nicer to add the proxyBypassHosts / proxyOnlyHosts restriction on
 // simultaneous usage in the config validator directly, but there's no good way to express
@@ -173,6 +425,21 @@ export function getValidatedConfig(logger: Logger, originalConfig: ActionsConfig
     const tmp: Record<string, unknown> = originalConfig;
     delete tmp.proxyOnlyHosts;
     return tmp as ActionsConfig;
+  }
+
+  if (originalConfig.email && originalConfig.email.maximum_body_length != null) {
+    const emailMaximumBodyLength = originalConfig.email.maximum_body_length;
+    if (emailMaximumBodyLength === 0) {
+      logger.warn(
+        `The configuration xpack.actions.email.maximum_body_length is set to 0 and will result in sending empty emails`
+      );
+    }
+
+    if (emailMaximumBodyLength > MAX_EMAIL_BODY_LENGTH) {
+      logger.warn(
+        `The configuration xpack.actions.email.maximum_body_length value ${emailMaximumBodyLength} is larger than the maximum setting of ${MAX_EMAIL_BODY_LENGTH} and the maximum value will be used instead`
+      );
+    }
   }
 
   return originalConfig;

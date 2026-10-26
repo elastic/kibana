@@ -23,6 +23,8 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { useGeneratedHtmlId } from '@elastic/eui';
+
 import {
   useStartServices,
   useFleetStatus,
@@ -49,6 +51,7 @@ export * from './agent_policy_selection';
 export * from './agent_policy_select_create';
 export * from './instructions';
 export * from './steps';
+export { usePollingAgentCount } from './confirm_agent_enrollment';
 
 export const AgentEnrollmentFlyout: React.FunctionComponent<FlyOutProps> = ({
   onClose,
@@ -57,6 +60,11 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<FlyOutProps> = ({
   defaultMode = 'managed',
   isIntegrationFlow,
   installedPackagePolicy,
+  hideIncomingDataStep,
+  hideViewAgentsButton,
+  onAgentPolicyCreated,
+  defaultAgentPolicyName,
+  forceCreatePolicy,
 }) => {
   const authz = useAuthz();
 
@@ -83,6 +91,7 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<FlyOutProps> = ({
 
   const {
     fleetServerHost,
+    fleetServerHostConfig,
     fleetProxy,
     downloadSource,
     isLoadingInitialRequest,
@@ -112,11 +121,18 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<FlyOutProps> = ({
   const { isK8s } = useIsK8sPolicy(selectedPolicy ?? undefined);
   const { cloudSecurityIntegration } = useCloudSecurityIntegration(selectedPolicy ?? undefined);
 
+  const flyoutTitleId = useGeneratedHtmlId();
+
   return (
-    <EuiFlyout data-test-subj="agentEnrollmentFlyout" onClose={onClose} maxWidth={MAX_FLYOUT_WIDTH}>
-      <EuiFlyoutHeader hasBorder aria-labelledby="FleetAgentEnrollmentFlyoutTitle">
+    <EuiFlyout
+      data-test-subj="agentEnrollmentFlyout"
+      onClose={onClose}
+      maxWidth={MAX_FLYOUT_WIDTH}
+      aria-labelledby={flyoutTitleId}
+    >
+      <EuiFlyoutHeader hasBorder aria-labelledby={flyoutTitleId}>
         <EuiTitle size="m">
-          <h2 id="FleetAgentEnrollmentFlyoutTitle">
+          <h2 id={flyoutTitleId}>
             {isFleetServerPolicySelected ? (
               <FormattedMessage
                 id="xpack.fleet.agentEnrollment.flyoutFleetServerTitle"
@@ -179,8 +195,8 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<FlyOutProps> = ({
                 data-test-subj="standaloneTab"
                 isSelected={mode === 'standalone'}
                 onClick={() => setMode('standalone')}
-                // Standalone need read access to agent policies
-                disabled={!authz.fleet.readAgentPolicies}
+                // Standalone need read access to agent policies and cannot be used for Fleet Server policies
+                disabled={!authz.fleet.readAgentPolicies || isFleetServerPolicySelected}
               >
                 <FormattedMessage
                   id="xpack.fleet.agentEnrollment.enrollStandaloneTabLabel"
@@ -203,10 +219,12 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<FlyOutProps> = ({
         ) : (
           <Instructions
             fleetServerHost={fleetServerHost}
+            fleetServerHostConfig={fleetServerHostConfig}
             fleetProxy={fleetProxy}
             downloadSource={downloadSource}
             downloadSourceProxy={downloadSourceProxy}
             setSelectedPolicyId={setSelectedPolicyId}
+            selectedPolicyId={selectedPolicyId}
             agentPolicy={agentPolicy}
             selectedPolicy={selectedPolicy}
             agentPolicies={agentPolicies}
@@ -222,8 +240,12 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<FlyOutProps> = ({
             isIntegrationFlow={isIntegrationFlow}
             selectedApiKeyId={selectedApiKeyId}
             setSelectedAPIKeyId={setSelectedAPIKeyId}
-            onClickViewAgents={onClose}
+            onClickViewAgents={hideViewAgentsButton ? undefined : onClose}
             installedPackagePolicy={installedPackagePolicy}
+            hideIncomingDataStep={hideIncomingDataStep}
+            onAgentPolicyCreated={onAgentPolicyCreated}
+            defaultAgentPolicyName={defaultAgentPolicyName}
+            forceCreatePolicy={forceCreatePolicy}
           />
         )}
       </EuiFlyoutBody>

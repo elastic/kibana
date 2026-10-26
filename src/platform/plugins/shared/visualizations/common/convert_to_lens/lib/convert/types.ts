@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { METRIC_TYPES } from '@kbn/data-plugin/common';
+import type { METRIC_TYPES } from '@kbn/data-plugin/common';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { SchemaConfig, SupportedAggregation } from '../../../types';
-import {
+import type { SchemaConfig, SupportedAggregation } from '../../../types';
+import type {
   Operation,
   BaseColumn as GenericBaseColumn,
   Column as BaseColumn,
@@ -33,6 +33,8 @@ import {
   TermsColumn as BaseTermsColumn,
   FiltersColumn as BaseFiltersColumn,
   RangeColumn as BaseRangeColumn,
+  AnyMetricColumnWithSourceFieldWithMeta,
+  Meta,
 } from '../../types';
 
 export type MetricsWithField = Exclude<
@@ -80,14 +82,8 @@ export interface CommonBucketConverterArgs<
   visType: string;
   agg: SchemaConfig<Agg>;
   dataView: DataView;
-  metricColumns: AggBasedColumn[];
+  metricColumns: AnyMetricColumnWithSourceFieldWithMeta[];
   aggs: Array<SchemaConfig<METRIC_TYPES>>;
-}
-
-export type AggId = `${string}`;
-
-export interface Meta {
-  aggId: AggId;
 }
 
 export type GeneralColumn = Omit<GenericBaseColumn<Operation, unknown>, 'operationType' | 'params'>;

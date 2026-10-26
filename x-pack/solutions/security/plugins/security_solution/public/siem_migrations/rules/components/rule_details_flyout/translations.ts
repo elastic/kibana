@@ -21,13 +21,6 @@ export const OVERVIEW_TAB_LABEL = i18n.translate(
   }
 );
 
-export const SUMMARY_TAB_LABEL = i18n.translate(
-  'xpack.securitySolution.siemMigrations.rules.translationDetails.summaryTabLabel',
-  {
-    defaultMessage: 'Summary',
-  }
-);
-
 export const TRANSLATION_TAB_LABEL = i18n.translate(
   'xpack.securitySolution.siemMigrations.rules.translationDetails.translationTabLabel',
   {
@@ -35,16 +28,8 @@ export const TRANSLATION_TAB_LABEL = i18n.translate(
   }
 );
 
-export const CLOSE_BUTTON_LABEL = i18n.translate(
-  'xpack.securitySolution.siemMigrations.rules.translationDetails.dismissButtonLabel',
-  {
-    defaultMessage: 'Close',
-  }
-);
-
-export const LAST_UPDATED_LABEL = i18n.translate(
-  'xpack.securitySolution.siemMigrations.rules.translationDetails.lastUpdatedLabel',
-  {
-    defaultMessage: 'Last updated',
-  }
-);
+export const ADD_TO_CHAT_PROMPT = (ruleTitle: string) =>
+  i18n.translate('xpack.securitySolution.siemMigrations.rules.translationDetails.addToChatPrompt', {
+    defaultMessage: 'Please help me with this Automatic migration rule: {ruleTitle}',
+    values: { ruleTitle },
+  });

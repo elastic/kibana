@@ -5,16 +5,15 @@
  * 2.0.
  */
 
-import { shallow } from 'enzyme';
 import React from 'react';
+import { screen, render, fireEvent, waitFor } from '@testing-library/react';
 
 import { TestProviders, createMockStore } from '../../../../common/mock';
-import { useMountAppended } from '../../../../common/utils/use_mount_appended';
 import { hostsModel } from '../../store';
 import { HostsTableType } from '../../store/model';
+import { FLYOUT_ORIGIN } from '../../../../common/lib/telemetry';
 import { HostsTable } from '.';
 import { mockData } from './mock';
-import { render } from '@testing-library/react';
 
 jest.mock('../../../../common/lib/kibana');
 
@@ -35,7 +34,7 @@ jest.mock('../../../../common/components/query_bar', () => ({
 
 jest.mock('../../../../common/components/link_to');
 
-const mockUseMlCapabilities = jest.fn();
+const mockUseMlCapabilities = jest.fn().mockReturnValue({ isPlatinumOrTrialLicense: true });
 
 jest.mock('../../../../common/components/ml/hooks/use_ml_capabilities', () => ({
   useMlCapabilities: () => mockUseMlCapabilities(),
@@ -44,6 +43,23 @@ jest.mock('../../../../common/components/ml/hooks/use_ml_capabilities', () => ({
 const mockUseHasSecurityCapability = jest.fn().mockReturnValue(false);
 jest.mock('../../../../helper_hooks', () => ({
   useHasSecurityCapability: () => mockUseHasSecurityCapability(),
+}));
+
+const mockOpenHostFlyout = jest.fn();
+const mockOpenFlyout = jest.fn();
+jest.mock('@kbn/expandable-flyout', () => ({
+  useExpandableFlyoutApi: () => ({ openFlyout: mockOpenFlyout, closeFlyout: jest.fn() }),
+}));
+jest.mock('../../../../common/hooks/use_is_new_flyout_enabled', () => ({
+  useIsNewFlyoutEnabled: () => true,
+}));
+jest.mock('../../../../flyout_v2/use_flyout_api', () => ({
+  useFlyoutApi: () => ({
+    openHostFlyout: mockOpenHostFlyout,
+    openUserFlyout: jest.fn(),
+    openServiceFlyout: jest.fn(),
+    openGenericEntityFlyout: jest.fn(),
+  }),
 }));
 
 const mockUseUiSetting = jest.fn().mockReturnValue([false]);
@@ -59,11 +75,15 @@ jest.mock('@kbn/kibana-react-plugin/public', () => {
 describe('Hosts Table', () => {
   const loadPage = jest.fn();
   const store = createMockStore();
-  const mount = useMountAppended();
+
+  beforeEach(() => {
+    mockOpenHostFlyout.mockClear();
+    mockOpenFlyout.mockClear();
+  });
 
   describe('rendering', () => {
     test('it renders the default Hosts table', () => {
-      const wrapper = shallow(
+      render(
         <TestProviders store={store}>
           <HostsTable
             data={mockData}
@@ -80,14 +100,45 @@ describe('Hosts Table', () => {
         </TestProviders>
       );
 
-      expect(wrapper.find('HostsTable')).toMatchSnapshot();
+      expect(screen.getByTestId('table-allHosts-loading-false')).toBeInTheDocument();
+    });
+
+    test('it renders keyboard-focusable info tooltips in the column headers', () => {
+      render(
+        <TestProviders store={store}>
+          <HostsTable
+            data={mockData}
+            id="hostsQuery"
+            isInspect={false}
+            fakeTotalCount={-1}
+            loading={false}
+            loadPage={loadPage}
+            setQuerySkip={jest.fn()}
+            showMorePagesIndicator={false}
+            totalCount={0}
+            type={hostsModel.HostsType.page}
+          />
+        </TestProviders>
+      );
+
+      // "Last seen" is sortable, so EUI wraps the whole header in the tooltip
+      // and the natively focusable sort button is the tooltip anchor.
+      expect(
+        screen.getByTestId('tableHeaderCell_node.lastSeen_1').querySelector('button')
+      ).toBeInTheDocument();
+
+      // "OS" is not sortable, so EUI renders a focusable icon as the anchor.
+      // The EUI test environment renders `EuiIcon` as a stub that outputs its
+      // `aria-label` as text content instead of as an attribute.
+      const osTooltip = screen.getByText('More information about the operating system column');
+      expect(osTooltip).toHaveAttribute('tabindex', '0');
     });
 
     test('it renders "Host Risk level" column when "isPlatinumOrTrialLicense" is truthy and user has risk-entity capability', () => {
       mockUseMlCapabilities.mockReturnValue({ isPlatinumOrTrialLicense: true });
       mockUseHasSecurityCapability.mockReturnValue(true);
 
-      const { queryByTestId } = render(
+      render(
         <TestProviders store={store}>
           <HostsTable
             id="hostsQuery"
@@ -104,14 +155,14 @@ describe('Hosts Table', () => {
         </TestProviders>
       );
 
-      expect(queryByTestId('tableHeaderCell_node.risk_4')).toBeInTheDocument();
+      expect(screen.queryByTestId('tableHeaderCell_node.risk_4')).toBeInTheDocument();
     });
 
-    test("it doesn't renders 'Host Risk level' column when 'isPlatinumOrTrialLicense' is falsy", () => {
+    test("it doesn't render 'Host Risk level' column when 'isPlatinumOrTrialLicense' is falsy", () => {
       mockUseMlCapabilities.mockReturnValue({ isPlatinumOrTrialLicense: false });
       mockUseHasSecurityCapability.mockReturnValue(true);
 
-      const { queryByTestId } = render(
+      render(
         <TestProviders store={store}>
           <HostsTable
             id="hostsQuery"
@@ -128,14 +179,14 @@ describe('Hosts Table', () => {
         </TestProviders>
       );
 
-      expect(queryByTestId('tableHeaderCell_node.riskScore_4')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('tableHeaderCell_node.riskScore_4')).not.toBeInTheDocument();
     });
 
-    test("it doesn't renders 'Host Risk level' column when user doesn't has entity-analytics capabilities", () => {
+    test("it doesn't render 'Host Risk level' column when user doesn't has entity-analytics capabilities", () => {
       mockUseMlCapabilities.mockReturnValue({ isPlatinumOrTrialLicense: true });
       mockUseHasSecurityCapability.mockReturnValue(false);
 
-      const { queryByTestId } = render(
+      render(
         <TestProviders store={store}>
           <HostsTable
             id="hostsQuery"
@@ -152,7 +203,7 @@ describe('Hosts Table', () => {
         </TestProviders>
       );
 
-      expect(queryByTestId('tableHeaderCell_node.riskScore_4')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('tableHeaderCell_node.riskScore_4')).not.toBeInTheDocument();
     });
 
     test('it renders "Asset Criticality" column when "isPlatinumOrTrialLicense" is truthy, user has risk-entity capability and Asset Criticality is enabled in Kibana settings', () => {
@@ -160,7 +211,7 @@ describe('Hosts Table', () => {
       mockUseHasSecurityCapability.mockReturnValue(true);
       mockUseUiSetting.mockReturnValue([true]);
 
-      const { queryByTestId } = render(
+      render(
         <TestProviders store={store}>
           <HostsTable
             id="hostsQuery"
@@ -177,14 +228,78 @@ describe('Hosts Table', () => {
         </TestProviders>
       );
 
-      expect(queryByTestId('tableHeaderCell_node.criticality_5')).toBeInTheDocument();
+      expect(screen.queryByTestId('tableHeaderCell_node.criticality_5')).toBeInTheDocument();
+    });
+
+    test('opens the host flyout when clicking a host name that has an entityId', () => {
+      const hostName = 'test-host';
+      const entityId = 'test-entity-id';
+
+      render(
+        <TestProviders store={store}>
+          <HostsTable
+            data={[
+              {
+                node: {
+                  _id: hostName,
+                  lastSeen: ['2021-03-11T15:05:36.783Z'],
+                  host: { name: [hostName] },
+                  entityId,
+                },
+                cursor: { value: hostName, tiebreaker: null },
+              },
+            ]}
+            id="hostsQuery"
+            isInspect={false}
+            fakeTotalCount={0}
+            loading={false}
+            loadPage={loadPage}
+            setQuerySkip={jest.fn()}
+            showMorePagesIndicator={false}
+            totalCount={0}
+            type={hostsModel.HostsType.page}
+          />
+        </TestProviders>
+      );
+
+      fireEvent.click(screen.getByTestId('host-details-button'));
+
+      expect(mockOpenHostFlyout).toHaveBeenCalledWith({
+        hostName,
+        entityId,
+        contextID: 'allHosts',
+        scopeId: 'allHosts',
+        origin: FLYOUT_ORIGIN.HOSTS_TABLE,
+      });
+    });
+
+    test('does not open the flyout when clicking a host name without an entityId', () => {
+      render(
+        <TestProviders store={store}>
+          <HostsTable
+            data={mockData}
+            id="hostsQuery"
+            isInspect={false}
+            fakeTotalCount={0}
+            loading={false}
+            loadPage={loadPage}
+            setQuerySkip={jest.fn()}
+            showMorePagesIndicator={false}
+            totalCount={0}
+            type={hostsModel.HostsType.page}
+          />
+        </TestProviders>
+      );
+
+      fireEvent.click(screen.getByTestId('host-details-button'));
+
+      expect(mockOpenHostFlyout).not.toHaveBeenCalled();
+      expect(mockOpenFlyout).not.toHaveBeenCalled();
     });
 
     describe('Sorting on Table', () => {
-      let wrapper: ReturnType<typeof mount>;
-
-      beforeEach(() => {
-        wrapper = mount(
+      test('Initial value of the store', async () => {
+        const { container } = render(
           <TestProviders store={store}>
             <HostsTable
               id="hostsQuery"
@@ -200,30 +315,52 @@ describe('Hosts Table', () => {
             />
           </TestProviders>
         );
-      });
-      test('Initial value of the store', () => {
+
         expect(store.getState().hosts.page.queries[HostsTableType.hosts]).toEqual({
           activePage: 0,
           direction: 'desc',
           sortField: 'lastSeen',
           limit: 10,
         });
-        expect(wrapper.find('.euiTable thead tr th button').at(1).text()).toEqual('Last seen ');
-        expect(wrapper.find('.euiTable thead tr th button').at(1).find('svg')).toBeTruthy();
+
+        const lastSeenHeader = Array.from(
+          container.querySelectorAll('.euiTable thead tr th button')
+        ).at(-1);
+        expect(lastSeenHeader).toHaveTextContent('Last seen');
       });
 
-      test('when you click on the column header, you should show the sorting icon', () => {
-        wrapper.find('.euiTable thead tr th button').first().simulate('click');
+      test('when you click on the column header, you should show the sorting icon', async () => {
+        const { container } = render(
+          <TestProviders store={store}>
+            <HostsTable
+              id="hostsQuery"
+              isInspect={false}
+              loading={false}
+              data={mockData}
+              totalCount={0}
+              fakeTotalCount={-1}
+              setQuerySkip={jest.fn()}
+              showMorePagesIndicator={false}
+              loadPage={loadPage}
+              type={hostsModel.HostsType.page}
+            />
+          </TestProviders>
+        );
 
-        wrapper.update();
+        const hostNameHeader = container.querySelector('.euiTable thead tr th:first-child button');
+        if (hostNameHeader) {
+          fireEvent.click(hostNameHeader);
+        }
 
-        expect(store.getState().hosts.page.queries[HostsTableType.hosts]).toEqual({
-          activePage: 0,
-          direction: 'asc',
-          sortField: 'hostName',
-          limit: 10,
+        await waitFor(() => {
+          expect(store.getState().hosts.page.queries[HostsTableType.hosts]).toEqual({
+            activePage: 0,
+            direction: 'asc',
+            sortField: 'hostName',
+            limit: 10,
+          });
+          expect(hostNameHeader).toHaveTextContent('Host name');
         });
-        expect(wrapper.find('.euiTable thead tr th button').first().text()).toEqual('Host name');
       });
     });
   });

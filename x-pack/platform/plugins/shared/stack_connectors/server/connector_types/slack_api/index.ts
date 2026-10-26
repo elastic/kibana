@@ -10,24 +10,25 @@ import {
   UptimeConnectorFeatureId,
   AlertingConnectorFeatureId,
   SecurityConnectorFeatureId,
+  WorkflowsConnectorFeatureId,
 } from '@kbn/actions-plugin/common';
 import type { Logger } from '@kbn/core/server';
 import { renderMustacheString } from '@kbn/actions-plugin/server/lib/mustache_renderer';
 import type { ValidatorServices } from '@kbn/actions-plugin/server/types';
 import { i18n } from '@kbn/i18n';
+import type { SlackApiParams, SlackApiSecrets } from '@kbn/connector-schemas/slack_api';
+import {
+  CONNECTOR_ID,
+  CONNECTOR_NAME,
+  SLACK_URL,
+  SlackApiConfigSchema,
+  SlackApiParamsSchema,
+  SlackApiSecretsSchema,
+} from '@kbn/connector-schemas/slack_api';
 import type {
   SlackApiExecutorOptions,
   SlackApiConnectorType,
-  SlackApiParams,
-  SlackApiSecrets,
 } from '../../../common/slack_api/types';
-import {
-  SlackApiSecretsSchema,
-  SlackApiParamsSchema,
-  SlackApiConfigSchema,
-} from '../../../common/slack_api/schema';
-import { SLACK_API_CONNECTOR_ID, SLACK_URL } from '../../../common/slack_api/constants';
-import { SLACK_CONNECTOR_NAME } from './translations';
 import { api } from './api';
 import { createExternalService } from './service';
 
@@ -35,13 +36,14 @@ const supportedSubActions = ['getAllowedChannels', 'validChannelId', 'postMessag
 
 export const getConnectorType = (): SlackApiConnectorType => {
   return {
-    id: SLACK_API_CONNECTOR_ID,
+    id: CONNECTOR_ID,
     minimumLicenseRequired: 'gold',
-    name: SLACK_CONNECTOR_NAME,
+    name: CONNECTOR_NAME,
     supportedFeatureIds: [
       UptimeConnectorFeatureId,
       AlertingConnectorFeatureId,
       SecurityConnectorFeatureId,
+      WorkflowsConnectorFeatureId,
     ],
     validate: {
       config: { schema: SlackApiConfigSchema },
@@ -80,15 +82,7 @@ const renderParameterTemplates = (
   params: SlackApiParams,
   variables: Record<string, unknown>
 ) => {
-  if (params.subAction === 'postMessage') {
-    return {
-      subAction: params.subAction,
-      subActionParams: {
-        ...params.subActionParams,
-        text: renderMustacheString(logger, params.subActionParams.text, variables, 'slack'),
-      },
-    };
-  } else if (params.subAction === 'postBlockkit') {
+  if (params.subAction === 'postBlockkit') {
     return {
       subAction: params.subAction,
       subActionParams: {
@@ -97,7 +91,19 @@ const renderParameterTemplates = (
       },
     };
   }
-  return params;
+
+  if (params.subAction === 'validChannelId') {
+    return params;
+  }
+
+  const text = params.subActionParams !== null ? params.subActionParams.text : '';
+  return {
+    subAction: 'postMessage' as const,
+    subActionParams: {
+      ...params.subActionParams,
+      text: renderMustacheString(logger, text, variables, 'slack'),
+    },
+  };
 };
 
 const slackApiExecutor = async ({

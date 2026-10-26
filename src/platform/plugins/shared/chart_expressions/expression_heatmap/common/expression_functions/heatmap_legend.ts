@@ -7,11 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Position } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
-import { DEFAULT_LEGEND_SIZE, LegendSize } from '@kbn/visualizations-plugin/common/constants';
+import { DEFAULT_LEGEND_SIZE, LegendSize, ChartPosition } from '@kbn/chart-expressions-common';
 import { EXPRESSION_HEATMAP_LEGEND_NAME } from '../constants';
-import { HeatmapLegendExpressionFunctionDefinition } from '../types';
+import type { HeatmapLegendExpressionFunctionDefinition } from '../types';
 
 export const heatmapLegendConfig: HeatmapLegendExpressionFunctionDefinition = {
   name: EXPRESSION_HEATMAP_LEGEND_NAME,
@@ -28,8 +27,8 @@ export const heatmapLegendConfig: HeatmapLegendExpressionFunctionDefinition = {
     },
     position: {
       types: ['string'],
-      default: Position.Right,
-      options: [Position.Top, Position.Right, Position.Bottom, Position.Left],
+      default: ChartPosition.Right,
+      options: [ChartPosition.Top, ChartPosition.Right, ChartPosition.Bottom, ChartPosition.Left],
       help: i18n.translate('expressionHeatmap.function.args.legend.position.help', {
         defaultMessage: 'Specifies the legend position.',
       }),

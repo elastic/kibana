@@ -5,17 +5,16 @@
  * 2.0.
  */
 
-import type { PropsOf } from '@elastic/eui';
-import { EuiToolTip } from '@elastic/eui';
+import { EuiToolTip, type EuiToolTipProps } from '@elastic/eui';
 import React from 'react';
 import {
   missingMlPrivilegesTitle,
   missingMlSetupPrivilegesDescription,
 } from './missing_privileges_messages';
 
-export const MissingSetupPrivilegesToolTip: React.FC<
-  Omit<PropsOf<EuiToolTip>, 'content' | 'title'>
-> = (props) => (
+export const MissingSetupPrivilegesToolTip: React.FC<Omit<EuiToolTipProps, 'content' | 'title'>> = (
+  props
+) => (
   <EuiToolTip
     {...props}
     content={missingMlSetupPrivilegesDescription}

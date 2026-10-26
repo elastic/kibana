@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import * as rt from 'io-ts';
+import { z } from '@kbn/zod/v4';
 
 /**
  * These values are used in a number of places including to define the accepted values in the
@@ -26,6 +26,13 @@ export const UserActionTypes = {
   delete_case: 'delete_case',
   category: 'category',
   customFields: 'customFields',
+  observables: 'observables',
+  // Key intentionally uses snake_case to match the saved object attribute name returned by
+  // Object.keys(updatedAttributes), which is used in getUserActionItemByDifference.
+  extended_fields: 'extended_fields',
+  template: 'template',
+  workflow: 'workflow',
+  bulkAttachments: 'bulkAttachments',
 } as const;
 
 type UserActionActionTypeKeys = keyof typeof UserActionTypes;
@@ -43,9 +50,11 @@ export const UserActionActions = {
   push_to_service: 'push_to_service',
 } as const;
 
-export const UserActionActionsRt = rt.keyof(UserActionActions);
-
 /**
  * This defines the high level category for the user action. Whether the user add, removed, updated something
  */
-export type UserActionAction = rt.TypeOf<typeof UserActionActionsRt>;
+export type UserActionAction = (typeof UserActionActions)[keyof typeof UserActionActions];
+
+export const UserActionActionsSchema = z.enum(
+  Object.values(UserActionActions) as [UserActionAction, ...UserActionAction[]]
+);

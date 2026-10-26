@@ -6,7 +6,6 @@
  */
 
 import type { IndexPatternMapping } from '../types';
-import type { IndexPatternSavedObject } from '../../../../../common/hooks/types';
 import { LAYER_TYPE } from '@kbn/maps-plugin/common';
 import type { EuiThemeComputed } from '@elastic/eui';
 
@@ -55,7 +54,7 @@ export const mockSourceLayer = {
       },
       lineColor: {
         type: 'STATIC',
-        options: { color: 'euiColorVisNeutral0' },
+        options: { color: 'euiColorVisBase0' },
       },
       lineWidth: { type: 'STATIC', options: { size: 2 } },
       iconSize: { type: 'STATIC', options: { size: 8 } },
@@ -113,7 +112,7 @@ export const mockDestinationLayer = {
       },
       lineColor: {
         type: 'STATIC',
-        options: { color: 'euiColorVisNeutral0' },
+        options: { color: 'euiColorVisBase0' },
       },
       lineWidth: { type: 'STATIC', options: { size: 2 } },
       iconSize: { type: 'STATIC', options: { size: 8 } },
@@ -169,7 +168,7 @@ export const mockClientLayer = {
       },
       lineColor: {
         type: 'STATIC',
-        options: { color: 'euiColorVisNeutral0' },
+        options: { color: 'euiColorVisBase0' },
       },
       lineWidth: { type: 'STATIC', options: { size: 2 } },
       iconSize: { type: 'STATIC', options: { size: 8 } },
@@ -232,7 +231,7 @@ export const mockServerLayer = {
       },
       lineColor: {
         type: 'STATIC',
-        options: { color: 'euiColorVisNeutral0' },
+        options: { color: 'euiColorVisBase0' },
       },
       lineWidth: { type: 'STATIC', options: { size: 2 } },
       iconSize: { type: 'STATIC', options: { size: 8 } },
@@ -433,111 +432,13 @@ export const mockLayerListMixed = [
   },
 ];
 
-export const mockAPMIndexPattern: IndexPatternSavedObject = {
-  id: 'apm-*',
-  type: 'index-pattern',
-  _version: 'abc',
-  attributes: {
-    title: 'apm-*',
-  },
-};
-
-export const mockAPMRegexIndexPattern: IndexPatternSavedObject = {
-  id: 'apm-7.*',
-  type: 'index-pattern',
-  _version: 'abc',
-  attributes: {
-    title: 'apm-7.*',
-  },
-};
-
-export const mockFilebeatIndexPattern: IndexPatternSavedObject = {
-  id: 'filebeat-*',
-  type: 'index-pattern',
-  _version: 'abc',
-  attributes: {
-    title: 'filebeat-*',
-  },
-};
-
-export const mockAuditbeatIndexPattern: IndexPatternSavedObject = {
-  id: 'auditbeat-*',
-  type: 'index-pattern',
-  _version: 'abc',
-  attributes: {
-    title: 'auditbeat-*',
-  },
-};
-
-export const mockAPMTransactionIndexPattern: IndexPatternSavedObject = {
-  id: 'apm-*-transaction*',
-  type: 'index-pattern',
-  _version: 'abc',
-  attributes: {
-    title: 'apm-*-transaction*',
-  },
-};
-
-export const mockAPMTracesDataStreamIndexPattern: IndexPatternSavedObject = {
-  id: 'traces-apm*',
-  type: 'index-pattern',
-  _version: 'abc',
-  attributes: {
-    title: 'traces-apm*',
-  },
-};
-
-export const mockGlobIndexPattern: IndexPatternSavedObject = {
-  id: '*',
-  type: 'index-pattern',
-  _version: 'abc',
-  attributes: {
-    title: '*',
-  },
-};
-
-export const mockCCSGlobIndexPattern: IndexPatternSavedObject = {
-  id: '*:*',
-  type: 'index-pattern',
-  _version: 'abc',
-  attributes: {
-    title: '*:*',
-  },
-};
-
-export const mockCommaFilebeatAuditbeatGlobIndexPattern: IndexPatternSavedObject = {
-  id: 'filebeat-*,auditbeat-*',
-  type: 'index-pattern',
-  _version: 'abc',
-  attributes: {
-    title: 'filebeat-*,auditbeat-*',
-  },
-};
-
-export const mockCommaFilebeatAuditbeatCCSGlobIndexPattern: IndexPatternSavedObject = {
-  id: '*:filebeat-*,*:auditbeat-*',
-  type: 'index-pattern',
-  _version: 'abc',
-  attributes: {
-    title: '*:filebeat-*,*:auditbeat-*',
-  },
-};
-
-export const mockCommaFilebeatExclusionGlobIndexPattern: IndexPatternSavedObject = {
-  id: 'filebeat-*,-filebeat-7.6.0*',
-  type: 'index-pattern',
-  _version: 'abc',
-  attributes: {
-    title: 'filebeat-*,-filebeat-7.6.0*',
-  },
-};
-
 export const mockEuiTheme: EuiThemeComputed<{}> = {
   colors: {
     vis: {
-      euiColorVisNeutral0: 'euiColorVisNeutral0',
+      euiColorVisNeutral1: 'euiColorVisNeutral1',
       euiColorVis4: 'euiColorVis4',
       euiColorVis2: 'euiColorVis2',
+      euiColorVisBase0: 'euiColorVisBase0',
     },
   },
 } as unknown as EuiThemeComputed<{}>;

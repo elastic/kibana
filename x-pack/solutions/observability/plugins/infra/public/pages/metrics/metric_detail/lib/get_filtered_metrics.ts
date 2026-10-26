@@ -5,25 +5,26 @@
  * 2.0.
  */
 
-import type { InventoryMetric } from '@kbn/metrics-data-access-plugin/common';
+import type { InventoryTsvbType, DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
 import { metrics } from '@kbn/metrics-data-access-plugin/common';
 import type { InfraMetadataFeature } from '../../../../../common/http_api/metadata_api';
 import { TIMESTAMP_FIELD } from '../../../../../common/constants';
 
 export const getFilteredMetrics = (
-  requiredMetrics: InventoryMetric[],
-  metadata: Array<InfraMetadataFeature | null | undefined>
+  requiredTsvb: InventoryTsvbType[],
+  metadata: Array<InfraMetadataFeature | null | undefined>,
+  schema?: DataSchemaFormat
 ) => {
   const metricMetadata = metadata
     .filter((data) => data && data.source === 'metrics')
     .map((data) => data && data.name);
-  return requiredMetrics.filter((metric) => {
+  return requiredTsvb.filter((metric) => {
     const metricModelCreator = metrics?.tsvb[metric] ?? null;
 
     // We just need to get a dummy version of the model so we can filter
     // using the `requires` attribute.
     const metricModel = metricModelCreator
-      ? metricModelCreator(TIMESTAMP_FIELD, 'test', '>=1m')
+      ? metricModelCreator(TIMESTAMP_FIELD, 'test', '>=1m', { schema })
       : { requires: [''] }; // when tsvb is not defined (host & container)
     return metricMetadata.some((m) => m && metricModel?.requires?.includes(m));
   });

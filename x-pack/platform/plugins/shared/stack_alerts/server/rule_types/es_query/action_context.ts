@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import type { AlertInstanceContext } from '@kbn/alerting-plugin/server';
 import type { EsQueryRuleParams } from '@kbn/response-ops-rule-params/es_query';
+import type { FieldsObject } from '@kbn/alerting-rule-utils';
 import type { Comparator } from '../../../common/comparator_types';
 import { getHumanReadableComparator } from '../../../common';
 import { isEsqlQueryRule } from './util';
@@ -34,7 +35,8 @@ export interface EsQueryRuleActionContext extends AlertInstanceContext {
   // a link to see records that triggered the rule for Discover rule
   // a link which navigates to stack management in case of Elastic query rule
   link: string;
-  sourceFields: string[];
+  sourceFields: Record<string, string[]>;
+  grouping?: FieldsObject;
 }
 
 interface AddMessagesOpts {

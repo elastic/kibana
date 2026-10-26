@@ -6,17 +6,13 @@
  */
 
 import { badData, badRequest } from '@hapi/boom';
-import {
-  IngestGetResponse,
-  StreamUpsertRequest,
-  ingestUpsertRequestSchema,
-  isUnwiredStreamDefinition,
-  isWiredStreamDefinition,
-} from '@kbn/streams-schema';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
+import { MAX_STREAM_NAME_LENGTH, Streams } from '@kbn/streams-schema';
+import { WiredIngestUpsertRequest, IngestUpsertRequest } from '@kbn/streams-schema';
+import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import { createServerRoute } from '../../create_server_route';
-import { ASSET_ID, ASSET_TYPE } from '../../../lib/streams/assets/fields';
-import { QueryAsset } from '../../../../common/assets';
+import { getWiredIngestResponse, upsertWiredIngestRequest } from '../../../oas_examples';
+import { updateWiredIngest, updateClassicIngest } from '../../../lib/streams/helpers/ingest_upsert';
 
 const readIngestRoute = createServerRoute({
   endpoint: 'GET /api/streams/{name}/_ingest 2023-10-31',
@@ -25,20 +21,46 @@ const readIngestRoute = createServerRoute({
     summary: 'Get ingest stream settings',
     description: 'Fetches the ingest settings of an ingest stream definition',
     availability: {
+      since: '9.1.0',
       stability: 'experimental',
     },
+    oasOperationObject: () => ({
+      requestBody: {
+        content: {
+          'application/json': {
+            examples: {},
+          },
+        },
+      },
+      responses: {
+        200: {
+          description: 'Ingest settings for the stream.',
+          content: {
+            'application/json': {
+              examples: {
+                getWiredIngest: { value: getWiredIngestResponse },
+              },
+            },
+          },
+        },
+      },
+    }),
   },
   security: {
     authz: {
-      enabled: false,
-      reason:
-        'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
   params: z.object({
-    path: z.object({ name: z.string() }),
+    path: z.object({
+      name: z.string().max(MAX_STREAM_NAME_LENGTH).describe('The name of the stream.'),
+    }),
   }),
-  handler: async ({ params, request, getScopedClients }): Promise<IngestGetResponse> => {
+  handler: async ({
+    params,
+    request,
+    getScopedClients,
+  }): Promise<{ ingest: Streams.ingest.all.Definition['ingest'] }> => {
     const { streamsClient } = await getScopedClients({
       request,
     });
@@ -47,11 +69,7 @@ const readIngestRoute = createServerRoute({
 
     const definition = await streamsClient.getStream(name);
 
-    if (isWiredStreamDefinition(definition)) {
-      return { ingest: definition.ingest };
-    }
-
-    if (isUnwiredStreamDefinition(definition)) {
+    if (Streams.ingest.all.Definition.is(definition)) {
       return { ingest: definition.ingest };
     }
 
@@ -66,57 +84,76 @@ const upsertIngestRoute = createServerRoute({
     summary: 'Update ingest stream settings',
     description: 'Upserts the ingest settings of an ingest stream definition',
     availability: {
+      since: '9.1.0',
       stability: 'experimental',
     },
+    oasOperationObject: () => ({
+      requestBody: {
+        content: {
+          'application/json': {
+            examples: {
+              upsertWiredIngest: { value: upsertWiredIngestRequest },
+            },
+          },
+        },
+      },
+      responses: {
+        200: {
+          description: 'The ingest settings were updated successfully.',
+        },
+      },
+    }),
   },
   security: {
     authz: {
-      enabled: false,
-      reason:
-        'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
     },
   },
   params: z.object({
     path: z.object({
-      name: z.string(),
+      name: z.string().max(MAX_STREAM_NAME_LENGTH).describe('The name of the stream.'),
     }),
-    body: ingestUpsertRequestSchema,
+    body: z.object({
+      ingest: IngestUpsertRequest.right,
+    }),
   }),
   handler: async ({ params, request, getScopedClients }) => {
-    const { streamsClient, assetClient } = await getScopedClients({
+    const { streamsClient, attachmentClient } = await getScopedClients({
       request,
     });
 
-    if (
-      isWiredStreamDefinition({ name: params.path.name, ...params.body }) &&
-      !(await streamsClient.isStreamsEnabled())
-    ) {
-      throw badData('Streams are not enabled for Wired streams.');
+    const { name } = params.path;
+    const { ingest } = params.body;
+
+    const definition = await streamsClient.getStream(name);
+
+    if (!Streams.ingest.all.Definition.is(definition)) {
+      throw badData(`_ingest is only supported on Wired and Classic streams`);
     }
 
-    const name = params.path.name;
+    // Replicated data streams are managed by the source cluster via CCR.
+    // Ingest settings (routing, processing, field mappings) cannot be modified locally.
+    const dataStream = await streamsClient.getDataStream(name).catch(() => null);
+    if (dataStream?.replicated) {
+      throw badData(
+        'Cannot modify ingest settings of a replicated stream. It is managed by the source cluster via cross-cluster replication.'
+      );
+    }
 
-    const assets = await assetClient.getAssets(name);
+    if (WiredIngestUpsertRequest.is(ingest)) {
+      return await updateWiredIngest({
+        streamsClient,
+        attachmentClient,
+        name,
+        ingest,
+      });
+    }
 
-    const ingestUpsertRequest = params.body;
-
-    const dashboards = assets
-      .filter((asset) => asset[ASSET_TYPE] === 'dashboard')
-      .map((asset) => asset[ASSET_ID]);
-
-    const queries = assets
-      .filter((asset): asset is QueryAsset => asset[ASSET_TYPE] === 'query')
-      .map((asset) => asset.query);
-
-    const upsertRequest = {
-      dashboards,
-      stream: ingestUpsertRequest,
-      queries,
-    } as StreamUpsertRequest;
-
-    return await streamsClient.upsertStream({
-      request: upsertRequest,
-      name: params.path.name,
+    return await updateClassicIngest({
+      streamsClient,
+      attachmentClient,
+      name,
+      ingest,
     });
   },
 });

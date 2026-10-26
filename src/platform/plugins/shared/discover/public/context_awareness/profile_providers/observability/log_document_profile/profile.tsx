@@ -8,21 +8,43 @@
  */
 
 import type { DataTableRecord } from '@kbn/discover-utils';
+import { BehaviorSubject } from 'rxjs';
 import type { DocumentProfileProvider } from '../../../profiles';
-import { DocumentType } from '../../../profiles';
+import { DataSourceCategory, DocumentType, SolutionType } from '../../../profiles';
 import type { ProfileProviderServices } from '../../profile_provider_services';
+import {
+  isClassicNavRootContext,
+  isSolutionProfileEnabled,
+} from '../../is_solution_profile_enabled';
 import { createGetDocViewer } from './accessors';
-import { OBSERVABILITY_ROOT_PROFILE_ID } from '../consts';
+import type { LogOverviewContext } from '../logs_data_source_profile/profile';
+import { isLogsDataSourceContext } from '../logs_data_source_profile/profile';
+
+export type LogDocumentProfileProvider = DocumentProfileProvider<{
+  logOverviewContext$: BehaviorSubject<LogOverviewContext | undefined>;
+}>;
+
+export const OBSERVABILITY_LOG_DOCUMENT_PROFILE_ID = 'observability-log-document-profile';
 
 export const createObservabilityLogDocumentProfileProvider = (
   services: ProfileProviderServices
-): DocumentProfileProvider => ({
-  profileId: 'observability-log-document-profile',
+): LogDocumentProfileProvider => ({
+  profileId: OBSERVABILITY_LOG_DOCUMENT_PROFILE_ID,
   profile: {
     getDocViewer: createGetDocViewer(services),
   },
-  resolve: ({ record, rootContext }) => {
-    if (rootContext.profileId !== OBSERVABILITY_ROOT_PROFILE_ID) {
+  resolve: ({ record, rootContext, dataSourceContext }) => {
+    if (!isSolutionProfileEnabled(rootContext, SolutionType.Observability, services.uiSettings)) {
+      return { isMatch: false };
+    }
+
+    // In Classic, only surface the Log overview when the logs data source profile claimed the source
+    // (the curated integrations). Ambiguous sources like `logs-*`, `audit-logs` and `filebeat-*` stay
+    // on the default flyout, mirroring the data source profile.
+    if (
+      isClassicNavRootContext(rootContext) &&
+      dataSourceContext.category !== DataSourceCategory.Logs
+    ) {
       return { isMatch: false };
     }
 
@@ -36,6 +58,9 @@ export const createObservabilityLogDocumentProfileProvider = (
       isMatch: true,
       context: {
         type: DocumentType.Log,
+        logOverviewContext$: isLogsDataSourceContext(dataSourceContext)
+          ? dataSourceContext.logOverviewContext$
+          : new BehaviorSubject<LogOverviewContext | undefined>(undefined),
       },
     };
   },
@@ -48,7 +73,8 @@ const getIsLogRecord = (
   return (
     getDataStreamType(record).includes('logs') ||
     hasFieldsWithPrefix('log.')(record) ||
-    getIndices(record).some(isLogsIndexPattern)
+    getIndices(record).some(isLogsIndexPattern) ||
+    hasLogsStreamName(record)
   );
 };
 
@@ -61,6 +87,15 @@ const getFieldValues =
 
 const getDataStreamType = getFieldValues('data_stream.type');
 const getIndices = getFieldValues('_index');
+
+// stream.name is set for wired streams. Everything that starts with logs. is a log stream.
+const hasLogsStreamName = (record: DataTableRecord) => {
+  const streamName = record.flattened['stream.name'];
+  if (!streamName || typeof streamName !== 'string') {
+    return false;
+  }
+  return streamName === 'logs' || streamName.startsWith('logs.');
+};
 
 const hasFieldsWithPrefix = (prefix: string) => (record: DataTableRecord) => {
   return Object.keys(record.flattened).some(

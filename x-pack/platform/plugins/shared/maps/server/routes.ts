@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
 import fs from 'fs';
 import path from 'path';
-import { CoreSetup, IRouter, Logger } from '@kbn/core/server';
-import { DataRequestHandlerContext } from '@kbn/data-plugin/server';
+import type { CoreSetup, IRouter, Logger } from '@kbn/core/server';
+import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 import { INDEX_SETTINGS_API_PATH, FONTS_API_PATH } from '../common/constants';
 import { getIndexPatternSettings } from './lib/get_index_pattern_settings';
 import { initMVTRoutes } from './mvt/mvt_routes';
 import { initIndexingRoutes } from './data_indexing/indexing_routes';
-import { StartDeps } from './types';
+import type { StartDeps } from './types';
 
 export function initRoutes(coreSetup: CoreSetup<StartDeps>, logger: Logger) {
   const router: IRouter<DataRequestHandlerContext> = coreSetup.http.createRouter();
@@ -36,10 +36,12 @@ export function initRoutes(coreSetup: CoreSetup<StartDeps>, logger: Logger) {
         version: '1',
         validate: {
           request: {
-            params: schema.object({
-              fontstack: schema.string(),
-              range: schema.string(),
-            }),
+            params: z
+              .object({
+                fontstack: z.string(),
+                range: z.string(),
+              })
+              .strict(),
           },
         },
       },
@@ -82,9 +84,11 @@ export function initRoutes(coreSetup: CoreSetup<StartDeps>, logger: Logger) {
         version: '1',
         validate: {
           request: {
-            query: schema.object({
-              indexPatternTitle: schema.string(),
-            }),
+            query: z
+              .object({
+                indexPatternTitle: z.string(),
+              })
+              .strict(),
           },
         },
       },

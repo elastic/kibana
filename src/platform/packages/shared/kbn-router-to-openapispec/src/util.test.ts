@@ -8,7 +8,8 @@
  */
 
 import type { RouteMethod } from '@kbn/core-http-server';
-import { OpenAPIV3 } from 'openapi-types';
+import type { OpenAPIV3 } from 'openapi-types';
+import type { GetOpId } from './util';
 import {
   buildGlobalTags,
   getXsrfHeaderForMethod,
@@ -16,10 +17,11 @@ import {
   prepareRoutes,
   getPathParameters,
   createOpIdGenerator,
-  GetOpId,
   assignToPaths,
   extractTags,
+  setXState,
 } from './util';
+import type { CustomOperationObject } from './type';
 
 describe('extractTags', () => {
   test.each([
@@ -178,6 +180,14 @@ describe('prepareRoutes', () => {
       ],
       output: [{ path: '/api/baz', options: { access: pub } }],
       filters: { excludePathsMatching: ['/api/bar'], access: pub },
+    },
+    {
+      input: [
+        { path: '/api/foo', options: { access: pub, options: { excludeFromOAS: true } } },
+        { path: '/api/baz', options: { access: pub, options: {} } },
+      ],
+      output: [{ path: '/api/baz', options: { access: pub, options: {} } }],
+      filters: { access: pub },
     },
   ])('returns the expected routes #%#', ({ input, output, filters }) => {
     expect(prepareRoutes(input, filters)).toEqual(output);
@@ -345,5 +355,152 @@ describe('createOpIdGenerator', () => {
     },
   ])('$input.method $input.path -> $output', ({ input, output }) => {
     expect(getOpId(input)).toBe(output);
+  });
+
+  describe('explicit operationId', () => {
+    test('is used verbatim instead of the generated value', () => {
+      expect(
+        getOpId({ method: 'put', path: '/api/dashboards/{id}', operationId: 'upsert-dashboard' })
+      ).toBe('upsert-dashboard');
+    });
+
+    test('does not reserve the generated name it replaces', () => {
+      getOpId({ method: 'put', path: '/api/dashboards/{id}', operationId: 'upsert-dashboard' });
+      expect(getOpId({ method: 'put', path: '/api/dashboards/{id}' })).toBe('put-dashboards-id');
+    });
+
+    test('throws when two routes declare the same ID', () => {
+      getOpId({ method: 'get', path: '/api/one', operationId: 'shared-id' });
+      expect(() => getOpId({ method: 'get', path: '/api/two', operationId: 'shared-id' })).toThrow(
+        /Duplicate operationId "shared-id" for route "GET \/api\/two".*Prefer kebab-case verb-resource names such as "create-dashboard"/
+      );
+    });
+
+    test('throws when it collides with an already generated ID', () => {
+      expect(getOpId({ method: 'get', path: '/api/test' })).toBe('get-test');
+      expect(() => getOpId({ method: 'get', path: '/api/other', operationId: 'get-test' })).toThrow(
+        /Duplicate operationId "get-test"/
+      );
+    });
+
+    test('still requires method and path', () => {
+      expect(() => getOpId({ method: '', path: '', operationId: 'x' })).toThrow(
+        /Must provide method and path/
+      );
+    });
+  });
+});
+
+describe('setXState', () => {
+  describe('with serverless=false (default)', () => {
+    test.each([
+      {
+        name: 'stable with since',
+        availability: { stability: 'stable' as const, since: '8.0.0' },
+        expected: 'Generally available; added in 8.0.0',
+      },
+      {
+        name: 'stable without since',
+        availability: { stability: 'stable' as const },
+        expected: 'Generally available',
+      },
+      {
+        name: 'experimental with since',
+        availability: { stability: 'experimental' as const, since: '8.0.0' },
+        expected: 'Experimental; added in 8.0.0',
+      },
+      {
+        name: 'experimental without since',
+        availability: { stability: 'experimental' as const },
+        expected: 'Experimental',
+      },
+      {
+        name: 'tech_preview with since',
+        availability: { stability: 'tech_preview' as const, since: '8.0.0' },
+        expected: 'Technical Preview; added in 8.0.0',
+      },
+      {
+        name: 'tech_preview without since',
+        availability: { stability: 'tech_preview' as const },
+        expected: 'Technical Preview',
+      },
+      {
+        name: 'no availability',
+        availability: undefined,
+        expected: undefined,
+      },
+      {
+        name: 'only since',
+        availability: { since: '8.0.0' },
+        expected: 'Added in 8.0.0',
+      },
+    ])('$name', ({ availability, expected }) => {
+      // Create a minimal valid CustomOperationObject with required responses property
+      const operation: CustomOperationObject = {
+        responses: {
+          '200': {
+            description: 'OK',
+          },
+        },
+      };
+      setXState(availability, operation, { serverless: false });
+      expect(operation['x-state']).toBe(expected);
+    });
+  });
+
+  describe('with serverless=true', () => {
+    test.each([
+      {
+        name: 'stable with since',
+        availability: { stability: 'stable' as const, since: '8.0.0' },
+        expected: 'Generally available',
+      },
+      {
+        name: 'stable without since',
+        availability: { stability: 'stable' as const },
+        expected: 'Generally available',
+      },
+      {
+        name: 'experimental with since',
+        availability: { stability: 'experimental' as const, since: '8.0.0' },
+        expected: 'Experimental',
+      },
+      {
+        name: 'experimental without since',
+        availability: { stability: 'experimental' as const },
+        expected: 'Experimental',
+      },
+      {
+        name: 'tech_preview with since',
+        availability: { stability: 'tech_preview' as const, since: '8.0.0' },
+        expected: 'Technical Preview',
+      },
+      {
+        name: 'tech_preview without since',
+        availability: { stability: 'tech_preview' as const },
+        expected: 'Technical Preview',
+      },
+      {
+        name: 'no availability',
+        availability: undefined,
+        expected: undefined,
+      },
+      {
+        name: 'only since',
+        availability: { since: '8.0.0' },
+        expected: '',
+      },
+    ])('$name', ({ availability, expected }) => {
+      // Create a minimal valid CustomOperationObject with required responses property
+      const operation: CustomOperationObject = {
+        responses: {
+          '200': {
+            description: 'OK',
+          },
+        },
+      };
+      setXState(availability, operation, { serverless: true });
+      expect(operation['x-state']).toBe(expected);
+    });
   });
 });

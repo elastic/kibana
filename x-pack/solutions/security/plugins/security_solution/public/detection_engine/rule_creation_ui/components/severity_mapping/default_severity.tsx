@@ -23,9 +23,10 @@ const describedByIds = ['detectionEngineStepAboutRuleSeverity'];
 interface DefaultSeverityProps {
   value: Severity;
   onChange: (newValue: Severity) => void;
+  isDisabled?: boolean;
 }
 
-export function DefaultSeverity({ value, onChange }: DefaultSeverityProps) {
+export function DefaultSeverity({ value, onChange, isDisabled = false }: DefaultSeverityProps) {
   const severityOptions = useSeverityOptions();
   return (
     <EuiFlexItem>
@@ -37,7 +38,7 @@ export function DefaultSeverity({ value, onChange }: DefaultSeverityProps) {
       >
         <EuiSuperSelect
           fullWidth={false}
-          disabled={false}
+          disabled={isDisabled}
           valueOfSelected={value}
           onChange={onChange}
           options={severityOptions}

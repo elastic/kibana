@@ -1,0 +1,176 @@
+## When to Use This Skill
+
+Load this skill to read **Context Engine signals** — the record of how agents actually retrieved
+context, and the evidence behind any claim that an AI index is or is not working.
+
+Reach for it when you need to know which retrievals failed and how often, what agents were reaching
+for when no indicator covered it, or whether a suspicion about an index is supported by anything.
+It is also what you need to establish that an index is *fine*, which is a real and frequently
+correct answer.
+
+This skill reads signals. Deciding what to change about an index as a result is
+`analyze-and-improve`.
+
+## What a signal is
+
+A signal is **one ES|QL tool call an agent made, classified after the fact** — not a log line and
+not an error report. Signals record retrieval behaviour: what the agent asked for, whether anything
+came back, and whether it went to an AI index or to raw data.
+
+Two consequences worth holding on to:
+
+- **A signal describes one call, not an outcome.** An agent that failed a retrieval and then found
+  the answer another way leaves a failure signal behind a successful conversation.
+- **Not every unflattering signal is a defect.** Indicators are a cache, not a replacement for
+  querying data. An agent going to raw data may be following an access pattern a KI handed it, or
+  asking something indicators were never meant to answer.
+
+## Where signals live
+
+`context-engine-signals-*` — one index per Kibana space. A wildcard spans every space the request
+can see, which is usually what you want for discovery and rarely what you want for a conclusion.
+
+| Field | What it means |
+|---|---|
+| `tags` | Classification labels; see below. An empty `tags` array is a clean signal. |
+| `@timestamp` | When the tool call ran. |
+| `trace_ids` | Join key into the Agent Builder traces index — one entry per signal. |
+| `data.target_index` | The index expression from the query's `FROM` clause: what the agent reached for. |
+| `data.query_kind` | `ki_retrieval` when the target was an AI index, `raw_access` when it was ordinary user data. |
+| `data.query` | The ES\|QL the agent ran, truncated to 1024 characters. |
+| `data.returned.row_count` | How many rows came back. |
+| `data.status` / `data.error` | Whether the call errored, and the message if it did. |
+| `data.agent` | Which agent ran it (`id`, `name`). |
+| `data.conversation_id` | The conversation the call belonged to. |
+| `data.fell_back_to_raw` | The round contained both a KI retrieval and a raw query. Not proof of a fallback: a KI can direct the agent to live data. |
+| `data.looped` | The round ran three or more ES\|QL queries: the agent kept trying. |
+| `data.round_signals` | Per-round counts: `esql_count`, `ki_retrieval_count`, `raw_query_count`. |
+
+## The tags
+
+- **`query_error`** — the query failed. `data.error` carries the message.
+- **`empty_retrieval`** — the query ran and returned zero rows. Usually the most informative tag,
+  but it establishes only that nothing matched: the content may be absent, or present under
+  vocabulary the query did not use. Those are different problems, and the tag does not distinguish
+  them.
+- **`coverage_gap`** — the agent queried ordinary user data rather than a KI index. Orthogonal to
+  the other two: it describes *how* the agent got its context, not whether it worked.
+
+`query_error` and `empty_retrieval` never co-occur, by construction. A failed query returns zero
+rows *because* it failed, so tagging it both would conflate "the query is broken" with "the index
+has nothing to say" — two different problems with two different fixes.
+
+## Reading signals with ES|QL
+
+`data` is mapped as a **`flattened`** field. Its sub-paths are therefore **not** addressable as
+ES|QL columns: `STATS ... BY data.target_index` fails with an unknown-column error. Extract
+sub-fields with `field_extract(data, "<path>")`, which returns a `keyword`:
+
+```esql
+FROM context-engine-signals-*
+| WHERE @timestamp >= NOW() - 7 days AND MV_CONTAINS(tags, "empty_retrieval")
+| EVAL target = field_extract(data, "target_index")
+| STATS signals = COUNT(*), conversations = COUNT_DISTINCT(field_extract(data, "conversation_id")) BY target
+| SORT signals DESC
+```
+
+Always match tags with `MV_CONTAINS(tags, "<tag>")`. Never compare `tags` to a value directly: it
+is multi-valued, so a comparison operator evaluates to `null` and matches only signals carrying
+that one tag **and no other**. You get a short result set with nothing to indicate it is
+incomplete.
+
+To read the queries behind a group, keep the whole object and read it yourself:
+
+```esql
+FROM context-engine-signals-*
+| WHERE @timestamp >= NOW() - 7 days AND MV_CONTAINS(tags, "empty_retrieval")
+| WHERE field_extract(data, "target_index") == "<target>"
+| SORT @timestamp DESC
+| LIMIT 20
+| KEEP @timestamp, trace_ids, data
+```
+
+Always bound the time window. An unbounded scan of every space's signals is slow and mixes in
+history that has already been acted on.
+
+## Count the denominator
+
+A tagged signal count on its own means very little. Ten failures out of twelve and ten out of ten
+thousand are different findings, and only the rate tells a broken index apart from a heavily used
+healthy one.
+
+Whenever you report how many signals carry a tag, report how many retrievals hit that same target
+over the same window, tagged or not:
+
+```esql
+FROM context-engine-signals-*
+| WHERE @timestamp >= NOW() - 7 days
+| EVAL target = field_extract(data, "target_index")
+| WHERE target == "<target>"
+| STATS total = COUNT(*), failed = COUNT(*) WHERE MV_CONTAINS(tags, "empty_retrieval")
+```
+
+Distinguish signals from conversations too. A pattern across several distinct conversations is
+evidence; five signals from one conversation where the agent retried is one event wearing a
+disguise. `data.conversation_id` separates them, and `data.looped` warns you when you are looking
+at the latter.
+
+## Following a signal back to its conversation
+
+`trace_ids` joins into `traces-agent_builder.otel-<space>` — the same space as the signals index the
+signal came from. A wildcard query spans spaces, so carry the signal's own index through or you
+will not know which trace index to join into. `_index` is a metadata field: request it on `FROM`
+before you can `KEEP` it, otherwise the query fails with `Unknown column [_index]`.
+
+```esql
+FROM context-engine-signals-* METADATA _index
+| WHERE @timestamp >= NOW() - 7 days AND MV_CONTAINS(tags, "empty_retrieval")
+| KEEP _index, @timestamp, trace_ids, data
+```
+
+Go there when the signal alone does not tell you *why* the agent asked what it asked: the user's
+question, the reasoning around the tool call, and what the agent did with the empty result all live
+on the trace, not on the signal.
+
+This is worth doing for the handful of signals a conclusion rests on, not for every signal in a
+group.
+
+For the traces index itself — how spans are named (`chat *`, `execute_tool *`, `invoke_agent *`),
+what the `attributes.gen_ai.*` fields hold, and that `duration` is nanoseconds — load
+`agent-builder-traces` rather than rediscovering it here. Two things it tells you that change how
+you read a trace:
+
+- **Message content is off by default.** User prompts, LLM responses and the system prompt are each
+  gated behind a separate `agentBuilder:tracing:*` privacy setting. A trace can therefore hold the
+  tool call and none of the conversation around it. When that happens the reasoning was not
+  captured, which is not the same as the agent having had none — report the former and do not
+  infer intent from an empty attribute.
+- **Its ES|QL helper resolves the *current* space's traces index.** Signals span every space, so
+  for a signal from another space that helper points at the wrong index and the join comes back
+  empty rather than failing. Keep deriving the traces index from the signal's own `_index`, as
+  above, and use the skill for the vocabulary rather than for the index name.
+
+That skill needs `agentBuilder:tracing:enabled`. If traces are not enabled, signals are all the
+evidence there is: say so rather than reporting the conversation as unavailable.
+
+## Prefer the signals you were given
+
+When a run hands you a pre-selected, grouped set of signals, **work from that set**. It has already
+been scoped to the AI index, the time window, and the tags the run cares about, and it is what the
+run's output will be reconciled against. Reading `context-engine-signals-*` directly in that case
+risks basing a conclusion on evidence that has nothing to do with this index.
+
+The one thing worth querying for anyway is the denominator above: a supplied set is usually scoped
+to particular tags and so will not contain the clean retrievals you need to compute a rate.
+
+## What signals cannot tell you
+
+Be explicit about the edges rather than reasoning past them.
+
+- **No signals is not evidence of health.** An index nobody queries produces no signals, and so
+  does an index that works perfectly. Say which you can and cannot rule out.
+- **A quiet window is not a quiet index.** Check whether the window you chose is representative
+  before reading anything into a low count.
+- **Signals do not say what the index contains.** They record what agents asked for and what came
+  back. Whether an `empty_retrieval` means missing content or badly described content is settled by
+  reading the indicators, not the signals.

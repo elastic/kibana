@@ -8,7 +8,6 @@
  */
 
 import { ByteSizeValue } from '@kbn/config-schema';
-import * as Option from 'fp-ts/Option';
 import type { DocLinksServiceSetup } from '@kbn/core-doc-links-server';
 import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
 import {
@@ -32,18 +31,10 @@ const migrationsConfig = {
   maxReadBatchSizeBytes: ByteSizeValue.parse('500mb'),
 } as unknown as SavedObjectsMigrationConfigType;
 
-const indexTypesMap = {
-  '.kibana': ['typeA', 'typeB', 'typeC'],
-  '.kibana_task_manager': ['task'],
-  '.kibana_cases': ['typeD', 'typeE'],
-};
-
 const createInitialStateCommonParams = {
   kibanaVersion: '8.1.0',
   waitForMigrationCompletion: false,
-  mustRelocateDocuments: true,
   indexTypes: ['typeA', 'typeB', 'typeC'],
-  indexTypesMap,
   hashToVersionMap: {
     'typeA|someHash': '10.1.0',
     'typeB|someHash': '10.1.0',
@@ -52,9 +43,6 @@ const createInitialStateCommonParams = {
   targetIndexMappings: {
     dynamic: 'strict',
     properties: { my_type: { properties: { title: { type: 'text' } } } },
-    _meta: {
-      indexTypesMap,
-    },
   } as IndexMapping,
   coreMigrationVersionPerType: {},
   migrationVersionPerType: {},
@@ -69,7 +57,9 @@ describe('createInitialState', () => {
   let createInitialStateParams: CreateInitialStateParams;
 
   beforeEach(() => {
-    typeRegistry = new SavedObjectTypeRegistry();
+    typeRegistry = new SavedObjectTypeRegistry({
+      legacyTypes: ['deprecated_type_1', 'deprecatedType2', 'deprecated-type-3'],
+    });
     typeRegistry.registerType({
       name: 'foo',
       hidden: false,
@@ -82,7 +72,6 @@ describe('createInitialState', () => {
           changes: [],
         },
       },
-      switchToModelVersionAt: '8.10.0',
     });
     typeRegistry.registerType({
       name: 'bar',
@@ -99,7 +88,6 @@ describe('createInitialState', () => {
           changes: [{ type: 'mappings_addition', addedMappings: {} }],
         },
       },
-      switchToModelVersionAt: '8.10.0',
     });
     docLinks = docLinksServiceMock.createSetupContract();
     logger = mockLogger.get();
@@ -136,117 +124,17 @@ describe('createInitialState', () => {
             "must_not": Array [
               Object {
                 "term": Object {
-                  "type": "apm-services-telemetry",
+                  "type": "deprecated_type_1",
                 },
               },
               Object {
                 "term": Object {
-                  "type": "application_usage_transactional",
+                  "type": "deprecatedType2",
                 },
               },
               Object {
                 "term": Object {
-                  "type": "background-session",
-                },
-              },
-              Object {
-                "term": Object {
-                  "type": "cases-sub-case",
-                },
-              },
-              Object {
-                "term": Object {
-                  "type": "csp_rule",
-                },
-              },
-              Object {
-                "term": Object {
-                  "type": "endpoint:user-artifact",
-                },
-              },
-              Object {
-                "term": Object {
-                  "type": "file-upload-telemetry",
-                },
-              },
-              Object {
-                "term": Object {
-                  "type": "fleet-agent-actions",
-                },
-              },
-              Object {
-                "term": Object {
-                  "type": "fleet-agent-events",
-                },
-              },
-              Object {
-                "term": Object {
-                  "type": "fleet-agents",
-                },
-              },
-              Object {
-                "term": Object {
-                  "type": "fleet-enrollment-api-keys",
-                },
-              },
-              Object {
-                "term": Object {
-                  "type": "guided-setup-state",
-                },
-              },
-              Object {
-                "term": Object {
-                  "type": "investigation",
-                },
-              },
-              Object {
-                "term": Object {
-                  "type": "maps-telemetry",
-                },
-              },
-              Object {
-                "term": Object {
-                  "type": "ml-telemetry",
-                },
-              },
-              Object {
-                "term": Object {
-                  "type": "osquery-usage-metric",
-                },
-              },
-              Object {
-                "term": Object {
-                  "type": "server",
-                },
-              },
-              Object {
-                "term": Object {
-                  "type": "siem-detection-engine-rule-execution-info",
-                },
-              },
-              Object {
-                "term": Object {
-                  "type": "siem-detection-engine-rule-status",
-                },
-              },
-              Object {
-                "term": Object {
-                  "type": "timelion-sheet",
-                },
-              },
-              Object {
-                "term": Object {
-                  "type": "tsvb-validation-telemetry",
-                },
-              },
-              Object {
-                "term": Object {
-                  "type": "ui-counter",
-                },
-              },
-              Object {
-                "term": Object {
-                  "type": "upgrade-assistant-telemetry",
+                  "type": "deprecated-type-3",
                 },
               },
             ],
@@ -263,20 +151,6 @@ describe('createInitialState', () => {
           "typeB",
           "typeC",
         ],
-        "indexTypesMap": Object {
-          ".kibana": Array [
-            "typeA",
-            "typeB",
-            "typeC",
-          ],
-          ".kibana_cases": Array [
-            "typeD",
-            "typeE",
-          ],
-          ".kibana_task_manager": Array [
-            "task",
-          ],
-        },
         "kibanaVersion": "8.1.0",
         "knownTypes": Array [
           "foo",
@@ -286,47 +160,26 @@ describe('createInitialState', () => {
           "bar": "10.2.0",
           "foo": "10.0.0",
         },
-        "legacyIndex": ".kibana_task_manager",
         "logs": Array [],
         "maxBatchSize": 1000,
         "maxBatchSizeBytes": 104857600,
         "maxReadBatchSizeBytes": 524288000,
         "migrationDocLinks": Object {
-          "clusterShardLimitExceeded": "https://www.elastic.co/guide/en/kibana/test-branch/resolve-migrations-failures.html#cluster-shard-limit-exceeded",
-          "repeatedTimeoutRequests": "https://www.elastic.co/guide/en/kibana/test-branch/resolve-migrations-failures.html#_repeated_time_out_requests_that_eventually_fail",
-          "resolveMigrationFailures": "https://www.elastic.co/guide/en/kibana/test-branch/resolve-migrations-failures.html",
-          "routingAllocationDisabled": "https://www.elastic.co/guide/en/kibana/test-branch/resolve-migrations-failures.html#routing-allocation-disabled",
+          "clusterShardLimitExceeded": "https://www.elastic.co/docs/troubleshoot/kibana/migration-failures#cluster-shard-limit-exceeded",
+          "repeatedTimeoutRequests": "https://www.elastic.co/docs/troubleshoot/kibana/migration-failures#_repeated_time_out_requests_that_eventually_fail",
+          "resolveMigrationFailures": "https://www.elastic.co/docs/troubleshoot/kibana/migration-failures",
+          "routingAllocationDisabled": "https://www.elastic.co/docs/troubleshoot/kibana/migration-failures#routing-allocation-disabled",
         },
-        "mustRelocateDocuments": true,
         "outdatedDocumentsQuery": Object {
           "bool": Object {
             "should": Array [],
           },
-        },
-        "preMigrationScript": Object {
-          "_tag": "None",
         },
         "retryAttempts": 15,
         "retryCount": 0,
         "retryDelay": 0,
         "skipRetryReset": false,
         "targetIndexMappings": Object {
-          "_meta": Object {
-            "indexTypesMap": Object {
-              ".kibana": Array [
-                "typeA",
-                "typeB",
-                "typeC",
-              ],
-              ".kibana_cases": Array [
-                "typeD",
-                "typeE",
-              ],
-              ".kibana_task_manager": Array [
-                "task",
-              ],
-            },
-          },
           "dynamic": "strict",
           "properties": Object {
             "my_type": Object {
@@ -335,19 +188,6 @@ describe('createInitialState', () => {
                   "type": "text",
                 },
               },
-            },
-          },
-        },
-        "tempIndex": ".kibana_task_manager_8.1.0_reindex_temp",
-        "tempIndexAlias": ".kibana_task_manager_8.1.0_reindex_temp_alias",
-        "tempIndexMappings": Object {
-          "dynamic": false,
-          "properties": Object {
-            "type": Object {
-              "type": "keyword",
-            },
-            "typeMigrationVersion": Object {
-              "type": "version",
             },
           },
         },
@@ -389,35 +229,12 @@ describe('createInitialState', () => {
     expect(initialState.excludeFromUpgradeFilterHooks).toEqual({ baz: fooExcludeOnUpgradeHook });
   });
 
-  it('returns state with a preMigration script', () => {
-    const preMigrationScript = "ctx._id = ctx._source.type + ':' + ctx._id";
-    const initialState = createInitialState({
-      ...createInitialStateParams,
-      preMigrationScript,
-    });
-
-    expect(Option.isSome(initialState.preMigrationScript)).toEqual(true);
-    expect((initialState.preMigrationScript as Option.Some<string>).value).toEqual(
-      preMigrationScript
-    );
-  });
-  it('returns state without a preMigration script', () => {
-    expect(
-      Option.isNone(
-        createInitialState({
-          ...createInitialStateParams,
-          preMigrationScript: undefined,
-        }).preMigrationScript
-      )
-    ).toEqual(true);
-  });
   it('returns state with an outdatedDocumentsQuery', () => {
     jest.spyOn(getOutdatedDocumentsQueryModule, 'getOutdatedDocumentsQuery');
 
     expect(
       createInitialState({
         ...createInitialStateParams,
-        preMigrationScript: "ctx._id = ctx._source.type + ':' + ctx._id",
         coreMigrationVersionPerType: {},
         migrationVersionPerType: { my_dashboard: '7.10.1', my_viz: '8.0.0' },
       }).outdatedDocumentsQuery
@@ -546,7 +363,7 @@ describe('createInitialState', () => {
   it('initializes the `discardUnknownObjects` flag to false if the flag is not provided in the config', () => {
     const initialState = createInitialState(createInitialStateParams);
 
-    expect(logger.warn).not.toBeCalled();
+    expect(logger.warn).not.toHaveBeenCalled();
     expect(initialState.discardUnknownObjects).toEqual(false);
   });
 
@@ -560,8 +377,8 @@ describe('createInitialState', () => {
     });
 
     expect(initialState.discardUnknownObjects).toEqual(false);
-    expect(logger.warn).toBeCalledTimes(1);
-    expect(logger.warn).toBeCalledWith(
+    expect(logger.warn).toHaveBeenCalledTimes(1);
+    expect(logger.warn).toHaveBeenCalledWith(
       'The flag `migrations.discardUnknownObjects` is defined but does not match the current kibana version; unknown objects will NOT be discarded.'
     );
   });
@@ -588,8 +405,8 @@ describe('createInitialState', () => {
     });
 
     expect(initialState.discardCorruptObjects).toEqual(false);
-    expect(logger.warn).toBeCalledTimes(1);
-    expect(logger.warn).toBeCalledWith(
+    expect(logger.warn).toHaveBeenCalledTimes(1);
+    expect(logger.warn).toHaveBeenCalledWith(
       'The flag `migrations.discardCorruptObjects` is defined but does not match the current kibana version; corrupt objects will NOT be discarded.'
     );
   });

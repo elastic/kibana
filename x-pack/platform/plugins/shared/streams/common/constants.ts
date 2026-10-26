@@ -5,4 +5,50 @@
  * 2.0.
  */
 
+import type { PricingProductFeature } from '@kbn/core-pricing-common';
+
 export const ASSET_VERSION = 1;
+
+export const ATTACHMENT_SUGGESTIONS_LIMIT = 50;
+
+export const STREAMS_FEATURE_ID = 'streams';
+
+export const STREAMS_CONFIGURATION_SAVED_OBJECT_TYPE = 'streams-configuration';
+export const STREAMS_UI_METADATA_SAVED_OBJECT_TYPE = 'streams-ui-metadata';
+export const STREAMS_METADATA_REFERENCE_NAME = 'streamsMetadata';
+/** V1 has a single authored unit; callers should use this id until multiple units exist. */
+export const STREAMS_DEFAULT_UNIT_ID = 'default';
+
+export const getStreamsUiMetadataSavedObjectId = (configurationSavedObjectId: string): string =>
+  `${configurationSavedObjectId}-streams-ui-metadata`;
+
+export const STREAMS_API_PRIVILEGES = {
+  read: 'read_stream',
+  manage: 'manage_stream',
+} as const;
+
+export const STREAMS_UI_PRIVILEGES = {
+  manage: 'manage',
+  show: 'show',
+} as const;
+
+/**
+ * Tiered features
+ */
+export const STREAMS_TIERED_ML_FEATURE: PricingProductFeature = {
+  id: 'streams:ml-features',
+  description: 'Enable ML features for streams',
+  products: [{ name: 'observability', tier: 'complete' }],
+};
+
+export const STREAMS_TIERED_AI_FEATURE: PricingProductFeature = {
+  id: 'streams:ai-features',
+  description: 'Enable AI features for streams',
+  products: [{ name: 'observability', tier: 'complete' }],
+};
+
+export const STREAMS_TIERED_FEATURES = [STREAMS_TIERED_ML_FEATURE, STREAMS_TIERED_AI_FEATURE];
+
+export const FAILURE_STORE_SELECTOR = '::failures';
+
+export const STREAMS_SETTINGS_DOCUMENT_ID = 'kibana_streams_settings';

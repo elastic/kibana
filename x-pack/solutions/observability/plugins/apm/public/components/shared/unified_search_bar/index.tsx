@@ -114,6 +114,7 @@ export function UnifiedSearchBar({
   value,
   showDatePicker = true,
   showQueryInput = true,
+  showFilterBar = false,
   showSubmitButton = true,
   isClearable = true,
   boolFilter,
@@ -122,6 +123,7 @@ export function UnifiedSearchBar({
   value?: string;
   showDatePicker?: boolean;
   showQueryInput?: boolean;
+  showFilterBar?: boolean;
   showSubmitButton?: boolean;
   isClearable?: boolean;
   boolFilter?: QueryDslQueryContainer[];
@@ -143,7 +145,7 @@ export function UnifiedSearchBar({
   const { kuery, serviceName, environment, groupId, refreshPausedFromUrl, refreshIntervalFromUrl } =
     useSearchBarParams(value);
   const { onPageRefreshStart } = usePerformanceContext();
-  const timePickerTimeDefaults = core.uiSettings.get<TimePickerTimeDefaults>(
+  const timePickerTimeDefaults = core?.uiSettings?.get<TimePickerTimeDefaults>(
     UI_SETTINGS.TIMEPICKER_TIME_DEFAULTS
   );
   const urlTimeRange = useUrlTimeRange(timePickerTimeDefaults);
@@ -184,7 +186,7 @@ export function UnifiedSearchBar({
   const { dataView } = useAdHocApmDataView();
   const { urlParams } = useLegacyUrlParams();
   const processorEvent = useProcessorEvent();
-  const { incrementTimeRangeId } = useTimeRangeId();
+  const { incrementTimeRangeId, isAutoRefreshPaused } = useTimeRangeId();
   const searchbarPlaceholder = getSearchBarPlaceholder(placeholder, processorEvent);
 
   const customFilters =
@@ -203,10 +205,18 @@ export function UnifiedSearchBar({
     } as Filter;
   });
 
-  const onRefresh = () => {
+  const doRefresh = () => {
     clearCache();
     incrementTimeRangeId();
     onPageRefreshStart();
+  };
+
+  // onAutoRefresh is wired to the SearchBar timer tick — guard it so the timer
+  // fires silently while a flyout is open. doRefresh is kept unguarded for the
+  // handleSubmit path where the user explicitly requests a refresh.
+  const onAutoRefresh = () => {
+    if (isAutoRefreshPaused) return;
+    doRefresh();
   };
 
   const onRefreshChange = ({ isPaused, refreshInterval }: Partial<OnRefreshChangeProps>) => {
@@ -256,7 +266,7 @@ export function UnifiedSearchBar({
         });
       } else {
         action = SearchQueryActions.Refresh;
-        onRefresh();
+        doRefresh();
       }
       telemetry.reportSearchQuerySubmitted({
         kueryFields,
@@ -269,26 +279,31 @@ export function UnifiedSearchBar({
   };
 
   return (
-    <SearchBar
-      appName={i18n.translate('xpack.apm.appName', {
-        defaultMessage: 'APM',
-      })}
-      iconType="search"
-      placeholder={searchbarPlaceholder}
-      useDefaultBehaviors={true}
-      indexPatterns={dataView ? [dataView] : undefined}
-      showQueryInput={showQueryInput}
-      showQueryMenu={false}
-      showFilterBar={false}
-      showDatePicker={showDatePicker}
-      showSubmitButton={showSubmitButton}
-      displayStyle="inPage"
-      onQuerySubmit={handleSubmit}
-      onRefresh={onRefresh}
-      onRefreshChange={onRefreshChange}
-      isClearable={isClearable}
-      dataTestSubj="apmUnifiedSearchBar"
-      filtersForSuggestions={filtersForSearchBarSuggestions}
-    />
+    // Don't remove nor change the attribute
+    // It's used to identify the unified search bar in the DOM (for the size to be correct)
+    // See use_secondary_filters_width_style.ts for more details
+    <div data-apm-unified-search-root={true}>
+      <SearchBar
+        appName={i18n.translate('xpack.apm.appName', {
+          defaultMessage: 'APM',
+        })}
+        iconType="magnify"
+        placeholder={searchbarPlaceholder}
+        useDefaultBehaviors={true}
+        indexPatterns={dataView ? [dataView] : undefined}
+        showQueryInput={showQueryInput}
+        showQueryMenu={false}
+        showFilterBar={showFilterBar}
+        showDatePicker={showDatePicker}
+        showSubmitButton={showSubmitButton}
+        displayStyle="inPage"
+        onQuerySubmit={handleSubmit}
+        onRefresh={onAutoRefresh}
+        onRefreshChange={onRefreshChange}
+        isClearable={isClearable}
+        dataTestSubj="apmUnifiedSearchBar"
+        filtersForSuggestions={filtersForSearchBarSuggestions}
+      />
+    </div>
   );
 }

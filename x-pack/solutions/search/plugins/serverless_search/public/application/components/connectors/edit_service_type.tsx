@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import React, { useMemo, useCallback } from 'react';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiFlexItem,
   EuiFlexGroup,
@@ -14,14 +15,14 @@ import {
   EuiFormRow,
   EuiComboBox,
   EuiBadge,
-  EuiComboBoxOptionOption,
   EuiText,
   useEuiTheme,
   EuiTextTruncate,
   EuiBadgeGroup,
+  EuiFormPrepend,
 } from '@elastic/eui';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { Connector as BaseConnector } from '@kbn/search-connectors';
+import { useMutation, useQueryClient } from '@kbn/react-query';
+import type { Connector as BaseConnector } from '@kbn/search-connectors';
 import { css } from '@emotion/react';
 
 import { BETA_LABEL, TECH_PREVIEW_LABEL } from '../../../../common/i18n_string';
@@ -67,13 +68,16 @@ export const EditServiceType: React.FC<EditServiceTypeProps> = ({ connector, isD
         return { serviceType: inputServiceType, name: connector.name };
       }
       const body = { service_type: inputServiceType };
-      await http.post(`/internal/serverless_search/connectors/${connector.id}/service_type`, {
-        body: JSON.stringify(body),
-      });
+      await http.post(
+        `/internal/serverless_search/connectors/${encodeURIComponent(connector.id)}/service_type`,
+        {
+          body: JSON.stringify(body),
+        }
+      );
 
       // if name is empty, auto generate it and a similar index name
       const results: Record<string, GeneratedConnectorNameResult> = await http.post(
-        `/internal/serverless_search/connectors/${connector.id}/generate_name`,
+        `/internal/serverless_search/connectors/${encodeURIComponent(connector.id)}/generate_name`,
         {
           body: JSON.stringify({
             name: connector.name,
@@ -87,17 +91,23 @@ export const EditServiceType: React.FC<EditServiceTypeProps> = ({ connector, isD
       const indexName = results.result.indexName;
 
       // save the generated connector name
-      await http.post(`/internal/serverless_search/connectors/${connector.id}/name`, {
-        body: JSON.stringify({ name: connectorName || '' }),
-      });
+      await http.post(
+        `/internal/serverless_search/connectors/${encodeURIComponent(connector.id)}/name`,
+        {
+          body: JSON.stringify({ name: connectorName || '' }),
+        }
+      );
 
       // save the generated index name (this does not create an index)
       try {
         // this can fail if another connector has an identical index_name value despite no index being created yet.
         // in this case we just won't update the index_name, the user can do that manually when they reach that step.
-        await http.post(`/internal/serverless_search/connectors/${connector.id}/index_name`, {
-          body: JSON.stringify({ index_name: indexName }),
-        });
+        await http.post(
+          `/internal/serverless_search/connectors/${encodeURIComponent(connector.id)}/index_name`,
+          {
+            body: JSON.stringify({ index_name: indexName }),
+          }
+        );
       } catch {
         // do nothing
       }
@@ -121,7 +131,7 @@ export const EditServiceType: React.FC<EditServiceTypeProps> = ({ connector, isD
           <EuiBadge
             aria-label={TECH_PREVIEW_LABEL}
             key={key + '-preview'}
-            iconType="beaker"
+            iconType="flask"
             color="hollow"
           >
             {i18n.translate(
@@ -145,7 +155,7 @@ export const EditServiceType: React.FC<EditServiceTypeProps> = ({ connector, isD
         label: conn.name,
         value: {
           _icon,
-          _badges: <EuiIcon size="l" type={conn.iconPath} />,
+          _badges: <EuiIcon size="l" type={conn.iconPath} aria-hidden />,
           serviceType: conn.serviceType,
         },
         'aria-label': conn.name + _ariaLabelAppend,
@@ -227,14 +237,13 @@ export const EditServiceType: React.FC<EditServiceTypeProps> = ({ connector, isD
         isLoading={isLoading}
         data-test-subj="serverlessSearchEditConnectorTypeChoices"
         prepend={
-          <EuiIcon
-            type={
+          <EuiFormPrepend
+            iconLeft={
               connector.service_type
                 ? connectorTypes.find((conn) => conn.serviceType === connector.service_type)
                     ?.iconPath ?? ''
                 : 'plugs'
             }
-            size="l"
           />
         }
         singleSelection={{ asPlainText: true }}

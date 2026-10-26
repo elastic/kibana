@@ -7,14 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
-import { Filter, updateFilter } from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
+import { updateFilter } from '@kbn/es-query';
 import { BooleanRelation } from '@kbn/es-query';
 import { cloneDeep } from 'lodash';
 import { buildCombinedFilter, isCombinedFilter } from '@kbn/es-query';
+import type { FilterableField, FilterableSource } from '@kbn/data-source';
 import { getBooleanRelationType } from '../../utils';
 import type { Operator } from '../../filter_bar/filter_editor';
-import { FilterLocation, Path } from '../types';
+import type { FilterLocation, Path } from '../types';
 
 const PATH_SEPARATOR = '.';
 
@@ -122,7 +123,7 @@ export const addFilter = (
   filter: Filter,
   dest: FilterLocation,
   booleanRelation: BooleanRelation,
-  dataView: DataView
+  dataView: FilterableSource
 ) => {
   const newFilters = cloneDeep(filters);
   const pathInArray = getPathInArray(dest.path);
@@ -161,7 +162,7 @@ export const moveFilter = (
   from: FilterLocation,
   to: FilterLocation,
   booleanRelation: BooleanRelation,
-  dataView: DataView
+  dataView: FilterableSource
 ) => {
   const newFilters = cloneDeep(filters);
   const movingFilter = getFilterByPath(newFilters, from.path);
@@ -181,7 +182,7 @@ export const moveFilter = (
 export const updateFilters = (
   filters: Filter[],
   dest: FilterLocation,
-  field?: DataViewField,
+  field?: FilterableField,
   operator?: Operator,
   params?: Filter['meta']['params']
 ) => {

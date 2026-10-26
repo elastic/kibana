@@ -7,7 +7,16 @@
 
 import type { outputType } from '../../constants';
 import type { BaseSSLSecrets, ValueOf } from '..';
-import type { kafkaAuthType, kafkaCompressionType, kafkaSaslMechanism } from '../../constants';
+import type {
+  kafkaAuthType,
+  kafkaCompressionType,
+  kafkaKerberosAuthType,
+  kafkaOAuth2GrantType,
+  kafkaOAuth2SignatureAlgorithm,
+  kafkaSaslMechanism,
+  otlpProtocol,
+  otlpCompressionType,
+} from '../../constants';
 import type { kafkaPartitionType } from '../../constants';
 import type { kafkaTopicWhenType } from '../../constants';
 import type { kafkaAcknowledgeReliabilityLevel } from '../../constants';
@@ -20,6 +29,9 @@ export type KafkaCompressionType = typeof kafkaCompressionType;
 export type KafkaAuthType = typeof kafkaAuthType;
 export type KafkaConnectionTypeType = typeof kafkaConnectionType;
 export type KafkaSaslMechanism = typeof kafkaSaslMechanism;
+export type KafkaKerberosAuthType = typeof kafkaKerberosAuthType;
+export type KafkaOAuth2GrantType = typeof kafkaOAuth2GrantType;
+export type KafkaOAuth2SignatureAlgorithm = typeof kafkaOAuth2SignatureAlgorithm;
 export type KafkaPartitionType = typeof kafkaPartitionType;
 export type KafkaTopicWhenType = typeof kafkaTopicWhenType;
 export type KafkaAcknowledgeReliabilityLevel = typeof kafkaAcknowledgeReliabilityLevel;
@@ -30,10 +42,16 @@ export type OutputPreset = 'custom' | 'balanced' | 'throughput' | 'scale' | 'lat
 interface NewBaseOutput {
   is_default: boolean;
   is_default_monitoring: boolean;
+  is_default_otel?: boolean;
   is_internal?: boolean;
   is_preconfigured?: boolean;
   name: string;
   type: ValueOf<OutputType>;
+  allow_edit?: string[];
+}
+
+interface BeatsBaseOutput extends NewBaseOutput {
+  proxy_id?: string | null;
   hosts?: string[];
   ca_sha256?: string | null;
   ca_trusted_fingerprint?: string | null;
@@ -44,18 +62,22 @@ interface NewBaseOutput {
     key?: string;
     verification_mode?: ValueOf<KafkaVerificationMode>;
   } | null;
-  proxy_id?: string | null;
   shipper?: ShipperOutput | null;
-  allow_edit?: string[];
   secrets?: BaseSSLSecrets;
   preset?: OutputPreset;
+  write_to_logs_streams?: boolean | null;
 }
 
-export interface NewElasticsearchOutput extends NewBaseOutput {
+export interface OtelExporterOutput {
+  otel_exporter_config_yaml?: string | null;
+  otel_disable_beatsauth?: boolean | null;
+}
+
+export interface NewElasticsearchOutput extends BeatsBaseOutput, OtelExporterOutput {
   type: OutputType['Elasticsearch'];
 }
 
-export interface NewRemoteElasticsearchOutput extends NewBaseOutput {
+export interface NewRemoteElasticsearchOutput extends BeatsBaseOutput, OtelExporterOutput {
   type: OutputType['RemoteElasticsearch'];
   service_token?: string | null;
   secrets?: RemoteESOutputSecrets;
@@ -65,15 +87,164 @@ export interface NewRemoteElasticsearchOutput extends NewBaseOutput {
   sync_uninstalled_integrations?: boolean;
 }
 
-export interface NewLogstashOutput extends NewBaseOutput {
+export interface NewLogstashOutput extends BeatsBaseOutput {
   type: OutputType['Logstash'];
 }
 
-export type NewOutput =
+export type OtlpOutputProtocol = ValueOf<typeof otlpProtocol>;
+export type OtlpGrpcCompression = ValueOf<typeof otlpCompressionType>;
+export type OtlpHttpCompression = 'gzip' | 'none';
+export type OtlpTlsCurvePreference = 'X25519' | 'P521' | 'P256' | 'P384';
+
+interface OtlpExporterTlsConfig {
+  insecure?: boolean;
+  insecure_skip_verify?: boolean;
+  ca_pem?: string | null;
+  cert_pem?: string | null;
+  ca_file?: string | null;
+  cert_file?: string | null;
+  key_file?: string | null;
+  include_system_ca_certs_pool?: boolean;
+  include_insecure_cipher_suites?: boolean;
+  min_version?: string | null;
+  max_version?: string | null;
+  reload_interval?: string | null;
+  server_name_override?: string | null;
+  cipher_suites?: string[] | null;
+  curve_preferences?: OtlpTlsCurvePreference[] | null;
+  tpm?: {
+    enabled?: boolean;
+    path?: string | null;
+  } | null;
+}
+
+interface OtlpExporterSendingQueueConfig {
+  enabled?: boolean;
+  num_consumers?: number | null;
+  queue_size?: number | null;
+  sizer?: 'requests' | 'items' | 'bytes';
+  wait_for_result?: boolean;
+  block_on_overflow?: boolean;
+  batch?: {
+    flush_timeout?: string | null;
+    min_size?: number | null;
+    max_size?: number | null;
+    sizer?: 'items' | 'bytes';
+    partition?: {
+      metadata_keys?: string[] | null;
+    } | null;
+  } | null;
+}
+
+interface OtlpExporterRetryConfig {
+  enabled?: boolean;
+  initial_interval?: string | null;
+  randomization_factor?: number | null;
+  multiplier?: number | null;
+  max_interval?: string | null;
+  max_elapsed_time?: string | null;
+}
+
+interface OtlpExporterBaseConfig {
+  endpoint: string;
+  headers?: Record<string, string> | null;
+  timeout?: string | null;
+  tls?: OtlpExporterTlsConfig | null;
+  sending_queue?: OtlpExporterSendingQueueConfig | null;
+  retry_on_failure?: OtlpExporterRetryConfig | null;
+}
+
+export interface OtlpGrpcExporterConfig extends OtlpExporterBaseConfig {
+  protocol: typeof otlpProtocol.Grpc;
+  compression?: OtlpGrpcCompression;
+  balancer_name?: string | null;
+  keepalive?: {
+    time?: string | null;
+    timeout?: string | null;
+    permit_without_stream?: boolean;
+  } | null;
+  read_buffer_size?: number | null;
+  write_buffer_size?: number | null;
+  wait_for_ready?: boolean;
+  user_agent?: string | null;
+  authority?: string | null;
+}
+
+export interface OtlpHttpExporterConfig extends OtlpExporterBaseConfig {
+  protocol: typeof otlpProtocol.HttpProtobuf;
+  compression?: OtlpHttpCompression;
+  encoding?: 'proto' | 'json';
+  traces_endpoint?: string | null;
+  metrics_endpoint?: string | null;
+  logs_endpoint?: string | null;
+  profiles_endpoint?: string | null;
+  read_buffer_size?: number | null;
+  write_buffer_size?: number | null;
+  proxy_url?: string | null;
+  max_idle_conns?: number | null;
+  max_idle_conns_per_host?: number | null;
+  max_conns_per_host?: number | null;
+  idle_conn_timeout?: string | null;
+  disable_keep_alives?: boolean;
+  http2_read_idle_timeout?: string | null;
+  http2_ping_timeout?: string | null;
+  force_attempt_http2?: boolean;
+  compression_params?: { level?: number } | null;
+  cookies?: { enabled?: boolean } | null;
+}
+
+export type OtlpExporterConfig = OtlpGrpcExporterConfig | OtlpHttpExporterConfig;
+
+export interface NewOtlpOutput extends NewBaseOutput {
+  type: OutputType['Otlp'];
+  otlp_exporter: OtlpExporterConfig;
+  secrets?: OtlpOutputSecrets;
+}
+
+interface OtlpOutputSecrets {
+  otlp_exporter?: {
+    tls?: {
+      key_pem?: SOSecret;
+      tpm?: {
+        owner_auth?: SOSecret;
+        auth?: SOSecret;
+      };
+    };
+  };
+}
+
+export type PresetCapableOutput = NewElasticsearchOutput | NewRemoteElasticsearchOutput;
+
+export type NewBeatsOutput =
   | NewElasticsearchOutput
   | NewRemoteElasticsearchOutput
   | NewLogstashOutput
   | KafkaOutput;
+
+export type NewOutput = NewBeatsOutput | NewOtlpOutput;
+
+export type UpdateOutput =
+  | Partial<NewElasticsearchOutput>
+  | Partial<NewRemoteElasticsearchOutput>
+  | Partial<NewLogstashOutput>
+  | Partial<KafkaOutput>
+  | Partial<NewOtlpOutput>;
+
+/** UpdateOutput where `type` is guaranteed present — use when the original output's type has already been merged in. */
+export type UpdateTypedOutput =
+  | (Partial<NewElasticsearchOutput> & Pick<NewElasticsearchOutput, 'type'>)
+  | (Partial<NewRemoteElasticsearchOutput> & Pick<NewRemoteElasticsearchOutput, 'type'>)
+  | (Partial<NewLogstashOutput> & Pick<NewLogstashOutput, 'type'>)
+  | (Partial<KafkaOutput> & Pick<KafkaOutput, 'type'>)
+  | (Partial<NewOtlpOutput> & Pick<NewOtlpOutput, 'type'>);
+
+export type EsOutput = (NewElasticsearchOutput | NewRemoteElasticsearchOutput) & {
+  id: string;
+};
+
+export type BeatsOutput = NewBeatsOutput & {
+  id: string;
+};
 
 export type Output = NewOutput & {
   id: string;
@@ -92,14 +263,13 @@ export interface ShipperOutput {
   max_batch_bytes?: number | null;
 }
 
-export interface KafkaOutput extends NewBaseOutput {
+export interface KafkaOutput extends BeatsBaseOutput {
   type: OutputType['Kafka'];
-  hosts?: string[];
   client_id?: string;
   version?: string;
   key?: string;
   compression?: ValueOf<KafkaCompressionType>;
-  compression_level?: number;
+  compression_level?: number | null;
   auth_type?: ValueOf<KafkaAuthType>;
   connection_type?: ValueOf<KafkaConnectionTypeType>;
   username?: string | null;
@@ -107,6 +277,8 @@ export interface KafkaOutput extends NewBaseOutput {
   sasl?: {
     mechanism?: ValueOf<KafkaSaslMechanism>;
   } | null;
+  oauth2?: KafkaOAuth2Config | null;
+  kerberos?: KafkaKerberosConfig | null;
   partition?: ValueOf<KafkaPartitionType>;
   random?: {
     group_events?: number;
@@ -129,8 +301,65 @@ export interface KafkaOutput extends NewBaseOutput {
   secrets?: KafkaOutputSecrets;
 }
 
+/**
+ * Settings of the OAuth2 authentication method, they follow the `oauth2clientauthextension` of the
+ * OpenTelemetry collector. The client secret and the client certificate key are in `secrets`.
+ */
+export interface KafkaOAuth2Config {
+  grant_type?: ValueOf<KafkaOAuth2GrantType>;
+  client_id?: string;
+  client_id_file?: string;
+  client_secret_file?: string;
+  token_url: string;
+  scopes?: string[];
+  endpoint_params?: Record<string, string[]>;
+  tls?: {
+    ca_file?: string;
+    cert_file?: string;
+    key_file?: string;
+    insecure_skip_verify?: boolean;
+    server_name_override?: string;
+    min_version?: string;
+    max_version?: string;
+  };
+  // in seconds
+  timeout?: number;
+  expiry_buffer?: number;
+  // jwt-bearer grant only
+  client_certificate_key_id?: string;
+  client_certificate_key_file?: string;
+  signature_algorithm?: ValueOf<KafkaOAuth2SignatureAlgorithm>;
+  iss?: string;
+  audience?: string;
+  claims?: Record<string, unknown>;
+}
+
+/**
+ * Settings of the Kerberos authentication method, they follow the `kerberos` settings of the Kafka
+ * output of Beats. The password is in `secrets`.
+ */
+export interface KafkaKerberosConfig {
+  auth_type: ValueOf<KafkaKerberosAuthType>;
+  // path of the `krb5.conf` file, on the host of the agent
+  config_path: string;
+  // path of the keytab file, on the host of the agent (keytab only)
+  keytab?: string;
+  // password only
+  username?: string;
+  service_name?: string;
+  realm: string;
+  enable_krb5_fast?: boolean;
+}
+
 interface KafkaOutputSecrets extends BaseSSLSecrets {
   password?: SOSecret;
+  oauth2?: {
+    client_secret?: SOSecret;
+    client_certificate_key?: SOSecret;
+  };
+  kerberos?: {
+    password?: SOSecret;
+  };
 }
 interface RemoteESOutputSecrets extends BaseSSLSecrets {
   service_token?: SOSecret;

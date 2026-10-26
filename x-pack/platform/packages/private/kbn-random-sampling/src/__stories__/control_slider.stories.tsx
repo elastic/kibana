@@ -7,7 +7,8 @@
 
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
-import { ControlSlider, ControlSliderProps } from '../ui/slider_control';
+import type { ControlSliderProps } from '../ui/slider_control';
+import { ControlSlider } from '../ui/slider_control';
 
 const Template = (args: ControlSliderProps) => (
   <I18nProvider>

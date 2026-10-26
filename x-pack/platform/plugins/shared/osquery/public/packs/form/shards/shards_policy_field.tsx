@@ -23,6 +23,7 @@ interface ShardsPolicyFieldComponent {
 const ShardsPolicyFieldComponent = ({
   index,
   control,
+  euiFieldProps,
   hideLabel,
   options,
 }: ShardsPolicyFieldComponent) => {
@@ -53,7 +54,7 @@ const ShardsPolicyFieldComponent = ({
     },
   });
 
-  const hasError = useMemo(() => !!error?.message, [error?.message]);
+  const hasError = useMemo(() => !!value?.key && !!error?.message, [value?.key, error?.message]);
 
   const [selectedOptions, setSelected] = useState<EuiComboBoxOptionOption[]>([]);
   const handleChange = useCallback(
@@ -82,7 +83,7 @@ const ShardsPolicyFieldComponent = ({
               defaultMessage: 'Policy',
             })
       }
-      error={error?.message}
+      error={hasError ? error?.message : undefined}
       isInvalid={hasError}
       fullWidth
     >
@@ -96,6 +97,7 @@ const ShardsPolicyFieldComponent = ({
         data-test-subj="shards-field-policy"
         rowHeight={32}
         isClearable
+        {...euiFieldProps}
       />
     </EuiFormRow>
   );

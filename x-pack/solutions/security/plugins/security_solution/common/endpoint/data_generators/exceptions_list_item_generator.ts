@@ -5,22 +5,30 @@
  * 2.0.
  */
 
-import type {
-  ExceptionListItemSchema,
-  CreateExceptionListItemSchema,
-  UpdateExceptionListItemSchema,
-  EntriesArray,
-} from '@kbn/securitysolution-io-ts-list-types';
 import {
+  type OsTypeArray,
+  type OsType,
+  type ExportExceptionDetails,
+  type ExceptionListItemSchema,
+  type CreateExceptionListItemSchema,
+  type UpdateExceptionListItemSchema,
+  type EntriesArray,
   ListOperatorTypeEnum,
   type ListOperatorType,
 } from '@kbn/securitysolution-io-ts-list-types';
-import { ENDPOINT_ARTIFACT_LISTS, ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
+import type { ENDPOINT_ARTIFACT_LIST_IDS } from '@kbn/securitysolution-list-constants';
+import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import { ConditionEntryField } from '@kbn/securitysolution-utils';
+import { MetaOsValue, MetaArchValue, MetaScanTypeValue, YaraMetaKeyOfInterest } from '../types';
 import { LIST_ITEM_ENTRY_OPERATOR_TYPES } from './common/artifact_list_item_entry_values';
 import { BaseDataGenerator } from './base_data_generator';
-import { BY_POLICY_ARTIFACT_TAG_PREFIX, GLOBAL_ARTIFACT_TAG } from '../service/artifacts/constants';
+import {
+  BY_POLICY_ARTIFACT_TAG_PREFIX,
+  GLOBAL_ARTIFACT_TAG,
+  CUSTOM_YARA_SIGNATURE_FIELD_TYPE,
+} from '../service/artifacts/constants';
 import { ENDPOINT_EVENTS_LOG_INDEX_FIELDS } from './common/alerts_ecs_fields';
+import { addDisabledArtifactTag } from '../service/artifacts/utils';
 
 /** Utility that removes null and undefined from a Type's property value */
 type NonNullableTypeProperties<T> = {
@@ -45,7 +53,6 @@ export const exceptionItemToCreateExceptionItem = (
   exceptionItem: ExceptionListItemSchema
 ): CreateExceptionListItemSchemaWithNonNullProps => {
   const {
-    /* eslint-disable @typescript-eslint/naming-convention */
     description,
     entries,
     expire_time,
@@ -58,7 +65,6 @@ export const exceptionItemToCreateExceptionItem = (
     namespace_type,
     os_types,
     tags,
-    /* eslint-enable @typescript-eslint/naming-convention */
   } = exceptionItem;
 
   return {
@@ -80,7 +86,6 @@ export const exceptionItemToCreateExceptionItem = (
 const exceptionItemToUpdateExceptionItem = (
   exceptionItem: ExceptionListItemSchema
 ): UpdateExceptionListItemSchemaWithNonNullProps => {
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   const { id, item_id, _version } = exceptionItem;
   const { list_id: _, ...updateAttributes } = exceptionItemToCreateExceptionItem(exceptionItem);
 
@@ -154,7 +159,7 @@ export class ExceptionsListItemGenerator extends BaseDataGenerator<ExceptionList
   ): ExceptionListItemSchema {
     return this.generate({
       name: `Endpoint exception (${this.randomString(5)})`,
-      list_id: ENDPOINT_LIST_ID,
+      list_id: ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id,
       entries: this.randomEndpointExceptionEntries(1),
       tags: [],
       ...overrides,
@@ -163,9 +168,18 @@ export class ExceptionsListItemGenerator extends BaseDataGenerator<ExceptionList
 
   generateEndpointExceptionForCreate(
     overrides: Partial<CreateExceptionListItemSchema> = {}
-  ): CreateExceptionListItemSchema {
+  ): CreateExceptionListItemSchemaWithNonNullProps {
     return {
       ...exceptionItemToCreateExceptionItem(this.generateEndpointException()),
+      ...overrides,
+    };
+  }
+
+  generateEndpointExceptionForUpdate(
+    overrides: Partial<UpdateExceptionListItemSchema> = {}
+  ): UpdateExceptionListItemSchemaWithNonNullProps {
+    return {
+      ...exceptionItemToUpdateExceptionItem(this.generateEndpointException()),
       ...overrides,
     };
   }
@@ -408,6 +422,267 @@ export class ExceptionsListItemGenerator extends BaseDataGenerator<ExceptionList
     return {
       ...exceptionItemToUpdateExceptionItem(this.generateBlocklist()),
       ...overrides,
+    };
+  }
+
+  generateYaraRuleText(
+    metaOs: MetaOsValue[],
+    metaArch: MetaArchValue[],
+    metaScanType: MetaScanTypeValue[]
+  ): string {
+    const condition = this.randomChoice([
+      'condition: true',
+      'condition: false',
+      'strings: $a = "test_string"\n  condition: $a',
+      'strings: $bbb = /00 ae 53 ff/\n  condition: all of them',
+    ]);
+
+    return `rule Generated_Yara_Rule_${this.randomString(5)} {
+  meta:
+    description = "Generated test YARA rule"
+    ${
+      metaScanType.length ? `${YaraMetaKeyOfInterest.SCAN_TYPE} = "${metaScanType.join(', ')}"` : ''
+    }
+    ${metaArch.length ? `${YaraMetaKeyOfInterest.ARCH} = "${metaArch.join(', ')}"` : ''}
+    ${metaOs.length ? `${YaraMetaKeyOfInterest.OS} = "${metaOs.join(', ')}"` : ''}
+
+  ${condition}
+}`;
+  }
+
+  generateMatchingOsTypesAndYaraOsMeta(): {
+    osTypes: OsTypeArray;
+    metaOs: MetaOsValue[];
+  } {
+    const possibleOsMetaVariations: MetaOsValue[][] = [
+      [MetaOsValue.WINDOWS],
+      [MetaOsValue.LINUX],
+      [MetaOsValue.MACOS],
+      [MetaOsValue.WINDOWS, MetaOsValue.LINUX],
+      [MetaOsValue.WINDOWS, MetaOsValue.MACOS],
+      [MetaOsValue.LINUX, MetaOsValue.MACOS],
+      [MetaOsValue.WINDOWS, MetaOsValue.LINUX, MetaOsValue.MACOS],
+    ];
+
+    const metaOs: MetaOsValue[] = this.randomChoice(possibleOsMetaVariations);
+    const osTypes: OsTypeArray = metaOs.map<OsType>((os) => os.toLowerCase() as OsType);
+
+    return { osTypes, metaOs: this.randomBoolean() ? metaOs : [] };
+  }
+
+  convertOsTypeToMetaOsValue(osType: OsType): MetaOsValue {
+    switch (osType) {
+      case 'windows':
+        return MetaOsValue.WINDOWS;
+      case 'linux':
+        return MetaOsValue.LINUX;
+      case 'macos':
+        return MetaOsValue.MACOS;
+      default:
+        throw new Error(`Unknown OS type: ${osType}`);
+    }
+  }
+
+  generateCustomYaraSignature(
+    overrides: Partial<ExceptionListItemSchema> = {}
+  ): ExceptionListItemSchema {
+    let osTypes: OsTypeArray;
+    let metaOs: MetaOsValue[];
+
+    if (overrides.os_types) {
+      osTypes = overrides.os_types;
+      metaOs = osTypes.map((osType) => this.convertOsTypeToMetaOsValue(osType));
+    } else {
+      ({ osTypes, metaOs } = this.generateMatchingOsTypesAndYaraOsMeta());
+    }
+
+    const metaArch: MetaArchValue[] = this.randomChoice([
+      [],
+      [MetaArchValue.X86],
+      [MetaArchValue.ARM64],
+      [MetaArchValue.X86, MetaArchValue.ARM64],
+    ]);
+
+    const metaScanType: MetaScanTypeValue[] = this.randomChoice([[], [MetaScanTypeValue.MEMORY]]);
+
+    const numberOfRules = this.randomN(9) + 1;
+
+    // meta fields are shared amongst all rules in one entry: either all the same or all omitted
+    const ruleText = Array.from({ length: numberOfRules }, () =>
+      this.generateYaraRuleText(metaOs, metaArch, metaScanType)
+    ).join('\n\n');
+
+    const item = this.generate({
+      name: `YARA Signature ${this.randomString(5)}`,
+      list_id: ENDPOINT_ARTIFACT_LISTS.customYaraSignatures.id,
+      item_id: `generator_endpoint_yara_signature_${this.seededUUIDv4()}`,
+      entries: [
+        {
+          field: CUSTOM_YARA_SIGNATURE_FIELD_TYPE,
+          operator: 'included',
+          type: 'match',
+          value: ruleText,
+        },
+      ],
+      ...overrides,
+      os_types: osTypes as ExceptionListItemSchema['os_types'],
+    });
+
+    if (!overrides.tags) {
+      // Add it only if caller does not override the tags
+      if (this.randomBoolean(1 / 3)) {
+        item.tags = addDisabledArtifactTag(item.tags);
+      }
+    }
+
+    return item;
+  }
+
+  generateCustomYaraSignatureForCreate(
+    overrides: Partial<CreateExceptionListItemSchema> = {}
+  ): CreateExceptionListItemSchemaWithNonNullProps {
+    // os_types needs to be passed to `generateCustomYaraSignature` to generate the rule text correctly,
+    // while the rest can be spreaded over so all output fields can be overridden.
+    const { os_types, ...rest } = overrides;
+
+    return {
+      ...exceptionItemToCreateExceptionItem(this.generateCustomYaraSignature({ os_types })),
+      ...rest,
+    };
+  }
+
+  generateCustomYaraSignatureForUpdate(
+    overrides: Partial<UpdateExceptionListItemSchema> = {}
+  ): UpdateExceptionListItemSchemaWithNonNullProps {
+    // os_types needs to be passed to `generateCustomYaraSignature` to generate the rule text correctly,
+    // while the rest can be spreaded over so all output fields can be overridden.
+    const { os_types, ...rest } = overrides;
+
+    return {
+      ...exceptionItemToUpdateExceptionItem(this.generateCustomYaraSignature({ os_types })),
+      ...rest,
+    };
+  }
+
+  generateTrustedDevice(overrides: Partial<ExceptionListItemSchema> = {}): ExceptionListItemSchema {
+    // Use HOST field by default for compatibility with all OS types
+    // USERNAME field can only be used with Windows-only OS
+    const defaultEntries: ExceptionListItemSchema['entries'] = [
+      {
+        field: 'host.name',
+        operator: 'included' as const,
+        type: 'match' as const,
+        value: `host_${this.randomString(5)}`,
+      },
+    ];
+
+    return this.generate({
+      name: `Trusted device (${this.randomString(5)})`,
+      list_id: ENDPOINT_ARTIFACT_LISTS.trustedDevices.id,
+      os_types: this.randomChoice([['windows'], ['macos'], ['windows', 'macos']]),
+      entries: defaultEntries,
+      ...overrides,
+    });
+  }
+
+  generateTrustedDeviceForCreate(
+    overrides: Partial<CreateExceptionListItemSchema> = {}
+  ): CreateExceptionListItemSchemaWithNonNullProps {
+    return {
+      ...exceptionItemToCreateExceptionItem(this.generateTrustedDevice()),
+      ...overrides,
+    };
+  }
+
+  generateTrustedDeviceForUpdate(
+    overrides: Partial<UpdateExceptionListItemSchema> = {}
+  ): UpdateExceptionListItemSchemaWithNonNullProps {
+    return {
+      ...exceptionItemToUpdateExceptionItem(this.generateTrustedDevice()),
+      ...overrides,
+    };
+  }
+
+  generateEndpointArtifact = (
+    listId: (typeof ENDPOINT_ARTIFACT_LIST_IDS)[number],
+    overrides: Partial<ExceptionListItemSchema> = {}
+  ) => {
+    switch (listId) {
+      case ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id:
+        return this.generateEndpointException(overrides);
+
+      case ENDPOINT_ARTIFACT_LISTS.blocklists.id:
+        return this.generateBlocklist(overrides);
+
+      case ENDPOINT_ARTIFACT_LISTS.eventFilters.id:
+        return this.generateEventFilter(overrides);
+
+      case ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.id:
+        return this.generateHostIsolationException(overrides);
+
+      case ENDPOINT_ARTIFACT_LISTS.trustedApps.id:
+        return this.generateTrustedApp(overrides);
+
+      case ENDPOINT_ARTIFACT_LISTS.trustedDevices.id:
+        return this.generateTrustedDevice(overrides);
+
+      case ENDPOINT_ARTIFACT_LISTS.customYaraSignatures.id:
+        return this.generateCustomYaraSignature(overrides);
+
+      default:
+        throw new Error(`Unknown listId: ${listId}. Unable to generate exception list item.`);
+    }
+  };
+
+  /**
+   * Generates a Buffer that can be used as a file attachment for an _import API call.
+   */
+  generateImportBuffer(
+    listId: (typeof ENDPOINT_ARTIFACT_LIST_IDS)[number],
+    itemsArray: Partial<ExceptionListItemSchema>[] = [{}, {}, {}],
+    listNamespace: 'agnostic' | 'single' = 'agnostic'
+  ): Buffer {
+    const items = itemsArray.map((override) => this.generateEndpointArtifact(listId, override));
+
+    return Buffer.from(
+      `
+          ${this.generateImportListInfo(listId, listNamespace)}
+          ${items.map((item) => JSON.stringify(item)).join('\n')}
+          ${JSON.stringify(
+            this.generateImportDetails({ exported_exception_list_item_count: items.length })
+          )}
+          `,
+      'utf8'
+    );
+  }
+
+  /**
+   * Generates the list info section of the import file for an _import API call.
+   */
+  generateImportListInfo(listId: string, namespace: 'agnostic' | 'single' = 'agnostic'): string {
+    const listInfo = Object.values(ENDPOINT_ARTIFACT_LISTS).find((listDefinition) => {
+      return listDefinition.id === listId;
+    }) ?? {
+      id: listId,
+      name: `random list for ${listId}`,
+      description: `random description for ${listId}`,
+    };
+
+    return `{"_version":"WzEsMV0=","created_at":"2025-08-21T14:20:07.012Z","created_by":"kibana","description":"${listInfo.description}","id":"${listId}","immutable":false,"list_id":"${listId}","name":"${listInfo.name}","namespace_type":"${namespace}","os_types":[],"tags":[],"tie_breaker_id":"034d07f4-fa33-43bb-adfa-6f6bda7921ce","type":"endpoint","updated_at":"2025-08-21T14:20:07.012Z","updated_by":"kibana","version":1}`;
+  }
+
+  /**
+   * Generates the details section of the import file for an _import API call.
+   */
+  generateImportDetails(override: Partial<ExportExceptionDetails> = {}): ExportExceptionDetails {
+    return {
+      exported_exception_list_count: 1,
+      exported_exception_list_item_count: 3,
+      missing_exception_list_item_count: 0,
+      missing_exception_list_items: [],
+      missing_exception_lists: [],
+      missing_exception_lists_count: 0,
+      ...override,
     };
   }
 }

@@ -178,7 +178,7 @@ export const ALERT_WARNING_UNKNOWN_REASON = i18n.translate(
 export const ALERT_WARNING_EXECUTION_REASON = i18n.translate(
   'xpack.triggersActionsUI.sections.rulesList.ruleWarningReasonExecution',
   {
-    defaultMessage: 'Rule execution warning',
+    defaultMessage: 'Rule execution warning.',
   }
 );
 
@@ -368,6 +368,11 @@ export const getConfirmDeletionModalText = (
       singleTitle,
       multipleTitle,
     },
+  });
+
+export const getConfirmDeletionModalWarningText = () =>
+  i18n.translate('xpack.triggersActionsUI.deleteSelectedIdsConfirmModal.warningText', {
+    defaultMessage: 'Elastic managed (internal) rules will be ignored',
   });
 
 export const getConfirmDeletionButtonText = (

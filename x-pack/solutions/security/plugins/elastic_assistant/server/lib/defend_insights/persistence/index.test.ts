@@ -92,7 +92,7 @@ describe('DefendInsightsDataClient', () => {
   describe('createDefendInsight', () => {
     const defendInsightCreate: DefendInsightCreateProps = {
       endpointIds: [],
-      insightType: DefendInsightType.Enum.incompatible_antivirus,
+      insightType: DefendInsightType.enum.incompatible_antivirus,
       insights: [],
       apiConfig: {
         actionTypeId: 'action-type-id',
@@ -103,7 +103,7 @@ describe('DefendInsightsDataClient', () => {
       },
       eventsContextCount: 10,
       replacements: { key1: 'value1', key2: 'value2' },
-      status: DefendInsightStatus.Enum.running,
+      status: DefendInsightStatus.enum.running,
     };
 
     it('should create defend insight successfully', async () => {
@@ -128,7 +128,7 @@ describe('DefendInsightsDataClient', () => {
         defendInsightCreate,
         authenticatedUser: user,
       });
-      await expect(responsePromise).rejects.toThrowError('Elasticsearch error');
+      await expect(responsePromise).rejects.toThrow('Elasticsearch error');
       expect(mockEsClient.create).toHaveBeenCalledTimes(1);
       expect(mockGetDefendInsight).not.toHaveBeenCalled();
     });
@@ -144,8 +144,8 @@ describe('DefendInsightsDataClient', () => {
         ids: ['insight-id1', 'insight-id2'],
         endpoint_ids: ['endpoint-id1', 'endpoint-id2'],
         connector_id: 'connector-id1',
-        type: DefendInsightType.Enum.incompatible_antivirus,
-        status: DefendInsightStatus.Enum.succeeded,
+        type: DefendInsightType.enum.incompatible_antivirus,
+        status: DefendInsightStatus.enum.succeeded,
       };
     }
 
@@ -277,7 +277,7 @@ describe('DefendInsightsDataClient', () => {
         dataClient.findAllDefendInsights({
           authenticatedUser: user,
         })
-      ).rejects.toThrowError('Elasticsearch error');
+      ).rejects.toThrow('Elasticsearch error');
       expect(mockEsClient.search).toHaveBeenCalledTimes(1);
       expect(mockLogger.error).toHaveBeenCalledTimes(1);
     });
@@ -291,7 +291,7 @@ describe('DefendInsightsDataClient', () => {
         {
           id: 'insight-id1',
           backingIndex: 'defend-insights-index',
-          status: DefendInsightStatus.Enum.succeeded,
+          status: DefendInsightStatus.enum.succeeded,
           insights: [
             {
               group: 'windows_defender',
@@ -377,7 +377,7 @@ describe('DefendInsightsDataClient', () => {
       const defendInsightUpdateProps = {
         id: 'insight-id1',
         backingIndex: 'defend-insights-index',
-        status: DefendInsightStatus.Enum.succeeded,
+        status: DefendInsightStatus.enum.succeeded,
         insights: [
           {
             group: 'windows_defender',

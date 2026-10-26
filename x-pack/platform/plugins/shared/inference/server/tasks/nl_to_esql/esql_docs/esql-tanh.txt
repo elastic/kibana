@@ -1,25 +1,22 @@
 # TANH
 
-The TANH function calculates the hyperbolic tangent of a given angle.
+Returns the hyperbolic tangent of a number.
 
 ## Syntax
 
-`TANH(angle)`
+`TANH(number)`
 
 ### Parameters
 
-#### angle
+#### number
 
-This is the angle in radians for which you want to calculate the hyperbolic tangent.
+Numeric expression. If `null`, the function returns `null`.
 
 ## Examples
 
-```esql
-ROW a=1.8
-| EVAL tanh = TANH(a)
-```
+Calculates the hyperbolic tangent of the value in column `a` (which is set to 1.8).
 
 ```esql
-ROW angle=0.5
-| EVAL hyperbolic_tangent = TANH(angle)
+ROW a=1.8
+| EVAL tanh=TANH(a)
 ```

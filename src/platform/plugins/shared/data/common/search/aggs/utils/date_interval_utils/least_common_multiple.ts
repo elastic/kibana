@@ -15,7 +15,7 @@
  * pass in fractional numbers there usually will be an output, but that's not necessarily
  * the greatest common divisor of those two numbers.
  *
- * @private
+ * @internal
  */
 function greatestCommonDivisor(a: number, b: number): number {
   return a === 0 ? Math.abs(b) : greatestCommonDivisor(b % a, a);

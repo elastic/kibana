@@ -16,12 +16,14 @@ export interface HostPreviewPanelFooterProps {
   contextID: string;
   scopeId: string;
   hostName: string;
+  entityId?: string;
 }
 
 export const HostPreviewPanelFooter = ({
   contextID,
   scopeId,
   hostName,
+  entityId,
 }: HostPreviewPanelFooterProps) => {
   const { openFlyout } = useExpandableFlyoutApi();
 
@@ -32,11 +34,12 @@ export const HostPreviewPanelFooter = ({
         params: {
           contextID,
           hostName,
+          entityId,
           scopeId,
         },
       },
     });
-  }, [openFlyout, hostName, contextID, scopeId]);
+  }, [openFlyout, hostName, entityId, contextID, scopeId]);
 
   return (
     <FlyoutFooter data-test-subj={'host-preview-footer'}>

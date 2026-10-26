@@ -5,16 +5,18 @@
  * 2.0.
  */
 
-import React, { MutableRefObject } from 'react';
+import type { MutableRefObject } from 'react';
+import React from 'react';
 
 import { EuiFormRow } from '@elastic/eui';
-import {
+import type {
   PaletteOutput,
   PaletteRegistry,
-  CustomizablePalette,
   DataBounds,
   CustomPaletteParams,
 } from '@kbn/coloring';
+import { CUSTOM_PALETTE } from '@kbn/coloring';
+import { CustomizablePalette } from '@kbn/coloring';
 import { i18n } from '@kbn/i18n';
 import { PalettePanelContainer } from './palette_panel_container';
 
@@ -25,6 +27,11 @@ interface ColorMappingByValuesProps {
   paletteService: PaletteRegistry;
   panelRef: MutableRefObject<HTMLDivElement | null>;
   dataBounds: DataBounds;
+  /**
+   * Band count applied when switching to a named palette. Required so every editor surface that
+   * renders this component stays consistent (see the datatable cell vs progress-bar editors).
+   */
+  defaultBandCount: number;
 }
 
 export function ColorMappingByValues<T>({
@@ -34,8 +41,12 @@ export function ColorMappingByValues<T>({
   paletteService,
   panelRef,
   dataBounds,
+  defaultBandCount,
 }: ColorMappingByValuesProps) {
-  const colors = palette.params?.stops?.map(({ color }) => color) ?? [];
+  const colors =
+    palette.name === CUSTOM_PALETTE
+      ? (palette.params?.colorStops ?? palette.params?.stops)?.map(({ color }) => color) ?? []
+      : paletteService.get(palette.name).getCategoricalColors(palette.params?.steps || 10, palette);
 
   return (
     <EuiFormRow
@@ -62,6 +73,7 @@ export function ColorMappingByValues<T>({
             palettes={paletteService}
             dataBounds={dataBounds}
             activePalette={palette}
+            defaultBandCount={defaultBandCount}
             setPalette={(p) => {
               setPalette(p);
             }}

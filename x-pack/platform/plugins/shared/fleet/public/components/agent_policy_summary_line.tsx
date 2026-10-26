@@ -5,92 +5,249 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiLink, EuiText } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiIconTip,
+  EuiLink,
+  EuiText,
+  EuiToolTip,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { CSSProperties } from 'react';
 import React, { memo } from 'react';
+import { css } from '@emotion/css';
 
 import type { AgentPolicy, Agent } from '../../common/types';
+import { getIncompatibleIntegrations } from '../../common/services';
 import { useLink } from '../hooks';
-const MIN_WIDTH: CSSProperties = { minWidth: 0 };
-const NO_WRAP_WHITE_SPACE: CSSProperties = { whiteSpace: 'nowrap' };
-const WRAP_WHITE_SPACE: CSSProperties = { whiteSpace: 'normal' };
+
+const MIN_WIDTH = css`
+  min-width: 0;
+`;
 
 export const AgentPolicySummaryLine = memo<{
   policy: AgentPolicy;
   agent?: Agent;
   direction?: 'column' | 'row';
   withDescription?: boolean;
-}>(({ policy, agent, direction = 'row', withDescription = false }) => {
-  const { getHref } = useLink();
-  const { name, id, is_managed: isManaged, description } = policy;
+  /** When true (e.g. in agent list/details), show policy ID in a tooltip on hover instead of inline. */
+  showPolicyId?: boolean;
+  isVersionSpecific?: boolean;
+}>(
+  ({
+    policy,
+    agent,
+    direction = 'row',
+    withDescription = false,
+    showPolicyId = false,
+    isVersionSpecific = false,
+  }) => {
+    const { getHref } = useLink();
+    const { name, id, is_managed: isManaged, description } = policy;
+    const policyDisplayName = name || id;
 
-  const revision = agent ? agent.policy_revision : policy.revision;
-  return (
-    <EuiFlexGroup direction="column" gutterSize="xs" wrap={true}>
-      <EuiFlexItem>
-        <EuiFlexGroup
-          direction={direction}
-          gutterSize={direction === 'column' ? 'none' : 's'}
-          alignItems="baseline"
-          style={MIN_WIDTH}
-          responsive={false}
-          justifyContent={'flexStart'}
-        >
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup style={MIN_WIDTH} gutterSize="s" alignItems="baseline" responsive={false}>
+    const revision = agent ? agent.policy_revision : policy.revision;
+    const isOutdated = agent?.policy_revision && policy.revision > agent.policy_revision;
+
+    const agentVersion: string | undefined = agent?.local_metadata?.elastic?.agent?.version;
+    const incompatibleIntegrations = getIncompatibleIntegrations({
+      agentVersion,
+      conditions: policy.package_agent_version_conditions,
+    });
+    const showIncompatibilityBadge =
+      incompatibleIntegrations.length > 0 && Boolean(policy.min_agent_version);
+
+    const showVersionSpecificTooltip = isVersionSpecific && incompatibleIntegrations.length > 0;
+
+    if (agent?.type === 'OPAMP') {
+      return <EuiText>-</EuiText>;
+    }
+
+    const warnings: Array<{ label: string; description: string }> = [];
+    if (isOutdated) {
+      warnings.push({
+        label: i18n.translate('xpack.fleet.agentPolicySummaryLine.outdatedPolicyWarning', {
+          defaultMessage: 'Outdated policy',
+        }),
+        description: i18n.translate(
+          'xpack.fleet.agentPolicySummaryLine.outdatedPolicyWarningExpanded',
+          {
+            defaultMessage:
+              "This agent isn't synced to the latest policy revision. Check its connection to the Fleet server.",
+          }
+        ),
+      });
+    }
+    if (showIncompatibilityBadge) {
+      warnings.push({
+        label: i18n.translate('xpack.fleet.agentPolicySummaryLine.incompatibleIntegrationsLabel', {
+          defaultMessage: 'Incompatible integrations',
+        }),
+        description: i18n.translate(
+          'xpack.fleet.agentPolicySummaryLine.incompatibleIntegrationsTooltip',
+          {
+            defaultMessage:
+              'This policy contains the following incompatible integrations: {integrations}. Upgrade the agent to {minVersion} or later.',
+            values: {
+              integrations: incompatibleIntegrations
+                .map(({ title, name: pkgName }) => title || pkgName)
+                .join(', '),
+              minVersion: policy.min_agent_version,
+            },
+          }
+        ),
+      });
+    }
+
+    return (
+      <EuiFlexGroup direction="column" gutterSize="xs" css={MIN_WIDTH}>
+        {/* Row 1: small icon tips (left) + policy name (full width) */}
+        <EuiFlexItem css={MIN_WIDTH}>
+          <EuiFlexGroup
+            direction={direction}
+            gutterSize={direction === 'column' ? 'none' : 's'}
+            alignItems="baseline"
+            css={MIN_WIDTH}
+            responsive={false}
+            justifyContent="flexStart"
+            wrap={false}
+          >
+            {(showVersionSpecificTooltip || isManaged) && (
               <EuiFlexItem grow={false}>
+                <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+                  {showVersionSpecificTooltip && (
+                    <EuiFlexItem grow={false} data-test-subj="agentPolicyVersionSpecificTooltip">
+                      <EuiIconTip
+                        type="info"
+                        size="m"
+                        color="subdued"
+                        content={
+                          <FormattedMessage
+                            id="xpack.fleet.agentPolicySummaryLine.versionSpecificPolicyTooltip"
+                            defaultMessage="This agent uses a version-specific policy because it doesn't meet the agent version requirements of some integrations."
+                          />
+                        }
+                      />
+                    </EuiFlexItem>
+                  )}
+                  {isManaged && (
+                    <EuiFlexItem grow={false}>
+                      <EuiIconTip
+                        title="Hosted agent policy"
+                        content={i18n.translate(
+                          'xpack.fleet.agentPolicySummaryLine.hostedPolicyTooltip',
+                          {
+                            defaultMessage:
+                              'This policy is managed outside of Fleet. Most actions related to this policy are unavailable.',
+                          }
+                        )}
+                        type="lock"
+                        size="m"
+                        color="subdued"
+                      />
+                    </EuiFlexItem>
+                  )}
+                </EuiFlexGroup>
+              </EuiFlexItem>
+            )}
+            <EuiFlexItem grow={false} css={MIN_WIDTH}>
+              <EuiToolTip
+                content={
+                  showPolicyId && name ? (
+                    <FormattedMessage
+                      id="xpack.fleet.agentPolicySummaryLine.policyIdTooltip"
+                      defaultMessage="ID: {id}"
+                      values={{ id }}
+                    />
+                  ) : undefined
+                }
+              >
                 <EuiLink
-                  style={WRAP_WHITE_SPACE}
+                  className="eui-textBreakWord"
                   href={getHref('policy_details', { policyId: id })}
-                  title={name || id}
                   data-test-subj="agentPolicyNameLink"
                 >
-                  {name || id}
+                  {policyDisplayName}
                 </EuiLink>
-              </EuiFlexItem>
+              </EuiToolTip>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
 
-              {isManaged && (
+        {/* Row 2: revision (left) + warnings (right) */}
+        {(revision || warnings.length > 0) && (
+          <EuiFlexItem>
+            <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={false}>
+              {revision && (
                 <EuiFlexItem grow={false}>
-                  <EuiIconTip
-                    title="Hosted agent policy"
-                    content={i18n.translate(
-                      'xpack.fleet.agentPolicySummaryLine.hostedPolicyTooltip',
-                      {
-                        defaultMessage:
-                          'This policy is managed outside of Fleet. Most actions related to this policy are unavailable.',
-                      }
-                    )}
-                    type="lock"
-                    size="m"
-                    color="subdued"
-                  />
+                  <EuiText color="subdued" size="xs" className="eui-textNoWrap">
+                    <FormattedMessage
+                      id="xpack.fleet.agentPolicySummaryLine.revisionNumber"
+                      defaultMessage="rev. {revNumber}"
+                      values={{ revNumber: revision }}
+                    />
+                  </EuiText>
+                </EuiFlexItem>
+              )}
+              {warnings.length > 0 && (
+                <EuiFlexItem grow={false}>
+                  <EuiToolTip
+                    content={
+                      warnings.length === 1 ? (
+                        warnings[0].description
+                      ) : (
+                        <>
+                          {warnings.map((w) => (
+                            <div key={w.label}>
+                              <strong>{w.label}</strong>: {w.description}
+                            </div>
+                          ))}
+                        </>
+                      )
+                    }
+                  >
+                    <EuiFlexGroup
+                      alignItems="center"
+                      gutterSize="xs"
+                      responsive={false}
+                      tabIndex={0}
+                    >
+                      <EuiFlexItem grow={false}>
+                        <EuiIcon size="m" type="warning" color="warning" aria-hidden={true} />
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <EuiText color="subdued" size="xs" className="eui-textNoWrap">
+                          {warnings.length === 1 ? (
+                            warnings[0].label
+                          ) : (
+                            <FormattedMessage
+                              id="xpack.fleet.agentPolicySummaryLine.multipleWarnings"
+                              defaultMessage="{count} warnings"
+                              values={{ count: warnings.length }}
+                            />
+                          )}
+                        </EuiText>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </EuiToolTip>
                 </EuiFlexItem>
               )}
             </EuiFlexGroup>
           </EuiFlexItem>
+        )}
 
-          {revision && (
-            <EuiFlexItem grow={false}>
-              <EuiText color="subdued" size="xs" style={NO_WRAP_WHITE_SPACE}>
-                <FormattedMessage
-                  id="xpack.fleet.agentPolicySummaryLine.revisionNumber"
-                  defaultMessage="rev. {revNumber}"
-                  values={{ revNumber: revision }}
-                />
+        {withDescription && description && (
+          <EuiFlexItem>
+            <EuiToolTip content={description}>
+              <EuiText color="subdued" size="xs" tabIndex={0}>
+                {description}
               </EuiText>
-            </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
-      </EuiFlexItem>
-      {withDescription && description && (
-        <EuiFlexItem>
-          <EuiText color="subdued" title={description} size="xs">
-            {description}
-          </EuiText>
-        </EuiFlexItem>
-      )}
-    </EuiFlexGroup>
-  );
-});
+            </EuiToolTip>
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
+    );
+  }
+);

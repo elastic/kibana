@@ -1,0 +1,223 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import { v4 as generateUuid } from 'uuid';
+import type { Logger } from '@kbn/core/server';
+import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
+import type { EsWorkflowExecution, WorkflowExecutionEngineModel } from '@kbn/workflows';
+import { ExecutionStatus, pickManagedWorkflowFields } from '@kbn/workflows';
+
+import { markExecutionFailedTaskRecovery, taskRecoveryMessages } from '../lib/task_recovery';
+import type { StepExecutionRepository } from '../repositories/step_execution_repository';
+import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
+
+export interface CheckAndSkipScheduledExecutionResult {
+  skipped: boolean;
+  /** Present when this tick skipped (HITL wait or newly created SKIPPED execution). */
+  workflowExecutionId?: string;
+}
+
+export interface CheckExistingScheduledExecutionOptions {
+  /**
+   * When true (default), create a SKIPPED execution if another scheduled run
+   * (different `taskRunAt`) is still non-terminal.
+   * When false (workflows with concurrency `key` + `strategy`), leave in-flight overlap
+   * to the concurrency check so strategies like `cancel-in-progress` still apply.
+   * Stale same-`taskRunAt` recovery always runs. Past-tick abandoned `pending` reaping
+   * runs unless Task Manager still has active work scoped to that execution (e.g.
+   * queue-promoted backlog with a dormant/`runSoon`'d `workflow:run`).
+   */
+  createSkippedForInFlightDuplicates?: boolean;
+  /**
+   * Optional: whether TM still has idle/claiming/running work for this execution scope.
+   */
+  hasActiveTaskForExecution?: (executionId: string) => Promise<boolean>;
+}
+
+/**
+ * Checks if there's an existing non-terminal scheduled execution for a workflow.
+ *
+ * We use the task's `runAt` to link executions to specific scheduled runs:
+ * - `runAt` represents the scheduled time for this specific run of a recurring task
+ * - Each scheduled run has a unique `runAt` value (calculated from the previous run's completion)
+ * - `runAt` is only updated AFTER a task completes successfully (or fails with retry)
+ * - If a task is interrupted/recovered BEFORE completion, `runAt` stays the same
+ *
+ * Logic:
+ * - If execution's `taskRunAt` matches current task's `runAt` AND `attempts > 1`:
+ *   → Execution was created for THIS scheduled run but is still PENDING/RUNNING
+ *   → `attempts > 1` means this is a retry/recovery (not the first attempt)
+ *   → The execution is stale from a previous attempt and will never complete
+ *   → If `waiting_for_input`, skip this tick only (human resume; do not fail the execution)
+ *   → Else mark execution as FAILED (TaskRecoveryError) and proceed with a new execution for this tick
+ *   → This stale path always runs when invoked, including for workflows with valid concurrency settings
+ *
+ * - If execution is still `pending` and `taskRunAt` differs from current `runAt`:
+ *   → Candidate never-started orphan from a prior tick. If a bound `workflow:run` task
+ *     exists (queue-promoted backlog waiting to claim), leave it alone and fall through.
+ *   → Otherwise mark FAILED and proceed (one reap per tick).
+ *
+ * - If execution's `taskRunAt` differs from current task's `runAt` (in-flight work):
+ *   → When `createSkippedForInFlightDuplicates` is true: skip current run (create SKIPPED)
+ *   → When false: return not-skipped so the concurrency check governs overlap
+ *
+ * Note: Retries of the same scheduled run will have the same `runAt` but different `startedAt`.
+ * This is why we use `runAt` instead of `startedAt` for comparison.
+ * We also check `attempts > 1` to ensure we only mark executions as stale when they're from a previous attempt.
+ */
+export async function checkAndSkipIfExistingScheduledExecution(
+  workflow: WorkflowExecutionEngineModel,
+  spaceId: string,
+  workflowExecutionRepository: WorkflowExecutionRepository,
+  stepExecutionRepository: StepExecutionRepository,
+  currentTaskInstance: ConcreteTaskInstance,
+  logger: Logger,
+  options: CheckExistingScheduledExecutionOptions = {}
+): Promise<CheckAndSkipScheduledExecutionResult> {
+  const { createSkippedForInFlightDuplicates = true, hasActiveTaskForExecution } = options;
+
+  // Check if there's already a scheduled workflow execution in non-terminal state
+  const runningExecutions = await workflowExecutionRepository.getRunningExecutionsByWorkflowId(
+    workflow.id,
+    spaceId,
+    'scheduled'
+  );
+
+  if (runningExecutions.length > 0) {
+    const existingExecution = runningExecutions[0]?._source;
+    if (!existingExecution) {
+      return { skipped: false };
+    }
+
+    const currentTaskRunAt = currentTaskInstance.runAt
+      ? new Date(currentTaskInstance.runAt).toISOString()
+      : null;
+
+    // taskRunAt is stored in the execution document to link it to a specific scheduled run
+    const executionTaskRunAt = (existingExecution as EsWorkflowExecution & { taskRunAt?: string })
+      .taskRunAt;
+
+    // Execution is stale only if:
+    // 1. Both taskRunAt values exist and are equal (same scheduled run)
+    // 2. [for Extra Safety] Task attempts > 1 (this is a retry/recovery, not the first attempt)
+    const isStaleExecution =
+      executionTaskRunAt !== null &&
+      currentTaskRunAt !== null &&
+      executionTaskRunAt === currentTaskRunAt &&
+      currentTaskInstance.attempts > 1;
+
+    if (isStaleExecution) {
+      if (existingExecution.status === ExecutionStatus.WAITING_FOR_INPUT) {
+        logger.warn(
+          `Stale scheduled retry for execution ${existingExecution.id} (taskRunAt: ${executionTaskRunAt}) is waiting_for_input - skipping duplicate scheduled invocation (human resume only)`
+        );
+        return { skipped: true, workflowExecutionId: existingExecution.id };
+      }
+
+      logger.warn(
+        `Found stale execution ${existingExecution.id} from current scheduled run (taskRunAt: ${executionTaskRunAt}, current taskRunAt: ${currentTaskRunAt}, attempts: ${currentTaskInstance.attempts}) - marking as failed and proceeding`
+      );
+      await markExecutionFailedTaskRecovery(
+        workflowExecutionRepository,
+        stepExecutionRepository,
+        existingExecution.id,
+        {
+          message: taskRecoveryMessages.scheduledStale,
+        }
+      );
+      return { skipped: false };
+    }
+
+    // Never-started orphan from a prior schedule claim - free the slot and proceed
+    // (one reap per tick). TM only advances `runAt` after that claim finishes, so
+    // `PENDING` + a different `taskRunAt` usually means the earlier claim created the
+    // doc but never started it. Exception: queue drain promotes QUEUED→PENDING while
+    // keeping the backlog `taskRunAt` and leaving a scoped `workflow:run` task - if TM
+    // still has active work for that execution, it is live backlog, not an orphan.
+    const isAbandonedNeverStartedPendingCandidate =
+      existingExecution.status === ExecutionStatus.PENDING &&
+      executionTaskRunAt != null &&
+      currentTaskRunAt != null &&
+      executionTaskRunAt !== currentTaskRunAt;
+
+    if (isAbandonedNeverStartedPendingCandidate) {
+      const hasActiveTask = hasActiveTaskForExecution
+        ? await hasActiveTaskForExecution(existingExecution.id)
+        : false;
+
+      if (hasActiveTask) {
+        logger.debug(
+          `Prior-tick pending execution ${existingExecution.id} still has active Task Manager work ` +
+            `(taskRunAt: ${executionTaskRunAt}); not treating as abandoned orphan`
+        );
+      } else {
+        logger.warn(
+          `Found abandoned pending execution ${existingExecution.id} from a prior scheduled run ` +
+            `(taskRunAt: ${executionTaskRunAt}, current taskRunAt: ${currentTaskRunAt}) - marking as failed and proceeding`
+        );
+        await markExecutionFailedTaskRecovery(
+          workflowExecutionRepository,
+          stepExecutionRepository,
+          existingExecution.id,
+          {
+            message: taskRecoveryMessages.scheduledAbandonedPending,
+          },
+          { refresh: 'wait_for' }
+        );
+        return { skipped: false };
+      }
+    }
+
+    if (!createSkippedForInFlightDuplicates) {
+      logger.debug(
+        `Deferring in-flight scheduled overlap for workflow ${workflow.id} to concurrency check ` +
+          `(existing execution ${existingExecution.id}, taskRunAt: ${executionTaskRunAt}, current taskRunAt: ${currentTaskRunAt})`
+      );
+      return { skipped: false };
+    }
+
+    logger.debug(
+      `Skipping scheduled workflow ${workflow.id} execution - found existing non-terminal scheduled execution ${existingExecution.id} (taskRunAt: ${executionTaskRunAt}, current taskRunAt: ${currentTaskRunAt})`
+    );
+    const workflowCreatedAt = new Date();
+    const skippedExecutionId = generateUuid();
+    const skippedExecution: Partial<EsWorkflowExecution> = {
+      id: skippedExecutionId,
+      spaceId,
+      workflowId: workflow.id,
+      ...pickManagedWorkflowFields(workflow),
+      isTestRun: workflow.isTestRun,
+      workflowDefinition: workflow.definition,
+      yaml: workflow.yaml,
+      context: {
+        workflowRunId: `scheduled-${Date.now()}`,
+        spaceId,
+        inputs: {},
+        event: {
+          type: 'scheduled',
+          timestamp: new Date().toISOString(),
+          source: 'task-manager',
+        },
+        triggeredBy: 'scheduled',
+      },
+      status: ExecutionStatus.SKIPPED,
+      createdAt: workflowCreatedAt.toISOString(),
+      createdBy: '',
+      triggeredBy: 'scheduled',
+      cancelRequested: true,
+      cancellationReason: 'Skipped due to existing non-terminal scheduled execution',
+      cancelledAt: workflowCreatedAt.toISOString(),
+      cancelledBy: 'system',
+    };
+    await workflowExecutionRepository.createWorkflowExecution(skippedExecution);
+    return { skipped: true, workflowExecutionId: skippedExecutionId };
+  }
+
+  return { skipped: false };
+}

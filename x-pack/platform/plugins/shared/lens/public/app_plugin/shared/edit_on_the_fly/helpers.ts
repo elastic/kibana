@@ -6,28 +6,27 @@
  */
 import {
   getIndexPatternFromESQLQuery,
-  getESQLAdHocDataview,
   getESQLResults,
   formatESQLColumns,
   mapVariableToColumn,
 } from '@kbn/esql-utils';
-import { isEqual, cloneDeep } from 'lodash';
-import { type AggregateQuery, buildEsQuery } from '@kbn/es-query';
+import { type AggregateQuery, buildEsQuery, isOfAggregateQueryType } from '@kbn/es-query';
+import type { CoreStart, IUiSettingsClient } from '@kbn/core/public';
+import { getEsQueryConfig, UI_SETTINGS } from '@kbn/data-plugin/public';
 import type { ESQLControlVariable } from '@kbn/esql-types';
-import type { ESQLRow } from '@kbn/es-types';
-import {
-  getLensAttributesFromSuggestion,
-  mapVisToChartType,
-  getDatasourceId,
-} from '@kbn/visualization-utils';
+import type { ESQLColumn, ESQLRow } from '@kbn/es-types';
+import { getLensAttributesFromSuggestion, mapVisToChartType } from '@kbn/visualization-utils';
 import type { DataViewSpec } from '@kbn/data-views-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { getTime } from '@kbn/data-plugin/common';
 import { type DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { TypedLensSerializedState } from '../../../react_embeddable/types';
-import type { DatasourceMap, VisualizationMap } from '../../../types';
+import type { TypedLensSerializedState, DatasourceMap, VisualizationMap } from '@kbn/lens-common';
+
+import { createEsqlAdHocDataView } from '../../../data_views_service/create_esql_ad_hoc_data_view';
 import { suggestionsApi } from '../../../lens_suggestions_api';
+import { readUserChartTypeFromSessionStorage } from '../../../chart_type_session_storage';
+import { hydrateEsqlMetricTrendlineAfterSuggestion } from '../../../visualizations/metric/state_hydration/esql_trendline';
 
 export interface ESQLDataGridAttrs {
   rows: ESQLRow[];
@@ -35,7 +34,37 @@ export interface ESQLDataGridAttrs {
   columns: DatatableColumn[];
 }
 
-const getDSLFilter = (queryService: DataPublicPluginStart['query'], timeFieldName?: string) => {
+const columnsMatchInOrder = (a: ESQLColumn[], b: ESQLColumn[]) => {
+  return a.length === b.length && a.every((col, i) => col.name === b[i]?.name);
+};
+
+export const buildDisplayRowsFromEsqlValues = ({
+  displayColumns,
+  valueColumns,
+  values,
+}: {
+  displayColumns: ESQLColumn[];
+  valueColumns: ESQLColumn[];
+  values: ESQLRow[];
+}): ESQLRow[] => {
+  if (columnsMatchInOrder(valueColumns, displayColumns)) {
+    return values;
+  }
+
+  // Pre-compute which value column index each display column maps to (-1 if missing)
+  const valueIndexPerGridColumn = displayColumns.map((col) =>
+    valueColumns.findIndex((v) => v.name === col.name)
+  );
+  // For each row, pick values by index; fill null for columns with no data
+  return values.map((row) => valueIndexPerGridColumn.map((i) => (i >= 0 ? row[i] : null)));
+};
+
+const getDSLFilter = (
+  queryService: DataPublicPluginStart['query'],
+  uiSettings: IUiSettingsClient,
+  timeFieldName?: string
+) => {
+  const esQueryConfigs = getEsQueryConfig(uiSettings);
   const kqlQuery = queryService.queryString.getQuery();
   const filters = queryService.filterManager.getFilters();
   const timeFilter =
@@ -44,30 +73,43 @@ const getDSLFilter = (queryService: DataPublicPluginStart['query'], timeFieldNam
       fieldName: timeFieldName,
     });
 
-  return buildEsQuery(undefined, kqlQuery || [], [
-    ...(filters ?? []),
-    ...(timeFilter ? [timeFilter] : []),
-  ]);
+  return buildEsQuery(
+    undefined,
+    kqlQuery || [],
+    [...(filters ?? []), ...(timeFilter ? [timeFilter] : [])],
+    esQueryConfigs
+  );
 };
 
 export const getGridAttrs = async (
   query: AggregateQuery,
   adHocDataViews: DataViewSpec[],
   data: DataPublicPluginStart,
+  http: CoreStart['http'],
+  uiSettings: IUiSettingsClient,
   abortController?: AbortController,
-  esqlVariables: ESQLControlVariable[] = []
+  esqlVariables: ESQLControlVariable[] = [],
+  approximation?: boolean
 ): Promise<ESQLDataGridAttrs> => {
   const indexPattern = getIndexPatternFromESQLQuery(query.esql);
   const dataViewSpec = adHocDataViews.find((adHoc) => {
-    return adHoc.name === indexPattern;
+    return adHoc.title === indexPattern;
   });
 
-  const dataView = dataViewSpec
-    ? await data.dataViews.create(dataViewSpec)
-    : await getESQLAdHocDataview(query.esql, data.dataViews);
+  // Resolve the dataset when the spec has no timeFieldName, which detects the time
+  // field via HTTP (with a promise cache to avoid redundant requests).
+  const dataView = dataViewSpec?.timeFieldName
+    ? await data.dataViews.create(dataViewSpec, true)
+    : await createEsqlAdHocDataView({
+        dataViews: data.dataViews,
+        query: query.esql,
+        id: dataViewSpec?.id,
+        skipFetchFields: true,
+        http,
+      });
 
-  const filter = getDSLFilter(data.query, dataView.timeFieldName);
-
+  const filter = getDSLFilter(data.query, uiSettings, dataView.timeFieldName);
+  const timezone = uiSettings.get<'Browser' | string>(UI_SETTINGS.DATEFORMAT_TZ);
   const results = await getESQLResults({
     esqlQuery: query.esql,
     search: data.search.search,
@@ -76,19 +118,21 @@ export const getGridAttrs = async (
     dropNullColumns: true,
     timeRange: data.query.timefilter.timefilter.getAbsoluteTime(),
     variables: esqlVariables,
+    timezone,
+    ...(approximation !== undefined ? { approximation } : {}),
+    includeColumnMetadata: true,
   });
 
-  let queryColumns = results.response.columns;
-  // if the query columns are empty, we need to use the all_columns property
+  const { all_columns: allColumns = [], columns: valueColumns = [], values } = results.response;
+  // Use `all_columns` property if it exists in the payload,
   // which has all columns regardless if they have data or not
-  if (queryColumns.length === 0 && results.response.all_columns) {
-    queryColumns = results.response.all_columns;
-  }
+  const displayColumns = allColumns.length > 0 ? allColumns : valueColumns;
 
-  const columns = formatESQLColumns(queryColumns);
+  const rows = buildDisplayRowsFromEsqlValues({ displayColumns, valueColumns, values });
+  const columns = formatESQLColumns(displayColumns);
 
   return {
-    rows: results.response.values,
+    rows,
     dataView,
     columns,
   };
@@ -97,6 +141,8 @@ export const getGridAttrs = async (
 export const getSuggestions = async (
   query: AggregateQuery,
   data: DataPublicPluginStart,
+  http: CoreStart['http'],
+  uiSettings: IUiSettingsClient,
   datasourceMap: DatasourceMap,
   visualizationMap: VisualizationMap,
   adHocDataViews: DataViewSpec[],
@@ -105,15 +151,19 @@ export const getSuggestions = async (
   setDataGridAttrs?: (attrs: ESQLDataGridAttrs) => void,
   esqlVariables: ESQLControlVariable[] = [],
   shouldUpdateAttrs = true,
-  preferredVisAttributes?: TypedLensSerializedState['attributes']
+  preferredVisAttributes?: TypedLensSerializedState['attributes'],
+  approximation?: boolean
 ) => {
   try {
     const { dataView, columns, rows } = await getGridAttrs(
       query,
       adHocDataViews,
       data,
+      http,
+      uiSettings,
       abortController,
-      esqlVariables
+      esqlVariables,
+      approximation
     );
     const updatedWithVariablesColumns = esqlVariables.length
       ? mapVariableToColumn(query.esql, esqlVariables, columns)
@@ -129,8 +179,11 @@ export const getSuggestions = async (
       return;
     }
 
-    const preferredChartType = preferredVisAttributes
-      ? mapVisToChartType(preferredVisAttributes.visualizationType)
+    // User deliberately changed the chart type
+    const userDefinedChartType = readUserChartTypeFromSessionStorage();
+
+    const preferredChartType = userDefinedChartType
+      ? mapVisToChartType(userDefinedChartType)
       : undefined;
 
     const context = {
@@ -147,9 +200,7 @@ export const getSuggestions = async (
         datasourceMap,
         visualizationMap,
         preferredChartType,
-        preferredVisAttributes: preferredVisAttributes
-          ? injectESQLQueryIntoLensLayers(preferredVisAttributes, query)
-          : undefined,
+        preferredVisAttributes,
       }) ?? [];
 
     // Lens might not return suggestions for some cases, i.e. in case of errors
@@ -160,9 +211,36 @@ export const getSuggestions = async (
     const attrs = getLensAttributesFromSuggestion({
       filters: [],
       query,
-      suggestion: firstSuggestion,
+      suggestion: {
+        ...firstSuggestion,
+        title: '',
+      },
       dataView,
     }) as TypedLensSerializedState['attributes'];
+
+    // Suggestions only rebuild the main layer. Restore metric trendline
+    // accessors from the previous attributes and hydrate the hidden layer.
+    if (preferredVisAttributes && isOfAggregateQueryType(query)) {
+      const hydrated = hydrateEsqlMetricTrendlineAfterSuggestion({
+        visualizationType: attrs.visualizationType,
+        visualizationState: attrs.state.visualization,
+        textBasedState: attrs.state.datasourceStates.textBased,
+        previousVisualizationState: preferredVisAttributes.state.visualization,
+        previousTextBasedState: preferredVisAttributes.state.datasourceStates.textBased,
+        esqlQuery: query.esql,
+      });
+      if (hydrated) {
+        attrs.state = {
+          ...attrs.state,
+          visualization: hydrated.visualizationState,
+          datasourceStates: {
+            ...attrs.state.datasourceStates,
+            textBased: hydrated.textBasedState,
+          },
+        };
+      }
+    }
+
     return {
       ...attrs,
       state: {
@@ -171,49 +249,9 @@ export const getSuggestions = async (
       },
     };
   } catch (e) {
-    setErrors?.([e]);
+    if (!abortController?.signal.aborted) {
+      setErrors?.([e]);
+    }
   }
   return undefined;
-};
-
-/**
- * Injects the ESQL query into the lens layers. This is used to keep the query in sync with the lens layers.
- * @param attributes, the current lens attributes
- * @param query, the new query to inject
- * @returns the new lens attributes with the query injected
- */
-export const injectESQLQueryIntoLensLayers = (
-  attributes: TypedLensSerializedState['attributes'],
-  query: AggregateQuery
-) => {
-  const datasourceId = getDatasourceId(attributes.state.datasourceStates);
-
-  // if the datasource is formBased, we should not fix the query
-  if (!datasourceId || datasourceId === 'formBased') {
-    return attributes;
-  }
-
-  if (!attributes.state.datasourceStates[datasourceId]) {
-    return attributes;
-  }
-
-  const datasourceState = cloneDeep(attributes.state.datasourceStates[datasourceId]);
-
-  if (datasourceState && datasourceState.layers) {
-    Object.values(datasourceState.layers).forEach((layer) => {
-      if (!isEqual(layer.query, query)) {
-        layer.query = query;
-      }
-    });
-  }
-  return {
-    ...attributes,
-    state: {
-      ...attributes.state,
-      datasourceStates: {
-        ...attributes.state.datasourceStates,
-        [datasourceId]: datasourceState,
-      },
-    },
-  };
 };

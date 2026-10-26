@@ -767,7 +767,9 @@ describe('blocks', () => {
 
         kbnHandlebarsEnv!.unregisterDecorator('decorator');
 
-        expectTemplate('{{*decorator}}').toThrow('lookupProperty(...) is not a function');
+        expectTemplate('{{*decorator}}').toThrow(
+          /Missing decorator: "decorator"|lookupProperty\(.*\) is not a function/
+        );
         expect(calls).toEqual(0);
       });
     });

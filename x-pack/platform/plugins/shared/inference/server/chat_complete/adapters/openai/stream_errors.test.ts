@@ -5,12 +5,8 @@
  * 2.0.
  */
 
-import {
-  convertStreamError,
-  OpenAIErrorLine,
-  ElasticInferenceErrorLine,
-  UnknownErrorLine,
-} from './stream_errors';
+import type { OpenAIErrorLine, ElasticInferenceErrorLine, UnknownErrorLine } from './stream_errors';
+import { convertStreamError } from './stream_errors';
 
 describe('convertStreamError', () => {
   it('handles the openAI format', () => {
@@ -46,6 +42,26 @@ describe('convertStreamError', () => {
         code: 'providerError',
         message: 'some_error_type - something bad happened',
         meta: {},
+      },
+    });
+  });
+
+  it('keeps the HTTP status when the line carries one', () => {
+    const line: ElasticInferenceErrorLine = {
+      error: {
+        type: 'status_exception',
+        reason: 'not found',
+      },
+      status: 404,
+    };
+    const error = convertStreamError(line);
+
+    expect(error.toJSON()).toEqual({
+      type: 'error',
+      error: {
+        code: 'providerError',
+        message: 'status_exception - not found',
+        meta: { status: 404 },
       },
     });
   });

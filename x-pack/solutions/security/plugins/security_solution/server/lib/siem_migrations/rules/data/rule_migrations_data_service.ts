@@ -4,115 +4,136 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { AuthenticatedUser, IScopedClusterClient, Logger } from '@kbn/core/server';
-import {
-  IndexAdapter,
-  IndexPatternAdapter,
-  type FieldMap,
-  type InstallParams,
-} from '@kbn/index-adapter';
+import type {
+  AuthenticatedUser,
+  ElasticsearchClient,
+  IScopedClusterClient,
+  Logger,
+} from '@kbn/core/server';
+import { type FieldMap, type InstallParams } from '@kbn/index-adapter';
 import type {} from './rule_migrations_data_client';
 import { RuleMigrationsDataClient } from './rule_migrations_data_client';
 import type {
-  AdapterId,
-  Adapters,
-  SiemRuleMigrationsClientDependencies,
-  IndexNameProvider,
-  IndexNameProviders,
+  RuleMigrationAdapterId,
+  RuleMigrationAdapters,
+  RuleMigrationIndexNameProviders,
 } from '../types';
+import type { SiemMigrationsClientDependencies } from '../../common/types';
 import {
-  integrationsFieldMap,
+  getIntegrationsFieldMap,
+  getPrebuiltRulesFieldMap,
   migrationsFieldMaps,
-  prebuiltRulesFieldMap,
   ruleMigrationResourcesFieldMap,
   ruleMigrationsFieldMap,
-} from './rule_migrations_field_maps';
-
-const TOTAL_FIELDS_LIMIT = 2500;
-export const INDEX_PATTERN = '.kibana-siem-rule-migrations';
+} from './field_maps';
+import { RuleMigrationIndexMigrator } from '../index_migrators';
+import { resolveElserInferenceId } from './utils/resolve_elser_inference_id';
+import { SiemMigrationsBaseDataService } from '../../common/siem_migrations_base_service';
 
 interface CreateClientParams {
   spaceId: string;
   currentUser: AuthenticatedUser;
   esScopedClient: IScopedClusterClient;
-  dependencies: SiemRuleMigrationsClientDependencies;
+  dependencies: SiemMigrationsClientDependencies;
 }
-interface CreateAdapterParams {
-  adapterId: AdapterId;
+interface CreateRuleAdapterParams {
+  adapterId: RuleMigrationAdapterId;
   fieldMap: FieldMap;
 }
 
-export class RuleMigrationsDataService {
-  private readonly adapters: Adapters;
+export interface SetupParams extends Omit<InstallParams, 'logger'> {
+  esClient: ElasticsearchClient;
+}
 
-  constructor(private logger: Logger, private kibanaVersion: string) {
-    this.adapters = {
-      migrations: this.createIndexPatternAdapter({
+export class RuleMigrationsDataService extends SiemMigrationsBaseDataService {
+  protected readonly baseIndexName = '.kibana-siem-rule-migrations';
+
+  /** Adapters are created during `setup`, once the ELSER inference endpoint has been resolved. */
+  private adapters?: RuleMigrationAdapters;
+
+  constructor(
+    private logger: Logger,
+    protected kibanaVersion: string,
+    private readonly elserInferenceId?: string
+  ) {
+    super(kibanaVersion);
+  }
+
+  private ensureAdapters(): RuleMigrationAdapters {
+    if (!this.adapters) {
+      throw new Error('Service not initialized, please call setup first');
+    }
+    return this.adapters;
+  }
+
+  private createAdapters(elserInferenceId: string): RuleMigrationAdapters {
+    return {
+      migrations: this.createRuleIndexPatternAdapter({
         adapterId: 'migrations',
         fieldMap: migrationsFieldMaps,
       }),
-      rules: this.createIndexPatternAdapter({
+      rules: this.createRuleIndexPatternAdapter({
         adapterId: 'rules',
         fieldMap: ruleMigrationsFieldMap,
       }),
-      resources: this.createIndexPatternAdapter({
+      resources: this.createRuleIndexPatternAdapter({
         adapterId: 'resources',
         fieldMap: ruleMigrationResourcesFieldMap,
       }),
-      integrations: this.createIndexAdapter({
+      integrations: this.createRuleIndexAdapter({
         adapterId: 'integrations',
-        fieldMap: integrationsFieldMap,
+        fieldMap: getIntegrationsFieldMap({ elserInferenceId }),
       }),
-      prebuiltrules: this.createIndexAdapter({
+      prebuiltrules: this.createRuleIndexAdapter({
         adapterId: 'prebuiltrules',
-        fieldMap: prebuiltRulesFieldMap,
+        fieldMap: getPrebuiltRulesFieldMap({ elserInferenceId }),
       }),
     };
   }
 
-  private getAdapterIndexName(adapterId: AdapterId) {
-    return `${INDEX_PATTERN}-${adapterId}`;
-  }
-
-  private createIndexPatternAdapter({ adapterId, fieldMap }: CreateAdapterParams) {
+  private createRuleIndexPatternAdapter({ adapterId, fieldMap }: CreateRuleAdapterParams) {
     const name = this.getAdapterIndexName(adapterId);
-    const adapter = new IndexPatternAdapter(name, {
-      kibanaVersion: this.kibanaVersion,
-      totalFieldsLimit: TOTAL_FIELDS_LIMIT,
-    });
-    adapter.setComponentTemplate({ name, fieldMap });
-    adapter.setIndexTemplate({ name, componentTemplateRefs: [name] });
-    return adapter;
+    return this.createIndexPatternAdapter({ name, fieldMap });
   }
 
-  private createIndexAdapter({ adapterId, fieldMap }: CreateAdapterParams) {
+  private createRuleIndexAdapter({ adapterId, fieldMap }: CreateRuleAdapterParams) {
     const name = this.getAdapterIndexName(adapterId);
-    const adapter = new IndexAdapter(name, {
-      kibanaVersion: this.kibanaVersion,
-      totalFieldsLimit: TOTAL_FIELDS_LIMIT,
-    });
-    adapter.setComponentTemplate({ name, fieldMap });
-    adapter.setIndexTemplate({ name, componentTemplateRefs: [name] });
-    return adapter;
+    return this.createIndexAdapter({ name, fieldMap });
   }
 
-  public async install(params: Omit<InstallParams, 'logger'>): Promise<void> {
+  private async runIndexMigrations(esClient: SetupParams['esClient']) {
+    const adapters = this.ensureAdapters();
+    const indexMigrator = new RuleMigrationIndexMigrator(adapters, esClient, this.logger);
+    await indexMigrator.run();
+  }
+
+  private async install(params: SetupParams): Promise<void> {
+    const adapters = this.ensureAdapters();
+    const installParams = { ...params, logger: this.logger };
     await Promise.all([
-      this.adapters.rules.install({ ...params, logger: this.logger }),
-      this.adapters.resources.install({ ...params, logger: this.logger }),
-      this.adapters.integrations.install({ ...params, logger: this.logger }),
-      this.adapters.prebuiltrules.install({ ...params, logger: this.logger }),
-      this.adapters.migrations.install({ ...params, logger: this.logger }),
+      adapters.rules.install(installParams),
+      adapters.resources.install(installParams),
+      adapters.integrations.install(installParams),
+      adapters.prebuiltrules.install(installParams),
+      adapters.migrations.install(installParams),
     ]);
   }
 
+  public async setup(params: SetupParams): Promise<void> {
+    const elserInferenceId = await resolveElserInferenceId(params.esClient, this.elserInferenceId);
+    this.adapters = this.createAdapters(elserInferenceId);
+    await this.install(params);
+    await this.runIndexMigrations(params.esClient);
+  }
+
   public createClient({ spaceId, currentUser, esScopedClient, dependencies }: CreateClientParams) {
-    const indexNameProviders: IndexNameProviders = {
-      rules: this.createIndexNameProvider(this.adapters.rules, spaceId),
-      resources: this.createIndexNameProvider(this.adapters.resources, spaceId),
+    const adapters = this.ensureAdapters();
+    const indexNameProviders: RuleMigrationIndexNameProviders = {
+      rules: this.createIndexNameProvider(adapters.rules, spaceId),
+      resources: this.createIndexNameProvider(adapters.resources, spaceId),
       integrations: async () => this.getAdapterIndexName('integrations'),
       prebuiltrules: async () => this.getAdapterIndexName('prebuiltrules'),
-      migrations: this.createIndexNameProvider(this.adapters.migrations, spaceId),
+      migrations: this.createIndexNameProvider(adapters.migrations, spaceId),
     };
 
     return new RuleMigrationsDataClient(
@@ -123,15 +144,5 @@ export class RuleMigrationsDataService {
       spaceId,
       dependencies
     );
-  }
-
-  private createIndexNameProvider(
-    adapter: IndexPatternAdapter,
-    spaceId: string
-  ): IndexNameProvider {
-    return async () => {
-      await adapter.createIndex(spaceId); // This will resolve instantly when the index is already created
-      return adapter.getIndexName(spaceId);
-    };
   }
 }

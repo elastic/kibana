@@ -9,7 +9,8 @@
 
 import { INDEX_PATTERN_TYPE } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { fieldValidators, ValidationFunc } from '../shared_imports';
+import type { ValidationFunc } from '../shared_imports';
+import { fieldValidators } from '../shared_imports';
 
 export const singleAstriskValidator = (
   ...args: Parameters<ValidationFunc>

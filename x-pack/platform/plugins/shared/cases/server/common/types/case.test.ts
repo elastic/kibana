@@ -7,16 +7,12 @@
 
 import { omit } from 'lodash';
 import { ConnectorTypes, SECURITY_SOLUTION_OWNER } from '../../../common';
-import {
-  CaseTransformedAttributesRt,
-  getPartialCaseTransformedAttributesRt,
-  OwnerRt,
-} from './case';
-import { decodeOrThrow } from '../runtime_types';
+import { getPartialCaseTransformedAttributesSchema, OwnerSchema } from './case';
+import { decodeOrThrowZod } from '../runtime_types';
 import { CaseSeverity, CaseStatuses } from '../../../common/types/domain';
 
 describe('case types', () => {
-  describe('getPartialCaseTransformedAttributesRt', () => {
+  describe('getPartialCaseTransformedAttributesSchema', () => {
     const theCaseAttributes = {
       closed_at: null,
       closed_by: null,
@@ -47,54 +43,52 @@ describe('case types', () => {
       },
       settings: {
         syncAlerts: true,
+        extractObservables: true,
       },
       owner: SECURITY_SOLUTION_OWNER,
       assignees: [],
       observables: [],
     };
-    const caseTransformedAttributesProps = CaseTransformedAttributesRt.types.reduce(
-      (acc, type) => ({ ...acc, ...type.type.props }),
-      {}
-    );
 
-    const type = getPartialCaseTransformedAttributesRt();
+    const schema = getPartialCaseTransformedAttributesSchema();
 
-    it.each(Object.keys(caseTransformedAttributesProps))(
-      'does not throw if %s is omitted',
-      (key) => {
-        const theCase = omit(theCaseAttributes, key);
-        const decodedRes = type.decode(theCase);
+    it.each(Object.keys(theCaseAttributes))('does not throw if %s is omitted', (key) => {
+      const theCase = omit(theCaseAttributes, key);
+      const decoded = schema.parse(theCase);
 
-        expect(decodedRes._tag).toEqual('Right');
-        // @ts-expect-error: the check above ensures that right exists
-        expect(decodedRes.right).toEqual(theCase);
-      }
-    );
+      expect(decoded).toEqual(theCase);
+    });
 
-    it('removes excess properties', () => {
-      const decodedRes = type.decode({ description: 'test', 'not-exists': 'excess' });
+    it('strips excess properties', () => {
+      const decoded = schema.parse({ description: 'test', 'not-exists': 'excess' });
 
-      expect(decodedRes._tag).toEqual('Right');
-      // @ts-expect-error: the check above ensures that right exists
-      expect(decodedRes.right).toEqual({ description: 'test' });
+      expect(decoded).toEqual({ description: 'test' });
+    });
+
+    it('keeps the attachment stats', () => {
+      const decoded = schema.parse({
+        description: 'test',
+        total_alerts: 0,
+        total_comments: 0,
+      });
+
+      expect(decoded).toEqual({ description: 'test', total_alerts: 0, total_comments: 0 });
     });
   });
 
-  describe('OwnerRt', () => {
+  describe('OwnerSchema', () => {
     it('strips excess fields from the result', () => {
-      const res = decodeOrThrow(OwnerRt)({
+      const res = decodeOrThrowZod(OwnerSchema)({
         owner: 'yes',
         created_at: '123',
       });
 
-      expect(res).toStrictEqual({
-        owner: 'yes',
-      });
+      expect(res).toStrictEqual({ owner: 'yes' });
     });
 
     it('throws an error when owner is not present', () => {
-      expect(() => decodeOrThrow(OwnerRt)({})).toThrowErrorMatchingInlineSnapshot(
-        `"Invalid value \\"undefined\\" supplied to \\"owner\\""`
+      expect(() => decodeOrThrowZod(OwnerSchema)({})).toThrowErrorMatchingInlineSnapshot(
+        `"owner: Invalid input: expected string, received undefined"`
       );
     });
   });

@@ -8,64 +8,127 @@
  */
 
 import { omit } from 'lodash';
-import { internalStateSlice } from './internal_state';
-import {
-  loadDataViewList,
-  appendAdHocDataViews,
-  initializeSession,
-  replaceAdHocDataViewWithId,
-  setAdHocDataViews,
-  setDataView,
-  setDefaultProfileAdHocDataViews,
-  setTabs,
-  updateTabs,
-  disconnectTab,
-} from './actions';
+import { internalStateSlice, syncLocallyPersistedTabState } from './internal_state';
+import * as actions from './actions';
 
-export type { DiscoverInternalState, TabState, InternalStateDataRequestParams } from './types';
+export {
+  type DiscoverInternalState,
+  type TabState,
+  type TabStateGlobalState,
+  type RecentlyClosedTabState,
+  type DiscoverAppState,
+  type ExpandedDocCascadePath,
+  type InternalStateDataRequestParams,
+  type CascadedDocumentsState,
+  type ProfileAppStateDefaultField,
+  type ProfileAppStateDefaultFields,
+  type ProfileAppStateDefaults,
+  type ProfileAppStateSnapshot,
+  type UpdateESQLQueryActionPayload,
+  PROFILE_APP_STATE_DEFAULT_FIELDS,
+  TabInitializationStatus,
+  TabsBarVisibility,
+} from './types';
 
-export { type InternalStateStore, createInternalStateStore } from './internal_state';
+export { DEFAULT_EXPANDED_DOC_OWNER, DEFAULT_TAB_STATE } from './constants';
+
+export {
+  type InternalStateStore,
+  type InternalStateDispatch,
+  type InternalStateDependencies,
+  createInternalStateStore,
+} from './internal_state';
 
 export const internalStateActions = {
   ...omit(
     internalStateSlice.actions,
     'setTabs',
-    'setDataViewId',
-    'setDefaultProfileAdHocDataViewIds'
+    'setPersistedDiscoverSession',
+    'disconnectTab',
+    'setDefaultProfileAdHocDataViewIds',
+    'setAppState',
+    'setProfileState',
+    'syncProfileAppStateSnapshot',
+    'setExpandedDoc'
   ),
-  loadDataViewList,
-  setTabs,
-  updateTabs,
-  disconnectTab,
-  setDataView,
-  setAdHocDataViews,
-  setDefaultProfileAdHocDataViews,
-  appendAdHocDataViews,
-  replaceAdHocDataViewWithId,
-  initializeSession,
+  ...actions,
+  syncLocallyPersistedTabState,
 };
 
 export {
   InternalStateProvider,
   useInternalStateDispatch,
+  useInternalStateGetState,
+  useInternalStateSubscribe,
   useInternalStateSelector,
   CurrentTabProvider,
   useCurrentTabSelector,
+  useAppStateSelector,
   useCurrentTabAction,
+  useCurrentChartPortalNode,
   useDataViewsForPicker,
 } from './hooks';
 
-export { selectAllTabs, selectTab } from './selectors';
+export {
+  selectAllTabs,
+  selectRecentlyClosedTabs,
+  selectPersistedDiscoverSession,
+  selectSavedDataViews,
+  selectTab,
+  selectTabAppState,
+  selectTabCombinedFilters,
+  selectIsTabsBarHidden,
+  selectHasUnsavedChanges,
+  searchSourceComparator,
+  selectTabSavedSearch,
+  selectTabSavedSearchByValueAttributes,
+} from './selectors';
 
 export {
   type RuntimeStateManager,
+  type ReactiveTabRuntimeState,
+  type CombinedRuntimeState,
+  type InitialUnifiedHistogramLayoutProps,
+  DEFAULT_HISTOGRAM_KEY_PREFIX,
   createRuntimeStateManager,
   useRuntimeState,
   selectTabRuntimeState,
+  selectDataSourceProfileId,
+  selectCurrentProfileStateDefinition,
+  selectCurrentProfileUrlState,
+  selectCurrentProfileLocatorState,
+  selectCurrentTabType,
+  selectTabTypeForPersistence,
+  selectIsDataViewUsedInMultipleRuntimeTabStates,
+  selectInitialUnifiedHistogramLayoutPropsMap,
   useCurrentTabRuntimeState,
+  useCurrentTabDataStateContainer,
   RuntimeStateProvider,
+  RuntimeStateManagerProvider,
+  useRuntimeStateManager,
+  getDataViewIdOfSource,
+  pinDataViewOfSource,
+  getDataViewOfSource,
+  getTabDataView,
   useCurrentDataView,
+  useCurrentDataSource,
   useAdHocDataViews,
 } from './runtime_state';
 
-export { type TabActionInjector, createTabActionInjector, createTabItem } from './utils';
+export {
+  type TabActionInjector,
+  createTabActionInjector,
+  createTabItem,
+  getSerializedSearchSourceDataViewDetails,
+  parseControlGroupJson,
+  extractEsqlVariables,
+} from './utils';
+
+export {
+  fromSavedObjectTabToSearchSource,
+  fromSavedObjectTabToAppState,
+  fromSavedObjectTabToTabState,
+  fromSavedObjectTabToSavedSearch,
+  fromTabStateToSavedObjectTab,
+  fromSavedSearchToSavedObjectTab,
+} from './tab_mapping_utils';

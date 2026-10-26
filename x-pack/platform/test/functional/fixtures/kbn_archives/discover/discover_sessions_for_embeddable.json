@@ -1,0 +1,203 @@
+{
+  "attributes": {
+    "title": "Discover embeddable multi tab",
+    "description": "",
+    "columns": ["@timestamp", "agent"],
+    "sort": [["@timestamp", "desc"]],
+    "grid": {},
+    "hideChart": false,
+    "isTextBasedQuery": false,
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"highlightAll\":true,\"version\":true,\"query\":{\"language\":\"kuery\",\"query\":\"\"},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+    },
+    "tabs": [
+      {
+        "id": "default-tab",
+        "label": "Default tab",
+        "attributes": {
+          "columns": ["@timestamp", "agent"],
+          "sort": [["@timestamp", "desc"]],
+          "grid": {},
+          "hideChart": false,
+          "isTextBasedQuery": false,
+          "kibanaSavedObjectMeta": {
+            "searchSourceJSON": "{\"highlightAll\":true,\"version\":true,\"query\":{\"language\":\"kuery\",\"query\":\"\"},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+          }
+        }
+      },
+      {
+        "id": "filtered-tab",
+        "label": "Filtered tab",
+        "attributes": {
+          "columns": ["bytes", "clientip"],
+          "sort": [["bytes", "asc"]],
+          "grid": {},
+          "hideChart": false,
+          "isTextBasedQuery": false,
+          "kibanaSavedObjectMeta": {
+            "searchSourceJSON": "{\"highlightAll\":true,\"version\":true,\"query\":{\"language\":\"kuery\",\"query\":\"bytes > 5000\"},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+          }
+        }
+      },
+      {
+        "id": "filtered-tab-2",
+        "label": "Filtered tab 2",
+        "attributes": {
+          "columns": ["bytes", "clientip", "agent"],
+          "sort": [["bytes", "asc"]],
+          "grid": {},
+          "hideChart": false,
+          "isTextBasedQuery": false,
+          "kibanaSavedObjectMeta": {
+            "searchSourceJSON": "{\"highlightAll\":true,\"version\":true,\"query\":{\"language\":\"kuery\",\"query\":\"bytes > 5000\"},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+          }
+        }
+      }
+    ]
+  },
+  "id": "discover-embeddable-multi-tab-ftr",
+  "references": [
+    {
+      "id": "0bf35f60-3dc9-11e8-8660-4d65aa086b3c",
+      "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+      "type": "index-pattern"
+    }
+  ],
+  "type": "search"
+}
+
+{
+  "attributes": {
+    "title": "Discover embeddable deleted tab editor",
+    "description": "",
+    "columns": ["@timestamp", "agent"],
+    "sort": [["@timestamp", "desc"]],
+    "grid": {},
+    "hideChart": false,
+    "isTextBasedQuery": false,
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"highlightAll\":true,\"version\":true,\"query\":{\"language\":\"kuery\",\"query\":\"\"},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+    },
+    "tabs": [
+      {
+        "id": "default-tab",
+        "label": "Default tab",
+        "attributes": {
+          "columns": ["@timestamp", "agent"],
+          "sort": [["@timestamp", "desc"]],
+          "grid": {},
+          "hideChart": false,
+          "isTextBasedQuery": false,
+          "kibanaSavedObjectMeta": {
+            "searchSourceJSON": "{\"highlightAll\":true,\"version\":true,\"query\":{\"language\":\"kuery\",\"query\":\"\"},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+          }
+        }
+      },
+      {
+        "id": "filtered-tab",
+        "label": "Filtered tab",
+        "attributes": {
+          "columns": ["bytes", "clientip"],
+          "sort": [["bytes", "asc"]],
+          "grid": {},
+          "hideChart": false,
+          "isTextBasedQuery": false,
+          "kibanaSavedObjectMeta": {
+            "searchSourceJSON": "{\"highlightAll\":true,\"version\":true,\"query\":{\"language\":\"kuery\",\"query\":\"bytes > 5000\"},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+          }
+        }
+      },
+      {
+        "id": "filtered-tab-2",
+        "label": "Filtered tab 2",
+        "attributes": {
+          "columns": ["bytes", "clientip", "agent"],
+          "sort": [["bytes", "asc"]],
+          "grid": {},
+          "hideChart": false,
+          "isTextBasedQuery": false,
+          "kibanaSavedObjectMeta": {
+            "searchSourceJSON": "{\"highlightAll\":true,\"version\":true,\"query\":{\"language\":\"kuery\",\"query\":\"bytes > 5000\"},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+          }
+        }
+      }
+    ]
+  },
+  "id": "discover-embeddable-deleted-tab-editor-ftr",
+  "references": [
+    {
+      "id": "0bf35f60-3dc9-11e8-8660-4d65aa086b3c",
+      "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+      "type": "index-pattern"
+    }
+  ],
+  "type": "search"
+}
+
+{
+  "attributes": {
+    "title": "Discover embeddable deleted tab read only",
+    "description": "",
+    "columns": ["@timestamp", "agent"],
+    "sort": [["@timestamp", "desc"]],
+    "grid": {},
+    "hideChart": false,
+    "isTextBasedQuery": false,
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"highlightAll\":true,\"version\":true,\"query\":{\"language\":\"kuery\",\"query\":\"\"},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+    },
+    "tabs": [
+      {
+        "id": "default-tab",
+        "label": "Default tab",
+        "attributes": {
+          "columns": ["@timestamp", "agent"],
+          "sort": [["@timestamp", "desc"]],
+          "grid": {},
+          "hideChart": false,
+          "isTextBasedQuery": false,
+          "kibanaSavedObjectMeta": {
+            "searchSourceJSON": "{\"highlightAll\":true,\"version\":true,\"query\":{\"language\":\"kuery\",\"query\":\"\"},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+          }
+        }
+      },
+      {
+        "id": "filtered-tab",
+        "label": "Filtered tab",
+        "attributes": {
+          "columns": ["bytes", "clientip"],
+          "sort": [["bytes", "asc"]],
+          "grid": {},
+          "hideChart": false,
+          "isTextBasedQuery": false,
+          "kibanaSavedObjectMeta": {
+            "searchSourceJSON": "{\"highlightAll\":true,\"version\":true,\"query\":{\"language\":\"kuery\",\"query\":\"bytes > 5000\"},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+          }
+        }
+      },
+      {
+        "id": "filtered-tab-2",
+        "label": "Filtered tab 2",
+        "attributes": {
+          "columns": ["bytes", "clientip", "agent"],
+          "sort": [["bytes", "asc"]],
+          "grid": {},
+          "hideChart": false,
+          "isTextBasedQuery": false,
+          "kibanaSavedObjectMeta": {
+            "searchSourceJSON": "{\"highlightAll\":true,\"version\":true,\"query\":{\"language\":\"kuery\",\"query\":\"bytes > 5000\"},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+          }
+        }
+      }
+    ]
+  },
+  "id": "discover-embeddable-deleted-tab-read-only-ftr",
+  "references": [
+    {
+      "id": "0bf35f60-3dc9-11e8-8660-4d65aa086b3c",
+      "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+      "type": "index-pattern"
+    }
+  ],
+  "type": "search"
+}

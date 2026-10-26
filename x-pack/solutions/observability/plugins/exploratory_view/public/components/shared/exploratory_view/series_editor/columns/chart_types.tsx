@@ -9,10 +9,10 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiIcon, EuiSuperSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { SeriesType } from '@kbn/lens-plugin/public';
+import type { SeriesType } from '@kbn/lens-plugin/public';
 import { useFetcher } from '@kbn/observability-shared-plugin/public';
-import { ExploratoryViewPublicPluginsStart } from '../../../../../plugin';
-import { SeriesUrl } from '../../../../..';
+import type { ExploratoryViewPublicPluginsStart } from '../../../../../plugin';
+import type { SeriesUrl } from '../../../../..';
 import { useSeriesStorage } from '../../hooks/use_series_storage';
 
 const CHART_TYPE_LABEL = i18n.translate('xpack.exploratoryView.expView.chartTypes.label', {
@@ -89,7 +89,7 @@ export function XYChartTypesSelect({
     const LabelWithIcon = (
       <EuiFlexGroup gutterSize="s" alignItems="center">
         <EuiFlexItem grow={false}>
-          <EuiIcon type={icon} />
+          <EuiIcon type={icon} aria-hidden={true} />
         </EuiFlexItem>
         <EuiFlexItem>{fullLabel || label}</EuiFlexItem>
       </EuiFlexGroup>

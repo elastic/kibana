@@ -9,15 +9,13 @@ import React, { useEffect, useState, useMemo, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import datemath from '@kbn/datemath';
 import { EuiFlexGroup, EuiFlexItem, EuiStat } from '@elastic/eui';
-import { IExecutionKPIResult } from '@kbn/alerting-plugin/common';
-import {
-  ComponentOpts as RuleApis,
-  withBulkRuleOperations,
-} from '../../common/components/with_bulk_rule_api_operations';
+import type { IExecutionKPIResult } from '@kbn/alerting-plugin/common';
+import type { ComponentOpts as RuleApis } from '../../common/components/with_bulk_rule_api_operations';
+import { withBulkRuleOperations } from '../../common/components/with_bulk_rule_api_operations';
 import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
 import { useKibana } from '../../../../common/lib/kibana';
 import { EventLogListStatus, EventLogStat } from '../../common/components/event_log';
-import { RefreshToken } from './types';
+import type { RefreshToken } from './types';
 
 const getParsedDate = (date: string) => {
   if (date.includes('now')) {
@@ -43,7 +41,8 @@ const RESPONSE_TOOLTIP = i18n.translate(
 const ALERTS_TOOLTIP = i18n.translate(
   'xpack.triggersActionsUI.sections.ruleDetails.ruleEventLogListKpi.alertsTooltip',
   {
-    defaultMessage: 'The alert statuses for up to 10,000 most recent rule runs.',
+    defaultMessage:
+      'The alert statuses for up to 10,000 most recent rule runs within the selected time range. Active is the sum of the active alerts reported by each rule run, so an alert that stays active across several runs is counted once per run.',
   }
 );
 

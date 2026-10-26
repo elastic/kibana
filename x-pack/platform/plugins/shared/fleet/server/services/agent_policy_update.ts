@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { KibanaRequest } from '@kbn/core/server';
 import type { ElasticsearchClient } from '@kbn/core/server';
 
 import type { AgentPolicy } from '../../common';
@@ -15,21 +14,6 @@ import { unenrollForAgentPolicyId } from './agents';
 import { agentPolicyService } from './agent_policy';
 import { appContextService } from './app_context';
 
-const fakeRequest = {
-  headers: {},
-  getBasePath: () => '',
-  path: '/',
-  route: { settings: {} },
-  url: {
-    href: '/',
-  },
-  raw: {
-    req: {
-      url: '/',
-    },
-  },
-} as unknown as KibanaRequest;
-
 export async function agentPolicyUpdateEventHandler(
   esClient: ElasticsearchClient,
   action: string,
@@ -37,10 +21,11 @@ export async function agentPolicyUpdateEventHandler(
   options?: { skipDeploy?: boolean; spaceId?: string; agentPolicy?: AgentPolicy | null }
 ) {
   // `soClient` from ingest `appContextService` is used to create policy change actions
-  // to ensure encrypted SOs are handled correctly
-  const internalSoClient = options?.spaceId
-    ? appContextService.getInternalUserSOClientForSpaceId(options?.spaceId)
-    : appContextService.getInternalUserSOClient(fakeRequest);
+  // to ensure encrypted SOs are handled correctly.
+  // getInternalUserSOClientForSpaceId handles both cases: when spaceId is defined it scopes to
+  // that space; when undefined it returns the client without the Spaces extension, which avoids
+  // a spurious _has_privileges ES call on a context with no user credentials.
+  const internalSoClient = appContextService.getInternalUserSOClientForSpaceId(options?.spaceId);
 
   if (action === 'created') {
     await generateEnrollmentAPIKey(internalSoClient, esClient, {

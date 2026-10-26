@@ -17,7 +17,7 @@ import {
   type FeatureProcessor,
 } from '@kbn/ml-data-frame-analytics-utils';
 import type { DeepPartial } from '@kbn/utility-types';
-import type { DeepReadonly } from '../../../../../../../common/types/common';
+import type { DeepReadonly } from '@kbn/ml-common-types/common';
 import { checkPermission } from '../../../../../capabilities/check_capabilities';
 import { mlNodesAvailable } from '../../../../../ml_nodes_check';
 
@@ -386,7 +386,7 @@ export function getFormStateFromJobConfig(
     resultState.destinationIndex = analyticsJobConfig?.dest.index ?? '';
   }
 
-  const analysisConfig = analyticsJobConfig.analysis[jobType];
+  const analysisConfig = analyticsJobConfig.analysis?.[jobType];
 
   for (const key in analysisConfig) {
     if (Object.hasOwn(analysisConfig, key)) {

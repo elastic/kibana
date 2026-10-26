@@ -7,8 +7,10 @@
 
 import { useEffect, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
+import { isMac } from '@kbn/shared-ux-utility';
+import { buildCommandUsageList } from '../../../service/utils';
+import { useInputCommand } from '../../../hooks/state_selectors/use_input_command';
 import { useWithInputTextEntered } from '../../../hooks/state_selectors/use_with_input_text_entered';
-import { getArgumentsForCommand } from '../../../service/parsed_command_input';
 import type { CommandDefinition } from '../../..';
 import { useConsoleStateDispatch } from '../../../hooks/state_selectors/use_console_state_dispatch';
 import { useWithInputShowPopover } from '../../../hooks/state_selectors/use_with_input_show_popover';
@@ -27,7 +29,11 @@ const NO_ARGUMENTS_HINT = i18n.translate('xpack.securitySolution.useInputHints.n
 
 export const UP_ARROW_ACCESS_HISTORY_HINT = i18n.translate(
   'xpack.securitySolution.useInputHints.viewInputHistory',
-  { defaultMessage: 'Press the up arrow key to access previously entered commands' }
+  {
+    defaultMessage:
+      'Press [{isMac, select, true {⌥} other {ALT}}][SPACE] for list of commands or arguments for a command. Press [UP] arrow key for previously entered commands',
+    values: { isMac },
+  }
 );
 
 /**
@@ -36,23 +42,27 @@ export const UP_ARROW_ACCESS_HISTORY_HINT = i18n.translate(
 export const useInputHints = () => {
   const dispatch = useConsoleStateDispatch();
   const isInputPopoverOpen = Boolean(useWithInputShowPopover());
-  const commandEntered = useWithInputCommandEntered();
+  const commandNameEntered = useWithInputCommandEntered();
   const commandList = useWithCommandList();
+  const inputCommand = useInputCommand();
   const { leftOfCursorText } = useWithInputTextEntered();
 
   const commandEnteredDefinition = useMemo<CommandDefinition | undefined>(() => {
-    if (commandEntered) {
-      return commandList.find((commandDef) => commandDef.name === commandEntered);
+    if (commandNameEntered) {
+      return commandList.find((commandDef) => commandDef.name === commandNameEntered);
     }
-  }, [commandEntered, commandList]);
+  }, [commandNameEntered, commandList]);
 
   useEffect(() => {
     // If we know the command name and the input popover is not opened, then show hints (if any)
-    if (commandEntered && !isInputPopoverOpen) {
+    if (commandNameEntered && !isInputPopoverOpen) {
       // Is valid command name? ==> show usage
       if (commandEnteredDefinition && commandEnteredDefinition.helpHidden !== true) {
         const exampleInstruction = commandEnteredDefinition?.exampleInstruction ?? '';
-        const exampleUsage = commandEnteredDefinition?.exampleUsage ?? '';
+        const exampleUsage =
+          typeof commandEnteredDefinition?.exampleUsage === 'function'
+            ? commandEnteredDefinition?.exampleUsage(inputCommand)
+            : commandEnteredDefinition?.exampleUsage ?? '';
 
         let hint = exampleInstruction ?? '';
 
@@ -76,15 +86,14 @@ export const useInputHints = () => {
         //
         // Generated usage is only created if the command has arguments.
         if (!hint || !exampleUsage) {
-          const commandArguments = getArgumentsForCommand(commandEnteredDefinition);
-
-          if (commandArguments.length > 0) {
-            hint += `${commandEnteredDefinition.name} ${commandArguments}`;
+          if (commandEnteredDefinition.args) {
+            hint +=
+              (hint.length > 0 ? ' | ' : '') +
+              buildCommandUsageList(commandEnteredDefinition).shift();
           } else {
             hint += NO_ARGUMENTS_HINT;
           }
         }
-
         dispatch({
           type: 'updateFooterContent',
           payload: { value: hint },
@@ -95,7 +104,7 @@ export const useInputHints = () => {
         dispatch({
           type: 'updateFooterContent',
           payload: {
-            value: UNKNOWN_COMMAND_HINT(commandEntered),
+            value: UNKNOWN_COMMAND_HINT(commandNameEntered),
           },
         });
 
@@ -110,5 +119,12 @@ export const useInputHints = () => {
       });
       dispatch({ type: 'setInputState', payload: { value: undefined } });
     }
-  }, [commandEntered, commandEnteredDefinition, dispatch, isInputPopoverOpen, leftOfCursorText]);
+  }, [
+    commandNameEntered,
+    commandEnteredDefinition,
+    dispatch,
+    isInputPopoverOpen,
+    leftOfCursorText,
+    inputCommand,
+  ]);
 };

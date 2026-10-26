@@ -51,9 +51,6 @@ async function unmuteInstanceWithOCC(
       operation: WriteOperations.UnmuteAlert,
       entity: AlertingAuthorizationEntity.Rule,
     });
-    if (attributes.actions.length) {
-      await context.actionsAuthorization.ensureAuthorized({ operation: 'execute' });
-    }
   } catch (error) {
     context.auditLogger?.log(
       ruleAuditEvent({
@@ -77,15 +74,29 @@ async function unmuteInstanceWithOCC(
 
   const mutedInstanceIds = attributes.mutedInstanceIds || [];
   if (!attributes.muteAll && mutedInstanceIds.includes(alertInstanceId)) {
+    const indices = context.getAlertIndicesAlias([attributes.alertTypeId], context.spaceId);
+    const username = await context.getUserName();
+    const profileUid = await context.getProfileUid();
+
     await updateRuleSo({
       savedObjectsClient: context.unsecuredSavedObjectsClient,
       savedObjectsUpdateOptions: { version },
       id: ruleId,
       updateRuleAttributes: updateMeta(context, {
         mutedInstanceIds: mutedInstanceIds.filter((id: string) => id !== alertInstanceId),
-        updatedBy: await context.getUserName(),
+        updatedBy: username,
+        updatedByProfileUid: profileUid,
         updatedAt: new Date().toISOString(),
       }),
     });
+
+    if (indices && indices.length > 0) {
+      await context.alertsService?.unmuteAlertInstance({
+        ruleId,
+        alertInstanceId,
+        indices,
+        logger: context.logger,
+      });
+    }
   }
 }

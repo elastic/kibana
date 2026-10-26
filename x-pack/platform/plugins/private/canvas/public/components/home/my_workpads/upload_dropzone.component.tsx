@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import React, { FC, PropsWithChildren } from 'react';
+import type { FC, PropsWithChildren } from 'react';
+import React, { useMemo } from 'react';
+import { css } from '@emotion/react';
+import { useEuiTheme } from '@elastic/eui';
 import Dropzone from 'react-dropzone';
 
 import './upload_dropzone.scss';
@@ -20,6 +23,17 @@ export const UploadDropzone: FC<PropsWithChildren<Props>> = ({
   disabled,
   children,
 }) => {
+  const { euiTheme } = useEuiTheme();
+  const styles = useMemo(
+    () => css`
+      &.canvasWorkpad__dropzone--active {
+        background-color: ${euiTheme.colors.lightestShade};
+        border-color: ${euiTheme.colors.lightShade};
+      }
+    `,
+    [euiTheme]
+  );
+
   const dropFn = (acceptedFiles: File[]) => {
     const fileList = acceptedFiles as unknown as FileList;
     onDrop(fileList);
@@ -33,6 +47,7 @@ export const UploadDropzone: FC<PropsWithChildren<Props>> = ({
               isDragActive ? ' canvasWorkpad__dropzone--active' : ''
             }`,
           })}
+          css={styles}
         >
           {children}
         </div>

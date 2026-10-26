@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { AttachmentType } from '@kbn/cases-plugin/common';
+import { COMMENT_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
 import {
-  DataQualityPanel,
   DATA_QUALITY_SUBTITLE,
+  DataQualityPanel,
   ECS_REFERENCE_URL,
 } from '@kbn/ecs-data-quality-dashboard';
 import type { OnTimeChangeProps } from '@elastic/eui';
-import { EuiLink, EuiLoadingSpinner, EuiText, EuiToolTip, EuiSuperDatePicker } from '@elastic/eui';
+import { EuiLink, EuiLoadingSpinner, EuiSuperDatePicker, EuiText, EuiToolTip } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { useAssistantAvailability } from '../../assistant/use_assistant_availability';
@@ -23,16 +23,18 @@ import { EmptyPrompt } from '../../common/components/empty_prompt';
 import { useLocalStorage } from '../../common/components/local_storage';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
 import { APP_ID, DEFAULT_BYTES_FORMAT, DEFAULT_NUMBER_FORMAT } from '../../../common/constants';
-import { useSourcererDataView } from '../../sourcerer/containers';
 import { KibanaServices, useKibana, useToasts, useUiSetting$ } from '../../common/lib/kibana';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { useSignalIndex } from '../../detections/containers/detection_engine/alerts/use_signal_index';
 import * as i18n from './translations';
 import {
+  DataQualityEventTypes,
   type ReportDataQualityCheckAllCompletedParams,
   type ReportDataQualityIndexCheckedParams,
-  DataQualityEventTypes,
 } from '../../common/lib/telemetry';
+import { useDataView } from '../../data_view_manager/hooks/use_data_view';
+import { useSelectedPatterns } from '../../data_view_manager/hooks/use_selected_patterns';
+import { PageLoader } from '../../common/components/page_loader';
 
 const LOCAL_STORAGE_KEY = 'dataQualityDashboardLastChecked';
 
@@ -47,7 +49,12 @@ const DataQualityComponent: React.FC = () => {
 
   const [defaultBytesFormat] = useUiSetting$<string>(DEFAULT_BYTES_FORMAT);
   const [defaultNumberFormat] = useUiSetting$<string>(DEFAULT_NUMBER_FORMAT);
-  const { indicesExist, loading: isSourcererLoading, selectedPatterns } = useSourcererDataView();
+
+  const { dataView, status } = useDataView();
+  const selectedPatterns = useSelectedPatterns(dataView);
+
+  const indicesExist = !!dataView?.matchedIndices?.length;
+
   const { signalIndexName, loading: isSignalIndexNameLoading } = useSignalIndex();
   const { configSettings, cases, telemetry } = useKibana().services;
   const isILMAvailable = configSettings.ILMEnabled;
@@ -70,9 +77,16 @@ const DataQualityComponent: React.FC = () => {
     }
   }, [isILMAvailable]);
 
+  /**
+   * Merges the detection alerts index with sourcerer / data view index patterns for the ECS Data Quality panel.
+   * Deduplicates when the same pattern (e.g. `.alerts-security.alerts-default`) appears as `signalIndexName` and again in `selectedPatterns`.
+   */
   const alertsAndSelectedPatterns = useMemo(
-    () =>
-      signalIndexName != null ? [signalIndexName, ...selectedPatterns] : [...selectedPatterns],
+    () => [
+      ...new Set(
+        signalIndexName != null ? [signalIndexName, ...selectedPatterns] : selectedPatterns
+      ),
+    ],
     [selectedPatterns, signalIndexName]
   );
 
@@ -104,12 +118,9 @@ const DataQualityComponent: React.FC = () => {
   });
   const openCreateCaseFlyout = useCallback(
     ({ comments, headerContent }: { comments: string[]; headerContent?: React.ReactNode }) => {
-      const attachments: Array<{
-        comment: string;
-        type: AttachmentType.user;
-      }> = comments.map((x) => ({
-        comment: x,
-        type: AttachmentType.user,
+      const attachments = comments.map((x) => ({
+        type: COMMENT_ATTACHMENT_TYPE,
+        data: { content: x },
       }));
 
       createCaseFlyout.open({ attachments, headerContent });
@@ -131,8 +142,12 @@ const DataQualityComponent: React.FC = () => {
     [telemetry]
   );
 
-  if (isSourcererLoading || isSignalIndexNameLoading) {
+  if (status === 'loading' || isSignalIndexNameLoading) {
     return <EuiLoadingSpinner size="l" data-test-subj="ecsDataQualityDashboardLoader" />;
+  }
+
+  if (status === 'pristine') {
+    return <PageLoader />;
   }
 
   return (

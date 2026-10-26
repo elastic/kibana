@@ -1,15 +1,12 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
-    "outDir": "target/types",
+    "outDir": "target/types"
   },
-  "include": [
-    "common/**/*",
-    "public/**/*",
-    "server/**/*",
-  ],
+  "include": ["common/**/*", "public/**/*", "server/**/*", "test/scout*/**/*"],
   "kbn_references": [
     "@kbn/core",
+    "@kbn/app-header",
     "@kbn/data-plugin",
     "@kbn/home-plugin",
     "@kbn/kibana-react-plugin",
@@ -33,8 +30,14 @@
     "@kbn/code-editor",
     "@kbn/react-kibana-context-render",
     "@kbn/shared-ux-table-persist",
+    "@kbn/css-utils",
+    "@kbn/content-management-plugin",
+    "@kbn/scout",
+    "@kbn/repo-info",
+    "@kbn/core-saved-objects-server"
   ],
   "exclude": [
     "target/**/*",
+    "public/management_section/objects_table/saved_objects_table_pseudo.tsx"
   ]
 }

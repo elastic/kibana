@@ -20,7 +20,7 @@ export const EmptyPrompt = ({
     if (showCreateRule) {
       return [
         <EuiButton
-          iconType="plusInCircle"
+          iconType="plusCircle"
           data-test-subj="createFirstRuleButton"
           key="create-action"
           fill

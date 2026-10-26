@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { EuiBetaBadge, IconType } from '@elastic/eui';
+import type { IconType } from '@elastic/eui';
+import { EuiBetaBadge } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 
@@ -13,7 +14,7 @@ type Props = {
   icon?: IconType;
 } & Pick<React.ComponentProps<typeof EuiBetaBadge>, 'size' | 'style'>;
 
-export function TechnicalPreviewBadge({ icon = 'beaker', size, style }: Props) {
+export function TechnicalPreviewBadge({ icon = 'flask', size, style }: Props) {
   return (
     <EuiBetaBadge
       label={i18n.translate('xpack.observabilityShared.technicalPreviewBadgeLabel', {

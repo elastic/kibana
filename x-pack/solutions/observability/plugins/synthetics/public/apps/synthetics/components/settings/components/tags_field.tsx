@@ -6,19 +6,23 @@
  */
 
 import React from 'react';
-import { EuiComboBox, EuiFormRow } from '@elastic/eui';
-import { Control, Controller, FieldErrors } from 'react-hook-form';
+import { EuiFormRow } from '@elastic/eui';
+import type { Control, FieldErrors } from 'react-hook-form';
+import { Controller } from 'react-hook-form';
 import { i18n } from '@kbn/i18n';
-import { PrivateLocation } from '../../../../../../common/runtime_types';
+import { TagsComboBox } from '@kbn/observability-shared-plugin/public';
+import type { PrivateLocation } from '../../../../../../common/runtime_types';
 
 export function TagsField({
   tagsList,
   control,
   errors,
+  isDisabled,
 }: {
   tagsList: string[];
   errors: FieldErrors;
   control: Control<PrivateLocation, any>;
+  isDisabled?: boolean;
 }) {
   return (
     <EuiFormRow fullWidth label={TAGS_LABEL}>
@@ -26,20 +30,17 @@ export function TagsField({
         name="tags"
         control={control}
         render={({ field }) => (
-          <EuiComboBox
+          <TagsComboBox
+            isDisabled={isDisabled}
             fullWidth
             aria-label={TAGS_LABEL}
             placeholder={TAGS_LABEL}
             isInvalid={!!errors?.tags}
-            selectedOptions={field.value?.map((tag) => ({ label: tag, value: tag })) ?? []}
+            selectedTags={field.value ?? []}
             options={tagsList.map((tag) => ({ label: tag, value: tag }))}
-            onCreateOption={(newTag) => {
-              field.onChange([...(field.value ?? []), newTag]);
-            }}
-            {...field}
-            onChange={(selectedTags) => {
-              field.onChange(selectedTags.map((tag) => tag.value));
-            }}
+            onChange={field.onChange}
+            onBlur={field.onBlur}
+            copyButtonDataTestSubj="syntheticsPrivateLocationTagsCopyButton"
           />
         )}
       />

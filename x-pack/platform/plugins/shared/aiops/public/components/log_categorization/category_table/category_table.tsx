@@ -31,6 +31,7 @@ import type { EventRate } from '../use_categorize_request';
 
 import { ExpandedRow } from './expanded_row';
 import { FormattedPatternExamples, FormattedTokens } from '../format_category';
+import { useIsInteractive } from '../../../hooks/use_is_interactive';
 
 interface Props {
   categories: Category[];
@@ -48,6 +49,7 @@ interface Props {
   displayExamples?: boolean;
   selectable?: boolean;
   onRenderComplete?: () => void;
+  parentApi?: unknown;
 }
 
 export const CategoryTable: FC<Props> = ({
@@ -61,10 +63,13 @@ export const CategoryTable: FC<Props> = ({
   displayExamples = true,
   selectable = true,
   onRenderComplete,
+  parentApi,
 }) => {
   const { euiTheme } = useEuiTheme();
   const primaryBackgroundColor = useEuiBackgroundColor('primary');
   const { onTableChange, pagination, sorting } = tableState;
+
+  const isInteractive = useIsInteractive(parentApi);
 
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<Record<string, JSX.Element>>(
     {}
@@ -95,10 +100,8 @@ export const CategoryTable: FC<Props> = ({
       width: '40px',
       isExpander: true,
       render: (item: Category) => (
-        <EuiButtonIcon
-          data-test-subj="aiopsLogPatternsColumnsButton"
-          onClick={() => toggleDetails(item)}
-          aria-label={
+        <EuiToolTip
+          content={
             itemIdToExpandedRowMap[item.key]
               ? i18n.translate('xpack.aiops.logCategorization.column.collapseRow', {
                   defaultMessage: 'Collapse',
@@ -107,8 +110,23 @@ export const CategoryTable: FC<Props> = ({
                   defaultMessage: 'Expand',
                 })
           }
-          iconType={itemIdToExpandedRowMap[item.key] ? 'arrowDown' : 'arrowRight'}
-        />
+          disableScreenReaderOutput
+        >
+          <EuiButtonIcon
+            data-test-subj="aiopsLogPatternsColumnsButton"
+            onClick={() => toggleDetails(item)}
+            aria-label={
+              itemIdToExpandedRowMap[item.key]
+                ? i18n.translate('xpack.aiops.logCategorization.column.collapseRow', {
+                    defaultMessage: 'Collapse',
+                  })
+                : i18n.translate('xpack.aiops.logCategorization.column.expandRow', {
+                    defaultMessage: 'Expand',
+                  })
+            }
+            iconType={itemIdToExpandedRowMap[item.key] ? 'chevronSingleDown' : 'chevronSingleRight'}
+          />
+        </EuiToolTip>
       ),
       'data-test-subj': 'aiopsLogPatternsExpandRowToggle',
     },
@@ -127,14 +145,18 @@ export const CategoryTable: FC<Props> = ({
       sortable: true,
       render: (item: Category) => <FormattedPatternExamples category={item} count={1} />,
     },
-    {
-      name: i18n.translate('xpack.aiops.logCategorization.column.actions', {
-        defaultMessage: 'Actions',
-      }),
-      sortable: false,
-      width: '65px',
-      actions,
-    },
+    ...(isInteractive
+      ? [
+          {
+            name: i18n.translate('xpack.aiops.logCategorization.column.actions', {
+              defaultMessage: 'Actions',
+            }),
+            sortable: false,
+            width: '65px',
+            actions,
+          },
+        ]
+      : []),
   ] as Array<EuiBasicTableColumn<Category>>;
 
   if (displayExamples === false) {
@@ -152,7 +174,13 @@ export const CategoryTable: FC<Props> = ({
             {i18n.translate('xpack.aiops.logCategorization.column.tokens', {
               defaultMessage: 'Tokens',
             })}
-            <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
+            <EuiIcon
+              aria-hidden={true}
+              size="s"
+              color="subdued"
+              type="question"
+              className="eui-alignTop"
+            />
           </>
         </EuiToolTip>
       ),
@@ -274,7 +302,7 @@ export const CategoryTable: FC<Props> = ({
         itemId="key"
         onTableChange={onTableChange}
         pagination={pagination}
-        sorting={sorting}
+        sorting={{ ...sorting, ...(!isInteractive && { readOnly: true }) }}
         data-test-subj="aiopsLogPatternsTable"
         itemIdToExpandedRowMap={itemIdToExpandedRowMap}
         css={tableStyle}
@@ -298,6 +326,9 @@ export const CategoryTable: FC<Props> = ({
               }
             : undefined;
         }}
+        tableCaption={i18n.translate('xpack.aiops.logCategorization.categoryTable.tableCaption', {
+          defaultMessage: 'Log pattern categories',
+        })}
       />
     </div>
   );

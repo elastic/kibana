@@ -6,16 +6,19 @@
  */
 
 import type { RulesClient } from '@kbn/alerting-plugin/server';
+import { withTimeout } from '@kbn/std';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
+import type { ExperimentalFeatures } from '../../../../../../common';
 import type { RuleMigrationsDataClient } from '../../data/rule_migrations_data_client';
 import { IntegrationRetriever } from './integration_retriever';
 import { PrebuiltRulesRetriever } from './prebuilt_rules_retriever';
 import { RuleResourceRetriever } from './rule_resource_retriever';
 
-export interface RuleMigrationsRetrieverClients {
+export interface RuleMigrationsRetrieverDeps {
   data: RuleMigrationsDataClient;
   rules: RulesClient;
   savedObjects: SavedObjectsClientContract;
+  experimentalFeatures: ExperimentalFeatures;
 }
 
 /** The timeout to populate ELSER indices in minutes */
@@ -32,23 +35,27 @@ export class RuleMigrationsRetriever {
   public readonly integrations: IntegrationRetriever;
   public readonly prebuiltRules: PrebuiltRulesRetriever;
 
-  constructor(migrationId: string, clients: RuleMigrationsRetrieverClients) {
-    this.resources = new RuleResourceRetriever(migrationId, clients.data);
-    this.integrations = new IntegrationRetriever(clients);
-    this.prebuiltRules = new PrebuiltRulesRetriever(clients);
+  constructor(migrationId: string, deps: RuleMigrationsRetrieverDeps) {
+    this.resources = new RuleResourceRetriever(migrationId, {
+      experimentalFeatures: deps.experimentalFeatures,
+      resourcesDataClient: deps.data.resources,
+    });
+    this.integrations = new IntegrationRetriever(deps);
+    this.prebuiltRules = new PrebuiltRulesRetriever(deps);
   }
 
   private async populateElserIndices() {
     try {
-      await Promise.race([
-        Promise.all([this.prebuiltRules.populateIndex(), this.integrations.populateIndex()]),
-        new Promise((_, reject) => {
-          setTimeout(
-            () => reject(new Error(`Timeout (${POPULATE_ELSER_INDICES_TIMEOUT_MIN}m)`)),
-            POPULATE_ELSER_INDICES_TIMEOUT_MIN * 60 * 1000
-          );
-        }),
-      ]);
+      const outcome = await withTimeout({
+        promise: Promise.all([
+          this.prebuiltRules.populateIndex(),
+          this.integrations.populateIndex(),
+        ]),
+        timeoutMs: POPULATE_ELSER_INDICES_TIMEOUT_MIN * 60 * 1000,
+      });
+      if (outcome.timedout) {
+        throw new Error(`Timeout (${POPULATE_ELSER_INDICES_TIMEOUT_MIN}m)`);
+      }
     } catch (err) {
       throw new Error(
         `Failed to populate ELSER indices. Make sure the ELSER model is deployed and running at Machine Learning > Trained Models. ${err}`

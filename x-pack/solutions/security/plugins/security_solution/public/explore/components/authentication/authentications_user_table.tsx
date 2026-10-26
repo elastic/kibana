@@ -8,7 +8,12 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { getOr } from 'lodash/fp';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { useIsNewFlyoutEnabled } from '../../../common/hooks/use_is_new_flyout_enabled';
+import { FLYOUT_ORIGIN } from '../../../common/lib/telemetry';
+import { useFlyoutApi } from '../../../flyout_v2/use_flyout_api';
+import { UserPanelKey, HostPanelKey } from '../../../flyout/entity_details/shared/constants';
 import { AuthStackByField } from '../../../../common/search_strategy/security_solution/users/authentications';
 import type { SiemTables } from '../paginated_table';
 import { PaginatedTable } from '../paginated_table';
@@ -20,6 +25,10 @@ import {
   rowItems,
 } from './helpers';
 import { useAuthentications } from '../../containers/authentications';
+import {
+  buildExecutionContext,
+  EA_EXECUTION_CONTEXT_NAMES,
+} from '../../../common/utils/execution_context';
 import { useQueryInspector } from '../../../common/components/page/manage_query';
 import { useQueryToggle } from '../../../common/containers/query_toggle';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
@@ -27,6 +36,11 @@ import { usersActions, usersModel, usersSelectors } from '../../users/store';
 import type { AuthenticationsUserTableProps } from './types';
 
 const TABLE_QUERY_ID = 'authenticationsUsersTableQuery';
+
+const USERS_AUTHENTICATIONS_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.EXPLORE_USERS_PAGE,
+  'authentications'
+);
 
 const AuthenticationsUserTableComponent: React.FC<AuthenticationsUserTableProps> = ({
   endDate,
@@ -40,6 +54,53 @@ const AuthenticationsUserTableComponent: React.FC<AuthenticationsUserTableProps>
   userName,
 }) => {
   const dispatch = useDispatch();
+  const enableNewFlyout = useIsNewFlyoutEnabled();
+  const { openFlyout } = useExpandableFlyoutApi();
+  const { openUserFlyout, openHostFlyout } = useFlyoutApi();
+
+  const openUserDetails = useCallback(
+    (name: string) => {
+      if (enableNewFlyout) {
+        openUserFlyout({
+          userName: name,
+          contextID: 'authentications',
+          scopeId: 'authentications',
+          origin: FLYOUT_ORIGIN.AUTHENTICATIONS_TABLE,
+        });
+        return;
+      }
+
+      openFlyout({
+        right: {
+          id: UserPanelKey,
+          params: { userName: name, contextID: 'authentications', scopeId: 'authentications' },
+        },
+      });
+    },
+    [enableNewFlyout, openFlyout, openUserFlyout]
+  );
+
+  const openHostDetails = useCallback(
+    (hostName: string) => {
+      if (enableNewFlyout) {
+        openHostFlyout({
+          hostName,
+          contextID: 'authentications',
+          scopeId: 'authentications',
+          origin: FLYOUT_ORIGIN.AUTHENTICATIONS_TABLE,
+        });
+        return;
+      }
+
+      openFlyout({
+        right: {
+          id: HostPanelKey,
+          params: { hostName, contextID: 'authentications', scopeId: 'authentications' },
+        },
+      });
+    },
+    [enableNewFlyout, openFlyout, openHostFlyout]
+  );
   const { toggleStatus } = useQueryToggle(TABLE_QUERY_ID);
   const [querySkip, setQuerySkip] = useState(skip || !toggleStatus);
   useEffect(() => {
@@ -61,11 +122,15 @@ const AuthenticationsUserTableComponent: React.FC<AuthenticationsUserTableProps>
     activePage,
     limit,
     stackByField: userName ? AuthStackByField.hostName : AuthStackByField.userName,
+    executionContext: USERS_AUTHENTICATIONS_CONTEXT,
   });
 
   const columns = useMemo(
-    () => (userName ? getUserDetailsAuthenticationColumns() : getUsersPageAuthenticationColumns()),
-    [userName]
+    () =>
+      userName
+        ? getUserDetailsAuthenticationColumns(openHostDetails)
+        : getUsersPageAuthenticationColumns(openUserDetails, openHostDetails),
+    [userName, openUserDetails, openHostDetails]
   );
 
   const updateLimitPagination = useCallback<SiemTables['updateLimitPagination']>(

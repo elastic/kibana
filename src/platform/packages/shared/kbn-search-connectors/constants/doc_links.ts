@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DocLinks } from '@kbn/doc-links';
+import type { DocLinks } from '@kbn/doc-links';
 
 class ESDocLinks {
   public connectors: string = '';
@@ -16,7 +16,9 @@ class ESDocLinks {
   public connectorsClients: string = '';
   public connectorsConfluence: string = '';
   public connectorsDropbox: string = '';
+  public connectorsExchangeServer: string = '';
   public connectorsGithub: string = '';
+  public connectorsGitlab: string = '';
   public connectorsGmail: string = '';
   public connectorsGoogleCloudStorage: string = '';
   public connectorsGoogleDrive: string = '';
@@ -50,7 +52,9 @@ class ESDocLinks {
     this.connectorsConfluence = docLinks.enterpriseSearch.connectorsConfluence;
     this.connectorsClients = docLinks.enterpriseSearch.connectorsClients;
     this.connectorsDropbox = docLinks.enterpriseSearch.connectorsDropbox;
+    this.connectorsExchangeServer = docLinks.enterpriseSearch.connectorsExchangeServer;
     this.connectorsGithub = docLinks.enterpriseSearch.connectorsGithub;
+    this.connectorsGitlab = docLinks.enterpriseSearch.connectorsGitlab;
     this.connectorsGoogleCloudStorage = docLinks.enterpriseSearch.connectorsGoogleCloudStorage;
     this.connectorsGoogleDrive = docLinks.enterpriseSearch.connectorsGoogleDrive;
     this.connectorsGmail = docLinks.enterpriseSearch.connectorsGmail;

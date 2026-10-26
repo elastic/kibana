@@ -9,7 +9,10 @@
 
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { AggregateQuery, Query } from '@kbn/es-query';
+import type { SerializableRecord } from '@kbn/utility-types';
+import type { DiscoverTabType } from '@kbn/discover-session-constants';
 import type { DiscoverDataSource } from '../../../common/data_sources';
+import type { ProfileStateDefinition } from '../../../common/context_awareness';
 import type { AsyncProfileProvider, ContextWithProfileId } from '../profile_service';
 import { AsyncProfileService } from '../profile_service';
 import type { Profile } from '../types';
@@ -20,14 +23,16 @@ import type { RootContext } from './root_profile';
  */
 export enum DataSourceCategory {
   Traces = 'traces',
+  Metrics = 'metrics',
   Logs = 'logs',
+  Security = 'security',
   Default = 'default',
 }
 
 /**
  * The data source profile interface
  */
-export type DataSourceProfile = Omit<Profile, 'getRenderAppWrapper'>;
+export type DataSourceProfile = Profile;
 
 /**
  * Parameters for the data source profile provider `resolve` method
@@ -59,6 +64,14 @@ export interface DataSourceContext {
    * The category of the current data source
    */
   category: DataSourceCategory;
+  /**
+   * Optional profile state definition whose URL fields should sync with Discover's URL.
+   */
+  profileState?: ProfileStateDefinition<SerializableRecord>;
+  /**
+   * Optional tab type identifying the kind of experience this tab represents (e.g. metrics).
+   */
+  tabType?: DiscoverTabType;
 }
 
 export type DataSourceProfileProvider<TProviderContext = {}> = AsyncProfileProvider<

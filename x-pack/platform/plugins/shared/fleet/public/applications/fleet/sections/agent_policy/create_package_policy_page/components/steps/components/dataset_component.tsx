@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   EuiComboBox,
   EuiFormRow,
@@ -23,7 +23,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { DataStream } from '../../../../../../../../../common/types';
 import { GENERIC_DATASET_NAME } from '../../../../../../../../../common/constants';
-import { isValidDataset } from '../../../../../../../../../common';
 
 const FormRow = styled(EuiFormRow)`
   .euiFormRow__label {
@@ -48,7 +47,19 @@ export const DatasetComponent: React.FC<{
   isDisabled?: boolean;
   fieldLabel: string;
   description?: string;
-}> = ({ value, onChange, datastreams, isDisabled, pkgName = '', fieldLabel, description }) => {
+  errors?: string[] | null;
+  isInvalid?: boolean;
+}> = ({
+  value,
+  errors,
+  onChange,
+  datastreams,
+  isDisabled,
+  isInvalid,
+  pkgName = '',
+  fieldLabel,
+  description,
+}) => {
   const datasetOptions =
     datastreams.map((datastream: DataStream) => ({
       label: datastream.dataset,
@@ -67,20 +78,28 @@ export const DatasetComponent: React.FC<{
     };
 
   const [selectedOptions, setSelectedOptions] = useState<Array<{ label: string }>>([defaultOption]);
-  const [isInvalid, setIsInvalid] = useState<boolean>(false);
-  const [error, setError] = useState<string | undefined>(undefined);
+
+  const error = errors ? errors.join(', ') : undefined;
+
+  const updateValue = useCallback(
+    (val: SelectedDataset) => {
+      if (isDisabled) {
+        return;
+      }
+      onChange(val);
+    },
+    [onChange, isDisabled]
+  );
 
   useEffect(() => {
-    if (!value || typeof value === 'string') onChange(defaultOption.value as SelectedDataset);
-  }, [value, defaultOption.value, onChange, pkgName]);
+    if (!value || typeof value === 'string') updateValue(defaultOption.value as SelectedDataset);
+  }, [value, defaultOption.value, updateValue, pkgName]);
 
   const onDatasetChange = (newSelectedOptions: Array<{ label: string; value?: DataStream }>) => {
     setSelectedOptions(newSelectedOptions);
     const dataStream = newSelectedOptions[0].value;
-    const { valid, error: dsError } = isValidDataset(newSelectedOptions[0].label, false);
-    setIsInvalid(!valid);
-    setError(dsError);
-    onChange({
+
+    updateValue({
       dataset: newSelectedOptions[0].label,
       package: !dataStream || typeof dataStream === 'string' ? pkgName : dataStream.package,
     });
@@ -96,10 +115,7 @@ export const DatasetComponent: React.FC<{
       value: { dataset: searchValue, package: pkgName },
     };
     setSelectedOptions([newOption]);
-    const { valid, error: dsError } = isValidDataset(searchValue, false);
-    setIsInvalid(!valid);
-    setError(dsError);
-    onChange({
+    updateValue({
       dataset: searchValue,
       package: pkgName,
     });
@@ -139,7 +155,7 @@ export const DatasetComponent: React.FC<{
           <>
             <EuiSpacer size="xs" />
             <EuiText size="xs" color="warning">
-              <EuiIcon type="warning" />
+              <EuiIcon type="warning" aria-hidden={true} />
               &nbsp;
               <FormattedMessage
                 id="xpack.fleet.datasetCombo.warning"

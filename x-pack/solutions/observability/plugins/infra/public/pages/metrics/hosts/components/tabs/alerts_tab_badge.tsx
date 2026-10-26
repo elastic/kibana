@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiIcon, EuiLoadingSpinner, EuiBadge, EuiToolTip } from '@elastic/eui';
+import { EuiLoadingSpinner, EuiBadge, EuiIconTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { OBSERVABILITY_RULE_TYPE_IDS } from '@kbn/rule-data-utils';
 import { INFRA_ALERT_CONSUMERS } from '../../../../../../common/constants';
@@ -22,19 +22,21 @@ export const AlertsTabBadge = () => {
   });
 
   if (loading) {
-    return <EuiLoadingSpinner />;
+    return <EuiLoadingSpinner data-test-subj="hostsView-tabs-alerts-count-loading" />;
   }
 
   if (error) {
     return (
-      <EuiToolTip
-        content={i18n.translate('xpack.infra.hostsViewPage.tabs.alerts.countError', {
-          defaultMessage:
-            'The active alert count was not retrieved correctly, try reloading the page.',
-        })}
-      >
-        <EuiIcon color="warning" type="warning" />
-      </EuiToolTip>
+      <span data-test-subj="hostsView-tabs-alerts-count-error">
+        <EuiIconTip
+          content={i18n.translate('xpack.infra.hostsViewPage.tabs.alerts.countError', {
+            defaultMessage:
+              'The active alert count was not retrieved correctly, try reloading the page.',
+          })}
+          type="warning"
+          color="warning"
+        />
+      </span>
     );
   }
 

@@ -22,35 +22,68 @@ import type {
   PackagePolicySOAttributes,
   PackageInfo,
 } from '../../types';
+import { appContextService } from '..';
 import {
   PackagePolicyMultipleAgentPoliciesError,
   PackagePolicyOutputError,
   PackagePolicyContentPackageError,
+  CustomPackagePolicyNotAllowedForAgentlessError,
+  PackagePolicyValidationError,
 } from '../../errors';
+import { packagePolicyInputAllowsUndefinedDataStreamType } from '../../../common/services';
 import { licenseService } from '../license';
 import { outputService } from '../output';
 
-export const mapPackagePolicySavedObjectToPackagePolicy = (
-  { id, version, attributes }: SavedObject<PackagePolicySOAttributes>,
-  namespaces?: string[]
-): PackagePolicy => {
-  const { bump_agent_policy_revision: bumpAgentPolicyRevision, ...restAttributes } = attributes;
+export const mapPackagePolicySavedObjectToPackagePolicy = ({
+  id,
+  version,
+  attributes,
+  namespaces,
+}: SavedObject<PackagePolicySOAttributes>): PackagePolicy => {
+  const {
+    bump_agent_policy_revision: bumpAgentPolicyRevision,
+    latest_revision: latestRevision,
+    inputs_for_versions: inputsForVersions,
+    ...restAttributes
+  } = attributes;
   return {
     id,
     version,
-    ...(namespaces ? { spaceIds: namespaces } : {}),
     ...restAttributes,
+    inputs: restAttributes.inputs ?? [],
+    ...(namespaces ? { spaceIds: namespaces } : {}),
   };
 };
 
 export async function preflightCheckPackagePolicy(
   soClient: SavedObjectsClientContract,
   packagePolicy: PackagePolicy | NewPackagePolicy,
-  packageInfo?: Pick<PackageInfo, 'type'>
+  packageInfo?: PackageInfo
 ) {
   // Package policies cannot be created for content type packages
   if (packageInfo?.type === 'content') {
     throw new PackagePolicyContentPackageError('Cannot create policy for content only packages');
+  }
+
+  // Guard: streams without data_stream.type are only valid for inputs that allow
+  // dynamic signal types (OTel collector with dynamic_signal_types: true).
+  // Checked per-input so mixed packages (some dynamic, some static) are handled correctly.
+  if (packageInfo) {
+    for (const input of packagePolicy.inputs) {
+      const inputAllowsDynamic = packagePolicyInputAllowsUndefinedDataStreamType(
+        packageInfo,
+        input
+      );
+      if (!inputAllowsDynamic) {
+        for (const stream of input.streams ?? []) {
+          if (!stream.data_stream?.type) {
+            throw new PackagePolicyValidationError(
+              `[data_stream.type]: required for stream in package "${packageInfo.name}"`
+            );
+          }
+        }
+      }
+    }
   }
 
   // If package policy has multiple agent policies IDs, or no agent policies (orphaned integration policy)
@@ -84,7 +117,9 @@ export function canUseMultipleAgentPolicies() {
 
 export async function canUseOutputForIntegration(
   soClient: SavedObjectsClientContract,
-  packagePolicy: Pick<PackagePolicy, 'output_id' | 'package' | 'supports_agentless'>
+  packagePolicy: Pick<PackagePolicy, 'output_id' | 'package' | 'supports_agentless'> & {
+    inputs?: Array<{ type: string; enabled: boolean }>;
+  }
 ) {
   const outputId = packagePolicy.output_id;
   const packageName = packagePolicy.package?.name;
@@ -104,7 +139,7 @@ export async function canUseOutputForIntegration(
       allowedOutputTypesForPackagePolicy.includes(type)
     );
 
-    const output = await outputService.get(soClient, outputId);
+    const output = await outputService.get(outputId);
 
     if (!allowedOutputTypes.includes(output.type)) {
       return {
@@ -118,4 +153,23 @@ export async function canUseOutputForIntegration(
     canUseOutputForIntegrationResult: true,
     errorMessage: null,
   };
+}
+
+export function canDeployCustomPackageAsAgentlessOrThrow(
+  packagePolicy: Pick<NewPackagePolicy, 'supports_agentless'>,
+  packageInfo: PackageInfo
+) {
+  const installSource =
+    packageInfo &&
+    'savedObject' in packageInfo &&
+    packageInfo.savedObject?.attributes.install_source;
+  const isCustom = installSource === 'custom' || installSource === 'upload';
+  const isCustomAgentlessAllowed =
+    appContextService.getConfig()?.agentless?.customIntegrations?.enabled;
+
+  if (packagePolicy.supports_agentless && isCustom && !isCustomAgentlessAllowed) {
+    throw new CustomPackagePolicyNotAllowedForAgentlessError();
+  }
+
+  return true;
 }

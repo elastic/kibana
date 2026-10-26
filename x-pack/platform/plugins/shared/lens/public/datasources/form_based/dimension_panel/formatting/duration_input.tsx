@@ -84,6 +84,9 @@ export const DurationRowInputs = ({
         singleSelection={{ asPlainText: true }}
         data-test-subj={testSubjStart}
         compressed
+        aria-label={i18n.translate('xpack.lens.indexPattern.duration.convertFromAriaLabel', {
+          defaultMessage: 'Convert from unit',
+        })}
       />
       <EuiSpacer size="s" />
       <EuiComboBox
@@ -101,6 +104,9 @@ export const DurationRowInputs = ({
         singleSelection={{ asPlainText: true }}
         data-test-subj={testSubjEnd}
         compressed
+        aria-label={i18n.translate('xpack.lens.indexPattern.duration.convertToAriaLabel', {
+          defaultMessage: 'Convert to unit',
+        })}
       />
     </>
   );

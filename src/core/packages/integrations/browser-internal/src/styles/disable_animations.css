@@ -2,7 +2,7 @@
  * `@hello-pangea/dnd` relies on `transition` for functionality
  * https://github.com/elastic/kibana/issues/95133
  */
-*:not(.essentialAnimation):not([data-rbd-draggable-context-id]):not([data-rbd-droppable-context-id]),
+*:not(.essentialAnimation):not([data-rbd-draggable-context-id]):not([data-rbd-droppable-context-id]):not([data-rfd-draggable-context-id]):not([data-rfd-droppable-context-id]),
 *:not(.essentialAnimation):before,
 *:not(.essentialAnimation):after {
   /**

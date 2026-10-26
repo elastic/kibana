@@ -9,21 +9,21 @@ import type { FC } from 'react';
 import React, { useCallback, useState, useMemo, useEffect, useRef } from 'react';
 import moment from 'moment-timezone';
 import useMountedState from 'react-use/lib/useMountedState';
-import { EuiCallOut, EuiLoadingChart, EuiResizeObserver, EuiText } from '@elastic/eui';
+import { EuiLoadingChart, EuiResizeObserver, EuiText } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import type { Observable } from 'rxjs';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { throttle } from 'lodash';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
-import {
-  type MlEntityField,
-  type MlEntityFieldOperation,
-  ML_ANOMALY_THRESHOLD,
-} from '@kbn/ml-anomaly-utils';
+import { type MlEntityField, type MlEntityFieldOperation } from '@kbn/ml-anomaly-utils';
 import { TimeBuckets } from '@kbn/ml-time-buckets';
 import useObservable from 'react-use/lib/useObservable';
 import type { TimeRange } from '@kbn/es-query';
+import { ML_APP_LOCATOR } from '@kbn/ml-common-types/locator_app_locator';
+import type { MlLocatorParams } from '@kbn/ml-common-types/locator';
+import { EXPLORER_ENTITY_FIELD_SELECTION_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
+import type { SeverityThreshold } from '@kbn/ml-server-schemas/embeddables/anomaly_charts';
 import type {
-  AnomalyChartsEmbeddableOverridableState,
   AnomalyChartsEmbeddableServices,
   AnomalyChartsApi,
   AnomalyChartsAttachmentApi,
@@ -31,19 +31,18 @@ import type {
 
 import type { AnomaliesTableData, ExplorerJob } from '../../application/explorer/explorer_utils';
 import { ExplorerAnomaliesContainer } from '../../application/explorer/explorer_charts/explorer_anomalies_container';
-import { ML_APP_LOCATOR } from '../../../common/constants/locator';
-import { optionValueToThreshold } from '../../application/components/controls/select_severity/select_severity';
-import { EXPLORER_ENTITY_FIELD_SELECTION_TRIGGER } from '../../ui_actions/triggers';
-import type { MlLocatorParams } from '../../../common/types/locator';
 import { useAnomalyChartsData } from './use_anomaly_charts_data';
 import { useDateFormatTz, loadAnomaliesTableData } from '../../application/explorer/explorer_utils';
 import { useMlJobService } from '../../application/services/job_service';
+import { resolveSeverityFormat } from '../../../common/util/severity_threshold';
+import { useDefaultSeverity } from '../../application/components/controls/select_severity/select_severity';
+import type { SeverityOption } from '../../application/explorer/hooks/use_severity_options';
 
 const RESIZE_THROTTLE_TIME_MS = 500;
 
-export interface AnomalyChartsContainerProps
-  extends Partial<AnomalyChartsEmbeddableOverridableState> {
+export interface AnomalyChartsContainerProps {
   lastReloadRequestTime?: number;
+  severityThreshold?: SeverityThreshold[];
   api: AnomalyChartsApi | AnomalyChartsAttachmentApi;
   id: string;
   services: AnomalyChartsEmbeddableServices;
@@ -52,6 +51,7 @@ export interface AnomalyChartsContainerProps
   onLoading: (v: boolean) => void;
   onError: (error: Error) => void;
   showFilterIcons?: boolean;
+  isInteractive?: boolean;
 }
 
 const AnomalyChartsContainer: FC<AnomalyChartsContainerProps> = ({
@@ -64,6 +64,7 @@ const AnomalyChartsContainer: FC<AnomalyChartsContainerProps> = ({
   onLoading,
   api,
   showFilterIcons = true,
+  isInteractive = true,
 }) => {
   const isMounted = useMountedState();
 
@@ -76,11 +77,20 @@ const AnomalyChartsContainer: FC<AnomalyChartsContainerProps> = ({
   });
 
   const [chartWidth, setChartWidth] = useState<number>(0);
-  const [severity, setSeverity] = useState(
-    optionValueToThreshold(
-      severityThreshold !== undefined ? severityThreshold : ML_ANOMALY_THRESHOLD.WARNING
-    )
+  // Define a default threshold to use when severityThreshold is undefined (embeddable creation)
+  const { val: defaultThreshold } = useDefaultSeverity();
+
+  // Keep the resolved thresholds as the source of truth so a custom open-ended
+  // floor (e.g. `{ min: 30 }`) is used for fetching. SelectSeverityUI maps that
+  // floor onto overlapping canonical bands for the anomaly-score control.
+  const [severityThresholds, setSeverityThresholds] = useState<SeverityThreshold[]>(() =>
+    severityThreshold !== undefined ? resolveSeverityFormat(severityThreshold) : defaultThreshold
   );
+
+  const handleSetSeverity = useCallback((options: SeverityOption[]) => {
+    setSeverityThresholds(options.map((s) => s.threshold));
+  }, []);
+
   const [selectedEntities, setSelectedEntities] = useState<MlEntityField[] | undefined>();
   const [
     { uiSettings },
@@ -110,10 +120,10 @@ const AnomalyChartsContainer: FC<AnomalyChartsContainerProps> = ({
 
   useEffect(() => {
     if (api?.updateSeverityThreshold) {
-      api.updateSeverityThreshold(severity.val);
+      api.updateSeverityThreshold(severityThresholds);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [severity.val, api?.updateSeverityThreshold]);
+  }, [severityThresholds, api?.updateSeverityThreshold]);
 
   useEffect(() => {
     if (api?.updateSelectedEntities) {
@@ -129,7 +139,7 @@ const AnomalyChartsContainer: FC<AnomalyChartsContainerProps> = ({
     chartsData,
     isLoading: isExplorerLoading,
     error,
-  } = useAnomalyChartsData(api, services, chartWidth, severity.val, renderCallbacks);
+  } = useAnomalyChartsData(api, services, chartWidth, severityThresholds, renderCallbacks);
 
   const dateFormatTz = useDateFormatTz();
 
@@ -167,7 +177,7 @@ const AnomalyChartsContainer: FC<AnomalyChartsContainerProps> = ({
           timeRangeBounds,
           'job ID',
           'auto',
-          0
+          { val: defaultThreshold }
         );
 
         if (isMounted()) {
@@ -205,19 +215,16 @@ const AnomalyChartsContainer: FC<AnomalyChartsContainerProps> = ({
 
   if (error) {
     return (
-      <EuiCallOut
+      <KbnDangerCallout
         title={
           <FormattedMessage
             id="xpack.ml.anomalyChartsEmbeddable.errorMessage"
             defaultMessage="Unable to load the data for the anomaly charts"
           />
         }
-        color="danger"
-        iconType="warning"
-        style={{ width: '100%' }}
-      >
-        <p>{error.message}</p>
-      </EuiCallOut>
+        css={{ width: '100%' }}
+        text={error.message}
+      />
     );
   }
 
@@ -233,7 +240,7 @@ const AnomalyChartsContainer: FC<AnomalyChartsContainerProps> = ({
     };
     const uniqueSelectedEntities = [entity];
     setSelectedEntities(uniqueSelectedEntities);
-    uiActions.getTrigger(EXPLORER_ENTITY_FIELD_SELECTION_TRIGGER).exec({
+    uiActions.executeTriggerActions(EXPLORER_ENTITY_FIELD_SELECTION_TRIGGER, {
       embeddable: api,
       data: uniqueSelectedEntities,
     });
@@ -257,7 +264,7 @@ const AnomalyChartsContainer: FC<AnomalyChartsContainerProps> = ({
           {isExplorerLoading && (
             <EuiText
               textAlign={'center'}
-              style={{
+              css={{
                 position: 'absolute',
                 top: '50%',
                 left: '50%',
@@ -275,8 +282,8 @@ const AnomalyChartsContainer: FC<AnomalyChartsContainerProps> = ({
               id={id}
               showCharts={true}
               chartsData={chartsData}
-              severity={severity}
-              setSeverity={setSeverity}
+              severity={severityThresholds}
+              setSeverity={handleSetSeverity}
               mlLocator={mlLocator}
               tableData={tableData}
               timeBuckets={timeBuckets}
@@ -286,6 +293,7 @@ const AnomalyChartsContainer: FC<AnomalyChartsContainerProps> = ({
               chartsService={chartsService}
               timeRange={timeRange}
               showFilterIcons={showFilterIcons}
+              isInteractive={isInteractive}
             />
           ) : null}
         </div>

@@ -20,20 +20,17 @@ interface HandlersByUrl {
 }
 
 const responseIntercepted = {
-  ok(response: any) {
-    return response;
+  ok(response?: any) {
+    return response ?? { status: 200, options: {} };
   },
-  conflict(response: any) {
-    response.status = 409;
-    return response;
+  conflict(response?: any) {
+    return { status: 409, options: {}, ...response };
   },
-  internalError(response: any) {
-    response.status = 500;
-    return response;
+  internalError(response?: any) {
+    return { status: 500, options: {}, ...response };
   },
-  notFound(response: any) {
-    response.status = 404;
-    return response;
+  notFound(response?: any) {
+    return { status: 404, options: {}, ...response };
   },
 };
 
@@ -98,6 +95,10 @@ export class RouterMock implements IRouter {
 
   getMockESApiFnAsSecondaryAuthUser(path: string): jest.Mock {
     return get(this.contextMock.core.elasticsearch.client.asSecondaryAuthUser, path);
+  }
+
+  getMockESApiFnAsInternalUser(path: string): jest.Mock {
+    return get(this.contextMock.core.elasticsearch.client.asInternalUser, path);
   }
 
   runRequest({ method, path, ...mockRequest }: RequestMock) {

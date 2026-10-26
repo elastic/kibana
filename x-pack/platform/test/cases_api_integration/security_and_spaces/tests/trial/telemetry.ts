@@ -1,0 +1,774 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import expect from 'expect';
+import { stringify as yamlStringify } from 'yaml';
+import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server/src/saved_objects_index_pattern';
+import {
+  ATTACHMENT_WORKFLOW_ORIGIN_TYPE,
+  CASES_URL,
+  CASE_TELEMETRY_SAVED_OBJECT,
+  CASE_TEMPLATE_SAVED_OBJECT,
+  CASE_WORKFLOW_ORIGIN_TYPE,
+  INTERNAL_FIELD_DEFINITIONS_URL,
+  OBSERVABLE_TYPE_IPV4,
+  OBSERVABLE_WORKFLOW_ORIGIN_TYPE,
+  SECURITY_ALERT_ATTACHMENT_TYPE,
+} from '@kbn/cases-plugin/common/constants';
+import type { CasesTelemetry } from '@kbn/cases-plugin/server/telemetry/types';
+import {
+  buildUnifiedAlertReq,
+  getPostCaseRequest,
+  postCommentAlertReq,
+} from '../../../common/lib/mock';
+import {
+  deleteAllCaseItems,
+  deleteFieldDefinitions,
+  createCase,
+  getSpaceUrlPrefix,
+  getTelemetry,
+  runTelemetryTask,
+  createComment,
+  bulkCreateAttachments,
+  addObservable,
+  createConfiguration,
+  getConfigurationRequest,
+  createWorkflow,
+  deleteWorkflow,
+  runCaseWorkflow,
+} from '../../../common/lib/api';
+import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import { superUser } from '../../../common/lib/authentication/users';
+
+// Helper function to extract cases telemetry data from the response
+const getCasesTelemetry = (telemetryResponse: any): CasesTelemetry => {
+  return telemetryResponse.stats.stack_stats.kibana.plugins.cases;
+};
+
+export default ({ getService }: FtrProviderContext): void => {
+  const supertest = getService('supertest');
+  const es = getService('es');
+  const retry = getService('retry');
+
+  describe('Cases telemetry', () => {
+    before(async () => {
+      await deleteAllCaseItems(es);
+    });
+
+    afterEach(async () => {
+      await deleteAllCaseItems(es);
+    });
+
+    it('should count cases from all spaces', async () => {
+      await createCase(supertest, getPostCaseRequest(), 200, {
+        user: superUser,
+        space: 'space1',
+      });
+
+      await createCase(supertest, getPostCaseRequest(), 200, {
+        user: superUser,
+        space: 'space2',
+      });
+
+      await runTelemetryTask(supertest);
+
+      await retry.try(async () => {
+        const res = await getTelemetry(supertest);
+        const casesTelemetry = getCasesTelemetry(res);
+        expect(casesTelemetry.cases.all.total).toBe(2);
+      });
+    });
+
+    it('should return the correct total number of alerts attached to cases', async () => {
+      const firstCase = await createCase(
+        supertest,
+        getPostCaseRequest({ owner: 'securitySolution' })
+      );
+      const secondCase = await createCase(
+        supertest,
+        getPostCaseRequest({ owner: 'securitySolution' })
+      );
+
+      const firstCaseAlerts = [...Array(3).keys()].map((num) => `test-case-1-${num}`);
+      const secondCaseAlerts = [...Array(2).keys()].map((num) => `test-case-2-${num}`);
+
+      await bulkCreateAttachments({
+        supertest,
+        caseId: firstCase.id,
+        params: [
+          buildUnifiedAlertReq('securitySolution', {
+            alertId: firstCaseAlerts,
+            index: firstCaseAlerts,
+          }),
+        ],
+        expectedHttpCode: 200,
+      });
+
+      await bulkCreateAttachments({
+        supertest,
+        caseId: firstCase.id,
+        params: [
+          buildUnifiedAlertReq('securitySolution', {
+            alertId: secondCaseAlerts,
+            index: secondCaseAlerts,
+          }),
+        ],
+        expectedHttpCode: 200,
+      });
+
+      await createComment({
+        supertest,
+        caseId: secondCase.id,
+        params: {
+          ...postCommentAlertReq,
+          alertId: 'test-case-2-3',
+          index: 'test-case-2-3',
+          owner: 'securitySolution',
+        },
+      });
+
+      await runTelemetryTask(supertest);
+
+      await retry.try(async () => {
+        const res = await getTelemetry(supertest);
+        const casesTelemetry = getCasesTelemetry(res);
+        expect(casesTelemetry.alerts.all.total).toBe(6);
+      });
+    });
+
+    it('should return the correct telemetry for cases with observables', async () => {
+      // Index synthetic alert docs with ECS source.ip fields.  The server-side
+      // extraction path fetches these via mget so we can control exactly which
+      // observables are produced without needing real detection-engine alerts.
+      const alertIndex = 'synthetic-cases-telemetry-alerts';
+
+      // First case: one alert whose source.ip produces 1 auto-extracted observable
+      await es.index({
+        index: alertIndex,
+        id: 'alert-telemetry-1',
+        refresh: 'true',
+        document: { 'source.ip': '127.0.0.2' },
+      });
+
+      // Second case: 50 alerts each with a distinct source.ip so they produce
+      // 50 distinct observables — hitting MAX_OBSERVABLES_PER_CASE exactly.
+      const bulkOps: Array<Record<string, unknown>> = [];
+      for (let i = 0; i < 50; i++) {
+        bulkOps.push({ index: { _index: alertIndex, _id: `alert-telemetry-2-${i}` } });
+        bulkOps.push({ 'source.ip': `10.0.0.${i}` });
+      }
+      await es.bulk({ operations: bulkOps, refresh: 'true' });
+
+      const caseSettings = { syncAlerts: false, extractObservables: true };
+
+      const firstCase = await createCase(
+        supertest,
+        getPostCaseRequest({ owner: 'securitySolution', settings: caseSettings }),
+        200,
+        { user: superUser, space: 'space1' }
+      );
+
+      const secondCase = await createCase(
+        supertest,
+        getPostCaseRequest({ owner: 'securitySolution', settings: caseSettings }),
+        200,
+        { user: superUser, space: 'space2' }
+      );
+
+      // 1 manual observable on the first case
+      await addObservable({
+        supertest,
+        caseId: firstCase.id,
+        params: {
+          observable: {
+            typeKey: OBSERVABLE_TYPE_IPV4.key,
+            value: '127.0.0.1',
+            description: 'Manually added observable',
+          },
+        },
+        auth: { user: superUser, space: 'space1' },
+      });
+
+      // 1 auto-extracted observable: attach the first alert to the first case.
+      // extractAndAddObservables fires on bulkCreate and pulls source.ip from the doc.
+      await bulkCreateAttachments({
+        supertest,
+        caseId: firstCase.id,
+        params: [
+          buildUnifiedAlertReq('securitySolution', {
+            alertId: 'alert-telemetry-1',
+            index: alertIndex,
+            rule: { id: 'rule-1', name: 'Rule 1' },
+          }),
+        ],
+        auth: { user: superUser, space: 'space1' },
+        expectedHttpCode: 200,
+      });
+
+      // 50 auto-extracted observables: one attachment per alert on the second case.
+      // This reaches MAX_OBSERVABLES_PER_CASE (50) making totalWithMaxObservables = 1.
+      const secondCaseAttachments = Array.from({ length: 50 }, (_, i) =>
+        buildUnifiedAlertReq('securitySolution', {
+          alertId: `alert-telemetry-2-${i}`,
+          index: alertIndex,
+          rule: { id: 'rule-2', name: 'Rule 2' },
+        })
+      );
+      await bulkCreateAttachments({
+        supertest,
+        caseId: secondCase.id,
+        params: secondCaseAttachments,
+        auth: { user: superUser, space: 'space2' },
+        expectedHttpCode: 200,
+      });
+
+      await runTelemetryTask(supertest);
+
+      await retry.try(async () => {
+        const res = await getTelemetry(supertest);
+        const casesTelemetry = getCasesTelemetry(res);
+        const allCasesTelemetry = casesTelemetry.cases.all;
+        const securityCasesTelemetry = casesTelemetry.cases.sec;
+
+        for (const telemetry of [allCasesTelemetry, securityCasesTelemetry]) {
+          // 1 manual (addObservable call)
+          expect(telemetry.observables.manual.default).toBe(1);
+          // 1 from first case + 50 from second case = 51 auto-extracted
+          expect(telemetry.observables.auto.default).toBe(51);
+          expect(telemetry.observables.total).toBe(52);
+          // second case has exactly MAX_OBSERVABLES_PER_CASE observables
+          expect(telemetry.totalWithMaxObservables).toBe(1);
+        }
+      });
+
+      // Clean up synthetic index
+      await es.indices.delete({ index: alertIndex, ignore_unavailable: true });
+    });
+
+    describe('templates', () => {
+      const TEMPLATES_URL = `${CASES_URL}/templates`;
+      const OWNER = 'securitySolutionFixture';
+
+      // Every field is inline, never a `$ref`. Only then do the declared field count and the
+      // resolved field definitions share a denominator, so the test may assert both.
+      const TEXT = { control: 'INPUT_TEXT', type: 'keyword' };
+      const TOGGLE = { control: 'TOGGLE', type: 'boolean' };
+      const DATE = { control: 'DATE_PICKER', type: 'date' };
+      const NUMBER = { control: 'INPUT_NUMBER', type: 'long' };
+
+      type FieldKind = typeof TEXT;
+
+      const field = (name: string, kind: FieldKind) => ({ name, label: name, ...kind });
+
+      const buildBody = (
+        name: string,
+        fields: Array<ReturnType<typeof field>>,
+        overrides: Record<string, unknown> = {}
+      ) => ({
+        name,
+        owner: OWNER,
+        definition: yamlStringify({ name: `${name} case title`, fields }),
+        ...overrides,
+      });
+
+      const request = (method: 'post' | 'put' | 'delete', path: string) =>
+        supertest[method](path).set('kbn-xsrf', 'true').set('x-elastic-internal-origin', 'foo');
+
+      /**
+       * Drops the stored snapshot, which `deleteAllCaseItems` leaves behind and the collector
+       * serves verbatim. Without this the retry below can pass on the PREVIOUS run's snapshot
+       * before the task overwrites it, so the assertions would hold even against a broken
+       * query. Removing it first means the only payload that can satisfy them is a fresh one.
+       */
+      const deleteTelemetrySnapshot = async () => {
+        await es.deleteByQuery({
+          index: ALERTING_CASES_SAVED_OBJECT_INDEX,
+          q: `type:${CASE_TELEMETRY_SAVED_OBJECT}`,
+          wait_for_completion: true,
+          refresh: true,
+          conflicts: 'proceed',
+        });
+      };
+
+      /**
+       * Removes `isEnabled` from a template document. No API path can produce this shape,
+       * because create and update both write `isEnabled: input.isEnabled ?? true` — hence the
+       * direct write. The shape is real all the same: the attribute is optional in every model
+       * version, nothing backfills it, and the read path treats only an explicit `false` as
+       * disabled, so a deployment can hold such documents.
+       *
+       * This is the only place that can prove the `missing: true` clause on the inventory's
+       * boolean terms aggregation buckets an absent flag as enabled. A mocked client cannot,
+       * and the clause has no precedent in this repository.
+       *
+       * `templateId` is the template's stable identity across versions. The raw document nests
+       * attributes directly under the saved-object type, with no `attributes` level, which is
+       * what the saved-object layer rewrites its own `.attributes.` KQL paths into.
+       */
+      const stripIsEnabled = async (templateId: string) => {
+        const { updated } = await es.updateByQuery({
+          index: ALERTING_CASES_SAVED_OBJECT_INDEX,
+          query: {
+            bool: {
+              filter: [
+                { term: { type: CASE_TEMPLATE_SAVED_OBJECT } },
+                { term: { [`${CASE_TEMPLATE_SAVED_OBJECT}.templateId`]: templateId } },
+              ],
+            },
+          },
+          script: {
+            source: `ctx._source['${CASE_TEMPLATE_SAVED_OBJECT}'].remove('isEnabled')`,
+          },
+          refresh: true,
+          conflicts: 'proceed',
+        });
+
+        // A wrong field path would match nothing and update nothing, leaving the assertion
+        // this exists to support passing for the wrong reason. Fail loudly instead.
+        expect(updated).toBe(1);
+      };
+
+      const createTemplate = async (
+        name: string,
+        fields: Array<ReturnType<typeof field>>,
+        overrides: Record<string, unknown> = {}
+      ) => {
+        const { body } = await request('post', TEMPLATES_URL)
+          .send(buildBody(name, fields, overrides))
+          .expect(200);
+
+        return body;
+      };
+
+      const updateTemplate = async (
+        templateId: string,
+        name: string,
+        fields: Array<ReturnType<typeof field>>
+      ) => {
+        const { body } = await request('put', `${TEMPLATES_URL}/${templateId}`)
+          .send(buildBody(name, fields))
+          .expect(200);
+
+        return body;
+      };
+
+      // Every solution scope stays empty because the fixture owner is not one of the three
+      // real owners. Asserted rather than skipped, so a regression that folded an unknown
+      // owner into a solution scope would fail here.
+      const zeroedScope = {
+        total: 0,
+        totalEnabled: 0,
+        totalDisabled: 0,
+        totalSoftDeleted: 0,
+        totalMigratedFromV1: 0,
+        versionPercentiles: { p50: 0, p90: 0, p99: 0 },
+        fieldCount: { total: 0, max: 0, average: 0 },
+        fieldDefinitions: { totalsByControl: {}, totalsByType: {} },
+        cases: {
+          withTemplate: { total: 0, daily: 0, weekly: 0, monthly: 0 },
+          withoutTemplate: { total: 0, daily: 0, weekly: 0, monthly: 0 },
+        },
+      };
+
+      it('should report the templates snapshot', async () => {
+        /**
+         * Edited twice, so three version documents exist. Each version declares a different
+         * field set on purpose: if the `isLatest` scoping regressed, the superseded versions
+         * would move the field numbers as well as the total, rather than the total alone.
+         */
+        const edited = await createTemplate('Edited Template', [field('a1', TEXT)]);
+        await updateTemplate(edited.templateId, 'Edited Template', [
+          field('a1', TEXT),
+          field('a2', TOGGLE),
+          field('a3', DATE),
+          field('a4', NUMBER),
+        ]);
+        const latest = await updateTemplate(edited.templateId, 'Edited Template', [
+          field('a1', TEXT),
+          field('a2', TOGGLE),
+        ]);
+
+        // Guards the version-percentile expectation below against a change in how an edit
+        // numbers versions.
+        expect(latest.templateVersion).toBe(3);
+
+        const simple = await createTemplate('Simple Template', [field('b1', TEXT)]);
+
+        /**
+         * Left with no `isEnabled` at all. It must still count as enabled, so the numbers below
+         * are unchanged by this — which is the point: if the aggregation stopped bucketing an
+         * absent flag as enabled, `totalEnabled` would drop to 1 and the two counts would no
+         * longer sum to the total.
+         */
+        await stripIsEnabled(simple.templateId);
+
+        await createTemplate(
+          'Disabled Template',
+          [field('d1', TEXT), field('d2', DATE), field('d3', NUMBER)],
+          { isEnabled: false }
+        );
+
+        /**
+         * Edited once before the delete, so it has two version documents and a soft delete
+         * stamps both. It must be counted as ONE deleted template, and must leave the
+         * inventory entirely — its text field must not reach the field totals.
+         */
+        const doomed = await createTemplate('Doomed Template', [field('c1', TEXT)]);
+        await updateTemplate(doomed.templateId, 'Doomed Template', [
+          field('c1', TEXT),
+          field('c2', TOGGLE),
+        ]);
+        await request('delete', `${TEMPLATES_URL}/${doomed.templateId}`).expect(204);
+
+        await createCase(
+          supertest,
+          getPostCaseRequest({ tags: [], template: { id: edited.templateId } })
+        );
+        await createCase(
+          supertest,
+          getPostCaseRequest({ tags: [], template: { id: edited.templateId } })
+        );
+        await createCase(supertest, getPostCaseRequest({ tags: [] }));
+
+        await deleteTelemetrySnapshot();
+        await runTelemetryTask(supertest);
+
+        await retry.try(async () => {
+          const res = await getTelemetry(supertest);
+          const casesTelemetry = getCasesTelemetry(res);
+
+          /**
+           * Checked before the deep assertion below. Collection omits this key when the
+           * templates area fails, and `CasesTelemetry` declares it required, so reading
+           * through it would fail with an opaque `TypeError` instead of a readable diff.
+           */
+          expect(casesTelemetry.templates).toBeDefined();
+
+          /**
+           * Asserted on its own, ahead of the payload comparison, because it is the one figure
+           * a mocked client cannot establish. One of the three live templates carries no
+           * `isEnabled`, so the counts only sum to the total while the aggregation buckets an
+           * absent flag as enabled. On a regression this reports `2 !== 3` rather than burying
+           * the cause in a whole-payload diff.
+           */
+          const { total, totalEnabled, totalDisabled } = casesTelemetry.templates.all;
+          expect(totalEnabled + totalDisabled).toBe(total);
+
+          expect(casesTelemetry.templates).toEqual({
+            all: {
+              // The edited template counts once despite its three versions, and the
+              // soft-deleted one does not count at all.
+              total: 3,
+              totalEnabled: 2,
+              totalDisabled: 1,
+              // One template, not one per version document.
+              totalSoftDeleted: 1,
+              totalMigratedFromV1: 0,
+              // Two templates are on version 1, and the edited template is on version 3.
+              versionPercentiles: { p50: 1, p90: 3, p99: 3 },
+              // 2 + 1 + 3 declared fields across the live templates only.
+              fieldCount: { total: 6, max: 3, average: 2 },
+              // Read from the indexed field definitions, not from a re-parse of the YAML.
+              fieldDefinitions: {
+                totalsByControl: { INPUT_TEXT: 3, TOGGLE: 1, DATE_PICKER: 1, INPUT_NUMBER: 1 },
+                totalsByType: { keyword: 3, boolean: 1, date: 1, long: 1 },
+              },
+              cases: {
+                withTemplate: { total: 2, daily: 2, weekly: 2, monthly: 2 },
+                withoutTemplate: { total: 1, daily: 1, weekly: 1, monthly: 1 },
+              },
+            },
+            sec: zeroedScope,
+            obs: zeroedScope,
+            main: zeroedScope,
+          });
+        });
+      });
+    });
+
+    describe('field library', () => {
+      const createFieldDefinition = async (
+        name: string,
+        owner: string,
+        overrides: Record<string, unknown> = {},
+        space?: string
+      ) => {
+        await supertest
+          .post(`${getSpaceUrlPrefix(space)}${INTERNAL_FIELD_DEFINITIONS_URL}`)
+          .set('kbn-xsrf', 'true')
+          .set('x-elastic-internal-origin', 'foo')
+          .send({
+            name,
+            owner,
+            definition: `name: ${name}\ncontrol: INPUT_TEXT\ntype: keyword\n`,
+            ...overrides,
+          })
+          .expect(200);
+      };
+
+      /**
+       * Drops the stored snapshot, which `deleteAllCaseItems` leaves behind and the collector
+       * serves verbatim. Without this the retry below can pass on the PREVIOUS run's snapshot
+       * before the task overwrites it, so the assertions would hold even against a broken query.
+       */
+      const deleteTelemetrySnapshot = async () => {
+        await es.deleteByQuery({
+          index: ALERTING_CASES_SAVED_OBJECT_INDEX,
+          q: `type:${CASE_TELEMETRY_SAVED_OBJECT}`,
+          wait_for_completion: true,
+          refresh: true,
+          conflicts: 'proceed',
+        });
+      };
+
+      const zeroedScope = { total: 0, totalGlobal: 0, totalReusable: 0 };
+
+      it('should report the field library snapshot', async () => {
+        // The counts below are absolute, so they only stay diagnostic from an empty start. A
+        // single leftover reusable definition would reproduce them even with a broken query.
+        await deleteFieldDefinitions(es);
+
+        await createFieldDefinition('sec_global', 'securitySolution', { isGlobal: true });
+        await createFieldDefinition('sec_reusable', 'securitySolution', { isGlobal: false });
+        // No `isGlobal` key at all, which the create route allows and nothing backfills.
+        await createFieldDefinition('sec_unset', 'securitySolution');
+
+        // Not one of the three real owners, so it must reach `all` and no solution scope.
+        await createFieldDefinition('fixture_global', 'securitySolutionFixture', {
+          isGlobal: true,
+        });
+
+        // The type is `multiple-isolated`, so a definition outside the default space is only
+        // counted while the query keeps searching every namespace.
+        await createFieldDefinition(
+          'space1_global',
+          'securitySolution',
+          { isGlobal: true },
+          'space1'
+        );
+
+        await deleteTelemetrySnapshot();
+        await runTelemetryTask(supertest);
+
+        await retry.try(async () => {
+          const res = await getTelemetry(supertest);
+          const casesTelemetry = getCasesTelemetry(res);
+
+          expect(casesTelemetry.fieldLibrary).toBeDefined();
+
+          expect(casesTelemetry.fieldLibrary.sec.totalReusable).toBe(2);
+
+          expect(casesTelemetry.fieldLibrary).toEqual({
+            all: { total: 5, totalGlobal: 3, totalReusable: 2 },
+            sec: { total: 4, totalGlobal: 2, totalReusable: 2 },
+            obs: zeroedScope,
+            main: zeroedScope,
+          });
+        });
+      });
+    });
+
+    describe('workflows', () => {
+      const workflowYaml = `
+name: cases-telemetry-workflow-ftr
+enabled: true
+triggers:
+  - type: manual
+steps:
+  - name: log
+    type: console
+    with:
+      message: "cases telemetry ftr run"
+`.trim();
+
+      let workflowId: string;
+
+      before(async () => {
+        workflowId = await createWorkflow({ supertest, yaml: workflowYaml });
+      });
+
+      after(async () => {
+        // Force-deleting a workflow is rejected with 409 while any of its executions is still
+        // running, and the runs below are still in flight when the suite ends.
+        await retry.try(() => deleteWorkflow({ supertest, workflowId }));
+      });
+
+      /**
+       * Drops the stored snapshot, which `deleteAllCaseItems` leaves behind and the collector
+       * serves verbatim. Without this the retry below can pass on the PREVIOUS run's snapshot
+       * before the task overwrites it, so the assertions would hold even against a broken query.
+       */
+      const deleteTelemetrySnapshot = async () => {
+        await es.deleteByQuery({
+          index: ALERTING_CASES_SAVED_OBJECT_INDEX,
+          q: `type:${CASE_TELEMETRY_SAVED_OBJECT}`,
+          wait_for_completion: true,
+          refresh: true,
+          conflicts: 'proceed',
+        });
+      };
+
+      it('should report the workflows snapshot', async () => {
+        // Registered owners, so the runs split across the `sec` and `main` scopes.
+        const [detailCase, firstListCase, secondListCase] = await Promise.all([
+          createCase(supertest, getPostCaseRequest({ owner: 'securitySolution' })),
+          createCase(supertest, getPostCaseRequest({ owner: 'cases' })),
+          createCase(supertest, getPostCaseRequest({ owner: 'cases' })),
+        ]);
+
+        const { observables } = await addObservable({
+          supertest,
+          caseId: detailCase.id,
+          params: {
+            observable: { typeKey: OBSERVABLE_TYPE_IPV4.key, value: '10.0.0.1', description: '' },
+          },
+        });
+        const observableId = observables[0].id as string;
+
+        await runCaseWorkflow({
+          supertest,
+          workflowId,
+          params: {
+            caseIds: [detailCase.id],
+            inputs: {},
+            origin: { type: CASE_WORKFLOW_ORIGIN_TYPE, caseId: detailCase.id },
+          },
+        });
+
+        await runCaseWorkflow({
+          supertest,
+          workflowId,
+          params: {
+            caseIds: [detailCase.id],
+            inputs: {},
+            origin: {
+              type: OBSERVABLE_WORKFLOW_ORIGIN_TYPE,
+              caseId: detailCase.id,
+              observableId,
+            },
+          },
+        });
+
+        await createComment({
+          supertest,
+          caseId: detailCase.id,
+          params: { ...postCommentAlertReq, owner: 'securitySolution' },
+        });
+
+        await runCaseWorkflow({
+          supertest,
+          workflowId,
+          params: {
+            caseIds: [detailCase.id],
+            inputs: {
+              event: {
+                alertIds: [{ _id: postCommentAlertReq.alertId, _index: postCommentAlertReq.index }],
+              },
+            },
+            origin: {
+              type: ATTACHMENT_WORKFLOW_ORIGIN_TYPE,
+              caseId: detailCase.id,
+              attachmentType: SECURITY_ALERT_ATTACHMENT_TYPE,
+              attachmentId: postCommentAlertReq.alertId as string,
+            },
+          },
+        });
+
+        // A cases-list run carries no origin and writes one activity record per case.
+        await runCaseWorkflow({
+          supertest,
+          workflowId,
+          params: { caseIds: [firstListCase.id, secondListCase.id], inputs: {} },
+        });
+
+        await createConfiguration(
+          supertest,
+          getConfigurationRequest({
+            overrides: { owner: 'securitySolution', workflowTags: ['soc-triage'] },
+          })
+        );
+        // An emptied tag list must not satisfy the `exists` filter.
+        await createConfiguration(
+          supertest,
+          getConfigurationRequest({
+            overrides: { owner: 'observabilityFixture', workflowTags: [] },
+          })
+        );
+
+        await deleteTelemetrySnapshot();
+        await runTelemetryTask(supertest);
+
+        await retry.try(async () => {
+          const res = await getTelemetry(supertest);
+          const casesTelemetry = getCasesTelemetry(res);
+
+          expect(casesTelemetry.workflows).toBeDefined();
+
+          /**
+           * Asserted ahead of the payload comparison because they are the figures a mocked
+           * client cannot establish: the attributed buckets are only non-zero while
+           * `payload.origin.type` and `payload.origin.attachmentType` are mapped. Without the
+           * mappings every run collapses into `unattributed` and no attachment type is reported.
+           */
+          expect(casesTelemetry.workflows.all.byOriginType.case).toBe(1);
+          expect(casesTelemetry.workflows.all.byAttachmentType.security_alert).toBe(1);
+
+          const emptyOriginTypes = {
+            case: 0,
+            observable: 0,
+            observables: 0,
+            attachment: 0,
+            attachments: 0,
+            unattributed: 0,
+          };
+
+          expect(casesTelemetry.workflows).toEqual({
+            all: {
+              // One activity record per case: 1 + 1 + 1 + 2.
+              runs: { total: 5, daily: 5, weekly: 5, monthly: 5 },
+              totalCasesWithRuns: 3,
+              totalUniqueUsers: 1,
+              byOriginType: {
+                ...emptyOriginTypes,
+                case: 1,
+                observable: 1,
+                attachment: 1,
+                unattributed: 2,
+              },
+              byAttachmentType: { security_alert: 1 },
+              configurationsWithWorkflowTags: 1,
+            },
+            sec: {
+              runs: { total: 3, daily: 3, weekly: 3, monthly: 3 },
+              totalCasesWithRuns: 1,
+              totalUniqueUsers: 1,
+              byOriginType: { ...emptyOriginTypes, case: 1, observable: 1, attachment: 1 },
+              byAttachmentType: { security_alert: 1 },
+              configurationsWithWorkflowTags: 1,
+            },
+            obs: {
+              runs: { total: 0, daily: 0, weekly: 0, monthly: 0 },
+              totalCasesWithRuns: 0,
+              totalUniqueUsers: 0,
+              byOriginType: emptyOriginTypes,
+              byAttachmentType: {},
+              configurationsWithWorkflowTags: 0,
+            },
+            main: {
+              runs: { total: 2, daily: 2, weekly: 2, monthly: 2 },
+              totalCasesWithRuns: 2,
+              totalUniqueUsers: 1,
+              byOriginType: { ...emptyOriginTypes, unattributed: 2 },
+              byAttachmentType: {},
+              configurationsWithWorkflowTags: 0,
+            },
+          });
+        });
+      });
+    });
+  });
+};

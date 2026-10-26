@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { SavedObject, SavedObjectsType } from '@kbn/core/server';
-import { fold } from 'fp-ts/lib/Either';
-import { pipe } from 'fp-ts/lib/pipeable';
+import type { SavedObject, SavedObjectsType } from '@kbn/core/server';
+import { fold } from 'fp-ts/Either';
+import { pipe } from 'fp-ts/pipeable';
 import { logViewSavedObjectRT } from './types';
 
 export const logViewSavedObjectName = 'infrastructure-monitoring-log-view';
@@ -29,7 +29,7 @@ export const logViewSavedObjectType: SavedObjectsType = {
     defaultSearchField: 'name',
     displayName: 'log view',
     getTitle: getLogViewTitle,
-    icon: 'logsApp',
+    icon: 'documents',
     importableAndExportable: true,
   },
   mappings: {

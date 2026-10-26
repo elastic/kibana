@@ -6,8 +6,9 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { Status } from '@kbn/cases-components/src/status/status';
+import { getDefaultClosingReasonLabel } from '@kbn/response-ops-detections-close-reason';
 import type { SnakeToCamelCase } from '../../../common/types';
 import type { StatusUserAction, CaseStatuses } from '../../../common/types/domain';
 import type { UserActionBuilder } from './types';
@@ -19,7 +20,12 @@ const isStatusValid = (status: string): status is CaseStatuses => Object.hasOwn(
 
 const getLabelTitle = (userAction: SnakeToCamelCase<StatusUserAction>) => {
   const status = userAction.payload.status ?? '';
+  const closeReason = userAction.payload.closeReason;
+  const syncedAlertCount = userAction.payload.syncedAlertCount;
+
   if (isStatusValid(status)) {
+    const shouldRenderSyncDetails = closeReason != null && syncedAlertCount != null;
+
     return (
       <EuiFlexGroup
         gutterSize="s"
@@ -31,6 +37,18 @@ const getLabelTitle = (userAction: SnakeToCamelCase<StatusUserAction>) => {
         <EuiFlexItem grow={false}>
           <Status status={status} />
         </EuiFlexItem>
+        {shouldRenderSyncDetails && (
+          <>
+            <EuiFlexItem grow={false}>
+              {i18n.SYNCED_ALERTS_WITH_CLOSE_REASON(syncedAlertCount)}
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiBadge data-test-subj={`${userAction.id}-user-action-close-reason-badge`}>
+                {getDefaultClosingReasonLabel(closeReason)}
+              </EuiBadge>
+            </EuiFlexItem>
+          </>
+        )}
       </EuiFlexGroup>
     );
   }

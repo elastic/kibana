@@ -11,7 +11,20 @@ import { licenseStateMock } from '../../../lib/license_state.mock';
 import { mockHandlerArguments } from '../../_mock_handler_arguments';
 import { actionsClientMock } from '../../../actions_client/actions_client.mock';
 import { verifyAccessAndContext } from '../../verify_access_and_context';
-import { updateConnectorBodySchema } from '../../../../common/routes/connector/apis/update';
+import {
+  getUpdateConnectorBodySchema,
+  updateConnectorBodySchema,
+  updateConnectorParamsSchema,
+} from '../../../../common/routes/connector/apis/update';
+import { createMockConnector } from '../../../application/connector/mocks';
+import { actionsConfigMock } from '../../../actions_config.mock';
+import Boom from '@hapi/boom';
+
+const actionsConfigUtils = (inboundEventsFeatureEnabled = false) => {
+  const utils = actionsConfigMock.create();
+  utils.isInboundEventsEnabled.mockReturnValue(inboundEventsFeatureEnabled);
+  return utils;
+};
 
 jest.mock('../../verify_access_and_context', () => ({
   verifyAccessAndContext: jest.fn(),
@@ -27,21 +40,18 @@ describe('updateConnectorRoute', () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    updateConnectorRoute(router, licenseState);
+    updateConnectorRoute(router, licenseState, actionsConfigUtils());
 
     const [config, handler] = router.put.mock.calls[0];
 
     expect(config.path).toMatchInlineSnapshot(`"/api/actions/connector/{id}"`);
 
-    const updateResult = {
+    const updateResult = createMockConnector({
       id: '1',
       actionTypeId: 'my-action-type-id',
       name: 'My name',
       config: { foo: true },
-      isPreconfigured: false,
-      isDeprecated: false,
-      isSystemAction: false,
-    };
+    });
 
     const actionsClient = actionsClientMock.create();
     actionsClient.update.mockResolvedValueOnce(updateResult);
@@ -70,6 +80,7 @@ describe('updateConnectorRoute', () => {
         is_preconfigured: false,
         is_deprecated: false,
         is_system_action: false,
+        is_connector_type_deprecated: false,
       },
     });
 
@@ -94,23 +105,110 @@ describe('updateConnectorRoute', () => {
     expect(res.ok).toHaveBeenCalled();
   });
 
+  it('forwards is_inbound_events_enabled when the inbound events flag is on', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+    updateConnectorRoute(router, licenseState, actionsConfigUtils(true));
+    const [, handler] = router.put.mock.calls[0];
+
+    const actionsClient = actionsClientMock.create();
+    actionsClient.update.mockResolvedValueOnce(
+      createMockConnector({
+        id: '1',
+        actionTypeId: '.dual',
+        name: 'Datadog prod',
+        isInboundEventsEnabled: true,
+      })
+    );
+
+    const [context, req, res] = mockHandlerArguments(
+      { actionsClient },
+      {
+        params: { id: '1' },
+        body: {
+          name: 'Datadog prod',
+          config: {},
+          secrets: {},
+          is_inbound_events_enabled: true,
+        },
+      },
+      ['ok']
+    );
+
+    await handler(context, req, res);
+
+    expect(actionsClient.update).toHaveBeenCalledWith({
+      id: '1',
+      action: expect.objectContaining({ isInboundEventsEnabled: true }),
+    });
+    expect(res.ok).toHaveBeenCalledWith({
+      body: expect.objectContaining({ is_inbound_events_enabled: true }),
+    });
+  });
+
+  it('rejects is_inbound_events_enabled as unknown when the inbound events flag is off', () => {
+    expect(() =>
+      getUpdateConnectorBodySchema(false).validate({
+        name: 'Datadog prod',
+        config: {},
+        secrets: {},
+        is_inbound_events_enabled: true,
+      })
+    ).toThrow(
+      /\[is_inbound_events_enabled\]: Additional properties are not allowed \('is_inbound_events_enabled' was unexpected\)/
+    );
+  });
+
+  it('omits is_inbound_events_enabled from the response when the inbound events flag is off', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+    updateConnectorRoute(router, licenseState, actionsConfigUtils());
+    const [, handler] = router.put.mock.calls[0];
+
+    const actionsClient = actionsClientMock.create();
+    actionsClient.update.mockResolvedValueOnce(
+      createMockConnector({
+        id: '1',
+        actionTypeId: '.dual',
+        name: 'Datadog prod',
+        isInboundEventsEnabled: true,
+      })
+    );
+
+    const [context, req, res] = mockHandlerArguments(
+      { actionsClient },
+      {
+        params: { id: '1' },
+        body: {
+          name: 'Datadog prod',
+          config: {},
+          secrets: {},
+        },
+      },
+      ['ok']
+    );
+
+    await handler(context, req, res);
+
+    expect(res.ok).toHaveBeenCalledWith({
+      body: expect.not.objectContaining({ is_inbound_events_enabled: expect.anything() }),
+    });
+  });
+
   it('ensures the license allows deleting actions', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    updateConnectorRoute(router, licenseState);
+    updateConnectorRoute(router, licenseState, actionsConfigUtils());
 
     const [, handler] = router.put.mock.calls[0];
 
-    const updateResult = {
+    const updateResult = createMockConnector({
       id: '1',
       actionTypeId: 'my-action-type-id',
       name: 'My name',
       config: { foo: true },
-      isPreconfigured: false,
-      isDeprecated: false,
-      isSystemAction: false,
-    };
+    });
 
     const actionsClient = actionsClientMock.create();
     actionsClient.update.mockResolvedValueOnce(updateResult);
@@ -143,19 +241,16 @@ describe('updateConnectorRoute', () => {
       throw new Error('OMG');
     });
 
-    updateConnectorRoute(router, licenseState);
+    updateConnectorRoute(router, licenseState, actionsConfigUtils());
 
     const [, handler] = router.put.mock.calls[0];
 
-    const updateResult = {
+    const updateResult = createMockConnector({
       id: '1',
       actionTypeId: 'my-action-type-id',
       name: 'My name',
       config: { foo: true },
-      isPreconfigured: false,
-      isDeprecated: false,
-      isSystemAction: false,
-    };
+    });
 
     const actionsClient = actionsClientMock.create();
     actionsClient.update.mockResolvedValueOnce(updateResult);
@@ -188,6 +283,70 @@ describe('updateConnectorRoute', () => {
     };
     expect(() => updateConnectorBodySchema.validate(body)).toThrowErrorMatchingInlineSnapshot(
       `"[name]: value '' is not valid"`
+    );
+  });
+
+  test('rejects names, ids, and config keys past the max length', () => {
+    expect(() =>
+      updateConnectorBodySchema.validate({
+        name: 'a'.repeat(1025),
+        config: {},
+        secrets: {},
+      })
+    ).toThrow(/maximum length/);
+    expect(() =>
+      updateConnectorBodySchema.validate({
+        name: 'ok',
+        config: { ['a'.repeat(1025)]: true },
+        secrets: {},
+      })
+    ).toThrow(/maximum length/);
+    expect(() => updateConnectorParamsSchema.validate({ id: 'a'.repeat(37) })).toThrow(
+      /maximum length/
+    );
+  });
+
+  it('rejects update when OAuth URLs fail allowedHosts validation (validation error)', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+    updateConnectorRoute(router, licenseState, actionsConfigUtils());
+    const [, handler] = router.put.mock.calls[0];
+
+    const actionsClient = actionsClientMock.create();
+    const validationMessage =
+      'error validating connector type secrets: target url "https://not-allowed.example.com/token" is not added to the Kibana config xpack.actions.allowedHosts';
+    actionsClient.update.mockRejectedValueOnce(Boom.badRequest(validationMessage));
+
+    const [context, req, res] = mockHandlerArguments(
+      { actionsClient },
+      {
+        params: {
+          id: '1',
+        },
+        body: {
+          name: 'OAuth connector',
+          config: {},
+          secrets: {
+            authType: 'oauth_authorization_code',
+            authorizationUrl: 'https://accounts.google.com/o/oauth2/v2/auth',
+            tokenUrl: 'https://not-allowed.example.com/token',
+            clientId: 'client-id',
+            clientSecret: 'client-secret',
+          },
+        },
+      },
+      ['customError', 'forbidden', 'badRequest', 'notFound']
+    );
+
+    await expect(handler(context, req, res)).rejects.toEqual(
+      expect.objectContaining({
+        output: expect.objectContaining({
+          statusCode: 400,
+          payload: expect.objectContaining({
+            message: validationMessage,
+          }),
+        }),
+      })
     );
   });
 });

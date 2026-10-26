@@ -1,0 +1,265 @@
+version: "1"
+name: Case workflow - Prod
+enabled: true
+triggers:
+  - type: alert
+consts:
+    kibana_domain: REDACTED
+    cyberbro_domain: REDACTED
+    email_to_send_to: REDACTED
+    ai_connector_id: REDACTED
+    hash_ioc: REDACTED
+    url_ioc: REDACTED
+    vtkey: REDACTED
+    web_query: REDACTED
+steps:
+  - name: choose-ioc-using-event-category
+    type: console
+    with:
+      message: |2-
+        {%- assign category = event.alerts[0].event.category -%}
+        {%- if category contains "process" -%}
+        {{-  event.alerts[0].process.hash.sha256 | strip -}}
+        {%- elsif category contains "file" -%}
+        {{- event.alerts[0].file.hash.sha256 | strip -}}
+        {%- elsif category contains " dll" -%}
+        {{- event.alerts[0].dll.hash.sha256 | strip -}}
+        {%- elsif category contains " network" -%}
+        {{- event.alerts[0].destination.ip | strip -}}
+        {%- elsif category contains " network" and event.alerts[0].url.domain  -%}
+        {{- event.alerts[0].url.domain | strip -}}
+        {%- else -%}
+        {{-  event.alerts[0].process.hash.sha256 | strip -}}
+        {%- endif -%}
+  - name: lookup-hash-via-vt
+    type: http
+    with:
+      url: https://www.virustotal.com/api/v3/search?query={{steps.choose-ioc-using-event-category.output}}
+      method: GET
+      headers:
+        Content-Type: application/json
+        x-apikey: "{{ consts.vtkey }}"
+      timeout: 30s
+  - name: lookup-url-via-urlscan
+    type: http
+    with:
+      url: https://urlscan.io/api/v1/search/?q=domain:{{steps.choose-ioc-using-event-category.output}}
+      method: GET
+      headers:
+        Content-Type: application/json
+      timeout: 30s
+  - name: search-on-web
+    type: http
+    with:
+      url: "https://leta.mullvad.net/search?q={{ steps.choose-ioc-using-event-category.output | url_encode}}&engine=google"
+      method: GET
+      headers:
+          Accept: application/json
+          Accept-Encoding: gzip
+  - name: search_similair_cases_id-process
+    type: elasticsearch.esql.query
+    with:
+      format: json
+      query: FROM .kibana_alerting_cases* METADATA _id | WHERE cases.created_at > now() - 1h and cases.status == 0 or cases.status == 10  | WHERE (cases.title LIKE "*{{event.alerts[0].user.name}}*" and cases.title LIKE  "*{{event.alerts[0].process.name}}*") OR  (cases.title LIKE "*{{event.alerts[0].host.name}}*" and cases.title LIKE  "*{{event.alerts[0].user.name}}*") OR  (cases.title LIKE "*{{event.alerts[0].process.name}}*" and cases.title LIKE  "*{{event.alerts[0].host.name}}*") or (cases.description LIKE "*{{event.alerts[0].user.name}}*" and cases.description LIKE  "*{{event.alerts[0].source.ip}}*" and cases.description LIKE  "*{{event.alerts[0].destination.ip}}*") OR  (cases.description LIKE "*{{event.alerts[0].host.name}}*" and cases.description LIKE  "*{{event.alerts[0].source.ip}}*" and cases.description LIKE  "*{{event.alerts[0].destination.ip}}*") | SORT cases.created_at DESC | LIMIT 1 | EVAL case_id = REPLACE(_id, ".*:","")  | keep case_id
+  - name: find_similar_case_id
+    type: console
+    with:
+      message: |2-
+        {%- assign category = event.alerts[0].event.category -%}
+        {%- if category contains "process" -%}
+        {{- steps.search_similair_cases_id-process.output.values[0] | strip -}}
+        {%- elsif category contains "file" -%}
+        {{- steps.search_similair_cases_id-process.output.values[0] | strip -}}
+        {%- elsif category contains " network" -%}
+        {{- steps.search_similair_cases_id-process.output.values[0] | strip -}}
+        {%- else -%}
+        {{- steps.search_similair_cases_id-process.output.values[0] | strip -}}
+        {%- endif -%}
+  - name: create_case_title
+    type: console
+    with:
+      message: |2-
+        {%- assign category = event.alerts[0].event.category -%}
+        {%- if category contains "process" -%}
+        {{event.alerts[0].signal.rule.name}} on {{event.alerts[0].host.name}} by {{event.alerts[0].user.name}} via {{event.alerts[0].process.name}}
+        {%- elsif category contains "file" -%}
+        {{event.alerts[0].signal.rule.name}} on {{event.alerts[0].host.name}} by {{event.alerts[0].user.name}} via {{event.alerts[0].process.name}} with file {{event.alerts[0].file.name}}
+        {%- elsif category contains "dll" -%}
+        {{event.alerts[0].signal.rule.name}} on {{event.alerts[0].host.name}} by {{event.alerts[0].user.name}} via {{event.alerts[0].process.name}} with dll {{event.alerts[0].dll.name}}
+        {%- elsif category contains "network" -%}
+        {{event.alerts[0].signal.rule.name}} with source: {{event.alerts[0].source.ip}} and destination:{{event.alerts[0].destination.ip}}
+        {%- else -%}
+        {{event.alerts[0].signal.rule.name}} on {{event.alerts[0].host.name}} by {{event.alerts[0].user.name}} via {{event.alerts[0].process.name}}
+        {%- endif -%}
+  - name: update_existing_case
+    type: if
+    condition: 'not steps.find_similar_case_id.output: ""'
+    steps:
+      - name: get_case_to_update
+        type: kibana.getCaseDefaultSpace
+        with:
+          caseId: "{{steps.find_similar_case_id.output}}"
+          fetcher:
+            skip_ssl_verification: true
+      - name: update_case_tag
+        type: kibana.updateCaseDefaultSpace
+        with:
+          cases:
+            - id: "{{steps.get_case_to_update.id}}"
+              tags:
+                - new-alert
+                - automatic
+              version: "{{steps.get_case_to_update.version}}"
+              fetcher:
+                skip_ssl_verification: true
+      - name: loop_trough_alerts_to_update
+        type: foreach
+        foreach: "{{event.alerts | json}}"
+        steps:
+          - name: add_alert_to_case_update
+            type: kibana.addCaseCommentDefaultSpace
+            with:
+              alertId: "{{foreach.item._id}}"
+              index: .alerts-security.alerts-*
+              owner: securitySolution
+              rule:
+                id: "{{foreach.item.signal.rule.id}}"
+                name: "{{foreach.item.signal.rule.name}}"
+              type: alert
+              caseId: "{{steps.find_similar_case_id.output}}"
+              fetcher:
+                skip_ssl_verification: true
+          - name: update_alert_statuss
+            type: kibana.SetAlertsStatus
+            with:
+              status: "in-progress"
+              signal_ids: ["{{foreach.item._id}}"]
+              fetcher:
+                skip_ssl_verification: true
+  - name: create_new_case
+    type: if
+    condition: 'steps.find_similar_case_id.output: ""'
+    steps:
+      - name: esql_get_context_for_host
+        type: elasticsearch.esql.query
+        with:
+          format: json
+          query: FROM logs-* | WHERE host.name == "{{event.alerts[0].host.name}}" | keep host.os.type, host.os.version
+      - name: esql_first_login_user
+        type: elasticsearch.esql.query
+        with:
+          format: json
+          query: FROM logs-system* | WHERE user.name == "{{event.alerts[0].user.name}}" | STATS first_login = MIN(@timestamp) | keep first_login
+      - name: esql_get_context_for_user
+        type: elasticsearch.esql.query
+        with:
+          format: json
+          query: FROM logs-* | WHERE host.name == "{{event.alerts[0].user.name}}"
+      - name: esql_get_alerts_by_host
+        type: elasticsearch.esql.query
+        with:
+          format: json
+          query: FROM .alerts-security.alerts-* | WHERE host.name == "{{event.alerts[0].host.name}}" | STATS triggers = COUNT(*), last_trigger = MAX(@timestamp) BY rule_name = kibana.alert.rule.name, host.name | SORT triggers DESC | KEEP last_trigger, triggers,rule_name, host.name
+      - name: esql_get_alerts_by_user
+        type: elasticsearch.esql.query
+        with:
+          format: json
+          query: FROM .alerts-security.alerts-* | WHERE user.name == "{{event.alerts[0].user.name}}" | STATS triggers = COUNT(*), last_trigger = MAX(@timestamp) BY rule_name = kibana.alert.rule.name, user.name | SORT triggers DESC | KEEP last_trigger, triggers,rule_name, user.name
+      - name: esql_get_cases_with_indicators
+        type: elasticsearch.esql.query
+        with:
+          format: json
+          query: FROM .kibana_alerting_cases* METADATA _id | WHERE (cases.description LIKE "*{{event.alerts[0].user.name}}*" and cases.description LIKE "*{{event.alerts[0].process.name}}*") or (cases.description LIKE "*{{event.alerts[0].host.name}}*" and cases.description LIKE "*{{event.alerts[0].process.name}}*") | EVAL case_id = REPLACE(_id, ".*:","") | keep cases.created_at, cases.title, case_id
+      - name: kibana_createCaseDefaultSpace_step
+        type: kibana.createCaseDefaultSpace
+        with:
+          connector:
+            fields: null
+            id: none
+            name: none
+            type: .none
+          description: |
+            > **What is the actual date of the alert:**
+            signal.original_time: \`{{ event.alerts[0].signal.original_time | date: "%Y-%m-%d %H:%M:%S.%L", "Europe/Amsterdam" | default: "niet beschikbaar" }}\`
+            >**Which hosts and users are involved in the alert:**
+            {% if event.alerts[0].host.name %}
+            host.name: \`{{event.alerts[0].host.name | default: "niet beschikbaar"}}\` van type: \`{{steps.esql_get_context_for_host.output.values[0] | default: "niet beschikbaar"}}\`
+            {% endif %}
+            {% if event.alerts[0].user.name %}
+            user.name: \`{{event.alerts[0].user.name | default: "niet beschikbaar"}}\` met email: \`{{steps.esql_get_context_for_user.output.values[1] | default: "niet beschikbaar"}}\`
+            {% endif %}
+            >**Important IOC information**
+            {% if steps.choose-ioc-using-event-category.output %}
+            Virustotal malicious hits \`{{steps.lookup-hash-via-vt.output.data.data[0].attributes.last_analysis_stats.malicious | default: "niet beschikbaar"}}\`
+            {% endif %}
+            {% if event.alerts[0].process.command_line %}
+            process.command_line: \`{{event.alerts[0].process.command_line | default: "niet beschikbaar"}}\`
+            {% endif %}
+            {% if event.alerts[0].file.hash.sha256 %}
+            file.hash: \`{{event.alerts[0].file.hash.sha256 | default: "niet beschikbaar"}}\`
+            {% endif %}
+            {% if event.alerts[0].process.hash.sha256 %}
+            process.hash: \`{{event.alerts[0].process.hash.sha256 | default: "niet beschikbaar"}}\`
+            {% endif %}
+            {% if event.alerts[0].source.ip %}
+            source.ip: \`{{event.alerts[0].source.ip | default: "niet beschikbaar"}}\`
+            {% endif %}
+            {% if event.alerts[0].destination.ip %}
+            destination.ip: \`{{event.alerts[0].destination.ip | default: "niet beschikbaar"}}\`
+            {% endif %}
+            {% for value in steps.esql_get_alerts_by_host.output.values %}
+            {{ value[0] | date: "%Y-%m-%d %H:%M:%S.%L", "Europe/Amsterdam" | default: "niet beschikbaar" }}
+            {% endfor %}
+            >**Analysis**
+                  AI Response {{steps.ask_ai_for_summary.output.data}}
+            >**Conclusion**
+          owner: securitySolution
+          settings:
+            syncAlerts: true
+          severity: high
+          tags:
+            - Automatic
+          title: "{{steps.create_case_title.output}}"
+          fetcher:
+            skip_ssl_verification: true
+      - name: esql_get_case_id
+        type: elasticsearch.esql.query
+        with:
+          format: json
+          query: FROM .kibana_alerting_cases* METADATA _id | WHERE cases.title LIKE "{{steps.create_case_title.output}}" | LIMIT 1 | EVAL case_id = REPLACE(_id, ".*:","") | keep case_id
+      - name: loop_over_results
+        type: foreach
+        foreach: "{{event.alerts | json}}"
+        steps:
+          - name: process-item
+            type: console
+            with:
+              message: "{{foreach.item.id}}"
+          - name: add_alert_to_case
+            type: kibana.addCaseCommentDefaultSpace
+            with:
+              alertId: "{{foreach.item._id}}"
+              index: .alerts-security.alerts-*
+              owner: securitySolution
+              rule:
+                id: "{{foreach.item.signal.rule.id}}"
+                name: "{{foreach.item.signal.rule.name}}"
+              type: alert
+              caseId: "{{steps.kibana_createCaseDefaultSpace_step.output.id}}"
+              fetcher:
+                skip_ssl_verification: true
+          - name: update_alert_status
+            type: kibana.SetAlertsStatus
+            with:
+              status: "in-progress"
+              signal_ids: ["{{foreach.item._id}}"]
+              fetcher:
+                  skip_ssl_verification: true
+      - name: email_step
+        type: email
+        connector-id: Gmail
+        with:
+          to:
+            - "{{consts.email_to_send_to}}"
+          subject: "{{steps.create_case_title.output}} [{{event.alerts[0].signal.rule.severity}}]"
+          message: "{{steps.create_case_title.output}}"

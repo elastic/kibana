@@ -9,15 +9,17 @@
 
 import { schema } from '@kbn/config-schema';
 import { FILES_MANAGE_PRIVILEGE } from '../../common/constants';
-import { FilesClient } from '../../common/files_client';
+import type { FilesClient } from '../../common/files_client';
 import type { CreateHandler, FilesRouter } from './types';
-import { FILES_API_ROUTES, CreateRouteDefinition } from './api_routes';
+import type { CreateRouteDefinition } from './api_routes';
+import { FILES_API_ROUTES } from './api_routes';
+import { fileId } from './common_schemas';
 
 const method = 'delete' as const;
 
 const rt = {
   body: schema.object({
-    ids: schema.arrayOf(schema.string({ minLength: 1 }), { minSize: 1, maxSize: 100 }),
+    ids: schema.arrayOf(fileId, { minSize: 1, maxSize: 100 }),
   }),
 };
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MlInferenceError } from '../../../../../common/types/pipelines';
+import type { MlInferenceError } from '../../../../../common/types/pipelines';
 import { createApiLogic } from '../../../shared/api_logic/create_api_logic';
 import { HttpLogic } from '../../../shared/http';
 
@@ -17,7 +17,9 @@ export interface FetchMlInferenceErrorsApiLogicResponse {
 }
 
 export const fetchMlInferenceErrors = async ({ indexName }: FetchMlInferenceErrorsApiLogicArgs) => {
-  const route = `/internal/enterprise_search/indices/${indexName}/ml_inference/errors`;
+  const route = `/internal/enterprise_search/indices/${encodeURIComponent(
+    indexName
+  )}/ml_inference/errors`;
 
   return await HttpLogic.values.http.get<FetchMlInferenceErrorsApiLogicResponse>(route);
 };

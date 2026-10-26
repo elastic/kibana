@@ -7,16 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { $Values } from '@kbn/utility-types';
-import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
-import {
+import type { ReactNode } from 'react';
+import type { $Values } from '@kbn/utility-types';
+import type { ExpressionValueVisDimension } from '@kbn/chart-expressions-common';
+import type {
   ColorMode,
   Labels,
   CustomPaletteState,
   Style as ChartStyle,
 } from '@kbn/charts-plugin/common';
-import { Style } from '@kbn/expressions-plugin/common';
-import { LabelPosition } from '../constants';
+import type { Style } from '@kbn/expressions-plugin/common';
+import type { LabelPosition } from '../constants';
 
 export const visType = 'metric';
 
@@ -53,7 +54,7 @@ export interface VisParams {
 }
 
 export interface MetricOptions {
-  value: string;
+  value: ReactNode;
   label: string;
   color?: string;
   bgColor?: string;

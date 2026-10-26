@@ -7,10 +7,17 @@
 
 import type { ChangeEventHandler } from 'react';
 import React, { memo, useCallback, useMemo, useState } from 'react';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import { i18n } from '@kbn/i18n';
 import type { EuiSuperSelectOption, EuiSuperSelectProps } from '@elastic/eui';
-import { EuiButtonIcon, EuiFieldText, EuiFormRow, EuiSuperSelect, EuiText } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiFieldText,
+  EuiFormRow,
+  EuiSuperSelect,
+  EuiText,
+  EuiToolTip,
+} from '@elastic/eui';
 import type { TrustedAppEntryTypes } from '@kbn/securitysolution-utils';
 import { ConditionEntryField, OperatingSystem } from '@kbn/securitysolution-utils';
 import type { TrustedAppConditionEntry } from '../../../../../../../common/endpoint/types';
@@ -70,7 +77,7 @@ const InputGroup = styled.div`
 const InputItem = styled.div<{ gridArea: string }>`
   grid-area: ${({ gridArea }) => gridArea};
   align-self: center;
-  margin: 4px;
+  margin-right: ${(props) => props.theme.euiTheme.size.s};
   vertical-align: baseline;
 `;
 
@@ -195,6 +202,7 @@ export const ConditionEntryInput = memo<ConditionEntryInputProps>(
               valueOfSelected={entry.field}
               onChange={handleFieldUpdate}
               data-test-subj={getTestId('field')}
+              aria-label={ENTRY_PROPERTY_TITLES.field}
             />
           </ConditionEntryCell>
         </InputItem>
@@ -206,6 +214,7 @@ export const ConditionEntryInput = memo<ConditionEntryInputProps>(
                 onChange={handleOperatorUpdate}
                 valueOfSelected={entry.type}
                 data-test-subj={getTestId('operator')}
+                aria-label={ENTRY_PROPERTY_TITLES.operator}
               />
             ) : (
               <EuiFieldText
@@ -238,17 +247,25 @@ export const ConditionEntryInput = memo<ConditionEntryInputProps>(
         <InputItem gridArea="remove">
           {/* Unicode `nbsp` is used below so that Remove button is properly displayed */}
           <ConditionEntryCell showLabel={showLabels} label={'\u00A0'}>
-            <EuiButtonIcon
-              color="danger"
-              iconType="trash"
-              onClick={handleRemoveClick}
-              isDisabled={isRemoveDisabled}
-              aria-label={i18n.translate(
+            <EuiToolTip
+              content={i18n.translate(
                 'xpack.securitySolution.trustedapps.logicalConditionBuilder.entry.removeLabel',
                 { defaultMessage: 'Remove Entry' }
               )}
-              data-test-subj={getTestId('remove')}
-            />
+              disableScreenReaderOutput
+            >
+              <EuiButtonIcon
+                color="danger"
+                iconType="trash"
+                onClick={handleRemoveClick}
+                isDisabled={isRemoveDisabled}
+                aria-label={i18n.translate(
+                  'xpack.securitySolution.trustedapps.logicalConditionBuilder.entry.removeLabel',
+                  { defaultMessage: 'Remove Entry' }
+                )}
+                data-test-subj={getTestId('remove')}
+              />
+            </EuiToolTip>
           </ConditionEntryCell>
         </InputItem>
       </InputGroup>

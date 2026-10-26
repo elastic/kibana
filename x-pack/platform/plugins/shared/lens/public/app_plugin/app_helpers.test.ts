@@ -7,13 +7,13 @@
 
 import { renderHook, act } from '@testing-library/react';
 import { faker } from '@faker-js/faker';
-import { UseNavigateBackToAppProps, useNavigateBackToApp } from './app_helpers';
+import type { UseNavigateBackToAppProps } from './app_helpers';
+import { getTelemetrySource, useNavigateBackToApp } from './app_helpers';
 import { defaultDoc, makeDefaultServices } from '../mocks/services_mock';
-import { cloneDeep } from 'lodash';
-import { LensDocument } from '../persistence';
+import type { LensDocument } from '@kbn/lens-common';
 
 function getLensDocumentMock(someProps?: Partial<LensDocument>) {
-  return cloneDeep({ ...defaultDoc, ...someProps });
+  return structuredClone({ ...defaultDoc, ...someProps });
 }
 
 const getApplicationMock = () => makeDefaultServices().application;
@@ -56,21 +56,80 @@ describe('App helpers', () => {
       });
 
       expect(props.application.navigateToApp).not.toHaveBeenCalled();
-      expect(result.current.shouldShowGoBackToVizEditorModal).toBe(true);
+      expect(result.current.shouldShowGoBackToVisEditorModal).toBe(true);
     });
 
-    it('navigateToVizEditor hides modal and navigates back to Viz editor', () => {
+    it('navigateToVisEditor hides modal and navigates back to Vis editor', () => {
       const props = getDefaultProps();
       const { result } = renderHook(() => useNavigateBackToApp(props));
 
       act(() => {
-        result.current.navigateToVizEditor();
+        result.current.navigateToVisEditor();
       });
 
-      expect(result.current.shouldShowGoBackToVizEditorModal).toBe(false);
+      expect(result.current.shouldShowGoBackToVisEditorModal).toBe(false);
       expect(props.application.navigateToApp).toHaveBeenCalledWith(props.legacyEditorAppName, {
         path: props.legacyEditorAppUrl,
       });
+    });
+  });
+
+  describe('getTelemetrySource', () => {
+    it('returns dashboards when creating a new panel from a dashboard', () => {
+      expect(
+        getTelemetrySource({ originatingApp: 'dashboards', originatingPath: '#/view/123' })
+      ).toBe('dashboards');
+    });
+
+    it('returns undefined when editing an existing dashboard panel', () => {
+      expect(
+        getTelemetrySource({
+          originatingApp: 'dashboards',
+          originatingPath: '#/view/123',
+          embeddableId: 'panel-1',
+        })
+      ).toBeUndefined();
+    });
+
+    it('returns dashboards when an existing dashboard panel is saved as a new copy', () => {
+      expect(
+        getTelemetrySource(
+          {
+            originatingApp: 'dashboards',
+            originatingPath: '#/view/123',
+            embeddableId: 'panel-1',
+          },
+          true
+        )
+      ).toBe('dashboards');
+    });
+
+    it('returns undefined for untracked app', () => {
+      expect(
+        getTelemetrySource({ originatingApp: 'securitySolutionUI', originatingPath: '/dashboards' })
+      ).toBeUndefined();
+    });
+
+    it('returns dashboards when created from a dashboard hosted in another app', () => {
+      expect(
+        getTelemetrySource({
+          originatingApp: 'securitySolutionUI',
+          originatingPath: '/dashboards/123/edit',
+          originatingContainer: 'dashboard',
+        })
+      ).toBe('dashboards');
+    });
+
+    it('returns library when creating from the Visualize library', () => {
+      expect(getTelemetrySource({ originatingApp: 'visualize' })).toBe('library');
+    });
+
+    it('returns library when creating from the Dashboards app visualizations tab', () => {
+      expect(getTelemetrySource({ originatingApp: 'dashboards' })).toBe('library');
+    });
+
+    it('returns discover when editing a Discover chart in Lens', () => {
+      expect(getTelemetrySource({ originatingApp: 'discover' })).toBe('discover');
     });
   });
 });

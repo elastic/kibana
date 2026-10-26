@@ -7,10 +7,36 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SpecDefinitionsService } from '../../../services';
+import type { SpecDefinitionsService } from '../../../services';
+import { ChunkingSettings } from './shared';
 
 export const retriever = (specService: SpecDefinitionsService) => {
   specService.addGlobalAutocompleteRules('retriever', {
+    diversify: {
+      __template: {
+        type: '',
+        field: '',
+        retriever: {},
+      },
+      // only `mmr` is available at the moment. More to come in the future.
+      type: { __one_of: ['mmr'] },
+      field: '{field}',
+      retriever: {
+        __scope_link: '.',
+      },
+      // size is only applicable for 'mmr' diversify type
+      size: 10,
+      rank_window_size: 100,
+      query_vector: [],
+      query_vector_builder: {
+        text_embedding: {
+          model_id: '',
+          model_text: '',
+        },
+      },
+      // lambda is only applicable for 'mmr' diversify type
+      lambda: 0.5,
+    },
     knn: {
       __template: {
         field: '',
@@ -48,10 +74,13 @@ export const retriever = (specService: SpecDefinitionsService) => {
               __scope_link: '.',
             },
             weight: 2,
-            normalizer: 'minmax',
+            normalizer: { __one_of: ['minmax', 'l2_norm', 'none'] },
           },
         ],
       },
+      query: '',
+      fields: [],
+      normalizer: { __one_of: ['minmax', 'l2_norm', 'none'] },
     },
     rescorer: {
       __template: {
@@ -91,6 +120,8 @@ export const retriever = (specService: SpecDefinitionsService) => {
       },
       rank_constant: 60,
       rank_window_size: 100,
+      query: '',
+      fields: [],
     },
     rule: {
       __template: {
@@ -103,6 +134,19 @@ export const retriever = (specService: SpecDefinitionsService) => {
       },
       ruleset_ids: [],
       match_criteria: {},
+      rank_window_size: 10,
+    },
+    pinned: {
+      __template: {
+        retriever: {},
+        ids: [],
+      },
+      retriever: {
+        __scope_link: '.',
+      },
+      // Only one of 'ids' or 'docs' should be used at a time
+      ids: [],
+      docs: [],
       rank_window_size: 10,
     },
     standard: {
@@ -131,6 +175,7 @@ export const retriever = (specService: SpecDefinitionsService) => {
         inference_id: '',
         inference_text: '',
         field: '',
+        chunk_rescorer: {},
       },
       retriever: {
         __scope_link: '.',
@@ -142,6 +187,10 @@ export const retriever = (specService: SpecDefinitionsService) => {
       min_score: 0,
       filter: {
         __scope_link: 'GLOBAL.query',
+      },
+      chunk_rescorer: {
+        size: 1,
+        chunking_settings: ChunkingSettings,
       },
     },
   });

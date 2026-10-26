@@ -10,19 +10,29 @@
 import React from 'react';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import { render, screen } from '@testing-library/react';
-import SummaryColumn, {
+import { userEvent } from '@testing-library/user-event';
+import type {
   AllSummaryColumnProps,
-  SummaryCellPopover,
   SummaryColumnFactoryDeps,
   SummaryColumnProps,
 } from './summary_column';
+import SummaryColumn, { SummaryCellPopover } from './summary_column';
 import { DataGridDensity, ROWS_HEIGHT_OPTIONS } from '@kbn/unified-data-table';
 import * as constants from '@kbn/discover-utils/src/data_types/logs/constants';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import { coreMock as corePluginMock } from '@kbn/core/public/mocks';
-import { DataTableRecord, buildDataTableRecord } from '@kbn/discover-utils';
-import { dataViewMock } from '@kbn/discover-utils/src/__mocks__/data_view';
+import type { DataTableRecord } from '@kbn/discover-utils';
+import { buildDataTableRecord, MAX_RENDERED_FIELD_VALUE_LENGTH } from '@kbn/discover-utils';
+import {
+  dataViewMock,
+  createDataViewWithBytesField,
+  esqlSourceOverridingBytesType,
+  esqlSourceWithCustomField,
+  createFormatFieldValueReactSpy,
+  expectFieldCallToMatch,
+} from '@kbn/discover-utils/src/__mocks__';
 import type { IFieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
+import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 
 jest.mock('@elastic/eui', () => ({
   ...jest.requireActual('@elastic/eui'),
@@ -53,7 +63,9 @@ const getSummaryProps = (
       .fn()
       .mockImplementation((...params: Parameters<IFieldFormatsRegistry['getDefaultInstance']>) => ({
         ...fieldFormatsMock.getDefaultInstance(...params),
-        convert: jest.fn().mockImplementation((t: string) => String(t)),
+        type: { id: FIELD_FORMAT_IDS.STRING },
+        param: jest.fn(),
+        convertToText: jest.fn().mockImplementation((t: string) => String(t)),
       })),
   },
   setCellProps: () => {},
@@ -151,11 +163,13 @@ describe('SummaryColumn', () => {
       expect(screen.queryByText('+2')).not.toBeInTheDocument();
     });
 
-    it('should display a popover with details and actions upon a badge click', () => {
+    it('should display a popover with details and actions upon a badge click', async () => {
       const record = getBaseRecord();
       renderSummary(record);
       // Open badge popover
-      screen.getByTestId(`dataTableCellActionsPopover_${constants.SERVICE_NAME_FIELD}`).click();
+      await userEvent.click(
+        screen.getByTestId(`dataTableCellActionsPopover_${constants.SERVICE_NAME_FIELD}`)
+      );
 
       expect(screen.getByTestId('dataTableCellActionPopoverTitle')).toHaveTextContent(
         'service.name synth-service-2'
@@ -235,6 +249,28 @@ describe('SummaryColumn', () => {
       );
     });
 
+    it('should render angle brackets as text (not HTML tags)', () => {
+      const message =
+        '2026-02-06 04:41:12,718 INFO some.program.module(128):Search for <John Doe> found <48> items in <0.314> seconds';
+      const record = getBaseRecord({ message });
+
+      renderSummary(record);
+
+      expect(screen.queryByTestId('discoverDataTableMessageValue')).toHaveTextContent(message);
+      expect(document.querySelector('john')).toBeNull();
+    });
+
+    it('should truncate a very long message', () => {
+      const message = 'z'.repeat(MAX_RENDERED_FIELD_VALUE_LENGTH + 100);
+      const record = getBaseRecord({ message });
+
+      renderSummary(record);
+
+      expect(screen.queryByTestId('discoverDataTableMessageValue')?.textContent).toBe(
+        `${'z'.repeat(MAX_RENDERED_FIELD_VALUE_LENGTH)}…`
+      );
+    });
+
     it(`should fallback to ${constants.ERROR_MESSAGE_FIELD} and ${constants.EVENT_ORIGINAL_FIELD} fields if message does not exist`, () => {
       const recordWithoutMessage = getBaseRecord({ message: undefined });
       renderSummary(recordWithoutMessage);
@@ -252,10 +288,100 @@ describe('SummaryCellPopover', () => {
     expect(screen.queryByTestId('codeBlock')?.innerHTML).toBe(message);
   });
 
+  it('should render a very long message value in full', async () => {
+    const message = 'z'.repeat(MAX_RENDERED_FIELD_VALUE_LENGTH + 100);
+    render(<SummaryCellPopover {...getSummaryProps(getBaseRecord({ message }))} />);
+    expect(screen.queryByTestId('codeBlock')?.innerHTML).toBe(message);
+  });
+
   it('should render formatted JSON message value', async () => {
     const json = { foo: { bar: true } };
     const message = JSON.stringify(json);
     render(<SummaryCellPopover {...getSummaryProps(getBaseRecord({ message }))} />);
     expect(screen.queryByTestId('codeBlock')?.innerHTML).toBe(JSON.stringify(json, null, 2));
+  });
+});
+
+describe('SummaryColumn with ES|QL columns', () => {
+  it('should use data view field type without an ES|QL source', () => {
+    const formatFieldValueReactSpy = createFormatFieldValueReactSpy();
+    const testDataView = createDataViewWithBytesField();
+
+    const record = buildDataTableRecord(
+      {
+        fields: {
+          '@timestamp': 1726218404776,
+          bytes: [100],
+        },
+      },
+      testDataView
+    );
+
+    render(
+      <SummaryColumn
+        {...getSummaryProps(record, {
+          dataView: testDataView,
+        })}
+      />
+    );
+
+    expectFieldCallToMatch(formatFieldValueReactSpy, 'bytes', 'number');
+    formatFieldValueReactSpy.mockRestore();
+  });
+
+  it('should use the ES|QL column type instead of the data view field type', () => {
+    const formatFieldValueReactSpy = createFormatFieldValueReactSpy();
+    const testDataView = createDataViewWithBytesField();
+
+    const record = buildDataTableRecord(
+      {
+        fields: {
+          '@timestamp': 1726218404776,
+          bytes: ['100'],
+        },
+      },
+      testDataView
+    );
+
+    render(
+      <SummaryColumn
+        {...getSummaryProps(record, {
+          dataView: testDataView,
+          dataSource: esqlSourceOverridingBytesType,
+        })}
+      />
+    );
+
+    expectFieldCallToMatch(formatFieldValueReactSpy, 'bytes', 'string', ['keyword']);
+    formatFieldValueReactSpy.mockRestore();
+  });
+
+  it('should format a computed ES|QL column absent from the data view when message is dropped', () => {
+    const formatFieldValueReactSpy = createFormatFieldValueReactSpy();
+    const testDataView = createDataViewWithBytesField();
+
+    // Mirrors `FROM logs-* | eval custom_esql_field = ... | drop message`: the field exists only
+    // in the ES|QL columns, and there is no `message` for the summary to fall back on.
+    const record = buildDataTableRecord(
+      {
+        fields: {
+          '@timestamp': 1726218404776,
+          custom_esql_field: [200],
+        },
+      },
+      testDataView
+    );
+
+    render(
+      <SummaryColumn
+        {...getSummaryProps(record, {
+          dataView: testDataView,
+          dataSource: esqlSourceWithCustomField,
+        })}
+      />
+    );
+
+    expectFieldCallToMatch(formatFieldValueReactSpy, 'custom_esql_field', 'number', ['long']);
+    formatFieldValueReactSpy.mockRestore();
   });
 });

@@ -23,15 +23,21 @@ export {
   type FromToolSchema,
   type ToolSchema,
   type UnvalidatedToolCall,
-  type ToolCallsOf,
   type ToolCall,
+  type ToolCallback,
   type ToolDefinition,
   type ToolOptions,
   type FunctionCallingMode,
   type ToolChoice,
   type ChatCompleteAPI,
+  type ChatCompleteAPIResponse,
   type ChatCompleteOptions,
+  type ChatCompleteTemplate,
+  parseTemplateJson,
   type ChatCompleteCompositeResponse,
+  chatCompletionReasoningEfforts,
+  type ChatCompletionReasoning,
+  type ChatCompletionReasoningEffort,
   type ChatCompletionTokenCountEvent,
   type ChatCompletionEvent,
   type ChatCompletionChunkEvent,
@@ -40,9 +46,9 @@ export {
   type ChatCompleteStreamResponse,
   type ChatCompleteResponse,
   type ChatCompleteRetryConfiguration,
+  type ChatCompleteCacheControl,
   type ChatCompletionTokenCount,
   type BoundChatCompleteAPI,
-  type BoundChatCompleteOptions,
   type UnboundChatCompleteOptions,
   withoutTokenCountEvents,
   withoutChunkEvents,
@@ -54,12 +60,35 @@ export {
   type ChatCompletionToolNotFoundError,
   type ChatCompletionToolValidationError,
   type ChatCompletionTokenLimitReachedError,
+  isContextLengthExceededError,
   isToolValidationError,
-  isTokenLimitReachedError,
+  isOutputTokenLimitReachedError,
   isToolNotFoundError,
   type ChatCompleteMetadata,
   type ConnectorTelemetryMetadata,
+  type ChatCompleteAnonymizationMetadata,
+  type AnonymizationEntity,
+  type Anonymization,
+  type Deanonymization,
+  type AnonymizationOutput,
+  type DeanonymizationOutput,
+  type DeanonymizedMessage,
+  type AnonymizationResponseMetadata,
+  type DeanonymizedMessageData,
+  type CustomToolChoice,
+  type ToolCallArgumentsOfToolDefinition,
+  type ToolCallOfToolDefinitions,
+  type ToolCallOfToolOptions,
+  type ToolCallbacksOfToolOptions,
+  type ToolNamesOf,
+  type ToolsOfChoice,
+  type ToolCallArguments,
+  type ToolCallbackResult,
+  type InferenceCallbacks,
+  type InferenceEventEmitter,
 } from './src/chat_complete';
+
+export type { BoundInferenceClient, InferenceClient } from './src/inference_client';
 export {
   OutputEventType,
   type OutputAPI,
@@ -72,7 +101,6 @@ export {
   type Output,
   type OutputEvent,
   type BoundOutputAPI,
-  type BoundOutputOptions,
   type UnboundOutputOptions,
   isOutputCompleteEvent,
   isOutputUpdateEvent,
@@ -102,8 +130,10 @@ export {
   isInferenceRequestAbortedError,
   isInferenceProviderError,
 } from './src/errors';
-export { generateFakeToolCallId } from './src/utils';
-export { elasticModelDictionary } from './src/const';
+
+export { Tokenizer, generateFakeToolCallId, ShortIdTable } from './src/utils';
+
+export { elasticModelDictionary, MAX_STREAM_DURATION_MS } from './src/const';
 
 export { truncateList } from './src/truncate_list';
 export {
@@ -111,14 +141,66 @@ export {
   isSupportedConnectorType,
   isSupportedConnector,
   getConnectorDefaultModel,
+  getConnectorModel,
+  getConnectorFamily,
+  getConnectorPlatform,
   getConnectorProvider,
   connectorToInference,
+  getModelDefinition,
+  getContextWindowSize,
+  contextWindowFromModelName,
+  getSupportedReasoningEffortLevels,
+  isTemplateRequiredConnector,
+  validateReasoningEffort,
   type InferenceConnector,
+  type InferenceConnectorCapabilities,
+  type RawConnector,
+  type RawInferenceConnector,
 } from './src/connectors';
 export {
   defaultInferenceEndpoints,
+  INFERENCE_ENDPOINT_INTERNAL_API_VERSION,
   InferenceEndpointProvider,
   elasticModelIds,
+  type EisInferenceEndpointMetadata,
+  type EisInferenceEndpointCapabilities,
+  type CspRegion,
+  type InferenceEndpointRequestBody,
 } from './src/inference_endpoints';
 
-export { Tokenizer } from './src/utils/tokenizer';
+export {
+  INFERENCE_CONNECTORS_INTERNAL_API_PATH,
+  type ApiInferenceConnector,
+  type InferenceConnectorsApiResponseBody,
+} from './src/inference_connectors_api';
+
+export {
+  FieldType,
+  type ConfigValue,
+  SERVICE_SETTINGS,
+  TASK_SETTINGS,
+  type ConfigProperties,
+  type FieldsConfiguration,
+  type InferenceProvider,
+  type InferenceServiceFeatures,
+  supportsNonStreamingChat,
+} from './src/inference_services_api';
+
+export { type Model, ModelFamily, ModelPlatform, ModelProvider } from './src/model_provider';
+
+export {
+  type BoundPromptAPI,
+  type Prompt,
+  type PromptAPI,
+  type PromptCompositeResponse,
+  type PromptFactory,
+  type PromptOptions,
+  type PromptResponse,
+  type PromptStreamResponse,
+  type PromptVersion,
+  type ToolOptionsOfPrompt,
+  type UnboundPromptOptions,
+  createPrompt,
+} from './src/prompt';
+
+export { type BoundOptions, type UnboundOptions, bindApi } from './src/bind';

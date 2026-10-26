@@ -4,11 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { PropsWithChildren } from 'react';
 import React, { useEffect } from 'react';
-import { Provider as ReduxProvider } from 'react-redux';
+import useObservable from 'react-use/lib/useObservable';
+import { Provider as ReduxProvider } from 'react-redux-v7';
 import { Router } from '@kbn/shared-ux-router';
 import { i18n } from '@kbn/i18n';
-import { I18nStart, ChromeBreadcrumb, CoreStart, AppMountParameters } from '@kbn/core/public';
+import type { I18nStart, ChromeBreadcrumb, CoreStart, AppMountParameters } from '@kbn/core/public';
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
@@ -17,14 +19,14 @@ import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { InspectorContextProvider } from '@kbn/observability-shared-plugin/public';
 import { PerformanceContextProvider } from '@kbn/ebt-tools';
-import { ClientPluginsSetup, ClientPluginsStart } from '../../plugin';
-import { UMUpdateBadge } from '../lib/lib';
+import type { ClientPluginsSetup, ClientPluginsStart } from '../../plugin';
+import type { UMUpdateBadge } from '../lib/lib';
 import {
   UptimeRefreshContextProvider,
   UptimeSettingsContextProvider,
   UptimeStartupPluginsContextProvider,
 } from '../contexts';
-import { CommonlyUsedRange } from '../components/common/uptime_date_picker';
+import type { CommonlyUsedRange } from '../components/common/uptime_date_picker';
 import { setBasePath } from '../state/actions';
 import { PageRouter } from '../routes';
 import { UptimeAlertsFlyoutWrapper } from '../components/overview';
@@ -37,7 +39,6 @@ export interface UptimeAppProps {
   basePath: string;
   canSave: boolean;
   core: CoreStart;
-  darkMode: boolean;
   i18n: I18nStart;
   isApmAvailable: boolean;
   isInfraAvailable: boolean;
@@ -52,12 +53,20 @@ export interface UptimeAppProps {
   isDev: boolean;
 }
 
+// A theme change must not re-render Application: it dispatches to the store during render.
+function StyledComponentsThemeProvider({
+  theme,
+  children,
+}: PropsWithChildren<{ theme: CoreStart['theme'] }>) {
+  const { darkMode } = useObservable(theme.theme$, theme.getTheme());
+  return <EuiThemeProvider darkMode={darkMode}>{children}</EuiThemeProvider>;
+}
+
 const Application = (props: UptimeAppProps) => {
   const {
     basePath,
     canSave,
     core,
-    darkMode,
     plugins,
     renderGlobalHelpControls,
     setBadge,
@@ -76,7 +85,7 @@ const Application = (props: UptimeAppProps) => {
             tooltip: i18n.translate('xpack.uptime.badge.readOnly.tooltip', {
               defaultMessage: 'Unable to save',
             }),
-            iconType: 'glasses',
+            iconType: 'readOnly',
           }
         : undefined
     );
@@ -106,17 +115,17 @@ const Application = (props: UptimeAppProps) => {
               storage,
               data: startPlugins.data,
               unifiedSearch: startPlugins.unifiedSearch,
+              kql: startPlugins.kql,
               fleet: startPlugins.fleet,
               inspector: startPlugins.inspector,
               triggersActionsUi: startPlugins.triggersActionsUi,
               observability: startPlugins.observability,
               observabilityShared: startPlugins.observabilityShared,
               exploratoryView: startPlugins.exploratoryView,
-              cases: startPlugins.cases,
             }}
           >
             <Router history={appMountParameters.history}>
-              <EuiThemeProvider darkMode={darkMode}>
+              <StyledComponentsThemeProvider theme={core.theme}>
                 <UptimeRefreshContextProvider>
                   <UptimeSettingsContextProvider {...props}>
                     <UptimeStartupPluginsContextProvider {...startPlugins}>
@@ -140,7 +149,7 @@ const Application = (props: UptimeAppProps) => {
                     </UptimeStartupPluginsContextProvider>
                   </UptimeSettingsContextProvider>
                 </UptimeRefreshContextProvider>
-              </EuiThemeProvider>
+              </StyledComponentsThemeProvider>
             </Router>
           </KibanaContextProvider>
         </ReduxProvider>

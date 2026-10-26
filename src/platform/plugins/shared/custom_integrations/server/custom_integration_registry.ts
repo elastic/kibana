@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Logger } from '@kbn/core/server';
-import { IntegrationCategory, INTEGRATION_CATEGORY_DISPLAY, CustomIntegration } from '../common';
+import type { Logger } from '@kbn/core/server';
+import type { IntegrationCategory, CustomIntegration } from '../common';
+import { INTEGRATION_CATEGORY_DISPLAY } from '../common';
 
 function isAddable(integration: CustomIntegration): boolean {
   return !!integration.categories.length && !integration.eprOverlap;
@@ -22,11 +23,28 @@ export class CustomIntegrationRegistry {
   private readonly _integrations: CustomIntegration[];
   private readonly _logger: Logger;
   private readonly _isDev: boolean;
+  /**
+   * Deferred initializers registered via {@link registerDeferredInitializer}.  They are
+   * called (in order, exactly once) the first time the integration list is read, so that
+   * callers can avoid executing expensive work (e.g. evaluating i18n strings) at plugin
+   * start time.
+   */
+  private readonly _deferredInitializers: Array<() => void> = [];
 
   constructor(logger: Logger, isDev: boolean) {
     this._integrations = [];
     this._logger = logger;
     this._isDev = isDev;
+  }
+
+  registerDeferredInitializer(init: () => void) {
+    this._deferredInitializers.push(init);
+  }
+
+  private _materializeDeferredInitializers() {
+    while (this._deferredInitializers.length > 0) {
+      this._deferredInitializers.shift()!();
+    }
   }
 
   registerCustomIntegration(customIntegration: CustomIntegration) {
@@ -54,10 +72,12 @@ export class CustomIntegrationRegistry {
   }
 
   getAppendCustomIntegrations(): CustomIntegration[] {
+    this._materializeDeferredInitializers();
     return this._integrations.filter(isAddable);
   }
 
   getReplacementCustomIntegrations(): CustomIntegration[] {
+    this._materializeDeferredInitializers();
     return this._integrations.filter(isReplacement);
   }
 }

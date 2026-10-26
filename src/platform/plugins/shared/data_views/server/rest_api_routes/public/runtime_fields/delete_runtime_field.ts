@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { schema } from '@kbn/config-schema';
-import { IRouter, StartServicesAccessor } from '@kbn/core/server';
-import { DataViewsService } from '../../../../common';
+import type { IRouter, StartServicesAccessor } from '@kbn/core/server';
+import type { DataViewsService } from '../../../../common';
 import { ErrorIndexPatternFieldNotFound } from '../../../error';
 import { handleErrors } from '../util/handle_errors';
 import type {
@@ -21,6 +21,7 @@ import {
   SPECIFIC_RUNTIME_FIELD_PATH,
   SPECIFIC_RUNTIME_FIELD_PATH_LEGACY,
   INITIAL_REST_VERSION,
+  DELETE_RUNTIME_FIELD_SUMMARY,
   DELETE_RUNTIME_FIELD_DESCRIPTION,
 } from '../../../constants';
 
@@ -53,7 +54,7 @@ export const deleteRuntimeField = async ({
 };
 
 const deleteRuntimeFieldRouteFactory =
-  (path: string, description?: string) =>
+  (path: string, summary?: string, description?: string) =>
   (
     router: IRouter,
     getStartServices: StartServicesAccessor<
@@ -66,6 +67,7 @@ const deleteRuntimeFieldRouteFactory =
       .delete({
         path,
         access: 'public',
+        summary,
         description,
         security: {
           authz: {
@@ -82,10 +84,12 @@ const deleteRuntimeFieldRouteFactory =
                 id: schema.string({
                   minLength: 1,
                   maxLength: 1_000,
+                  meta: { description: 'The unique identifier of the data view.' },
                 }),
                 name: schema.string({
                   minLength: 1,
                   maxLength: 1_000,
+                  meta: { description: 'The name of the runtime field to delete.' },
                 }),
               }),
             },
@@ -124,9 +128,12 @@ const deleteRuntimeFieldRouteFactory =
 
 export const registerDeleteRuntimeFieldRoute = deleteRuntimeFieldRouteFactory(
   SPECIFIC_RUNTIME_FIELD_PATH,
+  DELETE_RUNTIME_FIELD_SUMMARY,
   DELETE_RUNTIME_FIELD_DESCRIPTION
 );
 
 export const registerDeleteRuntimeFieldRouteLegacy = deleteRuntimeFieldRouteFactory(
-  SPECIFIC_RUNTIME_FIELD_PATH_LEGACY
+  SPECIFIC_RUNTIME_FIELD_PATH_LEGACY,
+  DELETE_RUNTIME_FIELD_SUMMARY,
+  'Deprecated in 8.0.0. Use the data_views/data_view/{id}/runtime_field/{name} endpoint instead.'
 );

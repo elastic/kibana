@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { WelcomeService, WelcomeServiceSetup } from './welcome_service';
+import type { WelcomeServiceSetup } from './welcome_service';
+import { WelcomeService } from './welcome_service';
 
 describe('WelcomeService', () => {
   let welcomeService: WelcomeService;
@@ -68,7 +69,7 @@ describe('WelcomeService', () => {
       const renderer = jest.fn().mockReturnValue('rendered text');
       const renderer2 = jest.fn().mockReturnValue('other text');
       welcomeServiceSetup.registerTelemetryNoticeRenderer(renderer);
-      expect(() => welcomeServiceSetup.registerTelemetryNoticeRenderer(renderer2)).toThrowError(
+      expect(() => welcomeServiceSetup.registerTelemetryNoticeRenderer(renderer2)).toThrow(
         'Only one renderTelemetryNotice handler can be registered'
       );
 

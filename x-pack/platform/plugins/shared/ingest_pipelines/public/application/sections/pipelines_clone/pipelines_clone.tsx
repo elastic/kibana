@@ -5,13 +5,16 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useEffect } from 'react';
-import { RouteComponentProps } from 'react-router-dom';
+import type { FunctionComponent } from 'react';
+import React, { useEffect } from 'react';
+import type { RouteComponentProps } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { SectionLoading, useKibana, attemptToURIDecode } from '../../../shared_imports';
+import { SectionLoading, useKibana } from '../../../shared_imports';
 
+import { normalizePipelineNameFromParams } from '../../lib/normalize_pipeline_name_from_params';
+import { PipelineAppHeader } from '../../components';
 import { PipelinesCreate } from '../pipelines_create';
 import { getErrorText } from '../utils';
 
@@ -27,7 +30,7 @@ export const PipelinesClone: FunctionComponent<RouteComponentProps<ParamProps>> 
   const { sourceName } = props.match.params;
   const { services } = useKibana();
 
-  const decodedSourceName = attemptToURIDecode(sourceName)!;
+  const decodedSourceName = normalizePipelineNameFromParams(sourceName) ?? '';
   const {
     error,
     data: pipeline,
@@ -49,12 +52,21 @@ export const PipelinesClone: FunctionComponent<RouteComponentProps<ParamProps>> 
 
   if (isLoading && isInitialRequest) {
     return (
-      <SectionLoading>
-        <FormattedMessage
-          id="xpack.ingestPipelines.clone.loadingPipelinesDescription"
-          defaultMessage="Loading pipeline…"
+      <>
+        <PipelineAppHeader
+          title={i18n.translate('xpack.ingestPipelines.create.pageTitle', {
+            defaultMessage: 'Create pipeline',
+          })}
+          history={props.history}
+          docLink={services.documentation.getCreatePipelineUrl()}
         />
-      </SectionLoading>
+        <SectionLoading>
+          <FormattedMessage
+            id="xpack.ingestPipelines.clone.loadingPipelinesDescription"
+            defaultMessage="Loading pipeline…"
+          />
+        </SectionLoading>
+      </>
     );
   } else {
     // We still show the create form even if we were not able to load the

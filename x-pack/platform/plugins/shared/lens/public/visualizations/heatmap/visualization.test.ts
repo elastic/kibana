@@ -20,13 +20,15 @@ import {
 } from './constants';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { Position } from '@elastic/charts';
+import type { Ast } from '@kbn/interpreter';
+import { LegendSize } from '@kbn/chart-expressions-common';
 import type { HeatmapVisualizationState } from './types';
 import type {
   DatasourceLayers,
   FramePublicAPI,
   OperationDescriptor,
   UserMessage,
-} from '../../types';
+} from '@kbn/lens-common';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { themeServiceMock } from '@kbn/core/public/mocks';
 
@@ -68,7 +70,6 @@ describe('heatmap', () => {
       expect(getHeatmapVisualization({ paletteService, theme }).initialize(() => 'l1')).toEqual({
         layerId: 'l1',
         layerType: LayerTypes.DATA,
-        title: 'Empty Heatmap chart',
         shape: CHART_SHAPES.HEATMAP,
         legend: {
           isVisible: true,
@@ -437,6 +438,7 @@ describe('heatmap', () => {
                       function: LEGEND_FUNCTION,
                       arguments: {
                         isVisible: [true],
+                        legendSize: ['auto'],
                         maxLines: [1],
                         position: ['right'],
                         shouldTruncate: [true],
@@ -461,6 +463,7 @@ describe('heatmap', () => {
                         // X-axis
                         isXAxisLabelVisible: [true],
                         isXAxisTitleVisible: [true],
+                        xScaleType: ['ordinal'],
                       },
                     },
                   ],
@@ -470,6 +473,87 @@ describe('heatmap', () => {
           },
         ],
       });
+    });
+
+    test.each([
+      [undefined, 'auto'],
+      [LegendSize.MEDIUM, 'medium'],
+      [LegendSize.LARGE, 'large'],
+    ])('uses the %s legend size as %s in the expression', (legendSize, expected) => {
+      const state: HeatmapVisualizationState = {
+        ...exampleState(),
+        layerId: 'first',
+        xAccessor: 'x-accessor',
+        valueAccessor: 'value-accessor',
+        legend: { ...exampleState().legend, legendSize },
+      };
+
+      const expression = getHeatmapVisualization({ paletteService, theme }).toExpression(
+        state,
+        datasourceLayers
+      ) as Ast;
+
+      expect(
+        (expression.chain[0].arguments.legend[0] as Ast).chain[0].arguments.legendSize
+      ).toEqual([expected]);
+    });
+
+    test('ignores xSortPredicate for a time-based horizontal axis', () => {
+      const mockDatasource = createMockDatasource();
+      mockDatasource.publicAPIMock.getTableSpec.mockReturnValue([
+        { columnId: 'x-accessor', fields: [] },
+        { columnId: 'value-accessor', fields: [] },
+      ]);
+
+      const timeSeriesXAxisOperation: OperationDescriptor = {
+        label: 'Date histogram',
+        dataType: 'date',
+        scale: 'interval',
+        isBucketed: true,
+        hasTimeShift: false,
+        hasReducedTimeRange: false,
+      };
+      const valueOperation: OperationDescriptor = {
+        label: 'Metric',
+        dataType: 'number',
+        scale: 'ratio',
+        isBucketed: false,
+        hasTimeShift: false,
+        hasReducedTimeRange: false,
+      };
+
+      mockDatasource.publicAPIMock.getOperationForColumnId.mockImplementation((columnId: string) =>
+        columnId === 'x-accessor' ? timeSeriesXAxisOperation : valueOperation
+      );
+
+      datasourceLayers = { first: mockDatasource.publicAPIMock };
+
+      const state: HeatmapVisualizationState = {
+        ...exampleState(),
+        layerId: 'first',
+        xAccessor: 'x-accessor',
+        valueAccessor: 'value-accessor',
+        gridConfig: {
+          ...exampleState().gridConfig,
+          xSortPredicate: 'asc',
+        },
+      };
+
+      const { xSortPredicate: _omit, ...gridConfigWithoutSort } = state.gridConfig;
+      const stateWithoutSortPredicate: HeatmapVisualizationState = {
+        ...state,
+        gridConfig: gridConfigWithoutSort,
+      };
+
+      const heatmapVis = getHeatmapVisualization({ paletteService, theme });
+      const expressionWithSort = heatmapVis.toExpression(state, datasourceLayers);
+      const expressionWithoutSort = heatmapVis.toExpression(
+        stateWithoutSortPredicate,
+        datasourceLayers
+      );
+
+      expect(expressionWithSort).not.toBeNull();
+      expect(expressionWithSort).toEqual(expressionWithoutSort);
     });
 
     test('returns null with a missing value accessor', () => {
@@ -488,6 +572,51 @@ describe('heatmap', () => {
           theme,
         }).toExpression(state, datasourceLayers, attributes)
       ).toEqual(null);
+    });
+
+    test('includes xScaleType in expression when x-axis is time-based', () => {
+      const mockDatasource = createMockDatasource();
+
+      // Mock date operation for x-axis
+      mockDatasource.publicAPIMock.getOperationForColumnId.mockImplementation((columnId) => {
+        if (columnId === 'x-accessor') {
+          return {
+            dataType: 'date',
+            label: 'Timestamp',
+            isBucketed: true,
+          } as OperationDescriptor;
+        }
+        return {
+          dataType: 'number',
+          label: 'Value',
+        } as OperationDescriptor;
+      });
+
+      const dateBasedDatasourceLayers: DatasourceLayers = {
+        first: mockDatasource.publicAPIMock,
+      };
+
+      const state: HeatmapVisualizationState = {
+        ...exampleState(),
+        layerId: 'first',
+        xAccessor: 'x-accessor',
+        valueAccessor: 'value-accessor',
+      };
+
+      const expression = getHeatmapVisualization({
+        paletteService,
+        theme,
+      }).toExpression(state, dateBasedDatasourceLayers);
+
+      expect(expression).not.toBeNull();
+      if (expression && typeof expression !== 'string') {
+        expect(expression.chain[0].arguments.gridConfig).toBeDefined();
+
+        const gridConfig = expression.chain[0].arguments.gridConfig?.[0];
+        if (gridConfig && typeof gridConfig === 'object' && 'chain' in gridConfig) {
+          expect(gridConfig.chain[0].arguments.xScaleType).toEqual(['time']);
+        }
+      }
     });
   });
 
@@ -577,6 +706,7 @@ describe('heatmap', () => {
                         // X-axis
                         isXAxisLabelVisible: [false],
                         isXAxisTitleVisible: [false],
+                        xScaleType: ['ordinal'],
                       },
                     },
                   ],

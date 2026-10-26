@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { gapFillStatus } from '@kbn/alerting-plugin/common';
 import { DETECTION_ENGINE_RULES_BULK_ACTION } from '../../../../../../../common/constants';
 import { mlServicesMock } from '../../../../../machine_learning/mocks';
 import { buildMlAuthz } from '../../../../../machine_learning/authz';
@@ -14,30 +15,56 @@ import {
   getBulkActionEditRequest,
   getFindResultWithSingleHit,
   getFindResultWithMultiHits,
+  getBulkActionEditAlertSuppressionRequest,
 } from '../../../../routes/__mocks__/request_responses';
 import { requestContextMock, serverMock, requestMock } from '../../../../routes/__mocks__';
 import { performBulkActionRoute } from './route';
 import {
   getPerformBulkActionEditSchemaMock,
   getBulkDisableRuleActionSchemaMock,
+  getPerformBulkActionDuplicateSchemaMock,
 } from '../../../../../../../common/api/detection_engine/rule_management/mocks';
-import { readRules } from '../../../logic/detection_rules_client/read_rules';
 import { BulkActionsDryRunErrCodeEnum } from '../../../../../../../common/api/detection_engine';
+import { BulkActionTypeEnum } from '../../../../../../../common/api/detection_engine/rule_management';
+import { SecurityRuleChangeTrackingAction } from '../../../../../../../common/detection_engine/rule_management/rule_change_tracking';
+import { DETECTION_RULE_DUPLICATE_EVENT } from '../../../../../telemetry/event_based/events';
+import { analyticsServiceMock } from '@kbn/core/server/mocks';
+import { createMockEndpointAppContextService } from '../../../../../../endpoint/mocks';
+import { validateRuleResponseActions as _validateRuleResponseActions } from '../../../../../../endpoint/services';
+import { duplicateExceptions as _duplicateExceptions } from '../../../logic/actions/duplicate_exceptions';
 
 jest.mock('../../../../../machine_learning/authz');
-jest.mock('../../../logic/detection_rules_client/read_rules', () => ({ readRules: jest.fn() }));
+jest.mock('../../../logic/actions/duplicate_exceptions');
+
+let bulkGetRulesMock: jest.Mock;
+
+const validateRuleResponseActionsMock = _validateRuleResponseActions as jest.Mock;
+const duplicateExceptionsMock = _duplicateExceptions as jest.Mock;
+
+jest.mock('../../../../../../endpoint/services', () => {
+  const actualModule = jest.requireActual('../../../../../../endpoint/services');
+  return {
+    ...actualModule,
+    validateRuleResponseActions: jest.fn(actualModule.validateRuleResponseActions),
+  };
+});
 
 describe('Perform bulk action route', () => {
-  const readRulesMock = readRules as jest.Mock;
   let server: ReturnType<typeof serverMock.create>;
-  let { clients, context } = requestContextMock.createTools();
+  let clients: ReturnType<typeof requestContextMock.createTools>['clients'];
+  let context: ReturnType<typeof requestContextMock.createTools>['context'];
   let ml: ReturnType<typeof mlServicesMock.createSetupContract>;
   const mockRule = getFindResultWithSingleHit().data[0];
 
-  beforeEach(() => {
+  beforeEach(async () => {
     server = serverMock.create();
     ({ clients, context } = requestContextMock.createTools());
     ml = mlServicesMock.createSetupContract();
+    bulkGetRulesMock = (await context.alerting.getRulesClient()).bulkGetRules as jest.Mock;
+
+    context.securitySolution.getEndpointService.mockReturnValue(
+      createMockEndpointAppContextService()
+    );
 
     clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
     clients.rulesClient.bulkDisableRules.mockResolvedValue({
@@ -45,7 +72,14 @@ describe('Perform bulk action route', () => {
       errors: [],
       total: 1,
     });
+    clients.rulesClient.create.mockResolvedValue(mockRule);
+    duplicateExceptionsMock.mockResolvedValue([]);
     performBulkActionRoute(server.router, ml);
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+    jest.restoreAllMocks();
   });
 
   describe('status codes', () => {
@@ -104,6 +138,260 @@ describe('Perform bulk action route', () => {
       expect(response.body).toEqual({
         message: 'More than 10000 rules matched the filter query. Try to narrow it down.',
         status_code: 400,
+      });
+    });
+
+    it('returns 403 if alert suppression license is not sufficient', async () => {
+      (context.licensing.license.hasAtLeast as jest.Mock).mockReturnValue(false);
+      const response = await server.inject(
+        getBulkActionEditAlertSuppressionRequest(),
+        requestContextMock.convertContext(context)
+      );
+
+      expect(response.body).toEqual({
+        message: 'Alert suppression is enabled with platinum license or above.',
+        status_code: 403,
+      });
+    });
+
+    it('returns 403 for dry run mode if alert suppression license is not sufficient', async () => {
+      (context.licensing.license.hasAtLeast as jest.Mock).mockReturnValue(false);
+      const response = await server.inject(
+        { ...getBulkActionEditAlertSuppressionRequest(), query: { dry_run: 'true' } },
+        requestContextMock.convertContext(context)
+      );
+
+      expect(response.body).toEqual({
+        message: 'Alert suppression is enabled with platinum license or above.',
+        status_code: 403,
+      });
+    });
+  });
+
+  describe('delete action', () => {
+    const getBulkDeleteRequest = () =>
+      requestMock.create({
+        method: 'patch',
+        path: DETECTION_ENGINE_RULES_BULK_ACTION,
+        body: { ...getBulkDisableRuleActionSchemaMock(), action: BulkActionTypeEnum.delete },
+      });
+
+    it('returns 200 with the rule in deleted when bulkDeleteRules succeeds', async () => {
+      clients.detectionRulesClient.bulkDeleteRules.mockResolvedValue({
+        rules: [mockRule],
+        errors: [],
+        skipped: [],
+      });
+
+      const response = await server.inject(
+        getBulkDeleteRequest(),
+        requestContextMock.convertContext(context)
+      );
+
+      expect(response.status).toEqual(200);
+      expect(response.body).toEqual({
+        success: true,
+        rules_count: 1,
+        attributes: {
+          results: someBulkActionResults(),
+          summary: {
+            failed: 0,
+            skipped: 0,
+            succeeded: 1,
+            total: 1,
+          },
+        },
+      });
+      expect(response.body.attributes.results.deleted).toHaveLength(1);
+      expect(response.body.attributes.results.deleted[0].id).toEqual(mockRule.id);
+    });
+
+    it('returns 200 with skipped rules when rules were not found', async () => {
+      clients.detectionRulesClient.bulkDeleteRules.mockResolvedValue({
+        rules: [],
+        errors: [],
+        skipped: [{ id: mockRule.id, name: mockRule.name, skip_reason: 'RULE_NOT_FOUND' }],
+      });
+
+      const response = await server.inject(
+        getBulkDeleteRequest(),
+        requestContextMock.convertContext(context)
+      );
+
+      expect(response.status).toEqual(200);
+      expect(response.body.attributes.summary).toEqual({
+        failed: 0,
+        skipped: 1,
+        succeeded: 0,
+        total: 1,
+      });
+      expect(response.body.attributes.results.skipped).toEqual([
+        { id: mockRule.id, name: mockRule.name, skip_reason: 'RULE_NOT_FOUND' },
+      ]);
+    });
+
+    it('returns 200 with skipped rules when rules are not found at fetch time', async () => {
+      const missingId = 'missing-rule-id';
+      bulkGetRulesMock.mockResolvedValue({
+        rules: [],
+        errors: [{ id: missingId, error: { statusCode: 404 } }],
+      });
+      clients.detectionRulesClient.bulkDeleteRules.mockResolvedValue({
+        rules: [],
+        errors: [],
+        skipped: [],
+      });
+
+      const response = await server.inject(
+        requestMock.create({
+          method: 'patch',
+          path: DETECTION_ENGINE_RULES_BULK_ACTION,
+          body: { query: undefined, ids: [missingId], action: BulkActionTypeEnum.delete },
+        }),
+        requestContextMock.convertContext(context)
+      );
+
+      expect(response.status).toEqual(200);
+      expect(response.body.attributes.summary).toEqual({
+        failed: 0,
+        skipped: 1,
+        succeeded: 0,
+        total: 1,
+      });
+      expect(response.body.attributes.results.skipped).toEqual([
+        { id: missingId, skip_reason: 'RULE_NOT_FOUND' },
+      ]);
+    });
+
+    it('returns 500 when rules fail to be fetched for a reason other than not found', async () => {
+      const brokenId = 'broken-rule-id';
+      bulkGetRulesMock.mockResolvedValue({
+        rules: [],
+        errors: [{ id: brokenId, error: { statusCode: 500 } }],
+      });
+      clients.detectionRulesClient.bulkDeleteRules.mockResolvedValue({
+        rules: [],
+        errors: [],
+        skipped: [],
+      });
+
+      const response = await server.inject(
+        requestMock.create({
+          method: 'patch',
+          path: DETECTION_ENGINE_RULES_BULK_ACTION,
+          body: { query: undefined, ids: [brokenId], action: BulkActionTypeEnum.delete },
+        }),
+        requestContextMock.convertContext(context)
+      );
+
+      expect(response.status).toEqual(500);
+      expect(response.body.attributes.summary).toEqual({
+        failed: 1,
+        skipped: 0,
+        succeeded: 0,
+        total: 1,
+      });
+      expect(response.body.attributes.errors).toEqual([
+        { message: 'Error resolving the rule', status_code: 500, rules: [{ id: brokenId }] },
+      ]);
+    });
+
+    it('returns 200 with skipped rules when rules are not found at fetch time during dry run', async () => {
+      const missingId = 'missing-rule-id';
+      bulkGetRulesMock.mockResolvedValue({
+        rules: [],
+        errors: [{ id: missingId, error: { statusCode: 404 } }],
+      });
+
+      const response = await server.inject(
+        requestMock.create({
+          method: 'patch',
+          path: DETECTION_ENGINE_RULES_BULK_ACTION,
+          query: { dry_run: true },
+          body: { query: undefined, ids: [missingId], action: BulkActionTypeEnum.delete },
+        }),
+        requestContextMock.convertContext(context)
+      );
+
+      expect(response.status).toEqual(200);
+      expect(response.body.attributes.summary).toEqual({
+        failed: 0,
+        skipped: 1,
+        succeeded: 0,
+        total: 1,
+      });
+    });
+
+    it('returns 500 with mixed success, skipped, and error in one request', async () => {
+      const failedRuleId = 'failed-rule-id';
+      clients.detectionRulesClient.bulkDeleteRules.mockResolvedValue({
+        rules: [mockRule],
+        errors: [
+          {
+            message: 'Internal error',
+            status: 500,
+            rule: { id: failedRuleId, name: 'Failed Rule' },
+          },
+        ],
+        skipped: [{ id: 'skipped-rule-id', name: 'Skipped Rule', skip_reason: 'RULE_NOT_FOUND' }],
+      });
+
+      const response = await server.inject(
+        getBulkDeleteRequest(),
+        requestContextMock.convertContext(context)
+      );
+
+      expect(response.status).toEqual(500);
+      expect(response.body.attributes.summary).toEqual({
+        failed: 1,
+        skipped: 1,
+        succeeded: 1,
+        total: 3,
+      });
+      expect(response.body.attributes.results.deleted).toHaveLength(1);
+      expect(response.body.attributes.results.skipped).toEqual([
+        { id: 'skipped-rule-id', name: 'Skipped Rule', skip_reason: 'RULE_NOT_FOUND' },
+      ]);
+    });
+
+    it('returns 500 when deletion fails with a non-404 error', async () => {
+      clients.detectionRulesClient.bulkDeleteRules.mockResolvedValue({
+        rules: [],
+        errors: [
+          {
+            message: 'Test error',
+            status: 500,
+            rule: { id: mockRule.id, name: mockRule.name },
+          },
+        ],
+        skipped: [],
+      });
+
+      const response = await server.inject(
+        getBulkDeleteRequest(),
+        requestContextMock.convertContext(context)
+      );
+
+      expect(response.status).toEqual(500);
+      expect(response.body).toEqual({
+        message: 'Bulk edit failed',
+        status_code: 500,
+        attributes: {
+          errors: [
+            {
+              message: 'Test error',
+              status_code: 500,
+              rules: [{ id: mockRule.id, name: mockRule.name }],
+            },
+          ],
+          results: someBulkActionResults(),
+          summary: {
+            failed: 1,
+            skipped: 0,
+            succeeded: 0,
+            total: 1,
+          },
+        },
       });
     });
   });
@@ -326,9 +614,10 @@ describe('Perform bulk action route', () => {
     });
 
     it('returns partial failure error if one if rules from ids params can`t be fetched', async () => {
-      readRulesMock
-        .mockImplementationOnce(() => Promise.resolve(mockRule))
-        .mockImplementationOnce(() => Promise.resolve(null));
+      bulkGetRulesMock.mockImplementation(() => ({
+        rules: [mockRule],
+        errors: [{ id: 'failed-mock-id', error: { statusCode: 404 } }],
+      }));
 
       const request = requestMock.create({
         method: 'patch',
@@ -506,7 +795,7 @@ describe('Perform bulk action route', () => {
       });
       const result = server.validate(request);
       expect(result.badRequest).toHaveBeenCalledWith(
-        'action: Invalid literal value, expected "delete", action: Invalid literal value, expected "disable", action: Invalid literal value, expected "enable", action: Invalid literal value, expected "export", action: Invalid literal value, expected "duplicate", and 4 more'
+        'action: Invalid input: expected "delete", action: Invalid input: expected "disable", action: Invalid input: expected "enable", action: Invalid input: expected "export", action: Invalid input: expected "duplicate", and 6 more'
       );
     });
 
@@ -518,7 +807,7 @@ describe('Perform bulk action route', () => {
       });
       const result = server.validate(request);
       expect(result.badRequest).toHaveBeenCalledWith(
-        'action: Invalid literal value, expected "delete", action: Invalid literal value, expected "disable", action: Invalid literal value, expected "enable", action: Invalid literal value, expected "export", action: Invalid literal value, expected "duplicate", and 4 more'
+        'action: Invalid input: expected "delete", action: Invalid input: expected "disable", action: Invalid input: expected "enable", action: Invalid input: expected "export", action: Invalid input: expected "duplicate", and 6 more'
       );
     });
 
@@ -552,25 +841,42 @@ describe('Perform bulk action route', () => {
       });
       const result = server.validate(request);
       expect(result.badRequest).toHaveBeenCalledWith(
-        'ids: Expected array, received string, action: Invalid literal value, expected "delete", ids: Expected array, received string, ids: Expected array, received string, action: Invalid literal value, expected "enable", and 10 more'
+        'ids: Invalid input: expected array, received string, action: Invalid input: expected "delete", ids: Invalid input: expected array, received string, ids: Invalid input: expected array, received string, action: Invalid input: expected "enable", and 13 more'
       );
     });
 
-    it('rejects payload if there is more than 100 ids in payload', async () => {
+    it('rejects payload if there are more than 1000 ids in payload for any action', async () => {
       const request = requestMock.create({
         method: 'patch',
         path: DETECTION_ENGINE_RULES_BULK_ACTION,
         body: {
           ...getBulkDisableRuleActionSchemaMock(),
           query: undefined,
-          ids: Array.from({ length: 101 }).map(() => 'fake-id'),
+          ids: Array.from({ length: 1001 }).map(() => 'fake-id'),
         },
       });
 
       const response = await server.inject(request, requestContextMock.convertContext(context));
 
       expect(response.status).toEqual(400);
-      expect(response.body.message).toEqual('More than 100 ids sent for bulk edit action.');
+      expect(response.body.message).toEqual('More than 1000 ids sent for bulk action.');
+    });
+
+    it('rejects payload if there are more than 1000 ids in payload for edit actions', async () => {
+      const request = requestMock.create({
+        method: 'patch',
+        path: DETECTION_ENGINE_RULES_BULK_ACTION,
+        body: {
+          ...getPerformBulkActionEditSchemaMock(),
+          query: undefined,
+          ids: Array.from({ length: 1001 }).map(() => 'fake-id'),
+        },
+      });
+
+      const response = await server.inject(request, requestContextMock.convertContext(context));
+
+      expect(response.status).toEqual(400);
+      expect(response.body.message).toEqual('More than 1000 ids sent for bulk action.');
     });
 
     it('rejects payload if both query and ids defined', async () => {
@@ -600,7 +906,7 @@ describe('Perform bulk action route', () => {
       });
       const result = server.validate(request);
       expect(result.badRequest).toHaveBeenCalledWith(
-        'ids: Array must contain at least 1 element(s)'
+        expect.stringContaining('ids: Too small: expected array to have >=1 items')
       );
     });
 
@@ -612,7 +918,7 @@ describe('Perform bulk action route', () => {
       });
       const result = server.validate(request);
       expect(result.badRequest).toHaveBeenCalledWith(
-        expect.stringContaining('edit: Array must contain at least 1 element(s)')
+        expect.stringContaining('edit: Too small: expected array to have >=1 items')
       );
     });
 
@@ -626,8 +932,334 @@ describe('Perform bulk action route', () => {
       const result = server.validate(request);
       expect(result.badRequest).toHaveBeenCalledWith(
         expect.stringContaining(
-          "dry_run: Invalid enum value. Expected 'true' | 'false', received 'invalid', dry_run: Expected boolean, received string"
+          'Invalid option: expected one of "true"|"false", Invalid input: expected boolean, received string'
         )
+      );
+    });
+
+    it('rejects payload if both ids and gap range are defined', async () => {
+      const request = requestMock.create({
+        method: 'patch',
+        path: DETECTION_ENGINE_RULES_BULK_ACTION,
+        body: {
+          ...getBulkDisableRuleActionSchemaMock(),
+          query: undefined,
+          ids: ['id'],
+          gaps_range_start: '2025-01-01T00:00:00.000Z',
+          gaps_range_end: '2025-01-02T00:00:00.000Z',
+        },
+      });
+
+      const response = await server.inject(request, requestContextMock.convertContext(context));
+
+      expect(response.status).toEqual(400);
+      expect(response.body.message).toEqual(
+        'gaps_range_start, gaps_range_end and gap_fill_statuses must be provided together.'
+      );
+    });
+
+    it('rejects payload if only gaps_range_start is defined without gaps_range_end', async () => {
+      const request = requestMock.create({
+        method: 'patch',
+        path: DETECTION_ENGINE_RULES_BULK_ACTION,
+        body: {
+          ...getBulkDisableRuleActionSchemaMock(),
+          query: '',
+          gaps_range_start: '2025-01-01T00:00:00.000Z',
+        },
+      });
+
+      const response = await server.inject(request, requestContextMock.convertContext(context));
+
+      expect(response.status).toEqual(400);
+      expect(response.body.message).toEqual(
+        'gaps_range_start, gaps_range_end and gap_fill_statuses must be provided together.'
+      );
+    });
+
+    it('rejects payload if only gaps_range_end is defined without gaps_range_start', async () => {
+      const request = requestMock.create({
+        method: 'patch',
+        path: DETECTION_ENGINE_RULES_BULK_ACTION,
+        body: {
+          ...getBulkDisableRuleActionSchemaMock(),
+          query: '',
+          gaps_range_end: '2025-01-02T00:00:00.000Z',
+        },
+      });
+
+      const response = await server.inject(request, requestContextMock.convertContext(context));
+
+      expect(response.status).toEqual(400);
+      expect(response.body.message).toEqual(
+        'gaps_range_start, gaps_range_end and gap_fill_statuses must be provided together.'
+      );
+    });
+
+    it('rejects payload if gaps range is provided without gap_fill_statuses', async () => {
+      const request = requestMock.create({
+        method: 'patch',
+        path: DETECTION_ENGINE_RULES_BULK_ACTION,
+        body: {
+          ...getBulkDisableRuleActionSchemaMock(),
+          query: '',
+          gaps_range_start: '2025-01-01T00:00:00.000Z',
+          gaps_range_end: '2025-01-02T00:00:00.000Z',
+        },
+      });
+      const response = await server.inject(request, requestContextMock.convertContext(context));
+      expect(response.status).toEqual(400);
+      expect(response.body.message).toEqual(
+        'gaps_range_start, gaps_range_end and gap_fill_statuses must be provided together.'
+      );
+    });
+
+    it('rejects payload if gap_fill_statuses are provided without gaps range', async () => {
+      const request = requestMock.create({
+        method: 'patch',
+        path: DETECTION_ENGINE_RULES_BULK_ACTION,
+        body: {
+          ...getBulkDisableRuleActionSchemaMock(),
+          query: '',
+          gap_fill_statuses: [gapFillStatus.UNFILLED],
+        },
+      });
+      const response = await server.inject(request, requestContextMock.convertContext(context));
+      expect(response.status).toEqual(400);
+      expect(response.body.message).toEqual(
+        'gaps_range_start, gaps_range_end and gap_fill_statuses must be provided together.'
+      );
+    });
+
+    it('validates endpoint response actions for duplicate bulk action', async () => {
+      bulkGetRulesMock.mockResolvedValue({
+        rules: [mockRule],
+        errors: [],
+      });
+
+      const request = requestMock.create({
+        method: 'post',
+        path: DETECTION_ENGINE_RULES_BULK_ACTION,
+        body: getPerformBulkActionDuplicateSchemaMock(),
+      });
+
+      await server.inject(request, requestContextMock.convertContext(context));
+
+      expect(validateRuleResponseActionsMock).toHaveBeenCalledWith({
+        checkOsqueryResponseActionAuthz: expect.any(Function),
+        endpointAuthz: expect.any(Object),
+        endpointService: expect.any(Object),
+        spaceId: 'default',
+        rulePayload: { response_actions: mockRule.params.responseActions },
+        skipRunscriptPayloadValidation: true,
+      });
+    });
+
+    it('passes the duplicated response actions as the payload so dry run is not a no-op', async () => {
+      // A duplicate persists these actions on a new rule, so it is validated like a create.
+      // Passing `{}` with `existingRule` would make each one look like it is being *removed*,
+      // so validation would skip them all and a dry run would report success for a duplicate
+      // that `create` goes on to deny.
+      const responseActions = [
+        {
+          actionTypeId: '.osquery' as const,
+          params: { savedQueryId: 'saved-query-1' },
+        },
+      ];
+      bulkGetRulesMock.mockResolvedValue({
+        rules: [{ ...mockRule, params: { ...mockRule.params, responseActions } }],
+        errors: [],
+      });
+
+      const request = requestMock.create({
+        method: 'post',
+        path: DETECTION_ENGINE_RULES_BULK_ACTION,
+        body: getPerformBulkActionDuplicateSchemaMock(),
+      });
+
+      await server.inject(request, requestContextMock.convertContext(context));
+
+      // Params reach the validator in the snake_case payload shape, as they would on a create.
+      expect(validateRuleResponseActionsMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          skipRunscriptPayloadValidation: true,
+          rulePayload: {
+            response_actions: [
+              {
+                action_type_id: '.osquery',
+                params: expect.objectContaining({ saved_query_id: 'saved-query-1' }),
+              },
+            ],
+          },
+        })
+      );
+      // No `existingRule`: nothing is being removed, so nothing should be carved out.
+      expect(validateRuleResponseActionsMock.mock.calls[0][0]).not.toHaveProperty('existingRule');
+    });
+  });
+
+  describe('rule duplication', () => {
+    beforeEach(() => {
+      bulkGetRulesMock.mockResolvedValue({ rules: [mockRule], errors: [] });
+    });
+
+    it('creates the duplicate rule with cloned exceptions when include_exceptions is true', async () => {
+      const clonedExceptions = [
+        {
+          id: 'cloned-list-id',
+          list_id: 'cloned-list',
+          namespace_type: 'single' as const,
+          type: 'rule_default' as const,
+        },
+      ];
+      duplicateExceptionsMock.mockResolvedValue(clonedExceptions);
+      const analytics = analyticsServiceMock.createAnalyticsServiceSetup();
+      context.securitySolution.getAnalytics.mockReturnValue(analytics);
+
+      const request = requestMock.create({
+        method: 'post',
+        path: DETECTION_ENGINE_RULES_BULK_ACTION,
+        body: {
+          ...getPerformBulkActionDuplicateSchemaMock(),
+          duplicate: { include_exceptions: true, include_expired_exceptions: true },
+        },
+      });
+
+      await server.inject(request, requestContextMock.convertContext(context));
+
+      expect(duplicateExceptionsMock).toHaveBeenCalledTimes(1);
+      expect(clients.rulesClient.create).toHaveBeenCalledTimes(1);
+      expect(clients.rulesClient.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            params: expect.objectContaining({ exceptionsList: clonedExceptions }),
+          }),
+          changeTracking: expect.objectContaining({
+            action: SecurityRuleChangeTrackingAction.ruleDuplicate,
+          }),
+        })
+      );
+      expect(clients.rulesClient.update).not.toHaveBeenCalled();
+      expect(analytics.reportEvent).toHaveBeenCalledWith(
+        DETECTION_RULE_DUPLICATE_EVENT.eventType,
+        expect.objectContaining({ ruleType: 'query' })
+      );
+    });
+
+    it('creates the duplicate rule with empty exceptions when include_exceptions is false', async () => {
+      const request = requestMock.create({
+        method: 'post',
+        path: DETECTION_ENGINE_RULES_BULK_ACTION,
+        body: {
+          ...getPerformBulkActionDuplicateSchemaMock(),
+          duplicate: { include_exceptions: false, include_expired_exceptions: false },
+        },
+      });
+
+      await server.inject(request, requestContextMock.convertContext(context));
+
+      expect(duplicateExceptionsMock).not.toHaveBeenCalled();
+      expect(clients.rulesClient.create).toHaveBeenCalledTimes(1);
+      expect(clients.rulesClient.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            params: expect.objectContaining({ exceptionsList: [] }),
+          }),
+          changeTracking: expect.objectContaining({
+            action: SecurityRuleChangeTrackingAction.ruleDuplicate,
+          }),
+        })
+      );
+      expect(clients.rulesClient.update).not.toHaveBeenCalled();
+    });
+
+    it('deletes cloned rule_default exception lists when rule creation fails', async () => {
+      const clonedExceptions = [
+        {
+          id: 'shared-list-id',
+          list_id: 'shared-list',
+          namespace_type: 'single' as const,
+          type: 'detection' as const,
+        },
+        {
+          id: 'cloned-list-id',
+          list_id: 'cloned-list',
+          namespace_type: 'single' as const,
+          type: 'rule_default' as const,
+        },
+      ];
+      duplicateExceptionsMock.mockResolvedValue(clonedExceptions);
+      clients.rulesClient.create.mockRejectedValue(new Error('create failed'));
+
+      const request = requestMock.create({
+        method: 'post',
+        path: DETECTION_ENGINE_RULES_BULK_ACTION,
+        body: {
+          ...getPerformBulkActionDuplicateSchemaMock(),
+          duplicate: { include_exceptions: true, include_expired_exceptions: true },
+        },
+      });
+
+      await server.inject(request, requestContextMock.convertContext(context));
+
+      expect(clients.lists.exceptionListClient.deleteExceptionList).toHaveBeenCalledTimes(1);
+      expect(clients.lists.exceptionListClient.deleteExceptionList).toHaveBeenCalledWith({
+        id: 'cloned-list-id',
+        listId: undefined,
+        namespaceType: 'single',
+      });
+    });
+
+    it('does not delete exception lists when rule creation succeeds', async () => {
+      duplicateExceptionsMock.mockResolvedValue([
+        {
+          id: 'cloned-list-id',
+          list_id: 'cloned-list',
+          namespace_type: 'single' as const,
+          type: 'rule_default' as const,
+        },
+      ]);
+
+      const request = requestMock.create({
+        method: 'post',
+        path: DETECTION_ENGINE_RULES_BULK_ACTION,
+        body: {
+          ...getPerformBulkActionDuplicateSchemaMock(),
+          duplicate: { include_exceptions: true, include_expired_exceptions: true },
+        },
+      });
+
+      await server.inject(request, requestContextMock.convertContext(context));
+
+      expect(clients.lists.exceptionListClient.deleteExceptionList).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('gap range functionality', () => {
+    it('passes gap range and status to rules find when provided with query', async () => {
+      const gapStartDate = '2025-01-01T00:00:00.000Z';
+      const gapEndDate = '2025-01-02T00:00:00.000Z';
+
+      const request = requestMock.create({
+        method: 'patch',
+        path: DETECTION_ENGINE_RULES_BULK_ACTION,
+        body: {
+          ...getBulkDisableRuleActionSchemaMock(),
+          query: '',
+          gaps_range_start: gapStartDate,
+          gaps_range_end: gapEndDate,
+          gap_fill_statuses: [gapFillStatus.UNFILLED],
+        },
+      });
+
+      await server.inject(request, requestContextMock.convertContext(context));
+
+      expect(clients.rulesClient.getRuleIdsWithGaps).toHaveBeenCalledWith(
+        expect.objectContaining({
+          start: gapStartDate,
+          end: gapEndDate,
+          highestPriorityGapFillStatuses: ['unfilled'],
+        })
       );
     });
   });

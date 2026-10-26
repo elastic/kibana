@@ -9,16 +9,17 @@
 
 import type { Reducer, RefObject } from 'react';
 import { useRef, useEffect, useLayoutEffect, useReducer } from 'react';
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 import { filter } from 'rxjs';
 import useUpdateEffect from 'react-use/lib/useUpdateEffect';
-import {
-  ExpressionAstExpression,
-  IInterpreterRenderHandlers,
-  isExpressionValueError,
-} from '../../common';
+import type { ExpressionAstExpression, IInterpreterRenderHandlers } from '../../common';
+import { isExpressionValueError } from '../../common';
 import { ExpressionLoader } from '../loader';
-import { IExpressionLoaderParams, ExpressionRenderError, ExpressionRendererEvent } from '../types';
+import type {
+  IExpressionLoaderParams,
+  ExpressionRenderError,
+  ExpressionRendererEvent,
+} from '../types';
 import { useDebouncedValue } from './use_debounced_value';
 import { useShallowMemo } from './use_shallow_memo';
 
@@ -81,10 +82,15 @@ export function useExpressionRenderer(
   const errorRenderHandlerRef = useRef<IInterpreterRenderHandlers | null>(null);
 
   useEffect(() => {
-    if (abortController?.signal)
-      abortController.signal.onabort = () => {
-        expressionLoaderRef.current?.cancel();
-      };
+    if (abortController?.signal) {
+      if (abortController.signal.aborted) {
+        expressionLoaderRef.current?.cancel(abortController.signal.reason);
+      } else {
+        abortController.signal.onabort = () => {
+          expressionLoaderRef.current?.cancel(abortController.signal.reason);
+        };
+      }
+    }
   }, [abortController]);
 
   /* eslint-disable react-hooks/exhaustive-deps */

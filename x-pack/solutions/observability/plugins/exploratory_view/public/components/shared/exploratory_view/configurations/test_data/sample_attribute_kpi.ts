@@ -39,7 +39,6 @@ export const sampleAttributeKpi = {
                   interval: 'auto',
                   includeEmptyRows: true,
                 },
-                scale: 'interval',
                 sourceField: '@timestamp',
               },
               'y-axis-column-layer0-0': {
@@ -52,7 +51,6 @@ export const sampleAttributeKpi = {
                 label: 'test-series',
                 customLabel: true,
                 operationType: 'count',
-                scale: 'ratio',
                 sourceField: RECORDS_FIELD,
               },
             },
@@ -73,6 +71,7 @@ export const sampleAttributeKpi = {
         yRight: true,
       },
       curveType: 'CURVE_MONOTONE_X',
+      areaFill: 'solid',
       fittingFunction: 'Linear',
       gridlinesVisibilitySettings: {
         x: false,

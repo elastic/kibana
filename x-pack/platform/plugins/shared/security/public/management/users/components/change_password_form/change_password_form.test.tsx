@@ -5,28 +5,17 @@
  * 2.0.
  */
 
-import { EuiFieldPassword } from '@elastic/eui';
-import type { ReactWrapper } from 'enzyme';
+import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 
 import { coreMock } from '@kbn/core/public/mocks';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { I18nProvider } from '@kbn/i18n-react';
 
 import { ChangePasswordForm } from './change_password_form';
 import type { User } from '../../../../../common';
 import { userAPIClientMock } from '../../index.mock';
 
-function getCurrentPasswordField(wrapper: ReactWrapper<any>) {
-  return wrapper.find(EuiFieldPassword).filter('[data-test-subj="currentPassword"]');
-}
-
-function getNewPasswordField(wrapper: ReactWrapper<any>) {
-  return wrapper.find(EuiFieldPassword).filter('[data-test-subj="newPassword"]');
-}
-
-function getConfirmPasswordField(wrapper: ReactWrapper<any>) {
-  return wrapper.find(EuiFieldPassword).filter('[data-test-subj="confirmNewPassword"]');
-}
+const renderWithIntl = (ui: React.ReactElement) => render(<I18nProvider>{ui}</I18nProvider>);
 
 describe('<ChangePasswordForm>', () => {
   describe('for the current user', () => {
@@ -39,7 +28,7 @@ describe('<ChangePasswordForm>', () => {
         roles: [],
       };
 
-      const wrapper = mountWithIntl(
+      renderWithIntl(
         <ChangePasswordForm
           user={user}
           isUserChangingOwnPassword={true}
@@ -48,9 +37,9 @@ describe('<ChangePasswordForm>', () => {
         />
       );
 
-      expect(getCurrentPasswordField(wrapper)).toHaveLength(1);
-      expect(getNewPasswordField(wrapper)).toHaveLength(1);
-      expect(getConfirmPasswordField(wrapper)).toHaveLength(1);
+      expect(screen.getByTestId('currentPassword')).toBeInTheDocument();
+      expect(screen.getByTestId('newPassword')).toBeInTheDocument();
+      expect(screen.getByTestId('confirmNewPassword')).toBeInTheDocument();
     });
 
     it('allows a password to be changed', () => {
@@ -66,7 +55,7 @@ describe('<ChangePasswordForm>', () => {
 
       const apiClientMock = userAPIClientMock.create();
 
-      const wrapper = mountWithIntl(
+      renderWithIntl(
         <ChangePasswordForm
           user={user}
           isUserChangingOwnPassword={true}
@@ -76,16 +65,19 @@ describe('<ChangePasswordForm>', () => {
         />
       );
 
-      const currentPassword = getCurrentPasswordField(wrapper);
-      currentPassword.props().onChange!({ target: { value: 'myCurrentPassword' } } as any);
+      fireEvent.change(screen.getByTestId('currentPassword'), {
+        target: { value: 'myCurrentPassword' },
+      });
 
-      const newPassword = getNewPasswordField(wrapper);
-      newPassword.props().onChange!({ target: { value: 'myNewPassword' } } as any);
+      fireEvent.change(screen.getByTestId('newPassword'), {
+        target: { value: 'myNewPassword' },
+      });
 
-      const confirmPassword = getConfirmPasswordField(wrapper);
-      confirmPassword.props().onChange!({ target: { value: 'myNewPassword' } } as any);
+      fireEvent.change(screen.getByTestId('confirmNewPassword'), {
+        target: { value: 'myNewPassword' },
+      });
 
-      wrapper.find('button[data-test-subj="changePasswordButton"]').simulate('click');
+      fireEvent.click(screen.getByTestId('changePasswordButton'));
 
       expect(apiClientMock.changePassword).toHaveBeenCalledTimes(1);
       expect(apiClientMock.changePassword).toHaveBeenCalledWith(
@@ -106,7 +98,7 @@ describe('<ChangePasswordForm>', () => {
         roles: [],
       };
 
-      const wrapper = mountWithIntl(
+      renderWithIntl(
         <ChangePasswordForm
           user={user}
           isUserChangingOwnPassword={false}
@@ -115,9 +107,9 @@ describe('<ChangePasswordForm>', () => {
         />
       );
 
-      expect(getCurrentPasswordField(wrapper)).toHaveLength(0);
-      expect(getNewPasswordField(wrapper)).toHaveLength(1);
-      expect(getConfirmPasswordField(wrapper)).toHaveLength(1);
+      expect(screen.queryByTestId('currentPassword')).not.toBeInTheDocument();
+      expect(screen.getByTestId('newPassword')).toBeInTheDocument();
+      expect(screen.getByTestId('confirmNewPassword')).toBeInTheDocument();
     });
   });
 });

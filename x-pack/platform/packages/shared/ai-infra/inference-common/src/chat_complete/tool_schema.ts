@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Required, ValuesType } from 'utility-types';
+import type { Required, ValuesType } from 'utility-types';
 
 interface ToolSchemaFragmentBase {
   description?: string;
@@ -15,6 +15,10 @@ export interface ToolSchemaTypeObject extends ToolSchemaFragmentBase {
   type: 'object';
   properties: Record<string, ToolSchemaType>;
   required?: string[] | readonly string[];
+  /** Referenced sub-schemas (JSON Schema 2019-09+) */
+  $defs?: Record<string, ToolSchemaType>;
+  /** Referenced sub-schemas (draft-07) */
+  definitions?: Record<string, ToolSchemaType>;
 }
 
 interface ToolSchemaTypeString extends ToolSchemaFragmentBase {
@@ -37,7 +41,7 @@ interface ToolSchemaTypeNumber extends ToolSchemaFragmentBase {
 
 interface ToolSchemaTypeArray extends ToolSchemaFragmentBase {
   type: 'array';
-  items: Exclude<ToolSchemaType, ToolSchemaTypeArray>;
+  items?: Exclude<ToolSchemaType, ToolSchemaTypeArray>;
 }
 
 /**
@@ -64,9 +68,10 @@ type FromToolSchemaObject<TToolSchemaObject extends ToolSchemaTypeObject> =
       >
     : never;
 
-type FromToolSchemaArray<TToolSchemaObject extends ToolSchemaTypeArray> = Array<
-  FromToolSchema<TToolSchemaObject['items']>
->;
+type FromToolSchemaArray<TToolSchemaObject extends ToolSchemaTypeArray> =
+  TToolSchemaObject['items'] extends Exclude<ToolSchemaType, ToolSchemaTypeArray>
+    ? Array<FromToolSchema<TToolSchemaObject['items']>>
+    : unknown[];
 
 type FromToolSchemaString<TToolSchemaString extends ToolSchemaTypeString> =
   TToolSchemaString extends { const: string }

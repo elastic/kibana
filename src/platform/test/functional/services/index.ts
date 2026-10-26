@@ -45,6 +45,7 @@ import {
   VegaDebugInspectorViewService,
 } from './visualizations';
 import { ListingTableService } from './listing_table';
+import { ContentListService } from './content_list';
 import { SavedQueryManagementComponentService } from './saved_query_management_component';
 import { KibanaSupertestProvider } from './supertest';
 import { MenuToggleService } from './menu_toggle';
@@ -54,6 +55,8 @@ import { SavedObjectsFinderService } from './saved_objects_finder';
 import { DashboardSettingsProvider } from './dashboard/dashboard_settings';
 import { ESQLService } from './esql';
 import { DataViewsService } from './data_views';
+import { SynthtraceClientProvider } from './synthtrace/sythtrace';
+import { SearchSessionsService } from './search_sessions';
 
 export const services = {
   ...commonFunctionalServices,
@@ -65,6 +68,7 @@ export const services = {
   snapshots: SnapshotsService,
   failureDebugging: FailureDebuggingProvider,
   listingTable: ListingTableService,
+  contentList: ContentListService,
   dashboardVisualizations: DashboardVisualizationsService,
   dashboardExpect: DashboardExpectService,
   dashboardAddPanel: DashboardAddPanelService,
@@ -96,4 +100,6 @@ export const services = {
   usageCollection: UsageCollectionService,
   savedObjectsFinder: SavedObjectsFinderService,
   esql: ESQLService,
+  synthtrace: SynthtraceClientProvider,
+  searchSessions: SearchSessionsService,
 };

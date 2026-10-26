@@ -8,7 +8,8 @@
  */
 
 import React, { useMemo } from 'react';
-import { DropOverlayWrapper, DropType, Droppable, useDragDropContext } from '@kbn/dom-drag-drop';
+import type { DropType } from '@kbn/dom-drag-drop';
+import { DropOverlayWrapper, Droppable, useDragDropContext } from '@kbn/dom-drag-drop';
 import { EuiEmptyPrompt, EuiPanel } from '@elastic/eui';
 
 const DROP_PROPS = {
@@ -50,7 +51,7 @@ export const ExampleDropZone: React.FC<ExampleDropZoneProps> = ({ onDropField })
       <DropOverlayWrapper isVisible={isDropAllowed}>
         <EuiPanel hasShadow={false} paddingSize="l" className="eui-fullHeight">
           <EuiEmptyPrompt
-            iconType="beaker"
+            iconType="flask"
             title={<h3>Example drop zone</h3>}
             body={
               <p>

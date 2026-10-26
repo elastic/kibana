@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { GlobalSearchRouter } from '../types';
+import type { GlobalSearchRouter } from '../types';
 import { registerInternalFindRoute } from './find';
 import { registerInternalSearchableTypesRoute } from './get_searchable_types';
 

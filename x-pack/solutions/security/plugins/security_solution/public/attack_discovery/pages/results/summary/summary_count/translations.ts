@@ -13,6 +13,13 @@ export const ALERTS = (alertsCount: number) =>
     values: { alertsCount },
   });
 
+/** For displaying alert counts where the exact count is unknown */
+export const PLUS_ALERTS = (alertsCount: number) =>
+  i18n.translate('xpack.securitySolution.attackDiscovery.summaryCount.plusAlertsLabel', {
+    defaultMessage: `{alertsCount}+ alerts`,
+    values: { alertsCount },
+  });
+
 export const DISCOVERIES = (attackDiscoveriesCount: number) =>
   i18n.translate('xpack.securitySolution.attackDiscovery.summaryCount.discoveriesLabel', {
     defaultMessage: `{attackDiscoveriesCount} {attackDiscoveriesCount, plural, =1 {discovery} other {discoveries}}`,

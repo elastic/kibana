@@ -9,11 +9,11 @@
 
 import { ExpressionRenderHandler, render } from './render';
 import { Observable } from 'rxjs';
-import { SerializableRecord } from '@kbn/utility-types';
-import { ExpressionRenderError } from './types';
+import type { SerializableRecord } from '@kbn/utility-types';
+import type { ExpressionRenderError } from './types';
 import { getRenderersRegistry } from './services';
 import { first, take, toArray } from 'rxjs';
-import { IInterpreterRenderHandlers } from '../common';
+import type { IInterpreterRenderHandlers } from '../common';
 
 const element: HTMLElement = {} as HTMLElement;
 const mockNotificationService = {
@@ -184,7 +184,7 @@ describe('ExpressionRenderHandler', () => {
       const promise1 = expressionRenderHandler.render$.pipe(first()).toPromise();
       expressionRenderHandler.render(false as unknown as SerializableRecord);
       await expect(promise1).resolves.toEqual(1);
-      expect(mockNotificationService.toasts.addError).toBeCalledWith(
+      expect(mockNotificationService.toasts.addError).toHaveBeenCalledWith(
         expect.objectContaining({
           message: 'invalid data provided to the expression renderer',
         }),

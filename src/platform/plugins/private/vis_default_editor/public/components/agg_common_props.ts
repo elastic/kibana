@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { VisParams, Schema } from '@kbn/visualizations-plugin/public';
+import type { Schema } from '@kbn/visualizations-plugin/public';
 import type { IAggType, IAggConfig, AggGroupName } from '@kbn/data-plugin/public';
 
+import type { VisParams } from '@kbn/visualizations-common';
 import type { EditorVisState } from './sidebar/state/reducers';
 
 type AggId = IAggConfig['id'];

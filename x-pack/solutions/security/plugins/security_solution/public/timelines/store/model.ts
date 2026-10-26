@@ -7,22 +7,22 @@
 
 import type { Filter } from '@kbn/es-query';
 import type { SavedSearch } from '@kbn/saved-search-plugin/common';
-import type { SessionViewConfig } from '../../../common/types';
 import type { EqlOptions, TimelineNonEcsData } from '../../../common/search_strategy/timeline';
 import type {
-  TimelineTabs,
-  ScrollToTopEvent,
-  SortColumnTimeline,
   ColumnHeaderOptions,
   DataProvider,
+  ScrollToTopEvent,
   SerializedFilterQuery,
+  SortColumnTimeline,
   TimelineEventsType,
+  KueryFilterQuery,
+  TimelineTabs,
 } from '../../../common/types/timeline';
 import type {
+  PinnedEvent,
   RowRendererId,
   TimelineStatus,
   TimelineType,
-  PinnedEvent,
 } from '../../../common/api/timeline';
 import type { ResolveTimelineConfig } from '../components/open_timeline/types';
 
@@ -70,7 +70,6 @@ export interface TimelineModel {
   resolveTimelineConfig?: ResolveTimelineConfig;
   showSaveModal?: boolean;
   savedQueryId?: string | null;
-  sessionViewConfig: SessionViewConfig | null;
   /** When true, show the timeline flyover */
   show: boolean;
   /** status: active | draft */
@@ -138,8 +137,32 @@ export interface TimelineModel {
   rowHeight?: number;
   /* sample size, total record number stored in in memory EuiDataGrid */
   sampleSize: number;
-  /** the note id pending deletion */
-  confirmingNoteId?: string | null;
+  /**
+   * When true, this timeline is a transient, read-only Super Timeline aggregated from multiple
+   * source timelines. Runtime-only — not persisted to the saved object.
+   */
+  isSuperTimeline?: boolean;
+  /**
+   * The savedObjectIds of the source timelines that were aggregated to build this Super Timeline.
+   * Used to fetch notes across all source timelines. Runtime-only — not persisted.
+   */
+  superTimelineSourceIds?: string[];
+  /**
+   * Display titles for each source timeline, parallel to superTimelineSourceIds.
+   * Runtime-only — not persisted.
+   */
+  superTimelineSourceTitles?: string[];
+  /**
+   * Descriptions from each source timeline that had one, shown as attributed comments in the
+   * Notes tab. Runtime-only — not persisted.
+   */
+  superTimelineDescriptions?: Array<{
+    savedObjectId: string;
+    title: string;
+    description: string;
+    updatedBy: string | null | undefined;
+    updated: number | null | undefined;
+  }>;
 }
 
 export type SubsetTimelineModel = Readonly<
@@ -182,7 +205,6 @@ export type SubsetTimelineModel = Readonly<
     | 'dateRange'
     | 'selectAll'
     | 'selectedEventIds'
-    | 'sessionViewConfig'
     | 'show'
     | 'sort'
     | 'isSaving'
@@ -194,6 +216,10 @@ export type SubsetTimelineModel = Readonly<
     | 'savedSearch'
     | 'isDataProviderVisible'
     | 'changed'
+    | 'isSuperTimeline'
+    | 'superTimelineSourceIds'
+    | 'superTimelineSourceTitles'
+    | 'superTimelineDescriptions'
   >
 >;
 
@@ -203,4 +229,5 @@ export interface TimelineUrl {
   isOpen: boolean;
   graphEventId?: string;
   savedSearchId?: string;
+  query?: KueryFilterQuery;
 }

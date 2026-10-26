@@ -5,19 +5,23 @@
  * 2.0.
  */
 
+import { addTransactionLabels } from '@kbn/apm-utils';
 import { getSLOSummaryTransformId, getSLOTransformId } from '../../common/constants';
-import { SLORepository } from './slo_repository';
-import { TransformManager } from './transform_manager';
+import type { SLODefinitionRepository } from './slo_definition_repository';
+import type { TransformManager } from './transform_manager';
+import { getSloApmLabels } from './utils';
 
 export class ManageSLO {
   constructor(
-    private repository: SLORepository,
+    private repository: SLODefinitionRepository,
     private transformManager: TransformManager,
-    private summaryTransformManager: TransformManager
+    private summaryTransformManager: TransformManager,
+    private userId: string
   ) {}
 
   async enable(sloId: string) {
     const slo = await this.repository.findById(sloId);
+    addTransactionLabels(getSloApmLabels(slo));
     if (slo.enabled) {
       return;
     }
@@ -25,12 +29,14 @@ export class ManageSLO {
     await this.summaryTransformManager.start(getSLOSummaryTransformId(slo.id, slo.revision));
     await this.transformManager.start(getSLOTransformId(slo.id, slo.revision));
     slo.enabled = true;
+    slo.updatedBy = this.userId;
     slo.updatedAt = new Date();
     await this.repository.update(slo);
   }
 
   async disable(sloId: string) {
     const slo = await this.repository.findById(sloId);
+    addTransactionLabels(getSloApmLabels(slo));
     if (!slo.enabled) {
       return;
     }
@@ -38,6 +44,7 @@ export class ManageSLO {
     await this.summaryTransformManager.stop(getSLOSummaryTransformId(slo.id, slo.revision));
     await this.transformManager.stop(getSLOTransformId(slo.id, slo.revision));
     slo.enabled = false;
+    slo.updatedBy = this.userId;
     slo.updatedAt = new Date();
     await this.repository.update(slo);
   }

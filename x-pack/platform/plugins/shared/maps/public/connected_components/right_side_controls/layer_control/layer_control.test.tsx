@@ -21,7 +21,7 @@ import React from 'react';
 import { shallow } from 'enzyme';
 
 import { LayerControl } from './layer_control';
-import { ILayer } from '../../../classes/layers/layer';
+import type { ILayer } from '../../../classes/layers/layer';
 
 const defaultProps = {
   isReadOnly: false,
@@ -33,7 +33,7 @@ const defaultProps = {
   isLayerTOCOpen: true,
   layerList: [],
   isFlyoutOpen: false,
-  zoom: 0,
+  isLoading: false,
 };
 
 describe('LayerControl', () => {
@@ -63,23 +63,7 @@ describe('LayerControl', () => {
 
     test('Should render expand button with loading icon when layer is loading', () => {
       const component = shallow(
-        <LayerControl
-          {...defaultProps}
-          isLayerTOCOpen={false}
-          layerList={[
-            {
-              hasErrors: () => {
-                return false;
-              },
-              hasWarnings: () => {
-                return false;
-              },
-              isLayerLoading: () => {
-                return true;
-              },
-            } as unknown as ILayer,
-          ]}
-        />
+        <LayerControl {...defaultProps} isLayerTOCOpen={false} isLoading={true} />
       );
       expect(component).toMatchSnapshot();
     });
@@ -90,9 +74,6 @@ describe('LayerControl', () => {
           return true;
         },
         hasWarnings: () => {
-          return false;
-        },
-        isLayerLoading: () => {
           return false;
         },
       } as unknown as ILayer;

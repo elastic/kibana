@@ -7,12 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  UPDATE_FILTER_REFERENCES_ACTION,
-  UPDATE_FILTER_REFERENCES_TRIGGER,
-} from '@kbn/unified-search-plugin/public';
+import { UPDATE_FILTER_REFERENCES_ACTION } from '@kbn/unified-search-plugin/public';
 import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
+import { UPDATE_FILTER_REFERENCES_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { DiscoverServices } from '../../../../build_services';
 
 export const updateFiltersReferences = async ({

@@ -6,6 +6,7 @@
  */
 
 import React, { type FC, useMemo, useState, useEffect, useRef, useCallback } from 'react';
+import { i18n } from '@kbn/i18n';
 import {
   EuiBadge,
   EuiDescriptionList,
@@ -13,13 +14,10 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
-  EuiIcon,
-  EuiPagination,
   EuiPanel,
+  EuiPagination,
   EuiText,
-  EuiToolTip,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useTimefilter } from '@kbn/ml-date-picker';
 import { type RefreshInterval } from '@kbn/data-plugin/common';
@@ -33,6 +31,7 @@ const CHARTS_PER_PAGE = 6;
 
 interface ChartsGridProps {
   changePoints: Record<number, SelectedChangePoint[]>;
+  parentApi?: unknown;
 }
 
 /**
@@ -46,7 +45,8 @@ export const ChartsGrid: FC<{
   changePoints: SelectedChangePoint[];
   interval: string;
   onRenderComplete?: () => void;
-}> = ({ changePoints, interval, onRenderComplete }) => {
+  parentApi: unknown;
+}> = ({ changePoints, interval, onRenderComplete, parentApi }) => {
   // Render is complete when all chart components in the grid are ready
   const loadCounter = useRef<Record<number, boolean>>(
     Object.fromEntries(changePoints.map((v, i) => [i, true]))
@@ -90,22 +90,6 @@ export const ChartsGrid: FC<{
                       listItems={[{ title: v.group.name, description: v.group.value }]}
                     />
                   ) : null}
-
-                  {v.reason ? (
-                    <EuiToolTip position="top" content={v.reason}>
-                      <EuiIcon
-                        tabIndex={0}
-                        color={'warning'}
-                        type="warning"
-                        title={i18n.translate(
-                          'xpack.aiops.changePointDetection.notResultsWarning',
-                          {
-                            defaultMessage: 'No change point agg results warning',
-                          }
-                        )}
-                      />
-                    </EuiToolTip>
-                  ) : null}
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiText color={'subdued'} size={'s'}>
@@ -135,6 +119,7 @@ export const ChartsGrid: FC<{
                     />
                   </EuiFlexItem>
                 ) : null}
+
                 <EuiFlexItem grow={false}>
                   <EuiBadge color="hollow">{v.type}</EuiBadge>
                 </EuiFlexItem>
@@ -152,6 +137,7 @@ export const ChartsGrid: FC<{
                 onRenderComplete={() => {
                   onChartRenderCompleteCallback(index, false);
                 }}
+                parentApi={parentApi}
               />
             </EuiPanel>
           </EuiFlexItem>
@@ -167,7 +153,10 @@ export const ChartsGrid: FC<{
  * @param changePointsDict
  * @constructor
  */
-export const ChartsGridContainer: FC<ChartsGridProps> = ({ changePoints: changePointsDict }) => {
+export const ChartsGridContainer: FC<ChartsGridProps> = ({
+  changePoints: changePointsDict,
+  parentApi,
+}) => {
   const timefilter = useTimefilter();
 
   const initialRefreshSetting = useRef<RefreshInterval>();
@@ -213,7 +202,11 @@ export const ChartsGridContainer: FC<ChartsGridProps> = ({ changePoints: changeP
 
   return (
     <>
-      <ChartsGrid changePoints={resultPerPage} interval={bucketInterval.expression} />
+      <ChartsGrid
+        changePoints={resultPerPage}
+        interval={bucketInterval.expression}
+        parentApi={parentApi}
+      />
 
       {pagination.pageCount > 1 ? (
         <EuiFlexGroup justifyContent="spaceAround">
@@ -222,6 +215,9 @@ export const ChartsGridContainer: FC<ChartsGridProps> = ({ changePoints: changeP
               pageCount={pagination.pageCount}
               activePage={pagination.activePage}
               onPageClick={pagination.updatePagination}
+              aria-label={i18n.translate('xpack.aiops.changePointDetection.paginationAriaLabel', {
+                defaultMessage: 'Change point detection charts pagination',
+              })}
             />
           </EuiFlexItem>
         </EuiFlexGroup>

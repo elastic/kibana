@@ -1,0 +1,39 @@
+title: Case observable
+description: A single observable attached to a case.
+type: object
+required:
+  - id
+  - typeKey
+  - value
+  - description
+  - createdAt
+  - updatedAt
+properties:
+  id:
+    type: string
+    description: The observable identifier.
+    example: df927ab8-54ed-47d6-be07-9948c255c097
+  typeKey:
+    type: string
+    description: The observable type key.
+    example: observable-type-ipv4
+  value:
+    type: string
+    description: The observable value.
+    example: 10.0.0.8
+  description:
+    type: string
+    nullable: true
+    description: An optional description for the observable.
+    example: Source IP
+  createdAt:
+    type: string
+    format: date-time
+    description: When the observable was created.
+    example: '2024-11-14T10:00:00.000Z'
+  updatedAt:
+    type: string
+    format: date-time
+    nullable: true
+    description: When the observable was last updated.
+    example: '2024-11-14T10:00:00.000Z'

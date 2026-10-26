@@ -8,17 +8,22 @@
 export type {
   ChatCompleteCompositeResponse,
   ChatCompleteAPI,
+  ChatCompleteAPIResponse,
   ChatCompleteOptions,
+  ChatCompleteTemplate,
+  ChatCompleteCacheControl,
   FunctionCallingMode,
   ChatCompleteStreamResponse,
   ChatCompleteResponse,
   ChatCompleteRetryConfiguration,
 } from './api';
-export type {
-  BoundChatCompleteAPI,
-  BoundChatCompleteOptions,
-  UnboundChatCompleteOptions,
-} from './bound_api';
+export {
+  chatCompletionReasoningEfforts,
+  type ChatCompletionReasoning,
+  type ChatCompletionReasoningEffort,
+} from './reasoning';
+export type { BoundChatCompleteAPI, UnboundChatCompleteOptions } from './bound_api';
+export { parseTemplateJson } from './parse_template_json';
 export {
   ChatCompletionEventType,
   type ChatCompletionMessageEvent,
@@ -44,14 +49,32 @@ export {
 export { type ToolSchema, type ToolSchemaType, type FromToolSchema } from './tool_schema';
 export {
   ToolChoiceType,
+  type ToolCallback,
   type ToolOptions,
   type ToolDefinition,
   type ToolCall,
-  type ToolCallsOf,
   type UnvalidatedToolCall,
   type ToolChoice,
+  type CustomToolChoice,
+  type ToolCallArguments,
+  type ToolCallbackResult,
 } from './tools';
-export type { ChatCompleteMetadata, ConnectorTelemetryMetadata } from './metadata';
+
+export type {
+  ToolCallArgumentsOfToolDefinition,
+  ToolCallOfToolDefinitions,
+  ToolCallOfToolOptions,
+  ToolCallbacksOfToolOptions,
+  ToolNamesOf,
+  ToolsOfChoice,
+  ToolCallsOfToolOptions,
+} from './tools_of';
+
+export type {
+  ChatCompleteMetadata,
+  ConnectorTelemetryMetadata,
+  ChatCompleteAnonymizationMetadata,
+} from './metadata';
 export {
   isChatCompletionChunkEvent,
   isChatCompletionEvent,
@@ -65,7 +88,28 @@ export {
   type ChatCompletionToolNotFoundError,
   type ChatCompletionToolValidationError,
   type ChatCompletionTokenLimitReachedError,
+  isContextLengthExceededError,
   isToolValidationError,
-  isTokenLimitReachedError,
+  isOutputTokenLimitReachedError,
   isToolNotFoundError,
 } from './errors';
+
+export type {
+  AnonymizationEntity,
+  Anonymization,
+  Deanonymization,
+  AnonymizationOutput,
+  DeanonymizationOutput,
+  DeanonymizedMessage,
+  AnonymizationResponseMetadata,
+  DeanonymizedMessageData,
+} from './anonymization';
+
+export type {
+  InferenceCallbacks,
+  InferenceCallbackErrorEvent,
+  InferenceCallbackCompleteEvent,
+  InferenceCompleteCallbackHandler,
+  InferenceErrorCallbackHandler,
+  InferenceEventEmitter,
+} from './callbacks';

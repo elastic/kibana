@@ -8,6 +8,7 @@
  */
 
 import { IpFormat } from './ip';
+import { expectReactElementWithNull, expectReactElementAsArray } from '../test_utils';
 
 describe('IP Address Format', () => {
   let ip: IpFormat;
@@ -17,11 +18,33 @@ describe('IP Address Format', () => {
   });
 
   test('converts a value from a decimal to a string', () => {
-    expect(ip.convert(1186489492)).toBe('70.184.100.148');
+    expect(ip.convertToText(1186489492)).toBe('70.184.100.148');
+    expect(ip.convertToReact(1186489492)).toBe('70.184.100.148');
   });
 
-  test('converts null and undefined to -', () => {
-    expect(ip.convert(null)).toBe('-');
-    expect(ip.convert(undefined)).toBe('-');
+  test('missing value', () => {
+    expect(ip.convertToText(null)).toBe('(null)');
+    expect(ip.convertToText(undefined)).toBe('(null)');
+    expectReactElementWithNull(ip.convertToReact(null));
+    expectReactElementWithNull(ip.convertToReact(undefined));
+  });
+
+  test('convertToReact returns raw string for unhighlighted content (React escapes at render)', () => {
+    expect(ip.convertToReact('<script>alert("test")</script>')).toBe(
+      '<script>alert("test")</script>'
+    );
+  });
+
+  test('wraps a multi-value array with bracket notation', () => {
+    expect(ip.convertToText([1186489492, 16777343])).toBe('["70.184.100.148","1.0.0.127"]');
+    expectReactElementAsArray(ip.convertToReact([1186489492, 16777343]), [
+      '70.184.100.148',
+      '1.0.0.127',
+    ]);
+  });
+
+  test('returns the single element without brackets for a one-element array', () => {
+    expect(ip.convertToText([1186489492])).toBe('["70.184.100.148"]');
+    expect(ip.convertToReact([1186489492])).toBe('70.184.100.148');
   });
 });

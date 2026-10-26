@@ -10,16 +10,20 @@ import {
   UptimeConnectorFeatureId,
   SecurityConnectorFeatureId,
 } from '@kbn/actions-plugin/common';
+import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { SubActionConnectorType } from '@kbn/actions-plugin/server/sub_action_framework/types';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { SavedObjectsClientContract } from '@kbn/core/server';
+import type { IUiSettingsClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import type { ConnectorAdapter } from '@kbn/alerting-plugin/server';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import { ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID } from '@kbn/elastic-assistant-common';
+import type { ServerlessProjectType } from '../../../common/constants/types';
 import { CasesConnector } from './cases_connector';
-import { DEFAULT_MAX_OPEN_CASES } from './constants';
 import {
   CASES_CONNECTOR_ID,
   CASES_CONNECTOR_TITLE,
-  SECURITY_SOLUTION_OWNER,
+  OWNER_INFO,
+  DEFAULT_MAX_OPEN_CASES,
 } from '../../../common/constants';
 import { getOwnerFromRuleConsumerProducer } from '../../../common/utils/owner';
 
@@ -28,6 +32,7 @@ import type {
   CasesConnectorParams,
   CasesConnectorRuleActionParams,
   CasesConnectorSecrets,
+  CasesGroupedAlerts,
 } from './types';
 import {
   CasesConnectorConfigSchema,
@@ -36,22 +41,33 @@ import {
 } from './schema';
 import type { CasesClient } from '../../client';
 import { constructRequiredKibanaPrivileges } from './utils';
+import { ATTACK_DISCOVERY_MAX_OPEN_CASES, groupAttackDiscoveryAlerts } from './attack_discovery';
 
 interface GetCasesConnectorTypeArgs {
   getCasesClient: (request: KibanaRequest) => Promise<CasesClient>;
+  getActionsClient: (request: KibanaRequest) => Promise<PublicMethodsOf<ActionsClient>>;
   getUnsecuredSavedObjectsClient: (
     request: KibanaRequest,
     savedObjectTypes: string[]
   ) => Promise<SavedObjectsClientContract>;
+  getUiSettingsClient: (request: KibanaRequest) => Promise<IUiSettingsClient>;
   getSpaceId: (request?: KibanaRequest) => string;
-  isServerlessSecurity?: boolean;
+  serverlessProjectType?: string;
+  isCasesAttachmentsEnabled: boolean;
+  isTemplatesEnabled: boolean;
+  isAtLeastPlatinum: () => Promise<boolean>;
 }
 
 export const getCasesConnectorType = ({
   getCasesClient,
+  getActionsClient,
   getSpaceId,
   getUnsecuredSavedObjectsClient,
-  isServerlessSecurity,
+  getUiSettingsClient,
+  serverlessProjectType,
+  isCasesAttachmentsEnabled,
+  isTemplatesEnabled,
+  isAtLeastPlatinum,
 }: GetCasesConnectorTypeArgs): SubActionConnectorType<
   CasesConnectorConfig,
   CasesConnectorSecrets
@@ -60,7 +76,16 @@ export const getCasesConnectorType = ({
   name: CASES_CONNECTOR_TITLE,
   getService: (params) =>
     new CasesConnector({
-      casesParams: { getCasesClient, getSpaceId, getUnsecuredSavedObjectsClient },
+      casesParams: {
+        getCasesClient,
+        getActionsClient,
+        getSpaceId,
+        getUnsecuredSavedObjectsClient,
+        getUiSettingsClient,
+        isCasesAttachmentsEnabled,
+        isTemplatesEnabled,
+        isAtLeastPlatinum,
+      },
       connectorParams: params,
     }),
   schema: {
@@ -79,18 +104,28 @@ export const getCasesConnectorType = ({
       throw new Error('Cannot authorize cases. Owner is not defined in the subActionParams.');
     }
 
-    const owner = isServerlessSecurity
-      ? SECURITY_SOLUTION_OWNER
-      : (params?.subActionParams?.owner as string);
+    let owner: string;
+    if (serverlessProjectType) {
+      const foundOwner = Object.entries(OWNER_INFO).find(([, info]) => {
+        return info.serverlessProjectType === serverlessProjectType;
+      });
+
+      owner = foundOwner ? foundOwner[1].id : OWNER_INFO.cases.id;
+    } else {
+      owner = params?.subActionParams?.owner as string;
+    }
 
     return constructRequiredKibanaPrivileges(owner);
   },
 });
 
 export const getCasesConnectorAdapter = ({
-  isServerlessSecurity,
+  serverlessProjectType,
+  logger,
 }: {
+  serverlessProjectType?: ServerlessProjectType;
   isServerlessSecurity?: boolean;
+  logger: Logger;
 }): ConnectorAdapter<CasesConnectorRuleActionParams, CasesConnectorParams> => {
   return {
     connectorTypeId: CASES_CONNECTOR_ID,
@@ -98,27 +133,51 @@ export const getCasesConnectorAdapter = ({
     buildActionParams: ({ alerts, rule, params, ruleUrl }) => {
       const caseAlerts = [...alerts.new.data, ...alerts.ongoing.data];
 
+      /**
+       * We handle attack discovery alerts differently than other alerts and group
+       * their building block SIEM alerts that led to each attack separately.
+       */
+      let source: 'attack' | 'rule' = 'rule';
+      let groupedAlerts: CasesGroupedAlerts[] | null = null;
+      let maximumCasesToOpen = params.subActionParams.maximumCasesToOpen ?? DEFAULT_MAX_OPEN_CASES;
+      if (rule.ruleTypeId === ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID) {
+        try {
+          groupedAlerts = groupAttackDiscoveryAlerts(caseAlerts);
+          source = 'attack';
+          maximumCasesToOpen = ATTACK_DISCOVERY_MAX_OPEN_CASES;
+        } catch (error) {
+          logger.error(
+            `Could not setup grouped Attack Discovery alerts, because of error: ${error}`
+          );
+        }
+      }
+
       const owner = getOwnerFromRuleConsumerProducer({
         consumer: rule.consumer,
         producer: rule.producer,
-        isServerlessSecurity,
+        serverlessProjectType,
       });
 
       const subActionParams = {
         alerts: caseAlerts,
+        autoPushCase: params.subActionParams.autoPushCase,
         rule: { id: rule.id, name: rule.name, tags: rule.tags, ruleUrl: ruleUrl ?? null },
         groupingBy: params.subActionParams.groupingBy,
+        groupedAlerts,
         owner,
         reopenClosedCases: params.subActionParams.reopenClosedCases,
         timeWindow: params.subActionParams.timeWindow,
-        maximumCasesToOpen: DEFAULT_MAX_OPEN_CASES,
+        maximumCasesToOpen,
         templateId: params.subActionParams.templateId,
+        templateVersion: params.subActionParams.templateVersion,
+        extractObservables: params.subActionParams.extractObservables,
+        source,
       };
 
       return { subAction: 'run', subActionParams };
     },
     getKibanaPrivileges: ({ consumer, producer }) => {
-      const owner = getOwnerFromRuleConsumerProducer({ consumer, producer, isServerlessSecurity });
+      const owner = getOwnerFromRuleConsumerProducer({ consumer, producer, serverlessProjectType });
       return constructRequiredKibanaPrivileges(owner);
     },
   };

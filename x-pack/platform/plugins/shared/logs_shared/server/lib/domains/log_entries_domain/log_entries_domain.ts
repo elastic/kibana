@@ -6,28 +6,27 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import { JsonObject } from '@kbn/utility-types';
-import { LogColumn, LogEntry, LogEntryCursor } from '../../../../common/log_entry';
-import {
+import type { JsonObject } from '@kbn/utility-types';
+import type { LogColumn, LogEntry, LogEntryCursor } from '../../../../common/log_entry';
+import type {
   LogViewColumnConfiguration,
-  logViewFieldColumnConfigurationRT,
   LogViewReference,
   ResolvedLogView,
 } from '../../../../common/log_views';
+import { logViewFieldColumnConfigurationRT } from '../../../../common/log_views';
 import { decodeOrThrow } from '../../../../common/runtime_types';
 import { getBuiltinRules } from '../../../services/log_entries/message/builtin_rules';
-import {
+import type {
   CompiledLogMessageFormattingRule,
-  compileFormattingRules,
   Fields,
   Highlights,
 } from '../../../services/log_entries/message/message';
+import { compileFormattingRules } from '../../../services/log_entries/message/message';
 import type { LogsSharedPluginRequestHandlerContext } from '../../../types';
-import { LogsSharedBackendLibs } from '../../logs_shared_types';
+import type { LogsSharedBackendLibs } from '../../logs_shared_types';
+import type { CompositeDatasetKey, LogEntryDatasetBucket } from './queries/log_entry_datasets';
 import {
-  CompositeDatasetKey,
   createLogEntryDatasetsQuery,
-  LogEntryDatasetBucket,
   logEntryDatasetsResponseRT,
 } from './queries/log_entry_datasets';
 
@@ -59,7 +58,8 @@ export interface ILogsSharedLogEntriesDomain {
     indexName: string,
     startTime: number,
     endTime: number,
-    runtimeMappings: estypes.MappingRuntimeFields
+    runtimeMappings: estypes.MappingRuntimeFields,
+    projectRouting?: string
   ): Promise<string[]>;
 }
 
@@ -136,7 +136,8 @@ export class LogsSharedLogEntriesDomain implements ILogsSharedLogEntriesDomain {
     indexName: string,
     startTime: number,
     endTime: number,
-    runtimeMappings: estypes.MappingRuntimeFields
+    runtimeMappings: estypes.MappingRuntimeFields,
+    projectRouting?: estypes.ProjectRouting
   ) {
     let datasetBuckets: LogEntryDatasetBucket[] = [];
     let afterLatestBatchKey: CompositeDatasetKey | undefined;
@@ -152,7 +153,8 @@ export class LogsSharedLogEntriesDomain implements ILogsSharedLogEntriesDomain {
           endTime,
           runtimeMappings,
           COMPOSITE_AGGREGATION_BATCH_SIZE,
-          afterLatestBatchKey
+          afterLatestBatchKey,
+          projectRouting
         )
       );
 

@@ -1,0 +1,120 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import type { ReactNode } from 'react';
+import type { DefaultItemAction, EuiButtonIconProps } from '@elastic/eui';
+import type { ActionId, ContentListItem, KnownActionId } from '@kbn/content-list-provider';
+import type { BuilderContext } from '../column/types';
+
+/**
+ * Output type for resolved action presets.
+ *
+ * Each action preset resolves to an EUI `DefaultItemAction` suitable for
+ * use in an `EuiTableActionsColumnType.actions` array.
+ */
+export type ActionOutput = DefaultItemAction<ContentListItem>;
+
+/**
+ * Context passed to action builder functions.
+ */
+export type ActionBuilderContext = BuilderContext;
+
+/**
+ * Props for the `Action` component (custom actions).
+ *
+ * Custom actions are purely declarative: behavior is supplied at the
+ * provider level via `itemConfig.actions[id]`. The `id` prop ties the JSX
+ * declaration to the matching config entry.
+ *
+ * Built-in IDs ({@link KnownActionId}) are intentionally excluded —
+ * use `Action.Edit` or `Action.Delete` for those so preset defaults
+ * (read-only gating, danger color, etc.) are applied. The content editor
+ * (`Action.ContentEditor`) is also intentionally excluded; its handler
+ * lives on `features.contentEditor.open` rather than on `item.actions`,
+ * so a custom `<Action id="contentEditor" />` cannot wire it up.
+ */
+export interface ActionProps {
+  /**
+   * Unique identifier for the action. Must NOT be one of the built-in
+   * IDs (`'edit'`, `'delete'`) or `'contentEditor'` — use the matching
+   * preset (`Action.Edit`, `Action.Delete`, `Action.ContentEditor`) for
+   * those.
+   */
+  id: Exclude<ActionId, KnownActionId | 'contentEditor'>;
+  /** Display name for the action (shown in menu and tooltip). */
+  name: string | ((item: ContentListItem) => ReactNode);
+  /** Accessible description for the action. */
+  description?: string;
+  /** Icon type (EUI icon name). */
+  icon?: string;
+  /** Render type: `'icon'` (compact) or `'button'` (full). */
+  type?: 'icon' | 'button';
+  /** Icon/button color (matches EUI button color palette). */
+  color?: EuiButtonIconProps['color'];
+  /** Whether the action is enabled for a given item. */
+  enabled?: (item: ContentListItem) => boolean;
+  /** Whether the action is available (visible) for a given item. */
+  available?: (item: ContentListItem) => boolean;
+  /** Test subject for testing. */
+  'data-test-subj'?: string;
+}
+
+/**
+ * Namespace interface for `Action` sub-components.
+ *
+ * The base `Action` accepts {@link ActionProps}; pre-built actions
+ * are properties (e.g., `Action.Edit`, `Action.Delete`, `Action.ContentEditor`).
+ */
+export interface ActionNamespace {
+  (props: ActionProps): ReactNode;
+  Edit: (props: EditActionProps) => ReactNode;
+  Delete: (props: DeleteActionProps) => ReactNode;
+  ContentEditor: (props: ContentEditorActionProps) => ReactNode;
+}
+
+/**
+ * Props for the `Action.Edit` preset component.
+ */
+export interface EditActionProps {
+  /** Custom label for the edit action. Defaults to `'Edit'`. */
+  label?: string;
+  /** Per-item guard. When provided, disables the action for items where this returns `false`. */
+  enabled?: (item: ContentListItem) => boolean;
+}
+
+/**
+ * Props for the `Action.Delete` preset component.
+ */
+export interface DeleteActionProps {
+  /** Custom label for the delete action. Defaults to `'Delete'`. */
+  label?: string;
+  /** Per-item guard. When provided, disables the action for items where this returns `false`. */
+  enabled?: (item: ContentListItem) => boolean;
+}
+
+/**
+ * Props for the `Action.ContentEditor` preset component.
+ *
+ * Renders the content editor (view details) row icon. Behavior is wired
+ * at the provider level via `features.contentEditor.open` — the action
+ * has no direct binding on `item.actions`. When `open` is not configured,
+ * the action returns `undefined` and the table omits the icon entirely.
+ */
+export interface ContentEditorActionProps {
+  /**
+   * Custom label for the content editor action. Defaults to `'View details'`.
+   *
+   * Pass a function to derive the label from the item (e.g.
+   * `'View {itemTitle} details'`); the default deliberately omits the
+   * item title to keep the icon-button affordance terse.
+   */
+  label?: string | ((item: ContentListItem) => ReactNode);
+  /** Per-item guard. When provided, disables the action for items where this returns `false`. */
+  enabled?: (item: ContentListItem) => boolean;
+}

@@ -1,0 +1,27 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { AgentBuilderPluginSetup, ToolAvailabilityConfig } from '@kbn/agent-builder-server';
+import { streamsManagementSkill } from './streams_management_skill';
+
+export const registerAgentBuilderSkills = ({
+  agentBuilder,
+  availability,
+}: {
+  agentBuilder: AgentBuilderPluginSetup;
+  availability: ToolAvailabilityConfig;
+}): void => {
+  if (!agentBuilder) {
+    return;
+  }
+
+  const streamsSkills = [streamsManagementSkill];
+
+  for (const skill of streamsSkills) {
+    agentBuilder.skills.register({ ...skill, availability });
+  }
+};

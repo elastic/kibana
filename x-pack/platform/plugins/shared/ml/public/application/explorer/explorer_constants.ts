@@ -18,13 +18,6 @@ export const FILTER_ACTION = {
 
 export type FilterAction = (typeof FILTER_ACTION)[keyof typeof FILTER_ACTION];
 
-export const SWIMLANE_TYPE = {
-  OVERALL: 'overall',
-  VIEW_BY: 'viewBy',
-} as const;
-
-export type SwimlaneType = (typeof SWIMLANE_TYPE)[keyof typeof SWIMLANE_TYPE];
-
 export const CHART_TYPE = {
   EVENT_DISTRIBUTION: 'event_distribution',
   POPULATION_DISTRIBUTION: 'population_distribution',
@@ -49,12 +42,6 @@ export const VIEW_BY_JOB_LABEL = i18n.translate('xpack.ml.explorer.jobIdLabel', 
 export const OVERALL_LABEL = i18n.translate('xpack.ml.explorer.overallLabel', {
   defaultMessage: 'Overall',
 });
-
-/**
- * Hard limitation for the size of terms
- * aggregations on influencers values.
- */
-export const ANOMALY_SWIM_LANE_HARD_LIMIT = 1000;
 
 /**
  * Default page size for the anomaly swim lane.

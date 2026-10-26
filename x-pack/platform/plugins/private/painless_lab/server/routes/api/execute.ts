@@ -8,10 +8,10 @@
 import { schema } from '@kbn/config-schema';
 
 import { API_BASE_PATH } from '../../../common/constants';
-import { RouteDependencies } from '../../types';
+import type { RouteDependencies } from '../../types';
 import { handleEsError } from '../../shared_imports';
 
-const bodySchema = schema.string();
+const bodySchema = schema.string({ maxLength: 100000 });
 
 export function registerExecuteRoute({ router, license }: RouteDependencies) {
   router.post(

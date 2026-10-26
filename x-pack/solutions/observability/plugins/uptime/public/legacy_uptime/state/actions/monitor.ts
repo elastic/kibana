@@ -6,10 +6,10 @@
  */
 
 import { createAction } from 'redux-actions';
-import { MonitorDetailsActionPayload } from './types';
-import { PingError } from '../../../../common/runtime_types';
-import { MonitorLocations } from '../../../../common/runtime_types';
-import { QueryParams } from './types';
+import type { MonitorDetailsActionPayload } from './types';
+import type { PingError } from '../../../../common/runtime_types';
+import type { MonitorLocations } from '../../../../common/runtime_types';
+import type { QueryParams } from './types';
 import { createAsyncAction } from './utils';
 
 export interface MonitorLocationsPayload extends QueryParams {

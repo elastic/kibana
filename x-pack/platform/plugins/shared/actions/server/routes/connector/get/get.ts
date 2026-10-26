@@ -8,17 +8,19 @@
 import type { IRouter } from '@kbn/core/server';
 import type { GetConnectorParamsV1 } from '../../../../common/routes/connector/apis/get';
 import { getConnectorParamsSchemaV1 } from '../../../../common/routes/connector/apis/get';
-import { connectorResponseSchemaV1 } from '../../../../common/routes/connector/response';
+import { getConnectorResponseSchemaV1 } from '../../../../common/routes/connector/response';
 import { transformConnectorResponseV1 } from '../common_transforms';
 import type { ILicenseState } from '../../../lib';
 import { BASE_ACTION_API_PATH } from '../../../../common';
 import type { ActionsRequestHandlerContext } from '../../../types';
 import { verifyAccessAndContext } from '../../verify_access_and_context';
 import { DEFAULT_ACTION_ROUTE_SECURITY } from '../../constants';
+import type { ActionsConfigurationUtilities } from '../../../actions_config';
 
 export const getConnectorRoute = (
   router: IRouter<ActionsRequestHandlerContext>,
-  licenseState: ILicenseState
+  licenseState: ILicenseState,
+  actionsConfigUtils: ActionsConfigurationUtilities
 ) => {
   router.get(
     {
@@ -29,24 +31,33 @@ export const getConnectorRoute = (
         summary: `Get connector information`,
         tags: ['oas-tag:connectors'],
       },
-      validate: {
-        request: {
-          params: getConnectorParamsSchemaV1,
-        },
-        response: {
-          200: {
-            body: () => connectorResponseSchemaV1,
-            description: 'Indicates a successful call.',
+      validate: () => {
+        const includeInboundEventsField = actionsConfigUtils.isInboundEventsEnabled();
+        return {
+          request: {
+            params: getConnectorParamsSchemaV1,
           },
-        },
+          response: {
+            200: {
+              body: () => getConnectorResponseSchemaV1(includeInboundEventsField),
+              description: 'Indicates a successful call.',
+            },
+            403: {
+              description: 'Indicates that this call is forbidden.',
+            },
+          },
+        };
       },
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
         const actionsClient = (await context.actions).getActionsClient();
         const { id }: GetConnectorParamsV1 = req.params;
+        const connector = await actionsClient.get({ id });
         return res.ok({
-          body: transformConnectorResponseV1(await actionsClient.get({ id })),
+          body: transformConnectorResponseV1(connector, {
+            includeInboundEventsField: actionsConfigUtils.isInboundEventsEnabled(),
+          }),
         });
       })
     )

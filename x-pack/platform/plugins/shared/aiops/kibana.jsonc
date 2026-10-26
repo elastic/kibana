@@ -2,7 +2,7 @@
   "type": "plugin",
   "id": "@kbn/aiops-plugin",
   "owner": [
-    "@elastic/ml-ui"
+    "@elastic/search-ml-ux"
   ],
   "group": "platform",
   "visibility": "shared",
@@ -11,6 +11,7 @@
     "id": "aiops",
     "browser": true,
     "server": true,
+    "configPath": ["xpack", "aiops"],
     "requiredPlugins": [
       "charts",
       "data",
@@ -18,7 +19,6 @@
       "licensing",
       "uiActions",
       "embeddable",
-      "presentationUtil",
       "dashboard",
       "fieldFormats",
       "unifiedSearch",
@@ -27,15 +27,20 @@
     "optionalPlugins": [
       "cases",
       "observabilityAIAssistant",
-      "usageCollection"
+      "usageCollection",
+      "cps",
+      "dataViewEditor",
+      "dataViewFieldEditor",
+      "contentManagement"
     ],
     "requiredBundles": [
-      "dataViews",
       "fieldFormats",
       "kibanaReact",
       "kibanaUtils",
-      "embeddable",
-      "cases"
+      "cases",
+      "savedSearch",
+      "savedObjectsFinder",
+      "presentationUtil"
     ]
   }
 }

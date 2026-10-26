@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Logger } from '@kbn/logging';
-import { Log } from './log';
+import type { Logger } from '@kbn/logging';
+import type { Log } from './log';
 
 export const convertToLogger = (cliLog: Log): Logger => {
   const getErrorMessage = (msgOrError: string | (() => string) | Error): string => {

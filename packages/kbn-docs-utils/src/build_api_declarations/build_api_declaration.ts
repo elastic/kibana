@@ -7,20 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { FunctionTypeNode, Node } from 'ts-morph';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { FunctionTypeNode } from 'ts-morph';
+import { Node } from 'ts-morph';
+import type { ToolingLog } from '@kbn/tooling-log';
 import { buildClassDec } from './build_class_dec';
 import { buildFunctionDec } from './build_function_dec';
 import { isNamedNode } from '../tsmorph_utils';
-import { ApiDeclaration, PluginOrPackage } from '../types';
+import type { ApiDeclaration, PluginOrPackage } from '../types';
 import { buildVariableDec } from './build_variable_dec';
 import { buildTypeLiteralDec } from './build_type_literal_dec';
-import { ApiScope } from '../types';
+import type { ApiScope } from '../types';
 import { buildInterfaceDec } from './build_interface_dec';
 import { buildBasicApiDeclaration } from './build_basic_api_declaration';
 import { buildFunctionTypeDec } from './build_function_type_dec';
 import { buildCallSignatureDec } from './build_call_signature_dec';
-import { BuildApiDecOpts } from './types';
+import { buildMultipleCallSignaturesDec } from './build_multiple_call_signatures_dec';
+import type { BuildApiDecOpts } from './types';
 import { buildApiId } from './utils';
 
 export function buildApiDeclarationTopNode(
@@ -67,15 +69,18 @@ export function buildApiDeclaration(node: Node, opts: BuildApiDecOpts): ApiDecla
     Node.isFunctionDeclaration(node) ||
     Node.isMethodDeclaration(node) ||
     Node.isConstructSignatureDeclaration(node) ||
-    Node.isConstructorDeclaration(node)
+    Node.isConstructorDeclaration(node) ||
+    Node.isCallSignatureDeclaration(node)
   ) {
     return buildFunctionDec(node, {
       ...opts,
-      // Use "Constructor" if applicable, instead of the default "Unnamed"
+      // Use appropriate name based on node type
       name: Node.isConstructSignatureDeclaration(node)
         ? 'new'
         : Node.isConstructorDeclaration(node)
         ? 'Constructor'
+        : Node.isCallSignatureDeclaration(node)
+        ? 'Unnamed'
         : node.getName() || 'Unnamed',
     });
   } else if (
@@ -96,12 +101,11 @@ export function buildApiDeclaration(node: Node, opts: BuildApiDecOpts): ApiDecla
   //  */
   // export type AFn = (t: string) => void;
   //
-  if (node.getType().getCallSignatures().length > 0) {
-    if (node.getType().getCallSignatures().length > 1) {
-      opts.log.warning(`Not handling more than one call signature for node ${opts.name}`);
-    } else {
-      return buildCallSignatureDec(node, node.getType().getCallSignatures()[0], opts);
-    }
+  const callSignatures = node.getType().getCallSignatures();
+  if (callSignatures.length === 1) {
+    return buildCallSignatureDec(node, callSignatures[0], opts);
+  } else if (callSignatures.length > 1) {
+    return buildMultipleCallSignaturesDec(node, callSignatures, opts);
   }
 
   return buildBasicApiDeclaration(node, opts);

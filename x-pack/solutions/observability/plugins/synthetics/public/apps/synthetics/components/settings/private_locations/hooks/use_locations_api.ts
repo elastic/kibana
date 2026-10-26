@@ -6,23 +6,27 @@
  */
 
 import { useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { NewLocation } from '../add_location_flyout';
+import { useDispatch, useSelector } from 'react-redux-v7';
+import type { EditPrivateLocationAttributes } from '../../../../../../../server/routes/settings/private_locations/edit_private_location';
+import type { NewLocation } from '../add_or_edit_location_flyout';
 import {
   createPrivateLocationAction,
   deletePrivateLocationAction,
+  editPrivateLocationAction,
   getPrivateLocationsAction,
 } from '../../../../state/private_locations/actions';
 import { selectPrivateLocationsState } from '../../../../state/private_locations/selectors';
+import { useSyntheticsRefreshContext } from '../../../../contexts';
 
 export const usePrivateLocationsAPI = () => {
   const dispatch = useDispatch();
+  const { lastRefresh } = useSyntheticsRefreshContext();
 
   const { loading, createLoading, deleteLoading, data } = useSelector(selectPrivateLocationsState);
 
   useEffect(() => {
     dispatch(getPrivateLocationsAction.get());
-  }, [dispatch]);
+  }, [dispatch, lastRefresh]);
 
   useEffect(() => {
     if (data === null) {
@@ -30,17 +34,22 @@ export const usePrivateLocationsAPI = () => {
     }
   }, [data, dispatch]);
 
-  const onSubmit = (newLoc: NewLocation) => {
+  const onCreateLocationAPI = (newLoc: NewLocation) => {
     dispatch(createPrivateLocationAction.get(newLoc));
   };
 
-  const onDelete = (id: string) => {
+  const onEditLocationAPI = (locationId: string, newAttributes: EditPrivateLocationAttributes) => {
+    dispatch(editPrivateLocationAction.get({ locationId, newAttributes }));
+  };
+
+  const onDeleteLocationAPI = (id: string) => {
     dispatch(deletePrivateLocationAction.get(id));
   };
 
   return {
-    onSubmit,
-    onDelete,
+    onCreateLocationAPI,
+    onEditLocationAPI,
+    onDeleteLocationAPI,
     deleteLoading,
     loading,
     createLoading,

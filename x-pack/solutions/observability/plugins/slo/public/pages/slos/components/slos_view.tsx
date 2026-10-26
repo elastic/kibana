@@ -6,24 +6,26 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React from 'react';
+import { ActionModalProvider } from '../../../context/action_modal';
+import type { ViewType } from '../types';
 import { SloListCardView } from './card_view/slo_list_card_view';
 import { SloListCompactView } from './compact_view/slo_list_compact_view';
 import { HealthCallout } from './health_callout/health_callout';
 import { SloListEmpty } from './slo_list_empty';
 import { SloListError } from './slo_list_error';
 import { SloListView } from './slo_list_view/slo_list_view';
-import type { ViewType } from '../types';
 
 export interface Props {
   sloList: SLOWithSummaryResponse[];
   loading: boolean;
   error: boolean;
   view: ViewType;
+  isInteractive?: boolean;
 }
 
-export function SlosView({ sloList, loading, error, view }: Props) {
+export function SlosView({ sloList, loading, error, view, isInteractive = true }: Props) {
   if (!loading && !error && sloList.length === 0) {
     return <SloListEmpty />;
   }
@@ -34,37 +36,49 @@ export function SlosView({ sloList, loading, error, view }: Props) {
 
   if (view === 'cardView') {
     return (
-      <EuiFlexGroup direction="column">
-        <EuiFlexItem>
-          <HealthCallout sloList={sloList} />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <SloListCardView sloList={sloList} loading={loading} error={error} />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <Wrapper sloList={sloList} isInteractive={isInteractive}>
+        <SloListCardView
+          sloList={sloList}
+          loading={loading}
+          error={error}
+          isInteractive={isInteractive}
+        />
+      </Wrapper>
     );
   }
 
   if (view === 'compactView') {
     return (
-      <EuiFlexGroup direction="column">
-        <EuiFlexItem>
-          <HealthCallout sloList={sloList} />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <SloListCompactView sloList={sloList} loading={loading} error={error} />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <Wrapper sloList={sloList} isInteractive={isInteractive}>
+        <SloListCompactView
+          sloList={sloList}
+          loading={loading}
+          error={error}
+          isInteractive={isInteractive}
+        />
+      </Wrapper>
     );
   }
 
   return (
+    <Wrapper sloList={sloList} isInteractive={isInteractive}>
+      <SloListView sloList={sloList} loading={loading} error={error} />
+    </Wrapper>
+  );
+}
+
+function Wrapper({
+  children,
+  sloList,
+  isInteractive = true,
+}: { children: React.ReactNode; isInteractive?: boolean } & Pick<Props, 'sloList'>) {
+  return (
     <EuiFlexGroup direction="column">
       <EuiFlexItem>
-        <HealthCallout sloList={sloList} />
+        <HealthCallout sloList={sloList} isInteractive={isInteractive} />
       </EuiFlexItem>
       <EuiFlexItem>
-        <SloListView sloList={sloList} loading={loading} error={error} />
+        <ActionModalProvider>{children}</ActionModalProvider>
       </EuiFlexItem>
     </EuiFlexGroup>
   );

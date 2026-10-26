@@ -6,25 +6,23 @@
  */
 
 import moment from 'moment';
-
-jest.mock('./post_pagerduty', () => ({
-  postPagerduty: jest.fn(),
-}));
 import type { Services } from '@kbn/actions-plugin/server/types';
 import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
-import { validateConfig, validateSecrets, validateParams } from '@kbn/actions-plugin/server/lib';
+import { validateConfig, validateParams, validateSecrets } from '@kbn/actions-plugin/server/lib';
 import { postPagerduty } from './post_pagerduty';
 import type { Logger } from '@kbn/core/server';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
-import type {
-  ActionParamsType,
-  PagerDutyConnectorType,
-  PagerDutyConnectorTypeExecutorOptions,
-} from '.';
+import type { PagerDutyConnectorType, PagerDutyConnectorTypeExecutorOptions } from '.';
+import type { ActionParamsType } from '@kbn/connector-schemas/pagerduty';
 import { getConnectorType } from '.';
 import type { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
 import { loggerMock } from '@kbn/logging-mocks';
+import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
+
+jest.mock('./post_pagerduty', () => ({
+  postPagerduty: jest.fn(),
+}));
 
 const postPagerdutyMock = postPagerduty as jest.Mock;
 const services: Services = actionsMock.createServices();
@@ -68,7 +66,7 @@ describe('validateConfig()', () => {
     expect(() => {
       validateConfig(connectorType, { shouldNotBeHere: true }, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type config: [shouldNotBeHere]: definition for this key is missing"`
+      `"error validating connector type config: ✖ Unrecognized key: \\"shouldNotBeHere\\""`
     );
   });
 
@@ -106,7 +104,7 @@ describe('validateConfig()', () => {
         { configurationUtilities: configUtils }
       );
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type config: error configuring pagerduty action: target url is not added to allowedHosts"`
+      `"error validating connector type config: error configuring pagerduty action: target url is not added to allowedHosts"`
     );
   });
 });
@@ -122,15 +120,17 @@ describe('validateSecrets()', () => {
   test('should validate and throw error when secrets is invalid', () => {
     expect(() => {
       validateSecrets(connectorType, { routingKey: false }, { configurationUtilities });
-    }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type secrets: [routingKey]: expected value of type [string] but got [boolean]"`
-    );
+    }).toThrowErrorMatchingInlineSnapshot(`
+      "error validating connector type secrets: ✖ Invalid input: expected string, received boolean
+        → at routingKey"
+    `);
 
     expect(() => {
       validateSecrets(connectorType, {}, { configurationUtilities });
-    }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type secrets: [routingKey]: expected value of type [string] but got [undefined]"`
-    );
+    }).toThrowErrorMatchingInlineSnapshot(`
+      "error validating connector type secrets: ✖ Invalid input: expected string, received undefined
+        → at routingKey"
+    `);
   });
 });
 
@@ -156,11 +156,9 @@ describe('validateParams()', () => {
     expect(() => {
       validateParams(connectorType, { eventAction: 'ackynollage' }, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(`
-"error validating action params: [eventAction]: types that failed validation:
-- [eventAction.0]: expected value to equal [trigger]
-- [eventAction.1]: expected value to equal [resolve]
-- [eventAction.2]: expected value to equal [acknowledge]"
-`);
+      "error validating action params: ✖ Invalid option: expected one of \\"trigger\\"|\\"resolve\\"|\\"acknowledge\\"
+        → at eventAction"
+    `);
   });
 
   test('should validate and pass when valid timestamp has spaces', () => {
@@ -234,7 +232,9 @@ describe('validateParams()', () => {
         },
         { configurationUtilities }
       );
-    }).toThrowError(`error validating action params: error parsing timestamp "${timestamp}"`);
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"error validating action params: ✖ error parsing timestamp \\"1963-09-55 90:23:45\\""`
+    );
   });
 
   test('should validate and throw error when dedupKey is missing on resolve', () => {
@@ -246,8 +246,8 @@ describe('validateParams()', () => {
         },
         { configurationUtilities }
       );
-    }).toThrowError(
-      `error validating action params: DedupKey is required when eventAction is "resolve"`
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"error validating action params: ✖ DedupKey is required when eventAction is \\"resolve\\""`
     );
   });
 });
@@ -576,7 +576,7 @@ describe('execute()', () => {
     const params = {};
 
     postPagerdutyMock.mockImplementation(() => {
-      throw new Error('doing some testing');
+      throw createTaskRunError(new Error('doing some testing'), TaskErrorSource.USER);
     });
 
     const actionId = 'some-action-id';
@@ -594,6 +594,7 @@ describe('execute()', () => {
     expect(actionResponse).toMatchInlineSnapshot(`
       Object {
         "actionId": "some-action-id",
+        "errorSource": "user",
         "message": "error posting pagerduty event",
         "serviceMessage": "doing some testing",
         "status": "error",
@@ -951,5 +952,86 @@ describe('execute()', () => {
         "status": "ok",
       }
     `);
+  });
+
+  test('should remove links with empty href values', async () => {
+    const randoDate = new Date('1963-09-23T01:23:45Z').toISOString();
+    const secrets = {
+      routingKey: 'super-secret',
+    };
+    const config = {
+      apiUrl: 'the-api-url',
+    };
+    const params: ActionParamsType = {
+      eventAction: 'trigger',
+      dedupKey: 'a-dedup-key',
+      summary: 'the summary',
+      source: 'the-source',
+      severity: 'critical',
+      timestamp: randoDate,
+      component: 'the-component',
+      group: 'the-group',
+      class: 'the-class',
+      links: [
+        {
+          href: '',
+          text: 'an empty link',
+        },
+        {
+          href: '       ',
+          text: 'another empty link',
+        },
+        {
+          href: 'http://example.com',
+          text: 'a correct link',
+        },
+      ],
+    };
+    postPagerdutyMock.mockImplementation(() => {
+      return { status: 202, data: 'data-here' };
+    });
+
+    const actionId = 'some-action-id';
+    const executorOptions: PagerDutyConnectorTypeExecutorOptions = {
+      actionId,
+      config,
+      params,
+      secrets,
+      services,
+      configurationUtilities,
+      logger: mockedLogger,
+      connectorUsageCollector,
+    };
+
+    const actionResponse = await connectorType.executor(executorOptions);
+
+    expect(postPagerdutyMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        apiUrl: 'the-api-url',
+        data: expect.objectContaining({
+          dedup_key: 'a-dedup-key',
+          event_action: 'trigger',
+          links: [
+            {
+              href: 'http://example.com',
+              text: 'a correct link',
+            },
+          ],
+        }),
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Routing-Key': 'super-secret',
+        },
+      }),
+      mockedLogger,
+      configurationUtilities,
+      connectorUsageCollector
+    );
+
+    expect(actionResponse).toMatchObject({
+      actionId: 'some-action-id',
+      data: 'data-here',
+      status: 'ok',
+    });
   });
 });

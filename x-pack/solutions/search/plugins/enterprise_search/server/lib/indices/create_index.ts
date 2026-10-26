@@ -5,8 +5,11 @@
  * 2.0.
  */
 
-import { MappingKeywordProperty, MappingTextProperty } from '@elastic/elasticsearch/lib/api/types';
-import { IScopedClusterClient } from '@kbn/core/server';
+import type {
+  MappingKeywordProperty,
+  MappingTextProperty,
+} from '@elastic/elasticsearch/lib/api/types';
+import type { IScopedClusterClient } from '@kbn/core/server';
 
 import { textAnalysisSettings } from './text_analysis';
 
@@ -40,6 +43,10 @@ const stemMapping: MappingTextProperty = {
   type: 'text',
 };
 
+const documentIdMapping: MappingKeywordProperty = {
+  type: 'keyword',
+};
+
 const defaultMappings = {
   dynamic: true,
   dynamic_templates: [
@@ -59,6 +66,9 @@ const defaultMappings = {
       },
     },
   ],
+  properties: {
+    id: documentIdMapping,
+  },
 };
 
 export const createIndex = async (

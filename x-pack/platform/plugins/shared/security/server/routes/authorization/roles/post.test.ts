@@ -9,7 +9,7 @@ import { kibanaResponseFactory } from '@kbn/core/server';
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 import type { MockedVersionedRouter } from '@kbn/core-http-router-server-mocks';
 import { KibanaFeature } from '@kbn/features-plugin/server';
-import type { LicenseCheck } from '@kbn/licensing-plugin/server';
+import type { LicenseCheck } from '@kbn/licensing-types';
 import { GLOBAL_RESOURCE } from '@kbn/security-plugin-types-server';
 
 import type { BulkCreateOrUpdateRolesPayloadSchemaType } from './model/bulk_create_or_update_payload';
@@ -213,7 +213,7 @@ const postRolesTest = (
 describe('POST roles', () => {
   describe('failure', () => {
     postRolesTest('returns result of license checker', {
-      payload: { roles: {} } as BulkCreateOrUpdateRolesPayloadSchemaType,
+      payload: { roles: { 'role-1': { elasticsearch: {}, kibana: [] } } },
       licenseCheckResult: { state: 'invalid', message: 'test forbidden message' },
       asserts: { statusCode: 403, result: { message: 'test forbidden message' } },
     });

@@ -8,17 +8,17 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { METRIC_TYPES } from '@kbn/data-plugin/public';
-import {
+import type { METRIC_TYPES } from '@kbn/data-plugin/public';
+import type {
   FormulaParams,
   FormulaColumn as BaseFormulaColumn,
 } from '@kbn/visualizations-plugin/common/convert_to_lens';
-import { CommonColumnConverterArgs, CommonColumnsConverterArgs, FormulaColumn } from './types';
-import { TSVB_METRIC_TYPES } from '../../../../common/enums';
+import type { CommonColumnConverterArgs, CommonColumnsConverterArgs, FormulaColumn } from './types';
+import type { TSVB_METRIC_TYPES } from '../../../../common/enums';
 import type { Metric } from '../../../../common/types';
 import { getFormulaEquivalent, getPipelineSeriesFormula } from '../metrics';
 import { createColumn, getFormat } from './column';
-import { AdditionalArgs } from '../../types';
+import type { AdditionalArgs } from '../../types';
 
 type OtherFormulaAggregations =
   | typeof TSVB_METRIC_TYPES.POSITIVE_ONLY

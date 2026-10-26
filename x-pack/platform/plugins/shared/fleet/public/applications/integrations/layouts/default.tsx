@@ -4,12 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { memo } from 'react';
+import React, { memo, useMemo } from 'react';
+import { useLocation } from 'react-router-dom';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiNotificationBadge } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { useLink, useStartServices } from '../../../hooks';
+import { useLink } from '../../../hooks';
 import type { Section } from '../sections';
+import { BackLink } from '../sections/epm/components/back_link';
+import { appendReturnParams, readReturnParams } from '../sections/epm/components/return_params';
 
 import { WithHeaderLayout } from '.';
 
@@ -17,12 +20,17 @@ interface Props {
   section?: Section;
   children?: React.ReactNode;
   notificationsBySection?: Partial<Record<Section, number>>;
+  noSpacerInContent?: boolean;
 }
 
 export const DefaultLayout: React.FC<Props> = memo(
-  ({ section, children, notificationsBySection }) => {
-    const { automaticImport } = useStartServices();
+  ({ section, children, notificationsBySection, noSpacerInContent }) => {
     const { getHref } = useLink();
+    const { search } = useLocation();
+    const returnParams = readReturnParams(search);
+    const queryParams = useMemo(() => new URLSearchParams(search), [search]);
+    const browseHref = appendReturnParams(getHref('integrations_all'), returnParams);
+    const installedHref = appendReturnParams(getHref('integrations_installed'), returnParams);
     const tabs = [
       {
         name: (
@@ -32,7 +40,7 @@ export const DefaultLayout: React.FC<Props> = memo(
           />
         ),
         section: 'browse' as Section,
-        href: getHref('integrations_all'),
+        href: browseHref,
       },
       {
         name: (
@@ -42,16 +50,25 @@ export const DefaultLayout: React.FC<Props> = memo(
           />
         ),
         section: 'manage' as Section,
-        href: getHref('integrations_installed'),
+        href: installedHref,
       },
     ];
 
-    const { CreateIntegrationCardButton } = automaticImport?.components ?? {};
-
     return (
       <WithHeaderLayout
+        noSpacerInContent={noSpacerInContent}
         leftColumn={
           <EuiFlexGroup direction="column" gutterSize="none" justifyContent="center">
+            {returnParams ? (
+              <EuiFlexItem grow={false}>
+                <div>
+                  <BackLink
+                    queryParams={queryParams}
+                    integrationsPath={getHref('integrations_all')}
+                  />
+                </div>
+              </EuiFlexItem>
+            ) : null}
             <EuiText>
               <h1>
                 <FormattedMessage
@@ -78,13 +95,7 @@ export const DefaultLayout: React.FC<Props> = memo(
           </EuiFlexGroup>
         }
         rightColumnGrow={false}
-        rightColumn={
-          CreateIntegrationCardButton ? (
-            <EuiFlexItem grow={false}>
-              <CreateIntegrationCardButton />
-            </EuiFlexItem>
-          ) : undefined
-        }
+        rightColumn={undefined}
         tabs={tabs.map((tab) => {
           const notificationCount = notificationsBySection?.[tab.section];
           return {

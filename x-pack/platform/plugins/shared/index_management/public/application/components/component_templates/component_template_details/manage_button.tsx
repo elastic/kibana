@@ -8,13 +8,9 @@
 import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiPopover,
-  EuiButton,
-  EuiContextMenu,
-  EuiContextMenuPanelItemDescriptor,
-} from '@elastic/eui';
-import { ComponentTemplateDeserialized } from '../shared_imports';
+import type { EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
+import { EuiPopover, EuiButton, EuiContextMenu } from '@elastic/eui';
+import type { ComponentTemplateDeserialized } from '../shared_imports';
 
 export interface ManageAction {
   name: string;
@@ -64,11 +60,14 @@ export const ManageButton: React.FunctionComponent<Props> = ({
   return (
     <EuiPopover
       id="manageComponentTemplatePanel"
+      aria-label={i18n.translate('xpack.idxMgmt.componentTemplateDetails.managePopoverAriaLabel', {
+        defaultMessage: 'Manage component template',
+      })}
       button={
         <EuiButton
           fill
           data-test-subj="manageComponentTemplateButton"
-          iconType="arrowDown"
+          iconType="chevronSingleDown"
           iconSide="right"
           onClick={() => setIsPopOverOpen((prevBoolean) => !prevBoolean)}
         >

@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { FC, PropsWithChildren } from 'react';
 import React, {
   createContext,
   useState,
@@ -15,15 +16,13 @@ import React, {
   useCallback,
   useEffect,
   useRef,
-  FC,
-  PropsWithChildren,
 } from 'react';
 import { renderToString } from 'react-dom/server';
 import useDebounce from 'react-use/lib/useDebounce';
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
 import { BehaviorSubject } from 'rxjs';
-import { RuntimePrimitiveTypes } from '../../shared_imports';
+import type { RuntimePrimitiveTypes } from '../../shared_imports';
 import { useStateSelector } from '../../state_utils';
 
 import { parseEsError } from '../../lib/runtime_field_validation';
@@ -35,6 +34,7 @@ const fieldPreviewContext = createContext<Context | undefined>(undefined);
 
 const defaultParams: Params = {
   name: null,
+  customLabel: null,
   index: null,
   script: null,
   document: null,
@@ -142,6 +142,8 @@ export const FieldPreviewProvider: FC<
       script: previewScript,
     });
 
+    controller.completePreviewRequest(currentApiCall);
+
     if (currentApiCall !== controller.getPreviewCount()) {
       // Discard this response as there is another one inflight
       // or we have called reset() and no longer need the response.
@@ -187,7 +189,8 @@ export const FieldPreviewProvider: FC<
             (value: FieldPreview[] | undefined) => fieldPreview$.current.next(value)
           );
         } else {
-          controller.updateSingleFieldPreview(name!, values, type, format);
+          // the preview also runs before a name is set, so default to the same key as the error case
+          controller.updateSingleFieldPreview(name ?? '', values, type, format);
         }
       }
     }
@@ -317,6 +320,25 @@ export const FieldPreviewProvider: FC<
       controller.setPreviewError(null);
     }
   }, [script?.source, controller]);
+
+  /**
+   * The script validation resolves against the preview response, so as soon as an _execute param
+   * changes the preview has to count as loading and the response of a request that is still in
+   * flight has to be discarded: it describes the previous form values, and the guard in
+   * updatePreview() only discards it once the next request has been issued, which the 500ms
+   * debounce below delays. Discarding also invalidates the params cache, so that the debounced
+   * updatePreview() issues a new request even if the form went back to the discarded request's
+   * params in the meantime.
+   */
+  useEffect(() => {
+    if (
+      controller.allParamsDefined(type, script?.source, currentDocIndex) &&
+      controller.hasSomeParamsChanged(type, script?.source, currentDocId)
+    ) {
+      controller.setIsLoadingPreview(true);
+      controller.discardInFlightPreview();
+    }
+  }, [controller, type, script?.source, currentDocIndex, currentDocId]);
 
   // Handle the validation state coming from the Painless DiagnosticAdapter
   // (see @kbn-monaco/src/painless/diagnostics_adapter.ts)

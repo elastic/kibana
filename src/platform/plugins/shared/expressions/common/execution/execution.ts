@@ -10,45 +10,53 @@
 import { i18n } from '@kbn/i18n';
 import type { Logger } from '@kbn/logging';
 import { isPromise } from '@kbn/std';
-import { ObservableLike, UnwrapObservable } from '@kbn/utility-types';
+import type { ObservableLike, UnwrapObservable } from '@kbn/utility-types';
 import { keys, last as lastOf, mapValues, reduce, zipObject } from 'lodash';
+import type { Subscription } from 'rxjs';
 import {
+  catchError,
   combineLatest,
   defer,
+  finalize,
   from,
   identity,
   isObservable,
   last,
+  map,
+  Observable,
   of,
+  pluck,
+  ReplaySubject,
+  shareReplay,
+  switchMap,
   takeWhile,
+  tap,
   throwError,
   timer,
-  Observable,
-  ReplaySubject,
-  Subscription,
 } from 'rxjs';
-import { catchError, finalize, map, pluck, shareReplay, switchMap, tap } from 'rxjs';
-import { now, AbortError, calculateObjectHash } from '@kbn/kibana-utils-plugin/common';
-import { Adapters } from '@kbn/inspector-plugin/common';
-import { Executor } from '../executor';
-import { createExecutionContainer, ExecutionContainer } from './container';
+import { AbortReason } from '@kbn/kibana-utils-plugin/common';
+import { AbortError, calculateObjectHash, now } from '@kbn/kibana-utils-plugin/common';
+import type { Adapters } from '@kbn/inspector-plugin/common';
+import type { Executor } from '../executor';
+import type { ExecutionContainer } from './container';
+import { createExecutionContainer } from './container';
 import { createError } from '../util';
-import { isExpressionValueError, ExpressionValueError } from '../expression_types/specs/error';
-import {
+import type { ExpressionValueError } from '../expression_types/specs/error';
+import { isExpressionValueError } from '../expression_types/specs/error';
+import type {
   ExpressionAstArgument,
   ExpressionAstExpression,
   ExpressionAstFunction,
-  parse,
-  formatExpression,
-  parseExpression,
   ExpressionAstNode,
 } from '../ast';
-import { ExecutionContext, DefaultInspectorAdapters } from './types';
-import { getType, Datatable } from '../expression_types';
+import { formatExpression, parse, parseExpression } from '../ast';
+import type { DefaultInspectorAdapters, ExecutionContext } from './types';
+import type { Datatable } from '../expression_types';
+import { getType } from '../expression_types';
 import type { ExpressionFunction, ExpressionFunctionParameter } from '../expression_functions';
 import { getByAlias } from '../util/get_by_alias';
 import { ExecutionContract } from './execution_contract';
-import { ExpressionExecutionParams } from '../service';
+import type { ExpressionExecutionParams } from '../service';
 import { createDefaultInspectorAdapters } from '../util/create_default_inspector_adapters';
 
 type UnwrapReturnType<Function extends (...args: any[]) => unknown> =
@@ -170,8 +178,12 @@ function throttle<T>(timeout: number) {
 function takeUntilAborted<T>(signal: AbortSignal) {
   return (source: Observable<T>) =>
     new Observable<T>((subscriber) => {
-      const throwAbortError = () => {
-        subscriber.error(new AbortError());
+      const throwAbortError = (e?: Event) => {
+        const reason = (e?.target as AbortSignal)?.reason;
+        // For CANCELED, let the chain continue so partial results can flow through.
+        if (reason !== AbortReason.CANCELED) {
+          subscriber.error(new AbortError());
+        }
       };
 
       subscriber.add(source.subscribe(subscriber));
@@ -240,7 +252,7 @@ export class Execution<
   /**
    * Keeping track of any child executions
    * Needed to cancel child executions in case parent execution is canceled
-   * @private
+   * @internal
    */
   private readonly childExecutions: Execution[] = [];
   private cacheTimeout: number = 30000;
@@ -305,6 +317,15 @@ export class Execution<
       getExecutionContext: () => execution.params.executionContext,
     };
 
+    // Cancel children when this execution is aborted.
+    // Uses queueMicrotask so the parent's error path completes before child
+    // errors can re-enter the parent's chain.
+    this.abortController.signal.addEventListener('abort', () => {
+      queueMicrotask(() => {
+        this.childExecutions.forEach((child) => child.cancel(this.abortController.signal.reason));
+      });
+    });
+
     this.result = this.input$.pipe(
       switchMap((input) =>
         this.invokeChain<Output>(this.state.get().ast.chain, input).pipe(
@@ -317,8 +338,6 @@ export class Execution<
       ),
       catchError((error) => {
         if (this.abortController.signal.aborted) {
-          this.childExecutions.forEach((childExecution) => childExecution.cancel());
-
           return of({ result: createAbortErrorValue(), partial: false });
         }
 
@@ -338,8 +357,8 @@ export class Execution<
   /**
    * Stop execution of expression.
    */
-  cancel() {
-    this.abortController.abort();
+  cancel(reason?: AbortReason) {
+    this.abortController.abort(reason);
   }
 
   /**
@@ -525,6 +544,7 @@ export class Execution<
           if (completionFlag && hash) {
             const sideEffectResult = this.#getSideEffectFn(fn, args);
             while (this.functionCache.size >= maxCacheSize) {
+              // @ts-expect-error upgrade typescript v5.9.3
               this.functionCache.delete(this.functionCache.keys().next().value);
             }
             this.functionCache.set(hash, {
@@ -707,7 +727,6 @@ export class Execution<
           variables: this.context.variables,
         });
         this.childExecutions.push(execution);
-
         return execution.start(input, true);
       case 'string':
       case 'number':

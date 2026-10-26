@@ -8,10 +8,10 @@
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 
 import { i18n } from '@kbn/i18n';
+import type { EuiSelectOption } from '@elastic/eui';
 import {
   EuiFormRow,
   EuiComboBox,
-  EuiSelectOption,
   EuiHorizontalRule,
   EuiSelect,
   EuiFlexGroup,
@@ -26,13 +26,20 @@ import {
   useKibana,
   JsonEditorWithMessageVariables,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { JiraActionParams } from './types';
+import type { JiraActionParams } from './types';
 import { useGetIssueTypes } from './use_get_issue_types';
 import { useGetFieldsByIssueType } from './use_get_fields_by_issue_type';
 import { SearchIssues } from './search_issues';
 import { OptionalFieldLabel } from '../../common/optional_field_label';
 
-const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionParams>> = ({
+const summaryFieldLabel = i18n.translate(
+  'xpack.stackConnectors.components.jira.summaryFieldLabel',
+  {
+    defaultMessage: 'Summary',
+  }
+);
+
+const JiraConnectorParams: React.FunctionComponent<ActionParamsProps<JiraActionParams>> = ({
   actionConnector,
   actionParams,
   editAction,
@@ -286,9 +293,8 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
             Number(errors['subActionParams.incident.summary'].length) > 0 &&
             incident.summary !== undefined
           }
-          label={i18n.translate('xpack.stackConnectors.components.jira.summaryFieldLabel', {
-            defaultMessage: 'Summary',
-          })}
+          label={summaryFieldLabel}
+          aria-label={summaryFieldLabel}
         >
           <TextFieldWithMessageVariables
             index={index}
@@ -399,7 +405,7 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
                 <EuiIconTip
                   size="s"
                   color="subdued"
-                  type="questionInCircle"
+                  type="question"
                   className="eui-alignTop"
                   data-test-subj="otherFieldsHelpTooltip"
                   aria-label={i18n.translate(
@@ -430,4 +436,4 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
 };
 
 // eslint-disable-next-line import/no-default-export
-export { JiraParamsFields as default };
+export { JiraConnectorParams as default };

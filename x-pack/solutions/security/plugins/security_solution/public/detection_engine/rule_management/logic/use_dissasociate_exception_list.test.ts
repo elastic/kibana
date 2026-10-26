@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { act, waitFor, renderHook } from '@testing-library/react';
+import { renderHook } from '@testing-library/react';
 
 import { coreMock } from '@kbn/core/public/mocks';
 
@@ -27,18 +27,16 @@ describe('useDisassociateExceptionList', () => {
     jest.clearAllMocks();
   });
 
-  test('initializes hook', async () => {
-    await act(async () => {
-      const { result } = renderHook(() =>
-        useDisassociateExceptionList({
-          http: mockKibanaHttpService,
-          ruleRuleId: 'rule_id',
-          onError,
-          onSuccess,
-        })
-      );
+  test('initializes hook', () => {
+    const { result } = renderHook(() =>
+      useDisassociateExceptionList({
+        http: mockKibanaHttpService,
+        ruleRuleId: 'rule_id',
+        onError,
+        onSuccess,
+      })
+    );
 
-      await waitFor(() => expect(result.current).toEqual([false, null]));
-    });
+    expect(result.current).toEqual([false, null]);
   });
 });

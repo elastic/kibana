@@ -7,5 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-require('../src/setup_node_env');
-require('../src/dev/buildkite_migration/rewrite_buildkite_agent_rules');
+require('@kbn/setup-node-env');
+require('@kbn/dev/buildkite_migration/rewrite_buildkite_agent_rules');

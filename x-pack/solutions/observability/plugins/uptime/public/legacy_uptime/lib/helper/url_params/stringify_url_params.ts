@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { stringify } from 'query-string';
-import { UptimeUrlParams } from '..';
+import queryString from 'query-string';
+import type { UptimeUrlParams } from '..';
 import { CLIENT_DEFAULTS } from '../../../../../common/constants';
 
 const {
@@ -48,5 +48,5 @@ export const stringifyUrlParams = (params: Partial<UptimeUrlParams>, ignoreEmpty
       }
     });
   }
-  return `?${stringify(params, { sort: false })}`;
+  return `?${queryString.stringify(params, { sort: false })}`;
 };

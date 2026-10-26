@@ -23,6 +23,19 @@ export interface SecuritySolutionUiConfigType {
   enableExperimental: string[];
   prebuiltRulesPackageVersion?: string;
   offeringSettings: Record<string, boolean>;
+  entityAnalytics: {
+    monitoring: {
+      privileges: {
+        users: {
+          maxPrivilegedUsersAllowed: number;
+          csvUpload: {
+            errorRetries: number;
+            maxBulkRequestBodySizeBytes: number;
+          };
+        };
+      };
+    };
+  };
 }
 
 /**

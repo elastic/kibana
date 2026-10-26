@@ -14,19 +14,20 @@ import type { TimefilterContract } from '@kbn/data-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { MlEntityFieldOperation } from '@kbn/ml-anomaly-utils';
 import type { TimeBuckets } from '@kbn/ml-time-buckets';
+import type { SeverityThreshold } from '@kbn/ml-server-schemas/embeddables/anomaly_charts';
+import type { MlLocator } from '@kbn/ml-common-types/locator';
 import { ExplorerChartsContainer } from './explorer_charts_container';
-import type { TableSeverity } from '../../components/controls/select_severity/select_severity';
-import { SelectSeverityUI } from '../../components/controls/select_severity/select_severity';
+import { SelectSeverityUI } from '../../components/controls/select_severity';
 import type { ExplorerChartsData } from './explorer_charts_container_service';
-import type { MlLocator } from '../../../../common/types/locator';
 import type { AnomaliesTableData } from '../explorer_utils';
+import type { SeverityOption } from '../hooks/use_severity_options';
 
 interface ExplorerAnomaliesContainerProps {
   id: string;
   chartsData: ExplorerChartsData;
   showCharts: boolean;
-  severity: TableSeverity;
-  setSeverity: (severity: TableSeverity) => void;
+  severity: SeverityThreshold[];
+  setSeverity: (severity: SeverityOption[]) => void;
   mlLocator: MlLocator;
   tableData: AnomaliesTableData;
   timeBuckets: TimeBuckets;
@@ -40,6 +41,7 @@ interface ExplorerAnomaliesContainerProps {
   chartsService: ChartsPluginStart;
   timeRange: { from: string; to: string } | undefined;
   showFilterIcons: boolean;
+  isInteractive?: boolean;
 }
 
 const tooManyBucketsCalloutMsg = i18n.translate(
@@ -65,16 +67,17 @@ export const ExplorerAnomaliesContainer: FC<ExplorerAnomaliesContainerProps> = (
   chartsService,
   timeRange,
   showFilterIcons,
+  isInteractive = true,
 }) => {
   return (
-    // TODO: Remove data-shared-item and data-rendering-count as part of https://github.com/elastic/kibana/issues/179376
-    // These attributes are temporarily needed for reporting to not have any warning
-    <div data-shared-item="" data-rendering-count={1}>
-      <EuiFlexGroup id={id} direction="row" gutterSize="l" responsive={true}>
-        <EuiFlexItem grow={false}>
-          <SelectSeverityUI severity={severity} onChange={setSeverity} />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+    <div>
+      {isInteractive && (
+        <EuiFlexGroup id={id} direction="row" gutterSize="l" responsive={true}>
+          <EuiFlexItem grow={false}>
+            <SelectSeverityUI severity={severity} onChange={setSeverity} />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      )}
       <EuiSpacer size="m" />
       {Array.isArray(chartsData.seriesToPlot) &&
         chartsData.seriesToPlot.length === 0 &&
@@ -93,7 +96,8 @@ export const ExplorerAnomaliesContainer: FC<ExplorerAnomaliesContainerProps> = (
           {...{
             ...chartsData,
             isEmbeddable: true,
-            severity: severity.val,
+            isInteractive,
+            severity,
             mlLocator,
             tableData,
             timeBuckets,

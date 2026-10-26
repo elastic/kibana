@@ -8,7 +8,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { IRouter } from '@kbn/core/server';
+import type { IRouter } from '@kbn/core/server';
 import { getKbnServerError } from '@kbn/kibana-utils-plugin/server';
 
 export function registerResolveIndexRoute(router: IRouter): void {
@@ -35,25 +35,39 @@ export function registerResolveIndexRoute(router: IRouter): void {
               schema.literal('none'),
             ])
           ),
+          project_routing: schema.maybe(schema.string()),
         }),
       },
     },
     async (context, req, res) => {
       const esClient = (await context.core).elasticsearch.client;
       try {
-        const body = await esClient.asCurrentUser.indices.resolveIndex({
+        const params = {
           name: req.params.query,
           expand_wildcards: req.query.expand_wildcards || 'open',
-        });
+          ...(req.query.project_routing ? { project_routing: req.query.project_routing } : {}),
+        };
+
+        // @ts-ignore because the types for resolveIndex do not yet include body param
+        const body = await esClient.asCurrentUser.indices.resolveIndex(params);
         return res.ok({ body });
       } catch (e) {
-        // 403: no_such_remote_cluster_exception
+        const statusCode = e?.meta?.statusCode;
+        const error = e?.meta?.body?.error;
+        // Elasticsearch wraps `no_such_remote_cluster_exception` in a 403 `security_exception`
+        const isNoSuchRemoteCluster = error?.root_cause?.some(
+          ({ type }: { type: string }) => type === 'no_such_remote_cluster_exception'
+        );
+
         // 404: index_not_found_exception
-        if ([403, 404].includes(e?.meta.statusCode)) {
-          return res.notFound({ body: { message: e.meta?.body?.error?.reason } });
-        } else {
-          throw getKbnServerError(e);
+        if (statusCode === 404 || isNoSuchRemoteCluster) {
+          return res.notFound({ body: { message: error?.reason } });
         }
+        // 403: security_exception, the user lacks the privileges to view the matching indices
+        if (statusCode === 403) {
+          return res.forbidden({ body: { message: error?.reason } });
+        }
+        throw getKbnServerError(e);
       }
     }
   );

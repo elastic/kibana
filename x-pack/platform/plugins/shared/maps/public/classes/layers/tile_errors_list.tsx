@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { Adapters } from '@kbn/inspector-plugin/common/adapters';
+import type { Adapters } from '@kbn/inspector-plugin/common/adapters';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonEmpty, EuiContextMenu, EuiPopover } from '@elastic/eui';
 import { createEsError } from '@kbn/search-errors';
@@ -100,7 +100,7 @@ export function TileErrorsList(props: Props) {
         button={
           <EuiButtonEmpty
             flush="left"
-            iconType="arrowDown"
+            iconType="chevronSingleDown"
             iconSide="right"
             onClick={() => {
               setIsPopoverOpen(!isPopoverOpen);
@@ -114,8 +114,11 @@ export function TileErrorsList(props: Props) {
         closePopover={() => {
           setIsPopoverOpen(false);
         }}
+        aria-label={i18n.translate('xpack.maps.tileErrorsList.popoverAriaLabel', {
+          defaultMessage: 'Tile errors',
+        })}
       >
-        <EuiContextMenu initialPanelId={0} panels={panels} size="s" />
+        <EuiContextMenu initialPanelId={0} panels={panels} />
       </EuiPopover>
       {renderError(selectedTileError)}
     </>

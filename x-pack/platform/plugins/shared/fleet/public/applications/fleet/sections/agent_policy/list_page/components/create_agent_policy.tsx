@@ -22,6 +22,7 @@ import {
   EuiButton,
   EuiText,
   EuiSpacer,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 
 import { useSpaceSettingsContext } from '../../../../../../hooks/use_space_settings_context';
@@ -47,6 +48,7 @@ export const CreateAgentPolicyFlyout: React.FunctionComponent<Props> = ({
   ...restOfProps
 }) => {
   const { notifications } = useStartServices();
+  const flyoutTitleId = useGeneratedHtmlId();
   const hasFleetAllAgentPoliciesPrivileges = useAuthz().fleet.allAgentPolicies;
   const spaceSettings = useSpaceSettingsContext();
   const [agentPolicy, setAgentPolicy] = useState<NewAgentPolicy>(
@@ -74,9 +76,9 @@ export const CreateAgentPolicyFlyout: React.FunctionComponent<Props> = ({
   };
 
   const header = (
-    <EuiFlyoutHeader hasBorder aria-labelledby="CreateAgentPolicyFlyoutTitle">
+    <EuiFlyoutHeader hasBorder aria-labelledby={flyoutTitleId}>
       <EuiTitle size="m">
-        <h2 id="CreateAgentPolicyFlyoutTitle" data-test-subj="createAgentPolicyFlyoutTitle">
+        <h2 id={flyoutTitleId} data-test-subj="createAgentPolicyFlyoutTitle">
           <FormattedMessage
             id="xpack.fleet.createAgentPolicy.flyoutTitle"
             defaultMessage="Create agent policy"
@@ -199,8 +201,15 @@ export const CreateAgentPolicyFlyout: React.FunctionComponent<Props> = ({
     </EuiFlyoutFooter>
   );
 
+  // ref={null} is needed to fix styled-components' ref prop type
   return (
-    <FlyoutWithHigherZIndex onClose={() => onClose()} {...restOfProps} maxWidth={MAX_FLYOUT_WIDTH}>
+    <FlyoutWithHigherZIndex
+      onClose={() => onClose()}
+      {...restOfProps}
+      maxWidth={MAX_FLYOUT_WIDTH}
+      aria-labelledby={flyoutTitleId}
+      ref={null}
+    >
       {header}
       {body}
       {footer}

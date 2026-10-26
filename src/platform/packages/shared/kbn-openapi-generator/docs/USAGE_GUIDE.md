@@ -210,7 +210,7 @@ components:
 Running OpenAPI Generator on that file will produce the following `.gen.ts` file
 
 ```ts
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 
 export type EntityId = z.infer<typeof EntityId>;
 export const EntityId = z.string();
@@ -270,9 +270,9 @@ export const createEntityRoute = (router: Router): void => {
       path: '/api/my/data/{id}',
       security: {
         authz: {
-          requiredPrivileges: ['securitySolution']
-        }
-      }
+          requiredPrivileges: ['securitySolution'],
+        },
+      },
     })
     .addVersion(
       {

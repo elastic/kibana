@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 import { useToasts } from '../common/lib/kibana';
 import { getActionLicense } from './api';
 import * as i18n from './translations';

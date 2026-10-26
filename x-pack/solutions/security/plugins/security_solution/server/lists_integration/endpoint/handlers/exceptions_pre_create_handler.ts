@@ -9,6 +9,7 @@ import type {
   CreateExceptionListItemOptions,
   ExceptionsListPreCreateItemServerExtension,
 } from '@kbn/lists-plugin/server';
+import { GLOBAL_ARTIFACT_TAG } from '../../../../common/endpoint/service/artifacts';
 import { EndpointArtifactExceptionValidationError } from '../validators/errors';
 import type { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
 import {
@@ -17,8 +18,13 @@ import {
   EventFilterValidator,
   HostIsolationExceptionsValidator,
   TrustedAppValidator,
+  TrustedDeviceValidator,
+  CustomYaraSignaturesValidator,
 } from '../validators';
-import { setArtifactOwnerSpaceId } from '../../../../common/endpoint/service/artifacts/utils';
+import {
+  hasGlobalOrPerPolicyTag,
+  setArtifactOwnerSpaceId,
+} from '../../../../common/endpoint/service/artifacts/utils';
 
 export const getExceptionsPreCreateItemHandler = (
   endpointAppContext: EndpointAppContextService
@@ -37,6 +43,14 @@ export const getExceptionsPreCreateItemHandler = (
       const trustedAppValidator = new TrustedAppValidator(endpointAppContext, request);
       validatedItem = await trustedAppValidator.validatePreCreateItem(data);
       trustedAppValidator.notifyFeatureUsage(data, 'TRUSTED_APP_BY_POLICY');
+    }
+
+    // Validate trusted devices
+    if (TrustedDeviceValidator.isTrustedDevice(data)) {
+      isEndpointArtifact = true;
+      const trustedDeviceValidator = new TrustedDeviceValidator(endpointAppContext, request);
+      validatedItem = await trustedDeviceValidator.validatePreCreateItem(data);
+      trustedDeviceValidator.notifyFeatureUsage(data, 'TRUSTED_DEVICE_BY_POLICY');
     }
 
     // Validate event filter
@@ -70,6 +84,18 @@ export const getExceptionsPreCreateItemHandler = (
       blocklistValidator.notifyFeatureUsage(data, 'BLOCKLIST_BY_POLICY');
     }
 
+    // Validate YARA signatures
+    if (CustomYaraSignaturesValidator.isCustomYaraSignature(data)) {
+      isEndpointArtifact = true;
+      const customYaraSignaturesValidator = new CustomYaraSignaturesValidator(
+        endpointAppContext,
+        request
+      );
+      validatedItem = await customYaraSignaturesValidator.validatePreCreateItem(data);
+      customYaraSignaturesValidator.notifyFeatureUsage(data, 'CUSTOM_YARA_SIGNATURE');
+      customYaraSignaturesValidator.notifyFeatureUsage(data, 'CUSTOM_YARA_SIGNATURE_BY_POLICY');
+    }
+
     // validate endpoint exceptions
     if (EndpointExceptionsValidator.isEndpointException(data)) {
       isEndpointArtifact = true;
@@ -78,23 +104,32 @@ export const getExceptionsPreCreateItemHandler = (
         request
       );
       validatedItem = await endpointExceptionValidator.validatePreCreateItem(data);
+
+      if (!(await endpointAppContext.isEndpointExceptionsPerPolicyEnabled())) {
+        // If artifact does not have an assignment tag, then add it now. This is in preparation for
+        // adding per-policy support to Endpoint Exceptions as well as to support space awareness.
+        //
+        // Only added when the user has not opted in to per-policy Endpoint Exceptions.
+        if (!hasGlobalOrPerPolicyTag(validatedItem)) {
+          validatedItem.tags = validatedItem.tags ?? [];
+          validatedItem.tags.push(GLOBAL_ARTIFACT_TAG);
+        }
+      }
+
       endpointExceptionValidator.notifyFeatureUsage(data, 'ENDPOINT_EXCEPTIONS');
     }
 
-    if (
-      isEndpointArtifact &&
-      endpointAppContext.experimentalFeatures.endpointManagementSpaceAwarenessEnabled
-    ) {
+    if (isEndpointArtifact) {
       if (!request) {
         throw new EndpointArtifactExceptionValidationError(`Missing HTTP Request object`);
       }
 
-      const spaceId = (await endpointAppContext.getActiveSpace(request)).id;
+      const spaceId = endpointAppContext.getActiveSpaceId(request);
       setArtifactOwnerSpaceId(validatedItem, spaceId);
 
       return validatedItem;
     }
 
-    return data;
+    return isEndpointArtifact ? validatedItem : data;
   };
 };

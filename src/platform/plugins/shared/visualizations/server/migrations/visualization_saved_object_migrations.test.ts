@@ -8,7 +8,7 @@
  */
 
 import { getAllMigrations } from './visualization_saved_object_migrations';
-import {
+import type {
   SavedObjectMigrationContext,
   SavedObjectMigrationFn,
   SavedObjectUnsanitizedDoc,
@@ -778,7 +778,7 @@ describe('migration visualization', () => {
           },
         },
       };
-      expect(() => migrate(doc)).toThrowError(/My Vis/);
+      expect(() => migrate(doc)).toThrow(/My Vis/);
     });
   });
 

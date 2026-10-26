@@ -6,6 +6,7 @@
  */
 
 import { EuiInMemoryTable } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
 
@@ -38,6 +39,12 @@ const ErrorsViewerComponent: React.FC<Props> = ({ errorSummary }) => {
         items={errorSummary}
         sorting={false}
         pagination={true}
+        tableCaption={i18n.translate(
+          'securitySolutionPackages.errorsViewerComponent.tableCaption',
+          {
+            defaultMessage: 'Errors viewer',
+          }
+        )}
       />
     </div>
   );

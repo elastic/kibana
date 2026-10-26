@@ -6,8 +6,8 @@
  */
 
 import React, { useState, useEffect, useRef } from 'react';
-import PropTypes from 'prop-types';
-import { Paginate as Component, PaginateProps, PaginateChildProps } from './paginate';
+import type { PaginateProps, PaginateChildProps } from './paginate';
+import { Paginate as Component } from './paginate';
 
 export type { PaginateProps, PaginateChildProps };
 export interface InPaginateProps {
@@ -75,10 +75,4 @@ export const Paginate: React.FunctionComponent<InPaginateProps> = ({
       children={children}
     />
   );
-};
-
-Paginate.propTypes = {
-  rows: PropTypes.array.isRequired,
-  perPage: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-  startPage: PropTypes.number,
 };

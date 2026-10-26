@@ -21,7 +21,8 @@ export async function stepInstallILMPolicies(context: InstallContext) {
 
   // Array that gets updated by each operation. This allows each operation to accurately update the
   // installation object with its references without requiring a refresh of the SO index on each update (faster).
-  let esReferences = installedPkg?.attributes.installed_es ?? [];
+  let esReferences =
+    context.esReferences ?? context.esReferences ?? installedPkg?.attributes.installed_es ?? [];
 
   // currently only the base package has an ILM policy
   // at some point ILM policies can be installed/modified
@@ -67,6 +68,9 @@ export async function cleanupILMPoliciesStep(context: InstallContext) {
           indexAssets,
           transformAssets,
           indexTemplatesAndPipelines,
+          // Rollback of a partial install deletes the same assets the uninstall path does, so
+          // it makes the same trust decision about the transform destination indices.
+          installSource: context.installSource,
         },
         esClient
       );

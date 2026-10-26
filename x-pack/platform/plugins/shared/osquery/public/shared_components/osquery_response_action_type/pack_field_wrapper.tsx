@@ -13,6 +13,7 @@ import type { ECSMapping } from '@kbn/osquery-io-ts-types';
 import { PackQueriesStatusTable } from '../../live_queries/form/pack_queries_status_table';
 import { usePacks } from '../../packs/use_packs';
 import { PacksComboBoxField } from '../../live_queries/form/packs_combobox_field';
+import type { AddToTimelineHandler } from '../../types';
 
 interface PackFieldWrapperProps {
   liveQueryDetails?: {
@@ -23,15 +24,19 @@ interface PackFieldWrapperProps {
     }>;
     action_id?: string;
     agents?: string[];
+    '@timestamp'?: string;
+    expiration?: string;
   };
   submitButtonContent?: React.ReactNode;
   showResultsHeader?: boolean;
+  addToTimeline?: AddToTimelineHandler;
 }
 
 export const PackFieldWrapper = ({
   liveQueryDetails,
   submitButtonContent,
   showResultsHeader,
+  addToTimeline,
 }: PackFieldWrapperProps) => {
   const { data: packsData } = usePacks({});
   const { packId } = useWatch<{ packId: string[] }>();
@@ -43,6 +48,10 @@ export const PackFieldWrapper = ({
 
   const actionId = useMemo(() => liveQueryDetails?.action_id, [liveQueryDetails?.action_id]);
   const agentIds = useMemo(() => liveQueryDetails?.agents, [liveQueryDetails?.agents]);
+
+  // Supplied details win: the response action form passes the form value that gets
+  // persisted, so a pack list fallback would advertise queries the rule won't save.
+  const packQueries = liveQueryDetails ? liveQueryDetails.queries : selectedPackData?.queries;
 
   return (
     <>
@@ -56,14 +65,17 @@ export const PackFieldWrapper = ({
       {submitButtonContent}
       <EuiSpacer />
 
-      {liveQueryDetails?.queries?.length || selectedPackData?.queries?.length ? (
+      {packQueries?.length ? (
         <EuiFlexItem>
           <PackQueriesStatusTable
             actionId={actionId}
             agentIds={agentIds}
+            startDate={liveQueryDetails?.['@timestamp']}
+            expirationDate={liveQueryDetails?.expiration}
             // @ts-expect-error update types
-            data={liveQueryDetails?.queries ?? selectedPackData?.queries}
+            data={packQueries}
             showResultsHeader={showResultsHeader}
+            addToTimeline={addToTimeline}
           />
         </EuiFlexItem>
       ) : null}

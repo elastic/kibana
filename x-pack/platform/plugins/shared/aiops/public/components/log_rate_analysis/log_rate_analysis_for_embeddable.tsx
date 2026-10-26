@@ -7,12 +7,11 @@
 
 import React, { useMemo, type FC } from 'react';
 
-import datemath from '@elastic/datemath';
-
 import type { TimeRange } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
 import { getEsQueryConfig } from '@kbn/data-service';
 
+import { calculateBounds } from '@kbn/data-plugin/common';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { useFilterQueryUpdates } from '../../hooks/use_filters_query';
 import { useSearch } from '../../hooks/use_search';
@@ -24,10 +23,12 @@ import { LogRateAnalysisContent } from './log_rate_analysis_content/log_rate_ana
 
 export interface LogRateAnalysisForEmbeddableProps {
   timeRange: TimeRange;
+  parentApi: unknown;
 }
 
 export const LogRateAnalysisForEmbeddable: FC<LogRateAnalysisForEmbeddableProps> = ({
   timeRange,
+  parentApi,
 }) => {
   const { uiSettings } = useAiopsAppContext();
   const { dataView } = useDataSource();
@@ -45,10 +46,9 @@ export const LogRateAnalysisForEmbeddable: FC<LogRateAnalysisForEmbeddableProps>
 
   const timeRangeParsed = useMemo(() => {
     if (timeRange) {
-      const min = datemath.parse(timeRange.from);
-      const max = datemath.parse(timeRange.to);
-      if (min && max) {
-        return { min, max };
+      const bounds = calculateBounds(timeRange);
+      if (bounds.min && bounds.max) {
+        return { min: bounds.min, max: bounds.max };
       }
     }
   }, [timeRange]);
@@ -59,7 +59,7 @@ export const LogRateAnalysisForEmbeddable: FC<LogRateAnalysisForEmbeddableProps>
         timeRange={timeRangeParsed}
         esSearchQuery={searchQuery}
       />
-      <LogRateAnalysisContent esSearchQuery={searchQuery} />
+      <LogRateAnalysisContent esSearchQuery={searchQuery} parentApi={parentApi} />
     </>
   );
 };

@@ -7,7 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
+import type {
+  CoreSecurityDelegateHandle,
+  CoreServiceAccountsService,
+  ResolvedServiceAccountWorkload,
+  ServiceAccountBoundWorkloadRef,
   SecurityServiceSetup,
   SecurityServiceStart,
   SecurityRequestHandlerContext,
@@ -16,15 +20,47 @@ import type {
   InternalSecurityServiceSetup,
   InternalSecurityServiceStart,
 } from '@kbn/core-security-server-internal';
+import { createCoreUiamService } from '@kbn/core-security-server-internal';
 import { apiKeysMock } from './api_keys.mock';
 import { auditServiceMock, type MockedAuditService } from './audit.mock';
-import { mockAuthenticatedUser, MockAuthenticatedUserProps } from '@kbn/core-security-common/mocks';
+import type { MockAuthenticatedUserProps } from '@kbn/core-security-common/mocks';
+import { mockAuthenticatedUser } from '@kbn/core-security-common/mocks';
+import { lazyObject } from '@kbn/lazy-object';
+
+const createServiceAccountsStartMock = (): jest.MockedObjectDeep<CoreServiceAccountsService> =>
+  lazyObject({
+    isEnabled: jest.fn().mockReturnValue(false),
+    create: jest.fn(),
+    delete: jest.fn(),
+    bindWorkload: jest.fn(),
+    unbindWorkload: jest.fn(),
+    getWorkloadBinding: jest.fn().mockResolvedValue(null),
+    withScopedRequestForWorkload: jest.fn(),
+  });
+
+const createDelegateHandleMock = (): jest.MockedObjectDeep<CoreSecurityDelegateHandle> =>
+  lazyObject({
+    serviceAccounts: lazyObject({
+      getWorkloadTypeName: jest.fn().mockReturnValue(undefined),
+      resolveBoundWorkloads: jest
+        .fn()
+        .mockImplementation(
+          async (
+            bindings: ReadonlyArray<ServiceAccountBoundWorkloadRef>
+          ): Promise<ResolvedServiceAccountWorkload[]> => bindings.map(() => ({}))
+        ),
+    }),
+  });
 
 const createSetupMock = () => {
-  const mock: jest.Mocked<SecurityServiceSetup> = {
-    registerSecurityDelegate: jest.fn(),
+  const mock: jest.Mocked<SecurityServiceSetup> = lazyObject({
+    registerSecurityDelegate: jest.fn().mockImplementation(createDelegateHandleMock),
+    acquireFakeRequestEnricher: jest.fn().mockReturnValue(jest.fn()),
     fips: { isEnabled: jest.fn() },
-  };
+    serviceAccounts: lazyObject({
+      registerWorkloadType: jest.fn(),
+    }),
+  });
 
   return mock;
 };
@@ -34,22 +70,35 @@ export type SecurityStartMock = jest.MockedObjectDeep<Omit<SecurityServiceStart,
 };
 
 const createStartMock = (): SecurityStartMock => {
-  const mock = {
-    authc: {
+  const mock = lazyObject({
+    authc: lazyObject({
       getCurrentUser: jest.fn(),
+      getPrincipal: jest.fn(),
+      getRedactedSessionId: jest.fn().mockResolvedValue(undefined),
       apiKeys: apiKeysMock.create(),
-    },
+    }),
     audit: auditServiceMock.create(),
-  };
+    serviceAccounts: createServiceAccountsStartMock(),
+  });
 
   return mock;
 };
 
 const createInternalSetupMock = () => {
-  const mock: jest.Mocked<InternalSecurityServiceSetup> = {
-    registerSecurityDelegate: jest.fn(),
+  // Back the mock with the real CoreUiamService so tests exercise the actual attach/attestation
+  // logic, wrap the method in a jest.fn so callers can still spy on / override it.
+  const uiam = createCoreUiamService('some-shared-secret');
+  const mock: jest.Mocked<InternalSecurityServiceSetup> = lazyObject({
+    registerSecurityDelegate: jest.fn().mockImplementation(createDelegateHandleMock),
+    acquireFakeRequestEnricher: jest.fn().mockReturnValue(jest.fn()),
     fips: { isEnabled: jest.fn() },
-  };
+    serviceAccounts: lazyObject({
+      registerWorkloadType: jest.fn(),
+    }),
+    uiam: {
+      getElasticsearchClientAuthentication: jest.fn(uiam.getElasticsearchClientAuthentication),
+    },
+  });
 
   return mock;
 };
@@ -61,53 +110,66 @@ export type InternalSecurityStartMock = jest.MockedObjectDeep<
 };
 
 const createInternalStartMock = (): InternalSecurityStartMock => {
-  const mock = {
-    authc: {
+  const mock = lazyObject({
+    authc: lazyObject({
       getCurrentUser: jest.fn(),
+      getPrincipal: jest.fn(),
+      getRedactedSessionId: jest.fn().mockResolvedValue(undefined),
       apiKeys: apiKeysMock.create(),
-    },
+    }),
     audit: auditServiceMock.create(),
-  };
+    serviceAccounts: lazyObject({
+      asScopedToPlugin: jest.fn().mockImplementation(createServiceAccountsStartMock),
+    }),
+  });
 
   return mock;
 };
 
 const createServiceMock = () => {
-  const mock = {
+  const mock = lazyObject({
     setup: jest.fn().mockReturnValue(createSetupMock()),
     start: jest.fn().mockReturnValue(createStartMock()),
     stop: jest.fn(),
-  };
+  });
 
   return mock;
 };
 
 const createRequestHandlerContextMock = () => {
-  const mock: jest.MockedObjectDeep<SecurityRequestHandlerContext> = {
-    authc: {
+  const mock: jest.MockedObjectDeep<SecurityRequestHandlerContext> = lazyObject({
+    authc: lazyObject({
       getCurrentUser: jest.fn(),
-      apiKeys: {
+      getPrincipal: jest.fn(),
+      apiKeys: lazyObject({
         areAPIKeysEnabled: jest.fn(),
         create: jest.fn(),
         update: jest.fn(),
         validate: jest.fn(),
         invalidate: jest.fn(),
-      },
-    },
-    audit: {
-      logger: {
+        uiam: {
+          grant: jest.fn(),
+          invalidate: jest.fn(),
+          convert: jest.fn(),
+        },
+      }),
+    }),
+    audit: lazyObject({
+      logger: lazyObject({
         log: jest.fn(),
         enabled: true,
         includeSavedObjectNames: false,
-      },
-    },
-  };
+      }),
+    }),
+  });
   return mock;
 };
 
 export const securityServiceMock = {
   create: createServiceMock,
   createSetup: createSetupMock,
+  createServiceAccounts: createServiceAccountsStartMock,
+  createDelegateHandle: createDelegateHandleMock,
   createStart: createStartMock,
   createInternalSetup: createInternalSetupMock,
   createInternalStart: createInternalStartMock,

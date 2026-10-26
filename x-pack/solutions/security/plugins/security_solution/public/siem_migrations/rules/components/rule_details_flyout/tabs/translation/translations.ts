@@ -7,13 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const TAB_HEADER_TITLE = i18n.translate(
-  'xpack.securitySolution.siemMigrations.rules.translationDetails.translationTab.title',
-  {
-    defaultMessage: 'Translation',
-  }
-);
-
 export const NAME_LABEL = i18n.translate(
   'xpack.securitySolution.siemMigrations.rules.translationDetails.translationTab.nameLabel',
   {

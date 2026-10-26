@@ -55,15 +55,22 @@ export const LimitOptions = ({ limit, onChange }: Props) => {
       <EuiFlexItem>
         <EuiToolTip
           className="eui-fullWidth"
-          delay="regular"
           content={i18n.translate('xpack.infra.hostsViewPage.hostLimit.tooltip', {
             defaultMessage:
               'To ensure faster query performance, there is a limit to the number of hosts returned',
           })}
           anchorClassName="eui-fullWidth"
         >
-          <button data-test-subj="hostsViewLimitOptionsButton">
-            <EuiIcon type="iInCircle" />
+          <button
+            aria-label={i18n.translate(
+              'xpack.infra.hostsViewPage.hostLimit.infoIconButtonAriaLabel',
+              {
+                defaultMessage: 'Host limit info button',
+              }
+            )}
+            data-test-subj="hostsViewLimitOptionsButton"
+          >
+            <EuiIcon type="info" aria-hidden={true} />
           </button>
         </EuiToolTip>
       </EuiFlexItem>

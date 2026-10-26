@@ -8,8 +8,8 @@
  */
 
 import compare from 'semver/functions/compare';
-import { SerializableRecord } from '@kbn/utility-types';
-import { VersionedState, MigrateFunctionsObject } from './types';
+import type { SerializableRecord } from '@kbn/utility-types';
+import type { VersionedState, MigrateFunctionsObject } from './types';
 
 export function migrateToLatest<S extends SerializableRecord>(
   migrations: MigrateFunctionsObject,

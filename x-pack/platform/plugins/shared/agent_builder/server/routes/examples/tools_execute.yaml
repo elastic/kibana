@@ -1,0 +1,154 @@
+requestBody:
+  content:
+    application/json:
+      examples:
+        executeBuiltinToolRequest:
+          description: "Example request executing platform.core.get_document_by_id tool"
+          value:
+            tool_id: platform.core.get_document_by_id
+            tool_params:
+              id: TRD-20250805-0820a89f
+              index: financial_trades
+        executeBuiltinEsqlToolRequest:
+          description: "Example request executing platform.core.execute_esql tool"
+          value:
+            tool_id: platform.core.execute_esql
+            tool_params:
+              query: "FROM financial_trades | LIMIT 3"
+        executeCustomEsqlToolRequest:
+          description: "Example request executing custom example-esql-tool tool"
+          value:
+            tool_id: example-esql-tool
+            tool_params:
+              startTime: "2024-01-01T00:00:00Z"
+              limit: 3
+        executeIndexSearchToolRequest:
+          description: "Example request executing custom example-index-search-tool tool"
+          value:
+            tool_id: example-index-search-tool
+            tool_params:
+              nlQuery: "find trades with high execution prices above 100"
+responses:
+  200:
+    description: "Indicates a successful response"
+    content:
+      application/json:
+        examples:
+          executeBuiltinToolExample:
+            description: "Example response calling built-in platform.core.get_document_by_id tool"
+            value:
+              results:
+                - type: resource
+                  data:
+                    reference:
+                      id: TRD-20250805-0820a89f
+                      index: financial_trades
+                    partial: false
+                    content:
+                      trade_id: TRD-20250805-0820a89f
+                      account_id: ACC00271-fb5c
+                      symbol: EWL
+                      trade_type: sell
+                      order_type: market
+                      order_status: executed
+                      quantity: 131
+                      execution_price: 488.54
+                      trade_cost: 63998.74
+                      execution_timestamp: "2025-08-05T08:04:11.649855"
+                      status_reason: fully_filled
+                      last_updated: "2025-09-15T13:23:36"
+          executeBuiltinEsqlToolExample:
+            description: "Example response calling built-in platform.core.execute_esql tool"
+            value:
+              results:
+                - type: query
+                  data:
+                    esql: "FROM financial_trades | LIMIT 3"
+                - tool_result_id: xTpT
+                  type: esql_results
+                  data:
+                    source: esql
+                    query: "FROM financial_trades | LIMIT 3"
+                    columns:
+                      - name: account_id
+                        type: keyword
+                      - name: execution_price
+                        type: double
+                      - name: symbol
+                        type: keyword
+                      - name: trade_type
+                        type: keyword
+                    values:
+                      - ["ACC00179-1f91", 43.77000045776367, "CVX", "sell"]
+                      - ["ACC00407-0bbb", 660.4199829101562, "V", "buy"]
+                      - ["ACC00179-1f91", 440.3599853515625, "KO", "buy"]
+          executeCustomEsqlToolExample:
+            description: "Example response calling custom example-esql-tool tool"
+            value:
+              results:
+                - tool_result_id: Voy8
+                  type: esql_results
+                  data:
+                    source: esql
+                    query: "FROM financial_trades | WHERE execution_timestamp >= ?startTime | STATS trade_count=COUNT(*), avg_price=AVG(execution_price) BY symbol | SORT trade_count DESC | LIMIT ?limit"
+                    columns:
+                      - name: trade_count
+                        type: long
+                      - name: avg_price
+                        type: double
+                      - name: symbol
+                        type: keyword
+                    values:
+                      - [2115, 89.33911587329621, "US_T_BOND_20YR"]
+                      - [2112, 104.20854155945055, "INTL_CORP_ASIA_D"]
+                      - [2105, 89.93244177666526, "INTL_CORP_EU_B"]
+          executeIndexSearchToolExample:
+            description: "Example response calling custom example-index-search-tool tool"
+            value:
+              results:
+                - type: query
+                  data:
+                    esql: "FROM financial_trades\n| WHERE execution_price > 100\n| LIMIT 100"
+                - tool_result_id: uE8y
+                  type: esql_results
+                  data:
+                    source: esql
+                    query: "FROM financial_trades\n| WHERE execution_price > 100\n| LIMIT 100"
+                    columns:
+                      - name: account_id
+                        type: keyword
+                      - name: execution_price
+                        type: double
+                      - name: execution_timestamp
+                        type: date
+                      - name: symbol
+                        type: keyword
+                      - name: trade_type
+                        type: keyword
+                    values:
+                      - ["ACC00407-0bbb", 660.4199829101562, "2020-09-25T11:06:08.687Z", "V", "buy"]
+                      - ["ACC00179-1f91", 440.3599853515625, "2025-08-07T21:56:45.377Z", "KO", "buy"]
+                      - ["ACC00407-0bbb", 132.8800048828125, "2020-11-19T04:39:13.655Z", "JAP_JGB_10YR", "sell"]
+x-codeSamples:
+- lang: curl
+  source: |
+    curl \
+     -X POST "https://${KIBANA_URL}/api/agent_builder/tools/_execute" \
+     -H "Authorization: ApiKey ${API_KEY}" \
+     -H "kbn-xsrf: true" \
+     -H "Content-Type: application/json" \
+     -d '{
+       "tool_id": "platform.core.search",
+       "tool_params": {
+         "query": "can you find john doe's email from the employee index?"}
+       }
+     }'
+- lang: Console
+  source: |
+    POST kbn:/api/agent_builder/tools/_execute
+    {
+      "tool_id": "platform.core.search",
+      "tool_params": {
+        "query": "can you find john doe's email from the employee index?"
+      }
+    }

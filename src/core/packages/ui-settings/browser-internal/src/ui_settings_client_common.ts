@@ -8,17 +8,18 @@
  */
 
 import { cloneDeep, defaultsDeep } from 'lodash';
-import { Observable, Subject, concat, defer, of } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { Subject, concat, defer, of } from 'rxjs';
 import { filter, map } from 'rxjs';
 
-import { UserProvidedValues } from '@kbn/core-ui-settings-common';
-import {
+import type { UserProvidedValues } from '@kbn/core-ui-settings-common';
+import type {
   IUiSettingsClient,
   UiSettingsState,
   PublicUiSettingsParams,
 } from '@kbn/core-ui-settings-browser';
 
-import { UiSettingsApi } from './ui_settings_api';
+import type { UiSettingsApi } from './ui_settings_api';
 
 export interface UiSettingsClientParams {
   api: UiSettingsApi;
@@ -77,7 +78,19 @@ You can use \`IUiSettingsClient.get("${key}", defaultValue)\`, which will just r
     const defaultValue = defaultOverride !== undefined ? defaultOverride : this.cache[key].value;
     const value = userValue == null ? defaultValue : userValue;
     if (type === 'json') {
-      return JSON.parse(value);
+      // Defensively handle corrupted settings that can't be parsed.
+      // If parsing fails, fall back to the default value to allow safe retrieval and restoration.
+      try {
+        // Empty strings are invalid JSON and will throw, so check first
+        if (typeof value === 'string' && value.trim() === '') {
+          return defaultValue;
+        }
+        return JSON.parse(value);
+      } catch (e) {
+        // If parsing fails (corrupted setting), return the default value
+        // This allows users to safely retrieve and fix corrupted settings
+        return defaultValue;
+      }
     }
 
     if (type === 'number') {
@@ -113,7 +126,11 @@ You can use \`IUiSettingsClient.get("${key}", defaultValue)\`, which will just r
   }
 
   isDefault(key: string) {
-    return !this.isDeclared(key) || this.cache[key].userValue == null;
+    return (
+      !this.isDeclared(key) ||
+      !this.cache[key].userValue ||
+      this.cache[key].userValue === this.cache[key].value
+    );
   }
 
   isCustom(key: string) {

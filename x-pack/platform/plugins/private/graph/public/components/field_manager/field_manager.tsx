@@ -11,6 +11,7 @@ import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import { FieldPicker } from './field_picker';
 import { FieldEditor } from './field_editor';
+import type { GraphState, GraphStore } from '../../state_management';
 import {
   selectedFieldsSelector,
   fieldsSelector,
@@ -18,10 +19,8 @@ import {
   updateFieldProperties,
   selectField,
   deselectField,
-  GraphState,
-  GraphStore,
 } from '../../state_management';
-import { WorkspaceField } from '../../types';
+import type { WorkspaceField } from '../../types';
 
 export type UpdateableFieldProperties = 'hopSize' | 'lastValidHopSize' | 'color' | 'icon';
 

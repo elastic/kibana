@@ -5,4 +5,58 @@
  * 2.0.
  */
 
-export type { Asset, AssetType } from './assets';
+export type {
+  ProcessorSuggestion,
+  ProcessorPropertySuggestion,
+  ProcessorSuggestionsResponse,
+} from './ingest_processor_suggestions';
+
+export {
+  STREAMS_TIERED_FEATURES,
+  STREAMS_TIERED_ML_FEATURE,
+  STREAMS_TIERED_AI_FEATURE,
+  ATTACHMENT_SUGGESTIONS_LIMIT,
+  FAILURE_STORE_SELECTOR,
+  STREAMS_DEFAULT_UNIT_ID,
+} from './constants';
+
+export type { StreamDocsStat } from './doc_counts';
+export {
+  excludeFrozenQuery,
+  kqlQuery,
+  rangeQuery,
+  isKqlQueryValid,
+  buildEsqlFilter,
+} from './query_helpers';
+
+export {
+  PRIORITIZED_CONTENT_FIELDS,
+  getDefaultTextField,
+  extractMessagesFromField,
+} from './pattern_extraction_helpers';
+
+export {
+  type StreamsAppLocation,
+  type StreamsAppLocationParams,
+  getStreamsLocation,
+} from './get_streams_location/get_streams_location';
+
+export {
+  MAX_RESOLVE_INDEX_PATTERN_LENGTH,
+  MAX_RESOLVE_INDEX_PATTERNS,
+  collectResolvedIndexNames,
+  collectResolvedDataStreamNames,
+} from './resolve_index_patterns';
+export type { ResolvedIndexPatternMatches } from './resolve_index_patterns';
+
+export { matchesIndexPattern } from './matches_index_pattern';
+export { getUnitDestinationWritePatterns } from './unit_destination_write_patterns';
+export type { UnitDestination } from './unit_destination_write_patterns';
+export type {
+  IndexMetadataResponse,
+  ResolvedDestinationIndex,
+  ResolveUnitIndicesResponse,
+} from './resolve_unit_indices';
+
+export type { StreamSummary } from './stream_summary';
+export type { PaginatedResponse } from './pagination';

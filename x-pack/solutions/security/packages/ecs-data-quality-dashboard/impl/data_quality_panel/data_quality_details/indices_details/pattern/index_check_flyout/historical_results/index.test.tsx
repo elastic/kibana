@@ -152,6 +152,7 @@ describe('HistoricalResults', () => {
 
     describe('when new date is selected', () => {
       it('should invoke fetchHistoricalResults with new start and end dates, from: 0 and remaining fetch query opts', async () => {
+        const user = userEvent.setup({ pointerEventsCheck: 0 });
         const indexName = 'test';
         const historicalResult = getHistoricalResultStub(indexName);
         const fetchHistoricalResults = jest.fn();
@@ -175,18 +176,14 @@ describe('HistoricalResults', () => {
 
         const superDatePicker = screen.getByTestId('historicalResultsDatePicker');
 
-        await act(async () => {
-          const dateQuickSelect = within(superDatePicker).getByTestId(
-            'superDatePickerToggleQuickMenuButton'
-          );
-          await userEvent.click(dateQuickSelect);
-        });
+        const dateQuickSelect = within(superDatePicker).getByTestId(
+          'superDatePickerToggleQuickMenuButton'
+        );
+        await user.click(dateQuickSelect);
 
-        await act(async () => {
-          const monthToDateButton = screen.getByTestId('superDatePickerCommonlyUsed_Month_to date');
+        const monthToDateButton = screen.getByTestId('superDatePickerCommonlyUsed_Month_to date');
 
-          await userEvent.click(monthToDateButton);
-        });
+        await user.click(monthToDateButton);
 
         const fetchQueryOpts = {
           abortController: expect.any(AbortController),
@@ -391,11 +388,9 @@ describe('HistoricalResults', () => {
 
         const wrapper = screen.getByTestId('historicalResultsPagination');
 
-        await act(() =>
-          userEvent.click(within(wrapper).getByTestId('tablePaginationPopoverButton'))
-        );
+        await userEvent.click(within(wrapper).getByTestId('tablePaginationPopoverButton'));
 
-        await act(() => userEvent.click(screen.getByTestId('tablePagination-25-rows')));
+        await userEvent.click(screen.getByTestId('tablePagination-25-rows'));
 
         const fetchQueryOpts = {
           abortController: expect.any(AbortController),

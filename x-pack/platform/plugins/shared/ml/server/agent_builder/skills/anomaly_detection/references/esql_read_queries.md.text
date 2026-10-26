@@ -1,0 +1,282 @@
+# ES|QL Read Query Templates — Records, Timeline, Influencers, RCA
+
+Use `ml.query_anomalies` and pass the ES|QL below in the `query` parameter for `.ml-*` system indices. Keep `?param` placeholders in the query and bind values in `params` (keys without `?`, e.g. `{ "job_id_pattern": "*", "min_score": 25 }`). Never call with an empty argument object — `query` is always required. Omit the `params` field entirely when the query has no placeholders.
+
+Section titles (e.g. `ad_query_anomaly_records`) are labels for the query examples only — they are not tool arguments.
+
+For **source-data** examples (`ad_rca_source_evidence`, `ad_search_log_category_examples`) use `platform.core.execute_esql` instead.
+
+**Anomaly results source:** `FROM .ml-anomalies` (materialized view of `record` / `bucket` / `influencer`). Always copy these templates as written. `ml.query_anomalies` probes whether the view exists on the connected Elasticsearch cluster and, on older versions that do not have it, rewrites to `FROM .ml-anomalies-*` and restricts `result_type` to `bucket`, `influencer`, and `record`. `` `event.ingested` `` is kept as-is: it is the indexing time on the raw result indices, not the same column as `timestamp`. Do not write the wildcard yourself for these result types.
+
+**Time fields:** Use `timestamp` for time-range filters — it is the anomaly bucket time and is correct for both real-time and historical batch jobs. Using `` `event.ingested` `` (the indexing timestamp) returns no results for batch jobs that processed historical data. Never use `@timestamp`. Filter `is_interim == false` when you want finalized results only.
+
+`event.ingested` is appropriate only for operational/polling queries where you specifically need the indexing time — e.g. "give me results ingested since checkpoint X" or "has this job written new output in the last hour?". It is never correct for investigation queries about when anomalies occurred.
+
+**`causes` is not supported** on the materialized view. Use flattened entity fields (`by_field_*`, `over_field_*`, `partition_field_*`, `influencer_field_*`) plus `actual` / `typical` instead.
+
+### Fields available on `.ml-anomalies`
+
+The view unifies the per-result-type score columns into two columns. Use `score` / `initial_score` for all result types; do not use `record_score`, `anomaly_score`, `influencer_score`, `initial_record_score`, `initial_anomaly_score`, or `initial_influencer_score` — those do not exist on the view.
+
+| Use | Fields |
+| --- | --- |
+| Filter | `job_id` (keyword), `result_type` (`bucket` \| `record` \| `influencer`), `timestamp` (date — the anomaly bucket time; always use this for time-range filters), `is_interim` (boolean) |
+| Aggregate | `timestamp`, `score`, `initial_score` (all double except `timestamp`) |
+| Result columns | All of the above, plus `bucket_span` (long), `function`, `function_description`, `field_name`, `by_field_name`, `by_field_value`, `over_field_name`, `over_field_value`, `partition_field_name`, `partition_field_value`, `influencer_field_name`, `influencer_field_value`, `detector_index`, `actual`, `typical`, `event_count`, `processing_time_ms` |
+
+Do not `KEEP`, filter, or aggregate fields that are not listed (`causes`, `probability`, `multi_bucket_impact`, `anomaly_score_explanation.*`, and others). Those are unknown columns on the materialized view.
+
+**On older Elasticsearch clusters** (without the view), `ml.query_anomalies` falls back to `FROM .ml-anomalies-*`, injects `EVAL score = COALESCE(record_score, anomaly_score, influencer_score), initial_score = COALESCE(initial_record_score, ...)`, and adds `WHERE result_type IN ("bucket", "influencer", "record")` so model plots, forecasts, snapshots, categories, and memory stats are excluded.
+
+---
+
+## ad_query_anomaly_records
+
+Search anomaly records by score threshold and time range. Use `job_id_pattern='*'` for cross-job search or an exact job ID for single-job drill-down.
+
+**Parameters:** `job_id_pattern` (string, LIKE wildcards), `min_score` (number), `start_time` (ISO 8601), `end_time` (ISO 8601)
+
+```esql
+FROM .ml-anomalies
+| WHERE result_type == "record"
+  AND job_id LIKE ?job_id_pattern
+  AND score >= ?min_score
+  AND timestamp >= ?start_time
+  AND timestamp <= ?end_time
+| SORT score DESC
+| LIMIT 50
+| KEEP job_id, timestamp, is_interim, score, initial_score,
+       function, function_description, field_name, actual, typical, detector_index, bucket_span,
+       by_field_name, by_field_value, over_field_name, over_field_value,
+       partition_field_name, partition_field_value
+```
+
+---
+
+## ad_query_anomaly_timeline
+
+Time-series summary of anomaly severity across jobs. Use for cross-job swimlanes and detecting anomaly storms.
+
+**Parameters:** `job_id_pattern`, `min_score`, `start_time`, `end_time`
+
+```esql
+FROM .ml-anomalies
+| WHERE result_type == "bucket"
+  AND job_id LIKE ?job_id_pattern
+  AND score >= ?min_score
+  AND timestamp >= ?start_time
+  AND timestamp <= ?end_time
+| STATS max_score = MAX(score),
+        job_count = COUNT_DISTINCT(job_id),
+        jobs = VALUES(job_id),
+        composite_score = SUM(score),
+        avg_score = AVG(score)
+  BY timestamp
+| SORT timestamp
+```
+
+---
+
+## ad_query_influencers
+
+Find the most unusual entities across all or selected jobs. When `job_count > 1`, entities appear as influencers in multiple jobs — prime RCA signal.
+
+**Parameters:** `job_id_pattern`, `min_score`, `start_time`, `end_time`
+
+```esql
+FROM .ml-anomalies
+| WHERE result_type == "influencer"
+  AND job_id LIKE ?job_id_pattern
+  AND score >= ?min_score
+  AND timestamp >= ?start_time
+  AND timestamp <= ?end_time
+| STATS total_score = SUM(score),
+        job_count = COUNT_DISTINCT(job_id),
+        jobs = VALUES(job_id),
+        max_score = MAX(score)
+  BY influencer_field_name, influencer_field_value
+| SORT total_score DESC
+| LIMIT 30
+```
+
+---
+
+## ad_rca_blast_radius
+
+Measure how widespread an issue is by counting distinct partitions/entities affected by a specific anomalous value.
+
+**Parameters:** `anomalous_value` (string), `min_score`, `start_time`, `end_time`
+
+```esql
+FROM .ml-anomalies
+| WHERE result_type == "record"
+  AND score >= ?min_score
+  AND timestamp >= ?start_time
+  AND timestamp <= ?end_time
+  AND (by_field_value == ?anomalous_value
+       OR over_field_value == ?anomalous_value
+       OR partition_field_value == ?anomalous_value)
+| STATS affected_partitions = COUNT_DISTINCT(partition_field_value),
+        affected_jobs = COUNT_DISTINCT(job_id),
+        total_anomalies = COUNT(*),
+        max_score = MAX(score),
+        time_span_hours = DATE_DIFF("hour", MIN(timestamp), MAX(timestamp))
+  BY by_field_value
+| SORT affected_partitions DESC
+```
+
+---
+
+## ad_rca_correlation
+
+Find temporally correlated anomalies across different jobs. Sort by timestamp to detect cascading failures (network → app → DB).
+
+**Parameters:** `job_id_pattern`, `min_score`, `start_time`, `end_time`
+
+```esql
+FROM .ml-anomalies
+| WHERE result_type == "record"
+  AND job_id LIKE ?job_id_pattern
+  AND score >= ?min_score
+  AND timestamp >= ?start_time
+  AND timestamp <= ?end_time
+| SORT timestamp ASC
+| KEEP job_id, timestamp, score, initial_score,
+       function, function_description, field_name, actual, typical, detector_index,
+       by_field_name, by_field_value, partition_field_name, partition_field_value,
+       over_field_name, over_field_value
+| LIMIT 100
+```
+
+---
+
+## ad_rca_cross_job_entity_match
+
+Starting from a specific entity value, find all other jobs where that entity appears as anomalous — across all split field types.
+
+**Parameters:** `entity_value` (string), `min_score`, `start_time`, `end_time`
+
+```esql
+FROM .ml-anomalies
+| WHERE result_type == "record"
+  AND score >= ?min_score
+  AND timestamp >= ?start_time
+  AND timestamp <= ?end_time
+  AND (partition_field_value == ?entity_value
+       OR by_field_value == ?entity_value
+       OR over_field_value == ?entity_value)
+| STATS max_score = MAX(score),
+        anomaly_count = COUNT(*),
+        functions = VALUES(function),
+        fields = VALUES(field_name),
+        first_anomaly = MIN(timestamp),
+        last_anomaly = MAX(timestamp)
+  BY job_id
+| SORT max_score DESC
+```
+
+---
+
+## ad_rca_detector_fingerprint
+
+For a specific incident time window, show exactly which detectors fired across all/selected jobs and what they monitor.
+
+**Parameters:** `job_id_pattern`, `min_score`, `start_time`, `end_time`
+
+```esql
+FROM .ml-anomalies
+| WHERE result_type == "record"
+  AND job_id LIKE ?job_id_pattern
+  AND score >= ?min_score
+  AND timestamp >= ?start_time
+  AND timestamp <= ?end_time
+| STATS count = COUNT(*),
+        max_score = MAX(score),
+        avg_score = AVG(score)
+  BY job_id, function, field_name, detector_index
+| SORT max_score DESC
+```
+
+---
+
+## ad_rca_entity_profile
+
+Build a complete anomaly dossier for a suspect entity across all jobs.
+
+**Parameters:** `entity_value` (string), `start_time`, `end_time`
+
+```esql
+FROM .ml-anomalies
+| WHERE result_type == "record"
+  AND timestamp >= ?start_time
+  AND timestamp <= ?end_time
+  AND (by_field_value == ?entity_value
+       OR over_field_value == ?entity_value
+       OR partition_field_value == ?entity_value)
+| SORT timestamp ASC
+| LIMIT 100
+| KEEP job_id, timestamp, score, initial_score,
+       function, function_description, field_name, actual, typical, detector_index,
+       by_field_name, by_field_value, over_field_name, over_field_value,
+       partition_field_name, partition_field_value
+```
+
+---
+
+## ad_rca_multi_job_entities
+
+Find entities that are anomalous in multiple jobs simultaneously — the strongest root cause signal.
+
+**Parameters:** `min_score`, `min_job_count` (number, use 2 for root cause candidates), `start_time`, `end_time`
+
+```esql
+FROM .ml-anomalies
+| WHERE result_type == "record"
+  AND score >= ?min_score
+  AND timestamp >= ?start_time
+  AND timestamp <= ?end_time
+| STATS job_count = COUNT_DISTINCT(job_id),
+        jobs = VALUES(job_id),
+        max_score = MAX(score),
+        total_records = COUNT(*),
+        functions = VALUES(function),
+        fields = VALUES(field_name)
+  BY partition_field_value
+| WHERE job_count >= ?min_job_count
+| SORT job_count DESC, max_score DESC
+| LIMIT 20
+```
+
+---
+
+## ad_rca_source_evidence
+
+After identifying an anomaly, retrieve raw source documents from the original data index.
+
+**Parameters:** `source_index` (LIKE pattern, get from datafeed config), `start_time`, `end_time`
+
+```esql
+FROM * METADATA _index
+| WHERE _index LIKE ?source_index
+  AND @timestamp >= ?start_time
+  AND @timestamp <= ?end_time
+| SORT @timestamp DESC
+| LIMIT 50
+```
+
+---
+
+## ad_search_log_category_examples
+
+Search for log message examples in source data. Run twice — baseline window vs. anomaly window — to compare what changed.
+
+**Parameters:** `source_index` (LIKE pattern), `start_time`, `end_time`
+
+```esql
+FROM * METADATA _index
+| WHERE _index LIKE ?source_index
+  AND @timestamp >= ?start_time
+  AND @timestamp <= ?end_time
+| SORT @timestamp DESC
+| LIMIT 50
+```

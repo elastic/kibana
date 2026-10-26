@@ -1,0 +1,29 @@
+# SAMPLE
+
+The SAMPLE function collects a specified number of sample values from a field.
+
+## Syntax
+
+`SAMPLE(field, limit)`
+
+### Parameters
+
+#### field
+
+The field from which to collect sample values.
+
+#### limit
+
+The maximum number of values to collect.
+
+## Examples
+
+Collects up to 5 sample values from the `gender` field across all employee records.
+
+```esql
+FROM employees
+| STATS sample = SAMPLE(gender, 5)
+```OM employees
+| KEEP emp_no
+| SAMPLE 0.05
+```

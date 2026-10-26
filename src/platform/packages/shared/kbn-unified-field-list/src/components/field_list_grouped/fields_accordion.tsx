@@ -8,24 +8,31 @@
  */
 
 import React, { useMemo, Fragment } from 'react';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import {
-  EuiText,
+  EuiAccordion,
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIconTip,
+  EuiLoadingSpinner,
   EuiNotificationBadge,
   EuiSpacer,
-  EuiAccordion,
-  EuiLoadingSpinner,
-  EuiIconTip,
+  EuiText,
+  EuiToolTip,
+  type UseEuiTheme,
 } from '@elastic/eui';
-import classNames from 'classnames';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { type DataViewField } from '@kbn/data-views-plugin/common';
-import { type FieldListItem, FieldsGroupNames, type RenderFieldItemParams } from '../../types';
-import './fields_accordion.scss';
+import { ReorderProvider } from '@kbn/dom-drag-drop';
+import { FieldsGroupNames, type FieldListItem, type RenderFieldItemParams } from '../../types';
 
 export interface FieldsAccordionProps<T extends FieldListItem> {
   initialIsOpen: boolean;
   onToggle: (open: boolean) => void;
   id: string;
+  buttonId: string;
   label: string;
   helpTooltip?: string;
   hasLoaded: boolean;
@@ -38,14 +45,21 @@ export interface FieldsAccordionProps<T extends FieldListItem> {
   paginatedFields: T[];
   renderFieldItem: (params: RenderFieldItemParams<T>) => JSX.Element;
   renderCallout: () => JSX.Element;
+  extraAction: React.ReactNode;
   showExistenceFetchError?: boolean;
   showExistenceFetchTimeout?: boolean;
+  onDeselectSelectedFields?: () => void;
+  /**
+   * Whether the items of the group can be reordered via drag and drop
+   */
+  isReorderable?: boolean;
 }
 
 function InnerFieldsAccordion<T extends FieldListItem = DataViewField>({
   initialIsOpen,
   onToggle,
   id,
+  buttonId,
   label,
   helpTooltip,
   hasLoaded,
@@ -60,29 +74,20 @@ function InnerFieldsAccordion<T extends FieldListItem = DataViewField>({
   renderCallout,
   showExistenceFetchError,
   showExistenceFetchTimeout,
+  extraAction,
+  onDeselectSelectedFields,
+  isReorderable,
 }: FieldsAccordionProps<T>) {
-  const renderButton = useMemo(() => {
-    const titleClassname = classNames({
-      // eslint-disable-next-line @typescript-eslint/naming-convention
-      unifiedFieldList__fieldsAccordion__titleTooltip: !!helpTooltip,
-    });
+  const styles = useMemoCss(componentStyles);
 
+  const renderButton = useMemo(() => {
     return (
       <EuiText size="xs">
-        <strong
-          className={titleClassname}
-          aria-label={i18n.translate('unifiedFieldList.fieldsAccordion.accordionButtonAriaLabel', {
-            defaultMessage:
-              '{label}: {fieldsCount} {fieldsCount, plural, one {item} other {items}}',
-            values: { label, fieldsCount },
-          })}
-        >
-          {label}
-        </strong>
+        <strong css={!!helpTooltip ? styles.titleTooltip : undefined}>{label}</strong>
         {!!helpTooltip && (
           <EuiIconTip
             aria-label={helpTooltip}
-            type="questionInCircle"
+            type="question"
             color="subdued"
             size="s"
             position="right"
@@ -94,9 +99,9 @@ function InnerFieldsAccordion<T extends FieldListItem = DataViewField>({
         )}
       </EuiText>
     );
-  }, [label, helpTooltip, fieldsCount]);
+  }, [label, helpTooltip, styles.titleTooltip]);
 
-  const extraAction = useMemo(() => {
+  const accordionExtraAction = useMemo(() => {
     if (showExistenceFetchError) {
       return (
         <EuiIconTip
@@ -129,7 +134,7 @@ function InnerFieldsAccordion<T extends FieldListItem = DataViewField>({
       );
     }
     if (hasLoaded) {
-      return (
+      const countBadge = (
         <EuiNotificationBadge
           size="m"
           color={isFiltered ? 'accent' : 'subdued'}
@@ -138,10 +143,54 @@ function InnerFieldsAccordion<T extends FieldListItem = DataViewField>({
           {fieldsCount}
         </EuiNotificationBadge>
       );
+
+      if (
+        groupName === FieldsGroupNames.SelectedFields &&
+        fieldsCount > 0 &&
+        onDeselectSelectedFields
+      ) {
+        return (
+          <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <DeselectSelectedFieldsButton id={id} onClick={onDeselectSelectedFields} />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>{countBadge}</EuiFlexItem>
+          </EuiFlexGroup>
+        );
+      }
+
+      return countBadge;
     }
 
     return <EuiLoadingSpinner size="m" data-test-subj={`${id}-countLoading`} />;
-  }, [showExistenceFetchError, showExistenceFetchTimeout, hasLoaded, isFiltered, id, fieldsCount]);
+  }, [
+    showExistenceFetchError,
+    showExistenceFetchTimeout,
+    hasLoaded,
+    isFiltered,
+    id,
+    fieldsCount,
+    groupName,
+    onDeselectSelectedFields,
+  ]);
+
+  const fieldsList = (
+    <ul>
+      {paginatedFields &&
+        paginatedFields.map((field, index) => (
+          <Fragment key={getFieldKey(field)}>
+            {renderFieldItem({
+              field,
+              itemIndex: index,
+              groupIndex,
+              groupName,
+              hideDetails,
+              fieldSearchHighlight,
+            })}
+          </Fragment>
+        ))}
+    </ul>
+  );
 
   return (
     <EuiAccordion
@@ -149,27 +198,23 @@ function InnerFieldsAccordion<T extends FieldListItem = DataViewField>({
       onToggle={onToggle}
       data-test-subj={id}
       id={id}
+      buttonProps={{
+        id: buttonId,
+        'aria-label': i18n.translate('unifiedFieldList.fieldsAccordion.accordionButtonAriaLabel', {
+          defaultMessage: '{label}: {fieldsCount} {fieldsCount, plural, one {item} other {items}}',
+          values: { label, fieldsCount },
+        }),
+      }}
       buttonContent={renderButton}
-      extraAction={extraAction}
+      extraAction={accordionExtraAction}
     >
       <EuiSpacer size="s" />
       {hasLoaded &&
         (!!fieldsCount ? (
-          <ul>
-            {paginatedFields &&
-              paginatedFields.map((field, index) => (
-                <Fragment key={getFieldKey(field)}>
-                  {renderFieldItem({
-                    field,
-                    itemIndex: index,
-                    groupIndex,
-                    groupName,
-                    hideDetails,
-                    fieldSearchHighlight,
-                  })}
-                </Fragment>
-              ))}
-          </ul>
+          <>
+            {extraAction}
+            {isReorderable ? <ReorderProvider>{fieldsList}</ReorderProvider> : fieldsList}
+          </>
         ) : (
           renderCallout()
         ))}
@@ -181,3 +226,32 @@ export const FieldsAccordion = React.memo(InnerFieldsAccordion) as typeof InnerF
 
 export const getFieldKey = (field: FieldListItem): string =>
   `${field.name}-${field.displayName}-${field.type}`;
+
+const DeselectSelectedFieldsButton = ({ id, onClick }: { id: string; onClick: () => void }) => {
+  const buttonLabel = i18n.translate(
+    'unifiedFieldList.fieldsAccordion.clearSelectedFieldsButtonLabel',
+    {
+      defaultMessage: 'Clear selected fields',
+    }
+  );
+
+  return (
+    <EuiToolTip content={buttonLabel} disableScreenReaderOutput>
+      <EuiButtonIcon
+        aria-label={buttonLabel}
+        color="text"
+        data-test-subj={`${id}-deselectSelectedFields`}
+        iconType="undo"
+        size="xs"
+        onClick={onClick}
+      />
+    </EuiToolTip>
+  );
+};
+
+const componentStyles = {
+  titleTooltip: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      marginRight: euiTheme.size.xs,
+    }),
+};

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RestoreSettings, RestoreSettingsEs } from '../types';
+import type { RestoreSettings, RestoreSettingsEs } from '../types';
 
 const removeUndefinedSettings = (settings: RestoreSettingsEs): RestoreSettingsEs => {
   return Object.entries(settings).reduce((sts: RestoreSettingsEs, [key, value]) => {

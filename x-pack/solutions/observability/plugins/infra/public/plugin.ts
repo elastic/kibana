@@ -34,12 +34,16 @@ import {
   type InventoryLocatorParams,
 } from '@kbn/observability-shared-plugin/common';
 import type { NavigationEntry } from '@kbn/observability-shared-plugin/public';
+import { ProjectRoutingAccess } from '@kbn/cps-utils';
 import { OBSERVABILITY_LOGS_EXPLORER_APP_ID } from '@kbn/deeplinks-observability/constants';
+import {
+  OBSERVABILITY_INFRA_CPS_ENABLED_DEFAULT,
+  OBSERVABILITY_INFRA_CPS_ENABLED_FEATURE_FLAG,
+} from '../common/cps_feature_flag';
 import type { InfraPublicConfig } from '../common/plugin_config_types';
 import { createInventoryMetricRuleType } from './alerting/inventory';
 import { createLogThresholdRuleType } from './alerting/log_threshold';
 import { createMetricThresholdRuleType } from './alerting/metric_threshold';
-import { LOG_STREAM_EMBEDDABLE } from './components/log_stream/constants';
 import { createMetricsFetchData, createMetricsHasData } from './metrics_overview_fetchers';
 import { registerFeatures } from './register_feature';
 import { InventoryViewsService } from './services/inventory_views';
@@ -63,6 +67,58 @@ import {
 } from './translations';
 import type { LogsAppRoutes, LogsRoute } from './pages/logs/routes';
 import { getLogsAppRoutes } from './pages/logs/routes';
+
+// !! Need to be kept in sync with the routes in x-pack/solutions/observability/plugins/infra/public/pages/metrics/index.tsx
+export const getInfraDeepLinks = ({
+  metricsExplorerEnabled,
+}: {
+  metricsExplorerEnabled: boolean;
+}): AppDeepLink[] => {
+  const visibleIn: AppDeepLinkLocations[] = ['globalSearch', 'projectSideNav'];
+
+  return [
+    {
+      id: 'inventory',
+      title: inventoryTitle,
+      path: '/inventory',
+      visibleIn,
+    },
+    {
+      id: 'hosts',
+      title: i18n.translate('xpack.infra.homePage.metricsHostsTabTitle', {
+        defaultMessage: 'Hosts',
+      }),
+      path: '/hosts',
+      visibleIn,
+    },
+    ...(metricsExplorerEnabled
+      ? [
+          {
+            id: 'metrics-explorer',
+            title: i18n.translate('xpack.infra.homePage.metricsExplorerTabTitle', {
+              defaultMessage: 'Metrics Explorer',
+            }),
+            path: '/explorer',
+            visibleIn,
+          },
+        ]
+      : []),
+    {
+      id: 'settings',
+      title: i18n.translate('xpack.infra.homePage.settingsTabTitle', {
+        defaultMessage: 'Settings',
+      }),
+      path: '/settings',
+      visibleIn: ['globalSearch'],
+    },
+    {
+      id: 'assetDetails',
+      title: '', // Internal deep link, not shown in the UI. Title is dynamically set in the app.
+      path: '/detail',
+      visibleIn: [],
+    },
+  ];
+};
 
 export class Plugin implements InfraClientPluginClass {
   public config: InfraPublicConfig;
@@ -184,96 +240,32 @@ export class Plugin implements InfraClientPluginClass {
       )
     );
 
-    pluginsSetup.embeddable.registerReactEmbeddableFactory(LOG_STREAM_EMBEDDABLE, async () => {
-      const { getLogStreamEmbeddableFactory } = await import(
-        './components/log_stream/log_stream_react_embeddable'
-      );
-      const [coreStart, pluginDeps, pluginStart] = await core.getStartServices();
-      return getLogStreamEmbeddableFactory({
-        coreStart,
-        pluginDeps,
-        pluginStart,
-      });
-    });
-
     pluginsSetup.observability.observabilityRuleTypeRegistry.register(
       createLogThresholdRuleType(core, pluginsSetup.share.url)
     );
 
-    if (this.config.featureFlags.logsUIEnabled) {
-      core.application.register({
-        id: 'logs',
-        title: i18n.translate('xpack.infra.logs.pluginTitle', {
-          defaultMessage: 'Logs',
-        }),
-        euiIconType: 'logoObservability',
-        order: 8100,
-        appRoute: '/app/logs',
-        deepLinks: Object.values(logRoutes),
-        category: DEFAULT_APP_CATEGORIES.observability,
-        mount: async (params: AppMountParameters) => {
-          // mount callback should not use setup dependencies, get start dependencies instead
-          const [coreStart, plugins, pluginStart] = await core.getStartServices();
+    core.application.register({
+      id: 'logs',
+      title: i18n.translate('xpack.infra.logs.pluginTitle', {
+        defaultMessage: 'Logs',
+      }),
+      euiIconType: 'logoObservability',
+      order: 8100,
+      appRoute: '/app/logs',
+      deepLinks: Object.values(logRoutes),
+      category: DEFAULT_APP_CATEGORIES.observability,
+      mount: async (params: AppMountParameters) => {
+        // mount callback should not use setup dependencies, get start dependencies instead
+        const [coreStart, plugins, pluginStart] = await core.getStartServices();
 
-          const isLogsExplorerAccessible = await firstValueFrom(
-            getLogsExplorerAccessible$(coreStart.application)
-          );
+        const isLogsExplorerAccessible = await firstValueFrom(
+          getLogsExplorerAccessible$(coreStart.application)
+        );
 
-          const { renderApp } = await import('./apps/logs_app');
-          return renderApp(coreStart, plugins, pluginStart, isLogsExplorerAccessible, params);
-        },
-      });
-    }
-
-    // !! Need to be kept in sync with the routes in x-pack/solutions/observability/plugins/infra/public/pages/metrics/index.tsx
-    const getInfraDeepLinks = ({
-      metricsExplorerEnabled,
-    }: {
-      metricsExplorerEnabled: boolean;
-    }): AppDeepLink[] => {
-      const visibleIn: AppDeepLinkLocations[] = ['globalSearch'];
-
-      return [
-        {
-          id: 'inventory',
-          title: inventoryTitle,
-          path: '/inventory',
-          visibleIn,
-        },
-        {
-          id: 'hosts',
-          title: i18n.translate('xpack.infra.homePage.metricsHostsTabTitle', {
-            defaultMessage: 'Hosts',
-          }),
-          path: '/hosts',
-          visibleIn,
-        },
-        ...(metricsExplorerEnabled
-          ? [
-              {
-                id: 'metrics-explorer',
-                title: i18n.translate('xpack.infra.homePage.metricsExplorerTabTitle', {
-                  defaultMessage: 'Metrics Explorer',
-                }),
-                path: '/explorer',
-              },
-            ]
-          : []),
-        {
-          id: 'settings',
-          title: i18n.translate('xpack.infra.homePage.settingsTabTitle', {
-            defaultMessage: 'Settings',
-          }),
-          path: '/settings',
-        },
-        {
-          id: 'assetDetails',
-          title: '', // Internal deep link, not shown in the UI. Title is dynamically set in the app.
-          path: '/detail',
-          visibleIn: [],
-        },
-      ];
-    };
+        const { renderApp } = await import('./apps/logs_app');
+        return renderApp(coreStart, plugins, pluginStart, isLogsExplorerAccessible, params);
+      },
+    });
 
     core.application.register({
       id: 'metrics',
@@ -323,6 +315,24 @@ export class Plugin implements InfraClientPluginClass {
   }
 
   start(core: InfraClientCoreStart, plugins: InfraClientStartDeps) {
+    let infraCpsEnabled = OBSERVABILITY_INFRA_CPS_ENABLED_DEFAULT;
+    core.featureFlags
+      .getBooleanValue$(
+        OBSERVABILITY_INFRA_CPS_ENABLED_FEATURE_FLAG,
+        OBSERVABILITY_INFRA_CPS_ENABLED_DEFAULT
+      )
+      .subscribe((enabled) => {
+        infraCpsEnabled = enabled;
+      })
+      .unsubscribe();
+
+    if (infraCpsEnabled) {
+      // The logs app starts disabled and will later register its own picker access from within its page providers
+      // (useInfraMlCpsPickerAccess), where the ML CPS capability of Elasticsearch is known after resolving asynchronously;
+      plugins.cps?.cpsManager?.registerAppAccess('logs', () => ProjectRoutingAccess.DISABLED);
+      plugins.cps?.cpsManager?.registerAppAccess('metrics', () => ProjectRoutingAccess.EDITABLE);
+    }
+
     const { http } = core;
     const inventoryViews = this.inventoryViews.start({ http });
     const metricsExplorerViews = this.metricsExplorerViews?.start({ http });
@@ -350,8 +360,6 @@ const getLogsNavigationEntries = ({
   routes: LogsAppRoutes;
 }) => {
   const entries: NavigationEntry[] = [];
-
-  if (!config.featureFlags.logsUIEnabled) return entries;
 
   if (isLogsExplorerAccessible) {
     entries.push({

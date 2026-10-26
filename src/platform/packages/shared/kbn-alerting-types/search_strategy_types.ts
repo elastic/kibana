@@ -20,12 +20,13 @@ export type RuleRegistrySearchRequest = IEsSearchRequest & {
   ruleTypeIds: string[];
   consumers?: string[];
   fields?: QueryDslFieldAndFormat[];
-  query?: Pick<QueryDslQueryContainer, 'bool' | 'ids'>;
+  query?: Pick<NonNullable<QueryDslQueryContainer>, 'bool' | 'ids'>;
   sort?: SortCombinations[];
   pagination?: RuleRegistrySearchRequestPagination;
   runtimeMappings?: MappingRuntimeFields;
   minScore?: number;
   trackScores?: boolean;
+  includeDelayedAlerts?: boolean;
 };
 
 export interface RuleRegistrySearchRequestPagination {

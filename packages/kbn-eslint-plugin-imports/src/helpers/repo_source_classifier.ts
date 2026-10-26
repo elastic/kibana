@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ImportResolver } from '@kbn/import-resolver';
+import type { ImportResolver } from '@kbn/import-resolver';
 import { RepoSourceClassifier } from '@kbn/repo-source-classifier';
 
 const cache = new WeakMap<ImportResolver, RepoSourceClassifier>();

@@ -21,14 +21,20 @@ import {
   PercentilesKeyedTypeRT,
   TopMetricsTypeRT,
   MetricValueTypeRT,
+  FilterWithNestedAggRT,
 } from '../types';
 
 const BASE_COLUMNS = [{ name: 'timestamp', type: 'date' }] as MetricsAPIColumn[];
 
-const ValueObjectTypeRT = rt.union([rt.string, rt.number, MetricValueTypeRT]);
+const ValueObjectTypeRT = rt.union([
+  rt.string,
+  rt.number,
+  MetricValueTypeRT,
+  FilterWithNestedAggRT,
+]);
 type ValueObjectType = rt.TypeOf<typeof ValueObjectTypeRT>;
 
-const getValue = (valueObject: ValueObjectType) => {
+const getValue = (valueObject: ValueObjectType): number | null | object[] => {
   if (NormalizedMetricValueRT.is(valueObject)) {
     return valueObject.normalized_value || valueObject.value;
   }
@@ -61,12 +67,34 @@ const getValue = (valueObject: ValueObjectType) => {
     return valueObject.top.map((res) => res.metrics);
   }
 
+  // Handle filter aggregation wrapping another aggregation (e.g., filter + top_metrics)
+  if (FilterWithNestedAggRT.is(valueObject)) {
+    const nestedKey = Object.keys(valueObject).find((k) => k !== 'doc_count' && k !== 'meta');
+    if (nestedKey) {
+      const nestedValue = (valueObject as Record<string, unknown>)[nestedKey];
+      if (MetricValueTypeRT.is(nestedValue) || FilterWithNestedAggRT.is(nestedValue)) {
+        return getValue(nestedValue as ValueObjectType);
+      }
+    }
+  }
+
   return null;
 };
 
 const dropOutOfBoundsBuckets =
   (from: number, to: number, bucketSizeInMillis: number) => (row: MetricsAPIRow) =>
     row.timestamp >= from && row.timestamp + bucketSizeInMillis <= to;
+
+// Extract first numeric value from top_metrics result for non-metadata fields
+const extractFirstNumericValue = (metricsArray: object[]): number | null => {
+  const firstItem = first(metricsArray);
+  if (!firstItem) return null;
+  const firstValue = first(values(firstItem));
+  return typeof firstValue === 'number' ? firstValue : null;
+};
+
+// Metadata key that should keep full top_metrics array
+const META_KEY = '__metadata__';
 
 export const convertBucketsToRows = (
   options: MetricsAPIRequest,
@@ -76,7 +104,9 @@ export const convertBucketsToRows = (
     const ids = options.metrics.map((metric) => metric.id);
     const metrics = ids.reduce((acc, id) => {
       const valueObject = get(bucket, [id]);
-      acc[id] = ValueObjectTypeRT.is(valueObject) ? getValue(valueObject) : null;
+      const value = ValueObjectTypeRT.is(valueObject) ? getValue(valueObject) : null;
+      // For non-metadata fields, extract numeric value from top_metrics array
+      acc[id] = Array.isArray(value) && id !== META_KEY ? extractFirstNumericValue(value) : value;
       return acc;
     }, {} as Record<string, number | null | object[]>);
 

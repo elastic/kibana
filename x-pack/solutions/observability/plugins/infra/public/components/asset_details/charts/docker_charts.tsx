@@ -9,7 +9,7 @@ import React from 'react';
 import { findInventoryFields } from '@kbn/metrics-data-access-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css, cx } from '@emotion/css';
-import { EuiText, EuiLink, EuiButtonEmpty } from '@elastic/eui';
+import { EuiText, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useDockerContainerPageViewMetricsCharts } from '../hooks/use_container_metrics_charts';
 import { Section } from '../components/section';
@@ -27,7 +27,7 @@ interface Props extends MetricsChartsFields {
 const FRAGMENT_BASE = 'key-metrics';
 
 export const DockerCharts = React.forwardRef<HTMLDivElement, Props>(
-  ({ assetId, dataView, dateRange, metric, onShowAll }, ref) => {
+  ({ entityId, dataView, dateRange, metric, onShowAll }, ref) => {
     const { charts } = useDockerContainerPageViewMetricsCharts({
       metric,
       metricsDataViewId: dataView?.id,
@@ -37,6 +37,7 @@ export const DockerCharts = React.forwardRef<HTMLDivElement, Props>(
         title={
           <TitleWithTooltip
             title={CONTAINER_METRIC_GROUP_TITLES[metric]}
+            data-test-subj={`infraAssetDetailsDockerChartsSection${metric}Title`}
             tooltipContent={
               <EuiText size="xs">
                 <FormattedMessage
@@ -45,7 +46,7 @@ export const DockerCharts = React.forwardRef<HTMLDivElement, Props>(
                   values={{
                     link: (
                       <EuiLink
-                        data-test-subj="infraAssetDetailsViewContainerMetricsDocumentationLink"
+                        data-test-subj={`infraAssetDetailsDockerChartsSection${metric}DocumentationLink`}
                         href={`${CONTAINER_METRICS_DOC_HREF}#${FRAGMENT_BASE}-${metric}`}
                         target="_blank"
                         className={cx({
@@ -72,7 +73,7 @@ export const DockerCharts = React.forwardRef<HTMLDivElement, Props>(
         ref={ref}
         extraAction={
           onShowAll ? (
-            <EuiButtonEmpty
+            <EuiLink
               aria-label={i18n.translate(
                 'xpack.infra.assetDetails.charts.host.showAllButton.ariaLabel',
                 {
@@ -82,16 +83,12 @@ export const DockerCharts = React.forwardRef<HTMLDivElement, Props>(
               )}
               data-test-subj="infraAssetDetailsHostChartsShowAllButton"
               onClick={() => onShowAll(metric)}
-              size="xs"
-              flush="both"
-              iconSide="right"
-              iconType="sortRight"
             >
               <FormattedMessage
                 id="xpack.infra.assetDetails.charts.host.showAllButton"
                 defaultMessage="Show all"
               />
-            </EuiButtonEmpty>
+            </EuiLink>
           ) : null
         }
       >
@@ -101,8 +98,9 @@ export const DockerCharts = React.forwardRef<HTMLDivElement, Props>(
               id={chart.id}
               key={chart.id}
               lensAttributes={chart}
-              assetId={assetId}
+              entityId={entityId}
               dateRange={dateRange}
+              dataView={dataView}
               queryField={findInventoryFields('container').id}
             />
           ))}

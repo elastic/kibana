@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { TabItem } from '../types';
+import type { TabItem } from '../types';
 
 export const getTabIdAttribute = (item: TabItem) => {
   return `tab-${item.id}`;

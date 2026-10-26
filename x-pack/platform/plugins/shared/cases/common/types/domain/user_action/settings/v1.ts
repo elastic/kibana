@@ -5,13 +5,17 @@
  * 2.0.
  */
 
-import * as rt from 'io-ts';
-import { CaseSettingsRt } from '../../case/v1';
+import { z } from '@kbn/zod/v4';
 import { UserActionTypes } from '../action/v1';
 
-export const SettingsUserActionPayloadRt = rt.strict({ settings: CaseSettingsRt });
+export const SettingsUserActionPayloadSchema = z.object({
+  settings: z.object({
+    syncAlerts: z.boolean().optional(),
+    extractObservables: z.boolean().optional(),
+  }),
+});
 
-export const SettingsUserActionRt = rt.strict({
-  type: rt.literal(UserActionTypes.settings),
-  payload: SettingsUserActionPayloadRt,
+export const SettingsUserActionSchema = z.object({
+  type: z.literal(UserActionTypes.settings),
+  payload: SettingsUserActionPayloadSchema,
 });

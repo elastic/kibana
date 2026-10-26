@@ -5,15 +5,14 @@
  * 2.0.
  */
 
-import {
+import type {
   SendRequestConfig,
   UseRequestConfig,
-  sendRequest as _sendRequest,
-  useRequest as _useRequest,
   Error as CustomError,
 } from '../../../shared_imports';
+import { sendRequest as _sendRequest, useRequest as _useRequest } from '../../../shared_imports';
 
-import { httpService } from '.';
+import { httpService } from './http';
 
 export const sendRequest = (config: SendRequestConfig) => {
   return _sendRequest<any, CustomError>(httpService.httpClient, config);

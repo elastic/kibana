@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { HttpResponse } from '@kbn/core/public';
+import type { HttpResponse } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 
 import { FlashMessagesLogic } from './flash_messages_logic';
 import { flashErrorToast } from './set_message_helpers';
-import { IFlashMessage } from './types';
+import type { IFlashMessage } from './types';
 
 /**
  * The API errors we are handling can come from one of two ways:

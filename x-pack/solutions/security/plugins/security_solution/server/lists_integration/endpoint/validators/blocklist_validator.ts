@@ -15,10 +15,12 @@ import type {
   UpdateExceptionListItemOptions,
 } from '@kbn/lists-plugin/server';
 import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
+import type { PromiseFromStreams } from '@kbn/lists-plugin/server/services/exception_lists/import_exception_list_and_items';
 import { BaseValidator } from './base_validator';
 import type { ExceptionItemLikeOptions } from '../types';
 import { isValidHash } from '../../../../common/endpoint/service/artifacts/validations';
 import { EndpointArtifactExceptionValidationError } from './errors';
+import { ENTRY_VALUE_MAX_LENGTH } from './constants';
 
 const allowedHashes: Readonly<string[]> = ['file.hash.md5', 'file.hash.sha1', 'file.hash.sha256'];
 const allowedFilePaths: Readonly<string[]> = ['file.path', 'file.path.caseless'];
@@ -31,20 +33,34 @@ const FilePath = schema.oneOf(
   allowedFilePaths.map((path) => schema.literal(path)) as [Type<string>]
 );
 
+const FileName = schema.literal('file.name');
+const FileNameCaseless = schema.literal('file.name.caseless');
+
 const FileCodeSigner = schema.literal('file.Ext.code_signature');
 
-const ConditionEntryTypeSchema = schema.literal('match_any');
+// Path and File Name support an additional `wildcard` (Match) entry type, in addition to `match_any`.
+// `file.name.caseless` is the field the UI sends for `wildcard` (Match) entries on Windows/macOS.
+const PathOrFileNameField = schema.oneOf([FilePath, FileName, FileNameCaseless]);
+
+const ConditionEntryTypeSchema = schema.conditional(
+  schema.siblingRef('field'),
+  PathOrFileNameField,
+  schema.oneOf([schema.literal('match_any'), schema.literal('wildcard')]),
+  schema.literal('match_any')
+);
 const ConditionEntryOperatorSchema = schema.literal('included');
 
 type ConditionEntryFieldAllowedType =
   | TypeOf<typeof FileHashField>
   | TypeOf<typeof FilePath>
+  | TypeOf<typeof FileName>
+  | TypeOf<typeof FileNameCaseless>
   | TypeOf<typeof FileCodeSigner>;
 
 type BlocklistConditionEntry =
   | {
       field: ConditionEntryFieldAllowedType;
-      type: 'match_any' | 'match';
+      type: 'match_any' | 'match' | 'wildcard';
       operator: 'included';
       value: string[] | string;
     }
@@ -54,7 +70,7 @@ type BlocklistConditionEntry =
  * A generic Entry schema to be used for a specific entry schema depending on the OS
  */
 const CommonEntrySchema = {
-  field: schema.oneOf([FileHashField, FilePath]),
+  field: schema.oneOf([FileHashField, FilePath, FileName, FileNameCaseless]),
   type: ConditionEntryTypeSchema,
   operator: ConditionEntryOperatorSchema,
   // If field === HASH then validate hash with custom method, else validate string with minLength = 1
@@ -63,27 +79,40 @@ const CommonEntrySchema = {
     FileHashField,
     schema.arrayOf(
       schema.string({
+        maxLength: ENTRY_VALUE_MAX_LENGTH,
         validate: (hash: string) =>
           isValidHash(hash) ? undefined : `invalid hash value [${hash}]`,
       }),
-      { minSize: 1 }
+      { minSize: 1, maxSize: 2000 }
     ),
     schema.conditional(
       schema.siblingRef('field'),
-      FilePath,
-      schema.arrayOf(
+      PathOrFileNameField,
+      // `wildcard` (Match) entries carry a single value, `match_any` (is one of) entries an array
+      schema.conditional(
+        schema.siblingRef('type'),
+        schema.literal('wildcard'),
         schema.string({
+          maxLength: ENTRY_VALUE_MAX_LENGTH,
           validate: (pathValue: string) =>
             pathValue.length > 0 ? undefined : `invalid path value [${pathValue}]`,
         }),
-        { minSize: 1 }
+        schema.arrayOf(
+          schema.string({
+            maxLength: ENTRY_VALUE_MAX_LENGTH,
+            validate: (pathValue: string) =>
+              pathValue.length > 0 ? undefined : `invalid path value [${pathValue}]`,
+          }),
+          { minSize: 1, maxSize: 2000 }
+        )
       ),
       schema.arrayOf(
         schema.string({
+          maxLength: ENTRY_VALUE_MAX_LENGTH,
           validate: (signerValue: string) =>
             signerValue.length > 0 ? undefined : `invalid signer value [${signerValue}]`,
         }),
-        { minSize: 1 }
+        { minSize: 1, maxSize: 2000 }
       )
     )
   ),
@@ -100,30 +129,37 @@ const WindowsSignerEntrySchema = schema.object({
       value: schema.conditional(
         schema.siblingRef('type'),
         schema.literal('match'),
-        schema.string({ minLength: 1 }),
-        schema.arrayOf(schema.string({ minLength: 1 }))
+        schema.string({ minLength: 1, maxLength: ENTRY_VALUE_MAX_LENGTH }),
+        schema.arrayOf(schema.string({ minLength: 1, maxLength: ENTRY_VALUE_MAX_LENGTH }), {
+          maxSize: 2000,
+        })
       ),
       type: schema.oneOf([schema.literal('match'), schema.literal('match_any')]),
       operator: schema.literal('included'),
     }),
-    { minSize: 1 }
+    { minSize: 1, maxSize: 250 }
   ),
 });
 
+// Windows and macOS are case-insensitive, so `wildcard` (Match) entries must use the `.caseless`
+// fields. Exact-match (`match_any`) entries keep accepting the non-caseless fields.
+const caselessWildcardValidation = (entry: { field: string; type: string }): string | undefined => {
+  if (entry.type === 'wildcard' && ['file.path', 'file.name'].includes(entry.field)) {
+    return `[${entry.field}] is not allowed for a wildcard entry on this OS. Use [${entry.field}.caseless]`;
+  }
+};
+
 const WindowsEntrySchema = schema.oneOf([
   WindowsSignerEntrySchema,
-  schema.object({
-    ...CommonEntrySchema,
-    field: schema.oneOf([FileHashField, FilePath]),
-  }),
+  schema.object(CommonEntrySchema, { validate: caselessWildcardValidation }),
 ]);
 
 const LinuxEntrySchema = schema.object({
   ...CommonEntrySchema,
 });
 
-const MacEntrySchema = schema.object({
-  ...CommonEntrySchema,
+const MacEntrySchema = schema.object(CommonEntrySchema, {
+  validate: caselessWildcardValidation,
 });
 
 // Hash entries validator method.
@@ -155,6 +191,7 @@ const hashEntriesValidation = (entries: BlocklistConditionEntry[]) => {
 // Validate there is only one entry when signer or path and the allowed entries for hashes
 const entriesSchemaOptions = {
   minSize: 1,
+  maxSize: 250,
   validate(entries: BlocklistConditionEntry[]) {
     if (allowedHashes.includes(entries[0].field)) {
       return hashEntriesValidation(entries);
@@ -177,12 +214,21 @@ const entriesSchemaOptions = {
 const EntriesSchema = schema.conditional(
   schema.contextRef('os'),
   OperatingSystem.WINDOWS,
-  schema.arrayOf(WindowsEntrySchema, entriesSchemaOptions),
+  schema.arrayOf(WindowsEntrySchema, {
+    ...entriesSchemaOptions,
+    maxSize: entriesSchemaOptions.maxSize,
+  }),
   schema.conditional(
     schema.contextRef('os'),
     OperatingSystem.LINUX,
-    schema.arrayOf(LinuxEntrySchema, entriesSchemaOptions),
-    schema.arrayOf(MacEntrySchema, entriesSchemaOptions)
+    schema.arrayOf(LinuxEntrySchema, {
+      ...entriesSchemaOptions,
+      maxSize: entriesSchemaOptions.maxSize,
+    }),
+    schema.arrayOf(MacEntrySchema, {
+      ...entriesSchemaOptions,
+      maxSize: entriesSchemaOptions.maxSize,
+    })
   )
 );
 
@@ -230,6 +276,24 @@ export class BlocklistValidator extends BaseValidator {
     return super.validateHasPrivilege('canReadBlocklist');
   }
 
+  async validatePreImport(items: PromiseFromStreams): Promise<void> {
+    await this.validateHasWritePrivilege();
+
+    await this.validatePreImportItems(items, async (item) => {
+      // import specific validations
+      await this.validateImportOwnerSpaceIds(item); // instead of validateCreateOwnerSpaceIds
+      await this.validateCanImportGlobalArtifacts(item); // instead of validateCanCreateGlobalArtifacts
+      await this.removeInvalidPolicyIds(item); // instead of validateByPolicyItem
+
+      // usual validators from pre-create
+      (item.entries as BlocklistConditionEntry[]) = removeDuplicateEntryValues(
+        item.entries as BlocklistConditionEntry[]
+      );
+      await this.validateBlocklistData(item);
+      await this.validateCanCreateByPolicyArtifacts(item);
+    });
+  }
+
   async validatePreCreateItem(
     item: CreateExceptionListItemOptions
   ): Promise<CreateExceptionListItemOptions> {
@@ -242,6 +306,7 @@ export class BlocklistValidator extends BaseValidator {
     await this.validateBlocklistData(item);
     await this.validateCanCreateByPolicyArtifacts(item);
     await this.validateByPolicyItem(item);
+    await this.validateCanCreateGlobalArtifacts(item);
     await this.validateCreateOwnerSpaceIds(item);
 
     return item;

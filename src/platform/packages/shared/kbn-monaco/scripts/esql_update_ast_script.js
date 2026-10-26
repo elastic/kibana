@@ -9,7 +9,7 @@
 
 const { join } = require('path');
 const { ESLint } = require('eslint');
-const partition = require('lodash/partition');
+const { partition } = require('lodash');
 const { readdirSync, readFileSync, writeFileSync } = require('fs');
 const ora = require('ora');
 const log = ora('Updating ES|QL AST walker from antlr grammar').start();
@@ -91,7 +91,6 @@ function getUnquotedText(ctx: ParserRuleContext) {
           ecmaVersion: 2018,
         },
         rules: {
-          '@kbn/imports/no_unresolvable_imports': 'off',
           'prettier/prettier': [
             'error',
             {

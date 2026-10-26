@@ -21,6 +21,9 @@ import { cloudMock } from '@kbn/cloud-plugin/server/mocks';
 import {
   policyFactory,
   policyFactoryWithoutPaidFeatures,
+  policyFactoryWithoutPaidEnterpriseFeatures,
+  DefaultPolicyNotificationMessage,
+  DefaultPolicyRuleNotificationMessage,
 } from '../../common/endpoint/models/policy_config';
 import { buildManifestManagerMock } from '../endpoint/services/artifacts/manifest_manager/manifest_manager.mock';
 import {
@@ -31,7 +34,7 @@ import {
   getPackagePolicyPostCreateCallback,
   getPackagePolicyUpdateCallback,
 } from './fleet_integration';
-import type { KibanaRequest, Logger } from '@kbn/core/server';
+import type { KibanaRequest, Logger, RequestHandlerContext } from '@kbn/core/server';
 import {
   ALL_PRODUCT_FEATURE_KEYS,
   ProductFeatureSecurityKey,
@@ -46,10 +49,14 @@ import {
 import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
 import { LicenseService } from '../../common/license';
 import { Subject } from 'rxjs';
-import type { ILicense } from '@kbn/licensing-plugin/common/types';
+import type { ILicense } from '@kbn/licensing-types';
 import { EndpointDocGenerator } from '../../common/endpoint/generate_data';
 import type { PolicyConfig, PolicyData } from '../../common/endpoint/types';
-import { AntivirusRegistrationModes, ProtectionModes } from '../../common/endpoint/types';
+import {
+  AntivirusRegistrationModes,
+  DeviceControlAccessLevel,
+  ProtectionModes,
+} from '../../common/endpoint/types';
 import { getExceptionListClientMock } from '@kbn/lists-plugin/server/services/exception_lists/exception_list_client.mock';
 import { getExceptionListSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_schema.mock';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
@@ -67,11 +74,18 @@ import type {
   GetAgentPoliciesResponseItem,
   PostDeletePackagePoliciesResponse,
 } from '@kbn/fleet-plugin/common';
+import {
+  LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+} from '@kbn/fleet-plugin/common';
 import { createMockPolicyData } from '../endpoint/services/feature_usage/mocks';
 import { ALL_ENDPOINT_ARTIFACT_LIST_IDS } from '../../common/endpoint/service/artifacts/constants';
 import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import * as PolicyConfigHelpers from '../../common/endpoint/models/policy_config_helpers';
-import { disableProtections } from '../../common/endpoint/models/policy_config_helpers';
+import {
+  disableProtections,
+  resetCustomNotifications,
+} from '../../common/endpoint/models/policy_config_helpers';
 import type { ProductFeaturesService } from '../lib/product_features_service/product_features_service';
 import { createProductFeaturesServiceMock } from '../lib/product_features_service/mocks';
 import * as moment from 'moment';
@@ -84,6 +98,31 @@ import type { EndpointMetadataService } from '../endpoint/services/metadata';
 import { createEndpointMetadataServiceTestContextMock } from '../endpoint/services/metadata/mocks';
 import { createPolicyDataStreamsIfNeeded as _createPolicyDataStreamsIfNeeded } from './handlers/create_policy_datastreams';
 import { createTelemetryConfigProviderMock } from '../../common/telemetry_config/mocks';
+import { FleetPackagePolicyGenerator } from '../../common/endpoint/data_generators/fleet_package_policy_generator';
+import { RESPONSE_ACTIONS_SUPPORTED_INTEGRATION_TYPES } from '../../common/endpoint/service/response_actions/constants';
+import { merge, pick } from 'lodash';
+import { ENDPOINT_ACTIONS_INDEX } from '../../common/endpoint/constants';
+import type { ExperimentalFeatures } from '../../common';
+import type { IRequestContextFactory } from '../request_context_factory';
+import { installEndpointSecurityPrebuiltRule as _installEndpointSecurityPrebuiltRule } from '../lib/detection_engine/prebuilt_rules/logic/integrations/install_endpoint_security_prebuilt_rule';
+
+const installEndpointSecurityPrebuiltRuleMock = _installEndpointSecurityPrebuiltRule as jest.Mock;
+
+jest.mock(
+  '../lib/detection_engine/prebuilt_rules/logic/integrations/install_endpoint_security_prebuilt_rule',
+  () => {
+    const actualModule = jest.requireActual(
+      '../lib/detection_engine/prebuilt_rules/logic/integrations/install_endpoint_security_prebuilt_rule'
+    );
+
+    return {
+      ...actualModule,
+      installEndpointSecurityPrebuiltRule: jest.fn(
+        actualModule.installEndpointSecurityPrebuiltRule
+      ),
+    };
+  }
+);
 
 jest.mock('uuid', () => ({
   v4: (): string => 'NEW_UUID',
@@ -123,6 +162,7 @@ describe('Fleet integrations', () => {
   let productFeaturesService: ProductFeaturesService;
   let endpointMetadataService: EndpointMetadataService;
   let logger: Logger;
+  let experimentalFeatures: ExperimentalFeatures;
 
   beforeEach(() => {
     endpointAppContextStartContract = createMockEndpointAppContextServiceStartContract();
@@ -131,6 +171,15 @@ describe('Fleet integrations', () => {
     licenseEmitter = new Subject();
     licenseService = new LicenseService();
     licenseService.start(licenseEmitter);
+    experimentalFeatures = {
+      trustedDevices: true,
+      linuxDnsEvents: true,
+      customYaraSignaturesEnabled: true,
+      linuxRansomwareProtection: true,
+      endpointAiDataCollection: true,
+      perOsPolicySettings: true,
+      registryCredentialHardening: true,
+    } as ExperimentalFeatures;
     productFeaturesService = endpointAppContextStartContract.productFeaturesService;
 
     const metadataMocks = createEndpointMetadataServiceTestContextMock();
@@ -148,52 +197,23 @@ describe('Fleet integrations', () => {
     jest.clearAllMocks();
   });
 
-  describe('package policy init callback (atifacts manifest initialisation tests)', () => {
-    const soClient = savedObjectsClientMock.create();
-    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-
-    const createNewEndpointPolicyInput = (
-      manifest: ManifestSchema,
-      license = 'platinum',
-      cloud = cloudService.isCloudEnabled,
-      licenseUuid = 'updated-uid',
-      clusterUuid = '',
-      clusterName = '',
-      isServerlessEnabled = cloudService.isServerlessEnabled,
-      isTelemetryEnabled = true
-    ) => ({
-      type: 'endpoint',
-      enabled: true,
-      streams: [],
-      config: {
-        integration_config: {},
-        policy: {
-          value: disableProtections(
-            policyFactory({
-              license,
-              cloud,
-              licenseUuid,
-              clusterUuid,
-              clusterName,
-              serverless: isServerlessEnabled,
-              isGlobalTelemetryEnabled: isTelemetryEnabled,
-            })
-          ),
-        },
-        artifact_manifest: { value: manifest },
-      },
-    });
+  describe('package policy create callback', () => {
+    let soClient: ReturnType<typeof savedObjectsClientMock.create>;
+    let esClient: ReturnType<typeof elasticsearchServiceMock.createClusterClient>['asInternalUser'];
+    let securitySolutionRequestContextFactory: jest.Mocked<IRequestContextFactory>;
+    let endpointServicesMock: ReturnType<typeof createMockEndpointAppContextService>;
 
     const invokeCallback = async (manifestManager: ManifestManager): Promise<NewPackagePolicy> => {
       const callback = getPackagePolicyCreateCallback(
         logger,
         manifestManager,
-        requestContextFactoryMock.create(),
+        securitySolutionRequestContextFactory,
         endpointAppContextStartContract.alerting,
         licenseService,
         cloudService,
         productFeaturesService,
-        telemetryConfigProviderMock
+        telemetryConfigProviderMock,
+        experimentalFeatures
       );
 
       return callback(
@@ -205,183 +225,255 @@ describe('Fleet integrations', () => {
       );
     };
 
-    const TEST_POLICY_ID_1 = 'c6d16e42-c32d-4dce-8a88-113cfe276ad1';
-    const TEST_POLICY_ID_2 = '93c46720-c217-11ea-9906-b5b8a21b268e';
-    const ARTIFACT_NAME_EXCEPTIONS_MACOS = 'endpoint-exceptionlist-macos-v1';
-    const ARTIFACT_NAME_TRUSTED_APPS_MACOS = 'endpoint-trustlist-macos-v1';
-    const ARTIFACT_NAME_TRUSTED_APPS_WINDOWS = 'endpoint-trustlist-windows-v1';
-    let ARTIFACT_EXCEPTIONS_MACOS: InternalArtifactCompleteSchema;
-    let ARTIFACT_EXCEPTIONS_WINDOWS: InternalArtifactCompleteSchema;
-    let ARTIFACT_TRUSTED_APPS_MACOS: InternalArtifactCompleteSchema;
-    let ARTIFACT_TRUSTED_APPS_WINDOWS: InternalArtifactCompleteSchema;
-
-    beforeAll(async () => {
-      const artifacts = await getMockArtifacts();
-      ARTIFACT_EXCEPTIONS_MACOS = artifacts[0];
-      ARTIFACT_EXCEPTIONS_WINDOWS = artifacts[1];
-      ARTIFACT_TRUSTED_APPS_MACOS = artifacts[3];
-      ARTIFACT_TRUSTED_APPS_WINDOWS = artifacts[4];
+    beforeEach(async () => {
+      soClient = savedObjectsClientMock.create();
+      esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      endpointServicesMock = createMockEndpointAppContextService();
+      securitySolutionRequestContextFactory = requestContextFactoryMock.create();
+      const reqContextMock = await securitySolutionRequestContextFactory.create(
+        ctx as unknown as RequestHandlerContext,
+        req
+      );
+      (reqContextMock.getEndpointService as jest.Mock).mockReturnValue(endpointServicesMock);
+      securitySolutionRequestContextFactory.create.mockReturnValue(Promise.resolve(reqContextMock));
     });
 
-    beforeEach(() => {
-      licenseEmitter.next(Platinum); // set license level to platinum
+    describe('SIEM rule install', () => {
+      it('should call utility to install SIEM prebuilt rule', async () => {
+        await invokeCallback(buildManifestManagerMock());
+
+        expect(installEndpointSecurityPrebuiltRuleMock).toHaveBeenCalled();
+      });
+
+      it('should not call utility to install SIEM prebuilt rule when server config setting is enabled', async () => {
+        (endpointServicesMock.getServerConfigValue as jest.Mock).mockReturnValue(true);
+        await invokeCallback(buildManifestManagerMock());
+
+        expect(installEndpointSecurityPrebuiltRuleMock).not.toHaveBeenCalled();
+      });
     });
 
-    test('default manifest is taken when there is none and there are errors building new one', async () => {
-      const manifestManager = buildManifestManagerMock();
-      manifestManager.getLastComputedManifest = jest.fn().mockResolvedValue(null);
-      manifestManager.buildNewManifest = jest.fn().mockRejectedValue(new Error());
+    describe('Artifacts manifest initialisation', () => {
+      const createNewEndpointPolicyInput = (
+        manifest: ManifestSchema,
+        license = 'platinum',
+        cloud = cloudService.isCloudEnabled,
+        licenseUuid = 'updated-uid',
+        clusterUuid = '',
+        clusterName = '',
+        isServerlessEnabled = cloudService.isServerlessEnabled,
+        isTelemetryEnabled = true
+      ) => ({
+        type: 'endpoint',
+        enabled: true,
+        streams: [],
+        config: {
+          integration_config: {},
+          policy: {
+            value: disableProtections(
+              policyFactory({
+                license,
+                cloud,
+                licenseUuid,
+                clusterUuid,
+                clusterName,
+                serverless: isServerlessEnabled,
+                isGlobalTelemetryEnabled: isTelemetryEnabled,
+              })
+            ),
+          },
+          artifact_manifest: { value: manifest },
+        },
+      });
 
-      expect((await invokeCallback(manifestManager)).inputs[0]).toStrictEqual(
-        createNewEndpointPolicyInput({
-          artifacts: {},
-          manifest_version: '1.0.0',
-          schema_version: 'v1',
-        })
-      );
+      const TEST_POLICY_ID_1 = 'c6d16e42-c32d-4dce-8a88-113cfe276ad1';
+      const TEST_POLICY_ID_2 = '93c46720-c217-11ea-9906-b5b8a21b268e';
+      const ARTIFACT_NAME_EXCEPTIONS_MACOS = 'endpoint-exceptionlist-macos-v1';
+      const ARTIFACT_NAME_TRUSTED_APPS_MACOS = 'endpoint-trustlist-macos-v1';
+      const ARTIFACT_NAME_TRUSTED_APPS_WINDOWS = 'endpoint-trustlist-windows-v1';
+      let ARTIFACT_EXCEPTIONS_MACOS: InternalArtifactCompleteSchema;
+      let ARTIFACT_EXCEPTIONS_WINDOWS: InternalArtifactCompleteSchema;
+      let ARTIFACT_TRUSTED_APPS_MACOS: InternalArtifactCompleteSchema;
+      let ARTIFACT_TRUSTED_APPS_WINDOWS: InternalArtifactCompleteSchema;
 
-      expect(manifestManager.buildNewManifest).toHaveBeenCalledWith();
-      expect(manifestManager.pushArtifacts).not.toHaveBeenCalled();
-      expect(manifestManager.commit).not.toHaveBeenCalled();
-    });
+      beforeAll(async () => {
+        const artifacts = await getMockArtifacts();
+        ARTIFACT_EXCEPTIONS_MACOS = artifacts[0];
+        ARTIFACT_EXCEPTIONS_WINDOWS = artifacts[1];
+        ARTIFACT_TRUSTED_APPS_MACOS = artifacts[3];
+        ARTIFACT_TRUSTED_APPS_WINDOWS = artifacts[4];
+      });
 
-    test('default manifest is taken when there is none and there are errors pushing artifacts', async () => {
-      const newManifest = ManifestManager.createDefaultManifest();
-      newManifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS);
+      beforeEach(() => {
+        licenseEmitter.next(Platinum); // set license level to platinum
+      });
 
-      const manifestManager = buildManifestManagerMock();
-      manifestManager.getLastComputedManifest = jest.fn().mockResolvedValue(null);
-      manifestManager.buildNewManifest = jest.fn().mockResolvedValue(newManifest);
-      manifestManager.pushArtifacts = jest.fn().mockResolvedValue([new Error()]);
-
-      expect((await invokeCallback(manifestManager)).inputs[0]).toStrictEqual(
-        createNewEndpointPolicyInput({
-          artifacts: {},
-          manifest_version: '1.0.0',
-          schema_version: 'v1',
-        })
-      );
-
-      expect(manifestManager.buildNewManifest).toHaveBeenCalledWith();
-      expect(manifestManager.pushArtifacts).toHaveBeenCalledWith(
-        [ARTIFACT_EXCEPTIONS_MACOS],
-        newManifest
-      );
-      expect(manifestManager.commit).not.toHaveBeenCalled();
-    });
-
-    test('default manifest is taken when there is none and there are errors commiting manifest', async () => {
-      const newManifest = ManifestManager.createDefaultManifest();
-      newManifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS);
-
-      const manifestManager = buildManifestManagerMock();
-      manifestManager.getLastComputedManifest = jest.fn().mockResolvedValue(null);
-      manifestManager.buildNewManifest = jest.fn().mockResolvedValue(newManifest);
-      manifestManager.pushArtifacts = jest.fn().mockResolvedValue([]);
-      manifestManager.commit = jest.fn().mockRejectedValue(new Error());
-
-      expect((await invokeCallback(manifestManager)).inputs[0]).toStrictEqual(
-        createNewEndpointPolicyInput({
-          artifacts: {},
-          manifest_version: '1.0.0',
-          schema_version: 'v1',
-        })
-      );
-
-      expect(manifestManager.buildNewManifest).toHaveBeenCalledWith();
-      expect(manifestManager.pushArtifacts).toHaveBeenCalledWith(
-        [ARTIFACT_EXCEPTIONS_MACOS],
-        newManifest
-      );
-      expect(manifestManager.commit).toHaveBeenCalledWith(newManifest);
-    });
-
-    test('manifest is created successfuly when there is none', async () => {
-      const newManifest = ManifestManager.createDefaultManifest();
-      newManifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS);
-      newManifest.addEntry(ARTIFACT_TRUSTED_APPS_MACOS);
-
-      const manifestManager = buildManifestManagerMock();
-      manifestManager.getLastComputedManifest = jest.fn().mockResolvedValue(null);
-      manifestManager.buildNewManifest = jest.fn().mockResolvedValue(newManifest);
-      manifestManager.pushArtifacts = jest.fn().mockResolvedValue([]);
-      manifestManager.commit = jest.fn().mockResolvedValue(null);
-
-      expect((await invokeCallback(manifestManager)).inputs[0]).toStrictEqual(
-        createNewEndpointPolicyInput({
-          artifacts: toArtifactRecords({
-            [ARTIFACT_NAME_EXCEPTIONS_MACOS]: ARTIFACT_EXCEPTIONS_MACOS,
-            [ARTIFACT_NAME_TRUSTED_APPS_MACOS]: ARTIFACT_TRUSTED_APPS_MACOS,
-          }),
-          manifest_version: '1.0.0',
-          schema_version: 'v1',
-        })
-      );
-
-      expect(manifestManager.buildNewManifest).toHaveBeenCalledWith();
-      expect(manifestManager.pushArtifacts).toHaveBeenCalledWith(
-        [ARTIFACT_EXCEPTIONS_MACOS, ARTIFACT_TRUSTED_APPS_MACOS],
-        newManifest
-      );
-      expect(manifestManager.commit).toHaveBeenCalledWith(newManifest);
-    });
-
-    test('policy is updated with only default entries from manifest', async () => {
-      const manifest = new Manifest({ soVersion: '1.0.1', semanticVersion: '1.0.1' });
-      manifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS);
-      manifest.addEntry(ARTIFACT_EXCEPTIONS_WINDOWS, TEST_POLICY_ID_1);
-      manifest.addEntry(ARTIFACT_TRUSTED_APPS_MACOS, TEST_POLICY_ID_2);
-      manifest.addEntry(ARTIFACT_TRUSTED_APPS_WINDOWS);
-
-      const manifestManager = buildManifestManagerMock();
-      manifestManager.getLastComputedManifest = jest.fn().mockResolvedValue(manifest);
-
-      expect((await invokeCallback(manifestManager)).inputs[0]).toStrictEqual(
-        createNewEndpointPolicyInput({
-          artifacts: toArtifactRecords({
-            [ARTIFACT_NAME_EXCEPTIONS_MACOS]: ARTIFACT_EXCEPTIONS_MACOS,
-            [ARTIFACT_NAME_TRUSTED_APPS_WINDOWS]: ARTIFACT_TRUSTED_APPS_WINDOWS,
-          }),
-          manifest_version: '1.0.1',
-          schema_version: 'v1',
-        })
-      );
-
-      expect(manifestManager.buildNewManifest).not.toHaveBeenCalled();
-      expect(manifestManager.pushArtifacts).not.toHaveBeenCalled();
-      expect(manifestManager.commit).not.toHaveBeenCalled();
-    });
-
-    it('should correctly set meta.billable', async () => {
-      const isBillablePolicySpy = jest.spyOn(PolicyConfigHelpers, 'isBillablePolicy');
-      isBillablePolicySpy.mockReturnValue(false);
-      const manifestManager = buildManifestManagerMock();
-
-      let packagePolicy = await invokeCallback(manifestManager);
-      expect(isBillablePolicySpy).toHaveBeenCalled();
-      expect(packagePolicy.inputs[0].config!.policy.value.meta.billable).toBe(false);
-
-      isBillablePolicySpy.mockReset();
-      isBillablePolicySpy.mockReturnValue(true);
-      packagePolicy = await invokeCallback(manifestManager);
-      expect(isBillablePolicySpy).toHaveBeenCalled();
-      expect(packagePolicy.inputs[0].config!.policy.value.meta.billable).toBe(true);
-
-      isBillablePolicySpy.mockRestore();
-    });
-
-    it.each([false, true])(
-      'should correctly set `global_telemetry_enabled` to %s',
-      async (targetValue) => {
+      test('default manifest is taken when there is none and there are errors building new one', async () => {
         const manifestManager = buildManifestManagerMock();
-        telemetryConfigProviderMock.getIsOptedIn.mockReturnValue(targetValue);
+        manifestManager.getLastComputedManifest = jest.fn().mockResolvedValue(null);
+        manifestManager.buildNewManifest = jest.fn().mockRejectedValue(new Error());
+
+        expect((await invokeCallback(manifestManager)).inputs[0]).toStrictEqual(
+          createNewEndpointPolicyInput({
+            artifacts: {},
+            manifest_version: '1.0.0',
+            schema_version: 'v1',
+          })
+        );
+
+        expect(manifestManager.buildNewManifest).toHaveBeenCalledWith();
+        expect(manifestManager.pushArtifacts).not.toHaveBeenCalled();
+        expect(manifestManager.commit).not.toHaveBeenCalled();
+      });
+
+      test('default manifest is taken when there is none and there are errors pushing artifacts', async () => {
+        const newManifest = ManifestManager.createDefaultManifest();
+        newManifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS);
+
+        const manifestManager = buildManifestManagerMock();
+        manifestManager.getLastComputedManifest = jest.fn().mockResolvedValue(null);
+        manifestManager.buildNewManifest = jest.fn().mockResolvedValue(newManifest);
+        manifestManager.pushArtifacts = jest.fn().mockResolvedValue([new Error()]);
+
+        expect((await invokeCallback(manifestManager)).inputs[0]).toStrictEqual(
+          createNewEndpointPolicyInput({
+            artifacts: {},
+            manifest_version: '1.0.0',
+            schema_version: 'v1',
+          })
+        );
+
+        expect(manifestManager.buildNewManifest).toHaveBeenCalledWith();
+        expect(manifestManager.pushArtifacts).toHaveBeenCalledWith(
+          [ARTIFACT_EXCEPTIONS_MACOS],
+          newManifest
+        );
+        expect(manifestManager.commit).not.toHaveBeenCalled();
+      });
+
+      test('default manifest is taken when there is none and there are errors commiting manifest', async () => {
+        const newManifest = ManifestManager.createDefaultManifest();
+        newManifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS);
+
+        const manifestManager = buildManifestManagerMock();
+        manifestManager.getLastComputedManifest = jest.fn().mockResolvedValue(null);
+        manifestManager.buildNewManifest = jest.fn().mockResolvedValue(newManifest);
+        manifestManager.pushArtifacts = jest.fn().mockResolvedValue([]);
+        manifestManager.commit = jest.fn().mockRejectedValue(new Error());
+
+        expect((await invokeCallback(manifestManager)).inputs[0]).toStrictEqual(
+          createNewEndpointPolicyInput({
+            artifacts: {},
+            manifest_version: '1.0.0',
+            schema_version: 'v1',
+          })
+        );
+
+        expect(manifestManager.buildNewManifest).toHaveBeenCalledWith();
+        expect(manifestManager.pushArtifacts).toHaveBeenCalledWith(
+          [ARTIFACT_EXCEPTIONS_MACOS],
+          newManifest
+        );
+        expect(manifestManager.commit).toHaveBeenCalledWith(newManifest);
+      });
+
+      test('manifest is created successfuly when there is none', async () => {
+        const newManifest = ManifestManager.createDefaultManifest();
+        newManifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS);
+        newManifest.addEntry(ARTIFACT_TRUSTED_APPS_MACOS);
+
+        const manifestManager = buildManifestManagerMock();
+        manifestManager.getLastComputedManifest = jest.fn().mockResolvedValue(null);
+        manifestManager.buildNewManifest = jest.fn().mockResolvedValue(newManifest);
+        manifestManager.pushArtifacts = jest.fn().mockResolvedValue([]);
+        manifestManager.commit = jest.fn().mockResolvedValue(null);
+
+        expect((await invokeCallback(manifestManager)).inputs[0]).toStrictEqual(
+          createNewEndpointPolicyInput({
+            artifacts: toArtifactRecords({
+              [ARTIFACT_NAME_EXCEPTIONS_MACOS]: ARTIFACT_EXCEPTIONS_MACOS,
+              [ARTIFACT_NAME_TRUSTED_APPS_MACOS]: ARTIFACT_TRUSTED_APPS_MACOS,
+            }),
+            manifest_version: '1.0.0',
+            schema_version: 'v1',
+          })
+        );
+
+        expect(manifestManager.buildNewManifest).toHaveBeenCalledWith();
+        expect(manifestManager.pushArtifacts).toHaveBeenCalledWith(
+          [ARTIFACT_EXCEPTIONS_MACOS, ARTIFACT_TRUSTED_APPS_MACOS],
+          newManifest
+        );
+        expect(manifestManager.commit).toHaveBeenCalledWith(newManifest);
+      });
+
+      test('policy is updated with only default entries from manifest', async () => {
+        const manifest = new Manifest({ soVersion: '1.0.1', semanticVersion: '1.0.1' });
+        manifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS);
+        manifest.addEntry(ARTIFACT_EXCEPTIONS_WINDOWS, TEST_POLICY_ID_1);
+        manifest.addEntry(ARTIFACT_TRUSTED_APPS_MACOS, TEST_POLICY_ID_2);
+        manifest.addEntry(ARTIFACT_TRUSTED_APPS_WINDOWS);
+
+        const manifestManager = buildManifestManagerMock();
+        manifestManager.getLastComputedManifest = jest.fn().mockResolvedValue(manifest);
+
+        expect((await invokeCallback(manifestManager)).inputs[0]).toStrictEqual(
+          createNewEndpointPolicyInput({
+            artifacts: toArtifactRecords({
+              [ARTIFACT_NAME_EXCEPTIONS_MACOS]: ARTIFACT_EXCEPTIONS_MACOS,
+              [ARTIFACT_NAME_TRUSTED_APPS_WINDOWS]: ARTIFACT_TRUSTED_APPS_WINDOWS,
+            }),
+            manifest_version: '1.0.1',
+            schema_version: 'v1',
+          })
+        );
+
+        expect(manifestManager.buildNewManifest).not.toHaveBeenCalled();
+        expect(manifestManager.pushArtifacts).not.toHaveBeenCalled();
+        expect(manifestManager.commit).not.toHaveBeenCalled();
+      });
+
+      it('should correctly set meta.billable', async () => {
+        const isBillablePolicySpy = jest.spyOn(PolicyConfigHelpers, 'isBillablePolicy');
+        isBillablePolicySpy.mockReturnValue(false);
+        const manifestManager = buildManifestManagerMock();
+
+        let packagePolicy = await invokeCallback(manifestManager);
+        expect(isBillablePolicySpy).toHaveBeenCalled();
+        expect(packagePolicy.inputs[0].config!.policy.value.meta.billable).toBe(false);
+
+        isBillablePolicySpy.mockReset();
+        isBillablePolicySpy.mockReturnValue(true);
+        packagePolicy = await invokeCallback(manifestManager);
+        expect(isBillablePolicySpy).toHaveBeenCalled();
+        expect(packagePolicy.inputs[0].config!.policy.value.meta.billable).toBe(true);
+
+        isBillablePolicySpy.mockRestore();
+      });
+
+      it.each([false, true])(
+        'should correctly set `global_telemetry_enabled` to %s',
+        async (targetValue) => {
+          const manifestManager = buildManifestManagerMock();
+          telemetryConfigProviderMock.getIsOptedIn.mockReturnValue(targetValue);
+
+          const packagePolicy = await invokeCallback(manifestManager);
+
+          const policyConfig: PolicyConfig = packagePolicy.inputs[0].config!.policy.value;
+          expect(policyConfig.global_telemetry_enabled).toBe(targetValue);
+        }
+      );
+
+      it('should remove Linux DNS events when linuxDnsEvents feature flag is disabled', async () => {
+        // @ts-expect-error write to readonly property for testing
+        experimentalFeatures.linuxDnsEvents = false;
+        const manifestManager = buildManifestManagerMock();
 
         const packagePolicy = await invokeCallback(manifestManager);
 
-        const policyConfig: PolicyConfig = packagePolicy.inputs[0].config!.policy.value;
-        expect(policyConfig.global_telemetry_enabled).toBe(targetValue);
-      }
-    );
+        expect(packagePolicy.inputs[0].config!.policy.value.linux.events.dns).toBeUndefined();
+      });
+    });
   });
 
   describe('package policy post create callback', () => {
@@ -395,9 +487,14 @@ describe('Fleet integrations', () => {
       soClient = savedObjectsClientMock.create();
       esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
       endpointAppContextServiceMock = createMockEndpointAppContextService();
+      jest.clearAllMocks();
       endpointAppContextServiceMock.getExceptionListsClient.mockReturnValue(exceptionListClient);
       callback = getPackagePolicyPostCreateCallback(endpointAppContextServiceMock);
       policyConfig = generator.generatePolicyPackagePolicy() as PackagePolicy;
+      // By default, simulate that the event filter list does not exist
+      (exceptionListClient.getExceptionList as jest.Mock).mockResolvedValue(null);
+      (exceptionListClient.createExceptionList as jest.Mock).mockResolvedValue({});
+      (exceptionListClient.createExceptionListItem as jest.Mock).mockResolvedValue({});
     });
 
     it('should create the Endpoint Event Filters List and add the correct Event Filters List Item attached to the policy given nonInteractiveSession parameter on integration config eventFilters', async () => {
@@ -419,6 +516,9 @@ describe('Fleet integrations', () => {
         req
       );
 
+      // Wait for all async code in createEventFilters to complete
+      await new Promise(process.nextTick);
+
       expect(exceptionListClient.createExceptionList).toHaveBeenCalledWith(
         expect.objectContaining({
           listId: ENDPOINT_ARTIFACT_LISTS.eventFilters.id,
@@ -426,6 +526,55 @@ describe('Fleet integrations', () => {
         })
       );
 
+      expect(exceptionListClient.createExceptionListItem).toHaveBeenCalledWith(
+        expect.objectContaining({
+          listId: ENDPOINT_ARTIFACT_LISTS.eventFilters.id,
+          tags: [`policy:${postCreatedPolicyConfig.id}`],
+          osTypes: ['linux'],
+          entries: [
+            {
+              field: 'process.entry_leader.interactive',
+              operator: 'included',
+              type: 'match',
+              value: 'false',
+            },
+          ],
+          itemId: 'NEW_UUID',
+          namespaceType: 'agnostic',
+          meta: undefined,
+        })
+      );
+    });
+
+    it('should NOT create the Event Filters List if it already exists, but should add the Event Filters List Item', async () => {
+      const integrationConfig = {
+        type: 'cloud',
+        eventFilters: {
+          nonInteractiveSession: true,
+        },
+      };
+
+      policyConfig.inputs[0]!.config!.integration_config = {
+        value: integrationConfig,
+      };
+
+      // Mock getExceptionList to return a non-null value (list already exists)
+      (exceptionListClient.getExceptionList as jest.Mock).mockResolvedValue({
+        id: 'existing-list-id',
+        listId: ENDPOINT_ARTIFACT_LISTS.eventFilters.id,
+      });
+
+      const postCreatedPolicyConfig = await callback(
+        policyConfig,
+        soClient,
+        esClient,
+        requestContextMock.convertContext(ctx),
+        req
+      );
+
+      // Should NOT attempt to create the list
+      expect(exceptionListClient.createExceptionList).not.toHaveBeenCalled();
+      // Should still create the event filter item
       expect(exceptionListClient.createExceptionListItem).toHaveBeenCalledWith(
         expect.objectContaining({
           listId: ENDPOINT_ARTIFACT_LISTS.eventFilters.id,
@@ -601,7 +750,8 @@ describe('Fleet integrations', () => {
         const callback = getPackagePolicyUpdateCallback(
           endpointAppContextServiceMock,
           cloudService,
-          productFeaturesService
+          productFeaturesService,
+          experimentalFeatures
         );
         const policyConfig = generator.generatePolicyPackagePolicy();
         policyConfig.inputs[0]!.config!.policy.value = mockPolicy;
@@ -617,7 +767,8 @@ describe('Fleet integrations', () => {
         const callback = getPackagePolicyUpdateCallback(
           endpointAppContextServiceMock,
           cloudService,
-          productFeaturesService
+          productFeaturesService,
+          experimentalFeatures
         );
         const policyConfig = generator.generatePolicyPackagePolicy();
         policyConfig.inputs[0]!.config!.policy.value = mockPolicy;
@@ -640,6 +791,24 @@ describe('Fleet integrations', () => {
         licenseEmitter.next(Enterprise); // set license level to enterprise
       });
 
+      it('resolves an update with absent macOS ransomware settings', async () => {
+        const mockPolicy = policyFactory();
+        Reflect.deleteProperty(mockPolicy.mac, 'ransomware');
+        Reflect.deleteProperty(mockPolicy.mac.popup, 'ransomware');
+        const callback = getPackagePolicyUpdateCallback(
+          endpointAppContextServiceMock,
+          cloudService,
+          productFeaturesService,
+          experimentalFeatures
+        );
+        const policyConfig = generator.generatePolicyPackagePolicy();
+        policyConfig.inputs[0]!.config!.policy.value = mockPolicy;
+
+        await expect(
+          callback(policyConfig, soClient, esClient, requestContextMock.convertContext(ctx), req)
+        ).resolves.toBeDefined();
+      });
+
       it('should throw if endpointProtectionUpdates productFeature is disabled and user modifies global_manifest_version', async () => {
         productFeaturesService = createProductFeaturesServiceMock(
           ALL_PRODUCT_FEATURE_KEYS.filter((key) => key !== 'endpoint_protection_updates')
@@ -647,7 +816,8 @@ describe('Fleet integrations', () => {
         const callback = getPackagePolicyUpdateCallback(
           endpointAppContextServiceMock,
           cloudService,
-          productFeaturesService
+          productFeaturesService,
+          experimentalFeatures
         );
         const policyConfig = generator.generatePolicyPackagePolicy();
         policyConfig.inputs[0]!.config!.policy.value.global_manifest_version = '2023-01-01';
@@ -665,7 +835,8 @@ describe('Fleet integrations', () => {
         const callback = getPackagePolicyUpdateCallback(
           endpointAppContextServiceMock,
           cloudService,
-          productFeaturesService
+          productFeaturesService,
+          experimentalFeatures
         );
         const policyConfig = generator.generatePolicyPackagePolicy();
         policyConfig.inputs[0]!.config!.policy.value.windows.popup.ransomware.message = 'foo';
@@ -686,7 +857,9 @@ describe('Fleet integrations', () => {
           message: 'Invalid date format. Use "latest" or "YYYY-MM-DD" format. UTC time.',
         },
         {
-          date: '2020-10-31',
+          // Test exact "too far in the past" boundary - exactly 18 months ago (without +1 day)
+          // This tests the precise boundary condition rather than an arbitrary old date
+          date: moment.utc().subtract(18, 'months').format('YYYY-MM-DD'),
           message:
             'Global manifest version is too far in the past. Please use either "latest" or a date within the last 18 months. The earliest valid date is October 1, 2023, in UTC time.',
         },
@@ -710,6 +883,16 @@ describe('Fleet integrations', () => {
         {
           date: moment.utc().subtract(1, 'day').format('YYYY-MM-DD'), // Correct date
         },
+        {
+          // Test exact cutoff boundary with buffer to prevent flakiness around midnight
+          // Add 30 minutes buffer to account for time elapsed between test setup and API call
+          date: moment
+            .utc()
+            .add(30, 'minutes')
+            .subtract(18, 'months')
+            .add(1, 'day')
+            .format('YYYY-MM-DD'),
+        },
       ])(
         'should return bad request for invalid endpoint package policy global manifest values',
         async ({ date, message }) => {
@@ -717,7 +900,8 @@ describe('Fleet integrations', () => {
           const callback = getPackagePolicyUpdateCallback(
             endpointAppContextServiceMock,
             cloudService,
-            productFeaturesService
+            productFeaturesService,
+            experimentalFeatures
           );
           const policyConfig = generator.generatePolicyPackagePolicy();
           policyConfig.inputs[0]!.config!.policy.value = {
@@ -774,11 +958,12 @@ describe('Fleet integrations', () => {
       ])(
         'should return bad request for invalid endpoint package policy global manifest values',
         async ({ date, message }) => {
-          const mockPolicy = policyFactory(); // defaults with paid features on
+          const mockPolicy = policyFactoryWithoutPaidEnterpriseFeatures(); // Use platinum-compatible policy
           const callback = getPackagePolicyUpdateCallback(
             endpointAppContextServiceMock,
             cloudService,
-            productFeaturesService
+            productFeaturesService,
+            experimentalFeatures
           );
           const policyConfig = generator.generatePolicyPackagePolicy();
           policyConfig.inputs[0]!.config!.policy.value = {
@@ -812,12 +997,14 @@ describe('Fleet integrations', () => {
       );
 
       it('updates successfully when paid features are turned on', async () => {
+        licenseEmitter.next(Enterprise); // Temporarily use Enterprise for this test
         const mockPolicy = policyFactory();
         mockPolicy.windows.popup.malware.message = 'paid feature';
         const callback = getPackagePolicyUpdateCallback(
           endpointAppContextServiceMock,
           cloudService,
-          productFeaturesService
+          productFeaturesService,
+          experimentalFeatures
         );
         const policyConfig = generator.generatePolicyPackagePolicy();
         policyConfig.inputs[0]!.config!.policy.value = mockPolicy;
@@ -832,13 +1019,15 @@ describe('Fleet integrations', () => {
       });
 
       it('should turn off protections if endpointPolicyProtections productFeature is disabled', async () => {
+        licenseEmitter.next(Enterprise); // Temporarily use Enterprise for this test
         productFeaturesService = createProductFeaturesServiceMock(
           ALL_PRODUCT_FEATURE_KEYS.filter((key) => key !== 'endpoint_policy_protections')
         );
         const callback = getPackagePolicyUpdateCallback(
           endpointAppContextServiceMock,
           cloudService,
-          productFeaturesService
+          productFeaturesService,
+          experimentalFeatures
         );
 
         const updatedPolicy = await callback(
@@ -872,6 +1061,90 @@ describe('Fleet integrations', () => {
       });
     });
 
+    describe('Essentials tier', () => {
+      const soClient = savedObjectsClientMock.create();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const customNotificationError =
+        'To customize the user notification, you must add Endpoint Protection Complete to your project.';
+
+      let callback: ReturnType<typeof getPackagePolicyUpdateCallback>;
+
+      const runUpdate = (policy: Parameters<typeof callback>[0]) =>
+        callback(policy, soClient, esClient, requestContextMock.convertContext(ctx), req);
+
+      // A policy as Fleet stores it on Essentials: the first save strips device control.
+      const getStoredEssentialsPolicy = async () => {
+        const stored = await runUpdate(generator.generatePolicyPackagePolicy());
+        return structuredClone(stored) as Parameters<typeof callback>[0];
+      };
+
+      beforeEach(() => {
+        licenseEmitter.next(Enterprise);
+        callback = getPackagePolicyUpdateCallback(
+          endpointAppContextServiceMock,
+          cloudService,
+          createProductFeaturesServiceMock(
+            ALL_PRODUCT_FEATURE_KEYS.filter(
+              (key) =>
+                key !== ProductFeatureSecurityKey.endpointTrustedDevices &&
+                key !== ProductFeatureSecurityKey.endpointCustomNotification
+            )
+          ),
+          experimentalFeatures
+        );
+      });
+
+      it('resolves an unmodified update of a stored policy and keeps device control stripped', async () => {
+        const updated = await runUpdate(await getStoredEssentialsPolicy());
+
+        const policyValue = updated.inputs[0]!.config!.policy.value;
+        for (const os of ['windows', 'mac'] as const) {
+          expect(policyValue[os]).not.toHaveProperty('device_control');
+          expect(policyValue[os].popup).not.toHaveProperty('device_control');
+        }
+      });
+
+      it('resolves an artifact-manifest-only update', async () => {
+        const stored = await getStoredEssentialsPolicy();
+        stored.inputs[0]!.config!.artifact_manifest = {
+          value: { manifest_version: 'WzEsMV0=', schema_version: 'v1', artifacts: {} },
+        };
+
+        await expect(runUpdate(stored)).resolves.toBeDefined();
+      });
+
+      it('resolves an update with the per-key defaults the policy details UI fills in', async () => {
+        const stored = await getStoredEssentialsPolicy();
+        const policyValue = stored.inputs[0]!.config!.policy.value;
+        for (const os of ['windows', 'mac', 'linux'] as const) {
+          policyValue[os].popup.malware.message = DefaultPolicyNotificationMessage;
+          policyValue[os].popup.memory_protection.message = DefaultPolicyRuleNotificationMessage;
+          policyValue[os].popup.behavior_protection.message = DefaultPolicyRuleNotificationMessage;
+        }
+
+        await expect(runUpdate(stored)).resolves.toBeDefined();
+      });
+
+      it('resolves an update after the startup migration reset', async () => {
+        const stored = await getStoredEssentialsPolicy();
+        const policyValue = stored.inputs[0]!.config!.policy.value;
+        stored.inputs[0]!.config!.policy.value = merge(
+          {},
+          policyValue,
+          resetCustomNotifications(policyValue)
+        );
+
+        await expect(runUpdate(stored)).resolves.toBeDefined();
+      });
+
+      it('rejects a custom malware message with the 403 message', async () => {
+        const stored = await getStoredEssentialsPolicy();
+        stored.inputs[0]!.config!.policy.value.windows.popup.malware.message = 'foo';
+
+        await expect(runUpdate(stored)).rejects.toThrow(customNotificationError);
+      });
+    });
+
     describe('when meta fields should be updated', () => {
       const soClient = savedObjectsClientMock.create();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
@@ -898,13 +1171,13 @@ describe('Fleet integrations', () => {
       esClient.info.mockResolvedValue(infoResponse);
 
       beforeEach(() => {
-        licenseEmitter.next(Platinum); // set license level to platinum
+        licenseEmitter.next(Enterprise); // set license level to enterprise
       });
 
       it('updates successfully when meta fields differ from services', async () => {
         const mockPolicy = policyFactory();
         mockPolicy.meta.cloud = true; // cloud mock will return true
-        mockPolicy.meta.license = 'platinum'; // license is set to emit platinum
+        mockPolicy.meta.license = 'enterprise'; // license is set to emit enterprise
         mockPolicy.meta.cluster_name = 'updated-name';
         mockPolicy.meta.cluster_uuid = 'updated-uuid';
         mockPolicy.meta.license_uuid = 'updated-uid';
@@ -913,7 +1186,8 @@ describe('Fleet integrations', () => {
         const callback = getPackagePolicyUpdateCallback(
           endpointAppContextServiceMock,
           cloudService,
-          productFeaturesService
+          productFeaturesService,
+          experimentalFeatures
         );
         const policyConfig = generator.generatePolicyPackagePolicy();
 
@@ -938,7 +1212,7 @@ describe('Fleet integrations', () => {
       it('meta fields stay the same where there is no difference', async () => {
         const mockPolicy = policyFactory();
         mockPolicy.meta.cloud = true; // cloud mock will return true
-        mockPolicy.meta.license = 'platinum'; // license is set to emit platinum
+        mockPolicy.meta.license = 'enterprise'; // license is set to emit enterprise
         mockPolicy.meta.cluster_name = 'updated-name';
         mockPolicy.meta.cluster_uuid = 'updated-uuid';
         mockPolicy.meta.license_uuid = 'updated-uid';
@@ -947,7 +1221,8 @@ describe('Fleet integrations', () => {
         const callback = getPackagePolicyUpdateCallback(
           endpointAppContextServiceMock,
           cloudService,
-          productFeaturesService
+          productFeaturesService,
+          experimentalFeatures
         );
         const policyConfig = generator.generatePolicyPackagePolicy();
         // values should be updated
@@ -969,6 +1244,757 @@ describe('Fleet integrations', () => {
       });
     });
 
+    describe('when device control features are disabled', () => {
+      const soClient = savedObjectsClientMock.create();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      beforeEach(() => {
+        licenseEmitter.next(Enterprise);
+      });
+
+      it('should remove device control when endpointTrustedDevices product feature is disabled', async () => {
+        productFeaturesService = createProductFeaturesServiceMock(
+          ALL_PRODUCT_FEATURE_KEYS.filter(
+            (key) => key !== ProductFeatureSecurityKey.endpointTrustedDevices
+          )
+        );
+
+        const mockPolicy = policyFactory();
+        // Add some device control settings to test removal
+        if (!mockPolicy.windows.device_control) {
+          mockPolicy.windows.device_control = { enabled: true, usb_storage: 'deny_all' };
+        } else {
+          mockPolicy.windows.device_control.enabled = true;
+          mockPolicy.windows.device_control.usb_storage = 'deny_all';
+        }
+
+        const removeDeviceControlSpy = jest.spyOn(PolicyConfigHelpers, 'removeDeviceControl');
+
+        const callback = getPackagePolicyUpdateCallback(
+          endpointAppContextServiceMock,
+          cloudService,
+          productFeaturesService,
+          experimentalFeatures
+        );
+
+        const policyConfig = generator.generatePolicyPackagePolicy();
+        policyConfig.inputs[0]!.config!.policy.value = mockPolicy;
+
+        await callback(
+          policyConfig,
+          soClient,
+          esClient,
+          requestContextMock.convertContext(ctx),
+          req
+        );
+
+        expect(removeDeviceControlSpy).toHaveBeenCalledWith(mockPolicy);
+      });
+
+      it('should remove device control when trustedDevices experimental feature is disabled', async () => {
+        // @ts-expect-error
+        experimentalFeatures.trustedDevices = false;
+
+        const mockPolicy = policyFactory();
+        // Add some device control settings to test removal
+        if (!mockPolicy.windows.device_control) {
+          mockPolicy.windows.device_control = { enabled: true, usb_storage: 'deny_all' };
+        } else {
+          mockPolicy.windows.device_control.enabled = true;
+          mockPolicy.windows.device_control.usb_storage = 'deny_all';
+        }
+
+        const removeDeviceControlSpy = jest.spyOn(PolicyConfigHelpers, 'removeDeviceControl');
+
+        const callback = getPackagePolicyUpdateCallback(
+          endpointAppContextServiceMock,
+          cloudService,
+          productFeaturesService,
+          experimentalFeatures
+        );
+
+        const policyConfig = generator.generatePolicyPackagePolicy();
+        policyConfig.inputs[0]!.config!.policy.value = mockPolicy;
+
+        await callback(
+          policyConfig,
+          soClient,
+          esClient,
+          requestContextMock.convertContext(ctx),
+          req
+        );
+
+        expect(removeDeviceControlSpy).toHaveBeenCalledWith(mockPolicy);
+      });
+
+      it('should not remove device control when both features are enabled', async () => {
+        // Reset to enabled states
+        // @ts-expect-error
+        experimentalFeatures.trustedDevices = true;
+        // @ts-expect-error
+        productFeaturesService = createProductFeaturesServiceMock(ALL_PRODUCT_FEATURE_KEYS);
+
+        const mockPolicy = policyFactory();
+        if (!mockPolicy.windows.device_control) {
+          mockPolicy.windows.device_control = { enabled: true, usb_storage: 'deny_all' };
+        } else {
+          mockPolicy.windows.device_control.enabled = true;
+          mockPolicy.windows.device_control.usb_storage = 'deny_all';
+        }
+
+        const removeDeviceControlSpy = jest.spyOn(PolicyConfigHelpers, 'removeDeviceControl');
+
+        const callback = getPackagePolicyUpdateCallback(
+          endpointAppContextServiceMock,
+          cloudService,
+          productFeaturesService,
+          experimentalFeatures
+        );
+
+        const policyConfig = generator.generatePolicyPackagePolicy();
+        policyConfig.inputs[0]!.config!.policy.value = mockPolicy;
+
+        await callback(
+          policyConfig,
+          soClient,
+          esClient,
+          requestContextMock.convertContext(ctx),
+          req
+        );
+
+        expect(removeDeviceControlSpy).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('when custom YARA signatures features are disabled', () => {
+      const soClient = savedObjectsClientMock.create();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const osList = ['windows', 'mac', 'linux'] as const;
+
+      const setCustomYaraSignaturesOnPolicy = (policy: PolicyConfig, value: boolean) => {
+        for (const os of osList) {
+          policy[os].memory_protection.custom_yara_signatures = value;
+        }
+      };
+
+      const expectCustomYaraSignaturesAbsent = (policy: PolicyConfig) => {
+        for (const os of osList) {
+          expect(policy[os].memory_protection).not.toHaveProperty('custom_yara_signatures');
+        }
+      };
+
+      beforeEach(() => {
+        licenseEmitter.next(Enterprise);
+      });
+
+      it('should omit custom YARA signatures when the product feature is disabled', async () => {
+        productFeaturesService = createProductFeaturesServiceMock(
+          ALL_PRODUCT_FEATURE_KEYS.filter(
+            (key) => key !== ProductFeatureSecurityKey.endpointCustomYaraSignatures
+          )
+        );
+
+        const mockPolicy = policyFactory();
+        setCustomYaraSignaturesOnPolicy(mockPolicy, true);
+
+        const callback = getPackagePolicyUpdateCallback(
+          endpointAppContextServiceMock,
+          cloudService,
+          productFeaturesService,
+          experimentalFeatures
+        );
+
+        const policyConfig = generator.generatePolicyPackagePolicy();
+        policyConfig.inputs[0]!.config!.policy.value = mockPolicy;
+
+        const updatedPolicyConfig = await callback(
+          policyConfig,
+          soClient,
+          esClient,
+          requestContextMock.convertContext(ctx),
+          req
+        );
+
+        expectCustomYaraSignaturesAbsent(updatedPolicyConfig.inputs[0]!.config!.policy.value);
+      });
+
+      it('should omit custom YARA signatures when the experimental flag is off', async () => {
+        // @ts-expect-error write to readonly property for testing
+        experimentalFeatures.customYaraSignaturesEnabled = false;
+
+        const mockPolicy = policyFactory();
+        setCustomYaraSignaturesOnPolicy(mockPolicy, true);
+
+        const callback = getPackagePolicyUpdateCallback(
+          endpointAppContextServiceMock,
+          cloudService,
+          productFeaturesService,
+          experimentalFeatures
+        );
+
+        const policyConfig = generator.generatePolicyPackagePolicy();
+        policyConfig.inputs[0]!.config!.policy.value = mockPolicy;
+
+        const updatedPolicyConfig = await callback(
+          policyConfig,
+          soClient,
+          esClient,
+          requestContextMock.convertContext(ctx),
+          req
+        );
+
+        expectCustomYaraSignaturesAbsent(updatedPolicyConfig.inputs[0]!.config!.policy.value);
+      });
+
+      it('should preserve custom YARA signatures when both the product feature and experimental flag are enabled', async () => {
+        const mockPolicy = policyFactory();
+        mockPolicy.windows.memory_protection.custom_yara_signatures = false;
+        mockPolicy.mac.memory_protection.custom_yara_signatures = true;
+        mockPolicy.linux.memory_protection.custom_yara_signatures = false;
+
+        const callback = getPackagePolicyUpdateCallback(
+          endpointAppContextServiceMock,
+          cloudService,
+          productFeaturesService,
+          experimentalFeatures
+        );
+
+        const policyConfig = generator.generatePolicyPackagePolicy();
+        policyConfig.inputs[0]!.config!.policy.value = mockPolicy;
+
+        const updatedPolicyConfig = await callback(
+          policyConfig,
+          soClient,
+          esClient,
+          requestContextMock.convertContext(ctx),
+          req
+        );
+
+        const updatedPolicy = updatedPolicyConfig.inputs[0]!.config!.policy.value;
+        expect(updatedPolicy.windows.memory_protection.custom_yara_signatures).toBe(false);
+        expect(updatedPolicy.mac.memory_protection.custom_yara_signatures).toBe(true);
+        expect(updatedPolicy.linux.memory_protection.custom_yara_signatures).toBe(false);
+      });
+
+      describe('when the license is below Enterprise so the callback throws', () => {
+        beforeEach(() => {
+          licenseEmitter.next(Platinum);
+        });
+
+        it('should strip custom YARA signatures from the shared inbound payload before throwing a license 403 when the experimental flag is off', async () => {
+          experimentalFeatures = {
+            ...experimentalFeatures,
+            customYaraSignaturesEnabled: false,
+          };
+
+          const mockPolicy = policyFactory();
+          setCustomYaraSignaturesOnPolicy(mockPolicy, true);
+
+          const callback = getPackagePolicyUpdateCallback(
+            endpointAppContextServiceMock,
+            cloudService,
+            productFeaturesService,
+            experimentalFeatures
+          );
+
+          const policyConfig = generator.generatePolicyPackagePolicy();
+          policyConfig.inputs[0]!.config!.policy.value = mockPolicy;
+
+          await expect(() =>
+            callback(policyConfig, soClient, esClient, requestContextMock.convertContext(ctx), req)
+          ).rejects.toThrow(
+            'Platinum license does not support this action. Please upgrade your license.'
+          );
+
+          expectCustomYaraSignaturesAbsent(policyConfig.inputs[0]!.config!.policy.value);
+        });
+
+        it('should strip custom YARA signatures from the shared inbound payload before throwing a license 403 when the product feature is disabled', async () => {
+          productFeaturesService = createProductFeaturesServiceMock(
+            ALL_PRODUCT_FEATURE_KEYS.filter(
+              (key) => key !== ProductFeatureSecurityKey.endpointCustomYaraSignatures
+            )
+          );
+
+          const mockPolicy = policyFactory();
+          setCustomYaraSignaturesOnPolicy(mockPolicy, true);
+
+          const callback = getPackagePolicyUpdateCallback(
+            endpointAppContextServiceMock,
+            cloudService,
+            productFeaturesService,
+            experimentalFeatures
+          );
+
+          const policyConfig = generator.generatePolicyPackagePolicy();
+          policyConfig.inputs[0]!.config!.policy.value = mockPolicy;
+
+          await expect(() =>
+            callback(policyConfig, soClient, esClient, requestContextMock.convertContext(ctx), req)
+          ).rejects.toThrow(
+            'Platinum license does not support this action. Please upgrade your license.'
+          );
+
+          expectCustomYaraSignaturesAbsent(policyConfig.inputs[0]!.config!.policy.value);
+        });
+      });
+    });
+
+    describe('when registry credential hardening features are disabled', () => {
+      const soClient = savedObjectsClientMock.create();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      const setRegistryCredentialHardeningOnPolicy = (policy: PolicyConfig, value: boolean) => {
+        policy.windows.attack_surface_reduction.registry_credential_hardening = {
+          enabled: value,
+        };
+      };
+
+      const expectRegistryCredentialHardeningAbsent = (policy: PolicyConfig) => {
+        expect(policy.windows.attack_surface_reduction).not.toHaveProperty(
+          'registry_credential_hardening'
+        );
+      };
+
+      beforeEach(() => {
+        licenseEmitter.next(Enterprise);
+      });
+
+      it('should strip registry credential hardening when the product feature is disabled', async () => {
+        // @ts-expect-error write to readonly property for testing
+        experimentalFeatures.registryCredentialHardening = true;
+        productFeaturesService = createProductFeaturesServiceMock(
+          ALL_PRODUCT_FEATURE_KEYS.filter(
+            (key) => key !== ProductFeatureSecurityKey.endpointRegistryCredentialHardening
+          )
+        );
+
+        const mockPolicy = policyFactory();
+        setRegistryCredentialHardeningOnPolicy(mockPolicy, true);
+
+        const callback = getPackagePolicyUpdateCallback(
+          endpointAppContextServiceMock,
+          cloudService,
+          productFeaturesService,
+          experimentalFeatures
+        );
+
+        const policyConfig = generator.generatePolicyPackagePolicy();
+        policyConfig.inputs[0]!.config!.policy.value = mockPolicy;
+
+        const updatedPolicyConfig = await callback(
+          policyConfig,
+          soClient,
+          esClient,
+          requestContextMock.convertContext(ctx),
+          req
+        );
+
+        expectRegistryCredentialHardeningAbsent(
+          updatedPolicyConfig.inputs[0]!.config!.policy.value
+        );
+      });
+
+      it('should strip registry credential hardening when the experimental flag is off', async () => {
+        // @ts-expect-error write to readonly property for testing
+        experimentalFeatures.registryCredentialHardening = false;
+
+        const mockPolicy = policyFactory();
+        setRegistryCredentialHardeningOnPolicy(mockPolicy, true);
+
+        const callback = getPackagePolicyUpdateCallback(
+          endpointAppContextServiceMock,
+          cloudService,
+          productFeaturesService,
+          experimentalFeatures
+        );
+
+        const policyConfig = generator.generatePolicyPackagePolicy();
+        policyConfig.inputs[0]!.config!.policy.value = mockPolicy;
+
+        const updatedPolicyConfig = await callback(
+          policyConfig,
+          soClient,
+          esClient,
+          requestContextMock.convertContext(ctx),
+          req
+        );
+
+        expectRegistryCredentialHardeningAbsent(
+          updatedPolicyConfig.inputs[0]!.config!.policy.value
+        );
+      });
+
+      it('should preserve registry credential hardening when both the product feature and experimental flag are enabled', async () => {
+        // @ts-expect-error write to readonly property for testing
+        experimentalFeatures.registryCredentialHardening = true;
+
+        const mockPolicy = policyFactory();
+        setRegistryCredentialHardeningOnPolicy(mockPolicy, true);
+
+        const callback = getPackagePolicyUpdateCallback(
+          endpointAppContextServiceMock,
+          cloudService,
+          productFeaturesService,
+          experimentalFeatures
+        );
+
+        const policyConfig = generator.generatePolicyPackagePolicy();
+        policyConfig.inputs[0]!.config!.policy.value = mockPolicy;
+
+        const updatedPolicyConfig = await callback(
+          policyConfig,
+          soClient,
+          esClient,
+          requestContextMock.convertContext(ctx),
+          req
+        );
+
+        expect(
+          updatedPolicyConfig.inputs[0]!.config!.policy.value.windows.attack_surface_reduction
+            .registry_credential_hardening
+        ).toEqual({ enabled: true });
+      });
+    });
+
+    describe('Linux ransomware protection', () => {
+      const soClient = savedObjectsClientMock.create();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      beforeEach(() => {
+        licenseEmitter.next(Enterprise);
+      });
+
+      it.each([
+        ['linuxRansomwareProtection', { linuxRansomwareProtection: false }],
+        ['perOsPolicySettings', { perOsPolicySettings: false }],
+      ])('should strip linux.ransomware from the policy when %s is off', async (_flag, flags) => {
+        experimentalFeatures = {
+          ...experimentalFeatures,
+          linuxRansomwareProtection: true,
+          perOsPolicySettings: true,
+          ...flags,
+        };
+
+        const mockPolicy = policyFactory();
+        const callback = getPackagePolicyUpdateCallback(
+          endpointAppContextServiceMock,
+          cloudService,
+          productFeaturesService,
+          experimentalFeatures
+        );
+
+        const policyConfig = generator.generatePolicyPackagePolicy();
+        policyConfig.inputs[0]!.config!.policy.value = mockPolicy;
+
+        const updatedPolicyConfig = await callback(
+          policyConfig,
+          soClient,
+          esClient,
+          requestContextMock.convertContext(ctx),
+          req
+        );
+
+        const { linux } = updatedPolicyConfig.inputs[0]!.config!.policy.value;
+        expect(linux).not.toHaveProperty('ransomware');
+        expect(linux.popup).not.toHaveProperty('ransomware');
+      });
+
+      it('should keep linux.ransomware on the policy when both experimental flags are on', async () => {
+        const mockPolicy = policyFactory();
+        const callback = getPackagePolicyUpdateCallback(
+          endpointAppContextServiceMock,
+          cloudService,
+          productFeaturesService,
+          experimentalFeatures
+        );
+
+        const policyConfig = generator.generatePolicyPackagePolicy();
+        policyConfig.inputs[0]!.config!.policy.value = mockPolicy;
+
+        const updatedPolicyConfig = await callback(
+          policyConfig,
+          soClient,
+          esClient,
+          requestContextMock.convertContext(ctx),
+          req
+        );
+
+        expect(updatedPolicyConfig.inputs[0]!.config!.policy.value.linux.ransomware).toEqual(
+          mockPolicy.linux.ransomware
+        );
+      });
+
+      it('should reject an update with linux.ransomware prevent under a Gold license when the flag is on', async () => {
+        licenseEmitter.next(Gold);
+
+        // Otherwise Gold-compliant policy, so the rejection below is attributable to
+        // `linux.ransomware` alone rather than to windows/mac ransomware support.
+        const mockPolicy = policyFactoryWithoutPaidFeatures();
+        mockPolicy.linux.ransomware = { mode: ProtectionModes.prevent, supported: true };
+        const callback = getPackagePolicyUpdateCallback(
+          endpointAppContextServiceMock,
+          cloudService,
+          productFeaturesService,
+          experimentalFeatures
+        );
+
+        const policyConfig = generator.generatePolicyPackagePolicy();
+        policyConfig.inputs[0]!.config!.policy.value = mockPolicy;
+
+        await expect(() =>
+          callback(policyConfig, soClient, esClient, requestContextMock.convertContext(ctx), req)
+        ).rejects.toThrow(
+          'Gold license does not support this action. Please upgrade your license.'
+        );
+      });
+
+      describe('when endpointCustomNotification product feature is disabled and linux.popup.ransomware has a custom message', () => {
+        const buildPolicyConfig = () => {
+          const mockPolicy = policyFactory();
+          mockPolicy.linux.popup.ransomware = { message: 'Custom message', enabled: true };
+          const policyConfig = generator.generatePolicyPackagePolicy();
+          policyConfig.inputs[0]!.config!.policy.value = mockPolicy;
+          return policyConfig;
+        };
+
+        beforeEach(() => {
+          productFeaturesService = createProductFeaturesServiceMock(
+            ALL_PRODUCT_FEATURE_KEYS.filter(
+              (key) => key !== ProductFeatureSecurityKey.endpointCustomNotification
+            )
+          );
+        });
+
+        it('should strip linux ransomware before product-feature validation when the flags are off', async () => {
+          experimentalFeatures = {
+            ...experimentalFeatures,
+            linuxRansomwareProtection: false,
+            perOsPolicySettings: false,
+          };
+          const callback = getPackagePolicyUpdateCallback(
+            endpointAppContextServiceMock,
+            cloudService,
+            productFeaturesService,
+            experimentalFeatures
+          );
+
+          const updatedPolicyConfig = await callback(
+            buildPolicyConfig(),
+            soClient,
+            esClient,
+            requestContextMock.convertContext(ctx),
+            req
+          );
+
+          const { linux } = updatedPolicyConfig.inputs[0]!.config!.policy.value;
+          expect(linux).not.toHaveProperty('ransomware');
+          expect(linux.popup).not.toHaveProperty('ransomware');
+        });
+
+        it('should reject the custom linux ransomware message when the flags are on', async () => {
+          experimentalFeatures = {
+            ...experimentalFeatures,
+            linuxRansomwareProtection: true,
+            perOsPolicySettings: true,
+          };
+          const callback = getPackagePolicyUpdateCallback(
+            endpointAppContextServiceMock,
+            cloudService,
+            productFeaturesService,
+            experimentalFeatures
+          );
+
+          const result = callback(
+            buildPolicyConfig(),
+            soClient,
+            esClient,
+            requestContextMock.convertContext(ctx),
+            req
+          );
+
+          await expect(result).rejects.toMatchObject({ apiPassThrough: true, statusCode: 403 });
+          await expect(result).rejects.toThrow('To customize the user notification');
+        });
+      });
+
+      describe('with malformed linux payloads', () => {
+        const runCallback = (policy: PolicyConfig) => {
+          const callback = getPackagePolicyUpdateCallback(
+            endpointAppContextServiceMock,
+            cloudService,
+            productFeaturesService,
+            experimentalFeatures
+          );
+          const policyConfig = generator.generatePolicyPackagePolicy();
+          policyConfig.inputs[0]!.config!.policy.value = policy;
+          return callback(
+            policyConfig,
+            soClient,
+            esClient,
+            requestContextMock.convertContext(ctx),
+            req
+          );
+        };
+        const setFlags = (enabled: boolean) => {
+          experimentalFeatures = {
+            ...experimentalFeatures,
+            linuxRansomwareProtection: enabled,
+            perOsPolicySettings: enabled,
+          };
+        };
+        const deleteLinuxPopup = (policy: PolicyConfig) => {
+          delete (policy.linux as Partial<PolicyConfig['linux']>).popup;
+        };
+
+        it('should reject with a license 403 under Gold when flags are off and linux.popup is missing', async () => {
+          setFlags(false);
+          licenseEmitter.next(Gold);
+          const mockPolicy = policyFactoryWithoutPaidFeatures(policyFactory());
+          mockPolicy.windows.memory_protection = {
+            ...mockPolicy.windows.memory_protection,
+            mode: ProtectionModes.prevent,
+            supported: true,
+          };
+          deleteLinuxPopup(mockPolicy);
+
+          await expect(runCallback(mockPolicy)).rejects.toMatchObject({
+            apiPassThrough: true,
+            statusCode: 403,
+          });
+        });
+
+        it('should reject with a license 403 under Platinum when flags are on and linux.popup is missing', async () => {
+          setFlags(true);
+          licenseEmitter.next(Platinum);
+          const mockPolicy = policyFactoryWithoutPaidEnterpriseFeatures();
+          mockPolicy.windows.device_control = {
+            enabled: true,
+            usb_storage: DeviceControlAccessLevel.deny_all,
+          };
+          deleteLinuxPopup(mockPolicy);
+
+          await expect(runCallback(mockPolicy)).rejects.toMatchObject({
+            apiPassThrough: true,
+            statusCode: 403,
+          });
+        });
+
+        it('should reject with a license 403 under Platinum when flags are on and linux.ransomware is null', async () => {
+          setFlags(true);
+          licenseEmitter.next(Platinum);
+          const mockPolicy = policyFactoryWithoutPaidEnterpriseFeatures();
+          mockPolicy.linux.ransomware = null as unknown as PolicyConfig['linux']['ransomware'];
+
+          await expect(runCallback(mockPolicy)).rejects.toMatchObject({
+            apiPassThrough: true,
+            statusCode: 403,
+          });
+        });
+
+        it('should strip a null linux.ransomware under Platinum when flags are off', async () => {
+          setFlags(false);
+          licenseEmitter.next(Platinum);
+          const mockPolicy = policyFactoryWithoutPaidEnterpriseFeatures();
+          mockPolicy.linux.ransomware = null as unknown as PolicyConfig['linux']['ransomware'];
+
+          const updatedPolicyConfig = await runCallback(mockPolicy);
+
+          expect(updatedPolicyConfig.inputs[0]!.config!.policy.value.linux).not.toHaveProperty(
+            'ransomware'
+          );
+        });
+
+        it.each([
+          ['on', true],
+          ['off', false],
+        ])(
+          'should reject with a 400 under Gold when flags are %s, behavior protection is Platinum-only and linux.popup is missing',
+          async (_label, enabled) => {
+            setFlags(enabled);
+            licenseEmitter.next(Gold);
+            const mockPolicy = policyFactoryWithoutPaidFeatures(policyFactory());
+            mockPolicy.windows.behavior_protection = {
+              ...mockPolicy.windows.behavior_protection,
+              mode: ProtectionModes.prevent,
+              supported: true,
+            };
+            deleteLinuxPopup(mockPolicy);
+
+            await expect(runCallback(mockPolicy)).rejects.toMatchObject({
+              apiPassThrough: true,
+              statusCode: 400,
+              message: expect.stringContaining('Invalid Elastic Defend policy configuration'),
+            });
+          }
+        );
+
+        it('should reject with a 400 under Gold when an otherwise compliant policy is missing linux.popup', async () => {
+          setFlags(false);
+          licenseEmitter.next(Gold);
+          const mockPolicy = policyFactoryWithoutPaidFeatures(policyFactory());
+          deleteLinuxPopup(mockPolicy);
+
+          await expect(runCallback(mockPolicy)).rejects.toMatchObject({
+            apiPassThrough: true,
+            statusCode: 400,
+            message: expect.stringContaining('Invalid Elastic Defend policy configuration'),
+          });
+        });
+      });
+    });
+
+    describe('AI Data Collection', () => {
+      const soClient = savedObjectsClientMock.create();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      const runUpdate = async () => {
+        const callback = getPackagePolicyUpdateCallback(
+          endpointAppContextServiceMock,
+          cloudService,
+          productFeaturesService,
+          experimentalFeatures
+        );
+        const policyConfig = generator.generatePolicyPackagePolicy();
+        policyConfig.inputs[0]!.config!.policy.value = policyFactory();
+
+        const updatedPolicyConfig = await callback(
+          policyConfig,
+          soClient,
+          esClient,
+          requestContextMock.convertContext(ctx),
+          req
+        );
+
+        return updatedPolicyConfig.inputs[0]!.config!.policy.value;
+      };
+
+      beforeEach(() => {
+        licenseEmitter.next(Enterprise);
+      });
+
+      it.each([
+        ['endpointAiDataCollection', { endpointAiDataCollection: false }],
+        ['perOsPolicySettings', { perOsPolicySettings: false }],
+      ])('should strip ai_data_collection from every OS when %s is off', async (_flag, flags) => {
+        experimentalFeatures = { ...experimentalFeatures, ...flags };
+
+        const policy = await runUpdate();
+
+        for (const os of ['windows', 'mac', 'linux'] as const) {
+          expect(policy[os]).not.toHaveProperty('ai_data_collection');
+        }
+      });
+
+      it('should keep ai_data_collection when both experimental flags are on', async () => {
+        const policy = await runUpdate();
+
+        for (const os of ['windows', 'mac', 'linux'] as const) {
+          expect(policy[os].ai_data_collection).toEqual({ enabled: true });
+        }
+      });
+    });
+
     describe('when `antivirus_registration.mode` is changed', () => {
       const soClient = savedObjectsClientMock.create();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
@@ -980,12 +2006,13 @@ describe('Fleet integrations', () => {
         config.inputs[0].config!.policy.value.windows.antivirus_registration.enabled;
 
       beforeEach(() => {
-        licenseEmitter.next(Platinum);
+        licenseEmitter.next(Enterprise);
 
         callback = getPackagePolicyUpdateCallback(
           endpointAppContextServiceMock,
           cloudService,
-          productFeaturesService
+          productFeaturesService,
+          experimentalFeatures
         );
 
         inputPolicyConfig = generator.generatePolicyPackagePolicy();
@@ -1070,6 +2097,31 @@ describe('Fleet integrations', () => {
       });
     });
 
+    it('should throw an error if the policy is invalid', async () => {
+      const soClient = savedObjectsClientMock.create();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      licenseEmitter.next(Enterprise);
+
+      const callback = getPackagePolicyUpdateCallback(
+        endpointAppContextServiceMock,
+        cloudService,
+        productFeaturesService,
+        experimentalFeatures
+      );
+      const policyConfig = generator.generatePolicyPackagePolicy();
+
+      // @ts-expect-error TS2790: The operand of a delete operator must be optional
+      delete policyConfig.inputs[0]!.config!.policy;
+      // @ts-expect-error TS2790: The operand of a delete operator must be optional
+      delete policyConfig.inputs[0]!.config!.artifact_manifest;
+
+      await expect(() =>
+        callback(policyConfig, soClient, esClient, requestContextMock.convertContext(ctx), req)
+      ).rejects.toThrow(
+        "Invalid Elastic Defend security policy. 'inputs[0].config.policy.value' and 'inputs[0].config.artifact_manifest.value' are required."
+      );
+    });
+
     it('should correctly set meta.billable', async () => {
       const isBillablePolicySpy = jest.spyOn(PolicyConfigHelpers, 'isBillablePolicy');
 
@@ -1080,7 +2132,8 @@ describe('Fleet integrations', () => {
       const callback = getPackagePolicyUpdateCallback(
         endpointAppContextServiceMock,
         cloudService,
-        productFeaturesService
+        productFeaturesService,
+        experimentalFeatures
       );
       const policyConfig = generator.generatePolicyPackagePolicy();
 
@@ -1109,22 +2162,119 @@ describe('Fleet integrations', () => {
 
       isBillablePolicySpy.mockRestore();
     });
+
+    describe('device control notification validation', () => {
+      const soClient = savedObjectsClientMock.create();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      beforeEach(() => {
+        licenseEmitter.next(Enterprise);
+      });
+
+      it.each<['windows' | 'mac', 'audit' | 'read_only', string]>([
+        ['windows', 'audit', 'Windows'],
+        ['mac', 'read_only', 'Mac'],
+      ])(
+        'should throw error when %s notifications are enabled and access level is %s',
+        async (os, accessLevel, osLabel) => {
+          const callback = getPackagePolicyUpdateCallback(
+            endpointAppContextServiceMock,
+            cloudService,
+            productFeaturesService,
+            experimentalFeatures
+          );
+          const policyConfig = generator.generatePolicyPackagePolicy();
+          policyConfig.inputs[0]!.config!.policy.value[os].device_control = {
+            enabled: true,
+            usb_storage: accessLevel,
+          };
+          policyConfig.inputs[0]!.config!.policy.value[os].popup.device_control = {
+            enabled: true,
+            message: 'Test message',
+          };
+
+          await expect(() =>
+            callback(policyConfig, soClient, esClient, requestContextMock.convertContext(ctx), req)
+          ).rejects.toThrow(
+            new RegExp(
+              `Device Control user notifications are only supported when USB storage access level is set to deny_all\\. Current ${osLabel} access level is "${accessLevel}"\\.`
+            )
+          );
+        }
+      );
+
+      it('should NOT throw when notifications are enabled and access level is deny_all', async () => {
+        const callback = getPackagePolicyUpdateCallback(
+          endpointAppContextServiceMock,
+          cloudService,
+          productFeaturesService,
+          experimentalFeatures
+        );
+        const policyConfig = generator.generatePolicyPackagePolicy();
+        policyConfig.inputs[0]!.config!.policy.value.windows.device_control = {
+          enabled: true,
+          usb_storage: 'deny_all',
+        };
+        policyConfig.inputs[0]!.config!.policy.value.windows.popup.device_control = {
+          enabled: true,
+          message: 'Test message',
+        };
+        policyConfig.inputs[0]!.config!.policy.value.mac.device_control = {
+          enabled: true,
+          usb_storage: 'deny_all',
+        };
+        policyConfig.inputs[0]!.config!.policy.value.mac.popup.device_control = {
+          enabled: true,
+          message: 'Test message',
+        };
+
+        await expect(
+          callback(policyConfig, soClient, esClient, requestContextMock.convertContext(ctx), req)
+        ).resolves.not.toThrow();
+      });
+
+      it('should NOT throw when notifications are disabled regardless of access level', async () => {
+        const callback = getPackagePolicyUpdateCallback(
+          endpointAppContextServiceMock,
+          cloudService,
+          productFeaturesService,
+          experimentalFeatures
+        );
+        const policyConfig = generator.generatePolicyPackagePolicy();
+        policyConfig.inputs[0]!.config!.policy.value.windows.device_control = {
+          enabled: true,
+          usb_storage: 'audit',
+        };
+        policyConfig.inputs[0]!.config!.policy.value.windows.popup.device_control = {
+          enabled: false,
+          message: 'Test message',
+        };
+
+        await expect(
+          callback(policyConfig, soClient, esClient, requestContextMock.convertContext(ctx), req)
+        ).resolves.not.toThrow();
+      });
+    });
   });
 
   describe('package policy delete callback', () => {
-    const soClient = savedObjectsClientMock.create();
-    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-
-    const invokeDeleteCallback = async (): Promise<void> => {
-      const callback = getPackagePolicyDeleteCallback(exceptionListClient, soClient);
-      await callback(deletePackagePolicyMock(), soClient, esClient);
-    };
-
+    let endpointServicesMock: ReturnType<typeof createMockEndpointAppContextService>;
     let removedPolicies: PostDeletePackagePoliciesResponse;
     let policyId: string;
     let fakeArtifact: ExceptionListSchema;
 
+    const invokeDeleteCallback = async (): Promise<void> => {
+      const callback = getPackagePolicyDeleteCallback(endpointServicesMock);
+      await callback(
+        removedPolicies,
+        endpointServicesMock.savedObjects.createInternalScopedSoClient(),
+        endpointServicesMock.getInternalEsClient()
+      );
+    };
+
     beforeEach(() => {
+      endpointServicesMock = createMockEndpointAppContextService();
+      endpointServicesMock.getExceptionListsClient.mockReturnValue(exceptionListClient);
       removedPolicies = deletePackagePolicyMock();
       policyId = removedPolicies[0].id;
       fakeArtifact = {
@@ -1141,7 +2291,9 @@ describe('Fleet integrations', () => {
     });
 
     it('removes policy from artifact', async () => {
-      soClient.find.mockResolvedValueOnce({
+      const soClientMock = endpointServicesMock.savedObjects.createInternalScopedSoClient();
+
+      (soClientMock.find as jest.Mock).mockResolvedValueOnce({
         total: 1,
         saved_objects: [
           {
@@ -1183,7 +2335,177 @@ describe('Fleet integrations', () => {
         tags: [],
       });
 
-      expect(soClient.delete).toBeCalledWith('policy-settings-protection-updates-note', 'id');
+      expect(
+        endpointServicesMock.savedObjects.createInternalScopedSoClient().delete
+      ).toHaveBeenCalledWith('policy-settings-protection-updates-note', 'id', { force: true });
+    });
+
+    it('searches for notes across all spaces and both package policy reference types', async () => {
+      const soClientMock = endpointServicesMock.savedObjects.createInternalScopedSoClient();
+
+      (soClientMock.find as jest.Mock).mockResolvedValueOnce({
+        total: 0,
+        saved_objects: [],
+        page: 1,
+        per_page: 10,
+      });
+
+      await invokeDeleteCallback();
+
+      expect(soClientMock.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'policy-settings-protection-updates-note',
+          hasReference: [
+            { type: PACKAGE_POLICY_SAVED_OBJECT_TYPE, id: policyId },
+            { type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE, id: policyId },
+          ],
+          hasReferenceOperator: 'OR',
+          namespaces: ['*'],
+        })
+      );
+    });
+
+    it('deletes a legacy note using a client scoped to the note namespace', async () => {
+      const soClientMock = endpointServicesMock.savedObjects.createInternalScopedSoClient();
+
+      (soClientMock.find as jest.Mock).mockResolvedValueOnce({
+        total: 1,
+        saved_objects: [
+          {
+            id: 'legacy-note-id',
+            type: 'type',
+            namespaces: ['legacy-space'],
+            references: [
+              {
+                id: 'id_package_policy',
+                name: 'package_policy',
+                type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+              },
+            ],
+            attributes: { note: 'legacy note' },
+            score: 1,
+          },
+        ],
+        page: 1,
+        per_page: 10,
+      });
+
+      await invokeDeleteCallback();
+
+      expect(endpointServicesMock.savedObjects.createInternalScopedSoClient).toHaveBeenCalledWith({
+        spaceId: 'legacy-space',
+        readonly: false,
+      });
+      expect(soClientMock.delete).toHaveBeenCalledWith(
+        'policy-settings-protection-updates-note',
+        'legacy-note-id',
+        { force: true }
+      );
+    });
+
+    describe('and with space awareness feature enabled', () => {
+      beforeEach(() => {
+        (
+          endpointServicesMock.getInternalFleetServices().isEndpointPackageInstalled as jest.Mock
+        ).mockResolvedValue(true);
+
+        const packagePolicyGenerator = new FleetPackagePolicyGenerator('seed');
+        const packageNames = Object.values(RESPONSE_ACTIONS_SUPPORTED_INTEGRATION_TYPES).flat();
+
+        removedPolicies = packageNames
+          .concat('some-other-package-name')
+          .map((packageName, index) => {
+            return {
+              ...pick(
+                packagePolicyGenerator.generate({
+                  id: `policy-${index}`,
+                  package: { name: packageName, title: packageName, version: '9.1.0' },
+                }),
+                ['id', 'name', 'package']
+              ),
+              success: true,
+            };
+          });
+      });
+
+      it('should check only policies whose package.name matches a package that supports response actions', async () => {
+        await invokeDeleteCallback();
+
+        expect(endpointServicesMock.getInternalEsClient().updateByQuery).toHaveBeenCalledWith(
+          expect.objectContaining({
+            query: {
+              bool: {
+                filter: {
+                  terms: {
+                    'agent.policy.integrationPolicyId': removedPolicies
+                      .filter((policy) => policy.package!.name !== 'some-other-package-name')
+                      .map((policy) => policy.id),
+                  },
+                },
+              },
+            },
+          })
+        );
+      });
+
+      it('should only process policies that were successfully deleted', async () => {
+        let endpointPolicyId = '';
+        removedPolicies.forEach((policy) => {
+          if (policy.package?.name !== 'endpoint') {
+            policy.success = false;
+          } else {
+            endpointPolicyId = policy.id;
+          }
+        });
+
+        await invokeDeleteCallback();
+
+        expect(endpointServicesMock.getInternalEsClient().updateByQuery).toHaveBeenCalledWith(
+          expect.objectContaining({
+            query: {
+              bool: {
+                filter: {
+                  terms: {
+                    'agent.policy.integrationPolicyId': [endpointPolicyId],
+                  },
+                },
+              },
+            },
+          })
+        );
+      });
+
+      it('should call updateByQuery() with expected arguments', async () => {
+        await invokeDeleteCallback();
+
+        expect(endpointServicesMock.getInternalEsClient().updateByQuery).toHaveBeenCalledWith({
+          conflicts: 'proceed',
+          ignore_unavailable: true,
+          index: ENDPOINT_ACTIONS_INDEX,
+          query: {
+            bool: {
+              filter: {
+                terms: {
+                  'agent.policy.integrationPolicyId': removedPolicies
+                    .filter((policy) => policy.package!.name !== 'some-other-package-name')
+                    .map((policy) => policy.id),
+                },
+              },
+            },
+          },
+          refresh: false,
+          script: {
+            lang: 'painless',
+            source: `
+if (ctx._source.containsKey('tags')) {
+  ctx._source.tags.add('INTEGRATION-POLICY-DELETED');
+} else {
+  ctx._source.tags = ['INTEGRATION-POLICY-DELETED'];
+}
+`,
+          },
+        });
+      });
     });
   });
 });

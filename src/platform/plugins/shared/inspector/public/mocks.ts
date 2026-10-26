@@ -9,9 +9,14 @@
 
 import { coreMock } from '@kbn/core/public/mocks';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
-import { Setup as PluginSetup, Start as PluginStart } from '.';
+import type { CPSPluginStart } from '@kbn/cps/public';
+import type { Setup as PluginSetup, Start as PluginStart } from '.';
 import { InspectorViewRegistry } from './view_registry';
 import { plugin as pluginInitializer } from '.';
+// we need to import this here otherwise the tests timeouts
+import { InspectorPanel } from './async_services';
+// eslint-disable-next-line @typescript-eslint/no-unused-expressions
+InspectorPanel;
 
 export type Setup = jest.Mocked<PluginSetup>;
 export type Start = jest.Mocked<PluginStart>;
@@ -21,10 +26,6 @@ const createSetupContract = (): Setup => {
 
   const setupContract: Setup = {
     registerView: jest.fn(views.register.bind(views)),
-
-    __LEGACY: {
-      views,
-    },
   };
   return setupContract;
 };
@@ -58,7 +59,7 @@ const createPlugin = async () => {
     coreStart,
     plugin,
     setup,
-    doStart: async () => await plugin.start(coreStart, { share }),
+    doStart: async (cps?: CPSPluginStart) => await plugin.start(coreStart, { share, cps }),
   };
 };
 

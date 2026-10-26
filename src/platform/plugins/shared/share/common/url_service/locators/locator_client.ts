@@ -8,12 +8,20 @@
  */
 
 import type { SerializableRecord } from '@kbn/utility-types';
-import { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
+import type { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
 import type { SavedObjectReference } from '@kbn/core/server';
+import type { DependencyList } from 'react';
 import type { LocatorDependencies } from './locator';
-import type { LocatorDefinition, LocatorPublic, ILocatorClient, LocatorData } from './types';
+import type {
+  LocatorDefinition,
+  LocatorPublic,
+  ILocatorClient,
+  LocatorData,
+  LocatorGetUrlParams,
+} from './types';
 import { Locator } from './locator';
-import { LocatorMigrationFunction, LocatorsMigrationMap } from '.';
+import type { LocatorMigrationFunction, LocatorsMigrationMap } from '.';
+import { useLocatorUrl } from '.';
 
 export type LocatorClientDependencies = LocatorDependencies;
 
@@ -48,6 +56,18 @@ export class LocatorClient implements ILocatorClient {
   public get<P extends SerializableRecord>(id: string): undefined | LocatorPublic<P> {
     return this.locators.get(id);
   }
+
+  public readonly useUrl = <P extends SerializableRecord>(
+    params: () => { id: string; params: P },
+    deps?: DependencyList,
+    getUrlParams?: LocatorGetUrlParams
+  ): string | undefined => {
+    const { id, params: locatorParams } = params();
+    const locator = this.get<P>(id);
+    // if useLocatorUrl returns an empty string, we return undefined. This is done to make sure the consumer
+    // checks whether the url has been resolved or not.
+    return useLocatorUrl(locator, locatorParams, getUrlParams, deps) || undefined;
+  };
 
   protected getOrThrow<P extends SerializableRecord>(id: string): LocatorPublic<P> {
     const locator = this.locators.get(id);

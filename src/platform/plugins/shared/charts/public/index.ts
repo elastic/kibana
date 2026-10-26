@@ -9,7 +9,7 @@
 
 // TODO: https://github.com/elastic/kibana/issues/110891
 
-import {
+import type {
   RangeSelectContext,
   ValueClickContext,
   MultiValueClickContext,
@@ -34,10 +34,10 @@ export {
   ColorPicker,
   LegendToggleLazy,
   LegendToggle,
-  MULTILAYER_TIME_AXIS_STYLE,
 } from './static';
 export { lightenColor } from './services/palettes/lighten_color';
 export { decreaseOpacity } from './services/palettes/decrease_opacity';
+export { COMPATIBILITY_PALETTE_ID } from './services/palettes/palettes';
 export { useActiveCursor } from './services/active_cursor';
 
 export interface ClickTriggerEvent {
@@ -53,6 +53,24 @@ export interface BrushTriggerEvent {
 export interface MultiClickTriggerEvent {
   name: 'multiFilter';
   data: MultiValueClickContext['data'];
+}
+
+export interface AnnotationClickDatum {
+  id: string;
+  type: 'point' | 'range';
+  time: string;
+  endTime?: string;
+  label?: string;
+  isGrouped?: boolean;
+  /** Query-driven extra fields (keys are the source field names, without a `field:` prefix). */
+  extras?: Record<string, unknown>;
+}
+
+export interface AnnotationClickTriggerEvent {
+  name: 'annotationClick';
+  data: {
+    annotations: AnnotationClickDatum[];
+  };
 }
 
 export type {

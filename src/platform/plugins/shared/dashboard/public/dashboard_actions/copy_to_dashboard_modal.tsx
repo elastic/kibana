@@ -18,16 +18,15 @@ import {
   EuiRadio,
   EuiSpacer,
 } from '@elastic/eui';
-import { EmbeddablePackageState, PanelNotFoundError } from '@kbn/embeddable-plugin/public';
-import { apiHasSnapshottableState } from '@kbn/presentation-publishing';
+import type { EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
 import { LazyDashboardPicker, withSuspense } from '@kbn/presentation-util-plugin/public';
-import { omit } from 'lodash';
 import React, { useCallback, useMemo, useState } from 'react';
 import { CREATE_NEW_DASHBOARD_URL, createDashboardEditUrl } from '../utils/urls';
-import { embeddableService } from '../services/kibana_services';
+import { coreServices, embeddableService } from '../services/kibana_services';
 import { getDashboardCapabilities } from '../utils/get_dashboard_capabilities';
+import { isDashboardLayoutPanel } from '../dashboard_api/layout_manager/types';
 import { dashboardCopyToDashboardActionStrings } from './_dashboard_actions_strings';
-import { CopyToDashboardAPI } from './copy_to_dashboard_action';
+import type { CopyToDashboardAPI } from './copy_to_dashboard_action';
 
 interface CopyToDashboardModalProps {
   api: CopyToDashboardAPI;
@@ -51,22 +50,27 @@ export function CopyToDashboardModal({ api, closeModal }: CopyToDashboardModalPr
   const dashboardId = api.parentApi.savedObjectId$.value;
 
   const onSubmit = useCallback(() => {
-    const dashboard = api.parentApi;
-    const panelToCopy = dashboard.getDashboardPanelFromId(api.uuid);
-    const runtimeSnapshot = apiHasSnapshottableState(api) ? api.snapshotRuntimeState() : undefined;
-
-    if (!panelToCopy && !runtimeSnapshot) {
-      throw new PanelNotFoundError();
+    let panelToCopy;
+    try {
+      panelToCopy = api.parentApi.getDashboardPanelFromId(api.uuid);
+      // TODO When we implement the ability to duplicate pinned panels,
+      // we should handle copying panels that don't have a `grid` defined
+      if (!isDashboardLayoutPanel(panelToCopy)) throw new Error();
+    } catch {
+      coreServices.notifications.toasts.addDanger({
+        title: dashboardCopyToDashboardActionStrings.getPanelNotFoundError(api.uuid),
+        'data-test-subj': 'copyToDashboardPanelNotFound',
+      });
+      closeModal();
+      return;
     }
 
     const state: EmbeddablePackageState = {
       type: panelToCopy.type,
-      input: runtimeSnapshot ?? {
-        ...omit(panelToCopy.explicitInput, 'id'),
-      },
+      serializedState: panelToCopy.serializedState,
       size: {
-        width: panelToCopy.gridData.w,
-        height: panelToCopy.gridData.h,
+        width: panelToCopy.grid.w,
+        height: panelToCopy.grid.h,
       },
     };
 
@@ -76,8 +80,8 @@ export function CopyToDashboardModal({ api, closeModal }: CopyToDashboardModalPr
         : `#${CREATE_NEW_DASHBOARD_URL}`;
 
     closeModal();
-    stateTransfer.navigateToWithEmbeddablePackage('dashboards', {
-      state,
+    stateTransfer.navigateToWithEmbeddablePackages('dashboards', {
+      state: [state],
       path,
     });
   }, [api, dashboardOption, selectedDashboard, closeModal, stateTransfer]);

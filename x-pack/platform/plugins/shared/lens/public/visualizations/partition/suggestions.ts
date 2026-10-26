@@ -8,11 +8,12 @@
 import { partition } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import type {
+  LensPartitionVisualizationState,
   SuggestionRequest,
   TableSuggestionColumn,
   VisualizationSuggestion,
-} from '../../types';
-import { PieVisualizationState } from '../../../common/types';
+  PartitionChartType as PieChartType,
+} from '@kbn/lens-common';
 import {
   CategoryDisplay,
   LegendDisplay,
@@ -20,7 +21,6 @@ import {
   PieChartTypes,
 } from '../../../common/constants';
 import { isPartitionShape } from '../../../common/visualizations';
-import type { PieChartType } from '../../../common/types';
 import { PartitionChartsMeta } from './partition_charts_meta';
 import { layerTypes } from '../..';
 import { getColorMappingDefaults } from '../../utils';
@@ -29,7 +29,11 @@ function hasIntervalScale(columns: TableSuggestionColumn[]) {
   return columns.some((col) => col.operation.scale === 'interval');
 }
 
-function shouldReject({ table, keptLayerIds, state }: SuggestionRequest<PieVisualizationState>) {
+function shouldReject({
+  table,
+  keptLayerIds,
+  state,
+}: SuggestionRequest<LensPartitionVisualizationState>) {
   return (
     keptLayerIds.length > 1 ||
     (keptLayerIds.length && table.layerId !== keptLayerIds[0]) ||
@@ -39,8 +43,8 @@ function shouldReject({ table, keptLayerIds, state }: SuggestionRequest<PieVisua
 }
 
 function getNewShape(
-  subVisualizationId?: PieVisualizationState['shape'],
-  currentShape?: PieVisualizationState['shape']
+  subVisualizationId?: LensPartitionVisualizationState['shape'],
+  currentShape?: LensPartitionVisualizationState['shape']
 ) {
   if (subVisualizationId) {
     return subVisualizationId;
@@ -72,8 +76,8 @@ export function suggestions({
   keptLayerIds,
   mainPalette,
   subVisualizationId,
-}: SuggestionRequest<PieVisualizationState>): Array<
-  VisualizationSuggestion<PieVisualizationState>
+}: SuggestionRequest<LensPartitionVisualizationState>): Array<
+  VisualizationSuggestion<LensPartitionVisualizationState>
 > {
   if (shouldReject({ table, state, keptLayerIds })) {
     return [];
@@ -110,7 +114,7 @@ export function suggestions({
 
   const metricColumnIds = metrics.map(({ columnId }) => columnId);
 
-  const results: Array<VisualizationSuggestion<PieVisualizationState>> = [];
+  const results: Array<VisualizationSuggestion<LensPartitionVisualizationState>> = [];
 
   // Histograms are not good for pi. But we should not hide suggestion on switching between partition charts.
   const shouldHideSuggestion =
@@ -121,10 +125,10 @@ export function suggestions({
     !hasCustomSuggestionsExists(subVisualizationId)
   ) {
     const newShape = getNewShape(
-      subVisualizationId as PieVisualizationState['shape'],
+      subVisualizationId as LensPartitionVisualizationState['shape'],
       state?.shape
     );
-    const baseSuggestion: VisualizationSuggestion<PieVisualizationState> = {
+    const baseSuggestion: VisualizationSuggestion<LensPartitionVisualizationState> = {
       title: i18n.translate('xpack.lens.pie.suggestionLabel', {
         defaultMessage: '{chartName}',
         values: { chartName: PartitionChartsMeta[newShape].label },

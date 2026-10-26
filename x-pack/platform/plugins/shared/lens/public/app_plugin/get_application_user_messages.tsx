@@ -5,20 +5,17 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { CoreStart } from '@kbn/core/public';
-import { Dispatch } from '@reduxjs/toolkit';
+import type { Dispatch } from '@reduxjs/toolkit';
 import { partition } from 'lodash';
-import {
-  updateDatasourceState,
-  type DataViewsState,
-  type VisualizationState,
-  DatasourceState,
-} from '../state_management';
 import type {
+  DataViewsState,
+  DatasourceState,
+  VisualizationState,
   AddUserMessages,
   Datasource,
   FramePublicAPI,
@@ -27,9 +24,13 @@ import type {
   UserMessagesDisplayLocationId,
   UserMessagesGetter,
   Visualization,
-} from '../types';
+  LensPublicCallbacks,
+} from '@kbn/lens-common';
+import { LENS_ERROR_CODES, type LensErrorCode } from '@kbn/lens-embeddable-utils';
+import { updateDatasourceState, updateVisualizationState } from '../state_management';
 import { getMissingIndexPattern } from '../editor_frame_service/editor_frame/state_helpers';
 import {
+  EDITOR_LOAD_ERROR,
   EDITOR_MISSING_DATAVIEW,
   EDITOR_MISSING_EXPRESSION_DATAVIEW,
   EDITOR_MISSING_VIS_TYPE,
@@ -37,14 +38,14 @@ import {
   EDITOR_UNKNOWN_VIS_TYPE,
 } from '../user_messages_ids';
 import { nonNullable } from '../utils';
-import type { LensPublicCallbacks } from '../react_embeddable/types';
+import { getLensErrorCode } from '../../common/errors';
 
 export interface UserMessageGetterProps {
   visualizationType: string | null | undefined;
   visualization: Visualization | undefined;
   visualizationState: VisualizationState | undefined;
   activeDatasource: Datasource | null | undefined;
-  activeDatasourceState: { isLoading: boolean; state: unknown } | null;
+  activeDatasourceState: DatasourceState | null;
   dataViews: DataViewsState;
   core: CoreStart;
 }
@@ -87,6 +88,42 @@ export const getApplicationUserMessages = ({
 
   return messages;
 };
+
+const LOAD_ERROR_TEXTS: Record<LensErrorCode, string> = {
+  [LENS_ERROR_CODES.DATA_VIEW_NOT_FOUND]: i18n.translate('xpack.lens.loadError.dataViewNotFound', {
+    defaultMessage: 'The data view used by this visualization could not be found.',
+  }),
+  [LENS_ERROR_CODES.DATASOURCE_NOT_FOUND]: i18n.translate(
+    'xpack.lens.loadError.datasourceNotFound',
+    {
+      defaultMessage: 'Could not find datasource for the visualization',
+    }
+  ),
+  [LENS_ERROR_CODES.DATASOURCE_UNSUPPORTED]: i18n.translate(
+    'xpack.lens.loadError.datasourceUnsupported',
+    {
+      defaultMessage: 'The datasource type used by this visualization is not supported.',
+    }
+  ),
+  [LENS_ERROR_CODES.INVALID_CONFIGURATION]: i18n.translate(
+    'xpack.lens.loadError.invalidConfiguration',
+    {
+      defaultMessage: 'The visualization configuration is invalid and cannot be displayed.',
+    }
+  ),
+};
+
+export function getLoadErrorMessage(error: Error): UserMessage {
+  const code = getLensErrorCode(error);
+  return {
+    uniqueId: EDITOR_LOAD_ERROR,
+    severity: 'error',
+    displayLocations: [{ id: 'visualizationOnEmbeddable' }],
+    fixableInEditor: false,
+    shortMessage: '',
+    longMessage: code ? LOAD_ERROR_TEXTS[code] : error.message,
+  };
+}
 
 function getMissingVisTypeError(): UserMessage {
   return {
@@ -292,14 +329,8 @@ export const useApplicationUserMessages = ({
   visualizationState?: VisualizationState;
   visualization?: Visualization;
 }) => {
-  const [userMessages, setUserMessages] = useState<UserMessage[]>([]);
-  // these are messages managed from other parts of Lens
-  const [additionalUserMessages, setAdditionalUserMessages] = useState<Record<string, UserMessage>>(
-    {}
-  );
-
-  useEffect(() => {
-    setUserMessages([
+  const userMessages = useMemo(
+    () => [
       ...(datasourceState && datasourceState.state && datasource && activeDatasourceId
         ? datasource.getUserMessages(datasourceState.state, {
             frame: framePublicAPI,
@@ -319,6 +350,17 @@ export const useApplicationUserMessages = ({
       ...(visualizationState?.activeId && visualizationState.state
         ? visualization?.getUserMessages?.(visualizationState.state, {
             frame: framePublicAPI,
+            setState: (newStateOrUpdater) => {
+              dispatch(
+                updateVisualizationState({
+                  visualizationId: visualizationState.activeId!,
+                  newState:
+                    typeof newStateOrUpdater === 'function'
+                      ? newStateOrUpdater(visualizationState.state)
+                      : newStateOrUpdater,
+                })
+              );
+            },
           }) ?? []
         : []),
       ...getApplicationUserMessages({
@@ -330,52 +372,63 @@ export const useApplicationUserMessages = ({
         core: coreStart,
         dataViews: framePublicAPI.dataViews,
       }),
-    ]);
-  }, [
-    activeDatasourceId,
-    datasource,
-    datasourceState,
-    dispatch,
-    framePublicAPI,
-    visualization,
-    visualizationState,
-    visualizationType,
-    coreStart,
-  ]);
+    ],
+    [
+      activeDatasourceId,
+      datasource,
+      datasourceState,
+      dispatch,
+      framePublicAPI,
+      visualization,
+      visualizationState,
+      visualizationType,
+      coreStart,
+    ]
+  );
+  // these are messages managed from other parts of Lens
+  const [additionalUserMessages, setAdditionalUserMessages] = useState<Record<string, UserMessage>>(
+    {}
+  );
 
-  const getUserMessages: UserMessagesGetter = (locationId, filterArgs) =>
-    filterAndSortUserMessages(
-      userMessages.concat(Object.values(additionalUserMessages)),
-      locationId,
-      filterArgs ?? {}
-    );
+  const getUserMessages: UserMessagesGetter = useCallback(
+    (locationId, filterArgs) =>
+      filterAndSortUserMessages(
+        userMessages.concat(Object.values(additionalUserMessages)),
+        locationId,
+        filterArgs ?? {}
+      ),
+    [additionalUserMessages, userMessages]
+  );
 
-  const addUserMessages: AddUserMessages = (messages) => {
-    const newMessageMap = {
-      ...additionalUserMessages,
-    };
-
-    const addedMessageIds: string[] = [];
-    messages.forEach((message) => {
-      if (!newMessageMap[message.uniqueId]) {
-        addedMessageIds.push(message.uniqueId);
-        newMessageMap[message.uniqueId] = message;
-      }
-    });
-
-    if (addedMessageIds.length) {
-      setAdditionalUserMessages(newMessageMap);
-    }
-
-    return () => {
-      const withMessagesRemoved = {
+  const addUserMessages: AddUserMessages = useCallback(
+    (messages) => {
+      const newMessageMap = {
         ...additionalUserMessages,
       };
 
-      addedMessageIds.forEach((id) => delete withMessagesRemoved[id]);
+      const addedMessageIds: string[] = [];
+      messages.forEach((message) => {
+        if (!newMessageMap[message.uniqueId]) {
+          addedMessageIds.push(message.uniqueId);
+          newMessageMap[message.uniqueId] = message;
+        }
+      });
 
-      setAdditionalUserMessages(withMessagesRemoved);
-    };
-  };
+      if (addedMessageIds.length) {
+        setAdditionalUserMessages(newMessageMap);
+      }
+
+      return () => {
+        const withMessagesRemoved = {
+          ...additionalUserMessages,
+        };
+
+        addedMessageIds.forEach((id) => delete withMessagesRemoved[id]);
+
+        setAdditionalUserMessages(withMessagesRemoved);
+      };
+    },
+    [additionalUserMessages]
+  );
   return { getUserMessages, addUserMessages };
 };

@@ -37,7 +37,7 @@ export const useCreateFieldButton: UseCreateFieldButton = ({
   const createFieldButton = useCallback<CreateFieldComponent>(
     ({ onHide }) => (
       <StyledButton
-        iconType={loading ? 'none' : 'plusInCircle'}
+        iconType={loading ? 'none' : 'plusCircle'}
         aria-label={i18n.CREATE_FIELD}
         data-test-subj="create-field"
         onClick={() => {

@@ -8,7 +8,7 @@
  */
 
 import type { MockedKeys } from '@kbn/utility-types-jest';
-import { CoreSetup, RequestHandlerContext } from '@kbn/core/server';
+import type { CoreSetup, RequestHandlerContext } from '@kbn/core/server';
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 import { registerHasDataViewsRoute, handler } from './has_data_views';
 
@@ -71,7 +71,7 @@ describe('preview has_data_views route', () => {
       }
     `);
 
-    expect(mockResponse.ok).toBeCalled();
+    expect(mockResponse.ok).toHaveBeenCalled();
     expect(mockResponse.ok.mock.calls[0][0]).toEqual({
       body: { hasDataView: true, hasUserDataView: true },
     });

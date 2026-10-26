@@ -1,24 +1,37 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Title it renders 1`] = `
-<EuiTitle
-  size="l"
+exports[`Title it renders title 1`] = `
+.c0,
+.c0 * {
+  display: inline-block;
+  max-width: 100%;
+  overflow: hidden;
+  -webkit-text-decoration: inherit;
+  text-decoration: inherit;
+  -webkit-text-decoration-thickness: inherit;
+  text-decoration-thickness: inherit;
+  text-overflow: ellipsis;
+  vertical-align: top;
+  white-space: nowrap;
+}
+
+<h1
+  class="euiTitle css-5v94va-Header-euiTitle-l ex2433o0"
+  data-test-subj="header-page-title"
 >
-  <Header
-    data-test-subj="header-page-title"
+  <span
+    class="css-80vzk8-TitleWrapper ex2433o1"
   >
-    <TitleWrapper>
-      <TruncatableText
-        tooltipContent="Test title"
+    <span
+      class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
+      id="generated-id-wrapper"
+    >
+      <span
+        class="c0"
       >
         Test title
-      </TruncatableText>
-    </TitleWrapper>
-    <EuiBetaBadge
-      label="Beta"
-      tooltipContent="Test tooltip"
-      tooltipPosition="bottom"
-    />
-  </Header>
-</EuiTitle>
+      </span>
+    </span>
+  </span>
+</h1>
 `;

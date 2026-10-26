@@ -15,7 +15,8 @@ import type {
   CreateExceptionListItemOptions,
   UpdateExceptionListItemOptions,
 } from '@kbn/lists-plugin/server';
-import {} from '@kbn/lists-plugin/server/services/exception_lists/exception_list_client_types';
+import type { PromiseFromStreams } from '@kbn/lists-plugin/server/services/exception_lists/import_exception_list_and_items';
+import { TRUSTED_PROCESS_DESCENDANTS_TAG } from '../../../../common/endpoint/service/artifacts/constants';
 import { BaseValidator } from './base_validator';
 import type { ExceptionItemLikeOptions } from '../types';
 import type { TrustedAppConditionEntry as ConditionEntry } from '../../../../common/endpoint/types';
@@ -24,6 +25,7 @@ import {
   isValidHash,
 } from '../../../../common/endpoint/service/artifacts/validations';
 import { EndpointArtifactExceptionValidationError } from './errors';
+import { ENTRY_FIELD_MAX_LENGTH, ENTRY_VALUE_MAX_LENGTH } from './constants';
 
 const ProcessHashField = schema.oneOf([
   schema.literal('process.hash.md5'),
@@ -72,16 +74,19 @@ const CommonEntrySchema = {
     schema.siblingRef('field'),
     ProcessHashField,
     schema.string({
+      maxLength: ENTRY_VALUE_MAX_LENGTH,
       validate: (hash: string) => (isValidHash(hash) ? undefined : `invalid hash value [${hash}]`),
     }),
     schema.conditional(
       schema.siblingRef('field'),
       ProcessExecutablePath,
       schema.string({
+        maxLength: ENTRY_VALUE_MAX_LENGTH,
         validate: (pathValue: string) =>
           pathValue.length > 0 ? undefined : `invalid path value [${pathValue}]`,
       }),
       schema.string({
+        maxLength: ENTRY_VALUE_MAX_LENGTH,
         validate: (signerValue: string) =>
           signerValue.length > 0 ? undefined : `invalid signer value [${signerValue}]`,
       })
@@ -103,7 +108,7 @@ const SignerEntrySchema = {
       }),
       schema.object({
         field: schema.literal('subject_name'),
-        value: schema.string({ minLength: 1 }),
+        value: schema.string({ minLength: 1, maxLength: ENTRY_VALUE_MAX_LENGTH }),
         type: schema.literal('match'),
         operator: schema.literal('included'),
       }),
@@ -144,6 +149,7 @@ const LinuxEntrySchema = schema.object({
 
 const entriesSchemaOptions = {
   minSize: 1,
+  maxSize: 250,
   validate(entries: TrustedAppConditionEntry[]) {
     const dups = getDuplicateFields(entries as ConditionEntry[]);
     return dups.map((field) => `Duplicated entry: ${field}`).join(', ') || undefined;
@@ -161,12 +167,21 @@ const entriesSchemaOptions = {
 const EntriesSchema = schema.conditional(
   schema.contextRef('os'),
   OperatingSystem.WINDOWS,
-  schema.arrayOf(WindowsEntrySchema, entriesSchemaOptions),
+  schema.arrayOf(WindowsEntrySchema, {
+    ...entriesSchemaOptions,
+    maxSize: entriesSchemaOptions.maxSize,
+  }),
   schema.conditional(
     schema.contextRef('os'),
     OperatingSystem.LINUX,
-    schema.arrayOf(LinuxEntrySchema, entriesSchemaOptions),
-    schema.arrayOf(MacEntrySchema, entriesSchemaOptions)
+    schema.arrayOf(LinuxEntrySchema, {
+      ...entriesSchemaOptions,
+      maxSize: entriesSchemaOptions.maxSize,
+    }),
+    schema.arrayOf(MacEntrySchema, {
+      ...entriesSchemaOptions,
+      maxSize: entriesSchemaOptions.maxSize,
+    })
   )
 );
 
@@ -187,6 +202,26 @@ const TrustedAppDataSchema = schema.object(
   { unknowns: 'ignore' }
 );
 
+/**
+ * Schema to validate Trusted Apps in Advanced mode
+ */
+const TrustedAppAdvancedModeDataSchema = schema.object(
+  {
+    entries: schema.arrayOf(
+      schema.object(
+        {
+          field: schema.string({ maxLength: ENTRY_FIELD_MAX_LENGTH }),
+        },
+        { unknowns: 'ignore' }
+      ),
+      { minSize: 1, maxSize: 250 }
+    ),
+  },
+  {
+    unknowns: 'ignore',
+  }
+);
+
 export class TrustedAppValidator extends BaseValidator {
   static isTrustedApp(item: { listId: string }): boolean {
     return item.listId === ENDPOINT_ARTIFACT_LISTS.trustedApps.id;
@@ -200,6 +235,21 @@ export class TrustedAppValidator extends BaseValidator {
     return super.validateHasPrivilege('canReadTrustedApplications');
   }
 
+  async validatePreImport(items: PromiseFromStreams): Promise<void> {
+    await this.validateHasWritePrivilege();
+
+    await this.validatePreImportItems(items, async (item) => {
+      // import specific validations
+      await this.validateImportOwnerSpaceIds(item); // instead of validateCreateOwnerSpaceIds
+      await this.validateCanImportGlobalArtifacts(item); // instead of validateCanCreateGlobalArtifacts
+      await this.removeInvalidPolicyIds(item); // instead of validateByPolicyItem
+
+      // usual validators from pre-create
+      await this.validateTrustedAppData(item);
+      await this.validateCanCreateByPolicyArtifacts(item);
+    });
+  }
+
   async validatePreCreateItem(
     item: CreateExceptionListItemOptions
   ): Promise<CreateExceptionListItemOptions> {
@@ -207,8 +257,8 @@ export class TrustedAppValidator extends BaseValidator {
     await this.validateTrustedAppData(item);
     await this.validateCanCreateByPolicyArtifacts(item);
     await this.validateByPolicyItem(item);
-    await this.validateCreateOwnerSpaceIds(item);
     await this.validateCanCreateGlobalArtifacts(item);
+    await this.validateCreateOwnerSpaceIds(item);
 
     return item;
   }
@@ -270,7 +320,31 @@ export class TrustedAppValidator extends BaseValidator {
     await this.validateBasicData(item);
 
     try {
-      TrustedAppDataSchema.validate(item, { os: item.osTypes[0] });
+      const isTAAdvancedModeFeatureFlagEnabled =
+        this.endpointAppContext.experimentalFeatures.trustedAppsAdvancedMode;
+      const isTAProcessDescendantsFeatureFlagEnabled =
+        this.endpointAppContext.experimentalFeatures.filterProcessDescendantsForTrustedAppsEnabled;
+      const isAdvancedMode = item.tags.includes('form_mode:advanced');
+      const hasProcessDescendants = item.tags.includes(TRUSTED_PROCESS_DESCENDANTS_TAG);
+
+      // Validate that the feature flags are enabled if the related features are used
+      if (!isTAAdvancedModeFeatureFlagEnabled && isAdvancedMode) {
+        throw new Error('Trusted apps advanced mode feature is not enabled');
+      }
+      if (!isTAProcessDescendantsFeatureFlagEnabled && hasProcessDescendants) {
+        throw new Error('Trusted apps process descendants feature is not enabled');
+      }
+      // Validate that process descendants is only used in advanced mode
+      if (!isAdvancedMode && hasProcessDescendants) {
+        throw new Error('Process descendants feature is only allowed on advanced mode');
+      }
+
+      // Validate with the correct schema depending on the mode
+      if (isTAAdvancedModeFeatureFlagEnabled && isAdvancedMode) {
+        TrustedAppAdvancedModeDataSchema.validate(item);
+      } else {
+        TrustedAppDataSchema.validate(item, { os: item.osTypes[0] });
+      }
     } catch (error) {
       throw new EndpointArtifactExceptionValidationError(error.message);
     }

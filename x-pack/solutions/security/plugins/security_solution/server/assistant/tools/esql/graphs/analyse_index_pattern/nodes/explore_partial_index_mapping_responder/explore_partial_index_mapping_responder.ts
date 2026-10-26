@@ -5,31 +5,34 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { Command } from '@langchain/langgraph';
 import { HumanMessage, SystemMessage } from '@langchain/core/messages';
+import type { BaseChatModel } from '@langchain/core/language_models/chat_models';
 import type { CreateLlmInstance } from '../../../../utils/common';
 import type { AnalyzeIndexPatternAnnotation } from '../../state';
 import { buildContext } from './utils';
 
-const structuredOutput = z.object({
-  containsRequiredFieldsForQuery: z
-    .boolean()
-    .describe('Whether the index pattern contains the required fields for the query'),
-});
+const structuredOutput = lazySchema(() =>
+  z.object({
+    containsRequiredFieldsForQuery: z
+      .boolean()
+      .describe('Whether the index pattern contains the required fields for the query'),
+  })
+);
 
-export const getExplorePartialIndexMappingResponder = ({
+export const getExplorePartialIndexMappingResponder = async ({
   createLlmInstance,
 }: {
   createLlmInstance: CreateLlmInstance;
 }) => {
-  const llm = createLlmInstance();
+  const llm = await createLlmInstance();
   return async (state: typeof AnalyzeIndexPatternAnnotation.State) => {
     const { messages } = state;
 
     const lastMessage = messages[messages.length - 1];
 
-    const result = await llm
+    const result = await (llm as BaseChatModel)
       .withStructuredOutput(structuredOutput, { name: 'indexMappingAnalysis' })
       .invoke([
         new SystemMessage({

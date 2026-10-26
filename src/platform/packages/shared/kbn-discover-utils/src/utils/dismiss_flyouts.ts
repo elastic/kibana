@@ -11,21 +11,41 @@ export enum DiscoverFlyouts {
   lensEdit = 'lensEdit',
   docViewer = 'docViewer',
   esqlDocs = 'esqlDocs',
+  metricInsights = 'metricInsights',
+  metricGridSettings = 'metricGridSettings',
+  esqlControls = 'esqlControls',
+  lensAlertRule = 'lensAlertRule',
+  inspectorPanel = 'inspectorPanel',
 }
 
 const AllDiscoverFlyouts = Object.values(DiscoverFlyouts);
 
-const getFlyoutCloseButton = (flyout: DiscoverFlyouts): HTMLElement | null => {
-  switch (flyout) {
-    case DiscoverFlyouts.lensEdit:
-      return document.getElementById('lnsCancelEditOnFlyFlyout');
-    case DiscoverFlyouts.docViewer:
-      return document.querySelector('[data-test-subj="docViewerFlyoutCloseButton"]');
-    case DiscoverFlyouts.esqlDocs:
-      return document.querySelector(
-        '[data-test-subj="esqlInlineDocumentationFlyout"] [data-test-subj="euiFlyoutCloseButton"]'
-      );
+const FlyoutRootSelectors: Record<DiscoverFlyouts, string> = {
+  [DiscoverFlyouts.lensEdit]: '[data-test-subj="lnsEditOnFlyFlyout"]',
+  [DiscoverFlyouts.docViewer]: '[data-test-subj="docViewerFlyout"]',
+  [DiscoverFlyouts.esqlDocs]: '[data-test-subj="esqlInlineDocumentationFlyout"]',
+  [DiscoverFlyouts.metricInsights]: '[data-test-subj="metricsExperienceFlyout"]',
+  [DiscoverFlyouts.metricGridSettings]: '[data-test-subj="metricsExperienceGridSettingsFlyout"]',
+  [DiscoverFlyouts.esqlControls]: '[data-test-subj="esqlControlsFlyout"]',
+  [DiscoverFlyouts.lensAlertRule]: '[data-test-subj="lensAlertRule"]',
+  [DiscoverFlyouts.inspectorPanel]: '[data-test-subj="inspectorPanel"]',
+};
+
+const getFlyoutCloseButtonGetters = (flyout: DiscoverFlyouts): Array<() => HTMLElement | null> => {
+  const root = FlyoutRootSelectors[flyout];
+
+  // The Lens edit flyout renders with `hideCloseButton`, so it has no EUI close button to click.
+  if (flyout === DiscoverFlyouts.lensEdit) {
+    return [
+      () =>
+        document.querySelector(
+          `${root} [data-test-subj="lns-indexPattern-dimensionContainerBack"]`
+        ),
+      () => document.getElementById('lnsCancelEditOnFlyFlyout'),
+    ];
   }
+
+  return [() => document.querySelector(`${root} [data-test-subj="euiFlyoutCloseButton"]`)];
 };
 
 export const dismissFlyouts = (
@@ -36,10 +56,11 @@ export const dismissFlyouts = (
     if (flyout === excludedFlyout) {
       return;
     }
-    const closeButton = getFlyoutCloseButton(flyout);
-    if (closeButton) {
-      closeButton.click?.();
-    }
+    const closeButtonGetters = getFlyoutCloseButtonGetters(flyout);
+    closeButtonGetters.forEach((getCloseButton) => {
+      const closeButton = getCloseButton();
+      closeButton?.click();
+    });
   });
 };
 

@@ -9,26 +9,31 @@
 
 import type { Logger } from '@kbn/logging';
 import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
-import type { CoreSecurityDelegateContract } from '@kbn/core-security-server';
-import { Observable, Subscription } from 'rxjs';
-import { Config } from '@kbn/config';
+import type {
+  CoreSecurityDelegateContract,
+  CoreSecurityDelegateHandle,
+  FakeRequestEnricher,
+} from '@kbn/core-security-server';
+import type { Observable, Subscription } from 'rxjs';
+import type { Config } from '@kbn/config';
 import { isFipsEnabled, checkFipsConfig } from './fips/fips';
 import type {
   InternalSecurityServiceSetup,
   InternalSecurityServiceStart,
 } from './internal_contracts';
-import {
-  getDefaultSecurityImplementation,
-  convertSecurityApi,
-  SecurityServiceConfigType,
-  PKCS12ConfigType,
-} from './utils';
+import type { SecurityServiceConfigType, PKCS12ConfigType } from './utils';
+import { getDefaultSecurityImplementation, convertSecurityApi } from './utils';
+import { createCoreUiamService } from './uiam';
+import { WorkloadTypeRegistry } from './workload_type_registry';
+import { createBoundWorkloadResolver } from './resolve_bound_workloads';
 
 export class SecurityService
   implements CoreService<InternalSecurityServiceSetup, InternalSecurityServiceStart>
 {
   private readonly log: Logger;
   private securityApi?: CoreSecurityDelegateContract;
+  private fakeRequestEnricherAcquired = false;
+  private readonly workloadTypes = new WorkloadTypeRegistry();
   private config$: Observable<Config>;
   private configSubscription?: Subscription;
   private config: Config | undefined;
@@ -50,22 +55,64 @@ export class SecurityService
 
   public setup(): InternalSecurityServiceSetup {
     const config = this.getConfig();
-    const securityConfig: SecurityServiceConfigType = config.get(['xpack', 'security']);
+    const securityConfig: SecurityServiceConfigType | undefined = config.get(['xpack', 'security']);
     const elasticsearchConfig: PKCS12ConfigType = config.get(['elasticsearch']);
-    const serverConfig: PKCS12ConfigType = config.get(['server']);
+    const serverConfig: PKCS12ConfigType & { basePath?: string } = config.get(['server']);
 
     checkFipsConfig(securityConfig, elasticsearchConfig, serverConfig, this.log);
 
+    // The HTTP service sets up after this one, so the base path comes from the same raw setting the
+    // HTTP service reads, which its config schema has already validated.
+    const serverBasePath = serverConfig?.basePath ?? '';
+
     return {
-      registerSecurityDelegate: (api) => {
+      registerSecurityDelegate: (api): CoreSecurityDelegateHandle => {
         if (this.securityApi) {
           throw new Error('security API can only be registered once');
         }
         this.securityApi = api;
+
+        return {
+          serviceAccounts: {
+            getWorkloadTypeName: (pluginId, workloadType) =>
+              this.workloadTypes.get(pluginId, workloadType)?.name,
+            resolveBoundWorkloads: createBoundWorkloadResolver({
+              registry: this.workloadTypes,
+              serverBasePath,
+              logger: this.log.get('service-accounts'),
+            }),
+          },
+        };
+      },
+      acquireFakeRequestEnricher: (): FakeRequestEnricher => {
+        if (this.fakeRequestEnricherAcquired) {
+          throw new Error(
+            'acquireFakeRequestEnricher() can only be called once and is reserved for Task Manager.'
+          );
+        }
+        this.fakeRequestEnricherAcquired = true;
+
+        // Returned eagerly at setup but invoked at task-run time, by which point
+        // the security delegate has been registered.
+        return (request, user) => {
+          if (!this.securityApi) {
+            throw new Error(
+              'Cannot enrich a fake request before the security delegate has been registered.'
+            );
+          }
+          this.securityApi.fakeRequestEnricher(request, user);
+        };
       },
       fips: {
         isEnabled: () => isFipsEnabled(securityConfig),
       },
+      serviceAccounts: {
+        registerWorkloadType: (pluginId, registration) =>
+          this.workloadTypes.register(pluginId, registration),
+      },
+      uiam: securityConfig?.uiam?.enabled
+        ? createCoreUiamService(securityConfig.uiam.sharedSecret)
+        : null,
     };
   }
 
@@ -74,7 +121,7 @@ export class SecurityService
       this.log.warn('Security API was not registered, using default implementation');
     }
     const apiContract = this.securityApi ?? getDefaultSecurityImplementation();
-    return convertSecurityApi(apiContract);
+    return convertSecurityApi(apiContract, this.workloadTypes);
   }
 
   public stop() {

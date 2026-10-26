@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { HttpSetup } from '@kbn/core/public';
+import type { HttpSetup } from '@kbn/core/public';
 import {
   notificationServiceMock,
   fatalErrorsServiceMock,

@@ -7,18 +7,19 @@
 
 import type { FC } from 'react';
 import React, { useCallback, useEffect, useState } from 'react';
-import { EuiCallOut, EuiLink, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiLink, EuiLoadingSpinner } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 
 import { useStorage } from '@kbn/ml-local-storage';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { MlStorageKey, TMlStorageMapped } from '@kbn/ml-common-types/storage';
+import { ML_OVERVIEW_PANELS } from '@kbn/ml-common-types/storage';
 import { type AnalyticStatsBarStats } from '../../../components/stats_bar';
 import {
   OverviewStatsBar,
   type StatEntry,
 } from '../../../components/collapsible_panel/collapsible_panel';
-import type { MlStorageKey, TMlStorageMapped } from '../../../../../common/types/storage';
-import { ML_OVERVIEW_PANELS } from '../../../../../common/types/storage';
 import { AnalyticsTable } from './table';
 import { useGetAnalytics } from '../../../data_frame_analytics/pages/analytics_management/services/analytics_service';
 import type { DataFrameAnalyticsListRow } from '../../../data_frame_analytics/pages/analytics_management/components/analytics_list/common';
@@ -76,19 +77,17 @@ export const AnalyticsPanel: FC<Props> = ({ setLazyJobCount }) => {
   }, [refresh]);
 
   const errorDisplay = (
-    <EuiCallOut
+    <KbnDangerCallout
       title={i18n.translate('xpack.ml.overview.analyticsList.errorPromptTitle', {
         defaultMessage: 'An error occurred getting the data frame analytics list.',
       })}
-      color="danger"
-      iconType="warning"
     >
       <pre>
         {errorMessage && errorMessage.message !== undefined
           ? errorMessage.message
           : JSON.stringify(errorMessage)}
       </pre>
-    </EuiCallOut>
+    </KbnDangerCallout>
   );
 
   const noDFAJobs = errorMessage === undefined && isInitialized === true && analytics.length === 0;
@@ -125,7 +124,7 @@ export const AnalyticsPanel: FC<Props> = ({ setLazyJobCount }) => {
         defaultMessage: 'data frame analytics panel',
       })}
     >
-      {noDFAJobs ? <AnalyticsEmptyPrompt /> : null}
+      {noDFAJobs ? <AnalyticsEmptyPrompt iconSize="s" /> : null}
 
       {typeof errorMessage !== 'undefined' ? errorDisplay : null}
 

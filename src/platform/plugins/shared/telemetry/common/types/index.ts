@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './latest';
+export type * from './latest';
 
-export * as v1 from './v2'; // Just so v1 can also be used (but for some reason telemetry endpoints have always been v2 :shrug:)
-export * as v2 from './v2';
+export type * as v1 from './v2'; // Just so v1 can also be used (but for some reason telemetry endpoints have always been v2 :shrug:)
+export type * as v2 from './v2';

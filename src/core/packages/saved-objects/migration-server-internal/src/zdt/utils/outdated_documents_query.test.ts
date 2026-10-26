@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SavedObjectsModelVersion } from '@kbn/core-saved-objects-server';
+import type { SavedObjectsModelVersion } from '@kbn/core-saved-objects-server';
 import { getOutdatedDocumentsQuery } from './outdated_documents_query';
 import { createType } from '../test_helpers/saved_object_type';
 
@@ -21,7 +21,6 @@ describe('getOutdatedDocumentsQuery', () => {
   it('generates the correct query for types using model versions', () => {
     const fooType = createType({
       name: 'foo',
-      switchToModelVersionAt: '8.8.0',
       modelVersions: {
         1: dummyModelVersion,
         2: dummyModelVersion,
@@ -29,7 +28,6 @@ describe('getOutdatedDocumentsQuery', () => {
     });
     const barType = createType({
       name: 'bar',
-      switchToModelVersionAt: '8.8.0',
       modelVersions: {
         1: dummyModelVersion,
         2: dummyModelVersion,
@@ -102,9 +100,12 @@ describe('getOutdatedDocumentsQuery', () => {
         '8.7.2': dummyMigration,
       }),
     });
+    const bazType = createType({
+      name: 'baz',
+    });
 
     const query = getOutdatedDocumentsQuery({
-      types: [fooType, barType],
+      types: [fooType, barType, bazType],
     });
 
     expect(query).toMatchInlineSnapshot(`
@@ -160,7 +161,6 @@ describe('getOutdatedDocumentsQuery', () => {
         '7.17.2': dummyMigration,
         '8.5.0': dummyMigration,
       },
-      switchToModelVersionAt: '8.8.0',
       modelVersions: {
         1: dummyModelVersion,
         2: dummyModelVersion,
@@ -173,9 +173,12 @@ describe('getOutdatedDocumentsQuery', () => {
         '8.7.2': dummyMigration,
       }),
     });
+    const bazType = createType({
+      name: 'baz',
+    });
 
     const query = getOutdatedDocumentsQuery({
-      types: [fooType, barType],
+      types: [fooType, barType, bazType],
     });
 
     expect(query).toMatchInlineSnapshot(`

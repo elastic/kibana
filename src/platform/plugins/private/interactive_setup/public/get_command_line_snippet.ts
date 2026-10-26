@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { isWindows } from '@kbn/shared-ux-utility';
+
 export function getCommandLineSnippet(command: string, args?: string) {
-  const isWindows = window.navigator.userAgent.includes('Win');
   return `${isWindows ? `bin\\${command}.bat` : `bin/${command}`}${args ? ` ${args}` : ''}`;
 }

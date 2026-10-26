@@ -18,7 +18,8 @@ import {
 } from './rolling_file_appender.test.mocks';
 import { rollingFileAppenderMocks } from './mocks';
 import moment from 'moment-timezone';
-import { LogLevel, LogRecord } from '@kbn/logging';
+import type { LogRecord } from '@kbn/logging';
+import { LogLevel } from '@kbn/logging';
 import type { RollingFileAppenderConfig } from '@kbn/core-logging-server';
 import { RollingFileAppender } from './rolling_file_appender';
 
@@ -112,7 +113,7 @@ describe('RollingFileAppender', () => {
     expect(RollingFileContextMock).toHaveBeenCalledWith(config.fileName);
 
     expect(RollingFileManagerMock).toHaveBeenCalledTimes(1);
-    expect(RollingFileManagerMock).toHaveBeenCalledWith(context);
+    expect(RollingFileManagerMock).toHaveBeenCalledWith(context, undefined);
 
     expect(LayoutsMock.create).toHaveBeenCalledTimes(1);
     expect(LayoutsMock.create).toHaveBeenCalledWith(config.layout);

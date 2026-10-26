@@ -1,0 +1,271 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React from 'react';
+import { Container, ContainerModule } from 'inversify';
+import { OnSetup, PluginSetup, PluginStart, Start } from '@kbn/core-di';
+import { CoreSetup, CoreStart, PluginInitializer } from '@kbn/core-di-browser';
+import type { PluginInitializerContext } from '@kbn/core/public';
+import type { SharePluginSetup } from '@kbn/share-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
+import type { LensPublicStart } from '@kbn/lens-plugin/public';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { DashboardStart } from '@kbn/dashboard-plugin/public';
+import type { CPSPluginStart } from '@kbn/cps/public';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
+import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extensions/public';
+import { WorkflowApi } from '@kbn/workflows-ui';
+import { isAlertingV2Enabled } from '@kbn/alerting-v2-utils';
+import { ActionPoliciesApi } from './services/action_policies_api';
+import { ExecutionHistoryApi } from './services/execution_history_api';
+import { RuleChangeHistoryApi } from './services/rule_change_history_api';
+import { RulesApi } from './services/rules_api';
+import { RuleTemplatesApi } from './services/rule_templates_api';
+import { UserCapabilities } from './services/user_capabilities';
+import { registerTriggerDefinitions } from './lib/workflow_extensions/register_trigger_definitions';
+import { registerCreateAlertEventStep } from './lib/workflow_extensions/register_create_alert_event_step';
+import { setKibanaServices } from './kibana_services';
+import type { AlertingV2UIConfig } from './kibana_services';
+import type { AlertingV2PublicStart } from './types';
+import type { CreateRuleOptionsFlyoutProps } from './create_rule_options_flyout';
+import type { AlertingV2PageProps } from './application/composable_pages';
+import {
+  AlertingV2RulesLocatorDefinition,
+  AlertingV2RuleLibraryLocatorDefinition,
+  AlertingV2EpisodesLocatorDefinition,
+  AlertingV2ActionPoliciesLocatorDefinition,
+  AlertingV2ExecutionHistoryLocatorDefinition,
+  createAlertingV2HostApp,
+} from './locators';
+
+const LazyCreateRuleOptionsFlyout = React.lazy(() =>
+  import('./create_rule_options_flyout').then((m) => ({ default: m.CreateRuleOptionsFlyout }))
+);
+
+const CreateRuleOptionsFlyout = (props: CreateRuleOptionsFlyoutProps) =>
+  React.createElement(
+    React.Suspense,
+    { fallback: null },
+    React.createElement(LazyCreateRuleOptionsFlyout, props)
+  );
+
+/**
+ * Injects this plugin's DI container into a composable page.
+ *
+ * Do not use `props.coreStart.injection.getContainer()`: when a host plugin
+ * (e.g. observabilityAlerting) renders these pages, that call returns the
+ * *host* container, which does not bind `PluginStart('share')` or this
+ * plugin's internal services.
+ */
+const lazyPageWithContainer = (
+  loader: () => Promise<{
+    default: React.ComponentType<AlertingV2PageProps & { container: Container }>;
+  }>,
+  container: Container
+): React.ComponentType<AlertingV2PageProps> => {
+  const LazyComponent = React.lazy(loader);
+  return (props: AlertingV2PageProps) =>
+    React.createElement(
+      React.Suspense,
+      { fallback: null },
+      React.createElement(LazyComponent, {
+        ...props,
+        container,
+      })
+    );
+};
+
+export type {
+  AlertingV2PublicStart,
+  CreateRuleOptionsFlyoutLegacyItem,
+  AlertingV2PageProps,
+  PrivilegeCheck,
+} from './types';
+export type { CreateRuleOptionsFlyoutProps } from './create_rule_options_flyout';
+export type { AlertingV2HostApp, CreateAlertingV2HostApp } from './locator_host';
+export type {
+  AlertingV2RulesLocatorParams,
+  AlertingV2RuleLibraryLocatorParams,
+  AlertingV2EpisodesLocatorParams,
+  AlertingV2ActionPoliciesLocatorParams,
+  AlertingV2ExecutionHistoryLocatorParams,
+} from './locators';
+export {
+  useV2RulesTabNewBadge,
+  V2_RULES_TAB_NEW_BADGE_VISITED_STORAGE_KEY,
+} from './hooks/use_v2_rules_tab_new_badge';
+
+const pluginModule = new ContainerModule(({ bind }) => {
+  bind(RulesApi).toSelf().inSingletonScope();
+  bind(ActionPoliciesApi).toSelf().inSingletonScope();
+  bind(ExecutionHistoryApi).toSelf().inSingletonScope();
+  bind(RuleTemplatesApi).toSelf().inSingletonScope();
+  bind(RuleChangeHistoryApi).toSelf().inSingletonScope();
+  bind(UserCapabilities).toSelf().inSingletonScope();
+  bind(WorkflowApi)
+    .toDynamicValue(({ get }) => new WorkflowApi(get(CoreStart('http'))))
+    .inSingletonScope();
+  bind(Start)
+    .toDynamicValue(({ get }) => {
+      const container = get(Container);
+      return {
+        CreateRuleOptionsFlyout,
+        RulesPage: lazyPageWithContainer(
+          () =>
+            import('./application/composable_pages').then((m) => ({
+              default: m.AlertingV2RulesPage,
+            })),
+          container
+        ),
+        RuleLibraryPage: lazyPageWithContainer(
+          () =>
+            import('./application/composable_pages').then((m) => ({
+              default: m.AlertingV2RuleLibraryPage,
+            })),
+          container
+        ),
+        EpisodesPage: lazyPageWithContainer(
+          () =>
+            import('./application/composable_pages').then((m) => ({
+              default: m.AlertingV2EpisodesPage,
+            })),
+          container
+        ),
+        ActionPoliciesPage: lazyPageWithContainer(
+          () =>
+            import('./application/composable_pages').then((m) => ({
+              default: m.AlertingV2ActionPoliciesPage,
+            })),
+          container
+        ),
+        ExecutionHistoryPage: lazyPageWithContainer(
+          () =>
+            import('./application/composable_pages').then((m) => ({
+              default: m.AlertingV2ExecutionHistoryPage,
+            })),
+          container
+        ),
+        createAlertingV2HostApp,
+      } satisfies AlertingV2PublicStart;
+    })
+    .inSingletonScope();
+  bind(OnSetup).toConstantValue((container) => {
+    const getStartServices = container.get(CoreSetup('getStartServices'));
+    const workflowsExtensionsSetup = container.get(
+      PluginSetup('workflowsExtensions')
+    ) as WorkflowsExtensionsPublicPluginSetup;
+
+    registerTriggerDefinitions(workflowsExtensionsSetup);
+    registerCreateAlertEventStep(workflowsExtensionsSetup);
+
+    // Register change-history telemetry event types once, lazily, to keep the
+    // React UI out of the page-load bundle.
+    const analytics = container.get(CoreSetup('analytics'));
+    void import('@kbn/change-history-ui/telemetry')
+      .then(({ registerChangeHistoryTelemetryEvents }) => {
+        registerChangeHistoryTelemetryEvents(analytics);
+      })
+      .catch(() => {
+        // Telemetry registration must not break plugin setup.
+      });
+
+    const share = container.get(PluginSetup('share')) as SharePluginSetup;
+    share.url.locators.create(AlertingV2RulesLocatorDefinition);
+    share.url.locators.create(AlertingV2RuleLibraryLocatorDefinition);
+    share.url.locators.create(AlertingV2EpisodesLocatorDefinition);
+    share.url.locators.create(AlertingV2ActionPoliciesLocatorDefinition);
+    share.url.locators.create(AlertingV2ExecutionHistoryLocatorDefinition);
+
+    getStartServices().then(([coreStart]) => {
+      const diContainer = coreStart.injection.getContainer();
+
+      const dashboardToken = PluginStart('dashboard');
+      const dashboard = diContainer.isBound(dashboardToken)
+        ? (diContainer.get(dashboardToken) as DashboardStart)
+        : undefined;
+
+      // Optional RuleFormServices field; used by ComposeDiscoverFlyout (CpsPicker), not artifacts UI.
+      const cpsToken = PluginStart('cps');
+      const cps = diContainer.isBound(cpsToken)
+        ? (diContainer.get(cpsToken) as CPSPluginStart)
+        : undefined;
+
+      const configAccessor = diContainer.get<
+        PluginInitializerContext<AlertingV2UIConfig>['config']
+      >(PluginInitializer('config'));
+      const { minimumScheduleInterval } = configAccessor.get<AlertingV2UIConfig>().rules;
+
+      setKibanaServices({
+        http: coreStart.http,
+        notifications: coreStart.notifications,
+        application: coreStart.application,
+        uiSettings: coreStart.uiSettings,
+        featureFlags: coreStart.featureFlags,
+        data: diContainer.get(PluginStart('data')) as DataPublicPluginStart,
+        dataViews: diContainer.get(PluginStart('dataViews')) as DataViewsPublicPluginStart,
+        lens: diContainer.get(PluginStart('lens')) as LensPublicStart,
+        expressions: diContainer.get(PluginStart('expressions')) as ExpressionsStart,
+        uiActions: diContainer.get(PluginStart('uiActions')) as UiActionsStart,
+        dashboard,
+        cps,
+        minimumScheduleInterval,
+        container: diContainer,
+      });
+
+      if (!isAlertingV2Enabled(coreStart)) {
+        return;
+      }
+
+      const agentBuilderToken = PluginStart('agentBuilder');
+      if (diContainer.isBound(agentBuilderToken)) {
+        const agentBuilder = diContainer.get(agentBuilderToken) as AgentBuilderPluginStart;
+        import(
+          /* webpackChunkName: "alerting_v2_rule_attachment" */
+          './agent_builder/attachments/rule_attachment_definition'
+        ).then(({ createRuleAttachmentDefinition, RULE_ATTACHMENT_TYPE: ruleAttachmentType }) => {
+          agentBuilder.attachments.addAttachmentType(
+            ruleAttachmentType,
+            createRuleAttachmentDefinition({
+              container: diContainer,
+            })
+          );
+        });
+        import(
+          /* webpackChunkName: "alerting_v2_action_policy_attachment" */
+          './agent_builder/attachments/action_policy_attachment_definition'
+        ).then(
+          ({
+            createActionPolicyAttachmentDefinition,
+            ACTION_POLICY_ATTACHMENT_TYPE: actionPolicyAttachmentType,
+          }) => {
+            agentBuilder.attachments.addAttachmentType(
+              actionPolicyAttachmentType,
+              createActionPolicyAttachmentDefinition({
+                container: diContainer,
+              })
+            );
+          }
+        );
+        import(
+          /* webpackChunkName: "alerting_v2_alert_attachment" */
+          './agent_builder/attachments/alert_attachment_definition'
+        ).then(
+          ({ createAlertAttachmentDefinition, ALERT_ATTACHMENT_TYPE: alertAttachmentType }) => {
+            agentBuilder.attachments.addAttachmentType(
+              alertAttachmentType,
+              createAlertAttachmentDefinition()
+            );
+          }
+        );
+      }
+    });
+  });
+});
+
+export { pluginModule as module };

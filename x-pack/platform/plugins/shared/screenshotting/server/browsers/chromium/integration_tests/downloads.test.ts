@@ -1,3 +1,8 @@
+/**
+ * @jest-environment node
+ */
+
+/* eslint-disable @kbn/eslint/require-license-header */
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,7 +11,7 @@
  */
 
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import { PackageInfo } from '@kbn/screenshotting-server';
+import type { PackageInfo } from '@kbn/screenshotting-server';
 import assert from 'assert';
 import axios from 'axios';
 import path from 'path';

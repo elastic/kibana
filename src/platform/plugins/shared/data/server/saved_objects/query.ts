@@ -8,7 +8,7 @@
  */
 
 import { ANALYTICS_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
-import { SavedObjectsType } from '@kbn/core/server';
+import type { SavedObjectsType } from '@kbn/core/server';
 import { savedQueryMigrations } from './migrations/query';
 import {
   SCHEMA_QUERY_V8_8_0,
@@ -23,7 +23,7 @@ export const querySavedObjectType: SavedObjectsType = {
   namespaceType: 'multiple',
   convertToMultiNamespaceTypeVersion: '8.0.0',
   management: {
-    icon: 'search',
+    icon: 'magnify',
     defaultSearchField: 'title',
     importableAndExportable: true,
     getTitle(obj) {

@@ -40,7 +40,11 @@ The api returns an array of suggestions.
 
 ```typescript
 const indexName = (await getIndexForESQLQuery({ dataViews })) ?? '*';
-const dataView = await getESQLAdHocDataview(`from ${indexName}`, dataViews);
+const dataView = await getESQLAdHocDataview({
+      dataViewsService: dataViews,
+      query: `from ${indexName}`,
+      options: { skipFetchFields: true },
+    });
 ```
 Optional parameters:
 - `preferredChartType`: Use this if you want the suggestions api to prioritize a specific suggestion type.

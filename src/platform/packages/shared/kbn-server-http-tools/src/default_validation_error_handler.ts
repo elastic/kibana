@@ -7,9 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Lifecycle, Request, ResponseToolkit, Utils } from '@hapi/hapi';
-import { ValidationError } from 'joi';
-import Hoek from '@hapi/hoek';
+import type { Lifecycle, Request, ResponseToolkit, Utils } from '@hapi/hapi';
+import type { ValidationError } from 'joi';
+
+const htmlEscapes: Record<string, string> = {
+  '&': '&amp;',
+  '<': '&lt;',
+  '>': '&gt;',
+  '"': '&quot;',
+  "'": '&#x27;',
+  '`': '&#x60;',
+};
+
+const escapeHtml = (value: string): string =>
+  value.replace(/[&<>"'`]/g, (character) => htmlEscapes[character]);
 
 /**
  * Hapi extends the ValidationError interface to add this output key with more data.
@@ -50,7 +61,7 @@ export function defaultValidationErrorHandler(
 
     validationError.details.forEach((detail) => {
       if (detail.path.length > 0) {
-        validationKeys.push(Hoek.escapeHtml(detail.path.join('.')));
+        validationKeys.push(escapeHtml(detail.path.join('.')));
       } else {
         // If no path, use the value sigil to signal the entire value had an issue.
         validationKeys.push('value');

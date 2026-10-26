@@ -7,13 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { FunctionComponent } from 'react';
+import type { FunctionComponent } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { CoreStart } from '@kbn/core/public';
-import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
+import type { CoreStart } from '@kbn/core/public';
 import { EuiButton, EuiCard, EuiTextColor, EuiScreenReaderOnly, EuiImage } from '@elastic/eui';
 import { useKibana } from '../../../context';
-import { NoDataPageActions, NO_DATA_RECOMMENDED } from '../no_data_page';
+import type { NoDataPageActions } from '../no_data_page';
+import { NO_DATA_RECOMMENDED } from '../no_data_page';
 
 export type ElasticAgentCardProps = NoDataPageActions & {
   solution: string;
@@ -27,9 +28,13 @@ export const ElasticAgentCard: FunctionComponent<ElasticAgentCardProps> = ({
   recommended,
   title,
   href,
+  onClick,
   button,
   layout,
   category,
+  isDisabled,
+  target,
+  rel,
   ...cardRest
 }) => {
   const {
@@ -82,39 +87,44 @@ export const ElasticAgentCard: FunctionComponent<ElasticAgentCardProps> = ({
     defaultMessage: 'Add Elastic Agent',
   });
 
+  const resolvedHref = href ?? addBasePath(`/app/integrations/browse${hasCategory}`);
+
+  // The href/onClick live on the button only: a card-level href/onClick would make
+  // the whole card an interactive wrapper around this button, which is invalid,
+  // doubly-focusable nesting (@elastic/eui/no-nested-interactive-element).
   const footer =
     typeof button !== 'string' && typeof button !== 'undefined' ? (
       button
     ) : (
-      // The href and/or onClick are attached to the whole Card, so the button is just for show.
-      // Do not add the behavior here too or else it will propogate through
-      <EuiButton fill>{button || title || defaultCTAtitle}</EuiButton>
+      <EuiButton
+        fill
+        href={resolvedHref}
+        onClick={onClick}
+        isDisabled={isDisabled}
+        target={target}
+        rel={rel}
+      >
+        {button || title || defaultCTAtitle}
+      </EuiButton>
     );
 
   return (
-    <RedirectAppLinks
-      coreStart={{
-        application,
-      }}
-    >
-      <EuiCard
-        paddingSize="l"
-        image={image}
-        href={href ?? addBasePath(`/app/integrations/browse${hasCategory}`)}
-        // Bad hack to fix the need for an a11y title even though the button exists
-        title={
-          <EuiScreenReaderOnly>
-            <span>{defaultCTAtitle}</span>
-          </EuiScreenReaderOnly>
-        }
-        description={i18n.translate('kibana-react.noDataPage.elasticAgentCard.description', {
-          defaultMessage: `Use Elastic Agent for a simple, unified way to collect data from your machines.`,
-        })}
-        betaBadgeProps={recommended ? { label: NO_DATA_RECOMMENDED } : undefined}
-        footer={footer}
-        layout={layout as 'vertical' | undefined}
-        {...cardRest}
-      />
-    </RedirectAppLinks>
+    <EuiCard
+      paddingSize="l"
+      image={image}
+      title={
+        <EuiScreenReaderOnly>
+          <span>{defaultCTAtitle}</span>
+        </EuiScreenReaderOnly>
+      }
+      description={i18n.translate('kibana-react.noDataPage.elasticAgentCard.description', {
+        defaultMessage: `Use Elastic Agent for a simple, unified way to collect data from your machines.`,
+      })}
+      betaBadgeProps={recommended ? { label: NO_DATA_RECOMMENDED } : undefined}
+      footer={footer}
+      layout={layout as 'vertical' | undefined}
+      isDisabled={isDisabled}
+      {...cardRest}
+    />
   );
 };

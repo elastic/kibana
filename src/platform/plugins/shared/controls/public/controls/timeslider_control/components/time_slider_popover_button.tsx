@@ -8,22 +8,65 @@
  */
 
 import React from 'react';
+import type { UseEuiTheme } from '@elastic/eui';
 import { EuiText } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 
 interface Props {
   onClick: () => void;
+  isInteractive: boolean;
   formatDate: (epoch: number) => string;
   from: number;
   to: number;
 }
 
+const timeSliderStyles = {
+  anchor: ({ euiTheme }: UseEuiTheme) => css`
+    width: 100%;
+    height: 100%;
+    box-shadow: none;
+    overflow: hidden;
+
+    :disabled {
+      cursor: default;
+    }
+
+    :not(:disabled) .euiText {
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+
+    .timeSlider__anchorText {
+      font-weight: ${euiTheme.font.weight.medium};
+    }
+
+    .timeSlider__anchorText--default {
+      color: ${euiTheme.colors.mediumShade};
+    }
+
+    .timeSlider__anchorText--invalid {
+      text-decoration: line-through;
+      color: ${euiTheme.colors.mediumShade};
+    }
+
+    &:focus-visible {
+      outline-offset: -3px;
+    }
+  `,
+};
+
 export function TimeSliderPopoverButton(props: Props) {
+  const styles = useMemoCss(timeSliderStyles);
   return (
     <button
-      className="timeSlider__anchor eui-textTruncate"
+      className="eui-textTruncate"
       color="text"
       onClick={props.onClick}
       data-test-subj="timeSlider-popoverToggleButton"
+      css={styles.anchor}
+      disabled={!props.isInteractive}
     >
       <EuiText className="timeSlider__anchorText eui-textTruncate" size="s">
         <span>{props.formatDate(props.from)}</span>

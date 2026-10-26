@@ -11,7 +11,6 @@ import { ThemeProvider } from '@emotion/react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 
 import {
-  defaultToEmptyTag,
   getEmptyString,
   getEmptyStringTag,
   getEmptyCellValue,
@@ -69,38 +68,6 @@ describe('EmptyValue', () => {
         </ThemeProvider>
       );
       expect(wrapper.text()).toBe(getEmptyString());
-    });
-  });
-
-  describe('#defaultToEmptyTag', () => {
-    test('should default to an empty value when a value is null', () => {
-      const wrapper = mount(
-        <ThemeProvider theme={mockTheme}>
-          <p>{defaultToEmptyTag(null)}</p>
-        </ThemeProvider>
-      );
-      expect(wrapper.text()).toBe(getEmptyValue());
-    });
-
-    test('should default to an empty value when a value is undefined', () => {
-      const wrapper = mount(
-        <ThemeProvider theme={mockTheme}>
-          <p>{defaultToEmptyTag(undefined)}</p>
-        </ThemeProvider>
-      );
-      expect(wrapper.text()).toBe(getEmptyValue());
-    });
-
-    test('should return a deep path value', () => {
-      const test = {
-        a: {
-          b: {
-            c: 1,
-          },
-        },
-      };
-      const wrapper = mount(<p>{defaultToEmptyTag(test.a.b.c)}</p>);
-      expect(wrapper.text()).toBe('1');
     });
   });
 

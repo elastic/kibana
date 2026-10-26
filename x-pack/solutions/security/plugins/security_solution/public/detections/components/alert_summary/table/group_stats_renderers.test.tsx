@@ -5,17 +5,43 @@
  * 2.0.
  */
 
-import { getIntegrationComponent, groupStatsRenderer } from './group_stats_renderers';
-import { useGetIntegrationFromRuleId } from '../../../hooks/alert_summary/use_get_integration_from_rule_id';
+import React from 'react';
+import { render } from '@testing-library/react';
+import {
+  getIntegrationComponent,
+  groupStatsRenderer,
+  IntegrationIcon,
+  TABLE_GROUP_STATS_TEST_ID,
+} from './group_stats_renderers';
+import { useTableSectionContext } from './table_section_context';
+import { usePackageIconType } from '@kbn/fleet-plugin/public/hooks';
+import { INTEGRATION_ICON_TEST_ID } from '../common/integration_icon';
+import type { PackageListItem } from '@kbn/fleet-plugin/common';
+import { installationStatuses } from '@kbn/fleet-plugin/common/constants';
 
-jest.mock('../../../hooks/alert_summary/use_get_integration_from_rule_id');
 jest.mock('@kbn/fleet-plugin/public/hooks');
+jest.mock('./table_section_context');
+
+const packages: PackageListItem[] = [
+  {
+    id: 'splunk',
+    icons: [{ src: 'icon.svg', path: 'mypath/icon.svg', type: 'image/svg+xml' }],
+    name: 'splunk',
+    status: installationStatuses.NotInstalled,
+    title: 'Splunk',
+    version: '0.1.0',
+  },
+];
 
 describe('getIntegrationComponent', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('should return an empty array', () => {
     const groupStatsItems = getIntegrationComponent({
       key: '',
-      signalRuleIdSubAggregation: { buckets: [] },
+      relatedIntegrationSubAggregation: { buckets: [] },
       doc_count: 2,
     });
 
@@ -23,21 +49,16 @@ describe('getIntegrationComponent', () => {
   });
 
   it('should return a single integration', () => {
-    (useGetIntegrationFromRuleId as jest.Mock).mockReturnValue({
-      integration: { title: 'title', icons: 'icons', name: 'name', version: 'version' },
-      isLoading: false,
-    });
-
     const groupStatsItems = getIntegrationComponent({
       key: '',
-      signalRuleIdSubAggregation: { buckets: [{ key: 'crowdstrike', doc_count: 10 }] },
+      relatedIntegrationSubAggregation: { buckets: [{ key: 'crowdstrike', doc_count: 10 }] },
       doc_count: 2,
     });
 
     expect(groupStatsItems.length).toBe(1);
     expect(groupStatsItems[0].component).toMatchInlineSnapshot(`
       <Memo(IntegrationIcon)
-        ruleId="crowdstrike"
+        integrationName="crowdstrike"
       />
     `);
   });
@@ -45,7 +66,7 @@ describe('getIntegrationComponent', () => {
   it('should return a single integration loading', () => {
     const groupStatsItems = getIntegrationComponent({
       key: '',
-      signalRuleIdSubAggregation: {
+      relatedIntegrationSubAggregation: {
         buckets: [
           { key: 'crowdstrike', doc_count: 10 },
           {
@@ -66,9 +87,47 @@ describe('getIntegrationComponent', () => {
   });
 });
 
+describe('IntegrationIcon', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('should render integration icon', () => {
+    (usePackageIconType as jest.Mock).mockReturnValue('iconType');
+    (useTableSectionContext as jest.Mock).mockReturnValue({
+      packages,
+      ruleResponse: {},
+    });
+
+    const { getByTestId } = render(<IntegrationIcon integrationName={'splunk'} />);
+
+    expect(
+      getByTestId(`${TABLE_GROUP_STATS_TEST_ID}-${INTEGRATION_ICON_TEST_ID}`)
+    ).toBeInTheDocument();
+  });
+
+  it('should not render icon', () => {
+    (usePackageIconType as jest.Mock).mockReturnValue('iconType');
+    (useTableSectionContext as jest.Mock).mockReturnValue({
+      packages: [],
+      ruleResponse: {},
+    });
+
+    const { queryByTestId } = render(<IntegrationIcon integrationName={'splunk'} />);
+
+    expect(
+      queryByTestId(`${TABLE_GROUP_STATS_TEST_ID}-${INTEGRATION_ICON_TEST_ID}`)
+    ).not.toBeInTheDocument();
+  });
+});
+
 describe('groupStatsRenderer', () => {
-  it('should return array of badges for signal.rule.id field', () => {
-    const badges = groupStatsRenderer('signal.rule.id', {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('should return array of badges for relatedIntegration field', () => {
+    const badges = groupStatsRenderer('relatedIntegration', {
       key: '',
       severitiesSubAggregation: { buckets: [{ key: 'medium', doc_count: 10 }] },
       rulesCountAggregation: { value: 3 },
@@ -104,7 +163,7 @@ describe('groupStatsRenderer', () => {
   it('should return array of badges for kibana.alert.severity field', () => {
     const badges = groupStatsRenderer('kibana.alert.severity', {
       key: '',
-      signalRuleIdSubAggregation: { buckets: [{ key: 'crowdstrike', doc_count: 10 }] },
+      relatedIntegrationSubAggregation: { buckets: [{ key: 'crowdstrike', doc_count: 10 }] },
       rulesCountAggregation: { value: 4 },
       doc_count: 2,
     });
@@ -138,7 +197,7 @@ describe('groupStatsRenderer', () => {
   it('should return array of badges for kibana.alert.rule.name field', () => {
     const badges = groupStatsRenderer('kibana.alert.rule.name', {
       key: '',
-      signalRuleIdSubAggregation: { buckets: [{ key: 'crowdstrike', doc_count: 9 }] },
+      relatedIntegrationSubAggregation: { buckets: [{ key: 'crowdstrike', doc_count: 9 }] },
       severitiesSubAggregation: { buckets: [{ key: 'medium', doc_count: 8 }] },
       doc_count: 1,
     });
@@ -168,7 +227,7 @@ describe('groupStatsRenderer', () => {
   it('should return default badges if the field does not exist', () => {
     const badges = groupStatsRenderer('process.name', {
       key: '',
-      signalRuleIdSubAggregation: { buckets: [{ key: 'crowdstrike', doc_count: 4 }] },
+      relatedIntegrationSubAggregation: { buckets: [{ key: 'crowdstrike', doc_count: 4 }] },
       severitiesSubAggregation: { buckets: [{ key: 'medium', doc_count: 5 }] },
       rulesCountAggregation: { value: 2 },
       doc_count: 11,

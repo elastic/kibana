@@ -16,12 +16,18 @@ import {
   EuiLoadingSpinner,
   EuiDescriptionList,
 } from '@elastic/eui';
-import { AlertConsumers, getEditRuleRoute, getRuleDetailsRoute } from '@kbn/rule-data-utils';
+import { ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID } from '@kbn/elastic-assistant-common';
+import {
+  AlertConsumers,
+  getEditRuleRoute,
+  getRuleDetailsRoute,
+  getTriggersActionsManagementPath,
+} from '@kbn/rule-data-utils';
 import { i18n } from '@kbn/i18n';
 import { formatDuration } from '@kbn/alerting-plugin/common';
 import { useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared/src/common/hooks';
-import { RuleDefinitionProps } from '../../../../types';
-import { RuleType } from '../../../..';
+import type { RuleDefinitionProps } from '../../../../types';
+import type { RuleType } from '../../../..';
 import { useKibana } from '../../../../common/lib/kibana';
 import {
   hasAllPrivilege,
@@ -29,6 +35,7 @@ import {
   hasShowActionsCapability,
 } from '../../../lib/capabilities';
 import { RuleActions } from './rule_actions';
+import { useRuleDescriptionFields } from './use_rule_description_fields';
 
 const INITIAL_FILTERED_RULE_TYPES: string[] = [];
 
@@ -39,6 +46,7 @@ export const RuleDefinition: React.FunctionComponent<RuleDefinitionProps> = memo
     ruleTypeRegistry,
     hideEditButton = false,
     filteredRuleTypes = INITIAL_FILTERED_RULE_TYPES,
+    navigateToEditRuleForm,
   }) => {
     const {
       application: { capabilities, navigateToApp },
@@ -102,6 +110,11 @@ export const RuleDefinition: React.FunctionComponent<RuleDefinitionProps> = memo
       if (ruleTypeRegistry.has(rule.ruleTypeId)) {
         return ruleTypeRegistry.get(rule.ruleTypeId).description;
       }
+      if (rule.ruleTypeId === ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID) {
+        return i18n.translate('xpack.triggersActionsUI.ruleDetails.attackDiscoveryRule', {
+          defaultMessage: 'Attack Discovery rule',
+        });
+      }
       // TODO: Replace this generic description with proper SIEM rule descriptions
       if (rule.consumer === AlertConsumers.SIEM) {
         return i18n.translate('xpack.triggersActionsUI.ruleDetails.securityDetectionRule', {
@@ -111,12 +124,22 @@ export const RuleDefinition: React.FunctionComponent<RuleDefinitionProps> = memo
       return '';
     }, [rule, ruleTypeRegistry]);
 
+    const { descriptionFields } = useRuleDescriptionFields({
+      rule,
+      ruleTypeRegistry,
+    });
+
     const onEditRuleClick = () => {
+      if (navigateToEditRuleForm) {
+        navigateToEditRuleForm(rule.id);
+        return;
+      }
+
       navigateToApp('management', {
-        path: `insightsAndAlerting/triggersActions/${getEditRuleRoute(rule.id)}`,
+        path: getTriggersActionsManagementPath(getEditRuleRoute(rule.id)),
         state: {
           returnApp: 'management',
-          returnPath: `insightsAndAlerting/triggersActions/${getRuleDetailsRoute(rule.id)}`,
+          returnPath: getTriggersActionsManagementPath(getRuleDetailsRoute(rule.id)),
         },
       });
     };
@@ -185,6 +208,7 @@ export const RuleDefinition: React.FunctionComponent<RuleDefinitionProps> = memo
             },
           ]
         : []),
+      ...descriptionFields,
       {
         title: i18n.translate('xpack.triggersActionsUI.ruleDetails.actions', {
           defaultMessage: 'Actions',
@@ -208,7 +232,11 @@ export const RuleDefinition: React.FunctionComponent<RuleDefinitionProps> = memo
     ];
 
     return (
-      <EuiFlexItem data-test-subj="ruleSummaryRuleDefinition" grow={3}>
+      <EuiFlexItem
+        data-test-subj="ruleSummaryRuleDefinition"
+        grow={3}
+        css={{ minWidth: 'min(100%, 500px)' }}
+      >
         <EuiPanel color="subdued" hasBorder={false} paddingSize="m">
           <EuiFlexGroup justifyContent="spaceBetween">
             <EuiTitle size="s">
@@ -229,13 +257,24 @@ export const RuleDefinition: React.FunctionComponent<RuleDefinitionProps> = memo
                     data-test-subj="ruleDetailsEditButton"
                     iconType={'pencil'}
                     onClick={onEditRuleClick}
+                    aria-label={i18n.translate('xpack.triggersActionsUI.ruleDetails.editButton', {
+                      defaultMessage: 'Edit Rule',
+                    })}
                   />
                 </EuiFlexItem>
               )
             )}
           </EuiFlexGroup>
           <EuiSpacer size="m" />
-          <EuiDescriptionList compressed={true} type="column" listItems={ruleDefinitionList} />
+          <EuiDescriptionList
+            compressed={true}
+            type="responsiveColumn"
+            columnWidths={[1, 3]}
+            listItems={ruleDefinitionList}
+            css={{ alignItems: 'start' }}
+            titleProps={{ css: { minWidth: 0 } }}
+            descriptionProps={{ css: { minWidth: 0, overflowWrap: 'break-word' } }}
+          />
         </EuiPanel>
       </EuiFlexItem>
     );

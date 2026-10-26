@@ -20,10 +20,10 @@ import {
   EuiTitle,
   EuiText,
   EuiSpacer,
-  EuiCallOut,
 } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 
-import {
+import type {
   EnrichedDeprecationInfo,
   ClusterSettingAction,
   ResponseError,
@@ -106,26 +106,21 @@ export const RemoveClusterSettingsFlyout = ({
   return (
     <>
       <EuiFlyoutHeader hasBorder>
-        <DeprecationBadge
-          isCritical={deprecation.isCritical}
-          isResolved={statusType === 'complete'}
-        />
+        <DeprecationBadge level={deprecation.level} isResolved={statusType === 'complete'} />
         <EuiSpacer size="s" />
         <EuiTitle size="s" data-test-subj="flyoutTitle">
           <h2 id="removeClusterSettingsDetailsFlyoutTitle">{message}</h2>
         </EuiTitle>
       </EuiFlyoutHeader>
-      <EuiFlyoutBody>
+      <EuiFlyoutBody data-test-subj="flyoutBody">
         {statusType === 'error' && (
           <>
-            <EuiCallOut
+            <KbnDangerCallout
+              announceOnMount
               title={i18nTexts.errorTitle}
-              color="danger"
-              iconType="warning"
               data-test-subj="deleteClusterSettingsError"
-            >
-              {statusDetails!.message as string}
-            </EuiCallOut>
+              text={statusDetails!.message as string}
+            />
             <EuiSpacer />
           </>
         )}

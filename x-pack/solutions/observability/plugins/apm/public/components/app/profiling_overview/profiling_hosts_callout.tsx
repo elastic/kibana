@@ -37,12 +37,12 @@ export function ProfilingHostsCallout({ serviceName }: Props) {
         values: { serviceName },
       })}
       color="primary"
-      iconType="iInCircle"
+      iconType="info"
     >
       <p>
         {i18n.translate('xpack.apm.profiling.callout.description', {
           defaultMessage:
-            'Universal Profiling provides unprecedented code visibility into the runtime behaviour of all applications. It profiles every line of code on the host(s) running your services, including not only your application code but also the kernel and third-party libraries.',
+            'Profiling provides unprecedented code visibility into the runtime behaviour of all applications. It profiles every line of code on the host(s) running your services, including not only your application code but also the kernel and third-party libraries.',
         })}
       </p>
       <EuiFlexGroup direction="row">

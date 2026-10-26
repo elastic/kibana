@@ -4,38 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { AlertConsumers } from '@kbn/rule-data-utils';
 
-import type { ConstructorOptions } from '../../../../rules_client/rules_client';
 import { RulesClient } from '../../../../rules_client/rules_client';
-import {
-  savedObjectsClientMock,
-  loggingSystemMock,
-  savedObjectsRepositoryMock,
-  uiSettingsServiceMock,
-} from '@kbn/core/server/mocks';
-import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
-import { ruleTypeRegistryMock } from '../../../../rule_type_registry.mock';
-import { alertingAuthorizationMock } from '../../../../authorization/alerting_authorization.mock';
-import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
-import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
-import type { AlertingAuthorization } from '../../../../authorization/alerting_authorization';
-import type { ActionsAuthorization } from '@kbn/actions-plugin/server';
-import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { getBeforeSetup, setGlobalDate } from '../../../../rules_client/tests/lib';
 import { eventLoggerMock } from '@kbn/event-log-plugin/server/event_logger.mock';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
-import { migrateLegacyActions } from '../../../../rules_client/lib';
-import { migrateLegacyActionsMock } from '../../../../rules_client/lib/siem_legacy_actions/retrieve_migrated_legacy_actions.mock';
-import { ConnectorAdapterRegistry } from '../../../../connector_adapters/connector_adapter_registry';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
-import { backfillClientMock } from '../../../../backfill_client/backfill_client.mock';
-
-jest.mock('../../../../rules_client/lib/siem_legacy_actions/migrate_legacy_actions', () => {
-  return {
-    migrateLegacyActions: jest.fn(),
-  };
-});
+import { getRulesClientMockParams } from '../../../../test_utils';
 
 jest.mock('../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation', () => ({
   bulkMarkApiKeysForInvalidation: jest.fn(),
@@ -45,46 +20,17 @@ jest.mock('uuid', () => ({
   v4: () => '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
 }));
 
-const taskManager = taskManagerMock.createStart();
-const ruleTypeRegistry = ruleTypeRegistryMock.create();
-const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
-const encryptedSavedObjects = encryptedSavedObjectsMock.createClient();
-const authorization = alertingAuthorizationMock.create();
-const actionsAuthorization = actionsAuthorizationMock.create();
-const auditLogger = auditLoggerMock.create();
 const eventLogger = eventLoggerMock.create();
-const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
 
-const kibanaVersion = 'v7.10.0';
-const rulesClientParams: jest.Mocked<ConstructorOptions> = {
+const {
+  rulesClientParams,
   taskManager,
   ruleTypeRegistry,
   unsecuredSavedObjectsClient,
-  authorization: authorization as unknown as AlertingAuthorization,
-  actionsAuthorization: actionsAuthorization as unknown as ActionsAuthorization,
-  spaceId: 'default',
-  namespace: 'default',
-  maxScheduledPerMinute: 10000,
-  minimumScheduleInterval: { value: '1m', enforce: false },
-  getUserName: jest.fn(),
-  createAPIKey: jest.fn(),
-  logger: loggingSystemMock.create().get(),
-  internalSavedObjectsRepository,
-  encryptedSavedObjectsClient: encryptedSavedObjects,
-  getActionsClient: jest.fn(),
-  getEventLogClient: jest.fn(),
-  kibanaVersion,
+  encryptedSavedObjects,
+  authorization,
   auditLogger,
-  eventLogger,
-  isAuthenticationTypeAPIKey: jest.fn(),
-  getAuthenticationAPIKey: jest.fn(),
-  connectorAdapterRegistry: new ConnectorAdapterRegistry(),
-  getAlertIndicesAlias: jest.fn(),
-  alertsService: null,
-  backfillClient: backfillClientMock.create(),
-  uiSettings: uiSettingsServiceMock.createStartContract(),
-  isSystemAction: jest.fn(),
-};
+} = getRulesClientMockParams({ eventLogger });
 
 const fakeRuleName = 'fakeRuleName';
 
@@ -153,11 +99,6 @@ describe('disableRule()', () => {
     rulesClient = new RulesClient(rulesClientParams);
     unsecuredSavedObjectsClient.get.mockResolvedValue(existingRule);
     encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue(existingDecryptedRule);
-    (migrateLegacyActions as jest.Mock).mockResolvedValue({
-      hasLegacyActions: false,
-      resultedActions: [],
-      resultedReferences: [],
-    });
   });
 
   describe('authorization', () => {
@@ -258,6 +199,7 @@ describe('disableRule()', () => {
         apiKeyOwner: 'elastic',
         updatedAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
+        updatedByProfileUid: null,
         actions: [
           {
             group: 'default',
@@ -337,6 +279,7 @@ describe('disableRule()', () => {
         apiKeyOwner: 'elastic',
         updatedAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
+        updatedByProfileUid: null,
         actions: [
           {
             group: 'default',
@@ -428,6 +371,7 @@ describe('disableRule()', () => {
         apiKeyOwner: 'elastic',
         updatedAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
+        updatedByProfileUid: null,
         actions: [
           {
             group: 'default',
@@ -482,6 +426,7 @@ describe('disableRule()', () => {
         apiKeyOwner: 'elastic',
         updatedAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
+        updatedByProfileUid: null,
         actions: [
           {
             group: 'default',
@@ -528,6 +473,7 @@ describe('disableRule()', () => {
         scheduledTaskId: '1',
         updatedAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
+        updatedByProfileUid: null,
         actions: [
           {
             group: 'default',
@@ -646,6 +592,7 @@ describe('disableRule()', () => {
         scheduledTaskId: null,
         updatedAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
+        updatedByProfileUid: null,
         actions: [
           {
             group: 'default',
@@ -700,6 +647,7 @@ describe('disableRule()', () => {
         scheduledTaskId: null,
         updatedAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
+        updatedByProfileUid: null,
         actions: [
           {
             group: 'default',
@@ -718,36 +666,5 @@ describe('disableRule()', () => {
       }
     );
     expect(taskManager.bulkDisable).not.toHaveBeenCalled();
-  });
-
-  describe('legacy actions migration for SIEM', () => {
-    test('should call migrateLegacyActions', async () => {
-      const existingDecryptedSiemRule = {
-        ...existingDecryptedRule,
-        attributes: { ...existingDecryptedRule.attributes, consumer: AlertConsumers.SIEM },
-      };
-
-      encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue(existingDecryptedSiemRule);
-      (migrateLegacyActions as jest.Mock).mockResolvedValue(migrateLegacyActionsMock);
-
-      await rulesClient.disableRule({ id: '1' });
-
-      expect(migrateLegacyActions).toHaveBeenCalledWith(expect.any(Object), {
-        attributes: expect.objectContaining({ consumer: AlertConsumers.SIEM }),
-        actions: [
-          {
-            actionRef: '1',
-            actionTypeId: '1',
-            group: 'default',
-            id: '1',
-            params: {
-              foo: true,
-            },
-          },
-        ],
-        references: [],
-        ruleId: '1',
-      });
-    });
   });
 });

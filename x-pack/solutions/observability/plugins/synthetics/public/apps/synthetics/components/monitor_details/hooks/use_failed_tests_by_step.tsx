@@ -9,21 +9,29 @@ import { useParams } from 'react-router-dom';
 import { useMemo } from 'react';
 import { useReduxEsSearch } from '../../../hooks/use_redux_es_search';
 import { useSelectedLocation } from './use_selected_location';
+import { useSelectedMonitor } from './use_selected_monitor';
 import { createEsQuery } from '../../../../../../common/utils/es_search';
-import { Ping } from '../../../../../../common/runtime_types';
+import { isHeartbeatSyntheticsMonitor, type Ping } from '../../../../../../common/runtime_types';
 import { STEP_END_FILTER } from '../../../../../../common/constants/data_filters';
-import { SYNTHETICS_INDEX_PATTERN } from '../../../../../../common/constants';
+import { getHeartbeatLocationFilter, getMonitorIdentityFilter } from '../../../../../../common/lib';
+import { getSyntheticsCcsIndex } from '../../../../../../common/get_synthetics_indices';
 import { useSyntheticsRefreshContext } from '../../../contexts';
+import { useGetUrlParams } from '../../../hooks';
 
 export function useFailedTestByStep({ to, from }: { to: string; from: string }) {
   const { lastRefresh } = useSyntheticsRefreshContext();
 
   const { monitorId } = useParams<{ monitorId: string }>();
 
+  const { remoteName } = useGetUrlParams();
+
+  const { monitor } = useSelectedMonitor();
+  const origin = isHeartbeatSyntheticsMonitor(monitor) ? monitor.origin : undefined;
+
   const selectedLocation = useSelectedLocation();
 
   const params = createEsQuery({
-    index: SYNTHETICS_INDEX_PATTERN,
+    index: getSyntheticsCcsIndex(remoteName),
     size: 0,
     track_total_hits: true,
     query: {
@@ -43,16 +51,15 @@ export function useFailedTestByStep({ to, from }: { to: string; from: string }) 
               'synthetics.step.status': 'failed',
             },
           },
-          {
-            term: {
-              'observer.geo.name': selectedLocation?.label,
-            },
-          },
-          {
-            term: {
-              config_id: monitorId,
-            },
-          },
+          ...getHeartbeatLocationFilter({
+            field: 'observer.geo.name',
+            value: selectedLocation?.label,
+          }),
+          getMonitorIdentityFilter({
+            monitorId,
+            origin,
+            remoteName,
+          }),
         ],
       },
     },
@@ -75,9 +82,9 @@ export function useFailedTestByStep({ to, from }: { to: string; from: string }) 
 
   const { data, loading } = useReduxEsSearch<Ping, typeof params>(
     params,
-    [lastRefresh, monitorId],
+    [lastRefresh, monitorId, from, to, remoteName, origin],
     {
-      name: `getFailedTestsByStep/${monitorId}`,
+      name: `getFailedTestsByStep/${monitorId}/${from}/${to}`,
       isRequestReady: !!selectedLocation,
     }
   );
@@ -91,6 +98,7 @@ export function useFailedTestByStep({ to, from }: { to: string; from: string }) 
         index,
         count,
         name: key,
+        // @ts-expect-error upgrade typescript v5.4.5
         percent: (count / total) * 100,
       };
     });

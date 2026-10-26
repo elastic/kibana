@@ -30,6 +30,7 @@ import {
   mockUserSettingsService,
   mockSecurityService,
   mockUserProfileService,
+  mockInjectionService,
 } from './server.test.mocks';
 
 import { BehaviorSubject } from 'rxjs';
@@ -42,6 +43,15 @@ import { Server } from './server';
 import { MIGRATION_EXCEPTION_CODE } from './constants';
 
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
+import {
+  deriveInternalCallerAttestation,
+  ES_CLIENT_AUTHENTICATION_HEADER,
+  HTTPAuthorizationHeader,
+  isExternalUiamCredential,
+  UIAM_INTERNAL_CALLER_ATTESTATION_HEADER,
+} from '@kbn/core-security-server';
+import { createCoreUiamService } from '@kbn/core-security-server-internal';
 import type { InternalNodeServicePreboot } from '@kbn/core-node-server-internal';
 import { CriticalError } from '@kbn/core-base-server-internal';
 
@@ -78,6 +88,42 @@ afterEach(() => {
   mockEnsureValidConfiguration.mockReset();
 });
 
+test('sets service.version global context to kibana version on traditional', () => {
+  const loggingSystem = loggingSystemMock.create();
+  const traditionalEnv = Env.createDefault(
+    REPO_ROOT,
+    getEnvOptions({ cliArgs: { serverless: false } })
+  );
+
+  new Server(rawConfigService, traditionalEnv, loggingSystem);
+
+  expect(traditionalEnv.packageInfo.buildFlavor).toBe('traditional');
+  expect(loggingSystem.setGlobalContext).toHaveBeenCalledTimes(1);
+  expect(loggingSystem.setGlobalContext).toHaveBeenCalledWith({
+    service: { state: 'initializing', type: 'kibana', version: traditionalEnv.packageInfo.version },
+  });
+});
+
+test('sets service.version global context to build sha short on serverless', () => {
+  const loggingSystem = loggingSystemMock.create();
+  const serverlessEnv = Env.createDefault(
+    REPO_ROOT,
+    getEnvOptions({ cliArgs: { serverless: true } })
+  );
+
+  new Server(rawConfigService, serverlessEnv, loggingSystem);
+
+  expect(serverlessEnv.packageInfo.buildFlavor).toBe('serverless');
+  expect(loggingSystem.setGlobalContext).toHaveBeenCalledTimes(1);
+  expect(loggingSystem.setGlobalContext).toHaveBeenCalledWith({
+    service: {
+      state: 'initializing',
+      type: 'kibana',
+      version: serverlessEnv.packageInfo.buildShaShort,
+    },
+  });
+});
+
 test('preboot services on "preboot"', async () => {
   const server = new Server(rawConfigService, env, logger);
 
@@ -86,6 +132,7 @@ test('preboot services on "preboot"', async () => {
   expect(mockContextService.preboot).not.toHaveBeenCalled();
   expect(mockHttpService.preboot).not.toHaveBeenCalled();
   expect(mockI18nService.preboot).not.toHaveBeenCalled();
+  expect(mockDocLinksService.setup).not.toHaveBeenCalled();
   expect(mockElasticsearchService.preboot).not.toHaveBeenCalled();
   expect(mockUiSettingsService.preboot).not.toHaveBeenCalled();
   expect(mockRenderingService.preboot).not.toHaveBeenCalled();
@@ -101,6 +148,7 @@ test('preboot services on "preboot"', async () => {
   expect(mockContextService.preboot).toHaveBeenCalledTimes(1);
   expect(mockHttpService.preboot).toHaveBeenCalledTimes(1);
   expect(mockI18nService.preboot).toHaveBeenCalledTimes(1);
+  expect(mockDocLinksService.setup).toHaveBeenCalledTimes(1);
   expect(mockElasticsearchService.preboot).toHaveBeenCalledTimes(1);
   expect(mockUiSettingsService.preboot).toHaveBeenCalledTimes(1);
   expect(mockRenderingService.preboot).toHaveBeenCalledTimes(1);
@@ -127,12 +175,12 @@ test('sets up services on "setup"', async () => {
   expect(mockLoggingService.setup).not.toHaveBeenCalled();
   expect(mockI18nService.setup).not.toHaveBeenCalled();
   expect(mockDeprecationService.setup).not.toHaveBeenCalled();
-  expect(mockDocLinksService.setup).not.toHaveBeenCalled();
   expect(mockCustomBrandingService.setup).not.toHaveBeenCalled();
   expect(mockUserSettingsService.setup).not.toHaveBeenCalled();
   expect(mockSecurityService.setup).not.toHaveBeenCalled();
   expect(mockSecurityService.setup).not.toHaveBeenCalled();
   expect(mockUserProfileService.setup).not.toHaveBeenCalled();
+  expect(mockInjectionService.setup).not.toHaveBeenCalled();
 
   await server.setup();
 
@@ -148,11 +196,12 @@ test('sets up services on "setup"', async () => {
   expect(mockLoggingService.setup).toHaveBeenCalledTimes(1);
   expect(mockI18nService.setup).toHaveBeenCalledTimes(1);
   expect(mockDeprecationService.setup).toHaveBeenCalledTimes(1);
-  expect(mockDocLinksService.setup).toHaveBeenCalledTimes(1);
+  expect(mockDocLinksService.setup).toHaveBeenCalledTimes(2);
   expect(mockCustomBrandingService.setup).toHaveBeenCalledTimes(1);
   expect(mockUserSettingsService.setup).toHaveBeenCalledTimes(1);
   expect(mockSecurityService.setup).toHaveBeenCalledTimes(1);
   expect(mockUserProfileService.setup).toHaveBeenCalledTimes(1);
+  expect(mockInjectionService.setup).toHaveBeenCalledTimes(1);
 });
 
 test('injects legacy dependency to context#setup()', async () => {
@@ -207,6 +256,7 @@ test('runs services on "start"', async () => {
   expect(mockCustomBrandingService.start).not.toHaveBeenCalled();
   expect(mockSecurityService.start).not.toHaveBeenCalled();
   expect(mockUserProfileService.start).not.toHaveBeenCalled();
+  expect(mockInjectionService.start).not.toHaveBeenCalled();
 
   await server.start();
 
@@ -221,6 +271,7 @@ test('runs services on "start"', async () => {
   expect(mockSecurityService.start).toHaveBeenCalledTimes(1);
   expect(mockUserProfileService.start).toHaveBeenCalledTimes(1);
   expect(mockUserSettingsService.start).toHaveBeenCalledTimes(1);
+  expect(mockInjectionService.start).toHaveBeenCalledTimes(1);
 });
 
 test('does not fail on "setup" if there are unused paths detected', async () => {
@@ -415,5 +466,219 @@ describe('When preboot is disabled', () => {
     expect(mockPluginsService.preboot).not.toHaveBeenCalled();
     expect(mockPrebootService.preboot).not.toHaveBeenCalled();
     expect(mockStatusService.preboot).not.toHaveBeenCalled();
+  });
+});
+
+describe('self client UIAM attestation getter', () => {
+  const ATTESTATION = 'attestation-for-outbound';
+  const ATTESTATION_HEADERS = { [UIAM_INTERNAL_CALLER_ATTESTATION_HEADER]: ATTESTATION };
+
+  beforeEach(() => {
+    // An earlier test leaves the node service mocked as a migrator-only node, which aborts `start`.
+    const nodeServiceContract: InternalNodeServicePreboot = {
+      roles: { migrator: false, ui: true, backgroundTasks: true },
+    };
+    mockNodeService.preboot.mockResolvedValue(nodeServiceContract);
+    mockNodeService.start.mockReturnValue(nodeServiceContract);
+    rawConfigService.getConfig$.mockReturnValue(new BehaviorSubject({}));
+  });
+
+  const startServerAndGetAttestationGetter = async () => {
+    const server = new Server(rawConfigService, env, logger);
+    await server.preboot();
+    await server.setup();
+    await server.start();
+
+    const { setSelfClientUiamAttestationGetter } = mockHttpService.getStartContract();
+    expect(setSelfClientUiamAttestationGetter).toHaveBeenCalledTimes(1);
+    return jest.mocked(setSelfClientUiamAttestationGetter).mock.calls[0][0];
+  };
+
+  const getUiamMock = () => mockSecurityService.start().authc.apiKeys.uiam!;
+
+  it('derives the attestation from the outbound credential, not the inbound request', async () => {
+    const uiam = getUiamMock();
+    uiam.getInternalCallerAttestationHeaders.mockReturnValue(ATTESTATION_HEADERS);
+    const getAttestation = await startServerAndGetAttestationGetter();
+
+    const request = httpServerMock.createFakeKibanaRequest({
+      headers: { authorization: 'Bearer essu_inbound' },
+    });
+    expect(getAttestation(request, 'Bearer essu_outbound')).toBe(ATTESTATION);
+    expect(uiam.getInternalCallerAttestationHeaders).toHaveBeenCalledWith(
+      expect.objectContaining({ scheme: 'Bearer', credentials: 'essu_outbound' })
+    );
+  });
+
+  it('does not attest when the outbound credential is not a UIAM credential', async () => {
+    const uiam = getUiamMock();
+    const getAttestation = await startServerAndGetAttestationGetter();
+
+    const request = httpServerMock.createFakeKibanaRequest({
+      headers: { authorization: 'Bearer essu_inbound' },
+    });
+    expect(getAttestation(request, 'ApiKey not-a-uiam-key')).toBeUndefined();
+    expect(uiam.getInternalCallerAttestationHeaders).not.toHaveBeenCalled();
+  });
+
+  it('does not attest when there is no outbound authorization header', async () => {
+    const uiam = getUiamMock();
+    const getAttestation = await startServerAndGetAttestationGetter();
+
+    const request = httpServerMock.createFakeKibanaRequest({
+      headers: { authorization: 'Bearer essu_inbound' },
+    });
+
+    expect(getAttestation(request, null)).toBeUndefined();
+    expect(uiam.getInternalCallerAttestationHeaders).not.toHaveBeenCalled();
+  });
+
+  // The security plugin's `isExternalApiKey` checks the external marker on fake requests (see
+  // `UiamAPIKeysType.isExternalApiKey`), so this test only covers the delegation.
+  it('does not attest a fake request carrying a user-created (external) UIAM API key', async () => {
+    const uiam = getUiamMock();
+    uiam.isExternalApiKey.mockReturnValueOnce(true);
+    const getAttestation = await startServerAndGetAttestationGetter();
+
+    const request = httpServerMock.createFakeKibanaRequest({
+      headers: { authorization: 'ApiKey essu_external' },
+    });
+    expect(getAttestation(request, 'ApiKey essu_external')).toBeUndefined();
+    expect(uiam.isExternalApiKey).toHaveBeenCalledWith(request);
+    expect(uiam.getInternalCallerAttestationHeaders).not.toHaveBeenCalled();
+  });
+
+  it('does not attest a real request authenticated with a user-created UIAM API key', async () => {
+    const uiam = getUiamMock();
+    uiam.isExternalApiKey.mockReturnValueOnce(true);
+    const getAttestation = await startServerAndGetAttestationGetter();
+
+    const request = httpServerMock.createKibanaRequest({
+      headers: { authorization: 'ApiKey essu_external' },
+    });
+    expect(request.isFakeRequest).toBe(false);
+    expect(isExternalUiamCredential(request)).toBe(false);
+    expect(getAttestation(request, 'ApiKey essu_external')).toBeUndefined();
+    expect(uiam.isExternalApiKey).toHaveBeenCalledWith(request);
+    expect(uiam.getInternalCallerAttestationHeaders).not.toHaveBeenCalled();
+  });
+
+  it('still attests a Kibana-minted UIAM credential with no inbound client authentication', async () => {
+    const uiam = getUiamMock();
+    uiam.getInternalCallerAttestationHeaders.mockReturnValue(ATTESTATION_HEADERS);
+    const getAttestation = await startServerAndGetAttestationGetter();
+
+    const request = httpServerMock.createFakeKibanaRequest({
+      headers: { authorization: 'Bearer essu_inbound' },
+    });
+    expect(getAttestation(request, 'Bearer essu_ephemeral')).toBe(ATTESTATION);
+    expect(uiam.getInternalCallerAttestationHeaders).toHaveBeenCalledWith(
+      expect.objectContaining({ scheme: 'Bearer', credentials: 'essu_ephemeral' })
+    );
+  });
+
+  it('attests a Kibana-minted internal UIAM API key', async () => {
+    const uiam = getUiamMock();
+    uiam.getInternalCallerAttestationHeaders.mockReturnValue(ATTESTATION_HEADERS);
+    const getAttestation = await startServerAndGetAttestationGetter();
+
+    const request = httpServerMock.createFakeKibanaRequest({
+      headers: { authorization: 'ApiKey essu_internal' },
+    });
+    expect(getAttestation(request, 'ApiKey essu_internal')).toBe(ATTESTATION);
+    expect(uiam.getInternalCallerAttestationHeaders).toHaveBeenCalledWith(
+      expect.objectContaining({ scheme: 'ApiKey', credentials: 'essu_internal' })
+    );
+  });
+
+  it('attests a cookie-authenticated UIAM session from the outbound credential', async () => {
+    const uiam = getUiamMock();
+    uiam.getInternalCallerAttestationHeaders.mockReturnValue(ATTESTATION_HEADERS);
+    const getAttestation = await startServerAndGetAttestationGetter();
+
+    const request = httpServerMock.createFakeKibanaRequest({ headers: {} });
+    expect(request.headers.authorization).toBeUndefined();
+    expect(getAttestation(request, 'Bearer essu_session_token')).toBe(ATTESTATION);
+    expect(uiam.getInternalCallerAttestationHeaders).toHaveBeenCalledWith(
+      expect.objectContaining({ scheme: 'Bearer', credentials: 'essu_session_token' })
+    );
+  });
+
+  it('ignores client authentication on request.headers', async () => {
+    const uiam = getUiamMock();
+    uiam.getInternalCallerAttestationHeaders.mockReturnValue(ATTESTATION_HEADERS);
+    const getAttestation = await startServerAndGetAttestationGetter();
+
+    const request = httpServerMock.createFakeKibanaRequest({
+      headers: {
+        authorization: 'Bearer essu_session_token',
+        [ES_CLIENT_AUTHENTICATION_HEADER]: 'upstream-secret',
+      },
+    });
+    expect(getAttestation(request, 'Bearer essu_session_token')).toBe(ATTESTATION);
+    expect(uiam.getInternalCallerAttestationHeaders).toHaveBeenCalledWith(
+      expect.objectContaining({ scheme: 'Bearer', credentials: 'essu_session_token' })
+    );
+  });
+
+  it('mints an attestation the receiving UIAM service accepts', async () => {
+    const sharedSecret = 'shared-secret';
+    const uiam = getUiamMock();
+    uiam.getInternalCallerAttestationHeaders.mockImplementation(
+      (credential: HTTPAuthorizationHeader) => ({
+        [UIAM_INTERNAL_CALLER_ATTESTATION_HEADER]: deriveInternalCallerAttestation(
+          sharedSecret,
+          credential
+        ),
+      })
+    );
+    const getAttestation = await startServerAndGetAttestationGetter();
+
+    const minted = getAttestation(
+      httpServerMock.createFakeKibanaRequest({ headers: {} }),
+      'Bearer essu_outbound'
+    );
+
+    expect(minted).toEqual(expect.any(String));
+    expect(
+      createCoreUiamService(sharedSecret).getElasticsearchClientAuthentication({
+        credentialSource: 'inbound',
+        credential: new HTTPAuthorizationHeader('Bearer', 'essu_outbound'),
+        relayedClientAuthentication: undefined,
+        requestHeaders: {
+          [UIAM_INTERNAL_CALLER_ATTESTATION_HEADER]: minted ?? '',
+        },
+      })
+    ).toBe(sharedSecret);
+  });
+});
+
+describe('self client own client authentication check', () => {
+  beforeEach(() => {
+    const nodeServiceContract: InternalNodeServicePreboot = {
+      roles: { migrator: false, ui: true, backgroundTasks: true },
+    };
+    mockNodeService.preboot.mockResolvedValue(nodeServiceContract);
+    mockNodeService.start.mockReturnValue(nodeServiceContract);
+    rawConfigService.getConfig$.mockReturnValue(new BehaviorSubject({}));
+  });
+
+  it("delegates to UIAM's own client authentication check", async () => {
+    const uiam = mockSecurityService.start().authc.apiKeys.uiam!;
+    uiam.isOwnClientAuthentication.mockImplementation(
+      (value: string) => value === 'kibana-shared-secret'
+    );
+    const server = new Server(rawConfigService, env, logger);
+    await server.preboot();
+    await server.setup();
+    await server.start();
+
+    const { setSelfClientOwnClientAuthenticationCheck } = mockHttpService.getStartContract();
+    expect(setSelfClientOwnClientAuthenticationCheck).toHaveBeenCalledTimes(1);
+    const isOwn = jest.mocked(setSelfClientOwnClientAuthenticationCheck).mock.calls[0][0];
+
+    expect(isOwn('kibana-shared-secret')).toBe(true);
+    expect(isOwn('upstream-secret')).toBe(false);
+    expect(uiam.isOwnClientAuthentication).toHaveBeenCalledWith('upstream-secret');
   });
 });

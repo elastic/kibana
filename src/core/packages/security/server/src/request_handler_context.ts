@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { AuthenticatedUser } from '@kbn/core-security-common';
+import type { AuthenticatedPrincipal, AuthenticatedUser } from '@kbn/core-security-common';
 
-import { AuditLogger } from './audit_logging/audit_logger';
-import type { APIKeysServiceWithContext } from './authentication/api_keys';
+import type { AuditLogger } from './audit_logging/audit_logger';
+import type { APIKeysWithContextType } from './authentication/api_keys';
 
 export interface SecurityRequestHandlerContext {
   authc: AuthcRequestHandlerContext;
@@ -19,7 +19,9 @@ export interface SecurityRequestHandlerContext {
 
 export interface AuthcRequestHandlerContext {
   getCurrentUser(): AuthenticatedUser | null;
-  apiKeys: APIKeysServiceWithContext;
+  /** See `CoreAuthenticationService.getPrincipal`, bound to the context's request. */
+  getPrincipal(): AuthenticatedPrincipal | null;
+  apiKeys: APIKeysWithContextType;
 }
 
 export interface AuditRequestHandlerContext {

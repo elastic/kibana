@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 
 /** @public */
 export interface RecentlyAccessedHistoryItem {
@@ -34,6 +34,13 @@ export interface RecentlyAccessed {
    * @param id a unique string used to de-duplicate the recently accessed list.
    */
   add(link: string, label: string, id: string): void;
+
+  /**
+   * Removes an item from the recently accessed history.
+   *
+   * @param id the unique string used to de-duplicate the recently accessed list.
+   */
+  remove(id: string): void;
 
   /**
    * Gets an Array of the current recently accessed history.

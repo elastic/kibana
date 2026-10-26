@@ -22,7 +22,7 @@ export const getResultSchema = schema.object(
   { unknowns: 'forbid' }
 );
 
-export const getSchemas: ProcedureSchemas = {
+export const getSchemas = {
   in: schema.object(
     {
       contentTypeId: schema.string(),
@@ -33,7 +33,7 @@ export const getSchemas: ProcedureSchemas = {
     { unknowns: 'forbid' }
   ),
   out: getResultSchema,
-};
+} satisfies ProcedureSchemas;
 
 export interface GetIn<T extends string = string, Options extends void | object = object> {
   id: string;

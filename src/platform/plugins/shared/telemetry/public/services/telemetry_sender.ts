@@ -12,7 +12,7 @@ import { fromEvent, interval, merge } from 'rxjs';
 import { exhaustMap } from 'rxjs';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { LOCALSTORAGE_KEY, PAYLOAD_CONTENT_ENCODING } from '../../common/constants';
-import { TelemetryService } from './telemetry_service';
+import type { TelemetryService } from './telemetry_service';
 import type { EncryptedTelemetryPayload } from '../../common/types/latest';
 import { isReportIntervalExpired } from '../../common/is_report_interval_expired';
 
@@ -144,7 +144,7 @@ export class TelemetrySender {
         // exponentially backoff the time between subsequent retries to up to 19 attempts, after which we give up until the next report is due
         window.setTimeout(this.sendUsageData, TelemetrySender.getRetryDelay(this.retryCount));
       } else {
-        /* eslint no-console: ["error", { allow: ["warn"] }] */
+        // eslint-disable-next-line no-console
         console.warn(
           `TelemetrySender.sendUsageData exceeds number of retry attempts with ${err.message}`
         );

@@ -5,11 +5,15 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useRef } from 'react';
+import type { ConsoleApi, ConsoleProps } from '../components/console/types';
+import { type SupportedHostOsType } from '../../../common/endpoint/constants';
 import { useLicense } from '../../common/hooks/use_license';
 import type { MaybeImmutable } from '../../../common/endpoint/types';
-import type { EndpointCapabilities } from '../../../common/endpoint/service/response_actions/constants';
-import { type ResponseActionAgentType } from '../../../common/endpoint/service/response_actions/constants';
+import {
+  type ResponseActionAgentType,
+  type EndpointCapabilities,
+} from '../../../common/endpoint/service/response_actions/constants';
 import { AgentInfo } from '../components/endpoint_responder/components/header_info/agent_info/agent_info';
 
 import { useUserPrivileges } from '../../common/components/user_privileges';
@@ -30,6 +34,10 @@ export interface BasicConsoleProps {
   /** Required for Endpoint agents. */
   capabilities: MaybeImmutable<EndpointCapabilities[]>;
   platform: string;
+  /**
+   * If defined, the console's input area will be populated with this command
+   */
+  inputCommand?: string;
 }
 
 type ResponderInfoProps =
@@ -44,10 +52,19 @@ export const useWithShowResponder = (): ShowResponseActionsConsole => {
   const consoleManager = useConsoleManager();
   const endpointPrivileges = useUserPrivileges().endpointPrivileges;
   const isEnterpriseLicense = useLicense().isEnterprise();
+  const consoleApi = useRef<ConsoleApi>();
+  const pendingInputCommand = useRef<string | undefined>();
+
+  const applyPendingInputCommand = useCallback((api: ConsoleApi) => {
+    if (pendingInputCommand.current) {
+      api.setInput(pendingInputCommand.current);
+      pendingInputCommand.current = undefined;
+    }
+  }, []);
 
   return useCallback(
     (props: ResponderInfoProps) => {
-      const { agentId, agentType, capabilities, hostName, platform } = props;
+      const { agentId, agentType, capabilities, hostName, platform, inputCommand } = props;
 
       // If no authz, just exit and log something to the console
       if (agentType === 'endpoint' && !endpointPrivileges.canAccessResponseConsole) {
@@ -62,19 +79,30 @@ export const useWithShowResponder = (): ShowResponseActionsConsole => {
 
       const endpointRunningConsole = consoleManager.getOne(agentId);
 
+      pendingInputCommand.current = inputCommand;
+
       if (endpointRunningConsole) {
+        // An already visible console is not re-mounted by `show()`, so `onApiAvailable` won't fire
+        const isAlreadyVisible = endpointRunningConsole.isVisible();
+
         endpointRunningConsole.show();
+
+        if (isAlreadyVisible && consoleApi.current) {
+          applyPendingInputCommand(consoleApi.current);
+        }
       } else {
-        const consoleProps = {
+        const consoleProps: ConsoleProps = {
           commands: getEndpointConsoleCommands({
             agentType,
             endpointAgentId: agentId,
             endpointCapabilities: capabilities,
             endpointPrivileges,
-            platform,
+            platform: platform as SupportedHostOsType,
           }),
           'data-test-subj': `${agentType}ResponseActionsConsole`,
           storagePrefix: 'xpack.securitySolution.Responder',
+          apiRef: consoleApi,
+          onApiAvailable: applyPendingInputCommand,
           TitleComponent: () => {
             return (
               <AgentInfo
@@ -117,6 +145,6 @@ export const useWithShowResponder = (): ShowResponseActionsConsole => {
           .show();
       }
     },
-    [endpointPrivileges, isEnterpriseLicense, consoleManager]
+    [endpointPrivileges, isEnterpriseLicense, consoleManager, applyPendingInputCommand]
   );
 };

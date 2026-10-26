@@ -21,6 +21,8 @@ import {
   EuiPopover,
   EuiSelect,
   EuiFieldNumber,
+  EuiToolTip,
+  htmlIdGenerator,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -98,10 +100,10 @@ export class ConditionExpression extends Component {
     updateCondition(index, appliesTo, operator, +event.target.value);
   };
 
-  renderAppliesToPopover() {
+  renderAppliesToPopover(titleId) {
     return (
       <div>
-        <EuiPopoverTitle>
+        <EuiPopoverTitle id={titleId}>
           <FormattedMessage
             id="xpack.ml.ruleEditor.conditionExpression.appliesToPopoverTitle"
             defaultMessage="When"
@@ -109,6 +111,12 @@ export class ConditionExpression extends Component {
         </EuiPopoverTitle>
         <div className="euiExpression" style={{ width: 200 }}>
           <EuiSelect
+            aria-label={i18n.translate(
+              'xpack.ml.ruleEditor.conditionExpression.appliesToSelectAriaLabel',
+              {
+                defaultMessage: 'Applies to',
+              }
+            )}
             value={this.props.appliesTo}
             onChange={this.changeAppliesTo}
             options={[
@@ -131,10 +139,10 @@ export class ConditionExpression extends Component {
     );
   }
 
-  renderOperatorValuePopover() {
+  renderOperatorValuePopover(titleId) {
     return (
       <div>
-        <EuiPopoverTitle>
+        <EuiPopoverTitle id={titleId}>
           <FormattedMessage
             id="xpack.ml.ruleEditor.conditionExpression.operatorValuePopoverTitle"
             defaultMessage="Is"
@@ -144,6 +152,12 @@ export class ConditionExpression extends Component {
           <EuiFlexGroup style={{ maxWidth: 450 }}>
             <EuiFlexItem grow={false} style={{ width: 250 }}>
               <EuiSelect
+                aria-label={i18n.translate(
+                  'xpack.ml.ruleEditor.conditionExpression.operatorSelectAriaLabel',
+                  {
+                    defaultMessage: 'Operator',
+                  }
+                )}
                 value={this.props.operator}
                 onChange={this.changeOperator}
                 options={[
@@ -178,12 +192,15 @@ export class ConditionExpression extends Component {
 
   render() {
     const { index, appliesTo, operator, value, deleteCondition } = this.props;
+    const appliesToTitleId = htmlIdGenerator()('appliesToTitle');
+    const operatorTitleId = htmlIdGenerator()('operatorTitle');
 
     return (
       <EuiFlexGroup gutterSize="m">
         <EuiFlexItem grow={false}>
           <EuiPopover
             id="appliesToPopover"
+            aria-labelledby={appliesToTitleId}
             button={
               <EuiExpression
                 description={
@@ -203,13 +220,14 @@ export class ConditionExpression extends Component {
             ownFocus
             anchorPosition="downLeft"
           >
-            {this.renderAppliesToPopover()}
+            {this.renderAppliesToPopover(appliesToTitleId)}
           </EuiPopover>
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
           <EuiPopover
             id="operatorValuePopover"
+            aria-labelledby={operatorTitleId}
             button={
               <EuiExpression
                 description={
@@ -228,25 +246,34 @@ export class ConditionExpression extends Component {
             closePopover={this.closeOperatorValue}
             panelPaddingSize="s"
             ownFocus
-            withTitle
             anchorPosition="downLeft"
           >
-            {this.renderOperatorValuePopover()}
+            {this.renderOperatorValuePopover(operatorTitleId)}
           </EuiPopover>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButtonIcon
-            size="s"
-            color="danger"
-            onClick={() => deleteCondition(index)}
-            iconType="trash"
-            aria-label={i18n.translate(
+          <EuiToolTip
+            content={i18n.translate(
               'xpack.ml.ruleEditor.conditionExpression.deleteConditionButtonAriaLabel',
               {
                 defaultMessage: 'Delete condition',
               }
             )}
-          />
+            disableScreenReaderOutput
+          >
+            <EuiButtonIcon
+              size="s"
+              color="danger"
+              onClick={() => deleteCondition(index)}
+              iconType="trash"
+              aria-label={i18n.translate(
+                'xpack.ml.ruleEditor.conditionExpression.deleteConditionButtonAriaLabel',
+                {
+                  defaultMessage: 'Delete condition',
+                }
+              )}
+            />
+          </EuiToolTip>
         </EuiFlexItem>
       </EuiFlexGroup>
     );

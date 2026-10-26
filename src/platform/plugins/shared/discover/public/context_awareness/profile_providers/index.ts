@@ -7,4 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+export {
+  type ProfileProviderSharedServices,
+  type ProfileProviderServices,
+  createProfileProviderSharedServices,
+} from './profile_provider_services';
 export { registerProfileProviders } from './register_profile_providers';

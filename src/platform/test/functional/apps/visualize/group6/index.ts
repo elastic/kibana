@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const browser = getService('browser');
@@ -29,10 +29,8 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       );
     });
 
-    loadTestFile(require.resolve('./_tag_cloud'));
     loadTestFile(require.resolve('./_tsvb_markdown'));
     loadTestFile(require.resolve('./_tsvb_table'));
     loadTestFile(require.resolve('./_tsvb_tsdb_basic'));
-    loadTestFile(require.resolve('./_vega_chart'));
   });
 }

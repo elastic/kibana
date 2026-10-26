@@ -9,7 +9,11 @@
 
 export type {
   DocView,
+  DocViewActions,
   DocViewFilterFn,
-  DocViewRenderFn,
   DocViewRenderProps,
+  DocViewRestorableStateProps,
+  DocViewerComponent,
+  DocViewerRestorableState,
+  DocViewerShareableState,
 } from './services/types';

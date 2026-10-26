@@ -7,11 +7,12 @@
 
 import type { TimeRangeMetadata } from '@kbn/apm-data-access-plugin/common';
 import type { GetInfraMetricsResponsePayload } from '../../../../../common/http_api/infra';
-import { getFilteredHostNames, getHasDataFromSystemIntegration } from './get_filtered_hosts';
+import { DEFAULT_SCHEMA } from '../../../../../common/constants';
+import { getFilteredHostNames } from './get_filtered_hosts';
 import type { GetHostParameters } from '../types';
 import { getAllHosts } from './get_all_hosts';
 import { getHostsAlertsCount } from './get_hosts_alerts_count';
-import { assertQueryStructure } from '../utils';
+import { assertQueryStructure, extractExcludedMetadataValues } from '../utils';
 import { getApmHostNames } from './get_apm_hosts';
 
 export const getHosts = async ({
@@ -23,6 +24,7 @@ export const getHosts = async ({
   alertsClient,
   apmDataAccessServices,
   infraMetricsClient,
+  schema,
 }: GetHostParameters): Promise<GetInfraMetricsResponsePayload> => {
   const apmDocumentSources = await apmDataAccessServices?.getDocumentSources({
     start: from,
@@ -37,11 +39,12 @@ export const getHosts = async ({
     to,
     limit,
     query,
+    schema,
   });
 
   if (hostNames.length === 0) {
     return {
-      assetType: 'host',
+      entityType: 'host',
       nodes: [],
     };
   }
@@ -55,6 +58,7 @@ export const getHosts = async ({
       limit,
       metrics,
       hostNames,
+      schema,
     }),
     getHostsAlertsCount({
       alertsClient,
@@ -65,12 +69,24 @@ export const getHosts = async ({
     }),
   ]);
 
+  const excludedValues = extractExcludedMetadataValues(query);
+  const filteredHostMetrics = hostMetricsResponse.filter((host) =>
+    host.metadata.every((meta) => {
+      const excluded = excludedValues.get(meta.name);
+      if (!excluded || meta.value === null) return true;
+      if (Array.isArray(meta.value)) {
+        return meta.value.every((v) => !excluded.has(String(v)));
+      }
+      return !excluded.has(String(meta.value));
+    })
+  );
+
   const alertsByHostName = alertsCountResponse.reduce((acc, { name, alertsCount }) => {
     acc[name] = { alertsCount };
     return acc;
   }, {} as Record<string, { alertsCount: number }>);
 
-  const hosts = hostMetricsResponse.map((host) => {
+  const hosts = filteredHostMetrics.map((host) => {
     const { alertsCount } = alertsByHostName[host.name] ?? {};
     return {
       ...host,
@@ -79,7 +95,7 @@ export const getHosts = async ({
   });
 
   return {
-    assetType: 'host',
+    entityType: 'host',
     nodes: hosts,
   };
 };
@@ -92,31 +108,24 @@ const getHostNames = async ({
   to,
   limit,
   query,
+  schema = DEFAULT_SCHEMA,
 }: Pick<
   GetHostParameters,
-  'apmDataAccessServices' | 'infraMetricsClient' | 'from' | 'to' | 'limit' | 'query'
+  'apmDataAccessServices' | 'infraMetricsClient' | 'from' | 'to' | 'limit' | 'query' | 'schema'
 > & {
   apmDocumentSources?: TimeRangeMetadata['sources'];
 }) => {
   assertQueryStructure(query);
 
-  const hasSystemIntegrationData = await getHasDataFromSystemIntegration({
-    infraMetricsClient,
-    from,
-    to,
-    query,
-  });
-
-  const [monitoredHosts, apmHosts] = await Promise.all([
-    hasSystemIntegrationData
-      ? getFilteredHostNames({
-          infraMetricsClient,
-          query,
-          from,
-          to,
-          limit,
-        })
-      : undefined,
+  const [filteredHosts, apmHosts] = await Promise.all([
+    getFilteredHostNames({
+      infraMetricsClient,
+      query,
+      from,
+      to,
+      limit,
+      schema,
+    }),
     apmDataAccessServices && apmDocumentSources
       ? getApmHostNames({
           apmDataAccessServices,
@@ -125,9 +134,10 @@ const getHostNames = async ({
           from,
           to,
           limit,
+          schema,
         })
       : undefined,
   ]);
 
-  return [...new Set([...(monitoredHosts ?? []), ...(apmHosts ?? [])])];
+  return [...new Set([...filteredHosts, ...(apmHosts ?? [])])];
 };

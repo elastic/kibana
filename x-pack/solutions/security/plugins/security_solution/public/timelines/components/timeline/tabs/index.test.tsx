@@ -15,7 +15,6 @@ import { TimelineId, TimelineTabs } from '../../../../../common/types/timeline';
 import { TimelineTypeEnum } from '../../../../../common/api/timeline';
 import { useEsqlAvailability } from '../../../../common/hooks/esql/use_esql_availability';
 import { render, screen, waitFor } from '@testing-library/react';
-import { useLicense } from '../../../../common/hooks/use_license';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 
 jest.mock('../../../../common/hooks/use_license');
@@ -112,30 +111,34 @@ describe('Timeline', () => {
     });
   });
 
-  describe('analyzer tab and session view tab', () => {
-    const analyzerTabSubj = `timelineTabs-${TimelineTabs.graph}`;
-    const sessionViewTabSubj = `timelineTabs-${TimelineTabs.session}`;
-    it('should show the analyzer tab when the advanced setting is disabled', () => {
-      (useLicense as jest.Mock).mockReturnValue({ isEnterprise: () => true });
-      render(
-        <TestProviders>
-          <TabsContent {...defaultProps} />
-        </TestProviders>
-      );
-      expect(screen.getByTestId(analyzerTabSubj)).toBeInTheDocument();
-      expect(screen.getByTestId(sessionViewTabSubj)).toBeInTheDocument();
+  describe('Super Timeline mode', () => {
+    let mockStore: ReturnType<typeof createMockStore>;
+    beforeEach(() => {
+      const superState = structuredClone(mockGlobalState);
+      superState.timeline.timelineById[TimelineId.test].isSuperTimeline = true;
+      mockStore = createMockStore(superState);
     });
 
-    it('should not show the analyzer tab when the advanced setting is enabled', async () => {
-      mockUseUiSetting.mockReturnValue([true]);
-      (useLicense as jest.Mock).mockReturnValue({ isEnterprise: () => true });
+    it('hides the ESQL tab when isSuperTimeline is true', async () => {
       render(
-        <TestProviders>
+        <TestProviders store={mockStore}>
           <TabsContent {...defaultProps} />
         </TestProviders>
       );
-      expect(screen.queryByTestId(analyzerTabSubj)).not.toBeInTheDocument();
-      expect(screen.queryByTestId(sessionViewTabSubj)).not.toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.queryByTestId(`timelineTabs-${TimelineTabs.esql}`)).toBeNull();
+      });
+    });
+
+    it('hides the EQL tab when isSuperTimeline is true', async () => {
+      render(
+        <TestProviders store={mockStore}>
+          <TabsContent {...defaultProps} />
+        </TestProviders>
+      );
+      await waitFor(() => {
+        expect(screen.queryByTestId(`timelineTabs-${TimelineTabs.eql}`)).toBeNull();
+      });
     });
   });
 

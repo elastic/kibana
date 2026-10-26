@@ -6,18 +6,24 @@
  */
 
 import React, { useCallback, useState } from 'react';
-import { StyledNodeExpandButton, RoundEuiButtonIcon, ExpandButtonSize } from './styles';
+import { useEuiTheme } from '@elastic/eui';
+import { NodeExpandButtonContainer, RoundEuiButtonIcon, ExpandButtonSize } from './styles';
 import type { EntityNodeViewModel, LabelNodeViewModel } from '..';
-import { NODE_EXPAND_BUTTON_TEST_ID } from '../test_ids';
+import { GRAPH_NODE_EXPAND_BUTTON_ID } from '../test_ids';
 
 export interface NodeExpandButtonProps {
   x?: string;
   y?: string;
   color?: EntityNodeViewModel['color'] | LabelNodeViewModel['color'];
   onClick?: (e: React.MouseEvent<HTMLElement>, unToggleCallback: () => void) => void;
+  /** Allows callers to hide the button via inline style (e.g. `display: 'none'`) while keeping it
+   * in the DOM so tests can still find and interact with it. */
+  style?: React.CSSProperties;
 }
 
-export const NodeExpandButton = ({ x, y, color, onClick }: NodeExpandButtonProps) => {
+export const NodeExpandButton = ({ x, y, color, onClick, ...props }: NodeExpandButtonProps) => {
+  const { euiTheme } = useEuiTheme();
+
   // State to track whether the icon is "plus" or "minus"
   const [isToggled, setIsToggled] = useState(false);
 
@@ -25,22 +31,26 @@ export const NodeExpandButton = ({ x, y, color, onClick }: NodeExpandButtonProps
     setIsToggled(false);
   }, []);
 
-  const onClickHandler = (e: React.MouseEvent<HTMLElement>) => {
-    setIsToggled((currIsToggled) => !currIsToggled);
-    onClick?.(e, unToggleCallback);
-  };
+  const onClickHandler = useCallback(
+    (e: React.MouseEvent<HTMLElement>) => {
+      setIsToggled((currIsToggled) => !currIsToggled);
+      onClick?.(e, unToggleCallback);
+    },
+    [onClick, unToggleCallback]
+  );
 
   return (
-    <StyledNodeExpandButton x={x} y={y} className={isToggled ? 'toggled' : undefined}>
+    <NodeExpandButtonContainer x={x} y={y} className={isToggled ? 'toggled' : undefined} {...props}>
       <RoundEuiButtonIcon
         color={color ?? 'primary'}
-        iconType={isToggled ? 'minusInCircleFilled' : 'plusInCircleFilled'}
+        backgroundColor={euiTheme.colors.backgroundBasePlain}
+        iconType={isToggled ? 'minusCircle' : 'plusCircle'}
         onClick={onClickHandler}
         iconSize="m"
         aria-label="Open or close node actions"
-        data-test-subj={NODE_EXPAND_BUTTON_TEST_ID}
+        data-test-subj={GRAPH_NODE_EXPAND_BUTTON_ID}
       />
-    </StyledNodeExpandButton>
+    </NodeExpandButtonContainer>
   );
 };
 

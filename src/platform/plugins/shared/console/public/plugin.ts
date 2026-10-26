@@ -8,11 +8,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Plugin, CoreSetup, CoreStart, PluginInitializerContext } from '@kbn/core/public';
+import type { Plugin, CoreSetup, CoreStart, PluginInitializerContext } from '@kbn/core/public';
 import { ENABLE_PERSISTENT_CONSOLE_UI_SETTING_ID } from '@kbn/dev-tools-plugin/public';
 
 import { EmbeddableConsole } from './application/containers/embeddable';
-import {
+import type {
   AppSetupUIPluginDependencies,
   AppStartUIPluginDependencies,
   ClientConfigType,
@@ -20,6 +20,7 @@ import {
   ConsolePluginStart,
   ConsoleUILocatorParams,
   EmbeddedConsoleView,
+  AppPluginSetupDependencies,
 } from './types';
 import {
   AutocompleteInfo,
@@ -31,10 +32,17 @@ import {
 } from './services';
 
 export class ConsoleUIPlugin
-  implements Plugin<ConsolePluginSetup, ConsolePluginStart, AppSetupUIPluginDependencies>
+  implements
+    Plugin<
+      ConsolePluginSetup,
+      ConsolePluginStart,
+      AppSetupUIPluginDependencies,
+      AppPluginSetupDependencies
+    >
 {
   private readonly autocompleteInfo = new AutocompleteInfo();
   private _embeddableConsole: EmbeddableConsoleInfo;
+  private defaultEditorContent?: string;
 
   constructor(private ctx: PluginInitializerContext) {
     const storage = createStorage({
@@ -46,7 +54,7 @@ export class ConsoleUIPlugin
   }
 
   public setup(
-    { notifications, getStartServices, http }: CoreSetup,
+    { notifications, getStartServices, http }: CoreSetup<AppPluginSetupDependencies>,
     { devTools, home, share, usageCollection }: AppSetupUIPluginDependencies
   ): ConsolePluginSetup {
     const {
@@ -82,12 +90,14 @@ export class ConsoleUIPlugin
         }),
         enableRouting: true,
         mount: async ({ element, history }) => {
-          const [core] = await getStartServices();
+          const [core, deps] = await getStartServices();
 
           const {
             docLinks: { DOC_LINK_VERSION, links },
+            application,
             ...startServices
           } = core;
+          const { data, licensing } = deps;
 
           const { renderApp } = await import('./application');
 
@@ -96,12 +106,16 @@ export class ConsoleUIPlugin
             http,
             docLinkVersion: DOC_LINK_VERSION,
             docLinks: links,
+            application,
+            data,
+            licensing,
             notifications,
             usageCollection,
             element,
             history,
             autocompleteInfo: this.autocompleteInfo,
             isDevMode: this.ctx.env.mode.dev,
+            defaultEditorContent: this.defaultEditorContent,
           });
         },
       });
@@ -117,7 +131,12 @@ export class ConsoleUIPlugin
         },
       });
 
-      return { locator };
+      return {
+        locator,
+        setDefaultEditorContent: (content: string) => {
+          this.defaultEditorContent = content;
+        },
+      };
     }
 
     return {};
@@ -143,6 +162,8 @@ export class ConsoleUIPlugin
       consoleStart.EmbeddableConsole = (_props: {}) => {
         return EmbeddableConsole({
           core,
+          data: deps.data,
+          licensing: deps.licensing,
           usageCollection: deps.usageCollection,
           setDispatch: (d) => {
             this._embeddableConsole.setDispatch(d);

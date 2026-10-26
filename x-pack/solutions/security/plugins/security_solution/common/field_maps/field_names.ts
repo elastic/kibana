@@ -8,6 +8,7 @@
 import { ALERT_NAMESPACE, ALERT_RULE_NAMESPACE, ALERT_RULE_PARAMETERS } from '@kbn/rule-data-utils';
 
 export const ALERT_ANCESTORS = `${ALERT_NAMESPACE}.ancestors` as const;
+export const ALERT_ANCESTORS_ID = `${ALERT_NAMESPACE}.ancestors.id` as const;
 export const ALERT_BUILDING_BLOCK_TYPE = `${ALERT_NAMESPACE}.building_block_type` as const;
 export const ALERT_DEPTH = `${ALERT_NAMESPACE}.depth` as const;
 export const ALERT_GROUP_ID = `${ALERT_NAMESPACE}.group.id` as const;
@@ -25,6 +26,16 @@ export const LEGACY_ALERT_HOST_CRITICALITY = `${ALERT_NAMESPACE}.host.criticalit
  * @deprecated Use {@link ALERT_USER_CRITICALITY}
  */
 export const LEGACY_ALERT_USER_CRITICALITY = `${ALERT_NAMESPACE}.user.criticality_level` as const;
+
+/**
+ * EUIDs of the entities this alert resolves to, computed at rule execution by the entity store
+ * enrichments. Multi-valued: one alert can resolve to a host, a user and a service at once, and
+ * each EUID is type-prefixed (`host:`, `user:`, `service:`).
+ *
+ * Present for every alert with derivable identity fields at rule execution — regardless of whether
+ * the entity was in the store — so absence means "no EUID could be derived", not "not in the store".
+ */
+export const ALERT_ENTITY_ID = `${ALERT_NAMESPACE}.entity.id` as const;
 
 export const ALERT_HOST_CRITICALITY = `host.asset.criticality` as const;
 export const ALERT_USER_CRITICALITY = `user.asset.criticality` as const;
@@ -45,6 +56,12 @@ export const ALERT_ORIGINAL_EVENT_CATEGORY = `${ALERT_ORIGINAL_EVENT}.category` 
 export const ALERT_ORIGINAL_EVENT_KIND = `${ALERT_ORIGINAL_EVENT}.kind` as const;
 export const ALERT_ORIGINAL_EVENT_MODULE = `${ALERT_ORIGINAL_EVENT}.module` as const;
 
+export const ALERT_ORIGINAL_DATA_STREAM = `${ALERT_NAMESPACE}.original_data_stream` as const;
+export const ALERT_ORIGINAL_DATA_STREAM_DATASET = `${ALERT_ORIGINAL_DATA_STREAM}.dataset` as const;
+export const ALERT_ORIGINAL_DATA_STREAM_NAMESPACE =
+  `${ALERT_ORIGINAL_DATA_STREAM}.namespace` as const;
+export const ALERT_ORIGINAL_DATA_STREAM_TYPE = `${ALERT_ORIGINAL_DATA_STREAM}.type` as const;
+
 export const ALERT_RULE_ACTIONS = `${ALERT_RULE_NAMESPACE}.actions` as const;
 export const ALERT_RULE_EXCEPTIONS_LIST = `${ALERT_RULE_NAMESPACE}.exceptions_list` as const;
 export const ALERT_RULE_FALSE_POSITIVES = `${ALERT_RULE_NAMESPACE}.false_positives` as const;
@@ -59,3 +76,5 @@ export const ALERT_RULE_TIMELINE_ID = `${ALERT_RULE_NAMESPACE}.timeline_id` as c
 export const ALERT_RULE_TIMELINE_TITLE = `${ALERT_RULE_NAMESPACE}.timeline_title` as const;
 export const ALERT_RULE_TIMESTAMP_OVERRIDE = `${ALERT_RULE_NAMESPACE}.timestamp_override` as const;
 export const ALERT_RULE_INDICES = `${ALERT_RULE_NAMESPACE}.indices` as const;
+
+export const ALERT_ATTACK_IDS = `${ALERT_NAMESPACE}.attack_ids` as const;

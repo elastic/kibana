@@ -7,7 +7,15 @@
 
 import type { IKibanaResponse } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
+import {
+  CUSTOM_HIGHLIGHTED_FIELDS_API_EDIT,
+  ENABLE_DISABLE_RULES_API_PRIVILEGE,
+  EXCEPTIONS_API_ALL,
+  INVESTIGATION_GUIDE_API_EDIT,
+  RULES_API_ALL,
+} from '@kbn/security-solution-features/constants';
+import { validateRuleResponseActions } from '../../../../../../endpoint/services';
 import type { UpdateRuleResponse } from '../../../../../../../common/api/detection_engine/rule_management';
 import {
   UpdateRuleRequestBody,
@@ -20,7 +28,6 @@ import { readRules } from '../../../logic/detection_rules_client/read_rules';
 import { checkDefaultRuleExceptionListReferences } from '../../../logic/exceptions/check_for_default_rule_exception_list';
 import { validateRuleDefaultExceptionList } from '../../../logic/exceptions/validate_rule_default_exception_list';
 import { getIdError } from '../../../utils/utils';
-import { validateResponseActionsPermissions } from '../../../utils/validate';
 
 export const updateRuleRoute = (router: SecuritySolutionPluginRouter) => {
   router.versioned
@@ -29,7 +36,17 @@ export const updateRuleRoute = (router: SecuritySolutionPluginRouter) => {
       path: DETECTION_ENGINE_RULES_URL,
       security: {
         authz: {
-          requiredPrivileges: ['securitySolution'],
+          requiredPrivileges: [
+            {
+              anyRequired: [
+                RULES_API_ALL,
+                EXCEPTIONS_API_ALL,
+                CUSTOM_HIGHLIGHTED_FIELDS_API_EDIT,
+                INVESTIGATION_GUIDE_API_EDIT,
+                ENABLE_DISABLE_RULES_API_PRIVILEGE,
+              ],
+            },
+          ],
         },
       },
     })
@@ -76,11 +93,15 @@ export const updateRuleRoute = (router: SecuritySolutionPluginRouter) => {
             });
           }
 
-          await validateResponseActionsPermissions(
-            ctx.securitySolution,
-            request.body,
-            existingRule
-          );
+          await validateRuleResponseActions({
+            endpointAuthz: await ctx.securitySolution.getEndpointAuthz(),
+            endpointService: ctx.securitySolution.getEndpointService(),
+            rulePayload: request.body,
+            spaceId: ctx.securitySolution.getSpaceId(),
+            existingRule,
+            checkOsqueryResponseActionAuthz:
+              ctx.securitySolution.getCheckOsqueryResponseActionAuthz(),
+          });
 
           const updatedRule = await detectionRulesClient.updateRule({
             ruleUpdate: request.body,

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { estypes } from '@elastic/elasticsearch';
 import type { ISearchRequestParams } from '@kbn/search-types';
 import { AGENT_ACTIONS_RESULTS_INDEX } from '@kbn/fleet-plugin/common';
 import { isEmpty } from 'lodash';
@@ -15,26 +16,37 @@ import {
 } from '../../../../../../common/constants';
 import type { ActionResultsRequestOptions } from '../../../../../../common/search_strategy';
 import { getQueryFilter } from '../../../../../utils/build_query';
+import { buildIndexNamesWithNamespaces } from '../../../../../utils/build_index_name_with_namespace';
+import { buildSpaceIdFilter } from '../../../../../utils/build_space_id_filter';
+import { prefixIndexPatternsWithCcs } from '../../../../../utils/ccs_utils';
 
 export const buildActionResultsQuery = ({
   actionId,
+  agentIds,
   kuery,
   startDate,
   sort,
+  pagination,
   componentTemplateExists,
+  ccsEnabled,
   useNewDataStream,
-}: ActionResultsRequestOptions): ISearchRequestParams => {
-  let filter = `action_id: ${actionId}`;
-  if (!isEmpty(kuery)) {
-    filter = filter + ` AND ${kuery}`;
-  }
+  integrationNamespaces,
+  spaceId,
+  matchMissingSpaceId,
+  matchActionDataSpaceId,
+  skipSpaceFilter,
+}: ActionResultsRequestOptions & {
+  matchActionDataSpaceId?: boolean;
+  skipSpaceFilter?: boolean;
+}): ISearchRequestParams => {
+  const kueryFilter = kuery ? [getQueryFilter({ filter: kuery })] : [];
 
-  const timeRangeFilter =
+  const timeRangeFilter: estypes.QueryDslQueryContainer[] =
     startDate && !isEmpty(startDate)
       ? [
           {
             range: {
-              started_at: {
+              'event.ingested': {
                 gte: startDate,
                 lte: moment(startDate).clone().add(30, 'minutes').toISOString(),
               },
@@ -43,16 +55,65 @@ export const buildActionResultsQuery = ({
         ]
       : [];
 
-  const filterQuery = [...timeRangeFilter, getQueryFilter({ filter })];
+  const agentIdsFilter: estypes.QueryDslQueryContainer[] =
+    agentIds && agentIds.length > 0
+      ? [
+          {
+            bool: {
+              should: [
+                { terms: { 'agent.id': agentIds } },
+                { terms: { agent_id: agentIds } },
+              ] as estypes.QueryDslQueryContainer[],
+              minimum_should_match: 1,
+            },
+          },
+        ]
+      : [];
 
-  let index: string;
+  // Hit-level scoping is enforced centrally in the search strategy
+  // (enforceSpaceScope). The aggregation below is a separate filter context that
+  // the top-level query does not constrain, so it is scoped explicitly here.
+  //
+  // This read is bound to a single `action_id`, which the caller can only have
+  // learned from a space-stamped, Kibana-written action document. That binding is
+  // the authorization gate that makes honouring the agent-carried
+  // `action_data.space_id` safe here — see buildSpaceIdFilter. The strategy
+  // passes `matchActionDataSpaceId` from ID_BOUND_FACTORY_QUERY_TYPES so this
+  // aggregation cannot drift from the hit filter. Default off: omitting the
+  // flag must not enable the less-trusted field in aggregations only.
+  //
+  // `skipSpaceFilter` means the strategy already found this `action_id` on the
+  // Kibana-written action document in the active space and omitted the hit-level
+  // filter, so the aggregation omits it too and counts match the hits.
+  const spaceIdFilters: estypes.QueryDslQueryContainer[] = skipSpaceFilter
+    ? []
+    : [
+        buildSpaceIdFilter(spaceId, {
+          matchMissingSpaceId: matchMissingSpaceId ?? true,
+          matchActionDataSpaceId: matchActionDataSpaceId ?? false,
+        }),
+      ];
+
+  const filterQuery: estypes.QueryDslQueryContainer[] = [
+    ...timeRangeFilter,
+    ...agentIdsFilter,
+    { term: { action_id: actionId } },
+    ...kueryFilter,
+  ];
+
+  let baseIndex: string;
   if (useNewDataStream) {
-    index = `${ACTION_RESPONSES_DATA_STREAM_INDEX}*`;
+    baseIndex = `${ACTION_RESPONSES_DATA_STREAM_INDEX}*`;
   } else if (componentTemplateExists) {
-    index = `${ACTION_RESPONSES_INDEX}*`;
+    baseIndex = `${ACTION_RESPONSES_INDEX}*`;
   } else {
-    index = `${AGENT_ACTIONS_RESULTS_INDEX}*`;
+    baseIndex = `${AGENT_ACTIONS_RESULTS_INDEX}*`;
   }
+
+  const index = prefixIndexPatternsWithCcs(
+    buildIndexNamesWithNamespaces(baseIndex, integrationNamespaces),
+    ccsEnabled ?? false
+  );
 
   return {
     allow_no_indices: true,
@@ -67,10 +128,11 @@ export const buildActionResultsQuery = ({
               bool: {
                 must: [
                   {
-                    match: {
+                    term: {
                       action_id: actionId,
                     },
                   },
+                  ...spaceIdFilters,
                 ],
               },
             },
@@ -95,8 +157,8 @@ export const buildActionResultsQuery = ({
       },
     },
     query: { bool: { filter: filterQuery } },
-    // from: activePage * querySize,
-    size: 10000, // querySize,
+    from: pagination ? pagination.activePage * pagination.querySize : 0,
+    size: pagination?.querySize ?? 100,
     track_total_hits: true,
     fields: ['*'],
     sort: [

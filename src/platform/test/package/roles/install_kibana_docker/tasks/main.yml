@@ -1,13 +1,22 @@
 - name: find docker image
   find:
     paths: /packages/
-    patterns: kibana-[0-9]*-docker-image.tar.gz
+    patterns: '{{ kibana_docker_image_prefix }}-[0-9]*-docker-image-amd64.tar.gz'
   register: kibana_docker
+
+- name: assert one docker image
+  assert:
+    that:
+      - kibana_docker.matched == 1
+
+- name: set docker image name
+  set_fact:
+    kibana_docker_image: "{{ kibana_docker.files[0].path | basename | regex_replace(kibana_docker_image_prefix ~ '-(.*)-docker-image-amd64.tar.gz', kibana_docker_image_repository ~ ':\\1') }}"
 
 - name: load image
   become: yes
   docker_image:
-    name: "{{ kibana_docker.files[0].path | basename| regex_replace('kibana-(.*)-docker-image.tar.gz', 'docker.elastic.co/kibana/kibana:\\1') }}"
+    name: '{{ kibana_docker_image }}'
     load_path: '{{ kibana_docker.files[0].path }}'
     timeout: 300
     source: load
@@ -17,9 +26,10 @@
   become: yes
   docker_container:
     name: kibana
-    image: "{{ kibana_docker.files[0].path | basename| regex_replace('kibana-(.*)-docker-image.tar.gz', 'docker.elastic.co/kibana/kibana:\\1') }}"
+    image: '{{ kibana_docker_image }}'
     network_mode: host
     env:
+      KBN_ENABLE_POINTER_COMPRESSION: '{{ kibana_enable_pointer_compression }}'
       SERVER_HOST: 0.0.0.0
       ELASTICSEARCH_HOSTS: http://192.168.56.1:9200
       ELASTICSEARCH_USERNAME: '{{ elasticsearch_username }}'

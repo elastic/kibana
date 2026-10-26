@@ -10,15 +10,23 @@ import { schema } from '@kbn/config-schema';
 
 export const EndpointSuggestionsSchema = {
   body: schema.object({
-    field: schema.string(),
-    query: schema.string(),
-    filters: schema.maybe(schema.any()),
+    field: schema.string({ maxLength: 1024 }),
+    query: schema.string({ maxLength: 2048 }),
+    filters: schema.maybe(
+      schema.arrayOf(schema.object({}, { unknowns: 'allow' }), { maxSize: 50 })
+    ),
     fieldMeta: schema.maybe(schema.any()),
   }),
   params: schema.object({
-    // Ready to be used with other suggestion types like endpoints
-    suggestion_type: schema.oneOf([schema.literal('eventFilters')]),
+    suggestion_type: schema.oneOf([
+      schema.literal('eventFilters'),
+      schema.literal('endpoints'),
+      schema.literal('endpointExceptions'),
+      schema.literal('trustedApps'),
+      schema.literal('trustedDevices'),
+    ]),
   }),
 };
 
 export type EndpointSuggestionsBody = TypeOf<typeof EndpointSuggestionsSchema.body>;
+export type EndpointSuggestionsParams = TypeOf<typeof EndpointSuggestionsSchema.params>;

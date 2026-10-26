@@ -13,10 +13,19 @@ import { asHttpRequestExecutionSource } from '../../../lib';
 import { actionsClientMock } from '../../../actions_client/actions_client.mock';
 import type { ActionTypeExecutorResult } from '../../../types';
 import { verifyAccessAndContext } from '../../verify_access_and_context';
+import { NEVER, Subject } from 'rxjs';
+import { actionsConfigMock } from '../../../actions_config.mock';
 
 jest.mock('../../verify_access_and_context', () => ({
   verifyAccessAndContext: jest.fn(),
 }));
+
+function mockRequest(overrides: Record<string, unknown> = {}) {
+  return {
+    events: { aborted$: NEVER },
+    ...overrides,
+  };
+}
 
 beforeEach(() => {
   jest.resetAllMocks();
@@ -37,7 +46,7 @@ describe('executeConnectorRoute', () => {
 
     const [context, req, res] = mockHandlerArguments(
       { actionsClient },
-      {
+      mockRequest({
         body: {
           params: {
             someData: 'data',
@@ -46,7 +55,7 @@ describe('executeConnectorRoute', () => {
         params: {
           id: '1',
         },
-      },
+      }),
       ['ok']
     );
 
@@ -55,7 +64,7 @@ describe('executeConnectorRoute', () => {
       status: 'ok',
     };
 
-    executeConnectorRoute(router, licenseState);
+    executeConnectorRoute(router, licenseState, actionsConfigMock.create());
 
     const [config, handler] = router.post.mock.calls[0];
 
@@ -70,6 +79,7 @@ describe('executeConnectorRoute', () => {
       },
       source: asHttpRequestExecutionSource(req),
       relatedSavedObjects: [],
+      signal: expect.any(AbortSignal),
     });
 
     expect(res.ok).toHaveBeenCalled();
@@ -84,18 +94,18 @@ describe('executeConnectorRoute', () => {
 
     const [context, req, res] = mockHandlerArguments(
       { actionsClient },
-      {
+      mockRequest({
         body: {
           params: {},
         },
         params: {
           id: '1',
         },
-      },
+      }),
       ['noContent']
     );
 
-    executeConnectorRoute(router, licenseState);
+    executeConnectorRoute(router, licenseState, actionsConfigMock.create());
 
     const [, handler] = router.post.mock.calls[0];
 
@@ -106,6 +116,7 @@ describe('executeConnectorRoute', () => {
       params: {},
       relatedSavedObjects: [],
       source: asHttpRequestExecutionSource(req),
+      signal: expect.any(AbortSignal),
     });
 
     expect(res.ok).not.toHaveBeenCalled();
@@ -124,14 +135,14 @@ describe('executeConnectorRoute', () => {
 
     const [context, req, res] = mockHandlerArguments(
       { actionsClient },
-      {
+      mockRequest({
         body: {},
         params: {},
-      },
+      }),
       ['ok']
     );
 
-    executeConnectorRoute(router, licenseState);
+    executeConnectorRoute(router, licenseState, actionsConfigMock.create());
 
     const [, handler] = router.post.mock.calls[0];
 
@@ -156,14 +167,14 @@ describe('executeConnectorRoute', () => {
 
     const [context, req, res] = mockHandlerArguments(
       { actionsClient },
-      {
+      mockRequest({
         body: {},
         params: {},
-      },
+      }),
       ['ok']
     );
 
-    executeConnectorRoute(router, licenseState);
+    executeConnectorRoute(router, licenseState, actionsConfigMock.create());
 
     const [, handler] = router.post.mock.calls[0];
 
@@ -181,18 +192,18 @@ describe('executeConnectorRoute', () => {
 
     const [context, req, res] = mockHandlerArguments(
       { actionsClient },
-      {
+      mockRequest({
         body: {
           params: {},
         },
         params: {
           id: 'system-connector-.test-connector',
         },
-      },
+      }),
       ['ok']
     );
 
-    executeConnectorRoute(router, licenseState);
+    executeConnectorRoute(router, licenseState, actionsConfigMock.create());
 
     const [_, handler] = router.post.mock.calls[0];
 
@@ -201,5 +212,95 @@ describe('executeConnectorRoute', () => {
     expect(actionsClient.execute).not.toHaveBeenCalled();
     expect(res.ok).not.toHaveBeenCalled();
     expect(res.badRequest).toHaveBeenCalled();
+  });
+
+  it('throws an error if the executor throws', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+
+    const actionsClient = actionsClientMock.create();
+    const errorMessage = 'an error occurred while running the action';
+
+    actionsClient.execute.mockRejectedValueOnce(new Error(errorMessage));
+
+    const [context, req, res] = mockHandlerArguments(
+      { actionsClient },
+      mockRequest({
+        body: {
+          params: {
+            someData: 'data',
+          },
+        },
+        params: {
+          id: 'test-connector',
+        },
+      }),
+      ['ok']
+    );
+
+    executeConnectorRoute(router, licenseState, actionsConfigMock.create());
+
+    const [, handler] = router.post.mock.calls[0];
+
+    await expect(handler(context, req, res)).rejects.toThrow(errorMessage);
+
+    expect(actionsClient.execute).toHaveBeenCalledWith({
+      actionId: 'test-connector',
+      params: {
+        someData: 'data',
+      },
+      source: asHttpRequestExecutionSource(req),
+      relatedSavedObjects: [],
+      signal: expect.any(AbortSignal),
+    });
+  });
+
+  it('passes an AbortSignal to actionsClient.execute that aborts when request is aborted', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+
+    const abortedSubject = new Subject<void>();
+    let capturedSignal: AbortSignal | undefined;
+
+    const actionsClient = actionsClientMock.create();
+    actionsClient.execute.mockImplementation((opts) => {
+      capturedSignal = opts.signal;
+      return Promise.resolve({ status: 'ok', actionId: '1' });
+    });
+
+    const [context, req, res] = mockHandlerArguments(
+      { actionsClient },
+      mockRequest({
+        body: { params: {} },
+        params: { id: '1' },
+        events: { aborted$: abortedSubject.asObservable() },
+      }),
+      ['ok']
+    );
+
+    executeConnectorRoute(router, licenseState, actionsConfigMock.create());
+
+    const [, handler] = router.post.mock.calls[0];
+
+    const handlerPromise = handler(context, req, res);
+    await Promise.resolve();
+
+    expect(actionsClient.execute).toHaveBeenCalledWith(
+      expect.objectContaining({
+        actionId: '1',
+        params: {},
+        source: asHttpRequestExecutionSource(req),
+        relatedSavedObjects: [],
+        signal: expect.any(AbortSignal),
+      })
+    );
+    expect(capturedSignal).toBeDefined();
+    expect(capturedSignal!.aborted).toBe(false);
+
+    abortedSubject.next();
+
+    expect(capturedSignal!.aborted).toBe(true);
+
+    await handlerPromise;
   });
 });

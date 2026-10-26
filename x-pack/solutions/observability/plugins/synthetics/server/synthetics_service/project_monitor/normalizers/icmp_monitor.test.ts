@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import { MonitorTypeEnum, Locations, LocationStatus } from '../../../../common/runtime_types';
+import type { Locations } from '../../../../common/runtime_types';
+import type { MaintenanceWindow } from '@kbn/maintenance-windows-plugin/common';
+import { MonitorTypeEnum, LocationStatus } from '../../../../common/runtime_types';
 import { DEFAULT_FIELDS } from '../../../../common/constants/monitor_defaults';
 import { normalizeProjectMonitors } from '.';
-import { PrivateLocationAttributes } from '../../../runtime_types/private_locations';
+import type { PrivateLocationAttributes } from '../../../runtime_types/private_locations';
 
 describe('icmp normalizers', () => {
   const testHash = 'ljlkj';
@@ -40,6 +42,10 @@ describe('icmp normalizers', () => {
         agentPolicyId: 'germany',
       },
     ];
+    const maintenanceWindows = [
+      { id: 'mw-1', title: 'First maintenance window' },
+      { id: 'mw-2', title: 'Second maintenance window' },
+    ] as unknown as MaintenanceWindow[];
     const monitors = [
       {
         locations: ['us_central'],
@@ -54,6 +60,7 @@ describe('icmp normalizers', () => {
         wait: '30s',
         'service.name': 'test service',
         hash: testHash,
+        maintenanceWindows: ['mw-1'],
       },
       {
         locations: ['us_central'],
@@ -65,6 +72,7 @@ describe('icmp normalizers', () => {
         tags: 'tag1,tag2',
         privateLocations: ['Germany'],
         wait: '1m',
+        maintenanceWindows: ['mw-2'],
         service: {
           name: 'test service',
         },
@@ -94,6 +102,7 @@ describe('icmp normalizers', () => {
         projectId,
         namespace: 'test-space',
         version: '8.5.0',
+        maintenanceWindows,
       });
       expect(actual).toEqual([
         {
@@ -139,6 +148,7 @@ describe('icmp normalizers', () => {
             wait: '30',
             id: '',
             hash: testHash,
+            maintenance_windows: ['mw-1'],
           },
           unsupportedKeys: [],
         },
@@ -185,6 +195,7 @@ describe('icmp normalizers', () => {
             wait: '60',
             id: '',
             hash: testHash,
+            maintenance_windows: ['mw-2'],
           },
           unsupportedKeys: [],
         },
@@ -244,6 +255,7 @@ describe('icmp normalizers', () => {
             wait: '1',
             id: '',
             hash: testHash,
+            maintenance_windows: [],
           },
           unsupportedKeys: ['unsupportedKey.nestedUnsupportedKey'],
         },

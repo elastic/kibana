@@ -5,21 +5,22 @@
  * 2.0.
  */
 
-import { kea, MakeLogicType } from 'kea';
+import type { MakeLogicType } from 'kea';
+import { kea } from 'kea';
 
 import { isEqual } from 'lodash';
 
-import { Connector } from '@kbn/search-connectors';
+import type { Connector } from '@kbn/search-connectors';
 
 import { Status } from '../../../../../common/types/api';
 
-import { Actions } from '../../../shared/api_logic/create_api_logic';
+import type { Actions } from '../../../shared/api_logic/create_api_logic';
 
-import {
-  FetchConnectorByIdApiLogic,
+import type {
   FetchConnectorByIdApiLogicArgs,
   FetchConnectorByIdApiLogicResponse,
 } from './fetch_connector_by_id_logic';
+import { FetchConnectorByIdApiLogic } from './fetch_connector_by_id_logic';
 
 const FETCH_CONNECTOR_POLLING_DURATION = 5000; // 5 seconds
 const FETCH_CONNECTOR_POLLING_DURATION_ON_FAILURE = 30000; // 30 seconds
@@ -40,6 +41,7 @@ export interface CachedFetchConnectorByIdApiLogicActions {
   setTimeoutId(id: NodeJS.Timeout): { id: NodeJS.Timeout };
   startPolling(connectorId: string): { connectorId: string };
   stopPolling(): void;
+  updateConnectorData(update: Partial<Connector>): Partial<Connector>;
 }
 export interface CachedFetchConnectorByIdApiLogicValues {
   connectorData: Connector | null;
@@ -60,6 +62,7 @@ export const CachedFetchConnectorByIdApiLogic = kea<
     setTimeoutId: (id) => ({ id }),
     startPolling: (connectorId) => ({ connectorId }),
     stopPolling: true,
+    updateConnectorData: (update) => update,
   },
   connect: {
     actions: [FetchConnectorByIdApiLogic, ['apiSuccess', 'apiError', 'apiReset', 'makeRequest']],
@@ -116,11 +119,17 @@ export const CachedFetchConnectorByIdApiLogic = kea<
       null,
       {
         apiReset: () => null,
-        // @ts-expect-error upgrade typescript v5.1.6
         apiSuccess: (currentState, newConnectorData) => {
           return isEqual(currentState, newConnectorData.connector)
             ? currentState
             : newConnectorData.connector ?? null;
+        },
+        updateConnectorData: (currentState, update) => {
+          if (!currentState) {
+            return currentState;
+          }
+          const nextState = { ...currentState, ...update };
+          return isEqual(currentState, nextState) ? currentState : nextState;
         },
       },
     ],
@@ -128,7 +137,6 @@ export const CachedFetchConnectorByIdApiLogic = kea<
       '',
       {
         apiReset: () => '',
-        // @ts-expect-error upgrade typescript v5.1.6
         startPolling: (_, { connectorId }) => connectorId,
       },
     ],
@@ -136,7 +144,6 @@ export const CachedFetchConnectorByIdApiLogic = kea<
       null,
       {
         clearPollTimeout: () => null,
-        // @ts-expect-error upgrade typescript v5.1.6
         setTimeoutId: (_, { id }) => id,
       },
     ],

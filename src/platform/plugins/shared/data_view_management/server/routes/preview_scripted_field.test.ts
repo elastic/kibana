@@ -8,7 +8,7 @@
  */
 
 import type { MockedKeys } from '@kbn/utility-types-jest';
-import { CoreSetup, RequestHandlerContext } from '@kbn/core/server';
+import type { CoreSetup, RequestHandlerContext } from '@kbn/core/server';
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 import { registerPreviewScriptedFieldRoute } from './preview_scripted_field';
 
@@ -65,7 +65,7 @@ describe('preview_scripted_field route', () => {
       }
     `);
 
-    expect(mockResponse.ok).toBeCalled();
+    expect(mockResponse.ok).toHaveBeenCalled();
     expect(mockResponse.ok.mock.calls[0][0]).toEqual({ body: response });
   });
 
@@ -151,8 +151,8 @@ describe('preview_scripted_field route', () => {
     const handler = mockRouter.post.mock.calls[0][1];
     await handler(mockContext as unknown as RequestHandlerContext, mockRequest, mockResponse);
 
-    expect(mockClient.search).toBeCalled();
-    expect(mockResponse.customError).toBeCalled();
+    expect(mockClient.search).toHaveBeenCalled();
+    expect(mockResponse.customError).toHaveBeenCalled();
 
     const error: any = mockResponse.customError.mock.calls[0][0];
     expect(error.statusCode).toBe(400);

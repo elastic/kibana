@@ -21,27 +21,27 @@ describe('SubmitCaseButton', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     // @ts-expect-error: not all properties are needed for testing
-    jest.mocked(useFormContext).mockReturnValue({ submit: onSubmit, isSubmitting: false });
+    jest.mocked(useFormContext).mockReturnValue({ submit: onSubmit });
   });
 
   it('renders', async () => {
-    renderWithTestingProviders(<SubmitCaseButton />);
+    renderWithTestingProviders(<SubmitCaseButton isSubmitting={false} />);
 
     expect(await screen.findByTestId('create-case-submit')).toBeInTheDocument();
   });
 
   it('submits', async () => {
-    renderWithTestingProviders(<SubmitCaseButton />);
+    renderWithTestingProviders(<SubmitCaseButton isSubmitting={false} />);
 
     await userEvent.click(await screen.findByTestId('create-case-submit'));
 
-    await waitFor(() => expect(onSubmit).toBeCalled());
+    await waitFor(() => expect(onSubmit).toHaveBeenCalled());
   });
 
   it('disables when submitting', async () => {
     // @ts-expect-error: not all properties are needed for testing
-    jest.mocked(useFormContext).mockReturnValue({ submit: onSubmit, isSubmitting: true });
-    renderWithTestingProviders(<SubmitCaseButton />);
+    jest.mocked(useFormContext).mockReturnValue({ submit: onSubmit });
+    renderWithTestingProviders(<SubmitCaseButton isSubmitting={true} />);
 
     const button = await screen.findByTestId('create-case-submit');
     await userEvent.click(button);

@@ -9,9 +9,8 @@
 
 import { isEmpty } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
-import { Filter, isCombinedFilter } from '@kbn/es-query';
+import type { FilterableField } from '@kbn/data-source';
 import { validateParams } from './filter_editor_utils';
 
 export const strings = {
@@ -22,7 +21,7 @@ export const strings = {
 };
 
 export const getFieldValidityAndErrorMessage = (
-  field: DataViewField,
+  field: FilterableField,
   value?: string | undefined
 ): { isInvalid: boolean; errorMessage?: string } => {
   const type = field?.type;
@@ -48,21 +47,6 @@ const invalidFormatError = (): { isInvalid: boolean; errorMessage?: string } => 
     isInvalid: true,
     errorMessage: strings.getInvalidDateFormatProvidedErrorMessage(),
   };
-};
-
-export const flattenFilters = (filter: Filter[]) => {
-  const returnArray: Filter[] = [];
-  const flattenFilterRecursively = (f: Filter) => {
-    if (isCombinedFilter(f)) {
-      f.meta.params.forEach(flattenFilterRecursively);
-    } else if (f) {
-      returnArray.push(f);
-    }
-  };
-
-  filter.forEach(flattenFilterRecursively);
-
-  return returnArray;
 };
 
 export const MIDDLE_TRUNCATION_PROPS = { truncation: 'middle' as const };

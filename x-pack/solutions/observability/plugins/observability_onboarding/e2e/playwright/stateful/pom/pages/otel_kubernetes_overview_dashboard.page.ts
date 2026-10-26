@@ -10,18 +10,21 @@ import { expect, type Page, type Locator } from '@playwright/test';
 export class OtelKubernetesOverviewDashboardPage {
   page: Page;
 
-  private readonly nodesPanelValue: Locator;
+  private readonly metricPanelValues: Locator;
 
   constructor(page: Page) {
     this.page = page;
 
-    this.nodesPanelValue = this.page.locator(
-      `#panel-6119419c-1899-4765-aed4-c050cde4c30a .echMetricText__value`
-    );
+    this.metricPanelValues = this.page.locator(`[id^=panel] .echMetricText__value`);
   }
 
   async assertNodesPanelNotEmpty() {
-    await expect(this.nodesPanelValue).toBeVisible();
-    expect(await this.nodesPanelValue.textContent()).toMatch(/\d+/);
+    // The dashboard may not auto-refresh if its saved state has refresh disabled.
+    // Reload periodically to trigger fresh Elasticsearch queries until a numeric
+    // value appears in a metric panel.
+    await expect(async () => {
+      await this.page.reload();
+      await expect(this.metricPanelValues.first()).toHaveText(/\d+/, { timeout: 30_000 });
+    }).toPass({ timeout: 10 * 60_000 });
   }
 }

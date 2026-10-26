@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { Pagination } from '@elastic/eui';
-import { ConnectorSyncJob, Paginate } from '@kbn/search-connectors';
-import { useQuery } from '@tanstack/react-query';
+import type { Pagination } from '@elastic/eui';
+import type { ConnectorSyncJob, Paginate } from '@kbn/search-connectors';
+import { useQuery } from '@kbn/react-query';
 import { useKibanaServices } from '../use_kibana';
 
 export const useSyncJobs = (
@@ -20,7 +20,7 @@ export const useSyncJobs = (
     queryKey: ['fetchSyncJobs', pagination],
     queryFn: async () =>
       http.fetch<Paginate<ConnectorSyncJob>>(
-        `/internal/serverless_search/connectors/${connectorId}/sync_jobs`,
+        `/internal/serverless_search/connectors/${encodeURIComponent(connectorId)}/sync_jobs`,
         {
           query: {
             from: pagination.pageIndex * (pagination.pageSize || 10),

@@ -7,7 +7,7 @@
 
 import { deserializeListAutoFollowPatterns } from '../../../../common/services/auto_follow_pattern_serialization';
 import { addBasePath } from '../../../services';
-import { RouteDependencies } from '../../../types';
+import type { RouteDependencies } from '../../../types';
 
 /**
  * Get a list of all auto-follow patterns

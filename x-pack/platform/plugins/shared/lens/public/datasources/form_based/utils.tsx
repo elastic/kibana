@@ -11,11 +11,11 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { DocLinksStart, ThemeServiceStart } from '@kbn/core/public';
 import { hasUnsupportedDownsampledAggregationFailure } from '@kbn/search-response-warnings';
 import type { DatatableUtilitiesService } from '@kbn/data-plugin/common';
-import { TimeRange } from '@kbn/es-query';
-import { EuiLink, EuiSpacer } from '@elastic/eui';
+import { escapeQuotes, type TimeRange } from '@kbn/es-query';
+import { EuiButtonEmpty, EuiLink, EuiSpacer } from '@elastic/eui';
 
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
-import { groupBy, escape, uniq, uniqBy } from 'lodash';
+import { groupBy, uniq, uniqBy } from 'lodash';
 import type { Query } from '@kbn/data-plugin/common';
 
 import {
@@ -26,40 +26,47 @@ import {
 import type { estypes } from '@elastic/elasticsearch';
 import { isQueryValid } from '@kbn/visualization-ui-components';
 import { getOriginalId } from '@kbn/transpose-utils';
-import type { DateRange } from '../../../common/types';
 import type {
+  DateRange,
+  FiltersIndexPatternColumn,
+  FormBasedLayer,
+  FormBasedPersistedState,
+  FormBasedPrivateState,
   FramePublicAPI,
   IndexPattern,
-  StateSetter,
+  ReferenceBasedIndexPatternColumn,
   UserMessage,
   VisualizationInfo,
-} from '../../types';
+  GenericIndexPatternColumn,
+  TermsIndexPatternColumn,
+  CountIndexPatternColumn,
+  RangeIndexPatternColumn,
+  FormulaIndexPatternColumn,
+  DateHistogramIndexPatternColumn,
+  MaxIndexPatternColumn,
+  MinIndexPatternColumn,
+  FieldBasedIndexPatternColumn,
+  StateSetter,
+} from '@kbn/lens-common';
+import { isColumnOfType } from '@kbn/lens-common';
 import { renewIDs } from '../../utils';
-import type { FormBasedLayer, FormBasedPersistedState, FormBasedPrivateState } from './types';
-import type { ReferenceBasedIndexPatternColumn } from './operations/definitions/column_types';
 
+import type { GenericOperationDefinition } from './operations';
 import {
   operationDefinitionMap,
   getReferenceRoot,
   updateColumnParam,
   updateDefaultLabels,
-  type GenericIndexPatternColumn,
-  type TermsIndexPatternColumn,
-  type CountIndexPatternColumn,
-  type RangeIndexPatternColumn,
-  type FormulaIndexPatternColumn,
-  type DateHistogramIndexPatternColumn,
-  type MaxIndexPatternColumn,
-  type MinIndexPatternColumn,
-  type GenericOperationDefinition,
-  type FieldBasedIndexPatternColumn,
 } from './operations';
 
-import { getInvalidFieldMessage, isColumnOfType } from './operations/definitions/helpers';
-import { FiltersIndexPatternColumn } from './operations/definitions/filters';
+import { getInvalidFieldMessage } from './operations/definitions/helpers';
+import {
+  getOrderAggLastValueSortFieldStatus,
+  isCustomLastValueOrderAgg,
+} from './operations/definitions/terms/helpers';
 import { hasField } from './pure_utils';
 import { mergeLayer } from './state_helpers';
-import { supportsRarityRanking } from './operations/definitions/terms';
+import { supportsRarityRanking, termsOperation } from './operations/definitions/terms';
 import { DEFAULT_MAX_DOC_COUNT } from './operations/definitions/terms/constants';
 import { ReducedSamplingSectionEntries } from './info_badges';
 import { IgnoredGlobalFiltersEntries } from '../../shared_components/ignore_global_filter';
@@ -70,6 +77,7 @@ import {
   PRECISION_ERROR_ACCURACY_MODE_DISABLED,
   PRECISION_ERROR_ACCURACY_MODE_ENABLED,
   PRECISION_ERROR_ASC_COUNT_PRECISION,
+  TERMS_CUSTOM_RANK_LAST_VALUE_MISSING_SORT_FIELD,
   TSDB_UNSUPPORTED_COUNTER_OP,
   UNSUPPORTED_DOWNSAMPLED_INDEX_AGG_PREFIX,
 } from '../../user_messages_ids';
@@ -598,6 +606,124 @@ export function getPrecisionErrorWarningMessages(
   return warningMessages;
 }
 
+/**
+ * Non-blocking warning for terms columns ranked by a custom `last_value` order-agg whose `sortField`
+ * is missing but can fall back to a default date field.
+ * Render auto-fills the default so the chart still works. This surfaces the fallback and, in the editor,
+ * offers a fix that persists the field onto the order-agg so the ranking becomes explicit on the next save.
+ */
+export function getCustomRankLastValueSortFieldWarningMessages(
+  state: FormBasedPrivateState,
+  { dataViews }: FramePublicAPI,
+  setState?: StateSetter<FormBasedPrivateState>
+): UserMessage[] {
+  const warningMessages: UserMessage[] = [];
+
+  if (!state) {
+    return warningMessages;
+  }
+
+  Object.entries(state.layers).forEach(([layerId, layer]) => {
+    const indexPattern = dataViews.indexPatterns[layer.indexPatternId];
+    if (!indexPattern) {
+      return;
+    }
+
+    Object.keys(layer.columns).forEach((columnId) => {
+      const column = layer.columns[columnId];
+      if (!isCustomLastValueOrderAgg(column)) {
+        return;
+      }
+
+      const status = getOrderAggLastValueSortFieldStatus(column, indexPattern);
+      if (status.status !== 'missing-with-default') {
+        return;
+      }
+
+      const { defaultField } = status;
+      const { orderAgg } = column.params;
+      // API-generated panels persist an empty `label`, so fall back to the operation's default
+      // label (and finally the source field) to avoid an empty {name} in the message.
+      const columnName =
+        (column.customLabel && column.label) ||
+        termsOperation.getDefaultLabel?.(column, layer.columns, indexPattern);
+
+      warningMessages.push({
+        uniqueId: TERMS_CUSTOM_RANK_LAST_VALUE_MISSING_SORT_FIELD,
+        severity: 'warning',
+        fixableInEditor: true,
+        displayLocations: [
+          { id: 'toolbar' },
+          { id: 'dimensionButton', dimensionId: columnId },
+          { id: 'embeddableBadge' },
+        ],
+        shortMessage: i18n.translate(
+          'xpack.lens.indexPattern.terms.customRankLastValueMissingSortField.shortMessage',
+          {
+            defaultMessage: 'Set a date field to rank by last value',
+          }
+        ),
+        longMessage: (
+          <>
+            <FormattedMessage
+              id="xpack.lens.indexPattern.terms.customRankLastValueMissingSortField"
+              defaultMessage="{name} is ranked by the last value of {sourceField}, but no date field is set. {field} is used for now. Edit the visualization and set a date field in Rank by."
+              values={{
+                name: <strong>{columnName}</strong>,
+                sourceField: <strong>{orderAgg.sourceField}</strong>,
+                field: <strong>{defaultField}</strong>,
+              }}
+            />
+            {setState ? (
+              <>
+                <EuiSpacer size="s" />
+                <EuiButtonEmpty
+                  data-test-subj="lnsCustomRankLastValueSortByField"
+                  size="s"
+                  flush="left"
+                  onClick={() => {
+                    setState((prevState) => {
+                      const prevLayer = prevState.layers[layerId];
+                      const prevColumn = prevLayer?.columns[columnId];
+                      if (!prevLayer || !isCustomLastValueOrderAgg(prevColumn)) {
+                        return prevState;
+                      }
+                      const { orderAgg: prevOrderAgg } = prevColumn.params;
+                      return mergeLayer({
+                        state: prevState,
+                        layerId,
+                        newLayer: updateDefaultLabels(
+                          updateColumnParam({
+                            layer: prevLayer,
+                            columnId,
+                            paramName: 'orderAgg',
+                            value: {
+                              ...prevOrderAgg,
+                              params: { ...prevOrderAgg.params, sortField: defaultField },
+                            },
+                          }),
+                          indexPattern
+                        ),
+                      });
+                    });
+                  }}
+                >
+                  {i18n.translate('xpack.lens.indexPattern.terms.customRankLastValueSortByField', {
+                    defaultMessage: 'Set {field} as date field',
+                    values: { field: defaultField },
+                  })}
+                </EuiButtonEmpty>
+              </>
+            ) : null}
+          </>
+        ),
+      });
+    });
+  });
+
+  return warningMessages;
+}
+
 export function getVisualDefaultsForLayer(layer: FormBasedLayer) {
   return Object.keys(layer.columns).reduce<Record<string, Record<string, unknown>>>(
     (memo, columnId) => {
@@ -745,13 +871,10 @@ function extractQueriesFromTerms(
       }
       if (typeof value !== 'string' && Array.isArray(value.keys)) {
         return value.keys
-          .map(
-            (term: string, index: number) =>
-              `${fields[index]}: ${`"${term === '' ? escape(term) : term}"`}`
-          )
+          .map((term: string, index: number) => `${fields[index]}: "${escapeQuotes(term)}"`)
           .join(' AND ');
       }
-      return `${column.sourceField}: ${`"${value === '' ? escape(value) : value}"`}`;
+      return `${column.sourceField}: "${escapeQuotes(String(value))}"`;
     })
     .filter(Boolean) as string[];
 

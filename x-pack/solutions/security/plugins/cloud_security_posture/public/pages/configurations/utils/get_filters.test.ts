@@ -6,7 +6,7 @@
  */
 import { CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX } from '@kbn/cloud-security-posture-common';
 import { createStubDataView } from '@kbn/data-views-plugin/common/stubs';
-import { DataView } from '@kbn/data-views-plugin/common';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { getFilters } from './get_filters';
 
 describe('Get Filters', () => {

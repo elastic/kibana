@@ -10,10 +10,10 @@
 import React from 'react';
 
 import { EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
-import type { DashboardPanelMap } from '@kbn/dashboard-plugin/common';
+import type { DashboardState } from '@kbn/as-code-dashboard-schema';
 import { DashboardRenderer } from '@kbn/dashboard-plugin/public';
 
-import panelsJson from './static_by_value_example_panels.json';
+import panels from './static_by_value_example_panels.json';
 
 export const StaticByValueExample = () => {
   return (
@@ -30,9 +30,9 @@ export const StaticByValueExample = () => {
           getCreationOptions={async () => {
             return {
               getInitialInput: () => ({
-                timeRange: { from: 'now-30d', to: 'now' },
+                time_range: { from: 'now-30d', to: 'now' },
                 viewMode: 'view',
-                panels: panelsJson as DashboardPanelMap,
+                panels: panels as DashboardState['panels'],
               }),
             };
           }}

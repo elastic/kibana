@@ -10,7 +10,8 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 
-import { NumberRow, NumberRowProps } from './number_row';
+import type { NumberRowProps } from './number_row';
+import { NumberRow } from './number_row';
 
 describe('NumberRow', () => {
   let defaultProps: NumberRowProps;
@@ -45,7 +46,7 @@ describe('NumberRow', () => {
     const comp = shallow(<NumberRow {...defaultProps} />);
     comp.find('EuiButtonIcon').simulate('click');
 
-    expect(defaultProps.onDelete).lastCalledWith(defaultProps.model.id);
+    expect(defaultProps.onDelete).toHaveBeenLastCalledWith(defaultProps.model.id);
   });
 
   test('should call onChange', () => {
@@ -54,6 +55,9 @@ describe('NumberRow', () => {
       target: { value: '5' },
     } as React.ChangeEvent<HTMLInputElement>);
 
-    expect(defaultProps.onChange).lastCalledWith({ id: defaultProps.model.id, value: '5' });
+    expect(defaultProps.onChange).toHaveBeenLastCalledWith({
+      id: defaultProps.model.id,
+      value: '5',
+    });
   });
 });

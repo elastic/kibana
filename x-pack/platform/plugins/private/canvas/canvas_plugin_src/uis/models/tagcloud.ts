@@ -6,7 +6,7 @@
  */
 
 import { get } from 'lodash';
-import { ResolvedColumns } from '../../../public/expression_types/arg';
+import type { ResolvedColumns } from '../../../public/expression_types/arg';
 
 import { ViewStrings } from '../../../i18n';
 import { getState, getValue } from '../../../public/lib/resolved_arg';

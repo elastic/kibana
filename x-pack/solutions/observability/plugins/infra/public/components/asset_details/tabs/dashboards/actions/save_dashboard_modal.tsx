@@ -17,13 +17,13 @@ import {
   EuiModalBody,
   EuiComboBox,
   EuiFlexGroup,
-  EuiToolTip,
-  EuiIcon,
+  EuiIconTip,
   EuiButtonEmpty,
   useEuiTheme,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
 import { FETCH_STATUS } from '../../../../../hooks/use_fetcher';
 import type {
   DashboardItemWithTitle,
@@ -51,10 +51,13 @@ export function SaveDashboardModal({
   customDashboards,
   assetType,
 }: Props) {
-  const { notifications } = useKibana();
+  const {
+    services: { notifications },
+  } = useKibanaContextForPlugin();
   const { data: allAvailableDashboards, status } = useDashboardFetcher();
   const [, setUrlState] = useAssetDetailsUrlState();
   const { euiTheme } = useEuiTheme();
+  const modalTitleId = useGeneratedHtmlId();
 
   const [assetNameEnabled, setAssetNameFiltersEnabled] = useState(
     currentDashboard?.dashboardFilterAssetIdEnabled ?? true
@@ -76,7 +79,7 @@ export function SaveDashboardModal({
   const options = useMemo(
     () =>
       allAvailableDashboards?.map((dashboardItem) => ({
-        label: dashboardItem.attributes.title,
+        label: dashboardItem.data.title,
         value: dashboardItem.id,
         disabled:
           customDashboards?.some(
@@ -117,18 +120,18 @@ export function SaveDashboardModal({
         const getToastLabels = isEditMode ? getEditSuccessToastLabels : getLinkSuccessToastLabels;
 
         if (result && !(isEditMode ? isUpdateLoading : isCreateLoading)) {
-          notifications.toasts.success(getToastLabels(newDashboard.label));
+          notifications.toasts.addSuccess(getToastLabels(newDashboard.label));
         }
 
         setUrlState({ dashboardId: newDashboard.value });
         onRefresh();
       } catch (error) {
-        notifications.toasts.danger({
+        notifications.toasts.addDanger({
           title: i18n.translate('xpack.infra.customDashboards.addFailure.toast.title', {
             defaultMessage: 'Error while adding "{dashboardName}" dashboard',
             values: { dashboardName: newDashboard.label },
           }),
-          body: error.message,
+          text: error.message,
         });
       }
       onClose();
@@ -151,9 +154,13 @@ export function SaveDashboardModal({
   );
 
   return (
-    <EuiModal onClose={onClose} data-test-subj="infraSelectCustomDashboard">
+    <EuiModal
+      onClose={onClose}
+      data-test-subj="infraSelectCustomDashboard"
+      aria-labelledby={modalTitleId}
+    >
       <EuiModalHeader>
-        <EuiModalHeaderTitle>
+        <EuiModalHeaderTitle id={modalTitleId}>
           {isEditMode
             ? i18n.translate('xpack.infra.customDashboards.selectDashboard.modalTitle.edit', {
                 defaultMessage: 'Edit dashboard',
@@ -169,6 +176,9 @@ export function SaveDashboardModal({
           <EuiComboBox
             isLoading={status === FETCH_STATUS.LOADING}
             isDisabled={status === FETCH_STATUS.LOADING || isEditMode}
+            aria-label={i18n.translate('xpack.infra.customDashboards.selectDashboard.ariaLabel', {
+              defaultMessage: 'Select dashboard',
+            })}
             placeholder={i18n.translate(
               'xpack.infra.customDashboards.selectDashboard.placeholder',
               {
@@ -195,7 +205,7 @@ export function SaveDashboardModal({
                     }
                   )}
                 </span>
-                <EuiToolTip
+                <EuiIconTip
                   position="bottom"
                   content={i18n.translate(
                     'xpack.infra.customDashboard.addDashboard.useContextFilterLabel.tooltip',
@@ -204,15 +214,8 @@ export function SaveDashboardModal({
                         'Enabling this option will apply filters to the dashboard based on your chosen host.',
                     }
                   )}
-                >
-                  <EuiIcon
-                    type="questionInCircle"
-                    title={i18n.translate(
-                      'xpack.infra.saveDashboardModal.euiIcon.iconWithTooltipLabel',
-                      { defaultMessage: 'Icon with tooltip' }
-                    )}
-                  />
-                </EuiToolTip>
+                  type="question"
+                />
               </p>
             }
             onChange={onChange}

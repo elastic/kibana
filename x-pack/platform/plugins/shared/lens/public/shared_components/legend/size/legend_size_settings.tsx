@@ -8,13 +8,12 @@
 import React, { useEffect, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiSuperSelect } from '@elastic/eui';
-import { DEFAULT_LEGEND_SIZE, LegendSize } from '@kbn/visualizations-plugin/public';
+import { LENS_DEFAULT_LEGEND_SIZE, LegendSize } from '@kbn/chart-expressions-common';
 
 export interface LegendSizeSettingsProps {
   legendSize?: LegendSize;
   onLegendSizeChange: (size?: LegendSize) => void;
   isVerticalLegend: boolean;
-  showAutoOption: boolean;
 }
 
 const legendSizeOptions: Array<{ value: LegendSize; inputDisplay: string }> = [
@@ -51,7 +50,6 @@ export const LegendSizeSettings = ({
   legendSize,
   onLegendSizeChange,
   isVerticalLegend,
-  showAutoOption,
 }: LegendSizeSettingsProps) => {
   useEffect(() => {
     if (legendSize && !isVerticalLegend) {
@@ -60,26 +58,22 @@ export const LegendSizeSettings = ({
   }, [isVerticalLegend, legendSize, onLegendSizeChange]);
 
   const onLegendSizeOptionChange = useCallback(
-    (option: LegendSize) => onLegendSizeChange(option === DEFAULT_LEGEND_SIZE ? undefined : option),
+    (option: LegendSize) =>
+      onLegendSizeChange(option === LENS_DEFAULT_LEGEND_SIZE ? undefined : option),
     [onLegendSizeChange]
   );
 
   if (!isVerticalLegend) return null;
 
-  const options = showAutoOption
-    ? [
-        {
-          value: LegendSize.AUTO,
-          inputDisplay: i18n.translate(
-            'xpack.lens.shared.legendSizeSetting.legendSizeOptions.auto',
-            {
-              defaultMessage: 'Auto',
-            }
-          ),
-        },
-        ...legendSizeOptions,
-      ]
-    : legendSizeOptions;
+  const options = [
+    {
+      value: LegendSize.AUTO,
+      inputDisplay: i18n.translate('xpack.lens.shared.legendSizeSetting.legendSizeOptions.auto', {
+        defaultMessage: 'Auto',
+      }),
+    },
+    ...legendSizeOptions,
+  ];
 
   return (
     <EuiFormRow
@@ -91,7 +85,7 @@ export const LegendSizeSettings = ({
     >
       <EuiSuperSelect
         compressed
-        valueOfSelected={legendSize ?? DEFAULT_LEGEND_SIZE}
+        valueOfSelected={legendSize ?? LENS_DEFAULT_LEGEND_SIZE}
         options={options}
         onChange={onLegendSizeOptionChange}
       />

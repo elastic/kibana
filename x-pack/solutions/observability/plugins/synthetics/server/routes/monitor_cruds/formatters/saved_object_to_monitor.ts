@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { SavedObject } from '@kbn/core/server';
+import type { SavedObject } from '@kbn/core/server';
 import { mergeWith, omit, omitBy } from 'lodash';
-import {
-  ConfigKey,
+import type {
   EncryptedSyntheticsMonitor,
   MonitorFields,
   MonitorFieldsResult,
 } from '../../../../common/runtime_types';
+import { ConfigKey } from '../../../../common/runtime_types';
 
 const keysToOmit = [
   ConfigKey.URLS,
@@ -90,9 +90,18 @@ export function mergeSourceMonitor(
   return mergeWith({ ...normalizedPreviousMonitor }, monitor, customizer);
 }
 
-// Ensure that METADATA is merged deeply, to protect AAD and prevent decryption errors
+// Ensure that METADATA is merged deeply, to protect AAD and prevent decryption errors.
+// Kerberos/NTLM are nested objects — shallow-replacing them on PATCH would wipe sibling
+// fields (e.g. password-only update clearing username/domain and flipping enabled:false
+// after mergeHttpAuthDefaults fills defaults). Explicit null clears the whole block.
 const customizer = (destVal: any, srcValue: any, key: string) => {
   if (key === ConfigKey.ALERT_CONFIG) {
+    return { ...destVal, ...srcValue };
+  }
+  if (key === ConfigKey.KERBEROS || key === ConfigKey.NTLM) {
+    if (srcValue === null) {
+      return null;
+    }
     return { ...destVal, ...srcValue };
   }
   if (key !== ConfigKey.METADATA) {

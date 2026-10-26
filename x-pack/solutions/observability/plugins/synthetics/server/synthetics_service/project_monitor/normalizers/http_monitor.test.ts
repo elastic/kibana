@@ -5,10 +5,12 @@
  * 2.0.
  */
 import { omit } from 'lodash';
-import { MonitorTypeEnum, Locations, LocationStatus } from '../../../../common/runtime_types';
+import type { MaintenanceWindow } from '@kbn/maintenance-windows-plugin/common';
+import type { Locations } from '../../../../common/runtime_types';
+import { MonitorTypeEnum, LocationStatus } from '../../../../common/runtime_types';
 import { DEFAULT_FIELDS } from '../../../../common/constants/monitor_defaults';
 import { normalizeProjectMonitors } from '.';
-import { PrivateLocationAttributes } from '../../../runtime_types/private_locations';
+import type { PrivateLocationAttributes } from '../../../runtime_types/private_locations';
 
 describe('http normalizers', () => {
   const testHash = 'ljlkj';
@@ -40,6 +42,11 @@ describe('http normalizers', () => {
         agentPolicyId: 'germany',
       },
     ];
+    const maintenanceWindows = [
+      { id: 'mw-1', title: 'First maintenance window' },
+      { id: 'mw-2', title: 'Second maintenance window' },
+      { id: 'mw-3', title: 'Third maintenance window' },
+    ] as unknown as MaintenanceWindow[];
     const monitors = [
       {
         privateLocations: ['Germany'],
@@ -79,6 +86,7 @@ describe('http normalizers', () => {
         },
         hash: testHash,
         max_redirects: 2,
+        maintenanceWindows: ['mw-1', 'mw-2'],
       },
       {
         privateLocations: ['Germany'],
@@ -90,6 +98,7 @@ describe('http normalizers', () => {
         urls: ['http://localhost:9200'],
         schedule: 60,
         timeout: '80s',
+        maintenanceWindows: ['mw-3'],
         'check.request': {
           method: 'POST',
           body: 'sometextbody',
@@ -122,6 +131,7 @@ describe('http normalizers', () => {
         projectId,
         namespace: 'test-space',
         version: '8.5.0',
+        maintenanceWindows,
       });
       expect(actual).toEqual([
         {
@@ -207,6 +217,7 @@ describe('http normalizers', () => {
             username: '',
             id: '',
             hash: testHash,
+            maintenance_windows: ['mw-1', 'mw-2'],
           },
           unsupportedKeys: ['check.response.body', 'unsupportedKey.nestedUnsupportedKey'],
         },
@@ -280,6 +291,7 @@ describe('http normalizers', () => {
             username: '',
             id: '',
             hash: testHash,
+            maintenance_windows: ['mw-3'],
           },
           unsupportedKeys: [],
         },
@@ -294,6 +306,7 @@ describe('http normalizers', () => {
         projectId,
         namespace: 'test-space',
         version: '8.5.0',
+        maintenanceWindows,
       });
       expect(actual).toEqual([
         {
@@ -379,6 +392,7 @@ describe('http normalizers', () => {
             username: '',
             id: '',
             hash: testHash,
+            maintenance_windows: ['mw-1', 'mw-2'],
           },
           unsupportedKeys: ['check.response.body', 'unsupportedKey.nestedUnsupportedKey'],
         },
@@ -452,6 +466,7 @@ describe('http normalizers', () => {
             username: '',
             id: '',
             hash: testHash,
+            maintenance_windows: ['mw-3'],
           },
           unsupportedKeys: [],
         },

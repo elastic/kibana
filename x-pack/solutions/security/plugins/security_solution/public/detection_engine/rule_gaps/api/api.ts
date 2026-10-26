@@ -13,7 +13,8 @@ import {
   INTERNAL_ALERTING_GAPS_GET_SUMMARY_BY_RULE_IDS_API_PATH,
   INTERNAL_ALERTING_GAPS_FILL_BY_ID_API_PATH,
   INTERNAL_ALERTING_GAPS_FIND_API_PATH,
-  gapStatus,
+  INTERNAL_ALERTING_GAPS_AUTO_FILL_SCHEDULER_API_PATH,
+  gapFillStatus,
 } from '@kbn/alerting-plugin/common';
 import type { FindBackfillResponseBody } from '@kbn/alerting-plugin/common/routes/backfill/apis/find';
 import type { ScheduleBackfillResponseBody } from '@kbn/alerting-plugin/common/routes/backfill/apis/schedule';
@@ -21,9 +22,18 @@ import type { GetGapsSummaryByRuleIdsResponseBody } from '@kbn/alerting-plugin/c
 import type { GetRuleIdsWithGapResponseBody } from '@kbn/alerting-plugin/common/routes/gaps/apis/get_rules_with_gaps';
 import type { FindGapsResponseBody } from '@kbn/alerting-plugin/common/routes/gaps/apis/find';
 import type { FillGapByIdResponseV1 } from '@kbn/alerting-plugin/common/routes/gaps/apis/fill';
+import type {
+  GapAutoFillSchedulerResponseBodyV1,
+  GapAutoFillSchedulerLogsResponseBodyV1,
+} from '@kbn/alerting-plugin/common/routes/gaps/apis/gap_auto_fill_scheduler';
 import dateMath from '@kbn/datemath';
 import { KibanaServices } from '../../../common/lib/kibana';
-import type { GapStatus, ScheduleBackfillProps } from '../types';
+import type {
+  GapReasonType,
+  GapStatus,
+  ScheduleBackfillProps,
+  GapAutoFillSchedulerBase,
+} from '../types';
 
 /**
  * Schedule rules run over a specified time range
@@ -40,8 +50,12 @@ export const scheduleRuleRun = async ({
   const params = ruleIds.map((ruleId) => {
     return {
       rule_id: ruleId,
-      start: timeRange.startDate.toISOString(),
-      end: timeRange.endDate.toISOString(),
+      ranges: [
+        {
+          start: timeRange.startDate.toISOString(),
+          end: timeRange.endDate.toISOString(),
+        },
+      ],
     };
   });
   return KibanaServices.get().http.fetch<ScheduleBackfillResponseBody>(
@@ -67,24 +81,27 @@ export const findBackfillsForRules = async ({
   signal,
   sortField = 'createdAt',
   sortOrder = 'desc',
+  initiator,
 }: {
-  ruleIds: string[];
+  ruleIds?: string[];
   page: number;
   perPage: number;
   signal?: AbortSignal;
   sortField?: string;
   sortOrder?: string;
+  initiator?: string;
 }): Promise<FindBackfillResponseBody> =>
   KibanaServices.get().http.fetch<FindBackfillResponseBody>(
     INTERNAL_ALERTING_BACKFILL_FIND_API_PATH,
     {
       method: 'POST',
       query: {
-        rule_ids: ruleIds.join(','),
+        ...(ruleIds && ruleIds.length > 0 ? { rule_ids: ruleIds.join(',') } : {}),
         page,
         per_page: perPage,
         sort_field: sortField,
         sort_order: sortOrder,
+        initiator,
       },
       signal,
     }
@@ -114,12 +131,22 @@ export const getRuleIdsWithGaps = async ({
   signal,
   start,
   end,
-  statuses = [gapStatus.UNFILLED, gapStatus.PARTIALLY_FILLED],
+  gapFillStatuses = [gapFillStatus.UNFILLED],
+  hasUnfilledIntervals,
+  hasInProgressIntervals,
+  hasFilledIntervals,
+  excludedReasons,
+  schedulerId,
 }: {
   start: string;
   end: string;
-  statuses: string[];
+  gapFillStatuses: string[];
+  hasUnfilledIntervals?: boolean;
+  hasInProgressIntervals?: boolean;
+  hasFilledIntervals?: boolean;
+  excludedReasons?: string[];
   signal?: AbortSignal;
+  schedulerId?: string;
 }): Promise<GetRuleIdsWithGapResponseBody> =>
   KibanaServices.get().http.fetch<GetRuleIdsWithGapResponseBody>(
     INTERNAL_ALERTING_GAPS_GET_RULES_API_PATH,
@@ -128,7 +155,18 @@ export const getRuleIdsWithGaps = async ({
       body: JSON.stringify({
         start,
         end,
-        statuses,
+        highest_priority_gap_fill_statuses: gapFillStatuses,
+        ...(hasUnfilledIntervals !== undefined && {
+          has_unfilled_intervals: hasUnfilledIntervals,
+        }),
+        ...(hasInProgressIntervals !== undefined && {
+          has_in_progress_intervals: hasInProgressIntervals,
+        }),
+        ...(hasFilledIntervals !== undefined && {
+          has_filled_intervals: hasFilledIntervals,
+        }),
+        ...(excludedReasons?.length ? { excluded_reasons: excludedReasons } : {}),
+        ...(schedulerId && { gap_auto_fill_scheduler_id: schedulerId }),
       }),
       signal,
     }
@@ -145,11 +183,15 @@ export const getGapsSummaryByRuleIds = async ({
   start,
   end,
   ruleIds,
+  excludedReasons,
+  schedulerId,
 }: {
   start: string;
   end: string;
   ruleIds: string[];
+  excludedReasons?: string[];
   signal?: AbortSignal;
+  schedulerId?: string;
 }): Promise<GetGapsSummaryByRuleIdsResponseBody> =>
   KibanaServices.get().http.fetch<GetGapsSummaryByRuleIdsResponseBody>(
     INTERNAL_ALERTING_GAPS_GET_SUMMARY_BY_RULE_IDS_API_PATH,
@@ -160,6 +202,8 @@ export const getGapsSummaryByRuleIds = async ({
         start,
         end,
         rule_ids: ruleIds,
+        ...(excludedReasons?.length ? { excluded_reasons: excludedReasons } : {}),
+        ...(schedulerId && { gap_auto_fill_scheduler_id: schedulerId }),
       }),
     }
   );
@@ -180,6 +224,7 @@ export const findGapsForRule = async ({
   start,
   end,
   statuses,
+  excludedReasons,
 }: {
   ruleId: string;
   page: number;
@@ -187,6 +232,7 @@ export const findGapsForRule = async ({
   start: string;
   end: string;
   statuses: GapStatus[];
+  excludedReasons?: GapReasonType[];
   signal?: AbortSignal;
   sortField?: string;
   sortOrder?: string;
@@ -207,6 +253,7 @@ export const findGapsForRule = async ({
         start: startDate?.utc().toISOString(),
         end: endDate?.utc().toISOString(),
         statuses,
+        ...(excludedReasons?.length ? { excluded_reasons: excludedReasons } : {}),
       }),
       signal,
     }
@@ -237,5 +284,101 @@ export const fillGapByIdForRule = async ({
         gap_id: gapId,
       },
       signal,
+    }
+  );
+
+export const getGapAutoFillScheduler = async ({
+  id,
+  signal,
+}: {
+  id: string;
+  signal?: AbortSignal;
+}): Promise<GapAutoFillSchedulerResponseBodyV1> =>
+  KibanaServices.get().http.fetch<GapAutoFillSchedulerResponseBodyV1>(
+    `${INTERNAL_ALERTING_GAPS_AUTO_FILL_SCHEDULER_API_PATH}/${id}`,
+    {
+      method: 'GET',
+      signal,
+    }
+  );
+
+export const createGapAutoFillScheduler = async (
+  params: GapAutoFillSchedulerBase
+): Promise<GapAutoFillSchedulerResponseBodyV1> =>
+  KibanaServices.get().http.fetch<GapAutoFillSchedulerResponseBodyV1>(
+    INTERNAL_ALERTING_GAPS_AUTO_FILL_SCHEDULER_API_PATH,
+    {
+      method: 'POST',
+      body: JSON.stringify({
+        id: params.id,
+        name: params.name,
+        scope: params.scope,
+        schedule: params.schedule,
+        rule_types: params.ruleTypes,
+        gap_fill_range: params.gapFillRange,
+        max_backfills: params.maxBackfills,
+        num_retries: params.numRetries,
+        enabled: params.enabled,
+        excluded_reasons: params.excludedReasons,
+      }),
+    }
+  );
+
+export const updateGapAutoFillScheduler = async (
+  params: GapAutoFillSchedulerBase
+): Promise<GapAutoFillSchedulerResponseBodyV1> =>
+  KibanaServices.get().http.fetch<GapAutoFillSchedulerResponseBodyV1>(
+    `${INTERNAL_ALERTING_GAPS_AUTO_FILL_SCHEDULER_API_PATH}/${params.id}`,
+    {
+      method: 'PUT',
+      body: JSON.stringify({
+        name: params.name,
+        scope: params.scope,
+        schedule: params.schedule,
+        rule_types: params.ruleTypes,
+        gap_fill_range: params.gapFillRange,
+        max_backfills: params.maxBackfills,
+        num_retries: params.numRetries,
+        enabled: params.enabled,
+        excluded_reasons: params.excludedReasons,
+      }),
+    }
+  );
+
+export const findGapAutoFillSchedulerLogs = async ({
+  id,
+  start,
+  end,
+  page,
+  perPage,
+  sortField,
+  sortDirection,
+  statuses,
+  signal,
+}: {
+  id: string;
+  start: string;
+  end: string;
+  page: number;
+  perPage: number;
+  sortField: string;
+  sortDirection: string;
+  statuses: string[];
+  signal?: AbortSignal;
+}): Promise<GapAutoFillSchedulerLogsResponseBodyV1> =>
+  KibanaServices.get().http.fetch<GapAutoFillSchedulerLogsResponseBodyV1>(
+    `${INTERNAL_ALERTING_GAPS_AUTO_FILL_SCHEDULER_API_PATH}/${id}/logs`,
+    {
+      method: 'POST',
+      signal,
+      body: JSON.stringify({
+        start,
+        end,
+        page,
+        per_page: perPage,
+        sort_field: sortField,
+        sort_direction: sortDirection,
+        ...(statuses && statuses.length > 0 && { statuses: [...statuses] }),
+      }),
     }
   );

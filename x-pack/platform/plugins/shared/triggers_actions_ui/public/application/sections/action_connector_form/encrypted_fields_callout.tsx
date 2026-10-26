@@ -9,7 +9,8 @@ import React, { memo } from 'react';
 import { EuiSpacer, EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
-  FieldsMap,
+  FIELD_TYPES,
+  type FieldsMap,
   useFormContext,
   useFormData,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
@@ -23,7 +24,7 @@ const Callout: React.FC<{ title: string; dataTestSubj: string }> = ({ title, dat
   return (
     <>
       <EuiSpacer size="s" />
-      <EuiCallOut size="s" iconType="iInCircle" data-test-subj={dataTestSubj} title={title} />
+      <EuiCallOut size="s" iconType="info" data-test-subj={dataTestSubj} title={title} />
       <EuiSpacer size="m" />
     </>
   );
@@ -33,7 +34,12 @@ const isEmpty = (value: string | undefined): value is string => value != null ||
 
 const getSecretFields = (fields: FieldsMap): FieldsMap =>
   Object.keys(fields)
-    .filter((fieldPath) => fieldPath.includes('secrets'))
+    .filter(
+      (fieldPath) =>
+        fieldPath.includes('secrets') &&
+        fields[fieldPath].label &&
+        fields[fieldPath].type !== FIELD_TYPES.HIDDEN
+    )
     .reduce((filteredFields, path) => ({ ...filteredFields, [path]: fields[path] }), {});
 
 const getLabelsFromFields = (fields: FieldsMap): string[] =>

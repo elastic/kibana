@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useState } from 'react';
-import { EuiFilterSelectItem, EuiPopover, EuiButtonEmpty } from '@elastic/eui';
+import type { FunctionComponent } from 'react';
+import React, { useState } from 'react';
+import { EuiPopover, EuiButtonEmpty, EuiSelectable, type EuiButtonEmptyProps } from '@elastic/eui';
 import { UseField } from '../../../form';
 
 interface Props {
   path: string;
+  buttonColor?: EuiButtonEmptyProps['color'];
   euiFieldProps?: Record<string, any>;
   options: Array<{
     value: string;
@@ -18,7 +20,12 @@ interface Props {
   }>;
 }
 
-export const UnitField: FunctionComponent<Props> = ({ path, options, euiFieldProps }) => {
+export const UnitField: FunctionComponent<Props> = ({
+  path,
+  buttonColor = 'text',
+  options,
+  euiFieldProps,
+}) => {
   const [open, setOpen] = useState(false);
 
   return (
@@ -34,9 +41,9 @@ export const UnitField: FunctionComponent<Props> = ({ path, options, euiFieldPro
             button={
               <EuiButtonEmpty
                 size="xs"
-                color="text"
+                color={buttonColor}
                 iconSide="right"
-                iconType="arrowDown"
+                iconType="chevronSingleDown"
                 onClick={() => setOpen((x) => !x)}
                 data-test-subj="show-filters-button"
               >
@@ -44,21 +51,33 @@ export const UnitField: FunctionComponent<Props> = ({ path, options, euiFieldPro
               </EuiButtonEmpty>
             }
             ownFocus
-            panelPaddingSize="none"
+            panelPaddingSize="s"
             isOpen={open}
             closePopover={() => setOpen(false)}
             {...euiFieldProps}
           >
-            {options.map((item) => (
-              <EuiFilterSelectItem
-                key={item.value}
-                checked={field.value === item.value ? 'on' : undefined}
-                onClick={() => onSelect(item.value)}
-                data-test-subj={`filter-option-${item.value}`}
-              >
-                {item.text}
-              </EuiFilterSelectItem>
-            ))}
+            <EuiSelectable
+              singleSelection="always"
+              listProps={{
+                onFocusBadge: false,
+                style: {
+                  minWidth: 130,
+                },
+              }}
+              options={options.map((item) => ({
+                key: item.value,
+                label: item.text,
+                checked: field.value === item.value ? 'on' : undefined,
+                'data-test-subj': `filter-option-${item.value}`,
+              }))}
+              onChange={(newOptions, event, changedOption) => {
+                if (changedOption) {
+                  onSelect(changedOption.key);
+                }
+              }}
+            >
+              {(list) => list}
+            </EuiSelectable>
           </EuiPopover>
         );
       }}

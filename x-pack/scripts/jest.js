@@ -5,5 +5,10 @@
  * 2.0.
  */
 
-require('../../src/setup_node_env');
-require('@kbn/test').runJest();
+require('@kbn/setup-node-env');
+
+if (require('@kbn/dev-validation-runner').hasValidationRunFlags(process.argv.slice(2))) {
+  require('@kbn/jest').runJestContract();
+} else {
+  require('@kbn/jest').runJest();
+}

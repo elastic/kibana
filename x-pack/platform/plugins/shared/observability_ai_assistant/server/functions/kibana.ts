@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-import axios from 'axios';
-import { format, parse } from 'url';
-import { castArray, first, pick, pickBy } from 'lodash';
-import type { KibanaRequest } from '@kbn/core/server';
+import type { HttpSelfFetchQuery, KibanaRequest } from '@kbn/core/server';
 import type { FunctionRegistrationParameters } from '.';
+import { KIBANA_FUNCTION_NAME } from '..';
 
 export function registerKibanaFunction({
   functions,
@@ -19,7 +17,7 @@ export function registerKibanaFunction({
 }) {
   functions.registerFunction(
     {
-      name: 'kibana',
+      name: KIBANA_FUNCTION_NAME,
       description:
         'Call Kibana APIs on behalf of the user. Only call this function when the user has explicitly requested it, and you know how to call it, for example by querying the knowledge base or having the user explain it to you. Assume that pathnames, bodies and query parameters may have changed since your knowledge cut off date.',
       descriptionForUser: 'Call Kibana APIs on behalf of the user',
@@ -47,55 +45,21 @@ export function registerKibanaFunction({
         required: ['method', 'pathname'] as const,
       },
     },
-    ({ arguments: { method, pathname, body, query } }, signal) => {
+    async ({ arguments: { method, pathname, body, query } }, signal) => {
       const { request } = resources;
-
-      const { protocol, host, pathname: pathnameFromRequest } = request.rewrittenUrl || request.url;
-
-      const origin = first(castArray(request.headers.origin));
-
-      const nextUrl = {
-        host,
-        protocol,
-        ...(origin ? pick(parse(origin), 'host', 'protocol') : {}),
-        pathname: pathnameFromRequest.replace(
-          '/internal/observability_ai_assistant/chat/complete',
-          pathname
-        ),
-        query: query ? (query as Record<string, string>) : undefined,
-      };
-
-      const copiedHeaderNames = [
-        'accept-encoding',
-        'accept-language',
-        'accept',
-        'content-type',
-        'cookie',
-        'kbn-build-number',
-        'kbn-version',
-        'origin',
-        'referer',
-        'user-agent',
-        'x-elastic-internal-origin',
-        'x-elastic-product-origin',
-        'x-kbn-context',
-      ];
-
-      const headers = pickBy(request.headers, (value, key) => {
-        return (
-          copiedHeaderNames.includes(key.toLowerCase()) || key.toLowerCase().startsWith('sec-')
-        );
-      });
-
-      return axios({
+      const core = await resources.plugins.core.start();
+      const fetchOptions = {
         method,
-        headers,
-        url: format(nextUrl),
-        data: body ? JSON.stringify(body) : undefined,
+        query: query as HttpSelfFetchQuery | undefined,
+        body,
         signal,
-      }).then((response) => {
-        return { content: response.data };
-      });
+        forwardRequestHeaders: true,
+        access: 'internal',
+        asResponse: true,
+      } as const;
+
+      const response = await core.http.selfClient.asScoped(request).fetch(pathname, fetchOptions);
+      return { content: response.body };
     }
   );
 }

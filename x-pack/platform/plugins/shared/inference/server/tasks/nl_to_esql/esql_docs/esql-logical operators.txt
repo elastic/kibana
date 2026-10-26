@@ -1,0 +1,15 @@
+# LOGICAL OPERATORS
+
+Logical operators combine or negate boolean expressions. The supported logical operators are `AND`, `OR`, and `NOT`.
+
+## Syntax
+
+`<boolean_expression> AND <boolean_expression>`
+
+`<boolean_expression> OR <boolean_expression>`
+
+`NOT <boolean_expression>`
+
+### Parameters
+
+## Examples

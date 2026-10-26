@@ -9,9 +9,9 @@ import { partition } from 'lodash';
 
 import type { CaseAttributes } from '../../../common/types/domain';
 import type { CasesBulkGetRequest, CasesBulkGetResponse } from '../../../common/types/api';
-import { CasesBulkGetResponseRt, CasesBulkGetRequestRt } from '../../../common/types/api';
-import { decodeWithExcessOrThrow, decodeOrThrow } from '../../common/runtime_types';
-import { createCaseError, generateCaseErrorResponse } from '../../common/error';
+import { CasesBulkGetResponseSchema, CasesBulkGetRequestSchema } from '../../../common/types/api';
+import { decodeWithExcessOrThrowZod, decodeOrThrowZod } from '../../common/runtime_types';
+import { createCaseError, generateCaseErrorResponse, isSOError } from '../../common/error';
 import { flattenCaseSavedObject } from '../../common/utils';
 import type { CasesClientArgs } from '../types';
 import { Operations } from '../../authorization';
@@ -34,13 +34,13 @@ export const bulkGet = async (
   } = clientArgs;
 
   try {
-    const request = decodeWithExcessOrThrow(CasesBulkGetRequestRt)(params);
+    const request = decodeWithExcessOrThrowZod(CasesBulkGetRequestSchema)(params);
 
     const cases = await caseService.getCases({ caseIds: request.ids });
 
     const [validCases, soBulkGetErrors] = partition(
       cases.saved_objects,
-      (caseInfo) => caseInfo.error === undefined
+      (caseInfo) => !isSOError(caseInfo)
     ) as [CaseSavedObjectTransformed[], CaseSavedObjectWithErrors];
 
     const { authorized: authorizedCases, unauthorized: unauthorizedCases } =
@@ -49,27 +49,29 @@ export const bulkGet = async (
         operation: Operations.bulkGetCases,
       });
 
-    const commentTotals = await attachmentService.getter.getCaseCommentStats({
+    const commentTotals = await attachmentService.getter.getCaseAttatchmentStats({
       caseIds: authorizedCases.map((theCase) => theCase.id),
     });
 
     const flattenedCases = authorizedCases.map((theCase) => {
-      const { userComments, alerts } = commentTotals.get(theCase.id) ?? {
+      const { userComments, alerts, events } = commentTotals.get(theCase.id) ?? {
         alerts: 0,
         userComments: 0,
+        events: 0,
       };
 
       return flattenCaseSavedObject({
         savedObject: theCase,
         totalComment: userComments,
         totalAlerts: alerts,
+        totalEvents: events,
       });
     });
 
     const errors = constructErrors(soBulkGetErrors, unauthorizedCases);
     const res = { cases: flattenedCases, errors };
 
-    return decodeOrThrow(CasesBulkGetResponseRt)(res);
+    return decodeOrThrowZod(CasesBulkGetResponseSchema)(res);
   } catch (error) {
     const ids = params.ids ?? [];
     throw createCaseError({

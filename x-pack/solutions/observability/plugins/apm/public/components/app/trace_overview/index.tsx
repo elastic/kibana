@@ -4,115 +4,102 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+
+import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
-import { TraceSearchType } from '../../../../common/trace_explorer';
-import { useApmParams } from '../../../hooks/use_apm_params';
-import { useApmRouter } from '../../../hooks/use_apm_router';
-import { useApmRoutePath } from '../../../hooks/use_apm_route_path';
-import { useTraceExplorerEnabledSetting } from '../../../hooks/use_trace_explorer_enabled_setting';
+import React, { useMemo } from 'react';
 import { ApmMainTemplate } from '../../routing/templates/apm_main_template';
-import { TechnicalPreviewBadge } from '../../shared/technical_preview_badge';
 import { Breadcrumb } from '../breadcrumb';
-import { TransactionTab } from '../transaction_details/waterfall_with_summary/transaction_tabs';
+import { useApmParams } from '../../../hooks/use_apm_params';
+import { useDiscoverHref } from '../../shared/links/discover_links/use_discover_href';
+import { ApmIndexSettingsContextProvider } from '../../../context/apm_index_settings/apm_index_settings_context';
+import { useApmIndexSettingsContext } from '../../../context/apm_index_settings/use_apm_index_settings_context';
+import { FETCH_STATUS } from '../../../hooks/use_fetcher';
+import { APM_EBT_ACTIONS } from '../ebt_constants';
+import { TRACE_OVERVIEW_EBT_ELEMENTS } from './ebt_constants';
 
-type Tab = Required<
-  Required<React.ComponentProps<typeof ApmMainTemplate>>['pageHeader']
->['tabs'][number];
+const tracesTitle = i18n.translate('xpack.apm.views.traceOverview.title', {
+  defaultMessage: 'Traces',
+});
 
-export function TraceOverview({ children }: { children: React.ReactElement }) {
-  const isTraceExplorerEnabled = useTraceExplorerEnabledSetting();
+const exploreTracesLabel = i18n.translate('xpack.apm.tracesOverview.exploreTracesInDiscover', {
+  defaultMessage: 'Explore traces',
+});
 
-  const router = useApmRouter();
+export function TraceOverview({
+  children,
+  searchBar,
+}: {
+  children: React.ReactElement;
+  searchBar?: React.ReactNode;
+}) {
+  return (
+    <ApmIndexSettingsContextProvider>
+      <Breadcrumb href="/traces" title={tracesTitle} omitOnServerless>
+        <TraceOverviewContent searchBar={searchBar}>{children}</TraceOverviewContent>
+      </Breadcrumb>
+    </ApmIndexSettingsContextProvider>
+  );
+}
 
-  const { query } = useApmParams('/traces');
+function TraceOverviewContent({
+  children,
+  searchBar,
+}: {
+  children: React.ReactElement;
+  searchBar?: React.ReactNode;
+}) {
+  const {
+    query: { environment, kuery, rangeFrom, rangeTo },
+  } = useApmParams('/traces');
+  const { indexSettingsStatus } = useApmIndexSettingsContext();
 
-  const routePath = useApmRoutePath();
-
-  const topTracesLink = router.link('/traces', {
-    query: {
-      comparisonEnabled: query.comparisonEnabled,
-      environment: query.environment,
-      kuery: query.kuery,
-      rangeFrom: query.rangeFrom,
-      rangeTo: query.rangeTo,
-      offset: query.offset,
-      refreshInterval: query.refreshInterval,
-      refreshPaused: query.refreshPaused,
-    },
+  const discoverHref = useDiscoverHref({
+    indexType: 'traces',
+    rangeFrom,
+    rangeTo,
+    queryParams: { kuery, environment, sortDirection: 'DESC' },
   });
 
-  const title = i18n.translate('xpack.apm.views.traceOverview.title', {
-    defaultMessage: 'Traces',
-  });
+  const isExploreReady = Boolean(discoverHref) && indexSettingsStatus === FETCH_STATUS.SUCCESS;
 
-  const explorerLink = router.link('/traces/explorer/waterfall', {
-    query: {
-      comparisonEnabled: query.comparisonEnabled,
-      environment: query.environment,
-      kuery: query.kuery,
-      rangeFrom: query.rangeFrom,
-      rangeTo: query.rangeTo,
-      offset: query.offset,
-      refreshInterval: query.refreshInterval,
-      refreshPaused: query.refreshPaused,
-      query: '',
-      type: TraceSearchType.kql,
-      waterfallItemId: '',
-      traceId: '',
-      transactionId: '',
-      detailTab: TransactionTab.timeline,
-      showCriticalPath: false,
-    },
-  });
-
-  const tabs: Tab[] = isTraceExplorerEnabled
-    ? [
-        {
-          href: topTracesLink,
-          label: i18n.translate('xpack.apm.traceOverview.topTracesTab', {
-            defaultMessage: 'Top traces',
-          }),
-          isSelected: routePath === '/traces',
+  const pageMenu = useMemo<AppMenuConfig>(() => {
+    return {
+      primaryActionItem: {
+        id: 'exploreTraces',
+        label: exploreTracesLabel,
+        iconType: 'productDiscover',
+        testId: 'apmTracesExploreInDiscoverButton',
+        ebt: {
+          action: APM_EBT_ACTIONS.EXPLORE_TRACES,
+          detail: TRACE_OVERVIEW_EBT_ELEMENTS.PAGE_HEADER,
         },
-        {
-          href: explorerLink,
-          label: (
-            <EuiFlexGroup gutterSize="s">
-              <EuiFlexItem grow={false}>
-                {i18n.translate('xpack.apm.traceOverview.traceExplorerTab', {
-                  defaultMessage: 'Explorer',
-                })}
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <TechnicalPreviewBadge icon="beaker" style={{ verticalAlign: 'middle' }} />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          ),
-          isSelected: routePath.startsWith('/traces/explorer'),
-        },
-      ]
-    : [];
+        disableButton: !isExploreReady,
+        isLoading: indexSettingsStatus === FETCH_STATUS.LOADING,
+        ...(discoverHref ? { href: discoverHref } : { run: () => undefined }),
+      },
+    };
+  }, [discoverHref, indexSettingsStatus, isExploreReady]);
 
   return (
-    <Breadcrumb href="/traces" title={title} omitOnServerless>
-      <ApmMainTemplate
-        pageTitle={title}
-        pageSectionProps={{
-          contentProps: {
-            style: {
-              display: 'flex',
-              flexGrow: 1,
-            },
+    <ApmMainTemplate
+      header={{
+        title: tracesTitle,
+        menu: pageMenu,
+      }}
+      searchBar={searchBar}
+      pageSectionProps={{
+        contentProps: {
+          style: {
+            display: 'flex',
+            flexDirection: 'column',
+            flexGrow: 1,
+            minInlineSize: 0,
           },
-        }}
-        pageHeader={{
-          tabs,
-        }}
-      >
-        {children}
-      </ApmMainTemplate>
-    </Breadcrumb>
+        },
+      }}
+    >
+      {children}
+    </ApmMainTemplate>
   );
 }

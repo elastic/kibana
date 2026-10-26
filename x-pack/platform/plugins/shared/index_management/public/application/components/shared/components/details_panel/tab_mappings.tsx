@@ -7,8 +7,9 @@
 
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiCodeBlock, EuiCallOut } from '@elastic/eui';
-import { Mappings } from '../../../../../../common';
+import { EuiCodeBlock } from '@elastic/eui';
+import { KbnInfoCallout } from '@kbn/ui-callout';
+import type { Mappings } from '../../../../../../common';
 
 interface Props {
   mappings: Mappings | undefined;
@@ -26,14 +27,13 @@ export const TabMappings: React.FunctionComponent<Props> = ({ mappings }) => {
   }
 
   return (
-    <EuiCallOut
+    <KbnInfoCallout
       title={
         <FormattedMessage
           id="xpack.idxMgmt.mappingsTab.noMappingsTitle"
           defaultMessage="No mappings defined."
         />
       }
-      iconType="pin"
       data-test-subj="noMappingsCallout"
       size="s"
     />

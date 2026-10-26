@@ -10,7 +10,7 @@
 // this file was generated, and should not be edited by hand
 // ---------------------------------- WARNING ----------------------------------
 import * as rt from 'io-ts';
-import type { Either } from 'fp-ts/lib/Either';
+import type { Either } from 'fp-ts/Either';
 import { AlertSchema } from './alert_schema';
 import { EcsSchema } from './ecs_schema';
 import { LegacyAlertSchema } from './legacy_alert_schema';
@@ -75,6 +75,7 @@ const ObservabilityLogsAlertRequired = rt.type({
 const ObservabilityLogsAlertOptional = rt.partial({
   'kibana.alert.context': schemaUnknown,
   'kibana.alert.evaluation.threshold': schemaStringOrNumber,
+  'kibana.alert.evaluation.time_range': schemaDateRange,
   'kibana.alert.evaluation.value': schemaStringOrNumber,
   'kibana.alert.evaluation.values': schemaStringOrNumberArray,
   'kibana.alert.group': rt.array(
@@ -83,6 +84,7 @@ const ObservabilityLogsAlertOptional = rt.partial({
       value: schemaStringArray,
     })
   ),
+  'kibana.alert.grouping': schemaUnknown,
 });
 
 // prettier-ignore

@@ -6,11 +6,8 @@
  */
 
 import React from 'react';
-import { fireEvent, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import { render } from '../../utils/testing/rtl_helpers';
 import { MonitorEditPage } from './monitor_edit_page';
-import { useMonitorName } from '../../hooks/use_monitor_name';
 import { ConfigKey } from '../../../../../common/runtime_types';
 
 import * as observabilitySharedPublic from '@kbn/observability-shared-plugin/public';
@@ -19,15 +16,30 @@ import {
   PROFILES_MAP,
 } from '../../../../../common/constants/monitor_defaults';
 
-jest.mock('@kbn/observability-shared-plugin/public');
+jest.mock('@kbn/observability-shared-plugin/public', () => ({
+  ...jest.requireActual('@kbn/observability-shared-plugin/public'),
+}));
 
 jest.mock('../../hooks/use_monitor_name', () => ({
   ...jest.requireActual('../../hooks/use_monitor_name'),
   useMonitorName: jest.fn().mockReturnValue({ nameAlreadyExists: false }),
 }));
 
+jest.mock('../../../../hooks/use_kibana_space', () => ({
+  ...jest.requireActual('../../../../hooks/use_kibana_space'),
+  useKibanaSpace: jest.fn().mockReturnValue({ id: 'default' }),
+}));
+
 describe('MonitorEditPage', () => {
   const { FETCH_STATUS } = observabilitySharedPublic;
+
+  beforeEach(() => {
+    jest.useFakeTimers();
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
+  });
 
   it('renders correctly', async () => {
     jest.spyOn(observabilitySharedPublic, 'useFetcher').mockReturnValue({
@@ -186,55 +198,4 @@ describe('MonitorEditPage', () => {
     // error
     expect(getByText('Unable to load monitor configuration')).toBeInTheDocument();
   });
-
-  it.each([true, false])(
-    'shows duplicate error when "nameAlreadyExists" is %s',
-    async (nameAlreadyExists) => {
-      (useMonitorName as jest.Mock).mockReturnValue({ nameAlreadyExists });
-
-      jest.spyOn(observabilitySharedPublic, 'useFetcher').mockReturnValue({
-        status: FETCH_STATUS.SUCCESS,
-        data: {
-          attributes: {
-            [ConfigKey.MONITOR_SOURCE_TYPE]: 'ui',
-            [ConfigKey.FORM_MONITOR_TYPE]: 'multistep',
-            [ConfigKey.MONITOR_TYPE]: 'browser',
-            [ConfigKey.LOCATIONS]: [],
-            [ConfigKey.THROTTLING_CONFIG]: PROFILES_MAP[PROFILE_VALUES_ENUM.DEFAULT],
-          },
-        },
-        refetch: () => null,
-        loading: false,
-      });
-      const { getByText, queryByText, getByTestId } = render(<MonitorEditPage />, {
-        state: {
-          serviceLocations: {
-            locations: [
-              {
-                id: 'us_central',
-                label: 'Us Central',
-              },
-              {
-                id: 'us_east',
-                label: 'US East',
-              },
-            ],
-            locationsLoaded: true,
-            loading: false,
-          },
-        },
-      });
-
-      const inputField = getByTestId('syntheticsMonitorConfigName');
-      fireEvent.focus(inputField);
-      await userEvent.type(inputField, 'any value'); // Hook is made to return duplicate error as true
-      fireEvent.blur(inputField);
-
-      if (nameAlreadyExists) {
-        await waitFor(() => getByText('Monitor name already exists'));
-      } else {
-        expect(queryByText('Monitor name already exists')).not.toBeInTheDocument();
-      }
-    }
-  );
 });

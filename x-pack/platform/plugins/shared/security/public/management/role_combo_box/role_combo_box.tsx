@@ -89,16 +89,21 @@ export const RoleComboBox = (props: Props) => {
     return acc;
   }, {});
 
+  const roleComboBoxPlaceholder =
+    props.placeholder ||
+    i18n.translate('xpack.security.management.users.roleComboBox.placeholder', {
+      defaultMessage: 'Select roles',
+    });
+
   return (
     <EuiComboBox
       data-test-subj="rolesDropdown"
       id={props.id}
-      placeholder={
-        props.placeholder ||
-        i18n.translate('xpack.security.management.users.roleComboBox.placeholder', {
-          defaultMessage: 'Select roles',
-        })
-      }
+      fullWidth={props.fullWidth}
+      isInvalid={props.isInvalid}
+      aria-describedby={props['aria-describedby']}
+      placeholder={roleComboBoxPlaceholder}
+      aria-label={roleComboBoxPlaceholder}
       onChange={onRolesChange}
       isLoading={props.isLoading}
       isDisabled={props.isDisabled}
@@ -146,7 +151,9 @@ function renderOption(option: Option) {
       <EuiFlexItem>
         {option.value?.description ? (
           <EuiToolTip position="left" content={option.value?.description}>
-            <EuiText size="s">{option.label}</EuiText>
+            <EuiText size="s" tabIndex={0}>
+              {option.label}
+            </EuiText>
           </EuiToolTip>
         ) : (
           <EuiText size="s">{option.label}</EuiText>

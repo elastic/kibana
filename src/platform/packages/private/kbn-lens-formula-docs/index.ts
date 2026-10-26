@@ -58,7 +58,7 @@ import { percentile } from './src/operations/percentile';
 import { stdDeviation } from './src/operations/std_deviation';
 import { sum } from './src/operations/sum';
 import { timeRange } from './src/operations/time_range';
-import { OperationDocumentationType } from './src/operations/types';
+import type { OperationDocumentationType } from './src/operations/types';
 
 export const documentationMap: Record<string, OperationDocumentationType> = [
   average,
@@ -89,5 +89,6 @@ export const documentationMap: Record<string, OperationDocumentationType> = [
   return memo;
 }, {});
 
-export { tinymathFunctions, getTypeI18n } from './src/math';
+export { tinymathFunctions, getTypeLabel, isFormulaArgType } from './src/math';
+export type { FormulaArgType } from './src/math';
 export { sections } from './src/sections';

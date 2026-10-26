@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 
 import { useActions, useValues } from 'kea';
 
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
@@ -21,16 +20,19 @@ import {
   EuiFlyoutHeader,
   EuiSpacer,
   EuiTitle,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+
+import { KbnDangerCallout } from '@kbn/ui-callout';
 
 import { Status } from '../../../../../common/types/api';
 import { isNotNullish } from '../../../../../common/utils/is_not_nullish';
 import { getErrorsFromHttpResponse } from '../../../shared/flash_messages/handle_api_errors';
 
+import type { IndicesSelectComboBoxOption } from '../search_applications/components/indices_select_combobox';
 import {
   IndicesSelectComboBox,
-  IndicesSelectComboBoxOption,
   indexToOption,
 } from '../search_applications/components/indices_select_combobox';
 
@@ -42,6 +44,8 @@ export interface AddIndicesFlyoutProps {
 }
 
 export const AddIndicesFlyout: React.FC<AddIndicesFlyoutProps> = ({ onClose }) => {
+  const modalTitleId = useGeneratedHtmlId();
+
   const { searchApplicationData } = useValues(SearchApplicationViewLogic);
   const { selectedIndices, updateSearchApplicationStatus, updateSearchApplicationError } =
     useValues(AddIndicesLogic);
@@ -60,11 +64,13 @@ export const AddIndicesFlyout: React.FC<AddIndicesFlyoutProps> = ({ onClose }) =
     [setSelectedIndices]
   );
 
+  const [isIndicesSelectComboBoxDisabled, setIndicesSelectComboBoxDisabled] =
+    useState<boolean>(false);
   return (
-    <EuiFlyout onClose={onClose}>
+    <EuiFlyout onClose={onClose} aria-labelledby={modalTitleId}>
       <EuiFlyoutHeader hasBorder>
         <EuiTitle>
-          <h2>
+          <h2 id={modalTitleId}>
             {i18n.translate(
               'xpack.enterpriseSearch.searchApplications.searchApplication.indices.addIndicesFlyout.title',
               { defaultMessage: 'Add new indices' }
@@ -74,8 +80,8 @@ export const AddIndicesFlyout: React.FC<AddIndicesFlyoutProps> = ({ onClose }) =
         {updateSearchApplicationStatus === Status.ERROR && updateSearchApplicationError && (
           <>
             <EuiSpacer />
-            <EuiCallOut
-              color="danger"
+            <KbnDangerCallout
+              announceOnMount
               title={i18n.translate(
                 'xpack.enterpriseSearch.searchApplications.searchApplication.indices.addIndicesFlyout.updateError.title',
                 { defaultMessage: 'Error updating search application' }
@@ -84,7 +90,7 @@ export const AddIndicesFlyout: React.FC<AddIndicesFlyoutProps> = ({ onClose }) =
               {getErrorsFromHttpResponse(updateSearchApplicationError).map((errMessage, i) => (
                 <p id={`createErrorMsg.${i}`}>{errMessage}</p>
               ))}
-            </EuiCallOut>
+            </KbnDangerCallout>
           </>
         )}
       </EuiFlyoutHeader>
@@ -98,6 +104,7 @@ export const AddIndicesFlyout: React.FC<AddIndicesFlyoutProps> = ({ onClose }) =
             'xpack.enterpriseSearch.searchApplications.searchApplication.indices.addIndicesFlyout.selectableLabel',
             { defaultMessage: 'Select searchable indices' }
           )}
+          setIndicesSelectComboBoxDisabled={setIndicesSelectComboBoxDisabled}
         />
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
@@ -107,8 +114,9 @@ export const AddIndicesFlyout: React.FC<AddIndicesFlyoutProps> = ({ onClose }) =
               data-test-subj="enterpriseSearchAddIndicesFlyoutAddSelectedButton"
               fill
               data-telemetry-id="entSearchApplications-indices-addNewIndices-submit"
-              iconType="plusInCircle"
+              iconType="plusCircle"
               onClick={submitSelectedIndices}
+              disabled={isIndicesSelectComboBoxDisabled}
             >
               {i18n.translate(
                 'xpack.enterpriseSearch.searchApplications.searchApplication.indices.addIndicesFlyout.submitButton',

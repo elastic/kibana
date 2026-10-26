@@ -36,7 +36,7 @@ describe('convertToLens', () => {
   test('should return null if getColumnsFromVis returns null', async () => {
     mockGetColumnsFromVis.mockReturnValue(null);
     const result = await convertToLens(samplePieVis as any, {} as any);
-    expect(mockGetColumnsFromVis).toBeCalledTimes(1);
+    expect(mockGetColumnsFromVis).toHaveBeenCalledTimes(1);
     expect(result).toBeNull();
   });
 
@@ -47,7 +47,7 @@ describe('convertToLens', () => {
       },
     ]);
     const result = await convertToLens(samplePieVis as any, {} as any);
-    expect(mockGetColumnsFromVis).toBeCalledTimes(1);
+    expect(mockGetColumnsFromVis).toHaveBeenCalledTimes(1);
     expect(result).toBeNull();
   });
 
@@ -58,7 +58,7 @@ describe('convertToLens', () => {
       },
     ]);
     const result = await convertToLens(samplePieVis as any, {} as any);
-    expect(mockGetColumnsFromVis).toBeCalledTimes(1);
+    expect(mockGetColumnsFromVis).toHaveBeenCalledTimes(1);
     expect(result).toBeNull();
   });
 
@@ -70,8 +70,8 @@ describe('convertToLens', () => {
       },
     ]);
     const result = await convertToLens(samplePieVis as any, {} as any);
-    expect(mockGetColumnsFromVis).toBeCalledTimes(1);
-    expect(mockGetConfiguration).toBeCalledTimes(1);
+    expect(mockGetColumnsFromVis).toHaveBeenCalledTimes(1);
+    expect(mockGetConfiguration).toHaveBeenCalledTimes(1);
     expect(result?.type).toEqual('lnsPie');
     expect(result?.layers.length).toEqual(1);
     expect(result?.layers[0]).toEqual(

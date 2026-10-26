@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { AcknowledgedResponseBase } from '@elastic/elasticsearch/lib/api/types';
+import type { AcknowledgedResponseBase } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { cancelSyncs } from './cancel_syncs';
 
@@ -21,5 +21,9 @@ export const deleteConnectorById = async (client: ElasticsearchClient, id: strin
   return await client.transport.request<AcknowledgedResponseBase>({
     method: 'DELETE',
     path: `/_connector/${id}`,
+    querystring: {
+      hard: true,
+      delete_sync_jobs: true,
+    },
   });
 };

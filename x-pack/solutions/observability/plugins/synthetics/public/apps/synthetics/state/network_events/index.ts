@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { createReducer } from '@reduxjs/toolkit';
-import { NetworkEvent } from '../../../../../common/runtime_types';
+import { createReducer } from 'redux-toolkit-v1';
+import type { NetworkEvent } from '../../../../../common/runtime_types';
 import { getNetworkEvents } from './actions';
 
 export interface NetworkEventsState {

@@ -8,13 +8,19 @@
  */
 
 // Mocking the module to avoid waiting for a valid ES connection during these unit tests
+import { securityServiceMock } from '@kbn/core-security-server-mocks';
+
 jest.mock('./is_valid_connection', () => ({
   isValidConnection: jest.fn(),
 }));
 
 // Mocking this module to force different statuses to help with the unit tests
-jest.mock('./version_check/ensure_es_version', () => ({
+jest.mock('./version_check/nodes_version', () => ({
   pollEsNodesVersion: jest.fn(),
+}));
+
+jest.mock('./version_check/clock_skew', () => ({
+  pollEsNodesClockSkew: jest.fn(() => new Promise(() => {})),
 }));
 
 import {
@@ -23,8 +29,7 @@ import {
   getClusterInfoMock,
 } from './elasticsearch_service.test.mocks';
 
-import type { NodesVersionCompatibility } from './version_check/ensure_es_version';
-import { BehaviorSubject, firstValueFrom, of } from 'rxjs';
+import { BehaviorSubject, firstValueFrom, of, throwError } from 'rxjs';
 import { first, concatMap } from 'rxjs';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { Env } from '@kbn/config';
@@ -36,19 +41,33 @@ import { executionContextServiceMock } from '@kbn/core-execution-context-server-
 import { httpServiceMock } from '@kbn/core-http-server-mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { configSchema, ElasticsearchConfig } from './elasticsearch_config';
-import { ElasticsearchService, SetupDeps } from './elasticsearch_service';
+import type { SetupDeps } from './elasticsearch_service';
+import { ElasticsearchService } from './elasticsearch_service';
 import { duration } from 'moment';
 import { isValidConnection } from './is_valid_connection';
-import { pollEsNodesVersion as pollEsNodesVersionMocked } from './version_check/ensure_es_version';
+import { pollEsNodesVersion as pollEsNodesVersionMocked } from './version_check/nodes_version';
+import { pollEsNodesClockSkew } from './version_check/clock_skew';
 
 const { pollEsNodesVersion: pollEsNodesVersionActual } = jest.requireActual(
-  './version_check/ensure_es_version'
+  './version_check/nodes_version'
 );
 
 const isValidConnectionMock = isValidConnection as jest.Mock;
 
 const TICK = 10;
 const tick = (ticks = 1) => jest.advanceTimersByTime(TICK * ticks);
+const sleepWithFakeTimers = (durationMs: number, signal?: AbortSignal): Promise<void> =>
+  new Promise((resolve, reject) => {
+    const timer = setTimeout(resolve, durationMs);
+    signal?.addEventListener(
+      'abort',
+      () => {
+        clearTimeout(timer);
+        reject(new Error('aborted'));
+      },
+      { once: true }
+    );
+  });
 
 const configService = configServiceMock.create();
 
@@ -58,12 +77,18 @@ let coreContext: CoreContext;
 let mockClusterClientInstance: ReturnType<typeof elasticsearchClientMock.createCustomClusterClient>;
 let mockConfig$: BehaviorSubject<any>;
 let setupDeps: SetupDeps;
+const nodesInfoResponse = {
+  cluster_name: 'cluster-name',
+  nodes: {},
+};
 
 beforeEach(() => {
   setupDeps = {
     analytics: analyticsServiceMock.createAnalyticsServiceSetup(),
     http: httpServiceMock.createInternalSetupContract(),
     executionContext: executionContextServiceMock.createInternalSetupContract(),
+    security: securityServiceMock.createInternalSetup(),
+    loggingSystem: loggingSystemMock.create(),
   };
 
   env = Env.createDefault(REPO_ROOT, getEnvOptions());
@@ -75,12 +100,16 @@ beforeEach(() => {
     healthCheck: {
       delay: duration(TICK),
       startupDelay: duration(TICK),
+      retry: 1,
     },
     ssl: {
       verificationMode: 'none',
     },
   });
-  configService.atPath.mockReturnValue(mockConfig$);
+  configService.atPath.mockImplementation((path) => {
+    if (path === 'elasticsearch') return mockConfig$;
+    return new BehaviorSubject({});
+  });
 
   const logger = loggingSystemMock.create();
   coreContext = { coreId: Symbol(), env, logger, configService: configService as any };
@@ -91,10 +120,12 @@ beforeEach(() => {
 
   isScriptingEnabledMock.mockResolvedValue(true);
 
-  getClusterInfoMock.mockReturnValue(of({}));
+  getClusterInfoMock.mockReturnValue(of({ cluster_uuid: 'test-cluster-uuid' }));
 
   // @ts-expect-error TS does not get that `pollEsNodesVersion` is mocked
-  pollEsNodesVersionMocked.mockImplementation(pollEsNodesVersionActual);
+  pollEsNodesVersionMocked.mockImplementation((options) =>
+    pollEsNodesVersionActual(options, { now: () => performance.now(), sleep: sleepWithFakeTimers })
+  );
 });
 
 afterEach(async () => {
@@ -189,6 +220,7 @@ describe('#preboot', () => {
       expect(config).toMatchInlineSnapshot(`
         Object {
           "healthCheckDelay": "PT0.01S",
+          "healthCheckRetry": 1,
           "healthCheckStartupDelay": "PT0.01S",
           "hosts": Array [
             "http://8.8.8.8",
@@ -221,43 +253,35 @@ describe('#setup', () => {
     expect(typeof setupContract.agentStatsProvider.getAgentsStats).toEqual('function');
   });
 
-  it('esNodeVersionCompatibility$ only starts polling when subscribed to', async () => {
+  it('esNodesCompatibility$ polls from setup at the health check interval', async () => {
     const mockedClient = mockClusterClientInstance.asInternalUser;
-    mockedClient.nodes.info.mockImplementation(() =>
-      elasticsearchClientMock.createErrorTransportRequestPromise(new Error())
-    );
+    mockedClient.nodes.info.mockResolvedValue(nodesInfoResponse);
 
     expect(mockedClient.nodes.info).toHaveBeenCalledTimes(0);
 
     const setupContract = await elasticsearchService.setup(setupDeps);
+    // The first request lands a microtask after setup, once the machine has yielded its initial state.
+    await jest.advanceTimersByTimeAsync(0);
 
     expect(mockedClient.nodes.info).toHaveBeenCalledTimes(1);
 
-    tick();
+    await jest.advanceTimersByTimeAsync(0);
+    await jest.advanceTimersByTimeAsync(TICK);
 
     expect(mockedClient.nodes.info).toHaveBeenCalledTimes(2);
 
     await firstValueFrom(setupContract.esNodesCompatibility$);
-    expect(mockedClient.nodes.info).toHaveBeenCalledTimes(2); // shares the last value
+    expect(mockedClient.nodes.info).toHaveBeenCalledTimes(2);
   });
 
-  it('esNodeVersionCompatibility$ stops polling when unsubscribed from', async () => {
-    const mockedClient = mockClusterClientInstance.asInternalUser;
-    mockedClient.nodes.info.mockImplementation(() =>
-      elasticsearchClientMock.createErrorTransportRequestPromise(new Error())
-    );
-
-    expect(mockedClient.nodes.info).toHaveBeenCalledTimes(0);
-
+  it("should inject the cluster's ID in the logging system", async () => {
     const setupContract = await elasticsearchService.setup(setupDeps);
 
-    expect(mockedClient.nodes.info).toHaveBeenCalledTimes(1);
+    await firstValueFrom(setupContract.clusterInfo$);
 
-    await firstValueFrom(setupContract.esNodesCompatibility$);
-
-    tick();
-
-    expect(mockedClient.nodes.info).toHaveBeenCalledTimes(2);
+    expect(setupDeps.loggingSystem.setGlobalContext).toHaveBeenCalledWith({
+      service: { id: 'test-cluster-uuid' },
+    });
   });
 });
 
@@ -274,32 +298,6 @@ describe('#start', () => {
     const client = startContract.client;
 
     expect(client.asInternalUser).toBe(mockClusterClientInstance.asInternalUser);
-  });
-
-  it('should log.error non-compatible nodes error', async () => {
-    const defaultMessage = {
-      isCompatible: true,
-      kibanaVersion: '8.0.0',
-      incompatibleNodes: [],
-      warningNodes: [],
-    };
-    const observable$ = new BehaviorSubject<NodesVersionCompatibility>(defaultMessage);
-
-    // @ts-expect-error this module is mocked, so `mockImplementation` is an allowed property
-    pollEsNodesVersionMocked.mockImplementation(() => observable$);
-
-    await elasticsearchService.setup(setupDeps);
-    tick();
-    await elasticsearchService.start();
-    expect(loggingSystemMock.collect(coreContext.logger).error).toEqual([]);
-    observable$.next({
-      ...defaultMessage,
-      isCompatible: false,
-      message: 'Something went terribly wrong!',
-    });
-    expect(loggingSystemMock.collect(coreContext.logger).error).toEqual([
-      ['Something went terribly wrong!'],
-    ]);
   });
 
   it('logs an info message about connecting to ES', async () => {
@@ -391,9 +389,7 @@ describe('#start', () => {
 
       await elasticsearchService.setup(setupDeps);
 
-      await expect(elasticsearchService.start()).rejects.toThrowError(
-        'Inline scripting is disabled'
-      );
+      await expect(elasticsearchService.start()).rejects.toThrow('Inline scripting is disabled');
     });
 
     it('does not throw error when `skipStartupConnectionCheck` is true', async () => {
@@ -458,22 +454,23 @@ describe('#start', () => {
       const config = MockClusterClient.mock.calls[0][0].config;
 
       expect(config).toMatchInlineSnapshot(`
-        Object {
-          "healthCheckDelay": "PT0.01S",
-          "healthCheckStartupDelay": "PT0.01S",
-          "hosts": Array [
-            "http://8.8.8.8",
-          ],
-          "logQueries": true,
-          "requestHeadersWhitelist": Array [
-            undefined,
-          ],
-          "ssl": Object {
-            "certificate": "certificate-value",
-            "verificationMode": "none",
-          },
-        }
-      `);
+      Object {
+        "healthCheckDelay": "PT0.01S",
+        "healthCheckRetry": 1,
+        "healthCheckStartupDelay": "PT0.01S",
+        "hosts": Array [
+          "http://8.8.8.8",
+        ],
+        "logQueries": true,
+        "requestHeadersWhitelist": Array [
+          undefined,
+        ],
+        "ssl": Object {
+          "certificate": "certificate-value",
+          "verificationMode": "none",
+        },
+      }
+    `);
     });
   });
 });
@@ -491,9 +488,7 @@ describe('#stop', () => {
     expect.assertions(3);
 
     const mockedClient = mockClusterClientInstance.asInternalUser;
-    mockedClient.nodes.info.mockImplementation(() =>
-      elasticsearchClientMock.createErrorTransportRequestPromise(new Error())
-    );
+    mockedClient.nodes.info.mockResolvedValue(nodesInfoResponse);
 
     const setupContract = await elasticsearchService.setup(setupDeps);
 
@@ -501,14 +496,116 @@ describe('#stop', () => {
       setupContract.esNodesCompatibility$.pipe(
         concatMap(async () => {
           expect(mockedClient.nodes.info).toHaveBeenCalledTimes(1);
-          tick();
+          await jest.advanceTimersByTimeAsync(0);
+          await jest.advanceTimersByTimeAsync(TICK);
           expect(mockedClient.nodes.info).toHaveBeenCalledTimes(2);
 
           await elasticsearchService.stop();
-          tick(10);
+          await jest.advanceTimersByTimeAsync(TICK * 10);
           expect(mockedClient.nodes.info).toHaveBeenCalledTimes(2);
         })
       )
     );
+  });
+});
+
+describe('clock skew check', () => {
+  it('runs on traditional deployments', async () => {
+    await elasticsearchService.setup(setupDeps);
+
+    expect(pollEsNodesClockSkew).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not run on serverless', async () => {
+    const serverlessService = new ElasticsearchService({
+      ...coreContext,
+      env: Env.createDefault(REPO_ROOT, getEnvOptions({ cliArgs: { serverless: true } })),
+    });
+    await serverlessService.setup(setupDeps);
+
+    expect(pollEsNodesClockSkew).not.toHaveBeenCalled();
+    await serverlessService.stop();
+  });
+});
+
+describe('CPS onRequestHandlerFactory', () => {
+  it('passes onRequestHandlerFactory to ClusterClient in non-serverless mode', async () => {
+    await elasticsearchService.setup(setupDeps);
+
+    expect(MockClusterClient).toHaveBeenCalledWith(
+      expect.objectContaining({ onRequestHandlerFactory: expect.any(Function) })
+    );
+  });
+
+  it('passes onRequestHandlerFactory to ClusterClient in serverless mode when CPS is enabled', async () => {
+    configService.atPath.mockImplementation((path) => {
+      if (path === 'elasticsearch') return mockConfig$;
+      if (path === 'cps') return new BehaviorSubject({ cpsEnabled: true });
+      return new BehaviorSubject({});
+    });
+    const serverlessEnv = Env.createDefault(
+      REPO_ROOT,
+      getEnvOptions({ cliArgs: { serverless: true } })
+    );
+    const serverlessService = new ElasticsearchService({
+      coreId: Symbol(),
+      env: serverlessEnv,
+      logger: loggingSystemMock.create(),
+      configService: configService as any,
+    });
+    await serverlessService.setup(setupDeps);
+
+    expect(MockClusterClient).toHaveBeenCalledWith(
+      expect.objectContaining({ onRequestHandlerFactory: expect.any(Function) })
+    );
+    await serverlessService.stop();
+  });
+
+  it('passes onRequestHandlerFactory to ClusterClient in serverless mode when CPS is disabled', async () => {
+    configService.atPath.mockImplementation((path) => {
+      if (path === 'elasticsearch') return mockConfig$;
+      if (path === 'cps') return new BehaviorSubject({ cpsEnabled: false });
+      return new BehaviorSubject({});
+    });
+    const serverlessEnv = Env.createDefault(
+      REPO_ROOT,
+      getEnvOptions({ cliArgs: { serverless: true } })
+    );
+    const serverlessService = new ElasticsearchService({
+      coreId: Symbol(),
+      env: serverlessEnv,
+      logger: loggingSystemMock.create(),
+      configService: configService as any,
+    });
+    await serverlessService.setup(setupDeps);
+
+    expect(MockClusterClient).toHaveBeenCalledWith(
+      expect.objectContaining({ onRequestHandlerFactory: expect.any(Function) })
+    );
+    await serverlessService.stop();
+  });
+
+  it('treats cpsEnabled as false when atPath("cps") observable errors', async () => {
+    configService.atPath.mockImplementation((path) => {
+      if (path === 'elasticsearch') return mockConfig$;
+      if (path === 'cps') return throwError(() => new Error('cps config unavailable'));
+      return new BehaviorSubject({});
+    });
+    const serverlessEnv = Env.createDefault(
+      REPO_ROOT,
+      getEnvOptions({ cliArgs: { serverless: true } })
+    );
+    const serverlessService = new ElasticsearchService({
+      coreId: Symbol(),
+      env: serverlessEnv,
+      logger: loggingSystemMock.create(),
+      configService: configService as any,
+    });
+    await serverlessService.setup(setupDeps);
+
+    expect(MockClusterClient).toHaveBeenCalledWith(
+      expect.objectContaining({ onRequestHandlerFactory: expect.any(Function) })
+    );
+    await serverlessService.stop();
   });
 });

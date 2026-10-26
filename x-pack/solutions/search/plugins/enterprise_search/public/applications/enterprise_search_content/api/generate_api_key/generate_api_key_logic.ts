@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { Actions, createApiLogic } from '../../../shared/api_logic/create_api_logic';
+import type { Actions } from '../../../shared/api_logic/create_api_logic';
+import { createApiLogic } from '../../../shared/api_logic/create_api_logic';
 import { HttpLogic } from '../../../shared/http';
 
 export interface APIKeyResponse {
@@ -23,7 +24,7 @@ export interface GenerateApiKeyApiArgs {
 }
 
 export const generateApiKey = async ({ indexName, keyName }: GenerateApiKeyApiArgs) => {
-  const route = `/internal/enterprise_search/${indexName}/api_keys`;
+  const route = `/internal/enterprise_search/${encodeURIComponent(indexName)}/api_keys`;
 
   return await HttpLogic.values.http.post<APIKeyResponse>(route, {
     body: JSON.stringify({

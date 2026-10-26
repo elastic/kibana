@@ -5,27 +5,20 @@
  * 2.0.
  */
 
-import { EuiTitle, useEuiTheme } from '@elastic/eui';
-import { css } from '@emotion/react';
+import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import React from 'react';
 
 import * as i18n from './translations';
 
-const PageTitleComponent: React.FC = () => {
-  const { euiTheme } = useEuiTheme();
-
-  return (
-    <EuiTitle
-      css={css`
-        margin-bottom: ${euiTheme.size.s};
-      `}
-      data-test-subj="attackDiscoveryPageTitle"
-      size="l"
-    >
-      <h1>{i18n.ATTACK_DISCOVERY_PAGE_TITLE}</h1>
-    </EuiTitle>
-  );
-};
+const PageTitleComponent: React.FC = () => (
+  <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false} wrap={true}>
+    <EuiFlexItem grow={false}>
+      <EuiTitle data-test-subj="attackDiscoveryPageTitle" size="l">
+        <h1>{i18n.ATTACK_DISCOVERY_PAGE_TITLE}</h1>
+      </EuiTitle>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+);
 
 PageTitleComponent.displayName = 'PageTitle';
 

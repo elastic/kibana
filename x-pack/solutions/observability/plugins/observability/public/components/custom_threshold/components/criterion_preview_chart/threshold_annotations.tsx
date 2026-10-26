@@ -8,7 +8,8 @@ import { AnnotationDomainType, LineAnnotation, RectAnnotation } from '@elastic/c
 import { first, last } from 'lodash';
 import React from 'react';
 import { COMPARATORS } from '@kbn/alerting-comparators';
-import { Color, colorTransformer } from '../../../../../common/custom_threshold_rule/color_palette';
+import type { Color } from '../../../../../common/custom_threshold_rule/color_palette';
+import { colorTransformer } from '../../../../../common/custom_threshold_rule/color_palette';
 
 interface ThresholdAnnotationsProps {
   threshold: number[];
@@ -55,7 +56,8 @@ export function ThresholdAnnotations({
           },
         }}
       />
-      {sortedThresholds.length === 2 && comparator === COMPARATORS.BETWEEN ? (
+      {sortedThresholds.length === 2 &&
+      (comparator === COMPARATORS.BETWEEN || comparator === COMPARATORS.BETWEEN_INCLUSIVE) ? (
         <>
           <RectAnnotation
             id={`${id}-lower-threshold`}
@@ -77,7 +79,9 @@ export function ThresholdAnnotations({
           />
         </>
       ) : null}
-      {sortedThresholds.length === 2 && comparator === COMPARATORS.NOT_BETWEEN ? (
+      {sortedThresholds.length === 2 &&
+      (comparator === COMPARATORS.NOT_BETWEEN ||
+        comparator === COMPARATORS.NOT_BETWEEN_INCLUSIVE) ? (
         <>
           <RectAnnotation
             id={`${id}-lower-threshold`}

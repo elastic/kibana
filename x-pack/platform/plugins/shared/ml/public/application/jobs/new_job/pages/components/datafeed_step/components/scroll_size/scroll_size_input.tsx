@@ -7,7 +7,7 @@
 
 import type { FC } from 'react';
 import React, { useState, useContext, useEffect } from 'react';
-import { EuiFieldNumber } from '@elastic/eui';
+import { EuiFieldNumber, useGeneratedHtmlId } from '@elastic/eui';
 import { getNewJobDefaults } from '../../../../../../../services/ml_server_info';
 import { JobCreatorContext } from '../../../job_creator_context';
 import { Description } from './description';
@@ -22,7 +22,9 @@ export const ScrollSizeInput: FC = () => {
 
   const { datafeeds } = getNewJobDefaults();
   const scrollSizeDefault = datafeeds.scroll_size !== undefined ? `${datafeeds.scroll_size}` : '';
-
+  const titleId = useGeneratedHtmlId({
+    prefix: 'scrollSizeInput',
+  });
   useEffect(() => {
     jobCreator.scrollSize = scrollSizeString === '' ? null : +scrollSizeString;
     jobCreatorUpdate();
@@ -40,7 +42,7 @@ export const ScrollSizeInput: FC = () => {
   }, [jobValidatorUpdated]);
 
   return (
-    <Description validation={validation}>
+    <Description validation={validation} titleId={titleId}>
       <EuiFieldNumber
         min={0}
         placeholder={scrollSizeDefault}
@@ -48,6 +50,7 @@ export const ScrollSizeInput: FC = () => {
         onChange={(e) => setScrollSize(e.target.value)}
         isInvalid={validation.valid === false}
         data-test-subj="mlJobWizardInputScrollSize"
+        aria-labelledby={titleId}
       />
     </Description>
   );

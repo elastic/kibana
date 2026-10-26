@@ -6,7 +6,7 @@
  */
 
 import { addBasePath } from './add_base_path';
-import { MonitorSummary } from '../../../../../common/runtime_types';
+import type { MonitorSummary } from '../../../../../common/runtime_types';
 
 export const getLegacyApmHref = (
   summary: MonitorSummary,
@@ -19,7 +19,9 @@ export const getLegacyApmHref = (
   if (serviceName) {
     return addBasePath(
       basePath,
-      `/app/apm/services/${serviceName}/overview/?rangeFrom=${dateRangeStart}&rangeTo=${dateRangeEnd}`
+      `/app/apm/services/${encodeURIComponent(
+        serviceName
+      )}/overview/?rangeFrom=${dateRangeStart}&rangeTo=${dateRangeEnd}`
     );
   }
 

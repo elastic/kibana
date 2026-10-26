@@ -82,6 +82,7 @@ export function CorrelationsTable<T extends FieldValuePair>({
 
   return (
     <EuiBasicTable
+      tableCaption={tableCaption}
       items={pageOfItems ?? []}
       noItemsMessage={status === FETCH_STATUS.LOADING ? loadingText : noDataText}
       loading={status === FETCH_STATUS.LOADING}
@@ -127,4 +128,8 @@ const noDataText = i18n.translate('xpack.apm.correlations.correlationsTable.noDa
 
 const errorMessage = i18n.translate('xpack.apm.correlations.correlationsTable.errorMessage', {
   defaultMessage: 'Failed to fetch',
+});
+
+const tableCaption = i18n.translate('xpack.apm.correlations.correlationsTable.tableCaption', {
+  defaultMessage: 'Correlations',
 });

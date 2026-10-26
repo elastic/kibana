@@ -5,14 +5,39 @@
  * 2.0.
  */
 
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import React from 'react';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { createExpandableFlyoutApiMock } from '../../../../../../common/mock/expandable_flyout';
 
 import { AttackDiscoveryTab } from '.';
 import type { Replacements } from '@kbn/elastic-assistant-common';
 import { TestProviders } from '../../../../../../common/mock';
+import { useAgentBuilderAvailability } from '../../../../../../agent_builder/hooks/use_agent_builder_availability';
 import { mockAttackDiscovery } from '../../../../mock/mock_attack_discovery';
+import { getMockAttackDiscoveryAlerts } from '../../../../mock/mock_attack_discovery_alerts';
 import { ATTACK_CHAIN, DETAILS, SUMMARY } from './translations';
+import { SECURITY_FEATURE_ID } from '../../../../../../../common';
+import { useKibana } from '../../../../../../common/lib/kibana';
+import { useFlyoutApi } from '../../../../../../flyout_v2/use_flyout_api';
+import { createFlyoutApiMock } from '../../../../../../flyout_v2/use_flyout_api.mock';
+
+jest.mock('../../../../../../common/lib/kibana');
+jest.mock('../../../../../../agent_builder/hooks/use_agent_builder_availability', () => ({
+  useAgentBuilderAvailability: jest.fn(),
+}));
+jest.mock('@kbn/expandable-flyout');
+jest.mock('../../../../../../flyout_v2/use_flyout_api');
+
+jest.mock(
+  '../../../attack_discovery_markdown_formatter/field_markdown_renderer/use_entity_euid_from_alerts',
+  () => ({
+    useEntityEuidFromAlerts: jest.fn(() => ({ euid: undefined, isLoading: false })),
+    ENTITY_TYPE_BY_FIELD: jest.requireActual(
+      '../../../attack_discovery_markdown_formatter/field_markdown_renderer/helpers'
+    ).ENTITY_TYPE_BY_FIELD,
+  })
+);
 
 describe('AttackDiscoveryTab', () => {
   const mockReplacements: Replacements = {
@@ -21,6 +46,26 @@ describe('AttackDiscoveryTab', () => {
     'c5ba13c4-2391-4045-962e-ec965fc1eb06': 'SRVWIN07',
     '2da30969-4127-4ddb-ba0c-2d8ac44d15d7': 'Administrator',
   };
+
+  const mockOpenRightPanel = jest.fn();
+  const mockUseExpandableFlyoutApi = useExpandableFlyoutApi as jest.MockedFunction<
+    typeof useExpandableFlyoutApi
+  >;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    jest
+      .mocked(useAgentBuilderAvailability)
+      .mockImplementation(
+        jest.requireActual('../../../../../../agent_builder/hooks/use_agent_builder_availability')
+          .useAgentBuilderAvailability
+      );
+    mockUseExpandableFlyoutApi.mockReturnValue({
+      ...createExpandableFlyoutApiMock(),
+      openRightPanel: mockOpenRightPanel,
+    });
+    jest.mocked(useFlyoutApi).mockReturnValue(createFlyoutApiMock());
+  });
 
   describe('when showAnonymized is false', () => {
     const showAnonymized = false;
@@ -44,6 +89,8 @@ describe('AttackDiscoveryTab', () => {
       expect(summaryMarkdown).toHaveTextContent(
         'A multi-stage malware attack was detected on foo.hostname involving bar.username. A suspicious application delivered malware, attempted credential theft, and established persistence.'
       );
+      expect(screen.getAllByTestId('entityButton')[0]).toHaveTextContent('foo.hostname');
+      expect(screen.getAllByTestId('entityButton')[1]).toHaveTextContent('bar.username');
     });
 
     it('renders the details using the real host and username', () => {
@@ -53,6 +100,14 @@ describe('AttackDiscoveryTab', () => {
       expect(detailsMarkdown).toHaveTextContent(
         `The following attack progression appears to have occurred on the host foo.hostname involving the user bar.username: A suspicious application named "My Go Application.app" was launched, likely through a malicious download or installation. This application spawned child processes to copy a malicious file named "unix1" to the user's home directory and make it executable. The malicious "unix1" file was then executed, attempting to access the user's login keychain and potentially exfiltrate credentials. The suspicious application also launched the "osascript" utility to display a fake system dialog prompting the user for their password, a technique known as credentials phishing. This appears to be a multi-stage attack involving malware delivery, privilege escalation, credential access, and potentially data exfiltration. The attacker may have used social engineering techniques like phishing to initially compromise the system. The suspicious "My Go Application.app" exhibits behavior characteristic of malware families that attempt to steal user credentials and maintain persistence. Mitigations should focus on removing the malicious files, resetting credentials, and enhancing security controls around application whitelisting, user training, and data protection.`
       );
+      expect(screen.getAllByTestId('entityButton')[0]).toHaveTextContent('foo.hostname');
+      expect(screen.getAllByTestId('entityButton')[1]).toHaveTextContent('bar.username');
+    });
+
+    it('opens the right panel when an entity badge is clicked', () => {
+      const entityButton = screen.getAllByTestId('entityButton')[0];
+      fireEvent.click(entityButton);
+      expect(mockOpenRightPanel).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -192,5 +247,100 @@ The user Administrator opened a malicious Microsoft Word document (C:\\Program F
         expect(content).toHaveStyle('overflow-x: auto');
       }
     );
+  });
+
+  describe('when configurations capabilities is defined (for EASE)', () => {
+    beforeEach(() => {
+      (useKibana as jest.Mock).mockReturnValue({
+        services: {
+          data: {
+            search: {
+              search: jest.fn().mockReturnValue({ toPromise: jest.fn().mockResolvedValue({}) }),
+            },
+          },
+          uiSettings: {
+            get: jest.fn().mockReturnValue(false),
+          },
+          application: {
+            capabilities: {
+              [SECURITY_FEATURE_ID]: {
+                configurations: true,
+              },
+            },
+          },
+        },
+      });
+
+      render(
+        <TestProviders>
+          <AttackDiscoveryTab
+            attackDiscovery={mockAttackDiscovery}
+            replacements={mockReplacements}
+          />
+        </TestProviders>
+      );
+    });
+
+    it('renders the summary with disabled badges using the host and username', () => {
+      const markdownFormatters = screen.getAllByTestId('attackDiscoveryMarkdownFormatter');
+      const summaryMarkdown = markdownFormatters[0];
+
+      expect(summaryMarkdown).toHaveTextContent(
+        'A multi-stage malware attack was detected on foo.hostname involving bar.username. A suspicious application delivered malware, attempted credential theft, and established persistence.'
+      );
+      expect(screen.getAllByTestId('disabledActionsBadge')[0]).toHaveTextContent('foo.hostname');
+      expect(screen.getAllByTestId('disabledActionsBadge')[1]).toHaveTextContent('bar.username');
+    });
+
+    it('renders the details with disabled badgesusing the host and username', () => {
+      const markdownFormatters = screen.getAllByTestId('attackDiscoveryMarkdownFormatter');
+      const detailsMarkdown = markdownFormatters[1];
+
+      expect(detailsMarkdown).toHaveTextContent(
+        `The following attack progression appears to have occurred on the host foo.hostname involving the user bar.username: A suspicious application named "My Go Application.app" was launched, likely through a malicious download or installation. This application spawned child processes to copy a malicious file named "unix1" to the user's home directory and make it executable. The malicious "unix1" file was then executed, attempting to access the user's login keychain and potentially exfiltrate credentials. The suspicious application also launched the "osascript" utility to display a fake system dialog prompting the user for their password, a technique known as credentials phishing. This appears to be a multi-stage attack involving malware delivery, privilege escalation, credential access, and potentially data exfiltration. The attacker may have used social engineering techniques like phishing to initially compromise the system. The suspicious "My Go Application.app" exhibits behavior characteristic of malware families that attempt to steal user credentials and maintain persistence. Mitigations should focus on removing the malicious files, resetting credentials, and enhancing security controls around application whitelisting, user training, and data protection.`
+      );
+      expect(screen.getAllByTestId('disabledActionsBadge')[0]).toHaveTextContent('foo.hostname');
+      expect(screen.getAllByTestId('disabledActionsBadge')[1]).toHaveTextContent('bar.username');
+    });
+  });
+
+  describe('Add to chat', () => {
+    beforeEach(() => {
+      jest.mocked(useAgentBuilderAvailability).mockReturnValue({
+        hasAgentBuilderPrivilege: true,
+        hasValidAgentBuilderLicense: true,
+        isAgentBuilderEnabled: true,
+        isAgentChatExperienceEnabled: true,
+      });
+    });
+
+    it('renders Add to chat for a persisted discovery', () => {
+      const [persistedAttackDiscovery] = getMockAttackDiscoveryAlerts();
+
+      render(
+        <TestProviders>
+          <AttackDiscoveryTab
+            attackDiscovery={persistedAttackDiscovery}
+            replacements={mockReplacements}
+          />
+        </TestProviders>
+      );
+
+      expect(screen.getByTestId('newAgentBuilderAttachment')).toBeInTheDocument();
+    });
+
+    // Only a persisted discovery can be attached, so a no-op action is not offered.
+    it('does not render Add to chat for a discovery that is not persisted', () => {
+      render(
+        <TestProviders>
+          <AttackDiscoveryTab
+            attackDiscovery={mockAttackDiscovery}
+            replacements={mockReplacements}
+          />
+        </TestProviders>
+      );
+
+      expect(screen.queryByTestId('newAgentBuilderAttachment')).not.toBeInTheDocument();
+    });
   });
 });

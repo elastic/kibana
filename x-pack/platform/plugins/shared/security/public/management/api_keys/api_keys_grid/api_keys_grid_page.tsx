@@ -5,14 +5,17 @@
  * 2.0.
  */
 
+import type { estypes } from '@elastic/elasticsearch';
 import type { Criteria, EuiSearchBarOnChangeArgs, Query } from '@elastic/eui';
 import { EuiButton, EuiCallOut, EuiSearchBar, EuiSpacer } from '@elastic/eui';
 import type { FunctionComponent } from 'react';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
 
+import { AppHeader, type AppHeaderMenu } from '@kbn/app-header';
 import type { CoreStart } from '@kbn/core/public';
+import type { ICPSManager } from '@kbn/cps-utils';
 import { SectionLoading } from '@kbn/es-ui-shared-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -27,8 +30,9 @@ import type { CategorizedApiKey } from '@kbn/security-plugin-types-common';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { Route } from '@kbn/shared-ux-router';
 
+import { ApiKeysCpsCallout } from './api_keys_cps_callout';
 import { ApiKeysEmptyPrompt } from './api_keys_empty_prompt';
-import { ApiKeysTable, MAX_PAGINATED_ITEMS } from './api_keys_table';
+import { ApiKeysTable, categorizeAggregations } from './api_keys_table';
 import type { QueryFilters } from './api_keys_table';
 import { InvalidateProvider } from './invalidate_provider';
 import { Breadcrumb } from '../../../components/breadcrumb';
@@ -37,24 +41,50 @@ import { useAuthentication } from '../../../components/use_current_user';
 
 interface ApiKeysTableState {
   query: Query;
-  from: number;
   size: number;
   sort: QueryApiKeySortOptions;
   filters: QueryFilters;
+  searchAfter?: estypes.SortResults;
 }
 
-const DEFAULT_TABLE_STATE = {
+type KueryNode = any;
+
+const DEFAULT_TABLE_STATE: ApiKeysTableState = {
   query: EuiSearchBar.Query.MATCH_ALL,
   sort: {
     field: 'creation' as const,
     direction: 'desc' as const,
   },
-  from: 0,
   size: 25,
-  filters: {},
+  filters: {
+    type: 'rest' as const,
+  },
+  searchAfter: undefined,
 };
 
-export const APIKeysGridPage: FunctionComponent = () => {
+const PLUS_SIGN_REGEX = /[+]/g;
+
+const createApiKeyButtonLabel = i18n.translate(
+  'xpack.security.management.apiKeys.table.createButton',
+  { defaultMessage: 'Create API key' }
+);
+
+const apiKeysTitle = i18n.translate('xpack.security.management.apiKeys.table.apiKeysTitle', {
+  defaultMessage: 'API keys',
+});
+
+const apiKeysDescription = i18n.translate(
+  'xpack.security.management.apiKeys.table.apiKeysAllDescription',
+  {
+    defaultMessage: 'Allow external services to access the Elastic Stack on behalf of a user.',
+  }
+);
+
+export interface APIKeysGridPageProps {
+  cpsManager?: ICPSManager;
+}
+
+export const APIKeysGridPage: FunctionComponent<APIKeysGridPageProps> = ({ cpsManager }) => {
   const { services } = useKibana<CoreStart>();
   const history = useHistory();
   const authc = useAuthentication();
@@ -64,9 +94,47 @@ export const APIKeysGridPage: FunctionComponent = () => {
   const readOnly = !useCapabilities('api_keys').save;
 
   const [tableState, setTableState] = useState<ApiKeysTableState>(DEFAULT_TABLE_STATE);
+  const [searchAfterHistory, setSearchAfterHistory] = useState<
+    Array<estypes.SortResults | undefined>
+  >([]);
 
   const [state, queryApiKeysAndAggregations] = useAsyncFn((tableStateArgs: ApiKeysTableState) => {
     const queryContainer = EuiSearchBar.Query.toESQuery(tableStateArgs.query);
+
+    // Enhance the query to support partial matches for name and owner field
+    if (queryContainer.bool?.must) {
+      queryContainer.bool.must = queryContainer.bool.must.map((clause: KueryNode) => {
+        if (clause.simple_query_string) {
+          // Add wildcard to support partial matches
+          const rawQuery = String(clause.simple_query_string.query ?? '');
+          const wildCardQuery = rawQuery.replace(PLUS_SIGN_REGEX, '');
+          return {
+            bool: {
+              should: [
+                clause,
+                {
+                  wildcard: {
+                    name: {
+                      value: `*${wildCardQuery}*`,
+                      case_insensitive: true,
+                    },
+                  },
+                },
+                {
+                  wildcard: {
+                    username: {
+                      value: `*${wildCardQuery}*`,
+                      case_insensitive: true,
+                    },
+                  },
+                },
+              ],
+            },
+          };
+        }
+        return clause;
+      });
+    }
 
     const requestBody = {
       ...tableStateArgs,
@@ -81,27 +149,58 @@ export const APIKeysGridPage: FunctionComponent = () => {
 
   const resetQueryOnError = () => {
     setTableState(DEFAULT_TABLE_STATE);
+    setSearchAfterHistory([]);
     queryApiKeysAndAggregations(DEFAULT_TABLE_STATE);
   };
 
-  const onTableChange = ({ page, sort }: Criteria<CategorizedApiKey>) => {
+  const onTableChange = ({ sort }: Criteria<CategorizedApiKey>) => {
+    // When sort changes, reset pagination cursors
+    if (
+      sort &&
+      (sort.field !== tableState.sort.field || sort.direction !== tableState.sort.direction)
+    ) {
+      const newState = {
+        ...tableState,
+        sort,
+        searchAfter: undefined,
+      };
+      setTableState(newState);
+      setSearchAfterHistory([]);
+      queryApiKeysAndAggregations(newState);
+    }
+  };
+
+  const onNextPage = (nextSearchAfter: estypes.SortResults) => {
+    setSearchAfterHistory((prev) => [...prev, tableState.searchAfter]);
     const newState = {
       ...tableState,
-      from: page?.index! * page?.size!,
-      size: page?.size!,
-      sort: sort ?? tableState.sort,
+      searchAfter: nextSearchAfter,
+    };
+    setTableState(newState);
+    queryApiKeysAndAggregations(newState);
+  };
+
+  const onPreviousPage = () => {
+    const newHistory = [...searchAfterHistory];
+    const previousCursor = newHistory.pop();
+    setSearchAfterHistory(newHistory);
+    const newState = {
+      ...tableState,
+      searchAfter: previousCursor,
     };
     setTableState(newState);
     queryApiKeysAndAggregations(newState);
   };
 
   const onSearchChange = (args: EuiSearchBarOnChangeArgs) => {
-    if (!args.error) {
+    if (!args.error && args.query) {
       const newState = {
         ...tableState,
         query: args.query,
+        searchAfter: undefined, // Reset pagination when query changes
       };
       setTableState(newState);
+      setSearchAfterHistory([]);
       queryApiKeysAndAggregations(newState);
     }
   };
@@ -113,8 +212,10 @@ export const APIKeysGridPage: FunctionComponent = () => {
         ...tableState.filters,
         ...filters,
       },
+      searchAfter: undefined, // Reset pagination when filters change
     };
     setTableState(newState);
+    setSearchAfterHistory([]);
     queryApiKeysAndAggregations(newState);
   };
 
@@ -122,19 +223,96 @@ export const APIKeysGridPage: FunctionComponent = () => {
     queryApiKeysAndAggregations(DEFAULT_TABLE_STATE);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  if (!state.value) {
-    if (state.loading) {
-      return (
-        <SectionLoading>
-          <FormattedMessage
-            id="xpack.security.management.apiKeys.table.loadingApiKeysDescription"
-            defaultMessage="Loading API keys…"
-          />
-        </SectionLoading>
-      );
+  // The table defaults to the personal (`rest`) view. If the user has no personal keys but does have
+  // keys of other types (e.g. only cross-cluster keys), the default view would be empty. In that
+  // case, switch once to the first available type so the user's keys are visible on load.
+  const hasAutoSelectedTypeRef = useRef(false);
+  useEffect(() => {
+    if (hasAutoSelectedTypeRef.current || !state.value) {
+      return;
     }
 
-    return (
+    const [result] = state.value;
+    const queryFailed = 'queryError' in result && result.queryError;
+    const loadedApiKeys = 'apiKeys' in result ? result.apiKeys : undefined;
+
+    if (queryFailed || tableState.filters.type !== 'rest' || loadedApiKeys?.length) {
+      return;
+    }
+
+    const { typeFilters } = categorizeAggregations(result.aggregations);
+    if (typeFilters.length === 0 || typeFilters.includes('rest')) {
+      return;
+    }
+
+    hasAutoSelectedTypeRef.current = true;
+    const nextType = typeFilters.includes('cross_cluster') ? 'cross_cluster' : typeFilters[0];
+    onFilterChange({ type: nextType });
+  }, [state.value]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const loaded = state.value;
+  const queryResult = loaded?.[0];
+
+  const aggregations = queryResult?.aggregations;
+  const canManageApiKeys = queryResult?.canManageApiKeys ?? false;
+  const canManageOwnApiKeys = queryResult?.canManageOwnApiKeys ?? false;
+  const canManageCrossClusterApiKeys = queryResult?.canManageCrossClusterApiKeys ?? false;
+  const totalKeys = queryResult?.aggregationTotal ?? 0;
+
+  // Check if the query result is an error or success
+  // Using 'in' operator for type-safe property access
+  const hasQueryError = Boolean(
+    queryResult && 'queryError' in queryResult && queryResult.queryError
+  );
+  const queryError = hasQueryError ? queryResult?.queryError : undefined;
+
+  // Extract success-only properties when there's no query error
+  // Cast to access properties that only exist on success result
+  const successResult =
+    queryResult && !hasQueryError
+      ? (queryResult as {
+          apiKeys: CategorizedApiKey[];
+          total: number;
+          searchAfter?: estypes.SortResults;
+        })
+      : undefined;
+
+  const apiKeys = successResult?.apiKeys ?? [];
+  const filteredItemTotal = successResult?.total ?? 0;
+  const responseSearchAfter = successResult?.searchAfter;
+
+  // Determine if there's a next page:
+  // - We have a searchAfter cursor (for pagination)
+  // - AND the current page returned the full page size (indicating there might be more)
+  const hasMoreResults = apiKeys.length === tableState.size && !!responseSearchAfter;
+
+  const categorizedApiKeys = apiKeys;
+
+  const createApiKeyNavigate = reactRouterNavigate(history, '/create');
+  const showCreateInHeader = Boolean(loaded) && totalKeys > 0 && !readOnly;
+  const menu: AppHeaderMenu | undefined = showCreateInHeader
+    ? {
+        primaryActionItem: {
+          id: 'createApiKey',
+          label: createApiKeyButtonLabel,
+          iconType: 'plusCircle',
+          testId: 'apiKeysCreateTableButton',
+          href: createApiKeyNavigate.href,
+          run: () => history.push('/create'),
+        },
+      }
+    : undefined;
+
+  let body: React.ReactNode;
+  if (!loaded) {
+    body = state.loading ? (
+      <SectionLoading inline data-test-subj="sectionLoading">
+        <FormattedMessage
+          id="xpack.security.management.apiKeys.table.loadingApiKeysDescription"
+          defaultMessage="Loading API keys…"
+        />
+      </SectionLoading>
+    ) : (
       <ApiKeysEmptyPrompt error={state.error}>
         <EuiButton iconType="refresh" onClick={() => queryApiKeysAndAggregations(tableState)}>
           <FormattedMessage
@@ -144,34 +322,91 @@ export const APIKeysGridPage: FunctionComponent = () => {
         </EuiButton>
       </ApiKeysEmptyPrompt>
     );
+  } else if (totalKeys === 0) {
+    body = (
+      <>
+        <ApiKeysCpsCallout cpsManager={cpsManager} />
+        <ApiKeysEmptyPrompt readOnly={readOnly}>
+          <EuiButton
+            {...reactRouterNavigate(history, '/create')}
+            fill
+            iconType="plusCircle"
+            data-test-subj="apiKeysCreatePromptButton"
+          >
+            {createApiKeyButtonLabel}
+          </EuiButton>
+        </ApiKeysEmptyPrompt>
+      </>
+    );
+  } else {
+    body = (
+      <KibanaPageTemplate.Section paddingSize="none">
+        <ApiKeysCpsCallout cpsManager={cpsManager} />
+
+        {createdApiKey && (
+          <>
+            <ApiKeyCreatedCallout createdApiKey={createdApiKey} />
+            <EuiSpacer />
+          </>
+        )}
+
+        {canManageOwnApiKeys && !canManageApiKeys ? (
+          <>
+            <EuiCallOut
+              announceOnMount
+              title={
+                <FormattedMessage
+                  id="xpack.security.management.apiKeys.table.manageOwnKeysWarning"
+                  defaultMessage="You only have permission to manage your own API keys."
+                />
+              }
+            />
+            <EuiSpacer />
+          </>
+        ) : undefined}
+
+        <InvalidateProvider
+          isAdmin={canManageApiKeys}
+          notifications={services.notifications}
+          apiKeysAPIClient={new APIKeysAPIClient(services.http)}
+        >
+          {(invalidateApiKeyPrompt) => (
+            <ApiKeysTable
+              apiKeys={categorizedApiKeys}
+              onClick={(apiKey) => setOpenedApiKey(apiKey)}
+              query={tableState.query}
+              queryFilters={tableState.filters}
+              onDelete={(apiKeysToDelete) =>
+                invalidateApiKeyPrompt(apiKeysToDelete, () =>
+                  queryApiKeysAndAggregations(tableState)
+                )
+              }
+              currentUser={loaded[1]}
+              createdApiKey={createdApiKey}
+              canManageCrossClusterApiKeys={canManageCrossClusterApiKeys}
+              canManageApiKeys={canManageApiKeys}
+              canManageOwnApiKeys={canManageOwnApiKeys}
+              readOnly={readOnly}
+              loading={state.loading}
+              totalItemCount={filteredItemTotal}
+              onTableChange={onTableChange}
+              onSearchChange={onSearchChange}
+              onFilterChange={onFilterChange}
+              aggregations={aggregations}
+              sortingOptions={tableState.sort}
+              queryErrors={queryError}
+              resetQuery={resetQueryOnError}
+              hasNextPage={hasMoreResults}
+              hasPreviousPage={searchAfterHistory.length > 0}
+              onNextPage={() => responseSearchAfter && onNextPage(responseSearchAfter)}
+              onPreviousPage={onPreviousPage}
+              onRefresh={() => queryApiKeysAndAggregations(tableState)}
+            />
+          )}
+        </InvalidateProvider>
+      </KibanaPageTemplate.Section>
+    );
   }
-
-  const [
-    {
-      aggregations,
-      canManageApiKeys,
-      apiKeys,
-      canManageOwnApiKeys,
-      canManageCrossClusterApiKeys,
-      aggregationTotal: totalKeys,
-      total: filteredItemTotal,
-      queryError,
-    },
-    currentUser,
-  ] = state.value;
-
-  const categorizedApiKeys = !queryError
-    ? apiKeys.map((apiKey) => apiKey as CategorizedApiKey)
-    : [];
-
-  const displayedItemCount = Math.min(filteredItemTotal, totalKeys, MAX_PAGINATED_ITEMS);
-
-  const pagination = {
-    pageIndex: tableState.from / tableState.size,
-    pageSize: tableState.size,
-    totalItemCount: displayedItemCount,
-    pageSizeOptions: [25, 50, 100],
-  };
 
   return (
     <>
@@ -183,15 +418,24 @@ export const APIKeysGridPage: FunctionComponent = () => {
           href="/create"
         >
           <ApiKeyFlyout
-            onSuccess={(createApiKeyResponse) => {
+            onSuccess={(createApiKeyResponse, type) => {
               history.push({ pathname: '/' });
               setCreatedApiKey(createApiKeyResponse);
-              queryApiKeysAndAggregations(tableState);
+              // Switch the table to the view matching the created key's type (and reset pagination)
+              // so the newly created key is immediately visible, regardless of the active filter.
+              const nextState = {
+                ...tableState,
+                filters: { ...tableState.filters, type: type as QueryFilters['type'] },
+                searchAfter: undefined,
+              };
+              setTableState(nextState);
+              setSearchAfterHistory([]);
+              queryApiKeysAndAggregations(nextState);
             }}
             onCancel={() => history.push({ pathname: '/' })}
             canManageCrossClusterApiKeys={canManageCrossClusterApiKeys}
-            currentUser={currentUser}
-            isLoadingCurrentUser={state.loading}
+            currentUser={loaded?.[1]}
+            isLoadingCurrentUser={!loaded || state.loading}
             readOnly={readOnly}
           />
         </Breadcrumb>
@@ -209,127 +453,28 @@ export const APIKeysGridPage: FunctionComponent = () => {
             });
 
             setOpenedApiKey(undefined);
-            queryApiKeysAndAggregations(DEFAULT_TABLE_STATE);
+            // Re-query using the current table state so the user's active filter (e.g.
+            // cross-cluster) is preserved after an update, instead of resetting to the default view.
+            queryApiKeysAndAggregations(tableState);
           }}
           onCancel={() => setOpenedApiKey(undefined)}
           apiKey={openedApiKey}
           readOnly={readOnly}
           canManageCrossClusterApiKeys={canManageCrossClusterApiKeys}
-          currentUser={currentUser}
-          isLoadingCurrentUser={state.loading}
+          currentUser={loaded?.[1]}
+          isLoadingCurrentUser={!loaded || state.loading}
         />
       )}
-      {totalKeys === 0 ? (
-        <ApiKeysEmptyPrompt readOnly={readOnly}>
-          <EuiButton
-            {...reactRouterNavigate(history, '/create')}
-            fill
-            iconType="plusInCircleFilled"
-            data-test-subj="apiKeysCreatePromptButton"
-          >
-            <FormattedMessage
-              id="xpack.security.management.apiKeys.table.createButton"
-              defaultMessage="Create API key"
-            />
-          </EuiButton>
-        </ApiKeysEmptyPrompt>
-      ) : (
-        <>
-          <KibanaPageTemplate.Header
-            pageTitle={
-              <FormattedMessage
-                id="xpack.security.management.apiKeys.table.apiKeysTitle"
-                defaultMessage="API keys"
-              />
-            }
-            description={
-              <FormattedMessage
-                id="xpack.security.management.apiKeys.table.apiKeysAllDescription"
-                defaultMessage="Allow external services to access the Elastic Stack on behalf of a user."
-              />
-            }
-            rightSideItems={
-              !readOnly
-                ? [
-                    <EuiButton
-                      {...reactRouterNavigate(history, '/create')}
-                      fill
-                      iconType="plusInCircleFilled"
-                      data-test-subj="apiKeysCreateTableButton"
-                    >
-                      <FormattedMessage
-                        id="xpack.security.management.apiKeys.table.createButton"
-                        defaultMessage="Create API key"
-                      />
-                    </EuiButton>,
-                  ]
-                : undefined
-            }
-            paddingSize="none"
-            bottomBorder
-          />
-          <EuiSpacer />
-          <KibanaPageTemplate.Section paddingSize="none">
-            {createdApiKey && (
-              <>
-                <ApiKeyCreatedCallout createdApiKey={createdApiKey} />
-                <EuiSpacer />
-              </>
-            )}
 
-            {canManageOwnApiKeys && !canManageApiKeys ? (
-              <>
-                <EuiCallOut
-                  title={
-                    <FormattedMessage
-                      id="xpack.security.management.apiKeys.table.manageOwnKeysWarning"
-                      defaultMessage="You only have permission to manage your own API keys."
-                    />
-                  }
-                />
-                <EuiSpacer />
-              </>
-            ) : undefined}
-
-            <InvalidateProvider
-              isAdmin={canManageApiKeys}
-              notifications={services.notifications}
-              apiKeysAPIClient={new APIKeysAPIClient(services.http)}
-            >
-              {(invalidateApiKeyPrompt) => (
-                <ApiKeysTable
-                  apiKeys={categorizedApiKeys}
-                  onClick={(apiKey) => setOpenedApiKey(apiKey)}
-                  query={tableState.query}
-                  queryFilters={tableState.filters}
-                  onDelete={(apiKeysToDelete) =>
-                    invalidateApiKeyPrompt(
-                      apiKeysToDelete.map(({ name, id }) => ({ name, id })),
-                      () => queryApiKeysAndAggregations(tableState)
-                    )
-                  }
-                  currentUser={currentUser}
-                  createdApiKey={createdApiKey}
-                  canManageCrossClusterApiKeys={canManageCrossClusterApiKeys}
-                  canManageApiKeys={canManageApiKeys}
-                  canManageOwnApiKeys={canManageOwnApiKeys}
-                  readOnly={readOnly}
-                  loading={state.loading}
-                  totalItemCount={filteredItemTotal}
-                  pagination={pagination}
-                  onTableChange={onTableChange}
-                  onSearchChange={onSearchChange}
-                  onFilterChange={onFilterChange}
-                  aggregations={aggregations}
-                  sortingOptions={tableState.sort}
-                  queryErrors={queryError}
-                  resetQuery={resetQueryOnError}
-                />
-              )}
-            </InvalidateProvider>
-          </KibanaPageTemplate.Section>
-        </>
-      )}
+      <AppHeader
+        title={apiKeysTitle}
+        description={apiKeysDescription}
+        menu={menu}
+        docLink={services.docLinks.links.management.apiKeys}
+        spacing="bleed"
+      />
+      <EuiSpacer size="l" />
+      {body}
     </>
   );
 };

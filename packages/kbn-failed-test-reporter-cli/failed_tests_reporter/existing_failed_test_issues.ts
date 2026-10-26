@@ -9,12 +9,11 @@
 
 import { setTimeout } from 'timers/promises';
 
-import Axios from 'axios';
-import { isAxiosRequestError, isAxiosResponseError } from '@kbn/dev-utils';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 
-import { GithubIssueMini } from './github_api';
-import { TestFailure } from './get_failures';
+import { getScoutTestId, getTestFilePath, isScoutFailure } from './failure_identity';
+import type { TestFailure } from './get_failures';
+import type { GithubIssueMini } from './github_api';
 
 export interface FailedTestIssue {
   classname: string;
@@ -27,9 +26,107 @@ export interface FailedTestIssue {
   };
 }
 
+/**
+ * A flaky suite issue filed by `report_flaky_test_issues`, as ci-stats indexes it: about a test
+ * file, or one `describe` block of it, rather than about one test.
+ */
+export interface FlakySuiteIssue {
+  kind: 'suite';
+  suite: {
+    filePath: string;
+    /** the `describe` block, absent when the issue is about the whole file */
+    title?: string;
+    framework?: string;
+    /** Scout test ids of the tests that were flaky when the issue was filed or last updated */
+    testIds: string[];
+  };
+  github: {
+    nodeId: string;
+    number: number;
+    htmlUrl: string;
+    state: 'open' | 'closed';
+    /** as of the last issue event ci-stats saw; the fail count the job keeps is read from it */
+    body: string;
+  };
+}
+
 interface FindFailedTestIssuesResponse {
   existingIssues: FailedTestIssue[];
+  /** missing from ci-stats versions that predate suite issues */
+  suiteIssues?: FlakySuiteIssue[];
 }
+
+/**
+ * How a failure identifies its test to ci-stats: per-test issues are matched on `classname` and
+ * `name`, suite issues on `filePath` and `testId`.
+ */
+interface FailureIdentity {
+  classname: string;
+  name: string;
+  filePath?: string;
+  testId?: string;
+}
+
+const getFailureIdentity = (failure: TestFailure): FailureIdentity => ({
+  classname: failure.classname,
+  name: failure.name,
+  filePath: getTestFilePath(failure),
+  testId: getScoutTestId(failure),
+});
+
+/** The two fields ci-stats versions that predate suite issues accept */
+const getLegacyFailureIdentity = ({ classname, name }: TestFailure): FailureIdentity => ({
+  classname,
+  name,
+});
+
+const getFramework = (failure: TestFailure): string | undefined =>
+  isScoutFailure(failure) ? 'playwright' : failure.testType;
+
+/**
+ * Whether two failures are of the same test. Scout failures compare by test id, which a test keeps
+ * across targets while tests that share a title in other suites do not; the rest by classname and
+ * name.
+ */
+const isSameTest = (a: TestFailure, b: TestFailure): boolean => {
+  if (isScoutFailure(a) && isScoutFailure(b)) {
+    return a.id === b.id;
+  }
+  if (isScoutFailure(a) || isScoutFailure(b)) {
+    return false;
+  }
+  return a.classname === b.classname && a.name === b.name;
+};
+
+/**
+ * Whether the failure is inside the `describe` block a suite issue is about. Suite titles join
+ * every `describe` title; a JUnit name starts with them, a Scout failure only knows the innermost.
+ */
+const isInDescribe = (failure: TestFailure, title: string): boolean =>
+  isScoutFailure(failure)
+    ? title === failure.classname || title.endsWith(` ${failure.classname}`)
+    : failure.name === title || failure.name.startsWith(`${title} `);
+
+const isAboutFailure = (issue: FlakySuiteIssue, failure: TestFailure): boolean => {
+  const { suite } = issue;
+  const framework = getFramework(failure);
+  if (framework && suite.framework && framework !== suite.framework) {
+    return false;
+  }
+
+  const testId = getScoutTestId(failure);
+  if (testId && suite.testIds.includes(testId)) {
+    return true;
+  }
+
+  // a test that became flaky after the issue was filed is only known by its file and describe block
+  const filePath = getTestFilePath(failure);
+  return (
+    filePath !== undefined &&
+    suite.filePath === filePath &&
+    (suite.title === undefined || isInDescribe(failure, suite.title))
+  );
+};
 
 export interface ExistingFailedTestIssue extends FailedTestIssue {
   github: FailedTestIssue['github'] & {
@@ -48,6 +145,10 @@ const BASE_URL = 'https://ci-stats.kibana.dev';
  */
 export class ExistingFailedTestIssues {
   private readonly results = new Map<TestFailure, ExistingFailedTestIssue | undefined>();
+  /** by issue number, newest first */
+  private suiteIssues: FlakySuiteIssue[] = [];
+  /** false once ci-stats turned out to predate suite issues and reject their request fields */
+  private askForSuiteIssues = true;
 
   constructor(private readonly log: ToolingLog) {}
 
@@ -65,8 +166,17 @@ export class ExistingFailedTestIssues {
     }
 
     this.log.debug('finding', unseenFailures.length, 'existing issues via ci-stats');
-    const failedTestIssues = await this.findExistingIssues(unseenFailures);
-    this.log.debug('found', failedTestIssues.length, 'existing issues');
+    const { existingIssues: failedTestIssues, suiteIssues = [] } = await this.findExistingIssues(
+      unseenFailures
+    );
+    this.log.debug(
+      'found',
+      failedTestIssues.length,
+      'existing issues and',
+      suiteIssues.length,
+      'suite issues'
+    );
+    this.addSuiteIssues(suiteIssues);
 
     const initialResultSize = this.results.size;
     for (const failure of unseenFailures) {
@@ -84,12 +194,34 @@ export class ExistingFailedTestIssues {
     this.log.debug('loaded', this.results.size - initialResultSize, 'existing test issues');
   }
 
+  isScoutFailure(failure: TestFailure): boolean {
+    return isScoutFailure(failure);
+  }
+
+  /**
+   * The flaky suite issue tracking the failure's test, if any: an open one before a closed one,
+   * then one that lists the test's id before one that only covers its file and describe block,
+   * then the newest.
+   */
+  getSuiteIssueForFailure(failure: TestFailure): FlakySuiteIssue | undefined {
+    const testId = getScoutTestId(failure);
+    const listsTest = (issue: FlakySuiteIssue): number =>
+      testId !== undefined && issue.suite.testIds.includes(testId) ? 1 : 0;
+    const isOpen = (issue: FlakySuiteIssue): number => (issue.github.state === 'open' ? 1 : 0);
+    // suiteIssues are newest first and the sort is stable, so ties keep that order
+    return this.suiteIssues
+      .filter((issue) => isAboutFailure(issue, failure))
+      .sort((a, b) => isOpen(b) - isOpen(a) || listsTest(b) - listsTest(a))[0];
+  }
+
   getForFailure(failure: TestFailure) {
     for (const [f, issue] of this.results) {
-      if (f.classname === failure.classname && f.name === failure.name) {
+      if (issue && isSameTest(f, failure)) {
         return issue;
       }
     }
+
+    return undefined;
   }
 
   addNewlyCreated(failure: TestFailure, newIssue: GithubIssueMini) {
@@ -105,9 +237,21 @@ export class ExistingFailedTestIssues {
     });
   }
 
-  private async findExistingIssues(failures: TestFailure[]) {
+  private addSuiteIssues(suiteIssues: FlakySuiteIssue[]) {
+    if (suiteIssues.length === 0) {
+      return;
+    }
+    // the same issue can come back for several batches of failures
+    const byNumber = new Map(this.suiteIssues.map((issue) => [issue.github.number, issue]));
+    for (const issue of suiteIssues) {
+      byNumber.set(issue.github.number, issue);
+    }
+    this.suiteIssues = [...byNumber.values()].sort((a, b) => b.github.number - a.github.number);
+  }
+
+  private async findExistingIssues(failures: TestFailure[]): Promise<FindFailedTestIssuesResponse> {
     if (failures.length === 0) {
-      return [];
+      return { existingIssues: [] };
     }
 
     const maxAttempts = 5;
@@ -115,41 +259,58 @@ export class ExistingFailedTestIssues {
     while (true) {
       attempt += 1;
 
+      const identities = failures.map(
+        this.askForSuiteIssues ? getFailureIdentity : getLegacyFailureIdentity
+      );
+      let response: Response;
       try {
-        const resp = await Axios.request<FindFailedTestIssuesResponse>({
+        response = await fetch(`${BASE_URL}/v1/find_failed_test_issues`, {
           method: 'POST',
-          baseURL: BASE_URL,
-          allowAbsoluteUrls: false,
-          url: '/v1/find_failed_test_issues',
-          data: {
-            failures: failures.map((f) => ({
-              classname: f.classname,
-              name: f.name,
-            })),
-          },
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ failures: identities }),
         });
-
-        return resp.data.existingIssues;
       } catch (error: unknown) {
-        if (
-          attempt < maxAttempts &&
-          ((isAxiosResponseError(error) && error.response.status >= 500) ||
-            isAxiosRequestError(error))
-        ) {
-          this.log.error(error);
+        // Network-level error (fetch throws TypeError for DNS/connection failures).
+        if (attempt < maxAttempts) {
+          this.log.error(error as Error);
           this.log.warning(`Failure talking to ci-stats, waiting ${attempt} before retrying`);
           await setTimeout(attempt * 1000);
           continue;
         }
-
         throw error;
       }
+
+      if (!response.ok) {
+        const text = await response.text();
+        // ci-stats versions that predate suite issues reject the fields they don't know, so ask
+        // them for per-test issues only, as before
+        if (
+          response.status === 400 &&
+          this.askForSuiteIssues &&
+          text.includes('unexpected fields')
+        ) {
+          this.log.warning(
+            `ci-stats does not know suite issues yet, asking for per-test issues only`
+          );
+          this.askForSuiteIssues = false;
+          continue;
+        }
+        // Server error: retry on 5xx, throw immediately on 4xx.
+        if (attempt < maxAttempts && response.status >= 500) {
+          this.log.warning(`Failure talking to ci-stats, waiting ${attempt} before retrying`);
+          await setTimeout(attempt * 1000);
+          continue;
+        }
+        throw new Error(`${response.status}:${text}`);
+      }
+
+      return (await response.json()) as FindFailedTestIssuesResponse;
     }
   }
 
   private isFailureSeen(failure: TestFailure) {
     for (const seen of this.results.keys()) {
-      if (seen.classname === failure.classname && seen.name === failure.name) {
+      if (isSameTest(seen, failure)) {
         return true;
       }
     }

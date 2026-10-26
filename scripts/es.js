@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-require('../src/setup_node_env');
+require('@kbn/setup-node-env');
 
 var resolve = require('path').resolve;
 var pkg = require('../package.json');
@@ -15,11 +15,11 @@ var kbnEs = require('@kbn/es');
 
 kbnEs
   .run({
-    license: 'basic',
+    license: 'trial',
     password: 'changeme',
     version: pkg.version,
     'source-path': resolve(__dirname, '../../elasticsearch'),
-    'base-path': resolve(__dirname, '../.es'),
+    'base-path': process.env.KBN_ES_BASE_PATH || resolve(__dirname, '../.es'),
     ssl: false,
   })
   .catch(function (e) {

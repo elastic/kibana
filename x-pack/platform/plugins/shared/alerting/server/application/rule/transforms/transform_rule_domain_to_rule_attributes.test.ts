@@ -19,6 +19,17 @@ describe('transformRuleDomainToRuleAttributes', () => {
     params: {},
   };
 
+  const artifacts = {
+    dashboards: [
+      {
+        id: 'dashboard-1',
+      },
+      {
+        id: 'dashboard-2',
+      },
+    ],
+  };
+
   const rule: RuleDomain<{}> = {
     id: 'test',
     enabled: false,
@@ -28,6 +39,7 @@ describe('transformRuleDomainToRuleAttributes', () => {
     consumer: 'myApp',
     schedule: { interval: '1m' },
     actions: [defaultAction],
+    artifacts,
     params: {},
     mapped_params: {},
     createdBy: 'user',
@@ -54,6 +66,145 @@ describe('transformRuleDomainToRuleAttributes', () => {
     },
   };
 
+  test('should preserve lastEnabledAt when present', () => {
+    const result = transformRuleDomainToRuleAttributes({
+      rule: { ...rule, lastEnabledAt: new Date('2024-01-15T10:00:00.000Z') },
+      actionsWithRefs: [
+        {
+          group: 'default',
+          actionRef: 'action_0',
+          actionTypeId: 'test',
+          uuid: 'test-uuid',
+          params: {},
+        },
+      ],
+      artifactsWithRefs: {
+        dashboards: [{ refId: 'dashboard_0' }],
+      },
+      params: {
+        legacyId: 'test',
+        paramsWithRefs: {},
+      },
+    });
+
+    expect(result.lastEnabledAt).toBe('2024-01-15T10:00:00.000Z');
+  });
+
+  test('should not include lastEnabledAt when absent', () => {
+    const result = transformRuleDomainToRuleAttributes({
+      rule,
+      actionsWithRefs: [
+        {
+          group: 'default',
+          actionRef: 'action_0',
+          actionTypeId: 'test',
+          uuid: 'test-uuid',
+          params: {},
+        },
+      ],
+      artifactsWithRefs: {
+        dashboards: [{ refId: 'dashboard_0' }],
+      },
+      params: {
+        legacyId: 'test',
+        paramsWithRefs: {},
+      },
+    });
+
+    expect(result).not.toHaveProperty('lastEnabledAt');
+  });
+
+  test('should include the profile uid fields when present', () => {
+    const result = transformRuleDomainToRuleAttributes({
+      rule: {
+        ...rule,
+        createdByProfileUid: 'u_profile_created',
+        updatedByProfileUid: 'u_profile_updated',
+        apiKeyOwnerProfileUid: 'u_profile_api_key_owner',
+      },
+      actionsWithRefs: [
+        {
+          group: 'default',
+          actionRef: 'action_0',
+          actionTypeId: 'test',
+          uuid: 'test-uuid',
+          params: {},
+        },
+      ],
+      artifactsWithRefs: {
+        dashboards: [{ refId: 'dashboard_0' }],
+      },
+      params: {
+        legacyId: 'test',
+        paramsWithRefs: {},
+      },
+    });
+
+    expect(result.createdByProfileUid).toBe('u_profile_created');
+    expect(result.updatedByProfileUid).toBe('u_profile_updated');
+    expect(result.apiKeyOwnerProfileUid).toBe('u_profile_api_key_owner');
+  });
+
+  test('should omit the profile uid fields when absent', () => {
+    const result = transformRuleDomainToRuleAttributes({
+      rule,
+      actionsWithRefs: [
+        {
+          group: 'default',
+          actionRef: 'action_0',
+          actionTypeId: 'test',
+          uuid: 'test-uuid',
+          params: {},
+        },
+      ],
+      artifactsWithRefs: {
+        dashboards: [{ refId: 'dashboard_0' }],
+      },
+      params: {
+        legacyId: 'test',
+        paramsWithRefs: {},
+      },
+    });
+
+    expect(result).not.toHaveProperty('createdByProfileUid');
+    expect(result).not.toHaveProperty('updatedByProfileUid');
+    expect(result).not.toHaveProperty('apiKeyOwnerProfileUid');
+  });
+
+  test('should preserve an explicit null for the profile uid fields', () => {
+    const result = transformRuleDomainToRuleAttributes({
+      rule: {
+        ...rule,
+        createdByProfileUid: null,
+        updatedByProfileUid: null,
+        apiKeyOwnerProfileUid: null,
+      },
+      actionsWithRefs: [
+        {
+          group: 'default',
+          actionRef: 'action_0',
+          actionTypeId: '.no-op',
+          params: {},
+          uuid: '1',
+        },
+      ],
+      artifactsWithRefs: {
+        dashboards: [],
+        investigation_guide: {
+          blob: '',
+        },
+      },
+      params: {
+        legacyId: null,
+        paramsWithRefs: {},
+      },
+    });
+
+    expect(result.createdByProfileUid).toBe(null);
+    expect(result.updatedByProfileUid).toBe(null);
+    expect(result.apiKeyOwnerProfileUid).toBe(null);
+  });
+
   test('should transform rule domain to rule attribute', () => {
     const result = transformRuleDomainToRuleAttributes({
       rule,
@@ -66,6 +217,13 @@ describe('transformRuleDomainToRuleAttributes', () => {
           params: {},
         },
       ],
+      artifactsWithRefs: {
+        dashboards: [
+          {
+            refId: 'dashboard_0',
+          },
+        ],
+      },
       params: {
         legacyId: 'test',
         paramsWithRefs: {},
@@ -86,6 +244,13 @@ describe('transformRuleDomainToRuleAttributes', () => {
         "alertTypeId": "myType",
         "apiKey": "MTIzOmFiYw==",
         "apiKeyOwner": "user",
+        "artifacts": Object {
+          "dashboards": Array [
+            Object {
+              "refId": "dashboard_0",
+            },
+          ],
+        },
         "consumer": "myApp",
         "createdAt": "2019-02-12T21:01:22.479Z",
         "createdBy": "user",
@@ -118,5 +283,51 @@ describe('transformRuleDomainToRuleAttributes', () => {
         "updatedBy": "user",
       }
     `);
+  });
+
+  test('should preserve snoozedInstances alongside mutedInstanceIds', () => {
+    const snoozedInstances = [
+      {
+        instanceId: 'alert-1',
+        expiresAt: '2025-01-01T00:00:00.000Z',
+        conditions: [
+          { type: 'field_change' as const, field: 'kibana.alert.status' },
+          { type: 'severity_change' as const },
+        ],
+        conditionOperator: 'all' as const,
+        snoozeSnapshot: {
+          'kibana.alert.status': 'active',
+        },
+        snoozedAt: '2024-12-31T00:00:00.000Z',
+        snoozedBy: 'elastic',
+      },
+    ];
+
+    const result = transformRuleDomainToRuleAttributes({
+      rule: {
+        ...rule,
+        mutedInstanceIds: ['muted-instance-1'],
+        snoozedInstances,
+      },
+      actionsWithRefs: [
+        {
+          group: 'default',
+          actionRef: 'action_0',
+          actionTypeId: 'test',
+          uuid: 'test-uuid',
+          params: {},
+        },
+      ],
+      artifactsWithRefs: {
+        dashboards: [{ refId: 'dashboard_0' }],
+      },
+      params: {
+        legacyId: 'test',
+        paramsWithRefs: {},
+      },
+    });
+
+    expect(result.mutedInstanceIds).toEqual(['muted-instance-1']);
+    expect(result.snoozedInstances).toEqual(snoozedInstances);
   });
 });

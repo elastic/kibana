@@ -6,7 +6,8 @@
  */
 
 import { addBasePath } from '..';
-import { RouterMock, routeDependencies, RequestMock } from '../../../test/helpers';
+import type { RequestMock } from '../../../test/helpers';
+import { RouterMock, routeDependencies } from '../../../test/helpers';
 
 import { registerDataStreamRoutes } from '.';
 import { getEsWarningText } from './register_put_route';
@@ -54,7 +55,7 @@ describe('Data streams API', () => {
       const error = new Error('Oh no!');
       updateDataLifecycle.mockRejectedValue(error);
 
-      await expect(router.runRequest(mockRequest)).rejects.toThrowError(error);
+      await expect(router.runRequest(mockRequest)).rejects.toThrow(error);
     });
 
     it('knows how to extract the es warning header from the response', () => {

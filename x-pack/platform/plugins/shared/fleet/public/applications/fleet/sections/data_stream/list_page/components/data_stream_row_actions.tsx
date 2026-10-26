@@ -19,6 +19,11 @@ export const DataStreamRowActions = memo<{ datastream: DataStream }>(({ datastre
   const { dashboards } = datastream;
   const dashboardLocator = useDashboardLocator();
 
+  const actionsAriaLabel = i18n.translate('xpack.fleet.dataStreamList.rowActionsAriaLabel', {
+    defaultMessage: 'Actions for {dataset}',
+    values: { dataset: datastream.dataset },
+  });
+
   const actionNameSingular = (
     <FormattedMessage
       id="xpack.fleet.dataStreamList.viewDashboardActionText"
@@ -58,7 +63,7 @@ export const DataStreamRowActions = memo<{ datastream: DataStream }>(({ datastre
         ],
       },
     ];
-    return <ContextMenuActions panels={apmItem} />;
+    return <ContextMenuActions panels={apmItem} aria-label={actionsAriaLabel} />;
   }
 
   if (!dashboards || dashboards.length === 0) {
@@ -74,7 +79,7 @@ export const DataStreamRowActions = memo<{ datastream: DataStream }>(({ datastre
         ],
       },
     ];
-    return <ContextMenuActions panels={disabledItems} />;
+    return <ContextMenuActions panels={disabledItems} aria-label={actionsAriaLabel} />;
   }
 
   if (dashboards.length === 1) {
@@ -84,13 +89,14 @@ export const DataStreamRowActions = memo<{ datastream: DataStream }>(({ datastre
         items: [
           {
             icon: 'dashboardApp',
+            // @ts-expect-error upgrade typescript v5.9.3
             href: dashboardLocator?.getRedirectUrl({ dashboardId: dashboards[0]?.id } || ''),
             name: actionNameSingular,
           },
         ],
       },
     ];
-    return <ContextMenuActions panels={panelItems} />;
+    return <ContextMenuActions panels={panelItems} aria-label={actionsAriaLabel} />;
   }
 
   const panelItems = [
@@ -110,6 +116,7 @@ export const DataStreamRowActions = memo<{ datastream: DataStream }>(({ datastre
       items: dashboards.map((dashboard) => {
         return {
           icon: 'dashboardApp',
+          // @ts-expect-error upgrade typescript v5.9.3
           href: dashboardLocator?.getRedirectUrl({ dashboardId: dashboard?.id } || ''),
           name: dashboard.title,
         };
@@ -117,5 +124,5 @@ export const DataStreamRowActions = memo<{ datastream: DataStream }>(({ datastre
     },
   ];
 
-  return <ContextMenuActions panels={panelItems} />;
+  return <ContextMenuActions panels={panelItems} aria-label={actionsAriaLabel} />;
 });

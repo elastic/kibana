@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { shallow } from 'enzyme';
+import { render } from '@testing-library/react';
 import React from 'react';
 
 import { LineToolTipContentComponent } from './line_tool_tip_content';
@@ -17,6 +17,7 @@ import {
 } from '../map_config';
 import type { ITooltipProperty } from '@kbn/maps-plugin/public/classes/tooltips/tooltip_property';
 import { TooltipProperty } from '@kbn/maps-plugin/public/classes/tooltips/tooltip_property';
+import { TestProviders } from '../../../../../common/mock';
 
 describe('LineToolTipContent', () => {
   const mockFeatureProps: ITooltipProperty[] = [
@@ -30,19 +31,23 @@ describe('LineToolTipContent', () => {
   ];
 
   test('renders correctly against snapshot', () => {
-    const wrapper = shallow(
-      <LineToolTipContentComponent contextId={'contextId'} featureProps={mockFeatureProps} />
+    const { container } = render(
+      <TestProviders>
+        <LineToolTipContentComponent contextId={'contextId'} featureProps={mockFeatureProps} />
+      </TestProviders>
     );
-    expect(wrapper).toMatchSnapshot();
+    expect(container.children[0]).toMatchSnapshot();
   });
 
   test('renders correctly against snapshot when rendering client & server', () => {
-    const wrapper = shallow(
-      <LineToolTipContentComponent
-        contextId={'contextId'}
-        featureProps={mockClientServerFeatureProps}
-      />
+    const { container } = render(
+      <TestProviders>
+        <LineToolTipContentComponent
+          contextId={'contextId'}
+          featureProps={mockClientServerFeatureProps}
+        />
+      </TestProviders>
     );
-    expect(wrapper).toMatchSnapshot();
+    expect(container.children[0]).toMatchSnapshot();
   });
 });

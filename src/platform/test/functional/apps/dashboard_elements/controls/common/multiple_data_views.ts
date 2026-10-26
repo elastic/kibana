@@ -9,7 +9,7 @@
 
 import expect from '@kbn/expect';
 
-import { FtrProviderContext } from '../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const security = getService('security');
@@ -24,6 +24,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'header',
   ]);
 
+  /**
+   * Purpose: Verify courier:ignoreFilterIfFieldNotInIndex works as expected
+   *
+   * Migration: Migrate to scout
+   */
   describe('Dashboard control group with multiple data views', () => {
     // Controls from flights data view
     const carrierControlId = '265b6a28-9ccb-44ae-83c9-3d7a7cac1961';

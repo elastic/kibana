@@ -60,7 +60,9 @@ export const EditAPMPolicy: StoryFn = () => {
         policy={{} as PackagePolicy}
         newPolicy={newPolicy}
         onChange={(value) => {
-          setIsPolicyValid(value.isValid);
+          if (value.isValid !== undefined) {
+            setIsPolicyValid(value.isValid);
+          }
           const updatedVars = value.updatedPolicy.inputs?.[0].vars;
           setNewPolicy((state) => ({
             ...state,
@@ -218,18 +220,6 @@ const policy = {
           value: false,
         },
         pprof_enabled: {
-          type: 'bool',
-          value: false,
-        },
-        java_attacher_discovery_rules: {
-          type: 'yaml',
-          value: '',
-        },
-        java_attacher_agent_version: {
-          type: 'text',
-          value: '',
-        },
-        java_attacher_enabled: {
           type: 'bool',
           value: false,
         },

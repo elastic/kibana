@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 export const UNTITLED_TIMELINE = i18n.translate(
   'xpack.securitySolution.timeline.properties.untitledTimelinePlaceholder',
   {
-    defaultMessage: 'Untitled timeline',
+    defaultMessage: 'Untitled Timeline',
   }
 );
 
@@ -28,13 +28,9 @@ export const DESCRIPTION = i18n.translate(
   }
 );
 
-export const NOTES = i18n.translate('xpack.securitySolution.timeline.properties.notesButtonLabel', {
-  defaultMessage: 'Notes',
-});
-
 export const ADD_TIMELINE = i18n.translate(
   'xpack.securitySolution.timeline.properties.addTimelineButtonLabel',
   {
-    defaultMessage: 'Add new timeline or template',
+    defaultMessage: 'Add new Timeline or template',
   }
 );

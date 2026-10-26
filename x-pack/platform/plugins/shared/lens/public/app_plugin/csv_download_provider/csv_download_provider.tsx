@@ -10,16 +10,17 @@ import React from 'react';
 import { tableHasFormulas } from '@kbn/data-plugin/common';
 import { downloadMultipleAs } from '@kbn/share-plugin/public';
 import { exporters } from '@kbn/data-plugin/public';
-import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
+import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { Datatable } from '@kbn/expressions-plugin/common';
-import { ShareMenuItemV2, ShareMenuProviderV2 } from '@kbn/share-plugin/public/types';
-import { FormatFactory } from '../../../common/types';
+import type { ExportShare, RegisterShareIntegrationArgs } from '@kbn/share-plugin/public/types';
+import type { FormatFactory } from '../../../common/types';
 
 export interface CSVSharingData {
   title: string;
   datatables: Datatable[];
   csvEnabled: boolean;
+  missingValueDisplay?: 'text' | 'table';
 }
 
 declare global {
@@ -37,10 +38,11 @@ async function downloadCSVs({
   datatables,
   formatFactory,
   uiSettings,
+  missingValueDisplay,
 }: {
   formatFactory: FormatFactory;
   uiSettings: IUiSettingsClient;
-} & Pick<CSVSharingData, 'title' | 'datatables'>) {
+} & Pick<CSVSharingData, 'title' | 'datatables' | 'missingValueDisplay'>) {
   if (datatables.length === 0) {
     if (window.ELASTIC_LENS_CSV_DOWNLOAD_DEBUG) {
       window.ELASTIC_LENS_CSV_CONTENT = undefined;
@@ -60,6 +62,7 @@ async function downloadCSVs({
             quoteValues: uiSettings.get('csv:quoteValues', true),
             formatFactory,
             escapeFormulaValues: false,
+            missingValueDisplay,
           }),
           type: exporters.CSV_MIME_TYPE,
         };
@@ -105,48 +108,45 @@ interface DownloadPanelShareOpts {
   atLeastGold: () => boolean;
 }
 
-export const downloadCsvShareProvider = ({
+export const downloadCsvLensShareProvider = ({
   uiSettings,
   formatFactoryFn,
   atLeastGold,
-}: DownloadPanelShareOpts): ShareMenuProviderV2 => {
-  const getShareMenuItems: ShareMenuProviderV2['getShareMenuItems'] = ({
-    objectType,
-    sharingData,
-  }) => {
-    if ('lens' !== objectType) {
-      return [];
-    }
+}: DownloadPanelShareOpts): RegisterShareIntegrationArgs<ExportShare> => {
+  return {
+    id: 'csvDownloadLens',
+    groupId: 'export',
+    getShareIntegrationConfig: async ({ sharingData }) => {
+      // TODO fix sharingData types
+      const { title, datatables, csvEnabled, missingValueDisplay } =
+        sharingData as unknown as CSVSharingData;
 
-    // TODO fix sharingData types
-    const { title, datatables, csvEnabled } = sharingData as unknown as CSVSharingData;
+      const panelTitle = i18n.translate(
+        'xpack.lens.reporting.shareContextMenu.csvReportsButtonLabel',
+        {
+          defaultMessage: 'CSV Download',
+        }
+      );
 
-    const panelTitle = i18n.translate(
-      'xpack.lens.reporting.shareContextMenu.csvReportsButtonLabel',
-      {
-        defaultMessage: 'CSV Download',
-      }
-    );
+      const downloadCSVHandler = () =>
+        downloadCSVs({
+          title,
+          formatFactory: formatFactoryFn(),
+          datatables,
+          uiSettings,
+          missingValueDisplay,
+        });
 
-    const downloadCSVHandler = () =>
-      downloadCSVs({
-        title,
-        formatFactory: formatFactoryFn(),
-        datatables,
-        uiSettings,
-      });
-
-    return [
-      {
-        shareMenuItem: {
-          name: panelTitle,
-          icon: 'document',
-          disabled: !csvEnabled,
-          sortOrder: 1,
-        },
-        label: 'CSV' as const,
-        reportType: 'lens_csv' as const,
-        generateExport: downloadCSVHandler,
+      return {
+        id: 'csvDownloadLens',
+        name: panelTitle,
+        icon: 'table',
+        sortOrder: 1,
+        label: 'CSV',
+        exportType: 'lens_csv',
+        supportedLayoutOptions: ['print'],
+        requiresSavedState: false,
+        generateAssetExport: downloadCSVHandler,
         warnings: getWarnings(datatables),
         ...(atLeastGold()
           ? {
@@ -161,16 +161,11 @@ export const downloadCsvShareProvider = ({
                   defaultMessage="Download the data displayed in the visualization."
                 />
               ),
-              generateExportButton: (
+              generateExportButtonLabel: (
                 <FormattedMessage id="xpack.lens.share.csvButton" defaultMessage="Download CSV" />
               ),
             }),
-      } satisfies ShareMenuItemV2,
-    ];
-  };
-
-  return {
-    id: 'csvDownloadLens',
-    getShareMenuItems,
+      };
+    },
   };
 };

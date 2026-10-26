@@ -5,9 +5,14 @@
  * 2.0.
  */
 
+import { type DeepPartial } from '@kbn/utility-types';
+
 import type {
   AgentPolicy,
+  AgentlessPolicy,
+  InstallSource,
   NewPackagePolicy,
+  PackageInfo,
   PackagePolicy,
   PostDeletePackagePoliciesResponse,
 } from './types';
@@ -90,6 +95,7 @@ export const createFleetAuthzMock = (): FleetAuthz => {
       readSettings: true,
       addAgents: true,
       addFleetServers: true,
+      generateAgentReports: true,
     },
     integrations: {
       all: true,
@@ -141,5 +147,134 @@ export const createAgentPolicyMock = (overrideProps?: Partial<AgentPolicy>): Age
     is_managed: false,
     is_protected: false,
     ...overrideProps,
+  };
+};
+
+export const createAgentlessPolicyMock = (
+  overrideProps?: Partial<AgentlessPolicy>
+): AgentlessPolicy => {
+  return {
+    id: 'agentless-policy-1',
+    name: 'agentless-policy-1',
+    description: 'an agentless policy',
+    namespace: 'default',
+    package: {
+      name: 'agentless_hello_world',
+      title: 'Elastic Hello World',
+      version: '0.5.0',
+    },
+    inputs: {},
+    created_at: '2023-06-30T16:03:38.159292',
+    created_by: 'user-1',
+    updated_at: '2023-06-30T16:03:38.159292',
+    updated_by: 'user-1',
+    ...overrideProps,
+  };
+};
+
+interface CreatePackageInfoMockOpts {
+  installSource: InstallSource;
+  agentless: {
+    enabled: boolean;
+    withGlobalDataTags: boolean;
+    withResources: boolean;
+  };
+}
+
+const defaultCreatePackageInfoMockOpts: CreatePackageInfoMockOpts = {
+  installSource: 'registry',
+  agentless: {
+    enabled: true,
+    withGlobalDataTags: true,
+    withResources: true,
+  },
+};
+
+export const createPackageInfoMock = (
+  opts?: DeepPartial<CreatePackageInfoMockOpts>
+): PackageInfo => {
+  const _opts: CreatePackageInfoMockOpts = {
+    ...defaultCreatePackageInfoMockOpts,
+    ...opts,
+    agentless: {
+      ...defaultCreatePackageInfoMockOpts.agentless,
+      ...opts?.agentless,
+    },
+  };
+
+  const agentlessResources = _opts.agentless.withResources
+    ? {
+        requests: {
+          memory: '256Mi',
+          cpu: '100m',
+        },
+      }
+    : undefined;
+
+  const agentlessGlobalDataTags = _opts.agentless.withGlobalDataTags
+    ? {
+        organization: 'org',
+        division: 'div',
+        team: 'team',
+      }
+    : {};
+
+  return {
+    status: 'installed',
+    type: 'integration',
+    name: 'test',
+    title: 'Test',
+    latestVersion: '0.0.1',
+    assets: { kibana: undefined, elasticsearch: undefined },
+    version: '0.0.1',
+    owner: {
+      type: 'community',
+    },
+    savedObject: {
+      id: 'abc-def',
+      type: 'integration',
+      attributes: {
+        name: 'test',
+        version: '0.0.1',
+        installed_es: [],
+        es_index_patterns: {},
+        installed_kibana: [],
+        install_status: 'installed',
+        install_version: '0.0.1',
+        install_started_at: new Date().toUTCString(),
+        verification_status: 'unknown',
+        install_source: _opts.installSource,
+      },
+    },
+    policy_templates: [
+      {
+        name: 'cspm',
+        title: 'Template 1',
+        description: '',
+        deployment_modes: {
+          default: {
+            enabled: true,
+          },
+          agentless: {
+            enabled: _opts.agentless.enabled,
+            ...agentlessGlobalDataTags,
+            resources: agentlessResources,
+          },
+        },
+      },
+      {
+        name: 'not-cspm',
+        title: 'Template 2',
+        description: '',
+        deployment_modes: {
+          default: {
+            enabled: true,
+          },
+          agentless: {
+            enabled: false,
+          },
+        },
+      },
+    ],
   };
 };

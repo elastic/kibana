@@ -9,8 +9,9 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import React from 'react';
 import { useEuiTheme } from '@elastic/eui';
 import { SUCCESSFUL_LABEL } from './monitor_complete_count';
-import { ClientPluginsStart } from '../../../../../plugin';
+import type { ClientPluginsStart } from '../../../../../plugin';
 import { useMonitorQueryFilters } from '../hooks/use_monitor_query_filters';
+import { useSyntheticsDataViewIndexPatterns } from '../hooks/use_synthetics_data_view_index_patterns';
 
 interface Props {
   from: string;
@@ -22,6 +23,7 @@ export const MonitorCompleteSparklines = (props: Props) => {
   } = useKibana<ClientPluginsStart>().services;
 
   const { queryIdFilter, locationFilter } = useMonitorQueryFilters();
+  const dataTypesIndexPatterns = useSyntheticsDataViewIndexPatterns();
 
   const { euiTheme } = useEuiTheme();
 
@@ -36,6 +38,7 @@ export const MonitorCompleteSparklines = (props: Props) => {
       axisTitlesVisibility={{ x: false, yRight: false, yLeft: false }}
       legendIsVisible={false}
       hideTicks={true}
+      dataTypesIndexPatterns={dataTypesIndexPatterns}
       attributes={[
         {
           seriesType: 'area',

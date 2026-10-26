@@ -1,0 +1,14 @@
+{
+  "name": "@kbn/task-manager-performance-plugin",
+  "version": "1.0.0",
+  "kibana": {
+    "version": "kibana",
+    "templateVersion": "1.0.0"
+  },
+  "main": "target/platform/test/plugin_api_perf/plugins/task_manager_performance",
+  "scripts": {
+    "kbn": "node ../../../../../../scripts/kbn.js",
+    "build": "rm -rf './target' && ../../../../../../node_modules/.bin/tsc"
+  },
+  "license": "Elastic License 2.0"
+}

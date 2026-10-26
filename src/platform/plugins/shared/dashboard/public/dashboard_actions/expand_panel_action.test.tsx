@@ -8,7 +8,8 @@
  */
 
 import { BehaviorSubject, take } from 'rxjs';
-import { ExpandPanelActionApi, ExpandPanelAction } from './expand_panel_action';
+import type { ExpandPanelActionApi } from './expand_panel_action';
+import { ExpandPanelAction } from './expand_panel_action';
 
 describe('Expand panel action', () => {
   let action: ExpandPanelAction;
@@ -20,6 +21,7 @@ describe('Expand panel action', () => {
     action = new ExpandPanelAction();
     context = {
       embeddable: {
+        isExpandable: true,
         uuid: 'superId',
         parentApi: {
           expandPanel: jest.fn(),
@@ -49,7 +51,7 @@ describe('Expand panel action', () => {
   });
 
   it('returns the correct icon based on expanded panel id', async () => {
-    expect(await action.getIconType(context)).toBe('expand');
+    expect(await action.getIconType(context)).toBe('maximize');
     expandedPanelId$.next('superPanelId');
     expect(await action.getIconType(context)).toBe('minimize');
   });

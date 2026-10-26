@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import { AppMountParameters, CoreStart, CoreTheme, MountPoint } from '@kbn/core/public';
+import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Redirect } from 'react-router-dom';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
-import { Observable } from 'rxjs';
 import {
   CODE_PATH_APM,
   CODE_PATH_BEATS,
@@ -21,10 +20,11 @@ import {
   CODE_PATH_KIBANA,
   CODE_PATH_LOGSTASH,
 } from '../../common/constants';
-import { MonitoringStartPluginDependencies, MonitoringStartServices } from '../types';
-import { ExternalConfig, ExternalConfigContext } from './contexts/external_config_context';
+import type { MonitoringStartPluginDependencies, MonitoringStartServices } from '../types';
+import type { ExternalConfig } from './contexts/external_config_context';
+import { ExternalConfigContext } from './contexts/external_config_context';
+import { ClusterListingAvailabilityProvider } from './contexts/cluster_listing_availability_context';
 import { GlobalStateProvider } from './contexts/global_state_context';
-import { HeaderActionMenuContext } from './contexts/header_action_menu_context';
 import { BreadcrumbContainer } from './hooks/use_breadcrumbs';
 import { MonitoringTimeContainer } from './hooks/use_monitoring_time';
 import { AccessDeniedPage } from './pages/access_denied';
@@ -65,7 +65,7 @@ import { RouteInit } from './route_init';
 export const renderApp = (
   core: CoreStart,
   plugins: MonitoringStartPluginDependencies,
-  { element, history, setHeaderActionMenu, theme$ }: AppMountParameters,
+  { element, history }: AppMountParameters,
   externalConfig: ExternalConfig
 ) => {
   // dispatch synthetic hash change event to update hash history objects
@@ -75,13 +75,7 @@ export const renderApp = (
   });
 
   ReactDOM.render(
-    <MonitoringApp
-      core={core}
-      plugins={plugins}
-      externalConfig={externalConfig}
-      setHeaderActionMenu={setHeaderActionMenu}
-      theme$={theme$}
-    />,
+    <MonitoringApp core={core} plugins={plugins} externalConfig={externalConfig} />,
     element
   );
 
@@ -95,9 +89,7 @@ const MonitoringApp: React.FC<{
   core: CoreStart;
   plugins: MonitoringStartPluginDependencies;
   externalConfig: ExternalConfig;
-  setHeaderActionMenu: (element: MountPoint<HTMLElement> | undefined) => void;
-  theme$: Observable<CoreTheme>;
-}> = ({ core, plugins, externalConfig, setHeaderActionMenu, theme$ }) => {
+}> = ({ core, plugins, externalConfig }) => {
   const history = createPreserveQueryHistory();
   const startServices: MonitoringStartServices = { ...core, ...plugins };
 
@@ -110,8 +102,8 @@ const MonitoringApp: React.FC<{
             toasts={core.notifications.toasts}
             uiSettings={core.uiSettings}
           >
-            <HeaderActionMenuContext.Provider value={{ setHeaderActionMenu, theme$ }}>
-              <MonitoringTimeContainer>
+            <MonitoringTimeContainer>
+              <ClusterListingAvailabilityProvider>
                 <BreadcrumbContainer history={history}>
                   <Router history={history}>
                     <Routes>
@@ -341,8 +333,8 @@ const MonitoringApp: React.FC<{
                     </Routes>
                   </Router>
                 </BreadcrumbContainer>
-              </MonitoringTimeContainer>
-            </HeaderActionMenuContext.Provider>
+              </ClusterListingAvailabilityProvider>
+            </MonitoringTimeContainer>
           </GlobalStateProvider>
         </ExternalConfigContext.Provider>
       </KibanaContextProvider>

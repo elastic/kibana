@@ -1,0 +1,33 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": [
+      "jest",
+      "node"
+    ]
+  },
+  "include": [
+    "**/*.ts",
+  ],
+  "exclude": [
+    "target/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/core-saved-objects-base-server-internal",
+    "@kbn/core-test-helpers-kbn-server",
+    "@kbn/core-plugins-server-internal",
+    "@kbn/dev-cli-runner",
+    "@kbn/tooling-log",
+    "@kbn/core-saved-objects-server",
+    "@kbn/core-root-server-internal",
+    "@kbn/core-test-helpers-so-type-serializer",
+    "@kbn/core-saved-objects-api-server",
+    "@kbn/migrator-test-kit",
+    "@kbn/config-schema",
+    "@kbn/repo-info",
+    "@kbn/encrypted-saved-objects-plugin",
+    "@kbn/object-utils",
+    "@kbn/std",
+  ]
+}

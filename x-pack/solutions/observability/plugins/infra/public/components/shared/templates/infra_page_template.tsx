@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import type { LazyObservabilityPageTemplateProps } from '@kbn/observability-shared-plugin/public';
 import React, { useEffect } from 'react';
+import type { EntityTypes } from '../../../../common/http_api/shared/entity_type';
 import type { GetHasDataResponse } from '../../../../common/metrics_sources/get_has_data';
 import { NoRemoteCluster } from '../../empty_states';
 import { SourceErrorPage } from '../../source_error_page';
@@ -17,15 +18,23 @@ import { ErrorCallout } from '../../error_callout';
 import { isPending, useFetcher } from '../../../hooks/use_fetcher';
 import type { OnboardingFlow } from './no_data_config';
 import { getNoDataConfig } from './no_data_config';
+import { resolveInfraPageHasData } from './resolve_infra_page_has_data';
 
 export const InfraPageTemplate = ({
   'data-test-subj': _dataTestSubj,
-  dataAvailabilityModules,
+  children,
+  dataSourceAvailability,
   onboardingFlow,
+  hasDataOverride,
+  header,
   ...pageTemplateProps
 }: Omit<LazyObservabilityPageTemplateProps, 'noDataConfig'> & {
-  dataAvailabilityModules?: string[];
+  dataSourceAvailability?: EntityTypes | 'all';
   onboardingFlow?: OnboardingFlow;
+  /** Page-owned hasData when the page does not pass onboardingFlow (so this template does not fetch). */
+  hasDataOverride?: boolean;
+  /** Rendered on success and on source-error / no-remote-cluster early returns. */
+  header?: React.ReactNode;
 }) => {
   const {
     services: {
@@ -48,14 +57,14 @@ export const InfraPageTemplate = ({
       return await callApi<GetHasDataResponse>('/api/metrics/source/hasData', {
         method: 'GET',
         query: {
-          modules: dataAvailabilityModules,
+          source: dataSourceAvailability,
         },
       });
     },
-    [onboardingFlow, dataAvailabilityModules]
+    [onboardingFlow, dataSourceAvailability]
   );
 
-  const hasData = !!data?.hasData;
+  const hasData = resolveInfraPageHasData(!!data?.hasData, hasDataOverride);
   const noDataConfig = getNoDataConfig({
     hasData,
     loading: isPending(status),
@@ -100,11 +109,11 @@ export const InfraPageTemplate = ({
   }, [hasData, setScreenContext, source]);
 
   if (sourceError) {
-    return <SourceErrorPage errorMessage={sourceError} retry={loadSource} />;
+    return <SourceErrorPage errorMessage={sourceError} retry={loadSource} header={header} />;
   }
 
   if (!isSourceLoading && !remoteClustersExist) {
-    return <NoRemoteCluster />;
+    return <NoRemoteCluster header={header} />;
   }
 
   if (dataViewLoadError) {
@@ -128,6 +137,9 @@ export const InfraPageTemplate = ({
       data-test-subj={hasData ? _dataTestSubj : 'noDataPage'}
       noDataConfig={noDataConfig}
       {...pageTemplateProps}
-    />
+    >
+      {header}
+      {children}
+    </PageTemplate>
   );
 };

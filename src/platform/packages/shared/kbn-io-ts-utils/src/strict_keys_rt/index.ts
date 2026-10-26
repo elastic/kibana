@@ -8,9 +8,9 @@
  */
 
 import * as t from 'io-ts';
-import { either, isRight } from 'fp-ts/lib/Either';
+import { either, isRight } from 'fp-ts/Either';
 import { difference, isPlainObject, forEach, isArray, castArray } from 'lodash';
-import { MergeType } from '../merge_rt';
+import type { MergeType } from '../merge_rt';
 
 /*
   Type that tracks validated keys, and fails when the input value

@@ -15,7 +15,7 @@ import { createFlagError, createFailError } from '@kbn/dev-cli-errors';
 import { findPluginDir } from './find_plugin_dir';
 import { loadKibanaPlatformPlugin } from './load_kibana_platform_plugin';
 import * as Tasks from './tasks';
-import { TaskContext } from './task_context';
+import type { TaskContext } from './task_context';
 import { resolveKibanaVersion } from './resolve_kibana_version';
 import { loadConfig } from './config';
 
@@ -83,15 +83,16 @@ export function runCli() {
           sourceDir,
           buildDir,
           kibanaVersion,
+          quiet: true,
         };
 
         await Tasks.initTargets(context);
-        await Tasks.buildBazelPackages(context);
+        await Tasks.buildWebpackPackages(context);
         await Tasks.optimize(context);
         await Tasks.brotliCompressBundles(context);
         await Tasks.writePublicAssets(context);
         await Tasks.writeServerFiles(context);
-        await Tasks.yarnInstall(context);
+        await Tasks.installDependencies(context);
 
         if (skipArchive !== true) {
           await Tasks.createArchive(context);
@@ -142,7 +143,7 @@ export function runCli() {
 
         if (!plugin.manifest.ui) {
           log.info(
-            'Your plugin is server only and there is no need to run a dev task in order to get it ready to test. Please just run `yarn start` at the Kibana root and your plugin will be started.'
+            'Your plugin is server only and there is no need to run a dev task in order to get it ready to test. Please just run `pnpm start` at the Kibana root and your plugin will be started.'
           );
           return;
         }
@@ -160,10 +161,11 @@ export function runCli() {
           sourceDir,
           buildDir: '',
           kibanaVersion: 'kibana',
+          quiet: false,
         };
 
         await Tasks.initDev(context);
-        await Tasks.buildBazelPackages(context);
+        await Tasks.buildWebpackPackages(context);
         await Tasks.optimize(context);
       },
     })

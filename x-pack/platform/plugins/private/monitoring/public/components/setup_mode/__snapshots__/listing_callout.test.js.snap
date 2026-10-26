@@ -3,8 +3,9 @@
 exports[`setupMode ListingCallOut all internally collected should render for apm 1`] = `
 <Fragment>
   <EuiCallOut
+    announceOnMount={false}
     color="danger"
-    iconType="flag"
+    iconType="pencil"
     title="Monitor with Metricbeat"
   >
     <p>
@@ -21,8 +22,9 @@ exports[`setupMode ListingCallOut all internally collected should render for apm
 exports[`setupMode ListingCallOut all internally collected should render for beats 1`] = `
 <Fragment>
   <EuiCallOut
+    announceOnMount={false}
     color="danger"
-    iconType="flag"
+    iconType="pencil"
     title="Monitor with Metricbeat"
   >
     <p>
@@ -39,8 +41,9 @@ exports[`setupMode ListingCallOut all internally collected should render for bea
 exports[`setupMode ListingCallOut all internally collected should render for elasticsearch 1`] = `
 <Fragment>
   <EuiCallOut
+    announceOnMount={false}
     color="danger"
-    iconType="flag"
+    iconType="pencil"
     title="Monitor with Metricbeat"
   >
     <p>
@@ -57,8 +60,9 @@ exports[`setupMode ListingCallOut all internally collected should render for ela
 exports[`setupMode ListingCallOut all internally collected should render for kibana 1`] = `
 <Fragment>
   <EuiCallOut
+    announceOnMount={false}
     color="danger"
-    iconType="flag"
+    iconType="pencil"
     title="Monitor with Metricbeat"
   >
     <p>
@@ -75,8 +79,9 @@ exports[`setupMode ListingCallOut all internally collected should render for kib
 exports[`setupMode ListingCallOut all internally collected should render for logstash 1`] = `
 <Fragment>
   <EuiCallOut
+    announceOnMount={false}
     color="danger"
-    iconType="flag"
+    iconType="pencil"
     title="Monitor with Metricbeat"
   >
     <p>
@@ -93,8 +98,9 @@ exports[`setupMode ListingCallOut all internally collected should render for log
 exports[`setupMode ListingCallOut all migrated should render for apm 1`] = `
 <Fragment>
   <EuiCallOut
+    announceOnMount={false}
     color="success"
-    iconType="flag"
+    iconType="pencil"
     title="Metricbeat is monitoring all servers."
   />
   <EuiSpacer
@@ -106,8 +112,9 @@ exports[`setupMode ListingCallOut all migrated should render for apm 1`] = `
 exports[`setupMode ListingCallOut all migrated should render for beats 1`] = `
 <Fragment>
   <EuiCallOut
+    announceOnMount={false}
     color="success"
-    iconType="flag"
+    iconType="pencil"
     title="Metricbeat is monitoring all instances."
   />
   <EuiSpacer
@@ -119,8 +126,9 @@ exports[`setupMode ListingCallOut all migrated should render for beats 1`] = `
 exports[`setupMode ListingCallOut all migrated should render for elasticsearch 1`] = `
 <Fragment>
   <EuiCallOut
+    announceOnMount={false}
     color="success"
-    iconType="flag"
+    iconType="pencil"
     title="Metricbeat is monitoring all nodes."
   />
   <EuiSpacer
@@ -132,8 +140,9 @@ exports[`setupMode ListingCallOut all migrated should render for elasticsearch 1
 exports[`setupMode ListingCallOut all migrated should render for kibana 1`] = `
 <Fragment>
   <EuiCallOut
+    announceOnMount={false}
     color="success"
-    iconType="flag"
+    iconType="pencil"
     title="Metricbeat is monitoring all instances."
   />
   <EuiSpacer
@@ -145,8 +154,9 @@ exports[`setupMode ListingCallOut all migrated should render for kibana 1`] = `
 exports[`setupMode ListingCallOut all migrated should render for logstash 1`] = `
 <Fragment>
   <EuiCallOut
+    announceOnMount={false}
     color="success"
-    iconType="flag"
+    iconType="pencil"
     title="Metricbeat is monitoring all nodes."
   />
   <EuiSpacer
@@ -158,8 +168,9 @@ exports[`setupMode ListingCallOut all migrated should render for logstash 1`] = 
 exports[`setupMode ListingCallOut all partially migrated should render for apm 1`] = `
 <Fragment>
   <EuiCallOut
+    announceOnMount={false}
     color="warning"
-    iconType="flag"
+    iconType="pencil"
     title="Disable self monitoring"
   >
     <p>
@@ -175,8 +186,9 @@ exports[`setupMode ListingCallOut all partially migrated should render for apm 1
 exports[`setupMode ListingCallOut all partially migrated should render for beats 1`] = `
 <Fragment>
   <EuiCallOut
+    announceOnMount={false}
     color="warning"
-    iconType="flag"
+    iconType="pencil"
     title="Disable self monitoring"
   >
     <p>
@@ -192,8 +204,9 @@ exports[`setupMode ListingCallOut all partially migrated should render for beats
 exports[`setupMode ListingCallOut all partially migrated should render for elasticsearch 1`] = `
 <Fragment>
   <EuiCallOut
+    announceOnMount={false}
     color="warning"
-    iconType="flag"
+    iconType="pencil"
     title="Disable self monitoring"
   >
     <p>
@@ -209,8 +222,9 @@ exports[`setupMode ListingCallOut all partially migrated should render for elast
 exports[`setupMode ListingCallOut all partially migrated should render for kibana 1`] = `
 <Fragment>
   <EuiCallOut
+    announceOnMount={false}
     color="warning"
-    iconType="flag"
+    iconType="pencil"
     title="Disable self monitoring"
   >
     <p>
@@ -226,8 +240,9 @@ exports[`setupMode ListingCallOut all partially migrated should render for kiban
 exports[`setupMode ListingCallOut all partially migrated should render for logstash 1`] = `
 <Fragment>
   <EuiCallOut
+    announceOnMount={false}
     color="warning"
-    iconType="flag"
+    iconType="pencil"
     title="Disable self monitoring"
   >
     <p>
@@ -243,7 +258,8 @@ exports[`setupMode ListingCallOut all partially migrated should render for logst
 exports[`setupMode ListingCallOut no detectable instances should render for apm 1`] = `
 <Fragment>
   <EuiCallOut
-    iconType="flag"
+    announceOnMount={false}
+    iconType="pencil"
     title="No APM servers detected"
   >
     <p>
@@ -259,7 +275,8 @@ exports[`setupMode ListingCallOut no detectable instances should render for apm 
 exports[`setupMode ListingCallOut no detectable instances should render for beats 1`] = `
 <Fragment>
   <EuiCallOut
-    iconType="flag"
+    announceOnMount={false}
+    iconType="pencil"
     title="No Beats instances detected"
   >
     <p>
@@ -275,7 +292,8 @@ exports[`setupMode ListingCallOut no detectable instances should render for beat
 exports[`setupMode ListingCallOut no detectable instances should render for elasticsearch 1`] = `
 <Fragment>
   <EuiCallOut
-    iconType="flag"
+    announceOnMount={false}
+    iconType="pencil"
     title="No Elasticsearch nodes detected"
   >
     <p>
@@ -291,7 +309,8 @@ exports[`setupMode ListingCallOut no detectable instances should render for elas
 exports[`setupMode ListingCallOut no detectable instances should render for kibana 1`] = `
 <Fragment>
   <EuiCallOut
-    iconType="flag"
+    announceOnMount={false}
+    iconType="pencil"
     title="No Kibana instances detected"
   >
     <p>
@@ -307,7 +326,8 @@ exports[`setupMode ListingCallOut no detectable instances should render for kiba
 exports[`setupMode ListingCallOut no detectable instances should render for logstash 1`] = `
 <Fragment>
   <EuiCallOut
-    iconType="flag"
+    announceOnMount={false}
+    iconType="pencil"
     title="No Logstash nodes detected"
   >
     <p>
@@ -323,8 +343,9 @@ exports[`setupMode ListingCallOut no detectable instances should render for logs
 exports[`setupMode ListingCallOut only detectable instances should render for apm 1`] = `
 <Fragment>
   <EuiCallOut
+    announceOnMount={false}
     color="warning"
-    iconType="flag"
+    iconType="pencil"
     title="APM server detected"
   >
     <p>
@@ -340,8 +361,9 @@ exports[`setupMode ListingCallOut only detectable instances should render for ap
 exports[`setupMode ListingCallOut only detectable instances should render for beats 1`] = `
 <Fragment>
   <EuiCallOut
+    announceOnMount={false}
     color="warning"
-    iconType="flag"
+    iconType="pencil"
     title="Beats instance detected"
   >
     <p>
@@ -357,8 +379,9 @@ exports[`setupMode ListingCallOut only detectable instances should render for be
 exports[`setupMode ListingCallOut only detectable instances should render for elasticsearch 1`] = `
 <Fragment>
   <EuiCallOut
+    announceOnMount={false}
     color="warning"
-    iconType="flag"
+    iconType="pencil"
     title="Elasticsearch node detected"
   >
     <p>
@@ -374,8 +397,9 @@ exports[`setupMode ListingCallOut only detectable instances should render for el
 exports[`setupMode ListingCallOut only detectable instances should render for kibana 1`] = `
 <Fragment>
   <EuiCallOut
+    announceOnMount={false}
     color="warning"
-    iconType="flag"
+    iconType="pencil"
     title="Kibana instance detected"
   >
     <p>
@@ -391,8 +415,9 @@ exports[`setupMode ListingCallOut only detectable instances should render for ki
 exports[`setupMode ListingCallOut only detectable instances should render for logstash 1`] = `
 <Fragment>
   <EuiCallOut
+    announceOnMount={false}
     color="warning"
-    iconType="flag"
+    iconType="pencil"
     title="Logstash node detected"
   >
     <p>

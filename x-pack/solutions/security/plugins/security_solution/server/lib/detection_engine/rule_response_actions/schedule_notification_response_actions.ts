@@ -44,8 +44,19 @@ export const getScheduleNotificationResponseActionsService =
           responseAction.actionTypeId === ResponseActionTypesEnum['.osquery'] &&
           osqueryCreateActionService
         ) {
-          await osqueryResponseAction(responseAction, osqueryCreateActionService, {
-            alerts,
+          await osqueryResponseAction(
+            responseAction,
+            osqueryCreateActionService,
+            endpointAppContextService,
+            {
+              alerts,
+            }
+          ).catch((error) => {
+            osqueryCreateActionService.logger.error(
+              `Unexpected failure of Osquery automated response actions: ${
+                error instanceof Error ? error.message : String(error)
+              }`
+            );
           });
         }
         if (responseAction.actionTypeId === ResponseActionTypesEnum['.endpoint']) {
@@ -58,6 +69,13 @@ export const getScheduleNotificationResponseActionsService =
           if (alertsFromElasticDefend.length > 0) {
             await endpointResponseAction(responseAction, endpointAppContextService, {
               alerts: alertsFromElasticDefend,
+            }).catch((error) => {
+              endpointAppContextService
+                .createLogger('getScheduleNotificationResponseActionsService')
+                .error(
+                  `Unexpected failure of Endpoint automated response actions: ${error.message}`,
+                  { error }
+                );
             });
           }
         }

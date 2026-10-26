@@ -16,7 +16,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { LocationsStatus } from '../../../hooks';
+import type { LocationsStatus } from '../../../hooks';
 import { useMonitorDetailLocator } from '../../../hooks/use_monitor_detail_locator';
 const DEFAULT_DISPLAY_COUNT = 3;
 
@@ -24,10 +24,14 @@ export const LocationStatusBadges = ({
   loading,
   locations,
   configId,
+  spaces,
+  isInteractive = true,
 }: {
   locations: LocationsStatus;
   loading: boolean;
   configId: string;
+  spaces?: string[];
+  isInteractive?: boolean;
 }) => {
   const [toDisplay, setToDisplay] = useState(DEFAULT_DISPLAY_COUNT);
 
@@ -55,6 +59,8 @@ export const LocationStatusBadges = ({
             locationId={loc.id}
             locationLabel={loc.label}
             color={loc.color}
+            spaces={spaces}
+            isInteractive={isInteractive}
           />
         </EuiFlexItem>
       ))}
@@ -105,20 +111,25 @@ const MonitorDetailLinkForLocation = ({
   locationId,
   locationLabel,
   color,
+  spaces,
+  isInteractive = true,
 }: {
   configId: string;
   locationId: string;
   locationLabel: string;
   color: string;
+  spaces?: string[];
+  isInteractive?: boolean;
 }) => {
   const monitorDetailLinkUrl = useMonitorDetailLocator({
     configId,
     locationId,
+    spaces,
   });
 
-  return (
+  return isInteractive ? (
     <EuiBadge
-      iconType={() => <EuiIcon size="m" type="dot" color={color} />}
+      iconType={() => <EuiIcon size="m" type="dot" color={color} aria-hidden={true} />}
       color="hollow"
       href={monitorDetailLinkUrl ?? '/'}
       aria-label={i18n.translate('xpack.synthetics.management.location.ariaLabel', {
@@ -127,6 +138,13 @@ const MonitorDetailLinkForLocation = ({
           locationLabel,
         },
       })}
+    >
+      {locationLabel}
+    </EuiBadge>
+  ) : (
+    <EuiBadge
+      iconType={() => <EuiIcon size="m" type="dot" color={color} aria-hidden={true} />}
+      color="hollow"
     >
       {locationLabel}
     </EuiBadge>

@@ -7,7 +7,7 @@
 
 import deepmerge from 'deepmerge';
 
-import type { MlSummaryJob } from '@kbn/ml-plugin/public';
+import type { MlSummaryJob } from '@kbn/ml-common-types/anomaly_detection_jobs/summary_job';
 import type { FlowTargetSourceDest } from '../../../../../common/search_strategy';
 import type { ESTermQuery } from '../../../../../common/typed_json';
 import { createFilter } from '../../helpers';

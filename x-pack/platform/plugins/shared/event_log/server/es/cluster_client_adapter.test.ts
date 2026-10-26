@@ -58,6 +58,20 @@ describe('indexDocument', () => {
     });
   });
 
+  test('should call cluster client bulk with given doc and id', async () => {
+    // @ts-expect-error
+    clusterClientAdapter.indexDocument({ id: 'abc', body: { message: 'foo' }, index: 'event-log' });
+
+    await retryUntil('cluster client bulk called', () => {
+      return clusterClient.bulk.mock.calls.length !== 0;
+    });
+
+    expect(clusterClient.bulk).toHaveBeenCalledWith({
+      body: [{ create: { _id: 'abc' } }, { message: 'foo' }],
+      index: 'kibana-event-log-ds',
+    });
+  });
+
   test('should log an error when cluster client throws an error', async () => {
     clusterClient.bulk.mockRejectedValue(new Error('expected failure'));
     clusterClientAdapter.indexDocument({ body: { message: 'foo' }, index: 'event-log' });
@@ -569,7 +583,7 @@ export const GetDataStreamsResponse: estypes.IndicesGetDataStreamResponse = {
       prefer_ilm: false,
       rollover_on_write: true,
       next_generation_managed_by: 'Index Lifecycle Management',
-    },
+    } as Partial<estypes.IndicesDataStream> as estypes.IndicesDataStream,
   ],
 };
 
@@ -2598,6 +2612,38 @@ describe('queryEventsBySavedObjectsSearchAfter', () => {
     },
   };
 
+  const defaultSearchResponse = {
+    hits: {
+      hits: [
+        {
+          _id: 'hit1',
+          _index: 'test-index',
+          _seq_no: 1,
+          _primary_term: 1,
+          _source: { field: 'value1' },
+          sort: ['2021-01-01T00:00:00.000Z'],
+        },
+        {
+          _id: 'hit2',
+          _index: 'test-index',
+          _seq_no: 2,
+          _primary_term: 1,
+          _source: { field: 'value2' },
+          sort: ['2021-01-01T00:00:01.000Z'],
+        },
+      ],
+      total: { value: 100, relation: 'eq' },
+    },
+    took: 0,
+    timed_out: false,
+    _shards: {
+      failed: 0,
+      successful: 0,
+      total: 0,
+      skipped: 0,
+    },
+  } as Awaited<ReturnType<typeof clusterClient.search>>;
+
   beforeEach(() => {
     clusterClient.openPointInTime.mockResponse({
       id: 'test-pit-id',
@@ -2608,37 +2654,7 @@ describe('queryEventsBySavedObjectsSearchAfter', () => {
         skipped: 0,
       },
     });
-    clusterClient.search.mockResponse({
-      hits: {
-        hits: [
-          {
-            _id: 'hit1',
-            _index: 'test-index',
-            _seq_no: 1,
-            _primary_term: 1,
-            _source: { field: 'value1' },
-            sort: ['2021-01-01T00:00:00.000Z'],
-          },
-          {
-            _id: 'hit2',
-            _index: 'test-index',
-            _seq_no: 2,
-            _primary_term: 1,
-            _source: { field: 'value2' },
-            sort: ['2021-01-01T00:00:01.000Z'],
-          },
-        ],
-        total: { value: 100, relation: 'eq' },
-      },
-      took: 0,
-      timed_out: false,
-      _shards: {
-        failed: 0,
-        successful: 0,
-        total: 0,
-        skipped: 0,
-      },
-    });
+    clusterClient.search.mockResponse(defaultSearchResponse);
   });
 
   test('should use seq_no_primary_term in query', async () => {
@@ -2723,6 +2739,43 @@ describe('queryEventsBySavedObjectsSearchAfter', () => {
 
     expect(clusterClient.closePointInTime).toHaveBeenCalledWith({ id: 'test-pit-id' });
   });
+
+  describe('when the search request returns a pit', () => {
+    beforeEach(() => {
+      clusterClient.search.mockResponseOnce({
+        ...defaultSearchResponse,
+        pit_id: 'pit-id-returned-in-search-response',
+      });
+    });
+
+    test('should return properly formatted response', async () => {
+      const response = await clusterClientAdapter.queryEventsBySavedObjectsSearchAfter(
+        defaultQuery
+      );
+
+      expect(response).toEqual({
+        data: [
+          {
+            field: 'value1',
+            _id: 'hit1',
+            _index: 'test-index',
+            _seq_no: 1,
+            _primary_term: 1,
+          },
+          {
+            field: 'value2',
+            _id: 'hit2',
+            _index: 'test-index',
+            _seq_no: 2,
+            _primary_term: 1,
+          },
+        ],
+        total: 100,
+        search_after: ['2021-01-01T00:00:01.000Z'],
+        pit_id: 'pit-id-returned-in-search-response',
+      });
+    });
+  });
 });
 
 describe('closePointInTime', () => {
@@ -2764,6 +2817,125 @@ describe('refreshIndex', () => {
     );
   });
 });
+
+describe('softDeleteByQuery', () => {
+  const gapQuery: estypes.QueryDslQueryContainer = {
+    bool: {
+      must: [
+        { term: { 'event.action': 'gap' } },
+        { term: { 'event.provider': 'alerting' } },
+        { terms: { 'rule.id': ['rule-1'] } },
+      ],
+      must_not: [{ term: { 'kibana.alert.rule.gap.deleted': true } }],
+    },
+  };
+
+  beforeEach(() => {
+    clusterClient.updateByQuery.mockResolvedValue({
+      updated: 1,
+      version_conflicts: 0,
+      failures: [],
+    } as estypes.UpdateByQueryResponse);
+  });
+
+  test('runs one update_by_query against the data stream with a null-safe set-field script', async () => {
+    await clusterClientAdapter.softDeleteByQuery({
+      query: gapQuery,
+      field: 'kibana.alert.rule.gap.deleted',
+    });
+
+    expect(clusterClient.updateByQuery).toHaveBeenCalledTimes(1);
+    expect(clusterClient.updateByQuery).toHaveBeenCalledWith({
+      index: 'kibana-event-log-ds',
+      conflicts: 'proceed',
+      slices: 'auto',
+      query: gapQuery,
+      script: {
+        source:
+          "if (ctx._source.kibana?.alert?.rule?.gap != null) { ctx._source.kibana.alert.rule.gap.deleted = true; } else { ctx.op = 'noop'; }",
+        lang: 'painless',
+      },
+    });
+  });
+
+  test('builds a null-safe script for a shallow field', async () => {
+    await clusterClientAdapter.softDeleteByQuery({ query: gapQuery, field: 'a.b' });
+
+    const [call] = clusterClient.updateByQuery.mock.calls[0] as [estypes.UpdateByQueryRequest];
+    expect(call.script).toEqual({
+      source: "if (ctx._source.a != null) { ctx._source.a.b = true; } else { ctx.op = 'noop'; }",
+      lang: 'painless',
+    });
+  });
+
+  test('builds a script for a flat single-segment field', async () => {
+    await clusterClientAdapter.softDeleteByQuery({ query: gapQuery, field: 'deleted' });
+
+    const [call] = clusterClient.updateByQuery.mock.calls[0] as [estypes.UpdateByQueryRequest];
+    expect(call.script).toEqual({
+      source: 'ctx._source.deleted = true;',
+      lang: 'painless',
+    });
+  });
+
+  // Field validation is now enforced by the EventLogClient schema; the adapter
+  // trusts its caller. See event_log_client.test.ts for rejection cases.
+
+  test('does not pass wait_for_completion (blocking)', async () => {
+    await clusterClientAdapter.softDeleteByQuery({ query: gapQuery, field: 'a.b' });
+
+    const [call] = clusterClient.updateByQuery.mock.calls[0];
+    expect(call).not.toHaveProperty('wait_for_completion');
+  });
+
+  // `requests_per_second` caps documents per second across the whole operation,
+  // so a default value would throttle throughput rather than limit round trips.
+  test('does not throttle by default', async () => {
+    await clusterClientAdapter.softDeleteByQuery({ query: gapQuery, field: 'a.b' });
+
+    const [call] = clusterClient.updateByQuery.mock.calls[0];
+    expect(call).not.toHaveProperty('requests_per_second');
+  });
+
+  test('honors conflicts, slices, and requestsPerSecond overrides', async () => {
+    await clusterClientAdapter.softDeleteByQuery({
+      query: gapQuery,
+      field: 'a.b',
+      conflicts: 'abort',
+      slices: 4,
+      requestsPerSecond: 250,
+    });
+
+    expect(clusterClient.updateByQuery).toHaveBeenCalledWith(
+      expect.objectContaining({ conflicts: 'abort', slices: 4, requests_per_second: 250 })
+    );
+  });
+
+  test('returns the update_by_query response', async () => {
+    clusterClient.updateByQuery.mockResolvedValue({
+      updated: 5,
+      version_conflicts: 1,
+      failures: [],
+    } as estypes.UpdateByQueryResponse);
+
+    const response = await clusterClientAdapter.softDeleteByQuery({
+      query: gapQuery,
+      field: 'a.b',
+    });
+
+    expect(response.updated).toBe(5);
+    expect(response.version_conflicts).toBe(1);
+  });
+
+  test('propagates errors from update_by_query', async () => {
+    clusterClient.updateByQuery.mockRejectedValue(new Error('boom'));
+
+    await expect(
+      clusterClientAdapter.softDeleteByQuery({ query: gapQuery, field: 'a.b' })
+    ).rejects.toThrow('boom');
+  });
+});
+
 type RetryableFunction = () => boolean;
 
 const RETRY_UNTIL_DEFAULT_COUNT = 20;

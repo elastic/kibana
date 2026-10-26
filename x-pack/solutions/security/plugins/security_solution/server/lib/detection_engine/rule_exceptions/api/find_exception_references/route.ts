@@ -9,6 +9,7 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import { getSavedObjectType } from '@kbn/securitysolution-list-utils';
 import { validate } from '@kbn/securitysolution-io-ts-utils';
 
+import { EXCEPTIONS_API_READ } from '@kbn/security-solution-features/constants';
 import { buildRouteValidation } from '../../../../../utils/build_validation/route_validation';
 import { buildSiemResponse } from '../../../routes/utils';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
@@ -31,7 +32,7 @@ export const findRuleExceptionReferencesRoute = (router: SecuritySolutionPluginR
       access: 'internal',
       security: {
         authz: {
-          requiredPrivileges: ['securitySolution'],
+          requiredPrivileges: [EXCEPTIONS_API_READ],
         },
       },
     })

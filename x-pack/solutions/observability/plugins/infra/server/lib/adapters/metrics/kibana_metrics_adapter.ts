@@ -12,9 +12,9 @@ import { isVisSeriesData } from '@kbn/vis-type-timeseries-plugin/server';
 import { metrics, findInventoryFields } from '@kbn/metrics-data-access-plugin/common';
 import type {
   TSVBMetricModelCreator,
-  InventoryMetric,
+  InventoryTsvbType,
 } from '@kbn/metrics-data-access-plugin/common';
-import { InventoryMetricRT } from '@kbn/metrics-data-access-plugin/common';
+import { InventoryTsvbTypeKeysRT } from '@kbn/metrics-data-access-plugin/common';
 import { TIMESTAMP_FIELD } from '../../../../common/constants';
 import type { NodeDetailsMetricData } from '../../../../common/http_api/node_details_api';
 import type { KibanaFramework } from '../framework/kibana_framework_adapter';
@@ -37,7 +37,7 @@ export class KibanaMetricsAdapter implements InfraMetricsAdapter {
     rawRequest: KibanaRequest
   ): Promise<NodeDetailsMetricData[]> {
     const indexPattern = `${options.sourceConfiguration.metricAlias}`;
-    const fields = findInventoryFields(options.nodeType);
+    const fields = findInventoryFields(options.nodeType, options.schema);
     const nodeField = fields.id;
 
     const search = <Aggregation>(searchOptions: object) =>
@@ -67,7 +67,7 @@ export class KibanaMetricsAdapter implements InfraMetricsAdapter {
           );
 
           return metricIds.map((id: string) => {
-            if (!InventoryMetricRT.is(id)) {
+            if (!InventoryTsvbTypeKeysRT.is(id)) {
               throw new Error(
                 i18n.translate('xpack.infra.kibanaMetrics.invalidInfraMetricErrorMessage', {
                   defaultMessage: '{id} is not a valid InfraMetric',
@@ -100,7 +100,7 @@ export class KibanaMetricsAdapter implements InfraMetricsAdapter {
   }
 
   async makeTSVBRequest(
-    metricId: InventoryMetric,
+    metricId: InventoryTsvbType,
     options: InfraMetricsRequestOptions,
     nodeField: string,
     requestContext: InfraPluginRequestHandlerContext,
@@ -125,13 +125,17 @@ export class KibanaMetricsAdapter implements InfraMetricsAdapter {
       max: options.timerange.to,
     };
 
-    const model = createTSVBModel(TIMESTAMP_FIELD, indexPattern, options.timerange.interval);
+    const model = createTSVBModel(TIMESTAMP_FIELD, indexPattern, options.timerange.interval, {
+      schema: options.schema,
+    });
 
     const client = <Hit = {}, Aggregation = undefined>(
       opts: CallWithRequestParams
     ): Promise<InfraDatabaseSearchResponse<Hit, Aggregation>> =>
       this.framework.callWithRequest(requestContext, 'search', opts);
 
+    // OTel docs have no metricset.period, so this stays undefined and the
+    // requested interval is kept.
     const calculatedInterval = await calculateMetricInterval(
       client,
       {

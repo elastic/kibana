@@ -9,22 +9,38 @@
 
 import React from 'react';
 
-import { EuiButton, EuiFlexGroup, EuiSpacer, EuiTitle } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiFieldText,
+  EuiFlexGroup,
+  EuiFormRow,
+  EuiIcon,
+  EuiLink,
+  EuiSpacer,
+  EuiTitle,
+} from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
+import { context as contextType } from '@kbn/kibana-react-plugin/public';
 import { DEFAULT_CONVERTER_COLOR } from '@kbn/field-formats-plugin/common';
-import { Color, ColorRow } from './color_row';
+import type { Color } from './color_row';
+import { ColorRow } from './color_row';
 import { DefaultFormatEditor } from '../default/default';
 import { formatId } from './constants';
 
-import { FormatEditorProps } from '../types';
+import type { FormatEditorProps } from '../types';
 
 export interface ColorFormatEditorFormatParams {
   colors: Color[];
+  pattern?: string;
 }
 
 export class ColorFormatEditor extends DefaultFormatEditor<ColorFormatEditorFormatParams> {
+  static contextType = contextType;
   static formatId = formatId;
+
+  declare context: React.ContextType<typeof contextType>;
+
   constructor(props: FormatEditorProps<ColorFormatEditorFormatParams>) {
     super(props);
     this.onChange({
@@ -65,6 +81,39 @@ export class ColorFormatEditor extends DefaultFormatEditor<ColorFormatEditorForm
 
     return (
       <>
+        {fieldType === 'number' && (
+          <EuiFormRow
+            label={
+              <FormattedMessage
+                id="indexPatternFieldEditor.color.numeralPatternLabel"
+                defaultMessage="Numeral.js format pattern (optional)"
+              />
+            }
+            helpText={
+              <span>
+                <EuiLink
+                  target="_blank"
+                  href={this.context.services.docLinks?.links.indexPatterns.fieldFormattersNumber}
+                >
+                  <FormattedMessage
+                    id="indexPatternFieldEditor.number.documentationLabel"
+                    defaultMessage="Documentation"
+                  />
+                  &nbsp;
+                  <EuiIcon type="link" aria-hidden={true} />
+                </EuiLink>
+              </span>
+            }
+          >
+            <EuiFieldText
+              data-test-subj="colorEditorNumeralPattern"
+              value={formatParams.pattern ?? ''}
+              onChange={(e) => {
+                this.onChange({ pattern: e.target.value });
+              }}
+            />
+          </EuiFormRow>
+        )}
         <EuiSpacer size="m" />
         <EuiFlexGroup direction="column" gutterSize="s">
           <EuiTitle size="xxs">
@@ -92,7 +141,7 @@ export class ColorFormatEditor extends DefaultFormatEditor<ColorFormatEditorForm
         </EuiFlexGroup>
         <EuiSpacer size="m" />
         <EuiButton
-          iconType="plusInCircle"
+          iconType="plusCircle"
           size="s"
           onClick={this.addColor}
           data-test-subj="colorEditorAddColor"

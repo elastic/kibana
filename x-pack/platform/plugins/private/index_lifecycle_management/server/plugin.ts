@@ -6,15 +6,16 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { CoreSetup, Plugin, Logger, PluginInitializerContext } from '@kbn/core/server';
-import { IScopedClusterClient } from '@kbn/core/server';
+import type { CoreSetup, Plugin, Logger, PluginInitializerContext } from '@kbn/core/server';
+import type { IScopedClusterClient } from '@kbn/core/server';
+import type { IlmExplainLifecycleResponse } from '@elastic/elasticsearch/lib/api/types';
 
-import { Index } from '@kbn/index-management-plugin/common/types';
+import type { Index } from '@kbn/index-management-plugin/common/types';
 import { PLUGIN } from '../common/constants';
-import { Dependencies } from './types';
+import type { Dependencies } from './types';
 import { registerApiRoutes } from './routes';
 import { License } from './services';
-import { IndexLifecycleManagementConfig } from './config';
+import type { IndexLifecycleManagementConfig } from './config';
 import { handleEsError } from './shared_imports';
 
 const indexLifecycleDataEnricher = async (
@@ -25,9 +26,11 @@ const indexLifecycleDataEnricher = async (
     return [];
   }
 
-  const { indices: ilmIndicesData } = await client.asCurrentUser.ilm.explainLifecycle({
-    index: '*,.*',
-  });
+  const { indices: ilmIndicesData } =
+    await client.asCurrentUser.transport.request<IlmExplainLifecycleResponse>({
+      method: 'GET',
+      path: '/_all/_ilm/explain?expand_wildcards=all',
+    });
   return indicesList.map((index: Index) => {
     return {
       ...index,

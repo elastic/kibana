@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { EuiErrorBoundary } from '@elastic/eui';
 import React from 'react';
 import { SubscriptionSplashPage } from '../../../components/subscription_splash_content';
 import { MissingResultsPrivilegesPrompt } from '../../../components/logging/log_analysis_setup';
@@ -14,6 +13,7 @@ import { AnomaliesPageTemplate, LogEntryRatePageContent } from './page_content';
 import { LogEntryRatePageProviders } from './page_providers';
 import { useLogsBreadcrumbs } from '../../../hooks/use_logs_breadcrumbs';
 import { logsAnomaliesTitle } from '../../../translations';
+import { LogsAppHeader, logsAnomaliesPageTitle } from '../header';
 import { LogMlJobIdFormatsShimProvider } from '../shared/use_log_ml_job_id_formats_shim';
 
 export const LogEntryRatePage = () => {
@@ -30,9 +30,7 @@ export const LogEntryRatePage = () => {
     return (
       <SubscriptionSplashPage
         data-test-subj="logsLogEntryRatePage"
-        pageHeader={{
-          pageTitle: logsAnomaliesTitle,
-        }}
+        header={<LogsAppHeader title={logsAnomaliesPageTitle} />}
       />
     );
   }
@@ -46,12 +44,10 @@ export const LogEntryRatePage = () => {
   }
 
   return (
-    <EuiErrorBoundary>
-      <LogMlJobIdFormatsShimProvider>
-        <LogEntryRatePageProviders>
-          <LogEntryRatePageContent />
-        </LogEntryRatePageProviders>
-      </LogMlJobIdFormatsShimProvider>
-    </EuiErrorBoundary>
+    <LogMlJobIdFormatsShimProvider>
+      <LogEntryRatePageProviders>
+        <LogEntryRatePageContent />
+      </LogEntryRatePageProviders>
+    </LogMlJobIdFormatsShimProvider>
   );
 };

@@ -5,11 +5,15 @@
  * 2.0.
  */
 
-import { StatusError } from '../../errors/status_error';
+import { AggregateStatusError } from '../../errors/aggregate_status_error';
 
-export class InvalidStateError extends StatusError {
-  constructor(message: string) {
-    super(message, 400);
+export class InvalidStateError extends AggregateStatusError {
+  constructor(errors: Error[], message: string) {
+    let overallMessage = message;
+    if (errors.length > 0) {
+      overallMessage += `: ${errors.map((error) => error.message).join(', ')}`;
+    }
+    super(errors, overallMessage, 400);
     this.name = 'InvalidStateError';
   }
 }

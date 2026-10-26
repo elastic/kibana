@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import { APIClientRequestParamsOf, APIReturnType } from '../rest';
+import type { APIClientRequestParamsOf, APIReturnType } from '../rest';
+
+export type GetDataStreamsTypesPrivilegesParams =
+  APIClientRequestParamsOf<`GET /internal/dataset_quality/data_streams/types_privileges`>['params'];
+export type GetDataStreamsTypesPrivilegesQuery = GetDataStreamsTypesPrivilegesParams['query'];
+export type GetDataStreamsTypesPrivilegesResponse =
+  APIReturnType<`GET /internal/dataset_quality/data_streams/types_privileges`>;
 
 export type GetDataStreamsStatsParams =
   APIClientRequestParamsOf<`GET /internal/dataset_quality/data_streams/stats`>['params'];
@@ -68,6 +74,12 @@ export type GetDataStreamDetailsResponse =
 
 export type GetNonAggregatableDataStreamsParams =
   APIClientRequestParamsOf<`GET /internal/dataset_quality/data_streams/non_aggregatable`>['params']['query'];
+type GetDataStreamNonAggregatablePathParams =
+  APIClientRequestParamsOf<`GET /internal/dataset_quality/data_streams/{dataStream}/non_aggregatable`>['params']['path'];
+type GetDataStreamNonAggregatableQueryParams =
+  APIClientRequestParamsOf<`GET /internal/dataset_quality/data_streams/{dataStream}/non_aggregatable`>['params']['query'];
+export type GetDataStreamNonAggregatableParams = GetDataStreamNonAggregatablePathParams &
+  GetDataStreamNonAggregatableQueryParams;
 
 export type GetIntegrationDashboardsParams =
   APIClientRequestParamsOf<`GET /internal/dataset_quality/integrations/{integration}/dashboards`>['params']['path'];

@@ -1,0 +1,311 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { schema } from '@kbn/config-schema';
+import type { SavedObjectsModelVersionMap } from '@kbn/core-saved-objects-server';
+import { needsInterval } from '@kbn/alerting-v2-schemas';
+import {
+  actionPolicySavedObjectAttributesSchemaV1,
+  actionPolicySavedObjectAttributesSchemaV2,
+  actionPolicySavedObjectAttributesSchemaV3,
+  actionPolicySavedObjectAttributesSchemaV4,
+  actionPolicySavedObjectAttributesSchemaV5,
+  actionPolicySavedObjectAttributesSchemaV6,
+} from '../schemas/action_policy_saved_object_attributes';
+import type { ActionPolicySavedObjectAttributesV1 } from '../schemas/action_policy_saved_object_attributes';
+import { toActor } from './to_actor';
+
+export const actionPolicyModelVersions: SavedObjectsModelVersionMap = {
+  '1': {
+    changes: [],
+    schemas: {
+      /**
+       * After the v2 migration `auth` is removed from every document. Make it
+       * optional here so that v2 docs can be down-converted to v1 during a
+       * rollback without a validation failure. The `create` schema stays strict
+       * (required `auth`) because v1 writes should always include it.
+       */
+      forwardCompatibility: actionPolicySavedObjectAttributesSchemaV1.extends(
+        {
+          auth: schema.maybe(
+            schema.object({
+              apiKey: schema.maybe(schema.string()),
+              owner: schema.maybe(schema.string()),
+              createdByUser: schema.maybe(schema.boolean()),
+            })
+          ),
+        },
+        { unknowns: 'ignore' }
+      ),
+      create: actionPolicySavedObjectAttributesSchemaV1,
+    },
+  },
+  /**
+   * v2 migrates action policies from the v1 nested `auth` layout to flat
+   * top-level attributes so the Encrypted Saved Objects service can correctly
+   * encrypt `apiKey` and bind `apiKeyOwner` / `apiKeyCreatedByUser` into AAD.
+   *
+   * ESO resolves attribute names via `Object.hasOwn(attributes, key)`, which
+   * silently ignores dotted paths (`auth.apiKey`, `auth.owner`, …). On v1,
+   * action-policy API keys were therefore stored in plaintext. This migration:
+   *   1. Backfills `apiKeyOwner` ← `auth.owner` and
+   *      `apiKeyCreatedByUser` ← `auth.createdByUser`.
+   *   2. Removes `auth.apiKey` (the formerly-plaintext secret). The flat `apiKey`
+   *      field is NOT populated — copying a plaintext value into a field ESO now
+   *      treats as ciphertext would cause every subsequent decrypt to fail. An
+   *      absent `apiKey` is safe: the dispatcher logs a warning and skips the
+   *      group until the policy is re-saved and a new key is generated.
+   *   Note: `auth.{owner,createdByUser}` are kept in the document (now optional in
+   *   v2 schema) so that the ZDT/rollback pipeline can successfully down-convert
+   *   a v2 doc back to v1 without losing the `auth` container that v1 expects.
+   *
+   * A plain model version (not `createModelVersion`) is correct here because
+   * there was never anything encrypted to decrypt; the wrapper would also throw
+   * since `inputType.attributesToEncrypt` must be non-empty.
+   */
+  '2': {
+    changes: [
+      {
+        type: 'data_backfill',
+        backfillFn: (doc, context) => {
+          const { auth } = doc.attributes as ActionPolicySavedObjectAttributesV1;
+          if (!auth) {
+            context.log.warn(
+              `Action policy '${doc.id}' is missing 'auth' attributes; backfilling empty API key ownership.`
+            );
+          }
+          return {
+            attributes: {
+              apiKeyOwner: auth?.owner ?? '',
+              apiKeyCreatedByUser: auth?.createdByUser ?? false,
+            },
+          };
+        },
+      },
+      {
+        type: 'data_removal',
+        removedAttributePaths: ['auth.apiKey'],
+      },
+    ],
+    schemas: {
+      forwardCompatibility: actionPolicySavedObjectAttributesSchemaV2.extends(
+        {},
+        { unknowns: 'ignore' }
+      ),
+      create: actionPolicySavedObjectAttributesSchemaV2,
+    },
+  },
+  /**
+   * v3 migrates `matcher` from a raw KQL string to a structured object
+   * `{ tags, expression }`. Existing string matchers are wrapped in
+   * `{ expression: oldMatcher }` so they continue to be stored identically.
+   * Note: pre-v3 expressions referencing `rule.*` fields will no longer match
+   * in the dispatcher (those fields are not present in the evaluation context).
+   *
+   * This reshapes an existing attribute, so it is NOT rollback-compatible: the
+   * v1/v2 `forwardCompatibility` schemas type `matcher` as a string and reject
+   * the object, meaning a node rolled back to v2 fails to read any policy that
+   * carries a matcher. Accepted while alerting v2 is in technical preview; the
+   * SO migration fixtures therefore only cover matcher-less documents, and the
+   * string → object conversion is covered by unit tests instead.
+   */
+  '3': {
+    changes: [
+      {
+        type: 'data_backfill',
+        backfillFn: (doc) => {
+          const matcher = (doc.attributes as { matcher?: unknown }).matcher;
+          if (typeof matcher !== 'string') return { attributes: {} };
+          return { attributes: { matcher: { expression: matcher } } };
+        },
+      },
+    ],
+    schemas: {
+      forwardCompatibility: actionPolicySavedObjectAttributesSchemaV3.extends(
+        {},
+        { unknowns: 'ignore' }
+      ),
+      create: actionPolicySavedObjectAttributesSchemaV3,
+    },
+  },
+  '4': {
+    /**
+     * v4 migrates `createdBy` and `updatedBy` from the profile UID string to a
+     * structured actor object. Only string values are rewritten: a `null` actor
+     * (an unattributed write) stays `null`, which the v4 schema still allows, and
+     * an already-structured actor is left alone so the backfill is idempotent.
+     *
+     * This reshapes existing attributes, so it is NOT rollback-compatible: the
+     * v1-v3 schemas type both fields as strings and reject the object, meaning a
+     * node rolled back to v3 fails to read any policy with an attributed actor.
+     * Accepted while alerting v2 is in technical preview. The SO migration
+     * fixtures therefore only carry `null` actors, which round-trip through the
+     * rollback check; the string -> object conversion is covered by unit tests.
+     *
+     * The stored `apiKeyOwner` / `apiKeyCreatedByUser` attributes are untouched,
+     * so the decryption AAD is unaffected and a plain model version is correct.
+     */
+    changes: [
+      {
+        type: 'data_backfill',
+        backfillFn: (doc) => {
+          const { createdBy, updatedBy } = doc.attributes as {
+            createdBy?: unknown;
+            updatedBy?: unknown;
+          };
+          const createdByActor = toActor(createdBy);
+          const updatedByActor = toActor(updatedBy);
+
+          return {
+            attributes: {
+              ...(createdByActor ? { createdBy: createdByActor } : {}),
+              ...(updatedByActor ? { updatedBy: updatedByActor } : {}),
+            },
+          };
+        },
+      },
+    ],
+    schemas: {
+      forwardCompatibility: actionPolicySavedObjectAttributesSchemaV4.extends(
+        {},
+        { unknowns: 'ignore' }
+      ),
+      create: actionPolicySavedObjectAttributesSchemaV4,
+    },
+  },
+  '5': {
+    /**
+     * v5 renames the `per_episode` grouping mode to `per_alert`. Only
+     * `per_episode` is rewritten; `all`, `per_field`, `null`, and an absent mode
+     * are left alone, so the backfill is idempotent.
+     *
+     * This changes the allowed values of an existing attribute, so it is NOT
+     * rollback-compatible: the v1-v4 schemas only accept `per_episode`, meaning a
+     * node rolled back to v4 fails to read any policy grouped `per_alert`.
+     * Accepted while alerting v2 is in technical preview. The SO migration
+     * fixtures therefore only carry `null`, `all`, or `per_field` grouping modes,
+     * which round-trip through the rollback check; the rename is covered by unit
+     * tests.
+     *
+     * `groupingMode` is neither encrypted nor part of the decryption AAD, so a
+     * plain model version is correct.
+     */
+    changes: [
+      {
+        type: 'data_backfill',
+        backfillFn: (doc) => {
+          const { groupingMode } = doc.attributes as { groupingMode?: unknown };
+          return groupingMode === 'per_episode'
+            ? { attributes: { groupingMode: 'per_alert' } }
+            : { attributes: {} };
+        },
+      },
+    ],
+    schemas: {
+      forwardCompatibility: actionPolicySavedObjectAttributesSchemaV5.extends(
+        {},
+        { unknowns: 'ignore' }
+      ),
+      create: actionPolicySavedObjectAttributesSchemaV5,
+    },
+  },
+  '6': {
+    /**
+     * v6 folds `groupingMode` and `groupBy` into a single `grouping` block keyed by `mode`, and
+     * normalises `throttle` the same way: in both, a stored document could hold keys its mode or
+     * strategy never read, which is what the unions on the API now make unsayable.
+     *
+     * The mode is kept as it was stored, so an explicit `per_alert` still reads back as one; only
+     * the dead configuration goes. `groupBy` on a mode that groups on no field is dropped, and
+     * `per_field` with nothing to group by becomes `all`, which is what it already dispatches as:
+     * the group key is built from the fields, so with none it is `{}` — one group per policy, the
+     * same action group `all` hashes to.
+     *
+     * A throttle whose strategy takes no interval loses the stray interval. One with no strategy at
+     * all is given the strategy the dispatcher has been inferring for it all along, so the
+     * throttling it performs today survives being written down; only a throttle with no interval
+     * either names nothing to keep, and becomes `null`.
+     *
+     * Dropping a key off `throttle` needs `unsafe_transform`: a `data_backfill` result is merged
+     * into the document with a deep merge, which cannot remove anything. It runs after the
+     * grouping backfill, so it reads the mode from the block that one just wrote.
+     *
+     * This reshapes existing attributes, so it is NOT rollback-compatible: the v1-v5 schemas have
+     * no `grouping` key and require the two they replace. Accepted while alerting v2 is in
+     * technical preview. None of these attributes is encrypted or part of the decryption AAD, so a
+     * plain model version is correct.
+     */
+    changes: [
+      {
+        type: 'data_backfill',
+        backfillFn: (doc) => {
+          const { groupingMode, groupBy } = doc.attributes as {
+            groupingMode?: unknown;
+            groupBy?: string[] | null;
+          };
+
+          if (groupingMode === 'per_field') {
+            return groupBy?.length
+              ? { attributes: { grouping: { mode: 'per_field' as const, fields: groupBy } } }
+              : { attributes: { grouping: { mode: 'all' as const } } };
+          }
+
+          return groupingMode === 'all' || groupingMode === 'per_alert'
+            ? { attributes: { grouping: { mode: groupingMode } } }
+            : { attributes: {} };
+        },
+      },
+      {
+        type: 'data_removal',
+        removedAttributePaths: ['groupingMode', 'groupBy'],
+      },
+      {
+        type: 'unsafe_transform',
+        transformFn: (typeSafeGuard) =>
+          typeSafeGuard((doc) => {
+            const attributes = doc.attributes as Record<string, unknown> & {
+              grouping?: { mode?: string };
+              throttle?: { strategy?: string; interval?: string | null } | null;
+            };
+
+            const { grouping, throttle } = attributes;
+            if (!throttle) return { document: doc };
+
+            const { strategy, interval } = throttle;
+            if (needsInterval(strategy) || (strategy != null && interval == null)) {
+              return { document: doc };
+            }
+
+            const inferred =
+              (grouping?.mode ?? 'per_alert') === 'per_alert'
+                ? 'on_status_change'
+                : 'time_interval';
+
+            const next =
+              strategy != null
+                ? { strategy }
+                : interval != null
+                ? needsInterval(inferred)
+                  ? { strategy: inferred, interval }
+                  : { strategy: inferred }
+                : null;
+
+            return {
+              document: { ...doc, attributes: { ...attributes, throttle: next } },
+            };
+          }),
+      },
+    ],
+    schemas: {
+      forwardCompatibility: actionPolicySavedObjectAttributesSchemaV6.extends(
+        {},
+        { unknowns: 'ignore' }
+      ),
+      create: actionPolicySavedObjectAttributesSchemaV6,
+    },
+  },
+};

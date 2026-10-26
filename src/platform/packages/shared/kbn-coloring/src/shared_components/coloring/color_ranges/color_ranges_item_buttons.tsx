@@ -7,10 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { Dispatch, useCallback, useContext } from 'react';
+import type { Dispatch } from 'react';
+import React, { useCallback, useContext } from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { EuiButtonIcon, EuiIconProps } from '@elastic/eui';
+import type { EuiIconProps } from '@elastic/eui';
+import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { TooltipWrapper } from '@kbn/visualization-utils';
 
 import type { PaletteContinuity, CustomPaletteParams } from '../../../palettes';
@@ -55,14 +57,15 @@ export function ColorRangeDeleteButton({ index, dispatch }: ColorRangesItemButto
   });
 
   return (
-    <EuiButtonIcon
-      iconType="trash"
-      color="danger"
-      aria-label={title}
-      title={title}
-      onClick={onExecuteAction}
-      data-test-subj={`lnsPalettePanel_dynamicColoring_removeColorRange_${index}`}
-    />
+    <EuiToolTip content={title} disableScreenReaderOutput>
+      <EuiButtonIcon
+        iconType="trash"
+        color="danger"
+        aria-label={title}
+        onClick={onExecuteAction}
+        data-test-subj={`lnsPalettePanel_dynamicColoring_removeColorRange_${index}`}
+      />
+    </EuiToolTip>
   );
 }
 
@@ -102,14 +105,16 @@ export function ColorRangeEditButton({
   }
 
   return (
-    <TooltipWrapper tooltipContent={tooltipContent} condition={true} position="top" delay="regular">
-      <EuiButtonIcon
-        iconType="pencil"
-        aria-label={tooltipContent}
-        disabled={disableSwitchingContinuity}
-        onClick={onExecuteAction}
-        data-test-subj={`lnsPalettePanel_dynamicColoring_editValue_${index}`}
-      />
+    <TooltipWrapper tooltipContent={tooltipContent} condition={true} position="top">
+      <EuiToolTip content={tooltipContent} disableScreenReaderOutput>
+        <EuiButtonIcon
+          iconType="pencil"
+          aria-label={tooltipContent}
+          disabled={disableSwitchingContinuity}
+          onClick={onExecuteAction}
+          data-test-subj={`lnsPalettePanel_dynamicColoring_editValue_${index}`}
+        />
+      </EuiToolTip>
     </TooltipWrapper>
   );
 }
@@ -134,15 +139,17 @@ export function ColorRangeAutoDetectButton({
   }, [continuity, dataBounds, dispatch, isLast, palettes]);
 
   return (
-    <TooltipWrapper tooltipContent={tooltipContent} condition={true} position="top" delay="regular">
-      <EuiButtonIcon
-        iconType={iconFactory}
-        aria-label={tooltipContent}
-        onClick={onExecuteAction}
-        data-test-subj={`lnsPalettePanel_dynamicColoring_autoDetect_${
-          isLast ? 'maximum' : 'minimum'
-        }`}
-      />
+    <TooltipWrapper tooltipContent={tooltipContent} condition={true} position="top">
+      <EuiToolTip content={tooltipContent} disableScreenReaderOutput>
+        <EuiButtonIcon
+          iconType={iconFactory}
+          aria-label={tooltipContent}
+          onClick={onExecuteAction}
+          data-test-subj={`lnsPalettePanel_dynamicColoring_autoDetect_${
+            isLast ? 'maximum' : 'minimum'
+          }`}
+        />
+      </EuiToolTip>
     </TooltipWrapper>
   );
 }

@@ -5,9 +5,17 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 
-import { EuiText, EuiSpacer, EuiButton, EuiCallOut, EuiSkeletonText, EuiCode } from '@elastic/eui';
+import {
+  EuiText,
+  EuiSpacer,
+  EuiButton,
+  EuiSkeletonText,
+  EuiCode,
+  EuiFlexGroup,
+} from '@elastic/eui';
+import { KbnDangerCallout, KbnWarningCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 import { FormattedDate, FormattedTime, FormattedMessage } from '@kbn/i18n-react';
 import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
@@ -17,11 +25,15 @@ import {
   APP_LOGS_COUNT_CLUSTER_PRIVILEGES,
   APP_LOGS_COUNT_INDEX_PRIVILEGES,
 } from '../../../../../common/constants';
-import { WithPrivileges, MissingPrivileges } from '../../../../shared_imports';
+import type { MissingPrivileges } from '../../../../shared_imports';
+import { WithPrivileges, GlobalFlyout } from '../../../../shared_imports';
 import { useAppContext } from '../../../app_context';
 import { loadLogsCheckpoint } from '../../../lib/logs_checkpoint';
 import type { OverviewStepProps } from '../../types';
 import { useDeprecationLogging } from '../../es_deprecation_logs';
+import { DiscoverExternalLinks } from '../../es_deprecation_logs/fix_deprecation_logs/external_links';
+import type { EsDeprecationLogsFlyoutProps } from '../../es_deprecation_logs/fix_deprecation_logs/es_deprecation_logs_flyout';
+import { EsDeprecationLogsFlyout } from '../../es_deprecation_logs/fix_deprecation_logs/es_deprecation_logs_flyout';
 
 const i18nTexts = {
   logsStepTitle: i18n.translate('xpack.upgradeAssistant.overview.logsStep.title', {
@@ -30,10 +42,10 @@ const i18nTexts = {
   logsStepDescription: i18n.translate('xpack.upgradeAssistant.overview.logsStep.description', {
     defaultMessage: `Review the Elasticsearch deprecation logs to ensure you're not using deprecated APIs.`,
   }),
-  viewLogsButtonLabel: i18n.translate(
-    'xpack.upgradeAssistant.overview.logsStep.viewLogsButtonLabel',
+  viewDetailsButtonLabel: i18n.translate(
+    'xpack.upgradeAssistant.overview.logsStep.viewDetailsButtonLabel',
     {
-      defaultMessage: 'View logs',
+      defaultMessage: 'View details',
     }
   ),
   enableLogsButtonLabel: i18n.translate(
@@ -101,11 +113,13 @@ const i18nTexts = {
   }),
 };
 
+const FLYOUT_ID = 'deprecationLogsFlyout';
+const { useGlobalFlyout } = GlobalFlyout;
+
 interface LogStepProps {
   setIsComplete: (isComplete: boolean) => void;
   hasPrivileges: boolean;
   privilegesMissing: MissingPrivileges;
-  navigateToEsDeprecationLogs: () => void;
 }
 
 const LogStepDescription = () => (
@@ -114,17 +128,13 @@ const LogStepDescription = () => (
   </EuiText>
 );
 
-const LogsStep = ({
-  setIsComplete,
-  hasPrivileges,
-  privilegesMissing,
-  navigateToEsDeprecationLogs,
-}: LogStepProps) => {
+const LogsStep = ({ setIsComplete, hasPrivileges, privilegesMissing }: LogStepProps) => {
   const {
     services: { api },
   } = useAppContext();
 
-  const { isDeprecationLogIndexingEnabled } = useDeprecationLogging();
+  const { isDeprecationLogIndexingEnabled, resendRequest: refreshDeprecationLogging } =
+    useDeprecationLogging();
 
   const checkpoint = loadLogsCheckpoint();
 
@@ -147,6 +157,38 @@ const LogsStep = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isDeprecationLogIndexingEnabled, logsCount]);
 
+  const [showFlyout, setShowFlyout] = useState(false);
+
+  const { addContent: addContentToGlobalFlyout, removeContent: removeContentFromGlobalFlyout } =
+    useGlobalFlyout();
+
+  const closeFlyout = useCallback(() => {
+    setShowFlyout(false);
+    removeContentFromGlobalFlyout(FLYOUT_ID);
+  }, [removeContentFromGlobalFlyout]);
+
+  const handleToggleChange = useCallback(() => {
+    refreshDeprecationLogging();
+  }, [refreshDeprecationLogging]);
+
+  useEffect(() => {
+    if (showFlyout) {
+      addContentToGlobalFlyout<EsDeprecationLogsFlyoutProps>({
+        id: FLYOUT_ID,
+        Component: EsDeprecationLogsFlyout,
+        props: {
+          closeFlyout,
+          handleToggleChange,
+        },
+        flyoutProps: {
+          onClose: closeFlyout,
+          'data-test-subj': 'esDeprecationLogsFlyout',
+          'aria-labelledby': 'esDeprecationLogsFlyoutTitle',
+        },
+      });
+    }
+  }, [addContentToGlobalFlyout, closeFlyout, handleToggleChange, showFlyout]);
+
   if (hasPrivileges === false && isDeprecationLogIndexingEnabled) {
     return (
       <>
@@ -155,27 +197,23 @@ const LogsStep = ({
         <EuiSpacer />
 
         {privilegesMissing.cluster && (
-          <EuiCallOut
-            iconType="help"
-            color="warning"
+          <KbnWarningCallout
+            announceOnMount={false}
             title={i18nTexts.missingClusterPrivilegesTitle}
             data-test-subj="missingClusterPrivilegesCallout"
-          >
-            <p>{i18nTexts.missingClusterPrivilegesDescription(privilegesMissing)}</p>
-          </EuiCallOut>
+            text={i18nTexts.missingClusterPrivilegesDescription(privilegesMissing)}
+          />
         )}
 
         {privilegesMissing.cluster && privilegesMissing.index && <EuiSpacer />}
 
         {privilegesMissing.index && (
-          <EuiCallOut
-            iconType="help"
-            color="warning"
+          <KbnWarningCallout
+            announceOnMount={false}
             title={i18nTexts.missingIndexPrivilegesTitle}
             data-test-subj="missingIndexPrivilegesCallout"
-          >
-            <p>{i18nTexts.missingIndexPrivilegesDescription(privilegesMissing)}</p>
-          </EuiCallOut>
+            text={i18nTexts.missingIndexPrivilegesDescription(privilegesMissing)}
+          />
         )}
       </>
     );
@@ -187,24 +225,23 @@ const LogsStep = ({
 
   if (hasPrivileges && error) {
     return (
-      <EuiCallOut
+      <KbnDangerCallout
+        announceOnMount={false}
         title={i18nTexts.loadingError}
-        color="danger"
-        iconType="warning"
         data-test-subj="deprecationLogsErrorCallout"
-      >
-        <p>
-          {error.statusCode} - {error.message as string}
-        </p>
-
-        <EuiButton
-          color="danger"
-          onClick={resendRequest}
-          data-test-subj="deprecationLogsRetryButton"
-        >
-          {i18nTexts.retryButton}
-        </EuiButton>
-      </EuiCallOut>
+        text={
+          <p>
+            {error.statusCode} - {error.message as string}
+          </p>
+        }
+        actionProps={{
+          primary: {
+            children: i18nTexts.retryButton,
+            onClick: resendRequest,
+            'data-test-subj': 'deprecationLogsRetryButton',
+          },
+        }}
+      />
     );
   }
 
@@ -223,16 +260,22 @@ const LogsStep = ({
           </EuiText>
 
           <EuiSpacer />
-
-          <EuiButton onClick={navigateToEsDeprecationLogs} data-test-subj="viewLogsLink">
-            {i18nTexts.viewLogsButtonLabel}
-          </EuiButton>
+          <EuiFlexGroup responsive={false} wrap gutterSize="s" alignItems="center">
+            <DiscoverExternalLinks
+              checkpoint={checkpoint}
+              showInfoParagraph={false}
+              isButtonFormat={true}
+            />
+            <EuiButton onClick={() => setShowFlyout(true)} data-test-subj="viewDetailsLink">
+              {i18nTexts.viewDetailsButtonLabel}
+            </EuiButton>
+          </EuiFlexGroup>
         </>
       ) : (
         <>
           <EuiSpacer />
 
-          <EuiButton onClick={navigateToEsDeprecationLogs} data-test-subj="enableLogsLink">
+          <EuiButton onClick={() => setShowFlyout(true)} data-test-subj="enableLogsLink">
             {i18nTexts.enableLogsButtonLabel}
           </EuiButton>
         </>
@@ -242,15 +285,7 @@ const LogsStep = ({
   );
 };
 
-interface CustomProps {
-  navigateToEsDeprecationLogs: () => void;
-}
-
-export const getLogsStep = ({
-  isComplete,
-  setIsComplete,
-  navigateToEsDeprecationLogs,
-}: OverviewStepProps & CustomProps): EuiStepProps => {
+export const getLogsStep = ({ isComplete, setIsComplete }: OverviewStepProps): EuiStepProps => {
   const status = isComplete ? 'complete' : 'incomplete';
 
   const requiredPrivileges = [
@@ -268,7 +303,6 @@ export const getLogsStep = ({
           <LogsStep
             setIsComplete={setIsComplete}
             hasPrivileges={!isLoading && hasPrivileges}
-            navigateToEsDeprecationLogs={navigateToEsDeprecationLogs}
             privilegesMissing={privilegesMissing}
           />
         )}

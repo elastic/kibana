@@ -5,34 +5,27 @@
  * 2.0.
  */
 
-import { createMockGraphStore, MockedGraphEnvironment } from './mocks';
-import { syncSettingsSaga, updateSettings } from './advanced_settings';
-import {
-  updateSaveButtonSaga,
-  syncFieldsSaga,
-  syncNodeStyleSaga,
-  selectField,
-  updateFieldProperties,
-} from './fields';
-import { AdvancedSettings, WorkspaceField, WorkspaceNode } from '../types';
-import { loadTemplates, syncTemplatesSaga } from './url_templates';
+import type { MockedGraphEnvironment } from './mocks';
+import { createMockGraphStore } from './mocks';
+import { registerAdvancedSettingsListeners, updateSettings } from './advanced_settings';
+import { registerFieldsListeners, selectField, updateFieldProperties } from './fields';
+import type { AdvancedSettings, WorkspaceField, WorkspaceNode } from '../types';
+import { loadTemplates, registerUrlTemplatesListeners } from './url_templates';
 
 /**
- * This suite tests all the sagas that only exist to sync the legacy world
+ * This suite tests listeners that only exist to sync the legacy world
  * with the redux state management. They can be discarded once everything is
  * migrated.
  */
-describe('legacy sync sagas', () => {
+describe('legacy sync listeners', () => {
   let env: MockedGraphEnvironment;
 
   beforeEach(() => {
     env = createMockGraphStore({
-      sagas: [
-        syncSettingsSaga,
-        updateSaveButtonSaga,
-        syncFieldsSaga,
-        syncNodeStyleSaga,
-        syncTemplatesSaga,
+      listeners: [
+        registerAdvancedSettingsListeners,
+        registerFieldsListeners,
+        registerUrlTemplatesListeners,
       ],
       initialStateOverwrites: {
         fields: {

@@ -7,6 +7,8 @@
 
 import { fireEvent, render, within } from '@testing-library/react';
 import React from 'react';
+import userEvent from '@testing-library/user-event';
+import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 
 import { TestProviders } from '../../../../common/mock';
 import { CoverageOverviewFiltersPanel } from './filters_panel';
@@ -51,29 +53,35 @@ const renderFiltersPanel = () => {
 };
 
 describe('CoverageOverviewFiltersPanel', () => {
-  test('it correctly populates rule activity filter state', () => {
+  test('it correctly populates rule activity filter state', async () => {
     const wrapper = renderFiltersPanel();
 
-    wrapper.getByTestId('coverageOverviewRuleActivityFilterButton').click();
+    await userEvent.click(wrapper.getByTestId('coverageOverviewRuleActivityFilterButton'));
+    await waitForEuiPopoverOpen();
 
-    within(wrapper.getByTestId('coverageOverviewFilterList'))
-      .getByText(ruleActivityFilterLabelMap[ruleActivityFilterDefaultOptions[0].label])
-      .click();
+    await userEvent.click(
+      within(wrapper.getByTestId('coverageOverviewFilterList')).getByText(
+        ruleActivityFilterLabelMap[ruleActivityFilterDefaultOptions[0].label]
+      )
+    );
     expect(setRuleActivityFilter).toHaveBeenCalledWith([ruleActivityFilterDefaultOptions[0].label]);
   });
 
-  test('it correctly populates rule source filter state', () => {
+  test('it correctly populates rule source filter state', async () => {
     const wrapper = renderFiltersPanel();
 
-    wrapper.getByTestId('coverageOverviewRuleSourceFilterButton').click();
+    await userEvent.click(wrapper.getByTestId('coverageOverviewRuleSourceFilterButton'));
+    await waitForEuiPopoverOpen();
 
-    within(wrapper.getByTestId('coverageOverviewFilterList'))
-      .getByText(ruleSourceFilterLabelMap[ruleSourceFilterDefaultOptions[0].label])
-      .click();
+    await userEvent.click(
+      within(wrapper.getByTestId('coverageOverviewFilterList')).getByText(
+        ruleSourceFilterLabelMap[ruleSourceFilterDefaultOptions[0].label]
+      )
+    );
     expect(setRuleSourceFilter).toHaveBeenCalledWith([ruleSourceFilterDefaultOptions[0].label]);
   });
 
-  test('it correctly populates search filter state', () => {
+  test('it correctly populates search filter state', async () => {
     const wrapper = renderFiltersPanel();
 
     fireEvent.change(wrapper.getByTestId('coverageOverviewFilterSearchBar'), {

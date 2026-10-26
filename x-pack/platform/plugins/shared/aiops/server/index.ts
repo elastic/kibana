@@ -6,10 +6,13 @@
  */
 
 import type { PluginInitializerContext } from '@kbn/core/server';
+import type { ConfigSchema } from './config_schema';
 
-export async function plugin(initializerContext: PluginInitializerContext) {
+export async function plugin(initializerContext: PluginInitializerContext<ConfigSchema>) {
   const { AiopsPlugin } = await import('./plugin');
   return new AiopsPlugin(initializerContext);
 }
 
 export type { AiopsPluginSetup, AiopsPluginStart } from './types';
+
+export { config, type ConfigSchema } from './config_schema';

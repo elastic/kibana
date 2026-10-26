@@ -6,25 +6,28 @@
  */
 
 import React, { Component } from 'react';
-import { Provider } from 'react-redux';
+import { Provider } from 'react-redux-v7';
 import type { AppMountParameters, ScopedHistory } from '@kbn/core/public';
-import type { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
+import type {
+  EmbeddableStateTransfer,
+  EmbeddableEditorBreadcrumb,
+} from '@kbn/embeddable-plugin/public';
 import { MapApp } from './map_app';
 import {
   SavedMap,
   getInitialLayersFromUrlParam,
   getOpenLayerWizardFromUrlParam,
 } from './saved_map';
-import type { MapSerializedState } from '../../react_embeddable/types';
+import type { MapEmbeddableState } from '../../../common';
 
 interface Props {
-  mapSerializedState?: MapSerializedState;
+  mapEmbeddableState?: MapEmbeddableState;
   embeddableId?: string;
   onAppLeave: AppMountParameters['onAppLeave'];
-  setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
   stateTransfer: EmbeddableStateTransfer;
   originatingApp?: string;
   originatingPath?: string;
+  breadcrumbs?: EmbeddableEditorBreadcrumb[];
   history: ScopedHistory;
 }
 
@@ -45,10 +48,11 @@ export class MapPage extends Component<Props, State> {
     this.state = {
       savedMap: new SavedMap({
         defaultLayers: getInitialLayersFromUrlParam(),
-        mapSerializedState: props.mapSerializedState,
+        mapEmbeddableState: props.mapEmbeddableState,
         embeddableId: props.embeddableId,
         originatingApp: props.originatingApp,
         originatingPath: props.originatingPath,
+        breadcrumbs: props.breadcrumbs,
         stateTransfer: props.stateTransfer,
         onSaveCallback: this.updateSaveCounter,
         defaultLayerWizard: getOpenLayerWizardFromUrlParam() || '',
@@ -80,7 +84,6 @@ export class MapPage extends Component<Props, State> {
           history={this.props.history}
           savedMap={this.state.savedMap}
           onAppLeave={this.props.onAppLeave}
-          setHeaderActionMenu={this.props.setHeaderActionMenu}
           saveCounter={this.state.saveCounter}
         />
       </Provider>

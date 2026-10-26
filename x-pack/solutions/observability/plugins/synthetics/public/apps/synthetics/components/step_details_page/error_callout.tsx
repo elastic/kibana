@@ -6,8 +6,9 @@
  */
 
 import React from 'react';
-import { EuiCallOut, EuiSpacer } from '@elastic/eui';
-import { JourneyStep } from '../../../../../common/runtime_types';
+import { EuiSpacer } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
+import type { JourneyStep } from '../../../../../common/runtime_types';
 
 export const ErrorCallOut = ({ step }: { step?: JourneyStep }) => {
   if (!step || step.synthetics.step?.status !== 'failed') {
@@ -21,7 +22,7 @@ export const ErrorCallOut = ({ step }: { step?: JourneyStep }) => {
 
   return (
     <>
-      <EuiCallOut title={error} color="danger" iconType="warning" />
+      <KbnDangerCallout title={error} />
       <EuiSpacer />
     </>
   );

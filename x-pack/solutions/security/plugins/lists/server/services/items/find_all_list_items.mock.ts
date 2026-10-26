@@ -11,7 +11,7 @@ import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-m
 import { LIST_ID, LIST_INDEX, LIST_ITEM_INDEX } from '../../../common/constants.mock';
 import { getShardMock } from '../../schemas/common/get_shard.mock';
 
-import { FindAllListItemsOptions } from './find_all_list_items';
+import type { FindAllListItemsOptions } from './find_all_list_items';
 
 export const getFindCount = (): Promise<estypes.CountResponse> => {
   return Promise.resolve({

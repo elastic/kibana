@@ -8,25 +8,22 @@
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
+import { css } from '@emotion/react';
 import {
   EuiButtonEmpty,
   EuiButtonIcon,
+  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
-  EuiFieldText,
   EuiFormRow,
+  EuiIcon,
   EuiText,
+  EuiToolTip,
+  useEuiTheme,
 } from '@elastic/eui';
 
-import {
-  UseField,
-  ArrayItem,
-  ValidationFunc,
-  getFieldValidityAndErrorMessage,
-} from '../../../../../../shared_imports';
-
-import './input_list.scss';
+import type { ArrayItem, ValidationFunc } from '../../../../../../shared_imports';
+import { UseField, getFieldValidityAndErrorMessage } from '../../../../../../shared_imports';
 
 interface Props {
   label: string;
@@ -57,6 +54,28 @@ const i18nTexts = {
   ),
 };
 
+const useStyles = () => {
+  const { euiTheme } = useEuiTheme();
+
+  return {
+    headerContainer: css`
+      margin-bottom: ${euiTheme.size.xs};
+    `,
+    listContainer: css`
+      background-color: ${euiTheme.colors.lightestShade};
+      padding: ${euiTheme.size.m};
+    `,
+    itemContainer: css`
+      background-color: ${euiTheme.colors.lightestShade};
+      padding-top: ${euiTheme.size.s};
+      padding-bottom: ${euiTheme.size.s};
+    `,
+    removeButton: css`
+      margin-left: ${euiTheme.size.s};
+    `,
+  };
+};
+
 export function InputList({
   label,
   helpText,
@@ -69,6 +88,7 @@ export function InputList({
   textDeserializer,
   textSerializer,
 }: Props): JSX.Element {
+  const styles = useStyles();
   const [firstItemId] = useState(() => uuidv4());
 
   return (
@@ -80,7 +100,7 @@ export function InputList({
     >
       <>
         <EuiFlexGroup
-          className="pipelineProcessorsEditor__form__inputList__labelContainer"
+          css={styles.headerContainer}
           justifyContent="flexStart"
           direction="column"
           gutterSize="none"
@@ -99,11 +119,11 @@ export function InputList({
           </EuiFlexItem>
         </EuiFlexGroup>
 
-        <div className="pipelineProcessorsEditor__form__inputList__panel">
+        <div css={styles.listContainer}>
           {value.map((item, idx) => (
             <EuiFlexGroup
               key={idx}
-              className="pipelineProcessorsEditor__form__inputList__item"
+              css={styles.itemContainer}
               justifyContent="center"
               gutterSize="none"
             >
@@ -139,24 +159,26 @@ export function InputList({
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 {value.length > 1 ? (
-                  <EuiButtonIcon
-                    aria-label={i18nTexts.removeItemButtonAriaLabel}
-                    className="pipelineProcessorsEditor__form__inputList__removeButton"
-                    iconType="minusInCircle"
-                    color="danger"
-                    onClick={() => onRemove(item.id)}
-                    size="s"
-                  />
+                  <EuiToolTip
+                    content={i18nTexts.removeItemButtonAriaLabel}
+                    disableScreenReaderOutput
+                  >
+                    <EuiButtonIcon
+                      aria-label={i18nTexts.removeItemButtonAriaLabel}
+                      css={styles.removeButton}
+                      iconType="minusCircle"
+                      color="danger"
+                      onClick={() => onRemove(item.id)}
+                      size="s"
+                    />
+                  </EuiToolTip>
                 ) : (
-                  <EuiIcon
-                    className="pipelineProcessorsEditor__form__inputList__removeButton"
-                    type="empty"
-                  />
+                  <EuiIcon css={styles.removeButton} type="empty" aria-hidden={true} />
                 )}
               </EuiFlexItem>
             </EuiFlexGroup>
           ))}
-          <EuiButtonEmpty iconType="plusInCircle" onClick={onAdd} data-test-subj="addButton">
+          <EuiButtonEmpty iconType="plusCircle" onClick={onAdd} data-test-subj="addButton">
             {addLabel}
           </EuiButtonEmpty>
         </div>

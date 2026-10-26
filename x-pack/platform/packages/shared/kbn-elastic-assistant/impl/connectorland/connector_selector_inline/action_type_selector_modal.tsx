@@ -5,76 +5,68 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiKeyPadMenuItem,
   EuiModal,
   EuiModalBody,
   EuiModalHeader,
   EuiModalHeaderTitle,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
-import { ActionType } from '@kbn/actions-plugin/common';
-import { ActionTypeRegistryContract } from '@kbn/triggers-actions-ui-plugin/public';
-import { css } from '@emotion/css';
+import type { ActionType } from '@kbn/actions-plugin/common';
+import type { ActionTypeRegistryContract } from '@kbn/triggers-actions-ui-plugin/public';
 import * as i18n from '../translations';
+import { ActionTypeList } from './action_type_list';
 
-interface Props {
+interface ActionTypeSelectorModalProps {
   actionTypes?: ActionType[];
   actionTypeRegistry: ActionTypeRegistryContract;
   onClose: () => void;
   onSelect: (actionType: ActionType) => void;
   actionTypeSelectorInline: boolean;
+  isMissingConnectorPrivileges?: boolean;
+  missingPrivilegesTooltip?: string;
 }
-const itemClassName = css`
-  inline-size: 150px;
 
-  .euiKeyPadMenuItem__label {
-    white-space: nowrap;
-    overflow: hidden;
-  }
-`;
-
-export const ActionTypeSelectorModal = React.memo(
-  ({ actionTypes, actionTypeRegistry, onClose, onSelect, actionTypeSelectorInline }: Props) => {
-    const content = useMemo(
-      () => (
-        <EuiFlexGroup justifyContent="center" responsive={false} wrap={true}>
-          {actionTypes?.map((actionType: ActionType) => {
-            const fullAction = actionTypeRegistry.get(actionType.id);
-            return (
-              <EuiFlexItem data-test-subj="action-option" key={actionType.id} grow={false}>
-                <EuiKeyPadMenuItem
-                  className={itemClassName}
-                  key={actionType.id}
-                  isDisabled={!actionType.enabled}
-                  label={actionType.name}
-                  data-test-subj={`action-option-${actionType.name}`}
-                  onClick={() => onSelect(actionType)}
-                >
-                  <EuiIcon size="xl" type={fullAction.iconClass} />
-                </EuiKeyPadMenuItem>
-              </EuiFlexItem>
-            );
-          })}
-        </EuiFlexGroup>
-      ),
-      [actionTypeRegistry, actionTypes, onSelect]
-    );
+export const ActionTypeSelectorModal: React.FC<ActionTypeSelectorModalProps> = React.memo(
+  ({
+    actionTypes,
+    actionTypeRegistry,
+    onClose,
+    onSelect,
+    actionTypeSelectorInline,
+    isMissingConnectorPrivileges = false,
+    missingPrivilegesTooltip,
+  }) => {
+    const modalTitleId = useGeneratedHtmlId();
 
     if (!actionTypes?.length) return null;
 
-    if (actionTypeSelectorInline) return <>{content}</>;
+    const actionTypeList = (
+      <ActionTypeList
+        actionTypes={actionTypes}
+        actionTypeRegistry={actionTypeRegistry}
+        onSelect={onSelect}
+        isMissingConnectorPrivileges={isMissingConnectorPrivileges}
+        missingPrivilegesTooltip={missingPrivilegesTooltip}
+      />
+    );
+
+    if (actionTypeSelectorInline) return actionTypeList;
 
     return (
-      <EuiModal onClose={onClose} data-test-subj="action-type-selector-modal">
+      <EuiModal
+        onClose={onClose}
+        data-test-subj="action-type-selector-modal"
+        aria-labelledby={modalTitleId}
+      >
         <EuiModalHeader>
-          <EuiModalHeaderTitle>{i18n.INLINE_CONNECTOR_PLACEHOLDER}</EuiModalHeaderTitle>
+          <EuiModalHeaderTitle id={modalTitleId}>
+            {i18n.INLINE_CONNECTOR_PLACEHOLDER}
+          </EuiModalHeaderTitle>
         </EuiModalHeader>
 
-        <EuiModalBody>{content}</EuiModalBody>
+        <EuiModalBody>{actionTypeList}</EuiModalBody>
       </EuiModal>
     );
   }

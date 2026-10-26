@@ -8,35 +8,68 @@
 import moment from 'moment';
 
 import type { NewPackagePolicyInput } from '@kbn/fleet-plugin/common';
-import { getControlledArtifactCutoffDate } from '../../../common/endpoint/utils/controlled_artifact_rollout';
+import { EndpointIntegrationFleetError } from './errors';
+import { getDeviceControlNotificationConflicts } from '../../../common/endpoint/models/policy_config_helpers';
+import {
+  classifyGlobalManifestVersion,
+  isPinnedGlobalManifestVersion,
+} from '../../../common/endpoint/utils/global_manifest_version';
+import { PolicyOperatingSystem } from '../../../common/endpoint/types';
 
-export const validateEndpointPackagePolicy = (inputs: NewPackagePolicyInput[]) => {
+export const validateEndpointPackagePolicy = (
+  inputs: NewPackagePolicyInput[],
+  operation: 'update' | 'create' = 'create'
+) => {
   const input = inputs.find((i) => i.type === 'endpoint');
+
+  // An elastic defend policy MUST have an input with expected policy and manifest data
+  if (
+    operation === 'update' &&
+    (!input?.config?.policy?.value || !input?.config?.artifact_manifest?.value)
+  ) {
+    throw new EndpointIntegrationFleetError(
+      `Invalid Elastic Defend security policy. 'inputs[0].config.policy.value' and 'inputs[0].config.artifact_manifest.value' are required.`
+    );
+  }
+
+  // Validate global manifest versions
   if (input?.config?.policy?.value?.global_manifest_version) {
     const globalManifestVersion = input.config.policy.value.global_manifest_version;
 
-    if (globalManifestVersion !== 'latest') {
-      const parsedDate = moment.utc(globalManifestVersion, 'YYYY-MM-DD', true);
-      if (!parsedDate.isValid()) {
+    const manifestStatus = classifyGlobalManifestVersion(globalManifestVersion);
+    if (isPinnedGlobalManifestVersion(manifestStatus)) {
+      if (manifestStatus === 'invalid_format') {
         throw createManifestVersionError(
           'Invalid date format. Use "latest" or "YYYY-MM-DD" format. UTC time.'
         );
       }
 
-      const maxAllowedDate = getControlledArtifactCutoffDate();
-      if (parsedDate.isBefore(maxAllowedDate)) {
+      if (manifestStatus === 'too_old') {
         throw createManifestVersionError(
           'Global manifest version is too far in the past. Please use either "latest" or a date within the last 18 months. The earliest valid date is October 1, 2023, in UTC time.'
         );
       }
-      const minAllowedDate = moment.utc().subtract(1, 'day');
-      if (parsedDate.isAfter(minAllowedDate)) {
+
+      if (manifestStatus === 'in_future') {
+        const minAllowedDate = moment.utc().subtract(1, 'day');
         throw createManifestVersionError(
           `Global manifest version cannot be in the future. Latest selectable date is ${minAllowedDate.format(
             'MMMM DD, YYYY'
           )} UTC time.`
         );
       }
+    }
+  }
+
+  // Validate device control notifications
+  const policyValue = input?.config?.policy?.value;
+  if (policyValue) {
+    const [conflict] = getDeviceControlNotificationConflicts(policyValue);
+    if (conflict !== undefined) {
+      const osLabel = conflict.os === PolicyOperatingSystem.windows ? 'Windows' : 'Mac';
+      throw new EndpointIntegrationFleetError(
+        `Device Control user notifications are only supported when USB storage access level is set to deny_all. Current ${osLabel} access level is "${conflict.accessLevel}". Please either set the access level to deny_all or disable user notifications.`
+      );
     }
   }
 };

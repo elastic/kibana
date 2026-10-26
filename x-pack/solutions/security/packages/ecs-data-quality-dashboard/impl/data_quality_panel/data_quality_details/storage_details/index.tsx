@@ -9,7 +9,7 @@ import React, { useCallback, useMemo } from 'react';
 
 import { useResultsRollupContext } from '../../contexts/results_rollup_context';
 import { StorageTreemap } from './storage_treemap';
-import { SelectedIndex } from '../../types';
+import type { SelectedIndex } from '../../types';
 import { useDataQualityContext } from '../../data_quality_context';
 import { DOCS_UNIT } from './translations';
 import { getFlattenedBuckets } from './utils/get_flattened_buckets';

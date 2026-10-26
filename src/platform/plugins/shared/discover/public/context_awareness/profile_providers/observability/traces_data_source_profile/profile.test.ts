@@ -16,11 +16,11 @@ import {
 } from '../../../profiles';
 import { DataSourceType, createDataViewDataSource } from '../../../../../common/data_sources';
 import { createTracesDataSourceProfileProvider } from './profile';
-import { createContextAwarenessMocks } from '../../../__mocks__';
+import { createProfileProviderSharedServicesMock } from '../../../__mocks__';
 import type { ContextWithProfileId } from '../../../profile_service';
 import { OBSERVABILITY_ROOT_PROFILE_ID } from '../consts';
 
-const mockServices = createContextAwarenessMocks().profileProviderServices;
+const mockServices = createProfileProviderSharedServicesMock();
 
 describe('tracesDataSourceProfileProvider', () => {
   const tracesDataSourceProfileProvider = createTracesDataSourceProfileProvider(mockServices);
@@ -77,6 +77,36 @@ describe('tracesDataSourceProfileProvider', () => {
     ).toEqual(RESOLUTION_MATCH);
   });
 
+  it('should NOT match when ES|QL query is transformational', () => {
+    expect(
+      tracesDataSourceProfileProvider.resolve({
+        rootContext: ROOT_CONTEXT,
+        dataSource: { type: DataSourceType.Esql },
+        query: { esql: 'FROM traces-* | STATS count()' },
+      } as DataSourceProfileProviderParams)
+    ).toEqual(RESOLUTION_MISMATCH);
+  });
+
+  it('should NOT match when ES|QL query is invalid', () => {
+    expect(
+      tracesDataSourceProfileProvider.resolve({
+        rootContext: ROOT_CONTEXT,
+        dataSource: { type: DataSourceType.Esql },
+        query: { esql: 'FROM traces-* | WHERE' },
+      } as DataSourceProfileProviderParams)
+    ).toEqual(RESOLUTION_MISMATCH);
+  });
+
+  it('should NOT match when ES|QL query is missing', () => {
+    expect(
+      tracesDataSourceProfileProvider.resolve({
+        rootContext: ROOT_CONTEXT,
+        dataSource: { type: DataSourceType.Esql },
+        query: undefined,
+      } as DataSourceProfileProviderParams)
+    ).toEqual(RESOLUTION_MISMATCH);
+  });
+
   it('should NOT match when the index is not for traces', () => {
     expect(
       tracesDataSourceProfileProvider.resolve({
@@ -95,12 +125,36 @@ describe('tracesDataSourceProfileProvider', () => {
     ).toEqual(RESOLUTION_MISMATCH);
   });
 
-  it("should NOT match when the root context isn't Observability", () => {
+  it('should match in Classic but not other solution views', () => {
+    expect(
+      tracesDataSourceProfileProvider.resolve({
+        rootContext: {
+          profileId: 'classic-nav-root-profile',
+          solutionType: SolutionType.Default,
+        },
+        dataSource: createDataViewDataSource({ dataViewId: 'other_view_id' }),
+        dataView: { getIndexPattern: () => 'traces-*' } as unknown as DataView,
+      } as DataSourceProfileProviderParams)
+    ).toEqual(RESOLUTION_MATCH);
     expect(
       tracesDataSourceProfileProvider.resolve({
         rootContext: {
           profileId: 'security-root-profile',
           solutionType: SolutionType.Security,
+        },
+        dataSource: createDataViewDataSource({ dataViewId: 'other_view_id' }),
+        dataView: { getIndexPattern: () => 'traces-*' } as unknown as DataView,
+      } as DataSourceProfileProviderParams)
+    ).toEqual(RESOLUTION_MISMATCH);
+  });
+
+  it('should NOT match in Classic when solution profiles are disabled', () => {
+    jest.spyOn(mockServices.uiSettings, 'get').mockReturnValueOnce(false);
+    expect(
+      tracesDataSourceProfileProvider.resolve({
+        rootContext: {
+          profileId: 'classic-nav-root-profile',
+          solutionType: SolutionType.Default,
         },
         dataSource: createDataViewDataSource({ dataViewId: 'other_view_id' }),
         dataView: { getIndexPattern: () => 'traces-*' } as unknown as DataView,

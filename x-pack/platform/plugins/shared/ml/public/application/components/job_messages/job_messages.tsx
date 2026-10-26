@@ -15,7 +15,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { timeFormatter } from '@kbn/ml-date-utils';
 
-import type { JobMessage } from '../../../../common/types/audit_message';
+import type { JobMessage } from '@kbn/ml-common-types/audit_message';
 
 import { blurButtonOnClick } from '../../util/component_utils';
 
@@ -119,7 +119,7 @@ export const JobMessages: FC<JobMessagesProps> = ({
                     aria-label={i18n.translate('xpack.ml.jobMessages.toggleInChartAriaLabel', {
                       defaultMessage: 'Toggle in chart',
                     })}
-                    iconType="visAreaStacked"
+                    iconType="chartAreaStack"
                     onClick={() => actionHandler(message)}
                   />
                 </EuiToolTip>
@@ -150,8 +150,13 @@ export const JobMessages: FC<JobMessagesProps> = ({
         compressed={true}
         loading={loading}
         error={error}
-        pagination={true}
+        pagination={{
+          initialPageSize: 25,
+        }}
         data-test-subj={'mlAnalyticsDetailsJobMessagesTable'}
+        tableCaption={i18n.translate('xpack.ml.jobMessages.tableCaption', {
+          defaultMessage: 'Job messages',
+        })}
       />
     </>
   );

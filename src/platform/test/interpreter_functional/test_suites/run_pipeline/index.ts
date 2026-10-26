@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { FtrProviderContext } from '../../../functional/ftr_provider_context';
+import type { FtrProviderContext } from '../../../functional/ftr_provider_context';
 
 export default function ({ getService, getPageObjects, loadTestFile }: FtrProviderContext) {
   const browser = getService('browser');
@@ -31,7 +31,6 @@ export default function ({ getService, getPageObjects, loadTestFile }: FtrProvid
       await kibanaServer.uiSettings.replace({
         'dateFormat:tz': 'Australia/North',
         defaultIndex: 'logstash-*',
-        'bfetch:disableCompression': true, // makes it easier to debug while developing tests
       });
       await browser.setWindowSize(1300, 900);
       await PageObjects.common.navigateToApp('settings');

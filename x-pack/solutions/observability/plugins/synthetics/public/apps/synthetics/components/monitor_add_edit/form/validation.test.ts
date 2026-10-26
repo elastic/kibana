@@ -5,14 +5,8 @@
  * 2.0.
  */
 
-import {
-  ConfigKey,
-  MonitorTypeEnum,
-  HTTPFields,
-  BrowserFields,
-  MonitorFields,
-  ScheduleUnit,
-} from '../types';
+import type { HTTPFields, BrowserFields, MonitorFields } from '../types';
+import { ConfigKey, MonitorTypeEnum, ScheduleUnit } from '../types';
 import { validate } from './validation';
 
 describe('[Monitor Management] validation', () => {
@@ -67,6 +61,24 @@ describe('[Monitor Management] validation', () => {
 
       expect(result).not.toEqual(expect.arrayContaining([true]));
     });
+  });
+
+  describe('Browser params', () => {
+    const validateParams = validate[MonitorTypeEnum.BROWSER][ConfigKey.PARAMS];
+
+    it.each(['[]', '["secret"]', '"secret"', '42', 'null', '{invalid'])(
+      'rejects params that are not a JSON object: %s',
+      (params) => {
+        expect(validateParams?.({ [ConfigKey.PARAMS]: params })).toBe(true);
+      }
+    );
+
+    it.each(['', '{}', '{"username":"elastic"}', '{"retries":3,"options":{"mode":"fast"}}'])(
+      'accepts empty or object params: %s',
+      (params) => {
+        expect(validateParams?.({ [ConfigKey.PARAMS]: params })).toBe(false);
+      }
+    );
   });
 
   // TODO: Add test for other monitor types if needed

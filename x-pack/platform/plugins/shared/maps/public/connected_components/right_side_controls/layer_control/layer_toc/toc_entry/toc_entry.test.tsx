@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
-import { ILayer } from '../../../../../classes/layers/layer';
+import type { ILayer } from '../../../../../classes/layers/layer';
 
 jest.mock('../../../../../kibana_services', () => {
   return {

@@ -9,10 +9,8 @@ import { httpServerMock } from '@kbn/core/server/mocks';
 
 import { getExceptionListItemSchemaMock } from '../../../common/schemas/response/exception_list_item_schema.mock';
 import { getExceptionListSchemaMock } from '../../../common/schemas/response/exception_list_schema.mock';
-import {
-  ExtensionPointStorageContextMock,
-  createExtensionPointStorageMock,
-} from '../extension_points/extension_point_storage.mock';
+import type { ExtensionPointStorageContextMock } from '../extension_points/extension_point_storage.mock';
+import { createExtensionPointStorageMock } from '../extension_points/extension_point_storage.mock';
 import type { ExtensionPointCallbackDataArgument } from '../extension_points';
 
 import {
@@ -97,6 +95,50 @@ describe('exception_list_client', () => {
           return extensionPointStorageContext.exceptionPreUpdate.callback;
         },
       ],
+
+      [
+        'createEndpointListItem',
+        (): ReturnType<ExceptionListClient['createEndpointListItem']> => {
+          const mockOptions = getCreateExceptionListItemOptionsMock();
+          return exceptionListClient.createEndpointListItem({
+            comments: mockOptions.comments,
+            description: mockOptions.description,
+            entries: mockOptions.entries,
+            itemId: mockOptions.itemId,
+            meta: mockOptions.meta,
+            name: mockOptions.name,
+            osTypes: mockOptions.osTypes,
+            tags: mockOptions.tags,
+            type: mockOptions.type,
+          });
+        },
+        (): ExtensionPointStorageContextMock['exceptionPreCreate']['callback'] => {
+          return extensionPointStorageContext.exceptionPreCreate.callback;
+        },
+      ],
+
+      [
+        'updateEndpointListItem',
+        (): ReturnType<ExceptionListClient['updateEndpointListItem']> => {
+          const mockOptions = getUpdateExceptionListItemOptionsMock();
+          return exceptionListClient.updateEndpointListItem({
+            _version: mockOptions._version,
+            comments: mockOptions.comments,
+            description: mockOptions.description,
+            entries: mockOptions.entries,
+            id: mockOptions.id,
+            itemId: mockOptions.itemId,
+            meta: mockOptions.meta,
+            name: mockOptions.name,
+            osTypes: mockOptions.osTypes,
+            tags: mockOptions.tags,
+            type: mockOptions.type,
+          });
+        },
+        (): ExtensionPointStorageContextMock['exceptionPreUpdate']['callback'] => {
+          return extensionPointStorageContext.exceptionPreUpdate.callback;
+        },
+      ],
     ])(
       'and calling `ExceptionListClient#%s()`',
       (methodName, callExceptionListClientMethod, getExtensionPointCallback) => {
@@ -142,6 +184,7 @@ describe('exception_list_client', () => {
             extensionPointCallback.mockImplementation(async (args) => {
               const {
                 data: { entries, ...rest },
+                // @ts-expect-error upgrade typescript v5.9.3
               } = args as { data: ExtensionPointCallbackDataArgument };
 
               expect(entries).toBeTruthy(); // Test entries to exist since we exclude it.
@@ -296,6 +339,60 @@ describe('exception_list_client', () => {
         },
       ],
       [
+        'bulkDeleteExceptionListItems',
+        (): ReturnType<ExceptionListClient['bulkDeleteExceptionListItems']> => {
+          return exceptionListClient.bulkDeleteExceptionListItems({
+            ids: ['1', '2', '3'],
+            namespaceType: 'agnostic',
+          });
+        },
+        (): ExtensionPointStorageContextMock['exceptionPreDelete']['callback'] => {
+          return extensionPointStorageContext.exceptionPreDelete.callback;
+        },
+      ],
+      [
+        'getEndpointListItem',
+        (): ReturnType<ExceptionListClient['getEndpointListItem']> => {
+          return exceptionListClient.getEndpointListItem({
+            id: '1',
+            itemId: '1',
+          });
+        },
+        (): ExtensionPointStorageContextMock['exceptionPreGetOne']['callback'] => {
+          return extensionPointStorageContext.exceptionPreGetOne.callback;
+        },
+      ],
+      [
+        'deleteEndpointListItem',
+        (): ReturnType<ExceptionListClient['deleteEndpointListItem']> => {
+          return exceptionListClient.deleteEndpointListItem({
+            id: '1',
+            itemId: '1',
+          });
+        },
+        (): ExtensionPointStorageContextMock['exceptionPreDelete']['callback'] => {
+          return extensionPointStorageContext.exceptionPreDelete.callback;
+        },
+      ],
+      [
+        'findEndpointListItem',
+        (): ReturnType<ExceptionListClient['findEndpointListItem']> => {
+          return exceptionListClient.findEndpointListItem({
+            filter: undefined,
+            page: 1,
+            perPage: 1,
+            pit: undefined,
+            search: undefined,
+            searchAfter: undefined,
+            sortField: 'name',
+            sortOrder: 'asc',
+          });
+        },
+        (): ExtensionPointStorageContextMock['exceptionPreSingleListFind']['callback'] => {
+          return extensionPointStorageContext.exceptionPreSingleListFind.callback;
+        },
+      ],
+      [
         'importExceptionListAndItems',
         (): ReturnType<ExceptionListClient['importExceptionListAndItems']> => {
           return exceptionListClient.importExceptionListAndItems({
@@ -380,5 +477,139 @@ describe('exception_list_client', () => {
         });
       }
     );
+
+    describe('and calling `ExceptionListClient#bulkDeleteExceptionList()`', () => {
+      let savedObjectsClient: ReturnType<typeof getExceptionListSavedObjectClientMock>;
+
+      const listContainerSavedObject = (id: string): unknown => {
+        const list = getExceptionListSchemaMock();
+        return {
+          attributes: {
+            ...list,
+            list_id: `list-id-${id}`,
+            list_type: 'list',
+          },
+          id,
+          references: [],
+          type: 'exception-list',
+          updated_at: list.updated_at,
+          version: list._version,
+        };
+      };
+
+      beforeEach(() => {
+        savedObjectsClient = getExceptionListSavedObjectClientMock();
+        savedObjectsClient.bulkGet.mockResolvedValue({
+          saved_objects: [listContainerSavedObject('so-1'), listContainerSavedObject('so-2')],
+        } as never);
+        savedObjectsClient.delete.mockResolvedValue({} as never);
+
+        exceptionListClient = new ExceptionListClient({
+          request: kibanaRequest,
+          savedObjectsClient,
+          serverExtensionsClient: extensionPointStorageContext.extensionPointStorage.getClient(),
+          user: 'elastic',
+        });
+      });
+
+      it('should execute the extension point once for the whole batch with `context` and pristine `blockedLists`', async () => {
+        const result = await exceptionListClient.bulkDeleteExceptionList({
+          ids: ['so-1', 'so-2'],
+          namespaceType: 'single',
+        });
+
+        const { callback } = extensionPointStorageContext.exceptionPreDeleteList;
+        expect(callback).toHaveBeenCalledTimes(1);
+        expect(callback.mock.calls[0][0].context).toEqual({
+          exceptionListClient: expect.any(ExceptionListClient),
+          request: kibanaRequest,
+        });
+        expect(callback.mock.calls[0][0].data).toEqual({
+          blockedLists: [],
+          lists: [expect.objectContaining({ id: 'so-1' }), expect.objectContaining({ id: 'so-2' })],
+          namespaceType: 'single',
+        });
+        expect(result.success).toBe(true);
+        expect(savedObjectsClient.delete).toHaveBeenCalledTimes(2);
+      });
+
+      it('should delete every list when NO extension point is registered, because `lists` alone enforces no rule-reference guard', async () => {
+        extensionPointStorageContext.extensionPointStorage.clear();
+
+        const result = await exceptionListClient.bulkDeleteExceptionList({
+          ids: ['so-1', 'so-2'],
+          namespaceType: 'single',
+        });
+
+        expect(result.success).toBe(true);
+        expect(result.results).toHaveLength(2);
+        expect(result.errors).toEqual([]);
+        expect(savedObjectsClient.delete).toHaveBeenCalledTimes(2);
+      });
+
+      it('should NOT call the extension point when server extension points are DISABLED', async () => {
+        exceptionListClient = new ExceptionListClient({
+          enableServerExtensionPoints: false,
+          request: kibanaRequest,
+          savedObjectsClient,
+          serverExtensionsClient: extensionPointStorageContext.extensionPointStorage.getClient(),
+          user: 'elastic',
+        });
+
+        const result = await exceptionListClient.bulkDeleteExceptionList({
+          ids: ['so-1', 'so-2'],
+          namespaceType: 'single',
+        });
+
+        expect(extensionPointStorageContext.exceptionPreDeleteList.callback).not.toHaveBeenCalled();
+        expect(result.success).toBe(true);
+      });
+
+      it('should report a per-list 409 conflict when the extension point blocks a list', async () => {
+        extensionPointStorageContext.exceptionPreDeleteList.callback.mockImplementation(
+          async ({ data }) => ({
+            ...data,
+            blockedLists: [{ id: 'so-1' }],
+          })
+        );
+
+        const result = await exceptionListClient.bulkDeleteExceptionList({
+          ids: ['so-1', 'so-2'],
+          namespaceType: 'single',
+        });
+
+        expect(result.success).toBe(false);
+        expect(result.errors).toEqual([
+          expect.objectContaining({
+            lists: [{ id: 'so-1', list_id: 'list-id-so-1' }],
+            status_code: 409,
+          }),
+        ]);
+        expect(result.results).toEqual([expect.objectContaining({ id: 'so-2' })]);
+        expect(savedObjectsClient.delete).toHaveBeenCalledTimes(1);
+        expect(savedObjectsClient.delete).toHaveBeenCalledWith('exception-list', 'so-2');
+      });
+
+      it('should refuse every list when the extension point returns malformed `blockedLists`', async () => {
+        extensionPointStorageContext.exceptionPreDeleteList.callback.mockImplementation(
+          async ({ data }) =>
+            ({
+              ...data,
+              blockedLists: [{ bogus: true }],
+            } as unknown as ExtensionPointCallbackDataArgument)
+        );
+
+        const result = await exceptionListClient.bulkDeleteExceptionList({
+          ids: ['so-1', 'so-2'],
+          namespaceType: 'single',
+        });
+
+        expect(result.success).toBe(false);
+        expect(result.errors).toHaveLength(2);
+        expect(result.errors[0].message).toContain('malformed [blockedLists]');
+        expect(savedObjectsClient.delete).not.toHaveBeenCalled();
+        expect(extensionPointStorageContext.logger.error).toHaveBeenCalled();
+      });
+    });
   });
 });

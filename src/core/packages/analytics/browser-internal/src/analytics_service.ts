@@ -8,6 +8,7 @@
  */
 
 import { of, Subscription } from 'rxjs';
+import { apm, type Transaction } from '@elastic/apm-rum';
 import type { AnalyticsClient } from '@elastic/ebt/client';
 import { createAnalytics } from '@elastic/ebt/client';
 import { registerPerformanceMetricEventType } from '@kbn/ebt-tools';
@@ -18,6 +19,7 @@ import { trackPerformanceMeasureEntries } from './track_performance_measure_entr
 import { trackClicks } from './track_clicks';
 
 import { getSessionId } from './get_session_id';
+import { trackBrowserPageTranslation } from './track_browser_page_translation';
 import { trackViewportSize } from './track_viewport_size';
 
 /** @internal */
@@ -25,14 +27,22 @@ export interface AnalyticsServiceSetupDeps {
   injectedMetadata: InternalInjectedMetadataSetup;
 }
 
+interface TransactionWithUndocumentedProps extends Transaction {
+  traceId: string;
+}
+
 export class AnalyticsService {
   private readonly analyticsClient: AnalyticsClient;
   private readonly subscriptionsHandler = new Subscription();
 
   constructor(core: CoreContext) {
+    const logger = core.logger.get('analytics');
     this.analyticsClient = createAnalytics({
       isDev: core.env.mode.dev,
-      logger: core.logger.get('analytics'),
+      logger,
+      getTraceContext: () => ({
+        id: (apm.getCurrentTransaction() as TransactionWithUndocumentedProps | undefined)?.traceId,
+      }),
     });
 
     this.registerBuildInfoAnalyticsContext(core);
@@ -47,6 +57,7 @@ export class AnalyticsService {
       trackPerformanceMeasureEntries(this.analyticsClient, core.env.mode.dev)
     );
     this.subscriptionsHandler.add(trackViewportSize(this.analyticsClient));
+    this.subscriptionsHandler.add(trackBrowserPageTranslation(this.analyticsClient, logger));
 
     // Register a flush method in the browser so CI can explicitly call it before closing the browser.
     window.__kbnAnalytics = { flush: () => this.analyticsClient.flush() };
@@ -54,6 +65,7 @@ export class AnalyticsService {
 
   public setup({ injectedMetadata }: AnalyticsServiceSetupDeps): AnalyticsServiceSetup {
     this.registerElasticsearchInfoContext(injectedMetadata);
+    this.registerDisplayLanguageContext(injectedMetadata);
 
     return {
       optIn: this.analyticsClient.optIn,
@@ -81,12 +93,16 @@ export class AnalyticsService {
 
   /**
    * Enriches the events with a session_id, so we can correlate them and understand funnels.
-   * @private
+   * @internal
    */
   private registerSessionIdContext() {
+    const sessionInfo = { session_id: getSessionId() };
+
+    apm.addLabels(sessionInfo); // Attach this label to APM to help us identify issues affecting multiple sessions
+
     this.analyticsClient.registerContextProvider({
       name: 'session-id',
-      context$: of({ session_id: getSessionId() }),
+      context$: of(sessionInfo),
       schema: {
         session_id: {
           type: 'keyword',
@@ -99,7 +115,7 @@ export class AnalyticsService {
   /**
    * Enriches the event with the build information.
    * @param core The core context.
-   * @private
+   * @internal
    */
   private registerBuildInfoAnalyticsContext(core: CoreContext) {
     this.analyticsClient.registerContextProvider({
@@ -134,7 +150,7 @@ export class AnalyticsService {
 
   /**
    * Enriches events with the current Browser's information
-   * @private
+   * @internal
    */
   private registerBrowserInfoAnalyticsContext() {
     this.analyticsClient.registerContextProvider({
@@ -165,9 +181,58 @@ export class AnalyticsService {
   }
 
   /**
+   * Enriches the events with the display language this page was rendered in and how it was chosen.
+   * @param injectedMetadata The injected metadata service.
+   * @internal
+   */
+  private registerDisplayLanguageContext(injectedMetadata: InternalInjectedMetadataSetup) {
+    const { locale, browserPreferredLocale, localeSource, configDefaultLocale } =
+      injectedMetadata.getI18nInfo();
+    this.analyticsClient.registerContextProvider({
+      name: 'display language',
+      context$: of({
+        display_language: locale,
+        ...(browserPreferredLocale !== undefined
+          ? { display_language_browser_preference: browserPreferredLocale }
+          : {}),
+        display_language_source: localeSource,
+        display_language_config_default: configDefaultLocale,
+      }),
+      schema: {
+        display_language: {
+          type: 'keyword',
+          _meta: { description: 'The language this page was shown in.' },
+        },
+        display_language_browser_preference: {
+          type: 'keyword',
+          _meta: {
+            optional: true,
+            description:
+              "The normalized locale the browser's Accept-Language header resolves to, regardless of what the display language resolved to. Absent when the browser's preference cannot be served.",
+          },
+        },
+        display_language_source: {
+          type: 'keyword',
+          _meta: {
+            description:
+              'What chose `display_language`: `profile` (the user saved a language), `cookie` (a previous choice remembered in the browser), `config` (the deployment default, because the user has made no choice), `browser` (the Accept-Language header), or `default` (nothing else applied, so English).',
+          },
+        },
+        display_language_config_default: {
+          type: 'keyword',
+          _meta: {
+            description:
+              "The deployment's configured `i18n.defaultLocale`. Any value other than `en` means the deployment forces a non-English default on users who have made no choice of their own.",
+          },
+        },
+      },
+    });
+  }
+
+  /**
    * Enriches the events with the Elasticsearch info (cluster name, uuid and version).
    * @param injectedMetadata The injected metadata service.
-   * @private
+   * @internal
    */
   private registerElasticsearchInfoContext(injectedMetadata: InternalInjectedMetadataSetup) {
     this.analyticsClient.registerContextProvider({

@@ -5,40 +5,27 @@
  * 2.0.
  */
 
-import React, { ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import React from 'react';
 
-import {
-  EuiCallOut,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLink,
-  EuiText,
-  EuiTitle,
-  EuiCode,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiTitle, EuiCode } from '@elastic/eui';
+import { KbnDangerCallout, KbnWarningCallout } from '@kbn/ui-callout';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { ReindexStatus, ReindexStep } from '../../../../../../../../../common/types';
+import { ReindexStep } from '@kbn/reindex-service-plugin/common';
+import { ReindexStatus } from '@kbn/upgrade-assistant-pkg-common';
 import { CancelLoadingState } from '../../../../../../types';
 import type { ReindexState } from '../../../use_reindex';
-import { StepProgress, StepProgressStep } from '../../../../../common/step_progress';
+import type { StepProgressStep } from '../../../../../common/step_progress';
+import { StepProgress } from '../../../../../common/step_progress';
 import { getReindexProgressLabel } from '../../../../../../../lib/utils';
 
 const ErrorCallout: React.FunctionComponent<{ errorMessage: string | null }> = ({
   errorMessage,
-}) => (
-  <EuiCallOut color="danger" title="There was an error">
-    <EuiText>
-      <p>{errorMessage}</p>
-    </EuiText>
-  </EuiCallOut>
-);
+}) => <KbnDangerCallout title="There was an error" text={errorMessage} />;
 
 const PausedCallout = () => (
-  <EuiCallOut
-    color="warning"
-    title="This step was paused due to a Kibana restart. Click 'Resume' below to continue."
-  />
+  <KbnWarningCallout title="This step was paused due to a Kibana restart. Click 'Resume' below to continue." />
 );
 
 const ReindexingDocumentsStepTitle: React.FunctionComponent<{

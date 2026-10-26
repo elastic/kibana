@@ -9,7 +9,7 @@ import { EuiFlexGroup, EuiFlexItem, useEuiFontSize } from '@elastic/eui';
 import { EuiToolTip } from '@elastic/eui';
 import React from 'react';
 import styled from '@emotion/styled';
-import { truncate } from '../../../utils/style';
+import { truncate } from '@kbn/apm-common';
 
 export interface IStickyProperty {
   val: JSX.Element | string | Date;
@@ -52,7 +52,7 @@ function getPropertyLabel({ fieldName, label }: Partial<IStickyProperty>) {
     return (
       <PropertyLabel>
         <EuiToolTip content={<TooltipFieldName>{fieldName}</TooltipFieldName>}>
-          <span>{label}</span>
+          <span tabIndex={0}>{label}</span>
         </EuiToolTip>
       </PropertyLabel>
     );
@@ -65,7 +65,7 @@ function getPropertyValue({ val, truncated = false }: Partial<IStickyProperty>) 
   if (truncated) {
     return (
       <EuiToolTip content={String(val)}>
-        <PropertyValueTruncated>{String(val)}</PropertyValueTruncated>
+        <PropertyValueTruncated tabIndex={0}>{String(val)}</PropertyValueTruncated>
       </EuiToolTip>
     );
   }

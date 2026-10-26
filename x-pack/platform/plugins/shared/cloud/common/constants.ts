@@ -13,3 +13,18 @@ export const ELASTIC_SUPPORT_LINK = 'https://support.elastic.co/';
 export const CLOUD_SNAPSHOTS_PATH = 'elasticsearch/snapshots/';
 
 export const ELASTICSEARCH_CONFIG_ROUTE = '/api/internal/cloud/elasticsearch_config';
+
+/**
+ * Users with any of these roles are shown Cloud billing links.
+ */
+export const CLOUD_BILLING_ROLES: readonly string[] = ['superuser', 'admin'];
+
+/**
+ * Serverless project roles whose members are allowed to edit Search Power on Cloud.
+ */
+export const SEARCH_POWER_EDITOR_ROLES: readonly string[] = ['superuser', 'admin', 'developer'];
+
+/**
+ * Query string that opens the Cloud project page on the "Search AI Lake settings" tab with the Search Power editor expanded.
+ */
+export const CLOUD_PROJECT_SEARCH_POWER_QUERY = 'tab=settings&edit=search_power';

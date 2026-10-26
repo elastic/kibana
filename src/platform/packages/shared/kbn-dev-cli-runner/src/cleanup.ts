@@ -10,7 +10,7 @@
 import { inspect } from 'util';
 
 import exitHook from 'exit-hook';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 import { isFailError } from '@kbn/dev-cli-errors';
 
 /**

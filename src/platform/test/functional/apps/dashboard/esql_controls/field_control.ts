@@ -9,21 +9,20 @@
 
 import expect from '@kbn/expect';
 
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const kibanaServer = getService('kibanaServer');
-  const { dashboard, timePicker, common, header } = getPageObjects([
+  const { dashboardControls, dashboard, timePicker, header } = getPageObjects([
+    'dashboardControls',
     'dashboard',
     'timePicker',
-    'common',
     'header',
   ]);
   const testSubjects = getService('testSubjects');
   const esql = getService('esql');
   const dashboardAddPanel = getService('dashboardAddPanel');
-  const browser = getService('browser');
   const comboBox = getService('comboBox');
   const elasticChart = getService('elasticChart');
 
@@ -51,10 +50,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboard.clickNewDashboard();
       await timePicker.setDefaultDataRange();
       await dashboard.switchToEditMode();
-      await dashboardAddPanel.clickEditorMenuButton();
-      await dashboardAddPanel.clickAddNewPanelFromUIActionLink('ES|QL');
+      await dashboardAddPanel.clickAddEsqlPanel();
       await dashboard.waitForRenderComplete();
       await elasticChart.setNewChartUiDebugFlag(true);
+      const panelCountBefore = await dashboard.getPanelCount();
 
       await retry.try(async () => {
         const panelCount = await dashboard.getPanelCount();
@@ -63,32 +62,23 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await esql.waitESQLEditorLoaded('InlineEditingESQLEditor');
 
-      await retry.waitFor('control flyout to open', async () => {
-        await esql.typeEsqlEditorQuery(
-          'FROM logstash* | STATS COUNT(*) BY ',
-          'InlineEditingESQLEditor'
-        );
-        // Wait until suggestions are loaded
-        await common.sleep(1000);
-        // Create control is the third suggestion
-        await browser.pressKeys(browser.keys.ARROW_DOWN);
-        await browser.pressKeys(browser.keys.ARROW_DOWN);
-        await browser.pressKeys(browser.keys.ENTER);
+      await esql.typeEsqlEditorQuery(
+        'FROM logstash* | STATS COUNT(*) BY ',
+        'InlineEditingESQLEditor'
+      );
+      await esql.selectEsqlSuggestionByLabel('Create control', 'InlineEditingESQLEditor');
 
-        return await testSubjects.exists('create_esql_control_flyout');
-      });
+      await testSubjects.existOrFail('create_esql_control_flyout');
 
       await comboBox.set('esqlIdentifiersOptions', 'geo.dest');
       await comboBox.set('esqlIdentifiersOptions', 'clientip');
 
       // create the control
       await testSubjects.click('saveEsqlControlsFlyoutButton');
-      await dashboard.waitForRenderComplete();
-
       await retry.try(async () => {
-        const controlGroupVisible = await testSubjects.exists('controls-group-wrapper');
-        expect(controlGroupVisible).to.be(true);
+        expect(await dashboard.getPanelCount()).to.be(panelCountBefore + 1);
       });
+      await dashboard.waitForRenderComplete();
 
       // Check Lens editor has been updated accordingly
       const editorValue = await esql.getEsqlEditorQuery();
@@ -98,11 +88,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('ESQLEditor-run-query-button');
       await dashboard.waitForRenderComplete();
       await header.waitUntilLoadingHasFinished();
+      await testSubjects.click('applyFlyoutButton');
     });
 
     it('should update the Lens chart accordingly', async () => {
       // change the control value
-      await comboBox.set('esqlControlValuesDropdown', 'clientip');
+      const controlId = await dashboard.getPanelIdByTitle('field');
+      expect(controlId).not.to.be(null);
+      await dashboardControls.optionsListOpenPopover(controlId!);
+      await dashboardControls.optionsListPopoverSelectOption('clientip');
       await dashboard.waitForRenderComplete();
 
       await retry.try(async () => {

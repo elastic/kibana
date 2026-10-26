@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Ast } from '@kbn/interpreter';
-import { Assign } from '@kbn/utility-types';
+import type { Ast } from '@kbn/interpreter';
+import type { Assign } from '@kbn/utility-types';
 
 /** @public **/
 export type PaletteContinuity = 'above' | 'below' | 'none' | 'all';
@@ -20,7 +20,7 @@ export interface DataBounds {
   fallback?: boolean;
 }
 
-export interface PaletteOutput<T = { [key: string]: unknown }> {
+export interface PaletteOutput<T = Record<string, unknown>> {
   type: 'palette' | 'system_palette';
   name: string;
   params?: T;
@@ -141,15 +141,23 @@ export interface CustomPaletteParams {
   reverse?: boolean;
   rangeType?: 'number' | 'percent';
   continuity?: PaletteContinuity;
+  /**
+   * @deprecated - appears to be unused
+   */
   progression?: 'fixed';
-  rangeMin?: number;
-  rangeMax?: number;
-  /** lower color stops */
+  rangeMin?: number; // this can be null
+  rangeMax?: number; // this can be null
+  /** upper bounds of color stops ranges */
   stops?: ColorStop[];
-  /** upper color stops */
+  /** lower bounds of color stops ranges */
   colorStops?: ColorStop[];
   steps?: number;
-  maxSteps?: number | undefined;
+  /**
+   * @deprecated Editor-only cap on how many color ranges the custom palette UI allows. It is not
+   * read at render time and is not part of the API. The cap is now supplied to
+   * `CustomizablePalette`/`ColorRanges` via the `maxSteps` prop instead of this persisted field.
+   */
+  maxSteps?: number;
 }
 
 export type RequiredPaletteParamTypes = Assign<
@@ -159,5 +167,5 @@ export type RequiredPaletteParamTypes = Assign<
 
 export interface ColorStop {
   color: string;
-  stop: number;
+  stop: number; // this can be null
 }

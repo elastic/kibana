@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { Actions, createApiLogic } from '../../../../shared/api_logic/create_api_logic';
+import type { Actions } from '../../../../shared/api_logic/create_api_logic';
+import { createApiLogic } from '../../../../shared/api_logic/create_api_logic';
 import { HttpLogic } from '../../../../shared/http';
 
 export interface StartTextExpansionModelArgs {
@@ -19,7 +20,7 @@ export interface StartTextExpansionModelResponse {
 export const startTextExpansionModel = async ({
   modelId,
 }: StartTextExpansionModelArgs): Promise<StartTextExpansionModelResponse> => {
-  const route = `/internal/enterprise_search/ml/models/${modelId}/deploy`;
+  const route = `/internal/enterprise_search/ml/models/${encodeURIComponent(modelId)}/deploy`;
   return await HttpLogic.values.http.post<StartTextExpansionModelResponse>(route);
 };
 

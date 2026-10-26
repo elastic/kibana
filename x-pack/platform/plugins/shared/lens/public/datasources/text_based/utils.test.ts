@@ -6,73 +6,222 @@
  */
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { DatatableColumn } from '@kbn/expressions-plugin/public';
-import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
-import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { mockDataViewsService } from '../../data_views_service/mocks';
 import {
-  getIndexPatternFromTextBasedQuery,
   loadIndexPatternRefs,
-  getStateFromAggregateQuery,
   getAllColumns,
   canColumnBeUsedBeInMetricDimension,
+  reconcileQueryColumns,
+  hasNumericColumn,
+  resolveTextBasedColumnType,
+  MAX_NUM_OF_COLUMNS,
 } from './utils';
-import type { TextBasedLayerColumn } from './types';
-import { type AggregateQuery } from '@kbn/es-query';
-
-jest.mock('./fetch_data_from_aggregate_query', () => ({
-  fetchDataFromAggregateQuery: jest.fn(() => {
-    return {
-      columns: [
-        {
-          name: 'timestamp',
-          id: 'timestamp',
-          meta: {
-            type: 'date',
-          },
-        },
-        {
-          name: 'bytes',
-          id: 'bytes',
-          meta: {
-            type: 'number',
-          },
-        },
-        {
-          name: 'memory',
-          id: 'memory',
-          meta: {
-            type: 'number',
-          },
-        },
-      ],
-    };
-  }),
-}));
+import type { TextBasedLayerColumn } from '@kbn/lens-common';
 
 describe('Text based languages utils', () => {
-  describe('getIndexPatternFromTextBasedQuery', () => {
-    it('should return the index pattern for es|ql query', () => {
-      const indexPattern = getIndexPatternFromTextBasedQuery({
-        esql: 'from foo | keep bytes, memory ',
-      });
-
-      expect(indexPattern).toBe('foo');
-    });
-
-    it('should return empty index pattern for non es|ql query', () => {
-      const indexPattern = getIndexPatternFromTextBasedQuery({
-        lang1: 'from foo | keep bytes, memory ',
-      } as unknown as AggregateQuery);
-
-      expect(indexPattern).toBe('');
-    });
-  });
-
   describe('loadIndexPatternRefs', () => {
     it('should return a list of sorted indexpattern refs', async () => {
       const refs = await loadIndexPatternRefs(mockDataViewsService() as DataViewsPublicPluginStart);
       expect(refs[0].title < refs[1].title).toBeTruthy();
+    });
+  });
+
+  describe('reconcileQueryColumns', () => {
+    it('preserves configured column IDs when compatible query fields change', () => {
+      const existingColumns: TextBasedLayerColumn[] = [
+        {
+          columnId: 'x-axis',
+          fieldName: '@timestamp',
+          meta: { type: 'date' },
+        },
+        {
+          columnId: 'y-axis',
+          fieldName: 'COUNT(*)',
+          label: 'Count of records',
+          customLabel: true,
+          meta: { type: 'number' },
+        },
+      ];
+      const queryColumns: DatatableColumn[] = [
+        { id: '@timestamp', name: '@timestamp', meta: { type: 'date' } },
+        { id: 'MAX(bytes)', name: 'MAX(bytes)', meta: { type: 'number' } },
+      ];
+
+      expect(reconcileQueryColumns(existingColumns, queryColumns)).toEqual([
+        {
+          columnId: 'x-axis',
+          fieldName: '@timestamp',
+          label: '@timestamp',
+          meta: { type: 'date' },
+        },
+        {
+          columnId: 'y-axis',
+          fieldName: 'MAX(bytes)',
+          label: 'Count of records',
+          customLabel: true,
+          meta: { type: 'number' },
+        },
+      ]);
+    });
+
+    it('rebinds same-type dimensions positionally when the query renames and reorders them', () => {
+      const existingColumns: TextBasedLayerColumn[] = [
+        { columnId: 'metric-a', fieldName: 'COUNT(*)', meta: { type: 'number' } },
+        { columnId: 'metric-b', fieldName: 'MEDIAN(bytes)', meta: { type: 'number' } },
+      ];
+      const queryColumns: DatatableColumn[] = [
+        { id: 'AVG(bytes)', name: 'AVG(bytes)', meta: { type: 'number' } },
+        { id: 'SUM(bytes)', name: 'SUM(bytes)', meta: { type: 'number' } },
+      ];
+
+      // no exact match: positional matching keeps existing dimension order
+      expect(reconcileQueryColumns(existingColumns, queryColumns)).toEqual([
+        {
+          columnId: 'metric-a',
+          fieldName: 'AVG(bytes)',
+          label: 'AVG(bytes)',
+          meta: { type: 'number' },
+        },
+        {
+          columnId: 'metric-b',
+          fieldName: 'SUM(bytes)',
+          label: 'SUM(bytes)',
+          meta: { type: 'number' },
+        },
+      ]);
+    });
+
+    it('falls back to the first remaining same-type dimension when positional match is incompatible', () => {
+      const existingColumns: TextBasedLayerColumn[] = [
+        { columnId: 'metric-a', fieldName: 'COUNT(*)', meta: { type: 'number' } },
+        { columnId: 'metric-b', fieldName: 'MEDIAN(bytes)', meta: { type: 'number' } },
+      ];
+      const queryColumns: DatatableColumn[] = [
+        { id: 'message', name: 'message', meta: { type: 'string' } },
+        { id: 'MEDIAN(bytes)', name: 'MEDIAN(bytes)', meta: { type: 'number' } },
+        { id: 'AVG(bytes)', name: 'AVG(bytes)', meta: { type: 'number' } },
+      ];
+
+      // exact match wins for MEDIAN(bytes); the renamed metric binds to the
+      // first remaining same-type dimension (best-effort, may be ambiguous)
+      expect(reconcileQueryColumns(existingColumns, queryColumns)).toEqual([
+        {
+          columnId: 'message',
+          fieldName: 'message',
+          label: 'message',
+          meta: { type: 'string' },
+        },
+        {
+          columnId: 'metric-b',
+          fieldName: 'MEDIAN(bytes)',
+          label: 'MEDIAN(bytes)',
+          meta: { type: 'number' },
+        },
+        {
+          columnId: 'metric-a',
+          fieldName: 'AVG(bytes)',
+          label: 'AVG(bytes)',
+          meta: { type: 'number' },
+        },
+      ]);
+    });
+
+    it('preserves the stable identifier variable when its concrete field changes', () => {
+      const existingColumns: TextBasedLayerColumn[] = [
+        {
+          columnId: 'x-axis',
+          fieldName: '??field',
+          variable: 'field',
+          meta: { type: 'number' },
+        },
+      ];
+      const queryColumns: DatatableColumn[] = [
+        {
+          id: 'bytes',
+          name: 'bytes',
+          variable: 'field',
+          meta: { type: 'number' },
+        },
+      ];
+
+      expect(reconcileQueryColumns(existingColumns, queryColumns)).toEqual([
+        {
+          columnId: 'x-axis',
+          fieldName: '??field',
+          variable: 'field',
+          label: 'bytes',
+          meta: { type: 'number' },
+        },
+      ]);
+    });
+
+    it('uses query column IDs for new incompatible fields', () => {
+      const existingColumns: TextBasedLayerColumn[] = [
+        { columnId: 'metric', fieldName: 'COUNT(*)', meta: { type: 'number' } },
+      ];
+      const queryColumns: DatatableColumn[] = [
+        { id: 'message', name: 'message', meta: { type: 'string' } },
+      ];
+
+      expect(reconcileQueryColumns(existingColumns, queryColumns)).toEqual([
+        {
+          columnId: 'message',
+          fieldName: 'message',
+          label: 'message',
+          meta: { type: 'string' },
+        },
+      ]);
+    });
+
+    // Regression test: when two existing columns share the same fieldName (an
+    // orphan from a previous reconcile plus a dimension-bound column), the
+    // dimension-bound column must win the exact-match tie so configured
+    // dimensions survive the query edit.
+    it('prefers dimension-bound columns over orphan duplicates with the same fieldName', () => {
+      const bucketField = 'BUCKET(@timestamp, 50, ?_tstart, ?_tend)';
+      const existingColumns: TextBasedLayerColumn[] = [
+        // orphan: columnId === query column id, not referenced by any dimension
+        { columnId: bucketField, fieldName: bucketField, meta: { type: 'date' } },
+        // dimension-bound column for the same field
+        { columnId: 'col-bucket', fieldName: bucketField, meta: { type: 'date' } },
+      ];
+      const queryColumns: DatatableColumn[] = [
+        { id: bucketField, name: bucketField, meta: { type: 'date' } },
+      ];
+
+      expect(reconcileQueryColumns(existingColumns, queryColumns, new Set(['col-bucket']))).toEqual(
+        [
+          {
+            columnId: 'col-bucket',
+            fieldName: bucketField,
+            label: bucketField,
+            meta: { type: 'date' },
+          },
+        ]
+      );
+    });
+
+    it('does not let a positional orphan shadow a dimension-bound column of the same type', () => {
+      // shape of a duplicated ES|QL layer: orphan copies of the query columns come
+      // first, dimension-bound columns last; the query is then changed to COUNT
+      const existingColumns: TextBasedLayerColumn[] = [
+        { columnId: 'MAX(bytes)', fieldName: 'MAX(bytes)', meta: { type: 'number' } },
+        { columnId: '@timestamp', fieldName: '@timestamp', meta: { type: 'date' } },
+        { columnId: 'gen-x', fieldName: '@timestamp', meta: { type: 'date' } },
+        { columnId: 'gen-y', fieldName: 'MAX(bytes)', meta: { type: 'number' } },
+      ];
+      const queryColumns: DatatableColumn[] = [
+        { id: 'COUNT(*)', name: 'COUNT(*)', meta: { type: 'number' } },
+        { id: '@timestamp', name: '@timestamp', meta: { type: 'date' } },
+      ];
+
+      const result = reconcileQueryColumns(
+        existingColumns,
+        queryColumns,
+        new Set(['gen-x', 'gen-y'])
+      );
+
+      expect(result.map(({ columnId }) => columnId)).toEqual(['gen-y', 'gen-x']);
     });
   });
 
@@ -216,445 +365,73 @@ describe('Text based languages utils', () => {
     });
   });
 
-  describe('getStateFromAggregateQuery', () => {
-    const textBasedQueryColumns = [
-      {
-        id: 'bytes',
-        name: 'bytes',
-        meta: {
-          type: 'number',
-        },
-      },
-      {
-        id: 'dest',
-        name: 'dest',
-        meta: {
-          type: 'string',
-        },
-      },
-    ] as DatatableColumn[];
-    it('should return the correct state', async () => {
-      const state = {
-        layers: {
-          first: {
-            columns: [],
-            query: undefined,
-            index: '',
-          },
-        },
-        indexPatternRefs: [],
-        initialContext: {
-          textBasedColumns: textBasedQueryColumns,
-          query: { esql: 'from foo' },
-          fieldName: '',
-          dataViewSpec: {
-            title: 'foo',
-            id: '1',
-            name: 'Foo',
-          },
-        },
-      };
-      const dataViewsMock = dataViewPluginMocks.createStartContract();
-      const dataMock = dataPluginMock.createStartContract();
-      const expressionsMock = expressionsPluginMock.createStartContract();
-      const updatedState = await getStateFromAggregateQuery(
-        state,
-        { esql: 'FROM my-fake-index-pattern' },
-        {
-          ...dataViewsMock,
-          getIdsWithTitle: jest.fn().mockReturnValue(
-            Promise.resolve([
-              { id: '1', title: 'my-fake-index-pattern' },
-              { id: '2', title: 'my-fake-restricted-pattern' },
-              { id: '3', title: 'my-compatible-pattern' },
-            ])
-          ),
-          get: jest.fn().mockReturnValue(
-            Promise.resolve({
-              id: '1',
-              title: 'my-fake-index-pattern',
-              timeFieldName: 'timeField',
-            })
-          ),
-          create: jest.fn().mockReturnValue(
-            Promise.resolve({
-              id: '4',
-              title: 'my-adhoc-index-pattern',
-              name: 'my-adhoc-index-pattern',
-              timeFieldName: 'timeField',
-              isPersisted: () => false,
-            })
-          ),
-        },
-        dataMock,
-        expressionsMock
-      );
-
-      expect(updatedState).toStrictEqual({
-        initialContext: {
-          textBasedColumns: textBasedQueryColumns,
-          query: { esql: 'from foo' },
-          fieldName: '',
-          dataViewSpec: {
-            title: 'foo',
-            id: '1',
-            name: 'Foo',
-          },
-        },
-        indexPatternRefs: [
-          {
-            id: '3',
-            timeField: 'timeField',
-            title: 'my-compatible-pattern',
-          },
-          {
-            id: '1',
-            timeField: 'timeField',
-            title: 'my-fake-index-pattern',
-          },
-          {
-            id: '2',
-            timeField: 'timeField',
-            title: 'my-fake-restricted-pattern',
-          },
-          {
-            id: '4',
-            timeField: undefined,
-            title: 'my-adhoc-index-pattern',
-          },
-        ],
-        layers: {
-          first: {
-            columns: [],
-            errors: [],
-            index: '4',
-            query: {
-              esql: 'FROM my-fake-index-pattern',
-            },
-            timeField: undefined,
-          },
-        },
-      });
-    });
-
-    it('should return the correct state for query with named params', async () => {
-      const state = {
-        layers: {
-          first: {
-            columns: [],
-            query: undefined,
-            index: '',
-          },
-        },
-        indexPatternRefs: [],
-        initialContext: {
-          textBasedColumns: textBasedQueryColumns,
-          query: { esql: 'from foo' },
-          fieldName: '',
-          dataViewSpec: {
-            title: 'foo',
-            id: '1',
-            name: 'Foo',
-          },
-        },
-      };
-      const dataViewsMock = dataViewPluginMocks.createStartContract();
-      const dataMock = dataPluginMock.createStartContract();
-      const expressionsMock = expressionsPluginMock.createStartContract();
-      const updatedState = await getStateFromAggregateQuery(
-        state,
-        { esql: 'FROM my-fake-index-pattern | WHERE time <= ?_tend' },
-        {
-          ...dataViewsMock,
-          getIdsWithTitle: jest.fn().mockReturnValue(
-            Promise.resolve([
-              { id: '1', title: 'my-fake-index-pattern' },
-              { id: '2', title: 'my-fake-restricted-pattern' },
-              { id: '3', title: 'my-compatible-pattern' },
-            ])
-          ),
-          get: jest.fn().mockReturnValue(
-            Promise.resolve({
-              id: '1',
-              title: 'my-fake-index-pattern',
-              timeFieldName: 'timeField',
-            })
-          ),
-          create: jest.fn().mockReturnValue(
-            Promise.resolve({
-              id: '4',
-              title: 'my-adhoc-index-pattern',
-              name: 'my-adhoc-index-pattern',
-              timeFieldName: 'timeField',
-              isPersisted: () => false,
-            })
-          ),
-        },
-        dataMock,
-        expressionsMock
-      );
-
-      expect(updatedState).toStrictEqual({
-        initialContext: {
-          textBasedColumns: textBasedQueryColumns,
-          query: { esql: 'from foo' },
-          fieldName: '',
-          dataViewSpec: {
-            title: 'foo',
-            id: '1',
-            name: 'Foo',
-          },
-        },
-        indexPatternRefs: [
-          {
-            id: '3',
-            timeField: 'timeField',
-            title: 'my-compatible-pattern',
-          },
-          {
-            id: '1',
-            timeField: 'timeField',
-            title: 'my-fake-index-pattern',
-          },
-          {
-            id: '2',
-            timeField: 'timeField',
-            title: 'my-fake-restricted-pattern',
-          },
-          {
-            id: '4',
-            timeField: 'time',
-            title: 'my-adhoc-index-pattern',
-          },
-        ],
-        layers: {
-          first: {
-            columns: [],
-            errors: [],
-            index: '4',
-            query: {
-              esql: 'FROM my-fake-index-pattern | WHERE time <= ?_tend',
-            },
-            timeField: 'time',
-          },
-        },
-      });
-    });
-
-    it('should return the correct state for not existing dataview', async () => {
-      const state = {
-        layers: {
-          first: {
-            columns: [],
-            query: undefined,
-            index: '',
-          },
-        },
-        indexPatternRefs: [],
-        initialContext: {
-          textBasedColumns: textBasedQueryColumns,
-          query: { esql: 'from foo' },
-          fieldName: '',
-          dataViewSpec: {
-            title: 'foo',
-            id: '1',
-            name: 'Foo',
-          },
-        },
-      };
-      const dataViewsMock = dataViewPluginMocks.createStartContract();
-      const dataMock = dataPluginMock.createStartContract();
-      const expressionsMock = expressionsPluginMock.createStartContract();
-      const updatedState = await getStateFromAggregateQuery(
-        state,
-        { esql: 'FROM my-fake-index-*' },
-        {
-          ...dataViewsMock,
-          getIdsWithTitle: jest.fn().mockReturnValue(
-            Promise.resolve([
-              { id: '1', title: 'my-fake-index-pattern' },
-              { id: '2', title: 'my-fake-restricted-pattern' },
-              { id: '3', title: 'my-compatible-pattern' },
-            ])
-          ),
-          get: jest.fn().mockReturnValue(
-            Promise.resolve({
-              id: '1',
-              title: 'my-fake-index-pattern',
-              timeFieldName: 'timeField',
-            })
-          ),
-          create: jest.fn().mockReturnValue(
-            Promise.resolve({
-              id: 'adHoc-id',
-              title: 'my-fake-index-*',
-              name: 'my-fake-index-*',
-              timeFieldName: 'timeField',
-              isPersisted: () => false,
-              fields: {
-                getByName: jest.fn().mockReturnValue({
-                  type: 'date',
-                }),
-              },
-            })
-          ),
-        },
-        dataMock,
-        expressionsMock
-      );
-
-      expect(updatedState).toStrictEqual({
-        initialContext: {
-          textBasedColumns: textBasedQueryColumns,
-          query: { esql: 'from foo' },
-          fieldName: '',
-          dataViewSpec: {
-            title: 'foo',
-            id: '1',
-            name: 'Foo',
-          },
-        },
-        indexPatternRefs: [
-          {
-            id: '3',
-            timeField: 'timeField',
-            title: 'my-compatible-pattern',
-          },
-          {
-            id: '1',
-            timeField: 'timeField',
-            title: 'my-fake-index-pattern',
-          },
-          {
-            id: '2',
-            timeField: 'timeField',
-            title: 'my-fake-restricted-pattern',
-          },
-          {
-            id: 'adHoc-id',
-            timeField: '@timestamp',
-            title: 'my-fake-index-*',
-          },
-        ],
-        layers: {
-          first: {
-            columns: [],
-            errors: [],
-            index: 'adHoc-id',
-            query: {
-              esql: 'FROM my-fake-index-*',
-            },
-            timeField: '@timestamp',
-          },
-        },
-      });
-    });
-  });
-
   describe('canColumnBeUsedBeInMetricDimension', () => {
-    it('should return true if there are non numeric field', async () => {
-      const fieldList = [
-        {
-          id: 'a',
-          name: 'Test 1',
-          meta: {
-            type: 'string',
-          },
-        },
-        {
-          id: 'b',
-          name: 'Test 2',
-          meta: {
-            type: 'string',
-          },
-        },
-      ] as DatatableColumn[];
-      const flag = canColumnBeUsedBeInMetricDimension(fieldList, 'string');
+    it('should return true if there are no numeric columns', async () => {
+      const flag = canColumnBeUsedBeInMetricDimension(false, 2, 'string');
       expect(flag).toBeTruthy();
     });
 
-    it('should return true if there are numeric field and the selected type is number', async () => {
-      const fieldList = [
-        {
-          id: 'a',
-          name: 'Test 1',
-          meta: {
-            type: 'number',
-          },
-        },
-        {
-          id: 'b',
-          name: 'Test 2',
-          meta: {
-            type: 'string',
-          },
-        },
-      ] as DatatableColumn[];
-      const flag = canColumnBeUsedBeInMetricDimension(fieldList, 'number');
+    it('should return true if there are numeric columns and the selected type is number', async () => {
+      const flag = canColumnBeUsedBeInMetricDimension(true, 2, 'number');
       expect(flag).toBeTruthy();
     });
 
-    it('should return false if there are non numeric fields and the selected type is non numeric', async () => {
-      const fieldList = [
-        {
-          id: 'a',
-          name: 'Test 1',
-          meta: {
-            type: 'number',
-          },
-        },
-        {
-          id: 'b',
-          name: 'Test 2',
-          meta: {
-            type: 'string',
-          },
-        },
-      ] as DatatableColumn[];
-      const flag = canColumnBeUsedBeInMetricDimension(fieldList, 'date');
+    it('should return false if there are numeric columns and the selected type is non numeric', async () => {
+      const flag = canColumnBeUsedBeInMetricDimension(true, 2, 'date');
       expect(flag).toBeFalsy();
     });
 
-    it('should return true if there are many columns regardless the types', async () => {
-      const fieldList = [
-        {
-          id: 'a',
-          name: 'Test 1',
-          meta: {
-            type: 'number',
-          },
-        },
-        {
-          id: 'b',
-          name: 'Test 2',
-          meta: {
-            type: 'number',
-          },
-        },
-        {
-          id: 'c',
-          name: 'Test 3',
-          meta: {
-            type: 'date',
-          },
-        },
-        {
-          id: 'd',
-          name: 'Test 4',
-          meta: {
-            type: 'string',
-          },
-        },
-        {
-          id: 'e',
-          name: 'Test 5',
-          meta: {
-            type: 'string',
-          },
-        },
-      ] as DatatableColumn[];
-      const flag = canColumnBeUsedBeInMetricDimension(fieldList, 'date');
+    it('should return true if there are many columns regardless of the types', async () => {
+      const flag = canColumnBeUsedBeInMetricDimension(true, MAX_NUM_OF_COLUMNS, 'date');
       expect(flag).toBeTruthy();
+    });
+  });
+
+  describe('resolveTextBasedColumnType', () => {
+    const column = {
+      columnId: 'col-uuid',
+      fieldName: '@timestamp',
+      meta: { type: 'string' },
+    } satisfies TextBasedLayerColumn;
+
+    it('prefers activeData column type', () => {
+      expect(
+        resolveTextBasedColumnType(column, {
+          id: 'col-uuid',
+          name: '@timestamp',
+          meta: { type: 'date' },
+        })
+      ).toEqual('date');
+    });
+
+    it('falls back to persisted meta.type', () => {
+      expect(resolveTextBasedColumnType(column)).toEqual('string');
+    });
+  });
+
+  describe('hasNumericColumn', () => {
+    const columns = [
+      { columnId: 'a', fieldName: 'bytes', meta: { type: 'string' } },
+      { columnId: 'b', fieldName: 'name', meta: { type: 'string' } },
+    ] satisfies TextBasedLayerColumn[];
+
+    it('detects a numeric column from the activeData overlay even if persisted meta is not numeric', () => {
+      const activeColumns = [
+        { id: 'a', name: 'bytes', meta: { type: 'number' } },
+      ] as DatatableColumn[];
+      expect(hasNumericColumn(columns, activeColumns)).toBe(true);
+    });
+
+    it('falls back to persisted meta.type when no activeData is present', () => {
+      expect(hasNumericColumn(columns)).toBe(false);
+    });
+
+    it('does not treat a persisted number as numeric when the overlay says otherwise', () => {
+      const persistedNumber = [
+        { columnId: 'a', fieldName: 'ts', meta: { type: 'number' } },
+      ] satisfies TextBasedLayerColumn[];
+      const activeColumns = [{ id: 'a', name: 'ts', meta: { type: 'date' } }] as DatatableColumn[];
+      expect(hasNumericColumn(persistedNumber, activeColumns)).toBe(false);
     });
   });
 });

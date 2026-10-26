@@ -9,7 +9,7 @@ import { EuiButtonEmpty, EuiLink } from '@elastic/eui';
 import React, { useCallback, useMemo, useEffect } from 'react';
 import { useAssistantContext } from '../..';
 
-import { PromptContext } from '../assistant/prompt_context/types';
+import type { PromptContext } from '../assistant/prompt_context/types';
 import { useAssistantOverlay } from '../assistant/use_assistant_overlay';
 
 import * as i18n from './translations';
@@ -18,7 +18,7 @@ export type Props = Omit<PromptContext, 'id'> & {
   children?: React.ReactNode;
   /** Optionally automatically add this context to a conversation when the assistant is shown */
   conversationTitle?: string;
-  /** Defaults to `discuss`. If null, the button will not have an icon. Not available for link */
+  /** Defaults to `comment`. If null, the button will not have an icon. Not available for link */
   iconType?: string | null;
   /** Optionally specify a well known ID, or default to a UUID */
   promptContextId?: string;
@@ -60,7 +60,10 @@ const NewChatComponent: React.FC<Props> = ({
     tooltip,
     isAssistantEnabled
   );
-  const { codeBlockRef } = useAssistantContext();
+  const {
+    codeBlockRef,
+    assistantAvailability: { isAssistantVisible },
+  } = useAssistantContext();
 
   const showOverlay = useCallback(() => {
     showAssistantOverlay(true);
@@ -84,10 +87,10 @@ const NewChatComponent: React.FC<Props> = ({
       return undefined;
     }
 
-    return iconType ?? 'discuss';
+    return iconType ?? 'comment';
   }, [iconType]);
 
-  return useMemo(
+  const button = useMemo(
     () =>
       asLink ? (
         <EuiLink color={color} data-test-subj="newChatLink" onClick={showOverlay}>
@@ -96,7 +99,7 @@ const NewChatComponent: React.FC<Props> = ({
       ) : (
         <EuiButtonEmpty
           color={color}
-          data-test-subj="newChat"
+          data-test-subj="plusCircle"
           onClick={showOverlay}
           iconType={icon}
         >
@@ -105,6 +108,12 @@ const NewChatComponent: React.FC<Props> = ({
       ),
     [children, icon, showOverlay, color, asLink]
   );
+
+  if (!isAssistantVisible) {
+    return null;
+  }
+
+  return button;
 };
 
 NewChatComponent.displayName = 'NewChatComponent';

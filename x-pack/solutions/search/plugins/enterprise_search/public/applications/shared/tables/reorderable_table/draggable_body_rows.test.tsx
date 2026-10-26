@@ -7,54 +7,57 @@
 
 import React from 'react';
 
-import { shallow } from 'enzyme';
+jest.mock('@elastic/eui', () => ({
+  ...jest.requireActual('@elastic/eui'),
+  EuiDragDropContext: jest.fn(({ children }: { children: React.ReactNode }) => <>{children}</>),
+  EuiDroppable: jest.fn(({ children }: { children: React.ReactNode }) => <>{children}</>),
+}));
+
+import { screen } from '@testing-library/react';
 
 import { EuiDragDropContext } from '@elastic/eui';
+import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
 
-import { BodyRows } from './body_rows';
 import { DraggableBodyRows } from './draggable_body_rows';
 
 describe('DraggableBodyRows', () => {
   const items = [{ id: 1 }, { id: 2 }];
   const onReorder = jest.fn();
 
+  const MockEuiDragDropContext = jest.mocked(EuiDragDropContext);
+
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   it('wraps BodyRows in a EuiDragDropContext', () => {
-    const renderItem = jest.fn();
-    const wrapper = shallow(
-      <DraggableBodyRows items={items} onReorder={onReorder} renderItem={renderItem} />
+    renderWithKibanaRenderContext(
+      <DraggableBodyRows items={items} onReorder={onReorder} renderItem={jest.fn()} />
     );
 
-    expect(wrapper.find(EuiDragDropContext).exists()).toBe(true);
-
-    const bodyRows = wrapper.find(BodyRows);
-    expect(bodyRows.props()).toEqual({
-      items,
-      renderItem,
-    });
+    expect(MockEuiDragDropContext).toHaveBeenCalled();
+    expect(screen.getByRole('rowgroup')).toBeInTheDocument();
   });
 
   it('will call the provided onReorder function whenever items are reordered', () => {
-    const wrapper = shallow(
+    renderWithKibanaRenderContext(
       <DraggableBodyRows items={items} onReorder={onReorder} renderItem={jest.fn()} />
     );
-    wrapper.find(EuiDragDropContext).simulate('dragEnd', {
-      source: { index: 1 },
-      destination: { index: 0 },
-    });
+
+    const { onDragEnd } = MockEuiDragDropContext.mock.calls[0][0] as { onDragEnd: Function };
+    onDragEnd({ source: { index: 1 }, destination: { index: 0 } });
+
     expect(onReorder).toHaveBeenCalledWith([{ id: 2 }, { id: 1 }], items);
   });
 
   it('will not call the provided onReorder function if there are not a source AND destination provided', () => {
-    const wrapper = shallow(
+    renderWithKibanaRenderContext(
       <DraggableBodyRows items={items} onReorder={onReorder} renderItem={jest.fn()} />
     );
-    wrapper.find(EuiDragDropContext).simulate('dragEnd', {
-      source: { index: 1 },
-    });
+
+    const { onDragEnd } = MockEuiDragDropContext.mock.calls[0][0] as { onDragEnd: Function };
+    onDragEnd({ source: { index: 1 } });
+
     expect(onReorder).not.toHaveBeenCalled();
   });
 });

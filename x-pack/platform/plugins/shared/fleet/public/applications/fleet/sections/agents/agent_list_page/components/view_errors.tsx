@@ -100,7 +100,14 @@ export const ViewErrors: React.FunctionComponent<{ action: ActionStatus }> = ({ 
   return (
     <>
       <EuiAccordion id={action.actionId + '_errors'} buttonContent="Show errors">
-        <EuiBasicTable items={action.latestErrors ?? []} columns={columns} tableLayout="auto" />
+        <EuiBasicTable
+          items={action.latestErrors ?? []}
+          columns={columns}
+          tableLayout="auto"
+          tableCaption={i18n.translate('xpack.fleet.agentList.viewErrors.tableCaption', {
+            defaultMessage: 'List of errors',
+          })}
+        />
       </EuiAccordion>
     </>
   );

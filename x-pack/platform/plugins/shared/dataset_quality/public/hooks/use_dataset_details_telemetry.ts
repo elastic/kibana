@@ -6,16 +6,16 @@
  */
 
 import { useCallback, useEffect, useMemo } from 'react';
-import { RouterLinkProps } from '@kbn/router-utils/src/get_router_link_props';
-import { getDateISORange } from '@kbn/timerange';
+import type { RouterLinkProps } from '@kbn/router-utils/src/get_router_link_props';
 import { useDatasetQualityDetailsState } from './use_dataset_quality_details_state';
-import { DatasetDetailsEbtProps, NavigationSource, NavigationTarget } from '../services/telemetry';
-import { BasicDataStream, TimeRangeConfig } from '../../common/types';
-import { DataStreamDetails } from '../../common/api_types';
-import { Integration } from '../../common/data_streams_stats/integration';
+import type { DatasetDetailsEbtProps } from '../services/telemetry';
+import { NavigationSource, NavigationTarget } from '../services/telemetry';
+import type { BasicDataStream, TimeRangeConfig } from '../../common/types';
+import type { DataStreamDetails } from '../../common/api_types';
+import type { Integration } from '../../common/data_streams_stats/integration';
 import { mapPercentageToQuality } from '../../common/utils';
 import { MASKED_FIELD_PLACEHOLDER, UNKOWN_FIELD_PLACEHOLDER } from '../../common/constants';
-import { calculatePercentage } from '../utils';
+import { calculatePercentage, getSafeDateISORange } from '../utils';
 
 export function useDatasetDetailsTelemetry() {
   const {
@@ -41,8 +41,8 @@ export function useDatasetDetailsTelemetry() {
         canUserViewIntegrations,
         canUserAccessDashboards,
         breakdownField,
-        isNonAggregatable,
-        isBreakdownFieldEcs,
+        isNonAggregatable: isNonAggregatable ?? false,
+        isBreakdownFieldEcs: isBreakdownFieldEcs ?? false,
         integration: integrationDetails.integration?.integration,
       });
     }
@@ -69,13 +69,21 @@ export function useDatasetDetailsTelemetry() {
   useEffect(() => {
     const datasetDetailsTrackingState = telemetryClient.getDatasetDetailsTrackingState();
     if (datasetDetailsTrackingState === 'started' && ebtProps) {
-      telemetryClient.trackDatasetDetailsOpened(ebtProps);
+      telemetryClient.trackDatasetDetailsOpened({
+        ...ebtProps,
+        data_stream: {
+          ...ebtProps.data_stream,
+          namespace: ebtProps.data_stream.namespace || '',
+        },
+      });
     }
   }, [ebtProps, telemetryClient]);
 
   const trackDetailsNavigated = useCallback(
     (target: NavigationTarget, source: NavigationSource, isDegraded = false) => {
       const datasetDetailsTrackingState = telemetryClient.getDatasetDetailsTrackingState();
+      // The navigation controls render before the data stream details resolve, so the event is
+      // skipped while its props are unavailable rather than aborting the navigation that fired it.
       if (
         (datasetDetailsTrackingState === 'opened' || datasetDetailsTrackingState === 'navigated') &&
         ebtProps
@@ -88,10 +96,6 @@ export function useDatasetDetailsTelemetry() {
           target,
           source,
         });
-      } else {
-        throw new Error(
-          'Cannot report dataset details navigation telemetry without required data and state'
-        );
       }
     },
     [ebtProps, telemetryClient]
@@ -160,12 +164,19 @@ function getDatasetDetailsEbtProps({
   isNonAggregatable: boolean;
   isBreakdownFieldEcs: boolean;
   integration?: Integration;
-}): DatasetDetailsEbtProps {
+}): DatasetDetailsEbtProps | undefined {
+  const dateRange = getSafeDateISORange(timeRange);
+  if (!dateRange) {
+    // Return undefined when date range is invalid - telemetry should not crash the UI
+    return undefined;
+  }
+  const { startDate: from, endDate: to } = dateRange;
+
   const indexName = datasetDetails.rawName;
   const dataStream = {
-    dataset: datasetDetails.name,
-    namespace: datasetDetails.namespace,
-    type: datasetDetails.type,
+    dataset: datasetDetails.name ?? '',
+    namespace: datasetDetails.namespace ?? '',
+    type: datasetDetails.name && datasetDetails.namespace ? datasetDetails.type : '',
   };
   const degradedDocs = dataStreamDetails?.degradedDocsCount ?? 0;
   const failedDocs = dataStreamDetails?.failedDocsCount ?? 0;
@@ -173,7 +184,6 @@ function getDatasetDetailsEbtProps({
   const degradedPercentage = calculatePercentage({ totalDocs, count: degradedDocs });
   const failedPercentage = calculatePercentage({ totalDocs, count: failedDocs });
   const health = mapPercentageToQuality([degradedPercentage, failedPercentage]);
-  const { startDate: from, endDate: to } = getDateISORange(timeRange);
 
   return {
     index_name: indexName,

@@ -11,13 +11,13 @@ import React, { useState } from 'react';
 import { EuiButtonGroup, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import useObservable from 'react-use/lib/useObservable';
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 import { INDEX_PATTERN_TYPE } from '@kbn/data-views-plugin/public';
 import { StatusMessage } from './status_message';
 import { IndicesList } from './indices_list';
 import { matchedIndiciesDefault } from '../../data_view_editor_service';
 
-import { MatchedIndicesSet } from '../../types';
+import type { MatchedIndicesSet } from '../../types';
 
 enum ViewMode {
   allIndices = 'allIndices',
@@ -44,11 +44,19 @@ export interface Props {
   allowHidden: boolean;
   title: string;
   matchedIndices$: Observable<MatchedIndicesSet>;
+  matchedIndicesError$: Observable<Error | undefined>;
 }
 
-export const PreviewPanel = ({ type, allowHidden, title = '', matchedIndices$ }: Props) => {
+export const PreviewPanel = ({
+  type,
+  allowHidden,
+  title = '',
+  matchedIndices$,
+  matchedIndicesError$,
+}: Props) => {
   const [viewMode, setViewMode] = useState<ViewMode>();
   const matched = useObservable(matchedIndices$, matchedIndiciesDefault);
+  const matchedIndicesError = useObservable(matchedIndicesError$);
 
   let currentlyVisibleIndices;
   let currentViewMode;
@@ -84,6 +92,7 @@ export const PreviewPanel = ({ type, allowHidden, title = '', matchedIndices$ }:
         showSystemIndices={type === INDEX_PATTERN_TYPE.ROLLUP ? false : true}
         isIncludingSystemIndices={allowHidden}
         query={title}
+        error={matchedIndicesError}
       />
       <EuiSpacer size="m" />
       {Boolean(title) &&

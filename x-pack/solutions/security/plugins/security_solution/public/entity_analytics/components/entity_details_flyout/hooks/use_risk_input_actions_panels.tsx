@@ -8,39 +8,86 @@
 import { EuiTextTruncate } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { SECURITY_SOLUTION_OWNER } from '@kbn/cases-plugin/common';
+import { TableId } from '@kbn/securitysolution-data-table';
 import { i18n } from '@kbn/i18n';
+import { ADD_TO_CASE } from '@kbn/response-ops-alerts-table/translations';
 import { get } from 'lodash/fp';
 import { ALERT_RULE_NAME } from '@kbn/rule-data-utils';
-import type { CasesPublicStart } from '@kbn/cases-plugin/public';
+import { useCanAttachToCase } from '../../../../cases/attachments/hooks/use_can_attach_to_case';
+import { withGroupSeparators } from '../../../../common/utils/action_menu_items';
 import { useRiskInputActions } from './use_risk_input_actions';
 import type { InputAlert } from '../../../hooks/use_risk_contributing_alerts';
+import { useGlobalTime } from '../../../../common/containers/use_global_time';
+import { useSendBulkToTimeline } from '../../../../detections/components/alerts_table/timeline_actions/use_send_bulk_to_timeline';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
+import { EntityEventTypes } from '../../../../common/lib/telemetry';
+import { useKibana } from '../../../../common/lib/kibana/kibana_react';
+import { useIsInSecurityApp } from '../../../../common/hooks/is_in_security_app';
+import { RISK_INPUT_ACTION_IDS } from '../../../../common/constants/action_ids';
 
 export const useRiskInputActionsPanels = (inputs: InputAlert[], closePopover: () => void) => {
-  const { cases: casesService } = useKibana<{ cases?: CasesPublicStart }>().services;
-  const { addToExistingCase, addToNewCaseClick, addToNewTimeline } = useRiskInputActions(
-    inputs,
-    closePopover
-  );
-  const userCasesPermissions = casesService?.helpers.canUseCases([SECURITY_SOLUTION_OWNER]);
-  const hasCasesPermissions = userCasesPermissions?.create && userCasesPermissions?.read;
+  const { telemetry } = useKibana().services;
+  const { addToCase } = useRiskInputActions(inputs, closePopover);
+  const { from, to } = useGlobalTime();
   const {
-    timelinePrivileges: { read: canAddToTimeline },
+    timelinePrivileges: { read: canReadTimelines },
   } = useUserPrivileges();
+  const isInSecurityApp = useIsInSecurityApp();
+  const hasCasesPermissions = useCanAttachToCase();
+
+  const { sendBulkEventsToTimelineHandler } = useSendBulkToTimeline({
+    to,
+    from,
+    tableId: TableId.riskInputs,
+  });
+  const timelineActions = useMemo(() => {
+    if (!canReadTimelines || !isInSecurityApp) {
+      return [];
+    }
+
+    return [
+      {
+        key: RISK_INPUT_ACTION_IDS.addToNewTimeline,
+        icon: 'timeline',
+        'data-test-subj': RISK_INPUT_ACTION_IDS.addToNewTimeline,
+        name: (
+          <FormattedMessage
+            id="xpack.securitySolution.flyout.entityDetails.riskInputs.actions.addToNewTimeline"
+            defaultMessage="Add to new timeline"
+          />
+        ),
+
+        onClick: () => {
+          telemetry.reportEvent(EntityEventTypes.AddRiskInputToTimelineClicked, {
+            quantity: inputs.length,
+          });
+
+          closePopover();
+          const items = inputs.map(({ input }: InputAlert) => {
+            return {
+              _id: input.id,
+              _index: input.index,
+              data: [],
+              ecs: {
+                _id: input.id,
+                _index: input.index,
+              },
+            };
+          });
+          sendBulkEventsToTimelineHandler(items);
+        },
+      },
+    ];
+  }, [
+    canReadTimelines,
+    isInSecurityApp,
+    inputs,
+    sendBulkEventsToTimelineHandler,
+    closePopover,
+    telemetry,
+  ]);
 
   return useMemo(() => {
-    const timelinePanel = {
-      name: (
-        <FormattedMessage
-          id="xpack.securitySolution.flyout.entityDetails.riskInputs.actions.addToNewTimeline"
-          defaultMessage="Add to new timeline"
-        />
-      ),
-
-      onClick: addToNewTimeline,
-    };
     const ruleName = get(['alert', ALERT_RULE_NAME], inputs[0]) ?? '';
     const title = i18n.translate(
       'xpack.securitySolution.flyout.entityDetails.riskInputs.actions.title',
@@ -72,42 +119,21 @@ export const useRiskInputActionsPanels = (inputs: InputAlert[], closePopover: ()
           />
         ),
         id: 0,
-        items: [
-          ...(canAddToTimeline ? [timelinePanel] : []),
-          ...(hasCasesPermissions
+        items: withGroupSeparators([
+          hasCasesPermissions
             ? [
                 {
-                  name: (
-                    <FormattedMessage
-                      id="xpack.securitySolution.flyout.entityDetails.riskInputs.actions.addToNewCase"
-                      defaultMessage="Add to new case"
-                    />
-                  ),
-
-                  onClick: addToNewCaseClick,
-                },
-
-                {
-                  name: (
-                    <FormattedMessage
-                      id="xpack.securitySolution.flyout.entityDetails.riskInputs.actions.addToExistingCase"
-                      defaultMessage="Add to existing case"
-                    />
-                  ),
-
-                  onClick: addToExistingCase,
+                  key: RISK_INPUT_ACTION_IDS.addToCase,
+                  icon: 'briefcase' as const,
+                  'data-test-subj': RISK_INPUT_ACTION_IDS.addToCase,
+                  name: ADD_TO_CASE,
+                  onClick: addToCase,
                 },
               ]
-            : []),
-        ],
+            : [],
+          timelineActions,
+        ]),
       },
     ];
-  }, [
-    addToExistingCase,
-    addToNewCaseClick,
-    addToNewTimeline,
-    inputs,
-    hasCasesPermissions,
-    canAddToTimeline,
-  ]);
+  }, [addToCase, inputs, hasCasesPermissions, timelineActions]);
 };

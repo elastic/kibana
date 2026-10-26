@@ -27,3 +27,9 @@ export const ALERT_ASSIGNEES_VALIDATION_ERROR = (duplicates: string) =>
     defaultMessage:
       'Duplicate assignees { duplicates } were found in the add and remove parameters.',
   });
+
+export const ALERT_CLOSING_REASON_VALIDATION_ERROR = (reason: string) =>
+  i18n.translate('xpack.securitySolution.api.alertStatus.reason.validationError', {
+    values: { reason },
+    defaultMessage: '{reason} is an invalid closing reason.',
+  });

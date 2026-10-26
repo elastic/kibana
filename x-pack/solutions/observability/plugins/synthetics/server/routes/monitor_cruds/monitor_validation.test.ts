@@ -5,28 +5,30 @@
  * 2.0.
  */
 
-import {
+import type {
   BrowserAdvancedFields,
   BrowserFields,
   BrowserSimpleFields,
-  CodeEditorMode,
   CommonFields,
-  ConfigKey,
-  MonitorTypeEnum,
-  FormMonitorType,
   HTTPAdvancedFields,
   HTTPFields,
   HTTPSimpleFields,
   ICMPSimpleFields,
   Metadata,
   MonitorFields,
-  ResponseBodyIndexPolicy,
-  ScheduleUnit,
-  SourceType,
   TCPAdvancedFields,
   TCPFields,
   TCPSimpleFields,
   TLSFields,
+} from '../../../common/runtime_types';
+import {
+  CodeEditorMode,
+  ConfigKey,
+  MonitorTypeEnum,
+  FormMonitorType,
+  ResponseBodyIndexPolicy,
+  ScheduleUnit,
+  SourceType,
   TLSVersion,
   VerificationMode,
 } from '../../../common/runtime_types';
@@ -176,6 +178,7 @@ describe('validateMonitor', () => {
       [ConfigKey.JOURNEY_FILTERS_MATCH]: 'false',
       [ConfigKey.JOURNEY_FILTERS_TAGS]: testTags,
       [ConfigKey.IGNORE_HTTPS_ERRORS]: false,
+      [ConfigKey.CERTIFICATE_ERROR_SPKI_ALLOWLIST]: [],
       [ConfigKey.THROTTLING_CONFIG]: {
         value: {
           download: '5',
@@ -204,7 +207,7 @@ describe('validateMonitor', () => {
         },
         locations: ['somewhere'],
       } as unknown as MonitorFields;
-      const result = validateMonitor(testMonitor);
+      const result = validateMonitor(testMonitor, 'default');
       expect(result).toMatchObject({
         valid: false,
         reason: 'Monitor type is invalid',
@@ -221,7 +224,7 @@ describe('validateMonitor', () => {
         },
         locations: ['somewhere'],
       } as unknown as MonitorFields;
-      const result = validateMonitor(monitor);
+      const result = validateMonitor(monitor, 'default');
       expect(result).toMatchObject({
         valid: false,
         reason: 'Monitor type is invalid',
@@ -230,13 +233,16 @@ describe('validateMonitor', () => {
     });
 
     it(`when schedule is not valid`, () => {
-      const result = validateMonitor({
-        ...testICMPFields,
-        schedule: {
-          number: '4',
-          unit: ScheduleUnit.MINUTES,
-        },
-      } as unknown as MonitorFields);
+      const result = validateMonitor(
+        {
+          ...testICMPFields,
+          schedule: {
+            number: '4',
+            unit: ScheduleUnit.MINUTES,
+          },
+        } as unknown as MonitorFields,
+        'default'
+      );
       expect(result).toMatchObject({
         valid: false,
         reason: 'Monitor schedule is invalid',
@@ -246,10 +252,13 @@ describe('validateMonitor', () => {
     });
 
     it(`when timeout is not valid`, () => {
-      const result = validateMonitor({
-        ...testICMPFields,
-        timeout: '3m',
-      } as unknown as MonitorFields);
+      const result = validateMonitor(
+        {
+          ...testICMPFields,
+          timeout: '3m',
+        } as unknown as MonitorFields,
+        'default'
+      );
       expect(result).toMatchObject({
         valid: false,
         reason: 'Monitor is not a valid monitor of type icmp',
@@ -258,22 +267,105 @@ describe('validateMonitor', () => {
     });
 
     it(`when location is not valid`, () => {
-      const result = validateMonitor({
-        ...testICMPFields,
-        locations: ['invalid-location'],
-      } as unknown as MonitorFields);
+      const result = validateMonitor(
+        {
+          ...testICMPFields,
+          locations: ['invalid-location'],
+        } as unknown as MonitorFields,
+        'default'
+      );
       expect(result).toMatchObject({
         valid: false,
         reason: 'Monitor is not a valid monitor of type icmp',
         details: 'Invalid value "invalid-location" supplied to "locations"',
       });
     });
+
+    it('when api monitor uses Elastic managed locations', () => {
+      const testMonitor = {
+        ...testBrowserFields,
+        [ConfigKey.MONITOR_TYPE]: MonitorTypeEnum.API,
+        [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorType.API,
+        [ConfigKey.SOURCE_INLINE]: 'step()',
+      } as MonitorFields;
+      const result = validateMonitor(testMonitor, 'default');
+      expect(result).toMatchObject({
+        valid: false,
+        reason: 'API Journey monitors cannot run on Elastic managed locations',
+        details:
+          'API Journey monitors can only run on private locations. Remove Elastic managed locations from this monitor.',
+        payload: testMonitor,
+      });
+    });
+
+    it('when api monitor is created on Serverless', () => {
+      const testMonitor = {
+        ...testBrowserFields,
+        [ConfigKey.MONITOR_TYPE]: MonitorTypeEnum.API,
+        [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorType.API,
+        [ConfigKey.SOURCE_INLINE]: 'step()',
+        [ConfigKey.LOCATIONS]: [
+          {
+            id: 'private-1',
+            label: 'Private Location',
+            geo: { lat: 0, lon: 0 },
+            isServiceManaged: false,
+          },
+        ],
+      } as MonitorFields;
+      const result = validateMonitor(testMonitor, 'default', true);
+      expect(result).toMatchObject({
+        valid: false,
+        reason: 'API Journey monitors are not yet supported on Serverless',
+        details: 'API Journey monitor support is not yet available on Serverless.',
+        payload: testMonitor,
+      });
+    });
+
+    it('when browser timeout is less than 30 seconds with private locations', () => {
+      const testMonitor = {
+        ...testBrowserFields,
+        [ConfigKey.SOURCE_INLINE]: 'step()',
+        [ConfigKey.TIMEOUT]: '29',
+        [ConfigKey.LOCATIONS]: [
+          {
+            id: 'private-1',
+            label: 'Private Location',
+            geo: { lat: 0, lon: 0 },
+            isServiceManaged: false,
+          },
+        ],
+      } as MonitorFields;
+      const result = validateMonitor(testMonitor, 'default');
+      expect(result).toMatchObject({
+        valid: false,
+        reason: 'Browser monitor timeout for private locations is invalid',
+        details:
+          'Timeout of 29 seconds is too low. Browser monitors on private locations require a minimum timeout of 30 seconds.',
+        payload: testMonitor,
+      });
+    });
   });
 
   describe('should validate', () => {
+    it('when browser timeout is less than 30 seconds with only public locations', () => {
+      const testMonitor = {
+        ...testBrowserFields,
+        [ConfigKey.SOURCE_INLINE]: 'step()',
+        [ConfigKey.TIMEOUT]: '10',
+      } as MonitorFields;
+      const result = validateMonitor(testMonitor, 'default');
+      expect(result).toMatchObject({
+        valid: true,
+        reason: '',
+        details: '',
+        payload: testMonitor,
+      });
+    });
+
     it('when payload is a correct ICMP monitor', () => {
       const testMonitor = testICMPFields as MonitorFields;
-      const result = validateMonitor(testMonitor);
+      const result = validateMonitor(testMonitor, 'default');
       expect(result).toMatchObject({
         valid: true,
         reason: '',
@@ -284,7 +376,7 @@ describe('validateMonitor', () => {
 
     it('when payload is a correct TCP monitor', () => {
       const testMonitor = testTCPFields as MonitorFields;
-      const result = validateMonitor(testMonitor);
+      const result = validateMonitor(testMonitor, 'default');
       expect(result).toMatchObject({
         valid: true,
         reason: '',
@@ -296,7 +388,7 @@ describe('validateMonitor', () => {
     it('when payload is a correct HTTP monitor', () => {
       const testMonitor = testHTTPFields as MonitorFields;
 
-      const result = validateMonitor(testMonitor);
+      const result = validateMonitor(testMonitor, 'default');
       expect(result).toMatchObject({
         valid: true,
         reason: '',
@@ -307,7 +399,7 @@ describe('validateMonitor', () => {
 
     it('when payload is not a correct Browser monitor', () => {
       const testMonitor = testBrowserFields as MonitorFields;
-      const result = validateMonitor(testMonitor);
+      const result = validateMonitor(testMonitor, 'default');
       expect(result).toMatchObject({
         valid: false,
         details: 'source.inline.script: Script is required for browser monitor.',
@@ -321,7 +413,7 @@ describe('validateMonitor', () => {
         ...testBrowserFields,
         [ConfigKey.SOURCE_INLINE]: 'journey()',
       } as MonitorFields;
-      const result = validateMonitor(testMonitor);
+      const result = validateMonitor(testMonitor, 'default');
       expect(result).toMatchObject({
         valid: false,
         reason: 'Monitor is not a valid monitor of type browser',
@@ -331,17 +423,483 @@ describe('validateMonitor', () => {
       });
     });
 
-    it('when payload is a correct Browser monitor', () => {
+    it('when payload is a correct API monitor on a private location', () => {
       const testMonitor = {
         ...testBrowserFields,
+        [ConfigKey.MONITOR_TYPE]: MonitorTypeEnum.API,
+        [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorType.API,
         [ConfigKey.SOURCE_INLINE]: 'step()',
+        [ConfigKey.LOCATIONS]: [
+          {
+            id: 'private-1',
+            label: 'Private Location',
+            geo: { lat: 0, lon: 0 },
+            isServiceManaged: false,
+          },
+        ],
       } as MonitorFields;
-      const result = validateMonitor(testMonitor);
+      const result = validateMonitor(testMonitor, 'default');
       expect(result).toMatchObject({
         valid: true,
         reason: '',
         details: '',
         payload: testMonitor,
+      });
+    });
+
+    it('when payload is a correct Browser monitor', () => {
+      const testMonitor = {
+        ...testBrowserFields,
+        [ConfigKey.SOURCE_INLINE]: 'step()',
+      } as MonitorFields;
+      const result = validateMonitor(testMonitor, 'default');
+      expect(result).toMatchObject({
+        valid: true,
+        reason: '',
+        details: '',
+        payload: testMonitor,
+      });
+    });
+  });
+
+  describe('Vault references', () => {
+    const privateLocation = { id: 'private-1', label: 'Private', isServiceManaged: false };
+
+    it.each([
+      [ConfigKey.PASSWORD, 'vault://prod@app/creds#password'],
+      [ConfigKey.REQUEST_HEADERS_CHECK, { Authorization: 'Bearer vault://prod@app/creds#token' }],
+      [ConfigKey.PASSWORD, 'vault://prod@app%2Fcreds#password'],
+    ])('rejects a reference in %s on an Elastic managed location', (key, value) => {
+      const result = validateMonitor(
+        { ...testHTTPFields, [ConfigKey.USERNAME]: 'user', [key]: value } as MonitorFields,
+        'default'
+      );
+      expect(result).toMatchObject({
+        valid: false,
+        reason: 'Vault references cannot be used on Elastic managed locations',
+      });
+    });
+
+    it('rejects a reference when a managed location is mixed with a private one', () => {
+      const result = validateMonitor(
+        {
+          ...testHTTPFields,
+          [ConfigKey.PASSWORD]: 'vault://prod@app/creds#password',
+          [ConfigKey.LOCATIONS]: [...testHTTPFields[ConfigKey.LOCATIONS], privateLocation],
+        } as MonitorFields,
+        'default'
+      );
+      expect(result.valid).toBe(false);
+    });
+
+    it('allows a reference on private locations only', () => {
+      const result = validateMonitor(
+        {
+          ...testHTTPFields,
+          [ConfigKey.PASSWORD]: 'vault://prod@app/creds#password',
+          [ConfigKey.LOCATIONS]: [privateLocation],
+        } as MonitorFields,
+        'default'
+      );
+      expect(result.valid).toBe(true);
+    });
+
+    it('rejects a reference when secret connections are disabled', () => {
+      const result = validateMonitor(
+        {
+          ...testHTTPFields,
+          [ConfigKey.PASSWORD]: 'vault://prod@app/creds#password',
+          [ConfigKey.LOCATIONS]: [privateLocation],
+        } as MonitorFields,
+        'default',
+        false,
+        false
+      );
+      expect(result).toMatchObject({
+        valid: false,
+        reason: 'Vault references are not available in this deployment',
+      });
+    });
+
+    it('allows a monitor without references when secret connections are disabled', () => {
+      const result = validateMonitor(
+        { ...testHTTPFields, [ConfigKey.LOCATIONS]: [privateLocation] } as MonitorFields,
+        'default',
+        false,
+        false
+      );
+      expect(result.valid).toBe(true);
+    });
+
+    it('ignores vault:// text in a browser script on a managed location', () => {
+      const result = validateMonitor(
+        {
+          ...testBrowserFields,
+          [ConfigKey.SOURCE_INLINE]: "step('x', () => page.goto('vault://prod@a#b'));",
+        } as MonitorFields,
+        'default'
+      );
+      expect(result.valid).toBe(true);
+    });
+  });
+
+  describe('HTTP authentication mutual exclusivity', () => {
+    it('validates an HTTP monitor using only Kerberos auth', () => {
+      const testMonitor = {
+        ...testHTTPFields,
+        [ConfigKey.USERNAME]: '',
+        [ConfigKey.PASSWORD]: '',
+        [ConfigKey.LOCATIONS]: [
+          {
+            id: 'private-1',
+            label: 'Private',
+            isServiceManaged: false,
+          },
+        ],
+        [ConfigKey.KERBEROS]: {
+          enabled: true,
+          auth_type: 'password',
+          realm: 'CORP.LOCAL',
+          username: 'svc',
+          password: 'secret',
+          keytab: '',
+          config_path: '/etc/krb5.conf',
+          krb5_conf: '',
+          service_name: '',
+          enable_krb5_fast: false,
+        },
+      } as MonitorFields;
+      const result = validateMonitor(testMonitor, 'default');
+      expect(result).toMatchObject({ valid: true, reason: '', details: '' });
+    });
+
+    it('validates an HTTP monitor using only Kerberos with inline krb5_conf', () => {
+      const testMonitor = {
+        ...testHTTPFields,
+        [ConfigKey.USERNAME]: '',
+        [ConfigKey.PASSWORD]: '',
+        [ConfigKey.KERBEROS]: {
+          enabled: true,
+          auth_type: 'password',
+          realm: 'CORP.LOCAL',
+          username: 'svc',
+          password: 'secret',
+          keytab: '',
+          config_path: '',
+          krb5_conf: '[libdefaults]\n  default_realm = CORP.LOCAL\n',
+          service_name: '',
+          enable_krb5_fast: false,
+        },
+      } as MonitorFields;
+      const result = validateMonitor(testMonitor, 'default');
+      expect(result).toMatchObject({ valid: true, reason: '', details: '' });
+    });
+
+    it('invalidates Kerberos password auth without credentials', () => {
+      const testMonitor = {
+        ...testHTTPFields,
+        [ConfigKey.USERNAME]: '',
+        [ConfigKey.PASSWORD]: '',
+        [ConfigKey.KERBEROS]: {
+          enabled: true,
+          auth_type: 'password',
+          realm: 'CORP.LOCAL',
+          username: '',
+          password: '',
+          keytab: '',
+          config_path: '/etc/krb5.conf',
+          krb5_conf: '',
+          service_name: '',
+          enable_krb5_fast: false,
+        },
+      } as MonitorFields;
+      const result = validateMonitor(testMonitor, 'default');
+      expect(result).toMatchObject({
+        valid: false,
+        reason: 'Monitor authentication configuration is invalid',
+        details: 'Kerberos password authentication requires both username and password.',
+      });
+    });
+
+    it('invalidates Kerberos keytab auth without a keytab path', () => {
+      const testMonitor = {
+        ...testHTTPFields,
+        [ConfigKey.USERNAME]: '',
+        [ConfigKey.PASSWORD]: '',
+        [ConfigKey.KERBEROS]: {
+          enabled: true,
+          auth_type: 'keytab',
+          realm: 'CORP.LOCAL',
+          username: 'svc',
+          password: '',
+          keytab: '',
+          config_path: '/etc/krb5.conf',
+          krb5_conf: '',
+          service_name: '',
+          enable_krb5_fast: false,
+        },
+      } as MonitorFields;
+      const result = validateMonitor(testMonitor, 'default');
+      expect(result).toMatchObject({
+        valid: false,
+        reason: 'Monitor authentication configuration is invalid',
+        details: 'Kerberos keytab authentication requires both username and a keytab path.',
+      });
+    });
+
+    it('invalidates Kerberos keytab auth without a username', () => {
+      const testMonitor = {
+        ...testHTTPFields,
+        [ConfigKey.USERNAME]: '',
+        [ConfigKey.PASSWORD]: '',
+        [ConfigKey.KERBEROS]: {
+          enabled: true,
+          auth_type: 'keytab',
+          realm: 'CORP.LOCAL',
+          username: '',
+          password: '',
+          keytab: '/etc/krb5.keytab',
+          config_path: '/etc/krb5.conf',
+          krb5_conf: '',
+          service_name: '',
+          enable_krb5_fast: false,
+        },
+      } as MonitorFields;
+      const result = validateMonitor(testMonitor, 'default');
+      expect(result).toMatchObject({
+        valid: false,
+        reason: 'Monitor authentication configuration is invalid',
+        details: 'Kerberos keytab authentication requires both username and a keytab path.',
+      });
+    });
+
+    it('invalidates Kerberos keytab auth on a public location', () => {
+      const testMonitor = {
+        ...testHTTPFields,
+        [ConfigKey.USERNAME]: '',
+        [ConfigKey.PASSWORD]: '',
+        [ConfigKey.KERBEROS]: {
+          enabled: true,
+          auth_type: 'keytab',
+          realm: 'CORP.LOCAL',
+          username: 'svc',
+          password: '',
+          keytab: '/etc/krb5.keytab',
+          config_path: '/etc/krb5.conf',
+          krb5_conf: '',
+          service_name: '',
+          enable_krb5_fast: false,
+        },
+      } as MonitorFields;
+      const result = validateMonitor(testMonitor, 'default');
+      expect(result).toMatchObject({
+        valid: false,
+        reason: 'Monitor authentication configuration is invalid',
+        details:
+          'Kerberos host-file settings (config_path or keytab) are only supported on private locations. Use an inline krb5_conf on public locations, or a private location for keytab auth.',
+      });
+    });
+
+    it('invalidates Kerberos config_path on a public location', () => {
+      const testMonitor = {
+        ...testHTTPFields,
+        [ConfigKey.USERNAME]: '',
+        [ConfigKey.PASSWORD]: '',
+        [ConfigKey.KERBEROS]: {
+          enabled: true,
+          auth_type: 'password',
+          realm: 'CORP.LOCAL',
+          username: 'svc',
+          password: 'secret',
+          keytab: '',
+          config_path: '/etc/krb5.conf',
+          krb5_conf: '',
+          service_name: '',
+          enable_krb5_fast: false,
+        },
+      } as MonitorFields;
+      const result = validateMonitor(testMonitor, 'default');
+      expect(result).toMatchObject({
+        valid: false,
+        reason: 'Monitor authentication configuration is invalid',
+        details:
+          'Kerberos host-file settings (config_path or keytab) are only supported on private locations. Use an inline krb5_conf on public locations, or a private location for keytab auth.',
+      });
+    });
+
+    it('validates Kerberos keytab auth on a private location', () => {
+      const testMonitor = {
+        ...testHTTPFields,
+        [ConfigKey.USERNAME]: '',
+        [ConfigKey.PASSWORD]: '',
+        [ConfigKey.LOCATIONS]: [
+          {
+            id: 'private-1',
+            label: 'Private',
+            isServiceManaged: false,
+          },
+        ],
+        [ConfigKey.KERBEROS]: {
+          enabled: true,
+          auth_type: 'keytab',
+          realm: 'CORP.LOCAL',
+          username: 'svc',
+          password: '',
+          keytab: '/etc/krb5.keytab',
+          config_path: '/etc/krb5.conf',
+          krb5_conf: '',
+          service_name: '',
+          enable_krb5_fast: false,
+        },
+      } as MonitorFields;
+      const result = validateMonitor(testMonitor, 'default');
+      expect(result).toMatchObject({ valid: true, reason: '', details: '' });
+    });
+
+    it('invalidates Kerberos when both config_path and krb5_conf are set', () => {
+      const testMonitor = {
+        ...testHTTPFields,
+        [ConfigKey.USERNAME]: '',
+        [ConfigKey.PASSWORD]: '',
+        [ConfigKey.KERBEROS]: {
+          enabled: true,
+          auth_type: 'password',
+          realm: 'CORP.LOCAL',
+          username: 'svc',
+          password: 'secret',
+          keytab: '',
+          config_path: '/etc/krb5.conf',
+          krb5_conf: '[libdefaults]\n  default_realm = CORP.LOCAL\n',
+          service_name: '',
+          enable_krb5_fast: false,
+        },
+      } as MonitorFields;
+      const result = validateMonitor(testMonitor, 'default');
+      expect(result).toMatchObject({
+        valid: false,
+        reason: 'Monitor authentication configuration is invalid',
+        details:
+          'Kerberos requires exactly one of config_path (file on the agent) or krb5_conf (inline krb5.conf body).',
+      });
+    });
+
+    it('invalidates Kerberos when neither config_path nor krb5_conf is set', () => {
+      const testMonitor = {
+        ...testHTTPFields,
+        [ConfigKey.USERNAME]: '',
+        [ConfigKey.PASSWORD]: '',
+        [ConfigKey.KERBEROS]: {
+          enabled: true,
+          auth_type: 'password',
+          realm: 'CORP.LOCAL',
+          username: 'svc',
+          password: 'secret',
+          keytab: '',
+          config_path: '',
+          krb5_conf: '',
+          service_name: '',
+          enable_krb5_fast: false,
+        },
+      } as MonitorFields;
+      const result = validateMonitor(testMonitor, 'default');
+      expect(result).toMatchObject({
+        valid: false,
+        reason: 'Monitor authentication configuration is invalid',
+        details:
+          'Kerberos requires exactly one of config_path (file on the agent) or krb5_conf (inline krb5.conf body).',
+      });
+    });
+
+    it('validates an HTTP monitor using only NTLM auth', () => {
+      const testMonitor = {
+        ...testHTTPFields,
+        [ConfigKey.USERNAME]: '',
+        [ConfigKey.PASSWORD]: '',
+        [ConfigKey.NTLM]: {
+          enabled: true,
+          username: 'ntlm-user',
+          password: 'ntlm-pass',
+          domain: 'EXAMPLE',
+          workstation: '',
+        },
+      } as MonitorFields;
+      const result = validateMonitor(testMonitor, 'default');
+      expect(result).toMatchObject({ valid: true, reason: '', details: '' });
+    });
+
+    it('invalidates NTLM auth without credentials', () => {
+      const testMonitor = {
+        ...testHTTPFields,
+        [ConfigKey.USERNAME]: '',
+        [ConfigKey.PASSWORD]: '',
+        [ConfigKey.NTLM]: {
+          enabled: true,
+          username: '',
+          password: '',
+          domain: '',
+          workstation: '',
+        },
+      } as MonitorFields;
+      const result = validateMonitor(testMonitor, 'default');
+      expect(result).toMatchObject({
+        valid: false,
+        reason: 'Monitor authentication configuration is invalid',
+        details: 'NTLM authentication requires both username and password.',
+      });
+    });
+
+    it('invalidates an HTTP monitor combining basic and Kerberos auth', () => {
+      const testMonitor = {
+        ...testHTTPFields,
+        [ConfigKey.KERBEROS]: {
+          enabled: true,
+          auth_type: 'password',
+          realm: '',
+          username: '',
+          password: '',
+          keytab: '',
+          config_path: '/etc/krb5.conf',
+          krb5_conf: '',
+          service_name: '',
+          enable_krb5_fast: false,
+        },
+      } as MonitorFields;
+      const result = validateMonitor(testMonitor, 'default');
+      expect(result).toMatchObject({
+        valid: false,
+        reason: 'Monitor authentication configuration is invalid',
+      });
+    });
+
+    it('invalidates an HTTP monitor combining Kerberos and NTLM auth', () => {
+      const testMonitor = {
+        ...testHTTPFields,
+        [ConfigKey.USERNAME]: '',
+        [ConfigKey.PASSWORD]: '',
+        [ConfigKey.KERBEROS]: {
+          enabled: true,
+          auth_type: 'password',
+          realm: '',
+          username: '',
+          password: '',
+          keytab: '',
+          config_path: '/etc/krb5.conf',
+          krb5_conf: '',
+          service_name: '',
+          enable_krb5_fast: false,
+        },
+        [ConfigKey.NTLM]: {
+          enabled: true,
+          username: '',
+          password: '',
+          domain: '',
+          workstation: '',
+        },
+      } as MonitorFields;
+      const result = validateMonitor(testMonitor, 'default');
+      expect(result).toMatchObject({
+        valid: false,
+        reason: 'Monitor authentication configuration is invalid',
       });
     });
   });
@@ -355,7 +913,7 @@ describe('validateMonitor', () => {
         } as unknown as Partial<ICMPSimpleFields>),
       } as MonitorFields;
 
-      const result = validateMonitor(testMonitor);
+      const result = validateMonitor(testMonitor, 'default');
 
       expect(result.details).toEqual(expect.stringContaining('Invalid value'));
       expect(result.details).toEqual(expect.stringContaining(ConfigKey.HOSTS));
@@ -374,7 +932,7 @@ describe('validateMonitor', () => {
         } as unknown as Partial<TCPFields>),
       } as MonitorFields;
 
-      const result = validateMonitor(testMonitor);
+      const result = validateMonitor(testMonitor, 'default');
 
       expect(result.details).toEqual(
         expect.stringContaining('Invalid field "host", must be a non-empty string.')
@@ -394,7 +952,7 @@ describe('validateMonitor', () => {
         } as unknown as Partial<HTTPFields>),
       } as MonitorFields;
 
-      const result = validateMonitor(testMonitor);
+      const result = validateMonitor(testMonitor, 'default');
 
       expect(result.details).toEqual('Invalid field "url", must be a non-empty string.');
       expect(result).toMatchObject({
@@ -412,7 +970,7 @@ describe('validateMonitor', () => {
         } as unknown as Partial<BrowserFields>),
       } as MonitorFields;
 
-      const result = validateMonitor(testMonitor);
+      const result = validateMonitor(testMonitor, 'default');
 
       expect(result.details).toEqual(
         expect.stringContaining('source.inline.script: Inline script must be a non-empty string')
@@ -436,7 +994,7 @@ describe('validateMonitor', () => {
         } as unknown as Partial<TCPFields>),
       } as MonitorFields;
 
-      const result = validateMonitor(testMonitor);
+      const result = validateMonitor(testMonitor, 'default');
 
       expect(result).toMatchObject({
         valid: true,
@@ -447,11 +1005,51 @@ describe('validateMonitor', () => {
     });
   });
 
+  // Partial updates validate the *merged* monitor (previous + patch), not the patch alone.
+  describe('merged partial-update gate', () => {
+    const mergedWith = (patch: Record<string, unknown>) =>
+      ({ ...testHTTPFields, ...patch } as unknown as MonitorFields);
+
+    it('accepts a valid partial patch on a known field', () => {
+      const result = validateMonitor(mergedWith({ [ConfigKey.ENABLED]: false }), 'default');
+      expect(result.valid).toBe(true);
+    });
+
+    it('rejects an out-of-range value on a known field (schedule)', () => {
+      const result = validateMonitor(
+        mergedWith({ [ConfigKey.SCHEDULE]: { number: '4', unit: ScheduleUnit.MINUTES } }),
+        'default'
+      );
+      expect(result).toMatchObject({ valid: false, reason: 'Monitor schedule is invalid' });
+    });
+
+    it('rejects a wrong-typed value on a known field (timeout)', () => {
+      const result = validateMonitor(mergedWith({ [ConfigKey.TIMEOUT]: '3m' }), 'default');
+      expect(result).toMatchObject({
+        valid: false,
+        reason: `Monitor is not a valid monitor of type ${MonitorTypeEnum.HTTP}`,
+      });
+    });
+
+    it('strips unknown/foreign fields rather than rejecting (io-ts t.exact)', () => {
+      const result = validateMonitor(
+        mergedWith({ notAMonitorField: 'nope', anotherBogusKey: 123 }),
+        'default'
+      );
+      // foreign keys do not fail validation...
+      expect(result.valid).toBe(true);
+      // ...but they are dropped from what actually gets persisted.
+      expect(result.decodedMonitor).toBeDefined();
+      expect(result.decodedMonitor).not.toHaveProperty('notAMonitorField');
+      expect(result.decodedMonitor).not.toHaveProperty('anotherBogusKey');
+    });
+  });
+
   describe('should validate payload', () => {
     it('when parsed from serialized JSON', () => {
       const testMonitor = getJsonPayload() as MonitorFields;
 
-      const result = validateMonitor(testMonitor);
+      const result = validateMonitor(testMonitor, 'default');
 
       expect(result).toMatchObject({
         valid: true,
@@ -463,36 +1061,36 @@ describe('validateMonitor', () => {
     it('when parsed from serialized JSON for alert', () => {
       const testMonitor = getJsonPayload() as MonitorFields;
 
-      const result = validateMonitor({
-        ...testMonitor,
-        alert: {},
-      });
+      const result = validateMonitor(
+        {
+          ...testMonitor,
+          alert: {},
+        },
+        'default'
+      );
 
-      expect(result).toMatchObject({
-        valid: false,
-        reason: 'Invalid alert configuration',
-        details: '[status.enabled]: expected value of type [boolean] but got [undefined]',
-        payload: testMonitor,
-      });
+      expect(result.valid).toBe(false);
+      expect(result.reason).toBe('Invalid alert configuration');
+      expect(result.details).toMatch(/status/);
     });
     it('when parsed from serialized JSON for alert invalid key', () => {
       const testMonitor = getJsonPayload() as MonitorFields;
 
-      const result = validateMonitor({
-        ...testMonitor,
-        alert: {
-          // @ts-ignore
-          invalidKey: 'invalid',
-          enabled: true,
+      const result = validateMonitor(
+        {
+          ...testMonitor,
+          alert: {
+            // @ts-ignore
+            invalidKey: 'invalid',
+            enabled: true,
+          },
         },
-      });
+        'default'
+      );
 
-      expect(result).toMatchObject({
-        valid: false,
-        reason: 'Invalid alert configuration',
-        details: '[status.enabled]: expected value of type [boolean] but got [undefined]',
-        payload: testMonitor,
-      });
+      expect(result.valid).toBe(false);
+      expect(result.reason).toBe('Invalid alert configuration');
+      expect(result.details).toMatch(/status/);
     });
   });
 
@@ -529,6 +1127,92 @@ describe('validateMonitor', () => {
         reason: "Couldn't save or update monitor because of an invalid configuration.",
         details:
           'Invalid location: "invalid-location". Remove it or replace it with a valid location.',
+      });
+    });
+
+    it('when api monitor uses public locations', () => {
+      const result = validateProjectMonitor(
+        {
+          type: MonitorTypeEnum.API,
+          id: 'api-1',
+          name: 'API Journey',
+          schedule: 5,
+          locations: ['us_central'],
+          content: 'apiJourney("orders", () => {})',
+        },
+        [
+          {
+            id: 'us_central',
+            label: 'US Central',
+            isServiceManaged: true,
+            geo: { lat: 0, lon: 0 },
+            url: 'https://example.com',
+          },
+        ],
+        []
+      );
+      expect(result).toMatchObject({
+        valid: false,
+        reason: "Couldn't save or update monitor because of an invalid configuration.",
+        details:
+          'API Journey monitors can only run on private locations. Remove "locations" or replace them with "privateLocations".',
+      });
+    });
+
+    it('when api monitor uses only private locations', () => {
+      const result = validateProjectMonitor(
+        {
+          type: MonitorTypeEnum.API,
+          id: 'api-1',
+          name: 'API Journey',
+          schedule: 5,
+          privateLocations: ['My Private'],
+          content: 'apiJourney("orders", () => {})',
+        },
+        [],
+        [
+          {
+            id: 'priv-1',
+            label: 'My Private',
+            agentPolicyId: 'policy-1',
+            isServiceManaged: false,
+            spaces: ['*'],
+          },
+        ]
+      );
+      expect(result).toMatchObject({
+        valid: true,
+        reason: '',
+        details: '',
+      });
+    });
+
+    it('when api project monitor is created on Serverless', () => {
+      const result = validateProjectMonitor(
+        {
+          type: MonitorTypeEnum.API,
+          id: 'api-1',
+          name: 'API Journey',
+          schedule: 5,
+          privateLocations: ['My Private'],
+          content: 'apiJourney("orders", () => {})',
+        },
+        [],
+        [
+          {
+            id: 'priv-1',
+            label: 'My Private',
+            agentPolicyId: 'policy-1',
+            isServiceManaged: false,
+            spaces: ['*'],
+          },
+        ],
+        true
+      );
+      expect(result).toMatchObject({
+        valid: false,
+        reason: 'API Journey monitors are not yet supported on Serverless',
+        details: 'API Journey monitor support is not yet available on Serverless.',
       });
     });
   });
@@ -579,6 +1263,19 @@ describe('normalizeAPIConfig', () => {
       errorMessage: 'Invalid monitor key(s) for browser type:  url',
       formattedConfig: {
         type: 'browser',
+      },
+    });
+
+    expect(normalizeAPIConfig({ type: 'api', urls: '' } as any)).toEqual({
+      formattedConfig: {
+        type: 'api',
+      },
+    });
+
+    expect(normalizeAPIConfig({ type: 'api', urls: 'https://www.google.com' } as any)).toEqual({
+      errorMessage: 'Invalid monitor key(s) for api type:  urls',
+      formattedConfig: {
+        type: 'api',
       },
     });
   });
@@ -664,7 +1361,8 @@ describe('normalizeAPIConfig', () => {
       },
     });
     expect(normalizeAPIConfig({ type: 'browser', params: '{d}' } as any)).toEqual({
-      errorMessage: "Invalid params: Expected property name or '}' in JSON at position 1",
+      errorMessage:
+        "Invalid params: Expected property name or '}' in JSON at position 1 (line 1 column 2)",
       formattedConfig: {
         type: 'browser',
         params: '{d}',
@@ -677,7 +1375,7 @@ describe('normalizeAPIConfig', () => {
       },
     });
     expect(normalizeAPIConfig({ type: 'browser', params: { a: [] } } as any)).toEqual({
-      errorMessage: 'Invalid params: [a]: expected value of type [string] but got [Array]',
+      errorMessage: 'Invalid params: Invalid value "[]" supplied to "a"',
       formattedConfig: {
         type: 'browser',
         params: { a: [] },
@@ -693,6 +1391,73 @@ describe('normalizeAPIConfig', () => {
     });
   });
 
+  it.each(['[]', '["secret"]', '"secret"', '42', 'true', 'null'])(
+    'rejects params that are not a JSON object: %s',
+    (params) => {
+      expect(normalizeAPIConfig({ type: 'browser', params } as any)).toEqual({
+        errorMessage: 'Invalid params: Params must be a JSON object.',
+        formattedConfig: {
+          type: 'browser',
+          params,
+        },
+      });
+    }
+  );
+
+  it.each([[['secret']], [new Date()], [new Set()], ['secret'], [/regex/]])(
+    'rejects non-string params that are not a plain record of strings: %p',
+    (params) => {
+      expect(normalizeAPIConfig({ type: 'browser', params } as any).errorMessage).toMatch(
+        /^Invalid params: /
+      );
+    }
+  );
+
+  it.each([[false], [0], [null]])(
+    'rejects falsy params that would silently clear stored params: %p',
+    (params) => {
+      expect(
+        normalizeAPIConfig({ type: 'browser', params } as any, { previousParams: '{"a":"b"}' })
+          .errorMessage
+      ).toMatch(/^Invalid params: /);
+    }
+  );
+
+  it('still treats empty string params as clearing them', () => {
+    expect(
+      normalizeAPIConfig({ type: 'browser', params: '' } as any, { previousParams: '{"a":"b"}' })
+        .errorMessage
+    ).toBeUndefined();
+  });
+
+  it('tolerates null params when there is no stored value to lose', () => {
+    expect(
+      normalizeAPIConfig({ type: 'browser', params: null } as any).errorMessage
+    ).toBeUndefined();
+  });
+
+  it('accepts params objects with nested values', () => {
+    const params = '{"retries":3,"options":{"mode":"fast"}}';
+    expect(normalizeAPIConfig({ type: 'browser', params } as any)).toEqual({
+      formattedConfig: {
+        type: 'browser',
+        params,
+      },
+    });
+  });
+
+  it('keeps unchanged stored params that are not a JSON object', () => {
+    const params = '["secret"]';
+    expect(
+      normalizeAPIConfig({ type: 'browser', params } as any, { previousParams: params })
+    ).toEqual({
+      formattedConfig: {
+        type: 'browser',
+        params,
+      },
+    });
+  });
+
   it('playwright_options key mapping validation', function () {
     expect(normalizeAPIConfig({ type: 'browser', playwright_options: '{}' } as any)).toEqual({
       formattedConfig: {
@@ -702,7 +1467,7 @@ describe('normalizeAPIConfig', () => {
     });
     expect(normalizeAPIConfig({ type: 'browser', playwright_options: '{d}' } as any)).toEqual({
       errorMessage:
-        "Invalid playwright_options: Expected property name or '}' in JSON at position 1",
+        "Invalid playwright_options: Expected property name or '}' in JSON at position 1 (line 1 column 2)",
       formattedConfig: {
         playwright_options: '{d}',
         type: 'browser',

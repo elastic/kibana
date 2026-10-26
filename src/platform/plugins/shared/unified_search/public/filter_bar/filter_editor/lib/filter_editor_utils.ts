@@ -8,14 +8,16 @@
  */
 
 import dateMath from '@kbn/datemath';
-import { Filter, RangeFilter, ScriptedRangeFilter, isRangeFilter } from '@kbn/es-query';
+import type { Filter, RangeFilter, ScriptedRangeFilter } from '@kbn/es-query';
+import { isRangeFilter } from '@kbn/es-query';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import isSemverValid from 'semver/functions/valid';
 import { isFilterable, IpAddress } from '@kbn/data-plugin/common';
-import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
-import { FILTER_OPERATORS, OPERATORS, Operator } from './filter_operators';
+import type { FilterableField, FilterableSource } from '@kbn/data-source';
+import type { Operator } from './filter_operators';
+import { FILTER_OPERATORS, OPERATORS } from './filter_operators';
 
-export function getFieldFromFilter(filter: Filter, indexPattern?: DataView) {
+export function getFieldFromFilter(filter: Filter, indexPattern?: FilterableSource) {
   return indexPattern?.fields.find((field) => field.name === filter.meta.key);
 }
 
@@ -44,15 +46,17 @@ export function getOperatorFromFilter(filter: Filter) {
     if (isRangeFilter(filter)) {
       return getRangeOperatorFromFilter(filter) === operator.id;
     }
-    return filter.meta.type === operator.type && filter.meta.negate === operator.negate;
+    // Treat missing meta.negate as false so stored filters without negate (e.g. from toStoredFilter) still match
+    const negate = filter.meta.negate ?? false;
+    return filter.meta.type === operator.type && negate === operator.negate;
   });
 }
 
-export function getFilterableFields(indexPattern: DataView) {
+export function getFilterableFields(indexPattern: FilterableSource) {
   return indexPattern.fields.filter(isFilterable);
 }
 
-export function getOperatorOptions(field: DataViewField) {
+export function getOperatorOptions(field: FilterableField) {
   return FILTER_OPERATORS.filter((operator) => {
     if (operator.field) return operator.field(field);
     if (operator.fieldTypes) return operator.fieldTypes.includes(field.type);
@@ -60,7 +64,7 @@ export function getOperatorOptions(field: DataViewField) {
   });
 }
 
-export function validateParams(params: any, field: DataViewField) {
+export function validateParams(params: any, field: FilterableField) {
   switch (field?.type) {
     case 'date':
       const moment = typeof params === 'string' ? dateMath.parse(params) : null;
@@ -84,8 +88,8 @@ export function validateParams(params: any, field: DataViewField) {
 }
 
 export function isFilterValid(
-  indexPattern?: DataView,
-  field?: DataViewField,
+  indexPattern?: FilterableSource,
+  field?: FilterableField,
   operator?: Operator,
   params?: any
 ) {

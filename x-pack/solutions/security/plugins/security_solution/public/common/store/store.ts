@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import thunk from 'redux-thunk';
+import thunk from 'redux-thunk-v2';
 import type {
   Action,
-  Store,
-  Middleware,
-  Dispatch,
-  PreloadedState,
   AnyAction,
+  Dispatch,
+  Middleware,
+  PreloadedState,
   Reducer,
-} from 'redux';
-import { applyMiddleware, createStore as createReduxStore } from 'redux';
+  Store,
+} from 'redux-v4';
+import { applyMiddleware, createStore as createReduxStore } from 'redux-v4';
 import { composeWithDevTools } from 'redux-devtools-extension/developmentOnly';
 import type { EnhancerOptions } from 'redux-devtools-extension';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
@@ -25,11 +25,6 @@ import { TimelineTypeEnum } from '../../../common/api/timeline';
 import { TimelineId } from '../../../common/types';
 import { initialGroupingState } from './grouping/reducer';
 import type { GroupState } from './grouping/types';
-import {
-  DEFAULT_DATA_VIEW_ID,
-  DEFAULT_INDEX_KEY,
-  DETECTION_ENGINE_INDEX_URL,
-} from '../../../common/constants';
 import { telemetryMiddleware } from '../lib/telemetry';
 import * as timelineActions from '../../timelines/store/actions';
 import type { TimelineModel } from '../../timelines/store/model';
@@ -39,23 +34,14 @@ import type { AppAction } from './actions';
 import type { Immutable } from '../../../common/endpoint/types';
 import type { State } from './types';
 import type { TimelineState } from '../../timelines/store/types';
-import type {
-  KibanaDataView,
-  SourcererModel,
-  SourcererDataView,
-} from '../../sourcerer/store/model';
-import { initDataView } from '../../sourcerer/store/model';
 import type { StartedSubPlugins, StartPlugins } from '../../types';
 import type { ExperimentalFeatures } from '../../../common/experimental_features';
-import { createSourcererDataView } from '../../sourcerer/containers/create_sourcerer_data_view';
 import type { AnalyzerState } from '../../resolver/types';
 import { resolverMiddlewareFactory } from '../../resolver/store/middleware';
 import { dataAccessLayerFactory } from '../../resolver/data_access_layer/factory';
-import { sourcererActions } from '../../sourcerer/store';
 import { createMiddlewares } from './middlewares';
 import { addNewTimeline } from '../../timelines/store/helpers';
 import { initialNotesState } from '../../notes/store/notes.slice';
-import { hasAccessToSecuritySolution } from '../../helpers_access';
 
 let store: Store<State, Action> | null = null;
 
@@ -66,47 +52,6 @@ export const createStoreFactory = async (
   storage: Storage,
   enableExperimental: ExperimentalFeatures
 ): Promise<Store<State, Action>> => {
-  let signal: { name: string | null; index_mapping_outdated: null | boolean } = {
-    name: null,
-    index_mapping_outdated: null,
-  };
-  try {
-    if (hasAccessToSecuritySolution(coreStart.application.capabilities)) {
-      signal = await coreStart.http.fetch(DETECTION_ENGINE_INDEX_URL, {
-        version: '2023-10-31',
-        method: 'GET',
-      });
-    }
-  } catch {
-    signal = { name: null, index_mapping_outdated: null };
-  }
-
-  const configPatternList = coreStart.uiSettings.get(DEFAULT_INDEX_KEY);
-  let defaultDataView: SourcererModel['defaultDataView'];
-  let kibanaDataViews: SourcererModel['kibanaDataViews'];
-  try {
-    // check for/generate default Security Solution Kibana data view
-    const sourcererDataViews = await createSourcererDataView({
-      body: {
-        patternList: [...configPatternList, ...(signal.name != null ? [signal.name] : [])],
-      },
-      dataViewService: startPlugins.data.dataViews,
-      dataViewId: `${DEFAULT_DATA_VIEW_ID}-${(await startPlugins.spaces?.getActiveSpace())?.id}`,
-    });
-
-    if (sourcererDataViews === undefined) {
-      throw new Error('');
-    }
-    defaultDataView = { ...initDataView, ...sourcererDataViews.defaultDataView };
-    kibanaDataViews = sourcererDataViews.kibanaDataViews.map((dataView: KibanaDataView) => ({
-      ...initDataView,
-      ...dataView,
-    }));
-  } catch (error) {
-    defaultDataView = { ...initDataView, error };
-    kibanaDataViews = [];
-  }
-
   const timelineInitialState = {
     timeline: {
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -162,10 +107,6 @@ export const createStoreFactory = async (
       ...subPlugins.management.store.initialState,
     },
     {
-      defaultDataView,
-      kibanaDataViews,
-      signalIndexName: signal.name,
-      signalIndexMappingOutdated: signal.index_mapping_outdated,
       enableExperimental,
     },
     dataTableInitialState,
@@ -194,18 +135,7 @@ const timelineActionsWithNonserializablePayloads = [
 ];
 
 const actionSanitizer = (action: AnyAction) => {
-  if (action.type === sourcererActions.setDataView.type) {
-    return {
-      ...action,
-      payload: {
-        ...action.payload,
-        dataView: 'dataView',
-        browserFields: 'browserFields',
-        indexFields: 'indexFields',
-        fields: 'fields',
-      },
-    };
-  } else if (timelineActionsWithNonserializablePayloads.includes(action.type)) {
+  if (timelineActionsWithNonserializablePayloads.includes(action.type)) {
     const { type, payload } = action;
     if (type === timelineActions.addTimeline.type || type === timelineActions.updateTimeline.type) {
       return {
@@ -228,37 +158,12 @@ const actionSanitizer = (action: AnyAction) => {
   return action;
 };
 
-const sanitizeDataView = (dataView: SourcererDataView) => {
-  return {
-    ...dataView,
-    browserFields: 'browserFields',
-    indexFields: 'indexFields',
-    fields: 'fields',
-    dataView: 'dataView',
-  };
-};
-
 const sanitizeTimelineModel = (timeline: TimelineModel) => {
   return {
     ...timeline,
     footerText: 'footerText',
     loadingText: 'loadingText',
   };
-};
-
-const stateSanitizer = (state: State) => {
-  if (state.sourcerer) {
-    return {
-      ...state,
-      sourcerer: {
-        ...state.sourcerer,
-        defaultDataView: sanitizeDataView(state.sourcerer.defaultDataView),
-        kibanaDataViews: state.sourcerer.kibanaDataViews.map(sanitizeDataView),
-      },
-    };
-  } else {
-    return state;
-  }
 };
 
 /**
@@ -275,7 +180,6 @@ export const createStore = (
     name: 'Kibana Security Solution',
     actionsBlacklist: ['USER_MOVED_POINTER', 'USER_SET_RASTER_SIZE'],
     actionSanitizer: actionSanitizer as EnhancerOptions['actionSanitizer'],
-    stateSanitizer: stateSanitizer as EnhancerOptions['stateSanitizer'],
     // uncomment the following to enable redux action tracing
     // https://github.com/zalmoxisus/redux-devtools-extension/commit/64717bb9b3534ff616d9db56c2be680627c7b09d#diff-182cb140f8a0fd8bc37bbdcdad07bbadb9aebeb2d1b8ed026acd6132f2c88ce8R10
     // trace: true,

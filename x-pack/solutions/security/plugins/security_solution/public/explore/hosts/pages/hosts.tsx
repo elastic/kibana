@@ -13,26 +13,25 @@ import { useParams } from 'react-router-dom';
 import type { Filter } from '@kbn/es-query';
 import { isTab } from '@kbn/timelines-plugin/public';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
-import { dataTableSelectors, tableDefaults, TableId } from '@kbn/securitysolution-data-table';
 import { LastEventIndexKey } from '@kbn/timelines-plugin/common';
-import { InputsModelId } from '../../../common/store/inputs/constants';
+import { PageScope } from '../../../data_view_manager/constants';
 import { SecurityPageName } from '../../../app/types';
-import { FiltersGlobal } from '../../../common/components/filters_global';
-import { HeaderPage } from '../../../common/components/header_page';
-import { LastEventTime } from '../../../common/components/last_event_time';
+import { LastEventTimeHeader } from '../../components/last_event_time_header';
 import { hasMlUserPermissions } from '../../../../common/machine_learning/has_ml_user_permissions';
 import { TabNavigation } from '../../../common/components/navigation/tab_navigation';
 import { HostsKpiComponent } from '../components/kpi_hosts';
-import { SiemSearchBar } from '../../../common/components/search_bar';
+import { SearchWithDataView } from '../../../common/components/search_with_data_view';
 import { SecuritySolutionPageWrapper } from '../../../common/components/page_wrapper';
-import { useGlobalFullScreen } from '../../../common/containers/use_full_screen';
+import {
+  useGlobalFullScreen,
+  useHasFullScreenContent,
+} from '../../../common/containers/use_full_screen';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { EntityType } from '../../../../common/entity_analytics/types';
 import { useKibana } from '../../../common/lib/kibana';
 import { convertToBuildEsQuery } from '../../../common/lib/kuery';
 import type { State } from '../../../common/store';
 import { inputsSelectors } from '../../../common/store';
-
 import { SpyRoute } from '../../../common/utils/route/spy_routes';
 import { useMlCapabilities } from '../../../common/components/ml/hooks/use_ml_capabilities';
 import { Display } from './display';
@@ -45,15 +44,15 @@ import { HostsTableType } from '../store/model';
 import {
   onTimelineTabKeyPressed,
   resetKeyboardFocus,
-  showGlobalFilters,
 } from '../../../timelines/components/timeline/helpers';
-import { useSourcererDataView } from '../../../sourcerer/containers';
-import { useDeepEqualSelector, useShallowEqualSelector } from '../../../common/hooks/use_selector';
+import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_query';
 import { ID } from '../containers/hosts';
 import { EmptyPrompt } from '../../../common/components/empty_prompt';
-import { fieldNameExistsFilter } from '../../../common/components/visualization_actions/utils';
 import { useLicense } from '../../../common/hooks/use_license';
+import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
+import { useSelectedPatterns } from '../../../data_view_manager/hooks/use_selected_patterns';
+import { PageLoader } from '../../../common/components/page_loader';
 
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
@@ -66,10 +65,6 @@ const StyledFullHeightContainer = styled.div`
 
 const HostsComponent = () => {
   const containerElement = useRef<HTMLDivElement | null>(null);
-  const getTable = useMemo(() => dataTableSelectors.getTableByIdSelector(), []);
-  const graphEventId = useShallowEqualSelector(
-    (state) => (getTable(state, TableId.hostsPageEvents) ?? tableDefaults).graphEventId
-  );
   const getGlobalFiltersQuerySelector = useMemo(
     () => inputsSelectors.globalFiltersQuerySelector(),
     []
@@ -88,43 +83,46 @@ const HostsComponent = () => {
 
   const { to, from, deleteQuery, setQuery, isInitializing } = useGlobalTime();
   const { globalFullScreen } = useGlobalFullScreen();
+  const hasFullScreenContent = useHasFullScreenContent();
   const capabilities = useMlCapabilities();
-  const { uiSettings } = useKibana().services;
+  const { uiSettings, docLinks } = useKibana().services;
   const { tabName } = useParams<{ tabName: string }>();
   const tabsFilters: Filter[] = React.useMemo(() => {
-    const hostNameExistsFilter = fieldNameExistsFilter(SecurityPageName.hosts);
     if (tabName === HostsTableType.events) {
-      return [...globalFilters, ...hostNameExistsFilter];
+      return [...globalFilters];
     }
 
     if (tabName === HostsTableType.risk) {
       const severityFilter = generateSeverityFilter(severitySelection, EntityType.host);
-      return [...globalFilters, ...hostNameExistsFilter, ...severityFilter];
+      return [...globalFilters, ...severityFilter];
     }
 
     return globalFilters;
   }, [globalFilters, severitySelection, tabName]);
 
-  const { indicesExist, selectedPatterns, sourcererDataView } = useSourcererDataView();
+  const { dataView, status } = useDataView(PageScope.explore);
+  const selectedPatterns = useSelectedPatterns(dataView);
+  const indicesExist = dataView.hasMatchedIndices();
+
   const [globalFilterQuery, kqlError] = useMemo(
     () =>
       convertToBuildEsQuery({
         config: getEsQueryConfig(uiSettings),
-        dataViewSpec: sourcererDataView,
+        dataView,
         queries: [query],
         filters: globalFilters,
       }),
-    [globalFilters, sourcererDataView, uiSettings, query]
+    [uiSettings, dataView, query, globalFilters]
   );
   const [tabsFilterQuery] = useMemo(
     () =>
       convertToBuildEsQuery({
         config: getEsQueryConfig(uiSettings),
-        dataViewSpec: sourcererDataView,
+        dataView,
         queries: [query],
         filters: tabsFilters,
       }),
-    [sourcererDataView, query, tabsFilters, uiSettings]
+    [uiSettings, dataView, query, tabsFilters]
   );
 
   useInvalidFilterQuery({
@@ -162,24 +160,30 @@ const HostsComponent = () => {
     [containerElement, onSkipFocusBeforeEventsTable, onSkipFocusAfterEventsTable]
   );
 
+  if (status === 'pristine') {
+    return <PageLoader />;
+  }
+
   return (
     <>
       {indicesExist ? (
         <StyledFullHeightContainer onKeyDown={onKeyDown} ref={containerElement}>
           <EuiWindowEvent event="resize" handler={noop} />
-          <FiltersGlobal show={showGlobalFilters({ globalFullScreen, graphEventId })}>
-            <SiemSearchBar id={InputsModelId.global} sourcererDataView={sourcererDataView} />
-          </FiltersGlobal>
 
           <SecuritySolutionPageWrapper noPadding={globalFullScreen}>
-            <Display show={!globalFullScreen}>
-              <HeaderPage
-                subtitle={
-                  <LastEventTime indexKey={LastEventIndexKey.hosts} indexNames={selectedPatterns} />
-                }
+            {/* Must stay a direct child of the page wrapper: CSS sticky is confined to its parent's height. */}
+            {!hasFullScreenContent && (
+              <LastEventTimeHeader
                 title={i18n.PAGE_TITLE}
-                border
+                docLink={docLinks.links.securitySolution.entityAnalytics.explore.hostsPage}
+                indexKey={LastEventIndexKey.hosts}
+                indexNames={selectedPatterns}
               />
+            )}
+            <Display show={!globalFullScreen && !hasFullScreenContent}>
+              <SearchWithDataView dataView={dataView} scope={PageScope.explore} />
+
+              <EuiSpacer size="l" />
 
               <HostsKpiComponent from={from} to={to} />
 

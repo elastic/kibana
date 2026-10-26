@@ -7,31 +7,31 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiFormRow,
-  EuiComboBox,
-  EuiComboBoxOptionOption,
-  EuiSwitch,
-  EuiToolTip,
-  EuiText,
-} from '@elastic/eui';
-import { AggFunctionsMapping } from '@kbn/data-plugin/public';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiFormRow, EuiComboBox, EuiSwitch, EuiToolTip, EuiText } from '@elastic/eui';
+import type { AggFunctionsMapping } from '@kbn/data-plugin/public';
 import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { LAST_VALUE_ID, LAST_VALUE_NAME } from '@kbn/lens-formula-docs';
-import type { FieldBasedOperationErrorMessage, OperationDefinition } from '.';
-import { FieldBasedIndexPatternColumn, ValueFormatConfig } from './column_types';
-import type { IndexPatternField, IndexPattern } from '../../../../types';
-import { DataType } from '../../../../types';
+import type {
+  DataType,
+  GenericIndexPatternColumn,
+  LastValueIndexPatternColumn,
+  LastValueOrderAggColumn,
+  IndexPatternField,
+  IndexPattern,
+} from '@kbn/lens-common';
+import { adjustTimeScaleLabelSuffix, getSafeName } from '@kbn/lens-common';
+import type { FieldBasedOperationErrorMessage, OperationDefinition, ParamEditorProps } from '.';
 import {
   getFormatFromPreviousColumn,
   getInvalidFieldMessage,
-  getSafeName,
   getFilter,
   getExistsFilter,
   comparePreviousColumnFilter,
+  getDateFields,
+  getDefaultDateFieldName,
 } from './helpers';
-import { adjustTimeScaleLabelSuffix } from '../time_scale_utils';
 import { isRuntimeField, isScriptedField } from './terms/helpers';
 import { FormRow } from './shared_components/form_row';
 import { getColumnReducedTimeRangeError } from '../../reduced_time_range_utils';
@@ -113,50 +113,15 @@ function getInvalidSortFieldMessages(
   return [];
 }
 
-function isTimeFieldNameDateField(indexPattern: IndexPattern) {
-  return (
-    indexPattern.timeFieldName &&
-    indexPattern.fields.find(
-      (field) => field.name === indexPattern.timeFieldName && field.type === 'date'
-    )
-  );
-}
-
-function getDateFields(indexPattern: IndexPattern): IndexPatternField[] {
-  const dateFields = indexPattern.fields.filter((field) => field.type === 'date');
-  if (isTimeFieldNameDateField(indexPattern)) {
-    dateFields.sort(({ name: nameA }, { name: nameB }) => {
-      if (nameA === indexPattern.timeFieldName) {
-        return -1;
-      }
-      if (nameB === indexPattern.timeFieldName) {
-        return 1;
-      }
-      return 0;
-    });
-  }
-  return dateFields;
-}
-
 function setDefaultShowArrayValues(
   field: IndexPatternField,
   oldParams: LastValueIndexPatternColumn['params']
 ) {
-  return (
+  return Boolean(
     isScriptedField(field) ||
-    (isRuntimeField(field) && field.type !== 'number') ||
-    oldParams?.showArrayValues
+      (isRuntimeField(field) && field.type !== 'number') ||
+      oldParams?.showArrayValues
   );
-}
-
-export interface LastValueIndexPatternColumn extends FieldBasedIndexPatternColumn {
-  operationType: typeof LAST_VALUE_ID;
-  params: {
-    sortField: string;
-    showArrayValues: boolean;
-    // last value on numeric fields can be formatted
-    format?: ValueFormatConfig;
-  };
 }
 
 function getScale(type: string) {
@@ -184,6 +149,16 @@ export const lastValueOperation: OperationDefinition<
       column.reducedTimeRange
     ),
   input: 'field',
+  scale: (column, dataview) => {
+    if (!dataview) {
+      return 'ratio';
+    }
+    const field = dataview.getFieldByName(column.sourceField);
+    if (!field) {
+      return 'ratio';
+    }
+    return getScale(field?.type);
+  },
   onFieldChange: (oldColumn, field) => {
     const newParams = { ...oldColumn.params };
 
@@ -198,7 +173,6 @@ export const lastValueOperation: OperationDefinition<
       label: ofName(field.displayName, oldColumn.timeShift, oldColumn.reducedTimeRange),
       sourceField: field.name,
       params: newParams,
-      scale: getScale(field.type),
       filter:
         oldColumn.filter && comparePreviousColumnFilter(oldColumn.filter, oldColumn.sourceField)
           ? getExistsFilter(field.name)
@@ -232,9 +206,7 @@ export const lastValueOperation: OperationDefinition<
   },
   buildColumn({ field, previousColumn, indexPattern }, columnParams) {
     const lastValueParams = columnParams as LastValueIndexPatternColumn['params'];
-    const sortField = isTimeFieldNameDateField(indexPattern)
-      ? indexPattern.timeFieldName
-      : indexPattern.fields.find((f) => f.type === 'date')?.name;
+    const sortField = getDefaultDateFieldName(indexPattern);
 
     if (!sortField) {
       throw new Error(
@@ -251,7 +223,6 @@ export const lastValueOperation: OperationDefinition<
       dataType: field.type as DataType,
       operationType: LAST_VALUE_ID,
       isBucketed: false,
-      scale: getScale(field.type),
       sourceField: field.name,
       filter: getFilter(previousColumn, columnParams) || getExistsFilter(field.name),
       timeShift: columnParams?.shift || previousColumn?.timeShift,
@@ -322,7 +293,12 @@ export const lastValueOperation: OperationDefinition<
     indexPattern,
     isReferenced,
     paramEditorCustomProps,
-  }) => {
+  }: // As a terms order-agg (rank-by), this editor receives a `LastValueOrderAggColumn`, whose `params`
+  // may be absent. Widen `currentColumn` so the compiler enforces the optional `params` handling.
+  ParamEditorProps<
+    LastValueIndexPatternColumn | LastValueOrderAggColumn,
+    GenericIndexPatternColumn
+  >) => {
     const { labels, isInline } = paramEditorCustomProps || {};
     const sortByFieldLabel =
       labels?.[0] ||
@@ -330,9 +306,16 @@ export const lastValueOperation: OperationDefinition<
         defaultMessage: 'Sort by date field',
       });
 
+    const sortField = currentColumn.params?.sortField;
+    const showArrayValues = Boolean(
+      currentColumn.params &&
+        'showArrayValues' in currentColumn.params &&
+        currentColumn.params.showArrayValues
+    );
+
     const dateFields = getDateFields(indexPattern);
     const isSortFieldInvalid =
-      getInvalidSortFieldMessages(currentColumn.params.sortField, '', indexPattern).length > 0;
+      getInvalidSortFieldMessages(sortField ?? '', '', indexPattern).length > 0;
 
     const usingTopValues = Object.keys(layer.columns).some(
       (_columnId) => layer.columns[_columnId].operationType === 'terms'
@@ -359,7 +342,7 @@ export const lastValueOperation: OperationDefinition<
                   'When you show array values, you are unable to use this field to rank top values.',
               }
             )}
-            isInvalid={currentColumn.params.showArrayValues && usingTopValues}
+            isInvalid={showArrayValues && usingTopValues}
             display="rowCompressed"
             fullWidth
             data-test-subj="lns-indexPattern-lastValue-showArrayValues"
@@ -383,9 +366,9 @@ export const lastValueOperation: OperationDefinition<
                   </EuiText>
                 }
                 compressed={true}
-                checked={Boolean(currentColumn.params.showArrayValues)}
+                checked={showArrayValues}
                 disabled={isScriptedField(currentColumn.sourceField, indexPattern)}
-                onChange={() => setShowArrayValues(!currentColumn.params.showArrayValues)}
+                onChange={() => setShowArrayValues(!showArrayValues)}
               />
             </EuiToolTip>
           </EuiFormRow>
@@ -430,13 +413,11 @@ export const lastValueOperation: OperationDefinition<
               } as LastValueIndexPatternColumn);
             }}
             selectedOptions={
-              (currentColumn.params?.sortField
+              (sortField
                 ? [
                     {
-                      label:
-                        indexPattern.getFieldByName(currentColumn.params.sortField)?.displayName ||
-                        currentColumn.params.sortField,
-                      value: currentColumn.params.sortField,
+                      label: indexPattern.getFieldByName(sortField)?.displayName || sortField,
+                      value: sortField,
                     },
                   ]
                 : []) as unknown as EuiComboBoxOptionOption[]

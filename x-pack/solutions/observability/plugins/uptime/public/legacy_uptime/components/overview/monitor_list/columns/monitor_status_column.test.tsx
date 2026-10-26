@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { getLocationStatus, MonitorListStatusColumn } from './monitor_status_column';
-import { Ping } from '../../../../../../common/runtime_types';
+import type { Ping } from '../../../../../../common/runtime_types';
 import { STATUS } from '../../../../../../common/constants';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { mockDate, mockMoment } from '../../../../lib/helper/test_helpers';

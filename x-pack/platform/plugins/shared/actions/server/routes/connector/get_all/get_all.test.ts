@@ -11,6 +11,13 @@ import { licenseStateMock } from '../../../lib/license_state.mock';
 import { mockHandlerArguments } from '../../_mock_handler_arguments';
 import { verifyAccessAndContext } from '../../verify_access_and_context';
 import { actionsClientMock } from '../../../actions_client/actions_client.mock';
+import { actionsConfigMock } from '../../../actions_config.mock';
+
+const actionsConfigUtils = (inboundEventsFeatureEnabled = false) => {
+  const utils = actionsConfigMock.create();
+  utils.isInboundEventsEnabled.mockReturnValue(inboundEventsFeatureEnabled);
+  return utils;
+};
 
 jest.mock('../../verify_access_and_context', () => ({
   verifyAccessAndContext: jest.fn(),
@@ -26,7 +33,7 @@ describe('getAllConnectorsRoute', () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    getAllConnectorsRoute(router, licenseState);
+    getAllConnectorsRoute(router, licenseState, actionsConfigUtils());
 
     const [config, handler] = router.get.mock.calls[0];
 
@@ -54,7 +61,7 @@ describe('getAllConnectorsRoute', () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    getAllConnectorsRoute(router, licenseState);
+    getAllConnectorsRoute(router, licenseState, actionsConfigUtils());
 
     const [config, handler] = router.get.mock.calls[0];
 
@@ -78,7 +85,7 @@ describe('getAllConnectorsRoute', () => {
       throw new Error('OMG');
     });
 
-    getAllConnectorsRoute(router, licenseState);
+    getAllConnectorsRoute(router, licenseState, actionsConfigUtils());
 
     const [config, handler] = router.get.mock.calls[0];
 
@@ -92,5 +99,200 @@ describe('getAllConnectorsRoute', () => {
     await expect(handler(context, req, res)).rejects.toMatchInlineSnapshot(`[Error: OMG]`);
 
     expect(verifyAccessAndContext).toHaveBeenCalledWith(licenseState, expect.any(Function));
+  });
+
+  it('returns connectors with authMode "shared"', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+
+    getAllConnectorsRoute(router, licenseState, actionsConfigUtils());
+
+    const [, handler] = router.get.mock.calls[0];
+
+    const actionsClient = actionsClientMock.create();
+    actionsClient.getAll.mockResolvedValueOnce([
+      {
+        id: '1',
+        name: 'Test Connector',
+        actionTypeId: '.webhook',
+        config: {},
+        isPreconfigured: false,
+        isDeprecated: false,
+        isSystemAction: false,
+        isConnectorTypeDeprecated: false,
+        referencedByCount: 0,
+        authMode: 'shared',
+      },
+    ]);
+
+    const [context, req, res] = mockHandlerArguments({ actionsClient }, {}, ['ok']);
+
+    const result = await handler(context, req, res);
+
+    expect(result).toMatchObject({
+      body: [
+        {
+          id: '1',
+          name: 'Test Connector',
+          connector_type_id: '.webhook',
+          is_preconfigured: false,
+          is_deprecated: false,
+          is_system_action: false,
+          is_connector_type_deprecated: false,
+          referenced_by_count: 0,
+          auth_mode: 'shared',
+        },
+      ],
+    });
+
+    expect(actionsClient.getAll).toHaveBeenCalledTimes(1);
+  });
+
+  it('returns connectors with authMode "per-user"', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+
+    getAllConnectorsRoute(router, licenseState, actionsConfigUtils());
+
+    const [, handler] = router.get.mock.calls[0];
+
+    const actionsClient = actionsClientMock.create();
+    actionsClient.getAll.mockResolvedValueOnce([
+      {
+        id: '1',
+        name: 'Test Connector',
+        actionTypeId: '.webhook',
+        config: {},
+        isPreconfigured: false,
+        isDeprecated: false,
+        isSystemAction: false,
+        isConnectorTypeDeprecated: false,
+        referencedByCount: 0,
+        authMode: 'per-user',
+      },
+    ]);
+
+    const [context, req, res] = mockHandlerArguments({ actionsClient }, {}, ['ok']);
+
+    const result = await handler(context, req, res);
+
+    expect(result).toMatchObject({
+      body: [
+        {
+          id: '1',
+          name: 'Test Connector',
+          connector_type_id: '.webhook',
+          is_preconfigured: false,
+          is_deprecated: false,
+          is_system_action: false,
+          is_connector_type_deprecated: false,
+          referenced_by_count: 0,
+          auth_mode: 'per-user',
+        },
+      ],
+    });
+
+    expect(actionsClient.getAll).toHaveBeenCalledTimes(1);
+  });
+
+  it('returns connectors without authMode when not set', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+
+    getAllConnectorsRoute(router, licenseState, actionsConfigUtils());
+
+    const [, handler] = router.get.mock.calls[0];
+
+    const actionsClient = actionsClientMock.create();
+    actionsClient.getAll.mockResolvedValueOnce([
+      {
+        id: '1',
+        name: 'Test Connector',
+        actionTypeId: '.slack',
+        config: {},
+        isPreconfigured: false,
+        isDeprecated: false,
+        isSystemAction: false,
+        isConnectorTypeDeprecated: false,
+        referencedByCount: 0,
+      },
+    ]);
+
+    const [context, req, res] = mockHandlerArguments({ actionsClient }, {}, ['ok']);
+
+    await handler(context, req, res);
+
+    expect(res.ok).toHaveBeenCalledWith({
+      body: expect.arrayContaining([
+        expect.objectContaining({
+          id: '1',
+          name: 'Test Connector',
+          connector_type_id: '.slack',
+        }),
+      ]),
+    });
+
+    const responseBody = (res.ok as jest.Mock).mock.calls[0][0].body;
+    expect(responseBody[0]).not.toHaveProperty('auth_mode');
+
+    expect(actionsClient.getAll).toHaveBeenCalledTimes(1);
+  });
+
+  it('maps isInboundEventsEnabled to is_inbound_events_enabled when the inbound events flag is on', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+    getAllConnectorsRoute(router, licenseState, actionsConfigUtils(true));
+    const [, handler] = router.get.mock.calls[0];
+
+    const actionsClient = actionsClientMock.create();
+    actionsClient.getAll.mockResolvedValueOnce([
+      {
+        id: '1',
+        name: 'inbound',
+        actionTypeId: '.inboundWebhook',
+        config: {},
+        isPreconfigured: false,
+        isDeprecated: false,
+        isSystemAction: false,
+        isConnectorTypeDeprecated: false,
+        referencedByCount: 0,
+        isInboundEventsEnabled: true,
+      },
+    ]);
+
+    const [context, req, res] = mockHandlerArguments({ actionsClient }, {}, ['ok']);
+    await handler(context, req, res);
+
+    const responseBody = (res.ok as jest.Mock).mock.calls[0][0].body;
+    expect(responseBody[0]).toEqual(expect.objectContaining({ is_inbound_events_enabled: true }));
+  });
+
+  it('omits is_inbound_events_enabled from the response when the inbound events flag is off', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+    getAllConnectorsRoute(router, licenseState, actionsConfigUtils());
+    const [, handler] = router.get.mock.calls[0];
+
+    const actionsClient = actionsClientMock.create();
+    actionsClient.getAll.mockResolvedValueOnce([
+      {
+        id: '1',
+        name: 'inbound',
+        actionTypeId: '.inboundWebhook',
+        config: {},
+        isPreconfigured: false,
+        isDeprecated: false,
+        isSystemAction: false,
+        isConnectorTypeDeprecated: false,
+        referencedByCount: 0,
+        isInboundEventsEnabled: true,
+      },
+    ]);
+
+    const [context, req, res] = mockHandlerArguments({ actionsClient }, {}, ['ok']);
+    await handler(context, req, res);
+
+    const responseBody = (res.ok as jest.Mock).mock.calls[0][0].body;
+    expect(responseBody[0]).not.toHaveProperty('is_inbound_events_enabled');
   });
 });

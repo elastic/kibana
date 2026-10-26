@@ -27,11 +27,12 @@ export class HeaderPageObject extends FtrService {
   }
 
   public async clickVisualize(ignoreAppLeaveWarning = false) {
-    await this.appsMenu.clickLink('Visualize Library', { category: 'kibana' });
+    await this.appsMenu.clickLink('Visualize library', { category: 'kibana' });
     await this.onAppLeaveWarning(ignoreAppLeaveWarning);
     await this.awaitGlobalLoadingIndicatorHidden();
     await this.retry.waitFor('Visualize app to be loaded', async () => {
-      const isNavVisible = await this.testSubjects.exists('top-nav');
+      const isNavVisible =
+        (await this.testSubjects.exists('top-nav')) || (await this.testSubjects.exists('app-menu'));
       return isNavVisible;
     });
   }
@@ -39,7 +40,8 @@ export class HeaderPageObject extends FtrService {
   public async clickDashboard() {
     await this.appsMenu.clickLink('Dashboard', { category: 'kibana' });
     await this.retry.waitFor('dashboard app to be loaded', async () => {
-      const isNavVisible = await this.testSubjects.exists('top-nav');
+      const isNavVisible =
+        (await this.testSubjects.exists('top-nav')) || (await this.testSubjects.exists('app-menu'));
       const isLandingPageVisible = await this.testSubjects.exists('dashboardLandingPage');
       return isNavVisible || isLandingPageVisible;
     });
@@ -66,7 +68,7 @@ export class HeaderPageObject extends FtrService {
 
   public async isGlobalLoadingIndicatorVisible() {
     this.log.debug('isGlobalLoadingIndicatorVisible');
-    return await this.testSubjects.exists('globalLoadingIndicator', { timeout: 1500 });
+    return await this.testSubjects.waitForExists('globalLoadingIndicator', { timeout: 1500 });
   }
 
   public async awaitGlobalLoadingIndicatorHidden() {
@@ -82,13 +84,11 @@ export class HeaderPageObject extends FtrService {
   }
 
   public async onAppLeaveWarning(ignoreWarning = false) {
-    await this.retry.try(async () => {
-      const warning = await this.testSubjects.exists('confirmModalTitleText');
-      if (warning) {
-        await this.testSubjects.click(
-          ignoreWarning ? 'confirmModalConfirmButton' : 'confirmModalCancelButton'
-        );
-      }
-    });
+    const warning = await this.testSubjects.exists('confirmModalTitleText');
+    if (warning) {
+      await this.testSubjects.click(
+        ignoreWarning ? 'confirmModalConfirmButton' : 'confirmModalCancelButton'
+      );
+    }
   }
 }

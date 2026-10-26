@@ -6,13 +6,13 @@
  */
 
 import { coreMock } from '@kbn/core/public/mocks';
-import { DataView } from '@kbn/data-views-plugin/common';
-import { DiscoverAppLocator } from '@kbn/discover-plugin/common';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import type { DiscoverAppLocator } from '@kbn/discover-plugin/common';
 import { i18n } from '@kbn/i18n';
-import { ViewMode } from '@kbn/presentation-publishing';
+import type { ViewMode } from '@kbn/presentation-publishing';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import { BehaviorSubject } from 'rxjs';
-import { Params, PluginDeps } from './abstract_explore_data_action';
+import type { Params, PluginDeps } from './abstract_explore_data_action';
 import { ExploreDataContextMenuAction } from './explore_data_context_menu_action';
 
 const i18nTranslateSpy = i18n.translate as unknown as jest.SpyInstance;
@@ -77,7 +77,7 @@ const setup = () => {
 describe('"Explore underlying data" panel action', () => {
   test('action has Discover icon', () => {
     const { action } = setup();
-    expect(action.getIconType()).toBe('discoverApp');
+    expect(action.getIconType()).toBe('productDiscover');
   });
 
   test('title is "Explore underlying data"', () => {

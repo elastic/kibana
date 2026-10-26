@@ -5,14 +5,16 @@
  * 2.0.
  */
 
+import type { estypes } from '@elastic/elasticsearch';
 import Boom from '@hapi/boom';
 
+import type { BuildFlavor } from '@kbn/config';
 import { kibanaResponseFactory } from '@kbn/core/server';
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 import type { MockedVersionedRouter } from '@kbn/core-http-router-server-mocks';
 import { KibanaFeature } from '@kbn/features-plugin/common';
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
-import type { LicenseCheck } from '@kbn/licensing-plugin/server';
+import type { LicenseCheck } from '@kbn/licensing-types';
 
 import { defineGetAllRolesRoutes } from './get_all';
 import { API_VERSIONS } from '../../../../common/constants';
@@ -22,9 +24,12 @@ const application = 'kibana-.kibana';
 const reservedPrivilegesApplicationWildcard = 'kibana-*';
 
 interface TestOptions {
+  buildFlavor?: BuildFlavor;
   name?: string;
   licenseCheckResult?: LicenseCheck;
   apiResponse?: () => unknown;
+  queryResponses?: Array<() => estypes.SecurityQueryRoleResponse>;
+  queryRequests?: estypes.SecurityQueryRoleRequest[];
   asserts: { statusCode: number; result?: Record<string, any> };
   query?: Record<string, unknown>;
 }
@@ -145,10 +150,19 @@ const features: KibanaFeature[] = [
 describe('GET all roles', () => {
   const getRolesTest = (
     description: string,
-    { licenseCheckResult = { state: 'valid' }, apiResponse, asserts, query }: TestOptions
+    {
+      licenseCheckResult = { state: 'valid' },
+      apiResponse,
+      queryResponses,
+      queryRequests,
+      asserts,
+      query,
+      buildFlavor = 'traditional',
+    }: TestOptions
   ) => {
     test(description, async () => {
       const mockRouteDefinitionParams = routeDefinitionParamsMock.create();
+      mockRouteDefinitionParams.buildFlavor = buildFlavor;
       const versionedRouterMock = mockRouteDefinitionParams.router
         .versioned as MockedVersionedRouter;
       mockRouteDefinitionParams.authz.applicationName = application;
@@ -170,6 +184,11 @@ describe('GET all roles', () => {
           (() => ({ body: apiResponse() })) as any
         );
       }
+
+      const { queryRole, getRole } = mockCoreContext.elasticsearch.client.asCurrentUser.security;
+      queryResponses?.forEach((queryResponse) => {
+        queryRole.mockResponseImplementationOnce(() => ({ body: queryResponse() }));
+      });
 
       defineGetAllRolesRoutes(mockRouteDefinitionParams);
       const handler = versionedRouterMock.getRoute('get', '/api/security/role').versions[
@@ -193,9 +212,154 @@ describe('GET all roles', () => {
           mockCoreContext.elasticsearch.client.asCurrentUser.security.getRole
         ).toHaveBeenCalled();
       }
+      if (queryResponses) {
+        expect(getRole).not.toHaveBeenCalled();
+        expect(queryRole.mock.calls.map(([params]) => params)).toEqual(
+          queryRequests ?? [{ size: 1000, sort: [{ name: { order: 'asc' } }] }]
+        );
+      } else {
+        expect(queryRole).not.toHaveBeenCalled();
+      }
       expect(mockLicensingContext.license.check).toHaveBeenCalledWith('security', 'basic');
     });
   };
+
+  describe('built-in role visibility', () => {
+    for (const buildFlavor of ['traditional', 'serverless'] as const) {
+      for (const includeReservedRoles of [undefined, false, true]) {
+        const customRole = {
+          cluster: [],
+          indices: [],
+          applications: [],
+          run_as: [],
+          metadata: {},
+        };
+        const builtinRole = { ...customRole, metadata: { _reserved: true } };
+        const returnedRole = {
+          elasticsearch: { cluster: [], indices: [], run_as: [] },
+          kibana: [],
+          _transform_error: [],
+          _unrecognized_applications: [],
+        };
+        getRolesTest(`${buildFlavor} with includeReservedRoles=${includeReservedRoles}`, {
+          buildFlavor,
+          query: includeReservedRoles === undefined ? {} : { includeReservedRoles },
+          ...(buildFlavor === 'serverless' && includeReservedRoles
+            ? {
+                queryResponses: [
+                  () => ({
+                    total: 4,
+                    count: 4,
+                    roles: [
+                      { name: 'custom', ...customRole },
+                      { name: 'viewer', ...builtinRole },
+                      { name: '_alertzero_alert_triage', ...builtinRole },
+                      { name: '_alertzero_custom', ...customRole },
+                    ],
+                  }),
+                ],
+              }
+            : {
+                apiResponse: () => ({
+                  custom: customRole,
+                  viewer: builtinRole,
+                  _alertzero_alert_triage: builtinRole,
+                  _alertzero_custom: customRole,
+                }),
+              }),
+          asserts: {
+            statusCode: 200,
+            result: [
+              ...(buildFlavor === 'traditional'
+                ? [
+                    {
+                      ...returnedRole,
+                      name: '_alertzero_alert_triage',
+                      metadata: { _reserved: true },
+                    },
+                  ]
+                : []),
+              { ...returnedRole, name: '_alertzero_custom', metadata: {} },
+              { ...returnedRole, name: 'custom', metadata: {} },
+              ...(buildFlavor === 'traditional' || includeReservedRoles
+                ? [{ ...returnedRole, name: 'viewer', metadata: { _reserved: true } }]
+                : []),
+            ],
+          },
+        });
+      }
+    }
+  });
+
+  describe('serverless role query pagination', () => {
+    const customRole = {
+      name: 'custom',
+      cluster: [],
+      indices: [],
+      applications: [],
+      run_as: [],
+      metadata: {},
+      _sort: ['custom'],
+    };
+    const builtinRole = { ...customRole, name: 'viewer', metadata: { _reserved: true } };
+    const firstPage = () => ({ total: 2, count: 1, roles: [customRole] });
+    const queryRequests = [
+      { size: 1000, sort: [{ name: { order: 'asc' as const } }] },
+      { size: 1000, sort: [{ name: { order: 'asc' as const } }], search_after: ['custom'] },
+    ];
+    const returnedRole = {
+      elasticsearch: { cluster: [], indices: [], run_as: [] },
+      kibana: [],
+      _transform_error: [],
+      _unrecognized_applications: [],
+    };
+
+    getRolesTest('accepts roles with omitted optional privilege fields', {
+      buildFlavor: 'serverless',
+      query: { includeReservedRoles: true },
+      queryResponses: [() => ({ total: 1, count: 1, roles: [{ name: 'custom' }] })],
+      asserts: { statusCode: 200, result: [{ ...returnedRole, name: 'custom' }] },
+    });
+
+    getRolesTest('includes roles from subsequent pages', {
+      buildFlavor: 'serverless',
+      query: { includeReservedRoles: true },
+      queryResponses: [firstPage, () => ({ total: 2, count: 1, roles: [builtinRole] })],
+      queryRequests,
+      asserts: {
+        statusCode: 200,
+        result: [
+          { ...returnedRole, name: 'custom', metadata: {} },
+          { ...returnedRole, name: 'viewer', metadata: { _reserved: true } },
+        ],
+      },
+    });
+
+    getRolesTest('stops if the next page is empty after roles are deleted', {
+      buildFlavor: 'serverless',
+      query: { includeReservedRoles: true },
+      queryResponses: [firstPage, () => ({ total: 2, count: 0, roles: [] })],
+      queryRequests,
+      asserts: {
+        statusCode: 200,
+        result: [{ ...returnedRole, name: 'custom', metadata: {} }],
+      },
+    });
+
+    const error = Boom.forbidden('Cannot query roles');
+    getRolesTest('propagates a subsequent page failure instead of returning partial roles', {
+      buildFlavor: 'serverless',
+      query: { includeReservedRoles: true },
+      queryResponses: [
+        firstPage,
+        () => {
+          throw error;
+        },
+      ],
+      queryRequests,
+      asserts: { statusCode: 403, result: error },
+    });
+  });
 
   describe('failure', () => {
     getRolesTest('returns result of license checker', {
@@ -660,7 +824,7 @@ describe('GET all roles', () => {
     });
 
     getRolesTest(
-      `resource not * without space: prefix returns empty kibana section with _transform_error set to ['kibana']`,
+      `resource not * without space: prefix returns empty kibana section with _transform_error reason set to kibana:global_privileges_space`,
       {
         apiResponse: () => ({
           first_role: {
@@ -699,7 +863,12 @@ describe('GET all roles', () => {
                 run_as: [],
               },
               kibana: [],
-              _transform_error: ['kibana'],
+              _transform_error: [
+                {
+                  reason: 'kibana:global_privileges_space',
+                  state: [{ application, privileges: ['read'], resources: ['default'] }],
+                },
+              ],
               _unrecognized_applications: [],
             },
           ],
@@ -708,7 +877,7 @@ describe('GET all roles', () => {
     );
 
     getRolesTest(
-      `* and a space in the same entry returns empty kibana section with _transform_error set to ['kibana']`,
+      `* and a space in the same entry returns empty kibana section with _transform_error reason set to kibana:global_resource_mixed`,
       {
         apiResponse: () => ({
           first_role: {
@@ -747,7 +916,14 @@ describe('GET all roles', () => {
                 run_as: [],
               },
               kibana: [],
-              _transform_error: ['kibana'],
+              _transform_error: [
+                {
+                  reason: 'kibana:global_resource_mixed',
+                  state: [
+                    { application, privileges: ['all'], resources: ['*', 'space:engineering'] },
+                  ],
+                },
+              ],
               _unrecognized_applications: [],
             },
           ],
@@ -756,7 +932,7 @@ describe('GET all roles', () => {
     );
 
     getRolesTest(
-      `* appearing in multiple entries returns empty kibana section with _transform_error set to ['kibana']`,
+      `* appearing in multiple entries returns empty kibana section with _transform_error reason set to kibana:duplicated_resources`,
       {
         apiResponse: () => ({
           first_role: {
@@ -800,7 +976,15 @@ describe('GET all roles', () => {
                 run_as: [],
               },
               kibana: [],
-              _transform_error: ['kibana'],
+              _transform_error: [
+                {
+                  reason: 'kibana:duplicated_resources',
+                  state: [
+                    { application, privileges: ['all'], resources: ['*'] },
+                    { application, privileges: ['read'], resources: ['*'] },
+                  ],
+                },
+              ],
               _unrecognized_applications: [],
             },
           ],
@@ -809,7 +993,7 @@ describe('GET all roles', () => {
     );
 
     getRolesTest(
-      `space appearing in multiple entries returns empty kibana section with _transform_error set to ['kibana']`,
+      `space appearing in multiple entries returns empty kibana section with _transform_error reason set to kibana:duplicated_resources`,
       {
         apiResponse: () => ({
           first_role: {
@@ -853,7 +1037,23 @@ describe('GET all roles', () => {
                 run_as: [],
               },
               kibana: [],
-              _transform_error: ['kibana'],
+              _transform_error: [
+                {
+                  reason: 'kibana:duplicated_resources',
+                  state: [
+                    {
+                      application,
+                      privileges: ['space_all'],
+                      resources: ['space:engineering'],
+                    },
+                    {
+                      application,
+                      privileges: ['space_read'],
+                      resources: ['space:engineering'],
+                    },
+                  ],
+                },
+              ],
               _unrecognized_applications: [],
             },
           ],
@@ -862,7 +1062,7 @@ describe('GET all roles', () => {
     );
 
     getRolesTest(
-      `space privilege assigned globally returns empty kibana section with _transform_error set to ['kibana']`,
+      `space privilege assigned globally returns empty kibana section with _transform_error reason set to kibana:space_privileges_global`,
       {
         apiResponse: () => ({
           first_role: {
@@ -904,9 +1104,19 @@ describe('GET all roles', () => {
                 cluster: [],
                 indices: [],
                 run_as: [],
+                remote_cluster: undefined,
+                remote_indices: undefined,
               },
               kibana: [],
-              _transform_error: ['kibana'],
+              _transform_error: [
+                {
+                  reason: 'kibana:space_privileges_global',
+                  state: [
+                    { application, privileges: ['space_all'], resources: ['*'] },
+                    { application, privileges: ['space_read'], resources: ['space:engineering'] },
+                  ],
+                },
+              ],
               _unrecognized_applications: [],
             },
           ],
@@ -915,7 +1125,7 @@ describe('GET all roles', () => {
     );
 
     getRolesTest(
-      `space privilege with application wildcard returns empty kibana section with _transform_error set to ['kibana']`,
+      `space privilege with application wildcard returns empty kibana section with _transform_error reason set to kibana:reserved_privileges_mixed`,
       {
         apiResponse: () => ({
           first_role: {
@@ -952,9 +1162,22 @@ describe('GET all roles', () => {
                 cluster: [],
                 indices: [],
                 run_as: [],
+                remote_cluster: undefined,
+                remote_indices: undefined,
               },
               kibana: [],
-              _transform_error: ['kibana'],
+              _transform_error: [
+                {
+                  reason: 'kibana:reserved_privileges_mixed',
+                  state: [
+                    {
+                      application: 'kibana-*',
+                      privileges: ['space_read'],
+                      resources: ['space:engineering'],
+                    },
+                  ],
+                },
+              ],
               _unrecognized_applications: [],
             },
           ],
@@ -963,7 +1186,7 @@ describe('GET all roles', () => {
     );
 
     getRolesTest(
-      `global base privilege assigned at a space returns empty kibana section with _transform_error set to ['kibana']`,
+      `global base privilege assigned at a space returns empty kibana section with _transform_error reason set to kibana:global_privileges_space`,
       {
         apiResponse: () => ({
           first_role: {
@@ -1007,7 +1230,15 @@ describe('GET all roles', () => {
                 run_as: [],
               },
               kibana: [],
-              _transform_error: ['kibana'],
+              _transform_error: [
+                {
+                  reason: 'kibana:global_privileges_space',
+                  state: [
+                    { application, privileges: ['all'], resources: ['space:marketing'] },
+                    { application, privileges: ['space_read'], resources: ['space:engineering'] },
+                  ],
+                },
+              ],
               _unrecognized_applications: [],
             },
           ],
@@ -1016,7 +1247,7 @@ describe('GET all roles', () => {
     );
 
     getRolesTest(
-      `global base privilege with application wildcard returns empty kibana section with _transform_error set to ['kibana']`,
+      `global base privilege with application wildcard returns empty kibana section with _transform_error reason set to kibana:reserved_privileges_mixed`,
       {
         apiResponse: () => ({
           first_role: {
@@ -1053,9 +1284,16 @@ describe('GET all roles', () => {
                 cluster: [],
                 indices: [],
                 run_as: [],
+                remote_cluster: undefined,
+                remote_indices: undefined,
               },
               kibana: [],
-              _transform_error: ['kibana'],
+              _transform_error: [
+                {
+                  reason: 'kibana:reserved_privileges_mixed',
+                  state: [{ application: 'kibana-*', privileges: ['all'], resources: ['*'] }],
+                },
+              ],
               _unrecognized_applications: [],
             },
           ],
@@ -1064,7 +1302,7 @@ describe('GET all roles', () => {
     );
 
     getRolesTest(
-      `reserved privilege assigned at a space returns empty kibana section with _transform_error set to ['kibana']`,
+      `reserved privilege assigned at a space returns empty kibana section with _transform_error reason set to kibana:reserved_privileges_mixed`,
       {
         apiResponse: () => ({
           first_role: {
@@ -1106,9 +1344,19 @@ describe('GET all roles', () => {
                 cluster: [],
                 indices: [],
                 run_as: [],
+                remote_cluster: undefined,
+                remote_indices: undefined,
               },
               kibana: [],
-              _transform_error: ['kibana'],
+              _transform_error: [
+                {
+                  reason: 'kibana:reserved_privileges_wrong_app',
+                  state: [
+                    { application, privileges: ['reserved_foo'], resources: ['space:marketing'] },
+                    { application, privileges: ['space_read'], resources: ['space:engineering'] },
+                  ],
+                },
+              ],
               _unrecognized_applications: [],
             },
           ],
@@ -1117,7 +1365,7 @@ describe('GET all roles', () => {
     );
 
     getRolesTest(
-      `reserved privilege assigned with a base privilege returns empty kibana section with _transform_error set to ['kibana']`,
+      `reserved privilege assigned with a base privilege returns empty kibana section with _transform_error reason set to kibana:reserved_privileges_wrong_app`,
       {
         apiResponse: () => ({
           first_role: {
@@ -1156,7 +1404,12 @@ describe('GET all roles', () => {
                 run_as: [],
               },
               kibana: [],
-              _transform_error: ['kibana'],
+              _transform_error: [
+                {
+                  reason: 'kibana:reserved_privileges_wrong_app',
+                  state: [{ application, privileges: ['reserved_foo', 'read'], resources: ['*'] }],
+                },
+              ],
               _unrecognized_applications: [],
             },
           ],
@@ -1232,7 +1485,7 @@ describe('GET all roles', () => {
     );
 
     getRolesTest(
-      `global base privilege assigned with a feature privilege returns empty kibana section with _transform_error set to ['kibana']`,
+      `global base privilege assigned with a feature privilege returns empty kibana section with _transform_error reason set to kibana:base_feature_privileges_mixed`,
       {
         apiResponse: () => ({
           first_role: {
@@ -1271,7 +1524,18 @@ describe('GET all roles', () => {
                 run_as: [],
               },
               kibana: [],
-              _transform_error: ['kibana'],
+              _transform_error: [
+                {
+                  reason: 'kibana:base_feature_privileges_mixed',
+                  state: [
+                    {
+                      application,
+                      privileges: ['all', 'feature_foo.foo-privilege-1'],
+                      resources: ['*'],
+                    },
+                  ],
+                },
+              ],
               _unrecognized_applications: [],
             },
           ],
@@ -1280,7 +1544,7 @@ describe('GET all roles', () => {
     );
 
     getRolesTest(
-      `space base privilege assigned with a feature privilege returns empty kibana section with _transform_error set to ['kibana']`,
+      `space base privilege assigned with a feature privilege returns empty kibana section with _transform_error reason set to kibana:base_feature_privileges_mixed`,
       {
         apiResponse: () => ({
           first_role: {
@@ -1319,7 +1583,18 @@ describe('GET all roles', () => {
                 run_as: [],
               },
               kibana: [],
-              _transform_error: ['kibana'],
+              _transform_error: [
+                {
+                  reason: 'kibana:base_feature_privileges_mixed',
+                  state: [
+                    {
+                      application,
+                      privileges: ['space_all', 'feature_foo.foo-privilege-1'],
+                      resources: ['space:space_1'],
+                    },
+                  ],
+                },
+              ],
               _unrecognized_applications: [],
             },
           ],

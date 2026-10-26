@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { Actions, createApiLogic } from '../../../shared/api_logic/create_api_logic';
+import type { Actions } from '../../../shared/api_logic/create_api_logic';
+import { createApiLogic } from '../../../shared/api_logic/create_api_logic';
 import { HttpLogic } from '../../../shared/http';
 
 export interface IndexExistsApiParams {
@@ -20,7 +21,7 @@ export interface IndexExistsApiResponse {
 export const fetchIndexExists = async ({
   indexName,
 }: IndexExistsApiParams): Promise<IndexExistsApiResponse> => {
-  const route = `/internal/enterprise_search/indices/${indexName}/exists`;
+  const route = `/internal/enterprise_search/indices/${encodeURIComponent(indexName)}/exists`;
 
   const { exists } = await HttpLogic.values.http.get<{ exists: boolean }>(route);
   return { exists, indexName };

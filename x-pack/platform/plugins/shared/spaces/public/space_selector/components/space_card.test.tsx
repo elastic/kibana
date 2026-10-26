@@ -5,47 +5,51 @@
  * 2.0.
  */
 
-import { EuiCard } from '@elastic/eui';
-import { mount, shallow } from 'enzyme';
+import { render, screen, within } from '@testing-library/react';
 import React from 'react';
+
+import { asSpaceId, type SpaceId } from '@kbn/core-spaces-common';
 
 import { SpaceCard } from './space_card';
 
 test('it renders without crashing', () => {
   const space = {
-    id: '',
+    id: '' as SpaceId,
     name: 'space name',
     description: 'space description',
     disabledFeatures: [],
   };
 
-  shallow(<SpaceCard space={space} serverBasePath={'/server-base-path'} />);
+  render(<SpaceCard space={space} serverBasePath={'/server-base-path'} />);
+  expect(screen.getByTestId('space-card-')).toBeInTheDocument();
 });
 
 test('links to the indicated space', () => {
   const space = {
-    id: 'some-space',
+    id: asSpaceId('some-space'),
     name: 'space name',
     description: 'space description',
     disabledFeatures: [],
   };
 
-  const wrapper = mount(<SpaceCard space={space} serverBasePath={'/server-base-path'} />);
-  expect(wrapper.find(EuiCard).props()).toMatchObject({
-    href: '/server-base-path/s/some-space/spaces/enter',
-  });
+  render(<SpaceCard space={space} serverBasePath={'/server-base-path'} />);
+  const card = screen.getByTestId('space-card-some-space');
+  const link = within(card).getByRole('link');
+  expect(link).toHaveAttribute('href', '/server-base-path/s/some-space/spaces/enter');
+  expect(card).toHaveTextContent('space name');
 });
 
 test('links to the default space too', () => {
   const space = {
-    id: 'default',
+    id: asSpaceId('default'),
     name: 'default space',
     description: 'space description',
     disabledFeatures: [],
   };
 
-  const wrapper = mount(<SpaceCard space={space} serverBasePath={'/server-base-path'} />);
-  expect(wrapper.find(EuiCard).props()).toMatchObject({
-    href: '/server-base-path/spaces/enter',
-  });
+  render(<SpaceCard space={space} serverBasePath={'/server-base-path'} />);
+  const card = screen.getByTestId('space-card-default');
+  const link = within(card).getByRole('link');
+  expect(link).toHaveAttribute('href', '/server-base-path/spaces/enter');
+  expect(card).toHaveTextContent('default space');
 });

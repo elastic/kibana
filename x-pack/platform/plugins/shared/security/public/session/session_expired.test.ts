@@ -65,6 +65,28 @@ describe('#logout', () => {
     );
   });
 
+  it(`redirects user to the logout URL with 'msg=SESSION_IDLE_TIMEOUT'`, async () => {
+    const sessionExpired = new SessionExpired(application, LOGOUT_URL, TENANT);
+    sessionExpired.logout(LogoutReason.SESSION_IDLE_TIMEOUT);
+
+    const next = `&next=${encodeURIComponent(CURRENT_URL)}`;
+    await expect(application.navigateToUrl).toHaveBeenCalledWith(
+      `${LOGOUT_URL}?msg=SESSION_IDLE_TIMEOUT${next}`,
+      { forceRedirect: true, skipAppLeave: true }
+    );
+  });
+
+  it(`redirects user to the logout URL with 'msg=SESSION_LIFESPAN_TIMEOUT'`, async () => {
+    const sessionExpired = new SessionExpired(application, LOGOUT_URL, TENANT);
+    sessionExpired.logout(LogoutReason.SESSION_LIFESPAN_TIMEOUT);
+
+    const next = `&next=${encodeURIComponent(CURRENT_URL)}`;
+    await expect(application.navigateToUrl).toHaveBeenCalledWith(
+      `${LOGOUT_URL}?msg=SESSION_LIFESPAN_TIMEOUT${next}`,
+      { forceRedirect: true, skipAppLeave: true }
+    );
+  });
+
   it(`adds 'provider' parameter when sessionStorage contains the provider name for this tenant`, async () => {
     const providerName = 'basic';
     mockGetItem.mockReturnValueOnce(providerName);
@@ -77,7 +99,7 @@ describe('#logout', () => {
 
     const next = `&next=${encodeURIComponent(CURRENT_URL)}`;
     const provider = `&provider=${providerName}`;
-    await expect(application.navigateToUrl).toBeCalledWith(
+    await expect(application.navigateToUrl).toHaveBeenCalledWith(
       `${LOGOUT_URL}?msg=SESSION_EXPIRED${next}${provider}`,
       { forceRedirect: true, skipAppLeave: true }
     );

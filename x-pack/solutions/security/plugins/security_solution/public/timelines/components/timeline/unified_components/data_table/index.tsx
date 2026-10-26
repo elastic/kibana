@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import React, { memo, useMemo, useCallback, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-
+import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
+import type { RowControlColumn } from '@kbn/discover-utils';
 import type {
   UnifiedDataTableProps,
   UnifiedDataTableSettingsColumn,
 } from '@kbn/unified-data-table';
-import { UnifiedDataTable, DataLoadingState } from '@kbn/unified-data-table';
+import { DataLoadingState, UnifiedDataTable } from '@kbn/unified-data-table';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type {
   EuiDataGridControlColumn,
@@ -21,28 +21,35 @@ import type {
   EuiDataGridProps,
 } from '@elastic/eui';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import {
+  SECURITY_CELL_ACTIONS_DEFAULT,
+  SECURITY_CELL_ACTIONS_DETAILS_FLYOUT,
+} from '@kbn/ui-actions-plugin/common/trigger_ids';
+import { createCellActionRenderer } from '../../../../../flyout_v2/shared/components/cell_actions';
+import { useFlyoutApi } from '../../../../../flyout_v2/use_flyout_api';
 import { JEST_ENVIRONMENT } from '../../../../../../common/constants';
 import { useOnExpandableFlyoutClose } from '../../../../../flyout/shared/hooks/use_on_expandable_flyout_close';
 import { DocumentDetailsRightPanelKey } from '../../../../../flyout/document_details/shared/constants/panel_keys';
+import { AttackDetailsRightPanelKey } from '../../../../../flyout/attack_details/constants/panel_keys';
 import { selectTimelineById } from '../../../../store/selectors';
 import { RowRendererCount } from '../../../../../../common/api/timeline';
 import { EmptyComponent } from '../../../../../common/lib/cell_actions/helpers';
 import { StatefulEventContext } from '../../../../../common/components/events_viewer/stateful_event_context';
 import type { TimelineItem } from '../../../../../../common/search_strategy';
 import { useKibana } from '../../../../../common/lib/kibana';
+import { useIsNewFlyoutEnabled } from '../../../../../common/hooks/use_is_new_flyout_enabled';
 import type {
   ColumnHeaderOptions,
   OnFetchMoreRecords,
   RowRenderer,
   TimelineTabs,
 } from '../../../../../../common/types/timeline';
-import type { State, inputsModel } from '../../../../../common/store';
-import { SecurityCellActionsTrigger } from '../../../../../app/actions/constants';
+import type { inputsModel, State } from '../../../../../common/store';
 import { getFormattedFields } from '../../body/renderers/formatted_field_udt';
 import ToolbarAdditionalControls from './toolbar_additional_controls';
 import {
-  StyledTimelineUnifiedDataTable,
   StyledEuiProgress,
+  StyledTimelineUnifiedDataTable,
   UnifiedTimelineGlobalStyles,
 } from '../styles';
 import { timelineActions } from '../../../../store';
@@ -50,10 +57,14 @@ import { transformTimelineItemToUnifiedRows } from '../utils';
 import { TimelineEventDetailRow } from './timeline_event_detail_row';
 import { CustomTimelineDataGridBody } from './custom_timeline_data_grid_body';
 import { TIMELINE_EVENT_DETAIL_ROW_ID } from '../../body/constants';
-import { DocumentEventTypes } from '../../../../../common/lib/telemetry/types';
+import { DocumentEventTypes, FLYOUT_ORIGIN } from '../../../../../common/lib/telemetry/types';
 import { getTimelineRowTypeIndicator } from './get_row_indicator';
+import { isAttackDiscoveryRow } from './is_attack_discovery_row';
+import { getAttackTitleValue } from '../../../../../flyout_v2/attack/utils/get_attack_title';
+import { PaginatedDocumentFlyout } from '../../../../../flyout_v2/document/pagination/paginated_document_flyout';
+import { usePaginatedFlyout } from '../../../../../flyout_v2/document/pagination/use_paginated_flyout';
+import { useFlyoutSessionContext } from '../../../../../flyout_v2/session_context';
 
-export const SAMPLE_SIZE_SETTING = 500;
 const DataGridMemoized = React.memo(UnifiedDataTable);
 
 type CommonDataTableProps = {
@@ -72,7 +83,7 @@ type CommonDataTableProps = {
   dataLoadingState: DataLoadingState;
   updatedAt: number;
   isTextBasedQuery?: boolean;
-  leadingControlColumns: EuiDataGridProps['leadingControlColumns'];
+  rowAdditionalLeadingControls?: RowControlColumn[];
 } & Pick<
   UnifiedDataTableProps,
   | 'onSort'
@@ -112,7 +123,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
     onSetColumns,
     onSort,
     onFilter,
-    leadingControlColumns,
+    rowAdditionalLeadingControls,
     onUpdatePageIndex,
   }) {
     const dispatch = useDispatch();
@@ -125,27 +136,25 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
       tabType: activeTab,
     });
 
+    const { services } = useKibana();
     const {
-      services: {
-        uiSettings,
-        fieldFormats,
-        storage,
-        dataViewFieldEditor,
-        notifications: { toasts: toastsService },
-        telemetry,
-        theme,
-        data: dataPluginContract,
-      },
-    } = useKibana();
+      uiSettings,
+      fieldFormats,
+      storage,
+      dataViewFieldEditor,
+      notifications: { toasts: toastsService },
+      telemetry,
+      theme,
+      data: dataPluginContract,
+    } = services;
+
+    const enableNewFlyout = useIsNewFlyoutEnabled();
+    const { openAttackFlyout } = useFlyoutApi();
+    const { historyKey: ambientFlyoutHistoryKey } = useFlyoutSessionContext();
 
     const [expandedDoc, setExpandedDoc] = useState<DataTableRecord & TimelineItem>();
 
-    const onCloseExpandableFlyout = useCallback((id: string) => {
-      setExpandedDoc((prev) => (!prev ? prev : undefined));
-    }, []);
-
     const { closeFlyout, openFlyout } = useExpandableFlyoutApi();
-    useOnExpandableFlyoutClose({ callback: onCloseExpandableFlyout });
 
     const showTimeCol = useMemo(() => !!dataView && !!dataView.timeFieldName, [dataView]);
 
@@ -154,6 +163,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
       sampleSize,
       excludedRowRendererIds,
       columns: timelineColumns,
+      isSuperTimeline,
     } = useSelector((state: State) => selectTimelineById(state, timelineId));
 
     const settings: UnifiedDataTableProps['settings'] = useMemo(() => {
@@ -173,24 +183,173 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
       [events, dataView]
     );
 
+    // The new document details flyout opened from Timeline must render alert/event field cell actions
+    // on the details-flyout trigger so the "Toggle column in table" action is available (it is not
+    // registered on the default trigger). The scope is bound to `timelineId`, so the action toggles
+    // columns on this Timeline via the Redux store; no alerts table ref is needed here.
+    const timelineCellActionRenderer = useMemo(
+      () =>
+        createCellActionRenderer(timelineId, {
+          triggerId: SECURITY_CELL_ACTIONS_DETAILS_FLYOUT,
+          visibleCellActions: 6,
+        }),
+      [timelineId]
+    );
+
+    // Body factory for the V2 paginated timeline flyout.
+    const getTimelineBody = useCallback(
+      () => (
+        <PaginatedDocumentFlyout
+          onAlertUpdated={refetch}
+          renderCellActions={timelineCellActionRenderer}
+        />
+      ),
+      [refetch, timelineCellActionRenderer]
+    );
+
+    // `resolveDocument` runs inside `usePaginatedFlyout`, so it can't destructure
+    // `closePaginatedFlyout` from that same hook call. The ref lets it reach the latest
+    // instance once the hook below has returned it.
+    const closePaginatedFlyoutRef = useRef<() => void>(() => {});
+
+    // Resolves the identity of the document at an absolute row index from the
+    // rows Timeline currently has loaded. The pager's count is that loaded set,
+    // so an index outside it is not reachable. The flyout fetches the document
+    // itself from `_id`/`_index`.
+    //
+    // Attack-discovery rows are routed to the attack flyout instead, mirroring the direct-click
+    // branch in `handleOnEventDetailPanelOpened` below: they have no document identity this
+    // pagination flow can resolve, so the paginated document flyout is closed first and `false`
+    // is returned so `openPaginatedFlyout` does not reopen a document flyout over it.
+    const resolveDocument = useCallback(
+      (documentIndex: number) => {
+        const targetRow = tableRows[documentIndex];
+        if (!targetRow) {
+          return null;
+        }
+
+        if (isAttackDiscoveryRow(targetRow)) {
+          closePaginatedFlyoutRef.current();
+          openAttackFlyout({
+            attackId: targetRow._id,
+            indexName: targetRow.ecs._index ?? '',
+            onAttackUpdated: refetch,
+            origin: FLYOUT_ORIGIN.TIMELINE,
+            attackTitle: getAttackTitleValue(targetRow),
+          });
+          return false;
+        }
+
+        return {
+          flyoutDocumentId: targetRow._id,
+          // `raw._index` is the concrete index carried by the underlying TimelineItem
+          // (see `transformTimelineItemToUnifiedRows`). The ECS `_index` is optional and
+          // frequently absent, and a null index makes `DocumentFlyoutWrapper` skip the
+          // search altogether, leaving the flyout on its loading state forever.
+          flyoutDocumentIndexName: targetRow.raw._index ?? null,
+          totalDocumentCount: tableRows.length,
+        };
+      },
+      [tableRows, openAttackFlyout, refetch]
+    );
+
+    const {
+      slice: { flyoutDocumentIndex },
+      openDocumentFlyout,
+      closePaginatedFlyout,
+    } = usePaginatedFlyout({
+      resolveDocument,
+      renderBody: getTimelineBody,
+      historyKey: ambientFlyoutHistoryKey,
+      origin: FLYOUT_ORIGIN.TIMELINE,
+    });
+    closePaginatedFlyoutRef.current = closePaginatedFlyout;
+
+    // Timeline's row icon is driven by `expandedDoc`, while in-flyout
+    // pagination is driven by the external pagination store. Keep the two in
+    // sync so the icon follows the document currently displayed in the flyout.
+    useEffect(() => {
+      if (!enableNewFlyout) return;
+      if (flyoutDocumentIndex == null) {
+        setExpandedDoc((prev) => (prev ? undefined : prev));
+        return;
+      }
+      const paginatedDocument = tableRows[flyoutDocumentIndex];
+      if (paginatedDocument) {
+        setExpandedDoc(paginatedDocument);
+      }
+    }, [enableNewFlyout, flyoutDocumentIndex, tableRows]);
+
+    const onCloseExpandableFlyout = useCallback(
+      (id: string) => {
+        setExpandedDoc((prev) => (!prev ? prev : undefined));
+        closePaginatedFlyout();
+      },
+      [closePaginatedFlyout]
+    );
+
+    useOnExpandableFlyoutClose({ callback: onCloseExpandableFlyout });
+
     const handleOnEventDetailPanelOpened = useCallback(
       (eventData: DataTableRecord & TimelineItem) => {
-        openFlyout({
-          right: {
-            id: DocumentDetailsRightPanelKey,
-            params: {
-              id: eventData._id,
-              indexName: eventData.ecs._index ?? '',
-              scopeId: timelineId,
+        const isAttackRow = isAttackDiscoveryRow(eventData);
+        const eventIndexName = eventData.ecs._index ?? '';
+
+        if (enableNewFlyout) {
+          if (isAttackRow) {
+            openAttackFlyout({
+              attackId: eventData._id,
+              indexName: eventIndexName,
+              onAttackUpdated: refetch,
+              origin: FLYOUT_ORIGIN.TIMELINE,
+              attackTitle: getAttackTitleValue(eventData),
+            });
+            return;
+          }
+
+          const newIndex = tableRows.findIndex((r) => r.id === eventData.id);
+          const eventIndex = newIndex >= 0 ? newIndex : 0;
+          openDocumentFlyout(eventIndex);
+          return;
+        }
+
+        if (isAttackRow) {
+          openFlyout({
+            right: {
+              id: AttackDetailsRightPanelKey,
+              params: {
+                attackId: eventData._id,
+                indexName: eventIndexName,
+              },
             },
-          },
-        });
+          });
+        } else {
+          openFlyout({
+            right: {
+              id: DocumentDetailsRightPanelKey,
+              params: {
+                id: eventData._id,
+                indexName: eventIndexName,
+                scopeId: timelineId,
+              },
+            },
+          });
+        }
         telemetry.reportEvent(DocumentEventTypes.DetailsFlyoutOpened, {
           location: timelineId,
           panel: 'right',
         });
       },
-      [openFlyout, timelineId, telemetry]
+      [
+        enableNewFlyout,
+        openAttackFlyout,
+        refetch,
+        tableRows,
+        openDocumentFlyout,
+        openFlyout,
+        timelineId,
+        telemetry,
+      ]
     );
 
     const onSetExpandedDoc = useCallback(
@@ -254,7 +413,11 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
       [timelineId, updatedAt]
     );
 
-    const cellActionsMetadata = useMemo(() => ({ scopeId: timelineId }), [timelineId]);
+    // isSuperTimeline in metadata invalidates the useBulkLoadActions cache when timeline mode changes.
+    const cellActionsMetadata = useMemo(
+      () => ({ scopeId: timelineId, isSuperTimeline }),
+      [timelineId, isSuperTimeline]
+    );
 
     const onUpdateSampleSize = useCallback(
       (newSampleSize: number) => {
@@ -409,12 +572,11 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
             isSortEnabled={isSortEnabled}
             sort={sort}
             rowHeightState={rowHeight}
-            isPlainRecord={isTextBasedQuery}
             rowsPerPageState={itemsPerPage}
             onUpdateRowsPerPage={onChangeItemsPerPage}
             onUpdateRowHeight={onUpdateRowHeight}
             onFieldEdited={onFieldEdited}
-            cellActionsTriggerId={SecurityCellActionsTrigger.DEFAULT}
+            cellActionsTriggerId={SECURITY_CELL_ACTIONS_DEFAULT}
             services={dataGridServices}
             visibleCellActions={3}
             externalCustomRenderers={customColumnRenderers}
@@ -431,7 +593,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
             externalAdditionalControls={additionalControls}
             renderCustomGridBody={finalRenderCustomBodyCallback}
             trailingControlColumns={finalTrailControlColumns}
-            externalControlColumns={leadingControlColumns}
+            rowAdditionalLeadingControls={rowAdditionalLeadingControls}
             onUpdatePageIndex={onUpdatePageIndex}
             getRowIndicator={getTimelineRowTypeIndicator}
             settings={settings}

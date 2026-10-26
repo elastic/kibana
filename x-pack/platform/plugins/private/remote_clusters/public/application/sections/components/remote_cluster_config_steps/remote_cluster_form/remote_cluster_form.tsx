@@ -6,12 +6,13 @@
  */
 
 import React, { useState, useContext, useCallback, useEffect } from 'react';
+import type { ReactNode } from 'react';
 import { merge } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
+import type { EuiSwitchEvent } from '@elastic/eui';
 import {
-  EuiCallOut,
   EuiDescribedFormGroup,
   EuiFieldText,
   EuiForm,
@@ -23,23 +24,24 @@ import {
   EuiDelayRender,
   EuiScreenReaderOnly,
   htmlIdGenerator,
-  EuiSwitchEvent,
   useEuiTheme,
   EuiText,
 } from '@elastic/eui';
-import { ReactNode } from 'react-markdown';
-import { Cluster, ClusterPayload } from '../../../../../../common/lib';
+import { KbnDangerCallout } from '@kbn/ui-callout';
+import type { Cluster, ClusterPayload } from '../../../../../../common/lib';
+import { extractHostAndPort } from '../../../../../../common/lib';
 import { SNIFF_MODE, PROXY_MODE } from '../../../../../../common/constants';
 import { AppContext } from '../../../../app_context';
 import { skippingDisconnectedClustersUrl } from '../../../../services/documentation';
 import { ConnectionMode } from './components';
+import type { ClusterErrors } from './validators';
 import {
-  ClusterErrors,
   convertCloudRemoteAddressToProxyConnection,
   validateCluster,
   isCloudAdvancedOptionsEnabled,
 } from './validators';
 import { ActionButtons, SaveError } from '../components';
+import type { RequestError } from '../../../../../types';
 const defaultClusterValues: ClusterPayload = {
   name: '',
   seeds: [],
@@ -55,7 +57,7 @@ interface Props {
   confirmFormAction: (cluster: ClusterPayload) => void;
   onBack?: () => void;
   isSaving?: boolean;
-  saveError?: any;
+  saveError?: RequestError;
   cluster?: Cluster;
   onConfigChange?: (cluster: ClusterPayload, hasErrors: boolean) => void;
   confirmFormText: ReactNode;
@@ -162,9 +164,12 @@ export const RemoteClusterForm: React.FC<Props> = ({
       // If we switch off the advanced options, revert the server name to
       // the host name from the proxy address
       if (cloudAdvancedOptionsEnabled === false) {
+        const serverName = fields.proxyAddress
+          ? extractHostAndPort(fields.proxyAddress)?.host
+          : undefined;
         changedFields = {
           ...changedFields,
-          serverName: fields.proxyAddress?.split(':')[0],
+          serverName,
           proxySocketConnections: defaultClusterValues.proxySocketConnections,
         };
       }
@@ -329,7 +334,7 @@ export const RemoteClusterForm: React.FC<Props> = ({
     );
     return (
       <>
-        <EuiCallOut
+        <KbnDangerCallout
           title={
             <span id={generateId(ERROR_TITLE_ID)}>
               <FormattedMessage
@@ -338,8 +343,6 @@ export const RemoteClusterForm: React.FC<Props> = ({
               />
             </span>
           }
-          color="danger"
-          iconType="error"
         />
         <EuiDelayRender>{messagesToBeRendered}</EuiDelayRender>
         <EuiSpacer size="m" data-test-subj="remoteClusterFormGlobalError" />

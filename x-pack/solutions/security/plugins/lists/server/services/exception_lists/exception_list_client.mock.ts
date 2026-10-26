@@ -10,10 +10,11 @@ import { Readable } from 'stream';
 import { loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { getSavedObjectType } from '@kbn/securitysolution-list-utils';
 import {
-  EXCEPTION_LIST_NAMESPACE,
   EXCEPTION_LIST_NAMESPACE_AGNOSTIC,
+  EXCEPTION_LIST_NAMESPACE_AWARE,
 } from '@kbn/securitysolution-list-constants';
 import type {
+  SavedObjectsBulkDeleteObject,
   SavedObjectsBulkUpdateObject,
   SavedObjectsFindResponse,
   SavedObjectsUpdateResponse,
@@ -28,7 +29,8 @@ import {
   getExceptionListSchemaMock,
   getTrustedAppsListSchemaMock,
 } from '../../../common/schemas/response/exception_list_schema.mock';
-import { ExtensionPointStorage, ExtensionPointStorageClientInterface } from '../extension_points';
+import type { ExtensionPointStorageClientInterface } from '../extension_points';
+import { ExtensionPointStorage } from '../extension_points';
 import type { ExceptionListSoSchema } from '../../schemas/saved_objects';
 import { DATE_NOW, ID, _VERSION } from '../../../common/constants.mock';
 
@@ -39,7 +41,7 @@ import type {
 } from './exception_list_client_types';
 
 const isExceptionsListSavedObjectType = (type: string): boolean =>
-  type === EXCEPTION_LIST_NAMESPACE || type === EXCEPTION_LIST_NAMESPACE_AGNOSTIC;
+  type === EXCEPTION_LIST_NAMESPACE_AWARE || type === EXCEPTION_LIST_NAMESPACE_AGNOSTIC;
 
 export class ExceptionListClientMock extends ExceptionListClient {
   public getExceptionList = jest.fn().mockResolvedValue(getExceptionListSchemaMock());
@@ -47,6 +49,12 @@ export class ExceptionListClientMock extends ExceptionListClient {
   public createExceptionList = jest.fn().mockResolvedValue(getExceptionListSchemaMock());
   public updateExceptionList = jest.fn().mockResolvedValue(getExceptionListSchemaMock());
   public deleteExceptionList = jest.fn().mockResolvedValue(getExceptionListSchemaMock());
+  public bulkDeleteExceptionList = jest.fn().mockResolvedValue({
+    errors: [],
+    results: [getExceptionListSchemaMock()],
+    success: true,
+    summary: { failed: 0, skipped: 0, succeeded: 1, total: 1 },
+  });
   public createExceptionListItem = jest.fn().mockResolvedValue(getExceptionListItemSchemaMock());
   public updateExceptionListItem = jest.fn().mockResolvedValue(getExceptionListItemSchemaMock());
   public deleteExceptionListItem = jest.fn().mockResolvedValue(getExceptionListItemSchemaMock());
@@ -67,6 +75,7 @@ export class ExceptionListClientMock extends ExceptionListClient {
       missing_exception_lists_count: 0,
     },
   });
+  public findExceptionListsItemPointInTimeFinder = jest.fn().mockReturnValue(Promise.resolve());
 }
 
 export const getExceptionListClientMock = (
@@ -150,7 +159,6 @@ export const getUpdateExceptionListItemOptionsMock = (): UpdateExceptionListItem
 export const getExceptionListSoSchemaMock = (
   overrides: Partial<ExceptionListSoSchema> = {}
 ): ExceptionListSoSchema => {
-  /* eslint-disable @typescript-eslint/naming-convention */
   const {
     comments,
     created_at,
@@ -167,7 +175,6 @@ export const getExceptionListSoSchemaMock = (
     type,
     updated_by,
   } = getExceptionListItemSchemaMock();
-  /* eslint-enable @typescript-eslint/naming-convention */
 
   const soSchema: ExceptionListSoSchema = {
     comments,
@@ -206,7 +213,6 @@ export const getExceptionListItemSavedObject = (
   return {
     attributes: getExceptionListSoSchemaMock(attributesOverrides),
     coreMigrationVersion: undefined,
-    error: undefined,
     id: ID,
     migrationVersion: undefined,
     namespaces: undefined,
@@ -313,6 +319,15 @@ export const getExceptionListSavedObjectClientMock = (
       saved_objects: importObjects.map((item) => {
         return getExceptionListItemSavedObject(item.attributes);
       }),
+    };
+  });
+
+  // Mock `.bulkDelete()` (used in bulk delete item cascades)
+  soClient.bulkDelete.mockImplementation(async (...args) => {
+    const [objects] = args as [SavedObjectsBulkDeleteObject[]];
+
+    return {
+      statuses: objects.map(({ id, type }) => ({ id, success: true, type })),
     };
   });
 

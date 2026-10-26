@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { ElasticsearchIndexWithIngestion } from '../../../../../common/types/indices';
-import { Actions, createApiLogic } from '../../../shared/api_logic/create_api_logic';
+import type { ElasticsearchIndexWithIngestion } from '../../../../../common/types/indices';
+import type { Actions } from '../../../shared/api_logic/create_api_logic';
+import { createApiLogic } from '../../../shared/api_logic/create_api_logic';
 import { HttpLogic } from '../../../shared/http';
 
 export interface FetchIndexApiParams {
@@ -20,7 +21,7 @@ export type FetchIndexApiResponse = ElasticsearchIndexWithIngestion & {
 export const fetchIndex = async ({
   indexName,
 }: FetchIndexApiParams): Promise<FetchIndexApiResponse> => {
-  const route = `/internal/enterprise_search/indices/${indexName}`;
+  const route = `/internal/enterprise_search/indices/${encodeURIComponent(indexName)}`;
 
   return await HttpLogic.values.http.get<FetchIndexApiResponse>(route);
 };

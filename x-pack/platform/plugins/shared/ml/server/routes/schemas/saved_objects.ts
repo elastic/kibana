@@ -23,20 +23,20 @@ export const jobTypeSchema = schema.object({ jobType: jobTypeLiterals });
 
 export const updateJobsSpaces = schema.object({
   jobType: jobTypeLiterals,
-  jobIds: schema.arrayOf(schema.string()),
-  spacesToAdd: schema.arrayOf(schema.string()),
-  spacesToRemove: schema.arrayOf(schema.string()),
+  jobIds: schema.arrayOf(schema.string({ maxLength: 10000 }), { maxSize: 10000 }),
+  spacesToAdd: schema.arrayOf(schema.string({ maxLength: 10000 }), { maxSize: 10000 }),
+  spacesToRemove: schema.arrayOf(schema.string({ maxLength: 10000 }), { maxSize: 10000 }),
 });
 
 export const updateTrainedModelsSpaces = schema.object({
-  modelIds: schema.arrayOf(schema.string()),
-  spacesToAdd: schema.arrayOf(schema.string()),
-  spacesToRemove: schema.arrayOf(schema.string()),
+  modelIds: schema.arrayOf(schema.string({ maxLength: 10000 }), { maxSize: 10000 }),
+  spacesToAdd: schema.arrayOf(schema.string({ maxLength: 10000 }), { maxSize: 10000 }),
+  spacesToRemove: schema.arrayOf(schema.string({ maxLength: 10000 }), { maxSize: 10000 }),
 });
 
 export const itemsAndCurrentSpace = schema.object({
   mlSavedObjectType: itemTypeLiterals,
-  ids: schema.arrayOf(schema.string()),
+  ids: schema.arrayOf(schema.string({ maxLength: 10000 }), { maxSize: 10000 }),
 });
 
 export const syncJobObjects = schema.object({
@@ -44,10 +44,13 @@ export const syncJobObjects = schema.object({
   addToAllSpaces: schema.maybe(schema.boolean()),
 });
 
-export const syncCheckSchema = schema.object({ mlSavedObjectType: schema.maybe(schema.string()) });
+export const syncCheckSchema = schema.object({
+  mlSavedObjectType: schema.maybe(schema.string({ maxLength: 10000 })),
+});
 
 export const canDeleteMLSpaceAwareItemsSchema = schema.object({
-  ids: schema.arrayOf(schema.string(), {
+  ids: schema.arrayOf(schema.string({ maxLength: 10000 }), {
+    maxSize: 10000,
     meta: { description: 'List of job or trained model IDs' },
   }),
 });

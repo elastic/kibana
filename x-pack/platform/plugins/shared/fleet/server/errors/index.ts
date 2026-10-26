@@ -8,6 +8,10 @@
 /* eslint-disable max-classes-per-file */
 import type { ElasticsearchErrorDetails } from '@kbn/es-errors';
 
+import { isObjectLike } from 'lodash';
+
+import type { RegistryConnectionErrorType } from '../../common/types';
+
 import { FleetError } from '../../common/errors';
 
 import { isESClientError } from './utils';
@@ -16,23 +20,61 @@ export {
   fleetErrorToResponseOptions,
 } from './handlers';
 
-export { isESClientError } from './utils';
+export { isESClientError, rethrowIfInstanceOrWrap, getErrorMessage } from './utils';
 export {
   FleetError as FleetError,
+  FleetVersionConflictError,
   OutputInvalidError as OutputInvalidError,
+  AgentlessAgentCreateOverProvisionedError as AgentlessAgentCreateOverProvisionnedError,
 } from '../../common/errors';
 
+export class FleetErrorWithStatusCode<TMeta = unknown> extends FleetError<TMeta> {
+  public readonly statusCode: number | undefined;
+
+  constructor(message?: string, statusCode?: number, public readonly meta?: TMeta) {
+    super(message, meta);
+
+    if (statusCode) {
+      this.statusCode = statusCode;
+    } else if (isObjectLike(meta)) {
+      const metaStatusCode = (meta as { statusCode?: unknown }).statusCode;
+
+      // If the original error had a status code, and it is not a `401`, then set that status code here.
+      // We don't set it for `401` because the error is likely due to internal processing or lack
+      // of access to specific SO/Indexes, and we don't want Kibana/UI logout a user out due to this
+      // `401`
+      if (typeof metaStatusCode === 'number' && metaStatusCode !== 401) {
+        this.statusCode = metaStatusCode;
+      }
+    }
+  }
+}
+
 export class RegistryError extends FleetError {}
-export class RegistryConnectionError extends RegistryError {}
+export class RegistryConnectionError extends RegistryError {
+  constructor(
+    message?: string,
+    attributes?: { type: RegistryConnectionErrorType; reason?: string }
+  ) {
+    super(message);
+    if (attributes) {
+      this.attributes = attributes;
+    }
+  }
+}
 export class RegistryResponseError extends RegistryError {
   constructor(message?: string, public readonly status?: number) {
     super(message);
+    if (status) {
+      this.attributes = { type: 'http', reason: String(status) };
+    }
   }
 }
 
 // Package errors
 
 export class PackageInvalidDeploymentMode extends FleetError {}
+export class PackageFipsIncompatibleError extends FleetError {}
 export class PackageOutdatedError extends FleetError {}
 export class PackageFailedVerificationError extends FleetError {
   constructor(pkgName: string, pkgVersion: string) {
@@ -46,10 +88,29 @@ export class PackageUnsupportedMediaTypeError extends FleetError {}
 export class PackageInvalidArchiveError extends FleetError {}
 export class PackageRemovalError extends FleetError {}
 export class PackageESError extends FleetError {}
+export class PackageAssetsVerificationError extends FleetError<
+  Array<{ id: string; type: string }>
+> {
+  constructor(missingAssets: Array<{ id: string; type: string }>) {
+    super(
+      `Package installation verification failed: ${
+        missingAssets.length
+      } asset(s) are missing from Elasticsearch: ${missingAssets
+        .map((a) => `${a.type}/${a.id}`)
+        .join(', ')}`,
+      missingAssets
+    );
+    this.attributes = {
+      type: 'package_assets_verification_failed',
+      missing_assets: missingAssets,
+    };
+  }
+}
 export class ConcurrentInstallOperationError extends FleetError {}
 export class PackageSavedObjectConflictError extends FleetError {}
 export class KibanaSOReferenceError extends FleetError {}
 export class PackageAlreadyInstalledError extends FleetError {}
+export class PackageRollbackError extends FleetError {}
 
 export class AgentPolicyError extends FleetError {}
 export class AgentRequestInvalidError extends FleetError {}
@@ -57,23 +118,34 @@ export class AgentPolicyInvalidError extends FleetError {}
 
 export class AgentlessAgentCreateError extends FleetError {
   constructor(message: string) {
-    super(`Error creating agentless agent in Fleet, ${message}`);
+    super(`Error creating managed integration in Fleet, ${message}`);
   }
 }
+
 export class AgentlessAgentDeleteError extends FleetError {
   constructor(message: string) {
-    super(`Error deleting agentless agent in Fleet, ${message}`);
+    super(`Error deleting managed integration in Fleet, ${message}`);
   }
 }
 
 export class AgentlessAgentUpgradeError extends FleetError {
   constructor(message: string) {
-    super(`Error upgrading agentless agent in Fleet, ${message}`);
+    super(`Error upgrading managed integration in Fleet, ${message}`);
+  }
+}
+export class AgentlessAgentListNotFoundError extends FleetError {
+  constructor(message: string) {
+    super(`Error listing managed integrations API not found in Fleet, ${message}`);
+  }
+}
+export class AgentlessAgentListError extends FleetError {
+  constructor(message: string) {
+    super(`Error listing managed integrations in Fleet, ${message}`);
   }
 }
 export class AgentlessAgentConfigError extends FleetError {
   constructor(message: string) {
-    super(`Error validating Agentless API configuration in Fleet, ${message}`);
+    super(`Error validating managed integration API configuration in Fleet, ${message}`);
   }
 }
 
@@ -83,8 +155,76 @@ export class AgentlessPolicyExistsRequestError extends AgentPolicyError {
   }
 }
 
+export class CloudConnectorCreateError extends FleetError {
+  constructor(message: string) {
+    super(`Error creating cloud connector in Fleet, ${message}`);
+  }
+}
+
+export class CloudConnectorGetListError extends FleetError {
+  constructor(message: string) {
+    super(`Error getting cloud connectors in Fleet, ${message}`);
+  }
+}
+
+export class CloudConnectorInvalidVarsError extends FleetError {
+  constructor(message: string) {
+    super(`Error validating cloud connector vars in Fleet, ${message}`);
+  }
+}
+
+export class CloudConnectorDeleteError extends FleetError {
+  constructor(message: string) {
+    super(`Error deleting cloud connector in Fleet, ${message}`);
+  }
+}
+
+export class CloudConnectorUpdateError extends FleetError {
+  constructor(message: string) {
+    super(`Error updating cloud connector in Fleet, ${message}`);
+  }
+}
+
+export class IacProvisionerConfigError extends FleetError {
+  constructor(message: string) {
+    super(`Error validating IaC Provisioner configuration in Fleet, ${message}`);
+  }
+}
+
+/**
+ * The IaC Provisioner rejected the request (4xx). `errorCodes` carries the
+ * provider's `errors[].code` values (e.g. `render.unknown_blueprint`) so the
+ * route can decide whether the caller may fall back to the static template.
+ */
+export class IacProvisionerRequestError extends FleetError {
+  constructor(
+    message: string,
+    public readonly statusCode: number,
+    public readonly errorCodes: string[] = []
+  ) {
+    super(`Error calling IaC Provisioner, ${message}`);
+  }
+}
+
+/**
+ * The IaC Provisioner could not be reached, returned a 5xx, or responded
+ * without the expected payload — a retryable availability problem rather
+ * than a contract rejection.
+ */
+export class IacProvisionerUnavailableError extends FleetError {
+  constructor(message: string, public readonly statusCode?: number) {
+    super(`IaC Provisioner unavailable, ${message}`);
+  }
+}
+
 export class AgentPolicyNameExistsError extends AgentPolicyError {}
 export class AgentReassignmentError extends FleetError {}
+export class AgentAlreadyAssignedError extends AgentReassignmentError {}
+export class AgentRollbackError extends FleetError {
+  constructor(message: string) {
+    super(`Error rolling back agent in Fleet: ${message}`);
+  }
+}
 export class PackagePolicyIneligibleForUpgradeError extends FleetError {}
 export class PackagePolicyValidationError extends FleetError {}
 export class PackagePolicyNameExistsError extends FleetError {}
@@ -94,12 +234,26 @@ export class PackagePolicyRequestError extends FleetError {}
 export class PackagePolicyMultipleAgentPoliciesError extends FleetError {}
 export class PackagePolicyOutputError extends FleetError {}
 export class PackagePolicyContentPackageError extends FleetError {}
+export class CustomPackagePolicyNotAllowedForAgentlessError extends FleetError {
+  constructor(message = 'Cannot perform that action') {
+    super(
+      `${message} in Fleet because custom packages are not allowed to be deployed as agentless. Please choose a different deployment mode.`
+    );
+  }
+}
 
 export class EnrollmentKeyNameExistsError extends FleetError {}
 export class HostedAgentPolicyRestrictionRelatedError extends FleetError {
   constructor(message = 'Cannot perform that action') {
     super(
       `${message} in Fleet because the agent policy is managed by an external orchestration solution, such as Elastic Cloud, Kubernetes, etc. Please make changes using your orchestration solution.`
+    );
+  }
+}
+export class AgentlessAgentRestrictionError extends FleetError {
+  constructor(message = 'Cannot perform that action') {
+    super(
+      `${message} in Fleet because managed agents are managed by Elastic and do not support this action.`
     );
   }
 }
@@ -135,7 +289,8 @@ export class OutputNotFoundError extends FleetNotFoundError {}
 export class PackageNotFoundError extends FleetNotFoundError {}
 export class ArchiveNotFoundError extends FleetNotFoundError {}
 export class IndexNotFoundError extends FleetNotFoundError {}
-
+export class CustomIntegrationNotFoundError extends FleetNotFoundError {}
+export class NotACustomIntegrationError extends FleetNotFoundError {}
 export class PackagePolicyNotFoundError extends FleetNotFoundError<{
   /** The package policy ID that was not found */
   packagePolicyId: string;
@@ -173,6 +328,21 @@ export class ArtifactsElasticsearchError extends FleetError {
     } else {
       this.requestDetails = 'unable to determine request details';
     }
+  }
+}
+
+export class FleetElasticsearchError extends FleetErrorWithStatusCode {
+  constructor(esError: Error) {
+    let statusCode: number | undefined;
+    const message = esError.message;
+
+    // Extract the original ES status code and ensure we have meta with statusCode
+    if (isESClientError(esError)) {
+      statusCode = esError.meta.statusCode;
+    }
+
+    // Pass through the ES error message, status code, and original error as meta
+    super(message, statusCode, esError);
   }
 }
 

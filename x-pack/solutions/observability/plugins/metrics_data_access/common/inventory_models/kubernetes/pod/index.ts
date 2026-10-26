@@ -6,21 +6,29 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type { estypes } from '@elastic/elasticsearch';
 import { metrics } from './metrics';
-import type { InventoryModel } from '../../types';
-import { nginx as nginxRequiredMetrics } from '../../shared/metrics/required_metrics';
+import { createInventoryModel } from '../../shared/create_inventory_model';
+import type { DataSchemaFormat } from '../../types';
+import {
+  DATASTREAM_DATASET,
+  EVENT_MODULE,
+  K8S_POD_NAME,
+  K8S_POD_UID,
+  KUBELET_STATS_RECEIVER_OTEL,
+} from '../../../constants';
 
-export { podSnapshotMetricTypes } from './metrics';
-
-export const pod: InventoryModel<typeof metrics> = {
-  id: 'pod',
+export const pod = createInventoryModel('pod', {
   displayName: i18n.translate('xpack.metricsData.inventoryModel.pod.displayName', {
     defaultMessage: 'Kubernetes Pods',
   }),
   singularDisplayName: i18n.translate('xpack.metricsData.inventoryModels.pod.singularDisplayName', {
     defaultMessage: 'Kubernetes Pod',
   }),
-  requiredModule: 'kubernetes',
+  requiredIntegration: {
+    beats: 'kubernetes',
+    otel: KUBELET_STATS_RECEIVER_OTEL,
+  },
   crosslinkSupport: {
     details: true,
     logs: true,
@@ -32,13 +40,20 @@ export const pod: InventoryModel<typeof metrics> = {
     name: 'kubernetes.pod.name',
     ip: 'kubernetes.pod.ip',
   },
+  // Whole SemConv identity: uid and name. These documents have no ip field.
+  schemaFields: {
+    semconv: { id: K8S_POD_UID, name: K8S_POD_NAME },
+  },
   metrics,
-  requiredMetrics: [
-    'podOverview',
-    'podCpuUsage',
-    'podMemoryUsage',
-    'podNetworkTraffic',
-    ...nginxRequiredMetrics,
-  ],
-  tooltipMetrics: ['cpu', 'memory', 'rx', 'tx'],
-};
+  nodeFilter: ({
+    schema,
+  }: { schema?: DataSchemaFormat } = {}): estypes.QueryDslQueryContainer[] => {
+    if (!schema) {
+      return [];
+    }
+
+    return schema === 'ecs'
+      ? [{ term: { [EVENT_MODULE]: 'kubernetes' } }]
+      : [{ term: { [DATASTREAM_DATASET]: KUBELET_STATS_RECEIVER_OTEL } }];
+  },
+});

@@ -7,12 +7,25 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { mockPersistedLogFactory } from './query_string_input.test.mocks';
+import { mockPersistedLogFactory } from '@kbn/kql/public/components/query_string_input/query_string_input.test.mocks';
+
+jest.mock('@kbn/esql/public/kibana_services', () => ({
+  useKibanaServices: jest.fn(() => ({})),
+  untilPluginStartServicesReady: jest.fn(() => new Promise(() => {})),
+}));
+
+jest.mock('@kbn/date-range-picker-presets', () => ({
+  useDateRangePickerPresets: jest.fn(() => ({
+    presets: [],
+    onPresetSave: undefined,
+    onPresetDelete: undefined,
+  })),
+}));
 
 import React from 'react';
-import { mount, shallow } from 'enzyme';
-import { render } from '@testing-library/react';
-import { EMPTY } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
+import { render, screen, waitFor, within, act } from '@testing-library/react';
+import { EMPTY, of } from 'rxjs';
 
 import { QueryBarTopRow, SharingMetaFields } from './query_bar_top_row';
 import { coreMock } from '@kbn/core/public/mocks';
@@ -20,17 +33,35 @@ import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { I18nProvider } from '@kbn/i18n-react';
 import { stubIndexPattern } from '@kbn/data-plugin/public/stubs';
+import { kqlPluginMock } from '@kbn/kql/public/mocks';
+import type { Filter } from '@kbn/es-query';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { unifiedSearchPluginMock } from '../mocks';
+import { EuiThemeProvider } from '@elastic/eui';
+import type { IUnifiedSearchPluginServices } from '../types';
+import userEvent from '@testing-library/user-event';
+import { getSessionServiceMock } from '@kbn/data-plugin/public/search/session/mocks';
+import { SearchSessionState } from '@kbn/data-plugin/public';
+import { useDateRangePickerPresets } from '@kbn/date-range-picker-presets';
+import { DATE_RANGE_PICKER_FEATURE_FLAG } from '@kbn/date-range-picker';
+import { QuerySubmitTrigger } from '../search_bar/query_submit_metadata';
+import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
+
+const mockUseDateRangePickerPresets = useDateRangePickerPresets as jest.Mock;
 
 const startMock = coreMock.createStart();
+startMock.chrome.getActiveSolutionNavId$.mockReturnValue(new BehaviorSubject('oblt'));
 
 const mockTimeHistory = {
+  add: () => jest.fn(),
   get: () => {
     return [];
   },
   get$: () => EMPTY,
 };
+
+let useNewDateRangePickerFlag = true;
+let usePresetPersistenceFlag = true;
 
 startMock.uiSettings.get.mockImplementation((key: string) => {
   switch (key) {
@@ -44,6 +75,10 @@ startMock.uiSettings.get.mockImplementation((key: string) => {
       ];
     case 'dateFormat':
       return 'MMM D, YYYY @ HH:mm:ss.SSS';
+    case 'dateFormat:tz':
+      return 'UTC';
+    case 'dateFormat:dow':
+      return 'Sunday';
     case UI_SETTINGS.HISTORY_LIMIT:
       return 10;
     case UI_SETTINGS.TIMEPICKER_TIME_DEFAULTS:
@@ -54,6 +89,16 @@ startMock.uiSettings.get.mockImplementation((key: string) => {
     default:
       throw new Error(`Unexpected config key: ${key}`);
   }
+});
+
+startMock.featureFlags.getBooleanValue$.mockImplementation((key: string, fallback: boolean) => {
+  if (key === DATE_RANGE_PICKER_FEATURE_FLAG) {
+    return of(useNewDateRangePickerFlag);
+  }
+  if (key === 'unifiedSearch.dateRangePickerPresetsPersistenceEnabled') {
+    return of(usePresetPersistenceFlag);
+  }
+  return of(fallback);
 });
 
 const noop = () => {
@@ -86,7 +131,10 @@ const createMockStorage = () => ({
   clear: jest.fn(),
 });
 
-function wrapQueryBarTopRowInContext(testProps: any) {
+function wrapQueryBarTopRowInContext(
+  testProps: any,
+  { servicesOverride }: { servicesOverride?: Partial<IUnifiedSearchPluginServices> } = {}
+) {
   const defaultOptions = {
     screenTitle: 'Another Screen',
     onSubmit: noop,
@@ -96,50 +144,412 @@ function wrapQueryBarTopRowInContext(testProps: any) {
 
   const services = {
     ...startMock,
+    core: startMock,
     unifiedSearch: unifiedSearchPluginMock.createStartContract(),
+    kql: kqlPluginMock.createStartContract(),
     data: dataPluginMock.createStartContract(),
     appName: 'discover',
     storage: createMockStorage(),
+    ...servicesOverride,
   };
 
   return (
-    <I18nProvider>
-      <KibanaContextProvider services={services}>
-        <QueryBarTopRow {...defaultOptions} {...testProps} />
-      </KibanaContextProvider>
-    </I18nProvider>
+    <EuiThemeProvider>
+      <I18nProvider>
+        <KibanaContextProvider services={services}>
+          <QueryBarTopRow {...defaultOptions} {...testProps} />
+        </KibanaContextProvider>
+      </I18nProvider>
+    </EuiThemeProvider>
   );
 }
 
 describe('QueryBarTopRowTopRow', () => {
-  const QUERY_INPUT_SELECTOR = 'QueryStringInput';
-  const TIMEPICKER_SELECTOR = 'Memo(EuiSuperDatePicker)';
-  const REFRESH_BUTTON_SELECTOR = 'EuiSuperUpdateButton';
-  const CANCEL_BUTTON_SELECTOR = '[data-test-subj="queryCancelButton"]';
-  const TIMEPICKER_DURATION = '[data-shared-timefilter-duration]';
-  const TEXT_BASED_EDITOR = '[data-test-subj="unifiedTextLangEditor"]';
-
   beforeEach(() => {
     jest.clearAllMocks();
+    useNewDateRangePickerFlag = true;
+    usePresetPersistenceFlag = true;
   });
 
-  it('Should render query and time picker', () => {
-    const { getByText, getByTestId } = render(
-      wrapQueryBarTopRowInContext({
-        query: kqlQuery,
-        screenTitle: 'Another Screen',
-        isDirty: false,
-        indexPatterns: [stubIndexPattern],
-        timeHistory: mockTimeHistory,
-      })
+  describe.each([
+    {
+      value: false,
+      description: 'disabled',
+      submitId: 'querySubmitButton',
+      cancelId: 'queryCancelButton',
+    },
+    {
+      value: true,
+      description: 'enabled',
+      submitId: 'querySubmitButton',
+      cancelId: 'queryCancelButton',
+    },
+  ])('when background search is $description', ({ value, submitId, cancelId }) => {
+    describe('when it is NOT loading', () => {
+      it('should render the submit button', async () => {
+        const { getByTestId } = render(
+          wrapQueryBarTopRowInContext({
+            query: kqlQuery,
+            screenTitle: 'Another Screen',
+            isDirty: false,
+            indexPatterns: [stubIndexPattern],
+            timeHistory: mockTimeHistory,
+            useBackgroundSearchButton: value,
+          })
+        );
+
+        await waitFor(() => {
+          expect(getByTestId('dataSharedTimefilterDuration')).toBeInTheDocument();
+          expect(within(getByTestId(submitId)).getByText('Refresh')).toBeVisible();
+        });
+      });
+    });
+
+    describe('when it is loading', () => {
+      it('should render the cancel button', async () => {
+        const { getByTestId } = render(
+          wrapQueryBarTopRowInContext({
+            query: kqlQuery,
+            screenTitle: 'Another Screen',
+            isDirty: false,
+            indexPatterns: [stubIndexPattern],
+            timeHistory: mockTimeHistory,
+            isLoading: true,
+            onCancel: jest.fn(),
+            submitButtonStyle: 'withText',
+            useBackgroundSearchButton: value,
+          })
+        );
+
+        await waitFor(() => {
+          expect(getByTestId('dataSharedTimefilterDuration')).toBeInTheDocument();
+          expect(within(getByTestId(cancelId)).getByText('Cancel')).toBeVisible();
+        });
+      });
+    });
+  });
+
+  it('does not disable submit, date picker, or fast mode just because the ES|QL query is empty', async () => {
+    const licensing = licensingMock.createStart();
+    licensing.getLicense.mockResolvedValue(licensingMock.createLicenseMock());
+
+    render(
+      wrapQueryBarTopRowInContext(
+        {
+          query: { esql: '' },
+          screenTitle: 'ES|QL Screen',
+          isDirty: false,
+          indexPatterns: [stubIndexPattern],
+          timeHistory: mockTimeHistory,
+          dateRangeFrom: 'now-15m',
+          dateRangeTo: 'now',
+          esqlApproximation: {
+            isApproximate: false,
+            onChange: jest.fn(),
+          },
+        },
+        { servicesOverride: { licensing } }
+      )
     );
 
-    expect(getByText(kqlQuery.query)).toBeInTheDocument();
-    expect(getByTestId('superDatePickerShowDatesButton')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByTestId('querySubmitButton')).toBeEnabled();
+      expect(screen.getByTestId('dateRangePickerControlButton')).toBeEnabled();
+      expect(screen.getByTestId('dateRangePickerPreviousButton')).toBeEnabled();
+      expect(screen.getByTestId('dateRangePickerNextButton')).toBeEnabled();
+      expect(screen.getByTestId('esqlApproximationToggleButton')).toBeEnabled();
+    });
   });
 
-  it('Should create a unique PersistedLog based on the appName and query language', () => {
-    mount(
+  it('disables submit, date picker, and fast mode when the consumer opts in', async () => {
+    const licensing = licensingMock.createStart();
+    licensing.getLicense.mockResolvedValue(licensingMock.createLicenseMock());
+    const disabledReason = 'Enter an ES|QL query to enable this.';
+
+    render(
+      wrapQueryBarTopRowInContext(
+        {
+          query: { esql: '' },
+          screenTitle: 'ES|QL Screen',
+          isDirty: false,
+          indexPatterns: [stubIndexPattern],
+          timeHistory: mockTimeHistory,
+          dateRangeFrom: 'now-15m',
+          dateRangeTo: 'now',
+          disableSubmitAction: true,
+          showDatePicker: { disabled: true, disabledReason },
+          esqlApproximation: {
+            isApproximate: false,
+            onChange: jest.fn(),
+            disabledReason,
+          },
+        },
+        { servicesOverride: { licensing } }
+      )
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('querySubmitButton')).toBeDisabled();
+      expect(screen.getByTestId('dateRangePickerControlButton')).toBeDisabled();
+      expect(screen.getByTestId('esqlApproximationToggleButton')).toBeDisabled();
+    });
+  });
+
+  it('forwards visor KQL submit with the quick search trigger', async () => {
+    const onSubmit = jest.fn();
+    const kql = kqlPluginMock.createStartContract();
+    (kql.autocomplete.hasQuerySuggestions as jest.Mock).mockReturnValue(true);
+
+    render(
+      wrapQueryBarTopRowInContext(
+        {
+          query: { esql: 'FROM test_index' },
+          screenTitle: 'ES|QL Screen',
+          isDirty: false,
+          indexPatterns: [stubIndexPattern],
+          timeHistory: mockTimeHistory,
+          dateRangeFrom: 'now-15m',
+          dateRangeTo: 'now',
+          onSubmit,
+          onTextLangQueryChange: jest.fn(),
+        },
+        { servicesOverride: { kql } }
+      )
+    );
+
+    await waitFor(() => expect(kql.QueryStringInput).toHaveBeenCalled());
+
+    const { onSubmit: visorKqlSubmit } = (kql.QueryStringInput as jest.Mock).mock.calls.at(-1)[0];
+    act(() => visorKqlSubmit({ query: 'hostname:web-01', language: 'kuery' }));
+
+    expect(onSubmit).toHaveBeenCalledWith(
+      expect.objectContaining({
+        query: { esql: 'FROM test_index | WHERE KQL("""hostname:web-01""")' },
+      }),
+      QuerySubmitTrigger.QUICK_SEARCH
+    );
+  });
+
+  describe('when background search is enabled', () => {
+    describe('when it is NOT loading', () => {
+      const data = dataPluginMock.createStartContract();
+      const session = getSessionServiceMock({
+        state$: new BehaviorSubject(SearchSessionState.Completed).asObservable(),
+      });
+      data.search.session = session;
+
+      describe('when the user clicks the main button', () => {
+        it('should call the submit callback', async () => {
+          // Given
+          const user = userEvent.setup();
+          const onSubmit = jest.fn();
+
+          // When
+          const { getByTestId } = render(
+            wrapQueryBarTopRowInContext(
+              {
+                query: kqlQuery,
+                screenTitle: 'Another Screen',
+                isDirty: false,
+                indexPatterns: [stubIndexPattern],
+                timeHistory: mockTimeHistory,
+                onSubmit,
+                useBackgroundSearchButton: true,
+              },
+              { servicesOverride: { data } }
+            )
+          );
+          await user.click(getByTestId('querySubmitButton'));
+
+          // Then
+          expect(onSubmit).toHaveBeenCalled();
+        });
+      });
+
+      it('the secondary button should be disabled', async () => {
+        // When
+        const { getByTestId } = render(
+          wrapQueryBarTopRowInContext(
+            {
+              query: kqlQuery,
+              screenTitle: 'Another Screen',
+              isDirty: false,
+              indexPatterns: [stubIndexPattern],
+              timeHistory: mockTimeHistory,
+              useBackgroundSearchButton: true,
+            },
+            { servicesOverride: { data } }
+          )
+        );
+
+        // Then
+        await waitFor(() => {
+          expect(getByTestId('dataSharedTimefilterDuration')).toBeInTheDocument();
+          expect(getByTestId('querySubmitButton-secondary-button')).toBeDisabled();
+        });
+      });
+    });
+
+    describe('when it is loading', () => {
+      const isLoading = true;
+
+      const data = dataPluginMock.createStartContract();
+      const loadingSession = getSessionServiceMock({
+        state$: new BehaviorSubject(SearchSessionState.Loading).asObservable(),
+      });
+      data.search.session = loadingSession;
+
+      describe('when the user clicks the main button', () => {
+        it('should call the cancel callback', async () => {
+          // Given
+          const user = userEvent.setup();
+          const onCancel = jest.fn();
+
+          // When
+          const { getByTestId } = render(
+            wrapQueryBarTopRowInContext(
+              {
+                query: kqlQuery,
+                screenTitle: 'Another Screen',
+                isDirty: false,
+                indexPatterns: [stubIndexPattern],
+                timeHistory: mockTimeHistory,
+                isLoading,
+                onCancel,
+                useBackgroundSearchButton: true,
+              },
+              { servicesOverride: { data } }
+            )
+          );
+          await user.click(getByTestId('queryCancelButton'));
+
+          // Then
+          expect(onCancel).toHaveBeenCalled();
+        });
+      });
+
+      describe('when the user clicks the secondary button', () => {
+        it('should call the send to background callback', async () => {
+          // Given
+          const user = userEvent.setup();
+          const onSendToBackground = jest.fn();
+
+          // When
+          const { getByTestId } = render(
+            wrapQueryBarTopRowInContext(
+              {
+                query: kqlQuery,
+                screenTitle: 'Another Screen',
+                isDirty: false,
+                indexPatterns: [stubIndexPattern],
+                timeHistory: mockTimeHistory,
+                isLoading,
+                onCancel: jest.fn(),
+                onSendToBackground,
+                useBackgroundSearchButton: true,
+              },
+              { servicesOverride: { data } }
+            )
+          );
+
+          const button = getByTestId('queryCancelButton-secondary-button');
+          await waitFor(() => expect(button).toBeEnabled(), { timeout: 1000 });
+          await user.click(button);
+
+          // Then
+          expect(onSendToBackground).toHaveBeenCalled();
+        });
+      });
+    });
+
+    describe('secondary button enabled state after rapid state transitions', () => {
+      beforeEach(() => {
+        jest.useFakeTimers();
+      });
+
+      afterEach(() => {
+        jest.useRealTimers();
+      });
+
+      it('should not re-enable the button when Loading transitions to Completed before the 500ms delay fires', () => {
+        // Regression test: mergeMap allowed a stale delayed Loading emission to fire after
+        // Completed, briefly re-enabling the secondary button. switchMap cancels the delayed
+        // emission when a new state arrives, preventing the stale re-enable.
+        const stateSubject = new Subject<SearchSessionState>();
+        const data = dataPluginMock.createStartContract();
+        data.search.session = getSessionServiceMock({
+          state$: stateSubject.asObservable(),
+        });
+
+        const { getByTestId } = render(
+          wrapQueryBarTopRowInContext(
+            {
+              query: kqlQuery,
+              screenTitle: 'Test Screen',
+              isDirty: false,
+              indexPatterns: [stubIndexPattern],
+              timeHistory: mockTimeHistory,
+              isLoading: true,
+              onCancel: jest.fn(),
+              useBackgroundSearchButton: true,
+            },
+            { servicesOverride: { data } }
+          )
+        );
+
+        const button = getByTestId('queryCancelButton-secondary-button');
+
+        // Rapidly emit Loading then Completed — simulates a fast search completing in < 500ms.
+        // Advance past the 500ms delay: with mergeMap the stale Loading would fire here;
+        // with switchMap it is cancelled by the Completed emission and never fires.
+        act(() => {
+          stateSubject.next(SearchSessionState.Loading);
+          stateSubject.next(SearchSessionState.Completed);
+          jest.advanceTimersByTime(600);
+        });
+
+        // The button must stay disabled — Completed cancelled any in-flight Loading delay.
+        expect(button).toBeDisabled();
+      });
+
+      it('should enable the button after 500ms when the search remains Loading', () => {
+        const stateSubject = new Subject<SearchSessionState>();
+        const data = dataPluginMock.createStartContract();
+        data.search.session = getSessionServiceMock({
+          state$: stateSubject.asObservable(),
+        });
+
+        const { getByTestId } = render(
+          wrapQueryBarTopRowInContext(
+            {
+              query: kqlQuery,
+              screenTitle: 'Test Screen',
+              isDirty: false,
+              indexPatterns: [stubIndexPattern],
+              timeHistory: mockTimeHistory,
+              isLoading: true,
+              onCancel: jest.fn(),
+              useBackgroundSearchButton: true,
+            },
+            { servicesOverride: { data } }
+          )
+        );
+
+        const button = getByTestId('queryCancelButton-secondary-button');
+
+        act(() => stateSubject.next(SearchSessionState.Loading));
+        // Button should be disabled before the 500ms delay fires.
+        expect(button).toBeDisabled();
+
+        // Advance past the 500ms delay — button should now be enabled.
+        act(() => jest.advanceTimersByTime(500));
+        expect(button).toBeEnabled();
+      });
+    });
+  });
+
+  it('Should create a unique PersistedLog based on the appName and query language', async () => {
+    render(
       wrapQueryBarTopRowInContext({
         query: kqlQuery,
         screenTitle: 'Another Screen',
@@ -150,69 +560,13 @@ describe('QueryBarTopRowTopRow', () => {
       })
     );
 
-    expect(mockPersistedLogFactory.mock.calls[0][0]).toBe('typeahead:discover-kuery');
+    await waitFor(() => {
+      expect(mockPersistedLogFactory.mock.calls[0][0]).toBe('typeahead:discover-kuery');
+    });
   });
 
-  it('Should render only timepicker when no options provided', () => {
-    const component = mount(
-      wrapQueryBarTopRowInContext({
-        isDirty: false,
-        timeHistory: mockTimeHistory,
-      })
-    );
-
-    expect(component.find(QUERY_INPUT_SELECTOR).length).toBe(0);
-    expect(component.find(TIMEPICKER_SELECTOR).length).toBe(1);
-  });
-
-  it('Should not show timepicker when asked', () => {
-    const component = mount(
-      wrapQueryBarTopRowInContext({
-        showDatePicker: false,
-        timeHistory: mockTimeHistory,
-        isDirty: false,
-      })
-    );
-
-    expect(component.find(QUERY_INPUT_SELECTOR).length).toBe(0);
-    expect(component.find(TIMEPICKER_SELECTOR).length).toBe(0);
-  });
-
-  it('Should render timepicker with options', () => {
-    const component = mount(
-      wrapQueryBarTopRowInContext({
-        isDirty: false,
-        screenTitle: 'Another Screen',
-        showDatePicker: true,
-        dateRangeFrom: 'now-7d',
-        dateRangeTo: 'now',
-        timeHistory: mockTimeHistory,
-      })
-    );
-
-    expect(component.find(QUERY_INPUT_SELECTOR).length).toBe(0);
-    expect(component.find(TIMEPICKER_SELECTOR).length).toBe(1);
-  });
-
-  it('Should render timepicker without the submit button if showSubmitButton is false', () => {
-    const component = mount(
-      wrapQueryBarTopRowInContext({
-        isDirty: false,
-        screenTitle: 'Another Screen',
-        showDatePicker: true,
-        showSubmitButton: false,
-        dateRangeFrom: 'now-7d',
-        dateRangeTo: 'now',
-        timeHistory: mockTimeHistory,
-      })
-    );
-
-    expect(component.find(REFRESH_BUTTON_SELECTOR).length).toBe(0);
-    expect(component.find(TIMEPICKER_SELECTOR).length).toBe(1);
-  });
-
-  it('Should render update button as icon button', () => {
-    const component = mount(
+  it('Should render update button as icon button', async () => {
+    render(
       wrapQueryBarTopRowInContext({
         isDirty: false,
         screenTitle: 'Another Screen',
@@ -225,11 +579,16 @@ describe('QueryBarTopRowTopRow', () => {
       })
     );
 
-    expect(component.find(REFRESH_BUTTON_SELECTOR).prop('iconOnly')).toBe(true);
+    await waitFor(() => {
+      const submitButton = screen.getByTestId('querySubmitButton');
+      expect(submitButton).toBeInTheDocument();
+      // In icon-only mode, the button should not have visible text
+      expect(submitButton.textContent).not.toContain('Update');
+    });
   });
 
-  it('Should render the timefilter duration container for sharing', () => {
-    const component = mount(
+  it('Should render the timefilter duration container for sharing', async () => {
+    render(
       wrapQueryBarTopRowInContext({
         isDirty: false,
         screenTitle: 'Another Screen',
@@ -240,115 +599,14 @@ describe('QueryBarTopRowTopRow', () => {
       })
     );
 
-    // match the data attribute rendered in the in the ReactHTML object
-    expect(component.find(TIMEPICKER_DURATION)).toMatchObject(
-      /<div\b.*\bdata-shared-timefilter-duration\b/
-    );
+    await waitFor(() => {
+      expect(screen.getByTestId('dataSharedTimefilterDuration')).toBeInTheDocument();
+      const durationElement = screen.getByTestId('dataSharedTimefilterDuration');
+      expect(durationElement).toHaveAttribute('data-shared-timefilter-duration');
+    });
   });
 
-  it('Should render only query input bar', () => {
-    const component = mount(
-      wrapQueryBarTopRowInContext({
-        query: kqlQuery,
-        indexPatterns: [stubIndexPattern],
-        isDirty: false,
-        screenTitle: 'Another Screen',
-        showDatePicker: false,
-        dateRangeFrom: 'now-7d',
-        dateRangeTo: 'now',
-        timeHistory: mockTimeHistory,
-      })
-    );
-
-    expect(component.find(QUERY_INPUT_SELECTOR).length).toBe(1);
-    expect(component.find(TIMEPICKER_SELECTOR).length).toBe(0);
-  });
-
-  it('Should NOT render query input bar if disabled', () => {
-    const component = mount(
-      wrapQueryBarTopRowInContext({
-        query: kqlQuery,
-        isDirty: false,
-        screenTitle: 'Another Screen',
-        indexPatterns: [stubIndexPattern],
-        showQueryInput: false,
-        showDatePicker: false,
-        timeHistory: mockTimeHistory,
-      })
-    );
-
-    expect(component.find(QUERY_INPUT_SELECTOR).length).toBe(0);
-    expect(component.find(TIMEPICKER_SELECTOR).length).toBe(0);
-  });
-
-  it('Should NOT render query input bar if missing options', () => {
-    const component = mount(
-      wrapQueryBarTopRowInContext({
-        isDirty: false,
-        screenTitle: 'Another Screen',
-        showDatePicker: false,
-        timeHistory: mockTimeHistory,
-      })
-    );
-
-    expect(component.find(QUERY_INPUT_SELECTOR).length).toBe(0);
-    expect(component.find(TIMEPICKER_SELECTOR).length).toBe(0);
-  });
-
-  it('Should NOT render query input bar if on text based languages mode', () => {
-    const component = mount(
-      wrapQueryBarTopRowInContext({
-        query: esqlQuery,
-        isDirty: false,
-        screenTitle: 'SQL Screen',
-        timeHistory: mockTimeHistory,
-        indexPatterns: [stubIndexPattern],
-        showDatePicker: true,
-        dateRangeFrom: 'now-7d',
-        dateRangeTo: 'now',
-      })
-    );
-
-    expect(component.find(QUERY_INPUT_SELECTOR).length).toBe(0);
-    expect(component.find(TEXT_BASED_EDITOR).length).toBe(1);
-    expect(component.find(TEXT_BASED_EDITOR).prop('detectedTimestamp')).toBe('@timestamp');
-    expect(component.find(TIMEPICKER_SELECTOR).prop('isDisabled')).toBe(false);
-  });
-
-  it('Should render disabled date picker if on text based languages mode and no timeFieldName', () => {
-    const dataView = {
-      ...stubIndexPattern,
-      timeFieldName: undefined,
-      isPersisted: () => false,
-    };
-    const component = mount(
-      wrapQueryBarTopRowInContext({
-        query: esqlQuery,
-        isDirty: false,
-        screenTitle: 'SQL Screen',
-        timeHistory: mockTimeHistory,
-        indexPatterns: [dataView],
-        showDatePicker: true,
-        dateRangeFrom: 'now-7d',
-        dateRangeTo: 'now',
-      })
-    );
-
-    expect(component.find(QUERY_INPUT_SELECTOR).length).toBe(0);
-    expect(component.find(TEXT_BASED_EDITOR).length).toBe(1);
-    expect(component.find(TEXT_BASED_EDITOR).prop('detectedTimestamp')).toBeUndefined();
-    expect(component.find(TIMEPICKER_SELECTOR).prop('isDisabled')).toMatchInlineSnapshot(`
-      Object {
-        "display": <span
-          data-test-subj="kbnQueryBar-datePicker-disabled"
-        >
-          All time
-        </span>,
-      }
-    `);
-  });
-
-  it('Should render custom data view picker', () => {
+  it('Should render custom data view picker', async () => {
     const dataViewPickerOverride = <div data-test-subj="dataViewPickerOverride" />;
     const { getByTestId } = render(
       wrapQueryBarTopRowInContext({
@@ -361,11 +619,13 @@ describe('QueryBarTopRowTopRow', () => {
       })
     );
 
-    expect(getByTestId('dataViewPickerOverride')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(getByTestId('dataViewPickerOverride')).toBeInTheDocument();
+    });
   });
 
-  it('Should render cancel button when loading', () => {
-    const component = mount(
+  it('Should render cancel button when loading', async () => {
+    render(
       wrapQueryBarTopRowInContext({
         isLoading: true,
         onCancel: () => {},
@@ -379,11 +639,14 @@ describe('QueryBarTopRowTopRow', () => {
       })
     );
 
-    expect(component.find(CANCEL_BUTTON_SELECTOR).length).not.toBe(0);
+    await waitFor(() => {
+      expect(screen.getByTestId('dataSharedTimefilterDuration')).toBeInTheDocument();
+      expect(screen.getByTestId('queryCancelButton')).toBeInTheDocument();
+    });
   });
 
-  it('Should NOT render cancel button when not loading', () => {
-    const component = mount(
+  it('Should NOT render cancel button when not loading', async () => {
+    render(
       wrapQueryBarTopRowInContext({
         isLoading: false,
         onCancel: () => {},
@@ -397,7 +660,666 @@ describe('QueryBarTopRowTopRow', () => {
       })
     );
 
-    expect(component.find(CANCEL_BUTTON_SELECTOR).length).toBe(0);
+    await waitFor(() => {
+      expect(screen.getByTestId('dataSharedTimefilterDuration')).toBeInTheDocument();
+      expect(screen.queryByTestId('queryCancelButton')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('filter bar toggle button', () => {
+    const filtersMock = [{ meta: {} }] as Filter[];
+
+    it('should render when showAddFilter is true and filters has at least one entry', async () => {
+      render(
+        wrapQueryBarTopRowInContext({
+          isDirty: false,
+          showAddFilter: true,
+          filters: filtersMock,
+          indexPatterns: [stubIndexPattern],
+          timeHistory: mockTimeHistory,
+        })
+      );
+
+      await waitFor(() => {
+        expect(screen.getByTestId('filterBarToggleButton')).toBeInTheDocument();
+      });
+    });
+
+    it('should not render when filters is empty', async () => {
+      render(
+        wrapQueryBarTopRowInContext({
+          isDirty: false,
+          showAddFilter: true,
+          filters: [],
+          indexPatterns: [stubIndexPattern],
+          timeHistory: mockTimeHistory,
+        })
+      );
+
+      await waitFor(() => {
+        expect(screen.queryByTestId('filterBarToggleButton')).not.toBeInTheDocument();
+      });
+    });
+  });
+
+  describe('draft', () => {
+    it('should call onDraftChange when in dirty state', async () => {
+      const onDraftChange = jest.fn();
+      const state = {
+        query: kqlQuery,
+        dateRangeFrom: 'now-7d',
+        dateRangeTo: 'now',
+      };
+      const { getByText } = render(
+        wrapQueryBarTopRowInContext({
+          isDirty: true,
+          onDraftChange,
+          ...state,
+        })
+      );
+
+      await waitFor(() => {
+        expect(getByText(kqlQuery.query)).toBeInTheDocument();
+        expect(onDraftChange).toHaveBeenCalledWith(state);
+      });
+    });
+
+    it('should call onDraftChange when in dirty state and no date picker', async () => {
+      const onDraftChange = jest.fn();
+      const state = {
+        query: kqlQuery,
+        dateRangeFrom: 'now-7d',
+        dateRangeTo: 'now',
+      };
+      const { getByText } = render(
+        wrapQueryBarTopRowInContext({
+          isDirty: true,
+          showDatePicker: false,
+          onDraftChange,
+          ...state,
+        })
+      );
+
+      await waitFor(() => {
+        expect(getByText(kqlQuery.query)).toBeInTheDocument();
+        expect(onDraftChange).toHaveBeenCalledWith({
+          query: state.query,
+          dateRangeFrom: undefined,
+          dateRangeTo: undefined,
+        });
+      });
+    });
+
+    it('should call onDraftChange with empty draft when in normal state', async () => {
+      const onDraftChange = jest.fn();
+      const state = {
+        query: kqlQuery,
+        dateRangeFrom: 'now-7d',
+        dateRangeTo: 'now',
+      };
+      const { getByText } = render(
+        wrapQueryBarTopRowInContext({
+          isDirty: false,
+          onDraftChange,
+          ...state,
+        })
+      );
+
+      await waitFor(() => {
+        expect(getByText(kqlQuery.query)).toBeInTheDocument();
+        expect(onDraftChange).toHaveBeenCalledWith(undefined);
+      });
+    });
+
+    it('should call onDraftChange only once even if unmounted', async () => {
+      const onDraftChange = jest.fn();
+      const state = {
+        query: kqlQuery,
+        dateRangeFrom: 'now-7d',
+        dateRangeTo: 'now',
+      };
+      const { unmount } = render(
+        wrapQueryBarTopRowInContext({
+          isDirty: false,
+          onDraftChange,
+          ...state,
+        })
+      );
+
+      unmount();
+
+      expect(onDraftChange).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe.each([
+    {
+      pickerMode: 'DateRangePicker',
+      useNewPicker: true,
+      pickerButtonTestSubj: 'dateRangePickerControlButton',
+    },
+    {
+      pickerMode: 'legacy EuiSuperDatePicker',
+      useNewPicker: false,
+      pickerButtonTestSubj: 'superDatePickerShowDatesButton',
+    },
+  ])('with $pickerMode', ({ useNewPicker, pickerButtonTestSubj }) => {
+    beforeEach(() => {
+      useNewDateRangePickerFlag = useNewPicker;
+    });
+
+    const wrapWithPicker = (props: any, opts?: any) =>
+      wrapQueryBarTopRowInContext({ enableDateRangePicker: useNewPicker, ...props }, opts);
+
+    it('Should render query and time picker', async () => {
+      const { getByText, getByTestId } = render(
+        wrapWithPicker({
+          query: kqlQuery,
+          screenTitle: 'Another Screen',
+          isDirty: false,
+          indexPatterns: [stubIndexPattern],
+          timeHistory: mockTimeHistory,
+        })
+      );
+
+      await waitFor(() => {
+        expect(getByText(kqlQuery.query)).toBeInTheDocument();
+        expect(getByTestId(pickerButtonTestSubj)).toBeInTheDocument();
+      });
+    });
+
+    it('Should render only timepicker when no options provided', async () => {
+      const { container } = render(
+        wrapWithPicker({
+          isDirty: false,
+          timeHistory: mockTimeHistory,
+        })
+      );
+
+      await waitFor(() => {
+        expect(screen.getByTestId(pickerButtonTestSubj)).toBeInTheDocument();
+        expect(
+          container.querySelector('input[placeholder*="search"], textarea')
+        ).not.toBeInTheDocument();
+      });
+    });
+
+    it('Should not show timepicker when asked', async () => {
+      const { container } = render(
+        wrapWithPicker({
+          showDatePicker: false,
+          timeHistory: mockTimeHistory,
+          isDirty: false,
+        })
+      );
+
+      await waitFor(() => {
+        expect(screen.getByTestId('dataSharedTimefilterDuration')).toBeInTheDocument();
+        expect(screen.queryByTestId(pickerButtonTestSubj)).not.toBeInTheDocument();
+        expect(
+          container.querySelector('input[placeholder*="search"], textarea')
+        ).not.toBeInTheDocument();
+      });
+    });
+
+    it('Should render timepicker with options', async () => {
+      const { container } = render(
+        wrapWithPicker({
+          isDirty: false,
+          screenTitle: 'Another Screen',
+          showDatePicker: true,
+          dateRangeFrom: 'now-7d',
+          dateRangeTo: 'now',
+          timeHistory: mockTimeHistory,
+        })
+      );
+
+      await waitFor(() => {
+        expect(screen.getByTestId(pickerButtonTestSubj)).toBeInTheDocument();
+        expect(
+          container.querySelector('input[placeholder*="search"], textarea')
+        ).not.toBeInTheDocument();
+      });
+    });
+
+    it('Should render timepicker without the submit button if showSubmitButton is false', async () => {
+      render(
+        wrapWithPicker({
+          isDirty: false,
+          screenTitle: 'Another Screen',
+          showDatePicker: true,
+          showSubmitButton: false,
+          dateRangeFrom: 'now-7d',
+          dateRangeTo: 'now',
+          timeHistory: mockTimeHistory,
+        })
+      );
+
+      await waitFor(() => {
+        expect(screen.getByTestId('dataSharedTimefilterDuration')).toBeInTheDocument();
+        expect(screen.getByTestId(pickerButtonTestSubj)).toBeInTheDocument();
+        expect(screen.queryByTestId('querySubmitButton')).not.toBeInTheDocument();
+      });
+
+      if (useNewPicker) {
+        expect(screen.getByTestId('dateRangePickerTimeWindowButtons')).toBeInTheDocument();
+      }
+    });
+
+    it('Should hide time window buttons when showTimeWindowButtons is false', async () => {
+      render(
+        wrapWithPicker({
+          isDirty: false,
+          screenTitle: 'Another Screen',
+          showDatePicker: true,
+          showSubmitButton: false,
+          showTimeWindowButtons: false,
+          dateRangeFrom: 'now-7d',
+          dateRangeTo: 'now',
+          timeHistory: mockTimeHistory,
+        })
+      );
+
+      await waitFor(() => {
+        expect(screen.getByTestId(pickerButtonTestSubj)).toBeInTheDocument();
+      });
+
+      expect(screen.queryByTestId('dateRangePickerTimeWindowButtons')).not.toBeInTheDocument();
+      expect(screen.queryByRole('group', { name: 'Time window actions' })).not.toBeInTheDocument();
+    });
+
+    it('Should render only query input bar', async () => {
+      render(
+        wrapWithPicker({
+          query: kqlQuery,
+          indexPatterns: [stubIndexPattern],
+          isDirty: false,
+          screenTitle: 'Another Screen',
+          showDatePicker: false,
+          dateRangeFrom: 'now-7d',
+          dateRangeTo: 'now',
+          timeHistory: mockTimeHistory,
+        })
+      );
+
+      await waitFor(() => {
+        expect(screen.getByText(kqlQuery.query)).toBeInTheDocument();
+        expect(screen.queryByTestId(pickerButtonTestSubj)).not.toBeInTheDocument();
+      });
+    });
+
+    it('Should NOT render query input bar if disabled', async () => {
+      const { container } = render(
+        wrapWithPicker({
+          query: kqlQuery,
+          isDirty: false,
+          screenTitle: 'Another Screen',
+          indexPatterns: [stubIndexPattern],
+          showQueryInput: false,
+          showDatePicker: false,
+          timeHistory: mockTimeHistory,
+        })
+      );
+
+      await waitFor(() => {
+        expect(screen.getByTestId('dataSharedTimefilterDuration')).toBeInTheDocument();
+        expect(screen.queryByTestId(pickerButtonTestSubj)).not.toBeInTheDocument();
+        expect(
+          container.querySelector('input[placeholder*="search"], textarea')
+        ).not.toBeInTheDocument();
+      });
+    });
+
+    it('Should NOT render query input bar if missing options', async () => {
+      const { container } = render(
+        wrapWithPicker({
+          isDirty: false,
+          screenTitle: 'Another Screen',
+          showDatePicker: false,
+          timeHistory: mockTimeHistory,
+        })
+      );
+
+      await waitFor(() => {
+        expect(screen.getByTestId('dataSharedTimefilterDuration')).toBeInTheDocument();
+        expect(screen.queryByTestId(pickerButtonTestSubj)).not.toBeInTheDocument();
+        expect(
+          container.querySelector('input[placeholder*="search"], textarea')
+        ).not.toBeInTheDocument();
+      });
+    });
+
+    it('Should NOT render query input bar if on text based languages mode', async () => {
+      const { container } = render(
+        wrapWithPicker({
+          query: esqlQuery,
+          isDirty: false,
+          screenTitle: 'SQL Screen',
+          timeHistory: mockTimeHistory,
+          indexPatterns: [stubIndexPattern],
+          showDatePicker: true,
+          dateRangeFrom: 'now-7d',
+          dateRangeTo: 'now',
+        })
+      );
+
+      await waitFor(() => {
+        expect(within(screen.getByTestId('querySubmitButton')).getByText('Search')).toBeVisible();
+        expect(screen.getByTestId(pickerButtonTestSubj)).toBeInTheDocument();
+        expect(
+          container.querySelector('input[placeholder*="search"], textarea')
+        ).not.toBeInTheDocument();
+      });
+    });
+
+    it('Should render disabled date picker if on text based languages mode and no timeFieldName', async () => {
+      const dataView = {
+        ...stubIndexPattern,
+        timeFieldName: undefined,
+        isPersisted: () => false,
+      };
+      const { container } = render(
+        wrapWithPicker({
+          query: esqlQuery,
+          isDirty: false,
+          screenTitle: 'SQL Screen',
+          timeHistory: mockTimeHistory,
+          indexPatterns: [dataView],
+          showDatePicker: true,
+          dateRangeFrom: 'now-7d',
+          dateRangeTo: 'now',
+        })
+      );
+
+      await waitFor(() => {
+        expect(within(screen.getByTestId('querySubmitButton')).getByText('Search')).toBeVisible();
+        if (useNewPicker) {
+          const button = screen.getByTestId('dateRangePickerControlButton');
+          expect(button).toBeDisabled();
+        } else {
+          expect(screen.getByTestId('kbnQueryBar-datePicker-disabled')).toBeInTheDocument();
+        }
+        expect(
+          container.querySelector('input[placeholder*="search"], textarea')
+        ).not.toBeInTheDocument();
+      });
+    });
+
+    it('Should keep the date picker enabled when the ES|QL query is empty', async () => {
+      render(
+        wrapWithPicker({
+          query: { esql: '' },
+          isDirty: false,
+          screenTitle: 'ES|QL Screen',
+          timeHistory: mockTimeHistory,
+          indexPatterns: [stubIndexPattern],
+          showDatePicker: true,
+          dateRangeFrom: 'now-15m',
+          dateRangeTo: 'now',
+        })
+      );
+
+      await waitFor(() => {
+        if (useNewPicker) {
+          expect(screen.getByTestId('dateRangePickerControlButton')).toBeEnabled();
+          expect(screen.getByTestId('dateRangePickerPreviousButton')).toBeEnabled();
+          expect(screen.getByTestId('dateRangePickerNextButton')).toBeEnabled();
+        } else {
+          expect(screen.getByTestId(pickerButtonTestSubj)).toBeEnabled();
+        }
+      });
+    });
+
+    it('Should disable the date picker when showDatePicker.disabled is set', async () => {
+      render(
+        wrapWithPicker({
+          query: { esql: '' },
+          isDirty: false,
+          screenTitle: 'ES|QL Screen',
+          timeHistory: mockTimeHistory,
+          indexPatterns: [stubIndexPattern],
+          showDatePicker: {
+            disabled: true,
+            disabledReason: 'Enter an ES|QL query to enable this.',
+          },
+          dateRangeFrom: 'now-15m',
+          dateRangeTo: 'now',
+        })
+      );
+
+      await waitFor(() => {
+        if (useNewPicker) {
+          expect(screen.getByTestId('dateRangePickerControlButton')).toBeDisabled();
+        } else {
+          expect(screen.getByTestId('kbnQueryBar-datePicker-disabled')).toBeInTheDocument();
+        }
+      });
+    });
+
+    it('Should keep the ES|QL date picker enabled when timeFieldName is set even if showDatePicker.disabled is true', async () => {
+      render(
+        wrapWithPicker({
+          query: esqlQuery,
+          isDirty: false,
+          screenTitle: 'ES|QL Screen',
+          timeHistory: mockTimeHistory,
+          indexPatterns: [stubIndexPattern],
+          showDatePicker: { disabled: true },
+          dateRangeFrom: 'now-15m',
+          dateRangeTo: 'now',
+        })
+      );
+
+      await waitFor(() => {
+        if (useNewPicker) {
+          expect(screen.getByTestId('dateRangePickerControlButton')).toBeEnabled();
+        } else {
+          expect(screen.getByTestId(pickerButtonTestSubj)).toBeEnabled();
+        }
+        expect(screen.queryByTestId('kbnQueryBar-datePicker-disabled')).not.toBeInTheDocument();
+      });
+    });
+
+    it('Should render disabled date picker for KQL when showDatePicker.disabled is true', async () => {
+      const dataView = {
+        ...stubIndexPattern,
+        timeFieldName: undefined,
+      };
+      render(
+        wrapWithPicker({
+          query: kqlQuery,
+          isDirty: false,
+          screenTitle: 'Another Screen',
+          timeHistory: mockTimeHistory,
+          indexPatterns: [dataView],
+          showDatePicker: { disabled: true },
+          dateRangeFrom: 'now-7d',
+          dateRangeTo: 'now',
+        })
+      );
+
+      await waitFor(() => {
+        if (useNewPicker) {
+          expect(screen.getByTestId('dateRangePickerControlButton')).toBeDisabled();
+        } else {
+          expect(screen.getByTestId('kbnQueryBar-datePicker-disabled')).toBeInTheDocument();
+        }
+      });
+    });
+
+    it('Should keep the KQL date picker enabled when no timeFieldName exists', async () => {
+      const dataView = {
+        ...stubIndexPattern,
+        timeFieldName: undefined,
+      };
+      render(
+        wrapWithPicker({
+          query: kqlQuery,
+          isDirty: false,
+          screenTitle: 'Another Screen',
+          timeHistory: mockTimeHistory,
+          indexPatterns: [dataView],
+          showDatePicker: true,
+          dateRangeFrom: 'now-7d',
+          dateRangeTo: 'now',
+        })
+      );
+
+      await waitFor(() => {
+        expect(screen.getByTestId(pickerButtonTestSubj)).toBeEnabled();
+        expect(screen.queryByTestId('kbnQueryBar-datePicker-disabled')).not.toBeInTheDocument();
+      });
+    });
+
+    it('Should keep the KQL date picker enabled when showDatePicker.disabled is false', async () => {
+      const dataView = {
+        ...stubIndexPattern,
+        timeFieldName: undefined,
+      };
+      render(
+        wrapWithPicker({
+          query: kqlQuery,
+          isDirty: false,
+          screenTitle: 'Another Screen',
+          timeHistory: mockTimeHistory,
+          indexPatterns: [dataView],
+          showDatePicker: { disabled: false },
+          dateRangeFrom: 'now-7d',
+          dateRangeTo: 'now',
+        })
+      );
+
+      await waitFor(() => {
+        expect(screen.getByTestId(pickerButtonTestSubj)).toBeEnabled();
+        expect(screen.queryByTestId('kbnQueryBar-datePicker-disabled')).not.toBeInTheDocument();
+      });
+    });
+
+    it('Should hide ES|QL UI when query input is disabled', async () => {
+      render(
+        wrapWithPicker({
+          query: esqlQuery,
+          isDirty: false,
+          screenTitle: 'SQL Screen',
+          timeHistory: mockTimeHistory,
+          indexPatterns: [stubIndexPattern],
+          showQueryInput: false,
+          showDatePicker: true,
+          showQueryMenu: false,
+          dateRangeFrom: 'now-7d',
+          dateRangeTo: 'now',
+        })
+      );
+
+      await waitFor(() => {
+        expect(screen.queryByTestId('unifiedTextLangEditor')).not.toBeInTheDocument();
+        expect(screen.getByTestId(pickerButtonTestSubj)).toBeInTheDocument();
+        expect(within(screen.getByTestId('querySubmitButton')).getByText('Refresh')).toBeVisible();
+      });
+    });
+  });
+
+  describe('date range picker preset persistence', () => {
+    const renderWithDatePicker = () =>
+      render(
+        wrapQueryBarTopRowInContext({
+          query: kqlQuery,
+          screenTitle: 'Another Screen',
+          isDirty: false,
+          indexPatterns: [stubIndexPattern],
+          timeHistory: mockTimeHistory,
+        })
+      );
+
+    it('enables the presets hook when the new picker and persistence flag are enabled', async () => {
+      useNewDateRangePickerFlag = true;
+      usePresetPersistenceFlag = true;
+
+      renderWithDatePicker();
+
+      await waitFor(() => {
+        expect(mockUseDateRangePickerPresets).toHaveBeenCalledWith(
+          expect.objectContaining({
+            service: expect.objectContaining({ getPresets$: expect.any(Function) }),
+            persistenceEnabled: true,
+            notifications: startMock.notifications,
+          })
+        );
+      });
+    });
+
+    it('disables the presets hook when persistence is disabled', async () => {
+      useNewDateRangePickerFlag = true;
+      usePresetPersistenceFlag = false;
+
+      renderWithDatePicker();
+
+      await waitFor(() => {
+        expect(mockUseDateRangePickerPresets).toHaveBeenCalledWith(
+          expect.objectContaining({
+            persistenceEnabled: false,
+          })
+        );
+      });
+    });
+
+    it('disables the presets hook on the legacy picker path', async () => {
+      useNewDateRangePickerFlag = false;
+      usePresetPersistenceFlag = true;
+
+      renderWithDatePicker();
+
+      await waitFor(() => {
+        expect(mockUseDateRangePickerPresets).toHaveBeenCalledWith(
+          expect.objectContaining({
+            persistenceEnabled: false,
+          })
+        );
+      });
+    });
+  });
+
+  describe('auto-refresh-only mode (new picker)', () => {
+    const renderAutoRefreshOnly = (onRefreshChange: jest.Mock) =>
+      render(
+        wrapQueryBarTopRowInContext({
+          isDirty: false,
+          timeHistory: mockTimeHistory,
+          showDatePicker: false,
+          showAutoRefreshOnly: true,
+          isRefreshPaused: true,
+          refreshInterval: 5000,
+          onRefreshChange,
+        })
+      );
+
+    beforeEach(() => {
+      useNewDateRangePickerFlag = true;
+    });
+
+    it('renders the picker readOnly with an operable play/pause button even when refresh starts paused', async () => {
+      renderAutoRefreshOnly(jest.fn());
+
+      await waitFor(() => {
+        // Time filter is off: hidden marker present, control inert.
+        expect(screen.getByTestId('kbnQueryBar-datePicker-disabled')).toBeInTheDocument();
+        expect(screen.getByTestId('dateRangePickerControlButton')).toBeDisabled();
+        // Auto-refresh stays operable despite the paused-on-load state.
+        expect(screen.getByTestId('dateRangePickerAutoRefreshButton')).toBeEnabled();
+      });
+    });
+
+    it('starts the refresh timer when the play button is clicked', async () => {
+      const onRefreshChange = jest.fn();
+      renderAutoRefreshOnly(onRefreshChange);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('dateRangePickerAutoRefreshButton')).toBeEnabled();
+      });
+      await userEvent.click(screen.getByTestId('dateRangePickerAutoRefreshButton'));
+
+      expect(onRefreshChange).toHaveBeenCalledWith({ isPaused: false, refreshInterval: 5000 });
+    });
   });
 });
 
@@ -405,14 +1327,16 @@ describe('SharingMetaFields', () => {
   it('Should render the component with data-shared-timefilter-duration if time is set correctly', () => {
     const from = '2023-04-07';
     const to = '2023-04-08';
-    const component = <SharingMetaFields from={from} to={to} dateFormat="MMM D, YYYY" />;
+    const { getByTestId } = render(
+      <SharingMetaFields from={from} to={to} dateFormat="MMM D, YYYY" />
+    );
 
-    expect(shallow(component)).toMatchInlineSnapshot(`
-      <div
-        data-shared-timefilter-duration="Apr 7, 2023 to Apr 8, 2023"
-        data-test-subj="dataSharedTimefilterDuration"
-      />
-    `);
+    const element = getByTestId('dataSharedTimefilterDuration');
+    expect(element).toBeInTheDocument();
+    expect(element).toHaveAttribute(
+      'data-shared-timefilter-duration',
+      'Apr 7, 2023 to Apr 8, 2023'
+    );
   });
 
   it('Should convert to absolute correctly', () => {
@@ -420,25 +1344,30 @@ describe('SharingMetaFields', () => {
 
     const from = 'now-1d/d';
     const to = 'now-1d/d';
-    const component = <SharingMetaFields from={from} to={to} dateFormat="MMM D, YYYY @ HH:mm:ss" />;
+    const { getByTestId } = render(
+      <SharingMetaFields from={from} to={to} dateFormat="MMM D, YYYY @ HH:mm:ss" />
+    );
 
-    expect(shallow(component)).toMatchInlineSnapshot(`
-      <div
-        data-shared-timefilter-duration="Oct 20, 2024 @ 00:00:00 to Oct 20, 2024 @ 23:59:59"
-        data-test-subj="dataSharedTimefilterDuration"
-      />
-    `);
+    const element = getByTestId('dataSharedTimefilterDuration');
+    expect(element).toBeInTheDocument();
+    expect(element).toHaveAttribute(
+      'data-shared-timefilter-duration',
+      'Oct 20, 2024 @ 00:00:00 to Oct 20, 2024 @ 23:59:59'
+    );
   });
 
   it('Should render the component without data-shared-timefilter-duration if time is not set correctly', () => {
-    const component = (
+    // Mock console.warn to suppress moment.js warnings about invalid date format
+    const consoleSpy = jest.spyOn(console, 'warn').mockImplementation();
+
+    const { getByTestId } = render(
       <SharingMetaFields from="boom" to="now" dateFormat="MMM D, YYYY @ HH:mm:ss.SSS" />
     );
 
-    expect(shallow(component)).toMatchInlineSnapshot(`
-      <div
-        data-test-subj="dataSharedTimefilterDuration"
-      />
-    `);
+    const element = getByTestId('dataSharedTimefilterDuration');
+    expect(element).toBeInTheDocument();
+    expect(element).not.toHaveAttribute('data-shared-timefilter-duration');
+
+    consoleSpy.mockRestore();
   });
 });

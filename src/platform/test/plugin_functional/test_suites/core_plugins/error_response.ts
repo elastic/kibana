@@ -9,7 +9,7 @@
 
 import expect from '@kbn/expect';
 import '@kbn/core-provider-plugin/types';
-import { PluginFunctionalProviderContext } from '../../services';
+import type { PluginFunctionalProviderContext } from '../../services';
 
 export default function ({ getService }: PluginFunctionalProviderContext) {
   const supertest = getService('supertest');

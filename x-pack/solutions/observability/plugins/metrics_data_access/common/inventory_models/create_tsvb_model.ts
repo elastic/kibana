@@ -5,11 +5,16 @@
  * 2.0.
  */
 
-import type { TSVBMetricModelCreator, TSVBMetricModel, TSVBSeries, InventoryMetric } from './types';
+import type {
+  TSVBMetricModelCreator,
+  TSVBMetricModel,
+  TSVBSeries,
+  InventoryTsvbType,
+} from './types';
 
 export const createTSVBModel =
   (
-    id: InventoryMetric,
+    id: InventoryTsvbType,
     requires: string[],
     series: TSVBSeries[],
     interval = '>=300s',

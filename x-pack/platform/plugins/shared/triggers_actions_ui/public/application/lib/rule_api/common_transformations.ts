@@ -62,6 +62,7 @@ const transformFlapping = (flapping: AsApiContract<Rule['flapping']>) => {
     return flapping;
   }
   return {
+    enabled: flapping.enabled,
     lookBackWindow: flapping.look_back_window,
     statusChangeThreshold: flapping.status_change_threshold,
   };
@@ -71,9 +72,12 @@ export const transformRule: RewriteRequestCase<Rule> = ({
   rule_type_id: ruleTypeId,
   created_by: createdBy,
   updated_by: updatedBy,
+  created_by_profile_uid: createdByProfileUid,
+  updated_by_profile_uid: updatedByProfileUid,
   created_at: createdAt,
   updated_at: updatedAt,
   api_key_owner: apiKeyOwner,
+  api_key_owner_profile_uid: apiKeyOwnerProfileUid,
   api_key_created_by_user: apiKeyCreatedByUser,
   notify_when: notifyWhen,
   mute_all: muteAll,
@@ -110,15 +114,16 @@ export const transformRule: RewriteRequestCase<Rule> = ({
   ...(lastRun ? { lastRun: transformLastRun(lastRun) } : {}),
   ...(nextRun ? { nextRun } : {}),
   ...(apiKeyCreatedByUser !== undefined ? { apiKeyCreatedByUser } : {}),
+  ...(createdByProfileUid !== undefined ? { createdByProfileUid } : {}),
+  ...(updatedByProfileUid !== undefined ? { updatedByProfileUid } : {}),
+  ...(apiKeyOwnerProfileUid !== undefined ? { apiKeyOwnerProfileUid } : {}),
   ...(alertDelay ? { alertDelay } : {}),
   ...(flapping !== undefined ? { flapping: transformFlapping(flapping) } : {}),
   ...rest,
 });
 
 export const transformResolvedRule: RewriteRequestCase<ResolvedRule> = ({
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   alias_target_id,
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   alias_purpose,
   outcome,
   ...rest

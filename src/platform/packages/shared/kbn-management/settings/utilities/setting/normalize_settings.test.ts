@@ -8,7 +8,7 @@
  */
 
 import { normalizeSettings } from './normalize_settings';
-import { UiSettingsType } from '@kbn/core-ui-settings-common';
+import type { UiSettingsType } from '@kbn/core-ui-settings-common';
 
 describe('normalizeSettings', () => {
   describe('adds a missing type if there is a value', () => {
@@ -87,13 +87,18 @@ describe('normalizeSettings', () => {
     });
   });
 
-  it('throws if the value is an object', () => {
-    const setting = { name: 'foo', value: { bar: 'baz' } };
-    const settings = { foo: setting };
+  it('skips incompatible object values and keeps the rest', () => {
+    const warnSpy = jest.spyOn(console, 'warn').mockImplementation();
+    const settings = {
+      foo: { name: 'foo', value: { bar: 'baz' } },
+      bar: { name: 'bar', value: 'ok' },
+    };
 
-    expect(() => normalizeSettings(settings)).toThrowError(
-      `incompatible SettingType: 'foo' type object | {"name":"foo","value":{"bar":"baz"}}`
-    );
+    expect(normalizeSettings(settings)).toEqual({
+      bar: { name: 'bar', value: 'ok', type: 'string' },
+    });
+    expect(warnSpy).toHaveBeenCalledWith("Ignoring incompatible UiSetting 'foo'.");
+    warnSpy.mockRestore();
   });
 
   it('does nothing if the type and value are already set', () => {

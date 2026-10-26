@@ -62,6 +62,7 @@ export const getSignalsTemplate = (index: string, aadIndexAliasName: string, spa
       aliases: {
         [aadIndexAliasName]: {
           is_write_index: false,
+          is_hidden: true,
         },
       },
       settings: {

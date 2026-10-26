@@ -15,7 +15,7 @@ import type {
 } from '../../../../rule_management/model/prebuilt_rule_upgrade';
 import { FieldUpgradeStateEnum } from '../../../../rule_management/model/prebuilt_rule_upgrade';
 import {
-  type FieldsDiff,
+  type ThreeWayFieldsDiff,
   type DiffableAllFields,
   type RuleUpgradeInfoForReview,
   ThreeWayDiffConflict,
@@ -128,7 +128,12 @@ export function usePrebuiltRulesUpgradeState(
         rulesResolvedValues[ruleUpgradeInfo.rule_id] ?? {}
       );
 
-      const hasRuleTypeChange = Boolean(ruleUpgradeInfo.diff.fields.type);
+      // `type` is excluded from the generic per-field loop above by
+      // NON_UPGRADEABLE_DIFFABLE_FIELDS_SET, so its conflict must be read directly here.
+      const ruleTypeConflict = ruleUpgradeInfo.diff.fields.type?.conflict;
+      const hasRuleTypeConflict =
+        ruleTypeConflict !== undefined && ruleTypeConflict !== ThreeWayDiffConflict.NONE;
+      const hasNonSolvableRuleTypeConflict = ruleTypeConflict === ThreeWayDiffConflict.NON_SOLVABLE;
       const hasFieldConflicts = Object.values(fieldsUpgradeState).some(
         ({ state: fieldState }) =>
           fieldState === FieldUpgradeStateEnum.SolvableConflict ||
@@ -143,10 +148,10 @@ export function usePrebuiltRulesUpgradeState(
         conflict: getWorstConflictLevelAmongFields(ruleUpgradeInfo.diff.fields),
         fieldsUpgradeState,
         hasUnresolvedConflicts: isRulesCustomizationEnabled
-          ? hasRuleTypeChange || hasFieldConflicts
+          ? hasRuleTypeConflict || hasFieldConflicts
           : false,
         hasNonSolvableUnresolvedConflicts: isRulesCustomizationEnabled
-          ? hasRuleTypeChange || hasNonSolvableFieldConflicts
+          ? hasNonSolvableRuleTypeConflict || hasNonSolvableFieldConflicts
           : false,
       };
     }
@@ -165,7 +170,7 @@ const NON_UPGRADEABLE_DIFFABLE_FIELDS_SET: Readonly<Set<string>> = new Set(
 );
 
 function calcFieldsState(
-  fieldsDiff: FieldsDiff<Record<string, unknown>>,
+  fieldsDiff: ThreeWayFieldsDiff<Record<string, unknown>>,
   ruleResolvedConflicts: RuleResolvedConflicts
 ): FieldsUpgradeState {
   const fieldsState: FieldsUpgradeState = {};
@@ -215,7 +220,7 @@ function calcFieldsState(
 }
 
 function getWorstConflictLevelAmongFields(
-  fieldsDiff: FieldsDiff<Record<string, unknown>>
+  fieldsDiff: ThreeWayFieldsDiff<Record<string, unknown>>
 ): ThreeWayDiffConflict {
   let mostSevereFieldConflict = ThreeWayDiffConflict.NONE;
 

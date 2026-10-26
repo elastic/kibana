@@ -34,7 +34,7 @@ export function AgentConfigurations() {
     <>
       <EuiFlexGroup alignItems="center">
         <EuiFlexItem grow={false}>
-          <EuiTitle size="s">
+          <EuiTitle size="s" data-test-subj="apmAgentConfigurationPanelTitle">
             <h2>
               {i18n.translate('xpack.apm.agentConfig.configurationsPanelTitle', {
                 defaultMessage: 'Configurations',
@@ -49,7 +49,7 @@ export function AgentConfigurations() {
 
       <EuiText color="subdued">
         {i18n.translate('xpack.apm.settings.agentConfig.descriptionText', {
-          defaultMessage: `Fine-tune your agent configuration from within the APM app. Changes are automatically propagated to your APM agents, so there’s no need to redeploy.`,
+          defaultMessage: `Fine-tune your agent configuration. Changes are automatically propagated to your APM agents and EDOT SDKs, so there’s no need to redeploy.`,
         })}
       </EuiText>
 
@@ -90,7 +90,7 @@ function CreateConfigurationButton() {
               data-test-subj="apmAgentConfigurationButtonCreateConfigurationButton"
               color="primary"
               fill
-              iconType="plusInCircle"
+              iconType="plusCircle"
               href={href}
               isDisabled={!canSave}
             >

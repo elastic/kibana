@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
     "types": [
@@ -9,6 +9,8 @@
   },
   "include": [
     "**/*.ts",
+    "removed_types.json",
+    "wip_types.json",
   ],
   "kbn_references": [
     "@kbn/config-schema",

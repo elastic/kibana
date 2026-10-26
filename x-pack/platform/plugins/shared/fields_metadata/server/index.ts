@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PluginInitializerContext } from '@kbn/core/server';
+import type { PluginInitializerContext } from '@kbn/core/server';
 
 export type { FieldsMetadataServerSetup, FieldsMetadataServerStart } from './types';
 export type {
@@ -13,6 +13,7 @@ export type {
   DatasetName,
   ExtractedIntegrationFields,
   ExtractedDatasetFields,
+  IFieldsMetadataClient,
 } from './services/fields_metadata/types';
 
 export async function plugin(context: PluginInitializerContext) {

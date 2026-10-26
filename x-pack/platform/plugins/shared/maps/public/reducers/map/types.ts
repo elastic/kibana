@@ -9,12 +9,11 @@
 
 import type { KibanaExecutionContext } from '@kbn/core/public';
 import type { Query } from '@kbn/data-plugin/common';
-import { Filter } from '@kbn/es-query';
+import type { Filter, ProjectRouting } from '@kbn/es-query';
 import type { TimeRange } from '@kbn/es-query';
-import {
+import type {
   DrawState,
   EditState,
-  Goto,
   LayerDescriptor,
   MapCenter,
   MapExtent,
@@ -50,13 +49,12 @@ export type MapContext = Partial<MapViewContext> & {
   editState?: EditState;
   searchSessionId?: string;
   searchSessionMapBuffer?: MapExtent;
+  projectRouting?: ProjectRouting;
 };
 
 export type MapState = {
   executionContext: KibanaExecutionContext;
-  ready: boolean;
   mapInitError?: string | null;
-  goto?: Goto | null;
   openTooltips: TooltipState[];
   mapState: MapContext;
   selectedLayerId: string | null;
@@ -64,4 +62,5 @@ export type MapState = {
   waitingForMapReadyLayerList: LayerDescriptor[];
   settings: MapSettings;
   __rollbackSettings: MapSettings | null;
+  __pauseSyncData: boolean;
 };

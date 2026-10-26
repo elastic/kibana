@@ -10,6 +10,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { hasActiveModifierKey } from '@kbn/shared-ux-utility';
 import {
   EuiButton,
   EuiFlexGroup,
@@ -19,6 +20,7 @@ import {
   EuiFlyoutFooter,
   EuiFlyoutBody,
   EuiTitle,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { SavedSearchType, SavedSearchTypeDisplayName } from '@kbn/saved-search-plugin/common';
 import { SavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
@@ -30,16 +32,22 @@ interface OpenSearchPanelProps {
 }
 
 export function OpenSearchPanel(props: OpenSearchPanelProps) {
+  const modalTitleId = useGeneratedHtmlId();
   const { addBasePath, capabilities, savedObjectsTagging, contentClient, uiSettings } =
     useDiscoverServices();
   const hasSavedObjectPermission =
     capabilities.savedObjectsManagement?.edit || capabilities.savedObjectsManagement?.delete;
 
   return (
-    <EuiFlyout ownFocus onClose={props.onClose} data-test-subj="loadSearchForm">
+    <EuiFlyout
+      aria-labelledby={modalTitleId}
+      ownFocus
+      onClose={props.onClose}
+      data-test-subj="loadSearchForm"
+    >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
-          <h2>
+          <h2 id={modalTitleId}>
             <FormattedMessage
               id="discover.topNav.openSearchPanel.openSearchTitle"
               defaultMessage="Open Discover session"
@@ -84,7 +92,10 @@ export function OpenSearchPanel(props: OpenSearchPanelProps) {
               {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
               <EuiButton
                 fill
-                onClick={props.onClose}
+                onClick={(e: React.MouseEvent) => {
+                  if (hasActiveModifierKey(e)) return;
+                  props.onClose();
+                }}
                 data-test-subj="manageSearchesBtn"
                 href={addBasePath(
                   `/app/management/kibana/objects?initialQuery=type:("${SavedSearchTypeDisplayName}")`

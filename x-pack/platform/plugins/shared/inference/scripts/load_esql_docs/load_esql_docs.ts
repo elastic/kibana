@@ -6,21 +6,26 @@
  */
 
 import { run } from '@kbn/dev-cli-runner';
-import { ESQLMessage, EditorError } from '@kbn/esql-ast';
-import { validateQuery } from '@kbn/esql-validation-autocomplete';
 import Fs from 'fs/promises';
 import Path from 'path';
-import yargs, { Argv } from 'yargs';
+import type { Argv } from 'yargs';
+import yargs from 'yargs';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { INLINE_ESQL_QUERY_REGEX } from '../../common/tasks/nl_to_esql/constants';
 import { correctCommonEsqlMistakes } from '../../common/tasks/nl_to_esql';
-import { connectorIdOption, elasticsearchOption, kibanaOption } from '../util/cli_options';
-import { getServiceUrls } from '../util/get_service_urls';
+import {
+  connectorIdOption,
+  elasticsearchOption,
+  inferenceIdOption,
+  kibanaOption,
+  resolveInferenceId,
+} from '../util/cli_options';
+import { assertChatCompletionInferenceEndpoint, getServiceUrls } from '../util/get_service_urls';
 import { KibanaClient } from '../util/kibana_client';
-import { selectConnector } from '../util/select_connector';
 import { syncBuiltDocs } from './sync_built_docs_repo';
 import { extractDocEntries } from './extract_doc_entries';
-import { generateDoc, FileToWrite } from './generate_doc';
+import { generateDoc } from './generate_doc';
+import { reportSyntaxErrors } from '../report_syntax_errors/report_syntax_errors';
 
 yargs(process.argv.slice(2))
   .command(
@@ -46,31 +51,41 @@ yargs(process.argv.slice(2))
         })
         .option('kibana', kibanaOption)
         .option('elasticsearch', elasticsearchOption)
-        .option('connectorId', connectorIdOption),
+        .option('inferenceId', inferenceIdOption)
+        .option('connectorId', {
+          ...connectorIdOption,
+          describe: 'Deprecated alias for --inferenceId',
+        }),
     (argv) => {
       run(
         async ({ log }) => {
+          const inferenceId = resolveInferenceId({
+            inferenceId: argv.inferenceId,
+            connectorId: argv.connectorId,
+            log,
+          });
+          if (!inferenceId) {
+            throw new Error(
+              'Pass --inferenceId with an Elasticsearch chat_completion inference endpoint id'
+            );
+          }
+
           const serviceUrls = await getServiceUrls({
             log,
             elasticsearch: argv.elasticsearch,
             kibana: argv.kibana,
           });
 
-          const kibanaClient = new KibanaClient(log, serviceUrls.kibanaUrl);
-
-          const connectors = await kibanaClient.getConnectors();
-          if (!connectors.length) {
-            throw new Error('No connectors found');
-          }
-          const connector = await selectConnector({
-            connectors,
-            preferredId: argv.connectorId,
-            log,
+          await assertChatCompletionInferenceEndpoint({
+            esUrl: serviceUrls.esUrl,
+            inferenceId,
           });
-          log.info(`Using connector ${connector.connectorId}`);
+
+          const kibanaClient = new KibanaClient(log, serviceUrls.kibanaUrl);
+          log.info(`Using inference endpoint ${inferenceId}`);
 
           const inferenceClient = kibanaClient.createInferenceClient({
-            connectorId: connector.connectorId,
+            connectorId: inferenceId,
           });
 
           const builtDocsDir = Path.join(REPO_ROOT, '../built-docs');
@@ -128,49 +143,10 @@ yargs(process.argv.slice(2))
             );
           }
 
-          log.info(`Checking syntax...`);
-          const syntaxErrors = (
-            await Promise.all(docFiles.map(async (file) => await findEsqlSyntaxError(file)))
-          ).flat();
-
-          log.warning(
-            `Please verify the following queries that had syntax errors\n${JSON.stringify(
-              syntaxErrors,
-              null,
-              2
-            )}`
-          );
+          await reportSyntaxErrors(outDir, log, docFiles);
         },
         { log: { defaultLevel: argv.logLevel as any }, flags: { allowUnexpected: true } }
       );
     }
   )
   .parse();
-
-interface SyntaxError {
-  query: string;
-  errors: Array<ESQLMessage | EditorError>;
-}
-
-const findEsqlSyntaxError = async (doc: FileToWrite): Promise<SyntaxError[]> => {
-  return Array.from(doc.content.matchAll(INLINE_ESQL_QUERY_REGEX)).reduce(
-    async (listP, [match, query]) => {
-      const list = await listP;
-      const { errors, warnings } = await validateQuery(query, {
-        // setting this to true, we don't want to validate the index / fields existence
-        ignoreOnMissingCallbacks: true,
-      });
-
-      const all = [...errors, ...warnings];
-      if (all.length) {
-        list.push({
-          errors: all,
-          query,
-        });
-      }
-
-      return list;
-    },
-    Promise.resolve([] as SyntaxError[])
-  );
-};

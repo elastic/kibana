@@ -1,5 +1,9 @@
 # @kbn-doc-linker partial
-
+title: APM error count
+description: >
+  The parameters for the APM error count rule.
+  These parameters are appropriate when `rule_type_id` is `apm.error_rate`.
+type: object
 required:
   - windowSize
   - windowUnit

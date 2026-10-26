@@ -7,7 +7,7 @@
 
 import * as React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { IToasts } from '@kbn/core/public';
+import type { IToasts } from '@kbn/core/public';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { UpdateApiKeyModalConfirmation } from './update_api_key_modal_confirmation';
 import { useKibana } from '../../common/lib/kibana';
@@ -91,10 +91,10 @@ describe('Update Api Key', () => {
     );
 
     fireEvent.click(await screen.findByText('Update'));
-    expect(setIsLoadingState).toBeCalledTimes(1);
+    expect(setIsLoadingState).toHaveBeenCalledTimes(1);
     expect(apiUpdateApiKeyCall).toHaveBeenLastCalledWith(expect.objectContaining({ ids: ['2'] }));
     await waitFor(() => {
-      expect(setIsLoadingState).toBeCalledTimes(2);
+      expect(setIsLoadingState).toHaveBeenCalledTimes(2);
       expect(onUpdated).toHaveBeenCalled();
     });
   });
@@ -113,10 +113,10 @@ describe('Update Api Key', () => {
     );
 
     fireEvent.click(await screen.findByText('Update'));
-    expect(setIsLoadingState).toBeCalledTimes(1);
+    expect(setIsLoadingState).toHaveBeenCalledTimes(1);
     expect(apiUpdateApiKeyCall).toHaveBeenLastCalledWith(expect.objectContaining({ ids: ['2'] }));
     await waitFor(() => {
-      expect(setIsLoadingState).toBeCalledTimes(2);
+      expect(setIsLoadingState).toHaveBeenCalledTimes(2);
       expect(addError).toHaveBeenCalled();
       expect(addError.mock.calls[0]).toMatchInlineSnapshot(`
         Array [

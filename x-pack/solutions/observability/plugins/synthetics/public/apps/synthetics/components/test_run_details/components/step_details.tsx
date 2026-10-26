@@ -8,7 +8,10 @@
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
-import { JourneyStep, SyntheticsJourneyApiResponse } from '../../../../../../common/runtime_types';
+import type {
+  JourneyStep,
+  SyntheticsJourneyApiResponse,
+} from '../../../../../../common/runtime_types';
 import { StepNumberNav } from './step_number_nav';
 import { StepScreenshotDetails } from '../step_screenshot_details';
 import { StepTabs } from '../step_tabs';
@@ -20,6 +23,7 @@ export const StepDetails = ({
   stepsData,
   totalSteps,
   setStepIndex,
+  isApiMonitor = false,
 }: {
   loading: boolean;
   step?: JourneyStep;
@@ -27,6 +31,10 @@ export const StepDetails = ({
   stepIndex: number;
   totalSteps: number;
   setStepIndex: (stepIndex: number) => void;
+  // API journeys reuse the synthexec step pipeline but never produce
+  // screenshots, so callers pass true to suppress the StepScreenshotDetails
+  // panel inside.
+  isApiMonitor?: boolean;
 }) => {
   if (totalSteps === 0 && !loading) return null;
 
@@ -61,8 +69,12 @@ export const StepDetails = ({
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
-      <StepScreenshotDetails stepIndex={stepIndex} step={step} />
-      <EuiSpacer size="m" />
+      {!isApiMonitor && (
+        <>
+          <StepScreenshotDetails stepIndex={stepIndex} step={step} />
+          <EuiSpacer size="m" />
+        </>
+      )}
       <StepTabs stepsList={stepsData?.steps} step={step} loading={loading} />
     </EuiPanel>
   );

@@ -8,7 +8,7 @@
 import { EuiIcon, EuiLoadingChart, EuiStat, EuiTextColor, EuiToolTip } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
-import { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import moment from 'moment';
 import React from 'react';
 import { useFetchSloBurnRates } from '../../../hooks/use_fetch_slo_burn_rates';
@@ -49,7 +49,7 @@ export function SimpleBurnRate({ slo, duration, lastRefreshTime }: Props) {
         description={
           <EuiTextColor color="subdued">
             <span>
-              <EuiIcon type="clock" color={'subdued'} /> {durationLabel}
+              <EuiIcon type="clock" color={'subdued'} aria-hidden={true} /> {durationLabel}
             </span>
           </EuiTextColor>
         }
@@ -84,14 +84,14 @@ export function SimpleBurnRate({ slo, duration, lastRefreshTime }: Props) {
           <EuiToolTip position="top" content={timeToExhaustLabel}>
             <EuiTextColor color={color}>
               <span>
-                <EuiIcon type="clock" color={color} /> {durationLabel}
+                <EuiIcon type="clock" color={color} aria-hidden={true} /> {durationLabel}
               </span>
             </EuiTextColor>
           </EuiToolTip>
         ) : (
           <EuiTextColor color={color}>
             <span>
-              <EuiIcon type="clock" color={color} /> {durationLabel}
+              <EuiIcon type="clock" color={color} aria-hidden={true} /> {durationLabel}
             </span>
           </EuiTextColor>
         )

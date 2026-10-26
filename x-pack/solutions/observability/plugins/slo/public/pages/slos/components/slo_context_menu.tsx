@@ -5,6 +5,7 @@
  * 2.0.
  */
 import React from 'react';
+import type { EuiSelectableOption } from '@elastic/eui';
 import {
   EuiButtonEmpty,
   EuiContextMenuPanel,
@@ -12,12 +13,11 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiPopover,
-  EuiSelectableOption,
   useGeneratedHtmlId,
   EuiTitle,
 } from '@elastic/eui';
 
-import { EuiSelectableOptionCheckedType } from '@elastic/eui/src/components/selectable/selectable_option';
+import type { EuiSelectableOptionCheckedType } from '@elastic/eui/src/components/selectable/selectable_option';
 
 export interface Option {
   label: string;
@@ -64,7 +64,7 @@ export function SLOContextMenu({
     <EuiButtonEmpty
       data-test-subj={`${id}GroupMenuButton`}
       size="xs"
-      iconType="arrowDown"
+      iconType="chevronSingleDown"
       iconSide="right"
       onClick={handleTogglePopover}
       isLoading={loading}
@@ -92,7 +92,7 @@ export function SLOContextMenu({
               anchorPosition="downLeft"
               aria-label={label}
             >
-              <EuiContextMenuPanel size="s" items={items} style={{ minWidth: 160 }} />
+              <EuiContextMenuPanel items={items} style={{ minWidth: 160 }} />
             </EuiPopover>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -114,7 +114,6 @@ export function ContextMenuItem({
 
   return (
     <EuiContextMenuItem
-      size="s"
       aria-label={option.label}
       key={option.value}
       icon={getIconType(option.checked)}

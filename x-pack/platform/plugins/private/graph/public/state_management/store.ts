@@ -5,30 +5,30 @@
  * 2.0.
  */
 
-import createSagaMiddleware, { SagaMiddleware } from 'redux-saga';
-import { combineReducers, createStore, Store, AnyAction, Dispatch, applyMiddleware } from 'redux';
-import { ChromeStart } from '@kbn/core/public';
-import { CoreStart } from '@kbn/core/public';
-import { ContentClient } from '@kbn/content-management-plugin/public';
+import type { Action, Dispatch, Store } from 'redux';
+import { combineReducers } from 'redux';
 import {
-  fieldsReducer,
-  FieldsState,
-  syncNodeStyleSaga,
-  syncFieldsSaga,
-  updateSaveButtonSaga,
-} from './fields';
-import { UrlTemplatesState, urlTemplatesReducer, syncTemplatesSaga } from './url_templates';
-import {
-  AdvancedSettingsState,
-  advancedSettingsReducer,
-  syncSettingsSaga,
-} from './advanced_settings';
-import { DatasourceState, datasourceReducer } from './datasource';
-import { datasourceSaga } from './datasource.sagas';
-import { IndexPatternProvider, Workspace, GraphSavePolicy, AdvancedSettings } from '../types';
-import { loadingSaga, savingSaga } from './persistence';
-import { metaDataReducer, MetaDataState, syncBreadcrumbSaga } from './meta_data';
-import { fillWorkspaceSaga, submitSearchSaga, workspaceReducer, WorkspaceState } from './workspace';
+  configureStore,
+  createListenerMiddleware,
+  type TypedStartListening,
+} from '@reduxjs/toolkit';
+import type { ChromeStart, CoreStart } from '@kbn/core/public';
+import type { ContentClient } from '@kbn/content-management-plugin/public';
+import type { FieldsState } from './fields';
+import { fieldsReducer, registerFieldsListeners } from './fields';
+import type { UrlTemplatesState } from './url_templates';
+import { registerUrlTemplatesListeners, urlTemplatesReducer } from './url_templates';
+import type { AdvancedSettingsState } from './advanced_settings';
+import { advancedSettingsReducer, registerAdvancedSettingsListeners } from './advanced_settings';
+import type { DatasourceState } from './datasource';
+import { datasourceReducer } from './datasource';
+import { registerDatasourceListeners } from './datasource_listeners';
+import type { IndexPatternProvider, Workspace, GraphSavePolicy, AdvancedSettings } from '../types';
+import { registerPersistenceListeners } from './persistence';
+import type { MetaDataState } from './meta_data';
+import { metaDataReducer, registerMetaDataListeners } from './meta_data';
+import type { WorkspaceState } from './workspace';
+import { registerWorkspaceListeners, workspaceReducer } from './workspace';
 
 export interface GraphState {
   fields: FieldsState;
@@ -56,6 +56,8 @@ export interface GraphStoreDependencies
   handleSearchQueryError: (err: Error | string) => void;
 }
 
+export type StartGraphListening = TypedStartListening<GraphState, GraphDispatch>;
+
 export function createRootReducer(addBasePath: (url: string) => string) {
   return combineReducers({
     fields: fieldsReducer,
@@ -67,31 +69,40 @@ export function createRootReducer(addBasePath: (url: string) => string) {
   });
 }
 
-function registerSagas(sagaMiddleware: SagaMiddleware<object>, deps: GraphStoreDependencies) {
-  sagaMiddleware.run(datasourceSaga(deps));
-  sagaMiddleware.run(loadingSaga(deps));
-  sagaMiddleware.run(savingSaga(deps));
-  sagaMiddleware.run(syncFieldsSaga(deps));
-  sagaMiddleware.run(syncNodeStyleSaga(deps));
-  sagaMiddleware.run(syncSettingsSaga(deps));
-  sagaMiddleware.run(updateSaveButtonSaga(deps));
-  sagaMiddleware.run(syncBreadcrumbSaga(deps));
-  sagaMiddleware.run(syncTemplatesSaga(deps));
-  sagaMiddleware.run(fillWorkspaceSaga(deps));
-  sagaMiddleware.run(submitSearchSaga(deps));
-}
+export const registerGraphListeners = (
+  startListening: StartGraphListening,
+  deps: GraphStoreDependencies,
+  state: GraphState
+) => {
+  registerDatasourceListeners(startListening, deps);
+  registerPersistenceListeners(startListening, deps);
+  registerFieldsListeners(startListening, deps);
+  registerAdvancedSettingsListeners(startListening, deps);
+  registerMetaDataListeners(startListening, deps, state);
+  registerUrlTemplatesListeners(startListening, deps);
+  registerWorkspaceListeners(startListening, deps);
+};
 
 export const createGraphStore = (deps: GraphStoreDependencies): Store => {
-  const sagaMiddleware = createSagaMiddleware();
-
+  const listenerMiddleware = createListenerMiddleware<GraphState, GraphDispatch>();
   const rootReducer = createRootReducer(deps.addBasePath);
 
-  const store = createStore(rootReducer, applyMiddleware(sagaMiddleware));
+  const store = configureStore({
+    reducer: rootReducer,
+    middleware: (getDefaultMiddleware) =>
+      getDefaultMiddleware({
+        // graph uses listeners instead of thunks
+        thunk: false,
+        // graph state and actions carry non-serializable values (e.g. Workspace instances)
+        serializableCheck: false,
+        immutableCheck: false,
+      }).prepend(listenerMiddleware.middleware),
+  });
 
-  registerSagas(sagaMiddleware, deps);
+  registerGraphListeners(listenerMiddleware.startListening, deps, store.getState());
 
   return store;
 };
 
-export type GraphStore = Store<GraphState, AnyAction>;
-export type GraphDispatch = Dispatch<AnyAction>;
+export type GraphStore = Store<GraphState, Action<string>>;
+export type GraphDispatch = Dispatch<Action<string>>;

@@ -16,6 +16,8 @@ import type { DocLinks } from '@kbn/doc-links';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { dataTableActions, TableId } from '@kbn/securitysolution-data-table';
 import { isObject } from 'lodash';
+import { CLOUD_SECURITY_POSTURE_BASE_PATH } from '@kbn/cloud-security-posture-common';
+import { PageScope } from './data_view_manager/constants';
 import {
   ALERTS_PATH,
   APP_UI_ID,
@@ -23,8 +25,11 @@ import {
   CASES_PATH,
   DASHBOARDS_PATH,
   EXCEPTIONS_PATH,
+  RULES_ADD_PATH,
+  RULES_CHANGES_HISTORY_PATH,
   RULES_PATH,
   THREAT_INTELLIGENCE_PATH,
+  ONBOARDING_PATH,
 } from '../common/constants';
 import type {
   FactoryQueryTypes,
@@ -37,8 +42,8 @@ import type { InspectResponse, StartedSubPlugins, StartServices } from './types'
 import { CASES_SUB_PLUGIN_KEY } from './types';
 import { timelineActions } from './timelines/store';
 import { TimelineId } from '../common/types';
-import { SourcererScopeName } from './sourcerer/store/model';
-import { hasAccessToSecuritySolution } from './helpers_access';
+import { AllRulesTabs } from './detection_engine/rule_management_ui/components/rules_table/constants';
+import { hasAccessToAttackDiscovery, hasAccessToSecuritySolution } from './helpers_access';
 
 export const parseRoute = (location: Pick<Location, 'hash' | 'pathname' | 'search'>) => {
   if (!isEmpty(location.hash)) {
@@ -181,6 +186,56 @@ export const isDashboardViewPath = (pathname: string): boolean =>
     strict: false,
   }) != null;
 
+export const isOnboardingPath = (pathname: string): boolean =>
+  matchPath(pathname, {
+    path: ONBOARDING_PATH,
+    exact: false,
+    strict: false,
+  }) != null;
+
+/**
+ * Matches the Add Elastic rules page, whose app header owns the page actions.
+ */
+export const isRulesAddPath = (pathname: string): boolean =>
+  !!matchPath(pathname, {
+    path: RULES_ADD_PATH,
+    exact: true,
+    strict: false,
+  });
+
+export const isRuleChangesHistoryPath = (pathname: string): boolean =>
+  !!matchPath(pathname, {
+    path: RULES_CHANGES_HISTORY_PATH,
+    exact: true,
+    strict: false,
+  });
+
+/**
+ * Matches the Rules page tabs (installed, monitoring, updates), whose app header owns the page actions.
+ */
+export const isRulesManagementPath = (pathname: string): boolean =>
+  !!matchPath(pathname, {
+    path: `${RULES_PATH}/:tabName(${Object.values(AllRulesTabs).join('|')})`,
+    exact: true,
+    strict: false,
+  });
+
+export const isCloudSecurityPosturePath = (pathname: string): boolean =>
+  !!matchPath(pathname, {
+    path: CLOUD_SECURITY_POSTURE_BASE_PATH,
+    strict: false,
+  });
+
+/**
+ * Matches the Shared Exception Lists page, whose app header owns the page actions.
+ */
+export const isSharedExceptionListsPath = (pathname: string): boolean =>
+  !!matchPath(pathname, {
+    path: EXCEPTIONS_PATH,
+    exact: true,
+    strict: false,
+  });
+
 const isAlertsPath = (pathname: string): boolean => {
   return !!matchPath(pathname, {
     path: `${ALERTS_PATH}`,
@@ -233,6 +288,9 @@ export const getSubPluginRoutesByCapabilities = (
 export const isSubPluginAvailable = (pluginKey: string, capabilities: Capabilities): boolean => {
   if (CASES_SUB_PLUGIN_KEY === pluginKey) {
     return capabilities[CASES_FEATURE_ID].read_cases === true;
+  }
+  if (pluginKey === 'attackDiscovery') {
+    return hasAccessToAttackDiscovery(capabilities);
   }
   return hasAccessToSecuritySolution(capabilities);
 };
@@ -301,9 +359,12 @@ export const isInTableScope = (scopeId: string) =>
   Object.values(TableId).includes(scopeId as unknown as TableId);
 
 export const isAlertsPageScope = (scopeId: string) =>
-  [TableId.alertsOnAlertsPage, TableId.alertsOnRuleDetailsPage, TableId.alertsOnCasePage].includes(
-    scopeId as TableId
-  );
+  [
+    TableId.alertsOnAlertsPage,
+    TableId.alertsOnRuleDetailsPage,
+    TableId.alertsOnCasePage,
+    TableId.alertsOnAttacksPage,
+  ].includes(scopeId as TableId);
 
 export const getScopedActions = (scopeId: string) => {
   if (isTimelineScope(scopeId)) {
@@ -315,12 +376,12 @@ export const getScopedActions = (scopeId: string) => {
 
 export const isActiveTimeline = (timelineId: string) => timelineId === TimelineId.active;
 
-export const getSourcererScopeId = (scopeId: string): SourcererScopeName => {
+export const getSourcererScopeId = (scopeId: string): PageScope => {
   if (isTimelineScope(scopeId)) {
-    return SourcererScopeName.timeline;
+    return PageScope.timeline;
   } else if (isAlertsPageScope(scopeId)) {
-    return SourcererScopeName.detections;
+    return PageScope.alerts;
   } else {
-    return SourcererScopeName.default;
+    return PageScope.default;
   }
 };

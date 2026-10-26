@@ -8,11 +8,11 @@
 import type { SecurityRoleDescriptor } from '@elastic/elasticsearch/lib/api/types';
 
 import type { agentPolicyStatuses } from '../../constants';
-import type { BaseSSLSecrets, MonitoringType, PolicySecretReference, ValueOf } from '..';
+import type { BaseSSLSecrets, MonitoringType, SecretReference, ValueOf } from '..';
 
-import type { PackagePolicy, PackagePolicyPackage } from './package_policy';
+import type { PackagePolicy } from './package_policy';
 import type { Output } from './output';
-
+import type { CloudProvider } from './cloud_connector';
 export type AgentPolicyStatus = typeof agentPolicyStatuses;
 
 // adding a property here? If it should be cloned when duplicating a policy, add it to `agentPolicyService.copy`
@@ -35,6 +35,7 @@ export interface NewAgentPolicy {
   data_output_id?: string | null;
   monitoring_output_id?: string | null;
   download_source_id?: string | null;
+  download_source_ids?: string[];
   fleet_server_host_id?: string | null;
   schema_version?: string;
   agent_features?: Array<{ name: string; enabled: boolean }>;
@@ -44,7 +45,7 @@ export interface NewAgentPolicy {
   keep_monitoring_alive?: boolean | null;
   supports_agentless?: boolean | null;
   global_data_tags?: GlobalDataTag[];
-  agentless?: AgentlessPolicy;
+  agentless?: AgentlessAgentPolicyConfig;
   monitoring_pprof_enabled?: boolean;
   monitoring_http?: {
     enabled?: boolean;
@@ -66,6 +67,8 @@ export interface NewAgentPolicy {
     };
   };
   required_versions?: AgentTargetVersion[] | null;
+  has_agent_version_conditions?: boolean;
+  is_verifier?: boolean;
 }
 
 export interface AgentTargetVersion {
@@ -73,13 +76,20 @@ export interface AgentTargetVersion {
   percentage: number;
 }
 
-export interface AgentlessPolicy {
+export interface CloudConnectors {
+  target_csp?: CloudProvider;
+  enabled?: boolean;
+}
+/** Agentless-specific configuration embedded in an AgentPolicy (cloud connectors, resources). */
+export interface AgentlessAgentPolicyConfig {
+  cloud_connectors?: CloudConnectors;
   resources?: {
     requests?: {
       memory?: string;
       cpu?: string;
     };
   };
+  cluster_id?: string;
 }
 
 export interface GlobalDataTag {
@@ -87,20 +97,39 @@ export interface GlobalDataTag {
   value: string | number;
 }
 
-// SO definition for this type is declared in server/types/interfaces
+export interface AgentPolicyAgentVersionCondition {
+  name: string;
+  title: string;
+  version_condition: string;
+}
+
+export interface AgentPolicyPackagePoliciesSummary {
+  count: number;
+  has_fleet_server: boolean;
+  has_managed: boolean;
+  has_root_integrations: boolean;
+  has_shared: boolean;
+}
+
 export interface AgentPolicy extends Omit<NewAgentPolicy, 'id'> {
   id: string;
   space_ids?: string[] | undefined;
   status: ValueOf<AgentPolicyStatus>;
   package_policies?: PackagePolicy[];
+  package_policies_summary?: AgentPolicyPackagePoliciesSummary;
   is_managed: boolean; // required for created policy
+  created_at?: string;
   updated_at: string;
   updated_by: string;
   revision: number;
   agents?: number;
   unprivileged_agents?: number;
+  fips_agents?: number;
+  agents_per_version?: Array<{ version: string; count: number }>;
   is_protected: boolean;
   version?: string;
+  min_agent_version?: string | null;
+  package_agent_version_conditions?: AgentPolicyAgentVersionCondition[] | null;
 }
 
 export interface FullAgentPolicyInputStream {
@@ -121,13 +150,21 @@ export interface FullAgentPolicyInput {
   use_output: string;
   package_policy_id: string;
   meta?: {
-    package?: Pick<PackagePolicyPackage, 'name' | 'version'>;
+    package?: FullAgentPolicyMetaPackage;
     [key: string]: unknown;
   };
   streams?: FullAgentPolicyInputStream[];
   processors?: FullAgentPolicyAddFields[];
   ssl?: BaseSSLConfig;
   [key: string]: any;
+}
+
+export interface FullAgentPolicyMetaPackage {
+  name: string;
+  version: string;
+  policy_template?: string;
+  release?: string;
+  agentVersion?: string;
 }
 
 export type TemplateAgentPolicyInput = Pick<FullAgentPolicyInput, 'id' | 'type' | 'streams'>;
@@ -143,12 +180,15 @@ export interface FullAgentPolicyAddFields {
 
 export type FullAgentPolicyOutputPermissions = Record<string, SecurityRoleDescriptor>;
 
-export type FullAgentPolicyOutput = Pick<Output, 'type' | 'hosts' | 'ca_sha256'> & {
+export interface FullAgentPolicyOutput {
+  type: Output['type'];
+  hosts?: string[];
+  ca_sha256?: string | null;
   proxy_url?: string;
   proxy_headers?: any;
   ssl?: BaseSSLConfig;
   [key: string]: any;
-};
+}
 
 export interface FullAgentPolicyMonitoring {
   namespace?: string;
@@ -177,10 +217,33 @@ export interface FullAgentPolicyMonitoring {
     };
   };
 }
+export interface FullAgentPolicyDownloadAuth {
+  username?: string;
+  password?: string;
+  api_key?: string;
+  headers?: Array<{
+    key: string;
+    value: string;
+  }>;
+}
+
+export interface FullAgentPolicyDownloadAuthSecrets {
+  password?: { id: string };
+  api_key?: { id: string };
+}
+
+export interface FullAgentPolicyDownloadSecrets extends BaseSSLSecrets {
+  auth?: FullAgentPolicyDownloadAuthSecrets;
+}
+
 export interface FullAgentPolicyDownload {
   sourceURI: string;
+  sources?: string[];
   ssl?: BaseSSLConfig;
-  secrets?: BaseSSLSecrets;
+  auth?: FullAgentPolicyDownloadAuth;
+  secrets?: FullAgentPolicyDownloadSecrets;
+  proxy_url?: string;
+  proxy_headers?: any;
 }
 
 export interface FullAgentPolicy {
@@ -221,7 +284,7 @@ export interface FullAgentPolicy {
       go_max_procs?: number;
     };
   };
-  secret_references?: PolicySecretReference[];
+  secret_references?: SecretReference[];
   signed?: {
     data: string;
     signature: string;
@@ -266,6 +329,10 @@ export interface FleetServerPolicy {
    */
   policy_id: string;
   /**
+   * The base policy ID (policy_id without version suffix) for efficient querying.
+   */
+  policy_base_id?: string;
+  /**
    * The revision index of the policy
    */
   revision_idx: number;
@@ -297,8 +364,29 @@ export interface FleetServerPolicy {
   inactivity_timeout?: number;
 }
 
-export interface AgentlessApiResponse {
-  id: string;
+export enum AgentlessApiDeploymentResponseCode {
+  Success = 'SUCCESS',
+  BackendFailed = 'BACKEND_OPERATION_FAILED',
+  BadRequest = 'BAD_REQUEST',
+  InternalError = 'INTERNAL_SERVER_ERROR',
+  NotAllowed = 'NOT_ALLOWED',
+  NotFound = 'NOT_FOUND',
+  Unauthorized = 'UNAUTHORIZED',
+  WrongEndpoint = 'WRONG_ENDPOINT',
+}
+
+export interface AgentlessApiDeploymentResponse {
+  code: AgentlessApiDeploymentResponseCode;
+  error: string | null;
+}
+
+export interface AgentlessApiListDeploymentResponse {
+  deployments: Array<{
+    policy_id: string;
+    revision_idx?: number;
+    cluster_id?: string;
+  }>;
+  next_token?: string;
 }
 
 // Definitions for agent policy outputs endpoints

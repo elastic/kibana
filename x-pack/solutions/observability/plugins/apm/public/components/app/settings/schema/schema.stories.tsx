@@ -6,12 +6,13 @@
  */
 
 import type { CoreStart } from '@kbn/core/public';
-import type { StoryFn, Meta } from '@storybook/react';
+import type { StoryFn, Meta, StoryContext } from '@storybook/react';
 import type { ComponentType } from 'react';
 import React from 'react';
+import { merge } from 'lodash';
 import { Schema } from '.';
-import type { ApmPluginContextValue } from '../../../../context/apm_plugin/apm_plugin_context';
-import { MockApmPluginStorybook } from '../../../../context/apm_plugin/mock_apm_plugin_storybook';
+import { ApmPluginContext } from '../../../../context/apm_plugin/apm_plugin_context';
+import { mockApmPluginContext } from '../../../../context/apm_plugin/mock_apm_plugin_storybook';
 import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 
 interface Args {
@@ -46,7 +47,7 @@ export default {
     },
     latestApmPackageVersion: {
       control: {
-        type: 'string',
+        type: 'text',
         defaultValue: '8.7',
       },
     },
@@ -80,7 +81,7 @@ export default {
     },
   },
   decorators: [
-    (StoryComponent: ComponentType, { args }: Meta<Args>) => {
+    (StoryComponent: ComponentType, { args }: StoryContext<Args>) => {
       if (args?.isMigrating) {
         const expiryDate = new Date();
         expiryDate.setMinutes(expiryDate.getMinutes() + 5);
@@ -111,13 +112,13 @@ export default {
       } as unknown as CoreStart;
 
       return (
-        <MockApmPluginStorybook apmContext={{ core: coreMock } as unknown as ApmPluginContextValue}>
+        <ApmPluginContext.Provider value={merge({}, mockApmPluginContext, { core: coreMock })}>
           <StoryComponent />
-        </MockApmPluginStorybook>
+        </ApmPluginContext.Provider>
       );
     },
   ],
-};
+} satisfies Meta<Args>;
 
 export const Example: StoryFn = () => {
   return <Schema />;

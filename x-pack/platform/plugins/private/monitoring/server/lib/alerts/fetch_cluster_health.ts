@@ -4,10 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ElasticsearchClient } from '@kbn/core/server';
-import { isCCSRemoteIndexName } from '@kbn/es-query';
-import { AlertCluster, AlertClusterHealth } from '../../../common/types/alerts';
-import { ElasticsearchSource } from '../../../common/types/es';
+import type { ElasticsearchClient } from '@kbn/core/server';
+import { isNonLocalIndexName } from '@kbn/es-query';
+import type { AlertCluster, AlertClusterHealth } from '../../../common/types/alerts';
+import type { ElasticsearchSource } from '../../../common/types/es';
 import { createDatasetFilter } from './create_dataset_query_filter';
 import { Globals } from '../../static_globals';
 import { getIndexPatterns, getElasticsearchDataset } from '../../../common/get_index_patterns';
@@ -86,7 +86,7 @@ export async function fetchClusterHealth(
       health:
         hit._source!.cluster_state?.status || hit._source!.elasticsearch?.cluster?.stats?.status,
       clusterUuid: hit._source!.cluster_uuid || hit._source!.elasticsearch?.cluster?.id,
-      ccs: isCCSRemoteIndexName(hit._index) ? hit._index.split(':')[0] : undefined,
+      ccs: isNonLocalIndexName(hit._index) ? hit._index.split(':')[0] : undefined,
     } as AlertClusterHealth;
   });
 }

@@ -7,17 +7,17 @@
 
 import { schema } from '@kbn/config-schema';
 import { get } from 'lodash';
-import { IScopedClusterClient } from '@kbn/core/server';
+import type { IScopedClusterClient } from '@kbn/core/server';
 
 import {
   buildServerWatchStatusModel,
   buildClientWatchStatusModel,
 } from '../../../../models/watch_status_model';
-import { RouteDependencies } from '../../../../types';
+import type { RouteDependencies } from '../../../../types';
 
 const paramsSchema = schema.object({
-  watchId: schema.string(),
-  actionId: schema.string(),
+  watchId: schema.string({ maxLength: 1000 }),
+  actionId: schema.string({ maxLength: 1000 }),
 });
 
 function acknowledgeAction(dataClient: IScopedClusterClient, watchId: string, actionId: string) {

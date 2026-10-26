@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ArgumentType } from '@kbn/expressions-plugin/common';
+import type { ArgumentType } from '@kbn/expressions-plugin/common';
 import { SeriesTypes, XScaleTypes, DATA_DECORATION_CONFIG, XYCurveTypes } from '../constants';
 import { strings } from '../i18n';
-import { DataLayerArgs, ExtendedDataLayerArgs } from '../types';
+import type { DataLayerArgs, ExtendedDataLayerArgs } from '../types';
 
 type CommonDataLayerArgs = ExtendedDataLayerArgs | DataLayerArgs;
 type CommonDataLayerFnArgs = {
@@ -19,7 +19,7 @@ type CommonDataLayerFnArgs = {
 
 export const commonDataLayerArgs: Omit<
   CommonDataLayerFnArgs,
-  'accessors' | 'xAccessor' | 'splitAccessor'
+  'accessors' | 'xAccessor' | 'splitAccessors'
 > = {
   simpleView: {
     types: ['boolean'],

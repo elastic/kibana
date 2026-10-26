@@ -8,14 +8,10 @@
  */
 
 import { each } from 'lodash';
-import { DataViewBase, DataViewFieldBase } from '../../es_query';
+import type { DataViewBase, DataViewFieldBase } from '../../es_query';
 import { fields, getField } from '../stubs';
-import {
-  buildRangeFilter,
-  getRangeFilterField,
-  RangeFilter,
-  ScriptedRangeFilter,
-} from './range_filter';
+import type { RangeFilter, ScriptedRangeFilter } from './range_filter';
+import { buildRangeFilter, getRangeFilterField } from './range_filter';
 
 describe('Range filter builder', () => {
   let indexPattern: DataViewBase;
@@ -121,11 +117,11 @@ describe('Range filter builder', () => {
 
     expect(() => {
       buildRangeFilter(field!, { gte: 1, gt: 3 }, indexPattern);
-    }).toThrowError();
+    }).toThrow();
 
     expect(() => {
       buildRangeFilter(field!, { lte: 1, lt: 3 }, indexPattern);
-    }).toThrowError();
+    }).toThrow();
   });
 
   it('to use the right operator for each of gte, gt, lt and lte', () => {

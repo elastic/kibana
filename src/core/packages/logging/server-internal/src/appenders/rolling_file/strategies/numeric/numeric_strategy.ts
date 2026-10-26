@@ -10,8 +10,8 @@
 import { basename, dirname } from 'path';
 import { schema } from '@kbn/config-schema';
 import type { NumericRollingStrategyConfig } from '@kbn/core-logging-server';
-import { RollingStrategy } from '../strategy';
-import { RollingFileContext } from '../../rolling_file_context';
+import type { RollingStrategy } from '../strategy';
+import type { RollingFileContext } from '../../rolling_file_context';
 import {
   shouldSkipRollout,
   getOrderedRolledFiles,

@@ -37,6 +37,7 @@ describe('useDeleteAction', () => {
         "data-test-subj": "cases-bulk-action-delete",
         "disabled": false,
         "icon": <EuiIcon
+          aria-hidden={true}
           color="danger"
           size="m"
           type="trash"
@@ -65,6 +66,7 @@ describe('useDeleteAction', () => {
         "data-test-subj": "cases-bulk-action-delete",
         "disabled": false,
         "icon": <EuiIcon
+          aria-hidden={true}
           color="danger"
           size="m"
           type="trash"
@@ -92,14 +94,14 @@ describe('useDeleteAction', () => {
 
     const action = result.current.getAction([basicCase]);
 
-    act(() => {
+    await act(async () => {
       action.onClick();
     });
 
     expect(onAction).toHaveBeenCalled();
     expect(result.current.isModalVisible).toBe(true);
 
-    act(() => {
+    await act(async () => {
       result.current.onConfirmDeletion();
     });
 
@@ -121,13 +123,13 @@ describe('useDeleteAction', () => {
 
     const action = result.current.getAction([basicCase]);
 
-    act(() => {
+    await act(async () => {
       action.onClick();
     });
 
     expect(result.current.isModalVisible).toBe(true);
 
-    act(() => {
+    await act(async () => {
       result.current.onCloseModal();
     });
 
@@ -148,11 +150,11 @@ describe('useDeleteAction', () => {
 
     const action = result.current.getAction([basicCase]);
 
-    act(() => {
+    await act(async () => {
       action.onClick();
     });
 
-    act(() => {
+    await act(async () => {
       result.current.onConfirmDeletion();
     });
 
@@ -176,11 +178,11 @@ describe('useDeleteAction', () => {
 
     const action = result.current.getAction([basicCase, basicCase]);
 
-    act(() => {
+    await act(async () => {
       action.onClick();
     });
 
-    act(() => {
+    await act(async () => {
       result.current.onConfirmDeletion();
     });
 

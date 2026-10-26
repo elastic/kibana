@@ -8,16 +8,16 @@
 import React from 'react';
 import { coreMock } from '@kbn/core/public/mocks';
 import { toastsServiceMock } from '@kbn/core-notifications-browser-mocks/src/toasts_service.mock';
-import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
-import {
+import type { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
+import type {
   XYByValueAnnotationLayerConfig,
   XYAnnotationLayerConfig,
-  XYState,
+  XYVisualizationState,
   XYByReferenceAnnotationLayerConfig,
 } from '../../types';
 import { onSave, SaveModal } from './save_action';
 import { shallowWithIntl } from '@kbn/test-jest-helpers';
-import {
+import type {
   EventAnnotationGroupConfig,
   PointInTimeEventAnnotationConfig,
 } from '@kbn/event-annotation-common';
@@ -26,12 +26,23 @@ import { taggingApiMock } from '@kbn/saved-objects-tagging-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/public';
 
+const mockSave = jest.fn();
+
+const getMockEventAnnotationService = (savedId?: string) =>
+  ({
+    createAnnotationGroup: jest.fn(() => Promise.resolve({ id: savedId })),
+    groupExistsWithTitle: jest.fn(() => Promise.resolve(false)),
+    updateAnnotationGroup: jest.fn(),
+    loadAnnotationGroup: jest.fn(),
+    toExpression: jest.fn(),
+    toFetchExpression: jest.fn(),
+    renderEventAnnotationGroupSavedObjectFinder: jest.fn(),
+  } as Partial<EventAnnotationServiceType> as EventAnnotationServiceType);
+
 describe('annotation group save action', () => {
   describe('save modal', () => {
     const modalSaveArgs = {
       newCopyOnSave: false,
-      isTitleDuplicateConfirmed: false,
-      onTitleDuplicate: () => {},
     };
 
     it('reports new saved object attributes', async () => {
@@ -39,9 +50,11 @@ describe('annotation group save action', () => {
       const savedObjectsTagging = taggingApiMock.create();
       const wrapper = shallowWithIntl(
         <SaveModal
+          eventAnnotationService={getMockEventAnnotationService()}
           domElement={document.createElement('div')}
           onSave={onSaveMock}
           savedObjectsTagging={savedObjectsTagging}
+          lastSavedTitle=""
           title=""
           description=""
           tags={[]}
@@ -69,7 +82,6 @@ describe('annotation group save action', () => {
         Array [
           Object {
             "closeModal": [Function],
-            "isTitleDuplicateConfirmed": false,
             "newCopyOnSave": false,
             "newDescription": "description",
             "newTags": Array [
@@ -78,7 +90,6 @@ describe('annotation group save action', () => {
               "tags",
             ],
             "newTitle": "title",
-            "onTitleDuplicate": [Function],
           },
         ]
       `);
@@ -93,9 +104,11 @@ describe('annotation group save action', () => {
 
       const wrapper = shallowWithIntl(
         <SaveModal
+          eventAnnotationService={getMockEventAnnotationService()}
           domElement={document.createElement('div')}
-          onSave={() => {}}
+          onSave={mockSave}
           savedObjectsTagging={savedObjectsTagging}
+          lastSavedTitle=""
           title={title}
           description={description}
           tags={tags}
@@ -148,19 +161,11 @@ describe('annotation group save action', () => {
           preferredSeriesType: 'area',
           legend: { isVisible: true, position: 'bottom' },
           layers: [{ layerId } as XYAnnotationLayerConfig],
-        } as XYState,
+        } as XYVisualizationState,
         layer: byValueLayer,
         registerLibraryAnnotationGroup: jest.fn(),
         setState: jest.fn(),
-        eventAnnotationService: {
-          createAnnotationGroup: jest.fn(() => Promise.resolve({ id: savedId })),
-          groupExistsWithTitle: jest.fn(() => Promise.resolve(false)),
-          updateAnnotationGroup: jest.fn(),
-          loadAnnotationGroup: jest.fn(),
-          toExpression: jest.fn(),
-          toFetchExpression: jest.fn(),
-          renderEventAnnotationGroupSavedObjectFinder: jest.fn(),
-        } as Partial<EventAnnotationServiceType> as EventAnnotationServiceType,
+        eventAnnotationService: getMockEventAnnotationService(savedId),
         toasts: toastsServiceMock.createStartContract(),
         modalOnSaveProps: {
           newTitle: 'my title',
@@ -168,8 +173,6 @@ describe('annotation group save action', () => {
           closeModal: jest.fn(),
           newTags: ['my-tag'],
           newCopyOnSave: false,
-          isTitleDuplicateConfirmed: false,
-          onTitleDuplicate: jest.fn(),
         },
         dataViews,
         goToAnnotationLibrary: () => Promise.resolve(),
@@ -358,78 +361,5 @@ describe('annotation group save action', () => {
 
       expect(props.toasts.addSuccess).toHaveBeenCalledTimes(1);
     });
-
-    it.each`
-      existingGroup | newCopyOnSave | titleChanged | isTitleDuplicateConfirmed | expectPreventSave
-      ${false}      | ${false}      | ${false}     | ${false}                  | ${true}
-      ${false}      | ${false}      | ${false}     | ${true}                   | ${false}
-      ${true}       | ${false}      | ${false}     | ${false}                  | ${false}
-      ${true}       | ${true}       | ${false}     | ${false}                  | ${true}
-      ${true}       | ${true}       | ${false}     | ${true}                   | ${false}
-    `(
-      'checks duplicate title when saving group',
-      async ({
-        existingGroup,
-        newCopyOnSave,
-        titleChanged,
-        isTitleDuplicateConfirmed,
-        expectPreventSave,
-      }) => {
-        (props.eventAnnotationService.groupExistsWithTitle as jest.Mock).mockResolvedValueOnce(
-          true
-        );
-
-        const oldTitle = 'old title';
-        let layer: XYAnnotationLayerConfig = byValueLayer;
-        if (existingGroup) {
-          const byReferenceLayer: XYByReferenceAnnotationLayerConfig = {
-            ...props.layer,
-            annotationGroupId: 'my-group-id',
-            __lastSaved: {
-              ...props.layer,
-              title: oldTitle,
-              description: 'description',
-              tags: [],
-            },
-          };
-          layer = byReferenceLayer;
-        }
-
-        const newTitle = titleChanged ? 'my changed title' : oldTitle;
-
-        await onSave({
-          ...props,
-          layer,
-          modalOnSaveProps: {
-            ...props.modalOnSaveProps,
-            newTitle,
-            isTitleDuplicateConfirmed,
-            newCopyOnSave,
-          },
-        });
-
-        if (expectPreventSave) {
-          expect(props.eventAnnotationService.updateAnnotationGroup).not.toHaveBeenCalled();
-
-          expect(props.eventAnnotationService.createAnnotationGroup).not.toHaveBeenCalled();
-
-          expect(props.modalOnSaveProps.closeModal).not.toHaveBeenCalled();
-
-          expect(props.setState).not.toHaveBeenCalled();
-
-          expect(props.toasts.addSuccess).not.toHaveBeenCalled();
-
-          expect(props.modalOnSaveProps.onTitleDuplicate).toHaveBeenCalled();
-        } else {
-          expect(props.modalOnSaveProps.onTitleDuplicate).not.toHaveBeenCalled();
-
-          expect(props.modalOnSaveProps.closeModal).toHaveBeenCalled();
-
-          expect(props.setState).toHaveBeenCalled();
-
-          expect(props.toasts.addSuccess).toHaveBeenCalledTimes(1);
-        }
-      }
-    );
   });
 });

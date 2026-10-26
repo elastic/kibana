@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiFlexItem, EuiFormRow, EuiComboBox } from '@elastic/eui';
 
 import { UseField } from '../../../shared_imports';
-import { DataType, MainType, SubType, ComboBoxOption } from '../../../types';
+import type { DataType, MainType, SubType, ComboBoxOption } from '../../../types';
 import {
   getFieldConfig,
   filterTypesForMultiField,
@@ -72,6 +72,7 @@ export const SubTypeParameter = ({
           return (
             <EuiFormRow label={subTypeField.label} error={error} isInvalid={isInvalid}>
               <EuiComboBox
+                isInvalid={isInvalid}
                 placeholder={i18n.translate(
                   'xpack.idxMgmt.mappingsEditor.subTypeField.placeholderLabel',
                   {

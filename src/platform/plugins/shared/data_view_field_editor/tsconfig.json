@@ -1,7 +1,7 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
-    "outDir": "target/types",
+    "outDir": "target/types"
   },
   "include": [
     "../../../../../typings/**/*",
@@ -9,6 +9,7 @@
     "common/**/*",
     "public/**/*",
     "server/**/*",
+    "test/scout/**/*"
   ],
   "kbn_references": [
     "@kbn/core",
@@ -28,8 +29,11 @@
     "@kbn/config-schema",
     "@kbn/react-kibana-mount",
     "@kbn/code-editor",
+    "@kbn/css-utils",
+    "@kbn/field-formats-common",
+    "@kbn/ui-callout",
+    "@kbn/scout",
+    "@kbn/core-http-common",
   ],
-  "exclude": [
-    "target/**/*",
-  ]
+  "exclude": ["target/**/*"]
 }

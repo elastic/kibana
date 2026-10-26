@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PluginInitializerContext } from '@kbn/core-plugins-server';
+import type { PluginInitializerContext } from '@kbn/core-plugins-server';
 
 /**
  * Screenshotting plugin entry point.

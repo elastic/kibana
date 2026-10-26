@@ -9,10 +9,9 @@ import React, { Component, Fragment } from 'react';
 import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ApplicationStart } from '@kbn/core/public';
+import type { ApplicationStart } from '@kbn/core/public';
 
 import {
-  EuiLink,
   EuiSelect,
   EuiForm,
   EuiFormRow,
@@ -20,16 +19,17 @@ import {
   EuiModal,
   EuiModalBody,
   EuiModalHeader,
-  EuiCallOut,
   EuiSpacer,
   EuiModalHeaderTitle,
+  htmlIdGenerator,
 } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 
-import { Index } from '@kbn/index-management-plugin/common';
+import type { Index } from '../../../common/types';
 import { loadPolicies, addLifecyclePolicyToIndex } from '../../application/services/api';
 import { showApiError } from '../../application/services/api_errors';
 import { toasts } from '../../application/services/notification';
-import { PolicyFromES } from '../../../common/types';
+import type { PolicyFromES } from '../../../common/types';
 
 interface Props {
   indexName: string;
@@ -111,11 +111,12 @@ export class AddLifecyclePolicyConfirmModal extends Component<Props, State> {
       return null;
     }
     const { aliases } = index;
-    if (aliases === 'none') {
+    if (!Array.isArray(aliases) || aliases.length === 0) {
       return (
         <Fragment>
           <EuiSpacer size="m" />
-          <EuiCallOut
+          <KbnWarningCallout
+            announceOnMount={false}
             style={{ maxWidth: 400 }}
             title={
               <FormattedMessage
@@ -123,22 +124,22 @@ export class AddLifecyclePolicyConfirmModal extends Component<Props, State> {
                 defaultMessage="Index has no aliases"
               />
             }
-            color="warning"
-          >
-            <FormattedMessage
-              id="xpack.indexLifecycleMgmt.indexManagementTable.addLifecyclePolicyConfirmModal.indexHasNoAliasesWarningMessage"
-              defaultMessage="Policy {policyName} is configured for rollover,
+            text={
+              <FormattedMessage
+                id="xpack.indexLifecycleMgmt.indexManagementTable.addLifecyclePolicyConfirmModal.indexHasNoAliasesWarningMessage"
+                defaultMessage="Policy {policyName} is configured for rollover,
                 but index {indexName} does not have an alias, which is required for rollover."
-              values={{
-                policyName: selectedPolicy?.name,
-                indexName: index.name,
-              }}
-            />
-          </EuiCallOut>
+                values={{
+                  policyName: selectedPolicy?.name,
+                  indexName: index.name,
+                }}
+              />
+            }
+          />
         </Fragment>
       );
     }
-    const aliasOptions = (aliases as string[]).map((alias: string) => {
+    const aliasOptions = aliases.map((alias: string) => {
       return {
         text: alias,
         value: alias,
@@ -206,6 +207,7 @@ export class AddLifecyclePolicyConfirmModal extends Component<Props, State> {
           }
         >
           <EuiSelect
+            isInvalid={!!policyErrorMessage}
             options={options}
             value={selectedPolicyName}
             onChange={(e) => {
@@ -237,6 +239,10 @@ export class AddLifecyclePolicyConfirmModal extends Component<Props, State> {
   render() {
     const { policies, isLoading } = this.state;
     const { indexName, closeModal, getUrlForApp } = this.props;
+    const idGenerator = htmlIdGenerator();
+    const modalTitleId = idGenerator('modal');
+    const confirmModalId = idGenerator('confirmModal');
+
     const title = (
       <FormattedMessage
         id="xpack.indexLifecycleMgmt.indexManagementTable.addLifecyclePolicyConfirmModal.modalTitle"
@@ -248,13 +254,14 @@ export class AddLifecyclePolicyConfirmModal extends Component<Props, State> {
     );
     if (!isLoading && !policies.length) {
       return (
-        <EuiModal onClose={closeModal}>
+        <EuiModal onClose={closeModal} aria-labelledby={modalTitleId}>
           <EuiModalHeader>
-            <EuiModalHeaderTitle>{title}</EuiModalHeaderTitle>
+            <EuiModalHeaderTitle id={modalTitleId}>{title}</EuiModalHeaderTitle>
           </EuiModalHeader>
 
           <EuiModalBody>
-            <EuiCallOut
+            <KbnWarningCallout
+              announceOnMount={false}
               style={{ maxWidth: 400 }}
               title={
                 <FormattedMessage
@@ -262,28 +269,29 @@ export class AddLifecyclePolicyConfirmModal extends Component<Props, State> {
                   defaultMessage="No index lifecycle policies defined"
                 />
               }
-              color="warning"
-            >
-              <p>
-                <EuiLink
-                  href={getUrlForApp('management', {
+              actionProps={{
+                primary: {
+                  href: getUrlForApp('management', {
                     path: `data/index_lifecycle_management/policies/edit`,
-                  })}
-                >
-                  <FormattedMessage
-                    id="xpack.indexLifecycleMgmt.indexManagementTable.addLifecyclePolicyConfirmModal.defineLifecyclePolicyLinkText"
-                    defaultMessage="Define lifecycle policy"
-                  />
-                </EuiLink>
-              </p>
-            </EuiCallOut>
+                  }),
+                  children: (
+                    <FormattedMessage
+                      id="xpack.indexLifecycleMgmt.indexManagementTable.addLifecyclePolicyConfirmModal.defineLifecyclePolicyLinkText"
+                      defaultMessage="Define lifecycle policy"
+                    />
+                  ),
+                },
+              }}
+            />
           </EuiModalBody>
         </EuiModal>
       );
     }
     return (
       <EuiConfirmModal
+        aria-labelledby={confirmModalId}
         title={title}
+        titleProps={{ id: confirmModalId }}
         onCancel={closeModal}
         onConfirm={this.addPolicy}
         cancelButtonText={

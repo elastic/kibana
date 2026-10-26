@@ -1,0 +1,1874 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { CloudSetup } from '@kbn/cloud-plugin/public';
+
+import type { PackagePolicyConfigRecord } from '../../../common';
+import type { AwsCloudConnectorVars, AzureCloudConnectorVars } from '../../../common/types';
+
+import {
+  updateInputVarsWithCredentials,
+  isCloudConnectorReusableEnabled,
+  isAwsCloudConnectorVars,
+  isAzureCloudConnectorVars,
+  isGcpCloudConnectorVars,
+  getCloudConnectorRemoteRoleTemplate,
+  getKibanaComponentId,
+  getDeploymentIdFromUrl,
+  getCloudConnectorNameError,
+  isCloudConnectorNameValid,
+  CLOUD_CONNECTOR_NAME_MAX_LENGTH,
+  getAnyCloudConnectorIacTemplateUrl,
+  getTemplateUrlTokens,
+  getElasticCloudTemplateContext,
+  getElasticResource,
+  parseElasticCloudHost,
+  getElasticCloudEnvironmentFromHost,
+  getCloudHostFromCloudId,
+  getArtifactLaunchUrl,
+  getStaticLaunchUrl,
+  getStaticTemplate,
+  getAwsStackConsoleUrl,
+  isStackArnInvalid,
+  getUnresolvedTemplateUrlTokens,
+  getWorkloadIdentityFederationStackParams,
+} from './utils';
+import type { GetStaticTemplateParams } from './utils';
+import { SINGLE_ACCOUNT, ORGANIZATION_ACCOUNT, TEMPLATE_URL_TOKENS } from './constants';
+import type { CloudConnectorCredentials } from './types';
+import { AWS_PROVIDER, AZURE_PROVIDER, GCP_PROVIDER } from './constants';
+
+describe('updateInputVarsWithCredentials - AWS support', () => {
+  let mockInputVars: PackagePolicyConfigRecord;
+
+  beforeEach(() => {
+    mockInputVars = {
+      role_arn: { value: 'arn:aws:iam::123456789012:role/OriginalRole' },
+      external_id: { value: 'original-external-id' },
+      'aws.role_arn': { value: 'arn:aws:iam::123456789012:role/OriginalAwsRole' },
+      'aws.credentials.external_id': { value: 'original-aws-external-id' },
+    };
+  });
+
+  it('should update role_arn fields when roleArn is provided', () => {
+    const credentials: CloudConnectorCredentials = {
+      roleArn: 'arn:aws:iam::123456789012:role/UpdatedRole',
+      externalId: 'updated-external-id',
+    };
+
+    const result = updateInputVarsWithCredentials(mockInputVars, credentials);
+
+    expect(result?.role_arn?.value).toBe('arn:aws:iam::123456789012:role/UpdatedRole');
+    expect(result?.['aws.role_arn']?.value).toBe('arn:aws:iam::123456789012:role/UpdatedRole');
+  });
+
+  it('should update external_id fields when externalId is provided (not new credentials)', () => {
+    const credentials: CloudConnectorCredentials = {
+      roleArn: 'arn:aws:iam::123456789012:role/UpdatedRole',
+      externalId: 'updated-external-id',
+    };
+
+    const result = updateInputVarsWithCredentials(mockInputVars, credentials);
+
+    expect(result?.external_id?.value).toBe('updated-external-id');
+    expect(result?.['aws.credentials.external_id']?.value).toBe('updated-external-id');
+  });
+
+  it('should update external_id fields when externalId is provided (new credentials)', () => {
+    const credentials: CloudConnectorCredentials = {
+      roleArn: 'arn:aws:iam::123456789012:role/UpdatedRole',
+      externalId: 'updated-external-id',
+    };
+
+    const result = updateInputVarsWithCredentials(mockInputVars, credentials);
+
+    expect(result?.external_id).toEqual({ value: 'updated-external-id' });
+    expect(result?.['aws.credentials.external_id']?.value).toBe('updated-external-id');
+  });
+
+  it('should clear role_arn fields when roleArn is undefined', () => {
+    const credentials: CloudConnectorCredentials = {
+      roleArn: undefined,
+      externalId: 'updated-external-id',
+    };
+
+    const result = updateInputVarsWithCredentials(mockInputVars, credentials);
+
+    expect(result?.role_arn).toEqual({ value: undefined });
+    expect(result?.['aws.role_arn']).toEqual({ value: undefined });
+  });
+
+  it('should clear external_id fields when externalId is undefined', () => {
+    const credentials: CloudConnectorCredentials = {
+      roleArn: 'arn:aws:iam::123456789012:role/UpdatedRole',
+      externalId: undefined,
+    };
+
+    const result = updateInputVarsWithCredentials(mockInputVars, credentials);
+
+    expect(result?.external_id).toEqual({ value: undefined });
+    expect(result?.['aws.credentials.external_id']).toEqual({ value: undefined });
+  });
+
+  it('should return undefined when inputVars is undefined', () => {
+    const credentials: CloudConnectorCredentials = {
+      roleArn: 'arn:aws:iam::123456789012:role/UpdatedRole',
+      externalId: 'updated-external-id',
+    };
+
+    const result = updateInputVarsWithCredentials(undefined, credentials);
+
+    expect(result).toBeUndefined();
+  });
+
+  it('should handle partial inputVars (missing some fields)', () => {
+    const partialInputVars: PackagePolicyConfigRecord = {
+      role_arn: { value: 'arn:aws:iam::123456789012:role/OriginalRole' },
+    };
+
+    const credentials: CloudConnectorCredentials = {
+      roleArn: 'arn:aws:iam::123456789012:role/UpdatedRole',
+      externalId: 'updated-external-id',
+    };
+
+    const result = updateInputVarsWithCredentials(partialInputVars, credentials);
+
+    expect(result?.role_arn?.value).toBe('arn:aws:iam::123456789012:role/UpdatedRole');
+    expect(result).toEqual(
+      expect.objectContaining({
+        role_arn: { value: 'arn:aws:iam::123456789012:role/UpdatedRole' },
+      })
+    );
+  });
+
+  it('should handle undefined credentials', () => {
+    const result = updateInputVarsWithCredentials(mockInputVars, undefined);
+
+    expect(result?.role_arn).toEqual({ value: undefined });
+    expect(result?.external_id).toEqual({ value: undefined });
+    expect(result?.['aws.role_arn']).toEqual({ value: undefined });
+    expect(result?.['aws.credentials.external_id']).toEqual({ value: undefined });
+  });
+});
+
+describe('updateInputVarsWithCredentials - Azure support', () => {
+  let mockAzureInputVars: PackagePolicyConfigRecord;
+
+  beforeEach(() => {
+    mockAzureInputVars = {
+      tenant_id: { value: 'old-tenant-id' },
+      client_id: { value: 'old-client-id' },
+      azure_credentials_cloud_connector_id: { value: 'old-cc-id' },
+      'azure.credentials.tenant_id': { value: 'old-azure-tenant-id' },
+      'azure.credentials.client_id': { value: 'old-azure-client-id' },
+    };
+  });
+
+  it('should update Azure tenant_id and client_id fields', () => {
+    const credentials: CloudConnectorCredentials = {
+      tenantId: 'new-tenant-id',
+      clientId: 'new-client-id',
+      azure_credentials_cloud_connector_id: 'new-cc-id',
+    };
+
+    const result = updateInputVarsWithCredentials(mockAzureInputVars, credentials);
+
+    expect(result?.tenant_id?.value).toBe('new-tenant-id');
+    expect(result?.client_id?.value).toBe('new-client-id');
+    expect(result?.azure_credentials_cloud_connector_id?.value).toBe('new-cc-id');
+  });
+
+  it('should update Azure credentials with azure.credentials.* format', () => {
+    const credentials: CloudConnectorCredentials = {
+      tenantId: 'new-azure-tenant-id',
+      clientId: 'new-azure-client-id',
+    };
+
+    const result = updateInputVarsWithCredentials(mockAzureInputVars, credentials);
+
+    expect(result?.['azure.credentials.tenant_id']?.value).toBe('new-azure-tenant-id');
+    expect(result?.['azure.credentials.client_id']?.value).toBe('new-azure-client-id');
+  });
+
+  it('should clear Azure fields when credentials are undefined', () => {
+    const credentials: CloudConnectorCredentials = {
+      tenantId: undefined,
+      clientId: undefined,
+      azure_credentials_cloud_connector_id: undefined,
+    };
+
+    const result = updateInputVarsWithCredentials(mockAzureInputVars, credentials);
+
+    expect(result?.tenant_id).toEqual({ value: undefined });
+    expect(result?.client_id).toEqual({ value: undefined });
+    expect(result?.azure_credentials_cloud_connector_id).toEqual({ value: undefined });
+    expect(result?.['azure.credentials.tenant_id']).toEqual({ value: undefined });
+    expect(result?.['azure.credentials.client_id']).toEqual({ value: undefined });
+  });
+
+  it('should handle partial Azure credentials', () => {
+    const credentials: CloudConnectorCredentials = {
+      tenantId: 'partial-tenant-id',
+      clientId: undefined,
+      azure_credentials_cloud_connector_id: 'partial-cc-id',
+    };
+
+    const result = updateInputVarsWithCredentials(mockAzureInputVars, credentials);
+
+    expect(result?.tenant_id?.value).toBe('partial-tenant-id');
+    expect(result?.client_id).toEqual({ value: undefined });
+    expect(result?.azure_credentials_cloud_connector_id?.value).toBe('partial-cc-id');
+  });
+
+  it('should handle Azure credentials with secret references', () => {
+    const credentials: CloudConnectorCredentials = {
+      tenantId: { id: 'secret-tenant-id', isSecretRef: true },
+      clientId: { id: 'secret-client-id', isSecretRef: true },
+      azure_credentials_cloud_connector_id: 'secret-cc-id',
+    };
+
+    const result = updateInputVarsWithCredentials(mockAzureInputVars, credentials);
+
+    expect(result?.tenant_id?.value).toEqual({ id: 'secret-tenant-id', isSecretRef: true });
+    expect(result?.client_id?.value).toEqual({ id: 'secret-client-id', isSecretRef: true });
+    expect(result?.azure_credentials_cloud_connector_id?.value).toBe('secret-cc-id');
+  });
+});
+
+describe('updateInputVarsWithCredentials - supports_cloud_connectors flag', () => {
+  it('should set supports_cloud_connectors to true when AWS credentials are provided and var exists', () => {
+    const inputVars: PackagePolicyConfigRecord = {
+      role_arn: { value: '' },
+      external_id: { value: '' },
+      supports_cloud_connectors: { value: undefined },
+    };
+
+    const credentials: CloudConnectorCredentials = {
+      roleArn: 'arn:aws:iam::123456789012:role/TestRole',
+      externalId: 'test-external-id',
+    };
+
+    const result = updateInputVarsWithCredentials(inputVars, credentials);
+
+    expect(result?.supports_cloud_connectors?.value).toBe(true);
+  });
+
+  it('should set supports_cloud_connectors to true when Azure credentials are provided and var exists', () => {
+    const inputVars: PackagePolicyConfigRecord = {
+      tenant_id: { value: '' },
+      client_id: { value: '' },
+      supports_cloud_connectors: { value: undefined },
+    };
+
+    const credentials: CloudConnectorCredentials = {
+      tenantId: 'test-tenant-id',
+      clientId: 'test-client-id',
+    };
+
+    const result = updateInputVarsWithCredentials(inputVars, credentials);
+
+    expect(result?.supports_cloud_connectors?.value).toBe(true);
+  });
+
+  it('should set supports_cloud_connectors to false when credentials are undefined', () => {
+    const inputVars: PackagePolicyConfigRecord = {
+      role_arn: { value: 'some-arn' },
+      external_id: { value: 'some-id' },
+      supports_cloud_connectors: { value: true },
+    };
+
+    const result = updateInputVarsWithCredentials(inputVars, undefined);
+
+    expect(result?.supports_cloud_connectors?.value).toBe(false);
+  });
+
+  it('should not add supports_cloud_connectors if it does not exist in input vars', () => {
+    const inputVars: PackagePolicyConfigRecord = {
+      role_arn: { value: '' },
+      external_id: { value: '' },
+    };
+
+    const credentials: CloudConnectorCredentials = {
+      roleArn: 'arn:aws:iam::123456789012:role/TestRole',
+      externalId: 'test-external-id',
+    };
+
+    const result = updateInputVarsWithCredentials(inputVars, credentials);
+
+    expect(result).not.toHaveProperty('supports_cloud_connectors');
+  });
+
+  it('should preserve other properties on the supports_cloud_connectors var entry', () => {
+    const inputVars: PackagePolicyConfigRecord = {
+      role_arn: { value: '' },
+      external_id: { value: '' },
+      supports_cloud_connectors: { value: undefined, type: 'bool' },
+    };
+
+    const credentials: CloudConnectorCredentials = {
+      roleArn: 'arn:aws:iam::123456789012:role/TestRole',
+      externalId: 'test-external-id',
+    };
+
+    const result = updateInputVarsWithCredentials(inputVars, credentials);
+
+    expect(result?.supports_cloud_connectors?.value).toBe(true);
+    expect(result?.supports_cloud_connectors?.type).toBe('bool');
+  });
+});
+
+describe('isCloudConnectorReusableEnabled - AWS provider', () => {
+  it('should return true for CSPM when package version meets minimum requirement', () => {
+    expect(isCloudConnectorReusableEnabled(AWS_PROVIDER, '3.1.0-preview06', 'cspm')).toBe(true);
+    expect(isCloudConnectorReusableEnabled(AWS_PROVIDER, '3.2.0', 'cspm')).toBe(true);
+    expect(isCloudConnectorReusableEnabled(AWS_PROVIDER, '4.0.0', 'cspm')).toBe(true);
+  });
+
+  it('should return false for CSPM when package version is below minimum requirement', () => {
+    expect(isCloudConnectorReusableEnabled(AWS_PROVIDER, '3.0.0', 'cspm')).toBe(false);
+    expect(isCloudConnectorReusableEnabled(AWS_PROVIDER, '3.1.0-preview05', 'cspm')).toBe(false);
+    expect(isCloudConnectorReusableEnabled(AWS_PROVIDER, '2.5.0', 'cspm')).toBe(false);
+  });
+
+  it('should return true for asset inventory when package version meets minimum requirement', () => {
+    expect(isCloudConnectorReusableEnabled(AWS_PROVIDER, '1.1.5', 'asset_inventory')).toBe(true);
+    expect(isCloudConnectorReusableEnabled(AWS_PROVIDER, '1.2.0', 'asset_inventory')).toBe(true);
+    expect(isCloudConnectorReusableEnabled(AWS_PROVIDER, '2.0.0', 'asset_inventory')).toBe(true);
+  });
+
+  it('should return false for asset inventory when package version is below minimum requirement', () => {
+    expect(isCloudConnectorReusableEnabled(AWS_PROVIDER, '1.1.4', 'asset_inventory')).toBe(false);
+    expect(isCloudConnectorReusableEnabled(AWS_PROVIDER, '1.0.0', 'asset_inventory')).toBe(false);
+    expect(isCloudConnectorReusableEnabled(AWS_PROVIDER, '0.9.0', 'asset_inventory')).toBe(false);
+  });
+
+  it('should return true for var_groups-driven packages regardless of version', () => {
+    // Packages using Fleet's var_groups UI only render cloud connector setup when the
+    // manifest declares identity federation support, so reuse is enabled without
+    // per-package registration in Kibana.
+    expect(isCloudConnectorReusableEnabled(AWS_PROVIDER, '1.1.5', 'aws_securityhub')).toBe(true);
+    expect(isCloudConnectorReusableEnabled(AWS_PROVIDER, '7.2.0', 'aws')).toBe(true);
+    expect(isCloudConnectorReusableEnabled(AWS_PROVIDER, '0.1.0', 'aws_bedrock')).toBe(true);
+  });
+
+  it('should handle edge cases with version formats', () => {
+    expect(isCloudConnectorReusableEnabled(AWS_PROVIDER, '3.1.0', 'cspm')).toBe(true);
+    expect(isCloudConnectorReusableEnabled(AWS_PROVIDER, '3.1.0-preview06', 'cspm')).toBe(true);
+  });
+});
+
+describe('isCloudConnectorReusableEnabled - Azure provider', () => {
+  it('should return true for Azure CSPM when version meets requirement', () => {
+    expect(isCloudConnectorReusableEnabled(AZURE_PROVIDER, '3.1.0', 'cspm')).toBe(true);
+    expect(isCloudConnectorReusableEnabled(AZURE_PROVIDER, '3.2.0', 'cspm')).toBe(true);
+    expect(isCloudConnectorReusableEnabled(AZURE_PROVIDER, '4.0.0', 'cspm')).toBe(true);
+  });
+
+  it('should return false for Azure CSPM when version below requirement', () => {
+    expect(isCloudConnectorReusableEnabled(AZURE_PROVIDER, '3.0.9', 'cspm')).toBe(false);
+    expect(isCloudConnectorReusableEnabled(AZURE_PROVIDER, '2.9.0', 'cspm')).toBe(false);
+  });
+
+  it('should return true for Azure asset_inventory when version meets requirement', () => {
+    expect(isCloudConnectorReusableEnabled(AZURE_PROVIDER, '1.2.2', 'asset_inventory')).toBe(true);
+    expect(isCloudConnectorReusableEnabled(AZURE_PROVIDER, '1.3.0', 'asset_inventory')).toBe(true);
+    expect(isCloudConnectorReusableEnabled(AZURE_PROVIDER, '2.0.0', 'asset_inventory')).toBe(true);
+  });
+
+  it('should return false for Azure asset_inventory when version below requirement', () => {
+    expect(isCloudConnectorReusableEnabled(AZURE_PROVIDER, '1.2.1', 'asset_inventory')).toBe(false);
+    expect(isCloudConnectorReusableEnabled(AZURE_PROVIDER, '1.1.0', 'asset_inventory')).toBe(false);
+  });
+
+  it('should return false for unknown providers', () => {
+    expect(isCloudConnectorReusableEnabled('unknown', '1.0.0', 'asset_inventory')).toBe(false);
+    expect(isCloudConnectorReusableEnabled('unknown', '1.0.0', 'aws_securityhub')).toBe(false);
+  });
+});
+
+describe('isCloudConnectorReusableEnabled - GCP provider', () => {
+  it('should return true for GCP CSPM when version meets requirement', () => {
+    expect(isCloudConnectorReusableEnabled(GCP_PROVIDER, '3.3.0-preview06', 'cspm')).toBe(true);
+    expect(isCloudConnectorReusableEnabled(GCP_PROVIDER, '3.4.0', 'cspm')).toBe(true);
+    expect(isCloudConnectorReusableEnabled(GCP_PROVIDER, '4.0.0', 'cspm')).toBe(true);
+  });
+
+  it('should return false for GCP CSPM when version below requirement', () => {
+    expect(isCloudConnectorReusableEnabled(GCP_PROVIDER, '3.3.0-preview05', 'cspm')).toBe(false);
+    expect(isCloudConnectorReusableEnabled(GCP_PROVIDER, '3.2.0', 'cspm')).toBe(false);
+    expect(isCloudConnectorReusableEnabled(GCP_PROVIDER, '2.0.0', 'cspm')).toBe(false);
+  });
+
+  it('should return true for GCP asset_inventory when version meets requirement', () => {
+    expect(
+      isCloudConnectorReusableEnabled(GCP_PROVIDER, '1.5.0-preview04', 'asset_inventory')
+    ).toBe(true);
+    expect(isCloudConnectorReusableEnabled(GCP_PROVIDER, '1.6.0', 'asset_inventory')).toBe(true);
+    expect(isCloudConnectorReusableEnabled(GCP_PROVIDER, '2.0.0', 'asset_inventory')).toBe(true);
+  });
+
+  it('should return false for GCP asset_inventory when version below requirement', () => {
+    expect(
+      isCloudConnectorReusableEnabled(GCP_PROVIDER, '1.5.0-preview03', 'asset_inventory')
+    ).toBe(false);
+    expect(isCloudConnectorReusableEnabled(GCP_PROVIDER, '1.4.0', 'asset_inventory')).toBe(false);
+    expect(isCloudConnectorReusableEnabled(GCP_PROVIDER, '1.0.0', 'asset_inventory')).toBe(false);
+  });
+
+  it('should return true for GCP var_groups-driven packages regardless of version', () => {
+    expect(isCloudConnectorReusableEnabled(GCP_PROVIDER, '4.0.0', 'gcp_some_package')).toBe(true);
+  });
+});
+
+describe('Cloud Connector Type Guards', () => {
+  describe('isAwsCloudConnectorVars', () => {
+    it('should return true for AWS cloud connector vars with aws provider', () => {
+      const awsVars: AwsCloudConnectorVars = {
+        role_arn: { value: 'arn:aws:iam::123456789012:role/MyRole' },
+        external_id: { value: { isSecretRef: true, id: 'secret-id' }, type: 'password' },
+      };
+
+      expect(isAwsCloudConnectorVars(awsVars, AWS_PROVIDER)).toBe(true);
+    });
+
+    it('should return false for AWS cloud connector vars with non-aws provider', () => {
+      const awsVars: AwsCloudConnectorVars = {
+        role_arn: { value: 'arn:aws:iam::123456789012:role/MyRole' },
+        external_id: { value: { isSecretRef: true, id: 'secret-id' }, type: 'password' },
+      };
+
+      expect(isAwsCloudConnectorVars(awsVars, AZURE_PROVIDER)).toBe(false);
+    });
+
+    it('should return false for Azure cloud connector vars', () => {
+      const azureVars: AzureCloudConnectorVars = {
+        tenant_id: { value: { id: 'tenant-id', isSecretRef: true }, type: 'password' },
+        client_id: { value: { id: 'client-id', isSecretRef: true }, type: 'password' },
+        azure_credentials_cloud_connector_id: {
+          value: 'connector-id',
+          type: 'text',
+        },
+      };
+
+      expect(isAwsCloudConnectorVars(azureVars, AWS_PROVIDER)).toBe(false);
+    });
+  });
+
+  describe('isAzureCloudConnectorVars', () => {
+    it('should return true for Azure cloud connector vars with azure provider', () => {
+      const azureVars: AzureCloudConnectorVars = {
+        tenant_id: { value: { id: 'tenant-id', isSecretRef: true }, type: 'password' },
+        client_id: { value: { id: 'client-id', isSecretRef: true }, type: 'password' },
+        azure_credentials_cloud_connector_id: {
+          value: 'connector-id',
+          type: 'text',
+        },
+      };
+
+      expect(isAzureCloudConnectorVars(azureVars, AZURE_PROVIDER)).toBe(true);
+    });
+
+    it('should return false for Azure cloud connector vars with non-azure provider', () => {
+      const awsVars: AwsCloudConnectorVars = {
+        role_arn: { value: 'arn:aws:iam::123456789012:role/MyRole' },
+        external_id: { value: { isSecretRef: true, id: 'secret-id' }, type: 'password' },
+      };
+
+      expect(isAzureCloudConnectorVars(awsVars, AWS_PROVIDER)).toBe(false);
+    });
+
+    it('should return false for AWS cloud connector vars', () => {
+      const awsVars: AwsCloudConnectorVars = {
+        role_arn: { value: 'arn:aws:iam::123456789012:role/MyRole' },
+        external_id: { value: { isSecretRef: true, id: 'secret-id' }, type: 'password' },
+      };
+
+      expect(isAzureCloudConnectorVars(awsVars, AZURE_PROVIDER)).toBe(false);
+    });
+  });
+
+  describe('isGcpCloudConnectorVars', () => {
+    it('should return true for GCP cloud connector vars with gcp provider', () => {
+      const gcpVars = {
+        service_account: {
+          value: 'test-service-account@project.iam.gserviceaccount.com',
+          type: 'text',
+        },
+        audience: {
+          value:
+            '//iam.googleapis.com/projects/123456789/locations/global/workloadIdentityPools/my-pool/providers/my-provider',
+          type: 'text',
+        },
+        gcp_credentials_cloud_connector_id: { value: 'gcp-connector-id', type: 'text' },
+      };
+
+      expect(isGcpCloudConnectorVars(gcpVars, GCP_PROVIDER)).toBe(true);
+    });
+
+    it('should return false for GCP cloud connector vars with non-gcp provider', () => {
+      const gcpVars = {
+        service_account: {
+          value: 'test-service-account@project.iam.gserviceaccount.com',
+          type: 'text',
+        },
+        audience: {
+          value:
+            '//iam.googleapis.com/projects/123456789/locations/global/workloadIdentityPools/my-pool/providers/my-provider',
+          type: 'text',
+        },
+        gcp_credentials_cloud_connector_id: { value: 'gcp-connector-id', type: 'text' },
+      };
+
+      expect(isGcpCloudConnectorVars(gcpVars, AWS_PROVIDER)).toBe(false);
+    });
+
+    it('should return false for AWS cloud connector vars', () => {
+      const awsVars: AwsCloudConnectorVars = {
+        role_arn: { value: 'arn:aws:iam::123456789012:role/MyRole' },
+        external_id: { value: { isSecretRef: true, id: 'secret-id' }, type: 'password' },
+      };
+
+      expect(isGcpCloudConnectorVars(awsVars, GCP_PROVIDER)).toBe(false);
+    });
+
+    it('should return false for Azure cloud connector vars', () => {
+      const azureVars: AzureCloudConnectorVars = {
+        tenant_id: { value: { id: 'tenant-id', isSecretRef: true }, type: 'password' },
+        client_id: { value: { id: 'client-id', isSecretRef: true }, type: 'password' },
+        azure_credentials_cloud_connector_id: {
+          value: 'connector-id',
+          type: 'text',
+        },
+      };
+
+      expect(isGcpCloudConnectorVars(azureVars, GCP_PROVIDER)).toBe(false);
+    });
+
+    it('should return false when missing service_account', () => {
+      const incompleteVars = {
+        audience: {
+          value:
+            '//iam.googleapis.com/projects/123456789/locations/global/workloadIdentityPools/my-pool/providers/my-provider',
+          type: 'text',
+        },
+        gcp_credentials_cloud_connector_id: { value: 'gcp-connector-id', type: 'text' },
+      };
+
+      expect(isGcpCloudConnectorVars(incompleteVars, GCP_PROVIDER)).toBe(false);
+    });
+
+    it('should return false when missing audience', () => {
+      const incompleteVars = {
+        service_account: {
+          value: 'test-service-account@project.iam.gserviceaccount.com',
+          type: 'text',
+        },
+        gcp_credentials_cloud_connector_id: { value: 'gcp-connector-id', type: 'text' },
+      };
+
+      expect(isGcpCloudConnectorVars(incompleteVars, GCP_PROVIDER)).toBe(false);
+    });
+  });
+});
+
+describe('getCloudConnectorRemoteRoleTemplate', () => {
+  const mockCloudSetup = {
+    isCloudEnabled: true,
+    cloudId: 'cluster:ZW5kcG9pbnQkZGVwbG95bWVudCRraWJhbmEtY29tcG9uZW50LWlk',
+    baseUrl: 'https://elastic.co',
+    deploymentUrl: 'https://cloud.elastic.co/deployments/deployment-123/kibana',
+    deploymentId: 'deployment-123',
+    profileUrl: 'https://elastic.co/profile',
+    organizationUrl: 'https://elastic.co/organizations',
+    snapshotsUrl: 'https://elastic.co/snapshots',
+    isServerlessEnabled: false,
+  } as CloudSetup;
+
+  const mockServerlessCloudSetup = {
+    isCloudEnabled: false,
+    isServerlessEnabled: true,
+    serverless: { projectId: 'serverless-project-id' },
+  } as CloudSetup;
+
+  const mockIacTemplateUrl =
+    'https://example.com/templates/ACCOUNT_TYPE/RESOURCE_ID/cloudformation.yaml';
+
+  describe('Successful template URL generation', () => {
+    it('should generate template URL with ESS deployment resource ID', () => {
+      const result = getCloudConnectorRemoteRoleTemplate({
+        cloud: mockCloudSetup,
+        accountType: SINGLE_ACCOUNT,
+        iacTemplateUrl: mockIacTemplateUrl,
+      });
+
+      expect(result).toBe(
+        'https://example.com/templates/single-account/kibana-component-id/cloudformation.yaml'
+      );
+    });
+
+    it('should generate template URL with serverless project ID', () => {
+      const result = getCloudConnectorRemoteRoleTemplate({
+        cloud: mockServerlessCloudSetup,
+        accountType: ORGANIZATION_ACCOUNT,
+        iacTemplateUrl: mockIacTemplateUrl,
+      });
+
+      expect(result).toBe(
+        'https://example.com/templates/organization-account/serverless-project-id/cloudformation.yaml'
+      );
+    });
+
+    it('should replace ACCOUNT_TYPE placeholder with organization-account', () => {
+      const result = getCloudConnectorRemoteRoleTemplate({
+        cloud: mockCloudSetup,
+        accountType: ORGANIZATION_ACCOUNT,
+        iacTemplateUrl: mockIacTemplateUrl,
+      });
+
+      expect(result).toContain('/organization-account/');
+      expect(result).not.toContain('ACCOUNT_TYPE');
+    });
+
+    it('should replace ACCOUNT_TYPE placeholder with single-account', () => {
+      const result = getCloudConnectorRemoteRoleTemplate({
+        cloud: mockCloudSetup,
+        accountType: SINGLE_ACCOUNT,
+        iacTemplateUrl: mockIacTemplateUrl,
+      });
+
+      expect(result).toContain('/single-account/');
+      expect(result).not.toContain('ACCOUNT_TYPE');
+    });
+
+    it('should replace RESOURCE_ID placeholder with elastic resource ID', () => {
+      const result = getCloudConnectorRemoteRoleTemplate({
+        cloud: mockCloudSetup,
+        accountType: SINGLE_ACCOUNT,
+        iacTemplateUrl: mockIacTemplateUrl,
+      });
+
+      expect(result).toContain('/kibana-component-id/');
+      expect(result).not.toContain('RESOURCE_ID');
+    });
+
+    it('should use the serverless project ID when both serverless and cloud are enabled', () => {
+      const hybridCloudSetup = {
+        ...mockCloudSetup,
+        isServerlessEnabled: true,
+        serverless: { projectId: 'serverless-project-id' },
+      } as CloudSetup;
+
+      const result = getCloudConnectorRemoteRoleTemplate({
+        cloud: hybridCloudSetup,
+        accountType: SINGLE_ACCOUNT,
+        iacTemplateUrl: mockIacTemplateUrl,
+      });
+
+      expect(result).toBe(
+        'https://example.com/templates/single-account/serverless-project-id/cloudformation.yaml'
+      );
+    });
+
+    it('should handle complex cloud ID with base64 encoding', () => {
+      const complexCloudSetup = {
+        ...mockCloudSetup,
+        cloudId:
+          'production:ZXUtd2VzdC0xLmF3cy5mb3VuZC5pbyRkZXBsb3ltZW50LWNvbXBsZXgkY29tcGxleC1raWJhbmEtaWQ=',
+      } as CloudSetup;
+
+      const result = getCloudConnectorRemoteRoleTemplate({
+        cloud: complexCloudSetup,
+        accountType: SINGLE_ACCOUNT,
+        iacTemplateUrl: mockIacTemplateUrl,
+      });
+
+      expect(result).toContain('complex-kibana-id');
+    });
+  });
+
+  describe('Failure cases', () => {
+    it('should return undefined when iacTemplateUrl is not provided', () => {
+      const result = getCloudConnectorRemoteRoleTemplate({
+        cloud: mockCloudSetup,
+        accountType: SINGLE_ACCOUNT,
+        iacTemplateUrl: undefined,
+      });
+
+      expect(result).toBeUndefined();
+    });
+
+    it('should return undefined when no elastic resource ID is available', () => {
+      const noResourceCloudSetup = {
+        isCloudEnabled: false,
+        isServerlessEnabled: false,
+      } as CloudSetup;
+
+      const result = getCloudConnectorRemoteRoleTemplate({
+        cloud: noResourceCloudSetup,
+        accountType: SINGLE_ACCOUNT,
+        iacTemplateUrl: mockIacTemplateUrl,
+      });
+
+      expect(result).toBeUndefined();
+    });
+
+    it('should return undefined when serverless is enabled but project ID is missing', () => {
+      const serverlessNoProjectSetup = {
+        isCloudEnabled: false,
+        isServerlessEnabled: true,
+        serverless: { projectId: undefined },
+      } as CloudSetup;
+
+      const result = getCloudConnectorRemoteRoleTemplate({
+        cloud: serverlessNoProjectSetup,
+        accountType: SINGLE_ACCOUNT,
+        iacTemplateUrl: mockIacTemplateUrl,
+      });
+
+      expect(result).toBeUndefined();
+    });
+
+    it('should return undefined when cloud is enabled but deployment ID is missing', () => {
+      const noDeploymentIdSetup = {
+        ...mockCloudSetup,
+        deploymentId: undefined,
+        deploymentUrl: undefined,
+      } as CloudSetup;
+
+      const result = getCloudConnectorRemoteRoleTemplate({
+        cloud: noDeploymentIdSetup,
+        accountType: SINGLE_ACCOUNT,
+        iacTemplateUrl: mockIacTemplateUrl,
+      });
+
+      expect(result).toBeUndefined();
+    });
+
+    it('should return undefined when cloud is enabled but cloud ID is missing', () => {
+      const noCloudIdSetup = {
+        ...mockCloudSetup,
+        cloudId: undefined,
+      } as CloudSetup;
+
+      const result = getCloudConnectorRemoteRoleTemplate({
+        cloud: noCloudIdSetup,
+        accountType: SINGLE_ACCOUNT,
+        iacTemplateUrl: mockIacTemplateUrl,
+      });
+
+      expect(result).toBeUndefined();
+    });
+
+    it('should return undefined when cloud ID has missing kibana component', () => {
+      const invalidCloudIdSetup = {
+        ...mockCloudSetup,
+        cloudId: 'cluster:ZW5kcG9pbnQkZGVwbG95bWVudA==',
+      } as CloudSetup;
+
+      const result = getCloudConnectorRemoteRoleTemplate({
+        cloud: invalidCloudIdSetup,
+        accountType: SINGLE_ACCOUNT,
+        iacTemplateUrl: mockIacTemplateUrl,
+      });
+
+      expect(result).toBeUndefined();
+    });
+
+    it('falls back to the deployment URL when deploymentId is empty (trailing-slash deployment_url)', () => {
+      const trailingSlashSetup = {
+        ...mockCloudSetup,
+        deploymentId: '',
+        deploymentUrl: 'https://cloud.elastic.co/deployments/deployment-123/',
+      } as CloudSetup;
+
+      const result = getCloudConnectorRemoteRoleTemplate({
+        cloud: trailingSlashSetup,
+        accountType: SINGLE_ACCOUNT,
+        iacTemplateUrl: mockIacTemplateUrl,
+      });
+
+      expect(result).toContain('kibana-component-id');
+    });
+
+    it('should return undefined when neither deploymentId nor a parseable deployment URL is present', () => {
+      const noDeploymentSetup = {
+        ...mockCloudSetup,
+        deploymentId: '',
+        deploymentUrl: 'https://invalid-url-without-deployments-path',
+      } as CloudSetup;
+
+      const result = getCloudConnectorRemoteRoleTemplate({
+        cloud: noDeploymentSetup,
+        accountType: SINGLE_ACCOUNT,
+        iacTemplateUrl: mockIacTemplateUrl,
+      });
+
+      expect(result).toBeUndefined();
+    });
+  });
+
+  describe('Token-free template URLs', () => {
+    const tokenFreeUrl =
+      'https://console.aws.amazon.com/cloudformation/home#/stacks/quickcreate?templateURL=https://elastic-cspm-cft.s3.eu-central-1.amazonaws.com/cloudformation-federated-identity-aws-9.5.0.yml';
+
+    it('should return the URL as-is when it contains no substitution tokens', () => {
+      const result = getCloudConnectorRemoteRoleTemplate({
+        cloud: mockCloudSetup,
+        accountType: SINGLE_ACCOUNT,
+        iacTemplateUrl: tokenFreeUrl,
+      });
+
+      expect(result).toBe(tokenFreeUrl);
+    });
+
+    it('should return the URL as-is even when no elastic resource ID can be derived', () => {
+      const noResourceCloudSetup = {
+        isCloudEnabled: false,
+        isServerlessEnabled: false,
+      } as CloudSetup;
+
+      const result = getCloudConnectorRemoteRoleTemplate({
+        cloud: noResourceCloudSetup,
+        accountType: SINGLE_ACCOUNT,
+        iacTemplateUrl: tokenFreeUrl,
+      });
+
+      expect(result).toBe(tokenFreeUrl);
+    });
+  });
+});
+
+describe('getKibanaComponentId', () => {
+  it('should extract kibana component ID from valid cloudId', () => {
+    const cloudId = 'test:dGVzdC1ob3N0JGtpYmFuYS1jb21wb25lbnQtaWQkZXMtY29tcG9uZW50LWlk';
+    const result = getKibanaComponentId(cloudId);
+    expect(result).toBe('es-component-id');
+  });
+
+  it('should return undefined when cloudId is undefined', () => {
+    const result = getKibanaComponentId(undefined);
+    expect(result).toBeUndefined();
+  });
+
+  it('should return undefined when cloudId has no colon', () => {
+    const cloudId = 'invalid-cloud-id-without-colon';
+    const result = getKibanaComponentId(cloudId);
+    expect(result).toBeUndefined();
+  });
+
+  it('should return undefined when cloudId base64 part is empty', () => {
+    const cloudId = 'test:';
+    const result = getKibanaComponentId(cloudId);
+    expect(result).toBeUndefined();
+  });
+
+  it('should return undefined when base64 decoding fails', () => {
+    const cloudId = 'test:invalid-base64!!!';
+    const result = getKibanaComponentId(cloudId);
+    expect(result).toBeUndefined();
+  });
+
+  it('should return undefined when decoded value does not have expected format', () => {
+    const encodedValue = btoa('no-dollar-signs');
+    const cloudId = `test:${encodedValue}`;
+    const result = getKibanaComponentId(cloudId);
+    expect(result).toBeUndefined();
+  });
+
+  it('should handle cloudId with only one $ separator', () => {
+    const encodedValue = btoa('host$component');
+    const cloudId = `test:${encodedValue}`;
+    const result = getKibanaComponentId(cloudId);
+    expect(result).toBeUndefined();
+  });
+});
+
+describe('getDeploymentIdFromUrl', () => {
+  it('should extract deployment ID from valid deployment URL', () => {
+    const url = 'https://cloud.elastic.co/deployments/deployment-123';
+    const result = getDeploymentIdFromUrl(url);
+    expect(result).toBe('deployment-123');
+  });
+
+  it('should extract deployment ID from URL with query parameters', () => {
+    const url = 'https://cloud.elastic.co/deployments/deployment-456?tab=overview';
+    const result = getDeploymentIdFromUrl(url);
+    expect(result).toBe('deployment-456');
+  });
+
+  it('should extract deployment ID from URL with hash', () => {
+    const url = 'https://cloud.elastic.co/deployments/deployment-789#section';
+    const result = getDeploymentIdFromUrl(url);
+    expect(result).toBe('deployment-789');
+  });
+
+  it('should return undefined when url is undefined', () => {
+    const result = getDeploymentIdFromUrl(undefined);
+    expect(result).toBeUndefined();
+  });
+
+  it('should return undefined when url does not contain deployments path', () => {
+    const url = 'https://cloud.elastic.co/some/other/path';
+    const result = getDeploymentIdFromUrl(url);
+    expect(result).toBeUndefined();
+  });
+
+  it('should handle deployment ID with special characters', () => {
+    const url = 'https://cloud.elastic.co/deployments/deployment-abc-123-xyz';
+    const result = getDeploymentIdFromUrl(url);
+    expect(result).toBe('deployment-abc-123-xyz');
+  });
+});
+
+describe('Cloud Connector Name Validation', () => {
+  describe('CLOUD_CONNECTOR_NAME_MAX_LENGTH', () => {
+    it('should be 255', () => {
+      expect(CLOUD_CONNECTOR_NAME_MAX_LENGTH).toBe(255);
+    });
+  });
+
+  describe('isCloudConnectorNameValid', () => {
+    it('should return false for undefined name', () => {
+      expect(isCloudConnectorNameValid(undefined)).toBe(false);
+    });
+
+    it('should return false for empty string', () => {
+      expect(isCloudConnectorNameValid('')).toBe(false);
+    });
+
+    it('should return false for whitespace-only string', () => {
+      expect(isCloudConnectorNameValid('   ')).toBe(false);
+      expect(isCloudConnectorNameValid('\t\n')).toBe(false);
+    });
+
+    it('should return true for valid name', () => {
+      expect(isCloudConnectorNameValid('my-connector')).toBe(true);
+      expect(isCloudConnectorNameValid('Test Connector 123')).toBe(true);
+    });
+
+    it('should return true for name with exactly 255 characters', () => {
+      const exactly255Chars = 'a'.repeat(255);
+      expect(isCloudConnectorNameValid(exactly255Chars)).toBe(true);
+    });
+
+    it('should return false for name exceeding 255 characters', () => {
+      const chars256 = 'a'.repeat(256);
+      expect(isCloudConnectorNameValid(chars256)).toBe(false);
+    });
+
+    it('should handle boundary cases correctly', () => {
+      expect(isCloudConnectorNameValid('a'.repeat(254))).toBe(true);
+      expect(isCloudConnectorNameValid('a'.repeat(255))).toBe(true);
+      expect(isCloudConnectorNameValid('a'.repeat(256))).toBe(false);
+      expect(isCloudConnectorNameValid('a'.repeat(257))).toBe(false);
+    });
+
+    it('should handle special characters', () => {
+      expect(isCloudConnectorNameValid('my-connector_123!@#')).toBe(true);
+    });
+
+    it('should handle unicode characters', () => {
+      expect(isCloudConnectorNameValid('connector-中文-名称')).toBe(true);
+    });
+  });
+
+  describe('getCloudConnectorNameError', () => {
+    it('should return required error for undefined name', () => {
+      expect(getCloudConnectorNameError(undefined)).toBe('Federated Identity Name is required');
+    });
+
+    it('should return required error for empty string', () => {
+      expect(getCloudConnectorNameError('')).toBe('Federated Identity Name is required');
+    });
+
+    it('should return required error for whitespace-only string', () => {
+      expect(getCloudConnectorNameError('   ')).toBe('Federated Identity Name is required');
+      expect(getCloudConnectorNameError('\t\n')).toBe('Federated Identity Name is required');
+    });
+
+    it('should return undefined for valid name', () => {
+      expect(getCloudConnectorNameError('my-connector')).toBeUndefined();
+      expect(getCloudConnectorNameError('Test Connector 123')).toBeUndefined();
+    });
+
+    it('should return undefined for name with exactly 255 characters', () => {
+      const exactly255Chars = 'a'.repeat(255);
+      expect(getCloudConnectorNameError(exactly255Chars)).toBeUndefined();
+    });
+
+    it('should return length error for name exceeding 255 characters', () => {
+      const chars256 = 'a'.repeat(256);
+      expect(getCloudConnectorNameError(chars256)).toBe(
+        'Federated Identity Name must be 255 characters or less'
+      );
+    });
+
+    it('should handle boundary cases correctly', () => {
+      expect(getCloudConnectorNameError('a'.repeat(254))).toBeUndefined();
+      expect(getCloudConnectorNameError('a'.repeat(255))).toBeUndefined();
+      expect(getCloudConnectorNameError('a'.repeat(256))).toBe(
+        'Federated Identity Name must be 255 characters or less'
+      );
+    });
+  });
+});
+
+describe('getAnyCloudConnectorIacTemplateUrl', () => {
+  it('returns undefined for undefined input', () => {
+    expect(getAnyCloudConnectorIacTemplateUrl(undefined)).toBeUndefined();
+  });
+
+  it('returns undefined when package has no var_groups or policy_templates', () => {
+    expect(getAnyCloudConnectorIacTemplateUrl({} as any)).toBeUndefined();
+  });
+
+  it('returns iac_template_url from var_groups options (primary path — AWS package format)', () => {
+    const packageInfo = {
+      var_groups: [
+        {
+          name: 'credentials',
+          title: 'Credentials',
+          selector_title: 'Auth method',
+          options: [
+            {
+              name: 'cloud_connector',
+              title: 'Federated Identity',
+              provider: 'aws',
+              vars: [],
+              iac_template_url:
+                'https://example.com/cloudformation.yaml?account_type=ACCOUNT_TYPE&resource_id=RESOURCE_ID',
+            },
+          ],
+        },
+      ],
+    } as any;
+    expect(getAnyCloudConnectorIacTemplateUrl(packageInfo)).toBe(
+      'https://example.com/cloudformation.yaml?account_type=ACCOUNT_TYPE&resource_id=RESOURCE_ID'
+    );
+  });
+
+  it('returns undefined when var_groups exist but no cloud provider option found', () => {
+    const packageInfo = {
+      var_groups: [
+        {
+          name: 'g1',
+          options: [{ name: 'no_cloud_provider', provider: 'other', vars: [] }],
+        },
+      ],
+    } as any;
+    expect(getAnyCloudConnectorIacTemplateUrl(packageInfo)).toBeUndefined();
+  });
+});
+
+describe('Workload Identity template URLs', () => {
+  const WII_TEMPLATE_URL =
+    'https://console.aws.amazon.com/cloudformation/home#/stacks/quickcreate?templateURL=https://elastic-cspm-cft.s3.eu-central-1.amazonaws.com/cloudformation-federated-identity-wii-aws-9.6.0.yml&param_ElasticOrganizationId=ORGANIZATION_ID&param_ElasticCloudProvider=CLOUD_PROVIDER&param_ElasticCloudRegion=CLOUD_REGION&param_ElasticCloudEnvironment=CLOUD_ENVIRONMENT&param_ElasticResourceType=RESOURCE_TYPE&param_ElasticResourceId=RESOURCE_ID';
+  const LEGACY_TEMPLATE_URL =
+    'https://console.aws.amazon.com/cloudformation/home#/stacks/quickcreate?templateURL=https://elastic-cspm-cft.s3.eu-central-1.amazonaws.com/cloudformation-federated-identity-aws-9.6.0.yml';
+
+  const encodeCloudId = (host: string, kibanaComponentId: string) =>
+    `label:${btoa(`${host}$es-component-id$${kibanaComponentId}`)}`;
+
+  const KIBANA_COMPONENT_ID = '3a127b696031473aba8624d0cb17ec43';
+  const PROJECT_ID = 'fe9c342b06c74eda8afb679e0b3d22d8';
+
+  const echQaCloud = {
+    isCloudEnabled: true,
+    isServerlessEnabled: false,
+    cloudId: encodeCloudId('eu-west-1.aws.qa.cld.elstc.co:9243', KIBANA_COMPONENT_ID),
+    deploymentUrl: 'https://console.qa.cld.elstc.co/deployments/1f2e3d4c5b6a79808172635445362718',
+    deploymentId: '1f2e3d4c5b6a79808172635445362718',
+    organizationId: '2070044029',
+    serverless: {},
+  } as CloudSetup;
+
+  const serverlessProductionCloud = {
+    isCloudEnabled: true,
+    isServerlessEnabled: true,
+    cloudId: encodeCloudId('us-east-1.aws.elastic.cloud', `${PROJECT_ID}.kb`),
+    deploymentUrl: `https://cloud.elastic.co/projects/security/${PROJECT_ID}`,
+    deploymentId: PROJECT_ID,
+    organizationId: '10',
+    csp: 'aws',
+    baseUrl: 'https://cloud.elastic.co',
+    serverless: { projectId: PROJECT_ID },
+  } as CloudSetup;
+
+  const getQuickCreateParams = (url: string) => new URLSearchParams(url.split('?')[1]);
+
+  describe('getCloudConnectorRemoteRoleTemplate', () => {
+    it('pre-fills every parameter for an Elastic Cloud Hosted deployment (Kibana component ID as resource)', () => {
+      const result = getCloudConnectorRemoteRoleTemplate({
+        cloud: echQaCloud,
+        accountType: SINGLE_ACCOUNT,
+        iacTemplateUrl: WII_TEMPLATE_URL,
+      });
+
+      expect(result).toBeDefined();
+      const params = getQuickCreateParams(result!);
+      expect(params.get('templateURL')).toBe(
+        'https://elastic-cspm-cft.s3.eu-central-1.amazonaws.com/cloudformation-federated-identity-wii-aws-9.6.0.yml'
+      );
+      expect(params.get('param_ElasticOrganizationId')).toBe('2070044029');
+      expect(params.get('param_ElasticCloudProvider')).toBe('aws');
+      expect(params.get('param_ElasticCloudRegion')).toBe('eu-west-1');
+      expect(params.get('param_ElasticCloudEnvironment')).toBe('qa');
+      expect(params.get('param_ElasticResourceType')).toBe('deployment');
+      expect(params.get('param_ElasticResourceId')).toBe(KIBANA_COMPONENT_ID);
+      TEMPLATE_URL_TOKENS.forEach((token) => expect(result).not.toContain(token));
+    });
+
+    it('pre-fills every parameter for a Serverless project (project ID as resource)', () => {
+      const result = getCloudConnectorRemoteRoleTemplate({
+        cloud: serverlessProductionCloud,
+        accountType: SINGLE_ACCOUNT,
+        iacTemplateUrl: WII_TEMPLATE_URL,
+      });
+
+      expect(result).toBeDefined();
+      const params = getQuickCreateParams(result!);
+      expect(params.get('param_ElasticOrganizationId')).toBe('10');
+      expect(params.get('param_ElasticCloudProvider')).toBe('aws');
+      expect(params.get('param_ElasticCloudRegion')).toBe('us-east-1');
+      expect(params.get('param_ElasticCloudEnvironment')).toBe('production');
+      expect(params.get('param_ElasticResourceType')).toBe('project');
+      expect(params.get('param_ElasticResourceId')).toBe(PROJECT_ID);
+    });
+
+    it('prefers the explicit cloud plugin CSP and region over the Cloud ID host', () => {
+      const result = getCloudConnectorRemoteRoleTemplate({
+        cloud: { ...echQaCloud, csp: 'gcp', region: 'us-central1' } as CloudSetup,
+        accountType: SINGLE_ACCOUNT,
+        iacTemplateUrl: WII_TEMPLATE_URL,
+      });
+
+      const params = getQuickCreateParams(result!);
+      expect(params.get('param_ElasticCloudProvider')).toBe('gcp');
+      expect(params.get('param_ElasticCloudRegion')).toBe('us-central1');
+      expect(params.get('param_ElasticCloudEnvironment')).toBe('qa');
+    });
+
+    it('prefers the cloudHost exposed by the cloud plugin over decoding the Cloud ID', () => {
+      const result = getCloudConnectorRemoteRoleTemplate({
+        cloud: { ...echQaCloud, cloudHost: 'eastus2.azure.staging.cld.elstc.co' } as CloudSetup,
+        accountType: SINGLE_ACCOUNT,
+        iacTemplateUrl: WII_TEMPLATE_URL,
+      });
+
+      const params = getQuickCreateParams(result!);
+      expect(params.get('param_ElasticCloudProvider')).toBe('azure');
+      expect(params.get('param_ElasticCloudRegion')).toBe('eastus2');
+      expect(params.get('param_ElasticCloudEnvironment')).toBe('staging');
+    });
+
+    it('falls back to the console base URL for the environment when no Cloud ID host is available', () => {
+      const result = getCloudConnectorRemoteRoleTemplate({
+        cloud: {
+          ...serverlessProductionCloud,
+          cloudId: undefined,
+          region: 'us-east-1',
+          baseUrl: 'https://console.staging.foundit.no',
+        } as CloudSetup,
+        accountType: SINGLE_ACCOUNT,
+        iacTemplateUrl: WII_TEMPLATE_URL,
+      });
+
+      const params = getQuickCreateParams(result!);
+      expect(params.get('param_ElasticCloudEnvironment')).toBe('staging');
+      expect(params.get('param_ElasticResourceId')).toBe(PROJECT_ID);
+    });
+
+    it('returns undefined when the organization ID is unknown', () => {
+      const result = getCloudConnectorRemoteRoleTemplate({
+        cloud: { ...echQaCloud, organizationId: undefined } as CloudSetup,
+        accountType: SINGLE_ACCOUNT,
+        iacTemplateUrl: WII_TEMPLATE_URL,
+      });
+
+      expect(result).toBeUndefined();
+    });
+
+    it('returns undefined when the region cannot be derived from config or the Cloud ID host', () => {
+      const result = getCloudConnectorRemoteRoleTemplate({
+        cloud: { ...serverlessProductionCloud, cloudId: undefined } as CloudSetup,
+        accountType: SINGLE_ACCOUNT,
+        iacTemplateUrl: WII_TEMPLATE_URL,
+      });
+
+      expect(result).toBeUndefined();
+    });
+
+    it('returns undefined outside Elastic Cloud', () => {
+      const result = getCloudConnectorRemoteRoleTemplate({
+        cloud: { isCloudEnabled: false, isServerlessEnabled: false, serverless: {} } as CloudSetup,
+        accountType: SINGLE_ACCOUNT,
+        iacTemplateUrl: WII_TEMPLATE_URL,
+      });
+
+      expect(result).toBeUndefined();
+    });
+
+    it('still returns legacy token-free template URLs untouched', () => {
+      const result = getCloudConnectorRemoteRoleTemplate({
+        cloud: echQaCloud,
+        accountType: SINGLE_ACCOUNT,
+        iacTemplateUrl: LEGACY_TEMPLATE_URL,
+      });
+
+      expect(result).toBe(LEGACY_TEMPLATE_URL);
+    });
+
+    it('leaves everything that is not a known token untouched, including upper-case values', () => {
+      const url = `${LEGACY_TEMPLATE_URL}&capabilities=CAPABILITY_NAMED_IAM&param_LogLevel=INFO`;
+
+      expect(
+        getCloudConnectorRemoteRoleTemplate({
+          cloud: echQaCloud,
+          accountType: SINGLE_ACCOUNT,
+          iacTemplateUrl: url,
+        })
+      ).toBe(url);
+    });
+
+    it('substitutes ACCOUNT_TYPE inside an encoded ARM template path', () => {
+      const armUrl =
+        'https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Felastic%2Fcloudbeat%2Fmain%2Fdeploy%2Fazure%2FARM-for-ACCOUNT_TYPE.json';
+
+      expect(
+        getCloudConnectorRemoteRoleTemplate({
+          cloud: echQaCloud,
+          accountType: ORGANIZATION_ACCOUNT,
+          iacTemplateUrl: armUrl,
+        })
+      ).toBe(armUrl.replace('ACCOUNT_TYPE', 'organization-account'));
+    });
+
+    it('URL-encodes substituted values', () => {
+      const result = getCloudConnectorRemoteRoleTemplate({
+        cloud: { ...echQaCloud, organizationId: 'org id&x' } as CloudSetup,
+        accountType: SINGLE_ACCOUNT,
+        iacTemplateUrl: WII_TEMPLATE_URL,
+      });
+
+      expect(result).toContain('param_ElasticOrganizationId=org%20id%26x');
+    });
+  });
+
+  describe('getTemplateUrlTokens', () => {
+    it('returns the tokens present in declaration order', () => {
+      expect(getTemplateUrlTokens(WII_TEMPLATE_URL)).toEqual([
+        'RESOURCE_ID',
+        'RESOURCE_TYPE',
+        'ORGANIZATION_ID',
+        'CLOUD_PROVIDER',
+        'CLOUD_REGION',
+        'CLOUD_ENVIRONMENT',
+      ]);
+      expect(getTemplateUrlTokens(LEGACY_TEMPLATE_URL)).toEqual([]);
+      expect(getTemplateUrlTokens(undefined)).toEqual([]);
+    });
+  });
+
+  describe('getWorkloadIdentityFederationStackParams', () => {
+    it('fills every stack parameter for an Elastic Cloud Hosted deployment', () => {
+      expect(getWorkloadIdentityFederationStackParams(echQaCloud)).toEqual({
+        ElasticOrganizationId: '2070044029',
+        ElasticCloudProvider: 'aws',
+        ElasticCloudRegion: 'eu-west-1',
+        ElasticCloudEnvironment: 'qa',
+        ElasticResourceType: 'deployment',
+        ElasticResourceId: KIBANA_COMPONENT_ID,
+      });
+    });
+
+    it('fills every stack parameter for a Serverless project', () => {
+      expect(getWorkloadIdentityFederationStackParams(serverlessProductionCloud)).toEqual({
+        ElasticOrganizationId: '10',
+        ElasticCloudProvider: 'aws',
+        ElasticCloudRegion: 'us-east-1',
+        ElasticCloudEnvironment: 'production',
+        ElasticResourceType: 'project',
+        ElasticResourceId: PROJECT_ID,
+      });
+    });
+
+    it('omits parameters this Kibana cannot resolve', () => {
+      const params = getWorkloadIdentityFederationStackParams({
+        ...echQaCloud,
+        organizationId: undefined,
+      } as CloudSetup);
+
+      expect(params).not.toHaveProperty('ElasticOrganizationId');
+      expect(params.ElasticResourceId).toBe(KIBANA_COMPONENT_ID);
+    });
+
+    it('returns no parameters without a cloud context', () => {
+      expect(getWorkloadIdentityFederationStackParams(undefined)).toEqual({});
+    });
+
+    it('returns no parameters outside Elastic Cloud', () => {
+      expect(
+        getWorkloadIdentityFederationStackParams({
+          ...echQaCloud,
+          isCloudEnabled: false,
+          isServerlessEnabled: false,
+        } as CloudSetup)
+      ).toEqual({});
+    });
+  });
+
+  describe('getElasticCloudTemplateContext', () => {
+    it('describes an Elastic Cloud Hosted deployment', () => {
+      expect(getElasticCloudTemplateContext(echQaCloud)).toEqual({
+        resourceType: 'deployment',
+        resourceId: KIBANA_COMPONENT_ID,
+        organizationId: '2070044029',
+        cloudProvider: 'aws',
+        cloudRegion: 'eu-west-1',
+        cloudEnvironment: 'qa',
+      });
+    });
+
+    it('describes a Serverless project', () => {
+      expect(getElasticCloudTemplateContext(serverlessProductionCloud)).toEqual({
+        resourceType: 'project',
+        resourceId: PROJECT_ID,
+        organizationId: '10',
+        cloudProvider: 'aws',
+        cloudRegion: 'us-east-1',
+        cloudEnvironment: 'production',
+      });
+    });
+
+    it('ignores a CSP value that is not a supported provider', () => {
+      expect(
+        getElasticCloudTemplateContext({ ...echQaCloud, csp: 'ibm' } as CloudSetup).cloudProvider
+      ).toBe('aws');
+    });
+
+    it('lower-cases the configured region and falls back to the host for invalid values', () => {
+      expect(
+        getElasticCloudTemplateContext({ ...echQaCloud, region: 'EU-WEST-2' } as CloudSetup)
+          .cloudRegion
+      ).toBe('eu-west-2');
+      expect(
+        getElasticCloudTemplateContext({ ...echQaCloud, region: 'eu west 2' } as CloudSetup)
+          .cloudRegion
+      ).toBe('eu-west-1');
+    });
+
+    it('defaults to production and leaves unknown values undefined without cloud context', () => {
+      expect(getElasticCloudTemplateContext(undefined)).toEqual({
+        resourceType: 'deployment',
+        resourceId: undefined,
+        organizationId: undefined,
+        cloudProvider: undefined,
+        cloudRegion: undefined,
+        cloudEnvironment: 'production',
+      });
+    });
+  });
+
+  describe('getElasticResource', () => {
+    it('uses the Kibana component ID on Elastic Cloud Hosted', () => {
+      expect(getElasticResource(echQaCloud)).toEqual({
+        type: 'deployment',
+        id: KIBANA_COMPONENT_ID,
+      });
+    });
+
+    it('uses the project ID on Serverless', () => {
+      expect(getElasticResource(serverlessProductionCloud)).toEqual({
+        type: 'project',
+        id: PROJECT_ID,
+      });
+    });
+
+    it('uses the project ID on Serverless even when a deployment ID and Kibana component are present', () => {
+      expect(
+        getElasticResource({
+          ...echQaCloud,
+          isServerlessEnabled: true,
+          serverless: { projectId: PROJECT_ID },
+        } as CloudSetup)
+      ).toEqual({ type: 'project', id: PROJECT_ID });
+    });
+
+    it('returns the resource type without an ID when nothing can be derived', () => {
+      expect(
+        getElasticResource({
+          isCloudEnabled: true,
+          isServerlessEnabled: true,
+          serverless: {},
+        } as CloudSetup)
+      ).toEqual({ type: 'project' });
+      expect(getElasticResource(undefined)).toEqual({ type: 'deployment' });
+    });
+  });
+
+  describe('parseElasticCloudHost', () => {
+    it.each([
+      ['us-east-1.aws.found.io', 'us-east-1', 'aws'],
+      ['us-central1.gcp.cloud.es.io', 'us-central1', 'gcp'],
+      ['eastus2.azure.elastic-cloud.com', 'eastus2', 'azure'],
+      ['us-gov-east-1.aws.elastic-cloud.com', 'us-gov-east-1', 'aws'],
+      ['eu-west-1.aws.elastic.cloud', 'eu-west-1', 'aws'],
+      ['eu-west-1.aws.qa.cld.elstc.co', 'eu-west-1', 'aws'],
+      ['us-central1.gcp.qa.elastic.cloud', 'us-central1', 'gcp'],
+      ['us-east-1.aws.staging.foundit.no', 'us-east-1', 'aws'],
+      ['us-east-1.aws.staging.elastic.cloud', 'us-east-1', 'aws'],
+      ['EU-WEST-1.AWS.QA.CLD.ELSTC.CO:9243', 'eu-west-1', 'aws'],
+    ])('parses %s', (host, region, csp) => {
+      expect(parseElasticCloudHost(host)).toEqual({ region, csp });
+    });
+
+    it('leaves the CSP undefined for hosts that do not follow the Elastic Cloud layout', () => {
+      expect(parseElasticCloudHost('my-ece.example.com')).toEqual({
+        region: 'my-ece',
+        csp: undefined,
+      });
+    });
+
+    it('returns undefined for hosts with fewer than three labels or no host', () => {
+      expect(parseElasticCloudHost('localhost')).toBeUndefined();
+      expect(parseElasticCloudHost('kibana.local')).toBeUndefined();
+      expect(parseElasticCloudHost(undefined)).toBeUndefined();
+      expect(parseElasticCloudHost('')).toBeUndefined();
+    });
+  });
+
+  describe('getElasticCloudEnvironmentFromHost', () => {
+    it('maps QA and staging labels and defaults everything else to production', () => {
+      expect(getElasticCloudEnvironmentFromHost('console.qa.cld.elstc.co')).toBe('qa');
+      expect(getElasticCloudEnvironmentFromHost('staging.found.no')).toBe('staging');
+      expect(getElasticCloudEnvironmentFromHost('console.staging.foundit.no')).toBe('staging');
+      expect(getElasticCloudEnvironmentFromHost('cloud.elastic.co')).toBe('production');
+      expect(getElasticCloudEnvironmentFromHost('ap-southeast-1.aws.found.io')).toBe('production');
+      expect(getElasticCloudEnvironmentFromHost('eu-west-1.aws.dev.elastic.cloud')).toBe(
+        'production'
+      );
+      expect(getElasticCloudEnvironmentFromHost(undefined)).toBeUndefined();
+    });
+  });
+
+  describe('getCloudHostFromCloudId', () => {
+    it('returns the host without the port', () => {
+      expect(
+        getCloudHostFromCloudId(encodeCloudId('eu-west-1.aws.qa.cld.elstc.co:9243', 'kb'))
+      ).toBe('eu-west-1.aws.qa.cld.elstc.co');
+      expect(getCloudHostFromCloudId(encodeCloudId('us-east-1.aws.elastic.cloud', 'kb'))).toBe(
+        'us-east-1.aws.elastic.cloud'
+      );
+    });
+
+    it('returns undefined for missing or malformed Cloud IDs', () => {
+      expect(getCloudHostFromCloudId(undefined)).toBeUndefined();
+      expect(getCloudHostFromCloudId('no-colon')).toBeUndefined();
+      expect(getCloudHostFromCloudId('label:')).toBeUndefined();
+      expect(getCloudHostFromCloudId('label:!!!not-base64!!!')).toBeUndefined();
+    });
+  });
+});
+
+describe('IaC launch URL helpers', () => {
+  const STATIC_URL =
+    'https://console.aws.amazon.com/cloudformation/home#/stacks/quickcreate?templateURL=https%3A%2F%2Fstatic.example%2Ft.yml&param_X=1';
+  const ARTIFACT = 'https://s3.example/rendered?X-Amz-Signature=abc';
+  const STACK_ARN = 'arn:aws:cloudformation:us-east-1:123456789012:stack/my-stack/uuid';
+
+  it('getArtifactLaunchUrl builds the quick-create link from the artifact', () => {
+    expect(getArtifactLaunchUrl({ provider: 'aws', artifactUrl: ARTIFACT })).toBe(
+      `https://console.aws.amazon.com/cloudformation/home#/stacks/quickcreate?templateURL=${encodeURIComponent(
+        ARTIFACT
+      )}`
+    );
+  });
+
+  it('getArtifactLaunchUrl adds encoded stack params to the quick-create link', () => {
+    const url = getArtifactLaunchUrl({
+      provider: 'aws',
+      artifactUrl: ARTIFACT,
+      stackParams: { ElasticOrganizationId: 'org id&x', ElasticResourceType: 'project' },
+    });
+
+    expect(url).toBe(
+      `https://console.aws.amazon.com/cloudformation/home#/stacks/quickcreate?templateURL=${encodeURIComponent(
+        ARTIFACT
+      )}&param_ElasticOrganizationId=org%20id%26x&param_ElasticResourceType=project`
+    );
+  });
+
+  it('getArtifactLaunchUrl swaps the artifact into the static URL, keeping its host and params', () => {
+    const staticUrl =
+      'https://console.amazonaws-us-gov.com/cloudformation/home#/stacks/quickcreate?templateURL=https%3A%2F%2Fstatic.example%2Ft.yml&stackName=Elastic-Cloud-Connector&param_X=1';
+
+    expect(getArtifactLaunchUrl({ provider: 'aws', artifactUrl: ARTIFACT, staticUrl })).toBe(
+      `https://console.amazonaws-us-gov.com/cloudformation/home#/stacks/quickcreate?templateURL=${encodeURIComponent(
+        ARTIFACT
+      )}&stackName=Elastic-Cloud-Connector&param_X=1`
+    );
+  });
+
+  it('getArtifactLaunchUrl sets stack params on the static URL, replacing any it already carries', () => {
+    const url = getArtifactLaunchUrl({
+      provider: 'aws',
+      artifactUrl: ARTIFACT,
+      staticUrl: `${STATIC_URL}&stackName=Elastic-Cloud-Connector`,
+      stackParams: { X: 'replaced', ElasticOrganizationId: '2070044029' },
+    });
+
+    expect(url).toBe(
+      `https://console.aws.amazon.com/cloudformation/home#/stacks/quickcreate?templateURL=${encodeURIComponent(
+        ARTIFACT
+      )}&param_X=replaced&stackName=Elastic-Cloud-Connector&param_ElasticOrganizationId=2070044029`
+    );
+  });
+
+  it('getArtifactLaunchUrl builds the quick-create link when the static URL has no templateURL param', () => {
+    expect(
+      getArtifactLaunchUrl({
+        provider: 'aws',
+        artifactUrl: ARTIFACT,
+        staticUrl: 'https://static.example/t.yml',
+      })
+    ).toBe(
+      `https://console.aws.amazon.com/cloudformation/home#/stacks/quickcreate?templateURL=${encodeURIComponent(
+        ARTIFACT
+      )}`
+    );
+  });
+
+  it('getArtifactLaunchUrl ignores the static URL for the stack-update deep link', () => {
+    expect(
+      getArtifactLaunchUrl({
+        provider: 'aws',
+        artifactUrl: ARTIFACT,
+        deploymentId: STACK_ARN,
+        staticUrl: STATIC_URL,
+      })
+    ).toBe(
+      `https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/update/template?stackId=${encodeURIComponent(
+        STACK_ARN
+      )}&templateURL=${encodeURIComponent(ARTIFACT)}`
+    );
+  });
+
+  it('getStaticLaunchUrl adds stack params to the static URL', () => {
+    expect(
+      getStaticLaunchUrl({
+        provider: 'aws',
+        staticUrl: STATIC_URL,
+        stackParams: { ElasticOrganizationId: '2070044029' },
+      })
+    ).toBe(`${STATIC_URL}&param_ElasticOrganizationId=2070044029`);
+  });
+
+  it('getStaticLaunchUrl replaces stack params the static URL already carries', () => {
+    expect(
+      getStaticLaunchUrl({
+        provider: 'aws',
+        staticUrl: STATIC_URL,
+        stackParams: { X: 'replaced' },
+      })
+    ).toBe(STATIC_URL.replace('param_X=1', 'param_X=replaced'));
+  });
+
+  it('getStaticLaunchUrl keeps replacement patterns in stack params literal', () => {
+    const url = getStaticLaunchUrl({
+      provider: 'aws',
+      staticUrl: STATIC_URL,
+      stackParams: { X: '$&$1' },
+    });
+
+    expect(new URLSearchParams(url?.split('?')[1]).get('param_X')).toBe('$&$1');
+  });
+
+  it('getStaticLaunchUrl leaves a URL that is not a quick-create link unchanged', () => {
+    const rawTemplateUrl = 'https://static.example/t.yml?X-Amz-Signature=abc';
+
+    expect(
+      getStaticLaunchUrl({
+        provider: 'aws',
+        staticUrl: rawTemplateUrl,
+        stackParams: { ElasticOrganizationId: '2070044029' },
+      })
+    ).toBe(rawTemplateUrl);
+  });
+
+  it('getStaticLaunchUrl returns undefined when there is no static URL', () => {
+    expect(
+      getStaticLaunchUrl({
+        provider: 'aws',
+        staticUrl: undefined,
+        stackParams: { ElasticOrganizationId: '2070044029' },
+      })
+    ).toBeUndefined();
+  });
+
+  it('getArtifactLaunchUrl does not add stack params to the stack-update deep link', () => {
+    const url = getArtifactLaunchUrl({
+      provider: 'aws',
+      artifactUrl: ARTIFACT,
+      deploymentId: STACK_ARN,
+      stackParams: { ElasticOrganizationId: '2070044029' },
+    });
+
+    expect(url).not.toContain('param_');
+  });
+
+  it('getArtifactLaunchUrl builds the stack-update deep link when a deployment id is known', () => {
+    expect(
+      getArtifactLaunchUrl({
+        provider: 'aws',
+        artifactUrl: ARTIFACT,
+        deploymentId: STACK_ARN,
+      })
+    ).toBe(
+      `https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/update/template?stackId=${encodeURIComponent(
+        STACK_ARN
+      )}&templateURL=${encodeURIComponent(ARTIFACT)}`
+    );
+  });
+
+  it('getStaticLaunchUrl and getArtifactLaunchUrl return undefined for non-AWS providers', () => {
+    expect(getStaticLaunchUrl({ provider: 'azure', staticUrl: STATIC_URL })).toBeUndefined();
+    expect(getArtifactLaunchUrl({ provider: 'azure', artifactUrl: ARTIFACT })).toBeUndefined();
+  });
+
+  it('getArtifactLaunchUrl and getAwsStackConsoleUrl link to the console of the ARN partition', () => {
+    // The ARN validator accepts GovCloud and China stacks; their consoles live on other hosts.
+    const GOV_ARN = 'arn:aws-us-gov:cloudformation:us-gov-west-1:123456789012:stack/s/u';
+    const CN_ARN = 'arn:aws-cn:cloudformation:cn-north-1:123456789012:stack/s/u';
+
+    expect(
+      getArtifactLaunchUrl({
+        provider: 'aws',
+        artifactUrl: ARTIFACT,
+        deploymentId: GOV_ARN,
+      })
+    ).toBe(
+      `https://console.amazonaws-us-gov.com/cloudformation/home?region=us-gov-west-1#/stacks/update/template?stackId=${encodeURIComponent(
+        GOV_ARN
+      )}&templateURL=${encodeURIComponent(ARTIFACT)}`
+    );
+    expect(getAwsStackConsoleUrl(CN_ARN)).toBe(
+      `https://console.amazonaws.cn/cloudformation/home?region=cn-north-1#/stacks/stackinfo?stackId=${encodeURIComponent(
+        CN_ARN
+      )}`
+    );
+  });
+
+  it('returns undefined for a partition with no public console instead of a commercial link', () => {
+    const ISO_ARN = 'arn:aws-iso:cloudformation:us-iso-east-1:123456789012:stack/s/u';
+
+    expect(
+      getArtifactLaunchUrl({
+        provider: 'aws',
+        artifactUrl: ARTIFACT,
+        deploymentId: ISO_ARN,
+      })
+    ).toBeUndefined();
+    expect(getAwsStackConsoleUrl(ISO_ARN)).toBeUndefined();
+  });
+
+  it('returns undefined for a regional ARN that is not a CloudFormation stack', () => {
+    // A CloudWatch Logs ARN has a parseable region and a console host, but no stack to update or
+    // view; a legacy stored value like this must not be linked as a stack.
+    const LOGS_ARN = 'arn:aws:logs:us-east-1:123456789012:log-group:/aws/lambda/fn:*';
+
+    expect(
+      getArtifactLaunchUrl({
+        provider: 'aws',
+        artifactUrl: ARTIFACT,
+        deploymentId: LOGS_ARN,
+      })
+    ).toBeUndefined();
+    expect(getAwsStackConsoleUrl(LOGS_ARN)).toBeUndefined();
+  });
+
+  it('getArtifactLaunchUrl returns undefined for a malformed deploymentId that has no parseable region', () => {
+    expect(
+      getArtifactLaunchUrl({
+        provider: 'aws',
+        artifactUrl: ARTIFACT,
+        deploymentId: 'not-an-arn',
+      })
+    ).toBeUndefined();
+  });
+
+  it('getAwsStackConsoleUrl links to the stack info page', () => {
+    expect(getAwsStackConsoleUrl(STACK_ARN)).toBe(
+      `https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/stackinfo?stackId=${encodeURIComponent(
+        STACK_ARN
+      )}`
+    );
+    expect(getAwsStackConsoleUrl(undefined)).toBeUndefined();
+  });
+
+  it('getAwsStackConsoleUrl returns undefined for a malformed ARN', () => {
+    expect(getAwsStackConsoleUrl('not-an-arn')).toBeUndefined();
+  });
+});
+
+describe('isStackArnInvalid', () => {
+  const STACK_ARN = 'arn:aws:cloudformation:us-east-1:123456789012:stack/my-stack/uuid';
+
+  it('returns false for an empty or undefined value', () => {
+    expect(isStackArnInvalid(undefined)).toBe(false);
+    expect(isStackArnInvalid('')).toBe(false);
+    expect(isStackArnInvalid('   ')).toBe(false);
+  });
+
+  it('returns false for a valid stack ARN', () => {
+    expect(isStackArnInvalid(STACK_ARN)).toBe(false);
+  });
+
+  it('returns true for a value whose region cannot be parsed', () => {
+    expect(isStackArnInvalid('not-an-arn')).toBe(true);
+    expect(isStackArnInvalid('arn:aws:cloudformation::123456789012:stack/x/y')).toBe(true);
+  });
+
+  it('returns true for a regional ARN that is not a CloudFormation stack', () => {
+    // A region alone is not enough: the value is deep-linked as a stack and stored as one.
+    expect(
+      isStackArnInvalid('arn:aws:logs:us-east-1:123456789012:log-group:/aws/lambda/fn:*')
+    ).toBe(true);
+    expect(isStackArnInvalid('arn:aws:iam::123456789012:role/MyRole')).toBe(true);
+  });
+
+  it('accepts other AWS partitions', () => {
+    expect(
+      isStackArnInvalid('arn:aws-us-gov:cloudformation:us-gov-west-1:123456789012:stack/s/u')
+    ).toBe(false);
+  });
+
+  it('ignores leading and trailing whitespace around a valid ARN', () => {
+    expect(isStackArnInvalid(`  ${STACK_ARN}\n`)).toBe(false);
+  });
+});
+
+describe('getUnresolvedTemplateUrlTokens', () => {
+  const wiiUrl =
+    'https://console.aws.amazon.com/cloudformation/home#/stacks/quickcreate?templateURL=https://example.com/wii.yml&param_ElasticOrganizationId=ORGANIZATION_ID&param_ElasticCloudProvider=CLOUD_PROVIDER&param_ElasticCloudRegion=CLOUD_REGION&param_ElasticResourceId=RESOURCE_ID';
+  const echCloud = {
+    isCloudEnabled: true,
+    isServerlessEnabled: false,
+    cloudId: `qa:${btoa('eu-west-1.aws.qa.cld.elstc.co:9243$es-id$kibana-id')}`,
+    deploymentId: 'deployment-id',
+    organizationId: '2070044029',
+    serverless: {},
+  } as CloudSetup;
+
+  it('returns nothing when every token resolves', () => {
+    expect(
+      getUnresolvedTemplateUrlTokens({
+        cloud: echCloud,
+        accountType: SINGLE_ACCOUNT,
+        iacTemplateUrl: wiiUrl,
+      })
+    ).toEqual([]);
+  });
+
+  it('names the tokens the cloud contract cannot fill', () => {
+    expect(
+      getUnresolvedTemplateUrlTokens({
+        cloud: { ...echCloud, organizationId: undefined } as CloudSetup,
+        accountType: SINGLE_ACCOUNT,
+        iacTemplateUrl: wiiUrl,
+      })
+    ).toEqual(['ORGANIZATION_ID']);
+    expect(
+      getUnresolvedTemplateUrlTokens({
+        cloud: {
+          ...echCloud,
+          organizationId: undefined,
+          cloudId: `ece:${btoa('my-ece.example.com$es-id$kibana-id')}`,
+        } as CloudSetup,
+        accountType: SINGLE_ACCOUNT,
+        iacTemplateUrl: wiiUrl,
+      })
+    ).toEqual(['ORGANIZATION_ID', 'CLOUD_PROVIDER']);
+  });
+
+  it('returns nothing for a token-free or missing URL', () => {
+    expect(
+      getUnresolvedTemplateUrlTokens({
+        cloud: echCloud,
+        accountType: SINGLE_ACCOUNT,
+        iacTemplateUrl: 'https://example.com/legacy.yml',
+      })
+    ).toEqual([]);
+    expect(
+      getUnresolvedTemplateUrlTokens({
+        cloud: echCloud,
+        accountType: SINGLE_ACCOUNT,
+        iacTemplateUrl: undefined,
+      })
+    ).toEqual([]);
+  });
+});
+
+describe('getStaticTemplate', () => {
+  const wiiUrl =
+    'https://console.aws.amazon.com/cloudformation/home#/stacks/quickcreate?templateURL=https://example.com/wii.yml&param_ElasticOrganizationId=ORGANIZATION_ID&param_ElasticResourceId=RESOURCE_ID';
+  const echCloud = {
+    isCloudEnabled: true,
+    isServerlessEnabled: false,
+    cloudId: `qa:${btoa('eu-west-1.aws.qa.cld.elstc.co:9243$es-id$kibana-id')}`,
+    deploymentId: 'deployment-id',
+    organizationId: '2070044029',
+    serverless: {},
+  } as CloudSetup;
+  const BASE: GetStaticTemplateParams = {
+    provider: 'aws',
+    cloud: echCloud,
+    accountType: SINGLE_ACCOUNT,
+    iacTemplateUrl: wiiUrl,
+  };
+
+  it('returns the token-substituted URL with the stack params set', () => {
+    const { url, unresolvedTokensError } = getStaticTemplate({
+      ...BASE,
+      stackParams: { ElasticCloudProvider: 'aws' },
+    });
+
+    expect(unresolvedTokensError).toBeUndefined();
+    expect(url).toContain('param_ElasticOrganizationId=2070044029');
+    expect(url).toContain('param_ElasticResourceId=kibana-id');
+    expect(url).toContain('param_ElasticCloudProvider=aws');
+  });
+
+  it('names the unresolved tokens instead of returning a URL', () => {
+    expect(
+      getStaticTemplate({
+        ...BASE,
+        cloud: { ...echCloud, organizationId: undefined } as CloudSetup,
+      })
+    ).toEqual({
+      url: undefined,
+      unresolvedTokensError: expect.stringContaining('ORGANIZATION_ID'),
+    });
+  });
+
+  it('returns neither a URL nor an error when there is no cloud context or template', () => {
+    expect(getStaticTemplate({ ...BASE, cloud: undefined })).toEqual({
+      url: undefined,
+      unresolvedTokensError: undefined,
+    });
+    expect(getStaticTemplate({ ...BASE, iacTemplateUrl: undefined })).toEqual({
+      url: undefined,
+      unresolvedTokensError: undefined,
+    });
+  });
+
+  it('returns neither a URL nor an error for non-AWS providers', () => {
+    expect(getStaticTemplate({ ...BASE, provider: 'azure' })).toEqual({
+      url: undefined,
+      unresolvedTokensError: undefined,
+    });
+  });
+});

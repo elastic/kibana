@@ -4,25 +4,31 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import {
+  getViewModeSubject,
+  initializeStateApi,
+  type ViewMode,
+} from '@kbn/presentation-publishing';
+import {
   fetch$,
+  initializeStateManager,
   initializeTitleManager,
+  titleComparators,
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
-import { Router } from '@kbn/shared-ux-router';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { createBrowserHistory } from 'history';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import React, { useEffect } from 'react';
-import { BehaviorSubject, Subject } from 'rxjs';
-import { CoreStart } from '@kbn/core-lifecycle-browser';
+import { BehaviorSubject, Subject, merge } from 'rxjs';
+import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import { BurnRate } from './burn_rate';
-import { SLO_BURN_RATE_EMBEDDABLE_ID } from './constants';
-import { BurnRateApi, SloBurnRateEmbeddableState } from './types';
+import { SLO_BURN_RATE_EMBEDDABLE_ID } from '../../../../common/embeddables/burn_rate/constants';
+import type { BurnRateApi, BurnRateCustomState, BurnRateEmbeddableState } from './types';
 import type { SLOPublicPluginsStart, SLORepositoryClient } from '../../../types';
 import { PluginContext } from '../../../context/plugin_context';
+import { ensureLicense } from '../ensure_license';
 
 const getTitle = () =>
   i18n.translate('xpack.slo.burnRateEmbeddable.title', {
@@ -38,46 +44,63 @@ export const getBurnRateEmbeddableFactory = ({
   pluginsStart: SLOPublicPluginsStart;
   sloClient: SLORepositoryClient;
 }) => {
-  const factory: ReactEmbeddableFactory<
-    SloBurnRateEmbeddableState,
-    SloBurnRateEmbeddableState,
-    BurnRateApi
-  > = {
+  const factory: EmbeddablePublicDefinition<BurnRateEmbeddableState, BurnRateApi> = {
     type: SLO_BURN_RATE_EMBEDDABLE_ID,
-    deserializeState: (state) => {
-      return state.rawState as SloBurnRateEmbeddableState;
+    getPlacementHints: () => {
+      return { width: 14, height: 7 };
     },
-    buildEmbeddable: async (state, buildApi, uuid, parentApi) => {
+    buildEmbeddable: async ({
+      initialState,
+      finalizeApi,
+      uuid,
+      parentApi,
+      initializeDrilldownsManager,
+    }) => {
+      await ensureLicense(pluginsStart.licensing);
       const deps = { ...coreStart, ...pluginsStart };
-      const titleManager = initializeTitleManager(state);
+      const titleManager = initializeTitleManager(initialState);
       const defaultTitle$ = new BehaviorSubject<string | undefined>(getTitle());
-      const sloId$ = new BehaviorSubject(state.sloId);
-      const sloInstanceId$ = new BehaviorSubject(state.sloInstanceId);
-      const duration$ = new BehaviorSubject(state.duration);
+      const sloBurnRateManager = initializeStateManager<BurnRateCustomState>(initialState, {
+        slo_id: '',
+        slo_instance_id: '*',
+        duration: '',
+      });
+      const drilldownsManager = initializeDrilldownsManager(uuid, initialState);
       const reload$ = new Subject<boolean>();
 
-      const api = buildApi(
-        {
-          ...titleManager.api,
-          defaultTitle$,
-          serializeState: () => {
-            return {
-              rawState: {
-                ...titleManager.serialize(),
-                sloId: sloId$.getValue(),
-                sloInstanceId: sloInstanceId$.getValue(),
-                duration: duration$.getValue(),
-              },
-            };
-          },
+      const stateApi = initializeStateApi<BurnRateEmbeddableState>({
+        uuid,
+        parentApi,
+        anyStateChange$: merge(
+          titleManager.anyStateChange$,
+          sloBurnRateManager.anyStateChange$,
+          drilldownsManager.anyStateChange$
+        ),
+        serializeState: () => ({
+          ...titleManager.getLatestState(),
+          ...sloBurnRateManager.getLatestState(),
+          ...drilldownsManager.getLatestState(),
+        }),
+        getComparators: () => ({
+          ...titleComparators,
+          ...drilldownsManager.comparators,
+          slo_id: 'referenceEquality',
+          slo_instance_id: 'referenceEquality',
+          duration: 'referenceEquality',
+        }),
+        applySerializedState: (nextState) => {
+          sloBurnRateManager.reinitializeState(nextState);
+          titleManager.reinitializeState(nextState);
+          drilldownsManager.reinitializeState(nextState);
         },
-        {
-          sloId: [sloId$, (value) => sloId$.next(value)],
-          sloInstanceId: [sloInstanceId$, (value) => sloInstanceId$.next(value)],
-          duration: [duration$, (value) => duration$.next(value)],
-          ...titleManager.comparators,
-        }
-      );
+      });
+
+      const api = finalizeApi({
+        ...titleManager.api,
+        ...stateApi,
+        ...drilldownsManager.api,
+        defaultTitle$,
+      });
 
       const fetchSubscription = fetch$(api)
         .pipe()
@@ -85,46 +108,49 @@ export const getBurnRateEmbeddableFactory = ({
           reload$.next(next.isReload);
         });
 
+      const viewMode$ = getViewModeSubject(api) ?? new BehaviorSubject<ViewMode>('view');
+
       return {
         api,
         Component: () => {
-          const [sloId, sloInstanceId, duration] = useBatchedPublishingSubjects(
-            sloId$,
-            sloInstanceId$,
-            duration$
+          const [sloId, sloInstanceId, duration, viewMode] = useBatchedPublishingSubjects(
+            sloBurnRateManager.api.sloId$, // from slo_id key
+            sloBurnRateManager.api.sloInstanceId$, // from slo_instance_id key
+            sloBurnRateManager.api.duration$,
+            viewMode$
           );
 
           useEffect(() => {
             return () => {
               fetchSubscription.unsubscribe();
+              drilldownsManager.cleanup();
             };
           }, []);
 
           const queryClient = new QueryClient();
 
           return (
-            <Router history={createBrowserHistory()}>
-              <KibanaContextProvider services={deps}>
-                <PluginContext.Provider
-                  value={{
-                    observabilityRuleTypeRegistry:
-                      pluginsStart.observability.observabilityRuleTypeRegistry,
-                    ObservabilityPageTemplate:
-                      pluginsStart.observabilityShared.navigation.PageTemplate,
-                    sloClient,
-                  }}
-                >
-                  <QueryClientProvider client={queryClient}>
-                    <BurnRate
-                      sloId={sloId}
-                      sloInstanceId={sloInstanceId}
-                      duration={duration}
-                      reloadSubject={reload$}
-                    />
-                  </QueryClientProvider>
-                </PluginContext.Provider>
-              </KibanaContextProvider>
-            </Router>
+            <KibanaContextProvider services={deps}>
+              <PluginContext.Provider
+                value={{
+                  observabilityRuleTypeRegistry:
+                    pluginsStart.observability.observabilityRuleTypeRegistry,
+                  ObservabilityPageTemplate:
+                    pluginsStart.observabilityShared.navigation.PageTemplate,
+                  sloClient,
+                }}
+              >
+                <QueryClientProvider client={queryClient}>
+                  <BurnRate
+                    sloId={sloId}
+                    sloInstanceId={sloInstanceId}
+                    duration={duration}
+                    reloadSubject={reload$}
+                    isInteractive={viewMode !== 'non-interactive'}
+                  />
+                </QueryClientProvider>
+              </PluginContext.Provider>
+            </KibanaContextProvider>
           );
         },
       };

@@ -13,7 +13,7 @@ import {
 } from '../../__mocks__/fetch_indices.mock';
 
 import { ByteSizeValue } from '@kbn/config-schema';
-import { IScopedClusterClient } from '@kbn/core/server';
+import type { IScopedClusterClient } from '@kbn/core/server';
 
 import { fetchIndices, fetchSearchIndices } from './fetch_indices';
 

@@ -5,13 +5,16 @@
  * 2.0.
  */
 
-import type { RuleAction } from '@kbn/alerting-plugin/common';
+import type { RuleAction, RuleSystemAction } from '@kbn/alerting-plugin/common';
 import type { AlertsSelectionSettings } from '../../types';
+import type { WorkflowConfiguration } from '../../workflow_configuration/types';
 
 export interface AttackDiscoveryScheduleSchema {
-  name: string;
-  connectorId?: string;
+  actions: Array<RuleAction | RuleSystemAction>;
   alertsSelectionSettings: AlertsSelectionSettings;
+  connectorId?: string;
   interval: string;
-  actions: RuleAction[];
+  name: string;
+  type?: string;
+  workflowConfig?: WorkflowConfiguration;
 }

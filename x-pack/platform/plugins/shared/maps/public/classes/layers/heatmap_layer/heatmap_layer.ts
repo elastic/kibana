@@ -6,21 +6,22 @@
  */
 
 import type { FilterSpecification, Map as MbMap, VectorTileSource } from '@kbn/mapbox-gl';
+import type { Writable } from '@kbn/utility-types';
 import { AbstractLayer } from '../layer';
 import { HeatmapStyle } from '../../styles/heatmap/heatmap_style';
 import { LAYER_TYPE } from '../../../../common/constants';
-import { HeatmapLayerDescriptor } from '../../../../common/descriptor_types';
-import { ESGeoGridSource } from '../../sources/es_geo_grid_source';
+import type { HeatmapLayerDescriptor } from '../../../../common/descriptor_types';
+import type { ESGeoGridSource } from '../../sources/es_geo_grid_source';
 import { hasESSourceMethod } from '../../sources/es_source';
+import type { MvtSourceData } from '../vector_layer';
 import {
   NO_RESULTS_ICON_AND_TOOLTIPCONTENT,
   syncBoundsData,
-  MvtSourceData,
   syncMvtSourceData,
 } from '../vector_layer';
-import { DataRequestContext } from '../../../actions';
+import type { DataRequestContext } from '../../../actions';
 import { buildVectorRequestMeta } from '../build_vector_request_meta';
-import { IMvtVectorSource } from '../../sources/vector_source';
+import type { IMvtVectorSource } from '../../sources/vector_source';
 import { getAggsMeta } from '../../util/tile_meta_feature_utils';
 import { Mask } from '../vector_layer/mask';
 
@@ -28,7 +29,9 @@ export class HeatmapLayer extends AbstractLayer {
   private readonly _style: HeatmapStyle;
 
   static createDescriptor(options: Partial<HeatmapLayerDescriptor>) {
-    const heatmapLayerDescriptor = super.createDescriptor(options);
+    const heatmapLayerDescriptor = super.createDescriptor(
+      options
+    ) as Writable<HeatmapLayerDescriptor>;
     heatmapLayerDescriptor.type = LAYER_TYPE.HEATMAP;
     heatmapLayerDescriptor.style = HeatmapStyle.createDescriptor();
     return heatmapLayerDescriptor;

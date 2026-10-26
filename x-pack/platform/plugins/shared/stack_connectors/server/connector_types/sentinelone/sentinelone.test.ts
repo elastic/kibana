@@ -10,7 +10,7 @@ import type {
   SentinelOneDownloadAgentFileParams,
   SentinelOneFetchAgentFilesParams,
   SentinelOneGetActivitiesParams,
-} from '../../../common/sentinelone/types';
+} from '@kbn/connector-schemas/sentinelone';
 import { API_PATH } from './sentinelone';
 import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
@@ -57,6 +57,8 @@ describe('SentinelOne Connector', () => {
       expect(response).toEqual({ data: { success: true }, errors: null });
       expect(connectorInstance.requestSpy).toHaveBeenLastCalledWith({
         url: fetchFilesUrl,
+        maxContentLength: Infinity,
+        maxBodyLength: Infinity,
         method: 'post',
         data: {
           data: {
@@ -102,6 +104,8 @@ describe('SentinelOne Connector', () => {
 
       expect(connectorInstance.requestSpy).toHaveBeenCalledWith({
         method: 'get',
+        maxContentLength: Infinity,
+        maxBodyLength: Infinity,
         url: `${connectorInstance.constructorParams.config.url}${API_PATH}/activities`,
         params: {
           APIToken: 'token-abc',
@@ -162,6 +166,35 @@ describe('SentinelOne Connector', () => {
           connectorUsageCollector
         )
       ).resolves.toEqual(connectorInstance.mockResponses.downloadRemoteScriptResults);
+    });
+  });
+
+  describe(`#getRemoteScripts()`, () => {
+    it('should pass query parameters to sentinelone API', async () => {
+      const queryOptions = {
+        osTypes: 'windows',
+        limit: 123,
+        sortBy: 'scriptName',
+        cursor: 'at-position-1',
+        groupIds: 'abc',
+        ids: '987',
+        isAvailableForArs: true,
+        query: 'match something',
+        scriptType: 'action',
+        siteIds: 'site-aaa',
+        skip: 10,
+        skipCount: true,
+        sortOrder: 'asc',
+      };
+
+      await connectorInstance.getRemoteScripts(queryOptions, connectorUsageCollector);
+
+      expect(connectorInstance.requestSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          url: `${connectorInstance.constructorParams.config.url}${API_PATH}/remote-scripts`,
+          params: expect.objectContaining(queryOptions),
+        })
+      );
     });
   });
 });

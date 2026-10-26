@@ -1,0 +1,10 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/field-formats-common",
+  "owner": [
+    "@elastic/kibana-dashboards",
+    "@elastic/kibana-discover"
+  ],
+  "group": "platform",
+  "visibility": "shared"
+}

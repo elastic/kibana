@@ -8,29 +8,32 @@
  */
 
 import Path from 'path';
-import { firstValueFrom, Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { firstValueFrom } from 'rxjs';
 import { filter, map, tap, toArray } from 'rxjs';
 import { getFlattenedObject } from '@kbn/std';
 
-import { Logger } from '@kbn/logging';
+import type { Logger } from '@kbn/logging';
 import type { IConfigService } from '@kbn/config';
 import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
 import { type PluginName, PluginType } from '@kbn/core-base-common';
 import type { InternalEnvironmentServicePreboot } from '@kbn/core-environment-server-internal';
 import type { InternalNodeServicePreboot } from '@kbn/core-node-server-internal';
 import type { InternalPluginInfo, UiPlugins } from '@kbn/core-plugins-base-server-internal';
-import {
+import type {
   InternalCorePreboot,
   InternalCoreSetup,
   InternalCoreStart,
 } from '@kbn/core-lifecycle-server-internal';
-import { PluginConfigDescriptor } from '@kbn/core-plugins-server';
+import type { PluginConfigDescriptor } from '@kbn/core-plugins-server';
 import type { DiscoveredPlugin } from '@kbn/core-base-common';
-import { discover, PluginDiscoveryError, PluginDiscoveryErrorType } from './discovery';
-import { PluginWrapper } from './plugin';
+import type { PluginDiscoveryError } from './discovery';
+import { discover, PluginDiscoveryErrorType } from './discovery';
+import type { PluginWrapper } from './plugin';
 
 import type { PluginDependencies } from './types';
-import { PluginsConfig, PluginsConfigType } from './plugins_config';
+import type { PluginsConfigType } from './plugins_config';
+import { PluginsConfig } from './plugins_config';
 import { PluginsSystem } from './plugins_system';
 import { createBrowserConfig } from './create_browser_config';
 
@@ -103,11 +106,16 @@ export class PluginsService
   }: PluginsServiceDiscoverDeps): Promise<DiscoveredPlugins> {
     const config = await firstValueFrom(this.config$);
 
+    const airgapped = await firstValueFrom(
+      this.coreContext.configService.atPath<boolean>('airgapped')
+    ).catch(() => false);
+
     const { error$, plugin$ } = discover({
       config,
       coreContext: this.coreContext,
       instanceInfo: {
         uuid: environment.instanceUuid,
+        airgapped,
       },
       nodeInfo: {
         roles: node.roles,
@@ -263,33 +271,35 @@ export class PluginsService
     const plugins = await firstValueFrom(plugin$.pipe(toArray()));
 
     // Register config descriptors and deprecations
-    for (const plugin of plugins) {
-      const configDescriptor = plugin.getConfigDescriptor();
-      if (configDescriptor) {
-        this.pluginConfigDescriptors.set(plugin.name, configDescriptor);
-        if (configDescriptor.deprecations) {
-          this.coreContext.configService.addDeprecationProvider(
-            plugin.configPath,
-            configDescriptor.deprecations
-          );
-        }
-        if (configDescriptor.exposeToUsage) {
-          this.pluginConfigUsageDescriptors.set(
-            Array.isArray(plugin.configPath) ? plugin.configPath.join('.') : plugin.configPath,
-            getFlattenedObject(configDescriptor.exposeToUsage)
-          );
-        }
-        if (configDescriptor.dynamicConfig) {
-          const configKeys = Object.entries(getFlattenedObject(configDescriptor.dynamicConfig))
-            .filter(([, value]) => value === true)
-            .map(([key]) => key);
-          if (configKeys.length > 0) {
-            this.coreContext.configService.addDynamicConfigPaths(plugin.configPath, configKeys);
+    await Promise.all(
+      plugins.map(async (plugin) => {
+        const configDescriptor = await plugin.getConfigDescriptor();
+        if (configDescriptor) {
+          this.pluginConfigDescriptors.set(plugin.name, configDescriptor);
+          if (configDescriptor.deprecations) {
+            this.coreContext.configService.addDeprecationProvider(
+              plugin.configPath,
+              configDescriptor.deprecations
+            );
           }
+          if (configDescriptor.exposeToUsage) {
+            this.pluginConfigUsageDescriptors.set(
+              Array.isArray(plugin.configPath) ? plugin.configPath.join('.') : plugin.configPath,
+              getFlattenedObject(configDescriptor.exposeToUsage)
+            );
+          }
+          if (configDescriptor.dynamicConfig) {
+            const configKeys = Object.entries(getFlattenedObject(configDescriptor.dynamicConfig))
+              .filter(([, value]) => value === true)
+              .map(([key]) => key);
+            if (configKeys.length > 0) {
+              this.coreContext.configService.addDynamicConfigPaths(plugin.configPath, configKeys);
+            }
+          }
+          this.coreContext.configService.setSchema(plugin.configPath, configDescriptor.schema);
         }
-        this.coreContext.configService.setSchema(plugin.configPath, configDescriptor.schema);
-      }
-    }
+      })
+    );
 
     const config = await firstValueFrom(this.config$);
     const enableAllPlugins = config.shouldEnableAllPlugins;

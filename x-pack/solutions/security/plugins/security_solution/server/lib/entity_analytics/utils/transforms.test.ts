@@ -103,11 +103,17 @@ const outdatedTransformsRequiredReinstallMock = {
   ],
 } as TransformGetTransformResponse;
 
-const logger = loggingSystemMock.createLogger();
-
 describe('transforms utils', () => {
+  let logger: ReturnType<typeof loggingSystemMock.createLogger>;
+
   beforeEach(() => {
     jest.resetAllMocks();
+    logger = loggingSystemMock.createLogger();
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+    jest.restoreAllMocks();
   });
 
   describe('scheduleTransformNow', () => {
@@ -115,7 +121,7 @@ describe('transforms utils', () => {
       const esClient = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;
       esClient.transform.getTransformStats.mockResolvedValueOnce(stoppedTransformsMock);
 
-      await scheduleTransformNow({ esClient, transformId });
+      await scheduleTransformNow({ esClient, logger, transformId });
 
       expect(esClient.transform.startTransform).toHaveBeenCalled();
     });
@@ -124,7 +130,7 @@ describe('transforms utils', () => {
       const esClient = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;
       esClient.transform.getTransformStats.mockResolvedValueOnce(startedTransformsMock);
 
-      await scheduleTransformNow({ esClient, transformId });
+      await scheduleTransformNow({ esClient, logger, transformId });
 
       expect(esClient.transform.scheduleNowTransform).toHaveBeenCalled();
     });

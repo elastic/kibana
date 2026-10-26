@@ -1,0 +1,193 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import React, { useCallback, useMemo } from 'react';
+import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/react';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiText,
+  euiScrollBarStyles,
+  useEuiTheme,
+  type EuiFlexGridProps,
+} from '@elastic/eui';
+import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
+import type { AggregateQuery, Query } from '@kbn/es-query';
+import type { Dimension, ParsedMetricItem, UnifiedMetricsGridProps } from '../../../types';
+import { getEsqlQuery } from './utils/get_esql_query';
+import { PAGE_SIZE } from '../../../common/constants';
+import { isLegacyHistogram } from '../../../common/utils/histogram_metric';
+import { LEGACY_HISTOGRAM_USER_MESSAGES } from '../../../common/utils/user_messages';
+import { MetricsGrid } from './metrics_grid';
+import { Pagination } from '../../pagination';
+import { useFetchHistogramBounds, usePagination } from './hooks';
+import { MetricsGridLoadingProgress } from '../../empty_state/empty_state';
+import { useMetricsExperienceState } from './context/metrics_experience_state_provider';
+import { firstNonNullable } from '../../../common/utils';
+import { extractWhereCommand } from '../../../utils/extract_where_command';
+import { getDuplicateMetricNames } from './utils/get_duplicate_metric_names';
+
+export interface MetricsExperienceGridContentProps
+  extends Pick<
+    UnifiedMetricsGridProps,
+    'services' | 'fetchParams' | 'onBrushEnd' | 'onFilter' | 'actions' | 'histogramCss'
+  > {
+  discoverFetch$: UnifiedMetricsGridProps['fetch$'];
+  metricItems: ParsedMetricItem[];
+  activeDimensions: Dimension[];
+  /**
+   * Fetch params captured when the current `metricItems` landed. The histogram bounds fetch is
+   * built from these so it never runs for stale items against new Discover inputs.
+   */
+  loadedFetchParams?: UnifiedMetricsGridProps['fetchParams'];
+  isDiscoverLoading?: boolean;
+  isTabSelected: boolean;
+  isComponentVisible: boolean;
+}
+
+const useEsqlQueryParts = (query: Query | AggregateQuery | undefined) => {
+  const esqlQuery = useMemo(() => getEsqlQuery(query), [query]);
+  const whereStatements = useMemo(() => extractWhereCommand(esqlQuery), [esqlQuery]);
+  const userSource = useMemo(
+    () => (esqlQuery ? getIndexPatternFromESQLQuery(esqlQuery) || undefined : undefined),
+    [esqlQuery]
+  );
+  return { whereStatements, userSource };
+};
+
+export const MetricsExperienceGridContent = ({
+  metricItems,
+  activeDimensions,
+  loadedFetchParams,
+  services,
+  discoverFetch$,
+  fetchParams,
+  onBrushEnd,
+  onFilter,
+  actions,
+  histogramCss,
+  isDiscoverLoading = false,
+  isTabSelected,
+  isComponentVisible,
+}: MetricsExperienceGridContentProps) => {
+  const { query } = fetchParams;
+  const euiThemeContext = useEuiTheme();
+  const { euiTheme } = euiThemeContext;
+
+  const { whereStatements, userSource } = useEsqlQueryParts(query);
+  const { whereStatements: loadedWhereStatements, userSource: loadedUserSource } =
+    useEsqlQueryParts(loadedFetchParams?.query);
+
+  const { searchTerm, currentPage, onPageChange, profileId } = useMetricsExperienceState();
+
+  const {
+    currentPageItems: currentPageFields = [],
+    totalPages = 0,
+    totalCount: filteredFieldsCount = 0,
+  } = usePagination({
+    items: metricItems,
+    pageSize: PAGE_SIZE,
+    currentPage,
+  }) ?? {};
+
+  const { loading: histogramBoundsLoading, bounds: histogramBounds } = useFetchHistogramBounds({
+    enabled: isComponentVisible,
+    metricItems: currentPageFields,
+    fetchParams: loadedFetchParams,
+    services,
+    whereStatements: loadedWhereStatements,
+    originalSource: loadedUserSource,
+    profileId,
+  });
+
+  const columns = useMemo<NonNullable<EuiFlexGridProps['columns']>>(
+    () => Math.min(filteredFieldsCount, 4) as NonNullable<EuiFlexGridProps['columns']>,
+    [filteredFieldsCount]
+  );
+
+  const getUserMessages = useCallback(
+    (metricItem: ParsedMetricItem) =>
+      isLegacyHistogram(
+        firstNonNullable(metricItem.fieldTypes),
+        firstNonNullable(metricItem.metricTypes)
+      )
+        ? LEGACY_HISTOGRAM_USER_MESSAGES
+        : undefined,
+    []
+  );
+
+  const duplicateMetricNames = useMemo(() => getDuplicateMetricNames(metricItems), [metricItems]);
+
+  const getDescription = useCallback(
+    (metricItem: ParsedMetricItem) =>
+      duplicateMetricNames.has(metricItem.metricName)
+        ? i18n.translate('metricsExperience.grid.duplicateMetricIndexDescription', {
+            defaultMessage:
+              'This metric exists in multiple data streams. This chart shows data from {indexName} only.',
+            values: { indexName: metricItem.indexName },
+          })
+        : undefined,
+    [duplicateMetricNames]
+  );
+
+  return (
+    <EuiFlexGroup
+      direction="column"
+      gutterSize="s"
+      tabIndex={-1}
+      data-test-subj="metricsExperienceRendered"
+      css={css`
+        ${histogramCss || ''}
+        height: 100%;
+        overflow: auto;
+        padding: ${euiTheme.size.s} ${euiTheme.size.s} 0;
+        margin-block: ${euiTheme.size.xs};
+        ${euiScrollBarStyles(euiThemeContext)}
+      `}
+    >
+      <EuiFlexItem grow={false}>
+        <EuiText size="s">
+          <strong>
+            {i18n.translate('metricsExperience.grid.metricsCount.label', {
+              defaultMessage: '{count} {count, plural, one {metric} other {metrics}}',
+              values: { count: filteredFieldsCount },
+            })}
+          </strong>
+        </EuiText>
+      </EuiFlexItem>
+      <EuiFlexItem grow>
+        {isDiscoverLoading && <MetricsGridLoadingProgress />}
+        <MetricsGrid
+          columns={columns}
+          dimensions={activeDimensions}
+          services={services}
+          metricItems={currentPageFields}
+          onBrushEnd={onBrushEnd}
+          actions={actions}
+          onFilter={onFilter}
+          discoverFetch$={discoverFetch$}
+          fetchParams={fetchParams}
+          searchTerm={searchTerm}
+          whereStatements={whereStatements}
+          userSource={userSource}
+          getUserMessages={getUserMessages}
+          getDescription={getDescription}
+          isTabSelected={isTabSelected}
+          isComponentVisible={isComponentVisible}
+          histogramBounds={histogramBounds}
+          histogramBoundsLoading={histogramBoundsLoading}
+        />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <Pagination totalPages={totalPages} currentPage={currentPage} onPageChange={onPageChange} />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};

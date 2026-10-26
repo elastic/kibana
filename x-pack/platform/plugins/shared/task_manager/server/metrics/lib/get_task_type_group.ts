@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-const taskTypeGrouping = new Set<string>(['alerting:', 'actions:']);
+import { TaskTypeGroup } from '../../task';
 
-export function getTaskTypeGroup(taskType: string): string | undefined {
-  for (const group of taskTypeGrouping) {
-    if (taskType.startsWith(group)) {
-      return group.replace(':', '');
-    }
+const taskTypeGrouping = [TaskTypeGroup.Actions, TaskTypeGroup.Alerting];
+
+export function getTaskTypeGroup(taskTypeGroup?: string): TaskTypeGroup | undefined {
+  if (taskTypeGroup !== undefined && taskTypeGrouping.includes(taskTypeGroup as TaskTypeGroup)) {
+    return taskTypeGroup as TaskTypeGroup;
   }
 }

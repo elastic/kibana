@@ -37,6 +37,11 @@ export function createSearchRequestHandlerContext() {
     search: jest.fn(),
     cancel: jest.fn(),
     extend: jest.fn(),
+    dsl: jest.fn(),
+    dslPaginated: jest.fn(),
+    esql: jest.fn(),
+    eql: jest.fn(),
+    sql: jest.fn(),
     saveSession: jest.fn(),
     getSession: jest.fn(),
     findSessions: jest.fn(),
@@ -45,5 +50,6 @@ export function createSearchRequestHandlerContext() {
     cancelSession: jest.fn(),
     deleteSession: jest.fn(),
     getSessionStatus: jest.fn(),
+    updateSessionStatuses: jest.fn(),
   };
 }

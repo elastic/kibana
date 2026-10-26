@@ -7,12 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { WebDriver, WebElement, By, until } from 'selenium-webdriver';
+import type { WebDriver, WebElement } from 'selenium-webdriver';
+import { By, until } from 'selenium-webdriver';
 
-import { Browsers } from './remote/browsers';
+import { delay } from '@kbn/test-jest-helpers';
+import type { Browsers } from './remote/browsers';
 import type { FtrProviderContext } from './ftr_provider_context';
 import { WebElementWrapper } from './web_element_wrapper';
-import { TimeoutOpt } from '../types';
+import type { TimeoutOpt } from '../types';
 
 import { FtrService } from './ftr_provider_context';
 
@@ -282,22 +284,64 @@ export class FindService extends FtrService {
     timeout: number = this.WAIT_FOR_EXISTS_TIME
   ): Promise<boolean> {
     this.log.debug(`Find.existsByDisplayedByCssSelector('${selector}') with timeout=${timeout}`);
+    // Use implicit timeout 0 so findElements returns immediately inside the poll loop,
+    // avoiding redundant WebDriver round-trips to change timeout on every iteration.
+    await this._withTimeout(0);
     try {
-      await this.retry.tryForTime(timeout, async () => {
-        // make sure that the find timeout is not longer than the retry timeout
-        await this._withTimeout(Math.min(timeout, this.WAIT_FOR_EXISTS_TIME));
+      // driver.wait treats timeout=0 as "wait forever"; use 1ms so a single
+      // check fires and the timeout guard (elapsed >= timeout) trips immediately.
+      await this.driver.wait(async () => {
         const elements = await this.driver.findElements(By.css(selector));
-        await this._withTimeout(this.defaultFindTimeout);
-        const displayed = await this.filterElementIsDisplayed(this.wrapAll(elements));
-        if (displayed.length === 0) {
-          throw new Error(`${selector} is not displayed`);
+        for (const el of elements) {
+          try {
+            if (await el.isDisplayed()) return true;
+          } catch {
+            // stale element; continue to next
+          }
         }
-      });
+        return false;
+      }, timeout || 1);
+      return true;
     } catch (err) {
-      await this._withTimeout(this.defaultFindTimeout);
       return false;
+    } finally {
+      await this._withTimeout(this.defaultFindTimeout);
     }
-    return true;
+  }
+
+  /**
+   * Polls for the given selectors in a single wait and returns the index of the first one
+   * with a displayed match, or -1 if none appears within the timeout.
+   */
+  public async firstDisplayedIndexByCssSelector(
+    selectors: readonly string[],
+    timeout: number = this.WAIT_FOR_EXISTS_TIME
+  ): Promise<number> {
+    this.log.debug(
+      `Find.firstDisplayedIndexByCssSelector(${JSON.stringify(selectors)}) with timeout=${timeout}`
+    );
+    await this._withTimeout(0);
+    try {
+      // driver.wait resolves on a truthy value, so return index + 1 from the condition.
+      const found = await this.driver.wait(async () => {
+        for (const [index, selector] of selectors.entries()) {
+          const elements = await this.driver.findElements(By.css(selector));
+          for (const el of elements) {
+            try {
+              if (await el.isDisplayed()) return index + 1;
+            } catch {
+              // stale element; continue to next
+            }
+          }
+        }
+        return null;
+      }, timeout || 1);
+      return (found ?? 0) - 1;
+    } catch {
+      return -1;
+    } finally {
+      await this._withTimeout(this.defaultFindTimeout);
+    }
   }
 
   public async existsByCssSelector(
@@ -414,14 +458,15 @@ export class FindService extends FtrService {
   public async clickByCssSelector(
     selector: string,
     timeout: number = this.defaultFindTimeout,
-    topOffset?: number
+    topOffsetOrOptions?: number | { topOffset?: number; bottomOffset?: number },
+    preclickDelay: number = 0
   ): Promise<void> {
     this.log.debug(`Find.clickByCssSelector('${selector}') with timeout=${timeout}`);
     await this.retry.try(async () => {
       const element = await this.byCssSelector(selector, timeout);
       if (element) {
-        // await element.moveMouseTo();
-        await element.click(topOffset);
+        await delay(preclickDelay); // give React enough time to bind the click handler to the element
+        await element.click(topOffsetOrOptions);
       } else {
         throw new Error(`Element with css='${selector}' is not found`);
       }

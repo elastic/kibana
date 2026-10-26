@@ -9,6 +9,10 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import type { RuntimeMappings } from '@kbn/ml-runtime-field-utils';
 
 import { PIVOT_SUPPORTED_AGGS } from '../../../common/types/pivot_aggs';
+import {
+  DEFAULT_TRANSFORM_SETTINGS_MAX_PAGE_SEARCH_SIZE,
+  DEFAULT_TRANSFORM_SETTINGS_MAX_PAGE_SEARCH_SIZE_LATEST,
+} from '../../../common/constants';
 
 import type { PivotGroupByConfig } from '.';
 
@@ -132,6 +136,35 @@ describe('Transform: Common', () => {
     });
   });
 
+  test('getPreviewTransformRequestBody() with project routing', () => {
+    const query = getTransformConfigQuery('the-query');
+    const request = getPreviewTransformRequestBody(
+      { getIndexPattern: () => 'the-data-view-title' } as DataView,
+      query,
+      {
+        pivot: {
+          aggregations: { 'the-agg-agg-name': { avg: { field: 'the-agg-field' } } },
+          group_by: { 'the-group-by-agg-name': { terms: { field: 'the-group-by-field' } } },
+        },
+      },
+      undefined,
+      undefined,
+      '_alias:*'
+    );
+
+    expect(request).toEqual({
+      pivot: {
+        aggregations: { 'the-agg-agg-name': { avg: { field: 'the-agg-field' } } },
+        group_by: { 'the-group-by-agg-name': { terms: { field: 'the-group-by-field' } } },
+      },
+      source: {
+        index: ['the-data-view-title'],
+        query: { query_string: { default_operator: 'AND', query: 'the-query' } },
+        project_routing: '_alias:*',
+      },
+    });
+  });
+
   test('getMissingBucketConfig()', () => {
     expect(getMissingBucketConfig(groupByTerms)).toEqual({});
     expect(getMissingBucketConfig({ ...groupByTerms, ...{ missing_bucket: true } })).toEqual({
@@ -243,10 +276,11 @@ describe('Transform: Common', () => {
       transformId: 'the-transform-id',
       transformDescription: 'the-transform-description',
       transformFrequency: '1m',
-      transformSettingsMaxPageSearchSize: 500,
+      transformSettingsMaxPageSearchSize: DEFAULT_TRANSFORM_SETTINGS_MAX_PAGE_SEARCH_SIZE,
       transformSettingsDocsPerSecond: null,
       destinationIndex: 'the-destination-index',
       destinationIngestPipeline: 'the-destination-ingest-pipeline',
+      deferValidation: false,
       touched: true,
       valid: true,
     };
@@ -311,6 +345,7 @@ describe('Transform: Common', () => {
       runtimeMappings,
       runtimeMappingsUpdated: false,
       isRuntimeMappingsEditorEnabled: false,
+      projectRouting: '_alias:*',
     };
     const transformDetailsState: StepDetailsExposedState = {
       continuousModeDateField: 'the-continuous-mode-date-field',
@@ -328,6 +363,7 @@ describe('Transform: Common', () => {
       transformSettingsNumFailureRetries: 5,
       destinationIndex: 'the-destination-index',
       destinationIngestPipeline: 'the-destination-ingest-pipeline',
+      deferValidation: false,
       touched: true,
       valid: true,
     };
@@ -354,6 +390,7 @@ describe('Transform: Common', () => {
       source: {
         index: ['the-data-view-title'],
         query: { query_string: { default_operator: 'AND', query: 'the-search-query' } },
+        project_routing: '_alias:*',
         runtime_mappings: runtimeMappings,
       },
       sync: {
@@ -395,13 +432,27 @@ describe('Transform: Common', () => {
     });
   });
 
-  test('getCreateTransformSettingsRequestBody() skips default settings', () => {
+  test('getCreateTransformSettingsRequestBody() skips default settings for pivot', () => {
     const transformDetailsState: Partial<StepDetailsExposedState> = {
       transformSettingsDocsPerSecond: null,
-      transformSettingsMaxPageSearchSize: 500,
+      transformSettingsMaxPageSearchSize: DEFAULT_TRANSFORM_SETTINGS_MAX_PAGE_SEARCH_SIZE,
     };
 
     const request = getCreateTransformSettingsRequestBody(transformDetailsState);
+
+    expect(request).toEqual({});
+  });
+
+  test('getCreateTransformSettingsRequestBody() skips default settings for latest', () => {
+    const transformDetailsState: Partial<StepDetailsExposedState> = {
+      transformSettingsDocsPerSecond: null,
+      transformSettingsMaxPageSearchSize: DEFAULT_TRANSFORM_SETTINGS_MAX_PAGE_SEARCH_SIZE_LATEST,
+    };
+
+    const request = getCreateTransformSettingsRequestBody(
+      transformDetailsState,
+      DEFAULT_TRANSFORM_SETTINGS_MAX_PAGE_SEARCH_SIZE_LATEST
+    );
 
     expect(request).toEqual({});
   });

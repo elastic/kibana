@@ -1,0 +1,1045 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import {
+  EsqlSource,
+  registerEsqlSourceInDataViewsCache,
+  unregisterFromDataViewsCache,
+} from '@kbn/data-source';
+import { getRepresentativeQuery } from '@kbn/lens-common';
+import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
+import { FilterStateStore } from '@kbn/es-query';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
+import {
+  dataViewWithTimefieldMock,
+  dataViewWithAtTimefieldMock,
+} from '../__mocks__/data_view_with_timefield';
+import { currentSuggestionMock, allSuggestionsMock } from '../__mocks__/suggestions';
+import { getDefaultDataSource, getLensVisMock } from '../__mocks__/lens_vis';
+import { UnifiedHistogramExternalVisContextStatus, UnifiedHistogramSuggestionType } from '../types';
+
+describe('LensVisService attributes', () => {
+  const dataView: DataView = dataViewWithTimefieldMock;
+  const filters: Filter[] = [
+    {
+      meta: {
+        index: dataView.id,
+        negate: false,
+        disabled: false,
+        alias: null,
+        type: 'phrase',
+        key: 'extension',
+        params: {
+          query: 'js',
+        },
+      },
+      query: {
+        match: {
+          extension: {
+            query: 'js',
+            type: 'phrase',
+          },
+        },
+      },
+      $state: {
+        store: FilterStateStore.APP_STATE,
+      },
+    },
+  ];
+  const query: Query | AggregateQuery = { language: 'kuery', query: 'extension : css' };
+  const queryEsql: Query | AggregateQuery = { esql: 'from logstash-* | limit 10' };
+  const timeInterval = 'auto';
+
+  it('should return correct attributes', async () => {
+    const breakdownField: DataViewField | undefined = undefined;
+    const lensVis = await getLensVisMock({
+      filters,
+      query,
+      dataView,
+      timeInterval,
+      breakdownField,
+      columns: [],
+    });
+
+    expect(lensVis.visContext).toMatchInlineSnapshot(`
+      Object {
+        "attributes": Object {
+          "references": Array [
+            Object {
+              "id": "index-pattern-with-timefield-id",
+              "name": "indexpattern-datasource-layer-unifiedHistogram",
+              "type": "index-pattern",
+            },
+          ],
+          "state": Object {
+            "datasourceStates": Object {
+              "formBased": Object {
+                "layers": Object {
+                  "unifiedHistogram": Object {
+                    "columnOrder": Array [
+                      "date_column",
+                      "count_column",
+                    ],
+                    "columns": Object {
+                      "count_column": Object {
+                        "dataType": "number",
+                        "isBucketed": false,
+                        "label": "Count of records",
+                        "operationType": "count",
+                        "params": Object {
+                          "format": Object {
+                            "id": "number",
+                            "params": Object {
+                              "decimals": 0,
+                            },
+                          },
+                        },
+                        "scale": "ratio",
+                        "sourceField": "___records___",
+                      },
+                      "date_column": Object {
+                        "dataType": "date",
+                        "isBucketed": true,
+                        "label": "timestamp",
+                        "operationType": "date_histogram",
+                        "params": Object {
+                          "interval": "auto",
+                        },
+                        "scale": "interval",
+                        "sourceField": "timestamp",
+                      },
+                    },
+                    "indexPatternId": "index-pattern-with-timefield-id",
+                  },
+                },
+              },
+            },
+            "filters": Array [
+              Object {
+                "$state": Object {
+                  "store": "appState",
+                },
+                "meta": Object {
+                  "alias": null,
+                  "disabled": false,
+                  "index": "index-pattern-with-timefield-id",
+                  "key": "extension",
+                  "negate": false,
+                  "params": Object {
+                    "query": "js",
+                  },
+                  "type": "phrase",
+                },
+                "query": Object {
+                  "match": Object {
+                    "extension": Object {
+                      "query": "js",
+                      "type": "phrase",
+                    },
+                  },
+                },
+              },
+            ],
+            "query": Object {
+              "language": "kuery",
+              "query": "extension : css",
+            },
+            "visualization": Object {
+              "axisTitlesVisibilitySettings": Object {
+                "x": false,
+                "yLeft": false,
+                "yRight": false,
+              },
+              "fittingFunction": "None",
+              "gridlinesVisibilitySettings": Object {
+                "x": true,
+                "yLeft": true,
+                "yRight": false,
+              },
+              "layers": Array [
+                Object {
+                  "accessors": Array [
+                    "count_column",
+                  ],
+                  "layerId": "unifiedHistogram",
+                  "layerType": "data",
+                  "seriesType": "bar_stacked",
+                  "xAccessor": "date_column",
+                  "yConfig": Array [
+                    Object {
+                      "forAccessor": "count_column",
+                    },
+                  ],
+                },
+              ],
+              "legend": Object {
+                "isVisible": true,
+                "legendSize": "xlarge",
+                "position": "right",
+                "shouldTruncate": false,
+              },
+              "minBarHeight": 2,
+              "preferredSeriesType": "bar_stacked",
+              "showCurrentTimeMarker": true,
+              "tickLabelsVisibilitySettings": Object {
+                "x": true,
+                "yLeft": true,
+                "yRight": false,
+              },
+              "valueLabels": "hide",
+            },
+          },
+          "title": "Edit visualization",
+          "version": 3,
+          "visualizationType": "lnsXY",
+        },
+        "requestData": Object {
+          "breakdownField": undefined,
+          "dataViewId": "index-pattern-with-timefield-id",
+          "timeField": "timestamp",
+          "timeInterval": "auto",
+        },
+        "suggestionType": "histogramForDataView",
+      }
+    `);
+  });
+
+  it('should return correct attributes with breakdown field', async () => {
+    const breakdownField: DataViewField | undefined = dataView.fields.find(
+      (f) => f.name === 'extension'
+    );
+    const lensVis = await getLensVisMock({
+      filters,
+      query,
+      dataView,
+      timeInterval,
+      breakdownField,
+      columns: [],
+    });
+    expect(lensVis.visContext).toMatchInlineSnapshot(`
+      Object {
+        "attributes": Object {
+          "references": Array [
+            Object {
+              "id": "index-pattern-with-timefield-id",
+              "name": "indexpattern-datasource-layer-unifiedHistogram",
+              "type": "index-pattern",
+            },
+          ],
+          "state": Object {
+            "datasourceStates": Object {
+              "formBased": Object {
+                "layers": Object {
+                  "unifiedHistogram": Object {
+                    "columnOrder": Array [
+                      "breakdown_column",
+                      "date_column",
+                      "count_column",
+                    ],
+                    "columns": Object {
+                      "breakdown_column": Object {
+                        "dataType": "string",
+                        "isBucketed": true,
+                        "label": "Top 9 values of extension",
+                        "operationType": "terms",
+                        "params": Object {
+                          "missingBucket": true,
+                          "orderBy": Object {
+                            "columnId": "count_column",
+                            "type": "column",
+                          },
+                          "orderDirection": "desc",
+                          "otherBucket": true,
+                          "parentFormat": Object {
+                            "id": "terms",
+                          },
+                          "size": 9,
+                        },
+                        "scale": "ordinal",
+                        "sourceField": "extension",
+                      },
+                      "count_column": Object {
+                        "dataType": "number",
+                        "isBucketed": false,
+                        "label": "Count of records",
+                        "operationType": "count",
+                        "params": Object {
+                          "format": Object {
+                            "id": "number",
+                            "params": Object {
+                              "decimals": 0,
+                            },
+                          },
+                        },
+                        "scale": "ratio",
+                        "sourceField": "___records___",
+                      },
+                      "date_column": Object {
+                        "dataType": "date",
+                        "isBucketed": true,
+                        "label": "timestamp",
+                        "operationType": "date_histogram",
+                        "params": Object {
+                          "interval": "auto",
+                        },
+                        "scale": "interval",
+                        "sourceField": "timestamp",
+                      },
+                    },
+                    "indexPatternId": "index-pattern-with-timefield-id",
+                  },
+                },
+              },
+            },
+            "filters": Array [
+              Object {
+                "$state": Object {
+                  "store": "appState",
+                },
+                "meta": Object {
+                  "alias": null,
+                  "disabled": false,
+                  "index": "index-pattern-with-timefield-id",
+                  "key": "extension",
+                  "negate": false,
+                  "params": Object {
+                    "query": "js",
+                  },
+                  "type": "phrase",
+                },
+                "query": Object {
+                  "match": Object {
+                    "extension": Object {
+                      "query": "js",
+                      "type": "phrase",
+                    },
+                  },
+                },
+              },
+            ],
+            "query": Object {
+              "language": "kuery",
+              "query": "extension : css",
+            },
+            "visualization": Object {
+              "axisTitlesVisibilitySettings": Object {
+                "x": false,
+                "yLeft": false,
+                "yRight": false,
+              },
+              "fittingFunction": "None",
+              "gridlinesVisibilitySettings": Object {
+                "x": true,
+                "yLeft": true,
+                "yRight": false,
+              },
+              "layers": Array [
+                Object {
+                  "accessors": Array [
+                    "count_column",
+                  ],
+                  "layerId": "unifiedHistogram",
+                  "layerType": "data",
+                  "seriesType": "bar_stacked",
+                  "splitAccessors": Array [
+                    "breakdown_column",
+                  ],
+                  "xAccessor": "date_column",
+                },
+              ],
+              "legend": Object {
+                "isVisible": true,
+                "legendSize": "xlarge",
+                "position": "right",
+                "shouldTruncate": false,
+              },
+              "minBarHeight": 2,
+              "preferredSeriesType": "bar_stacked",
+              "showCurrentTimeMarker": true,
+              "tickLabelsVisibilitySettings": Object {
+                "x": true,
+                "yLeft": true,
+                "yRight": false,
+              },
+              "valueLabels": "hide",
+            },
+          },
+          "title": "Edit visualization",
+          "version": 3,
+          "visualizationType": "lnsXY",
+        },
+        "requestData": Object {
+          "breakdownField": "extension",
+          "dataViewId": "index-pattern-with-timefield-id",
+          "timeField": "timestamp",
+          "timeInterval": "auto",
+        },
+        "suggestionType": "histogramForDataView",
+      }
+    `);
+  });
+
+  it('should return correct attributes with unsupported breakdown field', async () => {
+    const breakdownField: DataViewField | undefined = dataView.fields.find(
+      (f) => f.name === 'scripted'
+    );
+    const lensVis = await getLensVisMock({
+      filters,
+      query,
+      dataView,
+      timeInterval,
+      breakdownField,
+      columns: [],
+    });
+    expect(lensVis.visContext).toMatchInlineSnapshot(`
+      Object {
+        "attributes": Object {
+          "references": Array [
+            Object {
+              "id": "index-pattern-with-timefield-id",
+              "name": "indexpattern-datasource-layer-unifiedHistogram",
+              "type": "index-pattern",
+            },
+          ],
+          "state": Object {
+            "datasourceStates": Object {
+              "formBased": Object {
+                "layers": Object {
+                  "unifiedHistogram": Object {
+                    "columnOrder": Array [
+                      "date_column",
+                      "count_column",
+                    ],
+                    "columns": Object {
+                      "count_column": Object {
+                        "dataType": "number",
+                        "isBucketed": false,
+                        "label": "Count of records",
+                        "operationType": "count",
+                        "params": Object {
+                          "format": Object {
+                            "id": "number",
+                            "params": Object {
+                              "decimals": 0,
+                            },
+                          },
+                        },
+                        "scale": "ratio",
+                        "sourceField": "___records___",
+                      },
+                      "date_column": Object {
+                        "dataType": "date",
+                        "isBucketed": true,
+                        "label": "timestamp",
+                        "operationType": "date_histogram",
+                        "params": Object {
+                          "interval": "auto",
+                        },
+                        "scale": "interval",
+                        "sourceField": "timestamp",
+                      },
+                    },
+                    "indexPatternId": "index-pattern-with-timefield-id",
+                  },
+                },
+              },
+            },
+            "filters": Array [
+              Object {
+                "$state": Object {
+                  "store": "appState",
+                },
+                "meta": Object {
+                  "alias": null,
+                  "disabled": false,
+                  "index": "index-pattern-with-timefield-id",
+                  "key": "extension",
+                  "negate": false,
+                  "params": Object {
+                    "query": "js",
+                  },
+                  "type": "phrase",
+                },
+                "query": Object {
+                  "match": Object {
+                    "extension": Object {
+                      "query": "js",
+                      "type": "phrase",
+                    },
+                  },
+                },
+              },
+            ],
+            "query": Object {
+              "language": "kuery",
+              "query": "extension : css",
+            },
+            "visualization": Object {
+              "axisTitlesVisibilitySettings": Object {
+                "x": false,
+                "yLeft": false,
+                "yRight": false,
+              },
+              "fittingFunction": "None",
+              "gridlinesVisibilitySettings": Object {
+                "x": true,
+                "yLeft": true,
+                "yRight": false,
+              },
+              "layers": Array [
+                Object {
+                  "accessors": Array [
+                    "count_column",
+                  ],
+                  "layerId": "unifiedHistogram",
+                  "layerType": "data",
+                  "seriesType": "bar_stacked",
+                  "xAccessor": "date_column",
+                  "yConfig": Array [
+                    Object {
+                      "forAccessor": "count_column",
+                    },
+                  ],
+                },
+              ],
+              "legend": Object {
+                "isVisible": true,
+                "legendSize": "xlarge",
+                "position": "right",
+                "shouldTruncate": false,
+              },
+              "minBarHeight": 2,
+              "preferredSeriesType": "bar_stacked",
+              "showCurrentTimeMarker": true,
+              "tickLabelsVisibilitySettings": Object {
+                "x": true,
+                "yLeft": true,
+                "yRight": false,
+              },
+              "valueLabels": "hide",
+            },
+          },
+          "title": "Edit visualization",
+          "version": 3,
+          "visualizationType": "lnsXY",
+        },
+        "requestData": Object {
+          "breakdownField": "scripted",
+          "dataViewId": "index-pattern-with-timefield-id",
+          "timeField": "timestamp",
+          "timeInterval": "auto",
+        },
+        "suggestionType": "histogramForDataView",
+      }
+    `);
+  });
+
+  it('should return correct attributes for text based languages', async () => {
+    const lensVis = await getLensVisMock({
+      filters,
+      query: queryEsql,
+      dataView,
+      timeInterval,
+      breakdownField: undefined,
+      columns: [],
+    });
+    expect(lensVis.visContext).toMatchInlineSnapshot(`
+      Object {
+        "attributes": Object {
+          "references": Array [],
+          "state": Object {
+            "datasourceStates": Object {
+              "textBased": Object {
+                "indexPatternRefs": Array [],
+                "initialContext": Object {
+                  "contextualFields": Array [
+                    "Dest",
+                    "AvgTicketPrice",
+                  ],
+                  "dataViewSpec": Object {
+                    "allowNoIndex": false,
+                    "fields": Object {
+                      "AvgTicketPrice": Object {
+                        "aggregatable": true,
+                        "count": 0,
+                        "esTypes": Array [
+                          "float",
+                        ],
+                        "format": Object {
+                          "id": "number",
+                          "params": Object {
+                            "pattern": "$0,0.[00]",
+                          },
+                        },
+                        "isMapped": true,
+                        "name": "AvgTicketPrice",
+                        "readFromDocValues": true,
+                        "scripted": false,
+                        "searchable": true,
+                        "shortDotsEnable": false,
+                        "type": "number",
+                      },
+                      "Dest": Object {
+                        "aggregatable": true,
+                        "count": 0,
+                        "esTypes": Array [
+                          "keyword",
+                        ],
+                        "format": Object {
+                          "id": "string",
+                        },
+                        "isMapped": true,
+                        "name": "Dest",
+                        "readFromDocValues": true,
+                        "scripted": false,
+                        "searchable": true,
+                        "shortDotsEnable": false,
+                        "type": "string",
+                      },
+                      "timestamp": Object {
+                        "aggregatable": true,
+                        "count": 0,
+                        "esTypes": Array [
+                          "date",
+                        ],
+                        "format": Object {
+                          "id": "date",
+                        },
+                        "isMapped": true,
+                        "name": "timestamp",
+                        "readFromDocValues": true,
+                        "scripted": false,
+                        "searchable": true,
+                        "shortDotsEnable": false,
+                        "type": "date",
+                      },
+                    },
+                    "id": "d3d7af60-4c81-11e8-b3d7-01146121b73d",
+                    "name": "Kibana Sample Data Flights",
+                    "sourceFilters": Array [],
+                    "timeFieldName": "timestamp",
+                    "title": "kibana_sample_data_flights",
+                    "version": "WzM1ODA3LDFd",
+                  },
+                  "fieldName": "",
+                  "query": Object {
+                    "esql": "FROM \\"kibana_sample_data_flights\\"",
+                  },
+                },
+                "layers": Object {
+                  "46aa21fa-b747-4543-bf90-0b40007c546d": Object {
+                    "columns": Array [
+                      Object {
+                        "columnId": "81e332d6-ee37-42a8-a646-cea4fc75d2d3",
+                        "fieldName": "Dest",
+                        "meta": Object {
+                          "type": "string",
+                        },
+                      },
+                      Object {
+                        "columnId": "5b9b8b76-0836-4a12-b9c0-980c9900502f",
+                        "fieldName": "AvgTicketPrice",
+                        "meta": Object {
+                          "type": "number",
+                        },
+                      },
+                    ],
+                    "index": "d3d7af60-4c81-11e8-b3d7-01146121b73d",
+                    "query": Object {
+                      "esql": "FROM kibana_sample_data_flights | keep Dest, AvgTicketPrice",
+                    },
+                    "timeField": "timestamp",
+                  },
+                },
+              },
+            },
+            "filters": Array [
+              Object {
+                "$state": Object {
+                  "store": "appState",
+                },
+                "meta": Object {
+                  "alias": null,
+                  "disabled": false,
+                  "index": "index-pattern-with-timefield-id",
+                  "key": "extension",
+                  "negate": false,
+                  "params": Object {
+                    "query": "js",
+                  },
+                  "type": "phrase",
+                },
+                "query": Object {
+                  "match": Object {
+                    "extension": Object {
+                      "query": "js",
+                      "type": "phrase",
+                    },
+                  },
+                },
+              },
+            ],
+            "visualization": Object {
+              "gridConfig": Object {
+                "isCellLabelVisible": false,
+                "isXAxisLabelVisible": true,
+                "isXAxisTitleVisible": false,
+                "isYAxisLabelVisible": true,
+                "isYAxisTitleVisible": false,
+                "type": "heatmap_grid",
+              },
+              "layerId": "46aa21fa-b747-4543-bf90-0b40007c546d",
+              "layerType": "data",
+              "legend": Object {
+                "isVisible": true,
+                "position": "right",
+                "type": "heatmap_legend",
+              },
+              "shape": "heatmap",
+              "valueAccessor": "5b9b8b76-0836-4a12-b9c0-980c9900502f",
+              "xAccessor": "81e332d6-ee37-42a8-a646-cea4fc75d2d3",
+            },
+          },
+          "title": "Heat map",
+          "version": 3,
+          "visualizationType": "lnsHeatmap",
+        },
+        "requestData": Object {
+          "breakdownField": undefined,
+          "dataViewId": "index-pattern-with-timefield-id",
+          "timeField": "timestamp",
+          "timeInterval": undefined,
+        },
+        "suggestionType": "histogramForESQL",
+      }
+    `);
+  });
+
+  it('should return correct attributes for text based languages with adhoc dataview', async () => {
+    const adHocDataview = {
+      ...dataView,
+      isPersisted: () => false,
+    } as DataView;
+    const lensVis = await getLensVisMock({
+      filters,
+      query: queryEsql,
+      dataView: adHocDataview,
+      timeInterval,
+      breakdownField: undefined,
+      columns: [],
+    });
+    expect(lensVis.visContext?.attributes).toEqual({
+      state: expect.objectContaining({
+        adHocDataViews: {
+          'index-pattern-with-timefield-id': {},
+        },
+      }),
+      version: 3,
+      references: [],
+      title: 'Heat map',
+      visualizationType: 'lnsHeatmap',
+    });
+  });
+
+  it('should allow modifying attributes with getModifiedVisAttributes', async () => {
+    const lensVis = await getLensVisMock({
+      filters,
+      query,
+      dataView,
+      timeInterval,
+      breakdownField: undefined,
+      columns: [],
+      getModifiedVisAttributes: (attributes) => ({
+        ...attributes,
+        title: 'Modified title',
+        visualizationType: 'lnsHeatmap',
+      }),
+    });
+    expect(lensVis.visContext?.attributes).toEqual(
+      expect.objectContaining({
+        title: 'Modified title',
+        visualizationType: 'lnsHeatmap',
+      })
+    );
+  });
+
+  it('should not allow modifying attributes with getModifiedVisAttributes if externalVisContext is applied', async () => {
+    const lensVis = await getLensVisMock({
+      filters,
+      query,
+      dataView,
+      timeInterval,
+      breakdownField: undefined,
+      columns: [],
+    });
+    const lensVis2 = await getLensVisMock({
+      filters,
+      query,
+      dataView,
+      timeInterval,
+      breakdownField: undefined,
+      columns: [],
+      externalVisContext: lensVis.visContext,
+      getModifiedVisAttributes: (attributes) => ({
+        ...attributes,
+        title: 'Modified title',
+        visualizationType: 'lnsHeatmap',
+      }),
+    });
+    expect(lensVis2.visContext?.attributes).not.toEqual(
+      expect.objectContaining({
+        title: 'Modified title',
+        visualizationType: 'lnsHeatmap',
+      })
+    );
+  });
+
+  it('should return suggestion title', async () => {
+    const lensVis = await getLensVisMock({
+      filters,
+      query: queryEsql,
+      dataView,
+      timeInterval,
+      breakdownField: undefined,
+      columns: [],
+    });
+    expect(lensVis.visContext?.attributes.title).toBe(currentSuggestionMock.title);
+  });
+
+  it('fingerprints an ES|QL chart with its data view, not with the per-query source id', async () => {
+    const esqlSource = await EsqlSource.create({
+      query: queryEsql.esql,
+      resultColumns: [],
+      timeFieldName: '@timestamp',
+    });
+    const dataViews = {
+      create: jest.fn(async ({ id }: { id: string }) => ({ ...dataViewWithAtTimefieldMock, id })),
+      clearInstanceCache: jest.fn(),
+    } as unknown as Parameters<typeof registerEsqlSourceInDataViewsCache>[0];
+    const chartDataView = await registerEsqlSourceInDataViewsCache(dataViews, esqlSource);
+
+    const { visContext } = await getLensVisMock({
+      filters: [],
+      query: queryEsql,
+      dataView: dataViewWithAtTimefieldMock,
+      dataSource: esqlSource,
+      timeInterval,
+      breakdownField: undefined,
+      columns: [],
+      allSuggestions: [],
+    });
+
+    expect(chartDataView.id).not.toBe(esqlSource.id);
+    expect(visContext?.requestData.dataViewId).toBe(chartDataView.id);
+  });
+
+  it('should reuse an unchanged ES|QL histogram whose query is stored only in Lens layers', async () => {
+    const timeRange = {
+      from: '2022-11-17T00:00:00.000Z',
+      to: '2022-11-17T12:00:00.000Z',
+    };
+    const { lensService, visContext } = await getLensVisMock({
+      filters: [],
+      query: queryEsql,
+      dataView: dataViewWithAtTimefieldMock,
+      timeInterval,
+      timeRange,
+      breakdownField: undefined,
+      columns: [],
+      allSuggestions: [],
+    });
+
+    expect(visContext?.suggestionType).toBe(UnifiedHistogramSuggestionType.histogramForESQL);
+    expect(visContext?.attributes.state.query).toBeUndefined();
+    expect(getRepresentativeQuery(visContext?.attributes)).toStrictEqual({
+      esql: `from logstash-* | limit 10
+| STATS results = COUNT(*) BY timestamp = BUCKET(@timestamp, 5 minute)
+| LIMIT 10000`,
+    });
+    expect(visContext?.requestData).toStrictEqual({
+      dataViewId: dataViewWithAtTimefieldMock.id,
+      timeField: '@timestamp',
+      timeInterval: undefined,
+      breakdownField: undefined,
+    });
+
+    const onVisContextChanged = jest.fn();
+    lensService.update({
+      queryParams: {
+        dataSource: await getDefaultDataSource({
+          query: queryEsql,
+          dataView: dataViewWithAtTimefieldMock,
+          columns: [],
+        }),
+        query: queryEsql,
+        filters: [],
+        timeRange,
+        columns: [],
+      },
+      timeInterval,
+      breakdownField: undefined,
+      externalVisContext: visContext,
+      onVisContextChanged,
+    });
+
+    expect(onVisContextChanged).toHaveBeenCalledWith(
+      visContext,
+      UnifiedHistogramExternalVisContextStatus.applied
+    );
+  });
+
+  it('keeps an ES|QL chart edit after the source data view is unregistered', async () => {
+    const timeRange = {
+      from: '2022-11-17T00:00:00.000Z',
+      to: '2022-11-17T12:00:00.000Z',
+    };
+    const dataSource = await getDefaultDataSource({
+      query: queryEsql,
+      dataView: dataViewWithAtTimefieldMock,
+      columns: [],
+    });
+    const { lensService, currentSuggestionContext } = await getLensVisMock({
+      filters: [],
+      query: queryEsql,
+      dataView: dataViewWithAtTimefieldMock,
+      dataSource,
+      timeInterval,
+      timeRange,
+      breakdownField: undefined,
+      columns: [],
+      allSuggestions: [],
+    });
+    const onVisContextChanged = jest.fn();
+    lensService.update({
+      queryParams: { dataSource, query: queryEsql, filters: [], timeRange, columns: [] },
+      timeInterval,
+      breakdownField: undefined,
+      externalVisContext: undefined,
+      onVisContextChanged,
+    });
+    onVisContextChanged.mockClear();
+
+    // Discover unregisters the previous source's shim as soon as the query changes,
+    // while the edit flyout can still be open on the chart built from that source.
+    unregisterFromDataViewsCache(dataSource.id);
+    lensService.onSuggestionEdited({ editedSuggestionContext: currentSuggestionContext });
+
+    expect(onVisContextChanged).toHaveBeenCalledTimes(1);
+    expect(onVisContextChanged).toHaveBeenCalledWith(
+      expect.objectContaining({
+        suggestionType: UnifiedHistogramSuggestionType.histogramForESQL,
+        requestData: expect.objectContaining({ dataViewId: dataViewWithAtTimefieldMock.id }),
+      }),
+      UnifiedHistogramExternalVisContextStatus.manuallyCustomized
+    );
+  });
+
+  it('should use the correct histogram query when no suggestion passed', async () => {
+    const histogramQuery = {
+      esql: `from logstash-* | limit 10
+| STATS results = COUNT(*) BY timestamp = BUCKET(@timestamp, 5 minute)
+| LIMIT 10000`,
+    };
+    const lensVis = await getLensVisMock({
+      filters,
+      query: queryEsql,
+      dataView: dataViewWithAtTimefieldMock,
+      timeInterval,
+      breakdownField: undefined,
+      columns: [],
+      allSuggestions: [], // none available
+      isTransformationalESQL: false,
+    });
+    expect(getRepresentativeQuery(lensVis.visContext?.attributes)).toStrictEqual(histogramQuery);
+  });
+
+  it('should inject table with approximationApplied:true into Lens layers for ES|QL STATS query', async () => {
+    const queryStats = { esql: 'from logstash-* | stats maxB = max(bytes)' };
+    const columns = [{ id: 'maxB', name: 'maxB', meta: { type: 'number' as const } }];
+    const table = {
+      type: 'datatable' as const,
+      rows: [{ maxB: 100 }],
+      columns,
+      meta: { type: 'es_ql' as const, approximationApplied: true },
+    };
+
+    const lensVis = await getLensVisMock({
+      filters,
+      query: queryStats,
+      dataView,
+      timeInterval,
+      breakdownField: undefined,
+      columns,
+      allSuggestions: allSuggestionsMock,
+      table,
+    });
+
+    expect(lensVis.currentSuggestionContext?.type).toBe(
+      UnifiedHistogramSuggestionType.lensSuggestion
+    );
+
+    const layers = lensVis.visContext?.attributes.state.datasourceStates.textBased?.layers ?? {};
+    const layerValues = Object.values(layers);
+    expect(layerValues.length).toBeGreaterThan(0);
+    for (const layer of layerValues) {
+      expect((layer as { table?: typeof table }).table?.meta?.approximationApplied).toBe(true);
+    }
+  });
+
+  it('should inject table with approximationApplied:false into Lens layers for ES|QL STATS query', async () => {
+    const queryStats = { esql: 'from logstash-* | stats maxB = max(bytes)' };
+    const columns = [{ id: 'maxB', name: 'maxB', meta: { type: 'number' as const } }];
+    const table = {
+      type: 'datatable' as const,
+      rows: [{ maxB: 100 }],
+      columns,
+      meta: { type: 'es_ql' as const, approximationApplied: false },
+    };
+
+    const lensVis = await getLensVisMock({
+      filters,
+      query: queryStats,
+      dataView,
+      timeInterval,
+      breakdownField: undefined,
+      columns,
+      allSuggestions: allSuggestionsMock,
+      table,
+    });
+
+    const layers = lensVis.visContext?.attributes.state.datasourceStates.textBased?.layers ?? {};
+    const layerValues = Object.values(layers);
+    expect(layerValues.length).toBeGreaterThan(0);
+    for (const layer of layerValues) {
+      expect((layer as { table?: typeof table }).table?.meta?.approximationApplied).toBe(false);
+    }
+  });
+
+  it('should not inject table into Lens layers when table is not provided', async () => {
+    const queryStats = { esql: 'from logstash-* | stats maxB = max(bytes)' };
+    const columns = [{ id: 'maxB', name: 'maxB', meta: { type: 'number' as const } }];
+
+    const lensVis = await getLensVisMock({
+      filters,
+      query: queryStats,
+      dataView,
+      timeInterval,
+      breakdownField: undefined,
+      columns,
+      allSuggestions: allSuggestionsMock,
+      table: undefined,
+    });
+
+    const layers = lensVis.visContext?.attributes.state.datasourceStates.textBased?.layers ?? {};
+    const layerValues = Object.values(layers);
+    for (const layer of layerValues) {
+      expect((layer as { table?: unknown }).table).toBeUndefined();
+    }
+  });
+});

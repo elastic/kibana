@@ -7,7 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SettingType, UnsavedFieldChange, FieldDefinition } from '@kbn/management-settings-types';
+import type {
+  SettingType,
+  UnsavedFieldChange,
+  FieldDefinition,
+} from '@kbn/management-settings-types';
 import { hasUnsavedChange } from './has_unsaved_change';
 
 type F<T extends SettingType> = Pick<FieldDefinition<T>, 'savedValue' | 'defaultValue'>;

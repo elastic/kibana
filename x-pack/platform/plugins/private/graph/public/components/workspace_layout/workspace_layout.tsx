@@ -5,32 +5,28 @@
  * 2.0.
  */
 
-import React, { Fragment, memo, useCallback, useRef, useState } from 'react';
+import React, { Fragment, memo, useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiSpacer } from '@elastic/eui';
 import { connect } from 'react-redux';
 import { useLocation } from 'react-router-dom';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { RequestAdapter } from '@kbn/inspector-plugin/common';
+import type { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { type UseEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { SearchBar } from '../search_bar';
-import {
-  GraphState,
-  hasFieldsSelector,
-  workspaceInitializedSelector,
-} from '../../state_management';
+import type { GraphState } from '../../state_management';
+import { hasFieldsSelector, workspaceInitializedSelector } from '../../state_management';
 import { FieldManager } from '../field_manager';
-import { ControlType, IndexPatternProvider, TermIntersect, WorkspaceNode } from '../../types';
+import type { ControlType, IndexPatternProvider, TermIntersect, WorkspaceNode } from '../../types';
 import { WorkspaceTopNavMenu } from './workspace_top_nav_menu';
 import { GuidancePanel } from '../guidance_panel';
-import { GraphTitle } from '../graph_title';
-import { GraphWorkspaceSavedObject, Workspace } from '../../types';
-import { GraphServices } from '../../application';
+import type { GraphWorkspaceSavedObject, Workspace } from '../../types';
+import type { GraphServices } from '../../application';
 import { ControlPanel } from '../control_panel';
-import { GraphVisualization } from '../graph_visualization';
+import { ReduxGraphVisualization } from '../graph_visualization';
 import { colorChoices } from '../../helpers/style_choices';
-import { SharingSavedObjectProps } from '../../helpers/use_workspace_loader';
+import type { SharingSavedObjectProps } from '../../helpers/use_workspace_loader';
 import { getEditUrl } from '../../services/url';
 
 /**
@@ -43,9 +39,7 @@ const GuidancePanelMemoized = memo(GuidancePanel);
 
 type WorkspaceLayoutProps = Pick<
   GraphServices,
-  | 'setHeaderActionMenu'
   | 'graphSavePolicy'
-  | 'navigation'
   | 'capabilities'
   | 'coreStart'
   | 'canEditDrillDownUrls'
@@ -79,9 +73,7 @@ export const WorkspaceLayoutComponent = ({
   capabilities,
   coreStart,
   graphSavePolicy,
-  navigation,
   canEditDrillDownUrls,
-  setHeaderActionMenu,
   sharingSavedObjectProps,
   spaces,
   inspect,
@@ -91,7 +83,7 @@ export const WorkspaceLayoutComponent = ({
   const [pickerOpen, setPickerOpen] = useState(false);
   const [mergeCandidates, setMergeCandidates] = useState<TermIntersect[]>([]);
   const [control, setControl] = useState<ControlType>('none');
-  const selectedNode = useRef<WorkspaceNode | undefined>(undefined);
+  const [selectedNode, setSelectedNode] = useState<WorkspaceNode>();
 
   const search = useLocation().search;
   const urlQuery = new URLSearchParams(search).get('query');
@@ -103,12 +95,12 @@ export const WorkspaceLayoutComponent = ({
   );
 
   const selectSelected = useCallback((node: WorkspaceNode) => {
-    selectedNode.current = node;
+    setSelectedNode(node);
     setControl('editLabel');
   }, []);
 
   const onSetControl = useCallback((newControl: ControlType) => {
-    selectedNode.current = undefined;
+    setSelectedNode(undefined);
     setControl(newControl);
   }, []);
 
@@ -191,18 +183,15 @@ export const WorkspaceLayoutComponent = ({
         workspace={workspace}
         savedWorkspace={savedWorkspace}
         graphSavePolicy={graphSavePolicy}
-        navigation={navigation}
         capabilities={capabilities}
         inspect={inspect}
         requestAdapter={requestAdapter}
         coreStart={coreStart}
         canEditDrillDownUrls={canEditDrillDownUrls}
         confirmWipeWorkspace={confirmWipeWorkspace}
-        setHeaderActionMenu={setHeaderActionMenu}
         isInitialized={isInitialized}
       />
 
-      {isInitialized && <GraphTitle />}
       <div css={styles.bar}>
         <SearchBar
           isLoading={loading}
@@ -225,7 +214,7 @@ export const WorkspaceLayoutComponent = ({
       {isInitialized && workspace && (
         <div id="GraphSvgContainer" css={styles.container}>
           <div css={styles.visualization}>
-            <GraphVisualization
+            <ReduxGraphVisualization
               workspace={workspace}
               selectSelected={selectSelected}
               onSetControl={onSetControl}
@@ -237,7 +226,7 @@ export const WorkspaceLayoutComponent = ({
             renderCounter={renderCounter}
             workspace={workspace}
             control={control}
-            selectedNode={selectedNode.current}
+            selectedNode={selectedNode}
             colors={colorChoices}
             mergeCandidates={mergeCandidates}
             selectSelected={selectSelected}

@@ -8,6 +8,7 @@
 import { createContext, type FC, useContext } from 'react';
 
 import type { ObservabilityAIAssistantPublicStart } from '@kbn/observability-ai-assistant-plugin/public';
+import type { CPSPluginStart } from '@kbn/cps/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
@@ -16,13 +17,13 @@ import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type {
   AnalyticsServiceStart,
-  CoreSetup,
   CoreStart,
   ExecutionContextStart,
   HttpStart,
   IUiSettingsClient,
   ThemeServiceStart,
   UserProfileService,
+  NotificationsStart,
 } from '@kbn/core/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
@@ -31,6 +32,9 @@ import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { FieldStatsFlyoutProviderProps } from '@kbn/ml-field-stats-flyout/field_stats_flyout_provider';
 import type { UseFieldStatsTrigger } from '@kbn/ml-field-stats-flyout/use_field_stats_trigger';
+import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
+import type { DataViewFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
+import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 
 /**
  * AIOps app context value to be provided via React context.
@@ -70,7 +74,7 @@ export interface AiopsAppContextValue {
   /**
    * Used for toast notifications.
    */
-  notifications: CoreSetup['notifications'];
+  notifications: NotificationsStart;
   /**
    * Used to store user settings in local storage.
    */
@@ -121,10 +125,18 @@ export interface AiopsAppContextValue {
   embeddable?: EmbeddableStart;
   cases?: CasesPublicStart;
   isServerless?: boolean;
+  /** Used by the data source picker to open the data view editor */
+  dataViewEditor?: DataViewEditorStart;
+  /** Used by the data source picker to open the field editor */
+  dataViewFieldEditor?: DataViewFieldEditorStart;
+  /** Used by the data source picker's Discover session flyout */
+  contentManagement?: ContentManagementPublicStart;
   /** Identifier to indicate the plugin utilizing the component */
   embeddingOrigin: string;
   /** Observability AI Assistant */
   observabilityAIAssistant?: ObservabilityAIAssistantPublicStart;
+  /** CPS plugin for project routing */
+  cps?: CPSPluginStart;
 }
 
 /**

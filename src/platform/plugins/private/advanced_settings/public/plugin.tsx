@@ -8,13 +8,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { CoreSetup, Plugin } from '@kbn/core/public';
+import type { CoreSetup, Plugin } from '@kbn/core/public';
 import { SectionRegistry } from '@kbn/management-settings-section-registry';
 import ReactDOM from 'react-dom';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import React from 'react';
 import { withSuspense } from '@kbn/shared-ux-utility';
-import {
+import type {
   AdvancedSettingsSetup,
   AdvancedSettingsStart,
   AdvancedSettingsPluginSetup,
@@ -60,7 +59,7 @@ export class AdvancedSettingsPlugin
         setBreadcrumbs([{ text: title }]);
 
         ReactDOM.render(
-          <KibanaRenderContextProvider {...coreStart}>
+          coreStart.rendering.addContext(
             <KibanaSettingsApplication
               {...{
                 ...coreStart,
@@ -69,7 +68,7 @@ export class AdvancedSettingsPlugin
                 sectionRegistry: sectionRegistryStart,
               }}
             />
-          </KibanaRenderContextProvider>,
+          ),
           element
         );
         return () => {

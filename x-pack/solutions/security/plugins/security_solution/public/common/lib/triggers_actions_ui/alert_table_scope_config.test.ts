@@ -14,6 +14,9 @@ describe('getAlertConfigIdByScopeId', () => {
     expect(getAlertConfigIdByScopeId(TableId.alertsOnAlertsPage)).toEqual(
       ALERTS_TABLE_REGISTRY_CONFIG_IDS.ALERTS_PAGE
     );
+    expect(getAlertConfigIdByScopeId(TableId.alertsOnAttacksPage)).toEqual(
+      ALERTS_TABLE_REGISTRY_CONFIG_IDS.ATTACKS_PAGE
+    );
     expect(getAlertConfigIdByScopeId(TableId.alertsOnRuleDetailsPage)).toEqual(
       ALERTS_TABLE_REGISTRY_CONFIG_IDS.RULE_DETAILS
     );

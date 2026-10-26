@@ -37,6 +37,11 @@ export default new Datasource('static', {
   fn: function staticFn(args, tlConfig) {
     let data;
     const target = tlConfig.getTargetSeries();
+    if (typeof args.byName.value !== 'number' && typeof args.byName.value !== 'string') {
+      throw new Error(
+        'The value argument for static() must be a number or a colon-separated string of numbers.'
+      );
+    }
     if (typeof args.byName.value === 'string') {
       const points = args.byName.value.split(':');
       const begin = _.first(target)[0];

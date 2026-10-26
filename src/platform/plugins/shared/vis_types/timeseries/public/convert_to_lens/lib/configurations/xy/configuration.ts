@@ -8,10 +8,13 @@
  */
 
 import { Position } from '@elastic/charts';
-import { XYCurveTypes } from '@kbn/visualizations-plugin/public';
-import type { XYConfiguration, XYLayerConfig } from '@kbn/visualizations-plugin/common';
-import { Panel } from '../../../../../common/types';
+import type { XYVisualizationState as XYConfiguration, XYLayerConfig } from '@kbn/lens-common';
+import { AreaFillOptions, XYCurveTypes } from '@kbn/expression-xy-plugin/common';
+import type { Panel } from '../../../../../common/types';
 import { getYExtents } from './extents';
+
+const hasAreaLayer = (layers: XYLayerConfig[]): boolean =>
+  layers.some((layer) => 'seriesType' in layer && layer.seriesType.includes('area'));
 
 export const getConfigurationForTimeseries = (
   model: Panel,
@@ -22,6 +25,7 @@ export const getConfigurationForTimeseries = (
     layers,
     curveType: model.series[0].steps === 1 ? XYCurveTypes.CURVE_STEP_AFTER : undefined,
     fillOpacity: Number(model.series[0].fill) ?? 0.3,
+    ...(hasAreaLayer(layers) ? { areaFill: AreaFillOptions.SOLID } : {}),
     legend: {
       isVisible: Boolean(model.show_legend),
       showSingleSeries: Boolean(model.show_legend),
@@ -38,6 +42,7 @@ export const getConfigurationForTimeseries = (
     yRightExtent: extents.yRightExtent,
     yLeftScale: model.axis_scale === 'log' ? 'log' : 'linear',
     yRightScale: model.axis_scale === 'log' ? 'log' : 'linear',
+    preferredSeriesType: 'bar',
   };
 };
 
@@ -70,4 +75,5 @@ export const getConfigurationForTopN = (
     yRight: false,
   },
   valueLabels: 'show',
+  preferredSeriesType: 'bar',
 });

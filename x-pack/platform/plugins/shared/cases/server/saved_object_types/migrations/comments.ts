@@ -42,8 +42,7 @@ import {
   MIN_COMMENTS_DEFERRED_KIBANA_VERSION,
   SUB_CASE_SAVED_OBJECT,
 } from './constants';
-import type { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
-import type { AttachmentPersistedAttributes } from '../../common/types/attachments';
+import type { AttachmentPersistedAttributes } from '../../common/types/attachments_v1';
 
 interface UnsanitizedComment {
   comment: string;
@@ -65,7 +64,6 @@ interface SanitizedCommentWithAssociation {
 }
 
 export interface CreateCommentsMigrationsDeps {
-  persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
   lensEmbeddableFactory: LensServerPluginSetup['lensEmbeddableFactory'];
 }
 
@@ -171,7 +169,7 @@ const migrateLensComment = ({
       if (isLensMarkdownNode(comment)) {
         // casting here because ts complains that comment isn't serializable because LensMarkdownNode
         // extends Node which has fields that conflict with SerializableRecord even though it is serializable
-        return migrate(comment as SerializableRecord) as LensMarkdownNode;
+        return migrate(comment as unknown as SerializableRecord) as unknown as LensMarkdownNode;
       }
 
       return comment;

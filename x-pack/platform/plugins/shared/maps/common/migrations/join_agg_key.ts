@@ -6,24 +6,26 @@
  */
 
 import _ from 'lodash';
+import type { VECTOR_STYLES } from '../constants';
 import {
   AGG_DELIMITER,
   AGG_TYPE,
   FIELD_ORIGIN,
   JOIN_FIELD_NAME_PREFIX,
   LAYER_TYPE,
-  VECTOR_STYLES,
 } from '../constants';
 import { getJoinAggKey } from '../get_agg_key';
-import {
-  AggDescriptor,
-  JoinDescriptor,
-  LayerDescriptor,
-  VectorLayerDescriptor,
-} from '../descriptor_types';
-import type { MapAttributes } from '../content_management';
+import type { AggDescriptor, JoinDescriptor, VectorLayerDescriptor } from '../descriptor_types';
+import type { StoredMapAttributes } from '../../server';
 
 const GROUP_BY_DELIMITER = '_groupby_';
+
+/** Serialized join `right` during map migrations (includes legacy fields like indexPatternTitle). */
+interface LegacySerializedJoinRight {
+  metrics?: AggDescriptor[];
+  indexPatternTitle?: string;
+  term?: string;
+}
 
 function getLegacyAggKey({
   aggType,
@@ -53,7 +55,11 @@ function parseLegacyAggKey(legacyAggKey: string): { aggType: AGG_TYPE; aggFieldN
   };
 }
 
-export function migrateJoinAggKey({ attributes }: { attributes: MapAttributes }): MapAttributes {
+export function migrateJoinAggKey({
+  attributes,
+}: {
+  attributes: StoredMapAttributes;
+}): StoredMapAttributes {
   if (!attributes || !attributes.layerListJSON) {
     return attributes;
   }
@@ -65,7 +71,7 @@ export function migrateJoinAggKey({ attributes }: { attributes: MapAttributes })
     throw new Error('Unable to parse attribute layerListJSON');
   }
 
-  layerList.forEach((layerDescriptor: LayerDescriptor) => {
+  layerList.forEach((layerDescriptor: { type: string }) => {
     if (
       // can not use LAYER_TYPE because LAYER_TYPE.VECTOR does not exist >8.1
       layerDescriptor.type === 'VECTOR' ||
@@ -83,12 +89,13 @@ export function migrateJoinAggKey({ attributes }: { attributes: MapAttributes })
 
       const legacyJoinFields = new Map<string, Partial<JoinDescriptor>>();
       vectorLayerDescriptor.joins.forEach((joinDescriptor: Partial<JoinDescriptor>) => {
-        _.get(joinDescriptor, 'right.metrics', []).forEach((aggDescriptor: AggDescriptor) => {
+        const right = joinDescriptor.right as LegacySerializedJoinRight | undefined;
+        (right?.metrics ?? []).forEach((aggDescriptor) => {
           const legacyAggKey = getLegacyAggKey({
             aggType: aggDescriptor.type,
             aggFieldName: 'field' in aggDescriptor ? aggDescriptor.field : undefined,
-            indexPatternTitle: _.get(joinDescriptor, 'right.indexPatternTitle', ''),
-            termFieldName: _.get(joinDescriptor, 'right.term', ''),
+            indexPatternTitle: right?.indexPatternTitle ?? '',
+            termFieldName: right?.term ?? '',
           });
           // The legacy getAggKey implemenation has a naming collision bug where
           // aggType, aggFieldName, indexPatternTitle, and termFieldName would result in the identical aggKey.

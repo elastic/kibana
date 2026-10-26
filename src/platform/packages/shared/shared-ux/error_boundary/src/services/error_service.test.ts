@@ -10,39 +10,33 @@
 import { KibanaErrorService } from './error_service';
 
 describe('KibanaErrorBoundary Error Service', () => {
-  beforeEach(() => {
-    jest.spyOn(console, 'error').mockImplementation(() => {});
-  });
+  const service = new KibanaErrorService();
 
-  const mockDeps = {
-    analytics: { reportEvent: jest.fn() },
-  };
-  const service = new KibanaErrorService(mockDeps);
+  describe('Service components', () => {
+    it('construction', () => {
+      expect(service).toHaveProperty('enqueueError');
+    });
 
-  it('construction', () => {
-    expect(service).toHaveProperty('registerError');
-  });
+    it('decorates fatal error object', () => {
+      const testFatal = new Error('This is an unrecognized and fatal error');
+      const enqueued = service.enqueueError(testFatal, { componentStack: '' });
 
-  it('decorates fatal error object', () => {
-    const testFatal = new Error('This is an unrecognized and fatal error');
-    const serviceError = service.registerError(testFatal, { componentStack: '' });
+      expect(enqueued.isFatal).toBe(true);
+    });
 
-    expect(serviceError.isFatal).toBe(true);
-  });
+    it('decorates recoverable error object', () => {
+      const testRecoverable = new Error('Could not load chunk blah blah');
+      testRecoverable.name = 'ChunkLoadError';
+      const enqueued = service.enqueueError(testRecoverable, { componentStack: '' });
 
-  it('decorates recoverable error object', () => {
-    const testRecoverable = new Error('Could not load chunk blah blah');
-    testRecoverable.name = 'ChunkLoadError';
-    const serviceError = service.registerError(testRecoverable, { componentStack: '' });
+      expect(enqueued.isFatal).toBe(false);
+    });
 
-    expect(serviceError.isFatal).toBe(false);
-  });
+    it('derives component name', () => {
+      const testFatal = new Error('This is an unrecognized and fatal error');
 
-  it('derives component name', () => {
-    const testFatal = new Error('This is an unrecognized and fatal error');
-
-    const errorInfo = {
-      componentStack: `
+      const errorInfo = {
+        componentStack: `
     at BadComponent (http://localhost:9001/main.iframe.bundle.js:11616:73)
     at ErrorBoundaryInternal (http://localhost:9001/main.iframe.bundle.js:12232:81)
     at KibanaErrorBoundary (http://localhost:9001/main.iframe.bundle.js:12295:116)
@@ -51,18 +45,18 @@ describe('KibanaErrorBoundary Error Service', () => {
     at http://localhost:9001/kbn-ui-shared-deps-npm.dll.js:164499:73
     at section
     at http://localhost:9001/kbn-ui-shared-deps-npm.dll.js`,
-    };
+      };
 
-    const serviceError = service.registerError(testFatal, errorInfo);
+      const enqueued = service.enqueueError(testFatal, errorInfo);
 
-    expect(serviceError.name).toBe('BadComponent');
-  });
+      expect(enqueued.name).toBe('BadComponent');
+    });
 
-  it('passes the common helper utility when deriving component name', () => {
-    const testFatal = new Error('This is an mind-bendingly fatal error');
+    it('passes the common helper utility when deriving component name', () => {
+      const testFatal = new Error('This is an mind-bendingly fatal error');
 
-    const errorInfo = {
-      componentStack: `
+      const errorInfo = {
+        componentStack: `
     at ThrowIfError (http://localhost:9001/main.iframe.bundle.js:11616:73)
     at BadComponent (http://localhost:9001/main.iframe.bundle.js:11616:73)
     at ErrorBoundaryInternal (http://localhost:9001/main.iframe.bundle.js:12232:81)
@@ -72,57 +66,12 @@ describe('KibanaErrorBoundary Error Service', () => {
     at http://localhost:9001/kbn-ui-shared-deps-npm.dll.js:164499:73
     at section
     at http://localhost:9001/kbn-ui-shared-deps-npm.dll.js`,
-    };
+      };
 
-    const serviceError = service.registerError(testFatal, errorInfo);
+      const enqueued = service.enqueueError(testFatal, errorInfo);
 
-    // should not be "ThrowIfError"
-    expect(serviceError.name).toBe('BadComponent');
-  });
-
-  it('captures the error event for telemetry', () => {
-    jest.resetAllMocks();
-    const testFatal = new Error('This is an outrageous and fatal error');
-
-    const errorInfo = {
-      componentStack: `
-    at OutrageousMaker (http://localhost:9001/main.iframe.bundle.js:11616:73)
-    `,
-    };
-
-    service.registerError(testFatal, errorInfo);
-
-    expect(mockDeps.analytics.reportEvent).toHaveBeenCalledTimes(1);
-    expect(mockDeps.analytics.reportEvent.mock.calls[0][0]).toBe('fatal-error-react');
-    expect(mockDeps.analytics.reportEvent.mock.calls[0][1]).toMatchObject({
-      component_name: 'OutrageousMaker',
-      error_message: 'Error: This is an outrageous and fatal error',
+      // should not be "ThrowIfError"
+      expect(enqueued.name).toBe('BadComponent');
     });
-  });
-
-  it('captures component stack trace and error stack trace for telemetry', () => {
-    jest.resetAllMocks();
-    const testFatal = new Error('This is an outrageous and fatal error');
-
-    const errorInfo = {
-      componentStack: `
-    at OutrageousMaker (http://localhost:9001/main.iframe.bundle.js:11616:73)
-    `,
-    };
-
-    service.registerError(testFatal, errorInfo);
-
-    expect(mockDeps.analytics.reportEvent).toHaveBeenCalledTimes(1);
-    expect(mockDeps.analytics.reportEvent.mock.calls[0][0]).toBe('fatal-error-react');
-    expect(
-      String(mockDeps.analytics.reportEvent.mock.calls[0][1].component_stack).includes(
-        'at OutrageousMaker'
-      )
-    ).toBe(true);
-    expect(
-      String(mockDeps.analytics.reportEvent.mock.calls[0][1].error_stack).startsWith(
-        'Error: This is an outrageous and fatal error'
-      )
-    ).toBe(true);
   });
 });

@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { left } from 'fp-ts/lib/Either';
-import { pipe } from 'fp-ts/lib/pipeable';
+import { left } from 'fp-ts/Either';
+import { pipe } from 'fp-ts/pipeable';
 import { exactCheck, foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 
 import { getExceptionListItemSchemaMock } from './index.mock';
-import { ExceptionListItemSchema, exceptionListItemSchema } from '.';
+import type { ExceptionListItemSchema } from '.';
+import { exceptionListItemSchema } from '.';
 
 describe('exception_list_item_schema', () => {
   test('it should validate a typical exception list item response', () => {

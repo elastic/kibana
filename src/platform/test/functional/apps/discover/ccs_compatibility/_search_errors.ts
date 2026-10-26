@@ -8,7 +8,15 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
+
+/**
+ * Migration recommendation: MIXED. See individual tests. Mapping shard failures / timeouts
+ * onto warnings is covered in
+ * src/platform/packages/shared/kbn-search-response-warnings/src/extract_warnings.test.ts.
+ * The callout is covered in callout.test.tsx. The empty prompt is already shown in
+ * src/platform/plugins/shared/discover/test/scout/core2/ui/parallel_tests/async_scripted_fields.spec.ts.
+ */
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const config = getService('config');
@@ -17,7 +25,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
   const dataViews = getService('dataViews');
-  const { common, discover, timePicker } = getPageObjects(['common', 'discover', 'timePicker']);
+  const { discover, timePicker } = getPageObjects(['discover', 'timePicker']);
 
   const isCcsTest = config.get('esTestCluster.ccs');
   const archiveDirectory = isCcsTest
@@ -42,8 +50,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await esNode.unload('src/platform/test/functional/fixtures/es_archiver/logstash_functional');
     });
 
+    /**
+     * Migration recommendation: MIXED. extract_warnings.test.ts already covers shard failures →
+     * incomplete warning. Keep a Scout smoke that Discover shows
+     * `searchResponseWarningsCallout` and that the hit count drops from 14,004 to 9,247 — that
+     * number is the proof only the failed shard was lost.
+     */
     it('exception on single shard shows warning and results', async () => {
-      await common.navigateToApp('discover');
+      await discover.navigateToApp({ queryMode: 'classic' });
       await dataViews.switchToAndValidate(defaultIndex);
       await timePicker.setDefaultAbsoluteRange();
       await retry.try(async () => {
@@ -75,8 +89,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.exists('searchResponseWarningsCallout');
     });
 
+    /**
+     * Migration recommendation: DELETE. The empty prompt is already covered in
+     * async_scripted_fields.spec.ts. All-shards-failed → warning extraction is in
+     * extract_warnings.test.ts.
+     */
     it('exception on all shards shows error', async () => {
-      await common.navigateToApp('discover');
+      await discover.navigateToApp({ queryMode: 'classic' });
       await dataViews.switchToAndValidate(defaultIndex);
       await timePicker.setDefaultAbsoluteRange();
       await retry.try(async () => {

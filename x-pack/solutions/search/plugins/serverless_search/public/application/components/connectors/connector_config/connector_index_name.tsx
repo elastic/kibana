@@ -17,9 +17,10 @@ import {
   EuiCode,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Connector, ConnectorStatus } from '@kbn/search-connectors';
+import type { Connector } from '@kbn/search-connectors';
+import { ConnectorStatus } from '@kbn/search-connectors';
 import React, { useState } from 'react';
-import { useQueryClient, useMutation } from '@tanstack/react-query';
+import { useQueryClient, useMutation } from '@kbn/react-query';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { isValidIndexName } from '../../../../utils/validate_index_name';
 import { SAVE_LABEL } from '../../../../../common/i18n_string';
@@ -48,12 +49,17 @@ export const ConnectorIndexName: React.FC<ConnectorIndexNameProps> = ({
       setShowSyncCallOut(false);
       if (inputName && inputName !== connector.index_name) {
         const body = { index_name: inputName };
-        await http.post(`/internal/serverless_search/connectors/${connector.id}/index_name`, {
-          body: JSON.stringify(body),
-        });
+        await http.post(
+          `/internal/serverless_search/connectors/${encodeURIComponent(connector.id)}/index_name`,
+          {
+            body: JSON.stringify(body),
+          }
+        );
       }
       if (sync) {
-        await http.post(`/internal/serverless_search/connectors/${connector.id}/sync`);
+        await http.post(
+          `/internal/serverless_search/connectors/${encodeURIComponent(connector.id)}/sync`
+        );
         setShowSyncCallOut(true);
       }
       return inputName;

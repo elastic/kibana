@@ -71,7 +71,7 @@ const OsqueryAppEmptyStateComponent = () => {
           fill
           href={integrationHref}
           onClick={integrationClick}
-          iconType="plusInCircleFilled"
+          iconType="plusCircle"
           data-test-subj="osquery-add-integration-button"
         >
           <FormattedMessage

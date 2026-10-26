@@ -8,8 +8,9 @@
 import type { AggregationOptionsByType } from '@kbn/es-types';
 
 import Boom from '@hapi/boom';
+import { isDerivativeAgg } from '../../../../common/inventory_models';
 import { afterKeyObjectRT } from '../../../../common/http_api';
-import { TIMESTAMP_FIELD } from '../../../../common/constants';
+import { TIMESTAMP } from '../../../../common/constants';
 import type { MetricsAPIRequest } from '../../../../common/http_api/metrics_api';
 import { calculateDateHistogramOffset } from './calculate_date_histogram_offset';
 import { createMetricsAggregations } from './create_metrics_aggregations';
@@ -37,7 +38,7 @@ const createMetricHistogramAggs = (options: MetricsAPIRequest): HistogramAggrega
   return {
     histogram: {
       date_histogram: {
-        field: TIMESTAMP_FIELD,
+        field: TIMESTAMP,
         fixed_interval: intervalString,
         offset: options.alignDataToEnd ? calculateDateHistogramOffset(options.timerange) : '0s',
         extended_bounds: {
@@ -65,8 +66,14 @@ export const createCompositeAggregations = (options: MetricsAPIRequest) => {
     throw Boom.badRequest('groupBy must be informed.');
   }
 
-  if (!options.includeTimeseries && !!options.metrics.find((p) => p.id === 'logRate')) {
-    throw Boom.badRequest('logRate metric is not supported without time series');
+  const derivativeMetrics = Object.values(options.metrics)
+    .filter((metric) => Object.values(metric.aggregations).some(isDerivativeAgg))
+    .map((metric) => metric.id);
+
+  if (!options.includeTimeseries && derivativeMetrics.length > 0) {
+    throw Boom.badRequest(
+      `The following metrics require time series: ${derivativeMetrics.join(', ')}`
+    );
   }
 
   const after = getAfterKey(options);

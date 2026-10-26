@@ -18,8 +18,8 @@ import {
   SwitchOption,
   RequiredNumberInputOption,
 } from '@kbn/vis-default-editor-plugin/public';
-import { ValidationVisOptionsProps } from '../../common';
-import { VisParams } from '../../../../types';
+import type { ValidationVisOptionsProps } from '../../common';
+import type { VisParams } from '../../../../types';
 import { getThresholdLineStyles } from '../../../collections';
 
 const thresholdLineStyles = getThresholdLineStyles();

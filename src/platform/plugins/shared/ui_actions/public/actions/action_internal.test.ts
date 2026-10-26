@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ActionDefinition } from './action';
+import type { ActionDefinition } from './action';
 import { ActionInternal } from './action_internal';
 
 const defaultActionDef: ActionDefinition = {
@@ -44,7 +44,7 @@ describe('ActionInternal', () => {
         },
       });
       await action.execute({});
-      expect(addWarningMock).toBeCalledTimes(1);
+      expect(addWarningMock).toHaveBeenCalledTimes(1);
     });
 
     test('execute function is async', async () => {
@@ -55,7 +55,7 @@ describe('ActionInternal', () => {
         },
       });
       await action.execute({});
-      expect(addWarningMock).toBeCalledTimes(1);
+      expect(addWarningMock).toHaveBeenCalledTimes(1);
     });
   });
 });

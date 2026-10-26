@@ -27,12 +27,19 @@ import {
 
 import { patchRuleRoute } from './route';
 import { HttpAuthzError } from '../../../../../machine_learning/validation';
+import type {
+  MockClients,
+  SecuritySolutionRequestHandlerContextMock,
+} from '../../../../routes/__mocks__/request_context';
+import { createMockEndpointAppContextService } from '../../../../../../endpoint/mocks';
 
 describe('Patch rule route', () => {
   let server: ReturnType<typeof serverMock.create>;
-  let { clients, context } = requestContextMock.createTools();
+  let clients: MockClients;
+  let context: SecuritySolutionRequestHandlerContextMock;
 
   beforeEach(() => {
+    jest.clearAllMocks();
     server = serverMock.create();
     ({ clients, context } = requestContextMock.createTools());
 
@@ -41,7 +48,16 @@ describe('Patch rule route', () => {
     clients.rulesClient.update.mockResolvedValue(getRuleMock(getQueryRuleParams())); // successful update
     clients.detectionRulesClient.patchRule.mockResolvedValue(getRulesSchemaMock());
 
+    context.securitySolution.getEndpointService.mockReturnValue(
+      createMockEndpointAppContextService()
+    );
+
     patchRuleRoute(server.router);
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+    jest.restoreAllMocks();
   });
 
   describe('status codes', () => {
@@ -191,16 +207,18 @@ describe('Patch rule route', () => {
       expect(result.ok).toHaveBeenCalled();
     });
 
-    test('rejects unknown rule type', async () => {
+    test('preserves type-specific fields when "type" is omitted', async () => {
+      const threshold = { field: ['host.name'], value: 200 };
       const request = requestMock.create({
         method: 'patch',
         path: DETECTION_ENGINE_RULES_URL,
-        body: { ...getPatchRulesSchemaMock(), type: 'unknown_type' },
+        body: { rule_id: 'rule-1', threshold },
       });
-      const result = server.validate(request);
+      const response = await server.inject(request, requestContextMock.convertContext(context));
 
-      expect(result.badRequest).toHaveBeenCalledWith(
-        'type: Invalid literal value, expected "eql", language: Invalid literal value, expected "eql", type: Invalid literal value, expected "query", type: Invalid literal value, expected "saved_query", type: Invalid literal value, expected "threshold", and 5 more'
+      expect(response.status).toEqual(200);
+      expect(clients.detectionRulesClient.patchRule).toHaveBeenCalledWith(
+        expect.objectContaining({ rulePatch: expect.objectContaining({ threshold }) })
       );
     });
 
@@ -226,7 +244,9 @@ describe('Patch rule route', () => {
         },
       });
       const result = server.validate(request);
-      expect(result.badRequest).toHaveBeenCalledWith('from: Failed to parse date-math expression');
+      expect(result.badRequest).toHaveBeenCalledWith(
+        expect.stringContaining('from: Failed to parse date-math expression')
+      );
     });
   });
 });

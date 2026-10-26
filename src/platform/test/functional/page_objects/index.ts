@@ -7,12 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { AppMenuPageObject } from './app_menu';
 import { CommonPageObject } from './common_page';
 import { ConsolePageObject } from './console_page';
 import { ContextPageObject } from './context_page';
 import { DashboardPageObject } from './dashboard_page';
 import { DiscoverPageObject } from './discover_page';
 import { ErrorPageObject } from './error_page';
+import { ExportPageObject } from './export_page';
 import { HeaderPageObject } from './header_page';
 import { HomePageObject } from './home_page';
 import { NewsfeedPageObject } from './newsfeed_page';
@@ -36,14 +38,15 @@ import { DashboardPageLinks } from './dashboard_page_links';
 import { UnifiedSearchPageObject } from './unified_search_page';
 import { UnifiedFieldListPageObject } from './unified_field_list';
 import { UnifiedTabsPageObject } from './unified_tabs';
-import { FilesManagementPageObject } from './files_management';
 import { AnnotationEditorPageObject } from './annotation_library_editor_page';
 import { SolutionNavigationProvider } from './solution_navigation';
 import { EmbeddedConsoleProvider } from './embedded_console';
 import { SpaceSettingsPageObject } from './space_settings';
+import { IndexEditorObject } from './index_editor';
 
 export const pageObjects = {
   annotationEditor: AnnotationEditorPageObject,
+  appMenu: AppMenuPageObject,
   common: CommonPageObject,
   console: ConsolePageObject,
   context: ContextPageObject,
@@ -53,6 +56,7 @@ export const pageObjects = {
   discover: DiscoverPageObject,
   embeddedConsole: EmbeddedConsoleProvider,
   error: ErrorPageObject,
+  exports: ExportPageObject,
   header: HeaderPageObject,
   home: HomePageObject,
   newsfeed: NewsfeedPageObject,
@@ -75,8 +79,8 @@ export const pageObjects = {
   unifiedSearch: UnifiedSearchPageObject,
   unifiedFieldList: UnifiedFieldListPageObject,
   unifiedTabs: UnifiedTabsPageObject,
-  filesManagement: FilesManagementPageObject,
   spaceSettings: SpaceSettingsPageObject,
+  indexEditor: IndexEditorObject,
 };
 
 export { SolutionNavigationProvider } from './solution_navigation';

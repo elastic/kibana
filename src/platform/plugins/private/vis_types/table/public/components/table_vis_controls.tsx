@@ -18,8 +18,8 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
-import { DatatableColumn, DatatableRow } from '@kbn/expressions-plugin/common';
-import { CoreStart } from '@kbn/core/public';
+import type { DatatableColumn, DatatableRow } from '@kbn/expressions-plugin/common';
+import type { CoreStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { exporters } from '@kbn/data-plugin/public';
 import {
@@ -83,7 +83,7 @@ export const TableVisControls = memo(
       <EuiButtonEmpty
         aria-label={exportBtnAriaLabel}
         size="xs"
-        iconType="exportAction"
+        iconType="upload"
         color="text"
         className="euiDataGrid__controlBtn"
         onClick={togglePopover}
@@ -123,6 +123,7 @@ export const TableVisControls = memo(
 
     return (
       <EuiPopover
+        aria-label={exportBtnAriaLabel}
         id="dataTableExportData"
         button={downloadButton}
         isOpen={isPopoverOpen}

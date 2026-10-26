@@ -6,20 +6,21 @@
  */
 
 import { of } from 'rxjs';
-import React, { ReactElement } from 'react';
-import { stringify } from 'query-string';
+import type { ReactElement } from 'react';
+import React from 'react';
+import queryString from 'query-string';
+
+import type { RenderOptions, MatcherFunction } from '@testing-library/react';
 // eslint-disable-next-line import/no-extraneous-dependencies
-import {
-  render as reactTestLibRender,
-  RenderOptions,
-  MatcherFunction,
-} from '@testing-library/react';
+import { render as reactTestLibRender } from '@testing-library/react';
 import { Router, Route } from '@kbn/shared-ux-router';
-import { createMemoryHistory, History } from 'history';
-import { CoreStart } from '@kbn/core/public';
+import type { History } from 'history';
+import { createMemoryHistory } from 'history';
+import type { CoreStart } from '@kbn/core/public';
 import { I18nProvider } from '@kbn/i18n-react';
-import { coreMock, themeServiceMock } from '@kbn/core/public/mocks';
-import { KibanaContextProvider, KibanaServices } from '@kbn/kibana-react-plugin/public';
+import { coreMock } from '@kbn/core/public/mocks';
+import type { KibanaServices } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { EuiThemeProvider } from '@elastic/eui';
 import { lensPluginMock } from '@kbn/lens-plugin/public/mocks';
 import { setIndexPatterns } from '@kbn/unified-search-plugin/public/services';
@@ -28,25 +29,23 @@ import { createStubDataView } from '@kbn/data-views-plugin/common/stubs';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { casesPluginMock } from '@kbn/cases-plugin/public/mocks';
-import { DataViewSpec } from '@kbn/data-views-plugin/public';
+import type { DataViewSpec } from '@kbn/data-views-plugin/public';
 import { settingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 import * as useValuesListHook from '@kbn/observability-shared-plugin/public/hooks/use_values_list';
+import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 import { rumFieldFormats } from './configurations/rum/field_formats';
-import { ExploratoryViewPublicPluginsStart } from '../../../plugin';
+import type { ExploratoryViewPublicPluginsStart } from '../../../plugin';
 import * as useAppDataViewHook from './hooks/use_app_data_view';
-import { DataViewContext, DataViewContextProvider } from './hooks/use_app_data_view';
-import {
-  AllSeries,
-  reportTypeKey,
-  SeriesContextValue,
-  UrlStorageContext,
-} from './hooks/use_series_storage';
+import type { DataViewContext } from './hooks/use_app_data_view';
+import { DataViewContextProvider } from './hooks/use_app_data_view';
+import type { AllSeries, SeriesContextValue } from './hooks/use_series_storage';
+import { reportTypeKey, UrlStorageContext } from './hooks/use_series_storage';
 
 import * as useSeriesFilterHook from './hooks/use_series_filters';
 
 import dataViewData from './configurations/test_data/test_data_view.json';
 
-import { AppDataType, SeriesUrl, UrlFilter } from './types';
+import type { AppDataType, SeriesUrl, UrlFilter } from './types';
 import { TRANSACTION_DURATION } from './configurations/constants/elasticsearch_fieldnames';
 import { dataTypes, obsvReportConfigMap, reportTypesList } from './obsv_exploratory_view';
 import { ExploratoryViewContextProvider } from './contexts/exploratory_view_config';
@@ -210,20 +209,20 @@ export function render<ExtraCore>(
 
   return {
     ...reactTestLibRender(
-      <MockRouter history={history} kibanaProps={kibanaProps} core={core}>
-        <ExploratoryViewContextProvider
-          reportTypes={reportTypesList}
-          dataTypes={dataTypes}
-          reportConfigMap={obsvReportConfigMap}
-          setHeaderActionMenu={jest.fn()}
-          theme$={themeServiceMock.createTheme$()}
-          {...defaultCore}
-        >
-          <UrlStorageContext.Provider value={{ ...seriesContextValue }}>
-            {ui}
-          </UrlStorageContext.Provider>
-        </ExploratoryViewContextProvider>
-      </MockRouter>,
+      <MockAppHeaderProvider>
+        <MockRouter history={history} kibanaProps={kibanaProps} core={core}>
+          <ExploratoryViewContextProvider
+            reportTypes={reportTypesList}
+            dataTypes={dataTypes}
+            reportConfigMap={obsvReportConfigMap}
+            {...defaultCore}
+          >
+            <UrlStorageContext.Provider value={{ ...seriesContextValue }}>
+              {ui}
+            </UrlStorageContext.Provider>
+          </ExploratoryViewContextProvider>
+        </MockRouter>
+      </MockAppHeaderProvider>,
       renderOptions
     ),
     history,
@@ -240,7 +239,7 @@ export const getHistoryFromUrl = (url: Url) => {
   }
 
   return createMemoryHistory({
-    initialEntries: [url.path + stringify(url.queryParams)],
+    initialEntries: [url.path + queryString.stringify(url.queryParams)],
   });
 };
 

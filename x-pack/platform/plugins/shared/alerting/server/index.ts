@@ -14,6 +14,8 @@ export type RulesClient = PublicMethodsOf<RulesClientClass>;
 
 export type {
   RuleType,
+  RuleTypeParamsAuthorizer,
+  RuleTypeParamsAuthorizerContext,
   ActionGroup,
   ActionGroupIdsOf,
   AlertingPlugin,
@@ -33,12 +35,41 @@ export type {
   IRuleTypeAlerts,
   GetViewInAppRelativeUrlFnOpts,
   DataStreamAdapter,
+  CpsData,
 } from './types';
 export { DEFAULT_AAD_CONFIG } from './types';
 export { RULE_SAVED_OBJECT_TYPE, API_KEY_PENDING_INVALIDATION_TYPE } from './saved_objects';
 export { RuleNotifyWhen } from '../common';
 export type { AlertingServerSetup, AlertingServerStart } from './plugin';
-export type { FindResult, BulkEditOperation, BulkOperationError } from './rules_client';
+export type { AlertStatusChangedOptIn } from './lib/workflow_extensions/alert_status_changed_opt_in';
+export type {
+  RuleQueryInspectorFn,
+  RuleQueryInspectorResponse,
+  RuleQueryInspectorResult,
+  RuleQueryInspectorTimeRange,
+} from './rule_query_inspector/types';
+export type { RulesClientCreateOptions } from './rules_client_factory';
+export { RulesNotFoundError } from './rules_client/lib/rules_not_found_error';
+export { RulesNotVisibleError } from './rules_client/lib/rules_not_visible_error';
+export type {
+  FindResult,
+  BulkEditOperation,
+  BulkOperationError,
+  GetRuleHistoryParams,
+  RuleChangeHistoryDocument,
+  GetRuleHistoryResult,
+  RuleChangeTrackingDisabledError,
+} from './rules_client';
+export type {
+  BulkCreateRulesItem,
+  BulkCreateRulesParams,
+  BulkCreateRulesResult,
+} from './application/rule/methods/bulk_create';
+export type {
+  BulkUpdateRulesItem,
+  BulkUpdateRulesParams,
+  BulkUpdateRulesResult,
+} from './application/rule/methods/bulk_update';
 export type { Rule } from './application/rule/types';
 export type { PublicAlert as Alert } from './alert';
 export { parseDuration, isRuleSnoozed } from './lib';
@@ -51,6 +82,7 @@ export {
   WriteOperations,
   AlertingAuthorizationEntity,
 } from './authorization';
+import { autocompleteConfigDeprecationProvider } from './config_deprecations';
 
 export {
   DEFAULT_ALERTS_ILM_POLICY,
@@ -70,7 +102,11 @@ export {
   isValidAlertIndexName,
   InstallShutdownError,
 } from './alerts_service';
-export { sanitizeBulkErrorResponse, AlertsClientError } from './alerts_client';
+export {
+  sanitizeBulkErrorResponse,
+  AlertsClientError,
+  shouldCreateAlertsInAllSpaces,
+} from './alerts_client';
 export { getDataStreamAdapter } from './alerts_service/lib/data_stream_adapter';
 export type { ConnectorAdapter } from './connector_adapters/types';
 
@@ -83,11 +119,9 @@ export const config: PluginConfigDescriptor<AlertingConfig> = {
   schema: configSchema,
   exposeToBrowser: {
     rules: { run: { alerts: { max: true } } },
+    rulesSettings: { enabled: true },
+    disabledRuleTypes: true,
+    enabledRuleTypes: true,
   },
-  deprecations: ({ renameFromRoot, deprecate }) => [
-    deprecate('maxEphemeralActionsPerAlert', '9.0.0', {
-      level: 'warning',
-      message: `The setting "xpack.alerting.maxEphemeralActionsPerAlert" is deprecated and currently ignored by the system. Please remove this setting.`,
-    }),
-  ],
+  deprecations: autocompleteConfigDeprecationProvider,
 };

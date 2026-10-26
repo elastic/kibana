@@ -16,9 +16,30 @@ export const config: PluginConfigDescriptor<ConfigType> = {
     markdownPlugins: true,
     files: { maxSize: true, allowedMimeTypes: true },
     stack: { enabled: true },
+    incrementalId: {
+      enabled: true,
+    },
+    templates: {
+      enabled: true,
+    },
+    runWorkflows: {
+      enabled: true,
+    },
+    attachments: {
+      enabled: true,
+    },
+    chat: {
+      enabled: true,
+    },
   },
-  deprecations: ({ renameFromRoot }) => [
+  deprecations: ({ renameFromRoot, unused }) => [
     renameFromRoot('xpack.case.enabled', 'xpack.cases.enabled', { level: 'critical' }),
+    // The Cases UX redesign shipped as the only implementation in 9.6. These keys are still
+    // accepted and ignored so that upgrading with them present logs a warning rather than
+    // failing config validation. Removing the last leaf also drops the empty parent object.
+    unused('casesRedesign.list', { level: 'warning' }),
+    unused('casesRedesign.details', { level: 'warning' }),
+    unused('casesRedesign.settings', { level: 'warning' }),
   ],
 };
 export const plugin = async (initializerContext: PluginInitializerContext) => {
@@ -26,4 +47,16 @@ export const plugin = async (initializerContext: PluginInitializerContext) => {
   return new CasePlugin(initializerContext);
 };
 
-export type { CasesServerSetup, CasesServerStart } from './types';
+export type { CasesServerSetup, CasesServerStart, CloseReasonValidator } from './types';
+export type {
+  AttachmentDeleteTarget,
+  GetRelatedAttachments,
+  RelatedAttachmentIds,
+  RelatedAttachmentsContext,
+  RelatedAttachmentsDefinition,
+  AttachmentWorkflowDefinition,
+  UnifiedAttachmentTypeSetup,
+  WorkflowAttachmentResolverContext,
+  WorkflowAttachmentTarget,
+  WorkflowAttachmentValidationContext,
+} from './attachment_framework/types';

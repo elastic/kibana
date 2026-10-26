@@ -9,11 +9,22 @@
 
 import type { RouteDeprecationInfo } from '@kbn/core-http-server';
 
+const MAX_HEADER_LENGTH = 1000;
+
 export function getWarningHeaderMessageFromRouteDeprecation(
   deprecationObject: RouteDeprecationInfo,
   kibanaVersion: string
 ): string {
-  const msg = deprecationObject.message ?? 'This endpoint is deprecated';
-  const warningMessage = `299 Kibana-${kibanaVersion} "${msg}"`;
-  return warningMessage;
+  const rawMsg = deprecationObject.message ?? 'This endpoint is deprecated';
+  let encodedMsg = encodeURIComponent(rawMsg);
+
+  const prefix = `299 Kibana-${kibanaVersion} "`;
+  const suffix = `"`;
+  const maxMsgLength = MAX_HEADER_LENGTH - prefix.length - suffix.length;
+
+  if (encodedMsg.length > maxMsgLength) {
+    encodedMsg = encodedMsg.substring(0, maxMsgLength - 3) + '...';
+  }
+
+  return `${prefix}${encodedMsg}${suffix}`;
 }

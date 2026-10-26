@@ -14,12 +14,12 @@ import {
   CARD_TEST_ID,
   IntegrationSection,
 } from './integration_section';
-import { useAddIntegrationsUrl } from '../../../../common/hooks/use_add_integrations_url';
-import { useIntegrationsLastActivity } from '../../../hooks/alert_summary/use_integrations_last_activity';
+import { useIntegrationLastAlertIngested } from '../../../hooks/alert_summary/use_integration_last_alert_ingested';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useNavigateToIntegrationsPage } from '../../../hooks/alert_summary/use_navigate_to_integrations_page';
 
-jest.mock('../../../../common/hooks/use_add_integrations_url');
-jest.mock('../../../hooks/alert_summary/use_integrations_last_activity');
+jest.mock('../../../hooks/alert_summary/use_navigate_to_integrations_page');
+jest.mock('../../../hooks/alert_summary/use_integration_last_alert_ingested');
 jest.mock('@kbn/kibana-react-plugin/public');
 
 const packages: PackageListItem[] = [
@@ -45,7 +45,6 @@ describe('<IntegrationSection />', () => {
   beforeEach(() => {
     (useKibana as jest.Mock).mockReturnValue({
       services: {
-        application: { navigateToApp: jest.fn() },
         http: {
           basePath: {
             prepend: jest.fn().mockReturnValue('/app/integrations/detail/splunk-0.1.0/overview'),
@@ -56,10 +55,10 @@ describe('<IntegrationSection />', () => {
   });
 
   it('should render a card for each integration ', () => {
-    (useAddIntegrationsUrl as jest.Mock).mockReturnValue({ onClick: jest.fn() });
-    (useIntegrationsLastActivity as jest.Mock).mockReturnValue({
+    (useNavigateToIntegrationsPage as jest.Mock).mockReturnValue(jest.fn());
+    (useIntegrationLastAlertIngested as jest.Mock).mockReturnValue({
       isLoading: true,
-      lastActivities: {},
+      lastAlertIngested: {},
     });
 
     const { getByTestId } = render(<IntegrationSection packages={packages} />);
@@ -69,16 +68,14 @@ describe('<IntegrationSection />', () => {
   });
 
   it('should navigate to the fleet page when clicking on the add integrations button', () => {
-    const addIntegration = jest.fn();
-    (useAddIntegrationsUrl as jest.Mock).mockReturnValue({
-      onClick: addIntegration,
-    });
-    (useIntegrationsLastActivity as jest.Mock).mockReturnValue([]);
+    const navigateToIntegrationsPage = jest.fn();
+    (useNavigateToIntegrationsPage as jest.Mock).mockReturnValue(navigateToIntegrationsPage);
+    (useIntegrationLastAlertIngested as jest.Mock).mockReturnValue([]);
 
     const { getByTestId } = render(<IntegrationSection packages={[]} />);
 
     getByTestId(ADD_INTEGRATIONS_BUTTON_TEST_ID).click();
 
-    expect(addIntegration).toHaveBeenCalled();
+    expect(navigateToIntegrationsPage).toHaveBeenCalled();
   });
 });

@@ -8,9 +8,9 @@
  */
 
 import { chain } from 'lodash';
-import { Datatable } from '@kbn/expressions-plugin/common';
+import type { Datatable } from '@kbn/expressions-plugin/common';
 import { getFormatService } from '../services';
-import { FormattedColumn, FormattedColumns, TableVisConfig, TableContext } from '../types';
+import type { FormattedColumn, FormattedColumns, TableVisConfig, TableContext } from '../types';
 import { AggTypes } from '../../common';
 
 export const createFormattedTable = (
@@ -48,7 +48,7 @@ export const createFormattedTable = (
       switch (visConfig.totalFunc) {
         case AggTypes.SUM: {
           if (!isDate) {
-            formattedColumn.formattedTotal = formatter.convert(sumOfColumnValues);
+            formattedColumn.formattedTotal = formatter.convertToText(sumOfColumnValues);
             formattedColumn.total = sumOfColumnValues;
           }
           break;
@@ -56,20 +56,20 @@ export const createFormattedTable = (
         case AggTypes.AVG: {
           if (!isDate) {
             const total = sumOfColumnValues / table.rows.length;
-            formattedColumn.formattedTotal = formatter.convert(total);
+            formattedColumn.formattedTotal = formatter.convertToText(total);
             formattedColumn.total = total;
           }
           break;
         }
         case AggTypes.MIN: {
           const total = chain(table.rows).map(col.id).min().value() as number;
-          formattedColumn.formattedTotal = formatter.convert(total);
+          formattedColumn.formattedTotal = formatter.convertToText(total);
           formattedColumn.total = total;
           break;
         }
         case AggTypes.MAX: {
           const total = chain(table.rows).map(col.id).max().value() as number;
-          formattedColumn.formattedTotal = formatter.convert(total);
+          formattedColumn.formattedTotal = formatter.convertToText(total);
           formattedColumn.total = total;
           break;
         }

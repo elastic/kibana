@@ -7,11 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState, useCallback, ChangeEventHandler } from 'react';
+import type { ChangeEventHandler } from 'react';
+import React, { useState, useCallback } from 'react';
 import { EuiButton, EuiForm, EuiFormRow, EuiFieldText, EuiSwitch } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isEqual } from 'lodash';
-import { SavedQuery, SavedQueryService } from '@kbn/data-plugin/public';
+import type { SavedQuery, SavedQueryService } from '@kbn/data-plugin/public';
 
 interface Props {
   savedQuery?: SavedQuery;

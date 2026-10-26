@@ -6,8 +6,9 @@
  */
 
 import React, { Fragment, useEffect, useState } from 'react';
-import { IUiSettingsClient, HttpSetup } from '@kbn/core/public';
+import type { IUiSettingsClient, HttpSetup } from '@kbn/core/public';
 import { interval } from 'rxjs';
+import type { PartialTheme } from '@elastic/charts';
 import {
   AnnotationDomainType,
   Axis,
@@ -18,7 +19,6 @@ import {
   ScaleType,
   Settings,
   niceTimeFormatter,
-  PartialTheme,
 } from '@elastic/charts';
 import moment from 'moment-timezone';
 import {
@@ -30,18 +30,26 @@ import {
   EuiLoadingSpinner,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
-import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { AggregationType } from '@kbn/triggers-actions-ui-plugin/public';
+import type { AggregationType } from '@kbn/triggers-actions-ui-plugin/public';
 import type { Comparator } from '@kbn/alerting-comparators';
 import { parseDuration } from '@kbn/alerting-plugin/common/parse_duration';
 import { i18n } from '@kbn/i18n';
-import {
-  getThresholdRuleVisualizationData,
-  GetThresholdRuleVisualizationDataParams,
-} from './index_threshold_api';
-import { IndexThresholdRuleParams } from './types';
+import type { GetThresholdRuleVisualizationDataParams } from './index_threshold_api';
+import { getThresholdRuleVisualizationData } from './index_threshold_api';
+import type { IndexThresholdRuleParams } from './types';
+
+interface KibanaThresholdVizServices {
+  http: HttpSetup;
+  uiSettings: IUiSettingsClient;
+  cps?: {
+    cpsManager?: {
+      getProjectRouting: () => string | undefined;
+    };
+  };
+}
 
 const chartThemeOverrides = (): PartialTheme => {
   return {
@@ -132,7 +140,8 @@ export const ThresholdVisualization: React.FunctionComponent<Props> = ({
     groupBy,
     threshold,
   } = ruleParams;
-  const { http, uiSettings } = useKibana().services;
+  const { http, uiSettings, cps } = useKibana<KibanaThresholdVizServices>().services;
+  const projectRouting = cps?.cpsManager?.getProjectRouting();
   const [loadingState, setLoadingState] = useState<LoadingStateType | null>(null);
   const [hasError, setHasError] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<undefined | string>(undefined);
@@ -154,7 +163,7 @@ export const ThresholdVisualization: React.FunctionComponent<Props> = ({
       try {
         setLoadingState(loadingState ? LoadingStateType.Refresh : LoadingStateType.FirstLoad);
         setVisualizationData(
-          await getVisualizationData(alertWithoutActions, visualizeOptions, http!)
+          await getVisualizationData(alertWithoutActions, visualizeOptions, http!, projectRouting)
         );
         setHasError(false);
         setErrorMessage(undefined);
@@ -179,6 +188,7 @@ export const ThresholdVisualization: React.FunctionComponent<Props> = ({
     groupBy,
     threshold,
     startVisualizationAt,
+    projectRouting,
   ]);
 
   if (!charts || !uiSettings || !dataFieldsFormats) {
@@ -218,6 +228,7 @@ export const ThresholdVisualization: React.FunctionComponent<Props> = ({
       <Fragment>
         <EuiSpacer size="l" />
         <EuiCallOut
+          announceOnMount
           data-test-subj="errorCallout"
           title={
             <FormattedMessage
@@ -289,6 +300,7 @@ export const ThresholdVisualization: React.FunctionComponent<Props> = ({
                 <LineSeries
                   key={key}
                   id={key}
+                  // Defaults to multi layer time axis as of Elastic Charts v70
                   xScaleType={ScaleType.Time}
                   yScaleType={ScaleType.Linear}
                   data={visualizationData[key]}
@@ -312,6 +324,7 @@ export const ThresholdVisualization: React.FunctionComponent<Props> = ({
           </Chart>
         ) : (
           <EuiCallOut
+            announceOnMount
             data-test-subj="noDataCallout"
             size="s"
             title={
@@ -339,12 +352,14 @@ export const ThresholdVisualization: React.FunctionComponent<Props> = ({
 async function getVisualizationData(
   model: IndexThresholdRuleParams,
   visualizeOptions: GetThresholdRuleVisualizationDataParams['visualizeOptions'],
-  http: HttpSetup
+  http: HttpSetup,
+  projectRouting?: string
 ) {
   const vizData = await getThresholdRuleVisualizationData({
     model,
     visualizeOptions,
     http,
+    projectRouting,
   });
   const result: Record<string, Array<[number, number]>> = {};
 

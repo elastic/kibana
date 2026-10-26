@@ -8,8 +8,8 @@ paths:
       x-labels: [serverless, ess]
       x-codegen-enabled: true
       operationId: CreateEndpointList
-      summary: Create an endpoint exception list
-      description: Create an endpoint exception list, which groups endpoint exception list items. If an endpoint exception list already exists, an empty response is returned.
+      summary: Create an Elastic Endpoint rule exception list
+      description: Create the exception list for Elastic Endpoint rule exceptions. When you create the exception list, it will have a `list_id` of `endpoint_list`. If the Elastic Endpoint exception list already exists, your request will return an empty response.     
       responses:
         200:
           description: Successful response
@@ -17,6 +17,28 @@ paths:
             application/json:
               schema:
                 $ref: '../model/endpoint_list_common.schema.yaml#/components/schemas/EndpointList'
+              examples:
+                newList:
+                  summary: Endpoint exception list created
+                  value:
+                    id: "2e23a8c4-ef7e-4c10-adfa-3eae4e4b4b8b"
+                    list_id: "endpoint_list"
+                    type: "endpoint"
+                    name: "Endpoint Security Exception List"
+                    description: "Endpoint Security Exception List"
+                    immutable: false
+                    namespace_type: "agnostic"
+                    os_types: []
+                    tags: []
+                    version: 1
+                    tie_breaker_id: "e3c5a8e0-5b6a-4b4b-8b3a-2e23a8c4ef7e"
+                    created_at: "2025-01-01T00:00:00.000Z"
+                    created_by: "elastic"
+                    updated_at: "2025-01-01T00:00:00.000Z"
+                    updated_by: "elastic"
+                alreadyExists:
+                  summary: Endpoint exception list already exists (empty response)
+                  value: {}
         400:
           description: Invalid input data
           content:
@@ -25,21 +47,44 @@ paths:
                 oneOf:
                   - $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
                   - $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+              examples:
+                badRequest:
+                  value:
+                    statusCode: 400
+                    error: Bad Request
+                    message: '[request body]: expected value of type [object] but got [undefined]'
         401:
           description: Unsuccessful authentication
           content:
             application/json:
               schema:
                 $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+              examples:
+                unauthorized:
+                  value:
+                    statusCode: 401
+                    error: Unauthorized
+                    message: "[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]"
         403:
           description: Insufficient privileges
           content:
             application/json:
               schema:
                 $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+              examples:
+                forbidden:
+                  value:
+                    statusCode: 403
+                    error: Forbidden
+                    message: 'API [POST /api/endpoint_list] is unauthorized for user, this action is granted by the Kibana privileges [lists-all]'
         500:
           description: Internal server error
           content:
             application/json:
               schema:
                 $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+              examples:
+                serverError:
+                  value:
+                    status_code: 500
+                    message: Internal Server Error

@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -9,6 +9,7 @@
     "public/**/*.ts",
     "public/**/*.tsx",
     "server/**/*.ts",
+    "test/scout/**/*",
     "../../../../../typings/**/*"
   ],
   "exclude": [
@@ -28,5 +29,19 @@
     "@kbn/discover-plugin",
     "@kbn/security-plugin",
     "@kbn/streams-plugin",
+    "@kbn/observability-ai-assistant-plugin",
+    "@kbn/cases-plugin",
+    "@kbn/deeplinks-management",
+    "@kbn/ai-assistant-common",
+    "@kbn/management-settings-ids",
+    "@kbn/deeplinks-workflows",
+    "@kbn/deeplinks-evals",
+    "@kbn/scout-oblt",
+    "@kbn/alerting-v2-constants",
+    "@kbn/workflows-management-plugin",
+    "@kbn/significant-events-plugin",
+    "@kbn/nightshift-shared",
+    "@kbn/navigation-plugin",
+    "@kbn/profiling-plugin",
   ]
 }

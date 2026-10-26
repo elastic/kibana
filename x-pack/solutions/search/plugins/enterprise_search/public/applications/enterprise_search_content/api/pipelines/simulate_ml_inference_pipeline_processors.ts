@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IngestSimulateResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { IngestSimulateResponse } from '@elastic/elasticsearch/lib/api/types';
 
 import type { MlInferencePipeline } from '../../../../../common/types/pipelines';
 
@@ -25,7 +25,9 @@ export const simulateMlInferencePipeline = async ({
   indexName,
   pipeline,
 }: SimulateMlInterfacePipelineArgs) => {
-  const route = `/internal/enterprise_search/indices/${indexName}/ml_inference/pipeline_processors/simulate`;
+  const route = `/internal/enterprise_search/indices/${encodeURIComponent(
+    indexName
+  )}/ml_inference/pipeline_processors/simulate`;
 
   return await HttpLogic.values.http.post<IngestSimulateResponse>(route, {
     body: JSON.stringify({

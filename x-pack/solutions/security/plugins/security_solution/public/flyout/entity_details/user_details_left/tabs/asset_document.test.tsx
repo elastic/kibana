@@ -13,14 +13,18 @@ import { FLYOUT_BODY_TEST_ID } from './test_ids';
 import { DocumentDetailsContext } from '../../../document_details/shared/context';
 import { mockContextValue } from '../../../document_details/shared/mocks/mock_context';
 import userEvent from '@testing-library/user-event';
-import {
-  JSON_TAB_CONTENT_TEST_ID,
-  TABLE_TAB_CONTENT_TEST_ID,
-} from '../../../document_details/right/tabs/test_ids';
+import { TABLE_TAB_CONTENT_TEST_ID } from '../../../document_details/right/tabs/test_ids';
+import { JSON_TAB_CONTENT_TEST_ID } from '../../../../flyout_v2/shared/components/json_tab';
+import { PREFIX } from '../../../shared/test_ids';
 
-// FLAKY: https://github.com/elastic/kibana/issues/216735
-// FLAKY: https://github.com/elastic/kibana/issues/216815
-describe.skip('AssetDocumentTab', () => {
+jest.mock('@kbn/unified-doc-viewer-plugin/public');
+// Aliased with a `mock` prefix so the hoisted `jest.mock` factory below may reference it.
+const mockTableTabContentTestId = TABLE_TAB_CONTENT_TEST_ID;
+jest.mock('../../../../flyout_v2/document/main/tabs/table_tab', () => ({
+  TableTab: () => <div data-test-subj={mockTableTabContentTestId} />,
+}));
+
+describe('AssetDocumentTab', () => {
   it('renders', () => {
     const { getByTestId } = render(
       <TestProviders>
@@ -46,6 +50,7 @@ describe.skip('AssetDocumentTab', () => {
   });
 
   it('should select json tab when clicked', async () => {
+    const user = userEvent.setup({ delay: null });
     const { getByTestId, getByTitle } = render(
       <TestProviders>
         <DocumentDetailsContext.Provider value={mockContextValue}>
@@ -54,12 +59,13 @@ describe.skip('AssetDocumentTab', () => {
       </TestProviders>
     );
 
-    await userEvent.click(getByTitle('JSON'));
+    await user.click(getByTitle('JSON'));
 
-    expect(getByTestId(JSON_TAB_CONTENT_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(PREFIX + JSON_TAB_CONTENT_TEST_ID)).toBeInTheDocument();
   });
 
   it('should select table tab when path tab is table', async () => {
+    const user = userEvent.setup({ delay: null });
     const { getByTestId, getByTitle } = render(
       <TestProviders>
         <DocumentDetailsContext.Provider value={mockContextValue}>
@@ -68,8 +74,8 @@ describe.skip('AssetDocumentTab', () => {
       </TestProviders>
     );
 
-    await userEvent.click(getByTitle('JSON')); // make sure Table isn't selected
-    await userEvent.click(getByTitle('Table'));
+    await user.click(getByTitle('JSON')); // make sure Table isn't selected
+    await user.click(getByTitle('Table'));
 
     expect(getByTestId(TABLE_TAB_CONTENT_TEST_ID)).toBeInTheDocument();
   });

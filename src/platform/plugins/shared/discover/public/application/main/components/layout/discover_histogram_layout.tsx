@@ -7,67 +7,40 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback } from 'react';
-import { UnifiedHistogramContainer } from '@kbn/unified-histogram-plugin/public';
-import { css } from '@emotion/react';
-import { useDiscoverHistogram } from './use_discover_histogram';
+import React, { useMemo } from 'react';
+import { UnifiedHistogramLayout } from '@kbn/unified-histogram';
+import { OutPortal } from 'react-reverse-portal';
+import { PanelsToggle } from '../../../../components/panels_toggle';
 import { type DiscoverMainContentProps, DiscoverMainContent } from './discover_main_content';
-import { useAppStateSelector } from '../../state_management/discover_app_state_container';
-import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
+import {
+  DEFAULT_HISTOGRAM_KEY_PREFIX,
+  useCurrentChartPortalNode,
+  useCurrentTabRuntimeState,
+  useAppStateSelector,
+} from '../../state_management/redux';
 
-export interface DiscoverHistogramLayoutProps extends DiscoverMainContentProps {
-  container: HTMLElement | null;
-}
-
-const histogramLayoutCss = css`
-  height: 100%;
-`;
-
-export const DiscoverHistogramLayout = ({
-  dataView,
-  stateContainer,
-  container,
-  panelsToggle,
-  ...mainContentProps
-}: DiscoverHistogramLayoutProps) => {
-  const { dataState } = stateContainer;
-  const hideChart = useAppStateSelector((state) => state.hideChart);
-  const isEsqlMode = useIsEsqlMode();
-  const unifiedHistogramProps = useDiscoverHistogram({
-    stateContainer,
-    inspectorAdapters: dataState.inspectorAdapters,
-    hideChart,
-  });
-
-  const renderCustomChartToggleActions = useCallback(
-    () =>
-      React.isValidElement(panelsToggle)
-        ? React.cloneElement(panelsToggle, { renderedFor: 'histogram' })
-        : panelsToggle,
-    [panelsToggle]
+export const DiscoverHistogramLayout = (mainContentProps: DiscoverMainContentProps) => {
+  const chartPortalNode = useCurrentChartPortalNode();
+  const { localStorageKeyPrefix, layoutPropsMap } = useCurrentTabRuntimeState(
+    (tab) => tab.unifiedHistogramConfig$
   );
+  const layoutProps = layoutPropsMap[localStorageKeyPrefix ?? DEFAULT_HISTOGRAM_KEY_PREFIX];
+  const isMainPanelHidden = useAppStateSelector((state) => Boolean(state.hideTable));
+  const panelsToggle = useMemo(() => <PanelsToggle dataTestSubjSuffix="InHistogram" />, []);
 
-  // Initialized when the first search has been requested or
-  // when in ES|QL mode since search sessions are not supported
-  if (!unifiedHistogramProps.searchSessionId && !isEsqlMode) {
+  if (!layoutProps) {
     return null;
   }
 
   return (
-    <UnifiedHistogramContainer
-      {...unifiedHistogramProps}
-      requestAdapter={dataState.inspectorAdapters.requests}
-      container={container}
-      css={histogramLayoutCss}
-      renderCustomChartToggleActions={renderCustomChartToggleActions}
-      abortController={stateContainer.dataState.getAbortController()}
+    <UnifiedHistogramLayout
+      unifiedHistogramChart={
+        chartPortalNode ? <OutPortal node={chartPortalNode} panelsToggle={panelsToggle} /> : null
+      }
+      isMainPanelHidden={isMainPanelHidden}
+      {...layoutProps}
     >
-      <DiscoverMainContent
-        {...mainContentProps}
-        stateContainer={stateContainer}
-        dataView={dataView}
-        panelsToggle={panelsToggle}
-      />
-    </UnifiedHistogramContainer>
+      <DiscoverMainContent {...mainContentProps} />
+    </UnifiedHistogramLayout>
   );
 };

@@ -266,12 +266,12 @@ function validatePackageManifest(parsed, repoRoot, path) {
   if (
     group !== undefined &&
     (!isSomeString(group) ||
-      !['platform', 'search', 'security', 'observability', 'chat'].includes(group))
+      !['platform', 'search', 'security', 'observability', 'vectordb'].includes(group))
   ) {
     throw err(
       `plugin.group`,
       group,
-      `must have a valid value ("platform" | "search" | "security" | "observability" | "chat")`
+      `must have a valid value ("platform" | "search" | "security" | "observability" | "vectordb")`
     );
   }
 
@@ -310,7 +310,8 @@ function validatePackageManifest(parsed, repoRoot, path) {
     type === 'shared-server' ||
     type === 'functional-tests' ||
     type === 'test-helper' ||
-    type === 'core'
+    type === 'core' ||
+    type === 'tooling'
   ) {
     return {
       type,

@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const { common, discover } = getPageObjects(['common', 'discover']);
+  const { discover } = getPageObjects(['discover']);
   const a11y = getService('a11y');
   const filterBar = getService('filterBar');
   const testSubjects = getService('testSubjects');
@@ -18,7 +18,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('Filter panel', () => {
     before(async () => {
-      await common.navigateToApp('discover');
+      await discover.navigateToApp({ queryMode: 'classic' });
     });
 
     it('a11y test on add filter panel', async () => {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { DeleteSLOInstances } from './delete_slo_instances';
 
@@ -27,7 +27,7 @@ describe('DeleteSLOInstances', () => {
             { sloId: 'second', instanceId: '*' },
           ],
         })
-      ).rejects.toThrowError("Cannot delete an SLO instance '*'");
+      ).rejects.toThrow("Cannot delete an SLO instance '*'");
     });
   });
 

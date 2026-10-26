@@ -5,50 +5,64 @@
  * 2.0.
  */
 
-import { from } from 'rxjs';
-import { map } from 'rxjs';
+import type { ComponentType } from 'react';
+import { BehaviorSubject, combineLatest, from, map } from 'rxjs';
 import { i18n } from '@kbn/i18n';
-import {
+import type {
   FetchDataParams,
   HasDataParams,
   ObservabilityPublicSetup,
   ObservabilityPublicStart,
 } from '@kbn/observability-plugin/public';
-import {
+import type {
   AppMountParameters,
+  AppUpdater,
   CoreSetup,
   CoreStart,
-  DEFAULT_APP_CATEGORIES,
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/public';
-import { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { HomePublicPluginSetup } from '@kbn/home-plugin/public';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
+import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 
-import { FeaturesPluginSetup } from '@kbn/features-plugin/public';
-import { LicensingPluginSetup } from '@kbn/licensing-plugin/public';
-import { EmbeddableStart } from '@kbn/embeddable-plugin/public';
-import {
+import type { FeaturesPluginSetup } from '@kbn/features-plugin/public';
+import type { LicensingPluginSetup } from '@kbn/licensing-plugin/public';
+import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import type {
   ExploratoryViewPublicSetup,
   ExploratoryViewPublicStart,
 } from '@kbn/exploratory-view-plugin/public';
-import { MapsStartApi } from '@kbn/maps-plugin/public';
-import { Start as InspectorPluginStart } from '@kbn/inspector-plugin/public';
-import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import { LensPublicStart } from '@kbn/lens-plugin/public';
-import {
+import type { MapsStartApi } from '@kbn/maps-plugin/public';
+import type { Start as InspectorPluginStart } from '@kbn/inspector-plugin/public';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { LensPublicStart } from '@kbn/lens-plugin/public';
+import type {
   ObservabilitySharedPluginSetup,
   ObservabilitySharedPluginStart,
 } from '@kbn/observability-shared-plugin/public';
-import {
+import type {
   ObservabilityAIAssistantPublicSetup,
   ObservabilityAIAssistantPublicStart,
 } from '@kbn/observability-ai-assistant-plugin/public';
 import { OBLT_UX_APP_ID } from '@kbn/deeplinks-observability';
-import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import type { ClassicRumDashboardProps } from './components/classic_rum_dashboard/types';
 
 export type UxPluginSetup = void;
-export type UxPluginStart = void;
+
+export interface UxPluginStart {
+  /** Loads the Classic RUM dashboard, which renders one service inside another app. */
+  getClassicRumDashboard(): Promise<ComponentType<ClassicRumDashboardProps>>;
+  /** Names of the services with RUM data in the range, in epoch milliseconds. */
+  fetchClassicRumApplications(params: {
+    start: number;
+    end: number;
+    signal?: AbortSignal;
+  }): Promise<string[]>;
+  /** Hides User Experience from the navigation; the app stays reachable by URL. */
+  hideLegacyNavigation(): void;
+}
 
 export interface ApmPluginSetupDeps {
   data: DataPublicPluginSetup;
@@ -83,6 +97,9 @@ async function getDataStartPlugin(core: CoreSetup) {
 }
 
 export class UxPlugin implements Plugin<UxPluginSetup, UxPluginStart> {
+  private readonly legacyNavigationHidden$ = new BehaviorSubject(false);
+  private readonly appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
+
   constructor(private readonly initContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup, plugins: ApmPluginSetupDeps) {
@@ -141,11 +158,11 @@ export class UxPlugin implements Plugin<UxPluginSetup, UxPluginStart> {
 
     // register observability nav if user has access to plugin
     plugins.observabilityShared.navigation.registerSections(
-      from(core.getStartServices()).pipe(
-        map(([coreStart]) => {
+      combineLatest([from(core.getStartServices()), this.legacyNavigationHidden$]).pipe(
+        map(([[coreStart], legacyNavigationHidden]) => {
           // checking apm capability, since ux for now doesn't have it's
           // own capability
-          if (coreStart.application.capabilities.apm.show) {
+          if (!legacyNavigationHidden && coreStart.application.capabilities.apm.show) {
             return [
               // UX navigation
               {
@@ -178,6 +195,7 @@ export class UxPlugin implements Plugin<UxPluginSetup, UxPluginStart> {
       title: 'User Experience',
       order: 8500,
       euiIconType: 'logoObservability',
+      updater$: this.appUpdater$,
       category: DEFAULT_APP_CATEGORIES.observability,
       keywords: [
         'RUM',
@@ -215,5 +233,40 @@ export class UxPlugin implements Plugin<UxPluginSetup, UxPluginStart> {
       },
     });
   }
-  public start(core: CoreStart, plugins: ApmPluginStartDeps) {}
+
+  public start(core: CoreStart, plugins: ApmPluginStartDeps): UxPluginStart {
+    // Loaded on first use and cached, so the dashboard code stays out of the page-load bundle.
+    let classicRumDashboard: Promise<ComponentType<ClassicRumDashboardProps>> | undefined;
+
+    return {
+      getClassicRumDashboard: () => {
+        classicRumDashboard ??= Promise.all([
+          import('./components/classic_rum_dashboard/classic_rum_dashboard'),
+          plugins.spaces?.getActiveSpace(),
+        ]).then(([{ createClassicRumDashboard }, activeSpace]) =>
+          createClassicRumDashboard({
+            core,
+            startDeps: plugins,
+            isDev: this.initContext.env.mode.dev,
+            spaceId: activeSpace?.id ?? 'default',
+          })
+        );
+        // A failed download is not cached, so the next visit retries it.
+        classicRumDashboard.catch(() => {
+          classicRumDashboard = undefined;
+        });
+        return classicRumDashboard;
+      },
+      fetchClassicRumApplications: async (params) => {
+        const { fetchClassicRumApplications } = await import(
+          './services/rest/fetch_classic_rum_applications'
+        );
+        return fetchClassicRumApplications({ ...params, core, data: plugins.data });
+      },
+      hideLegacyNavigation: () => {
+        this.legacyNavigationHidden$.next(true);
+        this.appUpdater$.next(() => ({ visibleIn: [] }));
+      },
+    };
+  }
 }

@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import Papa from 'papaparse';
 
-import { FieldCopyAction, Pipeline, Processor } from '../../common/types';
+import type { FieldCopyAction, Pipeline, Processor } from '../../common/types';
 
 const REQUIRED_CSV_HEADERS = ['source_field', 'destination_field'];
 
@@ -70,7 +70,7 @@ function parseAndValidate(file: string) {
   }
 
   const missingHeaders = REQUIRED_CSV_HEADERS.reduce<string[]>((acc, header) => {
-    if (meta.fields.includes(header)) {
+    if (meta.fields?.includes(header)) {
       return acc;
     }
     return [...acc, header];

@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { PluginInitializer, PluginInitializerContext } from '@kbn/core/public';
-import {
-  Plugin,
+import type { PluginInitializer, PluginInitializerContext } from '@kbn/core/public';
+import type {
   ExploratoryViewPublicPluginsStart,
   ExploratoryViewPublicPluginsSetup,
   ExploratoryViewPublicStart,
   ExploratoryViewPublicSetup,
 } from './plugin';
+import { Plugin } from './plugin';
 export type {
   ExploratoryViewPublicSetup,
   ExploratoryViewPublicStart,
@@ -38,6 +38,8 @@ export { createExploratoryViewUrl } from './components/shared/exploratory_view/c
 export type { AllSeries } from './components/shared/exploratory_view/hooks/use_series_storage';
 export type { SeriesUrl, UrlFilter } from './components/shared/exploratory_view/types';
 export type { ExploratoryEmbeddableProps } from './components/shared/exploratory_view/embeddable/embeddable';
+export type { AnnotationLayerConfig } from './components/shared/exploratory_view/configurations/lens_attributes';
+export { ObservabilityDataViews } from './utils/observability_data_views/observability_data_views';
 
 export type { SeriesConfig, ConfigProps } from './components/shared/exploratory_view/types';
 export {

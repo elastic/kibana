@@ -5,11 +5,14 @@
  * 2.0.
  */
 
-import { EuiAccordion, EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
+import { EuiAccordion, EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
+import { useDatasetQualityState } from '../../../hooks/use_dataset_quality_state';
 import { useDatasetQualityWarnings } from '../../../hooks/use_dataset_quality_warnings';
+import { FailureStoreWarning } from '../../failure_store/failure_store_warning';
 
 const nonAggregatableWarningTitle = i18n.translate('xpack.datasetQuality.nonAggregatable.title', {
   defaultMessage: 'Your request may take longer to complete',
@@ -32,7 +35,7 @@ const nonAggregatableWarningDescription = (nonAggregatableDatasets: string[]) =>
                 values={{
                   accordion: (
                     <EuiAccordion
-                      style={{ marginTop: '12px ' }}
+                      css={{ marginTop: '12px ' }}
                       buttonContent={i18n.translate(
                         'xpack.datasetQuality.nonAggregatable.showAffectedDatasets',
                         {
@@ -82,14 +85,25 @@ const nonAggregatableWarningDescription = (nonAggregatableDatasets: string[]) =>
 // eslint-disable-next-line import/no-default-export
 export default function Warnings() {
   const { loading, nonAggregatableDatasets } = useDatasetQualityWarnings();
+  const { statsLoading, canUserReadFailureStore, canUserReadAnyDataset, canUserMonitorAnyDataset } =
+    useDatasetQualityState();
+
+  const canAccessAnyDataset = canUserReadAnyDataset || canUserMonitorAnyDataset;
 
   return (
     <EuiFlexGroup data-test-subj="datasetQualityWarningsContainer" gutterSize="s" wrap>
       {!loading && nonAggregatableDatasets.length > 0 && (
         <EuiFlexItem>
-          <EuiCallOut title={nonAggregatableWarningTitle} color="warning" iconType="warning">
-            <p>{nonAggregatableWarningDescription(nonAggregatableDatasets)}</p>
-          </EuiCallOut>
+          <KbnWarningCallout
+            announceOnMount={false}
+            title={nonAggregatableWarningTitle}
+            text={nonAggregatableWarningDescription(nonAggregatableDatasets)}
+          />
+        </EuiFlexItem>
+      )}
+      {!statsLoading && !canUserReadFailureStore && canAccessAnyDataset && (
+        <EuiFlexItem>
+          <FailureStoreWarning />
         </EuiFlexItem>
       )}
     </EuiFlexGroup>

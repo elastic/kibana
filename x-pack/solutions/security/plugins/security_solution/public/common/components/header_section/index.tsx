@@ -12,6 +12,7 @@ import {
   EuiFlexItem,
   EuiIconTip,
   EuiTitle,
+  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import React, { useCallback } from 'react';
@@ -68,6 +69,7 @@ export interface HeaderSectionProps {
   titleSize?: EuiTitleSize;
   tooltip?: string;
   tooltipTitle?: string;
+  toggleAriaLabel?: string;
 }
 
 export const getHeaderAlignment = ({
@@ -84,6 +86,10 @@ export const getHeaderAlignment = ({
   } else {
     return 'center';
   }
+};
+
+const tooltipIconProps = {
+  'data-test-subj': 'header-section-tooltip-icon',
 };
 
 const HeaderSectionComponent: React.FC<HeaderSectionProps> = ({
@@ -109,6 +115,7 @@ const HeaderSectionComponent: React.FC<HeaderSectionProps> = ({
   toggleStatus = true,
   tooltip,
   tooltipTitle,
+  toggleAriaLabel,
 }) => {
   const styles = useStyles(border, height);
   const toggle = useCallback(() => {
@@ -121,6 +128,7 @@ const HeaderSectionComponent: React.FC<HeaderSectionProps> = ({
     'toggle-expand': toggleStatus,
     siemHeaderSection: true,
   });
+
   return (
     <header css={styles.header} data-test-subj="header-section" className={classNames}>
       <EuiFlexGroup
@@ -146,16 +154,21 @@ const HeaderSectionComponent: React.FC<HeaderSectionProps> = ({
                   >
                     {toggleQuery && (
                       <EuiFlexItem grow={false}>
-                        <EuiButtonIcon
-                          data-test-subj="query-toggle-header"
-                          aria-label={i18n.QUERY_BUTTON_TITLE(toggleStatus)}
-                          color="text"
-                          display="empty"
-                          iconType={toggleStatus ? 'arrowDown' : 'arrowRight'}
-                          onClick={toggle}
-                          size="s"
-                          title={i18n.QUERY_BUTTON_TITLE(toggleStatus)}
-                        />
+                        <EuiToolTip
+                          content={i18n.QUERY_BUTTON_TITLE(toggleStatus)}
+                          disableScreenReaderOutput
+                        >
+                          <EuiButtonIcon
+                            data-test-subj="query-toggle-header"
+                            aria-label={toggleAriaLabel || i18n.QUERY_BUTTON_TITLE(toggleStatus)}
+                            aria-expanded={toggleStatus}
+                            color="text"
+                            display="empty"
+                            iconType={toggleStatus ? 'chevronSingleDown' : 'chevronSingleRight'}
+                            onClick={toggle}
+                            size="s"
+                          />
+                        </EuiToolTip>
                       </EuiFlexItem>
                     )}
                     <EuiFlexItem>
@@ -168,8 +181,9 @@ const HeaderSectionComponent: React.FC<HeaderSectionProps> = ({
                                 color="subdued"
                                 title={tooltipTitle}
                                 content={tooltip}
+                                iconProps={tooltipIconProps}
                                 size="l"
-                                type="iInCircle"
+                                type="info"
                               />
                             </>
                           )}

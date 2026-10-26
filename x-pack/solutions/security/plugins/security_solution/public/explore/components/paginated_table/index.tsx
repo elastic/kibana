@@ -8,6 +8,7 @@
 import type {
   EuiBasicTableProps,
   EuiGlobalToastListToast as Toast,
+  EuiTableFieldDataColumnType,
   EuiTableRowCellProps,
   EuiTitleSize,
 } from '@elastic/eui';
@@ -22,12 +23,12 @@ import {
   EuiPagination,
   EuiPopover,
 } from '@elastic/eui';
+import { i18n as i18nCore } from '@kbn/i18n';
 import { noop } from 'lodash/fp';
 import type { FC, ComponentType } from 'react';
 import React, { memo, useState, useMemo, useEffect, useCallback } from 'react';
 import styled from 'styled-components';
 
-import type { EntitiesListColumns } from '../../../entity_analytics/components/entity_store/hooks/use_entities_list_columns';
 import type { Direction } from '../../../../common/search_strategy';
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../common/constants';
 import type { HostsTableColumns } from '../../hosts/components/hosts_table';
@@ -96,8 +97,7 @@ declare type BasicTableColumns =
   | TlsColumns
   | UncommonProcessTableColumns
   | UsersColumns
-  | UsersTableColumns
-  | EntitiesListColumns;
+  | UsersTableColumns;
 
 export declare type SiemTables = BasicTableProps<BasicTableColumns>;
 
@@ -133,11 +133,15 @@ export interface BasicTableProps<T> {
 }
 type Func<T> = (arg: T) => string | number;
 
+// `EuiTableColumnNameTooltipProps` is not re-exported from the EUI package root.
+type NameTooltip = EuiTableFieldDataColumnType<never>['nameTooltip'];
+
 export interface Columns<T, U = T> {
   align?: string;
   field?: string;
   mobileOptions?: EuiTableRowCellProps['mobileOptions'];
   name: string | React.ReactNode;
+  nameTooltip?: NameTooltip;
   render?: (item: T, node: U) => React.ReactNode;
   sortable?: boolean | Func<T>;
   truncateText?: boolean | { lines: number };
@@ -227,7 +231,7 @@ const PaginatedTableComponent: FC<SiemTables> = ({
     <EuiButtonEmpty
       size="xs"
       color="text"
-      iconType="arrowDown"
+      iconType="chevronSingleDown"
       iconSide="right"
       onClick={onButtonClick}
     >
@@ -241,6 +245,8 @@ const PaginatedTableComponent: FC<SiemTables> = ({
       <EuiContextMenuItem
         key={item.text}
         icon={limit === item.numberOfRow ? 'check' : 'empty'}
+        aria-current={limit === item.numberOfRow ? 'true' : undefined}
+        data-test-subj={`loadingMorePickSizeRow-${item.numberOfRow}`}
         onClick={() => {
           closePopover();
           updateLimitPagination(item.numberOfRow);
@@ -319,6 +325,7 @@ const PaginatedTableComponent: FC<SiemTables> = ({
                     itemsPerRow.length > 0 &&
                     totalCount >= itemsPerRow[0].numberOfRow && (
                       <EuiPopover
+                        aria-label={i18n.ROWS}
                         id="customizablePagination"
                         data-test-subj="loadingMoreSizeRowPopover"
                         button={button}
@@ -342,13 +349,17 @@ const PaginatedTableComponent: FC<SiemTables> = ({
                       pageCount={pageCount}
                       activePage={myActivePage}
                       onPageClick={goToPage}
+                      aria-label={i18nCore.translate(
+                        'xpack.securitySolution.paginatedTable.pagination.ariaLabel',
+                        {
+                          defaultMessage: 'Table pagination',
+                        }
+                      )}
                     />
                   )}
                 </PaginationWrapper>
               </FooterAction>
-              {(isInspect || myLoading) && (
-                <Loader data-test-subj="loadingPanelPaginatedTable" overlay size="xl" />
-              )}
+              {(isInspect || myLoading) && <Loader overlay size="xl" />}
             </>
           ))}
       </Panel>

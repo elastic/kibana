@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import React, { FC, useMemo } from 'react';
+import type { FC } from 'react';
+import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLoadingSpinner, EuiToolTip } from '@elastic/eui';
 import { JOB_STATUS } from '@kbn/reporting-common/constants';
 
-import { Job } from '@kbn/reporting-public';
+import type { Job } from '@kbn/reporting-public';
 import { jobHasIssues } from '../utils';
 
 interface Props {
@@ -62,15 +63,15 @@ export const ReportStatusIndicator: FC<Props> = ({ job }) => {
   switch (job.status) {
     case JOB_STATUS.COMPLETED:
       if (hasIssues) {
-        icon = <EuiIcon type="warning" color="warning" />;
+        icon = <EuiIcon type="warning" color="warning" aria-hidden={true} />;
         statusText = i18nTexts.completedWithWarnings;
         break;
       }
-      icon = <EuiIcon type="checkInCircleFilled" color="success" />;
+      icon = <EuiIcon type="checkCircleFill" color="success" aria-hidden={true} />;
       statusText = i18nTexts.completed;
       break;
     case JOB_STATUS.WARNINGS:
-      icon = <EuiIcon type="warning" color="warning" />;
+      icon = <EuiIcon type="warning" color="warning" aria-hidden={true} />;
       statusText = i18nTexts.completedWithWarnings;
       break;
     case JOB_STATUS.PENDING:
@@ -82,11 +83,11 @@ export const ReportStatusIndicator: FC<Props> = ({ job }) => {
       statusText = i18nTexts.processing({ attempt: job.attempts, of: job.max_attempts });
       break;
     case JOB_STATUS.FAILED:
-      icon = <EuiIcon type="error" color="danger" />;
+      icon = <EuiIcon type="error" color="danger" aria-hidden={true} />;
       statusText = i18nTexts.failed;
       break;
     default:
-      icon = <EuiIcon type="cross" color="subdued" />;
+      icon = <EuiIcon type="cross" color="subdued" aria-hidden={true} />;
       statusText = i18nTexts.unknown;
   }
 

@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Plugin, CoreSetup } from '@kbn/core/public';
-import { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
+import type { Plugin, CoreSetup } from '@kbn/core/public';
+import type { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
 import { PLUGIN_ID, PLUGIN_NAME } from '../common/constants';
 import { mount } from './mount';
 
@@ -41,7 +41,6 @@ export class ResponseStreamPlugin implements Plugin {
           label: 'README',
           href: 'https://github.com/elastic/kibana/blob/main/examples/response_stream/README.md',
           iconType: 'logoGithub',
-          size: 's',
           target: '_blank',
         },
       ],

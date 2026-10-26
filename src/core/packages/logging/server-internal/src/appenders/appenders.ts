@@ -9,12 +9,13 @@
 
 import { schema } from '@kbn/config-schema';
 import { assertNever } from '@kbn/std';
-import { DisposableAppender } from '@kbn/logging';
-import type { AppenderConfigType } from '@kbn/core-logging-server';
+import type { DisposableAppender } from '@kbn/logging';
+import type { FileAppenderPluginConfig, PluginAppenderConfigType } from '@kbn/core-logging-server';
 
 import { Layouts } from '../layouts/layouts';
 import { ConsoleAppender } from './console/console_appender';
 import { FileAppender } from './file/file_appender';
+import { OtelAppender } from './otel/otel_appender';
 import { RewriteAppender } from './rewrite/rewrite_appender';
 import { RollingFileAppender } from './rolling_file/rolling_file_appender';
 
@@ -27,8 +28,18 @@ import { RollingFileAppender } from './rolling_file/rolling_file_appender';
 export const appendersSchema = schema.oneOf([
   ConsoleAppender.configSchema,
   FileAppender.configSchema,
+  OtelAppender.configSchema,
   RewriteAppender.configSchema,
   RollingFileAppender.configSchema,
+]);
+
+/** @internal {@link appendersSchema}, but the file and OTel appenders use their runtime schemas. */
+export const pluginAppendersSchema = schema.oneOf([
+  ConsoleAppender.configSchema,
+  FileAppender.runtimeConfigSchema,
+  OtelAppender.runtimeConfigSchema,
+  RewriteAppender.configSchema,
+  RollingFileAppender.runtimeConfigSchema,
 ]);
 
 /** @internal */
@@ -40,12 +51,20 @@ export class Appenders {
    * @param config Configuration specific to a particular `Appender` implementation.
    * @returns Fully constructed `Appender` instance.
    */
-  public static create(config: AppenderConfigType): DisposableAppender {
+  public static create(config: PluginAppenderConfigType): DisposableAppender {
     switch (config.type) {
       case 'console':
         return new ConsoleAppender(Layouts.create(config.layout));
-      case 'file':
-        return new FileAppender(Layouts.create(config.layout), config.fileName);
+      case 'file': {
+        const fileConfig: FileAppenderPluginConfig = config;
+        return new FileAppender(
+          Layouts.create(fileConfig.layout),
+          fileConfig.fileName,
+          fileConfig.onWriteError
+        );
+      }
+      case 'otel':
+        return new OtelAppender(config);
       case 'rewrite':
         return new RewriteAppender(config);
       case 'rolling-file':

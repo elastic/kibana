@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { AnyAction } from 'redux';
-import { ThunkDispatch } from 'redux-thunk';
-import { connect } from 'react-redux';
+import type { AnyAction } from 'redux-v4';
+import type { ThunkDispatch } from 'redux-thunk-v2';
+import { connect } from 'react-redux-v7';
 import { ToolsControl } from './tools_control';
 import { setDrawMode, updateDrawState } from '../../../actions';
-import { MapStoreState } from '../../../reducers/store';
-import { DrawState } from '../../../../common/descriptor_types';
+import type { MapStoreState } from '../../../reducers/store';
+import type { DrawState } from '../../../../common/descriptor_types';
 import { DRAW_MODE } from '../../../../common/constants';
 import { getDrawMode } from '../../../selectors/ui_selectors';
 

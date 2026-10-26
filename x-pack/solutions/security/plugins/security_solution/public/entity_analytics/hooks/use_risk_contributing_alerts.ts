@@ -7,10 +7,12 @@
 
 import { useEffect } from 'react';
 import type { ALERT_RULE_NAME, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
+import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 
 import type { EntityType } from '../../../common/entity_analytics/types';
 import type { RiskScoreInput } from '../../../common/api/entity_analytics/common';
 import { useQueryAlerts } from '../../detections/containers/detection_engine/alerts/use_query';
+import { useAlertsPrivileges } from '../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { ALERTS_QUERY_NAMES } from '../../detections/containers/detection_engine/alerts/constants';
 
 import type { EntityRiskScore } from '../../../common/search_strategy/security_solution/risk_score/all';
@@ -18,6 +20,7 @@ import type { EntityRiskScore } from '../../../common/search_strategy/security_s
 interface UseRiskContributingAlerts<T extends EntityType> {
   entityType: T;
   riskScore: EntityRiskScore<T> | undefined;
+  executionContext?: KibanaExecutionContext;
 }
 
 interface AlertData {
@@ -28,19 +31,21 @@ interface AlertData {
 interface AlertHit {
   _id: string;
   _index: string;
-  _source: AlertData;
+  _source: Record<string, unknown>;
 }
 
 export interface InputAlert {
   alert: AlertData;
   input: RiskScoreInput;
   _id: string;
+  rawSource: Record<string, unknown>;
 }
 
 export interface UseRiskContributingAlertsResult {
   loading: boolean;
   error: boolean;
   data?: InputAlert[];
+  hasAlertsRead: boolean;
 }
 
 /**
@@ -49,10 +54,14 @@ export interface UseRiskContributingAlertsResult {
 export const useRiskContributingAlerts = <T extends EntityType>({
   riskScore,
   entityType,
+  executionContext,
 }: UseRiskContributingAlerts<T>): UseRiskContributingAlertsResult => {
+  const { hasAlertsRead } = useAlertsPrivileges();
   const { loading, data, setQuery } = useQueryAlerts<AlertHit, unknown>({
     query: {},
     queryName: ALERTS_QUERY_NAMES.BY_ID,
+    skip: !hasAlertsRead,
+    executionContext,
   });
 
   const inputs = getInputs(riskScore, entityType);
@@ -68,18 +77,26 @@ export const useRiskContributingAlerts = <T extends EntityType>({
     });
   }, [riskScore, inputs, setQuery]);
 
-  const error = !loading && data === undefined;
+  // When the query is skipped (no alert read privileges), data is undefined by
+  // design — not an error.
+  const error = hasAlertsRead && !loading && data === undefined;
 
-  const alerts = inputs.map((input) => ({
-    _id: input.id,
-    input,
-    alert: (data?.hits.hits.find((alert) => alert._id === input.id)?._source || {}) as AlertData,
-  }));
+  const alerts = inputs.map((input) => {
+    const source = data?.hits.hits.find((alert) => alert._id === input.id)?._source;
+
+    return {
+      _id: input.id,
+      input,
+      alert: (source || {}) as unknown as AlertData,
+      rawSource: source || {},
+    };
+  });
 
   return {
     loading,
     error,
     data: alerts,
+    hasAlertsRead,
   };
 };
 

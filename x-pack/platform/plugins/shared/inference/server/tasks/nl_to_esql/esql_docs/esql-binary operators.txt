@@ -1,0 +1,78 @@
+# BINARY OPERATORS
+
+Binary operators compare two values or perform arithmetic on two values. If either value is multivalued, the result is `null`.
+
+## Syntax
+
+`BINARY OPERATORS()`
+
+### Parameters
+
+#### left
+
+The left operand in the binary operation.
+
+#### right
+
+The right operand in the binary operation.
+
+#### operator
+
+The binary operator to apply:
+
+- Equality
+- Inequality `!=`
+- Less than `<`
+- Less than or equal to `<=`
+- Greater than `>`
+- Greater than or equal to `>=`
+- Add `+`
+- Subtract `-`
+- Multiply `*`
+- Divide `/`
+- Modulus `%`
+
+## Examples
+
+Compare two values for equality:
+
+```esql
+ROW a = 1, b = 1
+| EVAL result = a == b
+```
+
+Check whether one value is less than another:
+
+```esql
+ROW a = 1, b = 2
+| EVAL result = a < b
+```
+
+Add two numeric values:
+
+```esql
+ROW a = 1, b = 2
+| EVAL result = a + b
+```
+
+Divide one numeric value by another:
+
+```esql
+ROW a = 10, b = 3
+| EVAL result = a / b
+```
+
+Return the remainder after division:
+
+```esql
+ROW a = 10, b = 3
+| EVAL result = a % b
+```
+
+## Limitations
+
+If either operand is multivalued, the result is `null`.
+
+Division of two integer types yields an integer result, rounding toward `0`. To perform floating-point division, cast one argument to `DOUBLE`.
+
+For `dense_vector` division operations, both operands should be `dense_vector` values. Vectors with unequal dimensions return `null`.

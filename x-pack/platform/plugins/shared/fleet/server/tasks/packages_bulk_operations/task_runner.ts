@@ -10,6 +10,8 @@ import type {
   TaskManagerSetupContract,
 } from '@kbn/task-manager-plugin/server';
 
+import type { KibanaRequest } from '@kbn/core/server';
+
 import { appContextService } from '../../services';
 
 import { type BulkUpgradeTaskParams, _runBulkUpgradeTask } from './run_bulk_upgrade';
@@ -22,14 +24,23 @@ import {
   TASK_TYPE,
   formatError,
 } from './utils';
+import type { BulkRollbackTaskParams } from './run_bulk_rollback';
+import { _runBulkRollbackTask } from './run_bulk_rollback';
 
 export function registerPackagesBulkOperationTask(taskManager: TaskManagerSetupContract) {
   taskManager.registerTaskDefinitions({
     [TASK_TYPE]: {
       title: TASK_TITLE,
       timeout: TASK_TIMEOUT,
-      createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
-        const abortController = new AbortController();
+      createTaskRunner: ({
+        taskInstance,
+        signal,
+        fakeRequest,
+      }: {
+        taskInstance: ConcreteTaskInstance;
+        signal: AbortSignal;
+        fakeRequest?: KibanaRequest;
+      }) => {
         const logger = appContextService.getLogger();
 
         return {
@@ -38,21 +49,27 @@ export function registerPackagesBulkOperationTask(taskManager: TaskManagerSetupC
             if (taskInstance.state.isDone) {
               return;
             }
-
             const taskParams = taskInstance.params as BulkPackageOperationsTaskParams;
             try {
               let results: BulkPackageOperationsTaskState['results'];
               if (taskParams.type === 'bulk_uninstall') {
                 results = await _runBulkUninstallTask({
-                  abortController,
+                  signal,
                   logger,
                   taskParams: taskParams as BulkUninstallTaskParams,
                 });
               } else if (taskParams.type === 'bulk_upgrade') {
                 results = await _runBulkUpgradeTask({
-                  abortController,
+                  signal,
                   logger,
                   taskParams: taskParams as BulkUpgradeTaskParams,
+                  request: fakeRequest!,
+                });
+              } else if (taskParams.type === 'bulk_rollback') {
+                results = await _runBulkRollbackTask({
+                  signal,
+                  logger,
+                  taskParams: taskParams as BulkRollbackTaskParams,
                 });
               }
               const state: BulkPackageOperationsTaskState = {
@@ -76,7 +93,6 @@ export function registerPackagesBulkOperationTask(taskManager: TaskManagerSetupC
           },
           cancel: async () => {
             logger.debug(`Bulk package operations timed out: ${taskInstance.params.type}`);
-            abortController.abort('task timed out');
           },
         };
       },

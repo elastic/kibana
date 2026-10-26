@@ -5,24 +5,42 @@
  * 2.0.
  */
 
-import { processVertexStreamMock } from './gemini_adapter.test.mocks';
+import { processVertexStreamMock, processVertexResponseMock } from './gemini_adapter.test.mocks';
 import { PassThrough } from 'stream';
 import { noop, tap, lastValueFrom, toArray, of } from 'rxjs';
+import { pick } from 'lodash';
+import { z } from '@kbn/zod/v4';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { InferenceExecutor } from '../../utils/inference_executor';
 import { observableIntoEventSourceStream } from '../../../util/observable_into_event_source_stream';
-import { MessageRole, ToolChoiceType } from '@kbn/inference-common';
+import type { ToolSchema } from '@kbn/inference-common';
+import { MessageRole, ToolChoiceType, InferenceConnectorType } from '@kbn/inference-common';
 import { geminiAdapter } from './gemini_adapter';
 
 describe('geminiAdapter', () => {
   const logger = loggerMock.create();
   const executorMock = {
     invoke: jest.fn(),
-  } as InferenceExecutor & { invoke: jest.MockedFn<InferenceExecutor['invoke']> };
+    getConnector: jest.fn(),
+  } as InferenceExecutor & {
+    invoke: jest.MockedFn<InferenceExecutor['invoke']>;
+    getConnector: jest.MockedFn<InferenceExecutor['getConnector']>;
+  };
 
   beforeEach(() => {
     executorMock.invoke.mockReset();
+    executorMock.getConnector.mockReset();
+    executorMock.getConnector.mockReturnValue({
+      type: InferenceConnectorType.Gemini,
+      name: 'gemini-connector',
+      connectorId: 'test-connector-id',
+      config: {},
+      capabilities: {},
+      isInferenceEndpoint: false,
+      isPreconfigured: false,
+    });
     processVertexStreamMock.mockReset().mockImplementation(() => tap(noop));
+    processVertexResponseMock.mockReset().mockImplementation(() => tap(noop));
   });
 
   function getCallParams() {
@@ -63,7 +81,7 @@ describe('geminiAdapter', () => {
 
       expect(executorMock.invoke).toHaveBeenCalledTimes(1);
       expect(executorMock.invoke).toHaveBeenCalledWith({
-        subAction: 'invokeStream',
+        subAction: 'invokeAIRaw',
         subActionParams: {
           messages: [
             {
@@ -75,6 +93,71 @@ describe('geminiAdapter', () => {
           temperature: 0,
           stopSequences: ['\n\nHuman:'],
         },
+      });
+    });
+
+    it('forwards `maxContentLength` for buffered (invokeAIRaw) requests', () => {
+      geminiAdapter
+        .chatComplete({
+          logger,
+          executor: executorMock,
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          stream: false,
+          maxContentLength: 10 * 1024 * 1024,
+        })
+        .subscribe(noop);
+
+      expect(executorMock.invoke).toHaveBeenCalledWith(
+        expect.objectContaining({
+          subAction: 'invokeAIRaw',
+          subActionParams: expect.objectContaining({ maxContentLength: 10 * 1024 * 1024 }),
+        })
+      );
+    });
+
+    it('forwards `maxContentLength` for streaming (invokeStream) requests', () => {
+      // Streaming responses are still subject to the connector's axios `maxContentLength`
+      // (enforced while the response stream is consumed), so the override must be forwarded
+      // for streaming requests too.
+      geminiAdapter
+        .chatComplete({
+          logger,
+          executor: executorMock,
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          stream: true,
+          maxContentLength: 10 * 1024 * 1024,
+        })
+        .subscribe(noop);
+
+      expect(executorMock.invoke).toHaveBeenCalledWith(
+        expect.objectContaining({
+          subAction: 'invokeStream',
+          subActionParams: expect.objectContaining({ maxContentLength: 10 * 1024 * 1024 }),
+        })
+      );
+    });
+
+    it('forwards only connector-supported telemetry metadata', () => {
+      geminiAdapter
+        .chatComplete({
+          logger,
+          executor: executorMock,
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          metadata: {
+            connectorTelemetry: {
+              pluginId: 'feature',
+              aggregateBy: 'parent',
+              productSolution: 'solution',
+              productFeature: 'product-feature',
+              interactionId: 'interaction-1',
+            },
+          },
+        })
+        .subscribe(noop);
+
+      expect(executorMock.invoke.mock.calls[0]?.[0].subActionParams?.telemetryMetadata).toEqual({
+        pluginId: 'feature',
+        aggregateBy: 'parent',
       });
     });
 
@@ -101,6 +184,11 @@ describe('geminiAdapter', () => {
                   foo: {
                     type: 'string',
                     description: 'foo',
+                  },
+                  bar: {
+                    type: 'string',
+                    description: 'bar',
+                    enum: ['a', 'b'],
                   },
                 },
                 required: ['foo'],
@@ -131,7 +219,11 @@ describe('geminiAdapter', () => {
                 properties: {
                   foo: {
                     description: 'foo',
-                    enum: undefined,
+                    type: 'string',
+                  },
+                  bar: {
+                    description: 'bar',
+                    enum: ['a', 'b'],
                     type: 'string',
                   },
                 },
@@ -142,6 +234,74 @@ describe('geminiAdapter', () => {
           ],
         },
       ]);
+    });
+
+    it('preserves tool schema shapes emitted by zod', () => {
+      const schema = pick(
+        z.toJSONSchema(
+          z.object({
+            count: z.number().int(),
+            note: z.string().nullable(),
+            value: z.union([z.string(), z.number()]),
+            data: z.record(z.string(), z.string()),
+            operations: z.array(
+              z.discriminatedUnion('type', [
+                z.object({ type: z.literal('add'), name: z.string() }),
+                z.object({ type: z.literal('remove') }),
+              ])
+            ),
+          }),
+          { io: 'input' }
+        ),
+        ['type', 'properties', 'required']
+      ) as ToolSchema;
+
+      geminiAdapter
+        .chatComplete({
+          logger,
+          executor: executorMock,
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          tools: { myFunction: { description: 'myFunction', schema } },
+        })
+        .subscribe(noop);
+
+      const { tools } = getCallParams();
+      expect(tools[0].functionDeclarations[0].parameters).toEqual({
+        type: 'object',
+        properties: {
+          count: {
+            type: 'integer',
+            minimum: Number.MIN_SAFE_INTEGER,
+            maximum: Number.MAX_SAFE_INTEGER,
+          },
+          note: { type: 'string', nullable: true },
+          value: { anyOf: [{ type: 'string' }, { type: 'number' }] },
+          data: { type: 'object', additionalProperties: { type: 'string' } },
+          operations: {
+            type: 'array',
+            items: {
+              anyOf: [
+                {
+                  type: 'object',
+                  properties: {
+                    type: { type: 'string', enum: ['add'] },
+                    name: { type: 'string' },
+                  },
+                  required: ['type', 'name'],
+                },
+                {
+                  type: 'object',
+                  properties: {
+                    type: { type: 'string', enum: ['remove'] },
+                  },
+                  required: ['type'],
+                },
+              ],
+            },
+          },
+        },
+        required: ['count', 'note', 'value', 'data', 'operations'],
+      });
     });
 
     it('correctly format messages', () => {
@@ -296,6 +456,38 @@ describe('geminiAdapter', () => {
             },
           },
         ],
+      });
+    });
+
+    it('filters out messages with empty parts and re-merges consecutive same-role messages', () => {
+      geminiAdapter
+        .chatComplete({
+          logger,
+          executor: executorMock,
+          messages: [
+            {
+              role: MessageRole.User,
+              content: 'first',
+            },
+            {
+              role: MessageRole.Assistant,
+              content: '',
+              toolCalls: [],
+            },
+            {
+              role: MessageRole.User,
+              content: 'second',
+            },
+          ],
+        })
+        .subscribe(noop);
+
+      expect(executorMock.invoke).toHaveBeenCalledTimes(1);
+      const { messages } = getCallParams();
+      expect(messages).toHaveLength(1);
+      expect(messages[0]).toEqual({
+        role: 'user',
+        parts: [{ text: 'first' }, { text: 'second' }],
       });
     });
 
@@ -515,40 +707,6 @@ describe('geminiAdapter', () => {
       expect(toolConfig).toEqual({ mode: 'ANY', allowedFunctionNames: ['foobar'] });
     });
 
-    it('process response events via processVertexStream', async () => {
-      const source$ = of({ chunk: 1 }, { chunk: 2 });
-
-      const tapFn = jest.fn();
-      processVertexStreamMock.mockImplementation(() => tap(tapFn));
-
-      executorMock.invoke.mockImplementation(async () => {
-        return {
-          actionId: '',
-          status: 'ok',
-          data: observableIntoEventSourceStream(source$, logger),
-        };
-      });
-
-      const response$ = geminiAdapter.chatComplete({
-        logger,
-        executor: executorMock,
-        messages: [
-          {
-            role: MessageRole.User,
-            content: 'question',
-          },
-        ],
-      });
-
-      const allChunks = await lastValueFrom(response$.pipe(toArray()));
-
-      expect(allChunks).toEqual([{ chunk: 1 }, { chunk: 2 }]);
-
-      expect(tapFn).toHaveBeenCalledTimes(2);
-      expect(tapFn).toHaveBeenCalledWith({ chunk: 1 });
-      expect(tapFn).toHaveBeenCalledWith({ chunk: 2 });
-    });
-
     it('propagates the abort signal when provided', () => {
       const abortController = new AbortController();
 
@@ -563,7 +721,7 @@ describe('geminiAdapter', () => {
 
       expect(executorMock.invoke).toHaveBeenCalledTimes(1);
       expect(executorMock.invoke).toHaveBeenCalledWith({
-        subAction: 'invokeStream',
+        subAction: 'invokeAIRaw',
         subActionParams: expect.objectContaining({
           signal: abortController.signal,
         }),
@@ -582,7 +740,7 @@ describe('geminiAdapter', () => {
 
       expect(executorMock.invoke).toHaveBeenCalledTimes(1);
       expect(executorMock.invoke).toHaveBeenCalledWith({
-        subAction: 'invokeStream',
+        subAction: 'invokeAIRaw',
         subActionParams: expect.objectContaining({
           temperature: 0.6,
         }),
@@ -601,36 +759,136 @@ describe('geminiAdapter', () => {
 
       expect(executorMock.invoke).toHaveBeenCalledTimes(1);
       expect(executorMock.invoke).toHaveBeenCalledWith({
-        subAction: 'invokeStream',
+        subAction: 'invokeAIRaw',
         subActionParams: expect.objectContaining({
           model: 'gemini-1.5',
         }),
       });
     });
 
-    it('throws an error if the connector response is in error', async () => {
-      executorMock.invoke.mockImplementation(async () => {
-        return {
-          actionId: 'actionId',
-          status: 'error',
-          serviceMessage: 'something went wrong',
-          data: undefined,
-        };
+    describe('non-streaming mode', () => {
+      it('process response events via processVertexResponse', async () => {
+        const response = { dummy: 'response' };
+
+        const tapFn = jest.fn();
+        processVertexResponseMock.mockImplementation(() => tap(tapFn));
+
+        executorMock.invoke.mockImplementation(async () => {
+          return {
+            actionId: '',
+            status: 'ok',
+            data: response,
+          };
+        });
+
+        const response$ = geminiAdapter.chatComplete({
+          stream: false,
+          logger,
+          executor: executorMock,
+          messages: [
+            {
+              role: MessageRole.User,
+              content: 'question',
+            },
+          ],
+        });
+
+        const events = await lastValueFrom(response$.pipe(toArray()));
+
+        expect(tapFn).toHaveBeenCalledTimes(1);
+        expect(tapFn).toHaveBeenCalledWith(response);
+
+        expect(events).toEqual([response]);
       });
 
-      await expect(
-        lastValueFrom(
-          geminiAdapter
-            .chatComplete({
-              logger,
-              executor: executorMock,
-              messages: [{ role: MessageRole.User, content: 'Hello' }],
-            })
-            .pipe(toArray())
-        )
-      ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Error calling connector: something went wrong"`
-      );
+      it('throws an error if the connector response is in error', async () => {
+        executorMock.invoke.mockImplementation(async () => {
+          return {
+            actionId: 'actionId',
+            status: 'error',
+            serviceMessage: 'something went wrong',
+            data: undefined,
+          };
+        });
+
+        await expect(
+          lastValueFrom(
+            geminiAdapter
+              .chatComplete({
+                stream: false,
+                logger,
+                executor: executorMock,
+                messages: [{ role: MessageRole.User, content: 'Hello' }],
+              })
+              .pipe(toArray())
+          )
+        ).rejects.toThrowErrorMatchingInlineSnapshot(
+          `"Error calling connector: something went wrong"`
+        );
+      });
+    });
+
+    describe('streaming mode', () => {
+      it('process response events via processVertexStream', async () => {
+        const source$ = of({ chunk: 1 }, { chunk: 2 });
+
+        const tapFn = jest.fn();
+        processVertexStreamMock.mockImplementation(() => tap(tapFn));
+
+        executorMock.invoke.mockImplementation(async () => {
+          return {
+            actionId: '',
+            status: 'ok',
+            data: observableIntoEventSourceStream(source$, logger),
+          };
+        });
+
+        const response$ = geminiAdapter.chatComplete({
+          stream: true,
+          logger,
+          executor: executorMock,
+          messages: [
+            {
+              role: MessageRole.User,
+              content: 'question',
+            },
+          ],
+        });
+
+        const allChunks = await lastValueFrom(response$.pipe(toArray()));
+
+        expect(allChunks).toEqual([{ chunk: 1 }, { chunk: 2 }]);
+
+        expect(tapFn).toHaveBeenCalledTimes(2);
+        expect(tapFn).toHaveBeenCalledWith({ chunk: 1 });
+        expect(tapFn).toHaveBeenCalledWith({ chunk: 2 });
+      });
+
+      it('throws an error if the connector response is in error', async () => {
+        executorMock.invoke.mockImplementation(async () => {
+          return {
+            actionId: 'actionId',
+            status: 'error',
+            serviceMessage: 'something went wrong',
+            data: undefined,
+          };
+        });
+
+        await expect(
+          lastValueFrom(
+            geminiAdapter
+              .chatComplete({
+                stream: true,
+                logger,
+                executor: executorMock,
+                messages: [{ role: MessageRole.User, content: 'Hello' }],
+              })
+              .pipe(toArray())
+          )
+        ).rejects.toThrowErrorMatchingInlineSnapshot(
+          `"Error calling connector: something went wrong"`
+        );
+      });
     });
   });
 });

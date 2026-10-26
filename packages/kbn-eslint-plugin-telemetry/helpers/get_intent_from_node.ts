@@ -7,17 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { TSESTree } from '@typescript-eslint/typescript-estree';
-import camelCase from 'lodash/camelCase';
+import type { TSESTree } from '@typescript-eslint/typescript-estree';
+import { camelCase } from 'lodash';
+import { getJsxStringValue } from './get_jsx_string_value';
 
 /*
     Attempts to get a string representation of the intent
     out of an array of nodes.
-    
+
     Currently supported node types in the array:
     * String literal text (JSXText)
     * Translated text via <FormattedMessage> component -> uses prop `defaultMessage`
-    * Translated text via {i18n.translate} call -> uses passed options object key `defaultMessage` 
+    * Translated text via {i18n.translate} call -> uses passed options object key `defaultMessage`
 */
 export function getIntentFromNode(originalNode: TSESTree.JSXOpeningElement): string {
   const parent = originalNode.parent as TSESTree.JSXElement;
@@ -38,7 +39,7 @@ export function getIntentFromNode(originalNode: TSESTree.JSXOpeningElement): str
     switch (currentNode.type) {
       case 'JSXText':
         // When node is a string primitive
-        return `${acc}${strip(currentNode.value)}`;
+        return `${acc}${strip(getJsxStringValue(currentNode))}`;
 
       case 'JSXElement':
         // Determining whether node is of form `<FormattedMessage defaultMessage="message" />`
@@ -64,7 +65,7 @@ export function getIntentFromNode(originalNode: TSESTree.JSXOpeningElement): str
           return '';
         }
 
-        return `${acc}${strip(defaultMessageProp.value.value)}`;
+        return `${acc}${strip(getJsxStringValue(defaultMessageProp.value))}`;
 
       case 'JSXExpressionContainer':
         // Determining whether node is of form `{i18n.translate('foo', { defaultMessage: 'message'})}`
@@ -76,7 +77,8 @@ export function getIntentFromNode(originalNode: TSESTree.JSXOpeningElement): str
         }
 
         const args: TSESTree.CallExpressionArgument[] = expression.arguments;
-        const callee: TSESTree.LeftHandSideExpression = expression.callee;
+        const callee: TSESTree.LeftHandSideExpression =
+          expression.callee as TSESTree.LeftHandSideExpression;
 
         if (!('object' in callee)) {
           return '';

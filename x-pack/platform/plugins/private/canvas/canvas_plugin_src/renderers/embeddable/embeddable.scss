@@ -10,12 +10,11 @@
     }
   }
 
-  .embPanel__hoverActionsLeft, .embPanel__hoverActions > .embPanel--dragHandle {
+  .embPanel__hoverActions > .embPanel--dragHandle {
     visibility: hidden;
   }
 
   .embPanel--dragHandle:hover {
-    background-color: transparentize($euiColorWarning, lightOrDarkTheme(.9, .7));
     cursor: move;
   }
 

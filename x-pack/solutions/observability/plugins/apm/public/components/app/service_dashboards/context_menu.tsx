@@ -6,7 +6,13 @@
  */
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
-import { EuiButtonIcon, EuiContextMenuPanel, EuiContextMenuItem, EuiPopover } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
+  EuiPopover,
+  EuiToolTip,
+} from '@elastic/eui';
 
 interface Props {
   items: React.ReactNode[];
@@ -25,17 +31,27 @@ export function ContextMenu({ items }: Props) {
 
   return (
     <EuiPopover
+      aria-label={i18n.translate('xpack.apm.serviceDashboards.contextMenu.ariaLabel', {
+        defaultMessage: 'More actions',
+      })}
       button={
-        <EuiButtonIcon
-          data-test-subj="apmContextMenuButton"
-          display="base"
-          size="s"
-          iconType="boxesVertical"
-          aria-label={i18n.translate('xpack.apm.serviceDashboards.contextMenu.moreLabel', {
+        <EuiToolTip
+          content={i18n.translate('xpack.apm.serviceDashboards.contextMenu.moreLabel', {
             defaultMessage: 'More',
           })}
-          onClick={onButtonClick}
-        />
+          disableScreenReaderOutput
+        >
+          <EuiButtonIcon
+            data-test-subj="apmContextMenuButton"
+            display="base"
+            size="s"
+            iconType="boxesVertical"
+            aria-label={i18n.translate('xpack.apm.serviceDashboards.contextMenu.moreLabel', {
+              defaultMessage: 'More',
+            })}
+            onClick={onButtonClick}
+          />
+        </EuiToolTip>
       }
       isOpen={isPopoverOpen}
       closePopover={closePopover}
@@ -43,12 +59,8 @@ export function ContextMenu({ items }: Props) {
       anchorPosition="downLeft"
     >
       <EuiContextMenuPanel
-        size="s"
         items={items.map((item, index) => (
-          <EuiContextMenuItem key={index} size="s">
-            {' '}
-            {item}
-          </EuiContextMenuItem>
+          <EuiContextMenuItem key={index}> {item}</EuiContextMenuItem>
         ))}
       />
     </EuiPopover>

@@ -18,7 +18,10 @@ export const createSavedSearchMock = () =>
   ({
     id: 'the-saved-search-id',
     title: 'A saved search',
-    searchSource: createSearchSourceMock({ index: dataViewMock }),
+    searchSource: createSearchSourceMock({
+      index: dataViewMock,
+      query: { query: '', language: 'kuery' },
+    }),
     columns: ['default_column'],
     sort: [],
   } as unknown as SavedSearch);
@@ -27,7 +30,10 @@ export const savedSearchMock = createSavedSearchMock();
 
 export const savedSearchMockWithTimeField = {
   id: 'the-saved-search-id-with-timefield',
-  searchSource: createSearchSourceMock({ index: dataViewWithTimefieldMock }),
+  searchSource: createSearchSourceMock({
+    index: dataViewWithTimefieldMock,
+    query: { query: '', language: 'kuery' },
+  }),
 } as unknown as SavedSearch;
 
 export const savedSearchMockWithTimeFieldNew = {

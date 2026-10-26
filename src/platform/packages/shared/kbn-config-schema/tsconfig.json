@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
     "stripInternal": true,
@@ -11,6 +11,7 @@
   "include": [
     "**/*.ts"
   ],
+  "kbn_references": ["@kbn/schema-string-helpers"],
   "exclude": [
     "target/**/*",
   ]

@@ -5,7 +5,8 @@
  * 2.0.
  */
 import type { KibanaRequest, Logger } from '@kbn/core/server';
-import { cloneDeep, keys } from 'lodash';
+import { cloneDeep, clone, keys } from 'lodash';
+import type { MaintenanceWindow } from '@kbn/maintenance-windows-plugin/common';
 import { Alert } from '../alert/alert';
 import type { AlertFactory } from '../alert/create_alert_factory';
 import { createAlertFactory, getPublicAlertFactory } from '../alert/create_alert_factory';
@@ -19,6 +20,7 @@ import type {
 } from '../types';
 import type { RulesSettingsFlappingProperties } from '../../common/rules_settings';
 import { DEFAULT_FLAPPING_SETTINGS } from '../../common/rules_settings';
+import { getMaxAlertLimit } from '../../common';
 import type {
   IAlertsClient,
   InitializeExecutionOpts,
@@ -69,6 +71,7 @@ export class LegacyAlertsClient<
     trackedActiveAlerts: Record<string, Alert<State, Context, ActionGroupIds>>;
     recovered: Record<string, Alert<State, Context, RecoveryActionGroupId>>;
     trackedRecoveredAlerts: Record<string, Alert<State, Context, RecoveryActionGroupId>>;
+    delayed: Record<string, Alert<State, Context, ActionGroupIds>>;
   };
 
   private alertFactory?: AlertFactory<
@@ -84,6 +87,7 @@ export class LegacyAlertsClient<
       trackedActiveAlerts: {},
       recovered: {},
       trackedRecoveredAlerts: {},
+      delayed: {},
     };
   }
 
@@ -94,14 +98,23 @@ export class LegacyAlertsClient<
     flappingSettings,
     activeAlertsFromState,
     recoveredAlertsFromState,
+    snoozedInstances,
   }: InitializeExecutionOpts) {
-    this.maxAlerts = maxAlerts;
+    this.maxAlerts = getMaxAlertLimit(maxAlerts);
     this.flappingSettings = flappingSettings;
     this.ruleLogPrefix = ruleLabel;
     this.startedAtString = startedAt ? startedAt.toISOString() : null;
 
+    const snoozedInstancesMap = new Map(
+      (snoozedInstances ?? []).map((instance) => [instance.instanceId, instance])
+    );
+
     for (const id of keys(activeAlertsFromState)) {
       this.trackedAlerts.active[id] = new Alert<State, Context>(id, activeAlertsFromState[id]);
+      const snoozeConfig = snoozedInstancesMap.get(id);
+      if (snoozeConfig) {
+        this.trackedAlerts.active[id].setSnoozeConfig(snoozeConfig);
+      }
     }
 
     for (const id of keys(recoveredAlertsFromState)) {
@@ -109,6 +122,10 @@ export class LegacyAlertsClient<
         id,
         recoveredAlertsFromState[id]
       );
+      const snoozeConfig = snoozedInstancesMap.get(id);
+      if (snoozeConfig) {
+        this.trackedAlerts.recovered[id].setSnoozeConfig(snoozeConfig);
+      }
     }
 
     // Legacy alerts client creates a copy of the active tracked alerts
@@ -123,9 +140,10 @@ export class LegacyAlertsClient<
     >({
       alerts: this.reportedAlerts,
       logger: this.options.logger,
-      maxAlerts: this.maxAlerts,
+      configuredMaxAlerts: maxAlerts, // Pass in the configured max alerts value, so we can determine if alert limit is set above the allowed threshold
       autoRecoverAlerts: this.options.ruleType.autoRecoverAlerts ?? true,
       canSetRecoveryContext: this.options.ruleType.doesSetRecoveryContext ?? false,
+      snoozedInstancesMap,
     });
   }
 
@@ -160,7 +178,7 @@ export class LegacyAlertsClient<
         keys(processedAlertsActive).length > 0 ||
         keys(processedAlertsRecovered).length > 0
       ) {
-        const { maintenanceWindowsWithoutScopedQueryIds } =
+        const { maintenanceWindowsWithoutScopedQueryIds, maintenanceWindows } =
           await this.options.maintenanceWindowsService.getMaintenanceWindows({
             eventLogger: this.options.alertingEventLogger,
             request: this.options.request,
@@ -168,9 +186,29 @@ export class LegacyAlertsClient<
             spaceId: this.options.spaceId,
           });
 
+        this.removeExpiredMaintenanceWindows({
+          processedAlertsActive,
+          processedAlertsRecovered,
+          maintenanceWindows,
+        });
+
+        // Create a map of maintenance window IDs to names
+        const maintenanceWindowNamesMap = new Map(
+          (maintenanceWindows ?? []).map((mw) => [mw.id, mw.title])
+        );
+
+        // Get the names corresponding to the IDs
+        const maintenanceWindowsWithoutScopedQueryNames =
+          maintenanceWindowsWithoutScopedQueryIds.map(
+            (id) => maintenanceWindowNamesMap.get(id) || id
+          );
+
         for (const id in processedAlertsNew) {
           if (Object.hasOwn(processedAlertsNew, id)) {
             processedAlertsNew[id].setMaintenanceWindowIds(maintenanceWindowsWithoutScopedQueryIds);
+            processedAlertsNew[id].setMaintenanceWindowNames(
+              maintenanceWindowsWithoutScopedQueryNames
+            );
           }
         }
       }
@@ -178,9 +216,9 @@ export class LegacyAlertsClient<
 
     this.processedAlerts.new = processedAlertsNew;
     this.processedAlerts.active = processedAlertsActive;
-    this.processedAlerts.trackedActiveAlerts = processedAlertsActive;
+    this.processedAlerts.trackedActiveAlerts = clone(processedAlertsActive);
     this.processedAlerts.recovered = processedAlertsRecovered;
-    this.processedAlerts.trackedRecoveredAlerts = processedAlertsRecovered;
+    this.processedAlerts.trackedRecoveredAlerts = clone(processedAlertsRecovered);
   }
 
   public logAlerts({ ruleRunMetricsStore, shouldLogAlerts }: LogAlertsOpts) {
@@ -192,13 +230,21 @@ export class LegacyAlertsClient<
       recoveredAlerts: this.processedAlerts.recovered,
       ruleLogPrefix: this.ruleLogPrefix,
       ruleRunMetricsStore,
+      // don't log alert instance docs to event log if rule type is persistent
+      shouldLogAlerts: this.options.ruleType.autoRecoverAlerts ?? true,
       canSetRecoveryContext: this.options.ruleType.doesSetRecoveryContext ?? false,
       shouldPersistAlerts: shouldLogAlerts,
     });
   }
 
   public getProcessedAlerts(
-    type: 'new' | 'active' | 'trackedActiveAlerts' | 'recovered' | 'trackedRecoveredAlerts'
+    type:
+      | 'new'
+      | 'active'
+      | 'trackedActiveAlerts'
+      | 'recovered'
+      | 'trackedRecoveredAlerts'
+      | 'delayed'
   ) {
     if (Object.hasOwn(this.processedAlerts, type)) {
       return this.processedAlerts[type];
@@ -209,6 +255,8 @@ export class LegacyAlertsClient<
 
   public getRawAlertInstancesForState(shouldOptimizeTaskState?: boolean) {
     return toRawAlertInstances<State, Context, ActionGroupIds, RecoveryActionGroupId>(
+      this.options.logger,
+      this.maxAlerts,
       this.processedAlerts.trackedActiveAlerts,
       this.processedAlerts.trackedRecoveredAlerts,
       shouldOptimizeTaskState
@@ -218,14 +266,12 @@ export class LegacyAlertsClient<
   public determineFlappingAlerts() {
     if (this.flappingSettings.enabled) {
       const alerts = determineFlappingAlerts({
-        logger: this.options.logger,
         newAlerts: this.processedAlerts.new,
         activeAlerts: this.processedAlerts.active,
         recoveredAlerts: this.processedAlerts.recovered,
         flappingSettings: this.flappingSettings,
         previouslyRecoveredAlerts: this.trackedAlerts.recovered,
         actionGroupId: this.options.ruleType.defaultActionGroupId,
-        maxAlerts: this.maxAlerts,
       });
 
       this.processedAlerts.new = alerts.newAlerts;
@@ -243,6 +289,7 @@ export class LegacyAlertsClient<
       trackedActiveAlerts: this.processedAlerts.trackedActiveAlerts,
       recoveredAlerts: this.processedAlerts.recovered,
       trackedRecoveredAlerts: this.processedAlerts.trackedRecoveredAlerts,
+      delayedAlerts: this.processedAlerts.delayed,
       alertDelay: opts.alertDelay,
       startedAt: this.startedAtString,
       ruleRunMetricsStore: opts.ruleRunMetricsStore,
@@ -276,13 +323,62 @@ export class LegacyAlertsClient<
   }
 
   public async persistAlerts() {
-    return null;
+    return;
   }
+
+  public async getAlertsToUpdateWithMaintenanceWindows() {
+    return {};
+  }
+
+  public getAlertsToUpdateWithLastScheduledActions() {
+    return {};
+  }
+
+  public async updatePersistedAlerts() {}
+
+  public async clearSnoozedStatusForAlerts(_conditionExpiredInstanceIds: string[]): Promise<void> {}
 
   public async setAlertStatusToUntracked() {
     return;
   }
-  public getTrackedExecutions() {
-    return new Set([]);
+
+  public getBuiltActiveAlertDataByInstanceId(_instanceId: string): undefined {
+    return undefined;
+  }
+
+  private removeExpiredMaintenanceWindows({
+    processedAlertsActive,
+    processedAlertsRecovered,
+    maintenanceWindows,
+  }: {
+    processedAlertsActive: Record<string, Alert<State, Context, ActionGroupIds>>;
+    processedAlertsRecovered: Record<string, Alert<State, Context, RecoveryActionGroupId>>;
+    maintenanceWindows: MaintenanceWindow[];
+  }) {
+    const maintenanceWindowIds = maintenanceWindows.map((mw) => mw.id);
+    const maintenanceWindowNamesMap = new Map(maintenanceWindows.map((mw) => [mw.id, mw.title]));
+
+    const clearMws = (
+      alerts: Record<string, Alert<State, Context, ActionGroupIds | RecoveryActionGroupId>>
+    ) => {
+      for (const id in alerts) {
+        if (Object.hasOwn(alerts, id)) {
+          const existingMaintenanceWindowIds = alerts[id].getMaintenanceWindowIds();
+          const activeMaintenanceWindowIds = existingMaintenanceWindowIds.filter((mw) => {
+            return maintenanceWindowIds.includes(mw);
+          });
+
+          // Map active IDs to their corresponding names
+          const activeMaintenanceWindowNames = activeMaintenanceWindowIds.map(
+            (mwId) => maintenanceWindowNamesMap.get(mwId) || mwId
+          );
+
+          alerts[id].setMaintenanceWindowIds(activeMaintenanceWindowIds);
+          alerts[id].setMaintenanceWindowNames(activeMaintenanceWindowNames);
+        }
+      }
+    };
+    clearMws(processedAlertsActive);
+    clearMws(processedAlertsRecovered);
   }
 }

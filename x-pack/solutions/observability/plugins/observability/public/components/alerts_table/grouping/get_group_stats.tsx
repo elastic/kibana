@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { GetGroupStats } from '@kbn/grouping/src';
+import type { GetGroupStats } from '@kbn/grouping/src';
 import { ALERT_INSTANCE_ID, ALERT_RULE_NAME } from '@kbn/rule-data-utils';
-import { AlertsByGroupingAgg } from '../types';
+import type { AlertsByGroupingAgg } from '../types';
 
 export const getGroupStats: GetGroupStats<AlertsByGroupingAgg> = (selectedGroup, bucket) => {
   const defaultBadges = [
@@ -15,7 +15,6 @@ export const getGroupStats: GetGroupStats<AlertsByGroupingAgg> = (selectedGroup,
       title: 'Alerts:',
       badge: {
         value: bucket.doc_count,
-        width: 50,
       },
     },
   ];
@@ -27,7 +26,6 @@ export const getGroupStats: GetGroupStats<AlertsByGroupingAgg> = (selectedGroup,
           title: 'Sources:',
           badge: {
             value: bucket.sourceCountAggregation?.value ?? 0,
-            width: 50,
           },
         },
         ...defaultBadges,
@@ -38,7 +36,6 @@ export const getGroupStats: GetGroupStats<AlertsByGroupingAgg> = (selectedGroup,
           title: 'Rules:',
           badge: {
             value: bucket.rulesCountAggregation?.value ?? 0,
-            width: 50,
           },
         },
         ...defaultBadges,
@@ -49,7 +46,6 @@ export const getGroupStats: GetGroupStats<AlertsByGroupingAgg> = (selectedGroup,
       title: 'Rules:',
       badge: {
         value: bucket.rulesCountAggregation?.value ?? 0,
-        width: 50,
       },
     },
     ...defaultBadges,

@@ -16,6 +16,7 @@ import type { FtrProviderContext } from '../services';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const { common } = getPageObjects(['common']);
   const browser = getService('browser');
+  const retry = getService('retry');
   const ebtUIHelper = getService('kibana_ebt_ui');
 
   describe('analytics service: public side', () => {
@@ -46,44 +47,46 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should see both events enqueued and sent to the shipper', async () => {
-      const telemetryCounters = await getTelemetryCounters(5);
-      expect(telemetryCounters).to.eql([
-        {
-          type: 'enqueued',
-          event_type: 'test-plugin-lifecycle',
-          source: 'client',
-          code: 'enqueued',
-          count: 1,
-        },
-        {
-          type: 'enqueued',
-          event_type: 'test-plugin-lifecycle',
-          source: 'client',
-          code: 'enqueued',
-          count: 1,
-        },
-        {
-          type: 'succeeded',
-          event_type: 'test-plugin-lifecycle',
-          source: 'FTR-shipper',
-          code: '200',
-          count: 1,
-        },
-        {
-          type: 'succeeded',
-          event_type: 'test-plugin-lifecycle',
-          source: 'FTR-shipper',
-          code: '200',
-          count: 1,
-        },
-        {
-          type: 'sent_to_shipper',
-          event_type: 'test-plugin-lifecycle',
-          source: 'client',
-          code: 'OK',
-          count: 2,
-        },
-      ]);
+      await retry.tryForTime(30_000, async () => {
+        const telemetryCounters = await getTelemetryCounters(5);
+        expect(telemetryCounters).to.eql([
+          {
+            type: 'enqueued',
+            event_type: 'test-plugin-lifecycle',
+            source: 'client',
+            code: 'enqueued',
+            count: 1,
+          },
+          {
+            type: 'enqueued',
+            event_type: 'test-plugin-lifecycle',
+            source: 'client',
+            code: 'enqueued',
+            count: 1,
+          },
+          {
+            type: 'succeeded',
+            event_type: 'test-plugin-lifecycle',
+            source: 'FTR-shipper',
+            code: '200',
+            count: 1,
+          },
+          {
+            type: 'succeeded',
+            event_type: 'test-plugin-lifecycle',
+            source: 'FTR-shipper',
+            code: '200',
+            count: 1,
+          },
+          {
+            type: 'sent_to_shipper',
+            event_type: 'test-plugin-lifecycle',
+            source: 'client',
+            code: 'OK',
+            count: 2,
+          },
+        ]);
+      });
     });
 
     describe('after setting opt-in', () => {
@@ -153,13 +156,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             timestamp: reportTestPluginLifecycleEventsAction!.meta[setupEvent].timestamp,
             event_type: 'test-plugin-lifecycle',
             context: initialContext,
-            properties: { plugin: 'analyticsPluginA', step: 'setup' },
+            properties: { plugin: 'analyticsPluginA', step: 'setup', traceId: events[0].trace?.id },
+            trace: { id: events[0].properties.traceId }, // Cross-checking with the properties.traceId to validate that the event reporter (plugin) and the client see the same transaction.
           },
           {
             timestamp: reportTestPluginLifecycleEventsAction!.meta[startEvent].timestamp,
             event_type: 'test-plugin-lifecycle',
             context: reportEventContext,
-            properties: { plugin: 'analyticsPluginA', step: 'start' },
+            properties: { plugin: 'analyticsPluginA', step: 'start', traceId: events[1].trace?.id },
+            trace: { id: events[1].properties.traceId }, // Cross-checking with the properties.traceId to validate that the event reporter (plugin) and the client see the same transaction.
           },
         ]);
       });

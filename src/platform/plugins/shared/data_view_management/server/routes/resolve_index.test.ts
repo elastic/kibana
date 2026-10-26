@@ -8,7 +8,7 @@
  */
 
 import type { MockedKeys } from '@kbn/utility-types-jest';
-import { CoreSetup, RequestHandlerContext } from '@kbn/core/server';
+import type { CoreSetup, RequestHandlerContext } from '@kbn/core/server';
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 import { registerResolveIndexRoute } from './resolve_index';
 
@@ -29,7 +29,7 @@ const mockResponseEmpty = {
   data_streams: [],
 };
 
-const mockError403 = {
+const mockError403NoSuchRemoteCluster = {
   meta: {
     body: {
       error: {
@@ -46,6 +46,27 @@ const mockError403 = {
           type: 'no_such_remote_cluster_exception',
           reason: 'no such remote cluster: [cluster1]',
         },
+      },
+      status: 403,
+    },
+    statusCode: 403,
+  },
+};
+
+const mockError403Unauthorized = {
+  meta: {
+    body: {
+      error: {
+        root_cause: [
+          {
+            type: 'security_exception',
+            reason:
+              'action [indices:admin/resolve/index] is unauthorized for user [restricted] with effective roles [restricted], this action is granted by the index privileges [view_index_metadata,manage,read,all]',
+          },
+        ],
+        type: 'security_exception',
+        reason:
+          'action [indices:admin/resolve/index] is unauthorized for user [restricted] with effective roles [restricted], this action is granted by the index privileges [view_index_metadata,manage,read,all]',
       },
       status: 403,
     },
@@ -118,7 +139,7 @@ describe('resolve_index route', () => {
       }
     `);
 
-    expect(mockResponse.ok).toBeCalled();
+    expect(mockResponse.ok).toHaveBeenCalled();
     expect(mockResponse.ok.mock.calls[0][0]).toEqual({ body: mockResponseIndices });
   });
 
@@ -153,14 +174,14 @@ describe('resolve_index route', () => {
       }
     `);
 
-    expect(mockResponse.ok).toBeCalled();
+    expect(mockResponse.ok).toHaveBeenCalled();
     expect(mockResponse.ok.mock.calls[0][0]).toEqual({ body: mockResponseEmpty });
   });
 
-  it('returns 404 when hitting a 403 from Elasticsearch', async () => {
+  it('returns 404 when hitting a 403 caused by no_such_remote_cluster_exception', async () => {
     const mockClient = {
       indices: {
-        resolveIndex: jest.fn().mockRejectedValue(mockError403),
+        resolveIndex: jest.fn().mockRejectedValue(mockError403NoSuchRemoteCluster),
       },
     };
     const mockContext = {
@@ -189,11 +210,47 @@ describe('resolve_index route', () => {
       }
     `);
 
-    expect(mockResponse.notFound).toBeCalled();
+    expect(mockResponse.notFound).toHaveBeenCalled();
     expect(mockResponse.notFound.mock.calls[0][0]).toMatchInlineSnapshot(`
       Object {
         "body": Object {
           "message": "action [indices:admin/resolve/index] is unauthorized for user [elastic] with effective roles [superuser], this action is granted by the index privileges [view_index_metadata,manage,read,all]",
+        },
+      }
+    `);
+  });
+
+  it('returns 403 when the user lacks the privileges to resolve the indices', async () => {
+    const mockClient = {
+      indices: {
+        resolveIndex: jest.fn().mockRejectedValue(mockError403Unauthorized),
+      },
+    };
+    const mockContext = {
+      core: {
+        elasticsearch: { client: { asCurrentUser: mockClient } },
+      },
+    };
+    const mockRequest = httpServerMock.createKibanaRequest({
+      params: {
+        query: 'kibana_sample_data_*',
+      },
+    });
+    const mockResponse = httpServerMock.createResponseFactory();
+
+    registerResolveIndexRoute(mockCoreSetup.http.createRouter());
+
+    const mockRouter = mockCoreSetup.http.createRouter.mock.results[0].value;
+    const handler = mockRouter.get.mock.calls[0][1];
+
+    await handler(mockContext as unknown as RequestHandlerContext, mockRequest, mockResponse);
+
+    expect(mockResponse.notFound).not.toHaveBeenCalled();
+    expect(mockResponse.forbidden).toHaveBeenCalled();
+    expect(mockResponse.forbidden.mock.calls[0][0]).toMatchInlineSnapshot(`
+      Object {
+        "body": Object {
+          "message": "action [indices:admin/resolve/index] is unauthorized for user [restricted] with effective roles [restricted], this action is granted by the index privileges [view_index_metadata,manage,read,all]",
         },
       }
     `);
@@ -231,7 +288,7 @@ describe('resolve_index route', () => {
       }
     `);
 
-    expect(mockResponse.notFound).toBeCalled();
+    expect(mockResponse.notFound).toHaveBeenCalled();
     expect(mockResponse.notFound.mock.calls[0][0]).toMatchInlineSnapshot(`
       Object {
         "body": Object {

@@ -5,22 +5,29 @@
  * 2.0.
  */
 import { omit } from 'lodash';
-import { FormattedValue } from './common';
+import type { FormattedValue } from './common';
+import type { SavedObject } from '@kbn/core/server';
 import {
   formatMonitorConfigFields,
   formatHeartbeatRequest,
+  formatMonitorConfigs,
+  formatSavedMonitors,
   mixParamsWithGlobalParams,
 } from './format_configs';
 
 import { loggerMock } from '@kbn/logging-mocks';
-import {
-  ConfigKey,
-  MonitorTypeEnum,
+import type {
   CodeEditorMode,
   MonitorFields,
   ResponseBodyIndexPolicy,
-  ScheduleUnit,
   SyntheticsMonitor,
+  SyntheticsMonitorWithSecretsAttributes,
+} from '../../../../common/runtime_types';
+import {
+  ConfigKey,
+  KerberosAuthType,
+  MonitorTypeEnum,
+  ScheduleUnit,
   VerificationMode,
 } from '../../../../common/runtime_types';
 
@@ -104,11 +111,13 @@ describe('formatMonitorConfig', () => {
         Object.keys(testHTTPConfig) as ConfigKey[],
         testHTTPConfig,
         logger,
-        { proxyUrl: 'https://www.google.com' }
+        { proxyUrl: 'https://www.google.com' },
+        []
       );
 
       expect(yamlConfig).toEqual({
-        'check.request.method': 'GET',
+        // check.request.method (GET), max_redirects (0), response.include_body
+        // (on_error) and timeout (16s) equal the Heartbeat defaults and are omitted.
         'check.response.headers': {
           'test-header': 'test-value',
         },
@@ -120,13 +129,10 @@ describe('formatMonitorConfig', () => {
         ],
         enabled: true,
         locations: [],
-        max_redirects: '0',
         name: 'Test',
         password: '3z9SBOQWW5F0UrdqLVFqlF6z',
-        'response.include_body': 'on_error',
         'response.include_headers': true,
         schedule: '@every 3m',
-        timeout: '16s',
         type: 'http',
         urls: 'https://www.google.com',
         proxy_url: 'https://www.google.com',
@@ -145,11 +151,13 @@ describe('formatMonitorConfig', () => {
             [ConfigKey.METADATA]: { is_tls_enabled: isTLSEnabled },
           },
           logger,
-          { proxyUrl: 'https://www.google.com' }
+          { proxyUrl: 'https://www.google.com' },
+          []
         );
 
         expect(yamlConfig).toEqual({
-          'check.request.method': 'GET',
+          // check.request.method, max_redirects, response.include_body and timeout
+          // equal the Heartbeat defaults and are omitted.
           'check.response.headers': {
             'test-header': 'test-value',
           },
@@ -161,15 +169,12 @@ describe('formatMonitorConfig', () => {
           ],
           enabled: true,
           locations: [],
-          max_redirects: '0',
           name: 'Test',
           username: 'test-username',
           password: '3z9SBOQWW5F0UrdqLVFqlF6z',
           proxy_url: 'https://www.google.com',
-          'response.include_body': 'on_error',
           'response.include_headers': true,
           schedule: '@every 3m',
-          timeout: '16s',
           type: 'http',
           'url.port': 900,
           urls: 'https://www.google.com',
@@ -177,6 +182,122 @@ describe('formatMonitorConfig', () => {
         });
       }
     );
+
+    it('emits the Kerberos block only when Kerberos is enabled and omits NTLM', () => {
+      const kerberosConfig: Partial<MonitorFields> = {
+        ...testHTTPConfig,
+        [ConfigKey.USERNAME]: '',
+        [ConfigKey.PASSWORD]: '',
+        [ConfigKey.KERBEROS]: {
+          enabled: true,
+          auth_type: KerberosAuthType.PASSWORD,
+          realm: 'CORP.LOCAL',
+          username: 'svc-heartbeat',
+          password: 'secret',
+          keytab: '',
+          config_path: '/etc/krb5.conf',
+          krb5_conf: '',
+          service_name: '',
+          enable_krb5_fast: false,
+        },
+        [ConfigKey.NTLM]: {
+          enabled: false,
+          username: '',
+          password: '',
+          domain: 'CORP',
+          workstation: '',
+        },
+      };
+      const yamlConfig = formatMonitorConfigFields(
+        Object.keys(kerberosConfig) as ConfigKey[],
+        kerberosConfig,
+        logger,
+        { proxyUrl: 'https://www.google.com' },
+        []
+      );
+
+      expect(yamlConfig[ConfigKey.KERBEROS]).toEqual({
+        enabled: true,
+        auth_type: KerberosAuthType.PASSWORD,
+        realm: 'CORP.LOCAL',
+        username: 'svc-heartbeat',
+        password: 'secret',
+        keytab: '',
+        config_path: '/etc/krb5.conf',
+        krb5_conf: '',
+        service_name: '',
+        enable_krb5_fast: false,
+      });
+      // NTLM is dropped because it is disabled.
+      expect(yamlConfig[ConfigKey.NTLM]).toBeUndefined();
+      // Basic auth fields are empty and therefore omitted.
+      expect(yamlConfig[ConfigKey.USERNAME]).toBeUndefined();
+    });
+
+    it('resolves nested NTLM params for public Heartbeat configs', () => {
+      const ntlmConfig: Partial<MonitorFields> = {
+        ...testHTTPConfig,
+        [ConfigKey.USERNAME]: '',
+        [ConfigKey.PASSWORD]: '',
+        [ConfigKey.NTLM]: {
+          enabled: true,
+          username: 'ntlm-user',
+          password: '${ntlmPassword}',
+          domain: 'EXAMPLE',
+          workstation: '',
+        },
+      };
+      const yamlConfig = formatMonitorConfigFields(
+        Object.keys(ntlmConfig) as ConfigKey[],
+        ntlmConfig,
+        logger,
+        { ntlmPassword: 's3c"ret\nline' },
+        []
+      );
+
+      expect(yamlConfig[ConfigKey.NTLM]).toEqual({
+        enabled: true,
+        username: 'ntlm-user',
+        password: 's3c"ret\nline',
+        domain: 'EXAMPLE',
+        workstation: '',
+      });
+    });
+
+    it('omits both Kerberos and NTLM blocks when neither is enabled', () => {
+      const noAuthConfig: Partial<MonitorFields> = {
+        ...testHTTPConfig,
+        [ConfigKey.KERBEROS]: {
+          enabled: false,
+          auth_type: KerberosAuthType.PASSWORD,
+          realm: 'CORP.LOCAL',
+          username: '',
+          password: '',
+          keytab: '',
+          config_path: '',
+          krb5_conf: '',
+          service_name: '',
+          enable_krb5_fast: false,
+        },
+        [ConfigKey.NTLM]: {
+          enabled: false,
+          username: '',
+          password: '',
+          domain: 'CORP',
+          workstation: '',
+        },
+      };
+      const yamlConfig = formatMonitorConfigFields(
+        Object.keys(noAuthConfig) as ConfigKey[],
+        noAuthConfig,
+        logger,
+        { proxyUrl: 'https://www.google.com' },
+        []
+      );
+
+      expect(yamlConfig[ConfigKey.KERBEROS]).toBeUndefined();
+      expect(yamlConfig[ConfigKey.NTLM]).toBeUndefined();
+    });
   });
 });
 
@@ -192,7 +313,6 @@ describe('browser fields', () => {
       name: 'Test',
       locations: [],
       schedule: '@every 3m',
-      screenshots: 'on',
       'service.name': 'APM Service',
       'source.inline.script':
         "step('Go to https://www.google.com/', async () => {\n  await page.goto('https://www.google.com/');\n});",
@@ -201,7 +321,6 @@ describe('browser fields', () => {
         latency: 20,
         upload: 3,
       },
-      timeout: '16s',
       type: 'browser',
       synthetics_args: ['--hasTouch true'],
       params: {
@@ -218,10 +337,23 @@ describe('browser fields', () => {
       Object.keys(testBrowserConfig) as ConfigKey[],
       testBrowserConfig,
       logger,
-      { proxyUrl: 'https://www.google.com' }
+      { proxyUrl: 'https://www.google.com' },
+      []
     );
 
     expect(yamlConfig).toEqual(formattedBrowserConfig);
+  });
+
+  it('omits timeout for browser monitors in public config', () => {
+    const yamlConfig = formatMonitorConfigFields(
+      Object.keys(testBrowserConfig) as ConfigKey[],
+      testBrowserConfig,
+      logger,
+      { proxyUrl: 'https://www.google.com' },
+      []
+    );
+
+    expect(yamlConfig.timeout).toBeUndefined();
   });
 
   it('does not set empty strings or empty objects for params and playwright options', () => {
@@ -233,7 +365,8 @@ describe('browser fields', () => {
         params: '',
       },
       logger,
-      { proxyUrl: 'https://www.google.com' }
+      { proxyUrl: 'https://www.google.com' },
+      []
     );
 
     expect(yamlConfig).toEqual(omit(formattedBrowserConfig, ['params', 'playwright_options']));
@@ -251,7 +384,8 @@ describe('browser fields', () => {
         },
       },
       logger,
-      { proxyUrl: 'https://www.google.com' }
+      { proxyUrl: 'https://www.google.com' },
+      []
     );
 
     const expected = {
@@ -269,7 +403,8 @@ describe('browser fields', () => {
       Object.keys(testBrowserConfig) as ConfigKey[],
       testBrowserConfig,
       logger,
-      { proxyUrl: 'https://www.google.com' }
+      { proxyUrl: 'https://www.google.com' },
+      []
     );
 
     const expected = {
@@ -287,12 +422,50 @@ describe('browser fields', () => {
       Object.keys(testBrowserConfig) as ConfigKey[],
       testBrowserConfig,
       logger,
-      { proxyUrl: 'https://www.google.com' }
+      { proxyUrl: 'https://www.google.com' },
+      []
     );
 
     const expected = { ...formattedConfig, enabled: false };
 
     expect(formattedConfig).toEqual(expected);
+  });
+
+  it('includes certificate_error_spki_allowlist when non-empty', () => {
+    const pem = '-----BEGIN CERTIFICATE-----\nAAA\n-----END CERTIFICATE-----';
+    const formattedConfig = formatMonitorConfigFields(
+      [
+        ...(Object.keys(testBrowserConfig) as ConfigKey[]),
+        ConfigKey.CERTIFICATE_ERROR_SPKI_ALLOWLIST,
+      ],
+      {
+        ...testBrowserConfig,
+        [ConfigKey.CERTIFICATE_ERROR_SPKI_ALLOWLIST]: [pem],
+      },
+      logger,
+      { proxyUrl: 'https://www.google.com' },
+      []
+    );
+
+    expect(formattedConfig.certificate_error_spki_allowlist).toEqual([pem]);
+  });
+
+  it('omits certificate_error_spki_allowlist when empty', () => {
+    const formattedConfig = formatMonitorConfigFields(
+      [
+        ...(Object.keys(testBrowserConfig) as ConfigKey[]),
+        ConfigKey.CERTIFICATE_ERROR_SPKI_ALLOWLIST,
+      ],
+      {
+        ...testBrowserConfig,
+        [ConfigKey.CERTIFICATE_ERROR_SPKI_ALLOWLIST]: [],
+      },
+      logger,
+      { proxyUrl: 'https://www.google.com' },
+      []
+    );
+
+    expect(formattedConfig.certificate_error_spki_allowlist).toBeUndefined();
   });
 });
 
@@ -318,6 +491,7 @@ describe('formatHeartbeatRequest', () => {
         'monitor.project.id': testBrowserConfig.project_id,
         run_once: undefined,
         test_run_id: undefined,
+        'monitor.interval': 180,
         meta: {
           space_id: 'test-space-id',
         },
@@ -346,6 +520,7 @@ describe('formatHeartbeatRequest', () => {
         'monitor.project.id': testBrowserConfig.project_id,
         run_once: undefined,
         test_run_id: undefined,
+        'monitor.interval': 180,
         meta: {
           space_id: 'test-space-id',
         },
@@ -374,6 +549,7 @@ describe('formatHeartbeatRequest', () => {
         'monitor.project.id': undefined,
         run_once: undefined,
         test_run_id: undefined,
+        'monitor.interval': 180,
         meta: {
           space_id: 'test-space-id',
         },
@@ -401,6 +577,7 @@ describe('formatHeartbeatRequest', () => {
         'monitor.project.id': undefined,
         run_once: undefined,
         test_run_id: undefined,
+        'monitor.interval': 180,
         meta: {
           space_id: 'test-space-id',
         },
@@ -428,6 +605,7 @@ describe('formatHeartbeatRequest', () => {
         'monitor.project.id': testBrowserConfig.project_id,
         run_once: true,
         test_run_id: undefined,
+        'monitor.interval': 180,
         meta: {
           space_id: 'test-space-id',
         },
@@ -456,6 +634,7 @@ describe('formatHeartbeatRequest', () => {
         'monitor.project.id': testBrowserConfig.project_id,
         run_once: undefined,
         test_run_id: testRunId,
+        'monitor.interval': 180,
         meta: {
           space_id: 'test-space-id',
         },
@@ -485,12 +664,38 @@ describe('formatHeartbeatRequest', () => {
         'monitor.project.id': testBrowserConfig.project_id,
         run_once: undefined,
         test_run_id: testRunId,
+        'monitor.interval': 180,
         meta: {
           space_id: 'test-space-id',
         },
       },
       fields_under_root: true,
     });
+  });
+
+  it('includes kibanaUrl in fields when provided', () => {
+    const monitorId = 'test-monitor-id';
+    const actual = formatHeartbeatRequest({
+      monitor: testBrowserConfig as SyntheticsMonitor,
+      configId: monitorId,
+      heartbeatId: monitorId,
+      spaceId: 'test-space-id',
+      kibanaUrl: 'https://my-kibana.example.com',
+    });
+
+    expect(actual.fields?.kibanaUrl).toBe('https://my-kibana.example.com');
+  });
+
+  it('omits kibanaUrl from fields when not provided', () => {
+    const monitorId = 'test-monitor-id';
+    const actual = formatHeartbeatRequest({
+      monitor: testBrowserConfig as SyntheticsMonitor,
+      configId: monitorId,
+      heartbeatId: monitorId,
+      spaceId: 'test-space-id',
+    });
+
+    expect(actual.fields?.kibanaUrl).toBeUndefined();
   });
 });
 
@@ -532,5 +737,118 @@ describe('mixParamsWithGlobalParams', () => {
       },
       str: '{"username":"superpower-user","password":"test-password","url":"test-url"}',
     });
+  });
+});
+
+describe('formatMonitorConfigs', () => {
+  const logger = loggerMock.create();
+  const config = {
+    monitor: testHTTPConfig as SyntheticsMonitor,
+    configId: 'config-id',
+    heartbeatId: 'heartbeat-id',
+    params: {},
+    spaceId: 'default',
+  };
+
+  it('formats a list of configs, one result for each', () => {
+    const formatted = formatMonitorConfigs({
+      configs: [config, { ...config, heartbeatId: 'another-id' }],
+      maintenanceWindows: [],
+      logger,
+    });
+
+    expect(formatted.map(({ id }) => id)).toEqual(['heartbeat-id', 'another-id']);
+  });
+
+  it('formats a single config like a list of one', () => {
+    expect(formatMonitorConfigs({ configs: config, maintenanceWindows: [], logger })).toEqual(
+      formatMonitorConfigs({ configs: [config], maintenanceWindows: [], logger })
+    );
+  });
+});
+
+describe('formatSavedMonitors', () => {
+  const logger = loggerMock.create();
+  const urlWithParams = String.raw`https://${'$'}{host}:${'$'}{port}`;
+
+  const savedMonitor = (
+    overrides: { namespaces?: string[]; attributes?: Record<string, unknown> } = {}
+  ) =>
+    ({
+      id: 'config-id',
+      type: 'synthetics-monitor-multi-space',
+      references: [],
+      namespaces: ['default'],
+      ...overrides,
+      attributes: {
+        ...testHTTPConfig,
+        id: 'heartbeat-id',
+        urls: urlWithParams,
+        secrets: '{}',
+        ...overrides.attributes,
+      },
+    } as unknown as SavedObject<SyntheticsMonitorWithSecretsAttributes>);
+
+  // `fields` is added when the config is formatted but is not part of the monitor fields type
+  const fieldsOf = (formatted: Partial<MonitorFields>) =>
+    (formatted as Partial<MonitorFields> & { fields?: { config_id?: string; kibanaUrl?: string } })
+      .fields;
+
+  const format = (
+    monitors: Array<SavedObject<SyntheticsMonitorWithSecretsAttributes>>,
+    paramsBySpace: Record<string, Record<string, string>> = {},
+    kibanaUrl?: string
+  ) => formatSavedMonitors({ monitors, paramsBySpace, maintenanceWindows: [], kibanaUrl, logger });
+
+  it('identifies each monitor by its heartbeat id and keeps its config id in the fields', () => {
+    const [formatted] = format([savedMonitor()]);
+
+    expect(formatted.id).toBe('heartbeat-id');
+    expect(fieldsOf(formatted)?.config_id).toBe('config-id');
+  });
+
+  it('resolves the params of the space the monitor is in', () => {
+    const [formatted] = format([savedMonitor()], {
+      default: { host: 'default.example.com', port: '8080' },
+      other: { host: 'other.example.com', port: '9090' },
+    });
+
+    expect(formatted.urls).toBe('https://default.example.com:8080');
+  });
+
+  it('lets params shared across all spaces win over the monitors own space', () => {
+    const [formatted] = format([savedMonitor()], {
+      default: { host: 'default.example.com', port: '8080' },
+      '*': { port: '7070' },
+    });
+
+    expect(formatted.urls).toBe('https://default.example.com:7070');
+  });
+
+  it('applies params shared across all spaces to a space that has no params of its own', () => {
+    const [formatted] = format([savedMonitor({ namespaces: ['no-params-space'] })], {
+      '*': { host: 'shared.example.com', port: '7070' },
+    });
+
+    expect(formatted.urls).toBe('https://shared.example.com:7070');
+  });
+
+  it('treats a monitor without a space as being in the default space', () => {
+    const [formatted] = format([savedMonitor({ namespaces: undefined })], {
+      default: { host: 'default.example.com', port: '8080' },
+    });
+
+    expect(formatted.urls).toBe('https://default.example.com:8080');
+  });
+
+  it('puts the kibana url in the fields only when it is known', () => {
+    expect(fieldsOf(format([savedMonitor()], {}, 'https://kibana.example.com')[0])?.kibanaUrl).toBe(
+      'https://kibana.example.com'
+    );
+    expect(fieldsOf(format([savedMonitor()])[0])?.kibanaUrl).toBeUndefined();
+  });
+
+  it('formats nothing when there are no monitors', () => {
+    expect(format([])).toEqual([]);
   });
 });

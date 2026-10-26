@@ -24,7 +24,9 @@ export const generateAnalyticsApiKey = async ({
   collectionName: string;
   keyName: string;
 }) => {
-  const route = `/internal/elasticsearch/analytics/collections/${collectionName}/api_key`;
+  const route = `/internal/elasticsearch/analytics/collections/${encodeURIComponent(
+    collectionName
+  )}/api_key`;
 
   return await HttpLogic.values.http.post<APIKeyResponse>(route, {
     body: JSON.stringify({

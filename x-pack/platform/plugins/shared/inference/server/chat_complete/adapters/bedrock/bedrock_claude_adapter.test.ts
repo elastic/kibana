@@ -7,17 +7,21 @@
 
 import { PassThrough } from 'stream';
 import { loggerMock } from '@kbn/logging-mocks';
-import { lastValueFrom, toArray, noop } from 'rxjs';
+import { noop } from 'rxjs';
 import type { InferenceExecutor } from '../../utils/inference_executor';
-import { MessageRole, ToolChoiceType } from '@kbn/inference-common';
+import { MessageRole, ToolChoiceType, InferenceConnectorType } from '@kbn/inference-common';
 import { bedrockClaudeAdapter } from './bedrock_claude_adapter';
 import { addNoToolUsageDirective } from './prompts';
-
+import { lastValueFrom, toArray } from 'rxjs';
 describe('bedrockClaudeAdapter', () => {
   const logger = loggerMock.create();
   const executorMock = {
     invoke: jest.fn(),
-  } as InferenceExecutor & { invoke: jest.MockedFn<InferenceExecutor['invoke']> };
+    getConnector: jest.fn(),
+  } as InferenceExecutor & {
+    invoke: jest.MockedFn<InferenceExecutor['invoke']>;
+    getConnector: jest.MockedFn<InferenceExecutor['getConnector']>;
+  };
 
   beforeEach(() => {
     executorMock.invoke.mockReset();
@@ -25,8 +29,21 @@ describe('bedrockClaudeAdapter', () => {
       return {
         actionId: '',
         status: 'ok',
-        data: new PassThrough(),
+        data: {
+          stream: new PassThrough(),
+          tokenStream: new PassThrough(),
+        },
       };
+    });
+    executorMock.getConnector.mockReset();
+    executorMock.getConnector.mockReturnValue({
+      type: InferenceConnectorType.Bedrock,
+      name: 'bedrock-connector',
+      connectorId: 'test-connector-id',
+      config: {},
+      capabilities: {},
+      isInferenceEndpoint: false,
+      isPreconfigured: false,
     });
   });
 
@@ -57,28 +74,89 @@ describe('bedrockClaudeAdapter', () => {
 
       expect(executorMock.invoke).toHaveBeenCalledTimes(1);
       expect(executorMock.invoke).toHaveBeenCalledWith({
-        subAction: 'invokeStream',
+        subAction: 'converse',
         subActionParams: {
           messages: [
             {
+              content: [
+                {
+                  text: 'question',
+                },
+              ],
               role: 'user',
-              rawContent: [{ type: 'text', text: 'question' }],
+            },
+          ],
+          model: undefined,
+          signal: undefined,
+          stopSequences: [
+            `
+
+Human:`,
+          ],
+          system: [
+            {
+              text: 'You are a helpful assistant for Elastic.',
             },
           ],
           temperature: 0,
-          stopSequences: ['\n\nHuman:'],
+          toolChoice: undefined,
           tools: [
             {
-              description: 'Do not call this tool, it is strictly forbidden',
-              input_schema: {
-                properties: {},
-                type: 'object',
+              toolSpec: {
+                name: 'do_not_call_this_tool',
+                description: 'Do not call this tool, it is strictly forbidden',
+                inputSchema: {
+                  json: {
+                    properties: {},
+                    type: 'object',
+                  },
+                },
               },
-              name: 'do_not_call_this_tool',
             },
           ],
         },
       });
+    });
+
+    it('forwards `maxContentLength` for buffered (converse) requests', () => {
+      bedrockClaudeAdapter
+        .chatComplete({
+          logger,
+          executor: executorMock,
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          stream: false,
+          maxContentLength: 10 * 1024 * 1024,
+        })
+        .subscribe(noop);
+
+      expect(executorMock.invoke).toHaveBeenCalledWith(
+        expect.objectContaining({
+          subAction: 'converse',
+          subActionParams: expect.objectContaining({ maxContentLength: 10 * 1024 * 1024 }),
+        })
+      );
+    });
+
+    it('forwards `maxContentLength` for streaming (converseStream) requests', () => {
+      // Streaming responses are still subject to the connector's axios `maxContentLength`
+      // (enforced while the response stream is consumed), so the override must be forwarded
+      // for streaming requests too.
+      bedrockClaudeAdapter
+        .chatComplete({
+          logger,
+          executor: executorMock,
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          stream: true,
+          maxContentLength: 10 * 1024 * 1024,
+        })
+        .subscribe(noop);
+
+      expect(executorMock.invoke).toHaveBeenCalledWith(
+        expect.objectContaining({
+          subAction: 'converseStream',
+          subActionParams: expect.objectContaining({ maxContentLength: 10 * 1024 * 1024 }),
+        })
+      );
     });
 
     it('correctly format tools', () => {
@@ -118,25 +196,33 @@ describe('bedrockClaudeAdapter', () => {
       const { tools } = getCallParams();
       expect(tools).toEqual([
         {
-          name: 'myFunction',
-          description: 'myFunction',
-          input_schema: {
-            properties: {},
-            type: 'object',
+          toolSpec: {
+            name: 'myFunction',
+            description: 'myFunction',
+            inputSchema: {
+              json: {
+                properties: {},
+                type: 'object',
+              },
+            },
           },
         },
         {
-          name: 'myFunctionWithArgs',
-          description: 'myFunctionWithArgs',
-          input_schema: {
-            properties: {
-              foo: {
-                description: 'foo',
-                type: 'string',
+          toolSpec: {
+            name: 'myFunctionWithArgs',
+            description: 'myFunctionWithArgs',
+            inputSchema: {
+              json: {
+                properties: {
+                  foo: {
+                    description: 'foo',
+                    type: 'string',
+                  },
+                },
+                required: ['foo'],
+                type: 'object',
               },
             },
-            required: ['foo'],
-            type: 'object',
           },
         },
       ]);
@@ -191,55 +277,237 @@ describe('bedrockClaudeAdapter', () => {
 
       const { messages } = getCallParams();
       expect(messages).toEqual([
+        { role: 'user', content: [{ text: 'question' }] },
+        { role: 'assistant', content: [{ text: 'answer' }] },
+        { role: 'user', content: [{ text: 'another question' }] },
         {
-          rawContent: [
-            {
-              text: 'question',
-              type: 'text',
-            },
-          ],
-          role: 'user',
-        },
-        {
-          rawContent: [
-            {
-              text: 'answer',
-              type: 'text',
-            },
-          ],
           role: 'assistant',
+          content: [{ toolUse: { toolUseId: '0', name: 'my_function', input: { foo: 'bar' } } }],
         },
         {
-          rawContent: [
-            {
-              text: 'another question',
-              type: 'text',
-            },
-          ],
           role: 'user',
+          content: [{ toolResult: { toolUseId: '0', content: [{ json: { bar: 'foo' } }] } }],
         },
-        {
-          rawContent: [
+      ]);
+    });
+
+    it('drops empty assistant messages without tool calls', () => {
+      bedrockClaudeAdapter
+        .chatComplete({
+          executor: executorMock,
+          logger,
+          messages: [
+            { role: MessageRole.User, content: 'question' },
+            { role: MessageRole.Assistant, content: '' },
+            { role: MessageRole.User, content: 'another question' },
+          ],
+        })
+        .subscribe(noop);
+
+      expect(executorMock.invoke).toHaveBeenCalledTimes(1);
+      const { messages } = getCallParams();
+      expect(messages).toEqual([
+        { role: 'user', content: [{ text: 'question' }] },
+        { role: 'user', content: [{ text: 'another question' }] },
+      ]);
+    });
+
+    it('correctly format consecutive tool result messages', () => {
+      bedrockClaudeAdapter
+        .chatComplete({
+          executor: executorMock,
+          logger,
+          messages: [
             {
-              id: '0',
-              input: {
-                foo: 'bar',
-              },
+              role: MessageRole.User,
+              content: 'question',
+            },
+            {
+              role: MessageRole.Assistant,
+              content: 'answer',
+            },
+            {
+              role: MessageRole.User,
+              content: 'another question',
+            },
+            {
+              role: MessageRole.Assistant,
+              content: null,
+              toolCalls: [
+                {
+                  function: {
+                    name: 'my_function',
+                    arguments: {
+                      foo: 'bar',
+                    },
+                  },
+                  toolCallId: '0',
+                },
+                {
+                  function: {
+                    name: 'my_other_function',
+                    arguments: {
+                      baz: 'qux',
+                    },
+                  },
+                  toolCallId: '1',
+                },
+              ],
+            },
+            {
               name: 'my_function',
-              type: 'tool_use',
+              role: MessageRole.Tool,
+              toolCallId: '0',
+              response: {
+                bar: 'foo',
+              },
+            },
+            {
+              name: 'my_other_function',
+              role: MessageRole.Tool,
+              toolCallId: '1',
+              response: {
+                qux: 'baz',
+              },
+            },
+            {
+              role: MessageRole.Assistant,
+              content: null,
+              toolCalls: [
+                {
+                  function: {
+                    name: 'my_function_2',
+                    arguments: {
+                      foo: 'bar',
+                    },
+                  },
+                  toolCallId: '2',
+                },
+                {
+                  function: {
+                    name: 'my_other_function_2',
+                    arguments: {
+                      baz: 'qux',
+                    },
+                  },
+                  toolCallId: '3',
+                },
+              ],
+            },
+            {
+              name: 'my_function_2',
+              role: MessageRole.Tool,
+              toolCallId: '2',
+              response: {
+                bar: 'foo',
+              },
+            },
+            {
+              name: 'my_other_function_2',
+              role: MessageRole.Tool,
+              toolCallId: '3',
+              response: {
+                qux: 'baz',
+              },
             },
           ],
+        })
+        .subscribe(noop);
+
+      expect(executorMock.invoke).toHaveBeenCalledTimes(1);
+
+      const { messages } = getCallParams();
+      expect(messages).toEqual([
+        { role: 'user', content: [{ text: 'question' }] },
+        { role: 'assistant', content: [{ text: 'answer' }] },
+        { role: 'user', content: [{ text: 'another question' }] },
+        {
           role: 'assistant',
+          content: [
+            { toolUse: { toolUseId: '0', name: 'my_function', input: { foo: 'bar' } } },
+            { toolUse: { toolUseId: '1', name: 'my_other_function', input: { baz: 'qux' } } },
+          ],
         },
         {
-          rawContent: [
+          role: 'user',
+          content: [
+            { toolResult: { toolUseId: '0', content: [{ json: { bar: 'foo' } }] } },
+            { toolResult: { toolUseId: '1', content: [{ json: { qux: 'baz' } }] } },
+          ],
+        },
+        {
+          role: 'assistant',
+          content: [
+            { toolUse: { toolUseId: '2', name: 'my_function_2', input: { foo: 'bar' } } },
+            { toolUse: { toolUseId: '3', name: 'my_other_function_2', input: { baz: 'qux' } } },
+          ],
+        },
+        {
+          role: 'user',
+          content: [
+            { toolResult: { toolUseId: '2', content: [{ json: { bar: 'foo' } }] } },
+            { toolResult: { toolUseId: '3', content: [{ json: { qux: 'baz' } }] } },
+          ],
+        },
+      ]);
+    });
+
+    it('merges a plain user message that follows a tool result into the tool-result turn', () => {
+      // Reproduces the bug in issue #284682: when a plain user message (e.g. the
+      // <system-notice> injected near the cycle limit) immediately follows a tool
+      // result, Bedrock Converse rejects the request with a consecutive-role error
+      // because the two user turns were not merged.
+      bedrockClaudeAdapter
+        .chatComplete({
+          executor: executorMock,
+          logger,
+          messages: [
             {
-              content: '{"bar":"foo"}',
-              tool_use_id: '0',
-              type: 'tool_result',
+              role: MessageRole.User,
+              content: 'question',
+            },
+            {
+              role: MessageRole.Assistant,
+              content: null,
+              toolCalls: [
+                {
+                  function: {
+                    name: 'my_function',
+                    arguments: { foo: 'bar' },
+                  },
+                  toolCallId: '0',
+                },
+              ],
+            },
+            {
+              name: 'my_function',
+              role: MessageRole.Tool,
+              toolCallId: '0',
+              response: { bar: 'foo' },
+            },
+            {
+              role: MessageRole.User,
+              content: '<system-notice>You have 5 cycles left.</system-notice>',
             },
           ],
+        })
+        .subscribe(noop);
+
+      expect(executorMock.invoke).toHaveBeenCalledTimes(1);
+
+      const { messages } = getCallParams();
+      expect(messages).toEqual([
+        { role: 'user', content: [{ text: 'question' }] },
+        {
+          role: 'assistant',
+          content: [{ toolUse: { toolUseId: '0', name: 'my_function', input: { foo: 'bar' } } }],
+        },
+        {
           role: 'user',
+          content: [
+            { toolResult: { toolUseId: '0', content: [{ json: { bar: 'foo' } }] } },
+            { text: '<system-notice>You have 5 cycles left.</system-notice>' },
+          ],
         },
       ]);
     });
@@ -262,7 +530,7 @@ describe('bedrockClaudeAdapter', () => {
       expect(executorMock.invoke).toHaveBeenCalledTimes(1);
 
       const { system } = getCallParams();
-      expect(system).toEqual('Some system message');
+      expect(system).toEqual([{ text: 'Some system message' }]);
     });
 
     it('correctly formats messages with content parts', () => {
@@ -275,8 +543,8 @@ describe('bedrockClaudeAdapter', () => {
               role: MessageRole.User,
               content: [
                 {
-                  type: 'text',
                   text: 'question',
+                  type: 'text',
                 },
               ],
             },
@@ -311,44 +579,24 @@ describe('bedrockClaudeAdapter', () => {
 
       const { messages } = getCallParams();
       expect(messages).toEqual([
+        { role: 'user', content: [{ text: 'question' }] },
+        { role: 'assistant', content: [{ text: 'answer' }] },
         {
-          rawContent: [
-            {
-              text: 'question',
-              type: 'text',
-            },
-          ],
           role: 'user',
-        },
-        {
-          rawContent: [
+          content: [
             {
-              text: 'answer',
-              type: 'text',
-            },
-          ],
-          role: 'assistant',
-        },
-        {
-          rawContent: [
-            {
-              type: 'image',
-              source: {
-                data: 'aaaaaa',
-                mediaType: 'image/png',
-                type: 'base64',
+              image: {
+                format: 'png',
+                source: { bytes: Buffer.from('aaaaaa', 'base64') },
               },
             },
             {
-              type: 'image',
-              source: {
-                data: 'bbbbbb',
-                mediaType: 'image/png',
-                type: 'base64',
+              image: {
+                format: 'png',
+                source: { bytes: Buffer.from('bbbbbb', 'base64') },
               },
             },
           ],
-          role: 'user',
         },
       ]);
     });
@@ -371,9 +619,7 @@ describe('bedrockClaudeAdapter', () => {
       expect(executorMock.invoke).toHaveBeenCalledTimes(1);
 
       const { toolChoice } = getCallParams();
-      expect(toolChoice).toEqual({
-        type: 'any',
-      });
+      expect(toolChoice).toEqual({ any: {} });
     });
 
     it('correctly format tool choice for named function', () => {
@@ -394,10 +640,7 @@ describe('bedrockClaudeAdapter', () => {
       expect(executorMock.invoke).toHaveBeenCalledTimes(1);
 
       const { toolChoice } = getCallParams();
-      expect(toolChoice).toEqual({
-        type: 'tool',
-        name: 'foobar',
-      });
+      expect(toolChoice).toEqual({ tool: { name: 'foobar' } });
     });
 
     it('correctly adapt the request for ToolChoiceType.None', () => {
@@ -425,8 +668,61 @@ describe('bedrockClaudeAdapter', () => {
 
       const { toolChoice, tools, system } = getCallParams();
       expect(toolChoice).toBeUndefined();
-      expect(tools).toEqual([]);
-      expect(system).toEqual(addNoToolUsageDirective('some system instruction'));
+      expect(tools).toEqual(undefined); // Claude requires tools to be undefined when no tools are available
+
+      expect(system).toEqual([{ text: addNoToolUsageDirective('some system instruction') }]);
+    });
+
+    it('keeps tools when ToolChoiceType.None and tool messages exist', () => {
+      bedrockClaudeAdapter
+        .chatComplete({
+          executor: executorMock,
+          logger,
+          system: 'some system instruction',
+          messages: [
+            {
+              role: MessageRole.User,
+              content: 'question',
+            },
+            {
+              role: MessageRole.Assistant,
+              content: null,
+              toolCalls: [
+                {
+                  function: {
+                    name: 'myFunction',
+                    arguments: { foo: 'bar' },
+                  },
+                  toolCallId: '0',
+                },
+              ],
+            },
+            {
+              role: MessageRole.Tool,
+              name: 'myFunction',
+              toolCallId: '0',
+              response: { ok: true },
+            },
+          ],
+          tools: {
+            myFunction: {
+              description: 'myFunction',
+              schema: {
+                type: 'object',
+                properties: {},
+              },
+            },
+          },
+          toolChoice: ToolChoiceType.none,
+        })
+        .subscribe(noop);
+
+      expect(executorMock.invoke).toHaveBeenCalledTimes(1);
+
+      const { toolChoice, tools } = getCallParams();
+      expect(toolChoice).toEqual({ auto: {} });
+      expect(Array.isArray(tools)).toBe(true);
+      expect(tools.length).toBeGreaterThan(0);
     });
 
     it('propagates the abort signal when provided', () => {
@@ -443,7 +739,7 @@ describe('bedrockClaudeAdapter', () => {
 
       expect(executorMock.invoke).toHaveBeenCalledTimes(1);
       expect(executorMock.invoke).toHaveBeenCalledWith({
-        subAction: 'invokeStream',
+        subAction: 'converse',
         subActionParams: expect.objectContaining({
           signal: abortController.signal,
         }),
@@ -462,7 +758,7 @@ describe('bedrockClaudeAdapter', () => {
 
       expect(executorMock.invoke).toHaveBeenCalledTimes(1);
       expect(executorMock.invoke).toHaveBeenCalledWith({
-        subAction: 'invokeStream',
+        subAction: 'converse',
         subActionParams: expect.objectContaining({
           temperature: 0.9,
         }),
@@ -481,7 +777,7 @@ describe('bedrockClaudeAdapter', () => {
 
       expect(executorMock.invoke).toHaveBeenCalledTimes(1);
       expect(executorMock.invoke).toHaveBeenCalledWith({
-        subAction: 'invokeStream',
+        subAction: 'converse',
         subActionParams: expect.objectContaining({
           model: 'claude-opus-3.5',
         }),
@@ -510,6 +806,42 @@ describe('bedrockClaudeAdapter', () => {
         )
       ).rejects.toThrowErrorMatchingInlineSnapshot(
         `"Error calling connector: something went wrong"`
+      );
+    });
+  });
+
+  describe('streaming mode', () => {
+    it('calls the right sub action', () => {
+      bedrockClaudeAdapter
+        .chatComplete({
+          stream: true,
+          logger,
+          executor: executorMock,
+          messages: [{ role: MessageRole.User, content: 'question' }],
+        })
+        .subscribe(noop);
+
+      expect(executorMock.invoke).toHaveBeenCalledTimes(1);
+      expect(executorMock.invoke).toHaveBeenCalledWith(
+        expect.objectContaining({ subAction: 'converseStream' })
+      );
+    });
+  });
+
+  describe('non-streaming mode', () => {
+    it('calls the right sub action', () => {
+      bedrockClaudeAdapter
+        .chatComplete({
+          stream: false,
+          logger,
+          executor: executorMock,
+          messages: [{ role: MessageRole.User, content: 'question' }],
+        })
+        .subscribe(noop);
+
+      expect(executorMock.invoke).toHaveBeenCalledTimes(1);
+      expect(executorMock.invoke).toHaveBeenCalledWith(
+        expect.objectContaining({ subAction: 'converse' })
       );
     });
   });

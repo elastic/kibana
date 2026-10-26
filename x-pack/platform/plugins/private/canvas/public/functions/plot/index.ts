@@ -7,7 +7,7 @@
 
 import { set } from '@kbn/safer-lodash-set';
 import { groupBy, get, keyBy, map, sortBy } from 'lodash';
-import { ExpressionFunctionDefinition, Style } from '@kbn/expressions-plugin/common';
+import type { ExpressionFunctionDefinition, Style } from '@kbn/expressions-plugin/common';
 import type { PaletteRegistry, PaletteOutput } from '@kbn/coloring';
 import { getLegendConfig } from '../../../common/lib/get_legend_config';
 import { getFlotAxisConfig } from './get_flot_axis_config';
@@ -15,7 +15,8 @@ import { getFontSpec } from './get_font_spec';
 import { seriesStyleToFlot } from './series_style_to_flot';
 import { getTickHash } from './get_tick_hash';
 import { getFunctionHelp } from '../../../i18n';
-import { AxisConfig, PointSeries, Render, SeriesStyle, Legend } from '../../../types';
+import type { AxisConfig, PointSeries, Render, SeriesStyle } from '../../../types';
+import { Legend } from '../../../types';
 
 export interface Arguments {
   seriesStyle: SeriesStyle[];

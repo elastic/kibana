@@ -8,7 +8,7 @@
 import { useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
 
-import { CanvasTemplate } from '../../../../types';
+import type { CanvasTemplate } from '../../../../types';
 import { useNotifyService } from '../../../services';
 import { getCanvasWorkpadService } from '../../../services/canvas_workpad_service';
 

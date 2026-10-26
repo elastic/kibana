@@ -7,7 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
+
+/**
+ * Migration recommendation: DELETE. Creating a data view from the Discover search bar is
+ * already covered in
+ * src/platform/plugins/shared/discover/test/scout/core2/ui/parallel_tests/data_view_create.spec.ts
+ * (ad hoc and saved). The CCS variant only changes the title to `ftr-remote:logstash`.
+ */
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dataViews = getService('dataViews');
@@ -15,7 +22,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const security = getService('security');
   const config = getService('config');
-  const { common, timePicker } = getPageObjects(['common', 'timePicker']);
+  const { discover, timePicker } = getPageObjects(['discover', 'timePicker']);
   const defaultIndexPatternString = config.get('esTestCluster.ccs')
     ? 'ftr-remote:logstash-*'
     : 'logstash-*';
@@ -44,7 +51,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.importExport.load(kbnDirectory);
       await kibanaServer.uiSettings.replace(defaultSettings);
       await timePicker.setDefaultAbsoluteRangeViaUiSettings();
-      await common.navigateToApp('discover');
+      await discover.navigateToApp({ queryMode: 'classic' });
     });
 
     after(async () => {
@@ -53,6 +60,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.savedObjects.clean({ types: ['saved-search', 'index-pattern'] });
     });
 
+    /**
+     * Migration recommendation: DELETE. Same as the file-level note. If we need to prove a
+     * remote-cluster title is accepted, that is a data-views API test, not a browser test.
+     */
     it('allows creating a new data view', async function () {
       const dataViewToCreate = config.get('esTestCluster.ccs') ? 'ftr-remote:logstash' : 'logstash';
       await dataViews.createFromSearchBar({ name: dataViewToCreate });

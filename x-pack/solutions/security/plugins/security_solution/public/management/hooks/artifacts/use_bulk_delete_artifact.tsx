@@ -7,8 +7,8 @@
 import pMap from 'p-map';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import type { UseMutationOptions, UseMutationResult } from '@tanstack/react-query';
-import { useMutation } from '@tanstack/react-query';
+import type { UseMutationOptions, UseMutationResult } from '@kbn/react-query';
+import { useMutation } from '@kbn/react-query';
 import type { ExceptionsListApiClient } from '../../services/exceptions_list/exceptions_list_api_client';
 
 const DEFAULT_OPTIONS = Object.freeze({});

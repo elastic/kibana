@@ -44,6 +44,10 @@ export interface Doc {
   internalFields?: InternalFields;
 }
 
+export type DocWithOptionalId = Doc & {
+  id?: string;
+};
+
 type Wait = () => Promise<boolean>;
 
 export interface ConstructorOpts {
@@ -132,9 +136,18 @@ export interface QueryEventsBySavedObjectSearchAfterResult {
   pit_id?: string;
 }
 
+export interface SoftDeleteByQueryParams {
+  query: estypes.QueryDslQueryContainer;
+  field: string;
+  conflicts?: estypes.Conflicts;
+  slices?: estypes.Slices;
+  requestsPerSecond?: number;
+}
+
 export class ClusterClientAdapter<
   TDoc extends {
     body: AliasAny;
+    id?: string;
     index: string;
     internalFields?: InternalFields;
   } = Doc
@@ -241,7 +254,12 @@ export class ClusterClientAdapter<
     for (const doc of docs) {
       if (doc.body === undefined) continue;
 
-      bulkBody.push({ create: {} });
+      if (doc.id) {
+        bulkBody.push({ create: { _id: doc.id } });
+      } else {
+        bulkBody.push({ create: {} });
+      }
+
       bulkBody.push(doc.body);
     }
 
@@ -737,11 +755,16 @@ export class ClusterClientAdapter<
     try {
       const {
         hits: { hits, total },
+        pit_id: returnedPit,
       } = await esClient.search<IValidatedEventInternalDocInfo>({
         ...body,
         track_total_hits: true,
         seq_no_primary_term: true,
       });
+
+      if (returnedPit && returnedPit !== pitId) {
+        pitId = returnedPit;
+      }
 
       // Get the sort values from the last hit to use as search_after for next page
       const lastHit = hits[hits.length - 1];
@@ -784,6 +807,51 @@ export class ClusterClientAdapter<
       this.logger.error(`Failed to close point in time: ${err.message}`);
       throw err;
     }
+  }
+
+  /**
+   * Sets a single boolean `field` to `true` on every document that matches
+   * `query`, using one blocking `_update_by_query` against the event log data
+   * stream. The field is only set when its parent object exists, so a malformed
+   * document cannot fail the batch. Chunking, logging, and error handling are the
+   * caller's responsibility.
+   */
+  public async softDeleteByQuery({
+    query,
+    field,
+    conflicts = 'proceed',
+    slices = 'auto',
+    requestsPerSecond,
+  }: SoftDeleteByQueryParams): Promise<estypes.UpdateByQueryResponse> {
+    const buildSetFieldTrueScript = (): string => {
+      const segments = field.split('.');
+      const assignPath = `ctx._source.${segments.join('.')}`;
+      const parents = segments.slice(0, -1);
+      if (parents.length === 0) {
+        return `${assignPath} = true;`;
+      }
+      const guardPath = `ctx._source.${parents[0]}${parents
+        .slice(1)
+        .map((segment) => `?.${segment}`)
+        .join('')}`;
+      return `if (${guardPath} != null) { ${assignPath} = true; } else { ctx.op = 'noop'; }`;
+    };
+
+    const source = buildSetFieldTrueScript();
+
+    const esClient = await this.elasticsearchClientPromise;
+    return esClient.updateByQuery({
+      index: this.esNames.dataStream,
+      conflicts,
+      slices,
+      query,
+      script: {
+        source,
+        lang: 'painless',
+      },
+      // Optional trottling param
+      ...(requestsPerSecond == null ? {} : { requests_per_second: requestsPerSecond }),
+    });
   }
 }
 

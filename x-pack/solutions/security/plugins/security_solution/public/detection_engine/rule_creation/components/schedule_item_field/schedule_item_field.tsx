@@ -45,8 +45,8 @@ export function ScheduleItemField({
   isDisabled,
   dataTestSubj,
   idAria,
-  minValue = Number.MIN_SAFE_INTEGER,
-  maxValue = Number.MAX_SAFE_INTEGER,
+  minValue,
+  maxValue,
   units = DEFAULT_TIME_DURATION_UNITS,
   fullWidth = false,
 }: ScheduleItemProps): JSX.Element {
@@ -61,6 +61,10 @@ export function ScheduleItemField({
 
     .euiFormControlLayout__append {
       padding-inline: 0 !important;
+
+      &:has(.euiSelect:focus) {
+        z-index: 1; // ensure focus outline is layered correctly in nested form layout
+      }
     }
 
     .euiFormControlLayoutIcons {
@@ -70,8 +74,12 @@ export function ScheduleItemField({
   const timeUnitSelectStyles = css`
     min-width: 106px; // Preserve layout when disabled & dropdown arrow is not rendered
     box-shadow: none;
-    background: ${euiTheme.colors.backgroundBasePrimary} !important;
+    background: transparent;
     color: ${euiTheme.colors.primary};
+
+    &:hover:not(:focus) {
+      outline: none !important;
+    }
   `;
 
   const onChangeTimeType = useCallback<NonNullable<EuiSelectProps['onChange']>>(
@@ -84,13 +92,15 @@ export function ScheduleItemField({
 
   const onChangeTimeVal = useCallback<NonNullable<EuiFieldNumberProps['onChange']>>(
     (e) => {
-      const number = e.target.value === '' ? minValue : parseInt(e.target.value, 10);
+      const lowerBound = minValue ?? Number.MIN_SAFE_INTEGER;
+      const upperBound = maxValue ?? Number.MAX_SAFE_INTEGER;
+      const number = e.target.value === '' ? lowerBound : parseInt(e.target.value, 10);
 
       if (Number.isNaN(number)) {
         return;
       }
 
-      const newTimeValue = saturate(number, minValue, maxValue);
+      const newTimeValue = saturate(number, lowerBound, upperBound);
 
       setTimeVal(newTimeValue);
       setValue(`${newTimeValue}${timeType}`);
@@ -144,6 +154,7 @@ export function ScheduleItemField({
       describedByIds={idAria ? [idAria] : undefined}
     >
       <EuiFieldNumber
+        isInvalid={isInvalid}
         append={
           <EuiSelect
             css={timeUnitSelectStyles}
@@ -157,6 +168,8 @@ export function ScheduleItemField({
           />
         }
         fullWidth
+        // Only real bounds go to the DOM: VoiceOver announces a spinbutton's value as a percentage
+        // of its min-max range, so a sentinel like Number.MAX_SAFE_INTEGER is always read as "0%".
         min={minValue}
         max={maxValue}
         value={timeVal}
@@ -168,7 +181,7 @@ export function ScheduleItemField({
   );
 }
 
-const DEFAULT_TIME_DURATION_UNITS = ['s', 'm', 'h'];
+const DEFAULT_TIME_DURATION_UNITS = ['s', 'm', 'h', 'd'];
 
 function saturate(input: number, minValue: number, maxValue: number): number {
   return Math.max(minValue, Math.min(input, maxValue));

@@ -63,6 +63,9 @@ export const TypeSwitcher: React.FC<Props> = ({ criteria, updateType }) => {
       <EuiFlexItem grow={false}>
         <EuiPopover
           id="thresholdType"
+          aria-label={i18n.translate('xpack.infra.logs.alertFlyout.thresholdTypePopoverAriaLabel', {
+            defaultMessage: 'Threshold type',
+          })}
           button={
             <>
               <EuiExpression
@@ -93,6 +96,12 @@ export const TypeSwitcher: React.FC<Props> = ({ criteria, updateType }) => {
                 value={thresholdType}
                 onChange={(e) => updateType(thresholdType === 'ratio' ? 'count' : 'ratio')}
                 options={getOptions()}
+                aria-label={i18n.translate(
+                  'xpack.infra.logs.alertFlyout.thresholdTypeSelect.ariaLabel',
+                  {
+                    defaultMessage: 'Threshold type',
+                  }
+                )}
               />
             </EuiFlexItem>
           </EuiFlexGroup>

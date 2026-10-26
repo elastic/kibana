@@ -6,14 +6,14 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { IScopedClusterClient } from '@kbn/core/server';
+import type { IScopedClusterClient } from '@kbn/core/server';
 import { get } from 'lodash';
 // @ts-ignore
 import { Watch } from '../../../models/watch';
-import { RouteDependencies } from '../../../types';
+import type { RouteDependencies } from '../../../types';
 
 const paramsSchema = schema.object({
-  id: schema.string(),
+  id: schema.string({ maxLength: 1000 }),
 });
 
 function fetchWatch(dataClient: IScopedClusterClient, watchId: string) {

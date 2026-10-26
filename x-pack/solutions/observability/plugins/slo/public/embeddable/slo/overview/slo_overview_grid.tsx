@@ -6,15 +6,10 @@
  */
 
 import React from 'react';
-import { ALL_VALUE, HistoricalSummaryResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
-import {
-  Chart,
-  isMetricElementEvent,
-  Metric,
-  MetricTrendShape,
-  Settings,
-  MetricDatum,
-} from '@elastic/charts';
+import type { HistoricalSummaryResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { ALL_VALUE } from '@kbn/slo-schema';
+import type { MetricDatum } from '@elastic/charts';
+import { Chart, isMetricElementEvent, Metric, MetricTrendShape, Settings } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLoadingSpinner } from '@elastic/eui';
@@ -67,7 +62,7 @@ const getSloChartData = ({
         }}
       />
     ),
-    icon: () => <EuiIcon type="visGauge" size="l" />,
+    icon: () => <EuiIcon type="chartGauge" size="l" aria-hidden={true} />,
     color: cardColor,
   };
 };
@@ -75,7 +70,13 @@ const getSloChartData = ({
 const ROW_HEIGHT = 220;
 const ITEMS_PER_ROW = 4;
 
-export function SloCardChartList({ sloId }: { sloId: string }) {
+export function SloCardChartList({
+  sloId,
+  isInteractive = true,
+}: {
+  sloId: string;
+  isInteractive?: boolean;
+}) {
   const {
     http: { basePath },
     uiSettings,
@@ -140,6 +141,7 @@ export function SloCardChartList({ sloId }: { sloId: string }) {
         rules={rules}
         activeAlerts={activeAlerts}
         handleCreateRule={() => {}}
+        isInteractive={isInteractive}
       />
     );
     chartsData[chartsData.length - 1].push(data);
@@ -161,7 +163,7 @@ export function SloCardChartList({ sloId }: { sloId: string }) {
 
   return (
     <>
-      <div data-shared-item="" style={{ width: '100%', overflow: 'auto' }}>
+      <div style={{ width: '100%', overflow: 'auto' }}>
         <Chart
           size={{
             height,
@@ -169,13 +171,17 @@ export function SloCardChartList({ sloId }: { sloId: string }) {
         >
           <Settings
             baseTheme={baseTheme}
-            onElementClick={([d]) => {
-              if (isMetricElementEvent(d)) {
-                const { columnIndex, rowIndex } = d;
-                const slo = sloList?.results[rowIndex * ITEMS_PER_ROW + columnIndex];
-                setSelectedSlo(slo ?? null);
-              }
-            }}
+            onElementClick={
+              isInteractive
+                ? ([d]) => {
+                    if (isMetricElementEvent(d)) {
+                      const { columnIndex, rowIndex } = d;
+                      const slo = sloList?.results[rowIndex * ITEMS_PER_ROW + columnIndex];
+                      setSelectedSlo(slo ?? null);
+                    }
+                  }
+                : undefined
+            }
             locale={i18n.getLocale()}
           />
           <Metric id={`slo-id-instances`} data={chartsData} />

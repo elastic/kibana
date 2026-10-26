@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ApmSourceAccessPluginStart } from '@kbn/apm-sources-access-plugin/public';
+import type { APMIndices, ApmSourceAccessPluginStart } from '@kbn/apm-sources-access-plugin/public';
 import { createRegExpPatternFrom, testPatternAgainstAllowedList } from '@kbn/data-view-utils';
 import { containsIndexPattern } from '../../utils';
 
 export interface TracesContextService {
-  getAllTracesIndexPattern(): string;
+  getAllTracesIndexPattern(): string | undefined;
   isTracesIndexPattern(indexPattern: unknown): boolean;
   containsTracesIndexPattern(indexPattern: unknown): boolean;
 }
@@ -25,49 +25,55 @@ export const DEFAULT_ALLOWED_TRACES_BASE_PATTERNS = ['trace', 'traces'];
 
 export const DEFAULT_ALLOWED_TRACES_BASE_PATTERNS_REGEXP = createRegExpPatternFrom(
   DEFAULT_ALLOWED_TRACES_BASE_PATTERNS,
-  'data'
+  'data',
+  // Observability traces live in `traces-*` indices, so only match names that start with the base
+  // pattern (e.g. `traces-*`), not names where it appears later (e.g. `shipping-traces`).
+  { allowPrefix: false }
 );
 
-export const createTracesContextService = async ({
-  apmSourcesAccess,
-}: TracesContextServiceDeps): Promise<TracesContextService> => {
-  if (!apmSourcesAccess) {
+export const createTracesContextService = ({
+  indices,
+}: {
+  indices: APMIndices | null;
+}): TracesContextService => {
+  if (!indices) {
     return defaultTracesContextService;
   }
 
-  try {
-    const indices = await apmSourcesAccess.getApmIndices();
+  const { transaction, span } = indices;
+  const allTraceIndices = getAllIndices(transaction, span);
+  const tracesIndexPattern = allTraceIndices.join();
 
-    if (!indices) {
-      return defaultTracesContextService;
-    }
+  // Allow:
+  // - each individual configured traces index pattern (e.g. `traces-apm*`)
+  // - the full combined list (e.g. `traces-apm*,apm-*,traces-*.otel-*`)
+  // - generic `trace|traces` base patterns (fallback)
+  const allowedDataSources = [
+    tracesIndexPattern,
+    ...allTraceIndices,
+    DEFAULT_ALLOWED_TRACES_BASE_PATTERNS_REGEXP,
+  ];
 
-    const { transaction, span } = indices;
-    const allIndices = getAllIndices(transaction, span);
-    const uniqueIndices = Array.from(new Set(allIndices));
-
-    const traces = uniqueIndices.join();
-    const allowedDataSources = [createRegExpPatternFrom(uniqueIndices, 'data')];
-
-    return getTracesContextService(traces, allowedDataSources);
-  } catch (error) {
-    return defaultTracesContextService;
-  }
+  return getTracesContextService({ tracesIndexPattern, allowedDataSources });
 };
 
 function getAllIndices(transaction: string, span: string) {
-  return [transaction, span]
-    .flatMap((index) => index.split(','))
-    .concat(DEFAULT_ALLOWED_TRACES_BASE_PATTERNS);
+  return Array.from(new Set([transaction, span].flatMap((index) => index.split(','))));
 }
 
-export const getTracesContextService = (traces: string, allowedDataSources: RegExp[]) => ({
-  getAllTracesIndexPattern: () => traces,
+export const getTracesContextService = ({
+  tracesIndexPattern,
+  allowedDataSources,
+}: {
+  tracesIndexPattern?: string;
+  allowedDataSources: Array<string | RegExp>;
+}) => ({
+  getAllTracesIndexPattern: () => tracesIndexPattern,
   isTracesIndexPattern: testPatternAgainstAllowedList(allowedDataSources),
   containsTracesIndexPattern: containsIndexPattern(allowedDataSources),
 });
 
-const defaultTracesContextService = getTracesContextService(
-  DEFAULT_ALLOWED_TRACES_BASE_PATTERNS.join(),
-  [DEFAULT_ALLOWED_TRACES_BASE_PATTERNS_REGEXP]
-);
+const defaultTracesContextService = getTracesContextService({
+  tracesIndexPattern: undefined,
+  allowedDataSources: [DEFAULT_ALLOWED_TRACES_BASE_PATTERNS_REGEXP],
+});

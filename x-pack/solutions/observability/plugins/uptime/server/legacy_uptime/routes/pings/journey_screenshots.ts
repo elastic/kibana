@@ -4,16 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { IKibanaResponse } from '@kbn/core-http-server';
+import type { IKibanaResponse } from '@kbn/core-http-server';
 import { schema } from '@kbn/config-schema';
-import { isRefResult, RefResult } from '../../../../common/runtime_types/ping/synthetics';
-import { UMServerLibs } from '../../lib/lib';
-import {
-  getJourneyScreenshot,
-  ScreenshotReturnTypesUnion,
-} from '../../lib/requests/get_journey_screenshot';
-import { RouteContext, UMRestApiRouteFactory, UptimeRouteContext } from '../types';
+import type { RefResult } from '../../../../common/runtime_types/ping/synthetics';
+import { isRefResult } from '../../../../common/runtime_types/ping/synthetics';
+import type { UMServerLibs } from '../../lib/lib';
+import type { ScreenshotReturnTypesUnion } from '../../lib/requests/get_journey_screenshot';
+import { getJourneyScreenshot } from '../../lib/requests/get_journey_screenshot';
+import type { RouteContext, UMRestApiRouteFactory, UptimeRouteContext } from '../types';
 import { API_URLS } from '../../../../common/constants';
+import { MAX_ID_LENGTH, boundedString } from '../schema_limits';
 
 export interface ClientContract {
   screenshotRef: RefResult;
@@ -34,7 +34,7 @@ export const createJourneyScreenshotRoute: UMRestApiRouteFactory<ClientContract>
   path: API_URLS.JOURNEY_SCREENSHOT,
   validate: {
     params: schema.object({
-      checkGroup: schema.string(),
+      checkGroup: boundedString(MAX_ID_LENGTH),
       stepIndex: schema.number(),
     }),
   },

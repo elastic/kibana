@@ -10,7 +10,7 @@ import React, { useCallback, useState } from 'react';
 import { IlmPhasesEmptyPrompt } from './ilm_phases_empty_prompt';
 import { IndicesDetails } from './indices_details';
 import { StorageDetails } from './storage_details';
-import { SelectedIndex } from '../types';
+import type { SelectedIndex } from '../types';
 import { useDataQualityContext } from '../data_quality_context';
 
 const DataQualityDetailsComponent: React.FC = () => {

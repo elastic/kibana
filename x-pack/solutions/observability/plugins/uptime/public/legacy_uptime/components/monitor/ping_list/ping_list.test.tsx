@@ -7,8 +7,8 @@
 
 import React from 'react';
 import { formatDuration, PingList } from './ping_list';
-import { Ping, PingsResponse } from '../../../../../common/runtime_types';
-import { ExpandedRowMap } from '../../overview/monitor_list/types';
+import type { Ping, PingsResponse } from '../../../../../common/runtime_types';
+import type { ExpandedRowMap } from '../../overview/monitor_list/types';
 import { rowShouldExpand, toggleDetails } from './columns/expand_row';
 import * as pingListHook from './use_pings';
 import { mockDispatch } from '../../../lib/helper/test_helpers';

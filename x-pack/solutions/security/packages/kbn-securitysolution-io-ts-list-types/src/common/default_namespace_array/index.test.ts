@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { pipe } from 'fp-ts/lib/pipeable';
-import { left } from 'fp-ts/lib/Either';
-import { DefaultNamespaceArray, DefaultNamespaceArrayType } from '.';
+import { pipe } from 'fp-ts/pipeable';
+import { left } from 'fp-ts/Either';
+import type { DefaultNamespaceArrayType } from '.';
+import { DefaultNamespaceArray } from '.';
 import { foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 
 describe('default_namespace_array', () => {

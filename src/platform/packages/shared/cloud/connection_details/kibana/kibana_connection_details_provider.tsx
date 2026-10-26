@@ -13,7 +13,7 @@ import type { CloudStart } from '@kbn/cloud-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { CreateAPIKeyParams, CreateAPIKeyResult } from '@kbn/security-plugin-types-server';
 import { ConnectionDetailsOptsProvider } from '../context';
-import { ConnectionDetailsOpts } from '../types';
+import type { ConnectionDetailsOpts } from '../types';
 import { useAsyncMemo } from '../hooks/use_async_memo';
 
 const createOpts = async (props: KibanaConnectionDetailsProviderProps) => {
@@ -67,7 +67,9 @@ const createOpts = async (props: KibanaConnectionDetailsProviderProps) => {
           },
         };
       },
-      hasPermission: async () => true,
+      hasPermission: async () => {
+        return !!start.core.application?.capabilities.api_keys?.save;
+      },
       ...options?.apiKeys,
     },
     onTelemetryEvent: (event) => {
@@ -115,6 +117,7 @@ const createOpts = async (props: KibanaConnectionDetailsProviderProps) => {
         }
       }
     },
+    defaultTabId: options?.defaultTabId ?? undefined,
   };
 
   return result;

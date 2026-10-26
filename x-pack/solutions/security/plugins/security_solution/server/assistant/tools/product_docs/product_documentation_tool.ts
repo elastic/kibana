@@ -7,7 +7,7 @@
 
 import { tool } from '@langchain/core/tools';
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import type { AssistantTool, AssistantToolParams } from '@kbn/elastic-assistant-plugin/server';
 import {
   contentReferenceBlock,
@@ -15,7 +15,17 @@ import {
 } from '@kbn/elastic-assistant-common';
 import type { ContentReferencesStore } from '@kbn/elastic-assistant-common';
 import type { RetrieveDocumentationResultDoc } from '@kbn/llm-tasks-plugin/server';
+import type { Require } from '@kbn/elastic-assistant-plugin/server/types';
+import {
+  resolveDefaultInferenceIdFromInferenceGet,
+  resolveInstalledProductDocInferenceId,
+} from '@kbn/product-doc-common';
 import { APP_UI_ID } from '../../../../common';
+
+export type ProductDocumentationToolParams = Require<
+  AssistantToolParams,
+  'llmTasks' | 'connectorId' | 'esClient'
+>;
 
 const toolDetails = {
   // note: this description is overwritten when `getTool` is called
@@ -29,20 +39,27 @@ const toolDetails = {
 export const PRODUCT_DOCUMENTATION_TOOL: AssistantTool = {
   ...toolDetails,
   sourceRegister: APP_UI_ID,
-  isSupported: (params: AssistantToolParams): params is AssistantToolParams => {
-    return params.llmTasks != null && params.connectorId != null;
+  isSupported: (params: AssistantToolParams): params is ProductDocumentationToolParams => {
+    return params.llmTasks != null && params.connectorId != null && params.esClient != null;
   },
-  getTool(params: AssistantToolParams) {
+  async getTool(params: AssistantToolParams) {
     if (!this.isSupported(params)) return null;
 
-    const { connectorId, llmTasks, request, contentReferencesStore } =
-      params as AssistantToolParams;
+    const { connectorId, llmTasks, request, contentReferencesStore, esClient } =
+      params as ProductDocumentationToolParams;
 
-    // This check is here in order to satisfy TypeScript
-    if (llmTasks == null || connectorId == null) return null;
+    const getDefaultInferenceId = () =>
+      resolveDefaultInferenceIdFromInferenceGet(() => esClient.inference.get({}));
 
     return tool(
       async ({ query, product }) => {
+        const inferenceId =
+          (await resolveInstalledProductDocInferenceId({
+            getDefaultInferenceId,
+            isDocumentationAvailable: (candidateInferenceId) =>
+              llmTasks.retrieveDocumentationAvailable({ inferenceId: candidateInferenceId }),
+          })) ?? (await getDefaultInferenceId());
+
         const response = await llmTasks.retrieveDocumentation({
           searchTerm: query,
           products: product ? [product] : undefined,
@@ -50,6 +67,7 @@ export const PRODUCT_DOCUMENTATION_TOOL: AssistantTool = {
           connectorId,
           request,
           functionCalling: 'auto',
+          inferenceId,
         });
 
         const enrichedDocuments = response.documents.map(enrichDocument(contentReferencesStore));

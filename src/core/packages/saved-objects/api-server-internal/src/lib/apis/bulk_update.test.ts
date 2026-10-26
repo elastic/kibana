@@ -27,10 +27,8 @@ import { type SavedObjectReference } from '@kbn/core-saved-objects-server';
 import { ALL_NAMESPACES_STRING } from '@kbn/core-saved-objects-utils-server';
 import { SavedObjectsRepository } from '../repository';
 import { loggerMock } from '@kbn/logging-mocks';
-import {
-  SavedObjectsSerializer,
-  encodeHitVersion,
-} from '@kbn/core-saved-objects-base-server-internal';
+import type { SavedObjectsSerializer } from '@kbn/core-saved-objects-base-server-internal';
+import { encodeHitVersion } from '@kbn/core-saved-objects-base-server-internal';
 import { kibanaMigratorMock } from '../../mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
@@ -42,7 +40,9 @@ import {
   mockTimestamp,
   mappings,
   createRegistry,
+  createType,
   createDocumentMigrator,
+  getMockGetResponse,
   getMockMgetResponse,
   type TypeIdTuple,
   createSpySerializer,
@@ -53,9 +53,13 @@ import {
   expectError,
   createBadRequestErrorPayload,
   expectUpdateResult,
+  MULTI_NAMESPACE_TYPE,
 } from '../../test_helpers/repository.test.common';
 import type { ISavedObjectsSecurityExtension } from '@kbn/core-saved-objects-server';
 import { savedObjectsExtensionsMock } from '../../mocks/saved_objects_extensions.mock';
+import { schema } from '@kbn/config-schema';
+
+const UPDATE_SCHEMA_TYPE = 'update-schema-type';
 
 interface ExpectedErrorResult {
   type: string;
@@ -72,6 +76,18 @@ describe('#bulkUpdate', () => {
   let securityExtension: jest.Mocked<ISavedObjectsSecurityExtension>;
 
   const registry = createRegistry();
+  const updateSchema = schema.object(
+    { title: schema.string(), count: schema.maybe(schema.number()) },
+    { unknowns: 'ignore' }
+  );
+  registry.registerType(
+    createType(UPDATE_SCHEMA_TYPE, {
+      migrations: {},
+      modelVersions: {
+        1: { changes: [], schemas: { create: updateSchema, update: updateSchema } },
+      },
+    })
+  );
   const documentMigrator = createDocumentMigrator(registry);
 
   const expectSuccess = ({ type, id }: { type: string; id: string }) => {
@@ -267,6 +283,38 @@ describe('#bulkUpdate', () => {
         );
       });
 
+      it('indexes a valid update and keeps unknown stored attributes', async () => {
+        const obj = {
+          type: UPDATE_SCHEMA_TYPE,
+          id: 'three',
+          attributes: { count: 2 },
+        };
+        const stored = getMockGetResponse(registry, obj);
+        stored._source![UPDATE_SCHEMA_TYPE] = { title: 'Testing', legacyFlag: true };
+        client.mget.mockResponseOnce({ docs: [stored] });
+        client.bulk.mockResponseOnce(getMockBulkUpdateResponse(registry, [obj]));
+
+        const result = await repository.bulkUpdate([obj]);
+
+        expect(result).toEqual({ saved_objects: [expectSuccess(obj)] });
+        expect(client.bulk).toHaveBeenCalledTimes(1);
+        expect(client.bulk).toHaveBeenCalledWith(
+          expect.objectContaining({
+            operations: [
+              getBulkIndexEntry('index', obj),
+              expect.objectContaining({
+                [UPDATE_SCHEMA_TYPE]: {
+                  title: 'Testing',
+                  count: 2,
+                  legacyFlag: true,
+                },
+              }),
+            ],
+          }),
+          expect.any(Object)
+        );
+      });
+
       it('should use the ES bulk action only with the provided attributes when mergeAttributes is false', async () => {
         const _obj1 = { ...obj1, attributes: { hello: 'dolly' }, mergeAttributes: false };
         await bulkUpdateSuccess(client, repository, registry, [_obj1]);
@@ -374,26 +422,31 @@ describe('#bulkUpdate', () => {
 
       it(`prepends namespace to the id when providing namespace for single-namespace type`, async () => {
         const getId = (type: string, id: string) => `${namespace}:${type}:${id}`; // test that the raw document ID equals this (e.g., has a namespace prefix)
-        await bulkUpdateSuccess(client, repository, registry, [obj1, obj2], { namespace });
+        let res = await bulkUpdateSuccess(client, repository, registry, [obj1, obj2], {
+          namespace,
+        });
         expectClientCallArgsAction([obj1, obj2], { method: 'index', getId });
+        expect(res.saved_objects[0].namespaces).toEqual([namespace]);
 
         jest.clearAllMocks();
         // test again with object namespace string that supersedes the operation's namespace ID
-        await bulkUpdateSuccess(client, repository, registry, [
+        res = await bulkUpdateSuccess(client, repository, registry, [
           { ...obj1, namespace },
           { ...obj2, namespace },
         ]);
         expectClientCallArgsAction([obj1, obj2], { method: 'index', getId });
+        expect(res.saved_objects[0].namespaces).toEqual([namespace]);
       });
 
       it(`doesn't prepend namespace to the id when providing no namespace for single-namespace type`, async () => {
         const getId = (type: string, id: string) => `${type}:${id}`; // test that the raw document ID equals this (e.g., does not have a namespace prefix)
-        await bulkUpdateSuccess(client, repository, registry, [obj1, obj2]);
+        let res = await bulkUpdateSuccess(client, repository, registry, [obj1, obj2]);
         expectClientCallArgsAction([obj1, obj2], { method: 'index', getId });
+        expect(res.saved_objects[0].namespaces).toEqual(['default']);
 
         jest.clearAllMocks();
         // test again with object namespace string that supersedes the operation's namespace ID
-        await bulkUpdateSuccess(
+        res = await bulkUpdateSuccess(
           client,
           repository,
           registry,
@@ -404,13 +457,15 @@ describe('#bulkUpdate', () => {
           { namespace }
         );
         expectClientCallArgsAction([obj1, obj2], { method: 'index', getId });
+        expect(res.saved_objects[0].namespaces).toEqual(['default']);
       });
 
       it(`normalizes options.namespace from 'default' to undefined`, async () => {
         const getId = (type: string, id: string) => `${type}:${id}`;
-        await bulkUpdateSuccess(client, repository, registry, [obj1, obj2], {
+        const res = await bulkUpdateSuccess(client, repository, registry, [obj1, obj2], {
           namespace: 'default',
         });
+        expect(res.saved_objects[0].namespaces).toEqual(['default']);
         expectClientCallArgsAction([obj1, obj2], { method: 'index', getId });
       });
 
@@ -523,7 +578,7 @@ describe('#bulkUpdate', () => {
       it(`throws when options.namespace is '*'`, async () => {
         await expect(
           repository.bulkUpdate([obj], { namespace: ALL_NAMESPACES_STRING })
-        ).rejects.toThrowError(createBadRequestErrorPayload('"options.namespace" cannot be "*"'));
+        ).rejects.toThrow(createBadRequestErrorPayload('"options.namespace" cannot be "*"'));
       });
 
       it(`returns error when type is invalid`, async () => {
@@ -563,6 +618,20 @@ describe('#bulkUpdate', () => {
         const _obj = { ...obj, type: MULTI_NAMESPACE_ISOLATED_TYPE };
         const mgetResponse = getMockMgetResponse(registry, [obj1, obj2, _obj], 'bar-namespace');
         await bulkUpdateMultiError([obj1, obj2, _obj], { namespace }, mgetResponse);
+      });
+
+      it(`returns error when update schema validation fails`, async () => {
+        const _obj = { type: UPDATE_SCHEMA_TYPE, id: 'three', attributes: { count: 'lots' } };
+        await bulkUpdateError(
+          _obj,
+          false,
+          expectErrorResult(
+            _obj,
+            createBadRequestErrorPayload(
+              '[attributes.count]: expected value of type [number] but got [string]'
+            )
+          )
+        );
       });
 
       it(`returns bulk error`, async () => {
@@ -615,6 +684,74 @@ describe('#bulkUpdate', () => {
           {
             id: modifiedObj1.id,
             type: modifiedObj1.type,
+          },
+          true,
+          2
+        );
+      });
+
+      it('migrates single namespace objects using the object namespace', async () => {
+        const modifiedObj2 = {
+          ...obj2,
+          coreMigrationVersion: '8.0.0',
+          namespace: 'test',
+        };
+        const objects = [modifiedObj2];
+        migrator.migrateDocument.mockImplementationOnce((doc) => ({ ...doc, migrated: true }));
+
+        await bulkUpdateSuccess(client, repository, registry, objects);
+
+        expect(migrator.migrateDocument).toHaveBeenCalledTimes(2);
+        expectMigrationArgs(
+          {
+            id: modifiedObj2.id,
+            namespace: 'test',
+          },
+          true,
+          2
+        );
+      });
+
+      it('migrates multiple namespace objects using the object namespaces', async () => {
+        const modifiedObj2 = {
+          ...obj2,
+          type: MULTI_NAMESPACE_TYPE,
+          coreMigrationVersion: '8.0.0',
+          namespace: 'test',
+        };
+        const objects = [modifiedObj2];
+        migrator.migrateDocument.mockImplementationOnce((doc) => ({ ...doc, migrated: true }));
+
+        await bulkUpdateSuccess(client, repository, registry, objects);
+
+        expect(migrator.migrateDocument).toHaveBeenCalledTimes(2);
+        expectMigrationArgs(
+          {
+            id: modifiedObj2.id,
+            namespaces: ['test'],
+          },
+          true,
+          2
+        );
+      });
+
+      it('migrates namespace agnsostic objects', async () => {
+        const modifiedObj2 = {
+          ...obj2,
+          type: NAMESPACE_AGNOSTIC_TYPE,
+          coreMigrationVersion: '8.0.0',
+          namespace: 'test', // specify a namespace, but it should be ignored
+        };
+        const objects = [modifiedObj2];
+        migrator.migrateDocument.mockImplementationOnce((doc) => ({ ...doc, migrated: true }));
+
+        await bulkUpdateSuccess(client, repository, registry, objects);
+
+        expect(migrator.migrateDocument).toHaveBeenCalledTimes(2);
+        expectMigrationArgs(
+          {
+            id: modifiedObj2.id,
+            namespaces: [],
           },
           true,
           2

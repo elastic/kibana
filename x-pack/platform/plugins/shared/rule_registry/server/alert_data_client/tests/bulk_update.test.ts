@@ -28,6 +28,7 @@ const alertsClientParams: jest.Mocked<ConstructorOptions> = {
   logger: loggingSystemMock.create().get(),
   authorization: alertingAuthMock,
   esClient: esClientMock,
+  esClientScoped: esClientMock,
   auditLogger,
   ruleDataService: ruleDataServiceMock.create(),
   getRuleType: jest.fn(),
@@ -212,19 +213,6 @@ describe('bulkUpdate()', () => {
         ).rejects.toThrowErrorMatchingInlineSnapshot(`"Unauthorized for fake.rule and apm"`);
         expect(auditLogger.log).toHaveBeenCalledTimes(2);
         expect(auditLogger.log).toHaveBeenNthCalledWith(1, {
-          message: `Failed attempt to update alert [id=${unsuccessfulAuthzHit}]`,
-          event: {
-            action: 'alert_update',
-            category: ['database'],
-            outcome: 'failure',
-            type: ['change'],
-          },
-          error: {
-            code: 'Error',
-            message: 'Unauthorized for fake.rule and apm',
-          },
-        });
-        expect(auditLogger.log).toHaveBeenNthCalledWith(2, {
           message: `Failed attempt to update alert [id=${successfulAuthzHit}]`,
           event: {
             action: 'alert_update',
@@ -237,7 +225,120 @@ describe('bulkUpdate()', () => {
             message: 'Unauthorized for fake.rule and apm',
           },
         });
+        expect(auditLogger.log).toHaveBeenNthCalledWith(2, {
+          message: `Failed attempt to update alert [id=${unsuccessfulAuthzHit}]`,
+          event: {
+            action: 'alert_update',
+            category: ['database'],
+            outcome: 'failure',
+            type: ['change'],
+          },
+          error: {
+            code: 'Error',
+            message: 'Unauthorized for fake.rule and apm',
+          },
+        });
       });
+    });
+
+    test('throws and does not write when a document is missing the authorization fields', async () => {
+      const indexName = '.alerts-observability.apm.alerts';
+      const alertsClient = new AlertsClient(alertsClientParams);
+      esClientMock.mget.mockResponseOnce({
+        docs: [
+          {
+            found: true,
+            _id: fakeAlertId,
+            _index: indexName,
+            _source: {
+              [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
+              [SPACE_IDS]: [DEFAULT_SPACE],
+            },
+          },
+        ],
+      });
+
+      await expect(
+        alertsClient.bulkUpdate({
+          ids: [fakeAlertId],
+          query: undefined,
+          index: indexName,
+          status: 'closed',
+        })
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Invalid alert found with id of \\"myfakeid1\\" and operation update"`
+      );
+
+      expect(esClientMock.bulk).not.toHaveBeenCalled();
+      expect(auditLogger.log).toHaveBeenCalledWith({
+        message: `Failed attempt to update alert [id=${fakeAlertId}]`,
+        event: {
+          action: 'alert_update',
+          category: ['database'],
+          outcome: 'failure',
+          type: ['change'],
+        },
+        error: {
+          code: 'Error',
+          message: 'Invalid alert found with id of "myfakeid1" and operation update',
+        },
+      });
+    });
+
+    test('authorizes valid documents and skips not-found and errored lookups', async () => {
+      const indexName = '.alerts-observability.apm.alerts';
+      const alertsClient = new AlertsClient(alertsClientParams);
+      esClientMock.mget.mockResponseOnce({
+        docs: [
+          {
+            found: true,
+            _id: fakeAlertId,
+            _index: indexName,
+            _source: {
+              [ALERT_RULE_TYPE_ID]: 'apm.error_rate',
+              [ALERT_RULE_CONSUMER]: 'apm',
+              [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
+              [SPACE_IDS]: [DEFAULT_SPACE],
+            },
+          },
+          { found: false, _id: 'absent-id', _index: indexName },
+          {
+            _id: 'error-id',
+            _index: indexName,
+            error: { type: 'index_not_found_exception', reason: 'no such index' },
+          },
+        ],
+      });
+      esClientMock.bulk.mockResponseOnce({
+        errors: false,
+        took: 1,
+        items: [],
+      });
+
+      await alertsClient.bulkUpdate({
+        ids: [fakeAlertId, 'absent-id', 'error-id'],
+        query: undefined,
+        index: indexName,
+        status: 'closed',
+      });
+
+      expect(alertingAuthMock.ensureAuthorized).toHaveBeenCalledTimes(1);
+      expect(alertingAuthMock.ensureAuthorized).toHaveBeenCalledWith({
+        consumer: 'apm',
+        entity: 'alert',
+        operation: 'update',
+        ruleTypeId: 'apm.error_rate',
+      });
+      expect(alertsClientParams.logger.warn).toHaveBeenCalledTimes(1);
+      expect(alertsClientParams.logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('error-id')
+      );
+      expect(esClientMock.bulk).toHaveBeenCalled();
+      const bulkBody = esClientMock.bulk.mock.calls[0][0].body;
+      expect(bulkBody).toEqual([
+        { update: { _index: indexName, _id: fakeAlertId } },
+        { doc: { signal: { status: 'closed' } } },
+      ]);
     });
 
     // test('throws an error if ES client fetch fails', async () => {});
@@ -409,7 +510,7 @@ describe('bulkUpdate()', () => {
 
         expect(auditLogger.log).toHaveBeenCalledTimes(2);
         expect(auditLogger.log).toHaveBeenNthCalledWith(1, {
-          message: `Failed attempt to update alert [id=${unsuccessfulAuthzHit}]`,
+          message: `Failed attempt to update alert [id=${successfulAuthzHit}]`,
           event: {
             action: 'alert_update',
             category: ['database'],
@@ -422,7 +523,7 @@ describe('bulkUpdate()', () => {
           },
         });
         expect(auditLogger.log).toHaveBeenNthCalledWith(2, {
-          message: `Failed attempt to update alert [id=${successfulAuthzHit}]`,
+          message: `Failed attempt to update alert [id=${unsuccessfulAuthzHit}]`,
           event: {
             action: 'alert_update',
             category: ['database'],
@@ -439,5 +540,238 @@ describe('bulkUpdate()', () => {
     // test('throws an error if ES client fetch fails', async () => {});
     // test('throws an error if ES client bulk update fails', async () => {});
     // test('throws an error if ES client updateByQuery fails', async () => {});
+  });
+});
+
+describe('bulkUpdate() - workflow status audit events', () => {
+  describe('ids', () => {
+    test('logs alert_acknowledge audit event when status is acknowledged', async () => {
+      const indexName = '.alerts-observability.apm.alerts';
+      const alertsClient = new AlertsClient(alertsClientParams);
+      esClientMock.mget.mockResponseOnce({
+        docs: [
+          {
+            found: true,
+            _id: fakeAlertId,
+            _index: indexName,
+            _source: {
+              [ALERT_RULE_TYPE_ID]: 'apm.error_rate',
+              [ALERT_RULE_CONSUMER]: 'apm',
+              [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
+              [SPACE_IDS]: [DEFAULT_SPACE],
+            },
+          },
+        ],
+      });
+      esClientMock.bulk.mockResponseOnce({
+        errors: false,
+        took: 1,
+        items: [
+          {
+            update: {
+              _id: fakeAlertId,
+              _index: indexName,
+              result: 'updated',
+              status: 200,
+            },
+          },
+        ],
+      });
+      await alertsClient.bulkUpdate({
+        ids: [fakeAlertId],
+        query: undefined,
+        index: indexName,
+        status: 'acknowledged',
+      });
+
+      // First call is the generic alert_update from ensureAllAlertsAuthorized
+      expect(auditLogger.log).toHaveBeenNthCalledWith(1, {
+        message: `User is updating alert [id=${fakeAlertId}]`,
+        event: {
+          action: 'alert_update',
+          category: ['database'],
+          outcome: 'unknown',
+          type: ['change'],
+        },
+        error: undefined,
+      });
+
+      // Second call is the workflow-status-specific audit event
+      expect(auditLogger.log).toHaveBeenNthCalledWith(2, {
+        message: `User has acknowledged alert [id=${fakeAlertId}]`,
+        event: {
+          action: 'alert_acknowledge',
+          category: ['database'],
+          outcome: 'success',
+          type: ['change'],
+        },
+        error: undefined,
+      });
+    });
+
+    test('logs alert_unacknowledge audit event when status is open', async () => {
+      const indexName = '.alerts-observability.apm.alerts';
+      const alertsClient = new AlertsClient(alertsClientParams);
+      esClientMock.mget.mockResponseOnce({
+        docs: [
+          {
+            found: true,
+            _id: fakeAlertId,
+            _index: indexName,
+            _source: {
+              [ALERT_RULE_TYPE_ID]: 'apm.error_rate',
+              [ALERT_RULE_CONSUMER]: 'apm',
+              [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
+              [SPACE_IDS]: [DEFAULT_SPACE],
+            },
+          },
+        ],
+      });
+      esClientMock.bulk.mockResponseOnce({
+        errors: false,
+        took: 1,
+        items: [
+          {
+            update: {
+              _id: fakeAlertId,
+              _index: indexName,
+              result: 'updated',
+              status: 200,
+            },
+          },
+        ],
+      });
+      await alertsClient.bulkUpdate({
+        ids: [fakeAlertId],
+        query: undefined,
+        index: indexName,
+        status: 'open',
+      });
+
+      // Second call is the workflow-status-specific audit event
+      expect(auditLogger.log).toHaveBeenNthCalledWith(2, {
+        message: `User has unacknowledged alert [id=${fakeAlertId}]`,
+        event: {
+          action: 'alert_unacknowledge',
+          category: ['database'],
+          outcome: 'success',
+          type: ['change'],
+        },
+        error: undefined,
+      });
+    });
+
+    test('does not log a workflow-specific audit event for unmapped statuses', async () => {
+      const indexName = '.alerts-observability.apm.alerts';
+      const alertsClient = new AlertsClient(alertsClientParams);
+      esClientMock.mget.mockResponseOnce({
+        docs: [
+          {
+            found: true,
+            _id: fakeAlertId,
+            _index: indexName,
+            _source: {
+              [ALERT_RULE_TYPE_ID]: 'apm.error_rate',
+              [ALERT_RULE_CONSUMER]: 'apm',
+              [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
+              [SPACE_IDS]: [DEFAULT_SPACE],
+            },
+          },
+        ],
+      });
+      esClientMock.bulk.mockResponseOnce({
+        errors: false,
+        took: 1,
+        items: [
+          {
+            update: {
+              _id: fakeAlertId,
+              _index: indexName,
+              result: 'updated',
+              status: 200,
+            },
+          },
+        ],
+      });
+      await alertsClient.bulkUpdate({
+        ids: [fakeAlertId],
+        query: undefined,
+        index: indexName,
+        status: 'closed',
+      });
+
+      // Only the generic alert_update event, no workflow-specific event
+      expect(auditLogger.log).toHaveBeenCalledTimes(1);
+      expect(auditLogger.log).toHaveBeenNthCalledWith(1, {
+        message: `User is updating alert [id=${fakeAlertId}]`,
+        event: {
+          action: 'alert_update',
+          category: ['database'],
+          outcome: 'unknown',
+          type: ['change'],
+        },
+        error: undefined,
+      });
+    });
+  });
+
+  describe('query', () => {
+    test('logs alert_acknowledge audit event when status is acknowledged', async () => {
+      const indexName = '.alerts-observability.apm.alerts';
+      const alertsClient = new AlertsClient(alertsClientParams);
+      esClientMock.search.mockResponseOnce({
+        took: 5,
+        timed_out: false,
+        _shards: { total: 1, successful: 1, failed: 0, skipped: 0 },
+        hits: {
+          total: 1,
+          max_score: 999,
+          hits: [
+            {
+              _id: fakeAlertId,
+              _index: indexName,
+              _source: {
+                [ALERT_RULE_TYPE_ID]: 'apm.error_rate',
+                [ALERT_RULE_CONSUMER]: 'apm',
+                [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
+                [SPACE_IDS]: [DEFAULT_SPACE],
+              },
+            },
+          ],
+        },
+      });
+      esClientMock.updateByQuery.mockResponseOnce({ updated: 1 });
+
+      await alertsClient.bulkUpdate({
+        ids: undefined,
+        query: `${ALERT_STATUS}: ${ALERT_STATUS_ACTIVE}`,
+        index: indexName,
+        status: 'acknowledged',
+      });
+
+      // First call: generic alert_update from queryAndAuditAllAlerts
+      expect(auditLogger.log).toHaveBeenNthCalledWith(1, {
+        message: `User is updating alert [id=${fakeAlertId}]`,
+        event: {
+          action: 'alert_update',
+          category: ['database'],
+          outcome: 'unknown',
+          type: ['change'],
+        },
+        error: undefined,
+      });
+
+      // Second call: workflow-status-specific audit event (bulk)
+      expect(auditLogger.log).toHaveBeenNthCalledWith(2, {
+        message: 'User has acknowledged alerts',
+        event: {
+          action: 'alert_acknowledge',
+          category: ['database'],
+          outcome: 'success',
+          type: ['change'],
+        },
+        error: undefined,
+      });
+    });
   });
 });

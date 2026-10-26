@@ -9,6 +9,24 @@ paths:
   /internal/elastic_assistant/defend_insights:
     post:
       x-codegen-enabled: true
+      x-codeSamples:
+        - lang: curl
+          label: Example request
+          source: |
+            curl \
+             --request POST 'http://localhost:5601/internal/elastic_assistant/defend_insights' \
+             --header "Authorization: $API_KEY" \
+             --header "Content-Type: application/json" \
+             --data '{
+               "endpointIds": ["endpoint-id-1", "endpoint-id-2"],
+               "insightType": "incompatible_antivirus",
+               "anonymizationFields": [],
+               "apiConfig": {
+                 "connectorId": "my-connector-id",
+                 "actionTypeId": ".gen-ai"
+               },
+               "subAction": "invokeAI"
+             }'
       x-labels: [ess, serverless]
       operationId: DefendInsightsPost
       description: Generate Elastic Defend configuration insights
@@ -54,15 +72,50 @@ paths:
                   enum:
                     - invokeAI
                     - invokeStream
+            examples:
+              endpointIds:
+                - "endpoint-id-1"
+                - "endpoint-id-2"
+              insightType: incompatible_antivirus
+              anonymizationFields: []
+              apiConfig:
+                connectorId: my-connector-id
+                actionTypeId: .gen-ai
+              subAction: invokeAI
       responses:
         '200':
-          description: Successful response
+          description: Indicates a successful call.
           content:
             application/json:
               schema:
                 $ref: './common_attributes.schema.yaml#/components/schemas/DefendInsightsResponse'
+              examples:
+                DefendInsightsPostResponse200Example:
+                  summary: A successful response containing a newly created Defend insight.
+                  value:
+                    id: "insight-abc123"
+                    status: running
+                    insightType: incompatible_antivirus
+                    endpointIds:
+                      - "endpoint-id-1"
+                      - "endpoint-id-2"
+                    insights: []
+                    apiConfig:
+                      connectorId: my-connector-id
+                      actionTypeId: .gen-ai
+                    createdAt: "2024-01-15T10:00:00.000Z"
+                    updatedAt: "2024-01-15T10:00:00.000Z"
+                    lastViewedAt: "2024-01-15T10:00:00.000Z"
+                    users:
+                      - id: "user-1"
+                        name: "user@example.com"
+                    namespace: "default"
+                    backingIndex: ".kibana-elastic-ai-assistant-defend-insights-default"
+                    generationIntervals: []
+                    averageIntervalMs: 0
+                    replacements: {}
         '400':
-          description: Bad request
+          description: Bad Request response.
           content:
             application/json:
               schema:
@@ -74,4 +127,10 @@ paths:
                     type: string
                   message:
                     type: string
-
+              examples:
+                DefendInsightsPostResponse400Example:
+                  summary: A bad request response.
+                  value:
+                    statusCode: 400
+                    error: Bad Request
+                    message: "endpointIds must not be empty."

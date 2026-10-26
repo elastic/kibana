@@ -26,6 +26,7 @@ import { ENDPOINT_CAPABILITIES } from '../../../../../../common/endpoint/service
 import { UPGRADE_AGENT_FOR_RESPONDER } from '../../../../../common/translations';
 import type { CommandDefinition } from '../../../console';
 import { useUserPrivileges as _useUserPrivileges } from '../../../../../common/components/user_privileges';
+import { EndpointActionGenerator } from '../../../../../../common/endpoint/data_generators/endpoint_action_generator';
 
 jest.mock('../../../../../common/components/user_privileges');
 
@@ -156,13 +157,54 @@ describe('When using processes action from response actions console', () => {
     });
   });
 
-  it('should show success when `processes` action completes with no errors', async () => {
+  it('should show pending status while `processes` action is not yet complete', async () => {
+    apiMocks.responseProvider.actionDetails.mockReturnValue({
+      data: new EndpointActionGenerator('seed').generateActionDetails({
+        command: 'running-processes',
+        agents: ['a.b.c'],
+        isCompleted: false,
+        wasSuccessful: false,
+        agentState: {
+          'a.b.c': { isCompleted: false, wasSuccessful: false },
+        },
+      }),
+    });
     await render();
     await enterConsoleCommand(renderResult, user, 'processes');
 
     await waitFor(() => {
-      expect(renderResult.getByTestId('getProcessesSuccessCallout')).toBeTruthy();
+      expect(apiMocks.responseProvider.actionDetails).toHaveBeenCalled();
     });
+
+    await waitFor(() => {
+      expect(renderResult.getByTestId('getProcesses-pending')).toBeTruthy();
+    });
+
+    expect(renderResult.getByTestId('getProcesses-actionResult-hostStatus')).toHaveTextContent(
+      'processes is pending'
+    );
+  });
+
+  it('should show success when `processes` action completes with no errors', async () => {
+    apiMocks.responseProvider.actionDetails.mockReturnValue({
+      data: new EndpointActionGenerator('seed').generateActionDetails({
+        command: 'running-processes',
+        agents: ['a.b.c'],
+      }),
+    });
+    await render();
+    await enterConsoleCommand(renderResult, user, 'processes');
+
+    await waitFor(() => {
+      expect(renderResult.getByTestId('getProcesses-success')).toBeTruthy();
+    });
+
+    expect(renderResult.getByTestId('getProcesses-actionResult-hostStatus')).toHaveTextContent(
+      'processes completed successfully'
+    );
+    expect(
+      renderResult.getByTestId('getProcesses-actionResult-processesResults-processListTable')
+    ).toBeTruthy();
   });
 
   it('should show error if get processes failed to complete successfully', async () => {
@@ -175,6 +217,7 @@ describe('When using processes action from response actions console', () => {
       'agent-a': {
         isCompleted: true,
         wasSuccessful: false,
+        wasCanceled: false,
         errors: ['error one', 'error two'],
         completedAt: new Date().toISOString(),
       },
@@ -189,6 +232,15 @@ describe('When using processes action from response actions console', () => {
         /error one \| error two/
       );
     });
+
+    expect(renderResult.getByTestId('getProcesses-actionResult-hostStatus')).toHaveTextContent(
+      'processes failed'
+    );
+    expect(
+      renderResult.getByTestId(
+        'getProcesses-actionResult-processesResults-outputFailureMessage-response-action-failure-info'
+      ).textContent
+    ).toMatch(/error one \| error two/);
   });
 
   it('should show error if get processes request failed', async () => {
@@ -266,7 +318,6 @@ describe('When using processes action from response actions console', () => {
 
   describe('and when agent type is SentinelOne', () => {
     beforeEach(() => {
-      mockedContext.setExperimentalFlag({ responseActionsSentinelOneProcessesEnabled: true });
       setConsoleCommands([], 'sentinel_one');
 
       const processesResponse = apiMocks.responseProvider.processes();
@@ -278,6 +329,7 @@ describe('When using processes action from response actions console', () => {
         path: '/api/endpoint/action/1.2.3',
       });
       actionDetails.data.agentType = 'sentinel_one';
+      actionDetails.data.command = 'running-processes';
       apiMocks.responseProvider.actionDetails.mockReturnValue(actionDetails);
       apiMocks.responseProvider.actionDetails.mockClear();
 
@@ -294,10 +346,10 @@ describe('When using processes action from response actions console', () => {
             'Show all running processes' +
             'Usage' +
             'processes [--comment]' +
-            'Example' +
-            'processes --comment "get the processes"' +
             'Optional parameters' +
-            '--comment - A comment to go along with the action'
+            '--comment - A comment to go along with the action' +
+            'Example' +
+            'processes --comment "get the processes"'
         );
       });
     });
@@ -329,39 +381,13 @@ describe('When using processes action from response actions console', () => {
       await enterConsoleCommand(renderResult, user, 'processes');
 
       await waitFor(() => {
-        expect(renderResult.getByTestId('getProcessesSuccessCallout').textContent).toEqual(
+        expect(
+          renderResult.getByTestId('getProcesses-actionResult-processesResults-download')
+            .textContent
+        ).toEqual(
           'Click here to download' +
             'Files are periodically deleted to clear storage space. Download and save file locally if needed.'
         );
-      });
-    });
-
-    describe('and `responseActionsSentinelOneProcessesEnabled` feature flag is disabled', () => {
-      beforeEach(() => {
-        mockedContext.setExperimentalFlag({ responseActionsSentinelOneProcessesEnabled: false });
-        setConsoleCommands([], 'sentinel_one');
-      });
-
-      it('should not display `processes` command in console help', async () => {
-        await render();
-        consoleSelectors.openHelpPanel();
-
-        expect(renderResult.queryByTestId('test-commandList-Responseactions-processes')).toBeNull();
-      });
-
-      it('should error if user enters `process` command', async () => {
-        await render();
-        await enterConsoleCommand(renderResult, user, 'processes');
-
-        await waitFor(() => {
-          expect(renderResult.getByTestId('test-validationError')).toHaveTextContent(
-            'Unsupported actionSupport for processes is not currently available for SentinelOne.'
-          );
-        });
-
-        await waitFor(() => {
-          expect(apiMocks.responseProvider.processes).not.toHaveBeenCalled();
-        });
       });
     });
   });

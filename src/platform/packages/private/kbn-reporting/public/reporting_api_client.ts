@@ -9,7 +9,7 @@
 
 import { ELASTIC_INTERNAL_ORIGIN_QUERY_PARAM } from '@kbn/core-http-common';
 import type { HttpFetchQuery } from '@kbn/core/public';
-import { HttpSetup, IUiSettingsClient } from '@kbn/core/public';
+import type { HttpSetup, IUiSettingsClient } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import {
   INTERNAL_ROUTES,
@@ -18,11 +18,17 @@ import {
   buildKibanaPath,
   REPORTING_REDIRECT_APP,
 } from '@kbn/reporting-common';
-import { BaseParams, JobId, ManagementLinkFn, ReportApiJSON } from '@kbn/reporting-common/types';
+import type {
+  BaseParams,
+  JobId,
+  ManagementLinkFn,
+  ReportApiJSON,
+  ScheduledReportApiJSON,
+} from '@kbn/reporting-common/types';
 import rison from '@kbn/rison';
 import moment from 'moment';
-import { stringify } from 'query-string';
-import { ReactElement } from 'react';
+import queryString from 'query-string';
+import type { ReactElement } from 'react';
 import { Job } from '.';
 import { jobCompletionNotifications } from './job_completion_notifications';
 
@@ -52,7 +58,7 @@ interface IReportingAPI {
   // CRUD
   downloadReport(jobId: string): void;
   deleteReport(jobId: string): Promise<void>;
-  list(page: number, jobIds: string[]): Promise<Job[]>; // gets the first 10 report of the page
+  list(page: number, perPage: number, jobIds: string[]): Promise<Job[]>;
   total(): Promise<number>;
   getError(jobId: string): Promise<string>;
   getInfo(jobId: string): Promise<Job>;
@@ -83,7 +89,10 @@ export class ReportingAPIClient implements IReportingAPI {
   }
 
   public getKibanaAppHref(job: Job): string {
-    const searchParams = stringify({ jobId: job.id });
+    const searchParams = queryString.stringify({
+      jobId: job.id,
+      ...(job.scheduled_report_id ? { scheduledReportId: job.scheduled_report_id } : {}),
+    });
 
     const path = buildKibanaPath({
       basePath: this.http.basePath.serverBasePath,
@@ -116,11 +125,10 @@ export class ReportingAPIClient implements IReportingAPI {
     return await this.http.delete<void>(`${INTERNAL_ROUTES.JOBS.DELETE_PREFIX}/${jobId}`);
   }
 
-  public async list(page = 0, jobIds: string[] = []) {
-    const query: HttpFetchQuery = { page };
+  public async list(page = 0, perPage = 50, jobIds: string[] = []) {
+    const query: HttpFetchQuery = { page, size: perPage };
     if (jobIds.length > 0) {
-      // Only getting the first 10, to prevent URL overflows
-      query.ids = jobIds.slice(0, 10).join(',');
+      query.ids = jobIds.slice(0, perPage).join(',');
     }
 
     const jobQueueEntries: ReportApiJSON[] = await this.http.get(INTERNAL_ROUTES.JOBS.LIST, {
@@ -158,6 +166,18 @@ export class ReportingAPIClient implements IReportingAPI {
     return new Job(report);
   }
 
+  public async getScheduledReportInfo(id: string, page: number = 0, perPage: number = 50) {
+    const { data: reportList = [] }: { data: ScheduledReportApiJSON[] } = await this.http.get(
+      `${INTERNAL_ROUTES.SCHEDULED.LIST}`,
+      {
+        query: { page, size: perPage },
+      }
+    );
+
+    const report = reportList.find((item) => item.id === id);
+    return report;
+  }
+
   public async findForJobIds(jobIds: JobId[]) {
     const reports: ReportApiJSON[] = await this.http.fetch(INTERNAL_ROUTES.JOBS.LIST, {
       query: { page: 0, ids: jobIds.join(',') },
@@ -171,7 +191,7 @@ export class ReportingAPIClient implements IReportingAPI {
    * This string must be shown when the user selects the option to view/copy the POST URL
    */
   public getReportingPublicJobPath(exportType: string, jobParams: BaseParams) {
-    const params = stringify({
+    const params = queryString.stringify({
       jobParams: rison.encode(jobParams),
     });
     return `${this.http.basePath.prepend(PUBLIC_ROUTES.GENERATE_PREFIX)}/${exportType}?${params}`;
@@ -222,10 +242,8 @@ export class ReportingAPIClient implements IReportingAPI {
     // If the TZ is set to the default "Browser", it will not be useful for
     // server-side export. We need to derive the timezone and pass it as a param
     // to the export API.
-    const browserTimezone: string =
-      this.uiSettings.get('dateFormat:tz') === 'Browser'
-        ? moment.tz.guess()
-        : this.uiSettings.get('dateFormat:tz');
+    const timeZone = this.uiSettings.get('dateFormat:tz');
+    const browserTimezone = moment.tz.zone(timeZone)?.name ?? moment.tz.guess(true);
 
     return {
       browserTimezone,

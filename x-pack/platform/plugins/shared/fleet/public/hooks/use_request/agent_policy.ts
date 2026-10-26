@@ -4,12 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@kbn/react-query';
 
 import type { GetAutoUpgradeAgentsStatusResponse } from '../../../common/types';
+import type { SimplifiedVars } from '../../../common/services/simplified_package_policy_helper';
 
 import { agentPolicyRouteService } from '../../services';
-import { API_VERSIONS } from '../../../common/constants';
+import { API_VERSIONS, AGENT_POLICY_API_ROUTES } from '../../../common/constants';
 
 import type {
   GetAgentPoliciesRequest,
@@ -25,6 +26,8 @@ import type {
   DeleteAgentPolicyRequest,
   DeleteAgentPolicyResponse,
   BulkGetAgentPoliciesResponse,
+  GetAgentPoliciesPackagePoliciesSummaryRequest,
+  GetAgentPoliciesPackagePoliciesSummaryResponse,
   GetAgentPolicyOutputsResponse,
   GetListAgentPolicyOutputsResponse,
   GetListAgentPolicyOutputsRequest,
@@ -61,20 +64,46 @@ export const useGetAgentPoliciesQuery = (
   });
 };
 
+export const useGetAgentPoliciesPackagePoliciesSummaryQuery = (
+  ids: GetAgentPoliciesPackagePoliciesSummaryRequest['body']['ids'],
+  options?: { enabled?: boolean }
+) => {
+  return useQuery<GetAgentPoliciesPackagePoliciesSummaryResponse, RequestError>({
+    // Prefixed with `agentPolicies` so that invalidating the agent policies refreshes the summaries
+    queryKey: ['agentPolicies', 'packagePoliciesSummary', ids],
+    queryFn: () =>
+      sendRequestForRq<GetAgentPoliciesPackagePoliciesSummaryResponse>({
+        path: agentPolicyRouteService.getPackagePoliciesSummaryPath(),
+        method: 'post',
+        body: JSON.stringify({ ids }),
+        version: API_VERSIONS.internal.v1,
+      }),
+    enabled: options?.enabled,
+  });
+};
+
 export const useBulkGetAgentPoliciesQuery = (
   ids: string[],
-  options?: { full?: boolean; ignoreMissing?: boolean }
+  options?: { full?: boolean; ignoreMissing?: boolean; enabled?: boolean }
 ) => {
-  return useQuery<BulkGetAgentPoliciesResponse, RequestError>(['agentPolicies', ids], () =>
-    sendRequestForRq<BulkGetAgentPoliciesResponse>({
-      path: agentPolicyRouteService.getBulkGetPath(),
-      method: 'post',
-      body: JSON.stringify({ ids, full: options?.full }),
-      version: API_VERSIONS.public.v1,
-    })
+  return useQuery<BulkGetAgentPoliciesResponse, RequestError>(
+    ['agentPolicies', ids, { full: options?.full, ignoreMissing: options?.ignoreMissing }],
+    () =>
+      sendRequestForRq<BulkGetAgentPoliciesResponse>({
+        path: agentPolicyRouteService.getBulkGetPath(),
+        method: 'post',
+        body: JSON.stringify({ ids, full: options?.full, ignoreMissing: options?.ignoreMissing }),
+        version: API_VERSIONS.public.v1,
+      }),
+    {
+      enabled: options?.enabled,
+    }
   );
 };
 
+/**
+ * @deprecated use sendBulkGetAgentPoliciesForRq instead
+ */
 export const sendBulkGetAgentPolicies = (
   ids: string[],
   options?: { full?: boolean; ignoreMissing?: boolean }
@@ -117,11 +146,16 @@ export const useGetOneAgentPolicy = (agentPolicyId: string | undefined) => {
   } as SendConditionalRequestConfig);
 };
 
-export const useGetOneAgentPolicyFull = (agentPolicyId: string) => {
-  return useRequest<GetFullAgentPolicyResponse>({
-    path: agentPolicyRouteService.getInfoFullPath(agentPolicyId),
-    method: 'get',
-    version: API_VERSIONS.public.v1,
+export const useGetOneAgentPolicyFull = (agentPolicyId: string, query?: { revision?: number }) => {
+  return useQuery<GetFullAgentPolicyResponse, RequestError>({
+    queryKey: ['agentPolicyFull', agentPolicyId, query],
+    queryFn: () =>
+      sendRequestForRq<GetFullAgentPolicyResponse>({
+        path: agentPolicyRouteService.getInfoFullPath(agentPolicyId),
+        method: 'get',
+        version: API_VERSIONS.public.v1,
+        query,
+      }),
   });
 };
 
@@ -231,6 +265,15 @@ export const sendDeleteAgentPolicy = (body: DeleteAgentPolicyRequest['body']) =>
   });
 };
 
+export const sendDeleteAgentPolicyForRq = (body: DeleteAgentPolicyRequest['body']) => {
+  return sendRequestForRq<DeleteAgentPolicyResponse>({
+    path: agentPolicyRouteService.getDeletePath(),
+    method: 'post',
+    body: JSON.stringify(body),
+    version: API_VERSIONS.public.v1,
+  });
+};
+
 export function useDeleteAgentPolicyMutation() {
   const queryClient = useQueryClient();
 
@@ -270,10 +313,47 @@ export const useGetListOutputsForPolicies = (body?: GetListAgentPolicyOutputsReq
 };
 
 export const useGetInfoOutputsForPolicy = (agentPolicyId: string | undefined) => {
-  return useConditionalRequest<GetAgentPolicyOutputsResponse>({
-    path: agentPolicyId ? agentPolicyRouteService.getInfoOutputsPath(agentPolicyId) : undefined,
-    method: 'get',
-    shouldSendRequest: !!agentPolicyId,
-    version: API_VERSIONS.public.v1,
-  } as SendConditionalRequestConfig);
+  return useQuery({
+    queryKey: ['get_info_outputs_for_policy', agentPolicyId],
+    enabled: !!agentPolicyId,
+    queryFn: () =>
+      sendRequestForRq<GetAgentPolicyOutputsResponse>({
+        path: agentPolicyId ? agentPolicyRouteService.getInfoOutputsPath(agentPolicyId) : '',
+        method: 'get',
+        version: API_VERSIONS.public.v1,
+      }),
+  });
 };
+
+/**
+ * Creates an agent policy and its package policies in a single transactional server-side call.
+ *
+ * Route: POST /internal/fleet/agent_and_package_policies
+ *
+ * IMPORTANT: despite the /internal/ URL path, this route is registered at
+ * API_VERSIONS.public.v1 ('2023-10-31'). Using internal.v1 ('1') returns 400
+ * "Unsupported version". The version literal below must not be changed.
+ * See: fleet/server/routes/agent_policy/index.ts ~line 308.
+ *
+ * The handler is transactional: on failure it deletes all created package policies
+ * and the agent policy, then rethrows — so the caller gets a clean rollback.
+ */
+export const sendCreateAgentPolicyWithPackagePolicies = (
+  body: CreateAgentPolicyRequest['body'] & {
+    package_policies: Array<{
+      name: string;
+      package: { name: string; version: string };
+      vars?: SimplifiedVars;
+      inputs?: Record<string, unknown>;
+      namespace?: string;
+    }>;
+  },
+  query?: { sys_monitoring?: boolean }
+) =>
+  sendRequestForRq<CreateAgentPolicyResponse>({
+    path: AGENT_POLICY_API_ROUTES.CREATE_WITH_PACKAGE_POLICIES,
+    method: 'post',
+    version: API_VERSIONS.public.v1,
+    query,
+    body: JSON.stringify(body),
+  });

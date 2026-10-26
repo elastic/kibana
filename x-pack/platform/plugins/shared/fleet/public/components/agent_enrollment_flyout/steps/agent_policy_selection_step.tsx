@@ -14,23 +14,32 @@ import type { EuiContainedStepProps } from '@elastic/eui/src/components/steps/st
 import type { AgentPolicy } from '../../../types';
 
 import { SelectCreateAgentPolicy } from '../agent_policy_select_create';
+import { MinAgentVersionCallout } from '../min_agent_version_callout';
 
 export const AgentPolicySelectionStep = ({
   agentPolicies,
   selectedPolicy,
+  selectedPolicyId,
   setSelectedPolicyId,
   selectedApiKeyId,
   setSelectedAPIKeyId,
   excludeFleetServer,
   refreshAgentPolicies,
+  onAgentPolicyCreated,
+  defaultAgentPolicyName,
+  forceCreatePolicy,
 }: {
   agentPolicies: AgentPolicy[];
   selectedPolicy?: AgentPolicy;
+  selectedPolicyId?: string;
   setSelectedPolicyId: (agentPolicyId?: string) => void;
   selectedApiKeyId?: string;
   setSelectedAPIKeyId?: (key?: string) => void;
   excludeFleetServer?: boolean;
   refreshAgentPolicies: () => void;
+  onAgentPolicyCreated?: (policy: AgentPolicy) => void;
+  defaultAgentPolicyName?: string;
+  forceCreatePolicy?: boolean;
 }): EuiContainedStepProps => {
   return {
     title: i18n.translate('xpack.fleet.agentEnrollment.stepChooseAgentPolicyTitle', {
@@ -40,14 +49,20 @@ export const AgentPolicySelectionStep = ({
       <>
         <SelectCreateAgentPolicy
           agentPolicies={agentPolicies}
-          selectedPolicyId={selectedPolicy?.id}
+          selectedPolicyId={selectedPolicyId}
           setSelectedPolicyId={setSelectedPolicyId}
           withKeySelection={setSelectedAPIKeyId ? true : false}
           selectedApiKeyId={selectedApiKeyId}
           onKeyChange={setSelectedAPIKeyId}
           refreshAgentPolicies={refreshAgentPolicies}
           excludeFleetServer={excludeFleetServer}
+          onAgentPolicyCreated={onAgentPolicyCreated}
+          defaultAgentPolicyName={defaultAgentPolicyName}
+          forceCreatePolicy={forceCreatePolicy}
         />
+        {selectedPolicy?.min_agent_version != null && (
+          <MinAgentVersionCallout minVersion={selectedPolicy.min_agent_version} />
+        )}
       </>
     ),
   };

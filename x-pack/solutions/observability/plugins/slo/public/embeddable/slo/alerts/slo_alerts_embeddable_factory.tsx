@@ -6,29 +6,34 @@
  */
 
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
-import { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
+import type { FetchContext, ViewMode } from '@kbn/presentation-publishing';
 import {
-  FetchContext,
   fetch$,
+  getViewModeSubject,
+  initializeStateManager,
   initializeTitleManager,
+  titleComparators,
   useBatchedPublishingSubjects,
   useFetchContext,
 } from '@kbn/presentation-publishing';
-import { Router } from '@kbn/shared-ux-router';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { createBrowserHistory } from 'history';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import React, { useEffect } from 'react';
-import { BehaviorSubject, Subject } from 'rxjs';
+import { BehaviorSubject, Subject, merge } from 'rxjs';
+import { initializeStateApi } from '@kbn/presentation-publishing';
 import { PluginContext } from '../../../context/plugin_context';
-import { SLOPublicPluginsStart, SLORepositoryClient } from '../../../types';
-import { SLO_ALERTS_EMBEDDABLE_ID } from './constants';
+import type { SLOPublicPluginsStart, SLORepositoryClient } from '../../../types';
+import {
+  SLO_ALERTS_EMBEDDABLE_ID,
+  SLO_ALERTS_SUPPORTED_TRIGGERS,
+} from '../../../../common/embeddables/alerts/constants';
 import { SloAlertsWrapper } from './slo_alerts_wrapper';
-import { SloAlertsApi, SloAlertsEmbeddableState } from './types';
+import type { AlertsCustomState, SloAlertsApi, SloAlertsEmbeddableState } from './types';
 import { openSloConfiguration } from './slo_alerts_open_configuration';
-const history = createBrowserHistory();
+import { ensureLicense } from '../ensure_license';
 const queryClient = new QueryClient();
 
 export const getAlertsPanelTitle = () =>
@@ -47,17 +52,18 @@ export function getAlertsEmbeddableFactory({
   sloClient: SLORepositoryClient;
   kibanaVersion: string;
 }) {
-  const factory: ReactEmbeddableFactory<
-    SloAlertsEmbeddableState,
-    SloAlertsEmbeddableState,
-    SloAlertsApi
-  > = {
+  const factory: EmbeddablePublicDefinition<SloAlertsEmbeddableState, SloAlertsApi> = {
     type: SLO_ALERTS_EMBEDDABLE_ID,
-    deserializeState: (state) => {
-      return state.rawState as SloAlertsEmbeddableState;
-    },
-    buildEmbeddable: async (state, buildApi, uuid, parentApi) => {
+    buildEmbeddable: async ({
+      initializeDrilldownsManager,
+      initialState,
+      finalizeApi,
+      uuid,
+      parentApi,
+    }) => {
+      await ensureLicense(pluginsStart.licensing);
       const deps = { ...coreStart, ...pluginsStart };
+      const drilldownsManager = initializeDrilldownsManager(uuid, initialState);
       async function onEdit() {
         try {
           const result = await openSloConfiguration(
@@ -72,52 +78,60 @@ export function getAlertsEmbeddableFactory({
         }
       }
 
-      const titleManager = initializeTitleManager(state);
-      const defaultTitle$ = new BehaviorSubject<string | undefined>(getAlertsPanelTitle());
-      const slos$ = new BehaviorSubject(state.slos);
-      const showAllGroupByInstances$ = new BehaviorSubject(state.showAllGroupByInstances);
-      const reload$ = new Subject<FetchContext>();
-      const api = buildApi(
-        {
-          ...titleManager.api,
-          defaultTitle$,
-          getTypeDisplayName: () =>
-            i18n.translate('xpack.slo.editSloAlertswEmbeddable.typeDisplayName', {
-              defaultMessage: 'configuration',
-            }),
-          isEditingEnabled: () => true,
-          onEdit: async () => {
-            onEdit();
-          },
-          serializeState: () => {
-            return {
-              rawState: {
-                ...titleManager.serialize(),
-                slos: slos$.getValue(),
-                showAllGroupByInstances: showAllGroupByInstances$.getValue(),
-              },
-            };
-          },
-          getSloAlertsConfig: () => {
-            return {
-              slos: slos$.getValue(),
-              showAllGroupByInstances: showAllGroupByInstances$.getValue(),
-            };
-          },
-          updateSloAlertsConfig: (update) => {
-            slos$.next(update.slos);
-            showAllGroupByInstances$.next(update.showAllGroupByInstances);
-          },
-        },
-        {
-          slos: [slos$, (value) => slos$.next(value)],
-          showAllGroupByInstances: [
-            showAllGroupByInstances$,
-            (value) => showAllGroupByInstances$.next(value),
-          ],
-          ...titleManager.comparators,
-        }
+      const titleManager = initializeTitleManager(initialState);
+      const sloAlertsStateManager = initializeStateManager<AlertsCustomState>(
+        { slos: initialState?.slos ?? [] },
+        { slos: [] }
       );
+      const defaultTitle$ = new BehaviorSubject<string | undefined>(getAlertsPanelTitle());
+      const reload$ = new Subject<FetchContext>();
+
+      const stateApi = initializeStateApi<SloAlertsEmbeddableState>({
+        uuid,
+        parentApi,
+        serializeState: () => ({
+          ...titleManager.getLatestState(),
+          ...drilldownsManager.getLatestState(),
+          ...sloAlertsStateManager.getLatestState(),
+        }),
+        anyStateChange$: merge(
+          drilldownsManager.anyStateChange$,
+          titleManager.anyStateChange$,
+          sloAlertsStateManager.anyStateChange$
+        ),
+        getComparators: () => ({
+          ...titleComparators,
+          ...drilldownsManager.comparators,
+          slos: 'referenceEquality',
+        }),
+        applySerializedState: (nextState) => {
+          drilldownsManager.reinitializeState(nextState);
+          titleManager.reinitializeState(nextState);
+          sloAlertsStateManager.reinitializeState(nextState);
+        },
+      });
+
+      const api = finalizeApi({
+        ...titleManager.api,
+        ...stateApi,
+        ...drilldownsManager.api,
+        defaultTitle$,
+        supportedTriggers: () => SLO_ALERTS_SUPPORTED_TRIGGERS,
+        getTypeDisplayName: () =>
+          i18n.translate('xpack.slo.editSloAlertswEmbeddable.typeDisplayName', {
+            defaultMessage: 'configuration',
+          }),
+        isEditingEnabled: () => true,
+        onEdit: async () => {
+          onEdit();
+        },
+        getSloAlertsConfig: () => ({
+          slos: sloAlertsStateManager.api.slos$.getValue(),
+        }),
+        updateSloAlertsConfig: (update) => {
+          sloAlertsStateManager.api.setSlos(update.slos);
+        },
+      });
 
       const fetchSubscription = fetch$(api)
         .pipe()
@@ -125,18 +139,21 @@ export function getAlertsEmbeddableFactory({
           reload$.next(next);
         });
 
+      const viewMode$ = getViewModeSubject(api) ?? new BehaviorSubject<ViewMode>('view');
+
       return {
         api,
         Component: () => {
-          const [slos, showAllGroupByInstances] = useBatchedPublishingSubjects(
-            slos$,
-            showAllGroupByInstances$
+          const [slos, viewMode] = useBatchedPublishingSubjects(
+            sloAlertsStateManager.api.slos$,
+            viewMode$
           );
           const fetchContext = useFetchContext(api);
           const I18nContext = deps.i18n.Context;
 
           useEffect(() => {
             return () => {
+              drilldownsManager.cleanup();
               fetchSubscription.unsubscribe();
             };
           }, []);
@@ -159,18 +176,16 @@ export function getAlertsEmbeddableFactory({
                     sloClient,
                   }}
                 >
-                  <Router history={history}>
-                    <QueryClientProvider client={queryClient}>
-                      <SloAlertsWrapper
-                        onEdit={onEdit}
-                        deps={deps}
-                        slos={slos}
-                        timeRange={fetchContext.timeRange ?? { from: 'now-15m/m', to: 'now' }}
-                        reloadSubject={reload$}
-                        showAllGroupByInstances={showAllGroupByInstances}
-                      />
-                    </QueryClientProvider>
-                  </Router>
+                  <QueryClientProvider client={queryClient}>
+                    <SloAlertsWrapper
+                      onEdit={onEdit}
+                      deps={deps}
+                      slos={slos}
+                      timeRange={fetchContext.timeRange ?? { from: 'now-15m/m', to: 'now' }}
+                      reloadSubject={reload$}
+                      isInteractive={viewMode !== 'non-interactive'}
+                    />
+                  </QueryClientProvider>
                 </PluginContext.Provider>
               </KibanaContextProvider>
             </I18nContext>

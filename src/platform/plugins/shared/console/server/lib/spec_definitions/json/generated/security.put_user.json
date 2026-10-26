@@ -11,6 +11,21 @@
         "wait_for"
       ]
     },
+    "data_autocomplete_rules": {
+      "username": "",
+      "email": "",
+      "full_name": "",
+      "metadata": {},
+      "password": "",
+      "password_hash": "",
+      "roles": [],
+      "enabled": {
+        "__one_of": [
+          true,
+          false
+        ]
+      }
+    },
     "methods": [
       "PUT",
       "POST"
@@ -18,7 +33,7 @@
     "patterns": [
       "_security/user/{username}"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/security-api-put-user.html",
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-put-user",
     "availability": {
       "stack": true,
       "serverless": false

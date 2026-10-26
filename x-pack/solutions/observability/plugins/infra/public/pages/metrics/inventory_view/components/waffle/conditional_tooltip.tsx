@@ -8,9 +8,11 @@
 import React, { useRef } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, useEuiTheme } from '@elastic/eui';
 import { first } from 'lodash';
-import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
+import { findInventoryFields, findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
+import { escapeQuotes } from '@kbn/es-query';
 import type { InventoryItemType, SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
 import { SnapshotMetricTypeRT } from '@kbn/metrics-data-access-plugin/common';
+import { i18n } from '@kbn/i18n';
 import { getCustomMetricLabel } from '../../../../../../common/formatters/get_custom_metric_label';
 import type { SnapshotCustomMetricInput } from '../../../../../../common/http_api';
 import { useSourceContext } from '../../../../../containers/metrics_source';
@@ -20,6 +22,7 @@ import { createInventoryMetricFormatter } from '../../lib/create_inventory_metri
 import { getSnapshotMetricTranslations } from '../../../../../../common/inventory_models/intl_strings';
 import { useWaffleOptionsContext } from '../../hooks/use_waffle_options';
 import { createFormatterForMetric } from '../../../metrics_explorer/components/helpers/create_formatter_for_metric';
+import { getInventoryRequestSchema } from '../../lib/get_inventory_request_schema';
 
 export interface Props {
   currentTime: number;
@@ -33,8 +36,14 @@ export const ConditionalToolTip = ({ node, nodeType, currentTime }: Props) => {
   // prevents auto-refresh from cancelling ongoing requests to fetch the data for the tooltip
   const requestCurrentTime = useRef(currentTime);
   const model = findInventoryModel(nodeType);
-  const { customMetrics } = useWaffleOptionsContext();
-  const requestMetrics = model.tooltipMetrics
+  const { customMetrics, preferredSchema } = useWaffleOptionsContext();
+  const requestSchema = getInventoryRequestSchema(preferredSchema);
+  const { id: nodeIdField } = findInventoryFields(nodeType, requestSchema);
+
+  const requestMetrics = model.metrics
+    .getWaffleMapTooltipMetrics({
+      schema: requestSchema,
+    })
     .map((type) => ({ type }))
     .concat(customMetrics) as Array<
     | {
@@ -42,15 +51,9 @@ export const ConditionalToolTip = ({ node, nodeType, currentTime }: Props) => {
       }
     | SnapshotCustomMetricInput
   >;
-  const query = JSON.stringify({
-    bool: {
-      filter: {
-        match_phrase: { [model.fields.id]: node.id },
-      },
-    },
-  });
+
   const { nodes, loading } = useSnapshot({
-    filterQuery: query,
+    kuery: `"${nodeIdField}": "${escapeQuotes(node.id)}"`,
     metrics: requestMetrics,
     groupBy: [],
     nodeType,
@@ -58,12 +61,19 @@ export const ConditionalToolTip = ({ node, nodeType, currentTime }: Props) => {
     currentTime: requestCurrentTime.current,
     accountId: '',
     region: '',
+    schema: requestSchema,
+    includeTimeseries: true,
   });
 
   const dataNode = first(nodes);
   const metrics = (dataNode && dataNode.metrics) || [];
+
   return (
-    <div style={{ minWidth: 220 }} data-test-subj={`conditionalTooltipContent-${node.name}`}>
+    <div
+      style={{ minWidth: 220 }}
+      data-test-subj={`conditionalTooltipContent-${node.name}`}
+      aria-label={node.name}
+    >
       <div
         style={{
           borderBottom: `${euiTheme.border.thin}`,
@@ -87,12 +97,20 @@ export const ConditionalToolTip = ({ node, nodeType, currentTime }: Props) => {
           // if custom metric, find field and label from waffleOptionsContext result
           // because useSnapshot does not return it
           const customMetric =
-            name === 'custom' ? customMetrics.find((item) => item.id === metric.name) : null;
+            name === 'custom' ? customMetrics?.find((item) => item.id === metric.name) : null;
           const formatter = customMetric
             ? createFormatterForMetric(customMetric)
             : createInventoryMetricFormatter({ type: metricName });
+
+          const metricAriaLabel = i18n.translate('xpack.infra.node.tooltip.ariaLabel', {
+            defaultMessage: '{customMetric} : {value}',
+            values: {
+              customMetric: customMetric ? getCustomMetricLabel(customMetric) : name,
+              value: (metric.value && formatter(metric.value)) || '-',
+            },
+          });
           return (
-            <EuiFlexGroup gutterSize="s" key={metric.name}>
+            <EuiFlexGroup gutterSize="s" key={metric.name} aria-label={metricAriaLabel}>
               <EuiFlexItem
                 grow={1}
                 className="eui-textTruncate eui-displayBlock"

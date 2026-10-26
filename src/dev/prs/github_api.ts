@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import axios, { AxiosError, AxiosResponse, AxiosInstance } from 'axios';
+import type { AxiosError, AxiosResponse, AxiosInstance } from 'axios';
+import axios from 'axios';
 
 import { createFailError } from '@kbn/dev-cli-errors';
 

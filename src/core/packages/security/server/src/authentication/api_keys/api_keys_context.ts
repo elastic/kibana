@@ -23,7 +23,7 @@ import type {
  * validation, and invalidation of API keys,
  * as well as checking the status of API key features.
  */
-export interface APIKeysServiceWithContext {
+export interface NativeAPIKeysWithContextType {
   /**
    * Determines if API Keys are enabled in Elasticsearch.
    */

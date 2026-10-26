@@ -8,6 +8,7 @@
 import React from 'react';
 import type { RecursivePartial } from '@elastic/eui/src/components/common';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
+import { kqlPluginMock } from '@kbn/kql/public/mocks';
 import { navigationPluginMock } from '@kbn/navigation-plugin/public/mocks';
 import { discoverPluginMock } from '@kbn/discover-plugin/public/mocks';
 import { coreMock, themeServiceMock } from '@kbn/core/public/mocks';
@@ -27,11 +28,11 @@ import {
   DEFAULT_INTERVAL_PAUSE,
   DEFAULT_INTERVAL_VALUE,
   DEFAULT_REFRESH_RATE_INTERVAL,
-  DEFAULT_TIME_RANGE,
-  DEFAULT_TO,
-  DEFAULT_RULES_TABLE_REFRESH_SETTING,
   DEFAULT_RULE_REFRESH_INTERVAL_ON,
   DEFAULT_RULE_REFRESH_INTERVAL_VALUE,
+  DEFAULT_RULES_TABLE_REFRESH_SETTING,
+  DEFAULT_TIME_RANGE,
+  DEFAULT_TO,
   SECURITY_FEATURE_ID,
 } from '../../../../common/constants';
 import type { StartServices } from '../../../types';
@@ -44,7 +45,6 @@ import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
 import { noCasesPermissions } from '../../../cases_test_utils';
 import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
 import { mockApm } from '../apm/service.mock';
-import { guidedOnboardingMock } from '@kbn/guided-onboarding-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
 import { NavigationProvider } from '@kbn/security-solution-navigation';
@@ -59,6 +59,7 @@ import { calculateBounds } from '@kbn/data-plugin/common';
 import { alertingPluginMock } from '@kbn/alerting-plugin/public/mocks';
 import { createTelemetryServiceMock } from '../telemetry/telemetry_service.mock';
 import { createSiemMigrationsMock } from '../../mock/mock_siem_migrations_service';
+import { KibanaServices } from './services';
 
 const mockUiSettings: Record<string, unknown> = {
   [DEFAULT_TIME_RANGE]: { from: 'now-15m', to: 'now', mode: 'quick' },
@@ -110,6 +111,7 @@ export const createStartServicesMock = (
   core.uiSettings.get.mockImplementation(createUseUiSettingMock());
   core.settings.client.get.mockImplementation(createUseUiSettingMock());
   const { storage } = createSecuritySolutionStorageMock();
+  const { storage: sessionStorage } = createSecuritySolutionStorageMock();
   const apm = mockApm();
   const data = dataPluginMock.createStartContract();
   const customDataService = dataPluginMock.createStartContract();
@@ -117,6 +119,7 @@ export const createStartServicesMock = (
   const urlService = new MockUrlService();
   const locator = urlService.locators.create(new MlLocatorDefinition());
   const fleet = fleetMock.createStartMock();
+  const kql = kqlPluginMock.createStartContract();
   const unifiedSearch = unifiedSearchPluginMock.createStartContract();
   const navigation = navigationPluginMock.createStartContract();
   const discover = discoverPluginMock.createStartContract();
@@ -124,7 +127,6 @@ export const createStartServicesMock = (
   const dataViewServiceMock = dataViewPluginMocks.createStartContract();
   cases.helpers.canUseCases.mockReturnValue(noCasesPermissions());
   const triggersActionsUi = triggersActionsUiMock.createStart();
-  const guidedOnboarding = guidedOnboardingMock.createStart();
   const cloud = cloudMock.createStart();
   const mockSetHeaderActionMenu = jest.fn();
   const timelineDataService = dataPluginMock.createStartContract();
@@ -155,6 +157,7 @@ export const createStartServicesMock = (
     configSettings: getDefaultConfigSettings(),
     apm,
     cases,
+    kql,
     unifiedSearch,
     navigation,
     discover,
@@ -215,6 +218,17 @@ export const createStartServicesMock = (
           showQueries: true,
           saveQuery: true,
         },
+        maintenanceWindow: {
+          show: true,
+          save: true,
+        },
+        actions: {
+          show: true,
+        },
+        fleet: {
+          crud: true,
+          read: true,
+        },
       },
     },
     security,
@@ -246,7 +260,6 @@ export const createStartServicesMock = (
       fetchAllLiveQueries: jest.fn().mockReturnValue({ data: { data: { items: [] } } }),
     },
     triggersActionsUi,
-    guidedOnboarding,
     cloud: {
       ...cloud,
       isCloudEnabled: false,
@@ -261,6 +274,9 @@ export const createStartServicesMock = (
     timelineDataService,
     alerting,
     siemMigrations,
+    sessionStorage,
+    aiRuleCreation: jest.fn(),
+    plugins: { onStart: jest.fn() },
   } as unknown as StartServices;
 };
 
@@ -275,6 +291,14 @@ export const createWithKibanaMock = () => {
 
 export const createKibanaContextProviderMock = () => {
   const services = createStartServicesMock();
+
+  KibanaServices.init({
+    ...services,
+    kibanaBranch: 'test',
+    kibanaVersion: 'test',
+    buildFlavor: 'test',
+    prebuiltRulesPackageVersion: 'test',
+  });
 
   // eslint-disable-next-line react/display-name
   return ({

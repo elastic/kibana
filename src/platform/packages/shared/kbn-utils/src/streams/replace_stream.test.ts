@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Writable, Readable } from 'stream';
+import type { Writable, Readable } from 'stream';
 
 import {
   createReplaceStream,
@@ -52,7 +52,7 @@ describe('replaceStream', () => {
 
   test('expects toReplace to be a string', () => {
     // @ts-expect-error
-    expect(() => createReplaceStream(Buffer.from('foo'))).toThrowError(/be a string/);
+    expect(() => createReplaceStream(Buffer.from('foo'))).toThrow(/be a string/);
   });
 
   test('replaces multiple single-char instances in a single chunk', async () => {

@@ -11,6 +11,12 @@ import React from 'react';
 
 import { UseField, TextField } from '../../../shared_imports';
 
-export const CustomLabelField = () => {
-  return <UseField path="customLabel" component={TextField} />;
+export const CustomLabelField = ({ disabled }: { disabled?: boolean }) => {
+  return (
+    <UseField
+      path="customLabel"
+      component={TextField}
+      componentProps={{ euiFieldProps: { disabled } }}
+    />
+  );
 };

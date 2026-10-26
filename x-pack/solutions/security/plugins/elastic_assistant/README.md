@@ -1,8 +1,8 @@
 # Elastic AI Assistant
 
-This plugin implements (only) server APIs for the `Elastic AI Assistant`.
+This plugin implements server APIs for the `Elastic AI Assistant`. Furthermore, it registers the `Elastic Assistant` in the navigation bar.
 
-This plugin does NOT contain UI components. See `x-pack/platform/packages/shared/kbn-elastic-assistant` for React components.
+For further UI components, see `x-pack/platform/packages/shared/kbn-elastic-assistant`.
 
 ## Maintainers
 
@@ -18,11 +18,15 @@ Maintained by the Security Solution team
 
 ![DefaultAttackDiscoveryGraph](./docs/img/default_attack_discovery_graph.png)
 
+### Default Defend insights graph
+
+![DefaultDefendInsightsGraph](./docs/img/default_defend_insights_graph.png)
+
 ## Development
 
 ### Generate graph structure
 
-To generate the graph structure, run `yarn draw-graph` from the plugin directory.
+To generate the graph structure, run `pnpm draw-graph` from the plugin directory.
 The graphs will be generated in the `docs/img` directory of the plugin.
 
 ### Testing

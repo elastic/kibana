@@ -21,9 +21,14 @@ export const PLI_PRODUCT_FEATURES: PliProductFeatures = {
       ProductFeatureKey.assistant,
       ProductFeatureKey.configurations,
       ProductFeatureKey.externalDetections,
+      ProductFeatureKey.externalRuleActions,
+      ProductFeatureKey.casesConnectors,
+      ProductFeatureKey.aiValueReport,
+      ProductFeatureKey.workflows,
     ],
-    essentials: [ProductFeatureKey.attackDiscovery, ProductFeatureKey.assistant],
-    complete: [ProductFeatureKey.attackDiscovery, ProductFeatureKey.assistant],
+    // neither of these tiers are available in ai_soc product line
+    essentials: [],
+    complete: [],
   },
   [ProductLine.security]: {
     search_ai_lake: [],
@@ -33,6 +38,7 @@ export const PLI_PRODUCT_FEATURES: PliProductFeatures = {
       ProductFeatureKey.notes,
       ProductFeatureKey.endpointHostManagement,
       ProductFeatureKey.endpointPolicyManagement,
+      ProductFeatureKey.endpointHostIsolation,
     ],
     complete: [
       ProductFeatureKey.detections,
@@ -40,6 +46,7 @@ export const PLI_PRODUCT_FEATURES: PliProductFeatures = {
       ProductFeatureKey.notes,
       ProductFeatureKey.endpointHostManagement,
       ProductFeatureKey.endpointPolicyManagement,
+      ProductFeatureKey.endpointHostIsolation,
       ProductFeatureKey.advancedInsights,
       ProductFeatureKey.assistant,
       ProductFeatureKey.attackDiscovery,
@@ -51,6 +58,10 @@ export const PLI_PRODUCT_FEATURES: PliProductFeatures = {
       ProductFeatureKey.automaticImport,
       ProductFeatureKey.prebuiltRuleCustomization,
       ProductFeatureKey.siemMigrations,
+      ProductFeatureKey.aiValueReport,
+      ProductFeatureKey.graphVisualization,
+      ProductFeatureKey.ruleGapsAutoFill,
+      ProductFeatureKey.workflows,
     ],
   },
   [ProductLine.endpoint]: {
@@ -64,7 +75,11 @@ export const PLI_PRODUCT_FEATURES: PliProductFeatures = {
       ProductFeatureKey.endpointPolicyProtections,
       ProductFeatureKey.endpointArtifactManagement,
       ProductFeatureKey.endpointExceptions,
+      ProductFeatureKey.endpointCustomYaraSignatures,
+      ProductFeatureKey.endpointRegistryCredentialHardening,
+      ProductFeatureKey.endpointTrustedDevices,
       ProductFeatureKey.endpointHostIsolationExceptions,
+      ProductFeatureKey.endpointScriptsManagement,
       ProductFeatureKey.endpointResponseActions,
       ProductFeatureKey.osqueryAutomatedResponseActions,
       ProductFeatureKey.endpointAgentTamperProtection,
@@ -75,7 +90,7 @@ export const PLI_PRODUCT_FEATURES: PliProductFeatures = {
   },
   [ProductLine.cloud]: {
     search_ai_lake: [], // cloud add-on not available in search_ai_lake tier
-    essentials: [ProductFeatureKey.cloudSecurityPosture],
-    complete: [ProductFeatureKey.cloudSecurityPosture],
+    essentials: [ProductFeatureKey.cloudSecurityPosture, ProductFeatureKey.cloudDefend],
+    complete: [ProductFeatureKey.cloudSecurityPosture, ProductFeatureKey.cloudDefend],
   },
 } as const;

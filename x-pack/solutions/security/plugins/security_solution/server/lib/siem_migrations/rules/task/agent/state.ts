@@ -5,22 +5,21 @@
  * 2.0.
  */
 
-import type { BaseMessage } from '@langchain/core/messages';
 import { Annotation, messagesStateReducer } from '@langchain/langgraph';
+import type { BaseMessage } from '@langchain/core/messages';
 import { uniq } from 'lodash/fp';
-import type { RuleTranslationResult } from '../../../../../../common/siem_migrations/constants';
+import type { MigrationTranslationResult } from '../../../../../../common/siem_migrations/constants';
 import type {
   ElasticRulePartial,
   OriginalRule,
-  RuleMigration,
+  RuleMigrationRule,
 } from '../../../../../../common/siem_migrations/model/rule_migration.gen';
+import type { EnrichedMigrationResources } from '../../../common/task/util/enrich_lookup_resources';
 
 export const migrateRuleState = Annotation.Root({
-  messages: Annotation<BaseMessage[]>({
-    reducer: messagesStateReducer,
-    default: () => [],
-  }),
+  id: Annotation<string>(),
   original_rule: Annotation<OriginalRule>(),
+  resources: Annotation<EnrichedMigrationResources>(),
   elastic_rule: Annotation<ElasticRulePartial>({
     reducer: (state, action) => ({ ...state, ...action }),
   }),
@@ -32,11 +31,22 @@ export const migrateRuleState = Annotation.Root({
     reducer: (current, value) => value ?? current,
     default: () => '',
   }),
-  translation_result: Annotation<RuleTranslationResult>(),
-  comments: Annotation<RuleMigration['comments']>({
+  translation_result: Annotation<MigrationTranslationResult>(),
+  comments: Annotation<RuleMigrationRule['comments']>({
     // Translation subgraph causes the original main graph comments to be concatenated again, we need to deduplicate them.
     reducer: (current, value) => uniq(value ? (current ?? []).concat(value) : current),
     default: () => [],
   }),
-  response: Annotation<string>(),
+  nl_query: Annotation<string>({
+    reducer: (current, value) => value ?? current,
+    default: () => '',
+  }),
+  messages: Annotation<BaseMessage[]>({
+    reducer: messagesStateReducer,
+    default: () => [],
+  }),
+});
+
+export const migrateRuleConfigSchema = Annotation.Root({
+  skipPrebuiltRulesMatching: Annotation<boolean | undefined>(),
 });

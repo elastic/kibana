@@ -7,7 +7,8 @@
 
 import { rangeQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import { unflattenKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
+import { accessKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
+import type { MetadataForDependencyResponse } from '@kbn/apm-api-shared';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import { maybe } from '../../../common/utils/maybe';
 import {
@@ -16,11 +17,6 @@ import {
   SPAN_TYPE,
 } from '../../../common/es_fields/apm';
 import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
-
-export interface MetadataForDependencyResponse {
-  spanType: string | undefined;
-  spanSubtype: string | undefined;
-}
 
 export async function getMetadataForDependency({
   apmEventClient,
@@ -36,7 +32,7 @@ export async function getMetadataForDependency({
   const fields = asMutableArray([SPAN_TYPE, SPAN_SUBTYPE] as const);
   const sampleResponse = await apmEventClient.search('get_metadata_for_dependency', {
     apm: {
-      events: [ProcessorEvent.span],
+      events: [ProcessorEvent.span, ProcessorEvent.transaction],
     },
     track_total_hits: false,
     size: 1,
@@ -58,10 +54,12 @@ export async function getMetadataForDependency({
     },
   });
 
-  const sample = unflattenKnownApmEventFields(maybe(sampleResponse.hits.hits[0])?.fields);
+  const hitFields = maybe(sampleResponse.hits.hits[0])?.fields;
+
+  const sample = hitFields && accessKnownApmEventFields(hitFields);
 
   return {
-    spanType: sample?.span?.type,
-    spanSubtype: sample?.span?.subtype,
+    spanType: sample?.[SPAN_TYPE],
+    spanSubtype: sample?.[SPAN_SUBTYPE],
   };
 }

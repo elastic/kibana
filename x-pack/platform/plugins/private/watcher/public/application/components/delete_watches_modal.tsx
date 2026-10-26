@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiConfirmModal } from '@elastic/eui';
+import { EuiConfirmModal, useGeneratedHtmlId } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { deleteWatches } from '../lib/api';
@@ -14,12 +14,17 @@ import { useAppContext } from '../app_context';
 export const DeleteWatchesModal = ({
   watchesToDelete,
   callback,
+  restoreMenuFocus,
 }: {
   watchesToDelete: string[];
   callback: (deleted?: string[]) => void;
+  restoreMenuFocus?: boolean;
 }) => {
   const { toasts } = useAppContext();
   const numWatchesToDelete = watchesToDelete.length;
+
+  const modalTitleId = useGeneratedHtmlId({ prefix: 'deleteWatchModal' });
+
   if (!numWatchesToDelete) {
     return null;
   }
@@ -49,6 +54,7 @@ export const DeleteWatchesModal = ({
       buttonColor="danger"
       data-test-subj="deleteWatchesConfirmation"
       title={confirmButtonText}
+      focusTrapProps={restoreMenuFocus ? { returnFocus: false } : undefined}
       onCancel={() => callback()}
       onConfirm={async () => {
         const { successes, errors } = await deleteWatches(watchesToDelete);
@@ -83,6 +89,8 @@ export const DeleteWatchesModal = ({
       }}
       cancelButtonText={cancelButtonText}
       confirmButtonText={confirmButtonText}
+      aria-labelledby={modalTitleId}
+      titleProps={{ id: modalTitleId }}
     >
       {confirmModalText}
     </EuiConfirmModal>

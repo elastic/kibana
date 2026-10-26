@@ -7,38 +7,43 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
-import { EuiModal, EuiModalBody } from '@elastic/eui';
-
-/**
- * By default the image formatter sets the max-width to "none" on the <img /> tag
- * To render nicely the image in the modal we want max_width: 100%
- */
-const setMaxWidthImage = (imgHTML: string): string => {
-  const regex = new RegExp('max-width:[^;]+;', 'gm');
-
-  if (regex.test(imgHTML)) {
-    return imgHTML.replace(regex, 'max-width: 100%;');
-  }
-
-  return imgHTML;
-};
+import React, { type ReactNode } from 'react';
+import { css } from '@emotion/react';
+import { EuiModal, EuiModalBody, type UseEuiTheme } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 
 interface Props {
-  imgHTML: string;
+  imgElement: ReactNode;
   closeModal: () => void;
 }
 
-export const ImagePreviewModal = ({ imgHTML, closeModal }: Props) => {
+export const ImagePreviewModal = ({ imgElement, closeModal }: Props) => {
+  const styles = useMemoCss(componentStyles);
+
   return (
-    <EuiModal onClose={closeModal}>
+    <EuiModal
+      aria-label={i18n.translate('indexPatternFieldEditor.imagePreviewModal.ariaLabel', {
+        defaultMessage: 'Image preview',
+      })}
+      onClose={closeModal}
+    >
       <EuiModalBody>
-        <div
-          className="indexPatternFieldEditor__previewImageModal__wrapper"
-          // We  can dangerously set HTML here because this content is guaranteed to have been run through a valid field formatter first.
-          dangerouslySetInnerHTML={{ __html: setMaxWidthImage(imgHTML) }} // eslint-disable-line react/no-danger
-        />
+        <div css={styles.previewImageModal}>{imgElement}</div>
       </EuiModalBody>
     </EuiModal>
   );
+};
+
+const componentStyles = {
+  previewImageModal: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      padding: euiTheme.size.base,
+
+      '& img': {
+        // `!important` is required to override the formatter's inline `max-width: none`
+        // so the image stays constrained to the modal width.
+        maxWidth: '100% !important',
+      },
+    }),
 };

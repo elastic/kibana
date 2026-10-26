@@ -7,7 +7,7 @@
 
 import React from 'react';
 import deepEqual from 'react-fast-compare';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 // @ts-expect-error unconverted component
 import { elementLayer } from '../../state/actions/elements';
 import { getSelectedPage, getNodes, getSelectedToplevelNodes } from '../../state/selectors/workpad';
@@ -16,7 +16,7 @@ import { flatten } from '../../lib/aeroelastic/functional';
 import { layerHandlerCreators } from '../../lib/element_handler_creators';
 // @ts-expect-error unconverted component
 import { crawlTree } from '../workpad_page/integration_utils';
-import { State } from '../../../types';
+import type { State } from '../../../types';
 import { SidebarHeader as Component } from './sidebar_header.component';
 
 const getSelectedNodes = (state: State, pageId: string): Array<string | undefined> => {

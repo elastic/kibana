@@ -31,8 +31,8 @@ jest.mock('react-router-dom', () => {
 });
 
 const mockDispatch = jest.fn();
-jest.mock('react-redux', () => {
-  const original = jest.requireActual('react-redux');
+jest.mock('react-redux-v7', () => {
+  const original = jest.requireActual('react-redux-v7');
   return {
     ...original,
     useDispatch: () => mockDispatch,
@@ -42,8 +42,8 @@ jest.mock('react-redux', () => {
 describe('queryTimelineByIdOnUrlChange', () => {
   const oldTestTimelineId = '04e8ffb0-2c2a-11ec-949c-39005af91f70';
   const newTestTimelineId = `${oldTestTimelineId}-newId`;
-  const oldTimelineRisonSearchString = `?timeline=(activeTab:query,graphEventId:%27%27,id:%27${oldTestTimelineId}%27,isOpen:!t)`;
-  const newTimelineRisonSearchString = `?timeline=(activeTab:query,graphEventId:%27%27,id:%27${newTestTimelineId}%27,isOpen:!t)`;
+  const oldTimelineRisonSearchString = `?timeline=(activeTab:query,id:%27${oldTestTimelineId}%27,isOpen:!t)`;
+  const newTimelineRisonSearchString = `?timeline=(activeTab:query,id:%27${newTestTimelineId}%27,isOpen:!t)`;
   const mockQueryTimelineById = jest.fn();
 
   beforeEach(() => {
@@ -66,7 +66,6 @@ describe('queryTimelineByIdOnUrlChange', () => {
         expect.objectContaining({
           activeTimelineTab: 'query',
           duplicate: false,
-          graphEventId: '',
           timelineId: newTestTimelineId,
           openTimeline: true,
         })
@@ -86,7 +85,7 @@ describe('queryTimelineByIdOnUrlChange', () => {
       jest.clearAllMocks();
       rerender();
 
-      expect(mockQueryTimelineById).not.toBeCalled();
+      expect(mockQueryTimelineById).not.toHaveBeenCalled();
     });
   });
 
@@ -99,7 +98,7 @@ describe('queryTimelineByIdOnUrlChange', () => {
 
       rerender();
 
-      expect(mockQueryTimelineById).not.toBeCalled();
+      expect(mockQueryTimelineById).not.toHaveBeenCalled();
     });
   });
 
@@ -111,7 +110,7 @@ describe('queryTimelineByIdOnUrlChange', () => {
       jest.clearAllMocks();
       rerender();
 
-      expect(mockQueryTimelineById).not.toBeCalled();
+      expect(mockQueryTimelineById).not.toHaveBeenCalled();
     });
   });
 
@@ -124,7 +123,7 @@ describe('queryTimelineByIdOnUrlChange', () => {
       jest.clearAllMocks();
       rerender();
 
-      expect(mockQueryTimelineById).not.toBeCalled();
+      expect(mockQueryTimelineById).not.toHaveBeenCalled();
     });
   });
 
@@ -138,7 +137,7 @@ describe('queryTimelineByIdOnUrlChange', () => {
       jest.clearAllMocks();
       rerender();
 
-      expect(mockQueryTimelineById).not.toBeCalled();
+      expect(mockQueryTimelineById).not.toHaveBeenCalled();
     });
   });
 });

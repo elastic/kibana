@@ -7,68 +7,69 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  BehaviorSubject,
-  combineLatest,
-  debounceTime,
-  Observable,
-  of,
-  startWith,
-  switchMap,
-  tap,
-  withLatestFrom,
-} from 'rxjs';
+import type { BehaviorSubject, Observable } from 'rxjs';
+import { combineLatest, debounceTime, startWith, switchMap, tap, withLatestFrom } from 'rxjs';
 
-import { PublishingSubject } from '@kbn/presentation-publishing';
-import { apiPublishesReload } from '@kbn/presentation-publishing/interfaces/fetch/publishes_reload';
-import { OptionsListSuccessResponse } from '../../../../common/options_list/types';
-import { isValidSearch } from '../../../../common/options_list/is_valid_search';
-import { OptionsListSelection } from '../../../../common/options_list/options_list_selections';
-import { ControlFetchContext } from '../../../control_group/control_fetch';
-import { ControlStateManager } from '../../types';
+import { fetch$, type PublishingSubject } from '@kbn/presentation-publishing';
+import type {
+  OptionsListSearchTechnique,
+  OptionsListSelection,
+  OptionsListSortingType,
+} from '@kbn/controls-schemas';
+import { ControlValuesSource, DEFAULT_DSL_OPTIONS_LIST_STATE } from '@kbn/controls-constants';
+
+import type {
+  OptionsListFailureResponse,
+  OptionsListSuccessResponse,
+} from '../../../../common/options_list/types';
+import { buildOptionsListFetchBody } from './build_options_list_fetch_body';
 import { OptionsListFetchCache } from './options_list_fetch_cache';
-import { OptionsListComponentApi, OptionsListComponentState, OptionsListControlApi } from './types';
+import type { DSLOptionsListComponentApi, OptionsListControlApi } from './types';
+import type { DataControlStateManager } from '../data_control_manager';
 
 export function fetchAndValidate$({
   api,
-  stateManager,
+  requestSize$,
+  runPastTimeout$,
+  selectedOptions$,
+  searchTechnique$,
+  sort$,
 }: {
-  api: Pick<OptionsListControlApi, 'dataViews$' | 'field$' | 'setBlockingError' | 'parentApi'> &
-    Pick<OptionsListComponentApi, 'loadMoreSubject'> & {
-      controlFetch$: Observable<ControlFetchContext>;
+  api: DataControlStateManager['api'] &
+    Pick<OptionsListControlApi, 'parentApi' | 'uuid'> &
+    Pick<DSLOptionsListComponentApi, 'loadMoreSubject'> & {
       loadingSuggestions$: BehaviorSubject<boolean>;
       debouncedSearchString: Observable<string>;
     };
-  stateManager: ControlStateManager<
-    Pick<OptionsListComponentState, 'requestSize' | 'runPastTimeout' | 'searchTechnique' | 'sort'>
-  > & {
-    selectedOptions: PublishingSubject<OptionsListSelection[] | undefined>;
-  };
-}): Observable<OptionsListSuccessResponse | { error: Error }> {
+  requestSize$: PublishingSubject<number>;
+  runPastTimeout$: PublishingSubject<boolean | undefined>;
+  selectedOptions$: PublishingSubject<OptionsListSelection[] | undefined>;
+  searchTechnique$: PublishingSubject<OptionsListSearchTechnique | undefined>;
+  sort$: PublishingSubject<OptionsListSortingType | undefined>;
+}): {
+  suggestions$: Observable<OptionsListSuccessResponse | { error: Error }>;
+  cancelRequests: () => void;
+} {
   const requestCache = new OptionsListFetchCache();
   let abortController: AbortController | undefined;
 
-  return combineLatest([
-    api.dataViews$,
-    api.field$,
-    api.controlFetch$,
-    api.parentApi.allowExpensiveQueries$,
-    api.parentApi.ignoreParentSettings$,
-    api.debouncedSearchString,
-    stateManager.sort,
-    stateManager.searchTechnique,
+  const suggestions$ = combineLatest({
+    dataViews: api.dataViews$,
+    field: api.field$,
+    esqlQuery: api.esqlQuery$,
+    valuesSource: api.valuesSource$,
+    fetchContext: fetch$(api),
+    useGlobalFilters: api.useGlobalFilters$,
+    searchString: api.debouncedSearchString,
+    ignoreValidations: api.ignoreValidations$,
+    sort: sort$,
+    searchTechnique: searchTechnique$,
     // cannot use requestSize directly, because we need to be able to reset the size to the default without refetching
-    api.loadMoreSubject.pipe(
+    loadMore: api.loadMoreSubject.pipe(
       startWith(null), // start with null so that `combineLatest` subscription fires
       debounceTime(100) // debounce load more so "loading" state briefly shows
     ),
-    apiPublishesReload(api.parentApi)
-      ? api.parentApi.reload$.pipe(
-          tap(() => requestCache.clearCache()),
-          startWith(undefined)
-        )
-      : of(undefined),
-  ]).pipe(
+  }).pipe(
     tap(() => {
       // abort any in progress requests
       if (abortController) {
@@ -76,57 +77,68 @@ export function fetchAndValidate$({
         abortController = undefined;
       }
     }),
-    withLatestFrom(
-      stateManager.requestSize,
-      stateManager.runPastTimeout,
-      stateManager.selectedOptions
-    ),
+    withLatestFrom(requestSize$, runPastTimeout$, selectedOptions$),
     switchMap(
       async ([
-        [
+        {
           dataViews,
           field,
-          controlFetchContext,
-          allowExpensiveQueries,
-          ignoreParentSettings,
+          fetchContext,
+          useGlobalFilters,
+          ignoreValidations,
           searchString,
           sort,
           searchTechnique,
-        ],
+          esqlQuery,
+          valuesSource,
+        },
         requestSize,
         runPastTimeout,
         selectedOptions,
       ]) => {
-        const dataView = dataViews?.[0];
-        if (
-          !dataView ||
-          !field ||
-          !isValidSearch({ searchString, fieldType: field.type, searchTechnique })
-        ) {
-          return { suggestions: [] };
+        let built: ReturnType<typeof buildOptionsListFetchBody>;
+        try {
+          built = buildOptionsListFetchBody({
+            valuesSource: valuesSource ?? ControlValuesSource.FIELD,
+            esqlQuery,
+            dataViews,
+            field,
+            fetchContext,
+            useGlobalFilters,
+            searchString,
+            sort: sort ?? DEFAULT_DSL_OPTIONS_LIST_STATE.sort,
+            searchTechnique: searchTechnique ?? DEFAULT_DSL_OPTIONS_LIST_STATE.search_technique,
+            requestSize,
+            runPastTimeout: runPastTimeout ?? false,
+            selectedOptions: selectedOptions ?? [],
+            ignoreValidations,
+          });
+        } catch (error) {
+          return { error };
+        }
+
+        if (built.outcome === 'empty') {
+          const emptyResponse = built.response;
+          if ('totalCardinality' in emptyResponse) {
+            return emptyResponse;
+          }
+          return { suggestions: emptyResponse.suggestions, totalCardinality: 0, isPartial: false };
+        }
+
+        if (built.showLoadingSuggestions) {
+          api.loadingSuggestions$.next(true);
         }
 
         /** Fetch the suggestions list + perform validation */
-        api.loadingSuggestions$.next(true);
-
-        const request = {
-          sort,
-          dataView,
-          searchString,
-          runPastTimeout,
-          searchTechnique,
-          selectedOptions,
-          field: field.toSpec(),
-          size: requestSize,
-          allowExpensiveQueries,
-          ignoreValidations: ignoreParentSettings?.ignoreValidations,
-          ...controlFetchContext,
-        };
-
         const newAbortController = new AbortController();
         abortController = newAbortController;
         try {
-          return await requestCache.runFetchRequest(request, newAbortController.signal);
+          const result = await requestCache.runFetchRequest(built.body, newAbortController.signal);
+          if ('error' in result) {
+            const err = (result as OptionsListFailureResponse).error;
+            return { error: err === 'aborted' ? new Error('Request aborted') : err };
+          }
+          return result;
         } catch (error) {
           return { error };
         }
@@ -136,4 +148,14 @@ export function fetchAndValidate$({
       api.loadingSuggestions$.next(false);
     })
   );
+
+  return {
+    suggestions$,
+    cancelRequests: () => {
+      if (abortController) {
+        abortController.abort();
+        abortController = undefined;
+      }
+    },
+  };
 }

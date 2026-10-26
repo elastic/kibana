@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { UserConfiguredActionConnector } from '@kbn/triggers-actions-ui-plugin/public/types';
 import type {
   ExecutorSubActionPushParams,
   MappingConfigType,
-} from '../../../server/connector_types/swimlane/types';
+} from '@kbn/connector-schemas/swimlane';
+import type { UserConfiguredActionConnector } from '@kbn/triggers-actions-ui-plugin/public/types';
 
 export type SwimlaneActionConnector = UserConfiguredActionConnector<
   SwimlaneConfig,

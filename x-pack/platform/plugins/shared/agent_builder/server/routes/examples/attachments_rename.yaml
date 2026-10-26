@@ -1,0 +1,30 @@
+requestBody:
+  content:
+    application/json:
+      examples:
+        renameAttachmentExample:
+          description: "Example request for renaming an attachment"
+          value:
+            description: "Updated attachment name"
+responses:
+  200:
+    description: "Indicates a successful response"
+    content:
+      application/json:
+        examples:
+          renameAttachmentResponseExample:
+            description: "Example response returning the renamed attachment (version unchanged)"
+            value:
+              success: true
+              attachment:
+                id: att-abc123
+                type: text
+                current_version: 1
+                versions:
+                  - version: 1
+                    data: "Content remains the same"
+                    created_at: "2025-01-06T10:00:00.000Z"
+                    content_hash: "sha256-xyz"
+                    estimated_tokens: 10
+                description: "Updated attachment name"
+                active: true

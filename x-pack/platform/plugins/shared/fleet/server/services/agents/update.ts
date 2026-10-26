@@ -11,20 +11,27 @@ import { AGENTS_PREFIX } from '../../constants';
 
 import { getAgentsByKuery } from './crud';
 import { unenrollAgent } from './unenroll';
+import { buildPolicyBaseIdWithFallbackKuery } from '../../../common/services/version_specific_policies_utils';
 
 export async function unenrollForAgentPolicyId(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
-  policyId: string
+  policyId: string,
+  options?: { revoke?: boolean }
 ) {
+  const revoke = options?.revoke ?? false;
   let hasMore = true;
   let page = 1;
   while (hasMore) {
     const { agents } = await getAgentsByKuery(esClient, soClient, {
-      kuery: `${AGENTS_PREFIX}.policy_id:"${policyId}"`,
+      kuery: buildPolicyBaseIdWithFallbackKuery(
+        policyId,
+        `${AGENTS_PREFIX}.policy_base_id`,
+        `${AGENTS_PREFIX}.policy_id`
+      ),
+      showInactive: revoke,
       page: page++,
       perPage: 1000,
-      showInactive: false,
     });
 
     if (agents.length === 0) {
@@ -32,6 +39,8 @@ export async function unenrollForAgentPolicyId(
     }
     for (const agent of agents) {
       await unenrollAgent(soClient, esClient, agent.id, {
+        force: revoke,
+        revoke,
         skipAgentlessValidation: true,
       });
     }

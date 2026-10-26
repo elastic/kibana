@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { addBasePath } from '../../../services';
-import { RouteDependencies } from '../../../types';
+import type { RouteDependencies } from '../../../types';
 
 /**
  * Pause auto-follow pattern(s)
@@ -18,7 +18,7 @@ export const registerPauseRoute = ({
   lib: { handleEsError },
 }: RouteDependencies) => {
   const paramsSchema = schema.object({
-    id: schema.string(),
+    id: schema.string({ maxLength: 1000 }),
   });
 
   router.post(

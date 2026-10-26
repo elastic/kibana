@@ -5,50 +5,47 @@
  * 2.0.
  */
 
-import {
-  WorkspaceNode,
-  WorkspaceEdge,
+import type {
   SerializedEdge,
   UrlTemplate,
   SerializedUrlTemplate,
   WorkspaceField,
   GraphWorkspaceSavedObject,
   SerializedWorkspaceState,
-  Workspace,
   AdvancedSettings,
   SerializedNode,
-  BlockListedNode,
 } from '../../types';
-import { IndexpatternDatasource } from '../../state_management';
+import type {
+  IndexpatternDatasource,
+  WorkspaceState,
+  WorkspaceNodeState,
+  WorkspaceEdgeState,
+} from '../../state_management';
 
-function serializeNode(
-  { data, scaledSize, parent, x, y, label, color }: BlockListedNode,
-  allNodes: WorkspaceNode[] = []
-) {
-  return {
-    x,
-    y,
-    label,
-    color,
-    field: data.field,
-    term: data.term,
-    parent: parent ? allNodes.indexOf(parent) : null,
-    size: scaledSize,
-  };
-}
+const serializeNode = (
+  { data, scaledSize, parentId, x, y, label, color }: WorkspaceNodeState,
+  nodeIndexes: ReadonlyMap<string, number> = new Map()
+): SerializedNode => ({
+  x,
+  y,
+  label,
+  color,
+  field: data.field,
+  term: data.term,
+  parent: parentId ? nodeIndexes.get(parentId) ?? null : null,
+  size: scaledSize,
+});
 
-function serializeEdge(
-  { source, target, weight, width, label }: WorkspaceEdge,
-  allNodes: WorkspaceNode[] = []
-): SerializedEdge {
-  return {
-    weight,
-    width,
-    label,
-    source: allNodes.indexOf(source),
-    target: allNodes.indexOf(target),
-  };
-}
+const serializeEdge = (
+  { sourceId, targetId, weight, width, label }: WorkspaceEdgeState,
+  nodeIndexes: ReadonlyMap<string, number>
+): SerializedEdge => ({
+  weight,
+  width,
+  label,
+  source: nodeIndexes.get(sourceId) ?? -1,
+  target: nodeIndexes.get(targetId) ?? -1,
+});
 
 function serializeUrlTemplate({ encoder, icon, url, description, isDefault }: UrlTemplate) {
   const serializedTemplate: SerializedUrlTemplate = {
@@ -81,45 +78,49 @@ function serializeField({
   };
 }
 
-export function appStateToSavedWorkspace(
+interface SerializableAppState {
+  urlTemplates: UrlTemplate[];
+  advancedSettings: AdvancedSettings;
+  selectedIndex: IndexpatternDatasource;
+  selectedFields: WorkspaceField[];
+}
+
+const serializeConfiguration = ({
+  urlTemplates,
+  advancedSettings,
+  selectedIndex,
+  selectedFields,
+}: SerializableAppState) => ({
+  indexPattern: selectedIndex.id,
+  selectedFields: selectedFields.map(serializeField),
+  urlTemplates: urlTemplates.map(serializeUrlTemplate),
+  exploreControls: advancedSettings,
+});
+
+export function reduxStateToSavedWorkspace(
   currentSavedWorkspace: GraphWorkspaceSavedObject,
-  {
-    workspace,
-    urlTemplates,
-    advancedSettings,
-    selectedIndex,
-    selectedFields,
-  }: {
-    workspace: Workspace;
-    urlTemplates: UrlTemplate[];
-    advancedSettings: AdvancedSettings;
-    selectedIndex: IndexpatternDatasource;
-    selectedFields: WorkspaceField[];
-  },
+  { workspace, ...configuration }: SerializableAppState & { workspace: WorkspaceState },
   canSaveData: boolean
 ) {
-  const blocklist: SerializedNode[] = canSaveData
-    ? workspace.blocklistedNodes.map((node) => serializeNode(node))
-    : [];
+  const nodeIndexes = new Map(workspace.nodeIds.map((nodeId, index) => [nodeId, index]));
   const vertices: SerializedNode[] = canSaveData
-    ? workspace.nodes.map((node) => serializeNode(node, workspace.nodes))
+    ? workspace.nodeIds.map((nodeId) => serializeNode(workspace.nodesById[nodeId], nodeIndexes))
+    : [];
+  const blocklist: SerializedNode[] = canSaveData
+    ? workspace.blocklistedNodeIds.map((nodeId) =>
+        serializeNode(workspace.blocklistedNodesById[nodeId])
+      )
     : [];
   const links: SerializedEdge[] = canSaveData
-    ? workspace.edges.map((edge) => serializeEdge(edge, workspace.nodes))
+    ? workspace.edgeIds.map((edgeId) => serializeEdge(workspace.edgesById[edgeId], nodeIndexes))
     : [];
 
-  const mappedUrlTemplates = urlTemplates.map(serializeUrlTemplate);
-
   const persistedWorkspaceState: SerializedWorkspaceState = {
-    indexPattern: selectedIndex.id,
-    selectedFields: selectedFields.map(serializeField),
+    ...serializeConfiguration(configuration),
     blocklist,
     vertices,
     links,
-    urlTemplates: mappedUrlTemplates,
-    exploreControls: advancedSettings,
   };
-
   currentSavedWorkspace.wsState = JSON.stringify(persistedWorkspaceState);
   currentSavedWorkspace.numVertices = vertices.length;
   currentSavedWorkspace.numLinks = links.length;

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Command } from '@kbn/dev-cli-runner';
+import type { Command } from '@kbn/dev-cli-runner';
 import {
   SCOUT_REPORTER_ES_API_KEY,
   SCOUT_REPORTER_ES_URL,

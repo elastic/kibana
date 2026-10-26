@@ -164,21 +164,21 @@ export const ALERTS_HEADERS_SERVICE_CRITICALITY = i18n.translate(
 export const ACTION_INVESTIGATE_IN_TIMELINE = i18n.translate(
   'xpack.securitySolution.detectionEngine.alerts.actions.investigateInTimelineTitle',
   {
-    defaultMessage: 'Investigate in timeline',
+    defaultMessage: 'Investigate in Timeline',
   }
 );
 
 export const ACTION_CANNOT_INVESTIGATE_IN_TIMELINE = i18n.translate(
   'xpack.securitySolution.detectionEngine.alerts.actions.cannotInvestigateInTimelineTitle',
   {
-    defaultMessage: 'Please navigate to a page with timeline to investigate',
+    defaultMessage: 'Please navigate to a page with Timeline to investigate',
   }
 );
 
 export const ACTION_INVESTIGATE_IN_TIMELINE_ARIA_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.alerts.actions.investigateInTimelineAriaLabel',
   {
-    defaultMessage: 'Send alert to timeline',
+    defaultMessage: 'Send alert to Timeline',
   }
 );
 
@@ -211,69 +211,10 @@ export const ACTION_ADD_ENDPOINT_EXCEPTION = i18n.translate(
   }
 );
 
-export const CLOSED_ALERT_SUCCESS_TOAST = (totalAlerts: number) =>
-  i18n.translate('xpack.securitySolution.detectionEngine.alerts.closedAlertSuccessToastMessage', {
-    values: { totalAlerts },
-    defaultMessage:
-      'Successfully closed {totalAlerts} {totalAlerts, plural, =1 {alert} other {alerts}}.',
-  });
-
-export const ALERT_DURATION = i18n.translate(
-  'xpack.securitySolution.eventsViewer.alerts.defaultHeaders.alertDurationTitle',
-  {
-    defaultMessage: 'Alert duration',
-  }
-);
-
-export const OPENED_ALERT_SUCCESS_TOAST = (totalAlerts: number) =>
-  i18n.translate('xpack.securitySolution.detectionEngine.alerts.openedAlertSuccessToastMessage', {
-    values: { totalAlerts },
-    defaultMessage:
-      'Successfully opened {totalAlerts} {totalAlerts, plural, =1 {alert} other {alerts}}.',
-  });
-
-export const ACKNOWLEDGED_ALERT_SUCCESS_TOAST = (totalAlerts: number) =>
-  i18n.translate(
-    'xpack.securitySolution.detectionEngine.alerts.acknowledgedAlertSuccessToastMessage',
-    {
-      values: { totalAlerts },
-      defaultMessage:
-        'Successfully marked {totalAlerts} {totalAlerts, plural, =1 {alert} other {alerts}} as acknowledged.',
-    }
-  );
-
-export const CLOSED_ALERT_FAILED_TOAST = i18n.translate(
-  'xpack.securitySolution.detectionEngine.alerts.closedAlertFailedToastMessage',
-  {
-    defaultMessage: 'Failed to close alert(s).',
-  }
-);
-
-export const OPENED_ALERT_FAILED_TOAST = i18n.translate(
-  'xpack.securitySolution.detectionEngine.alerts.openedAlertFailedToastMessage',
-  {
-    defaultMessage: 'Failed to open alert(s)',
-  }
-);
-
-export const ACKNOWLEDGED_ALERT_FAILED_TOAST = i18n.translate(
-  'xpack.securitySolution.detectionEngine.alerts.acknowledgedAlertFailedToastMessage',
-  {
-    defaultMessage: 'Failed to mark alert(s) as acknowledged',
-  }
-);
-
 export const MORE_ACTIONS = i18n.translate(
   'xpack.securitySolution.detectionEngine.alerts.moreActionsAriaLabel',
   {
     defaultMessage: 'More actions',
-  }
-);
-
-export const STATUS = i18n.translate(
-  'xpack.securitySolution.eventsViewer.alerts.defaultHeaders.statusTitle',
-  {
-    defaultMessage: 'Status',
   }
 );
 
@@ -291,31 +232,10 @@ export const CLICK_TO_CHANGE_ALERT_STATUS = i18n.translate(
   }
 );
 
-export const TRIGGERED = i18n.translate(
-  'xpack.securitySolution.eventsViewer.alerts.defaultHeaders.triggeredTitle',
-  {
-    defaultMessage: 'Triggered',
-  }
-);
-
-export const ADD_TO_EXISTING_CASE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.alerts.actions.addToCase',
-  {
-    defaultMessage: 'Add to existing case',
-  }
-);
-
-export const ADD_TO_NEW_CASE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.alerts.actions.addToNewCase',
-  {
-    defaultMessage: 'Add to new case',
-  }
-);
-
 export const INVESTIGATE_BULK_IN_TIMELINE = i18n.translate(
   'xpack.securitySolution.detectionEngine.alerts.actions.addBulkToTimeline',
   {
-    defaultMessage: 'Investigate in timeline',
+    defaultMessage: 'Investigate in Timeline',
   }
 );
 
@@ -418,3 +338,52 @@ export const EVENT_RENDERED_VIEW_COLUMNS = {
     defaultMessage: 'Event Summary',
   }),
 };
+
+export const INSUFFICIENT_PRIVILEGES = i18n.translate(
+  'xpack.securitySolution.detectionEngine.alerts.insufficientPrivileges',
+  {
+    defaultMessage: 'Insufficient privileges',
+  }
+);
+
+export const REMOTE_DOCUMENT_ACTIONS_UNAVAILABLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.alerts.remoteDocumentActionsUnavailable',
+  {
+    defaultMessage: 'Unavailable for remote documents',
+  }
+);
+
+export const CONTEXT_MENU_RUN_WORKFLOW = i18n.translate(
+  'xpack.securitySolution.detectionEngine.alerts.workflow.menu.run.workflow',
+  {
+    defaultMessage: 'Run workflow',
+  }
+);
+
+export const SELECT_WORKFLOW_PANEL_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.alerts.workflow.select.title',
+  {
+    defaultMessage: 'Select workflow',
+  }
+);
+
+export const REMOVE_FROM_CASE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.alerts.actions.removeFromCase',
+  {
+    defaultMessage: 'Remove from case',
+  }
+);
+
+export const RUN_WORKFLOW_SELECTION_TOO_LARGE = (maxItems: number) =>
+  i18n.translate('xpack.securitySolution.detectionEngine.alerts.workflow.selectionTooLarge', {
+    values: { maxItems },
+    defaultMessage:
+      'A workflow can run on up to {maxItems} items at a time. Narrow your selection to run a workflow.',
+  });
+
+export const RUN_WORKFLOW_SELECTION_FAILED = i18n.translate(
+  'xpack.securitySolution.detectionEngine.alerts.workflow.selectionFailed',
+  {
+    defaultMessage: 'Could not load the selected alerts. Try again.',
+  }
+);

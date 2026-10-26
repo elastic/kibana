@@ -1,0 +1,114 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { KibanaRequest } from '@kbn/core/server';
+import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import type { InferenceServerStart } from '@kbn/inference-plugin/server';
+import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
+import type { ApiInferenceConnector, InferenceConnector } from '@kbn/inference-common';
+
+export type { InferenceTaskType, InferenceConnector };
+
+export interface RecommendedEndpoint {
+  id: string;
+  parameters?: ApiInferenceConnector['parameters'];
+}
+
+export type RecommendedEndpointInput = string | RecommendedEndpoint;
+
+export interface InferenceFeatureConfig {
+  featureId: string;
+  parentFeatureId?: string;
+  featureName: string;
+  featureDescription: string;
+  taskType: InferenceTaskType;
+  maxNumberOfEndpoints?: number;
+  recommendedEndpoints: RecommendedEndpointInput[];
+  isTechPreview?: boolean;
+  isBeta?: boolean;
+  ignoreGlobalDefault?: boolean;
+  /**
+   * When true, the feature's model list contains only endpoints whose
+   * `capabilities.templates.policy` is `required`. Other features keep those
+   * endpoints hidden.
+   */
+  allowTemplateRequiredModels?: boolean;
+  visibilityCondition?: {
+    key: string;
+    value: string | number | boolean | null;
+  };
+}
+
+export type RegisteredInferenceFeature = Omit<InferenceFeatureConfig, 'recommendedEndpoints'> & {
+  recommendedEndpoints: RecommendedEndpoint[];
+};
+
+export type RegisterResult = { ok: true } | { ok: false; error: string };
+
+export interface InferenceFeatureRegistryContract {
+  register: (feature: InferenceFeatureConfig) => RegisterResult;
+}
+
+export interface InferenceFeatureRegistryStartContract extends InferenceFeatureRegistryContract {
+  getAll: () => RegisteredInferenceFeature[];
+  get: (featureId: string) => RegisteredInferenceFeature | undefined;
+  updateRecommendedEndpoints: (featureId: string, endpoints: RecommendedEndpointInput[]) => void;
+}
+
+export interface SearchInferenceEndpointsPluginSetup {
+  features: InferenceFeatureRegistryContract;
+}
+
+export interface ResolvedInferenceEndpoints {
+  endpoints: Array<Omit<ApiInferenceConnector, 'isRecommended'>>;
+  warnings: string[];
+  soEntryFound: boolean;
+}
+
+export interface ResolvedInferenceApiEndpoints {
+  endpoints: ApiInferenceConnector[];
+  warnings: string[];
+  soEntryFound: boolean;
+}
+
+export interface GetForFeatureOptions {
+  /**
+   * When true, bypasses the global-default-prepend logic in `resolveModelsForFeature` and
+   * skips the `KIBANA_DEFAULT_CHAT_COMPLETION` ultimate fallback.
+   *
+   * - SO overrides and `recommendedEndpoints` are still returned normally.
+   * - An empty list signals "nothing explicitly configured for this feature".
+   *
+   * Use this when the caller wants a clean "nothing configured" signal and
+   * handles the fallback itself (e.g. Agent Builder falling back to the
+   * user's current execution model).
+   */
+  onlyReturnConfigured?: boolean;
+}
+
+export interface InferenceEndpointsContract {
+  getForFeature: (
+    featureId: string,
+    request: KibanaRequest,
+    opts?: GetForFeatureOptions
+  ) => Promise<ResolvedInferenceApiEndpoints>;
+}
+
+export interface SearchInferenceEndpointsPluginStart {
+  features: InferenceFeatureRegistryStartContract;
+  endpoints: InferenceEndpointsContract;
+}
+
+export interface SearchInferenceEndpointsPluginStartDependencies {
+  inference: InferenceServerStart;
+}
+
+export interface SearchInferenceEndpointsPluginSetupDependencies {
+  features: FeaturesPluginSetup;
+}
+
+export * from '../common/types';

@@ -6,11 +6,12 @@
  */
 
 import { buildEsQuery } from '@kbn/es-query';
-import { QuerySchema, kqlQuerySchema } from '@kbn/slo-schema';
-import { Logger } from '@kbn/logging';
-import { DataView } from '@kbn/data-views-plugin/common';
+import type { QuerySchema } from '@kbn/slo-schema';
+import { is, kqlQuerySchemaZod } from '@kbn/slo-schema';
+import type { Logger } from '@kbn/logging';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { isEmpty } from 'lodash';
-import { SLODefinition } from '../../domain/models';
+import type { SLODefinition } from '../../domain/models';
 import { getDelayInSecondsFromSLO } from '../../domain/services/get_delay_in_seconds_from_slo';
 import { InvalidTransformError } from '../../errors';
 
@@ -19,8 +20,8 @@ export function getElasticsearchQueryOrThrow(kuery: QuerySchema = '', dataView?:
     if (isEmpty(kuery)) {
       return { match_all: {} };
     }
-    const kqlQuery = kqlQuerySchema.is(kuery) ? kuery : kuery.kqlQuery;
-    const filters = kqlQuerySchema.is(kuery) ? [] : kuery.filters;
+    const kqlQuery = is(kqlQuerySchemaZod, kuery) ? kuery : kuery.kqlQuery;
+    const filters = is(kqlQuerySchemaZod, kuery) ? [] : kuery.filters;
     return buildEsQuery(
       dataView,
       {
@@ -33,7 +34,7 @@ export function getElasticsearchQueryOrThrow(kuery: QuerySchema = '', dataView?:
       }
     );
   } catch (err) {
-    if (kqlQuerySchema.is(kuery)) {
+    if (is(kqlQuerySchemaZod, kuery)) {
       throw new InvalidTransformError(`Invalid KQL: ${kuery}`);
     } else {
       throw new InvalidTransformError(`Invalid KQL: ${kuery.kqlQuery}`);

@@ -16,12 +16,18 @@
 import { omit, unset } from 'lodash';
 import type { CaseAttributes, ExternalService, CaseConnector } from '../../../common/types/domain';
 import { CaseSeverity, CaseStatuses } from '../../../common/types/domain';
-import { CASE_SAVED_OBJECT, SECURITY_SOLUTION_OWNER } from '../../../common/constants';
+import {
+  CASE_COMMENT_SAVED_OBJECT,
+  CASE_EXTENDED_FIELDS,
+  CASE_EXTENDED_FIELDS_LABELS,
+  CASE_EXTENDED_FIELDS_CONTROLS,
+  CASE_SAVED_OBJECT,
+  SECURITY_SOLUTION_OWNER,
+} from '../../../common/constants';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import type {
   SavedObject,
   SavedObjectReference,
-  SavedObjectsBulkResponse,
   SavedObjectsCreateOptions,
   SavedObjectsFindResponse,
   SavedObjectsFindResult,
@@ -33,6 +39,11 @@ import { loggerMock } from '@kbn/logging-mocks';
 import { CONNECTOR_ID_REFERENCE_NAME } from '../../common/constants';
 import { getNoneCaseConnector } from '../../common/utils';
 import { CasesService } from '.';
+import {
+  V2_NOOP_ACTIVITY_WRITER,
+  V2_NOOP_ATTACHMENTS_WRITER,
+  V2_NOOP_WRITER,
+} from '../../cases_analytics_v2';
 import type { ESCaseConnectorWithId } from '../test_utils';
 import {
   createESJiraConnector,
@@ -45,7 +56,6 @@ import {
   createErrorSO,
 } from '../test_utils';
 import { AttachmentService } from '../attachments';
-import { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
 import type {
   CaseSavedObjectTransformed,
   CasePersistedAttributes,
@@ -54,8 +64,10 @@ import type {
 import {
   CasePersistedSeverity,
   CasePersistedStatus,
-  CaseTransformedAttributesRt,
+  CaseTransformedAttributesSchema,
 } from '../../common/types/case';
+import { transformSavedObjectToExternalModel } from './transform';
+import type { ConfigType } from '../../config';
 
 const createUpdateSOResponse = ({
   connector,
@@ -163,11 +175,11 @@ const createCasePatchParams = ({
 describe('CasesService', () => {
   const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
   const mockLogger = loggerMock.create();
-  const persistableStateAttachmentTypeRegistry = new PersistableStateAttachmentTypeRegistry();
   const attachmentService = new AttachmentService({
     log: mockLogger,
-    persistableStateAttachmentTypeRegistry,
     unsecuredSavedObjectsClient,
+    config: {} as ConfigType,
+    analyticsV2AttachmentsWriter: V2_NOOP_ATTACHMENTS_WRITER,
   });
 
   let service: CasesService;
@@ -178,6 +190,11 @@ describe('CasesService', () => {
       log: mockLogger,
       unsecuredSavedObjectsClient,
       attachmentService,
+      // Tests don't exercise the analytics v2 path; the no-op writers
+      // keep every hook a tight no-op.
+      analyticsV2Writer: V2_NOOP_WRITER,
+      analyticsV2ActivityWriter: V2_NOOP_ACTIVITY_WRITER,
+      analyticsV2AttachmentsWriter: V2_NOOP_ATTACHMENTS_WRITER,
     });
   });
 
@@ -238,9 +255,11 @@ describe('CasesService', () => {
                       "username": "elastic",
                     },
                   },
+                  "incremental_id": undefined,
                   "observables": Array [],
                   "owner": "securitySolution",
                   "settings": Object {
+                    "extractObservables": false,
                     "syncAlerts": true,
                   },
                   "severity": "low",
@@ -249,6 +268,7 @@ describe('CasesService', () => {
                     "defacement",
                   ],
                   "title": "Super Bad Security Issue",
+                  "total_observables": 0,
                   "updated_at": "2019-11-25T21:54:48.952Z",
                   "updated_by": Object {
                     "email": "testemail@elastic.co",
@@ -262,9 +282,9 @@ describe('CasesService', () => {
               },
               Object {
                 "error": Object {
-                  "error": "error",
-                  "message": "message",
-                  "statusCode": 500,
+                  "error": "Not Found",
+                  "message": "Saved object not found",
+                  "statusCode": 404,
                 },
                 "id": "1",
                 "references": Array [],
@@ -286,12 +306,16 @@ describe('CasesService', () => {
 
         await service.patchCase({
           caseId: '1',
-          updatedAttributes: createCasePostParams({
-            connector: createJiraConnector(),
-            externalService: createExternalService(),
-            severity: CaseSeverity.CRITICAL,
-            status: CaseStatuses['in-progress'],
-          }),
+          updatedAttributes: {
+            ...createCasePostParams({
+              connector: createJiraConnector(),
+              externalService: createExternalService(),
+              severity: CaseSeverity.CRITICAL,
+              status: CaseStatuses['in-progress'],
+            }),
+            total_alerts: 10,
+            total_comments: 5,
+          },
           originalCase: {} as CaseSavedObjectTransformed,
         });
 
@@ -318,6 +342,7 @@ describe('CasesService', () => {
             "observables": Array [],
             "owner": "securitySolution",
             "settings": Object {
+              "extractObservables": true,
               "syncAlerts": true,
             },
             "severity": 30,
@@ -326,6 +351,9 @@ describe('CasesService', () => {
               "defacement",
             ],
             "title": "Super Bad Security Issue",
+            "total_alerts": 10,
+            "total_comments": 5,
+            "total_observables": 0,
             "updated_at": "2019-11-25T21:54:48.952Z",
             "updated_by": Object {
               "email": "testemail@elastic.co",
@@ -582,9 +610,11 @@ describe('CasesService', () => {
           originalCase: {} as CaseSavedObjectTransformed,
         });
 
-        expect(unsecuredSavedObjectsClient.update.mock.calls[0][2]).toMatchInlineSnapshot(
-          `Object {}`
-        );
+        expect(unsecuredSavedObjectsClient.update.mock.calls[0][2]).toMatchInlineSnapshot(`
+          Object {
+            "total_observables": 0,
+          }
+        `);
         const updateOptions = unsecuredSavedObjectsClient.update.mock
           .calls[0][3] as SavedObjectsUpdateOptions<unknown>;
         expect(updateOptions.references).toBeUndefined();
@@ -608,6 +638,7 @@ describe('CasesService', () => {
               "name": "none",
               "type": ".none",
             },
+            "total_observables": 0,
           }
         `);
       });
@@ -660,6 +691,33 @@ describe('CasesService', () => {
           expect(patchAttributes.status).toEqual(expectedStatus);
         }
       );
+
+      it('updates the total attachment stats', async () => {
+        unsecuredSavedObjectsClient.update.mockResolvedValue(
+          {} as SavedObjectsUpdateResponse<CasePersistedAttributes>
+        );
+
+        await service.patchCase({
+          caseId: '1',
+          updatedAttributes: {
+            ...createCasePostParams({
+              connector: createJiraConnector(),
+              externalService: createExternalService(),
+              severity: CaseSeverity.CRITICAL,
+              status: CaseStatuses['in-progress'],
+            }),
+            total_alerts: 10,
+            total_comments: 5,
+          },
+          originalCase: {} as CaseSavedObjectTransformed,
+        });
+
+        const patchAttributes = unsecuredSavedObjectsClient.update.mock
+          .calls[0][2] as CasePersistedAttributes;
+
+        expect(patchAttributes.total_alerts).toEqual(10);
+        expect(patchAttributes.total_comments).toEqual(5);
+      });
     });
 
     describe('bulkPatch', () => {
@@ -764,6 +822,39 @@ describe('CasesService', () => {
         expect(patchResults[1].attributes.status).toEqual(CasePersistedStatus.IN_PROGRESS);
         expect(patchResults[2].attributes.status).toEqual(CasePersistedStatus.CLOSED);
       });
+
+      it('updates the total attachment stats', async () => {
+        unsecuredSavedObjectsClient.bulkUpdate.mockResolvedValue({
+          saved_objects: [
+            createCaseSavedObjectResponse({ caseId: '1' }),
+            createCaseSavedObjectResponse({ caseId: '2' }),
+            createCaseSavedObjectResponse({ caseId: '3' }),
+          ],
+        });
+
+        await service.patchCases({
+          cases: [
+            {
+              caseId: '1',
+              updatedAttributes: {
+                ...createCasePostParams({
+                  connector: getNoneCaseConnector(),
+                  status: CaseStatuses.open,
+                }),
+                total_alerts: 10,
+                total_comments: 5,
+              },
+              originalCase: {} as CaseSavedObjectTransformed,
+            },
+          ],
+        });
+
+        const patchResults = unsecuredSavedObjectsClient.bulkUpdate.mock
+          .calls[0][0] as unknown as Array<SavedObject<CasePersistedAttributes>>;
+
+        expect(patchResults[0].attributes.total_alerts).toEqual(10);
+        expect(patchResults[0].attributes.total_comments).toEqual(5);
+      });
     });
 
     describe('createCase', () => {
@@ -843,6 +934,7 @@ describe('CasesService', () => {
             "observables": Array [],
             "owner": "securitySolution",
             "settings": Object {
+              "extractObservables": true,
               "syncAlerts": true,
             },
             "severity": 0,
@@ -851,8 +943,10 @@ describe('CasesService', () => {
               "defacement",
             ],
             "title": "Super Bad Security Issue",
-            "total_alerts": -1,
-            "total_comments": -1,
+            "total_alerts": 0,
+            "total_comments": 0,
+            "total_events": 0,
+            "total_observables": 0,
             "updated_at": "2019-11-25T21:54:48.952Z",
             "updated_by": Object {
               "email": "testemail@elastic.co",
@@ -894,8 +988,8 @@ describe('CasesService', () => {
         const postAttributes = unsecuredSavedObjectsClient.create.mock
           .calls[0][1] as CasePersistedAttributes;
 
-        expect(postAttributes.total_alerts).toEqual(-1);
-        expect(postAttributes.total_comments).toEqual(-1);
+        expect(postAttributes.total_alerts).toEqual(0);
+        expect(postAttributes.total_comments).toEqual(0);
       });
 
       it('moves the connector.id and connector_id to the references', async () => {
@@ -1064,6 +1158,7 @@ describe('CasesService', () => {
                   "observables": Array [],
                   "owner": "securitySolution",
                   "settings": Object {
+                    "extractObservables": true,
                     "syncAlerts": true,
                   },
                   "severity": 10,
@@ -1072,8 +1167,10 @@ describe('CasesService', () => {
                     "defacement",
                   ],
                   "title": "Super Bad Security Issue",
-                  "total_alerts": -1,
-                  "total_comments": -1,
+                  "total_alerts": 0,
+                  "total_comments": 0,
+                  "total_events": 0,
+                  "total_observables": 0,
                   "updated_at": "2019-11-25T21:54:48.952Z",
                   "updated_by": Object {
                     "email": "testemail@elastic.co",
@@ -1111,8 +1208,8 @@ describe('CasesService', () => {
       const postAttributes = unsecuredSavedObjectsClient.bulkCreate.mock.calls[0][0][0]
         .attributes as CasePersistedAttributes;
 
-      expect(postAttributes.total_alerts).toEqual(-1);
-      expect(postAttributes.total_comments).toEqual(-1);
+      expect(postAttributes.total_alerts).toEqual(0);
+      expect(postAttributes.total_comments).toEqual(0);
     });
   });
 
@@ -1134,7 +1231,7 @@ describe('CasesService', () => {
           ],
         });
 
-        const res = await service.patchCases({
+        const res = (await service.patchCases({
           cases: [
             {
               caseId: '1',
@@ -1145,7 +1242,7 @@ describe('CasesService', () => {
               originalCase: {} as CaseSavedObjectTransformed,
             },
           ],
-        });
+        })) as { saved_objects: Array<SavedObjectsUpdateResponse<CaseTransformedAttributes>> };
 
         expect(res.saved_objects[0].attributes.connector).toMatchInlineSnapshot(`
           Object {
@@ -1202,7 +1299,7 @@ describe('CasesService', () => {
           ],
         });
 
-        const res = await service.patchCases({
+        const res = (await service.patchCases({
           cases: [
             {
               caseId: '1',
@@ -1210,7 +1307,7 @@ describe('CasesService', () => {
               originalCase: {} as CaseSavedObjectTransformed,
             },
           ],
-        });
+        })) as { saved_objects: Array<SavedObjectsUpdateResponse<CaseTransformedAttributes>> };
         expect(res.saved_objects[0].attributes.severity).toEqual(CaseSeverity.LOW);
         expect(res.saved_objects[1].attributes.severity).toEqual(CaseSeverity.MEDIUM);
         expect(res.saved_objects[2].attributes.severity).toEqual(CaseSeverity.HIGH);
@@ -1235,7 +1332,7 @@ describe('CasesService', () => {
           ],
         });
 
-        const res = await service.patchCases({
+        const res = (await service.patchCases({
           cases: [
             {
               caseId: '1',
@@ -1243,7 +1340,7 @@ describe('CasesService', () => {
               originalCase: {} as CaseSavedObjectTransformed,
             },
           ],
-        });
+        })) as { saved_objects: Array<SavedObjectsUpdateResponse<CaseTransformedAttributes>> };
         expect(res.saved_objects[0].attributes.status).toEqual(CaseStatuses.open);
         expect(res.saved_objects[1].attributes.status).toEqual(CaseStatuses['in-progress']);
         expect(res.saved_objects[2].attributes.status).toEqual(CaseStatuses.closed);
@@ -1258,7 +1355,7 @@ describe('CasesService', () => {
           ],
         });
 
-        const res = await service.patchCases({
+        const res = (await service.patchCases({
           cases: [
             {
               caseId: '1',
@@ -1266,7 +1363,7 @@ describe('CasesService', () => {
               originalCase: {} as CaseSavedObjectTransformed,
             },
           ],
-        });
+        })) as { saved_objects: Array<SavedObjectsUpdateResponse<CaseTransformedAttributes>> };
 
         expect(res.saved_objects[0].attributes).not.toHaveProperty('total_alerts');
         expect(res.saved_objects[0].attributes).not.toHaveProperty('total_comments');
@@ -1347,7 +1444,9 @@ describe('CasesService', () => {
 
         expect(res).toMatchInlineSnapshot(`
           Object {
-            "attributes": Object {},
+            "attributes": Object {
+              "total_events": -1,
+            },
           }
         `);
       });
@@ -1694,9 +1793,11 @@ describe('CasesService', () => {
                       "username": "elastic",
                     },
                   },
+                  "incremental_id": undefined,
                   "observables": Array [],
                   "owner": "securitySolution",
                   "settings": Object {
+                    "extractObservables": false,
                     "syncAlerts": true,
                   },
                   "severity": "medium",
@@ -1705,6 +1806,7 @@ describe('CasesService', () => {
                     "defacement",
                   ],
                   "title": "Super Bad Security Issue",
+                  "total_observables": 0,
                   "updated_at": "2019-11-25T21:54:48.952Z",
                   "updated_by": Object {
                     "email": "testemail@elastic.co",
@@ -1855,7 +1957,7 @@ describe('CasesService', () => {
 
         const res = (await service.getCases({
           caseIds: ['a'],
-        })) as SavedObjectsBulkResponse<CaseTransformedAttributes>;
+        })) as { saved_objects: Array<SavedObject<CaseTransformedAttributes>> };
 
         expect(res.saved_objects[0].attributes.connector.id).toMatchInlineSnapshot(`"1"`);
         expect(
@@ -1892,7 +1994,7 @@ describe('CasesService', () => {
 
         const res = (await service.getCases({
           caseIds: ['a'],
-        })) as SavedObjectsBulkResponse<CaseTransformedAttributes>;
+        })) as { saved_objects: Array<SavedObject<CaseTransformedAttributes>> };
 
         expect(res.saved_objects[0].attributes.severity).toEqual(CaseSeverity.LOW);
         expect(res.saved_objects[1].attributes.severity).toEqual(CaseSeverity.MEDIUM);
@@ -1920,7 +2022,7 @@ describe('CasesService', () => {
 
         const res = (await service.getCases({
           caseIds: ['a'],
-        })) as SavedObjectsBulkResponse<CaseTransformedAttributes>;
+        })) as { saved_objects: Array<SavedObject<CaseTransformedAttributes>> };
 
         expect(res.saved_objects[0].attributes.status).toEqual(CaseStatuses.open);
         expect(res.saved_objects[1].attributes.status).toEqual(CaseStatuses['in-progress']);
@@ -1938,7 +2040,7 @@ describe('CasesService', () => {
 
         const res = (await service.getCases({
           caseIds: ['a'],
-        })) as SavedObjectsBulkResponse<CaseTransformedAttributes>;
+        })) as { saved_objects: Array<SavedObject<CaseTransformedAttributes>> };
 
         expect(res.saved_objects[0].attributes).not.toHaveProperty('total_alerts');
         expect(res.saved_objects[0].attributes).not.toHaveProperty('total_comments');
@@ -2185,10 +2287,7 @@ describe('CasesService', () => {
   });
 
   describe('Decoding responses', () => {
-    const caseTransformedAttributesProps = CaseTransformedAttributesRt.types.reduce(
-      (acc, type) => ({ ...acc, ...type.type.props }),
-      {}
-    );
+    const caseTransformedAttributesProps = CaseTransformedAttributesSchema.shape;
 
     /**
      * The following fields are set to a default value if missing:
@@ -2197,8 +2296,12 @@ describe('CasesService', () => {
      * - connector
      * - external_service
      * - category
+     * - settings
      *
-     * Decode is not expected to throw an error as they are defined.
+     * The following fields can be undefined:
+     * - total_alerts
+     * - total_comments
+     * - incremental_id
      */
     const attributesToValidateIfMissing = omit(
       caseTransformedAttributesProps,
@@ -2208,7 +2311,21 @@ describe('CasesService', () => {
       'external_service',
       'category',
       'customFields',
-      'observables'
+      'observables',
+      'total_observables',
+      'settings',
+      'incremental_id',
+      'settings',
+      'total_alerts',
+      'total_comments',
+      'in_progress_at',
+      'time_to_acknowledge',
+      'time_to_resolve',
+      'time_to_investigate',
+      'template',
+      CASE_EXTENDED_FIELDS,
+      CASE_EXTENDED_FIELDS_LABELS,
+      CASE_EXTENDED_FIELDS_CONTROLS
     );
 
     describe('getCaseIdsByAlertId', () => {
@@ -2230,6 +2347,12 @@ describe('CasesService', () => {
           total: 1,
           per_page: 1,
           page: 1,
+          aggregations: {
+            references: {
+              doc_count: 0,
+              caseIds: { buckets: [] },
+            },
+          },
         });
       });
 
@@ -2241,7 +2364,7 @@ describe('CasesService', () => {
         await expect(
           service.getCaseIdsByAlertId({ alertId: '1' })
         ).rejects.toThrowErrorMatchingInlineSnapshot(
-          `"Invalid value \\"undefined\\" supplied to \\"owner\\""`
+          `"owner: Invalid input: expected string, received undefined"`
         );
       });
 
@@ -2250,6 +2373,43 @@ describe('CasesService', () => {
         unsecuredSavedObjectsClient.find.mockResolvedValue(findMockReturn);
 
         await expect(service.getCaseIdsByAlertId({ alertId: '1' })).resolves.not.toThrow();
+      });
+
+      describe('unified attachments', () => {
+        const buildAggsResponse = (caseIds: string[]) => ({
+          ...createSOFindResponse([]),
+          aggregations: {
+            references: {
+              doc_count: caseIds.length,
+              caseIds: { buckets: caseIds.map((key) => ({ key })) },
+            },
+          },
+        });
+
+        it('always issues both cases-comments and cases-attachments finds and merges deduped case ids', async () => {
+          unsecuredSavedObjectsClient.find
+            .mockResolvedValueOnce(buildAggsResponse(['shared-case', 'legacy-only']))
+            .mockResolvedValueOnce(buildAggsResponse(['shared-case', 'unified-only']));
+
+          const res = await service.getCaseIdsByAlertId({
+            alertId: 'alert-1',
+            unifiedFilter: undefined,
+          });
+
+          expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledTimes(2);
+          expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledWith(
+            expect.objectContaining({ type: 'cases-comments' })
+          );
+          expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledWith(
+            expect.objectContaining({ type: 'cases-attachments' })
+          );
+
+          expect(CasesService.getCaseIDsFromAlertAggs(res)).toEqual([
+            'shared-case',
+            'legacy-only',
+            'unified-only',
+          ]);
+        });
       });
     });
 
@@ -2267,9 +2427,7 @@ describe('CasesService', () => {
           const attributes = omit({ ...theCase.attributes }, key);
           unsecuredSavedObjectsClient.get.mockResolvedValue({ ...theCase, attributes });
 
-          await expect(service.getCase({ id: 'a' })).rejects.toThrow(
-            `Invalid value "undefined" supplied to "${key}"`
-          );
+          await expect(service.getCase({ id: 'a' })).rejects.toThrow(`${key}: Invalid input`);
         }
       );
 
@@ -2308,9 +2466,11 @@ describe('CasesService', () => {
               "description": "This is a brand new case of a bad meanie defacing data",
               "duration": null,
               "external_service": null,
+              "incremental_id": undefined,
               "observables": Array [],
               "owner": "securitySolution",
               "settings": Object {
+                "extractObservables": false,
                 "syncAlerts": true,
               },
               "severity": "low",
@@ -2319,6 +2479,7 @@ describe('CasesService', () => {
                 "defacement",
               ],
               "title": "Super Bad Security Issue",
+              "total_observables": 0,
               "updated_at": "2019-11-25T21:54:48.952Z",
               "updated_by": Object {
                 "email": "testemail@elastic.co",
@@ -2361,7 +2522,7 @@ describe('CasesService', () => {
           });
 
           await expect(service.getResolveCase({ id: 'a' })).rejects.toThrow(
-            `Invalid value "undefined" supplied to "${key}"`
+            `${key}: Invalid input`
           );
         }
       );
@@ -2411,9 +2572,11 @@ describe('CasesService', () => {
                     "username": "elastic",
                   },
                 },
+                "incremental_id": undefined,
                 "observables": Array [],
                 "owner": "securitySolution",
                 "settings": Object {
+                  "extractObservables": false,
                   "syncAlerts": true,
                 },
                 "severity": "low",
@@ -2422,6 +2585,7 @@ describe('CasesService', () => {
                   "defacement",
                 ],
                 "title": "Super Bad Security Issue",
+                "total_observables": 0,
                 "updated_at": "2019-11-25T21:54:48.952Z",
                 "updated_by": Object {
                   "email": "testemail@elastic.co",
@@ -2435,6 +2599,36 @@ describe('CasesService', () => {
             },
           }
         `);
+      });
+    });
+
+    describe('getCaseStatuses', () => {
+      it('reads only the status field, as a status name, leaving out cases not found', async () => {
+        unsecuredSavedObjectsClient.bulkGet.mockResolvedValue({
+          saved_objects: [
+            {
+              id: 'case-1',
+              type: CASE_SAVED_OBJECT,
+              references: [],
+              attributes: { status: CasePersistedStatus.CLOSED },
+            },
+            {
+              id: 'case-2',
+              type: CASE_SAVED_OBJECT,
+              references: [],
+              attributes: {},
+              error: { statusCode: 404, error: 'Not Found', message: 'Not found' },
+            },
+          ],
+        });
+
+        const statuses = await service.getCaseStatuses({ caseIds: ['case-1', 'case-2'] });
+
+        expect(unsecuredSavedObjectsClient.bulkGet).toHaveBeenCalledWith([
+          { type: CASE_SAVED_OBJECT, id: 'case-1', fields: ['status'] },
+          { type: CASE_SAVED_OBJECT, id: 'case-2', fields: ['status'] },
+        ]);
+        expect(statuses).toEqual(new Map([['case-1', CaseStatuses.closed]]));
       });
     });
 
@@ -2505,9 +2699,11 @@ describe('CasesService', () => {
                       "username": "elastic",
                     },
                   },
+                  "incremental_id": undefined,
                   "observables": Array [],
                   "owner": "securitySolution",
                   "settings": Object {
+                    "extractObservables": false,
                     "syncAlerts": true,
                   },
                   "severity": "low",
@@ -2516,6 +2712,7 @@ describe('CasesService', () => {
                     "defacement",
                   ],
                   "title": "Super Bad Security Issue",
+                  "total_observables": 0,
                   "updated_at": "2019-11-25T21:54:48.952Z",
                   "updated_by": Object {
                     "email": "testemail@elastic.co",
@@ -2550,7 +2747,7 @@ describe('CasesService', () => {
           });
 
           await expect(service.getCases({ caseIds: ['a', 'b'] })).rejects.toThrow(
-            `Invalid value "undefined" supplied to "${key}"`
+            `${key}: Invalid input`
           );
         }
       );
@@ -2599,9 +2796,11 @@ describe('CasesService', () => {
                       "username": "elastic",
                     },
                   },
+                  "incremental_id": undefined,
                   "observables": Array [],
                   "owner": "securitySolution",
                   "settings": Object {
+                    "extractObservables": false,
                     "syncAlerts": true,
                   },
                   "severity": "low",
@@ -2610,6 +2809,7 @@ describe('CasesService', () => {
                     "defacement",
                   ],
                   "title": "Super Bad Security Issue",
+                  "total_observables": 0,
                   "updated_at": "2019-11-25T21:54:48.952Z",
                   "updated_by": Object {
                     "email": "testemail@elastic.co",
@@ -2651,9 +2851,7 @@ describe('CasesService', () => {
 
           unsecuredSavedObjectsClient.find.mockResolvedValue(findMockReturn);
 
-          await expect(service.findCases()).rejects.toThrow(
-            `Invalid value "undefined" supplied to "${key}"`
-          );
+          await expect(service.findCases()).rejects.toThrow(`${key}: Invalid input`);
         }
       );
 
@@ -2706,9 +2904,11 @@ describe('CasesService', () => {
                       "username": "elastic",
                     },
                   },
+                  "incremental_id": undefined,
                   "observables": Array [],
                   "owner": "securitySolution",
                   "settings": Object {
+                    "extractObservables": false,
                     "syncAlerts": true,
                   },
                   "severity": "low",
@@ -2717,6 +2917,7 @@ describe('CasesService', () => {
                     "defacement",
                   ],
                   "title": "Super Bad Security Issue",
+                  "total_observables": 0,
                   "updated_at": "2019-11-25T21:54:48.952Z",
                   "updated_by": Object {
                     "email": "testemail@elastic.co",
@@ -2763,9 +2964,11 @@ describe('CasesService', () => {
                       "username": "elastic",
                     },
                   },
+                  "incremental_id": undefined,
                   "observables": Array [],
                   "owner": "securitySolution",
                   "settings": Object {
+                    "extractObservables": false,
                     "syncAlerts": true,
                   },
                   "severity": "low",
@@ -2774,6 +2977,7 @@ describe('CasesService', () => {
                     "defacement",
                   ],
                   "title": "Super Bad Security Issue",
+                  "total_observables": 0,
                   "updated_at": "2019-11-25T21:54:48.952Z",
                   "updated_by": Object {
                     "email": "testemail@elastic.co",
@@ -2817,7 +3021,7 @@ describe('CasesService', () => {
               attributes: createCasePostParams({ connector: createJiraConnector() }),
               id: '1',
             })
-          ).rejects.toThrow(`Invalid value "undefined" supplied to "${key}"`);
+          ).rejects.toThrow(`${key}: Invalid input`);
         }
       );
 
@@ -2866,9 +3070,11 @@ describe('CasesService', () => {
                   "username": "elastic",
                 },
               },
+              "incremental_id": undefined,
               "observables": Array [],
               "owner": "securitySolution",
               "settings": Object {
+                "extractObservables": false,
                 "syncAlerts": true,
               },
               "severity": "low",
@@ -2877,6 +3083,7 @@ describe('CasesService', () => {
                 "defacement",
               ],
               "title": "Super Bad Security Issue",
+              "total_observables": 0,
               "updated_at": "2019-11-25T21:54:48.952Z",
               "updated_by": Object {
                 "email": "testemail@elastic.co",
@@ -2928,7 +3135,7 @@ describe('CasesService', () => {
                 },
               ],
             })
-          ).rejects.toThrow(`Invalid value "undefined" supplied to "${key}"`);
+          ).rejects.toThrow(`${key}: Invalid input`);
         }
       );
 
@@ -2985,9 +3192,11 @@ describe('CasesService', () => {
                       "username": "elastic",
                     },
                   },
+                  "incremental_id": undefined,
                   "observables": Array [],
                   "owner": "securitySolution",
                   "settings": Object {
+                    "extractObservables": false,
                     "syncAlerts": true,
                   },
                   "severity": "low",
@@ -2996,6 +3205,7 @@ describe('CasesService', () => {
                     "defacement",
                   ],
                   "title": "Super Bad Security Issue",
+                  "total_observables": 0,
                   "updated_at": "2019-11-25T21:54:48.952Z",
                   "updated_by": Object {
                     "email": "testemail@elastic.co",
@@ -3198,7 +3408,7 @@ describe('CasesService', () => {
             attributes,
             id: '1',
           })
-        ).rejects.toThrow(`Invalid value "undefined" supplied to "title"`);
+        ).rejects.toThrow(`title: Invalid input`);
       });
 
       it('remove excess fields', async () => {
@@ -3211,6 +3421,18 @@ describe('CasesService', () => {
 
         const persistedAttributes = unsecuredSavedObjectsClient.create.mock.calls[0][1];
         expect(persistedAttributes).not.toHaveProperty('foo');
+      });
+
+      it('sets `incremental_id` field to undefined when it is passed', async () => {
+        const attributes = {
+          ...createCasePostParams({ connector: createJiraConnector() }),
+          incremental_id: 200,
+        };
+
+        await expect(service.createCase({ id: 'a', attributes })).resolves.not.toThrow();
+
+        const persistedAttributes = unsecuredSavedObjectsClient.create.mock.calls[0][1];
+        expect((persistedAttributes as CaseAttributes).incremental_id).toBeUndefined();
       });
     });
 
@@ -3235,7 +3457,7 @@ describe('CasesService', () => {
 
         await expect(
           service.bulkCreateCases({ cases: [{ id: '1', ...attributes }] })
-        ).rejects.toThrow(`Invalid value "undefined" supplied to "title"`);
+        ).rejects.toThrow(`title: Invalid input`);
       });
 
       it('remove excess fields', async () => {
@@ -3252,6 +3474,22 @@ describe('CasesService', () => {
           unsecuredSavedObjectsClient.bulkCreate.mock.calls[0][0][0].attributes;
 
         expect(persistedAttributes).not.toHaveProperty('foo');
+      });
+
+      it('sets `incremental_id` field to undefined when it is passed', async () => {
+        const attributes = {
+          ...createCasePostParams({ connector: createJiraConnector() }),
+          incremental_id: 200,
+        };
+
+        await expect(
+          service.bulkCreateCases({ cases: [{ id: 'a', ...attributes }] })
+        ).resolves.not.toThrow();
+
+        const persistedAttributes =
+          unsecuredSavedObjectsClient.bulkCreate.mock.calls[0][0][0].attributes;
+
+        expect((persistedAttributes as CaseAttributes).incremental_id).toBeUndefined();
       });
     });
 
@@ -3293,6 +3531,24 @@ describe('CasesService', () => {
 
         const persistedAttributes = unsecuredSavedObjectsClient.update.mock.calls[0][2];
         expect(persistedAttributes).not.toHaveProperty('foo');
+      });
+
+      it('removes incremental_id value', async () => {
+        const updatedAttributes = {
+          ...createCasePostParams({ connector: createJiraConnector() }),
+          incremental_id: 200,
+        };
+
+        await expect(
+          service.patchCase({
+            caseId: '1',
+            updatedAttributes,
+            originalCase: {} as CaseSavedObjectTransformed,
+          })
+        ).resolves.not.toThrow();
+
+        const persistedAttributes = unsecuredSavedObjectsClient.update.mock.calls[0][2];
+        expect((persistedAttributes as CaseAttributes).incremental_id).toBeUndefined();
       });
     });
 
@@ -3344,6 +3600,390 @@ describe('CasesService', () => {
           unsecuredSavedObjectsClient.bulkUpdate.mock.calls[0][0][0].attributes;
 
         expect(persistedAttributes).not.toHaveProperty('foo');
+      });
+
+      it('removes incremental_id values', async () => {
+        const updatedAttributes = {
+          ...createCasePostParams({ connector: createJiraConnector() }),
+          incremental_id: 200,
+        };
+
+        await expect(
+          service.patchCases({
+            cases: [
+              {
+                caseId: '1',
+                updatedAttributes,
+                originalCase: {} as CaseSavedObjectTransformed,
+              },
+            ],
+          })
+        ).resolves.not.toThrow();
+
+        const persistedAttributes =
+          unsecuredSavedObjectsClient.bulkUpdate.mock.calls[0][0][0].attributes;
+
+        expect((persistedAttributes as CaseAttributes).incremental_id).toBeUndefined();
+      });
+    });
+
+    describe('getCaseIdsByAttachmentSearch', () => {
+      const namespaces = ['default'];
+      const search = 'awesome case';
+
+      const mockEmptySearchResponse = () => {
+        // The SO mock doesn't include `search` by default, so wire it up here.
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (unsecuredSavedObjectsClient as any).search = jest
+          .fn()
+          .mockResolvedValue({ hits: { hits: [] } });
+      };
+
+      it('uses match_phrase for cases-comments.comment so multi-word searches require an exact phrase', async () => {
+        mockEmptySearchResponse();
+
+        await service.getCaseIdsByAttachmentSearch(namespaces, search, ['cases-comments.comment']);
+
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const searchCall = (unsecuredSavedObjectsClient as any).search.mock.calls[0][0];
+        expect(searchCall.query.bool.should).toEqual([
+          { match_phrase: { 'cases-comments.comment': search } },
+        ]);
+      });
+
+      it('uses match (not match_phrase) for keyword identifier fields like alertId and eventId', async () => {
+        mockEmptySearchResponse();
+
+        await service.getCaseIdsByAttachmentSearch(namespaces, search, [
+          'cases-comments.alertId',
+          'cases-comments.eventId',
+        ]);
+
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const searchCall = (unsecuredSavedObjectsClient as any).search.mock.calls[0][0];
+        expect(searchCall.query.bool.should).toEqual([
+          { match: { 'cases-comments.alertId': search } },
+          { match: { 'cases-comments.eventId': search } },
+        ]);
+      });
+
+      it('mixes match_phrase for comment and match for keyword fields when both are searched', async () => {
+        mockEmptySearchResponse();
+
+        await service.getCaseIdsByAttachmentSearch(namespaces, search, [
+          'cases-comments.alertId',
+          'cases-comments.comment',
+        ]);
+
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const searchCall = (unsecuredSavedObjectsClient as any).search.mock.calls[0][0];
+        expect(searchCall.query.bool.should).toEqual([
+          { match: { 'cases-comments.alertId': search } },
+          { match_phrase: { 'cases-comments.comment': search } },
+        ]);
+      });
+    });
+
+    describe('searchCasesGroupedByID stats', () => {
+      const namespaces = ['default'];
+
+      const mockSearch = () => {
+        const searchMock = jest.fn().mockResolvedValue({
+          hits: { hits: [], total: { value: 0 } },
+          aggregations: {
+            statuses: {
+              buckets: [
+                { key: '0', doc_count: 2 },
+                { key: '10', doc_count: 3 },
+                { key: '20', doc_count: 5 },
+              ],
+            },
+            mttr: { value: 360 },
+          },
+        });
+        // The SO mock doesn't include `search` by default, so wire it up here.
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (unsecuredSavedObjectsClient as any).search = searchMock;
+        jest
+          .spyOn(attachmentService.getter, 'getCaseAttatchmentStats')
+          .mockResolvedValue(new Map());
+        return searchMock;
+      };
+
+      it('does not run a stats query when statsOptions is not provided', async () => {
+        const searchMock = mockSearch();
+
+        const result = await service.searchCasesGroupedByID({
+          caseOptions: { search: 'anything' },
+          namespaces,
+        });
+
+        expect(searchMock).toHaveBeenCalledTimes(1);
+        expect(result.searchStats).toBeUndefined();
+      });
+
+      it('computes status counts and mttr with the same search query as the case list', async () => {
+        const searchMock = mockSearch();
+
+        const result = await service.searchCasesGroupedByID({
+          caseOptions: { search: 'my search term' },
+          namespaces,
+          statsOptions: {},
+        });
+
+        expect(searchMock).toHaveBeenCalledTimes(2);
+
+        const statsCall = searchMock.mock.calls.find(([args]) => args.size === 0)?.[0];
+        expect(statsCall).toBeDefined();
+        expect(statsCall.aggs).toEqual({
+          statuses: {
+            terms: { field: 'cases.status', size: 3, order: { _key: 'asc' } },
+          },
+          mttr: { avg: { field: 'cases.duration' } },
+        });
+        // The stats query carries the same free-text search clause as the list query.
+        const listCall = searchMock.mock.calls.find(([args]) => args.size !== 0)?.[0];
+        expect(statsCall.query).toEqual(listCall.query);
+
+        expect(result.searchStats).toEqual({
+          statusStats: { open: 2, 'in-progress': 3, closed: 5 },
+          mttr: 360,
+        });
+      });
+
+      it('returns zero counts and null mttr when the stats query matches nothing', async () => {
+        const searchMock = mockSearch();
+        searchMock.mockResolvedValue({
+          hits: { hits: [], total: { value: 0 } },
+          aggregations: { statuses: { buckets: [] }, mttr: { value: null } },
+        });
+
+        const result = await service.searchCasesGroupedByID({
+          caseOptions: { search: 'nothing matches' },
+          namespaces,
+          statsOptions: {},
+        });
+
+        expect(result.searchStats).toEqual({
+          statusStats: { open: 0, 'in-progress': 0, closed: 0 },
+          mttr: null,
+        });
+      });
+    });
+  });
+
+  describe('cases-analytics v2 writer integration', () => {
+    // The default service fixture uses V2_NOOP_WRITER; for these assertions
+    // we need a writer we can spy on.
+    const makeServiceWithMockWriter = () => {
+      const analyticsV2Writer = {
+        upsertCase: jest.fn(),
+        deleteCase: jest.fn(),
+        bulkUpsertCases: jest.fn(),
+        bulkDeleteCases: jest.fn(),
+        bulkUpsertCasesAwait: jest.fn().mockResolvedValue(undefined),
+      };
+      const analyticsV2ActivityWriter = {
+        upsertAction: jest.fn(),
+        bulkUpsertActions: jest.fn(),
+        bulkDeleteActionsByCaseIds: jest.fn(),
+        bulkUpsertActionsAwait: jest.fn().mockResolvedValue(undefined),
+      };
+      const analyticsV2AttachmentsWriter = {
+        upsertAttachment: jest.fn(),
+        deleteAttachment: jest.fn(),
+        bulkUpsertAttachments: jest.fn(),
+        bulkDeleteAttachments: jest.fn(),
+        bulkDeleteAttachmentsByCaseIds: jest.fn(),
+        bulkUpsertAttachmentsAwait: jest.fn().mockResolvedValue(undefined),
+      };
+      const svc = new CasesService({
+        log: mockLogger,
+        unsecuredSavedObjectsClient,
+        attachmentService,
+        analyticsV2Writer,
+        analyticsV2ActivityWriter,
+        analyticsV2AttachmentsWriter,
+      });
+      return { svc, analyticsV2Writer, analyticsV2ActivityWriter, analyticsV2AttachmentsWriter };
+    };
+
+    describe('bulkDeleteCaseEntities', () => {
+      it('removes the analytics doc only for cases whose SO delete succeeded', async () => {
+        // case-A delete succeeds; case-B fails with 409. Without inspecting
+        // the per-entity status, the analytics doc for case-B would be
+        // removed while the SO survives — and reconciliation can't repair
+        // it (the surviving SO's updated_at didn't change).
+        unsecuredSavedObjectsClient.bulkDelete.mockResolvedValue({
+          statuses: [
+            { id: 'case-A', type: CASE_SAVED_OBJECT, success: true },
+            {
+              id: 'case-B',
+              type: CASE_SAVED_OBJECT,
+              success: false,
+              error: { error: 'Conflict', message: 'version conflict', statusCode: 409 },
+            },
+          ],
+        });
+
+        const { svc, analyticsV2Writer, analyticsV2ActivityWriter } = makeServiceWithMockWriter();
+        await svc.bulkDeleteCaseEntities({
+          entities: [
+            { type: CASE_SAVED_OBJECT, id: 'case-A' },
+            { type: CASE_SAVED_OBJECT, id: 'case-B' },
+          ],
+        });
+
+        // Single bulk dispatch with only the successful case id — the
+        // individual `deleteCase` path is unused on bulk operations now.
+        expect(analyticsV2Writer.bulkDeleteCases).toHaveBeenCalledTimes(1);
+        expect(analyticsV2Writer.bulkDeleteCases).toHaveBeenCalledWith(['case-A']);
+        expect(analyticsV2Writer.deleteCase).not.toHaveBeenCalled();
+
+        // The activity surface cascades the same successful-case-id set:
+        // deleting a case cascades to its user-action SOs at the SO layer,
+        // and reconciliation can't see that gap, so the activity docs are
+        // dropped explicitly here.
+        expect(analyticsV2ActivityWriter.bulkDeleteActionsByCaseIds).toHaveBeenCalledTimes(1);
+        expect(analyticsV2ActivityWriter.bulkDeleteActionsByCaseIds).toHaveBeenCalledWith([
+          'case-A',
+        ]);
+      });
+
+      it('skips analytics writes for non-case entity types', async () => {
+        // Comments, user-actions, etc. are tracked by their own analytics
+        // surfaces (PR 2). The case-surface writer only handles cases.
+        unsecuredSavedObjectsClient.bulkDelete.mockResolvedValue({
+          statuses: [
+            { id: 'comment-1', type: CASE_COMMENT_SAVED_OBJECT, success: true },
+            { id: 'case-A', type: CASE_SAVED_OBJECT, success: true },
+          ],
+        });
+
+        const { svc, analyticsV2Writer, analyticsV2ActivityWriter } = makeServiceWithMockWriter();
+        await svc.bulkDeleteCaseEntities({
+          entities: [
+            { type: CASE_COMMENT_SAVED_OBJECT, id: 'comment-1' },
+            { type: CASE_SAVED_OBJECT, id: 'case-A' },
+          ],
+        });
+
+        expect(analyticsV2Writer.bulkDeleteCases).toHaveBeenCalledTimes(1);
+        expect(analyticsV2Writer.bulkDeleteCases).toHaveBeenCalledWith(['case-A']);
+        expect(analyticsV2Writer.deleteCase).not.toHaveBeenCalled();
+
+        // Activity cascade is keyed by case id and likewise skips the
+        // non-case entity — only `case-A` is passed through.
+        expect(analyticsV2ActivityWriter.bulkDeleteActionsByCaseIds).toHaveBeenCalledWith([
+          'case-A',
+        ]);
+      });
+    });
+
+    describe('deleteCase', () => {
+      it('cascades the deleted case id to the activity surface', async () => {
+        unsecuredSavedObjectsClient.delete.mockResolvedValue({});
+
+        const { svc, analyticsV2Writer, analyticsV2ActivityWriter } = makeServiceWithMockWriter();
+        await svc.deleteCase({ id: 'case-A', refresh: false });
+
+        expect(analyticsV2Writer.deleteCase).toHaveBeenCalledWith('case-A');
+        // Deleting the case cascades to its user-action SOs at the SO
+        // layer; reconciliation can't detect that, so the activity docs
+        // are dropped explicitly by case id.
+        expect(analyticsV2ActivityWriter.bulkDeleteActionsByCaseIds).toHaveBeenCalledWith([
+          'case-A',
+        ]);
+      });
+    });
+
+    describe('patchCase', () => {
+      it('dispatches the persisted model to the analytics writer even when status/severity are not part of the patch', async () => {
+        // `originalCase` is the external model (string status/severity,
+        // external_service.connector_id). When the patch only touches `title`,
+        // the base must be converted to the persisted model before merging —
+        // otherwise `status`/`severity` silently become `undefined` (the
+        // *_TO_STRING maps are keyed by the numeric enum) and any pushed case
+        // carries `external_service.connector_id` into the strict mapping.
+        const persistedSO = createCaseSavedObjectResponse({
+          externalService: createExternalService({ connector_id: 'push-connector-1' }),
+        });
+        const externalModelOriginalCase = transformSavedObjectToExternalModel(persistedSO);
+
+        unsecuredSavedObjectsClient.update.mockResolvedValue({
+          id: persistedSO.id,
+          type: CASE_SAVED_OBJECT,
+          attributes: { title: 'Updated Title' },
+          references: persistedSO.references,
+          version: 'WzEsMV0=',
+        });
+
+        const { svc, analyticsV2Writer } = makeServiceWithMockWriter();
+        await svc.patchCase({
+          caseId: persistedSO.id,
+          updatedAttributes: { title: 'Updated Title' },
+          originalCase: externalModelOriginalCase,
+          version: 'WzAsMV0=',
+          refresh: false,
+        });
+
+        expect(analyticsV2Writer.upsertCase).toHaveBeenCalledTimes(1);
+        const dispatchedDoc = analyticsV2Writer.upsertCase.mock.calls[0][0];
+
+        // status/severity must be the numeric persisted values, not the
+        // string external-model values.
+        expect(dispatchedDoc.attributes.status).toBe(CasePersistedStatus.OPEN);
+        expect(dispatchedDoc.attributes.severity).toBe(CasePersistedSeverity.LOW);
+
+        // connector_id must not appear — it's stored as a reference, not a
+        // mapping field. Its presence in the doc triggers a
+        // strict_dynamic_mapping_exception on the .cases index.
+        expect(dispatchedDoc.attributes.external_service).not.toHaveProperty('connector_id');
+      });
+    });
+
+    describe('patchCases', () => {
+      it('dispatches the persisted model to the analytics writer even when status/severity are not part of the bulk patch', async () => {
+        // Same model-mixing hazard as patchCase — both sites use the same
+        // synthesize-from-originalCase pattern and need the same fix.
+        const persistedSO = createCaseSavedObjectResponse({
+          externalService: createExternalService({ connector_id: 'push-connector-2' }),
+        });
+        const externalModelOriginalCase = transformSavedObjectToExternalModel(persistedSO);
+
+        unsecuredSavedObjectsClient.bulkUpdate.mockResolvedValue({
+          saved_objects: [
+            {
+              id: persistedSO.id,
+              type: CASE_SAVED_OBJECT,
+              attributes: { title: 'Bulk Updated Title' },
+              references: persistedSO.references,
+              version: 'WzEsMV0=',
+            },
+          ],
+        });
+
+        const { svc, analyticsV2Writer } = makeServiceWithMockWriter();
+        await svc.patchCases({
+          cases: [
+            {
+              caseId: persistedSO.id,
+              updatedAttributes: { title: 'Bulk Updated Title' },
+              originalCase: externalModelOriginalCase,
+              version: 'WzAsMV0=',
+            },
+          ],
+          refresh: false,
+        });
+
+        expect(analyticsV2Writer.bulkUpsertCases).toHaveBeenCalledTimes(1);
+        const [mirrors] = analyticsV2Writer.bulkUpsertCases.mock.calls[0];
+        expect(mirrors).toHaveLength(1);
+        const dispatchedDoc = mirrors[0];
+
+        expect(dispatchedDoc.attributes.status).toBe(CasePersistedStatus.OPEN);
+        expect(dispatchedDoc.attributes.severity).toBe(CasePersistedSeverity.LOW);
+        expect(dispatchedDoc.attributes.external_service).not.toHaveProperty('connector_id');
       });
     });
   });

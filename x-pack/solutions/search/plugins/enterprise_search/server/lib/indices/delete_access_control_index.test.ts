@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { IScopedClusterClient } from '@kbn/core/server';
+import type { IScopedClusterClient } from '@kbn/core/server';
 
-import { ElasticsearchResponseError } from '../../utils/identify_exceptions';
+import type { ElasticsearchResponseError } from '../../utils/identify_exceptions';
 
 import { deleteAccessControlIndex } from './delete_access_control_index';
 
@@ -56,7 +56,7 @@ describe('deleteAccessControlIndex lib function', () => {
       });
       await expect(
         deleteAccessControlIndex(mockClient as unknown as IScopedClusterClient, 'indexName')
-      ).resolves.not.toThrowError();
+      ).resolves.not.toThrow();
       expect(mockClient.asCurrentUser.indices.delete).toHaveBeenCalledWith({
         index: '.search-acl-filter-indexName',
       });

@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import { toNumberRt } from '@kbn/io-ts-utils';
-import * as t from 'io-ts';
+import {
+  routeDefinitions,
+  type ObservabilityOverviewHasDataResponse,
+  type ObservabilityOverviewResponse,
+} from '@kbn/apm-api-shared';
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 import { getSearchTransactionsEvents } from '../../lib/helpers/transactions';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
-import { rangeRt } from '../default_api_types';
-import type { ObservabilityOverviewResponse } from './get_observability_overview_data';
 import { getObservabilityOverviewData } from './get_observability_overview_data';
-import type { HasDataResponse } from './has_data';
 import { getHasData } from './has_data';
 
 const observabilityOverviewHasDataRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/observability_overview/has_data',
+  endpoint: routeDefinitions.observabilityOverview.observabilityOverviewHasData.endpoint,
   security: { authz: { requiredPrivileges: ['apm'] } },
-  handler: async (resources): Promise<HasDataResponse> => {
+  handler: async (resources): Promise<ObservabilityOverviewHasDataResponse> => {
     const apmEventClient = await getApmEventClient(resources);
     return await getHasData({
       indices: apmEventClient.indices,
@@ -29,10 +29,8 @@ const observabilityOverviewHasDataRoute = createApmServerRoute({
 });
 
 const observabilityOverviewRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/observability_overview',
-  params: t.type({
-    query: t.intersection([rangeRt, t.type({ bucketSize: toNumberRt, intervalString: t.string })]),
-  }),
+  endpoint: routeDefinitions.observabilityOverview.observabilityOverview.endpoint,
+  params: routeDefinitions.observabilityOverview.observabilityOverview.params,
   security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<ObservabilityOverviewResponse> => {
     const apmEventClient = await getApmEventClient(resources);

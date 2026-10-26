@@ -36,6 +36,7 @@ export function Application({
       service={service}
       theme$={theme$}
     >
+      {/* @ts-expect-error upgrade typescript v5.4.5 */}
       <RouterProvider history={history} router={observabilityAIAssistantRouter}>
         <RouteRenderer />
       </RouterProvider>

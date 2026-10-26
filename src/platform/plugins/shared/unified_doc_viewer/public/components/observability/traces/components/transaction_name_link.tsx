@@ -9,16 +9,28 @@
 
 import React from 'react';
 import { EuiLink, EuiText } from '@elastic/eui';
+import {
+  TRANSACTION_DETAILS_BY_NAME_LOCATOR,
+  type TransactionDetailsByNameParams,
+} from '@kbn/deeplinks-observability';
 import { getRouterLinkProps } from '@kbn/router-utils';
-import { TRANSACTION_DETAILS_BY_NAME_LOCATOR } from '@kbn/deeplinks-observability';
+import { getEbtProps, type EbtClickAttrs } from '@kbn/ebt-click';
 import { getUnifiedDocViewerServices } from '../../../../plugin';
+import { TRACES_DOC_VIEWER_EBT_CLICK_ACTIONS } from '../ebt_constants';
 
 interface TransactionNameLinkProps {
-  serviceName: string;
+  serviceName?: string;
   transactionName: string;
+  renderContent?: (name: string) => React.ReactNode;
+  ebt: Omit<EbtClickAttrs, 'action'>;
 }
 
-export function TransactionNameLink({ transactionName, serviceName }: TransactionNameLinkProps) {
+export function TransactionNameLink({
+  transactionName,
+  serviceName,
+  renderContent,
+  ebt,
+}: TransactionNameLinkProps) {
   const {
     share: { url: urlService },
     core,
@@ -29,24 +41,22 @@ export function TransactionNameLink({ transactionName, serviceName }: Transactio
   const { from: timeRangeFrom, to: timeRangeTo } =
     dataService.query.timefilter.timefilter.getTime();
 
-  const apmLinkToTransactionByNameLocator = urlService.locators.get<{
-    serviceName: string;
-    transactionName: string;
-    rangeFrom: string;
-    rangeTo: string;
-  }>(TRANSACTION_DETAILS_BY_NAME_LOCATOR);
+  const apmLinkToTransactionByNameLocator = urlService.locators.get<TransactionDetailsByNameParams>(
+    TRANSACTION_DETAILS_BY_NAME_LOCATOR
+  );
 
-  const href = apmLinkToTransactionByNameLocator?.getRedirectUrl({
-    serviceName,
-    transactionName,
-    rangeFrom: timeRangeFrom,
-    rangeTo: timeRangeTo,
-  });
+  const href =
+    serviceName &&
+    apmLinkToTransactionByNameLocator?.getRedirectUrl({
+      serviceName,
+      transactionName,
+      rangeFrom: timeRangeFrom,
+      rangeTo: timeRangeTo,
+    });
   const routeLinkProps = href
     ? getRouterLinkProps({
         href,
         onClick: () => {
-          // TODO add telemetry (https://github.com/elastic/kibana/issues/208919)
           apmLinkToTransactionByNameLocator?.navigate({
             serviceName,
             transactionName,
@@ -57,7 +67,9 @@ export function TransactionNameLink({ transactionName, serviceName }: Transactio
       })
     : undefined;
 
-  const content = <EuiText size="xs">{transactionName}</EuiText>;
+  const content = renderContent?.(transactionName) ?? (
+    <EuiText size="xs">{transactionName}</EuiText>
+  );
 
   return (
     <>
@@ -65,6 +77,7 @@ export function TransactionNameLink({ transactionName, serviceName }: Transactio
         <EuiLink
           {...routeLinkProps}
           data-test-subj="unifiedDocViewerObservabilityTracesTransactionNameLink"
+          {...getEbtProps({ action: TRACES_DOC_VIEWER_EBT_CLICK_ACTIONS.VIEW_TRANSACTION, ...ebt })}
         >
           {content}
         </EuiLink>

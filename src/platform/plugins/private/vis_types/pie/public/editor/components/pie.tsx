@@ -31,16 +31,17 @@ import {
   LongLegendOptions,
   LegendSizeSettings,
 } from '@kbn/vis-default-editor-plugin/public';
-import { LegendSize, VisEditorOptionsProps } from '@kbn/visualizations-plugin/public';
+import type { VisEditorOptionsProps } from '@kbn/visualizations-plugin/public';
+import type { LegendSize } from '@kbn/chart-expressions-common';
+import type { PartitionVisParams } from '@kbn/expression-partition-vis-plugin/common';
 import {
-  PartitionVisParams,
   LabelPositions,
   ValueFormats,
   LegendDisplay,
 } from '@kbn/expression-partition-vis-plugin/common';
 import { TruncateLabelsOption } from './truncate_labels';
 import { DEFAULT_PERCENT_DECIMALS } from '../../../common';
-import { PieTypeProps } from '../../types';
+import type { PieTypeProps } from '../../types';
 
 import { emptySizeRatioOptions, getLabelPositions, getValuesFormats } from '../collections';
 import { getLegendPositions } from '../positions';
@@ -98,7 +99,6 @@ const PieOptions = (props: PieOptionsProps) => {
   const segments = aggs?.aggs?.filter((agg) => agg.schema === 'segment' && agg.enabled) ?? [];
 
   const legendSize = stateParams.legendSize;
-  const [hadAutoLegendSize] = useState(() => legendSize === LegendSize.AUTO);
 
   const getLegendDisplay = useCallback(
     (isVisible: boolean) => (isVisible ? LegendDisplay.SHOW : LegendDisplay.HIDE),
@@ -204,7 +204,7 @@ const PieOptions = (props: PieOptionsProps) => {
                   <EuiIconTip
                     content="Use with multi-layer chart or multiple charts."
                     position="top"
-                    type="iInCircle"
+                    type="info"
                     color="subdued"
                   />
                 </EuiFlexItem>
@@ -244,7 +244,6 @@ const PieOptions = (props: PieOptionsProps) => {
                 stateParams.legendPosition === Position.Left ||
                 stateParams.legendPosition === Position.Right
               }
-              showAutoOption={hadAutoLegendSize}
             />
           </>
         )}

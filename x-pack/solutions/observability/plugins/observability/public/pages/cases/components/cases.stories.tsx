@@ -6,7 +6,8 @@
  */
 
 import { KibanaReactStorybookDecorator } from '../../../utils/kibana_react.storybook_decorator';
-import { Cases as Component, CasesProps } from './cases';
+import type { CasesProps } from './cases';
+import { Cases as Component } from './cases';
 
 export default {
   title: 'app/Cases',
@@ -27,6 +28,7 @@ const defaultProps: CasesProps = {
     reopenCase: true,
     createComment: true,
     assign: true,
+    manageTemplates: true,
   },
 };
 
@@ -47,6 +49,8 @@ export const CasesPageWithNoPermissions = {
       settings: false,
       reopenCase: false,
       createComment: false,
+      assign: false,
+      manageTemplates: false,
     },
   },
 };

@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import moment from 'moment';
 import { ConfigSchema } from './config_schema';
 
 describe('Reporting Config Schema', () => {
@@ -48,7 +49,7 @@ describe('Reporting Config Schema', () => {
         ConfigSchema.validate({
           kibanaServer: { hostname: address },
         })
-      ).toThrowError(`[kibanaServer.hostname]: value must be a valid hostname (see RFC 1123).`);
+      ).toThrow(`[kibanaServer.hostname]: value must be a valid hostname (see RFC 1123).`);
     }
   );
 
@@ -59,7 +60,7 @@ describe('Reporting Config Schema', () => {
         ConfigSchema.validate({
           kibanaServer: { hostname: address },
         })
-      ).toThrowError(
+      ).toThrow(
         `[kibanaServer.hostname]: cannot use '0.0.0.0' as Kibana host name, consider using the default (localhost) instead`
       );
     }
@@ -111,6 +112,15 @@ describe('Reporting Config Schema', () => {
       `);
   });
 
+  it('gives serverless task runs room to wait for the page-render-service', () => {
+    expect(ConfigSchema.validate({}, { serverless: true }).queue.timeout).toEqual(
+      moment.duration({ minutes: 5 })
+    );
+    expect(ConfigSchema.validate({}, { serverless: false }).queue.timeout).toEqual(
+      moment.duration({ minutes: 4 })
+    );
+  });
+
   it('it should allow image reporting for any non-serverless config', () => {
     expect(() =>
       ConfigSchema.validate({ export_types: { pdf: { enabled: true } } }, { dev: true })
@@ -121,5 +131,13 @@ describe('Reporting Config Schema', () => {
     expect(() =>
       ConfigSchema.validate({ export_types: { csv: { enabled: true } } }, { dev: true })
     ).not.toThrow();
+  });
+
+  it(`fails to validate "csv.maxRows" when maxRows is less than 1`, () => {
+    expect(() =>
+      ConfigSchema.validate({
+        csv: { maxRows: 0 },
+      })
+    ).toThrow('[csv.maxRows]: Value must be equal to or greater than [1].');
   });
 });

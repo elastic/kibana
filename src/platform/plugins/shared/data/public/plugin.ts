@@ -7,14 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import './index.scss';
-
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import type { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import { Storage, createStartServicesGetter } from '@kbn/kibana-utils-plugin/public';
+import { ON_CLICK_VALUE, ON_SELECT_RANGE } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import {
-  Storage,
-  IStorageWrapper,
-  createStartServicesGetter,
-} from '@kbn/kibana-utils-plugin/public';
+  EVENT_PROPERTY_EXECUTION_CONTEXT,
+  EVENT_PROPERTY_SEARCH_TIMEOUT_MS,
+  EVENT_TYPE_DATA_SEARCH_TIMEOUT,
+} from './search/constants';
 import type { ConfigSchema } from '../server/config';
 import type {
   DataPublicPluginSetup,
@@ -24,25 +25,24 @@ import type {
 } from './types';
 import { SearchService } from './search/search_service';
 import { QueryService } from './query';
+import { DateRangePickerPresetsService } from './date_range_picker_presets';
 import {
+  setHttp,
   setIndexPatterns,
   setOverlays,
   setSearchService,
   setUiSettings,
   setTheme,
 } from './services';
-import {
-  createFiltersFromValueClickAction,
-  createFiltersFromRangeSelectAction,
-  createFiltersFromMultiValueClickAction,
-  createMultiValueClickActionDefinition,
-  createValueClickActionDefinition,
-  createSelectRangeActionDefinition,
-} from './actions';
-import { applyFilterTrigger } from './triggers';
 import { getTableViewDescription } from './utils/table_inspector_view';
-import { NowProvider, NowProviderInternalContract } from './now_provider';
+import type { NowProviderInternalContract } from './now_provider';
+import { NowProvider } from './now_provider';
 import { getAggsFormats, DatatableUtilitiesService } from '../common';
+import type {
+  MultiValueClickDataContext,
+  RangeSelectDataContext,
+  ValueClickDataContext,
+} from './actions/filters';
 
 export class DataPublicPlugin
   implements
@@ -70,14 +70,7 @@ export class DataPublicPlugin
 
   public setup(
     core: CoreSetup<DataStartDependencies, DataPublicPluginStart>,
-    {
-      expressions,
-      uiActions,
-      usageCollection,
-      inspector,
-      fieldFormats,
-      management,
-    }: DataSetupDependencies
+    { expressions, uiActions, usageCollection, inspector, fieldFormats }: DataSetupDependencies
   ): DataPublicPluginSetup {
     const startServices = createStartServicesGetter(core.getStartServices);
 
@@ -86,7 +79,6 @@ export class DataPublicPlugin
     const searchService = this.searchService.setup(core, {
       usageCollection,
       expressions,
-      management,
       nowProvider: this.nowProvider,
     });
 
@@ -95,8 +87,6 @@ export class DataPublicPlugin
       storage: this.storage,
       nowProvider: this.nowProvider,
     });
-
-    uiActions.registerTrigger(applyFilterTrigger);
 
     inspector.registerView(
       getTableViewDescription(() => ({
@@ -113,6 +103,25 @@ export class DataPublicPlugin
       )
     );
 
+    core.analytics.registerEventType({
+      eventType: EVENT_TYPE_DATA_SEARCH_TIMEOUT,
+      schema: {
+        [EVENT_PROPERTY_SEARCH_TIMEOUT_MS]: {
+          type: 'long',
+          _meta: {
+            description:
+              'The time (in ms) before the search request was aborted due to timeout (search:timeout advanced setting)',
+          },
+        },
+        [EVENT_PROPERTY_EXECUTION_CONTEXT]: {
+          type: 'pass_through',
+          _meta: {
+            description: 'Execution context of the search request that timed out',
+          },
+        },
+      },
+    });
+
     return {
       search: searchService,
       query: queryService,
@@ -121,11 +130,12 @@ export class DataPublicPlugin
 
   public start(
     core: CoreStart,
-    { uiActions, fieldFormats, dataViews, inspector, screenshotMode }: DataStartDependencies
+    { uiActions, fieldFormats, dataViews, inspector, screenshotMode, cps }: DataStartDependencies
   ): DataPublicPluginStart {
-    const { uiSettings, overlays } = core;
+    const { uiSettings, overlays, http } = core;
     setOverlays(overlays);
     setUiSettings(uiSettings);
+    setHttp(http);
     setIndexPatterns(dataViews);
 
     const query = this.queryService.start({
@@ -134,49 +144,71 @@ export class DataPublicPlugin
       uiSettings,
     });
 
+    const dateRangePickerPresets = new DateRangePickerPresetsService({
+      userStorage: core.userStorage,
+      uiSettings,
+    });
+
     const search = this.searchService.start(core, {
       fieldFormats,
-      indexPatterns: dataViews,
+      dataViews,
       inspector,
       screenshotMode,
       scriptedFieldsEnabled: dataViews.scriptedFieldsEnabled,
+      cps,
     });
     setSearchService(search);
 
-    uiActions.addTriggerAction(
-      'SELECT_RANGE_TRIGGER',
-      createSelectRangeActionDefinition(() => ({
+    uiActions.addTriggerActionAsync(ON_SELECT_RANGE, 'ACTION_SELECT_RANGE', async () => {
+      const { createSelectRangeActionDefinition } = await import('./actions');
+      const rangeSelectAction = createSelectRangeActionDefinition(() => ({
         uiActions,
-      }))
-    );
+      }));
+      return rangeSelectAction;
+    });
 
-    uiActions.addTriggerAction(
-      'VALUE_CLICK_TRIGGER',
-      createValueClickActionDefinition(() => ({
+    uiActions.addTriggerActionAsync(ON_CLICK_VALUE, 'ACTION_VALUE_CLICK', async () => {
+      const { createValueClickActionDefinition } = await import('./actions');
+      const valueClickAction = createValueClickActionDefinition(() => ({
         uiActions,
-      }))
-    );
+      }));
+      return valueClickAction;
+    });
 
-    uiActions.addTriggerAction(
+    uiActions.addTriggerActionAsync(
       'MULTI_VALUE_CLICK_TRIGGER',
-      createMultiValueClickActionDefinition(() => ({
-        query,
-      }))
+      'ACTION_MULTI_VALUE_CLICK',
+      async () => {
+        const { createMultiValueClickActionDefinition } = await import('./actions');
+        const multiValueClickAction = createMultiValueClickActionDefinition(() => ({
+          query,
+        }));
+        return multiValueClickAction;
+      }
     );
 
     const datatableUtilities = new DatatableUtilitiesService(search.aggs, dataViews, fieldFormats);
     const dataServices = {
       actions: {
-        createFiltersFromValueClickAction,
-        createFiltersFromRangeSelectAction,
-        createFiltersFromMultiValueClickAction,
+        createFiltersFromValueClickAction: async (context: ValueClickDataContext) => {
+          const { createFiltersFromValueClickAction } = await import('./actions/filters');
+          return createFiltersFromValueClickAction(context);
+        },
+        createFiltersFromRangeSelectAction: async (context: RangeSelectDataContext) => {
+          const { createFiltersFromRangeSelectAction } = await import('./actions/filters');
+          return createFiltersFromRangeSelectAction(context);
+        },
+        createFiltersFromMultiValueClickAction: async (context: MultiValueClickDataContext) => {
+          const { createFiltersFromMultiValueClickAction } = await import('./actions/filters');
+          return createFiltersFromMultiValueClickAction(context);
+        },
       },
       datatableUtilities,
       fieldFormats,
-      indexPatterns: dataViews,
       dataViews,
       query,
       search,
+      dateRangePickerPresets,
       nowProvider: this.nowProvider,
     };
 

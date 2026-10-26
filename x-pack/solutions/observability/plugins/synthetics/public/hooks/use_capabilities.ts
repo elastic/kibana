@@ -5,26 +5,47 @@
  * 2.0.
  */
 
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import { SYNTHETICS_INDEX_PATTERN } from '../../common/constants';
-import { MonitorLocations } from '../../common/runtime_types';
+import type { MonitorLocations } from '../../common/runtime_types';
 
 export const useCanEditSynthetics = () => {
   return !!useKibana().services?.application?.capabilities.uptime.save;
 };
 
+/**
+ * Whether the current user can trigger manual test runs. True when they can edit
+ * Synthetics (write) OR have been granted the run-only `canRunTestManually` sub-feature.
+ */
+export const useCanRunTestManually = () => {
+  const capabilities = useKibana().services?.application?.capabilities.uptime;
+  return !!(capabilities?.save || capabilities?.canRunTestManually);
+};
+
+/**
+ * Whether the current user can manage Synthetics/Uptime alert rules. True when
+ * they can edit Synthetics (write) OR have been granted the `canManageRules`
+ * sub-feature.
+ */
+export const useCanManageRules = () => {
+  const capabilities = useKibana().services?.application?.capabilities.uptime;
+  return !!(capabilities?.save || capabilities?.canManageRules);
+};
+
+export const useCanUsePublicLocationsPermission = (): boolean =>
+  !!(useKibana().services?.application?.capabilities.uptime.elasticManagedLocationsEnabled ?? true);
+
 export const useCanUsePublicLocations = (monLocations?: MonitorLocations) => {
-  const canUsePublicLocations =
-    useKibana().services?.application?.capabilities.uptime.elasticManagedLocationsEnabled ?? true;
+  const canUsePublicLocations = useCanUsePublicLocationsPermission();
   const publicLocations = monLocations?.some((loc) => loc.isServiceManaged);
 
   if (!publicLocations) {
     return true;
   }
 
-  return !!canUsePublicLocations;
+  return canUsePublicLocations;
 };
 
 export const useCanReadSyntheticsIndex = () => {

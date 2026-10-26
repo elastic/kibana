@@ -8,11 +8,6 @@
 import type { ElasticsearchClient, KibanaRequest, Logger } from '@kbn/core/server';
 import { END, START, StateGraph } from '@langchain/langgraph';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
-import type {
-  ActionsClientChatBedrockConverse,
-  ActionsClientChatVertexAI,
-  ActionsClientChatOpenAI,
-} from '@kbn/langchain/server';
 import { ToolNode } from '@langchain/langgraph/prebuilt';
 import { GenerateEsqlAnnotation } from './state';
 
@@ -41,8 +36,9 @@ import { getBuildUnvalidatedReportFromLastMessageNode } from './nodes/build_unva
 
 import { getSelectIndexPattern } from './nodes/select_index_pattern/select_index_pattern';
 import { getSelectIndexPatternGraph } from '../select_index_pattern/select_index_pattern';
+import type { CreateLlmInstance } from '../../utils/common';
 
-export const getGenerateEsqlGraph = ({
+export const getGenerateEsqlGraph = async ({
   esClient,
   connectorId,
   inference,
@@ -55,10 +51,7 @@ export const getGenerateEsqlGraph = ({
   inference: InferenceServerStart;
   logger: Logger;
   request: KibanaRequest;
-  createLlmInstance: () =>
-    | ActionsClientChatBedrockConverse
-    | ActionsClientChatVertexAI
-    | ActionsClientChatOpenAI;
+  createLlmInstance: CreateLlmInstance;
 }) => {
   const nlToEsqlAgentNode = getNlToEsqlAgent({
     connectorId,
@@ -90,7 +83,7 @@ export const getGenerateEsqlGraph = ({
 
   const buildUnvalidatedReportFromLastMessageNode = getBuildUnvalidatedReportFromLastMessageNode();
 
-  const identifyIndexGraph = getSelectIndexPatternGraph({
+  const identifyIndexGraph = await getSelectIndexPatternGraph({
     esClient,
     createLlmInstance,
   });

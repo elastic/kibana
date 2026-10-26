@@ -6,7 +6,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { NetworkEvent } from '../../../../../../../common/runtime_types';
+import type { NetworkEvent } from '../../../../../../../common/runtime_types';
+// Aliased to avoid shadowing the `Metadata.MimeType` enum member below; the
+// canonical name is re-exported for consumers.
+import { MimeType as MimeTypeEnum } from '../../../../../../../common/constants/mime_types';
+
+export { MimeType, MimeTypesMap } from '../../../../../../../common/constants/mime_types';
 
 export enum Timings {
   Blocked = 'blocked',
@@ -147,113 +152,55 @@ export type CalculatedTimings = {
   [K in Timings]?: number;
 };
 
-export enum MimeType {
-  Html = 'html',
-  Script = 'script',
-  Stylesheet = 'stylesheet',
-  Media = 'media',
-  Image = 'image',
-  Font = 'font',
-  XHR = 'xhr',
-  Other = 'other',
-}
-
 export const FriendlyMimetypeLabels = {
-  [MimeType.Html]: i18n.translate(
+  [MimeTypeEnum.Html]: i18n.translate(
     'xpack.synthetics.synthetics.waterfallChart.labels.mimeTypes.html',
     {
       defaultMessage: 'HTML',
     }
   ),
-  [MimeType.Script]: i18n.translate(
+  [MimeTypeEnum.Script]: i18n.translate(
     'xpack.synthetics.synthetics.waterfallChart.labels.mimeTypes.script',
     {
       defaultMessage: 'JS',
     }
   ),
-  [MimeType.Stylesheet]: i18n.translate(
+  [MimeTypeEnum.Stylesheet]: i18n.translate(
     'xpack.synthetics.synthetics.waterfallChart.labels.mimeTypes.stylesheet',
     {
       defaultMessage: 'CSS',
     }
   ),
-  [MimeType.Image]: i18n.translate(
+  [MimeTypeEnum.Image]: i18n.translate(
     'xpack.synthetics.synthetics.waterfallChart.labels.mimeTypes.image',
     {
       defaultMessage: 'Image',
     }
   ),
-  [MimeType.Media]: i18n.translate(
+  [MimeTypeEnum.Media]: i18n.translate(
     'xpack.synthetics.synthetics.waterfallChart.labels.mimeTypes.media',
     {
       defaultMessage: 'Media',
     }
   ),
-  [MimeType.Font]: i18n.translate(
+  [MimeTypeEnum.Font]: i18n.translate(
     'xpack.synthetics.synthetics.waterfallChart.labels.mimeTypes.font',
     {
       defaultMessage: 'Font',
     }
   ),
-  [MimeType.XHR]: i18n.translate(
+  [MimeTypeEnum.XHR]: i18n.translate(
     'xpack.synthetics.synthetics.waterfallChart.labels.mimeTypes.xhr',
     {
       defaultMessage: 'XHR',
     }
   ),
-  [MimeType.Other]: i18n.translate(
+  [MimeTypeEnum.Other]: i18n.translate(
     'xpack.synthetics.synthetics.waterfallChart.labels.mimeTypes.other',
     {
       defaultMessage: 'Other',
     }
   ),
-};
-
-// NOTE: This list tries to cover the standard spec compliant mime types,
-// and a few popular non-standard ones, but it isn't exhaustive.
-export const MimeTypesMap: Record<string, MimeType> = {
-  'text/html': MimeType.Html,
-  'application/javascript': MimeType.Script,
-  'application/x-javascript': MimeType.Script,
-  'text/javascript': MimeType.Script,
-  'text/css': MimeType.Stylesheet,
-
-  // Images
-  'image/apng': MimeType.Image,
-  'image/bmp': MimeType.Image,
-  'image/gif': MimeType.Image,
-  'image/x-icon': MimeType.Image,
-  'image/jpeg': MimeType.Image,
-  'image/png': MimeType.Image,
-  'image/svg+xml': MimeType.Image,
-  'image/tiff': MimeType.Image,
-  'image/webp': MimeType.Image,
-
-  // Common audio / video formats
-  'audio/wave': MimeType.Media,
-  'audio/wav': MimeType.Media,
-  'audio/x-wav': MimeType.Media,
-  'audio/x-pn-wav': MimeType.Media,
-  'audio/webm': MimeType.Media,
-  'video/webm': MimeType.Media,
-  'video/mp4': MimeType.Media,
-  'audio/ogg': MimeType.Media,
-  'video/ogg': MimeType.Media,
-  'application/ogg': MimeType.Media,
-
-  // Fonts
-  'font/otf': MimeType.Font,
-  'font/ttf': MimeType.Font,
-  'font/woff': MimeType.Font,
-  'font/woff2': MimeType.Font,
-  'application/x-font-opentype': MimeType.Font,
-  'application/font-woff': MimeType.Font,
-  'application/font-woff2': MimeType.Font,
-  'application/vnd.ms-fontobject': MimeType.Font,
-  'application/font-sfnt': MimeType.Font,
-
-  // XHR
-  'application/json': MimeType.XHR,
 };
 
 export type WaterfallNetworkItem = Pick<NetworkEvent, 'url' | 'status' | 'method'> & {
@@ -271,36 +218,36 @@ export type ItemMatcher = (item: NetworkEvent) => boolean;
 
 export const MIME_FILTERS = [
   {
-    label: FriendlyMimetypeLabels[MimeType.Html],
-    mimeType: MimeType.Html,
+    label: FriendlyMimetypeLabels[MimeTypeEnum.Html],
+    mimeType: MimeTypeEnum.Html,
   },
   {
-    label: FriendlyMimetypeLabels[MimeType.Stylesheet],
-    mimeType: MimeType.Stylesheet,
+    label: FriendlyMimetypeLabels[MimeTypeEnum.Stylesheet],
+    mimeType: MimeTypeEnum.Stylesheet,
   },
   {
-    label: FriendlyMimetypeLabels[MimeType.Font],
-    mimeType: MimeType.Font,
+    label: FriendlyMimetypeLabels[MimeTypeEnum.Font],
+    mimeType: MimeTypeEnum.Font,
   },
   {
-    label: FriendlyMimetypeLabels[MimeType.Script],
-    mimeType: MimeType.Script,
+    label: FriendlyMimetypeLabels[MimeTypeEnum.Script],
+    mimeType: MimeTypeEnum.Script,
   },
   {
-    label: FriendlyMimetypeLabels[MimeType.Image],
-    mimeType: MimeType.Image,
+    label: FriendlyMimetypeLabels[MimeTypeEnum.Image],
+    mimeType: MimeTypeEnum.Image,
   },
   {
-    label: FriendlyMimetypeLabels[MimeType.Media],
-    mimeType: MimeType.Media,
+    label: FriendlyMimetypeLabels[MimeTypeEnum.Media],
+    mimeType: MimeTypeEnum.Media,
   },
   {
-    label: FriendlyMimetypeLabels[MimeType.XHR],
-    mimeType: MimeType.XHR,
+    label: FriendlyMimetypeLabels[MimeTypeEnum.XHR],
+    mimeType: MimeTypeEnum.XHR,
   },
   {
-    label: FriendlyMimetypeLabels[MimeType.Other],
-    mimeType: MimeType.Other,
+    label: FriendlyMimetypeLabels[MimeTypeEnum.Other],
+    mimeType: MimeTypeEnum.Other,
   },
 ];
 

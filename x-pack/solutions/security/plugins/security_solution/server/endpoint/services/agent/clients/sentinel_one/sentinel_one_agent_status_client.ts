@@ -14,7 +14,6 @@ import type { RawSentinelOneInfo } from './types';
 import { type AgentStatusRecords, HostStatus } from '../../../../../../common/endpoint/types';
 import type { ResponseActionAgentType } from '../../../../../../common/endpoint/service/response_actions/constants';
 import { AgentStatusClient } from '../lib/base_agent_status_client';
-import { AgentStatusClientError } from '../errors';
 
 const SENTINEL_ONE_AGENT_INDEX_PATTERN = `logs-sentinel_one.agent-*`;
 
@@ -30,7 +29,6 @@ export class SentinelOneAgentStatusClient extends AgentStatusClient {
 
   async getAgentStatuses(agentIds: string[]): Promise<AgentStatusRecords> {
     const esClient = this.options.esClient;
-    const metadataService = this.options.endpointService.getEndpointMetadataService();
     const sortField = 'sentinel_one.agent.last_active_date';
     const searchRequest: SearchRequest = {
       index: SENTINEL_ONE_AGENT_INDEX_PATTERN,
@@ -76,7 +74,7 @@ export class SentinelOneAgentStatusClient extends AgentStatusClient {
       const [searchResponse, allPendingActions] = await Promise.all([
         esClient.search(searchRequest, { ignore: [404] }),
 
-        getPendingActionsSummary(esClient, metadataService, this.log, agentIds),
+        getPendingActionsSummary(this.options.endpointService, this.options.spaceId, agentIds),
       ]).catch(catchAndWrapError);
 
       this.log.debug(
@@ -127,13 +125,7 @@ export class SentinelOneAgentStatusClient extends AgentStatusClient {
 
       return response;
     } catch (err) {
-      const error = new AgentStatusClientError(
-        `Failed to fetch SentinelOne agent status for agentIds: [${agentIds}], failed with: ${err.message}`,
-        500,
-        err
-      );
-      this.log.error(error);
-      throw error;
+      return this.handleUnexpectedFailureAndReturnDefaultResponse(agentIds, err);
     }
   }
 }

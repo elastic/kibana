@@ -8,8 +8,8 @@
  */
 
 import util from 'util';
-import { ToolingLog } from '@kbn/tooling-log';
-import { KbnClient } from '@kbn/test';
+import type { ToolingLog } from '@kbn/tooling-log';
+import type { KbnClient } from '@kbn/test';
 
 export class Role {
   constructor(private log: ToolingLog, private kibanaServer: KbnClient) {}
@@ -25,7 +25,7 @@ export class Role {
         method: 'GET',
       })
       .catch((e) => {
-        throw new Error(util.inspect(e.axiosError.response, true));
+        throw new Error(util.inspect({ status: e.status, message: e.message }, true));
       });
     if (status !== 200) {
       throw new Error(
@@ -49,7 +49,7 @@ export class Role {
         retries: 0,
       })
       .catch((e) => {
-        throw new Error(util.inspect(e.axiosError.response, true));
+        throw new Error(util.inspect({ status: e.status, message: e.message }, true));
       });
     if (status !== 204) {
       throw new Error(

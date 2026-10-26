@@ -426,9 +426,10 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
               <EuiFormRow>
                 {selectedRolesCombinedPrivileges.length > 1 ? (
                   <EuiCallOut
+                    announceOnMount
                     size="s"
                     color="warning"
-                    iconType="iInCircle"
+                    iconType="info"
                     data-test-subj="privilege-conflict-callout"
                     title={i18n.translate(
                       'xpack.spaces.management.spaceDetails.roles.assign.privilegeConflictMsg.title',
@@ -447,9 +448,10 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
                   </EuiCallOut>
                 ) : (
                   <EuiCallOut
+                    announceOnMount
                     size="s"
                     color="primary"
-                    iconType="iInCircle"
+                    iconType="info"
                     data-test-subj="privilege-info-callout"
                     title={i18n.translate(
                       'xpack.spaces.management.spaceDetails.roles.assign.privilegeCombinationMsg.title',
@@ -512,7 +514,6 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
                     ...privilege,
                     'data-test-subj': `${privilege.id}-privilege-button`,
                   }))}
-                  color="primary"
                   idSelected={roleSpacePrivilege}
                   onChange={(id) => onRoleSpacePrivilegeChange(id as KibanaRolePrivilege)}
                   isFullWidth
@@ -663,7 +664,7 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
     <React.Fragment>
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
-          <h2>
+          <h2 id="space-assign-role-privilege-form-title">
             {isEditOperation.current
               ? i18n.translate('xpack.spaces.management.spaceDetails.roles.assignRoleButton', {
                   defaultMessage: 'Edit role privileges for space',

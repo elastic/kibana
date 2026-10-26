@@ -5,16 +5,8 @@
  * 2.0.
  */
 
-import type { SimpleSavedObject } from '@kbn/core/public';
-import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 export type { SupportedFieldType } from './job_field_type';
-export type {
-  FieldRequestConfig,
-  DocumentCountBuckets,
-  DocumentCounts,
-  FieldVisStats,
-  Percentile,
-} from './field_request_config';
+export type { FieldRequestConfig, FieldVisStats, Percentile } from './field_request_config';
 
 export interface DataVisualizerTableState {
   pageSize: number;
@@ -24,10 +16,4 @@ export interface DataVisualizerTableState {
   visibleFieldTypes: string[];
   visibleFieldNames: string[];
   showDistributions: boolean;
-}
-
-export type SavedSearchSavedObject = SimpleSavedObject<any>;
-
-export function isSavedSearchSavedObject(arg: unknown): arg is SavedSearchSavedObject {
-  return isPopulatedObject(arg, ['id', 'type', 'attributes']);
 }

@@ -8,6 +8,7 @@
 import { useCallback } from 'react';
 import { useTrackedPromise } from '@kbn/use-tracked-promise';
 import { i18n } from '@kbn/i18n';
+import type { HttpFetchOptions } from '@kbn/core/public';
 import { useKibana } from './use_kibana';
 
 // Errors
@@ -46,8 +47,9 @@ export const useInstallIntegrations = ({
     {
       cancelPreviousOn: 'creation',
       createPromise: async () => {
-        const options = {
+        const options: HttpFetchOptions = {
           headers: { 'Elastic-Api-Version': '2023-10-31' },
+          query: { prerelease: true },
         };
 
         const integrations = [];
@@ -57,7 +59,9 @@ export const useInstallIntegrations = ({
           }>(`/api/fleet/epm/packages/${packageName}`, options);
 
           if (integration.status !== 'installed') {
-            await http.post(`/api/fleet/epm/packages/${packageName}`, options);
+            await http.post(`/api/fleet/epm/packages/${packageName}`, {
+              ...options,
+            });
           }
           integrations.push(integration);
         }
@@ -69,8 +73,9 @@ export const useInstallIntegrations = ({
       onResolve: ({ versions }: { versions?: string[] }) => {
         onIntegrationCreationSuccess?.({ versions });
       },
-      onReject: (requestError: any) => {
-        if (requestError?.body?.statusCode === 403) {
+      onReject: (requestError: unknown) => {
+        const err = requestError as { body?: { statusCode?: number; message?: string } };
+        if (err?.body?.statusCode === 403) {
           onIntegrationCreationFailure({
             type: 'AuthorizationError' as const,
             message: UNAUTHORIZED_ERROR,
@@ -78,7 +83,7 @@ export const useInstallIntegrations = ({
         } else {
           onIntegrationCreationFailure({
             type: 'UnknownError' as const,
-            message: requestError?.body?.message,
+            message: err?.body?.message ?? 'Unknown error',
           });
         }
       },

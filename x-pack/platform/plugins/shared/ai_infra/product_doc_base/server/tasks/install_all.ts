@@ -10,29 +10,69 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
+import { DocumentationProduct, ResourceTypes, type ProductName } from '@kbn/product-doc-common';
 import type { InternalServices } from '../types';
-import { isTaskCurrentlyRunningError } from './utils';
+import {
+  INSTALL_TASK_TIMEOUT,
+  getRequestTaskStatus,
+  runTaskUnderInstallLock,
+  scheduleRequestTask,
+  type InstallLockManager,
+  type RequestTaskParams,
+  type RequestTaskStatus,
+} from './utils';
 
 export const INSTALL_ALL_TASK_TYPE = 'ProductDocBase:InstallAll';
-export const INSTALL_ALL_TASK_ID = 'ProductDocBase:InstallAll';
+
+const allProducts = Object.values(DocumentationProduct) as ProductName[];
 
 export const registerInstallAllTaskDefinition = ({
   getServices,
   taskManager,
+  lockManager,
 }: {
   getServices: () => InternalServices;
   taskManager: TaskManagerSetupContract;
+  lockManager: InstallLockManager;
 }) => {
   taskManager.registerTaskDefinitions({
     [INSTALL_ALL_TASK_TYPE]: {
-      title: 'Install all product documentation artifacts',
-      timeout: '10m',
-      maxAttempts: 3,
-      createTaskRunner: (context) => {
+      title: `Install all product documentation artifacts ${INSTALL_ALL_TASK_TYPE}`,
+      timeout: INSTALL_TASK_TIMEOUT,
+      maxAttempts: 5,
+      createTaskRunner: ({ taskInstance }) => {
+        const { inferenceId, requestedAt } = taskInstance.params as RequestTaskParams;
+        const since = new Date(requestedAt);
         return {
           async run() {
-            const { packageInstaller } = getServices();
-            return packageInstaller.installAll({});
+            const { packageInstaller, logger } = getServices();
+            return runTaskUnderInstallLock({
+              lockManager,
+              metadata: { taskType: INSTALL_ALL_TASK_TYPE, inferenceId },
+              run: async () => {
+                for (const productName of allProducts) {
+                  // An uninstall requested after this install wins; OpenAPI-only uninstalls do not count
+                  if (
+                    await packageInstaller.wasUninstalledSince({
+                      inferenceId,
+                      since,
+                      resourceType: ResourceTypes.productDoc,
+                    })
+                  ) {
+                    logger.info(
+                      `Stopping product documentation install for [${inferenceId}]: superseded by a later uninstall`
+                    );
+                    return;
+                  }
+                  // Products another task installed after this request, or a retry already did, are skipped
+                  await packageInstaller.installProductIfNeeded({
+                    productName,
+                    inferenceId,
+                    since,
+                  });
+                }
+              },
+            });
           },
         };
       },
@@ -41,30 +81,36 @@ export const registerInstallAllTaskDefinition = ({
   });
 };
 
-export const scheduleInstallAllTask = async ({
+/**
+ * Schedules an install task for this request. A pending install for the same inference ID is reused
+ * unless the request is forced, so overlapping requests do not install everything twice.
+ */
+export const scheduleInstallAllTask = ({
   taskManager,
   logger,
+  inferenceId,
+  force = false,
 }: {
   taskManager: TaskManagerStartContract;
   logger: Logger;
-}) => {
-  try {
-    await taskManager.ensureScheduled({
-      id: INSTALL_ALL_TASK_ID,
-      taskType: INSTALL_ALL_TASK_TYPE,
-      params: {},
-      state: {},
-      scope: ['productDoc'],
-    });
-
-    await taskManager.runSoon(INSTALL_ALL_TASK_ID);
-
-    logger.info(`Task ${INSTALL_ALL_TASK_ID} scheduled to run soon`);
-  } catch (e) {
-    if (!isTaskCurrentlyRunningError(e)) {
-      throw e;
-    }
-  }
-
-  return INSTALL_ALL_TASK_ID;
+  inferenceId: string;
+  force?: boolean;
+}): Promise<string> => {
+  const params: RequestTaskParams = { inferenceId, requestedAt: new Date().toISOString() };
+  return scheduleRequestTask({
+    taskManager,
+    logger,
+    taskType: INSTALL_ALL_TASK_TYPE,
+    params,
+    reusePending: !force,
+  });
 };
+
+export const getInstallAllTaskStatus = ({
+  taskManager,
+  inferenceId,
+}: {
+  taskManager: TaskManagerStartContract;
+  inferenceId: string;
+}): Promise<RequestTaskStatus> =>
+  getRequestTaskStatus({ taskManager, taskType: INSTALL_ALL_TASK_TYPE, inferenceId });

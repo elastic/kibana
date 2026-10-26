@@ -10,8 +10,11 @@
 import { getFieldSubtypeNested } from '@kbn/data-views-plugin/common';
 import { get } from 'lodash';
 
-import { OptionsListRequestBody, OptionsListSuggestions } from '../../../common/options_list/types';
-import { EsBucket, OptionsListSuggestionAggregationBuilder } from '../types';
+import type {
+  OptionsListRequestBody,
+  OptionsListSuggestions,
+} from '../../../common/options_list/types';
+import type { EsBucket, OptionsListSuggestionAggregationBuilder } from '../types';
 import { getSortType } from './options_list_suggestion_query_helpers';
 
 /**
@@ -22,14 +25,8 @@ export const getAllSuggestionsAggregationBuilder: () => OptionsListSuggestionAgg
   () => allSuggestionsAggregationBuilder;
 
 const allSuggestionsAggregationBuilder: OptionsListSuggestionAggregationBuilder = {
-  buildAggregation: ({
-    fieldName,
-    fieldSpec,
-    sort,
-    size,
-    allowExpensiveQueries,
-  }: OptionsListRequestBody) => {
-    let suggestionsAgg: { suggestions: any; unique_terms?: any } = {
+  buildAggregation: ({ fieldName, fieldSpec, sort, size }: OptionsListRequestBody) => {
+    const suggestionsAgg: { suggestions: any; unique_terms: any } = {
       suggestions: {
         terms: {
           size,
@@ -38,18 +35,12 @@ const allSuggestionsAggregationBuilder: OptionsListSuggestionAggregationBuilder 
           order: getSortType(sort),
         },
       },
-    };
-
-    if (allowExpensiveQueries) {
-      suggestionsAgg = {
-        ...suggestionsAgg,
-        unique_terms: {
-          cardinality: {
-            field: fieldName,
-          },
+      unique_terms: {
+        cardinality: {
+          field: fieldName,
         },
-      };
-    }
+      },
+    };
 
     const subTypeNested = fieldSpec && getFieldSubtypeNested(fieldSpec);
     if (subTypeNested) {
@@ -67,7 +58,7 @@ const allSuggestionsAggregationBuilder: OptionsListSuggestionAggregationBuilder 
 
     return suggestionsAgg;
   },
-  parse: (rawEsResult, { fieldSpec, allowExpensiveQueries }: OptionsListRequestBody) => {
+  parse: (rawEsResult, { fieldSpec }: OptionsListRequestBody) => {
     const subTypeNested = fieldSpec && getFieldSubtypeNested(fieldSpec);
     const suggestions = get(
       rawEsResult,
@@ -84,14 +75,11 @@ const allSuggestionsAggregationBuilder: OptionsListSuggestionAggregationBuilder 
     }, []);
     return {
       suggestions,
-      totalCardinality: allowExpensiveQueries
-        ? get(
-            rawEsResult,
-            `aggregations.${
-              subTypeNested ? 'nestedSuggestions.unique_terms' : 'unique_terms'
-            }.value`
-          )
-        : undefined,
+      totalCardinality:
+        get(
+          rawEsResult,
+          `aggregations.${subTypeNested ? 'nestedSuggestions.unique_terms' : 'unique_terms'}.value`
+        ) ?? 0,
     };
   },
 };

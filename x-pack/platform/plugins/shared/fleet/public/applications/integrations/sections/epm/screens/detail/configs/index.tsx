@@ -12,20 +12,20 @@ import {
   EuiCodeBlock,
   EuiSpacer,
   EuiSkeletonText,
-  EuiCallOut,
   EuiLink,
   EuiCode,
 } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { PackageInfo } from '../../../../../types';
 
 import { useGetInputsTemplatesQuery, useStartServices } from '../../../../../hooks';
-import { PrereleaseCallout } from '../overview/overview';
 
 import { isPackagePrerelease } from '../../../../../../../../common/services';
 import { SideBarColumn } from '../../../components/side_bar_column';
+import { PrereleaseCallout } from '../overview/prerelease_callout';
 
 interface ConfigsProps {
   packageInfo: PackageInfo;
@@ -51,7 +51,8 @@ export const Configs: React.FC<ConfigsProps> = ({ packageInfo }) => {
       <SideBarColumn grow={1} />
       {error ? (
         <EuiFlexItem grow={7}>
-          <EuiCallOut
+          <KbnWarningCallout
+            announceOnMount
             data-test-subj="configsTab.errorCallout"
             title={
               <FormattedMessage
@@ -59,16 +60,13 @@ export const Configs: React.FC<ConfigsProps> = ({ packageInfo }) => {
                 defaultMessage="Unsupported"
               />
             }
-            color="warning"
-            iconType="alert"
-          >
-            <p>
+            text={
               <FormattedMessage
                 id="xpack.fleet.epm.InputTemplates.error"
                 defaultMessage="This integration doesn't support automatic generation of sample configurations."
               />
-            </p>
-          </EuiCallOut>
+            }
+          />
         </EuiFlexItem>
       ) : (
         <EuiFlexItem grow={7}>
@@ -79,10 +77,8 @@ export const Configs: React.FC<ConfigsProps> = ({ packageInfo }) => {
               {isPrerelease && (
                 <>
                   <EuiSpacer size="s" />
-                  <PrereleaseCallout
-                    packageName={packageInfo.name}
-                    packageTitle={packageInfo.title}
-                  />
+                  <PrereleaseCallout packageInfo={packageInfo} />
+                  <EuiSpacer size="l" />
                 </>
               )}
               <EuiText>
@@ -113,7 +109,8 @@ export const Configs: React.FC<ConfigsProps> = ({ packageInfo }) => {
               {notInstalled && (
                 <>
                   <EuiSpacer size="s" />
-                  <EuiCallOut
+                  <KbnWarningCallout
+                    announceOnMount
                     data-test-subj="configsTab.notInstalled"
                     title={
                       <FormattedMessage
@@ -121,8 +118,6 @@ export const Configs: React.FC<ConfigsProps> = ({ packageInfo }) => {
                         defaultMessage="Install the integration to use the following configs."
                       />
                     }
-                    color="warning"
-                    iconType="warning"
                   />
                 </>
               )}

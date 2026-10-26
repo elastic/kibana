@@ -6,13 +6,8 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
-import { DataViewsService } from '@kbn/data-views-plugin/common';
-import {
-  ALL_VALUE,
-  apmTransactionErrorRateIndicatorSchema,
-  timeslicesBudgetingMethodSchema,
-} from '@kbn/slo-schema';
+import type { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
+import { ALL_VALUE, is, apmTransactionErrorRateIndicatorSchemaZod } from '@kbn/slo-schema';
 import { TransformGenerator, getElasticsearchQueryOrThrow } from '.';
 import {
   SLI_DESTINATION_INDEX_NAME,
@@ -20,17 +15,13 @@ import {
   getSLOTransformId,
 } from '../../../common/constants';
 import { getSLOTransformTemplate } from '../../assets/transform_templates/slo_transform_template';
-import { APMTransactionErrorRateIndicator, SLODefinition } from '../../domain/models';
+import type { APMTransactionErrorRateIndicator, SLODefinition } from '../../domain/models';
 import { InvalidTransformError } from '../../errors';
 import { getFilterRange, getTimesliceTargetComparator, parseIndex } from './common';
 
 export class ApmTransactionErrorRateTransformGenerator extends TransformGenerator {
-  constructor(spaceId: string, dataViewService: DataViewsService, isServerless: boolean) {
-    super(spaceId, dataViewService, isServerless);
-  }
-
   public async getTransformParams(slo: SLODefinition): Promise<TransformPutTransformRequest> {
-    if (!apmTransactionErrorRateIndicatorSchema.is(slo.indicator)) {
+    if (!is(apmTransactionErrorRateIndicatorSchemaZod, slo.indicator)) {
       throw new InvalidTransformError(`Cannot handle SLO of indicator type: ${slo.indicator.type}`);
     }
 
@@ -42,7 +33,8 @@ export class ApmTransactionErrorRateTransformGenerator extends TransformGenerato
       this.buildGroupBy(slo, slo.indicator),
       this.buildAggregations(slo),
       this.buildSettings(slo, '@timestamp'),
-      slo
+      slo,
+      this.getProjectRouting(slo)
     );
   }
 
@@ -156,7 +148,7 @@ export class ApmTransactionErrorRateTransformGenerator extends TransformGenerato
           match_all: {},
         },
       },
-      ...(timeslicesBudgetingMethodSchema.is(slo.budgetingMethod) && {
+      ...(slo.budgetingMethod === 'timeslices' && {
         'slo.isGoodSlice': {
           bucket_script: {
             buckets_path: {

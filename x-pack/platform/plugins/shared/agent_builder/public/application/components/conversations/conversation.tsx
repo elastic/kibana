@@ -1,0 +1,206 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  useEuiOverflowScroll,
+  useEuiScrollBar,
+  useEuiTheme,
+  useResizeObserver,
+} from '@elastic/eui';
+import { css } from '@emotion/react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { isString } from 'lodash';
+import { useConversationError, useHasActiveConversation } from '../../hooks/use_conversation';
+import { ConversationInput } from './conversation_input/conversation_input';
+import { TimelineConnector } from './timeline/timeline_connector';
+import { NewConversationPrompt } from './new_conversation_prompt';
+import { useConversationId } from '../../context/conversation/use_conversation_id';
+import { useConversationScrollActions } from '../../hooks/use_conversation_scroll_actions';
+import { useAnchoredItemKey } from '../../hooks/use_anchored_item_key';
+import { useOnMessageFromOtherParticipant } from '../../hooks/use_on_message_from_other_participant';
+import { useConversationStatus } from '../../hooks/use_conversation';
+import { useSendPredefinedInitialMessage } from '../../hooks/use_initial_message';
+import {
+  conversationElementPaddingStyles,
+  conversationElementWidthStyles,
+  fullWidthAndHeightStyles,
+} from './conversation.styles';
+import { ScrollButton } from './scroll_button';
+import { ErrorPrompt } from '../common/prompt/error_prompt';
+import { PROMPT_LAYOUT_VARIANTS } from '../common/prompt/layout';
+import { StartNewConversationButton } from './actions/start_new_conversation_button';
+import { CanvasProvider } from './timeline/response/attachments/canvas_context';
+import { CanvasFlyout } from './timeline/response/attachments/canvas_flyout';
+import { useAgentBuilderServices } from '../../hooks/use_agent_builder_service';
+import { useConversationContext } from '../../context/conversation/conversation_context';
+import { StaleAttachmentsPanel } from './stale_attachments_panel';
+import { useStaleAttachments } from '../../hooks/use_stale_attachments_check';
+
+export const Conversation: React.FC<{}> = () => {
+  const { euiTheme } = useEuiTheme();
+  const conversationId = useConversationId();
+  const hasActiveConversation = useHasActiveConversation();
+  const { isFetched } = useConversationStatus();
+  const { errorType } = useConversationError();
+  const { attachmentsService } = useAgentBuilderServices();
+  const {
+    attachments: stagedAttachments = [],
+    upsertAttachments,
+    initialMessage,
+    autoSendInitialMessage,
+  } = useConversationContext();
+  const isPendingAutoSend = Boolean(initialMessage && autoSendInitialMessage);
+  const { staleAttachments, scheduleStaleCheck } = useStaleAttachments(conversationId);
+  const [dismissStaleAttachments, setDismissStaleAttachments] = useState(false);
+  useSendPredefinedInitialMessage();
+
+  const [scrollContainer, setScrollContainer] = useState<HTMLDivElement | null>(null);
+  const [timelineContent, setTimelineContent] = useState<HTMLDivElement | null>(null);
+
+  const { height: scrollContainerHeight } = useResizeObserver(scrollContainer, 'height');
+  const anchoredItemKey = useAnchoredItemKey();
+
+  const {
+    showScrollButton,
+    onMessageSent,
+    stopFollowingBottom,
+    smoothScrollToBottom,
+    stickToBottom,
+  } = useConversationScrollActions({
+    scrollContainer,
+    scrollContainerHeight,
+    timelineContent,
+    anchoredItemKey,
+  });
+
+  const stagedAttachmentIds = useMemo(() => {
+    const ids = stagedAttachments.map((attachment) => attachment.id).filter(isString);
+    return new Set(ids);
+  }, [stagedAttachments]);
+
+  const staleAttachmentInputs = useMemo(() => {
+    return staleAttachments.filter((a) => !a.id || !stagedAttachmentIds.has(a.id));
+  }, [staleAttachments, stagedAttachmentIds]);
+
+  const handleStageStaleAttachments = useCallback(() => {
+    if (staleAttachmentInputs.length > 0) {
+      upsertAttachments?.(staleAttachmentInputs);
+    }
+    setDismissStaleAttachments(true);
+  }, [staleAttachmentInputs, upsertAttachments]);
+
+  // Display stale attachments panel when stale attachments response changes or conversationId changes
+  useEffect(() => {
+    setDismissStaleAttachments(false);
+  }, [staleAttachments, conversationId]);
+
+  useOnMessageFromOtherParticipant(stopFollowingBottom);
+
+  // Stick to bottom when opening a conversation, once its data has loaded
+  useEffect(() => {
+    if (isFetched && conversationId) {
+      requestAnimationFrame(() => {
+        stickToBottom();
+      });
+    }
+  }, [stickToBottom, isFetched, conversationId]);
+
+  const containerStyles = css`
+    ${fullWidthAndHeightStyles}
+  `;
+
+  const scrollMaskHeight = euiTheme.size.l;
+
+  // Necessary to position the scroll button absolute to the container.
+  const scrollWrapperStyles = css`
+    ${fullWidthAndHeightStyles}
+    position: relative;
+    min-height: 0;
+
+    &::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: ${scrollMaskHeight};
+      pointer-events: none;
+      z-index: 1;
+      background: linear-gradient(to top, ${euiTheme.colors.backgroundBasePlain}, transparent);
+    }
+  `;
+
+  const scrollableStyles = css`
+    ${useEuiScrollBar()}
+    ${useEuiOverflowScroll('y')}
+    scrollbar-gutter: stable both-edges;
+    overflow-anchor: none;
+  `;
+
+  const inputPaddingStyles = css`
+    padding-bottom: ${euiTheme.size.base};
+  `;
+
+  if (!hasActiveConversation && !isPendingAutoSend) {
+    return <NewConversationPrompt />;
+  }
+  if (isPendingAutoSend && !hasActiveConversation) {
+    return null;
+  }
+
+  if (errorType) {
+    return (
+      <ErrorPrompt
+        errorType={errorType}
+        variant={PROMPT_LAYOUT_VARIANTS.EMBEDDABLE}
+        primaryButton={<StartNewConversationButton />}
+      />
+    );
+  }
+
+  return (
+    <CanvasProvider>
+      <EuiFlexGroup direction="column" alignItems="center" css={containerStyles} gutterSize="s">
+        <EuiFlexItem grow={true} css={scrollWrapperStyles}>
+          <EuiFlexGroup
+            direction="column"
+            alignItems="center"
+            ref={setScrollContainer}
+            css={scrollableStyles}
+          >
+            <EuiFlexItem css={[conversationElementWidthStyles, conversationElementPaddingStyles]}>
+              <div ref={setTimelineContent}>
+                <TimelineConnector />
+              </div>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          {showScrollButton && <ScrollButton onClick={smoothScrollToBottom} />}
+        </EuiFlexItem>
+        <EuiFlexItem
+          css={[
+            conversationElementWidthStyles,
+            conversationElementPaddingStyles,
+            inputPaddingStyles,
+          ]}
+          grow={false}
+        >
+          {!dismissStaleAttachments && (
+            <StaleAttachmentsPanel
+              attachmentInputs={staleAttachmentInputs}
+              onAddToInput={handleStageStaleAttachments}
+              onDismiss={() => setDismissStaleAttachments(true)}
+            />
+          )}
+          <ConversationInput onSubmit={onMessageSent} onEditorFocus={scheduleStaleCheck} />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <CanvasFlyout attachmentsService={attachmentsService} />
+    </CanvasProvider>
+  );
+};

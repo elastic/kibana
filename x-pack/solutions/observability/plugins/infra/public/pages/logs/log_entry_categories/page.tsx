@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { EuiErrorBoundary } from '@elastic/eui';
 import React from 'react';
 import { MissingResultsPrivilegesPrompt } from '../../../components/logging/log_analysis_setup';
 import { useLogAnalysisCapabilitiesContext } from '../../../containers/logs/log_analysis';
@@ -14,6 +13,7 @@ import { useLogsBreadcrumbs } from '../../../hooks/use_logs_breadcrumbs';
 import { CategoriesPageTemplate, LogEntryCategoriesPageContent } from './page_content';
 import { LogEntryCategoriesPageProviders } from './page_providers';
 import { logCategoriesTitle } from '../../../translations';
+import { LogsAppHeader, logCategoriesPageTitle } from '../header';
 import { LogMlJobIdFormatsShimProvider } from '../shared/use_log_ml_job_id_formats_shim';
 
 export const LogEntryCategoriesPage = () => {
@@ -30,9 +30,7 @@ export const LogEntryCategoriesPage = () => {
     return (
       <SubscriptionSplashPage
         data-test-subj="logsLogEntryCategoriesPage"
-        pageHeader={{
-          pageTitle: logCategoriesTitle,
-        }}
+        header={<LogsAppHeader title={logCategoriesPageTitle} />}
       />
     );
   }
@@ -46,12 +44,10 @@ export const LogEntryCategoriesPage = () => {
   }
 
   return (
-    <EuiErrorBoundary>
-      <LogMlJobIdFormatsShimProvider>
-        <LogEntryCategoriesPageProviders>
-          <LogEntryCategoriesPageContent />
-        </LogEntryCategoriesPageProviders>
-      </LogMlJobIdFormatsShimProvider>
-    </EuiErrorBoundary>
+    <LogMlJobIdFormatsShimProvider>
+      <LogEntryCategoriesPageProviders>
+        <LogEntryCategoriesPageContent />
+      </LogEntryCategoriesPageProviders>
+    </LogMlJobIdFormatsShimProvider>
   );
 };

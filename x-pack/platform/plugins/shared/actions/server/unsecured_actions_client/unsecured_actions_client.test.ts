@@ -6,20 +6,28 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
+import { asSpaceId, DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import {
   elasticsearchServiceMock,
   loggingSystemMock,
   savedObjectsRepositoryMock,
 } from '@kbn/core/server/mocks';
-import { asNotificationExecutionSource } from '../lib';
+import { asNotificationExecutionSource, NOTIFICATIONS_REQUESTER_ID } from '../lib';
 import { actionExecutorMock } from '../lib/action_executor.mock';
 import { UnsecuredActionsClient } from './unsecured_actions_client';
 import type { Logger } from '@kbn/core/server';
 import { getAllUnsecured } from '../application/connector/methods/get_all/get_all';
+import type { ActionTypeRegistry } from '../action_type_registry';
+import {
+  createMockConnectorFindResult,
+  createMockInMemoryConnector,
+} from '../application/connector/mocks';
 
 jest.mock('../application/connector/methods/get_all/get_all');
 
 const mockGetAllUnsecured = getAllUnsecured as jest.MockedFunction<typeof getAllUnsecured>;
+
+const connectorTypeRegistry: ActionTypeRegistry = jest.fn() as unknown as ActionTypeRegistry;
 
 const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
 const actionExecutor = actionExecutorMock.create();
@@ -27,38 +35,32 @@ const executionEnqueuer = jest.fn();
 const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 const clusterClient = elasticsearchServiceMock.createClusterClient();
 const inMemoryConnectors = [
-  {
+  createMockInMemoryConnector({
     id: 'testPreconfigured',
     actionTypeId: '.slack',
     secrets: {},
     isPreconfigured: true,
-    isDeprecated: false,
-    isSystemAction: false,
     name: 'test',
     config: {
       foo: 'bar',
     },
-  },
+  }),
   /**
    * System actions will not
    * be returned from getAllUnsecured
    */
-  {
+  createMockInMemoryConnector({
     id: 'system-connector-.cases',
     actionTypeId: '.cases',
     name: 'System action: .cases',
-    config: {},
-    secrets: {},
-    isDeprecated: false,
-    isMissingSecrets: false,
-    isPreconfigured: false,
     isSystemAction: true,
-  },
+  }),
 ];
 let unsecuredActionsClient: UnsecuredActionsClient;
 
 beforeEach(() => {
   jest.resetAllMocks();
+  connectorTypeRegistry.isDeprecated = jest.fn().mockReturnValue(false);
   unsecuredActionsClient = new UnsecuredActionsClient({
     actionExecutor,
     clusterClient,
@@ -67,35 +69,30 @@ beforeEach(() => {
     internalSavedObjectsRepository,
     kibanaIndices: ['.kibana'],
     logger,
+    connectorTypeRegistry,
   });
 });
 
 describe('getAll()', () => {
   test('calls getAllUnsecured library method with appropriate parameters', async () => {
     const expectedResult = [
-      {
+      createMockConnectorFindResult({
         actionTypeId: 'test',
         id: '1',
         name: 'test',
-        isMissingSecrets: false,
         config: { foo: 'bar' },
-        isPreconfigured: false,
-        isDeprecated: false,
-        isSystemAction: false,
         referencedByCount: 6,
-      },
-      {
+      }),
+      createMockConnectorFindResult({
         id: 'testPreconfigured',
         actionTypeId: '.slack',
         name: 'test',
         isPreconfigured: true,
-        isSystemAction: false,
-        isDeprecated: false,
         referencedByCount: 2,
-      },
+      }),
     ];
     mockGetAllUnsecured.mockResolvedValueOnce(expectedResult);
-    const result = await unsecuredActionsClient.getAll('default');
+    const result = await unsecuredActionsClient.getAll(DEFAULT_SPACE_ID);
     expect(result).toEqual(expectedResult);
     expect(mockGetAllUnsecured).toHaveBeenCalledWith({
       esClient: clusterClient.asInternalUser,
@@ -103,7 +100,8 @@ describe('getAll()', () => {
       kibanaIndices: ['.kibana'],
       logger,
       internalSavedObjectsRepository,
-      spaceId: 'default',
+      spaceId: DEFAULT_SPACE_ID,
+      connectorTypeRegistry,
     });
   });
 
@@ -112,7 +110,7 @@ describe('getAll()', () => {
       throw new Error('failfail');
     });
     await expect(
-      unsecuredActionsClient.getAll('customSpace')
+      unsecuredActionsClient.getAll(asSpaceId('custom-space'))
     ).rejects.toThrowErrorMatchingInlineSnapshot(`"failfail"`);
     expect(mockGetAllUnsecured).toHaveBeenCalledWith({
       esClient: clusterClient.asInternalUser,
@@ -120,7 +118,8 @@ describe('getAll()', () => {
       kibanaIndices: ['.kibana'],
       logger,
       internalSavedObjectsRepository,
-      spaceId: 'customSpace',
+      spaceId: asSpaceId('custom-space'),
+      connectorTypeRegistry,
     });
   });
 });
@@ -131,7 +130,7 @@ describe('execute()', () => {
       unsecuredActionsClient.execute({
         requesterId: 'badId',
         id: '1',
-        spaceId: 'default',
+        spaceId: DEFAULT_SPACE_ID,
         params: {
           name: 'my name',
         },
@@ -148,7 +147,7 @@ describe('execute()', () => {
       unsecuredActionsClient.execute({
         requesterId: 'background_task',
         id: actionId,
-        spaceId: 'default',
+        spaceId: DEFAULT_SPACE_ID,
         params: {
           name: 'my name',
         },
@@ -160,7 +159,7 @@ describe('execute()', () => {
       params: {
         name: 'my name',
       },
-      spaceId: 'default',
+      spaceId: DEFAULT_SPACE_ID,
       actionExecutionId: expect.any(String),
     });
     expect(logger.warn).toHaveBeenCalledWith(
@@ -179,7 +178,7 @@ describe('execute()', () => {
         params: {
           name: 'my name',
         },
-        spaceId: 'custom',
+        spaceId: asSpaceId('custom'),
         relatedSavedObjects: [
           {
             id: 'some-id',
@@ -195,7 +194,7 @@ describe('execute()', () => {
       params: {
         name: 'my name',
       },
-      spaceId: 'custom',
+      spaceId: asSpaceId('custom'),
       source: {
         source: {
           taskId: 'some-id',
@@ -226,7 +225,7 @@ describe('execute()', () => {
         params: {
           name: 'my name',
         },
-        spaceId: 'custom',
+        spaceId: asSpaceId('custom'),
         relatedSavedObjects: [
           {
             id: 'some-id',
@@ -241,7 +240,7 @@ describe('execute()', () => {
       params: {
         name: 'my name',
       },
-      spaceId: 'custom',
+      spaceId: asSpaceId('custom'),
       source: {
         source: {
           taskId: 'some-id',
@@ -321,7 +320,10 @@ describe('bulkEnqueueExecution()', () => {
 
     const optsWithSource = opts.map((opt) => ({
       ...opt,
-      source: asNotificationExecutionSource({ connectorId: opt.id, requesterId: 'notifications' }),
+      source: asNotificationExecutionSource({
+        connectorId: opt.id,
+        requesterId: NOTIFICATIONS_REQUESTER_ID,
+      }),
     }));
     expect(executionEnqueuer).toHaveBeenCalledWith(internalSavedObjectsRepository, optsWithSource);
   });

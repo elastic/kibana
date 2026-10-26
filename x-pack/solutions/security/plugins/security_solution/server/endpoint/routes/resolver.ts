@@ -7,20 +7,21 @@
 import type { StartServicesAccessor } from '@kbn/core/server';
 import type { SecuritySolutionPluginRouter } from '../../types';
 import type { StartPlugins } from '../../plugin';
-import type { ConfigType } from '../../config';
 import {
-  validateEvents,
   validateEntities,
+  validateEvents,
   validateTree,
 } from '../../../common/endpoint/schema/resolver';
 import { handleTree } from './resolver/tree/handler';
 import { handleEntities } from './resolver/entity/handler';
 import { handleEvents } from './resolver/events';
+import type { GetResolverClusterClient } from './resolver/utils/scoped_client';
+import { getResolverClusterClient } from './resolver/utils/scoped_client';
 
 export const registerResolverRoutes = (
   router: SecuritySolutionPluginRouter,
   startServices: StartServicesAccessor<StartPlugins>,
-  config: ConfigType
+  platformCpsEnabled: boolean
 ) => {
   const getRuleRegistry = async () => {
     const [, { ruleRegistry }] = await startServices();
@@ -32,6 +33,16 @@ export const registerResolverRoutes = (
     return licensing;
   };
 
+  const getClusterClient = async () => {
+    const [coreStart] = await startServices();
+    return coreStart.elasticsearch.client;
+  };
+
+  // Bound here so the handlers own no CPS wiring: they just ask for a client and get told whether
+  // the read fanned out across projects.
+  const getResolverClient: GetResolverClusterClient = (context, request) =>
+    getResolverClusterClient({ context, request, getClusterClient, platformCpsEnabled });
+
   router.post(
     {
       path: '/api/endpoint/resolver/tree',
@@ -41,9 +52,8 @@ export const registerResolverRoutes = (
         },
       },
       validate: validateTree,
-      options: { authRequired: true },
     },
-    handleTree(getRuleRegistry, getLicensing)
+    handleTree(getRuleRegistry, getLicensing, getResolverClient)
   );
 
   router.post(
@@ -55,9 +65,8 @@ export const registerResolverRoutes = (
         },
       },
       validate: validateEvents,
-      options: { authRequired: true },
     },
-    handleEvents(getRuleRegistry)
+    handleEvents(getRuleRegistry, getResolverClient)
   );
 
   /**
@@ -72,8 +81,7 @@ export const registerResolverRoutes = (
         },
       },
       validate: validateEntities,
-      options: { authRequired: true },
     },
-    handleEntities(config.experimentalFeatures)
+    handleEntities(getResolverClient)
   );
 };

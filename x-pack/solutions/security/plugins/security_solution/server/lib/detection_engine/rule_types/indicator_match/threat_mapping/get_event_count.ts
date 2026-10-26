@@ -28,6 +28,8 @@ export const getEventList = async ({
     ruleExecutionLogger,
     primaryTimestamp,
     secondaryTimestamp,
+    dateNanosTimestampFields,
+    mixedTimestampFields,
     runtimeMappings,
     tuple,
     exceptionFilter,
@@ -40,8 +42,8 @@ export const getEventList = async ({
     throw new TypeError('perPage cannot exceed the size of 10000');
   }
 
-  ruleExecutionLogger.debug(
-    `Querying the events items from the index: "${sharedParams.inputIndex}" with searchAfter: "${searchAfter}" for up to ${calculatedPerPage} indicator items`
+  ruleExecutionLogger.trace(
+    `Querying events\nIndex: "${sharedParams.inputIndex}", searchAfter: "${searchAfter}" for up to ${calculatedPerPage} indicator items.`
   );
 
   const queryFilter = getQueryFilter({
@@ -63,6 +65,8 @@ export const getEventList = async ({
     filter: queryFilter,
     primaryTimestamp,
     secondaryTimestamp,
+    dateNanosTimestampFields,
+    mixedTimestampFields,
     sortOrder,
     trackTotalHits: false,
     runtimeMappings,
@@ -75,7 +79,7 @@ export const getEventList = async ({
     ruleExecutionLogger,
   });
 
-  ruleExecutionLogger.debug(`Retrieved events items of size: ${searchResult.hits.hits.length}`);
+  ruleExecutionLogger.debug(`Events retrieved: ${searchResult.hits.hits.length}`);
   return searchResult;
 };
 

@@ -6,8 +6,13 @@
  */
 
 import { EuiFilePicker } from '@elastic/eui';
-import PropTypes from 'prop-types';
-import React, { FunctionComponent } from 'react';
+import { i18n } from '@kbn/i18n';
+import type { FunctionComponent } from 'react';
+import React from 'react';
+
+const SELECT_FILE_LABEL = i18n.translate('xpack.canvas.fileUpload.filePickerAriaLabel', {
+  defaultMessage: 'Select or drag and drop a file',
+});
 
 interface Props {
   /** Optional ID of the component */
@@ -18,22 +23,19 @@ interface Props {
   onUpload: () => void;
 }
 
-export const FileUpload: FunctionComponent<Props> = (props) => (
-  <EuiFilePicker compressed id={props.id} className={props.className} onChange={props.onUpload} />
+export const FileUpload: FunctionComponent<Props> = ({
+  id = '',
+  className = 'canvasFileUpload',
+  onUpload,
+}) => (
+  <EuiFilePicker
+    aria-label={SELECT_FILE_LABEL}
+    initialPromptText={SELECT_FILE_LABEL}
+    compressed
+    id={id}
+    className={className}
+    onChange={onUpload}
+  />
 );
-
-FileUpload.defaultProps = {
-  id: '',
-  className: 'canvasFileUpload',
-};
-
-FileUpload.propTypes = {
-  /** Optional ID of the component */
-  id: PropTypes.string,
-  /** Optional className of the component */
-  className: PropTypes.string,
-  /** Function to invoke when the file is successfully uploaded */
-  onUpload: PropTypes.func.isRequired,
-};
 
 FileUpload.displayName = 'FileUpload';

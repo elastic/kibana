@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SavedObject } from '@kbn/core/server';
+import type { SavedObject } from '@kbn/core/server';
 import { injectMetaAttributes } from './inject_meta_attributes';
 import { managementMock } from '../services/management.mock';
 

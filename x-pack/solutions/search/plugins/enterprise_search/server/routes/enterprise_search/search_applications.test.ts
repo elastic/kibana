@@ -17,7 +17,7 @@ jest.mock('../../lib/search_applications/fetch_alias_indices', () => ({
   fetchAliasIndices: jest.fn(),
 }));
 
-import { RequestHandlerContext } from '@kbn/core/server';
+import type { RequestHandlerContext } from '@kbn/core/server';
 
 import { fetchAliasIndices } from '../../lib/search_applications/fetch_alias_indices';
 import { fetchIndicesStats } from '../../lib/search_applications/fetch_indices_stats';

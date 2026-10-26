@@ -8,9 +8,9 @@
  */
 
 import { stubLogstashDataView } from '@kbn/data-views-plugin/common/data_view.stub';
-import { IAggConfig, METRIC_TYPES } from '@kbn/data-plugin/common';
-import { AggBasedColumn, ColumnWithMeta, Operations } from '../..';
-import { SchemaConfig } from '../../types';
+import type { IAggConfig } from '@kbn/data-plugin/common';
+import { METRIC_TYPES } from '@kbn/data-plugin/common';
+import type { SchemaConfig } from '../../types';
 import {
   getCustomBucketsFromSiblingAggs,
   getFieldNameFromField,
@@ -27,6 +27,9 @@ import {
   isSiblingPipeline,
   isStdDevAgg,
 } from './utils';
+import { Operations } from '../constants';
+import type { AggBasedColumn } from './convert/types';
+import type { ColumnWithMeta } from '../types';
 
 describe('getLabel', () => {
   const label = 'some label';
@@ -115,7 +118,9 @@ describe('getValidColumns', () => {
       isBucketed: true,
     },
   ];
-  test.each<[string, Parameters<typeof getValidColumns>, AggBasedColumn[] | null]>([
+  test.each<
+    [string, Parameters<typeof getValidColumns>, AggBasedColumn | (AggBasedColumn | null)[] | null]
+  >([
     ['null if array contains null', [[null, ...columns]], null],
     ['null if columns is null', [null], null],
     ['null if columns is undefined', [undefined], null],
@@ -471,19 +476,19 @@ describe('getMetricFromParentPipelineAgg', () => {
 
   test('should return null if aggParams are undefined', () => {
     expect(getMetricFromParentPipelineAgg({ ...agg, aggParams: undefined }, [])).toBeNull();
-    expect(mockConvertToSchemaConfig).toBeCalledTimes(0);
+    expect(mockConvertToSchemaConfig).toHaveBeenCalledTimes(0);
   });
 
   test('should return null if is sibling pipeline agg and custom metric is not defined', () => {
     expect(
       getMetricFromParentPipelineAgg({ ...agg, aggParams: { customMetric: undefined } }, [])
     ).toBeNull();
-    expect(mockConvertToSchemaConfig).toBeCalledTimes(0);
+    expect(mockConvertToSchemaConfig).toHaveBeenCalledTimes(0);
   });
 
   test('should return null if is parent pipeline agg, metricAgg is custom and custom metric is not defined', () => {
     expect(getMetricFromParentPipelineAgg(parentPipelineAgg, [])).toBeNull();
-    expect(mockConvertToSchemaConfig).toBeCalledTimes(0);
+    expect(mockConvertToSchemaConfig).toHaveBeenCalledTimes(0);
   });
 
   test('should return metric if is parent pipeline agg, metricAgg is equal to aggId and custom metric is not defined', () => {
@@ -499,12 +504,12 @@ describe('getMetricFromParentPipelineAgg', () => {
         plainAgg,
       ])
     ).toEqual(plainAgg);
-    expect(mockConvertToSchemaConfig).toBeCalledTimes(0);
+    expect(mockConvertToSchemaConfig).toHaveBeenCalledTimes(0);
   });
 
   test('should return metric if sibling pipeline agg with custom metric', () => {
     expect(getMetricFromParentPipelineAgg(agg, [agg])).toEqual(metric);
-    expect(mockConvertToSchemaConfig).toBeCalledTimes(1);
+    expect(mockConvertToSchemaConfig).toHaveBeenCalledTimes(1);
   });
 
   test('should return metric if parent pipeline agg with custom metric', () => {
@@ -517,6 +522,6 @@ describe('getMetricFromParentPipelineAgg', () => {
         [agg]
       )
     ).toEqual(metric);
-    expect(mockConvertToSchemaConfig).toBeCalledTimes(1);
+    expect(mockConvertToSchemaConfig).toHaveBeenCalledTimes(1);
   });
 });

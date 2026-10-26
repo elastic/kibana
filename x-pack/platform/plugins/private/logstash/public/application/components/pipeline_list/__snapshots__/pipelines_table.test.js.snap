@@ -47,7 +47,7 @@ exports[`PipelinesTable component renders component as expected 1`] = `
       },
     ]
   }
-  message={null}
+  noItemsMessage={null}
   pagination={
     Object {
       "initialPageSize": 20,
@@ -88,17 +88,6 @@ exports[`PipelinesTable component renders component as expected 1`] = `
         },
       ],
       "toolsLeft": null,
-      "toolsRight": <EuiButton
-        data-test-subj="btnAdd"
-        fill={true}
-        isDisabled={false}
-        onClick={[MockFunction]}
-      >
-        <Memo(MemoizedFormattedMessage)
-          defaultMessage="Create pipeline"
-          id="xpack.logstash.pipelinesTable.createPipelineButtonLabel"
-        />
-      </EuiButton>,
     }
   }
   searchFormat="eql"
@@ -110,6 +99,7 @@ exports[`PipelinesTable component renders component as expected 1`] = `
     }
   }
   sorting={true}
+  tableCaption="Logstash pipelines"
   tableLayout="fixed"
 />
 `;

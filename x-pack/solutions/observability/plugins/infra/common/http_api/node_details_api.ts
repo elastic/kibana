@@ -6,7 +6,8 @@
  */
 
 import * as rt from 'io-ts';
-import { InventoryMetricRT, ItemTypeRT } from '@kbn/metrics-data-access-plugin/common';
+import { InventoryTsvbTypeKeysRT, ItemTypeRT } from '@kbn/metrics-data-access-plugin/common';
+import { DataSchemaFormatRT } from './shared/data_schema_format';
 import { InfraTimerangeInputRT } from './snapshot_api';
 
 const NodeDetailsDataPointRT = rt.intersection([
@@ -28,7 +29,7 @@ export type NodeDetailsDataSeries = rt.TypeOf<typeof NodeDetailsDataSeriesRT>;
 
 export const NodeDetailsMetricDataRT = rt.intersection([
   rt.partial({
-    id: rt.union([InventoryMetricRT, rt.null]),
+    id: rt.union([InventoryTsvbTypeKeysRT, rt.null]),
   }),
   rt.type({
     series: rt.array(NodeDetailsDataSeriesRT),
@@ -43,12 +44,13 @@ export const NodeDetailsRequestRT = rt.intersection([
   rt.type({
     nodeType: ItemTypeRT,
     nodeId: rt.string,
-    metrics: rt.array(InventoryMetricRT),
+    metrics: rt.array(InventoryTsvbTypeKeysRT),
     timerange: InfraTimerangeInputRT,
     sourceId: rt.string,
   }),
   rt.partial({
     cloudId: rt.union([rt.string, rt.null]),
+    schema: DataSchemaFormatRT,
   }),
 ]);
 

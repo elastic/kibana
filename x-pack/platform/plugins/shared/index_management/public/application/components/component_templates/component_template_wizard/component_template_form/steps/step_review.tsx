@@ -22,14 +22,14 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import type { DataStreamOptions } from '../../../../../../../common/types/data_streams';
+import type { ComponentTemplateDeserialized } from '../../../shared_imports';
+import { serializers, serializeComponentTemplate } from '../../../shared_imports';
 import {
-  ComponentTemplateDeserialized,
-  serializers,
-  serializeComponentTemplate,
-} from '../../../shared_imports';
-import { getLifecycleValue } from '../../../../../lib/data_streams';
-
-const INFINITE_AS_ICON = true;
+  formatDlmLifecycleSummary,
+  resolveLifecycleForSummary,
+} from '../../../../../lib/data_streams';
+import { useAppContext } from '../../../../../app_context';
 const { stripEmptyFields } = serializers;
 
 const getDescriptionText = (data: any) => {
@@ -52,16 +52,22 @@ interface Props {
   componentTemplate: ComponentTemplateDeserialized;
   dataStreams?: string[];
   canRollover?: boolean;
+  dataStreamOptions?: DataStreamOptions;
 }
 
 export const StepReview: React.FunctionComponent<Props> = React.memo(
-  ({ dataStreams, canRollover, componentTemplate }) => {
+  ({ dataStreams, canRollover, componentTemplate, dataStreamOptions }) => {
+    const {
+      config: { isServerless },
+    } = useAppContext();
+    const dlmTiersLayoutEnabled = !isServerless;
     const { name } = componentTemplate;
 
     const serializedComponentTemplate = serializeComponentTemplate(
       stripEmptyFields(componentTemplate, {
         types: ['string'],
-      }) as ComponentTemplateDeserialized
+      }) as ComponentTemplateDeserialized,
+      dataStreamOptions
     );
 
     const {
@@ -72,6 +78,10 @@ export const StepReview: React.FunctionComponent<Props> = React.memo(
 
     const areDatastreamsVisible =
       Boolean(dataStreams?.length) && (componentTemplate.name.endsWith('@custom') || canRollover);
+
+    const lifecycle = resolveLifecycleForSummary(serializedTemplate?.lifecycle, {
+      hasDataStream: true,
+    });
 
     const SummaryTab = () => (
       <div data-test-subj="summaryTab">
@@ -126,15 +136,17 @@ export const StepReview: React.FunctionComponent<Props> = React.memo(
                 {getDescriptionText(serializedTemplate?.aliases)}
               </EuiDescriptionListDescription>
 
-              {/* Data retention */}
+              {/* Data lifecycle */}
               <EuiDescriptionListTitle>
                 <FormattedMessage
-                  id="xpack.idxMgmt.componentTemplateForm.stepReview.summaryTab.dataRetentionLabel"
-                  defaultMessage="Data retention"
+                  id="xpack.idxMgmt.componentTemplateForm.stepReview.summaryTab.dataLifecycleLabel"
+                  defaultMessage="Data lifecycle"
                 />
               </EuiDescriptionListTitle>
               <EuiDescriptionListDescription>
-                {getLifecycleValue(serializedTemplate?.lifecycle, INFINITE_AS_ICON)}
+                {formatDlmLifecycleSummary(lifecycle, {
+                  includePhaseCount: dlmTiersLayoutEnabled,
+                })}
               </EuiDescriptionListDescription>
             </EuiDescriptionList>
           </EuiFlexItem>

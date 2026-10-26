@@ -25,3 +25,16 @@ export {
   ECS_FIELD_REFERENCE_URL,
   MAPPING_URL,
 } from './impl/data_quality_panel/constants';
+
+export { checkIndex } from './impl/data_quality_panel/utils/check_index';
+
+export type {
+  OnCheckCompleted,
+  PartitionedFieldMetadata,
+  UnallowedValueCount,
+  AllowedValue,
+  IncompatibleFieldMappingItem,
+  IncompatibleFieldValueItem,
+  SameFamilyFieldItem,
+  StorageResult,
+} from './impl/data_quality_panel/types';

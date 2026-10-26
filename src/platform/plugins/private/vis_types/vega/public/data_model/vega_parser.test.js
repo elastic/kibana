@@ -12,8 +12,7 @@ import { cloneDeep } from 'lodash';
 import 'jest-canvas-mock';
 import { TimeCache } from './time_cache';
 import { VegaParser } from './vega_parser';
-import { bypassExternalUrlCheck } from '../vega_view/vega_base_view';
-import { VegaThemeColors } from './utils';
+import { VegaThemeColors, getDefaultAreaGradientFill } from './utils';
 import { DEFAULT_EMS_DARKMAP_ID } from '@kbn/maps-ems-plugin/common';
 
 jest.mock('../services');
@@ -145,10 +144,17 @@ describe(`VegaParser._setDefaultColors`, () => {
           domainColor: VegaThemeColors.borealis.light.grid,
           gridColor: VegaThemeColors.borealis.light.grid,
           tickColor: VegaThemeColors.borealis.light.grid,
+          titleFontWeight: 500,
         },
         background: 'transparent',
         range: { category: { scheme: 'elastic' } },
         mark: { color: VegaThemeColors.borealis.light.default },
+        area: {
+          fill: getDefaultAreaGradientFill(VegaThemeColors.borealis.light.default),
+          fillOpacity: 0.3,
+          line: true,
+        },
+        view: { stroke: null },
         style: {
           'group-title': {
             fill: VegaThemeColors.borealis.light.title,
@@ -175,18 +181,25 @@ describe(`VegaParser._setDefaultColors`, () => {
           domainColor: VegaThemeColors.borealis.light.grid,
           gridColor: VegaThemeColors.borealis.light.grid,
           tickColor: VegaThemeColors.borealis.light.grid,
+          titleFontWeight: 500,
         },
         background: 'transparent',
         range: { category: { scheme: 'elastic' } },
         arc: { fill: VegaThemeColors.borealis.light.default },
-        area: { fill: VegaThemeColors.borealis.light.default },
+        area: {
+          fill: VegaThemeColors.borealis.light.default,
+          fillOpacity: 0.5,
+          line: true,
+        },
         line: { stroke: VegaThemeColors.borealis.light.default },
         path: { stroke: VegaThemeColors.borealis.light.default },
         rect: { fill: VegaThemeColors.borealis.light.default },
         rule: { stroke: VegaThemeColors.borealis.light.default },
         shape: { stroke: VegaThemeColors.borealis.light.default },
         symbol: { fill: VegaThemeColors.borealis.light.default },
+        text: { fill: VegaThemeColors.borealis.light.text },
         trail: { fill: VegaThemeColors.borealis.light.default },
+        view: { stroke: null },
         style: {
           'group-title': {
             fill: VegaThemeColors.borealis.light.title,
@@ -273,10 +286,7 @@ describe('VegaParser._resolveEsQueries', () => {
   );
   test(
     'emsfile',
-    check(
-      { data: { url: { '%type%': 'emsfile', name: 'file1' } } },
-      { data: { url: bypassExternalUrlCheck('url1') } }
-    )
+    check({ data: { url: { '%type%': 'emsfile', name: 'file1' } } }, { data: { url: 'url1' } })
   );
   test(
     'timefilter_min',
@@ -555,4 +565,77 @@ describe('VegaParser._compileWithAutosize', () => {
     })
   );
   test('autosize signals are ignored', check({ autosize: { signal: 'asdf' } }, undefined));
+});
+
+describe('VegaParser.toRenderDescriptor', () => {
+  const searchApiStub = {
+    search: jest.fn(() => of([{ name: 'requestId', rawResponse: [42] }])),
+    resetSearchStats: jest.fn(),
+  };
+  const timeCache = { getTimeBounds: () => ({ min: 123456, max: 654321 }) };
+  const mockGetServiceSettings = async () => ({
+    getFileLayers: async () => [{ name: 'file1', url: 'https://ems.example/file1.geojson' }],
+    getUrlForRegionLayer: async (layer) => layer.url,
+  });
+
+  async function parse(spec) {
+    const vp = new VegaParser(spec, searchApiStub, timeCache, {}, mockGetServiceSettings, theme);
+    await vp.parseAsync();
+    return vp;
+  }
+
+  test('survives structuredClone with Elasticsearch and EMS file data resolved', async () => {
+    const vp = await parse({
+      $schema: 'https://vega.github.io/schema/vega/v5.json',
+      config: { kibana: { type: 'map', latitude: 25, longitude: -70, zoom: 3 } },
+      data: [
+        { name: 'requestId', url: { index: 'a' } },
+        { name: 'shapes', url: { '%type%': 'emsfile', name: 'file1' } },
+      ],
+    });
+    expect(vp.error).toBeUndefined();
+
+    const descriptor = vp.toRenderDescriptor();
+    const clone = structuredClone(descriptor);
+
+    expect(clone).toEqual(descriptor);
+    expect(clone).toEqual(
+      expect.objectContaining({
+        useMap: true,
+        isVegaLite: false,
+        trustedDataUrls: ['https://ems.example/file1.geojson'],
+        mapConfig: expect.objectContaining({ latitude: 25, longitude: -70, zoom: 3 }),
+      })
+    );
+    expect(clone.spec.data[0].values).toEqual([42]);
+    expect(clone.spec.data[1]).toEqual({
+      name: 'shapes',
+      url: 'https://ems.example/file1.geojson',
+    });
+  });
+
+  test('survives structuredClone for a compiled Vega-Lite spec', async () => {
+    const vp = await parse({
+      $schema: 'https://vega.github.io/schema/vega-lite/v5.json',
+      data: { values: [{ a: 1 }] },
+      mark: 'bar',
+      encoding: { x: { field: 'a' } },
+    });
+
+    const descriptor = vp.toRenderDescriptor();
+
+    expect(structuredClone(descriptor)).toEqual(descriptor);
+    expect(descriptor.isVegaLite).toBe(true);
+    expect(descriptor.vlspec).toEqual(expect.objectContaining({ mark: 'bar' }));
+  });
+
+  test('carries a parse error without parser internals', async () => {
+    const vp = new VegaParser('{}', undefined, undefined, undefined, undefined, theme);
+    await vp.parseAsync();
+
+    const clone = structuredClone(vp.toRenderDescriptor());
+
+    expect(clone.error).toMatch(/requires a "\$schema" field/);
+    expect(clone).not.toHaveProperty('searchAPI');
+  });
 });

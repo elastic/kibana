@@ -10,11 +10,23 @@
 import { readFile as readFileAsync } from 'fs/promises';
 import { extractI18nMessageDescriptors } from '../../extractors/formatjs';
 import { globNamespacePaths } from '../../utils';
+import { I18N_CALL_PATTERN } from '../../constants';
 
 const formatJsRunner = async (filePaths: string[]) => {
   const allNamespaceMessages = new Map();
-  for (const filePath of filePaths) {
-    const source = await readFileAsync(filePath, 'utf8');
+
+  const fileContents = await Promise.all(
+    filePaths.map(async (filePath) => ({
+      filePath,
+      source: await readFileAsync(filePath, 'utf8'),
+    }))
+  );
+
+  for (const { filePath, source } of fileContents) {
+    if (!I18N_CALL_PATTERN.test(source)) {
+      continue;
+    }
+
     const extractedMessages = await extractI18nMessageDescriptors(filePath, source);
 
     extractedMessages.forEach((extractedMessage) => {

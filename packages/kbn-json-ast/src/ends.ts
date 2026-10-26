@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import * as T from '@babel/types';
+import type * as T from '@babel/types';
 
 /**
  * Determine the start and end position of the given node

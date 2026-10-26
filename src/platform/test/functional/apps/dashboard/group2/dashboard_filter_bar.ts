@@ -9,7 +9,7 @@
 
 import expect from '@kbn/expect';
 
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dataGrid = getService('dataGrid');
@@ -75,12 +75,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboard.clickNewDashboard();
       });
 
-      it('uses default index pattern on an empty dashboard', async () => {
-        await testSubjects.click('addFilter');
-        await dashboardExpect.fieldSuggestions(['agent']);
-        await filterBar.ensureFieldEditorModalIsClosed();
-      });
-
       it('shows index pattern of vis when one is added', async () => {
         await dashboardAddPanel.addVisualization('Rendering-Test:-animal-sounds-pie');
         await header.waitUntilLoadingHasFinished();
@@ -135,9 +129,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('are preserved after opening a dashboard saved with filters', async () => {
-        await dashboard.gotoDashboardLandingPage();
         await dashboard.loadSavedDashboard('with filters');
-        await header.waitUntilLoadingHasFinished();
         await elasticChart.setNewChartUiDebugFlag(true);
         await queryBar.submitQuery();
 
@@ -168,18 +160,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it("navigating to a dashboard with global filter doesn't unpin it if same filter is saved with dashboard", async () => {
         await dashboard.preserveCrossAppState();
-        await dashboard.gotoDashboardLandingPage();
         await dashboard.loadSavedDashboard('with filters');
-        await header.waitUntilLoadingHasFinished();
         expect(await filterBar.isFilterPinned('bytes')).to.be(true);
         await pieChart.expectPieSliceCount(1);
       });
 
       it("pinned filters aren't saved", async () => {
         await filterBar.removeFilter('bytes');
-        await dashboard.gotoDashboardLandingPage();
         await dashboard.loadSavedDashboard('saved with pinned filters');
-        await header.waitUntilLoadingHasFinished();
         expect(await filterBar.getFilterCount()).to.be(0);
         await pieChart.expectPieSliceCount(5);
       });
@@ -205,37 +193,27 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('bad filters are loaded properly', function () {
       before(async () => {
         await filterBar.ensureFieldEditorModalIsClosed();
-        await dashboard.gotoDashboardLandingPage();
         await dashboard.loadSavedDashboard('dashboard with bad filters');
       });
 
       it('filter with non-existent index pattern renders if it matches a field', async function () {
-        const hasBadFieldFilter = await filterBar.hasFilter('name', 'moo', false);
-        expect(hasBadFieldFilter).to.be(true);
+        await filterBar.expectFilter('name', 'moo', false);
       });
 
       it('filter with non-existent field renders in warning mode', async function () {
-        const hasBadFieldFilter = await filterBar.hasFilter('baad-field', 'warn', false);
-        expect(hasBadFieldFilter).to.be(true);
+        await filterBar.expectFilter('baad-field', 'warn', false);
       });
 
       it('filter from unrelated index pattern is still applicable if field name is found', async function () {
-        const hasUnrelatedIndexPatternFilterPhrase = await filterBar.hasFilter(
-          '@timestamp',
-          '123',
-          true
-        );
-        expect(hasUnrelatedIndexPatternFilterPhrase).to.be(true);
+        await filterBar.expectFilter('@timestamp', '123', true);
       });
 
       it('filter from unrelated index pattern is rendred as a warning if field name is not found', async function () {
-        const hasWarningFieldFilter = await filterBar.hasFilter('extension', 'warn', true);
-        expect(hasWarningFieldFilter).to.be(true);
+        await filterBar.expectFilter('extension', 'warn', true);
       });
 
       it('filter without an index pattern is rendred as a warning, if the dashboard has an index pattern', async function () {
-        const noIndexPatternFilter = await filterBar.hasFilter('banana', 'warn', true);
-        expect(noIndexPatternFilter).to.be(true);
+        await filterBar.expectFilter('banana', 'warn', true);
       });
     });
   });

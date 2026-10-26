@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
-import PropTypes from 'prop-types';
-import { EuiButtonIcon, EuiFieldText, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import tinycolor from 'tinycolor2';
+import type { FC } from 'react';
+import React from 'react';
+import { EuiButtonIcon, EuiFieldText, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
+import chroma from 'chroma-js';
 import { i18n } from '@kbn/i18n';
 
 import { ColorDot } from '../color_dot/color_dot';
@@ -54,26 +54,29 @@ export const ColorManager: FC<Props> = ({
   onRemoveColor,
   value = '',
 }) => {
-  const tc = tinycolor(value);
-  const validColor = tc.isValid();
+  const validColor = chroma.valid(value);
 
   let buttons = null;
 
   if (hasButtons) {
     buttons = (
       <EuiFlexItem grow={false}>
-        <EuiButtonIcon
-          aria-label={strings.getAddAriaLabel()}
-          iconType="plusInCircle"
-          isDisabled={!validColor || !onAddColor}
-          onClick={() => onAddColor && onAddColor(value)}
-        />
-        <EuiButtonIcon
-          aria-label={strings.getRemoveAriaLabel()}
-          iconType="minusInCircle"
-          isDisabled={!validColor || !onRemoveColor}
-          onClick={() => onRemoveColor && onRemoveColor(value)}
-        />
+        <EuiToolTip content={strings.getAddAriaLabel()} disableScreenReaderOutput>
+          <EuiButtonIcon
+            aria-label={strings.getAddAriaLabel()}
+            iconType="plusCircle"
+            isDisabled={!validColor || !onAddColor}
+            onClick={() => onAddColor && onAddColor(value)}
+          />
+        </EuiToolTip>
+        <EuiToolTip content={strings.getRemoveAriaLabel()} disableScreenReaderOutput>
+          <EuiButtonIcon
+            aria-label={strings.getRemoveAriaLabel()}
+            iconType="minusCircle"
+            isDisabled={!validColor || !onRemoveColor}
+            onClick={() => onRemoveColor && onRemoveColor(value)}
+          />
+        </EuiToolTip>
       </EuiFlexItem>
     );
   }
@@ -83,7 +86,7 @@ export const ColorManager: FC<Props> = ({
       <EuiFlexItem grow={false}>
         <ColorDot value={validColor ? value : undefined} />
       </EuiFlexItem>
-      <EuiFlexItem style={{ display: 'inline-block' }}>
+      <EuiFlexItem css={{ display: 'inline-block' }}>
         {/* While the label indicates only hex values are honored, it can accept CSS values. */}
         <EuiFieldText
           value={value}
@@ -95,12 +98,4 @@ export const ColorManager: FC<Props> = ({
       {buttons}
     </EuiFlexGroup>
   );
-};
-
-ColorManager.propTypes = {
-  hasButtons: PropTypes.bool,
-  onAddColor: PropTypes.func,
-  onChange: PropTypes.func.isRequired,
-  onRemoveColor: PropTypes.func,
-  value: PropTypes.string,
 };

@@ -4,36 +4,37 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { StateComparators } from '@kbn/presentation-publishing';
 import {
-  getUnchangingComparator,
   type PublishesBlockingError,
   type PublishesDataLoading,
   type PublishesDataViews,
   type PublishesSavedObjectId,
-  type StateComparators,
   type PublishesRendered,
 } from '@kbn/presentation-publishing';
-import { noop } from 'lodash';
-import type { DataView } from '@kbn/data-views-plugin/common';
-import { BehaviorSubject } from 'rxjs';
-import type { IntegrationCallbacks, LensInternalApi, LensRuntimeState } from '../types';
-import { buildObservableVariable } from '../helper';
-import { SharingSavedObjectProps } from '../../types';
+import deepEqual from 'fast-deep-equal';
+import type { Observable } from 'rxjs';
+import { BehaviorSubject, map, merge, skip } from 'rxjs';
+import type {
+  IntegrationCallbacks,
+  LensInternalApi,
+  LensRuntimeState,
+  LensSerializedState,
+} from '@kbn/lens-common';
+import type { LensWireAPIConfig } from '@kbn/lens-common-2';
+import { isFlattenedAPIConfig, unflattenAPIConfig } from '../../../common/transforms/utils';
 
 export interface StateManagementConfig {
-  api: Pick<IntegrationCallbacks, 'updateAttributes' | 'updateSavedObjectId'> &
+  api: Pick<IntegrationCallbacks, 'updateAttributes' | 'updateRefId'> &
     PublishesSavedObjectId &
     PublishesDataViews &
     PublishesDataLoading &
     PublishesRendered &
     PublishesBlockingError;
-  serialize: () => Pick<LensRuntimeState, 'attributes' | 'savedObjectId'>;
-  comparators: StateComparators<
-    Pick<LensRuntimeState, 'attributes' | 'savedObjectId' | 'abortController'> & {
-      managed?: boolean | undefined;
-      sharingSavedObjectProps?: SharingSavedObjectProps | undefined;
-    }
-  >;
+  anyStateChange$: Observable<void>;
+  getComparators: () => StateComparators<Pick<LensSerializedState, 'attributes' | 'ref_id'>>;
+  reinitializeRuntimeState: (lastSavedRuntimeState: LensRuntimeState) => void;
+  getLatestState: () => Pick<LensRuntimeState, 'attributes' | 'ref_id'>;
   cleanup: () => void;
 }
 
@@ -45,59 +46,71 @@ export function initializeStateManagement(
   initialState: LensRuntimeState,
   internalApi: LensInternalApi
 ): StateManagementConfig {
-  const [attributes$, attributesComparator] = buildObservableVariable<
-    LensRuntimeState['attributes']
-  >(internalApi.attributes$);
+  // savedObjectId$ exposed for PublishesSavedObjectId compatibility, sourced from ref_id in state
+  const savedObjectId$ = new BehaviorSubject<string | undefined>(initialState.ref_id);
 
-  const [savedObjectId$, savedObjectIdComparator] = buildObservableVariable<
-    LensRuntimeState['savedObjectId']
-  >(initialState.savedObjectId);
+  const resolveAttributes = (
+    value: LensSerializedState['attributes'] | undefined,
+    state?: LensWireAPIConfig
+  ) => {
+    if (value !== undefined) return value;
+    if (state && 'attributes' in state && state.attributes) {
+      return state.attributes;
+    }
+    if (state && isFlattenedAPIConfig(state)) {
+      return unflattenAPIConfig(state).attributes;
+    }
+    return value;
+  };
 
-  const [dataViews$] = buildObservableVariable<DataView[] | undefined>(internalApi.dataViews$);
-  const [dataLoading$] = buildObservableVariable<boolean | undefined>(internalApi.dataLoading$);
-  const [rendered$] = buildObservableVariable<boolean>(internalApi.hasRenderCompleted$);
-  const [abortController$, abortControllerComparator] = buildObservableVariable<
-    AbortController | undefined
-  >(internalApi.expressionAbortController$);
+  const publicRenderCount$ = new BehaviorSubject(internalApi.renderCount$.getValue() + 1);
+  const renderCountSubscription = internalApi.renderCount$.subscribe((count) =>
+    publicRenderCount$.next(count + 1)
+  );
 
-  // This is the way to communicate to the embeddable panel to render a blocking error with the
-  // default panel error component - i.e. cannot find a Lens SO type of thing.
-  // For Lens specific errors, we use a Lens specific error component.
-  const [blockingError$] = buildObservableVariable<Error | undefined>(internalApi.blockingError$);
   return {
     api: {
       updateAttributes: internalApi.updateAttributes,
-      updateSavedObjectId: (newSavedObjectId: LensRuntimeState['savedObjectId']) =>
-        savedObjectId$.next(newSavedObjectId),
+      updateRefId: (newRefId: LensRuntimeState['ref_id']) => savedObjectId$.next(newRefId),
       savedObjectId$,
-      dataViews$,
-      dataLoading$,
-      blockingError$,
-      rendered$,
+      dataViews$: internalApi.dataViews$,
+      dataLoading$: internalApi.dataLoading$,
+      blockingError$: internalApi.blockingError$,
+      rendered$: internalApi.hasRenderCompleted$,
+      renderCount$: publicRenderCount$,
     },
-    serialize: () => {
+    anyStateChange$: merge(
+      internalApi.attributes$.pipe(
+        skip(1),
+        map(() => undefined)
+      )
+    ),
+    getComparators: () => {
       return {
-        attributes: attributes$.getValue(),
-        savedObjectId: savedObjectId$.getValue(),
-        abortController: abortController$.getValue(),
+        attributes:
+          initialState.ref_id === undefined
+            ? (lastValue, currentValue, lastState, currentState) => {
+                const lastAttributes = resolveAttributes(lastValue, lastState);
+                const currentAttributes = resolveAttributes(currentValue, currentState);
+                return deepEqual(lastAttributes, currentAttributes);
+              }
+            : 'skip',
+        ref_id: 'skip',
       };
     },
-    comparators: {
-      // need to force cast this to make it pass the type check
-      // @TODO: workout why this is needed
-      attributes: attributesComparator as [
-        BehaviorSubject<LensRuntimeState['attributes']>,
-        (newValue: LensRuntimeState['attributes'] | undefined) => void,
-        (
-          a: LensRuntimeState['attributes'] | undefined,
-          b: LensRuntimeState['attributes'] | undefined
-        ) => boolean
-      ],
-      savedObjectId: savedObjectIdComparator,
-      abortController: abortControllerComparator,
-      sharingSavedObjectProps: getUnchangingComparator(),
-      managed: getUnchangingComparator(),
+    getLatestState: () => {
+      return {
+        attributes: internalApi.attributes$.getValue(),
+        ref_id: savedObjectId$.getValue(),
+      };
     },
-    cleanup: noop,
+    reinitializeRuntimeState: (lastSavedRuntimeState: LensRuntimeState) => {
+      internalApi.updateAttributes(lastSavedRuntimeState.attributes);
+      // clear error from a previous load
+      internalApi.updateLoadError(lastSavedRuntimeState.loadError);
+    },
+    cleanup: () => {
+      renderCountSubscription.unsubscribe();
+    },
   };
 }

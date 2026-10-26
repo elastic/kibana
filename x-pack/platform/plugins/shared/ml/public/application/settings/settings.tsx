@@ -7,28 +7,27 @@
 
 import type { FC } from 'react';
 import React, { Fragment } from 'react';
-import { EuiSpacer } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import { AnomalyDetectionSettings } from './anomaly_detection_settings';
 import { HelpMenu } from '../components/help_menu';
 import { useMlKibana } from '../contexts/kibana';
-import { MlPageHeader } from '../components/page_header';
+import { MlAppHeader, useAnomalyDetectionJobsBack } from '../components/ml_app_header';
 
 export const Settings: FC = () => {
   const {
     services: { docLinks },
   } = useMlKibana();
   const helpLink = docLinks.links.ml.guide;
+  const anomalyDetectionJobsBack = useAnomalyDetectionJobsBack();
   return (
     <Fragment>
-      <EuiSpacer size="m" />
       <div data-test-subj="mlPageSettings">
-        <MlPageHeader>
-          <FormattedMessage
-            id="xpack.ml.anomalyDetectionSettings.title"
-            defaultMessage="Anomaly Detection Settings"
-          />
-        </MlPageHeader>
+        <MlAppHeader
+          title={i18n.translate('xpack.ml.anomalyDetectionSettings.title', {
+            defaultMessage: 'Anomaly Detection Settings',
+          })}
+          back={anomalyDetectionJobsBack}
+        />
         <AnomalyDetectionSettings />
       </div>
       <HelpMenu docLink={helpLink} />

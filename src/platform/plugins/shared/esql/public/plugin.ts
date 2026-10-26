@@ -7,74 +7,119 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Plugin, CoreStart, CoreSetup } from '@kbn/core/public';
-import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
-import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import type { ESQLSourceResult, EsqlView } from '@kbn/esql-types';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { IndexManagementPluginSetup } from '@kbn/index-management-shared-types';
 import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
+import type { KqlPluginStart } from '@kbn/kql/public';
+import type { CPSPluginStart } from '@kbn/cps/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import {
-  esqlControlTrigger,
-  ESQL_CONTROL_TRIGGER,
-} from './triggers/esql_controls/esql_control_trigger';
+  registerESQLEditorAnalyticsEvents,
+  type ESQLEditorTelemetryService,
+} from '@kbn/esql-editor';
+import { registerIndexEditorActions, registerIndexEditorAnalyticsEvents } from '@kbn/index-editor';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { FileUploadPluginStart } from '@kbn/file-upload-plugin/public';
 import {
-  updateESQLQueryTrigger,
+  ESQL_CONTROL_TRIGGER,
   UPDATE_ESQL_QUERY_TRIGGER,
-} from './triggers/update_esql_query/update_esql_query_trigger';
-import { ACTION_UPDATE_ESQL_QUERY, ACTION_CREATE_ESQL_CONTROL } from './triggers/constants';
+} from '@kbn/ui-actions-plugin/common/trigger_ids';
+import { ACTION_CREATE_ESQL_CONTROL, ACTION_UPDATE_ESQL_QUERY } from './triggers/constants';
 import { setKibanaServices } from './kibana_services';
-import { JoinIndicesAutocompleteResult } from '../common';
-import { cacheNonParametrizedAsyncFunction } from './util/cache';
 import { EsqlVariablesService } from './variables_service';
+import { EnricherService } from './enricher_service';
 
 interface EsqlPluginSetupDependencies {
-  indexManagement: IndexManagementPluginSetup;
   uiActions: UiActionsSetup;
 }
 
 interface EsqlPluginStartDependencies {
-  dataViews: DataViewsPublicPluginStart;
-  expressions: ExpressionsStart;
   uiActions: UiActionsStart;
-  data: DataPublicPluginStart;
   fieldsMetadata: FieldsMetadataPublicStart;
   licensing?: LicensingPluginStart;
   usageCollection?: UsageCollectionStart;
+  cps?: CPSPluginStart;
+  // LOOKUP JOIN deps
+  share: SharePluginStart;
+  data: DataPublicPluginStart;
+  fieldFormats: FieldFormatsStart;
+  fileUpload: FileUploadPluginStart;
+  kql: KqlPluginStart;
+}
+
+export interface EsqlPluginSetup {
+  /**
+   * Register a function to enrich ES|QL source autocomplete suggestions.
+   * Multiple plugins can register enrichers; they are chained in registration order.
+   */
+  registerSourceEnricher(
+    enricher: (sources: ESQLSourceResult[]) => Promise<ESQLSourceResult[]>
+  ): void;
+  registerViewEnricher(enricher: (views: EsqlView[]) => Promise<EsqlView[]>): void;
 }
 
 export interface EsqlPluginStart {
-  getJoinIndicesAutocomplete: () => Promise<JoinIndicesAutocompleteResult>;
   variablesService: EsqlVariablesService;
+  isServerless: boolean;
+  enrichSources: (sources: ESQLSourceResult[]) => Promise<ESQLSourceResult[]>;
+  enrichViews: (views: EsqlView[]) => Promise<EsqlView[]>;
+  /**
+   * Lazily resolves the ES|QL editor telemetry service.
+   */
+  getTelemetryService: () => Promise<ESQLEditorTelemetryService>;
 }
 
-export class EsqlPlugin implements Plugin<{}, EsqlPluginStart> {
-  private indexManagement?: IndexManagementPluginSetup;
+export class EsqlPlugin implements Plugin<EsqlPluginSetup, EsqlPluginStart> {
+  private readonly sourceEnricherService: EnricherService<ESQLSourceResult>;
+  private readonly viewEnricherService: EnricherService<EsqlView>;
 
-  public setup(_: CoreSetup, { indexManagement, uiActions }: EsqlPluginSetupDependencies) {
-    this.indexManagement = indexManagement;
+  constructor(private readonly initContext: PluginInitializerContext) {
+    this.sourceEnricherService = new EnricherService<ESQLSourceResult>(
+      initContext.logger.get('sourceEnricher'),
+      'SourceEnricher'
+    );
+    this.viewEnricherService = new EnricherService<EsqlView>(
+      initContext.logger.get('viewEnricher'),
+      'ViewEnricher'
+    );
+  }
 
-    uiActions.registerTrigger(updateESQLQueryTrigger);
-    uiActions.registerTrigger(esqlControlTrigger);
+  public setup(core: CoreSetup, { uiActions }: EsqlPluginSetupDependencies): EsqlPluginSetup {
+    registerESQLEditorAnalyticsEvents(core.analytics);
+    registerIndexEditorAnalyticsEvents(core.analytics);
 
-    return {};
+    return {
+      registerSourceEnricher: (enricher) => {
+        this.sourceEnricherService.register(enricher);
+      },
+      registerViewEnricher: (enricher) => {
+        this.viewEnricherService.register(enricher);
+      },
+    };
   }
 
   public start(
     core: CoreStart,
     {
-      dataViews,
-      expressions,
       data,
       uiActions,
       fieldsMetadata,
       usageCollection,
+      cps,
       licensing,
+      fileUpload,
+      fieldFormats,
+      share,
+      kql,
     }: EsqlPluginStartDependencies
   ): EsqlPluginStart {
+    const isServerless = this.initContext.env.packageInfo.buildFlavor === 'serverless';
+
     const storage = new Storage(localStorage);
 
     // Register triggers
@@ -94,41 +139,55 @@ export class EsqlPlugin implements Plugin<{}, EsqlPluginStart> {
       const { CreateESQLControlAction } = await import(
         './triggers/esql_controls/esql_control_action'
       );
-      const createESQLControlAction = new CreateESQLControlAction(core, data.search.search);
+      const createESQLControlAction = new CreateESQLControlAction(
+        core,
+        data.search.search,
+        data.query.timefilter.timefilter
+      );
       return createESQLControlAction;
+    });
+
+    /** Async register the index editor UI actions */
+    registerIndexEditorActions({
+      data,
+      coreStart: core,
+      share,
+      uiActions,
+      fieldFormats,
+      fileUpload,
+      kql,
     });
 
     const variablesService = new EsqlVariablesService();
 
-    const getJoinIndicesAutocomplete = cacheNonParametrizedAsyncFunction(
-      async () => {
-        const result = await core.http.get<JoinIndicesAutocompleteResult>(
-          '/internal/esql/autocomplete/join/indices'
-        );
-
-        return result;
-      },
-      1000 * 60 * 5, // Keep the value in cache for 5 minutes
-      1000 * 15 // Refresh the cache in the background only if 15 seconds passed since the last call
-    );
+    let telemetryServicePromise: Promise<ESQLEditorTelemetryService> | undefined;
 
     const start = {
-      getJoinIndicesAutocomplete,
+      isServerless,
       variablesService,
       getLicense: async () => await licensing?.getLicense(),
+      enrichSources: (sources: ESQLSourceResult[]) => this.sourceEnricherService.enrich(sources),
+      enrichViews: (views: EsqlView[]) => this.viewEnricherService.enrich(views),
+      getTelemetryService: () => {
+        if (!telemetryServicePromise) {
+          telemetryServicePromise = import('@kbn/esql-editor').then(
+            ({ ESQLEditorTelemetryService }) => new ESQLEditorTelemetryService(core.analytics)
+          );
+        }
+        return telemetryServicePromise;
+      },
     };
 
     setKibanaServices(
       start,
       core,
-      dataViews,
       data,
-      expressions,
       storage,
       uiActions,
-      this.indexManagement,
+      kql,
       fieldsMetadata,
-      usageCollection
+      usageCollection,
+      cps
     );
 
     return start;

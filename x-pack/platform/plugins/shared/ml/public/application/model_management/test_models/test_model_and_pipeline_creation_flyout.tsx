@@ -7,7 +7,7 @@
 
 import type { FC } from 'react';
 import React, { useState } from 'react';
-import type { TrainedModelItem } from '../../../../common/types/trained_models';
+import type { TrainedModelItem } from '@kbn/ml-common-types/trained_models';
 import {
   type TestTrainedModelsContextType,
   TestTrainedModelsContext,

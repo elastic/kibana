@@ -8,7 +8,7 @@
 import * as t from 'io-ts';
 
 import { list_id } from '../../common/list_id';
-import { RequiredKeepUndefined } from '../../common/required_keep_undefined';
+import type { RequiredKeepUndefined } from '../../common/required_keep_undefined';
 
 export const exportListItemQuerySchema = t.exact(
   t.type({

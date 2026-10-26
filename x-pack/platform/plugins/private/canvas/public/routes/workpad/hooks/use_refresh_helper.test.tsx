@@ -5,16 +5,18 @@
  * 2.0.
  */
 
-import React, { PropsWithChildren } from 'react';
+import type { PropsWithChildren } from 'react';
+import React from 'react';
 import { renderHook } from '@testing-library/react';
 import { useRefreshHelper } from './use_refresh_helper';
-import { WorkpadRoutingContext, WorkpadRoutingContextType } from '../workpad_routing_context';
+import type { WorkpadRoutingContextType } from '../workpad_routing_context';
+import { WorkpadRoutingContext } from '../workpad_routing_context';
 
 const mockDispatch = jest.fn();
 const mockGetState = jest.fn();
 const refreshAction = { type: 'fetchAllRenderables' };
 
-jest.mock('react-redux', () => ({
+jest.mock('react-redux-v7', () => ({
   useDispatch: () => mockDispatch,
   useSelector: (selector: any) => selector(mockGetState()),
 }));

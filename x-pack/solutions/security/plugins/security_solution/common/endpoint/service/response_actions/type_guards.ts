@@ -17,6 +17,15 @@ import type {
   GetProcessesActionOutputContent,
   ResponseActionRunScriptOutputContent,
   ResponseActionRunScriptParameters,
+  ResponseActionMemoryDumpOutputContent,
+  ResponseActionMemoryDumpParameters,
+  ResponseActionCancelOutputContent,
+  ResponseActionCancelParameters,
+  KillProcessActionOutputContent,
+  ResponseActionParametersWithProcessData,
+  SuspendProcessActionOutputContent,
+  ResponseActionScanOutputContent,
+  ResponseActionScanParameters,
 } from '../../types';
 import { RESPONSE_ACTION_AGENT_TYPE, RESPONSE_ACTION_TYPE } from './constants';
 
@@ -56,6 +65,45 @@ export const isRunScriptAction = (
   ResponseActionRunScriptParameters
 > => {
   return action.command === 'runscript';
+};
+
+export const isMemoryDumpAction = (
+  action: MaybeImmutable<SomeObjectWithCommand>
+): action is ActionDetails<
+  ResponseActionMemoryDumpOutputContent,
+  ResponseActionMemoryDumpParameters
+> => {
+  return action.command === 'memory-dump';
+};
+
+export const isCancelAction = (
+  action: MaybeImmutable<SomeObjectWithCommand>
+): action is ActionDetails<ResponseActionCancelOutputContent, ResponseActionCancelParameters> => {
+  return action.command === 'cancel';
+};
+
+export const isKillProcessAction = (
+  action: MaybeImmutable<SomeObjectWithCommand>
+): action is ActionDetails<
+  KillProcessActionOutputContent,
+  ResponseActionParametersWithProcessData
+> => {
+  return action.command === 'kill-process';
+};
+
+export const isSuspendProcessAction = (
+  action: MaybeImmutable<SomeObjectWithCommand>
+): action is ActionDetails<
+  SuspendProcessActionOutputContent,
+  ResponseActionParametersWithProcessData
+> => {
+  return action.command === 'suspend-process';
+};
+
+export const isScanAction = (
+  action: MaybeImmutable<SomeObjectWithCommand>
+): action is ActionDetails<ResponseActionScanOutputContent, ResponseActionScanParameters> => {
+  return action.command === 'scan';
 };
 
 // type guards to ensure only the matching string values are attached to the types filter type

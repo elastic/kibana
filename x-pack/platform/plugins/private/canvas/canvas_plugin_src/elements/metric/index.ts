@@ -7,8 +7,8 @@
 
 import { FORMATS_UI_SETTINGS } from '@kbn/field-formats-plugin/common';
 import { openSans } from '../../../common/lib/fonts';
-import { ElementFactory } from '../../../types';
-import { SetupInitializer } from '../../plugin';
+import type { ElementFactory } from '../../../types';
+import type { SetupInitializer } from '../../plugin';
 
 export const metricElementInitializer: SetupInitializer<ElementFactory> = (core, setup) => {
   return () => ({
@@ -18,7 +18,7 @@ export const metricElementInitializer: SetupInitializer<ElementFactory> = (core,
     help: 'A number with a label',
     width: 200,
     height: 100,
-    icon: 'visMetric',
+    icon: 'chartMetric',
     expression: `kibana
 | selectFilter
 | demodata

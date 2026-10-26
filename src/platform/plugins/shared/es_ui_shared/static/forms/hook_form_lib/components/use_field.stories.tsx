@@ -8,11 +8,11 @@
  */
 
 import React from 'react';
-import { Meta } from '@storybook/react';
+import type { Meta } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import { EuiButton, EuiSpacer } from '@elastic/eui';
 
-import { FormHook } from '../types';
+import type { FormHook } from '../types';
 import { useForm } from '../hooks/use_form';
 
 import { Form } from './form';

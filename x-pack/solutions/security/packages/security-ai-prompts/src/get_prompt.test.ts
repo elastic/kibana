@@ -6,23 +6,99 @@
  */
 
 import { getPrompt, getPromptsByGroupId } from './get_prompt';
-import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import { ActionsClient } from '@kbn/actions-plugin/server';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { localPrompts, promptDictionary, promptGroupId } from './mock_prompts';
 
 jest.mock('@kbn/core-saved-objects-api-server');
-jest.mock('@kbn/actions-plugin/server');
-const defaultConnector = {
-  id: 'mock',
-  name: 'Mock',
+
+const bedrockConnector = {
+  type: '.bedrock' as const,
+  name: 'Bedrock',
+  connectorId: 'connector-123',
+  config: { defaultModel: 'us.anthropic.claude-3-5-sonnet-20240620-v1:0' },
+  capabilities: {},
+  isInferenceEndpoint: false,
   isPreconfigured: false,
-  isDeprecated: false,
-  isSystemAction: false,
-  actionTypeId: '.inference',
 };
+
+const openaiConnector = {
+  type: '.gen-ai' as const,
+  name: 'OpenAI',
+  connectorId: 'connector-123',
+  config: { defaultModel: 'gpt-4o' },
+  capabilities: {},
+  isInferenceEndpoint: false,
+  isPreconfigured: false,
+};
+
+const inferenceBedrockConnector = {
+  type: '.inference' as const,
+  name: 'Inference Bedrock',
+  connectorId: 'connector-123',
+  config: {
+    provider: 'bedrock',
+    providerConfig: { model_id: 'us.anthropic.claude-3-5-sonnet-20240620-v1:0' },
+  },
+  capabilities: {},
+  isInferenceEndpoint: false,
+  isPreconfigured: false,
+};
+
+const inferenceElasticConnector = {
+  type: '.inference' as const,
+  name: 'Inference Elastic',
+  connectorId: 'connector-123',
+  config: { provider: 'elastic', providerConfig: { model_id: 'rainbow-sprinkles' } },
+  capabilities: {},
+  isInferenceEndpoint: false,
+  isPreconfigured: false,
+};
+
+const inferenceElasticUnknownConnector = {
+  type: '.inference' as const,
+  name: 'Inference Elastic Unknown',
+  connectorId: 'connector-123',
+  config: { provider: 'elastic', providerConfig: { model_id: 'unknown-model' } },
+  capabilities: {},
+  isInferenceEndpoint: false,
+  isPreconfigured: false,
+};
+
+const inferenceEndpointAmazonBedrock = {
+  type: '.inference' as const,
+  name: 'my-endpoint',
+  connectorId: 'my-bedrock-endpoint',
+  config: {
+    service: 'amazonbedrock',
+    providerConfig: { model_id: 'us.anthropic.claude-3-5-sonnet-20240620-v1:0' },
+  },
+  capabilities: {},
+  isInferenceEndpoint: true,
+  isPreconfigured: false,
+};
+
+const geminiConnector = {
+  type: '.gemini' as const,
+  name: 'Gemini',
+  connectorId: 'connector-123',
+  config: { defaultModel: 'gemini-1.5-pro-002' },
+  capabilities: {},
+  isInferenceEndpoint: false,
+  isPreconfigured: false,
+};
+
+const inferenceElasticConnectorRainbow = {
+  type: '.inference' as const,
+  name: 'Inference Elastic Rainbow',
+  connectorId: 'connector-123',
+  config: { provider: 'elastic', providerConfig: { model_id: 'rainbow-sprinkles' } },
+  capabilities: {},
+  isInferenceEndpoint: false,
+  isPreconfigured: false,
+};
+
 describe('get_prompt', () => {
   let savedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
-  let actionsClient: jest.Mocked<ActionsClient>;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -124,6 +200,29 @@ describe('get_prompt', () => {
           },
           {
             type: 'security-ai-prompt',
+            id: 'k6dacb9b-1029-4c4c-85e1-e4f97b31c7f4',
+            attributes: {
+              promptId: promptDictionary.systemPrompt,
+              promptGroupId: promptGroupId.aiAssistant,
+              provider: 'bedrock',
+              model: 'us.anthropic.claude-3-7-sonnet-20250219-v1:0',
+              description: 'Default prompt for AI Assistant system prompt.',
+              prompt: {
+                default: 'Hello world this is a system prompt for bedrock claude-3-7-sonnet',
+              },
+            },
+            references: [],
+            managed: false,
+            updated_at: '2025-01-22T19:11:48.806Z',
+            updated_by: 'u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0',
+            created_at: '2025-01-22T19:11:48.806Z',
+            created_by: 'u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0',
+            version: 'Wzk4MCwxXQ==',
+            coreMigrationVersion: '8.8.0',
+            score: 0.13353139,
+          },
+          {
+            type: 'security-ai-prompt',
             id: 'da530fad-87ce-49c3-a088-08073e5034d6',
             attributes: {
               promptId: promptDictionary.systemPrompt,
@@ -146,18 +245,11 @@ describe('get_prompt', () => {
         ],
       }),
     } as unknown as jest.Mocked<SavedObjectsClientContract>;
-
-    actionsClient = {
-      get: jest.fn().mockResolvedValue({
-        config: {
-          provider: 'openai',
-          providerConfig: { model_id: 'gpt-4o' },
-        },
-      }),
-    } as unknown as jest.Mocked<ActionsClient>;
   });
+
   describe('getPrompt', () => {
-    it('returns the prompt matching provider and model', async () => {
+    it('returns the prompt matching provider and model (no connector lookup needed)', async () => {
+      const getInferenceConnectorById = jest.fn();
       const result = await getPrompt({
         savedObjectsClient,
         localPrompts,
@@ -165,11 +257,10 @@ describe('get_prompt', () => {
         promptGroupId: promptGroupId.aiAssistant,
         provider: 'openai',
         model: 'gpt-4o',
-        actionsClient,
+        getInferenceConnectorById,
         connectorId: 'connector-123',
       });
-      expect(actionsClient.get).not.toHaveBeenCalled();
-
+      expect(getInferenceConnectorById).not.toHaveBeenCalled();
       expect(result).toBe('Hello world this is a system prompt');
     });
 
@@ -181,46 +272,38 @@ describe('get_prompt', () => {
         promptGroupId: promptGroupId.aiAssistant,
         provider: 'openai',
         model: 'gpt-4o-mini',
-        actionsClient,
-        connectorId: 'connector-123',
       });
-      expect(actionsClient.get).not.toHaveBeenCalled();
-
       expect(result).toBe('Hello world this is a system prompt no model');
     });
 
-    it('returns the prompt matching provider when model is not provided', async () => {
+    it('calls getInferenceConnectorById when only provider is given', async () => {
+      const getInferenceConnectorById = jest.fn().mockResolvedValue(openaiConnector);
       const result = await getPrompt({
         savedObjectsClient,
         localPrompts,
         promptId: promptDictionary.systemPrompt,
         promptGroupId: promptGroupId.aiAssistant,
         provider: 'openai',
-        actionsClient,
+        getInferenceConnectorById,
         connectorId: 'connector-123',
       });
-      expect(actionsClient.get).toHaveBeenCalled();
-
-      expect(result).toBe('Hello world this is a system prompt no model');
+      expect(getInferenceConnectorById).toHaveBeenCalledWith('connector-123');
+      expect(result).toBe('Hello world this is a system prompt');
     });
 
-    it('returns the default prompt when there is no match on provider', async () => {
+    it('returns the default prompt when provider has no match', async () => {
       const result = await getPrompt({
         savedObjectsClient,
         localPrompts,
         promptId: promptDictionary.systemPrompt,
         promptGroupId: promptGroupId.aiAssistant,
         provider: 'badone',
-        actionsClient,
-        connectorId: 'connector-123',
       });
-
       expect(result).toBe('Hello world this is a system prompt no model, no provider');
     });
 
-    it('defaults provider to bedrock if provider is "inference"', async () => {
-      actionsClient.get.mockResolvedValue(defaultConnector);
-
+    it('resolves the real provider when provider is "inference" via getInferenceConnectorById', async () => {
+      const getInferenceConnectorById = jest.fn().mockResolvedValue(inferenceBedrockConnector);
       const result = await getPrompt({
         savedObjectsClient,
         localPrompts,
@@ -228,76 +311,57 @@ describe('get_prompt', () => {
         promptGroupId: promptGroupId.aiAssistant,
         provider: 'inference',
         model: 'gpt-4o',
-        actionsClient,
+        getInferenceConnectorById,
         connectorId: 'connector-123',
       });
-
-      expect(result).toBe('Hello world this is a system prompt for bedrock');
-    });
-
-    it('returns the expected prompt from when provider is "elastic" and model matches in elasticModelDictionary', async () => {
-      actionsClient.get.mockResolvedValue({
-        ...defaultConnector,
-        config: {
-          provider: 'elastic',
-          providerConfig: { model_id: 'rainbow-sprinkles' },
-        },
-      });
-
-      const result = await getPrompt({
-        savedObjectsClient,
-        localPrompts,
-        promptId: promptDictionary.systemPrompt,
-        promptGroupId: promptGroupId.aiAssistant,
-        provider: 'inference',
-        actionsClient,
-        connectorId: 'connector-123',
-      });
-
+      expect(getInferenceConnectorById).toHaveBeenCalledWith('connector-123');
       expect(result).toBe('Hello world this is a system prompt for bedrock claude-3-5-sonnet');
     });
 
-    it('returns the bedrock prompt when provider is "elastic" but model does not match elasticModelDictionary', async () => {
-      actionsClient.get.mockResolvedValue({
-        ...defaultConnector,
-        config: {
-          provider: 'elastic',
-          providerConfig: { model_id: 'unknown-model' },
-        },
-      });
-
+    it('returns the expected prompt when provider is "elastic" and model matches in elasticModelDictionary', async () => {
+      const getInferenceConnectorById = jest.fn().mockResolvedValue(inferenceElasticConnector);
       const result = await getPrompt({
         savedObjectsClient,
         localPrompts,
         promptId: promptDictionary.systemPrompt,
         promptGroupId: promptGroupId.aiAssistant,
         provider: 'inference',
-        actionsClient,
+        getInferenceConnectorById,
         connectorId: 'connector-123',
       });
-
-      expect(result).toBe('Hello world this is a system prompt for bedrock');
+      expect(result).toBe('Hello world this is a system prompt for bedrock claude-3-7-sonnet');
     });
 
-    it('returns the model prompt when no prompts are found and model is provided', async () => {
-      savedObjectsClient.find.mockResolvedValue({
-        page: 1,
-        per_page: 20,
-        total: 0,
-        saved_objects: [],
-      });
-
+    it('returns the bedrock prompt when provider is "elastic" but model does not match elasticModelDictionary', async () => {
+      const getInferenceConnectorById = jest
+        .fn()
+        .mockResolvedValue(inferenceElasticUnknownConnector);
       const result = await getPrompt({
         savedObjectsClient,
         localPrompts,
         promptId: promptDictionary.systemPrompt,
         promptGroupId: promptGroupId.aiAssistant,
-        actionsClient,
-        provider: 'bedrock',
+        provider: 'inference',
+        getInferenceConnectorById,
         connectorId: 'connector-123',
       });
+      expect(result).toBe('Hello world this is a system prompt no model, no provider');
+    });
 
-      expect(result).toBe('provider:bedrock default system prompt');
+    it('returns the provider-specific prompt when connector has no model', async () => {
+      const getInferenceConnectorById = jest
+        .fn()
+        .mockResolvedValue({ ...bedrockConnector, config: {} });
+      const result = await getPrompt({
+        savedObjectsClient,
+        localPrompts,
+        promptId: promptDictionary.systemPrompt,
+        promptGroupId: promptGroupId.aiAssistant,
+        provider: 'bedrock',
+        getInferenceConnectorById,
+        connectorId: 'connector-123',
+      });
+      expect(result).toBe('Hello world this is a system prompt for bedrock');
     });
 
     it('returns the default prompt when no prompts are found', async () => {
@@ -307,16 +371,13 @@ describe('get_prompt', () => {
         total: 0,
         saved_objects: [],
       });
-
       const result = await getPrompt({
         savedObjectsClient,
         localPrompts,
         promptId: promptDictionary.systemPrompt,
         promptGroupId: promptGroupId.aiAssistant,
-        actionsClient,
         connectorId: 'connector-123',
       });
-
       expect(result).toBe('default system prompt');
     });
 
@@ -327,14 +388,12 @@ describe('get_prompt', () => {
         total: 0,
         saved_objects: [],
       });
-
       await expect(
         getPrompt({
           savedObjectsClient,
           localPrompts,
           promptId: 'nonexistent-prompt',
           promptGroupId: 'nonexistent-group',
-          actionsClient,
           connectorId: 'connector-123',
         })
       ).rejects.toThrow(
@@ -342,65 +401,82 @@ describe('get_prompt', () => {
       );
     });
 
-    it('handles invalid connector configuration gracefully when provider is "inference"', async () => {
-      actionsClient.get.mockResolvedValue({
-        ...defaultConnector,
-        config: {},
-      });
+    it('handles empty connector config gracefully when provider is "inference"', async () => {
+      const getInferenceConnectorById = jest
+        .fn()
+        .mockResolvedValue({ ...inferenceBedrockConnector, config: {} });
       const result = await getPrompt({
         savedObjectsClient,
         localPrompts,
         promptId: promptDictionary.systemPrompt,
         promptGroupId: promptGroupId.aiAssistant,
         provider: 'inference',
-        actionsClient,
+        getInferenceConnectorById,
         connectorId: 'connector-123',
       });
-
-      expect(result).toBe('Hello world this is a system prompt for bedrock');
+      expect(result).toBe('Hello world this is a system prompt no model, no provider');
     });
 
-    it('retrieves the connector when no model or provider is provided', async () => {
-      actionsClient.get.mockResolvedValue({
-        ...defaultConnector,
-        actionTypeId: '.bedrock',
-        config: {
-          defaultModel: 'us.anthropic.claude-3-5-sonnet-20240620-v1:0',
-        },
-      });
+    it('resolves provider and model from getInferenceConnectorById when none are provided', async () => {
+      const getInferenceConnectorById = jest.fn().mockResolvedValue(bedrockConnector);
       const result = await getPrompt({
         savedObjectsClient,
         localPrompts,
         promptId: promptDictionary.systemPrompt,
         promptGroupId: promptGroupId.aiAssistant,
-        actionsClient,
+        getInferenceConnectorById,
         connectorId: 'connector-123',
       });
-      expect(actionsClient.get).toHaveBeenCalled();
-
+      expect(getInferenceConnectorById).toHaveBeenCalled();
       expect(result).toBe('Hello world this is a system prompt for bedrock claude-3-5-sonnet');
     });
 
-    it('retrieves the connector when no model is provided', async () => {
-      actionsClient.get.mockResolvedValue({
-        ...defaultConnector,
-        actionTypeId: '.bedrock',
-        config: {
-          defaultModel: 'us.anthropic.claude-3-5-sonnet-20240620-v1:0',
-        },
-      });
+    it('finds the default prompt if no provider/model are indicated and no connector details are provided', async () => {
       const result = await getPrompt({
         savedObjectsClient,
         localPrompts,
         promptId: promptDictionary.systemPrompt,
         promptGroupId: promptGroupId.aiAssistant,
-        provider: 'bedrock',
-        actionsClient,
-        connectorId: 'connector-123',
       });
-      expect(actionsClient.get).toHaveBeenCalled();
+      expect(result).toEqual('Hello world this is a system prompt no model, no provider');
+    });
 
+    it('uses getInferenceConnectorById for native ES inference endpoints', async () => {
+      const getInferenceConnectorById = jest.fn().mockResolvedValue(inferenceEndpointAmazonBedrock);
+      const result = await getPrompt({
+        savedObjectsClient,
+        localPrompts,
+        promptId: promptDictionary.systemPrompt,
+        promptGroupId: promptGroupId.aiAssistant,
+        getInferenceConnectorById,
+        connectorId: 'my-bedrock-endpoint',
+      });
+      expect(getInferenceConnectorById).toHaveBeenCalledWith('my-bedrock-endpoint');
       expect(result).toBe('Hello world this is a system prompt for bedrock claude-3-5-sonnet');
+    });
+
+    it('falls back to default prompts when getInferenceConnectorById fails', async () => {
+      const getInferenceConnectorById = jest.fn().mockRejectedValue(new Error('Not found'));
+      const result = await getPrompt({
+        savedObjectsClient,
+        localPrompts,
+        promptId: promptDictionary.systemPrompt,
+        promptGroupId: promptGroupId.aiAssistant,
+        getInferenceConnectorById,
+        connectorId: 'unknown-endpoint',
+      });
+      expect(result).toBe('Hello world this is a system prompt no model, no provider');
+    });
+
+    it('falls back to default prompts when no getInferenceConnectorById is provided', async () => {
+      const result = await getPrompt({
+        savedObjectsClient,
+        localPrompts,
+        promptId: promptDictionary.systemPrompt,
+        promptGroupId: promptGroupId.aiAssistant,
+        connectorId: 'unknown-endpoint',
+      });
+      expect(result).toBe('Hello world this is a system prompt no model, no provider');
     });
   });
 
@@ -413,7 +489,6 @@ describe('get_prompt', () => {
         promptGroupId: promptGroupId.aiAssistant,
         provider: 'openai',
         model: 'gpt-4o',
-        actionsClient,
         connectorId: 'connector-123',
       });
       expect(savedObjectsClient.find).toHaveBeenCalledWith({
@@ -421,7 +496,6 @@ describe('get_prompt', () => {
         searchFields: ['promptGroupId'],
         search: promptGroupId.aiAssistant,
       });
-
       expect(result).toEqual([
         {
           promptId: promptDictionary.systemPrompt,
@@ -437,10 +511,8 @@ describe('get_prompt', () => {
         promptIds: [promptDictionary.systemPrompt, promptDictionary.userPrompt],
         promptGroupId: promptGroupId.aiAssistant,
         provider: 'gemini',
-        actionsClient,
         connectorId: 'connector-123',
       });
-
       expect(result).toEqual([
         {
           promptId: promptDictionary.systemPrompt,
@@ -453,27 +525,16 @@ describe('get_prompt', () => {
       ]);
     });
 
-    it('returns prompts matching the provided promptIds when connector is given', async () => {
+    it('returns prompts using getInferenceConnectorById for gemini connector', async () => {
+      const getInferenceConnectorById = jest.fn().mockResolvedValue(geminiConnector);
       const result = await getPromptsByGroupId({
         savedObjectsClient,
         localPrompts,
         promptIds: [promptDictionary.systemPrompt, promptDictionary.userPrompt],
         promptGroupId: promptGroupId.aiAssistant,
-        connector: {
-          actionTypeId: '.gemini',
-          config: {
-            defaultModel: 'gemini-1.5-pro-002',
-          },
-          id: 'connector-123',
-          name: 'Gemini',
-          isPreconfigured: false,
-          isDeprecated: false,
-          isSystemAction: false,
-        },
-        actionsClient,
+        getInferenceConnectorById,
         connectorId: 'connector-123',
       });
-
       expect(result).toEqual([
         {
           promptId: promptDictionary.systemPrompt,
@@ -485,35 +546,27 @@ describe('get_prompt', () => {
         },
       ]);
     });
-    it('returns prompts matching the provided promptIds when inference connector is given', async () => {
+
+    it('returns prompts using getInferenceConnectorById for inference connector with elastic provider', async () => {
+      const getInferenceConnectorById = jest
+        .fn()
+        .mockResolvedValue(inferenceElasticConnectorRainbow);
       const result = await getPromptsByGroupId({
         savedObjectsClient,
         localPrompts,
         promptIds: [promptDictionary.systemPrompt],
         promptGroupId: promptGroupId.aiAssistant,
-        connector: {
-          actionTypeId: '.inference',
-          config: {
-            provider: 'elastic',
-            providerConfig: { model_id: 'rainbow-sprinkles' },
-          },
-          id: 'connector-123',
-          name: 'Inference',
-          isPreconfigured: false,
-          isDeprecated: false,
-          isSystemAction: false,
-        },
-        actionsClient,
+        getInferenceConnectorById,
         connectorId: 'connector-123',
       });
-
       expect(result).toEqual([
         {
           promptId: promptDictionary.systemPrompt,
-          prompt: 'Hello world this is a system prompt for bedrock',
+          prompt: 'Hello world this is a system prompt for bedrock claude-3-7-sonnet',
         },
       ]);
     });
+
     it('throws an error when a prompt is missing', async () => {
       savedObjectsClient.find.mockResolvedValue({
         page: 1,
@@ -521,17 +574,30 @@ describe('get_prompt', () => {
         total: 0,
         saved_objects: [],
       });
-
       await expect(
         getPromptsByGroupId({
           savedObjectsClient,
           localPrompts,
           promptIds: [promptDictionary.systemPrompt, 'fake-id'],
           promptGroupId: promptGroupId.aiAssistant,
-          actionsClient,
           connectorId: 'connector-123',
         })
       ).rejects.toThrow('Prompt not found for promptId: fake-id and promptGroupId: aiAssistant');
+    });
+
+    it('finds the default prompt if no provider/model are indicated and no connector details are provided', async () => {
+      const result = await getPromptsByGroupId({
+        savedObjectsClient,
+        localPrompts,
+        promptIds: [promptDictionary.systemPrompt],
+        promptGroupId: promptGroupId.aiAssistant,
+      });
+      expect(result).toEqual([
+        {
+          promptId: promptDictionary.systemPrompt,
+          prompt: 'Hello world this is a system prompt no model, no provider',
+        },
+      ]);
     });
   });
 });

@@ -13,11 +13,10 @@ import { SO_SEARCH_LIMIT, REQUEST_DIAGNOSTICS_TIMEOUT_MS } from '../../constants
 
 import { getCurrentNamespace } from '../spaces/get_current_namespace';
 
-import { agentsKueryNamespaceFilter } from '../spaces/agent_namespaces';
-
 import type { GetAgentsOptions } from '.';
 import { getAgents, getAgentsByKuery } from './crud';
 import { createAgentAction } from './actions';
+import { throwIfAgentlessAgent } from './hosted_agent';
 import { openPointInTime } from './crud';
 import {
   RequestDiagnosticsActionRunner,
@@ -30,9 +29,16 @@ export async function requestDiagnostics(
   agentId: string,
   additionalMetrics?: RequestDiagnosticsAdditionalMetrics[]
 ): Promise<{ actionId: string }> {
+  await throwIfAgentlessAgent(
+    soClient,
+    esClient,
+    agentId,
+    `Cannot request diagnostics for managed agent ${agentId}`
+  );
+
   const currentSpaceId = getCurrentNamespace(soClient);
 
-  const response = await createAgentAction(esClient, {
+  const response = await createAgentAction(esClient, soClient, {
     agents: [agentId],
     created_at: new Date().toISOString(),
     type: 'REQUEST_DIAGNOSTICS',
@@ -51,11 +57,16 @@ export async function bulkRequestDiagnostics(
   options: GetAgentsOptions & {
     batchSize?: number;
     additionalMetrics?: RequestDiagnosticsAdditionalMetrics[];
+    dryRun?: boolean;
   }
-): Promise<{ actionId: string }> {
+): Promise<{ actionId: string } | { count: number }> {
   const currentSpaceId = getCurrentNamespace(soClient);
 
   if ('agentIds' in options) {
+    if (options.dryRun) {
+      const agents = await getAgents(esClient, soClient, options);
+      return { count: agents.length };
+    }
     const givenAgents = await getAgents(esClient, soClient, options);
     return await requestDiagnosticsBatch(esClient, givenAgents, {
       additionalMetrics: options.additionalMetrics,
@@ -64,15 +75,26 @@ export async function bulkRequestDiagnostics(
   }
 
   const batchSize = options.batchSize ?? SO_SEARCH_LIMIT;
-  const namespaceFilter = await agentsKueryNamespaceFilter(currentSpaceId);
-  const kuery = namespaceFilter ? `${namespaceFilter} AND ${options.kuery}` : options.kuery;
-  const res = await getAgentsByKuery(esClient, soClient, {
-    kuery,
+
+  // cheap count — avoids hydrating up to batchSize agent documents just to read the total
+  const { total } = await getAgentsByKuery(esClient, soClient, {
+    kuery: options.kuery,
+    spaceId: currentSpaceId,
     showInactive: false,
     page: 1,
-    perPage: batchSize,
+    perPage: 0,
   });
-  if (res.total <= batchSize) {
+  if (options.dryRun) {
+    return { count: total };
+  }
+  if (total <= batchSize) {
+    const res = await getAgentsByKuery(esClient, soClient, {
+      kuery: options.kuery,
+      spaceId: currentSpaceId,
+      showInactive: false,
+      page: 1,
+      perPage: batchSize,
+    });
     return await requestDiagnosticsBatch(esClient, res.agents, {
       additionalMetrics: options.additionalMetrics,
       spaceId: currentSpaceId,
@@ -84,7 +106,7 @@ export async function bulkRequestDiagnostics(
       {
         ...options,
         batchSize,
-        total: res.total,
+        total,
         spaceId: currentSpaceId,
       },
       { pitId: await openPointInTime(esClient) }

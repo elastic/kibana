@@ -8,14 +8,17 @@
  */
 
 import Url from 'url';
-import { Agent as HttpsAgent, ServerOptions as TlsOptions } from 'https';
-import http2, { Agent as Http2Agent, AutoRequestOptions } from 'http2-wrapper';
+import type { ServerOptions as TlsOptions } from 'https';
+import { Agent as HttpsAgent } from 'https';
+import type { AutoRequestOptions } from 'http2-wrapper';
+import http2, { Agent as Http2Agent } from 'http2-wrapper';
 import http2Proxy from 'http2-proxy';
+import Chalk from 'chalk';
 import { take } from 'rxjs';
 import { getServerOptions, getServerTLSOptions } from '@kbn/server-http-tools';
 
-import { DevConfig, HttpConfig } from '../config';
-import { Log } from '../log';
+import type { DevConfig, HttpConfig } from '../config';
+import type { Log } from '../log';
 import type { BasePathProxyServer, BasePathProxyServerOptions } from './types';
 import { getRandomBasePath } from './utils';
 
@@ -67,12 +70,13 @@ export class Http2BasePathProxyServer implements BasePathProxyServer {
 
     await this.setupServer(options);
 
+    const proxyUrl = Url.format({
+      protocol: this.httpConfig.ssl.enabled ? 'https' : 'http',
+      host: this.httpConfig.host,
+      pathname: this.httpConfig.basePath,
+    });
     this.log.write(
-      `basepath proxy server running at ${Url.format({
-        protocol: this.httpConfig.ssl.enabled ? 'https' : 'http',
-        host: this.httpConfig.host,
-        pathname: this.httpConfig.basePath,
-      })}`
+      Chalk.green('basepath proxy server running at ') + Chalk.cyan.bold.underline(proxyUrl)
     );
   }
 

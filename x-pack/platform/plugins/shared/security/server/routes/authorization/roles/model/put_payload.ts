@@ -24,6 +24,7 @@ export const transformPutPayloadToElasticsearchRole = (
       indices: undefined,
       remote_indices: undefined,
       run_as: undefined,
+      global: undefined,
     },
     kibana = [],
   } = rolePayload;
@@ -39,6 +40,7 @@ export const transformPutPayloadToElasticsearchRole = (
     indices: elasticsearch.indices || [],
     remote_indices: elasticsearch.remote_indices,
     run_as: elasticsearch.run_as || [],
+    ...(elasticsearch.global ? { global: elasticsearch.global } : {}),
     applications: [
       ...transformPrivilegesToElasticsearchPrivileges(application, kibana),
       ...otherApplications,
@@ -49,43 +51,51 @@ export const transformPutPayloadToElasticsearchRole = (
 export function getPutPayloadSchema(
   getBasePrivilegeNames: () => { global: string[]; space: string[] }
 ) {
-  return schema.object({
-    /**
-     * Optional text to describe the Role
-     */
-    description: schema.maybe(
-      schema.string({
-        maxLength: 2048,
-        meta: { description: 'A description for the role.' },
-      })
-    ),
-
-    /**
-     * An optional meta-data dictionary. Within the metadata, keys that begin with _ are reserved
-     * for system usage.
-     */
-    metadata: schema.maybe(
-      schema.recordOf(
+  return schema.object(
+    {
+      /**
+       * Optional text to describe the Role
+       */
+      description: schema.maybe(
         schema.string({
-          meta: {
-            description:
-              'A metadata dictionary. Keys that begin with `_` are reserved for system usage.',
-          },
-        }),
-        schema.any()
-      )
-    ),
+          maxLength: 2048,
+          meta: { description: 'A description for the role.' },
+        })
+      ),
 
-    /**
-     * Elasticsearch specific portion of the role definition.
-     */
-    elasticsearch: elasticsearchRoleSchema,
+      /**
+       * An optional meta-data dictionary. Within the metadata, keys that begin with _ are reserved
+       * for system usage.
+       */
+      metadata: schema.maybe(
+        schema.recordOf(
+          schema.string({
+            meta: {
+              description:
+                'A metadata dictionary. Keys that begin with `_` are reserved for system usage.',
+            },
+          }),
+          schema.any()
+        )
+      ),
 
-    /**
-     * Kibana specific portion of the role definition.
-     */
-    kibana: schema.maybe(getKibanaRoleSchema(getBasePrivilegeNames)),
-  });
+      /**
+       * Elasticsearch specific portion of the role definition.
+       */
+      elasticsearch: elasticsearchRoleSchema,
+
+      /**
+       * Kibana specific portion of the role definition.
+       */
+      kibana: schema.maybe(getKibanaRoleSchema(getBasePrivilegeNames)),
+    },
+    {
+      meta: {
+        id: 'security_role_put_payload',
+        description: 'The role definition to create or update.',
+      },
+    }
+  );
 }
 
 export type RolePayloadSchemaType = TypeOf<ReturnType<typeof getPutPayloadSchema>>;

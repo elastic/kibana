@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type PayloadAction, createSlice } from '@reduxjs/toolkit';
-import { RootState } from './color_mapping';
+import { type PayloadAction, createSlice } from 'redux-toolkit-v1';
+import type { RootState } from './color_mapping';
 
 const initialState: RootState['ui'] = {
   colorPicker: {

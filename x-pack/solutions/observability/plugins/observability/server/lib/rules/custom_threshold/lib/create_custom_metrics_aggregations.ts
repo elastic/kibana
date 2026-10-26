@@ -6,51 +6,85 @@
  */
 
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
+import type { DataViewBase, DslQuery } from '@kbn/es-query';
 import { isEmpty } from 'lodash';
-import {
-  Aggregators,
-  CustomThresholdExpressionMetric,
-} from '../../../../../common/custom_threshold_rule/types';
+import type { CustomThresholdExpressionMetric } from '../../../../../common/custom_threshold_rule/types';
+import { Aggregators } from '../../../../../common/custom_threshold_rule/types';
 import {
   createLastValueAggBucket,
   createLastValueAggBucketScript,
 } from './create_last_value_aggregation';
 import { createRateAggsBuckets, createRateAggsBucketScript } from './create_rate_aggregation';
 
+const FILTERED_METRIC_AGG_NAME = 'filtered_metric';
+
+const getMetricFilterQuery = (
+  { filter }: CustomThresholdExpressionMetric,
+  dataView?: DataViewBase
+): DslQuery | undefined =>
+  filter ? toElasticsearchQuery(fromKueryExpression(filter), dataView) : undefined;
+
 export const createCustomMetricsAggregations = (
   id: string,
   customMetrics: CustomThresholdExpressionMetric[],
   currentTimeFrame: { start: number; end: number },
   timeFieldName: string,
-  equation?: string
+  equation?: string,
+  dataView?: DataViewBase
 ) => {
   const bucketsPath: { [id: string]: string } = {};
   const metricAggregations = customMetrics.reduce((acc, metric) => {
     const key = `${id}_${metric.name}`;
     const aggregation: Aggregators = metric.aggType;
+    const filterQuery = getMetricFilterQuery(metric, dataView);
+
+    // Nests the metric aggregation under a filter aggregation when the metric has a KQL filter
+    const withMetricFilter = (metricAggregation: Record<string, unknown>) => {
+      if (!filterQuery) {
+        bucketsPath[metric.name] = key;
+        return { [key]: metricAggregation };
+      }
+      bucketsPath[metric.name] = `${key}>${FILTERED_METRIC_AGG_NAME}`;
+      return {
+        [key]: {
+          filter: filterQuery,
+          aggs: { [FILTERED_METRIC_AGG_NAME]: metricAggregation },
+        },
+      };
+    };
 
     if (aggregation === 'count') {
       bucketsPath[metric.name] = `${key}>_count`;
       return {
         ...acc,
         [key]: {
-          filter: metric.filter
-            ? toElasticsearchQuery(fromKueryExpression(metric.filter))
-            : { match_all: {} },
+          filter: filterQuery ?? { match_all: {} },
         },
       };
     }
-    if (aggregation === Aggregators.P95 || aggregation === Aggregators.P99) {
-      bucketsPath[metric.name] = key;
+    if (aggregation === Aggregators.MED) {
       return {
         ...acc,
-        [key]: {
+        ...withMetricFilter({
+          percentiles: {
+            field: metric.field,
+            percents: [50],
+            keyed: true,
+          },
+        }),
+      };
+    }
+
+    if (aggregation === Aggregators.P95 || aggregation === Aggregators.P99) {
+      return {
+        ...acc,
+        ...withMetricFilter({
           percentiles: {
             field: metric.field,
             percents: [aggregation === Aggregators.P95 ? 95 : 99],
             keyed: true,
           },
-        },
+        }),
       };
     }
 
@@ -58,7 +92,13 @@ export const createCustomMetricsAggregations = (
       bucketsPath[metric.name] = key;
       return {
         ...acc,
-        ...createRateAggsBuckets(currentTimeFrame, key, timeFieldName, metric.field || ''),
+        ...createRateAggsBuckets(
+          currentTimeFrame,
+          key,
+          timeFieldName,
+          metric.field || '',
+          filterQuery
+        ),
         ...createRateAggsBucketScript(currentTimeFrame, key),
       };
     }
@@ -68,7 +108,7 @@ export const createCustomMetricsAggregations = (
       return metric.field
         ? {
             ...acc,
-            ...createLastValueAggBucket(key, timeFieldName, metric.field),
+            ...createLastValueAggBucket(key, timeFieldName, metric.field, filterQuery),
             ...createLastValueAggBucketScript(key, metric.field),
           }
         : {
@@ -77,12 +117,9 @@ export const createCustomMetricsAggregations = (
     }
 
     if (aggregation && metric.field) {
-      bucketsPath[metric.name] = key;
       return {
         ...acc,
-        [key]: {
-          [aggregation]: { field: metric.field },
-        },
+        ...withMetricFilter({ [aggregation]: { field: metric.field } }),
       };
     }
 

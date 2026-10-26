@@ -1,0 +1,188 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
+import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
+import type { LensSuggestionsApi, Suggestion } from '@kbn/lens-plugin/public';
+import type { TimeRange } from '@kbn/data-plugin/common';
+import type { ChartType } from '@kbn/visualization-utils';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import { isOfAggregateQueryType } from '@kbn/es-query';
+import {
+  DataViewSource,
+  columnFromDatatableColumn,
+  registerEsqlSourceInDataViewsCache,
+  type DataSource,
+} from '@kbn/data-source';
+import { createMockEsqlSource } from '@kbn/data-source/src/__mocks__/esql_source.mock';
+import { LensVisService } from '../services/lens_vis_service';
+import { type QueryParams } from '../utils/external_vis_context';
+import { unifiedHistogramServicesMock } from './services';
+import { histogramESQLSuggestionMock } from './suggestions';
+
+/**
+ * Mirrors the real suggestions API behavior: the generated text-based layers
+ * carry the context query (see `getDatasourceSuggestionsForVisualizeField`).
+ */
+const withContextQuery = (suggestion: Suggestion, contextQuery: unknown): Suggestion => {
+  if (
+    !contextQuery ||
+    typeof contextQuery !== 'object' ||
+    !('esql' in contextQuery) ||
+    !suggestion.datasourceState ||
+    typeof suggestion.datasourceState !== 'object' ||
+    !('layers' in suggestion.datasourceState)
+  ) {
+    return suggestion;
+  }
+  const { layers } = suggestion.datasourceState as {
+    layers: Record<string, { query?: unknown }>;
+  };
+  return {
+    ...suggestion,
+    datasourceState: {
+      ...suggestion.datasourceState,
+      layers: Object.fromEntries(
+        Object.entries(layers).map(([id, layer]) => [id, { ...layer, query: contextQuery }])
+      ),
+    },
+  };
+};
+import type { UnifiedHistogramSuggestionContext, UnifiedHistogramVisContext } from '../types';
+
+const TIME_RANGE: TimeRange = {
+  from: '2022-11-17T00:00:00.000Z',
+  to: '2022-11-17T12:00:00.000Z',
+};
+
+export const getLensVisMock = async ({
+  filters,
+  query,
+  columns,
+  timeInterval,
+  timeRange,
+  breakdownField,
+  dataView,
+  dataSource,
+  allSuggestions,
+  isTransformationalESQL,
+  table,
+  externalVisContext,
+  getModifiedVisAttributes,
+  onLensSuggestionsApiCall,
+  onLensSuggestionsApiParams,
+}: {
+  filters: QueryParams['filters'];
+  query: QueryParams['query'];
+  dataView: DataView;
+  /** Defaults to an `EsqlSource` for an ES|QL query (with `dataView` registered for it), else a `DataViewSource`. */
+  dataSource?: DataSource;
+  columns: DatatableColumn[];
+  timeInterval: string;
+  timeRange?: TimeRange | null;
+  breakdownField: DataViewField | undefined;
+  allSuggestions?: Suggestion[];
+  isTransformationalESQL?: boolean;
+  table?: Datatable;
+  externalVisContext?: UnifiedHistogramVisContext;
+  getModifiedVisAttributes?: Parameters<LensVisService['update']>[0]['getModifiedVisAttributes'];
+  onLensSuggestionsApiCall?: (
+    preferredChartType: ChartType | undefined,
+    preferredVisAttributes: unknown
+  ) => void;
+  onLensSuggestionsApiParams?: (params: Parameters<LensSuggestionsApi>) => void;
+}): Promise<{
+  lensService: LensVisService;
+  visContext: UnifiedHistogramVisContext | undefined;
+  currentSuggestionContext: UnifiedHistogramSuggestionContext | undefined;
+}> => {
+  const lensApi = await unifiedHistogramServicesMock.lens.stateHelperApi();
+  const lensService = new LensVisService({
+    services: unifiedHistogramServicesMock,
+    lensSuggestionsApi: allSuggestions
+      ? (...params) => {
+          const context = params[0];
+          const preferredChartType = params[3];
+          const preferredVisAttributes = params[4];
+          onLensSuggestionsApiCall?.(preferredChartType, preferredVisAttributes);
+          onLensSuggestionsApiParams?.(params);
+          if ('query' in context && context.query === query) {
+            return allSuggestions;
+          }
+          return !isTransformationalESQL && dataView.isTimeBased()
+            ? [
+                withContextQuery(
+                  histogramESQLSuggestionMock,
+                  'query' in context ? context.query : undefined
+                ),
+              ]
+            : [];
+        }
+      : lensApi.suggestions,
+  });
+
+  let visContext: UnifiedHistogramVisContext | undefined;
+  let currentSuggestionContext: UnifiedHistogramSuggestionContext | undefined;
+  lensService.state$.subscribe((state) => {
+    visContext = state.visContext;
+    currentSuggestionContext = state.currentSuggestionContext;
+  });
+
+  const queryDataSource = dataSource ?? (await getDefaultDataSource({ query, dataView, columns }));
+
+  lensService.update({
+    queryParams: {
+      dataSource: queryDataSource,
+      query,
+      filters,
+      timeRange: timeRange ?? TIME_RANGE,
+      columns,
+    },
+    timeInterval,
+    breakdownField,
+    externalVisContext,
+    table,
+    onSuggestionContextChange: () => {},
+    getModifiedVisAttributes,
+  });
+
+  return {
+    lensService,
+    visContext,
+    currentSuggestionContext,
+  };
+};
+
+export const getDefaultDataSource = async ({
+  query,
+  dataView,
+  columns,
+}: {
+  query: QueryParams['query'];
+  dataView: DataView;
+  columns: DatatableColumn[];
+}): Promise<DataSource> => {
+  if (!query || !isOfAggregateQueryType(query)) {
+    return new DataViewSource(dataView);
+  }
+  const esqlSource = createMockEsqlSource(
+    columns.map(columnFromDatatableColumn),
+    columns,
+    dataView.timeFieldName,
+    query.esql
+  );
+  await registerEsqlSourceInDataViewsCache(
+    {
+      create: async () => dataView,
+      clearInstanceCache: () => {},
+    } as unknown as DataViewsPublicPluginStart,
+    esqlSource
+  );
+  return esqlSource;
+};

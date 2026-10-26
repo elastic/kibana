@@ -6,7 +6,7 @@
  */
 
 import type { FleetStartContract } from '@kbn/fleet-plugin/server';
-import { ElasticAgentVersionInfo } from '../../common/types';
+import type { ElasticAgentVersionInfo } from '../../common/types';
 
 export async function getAgentVersionInfo(
   fleetStart: FleetStartContract,

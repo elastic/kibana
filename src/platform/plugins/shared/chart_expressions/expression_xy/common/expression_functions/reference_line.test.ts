@@ -8,7 +8,7 @@
  */
 
 import { createMockExecutionContext } from '@kbn/expressions-plugin/common/mocks';
-import { ReferenceLineArgs, ReferenceLineConfigResult } from '../types';
+import type { ReferenceLineArgs, ReferenceLineConfigResult } from '../types';
 import { referenceLineFunction } from './reference_line';
 
 describe('referenceLine', () => {

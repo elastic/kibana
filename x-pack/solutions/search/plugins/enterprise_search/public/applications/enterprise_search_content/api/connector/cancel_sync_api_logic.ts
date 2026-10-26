@@ -7,7 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { Actions, createApiLogic } from '../../../shared/api_logic/create_api_logic';
+import type { Actions } from '../../../shared/api_logic/create_api_logic';
+import { createApiLogic } from '../../../shared/api_logic/create_api_logic';
 import { HttpLogic } from '../../../shared/http';
 
 export interface CancelSyncApiArgs {
@@ -19,7 +20,9 @@ export interface CancelSyncApiResponse {
 }
 
 export const cancelSync = async ({ syncJobId }: CancelSyncApiArgs) => {
-  const route = `/internal/enterprise_search/connectors/${syncJobId}/cancel_sync`;
+  const route = `/internal/enterprise_search/connectors/${encodeURIComponent(
+    syncJobId
+  )}/cancel_sync`;
   return await HttpLogic.values.http.put(route);
 };
 

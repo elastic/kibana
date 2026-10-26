@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { expectParseError, expectParseSuccess, stringifyZodError } from '@kbn/zod-helpers';
+import { expectParseError, expectParseSuccess, stringifyZodError } from '@kbn/zod-helpers/v4';
 import type { ErrorSchema } from '../../model/error_schema.gen';
 import { ImportRulesResponse } from './import_rules_route.gen';
 
@@ -15,6 +15,7 @@ describe('Import rules schema', () => {
       const payload: ImportRulesResponse = {
         success: true,
         success_count: 0,
+        rules_summary: { created: 0, updated: 0, skipped: 0, failed: 0 },
         rules_count: 0,
         errors: [],
         exceptions_errors: [],
@@ -34,6 +35,7 @@ describe('Import rules schema', () => {
       const payload: ImportRulesResponse = {
         success: false,
         success_count: 0,
+        rules_summary: { created: 0, updated: 0, skipped: 0, failed: 0 },
         rules_count: 0,
         errors: [{ error: { status_code: 400, message: 'some message' } }],
         exceptions_errors: [],
@@ -53,6 +55,7 @@ describe('Import rules schema', () => {
       const payload: ImportRulesResponse = {
         success: false,
         success_count: 0,
+        rules_summary: { created: 0, updated: 0, skipped: 0, failed: 0 },
         rules_count: 0,
         errors: [],
         exceptions_errors: [{ error: { status_code: 400, message: 'some message' } }],
@@ -72,6 +75,7 @@ describe('Import rules schema', () => {
       const payload: ImportRulesResponse = {
         success: false,
         success_count: 0,
+        rules_summary: { created: 0, updated: 0, skipped: 0, failed: 0 },
         rules_count: 0,
         errors: [
           { error: { status_code: 400, message: 'some message' } },
@@ -94,6 +98,7 @@ describe('Import rules schema', () => {
       const payload: ImportRulesResponse = {
         success: false,
         success_count: 0,
+        rules_summary: { created: 0, updated: 0, skipped: 0, failed: 0 },
         rules_count: 0,
         errors: [],
         exceptions_errors: [
@@ -116,6 +121,7 @@ describe('Import rules schema', () => {
       const payload: ImportRulesResponse = {
         success: false,
         success_count: -1,
+        rules_summary: { created: 0, updated: 0, skipped: 0, failed: 0 },
         rules_count: 0,
         errors: [],
         exceptions_errors: [],
@@ -129,7 +135,7 @@ describe('Import rules schema', () => {
       const result = ImportRulesResponse.safeParse(payload);
       expectParseError(result);
       expect(stringifyZodError(result.error)).toEqual(
-        'success_count: Number must be greater than or equal to 0'
+        'success_count: Too small: expected number to be >=0'
       );
     });
 
@@ -137,6 +143,7 @@ describe('Import rules schema', () => {
       const payload: ImportRulesResponse = {
         success: false,
         success_count: 0,
+        rules_summary: { created: 0, updated: 0, skipped: 0, failed: 0 },
         rules_count: 0,
         errors: [],
         exceptions_errors: [],
@@ -150,7 +157,7 @@ describe('Import rules schema', () => {
       const result = ImportRulesResponse.safeParse(payload);
       expectParseError(result);
       expect(stringifyZodError(result.error)).toEqual(
-        'exceptions_success_count: Number must be greater than or equal to 0'
+        'exceptions_success_count: Too small: expected number to be >=0'
       );
     });
 
@@ -158,6 +165,7 @@ describe('Import rules schema', () => {
       const payload: Omit<ImportRulesResponse, 'success'> & { success: string } = {
         success: 'hello',
         success_count: 0,
+        rules_summary: { created: 0, updated: 0, skipped: 0, failed: 0 },
         rules_count: 0,
         errors: [],
         exceptions_errors: [],
@@ -170,7 +178,9 @@ describe('Import rules schema', () => {
       };
       const result = ImportRulesResponse.safeParse(payload);
       expectParseError(result);
-      expect(stringifyZodError(result.error)).toEqual('success: Expected boolean, received string');
+      expect(stringifyZodError(result.error)).toEqual(
+        'success: Invalid input: expected boolean, received string'
+      );
     });
 
     test('it should NOT validate a exceptions_success that is not a boolean', () => {
@@ -179,6 +189,7 @@ describe('Import rules schema', () => {
       } = {
         success: true,
         success_count: 0,
+        rules_summary: { created: 0, updated: 0, skipped: 0, failed: 0 },
         rules_count: 0,
         errors: [],
         exceptions_errors: [],
@@ -192,7 +203,7 @@ describe('Import rules schema', () => {
       const result = ImportRulesResponse.safeParse(payload);
       expectParseError(result);
       expect(stringifyZodError(result.error)).toEqual(
-        'exceptions_success: Expected boolean, received string'
+        'exceptions_success: Invalid input: expected boolean, received string'
       );
     });
 
@@ -200,6 +211,7 @@ describe('Import rules schema', () => {
       const payload: ImportRulesResponse & { invalid_field: string } = {
         success: true,
         success_count: 0,
+        rules_summary: { created: 0, updated: 0, skipped: 0, failed: 0 },
         rules_count: 0,
         errors: [],
         invalid_field: 'invalid_data',
@@ -213,9 +225,7 @@ describe('Import rules schema', () => {
       };
       const result = ImportRulesResponse.safeParse(payload);
       expectParseError(result);
-      expect(stringifyZodError(result.error)).toEqual(
-        "Unrecognized key(s) in object: 'invalid_field'"
-      );
+      expect(stringifyZodError(result.error)).toEqual('Unrecognized key: "invalid_field"');
     });
 
     test('it should NOT validate an extra field in the second position of the errors array', () => {
@@ -225,6 +235,7 @@ describe('Import rules schema', () => {
       } = {
         success: true,
         success_count: 0,
+        rules_summary: { created: 0, updated: 0, skipped: 0, failed: 0 },
         rules_count: 0,
         errors: [
           { error: { status_code: 400, message: 'some message' } },
@@ -240,15 +251,14 @@ describe('Import rules schema', () => {
       };
       const result = ImportRulesResponse.safeParse(payload);
       expectParseError(result);
-      expect(stringifyZodError(result.error)).toEqual(
-        "errors.1: Unrecognized key(s) in object: 'invalid_data'"
-      );
+      expect(stringifyZodError(result.error)).toEqual('errors.1: Unrecognized key: "invalid_data"');
     });
 
     test('it should validate an empty import response with a single connectors error', () => {
       const payload: ImportRulesResponse = {
         success: false,
         success_count: 0,
+        rules_summary: { created: 0, updated: 0, skipped: 0, failed: 0 },
         rules_count: 0,
         errors: [],
         exceptions_errors: [],
@@ -268,6 +278,7 @@ describe('Import rules schema', () => {
       const payload: ImportRulesResponse = {
         success: false,
         success_count: 0,
+        rules_summary: { created: 0, updated: 0, skipped: 0, failed: 0 },
         rules_count: 0,
         errors: [
           { error: { status_code: 400, message: 'some message' } },
@@ -292,6 +303,7 @@ describe('Import rules schema', () => {
       } = {
         success: true,
         success_count: 0,
+        rules_summary: { created: 0, updated: 0, skipped: 0, failed: 0 },
         rules_count: 0,
         errors: [],
         exceptions_errors: [],
@@ -305,7 +317,7 @@ describe('Import rules schema', () => {
       const result = ImportRulesResponse.safeParse(payload);
       expectParseError(result);
       expect(stringifyZodError(result.error)).toEqual(
-        'action_connectors_success: Expected boolean, received string'
+        'action_connectors_success: Invalid input: expected boolean, received string'
       );
     });
 
@@ -313,6 +325,7 @@ describe('Import rules schema', () => {
       const payload: ImportRulesResponse = {
         success: false,
         success_count: 0,
+        rules_summary: { created: 0, updated: 0, skipped: 0, failed: 0 },
         rules_count: 0,
         errors: [],
         exceptions_errors: [],
@@ -326,13 +339,14 @@ describe('Import rules schema', () => {
       const result = ImportRulesResponse.safeParse(payload);
       expectParseError(result);
       expect(stringifyZodError(result.error)).toEqual(
-        'action_connectors_success_count: Number must be greater than or equal to 0'
+        'action_connectors_success_count: Too small: expected number to be >=0'
       );
     });
     test('it should validate a action_connectors_warnings after importing successfully', () => {
       const payload: ImportRulesResponse = {
         success: false,
         success_count: 0,
+        rules_summary: { created: 0, updated: 0, skipped: 0, failed: 0 },
         rules_count: 0,
         errors: [],
         exceptions_errors: [],
@@ -356,6 +370,7 @@ describe('Import rules schema', () => {
       } = {
         success: true,
         success_count: 0,
+        rules_summary: { created: 0, updated: 0, skipped: 0, failed: 0 },
         rules_count: 0,
         errors: [],
         exceptions_errors: [],
@@ -369,8 +384,28 @@ describe('Import rules schema', () => {
       const result = ImportRulesResponse.safeParse(payload);
       expectParseError(result);
       expect(stringifyZodError(result.error)).toEqual(
-        'action_connectors_warnings: Expected array, received string'
+        'action_connectors_warnings: Invalid input: expected array, received string'
       );
+    });
+
+    test('it should validate a mixed rules_summary', () => {
+      const payload: ImportRulesResponse = {
+        success: false,
+        success_count: 3,
+        rules_summary: { created: 1, updated: 1, skipped: 1, failed: 1 },
+        rules_count: 4,
+        errors: [{ error: { status_code: 400, message: 'some message' } }],
+        exceptions_errors: [],
+        exceptions_success: true,
+        exceptions_success_count: 0,
+        action_connectors_success: true,
+        action_connectors_success_count: 0,
+        action_connectors_errors: [],
+        action_connectors_warnings: [],
+      };
+      const result = ImportRulesResponse.safeParse(payload);
+      expectParseSuccess(result);
+      expect(result.data).toEqual(payload);
     });
   });
 });

@@ -7,18 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState, useEffect, Dispatch } from 'react';
+import type { Dispatch } from 'react';
+import React, { useState, useEffect } from 'react';
 import { camelCase } from 'lodash';
 import { EuiFlexGroup, EuiTextColor, EuiFlexItem } from '@elastic/eui';
-import { CustomPaletteParams, DEFAULT_CONTINUITY, DEFAULT_RANGE_TYPE } from '../../../palettes';
+import type { CustomPaletteParams } from '../../../palettes';
+import { DEFAULT_CONTINUITY, DEFAULT_RANGE_TYPE } from '../../../palettes';
 
 import { ColorRangesExtraActions } from './color_ranges_extra_actions';
 import { ColorRangeItem } from './color_ranges_item';
-import {
-  validateColorRanges,
-  getErrorMessages,
-  ColorRangeValidation,
-} from './color_ranges_validation';
+import type { ColorRangeValidation } from './color_ranges_validation';
+import { validateColorRanges, getErrorMessages } from './color_ranges_validation';
 
 import type { ColorRange } from './types';
 import type { PaletteConfigurationActions } from '../types';
@@ -28,6 +27,7 @@ export interface ColorRangesProps {
   paletteConfiguration: CustomPaletteParams | undefined;
   showExtraActions: boolean;
   dispatch: Dispatch<PaletteConfigurationActions>;
+  maxSteps?: number;
 }
 
 export function ColorRanges({
@@ -35,6 +35,7 @@ export function ColorRanges({
   paletteConfiguration,
   showExtraActions,
   dispatch,
+  maxSteps,
 }: ColorRangesProps) {
   const [colorRangesValidity, setColorRangesValidity] = useState<
     Record<string, ColorRangeValidation>
@@ -56,6 +57,7 @@ export function ColorRanges({
       gutterSize="s"
     >
       {colorRanges.map((colorRange, index) => (
+        // @ts-expect-error upgrade typescript v5.9.3
         <EuiFlexItem grow={false} key={`${colorRange.end ?? 0 + colorRange.start ?? 0}${index}`}>
           <ColorRangeItem
             colorRange={colorRange}
@@ -95,9 +97,7 @@ export function ColorRanges({
           <ColorRangesExtraActions
             dispatch={dispatch}
             shouldDisableAdd={Boolean(
-              (paletteConfiguration?.maxSteps &&
-                colorRanges.length >= paletteConfiguration?.maxSteps) ||
-                errors.length
+              (maxSteps && colorRanges.length >= maxSteps) || errors.length
             )}
             shouldDisableDistribute={Boolean(colorRanges.length === 1)}
             shouldDisableReverse={Boolean(colorRanges.length === 1)}

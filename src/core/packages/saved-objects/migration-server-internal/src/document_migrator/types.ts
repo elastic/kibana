@@ -7,7 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { SavedObjectUnsanitizedDoc } from '@kbn/core-saved-objects-server';
+import type {
+  SavedObjectUnsanitizedDoc,
+  SavedObjectTypeVersionGuesser,
+} from '@kbn/core-saved-objects-server';
 
 /**
  * Map containing all the info to convert types
@@ -34,6 +37,13 @@ export interface TypeTransforms {
   transforms: Transform[];
   /** Per-version schemas for the given type */
   versionSchemas: Record<string, TypeVersionSchema>;
+  /**
+   * Optional function that estimates the `typeMigrationVersion` for documents
+   * that do not carry that field (e.g. those created via the deprecated SO HTTP API).
+   * When present, the {@link DocumentMigrator} will call it before running migrations
+   * so that the appropriate subset of transforms is applied.
+   */
+  typeVersionGuesser?: SavedObjectTypeVersionGuesser;
 }
 
 /**

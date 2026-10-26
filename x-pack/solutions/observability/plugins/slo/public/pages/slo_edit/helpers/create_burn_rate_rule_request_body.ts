@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { CreateSLOInput } from '@kbn/slo-schema';
+import type { CreateSLOInput } from '@kbn/slo-schema';
 import { i18n } from '@kbn/i18n';
-import { CreateRuleRequestBody } from '@kbn/alerting-plugin/common/routes/rule/apis/create';
+import type { CreateRuleRequestBody } from '@kbn/alerting-plugin/common/routes/rule/apis/create';
 import { BURN_RATE_DEFAULTS } from '../../../components/burn_rate_rule_editor/constants';
 import { createNewWindow } from '../../../components/burn_rate_rule_editor/windows';
-import { BurnRateRuleParams } from '../../../typings';
+import type { BurnRateRuleParams } from '../../../typings';
 
 function createBurnRateWindowsFromSLO(slo: CreateSLOInput) {
   const burnRateDefaults = slo

@@ -9,9 +9,9 @@ import { omit, union } from 'lodash/fp';
 
 import { isEmpty } from 'lodash';
 import type { EuiDataGridColumn } from '@elastic/eui';
-import type { ColumnHeaderOptions, SessionViewConfig, SortColumnTable } from '../../common/types';
+import type { ColumnHeaderOptions, SortColumnTable } from '../../common/types';
 import type { DataTablePersistInput, TableById } from './types';
-import type { DataTableModelSettings } from './model';
+import type { DataTableModel, DataTableModelSettings } from './model';
 
 import { getDataTableManageDefaults, tableDefaults } from './defaults';
 import { DEFAULT_TABLE_COLUMN_MIN_WIDTH } from '../../components/data_table/constants';
@@ -435,42 +435,31 @@ export const setSelectedTableEvents = ({
   };
 };
 
-export const updateTableGraphEventId = ({
-  id,
-  graphEventId,
-  tableById,
-}: {
+interface UpdateTableAdditionalFiltersParams {
   id: string;
-  graphEventId: string;
   tableById: TableById;
-}): TableById => {
-  const table = tableById[id];
+  additionalFilters: Partial<DataTableModel['additionalFilters']>;
+}
+
+/** Merges alert-page filter flags, or returns `tableById` unchanged when the table is missing. */
+export const updateTableAdditionalFilters = ({
+  id,
+  tableById,
+  additionalFilters,
+}: UpdateTableAdditionalFiltersParams): TableById => {
+  const dataTable = tableById[id];
+  if (dataTable == null) {
+    return tableById;
+  }
 
   return {
     ...tableById,
     [id]: {
-      ...table,
-      graphEventId,
-    },
-  };
-};
-
-export const updateTableSessionViewConfig = ({
-  id,
-  sessionViewConfig,
-  tableById,
-}: {
-  id: string;
-  sessionViewConfig: SessionViewConfig | null;
-  tableById: TableById;
-}): TableById => {
-  const table = tableById[id];
-
-  return {
-    ...tableById,
-    [id]: {
-      ...table,
-      sessionViewConfig,
+      ...dataTable,
+      additionalFilters: {
+        ...dataTable.additionalFilters,
+        ...additionalFilters,
+      },
     },
   };
 };

@@ -5,6 +5,11 @@
  * 2.0.
  */
 
+import type { errors } from '@elastic/elasticsearch';
+import { ErrorCode } from '@modelcontextprotocol/sdk/types.js';
+import url from 'url';
+
+import type { BuildFlavor } from '@kbn/config';
 import type {
   CustomBrandingSetup,
   ElasticsearchServiceSetup,
@@ -15,7 +20,10 @@ import type {
   Logger,
   LoggerFactory,
 } from '@kbn/core/server';
+import type { APIKeysType, UiamOAuthType } from '@kbn/core-security-server';
+import type { UserActivityServiceStart } from '@kbn/core-user-activity-server';
 import type { KibanaFeature } from '@kbn/features-plugin/server';
+import { i18n as i18nLib } from '@kbn/i18n';
 import type {
   AuditServiceSetup,
   AuthenticationServiceStart,
@@ -23,31 +31,47 @@ import type {
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
 import { APIKeys } from './api_keys';
+import { UiamAPIKeys } from './api_keys/uiam';
 import type { AuthenticationResult } from './authentication_result';
 import type { ProviderLoginAttempt } from './authenticator';
 import { Authenticator } from './authenticator';
 import { canRedirectRequest } from './can_redirect_request';
 import type { DeauthenticationResult } from './deauthentication_result';
-import { renderUnauthenticatedPage } from './unauthenticated_page';
+import { UiamOAuth } from './oauth';
+import { UiamSystemIdentity } from './system_identity';
 import type { AuthenticatedUser, SecurityLicense } from '../../common';
-import { NEXT_URL_QUERY_STRING_PARAMETER } from '../../common/constants';
+import { KIBANA_AUTH_FULL_HEADER, NEXT_URL_QUERY_STRING_PARAMETER } from '../../common/constants';
 import { shouldProviderUseLoginForm } from '../../common/model';
 import type { ConfigType } from '../config';
 import { getDetailedErrorMessage, getErrorStatusCode } from '../errors';
 import type { SecurityFeatureUsageServiceStart } from '../feature_usage';
-import { ROUTE_TAG_AUTH_FLOW } from '../routes/tags';
+import { createRedirectHtmlPage } from '../lib/html_page_utils';
+import { ROUTE_TAG_ACCEPT_UIAM_OAUTH, ROUTE_TAG_AUTH_FLOW } from '../routes/tags';
+import type { ServiceAccountsServiceStart } from '../service_accounts';
 import type { Session } from '../session_management';
+import {
+  getProtectedResource,
+  getProtectedResourceMetadataUrl,
+  getRequestSpacePrefix,
+  type UiamServicePublic,
+} from '../uiam';
 import type { UserProfileServiceStartInternal } from '../user_profile';
 
 interface AuthenticationServiceSetupParams {
   http: Pick<
     HttpServiceSetup,
-    'basePath' | 'csp' | 'registerAuth' | 'registerOnPreResponse' | 'staticAssets'
+    | 'basePath'
+    | 'csp'
+    | 'registerAuth'
+    | 'registerOnPreResponse'
+    | 'setSelfClientUnauthorizedErrorHandler'
+    | 'staticAssets'
   >;
   customBranding: CustomBrandingSetup;
   elasticsearch: Pick<ElasticsearchServiceSetup, 'setUnauthorizedErrorHandler'>;
   config: ConfigType;
   license: SecurityLicense;
+  getServiceAccounts: () => ServiceAccountsServiceStart | null;
 }
 
 interface AuthenticationServiceStartParams {
@@ -58,16 +82,19 @@ interface AuthenticationServiceStartParams {
   featureUsageService: SecurityFeatureUsageServiceStart;
   userProfileService: UserProfileServiceStartInternal;
   session: PublicMethodsOf<Session>;
+  uiam?: UiamServicePublic;
   loggers: LoggerFactory;
   applicationName: string;
   kibanaFeatures: KibanaFeature[];
   isElasticCloudDeployment: () => boolean;
   customLogoutURL?: string;
+  buildFlavor?: BuildFlavor;
+  userActivity: UserActivityServiceStart;
 }
 
 export interface InternalAuthenticationServiceStart extends AuthenticationServiceStart {
   apiKeys: Pick<
-    APIKeys,
+    APIKeysType,
     | 'areAPIKeysEnabled'
     | 'areCrossClusterAPIKeysEnabled'
     | 'create'
@@ -75,8 +102,11 @@ export interface InternalAuthenticationServiceStart extends AuthenticationServic
     | 'invalidate'
     | 'validate'
     | 'grantAsInternalUser'
+    | 'cloneAsInternalUser'
     | 'invalidateAsInternalUser'
+    | 'uiam'
   >;
+  oauth: UiamOAuthType | null;
   login: (request: KibanaRequest, attempt: ProviderLoginAttempt) => Promise<AuthenticationResult>;
   logout: (request: KibanaRequest) => Promise<DeauthenticationResult>;
   acknowledgeAccessAgreement: (request: KibanaRequest) => Promise<void>;
@@ -96,6 +126,7 @@ export class AuthenticationService {
     license,
     elasticsearch,
     customBranding,
+    getServiceAccounts,
   }: AuthenticationServiceSetupParams) {
     this.license = license;
 
@@ -203,6 +234,36 @@ export class AuthenticationService {
         ? `${http.basePath.get(request)}/`
         : this.authenticator.getRequestOriginalURL(request);
 
+      // For routes that accept UIAM OAuth tokens, return a 401 with a WWW-Authenticate header
+      // containing the resource_metadata URL instead of redirecting to the login page.
+      // https://datatracker.ietf.org/doc/html/rfc9728#name-www-authenticate-response
+      if (
+        preResponse.statusCode === 401 &&
+        config.mcp?.oauth2 &&
+        request.route.options.tags.includes(ROUTE_TAG_ACCEPT_UIAM_OAUTH)
+      ) {
+        const resource = getProtectedResource(
+          config.mcp.oauth2.metadata.resource,
+          getRequestSpacePrefix(http.basePath, request)
+        );
+        const resourceMetadataUrl = getProtectedResourceMetadataUrl(resource);
+
+        return toolkit.render({
+          body: JSON.stringify({
+            jsonrpc: '2.0',
+            id: null,
+            // TODO: In MCP SDK v2, ErrorCode is renamed to ProtocolErrorCode, and ConnectionClosed moves to
+            // SdkErrorCode (local-only, string-valued). Update this import when upgrading to SDK v2.
+            // https://github.com/modelcontextprotocol/typescript-sdk/blob/main/docs/migration.md#error-hierarchy-refactoring
+            error: { code: ErrorCode.ConnectionClosed, message: 'Unauthorized' },
+          }),
+          headers: {
+            'WWW-Authenticate': `Bearer resource_metadata="${resourceMetadataUrl}"`,
+            'Content-Type': 'application/json',
+          },
+        });
+      }
+
       // Let API responses or <400 responses pass through as we can let their handlers deal with them.
       if (preResponse.statusCode < 400 || !canRedirectRequest(request)) {
         return toolkit.next();
@@ -212,23 +273,27 @@ export class AuthenticationService {
         return toolkit.next();
       }
 
+      const unauthenticatedTitle = i18nLib.translate(
+        'xpack.security.authentication.unauthenticatedTitle',
+        {
+          defaultMessage: 'Unauthenticated',
+        }
+      );
+
       // Now we are only dealing with authentication flow errors or 401 errors in non-authentication routes.
       // Additionally, if logout fails for any reason, we also want to show an error page.
       // At this point we redirect users to the login page if it's available, or render a dedicated unauthenticated error page.
       if (!isLoginPageAvailable || isLogoutRoute) {
-        const customBrandingValue = await customBranding.getBrandingFor(request, {
-          unauthenticated: true,
-        });
+        const location = http.basePath.prepend(
+          `/security/unauthenticated?next=${encodeURIComponent(originalURL)}`
+        );
+        const body = createRedirectHtmlPage(unauthenticatedTitle, location);
         return toolkit.render({
-          body: renderUnauthenticatedPage({
-            staticAssets: http.staticAssets,
-            basePath: http.basePath,
-            originalURL,
-            customBranding: customBrandingValue,
-          }),
+          body,
           headers: {
             'Content-Security-Policy': http.csp.header,
             'Content-Security-Policy-Report-Only': http.csp.reportOnlyHeader,
+            Refresh: `0;url=${location}`,
           },
         });
       }
@@ -238,18 +303,18 @@ export class AuthenticationService {
         this.logger.warn('Could not authenticate user with the existing session. Forcing logout.');
       }
 
+      const location = http.basePath.prepend(
+        `${
+          needsToLogout ? '/logout' : '/login'
+        }?msg=UNAUTHENTICATED&${NEXT_URL_QUERY_STRING_PARAMETER}=${encodeURIComponent(originalURL)}`
+      );
+      const body = createRedirectHtmlPage(unauthenticatedTitle, location);
       return toolkit.render({
-        body: '<div/>',
+        body,
         headers: {
+          Refresh: `0;url=${location}`,
           'Content-Security-Policy': http.csp.header,
           'Content-Security-Policy-Report-Only': http.csp.reportOnlyHeader,
-          Refresh: `0;url=${http.basePath.prepend(
-            `${
-              needsToLogout ? '/logout' : '/login'
-            }?msg=UNAUTHENTICATED&${NEXT_URL_QUERY_STRING_PARAMETER}=${encodeURIComponent(
-              originalURL
-            )}`
-          )}`,
         },
       });
     });
@@ -267,8 +332,8 @@ export class AuthenticationService {
         return toolkit.notHandled();
       }
 
-      // In theory, this should never happen since Core calls this handler only for `401` ("unauthorized") errors.
-      if (getErrorStatusCode(error) !== 401) {
+      // We can only re-authenticate if the original request failed because of the expired access token.
+      if (!isTokenExpiredError(error)) {
         this.logger.error(
           `Re-authentication is not possible for the following error: ${getDetailedErrorMessage(
             error
@@ -281,16 +346,30 @@ export class AuthenticationService {
         `Re-authenticating request due to error: ${getDetailedErrorMessage(error)}`
       );
 
+      // Fake requests never carry a session, so the re-authentication machinery below cannot help
+      // them (and its BWC header-scrubbing must never touch them). The one recoverable case is a
+      // request bound to a service account, whose credential Kibana minted and can mint again;
+      // everything else — API-key fakes from task manager/alerting, external user-created
+      // credentials — is deliberately left to its owner.
+      if (request.isFakeRequest) {
+        const authHeaders = await getServiceAccounts()
+          ?.backend.reauthenticateFakeRequest(request)
+          .catch(() => null);
+        return authHeaders ? toolkit.retry({ authHeaders }) : toolkit.notHandled();
+      }
+
       let authenticationResult;
       const originalHeaders = request.headers;
       try {
         // WORKAROUND: Due to BWC reasons Core mutates headers of the original request with authentication
         // headers returned during authentication stage. We should remove these headers before re-authentication to not
         // conflict with the HTTP authentication logic. Performance impact is negligible since this is not a hot path.
+        // Additionally, we explicitly include KIBANA_AUTH_FULL_HEADER header to skip any authentication optimizations
+        // and make sure re-authentication is performed in full scope.
         (request.headers as Record<string, unknown>) = Object.fromEntries(
-          Object.entries(originalHeaders).filter(
-            ([headerName]) => headerName.toLowerCase() !== 'authorization'
-          )
+          Object.entries(originalHeaders)
+            .filter(([headerName]) => headerName.toLowerCase() !== 'authorization')
+            .concat([[KIBANA_AUTH_FULL_HEADER, 'true']])
         );
         authenticationResult = await this.authenticator.reauthenticate(request);
       } catch (err) {
@@ -323,6 +402,31 @@ export class AuthenticationService {
 
       return toolkit.notHandled();
     });
+
+    http.setSelfClientUnauthorizedErrorHandler(async ({ request }, toolkit) => {
+      if (!license.isLicenseAvailable() || !license.isEnabled()) {
+        return toolkit.notHandled();
+      }
+
+      // Core only consults this handler for a 401 raised by the authentication lifecycle, so the
+      // target route handler did not run and replaying the call cannot duplicate a side
+      // effect. Unlike the Elasticsearch path there is no expiry marker to test. Kibana boomifies
+      // the upstream error — so the trigger is ownership instead: only a fake request bound to a
+      // service account, whose credential Kibana minted and can mint again, is recoverable.
+      // A real request's credential would have to be refreshed through the session machinery,
+      // which would mutate the ambient authentication state of a request this call merely borrows.
+      if (!request.isFakeRequest) {
+        return toolkit.notHandled();
+      }
+
+      // It is possible that the request is not bound to a service account.
+      // We do not yet have a great mechanism to detect within the authentication service,
+      // so we rely on the service accounts backend to return null for requests that are not bound to a service account.
+      const authHeaders = await getServiceAccounts()
+        ?.backend.reauthenticateFakeRequest(request)
+        .catch(() => null);
+      return authHeaders ? toolkit.retry({ authHeaders }) : toolkit.notHandled();
+    });
   }
 
   start({
@@ -338,14 +442,59 @@ export class AuthenticationService {
     kibanaFeatures,
     isElasticCloudDeployment,
     customLogoutURL,
+    buildFlavor = 'traditional',
+    uiam,
+    userActivity,
   }: AuthenticationServiceStartParams): InternalAuthenticationServiceStart {
+    const getCurrentUser = (request: KibanaRequest) =>
+      http.auth.get<AuthenticatedUser>(request).state ?? null;
+
     const apiKeys = new APIKeys({
       clusterClient,
       logger: this.logger.get('api-key'),
       license: this.license,
       applicationName,
       kibanaFeatures,
+      buildFlavor,
+      uiam,
+      serviceAccountsEnabled: config.serviceAccounts.enabled,
+      getCurrentUser,
     });
+
+    const uiamAPIKeys = uiam
+      ? new UiamAPIKeys({
+          logger: this.logger.get('api-key-uiam'),
+          license: this.license,
+          uiam,
+          getCurrentUser,
+        })
+      : null;
+
+    const uiamOAuth = uiam
+      ? new UiamOAuth({
+          logger: this.logger.get('oauth-uiam'),
+          license: this.license,
+          uiam,
+        })
+      : null;
+
+    // UIAM derives Kibana's own identity from the mTLS client certificate alone, so the capability
+    // only exists when that certificate is configured. `xpack.security.uiam.ssl.certificate` and
+    // `.key` are optional, and without them every mint fails with a UIAM 401.
+    const canMintSystemIdentityTokens = Boolean(
+      config.uiam?.ssl.certificate && config.uiam.ssl.key
+    );
+    if (uiam && !canMintSystemIdentityTokens) {
+      this.logger.debug(
+        'UIAM is enabled without a client certificate (`xpack.security.uiam.ssl.certificate` and `.key`), so Kibana cannot mint tokens for its own identity.'
+      );
+    }
+
+    const systemIdentity =
+      uiam && canMintSystemIdentityTokens
+        ? new UiamSystemIdentity({ logger: this.logger.get('system-identity'), uiam })
+        : undefined;
+
     /**
      * Retrieves server protocol name/host name/port and merges it with `xpack.security.public` config
      * to construct a server base URL (deprecated, used by the SAML provider only).
@@ -354,11 +503,16 @@ export class AuthenticationService {
       const { protocol, hostname, port } = http.getServerInfo();
       const serverConfig = { protocol, hostname, port, ...config.public };
 
-      return `${serverConfig.protocol}://${serverConfig.hostname}:${serverConfig.port}`;
+      // `url.format` brackets IPv6 literal hostnames (`::1` -> `[::1]`), without which the
+      // result is not a parseable URL. `slashes` is required because the server protocol is
+      // not always one of the schemes Node treats as slashed (e.g. `socket`).
+      return url.format({
+        protocol: serverConfig.protocol,
+        hostname: serverConfig.hostname,
+        port: serverConfig.port,
+        slashes: true,
+      });
     };
-
-    const getCurrentUser = (request: KibanaRequest) =>
-      http.auth.get<AuthenticatedUser>(request).state ?? null;
 
     this.session = session;
     const authenticator = (this.authenticator = new Authenticator({
@@ -369,6 +523,7 @@ export class AuthenticationService {
       config: {
         authc: config.authc,
         accessAgreement: config.accessAgreement,
+        uiam: config.uiam,
       },
       getCurrentUser,
       featureUsageService,
@@ -378,6 +533,8 @@ export class AuthenticationService {
       session,
       isElasticCloudDeployment,
       customLogoutURL,
+      uiam,
+      userActivity,
     }));
 
     return {
@@ -387,10 +544,39 @@ export class AuthenticationService {
         create: apiKeys.create.bind(apiKeys),
         update: apiKeys.update.bind(apiKeys),
         grantAsInternalUser: apiKeys.grantAsInternalUser.bind(apiKeys),
+        cloneAsInternalUser: apiKeys.cloneAsInternalUser.bind(apiKeys),
         invalidate: apiKeys.invalidate.bind(apiKeys),
         validate: apiKeys.validate.bind(apiKeys),
         invalidateAsInternalUser: apiKeys.invalidateAsInternalUser.bind(apiKeys),
+        uiam: uiamAPIKeys
+          ? {
+              grant: uiamAPIKeys.grant.bind(uiamAPIKeys),
+              invalidate: uiamAPIKeys.invalidate.bind(uiamAPIKeys),
+              convert: uiamAPIKeys.convert.bind(uiamAPIKeys),
+              getInternalCallerAttestationHeaders:
+                uiamAPIKeys.getInternalCallerAttestationHeaders.bind(uiamAPIKeys),
+              isOwnClientAuthentication: uiamAPIKeys.isOwnClientAuthentication.bind(uiamAPIKeys),
+              isExternalApiKey: uiamAPIKeys.isExternalApiKey.bind(uiamAPIKeys),
+            }
+          : null,
       },
+
+      oauth: uiamOAuth
+        ? {
+            createClient: uiamOAuth.createClient.bind(uiamOAuth),
+            listClients: uiamOAuth.listClients.bind(uiamOAuth),
+            updateClient: uiamOAuth.updateClient.bind(uiamOAuth),
+            revokeClient: uiamOAuth.revokeClient.bind(uiamOAuth),
+            deleteClient: uiamOAuth.deleteClient.bind(uiamOAuth),
+            listConnections: uiamOAuth.listConnections.bind(uiamOAuth),
+            updateConnection: uiamOAuth.updateConnection.bind(uiamOAuth),
+            revokeConnection: uiamOAuth.revokeConnection.bind(uiamOAuth),
+            deleteConnection: uiamOAuth.deleteConnection.bind(uiamOAuth),
+            resolveUsers: uiamOAuth.resolveUsers.bind(uiamOAuth),
+          }
+        : null,
+
+      systemIdentity,
 
       login: async (request: KibanaRequest, attempt: ProviderLoginAttempt) => {
         const providerIdentifier =
@@ -404,7 +590,8 @@ export class AuthenticationService {
           this.logger.error(
             `Login attempt with "${providerIdentifier}" provider failed due to unexpected error: ${getDetailedErrorMessage(
               err
-            )}`
+            )}`,
+            { error: { stack_trace: err.stack } }
           );
           throw err;
         }
@@ -439,4 +626,25 @@ export class AuthenticationService {
       getCurrentUser,
     };
   }
+}
+
+/**
+ * Checks if the provided error is caused by expired access token. The logic is based on the error
+ * reason set by the Elasticsearch and error code set by the UIAM service and is covered by the FTR
+ * and Scout API integration tests.
+ * @param error Error returned by the Elasticsearch client when authentication fails.
+ */
+function isTokenExpiredError(error: errors.ResponseError) {
+  // If the request failed because of expired access token it should always have 401 status code.
+  if (getErrorStatusCode(error) !== 401) {
+    return false;
+  }
+
+  // If expired the Elasticsearch native access token, it should properly set `reason` property.
+  if (error.body?.error?.reason === 'token expired') {
+    return true;
+  }
+
+  // If expired the UIAM access token, it should have `authentication_error_code` set to `0x7E0116`.
+  return error.body?.error?.caused_by?.authentication_error_code === '0x7E0116';
 }

@@ -11,7 +11,9 @@ import type { ArrayElement } from '@kbn/utility-types';
 import {
   CASE_COMMENT_SAVED_OBJECT,
   CASE_CONFIGURE_SAVED_OBJECT,
+  CASE_FIELD_DEFINITION_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
+  CASE_TEMPLATE_SAVED_OBJECT,
   CASE_USER_ACTION_SAVED_OBJECT,
 } from '../../common/constants';
 import type { Verbs, OperationDetails } from './types';
@@ -68,6 +70,15 @@ const DELETE_COMMENT_OPERATION: CasesSupportedOperations = 'deleteComment';
 const ACCESS_COMMENT_OPERATION: CasesSupportedOperations = 'getComment';
 const ACCESS_CASE_OPERATION: CasesSupportedOperations = 'getCase';
 const ACCESS_USER_ACTION_OPERATION: CasesSupportedOperations = 'getUserActions';
+/**
+ * Reading templates is granted by either the standard per-owner cases read/all privilege or the
+ * manageTemplates sub-privilege (users need to be able to see templates in order to manage them),
+ * matching the "must have read privileges for the Cases feature" contract documented on the public
+ * template routes. See `manageTemplatesReadOperations` in
+ * x-pack/platform/packages/private/security/authorization_core/src/privileges/feature_privilege_builder/cases.ts
+ */
+const ACCESS_TEMPLATE_OPERATION: CasesSupportedOperations = 'getTemplate';
+const FIND_TEMPLATES_OPERATION: CasesSupportedOperations = 'findTemplates';
 
 /**
  * Database constant for ECS category for use for audit logging.
@@ -125,6 +136,14 @@ const CaseOperations = {
     verbs: accessVerbs,
     docType: 'cases',
     savedObjectType: CASE_COMMENT_SAVED_OBJECT,
+  },
+  [ReadOperations.GetCaseIDsByAttachmentIDs]: {
+    ecsType: EVENT_TYPES.access,
+    name: ACCESS_CASE_OPERATION,
+    action: 'case_ids_by_attachment_ids_get',
+    verbs: accessVerbs,
+    docType: 'cases',
+    savedObjectType: CASE_SAVED_OBJECT,
   },
   [ReadOperations.GetCaseMetrics]: {
     ecsType: EVENT_TYPES.access,
@@ -197,6 +216,33 @@ const CaseOperations = {
     verbs: updateVerbs,
     docType: 'case',
     savedObjectType: CASE_SAVED_OBJECT,
+  },
+};
+
+const TemplateOperations = {
+  [WriteOperations.ManageTemplate]: {
+    ecsType: EVENT_TYPES.change,
+    name: WriteOperations.ManageTemplate as const,
+    action: 'case_template_manage',
+    verbs: updateVerbs,
+    docType: 'case templates',
+    savedObjectType: CASE_TEMPLATE_SAVED_OBJECT,
+  },
+  [ReadOperations.GetTemplate]: {
+    ecsType: EVENT_TYPES.access,
+    name: ACCESS_TEMPLATE_OPERATION,
+    action: 'case_template_get',
+    verbs: accessVerbs,
+    docType: 'case templates',
+    savedObjectType: CASE_TEMPLATE_SAVED_OBJECT,
+  },
+  [ReadOperations.FindTemplates]: {
+    ecsType: EVENT_TYPES.access,
+    name: FIND_TEMPLATES_OPERATION,
+    action: 'case_template_find',
+    verbs: accessVerbs,
+    docType: 'case templates',
+    savedObjectType: CASE_TEMPLATE_SAVED_OBJECT,
   },
 };
 
@@ -323,6 +369,7 @@ const AttachmentOperations = {
  */
 export const Operations: Record<ReadOperations | WriteOperations, OperationDetails> = {
   ...CaseOperations,
+  ...TemplateOperations,
   ...ConfigurationOperations,
   ...AttachmentOperations,
   [ReadOperations.GetTags]: {
@@ -396,5 +443,13 @@ export const Operations: Record<ReadOperations | WriteOperations, OperationDetai
     verbs: accessVerbs,
     docType: 'cases',
     savedObjectType: CASE_SAVED_OBJECT,
+  },
+  [ReadOperations.GetFieldDefinitions]: {
+    ecsType: EVENT_TYPES.access,
+    name: ReadOperations.GetFieldDefinitions as const,
+    action: 'case_field_definitions_get',
+    verbs: accessVerbs,
+    docType: 'case field definitions',
+    savedObjectType: CASE_FIELD_DEFINITION_SAVED_OBJECT,
   },
 };

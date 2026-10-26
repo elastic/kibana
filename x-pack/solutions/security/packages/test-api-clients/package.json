@@ -1,0 +1,7 @@
+{
+  "name": "@kbn/security-solution-test-api-clients",
+  "description": "Security Solution API clients for testing",
+  "private": true,
+  "version": "1.0.0",
+  "license": "Elastic License 2.0"
+}

@@ -4,10 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState, MouseEvent } from 'react';
+import type { MouseEvent } from 'react';
+import React, { useState } from 'react';
 import { EuiBadge, EuiFlexItem, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { SLOGroupings } from '../common/slo_groupings';
 
 export interface Props {
@@ -26,6 +27,9 @@ export function SLOCardItemInstanceBadge({ slo }: Props) {
   return (
     <EuiFlexItem grow={false}>
       <EuiPopover
+        aria-label={i18n.translate('xpack.slo.sloCardItemInstanceBadge.popoverAriaLabel', {
+          defaultMessage: 'All instance IDs',
+        })}
         isOpen={isPopoverOpen}
         button={
           <EuiBadge

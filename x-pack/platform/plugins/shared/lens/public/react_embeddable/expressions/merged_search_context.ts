@@ -6,16 +6,17 @@
  */
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { DataPublicPluginStart, FilterManager } from '@kbn/data-plugin/public';
+import type { ExecutionContextSearch, ProjectRouting } from '@kbn/es-query';
 import {
   type AggregateQuery,
   type Filter,
   isOfAggregateQueryType,
   type Query,
   type TimeRange,
-  ExecutionContextSearch,
 } from '@kbn/es-query';
-import { PublishingSubject, apiPublishesTimeslice } from '@kbn/presentation-publishing';
-import type { LensRuntimeState } from '../types';
+import type { PublishingSubject } from '@kbn/presentation-publishing';
+import { apiPublishesTimeslice } from '@kbn/presentation-publishing';
+import type { LensRuntimeState } from '@kbn/lens-common';
 import { nonNullable } from '../../utils';
 
 export interface MergedSearchContext {
@@ -25,6 +26,8 @@ export interface MergedSearchContext {
   filters: Filter[];
   disableWarningToasts: boolean;
   esqlVariables?: ESQLControlVariable[];
+  projectRouting?: ProjectRouting;
+  isApproximate?: boolean;
 }
 
 export function getMergedSearchContext(
@@ -34,11 +37,15 @@ export function getMergedSearchContext(
     query,
     timeRange,
     esqlVariables,
+    projectRouting,
+    isApproximate,
   }: {
     filters?: Filter[];
     query?: Query | AggregateQuery;
     timeRange?: TimeRange;
     esqlVariables?: ESQLControlVariable[];
+    projectRouting?: ProjectRouting;
+    isApproximate?: boolean;
   },
   customTimeRange$: PublishingSubject<TimeRange | undefined>,
   parentApi: unknown,
@@ -62,15 +69,25 @@ export function getMergedSearchContext(
   const customTimeRange = customTimeRange$.getValue();
 
   const timeRangeToRender = customTimeRange ?? timesliceTimeRange ?? timeRange;
+
   const context = {
     esqlVariables,
     now: data.nowProvider.get().getTime(),
     timeRange: timeRangeToRender,
+    // `state.query` is the chart-scoped filter of form-based documents (KQL/
+    // Lucene from the full editor's query bar). For text-based documents it
+    // holds an ES|QL copy of the layer query instead, which must not act as a
+    // filter and is stripped again in `getExecutionSearchContext` below.
     query: [attributes.state.query].filter(nonNullable),
     filters: injectFilterReferences(attributes.state.filters || [], attributes.references),
     disableWarningToasts: true,
+    projectRouting,
+    isApproximate,
   };
-  // Prepend query and filters from dashboard to the visualization ones
+  // Prepend query and filters from dashboard to the visualization ones.
+  // There is no precedence: downstream `buildEsQuery` turns every entry into
+  // AND-ed bool clauses, so the chart-scoped query can only narrow the
+  // dashboard result set, never widen or override it.
   if (query) {
     if (!isOfAggregateQueryType(query)) {
       context.query.unshift(query);
@@ -82,6 +99,11 @@ export function getMergedSearchContext(
   return context;
 }
 
+/**
+ * Strips an aggregate (ES|QL) `state.query` from the execution context: it is
+ * a copy of the text-based layer query (the layers fetch their own data), not
+ * a filter, and cannot be AND-ed with the dashboard KQL context.
+ */
 export function getExecutionSearchContext(
   searchContext: MergedSearchContext
 ): ExecutionContextSearch {

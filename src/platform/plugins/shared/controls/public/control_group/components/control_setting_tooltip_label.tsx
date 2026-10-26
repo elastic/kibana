@@ -11,6 +11,9 @@ import React from 'react';
 
 import { EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
+
+const rowStyles = css({ marginTop: '0px !important' });
 
 export const ControlSettingTooltipLabel = ({
   label,
@@ -19,15 +22,22 @@ export const ControlSettingTooltipLabel = ({
   label: string;
   tooltip: string;
 }) => (
-  <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
+  <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false} aria-label={label}>
     <EuiFlexItem grow={false}>{label}</EuiFlexItem>
-    <EuiFlexItem
-      grow={false}
-      css={css`
-        margin-top: 0px !important;
-      `}
-    >
-      <EuiIconTip content={tooltip} position="right" />
+    <EuiFlexItem grow={false} css={rowStyles}>
+      <EuiIconTip
+        content={tooltip}
+        position="right"
+        aria-label={i18n.translate(
+          'controls.controlGroup.controlSettingTooltipLabel.tooltipAriaLabel',
+          {
+            defaultMessage: 'More about {label}',
+            values: {
+              label,
+            },
+          }
+        )}
+      />
     </EuiFlexItem>
   </EuiFlexGroup>
 );

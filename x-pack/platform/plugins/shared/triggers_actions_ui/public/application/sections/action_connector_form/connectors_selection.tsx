@@ -5,11 +5,17 @@
  * 2.0.
  */
 
-import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiComboBox } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { ActionConnector, ActionTypeIndex, ActionTypeModel, RuleUiAction } from '../../../types';
+import type {
+  ActionConnector,
+  ActionTypeIndex,
+  ActionTypeModel,
+  RuleUiAction,
+} from '../../../types';
 import { getValidConnectors } from '../common/connectors';
 
 interface ConnectorOption {
@@ -20,6 +26,14 @@ interface ConnectorOption {
 
 interface SelectionProps {
   allowGroupConnector?: string[];
+  /**
+   * Both are supplied by the wrapping `EuiFormRow`, which controls the `id` of
+   * its child to associate it with the label it renders. Either one makes the
+   * combo box announce the visible label; without them it falls back to a
+   * static `aria-label`.
+   */
+  'aria-labelledby'?: string;
+  id?: string;
   actionItem: RuleUiAction;
   accordionIndex: number;
   actionTypesIndex: ActionTypeIndex;
@@ -31,7 +45,9 @@ interface SelectionProps {
 export const ConnectorsSelection = React.memo(ConnectorsSelectionComponent);
 
 function ConnectorsSelectionComponent({
+  'aria-labelledby': ariaLabelledBy,
   allowGroupConnector,
+  id,
   actionItem,
   accordionIndex,
   actionTypesIndex,
@@ -72,13 +88,16 @@ function ConnectorsSelectionComponent({
     [onConnectorSelected]
   );
 
+  const hasVisibleLabel = Boolean(ariaLabelledBy || id);
+
   return (
     <EuiComboBox
-      aria-label={incidentManagemSystem}
+      aria-label={hasVisibleLabel ? undefined : incidentManagemSystem}
+      aria-labelledby={ariaLabelledBy}
       data-test-subj={`selectActionConnector-${actionItem.actionTypeId}-${accordionIndex}`}
       fullWidth
       singleSelection={{ asPlainText: true }}
-      id={`selectActionConnector-${actionItem.id}`}
+      id={id ?? `selectActionConnector-${actionItem.id}`}
       isClearable={false}
       onChange={onChange}
       options={options}

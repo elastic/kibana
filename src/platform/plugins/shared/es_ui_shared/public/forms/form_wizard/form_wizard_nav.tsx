@@ -17,6 +17,7 @@ interface Props {
   onBack: () => void;
   onNext: () => void;
   isSaving?: boolean;
+  isNextButtonDisabled?: boolean;
   isStepValid?: boolean;
   texts?: Partial<NavTexts>;
   getRightContent?: () => JSX.Element | null | undefined;
@@ -41,6 +42,7 @@ export const FormWizardNav = ({
   lastStep,
   isStepValid,
   isSaving,
+  isNextButtonDisabled,
   onBack,
   onNext,
   texts,
@@ -68,10 +70,9 @@ export const FormWizardNav = ({
           {activeStepIndex > 0 ? (
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
-                iconType="arrowLeft"
+                iconType="chevronSingleLeft"
                 onClick={onBack}
                 data-test-subj="backButton"
-                disabled={isStepValid === false}
               >
                 {labels.back}
               </EuiButtonEmpty>
@@ -82,10 +83,10 @@ export const FormWizardNav = ({
           <EuiFlexItem grow={false}>
             <EuiButton
               fill
-              iconType={isLastStep ? 'check' : 'arrowRight'}
+              iconType={isLastStep ? 'check' : 'chevronSingleRight'}
               onClick={onNext}
               iconSide={isLastStep ? 'left' : 'right'}
-              disabled={isStepValid === false}
+              disabled={isStepValid === false || isNextButtonDisabled}
               data-test-subj="nextButton"
               isLoading={isSaving}
             >

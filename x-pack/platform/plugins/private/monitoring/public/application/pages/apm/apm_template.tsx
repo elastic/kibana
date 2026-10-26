@@ -7,7 +7,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { PageTemplate } from '../page_template';
-import { TabMenuItem, PageTemplateProps } from '../page_template';
+import type { TabMenuItem, PageTemplateProps } from '../page_template';
 
 export const ApmTemplate: React.FC<React.PropsWithChildren<PageTemplateProps>> = ({ ...props }) => {
   const tabs: TabMenuItem[] = [

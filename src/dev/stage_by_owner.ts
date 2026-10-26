@@ -7,10 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import simpleGit from 'simple-git';
+import { simpleGit } from 'simple-git';
 
 import { run } from '@kbn/dev-cli-runner';
-import { getOwningTeamsForPath, getCodeOwnersEntries, CodeOwnersEntry } from '@kbn/code-owners';
+import type { CodeOwnersEntry } from '@kbn/code-owners';
+import { getOwningTeamsForPath, getCodeOwnersEntries } from '@kbn/code-owners';
 import { asyncForEach } from '@kbn/std';
 import { inspect } from 'util';
 

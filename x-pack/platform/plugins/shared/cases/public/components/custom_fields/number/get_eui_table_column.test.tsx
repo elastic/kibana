@@ -10,6 +10,7 @@ import { screen, render } from '@testing-library/react';
 
 import { CustomFieldTypes } from '../../../../common/types/domain';
 import { getEuiTableColumn } from './get_eui_table_column';
+import { RIGHT_ALIGNMENT } from '@elastic/eui';
 
 describe('getEuiTableColumn ', () => {
   beforeEach(() => {
@@ -22,7 +23,10 @@ describe('getEuiTableColumn ', () => {
     expect(getEuiTableColumn({ label })).toEqual({
       name: label,
       render: expect.any(Function),
-      width: '150px',
+      maxWidth: '17ch',
+      minWidth: '4em',
+      className: 'eui-textNumber eui-textNoWrap',
+      align: RIGHT_ALIGNMENT,
       'data-test-subj': 'number-custom-field-column',
     });
   });

@@ -8,8 +8,15 @@
  */
 
 import React, { useState } from 'react';
-import { EuiCallOut, EuiSpacer, EuiConfirmModal, EuiFieldText, EuiFormRow } from '@elastic/eui';
+import {
+  EuiSpacer,
+  EuiConfirmModal,
+  EuiFieldText,
+  EuiFormRow,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 
 const geti18nTexts = (fieldName: string) => ({
   cancelButtonText: i18n.translate(
@@ -58,10 +65,13 @@ export const SaveFieldTypeOrNameChangedModal: React.FC<Props> = ({
 }) => {
   const i18nTexts = geti18nTexts(fieldName);
   const [confirmContent, setConfirmContent] = useState<string>('');
+  const confirmModalTitleId = useGeneratedHtmlId();
 
   return (
     <EuiConfirmModal
+      aria-labelledby={confirmModalTitleId}
       title={i18nTexts.titleConfirmChanges}
+      titleProps={{ id: confirmModalTitleId }}
       data-test-subj="runtimeFieldSaveConfirmModal"
       cancelButtonText={i18nTexts.cancelButtonText}
       confirmButtonText={i18nTexts.confirmButtonText}
@@ -69,12 +79,7 @@ export const SaveFieldTypeOrNameChangedModal: React.FC<Props> = ({
       onCancel={onCancel}
       onConfirm={onConfirm}
     >
-      <EuiCallOut
-        color="warning"
-        title={i18nTexts.warningChangingFields}
-        iconType="warning"
-        size="s"
-      />
+      <KbnWarningCallout title={i18nTexts.warningChangingFields} size="s" />
       <EuiSpacer />
       <EuiFormRow label={i18nTexts.typeConfirm}>
         <EuiFieldText

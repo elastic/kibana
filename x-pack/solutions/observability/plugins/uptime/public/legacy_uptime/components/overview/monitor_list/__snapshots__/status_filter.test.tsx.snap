@@ -3,58 +3,78 @@
 exports[`StatusFilterComponent renders without errors for valid props 1`] = `
 <div
   class="euiFilterGroup emotion-euiFilterGroup-uncompressed"
+  data-display="regular"
+  data-dividers="true"
 >
-  <button
-    class="euiButtonEmpty euiFilterButton euiFilterButton-hasActiveFilters emotion-euiButtonDisplay-euiButtonEmpty-m-empty-text-euiFilterButton-withNext-hasActiveFilters"
-    data-test-subj="xpack.synthetics.filterBar.filterStatusAll"
-    type="button"
+  <div
+    class="euiFilterButton__wrapper css-1x0f2lv-wrapper-withNext-hasDividers"
   >
-    <span
-      class="euiButtonEmpty__content emotion-euiButtonDisplayContent-euiFilterButton__content"
+    <button
+      aria-pressed="true"
+      class="euiButton euiFilterButton euiFilterButton-isSelected euiFilterButton-hasActiveFilters euiFilterButton-isToggle emotion-euiButtonDisplay-s-base-text-euiFilterButton-hasActiveFilters-toggle-isSelected"
+      data-test-subj="xpack.synthetics.filterBar.filterStatusAll"
+      id="filter-button_generated-id"
+      type="button"
     >
       <span
-        class="euiFilterButton__text emotion-euiFilterButton__text"
-        data-text="All"
-        title="All"
+        class="emotion-euiButtonDisplayContent-euiFilterButton__content"
       >
-        All
+        <span
+          class="euiFilterButton__text emotion-euiFilterButton__text"
+          data-text="All"
+          title="All"
+        >
+          All
+        </span>
       </span>
-    </span>
-  </button>
-  <button
-    class="euiButtonEmpty euiFilterButton emotion-euiButtonDisplay-euiButtonEmpty-m-empty-text-euiFilterButton-withNext"
-    data-test-subj="xpack.synthetics.filterBar.filterStatusUp"
-    type="button"
+    </button>
+  </div>
+  <div
+    class="euiFilterButton__wrapper css-1x0f2lv-wrapper-withNext-hasDividers"
   >
-    <span
-      class="euiButtonEmpty__content emotion-euiButtonDisplayContent-euiFilterButton__content"
+    <button
+      aria-pressed="false"
+      class="euiButton euiFilterButton euiFilterButton-isToggle emotion-euiButtonDisplay-s-base-text-euiFilterButton-toggle"
+      data-test-subj="xpack.synthetics.filterBar.filterStatusUp"
+      id="filter-button_generated-id"
+      type="button"
     >
       <span
-        class="euiFilterButton__text emotion-euiFilterButton__text"
-        data-text="Up"
-        title="Up"
+        class="emotion-euiButtonDisplayContent-euiFilterButton__content"
       >
-        Up
+        <span
+          class="euiFilterButton__text emotion-euiFilterButton__text"
+          data-text="Up"
+          title="Up"
+        >
+          Up
+        </span>
       </span>
-    </span>
-  </button>
-  <button
-    class="euiButtonEmpty euiFilterButton emotion-euiButtonDisplay-euiButtonEmpty-m-empty-text-euiFilterButton"
-    data-test-subj="xpack.synthetics.filterBar.filterStatusDown"
-    type="button"
+    </button>
+  </div>
+  <div
+    class="euiFilterButton__wrapper css-lcbovg-wrapper-hasDividers"
   >
-    <span
-      class="euiButtonEmpty__content emotion-euiButtonDisplayContent-euiFilterButton__content"
+    <button
+      aria-pressed="false"
+      class="euiButton euiFilterButton euiFilterButton-isToggle emotion-euiButtonDisplay-s-base-text-euiFilterButton-toggle"
+      data-test-subj="xpack.synthetics.filterBar.filterStatusDown"
+      id="filter-button_generated-id"
+      type="button"
     >
       <span
-        class="euiFilterButton__text emotion-euiFilterButton__text"
-        data-text="Down"
-        title="Down"
+        class="emotion-euiButtonDisplayContent-euiFilterButton__content"
       >
-        Down
+        <span
+          class="euiFilterButton__text emotion-euiFilterButton__text"
+          data-text="Down"
+          title="Down"
+        >
+          Down
+        </span>
       </span>
-    </span>
-  </button>
+    </button>
+  </div>
 </div>
 `;
 

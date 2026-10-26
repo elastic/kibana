@@ -5,51 +5,25 @@
  * 2.0.
  */
 
-import * as rt from 'io-ts';
-import { paginationSchema } from '../../../schema';
-import { MAX_USER_ACTIONS_PER_PAGE } from '../../../constants';
-import { UserActionTypes } from '../../domain/user_action/action/v1';
-import type { CaseUserActionInjectedIdsRt } from '../../domain/user_action/v1';
+import { z } from '@kbn/zod/v4';
 import {
-  CaseUserActionInjectedDeprecatedIdsRt,
-  CaseUserActionBasicRt,
-  UserActionsRt,
+  MAX_USER_ACTIONS_PER_PAGE,
+  MAX_USER_ACTION_SEARCH_LENGTH,
+  MAX_USER_ACTION_AUTHOR_LENGTH,
+  MAX_USER_ACTION_AUTHORS_FILTER_LENGTH,
+  MAX_USER_ACTION_SOURCES_FILTER_LENGTH,
+  NO_ACTION_SOURCE_FILTERING_KEYWORD,
+} from '../../../constants';
+import { limitedArraySchema, limitedStringSchema, paginationSchema } from '../../../schema';
+import type { CaseUserActionInjectedIdsSchema } from '../../domain/user_action/v1';
+import {
+  CaseUserActionBasicSchema,
+  CaseUserActionInjectedDeprecatedIdsSchema,
+  UserActionsSchema,
 } from '../../domain/user_action/v1';
-import type { Attachments } from '../../domain';
-
-export type UserActionWithResponse<T> = T & { id: string; version: string } & rt.TypeOf<
-    typeof CaseUserActionInjectedIdsRt
-  >;
-
-/**
- * User actions stats API
- */
-export const CaseUserActionStatsRt = rt.strict({
-  total: rt.number,
-  total_comments: rt.number,
-  total_other_actions: rt.number,
-});
-
-export type CaseUserActionStatsResponse = rt.TypeOf<typeof CaseUserActionStatsRt>;
-export const CaseUserActionStatsResponseRt = CaseUserActionStatsRt;
-
-/**
- * Deprecated APIs
- */
-export const CaseUserActionDeprecatedResponseRt = rt.intersection([
-  CaseUserActionBasicRt,
-  CaseUserActionInjectedDeprecatedIdsRt,
-]);
-export const CaseUserActionsDeprecatedResponseRt = rt.array(CaseUserActionDeprecatedResponseRt);
-export type CaseUserActionsDeprecatedResponse = rt.TypeOf<
-  typeof CaseUserActionsDeprecatedResponseRt
->;
-
-export type CaseUserActionDeprecatedResponse = rt.TypeOf<typeof CaseUserActionDeprecatedResponseRt>;
-
-/**
- * Find User Actions API
- */
+import { UserActionTypes } from '../../domain/user_action/action/v1';
+import { ActionSourceTypes } from '../../domain/user_action/source/v1';
+import type { UnifiedAttachment } from '../../domain/attachment/v2';
 
 const UserActionAdditionalFindRequestFilterTypes = {
   action: 'action',
@@ -63,30 +37,104 @@ const UserActionFindRequestTypes = {
   ...UserActionAdditionalFindRequestFilterTypes,
 } as const;
 
-const UserActionFindRequestTypesRt = rt.keyof(UserActionFindRequestTypes);
-export type UserActionFindRequestTypes = rt.TypeOf<typeof UserActionFindRequestTypesRt>;
+type UserActionFindRequestTypeValue =
+  (typeof UserActionFindRequestTypes)[keyof typeof UserActionFindRequestTypes];
+const UserActionFindRequestTypesValues = Object.values(UserActionFindRequestTypes) as [
+  UserActionFindRequestTypeValue,
+  ...UserActionFindRequestTypeValue[]
+];
 
-export const UserActionFindRequestRt = rt.intersection([
-  rt.exact(
-    rt.partial({
-      types: rt.array(UserActionFindRequestTypesRt),
-      sortOrder: rt.union([rt.literal('desc'), rt.literal('asc')]),
-    })
-  ),
-  paginationSchema({ maxPerPage: MAX_USER_ACTIONS_PER_PAGE }),
-]);
+const ActionSourceTypeValues = Object.values(ActionSourceTypes) as [string, ...string[]];
+const UserActionFindRequestSourcesValues = [
+  ...ActionSourceTypeValues,
+  NO_ACTION_SOURCE_FILTERING_KEYWORD,
+] as [string, ...string[]];
 
-export type UserActionFindRequest = rt.TypeOf<typeof UserActionFindRequestRt>;
-
-export const UserActionFindResponseRt = rt.strict({
-  userActions: UserActionsRt,
-  page: rt.number,
-  perPage: rt.number,
-  total: rt.number,
+/**
+ * User actions stats API
+ */
+export const CaseUserActionStatsSchema = z.object({
+  total: z.number(),
+  total_deletions: z.number(),
+  total_comments: z.number(),
+  total_comment_deletions: z.number(),
+  total_comment_creations: z.number(),
+  total_hidden_comment_updates: z.number(),
+  total_other_actions: z.number(),
+  total_other_action_deletions: z.number(),
 });
 
-export type UserActionFindResponse = rt.TypeOf<typeof UserActionFindResponseRt>;
+export const CaseUserActionStatsResponseSchema = CaseUserActionStatsSchema;
+
+/**
+ * Deprecated APIs
+ */
+export const CaseUserActionDeprecatedResponseSchema = CaseUserActionBasicSchema.and(
+  CaseUserActionInjectedDeprecatedIdsSchema
+);
+export const CaseUserActionsDeprecatedResponseSchema = z.array(
+  CaseUserActionDeprecatedResponseSchema
+);
+
+/**
+ * Find User Actions API
+ */
+export const UserActionFindRequestSchema = paginationSchema({
+  maxPerPage: MAX_USER_ACTIONS_PER_PAGE,
+}).extend({
+  types: z.array(z.enum(UserActionFindRequestTypesValues)).optional(),
+  sortOrder: z.enum(['desc', 'asc']).optional(),
+});
+
+export const UserActionFindResponseSchema = z.object({
+  userActions: UserActionsSchema,
+  page: z.number(),
+  perPage: z.number(),
+  total: z.number(),
+});
+
+export type CaseUserActionStats = z.infer<typeof CaseUserActionStatsSchema>;
+export type CaseUserActionStatsResponse = z.infer<typeof CaseUserActionStatsResponseSchema>;
+export type UserActionFindRequest = z.infer<typeof UserActionFindRequestSchema>;
+
+export const UserActionInternalFindRequestSchema = UserActionFindRequestSchema.extend({
+  authors: limitedArraySchema({
+    codec: limitedStringSchema({
+      fieldName: 'authors',
+      min: 1,
+      max: MAX_USER_ACTION_AUTHOR_LENGTH,
+    }),
+    fieldName: 'authors',
+    min: 0,
+    max: MAX_USER_ACTION_AUTHORS_FILTER_LENGTH,
+  }).optional(),
+  search: limitedStringSchema({
+    fieldName: 'search',
+    min: 1,
+    max: MAX_USER_ACTION_SEARCH_LENGTH,
+  }).optional(),
+  sources: limitedArraySchema({
+    codec: z.enum(UserActionFindRequestSourcesValues),
+    fieldName: 'sources',
+    min: 0,
+    max: MAX_USER_ACTION_SOURCES_FILTER_LENGTH,
+  }).optional(),
+});
+
+export type UserActionInternalFindRequest = z.infer<typeof UserActionInternalFindRequestSchema>;
+export type UserActionFindResponse = z.infer<typeof UserActionFindResponseSchema>;
+export type CaseUserActionDeprecatedResponse = z.infer<
+  typeof CaseUserActionDeprecatedResponseSchema
+>;
+export type CaseUserActionsDeprecatedResponse = z.infer<
+  typeof CaseUserActionsDeprecatedResponseSchema
+>;
+export type UserActionFindRequestTypes = (typeof UserActionFindRequestTypesValues)[number];
+export type UserActionFindRequestSources = (typeof UserActionFindRequestSourcesValues)[number];
+export type UserActionWithResponse<T> = T & { id: string; version: string } & z.infer<
+    typeof CaseUserActionInjectedIdsSchema
+  >;
 
 export interface UserActionInternalFindResponse extends UserActionFindResponse {
-  latestAttachments: Attachments;
+  latestAttachments: UnifiedAttachment[];
 }

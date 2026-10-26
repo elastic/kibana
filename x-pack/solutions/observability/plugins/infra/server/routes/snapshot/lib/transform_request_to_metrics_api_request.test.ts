@@ -6,10 +6,11 @@
  */
 
 import { transformRequestToMetricsAPIRequest } from './transform_request_to_metrics_api_request';
-import type { ESSearchClient } from '../../../lib/metrics/types';
+import { withDefaultSnapshotSchema } from './with_default_snapshot_schema';
 import type { InfraSource } from '../../../lib/sources';
 import type { SnapshotRequest } from '../../../../common/http_api';
 import type { MetricsAPIRequest } from '@kbn/metrics-data-access-plugin/common';
+import type { ESSearchClient } from '@kbn/metrics-data-access-plugin/server';
 
 jest.mock('./create_timerange_with_interval', () => {
   return {
@@ -19,19 +20,6 @@ jest.mock('./create_timerange_with_interval', () => {
       to: 1605706200000,
     }),
   };
-});
-
-describe('transformRequestToMetricsAPIRequest', () => {
-  test('returns a MetricsApiRequest given parameters', async () => {
-    const compositeSize = 3000;
-    const result = await transformRequestToMetricsAPIRequest({
-      client: {} as ESSearchClient,
-      source,
-      snapshotRequest,
-      compositeSize,
-    });
-    expect(result).toEqual(metricsApiRequest);
-  });
 });
 
 const source: InfraSource = {
@@ -64,11 +52,12 @@ const snapshotRequest: SnapshotRequest = {
   groupBy: [],
   nodeType: 'pod',
   timerange: { interval: '1m', to: 1605706200000, from: 1605705000000, lookbackSize: 5 },
-  filterQuery: '',
+  kuery: '',
   sourceId: 'default',
   accountId: '',
   region: '',
   includeTimeseries: true,
+  schema: 'ecs',
 };
 
 const metricsApiRequest: MetricsAPIRequest = {
@@ -87,7 +76,7 @@ const metricsApiRequest: MetricsAPIRequest = {
               source: 'params.with_limit > 0.0 ? params.with_limit : params.without_limit',
               lang: 'painless',
             },
-            gap_policy: 'skip',
+            gap_policy: 'insert_zeros',
           },
         },
       },
@@ -105,9 +94,316 @@ const metricsApiRequest: MetricsAPIRequest = {
       },
     },
   ],
+  filters: {
+    bool: {
+      filter: [
+        {
+          term: {
+            'event.module': 'kubernetes',
+          },
+        },
+      ],
+    },
+  },
   limit: 3000,
   alignDataToEnd: true,
   dropPartialBuckets: true,
   groupBy: ['kubernetes.pod.uid'],
   includeTimeseries: true,
 };
+
+describe('transformRequestToMetricsAPIRequest', () => {
+  test('returns no pod module filter when schema is omitted before the HTTP default', async () => {
+    const requestWithoutSchema: SnapshotRequest = { ...snapshotRequest };
+    delete requestWithoutSchema.schema;
+
+    const result = await transformRequestToMetricsAPIRequest({
+      // Intentional `as ESSearchClient` type assertion as the fixture supplies an empty object at the search-client parameter boundary;
+      client: {} as ESSearchClient,
+      source,
+      snapshotRequest: requestWithoutSchema,
+      compositeSize: 3000,
+    });
+
+    expect(result.filters).toEqual({ bool: { filter: [] } });
+    expect(result.groupBy).toContain('kubernetes.pod.uid');
+  });
+
+  test('applies the kubernetes module filter when the snapshot route defaults an omitted pod schema to ecs', async () => {
+    const requestWithoutSchema: SnapshotRequest = { ...snapshotRequest };
+    delete requestWithoutSchema.schema;
+
+    const result = await transformRequestToMetricsAPIRequest({
+      // Intentional `as ESSearchClient` type assertion as the fixture supplies an empty object at the search-client parameter boundary;
+      client: {} as ESSearchClient,
+      source,
+      snapshotRequest: withDefaultSnapshotSchema(requestWithoutSchema),
+      compositeSize: 3000,
+    });
+
+    expect(result.filters).toEqual(metricsApiRequest.filters);
+    expect(result.groupBy).toEqual(['kubernetes.pod.uid']);
+  });
+
+  test('returns a MetricsApiRequest for pods with kubernetes module filter', async () => {
+    const compositeSize = 3000;
+    const result = await transformRequestToMetricsAPIRequest({
+      client: {} as ESSearchClient,
+      source,
+      snapshotRequest,
+      compositeSize,
+    });
+    expect(result).toEqual(metricsApiRequest);
+  });
+
+  test('returns a MetricsApiRequest for host with ECS schema filter', async () => {
+    const compositeSize = 3000;
+    const hostRequest: SnapshotRequest = {
+      ...snapshotRequest,
+      nodeType: 'host',
+      schema: 'ecs',
+    };
+
+    const result = await transformRequestToMetricsAPIRequest({
+      client: {} as ESSearchClient,
+      source,
+      snapshotRequest: hostRequest,
+      compositeSize,
+    });
+
+    expect(result.filters).toEqual({
+      bool: {
+        filter: [
+          {
+            bool: {
+              should: [
+                { term: { 'event.module': 'system' } },
+                { term: { 'metricset.module': 'system' } },
+              ],
+              minimum_should_match: 1,
+            },
+          },
+        ],
+      },
+    });
+    expect(result.groupBy).toContain('host.name');
+  });
+
+  test('returns a MetricsApiRequest for host with semconv schema filter', async () => {
+    const compositeSize = 3000;
+    const hostRequest: SnapshotRequest = {
+      ...snapshotRequest,
+      nodeType: 'host',
+      schema: 'semconv',
+    };
+
+    const result = await transformRequestToMetricsAPIRequest({
+      client: {} as ESSearchClient,
+      source,
+      snapshotRequest: hostRequest,
+      compositeSize,
+    });
+
+    expect(result.filters).toEqual({
+      bool: {
+        filter: [
+          {
+            bool: {
+              filter: [{ term: { 'data_stream.dataset': 'hostmetricsreceiver.otel' } }],
+            },
+          },
+        ],
+      },
+    });
+    expect(result.groupBy).toContain('host.name');
+  });
+
+  test('returns a MetricsApiRequest for pods with semconv identity and kubeletstats filter', async () => {
+    const compositeSize = 3000;
+    const semconvPodRequest: SnapshotRequest = {
+      ...snapshotRequest,
+      nodeType: 'pod',
+      schema: 'semconv',
+      groupBy: [{ field: 'k8s.namespace.name' }],
+    };
+
+    const result = await transformRequestToMetricsAPIRequest({
+      client: {} as ESSearchClient,
+      source,
+      snapshotRequest: semconvPodRequest,
+      compositeSize,
+    });
+
+    expect(result.groupBy).toEqual(['k8s.namespace.name', 'k8s.pod.uid']);
+    expect(result.filters).toEqual({
+      bool: {
+        filter: [
+          {
+            term: {
+              'data_stream.dataset': 'kubeletstatsreceiver.otel',
+            },
+          },
+        ],
+      },
+    });
+
+    const metadataMetric = result.metrics.find((metric) => metric.id === '__metadata__');
+    expect(metadataMetric?.aggregations).toEqual({
+      __metadata__: {
+        top_metrics: {
+          metrics: [{ field: 'k8s.pod.name' }],
+          size: 1,
+          sort: { '@timestamp': 'desc' },
+        },
+      },
+    });
+  });
+
+  test('returns a MetricsApiRequest for containers with multiple module filters', async () => {
+    const compositeSize = 3000;
+    const containerRequest: SnapshotRequest = {
+      ...snapshotRequest,
+      nodeType: 'container',
+    };
+
+    const result = await transformRequestToMetricsAPIRequest({
+      client: {} as ESSearchClient,
+      source,
+      snapshotRequest: containerRequest,
+      compositeSize,
+    });
+
+    expect(result.filters).toEqual({
+      bool: {
+        filter: [
+          {
+            bool: {
+              should: [
+                { term: { 'event.module': 'docker' } },
+                { term: { 'event.module': 'kubernetes' } },
+                { term: { 'event.module': 'system' } },
+              ],
+              minimum_should_match: 1,
+            },
+          },
+        ],
+      },
+    });
+    expect(result.groupBy).toContain('container.id');
+  });
+
+  test('returns a MetricsApiRequest for AWS EC2 with aws module filter', async () => {
+    const compositeSize = 3000;
+    const ec2Request: SnapshotRequest = {
+      ...snapshotRequest,
+      nodeType: 'awsEC2',
+    };
+
+    const result = await transformRequestToMetricsAPIRequest({
+      client: {} as ESSearchClient,
+      source,
+      snapshotRequest: ec2Request,
+      compositeSize,
+    });
+
+    expect(result.filters).toEqual({
+      bool: {
+        filter: [{ term: { 'event.module': 'aws' } }],
+      },
+    });
+    expect(result.groupBy).toContain('cloud.instance.id');
+  });
+
+  test('returns a MetricsApiRequest for AWS S3 with aws module filter', async () => {
+    const compositeSize = 3000;
+    const s3Request: SnapshotRequest = {
+      ...snapshotRequest,
+      nodeType: 'awsS3',
+    };
+
+    const result = await transformRequestToMetricsAPIRequest({
+      client: {} as ESSearchClient,
+      source,
+      snapshotRequest: s3Request,
+      compositeSize,
+    });
+
+    expect(result.filters).toEqual({
+      bool: {
+        filter: [{ term: { 'event.module': 'aws' } }],
+      },
+    });
+    expect(result.groupBy).toContain('aws.s3.bucket.name');
+  });
+
+  test('returns a MetricsApiRequest for AWS RDS with aws module filter', async () => {
+    const compositeSize = 3000;
+    const rdsRequest: SnapshotRequest = {
+      ...snapshotRequest,
+      nodeType: 'awsRDS',
+    };
+
+    const result = await transformRequestToMetricsAPIRequest({
+      client: {} as ESSearchClient,
+      source,
+      snapshotRequest: rdsRequest,
+      compositeSize,
+    });
+
+    expect(result.filters).toEqual({
+      bool: {
+        filter: [{ term: { 'event.module': 'aws' } }],
+      },
+    });
+    expect(result.groupBy).toContain('aws.rds.db_instance.arn');
+  });
+
+  test('returns a MetricsApiRequest for AWS SQS with aws module filter', async () => {
+    const compositeSize = 3000;
+    const sqsRequest: SnapshotRequest = {
+      ...snapshotRequest,
+      nodeType: 'awsSQS',
+    };
+
+    const result = await transformRequestToMetricsAPIRequest({
+      client: {} as ESSearchClient,
+      source,
+      snapshotRequest: sqsRequest,
+      compositeSize,
+    });
+
+    expect(result.filters).toEqual({
+      bool: {
+        filter: [{ term: { 'event.module': 'aws' } }],
+      },
+    });
+    expect(result.groupBy).toContain('aws.sqs.queue.name');
+  });
+
+  test('applies additional filters like accountId and region', async () => {
+    const compositeSize = 3000;
+    const ec2RequestWithFilters: SnapshotRequest = {
+      ...snapshotRequest,
+      nodeType: 'awsEC2',
+      accountId: 'test-account-123',
+      region: 'us-east-1',
+    };
+
+    const result = await transformRequestToMetricsAPIRequest({
+      client: {} as ESSearchClient,
+      source,
+      snapshotRequest: ec2RequestWithFilters,
+      compositeSize,
+    });
+
+    expect(result.filters).toEqual({
+      bool: {
+        filter: [
+          { term: { 'cloud.account.id': 'test-account-123' } },
+          { term: { 'cloud.region': 'us-east-1' } },
+          { term: { 'event.module': 'aws' } },
+        ],
+      },
+    });
+  });
+});

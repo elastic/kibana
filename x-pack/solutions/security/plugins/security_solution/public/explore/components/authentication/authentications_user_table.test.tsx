@@ -7,6 +7,8 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
+// Necessary until components being tested are migrated of styled-components https://github.com/elastic/kibana/issues/219037
+import 'jest-styled-components';
 
 import { TestProviders } from '../../../common/mock';
 import { useAuthentications } from '../../containers/authentications';
@@ -62,6 +64,25 @@ describe('Authentication User Table Component', () => {
 
       expect(getByTestId('table-users-authentications-loading-false')).toMatchSnapshot();
     });
+  });
+
+  it('labels the authentications query with the users page execution context', () => {
+    render(
+      <TestProviders>
+        <AuthenticationsUserTable {...defaultProps} />
+      </TestProviders>
+    );
+    expect(mockUseAuthentications).toHaveBeenCalledWith(
+      expect.objectContaining({
+        executionContext: {
+          child: {
+            type: 'security_solution',
+            name: 'entity_analytics:explore-users_page',
+            id: 'authentications',
+          },
+        },
+      })
+    );
   });
 
   it('toggleStatus=true, do not skip', () => {

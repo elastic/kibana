@@ -6,7 +6,7 @@
  */
 
 import { API_BASE_PATH } from '../../../../common/constants';
-import { Repository, EmptyRepository } from '../../../../common/types';
+import type { Repository, EmptyRepository } from '../../../../common/types';
 import {
   UIM_REPOSITORY_CREATE,
   UIM_REPOSITORY_UPDATE,
@@ -15,7 +15,7 @@ import {
   UIM_REPOSITORY_DETAIL_PANEL_VERIFY,
   UIM_REPOSITORY_DETAIL_PANEL_CLEANUP,
 } from '../../constants';
-import { UiMetricService } from '../ui_metric';
+import type { UiMetricService } from '../ui_metric';
 import { sendRequest, useRequest } from './use_request';
 
 // Temporary hack to provide the uiMetricService instance to this file.
@@ -30,7 +30,9 @@ export const useLoadRepositories = () => {
   return useRequest({
     path: `${API_BASE_PATH}repositories`,
     method: 'get',
-    initialData: [],
+    initialData: {
+      repositories: [],
+    },
   });
 };
 
@@ -103,3 +105,13 @@ export const deleteRepositories = async (names: Array<Repository['name']>) => {
   );
   return result;
 };
+
+export const getDefaultRepository = () =>
+  sendRequest({ path: `${API_BASE_PATH}default_repository`, method: 'get' });
+
+export const setDefaultRepository = (name: string) =>
+  sendRequest({
+    path: `${API_BASE_PATH}default_repository`,
+    method: 'put',
+    query: { name },
+  });

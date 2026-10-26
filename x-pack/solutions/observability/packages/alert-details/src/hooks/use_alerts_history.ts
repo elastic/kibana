@@ -6,7 +6,7 @@
  */
 
 import { type HttpSetup } from '@kbn/core/public';
-import { AggregationsDateHistogramBucketKeys } from '@elastic/elasticsearch/lib/api/types';
+import type { AggregationsDateHistogramBucketKeys } from '@elastic/elasticsearch/lib/api/types';
 import {
   ALERT_DURATION,
   ALERT_INSTANCE_ID,
@@ -16,7 +16,7 @@ import {
   ALERT_TIME_RANGE,
 } from '@kbn/rule-data-utils';
 import { BASE_RAC_ALERTS_API_PATH } from '@kbn/rule-registry-plugin/common';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 
 export interface Props {
   http: HttpSetup | undefined;

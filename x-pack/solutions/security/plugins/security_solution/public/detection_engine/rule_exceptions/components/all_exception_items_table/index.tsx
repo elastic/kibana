@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useReducer } from 'react';
-import styled from 'styled-components';
+import React, { useCallback, useEffect, useMemo, useReducer, useState } from 'react';
+import styled from '@emotion/styled';
 
 import { EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
 
@@ -29,6 +29,10 @@ import {
   buildShowExpiredExceptionsFilter,
   getSavedObjectTypes,
 } from '@kbn/securitysolution-list-utils';
+import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
+import { useGetEndpointExceptionsPerPolicyOptIn } from '../../../../management/hooks/artifacts/use_endpoint_per_policy_opt_in';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { EndpointExceptionsMovedCallout } from '../../../../exceptions/components/endpoint_exceptions_moved_callout';
 import { useEndpointExceptionsCapability } from '../../../../exceptions/hooks/use_endpoint_exceptions_capability';
 import { useUserData } from '../../../../detections/components/user_info';
 import { useKibana, useToasts } from '../../../../common/lib/kibana';
@@ -42,9 +46,11 @@ import { ExceptionsViewerUtility } from './utility_bar';
 import { ExceptionsViewerItems } from './all_items';
 import { EditExceptionFlyout } from '../edit_exception_flyout';
 import { AddExceptionFlyout } from '../add_exception_flyout';
+import { ExceptionItemDeleteConfirmModal } from '../exception_item_delete_confirm_modal';
 import * as i18n from './translations';
 import { useFindExceptionListReferences } from '../../logic/use_find_references';
 import type { Rule } from '../../../rule_management/logic/types';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
 
 const StyledText = styled(EuiText)`
   font-style: italic;
@@ -97,7 +103,8 @@ const ExceptionsViewerComponent = ({
 }: ExceptionsViewerProps): JSX.Element => {
   const { services } = useKibana();
   const toasts = useToasts();
-  const [{ canUserCRUD, hasIndexWrite }] = useUserData();
+  const [{ hasIndexWrite }] = useUserData();
+  const canEditExceptions = useUserPrivileges().rulesPrivileges.exceptions.edit;
   const exceptionListsToQuery = useMemo(
     () =>
       rule != null && rule.exceptions_list != null
@@ -139,6 +146,8 @@ const ExceptionsViewerComponent = ({
   ] = useReducer(allExceptionItemsReducer(), {
     ...initialState,
   });
+
+  const isReadOnlyOnCurrentList = isEndpointSpecified ? !canWriteEndpointExceptions : isReadOnly;
 
   // Reducer actions
   const setLastUpdated = useCallback(
@@ -424,6 +433,10 @@ const ExceptionsViewerComponent = ({
     [setFlyoutType, handleGetExceptionListItems, onRuleChange]
   );
 
+  const [exceptionToDelete, setExceptionToDelete] = useState<ExceptionListItemIdentifiers | null>(
+    null
+  );
+
   const handleDeleteException = useCallback(
     async ({ id: itemId, name, namespaceType }: ExceptionListItemIdentifiers) => {
       const abortCtrl = new AbortController();
@@ -455,10 +468,21 @@ const ExceptionsViewerComponent = ({
     [handleGetExceptionListItems, services.http, setViewerState, toasts]
   );
 
+  const handleCancelDeleteException = useCallback(() => {
+    setExceptionToDelete(null);
+  }, []);
+
+  const handleConfirmDeleteException = useCallback(() => {
+    if (exceptionToDelete != null) {
+      handleDeleteException(exceptionToDelete);
+    }
+    setExceptionToDelete(null);
+  }, [exceptionToDelete, handleDeleteException]);
+
   // User privileges checks
   useEffect((): void => {
-    setReadOnly(isViewReadOnly || !canUserCRUD || !hasIndexWrite);
-  }, [setReadOnly, isViewReadOnly, canUserCRUD, hasIndexWrite]);
+    setReadOnly(isViewReadOnly || !canEditExceptions || !hasIndexWrite);
+  }, [setReadOnly, isViewReadOnly, hasIndexWrite, canEditExceptions]);
 
   useEffect(() => {
     if (exceptionListsToQuery.length > 0) {
@@ -475,6 +499,76 @@ const ExceptionsViewerComponent = ({
         : null,
     [allReferences, exceptionToEdit]
   );
+
+  const isEndpointExceptionListLinked: boolean = useMemo(
+    () =>
+      rule?.exceptions_list?.some(
+        (list) => list.list_id === ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id
+      ) ?? false,
+    [rule]
+  );
+
+  const isEndpointSecurityRule: boolean = useMemo(
+    () =>
+      rule != null &&
+      rule.immutable &&
+      rule.rule_source.type === 'external' &&
+      rule.related_integrations.some(({ package: pkg }) => pkg === 'endpoint'),
+    [rule]
+  );
+  const isDetectionRuleWithEndpointExceptions =
+    isEndpointExceptionListLinked && !isEndpointSecurityRule;
+
+  const isEndpointExceptionsMovedFFEnabled = useIsExperimentalFeatureEnabled(
+    'endpointExceptionsMovedUnderManagement'
+  );
+  const { data: endpointPerPolicyOptIn } = useGetEndpointExceptionsPerPolicyOptIn();
+
+  const endpointExceptionsMovedCallout = useMemo(() => {
+    if (!isEndpointExceptionsMovedFFEnabled) {
+      return null;
+    }
+
+    if (
+      isEndpointSecurityRule &&
+      (endpointPerPolicyOptIn?.status === false || endpointPerPolicyOptIn?.reason === 'userOptedIn')
+    ) {
+      return (
+        <EndpointExceptionsMovedCallout
+          id="exceptionsViewer-EndpointSecurityRule"
+          dismissable={false}
+          title="moved"
+        />
+      );
+    }
+
+    if (isDetectionRuleWithEndpointExceptions) {
+      if (endpointPerPolicyOptIn?.status === false) {
+        return (
+          <EndpointExceptionsMovedCallout
+            id="exceptionsViewer-rulesWithEndpointExceptions-NotOptedIn"
+            dismissable={false}
+            title="moved"
+          />
+        );
+      } else if (endpointPerPolicyOptIn?.reason === 'userOptedIn') {
+        return (
+          <EndpointExceptionsMovedCallout
+            id={`exceptionsViewer-rulesWithEndpointExceptions-UserOptedIn`}
+            dismissable={true}
+            title="noLongerEvaluatedOnRules"
+          />
+        );
+      }
+    }
+
+    return null;
+  }, [
+    isEndpointExceptionsMovedFFEnabled,
+    isEndpointSecurityRule,
+    endpointPerPolicyOptIn,
+    isDetectionRuleWithEndpointExceptions,
+  ]);
 
   return (
     <>
@@ -493,6 +587,14 @@ const ExceptionsViewerComponent = ({
           />
         )}
 
+      {exceptionToDelete != null && (
+        <ExceptionItemDeleteConfirmModal
+          exceptionItemName={exceptionToDelete.name}
+          onCancel={handleCancelDeleteException}
+          onConfirm={handleConfirmDeleteException}
+        />
+      )}
+
       {currenFlyout === 'addException' && rule != null && (
         <AddExceptionFlyout
           rules={[rule]}
@@ -507,6 +609,8 @@ const ExceptionsViewerComponent = ({
 
       <EuiPanel hasBorder={false} hasShadow={false}>
         <>
+          {endpointExceptionsMovedCallout}
+
           <StyledText size="s">
             {isEndpointSpecified ? i18n.ENDPOINT_EXCEPTIONS_TAB_ABOUT : i18n.EXCEPTIONS_TAB_ABOUT}
           </StyledText>
@@ -522,7 +626,7 @@ const ExceptionsViewerComponent = ({
               />
               <EuiSpacer size="m" />
               <ExceptionsViewerSearchBar
-                canAddException={isReadOnly}
+                isReadOnly={isReadOnlyOnCurrentList}
                 isEndpoint={isEndpointSpecified}
                 isSearching={viewerState === 'searching'}
                 onSearch={handleSearch}
@@ -533,13 +637,13 @@ const ExceptionsViewerComponent = ({
           <EuiSpacer size="l" />
 
           <ExceptionsViewerItems
-            isReadOnly={isReadOnly}
-            disableActions={isReadOnly || viewerState === 'deleting' || !canWriteEndpointExceptions}
+            isReadOnly={isReadOnlyOnCurrentList}
+            disableActions={isReadOnlyOnCurrentList || viewerState === 'deleting'}
             exceptions={exceptions}
             isEndpoint={isEndpointSpecified}
             ruleReferences={allReferences}
             viewerState={viewerState}
-            onDeleteException={handleDeleteException}
+            onDeleteException={setExceptionToDelete}
             onEditExceptionItem={handleEditException}
             onCreateExceptionListItem={handleAddException}
           />

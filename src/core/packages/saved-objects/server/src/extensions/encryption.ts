@@ -71,4 +71,12 @@ export interface ISavedObjectsEncryptionExtension {
     descriptor: EncryptedObjectDescriptor,
     attributes: T
   ) => Promise<T>;
+
+  /**
+   * Returns the set of attribute names that are encrypted for the given type.
+   * Returns undefined if the type is not registered as encryptable.
+   * @param type - the string name of the object type
+   * @returns the set of encrypted attribute names, or undefined
+   */
+  getEncryptedAttributes: (type: string) => ReadonlySet<string> | undefined;
 }

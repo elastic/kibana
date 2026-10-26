@@ -11,7 +11,7 @@ import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kb
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { LaunchDarklyClientProvider } from '@openfeature/launchdarkly-client-provider';
-import { type LDLogLevel, basicLogger } from 'launchdarkly-js-client-sdk';
+import { type LDLogLevel, basicLogger } from '@launchdarkly/js-client-sdk';
 import { initializeMetadata, MetadataService } from '../common/metadata_service';
 
 interface CloudExperimentsPluginSetupDeps {
@@ -73,7 +73,8 @@ export class CloudExperimentsPlugin
       logger: this.logger,
     });
 
-    const launchDarklyOpenFeatureProvider = this.createOpenFeatureProvider();
+    const initialFeatureFlags = core.featureFlags.getInitialFeatureFlags();
+    const launchDarklyOpenFeatureProvider = this.createOpenFeatureProvider(initialFeatureFlags);
     if (launchDarklyOpenFeatureProvider) {
       core.featureFlags.setProvider(launchDarklyOpenFeatureProvider);
     }
@@ -86,7 +87,7 @@ export class CloudExperimentsPlugin
    */
   public start(core: CoreStart, { dataViews }: CloudExperimentsPluginStartDeps) {
     this.metadataService.start({
-      hasDataFetcher: async () => ({ has_data: await dataViews.hasData.hasUserDataView() }),
+      hasDataFetcher: async () => ({ has_data: await dataViews.hasData.hasDataView() }),
     });
   }
 
@@ -99,27 +100,32 @@ export class CloudExperimentsPlugin
 
   /**
    * Sets up the OpenFeature LaunchDarkly provider
-   * @private
+   * @internal
    */
-  private createOpenFeatureProvider() {
+  private createOpenFeatureProvider(initialFeatureFlags: Record<string, unknown>) {
     const { launch_darkly: ldConfig } = this.initializerContext.config.get<{
       launch_darkly?: LaunchDarklyClientConfig;
     }>();
 
     if (!ldConfig) return;
 
+    const bootstrap = Object.keys(initialFeatureFlags).length > 0 ? initialFeatureFlags : undefined;
+
     return new LaunchDarklyClientProvider(ldConfig.client_id, {
       // logger: this.logger.get('launch-darkly'),
       // Using basicLogger for now because we can't limit the level for now if we're using core's logger.
       logger: basicLogger({ level: ldConfig.client_log_level }),
       streaming: true, // Necessary to react to flag changes
-      application: {
+      applicationInfo: {
         id: 'kibana-browser',
         version:
           this.initializerContext.env.packageInfo.buildFlavor === 'serverless'
             ? this.initializerContext.env.packageInfo.buildSha
             : this.initializerContext.env.packageInfo.version,
       },
+      bootstrap,
+      // Remove the query params from the URL
+      eventUrlTransformer: (url) => url.split('?')[0],
     });
   }
 }

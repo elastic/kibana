@@ -1,8 +1,10 @@
 {
   "type": "plugin",
   "id": "@kbn/unified-field-list-examples-plugin",
-  "owner": "@elastic/kibana-data-discovery",
+  "owner": "@elastic/kibana-discover",
   "description": "Examples for using unified field list.",
+  "group": "platform",
+  "visibility": "private",
   "plugin": {
     "id": "unifiedFieldListExamples",
     "server": false,

@@ -131,11 +131,11 @@ elasticsearch.hosts: ["https://localhost:9200"]
 elasticsearch.ssl.verificationMode: none
 ```
 
-then `yarn start`. A local Kibana running at http://localhost:5602 will talk to the elastic-package system, allowing local changes to Kibana to interact with data ingested by integrations.
+then `pnpm start`. A local Kibana running at http://localhost:5602 will talk to the elastic-package system, allowing local changes to Kibana to interact with data ingested by integrations.
 
 Note that the local kibana is not able to interact with the local package-registry when running http, this means we have to do all integration-related interaction on the kibana run by elastic-package (at https://localhost:5601).
 
-To enable ssl we can point the local kibana configuration to the certificates used by elastic-package (under ~/.elastic-package/profiles/{profile}/certs), then start the process with `NODE_EXTRA_CA_CERTS=~/.elastic-package/profiles/{profile}/certs/ca-cert.pem yarn start`.
+To enable ssl we can point the local kibana configuration to the certificates used by elastic-package (under ~/.elastic-package/profiles/{profile}/certs), then start the process with `NODE_EXTRA_CA_CERTS=~/.elastic-package/profiles/{profile}/certs/ca-cert.pem pnpm start`.
 
 ## Testing strategy
 
@@ -149,7 +149,7 @@ See the [elastic-package-test documentation](https://github.com/elastic/elastic-
 
 The system tests spawn a full setup (`elastic-package stack up` + `elastic-package service up`), install the package and attach a policy to a running agent to collect live data. This real-world setup can be leveraged to continuously validate future versions of the stack when they are released. Right now the service dependencies are running on 8.5.0 and the tests validate that this version is supported. The plan is to have an automated job that opens a PR validating that the tests are still successful with the latest released version.
 
-On the Stack Monitoring side, we have an API integration test suite running against packages; see https://github.com/elastic/kibana/tree/main/x-pack/test/monitoring_api_integration#readme
+On the Stack Monitoring side, we have an API integration test suite running against packages; see https://github.com/elastic/kibana/tree/main/x-pack/platform/test/monitoring_api_integration#readme
 
 ## Troubleshooting
 

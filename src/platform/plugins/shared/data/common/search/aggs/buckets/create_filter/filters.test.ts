@@ -10,8 +10,8 @@
 import { createFilterFilters } from './filters';
 import { AggConfigs } from '../../agg_configs';
 import { mockAggTypesRegistry } from '../../test_helpers';
-import { IBucketAggConfig } from '../bucket_agg_type';
-import { QueryStringFilter } from '@kbn/es-query';
+import type { IBucketAggConfig } from '../bucket_agg_type';
+import type { QueryStringFilter } from '@kbn/es-query';
 
 describe('AggConfig Filters', () => {
   describe('filters', () => {

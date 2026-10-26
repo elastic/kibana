@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CoreStart, Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import type {
   AlertDetailsContextualInsight,
   AlertDetailsContextualInsightsHandler,
@@ -19,7 +19,7 @@ import { getMlClient } from '../../../lib/helpers/get_ml_client';
 import { getRandomSampler } from '../../../lib/helpers/get_random_sampler';
 import { getApmServiceSummary } from '../get_apm_service_summary';
 import type { APMDownstreamDependency } from '../get_apm_downstream_dependencies';
-import { getAssistantDownstreamDependencies } from '../get_apm_downstream_dependencies';
+import { getApmDownstreamDependencies } from '../get_apm_downstream_dependencies';
 import { getLogRateAnalysisForAlert } from '../get_log_rate_analysis_for_alert';
 import type { LogCategory } from '../get_log_categories';
 import { getLogCategories } from '../get_log_categories';
@@ -28,15 +28,17 @@ import { getServiceNameFromSignals } from './get_service_name_from_signals';
 import { getContainerIdFromSignals } from './get_container_id_from_signals';
 import { getExitSpanChangePoints, getServiceChangePoints } from '../get_changepoints';
 import type { APMRouteHandlerResources } from '../../apm_routes/register_apm_server_routes';
+import type { APMCore } from '../../typings';
 import { getApmErrors } from './get_apm_errors';
 
 export const getAlertDetailsContextHandler = (
-  coreStartPromise: Promise<CoreStart>,
+  apmCore: APMCore,
   resourcePlugins: APMRouteHandlerResources['plugins'],
   logger: Logger
 ): AlertDetailsContextualInsightsHandler => {
   return async (requestContext, query) => {
     const resources = {
+      core: apmCore,
       getApmIndices: async () => {
         const coreContext = await requestContext.core;
         return resourcePlugins.apmDataAccess.setup.getApmIndices(coreContext.savedObjects.client);
@@ -64,7 +66,7 @@ export const getAlertDetailsContextHandler = (
       },
     };
 
-    const coreStart = await coreStartPromise;
+    const coreStart = await apmCore.start();
     const [
       apmEventClient,
       annotationsClient,
@@ -114,7 +116,7 @@ export const getAlertDetailsContextHandler = (
     ]);
 
     const downstreamDependenciesPromise = serviceName
-      ? getAssistantDownstreamDependencies({
+      ? getApmDownstreamDependencies({
           apmEventClient,
           arguments: {
             serviceName,
@@ -127,6 +129,8 @@ export const getAlertDetailsContextHandler = (
       : undefined;
 
     const dataFetchers: Array<() => Promise<AlertDetailsContextualInsight>> = [];
+
+    const hasEntityFilters = !!(serviceName || hostName || containerId || kubernetesPodName);
 
     // service summary
     if (serviceName) {
@@ -166,69 +170,71 @@ export const getAlertDetailsContextHandler = (
       });
     }
 
-    // log rate analysis
-    dataFetchers.push(async () => {
-      const { logRateAnalysisType, significantItems } = await getLogRateAnalysisForAlert({
-        esClient,
-        logSourcesService,
-        arguments: {
-          alertStartedAt: moment(alertStartedAt).toISOString(),
-          alertRuleParameterTimeSize: query.alert_rule_parameter_time_size
-            ? parseInt(query.alert_rule_parameter_time_size, 10)
-            : undefined,
-          alertRuleParameterTimeUnit: query.alert_rule_parameter_time_unit,
-          entities: {
-            'service.name': serviceName,
-            'host.name': hostName,
-            'container.id': containerId,
-            'kubernetes.pod.name': kubernetesPodName,
+    if (hasEntityFilters) {
+      // log rate analysis
+      dataFetchers.push(async () => {
+        const { logRateAnalysisType, significantItems } = await getLogRateAnalysisForAlert({
+          esClient,
+          logSourcesService,
+          arguments: {
+            alertStartedAt: moment(alertStartedAt).toISOString(),
+            alertRuleParameterTimeSize: query.alert_rule_parameter_time_size
+              ? parseInt(query.alert_rule_parameter_time_size, 10)
+              : undefined,
+            alertRuleParameterTimeUnit: query.alert_rule_parameter_time_unit,
+            entities: {
+              'service.name': serviceName,
+              'host.name': hostName,
+              'container.id': containerId,
+              'kubernetes.pod.name': kubernetesPodName,
+            },
           },
-        },
-      });
+        });
 
-      if (logRateAnalysisType !== 'spike' || significantItems.length === 0) {
+        if (logRateAnalysisType !== 'spike' || significantItems.length === 0) {
+          return {
+            key: 'logRateAnalysis',
+            description:
+              'Log rate analysis did not identify any significant metadata or log patterns.',
+            data: [],
+          };
+        }
+
         return {
           key: 'logRateAnalysis',
-          description:
-            'Log rate analysis did not identify any significant metadata or log patterns.',
-          data: [],
+          description: `Statistically significant log metadata and log message patterns occurring in the lookback period before the alert was triggered.`,
+          data: significantItems,
         };
-      }
-
-      return {
-        key: 'logRateAnalysis',
-        description: `Statistically significant log metadata and log message patterns occurring in the lookback period before the alert was triggered.`,
-        data: significantItems,
-      };
-    });
-
-    // log categories
-    dataFetchers.push(async () => {
-      const downstreamDependencies = await downstreamDependenciesPromise;
-      const { logCategories, entities } = await getLogCategories({
-        apmEventClient,
-        esClient,
-        logSourcesService,
-        arguments: {
-          start: moment(alertStartedAt).subtract(15, 'minute').toISOString(),
-          end: alertStartedAt,
-          entities: {
-            'service.name': serviceName,
-            'host.name': hostName,
-            'container.id': containerId,
-            'kubernetes.pod.name': kubernetesPodName,
-          },
-        },
       });
 
-      const entitiesAsString = entities.map(({ key, value }) => `${key}:${value}`).join(', ');
+      // log categories
+      dataFetchers.push(async () => {
+        const downstreamDependencies = await downstreamDependenciesPromise;
+        const { logCategories, entities } = await getLogCategories({
+          apmEventClient,
+          esClient,
+          logSourcesService,
+          arguments: {
+            start: moment(alertStartedAt).subtract(15, 'minute').toISOString(),
+            end: alertStartedAt,
+            entities: {
+              'service.name': serviceName,
+              'host.name': hostName,
+              'container.id': containerId,
+              'kubernetes.pod.name': kubernetesPodName,
+            },
+          },
+        });
 
-      return {
-        key: 'logCategories',
-        description: `Log events occurring up to 15 minutes before the alert was triggered. Filtered by the entities: ${entitiesAsString}`,
-        data: logCategoriesWithDownstreamServiceName(logCategories, downstreamDependencies),
-      };
-    });
+        const entitiesAsString = entities.map(({ key, value }) => `${key}:${value}`).join(', ');
+
+        return {
+          key: 'logCategories',
+          description: `Log events occurring up to 15 minutes before the alert was triggered. Filtered by the entities: ${entitiesAsString}`,
+          data: logCategoriesWithDownstreamServiceName(logCategories, downstreamDependencies),
+        };
+      });
+    }
 
     // apm errors
     if (serviceName) {
@@ -325,7 +331,7 @@ export const getAlertDetailsContextHandler = (
 
 function getApmErrorsWithDownstreamServiceName(
   apmErrors?: Awaited<ReturnType<typeof getApmErrors>>,
-  downstreamDependencies?: Awaited<ReturnType<typeof getAssistantDownstreamDependencies>>
+  downstreamDependencies?: Awaited<ReturnType<typeof getApmDownstreamDependencies>>
 ) {
   return apmErrors?.map(({ name, lastSeen, occurrences, downstreamServiceResource }) => {
     const downstreamServiceName = downstreamDependencies?.find(

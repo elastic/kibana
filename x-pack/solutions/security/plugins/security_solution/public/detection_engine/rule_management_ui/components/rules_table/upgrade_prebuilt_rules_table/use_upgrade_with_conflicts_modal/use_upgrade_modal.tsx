@@ -9,7 +9,7 @@ import type { ReactNode } from 'react';
 import React, { useCallback, useState } from 'react';
 import { useBoolean } from '@kbn/react-hooks';
 import { useAsyncConfirmation } from '../../rules_table/use_async_confirmation';
-import type { RulesConflictStats } from './upgrade_modal';
+import type { RulesConflictStats } from './conflicts_description';
 import { UpgradeWithConflictsModal } from './upgrade_modal';
 
 export enum ConfirmRulesUpgrade {
@@ -34,6 +34,7 @@ export function useUpgradeWithConflictsModal(): UseUpgradeWithConflictsModalResu
     numOfRulesWithoutConflicts: 0,
     numOfRulesWithSolvableConflicts: 0,
     numOfRulesWithNonSolvableConflicts: 0,
+    numOfRulesWithRuleTypeChange: 0,
   });
 
   const confirmConflictsUpgrade = useCallback(

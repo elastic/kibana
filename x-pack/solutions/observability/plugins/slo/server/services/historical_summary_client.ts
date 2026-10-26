@@ -5,32 +5,21 @@
  * 2.0.
  */
 
-import { MsearchMultisearchBody } from '@elastic/elasticsearch/lib/api/types';
-import { ElasticsearchClient } from '@kbn/core/server';
-import {
-  ALL_VALUE,
+import type { SearchSearchRequestBody } from '@elastic/elasticsearch/lib/api/types';
+import type { ElasticsearchClient } from '@kbn/core/server';
+import type {
   BudgetingMethod,
-  calendarAlignedTimeWindowSchema,
   DurationUnit,
   FetchHistoricalSummaryParams,
   FetchHistoricalSummaryResponse,
   HistoricalSummaryResponse,
-  occurrencesBudgetingMethodSchema,
-  rollingTimeWindowSchema,
-  timeslicesBudgetingMethodSchema,
-  toMomentUnitOfTime,
 } from '@kbn/slo-schema';
+import { ALL_VALUE, toMomentUnitOfTime } from '@kbn/slo-schema';
 import { assertNever } from '@kbn/std';
 import moment from 'moment';
 import { SLI_DESTINATION_INDEX_PATTERN } from '../../common/constants';
-import {
-  DateRange,
-  GroupBy,
-  Objective,
-  SLOId,
-  TimeWindow,
-  toCalendarAlignedTimeWindowMomentUnit,
-} from '../domain/models';
+import type { DateRange, GroupBy, Objective, SLOId, TimeWindow } from '../domain/models';
+import { toCalendarAlignedTimeWindowMomentUnit } from '../domain/models';
 import { computeSLI, computeSummaryStatus, toErrorBudget } from '../domain/services';
 import { getSlicesFromDateRange } from './utils/get_slices_from_date_range';
 
@@ -53,7 +42,7 @@ interface DailyAggBucket {
 }
 
 export class HistoricalSummaryClient {
-  constructor(private esClient: ElasticsearchClient) {}
+  constructor(private esClient: ElasticsearchClient, private spaceId: string) {}
 
   async fetch(params: FetchHistoricalSummaryParams): Promise<FetchHistoricalSummaryResponse> {
     const dateRangeBySlo = params.list.reduce<
@@ -78,6 +67,7 @@ export class HistoricalSummaryClient {
           timeWindow,
           budgetingMethod,
           dateRange: dateRangeBySlo[sloId],
+          spaceId: this.spaceId,
         }),
       ]
     );
@@ -100,8 +90,8 @@ export class HistoricalSummaryClient {
       // @ts-ignore typing msearch is hard, we cast the response to what it is supposed to be.
       const buckets = (result.responses[i].aggregations?.daily?.buckets as DailyAggBucket[]) || [];
 
-      if (rollingTimeWindowSchema.is(timeWindow)) {
-        if (timeslicesBudgetingMethodSchema.is(budgetingMethod)) {
+      if (timeWindow.type === 'rolling') {
+        if (budgetingMethod === 'timeslices') {
           historicalSummary.push({
             sloId,
             instanceId,
@@ -116,7 +106,7 @@ export class HistoricalSummaryClient {
           continue;
         }
 
-        if (occurrencesBudgetingMethodSchema.is(budgetingMethod)) {
+        if (budgetingMethod === 'occurrences') {
           historicalSummary.push({
             sloId,
             instanceId,
@@ -128,8 +118,8 @@ export class HistoricalSummaryClient {
         assertNever(budgetingMethod);
       }
 
-      if (calendarAlignedTimeWindowSchema.is(timeWindow)) {
-        if (timeslicesBudgetingMethodSchema.is(budgetingMethod)) {
+      if (timeWindow.type === 'calendarAligned') {
+        if (budgetingMethod === 'timeslices') {
           const dateRange = dateRangeBySlo[sloId];
           historicalSummary.push({
             sloId,
@@ -140,7 +130,7 @@ export class HistoricalSummaryClient {
           continue;
         }
 
-        if (occurrencesBudgetingMethodSchema.is(budgetingMethod)) {
+        if (budgetingMethod === 'occurrences') {
           historicalSummary.push({
             sloId,
             instanceId,
@@ -277,6 +267,7 @@ function generateSearchQuery({
   dateRange,
   timeWindow,
   budgetingMethod,
+  spaceId,
 }: {
   instanceId: string;
   sloId: string;
@@ -285,7 +276,8 @@ function generateSearchQuery({
   dateRange: { range: DateRange; queryRange: DateRange };
   timeWindow: TimeWindow;
   budgetingMethod: BudgetingMethod;
-}): MsearchMultisearchBody {
+  spaceId: string;
+}): SearchSearchRequestBody {
   const unit = toMomentUnitOfTime(timeWindow.duration.unit);
   const timeWindowDurationInDays = moment.duration(timeWindow.duration.value, unit).asDays();
 
@@ -306,6 +298,7 @@ function generateSearchQuery({
     query: {
       bool: {
         filter: [
+          { term: { spaceId } },
           { term: { 'slo.id': sloId } },
           { term: { 'slo.revision': revision } },
           {
@@ -331,7 +324,7 @@ function generateSearchQuery({
           },
         },
         aggs: {
-          ...(occurrencesBudgetingMethodSchema.is(budgetingMethod) && {
+          ...(budgetingMethod === 'occurrences' && {
             good: {
               sum: {
                 field: 'slo.numerator',
@@ -343,7 +336,7 @@ function generateSearchQuery({
               },
             },
           }),
-          ...(timeslicesBudgetingMethodSchema.is(budgetingMethod) && {
+          ...(budgetingMethod === 'timeslices' && {
             good: {
               sum: {
                 field: 'slo.isGoodSlice',
@@ -382,8 +375,8 @@ function generateSearchQuery({
 /**
  * queryRange is used for the filter range on the query,
  * while range is used for storing the actual range requested
- * For a rolling window, the query range starts 1 timeWindow duration before the actual range from.
- * For calednar window, the query range is the same as the range.
+ * For rolling SLO, the query range starts 1 timeWindow duration before the actual range from.
+ * For calendar aligned SLO, the query range is the same as the range.
  *
  * @param timeWindow
  * @param range
@@ -394,7 +387,7 @@ function getDateRange(
   timeWindow: TimeWindow,
   range?: DateRange
 ): { range: DateRange; queryRange: DateRange } {
-  if (rollingTimeWindowSchema.is(timeWindow)) {
+  if (timeWindow.type === 'rolling') {
     const unit = toMomentUnitOfTime(timeWindow.duration.unit as DurationUnit);
 
     if (range) {
@@ -427,9 +420,11 @@ function getDateRange(
     };
   }
 
-  if (calendarAlignedTimeWindowSchema.is(timeWindow)) {
-    const now = moment();
+  if (timeWindow.type === 'calendarAligned') {
+    // If range is provided, we use the lower bound to calculate the calendar aligned range.
+    const now = moment(range?.from ?? new Date());
     const unit = toCalendarAlignedTimeWindowMomentUnit(timeWindow);
+
     const from = moment.utc(now).startOf(unit);
     const to = moment.utc(now).endOf(unit);
 

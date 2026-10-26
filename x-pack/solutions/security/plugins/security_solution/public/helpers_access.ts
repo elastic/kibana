@@ -4,14 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { Capabilities } from '@kbn/core/public';
-import { SECURITY_FEATURE_ID } from '../common/constants';
 
-export function hasAccessToSecuritySolution(capabilities: Capabilities): boolean {
-  return Boolean(
-    // Using `siemV2`
-    capabilities[SECURITY_FEATURE_ID]?.show ||
-      capabilities.securitySolutionCasesV2?.read_cases ||
-      capabilities.securitySolutionAttackDiscovery?.['attack-discovery']
-  );
-}
+export {
+  hasAccessToAlerts,
+  hasAccessToAttackDiscovery,
+  hasAccessToCases,
+  hasAccessToRules,
+  hasAccessToSecuritySolution,
+  isSecuritySolutionAccessible,
+} from '../common/helpers_access';

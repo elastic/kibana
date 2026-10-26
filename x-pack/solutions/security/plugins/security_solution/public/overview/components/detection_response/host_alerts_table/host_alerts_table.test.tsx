@@ -27,8 +27,6 @@ jest.mock('../../../../common/hooks/use_global_filter_query', () => {
   };
 });
 
-jest.mock('../../../../common/hooks/use_get_field_spec');
-
 type UseHostAlertsItemsReturn = ReturnType<UseHostAlertsItems>;
 const defaultUseHostAlertsItemsReturn: UseHostAlertsItemsReturn = {
   items: [],
@@ -87,9 +85,9 @@ describe('HostAlertsTable', () => {
 
   it('should render the table columns', () => {
     mockUseHostAlertsItemsReturn({ items: parsedVulnerableHostsAlertsResult });
-    const { getAllByRole } = renderComponent();
+    const { getAllByTestId } = renderComponent();
 
-    const columnHeaders = getAllByRole('columnheader');
+    const columnHeaders = getAllByTestId(/tableHeaderCell_/);
     expect(columnHeaders.at(0)).toHaveTextContent('Host name');
     expect(columnHeaders.at(1)).toHaveTextContent('Alerts');
     expect(columnHeaders.at(2)).toHaveTextContent('Critical');
@@ -136,7 +134,7 @@ describe('HostAlertsTable', () => {
     fireEvent.click(getByTestId('hostSeverityAlertsTable-totalAlertsLink'));
 
     expect(mockNavigateToAlertsPageWithFilters).toHaveBeenCalledWith([
-      { fieldName: 'host.name', selectedOptions: ['Host-342m5gl1g2'], title: 'Host name' },
+      { field_name: 'host.name', selected_options: ['Host-342m5gl1g2'], title: 'Host name' },
     ]);
   });
 
@@ -148,13 +146,13 @@ describe('HostAlertsTable', () => {
 
     expect(mockNavigateToAlertsPageWithFilters).toHaveBeenCalledWith([
       {
-        fieldName: 'host.name',
-        selectedOptions: ['Host-342m5gl1g2'],
+        field_name: 'host.name',
+        selected_options: ['Host-342m5gl1g2'],
         title: 'Host name',
       },
       {
-        fieldName: 'kibana.alert.severity',
-        selectedOptions: ['critical'],
+        field_name: 'kibana.alert.severity',
+        selected_options: ['critical'],
         title: 'Severity',
       },
     ]);

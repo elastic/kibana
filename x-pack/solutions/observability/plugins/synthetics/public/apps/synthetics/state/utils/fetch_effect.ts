@@ -6,12 +6,13 @@
  */
 
 import { call, put } from 'redux-saga/effects';
-import { PayloadAction } from '@reduxjs/toolkit';
+import type { PayloadAction } from 'redux-toolkit-v1';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
-import { ErrorToastOptions } from '@kbn/core-notifications-browser';
+import type { ErrorToastOptions } from '@kbn/core-notifications-browser';
 import { toastTitle } from '../monitor_list/toast_title';
 import { kibanaService } from '../../../../utils/kibana_service';
-import { IHttpSerializedFetchError, serializeHttpFetchError } from './http_error';
+import type { IHttpSerializedFetchError } from './http_error';
+import { serializeHttpFetchError } from './http_error';
 
 interface ToastParams<MessageType> {
   message: MessageType;
@@ -49,6 +50,7 @@ export const sendErrorToast = (payload: ToastParams<ErrorToastOptions>, error: E
  * @param fail creates a failure action
  * @param onSuccess
  * @param onFailure
+ * @param shouldIgnoreError
  * @template T the action type expected by the fetch action
  * @template R the type that the API request should return on success
  * @template S the type of the success action
@@ -59,7 +61,9 @@ export function fetchEffectFactory<T, R, S, F>(
   success: (response: R) => PayloadAction<S>,
   fail: (error: IHttpSerializedFetchError<T>) => PayloadAction<F>,
   onSuccess?: ((response: R) => void) | string,
-  onFailure?: ((error: Error) => void) | string
+  onFailure?: ((error: Error) => void) | string,
+  shouldIgnoreError?: (error: unknown) => boolean,
+  onIgnoredError?: (action: PayloadAction<T>) => PayloadAction<unknown>
 ) {
   const showErrorToast = (error: Error, action: PayloadAction<T>) => {
     const serializedError = serializeHttpFetchError(error as IHttpFetchError, action.payload);
@@ -81,6 +85,13 @@ export function fetchEffectFactory<T, R, S, F>(
       const response = yield call(fetch, action.payload);
       if (response instanceof Error) {
         const error = response as Error;
+        if (shouldIgnoreError?.(error)) {
+          const ignoredErrorAction = onIgnoredError?.(action);
+          if (ignoredErrorAction) {
+            yield put(ignoredErrorAction);
+          }
+          return;
+        }
         // eslint-disable-next-line no-console
         console.error(error);
 
@@ -108,6 +119,13 @@ export function fetchEffectFactory<T, R, S, F>(
         }
       }
     } catch (error) {
+      if (shouldIgnoreError?.(error)) {
+        const ignoredErrorAction = onIgnoredError?.(action);
+        if (ignoredErrorAction) {
+          yield put(ignoredErrorAction);
+        }
+        return;
+      }
       // eslint-disable-next-line no-console
       console.error(error);
       const errorMessage = (action.payload as unknown as ActionMessages)?.error;

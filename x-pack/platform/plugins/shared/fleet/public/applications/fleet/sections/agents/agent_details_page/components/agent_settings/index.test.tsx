@@ -97,12 +97,59 @@ describe('AgentSettings', () => {
       },
     });
   };
-  it('should show log level dropdown with correct value', () => {
+  it('should show log level dropdown with correct value when agent has a per-agent override', () => {
     mockStartServices();
     const result = renderComponent();
     const logLevelDropdown = result.getByTestId('selectAgentLogLevel');
     expect(logLevelDropdown.getElementsByTagName('option').length).toBe(4);
     expect(logLevelDropdown).toHaveDisplayValue('debug');
+  });
+
+  it('should fall back to policy log level when agent has no per-agent override', () => {
+    mockStartServices();
+    const renderer = createFleetTestRendererMock();
+    const agent = {
+      id: 'agent1',
+      local_metadata: { elastic: { agent: { version: '8.15.0' } } },
+    } as any;
+    const agentPolicy = {
+      id: 'policy1',
+      name: 'policy1',
+      revision: 1,
+      namespace: 'default',
+      updated_at: '2023-10-04T13:08:53.340Z',
+      updated_by: 'elastic',
+      data_streams: [],
+      is_managed: false,
+      is_default: false,
+      is_preconfigured: false,
+      advanced_settings: { agent_logging_level: 'warning' },
+    } as any;
+    const result = renderer.render(<AgentSettings agent={agent} agentPolicy={agentPolicy} />);
+    expect(result.getByTestId('selectAgentLogLevel')).toHaveDisplayValue('warning');
+  });
+
+  it('should fall back to info when agent has no per-agent override and policy has no log level set', () => {
+    mockStartServices();
+    const renderer = createFleetTestRendererMock();
+    const agent = {
+      id: 'agent1',
+      local_metadata: { elastic: { agent: { version: '8.15.0' } } },
+    } as any;
+    const agentPolicy = {
+      id: 'policy1',
+      name: 'policy1',
+      revision: 1,
+      namespace: 'default',
+      updated_at: '2023-10-04T13:08:53.340Z',
+      updated_by: 'elastic',
+      data_streams: [],
+      is_managed: false,
+      is_default: false,
+      is_preconfigured: false,
+    } as any;
+    const result = renderer.render(<AgentSettings agent={agent} agentPolicy={agentPolicy} />);
+    expect(result.getByTestId('selectAgentLogLevel')).toHaveDisplayValue('info');
   });
 
   it('should hide reset log level button for agents version < 8.15.0', () => {
@@ -118,5 +165,33 @@ describe('AgentSettings', () => {
     const resetLogLevelBtn = result.getByTestId('resetLogLevelBtn');
     expect(resetLogLevelBtn).toBeInTheDocument();
     expect(resetLogLevelBtn).not.toHaveAttribute('disabled');
+  });
+
+  it('should make the log level read-only for an agentless agent', () => {
+    mockStartServices();
+    const renderer = createFleetTestRendererMock();
+    const agent = {
+      id: 'agent1',
+      local_metadata: { elastic: { agent: { version: '8.15.0', log_level: 'debug' } } },
+    } as any;
+
+    const regular = renderer.render(
+      <AgentSettings
+        agent={agent}
+        agentPolicy={{ id: 'policy1', supports_agentless: false } as any}
+      />
+    );
+    expect(regular.getByTestId('selectAgentLogLevel')).toBeEnabled();
+    expect(regular.getByTestId('resetLogLevelBtn')).toBeEnabled();
+    regular.unmount();
+
+    const agentless = renderer.render(
+      <AgentSettings
+        agent={agent}
+        agentPolicy={{ id: 'policy1', supports_agentless: true } as any}
+      />
+    );
+    expect(agentless.getByTestId('selectAgentLogLevel')).toBeDisabled();
+    expect(agentless.getByTestId('resetLogLevelBtn')).toBeDisabled();
   });
 });

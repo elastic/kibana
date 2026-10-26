@@ -8,3 +8,4 @@
  */
 
 export const PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY = 'aiAssistant:preferredAIAssistantType';
+export const PREFERRED_CHAT_EXPERIENCE_SETTING_KEY = 'aiAssistant:preferredChatExperience';

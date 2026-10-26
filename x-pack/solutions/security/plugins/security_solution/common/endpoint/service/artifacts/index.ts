@@ -8,9 +8,20 @@
 export {
   isArtifactGlobal,
   isArtifactByPolicy,
+  isArtifactDisabled,
+  addDisabledArtifactTag,
+  removeDisabledArtifactTag,
   getPolicyIdsFromArtifact,
   getEffectedPolicySelectionByTags,
   getArtifactTagsByPolicySelection,
 } from './utils';
 
-export { BY_POLICY_ARTIFACT_TAG_PREFIX, GLOBAL_ARTIFACT_TAG } from './constants';
+export {
+  BY_POLICY_ARTIFACT_TAG_PREFIX,
+  GLOBAL_ARTIFACT_TAG,
+  DISABLED_ARTIFACT_TAG,
+  IMPORTED_ARTIFACT_TAG,
+  ADVANCED_MODE_TAG,
+  FILTER_PROCESS_DESCENDANTS_TAG,
+  TRUSTED_PROCESS_DESCENDANTS_TAG,
+} from './constants';

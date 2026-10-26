@@ -10,7 +10,7 @@
 // this file was generated, and should not be edited by hand
 // ---------------------------------- WARNING ----------------------------------
 import * as rt from 'io-ts';
-import type { Either } from 'fp-ts/lib/Either';
+import type { Either } from 'fp-ts/Either';
 import { AlertSchema } from './alert_schema';
 import { EcsSchema } from './ecs_schema';
 const ISO_DATE_PATTERN = /^d{4}-d{2}-d{2}Td{2}:d{2}:d{2}.d{3}Z$/;
@@ -74,6 +74,7 @@ const ObservabilityThresholdAlertRequired = rt.type({
 const ObservabilityThresholdAlertOptional = rt.partial({
   'kibana.alert.context': schemaUnknown,
   'kibana.alert.evaluation.threshold': schemaStringOrNumber,
+  'kibana.alert.evaluation.time_range': schemaDateRange,
   'kibana.alert.evaluation.value': schemaStringOrNumber,
   'kibana.alert.evaluation.values': schemaStringOrNumberArray,
   'kibana.alert.group': rt.array(
@@ -82,6 +83,7 @@ const ObservabilityThresholdAlertOptional = rt.partial({
       value: schemaStringArray,
     })
   ),
+  'kibana.alert.grouping': schemaUnknown,
 });
 
 // prettier-ignore

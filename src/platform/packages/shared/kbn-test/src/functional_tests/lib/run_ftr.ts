@@ -10,17 +10,19 @@
 import type { ToolingLog } from '@kbn/tooling-log';
 import { createFailError } from '@kbn/dev-cli-errors';
 
-import { EsVersion, Config, FunctionalTestRunner } from '../../functional_test_runner';
+import type { EsVersion, Config } from '../../functional_test_runner';
+import { FunctionalTestRunner } from '../../functional_test_runner';
 
 export async function runFtr(options: {
   log: ToolingLog;
   config: Config;
   esVersion: EsVersion;
   signal?: AbortSignal;
+  retry?: number;
 }) {
   const ftr = new FunctionalTestRunner(options.log, options.config, options.esVersion);
 
-  const failureCount = await ftr.run(options.signal);
+  const failureCount = await ftr.run(options.signal, options.retry);
   if (failureCount > 0) {
     throw createFailError(
       `${failureCount} functional test ${failureCount === 1 ? 'failure' : 'failures'}`

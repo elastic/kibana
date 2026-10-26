@@ -6,22 +6,31 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { UMServerLibs } from '../../lib/lib';
-import { UMRestApiRouteFactory } from '../types';
+import type { UMServerLibs } from '../../lib/lib';
+import type { UMRestApiRouteFactory } from '../types';
 import { API_URLS } from '../../../../common/constants';
+import {
+  MAX_EVENT_TYPE_LENGTH,
+  MAX_ID_LENGTH,
+  boundedString,
+  boundedStringArray,
+} from '../schema_limits';
 
 export const createJourneyRoute: UMRestApiRouteFactory = (libs: UMServerLibs) => ({
   method: 'GET',
   path: API_URLS.JOURNEY,
   validate: {
     params: schema.object({
-      checkGroup: schema.string(),
+      checkGroup: boundedString(MAX_ID_LENGTH),
     }),
     query: schema.object({
       // provides a filter for the types of synthetic events to include
       // when fetching a journey's data
       syntheticEventTypes: schema.maybe(
-        schema.oneOf([schema.arrayOf(schema.string()), schema.string()])
+        schema.oneOf([
+          boundedStringArray(MAX_EVENT_TYPE_LENGTH, 10),
+          boundedString(MAX_EVENT_TYPE_LENGTH),
+        ])
       ),
     }),
   },
@@ -58,7 +67,7 @@ export const createJourneyFailedStepsRoute: UMRestApiRouteFactory = (libs: UMSer
   path: API_URLS.JOURNEY_FAILED_STEPS,
   validate: {
     query: schema.object({
-      checkGroups: schema.arrayOf(schema.string()),
+      checkGroups: boundedStringArray(MAX_ID_LENGTH, 100),
     }),
   },
   handler: async ({ uptimeEsClient, request, response }): Promise<any> => {

@@ -7,13 +7,17 @@
 
 // eslint-disable-next-line @kbn/eslint/module_migration
 import type { ExtractRouteParams } from 'react-router';
-import { generatePath } from 'react-router-dom';
+import { generatePath, matchPath } from 'react-router-dom';
 import {
   CASES_CREATE_PATH,
   CASES_CONFIGURE_PATH,
   CASE_VIEW_PATH,
   CASE_VIEW_COMMENT_PATH,
   CASE_VIEW_TAB_PATH,
+  CASES_CONFIGURE_TEMPLATES_PATH,
+  CASES_CONFIGURE_CREATE_TEMPLATE_PATH,
+  CASES_CONFIGURE_EDIT_TEMPLATE_PATH,
+  CASES_CONFIGURE_FIELD_LIBRARY_PATH,
 } from '../../../common/constants';
 import type { CASE_VIEW_PAGE_TABS } from '../../../common/types';
 
@@ -38,7 +42,26 @@ export const getCaseViewPath = (casesBasePath: string) =>
   normalizePath(`${casesBasePath}${CASE_VIEW_PATH}`);
 export const getCaseViewWithCommentPath = (casesBasePath: string) =>
   normalizePath(`${casesBasePath}${CASE_VIEW_COMMENT_PATH}`);
+export interface TemplateViewPathParams {
+  templateId: string;
+}
 
+export const getCasesConfigureTemplatesPath = (casesBasePath: string) =>
+  normalizePath(`${casesBasePath}${CASES_CONFIGURE_TEMPLATES_PATH}`);
+export const getCasesConfigureFieldLibraryPath = (casesBasePath: string) =>
+  normalizePath(`${casesBasePath}${CASES_CONFIGURE_FIELD_LIBRARY_PATH}`);
+export const getCasesConfigureCreateTemplatePath = (casesBasePath: string) =>
+  normalizePath(`${casesBasePath}${CASES_CONFIGURE_CREATE_TEMPLATE_PATH}`);
+export const getCasesConfigureEditTemplatePath = (casesBasePath: string) =>
+  normalizePath(`${casesBasePath}${CASES_CONFIGURE_EDIT_TEMPLATE_PATH}`);
+export const generateConfigureTemplateEditPath = (params: TemplateViewPathParams): string => {
+  return normalizePath(
+    generatePath(
+      CASES_CONFIGURE_EDIT_TEMPLATE_PATH,
+      params as ExtractRouteParams<typeof CASES_CONFIGURE_EDIT_TEMPLATE_PATH>
+    )
+  );
+};
 export const generateCaseViewPath = (params: CaseViewPathParams): string => {
   const { commentId, tabId } = params;
   // paths with commentId have their own specific path.
@@ -61,4 +84,16 @@ export const generateCaseViewPath = (params: CaseViewPathParams): string => {
   return normalizePath(
     generatePath(CASE_VIEW_PATH, params as ExtractRouteParams<typeof CASE_VIEW_PATH>)
   );
+};
+export const isCaseViewPath = (pathname: string, caseId?: string): boolean => {
+  const match = matchPath(pathname, {
+    // needs the wildcard because of spaces etc in front
+    path: `*${CASE_VIEW_PATH}/:detailName`,
+    strict: false,
+  });
+  if (caseId && match) {
+    return (match.params as unknown as Record<string, string>).detailName === caseId;
+  } else {
+    return !!match;
+  }
 };

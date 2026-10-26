@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/* eslint import/no-duplicates: 0 */
 import sinon from 'sinon';
 
 import { convertEsError } from './errors';
@@ -191,6 +190,37 @@ describe('server/index_patterns/service/lib/es_api', () => {
         expect(convertEsError.args[0][0]).toBe(indices);
         expect(convertEsError.args[0][1]).toBe(esError);
       }
+    });
+
+    it('passes projectRouting to es api when provided', async () => {
+      const projectRouting = 'test-project-id';
+      const fieldCaps = sinon.stub();
+      const callCluster = {
+        indices: {
+          getAlias: sinon.stub(),
+        },
+        fieldCaps,
+      };
+      await callFieldCapsApi({ callCluster, projectRouting });
+      sinon.assert.calledOnce(fieldCaps);
+
+      const passedOpts = fieldCaps.args[0][0];
+      expect(passedOpts).toHaveProperty('project_routing', projectRouting);
+    });
+
+    it('does not include project_routing when not provided', async () => {
+      const fieldCaps = sinon.stub();
+      const callCluster = {
+        indices: {
+          getAlias: sinon.stub(),
+        },
+        fieldCaps,
+      };
+      await callFieldCapsApi({ callCluster });
+      sinon.assert.calledOnce(fieldCaps);
+
+      const passedOpts = fieldCaps.args[0][0];
+      expect(passedOpts).not.toHaveProperty('project_routing');
     });
   });
 });

@@ -6,19 +6,30 @@
  */
 
 import React from 'react';
-import { fireEvent, waitFor } from '@testing-library/react';
+import { fireEvent, waitFor, within } from '@testing-library/react';
 
 import type { Output } from '../../../../types';
 import { createFleetTestRendererMock } from '../../../../../../mock';
 import { useFleetStatus } from '../../../../../../hooks/use_fleet_status';
 import { ExperimentalFeaturesService } from '../../../../../../services';
-import { useStartServices, sendPutOutput } from '../../../../hooks';
+import {
+  useStartServices,
+  useKafkaAuthMethods,
+  sendPutOutput,
+  licenseService,
+} from '../../../../hooks';
 
 import { EditOutputFlyout } from '.';
 
 // mock yaml code editor
 jest.mock('@kbn/code-editor', () => ({
   CodeEditor: () => <>CODE EDITOR</>,
+}));
+
+jest.mock('@elastic/eui', () => ({
+  ...jest.requireActual('@elastic/eui'),
+  EuiIconTip: () => '',
+  useGeneratedHtmlId: () => 'mocked-id',
 }));
 
 jest.mock('../../../../../../hooks/use_fleet_status', () => ({
@@ -33,6 +44,7 @@ jest.mock('../../../../hooks', () => {
     ...jest.requireActual('../../../../hooks'),
     useBreadcrumbs: jest.fn(),
     useStartServices: jest.fn(),
+    useKafkaAuthMethods: jest.fn(),
     sendPutOutput: jest.fn(),
   };
 });
@@ -43,14 +55,20 @@ jest.mock('./confirm_update', () => ({
 
 const mockSendPutOutput = sendPutOutput as jest.MockedFunction<typeof sendPutOutput>;
 const mockUseStartServices = useStartServices as jest.Mock;
+const mockUseKafkaAuthMethods = useKafkaAuthMethods as jest.Mock;
 
 const mockedUseFleetStatus = useFleetStatus as jest.MockedFunction<typeof useFleetStatus>;
 
-function renderFlyout(output?: Output) {
+function renderFlyout(output?: Output, defaultOutput?: Output) {
   const renderer = createFleetTestRendererMock();
 
   const utils = renderer.render(
-    <EditOutputFlyout proxies={[]} output={output} onClose={() => {}} />
+    <EditOutputFlyout
+      proxies={[]}
+      output={output}
+      defaultOutput={defaultOutput}
+      onClose={() => {}}
+    />
   );
 
   return { utils };
@@ -88,7 +106,12 @@ describe('EditOutputFlyout', () => {
         },
       },
       docLinks: {
-        links: { fleet: {}, logstash: {}, kibana: {} },
+        links: {
+          fleet: {},
+          logstash: {},
+          kibana: {},
+          observability: {},
+        },
       },
       cloud: {
         isServerlessEnabled,
@@ -99,6 +122,9 @@ describe('EditOutputFlyout', () => {
   beforeEach(() => {
     mockStartServices(false);
     jest.clearAllMocks();
+    // the optional authentication methods of the Kafka output are off by default
+    mockUseKafkaAuthMethods.mockReturnValue({ isOAuth2Enabled: false, isKerberosEnabled: false });
+    jest.spyOn(licenseService, 'isEnterprise').mockClear();
 
     mockedUseFleetStatus.mockReturnValue({} as any);
   });
@@ -166,6 +192,9 @@ describe('EditOutputFlyout', () => {
       kafkaSectionsLabels.forEach((label) => {
         expect(utils.queryByText(label)).toBeNull();
       });
+
+      // Show the Client certificate mTLS sub-section heading
+      expect(utils.queryByText('Client certificate (mTLS)')).not.toBeNull();
     });
   });
 
@@ -191,6 +220,42 @@ describe('EditOutputFlyout', () => {
     ['Client SSL certificate key', 'Client SSL certificate'].forEach((label) => {
       expect(utils.queryByLabelText(label)).toBeNull();
     });
+  });
+
+  it('should not show proxy input for kafka output', async () => {
+    const { utils } = renderFlyout({
+      type: 'kafka',
+      name: 'kafka output',
+      id: 'output123',
+      is_default: false,
+      is_default_monitoring: false,
+    });
+
+    expect(utils.queryByTestId('settingsOutputsFlyout.proxyIdInput')).toBeNull();
+  });
+
+  it('should show proxy input for elasticsearch output', async () => {
+    const { utils } = renderFlyout({
+      type: 'elasticsearch',
+      name: 'es output',
+      id: 'output456',
+      is_default: false,
+      is_default_monitoring: false,
+    });
+
+    expect(utils.queryByTestId('settingsOutputsFlyout.proxyIdInput')).not.toBeNull();
+  });
+
+  it('should show proxy input for logstash output', async () => {
+    const { utils } = renderFlyout({
+      type: 'logstash',
+      name: 'logstash output',
+      id: 'output789',
+      is_default: false,
+      is_default_monitoring: false,
+    });
+
+    expect(utils.queryByTestId('settingsOutputsFlyout.proxyIdInput')).not.toBeNull();
   });
 
   it('should populate secret input with plain text value when editing kafka output', async () => {
@@ -226,6 +291,38 @@ describe('EditOutputFlyout', () => {
         expect.objectContaining({
           secrets: { ssl: { key: 'key' } },
           ssl: { certificate: 'cert', key: '', verification_mode: 'full' },
+        })
+      );
+    });
+  });
+
+  it('should send dynamic kafka topic verbatim without wrapping on save', async () => {
+    const { utils } = renderFlyout({
+      type: 'kafka',
+      name: 'kafka output',
+      id: 'outputK',
+      is_default: false,
+      is_default_monitoring: false,
+      hosts: ['kafka:443'],
+      topic: '%{[data_stream.type]}-%{[data_stream.namespace]}',
+      auth_type: 'none',
+      version: '1.0.0',
+      compression: 'none',
+    });
+
+    mockSendPutOutput.mockResolvedValue({ data: {} } as any);
+
+    fireEvent.change(utils.getByTestId('settingsOutputsFlyout.nameInput'), {
+      target: { value: 'kafka output updated' },
+    });
+
+    fireEvent.click(utils.getByText('Save and apply settings'));
+
+    await waitFor(() => {
+      expect(mockSendPutOutput).toHaveBeenCalledWith(
+        'outputK',
+        expect.objectContaining({
+          topic: '%{[data_stream.type]}-%{[data_stream.namespace]}',
         })
       );
     });
@@ -272,6 +369,839 @@ describe('EditOutputFlyout', () => {
     });
   });
 
+  it('should not render username and password inputs for an authentication method this form cannot edit', async () => {
+    jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({} as any);
+
+    mockedUseFleetStatus.mockReturnValue({
+      isLoading: false,
+      isReady: true,
+      isSecretsStorageEnabled: true,
+    } as any);
+
+    const { utils } = renderFlyout({
+      type: 'kafka',
+      name: 'kafka output',
+      id: 'outputK',
+      is_default: false,
+      is_default_monitoring: false,
+      hosts: ['kafka:443'],
+      topic: 'topic',
+      // an authentication method the form has no inputs for, e.g. set through the API
+      auth_type: 'unsupported_auth' as any,
+      version: '1.0.0',
+      compression: 'none',
+    });
+
+    expect(
+      utils.getByTestId('settingsOutputsFlyout.kafkaAuthenticationManagedElsewhereCallout')
+    ).toBeInTheDocument();
+    expect(utils.queryByTestId('settingsOutputsFlyout.kafkaUsernameInput')).not.toBeInTheDocument();
+    expect(
+      utils.queryByTestId('settingsOutputsFlyout.kafkaPasswordSecretInput')
+    ).not.toBeInTheDocument();
+
+    mockSendPutOutput.mockResolvedValue({ data: {} } as any);
+
+    fireEvent.change(utils.getByTestId('settingsOutputsFlyout.nameInput'), {
+      target: { value: 'kafka output updated' },
+    });
+
+    fireEvent.click(utils.getByText('Save and apply settings'));
+
+    await waitFor(() => {
+      // the authentication settings of the output are kept as they are
+      expect(mockSendPutOutput).toHaveBeenCalledWith(
+        'outputK',
+        expect.objectContaining({ auth_type: 'unsupported_auth' })
+      );
+      const payload = mockSendPutOutput.mock.calls[0][1] as any;
+      expect(payload.username).toBeUndefined();
+      expect(payload.password).toBeUndefined();
+      expect(payload.secrets?.password).toBeUndefined();
+    });
+  });
+
+  describe('kafka Kerberos authentication', () => {
+    const kafkaOutput = {
+      type: 'kafka',
+      name: 'kafka output',
+      id: 'outputK',
+      is_default: false,
+      is_default_monitoring: false,
+      hosts: ['kafka:443'],
+      topic: 'topic',
+      version: '1.0.0',
+      compression: 'none',
+    } as any;
+
+    const change = (
+      utils: ReturnType<typeof renderFlyout>['utils'],
+      testSubj: string,
+      value: string
+    ) =>
+      fireEvent.change(utils.getByTestId(`settingsOutputsFlyout.${testSubj}`), {
+        target: { value },
+      });
+    const save = (utils: ReturnType<typeof renderFlyout>['utils']) =>
+      fireEvent.click(utils.getByText('Save and apply settings'));
+
+    beforeEach(() => {
+      jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({} as any);
+      mockedUseFleetStatus.mockReturnValue({
+        isLoading: false,
+        isReady: true,
+        isSecretsStorageEnabled: true,
+      } as any);
+      mockSendPutOutput.mockResolvedValue({ data: {} } as any);
+      mockUseKafkaAuthMethods.mockReturnValue({ isOAuth2Enabled: false, isKerberosEnabled: true });
+    });
+
+    it('should not offer Kerberos when the feature flag is off', () => {
+      mockUseKafkaAuthMethods.mockReturnValue({ isOAuth2Enabled: false, isKerberosEnabled: false });
+      const { utils } = renderFlyout({ ...kafkaOutput, auth_type: 'none' });
+
+      expect(utils.queryByTestId('kafkaAuthenticationKerberosRadioButton')).not.toBeInTheDocument();
+    });
+
+    it('should offer Kerberos when the feature flag is on', () => {
+      const { utils } = renderFlyout({ ...kafkaOutput, auth_type: 'none' });
+
+      expect(utils.getByTestId('kafkaAuthenticationKerberosRadioButton')).toBeInTheDocument();
+    });
+
+    it('should warn that Kerberos is not supported only in a FIPS environment', () => {
+      mockedUseFleetStatus.mockReturnValue({
+        isLoading: false,
+        isReady: true,
+        isSecretsStorageEnabled: true,
+        isFipsEnabled: true,
+      } as any);
+      const { utils } = renderFlyout({ ...kafkaOutput, auth_type: 'none' });
+
+      fireEvent.click(utils.getByRole('radio', { name: 'Kerberos' }));
+
+      expect(
+        utils.getByTestId('settingsOutputsFlyout.kafkaKerberosFipsCallout')
+      ).toBeInTheDocument();
+    });
+
+    it('should save the keytab authentication, keeping the timeout', async () => {
+      const { utils } = renderFlyout({ ...kafkaOutput, auth_type: 'none' });
+
+      fireEvent.click(utils.getByRole('radio', { name: 'Kerberos' }));
+
+      expect(utils.queryByTestId('settingsOutputsFlyout.kafkaKerberosFipsCallout')).toBeNull();
+      expect(utils.queryByTestId('settingsOutputsFlyout.kafkaKerberosPasswordInput')).toBeNull();
+      // Kerberos runs on the Beats runtime when the agent cannot translate the timeout
+      expect(
+        utils.getByTestId('settingsOutputsFlyout.kafkaBrokerTimeoutInput')
+      ).toBeInTheDocument();
+
+      change(utils, 'kafkaKerberosConfigPathInput', '/etc/krb5.conf');
+      change(utils, 'kafkaKerberosRealmInput', 'EXAMPLE.COM');
+      change(utils, 'kafkaKerberosKeytabInput', '/etc/kafka.keytab');
+      change(utils, 'kafkaKerberosServiceNameInput', 'kafka');
+      save(utils);
+
+      await waitFor(() => {
+        expect(mockSendPutOutput).toHaveBeenCalledWith(
+          'outputK',
+          expect.objectContaining({
+            auth_type: 'kerberos',
+            kerberos: {
+              auth_type: 'keytab',
+              config_path: '/etc/krb5.conf',
+              realm: 'EXAMPLE.COM',
+              keytab: '/etc/kafka.keytab',
+              service_name: 'kafka',
+            },
+          })
+        );
+      });
+      const payload = mockSendPutOutput.mock.calls[0][1] as any;
+      expect(payload.secrets).toBeUndefined();
+      expect(payload.timeout).toBeDefined();
+      expect(payload.username).toBeUndefined();
+      expect(payload.sasl).toBeUndefined();
+    });
+
+    it('should save the password authentication with the password as a secret', async () => {
+      const { utils } = renderFlyout({ ...kafkaOutput, auth_type: 'none' });
+
+      fireEvent.click(utils.getByRole('radio', { name: 'Kerberos' }));
+      // the radio group of Kerberos, not the one of the authentication methods
+      fireEvent.click(
+        within(utils.getByTestId('settingsOutputsFlyout.kafkaKerberosAuthTypeInput')).getByRole(
+          'radio',
+          { name: 'Username / Password' }
+        )
+      );
+
+      expect(utils.queryByTestId('settingsOutputsFlyout.kafkaKerberosKeytabInput')).toBeNull();
+
+      change(utils, 'kafkaKerberosConfigPathInput', '/etc/krb5.conf');
+      change(utils, 'kafkaKerberosRealmInput', 'EXAMPLE.COM');
+      change(utils, 'kafkaKerberosUsernameInput', 'kafka');
+      change(utils, 'kafkaKerberosPasswordInput', 'my-password');
+      fireEvent.click(utils.getByTestId('settingsOutputsFlyout.kafkaKerberosEnableFastInput'));
+      save(utils);
+
+      await waitFor(() => {
+        expect(mockSendPutOutput).toHaveBeenCalledWith(
+          'outputK',
+          expect.objectContaining({
+            auth_type: 'kerberos',
+            kerberos: {
+              auth_type: 'password',
+              config_path: '/etc/krb5.conf',
+              realm: 'EXAMPLE.COM',
+              username: 'kafka',
+              enable_krb5_fast: true,
+            },
+            secrets: { kerberos: { password: 'my-password' } },
+          })
+        );
+      });
+    });
+
+    it('should not save the output when the required Kerberos settings are missing', async () => {
+      const { utils } = renderFlyout({ ...kafkaOutput, auth_type: 'none' });
+
+      fireEvent.click(utils.getByRole('radio', { name: 'Kerberos' }));
+      save(utils);
+
+      await waitFor(() => {
+        expect(utils.getByText('Kerberos configuration file is required')).toBeInTheDocument();
+        expect(utils.getByText('Realm is required')).toBeInTheDocument();
+        expect(utils.getByText('Keytab file is required')).toBeInTheDocument();
+      });
+      expect(mockSendPutOutput).not.toHaveBeenCalled();
+    });
+
+    it('should save an output set up before Kerberos had settings when Kerberos is not enabled', async () => {
+      mockUseKafkaAuthMethods.mockReturnValue({ isOAuth2Enabled: false, isKerberosEnabled: false });
+      // only the type and the advanced YAML, as an output created through the API before this form
+      const { utils } = renderFlyout({
+        ...kafkaOutput,
+        auth_type: 'kerberos',
+        config_yaml: 'kerberos:\n  enabled: true\n',
+      });
+
+      change(utils, 'nameInput', 'renamed kafka output');
+      save(utils);
+
+      await waitFor(() => {
+        expect(mockSendPutOutput).toHaveBeenCalledWith(
+          'outputK',
+          expect.objectContaining({ auth_type: 'kerberos' })
+        );
+      });
+      // there are no settings to send, the server keeps the output as it is
+      expect((mockSendPutOutput.mock.calls[0][1] as any).kerberos).toBeUndefined();
+    });
+
+    describe('output set up before Kerberos had settings, with Kerberos enabled', () => {
+      const legacyOutput = {
+        ...kafkaOutput,
+        auth_type: 'kerberos',
+        config_yaml: 'kerberos:\n  enabled: true\n',
+      };
+
+      it('should show the Kerberos form without errors, and save the output as it is', async () => {
+        const { utils } = renderFlyout(legacyOutput);
+
+        expect(
+          utils.getByTestId('settingsOutputsFlyout.kafkaKerberosConfigPathInput')
+        ).toBeVisible();
+        change(utils, 'nameInput', 'renamed kafka output');
+        save(utils);
+
+        await waitFor(() => {
+          expect(mockSendPutOutput).toHaveBeenCalledWith(
+            'outputK',
+            expect.objectContaining({ auth_type: 'kerberos' })
+          );
+        });
+        expect(utils.queryByText('Realm is required')).not.toBeInTheDocument();
+        expect((mockSendPutOutput.mock.calls[0][1] as any).kerberos).toBeUndefined();
+        expect((mockSendPutOutput.mock.calls[0][1] as any).secrets).toBeUndefined();
+      });
+
+      it('should require every setting once one is entered', async () => {
+        const { utils } = renderFlyout(legacyOutput);
+
+        change(utils, 'kafkaKerberosConfigPathInput', '/etc/krb5.conf');
+        save(utils);
+
+        await waitFor(() => {
+          expect(utils.getByText('Realm is required')).toBeInTheDocument();
+          expect(utils.getByText('Keytab file is required')).toBeInTheDocument();
+        });
+        expect(mockSendPutOutput).not.toHaveBeenCalled();
+      });
+    });
+
+    it('should send the saved Kerberos settings unchanged when Kerberos is not enabled', async () => {
+      mockUseKafkaAuthMethods.mockReturnValue({ isOAuth2Enabled: false, isKerberosEnabled: false });
+      const kerberos = {
+        auth_type: 'keytab',
+        config_path: '/etc/krb5.conf',
+        keytab: '/etc/kafka.keytab',
+        realm: 'EXAMPLE.COM',
+      };
+      const { utils } = renderFlyout({ ...kafkaOutput, auth_type: 'kerberos', kerberos });
+
+      change(utils, 'nameInput', 'renamed kafka output');
+      save(utils);
+
+      await waitFor(() => {
+        expect(mockSendPutOutput).toHaveBeenCalledWith(
+          'outputK',
+          expect.objectContaining({ auth_type: 'kerberos', kerberos })
+        );
+      });
+    });
+
+    it('should keep the saved settings of an output that does not allow Kerberos to be edited', () => {
+      mockUseKafkaAuthMethods.mockReturnValue({ isOAuth2Enabled: false, isKerberosEnabled: false });
+      const { utils } = renderFlyout({
+        ...kafkaOutput,
+        auth_type: 'kerberos',
+        kerberos: {
+          auth_type: 'keytab',
+          config_path: '/etc/krb5.conf',
+          keytab: '/etc/kafka.keytab',
+          realm: 'EXAMPLE.COM',
+        },
+      });
+
+      expect(
+        utils.getByTestId('settingsOutputsFlyout.kafkaAuthenticationManagedElsewhereCallout')
+      ).toBeInTheDocument();
+    });
+  });
+
+  describe('kafka OAuth2 authentication', () => {
+    const kafkaOutput = {
+      type: 'kafka',
+      name: 'kafka output',
+      id: 'outputK',
+      is_default: false,
+      is_default_monitoring: false,
+      hosts: ['kafka:443'],
+      topic: 'topic',
+      version: '1.0.0',
+      compression: 'none',
+    } as any;
+
+    beforeEach(() => {
+      jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({} as any);
+      mockedUseFleetStatus.mockReturnValue({
+        isLoading: false,
+        isReady: true,
+        isSecretsStorageEnabled: true,
+      } as any);
+      mockSendPutOutput.mockResolvedValue({ data: {} } as any);
+    });
+
+    it('should not offer OAuth2 when the feature flag is off', () => {
+      const { utils } = renderFlyout({ ...kafkaOutput, auth_type: 'none' });
+
+      expect(utils.queryByTestId('kafkaAuthenticationOAuth2RadioButton')).not.toBeInTheDocument();
+    });
+
+    it('should offer OAuth2 when the feature flag is on', () => {
+      mockUseKafkaAuthMethods.mockReturnValue({ isOAuth2Enabled: true });
+      const { utils } = renderFlyout({ ...kafkaOutput, auth_type: 'none' });
+
+      expect(utils.getByTestId('kafkaAuthenticationOAuth2RadioButton')).toBeInTheDocument();
+    });
+
+    it('should save the OAuth2 settings, the client secret as a secret, and no timeout', async () => {
+      mockUseKafkaAuthMethods.mockReturnValue({ isOAuth2Enabled: true });
+      const { utils } = renderFlyout({ ...kafkaOutput, auth_type: 'none' });
+
+      fireEvent.click(utils.getByRole('radio', { name: 'OAuth2' }));
+
+      expect(
+        utils.getByTestId('settingsOutputsFlyout.kafkaOAuth2VersionCallout')
+      ).toBeInTheDocument();
+      // the broker timeout is not supported with OAuth2
+      expect(utils.queryByTestId('settingsOutputsFlyout.kafkaBrokerTimeoutInput')).toBeNull();
+
+      fireEvent.change(utils.getByTestId('settingsOutputsFlyout.kafkaOAuth2ClientIdInput'), {
+        target: { value: 'my-client' },
+      });
+      fireEvent.change(utils.getByTestId('settingsOutputsFlyout.kafkaOAuth2ClientSecretInput'), {
+        target: { value: 'my-secret' },
+      });
+      fireEvent.change(utils.getByTestId('settingsOutputsFlyout.kafkaOAuth2TokenUrlInput'), {
+        target: { value: 'https://idp.example.com/oauth2/token' },
+      });
+      fireEvent.change(utils.getByTestId('settingsOutputsFlyout.kafkaOAuth2EndpointParamName0'), {
+        target: { value: 'audience' },
+      });
+      fireEvent.change(utils.getByTestId('settingsOutputsFlyout.kafkaOAuth2EndpointParamValue0'), {
+        target: { value: 'kafka' },
+      });
+
+      fireEvent.click(utils.getByText('Save and apply settings'));
+
+      await waitFor(() => {
+        expect(mockSendPutOutput).toHaveBeenCalledWith(
+          'outputK',
+          expect.objectContaining({
+            auth_type: 'oauth2',
+            oauth2: {
+              client_id: 'my-client',
+              token_url: 'https://idp.example.com/oauth2/token',
+              endpoint_params: { audience: ['kafka'] },
+            },
+            secrets: { oauth2: { client_secret: 'my-secret' } },
+          })
+        );
+      });
+      const payload = mockSendPutOutput.mock.calls[0][1] as any;
+      expect(payload.timeout).toBeUndefined();
+      expect(payload.username).toBeUndefined();
+      expect(payload.sasl).toBeUndefined();
+    });
+
+    it('should not save the output when the required OAuth2 settings are missing', async () => {
+      mockUseKafkaAuthMethods.mockReturnValue({ isOAuth2Enabled: true });
+      const { utils } = renderFlyout({ ...kafkaOutput, auth_type: 'none' });
+
+      fireEvent.click(utils.getByRole('radio', { name: 'OAuth2' }));
+      fireEvent.change(utils.getByTestId('settingsOutputsFlyout.kafkaOAuth2TokenUrlInput'), {
+        target: { value: 'ftp://idp.example.com' },
+      });
+      fireEvent.click(utils.getByText('Save and apply settings'));
+
+      await waitFor(() => {
+        expect(utils.getByText('Client ID is required')).toBeInTheDocument();
+        expect(utils.getByText('Client secret is required')).toBeInTheDocument();
+        expect(
+          utils.getByText('Token URL must start with http:// or https://')
+        ).toBeInTheDocument();
+      });
+      expect(mockSendPutOutput).not.toHaveBeenCalled();
+    });
+
+    it('should keep the JWT bearer settings of an output when it is saved', async () => {
+      mockUseKafkaAuthMethods.mockReturnValue({ isOAuth2Enabled: true });
+      const { utils } = renderFlyout({
+        ...kafkaOutput,
+        auth_type: 'oauth2',
+        oauth2: {
+          grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer',
+          client_id: 'my-client',
+          client_certificate_key_file: '/etc/key.pem',
+          token_url: 'https://idp.example.com/oauth2/token',
+          tls: { ca_file: '/etc/ca.pem', insecure_skip_verify: true },
+        },
+        secrets: { oauth2: { client_certificate_key: { id: 'key-secret-id' } } },
+      });
+
+      // a jwt-bearer grant needs a private key, not a client secret
+      expect(utils.queryByTestId('settingsOutputsFlyout.kafkaOAuth2ClientSecretInput')).toBeNull();
+      fireEvent.change(utils.getByTestId('settingsOutputsFlyout.kafkaOAuth2TlsCaFileInput'), {
+        target: { value: '/etc/other-ca.pem' },
+      });
+      fireEvent.click(utils.getByText('Save and apply settings'));
+
+      await waitFor(() => {
+        expect(mockSendPutOutput).toHaveBeenCalledWith(
+          'outputK',
+          expect.objectContaining({
+            auth_type: 'oauth2',
+            oauth2: {
+              grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer',
+              client_id: 'my-client',
+              client_certificate_key_file: '/etc/key.pem',
+              token_url: 'https://idp.example.com/oauth2/token',
+              tls: { ca_file: '/etc/other-ca.pem', insecure_skip_verify: true },
+            },
+            secrets: { oauth2: { client_certificate_key: { id: 'key-secret-id' } } },
+          })
+        );
+      });
+    });
+
+    describe('JWT bearer grant, file paths and TLS settings', () => {
+      const oauth2Fields = {
+        client_id: 'my-client',
+        token_url: 'https://idp.example.com/oauth2/token',
+      };
+      const change = (utils: any, testSubj: string, value: string) =>
+        fireEvent.change(utils.getByTestId(`settingsOutputsFlyout.${testSubj}`), {
+          target: { value },
+        });
+      const save = (utils: any) => fireEvent.click(utils.getByText('Save and apply settings'));
+
+      beforeEach(() => {
+        mockUseKafkaAuthMethods.mockReturnValue({ isOAuth2Enabled: true });
+      });
+
+      it('should save the JWT bearer grant with its private key as a secret and no client secret', async () => {
+        const { utils } = renderFlyout({
+          ...kafkaOutput,
+          auth_type: 'oauth2',
+          oauth2: oauth2Fields,
+          secrets: { oauth2: { client_secret: { id: 'secret-id' } } },
+        });
+
+        fireEvent.click(utils.getByRole('radio', { name: 'JWT bearer' }));
+        // the private key replaces the client secret
+        expect(
+          utils.queryByTestId('settingsOutputsFlyout.kafkaOAuth2ClientSecretInput')
+        ).toBeNull();
+        change(utils, 'kafkaOAuth2ClientCertificateKeyInput', '-----BEGIN PRIVATE KEY-----');
+        change(utils, 'kafkaOAuth2ClientCertificateKeyIdInput', 'key-1');
+        change(utils, 'kafkaOAuth2SignatureAlgorithmInput', 'RS512');
+        change(utils, 'kafkaOAuth2IssInput', 'issuer');
+        change(utils, 'kafkaOAuth2AudienceInput', 'audience');
+        change(utils, 'kafkaOAuth2ClaimsInput', '{"sub": "my-client"}');
+        save(utils);
+
+        await waitFor(() => {
+          expect(mockSendPutOutput).toHaveBeenCalledWith(
+            'outputK',
+            expect.objectContaining({
+              auth_type: 'oauth2',
+              oauth2: {
+                ...oauth2Fields,
+                grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer',
+                client_certificate_key_id: 'key-1',
+                signature_algorithm: 'RS512',
+                iss: 'issuer',
+                audience: 'audience',
+                claims: { sub: 'my-client' },
+              },
+              secrets: { oauth2: { client_certificate_key: '-----BEGIN PRIVATE KEY-----' } },
+            })
+          );
+        });
+      });
+
+      it('should require the private key of the JWT bearer grant, and valid claims', async () => {
+        const { utils } = renderFlyout({
+          ...kafkaOutput,
+          auth_type: 'oauth2',
+          oauth2: { ...oauth2Fields, grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer' },
+        });
+
+        change(utils, 'kafkaOAuth2ClaimsInput', '["not", "an", "object"]');
+        save(utils);
+
+        await waitFor(() => {
+          expect(utils.getByText('Private key is required')).toBeInTheDocument();
+          expect(
+            utils.getByText('The claims must be a JSON object, for example {"sub": "my-client"}')
+          ).toBeInTheDocument();
+        });
+        expect(mockSendPutOutput).not.toHaveBeenCalled();
+      });
+
+      it('should accept the files of the client id and of the private key instead of the values', async () => {
+        const { utils } = renderFlyout({
+          ...kafkaOutput,
+          auth_type: 'oauth2',
+          oauth2: {
+            token_url: oauth2Fields.token_url,
+            grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer',
+          },
+        });
+
+        change(utils, 'kafkaOAuth2ClientIdFileInput', '/etc/client_id');
+        change(utils, 'kafkaOAuth2ClientCertificateKeyFileInput', '/etc/key.pem');
+        save(utils);
+
+        await waitFor(() => {
+          expect(mockSendPutOutput).toHaveBeenCalledWith(
+            'outputK',
+            expect.objectContaining({
+              oauth2: {
+                token_url: oauth2Fields.token_url,
+                grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer',
+                client_id_file: '/etc/client_id',
+                client_certificate_key_file: '/etc/key.pem',
+              },
+            })
+          );
+        });
+        expect((mockSendPutOutput.mock.calls[0][1] as any).secrets).toBeUndefined();
+      });
+
+      it('should accept the files of the client id and of the client secret instead of the values', async () => {
+        const { utils } = renderFlyout({
+          ...kafkaOutput,
+          auth_type: 'oauth2',
+          oauth2: { token_url: oauth2Fields.token_url },
+        });
+
+        change(utils, 'kafkaOAuth2ClientIdFileInput', '/etc/client_id');
+        change(utils, 'kafkaOAuth2ClientSecretFileInput', '/etc/client_secret');
+        save(utils);
+
+        await waitFor(() => {
+          expect(mockSendPutOutput).toHaveBeenCalledWith(
+            'outputK',
+            expect.objectContaining({
+              oauth2: {
+                token_url: oauth2Fields.token_url,
+                client_id_file: '/etc/client_id',
+                client_secret_file: '/etc/client_secret',
+              },
+            })
+          );
+        });
+      });
+
+      it('should save the TLS settings of the token endpoint', async () => {
+        const { utils } = renderFlyout({
+          ...kafkaOutput,
+          auth_type: 'oauth2',
+          oauth2: oauth2Fields,
+          secrets: { oauth2: { client_secret: { id: 'secret-id' } } },
+        });
+
+        change(utils, 'kafkaOAuth2TlsCaFileInput', '/etc/ca.pem');
+        change(utils, 'kafkaOAuth2TlsCertFileInput', '/etc/cert.pem');
+        change(utils, 'kafkaOAuth2TlsKeyFileInput', '/etc/key.pem');
+        change(utils, 'kafkaOAuth2TlsServerNameOverrideInput', 'idp.example.com');
+        change(utils, 'kafkaOAuth2TlsMinVersionInput', '1.2');
+        change(utils, 'kafkaOAuth2TlsMaxVersionInput', '1.3');
+        fireEvent.click(
+          utils.getByTestId('settingsOutputsFlyout.kafkaOAuth2TlsInsecureSkipVerifyInput')
+        );
+        save(utils);
+
+        await waitFor(() => {
+          expect(mockSendPutOutput).toHaveBeenCalledWith(
+            'outputK',
+            expect.objectContaining({
+              oauth2: {
+                ...oauth2Fields,
+                tls: {
+                  ca_file: '/etc/ca.pem',
+                  cert_file: '/etc/cert.pem',
+                  key_file: '/etc/key.pem',
+                  server_name_override: 'idp.example.com',
+                  min_version: '1.2',
+                  max_version: '1.3',
+                  insecure_skip_verify: true,
+                },
+              },
+              secrets: { oauth2: { client_secret: { id: 'secret-id' } } },
+            })
+          );
+        });
+      });
+
+      it('should save the durations in seconds, and keep the ones already set', async () => {
+        const { utils } = renderFlyout({
+          ...kafkaOutput,
+          auth_type: 'oauth2',
+          oauth2: { ...oauth2Fields, timeout: 10 },
+          secrets: { oauth2: { client_secret: { id: 'secret-id' } } },
+        });
+
+        expect(
+          (utils.getByTestId('settingsOutputsFlyout.kafkaOAuth2TimeoutInput') as any).value
+        ).toEqual('10');
+        change(utils, 'kafkaOAuth2ExpiryBufferInput', '90.5');
+        save(utils);
+
+        await waitFor(() => {
+          expect(mockSendPutOutput).toHaveBeenCalledWith(
+            'outputK',
+            expect.objectContaining({
+              oauth2: { ...oauth2Fields, timeout: 10, expiry_buffer: 90.5 },
+            })
+          );
+        });
+      });
+
+      it('should leave a duration out when it is cleared, and not save an invalid one', async () => {
+        const { utils } = renderFlyout({
+          ...kafkaOutput,
+          auth_type: 'oauth2',
+          oauth2: { ...oauth2Fields, timeout: 10 },
+          secrets: { oauth2: { client_secret: { id: 'secret-id' } } },
+        });
+
+        change(utils, 'kafkaOAuth2ExpiryBufferInput', '-5');
+        save(utils);
+        await waitFor(() => {
+          expect(
+            utils.getByText('Specify a number of seconds between 0 and 86400')
+          ).toBeInTheDocument();
+        });
+        expect(mockSendPutOutput).not.toHaveBeenCalled();
+
+        change(utils, 'kafkaOAuth2ExpiryBufferInput', '');
+        change(utils, 'kafkaOAuth2TimeoutInput', '');
+        save(utils);
+        await waitFor(() => {
+          expect(mockSendPutOutput).toHaveBeenCalledWith(
+            'outputK',
+            expect.objectContaining({ oauth2: oauth2Fields })
+          );
+        });
+      });
+
+      it('should accept names of endpoint parameters that are also properties of every object', async () => {
+        const { utils } = renderFlyout({
+          ...kafkaOutput,
+          auth_type: 'oauth2',
+          oauth2: oauth2Fields,
+          secrets: { oauth2: { client_secret: { id: 'secret-id' } } },
+        });
+
+        change(utils, 'kafkaOAuth2EndpointParamName0', 'constructor');
+        change(utils, 'kafkaOAuth2EndpointParamValue0', 'first');
+        fireEvent.click(utils.getByTestId('settingsOutputsFlyout.kafkaOAuth2AddEndpointParam'));
+        change(utils, 'kafkaOAuth2EndpointParamName1', 'constructor');
+        change(utils, 'kafkaOAuth2EndpointParamValue1', 'second');
+        save(utils);
+
+        await waitFor(() => {
+          expect(mockSendPutOutput).toHaveBeenCalled();
+        });
+        const { endpoint_params: endpointParams } = (mockSendPutOutput.mock.calls[0][1] as any)
+          .oauth2;
+        // own properties, not inherited ones
+        expect(Object.keys(endpointParams)).toEqual(['constructor']);
+        expect(endpointParams.constructor).toEqual(['first', 'second']);
+      });
+
+      it('should not save an endpoint parameter named __proto__ and explain why', async () => {
+        const { utils } = renderFlyout({
+          ...kafkaOutput,
+          auth_type: 'oauth2',
+          oauth2: oauth2Fields,
+          secrets: { oauth2: { client_secret: { id: 'secret-id' } } },
+        });
+
+        change(utils, 'kafkaOAuth2EndpointParamName0', '__proto__');
+        change(utils, 'kafkaOAuth2EndpointParamValue0', 'value');
+        save(utils);
+
+        await waitFor(() => {
+          expect(
+            utils.getByText('"__proto__" is a reserved name and cannot be used')
+          ).toBeInTheDocument();
+        });
+        expect(mockSendPutOutput).not.toHaveBeenCalled();
+      });
+
+      it('should not parse claims left in the form after switching to client credentials', async () => {
+        const { utils } = renderFlyout({
+          ...kafkaOutput,
+          auth_type: 'oauth2',
+          oauth2: { ...oauth2Fields, grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer' },
+          secrets: { oauth2: { client_certificate_key: { id: 'key-secret-id' } } },
+        });
+
+        // invalid claims under the JWT bearer grant, then another grant: the claims do not apply
+        change(utils, 'kafkaOAuth2ClaimsInput', 'not json');
+        fireEvent.click(utils.getByRole('radio', { name: 'Client credentials' }));
+        change(utils, 'kafkaOAuth2ClientSecretInput', 'my-secret');
+        save(utils);
+
+        await waitFor(() => {
+          expect(mockSendPutOutput).toHaveBeenCalled();
+        });
+        const payload = mockSendPutOutput.mock.calls[0][1] as any;
+        expect(payload.oauth2.claims).toBeUndefined();
+        expect(payload.secrets).toEqual({ oauth2: { client_secret: 'my-secret' } });
+      });
+
+      it('should drop the settings of the JWT bearer grant when the output goes back to client credentials', async () => {
+        const { utils } = renderFlyout({
+          ...kafkaOutput,
+          auth_type: 'oauth2',
+          oauth2: {
+            ...oauth2Fields,
+            grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer',
+            iss: 'issuer',
+            claims: { sub: 'my-client' },
+          },
+          secrets: { oauth2: { client_certificate_key: { id: 'key-secret-id' } } },
+        });
+
+        fireEvent.click(utils.getByRole('radio', { name: 'Client credentials' }));
+        change(utils, 'kafkaOAuth2ClientSecretInput', 'my-secret');
+        save(utils);
+
+        await waitFor(() => {
+          expect(mockSendPutOutput).toHaveBeenCalled();
+        });
+        const payload = mockSendPutOutput.mock.calls[0][1] as any;
+        expect(payload.oauth2).toEqual({
+          ...oauth2Fields,
+          // the grant was set before, so it stays explicit
+          grant_type: 'client_credentials',
+        });
+        expect(payload.secrets).toEqual({ oauth2: { client_secret: 'my-secret' } });
+      });
+    });
+
+    it('should keep the OAuth2 settings of an output when the feature flag is off', async () => {
+      const { utils } = renderFlyout({
+        ...kafkaOutput,
+        auth_type: 'oauth2',
+        oauth2: { client_id: 'my-client', token_url: 'https://idp.example.com/oauth2/token' },
+        secrets: { oauth2: { client_secret: { id: 'secret-id' } } },
+      });
+
+      expect(
+        utils.getByTestId('settingsOutputsFlyout.kafkaAuthenticationManagedElsewhereCallout')
+      ).toBeInTheDocument();
+      expect(utils.queryByTestId('settingsOutputsFlyout.kafkaOAuth2ClientIdInput')).toBeNull();
+
+      fireEvent.change(utils.getByTestId('settingsOutputsFlyout.nameInput'), {
+        target: { value: 'kafka output updated' },
+      });
+      fireEvent.click(utils.getByText('Save and apply settings'));
+
+      await waitFor(() => {
+        expect(mockSendPutOutput).toHaveBeenCalledWith(
+          'outputK',
+          expect.objectContaining({
+            auth_type: 'oauth2',
+            oauth2: { client_id: 'my-client', token_url: 'https://idp.example.com/oauth2/token' },
+            secrets: { oauth2: { client_secret: { id: 'secret-id' } } },
+          })
+        );
+      });
+    });
+  });
+
+  it('should render the username and password inputs for user_pass authentication', async () => {
+    jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({} as any);
+
+    const { utils } = renderFlyout({
+      type: 'kafka',
+      name: 'kafka output',
+      id: 'outputK',
+      is_default: false,
+      is_default_monitoring: false,
+      hosts: ['kafka:443'],
+      topic: 'topic',
+      auth_type: 'user_pass',
+      version: '1.0.0',
+      username: 'user',
+      password: 'pass',
+      compression: 'none',
+    });
+
+    expect(utils.getByTestId('settingsOutputsFlyout.kafkaUsernameInput')).toBeInTheDocument();
+    expect(
+      utils.queryByTestId('settingsOutputsFlyout.kafkaAuthenticationManagedElsewhereCallout')
+    ).not.toBeInTheDocument();
+  });
+
   it('should populate secret input with plain text value when editing logstash output', async () => {
     jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({} as any);
 
@@ -306,6 +1236,146 @@ describe('EditOutputFlyout', () => {
     });
   });
 
+  it('should save a logstash output with only server CA configured (no client cert or key)', async () => {
+    // Regression test for https://github.com/elastic/kibana/issues/272243
+    // Server-only TLS (one-way) must be saveable without a client certificate or key.
+    jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({} as any);
+
+    mockedUseFleetStatus.mockReturnValue({
+      isLoading: false,
+      isReady: true,
+      isSecretsStorageEnabled: true,
+    } as any);
+
+    const { utils } = renderFlyout({
+      type: 'logstash',
+      name: 'logstash output',
+      id: 'outputL',
+      is_default: false,
+      is_default_monitoring: false,
+      hosts: ['logstash:5044'],
+      ssl: {
+        certificate: '',
+        certificate_authorities: ['/etc/ssl/ca.pem'],
+      },
+    });
+
+    // Trigger a change to mark the form as modified so the Save button becomes enabled
+    fireEvent.change(utils.getByDisplayValue('logstash output'), {
+      target: { value: 'logstash output updated' },
+    });
+
+    fireEvent.click(utils.getByText('Save and apply settings'));
+
+    await waitFor(() => {
+      expect(mockSendPutOutput).toHaveBeenCalledWith(
+        'outputL',
+        expect.objectContaining({
+          ssl: expect.objectContaining({
+            certificate_authorities: ['/etc/ssl/ca.pem'],
+          }),
+        })
+      );
+    });
+  });
+
+  it('should block saving a logstash output when client cert is set but key is missing', async () => {
+    // Regression guard: cert without key must not save — mTLS requires both fields.
+    jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({} as any);
+
+    mockedUseFleetStatus.mockReturnValue({
+      isLoading: false,
+      isReady: true,
+      isSecretsStorageEnabled: false,
+    } as any);
+
+    const { utils } = renderFlyout({
+      type: 'logstash',
+      name: 'logstash output',
+      id: 'outputL',
+      is_default: false,
+      is_default_monitoring: false,
+      hosts: ['logstash:5044'],
+      ssl: {
+        certificate: 'cert',
+        certificate_authorities: [],
+      },
+    });
+
+    fireEvent.change(utils.getByDisplayValue('logstash output'), {
+      target: { value: 'logstash output updated' },
+    });
+
+    fireEvent.click(utils.getByText('Save and apply settings'));
+
+    await new Promise((resolve) => setTimeout(resolve, 100));
+    expect(mockSendPutOutput).not.toHaveBeenCalled();
+  });
+
+  it('should block saving a logstash output when key is set but client cert is missing', async () => {
+    jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({} as any);
+
+    mockedUseFleetStatus.mockReturnValue({
+      isLoading: false,
+      isReady: true,
+      isSecretsStorageEnabled: false,
+    } as any);
+
+    const { utils } = renderFlyout({
+      type: 'logstash',
+      name: 'logstash output',
+      id: 'outputL',
+      is_default: false,
+      is_default_monitoring: false,
+      hosts: ['logstash:5044'],
+      ssl: {
+        key: 'key',
+        certificate_authorities: [],
+      },
+    });
+
+    fireEvent.change(utils.getByDisplayValue('logstash output'), {
+      target: { value: 'logstash output updated' },
+    });
+
+    fireEvent.click(utils.getByText('Save and apply settings'));
+
+    await new Promise((resolve) => setTimeout(resolve, 100));
+    expect(mockSendPutOutput).not.toHaveBeenCalled();
+  });
+
+  it('should block saving an elasticsearch output when client cert is set but key is missing', async () => {
+    jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({} as any);
+
+    mockedUseFleetStatus.mockReturnValue({
+      isLoading: false,
+      isReady: true,
+      isSecretsStorageEnabled: false,
+    } as any);
+
+    const { utils } = renderFlyout({
+      type: 'elasticsearch',
+      name: 'elasticsearch output',
+      id: 'outputES',
+      is_default: false,
+      is_default_monitoring: false,
+      hosts: ['http://localhost:9200'],
+      ssl: {
+        certificate: 'cert',
+        certificate_authorities: [],
+      },
+    });
+
+    fireEvent.change(utils.getByDisplayValue('elasticsearch output'), {
+      target: { value: 'elasticsearch output updated' },
+    });
+
+    fireEvent.click(utils.getByText('Save and apply settings'));
+
+    await new Promise((resolve) => setTimeout(resolve, 100));
+    expect(mockSendPutOutput).not.toHaveBeenCalled();
+  });
+
   it('should show a callout in the flyout if the selected output is logstash and no encrypted key is set', async () => {
     mockedUseFleetStatus.mockReturnValue({
       missingOptionalFeatures: ['encrypted_saved_object_encryption_key_required'],
@@ -322,10 +1392,11 @@ describe('EditOutputFlyout', () => {
     expect(utils.getByText('Additional setup required')).not.toBeNull();
   });
 
-  it('should render the flyout if the output provided is a remote ES output', async () => {
+  it('should render the flyout if the output provided is a remote ES output and license is at least enterprise', async () => {
     jest
       .spyOn(ExperimentalFeaturesService, 'get')
       .mockReturnValue({ enableSyncIntegrationsOnRemote: true } as any);
+    jest.spyOn(licenseService, 'isEnterprise').mockReturnValue(true);
 
     mockedUseFleetStatus.mockReturnValue({
       isLoading: false,
@@ -380,10 +1451,48 @@ describe('EditOutputFlyout', () => {
     });
   });
 
+  it('should not render the flyout if the output is a remote ES output and the license is not at least enterprise', async () => {
+    jest
+      .spyOn(ExperimentalFeaturesService, 'get')
+      .mockReturnValue({ enableSyncIntegrationsOnRemote: true } as any);
+    jest.spyOn(licenseService, 'isEnterprise').mockReturnValue(false);
+
+    mockedUseFleetStatus.mockReturnValue({
+      isLoading: false,
+      isReady: true,
+      isSecretsStorageEnabled: true,
+    } as any);
+
+    const { utils } = renderFlyout({
+      type: 'remote_elasticsearch',
+      name: 'remote es output',
+      id: 'outputR',
+      is_default: false,
+      is_default_monitoring: false,
+      kibana_url: 'http://localhost',
+      sync_integrations: true,
+    });
+
+    remoteEsOutputLabels.forEach((label) => {
+      expect(utils.queryByLabelText(label)).not.toBeNull();
+    });
+    expect(utils.queryByTestId('serviceTokenCallout')).not.toBeNull();
+
+    expect(utils.queryByTestId('settingsOutputsFlyout.typeInput')?.textContent).toContain(
+      'Remote Elasticsearch'
+    );
+
+    expect(utils.queryByTestId('serviceTokenSecretInput')).not.toBeNull();
+
+    expect(utils.queryByTestId('remoteClusterConfigurationCallout')).not.toBeInTheDocument();
+    expect(utils.queryByTestId('kibanaAPIKeyCallout')).not.toBeInTheDocument();
+  });
+
   it('should populate secret service token input with plain text value when editing remote ES output', async () => {
     jest
       .spyOn(ExperimentalFeaturesService, 'get')
       .mockReturnValue({ enableSyncIntegrationsOnRemote: true } as any);
+    jest.spyOn(licenseService, 'isEnterprise').mockReturnValue(true);
 
     mockedUseFleetStatus.mockReturnValue({
       isLoading: false,
@@ -429,21 +1538,382 @@ describe('EditOutputFlyout', () => {
       );
     });
   });
-
-  it('should not display remote ES output in type lists if serverless', async () => {
-    jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({} as any);
-    mockUseStartServices.mockReset();
+  it('should not disable hosts input for remote ES output in serverless', async () => {
     mockStartServices(true);
+    jest.spyOn(licenseService, 'isEnterprise').mockReturnValue(true);
+
+    mockedUseFleetStatus.mockReturnValue({
+      isLoading: false,
+      isReady: true,
+      isSecretsStorageEnabled: true,
+    } as any);
+
     const { utils } = renderFlyout({
-      type: 'elasticsearch',
-      name: 'dummy',
-      id: 'output',
+      type: 'remote_elasticsearch',
+      name: 'remote es output',
+      id: 'outputR',
       is_default: false,
       is_default_monitoring: false,
+      hosts: ['https://remote-host:9200'],
     });
 
-    expect(utils.queryByTestId('settingsOutputsFlyout.typeInput')?.textContent).not.toContain(
-      'Remote Elasticsearch'
+    await waitFor(() => {
+      expect(utils.queryByDisplayValue('https://remote-host:9200')).not.toBeNull();
+    });
+
+    expect(utils.getByDisplayValue('https://remote-host:9200')).not.toBeDisabled();
+  });
+
+  it('should disable hosts input for ES output in serverless', async () => {
+    mockStartServices(true);
+
+    const { utils } = renderFlyout({
+      type: 'elasticsearch',
+      name: 'elasticsearch output',
+      id: 'output123',
+      is_default: false,
+      is_default_monitoring: false,
+      hosts: ['https://es-host:9200'],
+    });
+
+    await waitFor(() => {
+      expect(utils.queryByDisplayValue('https://es-host:9200')).not.toBeNull();
+    });
+
+    expect(utils.getByDisplayValue('https://es-host:9200')).toBeDisabled();
+  });
+
+  it('should show default host when creating new ES output in serverless', async () => {
+    mockStartServices(true);
+
+    const { utils } = renderFlyout(undefined, {
+      type: 'elasticsearch',
+      name: 'default output',
+      id: 'default-output',
+      is_default: true,
+      is_default_monitoring: true,
+      hosts: ['https://default-es-host:443'],
+    });
+
+    await waitFor(() => {
+      expect(utils.queryByDisplayValue('https://default-es-host:443')).not.toBeNull();
+    });
+
+    expect(utils.getByDisplayValue('https://default-es-host:443')).toBeDisabled();
+  });
+
+  it('should show default ES hosts when switching from remote ES to ES in serverless', async () => {
+    mockStartServices(true);
+    jest.spyOn(licenseService, 'isEnterprise').mockReturnValue(true);
+
+    mockedUseFleetStatus.mockReturnValue({
+      isLoading: false,
+      isReady: true,
+      isSecretsStorageEnabled: true,
+    } as any);
+
+    const { utils } = renderFlyout(
+      {
+        type: 'remote_elasticsearch',
+        name: 'remote es output',
+        id: 'outputR',
+        is_default: false,
+        is_default_monitoring: false,
+        hosts: ['https://remote-host:9200'],
+      },
+      {
+        type: 'elasticsearch',
+        name: 'default output',
+        id: 'default-output',
+        is_default: true,
+        is_default_monitoring: true,
+        hosts: ['https://default-es-host:443'],
+      }
     );
+
+    await waitFor(() => {
+      expect(utils.queryByDisplayValue('https://remote-host:9200')).not.toBeNull();
+    });
+
+    // Switch type from remote ES to ES
+    const typeSelect = utils.getByTestId('settingsOutputsFlyout.typeInput');
+    fireEvent.change(typeSelect, { target: { value: 'elasticsearch' } });
+
+    await waitFor(() => {
+      expect(utils.queryByDisplayValue('https://default-es-host:443')).not.toBeNull();
+    });
+  });
+
+  it('should show empty hosts when switching from ES to remote ES in serverless', async () => {
+    mockStartServices(true);
+    jest.spyOn(licenseService, 'isEnterprise').mockReturnValue(true);
+
+    mockedUseFleetStatus.mockReturnValue({
+      isLoading: false,
+      isReady: true,
+      isSecretsStorageEnabled: true,
+    } as any);
+
+    const { utils } = renderFlyout(
+      {
+        type: 'elasticsearch',
+        name: 'es output',
+        id: 'output1',
+        is_default: false,
+        is_default_monitoring: false,
+        hosts: ['https://es-host:9200'],
+      },
+      {
+        type: 'elasticsearch',
+        name: 'default output',
+        id: 'default-output',
+        is_default: true,
+        is_default_monitoring: true,
+        hosts: ['https://default-es-host:443'],
+      }
+    );
+
+    await waitFor(() => {
+      expect(utils.queryByDisplayValue('https://es-host:9200')).not.toBeNull();
+    });
+
+    // Switch type from ES to remote ES
+    const typeSelect = utils.getByTestId('settingsOutputsFlyout.typeInput');
+    fireEvent.change(typeSelect, { target: { value: 'remote_elasticsearch' } });
+
+    // The old ES host should be gone — hosts should be empty for fresh remote ES entry
+    await waitFor(() => {
+      expect(utils.queryByDisplayValue('https://es-host:9200')).toBeNull();
+    });
+  });
+
+  describe('OpenTelemetry Exporter section', () => {
+    it('should show the OTel exporter configuration section for ES output', async () => {
+      const { utils } = renderFlyout({
+        type: 'elasticsearch',
+        name: 'elasticsearch output',
+        id: 'output123',
+        is_default: false,
+        is_default_monitoring: false,
+      });
+
+      expect(utils.queryByText('OpenTelemetry exporter')).not.toBeNull();
+
+      // Expand the accordion to reveal the YAML editor
+      fireEvent.click(utils.getByText('OpenTelemetry exporter'));
+      expect(utils.queryByLabelText('Advanced YAML configuration')).not.toBeNull();
+    });
+
+    it('should not show the OTel exporter section for logstash output', async () => {
+      const { utils } = renderFlyout({
+        type: 'logstash',
+        name: 'logstash output',
+        id: 'output123',
+        is_default: false,
+        is_default_monitoring: false,
+      });
+
+      expect(utils.queryByText('OpenTelemetry exporter')).toBeNull();
+      expect(utils.queryByLabelText('Advanced YAML Configuration')).toBeNull();
+    });
+
+    it('should not show the OTel exporter section for kafka output', async () => {
+      const { utils } = renderFlyout({
+        type: 'kafka',
+        name: 'kafka output',
+        id: 'output123',
+        is_default: false,
+        is_default_monitoring: false,
+      });
+
+      expect(utils.queryByText('OpenTelemetry exporter')).toBeNull();
+      expect(utils.queryByLabelText('Advanced YAML Configuration')).toBeNull();
+    });
+
+    it('should show the OTel exporter configuration section for remote ES output', async () => {
+      jest.spyOn(licenseService, 'isEnterprise').mockReturnValue(true);
+      jest
+        .spyOn(ExperimentalFeaturesService, 'get')
+        .mockReturnValue({ enableSyncIntegrationsOnRemote: true } as any);
+
+      const { utils } = renderFlyout({
+        type: 'remote_elasticsearch',
+        name: 'remote es output',
+        id: 'outputR',
+        is_default: false,
+        is_default_monitoring: false,
+      });
+
+      expect(utils.queryByText('OpenTelemetry exporter')).not.toBeNull();
+
+      fireEvent.click(utils.getByText('OpenTelemetry exporter'));
+      expect(utils.queryByLabelText('Advanced YAML configuration')).not.toBeNull();
+    });
+
+    it('should include otel_exporter_config_yaml in the save payload when creating an ES output', async () => {
+      jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({} as any);
+      mockedUseFleetStatus.mockReturnValue({
+        isLoading: false,
+        isReady: true,
+        isSecretsStorageEnabled: true,
+      } as any);
+
+      const { utils } = renderFlyout({
+        type: 'elasticsearch',
+        name: 'elasticsearch output',
+        id: 'output123',
+        is_default: false,
+        is_default_monitoring: false,
+        hosts: ['http://localhost:9200'],
+        otel_exporter_config_yaml: 'flush_interval: 10s',
+      });
+
+      // Change a field so the Save button becomes enabled
+      fireEvent.change(utils.getByDisplayValue('elasticsearch output'), {
+        target: { value: 'updated output name' },
+      });
+
+      fireEvent.click(utils.getByText('Save and apply settings'));
+
+      await waitFor(() => {
+        expect(mockSendPutOutput).toHaveBeenCalledWith(
+          'output123',
+          expect.objectContaining({
+            otel_exporter_config_yaml: 'flush_interval: 10s',
+          })
+        );
+      });
+    });
+
+    it('should send null otel_exporter_config_yaml when the field is empty', async () => {
+      jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({} as any);
+      mockedUseFleetStatus.mockReturnValue({
+        isLoading: false,
+        isReady: true,
+        isSecretsStorageEnabled: true,
+      } as any);
+
+      const { utils } = renderFlyout({
+        type: 'elasticsearch',
+        name: 'elasticsearch output',
+        id: 'output123',
+        is_default: false,
+        is_default_monitoring: false,
+        hosts: ['http://localhost:9200'],
+      });
+
+      // Change a field so the Save button becomes enabled
+      fireEvent.change(utils.getByDisplayValue('elasticsearch output'), {
+        target: { value: 'updated output name' },
+      });
+
+      fireEvent.click(utils.getByText('Save and apply settings'));
+
+      await waitFor(() => {
+        expect(mockSendPutOutput).toHaveBeenCalledWith(
+          'output123',
+          expect.objectContaining({
+            otel_exporter_config_yaml: null,
+          })
+        );
+      });
+    });
+
+    it.each([
+      {
+        type: 'elasticsearch' as const,
+        outputId: 'outputE',
+        outputName: 'elasticsearch output',
+        extra: { hosts: ['http://localhost:9200'] },
+      },
+      {
+        type: 'remote_elasticsearch' as const,
+        outputId: 'outputR',
+        outputName: 'remote es output',
+        extra: { hosts: ['https://remote-es:9200'], service_token: 'remote-token' },
+      },
+    ])(
+      'should block saving a $type output when otel_exporter_config_yaml is invalid YAML',
+      async ({ type, outputId, outputName, extra }) => {
+        jest.spyOn(licenseService, 'isEnterprise').mockReturnValue(true);
+        jest
+          .spyOn(ExperimentalFeaturesService, 'get')
+          .mockReturnValue({ enableSyncIntegrationsOnRemote: true } as any);
+        mockedUseFleetStatus.mockReturnValue({
+          isLoading: false,
+          isReady: true,
+          isSecretsStorageEnabled: true,
+        } as any);
+
+        const { utils } = renderFlyout({
+          type,
+          name: outputName,
+          id: outputId,
+          is_default: false,
+          is_default_monitoring: false,
+          // Invalid YAML — unbalanced brackets cause the parser to throw
+          otel_exporter_config_yaml: 'foo: [bar',
+          ...extra,
+        } as Output);
+
+        // The yaml parser used by validators is loaded asynchronously via
+        // useYaml — wait until it has been picked up so that
+        // createValidateYamlConfig is wired to the real parser before save.
+        await waitFor(() => {
+          expect(utils.queryByText('OpenTelemetry exporter')).not.toBeNull();
+        });
+        await new Promise((resolve) => setTimeout(resolve, 50));
+
+        fireEvent.change(utils.getByDisplayValue(outputName), {
+          target: { value: `${outputName} updated` },
+        });
+
+        fireEvent.click(utils.getByText('Save and apply settings'));
+
+        // Submit must NOT be called because invalid OTel exporter YAML must
+        // block save for both ES and remote ES outputs.
+        await new Promise((resolve) => setTimeout(resolve, 100));
+        expect(mockSendPutOutput).not.toHaveBeenCalled();
+      }
+    );
+
+    it('should include otel_exporter_config_yaml in the save payload when editing a remote ES output', async () => {
+      jest.spyOn(licenseService, 'isEnterprise').mockReturnValue(true);
+      jest
+        .spyOn(ExperimentalFeaturesService, 'get')
+        .mockReturnValue({ enableSyncIntegrationsOnRemote: true } as any);
+      mockedUseFleetStatus.mockReturnValue({
+        isLoading: false,
+        isReady: true,
+        isSecretsStorageEnabled: true,
+      } as any);
+
+      const { utils } = renderFlyout({
+        type: 'remote_elasticsearch',
+        name: 'remote es output',
+        id: 'outputR',
+        is_default: false,
+        is_default_monitoring: false,
+        hosts: ['https://remote-es:9200'],
+        service_token: 'remote-token',
+        otel_exporter_config_yaml: 'flush_interval: 10s',
+      });
+
+      // Change a field so the Save button becomes enabled
+      fireEvent.change(utils.getByDisplayValue('remote es output'), {
+        target: { value: 'updated remote output name' },
+      });
+
+      fireEvent.click(utils.getByText('Save and apply settings'));
+
+      await waitFor(() => {
+        expect(mockSendPutOutput).toHaveBeenCalledWith(
+          'outputR',
+          expect.objectContaining({
+            otel_exporter_config_yaml: 'flush_interval: 10s',
+          })
+        );
+      });
+    });
   });
 });

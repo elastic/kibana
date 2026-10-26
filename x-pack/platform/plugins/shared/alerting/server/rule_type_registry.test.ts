@@ -19,6 +19,8 @@ import { alertsServiceMock } from './alerts_service/alerts_service.mock';
 import { schema } from '@kbn/config-schema';
 import type { RecoveredActionGroupId } from '../common';
 import type { AlertingConfig } from './config';
+import { TaskPriority } from '@kbn/task-manager-plugin/server';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 
 const logger = loggingSystemMock.create().get();
 let mockedLicenseState: jest.Mocked<ILicenseState>;
@@ -170,7 +172,7 @@ describe('Create Lifecycle', () => {
       };
       const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
 
-      expect(() => registry.register(ruleType)).toThrowError(
+      expect(() => registry.register(ruleType)).toThrow(
         new Error(
           `Rule type \"123\" has invalid timeout: string is not a valid duration: 23 milisec.`
         )
@@ -202,7 +204,7 @@ describe('Create Lifecycle', () => {
       };
       const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
 
-      expect(() => registry.register(ruleType)).toThrowError(
+      expect(() => registry.register(ruleType)).toThrow(
         new Error(
           `Rule type \"123\" has invalid default interval: string is not a valid duration: foobar.`
         )
@@ -314,7 +316,7 @@ describe('Create Lifecycle', () => {
       };
       const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
 
-      expect(() => registry.register(ruleType)).toThrowError(
+      expect(() => registry.register(ruleType)).toThrow(
         new Error(
           `Rule type [id="${ruleType.id}"] cannot be registered. Action groups [recovered] are reserved by the framework.`
         )
@@ -368,7 +370,7 @@ describe('Create Lifecycle', () => {
       };
       const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
 
-      expect(() => registry.register(ruleType)).toThrowError(
+      expect(() => registry.register(ruleType)).toThrow(
         new Error(
           `Rule type [id="${ruleType.id}"] cannot be registered. Action group definitions cannot contain duplicate severity levels.`
         )
@@ -499,6 +501,80 @@ describe('Create Lifecycle', () => {
       ]);
     });
 
+    test('allows RuleType to specify a priority', () => {
+      const ruleType: RuleType<never, never, never, never, never, 'default', 'backToAwesome', {}> =
+        {
+          id: 'test',
+          name: 'Test',
+          actionGroups: [
+            {
+              id: 'default',
+              name: 'Default',
+            },
+          ],
+          defaultActionGroupId: 'default',
+          recoveryActionGroup: {
+            id: 'backToAwesome',
+            name: 'Back To Awesome',
+          },
+          priority: TaskPriority.Deferrable,
+          executor: jest.fn(),
+          category: 'test',
+          producer: 'alerts',
+          solution: 'stack',
+          minimumLicenseRequired: 'basic',
+          isExportable: true,
+          validate: {
+            params: { validate: (params) => params },
+          },
+        };
+      const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
+      registry.register(ruleType);
+      expect(registry.get('test').priority).toEqual(TaskPriority.Deferrable);
+
+      expect(taskManager.registerTaskDefinitions).toHaveBeenCalledTimes(1);
+      expect(taskManager.registerTaskDefinitions.mock.calls[0][0]).toMatchObject({
+        'alerting:test': {
+          title: 'Test',
+          priority: TaskPriority.Deferrable,
+          taskTypeGroup: 'alerting',
+        },
+      });
+    });
+
+    test('throws if RuleType priority provided is invalid', () => {
+      const ruleType: RuleType<never, never, never, never, never, 'default', 'backToAwesome', {}> =
+        {
+          id: 'test',
+          name: 'Test',
+          actionGroups: [
+            {
+              id: 'default',
+              name: 'Default',
+            },
+          ],
+          defaultActionGroupId: 'default',
+          recoveryActionGroup: {
+            id: 'backToAwesome',
+            name: 'Back To Awesome',
+          },
+          priority: TaskPriority.Maintenance as TaskPriority.Standard, // Have to cast to force this error case
+          executor: jest.fn(),
+          category: 'test',
+          producer: 'alerts',
+          solution: 'stack',
+          minimumLicenseRequired: 'basic',
+          isExportable: true,
+          validate: {
+            params: { validate: (params) => params },
+          },
+        };
+      const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
+      expect(() => registry.register(ruleType)).toThrow(
+        new Error(`Rule type \"test\" has invalid priority: 1.`)
+      );
+    });
+
     test('throws if the custom recovery group is contained in the RuleType action groups', () => {
       const ruleType: RuleType<
         never,
@@ -539,7 +615,7 @@ describe('Create Lifecycle', () => {
       };
       const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
 
-      expect(() => registry.register(ruleType)).toThrowError(
+      expect(() => registry.register(ruleType)).toThrow(
         new Error(
           `Rule type [id="${ruleType.id}"] cannot be registered. Action group [backToAwesome] cannot be used as both a recovery and an active action group.`
         )
@@ -575,6 +651,7 @@ describe('Create Lifecycle', () => {
         'alerting:test': {
           timeout: '20m',
           title: 'Test',
+          taskTypeGroup: 'alerting',
         },
       });
     });
@@ -609,6 +686,7 @@ describe('Create Lifecycle', () => {
           timeout: '20m',
           title: 'Test',
           cost: 10,
+          taskTypeGroup: 'alerting',
         },
       });
     });
@@ -771,6 +849,62 @@ describe('Create Lifecycle', () => {
       registry.register(ruleType);
       expect(registry.get('test').producer).toEqual('alerts');
     });
+
+    test('registers rule if cancelAlertsOnRuleTimeout: true and autoRecoverAlerts: true', () => {
+      const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
+      registry.register({
+        id: 'foo',
+        name: 'Foo',
+        actionGroups: [
+          {
+            id: 'default',
+            name: 'Default',
+          },
+        ],
+        defaultActionGroupId: 'default',
+        minimumLicenseRequired: 'basic',
+        isExportable: true,
+        executor: jest.fn(),
+        category: 'test',
+        producer: 'alerts',
+        solution: 'stack',
+        validate: {
+          params: schema.any(),
+        },
+
+        cancelAlertsOnRuleTimeout: true,
+        autoRecoverAlerts: true,
+      });
+      expect(registry.has('foo')).toEqual(true);
+    });
+
+    test('registers rule if cancelAlertsOnRuleTimeout: false and autoRecoverAlerts: false', () => {
+      const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
+      registry.register({
+        id: 'foo',
+        name: 'Foo',
+        actionGroups: [
+          {
+            id: 'default',
+            name: 'Default',
+          },
+        ],
+        defaultActionGroupId: 'default',
+        minimumLicenseRequired: 'basic',
+        isExportable: true,
+        executor: jest.fn(),
+        category: 'test',
+        producer: 'alerts',
+        solution: 'stack',
+        validate: {
+          params: schema.any(),
+        },
+
+        cancelAlertsOnRuleTimeout: false,
+        autoRecoverAlerts: false,
+      });
+      expect(registry.has('foo')).toEqual(true);
+    });
   });
 
   describe('register() with overwriteProducer', () => {
@@ -911,7 +1045,10 @@ describe('Create Lifecycle', () => {
           context: 'test',
           mappings: { fieldMap: { foo: { type: 'keyword', required: false } } },
         },
+        autoRecoverAlerts: false,
+        internallyManaged: false,
       });
+
       const result = registry.list();
       expect(result).toMatchInlineSnapshot(`
         Map {
@@ -942,6 +1079,7 @@ describe('Create Lifecycle', () => {
                 },
               },
             },
+            "autoRecoverAlerts": false,
             "category": "test",
             "defaultActionGroupId": "testActionGroup",
             "defaultScheduleInterval": undefined,
@@ -949,6 +1087,7 @@ describe('Create Lifecycle', () => {
             "enabledInLicense": false,
             "hasAlertsMappings": true,
             "id": "test",
+            "internallyManaged": false,
             "isExportable": true,
             "minimumLicenseRequired": "basic",
             "name": "Test",
@@ -1033,6 +1172,171 @@ describe('Create Lifecycle', () => {
       });
       const result = registry.getAllTypes();
       expect(result).toEqual(['test']);
+    });
+  });
+
+  describe('getFilteredTypes()', () => {
+    test('should return empty when nothing is registered', () => {
+      const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
+      expect(
+        registry.getFilteredTypes({
+          categories: [
+            DEFAULT_APP_CATEGORIES.management.id,
+            DEFAULT_APP_CATEGORIES.observability.id,
+            DEFAULT_APP_CATEGORIES.security.id,
+          ],
+        })
+      ).toEqual([]);
+    });
+
+    test('should return list of registered type ids for a category', () => {
+      const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
+      registry.register({
+        id: 'test',
+        name: 'Test',
+        actionGroups: [
+          {
+            id: 'testActionGroup',
+            name: 'Test Action Group',
+          },
+        ],
+        defaultActionGroupId: 'testActionGroup',
+        doesSetRecoveryContext: false,
+        isExportable: true,
+        ruleTaskTimeout: '20m',
+        minimumLicenseRequired: 'basic',
+        executor: jest.fn(),
+        category: 'test',
+        producer: 'alerts',
+        solution: 'stack',
+        validate: {
+          params: schema.any(),
+        },
+      });
+      registry.register({
+        id: 'test2',
+        name: 'Test',
+        actionGroups: [
+          {
+            id: 'testActionGroup',
+            name: 'Test Action Group',
+          },
+        ],
+        defaultActionGroupId: 'testActionGroup',
+        doesSetRecoveryContext: false,
+        isExportable: true,
+        ruleTaskTimeout: '20m',
+        minimumLicenseRequired: 'basic',
+        executor: jest.fn(),
+        category: 'test2',
+        producer: 'alerts',
+        solution: 'stack',
+        validate: {
+          params: schema.any(),
+        },
+      });
+      registry.register({
+        id: 'test3',
+        name: 'Test',
+        actionGroups: [
+          {
+            id: 'testActionGroup',
+            name: 'Test Action Group',
+          },
+        ],
+        defaultActionGroupId: 'testActionGroup',
+        doesSetRecoveryContext: false,
+        isExportable: true,
+        ruleTaskTimeout: '20m',
+        minimumLicenseRequired: 'basic',
+        executor: jest.fn(),
+        category: 'test3',
+        producer: 'alerts',
+        solution: 'stack',
+        validate: {
+          params: schema.any(),
+        },
+      });
+      const result = registry.getFilteredTypes({
+        categories: ['test', 'test2'],
+      });
+      expect(result).toEqual(['test', 'test2']);
+    });
+
+    test('should exclude internally managed rule types', () => {
+      const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
+      registry.register({
+        id: 'test',
+        name: 'Test',
+        actionGroups: [
+          {
+            id: 'testActionGroup',
+            name: 'Test Action Group',
+          },
+        ],
+        defaultActionGroupId: 'testActionGroup',
+        doesSetRecoveryContext: false,
+        isExportable: true,
+        ruleTaskTimeout: '20m',
+        minimumLicenseRequired: 'basic',
+        executor: jest.fn(),
+        category: 'test',
+        producer: 'alerts',
+        solution: 'stack',
+        validate: {
+          params: schema.any(),
+        },
+      });
+      registry.register({
+        id: 'test2',
+        name: 'Test',
+        actionGroups: [
+          {
+            id: 'testActionGroup',
+            name: 'Test Action Group',
+          },
+        ],
+        defaultActionGroupId: 'testActionGroup',
+        doesSetRecoveryContext: false,
+        isExportable: true,
+        ruleTaskTimeout: '20m',
+        minimumLicenseRequired: 'basic',
+        executor: jest.fn(),
+        category: 'test2',
+        producer: 'alerts',
+        solution: 'stack',
+        validate: {
+          params: schema.any(),
+        },
+      });
+      registry.register({
+        id: 'test3',
+        name: 'Test',
+        actionGroups: [
+          {
+            id: 'testActionGroup',
+            name: 'Test Action Group',
+          },
+        ],
+        defaultActionGroupId: 'testActionGroup',
+        doesSetRecoveryContext: false,
+        isExportable: true,
+        ruleTaskTimeout: '20m',
+        minimumLicenseRequired: 'basic',
+        executor: jest.fn(),
+        category: 'test',
+        producer: 'alerts',
+        solution: 'stack',
+        validate: {
+          params: schema.any(),
+        },
+        internallyManaged: true,
+      });
+      const result = registry.getFilteredTypes({
+        excludeInternallyManaged: true,
+        categories: ['test', 'test2'],
+      });
+      expect(result).toEqual(['test', 'test2']);
     });
   });
 

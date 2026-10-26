@@ -7,7 +7,8 @@
 
 import React from 'react';
 
-import { AppContextTestRender, createAppRootMockRenderer } from '../../test';
+import type { AppContextTestRender } from '../../test';
+import { createAppRootMockRenderer } from '../../test';
 import { DetailPanelAlertTab } from '.';
 import { mockAlerts } from '../../../common/mocks/constants/session_view_process.mock';
 import { fireEvent } from '@testing-library/react';

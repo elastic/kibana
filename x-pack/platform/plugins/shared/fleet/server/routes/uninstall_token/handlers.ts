@@ -6,24 +6,32 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
-import { agentPolicyService } from '../../services';
+import { agentPolicyService, appContextService } from '../../services';
 import type { FleetRequestHandler } from '../../types';
 import type {
   GetUninstallTokensMetadataRequestSchema,
   GetUninstallTokenRequestSchema,
+  RotateUninstallTokenRequestSchema,
 } from '../../types/rest_spec/uninstall_token';
-import type { GetUninstallTokenResponse } from '../../../common/types/rest_spec/uninstall_token';
+import type {
+  GetUninstallTokenResponse,
+  RotateUninstallTokenResponse,
+} from '../../../common/types/rest_spec/uninstall_token';
 import { LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../../constants';
 
 export const getUninstallTokensMetadataHandler: FleetRequestHandler<
   unknown,
   TypeOf<typeof GetUninstallTokensMetadataRequestSchema.query>
 > = async (context, request, response) => {
+  const logger = appContextService.getLogger().get('httpGetUninstallTokensMetadataHandler');
   const [fleetContext, coreContext] = await Promise.all([context.fleet, context.core]);
   const uninstallTokenService = fleetContext.uninstallTokenService.asCurrentUser;
 
   const { page = 1, perPage = 20, policyId, search } = request.query;
+
+  logger.debug(`Retrieving uninstall tokens with policy id [${policyId}] and search [${search}]`);
 
   if (policyId && search) {
     return response.badRequest({
@@ -35,13 +43,15 @@ export const getUninstallTokensMetadataHandler: FleetRequestHandler<
 
   const soClient = coreContext.savedObjects.client;
 
-  const { items: managedPolicies } = await agentPolicyService.list(soClient, {
+  const { items: excludedPolicies } = await agentPolicyService.list(soClient, {
     fields: ['id'],
     perPage: SO_SEARCH_LIMIT,
-    kuery: `${LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE}.is_managed:true`,
+    kuery: `${LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE}.is_managed:true OR ${LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE}.supports_agentless:true`,
   });
 
-  const managedPolicyIds = managedPolicies.map((policy) => policy.id);
+  const excludedPolicyIds = excludedPolicies.map((policy) => policy.id);
+
+  logger.debug(`Found [${excludedPolicyIds.length}] managed or agentless policies to exclude`);
 
   let policyIdSearchTerm: string | undefined;
   let policyNameSearchTerm: string | undefined;
@@ -57,7 +67,7 @@ export const getUninstallTokensMetadataHandler: FleetRequestHandler<
     policyNameSearchTerm,
     page,
     perPage,
-    managedPolicyIds.length > 0 ? managedPolicyIds : undefined
+    excludedPolicyIds.length > 0 ? excludedPolicyIds : undefined
   );
 
   return response.ok({ body });
@@ -80,6 +90,53 @@ export const getUninstallTokenHandler: FleetRequestHandler<
   }
   const body: GetUninstallTokenResponse = {
     item: token,
+  };
+
+  return response.ok({ body });
+};
+
+export const rotateUninstallTokenHandler: FleetRequestHandler<
+  TypeOf<typeof RotateUninstallTokenRequestSchema.params>
+> = async (context, request, response) => {
+  const logger = appContextService.getLogger().get('httpRotateUninstallTokenHandler');
+  const [fleetContext, coreContext] = await Promise.all([context.fleet, context.core]);
+  const uninstallTokenService = fleetContext.uninstallTokenService.asCurrentUser;
+  const soClient = coreContext.savedObjects.client;
+
+  const { agentPolicyId } = request.params;
+
+  logger.debug(`Rotating uninstall token for agent policy [${agentPolicyId}]`);
+
+  let agentPolicy;
+  try {
+    agentPolicy = await agentPolicyService.get(soClient, agentPolicyId);
+  } catch (error) {
+    if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
+      return response.notFound({
+        body: { message: `Agent policy not found with id ${agentPolicyId}` },
+      });
+    }
+    throw error;
+  }
+
+  if (!agentPolicy) {
+    return response.notFound({
+      body: { message: `Agent policy not found with id ${agentPolicyId}` },
+    });
+  }
+
+  if (!agentPolicy.is_protected) {
+    return response.badRequest({
+      body: {
+        message: `Agent policy [${agentPolicyId}] does not have tamper protection enabled. Uninstall tokens can only be rotated for protected policies.`,
+      },
+    });
+  }
+
+  await uninstallTokenService.generateTokenForPolicyId(agentPolicyId, true);
+
+  const body: RotateUninstallTokenResponse = {
+    message: 'Uninstall token rotated successfully.',
   };
 
   return response.ok({ body });

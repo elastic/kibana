@@ -5,15 +5,18 @@
  * 2.0.
  */
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { CoreStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import { PerformanceContextProvider } from '@kbn/ebt-tools';
 import React, { useMemo } from 'react';
-import { DatasetQualityController } from '../../controller/dataset_quality';
+import { DATASET_QUALITY_ALL_SIGNALS_ID } from '../../../common/constants';
+import type { DatasetQualityController } from '../../controller/dataset_quality';
+import { useDatasetQualityState } from '../../hooks/use_dataset_quality_state';
 import SummaryPanelProvider from '../../hooks/use_summary_panel';
-import { ITelemetryClient } from '../../services/telemetry';
-import { DatasetQualityStartDeps } from '../../types';
+import type { ITelemetryClient } from '../../services/telemetry';
+import type { DatasetQualityStartDeps } from '../../types';
 import { useKibanaContextForPluginProvider } from '../../utils';
-import { DatasetQualityContext, DatasetQualityContextValue } from './context';
+import type { DatasetQualityContextValue } from './context';
+import { DatasetQualityContext } from './context';
 import EmptyStateWrapper from './empty_state/empty_state';
 import Filters from './filters/filters';
 import Header from './header';
@@ -29,7 +32,6 @@ export interface CreateDatasetQualityArgs {
   core: CoreStart;
   plugins: DatasetQualityStartDeps;
   telemetryClient: ITelemetryClient;
-  isFailureStoreEnabled: boolean;
 }
 
 export const DatasetQuality = ({
@@ -37,7 +39,6 @@ export const DatasetQuality = ({
   core,
   plugins,
   telemetryClient,
-  isFailureStoreEnabled,
 }: DatasetQualityProps & CreateDatasetQualityArgs) => {
   const KibanaContextProviderForPlugin = useKibanaContextForPluginProvider(core, plugins);
 
@@ -45,9 +46,11 @@ export const DatasetQuality = ({
     () => ({
       service: controller.service,
       telemetryClient,
-      isFailureStoreEnabled,
+      isDatasetQualityAllSignalsAvailable: core.pricing.isFeatureAvailable(
+        DATASET_QUALITY_ALL_SIGNALS_ID
+      ),
     }),
-    [controller.service, isFailureStoreEnabled, telemetryClient]
+    [controller.service, telemetryClient, core.pricing]
   );
 
   return (
@@ -64,11 +67,18 @@ export const DatasetQuality = ({
 };
 
 function DatasetQualityContent() {
+  // Surfaces the gate `EmptyStateWrapper` reads, so a consumer can tell "the user may not
+  // see any data set" apart from "we don't know yet" without inspecting the rendered branch.
+  const { statsLoading } = useDatasetQualityState();
+
   return (
-    <EuiFlexGroup direction="column" gutterSize="l">
-      <EuiFlexItem grow={false}>
-        <Header />
-      </EuiFlexItem>
+    <EuiFlexGroup
+      direction="column"
+      gutterSize="l"
+      data-test-subj="datasetQualityPage"
+      data-privileges-resolved={!statsLoading}
+    >
+      <Header />
       <EuiFlexItem grow={false}>
         <Warnings />
       </EuiFlexItem>

@@ -21,13 +21,6 @@ export const CANCEL = i18n.translate(
   }
 );
 
-export const SELECT_A_CONNECTOR = i18n.translate(
-  'xpack.securitySolution.attackDiscovery.pages.header.selectAConnector',
-  {
-    defaultMessage: 'Select a connector',
-  }
-);
-
 export const SETTINGS = i18n.translate(
   'xpack.securitySolution.attackDiscovery.pages.header.settingsButtonLabel',
   {

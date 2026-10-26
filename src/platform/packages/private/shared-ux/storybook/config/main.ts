@@ -14,5 +14,12 @@ module.exports = {
   stories: [
     '../../**/*.stories.+(tsx|mdx)',
     '../../../../shared/shared-ux/**/*.stories.+(tsx|mdx)',
+    '../../../../../../core/packages/chrome/**/*.stories.+(tsx|mdx)',
+    '../../../../shared/kbn-developer-toolbar/**/*.stories.+(tsx|mdx)',
+    '../../../kbn-dev-comments/**/*.stories.+(tsx|mdx)',
+    '../../../../shared/navigation-customization-components/**/*.stories.+(tsx|mdx)',
   ],
+  typescript: {
+    reactDocgen: 'react-docgen-typescript',
+  },
 };

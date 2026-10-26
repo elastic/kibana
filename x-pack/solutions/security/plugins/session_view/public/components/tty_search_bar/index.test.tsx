@@ -7,11 +7,13 @@
 import React from 'react';
 import { renderHook } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { AppContextTestRender, createAppRootMockRenderer } from '../../test';
+import type { AppContextTestRender } from '../../test';
+import { createAppRootMockRenderer } from '../../test';
 import { sessionViewIOEventsMock } from '../../../common/mocks/responses/session_view_io_events.mock';
 import { useIOLines } from '../tty_player/hooks';
 import type { ProcessEventsPage } from '../../../common';
-import { TTYSearchBar, TTYSearchBarDeps } from '.';
+import type { TTYSearchBarDeps } from '.';
+import { TTYSearchBar } from '.';
 
 // TTYSearchBar is a HOC to SessionViewSearchBar which is already well tested
 // so these tests will only focus on newly added functionality

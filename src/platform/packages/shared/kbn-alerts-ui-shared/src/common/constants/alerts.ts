@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DataViewField } from '@kbn/data-views-plugin/common';
+import type { GetBrowserFieldsResponse } from '@kbn/alerting-types';
 
 export const DEFAULT_ALERTS_PAGE_SIZE = 10;
-export const EMPTY_AAD_FIELDS: DataViewField[] = [];
+export const EMPTY_AAD_FIELDS: GetBrowserFieldsResponse['fields'] = [];

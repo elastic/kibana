@@ -5,15 +5,14 @@
  * 2.0.
  */
 
+import type { ExperimentalFeatures } from '../../common';
 import type { SecuritySubPlugin } from '../app/types';
-import { routes } from './routes';
+import { getSiemMigrationsRoutes } from './routes';
 
 export class SiemMigrations {
   public setup() {}
 
-  public start(isEnabled = false): SecuritySubPlugin {
-    return {
-      routes: isEnabled ? routes : [],
-    };
+  public start(experimentalFeatures: ExperimentalFeatures): SecuritySubPlugin {
+    return { routes: getSiemMigrationsRoutes(experimentalFeatures) };
   }
 }

@@ -1,0 +1,44 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import { getNoDataCardServicesMock } from '@kbn/shared-ux-card-no-data-mocks';
+import type { KibanaNoDataPageServices } from '@kbn/shared-ux-page-kibana-no-data-types';
+import { getNoDataViewsPromptServicesMock } from '@kbn/shared-ux-prompt-no-data-views-mocks';
+
+interface Params {
+  hasESData: boolean;
+  hasDataView: boolean;
+  showPlainSpinner: boolean;
+}
+
+const defaultParams = {
+  hasESData: true,
+  hasDataView: true,
+  showPlainSpinner: false,
+};
+
+/**
+ * Returns the Jest-compatible service abstractions for the `KibanaNoDataPage` Provider.
+ */
+export const getServicesMock = (params?: Partial<Params>) => {
+  const hasESData =
+    params && params.hasESData !== undefined ? params.hasESData : defaultParams.hasESData;
+
+  const hasDataView =
+    params && params.hasDataView !== undefined ? params.hasDataView : defaultParams.hasDataView;
+
+  const services: KibanaNoDataPageServices = {
+    ...getNoDataCardServicesMock(),
+    ...getNoDataViewsPromptServicesMock(),
+    hasESData: async () => hasESData,
+    hasDataView: async () => hasDataView,
+  };
+
+  return services;
+};

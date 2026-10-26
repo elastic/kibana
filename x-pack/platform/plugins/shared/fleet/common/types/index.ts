@@ -12,11 +12,13 @@ import type {
   PreconfiguredAgentPolicy,
   PreconfiguredPackage,
   PreconfiguredOutput,
+  PreconfiguredDownloadSource,
 } from './models/preconfiguration';
 
 export interface FleetConfigType {
   enabled: boolean;
   isAirGapped?: boolean;
+  productVersionsApiTimeoutMs?: number;
   registryUrl?: string;
   registryProxyUrl?: string;
   agents: {
@@ -41,6 +43,26 @@ export interface FleetConfigType {
         ca?: string;
       };
     };
+    deploymentSecrets?: {
+      fleetAppToken?: string;
+      elasticsearchAppToken?: string;
+    };
+    customIntegrations?: {
+      enabled?: boolean;
+    };
+    managedBulk?: {
+      enabled: boolean;
+    };
+  };
+  iacProvisioner?: {
+    api?: {
+      url?: string;
+      tls?: {
+        certificate?: string;
+        key?: string;
+        ca?: string;
+      };
+    };
   };
   spaceSettings?: Array<{
     space_id: string;
@@ -49,9 +71,11 @@ export interface FleetConfigType {
   agentPolicies?: PreconfiguredAgentPolicy[];
   packages?: PreconfiguredPackage[];
   outputs?: PreconfiguredOutput[];
+  binaryDownloadSource?: PreconfiguredDownloadSource[];
   agentIdVerificationEnabled?: boolean;
   eventIngestedEnabled?: boolean;
   enableExperimental?: string[];
+  experimentalFeatures?: { [k: string]: boolean };
   enableManagedLogsAndMetricsDataviews?: boolean;
   packageVerification?: {
     gpgKeyPath?: string;
@@ -59,6 +83,14 @@ export interface FleetConfigType {
   setup?: {
     agentPolicySchemaUpgradeBatchSize?: number;
     uninstallTokenVerificationBatchSize?: number;
+  };
+  startupOptimization?: {
+    deferPackageBumpInstallVersion?: boolean;
+    maxConcurrentPackageOperations?: number;
+    packageUpgradeBatchSize?: number;
+  };
+  packageInstallation?: {
+    maxConcurrentDatastreamOperations?: number;
   };
   developer?: {
     maxAgentPoliciesWithInactivityTimeout?: number;
@@ -74,6 +106,7 @@ export interface FleetConfigType {
     onlyAllowAgentUpgradeToKnownVersions: boolean;
     activeAgentsSoftLimit?: number;
     retrySetupOnBoot: boolean;
+    skipUploadPackageValidation?: boolean;
     registry: {
       kibanaVersionCheckEnabled: boolean;
       capabilities: string[];
@@ -82,13 +115,42 @@ export interface FleetConfigType {
         max?: string;
       };
       excludePackages: string[];
+      searchAiLakePackageAllowlistEnabled?: boolean;
     };
+    excludeDataStreamTypes?: string[];
   };
   createArtifactsBulkBatchSize?: number;
   autoUpgrades?: {
+    taskInterval?: string;
     retryDelays?: string[];
   };
+  syncIntegrations?: {
+    taskInterval?: string;
+  };
+  autoInstallContentPackages?: {
+    taskInterval?: string;
+  };
+  agentStatusChange?: {
+    taskInterval?: string;
+  };
   integrationsHomeOverride?: string;
+  prereleaseEnabledByDefault?: boolean;
+  hideDashboards?: boolean;
+  integrationRollbackTTL?: string;
+  installIntegrationsKnowledge?: boolean;
+  fleetPolicyRevisionsCleanup?: {
+    maxRevisions: number;
+    interval: string;
+    maxPoliciesPerRun: number;
+  };
+  versionSpecificPolicyAssignment?: {
+    taskInterval?: string;
+    orphanSweepIntervalMs?: number;
+  };
+  unenrollInactiveAgents?: {
+    taskInterval?: string;
+    gracePeriodMs?: number;
+  };
 }
 
 // Calling Object.entries(PackagesGroupedByStatus) gave `status: string`

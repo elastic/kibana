@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { TimelionFunctionArgs } from '../../../common/types';
+import type { TimelionFunctionArgs } from '../../../common/types';
 
 export interface TimelionFunctionInterface extends TimelionFunctionConfig {
   chainable: boolean;

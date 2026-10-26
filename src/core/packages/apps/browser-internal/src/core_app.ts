@@ -6,8 +6,6 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
-import type { UnregisterCallback } from 'history';
 import type { CoreContext } from '@kbn/core-base-browser-internal';
 import type { InternalInjectedMetadataSetup } from '@kbn/core-injected-metadata-browser-internal';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
@@ -24,11 +22,7 @@ import type { I18nStart } from '@kbn/core-i18n-browser';
 import type { ThemeServiceStart } from '@kbn/core-theme-browser';
 import type { UserProfileService } from '@kbn/core-user-profile-browser';
 import { renderApp as renderStatusApp } from './status';
-import {
-  renderApp as renderErrorApp,
-  setupPublicBaseUrlConfigWarning,
-  setupUrlOverflowDetection,
-} from './errors';
+import { renderApp as renderErrorApp, setupPublicBaseUrlConfigWarning } from './errors';
 
 export interface CoreAppsServiceSetupDeps {
   application: InternalApplicationSetup;
@@ -50,7 +44,7 @@ export interface CoreAppsServiceStartDeps {
 }
 
 export class CoreAppsService {
-  private stopHistoryListening?: UnregisterCallback;
+  private docLinks?: DocLinksStart;
 
   constructor(private readonly coreContext: CoreContext) {}
 
@@ -70,6 +64,7 @@ export class CoreAppsService {
     if (injectedMetadata.getAnonymousStatusPage()) {
       http.anonymousPaths.register('/status');
     }
+    const getDocLinks = () => this.docLinks;
     application.register(this.coreContext.coreId, {
       id: 'status',
       title: 'Server Status',
@@ -77,7 +72,7 @@ export class CoreAppsService {
       chromeless: true,
       visibleIn: [],
       mount(params: AppMountParameters) {
-        return renderStatusApp(params, { http, notifications });
+        return renderStatusApp(params, { http, notifications, getDocLinks });
       },
     });
   }
@@ -90,24 +85,14 @@ export class CoreAppsService {
     uiSettings,
     ...startDeps
   }: CoreAppsServiceStartDeps) {
+    this.docLinks = docLinks;
+
     if (!application.history) {
       return;
     }
 
-    this.stopHistoryListening = setupUrlOverflowDetection({
-      basePath: http.basePath,
-      history: application.history,
-      toasts: notifications.toasts,
-      uiSettings,
-    });
-
     setupPublicBaseUrlConfigWarning({ docLinks, http, notifications, ...startDeps });
   }
 
-  public stop() {
-    if (this.stopHistoryListening) {
-      this.stopHistoryListening();
-      this.stopHistoryListening = undefined;
-    }
-  }
+  public stop() {}
 }

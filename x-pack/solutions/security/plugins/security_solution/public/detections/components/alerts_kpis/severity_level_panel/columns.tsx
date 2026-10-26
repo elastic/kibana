@@ -12,6 +12,7 @@ import { capitalize } from 'lodash';
 import { ALERT_SEVERITY } from '@kbn/rule-data-utils';
 import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
 import { TableId } from '@kbn/securitysolution-data-table';
+import { SECURITY_CELL_ACTIONS_DEFAULT } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { SeverityBuckets as SeverityData } from '../../../../overview/components/detection_response/alerts_by_status/types';
 import { FormattedCount } from '../../../../common/components/formatted_number';
 import { COUNT_TABLE_TITLE } from '../alerts_count_panel/translations';
@@ -20,7 +21,6 @@ import { useRiskSeverityColors } from '../../../../common/utils/risk_color_palet
 import {
   CellActionsMode,
   SecurityCellActions,
-  SecurityCellActionsTrigger,
   SecurityCellActionType,
 } from '../../../../common/components/cell_actions';
 import { getSourcererScopeId } from '../../../../helpers';
@@ -68,7 +68,7 @@ export const useGetSeverityTableColumns = (
           <SecurityCellActions
             mode={CellActionsMode.INLINE}
             visibleCellActions={0}
-            triggerId={SecurityCellActionsTrigger.DEFAULT}
+            triggerId={SECURITY_CELL_ACTIONS_DEFAULT}
             data={{ field: ALERT_SEVERITY, value: severity }}
             sourcererScopeId={getSourcererScopeId(TableId.alertsOnAlertsPage)}
             disabledActionTypes={[SecurityCellActionType.SHOW_TOP_N]}

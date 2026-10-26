@@ -5,18 +5,17 @@
  * 2.0.
  */
 
-import { mount } from 'enzyme';
+import { render, screen } from '@testing-library/react';
 import React from 'react';
 import { Router } from '@kbn/shared-ux-router';
 
 import { TestProviders } from '../../../common/mock';
-import { TabNavigation } from '../../../common/components/navigation/tab_navigation';
 import { Users } from './users';
-import { useSourcererDataView } from '../../../sourcerer/containers';
 import { mockCasesContext } from '@kbn/cases-plugin/public/mocks/mock_cases_context';
+import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
+import { withIndices } from '../../../data_view_manager/hooks/__mocks__/use_data_view';
 
 jest.mock('../../../common/components/empty_prompt');
-jest.mock('../../../sourcerer/containers');
 jest.mock('../../../common/components/search_bar', () => ({
   SiemSearchBar: () => null,
 }));
@@ -68,14 +67,10 @@ const mockHistory = {
   createHref: jest.fn(),
   listen: jest.fn(),
 };
-const mockUseSourcererDataView = useSourcererDataView as jest.Mock;
+
 describe('Users - rendering', () => {
   test('it renders getting started page when no index is available', async () => {
-    mockUseSourcererDataView.mockReturnValue({
-      indicesExist: false,
-    });
-
-    const wrapper = mount(
+    render(
       <TestProviders>
         <Router history={mockHistory}>
           <Users />
@@ -83,22 +78,19 @@ describe('Users - rendering', () => {
       </TestProviders>
     );
 
-    expect(wrapper.find(`[data-test-subj="empty-prompt"]`).exists()).toBe(true);
+    expect(screen.getByTestId('empty-prompt')).toBeInTheDocument();
   });
 
   test('it should render tab navigation', async () => {
-    mockUseSourcererDataView.mockReturnValue({
-      indicesExist: true,
-      indexPattern: {},
-    });
+    jest.mocked(useDataView).mockReturnValue(withIndices(['test-index']));
 
-    const wrapper = mount(
+    render(
       <TestProviders>
         <Router history={mockHistory}>
           <Users />
         </Router>
       </TestProviders>
     );
-    expect(wrapper.find(TabNavigation).exists()).toBe(true);
+    expect(screen.getByTestId('navigation-container')).toBeInTheDocument();
   });
 });

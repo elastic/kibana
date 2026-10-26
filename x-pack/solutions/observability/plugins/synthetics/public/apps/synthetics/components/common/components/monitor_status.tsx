@@ -7,26 +7,42 @@
 import React from 'react';
 import { EuiBadge, EuiDescriptionList, EuiSkeletonText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { EncryptedSyntheticsMonitor } from '../../../../../../common/runtime_types';
+import { MONITOR_STATUS_ENUM } from '../../../../../../common/constants/monitor_management';
+import type {
+  EncryptedSyntheticsMonitor,
+  OverviewStatusMetaData,
+  SelectedSyntheticsMonitor,
+} from '../../../../../../common/runtime_types';
 
+// `isBrowserType` is a misnomer kept for backwards compatibility — it really
+// controls "show the journey-style Succeeded/Failed labels instead of the
+// reachability-style Up/Down labels". API journeys produce success/fail
+// results through synthexec, so callers pass true for them too.
 export const BadgeStatus = ({
   status,
   isBrowserType,
+  onClickBadge,
+  monitor,
 }: {
+  monitor?: OverviewStatusMetaData;
   status?: string;
   isBrowserType: boolean;
+  onClickBadge?: () => void;
 }) => {
-  return !status || status === 'unknown' ? (
-    <EuiBadge color="default" data-test-subj="monitorLatestStatusPending">
-      {PENDING_LABEL}
-    </EuiBadge>
-  ) : status === 'up' ? (
-    <EuiBadge color="success" data-test-subj="monitorLatestStatusUp">
-      {isBrowserType ? SUCCESS_LABEL : UP_LABEL}
-    </EuiBadge>
-  ) : (
-    <EuiBadge color="danger" data-test-subj="monitorLatestStatusDown">
-      {isBrowserType ? FAILED_LABEL : DOWN_LABEL}
+  const monStatus = status ? status : monitor?.overallStatus;
+  const { color, dataTestSubj, labels } = badgeMapping[monStatus || MONITOR_STATUS_ENUM.PENDING];
+  const label = isBrowserType && labels.browser ? labels.browser : labels.default;
+
+  return (
+    <EuiBadge
+      color={color}
+      data-test-subj={dataTestSubj}
+      onClick={() => {
+        if (onClickBadge) onClickBadge();
+      }}
+      onClickAriaLabel={CLICK_BADGE_ARIA_LABEL}
+    >
+      {label}
     </EuiBadge>
   );
 };
@@ -39,10 +55,12 @@ export const MonitorStatus = ({
 }: {
   loading?: boolean;
   compressed?: boolean;
-  monitor: EncryptedSyntheticsMonitor;
+  monitor: EncryptedSyntheticsMonitor | SelectedSyntheticsMonitor;
   status?: string;
 }) => {
-  const isBrowserType = monitor.type === 'browser';
+  // API journeys share the success/fail semantics of browser journeys; both
+  // should render "Succeeded"/"Failed" rather than "Up"/"Down".
+  const isBrowserType = monitor.type === 'browser' || monitor.type === 'api';
   const loadingContent = loading && !monitor;
 
   return (
@@ -75,6 +93,10 @@ const PENDING_LABEL = i18n.translate('xpack.synthetics.monitorStatus.pendingLabe
   defaultMessage: 'Pending',
 });
 
+const STALE_LABEL = i18n.translate('xpack.synthetics.monitorStatus.staleLabel', {
+  defaultMessage: 'Stale',
+});
+
 const SUCCESS_LABEL = i18n.translate('xpack.synthetics.monitorStatus.succeededLabel', {
   defaultMessage: 'Succeeded',
 });
@@ -86,3 +108,48 @@ const UP_LABEL = i18n.translate('xpack.synthetics.monitorStatus.upLabel', {
 const DOWN_LABEL = i18n.translate('xpack.synthetics.monitorStatus.downLabel', {
   defaultMessage: 'Down',
 });
+
+const DISABLED_LABEL = i18n.translate('xpack.synthetics.monitorStatus.disabledLabel', {
+  defaultMessage: 'Disabled',
+});
+
+const CLICK_BADGE_ARIA_LABEL = i18n.translate(
+  'xpack.synthetics.monitorStatus.clickBadgeAriaLabel',
+  {
+    defaultMessage: 'Click to trigger the related action',
+  }
+);
+
+interface BadgeData {
+  color: string;
+  dataTestSubj: string;
+  labels: { default: string; browser?: string };
+}
+
+const badgeMapping: Record<string, BadgeData> = {
+  pending: {
+    color: 'default',
+    dataTestSubj: 'monitorLatestStatusPending',
+    labels: { default: PENDING_LABEL },
+  },
+  stale: {
+    color: 'warning',
+    dataTestSubj: 'monitorLatestStatusStale',
+    labels: { default: STALE_LABEL },
+  },
+  up: {
+    color: 'success',
+    dataTestSubj: 'monitorLatestStatusUp',
+    labels: { default: UP_LABEL, browser: SUCCESS_LABEL },
+  },
+  down: {
+    color: 'danger',
+    dataTestSubj: 'monitorLatestStatusDown',
+    labels: { default: DOWN_LABEL, browser: FAILED_LABEL },
+  },
+  disabled: {
+    color: 'default',
+    dataTestSubj: 'monitorLatestStatusDisabled',
+    labels: { default: DISABLED_LABEL },
+  },
+};

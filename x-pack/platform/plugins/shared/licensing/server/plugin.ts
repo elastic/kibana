@@ -5,11 +5,9 @@
  * 2.0.
  */
 
+import type { Observable, Subject, Subscription } from 'rxjs';
 import {
   map,
-  Observable,
-  Subject,
-  Subscription,
   switchMap,
   takeUntil,
   filter,
@@ -21,16 +19,16 @@ import {
 } from 'rxjs';
 import moment from 'moment';
 import type { MaybePromise } from '@kbn/utility-types';
-import {
+import type {
   CoreSetup,
   Logger,
   Plugin,
   PluginInitializerContext,
   IClusterClient,
-  ServiceStatusLevels,
 } from '@kbn/core/server';
+import { ServiceStatusLevels } from '@kbn/core/server';
+import type { ILicense } from '@kbn/licensing-types';
 import { registerAnalyticsContextProvider } from '../common/register_analytics_context_provider';
-import type { ILicense } from '../common/types';
 import type { LicensingPluginSetup, LicensingPluginStart } from './types';
 import { createLicenseUpdate } from '../common/license_update';
 import { registerRoutes } from './routes';
@@ -51,7 +49,7 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup, LicensingPl
   private readonly isElasticsearchAvailable$ = new ReplaySubject<boolean>(1);
   private readonly logger: Logger;
   private readonly config: LicenseConfigType;
-  private loggingSubscription?: Subscription;
+  private licenseSubscription?: Subscription;
   private featureUsage = new FeatureUsageService();
 
   private refresh?: () => Promise<ILicense>;
@@ -134,7 +132,7 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup, LicensingPl
       licenseFetcher
     );
 
-    this.loggingSubscription = license$.subscribe((license) =>
+    this.licenseSubscription = license$.subscribe((license) => {
       this.logger.debug(
         () =>
           'Imported license information from Elasticsearch:' +
@@ -143,8 +141,8 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup, LicensingPl
             `status: ${license.status}`,
             `expiry date: ${moment(license.expiryDateInMillis, 'x').format()}`,
           ].join(' | ')
-      )
-    );
+      );
+    });
 
     return {
       refresh: async () => {
@@ -172,9 +170,9 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup, LicensingPl
     this.stop$.next();
     this.stop$.complete();
 
-    if (this.loggingSubscription !== undefined) {
-      this.loggingSubscription.unsubscribe();
-      this.loggingSubscription = undefined;
+    if (this.licenseSubscription !== undefined) {
+      this.licenseSubscription.unsubscribe();
+      this.licenseSubscription = undefined;
     }
   }
 }

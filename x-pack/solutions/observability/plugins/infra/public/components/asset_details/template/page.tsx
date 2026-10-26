@@ -5,64 +5,72 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
-import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
-import { EuiLoadingSpinner } from '@elastic/eui';
-import { useEntityCentricExperienceSetting } from '../../../hooks/use_entity_centric_experience_setting';
-import { isPending } from '../../../hooks/use_fetcher';
-import { SYSTEM_INTEGRATION } from '../../../../common/constants';
+import React, { useCallback, useEffect } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiPageSection, EuiSpacer } from '@elastic/eui';
+import {
+  EmbeddableProfilingSearchBar,
+  type EmbeddableProfilingSearchBarProps,
+  useProfilingSchemaState,
+} from '@kbn/observability-shared-plugin/public';
+import { capitalize } from 'lodash';
 import { useMetricsBreadcrumbs } from '../../../hooks/use_metrics_breadcrumbs';
 import { useParentBreadcrumbResolver } from '../../../hooks/use_parent_breadcrumb_resolver';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
-import { ASSET_DETAILS_PAGE_COMPONENT_NAME } from '../constants';
+import { ASSET_DETAILS_PAGE_COMPONENT_NAME, DATE_PICKER_VISIBLE_TABS } from '../constants';
 import { Content } from '../content/content';
+import { DatePicker } from '../date_picker/date_picker';
 import { useAssetDetailsRenderPropsContext } from '../hooks/use_asset_details_render_props';
+import { useDatePickerContext } from '../hooks/use_date_picker';
+import { useHostAttachmentConfig } from '../hooks/use_host_attachment_config';
 import { useMetadataStateContext } from '../hooks/use_metadata_state';
 import { usePageHeader } from '../hooks/use_page_header';
+import { useProfilingKuery } from '../hooks/use_profiling_kuery';
 import { useTabSwitcherContext } from '../hooks/use_tab_switcher';
-import type { ContentTemplateProps } from '../types';
+import { ContentTabIds, type ContentTemplateProps } from '../types';
+import { LogsSearchBarHeader } from '../tabs/logs/logs_search_bar_header';
+import { MetadataSearchBarHeader } from '../tabs/metadata/metadata_search_bar_header';
+import { ProcessesSearchBarHeader } from '../tabs/processes/processes_search_bar_header';
 import { getIntegrationsAvailable } from '../utils';
+import { DEFAULT_SCHEMA } from '../../../../common/constants';
 import { InfraPageTemplate } from '../../shared/templates/infra_page_template';
-import { OnboardingFlow } from '../../shared/templates/no_data_config';
-import { PageTitleWithPopover } from '../header/page_title_with_popover';
-import { useEntitySummary } from '../hooks/use_entity_summary';
-import { isLogsSignal, isMetricsSignal } from '../utils/get_data_stream_types';
-import { useDatePickerContext } from '../hooks/use_date_picker';
-
-const DATA_AVAILABILITY_PER_TYPE: Partial<Record<InventoryItemType, string[]>> = {
-  host: [SYSTEM_INTEGRATION],
-};
+import { getHostHeaderBadges } from '../header/host_header_title';
+import { MetricsDetailAppHeader } from '../../../pages/metrics/header/metrics_detail_app_header';
 
 export const Page = ({ tabs = [], links = [] }: ContentTemplateProps) => {
-  const { loading } = useAssetDetailsRenderPropsContext();
   const { metadata, loading: metadataLoading } = useMetadataStateContext();
-  const { rightSideItems, tabEntries, breadcrumbs: headerBreadcrumbs } = usePageHeader(tabs, links);
-  const { asset } = useAssetDetailsRenderPropsContext();
-  const { getDateRangeInTimestamp } = useDatePickerContext();
+  const { rightSideItems, appHeaderTabs } = usePageHeader(tabs, links);
+  const { entity, schema } = useAssetDetailsRenderPropsContext();
   const trackOnlyOnce = React.useRef(false);
-  const { dataStreams, status: entitySummaryStatus } = useEntitySummary({
-    entityType: asset.type,
-    entityId: asset.id,
-    from: new Date(getDateRangeInTimestamp().from).toISOString(),
-    to: new Date(getDateRangeInTimestamp().to).toISOString(),
-  });
-  const { isEntityCentricExperienceEnabled } = useEntityCentricExperienceSetting();
   const { activeTabId } = useTabSwitcherContext();
+  const isProfilingTab = activeTabId === ContentTabIds.PROFILING;
+  const isLogsTab = activeTabId === ContentTabIds.LOGS;
+  const isMetadataTab = activeTabId === ContentTabIds.METADATA;
+  const isProcessesTab = activeTabId === ContentTabIds.PROCESSES;
+  const showDatePicker = DATE_PICKER_VISIBLE_TABS.some((tabId) => tabId === activeTabId);
   const {
     services: { telemetry },
   } = useKibanaContextForPlugin();
 
+  // Configure agent builder global flyout with the host attachment
+  useHostAttachmentConfig();
+
   const parentBreadcrumbResolver = useParentBreadcrumbResolver();
-  const breadcrumbOptions = parentBreadcrumbResolver.getBreadcrumbOptions(asset.type);
-  useMetricsBreadcrumbs([
-    {
-      ...breadcrumbOptions.link,
-      text: breadcrumbOptions.text,
-    },
-    {
-      text: asset.name,
-    },
-  ]);
+  const breadcrumbOptions = parentBreadcrumbResolver.getBreadcrumbOptions();
+  useMetricsBreadcrumbs(
+    [
+      {
+        ...breadcrumbOptions.link,
+        text: breadcrumbOptions.text,
+      },
+      {
+        text: entity.name,
+      },
+      {
+        text: capitalize(activeTabId),
+      },
+    ],
+    { parent: 'app' }
+  );
 
   useEffect(() => {
     if (trackOnlyOnce.current) {
@@ -72,8 +80,9 @@ export const Page = ({ tabs = [], links = [] }: ContentTemplateProps) => {
       const integrations = getIntegrationsAvailable(metadata);
       const telemetryParams = {
         componentName: ASSET_DETAILS_PAGE_COMPONENT_NAME,
-        assetType: asset.type,
+        assetType: entity.type,
         tabId: activeTabId,
+        schema_selected: schema || DEFAULT_SCHEMA,
       };
 
       telemetry.reportAssetDetailsPageViewed(
@@ -86,38 +95,100 @@ export const Page = ({ tabs = [], links = [] }: ContentTemplateProps) => {
       );
       trackOnlyOnce.current = true;
     }
-  }, [activeTabId, asset.type, metadata, metadataLoading, telemetry]);
+  }, [activeTabId, entity.type, metadata, metadataLoading, telemetry, schema]);
 
-  const showPageTitleWithPopover = asset.type === 'host' && !isMetricsSignal(dataStreams);
-  const shouldBypassOnboarding =
-    isEntityCentricExperienceEnabled && (isLogsSignal(dataStreams) || isMetricsSignal(dataStreams));
+  const tabControls = isProfilingTab ? (
+    <ProfilingSearchBarHeader />
+  ) : isLogsTab ? (
+    <SearchBarWithDatePicker searchBar={<LogsSearchBarHeader />} />
+  ) : isMetadataTab ? (
+    <SearchBarWithDatePicker searchBar={<MetadataSearchBarHeader />} />
+  ) : isProcessesTab ? (
+    <SearchBarWithDatePicker searchBar={<ProcessesSearchBarHeader />} />
+  ) : showDatePicker ? (
+    <DatePicker />
+  ) : null;
+
+  const hostHeaderBadges =
+    entity.type === 'host' ? getHostHeaderBadges({ title: entity.name, schema }) : undefined;
 
   return (
     <InfraPageTemplate
-      onboardingFlow={
-        isPending(entitySummaryStatus) || shouldBypassOnboarding
-          ? undefined
-          : asset.type === 'host'
-          ? OnboardingFlow.Hosts
-          : OnboardingFlow.Infra
+      hasDataOverride={true}
+      header={
+        <MetricsDetailAppHeader
+          title={entity.name}
+          tabs={appHeaderTabs}
+          badges={hostHeaderBadges}
+        />
       }
-      dataAvailabilityModules={DATA_AVAILABILITY_PER_TYPE[asset.type] || undefined}
-      pageHeader={{
-        pageTitle: loading ? (
-          <EuiLoadingSpinner size="m" />
-        ) : showPageTitleWithPopover ? (
-          <PageTitleWithPopover name={asset.name} />
-        ) : (
-          asset.name
-        ),
-        tabs: tabEntries,
-        rightSideItems,
-        breadcrumbs: headerBreadcrumbs,
+      pageSectionProps={{
+        paddingSize: 'none',
       }}
       data-component-name={ASSET_DETAILS_PAGE_COMPONENT_NAME}
-      data-asset-type={asset.type}
+      data-asset-type={entity.type}
+      data-schema-selected={schema}
     >
-      <Content />
+      <EuiPageSection paddingSize="m" restrictWidth={false}>
+        {rightSideItems && rightSideItems.length > 0 ? (
+          <EuiFlexGroup
+            justifyContent="flexEnd"
+            alignItems="center"
+            gutterSize="m"
+            responsive={false}
+          >
+            {rightSideItems.map((item, index) => (
+              <EuiFlexItem key={index} grow={false}>
+                {item}
+              </EuiFlexItem>
+            ))}
+          </EuiFlexGroup>
+        ) : null}
+        {tabControls ? (
+          <>
+            {tabControls}
+            <EuiSpacer size="m" />
+          </>
+        ) : null}
+        <Content showDatePicker={false} showProfilingSearchBar={false} showTabSearchBar={false} />
+      </EuiPageSection>
     </InfraPageTemplate>
+  );
+};
+
+const SearchBarWithDatePicker = ({ searchBar }: { searchBar: React.ReactNode }) => (
+  <>
+    {searchBar}
+    <EuiSpacer size="s" />
+    <DatePicker />
+  </>
+);
+
+const ProfilingSearchBarHeader = () => {
+  const { dateRange, setDateRange } = useDatePickerContext();
+  const { customKuery, setCustomKuery } = useProfilingKuery();
+  const { schema } = useProfilingSchemaState();
+
+  const onSearchSubmit = useCallback<EmbeddableProfilingSearchBarProps['onQuerySubmit']>(
+    ({ dateRange: range, query }) => {
+      setDateRange(range);
+      setCustomKuery(query);
+    },
+    [setCustomKuery, setDateRange]
+  );
+
+  const onSearchRefresh = useCallback(() => {
+    setDateRange(dateRange);
+  }, [dateRange, setDateRange]);
+
+  return (
+    <EmbeddableProfilingSearchBar
+      kuery={customKuery}
+      rangeFrom={dateRange.from}
+      rangeTo={dateRange.to}
+      schema={schema}
+      onQuerySubmit={onSearchSubmit}
+      onRefresh={onSearchRefresh}
+    />
   );
 };

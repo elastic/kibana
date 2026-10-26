@@ -1,0 +1,89 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { injectable } from 'inversify';
+import { get } from 'lodash';
+import objectHash from 'object-hash';
+import type { LoggerServiceContract } from '../../services/logger_service/logger_service';
+import { RuleCatalog } from '../state';
+import type {
+  ActionGroup,
+  DispatcherPipelineState,
+  DispatcherStep,
+  DispatcherStepOutput,
+  MatchedPair,
+} from '../types';
+
+@injectable()
+export class BuildGroupsStep implements DispatcherStep {
+  public readonly name = 'build_groups';
+
+  public async execute(
+    state: Readonly<DispatcherPipelineState>,
+    _: LoggerServiceContract
+  ): Promise<DispatcherStepOutput> {
+    const { matched = [], rules = RuleCatalog.empty() } = state;
+
+    const groups = buildActionGroups(matched, rules);
+
+    return { type: 'continue', data: { groups } };
+  }
+}
+
+export function buildActionGroups(
+  matched: readonly MatchedPair[],
+  rules: RuleCatalog = RuleCatalog.empty()
+): ActionGroup[] {
+  const groupMap = new Map<string, ActionGroup>();
+
+  for (const { alert, policy } of matched) {
+    let groupKey: Record<string, unknown>;
+    switch (policy.grouping.mode) {
+      case 'per_alert':
+        groupKey = {
+          groupHash: alert.group_hash,
+          alertId: alert.alert_id,
+        };
+        break;
+      case 'all':
+        groupKey = {};
+        break;
+      case 'per_field':
+        groupKey = Object.fromEntries(
+          policy.grouping.fields.map((field) => [field, get(alert, field, null)])
+        );
+        break;
+    }
+
+    const actionGroupId = objectHash({
+      policyId: policy.id,
+      groupKey,
+    });
+
+    if (!groupMap.has(actionGroupId)) {
+      groupMap.set(actionGroupId, {
+        id: actionGroupId,
+        spaceId: policy.spaceId,
+        policyId: policy.id,
+        destinations: policy.destinations,
+        groupKey,
+        alerts: [],
+        rules: {},
+      });
+    }
+
+    const group = groupMap.get(actionGroupId)!;
+    group.alerts.push(alert);
+    const ruleId = alert.rule_id;
+    const rule = rules.forAlert(alert);
+    if (rule && ruleId != null) {
+      group.rules[ruleId] = { name: rule.name };
+    }
+  }
+
+  return [...groupMap.values()];
+}

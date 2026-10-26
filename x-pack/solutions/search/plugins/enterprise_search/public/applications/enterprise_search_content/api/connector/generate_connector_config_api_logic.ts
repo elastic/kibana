@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { Actions, createApiLogic } from '../../../shared/api_logic/create_api_logic';
+import type { Actions } from '../../../shared/api_logic/create_api_logic';
+import { createApiLogic } from '../../../shared/api_logic/create_api_logic';
 import { HttpLogic } from '../../../shared/http';
 
 export interface GenerateConfigApiArgs {
@@ -15,7 +16,9 @@ export interface GenerateConfigApiArgs {
 export type GenerateConfigApiActions = Actions<GenerateConfigApiArgs, {}>;
 
 export const generateConnectorConfig = async ({ connectorId }: GenerateConfigApiArgs) => {
-  const route = `/internal/enterprise_search/connectors/${connectorId}/generate_config`;
+  const route = `/internal/enterprise_search/connectors/${encodeURIComponent(
+    connectorId
+  )}/generate_config`;
   return await HttpLogic.values.http.post(route);
 };
 

@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { createAutoRefreshLoop, AutoRefreshDoneFn } from './auto_refresh_loop';
+import type { AutoRefreshDoneFn } from './auto_refresh_loop';
+import { createAutoRefreshLoop } from './auto_refresh_loop';
 
 jest.useFakeTimers({ legacyFakeTimers: true });
 
@@ -18,7 +19,7 @@ test('triggers refresh with interval', () => {
   loop$.subscribe(fn);
 
   jest.advanceTimersByTime(5000);
-  expect(fn).not.toBeCalled();
+  expect(fn).not.toHaveBeenCalled();
 
   start(1000);
 
@@ -215,7 +216,7 @@ test('pauses if page is not visible', () => {
   loop$.subscribe(fn);
 
   jest.advanceTimersByTime(5000);
-  expect(fn).not.toBeCalled();
+  expect(fn).not.toHaveBeenCalled();
 
   start(1000);
 

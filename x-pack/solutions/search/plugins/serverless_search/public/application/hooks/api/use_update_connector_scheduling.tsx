@@ -10,17 +10,20 @@
  * 2.0.
  */
 
-import { SchedulingConfiguraton } from '@kbn/search-connectors';
-import { useMutation } from '@tanstack/react-query';
+import type { SchedulingConfiguraton } from '@kbn/search-connectors';
+import { useMutation } from '@kbn/react-query';
 import { useKibanaServices } from '../use_kibana';
 
 export const useConnectorScheduling = (connectorId: string) => {
   const { http } = useKibanaServices();
   return useMutation({
     mutationFn: async (configuration: SchedulingConfiguraton) => {
-      return await http.post(`/internal/serverless_search/connectors/${connectorId}/scheduling`, {
-        body: JSON.stringify({ ...configuration }),
-      });
+      return await http.post(
+        `/internal/serverless_search/connectors/${encodeURIComponent(connectorId)}/scheduling`,
+        {
+          body: JSON.stringify({ ...configuration }),
+        }
+      );
     },
   });
 };

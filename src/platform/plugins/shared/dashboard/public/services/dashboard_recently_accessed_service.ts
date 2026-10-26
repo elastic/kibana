@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { RecentlyAccessed, RecentlyAccessedService } from '@kbn/recently-accessed';
+import type { RecentlyAccessed } from '@kbn/recently-accessed';
+import { RecentlyAccessedService } from '@kbn/recently-accessed';
 import { coreServices } from './kibana_services';
 
 let dashboardRecentlyAccessed: RecentlyAccessed;

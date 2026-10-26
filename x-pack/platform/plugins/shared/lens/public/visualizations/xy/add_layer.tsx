@@ -7,36 +7,37 @@
 
 import React, { useState } from 'react';
 import {
-  EuiButton,
+  EuiButtonIcon,
   EuiPopover,
   EuiIcon,
   EuiContextMenu,
+  EuiContextMenuItem,
+  EuiText,
   EuiFlexItem,
   EuiFlexGroup,
-  IconType,
-  transparentize,
-  type UseEuiTheme,
-  useEuiTheme,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
-import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
+import type { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
 import { css } from '@emotion/react';
-import { AddLayerFunction, VisualizationLayerDescription } from '../../types';
+import type { AddLayerFunction, VisualizationLayerDescription } from '@kbn/lens-common';
 import { LoadAnnotationLibraryFlyout } from './load_annotation_library_flyout';
 import type { ExtraAppendLayerArg } from './visualization';
-import { SeriesType, XYState, visualizationTypes } from './types';
+import type { SeriesType, XYVisualizationState } from './types';
+import { visualizationTypes } from './types';
 import { isHorizontalChart, isHorizontalSeries, isPercentageSeries } from './state_helpers';
 import { getDataLayers } from './visualization_helpers';
 import { ExperimentalBadge } from '../../shared_components';
-import { ChartOption } from '../../editor_frame_service/editor_frame/config_panel/chart_switch/chart_option';
 
-interface AddLayerButtonProps {
-  state: XYState;
+export interface AddLayerButtonProps {
+  state: XYVisualizationState;
   supportedLayers: VisualizationLayerDescription[];
   addLayer: AddLayerFunction<ExtraAppendLayerArg>;
   eventAnnotationService: EventAnnotationServiceType;
   isInlineEditing?: boolean;
+  /** Hides the annotation library option (ES|QL charts do not support data-view-based library groups) */
+  hideAnnotationLibrary?: boolean;
 }
 
 export enum AddLayerPanelType {
@@ -51,6 +52,7 @@ export function AddLayerButton({
   addLayer,
   eventAnnotationService,
   isInlineEditing,
+  hideAnnotationLibrary,
 }: AddLayerButtonProps) {
   const [showLayersChoice, toggleLayersChoice] = useState(false);
 
@@ -64,7 +66,16 @@ export function AddLayerButton({
     toolTipContent,
   }: (typeof supportedLayers)[0]) => {
     return {
-      panel: AddLayerPanelType.selectAnnotationMethod,
+      // without the library option there is no annotation method to choose from,
+      // so add a new annotation layer directly
+      ...(hideAnnotationLibrary
+        ? {
+            onClick: () => {
+              addLayer(LayerTypes.ANNOTATIONS);
+              toggleLayersChoice(false);
+            },
+          }
+        : { panel: AddLayerPanelType.selectAnnotationMethod }),
       toolTipContent,
       disabled,
       name: (
@@ -75,7 +86,7 @@ export function AddLayerButton({
           </EuiFlexItem>
         </EuiFlexGroup>
       ),
-      icon: icon && <EuiIcon size="m" type={icon} />,
+      icon: icon && <EuiIcon size="m" type={icon} aria-hidden={true} />,
       ['data-test-subj']: `lnsLayerAddButton-${type}`,
     };
   };
@@ -92,7 +103,7 @@ export function AddLayerButton({
       toolTipContent,
       disabled,
       name: label,
-      icon: icon && <EuiIcon size="m" type={icon} />,
+      icon: icon && <EuiIcon size="m" type={icon} aria-hidden={true} />,
       ['data-test-subj']: `lnsLayerAddButton-${type}`,
     };
   };
@@ -108,28 +119,33 @@ export function AddLayerButton({
 
   const firstLayerSubtype = getDataLayers(state.layers)?.[0]?.seriesType;
 
+  const buttonLabel = i18n.translate('xpack.lens.configPanel.addLayerButton', {
+    defaultMessage: 'Add layer',
+  });
+
   return (
-    <>
+    <div
+      css={css`
+        display: flex;
+        align-items: center;
+      `}
+      key="lsnLayerAdd"
+    >
       <EuiPopover
-        display="block"
+        aria-label={buttonLabel}
         data-test-subj="lnsConfigPanel__addLayerPopover"
         button={
-          <EuiButton
-            fullWidth
-            data-test-subj="lnsLayerAddButton"
-            aria-label={i18n.translate('xpack.lens.configPanel.addLayerButton', {
-              defaultMessage: 'Add layer',
-            })}
-            fill={false}
-            color="primary"
-            size="s"
-            onClick={() => toggleLayersChoice(!showLayersChoice)}
-            iconType="layers"
-          >
-            {i18n.translate('xpack.lens.configPanel.addLayerButton', {
-              defaultMessage: 'Add layer',
-            })}
-          </EuiButton>
+          <EuiToolTip content={buttonLabel} disableScreenReaderOutput>
+            <EuiButtonIcon
+              data-test-subj="lnsLayerAddButton"
+              aria-label={buttonLabel}
+              size="s"
+              onClick={() => toggleLayersChoice(!showLayersChoice)}
+              iconType="plus"
+              color="text"
+              display="base"
+            />
+          </EuiToolTip>
         }
         isOpen={showLayersChoice}
         closePopover={() => toggleLayersChoice(false)}
@@ -137,7 +153,6 @@ export function AddLayerButton({
       >
         <EuiContextMenu
           initialPanelId={AddLayerPanelType.main}
-          size="s"
           panels={[
             {
               id: AddLayerPanelType.main,
@@ -155,7 +170,7 @@ export function AddLayerButton({
                       toolTipContent,
                       disabled,
                       name: label,
-                      icon: icon && <EuiIcon size="m" type={icon} />,
+                      icon: icon && <EuiIcon size="m" type={icon} aria-hidden={true} />,
                       ['data-test-subj']: `lnsLayerAddButton-${type}`,
                       onClick: () => {
                         addLayer(type);
@@ -169,7 +184,7 @@ export function AddLayerButton({
                   toolTipContent,
                   disabled,
                   name: label,
-                  icon: icon && <EuiIcon size="m" type={icon} />,
+                  icon: icon && <EuiIcon size="m" type={icon} aria-hidden={true} />,
                   ['data-test-subj']: `lnsLayerAddButton-${type}`,
                   onClick: () => {
                     addLayer(type);
@@ -189,7 +204,7 @@ export function AddLayerButton({
                   name: i18n.translate('xpack.lens.configPanel.newAnnotation', {
                     defaultMessage: 'New annotation',
                   }),
-                  icon: 'plusInCircle',
+                  icon: 'plusCircle',
                   onClick: () => {
                     addLayer(LayerTypes.ANNOTATIONS);
                     toggleLayersChoice(false);
@@ -221,27 +236,30 @@ export function AddLayerButton({
                   t.subtypes?.includes(firstLayerSubtype) && !isPercentageSeries(firstLayerSubtype);
 
                 return {
-                  renderItem: () => {
-                    return (
-                      <ChartOptionWrapper
-                        type={t.id}
-                        label={t.label}
-                        description={t.description}
-                        icon={t.icon}
-                        onClick={() => {
-                          addLayer(
-                            LayerTypes.DATA,
-                            undefined,
-                            undefined,
-                            canInitializeWithSubtype
-                              ? firstLayerSubtype
-                              : (t.subtypes?.[0] as SeriesType)
-                          );
-                          toggleLayersChoice(false);
-                        }}
-                      />
-                    );
-                  },
+                  renderItem: () => (
+                    <EuiContextMenuItem
+                      icon={<EuiIcon type={t.icon} aria-hidden={true} />}
+                      data-test-subj={`lnsXY_seriesType-${t.id}`}
+                      onClick={() => {
+                        addLayer(
+                          LayerTypes.DATA,
+                          undefined,
+                          undefined,
+                          canInitializeWithSubtype
+                            ? firstLayerSubtype
+                            : (t.subtypes?.[0] as SeriesType)
+                        );
+                        toggleLayersChoice(false);
+                      }}
+                    >
+                      <EuiText size="s" data-test-subj="lnsChartSwitch-option-label">
+                        {t.label}
+                      </EuiText>
+                      <EuiText size="xs" color="subdued">
+                        {t.description}
+                      </EuiText>
+                    </EuiContextMenuItem>
+                  ),
                 };
               }),
             },
@@ -259,49 +277,6 @@ export function AddLayerButton({
           }}
         />
       )}
-    </>
+    </div>
   );
 }
-
-const ChartOptionWrapper = ({
-  label,
-  description,
-  icon,
-  onClick,
-  type,
-}: {
-  label: string;
-  description: string;
-  icon: IconType;
-  onClick: () => void;
-  type: string;
-}) => {
-  const euiThemeContext = useEuiTheme();
-  return (
-    <button
-      data-test-subj={`lnsXY_seriesType-${type}`}
-      onClick={onClick}
-      className="euiContextMenuItem"
-      css={chartOptionWrapperStyles(euiThemeContext)}
-    >
-      <ChartOption option={{ icon, label, description }} />
-    </button>
-  );
-};
-
-const chartOptionWrapperStyles = ({ euiTheme }: UseEuiTheme) => css`
-  padding: ${euiTheme.size.s};
-  border-bottom: ${euiTheme.border.thin};
-  border-bottom-color: ${euiTheme.colors.backgroundBaseSubdued};
-  width: 100%;
-  &:hover,
-  &:focus {
-    color: ${euiTheme.colors.primary};
-    background-color: ${transparentize(euiTheme.colors.primary, 0.1)};
-    span,
-    .euiText {
-      text-decoration: underline;
-      color: ${euiTheme.colors.primary};
-    }
-  }
-`;

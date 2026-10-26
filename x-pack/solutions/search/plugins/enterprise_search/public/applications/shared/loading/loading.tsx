@@ -7,20 +7,29 @@
 
 import React from 'react';
 
-import { EuiLoadingLogo, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiLoadingLogo, EuiLoadingSpinner, useEuiTheme } from '@elastic/eui';
 
-import './loading.scss';
+import * as Styles from './styles';
 
-export const Loading: React.FC = () => (
-  <div className="enterpriseSearchLoading">
-    <EuiLoadingLogo size="xl" logo="logoElasticsearch" />
-  </div>
-);
-
-export const LoadingOverlay: React.FC = () => (
-  <div className="enterpriseSearchLoadingOverlay">
-    <div className="enterpriseSearchLoading">
-      <EuiLoadingSpinner size="xl" />
+export const Loading: React.FC = () => {
+  const { euiTheme } = useEuiTheme();
+  return (
+    <div css={Styles.enterpriseSearchLoading(euiTheme)} data-test-subj="enterpriseSearchLoading">
+      <EuiLoadingLogo size="xl" logo="logoElasticsearch" data-test-subj="euiLoadingLogo" />
     </div>
-  </div>
-);
+  );
+};
+
+export const LoadingOverlay: React.FC = () => {
+  const { euiTheme } = useEuiTheme();
+  return (
+    <div
+      css={Styles.enterpriseSearchLoadingOverlay(euiTheme)}
+      data-test-subj="enterpriseSearchLoadingOverlay"
+    >
+      <div css={Styles.enterpriseSearchLoading(euiTheme)}>
+        <EuiLoadingSpinner size="xl" data-test-subj="euiLoadingSpinner" />
+      </div>
+    </div>
+  );
+};

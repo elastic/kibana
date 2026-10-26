@@ -10,7 +10,7 @@ import React from 'react';
 import moment from 'moment';
 import { BrowserRouter as Router } from 'react-router-dom';
 import { MostRecentError } from './most_recent_error';
-import { MonitorDetails, PingError } from '../../../../../../common/runtime_types';
+import type { MonitorDetails, PingError } from '../../../../../../common/runtime_types';
 
 describe('MostRecentError component', () => {
   let monitorDetails: MonitorDetails;

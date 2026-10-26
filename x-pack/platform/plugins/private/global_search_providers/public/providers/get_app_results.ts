@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { PublicAppInfo, PublicAppDeepLinkInfo, AppCategory } from '@kbn/core/public';
+import type { PublicAppInfo, PublicAppDeepLinkInfo, AppCategory } from '@kbn/core/public';
 import { distance } from 'fastest-levenshtein';
-import { GlobalSearchProviderResult } from '@kbn/global-search-plugin/public';
+import type { GlobalSearchProviderResult } from '@kbn/global-search-plugin/public';
 
 /** Type used internally to represent an application unrolled into its separate deepLinks */
 export interface AppLink {

@@ -1,0 +1,26 @@
+openapi: 3.0.0
+info:
+  version: '1'
+  title: Update Anonymization Fields API (Test Internal)
+  description: These APIs updates the anonymization fields for testing the Elastic Assistant.
+paths:
+  /internal/elastic_assistant/update_anonymization_fields:
+    post:
+      x-labels: [ess, serverless]
+      x-internal: true
+      x-codegen-enabled: true
+      operationId: UpdateAnonymizationFields
+      summary: Update Anonymization Fields
+      requestBody:
+        content:
+          application/json: {}
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean

@@ -1,8 +1,36 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`validateProxy IPv4 addresses rejects invalid IPv4 address 1`] = `
+<Memo(MemoizedFormattedMessage)
+  defaultMessage="Address must use host:port format. Example: 127.0.0.1:9400, [::1]:9400 or localhost:9400. Hosts can only consist of letters, numbers, and dashes."
+  id="xpack.remoteClusters.remoteClusterForm.proxyError.invalidCharactersMessage"
+/>
+`;
+
+exports[`validateProxy IPv4 addresses rejects valid IPv4 address without port 1`] = `
+<Memo(MemoizedFormattedMessage)
+  defaultMessage="A port is required."
+  id="xpack.remoteClusters.remoteClusterForm.addressError.invalidPortMessage"
+/>
+`;
+
+exports[`validateProxy IPv6 addresses rejects IPv6 address without brackets and port 1`] = `
+<Memo(MemoizedFormattedMessage)
+  defaultMessage="A port is required."
+  id="xpack.remoteClusters.remoteClusterForm.addressError.invalidPortMessage"
+/>
+`;
+
+exports[`validateProxy IPv6 addresses rejects invalid IPv6 address 1`] = `
+<Memo(MemoizedFormattedMessage)
+  defaultMessage="Address must use host:port format. Example: 127.0.0.1:9400, [::1]:9400 or localhost:9400. Hosts can only consist of letters, numbers, and dashes."
+  id="xpack.remoteClusters.remoteClusterForm.proxyError.invalidCharactersMessage"
+/>
+`;
+
 exports[`validateProxy rejects proxy address when the address is invalid 1`] = `
 <Memo(MemoizedFormattedMessage)
-  defaultMessage="Address must use host:port format. Example: 127.0.0.1:9400, localhost:9400. Hosts can only consist of letters, numbers, and dashes."
+  defaultMessage="Address must use host:port format. Example: 127.0.0.1:9400, [::1]:9400 or localhost:9400. Hosts can only consist of letters, numbers, and dashes."
   id="xpack.remoteClusters.remoteClusterForm.proxyError.invalidCharactersMessage"
 />
 `;

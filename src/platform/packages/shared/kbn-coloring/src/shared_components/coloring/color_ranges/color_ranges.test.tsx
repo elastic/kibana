@@ -10,8 +10,9 @@
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { ColorRanges, ColorRangesProps } from './color_ranges';
-import { ReactWrapper } from 'enzyme';
+import type { ColorRangesProps } from './color_ranges';
+import { ColorRanges } from './color_ranges';
+import type { ReactWrapper } from 'enzyme';
 import { ColorRangesContext } from './color_ranges_context';
 import type { PaletteRegistry } from '../../../palettes';
 
@@ -78,7 +79,7 @@ describe('Color Ranges', () => {
       { color: '#ccc', start: 80, end: 90 },
       { color: '#ccc', start: 90, end: 100 },
     ];
-    const component = renderColorRanges({ ...props, paletteConfiguration: { maxSteps: 5 } });
+    const component = renderColorRanges({ ...props, maxSteps: 5 });
 
     expect(pageObjects.getAddColorRangeButton(component).prop('disabled')).toBe(true);
   });

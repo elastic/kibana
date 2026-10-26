@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import type { ExternalService, ExecutorSubActionPushParams, PushToServiceApiParams } from './types';
+import type {
+  ExecutorSubActionPushParams,
+  PushToServiceApiParams,
+} from '@kbn/connector-schemas/cases_webhook';
+import type { ExternalService } from './types';
 
 const createMock = (): jest.Mocked<ExternalService> => {
   const service = {

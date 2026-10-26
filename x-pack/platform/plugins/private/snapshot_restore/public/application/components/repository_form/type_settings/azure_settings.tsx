@@ -14,9 +14,11 @@ import {
   EuiSelect,
   EuiSwitch,
   EuiTitle,
+  EuiToolTip,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
-import { AzureRepository, Repository } from '../../../../../common/types';
-import { RepositorySettingsValidation } from '../../../services/validation';
+import type { AzureRepository, Repository } from '../../../../../common/types';
+import type { RepositorySettingsValidation } from '../../../services/validation';
 import { ChunkSizeField, MaxSnapshotsField, MaxRestoreField } from './common';
 import { DisableToolTip, MANAGED_REPOSITORY_TOOLTIP_MESSAGE } from '../../disable_tooltip';
 
@@ -28,6 +30,8 @@ interface Props {
     replaceSettings?: boolean
   ) => void;
   settingErrors: RepositorySettingsValidation;
+  isReadOnlyToggleDisabled?: boolean;
+  readOnlyToggleDisabledTooltipContent?: React.ReactNode;
 }
 
 export const AzureSettings: React.FunctionComponent<Props> = ({
@@ -35,6 +39,8 @@ export const AzureSettings: React.FunctionComponent<Props> = ({
   isManagedRepository,
   updateRepositorySettings,
   settingErrors,
+  isReadOnlyToggleDisabled,
+  readOnlyToggleDisabledTooltipContent,
 }) => {
   const {
     settings: {
@@ -49,6 +55,15 @@ export const AzureSettings: React.FunctionComponent<Props> = ({
       maxSnapshotBytesPerSec,
     },
   } = repository;
+  const clientId = useGeneratedHtmlId({
+    prefix: 'azureClientInput',
+  });
+  const containerId = useGeneratedHtmlId({
+    prefix: 'azureContainerInput',
+  });
+  const basePathId = useGeneratedHtmlId({
+    prefix: 'azureBasePathInput',
+  });
   const hasErrors: boolean = Boolean(Object.keys(settingErrors).length);
 
   const locationModeOptions = ['primary_only', 'secondary_only'].map((option) => ({
@@ -61,6 +76,30 @@ export const AzureSettings: React.FunctionComponent<Props> = ({
       [name]: value,
     });
   };
+
+  const readOnlyTooltipContent = isReadOnlyToggleDisabled
+    ? readOnlyToggleDisabledTooltipContent
+    : undefined;
+  const isReadOnlySwitchDisabled =
+    Boolean(isReadOnlyToggleDisabled) || locationMode === locationModeOptions[1].value;
+  const readOnlySwitchControl = (
+    <EuiSwitch
+      disabled={isReadOnlySwitchDisabled}
+      label={
+        <FormattedMessage
+          id="xpack.snapshotRestore.repositoryForm.typeAzure.readonlyLabel"
+          defaultMessage="Read-only repository"
+        />
+      }
+      checked={!!readonly}
+      onChange={(e) => {
+        updateRepositorySettings({
+          readonly: locationMode === locationModeOptions[1].value ? true : e.target.checked,
+        });
+      }}
+      data-test-subj="readOnlyToggle"
+    />
+  );
 
   return (
     <Fragment>
@@ -86,10 +125,12 @@ export const AzureSettings: React.FunctionComponent<Props> = ({
       >
         <EuiFormRow
           label={
-            <FormattedMessage
-              id="xpack.snapshotRestore.repositoryForm.typeAzure.clientLabel"
-              defaultMessage="Client"
-            />
+            <span id={clientId}>
+              <FormattedMessage
+                id="xpack.snapshotRestore.repositoryForm.typeAzure.clientLabel"
+                defaultMessage="Client"
+              />
+            </span>
           }
           fullWidth
           isInvalid={Boolean(hasErrors && settingErrors.client)}
@@ -98,20 +139,20 @@ export const AzureSettings: React.FunctionComponent<Props> = ({
           <DisableToolTip
             isManaged={isManagedRepository}
             tooltipMessage={MANAGED_REPOSITORY_TOOLTIP_MESSAGE}
-            component={
-              <EuiFieldText
-                defaultValue={client || ''}
-                fullWidth
-                onChange={(e) => {
-                  updateRepositorySettings({
-                    client: e.target.value,
-                  });
-                }}
-                data-test-subj="clientInput"
-                disabled={isManagedRepository}
-              />
-            }
-          />
+          >
+            <EuiFieldText
+              defaultValue={client || ''}
+              fullWidth
+              onChange={(e) => {
+                updateRepositorySettings({
+                  client: e.target.value,
+                });
+              }}
+              data-test-subj="clientInput"
+              disabled={isManagedRepository}
+              aria-labelledby={clientId}
+            />
+          </DisableToolTip>
         </EuiFormRow>
       </EuiDescribedFormGroup>
 
@@ -137,10 +178,12 @@ export const AzureSettings: React.FunctionComponent<Props> = ({
       >
         <EuiFormRow
           label={
-            <FormattedMessage
-              id="xpack.snapshotRestore.repositoryForm.typeAzure.containerLabel"
-              defaultMessage="Container"
-            />
+            <span id={containerId}>
+              <FormattedMessage
+                id="xpack.snapshotRestore.repositoryForm.typeAzure.containerLabel"
+                defaultMessage="Container"
+              />
+            </span>
           }
           fullWidth
           isInvalid={Boolean(hasErrors && settingErrors.container)}
@@ -149,20 +192,20 @@ export const AzureSettings: React.FunctionComponent<Props> = ({
           <DisableToolTip
             isManaged={isManagedRepository}
             tooltipMessage={MANAGED_REPOSITORY_TOOLTIP_MESSAGE}
-            component={
-              <EuiFieldText
-                defaultValue={container || ''}
-                fullWidth
-                onChange={(e) => {
-                  updateRepositorySettings({
-                    container: e.target.value,
-                  });
-                }}
-                data-test-subj="containerInput"
-                disabled={isManagedRepository}
-              />
-            }
-          />
+          >
+            <EuiFieldText
+              defaultValue={container || ''}
+              fullWidth
+              onChange={(e) => {
+                updateRepositorySettings({
+                  container: e.target.value,
+                });
+              }}
+              data-test-subj="containerInput"
+              disabled={isManagedRepository}
+              aria-labelledby={containerId}
+            />
+          </DisableToolTip>
         </EuiFormRow>
       </EuiDescribedFormGroup>
 
@@ -188,10 +231,12 @@ export const AzureSettings: React.FunctionComponent<Props> = ({
       >
         <EuiFormRow
           label={
-            <FormattedMessage
-              id="xpack.snapshotRestore.repositoryForm.typeAzure.basePathLabel"
-              defaultMessage="Base path"
-            />
+            <span id={basePathId}>
+              <FormattedMessage
+                id="xpack.snapshotRestore.repositoryForm.typeAzure.basePathLabel"
+                defaultMessage="Base path"
+              />
+            </span>
           }
           fullWidth
           isInvalid={Boolean(hasErrors && settingErrors.basePath)}
@@ -200,20 +245,20 @@ export const AzureSettings: React.FunctionComponent<Props> = ({
           <DisableToolTip
             isManaged={isManagedRepository}
             tooltipMessage={MANAGED_REPOSITORY_TOOLTIP_MESSAGE}
-            component={
-              <EuiFieldText
-                defaultValue={basePath || ''}
-                fullWidth
-                onChange={(e) => {
-                  updateRepositorySettings({
-                    basePath: e.target.value,
-                  });
-                }}
-                data-test-subj="basePathInput"
-                disabled={isManagedRepository}
-              />
-            }
-          />
+          >
+            <EuiFieldText
+              defaultValue={basePath || ''}
+              fullWidth
+              onChange={(e) => {
+                updateRepositorySettings({
+                  basePath: e.target.value,
+                });
+              }}
+              data-test-subj="basePathInput"
+              disabled={isManagedRepository}
+              aria-labelledby={basePathId}
+            />
+          </DisableToolTip>
         </EuiFormRow>
       </EuiDescribedFormGroup>
 
@@ -316,6 +361,7 @@ export const AzureSettings: React.FunctionComponent<Props> = ({
           error={settingErrors.locationMode}
         >
           <EuiSelect
+            isInvalid={Boolean(hasErrors && settingErrors.locationMode)}
             options={locationModeOptions}
             value={locationMode || locationModeOptions[0].value}
             onChange={(e) => {
@@ -355,22 +401,11 @@ export const AzureSettings: React.FunctionComponent<Props> = ({
           isInvalid={Boolean(hasErrors && settingErrors.readonly)}
           error={settingErrors.readonly}
         >
-          <EuiSwitch
-            disabled={locationMode === locationModeOptions[1].value}
-            label={
-              <FormattedMessage
-                id="xpack.snapshotRestore.repositoryForm.typeAzure.readonlyLabel"
-                defaultMessage="Read-only repository"
-              />
-            }
-            checked={!!readonly}
-            onChange={(e) => {
-              updateRepositorySettings({
-                readonly: locationMode === locationModeOptions[1].value ? true : e.target.checked,
-              });
-            }}
-            data-test-subj="readOnlyToggle"
-          />
+          {readOnlyTooltipContent ? (
+            <EuiToolTip content={readOnlyTooltipContent}>{readOnlySwitchControl}</EuiToolTip>
+          ) : (
+            readOnlySwitchControl
+          )}
         </EuiFormRow>
       </EuiDescribedFormGroup>
     </Fragment>

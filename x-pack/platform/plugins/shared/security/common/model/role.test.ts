@@ -12,6 +12,7 @@ import {
   getExtendedRoleDeprecationNotice,
   isRoleDeprecated,
   isRoleEnabled,
+  isRoleHiddenOnServerless,
   isRoleReadOnly,
   isRoleReserved,
   prepareRoleClone,
@@ -65,6 +66,36 @@ describe('role', () => {
     test('should return false if role is NOT explicitly reserved or not reserved', () => {
       const testRole = {};
       expect(isRoleReserved(testRole)).toBe(false);
+    });
+  });
+
+  describe('isRoleHiddenOnServerless', () => {
+    test('should return true for a reserved role with a hidden name prefix', () => {
+      expect(
+        isRoleHiddenOnServerless({ name: '_alertzero_alert_triage', metadata: { _reserved: true } })
+      ).toBe(true);
+      expect(
+        isRoleHiddenOnServerless({ name: '_nightshift_agent', metadata: { _reserved: true } })
+      ).toBe(true);
+    });
+
+    test('should return false for a custom role with a hidden name prefix', () => {
+      expect(isRoleHiddenOnServerless({ name: '_alertzero_alert_triage', metadata: {} })).toBe(
+        false
+      );
+    });
+
+    test('should return false for a reserved role without a hidden name prefix', () => {
+      expect(isRoleHiddenOnServerless({ name: 'editor', metadata: { _reserved: true } })).toBe(
+        false
+      );
+      expect(
+        isRoleHiddenOnServerless({ name: 'alertzero_alert_triage', metadata: { _reserved: true } })
+      ).toBe(false);
+    });
+
+    test('should return false for a reserved role without a name', () => {
+      expect(isRoleHiddenOnServerless({ metadata: { _reserved: true } })).toBe(false);
     });
   });
 
@@ -124,7 +155,7 @@ describe('role', () => {
 
     test('returns true for roles with transform errors', () => {
       const testRole = {
-        _transform_error: ['kibana'],
+        _transform_error: [{ reason: 'kibana:reserved_privileges_mixed', state: [] }],
       };
       expect(isRoleReadOnly(testRole)).toBe(true);
     });

@@ -24,15 +24,11 @@ import {
   Placement,
   Tooltip,
 } from '@elastic/charts';
-import {
-  MULTILAYER_TIME_AXIS_STYLE,
-  renderEndzoneTooltip,
-  useActiveCursor,
-} from '@kbn/charts-plugin/public';
+import { renderEndzoneTooltip, useActiveCursor } from '@kbn/charts-plugin/public';
 import { EuiIcon } from '@elastic/eui';
 import { getTimeZone } from '@kbn/visualization-utils';
 import { getUISettings, getCharts } from '../../../../services';
-import { GRID_LINE_CONFIG, ICON_TYPES_MAP, STACKED_OPTIONS } from '../../constants';
+import { GRID_LINE_CONFIG, STACKED_OPTIONS, getIconType } from '../../constants';
 import { AreaSeriesDecorator } from './decorators/area_decorator';
 import { BarSeriesDecorator } from './decorators/bar_decorator';
 import { getStackAccessors } from './utils/stack_format';
@@ -81,8 +77,6 @@ export const TimeSeries = ({
   palettesService,
   interval,
   isLastBucketDropped,
-  useLegacyTimeAxis,
-  ignoreDaylightTime,
   initialRender,
 }) => {
   // If the color isn't configured by the user, use the color mapping service
@@ -134,11 +128,11 @@ export const TimeSeries = ({
       return;
     }
     const [min, max] = x;
-    onBrush(min, max, series);
+    onBrush?.(min, max, series);
   };
 
   const handleElementClick = (points) => {
-    onFilterClick(series, points);
+    onFilterClick?.(series, points);
   };
 
   const getSeriesColor = useCallback(
@@ -162,13 +156,6 @@ export const TimeSeries = ({
     ...GRID_LINE_CONFIG,
     visible: showGrid,
   };
-
-  const shouldUseNewTimeAxis =
-    series.every(
-      ({ stack, bars, lines }) => (bars?.show && stack !== STACKED_OPTIONS.NONE) || lines?.show
-    ) &&
-    !useLegacyTimeAxis &&
-    !ignoreDaylightTime;
 
   return (
     <Chart ref={chartRef} renderer="canvas" className={classes}>
@@ -241,7 +228,7 @@ export const TimeSeries = ({
             id={id}
             domainType={AnnotationDomainType.XDomain}
             dataValues={dataValues}
-            marker={<EuiIcon type={ICON_TYPES_MAP[icon] || 'asterisk'} />}
+            marker={<EuiIcon type={getIconType(icon) || 'asterisk'} aria-hidden={true} />}
             hideLinesTooltips={true}
             style={style}
           />
@@ -353,8 +340,6 @@ export const TimeSeries = ({
         title={getAxisLabelString(interval)}
         tickFormat={xAxisFormatter}
         gridLine={gridLineStyle}
-        style={shouldUseNewTimeAxis ? MULTILAYER_TIME_AXIS_STYLE : undefined}
-        timeAxisLayerCount={shouldUseNewTimeAxis ? 2 : 0}
       />
     </Chart>
   );
@@ -380,5 +365,4 @@ TimeSeries.propTypes = {
   annotations: PropTypes.array,
   interval: PropTypes.number,
   isLastBucketDropped: PropTypes.bool,
-  useLegacyTimeAxis: PropTypes.bool,
 };

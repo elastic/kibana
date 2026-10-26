@@ -4,31 +4,34 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { render } from '@testing-library/react';
-import type { RenderResult } from '@testing-library/react';
+import { screen, render } from '@testing-library/react';
 import React from 'react';
-import { createMockStore, mockGlobalState, TestProviders } from '../../mock';
-import type { State } from '../../store';
+
+import { TestProviders } from '../../mock';
 import { kpiHostMetricLensAttributes } from './lens_attributes/hosts/kpi_host_metric';
-import { LensEmbeddable } from './lens_embeddable';
+import { getInspectAdHocIndexPatterns, LensEmbeddable } from './lens_embeddable';
 import { useKibana } from '../../lib/kibana';
 import { useActions } from './use_actions';
+import { useVisualizationResponse } from './use_visualization_response';
+import type { UseVisualizationResponseMock } from './use_visualization_response.mock';
+import { useVisualizationResponseMock } from './use_visualization_response.mock';
 
-const mockActions = [
-  { id: 'inspect' },
-  { id: 'openInLens' },
-  { id: 'addToNewCase' },
-  { id: 'addToExistingCase' },
-];
-const mockSearchSessionId = 'f8b6b4b5-7de2-487c-b81b-0baa3de3378e';
+const mockActions = [{ id: 'inspect' }, { id: 'openInLens' }, { id: 'addToCase' }];
 
-jest.mock('react-redux', () => {
-  const actual = jest.requireActual('react-redux');
+jest.mock('react-redux-v7', () => {
+  const actual = jest.requireActual('react-redux-v7');
   return {
     ...actual,
     dispatch: jest.fn(),
   };
 });
+
+jest.mock('./use_visualization_response', () => ({
+  ...jest.requireActual('./use_visualization_response'),
+  useVisualizationResponse: jest
+    .requireActual('./use_visualization_response.mock')
+    .useVisualizationResponseMock.create(),
+}));
 
 jest.mock('../../lib/kibana', () => {
   return {
@@ -48,82 +51,153 @@ jest.mock('./use_actions', () => {
   };
 });
 
-describe('LensEmbeddable', () => {
-  const state: State = {
-    ...mockGlobalState,
-    inputs: {
-      ...mockGlobalState.inputs,
-      global: {
-        ...mockGlobalState.inputs.global,
-        queries: [
-          {
-            id: 'testId',
-            inspect: { dsl: [], response: ['{"mockResponse": "mockResponse"}'] },
-            isInspected: false,
-            loading: false,
-            selectedInspectIndex: 0,
-            searchSessionId: mockSearchSessionId,
-            refetch: jest.fn(),
-          },
-        ],
-      },
-    },
-  };
+jest.mock('../../../data_view_manager/hooks/use_data_view', () => ({
+  useDataView: jest.fn(() => ({
+    dataView: { id: undefined },
+    status: 'ready',
+  })),
+}));
 
-  const store = createMockStore(state);
+const mockUseVisualizationResponse = useVisualizationResponse as UseVisualizationResponseMock;
+
+const okResponseMock = useVisualizationResponseMock.buildOkResponse();
+
+describe('LensEmbeddable', () => {
   const mockEmbeddableComponent = jest
     .fn()
     .mockReturnValue(<div data-test-subj="embeddableComponent" />);
 
-  beforeAll(() => {
-    (useKibana as jest.Mock).mockReturnValue({
-      services: {
-        lens: {
-          EmbeddableComponent: mockEmbeddableComponent,
-        },
-        data: {
-          actions: {
-            createFiltersFromValueClickAction: jest.fn(),
-          },
+  (useKibana as jest.Mock).mockReturnValue({
+    services: {
+      lens: {
+        EmbeddableComponent: mockEmbeddableComponent,
+      },
+      data: {
+        actions: {
+          createFiltersFromValueClickAction: jest.fn(),
         },
       },
-    });
-    (useActions as jest.Mock).mockReturnValue(mockActions);
+    },
   });
-  let res: RenderResult;
+  (useActions as jest.Mock).mockReturnValue(mockActions);
+
   beforeEach(() => {
     jest.clearAllMocks();
-    res = render(
-      <TestProviders store={store}>
-        <LensEmbeddable
-          id="testId"
-          lensAttributes={kpiHostMetricLensAttributes}
-          timerange={{ from: '2022-10-27T23:00:00.000Z', to: '2022-11-04T10:46:16.204Z' }}
-        />
-      </TestProviders>
-    );
   });
 
-  it('should render LensComponent', () => {
-    expect(res.getByTestId('embeddableComponent')).toBeInTheDocument();
+  describe('rendering happy path', () => {
+    beforeEach(() => {
+      render(
+        <TestProviders>
+          <LensEmbeddable
+            id="testId"
+            lensAttributes={kpiHostMetricLensAttributes}
+            timerange={{ from: '2022-10-27T23:00:00.000Z', to: '2022-11-04T10:46:16.204Z' }}
+          />
+        </TestProviders>
+      );
+    });
+
+    it('should render LensComponent', () => {
+      expect(screen.getByTestId('embeddableComponent')).toBeInTheDocument();
+    });
+
+    it('should render actions', () => {
+      expect(mockEmbeddableComponent.mock.calls[0][0].extraActions).toEqual(mockActions);
+    });
+
+    it('should render with searchSessionId', () => {
+      expect(mockEmbeddableComponent.mock.calls[0][0].searchSessionId).toEqual(
+        okResponseMock.searchSessionId
+      );
+    });
+
+    it('should not sync highlight state between visualizations', () => {
+      expect(mockEmbeddableComponent.mock.calls[0][0].syncTooltips).toEqual(false);
+      expect(mockEmbeddableComponent.mock.calls[0][0].syncCursor).toEqual(false);
+    });
+
+    it('should not render Panel settings action', () => {
+      expect(
+        mockEmbeddableComponent.mock.calls[0][0].disabledActions.includes('ACTION_CUSTOMIZE_PANEL')
+      ).toBeTruthy();
+    });
   });
 
-  it('should render actions', () => {
-    expect(mockEmbeddableComponent.mock.calls[0][0].extraActions).toEqual(mockActions);
+  describe('when no searchSessionId exists', () => {
+    it('should not render', () => {
+      mockUseVisualizationResponse.mockReturnValue(
+        useVisualizationResponseMock.buildNoSearchSessionIdOkResponse()
+      );
+
+      const { container } = render(
+        <TestProviders>
+          <LensEmbeddable
+            id="testId"
+            lensAttributes={kpiHostMetricLensAttributes}
+            timerange={{ from: '2022-10-27T23:00:00.000Z', to: '2022-11-04T10:46:16.204Z' }}
+          />
+        </TestProviders>
+      );
+      expect(container).toBeEmptyDOMElement();
+    });
+  });
+});
+
+describe('getInspectAdHocIndexPatterns', () => {
+  const scopeId = 'explore-data-view-default';
+
+  it('returns null when the chart has no ad hoc data views', () => {
+    expect(getInspectAdHocIndexPatterns(undefined, scopeId)).toBeNull();
   });
 
-  it('should render with searchSessionId', () => {
-    expect(mockEmbeddableComponent.mock.calls[0][0].searchSessionId).toEqual(mockSearchSessionId);
-  });
-
-  it('should not sync highlight state between visualizations', () => {
-    expect(mockEmbeddableComponent.mock.calls[0][0].syncTooltips).toEqual(false);
-    expect(mockEmbeddableComponent.mock.calls[0][0].syncCursor).toEqual(false);
-  });
-
-  it('should not render Panel settings action', () => {
+  it('skips the injected scope data view so Inspect uses the request index', () => {
     expect(
-      mockEmbeddableComponent.mock.calls[0][0].disabledActions.includes('ACTION_CUSTOMIZE_PANEL')
-    ).toBeTruthy();
+      getInspectAdHocIndexPatterns(
+        {
+          [scopeId]: {
+            id: scopeId,
+            title: 'logs-*,filebeat-*',
+            name: 'Security solution explore',
+          },
+        },
+        scopeId
+      )
+    ).toBeNull();
+  });
+
+  it('keeps a chart-owned ad hoc data view title', () => {
+    expect(
+      getInspectAdHocIndexPatterns(
+        {
+          'entity-store-hosts': {
+            id: 'entity-store-hosts',
+            title: '.entities.v2.latest.security_default',
+            name: 'Security solution explore',
+          },
+        },
+        scopeId
+      )
+    ).toEqual(['.entities.v2.latest.security_default']);
+  });
+
+  it('keeps chart-owned patterns when the scope data view is also attached', () => {
+    expect(
+      getInspectAdHocIndexPatterns(
+        {
+          [scopeId]: {
+            id: scopeId,
+            title: 'logs-*',
+            name: 'Security solution explore',
+          },
+          'risk-score': {
+            id: 'risk-score',
+            title: 'ea_host_risk_score_latest_default',
+            name: 'ea_host_risk_score_latest_default_no_timestamp',
+          },
+        },
+        scopeId
+      )
+    ).toEqual(['ea_host_risk_score_latest_default']);
   });
 });

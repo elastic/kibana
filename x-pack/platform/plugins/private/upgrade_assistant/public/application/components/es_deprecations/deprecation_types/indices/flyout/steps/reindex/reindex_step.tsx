@@ -10,7 +10,6 @@ import React, { Fragment } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyoutBody,
@@ -19,17 +18,19 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
-import { ReindexStatus } from '../../../../../../../../../common/types';
+import { ReindexStatus } from '@kbn/upgrade-assistant-pkg-common';
 import { LoadingState } from '../../../../../../types';
 import type { ReindexState } from '../../../use_reindex';
 import { ReindexProgress } from './progress';
 import { useAppContext } from '../../../../../../../app_context';
-import { FrozenCallOut } from '../frozen_callout';
-import { FetchFailedCallOut } from '../fetch_failed_callout';
-import { ReindexingFailedCallOut } from '../reindexing_failed_callout';
+import { FrozenCallOut } from '../callouts';
+import { FetchFailedCallOut } from '../callouts';
+import { ReindexingFailedCallOut } from '../callouts';
+import { NodesLowSpaceCallOut } from '../../../../../common/nodes_low_disk_space';
 
 const buttonLabel = (status?: ReindexStatus) => {
   switch (status) {
@@ -102,58 +103,18 @@ export const ReindexFlyoutStep: React.FunctionComponent<{
         {hasRequiredPrivileges === false && (
           <Fragment>
             <EuiSpacer />
-            <EuiCallOut
+            <KbnDangerCallout
+              announceOnMount={false}
               title={
                 <FormattedMessage
                   id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.reindexStep.insufficientPrivilegeCallout.calloutTitle"
                   defaultMessage="You do not have sufficient privileges to reindex this index"
                 />
               }
-              color="danger"
-              iconType="warning"
             />
           </Fragment>
         )}
-        {nodes && nodes.length > 0 && (
-          <>
-            <EuiCallOut
-              color="warning"
-              iconType="warning"
-              data-test-subj="lowDiskSpaceCallout"
-              title={
-                <FormattedMessage
-                  id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.reindexStep.lowDiskSpaceCalloutTitle"
-                  defaultMessage="Nodes with low disk space"
-                />
-              }
-            >
-              <>
-                <FormattedMessage
-                  id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.reindexStep.lowDiskSpaceCalloutDescription"
-                  defaultMessage="Disk usage has exceeded the low watermark, which may prevent reindexing. The following nodes are impacted:"
-                />
-
-                <EuiSpacer size="s" />
-
-                <ul>
-                  {nodes.map(({ nodeName, available, nodeId }) => (
-                    <li key={nodeId} data-test-subj="impactedNodeListItem">
-                      <FormattedMessage
-                        id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.reindexStep.lowDiskSpaceUsedText"
-                        defaultMessage="{nodeName} ({available} available)"
-                        values={{
-                          nodeName,
-                          available,
-                        }}
-                      />
-                    </li>
-                  ))}
-                </ul>
-              </>
-            </EuiCallOut>
-            <EuiSpacer />
-          </>
-        )}
+        {nodes && nodes.length > 0 && <NodesLowSpaceCallOut nodes={nodes} />}
         {hasFetchFailed && <FetchFailedCallOut errorMessage={reindexState.errorMessage!} />}
         {!hasFetchFailed && hasReindexingFailed && (
           <ReindexingFailedCallOut errorMessage={reindexState.errorMessage!} />
@@ -197,21 +158,23 @@ export const ReindexFlyoutStep: React.FunctionComponent<{
               />
             </EuiButtonEmpty>
           </EuiFlexItem>
-          {!hasFetchFailed && !isCompleted && hasRequiredPrivileges && (
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                fill
-                color={status === ReindexStatus.paused ? 'warning' : 'primary'}
-                iconType={status === ReindexStatus.paused ? 'play' : undefined}
-                onClick={startReindex}
-                isLoading={loading}
-                disabled={loading || !hasRequiredPrivileges}
-                data-test-subj="startReindexingButton"
-              >
-                {buttonLabel(status)}
-              </EuiButton>
-            </EuiFlexItem>
-          )}
+          <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
+            {!hasFetchFailed && !isCompleted && hasRequiredPrivileges && (
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  fill
+                  color={status === ReindexStatus.paused ? 'warning' : 'primary'}
+                  iconType={status === ReindexStatus.paused ? 'play' : undefined}
+                  onClick={startReindex}
+                  isLoading={loading}
+                  disabled={loading || !hasRequiredPrivileges}
+                  data-test-subj="startReindexingButton"
+                >
+                  {buttonLabel(status)}
+                </EuiButton>
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
         </EuiFlexGroup>
       </EuiFlyoutFooter>
     </Fragment>

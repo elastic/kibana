@@ -7,6 +7,7 @@
 
 import type { SettingsSpec } from '@elastic/charts';
 
+export const THRESHOLD_SIDEBAR_MIN_WIDTH = 180;
 export const DEFAULT_DATE_FORMAT = 'HH:mm:ss';
 export const CHART_SETTINGS: Partial<SettingsSpec> = {
   showLegend: false,

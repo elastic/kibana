@@ -1,0 +1,23 @@
+requestBody:
+  content:
+    application/json:
+      examples:
+        putSpaceSettingsRequestExample:
+          description: 'Update allowed namespace prefixes for the current Kibana space'
+          value:
+            allowed_namespace_prefixes:
+              - 'team-a'
+              - 'team-b'
+responses:
+  200:
+    description: 'Successful response'
+    content:
+      application/json:
+        examples:
+          putSpaceSettingsExample:
+            description: 'The updated Fleet settings for the current Kibana space'
+            value:
+              item:
+                allowed_namespace_prefixes:
+                  - 'team-a'
+                  - 'team-b'

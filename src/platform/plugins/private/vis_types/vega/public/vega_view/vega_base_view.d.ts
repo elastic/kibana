@@ -8,21 +8,24 @@
  */
 
 import type { IExternalUrl } from '@kbn/core/public';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/common';
+import type { View } from 'vega';
 import type { IServiceSettings } from './vega_map_view/service_settings/service_settings_types';
-import { VegaParser } from '../data_model/vega_parser';
-import { createVegaStateRestorer } from '../lib/vega_state_restorer';
+import type { VegaRenderDescriptor } from '../data_model/types';
+import type { VegaFilterActionHandler } from '../types';
+import type { createVegaStateRestorer } from '../lib/vega_state_restorer';
 
 interface VegaViewParams {
   parentEl: HTMLDivElement;
-  fireEvent: IInterpreterRenderHandlers['event'];
-  vegaParser: VegaParser;
+  descriptor: VegaRenderDescriptor;
+  /** Receives every error the view displays, so the parent can surface it (e.g. in the inspector). */
+  onError: (message: string) => void;
+  /** Receives the live Vega view once it is created, so the parent can inspect its data and signals. */
+  onViewCreated: (view: View) => void;
+  onFilterAction: VegaFilterActionHandler;
   serviceSettings: IServiceSettings;
-  filterManager: DataPublicPluginStart['query']['filterManager'];
-  timefilter: DataPublicPluginStart['query']['timefilter']['timefilter'];
   vegaStateRestorer: ReturnType<typeof createVegaStateRestorer>;
   externalUrl: IExternalUrl;
+  showWarnings: boolean;
 }
 
 export class VegaBaseView {
@@ -31,7 +34,6 @@ export class VegaBaseView {
   onError(error: any): void;
   onWarn(error: any): void;
   setView(map: any): void;
-  setDebugValues(view: any, spec: any, vlspec: any): void;
   _addDestroyHandler(handler: Function): void;
 
   destroy(): Promise<void>;
@@ -39,7 +41,8 @@ export class VegaBaseView {
 
   _container: HTMLDivElement;
   _controls: HTMLDivElement;
-  _parser: any;
+  _descriptor: VegaRenderDescriptor;
+  _onViewCreated: VegaViewParams['onViewCreated'];
   _vegaViewConfig: any;
   _serviceSettings: VegaViewParams['serviceSettings'];
   _vegaStateRestorer: VegaViewParams['vegaStateRestorer'];

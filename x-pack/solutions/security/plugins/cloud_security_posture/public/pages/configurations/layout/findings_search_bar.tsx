@@ -6,13 +6,17 @@
  */
 import React, { useContext } from 'react';
 import { css } from '@emotion/react';
-import { EuiThemeComputed, useEuiTheme } from '@elastic/eui';
+import { InPortal } from 'react-reverse-portal';
+import type { EuiThemeComputed } from '@elastic/eui';
+import { useEuiTheme } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { Filter } from '@kbn/es-query';
 import type { CspClientPluginStartDeps } from '@kbn/cloud-security-posture';
+import { useRefresh } from '@kbn/cloud-security-posture/src/hooks/use_refresh';
 import { useDataViewContext } from '../../../common/contexts/data_view_context';
 import { SecuritySolutionContext } from '../../../application/security_solution_context';
+import { FindingsSearchBarPortalContext } from '../../../common/contexts/findings_search_bar_portal_context';
 import type { FindingsBaseURLQuery } from '../../../common/types';
 import { PLUGIN_NAME } from '../../../../common';
 
@@ -23,6 +27,7 @@ interface FindingsSearchBarProps {
   loading: boolean;
   placeholder?: string;
   query: SearchBarQueryProps;
+  refreshQueryKey: string;
 }
 
 export const FindingsSearchBar = ({
@@ -32,6 +37,7 @@ export const FindingsSearchBar = ({
   placeholder = i18n.translate('xpack.csp.findings.searchBar.searchPlaceholder', {
     defaultMessage: 'Search findings (eg. rule.section : "API Server" )',
   }),
+  refreshQueryKey,
 }: FindingsSearchBarProps) => {
   const { euiTheme } = useEuiTheme();
   const {
@@ -41,8 +47,11 @@ export const FindingsSearchBar = ({
   } = useKibana<CspClientPluginStartDeps>().services;
 
   const securitySolutionContext = useContext(SecuritySolutionContext);
+  const searchBarPortalNode = useContext(FindingsSearchBarPortalContext);
 
   const { dataView } = useDataViewContext();
+
+  const { refresh, isRefreshing } = useRefresh(refreshQueryKey);
 
   let searchBarNode = (
     <div css={getContainerStyle(euiTheme)}>
@@ -51,9 +60,9 @@ export const FindingsSearchBar = ({
         showFilterBar={true}
         showQueryInput={true}
         showDatePicker={false}
-        isLoading={loading}
+        isLoading={loading || isRefreshing}
         indexPatterns={[dataView]}
-        onQuerySubmit={setQuery}
+        onQuerySubmit={(payload, isUpdated) => (isUpdated ? setQuery(payload) : refresh())}
         onFiltersUpdated={(value: Filter[]) => setQuery({ filters: value })}
         placeholder={placeholder}
         query={{
@@ -64,6 +73,10 @@ export const FindingsSearchBar = ({
       />
     </div>
   );
+
+  if (searchBarPortalNode) {
+    return <InPortal node={searchBarPortalNode}>{searchBarNode}</InPortal>;
+  }
 
   if (securitySolutionContext) {
     const FiltersGlobal = securitySolutionContext.getFiltersGlobalComponent();

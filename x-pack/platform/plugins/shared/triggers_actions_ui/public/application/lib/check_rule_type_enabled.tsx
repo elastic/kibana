@@ -7,7 +7,7 @@
 
 import { upperFirst } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { RuleType } from '../../types';
+import type { RuleType } from '../../types';
 
 export interface IsEnabledResult {
   isEnabled: true;
@@ -18,14 +18,19 @@ export interface IsDisabledResult {
 }
 
 const getLicenseCheckResult = (ruleType: RuleType) => {
+  const license = ruleType.minimumLicenseRequired;
+  const minimumLicenseRequired = upperFirst(license);
+
   return {
     isEnabled: false,
     message: i18n.translate(
       'xpack.triggersActionsUI.checkRuleTypeEnabled.ruleTypeDisabledByLicenseMessage',
       {
-        defaultMessage: 'This rule type requires a {minimumLicenseRequired} license.',
+        defaultMessage:
+          'This rule type requires {license, select, enterprise {an Enterprise} other {a {minimumLicenseRequired}}} license.',
         values: {
-          minimumLicenseRequired: upperFirst(ruleType.minimumLicenseRequired),
+          license,
+          minimumLicenseRequired,
         },
       }
     ),

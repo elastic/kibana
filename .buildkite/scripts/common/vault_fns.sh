@@ -1,17 +1,6 @@
 #!/bin/bash
 
-# TODO: rewrite after https://github.com/elastic/kibana-operations/issues/15 is done
 export LEGACY_VAULT_ADDR="https://secrets.elastic.co:8200"
-if [[ "${VAULT_ADDR:-}" == "$LEGACY_VAULT_ADDR" ]]; then
-  VAULT_PATH_PREFIX="secret/kibana-issues/dev"
-  VAULT_KV_PREFIX="secret/kibana-issues/dev"
-  IS_LEGACY_VAULT_ADDR=true
-else
-  VAULT_PATH_PREFIX="secret/ci/elastic-kibana"
-  VAULT_KV_PREFIX="kv/ci-shared/kibana-deployments"
-  IS_LEGACY_VAULT_ADDR=false
-fi
-export IS_LEGACY_VAULT_ADDR
 
 retry() {
   local retries=$1; shift
@@ -38,7 +27,7 @@ vault_get() {
   key_path=${1:-}
   field=${2:-}
 
-  fullPath="$VAULT_PATH_PREFIX/$key_path"
+  fullPath="secret/ci/elastic-kibana/$key_path"
 
   if [[ -z "$field" || "$field" =~ ^-.* ]]; then
     retry 5 5 vault read "$fullPath" "${@:2}"
@@ -53,38 +42,10 @@ vault_set() {
   fields=("$@")
 
 
-  fullPath="$VAULT_PATH_PREFIX/$key_path"
+  fullPath="secret/ci/elastic-kibana/$key_path"
 
   # shellcheck disable=SC2068
   retry 5 5 vault write "$fullPath" ${fields[@]}
-}
-
-vault_kv_set() {
-  kv_path=$1
-  shift
-  fields=("$@")
-
-  vault kv put "$VAULT_KV_PREFIX/$kv_path" "${fields[@]}"
-}
-
-function get_vault_role_id() {
-  if [[ "$IS_LEGACY_VAULT_ADDR" == "true" ]]; then
-    VAULT_ROLE_ID="$(retry 5 15 gcloud secrets versions access latest --secret=kibana-buildkite-vault-role-id)"
-  else
-    VAULT_ROLE_ID="$(vault_get kibana-buildkite-vault-credentials role-id)"
-  fi
-
-  echo "$VAULT_ROLE_ID"
-}
-
-function get_vault_secret_id() {
-    if [[ "$IS_LEGACY_VAULT_ADDR" == "true" ]]; then
-      VAULT_SECRET_ID="$(retry 5 15 gcloud secrets versions access latest --secret=kibana-buildkite-vault-secret-id)"
-    else
-      VAULT_SECRET_ID="$(vault_get kibana-buildkite-vault-credentials secret-id)"
-    fi
-
-    echo "$VAULT_SECRET_ID"
 }
 
 function set_in_legacy_vault() {
@@ -92,8 +53,6 @@ function set_in_legacy_vault() {
   shift
   fields=("$@")
 
-  VAULT_ROLE_ID="$(get_vault_role_id)"
-  VAULT_SECRET_ID="$(get_vault_secret_id)"
   VAULT_TOKEN_BAK="$VAULT_TOKEN"
 
   # Make sure to either keep this variable name `VAULT_TOKEN` or unset `VAULT_TOKEN`,
@@ -115,8 +74,6 @@ function set_in_legacy_vault() {
 function unset_in_legacy_vault() {
   key_path=$1
 
-  VAULT_ROLE_ID="$(get_vault_role_id)"
-  VAULT_SECRET_ID="$(get_vault_secret_id)"
   VAULT_TOKEN_BAK="$VAULT_TOKEN"
 
   # Make sure to either keep this variable name `VAULT_TOKEN` or unset `VAULT_TOKEN`,

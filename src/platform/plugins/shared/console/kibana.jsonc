@@ -15,12 +15,14 @@
     ],
     "requiredPlugins": [
       "devTools",
-      "share"
+      "share",
+      "data"
     ],
     "optionalPlugins": [
       "usageCollection",
       "home",
-      "cloud"
+      "cloud",
+      "licensing"
     ],
     "requiredBundles": [
       "esUiShared",

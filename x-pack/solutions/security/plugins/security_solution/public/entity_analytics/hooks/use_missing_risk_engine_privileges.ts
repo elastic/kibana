@@ -6,21 +6,22 @@
  */
 
 import { useMemo } from 'react';
-import type { NonEmptyArray } from 'fp-ts/lib/NonEmptyArray';
+import type { NonEmptyArray } from 'fp-ts/NonEmptyArray';
 import { useRiskEnginePrivileges } from '../api/hooks/use_risk_engine_privileges';
 import { getMissingRiskEnginePrivileges } from '../../../common/entity_analytics/risk_engine';
 import type {
   MissingPrivileges,
   RiskEngineIndexPrivilege,
 } from '../../../common/entity_analytics/risk_engine';
-export type RiskEngineMissingPrivilegesResponse =
+export type RiskEngineMissingPrivilegesResponse = (
   | { isLoading: true }
   | { isLoading: false; hasAllRequiredPrivileges: true }
   | {
       isLoading: false;
       missingPrivileges: MissingPrivileges;
       hasAllRequiredPrivileges: false;
-    };
+    }
+) & { isError?: boolean };
 
 interface UseMissingRiskEnginePrivilegesParams {
   /**
@@ -31,19 +32,14 @@ interface UseMissingRiskEnginePrivilegesParams {
 export const useMissingRiskEnginePrivileges = (
   { readonly }: UseMissingRiskEnginePrivilegesParams = { readonly: false }
 ): RiskEngineMissingPrivilegesResponse => {
-  const { data: privilegesResponse, isLoading } = useRiskEnginePrivileges();
+  const { data: privilegesResponse, isLoading, isError } = useRiskEnginePrivileges();
 
   return useMemo<RiskEngineMissingPrivilegesResponse>(() => {
     if (isLoading || !privilegesResponse) {
       return {
         isLoading: true,
-      };
-    }
-
-    if (privilegesResponse.has_all_required) {
-      return {
-        isLoading: false,
-        hasAllRequiredPrivileges: true,
+        // TODO: give a failed check its own state; until then it also reads as loading, so only callers that check isError stop waiting.
+        isError,
       };
     }
 
@@ -60,21 +56,23 @@ export const useMissingRiskEnginePrivileges = (
     // Here we check if there are no missing privileges of the provided set of required privileges
     if (
       indexPrivileges.every(([_, missingPrivileges]) => missingPrivileges.length === 0) &&
-      (readonly || clusterPrivileges.length === 0) // cluster privileges check is required for write operations
+      (readonly || (clusterPrivileges.run.length === 0 && clusterPrivileges.enable.length === 0)) // cluster privileges check is required for write operations
     ) {
       return {
         isLoading: false,
+        isError,
         hasAllRequiredPrivileges: true,
       };
     }
 
     return {
       isLoading: false,
+      isError,
       hasAllRequiredPrivileges: false,
       missingPrivileges: {
         indexPrivileges,
-        clusterPrivileges: readonly ? [] : clusterPrivileges, // cluster privileges are not required for readonly
+        clusterPrivileges: readonly ? { enable: [], run: [] } : clusterPrivileges, // cluster privileges are not required for readonly
       },
     };
-  }, [isLoading, privilegesResponse, readonly]);
+  }, [isLoading, isError, privilegesResponse, readonly]);
 };

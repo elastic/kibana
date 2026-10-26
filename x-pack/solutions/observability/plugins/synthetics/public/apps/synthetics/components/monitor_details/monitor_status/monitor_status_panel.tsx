@@ -15,14 +15,10 @@ import { MonitorStatusHeader } from './monitor_status_header';
 import { MonitorStatusCellTooltip } from './monitor_status_cell_tooltip';
 import { MonitorStatusLegend } from './monitor_status_legend';
 import { getMonitorStatusChartTheme } from './monitor_status_chart_theme';
-import {
-  getXAxisLabelFormatter,
-  getColorBands,
-  getBrushData,
-  MonitorStatusPanelProps,
-} from './monitor_status_data';
+import type { MonitorStatusPanelProps } from './monitor_status_data';
+import { getXAxisLabelFormatter, getColorBands, getBrushData } from './monitor_status_data';
 import { useMonitorStatusData } from './use_monitor_status_data';
-import { ClientPluginsStart } from '../../../../../plugin';
+import type { ClientPluginsStart } from '../../../../../plugin';
 
 export const MonitorStatusPanel = ({
   from = 'now-24h',
@@ -31,11 +27,14 @@ export const MonitorStatusPanel = ({
   periodCaption = undefined,
   showViewHistoryButton = false,
   onBrushed,
+  monitorId,
+  locationLabel,
+  remoteName,
 }: MonitorStatusPanelProps) => {
   const { euiTheme, colorMode } = useEuiTheme();
   const initialSizeRef = useRef<HTMLDivElement | null>(null);
   const { loading, timeBins, handleResize, getTimeBinByXValue, xDomain, minsPerBin } =
-    useMonitorStatusData({ from, to, initialSizeRef });
+    useMonitorStatusData({ from, to, initialSizeRef, monitorId, locationLabel, remoteName });
   const { charts } = useKibana<ClientPluginsStart>().services;
   const baseTheme = charts.theme.useChartsBaseTheme();
 

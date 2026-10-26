@@ -10,9 +10,10 @@
 import React, { useState } from 'react';
 
 import { action } from '@storybook/addon-actions';
-import { monaco as monacoEditor } from '@kbn/monaco';
+import { monaco as monacoEditor, jsonDefaults } from '@kbn/monaco';
 
-import { CodeEditorStorybookMock, CodeEditorStorybookParams } from './mocks/storybook';
+import type { CodeEditorStorybookParams } from './mocks/storybook';
+import { CodeEditorStorybookMock } from './mocks/storybook';
 
 import mdx from './README.mdx';
 
@@ -38,7 +39,7 @@ export const Basic = {
         {...params}
         languageId="plainText"
         onChange={action('on change')}
-        value="Hello!"
+        placeholder="Type something here"
         height={200}
       />
     );
@@ -96,7 +97,7 @@ export const JSONSupport = () => {
       <CodeEditor
         languageId="json"
         editorDidMount={(editor) => {
-          monacoEditor.languages.json.jsonDefaults.setDiagnosticsOptions({
+          jsonDefaults.setDiagnosticsOptions({
             validate: true,
             schemas: [
               {

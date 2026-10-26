@@ -7,22 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { Fragment, memo, useEffect, useRef, useMemo, useCallback } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiText, EuiPage, EuiPageBody, EuiSpacer, useEuiPaddingSize } from '@elastic/eui';
+import React, { Fragment, memo, useEffect, useRef, useMemo, useCallback, useState } from 'react';
+import { EuiPage, EuiPageBody } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { cloneDeep } from 'lodash';
-import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
-import { generateFilters } from '@kbn/data-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { SORT_DEFAULT_ORDER_SETTING } from '@kbn/discover-utils';
 import type { UseColumnsProps } from '@kbn/unified-data-table';
-import { popularizeField, useColumns } from '@kbn/unified-data-table';
+import { useColumns } from '@kbn/unified-data-table';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import type { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
-import { kibanaFullBodyHeightCss } from '@kbn/core/public';
+import { AppHeader, type AppHeaderBack } from '@kbn/app-header';
+import type { DataTableRecord } from '@kbn/discover-utils/types';
+import type { DocViewerApi } from '@kbn/unified-doc-viewer';
 import { ContextErrorMessage } from './components/context_error_message';
 import { LoadingStatus } from './services/context_query_state';
 import type { AppState, GlobalState } from './services/context_state';
@@ -33,6 +33,7 @@ import { ContextAppContent } from './context_app_content';
 import { SurrDocType } from './services/context';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { setBreadcrumbs } from '../../utils/breadcrumbs';
+import { useScopedServices } from '../../components/scoped_services_provider';
 
 const ContextAppContentMemoized = memo(ContextAppContent);
 
@@ -40,22 +41,29 @@ export interface ContextAppProps {
   dataView: DataView;
   anchorId: string;
   referrer?: string;
+  addFilter: DocViewFilterFn;
+  expandedDoc: DataTableRecord | undefined;
+  initialDocViewerTabId: string | undefined;
+  docViewerRef: React.RefObject<DocViewerApi>;
+  setExpandedDoc: (doc: DataTableRecord | undefined, options?: { initialTabId?: string }) => void;
 }
 
-export const ContextApp = ({ dataView, anchorId, referrer }: ContextAppProps) => {
+export const ContextApp = ({
+  dataView,
+  anchorId,
+  referrer,
+  addFilter,
+  expandedDoc,
+  initialDocViewerTabId,
+  docViewerRef,
+  setExpandedDoc,
+}: ContextAppProps) => {
+  const styles = useMemoCss(componentStyles);
+
   const services = useDiscoverServices();
-  const {
-    analytics,
-    locator,
-    uiSettings,
-    capabilities,
-    dataViews,
-    navigation,
-    filterManager,
-    core,
-    ebtManager,
-    fieldsMetadata,
-  } = services;
+  const { scopedEBTManager } = useScopedServices();
+  const { locator, uiSettings, capabilities, dataViews, navigation, core, fieldsMetadata } =
+    services;
 
   /**
    * Context app state
@@ -66,6 +74,10 @@ export const ContextApp = ({ dataView, anchorId, referrer }: ContextAppProps) =>
   });
   const prevAppState = useRef<AppState>();
   const prevGlobalState = useRef<GlobalState>({ filters: [] });
+  const [isWarningCalloutDismissed, setIsWarningCalloutDismissed] = useState(false);
+  const onDismissWarningCallout = useCallback(() => {
+    setIsWarningCalloutDismissed(true);
+  }, []);
 
   const setAppState = useCallback<UseColumnsProps['setAppState']>(
     ({ settings, ...rest }) => {
@@ -126,7 +138,10 @@ export const ContextApp = ({ dataView, anchorId, referrer }: ContextAppProps) =>
    */
   useEffect(() => {
     const doFetch = async () => {
-      const startTime = window.performance.now();
+      const surroundingDocsFetchTracker = scopedEBTManager.trackPerformanceEvent(
+        'discoverSurroundingDocsFetch'
+      );
+
       let fetchType = '';
       if (!prevAppState.current) {
         fetchType = 'all';
@@ -145,13 +160,9 @@ export const ContextApp = ({ dataView, anchorId, referrer }: ContextAppProps) =>
         await fetchContextRows();
       }
 
-      if (analytics && fetchType) {
-        const fetchDuration = window.performance.now() - startTime;
-        reportPerformanceMetricEvent(analytics, {
-          eventName: 'discoverSurroundingDocsFetch',
-          duration: fetchDuration,
-          meta: { fetchType },
-        });
+      if (fetchType) {
+        surroundingDocsFetchTracker.reportEvent({ meta: { fetchType } });
+        setIsWarningCalloutDismissed(false);
       }
     };
 
@@ -160,7 +171,6 @@ export const ContextApp = ({ dataView, anchorId, referrer }: ContextAppProps) =>
     prevAppState.current = cloneDeep(appState);
     prevGlobalState.current = cloneDeep(globalState);
   }, [
-    analytics,
     appState,
     globalState,
     anchorId,
@@ -168,6 +178,7 @@ export const ContextApp = ({ dataView, anchorId, referrer }: ContextAppProps) =>
     fetchAllRows,
     fetchSurroundingRows,
     fetchedState.anchor.id,
+    scopedEBTManager,
   ]);
 
   const rows = useMemo(
@@ -192,37 +203,20 @@ export const ContextApp = ({ dataView, anchorId, referrer }: ContextAppProps) =>
     ]
   );
 
-  const addFilter = useCallback(
-    async (field: DataViewField | string, values: unknown, operation: '+' | '-') => {
-      const newFilters = generateFilters(filterManager, field, values, operation, dataView);
-      filterManager.addFilters(newFilters);
-      if (dataViews) {
-        const fieldName = typeof field === 'string' ? field : field.name;
-        await popularizeField(dataView, fieldName, dataViews, capabilities);
-        void ebtManager.trackFilterAddition({
-          fieldName: fieldName === '_exists_' ? String(values) : fieldName,
-          filterOperation: fieldName === '_exists_' ? '_exists_' : operation,
-          fieldsMetadata,
-        });
-      }
-    },
-    [filterManager, dataViews, dataView, capabilities, ebtManager, fieldsMetadata]
-  );
-
   const onAddColumnWithTracking = useCallback(
     (columnName: string) => {
       onAddColumn(columnName);
-      void ebtManager.trackDataTableSelection({ fieldName: columnName, fieldsMetadata });
+      void scopedEBTManager.trackDataTableSelection({ fieldName: columnName, fieldsMetadata });
     },
-    [onAddColumn, ebtManager, fieldsMetadata]
+    [onAddColumn, scopedEBTManager, fieldsMetadata]
   );
 
   const onRemoveColumnWithTracking = useCallback(
     (columnName: string) => {
       onRemoveColumn(columnName);
-      void ebtManager.trackDataTableRemoval({ fieldName: columnName, fieldsMetadata });
+      void scopedEBTManager.trackDataTableRemoval({ fieldName: columnName, fieldsMetadata });
     },
-    [onRemoveColumn, ebtManager, fieldsMetadata]
+    [onRemoveColumn, scopedEBTManager, fieldsMetadata]
   );
 
   const TopNavMenu = navigation.ui.AggregateQueryTopNavMenu;
@@ -238,12 +232,20 @@ export const ContextApp = ({ dataView, anchorId, referrer }: ContextAppProps) =>
     };
   };
 
-  const titlePadding = useEuiPaddingSize('m');
+  const title = i18n.translate('discover.context.pageTitle', {
+    defaultMessage: 'Documents surrounding #{anchorId}',
+    values: { anchorId },
+  });
+  const back: AppHeaderBack = {
+    href: referrer ?? '#/',
+    label: i18n.translate('discover.context.backButtonLabel', { defaultMessage: 'Discover' }),
+  };
 
   return (
     <Fragment>
+      <AppHeader title={title} back={back} spacing="compact" />
       {fetchedState.anchorStatus.value === LoadingStatus.FAILED ? (
-        <ContextErrorMessage status={fetchedState.anchorStatus} />
+        <ContextErrorMessage type="anchor" status={fetchedState.anchorStatus} />
       ) : (
         <Fragment>
           <h1
@@ -251,34 +253,16 @@ export const ContextApp = ({ dataView, anchorId, referrer }: ContextAppProps) =>
             className="euiScreenReaderOnly"
             data-test-subj="discoverContextAppTitle"
           >
-            {i18n.translate('discover.context.pageTitle', {
-              defaultMessage: 'Documents surrounding #{anchorId}',
-              values: { anchorId },
-            })}
+            {title}
           </h1>
           <TopNavMenu {...getNavBarProps()} />
-          <EuiPage css={dscDocsPageCss}>
+          <EuiPage>
             <EuiPageBody
               panelled
               paddingSize="none"
-              css={dscDocsContentCss}
-              panelProps={{ role: 'main' }}
+              css={styles.docsContent}
+              panelProps={{ role: 'main', hasShadow: false }}
             >
-              <EuiText
-                data-test-subj="contextDocumentSurroundingHeader"
-                css={css`
-                  padding: ${titlePadding} ${titlePadding} 0;
-                `}
-              >
-                <strong>
-                  <FormattedMessage
-                    id="discover.context.contextOfTitle"
-                    defaultMessage="Documents surrounding #{anchorId}"
-                    values={{ anchorId }}
-                  />
-                </strong>
-              </EuiText>
-              <EuiSpacer size="s" />
               <ContextAppContentMemoized
                 dataView={dataView}
                 columns={columns}
@@ -289,14 +273,20 @@ export const ContextApp = ({ dataView, anchorId, referrer }: ContextAppProps) =>
                 predecessorCount={appState.predecessorCount}
                 successorCount={appState.successorCount}
                 setAppState={stateContainer.setAppState}
-                addFilter={addFilter as DocViewFilterFn}
+                addFilter={addFilter}
+                expandedDoc={expandedDoc}
+                initialDocViewerTabId={initialDocViewerTabId}
+                docViewerRef={docViewerRef}
+                setExpandedDoc={setExpandedDoc}
                 rows={rows}
                 predecessors={fetchedState.predecessors}
                 successors={fetchedState.successors}
                 anchorStatus={fetchedState.anchorStatus.value}
-                predecessorsStatus={fetchedState.predecessorsStatus.value}
-                successorsStatus={fetchedState.successorsStatus.value}
+                predecessorsStatus={fetchedState.predecessorsStatus}
+                successorsStatus={fetchedState.successorsStatus}
                 interceptedWarnings={interceptedWarnings}
+                isWarningCalloutDismissed={isWarningCalloutDismissed}
+                onDismissWarningCallout={onDismissWarningCallout}
               />
             </EuiPageBody>
           </EuiPage>
@@ -306,12 +296,10 @@ export const ContextApp = ({ dataView, anchorId, referrer }: ContextAppProps) =>
   );
 };
 
-const dscDocsPageCss = css`
-  ${kibanaFullBodyHeightCss(54)}; // 54px is the action bar height
-`;
-
-const dscDocsContentCss = css`
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-`;
+const componentStyles = {
+  docsContent: css({
+    display: 'flex',
+    flexDirection: 'column',
+    height: '100%',
+  }),
+};

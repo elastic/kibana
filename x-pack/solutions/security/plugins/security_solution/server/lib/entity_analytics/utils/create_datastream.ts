@@ -62,6 +62,31 @@ const updateTotalFieldLimitSetting = async ({
   }
 };
 
+export const rolloverDataStream = async ({
+  logger,
+  esClient,
+  dataStreamName,
+}: {
+  logger: Logger;
+  esClient: ElasticsearchClient;
+  dataStreamName: string;
+}) => {
+  logger.info(`Rollover data stream - ${dataStreamName}`);
+  try {
+    await retryTransientEsErrors(
+      () =>
+        esClient.indices.rollover({
+          alias: dataStreamName,
+        }),
+      { logger }
+    );
+    logger.info(`Successfully rolled over data stream - ${dataStreamName}`);
+  } catch (err) {
+    logger.error(`Failed to rollover data stream - ${dataStreamName}: ${err.message}`);
+    throw err;
+  }
+};
+
 // This will update the mappings of  indices but *not* the settings. This
 // is due to the fact settings can be classed as dynamic and static, and static
 // updates will fail on an index that isn't closed. New settings *will* be applied as part
@@ -156,7 +181,9 @@ export const createDataStream = async ({
     // 404 is expected if no datastream have been created
     if (error.statusCode !== 404) {
       logger.error(
-        `Error fetching concrete indices for ${indexPatterns.alias} pattern - ${error.message}`
+        `Error fetching concrete indices for ${indexPatterns.alias} pattern - ${
+          (error as Error).message
+        }`
       );
       throw error;
     }
@@ -179,9 +206,21 @@ export const createDataStream = async ({
           }),
         { logger }
       );
-    } catch (error) {
-      logger.error(`Error creating datastream - ${error.message}`);
-      throw error;
+    } catch (error: unknown) {
+      const err = error as { meta?: { body?: { error?: { type?: string } } } };
+      if (
+        err?.meta?.body?.error?.type === 'resource_already_exists_exception' ||
+        err?.meta?.body?.error?.type === 'illegal_state_exception'
+      ) {
+        logger.debug(
+          `Datastream ${indexPatterns.alias} creation skipped (${err?.meta?.body?.error?.type}): ${
+            (error as Error).message
+          }`
+        );
+      } else {
+        logger.error(`Error creating datastream - ${(error as Error).message}`);
+        throw error;
+      }
     }
   }
 };

@@ -1,0 +1,16 @@
+{
+  "type": "plugin",
+  "id": "@kbn/gen-ai-settings-plugin",
+  "owner": ["@elastic/search-ml-ux"],
+  "group": "platform",
+  "visibility": "private",
+  "plugin": {
+    "id": "genAiSettings",
+    "browser": true,
+    "server": true,
+    "configPath": ["xpack", "genAiSettings"],
+    "requiredPlugins": ["management", "actions", "inference", "licensing", "productDocBase"],
+    "optionalPlugins": ["spaces", "agentBuilder", "agentBuilderPlatform", "dashboard"],
+    "requiredBundles": ["kibanaReact", "productDocBase"]
+  }
+}

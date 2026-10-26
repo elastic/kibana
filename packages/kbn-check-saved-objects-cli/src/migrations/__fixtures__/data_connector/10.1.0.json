@@ -1,0 +1,46 @@
+{
+  "10.0.0": [
+    {
+      "name": "My Notion Connector",
+      "type": "notion",
+      "config": {},
+      "createdAt": "2025-01-01T00:00:00.000Z",
+      "updatedAt": "2025-01-01T00:00:00.000Z",
+      "workflowIds": [],
+      "toolIds": [],
+      "kscIds": ["ksc-abc123"]
+    },
+    {
+      "name": "GitHub Data Source",
+      "type": "github",
+      "config": {},
+      "createdAt": "2025-01-02T00:00:00.000Z",
+      "updatedAt": "2025-01-02T00:00:00.000Z",
+      "workflowIds": ["workflow-123", "workflow-456"],
+      "toolIds": ["tool-789"],
+      "kscIds": ["ksc-def456"]
+    }
+  ],
+  "10.1.0": [
+    {
+      "name": "My Notion Connector",
+      "type": "notion",
+      "config": {},
+      "createdAt": "2025-01-01T00:00:00.000Z",
+      "updatedAt": "2025-01-01T00:00:00.000Z",
+      "workflowIds": [],
+      "toolIds": [],
+      "kscIds": ["ksc-abc123"]
+    },
+    {
+      "name": "GitHub Data Source",
+      "type": "github",
+      "config": {},
+      "createdAt": "2025-01-02T00:00:00.000Z",
+      "updatedAt": "2025-01-02T00:00:00.000Z",
+      "workflowIds": ["workflow-123", "workflow-456"],
+      "toolIds": ["tool-789"],
+      "kscIds": ["ksc-def456"]
+    }
+  ]
+}

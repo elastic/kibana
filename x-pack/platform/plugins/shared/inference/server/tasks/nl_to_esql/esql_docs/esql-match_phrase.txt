@@ -1,0 +1,46 @@
+# MATCH_PHRASE
+
+The MATCH_PHRASE function performs a phrase match on the specified field, returning true if the provided query matches the row. It is equivalent to the `match_phrase` query in the Query DSL and can be used on text fields, as well as keyword, boolean, or date types. It is not supported for semantic_text or numeric types. All `match_phrase` query parameters are supported, and additional options can be specified using function named parameters.
+
+## Syntax
+
+`MATCH_PHRASE(field, query, options, zero_terms_query, boost, analyzer, slop)`
+
+### Parameters
+
+#### field
+
+The field that the query will target.
+
+#### query
+
+The value to find in the provided field.
+
+#### options
+
+Optional. Additional options for the match_phrase query, specified as function named parameters.
+
+#### zero_terms_query
+
+Optional. Indicates whether all documents or none are returned if the analyzer removes all tokens, such as when using a stop filter. Defaults to none.
+
+#### boost
+
+Optional. Floating point number used to decrease or increase the relevance scores of the query. Defaults to 1.0.
+
+#### analyzer
+
+Optional. Analyzer used to convert the text in the query value into tokens. Defaults to the index-time analyzer mapped for the field, or the index’s default analyzer if none is mapped.
+
+#### slop
+
+Optional. Maximum number of positions allowed between matching tokens. Defaults to 0. Transposed terms have a slop of 2.
+
+## Examples
+
+Filters the `books` table to only include rows where the `author` field contains the exact phrase "William Faulkner".
+```esql
+FROM books
+| WHERE MATCH_PHRASE(author, "William Faulkner")
+```
+Filter rows from the `books` table where the `author` field contains the exact phrase "William Faulkner".

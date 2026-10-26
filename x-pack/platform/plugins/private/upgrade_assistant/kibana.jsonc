@@ -17,7 +17,8 @@
       "data",
       "licensing",
       "features",
-      "share"
+      "share",
+      "reindexService"
     ],
     "optionalPlugins": [
       "usageCollection",

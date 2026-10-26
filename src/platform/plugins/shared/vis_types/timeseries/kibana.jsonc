@@ -2,7 +2,7 @@
   "type": "plugin",
   "id": "@kbn/vis-type-timeseries-plugin",
   "owner": [
-    "@elastic/kibana-visualizations"
+    "@elastic/kibana-dashboards"
   ],
   // currently used from both visualisations and observability/infra
   "group": "platform",
@@ -21,13 +21,15 @@
       "dataViews",
       "fieldFormats",
       "usageCollection",
-      "unifiedSearch"
+      "kql",
+      "expressionXY",
+      "uiActions",
+      "embeddable"
     ],
     "optionalPlugins": [
       "home"
     ],
     "requiredBundles": [
-      "unifiedSearch",
       "kibanaUtils",
       "kibanaReact",
       "fieldFormats"

@@ -7,10 +7,19 @@
 
 import _ from 'lodash';
 import React from 'react';
-import { EuiSpacer, EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
+import {
+  EuiSpacer,
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiToolTip,
+} from '@elastic/eui';
 import { removeRow, isColorInvalid } from './color_stops_utils';
 import { i18n } from '@kbn/i18n';
 import { MbValidatedColorPicker } from './mb_validated_color_picker';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import { mapColorStopsStyles } from '../map_color_stops.styles';
 
 export const ColorStops = ({
   onChange,
@@ -21,6 +30,7 @@ export const ColorStops = ({
   addNewRow,
   swatches,
 }) => {
+  const styles = useMemoCss(mapColorStopsStyles);
   function getStopInput(stop, index) {
     const onStopChange = (newStopValue) => {
       const newColorStops = _.cloneDeep(colorStops);
@@ -82,37 +92,41 @@ export const ColorStops = ({
           isInvalid: isStopsInvalid(newColorStops),
         });
       };
+      const deleteLabel = i18n.translate('xpack.maps.styles.colorStops.deleteButtonAriaLabel', {
+        defaultMessage: 'Delete',
+      });
       deleteButton = (
-        <EuiButtonIcon
-          iconType="trash"
-          color="danger"
-          aria-label={i18n.translate('xpack.maps.styles.colorStops.deleteButtonAriaLabel', {
-            defaultMessage: 'Delete',
-          })}
-          title={i18n.translate('xpack.maps.styles.colorStops.deleteButtonLabel', {
-            defaultMessage: 'Delete',
-          })}
-          onClick={onRemove}
-        />
+        <EuiToolTip content={deleteLabel} disableScreenReaderOutput>
+          <EuiButtonIcon
+            iconType="trash"
+            color="danger"
+            aria-label={deleteLabel}
+            onClick={onRemove}
+          />
+        </EuiToolTip>
       );
     }
 
+    const addLabel = i18n.translate('xpack.maps.styles.colorStops.addButtonAriaLabel', {
+      defaultMessage: 'Add row',
+    });
     const colorPickerButtons = (
       <div>
         {deleteButton}
-        <EuiButtonIcon
-          iconType="plusInCircle"
-          color="primary"
-          aria-label="Add"
-          title="Add"
-          onClick={onAdd}
-        />
+        <EuiToolTip content={addLabel} disableScreenReaderOutput>
+          <EuiButtonIcon
+            iconType="plusCircle"
+            color="primary"
+            aria-label={addLabel}
+            onClick={onAdd}
+          />
+        </EuiToolTip>
       </div>
     );
     return (
       <EuiFormRow
         key={index}
-        className="mapColorStop"
+        css={styles.mapColorStops}
         isInvalid={errors.length !== 0}
         error={errors}
         display="rowCompressed"

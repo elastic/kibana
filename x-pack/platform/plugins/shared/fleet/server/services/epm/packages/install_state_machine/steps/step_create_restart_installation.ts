@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import semverGt from 'semver/functions/gt';
+import semverLt from 'semver/functions/lt';
+
 import { ConcurrentInstallOperationError } from '../../../../../errors';
 import { MAX_TIME_COMPLETE_INSTALL } from '../../../../../constants';
 
@@ -12,6 +15,7 @@ import { restartInstallation, createInstallation } from '../../install';
 
 import type { InstallContext } from '../_state_machine_package_install';
 import { withPackageSpan } from '../../utils';
+import { getPackageDependencies } from '../../dependencies';
 
 export async function stepCreateRestartInstallation(context: InstallContext) {
   const {
@@ -23,12 +27,20 @@ export async function stepCreateRestartInstallation(context: InstallContext) {
     force,
     verificationResult,
     installedPkg,
+    installedAsDependencyOf,
   } = context;
   const { packageInfo } = packageInstallContext;
   const { name: pkgName, version: pkgVersion } = packageInfo;
+  const dependencies = getPackageDependencies(packageInfo);
 
   // if some installation already exists
   if (installedPkg) {
+    let previousVersion: string | null | undefined;
+    if (semverGt(pkgVersion, installedPkg.attributes.install_version)) {
+      previousVersion = installedPkg.attributes.install_version;
+    } else if (semverLt(pkgVersion, installedPkg.attributes.install_version)) {
+      previousVersion = null;
+    }
     const isStatusInstalling = installedPkg.attributes.install_status === 'installing';
     const hasExceededTimeout =
       Date.now() - Date.parse(installedPkg.attributes.install_started_at) <
@@ -50,6 +62,10 @@ export async function stepCreateRestartInstallation(context: InstallContext) {
             pkgVersion,
             installSource,
             verificationResult,
+            previousVersion,
+            installedAsDependencyOf,
+            existingIsDependencyOf: installedPkg.attributes.is_dependency_of ?? [],
+            dependencies,
           })
         );
       } else {
@@ -72,6 +88,10 @@ export async function stepCreateRestartInstallation(context: InstallContext) {
           pkgVersion,
           installSource,
           verificationResult,
+          previousVersion,
+          installedAsDependencyOf,
+          existingIsDependencyOf: installedPkg.attributes.is_dependency_of ?? [],
+          dependencies,
         })
       );
     }
@@ -85,6 +105,8 @@ export async function stepCreateRestartInstallation(context: InstallContext) {
         installSource,
         spaceId,
         verificationResult,
+        installedAsDependencyOf,
+        dependencies,
       })
     );
   }

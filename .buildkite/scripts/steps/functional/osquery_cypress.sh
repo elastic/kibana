@@ -13,4 +13,9 @@ echo "--- Osquery Cypress tests"
 cd x-pack/platform/plugins/shared/osquery
 
 set +e
-yarn cypress:run; status=$?; yarn junit:merge || :; exit $status
+pnpm cypress:run; status=$?; pnpm junit:merge || :
+
+# Scout reporter
+upload_scout_cypress_events "Cypress tests"
+
+exit $status

@@ -5,12 +5,16 @@
  * 2.0.
  */
 
+import { castArray } from 'lodash';
 import { schema } from '@kbn/config-schema';
 
 import { isCommentUserAction } from '../../../../common/utils/user_actions';
-import type { attachmentApiV1, userActionApiV1 } from '../../../../common/types/api';
+import type { attachmentApiV2, userActionApiV1 } from '../../../../common/types/api';
+import { UserActionInternalFindRequestSchema } from '../../../../common/types/api';
 import { INTERNAL_CASE_FIND_USER_ACTIONS_URL } from '../../../../common/constants';
+import { toUnifiedAttachmentPayload } from '../../../common/attachments';
 import { createCaseError } from '../../../common/error';
+import { decodeWithExcessOrThrowZod } from '../../../common/runtime_types';
 import { createCasesRoute } from '../create_cases_route';
 import { DEFAULT_CASES_ROUTE_SECURITY } from '../constants';
 
@@ -28,12 +32,19 @@ export const findUserActionsRoute = createCasesRoute({
   routerOptions: {
     access: 'internal',
   },
-  handler: async ({ context, request, response }) => {
+  handler: async ({ context, request, response, logger }) => {
     try {
       const caseContext = await context.cases;
       const casesClient = await caseContext.getCasesClient();
       const caseId = request.params.case_id;
-      const options = request.query as userActionApiV1.UserActionFindRequest;
+      const query = request.query as Record<string, unknown>;
+      const { types, authors, sources, ...restQuery } = query;
+      const options = decodeWithExcessOrThrowZod(UserActionInternalFindRequestSchema)({
+        ...restQuery,
+        ...(types != null ? { types: castArray(types) } : {}),
+        ...(authors != null ? { authors: castArray(authors) } : {}),
+        ...(sources != null ? { sources: castArray(sources) } : {}),
+      });
 
       const userActionsResponse: userActionApiV1.UserActionFindResponse =
         await casesClient.userActions.find({
@@ -41,15 +52,38 @@ export const findUserActionsRoute = createCasesRoute({
           params: options,
         });
 
+      // Stored legacy-shaped, but the UI only renders unified. The public route stays legacy.
+      const userActions = userActionsResponse.userActions.map((userAction) => {
+        if (!isCommentUserAction(userAction)) {
+          return userAction;
+        }
+
+        try {
+          return {
+            ...userAction,
+            payload: {
+              ...userAction.payload,
+              comment: toUnifiedAttachmentPayload(userAction.payload.comment),
+            },
+          };
+        } catch (error) {
+          // A malformed historical payload must not fail the whole activity feed.
+          logger.warn(
+            `Failed to project user action ${userAction.id} comment payload to unified: ${error}`
+          );
+          return userAction;
+        }
+      });
+
       const uniqueCommentIds: Set<string> = new Set();
-      for (const action of userActionsResponse.userActions) {
+      for (const action of userActions) {
         if (isCommentUserAction(action) && action.comment_id) {
           uniqueCommentIds.add(action.comment_id);
         }
       }
       const commentIds = Array.from(uniqueCommentIds);
 
-      let attachmentRes: attachmentApiV1.BulkGetAttachmentsResponse = {
+      let attachmentRes: attachmentApiV2.BulkGetUnifiedAttachmentsResponse = {
         attachments: [],
         errors: [],
       };
@@ -57,12 +91,13 @@ export const findUserActionsRoute = createCasesRoute({
       if (commentIds.length > 0) {
         attachmentRes = await casesClient.attachments.bulkGet({
           caseID: caseId,
-          attachmentIDs: commentIds,
+          savedObjectIds: commentIds,
         });
       }
 
       const res: userActionApiV1.UserActionInternalFindResponse = {
         ...userActionsResponse,
+        userActions,
         latestAttachments: attachmentRes.attachments,
       };
 

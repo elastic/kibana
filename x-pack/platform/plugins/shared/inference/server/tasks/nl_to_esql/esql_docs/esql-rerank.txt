@@ -1,0 +1,73 @@
+# RERANK
+
+The RERANK command uses an inference model to compute a new relevance score for an initial set of documents. It is typically used after filtering and limiting the dataset to a manageable size, balancing performance and accuracy. RERANK processes each row through an inference model, which can impact performance and costs.
+
+## Syntax
+
+`RERANK [column =] query ON field [, field, ...] [WITH { "inference_id" : "my_inference_endpoint" }]`
+
+### Parameters
+
+#### column
+
+Optional. The name of the output column that will contain the reranked scores. If not specified, the results are stored in a column named `_score`. If the specified column already exists, it will be overwritten with the new results.
+
+#### query
+
+The query text used to rerank the documents. This is usually the same query used in the initial search.
+
+#### field
+
+One or more fields to use for reranking. These fields should contain the text that the reranking model will evaluate.
+
+#### my_inference_endpoint
+
+The ID of the inference endpoint to use for the reranking task. The endpoint must be configured with the `rerank` task type.
+
+## Examples
+
+Rerank the top 100 books matching "hobbit" in the description using a reranking model, then keep only the top 3 titles and their scores.
+
+```esql
+FROM books METADATA _score
+| WHERE MATCH(description, "hobbit")
+| SORT _score DESC
+| LIMIT 100
+| RERANK "hobbit" ON description WITH { "inference_id" : "test_reranker" }
+| LIMIT 3
+| KEEP title, _score
+```
+
+Rerank the top 100 books that match "hobbit" in the description or "Tolkien" as the author, using both fields for reranking, and store the new score in a column named `rerank_score`.
+
+```esql
+FROM books METADATA _score
+| WHERE MATCH(description, "hobbit") OR MATCH(author, "Tolkien")
+| SORT _score DESC
+| LIMIT 100
+| RERANK rerank_score = "hobbit" ON description, author WITH { "inference_id" : "test_reranker" }
+| SORT rerank_score
+| LIMIT 3
+| KEEP title, _score, rerank_score
+```
+
+Rerank the top 100 books, combine the original and reranked scores, and keep the top 3 results with both scores.
+
+```esql
+FROM books METADATA _score
+| WHERE MATCH(description, "hobbit") OR MATCH(author, "Tolkien")
+| SORT _score DESC
+| LIMIT 100
+| RERANK rerank_score = "hobbit" ON description, author WITH { "inference_id" : "test_reranker" }
+| EVAL original_score = _score, _score = rerank_score + original_score
+| SORT _score
+| LIMIT 3
+| KEEP title, original_score, rerank_score, _score
+```
+
+## Limitations
+
+- Starting in version 9.3.0, RERANK automatically limits processing to 1000 rows by default to prevent accidental high consumption. This limit is applied before the RERANK command executes. You can adjust or disable this limit using the `esql.command.rerank.limit` and `esql.command.rerank.enabled` cluster settings.
+- In version 9.2.x, no automatic row limit is applied. It is recommended to use LIMIT before or after RERANK to control the number of documents processed.
+- RERANK commands may time out when processing large datasets or complex queries. The default timeout is 10 minutes, and increasing this limit depends on your deployment type. For Elastic Cloud Serverless, a manual override from Elastic Support is required.
+- To avoid timeouts and high resource usage, reduce data volume with LIMIT or more selective filters before RERANK, split complex operations into multiple queries, or configure your HTTP client's response timeout.

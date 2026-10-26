@@ -8,6 +8,7 @@
  */
 
 import React from 'react';
+import type { EuiThemeComputed } from '@elastic/eui';
 import {
   EuiButtonIcon,
   EuiFlexGroup,
@@ -15,7 +16,6 @@ import {
   EuiProgress,
   EuiText,
   EuiTextBlockTruncate,
-  EuiThemeComputed,
   EuiToolTip,
   makeHighContrastColor,
   useEuiTheme,
@@ -24,6 +24,7 @@ import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import type { IFieldSubTypeMulti } from '@kbn/es-query';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
+import { EMPTY_LABEL } from '@kbn/field-formats-common';
 import type { AddFieldFilterHandler } from '../../types';
 
 export interface FieldTopValuesBucketParams {
@@ -45,6 +46,10 @@ export interface FieldTopValuesBucketProps extends FieldTopValuesBucketParams {
   'data-test-subj': string;
   onAddFilter?: AddFieldFilterHandler;
   /**
+   * Optional callback to filter for/out the "Other" bucket
+   */
+  onAddOtherFilter?: (options: { negate: boolean }) => void;
+  /**
    * Optional callback to allow overriding props on bucket level
    */
   overrideFieldTopValueBar?: OverrideFieldTopValueBarCallback;
@@ -53,6 +58,7 @@ export interface FieldTopValuesBucketProps extends FieldTopValuesBucketParams {
 const FieldTopValuesBucket: React.FC<FieldTopValuesBucketProps> = ({
   'data-test-subj': dataTestSubject,
   onAddFilter,
+  onAddOtherFilter,
   overrideFieldTopValueBar,
   ...fieldTopValuesBucketOverridableProps
 }) => {
@@ -72,19 +78,31 @@ const FieldTopValuesBucket: React.FC<FieldTopValuesBucketProps> = ({
     color,
     textProps = {},
   } = { ...fieldTopValuesBucketOverridableProps, ...overrides };
-  const fieldLabel = (field?.subType as IFieldSubTypeMulti)?.multi?.parent ?? field.name;
+  const multiFieldParent = (field?.subType as IFieldSubTypeMulti)?.multi?.parent;
+  const fieldLabel = multiFieldParent ?? field.name;
+  const fieldDisplayName = multiFieldParent ?? field.displayName;
+  const isOtherBucket = type === 'other';
+  const otherLabel = i18n.translate('unifiedFieldList.fieldStats.otherDocsLabel', {
+    defaultMessage: 'Other',
+  });
+  const filterValueLabel = isOtherBucket ? otherLabel : formattedFieldValue;
 
   const filterForLabel = i18n.translate('unifiedFieldList.fieldStats.filterValueButtonAriaLabel', {
     defaultMessage: 'Filter for {field}: "{value}"',
-    values: { value: formattedFieldValue, field: fieldLabel },
+    values: { value: filterValueLabel, field: fieldDisplayName },
   });
   const filterOutLabel = i18n.translate(
     'unifiedFieldList.fieldStats.filterOutValueButtonAriaLabel',
     {
       defaultMessage: 'Filter out {field}: "{value}"',
-      values: { value: formattedFieldValue, field: fieldLabel },
+      values: { value: filterValueLabel, field: fieldDisplayName },
     }
   );
+
+  const addFilter: ((options: { negate: boolean }) => void) | undefined = isOtherBucket
+    ? onAddOtherFilter
+    : onAddFilter && (({ negate }) => onAddFilter(field, fieldValue, negate ? '-' : '+'));
+  const filterValueTestSubj = isOtherBucket ? '__other__' : fieldValue;
 
   return (
     <EuiFlexGroup
@@ -99,112 +117,110 @@ const FieldTopValuesBucket: React.FC<FieldTopValuesBucketProps> = ({
           min-width: 0;
         `}
       >
-        <EuiFlexGroup alignItems="stretch" gutterSize="s" responsive={false}>
-          <EuiFlexItem
-            grow={true}
-            data-test-subj={`${dataTestSubject}-topValues-formattedFieldValue`}
-            css={css`
-              overflow-wrap: anywhere;
-            `}
-          >
-            {(formattedFieldValue?.length ?? 0) > 0 ? (
-              <EuiToolTip content={formattedFieldValue} delay="long">
-                <EuiTextBlockTruncate lines={3}>
-                  <EuiText size="xs" color={'subdued'} {...textProps}>
-                    {formattedFieldValue}
-                  </EuiText>
-                </EuiTextBlockTruncate>
-              </EuiToolTip>
-            ) : (
-              <EuiText size="xs">
-                {type === 'other'
-                  ? i18n.translate('unifiedFieldList.fieldStats.otherDocsLabel', {
-                      defaultMessage: 'Other',
-                    })
-                  : formattedFieldValue === ''
-                  ? i18n.translate('unifiedFieldList.fieldStats.emptyStringValueLabel', {
-                      defaultMessage: '(empty)',
-                    })
-                  : '-'}
-              </EuiText>
-            )}
-          </EuiFlexItem>
-
-          <EuiFlexItem
-            grow={false}
-            data-test-subj={`${dataTestSubject}-topValues-formattedPercentage`}
-          >
-            <EuiToolTip
-              content={i18n.translate('unifiedFieldList.fieldStats.bucketPercentageTooltip', {
-                defaultMessage:
-                  '{formattedPercentage} ({count, plural, one {# record} other {# records}})',
-                values: {
-                  formattedPercentage,
-                  count,
-                },
-              })}
-              delay="long"
-            >
-              <EuiText size="xs" textAlign="left" color={getPercentageColor(euiTheme, color)}>
-                {formattedPercentage}
-              </EuiText>
-            </EuiToolTip>
-          </EuiFlexItem>
-        </EuiFlexGroup>
         <EuiProgress
           value={progressValue}
           max={1}
           size="s"
           color={type === 'other' ? 'subdued' : color}
-          aria-label={`${formattedFieldValue} (${formattedPercentage})`}
+          valueText={
+            <div data-test-subj={`${dataTestSubject}-topValues-formattedPercentage`}>
+              <EuiToolTip
+                content={i18n.translate('unifiedFieldList.fieldStats.bucketPercentageTooltip', {
+                  defaultMessage:
+                    '{formattedPercentage} ({count, plural, one {# record} other {# records}})',
+                  values: {
+                    formattedPercentage,
+                    count,
+                  },
+                })}
+              >
+                <EuiText
+                  tabIndex={0}
+                  size="xs"
+                  textAlign="left"
+                  color={getPercentageColor(euiTheme, color)}
+                >
+                  {formattedPercentage}
+                </EuiText>
+              </EuiToolTip>
+            </div>
+          }
+          label={
+            <div
+              data-test-subj={`${dataTestSubject}-topValues-formattedFieldValue`}
+              css={css`
+                overflow-wrap: anywhere;
+              `}
+            >
+              {(formattedFieldValue?.length ?? 0) > 0 ? (
+                <EuiToolTip content={formattedFieldValue}>
+                  <EuiTextBlockTruncate lines={3}>
+                    <EuiText size="xs" color={'subdued'} {...textProps}>
+                      {formattedFieldValue}
+                    </EuiText>
+                  </EuiTextBlockTruncate>
+                </EuiToolTip>
+              ) : (
+                <EuiText size="xs">
+                  {isOtherBucket ? otherLabel : formattedFieldValue === '' ? EMPTY_LABEL : '-'}
+                </EuiText>
+              )}
+            </div>
+          }
+          labelProps={{
+            title: undefined,
+            css: css`
+              white-space: unset !important;
+            `,
+          }}
         />
       </EuiFlexItem>
       {onAddFilter && field.filterable && (
         <EuiFlexItem grow={false}>
-          {type === 'other' ? (
-            <div
-              css={css`
-                width: 48px;
-              `}
-            />
-          ) : (
-            <div>
-              <EuiToolTip content={filterForLabel}>
-                <EuiButtonIcon
-                  iconSize="s"
-                  iconType="plusInCircle"
-                  onClick={() => onAddFilter(field, fieldValue, '+')}
-                  aria-label={filterForLabel}
-                  data-test-subj={`plus-${fieldLabel}-${fieldValue}`}
-                  style={{
-                    minHeight: 'auto',
-                    minWidth: 'auto',
-                    paddingRight: 2,
-                    paddingLeft: 2,
-                    paddingTop: 0,
-                    paddingBottom: 0,
-                  }}
-                />
-              </EuiToolTip>
-              <EuiToolTip content={filterOutLabel}>
-                <EuiButtonIcon
-                  iconSize="s"
-                  iconType="minusInCircle"
-                  onClick={() => onAddFilter(field, fieldValue, '-')}
-                  aria-label={filterOutLabel}
-                  data-test-subj={`minus-${fieldLabel}-${fieldValue}`}
-                  style={{
-                    minHeight: 'auto',
-                    minWidth: 'auto',
-                    paddingTop: 0,
-                    paddingBottom: 0,
-                    paddingRight: 2,
-                    paddingLeft: 2,
-                  }}
-                />
-              </EuiToolTip>
-            </div>
-          )}
+          {/* buttons stay rendered when the bucket can't be filtered on, so all rows keep the same width */}
+          <div
+            css={
+              !addFilter &&
+              css`
+                visibility: hidden;
+              `
+            }
+          >
+            <EuiToolTip content={filterForLabel} disableScreenReaderOutput>
+              <EuiButtonIcon
+                iconSize="s"
+                iconType="plusCircle"
+                onClick={() => addFilter?.({ negate: false })}
+                aria-label={filterForLabel}
+                data-test-subj={`plus-${fieldLabel}-${filterValueTestSubj}`}
+                style={{
+                  minHeight: 'auto',
+                  minWidth: 'auto',
+                  paddingRight: 2,
+                  paddingLeft: 2,
+                  paddingTop: 0,
+                  paddingBottom: 0,
+                }}
+              />
+            </EuiToolTip>
+            <EuiToolTip content={filterOutLabel} disableScreenReaderOutput>
+              <EuiButtonIcon
+                iconSize="s"
+                iconType="minusCircle"
+                onClick={() => addFilter?.({ negate: true })}
+                aria-label={filterOutLabel}
+                data-test-subj={`minus-${fieldLabel}-${filterValueTestSubj}`}
+                style={{
+                  minHeight: 'auto',
+                  minWidth: 'auto',
+                  paddingTop: 0,
+                  paddingBottom: 0,
+                  paddingRight: 2,
+                  paddingLeft: 2,
+                }}
+              />
+            </EuiToolTip>
+          </div>
         </EuiFlexItem>
       )}
     </EuiFlexGroup>

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { createReducer } from '@reduxjs/toolkit';
-import { Ping, SyntheticsMonitorWithId } from '../../../../../common/runtime_types';
+import { createReducer } from 'redux-toolkit-v1';
+import type { Ping, SyntheticsMonitorWithId } from '../../../../../common/runtime_types';
 import { checkIsStalePing } from '../../utils/monitor_test_result/check_pings';
 import { enableMonitorAlertAction } from '../monitor_list/actions';
 
-import { IHttpSerializedFetchError } from '../utils/http_error';
+import type { IHttpSerializedFetchError } from '../utils/http_error';
 
 import {
   getMonitorLastRunAction,

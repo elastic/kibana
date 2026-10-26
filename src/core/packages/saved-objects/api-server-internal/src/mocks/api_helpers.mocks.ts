@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SavedObject } from '@kbn/core-saved-objects-server';
+import type { SavedObject } from '@kbn/core-saved-objects-server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type {
   CommonHelper,
@@ -75,6 +75,7 @@ const createValidationHelperMock = (): ValidationHelperMock => {
     validateInitialNamespaces: jest.fn(),
     validateObjectNamespaces: jest.fn(),
     validateObjectForCreate: jest.fn(),
+    validateObjectForUpdate: jest.fn(),
     validateOriginId: jest.fn(),
   };
 

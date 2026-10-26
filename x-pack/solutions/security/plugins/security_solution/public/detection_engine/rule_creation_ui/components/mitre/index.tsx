@@ -5,31 +5,31 @@
  * 2.0.
  */
 
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSuperSelect } from '@elastic/eui';
-import { camelCase, isEmpty } from 'lodash/fp';
-import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
+import {
+  EuiButtonEmpty,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
+  EuiFormRow,
+  EuiPopover,
+  EuiSpacer,
+} from '@elastic/eui';
+import { isEmpty } from 'lodash/fp';
+import React, { memo, useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
-import { isEqual } from 'lodash';
 import type { Threat, Threats } from '@kbn/securitysolution-io-ts-alerting-types';
-import * as Rulei18n from '../../../common/translations';
+import type { MitreFramework, ThreatFrameworkGroup } from '@kbn/security-mitre-attack-common';
+import {
+  DEFAULT_MITRE_FRAMEWORK,
+  THREAT_FRAMEWORK_NAME,
+  groupThreatsByFramework,
+} from '@kbn/security-mitre-attack-common';
+import { useAvailableMitreFrameworks } from '../../../../common/hooks/mitre/use_available_mitre_frameworks';
 import type { FieldHook } from '../../../../shared_imports';
 import { threatDefault } from '../step_about_rule/default_value';
-import { MyAddItemButton } from '../add_item_form';
 import * as i18n from './translations';
-import { MitreAttackTechniqueFields } from './technique_fields';
-import type { MitreTactic } from '../../../../detections/mitre/types';
-
-const lazyMitreConfiguration = () => {
-  /**
-   * The specially formatted comment in the `import` expression causes the corresponding webpack chunk to be named. This aids us in debugging chunk size issues.
-   * See https://webpack.js.org/api/module-methods/#magic-comments
-   */
-  return import(
-    /* webpackChunkName: "lazy_mitre_configuration" */
-    '../../../../detections/mitre/mitre_tactics_techniques'
-  );
-};
+import { MitreFrameworkThreatSection } from './framework_threat_section';
+import { UnknownFrameworkThreatSection } from './unknown_framework_threat_section';
 
 const MitreAttackContainer = styled.div`
   margin-top: 16px;
@@ -44,110 +44,50 @@ interface AddItemProps {
 
 // eslint-disable-next-line react/display-name
 export const AddMitreAttackThreat = memo(({ field, idAria, isDisabled }: AddItemProps) => {
-  const removeTactic = useCallback(
-    (index: number) => {
-      const values = [...(field.value as Threats)];
-      values.splice(index, 1);
-      if (isEmpty(values)) {
-        field.setValue(threatDefault);
-      } else {
-        field.setValue(values);
-      }
+  const [isAddFrameworkOpen, setIsAddFrameworkOpen] = useState(false);
+  const availableFrameworks = useAvailableMitreFrameworks();
+  const values = field.value as Threats;
+  const groups = useMemo((): Array<ThreatFrameworkGroup<Threat>> => {
+    const grouped = groupThreatsByFramework(values);
+    // An empty threat array (e.g. a saved rule without threats) still shows the enterprise section.
+    return grouped.length > 0
+      ? grouped
+      : [
+          {
+            framework: DEFAULT_MITRE_FRAMEWORK,
+            label: THREAT_FRAMEWORK_NAME[DEFAULT_MITRE_FRAMEWORK],
+            threats: [],
+          },
+        ];
+  }, [values]);
+  const absentFrameworks = useMemo(
+    () => availableFrameworks.filter((fw) => !groups.some((group) => group.framework === fw)),
+    [availableFrameworks, groups]
+  );
+
+  const removeThreats = useCallback(
+    (threatsToRemove: Threat[]) => {
+      const remaining = (field.value as Threats).filter(
+        (entry) => !threatsToRemove.includes(entry)
+      );
+      field.setValue(isEmpty(remaining) ? threatDefault : remaining);
     },
     [field]
   );
 
-  const addMitreAttackTactic = useCallback(() => {
-    const values = [...(field.value as Threats)];
-    if (!isEmpty(values[values.length - 1])) {
+  const addFramework = useCallback(
+    (framework: MitreFramework) => {
+      setIsAddFrameworkOpen(false);
       field.setValue([
-        ...values,
-        { tactic: { id: 'none', name: 'none', reference: 'none' }, technique: [] },
+        ...(field.value as Threats),
+        {
+          framework: THREAT_FRAMEWORK_NAME[framework],
+          tactic: { id: 'none', name: 'none', reference: 'none' },
+          technique: [],
+        },
       ]);
-    } else {
-      field.setValue([{ tactic: { id: 'none', name: 'none', reference: 'none' }, technique: [] }]);
-    }
-  }, [field]);
-
-  const [tacticsOptions, setTacticsOptions] = useState<MitreTactic[]>([]);
-
-  useEffect(() => {
-    async function getMitre() {
-      const mitreConfig = await lazyMitreConfiguration();
-      setTacticsOptions(mitreConfig.tactics);
-    }
-
-    getMitre();
-  }, []);
-
-  const updateTactic = useCallback(
-    (index: number, value: string) => {
-      const values = [...(field.value as Threats)];
-      const { id, reference, name } = tacticsOptions.find((t) => t.value === value) || {
-        id: '',
-        name: '',
-        reference: '',
-      };
-      values.splice(index, 1, {
-        ...values[index],
-        tactic: { id, reference, name },
-        technique: [],
-      });
-      field.setValue([...values]);
     },
-    [field, tacticsOptions]
-  );
-
-  const values = useMemo(() => {
-    return [...(field.value as Threats)];
-  }, [field]);
-
-  const getSelectTactic = useCallback(
-    (threat: Threat, index: number, disabled: boolean) => {
-      const tacticName = threat.tactic.name;
-      return (
-        <EuiFlexGroup gutterSize="s" alignItems="center">
-          <EuiFlexItem grow>
-            <EuiSuperSelect
-              id="mitreAttackTactic"
-              options={[
-                ...(tacticName === 'none'
-                  ? [
-                      {
-                        inputDisplay: <>{i18n.TACTIC_PLACEHOLDER}</>,
-                        value: 'none',
-                        disabled,
-                      },
-                    ]
-                  : []),
-                ...tacticsOptions.map((t) => ({
-                  inputDisplay: <>{t.label}</>,
-                  value: t.value,
-                  disabled,
-                })),
-              ]}
-              prepend={`${field.label} ${i18n.TACTIC}`}
-              aria-label=""
-              onChange={updateTactic.bind(null, index)}
-              fullWidth={true}
-              valueOfSelected={camelCase(tacticName)}
-              data-test-subj="mitreAttackTactic"
-              placeholder={i18n.TACTIC_PLACEHOLDER}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButtonIcon
-              color="danger"
-              iconType="trash"
-              isDisabled={isDisabled || isEqual(values, threatDefault)}
-              onClick={() => removeTactic(index)}
-              aria-label={Rulei18n.DELETE}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      );
-    },
-    [field.label, isDisabled, removeTactic, tacticsOptions, updateTactic, values]
+    [field]
   );
 
   /**
@@ -164,42 +104,75 @@ export const AddMitreAttackThreat = memo(({ field, idAria, isDisabled }: AddItem
 
   return (
     <MitreAttackContainer>
-      {values.map((threat, index) => (
-        <div key={index}>
-          {index === 0 ? (
-            <EuiFormRow
-              fullWidth
-              label={`${field.label} ${i18n.THREATS}`}
-              labelAppend={field.labelAppend}
-              describedByIds={idAria ? [`${idAria} ${i18n.TACTIC}`] : undefined}
-            >
-              <>{getSelectTactic(threat, index, isDisabled)}</>
-            </EuiFormRow>
-          ) : (
-            <EuiFormRow
-              fullWidth
-              describedByIds={idAria ? [`${idAria} ${i18n.TACTIC}`] : undefined}
-            >
-              {getSelectTactic(threat, index, isDisabled)}
-            </EuiFormRow>
-          )}
-
-          <MitreAttackTechniqueFields
-            field={field}
-            threatIndex={index}
-            isDisabled={isDisabled || threat.tactic.name === 'none'}
-            idAria={idAria}
-            onFieldChange={onFieldChange}
-          />
-        </div>
-      ))}
-      <MyAddItemButton
-        data-test-subj="addMitreAttackTactic"
-        onClick={addMitreAttackTactic}
-        isDisabled={isDisabled}
+      <EuiFormRow
+        fullWidth
+        hasChildLabel={false}
+        label={field.label}
+        labelAppend={field.labelAppend}
+        describedByIds={idAria ? [idAria] : undefined}
       >
-        {i18n.ADD_MITRE_TACTIC}
-      </MyAddItemButton>
+        <div>
+          {groups.map((group) => (
+            <React.Fragment key={group.framework ?? `unknown-${group.label}`}>
+              {group.framework && availableFrameworks.includes(group.framework) ? (
+                <MitreFrameworkThreatSection
+                  framework={group.framework}
+                  field={field}
+                  threats={group.threats}
+                  idAria={idAria}
+                  isDisabled={isDisabled}
+                  onFieldChange={onFieldChange}
+                  onRemoveThreats={removeThreats}
+                />
+              ) : (
+                <UnknownFrameworkThreatSection
+                  label={group.label}
+                  threats={group.threats}
+                  {...(group.framework
+                    ? {
+                        message: i18n.FRAMEWORK_UNAVAILABLE_WARNING,
+                        dataTestSubj: `mitreUnavailableFrameworkSection-${group.framework}`,
+                      }
+                    : {})}
+                  isDisabled={isDisabled}
+                  onRemoveThreats={removeThreats}
+                />
+              )}
+              <EuiSpacer size="s" />
+            </React.Fragment>
+          ))}
+          <EuiPopover
+            aria-label={i18n.ADD_FRAMEWORK}
+            isOpen={isAddFrameworkOpen}
+            closePopover={() => setIsAddFrameworkOpen(false)}
+            panelPaddingSize="none"
+            anchorPosition="downLeft"
+            button={
+              <EuiButtonEmpty
+                iconType="plusCircle"
+                size="xs"
+                data-test-subj="addMitreFramework"
+                isDisabled={isDisabled || absentFrameworks.length === 0}
+                onClick={() => setIsAddFrameworkOpen((open) => !open)}
+              >
+                {i18n.ADD_FRAMEWORK}
+              </EuiButtonEmpty>
+            }
+          >
+            <EuiContextMenuPanel
+              items={absentFrameworks.map((framework) => (
+                <EuiContextMenuItem
+                  key={framework}
+                  data-test-subj={`addMitreFramework-${framework}`}
+                  onClick={() => addFramework(framework)}
+                >
+                  {THREAT_FRAMEWORK_NAME[framework]}
+                </EuiContextMenuItem>
+              ))}
+            />
+          </EuiPopover>
+        </div>
+      </EuiFormRow>
     </MitreAttackContainer>
   );
 });

@@ -46,8 +46,8 @@ export function decorateShards(shards, nodes) {
   }
 
   return shards.map((shard) => {
-    const node = nodes[shard.node];
-    shard.nodeName = (node && node.name) || null;
+    const node = nodes && nodes[shard.node];
+    shard.nodeName = (node && node.name) || shard.node || null;
     shard.type = 'shard';
     shard.tooltip_message = getTooltipMessage(shard);
     return shard;

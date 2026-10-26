@@ -22,8 +22,8 @@ import {
   EuiTextArea,
   EuiTitle,
 } from '@elastic/eui';
-import React, { useCallback, useContext, useEffect, useState } from 'react';
-import { useDispatch } from 'react-redux';
+import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { useDispatch } from 'react-redux-v7';
 import { ThemeContext } from 'styled-components';
 import { i18n } from '@kbn/i18n';
 import type { Moment } from 'moment';
@@ -40,6 +40,10 @@ import { useUpdateEndpointPolicy } from '../../../../hooks/policy/use_update_end
 import type { PolicyData, MaybeImmutable } from '../../../../../../common/endpoint/types';
 import { ProtectionUpdatesWarningPanel } from './components/protection_updates_warning_panel';
 import { getControlledArtifactCutoffDate } from '../../../../../../common/endpoint/utils/controlled_artifact_rollout';
+import {
+  GLOBAL_MANIFEST_VERSION_OUTDATED_DAYS,
+  getGlobalManifestVersionAgeDays,
+} from '../../../../../../common/endpoint/utils/global_manifest_version';
 
 interface ProtectionUpdatesLayoutProps {
   policy: MaybeImmutable<PolicyData>;
@@ -73,8 +77,17 @@ export const ProtectionUpdatesLayout = React.memo<ProtectionUpdatesLayoutProps>(
     const policy = _policy as PolicyData;
     const deployedVersion = policy.inputs[0].config.policy.value.global_manifest_version;
 
-    const today = moment.utc();
-    const defaultDate = today.clone().subtract(1, 'days');
+    // Memoize date calculations to avoid midnight race conditions and ensure stability
+    const { today, defaultDate, cutoffDate } = useMemo(() => {
+      const todayMoment = moment.utc();
+      const defaultDateMoment = todayMoment.clone().subtract(1, 'days');
+      const cutoffDateMoment = getControlledArtifactCutoffDate();
+      return {
+        today: todayMoment,
+        defaultDate: defaultDateMoment,
+        cutoffDate: cutoffDateMoment,
+      };
+    }, []);
 
     const [selectedDate, setSelectedDate] = useState<Moment>(defaultDate);
 
@@ -95,7 +108,6 @@ export const ProtectionUpdatesLayout = React.memo<ProtectionUpdatesLayoutProps>(
     const internalDateFormat = 'YYYY-MM-DD';
     const displayDateFormat = 'MMMM DD, YYYY';
     const formattedDate = moment.utc(deployedVersion, internalDateFormat).format(displayDateFormat);
-    const cutoffDate = getControlledArtifactCutoffDate(); // Earliest selectable date
 
     const [selectedManifestVersion, setSelectedManifestVersion] = useState(
       deployedVersion === 'latest' ? 'latest' : selectedDate.format(internalDateFormat)
@@ -220,7 +232,10 @@ export const ProtectionUpdatesLayout = React.memo<ProtectionUpdatesLayoutProps>(
 
     const updateDatepickerSelectedDate = useCallback(
       (date: Moment | null) => {
-        if (date?.isAfter(cutoffDate) && date?.isSameOrBefore(defaultDate)) {
+        if (
+          date?.startOf('day').isSameOrAfter(cutoffDate.clone().startOf('day')) &&
+          date?.isSameOrBefore(defaultDate)
+        ) {
           setSelectedDate(date || defaultDate);
           setSelectedManifestVersion(date?.format(internalDateFormat) || 'latest');
         }
@@ -270,10 +285,9 @@ export const ProtectionUpdatesLayout = React.memo<ProtectionUpdatesLayoutProps>(
         return null;
       }
 
-      const deployedVersionDate = moment.utc(deployedVersion).format(internalDateFormat);
-      const daysSinceLastUpdate = today.diff(deployedVersionDate, 'days');
+      const daysSinceLastUpdate = getGlobalManifestVersionAgeDays(deployedVersion, today);
 
-      if (daysSinceLastUpdate < 30) {
+      if (daysSinceLastUpdate < GLOBAL_MANIFEST_VERSION_OUTDATED_DAYS) {
         return null;
       }
 
@@ -281,7 +295,7 @@ export const ProtectionUpdatesLayout = React.memo<ProtectionUpdatesLayoutProps>(
         <>
           <EuiCallOut
             color={'warning'}
-            iconType={'alert'}
+            iconType={'warning'}
             size="m"
             data-test-subj="protection-updates-manifest-outdated"
             title={i18n.translate(
@@ -320,8 +334,9 @@ export const ProtectionUpdatesLayout = React.memo<ProtectionUpdatesLayoutProps>(
       if (automaticUpdatesEnabled) {
         return (
           <EuiCallOut
+            announceOnMount={false}
             color={'primary'}
-            iconType={'iInCircle'}
+            iconType={'info'}
             size="m"
             data-test-subj="protection-updates-automatic-updates-enabled"
             title={i18n.translate(

@@ -65,7 +65,7 @@ export const LandingLinksImageCard: React.FC<LandingLinksImageCardProps> = React
     );
 
     return (
-      <EuiFlexItem data-test-subj="LandingImageCard-item" grow={false}>
+      <EuiFlexItem data-test-subj={`LandingImageCard-item-${item.id}`} grow={false}>
         <EuiPanelWithLink {...linkProps} hasBorder paddingSize="s" css={styles.card}>
           <EuiFlexGroup
             gutterSize="s"
@@ -77,7 +77,7 @@ export const LandingLinksImageCard: React.FC<LandingLinksImageCardProps> = React
             <EuiFlexItem grow={false}>
               {landingImage && (
                 <EuiPanel
-                  data-test-subj="LandingImageCard-image"
+                  data-test-subj={`LandingImageCard-image-${item.id}`}
                   paddingSize="none"
                   hasShadow={false}
                   hasBorder

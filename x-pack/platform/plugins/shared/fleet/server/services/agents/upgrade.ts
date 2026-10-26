@@ -7,10 +7,10 @@
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 
 import type { Agent } from '../../types';
-import { AgentReassignmentError, HostedAgentPolicyRestrictionRelatedError } from '../../errors';
+import { AgentNotFoundError, HostedAgentPolicyRestrictionRelatedError } from '../../errors';
 import { SO_SEARCH_LIMIT } from '../../constants';
 
-import { agentsKueryNamespaceFilter } from '../spaces/agent_namespaces';
+import { agentsKueryNamespaceFilter, buildFilterWithNamespace } from '../spaces/agent_namespaces';
 import { getCurrentNamespace } from '../spaces/get_current_namespace';
 
 import { createAgentAction } from './actions';
@@ -18,6 +18,7 @@ import type { GetAgentsOptions } from './crud';
 import { openPointInTime } from './crud';
 import { getAgentsByKuery } from './crud';
 import { getAgentsById, updateAgent, getAgentPolicyForAgent } from './crud';
+import { throwIfAgentlessAgentPolicy } from './hosted_agent';
 import { UpgradeActionRunner, upgradeBatch } from './upgrade_action_runner';
 
 export async function sendUpgradeAgentAction({
@@ -45,10 +46,11 @@ export async function sendUpgradeAgentAction({
       `Cannot upgrade agent ${agentId} in hosted agent policy ${agentPolicy.id}`
     );
   }
+  throwIfAgentlessAgentPolicy(agentPolicy, `Cannot upgrade managed agent ${agentId}`);
 
   const currentSpaceId = getCurrentNamespace(soClient);
 
-  await createAgentAction(esClient, {
+  await createAgentAction(esClient, soClient, {
     agents: [agentId],
     created_at: now,
     data,
@@ -74,22 +76,28 @@ export async function sendUpgradeAgentsActions(
     startTime?: string;
     batchSize?: number;
     isAutomatic?: boolean;
+    dryRun?: boolean;
   }
-): Promise<{ actionId: string }> {
+): Promise<{ actionId: string } | { count: number }> {
   const currentSpaceId = getCurrentNamespace(soClient);
   // Full set of agents
   const outgoingErrors: Record<Agent['id'], Error> = {};
   let givenAgents: Agent[] = [];
 
   if ('agents' in options) {
+    if (options.dryRun) {
+      return { count: options.agents.length };
+    }
     givenAgents = options.agents;
   } else if ('agentIds' in options) {
+    if (options.dryRun) {
+      const maybeAgents = await getAgentsById(esClient, soClient, options.agentIds);
+      return { count: maybeAgents.filter((a) => !('notFound' in a)).length };
+    }
     const maybeAgents = await getAgentsById(esClient, soClient, options.agentIds);
     for (const maybeAgent of maybeAgents) {
       if ('notFound' in maybeAgent) {
-        outgoingErrors[maybeAgent.id] = new AgentReassignmentError(
-          `Cannot find agent ${maybeAgent.id}`
-        );
+        outgoingErrors[maybeAgent.id] = new AgentNotFoundError(`Agent ${maybeAgent.id} not found`);
       } else {
         givenAgents.push(maybeAgent);
       }
@@ -97,16 +105,28 @@ export async function sendUpgradeAgentsActions(
   } else if ('kuery' in options) {
     const batchSize = options.batchSize ?? SO_SEARCH_LIMIT;
     const namespaceFilter = await agentsKueryNamespaceFilter(currentSpaceId);
-    const kuery = namespaceFilter ? `${namespaceFilter} AND ${options.kuery}` : options.kuery;
+    const kuery = buildFilterWithNamespace(namespaceFilter, options.kuery);
 
-    const res = await getAgentsByKuery(esClient, soClient, {
+    // cheap count — avoids hydrating up to batchSize agent documents just to read the total
+    const { total } = await getAgentsByKuery(esClient, soClient, {
       kuery,
+      showAgentless: options.showAgentless,
       showInactive: options.showInactive ?? false,
       page: 1,
-      perPage: batchSize,
+      perPage: 0,
     });
+    if (options.dryRun) {
+      return { count: total };
+    }
 
-    if (res.total <= batchSize) {
+    if (total <= batchSize) {
+      const res = await getAgentsByKuery(esClient, soClient, {
+        kuery,
+        showAgentless: options.showAgentless,
+        showInactive: options.showInactive ?? false,
+        page: 1,
+        perPage: batchSize,
+      });
       givenAgents = res.agents;
     } else {
       return await new UpgradeActionRunner(
@@ -115,7 +135,7 @@ export async function sendUpgradeAgentsActions(
         {
           ...options,
           batchSize,
-          total: res.total,
+          total,
           spaceId: currentSpaceId,
         },
         { pitId: await openPointInTime(esClient) }
@@ -123,7 +143,7 @@ export async function sendUpgradeAgentsActions(
     }
   }
 
-  return await upgradeBatch(esClient, givenAgents, outgoingErrors, options, currentSpaceId);
+  return await upgradeBatch(esClient, givenAgents, outgoingErrors, options, [currentSpaceId]);
 }
 
 export async function sendAutomaticUpgradeAgentsActions(
@@ -133,6 +153,8 @@ export async function sendAutomaticUpgradeAgentsActions(
     agents: Agent[];
     version: string;
     upgradeDurationSeconds?: number;
+    spaceIds?: string[];
+    force?: boolean;
   }
 ): Promise<{ actionId: string }> {
   const currentSpaceId = getCurrentNamespace(soClient);
@@ -140,7 +162,7 @@ export async function sendAutomaticUpgradeAgentsActions(
     esClient,
     options.agents,
     {},
-    { ...options, isAutomatic: true },
-    currentSpaceId
+    { ...options, isAutomatic: true, force: options.force ?? false },
+    options.spaceIds ?? [currentSpaceId]
   );
 }

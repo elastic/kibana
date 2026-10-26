@@ -6,7 +6,8 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import {
+import type { Writable } from '@kbn/utility-types';
+import type {
   AggDescriptor,
   ColorDynamicOptions,
   ESTermSourceDescriptor,
@@ -81,7 +82,7 @@ export function createRegionMapLayerDescriptor({
   const colorPallette = NUMERICAL_COLOR_PALETTES.find((pallette) => {
     return pallette.value.toLowerCase() === colorSchema.toLowerCase();
   });
-  const termSourceDescriptor: ESTermSourceDescriptor = {
+  const termSourceDescriptor: Writable<ESTermSourceDescriptor> = {
     type: SOURCE_TYPES.ES_TERM_SOURCE,
     id: joinId,
     indexPatternId,

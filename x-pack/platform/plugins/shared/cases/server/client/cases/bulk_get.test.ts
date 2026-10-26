@@ -14,6 +14,34 @@ import { bulkGet } from './bulk_get';
 describe('bulkGet', () => {
   const caseSO = mockCases[0];
 
+  it('returns updated totalEvents from attachment stats', async () => {
+    const clientArgs = createCasesClientMockArgs();
+    clientArgs.services.caseService.getCases.mockResolvedValue({
+      saved_objects: [caseSO],
+    });
+    clientArgs.authorization.getAndEnsureAuthorizedEntities.mockResolvedValue({
+      authorized: [caseSO],
+      unauthorized: [],
+    });
+    clientArgs.services.attachmentService.getter.getCaseAttatchmentStats.mockResolvedValue(
+      new Map([
+        [
+          caseSO.id,
+          {
+            alerts: 0,
+            userComments: 1,
+            events: 3,
+          },
+        ],
+      ])
+    );
+
+    const res = await bulkGet({ ids: [caseSO.id] }, clientArgs);
+
+    expect(res.errors).toEqual([]);
+    expect(res.cases[0]).toEqual(expect.objectContaining({ totalEvents: 3, totalComment: 1 }));
+  });
+
   describe('errors', () => {
     const clientArgs = createCasesClientMockArgs();
     clientArgs.authorization.getAndEnsureAuthorizedEntities.mockResolvedValue({
@@ -21,7 +49,9 @@ describe('bulkGet', () => {
       unauthorized: [],
     });
 
-    clientArgs.services.attachmentService.getter.getCaseCommentStats.mockResolvedValue(new Map());
+    clientArgs.services.attachmentService.getter.getCaseAttatchmentStats.mockResolvedValue(
+      new Map()
+    );
 
     beforeEach(() => {
       jest.clearAllMocks();
@@ -31,13 +61,13 @@ describe('bulkGet', () => {
       await expect(
         bulkGet({ ids: Array(MAX_BULK_GET_CASES + 1).fill('foobar') }, clientArgs)
       ).rejects.toThrow(
-        `Error: The length of the field ids is too long. Array must be of length <= ${MAX_BULK_GET_CASES}.`
+        `Error: ids: The length of the field ids is too long. Array must be of length <= ${MAX_BULK_GET_CASES}.`
       );
     });
 
     it('throws when trying to fetch zero cases', async () => {
       await expect(bulkGet({ ids: [] }, clientArgs)).rejects.toThrow(
-        'Error: The length of the field ids is too short. Array must be of length >= 1.'
+        'Error: ids: The length of the field ids is too short. Array must be of length >= 1.'
       );
     });
 
@@ -48,7 +78,7 @@ describe('bulkGet', () => {
           { ids: ['1'], foo: 'bar' },
           clientArgs
         )
-      ).rejects.toThrow('invalid keys "foo"');
+      ).rejects.toThrow('Excess keys are not allowed');
     });
 
     it('constructs the case error correctly', async () => {

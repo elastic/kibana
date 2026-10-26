@@ -25,6 +25,12 @@ export const ERROR_DELETING_FILE = i18n.translate('xpack.cases.containers.errorD
   defaultMessage: 'Error deleting file',
 });
 
+export const ATTACHMENTS_REMOVED = (attachments: string) =>
+  i18n.translate('xpack.cases.containers.attachmentsRemoved', {
+    values: { attachments },
+    defaultMessage: 'Removed {attachments}',
+  });
+
 export const ERROR_UPDATING = i18n.translate('xpack.cases.containers.errorUpdatingTitle', {
   defaultMessage: 'Error updating data',
 });
@@ -49,6 +55,12 @@ export const SYNC_CASE = (caseTitle: string) =>
   i18n.translate('xpack.cases.containers.syncCase', {
     values: { caseTitle },
     defaultMessage: 'Alerts in "{caseTitle}" have been synced',
+  });
+
+export const EXTRACT_OBSERVABLES = (caseTitle: string) =>
+  i18n.translate('xpack.cases.containers.extractObservables', {
+    values: { caseTitle },
+    defaultMessage: 'Auto-extract observables setting in "{caseTitle}" have been updated',
   });
 
 export const STATUS_CHANGED_TOASTER_TEXT = i18n.translate(
@@ -77,6 +89,26 @@ export const OBSERVABLE_REMOVED = i18n.translate('xpack.cases.caseView.observabl
   defaultMessage: 'Observable removed',
 });
 
+export const OBSERVABLES_BULK_REMOVED = (count: number) =>
+  i18n.translate('xpack.cases.caseView.observables.bulkRemoved', {
+    values: { count },
+    defaultMessage: '{count, plural, one {# observable removed} other {# observables removed}}',
+  });
+
 export const OBSERVABLE_UPDATED = i18n.translate('xpack.cases.caseView.observables.updated', {
   defaultMessage: 'Observable updated',
 });
+
+export const OBSERVABLE_BULK_CREATED = i18n.translate(
+  'xpack.cases.caseView.observables.bulkCreated',
+  {
+    defaultMessage: 'Observables added',
+  }
+);
+
+export const OBSERVABLE_MAX_REACHED = (maxObservables: number) =>
+  i18n.translate('xpack.cases.caseView.observables.maxReached', {
+    values: { maxObservables },
+    defaultMessage:
+      "You've reached the maximum number of observables {maxObservables} that can be added to a case. Some observables were not added.",
+  });

@@ -14,6 +14,7 @@
  */
 
 import React, { useEffect } from 'react';
+import type { UseEuiTheme } from '@elastic/eui';
 import {
   EuiTitle,
   EuiSpacer,
@@ -21,15 +22,12 @@ import {
   EuiFlexItem,
   EuiIcon,
   EuiPortal,
-  UseEuiTheme,
-  useEuiShadow,
   mathWithUnits,
-  useEuiTheme,
 } from '@elastic/eui';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
-import { fullScreenGraphicsMixinStyles } from '@kbn/core/public';
+import { useKbnFullScreenBgCss } from '@kbn/css-utils/public/full_screen_bg_css';
 import { getServices } from '../kibana_services';
 
 import { SampleDataCard } from './sample_data';
@@ -43,8 +41,7 @@ interface WelcomeProps {
  */
 export const Welcome: React.FC<WelcomeProps> = ({ urlBasePath, onSkip }: WelcomeProps) => {
   const services = getServices();
-  const euiShadowM = useEuiShadow('m');
-  const theme = useEuiTheme();
+  const kbnFullScreenBgCss = useKbnFullScreenBgCss();
 
   const redirectToAddData = () => {
     services.application.navigateToApp('integrations', { path: '/browse' });
@@ -80,24 +77,16 @@ export const Welcome: React.FC<WelcomeProps> = ({ urlBasePath, onSkip }: Welcome
 
   return (
     <EuiPortal>
-      <div
-        data-test-subj="homeWelcomeInterstitial"
-        css={[
-          styles,
-          fullScreenGraphicsMixinStyles(Number(theme.euiTheme.levels.navigation), theme),
-        ]}
-      >
+      <div data-test-subj="homeWelcomeInterstitial" css={[styles, kbnFullScreenBgCss]}>
         <header className="homeWelcome__header">
           <div className="homeWelcome__content eui-textCenter">
             <EuiSpacer size="xl" />
-            <span
+            <EuiIcon
               className="homeWelcome__logo"
-              css={css`
-                ${euiShadowM}
-              `}
-            >
-              <EuiIcon type="logoElastic" size="xxl" />
-            </span>
+              type="logoElastic"
+              size="xxl"
+              aria-hidden={true}
+            />
             <EuiTitle size="l">
               <h1>
                 <FormattedMessage id="home.welcomeTitle" defaultMessage="Welcome to Elastic" />
@@ -131,7 +120,6 @@ const styles = ({ euiTheme }: UseEuiTheme) =>
     },
     '.homeWelcome__logo': {
       marginBottom: euiTheme.size.xl,
-      display: 'inline-block',
     },
     '.homeWelcome__content': {
       margin: 'auto',

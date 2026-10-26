@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { XYLayerConfig } from '@kbn/lens-common';
 import { createPanel } from '../../__mocks__';
 import { getConfigurationForTopN, getConfigurationForTimeseries } from './configuration';
 
@@ -14,6 +15,7 @@ describe('getConfigurationForTimeseries', () => {
   test('should return correct configuration for timeseries', () => {
     expect(getConfigurationForTimeseries(createPanel(), [])).toEqual({
       layers: [],
+      preferredSeriesType: 'bar',
       fillOpacity: 0.5,
       legend: {
         isVisible: false,
@@ -33,11 +35,22 @@ describe('getConfigurationForTimeseries', () => {
       yRightScale: 'linear',
     });
   });
+
+  test('should pin a solid area fill when there is a area layer', () => {
+    const layers: XYLayerConfig[] = [
+      { layerId: 'layer-1', layerType: 'data', accessors: ['column-1'], seriesType: 'area' },
+    ];
+
+    expect(getConfigurationForTimeseries(createPanel(), layers)).toEqual(
+      expect.objectContaining({ areaFill: 'solid' })
+    );
+  });
 });
 
 describe('getConfigurationForTopN', () => {
   test('should return correct configuration for top n', () => {
     expect(getConfigurationForTopN(createPanel(), [])).toEqual({
+      preferredSeriesType: 'bar',
       layers: [],
       fillOpacity: 0.5,
       legend: {

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import {
   registerUpdateTagRoute,
   registerGetAllTagsRoute,
@@ -12,16 +13,30 @@ import {
   registerDeleteTagRoute,
   registerCreateTagRoute,
 } from './tags';
+import { registerApiRoutes } from './api';
 import {
   registerFindAssignableObjectsRoute,
   registerUpdateTagsAssignmentsRoute,
   registerGetAssignableTypesRoute,
 } from './assignments';
-import { registerInternalFindTagsRoute, registerInternalBulkDeleteRoute } from './internal';
-import { TagsPluginRouter } from '../types';
+import {
+  registerInternalFindTagsRoute,
+  registerInternalBulkDeleteRoute,
+  registerInternalGetAllTagsRoute,
+} from './internal';
+import type { TagsPluginRouter } from '../types';
 
-export const registerRoutes = ({ router }: { router: TagsPluginRouter }) => {
-  // tags API
+export const registerRoutes = ({
+  router,
+  usageCounter,
+}: {
+  router: TagsPluginRouter;
+  usageCounter?: UsageCounter;
+}) => {
+  // public API
+  registerApiRoutes(router, usageCounter);
+
+  // deprecated tags API
   registerCreateTagRoute(router);
   registerUpdateTagRoute(router);
   registerDeleteTagRoute(router);
@@ -34,4 +49,5 @@ export const registerRoutes = ({ router }: { router: TagsPluginRouter }) => {
   // internal API
   registerInternalFindTagsRoute(router);
   registerInternalBulkDeleteRoute(router);
+  registerInternalGetAllTagsRoute(router);
 };

@@ -25,11 +25,13 @@ import type { CasesUI } from '../../../../common';
 import { EditAssigneesSelectable } from './edit_assignees_selectable';
 import * as i18n from './translations';
 import type { ItemsSelectionState } from '../types';
+import { useFocusButtonTrap } from '../../use_focus_button';
 
 interface Props {
   selectedCases: CasesUI;
   onClose: () => void;
   onSaveAssignees: (args: ItemsSelectionState) => void;
+  focusButtonRef?: React.Ref<HTMLButtonElement>;
 }
 
 const FlyoutBodyCss = css`
@@ -44,6 +46,7 @@ const EditAssigneesFlyoutComponent: React.FC<Props> = ({
   selectedCases,
   onClose,
   onSaveAssignees,
+  focusButtonRef,
 }) => {
   const [assigneesSelection, setAssigneesSelection] = useState<ItemsSelectionState>({
     selectedItems: [],
@@ -54,6 +57,7 @@ const EditAssigneesFlyoutComponent: React.FC<Props> = ({
     () => onSaveAssignees(assigneesSelection),
     [onSaveAssignees, assigneesSelection]
   );
+  const focusTrapProps = useFocusButtonTrap(focusButtonRef);
 
   const headerSubtitle =
     selectedCases.length > 1 ? i18n.SELECTED_CASES(selectedCases.length) : selectedCases[0].title;
@@ -66,6 +70,7 @@ const EditAssigneesFlyoutComponent: React.FC<Props> = ({
       data-test-subj="cases-edit-assignees-flyout"
       size="s"
       paddingSize="m"
+      focusTrapProps={focusTrapProps}
     >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">

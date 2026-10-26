@@ -8,16 +8,18 @@
  */
 
 import Url from 'url';
-import { Agent as HttpsAgent, ServerOptions as TlsOptions } from 'https';
+import type { ServerOptions as TlsOptions } from 'https';
+import { Agent as HttpsAgent } from 'https';
 import apm from 'elastic-apm-node';
-import { Server, Request } from '@hapi/hapi';
+import type { Server, Request } from '@hapi/hapi';
 import HapiProxy from '@hapi/h2o2';
+import Chalk from 'chalk';
 import { take } from 'rxjs';
 import { ByteSizeValue } from '@kbn/config-schema';
 import { createServer, getServerOptions } from '@kbn/server-http-tools';
 
-import { DevConfig, HttpConfig } from '../config';
-import { Log } from '../log';
+import type { DevConfig, HttpConfig } from '../config';
+import type { Log } from '../log';
 import { getRandomBasePath } from './utils';
 import type { BasePathProxyServer, BasePathProxyServerOptions } from './types';
 
@@ -79,11 +81,12 @@ export class Http1BasePathProxyServer implements BasePathProxyServer {
 
     await this.server.start();
 
+    const proxyUrl = Url.format({
+      host: this.server.info.uri,
+      pathname: this.httpConfig.basePath,
+    });
     this.log.write(
-      `basepath proxy server running at ${Url.format({
-        host: this.server.info.uri,
-        pathname: this.httpConfig.basePath,
-      })}`
+      Chalk.green('basepath proxy server running at ') + Chalk.cyan.bold.underline(proxyUrl)
     );
   }
 
@@ -126,12 +129,6 @@ export class Http1BasePathProxyServer implements BasePathProxyServer {
           xforward: true,
           mapUri: async (request: Request) => {
             return {
-              // Passing in this header to merge it is a workaround until this is fixed:
-              // https://github.com/hapijs/h2o2/issues/124
-              headers:
-                request.headers['content-length'] != null
-                  ? { 'content-length': request.headers['content-length'] }
-                  : undefined,
               uri: Url.format({
                 hostname: request.server.info.host,
                 port: this.devConfig.basePathProxyTargetPort,
@@ -173,7 +170,11 @@ export class Http1BasePathProxyServer implements BasePathProxyServer {
               pathname: `${this.httpConfig.basePath}/${request.params.kbnPath}`,
               query: request.query,
             }),
-            headers: request.headers,
+            headers: Object.fromEntries(
+              Object.entries(request.headers).flatMap(([k, v]) =>
+                v === undefined ? [] : [[k, Array.isArray(v) ? v.join(', ') : v]]
+              )
+            ),
           }),
         },
       },

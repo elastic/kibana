@@ -7,26 +7,28 @@
 
 import React from 'react';
 
+import type {
+  EuiButtonEmptyProps,
+  EuiButtonIconProps,
+  EuiButtonProps,
+  EuiLinkAnchorProps,
+  EuiListGroupItemProps,
+  EuiCardProps,
+  EuiBadgeProps,
+} from '@elastic/eui';
 import {
   EuiLink,
   EuiButton,
   EuiButtonEmpty,
-  EuiButtonEmptyProps,
   EuiButtonIcon,
-  EuiButtonIconProps,
-  EuiButtonProps,
-  EuiLinkAnchorProps,
   EuiListGroupItem,
-  EuiListGroupItemProps,
   EuiPanel,
   EuiCard,
-  EuiCardProps,
   EuiBadge,
-  EuiBadgeProps,
 } from '@elastic/eui';
-import { EuiPanelProps } from '@elastic/eui/src/components/panel/panel';
+import type { EuiPanelProps } from '@elastic/eui/src/components/panel/panel';
 
-import { ReactRouterProps } from '../types';
+import type { ReactRouterProps } from '../types';
 
 import { generateReactRouterProps } from '.';
 
@@ -40,7 +42,13 @@ export const EuiLinkTo: React.FC<ReactRouterEuiLinkProps> = ({
   onClick,
   shouldNotCreateHref,
   ...rest
-}) => <EuiLink {...rest} {...generateReactRouterProps({ to, onClick, shouldNotCreateHref })} />;
+}) => (
+  <EuiLink
+    data-test-subj="enterpriseSearchEuiLinkToLink"
+    {...rest}
+    {...generateReactRouterProps({ to, onClick, shouldNotCreateHref })}
+  />
+);
 
 type ReactRouterEuiButtonProps = ReactRouterProps & EuiButtonProps;
 export const EuiButtonTo: React.FC<ReactRouterEuiButtonProps> = ({
@@ -48,7 +56,13 @@ export const EuiButtonTo: React.FC<ReactRouterEuiButtonProps> = ({
   onClick,
   shouldNotCreateHref,
   ...rest
-}) => <EuiButton {...rest} {...generateReactRouterProps({ to, onClick, shouldNotCreateHref })} />;
+}) => (
+  <EuiButton
+    data-test-subj="enterpriseSearchEuiButtonToButton"
+    {...rest}
+    {...generateReactRouterProps({ to, onClick, shouldNotCreateHref })}
+  />
+);
 
 type ReactRouterEuiButtonEmptyProps = ReactRouterProps & EuiButtonEmptyProps;
 export const EuiButtonEmptyTo: React.FC<ReactRouterEuiButtonEmptyProps> = ({
@@ -57,7 +71,11 @@ export const EuiButtonEmptyTo: React.FC<ReactRouterEuiButtonEmptyProps> = ({
   shouldNotCreateHref,
   ...rest
 }) => (
-  <EuiButtonEmpty {...rest} {...generateReactRouterProps({ to, onClick, shouldNotCreateHref })} />
+  <EuiButtonEmpty
+    data-test-subj="enterpriseSearchEuiButtonEmptyToButton"
+    {...rest}
+    {...generateReactRouterProps({ to, onClick, shouldNotCreateHref })}
+  />
 );
 
 type ReactRouterEuiButtonIconProps = ReactRouterProps & EuiButtonIconProps;
@@ -67,7 +85,11 @@ export const EuiButtonIconTo: React.FC<ReactRouterEuiButtonIconProps> = ({
   shouldNotCreateHref,
   ...rest
 }) => (
-  <EuiButtonIcon {...rest} {...generateReactRouterProps({ to, onClick, shouldNotCreateHref })} />
+  <EuiButtonIcon
+    data-test-subj="enterpriseSearchEuiButtonIconToButton"
+    {...rest}
+    {...generateReactRouterProps({ to, onClick, shouldNotCreateHref })}
+  />
 );
 
 type ReactRouterEuiPanelProps = ReactRouterProps & EuiPanelProps;
@@ -110,8 +132,6 @@ export const EuiBadgeTo: React.FC<ReactRouterEuiBadgeProps> = ({
 
   const badgeProps: EuiBadgeProps = {
     ...rest,
-    iconOnClick: routerProps.onClick,
-    iconOnClickAriaLabel: label,
     onClick: routerProps.onClick,
     onClickAriaLabel: label,
   };

@@ -83,6 +83,12 @@ export type SingleContextEvaluationContext = OpenFeatureEvaluationContext & {
 };
 
 /**
+ * Getter function type to retrieve the initial feature flags.
+ * @internal
+ */
+export type InitialFeatureFlagsGetter = () => Promise<Record<string, unknown>>;
+
+/**
  * Setup contract of the Feature Flags Service
  * @public
  */
@@ -101,6 +107,15 @@ export interface FeatureFlagsSetup {
    * @public
    */
   appendContext(contextToAppend: EvaluationContext): void;
+
+  /**
+   * Registers a getter function that will be used to retrieve the initial feature flags to be injected into the
+   * browser for faster bootstrapping.
+   * @param getter A function that returns all the feature flags and their values for this context.
+   * Ideally, using the underlying API shouldn't track them as actual evaluations.
+   * @internal
+   */
+  setInitialFeatureFlagsGetter(getter: InitialFeatureFlagsGetter): void;
 }
 
 /**
@@ -114,30 +129,6 @@ export interface FeatureFlagsStart {
    * @public
    */
   appendContext(contextToAppend: EvaluationContext): void;
-
-  /**
-   * Evaluates a boolean flag
-   * @param flagName The flag ID to evaluate
-   * @param fallbackValue If the flag cannot be evaluated for whatever reason, the fallback value is provided.
-   * @public
-   */
-  getBooleanValue(flagName: string, fallbackValue: boolean): Promise<boolean>;
-
-  /**
-   * Evaluates a string flag
-   * @param flagName The flag ID to evaluate
-   * @param fallbackValue If the flag cannot be evaluated for whatever reason, the fallback value is provided.
-   * @public
-   */
-  getStringValue<Value extends string>(flagName: string, fallbackValue: Value): Promise<Value>;
-
-  /**
-   * Evaluates a number flag
-   * @param flagName The flag ID to evaluate
-   * @param fallbackValue If the flag cannot be evaluated for whatever reason, the fallback value is provided.
-   * @public
-   */
-  getNumberValue<Value extends number>(flagName: string, fallbackValue: Value): Promise<Value>;
 
   /**
    * Returns an observable of a boolean flag

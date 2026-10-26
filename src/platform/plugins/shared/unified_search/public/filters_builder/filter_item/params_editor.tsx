@@ -8,23 +8,24 @@
  */
 
 import React, { useCallback, useContext } from 'react';
-import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import type { Filter } from '@kbn/es-query';
 import { EuiToolTip, EuiFormRow } from '@elastic/eui';
-import { FilterMetaParams } from '@kbn/es-query/src/filters/build_filters';
+import type { FilterMetaParams } from '@kbn/es-query/src/filters/build_filters';
+import type { FilterableField, FilterableSource } from '@kbn/data-source';
 import type { Operator } from '../../filter_bar/filter_editor';
 import { getFieldValidityAndErrorMessage } from '../../filter_bar/filter_editor/lib';
 import { FiltersBuilderContextType } from '../context';
-import { ParamsEditorInput, ParamsEditorInputProps } from './params_editor_input';
+import type { ParamsEditorInputProps } from './params_editor_input';
+import { ParamsEditorInput } from './params_editor_input';
 
 interface ParamsEditorProps {
-  dataView: DataView;
+  dataView: FilterableSource;
   params: unknown;
   onHandleParamsChange: (params: Filter['meta']['params']) => void;
   onHandleParamsUpdate: (value: string) => void;
   timeRangeForSuggestionsOverride?: boolean;
   filtersForSuggestions?: Filter[];
-  field?: DataViewField;
+  field?: FilterableField;
   operator?: Operator;
 }
 

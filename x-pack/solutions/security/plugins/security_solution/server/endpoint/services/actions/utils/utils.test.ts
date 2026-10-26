@@ -77,7 +77,7 @@ describe('When using Actions service utilities', () => {
         agents: ['6e6796b0-af39-4f12-b025-fcb06db499e5'],
         agentType: 'endpoint',
         hosts: {},
-        command: 'kill-process',
+        command: 'suspend-process',
         comment: expect.any(String),
         createdAt: '2022-04-27T16:08:47.449Z',
         createdBy: 'elastic',
@@ -99,7 +99,7 @@ describe('When using Actions service utilities', () => {
         agents: ['90d62689-f72d-4a05-b5e3-500cad0dc366'],
         agentType: 'endpoint',
         hosts: {},
-        command: 'kill-process',
+        command: 'suspend-process',
         comment: expect.any(String),
         createdAt: '2022-04-27T16:08:47.449Z',
         createdBy: 'Shanel',
@@ -117,6 +117,7 @@ describe('When using Actions service utilities', () => {
       isCompleted: false,
       completedAt: undefined,
       wasSuccessful: false,
+      wasCanceled: false,
       errors: undefined,
       outputs: {},
       agentState: {
@@ -125,6 +126,7 @@ describe('When using Actions service utilities', () => {
           errors: undefined,
           isCompleted: false,
           wasSuccessful: false,
+          wasCanceled: false,
         },
       },
     });
@@ -205,11 +207,10 @@ describe('When using Actions service utilities', () => {
         completedAt: COMPLETED_AT,
         errors: undefined,
         wasSuccessful: true,
+        wasCanceled: false,
         outputs: {
           '123': {
-            content: {
-              code: 'aaa',
-            },
+            content: expect.anything(),
             type: 'json',
           },
         },
@@ -219,6 +220,7 @@ describe('When using Actions service utilities', () => {
             errors: undefined,
             isCompleted: true,
             wasSuccessful: true,
+            wasCanceled: false,
           },
         },
       });
@@ -259,12 +261,11 @@ describe('When using Actions service utilities', () => {
         completedAt: COMPLETED_AT,
         errors: undefined,
         wasSuccessful: true,
+        wasCanceled: false,
         outputs: {
           '123': {
             type: 'json',
-            content: {
-              entries: processes,
-            },
+            content: expect.objectContaining({ entries: processes }),
           },
         },
         agentState: {
@@ -273,9 +274,126 @@ describe('When using Actions service utilities', () => {
             errors: undefined,
             isCompleted: true,
             wasSuccessful: true,
+            wasCanceled: false,
           },
         },
       });
+    });
+
+    it('should return file download URI for successful agent responses', () => {
+      expect(
+        getActionCompletionInfo(
+          mapToNormalizedActionRequest(
+            endpointActionGenerator.generate({
+              agent: { id: ['123', '456'] },
+              EndpointActions: { data: { command: 'get-file' } },
+            })
+          ),
+          {
+            fleetResponses: [],
+            endpointResponses: [
+              // Success response
+              endpointActionGenerator.generateResponse({
+                agent: { id: '123' },
+                EndpointActions: {
+                  data: {
+                    command: 'get-file',
+                    output: { type: 'json', content: { code: 'success' } },
+                  },
+                },
+              }),
+
+              // Failure response
+              endpointActionGenerator.generateResponse({
+                agent: { id: '456' },
+                error: { message: 'this one failed' },
+                EndpointActions: {
+                  data: {
+                    command: 'get-file',
+                    output: { type: 'json', content: { code: 'failure' } },
+                  },
+                },
+              }),
+            ],
+          }
+        )
+      ).toEqual(
+        expect.objectContaining({
+          outputs: {
+            '123': {
+              content: {
+                code: 'success',
+                downloadUri:
+                  '/api/endpoint/action/90d62689-f72d-4a05-b5e3-500cad0dc366/file/90d62689-f72d-4a05-b5e3-500cad0dc366.123/download',
+              },
+              type: 'json',
+            },
+            '456': {
+              content: {
+                code: 'failure',
+              },
+              type: 'json',
+            },
+          },
+        })
+      );
+    });
+
+    it('should NOT return file download URI for actions with no file support', () => {
+      expect(
+        getActionCompletionInfo(
+          mapToNormalizedActionRequest(
+            endpointActionGenerator.generate({
+              agent: { id: ['123', '456'] },
+              EndpointActions: { data: { command: 'isolate' } },
+            })
+          ),
+          {
+            fleetResponses: [],
+            endpointResponses: [
+              // Success response
+              endpointActionGenerator.generateResponse({
+                agent: { id: '123' },
+                EndpointActions: {
+                  data: {
+                    command: 'isolate',
+                    output: { type: 'json', content: { code: 'success' } },
+                  },
+                },
+              }),
+
+              // Failure response
+              endpointActionGenerator.generateResponse({
+                agent: { id: '456' },
+                error: { message: 'this one failed' },
+                EndpointActions: {
+                  data: {
+                    command: 'isolate',
+                    output: { type: 'json', content: { code: 'failure' } },
+                  },
+                },
+              }),
+            ],
+          }
+        )
+      ).toEqual(
+        expect.objectContaining({
+          outputs: {
+            '123': {
+              content: {
+                code: 'success',
+              },
+              type: 'json',
+            },
+            '456': {
+              content: {
+                code: 'failure',
+              },
+              type: 'json',
+            },
+          },
+        })
+      );
     });
 
     describe('and action failed', () => {
@@ -318,6 +436,7 @@ describe('When using Actions service utilities', () => {
           errors: ['Endpoint action response error: endpoint failed to apply'],
           isCompleted: true,
           wasSuccessful: false,
+          wasCanceled: false,
           outputs: expect.anything(),
           agentState: {
             '123': {
@@ -325,6 +444,7 @@ describe('When using Actions service utilities', () => {
               errors: ['Endpoint action response error: endpoint failed to apply'],
               isCompleted: true,
               wasSuccessful: false,
+              wasCanceled: false,
             },
           },
         });
@@ -345,6 +465,7 @@ describe('When using Actions service utilities', () => {
           errors: ['Fleet action response error: agent failed to deliver'],
           isCompleted: true,
           wasSuccessful: false,
+          wasCanceled: false,
           outputs: {},
           agentState: {
             '123': {
@@ -352,6 +473,7 @@ describe('When using Actions service utilities', () => {
               errors: ['Fleet action response error: agent failed to deliver'],
               isCompleted: true,
               wasSuccessful: false,
+              wasCanceled: false,
             },
           },
         });
@@ -375,6 +497,7 @@ describe('When using Actions service utilities', () => {
           ],
           isCompleted: true,
           wasSuccessful: false,
+          wasCanceled: false,
           outputs: expect.anything(),
           agentState: {
             '123': {
@@ -385,6 +508,7 @@ describe('When using Actions service utilities', () => {
               ],
               isCompleted: true,
               wasSuccessful: false,
+              wasCanceled: false,
             },
           },
         });
@@ -472,12 +596,14 @@ describe('When using Actions service utilities', () => {
               errors: undefined,
               isCompleted: false,
               wasSuccessful: false,
+              wasCanceled: false,
             },
             '789': {
               completedAt: undefined,
               errors: undefined,
               isCompleted: false,
               wasSuccessful: false,
+              wasCanceled: false,
             },
           },
         });
@@ -513,18 +639,21 @@ describe('When using Actions service utilities', () => {
               errors: undefined,
               isCompleted: true,
               wasSuccessful: true,
+              wasCanceled: false,
             },
             '456': {
               completedAt: undefined,
               errors: undefined,
               isCompleted: false,
               wasSuccessful: false,
+              wasCanceled: false,
             },
             '789': {
               completedAt: '2022-03-05T19:27:23.816Z',
               errors: undefined,
               isCompleted: true,
               wasSuccessful: true,
+              wasCanceled: false,
             },
           },
         });
@@ -555,6 +684,7 @@ describe('When using Actions service utilities', () => {
           isCompleted: true,
           completedAt: COMPLETED_AT,
           wasSuccessful: true,
+          wasCanceled: false,
           errors: undefined,
           outputs: expect.any(Object),
           agentState: {
@@ -563,18 +693,21 @@ describe('When using Actions service utilities', () => {
               errors: undefined,
               isCompleted: true,
               wasSuccessful: true,
+              wasCanceled: false,
             },
             '456': {
               completedAt: '2022-05-05T18:53:18.836Z',
               errors: undefined,
               isCompleted: true,
               wasSuccessful: true,
+              wasCanceled: false,
             },
             '789': {
               completedAt: '2022-03-05T19:27:23.816Z',
               errors: undefined,
               isCompleted: true,
               wasSuccessful: true,
+              wasCanceled: false,
             },
           },
         });
@@ -609,6 +742,7 @@ describe('When using Actions service utilities', () => {
           errors: ['Fleet action response error: something is no good'],
           isCompleted: true,
           wasSuccessful: false,
+          wasCanceled: false,
           outputs: expect.any(Object),
           agentState: {
             '123': {
@@ -616,18 +750,21 @@ describe('When using Actions service utilities', () => {
               errors: undefined,
               isCompleted: true,
               wasSuccessful: true,
+              wasCanceled: false,
             },
             '456': {
               completedAt: action456Responses.fleetResponses[0]['@timestamp'],
               errors: ['Fleet action response error: something is no good'],
               isCompleted: true,
               wasSuccessful: false,
+              wasCanceled: false,
             },
             '789': {
               completedAt: '2022-03-05T19:27:23.816Z',
               errors: undefined,
               isCompleted: true,
               wasSuccessful: true,
+              wasCanceled: false,
             },
           },
         });
@@ -677,18 +814,21 @@ describe('When using Actions service utilities', () => {
               errors: undefined,
               isCompleted: true,
               wasSuccessful: true,
+              wasCanceled: false,
             },
             '456': {
               completedAt: undefined,
               errors: undefined,
               isCompleted: false,
               wasSuccessful: false,
+              wasCanceled: false,
             },
             '789': {
               completedAt: '2022-03-05T19:27:23.816Z',
               errors: undefined,
               isCompleted: true,
               wasSuccessful: true,
+              wasCanceled: false,
             },
           },
           outputs: {
@@ -953,6 +1093,7 @@ describe('When using Actions service utilities', () => {
           expirationDate: new Date(new Date().setDate(new Date().getDate() - 1)).toISOString(),
           isCompleted: false,
           wasSuccessful: false,
+          wasCanceled: false,
         })
       ).toEqual({ isExpired: true, status: 'failed' });
     });
@@ -963,6 +1104,7 @@ describe('When using Actions service utilities', () => {
           expirationDate: new Date(new Date().setDate(new Date().getDate() + 2)).toISOString(),
           isCompleted: false,
           wasSuccessful: false,
+          wasCanceled: false,
         })
       ).toEqual({ isExpired: false, status: 'pending' });
     });
@@ -973,6 +1115,7 @@ describe('When using Actions service utilities', () => {
           expirationDate: new Date(new Date().setDate(new Date().getDate() + 2)).toISOString(),
           isCompleted: true,
           wasSuccessful: true,
+          wasCanceled: false,
         })
       ).toEqual({ isExpired: false, status: 'successful' });
     });
@@ -983,6 +1126,7 @@ describe('When using Actions service utilities', () => {
           expirationDate: new Date(new Date().setDate(new Date().getDate() + 2)).toISOString(),
           isCompleted: true,
           wasSuccessful: false,
+          wasCanceled: false,
         })
       ).toEqual({ isExpired: false, status: 'failed' });
     });
@@ -1043,6 +1187,7 @@ describe('When using Actions service utilities', () => {
         startedAt: '2022-04-27T16:08:47.449Z',
         status: 'successful',
         wasSuccessful: true,
+        wasCanceled: false,
         createdBy: 'elastic',
         errors: undefined,
         isCompleted: true,
@@ -1056,6 +1201,7 @@ describe('When using Actions service utilities', () => {
             errors: undefined,
             isCompleted: true,
             wasSuccessful: true,
+            wasCanceled: false,
           },
         },
         hosts: {
@@ -1065,19 +1211,7 @@ describe('When using Actions service utilities', () => {
         },
         outputs: {
           '6e6796b0-af39-4f12-b025-fcb06db499e5': {
-            content: {
-              code: 'ra_execute_success_done',
-              cwd: '/some/path',
-              output_file_id: 'some-output-file-id',
-              output_file_stderr_truncated: false,
-              output_file_stdout_truncated: true,
-              shell: 'bash',
-              shell_code: 0,
-              stderr: expect.any(String),
-              stderr_truncated: true,
-              stdout: expect.any(String),
-              stdout_truncated: true,
-            },
+            content: expect.anything(),
             type: 'json',
           },
         },

@@ -10,16 +10,28 @@
 import { pluck } from 'rxjs';
 import { lastValueFrom } from 'rxjs';
 import { i18n } from '@kbn/i18n';
-import type { Query, AggregateQuery, Filter, TimeRange } from '@kbn/es-query';
+import {
+  type Query,
+  type AggregateQuery,
+  type Filter,
+  type TimeRange,
+  type ProjectRouting,
+  isOfAggregateQueryType,
+} from '@kbn/es-query';
 import type { Adapters } from '@kbn/inspector-plugin/common';
+import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
-import type { Datatable } from '@kbn/expressions-plugin/public';
-import type { DataView } from '@kbn/data-views-plugin/common';
+import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/public';
 import { textBasedQueryStateToAstWithValidation } from '@kbn/data-plugin/common';
-import type { DataTableRecord } from '@kbn/discover-utils';
+import { getDocId, type DataTableRecord } from '@kbn/discover-utils';
+import type { EsqlSource } from '@kbn/data-source';
+import type { SearchResponseWarning } from '@kbn/search-response-warnings';
+import moment from 'moment';
+import type { ESQLColumnsWithHighlights } from '@kbn/esql-utils';
+import { getColumnsWithHighlights } from '@kbn/esql-utils';
 import type { RecordsFetchResponse } from '../../types';
-import type { ProfilesManager } from '../../../context_awareness';
+import type { ScopedProfilesManager } from '../../../context_awareness';
 
 interface EsqlErrorResponse {
   error: {
@@ -28,66 +40,112 @@ interface EsqlErrorResponse {
   type: 'error';
 }
 
+export interface FetchEsqlParams {
+  query: Query | AggregateQuery;
+  inputQuery?: Query;
+  filters?: Filter[];
+  timeRange?: TimeRange;
+  /** Time field comes from this source. Table columns, including `isNull`, are written onto it. */
+  esqlSource?: EsqlSource;
+  abortSignal?: AbortSignal;
+  inspectorAdapters: Adapters;
+  data: DataPublicPluginStart;
+  expressions: ExpressionsStart;
+  scopedProfilesManager: ScopedProfilesManager;
+  esqlVariables?: ESQLControlVariable[];
+  searchSessionId?: string;
+  projectRouting?: ProjectRouting;
+  esqlApproximation: boolean;
+  inspectorConfig?: {
+    title: string;
+    description: string;
+  };
+}
+
 export function fetchEsql({
   query,
   inputQuery,
   filters,
   timeRange,
-  dataView,
+  esqlSource,
   abortSignal,
   inspectorAdapters,
   data,
   expressions,
-  profilesManager,
-}: {
-  query: Query | AggregateQuery;
-  inputQuery?: Query;
-  filters?: Filter[];
-  timeRange?: TimeRange;
-  dataView: DataView;
-  abortSignal?: AbortSignal;
-  inspectorAdapters: Adapters;
-  data: DataPublicPluginStart;
-  expressions: ExpressionsStart;
-  profilesManager: ProfilesManager;
-}): Promise<RecordsFetchResponse> {
-  const props = getTextBasedQueryStateToAstProps({
-    query,
-    inputQuery,
-    filters,
-    timeRange,
-    dataView,
-    data,
-  });
+  scopedProfilesManager,
+  esqlVariables,
+  searchSessionId,
+  projectRouting,
+  esqlApproximation,
+  inspectorConfig,
+}: FetchEsqlParams): Promise<RecordsFetchResponse> {
+  const props = {
+    ...getTextBasedQueryStateToAstProps({
+      query,
+      inputQuery,
+      filters,
+      timeRange,
+      timeFieldName: esqlSource?.timeFieldName,
+      data,
+      inspectorConfig,
+    }),
+  };
   return textBasedQueryStateToAstWithValidation(props)
     .then((ast) => {
       if (ast) {
         const contract = expressions.execute(ast, null, {
           inspectorAdapters,
+          searchContext: {
+            timeRange,
+            esqlVariables,
+            projectRouting,
+            isApproximate: esqlApproximation,
+          },
+          searchSessionId,
         });
-        abortSignal?.addEventListener('abort', contract.cancel);
+        abortSignal?.addEventListener('abort', (e) => {
+          contract.cancel((e.target as AbortSignal)?.reason);
+        });
         const execution = contract.getData();
         let finalData: DataTableRecord[] = [];
-        let esqlQueryColumns: Datatable['columns'] | undefined;
+        let finalColumns: DatatableColumn[] = [];
         let error: string | undefined;
         let esqlHeaderWarning: string | undefined;
+        let approximationApplied: boolean | undefined;
         execution.pipe(pluck('result')).subscribe((resp) => {
           const response = resp as Datatable | EsqlErrorResponse;
           if (response.type === 'error') {
             error = response.error.message;
           } else {
             const table = response as Datatable;
+            finalColumns = table.columns ?? [];
             const rows = table?.rows ?? [];
-            esqlQueryColumns = table?.columns ?? undefined;
+            approximationApplied = table.meta?.approximationApplied;
+            const responseTime = moment().format('YYYY-MM-DD_HH_mm_ss');
             esqlHeaderWarning = table.warning ?? undefined;
+            let inlineHighlights: ESQLColumnsWithHighlights | undefined;
+            if (isOfAggregateQueryType(query)) {
+              try {
+                inlineHighlights = getColumnsWithHighlights(
+                  query.esql,
+                  finalColumns.map(({ name }) => name)
+                );
+              } catch (_e) {
+                inlineHighlights = undefined;
+              }
+            }
+            const hasInlineHighlights = Object.keys(inlineHighlights ?? {}).length > 0;
             finalData = rows.map((row, idx) => {
+              const raw = hasInlineHighlights
+                ? { ...row, inline_highlights: inlineHighlights }
+                : row;
               const record: DataTableRecord = {
-                id: String(idx),
-                raw: row,
+                id: row._index && row._id ? getDocId(row) : `${idx + 1}@${responseTime}`,
+                raw,
                 flattened: row,
               };
 
-              return profilesManager.resolveDocumentProfile({ record });
+              return scopedProfilesManager.resolveDocumentProfile({ record });
             });
           }
         });
@@ -95,50 +153,83 @@ export function fetchEsql({
           if (error) {
             throw new Error(error);
           } else {
+            const adapter = inspectorAdapters.requests;
+            const interceptedWarnings: SearchResponseWarning[] = [];
+            if (adapter) {
+              data.search.showWarnings(adapter, (warning) => {
+                interceptedWarnings.push(warning);
+                return true; // suppress the default behaviour
+              });
+            }
             return {
               records: finalData || [],
-              esqlQueryColumns,
+              dataSource: esqlSourceWithColumns(esqlSource, finalColumns),
+              interceptedWarnings,
               esqlHeaderWarning,
+              approximationApplied,
             };
           }
         });
       }
       return {
         records: [],
-        esqlQueryColumns: [],
+        dataSource: esqlSource,
+        interceptedWarnings: [],
         esqlHeaderWarning: undefined,
+        approximationApplied: undefined,
       };
     })
     .catch((err) => {
       throw new Error(err.message);
     });
 }
+
+/** Copies table nullability onto the LIMIT 0 source. An empty table keeps the original source. */
+function esqlSourceWithColumns(
+  esqlSource: EsqlSource | undefined,
+  columns: DatatableColumn[]
+): EsqlSource | undefined {
+  if (!esqlSource || columns.length === 0) {
+    return esqlSource;
+  }
+  return esqlSource.withColumns(columns);
+}
+
 export function getTextBasedQueryStateToAstProps({
   query,
   inputQuery,
   filters,
   timeRange,
-  dataView,
+  timeFieldName,
   data,
+  inspectorConfig,
 }: {
   query: Query | AggregateQuery;
   inputQuery?: Query;
   filters?: Filter[];
   timeRange?: TimeRange;
-  dataView: DataView;
+  timeFieldName?: string;
   data: DataPublicPluginStart;
+  inspectorConfig?: {
+    title: string;
+    description: string;
+  };
 }) {
   return {
     filters,
     query,
     time: timeRange ?? data.query.timefilter.timefilter.getAbsoluteTime(),
-    timeFieldName: dataView.timeFieldName,
+    timeFieldName,
     inputQuery,
-    titleForInspector: i18n.translate('discover.inspectorEsqlRequestTitle', {
-      defaultMessage: 'Table',
-    }),
-    descriptionForInspector: i18n.translate('discover.inspectorEsqlRequestDescription', {
-      defaultMessage: 'This request queries Elasticsearch to fetch results for the table.',
-    }),
+    titleForInspector:
+      inspectorConfig?.title ??
+      i18n.translate('discover.inspectorEsqlRequestTitle', {
+        defaultMessage: 'Table',
+      }),
+    descriptionForInspector:
+      inspectorConfig?.description ??
+      i18n.translate('discover.inspectorEsqlRequestDescription', {
+        defaultMessage: 'This request queries Elasticsearch to fetch results for the table.',
+      }),
   };
 }

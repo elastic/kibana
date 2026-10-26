@@ -7,40 +7,45 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo, useState } from 'react';
-import useObservable from 'react-use/lib/useObservable';
+import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
+import type { UseEuiTheme } from '@elastic/eui';
 import {
   EuiButton,
-  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiImage,
   EuiPageTemplate,
   EuiText,
+  euiBreakpoint,
+  euiMinBreakpoint,
 } from '@elastic/eui';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
+import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 
-import useMountedState from 'react-use/lib/useMountedState';
+import { css } from '@emotion/react';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { useDashboardApi } from '../../../dashboard_api/use_dashboard_api';
-import { coreServices } from '../../../services/kibana_services';
+import { coreServices, uiActionsService } from '../../../services/kibana_services';
 import { getDashboardCapabilities } from '../../../utils/get_dashboard_capabilities';
-import { executeAddLensPanelAction } from '../../../dashboard_actions/execute_add_lens_panel_action';
-import { addFromLibrary } from '../../add_panel_from_library';
+import { useFeaturedItems } from '../../../dashboard_app/top_nav/add_panel_button/use_featured_items';
+import { FeaturedItemCard } from '../../../dashboard_app/top_nav/add_panel_button/components/featured_item_card';
+import { DashboardEmptyScreenChat } from './dashboard_empty_screen_chat';
+import { OPEN_DASHBOARD_CHAT_ACTION_ID } from './dashboard_empty_screen_chat_action';
 
 export function DashboardEmptyScreen() {
   const { showWriteControls } = useMemo(() => {
     return getDashboardCapabilities();
   }, []);
 
-  const isMounted = useMountedState();
   const dashboardApi = useDashboardApi();
-  const [isLoading, setIsLoading] = useState(false);
-  const isDarkTheme = useObservable(coreServices.theme.theme$)?.darkMode;
+  const { featuredItems, loading: featuredItemsLoading } = useFeaturedItems({ dashboardApi });
+  const isDarkTheme = useKibanaIsDarkMode();
   const viewMode = useStateFromPublishingSubject(dashboardApi.viewMode$);
-  const isEditMode = useMemo(() => {
-    return viewMode === 'edit';
-  }, [viewMode]);
+  const isEditMode = viewMode === 'edit';
+  const hasChatItem = uiActionsService.hasAction(OPEN_DASHBOARD_CHAT_ACTION_ID);
+
+  const styles = useMemoCss(emptyScreenStyles);
 
   // TODO replace these SVGs with versions from EuiIllustration as soon as it becomes available.
   const imageUrl = coreServices.http.basePath.prepend(
@@ -49,6 +54,10 @@ export function DashboardEmptyScreen() {
 
   // If the user ends up in edit mode without write privileges, we shouldn't show the edit prompt.
   const showEditPrompt = showWriteControls && isEditMode;
+
+  if (showEditPrompt && featuredItemsLoading) {
+    return <div css={emptyScreenStyles.parent} />;
+  }
 
   const emptyPromptTestSubject = (() => {
     if (showEditPrompt) return 'emptyDashboardWidget';
@@ -71,11 +80,8 @@ export function DashboardEmptyScreen() {
   })();
 
   const body = (() => {
-    const bodyString = showEditPrompt
-      ? i18n.translate('dashboard.emptyScreen.editModeSubtitle', {
-          defaultMessage: 'Create a visualization of your data, or add one from the library.',
-        })
-      : showWriteControls
+    if (showEditPrompt) return undefined;
+    const bodyString = showWriteControls
       ? i18n.translate('dashboard.emptyScreen.viewModeSubtitle', {
           defaultMessage: 'Enter edit mode, and then start adding your visualizations.',
         })
@@ -92,35 +98,23 @@ export function DashboardEmptyScreen() {
   const actions = (() => {
     if (showEditPrompt) {
       return (
-        <EuiFlexGroup justifyContent="center" gutterSize="l" alignItems="center">
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              isLoading={isLoading}
-              iconType="lensApp"
-              onClick={async () => {
-                setIsLoading(true);
-                await executeAddLensPanelAction(dashboardApi);
-                if (isMounted()) {
-                  setIsLoading(false);
-                }
-              }}
+        <EuiFlexGroup gutterSize="s" wrap css={styles.actionsWrapper}>
+          {hasChatItem && (
+            <EuiFlexItem
+              key={OPEN_DASHBOARD_CHAT_ACTION_ID}
+              grow={hasChatItem}
+              css={styles.chatItem}
             >
-              {i18n.translate('dashboard.emptyScreen.createVisualization', {
-                defaultMessage: 'Create visualization',
-              })}
-            </EuiButton>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              flush="left"
-              iconType="folderOpen"
-              onClick={() => addFromLibrary(dashboardApi)}
-            >
-              {i18n.translate('dashboard.emptyScreen.addFromLibrary', {
-                defaultMessage: 'Add from library',
-              })}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
+              <DashboardEmptyScreenChat />
+            </EuiFlexItem>
+          )}
+          {featuredItems.map((item) => {
+            return (
+              <EuiFlexItem key={item.id} grow={hasChatItem} css={styles.featuredItem}>
+                {<FeaturedItemCard item={item} />}
+              </EuiFlexItem>
+            );
+          })}
         </EuiFlexGroup>
       );
     }
@@ -136,12 +130,8 @@ export function DashboardEmptyScreen() {
   })();
 
   return (
-    <div className="dshEmptyPromptParent">
-      <EuiPageTemplate
-        grow={false}
-        data-test-subj={emptyPromptTestSubject}
-        className="dshEmptyPromptPageTemplate"
-      >
+    <div css={emptyScreenStyles.parent}>
+      <EuiPageTemplate grow={false} data-test-subj={emptyPromptTestSubject} css={styles.template}>
         <EuiPageTemplate.EmptyPrompt
           icon={<EuiImage size="fullWidth" src={imageUrl} alt="" />}
           title={title}
@@ -149,9 +139,74 @@ export function DashboardEmptyScreen() {
           actions={actions}
           titleSize="xs"
           color="transparent"
-          className="dshEmptyWidgetContainer"
+          css={styles.widgetContainer}
         />
       </EuiPageTemplate>
     </div>
   );
 }
+
+const emptyScreenStyles = {
+  parent: css({
+    display: 'flex',
+    flexGrow: 1,
+    height: '100%',
+    minWidth: 0,
+    width: '100%',
+  }),
+  template: css({
+    backgroundColor: 'inherit',
+    paddingBlockStart: '0 !important',
+    width: '100%',
+    minWidth: 0,
+  }),
+  widgetContainer: (euiThemeContext: UseEuiTheme) => {
+    const { euiTheme } = euiThemeContext;
+    return css({
+      width: '100%',
+      // Wide enough for "Create visualization (query)" to stay on one line
+      // beside its icon when the two featured cards sit side-by-side on laptop.
+      maxWidth: '52rem',
+      minWidth: 0,
+      boxSizing: 'border-box',
+      padding: euiTheme.size.xl,
+      paddingTop: '0 !important',
+      borderRadius: euiTheme.border.radius.medium,
+      [euiBreakpoint(euiThemeContext, ['xs', 's'])]: {
+        maxWidth: '100%',
+        padding: euiTheme.size.base,
+        paddingTop: '0 !important',
+      },
+      [euiMinBreakpoint(euiThemeContext, 'm')]: {
+        width: '48rem',
+      },
+      '.euiEmptyPrompt__icon': {
+        marginBottom: euiTheme.size.l,
+        paddingRight: euiTheme.size.s,
+        maxWidth: '100%',
+        [euiBreakpoint(euiThemeContext, ['xs', 's'])]: {
+          marginBottom: euiTheme.size.m,
+          paddingRight: 0,
+        },
+      },
+      '.euiEmptyPrompt__content, .euiEmptyPrompt__actions': {
+        width: '100%',
+        maxWidth: '100%',
+        minWidth: 0,
+      },
+    });
+  },
+  actionsWrapper: css({
+    width: '100%',
+    maxWidth: '100%',
+    minWidth: 0,
+  }),
+  // Force Chat onto its own full-width row above the other featured cards.
+  chatItem: css({
+    flexBasis: '100%',
+    minWidth: 0,
+  }),
+  featuredItem: css({
+    minWidth: 0,
+  }),
+};

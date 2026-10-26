@@ -11,18 +11,6 @@ export const SERVICENOW = i18n.translate('xpack.stackConnectors.serviceNow.title
   defaultMessage: 'ServiceNow',
 });
 
-export const SERVICENOW_ITSM = i18n.translate('xpack.stackConnectors.serviceNowITSM.title', {
-  defaultMessage: 'ServiceNow ITSM',
-});
-
-export const SERVICENOW_SIR = i18n.translate('xpack.stackConnectors.serviceNowSIR.title', {
-  defaultMessage: 'ServiceNow SecOps',
-});
-
-export const SERVICENOW_ITOM = i18n.translate('xpack.stackConnectors.serviceNowITOM.title', {
-  defaultMessage: 'ServiceNow ITOM',
-});
-
 export const ALLOWED_HOSTS_ERROR = (message: string) =>
   i18n.translate('xpack.stackConnectors.serviceNow.configuration.apiAllowedHostsError', {
     defaultMessage: 'error configuring connector action: {message}',

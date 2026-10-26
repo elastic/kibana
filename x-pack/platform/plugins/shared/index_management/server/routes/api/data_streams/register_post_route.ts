@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 
-import { IScopedClusterClient } from '@kbn/core/server';
-import { RouteDependencies } from '../../../types';
+import type { IScopedClusterClient } from '@kbn/core/server';
+import type { RouteDependencies } from '../../../types';
 import { addBasePath } from '..';
 
 const getDataStreams = (client: IScopedClusterClient, name = '*') => {
@@ -24,7 +25,7 @@ export function registerPostOneApplyLatestMappings({
   config,
 }: RouteDependencies) {
   const paramsSchema = schema.object({
-    name: schema.string(),
+    name: schema.string({ maxLength: 1000 }),
   });
   router.post(
     {
@@ -80,7 +81,7 @@ export function registerPostOneRollover({
   config,
 }: RouteDependencies) {
   const paramsSchema = schema.object({
-    name: schema.string(),
+    name: schema.string({ maxLength: 1000 }),
   });
   router.post(
     {

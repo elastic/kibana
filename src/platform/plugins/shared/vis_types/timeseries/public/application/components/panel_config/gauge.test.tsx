@@ -15,7 +15,7 @@ jest.mock('../lib/get_default_query_language', () => ({
 }));
 
 import { GaugePanelConfig } from './gauge';
-import { PanelConfigProps } from './types';
+import type { PanelConfigProps } from './types';
 
 describe('GaugePanelConfig', () => {
   it('call switch tab onChange={handleChange}', () => {
@@ -27,7 +27,7 @@ describe('GaugePanelConfig', () => {
     const wrapper = shallow(<GaugePanelConfig {...props} />);
 
     wrapper.find('EuiTab').first().simulate('onClick');
-    expect(props.onChange).toBeCalled();
+    expect(props.onChange).toHaveBeenCalled();
   });
 
   it('call onChange={handleChange}', () => {
@@ -39,6 +39,6 @@ describe('GaugePanelConfig', () => {
     const wrapper = shallow(<GaugePanelConfig {...props} />);
 
     wrapper.simulate('onClick');
-    expect(props.onChange).toBeCalled();
+    expect(props.onChange).toHaveBeenCalled();
   });
 });

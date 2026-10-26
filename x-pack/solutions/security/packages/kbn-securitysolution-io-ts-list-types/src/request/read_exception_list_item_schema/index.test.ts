@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { left } from 'fp-ts/lib/Either';
-import { pipe } from 'fp-ts/lib/pipeable';
+import { left } from 'fp-ts/Either';
+import { pipe } from 'fp-ts/pipeable';
 import { exactCheck, foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 
 import { getReadExceptionListItemSchemaMock } from './index.mock';
-import { ReadExceptionListItemSchema, readExceptionListItemSchema } from '.';
+import type { ReadExceptionListItemSchema } from '.';
+import { readExceptionListItemSchema } from '.';
 
 describe('read_exception_list_item_schema', () => {
   test('it should validate a typical exception list request', () => {

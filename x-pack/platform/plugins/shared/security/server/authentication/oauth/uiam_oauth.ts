@@ -1,0 +1,282 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { KibanaRequest, Logger } from '@kbn/core/server';
+import type {
+  CreateUiamOAuthClientParams,
+  UiamOAuthClientResponse,
+  UiamOAuthConnectionResponse,
+  UiamOAuthType,
+  UiamResolvedUsersResponse,
+  UpdateUiamOAuthClientParams,
+  UpdateUiamOAuthConnectionParams,
+} from '@kbn/core-security-server';
+
+import type { SecurityLicense } from '../../../common';
+import { getDetailedErrorMessage } from '../../errors';
+import type { UiamServicePublic } from '../../uiam';
+
+export interface UiamOAuthOptions {
+  logger: Logger;
+  license: SecurityLicense;
+  uiam: UiamServicePublic;
+}
+
+export class UiamOAuth implements UiamOAuthType {
+  private readonly logger: Logger;
+  private readonly license: SecurityLicense;
+  private readonly uiam: UiamServicePublic;
+
+  constructor({ logger, license, uiam }: UiamOAuthOptions) {
+    this.logger = logger;
+    this.license = license;
+    this.uiam = uiam;
+  }
+
+  async createClient(
+    request: KibanaRequest,
+    params: CreateUiamOAuthClientParams
+  ): Promise<UiamOAuthClientResponse | null> {
+    if (!this.license.isEnabled()) {
+      this.logger.debug(
+        'Skipping OAuth client creation: security features are disabled in Elasticsearch.'
+      );
+      return null;
+    }
+
+    this.logger.debug('Attempting to create an OAuth client');
+
+    try {
+      const result = await this.uiam.createOAuthClient(request, params);
+      this.logger.debug(`OAuth client created successfully with id ${result.id}`);
+      return result;
+    } catch (e) {
+      this.logger.error(`Failed to create OAuth client: ${getDetailedErrorMessage(e)}`);
+      throw e;
+    }
+  }
+
+  async listClients(
+    request: KibanaRequest,
+    clientId?: string,
+    projectId?: string
+  ): Promise<{ clients: UiamOAuthClientResponse[] } | null> {
+    if (!this.license.isEnabled()) {
+      this.logger.debug(
+        'Skipping OAuth client listing: security features are disabled in Elasticsearch.'
+      );
+      return null;
+    }
+
+    this.logger.debug('Attempting to list OAuth clients');
+
+    try {
+      const result = await this.uiam.listOAuthClients(request, clientId, projectId);
+      this.logger.debug('OAuth clients listed successfully');
+      return result;
+    } catch (e) {
+      this.logger.error(`Failed to list OAuth clients: ${getDetailedErrorMessage(e)}`);
+      throw e;
+    }
+  }
+
+  async updateClient(
+    request: KibanaRequest,
+    clientId: string,
+    params: UpdateUiamOAuthClientParams
+  ): Promise<UiamOAuthClientResponse | null> {
+    if (!this.license.isEnabled()) {
+      this.logger.debug(
+        'Skipping OAuth client update: security features are disabled in Elasticsearch.'
+      );
+      return null;
+    }
+
+    this.logger.debug(`Attempting to update OAuth client ${clientId}`);
+
+    try {
+      const result = await this.uiam.updateOAuthClient(request, clientId, params);
+      this.logger.debug(`OAuth client ${clientId} updated successfully`);
+      return result;
+    } catch (e) {
+      this.logger.error(`Failed to update OAuth client ${clientId}: ${getDetailedErrorMessage(e)}`);
+      throw e;
+    }
+  }
+
+  async revokeClient(
+    request: KibanaRequest,
+    clientId: string,
+    reason?: string
+  ): Promise<UiamOAuthClientResponse | null> {
+    if (!this.license.isEnabled()) {
+      this.logger.debug(
+        'Skipping OAuth client revocation: security features are disabled in Elasticsearch.'
+      );
+      return null;
+    }
+
+    this.logger.debug(`Attempting to revoke OAuth client ${clientId}`);
+
+    try {
+      const result = await this.uiam.revokeOAuthClient(request, clientId, reason);
+      this.logger.debug(`OAuth client ${clientId} revoked successfully`);
+      return result;
+    } catch (e) {
+      this.logger.error(`Failed to revoke OAuth client ${clientId}: ${getDetailedErrorMessage(e)}`);
+      throw e;
+    }
+  }
+
+  async deleteClient(request: KibanaRequest, clientId: string): Promise<true | null> {
+    if (!this.license.isEnabled()) {
+      this.logger.debug(
+        'Skipping OAuth client deletion: security features are disabled in Elasticsearch.'
+      );
+      return null;
+    }
+
+    this.logger.debug(`Attempting to delete OAuth client ${clientId}`);
+
+    try {
+      await this.uiam.deleteOAuthClient(request, clientId);
+      this.logger.debug(`OAuth client ${clientId} deleted successfully`);
+      return true;
+    } catch (e) {
+      this.logger.error(`Failed to delete OAuth client ${clientId}: ${getDetailedErrorMessage(e)}`);
+      throw e;
+    }
+  }
+
+  async listConnections(
+    request: KibanaRequest,
+    clientId?: string,
+    connectionId?: string,
+    projectId?: string
+  ): Promise<{ connections: UiamOAuthConnectionResponse[] } | null> {
+    if (!this.license.isEnabled()) {
+      this.logger.debug(
+        'Skipping OAuth connection listing: security features are disabled in Elasticsearch.'
+      );
+      return null;
+    }
+
+    this.logger.debug('Attempting to list OAuth connections');
+
+    try {
+      const result = await this.uiam.listOAuthConnections(
+        request,
+        clientId,
+        connectionId,
+        projectId
+      );
+      this.logger.debug('OAuth connections listed successfully');
+      return result;
+    } catch (e) {
+      this.logger.error(`Failed to list OAuth connections: ${getDetailedErrorMessage(e)}`);
+      throw e;
+    }
+  }
+
+  async updateConnection(
+    request: KibanaRequest,
+    clientId: string,
+    connectionId: string,
+    params: UpdateUiamOAuthConnectionParams
+  ): Promise<UiamOAuthConnectionResponse | null> {
+    if (!this.license.isEnabled()) {
+      this.logger.debug(
+        'Skipping OAuth connection update: security features are disabled in Elasticsearch.'
+      );
+      return null;
+    }
+
+    this.logger.debug(`Attempting to update OAuth connection ${connectionId}`);
+
+    try {
+      const result = await this.uiam.updateOAuthConnection(request, clientId, connectionId, params);
+      this.logger.debug(`OAuth connection ${connectionId} updated successfully`);
+      return result;
+    } catch (e) {
+      this.logger.error(
+        `Failed to update OAuth connection ${connectionId}: ${getDetailedErrorMessage(e)}`
+      );
+      throw e;
+    }
+  }
+
+  async revokeConnection(
+    request: KibanaRequest,
+    clientId: string,
+    connectionId: string,
+    reason?: string
+  ): Promise<UiamOAuthConnectionResponse | null> {
+    if (!this.license.isEnabled()) {
+      this.logger.debug(
+        'Skipping OAuth connection revocation: security features are disabled in Elasticsearch.'
+      );
+      return null;
+    }
+
+    this.logger.debug(`Attempting to revoke OAuth connection ${connectionId}`);
+
+    try {
+      const result = await this.uiam.revokeOAuthConnection(request, clientId, connectionId, reason);
+      this.logger.debug(`OAuth connection ${connectionId} revoked successfully`);
+      return result;
+    } catch (e) {
+      this.logger.error(
+        `Failed to revoke OAuth connection ${connectionId}: ${getDetailedErrorMessage(e)}`
+      );
+      throw e;
+    }
+  }
+
+  async deleteConnection(
+    request: KibanaRequest,
+    clientId: string,
+    connectionId: string
+  ): Promise<true | null> {
+    if (!this.license.isEnabled()) {
+      this.logger.debug(
+        'Skipping OAuth connection deletion: security features are disabled in Elasticsearch.'
+      );
+      return null;
+    }
+
+    this.logger.debug(`Attempting to delete OAuth connection ${connectionId}`);
+
+    try {
+      await this.uiam.deleteOAuthConnection(request, clientId, connectionId);
+      this.logger.debug(`OAuth connection ${connectionId} deleted successfully`);
+      return true;
+    } catch (e) {
+      this.logger.error(
+        `Failed to delete OAuth connection ${connectionId} for client ${clientId}: ${getDetailedErrorMessage(
+          e
+        )}`
+      );
+      throw e;
+    }
+  }
+
+  async resolveUsers(
+    request: KibanaRequest,
+    userIds: string[]
+  ): Promise<UiamResolvedUsersResponse | null> {
+    if (!this.license.isEnabled()) {
+      this.logger.debug(
+        'Skipping user resolution: security features are disabled in Elasticsearch.'
+      );
+      return null;
+    }
+
+    this.logger.debug(`Attempting to resolve ${userIds.length} user(s)`);
+
+    return this.uiam.resolveUsers(request, userIds);
+  }
+}

@@ -1,0 +1,259 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import {
+  EuiButton,
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLoadingSpinner,
+  EuiPageTemplate,
+  EuiSpacer,
+} from '@elastic/eui';
+import { AppHeader } from '@kbn/app-header';
+import { KbnDangerCallout } from '@kbn/ui-callout';
+import type { ActionPolicyDestination, ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
+import { PluginStart } from '@kbn/core-di';
+import { CoreStart, useService } from '@kbn/core-di-browser';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React, { useCallback, useState } from 'react';
+import { FormProvider } from 'react-hook-form';
+import { useParams } from 'react-router-dom';
+import { useActionPolicyAutoAttach } from '@kbn/alerting-v2-browser-shared';
+import { ActionPolicyForm } from '../../components/action_policy/form/action_policy_form';
+import { ActionPoliciesLicenseCallout } from '../../components/action_policy/action_policies_license_callout';
+import { useIsActionPoliciesLicenseValid } from '../../hooks/use_is_action_policies_license_valid';
+import { toCreatePayload, toUpdatePayload } from '../../components/action_policy/form/form_utils';
+import type { ActionPolicyFormState } from '../../components/action_policy/form/types';
+import { useActionPolicyForm } from '../../components/action_policy/form/use_action_policy_form';
+import { useAlertingLocators } from '../../application/locator_context';
+import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
+import { useCreateActionPolicy } from '../../hooks/use_create_action_policy';
+import { useCreateInlineWorkflows } from '../../hooks/use_create_inline_workflows';
+import { useFetchActionPolicy } from '../../hooks/use_fetch_action_policy';
+import { useUpdateActionPolicy } from '../../hooks/use_update_action_policy';
+
+const CREATE_TITLE = i18n.translate('xpack.alertingV2.actionPolicy.formPage.createTitle', {
+  defaultMessage: 'Create action policy',
+});
+
+const EDIT_TITLE = i18n.translate('xpack.alertingV2.actionPolicy.formPage.editTitle', {
+  defaultMessage: 'Edit action policy',
+});
+
+const BACK_TO_LIST_LABEL = i18n.translate('xpack.alertingV2.actionPolicy.formPage.backToList', {
+  defaultMessage: 'Action Policies',
+});
+
+export const ActionPolicyFormPage = () => {
+  const { id: policyId } = useParams<{ id?: string }>();
+  const { actionPolicyLocators } = useAlertingLocators();
+
+  const {
+    data: existingPolicy,
+    isLoading: isFetchingPolicy,
+    isError: isFetchError,
+    error: fetchError,
+  } = useFetchActionPolicy(policyId);
+
+  const isEditMode = !!policyId;
+  useBreadcrumbs(isEditMode ? 'action_policy_edit' : 'action_policy_create');
+  const isReady = !isEditMode || !!existingPolicy;
+
+  const navigateToList = useCallback(() => {
+    actionPolicyLocators.navigateSync({ page: 'list' });
+  }, [actionPolicyLocators]);
+  const listHref = actionPolicyLocators.useUrl({ page: 'list' });
+
+  const renderBody = () => {
+    if (isEditMode && isFetchingPolicy) {
+      return (
+        <>
+          <EuiSpacer size="l" />
+          <EuiFlexGroup justifyContent="center">
+            <EuiLoadingSpinner size="l" data-test-subj="loadingSpinner" />
+          </EuiFlexGroup>
+        </>
+      );
+    }
+
+    if (isEditMode && isFetchError) {
+      return (
+        <>
+          <EuiSpacer size="m" />
+          <KbnDangerCallout
+            announceOnMount
+            title={
+              <FormattedMessage
+                id="xpack.alertingV2.actionPolicy.formPage.fetchErrorTitle"
+                defaultMessage="Failed to load action policy"
+              />
+            }
+            data-test-subj="fetchErrorCallout"
+          >
+            {fetchError?.message}
+          </KbnDangerCallout>
+        </>
+      );
+    }
+
+    if (!isReady) {
+      return null;
+    }
+
+    return (
+      <ActionPolicyFormPageContent
+        initialPolicy={existingPolicy}
+        onCancel={navigateToList}
+        onSuccess={navigateToList}
+      />
+    );
+  };
+
+  return (
+    <div data-test-subj="actionPolicyFormPage">
+      <AppHeader
+        title={isEditMode ? EDIT_TITLE : CREATE_TITLE}
+        back={{ href: listHref, label: BACK_TO_LIST_LABEL }}
+        spacing="bleed"
+      />
+      {renderBody()}
+    </div>
+  );
+};
+
+const ActionPolicyFormPageContent = ({
+  initialPolicy,
+  onCancel,
+  onSuccess,
+}: {
+  initialPolicy?: ActionPolicyResponse;
+  onCancel: () => void;
+  onSuccess: () => void;
+}) => {
+  useActionPolicyAutoAttach(initialPolicy, {
+    chrome: useService(CoreStart('chrome')),
+    agentBuilder: useService(PluginStart('agentBuilder'), { optional: true }) as
+      | AgentBuilderPluginStart
+      | undefined,
+  });
+  const { toasts } = useService(CoreStart('notifications'));
+  const { mutateAsync: createPolicy, isLoading: isCreating } = useCreateActionPolicy();
+  const { mutateAsync: updatePolicy, isLoading: isUpdating } = useUpdateActionPolicy();
+  const { createInlineWorkflows, rollbackWorkflows } = useCreateInlineWorkflows();
+  const [isCreatingWorkflows, setIsCreatingWorkflows] = useState(false);
+
+  const submitWithInlineWorkflows = useCallback(
+    async (
+      values: ActionPolicyFormState,
+      upsert: (destinations: ActionPolicyDestination[]) => Promise<unknown>
+    ) => {
+      let createdIds: string[] = [];
+      setIsCreatingWorkflows(true);
+      try {
+        createdIds = await createInlineWorkflows(values.inlineActions);
+      } catch (err) {
+        toasts.addError(err instanceof Error ? err : new Error(String(err)), {
+          title: i18n.translate('xpack.alertingV2.actionPolicy.inlineWorkflowsError', {
+            defaultMessage: 'Failed to create simple workflows',
+          }),
+        });
+        return;
+      } finally {
+        setIsCreatingWorkflows(false);
+      }
+
+      const destinations: ActionPolicyDestination[] = [
+        ...values.destinations,
+        ...createdIds.map((id) => ({ type: 'workflow' as const, id })),
+      ];
+
+      try {
+        await upsert(destinations);
+      } catch {
+        // The create/update mutation surfaces its own error toast; roll back the
+        // workflows we created so we don't leave orphans behind.
+        return await rollbackWorkflows(createdIds);
+      }
+
+      onSuccess();
+    },
+    [createInlineWorkflows, rollbackWorkflows, toasts, onSuccess]
+  );
+
+  const onSubmitCreate = useCallback(
+    (values: ActionPolicyFormState) =>
+      submitWithInlineWorkflows(values, (destinations) =>
+        createPolicy(toCreatePayload({ ...values, destinations }))
+      ),
+    [submitWithInlineWorkflows, createPolicy]
+  );
+
+  const onSubmitUpdate = useCallback(
+    (id: string, values: ActionPolicyFormState) =>
+      submitWithInlineWorkflows(values, (destinations) =>
+        updatePolicy({ id, data: toUpdatePayload({ ...values, destinations }) })
+      ),
+    [submitWithInlineWorkflows, updatePolicy]
+  );
+
+  const { methods, isEditMode, handleSubmit } = useActionPolicyForm({
+    initialValues: initialPolicy,
+    onSubmitCreate,
+    onSubmitUpdate,
+  });
+
+  const isLoading = isCreating || isUpdating || isCreatingWorkflows;
+  const isLicenseValid = useIsActionPoliciesLicenseValid();
+
+  return (
+    <EuiPageTemplate.Section paddingSize="none" restrictWidth={true}>
+      <EuiSpacer size="m" />
+      <ActionPoliciesLicenseCallout />
+
+      <FormProvider {...methods}>
+        <ActionPolicyForm />
+      </FormProvider>
+
+      <EuiSpacer size="l" />
+
+      <EuiFlexGroup justifyContent="spaceBetween" gutterSize="m">
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty onClick={onCancel} isLoading={isLoading} data-test-subj="cancelButton">
+            <FormattedMessage
+              id="xpack.alertingV2.actionPolicy.formPage.cancel"
+              defaultMessage="Cancel"
+            />
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            fill
+            onClick={handleSubmit}
+            isLoading={isLoading}
+            disabled={!isLicenseValid}
+            data-test-subj="submitButton"
+          >
+            {isEditMode ? (
+              <FormattedMessage
+                id="xpack.alertingV2.actionPolicy.formPage.update"
+                defaultMessage="Update policy"
+              />
+            ) : (
+              <FormattedMessage
+                id="xpack.alertingV2.actionPolicy.formPage.save"
+                defaultMessage="Create policy"
+              />
+            )}
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiPageTemplate.Section>
+  );
+};

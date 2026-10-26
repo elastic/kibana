@@ -7,11 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 import type { ServiceConfigDescriptor } from '@kbn/core-base-server-internal';
 
 const statusConfigSchema = schema.object({
   allowAnonymous: schema.boolean({ defaultValue: false }),
+  statusPageBypassMonitorPrivilege: schema.boolean({ defaultValue: false }),
 });
 
 export type StatusConfigType = TypeOf<typeof statusConfigSchema>;

@@ -9,17 +9,22 @@
 
 import React from 'react';
 
-import { EuiCallOut } from '@elastic/eui';
-import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
-
+import {
+  KbnDangerCallout,
+  KbnInfoCallout,
+  KbnSuccessCallout,
+  KbnWarningCallout,
+} from '@kbn/ui-callout';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { MatchedIndicesSet } from '../../../types';
+import type { MatchedIndicesSet } from '../../../types';
 
 interface StatusMessageProps {
   matchedIndices: MatchedIndicesSet;
   isIncludingSystemIndices: boolean;
   query: string;
   showSystemIndices: boolean;
+  /** Set when the user lacks the privileges to view the indices matching the query */
+  error?: Error;
 }
 
 const NoMatchStatusMessage = (allIndicesLength: number) => (
@@ -60,15 +65,38 @@ export const StatusMessage: React.FC<StatusMessageProps> = ({
   isIncludingSystemIndices,
   query,
   showSystemIndices,
+  error,
 }) => {
-  let statusIcon: EuiIconType | undefined;
   let statusMessage;
   let statusColor: 'primary' | 'success' | 'warning' | undefined;
 
   const allIndicesLength = allIndices.length;
 
+  if (error) {
+    return (
+      <KbnDangerCallout
+        data-test-subj="createIndexPatternStatusMessage"
+        title={
+          <FormattedMessage
+            id="indexPatternEditor.status.noPrivilegesLabel"
+            defaultMessage="You don't have permission to view the data streams, indices, or index aliases that match your index pattern."
+          />
+        }
+        text={
+          <FormattedMessage
+            id="indexPatternEditor.status.noPrivilegesDetail"
+            defaultMessage="Ask an administrator to grant you the {readPrivilege} and {viewIndexMetadataPrivilege} index privileges."
+            values={{
+              readPrivilege: <code>read</code>,
+              viewIndexMetadataPrivilege: <code>view_index_metadata</code>,
+            }}
+          />
+        }
+      />
+    );
+  }
+
   if (query.length === 0) {
-    statusIcon = undefined;
     statusColor = 'primary';
 
     if (allIndicesLength >= 1) {
@@ -104,7 +132,6 @@ export const StatusMessage: React.FC<StatusMessageProps> = ({
       );
     }
   } else if (exactMatchedIndices.length) {
-    statusIcon = 'check';
     statusColor = 'success';
     statusMessage = (
       <span>
@@ -122,7 +149,6 @@ export const StatusMessage: React.FC<StatusMessageProps> = ({
       </span>
     );
   } else if (partialMatchedIndices.length) {
-    statusIcon = undefined;
     statusColor = 'primary';
     statusMessage = (
       <span>
@@ -152,20 +178,20 @@ export const StatusMessage: React.FC<StatusMessageProps> = ({
       </span>
     );
   } else {
-    statusIcon = undefined;
     statusColor = 'warning';
     statusMessage = allIndicesLength
       ? NoMatchStatusMessage(allIndicesLength)
       : NoMatchNoIndicesStatusMessage();
   }
 
+  const Callout =
+    statusColor === 'warning'
+      ? KbnWarningCallout
+      : statusColor === 'success'
+      ? KbnSuccessCallout
+      : KbnInfoCallout;
+
   return (
-    <EuiCallOut
-      size="s"
-      color={statusColor}
-      data-test-subj="createIndexPatternStatusMessage"
-      iconType={statusIcon}
-      title={statusMessage}
-    />
+    <Callout size="s" data-test-subj="createIndexPatternStatusMessage" title={statusMessage} />
   );
 };

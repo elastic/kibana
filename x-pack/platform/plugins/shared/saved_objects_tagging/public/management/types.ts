@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { Observable } from 'rxjs';
-import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
+import type { Observable } from 'rxjs';
+import type { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 
 /**
  * Represents a tag `bulk action`

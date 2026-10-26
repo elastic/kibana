@@ -17,7 +17,7 @@ import {
   EuiAccordion,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { TrainedModelItem } from '../../../../common/types/trained_models';
+import type { TrainedModelItem } from '@kbn/ml-common-types/trained_models';
 import { useMlKibana } from '../../contexts/kibana';
 import { ProcessorsStats } from './expanded_row';
 
@@ -67,7 +67,7 @@ export const ModelPipelines: FC<ModelPipelinesProps> = ({ pipelines, ingestStats
                         absolute: true,
                       });
                     }}
-                    iconType={'documentEdit'}
+                    iconType={'pencil'}
                     iconSide="left"
                   >
                     <FormattedMessage

@@ -53,6 +53,12 @@ describe('checkErrorDetails', () => {
   });
 
   describe('data source verification errors', () => {
+    it('should mark as user error when index_not_found exceptoin', () => {
+      const errorMessage = `index_not_found_exception
+	Root causes:
+		index_not_found_exception: no such index [logs-ti_rapid7_threat_command_latest.vulnerability]`;
+      expect(checkErrorDetails(new Error(errorMessage))).toHaveProperty('isUserError', true);
+    });
     it('should mark as user error from search response body', () => {
       const errorResponse = {
         errBody: {
@@ -81,6 +87,24 @@ describe('checkErrorDetails', () => {
 line 1:45: invalid [test_not_lookup] resolution in lookup mode to an index in [standard] mode
 `;
 
+      expect(checkErrorDetails(new Error(errorMessage))).toHaveProperty('isUserError', true);
+    });
+    it('should mark query verification errors as user error', () => {
+      const errorMessage = `x_content_parse_exception Caused by: x_content_parse_exception: [1:266] [bool] failed to parse field [filter] Root causes: x_content_parse_exception: [1:266] [bool] failed to parse field [filter]`;
+      expect(checkErrorDetails(new Error(errorMessage))).toHaveProperty('isUserError', true);
+    });
+  });
+
+  describe('shard errors caused by data/mapping issues', () => {
+    it('should mark as user error when shard error is caused by number_format_exception', () => {
+      const errorMessage = `index: ".ds-my-index-2026.05.16-000008" reason: "failed to create query: Character is neither a decimal digit number, decimal point, nor \\"e\\" notation exponential mark." type: "query_shard_exception" caused by reason: "Character is neither a decimal digit number, decimal point, nor \\"e\\" notation exponential mark." caused by type: "number_format_exception"`;
+      expect(checkErrorDetails(errorMessage)).toHaveProperty('isUserError', true);
+    });
+  });
+
+  describe('missing ml job errors', () => {
+    it('should mark as user error error string', () => {
+      const errorMessage = `problem_child_rare_process_by_user missing`;
       expect(checkErrorDetails(new Error(errorMessage))).toHaveProperty('isUserError', true);
     });
   });
@@ -117,7 +141,78 @@ line 1:45: invalid [test_not_lookup] resolution in lookup mode to an index in [s
     });
   });
 
+  describe('user-driven query errors matched by reason substring', () => {
+    it('should mark as user error when reason contains "is not an IP string literal"', () => {
+      const errorMessage = `index: ".ds-logs-fortinet_fortigate.log-default-2026.05.29-000027" reason: "failed to create query: ' 115.77.100.113' is not an IP string literal." type: "query_shard_exception" caused by reason: "' 115.77.100.113' is not an IP string literal." caused by type: "illegal_argument_exception"`;
+      expect(checkErrorDetails(new Error(errorMessage))).toHaveProperty('isUserError', true);
+    });
+
+    it('should mark as user error when reason contains "Fielddata is disabled on"', () => {
+      const errorMessage = `index: "packetbeat-9.4.1" reason: "Fielddata is disabled on [source.ip] in [packetbeat-9.4.1]. Text fields are not optimised for operations that require per-document field data like aggregations and sorting, so these operations are disabled by default. Please use a keyword field instead." type: "query_shard_exception" caused by reason: "Fielddata is disabled on [source.ip] in [packetbeat-9.4.1]. Text fields are not optimised for operations that require per-document field data like aggregations and sorting, so these operations are disabled by default. Please use a keyword field instead." caused by type: "illegal_argument_exception"`;
+      expect(checkErrorDetails(new Error(errorMessage))).toHaveProperty('isUserError', true);
+    });
+
+    it('should not mark as user error when illegal_argument_exception has no known user-driven reason', () => {
+      const errorMessage = `index: "logs-*" reason: "failed to execute query" type: "query_shard_exception" caused by reason: "some unexpected framework error" caused by type: "illegal_argument_exception"`;
+      expect(checkErrorDetails(new Error(errorMessage))).toHaveProperty('isUserError', false);
+    });
+
+    it('should mark prefix-on-ip shard failure as user error', () => {
+      const errorMessage = `index: ".ds-logs-fortinet_fortigate.log-default-2026.05.29-000027" reason: "Can only use prefix queries on keyword, text and wildcard fields - not on [source.ip] which is of type [ip]" type: "query_shard_exception"`;
+      expect(checkErrorDetails(new Error(errorMessage))).toHaveProperty('isUserError', true);
+    });
+
+    it('should mark IP string literal error as user error when wrapped in search_phase_execution_exception without illegal_argument_exception', () => {
+      const errorMessage = `search_phase_execution_exception
+	Root causes:
+		query_shard_exception: failed to create query: 'exists' is not an IP string literal.`;
+      expect(checkErrorDetails(errorMessage)).toHaveProperty('isUserError', true);
+    });
+
+    // Fielddata errors can also come from framework-generated aggregations and sorts, so they
+    // still require the illegal_argument_exception wrapper to be classified as user errors.
+    it('should not mark Fielddata error without illegal_argument_exception as user error', () => {
+      const errorMessage = `index: "packetbeat-9.4.1" reason: "Fielddata is disabled on [source.ip] in [packetbeat-9.4.1]. Text fields are not optimised for operations that require per-document field data like aggregations and sorting, so these operations are disabled by default. Please use a keyword field instead." type: "query_shard_exception"`;
+      expect(checkErrorDetails(new Error(errorMessage))).toHaveProperty('isUserError', false);
+    });
+
+    it('should not mark a query_shard_exception with a reason outside the known list as user error', () => {
+      const errorMessage = `index: "logs-*" reason: "failed to create query: some unexpected framework error" type: "query_shard_exception"`;
+      expect(checkErrorDetails(new Error(errorMessage))).toHaveProperty('isUserError', false);
+    });
+  });
+
+  describe('authorization errors', () => {
+    it('should mark security_exception from a shard failure string as user error', () => {
+      const error =
+        'cluster: "kayak" index: "kayak:logs-a-000001" reason: "action [indices:data/read/search] is unauthorized for API key id [abc] of user [analyst]" type: "security_exception"';
+      expect(checkErrorDetails(error)).toEqual({ isUserError: true });
+    });
+
+    it('should mark security_exception from an Error message as user error', () => {
+      const error = new Error(
+        'security_exception: action [indices:data/read/search] is unauthorized for user [analyst]'
+      );
+      expect(checkErrorDetails(error)).toEqual({ isUserError: true });
+    });
+  });
+
   describe('non user errors', () => {
+    it('should not mark as user error shard exception', () => {
+      const errorResponse = {
+        errBody: {
+          error: {
+            root_cause: [
+              {
+                type: 'no_shard_available_action_exception',
+              },
+            ],
+            type: 'no_shard_available_action_exception',
+          },
+        },
+      };
+      expect(checkErrorDetails(errorResponse)).toHaveProperty('isUserError', false);
+    });
     it('should not mark as user error from search response body', () => {
       const errorResponse = {
         errBody: {

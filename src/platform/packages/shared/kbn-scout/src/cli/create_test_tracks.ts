@@ -1,0 +1,868 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import path from 'node:path';
+import { REPO_ROOT } from '@kbn/repo-info';
+import { findPackageForPath } from '@kbn/repo-packages';
+import type { ToolingLog } from '@kbn/tooling-log';
+import type { Command } from '@kbn/dev-cli-runner';
+import { createFlagError } from '@kbn/dev-cli-errors';
+import type { ScoutTargetAttribute, ScoutTestChannel } from '@kbn/scout-info';
+import {
+  ScoutTestTarget,
+  SCOUT_CI_CONFIG_PATH,
+  SCOUT_OUTPUT_ROOT,
+  SCOUT_TEST_CONFIG_STATS_PATH,
+  targetAttributes,
+  testTargets,
+  testChannel,
+  testChannels,
+} from '@kbn/scout-info';
+import { type ScoutTestConfig, ScoutTestConfigStats, testConfigs } from '@kbn/scout-reporting';
+import { parse } from 'yaml';
+import CliTable3 from 'cli-table3';
+import dedent from 'dedent';
+import type { TestTrackLane, TestTrackLoad } from '../execution/test_track';
+import { TestTrack } from '../execution/test_track';
+import { getPlaywrightLimitOptions } from '../playwright/tags';
+import type { SerializedScoutTestingScope } from '../tests_discovery/testing_scope';
+import { readScoutTestingScope } from '../tests_discovery/testing_scope';
+import {
+  isTestAllowedForTargetAttributes,
+  resolveTargetAttributes,
+} from '../tests_discovery/tag_utils';
+
+/**
+ * Selects which Scout test configs are eligible for distribution into lanes.
+ *
+ * - `kind: 'modules'` → keep configs whose owning @kbn/ module ID is in `ids`
+ * - `kind: 'configs'` → keep configs whose repo-relative path is in `paths`
+ * - `kind: 'channels'` → keep configs that match any of the test channels in `channels`
+ * - `kind: 'targetAttributes'` → keep configs with at least one test for the target that
+ *   isn't limited out by the declared attributes
+ */
+export type TestLoadFilter =
+  | { kind: 'modules'; ids: ReadonlySet<string> }
+  | { kind: 'configs'; paths: ReadonlySet<string> }
+  | { kind: 'channels'; channels: ReadonlySet<ScoutTestChannel> }
+  | { kind: 'targetAttributes'; attributes: ReadonlySet<ScoutTargetAttribute> };
+
+export interface ScoutCIConfig {
+  plugins: {
+    enabled: string[];
+    disabled: string[];
+  };
+  packages: {
+    enabled: string[];
+    disabled: string[];
+  };
+  excluded_configs: string[];
+}
+
+function loadScoutCIConfig(): ScoutCIConfig {
+  try {
+    return parse(readFileSync(SCOUT_CI_CONFIG_PATH, 'utf-8')) as ScoutCIConfig;
+  } catch (e) {
+    const message = e instanceof Error ? e.message : String(e);
+    throw createFlagError(`Failed to load Scout CI config: ${message}`);
+  }
+}
+
+function loadTestConfigStats(): ScoutTestConfigStats {
+  try {
+    return ScoutTestConfigStats.fromFile(SCOUT_TEST_CONFIG_STATS_PATH);
+  } catch (e) {
+    const message = e instanceof Error ? e.message : String(e);
+    throw createFlagError(`Failed to load Scout test config stats: ${message}`);
+  }
+}
+
+export interface ScoutCITestLoad {
+  config: ScoutTestConfig;
+  enabled: boolean;
+  stats?: ScoutTestConfigStats['data']['configs'][0];
+}
+
+export function identifyTestLoads(
+  scoutCIConfig: ScoutCIConfig,
+  testConfigStats: ScoutTestConfigStats,
+  testTarget: ScoutTestTarget,
+  testLoadFilters: TestLoadFilter[],
+  log: ToolingLog
+): ScoutCITestLoad[] {
+  // Runtime statistics are recorded per attribute set, so a lane prefers history gathered
+  // under the same attributes it is about to run with.
+  const runTargetAttributeKey = targetAttributes.key(
+    testLoadFilters.find(
+      (filter): filter is Extract<TestLoadFilter, { kind: 'targetAttributes' }> =>
+        filter.kind === 'targetAttributes'
+    )?.attributes ?? []
+  );
+
+  let statsFallbackCount = 0;
+
+  const findStats = (configPath: string) => {
+    const candidates = testConfigStats.data.configs.filter(
+      (statsEntry) =>
+        statsEntry.path === configPath && statsEntry.test_target.tag === testTarget.tag
+    );
+
+    const exactMatch = candidates.find(
+      (statsEntry) => targetAttributes.key(statsEntry.target_attributes) === runTargetAttributeKey
+    );
+
+    if (exactMatch !== undefined) {
+      return exactMatch;
+    }
+
+    // Attribute history can be missing for a long time — the events may live in a pipeline the
+    // stats query does not look at, or the attribute may be new. An estimate measured without
+    // the attribute is still far closer than `buildTrack`'s "assume a whole lane" fallback,
+    // which would open one lane per config.
+    const attributeBlindMatch = candidates.find(
+      (statsEntry) => statsEntry.target_attributes.length === 0
+    );
+
+    if (attributeBlindMatch !== undefined) {
+      statsFallbackCount++;
+    }
+
+    return attributeBlindMatch;
+  };
+
+  const testLoads = testConfigs.all
+    .filter((config) => !scoutCIConfig.excluded_configs.includes(config.path))
+    .filter((config) =>
+      config.manifest.tests.find((test) => {
+        return test.tags.includes(testTarget.playwrightTag);
+      })
+    )
+    .filter(
+      (config) =>
+        testLoadFilters.length === 0 ||
+        testLoadFilters.every((filter) => {
+          switch (filter.kind) {
+            case 'configs':
+              return filter.paths.has(config.path);
+            case 'modules':
+              if (filter.ids.size === 0) return false;
+              const resolvedModuleID = findPackageForPath(REPO_ROOT, config.path)?.id;
+              return resolvedModuleID ? filter.ids.has(resolvedModuleID) : false;
+            case 'channels':
+              if (filter.channels.size === 0) return true;
+              return filter.channels
+                .values()
+                .some((channel) => config.manifest.testChannels.includes(channel));
+            case 'targetAttributes':
+              // Limits are evaluated together with the target tag on the *same* test: a
+              // config may well hold a limited test for one target and an unlimited test
+              // for another, and only the former must be able to disqualify it.
+              return config.manifest.tests.some(
+                (test) =>
+                  test.tags.includes(testTarget.playwrightTag) &&
+                  isTestAllowedForTargetAttributes(test, filter.attributes)
+              );
+          }
+        })
+    )
+    .map((config) => {
+      let enabled: boolean;
+      switch (config.module.type) {
+        case 'plugin':
+          enabled = !scoutCIConfig.plugins.disabled?.includes(config.module.name);
+          break;
+
+        case 'package':
+          enabled = !scoutCIConfig.packages.disabled?.includes(config.module.name);
+          break;
+      }
+
+      return {
+        config,
+        enabled,
+        stats: findStats(config.path),
+      };
+    });
+
+  // Process test loads
+  if (testLoads.length === 0) {
+    log.warning(`No test loads discovered for test target '${testTarget.tag}'`);
+    return testLoads;
+  }
+
+  if (statsFallbackCount > 0) {
+    log.warning(
+      `No runtime stats recorded under target attributes '${runTargetAttributeKey}' for ` +
+        `${statsFallbackCount} of ${testLoads.length} test loads; falling back to stats ` +
+        'measured without attributes, so lane runtime estimates will be less accurate'
+    );
+  }
+
+  const enabledTestLoadCount = testLoads.filter((load) => load.enabled).length;
+  const disabledTestLoadCount = testLoads.filter((load) => !load.enabled).length;
+  const totalTestLoadCount = testLoads.length;
+  log.info(
+    `Found ${totalTestLoadCount} test loads for test target '${testTarget.tag}'` +
+      ` (enabled: ${enabledTestLoadCount}, disabled: ${disabledTestLoadCount})`
+  );
+
+  return testLoads;
+}
+
+export function buildTrack(
+  runtimeTarget: number,
+  estimatedLaneSetupDuration: number,
+  testTarget: ScoutTestTarget,
+  testLoads: ScoutCITestLoad[],
+  log: ToolingLog
+) {
+  const track = new TestTrack({ runtimeTarget, estimatedLaneSetupDuration });
+  track.metadata.testTarget = testTarget;
+
+  // Prepare loads for assignment
+  const loads: TestTrackLoad[] = [];
+
+  testLoads.forEach((load) => {
+    if (load.stats === undefined) {
+      log.warning(
+        `No stats available for config at path '${load.config.path}' and test target '${testTarget.tag}'`
+      );
+
+      // Because no stats are available, we're going to use an entire lane's length
+      // as the runtime estimate
+      loads.push({
+        id: load.config.path,
+        stats: {
+          runCount: 0,
+          runtime: {
+            avg: 0,
+            median: 0,
+            pc95th: 0,
+            pc99th: 0,
+            max: 0,
+            estimate: track.runtimeTarget - track.estimatedLaneSetupDuration,
+          },
+        },
+        metadata: {
+          server: load.config.server,
+          testConfig: {
+            type: load.config.type,
+          },
+        },
+      });
+      return;
+    }
+
+    loads.push({
+      id: load.stats.path,
+      stats: {
+        runCount: load.stats.runCount,
+        runtime: load.stats.runtime,
+      },
+      metadata: {
+        server: load.config.server,
+        testConfig: {
+          type: load.config.type,
+        },
+      },
+    });
+  });
+
+  loads
+    // Sort the loads in descending order based on their runtime estimate. The order is important
+    // to ensure we get the highest possible lane saturation.
+    //
+    // When we iterate over these to assign them to the least loaded lane, the runtime will get
+    // smaller and smaller, increasing the chance that the load will fit into an existing lane
+    // rather than having to open a new one to avoid congestion.
+    .sort((a, b) => b.stats.runtime.estimate - a.stats.runtime.estimate)
+    .forEach((load) => {
+      const lane = track.addLoadToLeastCongestedLane(load, true);
+      log.debug(`Routed load with ID '${load.id}' to lane #${lane.number}`);
+    });
+
+  log.debug(`Routed ${loads.length} loads to ${track.laneCount} lanes`);
+
+  // Final updates to lane metadata
+  track.lanes.forEach((lane) => {
+    const usesParallelWorkers = lane.loads.find(
+      (load) => load.metadata.testConfig.type === 'parallel'
+    );
+
+    lane.metadata.buildkite = {
+      agentQueue: usesParallelWorkers ? 'n2-8-spot' : 'n2-4-spot',
+    };
+  });
+
+  return track;
+}
+
+export interface CombinedLaneLoadGroup {
+  configSet: string;
+  loads: string[];
+}
+
+interface ShortLaneGroup {
+  testTarget: ScoutTestTarget;
+  agentQueue: string;
+  lanes: Array<{ configSet: string; lane: TestTrackLane }>;
+}
+
+/**
+ * Moves lanes shorter than the given threshold into combined tracks (one per test target and agent queue),
+ * packing them into as few lanes as the runtime target allows. Each combined lane lists its loads
+ * per server config set in `metadata.loadGroups`, as the server needs to be restarted for each group.
+ */
+export function combineShortLanes(
+  tracks: TestTrack[],
+  shortLaneThreshold: number,
+  log: ToolingLog
+): TestTrack[] {
+  const shortLanesByGroup = new Map<string, ShortLaneGroup>();
+
+  tracks.forEach((track) => {
+    track.lanes
+      .filter((lane) => lane.runtimeEstimate < shortLaneThreshold)
+      .forEach((lane) => {
+        const testTarget: ScoutTestTarget = track.metadata.testTarget;
+        const { agentQueue } = lane.metadata.buildkite;
+        const groupKey = `${testTarget.tag}/${agentQueue}`;
+        const group: ShortLaneGroup = shortLanesByGroup.get(groupKey) ?? {
+          testTarget,
+          agentQueue,
+          lanes: [],
+        };
+        group.lanes.push({ configSet: track.metadata.server.configSet, lane });
+        shortLanesByGroup.set(groupKey, group);
+      });
+  });
+
+  const movedLanes = new Set<TestTrackLane>();
+
+  const combinedTracks = shortLanesByGroup
+    .values()
+    // A single short lane has nothing to be combined with
+    .filter((group) => group.lanes.length > 1)
+    .map(({ testTarget, agentQueue, lanes }) => {
+      const combinedTrack = new TestTrack({ runtimeTarget: lanes[0].lane.runtimeTarget });
+      combinedTrack.metadata.testTarget = testTarget;
+
+      lanes
+        // Same as with loads: placing the longest lanes first gives the highest lane saturation
+        .sort((a, b) => b.lane.runtimeEstimate - a.lane.runtimeEstimate)
+        .forEach(({ configSet, lane: shortLane }) => {
+          const lane =
+            combinedTrack.lanes.find(
+              (candidate) =>
+                candidate.runtimeEstimate + shortLane.runtimeEstimate <= candidate.runtimeTarget
+            ) ?? combinedTrack.addLane();
+
+          // Every group needs its own server, so the setup duration adds up
+          lane.estimatedSetupDuration += shortLane.estimatedSetupDuration;
+          lane.loads.push(...shortLane.loads);
+          lane.metadata.buildkite = { agentQueue };
+          lane.metadata.loadGroups = [
+            ...(lane.metadata.loadGroups ?? []),
+            { configSet, loads: shortLane.loads.map((load) => load.id) },
+          ] satisfies CombinedLaneLoadGroup[];
+
+          movedLanes.add(shortLane);
+        });
+
+      log.info(
+        `Combined ${lanes.length} short lanes for test target '${testTarget.tag}' (${agentQueue})` +
+          ` into ${combinedTrack.laneCount} lane(s)`
+      );
+      return combinedTrack;
+    })
+    .toArray();
+
+  tracks.forEach((track) => {
+    track.lanes = track.lanes.filter((lane) => !movedLanes.has(lane));
+    track.lanes.forEach((lane, index) => {
+      lane.number = index + 1;
+    });
+  });
+
+  return [...tracks.filter((track) => track.laneCount > 0), ...combinedTracks];
+}
+
+export function msToHuman(ms: number): string {
+  if (ms === 0) {
+    return '0s';
+  }
+
+  let prefix = '';
+
+  if (ms < 0) {
+    prefix = '-';
+    ms = Math.abs(ms);
+  }
+
+  const totalSeconds = Math.floor(ms / 1000);
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+
+  const elements: Array<[number, string]> = [
+    [hours, 'h'],
+    [minutes, 'm'],
+    [seconds, 's'],
+  ];
+
+  let output =
+    prefix +
+    elements
+      .filter(([value, _]) => value > 0)
+      .map(([value, unit]) => `${value}${unit}`)
+      .join(' ');
+
+  if (output.length === 0) {
+    output = ms >= 10 ? ((ms % 1000) / 1000).toFixed(2) + 's' : '0s';
+  }
+
+  return output;
+}
+
+function displaySingleTrackSummary(
+  track: TestTrack,
+  configStats: ScoutTestConfigStats,
+  log: ToolingLog
+) {
+  const spec = track.specification;
+  const panel = new CliTable3();
+
+  panel.push([{ content: 'Test track summary', hAlign: 'center' }]);
+
+  if (track.metadata.server) {
+    panel.push([
+      dedent(`\
+        Server
+           Config set : ${track.metadata.server.configSet}
+        `),
+    ]);
+  }
+
+  if (track.metadata.testTarget) {
+    panel.push([
+      dedent(`\
+        Test target
+           Location     : ${track.metadata.testTarget.location}
+           Architecture : ${track.metadata.testTarget.arch}
+           Domain       : ${track.metadata.testTarget.domain}
+        `),
+    ]);
+  }
+
+  panel.push([
+    dedent(`\
+        Config stats
+          Last updated    : ${configStats.data.lastUpdated}
+          Lookback length : ${configStats.data.lookbackDays}d
+          BK pipeline     : ${configStats.data.buildkite.pipeline?.slug || 'all'}
+          BK branch       : ${configStats.data.buildkite.branch || 'any'}
+        `),
+  ]);
+  panel.push([
+    dedent(`\
+        Lane
+          Shortest   : ${msToHuman(spec.stats.lane.shortestEstimate)}
+          Longest    : ${msToHuman(spec.stats.lane.longestEstimate)}
+          Saturation : ${spec.stats.lane.saturationPercent}%
+          Count      : ${spec.stats.lane.count}
+        `),
+  ]);
+  panel.push([
+    dedent(`\
+        Combined runtime
+          Target   : ${msToHuman(spec.stats.combinedRuntime.target)}
+          Expected : ${msToHuman(spec.stats.combinedRuntime.expected)}
+          Unused   : ${msToHuman(spec.stats.combinedRuntime.unused)}
+          Overflow : ${msToHuman(spec.stats.combinedRuntime.overflow)}
+        `),
+  ]);
+
+  const table = new CliTable3({
+    head: ['#', 'Runtime estimate', 'Loads', 'Available capacity', 'Status', 'Congested'],
+  });
+
+  spec.lanes.forEach((lane) => {
+    table.push([
+      lane.number,
+      msToHuman(lane.runtimeEstimate),
+      lane.loads.length,
+      msToHuman(lane.availableCapacity),
+      lane.status,
+      lane.isCongested ? 'yes' : 'no',
+    ]);
+  });
+  panel.push(['Lanes\n' + table.toString()]);
+  log.write('\n');
+  log.write(panel.toString());
+}
+
+function displayMultiTrackSummary(
+  tracks: TestTrack[],
+  configStats: ScoutTestConfigStats,
+  log: ToolingLog
+) {
+  if (tracks.length === 0) {
+    log.warning('Multi-track summary requested, but the provided track list is empty');
+    return;
+  }
+
+  const panel = new CliTable3();
+  panel.push([{ content: 'Multi-track summary', hAlign: 'center' }]);
+
+  panel.push([
+    dedent(`\
+        Config stats
+          Last updated    : ${configStats.data.lastUpdated}
+          Lookback length : ${configStats.data.lookbackDays}d
+          BK pipeline     : ${configStats.data.buildkite.pipeline?.slug || 'all'}
+          BK branch       : ${configStats.data.buildkite.branch || 'any'}
+        `),
+  ]);
+
+  const combinedRuntime = {
+    target: 0,
+    expected: 0,
+    unused: 0,
+    overflow: 0,
+  };
+
+  tracks.forEach((track) => {
+    const trackSpec = track.specification;
+    combinedRuntime.target += trackSpec.stats.combinedRuntime.target;
+    combinedRuntime.expected += trackSpec.stats.combinedRuntime.expected;
+    combinedRuntime.unused += trackSpec.stats.combinedRuntime.unused;
+    combinedRuntime.overflow += trackSpec.stats.combinedRuntime.overflow;
+  });
+
+  const sharedTargetRuntime = tracks[0].runtimeTarget;
+  const saturationPc = (combinedRuntime.expected / combinedRuntime.target) * 100;
+
+  panel.push([
+    dedent(`\
+        Combined track stats
+          Track count            : ${tracks.length}
+          Shared runtime target  : ${msToHuman(sharedTargetRuntime)}
+          Expected runtime       : ${msToHuman(combinedRuntime.expected)}
+          Unused runtime         : ${msToHuman(combinedRuntime.unused)}
+          Expected overflow      : ${msToHuman(combinedRuntime.overflow)}
+          Overall saturation     : ${saturationPc.toFixed(2)}%
+        `),
+  ]);
+
+  const table = new CliTable3({
+    head: [
+      '#',
+      'Location',
+      'Arch',
+      'Domain',
+      'Server config',
+      'Runtime estimate',
+      'Loads',
+      'Available capacity',
+      'Status',
+      'Congested',
+    ],
+  });
+
+  tracks.forEach((track) =>
+    track.specification.lanes.forEach((lane) => {
+      table.push([
+        table.length + 1,
+        track.metadata.testTarget.location,
+        track.metadata.testTarget.arch,
+        track.metadata.testTarget.domain,
+        lane.metadata.loadGroups
+          ? lane.metadata.loadGroups
+              .map((group: CombinedLaneLoadGroup) => group.configSet)
+              .join('\n')
+          : track.metadata.server.configSet,
+        msToHuman(lane.runtimeEstimate),
+        lane.loads.length,
+        msToHuman(lane.availableCapacity),
+        lane.status,
+        lane.isCongested ? 'yes' : 'no',
+      ]);
+    })
+  );
+
+  panel.push(['Lanes\n' + table.toString()]);
+  log.write('\n');
+  log.write(panel.toString());
+}
+
+export const createTestTracks: Command<void> = {
+  name: 'create-test-tracks',
+  description: 'Distribute tests across test tracks for parallel execution',
+  flags: {
+    string: [
+      'testTarget',
+      'testChannel',
+      'targetAttribute',
+      'serverConfigSet',
+      'targetRuntimeMinutes',
+      'minRuntimeMinutes',
+      'estimatedLaneSetupMinutes',
+      'shortLaneThresholdMinutes',
+      'testing-scope',
+    ],
+    boolean: ['combineShortLanes', 'showIndividualTrackSummaries', 'showMultiTrackSummary'],
+    default: {
+      outputPath: `${SCOUT_OUTPUT_ROOT}/test_tracks/${Date.now()}.json`,
+    },
+    help: `
+    --testTarget                    (required)  One or more test target in the {location}-{arch}-{domain} format
+    --testChannel                   (optional)  Limit the test selection to one or more test channels
+                                                Valid channels: ${testChannels.all.join(', ')}
+    --targetAttribute               (optional)  Attribute(s) of the test target the tests will run against;
+                                                defaults to SCOUT_TARGET_ATTRIBUTES. Tests carrying an
+                                                unsatisfied '@limit/<selection-method>-<target-attr>' tag are
+                                                excluded, and configs left without a runnable test are not
+                                                distributed. Valid attributes: ${targetAttributes.all.join(
+                                                  ', '
+                                                )}
+    --outputPath                    (optional)  Where to write the test track specification [default: ${SCOUT_OUTPUT_ROOT}/test_tracks/{timestamp}.json]
+    --targetRuntimeMinutes          (optional)  How long the test track should run [default: longest estimated load runtime]
+    --minRuntimeMinutes             (optional)  Target runtime minutes shouldn't be lower than this
+    --estimatedLaneSetupMinutes     (optional)  How long a lane setup is expected to take
+    --combineShortLanes             (optional)  Combine short lanes of different server config sets into shared lanes
+    --shortLaneThresholdMinutes     (optional)  Lanes shorter than this are combined [default: half of the runtime target]
+    --showIndividualTrackSummaries  (optional)  Display individual test track summaries
+    --showMultiTrackSummary         (optional)  Display multi-track summary
+    --testing-scope                 (optional)  Path to a 'testing_scope.json' produced by 'scout resolve-testing-scope'.
+                                                Distribution is restricted to:
+                                                  - tests-only      → only Playwright configs touched by the diff
+                                                  - dependency-tree → only configs whose @kbn/ module is affected
+                                                  - full            → no filter (all configs are distributed)
+    `,
+  },
+  run: async ({ flagsReader, log }) => {
+    const testingScopePath = flagsReader.string('testing-scope');
+    const scope: SerializedScoutTestingScope = testingScopePath
+      ? readScoutTestingScope(testingScopePath)
+      : { kind: 'full', affectedModules: [] };
+
+    const filters: TestLoadFilter[] = [];
+
+    switch (scope.kind) {
+      case 'tests-only':
+        const paths = new Set(scope.affectedConfigs ?? []);
+        filters.push({ kind: 'configs', paths });
+        log.info(
+          `Selective testing (tests-only): limiting distribution to ${paths.size} affected config(s)`
+        );
+        break;
+      case 'dependency-tree':
+        const ids = new Set(scope.affectedModules);
+        filters.push({ kind: 'modules', ids });
+        log.info(
+          `Selective testing (dependency-tree): limiting distribution to ${ids.size} affected module(s)`
+        );
+        break;
+      default:
+        log.info('Distributing all eligible configs (full scope)');
+    }
+
+    const selectedTestTargets: ScoutTestTarget[] = flagsReader
+      .requiredArrayOfStrings('testTarget')
+      .map(ScoutTestTarget.fromTag);
+
+    if (selectedTestTargets.length === 0) {
+      throw createFlagError('No test targets specified');
+    }
+
+    selectedTestTargets.forEach((testTarget) => {
+      if (!testTargets.all.find((validTarget) => validTarget.tag === testTarget.tag)) {
+        throw createFlagError(`${testTarget.tag} is not a valid location/arch/domain combo.`);
+      }
+    });
+
+    log.info(
+      'Identifying test loads for the following test targets: ' +
+        selectedTestTargets.map((target) => target.tag).join(', ')
+    );
+
+    const rawChannels: string[] = flagsReader.arrayOfStrings('testChannel') || [];
+
+    const selectedTestChannels: Set<ScoutTestChannel> = new Set(
+      (rawChannels.length > 0 ? rawChannels : testChannels.current()).map((channel) => {
+        try {
+          return testChannel.fromString(channel);
+        } catch (e) {
+          throw createFlagError(String(e));
+        }
+      })
+    );
+
+    log.info(
+      'Only configs in the following test channels will be considered: ' +
+        `${Array.from(selectedTestChannels).join(', ')}`
+    );
+    filters.push({ kind: 'channels', channels: selectedTestChannels });
+
+    let selectedTargetAttributes: Set<ScoutTargetAttribute>;
+    try {
+      selectedTargetAttributes = new Set(
+        resolveTargetAttributes(flagsReader.arrayOfStrings('targetAttribute'))
+      );
+    } catch (e) {
+      throw createFlagError(String(e));
+    }
+
+    log.info(
+      selectedTargetAttributes.size > 0
+        ? `Test targets are assumed to have the following attributes: ${Array.from(
+            selectedTargetAttributes
+          ).join(', ')}`
+        : 'Test targets are assumed to have no attributes'
+    );
+    filters.push({ kind: 'targetAttributes', attributes: selectedTargetAttributes });
+
+    const testConfigStats = loadTestConfigStats();
+    const scoutCIConfig = loadScoutCIConfig();
+
+    const testLoadsByTarget = selectedTestTargets.reduce((loadsByTarget, target) => {
+      loadsByTarget.set(
+        target,
+        identifyTestLoads(scoutCIConfig, testConfigStats, target, filters, log)
+      );
+      return loadsByTarget;
+    }, new Map<ScoutTestTarget, ScoutCITestLoad[]>());
+
+    const estimatedLaneSetupDuration =
+      (flagsReader.number('estimatedLaneSetupMinutes') || 0) * 60 * 1000;
+
+    if (estimatedLaneSetupDuration > 0) {
+      log.info(
+        `Each track lane is expected to take ~${msToHuman(estimatedLaneSetupDuration)} to set up.`
+      );
+    } else {
+      log.warning("Assuming lanes won't need any time to set up.");
+    }
+
+    let runtimeTarget = (flagsReader.number('targetRuntimeMinutes') || 0) * 60 * 1000;
+
+    if (runtimeTarget === 0) {
+      // No runtime target was set, so we'll use the longest load runtime estimate plus the lane setup time estimate
+      runtimeTarget =
+        estimatedLaneSetupDuration +
+        testLoadsByTarget
+          .values()
+          .flatMap((loads) => loads)
+          .filter((load) => load.enabled)
+          .map((load): number => load.stats?.runtime.estimate || 0)
+          .reduce((prevEstimate, currentEstimate) => Math.max(prevEstimate, currentEstimate), 0);
+    }
+
+    if (runtimeTarget === 0) {
+      // Runtime target is *still* zero, which is unacceptable !!!
+      // This would suggest that a target runtime wasn't set, and we also didn't find stats for any of the configs
+      throw createFlagError(
+        "Failed to auto-determine runtime target: couldn't find stats for any of the given configs"
+      );
+    }
+
+    const minimumRuntime = (flagsReader.number('minRuntimeMinutes') || 0) * 60 * 1000;
+    runtimeTarget = Math.max(minimumRuntime, runtimeTarget);
+
+    log.info(`All tracks will use a runtime target of ${msToHuman(runtimeTarget)}`);
+
+    let tracks = testLoadsByTarget
+      .entries()
+      .flatMap(([target, loads]) => {
+        if (target.location === 'cloud') {
+          log.warning(
+            `Only the 'default' config set will be scheduled for test target '${target.tag}'` +
+              ' because custom server configurations are only supported with local targets.'
+          );
+        }
+
+        const configSets =
+          target.location === 'cloud'
+            ? ['default']
+            : [...new Set(loads.map((load) => load.config.server.configSet))];
+
+        // Each server config set gets its own track
+        return configSets.flatMap((configSet): TestTrack[] => {
+          log.info(
+            `Building test track for test target '${target.tag}' with server config set '${configSet}'`
+          );
+
+          const enabledLoads = loads.filter(
+            (load) => load.enabled && load.config.server.configSet === configSet
+          );
+
+          if (enabledLoads.length === 0) {
+            log.warning(
+              `No enabled test loads found for test target '${target.tag}' and server config set '${configSet}'`
+            );
+            return [];
+          }
+
+          const track = buildTrack(
+            Math.max(minimumRuntime, runtimeTarget),
+            estimatedLaneSetupDuration,
+            target,
+            enabledLoads,
+            log
+          );
+          track.metadata.server = { configSet };
+          return [track];
+        });
+      })
+      .toArray();
+
+    if (flagsReader.boolean('combineShortLanes')) {
+      // Half of the runtime target guarantees that at least two short lanes fit into a combined lane
+      const shortLaneThreshold =
+        (flagsReader.number('shortLaneThresholdMinutes') || 0) * 60 * 1000 || runtimeTarget / 2;
+      log.info(`Combining lanes shorter than ${msToHuman(shortLaneThreshold)}`);
+      tracks = combineShortLanes(tracks, shortLaneThreshold, log);
+    }
+
+    // Lanes run the Playwright binary directly, so they apply the limits through the same
+    // options `scout run-tests` passes, decided here once for the whole run.
+    const playwrightOptions = getPlaywrightLimitOptions(selectedTargetAttributes);
+    tracks.forEach((track) => {
+      track.metadata.playwright = { options: playwrightOptions };
+    });
+
+    // Write track specifications
+    const outputPath = flagsReader.requiredString('outputPath');
+    log.info(`Writing test track specification to ${outputPath}`);
+    mkdirSync(path.dirname(outputPath), { recursive: true });
+    writeFileSync(
+      outputPath,
+      JSON.stringify(
+        {
+          tracks: tracks.map((track) => track.specification),
+        },
+        null,
+        2
+      )
+    );
+
+    if (flagsReader.boolean('showIndividualTrackSummaries')) {
+      log.info('Displaying individual track summaries');
+      tracks.forEach((track) => displaySingleTrackSummary(track, testConfigStats, log));
+    }
+
+    if (flagsReader.boolean('showMultiTrackSummary')) {
+      log.info('Displaying multi-track summary');
+      displayMultiTrackSummary(tracks, testConfigStats, log);
+    }
+
+    log.success(`Finished in ${(performance.now() / 1000).toFixed(2)}s`);
+  },
+};

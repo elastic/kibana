@@ -8,7 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Adapters, InspectorViewDescription } from '@kbn/inspector-plugin/public';
+import type { Adapters, InspectorViewDescription } from '@kbn/inspector-plugin/public';
 import { getExpressionsInspectorViewComponentWrapper } from './expressions_inspector_view_wrapper';
 
 export const getExpressionsInspectorViewDescription = (): InspectorViewDescription => ({

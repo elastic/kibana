@@ -8,7 +8,7 @@
 import React from 'react';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { TextField } from '@kbn/es-ui-shared-plugin/static/forms/components';
-import type { FieldConfig } from '../../../shared_imports';
+import type { FieldConfig, ValidationError } from '../../../shared_imports';
 import { Form, UseField } from '../../../shared_imports';
 import type { FormWithWarningsSubmitHandler } from './use_form_with_warnings';
 import { useFormWithWarnings } from './use_form_with_warnings';
@@ -18,13 +18,15 @@ describe('useFormWithWarn', () => {
     it('is `undefined` initially', async () => {
       render(<TestForm warningValidationCodes={['warning']} />);
 
-      expect(screen.getByText('isValid: "undefined"')).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByText('isValid: "undefined"')).toBeInTheDocument();
+      });
     });
 
     it('is `true` when input is valid', async () => {
       render(<TestForm warningValidationCodes={['warning']} />);
 
-      typeText('someValue');
+      await typeText('someValue');
       await submitForm();
 
       await waitFor(() => {
@@ -35,25 +37,29 @@ describe('useFormWithWarn', () => {
     it('is `true` when input has warnings', async () => {
       render(<TestForm warningValidationCodes={['warning']} />);
 
-      typeText('warning');
+      await typeText('warning');
       await submitForm();
 
-      expect(screen.getByText('isValid: true')).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByText('isValid: true')).toBeInTheDocument();
+      });
     });
 
     it('is `false` when input has error', async () => {
       render(<TestForm warningValidationCodes={['warning']} />);
 
-      typeText('error');
+      await typeText('error');
       await submitForm();
 
-      expect(screen.getByText('isValid: false')).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByText('isValid: false')).toBeInTheDocument();
+      });
     });
   });
 
   describe('isSubmitting', () => {
     it('toggles upon form submission', async () => {
-      render(<TestForm warningValidationCodes={['warning']} />);
+      render(<TestForm warningValidationCodes={['warning']} />, { legacyRoot: true });
 
       expect(screen.getByText('isSubmitting: false')).toBeInTheDocument();
 
@@ -87,7 +93,7 @@ describe('useFormWithWarn', () => {
       const handleSubmit = jest.fn();
 
       render(<TestForm warningValidationCodes={['warning']} onSubmit={handleSubmit} />);
-      typeText('someValue');
+      await typeText('someValue');
 
       await submitForm();
 
@@ -105,7 +111,7 @@ describe('useFormWithWarn', () => {
       const handleSubmit = jest.fn();
 
       render(<TestForm warningValidationCodes={['warning']} onSubmit={handleSubmit} />);
-      typeText('warning');
+      await typeText('warning');
 
       await submitForm();
 
@@ -129,7 +135,7 @@ describe('useFormWithWarn', () => {
       const handleSubmit = jest.fn();
 
       render(<TestForm warningValidationCodes={['warning']} onSubmit={handleSubmit} />);
-      typeText('error');
+      await typeText('error');
 
       await submitForm();
 
@@ -148,12 +154,90 @@ describe('useFormWithWarn', () => {
     });
   });
 
+  describe('w/ a newer validation still running', () => {
+    const warning = { code: 'warning', message: 'Validation warning' };
+
+    // Submits, then starts a second validation before the first one finishes, which supersedes it.
+    // Returns the resolvers of the pending validations in the order they were started.
+    const submitWithSupersededValidation = async (
+      handleSubmit: FormWithWarningsSubmitHandler
+    ): Promise<Array<(error?: ValidationError) => void>> => {
+      const pendingValidations: Array<(error?: ValidationError) => void> = [];
+      const asyncValidator = (): Promise<ValidationError | undefined> =>
+        new Promise((resolve) => pendingValidations.push(resolve));
+
+      render(
+        <TestForm
+          warningValidationCodes={['warning']}
+          onSubmit={handleSubmit}
+          asyncValidator={asyncValidator}
+        />
+      );
+
+      await submitForm();
+      await waitFor(() => expect(pendingValidations).toHaveLength(1));
+
+      await typeText('someValue');
+      await waitFor(() => expect(pendingValidations).toHaveLength(2));
+
+      return pendingValidations;
+    };
+
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    it('waits for it and passes its warnings to the submit handler', async () => {
+      const handleSubmit = jest.fn();
+      const pendingValidations = await submitWithSupersededValidation(handleSubmit);
+
+      await act(async () => {
+        pendingValidations[0](warning);
+      });
+      await act(() => new Promise((resolve) => setTimeout(resolve, 200)));
+
+      expect(handleSubmit).not.toHaveBeenCalled();
+
+      await act(async () => {
+        pendingValidations[1](warning);
+      });
+
+      await waitFor(() => {
+        expect(handleSubmit).toHaveBeenCalledWith({ testField: 'someValue' }, true, {
+          errors: [],
+          warnings: [expect.objectContaining({ code: 'warning', path: 'testField' })],
+        });
+      });
+    });
+
+    it('stops waiting after the time limit when it never settles', async () => {
+      jest.useFakeTimers();
+      const handleSubmit = jest.fn();
+      const pendingValidations = await submitWithSupersededValidation(handleSubmit);
+
+      await act(async () => {
+        pendingValidations[0](warning);
+      });
+
+      // Still waiting shortly before the limit.
+      await act(() => jest.advanceTimersByTimeAsync(9000));
+      expect(handleSubmit).not.toHaveBeenCalled();
+
+      // Past the limit the form is submitted with what is known, instead of blocking forever.
+      await act(() => jest.advanceTimersByTimeAsync(2000));
+      expect(handleSubmit).toHaveBeenCalledWith({ testField: 'someValue' }, true, {
+        errors: [],
+        warnings: [],
+      });
+    });
+  });
+
   describe('w/ errors and warnings', () => {
     it('passes validation errors and warnings to submit handler', async () => {
       const handleSubmit = jest.fn();
 
       render(<TestForm warningValidationCodes={['warning']} onSubmit={handleSubmit} />);
-      typeText('error warning');
+      await typeText('error warning');
 
       await submitForm();
 
@@ -176,9 +260,14 @@ describe('useFormWithWarn', () => {
 interface TestFormProps {
   onSubmit?: FormWithWarningsSubmitHandler;
   warningValidationCodes: string[];
+  asyncValidator?: () => Promise<ValidationError | undefined>;
 }
 
-function TestForm({ onSubmit, warningValidationCodes }: TestFormProps): JSX.Element {
+function TestForm({
+  onSubmit,
+  warningValidationCodes,
+  asyncValidator,
+}: TestFormProps): JSX.Element {
   const { form } = useFormWithWarnings({
     onSubmit,
     options: {
@@ -187,6 +276,7 @@ function TestForm({ onSubmit, warningValidationCodes }: TestFormProps): JSX.Elem
   });
   const textFieldConfig: FieldConfig<string> = {
     validations: [
+      ...(asyncValidator ? [{ validator: asyncValidator, isAsync: true }] : []),
       {
         validator: (data) => {
           if (data.value.includes('error')) {
@@ -232,8 +322,8 @@ function submitForm(): Promise<void> {
   });
 }
 
-function typeText(value: string): void {
-  act(() => {
+async function typeText(value: string): Promise<void> {
+  await act(() => {
     fireEvent.input(screen.getByRole('textbox'), {
       target: { value },
     });

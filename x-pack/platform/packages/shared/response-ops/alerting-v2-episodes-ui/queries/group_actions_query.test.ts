@@ -1,0 +1,30 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { buildGroupActionsQuery } from './group_actions_query';
+
+const SPACE_ID = 'default';
+
+describe('buildGroupActionsQuery', () => {
+  it('filters by group hashes and aggregates the snooze and deactivate fields', () => {
+    const queryString = buildGroupActionsQuery(SPACE_ID, ['gh-1', 'gh-2']).print('basic');
+    expect(queryString).toContain('group_hash IN');
+    expect(queryString).toContain('"gh-1"');
+    expect(queryString).toContain('"gh-2"');
+    expect(queryString).toContain('last_snooze_action');
+    expect(queryString).toContain('snoozed_until');
+    expect(queryString).toContain('last_snooze_actor = LAST(actor.profile_uid, @timestamp)');
+    expect(queryString).toContain('last_deactivate_actor = LAST(actor.profile_uid, @timestamp)');
+    expect(queryString).toContain('BY group_hash, rule_id');
+  });
+
+  it('does not read the tags, which belong to each alert', () => {
+    const queryString = buildGroupActionsQuery(SPACE_ID, ['gh-1']).print('basic');
+    expect(queryString).not.toContain('"tag"');
+    expect(queryString).not.toMatch(/\btags\b/);
+  });
+});

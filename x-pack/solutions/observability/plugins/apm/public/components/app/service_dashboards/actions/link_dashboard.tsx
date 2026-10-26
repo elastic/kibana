@@ -29,7 +29,7 @@ export function LinkDashboard({
         <EuiButtonEmpty
           color="text"
           size="s"
-          iconType="plusInCircle"
+          iconType="plusCircle"
           data-test-subj="apmLinkServiceDashboardMenu"
           onClick={() => setIsModalVisible(true)}
         >

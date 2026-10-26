@@ -14,10 +14,12 @@ import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { sessionStorageMock } from '@kbn/core-http-server-mocks';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
+import { kqlPluginMock } from '@kbn/kql/public/mocks';
 
 export const getMockDependencies = () => ({
   data: dataPluginMock.createStartContract(),
   unifiedSearch: unifiedSearchPluginMock.createStartContract(),
+  kql: kqlPluginMock.createStartContract(),
   charts: chartPluginMock.createStartContract(),
   discover: discoverPluginMock.createStartContract(),
   fleet: fleetMock.createStartMock(),

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { UseQueryResult } from '@tanstack/react-query';
-import { useQuery } from '@tanstack/react-query';
+import type { UseQueryResult } from '@kbn/react-query';
+import { useQuery } from '@kbn/react-query';
 import { lastValueFrom } from 'rxjs';
 import { compact, filter, map } from 'lodash';
 
@@ -23,10 +23,18 @@ import type {
   ActionResponsesRequestStrategyResponse,
 } from '../../../../common/search_strategy/endpoint/response_actions';
 import { useKibana } from '../../../common/lib/kibana';
-import type {
-  EndpointAutomatedActionListRequestQuery,
-  EndpointAutomatedActionResponseRequestQuery,
-} from '../../../../common/endpoint/schema/automated_actions';
+
+interface EndpointAutomatedActionListRequestQuery {
+  alertIds: string[];
+}
+
+interface EndpointAutomatedActionResponseRequestQuery {
+  expiration: string;
+  actionId: string;
+  agent: {
+    id: string | string[];
+  };
+}
 
 interface GetAutomatedActionsListOptions {
   enabled: boolean;
@@ -171,6 +179,7 @@ const combineResponse = (
     isExpired: !!responseData?.isExpired,
     wasSuccessful: responseData.status === 'successful',
     status: responseData.status,
+    wasCanceled: false,
     agentState: {},
     errors: action.error ? [action.error.message as string] : undefined,
   };

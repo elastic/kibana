@@ -23,10 +23,14 @@ import type {
 } from '@kbn/custom-integrations-plugin/common';
 
 import { hasDeferredInstallations } from '../../../../../../services/has_deferred_installations';
-import { getPackageReleaseLabel } from '../../../../../../../common/services';
+import {
+  getPackageReleaseLabel,
+  shouldAddIntegrationFromCatalog,
+} from '../../../../../../../common/services';
 
-import { installationStatuses } from '../../../../../../../common/constants';
+import { dataTypes, installationStatuses } from '../../../../../../../common/constants';
 import type {
+  DeprecationInfo,
   EpmPackageInstallStatus,
   InstallFailedAttempt,
   IntegrationCardReleaseLabel,
@@ -34,9 +38,33 @@ import type {
 } from '../../../../../../../common/types';
 
 import type { DynamicPage, DynamicPagePathValues, StaticPage } from '../../../../constants';
-import { isPackageUnverified, isPackageUpdatable } from '../../../../services';
+import {
+  isPackageUnverified,
+  isPackageUpdatable,
+  ExperimentalFeaturesService,
+} from '../../../../services';
 
 import type { PackageListItem } from '../../../../types';
+import { COLLECTION_QUERYPARAM } from '../../../../../../services/collections';
+
+/** URL query-param key that holds the currently-open collection group id. */
+export { COLLECTION_QUERYPARAM };
+
+export interface CollectionStateRef {
+  groupId: string;
+  title: string;
+}
+
+/** View-model for one collection method shown inside the chooser flyout. */
+export interface CollectionVariant {
+  id: string;
+  title: string;
+  description: string;
+  icon: React.ReactElement;
+  href?: string;
+  onClick?: React.MouseEventHandler;
+  'data-test-subj'?: string;
+}
 
 export interface IntegrationCardItem {
   categories: string[];
@@ -45,27 +73,48 @@ export interface IntegrationCardItem {
   descriptionLineClamp?: number;
   extraLabelsBadges?: React.ReactNode[];
   fromIntegrations?: string;
+  fromCollection?: CollectionStateRef;
+  hasDataStreams?: boolean;
   icons: Array<PackageSpecIcon | CustomIntegrationIcon>;
   id: string;
   installStatus?: EpmPackageInstallStatus;
   integration: string;
   isCollectionCard?: boolean;
+  // Number of services a collection tile bundles behind it (e.g. AWS onboarding), shown as a badge.
+  collectionSize?: number;
+  groupMembers?: IntegrationCardItem[];
+  searchableContent?: string;
+  // Services bundled behind a single tile (e.g. AWS onboarding). Used to tell the user which
+  // service their search matched, since those services have no tile of their own.
+  searchMembers?: Array<{ name: string; title: string }>;
+  // Set at render time when the current search term matched `searchMembers`: every match, in order.
+  searchMemberMatch?: { memberTitles: string[]; collectionTitle: string };
   isQuickstart?: boolean;
   isReauthorizationRequired?: boolean;
   isUnverified?: boolean;
   isUpdateAvailable?: boolean;
+  isDeprecated?: boolean;
+  deprecationInfo?: DeprecationInfo;
   maxCardHeight?: number;
+  minCardHeight?: number;
   name: string;
   onCardClick?: () => void;
   release?: IntegrationCardReleaseLabel;
+  showDescription?: boolean;
   showInstallationStatus?: boolean;
+  showCompressedInstallationStatus?: boolean;
   showLabels?: boolean;
+  showReleaseBadge?: boolean;
   title: string;
   // Security Solution uses this prop to determine how many lines the card title should be truncated
   titleLineClamp?: number;
+  titleBadge?: React.ReactNode;
+  titleSize?: 'xs' | 's';
   url: string;
   version: string;
   type?: string;
+  supportsAgentless?: boolean;
+  signalTypes?: string[];
 }
 
 export const mapToCard = ({
@@ -75,6 +124,7 @@ export const mapToCard = ({
   addBasePath,
   packageVerificationKeyId,
   selectedCategory,
+  canAddIntegration = true,
 }: {
   getAbsolutePath: (p: string) => string;
   getHref: (page: StaticPage | DynamicPage, values?: DynamicPagePathValues) => string;
@@ -82,6 +132,8 @@ export const mapToCard = ({
   item: CustomIntegration | PackageListItem;
   packageVerificationKeyId?: string;
   selectedCategory?: string;
+  // The add-integration page requires write privileges; users without them keep the overview page.
+  canAddIntegration?: boolean;
 }): IntegrationCardItem => {
   let uiInternalPathUrl: string;
 
@@ -91,6 +143,9 @@ export const mapToCard = ({
 
   let isUpdateAvailable = false;
   let isReauthorizationRequired = false;
+  let isDeprecated = false;
+  let deprecationInfo: DeprecationInfo | undefined;
+
   if (item.type === 'ui_link') {
     uiInternalPathUrl = item.id.includes('language_client.')
       ? addBasePath(item.uiInternalPath)
@@ -104,10 +159,37 @@ export const mapToCard = ({
       isReauthorizationRequired = hasDeferredInstallations(item);
     }
 
-    const url = getHref('integration_details_overview', {
-      pkgkey: `${item.name}-${version}`,
-      ...(item.integration ? { integration: item.integration } : {}),
-    });
+    // Extract deprecation information
+    // officially deprecated items have a `deprecated` field
+    if ('deprecated' in item && item.deprecated) {
+      isDeprecated = true;
+      deprecationInfo = item.deprecated;
+    } else if (
+      // bwc: unofficially deprecated items are marked as such in their title, description or name
+      (item.title && /deprecated/i.test(item.title)) ||
+      (item.description && /deprecated/i.test(item.description)) ||
+      ('name' in item && item.name && /deprecated/i.test(item.name))
+    ) {
+      isDeprecated = true;
+    }
+
+    // Packages without an add-integration flow (content, documentation-only, assets-only) keep
+    // linking to the overview page. The rest go to the add-integration page when the feature flag is on.
+    const { enableIntegrationTileClickToAdd } = ExperimentalFeaturesService.get();
+    // Catalog tiles carry the classification, computed before `policy_templates` is stripped from them.
+    const addIntegrationFromCatalog =
+      ('addIntegrationFromCatalog' in item ? item.addIntegrationFromCatalog : undefined) ??
+      shouldAddIntegrationFromCatalog(item);
+    const url =
+      !enableIntegrationTileClickToAdd || !canAddIntegration || !addIntegrationFromCatalog
+        ? getHref('integration_details_overview', {
+            pkgkey: `${item.name}-${version}`,
+            ...(item.integration ? { integration: item.integration } : {}),
+          })
+        : getHref('add_integration_to_policy', {
+            pkgkey: `${item.name}-${version}`,
+            ...(item.integration ? { integration: item.integration } : {}),
+          });
 
     uiInternalPathUrl = url;
   }
@@ -135,6 +217,8 @@ export const mapToCard = ({
     isReauthorizationRequired,
     isUnverified,
     isUpdateAvailable,
+    isDeprecated,
+    deprecationInfo,
     extraLabelsBadges,
   };
 
@@ -142,8 +226,35 @@ export const mapToCard = ({
     cardResult.installStatus = item.installationInfo?.install_status;
   }
 
+  if ('supportsAgentless' in item && item.supportsAgentless) {
+    cardResult.supportsAgentless = true;
+  }
+
+  const signalTypes = getSignalTypes(item);
+  if (signalTypes.length > 0) {
+    cardResult.signalTypes = signalTypes;
+  }
+
   return cardResult;
 };
+
+// Derive the signal types (logs/metrics/traces) a card matches so the browse-page
+// signal filter can include it. Integration packages expose their signal types via
+// `data_streams`. Input packages have no concrete data streams, and the EPR search
+// response doesn't carry their policy template `type`/`dynamic_signal_types`, so the
+// signal type isn't knowable from the browse list. Since input packages choose the
+// data stream type at configuration time, match them against every signal filter.
+function getSignalTypes(item: CustomIntegration | PackageListItem): string[] {
+  if ('type' in item && item.type === 'input') {
+    return Object.values(dataTypes);
+  }
+
+  if ('data_streams' in item && Array.isArray(item.data_streams)) {
+    return [...new Set(item.data_streams.map((ds) => ds.type))];
+  }
+
+  return [];
+}
 
 export function getIntegrationLabels(item: PackageListItem): React.ReactNode[] {
   const extraLabelsBadges: React.ReactNode[] = [];
@@ -171,7 +282,7 @@ export function getIntegrationLabels(item: PackageListItem): React.ReactNode[] {
             }
             content={updateFailedAttempt ? formatAttempt(updateFailedAttempt) : undefined}
           >
-            <EuiBadge color="danger" iconType="error">
+            <EuiBadge color="danger" iconType="error" tabIndex={0}>
               <FormattedMessage
                 id="xpack.fleet.packageCard.updateFailed"
                 defaultMessage="Update failed"
@@ -201,7 +312,7 @@ export function getIntegrationLabels(item: PackageListItem): React.ReactNode[] {
             }
             content={installFailedAttempt ? formatAttempt(installFailedAttempt) : undefined}
           >
-            <EuiBadge color="danger" iconType="error">
+            <EuiBadge color="danger" iconType="error" tabIndex={0}>
               <FormattedMessage
                 id="xpack.fleet.packageCard.installFailed"
                 defaultMessage="Install failed"
@@ -245,6 +356,17 @@ function formatAttempt(attempt: InstallFailedAttempt): React.ReactNode {
       <p>
         {attempt.error?.name || ''} : {attempt.error?.message || ''}
       </p>
+      {attempt.missing_assets && attempt.missing_assets.length > 0 && (
+        <p>
+          <FormattedMessage
+            id="xpack.fleet.packageCard.missingAssetsDescription"
+            defaultMessage="Missing assets: {assets}"
+            values={{
+              assets: attempt.missing_assets.map((a) => `${a.type}/${a.id}`).join(', '),
+            }}
+          />
+        </p>
+      )}
     </>
   );
 }

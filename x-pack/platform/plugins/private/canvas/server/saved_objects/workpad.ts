@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectsType } from '@kbn/core/server';
+import type { SavedObjectsType } from '@kbn/core/server';
 import { ANALYTICS_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { CANVAS_TYPE } from '../../common/lib/constants';
 import { workpadMigrationsFactory } from './migrations';
@@ -37,7 +37,7 @@ export const workpadTypeFactory = (
   migrations: () => workpadMigrationsFactory(deps),
   management: {
     importableAndExportable: true,
-    icon: 'canvasApp',
+    icon: 'productCanvas',
     defaultSearchField: 'name',
     getTitle(obj) {
       return obj.attributes.name;

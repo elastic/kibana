@@ -1,0 +1,623 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { KibanaRequest } from '@kbn/core-http-server';
+import type { ChatCompleteOptions, Model } from '@kbn/inference-common';
+import type { AnonymizationRule } from '@kbn/ai-anonymization-common';
+import {
+  createInferenceInternalError,
+  createInferenceRequestError,
+  InferenceTaskErrorCode,
+  getConnectorFamily,
+  getConnectorProvider,
+  getConnectorPlatform,
+  getConnectorDefaultModel,
+  type ChatCompleteCompositeResponse,
+  MessageRole,
+} from '@kbn/inference-common';
+import type { Logger } from '@kbn/logging';
+import type { Observable } from 'rxjs';
+import { defer, forkJoin, from, identity, share, switchMap, catchError, throwError } from 'rxjs';
+import { withChatCompleteSpan } from '@kbn/inference-tracing';
+import type { ElasticsearchClient } from '@kbn/core/server';
+import { omit } from 'lodash';
+import { addAnonymizationInstruction, deanonymizeMessage } from '@kbn/ai-anonymization-server';
+import type {
+  InferenceAnonymizationOptions,
+  RegexWorkerService,
+} from '@kbn/ai-anonymization-server';
+import type { ActionsClientProvider } from '../types';
+import type {
+  InferenceAdapterChatCompleteOptions,
+  InferenceConnectorAdapterChatCompleteEvent,
+} from './types';
+import { getInferenceAdapter } from './adapters';
+import { inferenceEndpointAdapter } from './adapters/inference_endpoint';
+import {
+  chunksIntoMessage,
+  getInferenceExecutor,
+  createInferenceEndpointExecutor,
+  resolveInferenceEndpoint,
+  handleCancellation,
+  handleLifecycleCallbacks,
+  retryHoldingTokenCountEvents,
+  streamToResponse,
+} from './utils';
+import type { InferenceCallbackManager } from '../inference_client/callback_manager';
+import { getRetryFilter } from '../../common/utils/error_retry_filter';
+import type { InferenceEndpointIdCache } from '../util/inference_endpoint_id_cache';
+import { anonymizeChatTemplate } from './anonymize_chat_template';
+import { prepareAnonymization } from './prepare_anonymization';
+import type { TokenUsageLogger } from '../token_usage';
+import { handleTokenUsageLogging, buildTokenUsageContext } from '../token_usage';
+
+interface CreateChatCompleteApiOptions {
+  request: KibanaRequest;
+  namespace: string;
+  actions: ActionsClientProvider;
+  logger: Logger;
+  anonymizationRulesPromise: Promise<AnonymizationRule[]>;
+  regexWorker: RegexWorkerService;
+  esClient: ElasticsearchClient;
+  anonymization?: InferenceAnonymizationOptions;
+  endpointIdCache: InferenceEndpointIdCache;
+  callbackManager?: InferenceCallbackManager;
+  tokenUsageLogger?: TokenUsageLogger;
+  isTokenUsageTrackingEnabled?: () => Promise<boolean>;
+  isDefaultConnectorOnly?: () => Promise<boolean>;
+  getDefaultConnectorId?: () => Promise<string | undefined>;
+  resolveConnectorId?: (connectorId: string) => Promise<string>;
+  /** Decides whether an inference endpoint of the given service is called with `_stream`. */
+  shouldStreamInferenceEndpoint?: (service?: string) => Promise<boolean>;
+}
+
+type CreateChatCompleteApiOptionsKey =
+  | 'abortSignal'
+  | 'stream'
+  | 'retryConfiguration'
+  | 'maxRetries';
+
+type ChatCompleteApiWithCallbackInitOptions = Pick<
+  ChatCompleteOptions,
+  CreateChatCompleteApiOptionsKey
+> & { connectorId: string };
+
+export interface ChatCompleteCallbackContext {
+  model?: Partial<Model>;
+}
+
+export type ChatCompleteApiWithCallbackCallback = (
+  context: ChatCompleteCallbackContext
+) => Omit<ChatCompleteOptions, CreateChatCompleteApiOptionsKey | 'connectorId'>;
+
+export type ChatCompleteApiWithCallback = (
+  options: ChatCompleteApiWithCallbackInitOptions,
+  callback: ChatCompleteApiWithCallbackCallback
+) => ChatCompleteCompositeResponse;
+
+type ChatCompletePipelineAdapterOptions = Omit<InferenceAdapterChatCompleteOptions, 'executor'>;
+
+type SpanModel = Parameters<typeof withChatCompleteSpan>[0]['model'];
+
+interface ResolvedPipelineContext {
+  callbackContext: ChatCompleteCallbackContext;
+  getSpanModel: (modelName?: string) => SpanModel | undefined;
+  /** Inference endpoints can send `{ template }` instead of messages. */
+  supportsTemplates: boolean;
+  chatComplete: (
+    options: ChatCompletePipelineAdapterOptions
+  ) => Observable<InferenceConnectorAdapterChatCompleteEvent>;
+}
+
+export function createChatCompleteCallbackApi(
+  options: CreateChatCompleteApiOptions
+): ChatCompleteApiWithCallback;
+
+export function createChatCompleteCallbackApi({
+  request,
+  namespace,
+  actions,
+  logger,
+  anonymizationRulesPromise,
+  regexWorker,
+  esClient,
+  anonymization,
+  endpointIdCache,
+  callbackManager,
+  tokenUsageLogger,
+  isTokenUsageTrackingEnabled,
+  isDefaultConnectorOnly,
+  getDefaultConnectorId,
+  resolveConnectorId,
+  shouldStreamInferenceEndpoint,
+}: CreateChatCompleteApiOptions) {
+  return (
+    {
+      connectorId,
+      abortSignal,
+      stream,
+      maxRetries = 3,
+      retryConfiguration = {},
+    }: ChatCompleteApiWithCallbackInitOptions,
+    callback: ChatCompleteApiWithCallbackCallback
+  ) => {
+    const inference$ = defer(() =>
+      resolveAndCreatePipeline({
+        connectorId,
+        endpointIdCache,
+        request,
+        actions,
+        esClient,
+        logger,
+        anonymizationRulesPromise,
+        regexWorker,
+        callback,
+        abortSignal,
+        stream,
+        namespace,
+        anonymization,
+        tokenUsageLogger,
+        isTokenUsageTrackingEnabled,
+        isDefaultConnectorOnly,
+        getDefaultConnectorId,
+        resolveConnectorId,
+        shouldStreamInferenceEndpoint,
+      })
+    ).pipe(
+      retryHoldingTokenCountEvents({
+        maxRetry: maxRetries,
+        backoffMultiplier: retryConfiguration.backoffMultiplier,
+        initialDelay: retryConfiguration.initialDelay,
+        errorFilter: getRetryFilter(retryConfiguration.retryOn),
+      }),
+      callbackManager ? handleLifecycleCallbacks({ callbackManager }) : identity,
+      abortSignal ? handleCancellation(abortSignal) : identity
+    );
+
+    if (stream) {
+      return inference$.pipe(share());
+    } else {
+      return streamToResponse(inference$);
+    }
+  };
+}
+
+function createChatCompletePipeline({
+  resolve,
+  esClient,
+  logger,
+  anonymizationRulesPromise,
+  regexWorker,
+  callback,
+  abortSignal,
+  stream,
+  namespace,
+  anonymization,
+  connectorId,
+  tokenUsageLogger,
+  isTokenUsageTrackingEnabled,
+}: {
+  resolve: () => Promise<ResolvedPipelineContext>;
+  esClient: ElasticsearchClient;
+  logger: Logger;
+  anonymizationRulesPromise: Promise<AnonymizationRule[]>;
+  regexWorker: RegexWorkerService;
+  callback: ChatCompleteApiWithCallbackCallback;
+  abortSignal?: AbortSignal;
+  stream?: boolean;
+  namespace: string;
+  anonymization?: InferenceAnonymizationOptions;
+  connectorId: string;
+  tokenUsageLogger?: TokenUsageLogger;
+  isTokenUsageTrackingEnabled?: () => Promise<boolean>;
+}) {
+  return forkJoin({
+    context: from(resolve()),
+    anonymizationRules: from(anonymizationRulesPromise),
+  }).pipe(
+    switchMap(({ context, anonymizationRules }) => {
+      const { callbackContext, getSpanModel, chatComplete, supportsTemplates } = context;
+
+      const {
+        system,
+        messages: givenMessages,
+        functionCalling,
+        metadata,
+        modelName,
+        temperature,
+        reasoning,
+        toolChoice,
+        tools,
+        timeout,
+        maxContentLength,
+        cacheControl,
+        sessionId,
+        template,
+      } = callback(callbackContext);
+
+      const logTokenUsage = tokenUsageLogger
+        ? handleTokenUsageLogging({
+            tokenUsageLogger,
+            getContext: () =>
+              buildTokenUsageContext({
+                connectorId,
+                model: callbackContext.model,
+                modelName,
+                featureId: metadata?.connectorTelemetry?.pluginId,
+                parentFeatureId: metadata?.connectorTelemetry?.aggregateBy,
+              }),
+            logger,
+            isEnabled: isTokenUsageTrackingEnabled,
+          })
+        : identity;
+
+      if (template) {
+        if (!supportsTemplates) {
+          throw createInferenceRequestError(
+            'Chat completion templates are only supported for inference endpoints',
+            400
+          );
+        }
+
+        // The endpoint renders the template and rejects caller messages, so the
+        // anonymization instruction cannot be attached. Masks echoed in the
+        // response are still restored.
+        return from(
+          anonymizeChatTemplate({
+            template,
+            namespace,
+            logger,
+            anonymizationRules,
+            regexWorker,
+            esClient,
+            replacementsEsClient: anonymization?.replacements?.esClient,
+            replacementsEncryptionKeyPromise: anonymization?.replacements?.encryptionKeyPromise,
+            usePersistentReplacements: anonymization?.replacements?.usePersistentReplacements,
+            requireReplacementsEncryptionKey: anonymization?.replacements?.requireEncryptionKey,
+            saltPromise: anonymization?.saltPromise,
+            onFailurePromise: anonymization?.onFailurePromise,
+            metadata,
+          })
+        ).pipe(
+          switchMap(({ template: maskedTemplate, anonymization: preparedAnonymization }) =>
+            chatComplete({
+              system,
+              messages: [],
+              template: maskedTemplate,
+              temperature,
+              reasoning,
+              logger,
+              functionCalling,
+              modelName,
+              abortSignal,
+              metadata,
+              timeout,
+              maxContentLength,
+              cacheControl,
+              sessionId,
+              stream,
+            }).pipe(
+              chunksIntoMessage({ toolOptions: { toolChoice, tools }, logger }),
+              deanonymizeMessage(preparedAnonymization, logger)
+            )
+          ),
+          logTokenUsage
+        );
+      }
+
+      const messages = sanitizeMessages(givenMessages);
+
+      return from(
+        prepareAnonymization({
+          namespace,
+          logger,
+          anonymizationRules,
+          regexWorker,
+          esClient,
+          replacementsEsClient: anonymization?.replacements?.esClient,
+          replacementsEncryptionKeyPromise: anonymization?.replacements?.encryptionKeyPromise,
+          usePersistentReplacements: anonymization?.replacements?.usePersistentReplacements,
+          requireReplacementsEncryptionKey: anonymization?.replacements?.requireEncryptionKey,
+          saltPromise: anonymization?.saltPromise,
+          onFailurePromise: anonymization?.onFailurePromise,
+          metadata,
+          system,
+          messages,
+        })
+      ).pipe(
+        switchMap(({ anonymization: preparedAnonymization, replacementsId }) => {
+          // Gate on whether anything was actually masked this turn, not on whether a system
+          // prompt happens to exist — a request with no system prompt can still anonymize
+          // entities in its messages, and the model still needs to be told what the
+          // placeholder tokens mean.
+          const baseSystem = preparedAnonymization.system ?? system;
+          const systemWithAnonymizationInstructions = preparedAnonymization.anonymizations.length
+            ? addAnonymizationInstruction(baseSystem ?? '', anonymizationRules)
+            : baseSystem;
+
+          const spanModel = getSpanModel(modelName);
+
+          return withChatCompleteSpan(
+            {
+              system: systemWithAnonymizationInstructions,
+              messages: preparedAnonymization.messages,
+              tools,
+              toolChoice,
+              cacheControl,
+              sessionId,
+              reasoning,
+              ...(spanModel ? { model: spanModel } : {}),
+              ...metadata?.attributes,
+            },
+            () => {
+              return chatComplete({
+                system: systemWithAnonymizationInstructions,
+                messages: preparedAnonymization.messages,
+                toolChoice,
+                tools,
+                temperature,
+                reasoning,
+                logger,
+                functionCalling,
+                modelName,
+                abortSignal,
+                metadata,
+                timeout,
+                maxContentLength,
+                cacheControl,
+                sessionId,
+                stream,
+              }).pipe(chunksIntoMessage({ toolOptions: { toolChoice, tools }, logger }));
+            }
+          ).pipe(deanonymizeMessage({ ...preparedAnonymization, replacementsId }, logger));
+        }),
+        logTokenUsage
+      );
+    })
+  );
+}
+
+function resolveAndCreatePipeline({
+  connectorId,
+  endpointIdCache,
+  request,
+  actions,
+  esClient,
+  logger,
+  anonymizationRulesPromise,
+  regexWorker,
+  callback,
+  abortSignal,
+  stream,
+  namespace,
+  anonymization,
+  tokenUsageLogger,
+  isTokenUsageTrackingEnabled,
+  isDefaultConnectorOnly,
+  getDefaultConnectorId,
+  resolveConnectorId,
+  shouldStreamInferenceEndpoint,
+}: {
+  connectorId: string;
+  endpointIdCache: InferenceEndpointIdCache;
+  request: KibanaRequest;
+  actions: ActionsClientProvider;
+  esClient: ElasticsearchClient;
+  logger: Logger;
+  anonymizationRulesPromise: Promise<AnonymizationRule[]>;
+  regexWorker: RegexWorkerService;
+  callback: ChatCompleteApiWithCallbackCallback;
+  abortSignal?: AbortSignal;
+  stream?: boolean;
+  namespace: string;
+  anonymization?: InferenceAnonymizationOptions;
+  tokenUsageLogger?: TokenUsageLogger;
+  isTokenUsageTrackingEnabled?: () => Promise<boolean>;
+  isDefaultConnectorOnly?: () => Promise<boolean>;
+  getDefaultConnectorId?: () => Promise<string | undefined>;
+  resolveConnectorId?: (connectorId: string) => Promise<string>;
+  shouldStreamInferenceEndpoint?: (service?: string) => Promise<boolean>;
+}) {
+  return from(
+    throwIfConnectorNotAllowed({
+      connectorId,
+      isDefaultConnectorOnly,
+      getDefaultConnectorId,
+      resolveConnectorId,
+      logger,
+    }).then(() => endpointIdCache.has(connectorId))
+  ).pipe(
+    switchMap((isInferenceEndpoint) => {
+      let resolvedAsInferenceEndpoint = isInferenceEndpoint;
+
+      const resolve: () => Promise<ResolvedPipelineContext> = isInferenceEndpoint
+        ? () =>
+            resolveInferenceEndpointContext({
+              inferenceId: connectorId,
+              esClient,
+              shouldStreamInferenceEndpoint,
+            })
+        : async () => {
+            const executor = await getInferenceExecutor({
+              connectorId,
+              request,
+              actions,
+              esClient,
+              logger,
+            });
+            const connector = executor.getConnector();
+
+            if (connector.isInferenceEndpoint) {
+              resolvedAsInferenceEndpoint = true;
+              return resolveInferenceEndpointContext({
+                inferenceId: connector.connectorId,
+                esClient,
+                shouldStreamInferenceEndpoint,
+              });
+            }
+
+            const connectorType = connector.type;
+            const inferenceAdapter = getInferenceAdapter(connectorType);
+
+            if (!inferenceAdapter) {
+              throw createInferenceRequestError(
+                `Adapter for type ${connectorType} not implemented`,
+                400
+              );
+            }
+
+            return {
+              callbackContext: {
+                model: {
+                  family: getConnectorFamily(connector),
+                  provider: getConnectorProvider(connector),
+                  id: getConnectorDefaultModel(connector),
+                  platform: getConnectorPlatform(connector),
+                },
+              },
+              getSpanModel: (modelName) => ({
+                id: modelName ?? getConnectorDefaultModel(connector),
+                family: getConnectorFamily(connector),
+                provider: getConnectorProvider(connector),
+              }),
+              supportsTemplates: false,
+              chatComplete: (options) => inferenceAdapter.chatComplete({ ...options, executor }),
+            };
+          };
+
+      return createChatCompletePipeline({
+        resolve,
+        esClient,
+        logger,
+        anonymizationRulesPromise,
+        regexWorker,
+        callback,
+        abortSignal,
+        stream,
+        namespace,
+        anonymization,
+        connectorId,
+        tokenUsageLogger,
+        isTokenUsageTrackingEnabled,
+      }).pipe(
+        catchError((error) => {
+          const is404 = error?.meta?.status === 404 || error?.statusCode === 404;
+          const isUpstreamProviderError = error?.code === InferenceTaskErrorCode.providerError;
+          if (is404 && !isUpstreamProviderError) {
+            if (resolvedAsInferenceEndpoint) {
+              endpointIdCache.invalidate();
+              return throwError(() => error);
+            }
+            return throwError(() =>
+              createInferenceRequestError(
+                `No connector or inference endpoint found for ID '${connectorId}'`,
+                400
+              )
+            );
+          }
+          return throwError(() => error);
+        })
+      );
+    })
+  );
+}
+
+async function resolveInferenceEndpointContext({
+  inferenceId,
+  esClient,
+  shouldStreamInferenceEndpoint,
+}: {
+  inferenceId: string;
+  esClient: ElasticsearchClient;
+  shouldStreamInferenceEndpoint?: (service?: string) => Promise<boolean>;
+}): Promise<ResolvedPipelineContext> {
+  const endpointMeta = await resolveInferenceEndpoint({ inferenceId, esClient });
+  const stream = shouldStreamInferenceEndpoint
+    ? await shouldStreamInferenceEndpoint(endpointMeta.provider)
+    : true;
+  const executor = createInferenceEndpointExecutor({ inferenceId, esClient, stream });
+
+  return {
+    callbackContext: {
+      model: endpointMeta.modelId ? { id: endpointMeta.modelId } : undefined,
+    },
+    getSpanModel: (modelName) =>
+      endpointMeta.provider
+        ? ({
+            id: modelName ?? endpointMeta.modelId,
+            provider: endpointMeta.provider,
+          } as SpanModel)
+        : undefined,
+    supportsTemplates: true,
+    chatComplete: (options) =>
+      inferenceEndpointAdapter.chatComplete({
+        ...options,
+        executor,
+        endpointModelId: endpointMeta.modelId,
+        provider: endpointMeta.provider,
+      }),
+  };
+}
+
+async function throwIfConnectorNotAllowed({
+  connectorId,
+  isDefaultConnectorOnly,
+  getDefaultConnectorId,
+  resolveConnectorId,
+  logger,
+}: {
+  connectorId: string;
+  isDefaultConnectorOnly?: () => Promise<boolean>;
+  getDefaultConnectorId?: () => Promise<string | undefined>;
+  resolveConnectorId?: (connectorId: string) => Promise<string>;
+  logger: Logger;
+}): Promise<void> {
+  if (!isDefaultConnectorOnly || !getDefaultConnectorId) {
+    return;
+  }
+  let defaultConnectorId: string | undefined;
+  try {
+    if (!(await isDefaultConnectorOnly())) {
+      return;
+    }
+    defaultConnectorId = await getDefaultConnectorId();
+  } catch (error) {
+    // fail closed: block the call when the restriction cannot be verified
+    logger.error(`Failed to verify the default AI connector restriction: ${error.message}`);
+    throw createInferenceInternalError('Failed to verify the default AI connector restriction');
+  }
+  if (connectorId === defaultConnectorId) {
+    return;
+  }
+  // a `.inference` stack connector id resolves to its underlying inference endpoint,
+  // which is what the default connector id refers to
+  if (defaultConnectorId && resolveConnectorId) {
+    const resolvedConnectorId = await resolveConnectorId(connectorId).catch(() => undefined);
+    if (resolvedConnectorId === defaultConnectorId) {
+      return;
+    }
+  }
+  throw createInferenceRequestError(
+    `Connector "${connectorId}" is not allowed: Kibana is configured to only allow the default AI connector${
+      defaultConnectorId ? ` "${defaultConnectorId}"` : ''
+    }`,
+    400
+  );
+}
+
+function sanitizeMessages(messages: ChatCompleteOptions['messages']) {
+  return messages.map((message) => {
+    if (
+      message.role === MessageRole.Assistant &&
+      message.toolCalls !== undefined &&
+      message.toolCalls.length === 0
+    ) {
+      return omit(message, 'toolCalls');
+    }
+    return message;
+  });
+}

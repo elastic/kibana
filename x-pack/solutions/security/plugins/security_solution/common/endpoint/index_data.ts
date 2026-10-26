@@ -23,6 +23,7 @@ import {
 } from './data_loaders/index_endpoint_hosts';
 import { enableFleetServerIfNecessary } from './data_loaders/index_fleet_server';
 import { indexAlerts } from './data_loaders/index_alerts';
+import { indexDeviceEvents } from './data_loaders/index_device_events';
 import { setupFleetForEndpoint } from './data_loaders/setup_fleet_for_endpoint';
 import { createToolingLogger, mergeAndAppendArrays } from './data_loaders/utils';
 import {
@@ -67,6 +68,7 @@ export const indexHostsAndAlerts = usageTracker.track(
     policyResponseIndex: string,
     eventIndex: string,
     alertIndex: string,
+    deviceIndex: string,
     alertsPerHost: number,
     fleet: boolean,
     options: TreeOptions = {},
@@ -75,7 +77,8 @@ export const indexHostsAndAlerts = usageTracker.track(
     numResponseActions?: number,
     alertIds?: string[],
     isServerless: boolean = false,
-    logger_?: ToolingLog
+    logger_?: ToolingLog,
+    responseState?: 'success'
   ): Promise<IndexedHostsAndAlertsResponse> => {
     const random = seedrandom(seed);
     const logger = logger_ ?? createToolingLogger();
@@ -99,61 +102,84 @@ export const indexHostsAndAlerts = usageTracker.track(
       agentPolicies: [],
     };
 
-    // Ensure fleet is setup and endpoint package installed
-    await setupFleetForEndpoint(kbnClient, logger);
+    try {
+      // Ensure fleet is setup and endpoint package installed
+      await setupFleetForEndpoint(kbnClient, logger);
 
-    // If `fleet` integration is true, then ensure a (fake) fleet-server is connected
-    if (fleet) {
-      await enableFleetServerIfNecessary(client, isServerless, kbnClient, logger);
+      // If `fleet` integration is true, then ensure a (fake) fleet-server is connected
+      if (fleet) {
+        await enableFleetServerIfNecessary(client, isServerless, kbnClient, logger);
+      }
+
+      // Keep a map of host applied policy ids (fake) to real ingest package configs (policy record)
+      const realPolicies: Record<string, CreatePackagePolicyResponse['item']> = {};
+
+      const shouldWaitForEndpointMetadataDocs = fleet;
+      if (shouldWaitForEndpointMetadataDocs) {
+        await waitForMetadataTransformsReady(client, epmEndpointPackage.version);
+        await stopMetadataTransforms(client, epmEndpointPackage.version);
+      }
+
+      for (let i = 0; i < numHosts; i++) {
+        const generator = new DocGenerator(random);
+        const indexedHosts = await indexEndpointHostDocs({
+          numDocs,
+          client,
+          kbnClient,
+          realPolicies,
+          epmEndpointPackage,
+          metadataIndex,
+          policyResponseIndex,
+          enrollFleet: fleet,
+          generator,
+          withResponseActions,
+          numResponseActions,
+          alertIds,
+          responseState,
+        });
+
+        mergeAndAppendArrays(response, indexedHosts);
+
+        if (alertsPerHost > 0) {
+          await indexAlerts({
+            client,
+            eventIndex,
+            alertIndex,
+            generator,
+            numAlerts: alertsPerHost,
+            options,
+          });
+        }
+
+        if (options.deviceEvents && options.deviceEvents > 0) {
+          await indexDeviceEvents({
+            client,
+            deviceIndex,
+            generator,
+            numDeviceEvents: options.deviceEvents,
+            options,
+          });
+        }
+      }
+
+      if (shouldWaitForEndpointMetadataDocs) {
+        await startMetadataTransforms(
+          client,
+          response.agents.map((agent) => agent.agent?.id ?? ''),
+          epmEndpointPackage.version
+        );
+      }
+
+      return response;
+    } catch (error) {
+      // Hosts and policies are indexed before metadata transforms start. A throw
+      // after that point never returns `response`, so roll those documents back
+      // here. Callers only receive this value on success.
+      if (response.hosts.length > 0 || response.agents.length > 0) {
+        await deleteIndexedHostsAndAlerts(client, kbnClient, response).catch(() => undefined);
+      }
+      throw error;
     }
-
-    // Keep a map of host applied policy ids (fake) to real ingest package configs (policy record)
-    const realPolicies: Record<string, CreatePackagePolicyResponse['item']> = {};
-
-    const shouldWaitForEndpointMetadataDocs = fleet;
-    if (shouldWaitForEndpointMetadataDocs) {
-      await waitForMetadataTransformsReady(client, epmEndpointPackage.version);
-      await stopMetadataTransforms(client, epmEndpointPackage.version);
-    }
-
-    for (let i = 0; i < numHosts; i++) {
-      const generator = new DocGenerator(random);
-      const indexedHosts = await indexEndpointHostDocs({
-        numDocs,
-        client,
-        kbnClient,
-        realPolicies,
-        epmEndpointPackage,
-        metadataIndex,
-        policyResponseIndex,
-        enrollFleet: fleet,
-        generator,
-        withResponseActions,
-        numResponseActions,
-        alertIds,
-      });
-
-      mergeAndAppendArrays(response, indexedHosts);
-
-      await indexAlerts({
-        client,
-        eventIndex,
-        alertIndex,
-        generator,
-        numAlerts: alertsPerHost,
-        options,
-      });
-    }
-
-    if (shouldWaitForEndpointMetadataDocs) {
-      await startMetadataTransforms(
-        client,
-        response.agents.map((agent) => agent.agent?.id ?? ''),
-        epmEndpointPackage.version
-      );
-    }
-
-    return response;
   }
 );
 

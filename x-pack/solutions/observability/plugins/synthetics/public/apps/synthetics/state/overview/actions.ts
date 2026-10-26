@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { createAction } from '@reduxjs/toolkit';
-import { GetTrendPayload, TrendRequest, TrendTable } from '../../../../../common/types';
+import { createAction } from 'redux-toolkit-v1';
+import type { GetTrendPayload, TrendRequest, TrendTable } from '../../../../../common/types';
 import { createAsyncAction } from '../utils/actions';
 
 import type {
@@ -31,3 +31,7 @@ export const refreshOverviewTrends = createAsyncAction<void, TrendTable, any>(
 export const trendStatsBatch = createAsyncAction<TrendRequest[], GetTrendPayload, TrendRequest[]>(
   'batchTrendStats'
 );
+export const setOverviewViewAction =
+  createAction<MonitorOverviewState['view']>('setOverviewViewAction');
+
+export const setOverviewShowLastRunAction = createAction<boolean>('setOverviewShowLastRunAction');

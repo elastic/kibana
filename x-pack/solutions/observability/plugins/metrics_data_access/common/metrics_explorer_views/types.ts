@@ -69,7 +69,7 @@ export const metricExplorerOptionsRequiredRT = rt.type({
 export const metricExplorerOptionsOptionalRT = rt.partial({
   limit: rt.number,
   groupBy: rt.union([rt.string, rt.array(rt.string)]),
-  filterQuery: rt.string,
+  kuery: rt.string,
   source: rt.string,
   forceInterval: rt.boolean,
   dropLastBucket: rt.boolean,

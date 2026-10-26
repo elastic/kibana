@@ -5,11 +5,58 @@
  * 2.0.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 
-export const configSchema = schema.object({});
+export const configSchema = schema.object({
+  canvas: schema.object({
+    enabled: schema.boolean({ defaultValue: false }),
+  }),
+  /**
+   * Outbound client for streams-config-distributor (`PUT /v1/units/<unit-id>`
+   * and `POST /v1/units/validate`). A unit write requires `url`. When it is unset,
+   * validation and publish log an error and do not run, and the unit is not stored.
+   */
+  distributor: schema.object(
+    {
+      url: schema.maybe(schema.uri({ scheme: ['http', 'https'] })),
+      ssl: schema.object(
+        {
+          certificate: schema.maybe(schema.string({ maxLength: 4096 })),
+          key: schema.maybe(schema.string({ maxLength: 4096 })),
+          certificateAuthorities: schema.maybe(schema.string({ maxLength: 4096 })),
+        },
+        { defaultValue: {} }
+      ),
+    },
+    { defaultValue: { ssl: {} } }
+  ),
+  /** Mount directory of the project-controller `streams-encryption-key` Secret. */
+  encryptionKey: schema.object(
+    {
+      path: schema.maybe(schema.string({ maxLength: 4096 })),
+    },
+    { defaultValue: {} }
+  ),
+  preconfigured: schema.object({
+    enabled: schema.boolean({ defaultValue: true }),
+    stream_definitions: schema.arrayOf(schema.any(), { defaultValue: [] }),
+  }),
+  workers: schema.object({
+    patternExtraction: schema.object({
+      enabled: schema.boolean({ defaultValue: true }),
+      minThreads: schema.number({ defaultValue: 0, min: 0 }),
+      maxThreads: schema.number({ defaultValue: 2, min: 1 }),
+      maxQueue: schema.number({ defaultValue: 10, min: 1 }),
+      idleTimeout: schema.duration({ defaultValue: '30s' }),
+      taskTimeout: schema.duration({ defaultValue: '30s' }),
+    }),
+  }),
+});
 
 export type StreamsConfig = TypeOf<typeof configSchema>;
+
+export type PatternExtractionWorkerConfig = StreamsConfig['workers']['patternExtraction'];
 
 /**
  * The following map is passed to the server plugin setup under the
@@ -21,10 +68,5 @@ export type StreamsConfig = TypeOf<typeof configSchema>;
  */
 export const exposeToBrowserConfig = {} as const;
 
-type ValidKeys = keyof {
-  [K in keyof typeof exposeToBrowserConfig as (typeof exposeToBrowserConfig)[K] extends true
-    ? K
-    : never]: true;
-};
-
-export type StreamsPublicConfig = Pick<StreamsConfig, ValidKeys>;
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface StreamsPublicConfig {}

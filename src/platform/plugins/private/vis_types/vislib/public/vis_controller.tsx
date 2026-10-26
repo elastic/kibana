@@ -8,16 +8,17 @@
  */
 
 import $ from 'jquery';
-import React, { RefObject } from 'react';
+import type { RefObject } from 'react';
+import React from 'react';
 
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
+import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import type { PersistedState } from '@kbn/visualizations-plugin/public';
-import { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/public';
-import { CoreStart } from '@kbn/core/public';
-import { VisTypeVislibCoreSetup } from './plugin';
+import type { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/public';
+import type { CoreStart } from '@kbn/core/public';
+import type { VisTypeVislibCoreSetup } from './plugin';
 import { VisLegend, CUSTOM_LEGEND_VIS_TYPES } from './vislib/components/legend';
-import { BasicVislibParams } from './types';
+import type { BasicVislibParams } from './types';
 
 const legendClassName = {
   top: 'vislib--legend-top',
@@ -81,12 +82,14 @@ export const createVislibVisController = (
       }
 
       const { Vis: Vislib } = await import('./vislib/vis');
-      const { uiState, event: fireEvent } = handlers;
+      const { uiState, event: fireEvent, hasCompatibleActions } = handlers;
 
       this.vislibVis = new Vislib(this.chartEl, visParams, core, charts);
-      this.vislibVis.on('brush', fireEvent);
-      this.vislibVis.on('click', fireEvent);
-
+      const isInteractive = handlers.isInteractive();
+      if (isInteractive) {
+        this.vislibVis.on('brush', fireEvent);
+        this.vislibVis.on('click', fireEvent);
+      }
       const [startServices] = await core.getStartServices();
       this.vislibVis.on('renderComplete', () => {
         // refreshing the legend after the chart is rendered.
@@ -102,6 +105,8 @@ export const createVislibVisController = (
             esResponse,
             visParams,
             fireEvent,
+            hasCompatibleActions,
+            handlers.isInteractive(),
             uiState as PersistedState
           );
         }
@@ -109,10 +114,12 @@ export const createVislibVisController = (
         renderComplete?.();
       });
 
-      this.removeListeners = () => {
-        this.vislibVis.off('brush', fireEvent);
-        this.vislibVis.off('click', fireEvent);
-      };
+      this.removeListeners = isInteractive
+        ? () => {
+            this.vislibVis.off('brush', fireEvent);
+            this.vislibVis.off('click', fireEvent);
+          }
+        : undefined;
 
       this.vislibVis.initVisConfig(esResponse, uiState);
 
@@ -128,10 +135,11 @@ export const createVislibVisController = (
           esResponse,
           visParams,
           fireEvent,
+          hasCompatibleActions,
+          handlers.isInteractive(),
           uiState as PersistedState
         );
       }
-
       this.vislibVis.render(esResponse, uiState);
     }
 
@@ -140,6 +148,8 @@ export const createVislibVisController = (
       visData: unknown,
       visParams: BasicVislibParams,
       fireEvent: IInterpreterRenderHandlers['event'],
+      hasCompatibleActions: IInterpreterRenderHandlers['hasCompatibleActions'],
+      isInteractive: boolean,
       uiState?: PersistedState
     ) {
       const { legendPosition } = visParams;
@@ -150,8 +160,10 @@ export const createVislibVisController = (
           visData={visData}
           uiState={uiState}
           fireEvent={fireEvent}
+          hasCompatibleActions={hasCompatibleActions}
           addLegend={this.showLegend(visParams)}
           position={legendPosition}
+          isInteractive={isInteractive}
         />,
         startServices
       )(this.legendEl);

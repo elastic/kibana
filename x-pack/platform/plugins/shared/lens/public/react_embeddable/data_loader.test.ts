@@ -5,7 +5,10 @@
  * 2.0.
  */
 import { faker } from '@faker-js/faker';
-import { ReloadReason, loadEmbeddableData } from './data_loader';
+import type { CoreTheme } from '@kbn/core/public';
+import { coreMock } from '@kbn/core/public/mocks';
+import type { ReloadReason } from './data_loader';
+import { loadEmbeddableData } from './data_loader';
 import {
   createUnifiedSearchApi,
   getLensApiMock,
@@ -14,61 +17,31 @@ import {
   makeEmbeddableServices,
 } from './mocks';
 import { BehaviorSubject, filter, firstValueFrom } from 'rxjs';
-import { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
-import { LensDocument } from '../persistence';
-import {
+import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
+import type {
+  LensDocument,
+  ExpressionWrapperProps,
   GetStateType,
-  LensApi,
-  LensEmbeddableStartServices,
   LensInternalApi,
   LensOverrides,
   LensPublicCallbacks,
   LensRuntimeState,
-} from './types';
-import {
-  HasParentApi,
-  PublishesTimeRange,
-  PublishesUnifiedSearch,
-  PublishingSubject,
-  ViewMode,
-} from '@kbn/presentation-publishing';
-import { PublishesSearchSession } from '@kbn/presentation-publishing/interfaces/fetch/publishes_search_session';
+} from '@kbn/lens-common';
+import type { LensApi } from '@kbn/lens-common-2';
+import type { PublishingSubject, ViewMode } from '@kbn/presentation-publishing';
 import { isObject } from 'lodash';
+import { getOriginalRequestErrorMessages } from '../editor_frame_service/error_helper';
 import { createMockDatasource, defaultDoc } from '../mocks';
 import { ESQLVariableType, type ESQLControlVariable } from '@kbn/esql-types';
 import * as Logger from './logger';
-import { buildObservableVariable } from './helper';
+import type { LensEmbeddableStartServices } from './types';
+import { waitFor } from '@testing-library/dom';
 
 jest.mock('@kbn/interpreter', () => ({
   toExpression: jest.fn().mockReturnValue('expression'),
 }));
 
 const loggerFn = jest.spyOn(Logger, 'addLog');
-
-// Mock it for now, later investigate why the real one is not triggering here on tests
-jest.mock('@kbn/presentation-publishing', () => {
-  const original = jest.requireActual('@kbn/presentation-publishing');
-  const rx = jest.requireActual('rxjs');
-  return {
-    ...original,
-    fetch$: jest.fn((api: unknown) => {
-      const typeApi = api as PublishesTimeRange &
-        PublishesUnifiedSearch &
-        HasParentApi<PublishesUnifiedSearch & PublishesSearchSession>;
-      const emptyObservable = rx.of(undefined);
-      return rx.merge(
-        typeApi.timeRange$ ?? emptyObservable,
-        typeApi.filters$ ?? emptyObservable,
-        typeApi.query$ ?? emptyObservable,
-        typeApi.parentApi?.filters$ ?? emptyObservable,
-        typeApi.parentApi?.query$ ?? emptyObservable,
-        typeApi.parentApi?.searchSessionId$ ?? emptyObservable,
-        typeApi.timeRange$ ?? typeApi.parentApi?.timeRange$ ?? emptyObservable,
-        typeApi.parentApi?.timeslice$ ?? emptyObservable
-      );
-    }),
-  };
-});
 
 // In order to listen the reload function, we need to
 // monitor the internalApi dispatchRenderStart spy
@@ -85,6 +58,7 @@ type ChangeFnType = ({
   parentApi: ReturnType<typeof createUnifiedSearchApi> &
     LensPublicCallbacks & {
       searchSessionId$: BehaviorSubject<string>;
+      esqlVariables$: BehaviorSubject<ESQLControlVariable[] | undefined>;
     };
   services: LensEmbeddableStartServices;
 }) => Promise<void | ReloadReason | false>;
@@ -103,6 +77,7 @@ async function expectRerenderOnDataLoader(
         query$: BehaviorSubject<Query | AggregateQuery | undefined>;
         timeRange$: BehaviorSubject<TimeRange | undefined>;
         esqlVariables$: BehaviorSubject<ESQLControlVariable[] | undefined>;
+        isApproximate$: BehaviorSubject<boolean | undefined>;
       } & LensOverrides
     >;
     internalApiOverrides?: Partial<LensInternalApi>;
@@ -112,17 +87,12 @@ async function expectRerenderOnDataLoader(
   const parentApi = {
     ...createUnifiedSearchApi(),
     searchSessionId$: new BehaviorSubject<string>(''),
+    esqlVariables$: new BehaviorSubject<ESQLControlVariable[] | undefined>([]),
     onLoad: jest.fn(),
     onBeforeBadgesRender: jest.fn(),
     onBrushEnd: jest.fn(),
     onFilter: jest.fn(),
     onTableRowClick: jest.fn(),
-    // Make TS happy
-    removePanel: jest.fn(),
-    replacePanel: jest.fn(),
-    getPanelCount: jest.fn(),
-    children$: new BehaviorSubject({}),
-    addNewPanel: jest.fn(),
     ...parentApiOverrides,
   };
   const api: LensApi = {
@@ -132,12 +102,12 @@ async function expectRerenderOnDataLoader(
   const getState = jest.fn(() => runtimeState);
   const internalApi = getLensInternalApiMock({
     ...internalApiOverrides,
-    attributes$: buildObservableVariable(runtimeState.attributes)[0],
+    attributes$: new BehaviorSubject(runtimeState.attributes),
   });
   const services = {
     ...makeEmbeddableServices(new BehaviorSubject<string>(''), undefined, {
       visOverrides: { id: 'lnsXY' },
-      dataOverrides: { id: 'form_based' },
+      dataOverrides: { id: 'formBased' },
     }),
     documentToExpression: jest.fn().mockResolvedValue({ ast: 'expression_string' }),
     ...servicesOverrides,
@@ -152,7 +122,7 @@ async function expectRerenderOnDataLoader(
   );
   // there's a debounce, so skip to the next tick
   jest.advanceTimersByTime(100);
-  expect(internalApi.dispatchRenderStart).toHaveBeenCalledTimes(1);
+  await waitFor(() => expect(internalApi.dispatchRenderStart).toHaveBeenCalledTimes(1));
   // change something
   const result = await changeFn({
     api,
@@ -167,8 +137,6 @@ async function expectRerenderOnDataLoader(
   const rerenderReason = typeof result === 'string' ? result : undefined;
   // there's a debounce, so skip to the next tick
   jest.advanceTimersByTime(200);
-  // unsubscribe to all observables before checking
-  cleanup();
 
   if (expectRerender && rerenderReason) {
     const reloadCalls = loggerFn.mock.calls.filter((call) =>
@@ -179,7 +147,22 @@ async function expectRerenderOnDataLoader(
     );
   }
   // now check if the re-render has been dispatched
-  expect(internalApi.dispatchRenderStart).toHaveBeenCalledTimes(expectRerender ? 2 : 1);
+  await waitFor(() =>
+    expect(internalApi.dispatchRenderStart).toHaveBeenCalledTimes(expectRerender ? 2 : 1)
+  );
+
+  // wait for all rendering to complete before cleanup
+  cleanup();
+}
+
+const lightTheme: CoreTheme = { darkMode: false, name: 'borealis' };
+
+function createCoreStartWithTheme(theme$: BehaviorSubject<CoreTheme>) {
+  const coreStart = coreMock.createStart();
+  return {
+    ...coreStart,
+    theme: { ...coreStart.theme, theme$: theme$.asObservable(), getTheme: () => theme$.getValue() },
+  };
 }
 
 function waitForValue(
@@ -203,22 +186,10 @@ describe('Data Loader', () => {
   beforeEach(() => jest.clearAllMocks());
 
   it('should re-render once on filter change', async () => {
-    await expectRerenderOnDataLoader(async ({ api }) => {
-      (api.filters$ as BehaviorSubject<Filter[]>).next([
+    await expectRerenderOnDataLoader(async ({ parentApi }) => {
+      (parentApi.filters$ as BehaviorSubject<Filter[]>).next([
         { meta: { alias: 'test', negate: false, disabled: false } },
       ]);
-      return 'searchContext';
-    });
-  });
-
-  it('should re-render once on search session change', async () => {
-    await expectRerenderOnDataLoader(async ({ api }) => {
-      // dispatch a new searchSessionId
-
-      (
-        api.parentApi as unknown as { searchSessionId$: BehaviorSubject<string | undefined> }
-      ).searchSessionId$.next('newSessionId');
-
       return 'searchContext';
     });
   });
@@ -234,22 +205,17 @@ describe('Data Loader', () => {
     });
   });
 
-  it('should re-render when dashboard view/edit mode changes if dynamic actions are set', async () => {
+  it('should re-render when dashboard view/edit mode changes if drilldowns are set', async () => {
     await expectRerenderOnDataLoader(async ({ api, getState }) => {
       getState.mockReturnValue({
         attributes: getLensAttributesMock(),
-        enhancements: {
-          dynamicActions: {
-            events: [
-              // make sure there's at least one event
-              {
-                eventId: 'test',
-                triggers: [],
-                action: { factoryId: 'test', name: 'testAction', config: {} },
-              },
-            ],
+        drilldowns: [
+          {
+            label: 'Go to',
+            type: 'test',
+            trigger: 'on_click',
           },
-        },
+        ],
       });
       // trigger a change by changing the title in the attributes
       (api.viewMode$ as BehaviorSubject<ViewMode | undefined>).next('view');
@@ -258,16 +224,11 @@ describe('Data Loader', () => {
     });
   });
 
-  it('should not re-render when dashboard view/edit mode changes if dynamic actions are not set', async () => {
+  it('should not re-render when dashboard view/edit mode changes if there are no drilldowns', async () => {
     await expectRerenderOnDataLoader(async ({ api, getState }) => {
       getState.mockReturnValue({
         attributes: getLensAttributesMock(),
-        enhancements: {
-          dynamicActions: {
-            // empty list should not trigger
-            events: [],
-          },
-        },
+        drilldowns: [],
       });
       // trigger a change by changing the title in the attributes
       (api.viewMode$ as BehaviorSubject<ViewMode | undefined>).next('view');
@@ -329,8 +290,8 @@ describe('Data Loader', () => {
       { meta: { alias: 'external filter', negate: false, disabled: false } },
     ];
 
-    const vizQuery: Query = { language: 'kquery', query: 'saved filter' };
-    const vizFilters: Filter[] = [
+    const visQuery: Query = { language: 'kquery', query: 'saved filter' };
+    const visFilters: Filter[] = [
       { meta: { alias: 'test', negate: false, disabled: false, index: 'filter-0' } },
     ];
 
@@ -339,11 +300,11 @@ describe('Data Loader', () => {
       ...attributes,
       state: {
         ...attributes.state,
-        query: vizQuery,
-        filters: vizFilters,
+        query: visQuery,
+        filters: visFilters,
       },
       references: [
-        { type: 'index-pattern', name: vizFilters[0].meta.index!, id: 'my-index-pattern-id' },
+        { type: 'index-pattern', name: visFilters[0].meta.index!, id: 'my-index-pattern-id' },
       ],
     };
 
@@ -357,10 +318,10 @@ describe('Data Loader', () => {
         const params = internalApi.expressionParams$.getValue()!;
         expect(params.searchContext).toEqual(
           expect.objectContaining({
-            query: [parentApiQuery, vizQuery],
+            query: [parentApiQuery, visQuery],
             filters: [
               ...parentApiFilters,
-              ...vizFilters.map(({ meta }) => ({ meta: { ...meta, index: 'injected!' } })),
+              ...visFilters.map(({ meta }) => ({ meta: { ...meta, index: 'injected!' } })),
             ],
           })
         );
@@ -374,6 +335,117 @@ describe('Data Loader', () => {
           parentApiFilters,
           parentApiTimeRange
         ),
+      }
+    );
+  });
+
+  it('should propagate projectRouting from parent API to search context', async () => {
+    const projectRouting = '_alias:_origin';
+
+    await expectRerenderOnDataLoader(
+      async ({ internalApi }) => {
+        await waitForValue(
+          internalApi.expressionParams$,
+          (v: unknown) => isObject(v) && 'searchContext' in v
+        );
+
+        const params = internalApi.expressionParams$.getValue()!;
+        expect(params.searchContext).toEqual(
+          expect.objectContaining({
+            projectRouting,
+          })
+        );
+
+        return false;
+      },
+      undefined,
+      {
+        parentApiOverrides: createUnifiedSearchApi(
+          { query: '', language: 'kuery' },
+          [],
+          { from: 'now-7d', to: 'now' },
+          projectRouting
+        ),
+      }
+    );
+  });
+
+  it('should handle undefined projectRouting from parent API', async () => {
+    await expectRerenderOnDataLoader(
+      async ({ internalApi }) => {
+        await waitForValue(
+          internalApi.expressionParams$,
+          (v: unknown) => isObject(v) && 'searchContext' in v
+        );
+
+        const params = internalApi.expressionParams$.getValue()!;
+        expect(params.searchContext).toEqual(
+          expect.objectContaining({
+            projectRouting: undefined,
+          })
+        );
+
+        return false;
+      },
+      undefined,
+      {
+        parentApiOverrides: createUnifiedSearchApi(
+          { query: '', language: 'kuery' },
+          [],
+          { from: 'now-7d', to: 'now' },
+          undefined
+        ),
+      }
+    );
+  });
+
+  it('should propagate isApproximate from parent API to search context', async () => {
+    await expectRerenderOnDataLoader(
+      async ({ internalApi }) => {
+        await waitForValue(
+          internalApi.expressionParams$,
+          (v: unknown) => isObject(v) && 'searchContext' in v
+        );
+
+        const params = internalApi.expressionParams$.getValue()!;
+        expect(params.searchContext).toEqual(
+          expect.objectContaining({
+            isApproximate: true,
+          })
+        );
+
+        return false;
+      },
+      undefined,
+      {
+        parentApiOverrides: { isApproximate$: new BehaviorSubject<boolean | undefined>(true) },
+      }
+    );
+  });
+
+  it('should default isApproximate to false when parent API does not publish it', async () => {
+    await expectRerenderOnDataLoader(
+      async ({ internalApi }) => {
+        await waitForValue(
+          internalApi.expressionParams$,
+          (v: unknown) => isObject(v) && 'searchContext' in v
+        );
+
+        const params = internalApi.expressionParams$.getValue()!;
+        expect(params.searchContext).toEqual(
+          expect.objectContaining({
+            isApproximate: false,
+          })
+        );
+
+        return false;
+      },
+      undefined,
+      {
+        parentApiOverrides: createUnifiedSearchApi({ query: '', language: 'kuery' }, [], {
+          from: 'now-7d',
+          to: 'now',
+        }),
       }
     );
   });
@@ -445,8 +517,8 @@ describe('Data Loader', () => {
         ...internalApi.attributes$.getValue(),
         title: faker.lorem.word(),
       });
-      (api.savedObjectId$ as BehaviorSubject<string | undefined>).next('newSavedObjectId');
-      return 'savedObjectId';
+      (api.savedObjectId$ as BehaviorSubject<string | undefined>).next('newRefId');
+      return 'refId';
     });
   });
 
@@ -492,6 +564,8 @@ describe('Data Loader', () => {
         expect(error.message).toEqual(
           'Could not find the data view: 90943e30-9a47-11e8-b64d-95841ca0b247'
         );
+
+        expect(internalApi.updateExpressionParams).not.toHaveBeenCalled();
         return false;
       },
       undefined,
@@ -500,8 +574,8 @@ describe('Data Loader', () => {
         // Mock the testing datasource to return an error when asked for checkIntegrity
         servicesOverrides: {
           datasourceMap: {
-            form_based: {
-              ...createMockDatasource('form_based'),
+            formBased: {
+              ...createMockDatasource('formBased'),
               checkIntegrity: jest.fn().mockReturnValue(['90943e30-9a47-11e8-b64d-95841ca0b247']),
             },
           },
@@ -512,7 +586,7 @@ describe('Data Loader', () => {
             activeAttributes: {
               ...defaultDoc,
               visualizationType: 'lnsXY',
-              state: { ...defaultDoc.state, datasourceStates: { form_based: {} } },
+              state: { ...defaultDoc.state, datasourceStates: { formBased: {} } },
             },
             mergedSearchContext: {
               now: Date.now(),
@@ -532,21 +606,164 @@ describe('Data Loader', () => {
     );
   });
 
+  it('should surface a runtime error as a blocking error and drop it on the next reload', async () => {
+    await expectRerenderOnDataLoader(async ({ internalApi }) => {
+      await waitForValue(
+        internalApi.expressionParams$,
+        (v: unknown) => isObject(v) && 'expression' in v
+      );
+
+      // the expression pipeline fails at runtime, once the params are handed to the renderer
+      internalApi.expressionParams$.getValue()!.onRuntimeError(new Error('runtime failure'));
+      expect(internalApi.blockingError$.getValue()?.message).toEqual('runtime failure');
+
+      // a change in the attributes triggers a reload
+      (internalApi.attributes$ as BehaviorSubject<LensDocument | undefined>).next({
+        ...internalApi.attributes$.getValue(),
+        title: faker.lorem.word(),
+      });
+      jest.advanceTimersByTime(200);
+
+      await waitFor(() => expect(internalApi.blockingError$.getValue()).toBeUndefined());
+
+      return 'attributes';
+    });
+  });
+
+  it('should publish the rebuilt expression when a stale runtime error arrives while reloading', async () => {
+    const buildResult = {
+      ast: 'expression_string',
+      activeVisualizationState: {},
+      activeDatasourceState: {},
+    };
+    const error = new Error('runtime failure');
+    let staleParams: ExpressionWrapperProps | undefined;
+    const documentToExpression = jest
+      .fn()
+      .mockResolvedValueOnce(buildResult)
+      // the previous renderer is still mounted while the new expression is built, so it can
+      // fail in between: this replicates what ExpressionWrapper does on a render error
+      .mockImplementationOnce(async () => {
+        staleParams?.addUserMessages(getOriginalRequestErrorMessages(error));
+        staleParams?.onRuntimeError(error);
+        return buildResult;
+      });
+
+    await expectRerenderOnDataLoader(
+      async ({ internalApi, getState }) => {
+        staleParams = await waitForValue(
+          internalApi.expressionParams$,
+          (v: unknown) => isObject(v) && 'expression' in v
+        );
+
+        // the new attributes trigger a reload, and the state used to rebuild the expression
+        // has to follow the emission
+        const attributes = getLensAttributesMock({ title: faker.lorem.word() });
+        getState.mockReturnValue({ attributes });
+        (internalApi.attributes$ as BehaviorSubject<LensDocument | undefined>).next(attributes);
+        jest.advanceTimersByTime(200);
+
+        // the stale error should not prevent the new expression from being rendered
+        await waitFor(() => {
+          expect(internalApi.updateExpressionParams).toHaveBeenCalledTimes(2);
+          expect(internalApi.blockingError$.getValue()).toBeUndefined();
+        });
+
+        return 'attributes';
+      },
+      undefined,
+      { servicesOverrides: { documentToExpression } }
+    );
+  });
+
   it('should re-render on ES|QL variable changes', async () => {
     const baseAttributes = getLensAttributesMock();
     await expectRerenderOnDataLoader(
-      async ({ internalApi }) => {
-        (internalApi.esqlVariables$ as BehaviorSubject<ESQLControlVariable[]>).next([
+      async ({ parentApi }) => {
+        (parentApi.esqlVariables$ as BehaviorSubject<ESQLControlVariable[]>).next([
           { key: 'foo', value: faker.database.column(), type: ESQLVariableType.FIELDS },
         ]);
-        return 'ESQLvariables';
+        return 'searchContext';
       },
       {
         attributes: getLensAttributesMock({
-          state: { ...baseAttributes.state, query: { esql: 'from index | where $foo > 0' } },
+          state: {
+            ...baseAttributes.state,
+            datasourceStates: {
+              textBased: {
+                layers: {
+                  layer1: { query: { esql: 'from index | where $foo > 0' }, columns: [] },
+                },
+              },
+            },
+          },
         }),
       }
     );
+  });
+
+  it('should call setApproximationApplied onData', async () => {
+    const setApproximationApplied = jest.fn();
+    const runtimeState: LensRuntimeState = { attributes: getLensAttributesMock() };
+    const parentApi = {
+      ...createUnifiedSearchApi(),
+      searchSessionId$: new BehaviorSubject<string>(''),
+      esqlVariables$: new BehaviorSubject<ESQLControlVariable[] | undefined>([]),
+      onLoad: jest.fn(),
+      onBeforeBadgesRender: jest.fn(),
+      onBrushEnd: jest.fn(),
+      onFilter: jest.fn(),
+      onTableRowClick: jest.fn(),
+    };
+    const api: LensApi = { ...getLensApiMock(), parentApi };
+    const getState = jest.fn(() => runtimeState);
+    const internalApi = getLensInternalApiMock({
+      attributes$: new BehaviorSubject(runtimeState.attributes),
+    });
+    const services = {
+      ...makeEmbeddableServices(new BehaviorSubject<string>(''), undefined, {
+        visOverrides: { id: 'lnsXY' },
+        dataOverrides: { id: 'formBased' },
+      }),
+      documentToExpression: jest.fn().mockResolvedValue({ ast: 'expression_string' }),
+    };
+
+    const { cleanup } = loadEmbeddableData(
+      faker.string.uuid(),
+      getState,
+      api,
+      parentApi,
+      internalApi,
+      services,
+      undefined,
+      setApproximationApplied
+    );
+
+    jest.advanceTimersByTime(100);
+    await waitFor(() => expect(internalApi.dispatchRenderStart).toHaveBeenCalledTimes(1));
+
+    await waitForValue(
+      internalApi.expressionParams$,
+      (v: unknown) => isObject(v) && 'onData$' in v
+    );
+
+    const params = internalApi.expressionParams$.getValue();
+    params?.onData$?.(undefined, {
+      tables: {
+        tables: {
+          layer1: {
+            type: 'datatable' as const,
+            columns: [],
+            rows: [],
+            meta: { approximationApplied: true },
+          },
+        },
+      },
+    });
+
+    expect(setApproximationApplied).toHaveBeenCalledWith(true);
+
+    cleanup();
   });
 
   it('should not re-render on ES|QL variable identical changes', async () => {
@@ -562,14 +779,88 @@ describe('Data Loader', () => {
       },
       {
         attributes: getLensAttributesMock({
-          state: { ...baseAttributes.state, query: { esql: 'from index | where $foo > 0' } },
+          state: {
+            ...baseAttributes.state,
+            datasourceStates: {
+              textBased: {
+                layers: {
+                  layer1: { query: { esql: 'from index | where $foo > 0' }, columns: [] },
+                },
+              },
+            },
+          },
         }),
       },
       {
         internalApiOverrides: {
-          esqlVariables$: buildObservableVariable<ESQLControlVariable[]>(variables)[0],
+          esqlVariables$: new BehaviorSubject<ESQLControlVariable[]>(variables),
         },
       }
     );
+  });
+
+  it('should rebuild the expression when dark mode changes', async () => {
+    const theme$ = new BehaviorSubject<CoreTheme>(lightTheme);
+    const documentToExpression = jest.fn().mockResolvedValue({ ast: 'expression_string' });
+    await expectRerenderOnDataLoader(
+      async () => {
+        theme$.next({ ...lightTheme, darkMode: true });
+        return 'theme';
+      },
+      undefined,
+      {
+        servicesOverrides: { coreStart: createCoreStartWithTheme(theme$), documentToExpression },
+      }
+    );
+    await waitFor(() => expect(documentToExpression).toHaveBeenCalledTimes(2));
+  });
+
+  it('should not re-render when the theme emits an unchanged dark mode', async () => {
+    const theme$ = new BehaviorSubject<CoreTheme>(lightTheme);
+    await expectRerenderOnDataLoader(
+      async () => {
+        theme$.next({ ...lightTheme });
+        return false;
+      },
+      undefined,
+      { servicesOverrides: { coreStart: createCoreStartWithTheme(theme$) } }
+    );
+  });
+
+  it('should not re-render on a dark mode change after cleanup', async () => {
+    const theme$ = new BehaviorSubject<CoreTheme>(lightTheme);
+    const runtimeState: LensRuntimeState = { attributes: getLensAttributesMock() };
+    const parentApi = {
+      ...createUnifiedSearchApi(),
+      searchSessionId$: new BehaviorSubject<string>(''),
+      esqlVariables$: new BehaviorSubject<ESQLControlVariable[] | undefined>([]),
+    };
+    const internalApi = getLensInternalApiMock({
+      attributes$: new BehaviorSubject(runtimeState.attributes),
+    });
+    const services = {
+      ...makeEmbeddableServices(new BehaviorSubject<string>(''), undefined, {
+        visOverrides: { id: 'lnsXY' },
+        dataOverrides: { id: 'formBased' },
+      }),
+      documentToExpression: jest.fn().mockResolvedValue({ ast: 'expression_string' }),
+      coreStart: createCoreStartWithTheme(theme$),
+    };
+    const { cleanup } = loadEmbeddableData(
+      faker.string.uuid(),
+      jest.fn(() => runtimeState),
+      { ...getLensApiMock(), parentApi },
+      parentApi,
+      internalApi,
+      services
+    );
+    jest.advanceTimersByTime(100);
+    await waitFor(() => expect(internalApi.dispatchRenderStart).toHaveBeenCalledTimes(1));
+
+    cleanup();
+    theme$.next({ ...lightTheme, darkMode: true });
+    jest.advanceTimersByTime(200);
+
+    expect(internalApi.dispatchRenderStart).toHaveBeenCalledTimes(1);
   });
 });

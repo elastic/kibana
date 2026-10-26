@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FieldMap } from '@kbn/alerts-as-data-utils';
+import type { FieldMap } from '@kbn/alerts-as-data-utils';
 
 export const uptimeRuleFieldMap: FieldMap = {
   // common fields
@@ -55,6 +55,10 @@ export const uptimeRuleFieldMap: FieldMap = {
   },
   'monitor.state.id': {
     type: 'keyword',
+    required: false,
+  },
+  'monitor.failed_step_info': {
+    type: 'text',
     required: false,
   },
   configId: {

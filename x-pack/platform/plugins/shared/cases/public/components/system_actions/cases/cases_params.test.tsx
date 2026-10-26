@@ -7,7 +7,7 @@
 
 import React from 'react';
 import type { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public/types';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import userEvent, { type UserEvent } from '@testing-library/user-event';
 import { showEuiComboBoxOptions } from '@elastic/eui/lib/test/rtl';
 import { useAlertsDataView } from '@kbn/alerts-ui-shared/src/common/hooks/use_alerts_data_view';
@@ -19,16 +19,54 @@ import { useGetAllCaseConfigurations } from '../../../containers/configure/use_g
 import { useGetAllCaseConfigurationsResponse } from '../../configure_cases/__mock__';
 import { templatesConfigurationMock } from '../../../containers/mock';
 import * as utils from '../../../containers/configure/utils';
+import { ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID } from '@kbn/elastic-assistant-common';
+import { createMockActionConnector } from '@kbn/alerts-ui-shared/src/common/test_utils/connector.mock';
+import { MAX_OPEN_CASES_DEFAULT_MAXIMUM } from '../../../../common/constants';
+import { KibanaServices } from '../../../common/lib/kibana/services';
+import { useLicense } from '../../../common/use_license';
 
 jest.mock('@kbn/alerts-ui-shared/src/common/hooks/use_alerts_data_view');
 jest.mock('../../../common/lib/kibana/use_application');
 jest.mock('../../../common/lib/kibana/kibana_react');
+jest.mock('../../../common/use_license');
 jest.mock('../../../containers/configure/use_get_all_case_configurations');
+jest.mock('../../templates_v2/hooks/use_get_templates', () => ({
+  useGetTemplates: (...args: unknown[]) => mockUseGetTemplates(...args),
+}));
+
+// Mock TemplateSelectorV2 to control its onChange callback in isolation tests.
+// Use requireActual so the real findV2Template implementation is available to cases_params.tsx.
+jest.mock('./template_selector_v2', () => ({
+  ...jest.requireActual('./template_selector_v2'),
+  TemplateSelectorV2: ({
+    onChange,
+    isDisabled,
+    templateId,
+  }: {
+    onChange: (p: { templateId: string | null; templateVersion: string | null }) => void;
+    isDisabled?: boolean;
+    templateId: string | null;
+  }) => (
+    <button
+      type="button"
+      data-test-subj="cases-connector-template-v2-select"
+      disabled={isDisabled}
+      onClick={() => onChange({ templateId: 'tmpl-v2', templateVersion: '1' })}
+    >
+      {`V2 Selector templateId=${templateId}`}
+    </button>
+  ),
+}));
+
+const mockUseGetTemplates = jest
+  .fn()
+  .mockReturnValue({ data: { templates: [] }, isLoading: false });
 
 const useKibanaMock = jest.mocked(useKibana);
 const useAlertsDataViewMock = jest.mocked(useAlertsDataView);
 const useApplicationMock = useApplication as jest.Mock;
 const useGetAllCaseConfigurationsMock = useGetAllCaseConfigurations as jest.Mock;
+const useLicenseMock = useLicense as jest.Mock;
 
 const actionParams = {
   subAction: 'run',
@@ -39,14 +77,12 @@ const actionParams = {
   },
 };
 
-const connector: ActionConnector = {
+const connector: ActionConnector = createMockActionConnector({
   id: 'test',
   actionTypeId: '.test',
   name: 'Test',
-  isPreconfigured: false,
-  isDeprecated: false,
-  isSystemAction: true as const,
-};
+});
+
 const editAction = jest.fn();
 const defaultProps = {
   actionConnector: connector,
@@ -72,8 +108,13 @@ describe('CasesParamsFields renders', () => {
     // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
     user = userEvent.setup({
       advanceTimers: jest.advanceTimersByTime,
+      pointerEventsCheck: 0,
     });
     useApplicationMock.mockReturnValueOnce({ appId: 'management' });
+    useLicenseMock.mockReturnValue({
+      isAtLeastGold: () => true,
+      isAtLeastPlatinum: () => true,
+    });
     useAlertsDataViewMock.mockReturnValue({
       isLoading: false,
       dataView: {
@@ -96,7 +137,13 @@ describe('CasesParamsFields renders', () => {
     });
     useGetAllCaseConfigurationsMock.mockImplementation(() => useGetAllCaseConfigurationsResponse);
     useKibanaMock.mockReturnValue({
-      services: { ...createStartServicesMock(), data: { dataViews: {} } },
+      services: {
+        ...createStartServicesMock(),
+        uiSettings: {
+          get: jest.fn().mockReturnValue(MAX_OPEN_CASES_DEFAULT_MAXIMUM),
+        },
+        data: { dataViews: {} },
+      },
     } as unknown as ReturnType<typeof useKibana>);
   });
 
@@ -112,6 +159,8 @@ describe('CasesParamsFields renders', () => {
     expect(await screen.findByTestId('time-window-unit-select')).toBeInTheDocument();
     expect(await screen.findByTestId('create-case-template-select')).toBeInTheDocument();
     expect(await screen.findByTestId('reopen-case')).toBeInTheDocument();
+    expect(screen.queryByTestId('auto-push-case')).not.toBeInTheDocument();
+    expect(await screen.findByTestId('maximum-case-to-open-input')).toBeInTheDocument();
   });
 
   it('renders loading state of grouping by fields correctly', async () => {
@@ -152,6 +201,7 @@ describe('CasesParamsFields renders', () => {
       reopenClosedCases: false,
       groupingBy: [],
       templateId: null,
+      templateVersion: null,
     });
   });
 
@@ -166,6 +216,47 @@ describe('CasesParamsFields renders', () => {
     expect(await screen.findByText('error')).toBeInTheDocument();
   });
 
+  it('renders the default maximum amount of cases correctly', async () => {
+    render(<CasesParamsFields {...defaultProps} />);
+
+    const maximumCasesInput = await screen.findByTestId('maximum-case-to-open-input');
+    expect(maximumCasesInput).toHaveValue(5);
+
+    // set to the maximum
+    fireEvent.change(maximumCasesInput, { target: { value: '20' } });
+    expect(editAction.mock.calls[0][1].maximumCasesToOpen).toEqual(20);
+    expect(maximumCasesInput).toBeValid();
+
+    // set to an invalid value
+    fireEvent.change(maximumCasesInput, { target: { value: '22' } });
+    expect(maximumCasesInput).toBeInvalid();
+  });
+
+  it('uses the configured advanced setting ceiling for the maximum amount of cases', async () => {
+    useKibanaMock.mockReturnValue({
+      services: {
+        ...createStartServicesMock(),
+        uiSettings: {
+          get: jest.fn().mockReturnValue(30),
+        },
+        data: { dataViews: {} },
+      },
+    } as unknown as ReturnType<typeof useKibana>);
+
+    render(<CasesParamsFields {...defaultProps} />);
+
+    expect(
+      await screen.findByText('Set the maximum amount of cases to be opened. (Max 30)')
+    ).toBeInTheDocument();
+
+    const maximumCasesInput = await screen.findByTestId('maximum-case-to-open-input');
+    fireEvent.change(maximumCasesInput, { target: { value: '30' } });
+    expect(maximumCasesInput).toBeValid();
+
+    fireEvent.change(maximumCasesInput, { target: { value: '31' } });
+    expect(maximumCasesInput).toBeInvalid();
+  });
+
   describe('UI updates', () => {
     it('renders grouping by field options', async () => {
       render(<CasesParamsFields {...defaultProps} />);
@@ -177,6 +268,39 @@ describe('CasesParamsFields renders', () => {
       expect(await screen.findByText('host.ip')).toBeInTheDocument();
 
       expect(screen.queryByText('host.geo.location')).not.toBeInTheDocument();
+    });
+
+    it('renders the auto push case option correctly', async () => {
+      useGetAllCaseConfigurationsMock.mockImplementation(() => ({
+        ...useGetAllCaseConfigurationsResponse,
+        data: [
+          {
+            ...useGetAllCaseConfigurationsResponse.data[0],
+            templates: templatesConfigurationMock,
+          },
+        ],
+      }));
+
+      const props = {
+        ...defaultProps,
+        producerId: 'siem',
+        actionParams: {
+          subAction: 'run',
+          subActionParams: {
+            ...actionParams.subActionParams,
+            templateId: templatesConfigurationMock[3].key,
+          },
+        },
+      };
+
+      render(<CasesParamsFields {...props} />);
+
+      const autoPushCase = await screen.findByTestId('auto-push-case');
+      expect(autoPushCase).not.toBeChecked();
+
+      // click and observe update
+      await user.click(autoPushCase);
+      expect(editAction.mock.calls[0][1].autoPushCase).toEqual(true);
     });
 
     it('updates grouping by field', async () => {
@@ -230,6 +354,20 @@ describe('CasesParamsFields renders', () => {
       await user.type(await screen.findByTestId('comboBoxSearchInput'), 'alert.name{enter}');
 
       expect(editAction.mock.calls[0][1].groupingBy).toEqual(['alert.name']);
+    });
+
+    it('shows an error when the typed grouping by field does not match any field', async () => {
+      render(<CasesParamsFields {...defaultProps} />);
+
+      await user.click(await screen.findByTestId('group-by-alert-field-combobox'));
+
+      await showEuiComboBoxOptions();
+
+      await user.type(await screen.findByTestId('comboBoxSearchInput'), 'foobar');
+
+      expect(
+        await screen.findByText('Invalid field. Select a field from the list.')
+      ).toBeInTheDocument();
     });
 
     it('renders default template correctly', async () => {
@@ -316,6 +454,54 @@ describe('CasesParamsFields renders', () => {
       getConfigurationByOwnerSpy.mockRestore();
     });
 
+    it('renders observability templates if the project is serverless observability', async () => {
+      useKibanaMock.mockReturnValue({
+        services: {
+          ...createStartServicesMock(),
+          // simulate a observability security project
+          cloud: { isServerlessEnabled: true, serverless: { projectType: 'observability' } },
+          data: { dataViews: {} },
+        },
+      } as unknown as ReturnType<typeof useKibana>);
+
+      const configuration = {
+        ...useGetAllCaseConfigurationsResponse.data[0],
+        templates: templatesConfigurationMock,
+      };
+      useGetAllCaseConfigurationsMock.mockImplementation(() => ({
+        ...useGetAllCaseConfigurationsResponse,
+        data: [configuration],
+      }));
+      const getConfigurationByOwnerSpy = jest
+        .spyOn(utils, 'getConfigurationByOwner')
+        .mockImplementation(() => configuration);
+
+      const securityOwnedRule = {
+        ...defaultProps,
+        // these two would normally produce a security owner
+        producerId: 'securitySolution',
+        featureId: 'securitySolution',
+        actionParams: {
+          subAction: 'run',
+          subActionParams: {
+            ...actionParams.subActionParams,
+            templateId: templatesConfigurationMock[1].key,
+          },
+        },
+      };
+
+      render(<CasesParamsFields {...securityOwnedRule} />);
+
+      expect(getConfigurationByOwnerSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          // the observability owner was forced
+          owner: 'observability',
+        })
+      );
+
+      getConfigurationByOwnerSpy.mockRestore();
+    });
+
     it('updates template correctly', async () => {
       useGetAllCaseConfigurationsMock.mockReturnValueOnce({
         ...useGetAllCaseConfigurationsResponse,
@@ -369,6 +555,24 @@ describe('CasesParamsFields renders', () => {
       expect(editAction.mock.calls[0][1].timeWindow).toEqual('6d');
     });
 
+    it('renders time window warning', async () => {
+      const { rerender } = render(<CasesParamsFields {...defaultProps} />);
+
+      expect(screen.queryByTestId('show-time-window-warning')).not.toBeInTheDocument();
+
+      const updatedProps = {
+        ...defaultProps,
+        actionParams: {
+          ...defaultProps.actionParams,
+          subActionParams: { ...defaultProps.actionParams.subActionParams, timeWindow: '10m' },
+        },
+      };
+
+      rerender(<CasesParamsFields {...updatedProps} />);
+
+      expect(await screen.findByTestId('show-time-window-warning')).toBeInTheDocument();
+    });
+
     it('updates reopenClosedCases', async () => {
       render(<CasesParamsFields {...defaultProps} />);
 
@@ -377,6 +581,315 @@ describe('CasesParamsFields renders', () => {
       await user.click(await screen.findByTestId('reopen-case'));
 
       expect(editAction.mock.calls[0][1].reopenClosedCases).toEqual(true);
+    });
+
+    it('renders the extract observables select', async () => {
+      render(<CasesParamsFields {...defaultProps} producerId="siem" />);
+
+      expect(await screen.findByTestId('extract-observables-select')).toBeInTheDocument();
+    });
+
+    it('defaults extract observables to "Use space default"', async () => {
+      render(<CasesParamsFields {...defaultProps} producerId="siem" />);
+
+      const select = await screen.findByTestId('extract-observables-select');
+      expect((select as HTMLSelectElement).value).toBe('inherit');
+    });
+
+    it('labels "Use space default" with the resolved value when it is on', async () => {
+      render(<CasesParamsFields {...defaultProps} producerId="siem" />);
+
+      const select = await screen.findByTestId('extract-observables-select');
+      expect(within(select).getByText('Use space default (On)')).toBeInTheDocument();
+    });
+
+    it('labels "Use space default" with the resolved value when it is off', async () => {
+      useGetAllCaseConfigurationsMock.mockImplementation(() => ({
+        ...useGetAllCaseConfigurationsResponse,
+        data: [
+          {
+            ...useGetAllCaseConfigurationsResponse.data[0],
+            extractObservables: false,
+          },
+        ],
+      }));
+
+      render(<CasesParamsFields {...defaultProps} producerId="siem" />);
+
+      const select = await screen.findByTestId('extract-observables-select');
+      expect(within(select).getByText('Use space default (Off)')).toBeInTheDocument();
+    });
+
+    it('updates extractObservables to true when "On" is selected', async () => {
+      render(<CasesParamsFields {...defaultProps} producerId="siem" />);
+
+      const select = await screen.findByTestId('extract-observables-select');
+      await user.selectOptions(select, 'on');
+
+      expect(editAction.mock.calls[0][1].extractObservables).toEqual(true);
+    });
+
+    it('updates extractObservables to false when "Off" is selected', async () => {
+      render(<CasesParamsFields {...defaultProps} producerId="siem" />);
+
+      const select = await screen.findByTestId('extract-observables-select');
+      await user.selectOptions(select, 'off');
+
+      expect(editAction.mock.calls[0][1].extractObservables).toEqual(false);
+    });
+
+    it('updates extractObservables to null when "Use space default" is selected', async () => {
+      const propsWithOverride = {
+        ...defaultProps,
+        producerId: 'siem',
+        actionParams: {
+          ...defaultProps.actionParams,
+          subActionParams: {
+            ...defaultProps.actionParams.subActionParams,
+            extractObservables: true,
+          },
+        },
+      };
+
+      render(<CasesParamsFields {...propsWithOverride} />);
+
+      const select = await screen.findByTestId('extract-observables-select');
+      await user.selectOptions(select, 'inherit');
+
+      expect(editAction.mock.calls[0][1].extractObservables).toEqual(null);
+    });
+
+    it('hides the select for an owner that disables observables', async () => {
+      const observabilityOwnedRule = {
+        ...defaultProps,
+        producerId: 'observability',
+        featureId: 'observability',
+      };
+
+      render(<CasesParamsFields {...observabilityOwnedRule} />);
+
+      expect(await screen.findByTestId('time-window-size-input')).toBeInTheDocument();
+      expect(screen.queryByTestId('extract-observables-select')).not.toBeInTheDocument();
+    });
+
+    it('hides the select for an owner that does not auto-extract by default (Stack)', async () => {
+      const stackOwnedRule = {
+        ...defaultProps,
+        producerId: 'stackAlerts',
+        featureId: 'stackAlerts',
+      };
+
+      render(<CasesParamsFields {...stackOwnedRule} />);
+
+      expect(await screen.findByTestId('time-window-size-input')).toBeInTheDocument();
+      expect(screen.queryByTestId('extract-observables-select')).not.toBeInTheDocument();
+    });
+
+    it('hides the select below a Platinum license', async () => {
+      useLicenseMock.mockReturnValue({
+        isAtLeastGold: () => true,
+        isAtLeastPlatinum: () => false,
+      });
+
+      render(<CasesParamsFields {...defaultProps} producerId="siem" />);
+
+      expect(await screen.findByTestId('time-window-size-input')).toBeInTheDocument();
+      expect(screen.queryByTestId('extract-observables-select')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('Attack Discovery', () => {
+    it('does not render `group by` component', async () => {
+      const newProps = {
+        ...defaultProps,
+        ruleTypeId: ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID,
+      };
+      render(<CasesParamsFields {...newProps} />);
+
+      expect(screen.queryByTestId('group-by-alert-field-combobox')).not.toBeInTheDocument();
+    });
+
+    it('does not render `time window` component', async () => {
+      const newProps = {
+        ...defaultProps,
+        ruleTypeId: ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID,
+      };
+      render(<CasesParamsFields {...newProps} />);
+
+      expect(screen.queryByTestId('time-window-size-input')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('time-window-unit-select')).not.toBeInTheDocument();
+    });
+
+    it('does not render `reopen case` component', async () => {
+      const newProps = {
+        ...defaultProps,
+        ruleTypeId: ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID,
+      };
+      render(<CasesParamsFields {...newProps} />);
+
+      expect(screen.queryByTestId('reopen-case')).not.toBeInTheDocument();
+    });
+
+    it('renders disabled `template selector` component', async () => {
+      const newProps = {
+        ...defaultProps,
+        ruleTypeId: ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID,
+      };
+      render(<CasesParamsFields {...newProps} />);
+
+      const templateSelectorComponent = await screen.findByTestId('create-case-template-select');
+
+      expect(templateSelectorComponent).toBeInTheDocument();
+      expect(templateSelectorComponent).toBeDisabled();
+    });
+
+    it('shows attack discovery explanation tooltip', async () => {
+      const newProps = {
+        ...defaultProps,
+        ruleTypeId: ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID,
+      };
+      render(<CasesParamsFields {...newProps} />);
+
+      await user.hover(await screen.findByTestId('create-case-template-select'));
+
+      expect(await screen.findByTestId('case-action-attack-discovery-tooltip')).toBeTruthy();
+      expect(
+        await screen.findByText(
+          'Attack Discovery Schedules fully manage Case actions, automatically filling in all fields for new Cases.'
+        )
+      ).toBeInTheDocument();
+    });
+  });
+
+  describe('Templates v2 (templates.enabled=true)', () => {
+    const enableTemplatesV2 = () =>
+      jest
+        .spyOn(KibanaServices, 'getConfig')
+        .mockReturnValue({ templates: { enabled: true } } as ReturnType<
+          typeof KibanaServices.getConfig
+        >);
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+      mockUseGetTemplates.mockReturnValue({ data: { templates: [] }, isLoading: false });
+    });
+
+    it('renders the v2 template selector when templates.enabled is true', async () => {
+      enableTemplatesV2();
+      render(<CasesParamsFields {...defaultProps} />);
+
+      expect(await screen.findByTestId('cases-connector-template-v2-select')).toBeInTheDocument();
+      expect(screen.queryByTestId('create-case-template-select')).not.toBeInTheDocument();
+    });
+
+    it('does not render auto-push checkbox when v2 template has no connector', async () => {
+      enableTemplatesV2();
+      mockUseGetTemplates.mockReturnValue({
+        data: {
+          templates: [
+            {
+              templateId: 'tmpl-v2',
+              definition: 'title: Test',
+              definitionString: 'title: Test',
+            },
+          ],
+        },
+        isLoading: false,
+      });
+      const props = {
+        ...defaultProps,
+        actionParams: {
+          ...actionParams,
+          subActionParams: { ...actionParams.subActionParams, templateId: 'tmpl-v2' },
+        },
+      };
+      render(<CasesParamsFields {...props} />);
+
+      expect(screen.queryByTestId('auto-push-case')).not.toBeInTheDocument();
+    });
+
+    it('renders auto-push checkbox when v2 template has a connector', async () => {
+      enableTemplatesV2();
+      const definitionString = [
+        'connector:',
+        '  type: .jira',
+        '  id: jira-connector-id',
+        '  fields: null',
+      ].join('\n');
+      mockUseGetTemplates.mockReturnValue({
+        data: {
+          templates: [{ templateId: 'tmpl-v2', definition: definitionString, definitionString }],
+        },
+        isLoading: false,
+      });
+      const props = {
+        ...defaultProps,
+        actionParams: {
+          ...actionParams,
+          subActionParams: { ...actionParams.subActionParams, templateId: 'tmpl-v2' },
+        },
+      };
+      render(<CasesParamsFields {...props} />);
+
+      expect(await screen.findByTestId('auto-push-case')).toBeInTheDocument();
+    });
+
+    it('renders auto-push checkbox for a legacy v1 key bridged to a v2 template with connector', async () => {
+      enableTemplatesV2();
+      const definitionString = [
+        'connector:',
+        '  type: .jira',
+        '  id: jira-connector-id',
+        '  fields: null',
+      ].join('\n');
+      mockUseGetTemplates.mockReturnValue({
+        data: {
+          templates: [
+            {
+              templateId: 'tmpl-v2-uuid',
+              legacyKey: 'legacy-key-1',
+              definition: definitionString,
+              definitionString,
+            },
+          ],
+        },
+        isLoading: false,
+      });
+      const props = {
+        ...defaultProps,
+        actionParams: {
+          ...actionParams,
+          // Rule still stores the pre-migration v1 key, not the v2 UUID
+          subActionParams: { ...actionParams.subActionParams, templateId: 'legacy-key-1' },
+        },
+      };
+      render(<CasesParamsFields {...props} />);
+
+      expect(await screen.findByTestId('auto-push-case')).toBeInTheDocument();
+    });
+
+    it('writes templateId and templateVersion when onChange fires on v2 selector', async () => {
+      enableTemplatesV2();
+      render(<CasesParamsFields {...defaultProps} />);
+
+      await user.click(await screen.findByTestId('cases-connector-template-v2-select'));
+
+      const lastCall = editAction.mock.calls[editAction.mock.calls.length - 1];
+      expect(lastCall[1].templateId).toBe('tmpl-v2');
+      expect(lastCall[1].templateVersion).toBe('1');
+    });
+
+    it('shows v2 selector (disabled) for attack discovery rules when templates.enabled is true', async () => {
+      enableTemplatesV2();
+      const newProps = {
+        ...defaultProps,
+        ruleTypeId: ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID,
+      };
+      render(<CasesParamsFields {...newProps} />);
+
+      const templateSelect = await screen.findByTestId('cases-connector-template-v2-select');
+      expect(templateSelect).toBeInTheDocument();
+      expect(templateSelect).toBeDisabled();
     });
   });
 });

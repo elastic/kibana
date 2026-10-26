@@ -17,9 +17,10 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import styled from 'styled-components';
 
-import { AGENT_POLICY_ADVANCED_SETTINGS } from '../../../../../../common/settings';
+import { getAgentPolicyAdvancedSettings } from '../../../../../../common/settings';
 import type { NewAgentPolicy, AgentPolicy } from '../../../types';
-import { useAuthz } from '../../../../../hooks';
+import { useAuthz, useStartServices } from '../../../../../hooks';
+import { ExperimentalFeaturesService } from '../../../../../services';
 
 import { ConfiguredSettings } from '../../../components/form_settings';
 
@@ -70,7 +71,16 @@ export const AgentPolicyForm: React.FunctionComponent<Props> = ({
   setInvalidSpaceError,
 }) => {
   const authz = useAuthz();
-  const isDisabled = !authz.fleet.allAgentPolicies;
+  const { docLinks } = useStartServices();
+  // agentless policies are managed by Elastic: their settings are read-only
+  const isDisabled = !authz.fleet.allAgentPolicies || !!agentPolicy?.supports_agentless;
+  const { enableIncludeTagsInEvents } = ExperimentalFeaturesService.get();
+  const agentPolicyAdvancedSettings = getAgentPolicyAdvancedSettings(docLinks.links.fleet).map(
+    (setting) =>
+      setting.api_field.name === 'agent_features_include_tags_in_events_enabled'
+        ? { ...setting, hidden: !enableIncludeTagsInEvents }
+        : setting
+  );
 
   const generalSettingsWrapper = (children: JSX.Element[]) => (
     <EuiDescribedFormGroup
@@ -147,6 +157,7 @@ export const AgentPolicyForm: React.FunctionComponent<Props> = ({
                 agentPolicy={agentPolicy}
                 updateAgentPolicy={updateAgentPolicy}
                 validation={validation}
+                setInvalidSpaceError={setInvalidSpaceError}
               />
               <>
                 <EuiSpacer size="xl" />
@@ -161,7 +172,7 @@ export const AgentPolicyForm: React.FunctionComponent<Props> = ({
                 </EuiTitle>
                 <EuiSpacer size="m" />
                 <ConfiguredSettings
-                  configuredSettings={AGENT_POLICY_ADVANCED_SETTINGS}
+                  configuredSettings={agentPolicyAdvancedSettings}
                   disabled={isDisabled}
                 />
               </>
@@ -173,6 +184,7 @@ export const AgentPolicyForm: React.FunctionComponent<Props> = ({
               agentPolicy={agentPolicy}
               updateAgentPolicy={updateAgentPolicy}
               validation={validation}
+              setInvalidSpaceError={setInvalidSpaceError}
               disabled={isDisabled}
             />
             <>
@@ -188,10 +200,8 @@ export const AgentPolicyForm: React.FunctionComponent<Props> = ({
               </EuiTitle>
               <EuiSpacer size="m" />
               <ConfiguredSettings
-                configuredSettings={AGENT_POLICY_ADVANCED_SETTINGS}
-                disabled={
-                  isDisabled || !!agentPolicy?.supports_agentless || !!agentPolicy?.is_managed
-                }
+                configuredSettings={agentPolicyAdvancedSettings}
+                disabled={isDisabled || !!agentPolicy?.is_managed}
               />
             </>
             <EuiSpacer size="xl" />

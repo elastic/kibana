@@ -12,8 +12,8 @@ import { EuiFilterButton, EuiPopover, EuiSelectable } from '@elastic/eui';
 import * as i18n from '../../../../common/translations';
 import type { RuleExecutionStatus } from '../../../../../../common/api/detection_engine';
 import { RuleExecutionStatusEnum } from '../../../../../../common/api/detection_engine';
-import { getCapitalizedStatusText } from '../../../../../detections/components/rules/rule_execution_status/utils';
-import { RuleStatusBadge } from '../../../../../detections/components/rules/rule_execution_status/rule_status_badge';
+import { getCapitalizedStatusText } from '../../../../common/components/rule_execution_status/utils';
+import { RuleStatusBadge } from '../../../../common/components/rule_execution_status';
 
 interface OptionData {
   status: RuleExecutionStatus;
@@ -71,7 +71,7 @@ const RuleExecutionStatusSelectorComponent = ({
   const triggerButton = (
     <EuiFilterButton
       grow
-      iconType="arrowDown"
+      iconType="chevronSingleDown"
       onClick={() => {
         setIsExecutionStatusPopoverOpen(!isExecutionStatusPopoverOpen);
       }}
@@ -93,8 +93,9 @@ const RuleExecutionStatusSelectorComponent = ({
       closePopover={() => {
         setIsExecutionStatusPopoverOpen(!isExecutionStatusPopoverOpen);
       }}
-      panelPaddingSize="none"
+      panelPaddingSize="s"
       repositionOnScroll
+      aria-label={i18n.RULE_EXECUTION_STATUS_FILTER}
     >
       <EuiSelectable
         aria-label={i18n.RULE_EXECUTION_STATUS_FILTER}
@@ -109,7 +110,7 @@ const RuleExecutionStatusSelectorComponent = ({
           return (
             <div
               css={css`
-                margin-top: 4px; // aligns the badge within the option
+                display: inline-flex; // ensures styles to align the badge within the option are properly applied
               `}
               data-test-subj="executionStatusFilterOption"
             >

@@ -7,16 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { buildPath } from '@kbn/core-http-browser';
 import { parse as parseUrl } from 'url';
 import type { SerializableRecord } from '@kbn/utility-types';
-import {
-  LegacyShortUrlLocatorParams,
-  LEGACY_SHORT_URL_LOCATOR_ID,
-} from '../../../common/url_service/locators/legacy_short_url_locator';
-import {
-  SHORT_URL_REDIRECT_LOCATOR,
-  ShortUrlRedirectLocatorParams,
-} from '../../../common/url_service/locators/short_url_redirect_locator';
+import { convertRelativeTimeStringToAbsoluteTimeString } from '../../lib/time_utils';
+import type { LegacyShortUrlLocatorParams } from '../../../common/url_service/locators/legacy_short_url_locator';
+import { LEGACY_SHORT_URL_LOCATOR_ID } from '../../../common/url_service/locators/legacy_short_url_locator';
+import type { ShortUrlRedirectLocatorParams } from '../../../common/url_service/locators/short_url_redirect_locator';
+import { SHORT_URL_REDIRECT_LOCATOR } from '../../../common/url_service/locators/short_url_redirect_locator';
 import type {
   IShortUrlClient,
   ShortUrl,
@@ -75,9 +73,29 @@ export class BrowserShortUrlClient implements IShortUrlClient {
   }
 
   public async createWithLocator<P extends SerializableRecord>(
-    params: ShortUrlCreateParams<P>
+    params: ShortUrlCreateParams<P>,
+    isAbsoluteTime?: boolean
   ): Promise<ShortUrlCreateResponse<P>> {
-    const result = await this.create(params);
+    const getUpdatedParams = (inputParams: ShortUrlCreateParams<P>) => {
+      if (!isAbsoluteTime || !inputParams.locator.getTimeRange || !inputParams.locator.setTimeRange)
+        return inputParams;
+
+      const timeRange = inputParams.locator.getTimeRange(inputParams.params);
+
+      return timeRange
+        ? {
+            ...inputParams,
+            params: inputParams.locator.setTimeRange(inputParams.params, {
+              from: convertRelativeTimeStringToAbsoluteTimeString(timeRange.from),
+              to: convertRelativeTimeStringToAbsoluteTimeString(timeRange.to, {
+                roundUp: true,
+              }),
+            }),
+          }
+        : inputParams;
+    };
+
+    const result = await this.create(getUpdatedParams(params));
     const redirectLocator = this.dependencies.locators.get<ShortUrlRedirectLocatorParams>(
       SHORT_URL_REDIRECT_LOCATOR
     )!;
@@ -92,7 +110,10 @@ export class BrowserShortUrlClient implements IShortUrlClient {
     };
   }
 
-  public async createFromLongUrl(longUrl: string): Promise<ShortUrlCreateFromLongUrlResponse> {
+  public async createFromLongUrl(
+    longUrl: string,
+    isAbsoluteTime?: boolean
+  ): Promise<ShortUrlCreateFromLongUrlResponse> {
     const parsedUrl = parseUrl(longUrl);
 
     if (!parsedUrl || !parsedUrl.path) {
@@ -110,12 +131,16 @@ export class BrowserShortUrlClient implements IShortUrlClient {
       throw new Error(`Locator "${LEGACY_SHORT_URL_LOCATOR_ID}" not found`);
     }
 
-    const result = await this.createWithLocator({
-      locator,
-      params: {
-        url: relativeUrl,
+    const result = await this.createWithLocator(
+      {
+        locator,
+        params: {
+          url: relativeUrl,
+        },
       },
-    });
+      isAbsoluteTime
+    );
+
     const shortUrl = await result.locator.getUrl(result.params, { absolute: true });
 
     return {
@@ -126,7 +151,7 @@ export class BrowserShortUrlClient implements IShortUrlClient {
 
   public async get(id: string): Promise<ShortUrl> {
     const { http } = this.dependencies;
-    const data = await http.fetch<ShortUrlData>('/api/short_url/' + id, {
+    const data = await http.fetch<ShortUrlData>(buildPath('/api/short_url/{id}', { id }), {
       method: 'GET',
     });
 
@@ -135,16 +160,19 @@ export class BrowserShortUrlClient implements IShortUrlClient {
 
   public async resolve(slug: string): Promise<ShortUrl> {
     const { http } = this.dependencies;
-    const data = await http.fetch<ShortUrlData>('/api/short_url/_slug/' + slug, {
-      method: 'GET',
-    });
+    const data = await http.fetch<ShortUrlData>(
+      buildPath('/api/short_url/_slug/{slug}', { slug }),
+      {
+        method: 'GET',
+      }
+    );
 
     return { data };
   }
 
   public async delete(id: string): Promise<void> {
     const { http } = this.dependencies;
-    await http.fetch('/api/short_url/' + id, {
+    await http.fetch(buildPath('/api/short_url/{id}', { id }), {
       method: 'DELETE',
     });
   }

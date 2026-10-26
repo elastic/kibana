@@ -6,9 +6,11 @@
  */
 
 import React from 'react';
+// Necessary until components being tested are migrated of styled-components https://github.com/elastic/kibana/issues/219037
+import 'jest-styled-components';
 import { renderWithRouter, shallowWithRouter } from '../../lib';
 import { CertStatus } from './cert_status';
-import * as redux from 'react-redux';
+import * as redux from 'react-redux-v7';
 import moment from 'moment';
 
 describe('CertStatus', () => {

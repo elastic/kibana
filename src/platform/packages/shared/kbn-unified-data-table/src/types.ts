@@ -8,11 +8,17 @@
  */
 
 import type { FunctionComponent } from 'react';
-import type { EuiDataGridCellValueElementProps, EuiDataGridColumn } from '@elastic/eui';
+import type {
+  EuiContextMenuItem,
+  EuiDataGridCellValueElementProps,
+  EuiDataGridColumn,
+} from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils/src/types';
 import type { DataView } from '@kbn/data-views-plugin/common';
+import type { DataSource } from '@kbn/data-source';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-export type { DataTableColumnsMeta } from '@kbn/discover-utils/types';
+import type { SerializableRecord } from '@kbn/utility-types';
+import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 export type { DataGridDensity } from './constants';
 
 /**
@@ -44,6 +50,7 @@ export type DataGridCellValueElementProps = EuiDataGridCellValueElementProps & {
   fieldFormats: FieldFormatsStart;
   closePopover: () => void;
   isCompressed?: boolean;
+  dataSource?: DataSource;
 };
 
 export type CustomCellRenderer = Record<string, FunctionComponent<DataGridCellValueElementProps>>;
@@ -59,3 +66,66 @@ export type CustomGridColumnsConfiguration = Record<
 >;
 
 export type DataGridPaginationMode = 'multiPage' | 'singlePage' | 'infinite';
+
+/**
+ * Render mode of the grid: 'interactive' (default) or 'print', which renders it without
+ * interactive controls (sorting, column actions/resizing, drag-and-drop, etc.)
+ */
+export type DataGridRenderMode = 'interactive' | 'print';
+
+export type DocumentsDisplayMode = 'table' | 'json';
+
+/**
+ * Settings that only apply while the source column is rendered in JSON mode.
+ */
+export interface JsonModeSettings extends SerializableRecord {
+  hideNulls?: boolean;
+  wrapLines?: boolean;
+  /** How many nodes each JSON cell renders by default (≈ one line each); seeds the initial expansion. */
+  defaultRenderedNodes?: number;
+}
+
+export type CustomBulkActions = Array<
+  Omit<React.ComponentProps<typeof EuiContextMenuItem>, 'onClick'> & {
+    onClick: (payload: { selectedDocIds: string[] }) => void;
+    /**
+     * Optional predicate to decide whether the action should be shown for the
+     * current selection. Returning `false` hides the action from the menu.
+     * If omitted, the action is always shown.
+     */
+    isAvailable?: (payload: { selectedDocIds: string[] }) => boolean;
+    /**
+     * Optional reason the action cannot run on the current selection. Renders the action
+     * disabled, with the reason as its tooltip.
+     */
+    getDisabledReason?: (payload: { selectedDocIds: string[] }) => string | undefined;
+    label: React.ReactElement | string;
+    key: string;
+  }
+>;
+
+export type DocMap = Map<string, { doc: DataTableRecord; docIndex: number }>;
+
+/**
+ * The query and filters the rows were fetched with.
+ */
+export interface UnifiedDataTableQueryContext {
+  query?: Query | AggregateQuery;
+  filters?: Filter[];
+  /** An additional KQL/Lucene query applied on top of `query`, e.g. a dashboard's query */
+  filterQuery?: Query;
+  /** The time range of the rows, when it differs from the global time range */
+  timeRange?: TimeRange;
+}
+
+/**
+ * Opens a query, with optional filters, in a new Discover tab.
+ */
+export type UnifiedDataTableOpenInNewTab = (params: {
+  query?: Query | AggregateQuery;
+  filters?: Filter[];
+  /** Data view to use for a classic (DSL) query */
+  dataViewId?: string;
+  timeRange?: TimeRange;
+  tabLabel?: string;
+}) => Promise<void>;

@@ -6,7 +6,7 @@
  */
 
 import { useCallback } from 'react';
-import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
+import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import type { Action, ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import { i18n } from '@kbn/i18n';
 import useAsync from 'react-use/lib/useAsync';
@@ -14,8 +14,14 @@ import {
   type LensAttributes,
   type LensConfig,
   LensConfigBuilder,
-} from '@kbn/lens-embeddable-utils/config_builder';
+} from '@kbn/lens-embeddable-utils';
+
 import { useKibanaContextForPlugin } from './use_kibana';
+
+const isAppleDevice =
+  typeof window !== 'undefined' && /Mac|iPhone|iPad/.test(window.navigator.userAgent);
+const isMetaKey = ({ metaKey, ctrlKey }: { metaKey: boolean; ctrlKey: boolean }) =>
+  isAppleDevice ? metaKey : ctrlKey;
 
 export type UseLensAttributesParams = LensConfig;
 
@@ -26,15 +32,16 @@ export const useLensAttributes = (params: UseLensAttributesParams) => {
   const { navigateToPrefilledEditor } = lens;
 
   const { value: attributes, error } = useAsync(async () => {
-    const { formula: formulaAPI } = await lens.stateHelperApi();
-    if (!dataViews || !formulaAPI || !params.dataset) {
+    if (!dataViews || !params.dataset) {
       return undefined;
     }
 
-    const builder = new LensConfigBuilder(dataViews, formulaAPI);
+    const builder = new LensConfigBuilder(dataViews);
 
-    return builder.build(params) as Promise<LensAttributes>;
-  }, [params, dataViews, lens]);
+    return builder.build(
+      params.chartType === 'xy' ? { areaFill: 'solid', ...params } : params
+    ) as Promise<LensAttributes>;
+  }, [params, dataViews]);
 
   const injectFilters = useCallback(
     ({
@@ -42,7 +49,9 @@ export const useLensAttributes = (params: UseLensAttributesParams) => {
       query,
     }: {
       filters: Filter[];
-      query: Query | AggregateQuery;
+      // `state.query` only holds chart-scoped KQL/Lucene filters; ES|QL queries
+      // live on the text-based datasource layers and must not be injected here
+      query: Query;
     }): LensAttributes | null => {
       if (!attributes) {
         return null;
@@ -69,21 +78,21 @@ export const useLensAttributes = (params: UseLensAttributesParams) => {
       }: {
         timeRange: TimeRange;
         filters: Filter[];
-        query: Query | AggregateQuery;
+        query: Query;
         lastReloadRequestTime?: number;
       }) =>
-      () => {
+      (openInNewTab: boolean) => {
         const injectedAttributes = injectFilters({ filters, query });
         if (injectedAttributes) {
           navigateToPrefilledEditor(
             {
               id: '',
-              timeRange,
+              time_range: timeRange,
               attributes: injectedAttributes,
               lastReloadRequestTime,
             },
             {
-              openInNewTab: true,
+              openInNewTab,
             }
           );
         }
@@ -100,7 +109,7 @@ export const useLensAttributes = (params: UseLensAttributesParams) => {
     }: {
       timeRange: TimeRange;
       filters?: Filter[];
-      query?: Query | AggregateQuery;
+      query?: Query;
       lastReloadRequestTime?: number;
     }) => {
       const openInLens = getOpenInLensAction(
@@ -127,7 +136,7 @@ export const useLensAttributes = (params: UseLensAttributesParams) => {
   };
 };
 
-const getOpenInLensAction = (onExecute: () => void): Action => {
+const getOpenInLensAction = (onExecute: (openInNewTab: boolean) => void): Action => {
   return {
     id: 'openInLens',
     getDisplayName(_context: ActionExecutionContext): string {
@@ -136,14 +145,17 @@ const getOpenInLensAction = (onExecute: () => void): Action => {
       });
     },
     getIconType(_context: ActionExecutionContext): string | undefined {
-      return 'visArea';
+      return 'chartArea';
     },
     type: 'actionButton',
     async isCompatible(_context: ActionExecutionContext): Promise<boolean> {
       return true;
     },
-    async execute(_context: ActionExecutionContext): Promise<void> {
-      onExecute();
+    async execute({ event }: ActionExecutionContext): Promise<void> {
+      const openInNewTab = event
+        ? isMetaKey({ metaKey: event.metaKey, ctrlKey: event.ctrlKey })
+        : false;
+      onExecute(openInNewTab);
     },
     order: 100,
   };

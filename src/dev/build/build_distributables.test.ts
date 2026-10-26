@@ -1,0 +1,168 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import { ToolingLog } from '@kbn/tooling-log';
+
+import type { BuildOptions } from './build_distributables';
+import { buildDistributables } from './build_distributables';
+import { readCliArgs } from './args';
+import type { GlobalTask, Task } from './lib';
+import * as BuildRunner from './lib/runner';
+import * as Tasks from './tasks';
+
+jest.mock('./lib/version_info', () => ({
+  getVersionInfo: () => ({
+    buildSha: 'abc1234abcdef',
+    buildVersion: '8.0.0',
+    buildNumber: 1234,
+    buildDate: '2023-05-15T23:12:09+0000',
+  }),
+}));
+
+jest.mock('./tasks', () => {
+  const actual = jest.requireActual('./tasks') as Record<string, unknown>;
+  const mockBundleTaskRun = jest.fn().mockResolvedValue(undefined);
+
+  const result: Record<string, unknown> = {};
+
+  for (const [key, value] of Object.entries(actual)) {
+    if (
+      value &&
+      typeof value === 'object' &&
+      !Array.isArray(value) &&
+      'run' in value &&
+      typeof value.run === 'function'
+    ) {
+      result[key] = {
+        ...(value as object),
+        run: key === 'BuildBundles' ? mockBundleTaskRun : jest.fn().mockResolvedValue(undefined),
+      };
+    } else {
+      result[key] = value;
+    }
+  }
+
+  return result;
+});
+
+const mockBundleTaskRun = Tasks.BuildBundles.run as jest.MockedFunction<
+  typeof Tasks.BuildBundles.run
+>;
+
+const log = new ToolingLog();
+
+const minimalGenericFoldersOptions: BuildOptions = {
+  isRelease: false,
+  dockerContextUseLocalArtifact: null,
+  dockerCrossCompile: false,
+  dockerNamespace: null,
+  dockerPush: false,
+  dockerTag: null,
+  dockerTagQualifier: null,
+  downloadFreshNode: false,
+  forceNodePointerCompression: false,
+  downloadCloudDependencies: false,
+  initialize: false,
+  createGenericFolders: true,
+  createPlatformFolders: false,
+  createArchives: false,
+  createCdnAssets: false,
+  createRpmPackage: false,
+  createDebPackage: false,
+  createDockerUBI: false,
+  createDockerWolfi: false,
+  createDockerCloud: false,
+  createDockerCloudFIPS: false,
+  createDockerServerless: false,
+  createDockerContexts: false,
+  createDockerFIPS: false,
+  versionQualifier: undefined,
+  targetAllPlatforms: false,
+  targetServerlessPlatforms: false,
+  targetCloudPlatforms: false,
+  skipFipsProvider: false,
+  skipServerless: false,
+  tarZstd: false,
+  withExamplePlugins: false,
+  withTestPlugins: false,
+  eprRegistry: 'snapshot',
+};
+
+describe('buildDistributables', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  it('runs BuildBundles once when creating generic folders', async () => {
+    await buildDistributables(log, minimalGenericFoldersOptions);
+
+    expect(mockBundleTaskRun).toHaveBeenCalledTimes(1);
+    expect(Tasks.BundleFipsProvider.run).not.toHaveBeenCalled();
+  });
+
+  it('bundles the provider when creating platform folders', async () => {
+    await buildDistributables(log, {
+      ...minimalGenericFoldersOptions,
+      createGenericFolders: false,
+      createPlatformFolders: true,
+      targetAllPlatforms: true,
+    });
+
+    expect(Tasks.BundleFipsProvider.run).toHaveBeenCalledTimes(1);
+  });
+
+  it('skips the FIPS provider while still preparing platforms and creating archives', async () => {
+    await buildDistributables(log, {
+      ...minimalGenericFoldersOptions,
+      createGenericFolders: false,
+      createPlatformFolders: true,
+      createArchives: true,
+      targetAllPlatforms: true,
+      skipFipsProvider: true,
+    });
+
+    expect(Tasks.BundleFipsProvider.run).not.toHaveBeenCalled();
+    expect(Tasks.CreateArchivesSources.run).toHaveBeenCalledTimes(1);
+    expect(Tasks.CreateArchives.run).toHaveBeenCalledTimes(1);
+  });
+
+  it.each([false, true])(
+    'schedules only cloud artifact tasks with --cloud --all-platforms and cross-compilation = %s',
+    async (dockerCrossCompile) => {
+      const globalRun = jest.fn<Promise<void>, [GlobalTask | Task]>().mockResolvedValue(undefined);
+      const artifactRun = jest
+        .fn<Promise<void>, [GlobalTask | Task]>()
+        .mockResolvedValue(undefined);
+      jest
+        .spyOn(BuildRunner, 'createRunner')
+        .mockImplementation(({ bufferLogs }) => (bufferLogs ? artifactRun : globalRun));
+      const { buildOptions } = readCliArgs([
+        'node',
+        'scripts/build',
+        '--cloud',
+        '--all-platforms',
+        ...(dockerCrossCompile ? ['--docker-cross-compile'] : []),
+      ]);
+      if (!buildOptions) {
+        throw new Error('Expected cloud build options');
+      }
+
+      await buildDistributables(log, buildOptions);
+
+      expect(artifactRun.mock.calls.map(([task]) => task)).toEqual([
+        Tasks.CreateDockerCloudX64,
+        Tasks.CreateDockerCloudARM64,
+      ]);
+    }
+  );
+});

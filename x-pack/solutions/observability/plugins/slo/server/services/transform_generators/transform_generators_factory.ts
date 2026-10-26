@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { DataViewsService } from '@kbn/data-views-plugin/server';
+import type { DataViewsService } from '@kbn/data-views-plugin/server';
+import type { TransformGenerator } from '.';
 import {
   ApmTransactionDurationTransformGenerator,
   ApmTransactionErrorRateTransformGenerator,
@@ -14,46 +15,57 @@ import {
   MetricCustomTransformGenerator,
   SyntheticsAvailabilityTransformGenerator,
   TimesliceMetricTransformGenerator,
-  TransformGenerator,
 } from '.';
-import { IndicatorTypes } from '../../domain/models';
+import type { IndicatorTypes } from '../../domain/models';
 
 export function createTransformGenerators(
   spaceId: string,
   dataViewsService: DataViewsService,
-  isServerless: boolean
+  isServerless: boolean,
+  isCpsAvailable: boolean = false
 ): Record<IndicatorTypes, TransformGenerator> {
   return {
     'sli.apm.transactionDuration': new ApmTransactionDurationTransformGenerator(
       spaceId,
       dataViewsService,
-      isServerless
+      isServerless,
+      isCpsAvailable
     ),
     'sli.apm.transactionErrorRate': new ApmTransactionErrorRateTransformGenerator(
       spaceId,
       dataViewsService,
-      isServerless
+      isServerless,
+      isCpsAvailable
     ),
     'sli.synthetics.availability': new SyntheticsAvailabilityTransformGenerator(
       spaceId,
       dataViewsService,
-      isServerless
+      isServerless,
+      isCpsAvailable
     ),
-    'sli.kql.custom': new KQLCustomTransformGenerator(spaceId, dataViewsService, isServerless),
+    'sli.kql.custom': new KQLCustomTransformGenerator(
+      spaceId,
+      dataViewsService,
+      isServerless,
+      isCpsAvailable
+    ),
     'sli.metric.custom': new MetricCustomTransformGenerator(
       spaceId,
       dataViewsService,
-      isServerless
+      isServerless,
+      isCpsAvailable
     ),
     'sli.histogram.custom': new HistogramTransformGenerator(
       spaceId,
       dataViewsService,
-      isServerless
+      isServerless,
+      isCpsAvailable
     ),
     'sli.metric.timeslice': new TimesliceMetricTransformGenerator(
       spaceId,
       dataViewsService,
-      isServerless
+      isServerless,
+      isCpsAvailable
     ),
   };
 }

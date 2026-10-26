@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
-import { DatasourceDimensionDropHandlerProps } from '../../../types';
+import type { DatasourceDimensionDropHandlerProps, TextBasedPrivateState } from '@kbn/lens-common';
 import { getDropProps } from './get_drop_props';
 import {
   column1,
@@ -16,7 +16,6 @@ import {
   notNumericDraggedField,
   numericDraggedField,
 } from './mocks';
-import { TextBasedPrivateState } from '../types';
 import { addColumnsToCache } from '../fieldlist_cache';
 
 const defaultProps = {
@@ -228,5 +227,25 @@ describe('Text-based: getDropProps', () => {
       dropTypes: ['field_replace'],
       nextLabel: 'category',
     });
+  });
+  it('uses the activeData overlay to treat a persisted non-numeric column as numeric for metric-dimension drops', () => {
+    const props = {
+      ...defaultProps,
+      source: notNumericDraggedField,
+      target: {
+        ...defaultProps.target,
+        isMetricDimension: true,
+      },
+      activeData: {
+        first: {
+          type: 'datatable',
+          columns: [{ id: 'category', name: 'category', meta: { type: 'number' } }],
+          rows: [],
+        },
+      },
+    } as unknown as DatasourceDimensionDropHandlerProps<TextBasedPrivateState>;
+    // Without the overlay this returns undefined (persisted type is `string`); the Query Result
+    // Type overlay marks `category` as `number`, so the drop into the metric dimension is allowed.
+    expect(getDropProps(props)).toEqual({ dropTypes: ['field_replace'], nextLabel: 'category' });
   });
 });

@@ -8,17 +8,12 @@
  */
 
 import React, { memo, useCallback, useMemo, useRef } from 'react';
-import {
-  EuiDataGrid,
-  EuiDataGridProps,
-  EuiDataGridRefProps,
-  EuiDataGridSorting,
-  EuiTitle,
-} from '@elastic/eui';
+import type { EuiDataGridProps, EuiDataGridRefProps, EuiDataGridSorting } from '@elastic/eui';
+import { EuiDataGrid, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/common';
+import type { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/common';
 import { createTableVisCell } from './table_vis_cell';
-import { TableContext, TableVisConfig, TableVisUseUiStateProps } from '../types';
+import type { TableContext, TableVisConfig, TableVisUseUiStateProps } from '../types';
 import { usePagination } from '../utils';
 import { TableVisControls } from './table_vis_controls';
 import { createGridColumns } from './table_vis_columns';
@@ -30,6 +25,7 @@ interface TableVisBasicProps {
   visConfig: TableVisConfig;
   title?: string;
   uiStateProps: TableVisUseUiStateProps;
+  isInteractive?: boolean;
 }
 
 export const TableVisBasic = memo(
@@ -39,9 +35,9 @@ export const TableVisBasic = memo(
     visConfig,
     title,
     uiStateProps: { columnsWidth, sort, setColumnsWidth, setSort },
+    isInteractive = true,
   }: TableVisBasicProps) => {
     const dataGridRef = useRef<EuiDataGridRefProps>(null);
-
     const { columns, rows, formattedColumns } = table;
 
     // custom sorting is in place until the EuiDataGrid sorting gets rid of flaws -> https://github.com/elastic/eui/issues/4108
@@ -56,8 +52,14 @@ export const TableVisBasic = memo(
 
     // renderCellValue is a component which renders a cell based on column and row indexes
     const renderCellValue = useMemo(
-      () => createTableVisCell(sortedRows, formattedColumns, visConfig.autoFitRowToContent),
-      [formattedColumns, sortedRows, visConfig.autoFitRowToContent]
+      () =>
+        createTableVisCell(
+          sortedRows,
+          formattedColumns,
+          visConfig.autoFitRowToContent,
+          isInteractive
+        ),
+      [formattedColumns, sortedRows, visConfig.autoFitRowToContent, isInteractive]
     );
 
     const rowHeightsOptions = useMemo(
@@ -75,7 +77,8 @@ export const TableVisBasic = memo(
       formattedColumns,
       columnsWidth,
       fireEvent,
-      dataGridRef.current?.closeCellPopover
+      dataGridRef.current?.closeCellPopover,
+      isInteractive
     );
 
     // Pagination config

@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { PublicContract } from '@kbn/utility-types';
-import { HttpSetup } from '@kbn/core/public';
+import type { PublicContract } from '@kbn/utility-types';
+import type { HttpSetup } from '@kbn/core/public';
 import type {
   SavedObject,
   SavedObjectsUpdateResponse,
@@ -17,6 +17,7 @@ import type {
 import type {
   SearchSessionSavedObjectAttributes,
   SearchSessionsFindResponse,
+  SearchSessionStatusesResponse,
 } from '../../../common';
 export type SearchSessionSavedObject = SavedObject<SearchSessionSavedObjectAttributes>;
 export type ISessionsClient = PublicContract<SessionsClient>;
@@ -99,5 +100,12 @@ export class SessionsClient {
 
   public delete(sessionId: string): Promise<void> {
     return this.http!.delete(`/internal/session/${encodeURIComponent(sessionId)}`, options);
+  }
+
+  public status(sessionIds: string[]): Promise<SearchSessionStatusesResponse> {
+    return this.http!.post(`/internal/session/_status`, {
+      version,
+      body: JSON.stringify({ sessionIds }),
+    });
   }
 }

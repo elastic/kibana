@@ -10,9 +10,9 @@ import type { ExecutorParams } from '@kbn/actions-plugin/server/sub_action_frame
 import type { RenderParameterTemplates } from '@kbn/actions-plugin/server/types';
 import { set } from '@kbn/safer-lodash-set';
 import { cloneDeep, get, isString } from 'lodash';
+import { SUB_ACTION } from '@kbn/connector-schemas/opsgenie';
+import type { CreateAlertSubActionParams } from '@kbn/connector-schemas/opsgenie';
 import { RULE_TAGS_TEMPLATE } from '../../../common/opsgenie';
-import { OpsgenieSubActions } from '../../../common';
-import type { CreateAlertSubActionParams } from './types';
 
 export const renderParameterTemplates: RenderParameterTemplates<ExecutorParams> = (
   logger,
@@ -46,7 +46,7 @@ export const renderParameterTemplates: RenderParameterTemplates<ExecutorParams> 
 type CreateAlertParams = CreateAlertSubActionParams & Record<string, unknown>;
 
 const isCreateAlertSubAction = (params: ExecutorParams): params is CreateAlertParams =>
-  params.subAction === OpsgenieSubActions.CreateAlert;
+  params.subAction === SUB_ACTION.CreateAlert;
 
 const getRuleTags = (variables: Record<string, unknown>): string[] => {
   const ruleTagsAsUnknown = get(variables, 'rule.tags', []);

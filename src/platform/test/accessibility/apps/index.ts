@@ -7,10 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, loadTestFile, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
+  const supertest = getService('supertest');
   const PageObjects = getPageObjects(['common', 'dashboard', 'header', 'home', 'settings']);
 
   describe('a11y tests', function () {
@@ -23,10 +24,8 @@ export default function ({ getService, loadTestFile, getPageObjects }: FtrProvid
       });
 
       after(async () => {
-        await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
-          useActualUrl: true,
-        });
-        await PageObjects.home.removeSampleDataSet('flights');
+        await supertest.delete('/api/sample_data/flights').set('kbn-xsrf', 'true').expect(204);
+        await kibanaServer.uiSettings.unset('defaultIndex');
         await kibanaServer.savedObjects.clean({
           types: ['search', 'index-pattern', 'visualization', 'dashboard'],
         });
@@ -34,16 +33,11 @@ export default function ({ getService, loadTestFile, getPageObjects }: FtrProvid
 
       loadTestFile(require.resolve('./dashboard'));
       loadTestFile(require.resolve('./filter_panel'));
-      loadTestFile(require.resolve('./home'));
-      loadTestFile(require.resolve('./discover'));
       loadTestFile(require.resolve('./visualize'));
-      loadTestFile(require.resolve('./kibana_overview_with_data'));
     });
 
     describe('not using sample data', function () {
       loadTestFile(require.resolve('./management'));
-      loadTestFile(require.resolve('./console'));
-      loadTestFile(require.resolve('./kibana_overview_without_data'));
     });
   });
 }

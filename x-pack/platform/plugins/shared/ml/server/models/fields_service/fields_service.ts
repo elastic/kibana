@@ -15,10 +15,13 @@ import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type { RuntimeMappings } from '@kbn/ml-runtime-field-utils';
 import { parseInterval } from '@kbn/ml-parse-interval';
 
+import type {
+  Datafeed,
+  IndicesOptions,
+} from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
 import { initCardinalityFieldsCache } from './fields_aggs_cache';
 import { isValidAggregationField } from '../../../common/util/validation_utils';
 import { getDatafeedAggregations, getIndicesOptions } from '../../../common/util/datafeed_utils';
-import type { Datafeed, IndicesOptions } from '../../../common/types/anomaly_detection_jobs';
 
 /**
  * Service for carrying out queries to obtain data
@@ -52,6 +55,9 @@ export function fieldsServiceProvider({ asCurrentUser }: IScopedClusterClient) {
       {
         index,
         fields: fieldNames,
+        ...(datafeedConfig?.project_routing
+          ? { project_routing: datafeedConfig.project_routing }
+          : {}),
       },
       { maxRetries: 0 }
     );
@@ -191,6 +197,9 @@ export function fieldsServiceProvider({ asCurrentUser }: IScopedClusterClient) {
         index,
         body,
         ...getIndicesOptions(datafeedConfig),
+        ...(datafeedConfig?.project_routing
+          ? { project_routing: datafeedConfig.project_routing }
+          : {}),
       },
       { maxRetries: 0 }
     );
@@ -224,7 +233,8 @@ export function fieldsServiceProvider({ asCurrentUser }: IScopedClusterClient) {
     query: any,
     runtimeMappings?: RuntimeMappings,
     indicesOptions?: IndicesOptions,
-    allowFutureTime = false
+    allowFutureTime = false,
+    projectRouting?: string
   ): Promise<{
     success: boolean;
     start: number;
@@ -257,6 +267,7 @@ export function fieldsServiceProvider({ asCurrentUser }: IScopedClusterClient) {
         },
         ...(isPopulatedObject(runtimeMappings) ? { runtime_mappings: runtimeMappings } : {}),
         ...(indicesOptions ?? {}),
+        ...(projectRouting ? { project_routing: projectRouting } : {}),
       },
       { maxRetries: 0 }
     );
@@ -417,6 +428,9 @@ export function fieldsServiceProvider({ asCurrentUser }: IScopedClusterClient) {
         index,
         ...body,
         ...getIndicesOptions(datafeedConfig),
+        ...(datafeedConfig?.project_routing
+          ? { project_routing: datafeedConfig.project_routing }
+          : {}),
       },
       { maxRetries: 0 }
     );

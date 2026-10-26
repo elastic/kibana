@@ -6,10 +6,8 @@
  */
 
 import { handleActions } from 'redux-actions';
-import immutable from 'object-path-immutable';
 import { get } from 'lodash';
-
-const { assign, push, del, set } = immutable;
+import { assign, push, del, set } from '../../../common/lib/object_path_immutable';
 
 const getLocation = (type) => (type === 'group' ? 'groups' : 'elements');
 const firstOccurrence = (element, index, array) => array.indexOf(element) === index;

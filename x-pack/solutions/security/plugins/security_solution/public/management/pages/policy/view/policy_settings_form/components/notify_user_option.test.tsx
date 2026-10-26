@@ -13,17 +13,17 @@ import React from 'react';
 import { createLicenseServiceMock } from '../../../../../../../common/license/mocks';
 import { licenseService as licenseServiceMocked } from '../../../../../../common/hooks/__mocks__/use_license';
 import type { NotifyUserOptionProps } from './notify_user_option';
-import {
-  CUSTOMIZE_NOTIFICATION_MESSAGE_LABEL,
-  NOTIFY_USER_CHECKBOX_LABEL,
-  NOTIFY_USER_SECTION_TITLE,
-  NotifyUserOption,
-} from './notify_user_option';
+import { NotifyUserOption } from './notify_user_option';
 import { expectIsViewOnly, exactMatchText } from '../mocks';
 import { cloneDeep } from 'lodash';
 import { set } from '@kbn/safer-lodash-set';
-import { ProtectionModes } from '../../../../../../../common/endpoint/types';
+import { ProtectionModes, PolicyOperatingSystem } from '../../../../../../../common/endpoint/types';
 import userEvent from '@testing-library/user-event';
+import {
+  NOTIFY_USER_SECTION_TITLE,
+  NOTIFY_USER_CHECKBOX_LABEL,
+  CUSTOMIZE_NOTIFICATION_MESSAGE_LABEL,
+} from './shared_translations';
 
 jest.mock('../../../../../../common/hooks/use_license');
 
@@ -48,7 +48,11 @@ describe('Policy form Notify User option component', () => {
       mode: 'edit',
       'data-test-subj': 'test',
       protection: 'malware',
-      osList: ['windows', 'mac', 'linux'],
+      osList: [
+        PolicyOperatingSystem.windows,
+        PolicyOperatingSystem.mac,
+        PolicyOperatingSystem.linux,
+      ],
     };
 
     render = () => {

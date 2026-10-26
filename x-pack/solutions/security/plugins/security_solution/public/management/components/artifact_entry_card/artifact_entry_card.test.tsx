@@ -12,6 +12,7 @@ import type {
   ArtifactEntryCardDecoratorProps,
   ArtifactEntryCardProps,
 } from './artifact_entry_card';
+import type { CriteriaConditionsProps } from './components/criteria_conditions';
 import { ArtifactEntryCard } from './artifact_entry_card';
 import { act, fireEvent, getByTestId, waitFor } from '@testing-library/react';
 import type { AnyArtifact } from './types';
@@ -227,7 +228,7 @@ describe.each([
     });
 
     describe('when clicked', () => {
-      it('should show popup menu with list of associated policies, with `View details` button when has Policy privilege', async () => {
+      it('should show popup menu with list of associated policies when has Policy privilege', async () => {
         render({ policies });
         await act(async () => {
           await fireEvent.click(
@@ -239,16 +240,14 @@ describe.each([
           renderResult.getByTestId('testCard-subHeader-effectScope-popupMenu-popoverPanel')
         ).not.toBeNull();
 
-        expect(renderResult.getByTestId('policyMenuItem').textContent).toEqual(
-          'Policy one titleView details'
-        );
+        expect(renderResult.getByTestId('policyMenuItem').textContent).toEqual('Policy one title');
 
         expect((renderResult.getByTestId('policyMenuItem') as HTMLAnchorElement).href).toEqual(
           policies!['policy-1'].href
         );
       });
 
-      it('should show popup menu with list of associated policies, without `View details` button when does NOT have Policy privilege', async () => {
+      it('should show popup menu with list of associated policies when does NOT have Policy privilege', async () => {
         mockUserPrivileges.mockReturnValue({
           endpointPrivileges: getEndpointAuthzInitialStateMock({ canReadPolicyManagement: false }),
         });
@@ -307,6 +306,16 @@ describe.each([
       expect(renderResult.getByText('mock decorator')).toBeInTheDocument();
       expect(passedItem).toBe(item);
     });
+
+    it('should replace criteria conditions when CriteriaComponent is provided', () => {
+      const MockCriteria = memo<CriteriaConditionsProps>(() => <p>{'custom criteria'}</p>);
+      MockCriteria.displayName = 'MockCriteria';
+
+      render({ CriteriaComponent: MockCriteria });
+
+      expect(renderResult.getByText('custom criteria')).toBeInTheDocument();
+      expect(renderResult.queryByTestId('testCard-criteriaConditions-condition')).toBeNull();
+    });
   });
 
   describe('and space awareness is enabled', () => {
@@ -323,7 +332,6 @@ describe.each([
     });
 
     beforeEach(() => {
-      appTestContext.setExperimentalFlag({ endpointManagementSpaceAwarenessEnabled: true });
       authzMock = appTestContext.getUserPrivilegesMockSetter(mockUserPrivileges);
       authzMock.set({ canManageGlobalArtifacts: false });
       (item as ExceptionListItemSchema).tags = [GLOBAL_ARTIFACT_TAG, buildSpaceOwnerIdTag('foo')];
@@ -331,15 +339,6 @@ describe.each([
 
     afterEach(() => {
       authzMock.reset();
-    });
-
-    it('should render menu if feature flag is disabled', () => {
-      appTestContext.setExperimentalFlag({ endpointManagementSpaceAwarenessEnabled: false });
-      render({ actions });
-
-      expect(
-        (renderResult.getByTestId('testCard-header-actions-button') as HTMLButtonElement).disabled
-      ).toBe(false);
     });
 
     it('should disable card actions menu for global artifacts when user does not have global artifact privilege', () => {
@@ -399,5 +398,35 @@ describe.each([
         ).toBe(false);
       });
     });
+  });
+});
+
+describe('when using the ArtifactEntryCard component with a wildcard (Match) entry', () => {
+  beforeEach(() => {
+    mockUserPrivileges.mockReturnValue({ endpointPrivileges: getEndpointAuthzInitialStateMock() });
+  });
+
+  afterEach(() => {
+    mockUserPrivileges.mockReset();
+  });
+
+  it('should display the MATCHES operator for a wildcard entry', () => {
+    const item = getExceptionProviderMock();
+    item.entries = [
+      {
+        field: 'file.path.caseless',
+        operator: 'included',
+        type: 'wildcard',
+        value: 'C:\\foo\\*.exe',
+      },
+    ];
+
+    const renderResult = createAppRootMockRenderer().render(
+      <ArtifactEntryCard item={item} data-test-subj="testCard" />
+    );
+
+    expect(renderResult.getByTestId('testCard-criteriaConditions').textContent).toEqual(
+      ' OSIS WindowsAND file.path.caselessMATCHES C:\\foo\\*.exe'
+    );
   });
 });

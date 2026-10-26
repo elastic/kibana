@@ -6,9 +6,9 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 
-import { RouteDependencies } from '../../../types';
+import type { RouteDependencies } from '../../../types';
 import { addBasePath } from '../../../services';
 
 async function addLifecyclePolicy(
@@ -28,9 +28,9 @@ async function addLifecyclePolicy(
 }
 
 const bodySchema = schema.object({
-  indexName: schema.string(),
-  policyName: schema.string(),
-  alias: schema.maybe(schema.string()),
+  indexName: schema.string({ maxLength: 1000 }),
+  policyName: schema.string({ maxLength: 1000 }),
+  alias: schema.maybe(schema.string({ maxLength: 1000 })),
 });
 
 export function registerAddPolicyRoute({

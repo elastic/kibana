@@ -8,10 +8,12 @@
  */
 
 import type { RefObject } from 'react';
-import { renderHook, act, RenderHookResult } from '@testing-library/react';
+import type { RenderHookResult } from '@testing-library/react';
+import { renderHook, act } from '@testing-library/react';
 import { Subject } from 'rxjs';
 import type { IInterpreterRenderHandlers } from '../../common';
-import { ExpressionRendererParams, useExpressionRenderer } from './use_expression_renderer';
+import type { ExpressionRendererParams } from './use_expression_renderer';
+import { useExpressionRenderer } from './use_expression_renderer';
 import * as loader from '../loader';
 
 describe('useExpressionRenderer', () => {
@@ -32,12 +34,14 @@ describe('useExpressionRenderer', () => {
       events$: new Subject(),
       loading$: new Subject(),
       render$: new Subject(),
+      cancel: jest.fn(),
       destroy: jest.fn(),
       inspect: jest.fn(),
       update: jest.fn(),
     } as unknown as typeof expressionLoader;
 
     expressionLoaderSpy.mockImplementation(() => expressionLoader);
+    // @ts-expect-error upgrade typescript v5.9.3
     hook = renderHook(
       (params: ExpressionRendererParams) => useExpressionRenderer(nodeRef, params),
       { initialProps: { expression: 'something' } }
@@ -212,5 +216,25 @@ describe('useExpressionRenderer', () => {
     expect(expressionLoader.update).not.toHaveBeenCalled();
     reload$.next();
     expect(expressionLoader.update).toHaveBeenCalledWith('something', {});
+  });
+
+  it('should cancel the loader when abortController signal is aborted', () => {
+    const abortController = new AbortController();
+    hook.rerender({ expression: 'something', abortController });
+
+    expect(expressionLoader.cancel).not.toHaveBeenCalled();
+
+    abortController.abort('test reason');
+
+    expect(expressionLoader.cancel).toHaveBeenCalledWith('test reason');
+  });
+
+  it('should immediately cancel the loader when abortController is already aborted', () => {
+    const abortController = new AbortController();
+    abortController.abort('pre-aborted');
+
+    hook.rerender({ expression: 'something', abortController });
+
+    expect(expressionLoader.cancel).toHaveBeenCalledWith('pre-aborted');
   });
 });

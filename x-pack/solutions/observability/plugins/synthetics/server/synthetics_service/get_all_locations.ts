@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { SavedObjectsClientContract } from '@kbn/core/server';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { allLocationsToClientContract } from '../routes/settings/private_locations/helpers';
 import { getPrivateLocationsAndAgentPolicies } from '../routes/settings/private_locations/get_private_locations';
-import { SyntheticsServerSetup } from '../types';
+import type { SyntheticsServerSetup } from '../types';
 import { getServiceLocations } from './get_service_locations';
-import { SyntheticsMonitorClient } from './synthetics_monitor/synthetics_monitor_client';
+import type { SyntheticsMonitorClient } from './synthetics_monitor/synthetics_monitor_client';
 
 export async function getAllLocations({
   syntheticsMonitorClient,
@@ -44,8 +44,8 @@ export async function getAllLocations({
       throttling,
       allLocations: [...publicLocations, ...pvtLocations],
     };
-  } catch (e) {
-    server.logger.error(e);
+  } catch (error) {
+    server.logger.error(`Error getting Synthetics locations, Error: ${error.message}`, { error });
     return { publicLocations: [], privateLocations: [], allLocations: [] };
   }
 }
@@ -54,17 +54,17 @@ const getServicePublicLocations = async (
   server: SyntheticsServerSetup,
   syntheticsMonitorClient: SyntheticsMonitorClient
 ) => {
-  if (!syntheticsMonitorClient.syntheticsService.isAllowed) {
+  if (!syntheticsMonitorClient.serviceManagedLocations.isAllowed) {
     return {
       locations: [],
     };
   }
-  if (syntheticsMonitorClient.syntheticsService.locations.length === 0) {
+  if (syntheticsMonitorClient.serviceManagedLocations.locations.length === 0) {
     return await getServiceLocations(server);
   }
 
   return {
-    locations: syntheticsMonitorClient.syntheticsService.locations,
-    throttling: syntheticsMonitorClient.syntheticsService.throttling,
+    locations: syntheticsMonitorClient.serviceManagedLocations.locations,
+    throttling: syntheticsMonitorClient.serviceManagedLocations.throttling,
   };
 };

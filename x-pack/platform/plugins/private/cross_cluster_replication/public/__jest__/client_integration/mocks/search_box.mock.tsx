@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiSearchBoxProps } from '@elastic/eui/src/components/search_bar/search_box';
+import type { EuiSearchBoxProps } from '@elastic/eui/src/components/search_bar/search_box';
 
 jest.mock('@elastic/eui/lib/components/search_bar/search_box', () => {
   return {

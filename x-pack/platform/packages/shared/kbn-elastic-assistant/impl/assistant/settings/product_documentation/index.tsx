@@ -15,13 +15,14 @@ import {
   EuiText,
 } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
-import { InstallationStatus } from '@kbn/product-doc-base-plugin/common/install_status';
+import type { InstallationStatus } from '@kbn/product-doc-base-plugin/common/install_status';
 import { useInstallProductDoc } from '../../api/product_docs/use_install_product_doc';
 import * as i18n from './translations';
 
 export const ProductDocumentationManagement = React.memo<{
   status?: InstallationStatus;
-}>(({ status }) => {
+  inferenceId: string;
+}>(({ status, inferenceId }) => {
   const {
     mutateAsync: installProductDoc,
     isSuccess: isInstalled,
@@ -29,8 +30,8 @@ export const ProductDocumentationManagement = React.memo<{
   } = useInstallProductDoc();
 
   const onClickInstall = useCallback(() => {
-    installProductDoc();
-  }, [installProductDoc]);
+    installProductDoc(inferenceId);
+  }, [installProductDoc, inferenceId]);
 
   const content = useMemo(() => {
     if (isInstalling) {
@@ -68,7 +69,7 @@ export const ProductDocumentationManagement = React.memo<{
 
   return (
     <>
-      <EuiCallOut title={i18n.LABEL} iconType="iInCircle">
+      <EuiCallOut title={i18n.LABEL} iconType="info">
         <EuiText size="m">
           <span>{i18n.DESCRIPTION}</span>
         </EuiText>

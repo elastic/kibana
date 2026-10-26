@@ -5,31 +5,40 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { StaticHeader } from '../../../shared_components';
-import {
-  DatasourceMap,
+import type {
   FramePublicAPI,
   VisualizationLayerWidgetProps,
   VisualizationMap,
-} from '../../../types';
+} from '@kbn/lens-common';
+import { StaticHeader } from '../../../shared_components';
 import { ChartSwitchPopover } from './chart_switch/chart_switch_popover';
+import { useEditorFrameService } from '../../editor_frame_service_context';
 
 export function LayerHeader({
   activeVisualizationId,
   layerConfigProps,
-  visualizationMap,
-  datasourceMap,
   onlyAllowSwitchToSubtypes,
 }: {
-  visualizationMap: VisualizationMap;
-  datasourceMap: DatasourceMap;
   activeVisualizationId: string;
   layerConfigProps: VisualizationLayerWidgetProps;
   onlyAllowSwitchToSubtypes?: boolean;
 }) {
+  const { visualizationMap } = useEditorFrameService();
   const activeVisualization = visualizationMap[activeVisualizationId];
+
+  const availableVisualizationMap = useMemo(
+    () =>
+      filterVisualizationMap(
+        visualizationMap,
+        activeVisualization?.id,
+        layerConfigProps.frame,
+        onlyAllowSwitchToSubtypes
+      ),
+    [visualizationMap, activeVisualization?.id, layerConfigProps.frame, onlyAllowSwitchToSubtypes]
+  );
+
   if (!activeVisualization) {
     return null;
   }
@@ -37,13 +46,6 @@ export function LayerHeader({
   if (customLayerHeader) {
     return customLayerHeader;
   }
-
-  const availableVisualizationMap = filterVisualizationMap(
-    visualizationMap,
-    activeVisualization.id,
-    layerConfigProps.frame,
-    onlyAllowSwitchToSubtypes
-  );
 
   const hasOnlyOneVisAvailable =
     Object.keys(availableVisualizationMap).length === 1 &&
@@ -54,26 +56,25 @@ export function LayerHeader({
     return <StaticHeader label={description.label} icon={description.icon} />;
   }
 
-  const SubtypeSwitch = activeVisualization.getSubtypeSwitch?.(layerConfigProps);
+  // `getSubtypeSwitch` returns an element, not a component. Rendering it in place keeps the
+  // `SubtypeSwitch` component type stable across header re-renders (e.g. when new chart data
+  // arrives), so React reconciles instead of remounting and an open popover stays open.
+  const subtypeSwitch = activeVisualization.getSubtypeSwitch?.(layerConfigProps);
 
-  return SubtypeSwitch ? (
+  return subtypeSwitch ? (
     <EuiFlexGroup gutterSize="s">
       <EuiFlexItem>
         <ChartSwitchPopover
-          datasourceMap={datasourceMap}
-          visualizationMap={availableVisualizationMap}
+          filteredVisualizationMap={availableVisualizationMap}
           framePublicAPI={layerConfigProps.frame}
           layerId={layerConfigProps.layerId}
         />
       </EuiFlexItem>
-      <EuiFlexItem>
-        <SubtypeSwitch />
-      </EuiFlexItem>
+      <EuiFlexItem>{subtypeSwitch}</EuiFlexItem>
     </EuiFlexGroup>
   ) : (
     <ChartSwitchPopover
-      datasourceMap={datasourceMap}
-      visualizationMap={availableVisualizationMap}
+      filteredVisualizationMap={availableVisualizationMap}
       framePublicAPI={layerConfigProps.frame}
       layerId={layerConfigProps.layerId}
     />

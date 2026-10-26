@@ -10,7 +10,7 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { ClustersView } from './clusters_view';
-import { Request } from '../../../../../../common/adapters/request/types';
+import type { Request } from '../../../../../../common/adapters/request/types';
 
 describe('shouldShow', () => {
   test('should return true when response contains _shards', () => {
@@ -48,6 +48,20 @@ describe('shouldShow', () => {
       },
     } as unknown as Request;
     expect(ClustersView.shouldShow(request)).toBe(false);
+  });
+
+  test('is false if isCpsMultiProject is true', () => {
+    const request = {
+      response: {
+        json: {
+          rawResponse: {
+            _shards: {},
+            _clusters: {},
+          },
+        },
+      },
+    } as unknown as Request;
+    expect(ClustersView.shouldShow(request, true)).toBe(false);
   });
 });
 

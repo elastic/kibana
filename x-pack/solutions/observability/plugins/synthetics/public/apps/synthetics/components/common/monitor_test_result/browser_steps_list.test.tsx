@@ -5,11 +5,14 @@
  * 2.0.
  */
 
-import { Matcher, SelectorMatcherOptions, within } from '@testing-library/react';
+import type { Matcher, SelectorMatcherOptions } from '@testing-library/react';
+import { within } from '@testing-library/react';
 import React from 'react';
 import { render, WrappedHelper } from '../../../utils/testing';
-import { JourneyStep } from '../../../../../../common/runtime_types';
+import type { JourneyStep } from '../../../../../../common/runtime_types';
 import { BrowserStepsList } from './browser_steps_list';
+
+const SCREENSHOT_COLUMN_HEADER = 'Screenshot';
 
 describe('<BrowserStepsList />', () => {
   let steps: JourneyStep[] = [];
@@ -20,6 +23,27 @@ describe('<BrowserStepsList />', () => {
     );
 
     assertErrorIsExpanded(getByText);
+  });
+
+  it('renders the Screenshot column by default (browser monitors)', () => {
+    const { queryByText } = render(
+      <BrowserStepsList steps={steps} loading={false} showStepNumber={true} />
+    );
+
+    expect(queryByText(SCREENSHOT_COLUMN_HEADER)).not.toBeNull();
+  });
+
+  it('omits the Screenshot column when showScreenshots is false (API monitors)', () => {
+    const { queryByText } = render(
+      <BrowserStepsList
+        steps={steps}
+        loading={false}
+        showStepNumber={true}
+        showScreenshots={false}
+      />
+    );
+
+    expect(queryByText(SCREENSHOT_COLUMN_HEADER)).toBeNull();
   });
 
   it('renders step data and pre-expands after loading completes', () => {

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { Connector, ConnectorStatus } from '@kbn/search-connectors';
+import type { Connector } from '@kbn/search-connectors';
+import { ConnectorStatus } from '@kbn/search-connectors';
 
 import { hasDocumentLevelSecurityFeature, hasIncrementalSyncFeature } from './connector_helpers';
 

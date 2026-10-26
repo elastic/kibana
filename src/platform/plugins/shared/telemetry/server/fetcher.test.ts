@@ -10,10 +10,8 @@
 /* eslint-disable dot-notation */
 import { fakeSchedulers } from 'rxjs-marbles/jest';
 import { coreMock } from '@kbn/core/server/mocks';
-import {
-  telemetryCollectionManagerPluginMock,
-  Setup,
-} from '@kbn/telemetry-collection-manager-plugin/server/mocks';
+import type { Setup } from '@kbn/telemetry-collection-manager-plugin/server/mocks';
+import { telemetryCollectionManagerPluginMock } from '@kbn/telemetry-collection-manager-plugin/server/mocks';
 
 jest.mock('rxjs', () => {
   const RxJs = jest.requireActual('rxjs');
@@ -70,10 +68,10 @@ describe('FetcherTask', () => {
 
       const result = await fetcherTask['sendIfDue']();
       expect(result).toBe(undefined);
-      expect(getCurrentConfigs).toBeCalledTimes(0);
-      expect(fetchTelemetry).toBeCalledTimes(0);
-      expect(sendTelemetry).toBeCalledTimes(0);
-      expect(fetcherTask['logger'].warn).toBeCalledTimes(0);
+      expect(getCurrentConfigs).toHaveBeenCalledTimes(0);
+      expect(fetchTelemetry).toHaveBeenCalledTimes(0);
+      expect(sendTelemetry).toHaveBeenCalledTimes(0);
+      expect(fetcherTask['logger'].warn).toHaveBeenCalledTimes(0);
     });
 
     it('stops when it fails to get telemetry configs', async () => {
@@ -81,10 +79,10 @@ describe('FetcherTask', () => {
       getCurrentConfigs.mockRejectedValue(mockError);
       const result = await fetcherTask['sendIfDue']();
       expect(result).toBe(undefined);
-      expect(getCurrentConfigs).toBeCalledTimes(1);
-      expect(fetchTelemetry).toBeCalledTimes(0);
-      expect(sendTelemetry).toBeCalledTimes(0);
-      expect(fetcherTask['logger'].warn).toBeCalledTimes(1);
+      expect(getCurrentConfigs).toHaveBeenCalledTimes(1);
+      expect(fetchTelemetry).toHaveBeenCalledTimes(0);
+      expect(sendTelemetry).toHaveBeenCalledTimes(0);
+      expect(fetcherTask['logger'].warn).toHaveBeenCalledTimes(1);
       expect(fetcherTask['logger'].warn).toHaveBeenCalledWith(
         `Error getting telemetry configs. (${mockError})`
       );
@@ -105,10 +103,10 @@ describe('FetcherTask', () => {
 
       await fetcherTask['sendIfDue']();
 
-      expect(fetchTelemetry).toBeCalledTimes(1);
-      expect(sendTelemetry).toBeCalledTimes(1);
+      expect(fetchTelemetry).toHaveBeenCalledTimes(1);
+      expect(sendTelemetry).toHaveBeenCalledTimes(1);
       expect(sendTelemetry).toHaveBeenNthCalledWith(1, mockTelemetryUrl, mockClusters);
-      expect(updateReportFailure).toBeCalledTimes(0);
+      expect(updateReportFailure).toHaveBeenCalledTimes(0);
     });
   });
 
@@ -242,7 +240,7 @@ describe('FetcherTask', () => {
           await wait();
         }
 
-        expect(fetcherTask['logger'].error).toBeCalledTimes(1);
+        expect(fetcherTask['logger'].error).toHaveBeenCalledTimes(1);
         expect(fetcherTask['logger'].error).toHaveBeenCalledWith(
           `Cannot get the current config: SomeError`
         );

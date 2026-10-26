@@ -8,6 +8,9 @@
 import type { CSPM, KSPM, CNVM } from './constants';
 import type { MeteringCallbackInput, Tier } from '../types';
 
+export interface CloudDefendAssetCountAggregation {
+  asset_count_groups: AssetCountAggregationBucket;
+}
 export interface AssetCountAggregationBucket {
   buckets: AssetCountAggregation[];
 }
@@ -39,7 +42,7 @@ export interface MinTimestamp {
 export type CloudSecuritySolutions = typeof CSPM | typeof KSPM | typeof CNVM;
 
 export interface CloudSecurityMeteringCallbackInput
-  extends Omit<MeteringCallbackInput, 'cloudSetup' | 'abortController' | 'config'> {
+  extends Omit<MeteringCallbackInput, 'cloudSetup' | 'signal' | 'config'> {
   projectId: string;
   cloudSecuritySolution: CloudSecuritySolutions;
   tier: Tier;

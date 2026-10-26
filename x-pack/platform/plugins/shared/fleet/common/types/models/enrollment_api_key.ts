@@ -14,6 +14,8 @@ export interface EnrollmentAPIKey {
   active: boolean;
   policy_id?: string;
   created_at: string;
+  expire_at?: string;
+  hidden?: boolean;
 }
 
 // Generated
@@ -43,4 +45,5 @@ export interface FleetServerEnrollmentAPIKey {
   created_at?: string;
   updated_at?: string;
   namespaces?: string[];
+  hidden?: boolean;
 }

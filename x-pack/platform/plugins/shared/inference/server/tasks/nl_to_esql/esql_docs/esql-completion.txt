@@ -1,0 +1,66 @@
+# COMPLETION
+
+The COMPLETION command provides an interface for text generation tasks using a Large Language Model (LLM). It enables you to send prompts and context to an LLM directly within your queries, supporting a wide range of tasks such as question answering, summarization, translation, content rewriting, and creative generation. Each row processed by the COMPLETION command generates a separate API call to the LLM endpoint.
+
+## Syntax
+
+For version 9.2.0 and above:
+`COMPLETION [column =] prompt WITH { "inference_id" : "my_inference_endpoint" }`
+
+For version 9.1.x only:
+`COMPLETION [column =] prompt WITH my_inference_endpoint`
+
+### Parameters
+
+#### column
+
+Optional. The name of the output column that will contain the LLM's response. If not specified, the results are stored in a column named `completion`. If the specified column already exists, it will be overwritten.
+
+#### prompt
+
+The input text or expression used to prompt the LLM. This can be a string literal or a reference to a column containing text.
+
+#### my_inference_endpoint
+
+The ID of the inference endpoint to use for the task. The endpoint must be configured with the `completion` task type.
+
+## Examples
+
+Generate a response to the question "What is Elasticsearch?" and store the result in the `completion` column.
+
+```esql
+ROW question = "What is Elasticsearch?"
+| COMPLETION question WITH { "inference_id" : "my_inference_endpoint" }
+| KEEP question, completion
+```
+
+Generate a response to the question "What is Elasticsearch?" and store the result in the `answer` column.
+
+```esql
+ROW question = "What is Elasticsearch?"
+| COMPLETION answer = question WITH { "inference_id" : "my_inference_endpoint" }
+| KEEP question, answer
+```
+
+Generate a summary for each of the top 10 highest-rated movies using a custom prompt and store the result in the `summary` column.
+
+```esql
+FROM movies
+| SORT rating DESC
+| LIMIT 10
+| EVAL prompt = CONCAT(
+   "Summarize this movie using the following information: \n",
+   "Title: ", title, "\n",
+   "Synopsis: ", synopsis, "\n",
+   "Actors: ", MV_CONCAT(actors, ", "), "\n",
+  )
+| COMPLETION summary = prompt WITH { "inference_id" : "my_inference_endpoint" }
+| KEEP title, summary, rating
+```
+
+## Limitations
+
+- Every row processed by the COMPLETION command generates a separate API call to the LLM endpoint, which may result in high consumption and costs.
+- Starting in version 9.3.0, processing is automatically limited to 100 rows by default to prevent accidental high consumption. This limit can be adjusted or the command can be disabled via cluster settings.
+- COMPLETION commands may time out when processing large datasets or complex prompts. The default timeout is 10 minutes, and increasing it depends on your deployment type.
+- To use this command, you must deploy your LLM model as an inference endpoint with the `completion` task type.

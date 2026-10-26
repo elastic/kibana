@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo, useRef } from 'react';
 import { EuiButtonEmpty, EuiCallOut, EuiFormRow, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { DataViewFieldBase } from '@kbn/es-query';
+import useToggle from 'react-use/lib/useToggle';
 import type { RequiredFieldInput } from '../../../../../common/api/detection_engine';
 import { UseArray, useFormData } from '../../../../shared_imports';
 import type { FormHook, ArrayItem } from '../../../../shared_imports';
@@ -16,7 +17,9 @@ import { RequiredFieldsHelpInfo } from './required_fields_help_info';
 import * as defineRuleI18n from '../../../rule_creation_ui/components/step_define_rule/translations';
 import { OptionalFieldLabel } from '../optional_field_label';
 import { RequiredFieldRow } from './required_fields_row';
-import { getFlattenedArrayFieldNames } from './utils';
+import type { RequiredFieldRowView, RequiredFieldWarnings } from './required_fields_row';
+import { getFlattenedArrayFieldNames } from '../utils';
+import { MAX_UNFOLDED_REQUIRED_FIELDS } from './constants';
 import * as i18n from './translations';
 
 interface RequiredFieldsComponentProps {
@@ -105,51 +108,83 @@ const RequiredFieldsList = ({
 
   const allFieldNames = useMemo(() => Object.keys(typesByFieldName), [typesByFieldName]);
 
-  const selectedFieldNames = fieldValue.map(({ name }) => name);
+  const esFlattenedFieldNames = useMemo(
+    () =>
+      new Set(
+        Object.entries(typesByFieldName)
+          .filter(([, types]) => types.includes('flattened'))
+          .map(([name]) => name)
+      ),
+    [typesByFieldName]
+  );
 
-  const availableFieldNames = allFieldNames.filter((name) => !selectedFieldNames.includes(name));
+  const allFieldNamesSet = useMemo(() => new Set(allFieldNames), [allFieldNames]);
 
-  const nameWarnings = fieldValue.reduce<Record<string, string>>((warnings, { name }) => {
-    if (
-      !isIndexPatternLoading &&
-      /* Creating a warning only if "name" value is filled in */
-      name !== '' &&
-      !allFieldNames.includes(name)
-    ) {
-      warnings[name] = i18n.FIELD_NAME_NOT_FOUND_WARNING(name);
-    }
-    return warnings;
-  }, {});
+  const selectedFieldNamesKey = fieldValue.map(({ name }) => name).join('\u0000');
 
-  const typeWarnings = fieldValue.reduce<Record<string, string>>((warnings, { name, type }) => {
-    if (
-      !isIndexPatternLoading &&
-      /* Creating a warning for "type" only if "name" value is filled in */
-      name !== '' &&
-      typesByFieldName[name] &&
-      !typesByFieldName[name].includes(type)
-    ) {
-      warnings[`${name}-${type}`] = i18n.FIELD_TYPE_NOT_FOUND_WARNING(name, type);
-    }
-    return warnings;
-  }, {});
+  const availableFieldNames = useMemo(() => {
+    const selectedFieldNames = new Set(selectedFieldNamesKey.split('\u0000'));
 
-  const getWarnings = ({ name, type }: { name: string; type: string }) => ({
-    nameWarning: nameWarnings[name] || '',
-    typeWarning: typeWarnings[`${name}-${type}`] || '',
-  });
+    return allFieldNames.filter((name) => !selectedFieldNames.has(name));
+  }, [allFieldNames, selectedFieldNamesKey]);
+
+  /*
+    Rows read available field names via a stable getter so editing one row's name
+    doesn't re-render every other row. Name comboboxes read it when focused.
+  */
+  const availableFieldNamesRef = useRef(availableFieldNames);
+  availableFieldNamesRef.current = availableFieldNames;
+  const getAvailableFieldNames = useCallback(() => availableFieldNamesRef.current, []);
+
+  /* Stable across row value changes, so rows can compute their own warnings without re-rendering each other */
+  const getWarnings = useCallback(
+    ({ name, type }: RequiredFieldInput): RequiredFieldWarnings => {
+      /* Creating warnings only if "name" value is filled in */
+      if (isIndexPatternLoading || name === '') {
+        return NO_WARNINGS;
+      }
+
+      const typesForName = typesByFieldName[name];
+      const isNameFound =
+        allFieldNamesSet.has(name) || isSubfieldOfFlattenedField(name, esFlattenedFieldNames);
+
+      return {
+        nameWarning: isNameFound ? '' : i18n.FIELD_NAME_NOT_FOUND_WARNING(name),
+        typeWarning:
+          typesForName && !typesForName.includes(type)
+            ? i18n.FIELD_TYPE_NOT_FOUND_WARNING(name, type)
+            : '',
+      };
+    },
+    [isIndexPatternLoading, typesByFieldName, allFieldNamesSet, esFlattenedFieldNames]
+  );
 
   const hasEmptyFieldName = fieldValue.some(({ name }) => name === '');
 
-  const hasWarnings = Object.keys(nameWarnings).length > 0 || Object.keys(typeWarnings).length > 0;
+  /*
+    Rendering a row is expensive (two comboboxes per row), so long lists are folded.
+    Folded rows are still mounted as form fields to keep their values in the form.
+    Unfolded rows beyond the first ones render compact until the user focuses them.
+  */
+  const [isExpanded, toggleExpanded] = useToggle(false);
+  const foldedRowsCount = isExpanded
+    ? 0
+    : items.filter((item, index) => getRowView({ item, index, isExpanded }) === 'folded').length;
+
+  const hasWarnings = fieldValue.some((value) => {
+    const { nameWarning, typeWarning } = getWarnings(value);
+
+    return nameWarning !== '' || typeWarning !== '';
+  });
 
   return (
     <>
       {hasWarnings && (
         <EuiCallOut
+          announceOnMount
           title={i18n.REQUIRED_FIELDS_GENERAL_WARNING_TITLE}
           color="warning"
-          iconType="help"
+          iconType="question"
           data-test-subj="requiredFieldsGeneralWarning"
         >
           <p>
@@ -179,24 +214,39 @@ const RequiredFieldsList = ({
         }
         hasChildLabel={false}
         labelType="legend"
+        data-test-subj="requiredFieldsFormRow"
       >
         <>
-          {items.map((item) => (
+          {items.map((item, index) => (
             <RequiredFieldRow
               key={item.id}
               item={item}
+              view={getRowView({ item, index, isExpanded })}
               removeItem={removeItem}
               getWarnings={getWarnings}
               typesByFieldName={typesByFieldName}
-              availableFieldNames={availableFieldNames}
+              getAvailableFieldNames={getAvailableFieldNames}
               parentFieldPath={path}
             />
           ))}
 
+          {(foldedRowsCount > 0 || isExpanded) && (
+            <EuiButtonEmpty
+              size="xs"
+              iconType={isExpanded ? 'arrowUp' : 'arrowDown'}
+              onClick={toggleExpanded}
+              data-test-subj="toggleRequiredFieldsFoldButton"
+            >
+              {isExpanded
+                ? i18n.SHOW_LESS_REQUIRED_FIELDS
+                : i18n.SHOW_MORE_REQUIRED_FIELDS(foldedRowsCount)}
+            </EuiButtonEmpty>
+          )}
+
           <EuiSpacer size="s" />
           <EuiButtonEmpty
             size="xs"
-            iconType="plusInCircle"
+            iconType="plusCircle"
             onClick={addItem}
             isDisabled={isIndexPatternLoading || hasEmptyFieldName}
             data-test-subj="addRequiredFieldButton"
@@ -210,3 +260,39 @@ const RequiredFieldsList = ({
 };
 
 export const RequiredFields = React.memo(RequiredFieldsComponent);
+
+/* Newly added rows are always fully rendered so the user can fill them in */
+const getRowView = ({
+  item,
+  index,
+  isExpanded,
+}: {
+  item: ArrayItem;
+  index: number;
+  isExpanded: boolean;
+}): RequiredFieldRowView => {
+  if (index < MAX_UNFOLDED_REQUIRED_FIELDS || item.isNew) {
+    return 'full';
+  }
+
+  return isExpanded ? 'compact' : 'folded';
+};
+
+const NO_WARNINGS: RequiredFieldWarnings = { nameWarning: '', typeWarning: '' };
+
+const isSubfieldOfFlattenedField = (
+  fieldName: string,
+  esFlattenedFieldNames: Set<string>
+): boolean => {
+  const parts = fieldName.split('.');
+
+  for (let i = parts.length - 1; i > 0; i--) {
+    const parentPath = parts.slice(0, i).join('.');
+
+    if (esFlattenedFieldNames.has(parentPath)) {
+      return true;
+    }
+  }
+
+  return false;
+};

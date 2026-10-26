@@ -9,14 +9,17 @@
 
 import React, { useMemo } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { DataTableRecord, DataTableColumnsMeta } from '@kbn/discover-utils/types';
+import type { DataTableRecord } from '@kbn/discover-utils/types';
+import type { DataSource } from '@kbn/data-source';
 import { UnifiedDocViewerFlyout } from '@kbn/unified-doc-viewer-plugin/public';
-import { NotificationsStart } from '@kbn/core-notifications-browser';
+import type { NotificationsStart } from '@kbn/core-notifications-browser';
+import type { ChromeStart } from '@kbn/core-chrome-browser';
 
 export interface RowViewerProps {
   notifications?: NotificationsStart;
+  chrome: ChromeStart;
   columns: string[];
-  columnsMeta?: DataTableColumnsMeta;
+  dataSource?: DataSource;
   hit: DataTableRecord;
   hits?: DataTableRecord[];
   flyoutType?: 'push' | 'overlay';
@@ -36,15 +39,19 @@ export function RowViewer({
   hits,
   dataView,
   columns,
-  columnsMeta,
+  dataSource,
   notifications,
+  chrome,
   flyoutType = 'push',
   onClose,
   onRemoveColumn,
   onAddColumn,
   setExpandedDoc,
 }: RowViewerProps) {
-  const services = useMemo(() => ({ toastNotifications: notifications?.toasts }), [notifications]);
+  const services = useMemo(
+    () => ({ toastNotifications: notifications?.toasts, chrome }),
+    [notifications, chrome]
+  );
 
   return (
     <UnifiedDocViewerFlyout
@@ -57,7 +64,7 @@ export function RowViewer({
       hits={hits}
       dataView={dataView}
       columns={columns}
-      columnsMeta={columnsMeta}
+      dataSource={dataSource}
       onAddColumn={onAddColumn}
       onRemoveColumn={onRemoveColumn}
       onClose={onClose}

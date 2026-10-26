@@ -103,6 +103,7 @@ export const getKpiUniqueIpsAreaLensAttributes: GetLensAttributes = ({ euiTheme 
         ],
         legend: { isVisible: false, position: 'right', showSingleSeries: false },
         preferredSeriesType: 'area',
+        areaFill: 'solid',
         tickLabelsVisibilitySettings: { x: true, yLeft: true, yRight: true },
         valueLabels: 'hide',
         yLeftExtent: { mode: 'full' },
@@ -128,8 +129,5 @@ export const getKpiUniqueIpsAreaLensAttributes: GetLensAttributes = ({ euiTheme 
         type: 'index-pattern',
       },
     ],
-    type: 'lens',
-    updated_at: '2022-02-09T17:44:03.359Z',
-    version: 'WzI5MTI5OSwzXQ==',
   } as LensAttributes;
 };

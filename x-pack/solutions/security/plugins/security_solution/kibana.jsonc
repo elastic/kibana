@@ -17,8 +17,10 @@
     "requiredPlugins": [
       "actions",
       "alerting",
+      "anonymization",
       "cases",
       "cloud",
+      "cloudDefend",
       "cloudSecurityPosture",
       "contentManagement",
       "dashboard",
@@ -27,10 +29,13 @@
       "ecsDataQualityDashboard",
       "elasticAssistant",
       "embeddable",
+      "entityStore",
       "eventLog",
       "features",
       "fieldFormats",
+      "inference",
       "inspector",
+      "kubernetesSecurity",
       "lens",
       "licensing",
       "maps",
@@ -39,11 +44,11 @@
       "sessionView",
       "spaces",
       "taskManager",
-      "threatIntelligence",
       "timelines",
       "triggersActionsUi",
       "uiActions",
       "unifiedSearch",
+      "kql",
       "files",
       "controls",
       "dataViewEditor",
@@ -55,14 +60,17 @@
       "savedSearch",
       "unifiedDocViewer",
       "charts",
-      "entityManager",
       "inference",
       "discoverShared",
       "productDocBase",
-      "telemetry"
+      "telemetry",
+      "elasticAssistantSharedState",
+      "share",
+      "workflowsExtensions"
     ],
     "optionalPlugins": [
       "encryptedSavedObjects",
+      "evals",
       "fleet",
       "ml",
       "newsfeed",
@@ -74,9 +82,16 @@
       "dataViewFieldEditor",
       "osquery",
       "savedObjectsTaggingOss",
-      "guidedOnboarding",
       "automaticImport",
-      "serverless"
+      "serverless",
+      "agentBuilder",
+      "llmTasks",
+      "mitreAttack",
+      "cps",
+      "searchInferenceEndpoints",
+      "esql",
+      "alertzero",
+      "agenticInvestigations"
     ],
     "requiredBundles": [
       "esUiShared",
@@ -86,11 +101,21 @@
       "usageCollection",
       "lists",
       "ml",
+      "mitreAttack",
       "unifiedSearch",
-      "esql"
+      "esql",
+      "agentBuilder",
+      "workflowsExtensions"
     ],
     "extraPublicDirs": [
       "common"
+    ]
+  },
+  "build": {
+    "extraExcludes": [
+      // Data generator episode fixtures are large vendored artifacts intended for dev/testing only.
+      // Keep them out of distributable builds.
+      "**/scripts/data/episodes/**"
     ]
   }
 }

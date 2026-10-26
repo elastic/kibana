@@ -6,18 +6,22 @@
  */
 
 import { delay, finalize, switchMap, tap } from 'rxjs';
+import type { Dispatch } from '@reduxjs/toolkit';
 import { debounce, isEqual } from 'lodash';
-import { waitUntilNextSessionCompletes$, DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { setExecutionContext, LensGetState, LensDispatch } from '..';
+import { waitUntilNextSessionCompletes$ } from '@kbn/data-plugin/public';
+import type { ProjectRouting } from '@kbn/es-query';
+import type { LensAppServices } from '@kbn/lens-common';
+import type { LensGetState } from '..';
+import { setState, setExecutionContext } from '..';
 import { getResolvedDateRange } from '../../utils';
 
 /**
- * subscribes to external changes for filters, searchSessionId, timerange and autorefresh
+ * subscribes to external changes for filters, searchSessionId, timerange, autorefresh and projectRouting
  */
 export function subscribeToExternalContext(
-  data: DataPublicPluginStart,
+  { data, cps }: LensAppServices,
   getState: LensGetState,
-  dispatch: LensDispatch
+  dispatch: Dispatch
 ) {
   const { query: queryService, search } = data;
   const { filterManager } = queryService;
@@ -73,10 +77,23 @@ export function subscribeToExternalContext(
       )
     )
     .subscribe();
+
+  // Subscribe to CPS projectRouting changes
+  const cpsProjectRoutingSubscription = cps?.cpsManager
+    ?.getProjectRouting$()
+    .subscribe((cpsProjectRouting: ProjectRouting | undefined) => {
+      const currentProjectRouting = getState().lens.projectRouting;
+
+      if (cpsProjectRouting !== currentProjectRouting) {
+        dispatch(setState({ projectRouting: cpsProjectRouting }));
+      }
+    });
+
   return () => {
     filterSubscription.unsubscribe();
     timeSubscription.unsubscribe();
     autoRefreshSubscription.unsubscribe();
     sessionSubscription.unsubscribe();
+    cpsProjectRoutingSubscription?.unsubscribe();
   };
 }

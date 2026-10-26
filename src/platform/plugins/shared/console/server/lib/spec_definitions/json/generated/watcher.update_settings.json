@@ -6,6 +6,7 @@
       "human": "__flag__",
       "pretty": "__flag__",
       "master_timeout": [
+        "30s",
         "-1",
         "0"
       ],
@@ -14,13 +15,17 @@
         "0"
       ]
     },
+    "data_autocomplete_rules": {
+      "index.auto_expand_replicas": "",
+      "index.number_of_replicas": ""
+    },
     "methods": [
       "PUT"
     ],
     "patterns": [
       "_watcher/settings"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/watcher-api-update-settings.html",
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-watcher-update-settings",
     "availability": {
       "stack": true,
       "serverless": false

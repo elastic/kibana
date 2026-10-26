@@ -12,7 +12,7 @@ import { dataTypes, installationStatuses } from '../../../../../common/constants
 import { appContextService } from '../../..';
 import { getPackageSavedObjects } from '../../packages/get';
 import { MAX_CONCURRENT_INDEX_PATTERN_OPERATIONS } from '../../../../constants';
-const INDEX_PATTERN_SAVED_OBJECT_TYPE = 'index-pattern';
+export const INDEX_PATTERN_SAVED_OBJECT_TYPE = 'index-pattern';
 
 export const indexPatternTypes = [dataTypes.Logs, dataTypes.Metrics];
 
@@ -72,7 +72,6 @@ export async function removeUnusedIndexPatterns(savedObjectsClient: SavedObjects
     patternsToDelete.map((pattern) => ({ id: pattern, type: INDEX_PATTERN_SAVED_OBJECT_TYPE }))
   );
 
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   const idsToDelete = resolvedObjects.map(({ saved_object }) => saved_object.id);
   await pMap(
     idsToDelete,

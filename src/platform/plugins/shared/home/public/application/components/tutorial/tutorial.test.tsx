@@ -9,10 +9,11 @@
 
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
-import { fireEvent, render, waitFor } from '@testing-library/react';
-import { SavedObjectsBatchResponse } from '@kbn/core-saved-objects-api-browser';
+import { act, fireEvent, render, waitFor } from '@testing-library/react';
 import { Tutorial } from './tutorial';
-import { TutorialType } from '../../../services/tutorials/types';
+import type { TutorialType } from '../../../services/tutorials/types';
+
+const mockSetBreadcrumbs = jest.fn();
 
 jest.mock('../../kibana_services', () => ({
   getServices: () => ({
@@ -21,8 +22,14 @@ jest.mock('../../kibana_services', () => ({
       basePath: { prepend: (path: string) => `/foo/${path}` },
     },
     getBasePath: jest.fn(() => 'path'),
+    application: {
+      getUrlForApp: (appId: string, { path }: { path: string }) => `/app/${appId}${path}`,
+    },
+    history: {
+      location: { hash: '#/tutorial/apm' },
+    },
     chrome: {
-      setBreadcrumbs: () => {},
+      setBreadcrumbs: mockSetBreadcrumbs,
     },
     tutorialService: {
       getModuleNotices: () => [],
@@ -83,11 +90,6 @@ const addBasePath = (path: string) => {
 const replaceTemplateStrings = (text: string) => {
   return text;
 };
-const bulkCreateMock = jest
-  .fn<Promise<SavedObjectsBatchResponse<unknown>>, []>()
-  .mockResolvedValue({
-    savedObjects: [],
-  });
 
 describe('Tutorial component', () => {
   describe('when isCloudEnabled is false', () => {
@@ -100,11 +102,13 @@ describe('Tutorial component', () => {
             getTutorial={getTutorial}
             replaceTemplateStrings={replaceTemplateStrings}
             tutorialId={'my_testing_tutorial'}
-            bulkCreate={bulkCreateMock}
           />
         </I18nProvider>
       );
-      await loadTutorialPromise;
+
+      await act(async () => {
+        await loadTutorialPromise;
+      });
 
       expect(getByText('onPrem instructions')).toBeInTheDocument();
     });
@@ -127,11 +131,12 @@ describe('Tutorial component', () => {
             getTutorial={getBasicTutorial}
             replaceTemplateStrings={replaceTemplateStrings}
             tutorialId={'my_testing_tutorial'}
-            bulkCreate={bulkCreateMock}
           />
         </I18nProvider>
       );
-      await loadBasicTutorialPromise;
+      await act(async () => {
+        await loadBasicTutorialPromise;
+      });
 
       expect(queryByTestId('selfManagedTutorial')).not.toBeInTheDocument();
       expect(queryByTestId('onCloudTutorial')).not.toBeInTheDocument();
@@ -146,11 +151,13 @@ describe('Tutorial component', () => {
             getTutorial={getTutorial}
             replaceTemplateStrings={replaceTemplateStrings}
             tutorialId={'my_testing_tutorial'}
-            bulkCreate={bulkCreateMock}
           />
         </I18nProvider>
       );
-      await loadTutorialPromise;
+      await act(async () => {
+        await loadTutorialPromise;
+      });
+
       fireEvent.click(getByTestId('onCloudTutorial'));
 
       await waitFor(() => {
@@ -169,11 +176,12 @@ describe('Tutorial component', () => {
             getTutorial={getTutorial}
             replaceTemplateStrings={replaceTemplateStrings}
             tutorialId={'my_testing_tutorial'}
-            bulkCreate={bulkCreateMock}
           />
         </I18nProvider>
       );
-      await loadTutorialPromise;
+      await act(async () => {
+        await loadTutorialPromise;
+      });
 
       expect(getByText('elasticCloud instructions')).toBeInTheDocument();
     });
@@ -189,11 +197,13 @@ describe('Tutorial component', () => {
             getTutorial={getTutorial}
             replaceTemplateStrings={replaceTemplateStrings}
             tutorialId={'my_testing_tutorial'}
-            bulkCreate={bulkCreateMock}
           />
         </I18nProvider>
       );
-      await loadTutorialPromise;
+
+      await act(async () => {
+        await loadTutorialPromise;
+      });
 
       // Simulate status check
       fireEvent.click(getByTestId('statusCheckButton'));
@@ -220,17 +230,46 @@ describe('Tutorial component', () => {
             getTutorial={getTutorialWithNoDataCheck}
             replaceTemplateStrings={replaceTemplateStrings}
             tutorialId={'my_testing_tutorial'}
-            bulkCreate={bulkCreateMock}
           />
         </I18nProvider>
       );
-      await loadTutorialWithNoDataCheckPromise;
+      await act(async () => {
+        await loadTutorialWithNoDataCheckPromise;
+      });
 
       // Simulate status check
       fireEvent.click(getByTestId('statusCheckButton'));
       await waitFor(() => {
         expect(getByText('No data found')).toBeInTheDocument();
       });
+    });
+  });
+
+  describe('breadcrumbs', () => {
+    test('should set breadcrumbs with Integrations and tutorial name on mount', async () => {
+      mockSetBreadcrumbs.mockClear();
+      render(
+        <I18nProvider>
+          <Tutorial
+            addBasePath={addBasePath}
+            isCloudEnabled={false}
+            getTutorial={getTutorial}
+            replaceTemplateStrings={replaceTemplateStrings}
+            tutorialId={'my_testing_tutorial'}
+          />
+        </I18nProvider>
+      );
+      await act(async () => {
+        await loadTutorialPromise;
+      });
+
+      expect(mockSetBreadcrumbs).toHaveBeenCalledWith(
+        [
+          { text: 'Integrations', href: 'BASE_PATH//app/integrations/browse' },
+          { text: 'jest test tutorial' },
+        ],
+        expect.anything()
+      );
     });
   });
 });

@@ -6,9 +6,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ConfigKey, FormMonitorType, FieldMeta } from '../types';
+import type { FieldMeta } from '../types';
+import { ConfigKey, FormMonitorType } from '../types';
 import { AlertConfigKey } from '../constants';
-import { FIELD } from './field_config';
+import { API_PRIVATE_LOCATIONS_ONLY, FIELD } from './field_config';
 
 const DEFAULT_DATA_OPTIONS = (readOnly: boolean) => ({
   title: i18n.translate('xpack.synthetics.monitorConfig.section.dataOptions.title', {
@@ -25,7 +26,51 @@ const DEFAULT_DATA_OPTIONS = (readOnly: boolean) => ({
   ],
 });
 
+const MAINTENANCE_WINDOWS_OPTIONS = (readOnly: boolean) => ({
+  title: i18n.translate('xpack.synthetics.monitorConfig.section.maintenanceWindows.title', {
+    defaultMessage: 'Maintenance windows',
+  }),
+  description: i18n.translate(
+    'xpack.synthetics.monitorConfig.section.maintenanceWindows.description',
+    {
+      defaultMessage:
+        'Configure maintenance windows to prevent alerts from being triggered during scheduled downtime.',
+    }
+  ),
+  components: [FIELD(readOnly)[ConfigKey.MAINTENANCE_WINDOWS]],
+});
+
 const HTTP_ADVANCED = (readOnly: boolean) => ({
+  authentication: {
+    title: i18n.translate('xpack.synthetics.monitorConfig.section.authentication.title', {
+      defaultMessage: 'Authentication',
+    }),
+    description: i18n.translate(
+      'xpack.synthetics.monitorConfig.section.authentication.description',
+      {
+        defaultMessage:
+          'Configure how the monitor authenticates with the server. Only one method can be used per monitor.',
+      }
+    ),
+    components: [
+      FIELD(readOnly).authType,
+      FIELD(readOnly)[ConfigKey.USERNAME],
+      FIELD(readOnly)[ConfigKey.PASSWORD],
+      FIELD(readOnly)['kerberos.auth_type'],
+      FIELD(readOnly)['kerberos.realm'],
+      FIELD(readOnly)['kerberos.config_path'],
+      FIELD(readOnly)['kerberos.krb5_conf'],
+      FIELD(readOnly)['kerberos.service_name'],
+      FIELD(readOnly)['kerberos.username'],
+      FIELD(readOnly)['kerberos.password'],
+      FIELD(readOnly)['kerberos.keytab'],
+      FIELD(readOnly)['kerberos.enable_krb5_fast'],
+      FIELD(readOnly)['ntlm.username'],
+      FIELD(readOnly)['ntlm.password'],
+      FIELD(readOnly)['ntlm.domain'],
+      FIELD(readOnly)['ntlm.workstation'],
+    ],
+  },
   requestConfig: {
     title: i18n.translate('xpack.synthetics.monitorConfig.section.requestConfiguration.title', {
       defaultMessage: 'Request configuration',
@@ -38,8 +83,6 @@ const HTTP_ADVANCED = (readOnly: boolean) => ({
       }
     ),
     components: [
-      FIELD(readOnly)[ConfigKey.USERNAME],
-      FIELD(readOnly)[ConfigKey.PASSWORD],
       FIELD(readOnly)[ConfigKey.REQUEST_METHOD_CHECK],
       FIELD(readOnly)[ConfigKey.REQUEST_HEADERS_CHECK],
       FIELD(readOnly)[ConfigKey.REQUEST_BODY_CHECK],
@@ -146,6 +189,33 @@ export const BROWSER_ADVANCED = (readOnly: boolean) => [
     components: [
       FIELD(readOnly)[ConfigKey.THROTTLING_CONFIG],
       FIELD(readOnly)[ConfigKey.IGNORE_HTTPS_ERRORS],
+      FIELD(readOnly)[ConfigKey.CERTIFICATE_ERROR_SPKI_ALLOWLIST],
+      FIELD(readOnly)[ConfigKey.SYNTHETICS_ARGS],
+      FIELD(readOnly)[ConfigKey.PLAYWRIGHT_OPTIONS],
+      FIELD(readOnly)[ConfigKey.PARAMS],
+    ],
+  },
+];
+
+// API journeys share the synthexec runtime with browser journeys but never
+// launch Chromium. Heartbeat's `api` plugin (elastic/beats#50802) silently
+// strips `--throttling` / `--screenshots` / `--sandbox` from the CLI args,
+// so we omit THROTTLING_CONFIG from the form to avoid offering knobs that
+// do nothing. IGNORE_HTTPS_ERRORS and PLAYWRIGHT_OPTIONS are still
+// forwarded because they apply to APIRequestContext.
+export const API_ADVANCED = (readOnly: boolean) => [
+  {
+    title: i18n.translate('xpack.synthetics.monitorConfig.section.syntAgentOptions.title', {
+      defaultMessage: 'Synthetics agent options',
+    }),
+    description: i18n.translate(
+      'xpack.synthetics.monitorConfig.section.syntAgentOptions.description',
+      {
+        defaultMessage: 'Provide fine-tuned configuration for the synthetics agent.',
+      }
+    ),
+    components: [
+      FIELD(readOnly)[ConfigKey.IGNORE_HTTPS_ERRORS],
       FIELD(readOnly)[ConfigKey.SYNTHETICS_ARGS],
       FIELD(readOnly)[ConfigKey.PLAYWRIGHT_OPTIONS],
       FIELD(readOnly)[ConfigKey.PARAMS],
@@ -189,6 +259,17 @@ const TLS_OPTIONS = (readOnly: boolean): AdvancedFieldGroup => ({
   ],
 });
 
+const KIBANA_SPACES_OPTIONS = (readOnly: boolean): AdvancedFieldGroup => ({
+  title: i18n.translate('xpack.synthetics.monitorConfig.section.kibanaSpaces.title', {
+    defaultMessage: 'Kibana Spaces',
+  }),
+  description: i18n.translate('xpack.synthetics.monitorConfig.kibanaSpaces.description', {
+    defaultMessage:
+      'Select the Kibana spaces where this monitor should be available. Current space should always be part of list, unless All spaces is selected.',
+  }),
+  components: [FIELD(readOnly)[ConfigKey.KIBANA_SPACES]],
+});
+
 export const FORM_CONFIG = (readOnly: boolean): FieldConfig => ({
   [FormMonitorType.HTTP]: {
     step1: [FIELD(readOnly)[ConfigKey.FORM_MONITOR_TYPE]],
@@ -206,10 +287,13 @@ export const FORM_CONFIG = (readOnly: boolean): FieldConfig => ({
     ],
     advanced: [
       DEFAULT_DATA_OPTIONS(readOnly),
+      MAINTENANCE_WINDOWS_OPTIONS(readOnly),
+      HTTP_ADVANCED(readOnly).authentication,
       HTTP_ADVANCED(readOnly).requestConfig,
       HTTP_ADVANCED(readOnly).responseConfig,
       HTTP_ADVANCED(readOnly).responseChecks,
       TLS_OPTIONS(readOnly),
+      KIBANA_SPACES_OPTIONS(readOnly),
     ],
   },
   [FormMonitorType.TCP]: {
@@ -227,9 +311,11 @@ export const FORM_CONFIG = (readOnly: boolean): FieldConfig => ({
     ],
     advanced: [
       DEFAULT_DATA_OPTIONS(readOnly),
+      MAINTENANCE_WINDOWS_OPTIONS(readOnly),
       TCP_ADVANCED(readOnly).requestConfig,
       TCP_ADVANCED(readOnly).responseChecks,
       TLS_OPTIONS(readOnly),
+      KIBANA_SPACES_OPTIONS(readOnly),
     ],
   },
   [FormMonitorType.MULTISTEP]: {
@@ -242,8 +328,8 @@ export const FORM_CONFIG = (readOnly: boolean): FieldConfig => ({
       FIELD(readOnly)[ConfigKey.MAX_ATTEMPTS],
       FIELD(readOnly)[AlertConfigKey.STATUS_ENABLED],
     ],
-    step3: [FIELD(readOnly)['source.inline'], FIELD(readOnly)[ConfigKey.PARAMS]],
-    scriptEdit: [FIELD(readOnly)['source.inline'], FIELD(readOnly)[ConfigKey.PARAMS]],
+    step3: [FIELD(readOnly)['source.inline']],
+    scriptEdit: [FIELD(readOnly)['source.inline']],
     advanced: [
       {
         ...DEFAULT_DATA_OPTIONS(readOnly),
@@ -255,7 +341,39 @@ export const FORM_CONFIG = (readOnly: boolean): FieldConfig => ({
           FIELD(readOnly)[ConfigKey.NAMESPACE],
         ],
       },
+      MAINTENANCE_WINDOWS_OPTIONS(readOnly),
       ...BROWSER_ADVANCED(readOnly),
+      KIBANA_SPACES_OPTIONS(readOnly),
+    ],
+  },
+  [FormMonitorType.API]: {
+    step1: [FIELD(readOnly)[ConfigKey.FORM_MONITOR_TYPE]],
+    step2: [
+      FIELD(readOnly)[ConfigKey.NAME],
+      {
+        ...FIELD(readOnly)[ConfigKey.LOCATIONS],
+        helpText: API_PRIVATE_LOCATIONS_ONLY,
+      },
+      FIELD(readOnly)[`${ConfigKey.SCHEDULE}.number`],
+      FIELD(readOnly)[ConfigKey.ENABLED],
+      FIELD(readOnly)[ConfigKey.MAX_ATTEMPTS],
+      FIELD(readOnly)[AlertConfigKey.STATUS_ENABLED],
+    ],
+    step3: [FIELD(readOnly)['source.inline']],
+    scriptEdit: [FIELD(readOnly)['source.inline']],
+    advanced: [
+      {
+        ...DEFAULT_DATA_OPTIONS(readOnly),
+        components: [
+          FIELD(readOnly)[ConfigKey.TAGS],
+          FIELD(readOnly)[ConfigKey.LABELS],
+          FIELD(readOnly)[ConfigKey.APM_SERVICE_NAME],
+          FIELD(readOnly)[ConfigKey.NAMESPACE],
+        ],
+      },
+      MAINTENANCE_WINDOWS_OPTIONS(readOnly),
+      ...API_ADVANCED(readOnly),
+      KIBANA_SPACES_OPTIONS(readOnly),
     ],
   },
   [FormMonitorType.SINGLE]: {
@@ -281,7 +399,9 @@ export const FORM_CONFIG = (readOnly: boolean): FieldConfig => ({
           FIELD(readOnly)[ConfigKey.NAMESPACE],
         ],
       },
+      MAINTENANCE_WINDOWS_OPTIONS(readOnly),
       ...BROWSER_ADVANCED(readOnly),
+      KIBANA_SPACES_OPTIONS(readOnly),
     ],
   },
   [FormMonitorType.ICMP]: {
@@ -297,6 +417,11 @@ export const FORM_CONFIG = (readOnly: boolean): FieldConfig => ({
       FIELD(readOnly)[ConfigKey.MAX_ATTEMPTS],
       FIELD(readOnly)[AlertConfigKey.STATUS_ENABLED],
     ],
-    advanced: [DEFAULT_DATA_OPTIONS(readOnly), ICMP_ADVANCED(readOnly).requestConfig],
+    advanced: [
+      DEFAULT_DATA_OPTIONS(readOnly),
+      MAINTENANCE_WINDOWS_OPTIONS(readOnly),
+      ICMP_ADVANCED(readOnly).requestConfig,
+      KIBANA_SPACES_OPTIONS(readOnly),
+    ],
   },
 });

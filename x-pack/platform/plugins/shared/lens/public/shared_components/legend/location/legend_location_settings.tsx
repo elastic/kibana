@@ -9,6 +9,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiButtonGroup, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { VerticalAlignment, HorizontalAlignment, Position } from '@elastic/charts';
+import { css } from '@emotion/react';
 
 export interface LegendLocationSettingsProps {
   /**
@@ -52,6 +53,7 @@ const toggleButtonsIcons = [
       defaultMessage: 'Right',
     }),
     iconType: 'sortRight',
+    'data-test-subj': 'lens-legend-position-btn-right',
   },
   {
     id: Position.Left,
@@ -59,6 +61,7 @@ const toggleButtonsIcons = [
       defaultMessage: 'Left',
     }),
     iconType: 'sortLeft',
+    'data-test-subj': 'lens-legend-position-btn-left',
   },
   {
     id: Position.Top,
@@ -66,6 +69,7 @@ const toggleButtonsIcons = [
       defaultMessage: 'Top',
     }),
     iconType: 'sortUp',
+    'data-test-subj': 'lens-legend-position-btn-top',
   },
   {
     id: Position.Bottom,
@@ -73,6 +77,7 @@ const toggleButtonsIcons = [
       defaultMessage: 'Bottom',
     }),
     iconType: 'sortDown',
+    'data-test-subj': 'lens-legend-position-btn-bottom',
   },
 ];
 
@@ -109,7 +114,7 @@ const locationAlignmentButtonsIcons: Array<{
     label: i18n.translate('xpack.lens.shared.legendLocationTopRight', {
       defaultMessage: 'Top right',
     }),
-    iconType: 'editorPositionTopRight',
+    iconType: 'alignTopRight',
   },
   {
     id: 'xy_location_alignment_top_left',
@@ -117,7 +122,7 @@ const locationAlignmentButtonsIcons: Array<{
     label: i18n.translate('xpack.lens.shared.legendLocationTopLeft', {
       defaultMessage: 'Top left',
     }),
-    iconType: 'editorPositionTopLeft',
+    iconType: 'alignTopLeft',
   },
   {
     id: 'xy_location_alignment_bottom_right',
@@ -125,7 +130,7 @@ const locationAlignmentButtonsIcons: Array<{
     label: i18n.translate('xpack.lens.shared.legendLocationBottomRight', {
       defaultMessage: 'Bottom right',
     }),
-    iconType: 'editorPositionBottomRight',
+    iconType: 'alignBottomRight',
   },
   {
     id: 'xy_location_alignment_bottom_left',
@@ -133,7 +138,7 @@ const locationAlignmentButtonsIcons: Array<{
     label: i18n.translate('xpack.lens.shared.legendLocationBottomLeft', {
       defaultMessage: 'Bottom left',
     }),
-    iconType: 'editorPositionBottomLeft',
+    iconType: 'alignBottomLeft',
   },
 ];
 
@@ -180,7 +185,12 @@ export const LegendLocationSettings: React.FunctionComponent<LegendLocationSetti
                 }}
               />
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
+            <EuiFlexItem
+              grow={false}
+              css={css`
+                overflow: hidden;
+              `}
+            >
               <>
                 {(!location || location === 'outside') && (
                   <EuiButtonGroup

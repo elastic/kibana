@@ -7,21 +7,25 @@
 
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type {
+  RuleObjectId,
   RuleResponse,
   RuleSignatureId,
   RuleTagArray,
+  RuleVersion,
 } from '../../../../../../common/api/detection_engine/model/rule_schema';
 import { withSecuritySpan } from '../../../../../utils/with_security_span';
 import { findRules } from '../../../rule_management/logic/search/find_rules';
 import { internalRuleToAPIResponse } from '../../../rule_management/logic/detection_rules_client/converters/internal_rule_to_api_response';
-import { convertRulesFilterToKQL } from '../../../../../../common/detection_engine/rule_management/rule_filtering';
+import {
+  convertRulesFilterToKQL,
+  KQL_FILTER_IMMUTABLE_RULES,
+} from '../../../../../../common/detection_engine/rule_management/rule_filtering';
 import type {
   FindRulesSortField,
   PrebuiltRulesFilter,
   SortOrder,
 } from '../../../../../../common/api/detection_engine';
 import { MAX_PREBUILT_RULES_COUNT } from '../../../rule_management/logic/search/get_existing_prepackaged_rules';
-import type { RuleVersionSpecifier } from '../rule_versions/rule_version_specifier';
 
 interface FetchAllInstalledRulesArgs {
   page?: number;
@@ -32,7 +36,7 @@ interface FetchAllInstalledRulesArgs {
 }
 
 interface FetchAllInstalledRuleVersionsArgs {
-  filter?: PrebuiltRulesFilter;
+  kqlFilter?: string;
   sortField?: FindRulesSortField;
   sortOrder?: SortOrder;
 }
@@ -49,15 +53,20 @@ interface FetchInstalledRulesByIdsArgs {
   sortOrder?: SortOrder;
 }
 
+export interface RuleSummary {
+  id: RuleObjectId;
+  rule_id: RuleSignatureId;
+  version: RuleVersion;
+  tags: RuleTagArray;
+}
+
 export interface IPrebuiltRuleObjectsClient {
   fetchInstalledRulesByIds(args: FetchInstalledRulesByIdsArgs): Promise<RuleResponse[]>;
   fetchInstalledRules(args?: FetchAllInstalledRulesArgs): Promise<RuleResponse[]>;
   fetchInstalledRuleVersionsByIds(
     args: FetchInstalledRuleVersionsByIdsArgs
-  ): Promise<Array<RuleVersionSpecifier & { tags: RuleTagArray }>>;
-  fetchInstalledRuleVersions(
-    args?: FetchAllInstalledRuleVersionsArgs
-  ): Promise<Array<RuleVersionSpecifier & { tags: RuleTagArray }>>;
+  ): Promise<RuleSummary[]>;
+  fetchInstalledRuleVersions(args?: FetchAllInstalledRuleVersionsArgs): Promise<RuleSummary[]>;
 }
 
 export const createPrebuiltRuleObjectsClient = (
@@ -110,13 +119,21 @@ export const createPrebuiltRuleObjectsClient = (
       return withSecuritySpan(
         'IPrebuiltRuleObjectsClient.fetchInstalledRuleVersionsByIds',
         async () => {
-          const filterKQL = convertRulesFilterToKQL({
+          if (ruleIds.length === 0) {
+            return [];
+          }
+
+          // ruleIds are prebuilt rule signature IDs (params.ruleId), not alerting
+          // SO IDs, so filter via KQL like fetchInstalledRulesByIds does rather
+          // than the findRules `ruleIds` option (which targets alert.id).
+          const baseFilterKQL = convertRulesFilterToKQL({
             showElasticRules: true,
           });
+          const ruleIdsKQL = `alert.attributes.params.ruleId:(${ruleIds.join(' or ')})`;
+          const filterKQL = baseFilterKQL ? `(${baseFilterKQL}) AND (${ruleIdsKQL})` : ruleIdsKQL;
 
           const rulesData = await findRules({
             rulesClient,
-            ruleIds,
             filter: filterKQL,
             perPage: MAX_PREBUILT_RULES_COUNT,
             page: 1,
@@ -125,6 +142,7 @@ export const createPrebuiltRuleObjectsClient = (
             fields: ['params.ruleId', 'params.version', 'tags'],
           });
           return rulesData.data.map((rule) => ({
+            id: rule.id,
             rule_id: rule.params.ruleId,
             version: rule.params.version,
             tags: rule.tags,
@@ -132,18 +150,16 @@ export const createPrebuiltRuleObjectsClient = (
         }
       );
     },
-    fetchInstalledRuleVersions: ({ filter, sortField, sortOrder } = {}) => {
+    fetchInstalledRuleVersions: ({ kqlFilter, sortField, sortOrder } = {}) => {
       return withSecuritySpan('IPrebuiltRuleObjectsClient.fetchInstalledRuleVersions', async () => {
-        const filterKQL = convertRulesFilterToKQL({
-          showElasticRules: true,
-          filter: filter?.name,
-          tags: filter?.tags,
-          customizationStatus: filter?.customization_status,
-        });
+        const combinedKQL =
+          kqlFilter && kqlFilter.length > 0
+            ? `${KQL_FILTER_IMMUTABLE_RULES} AND (${kqlFilter})`
+            : KQL_FILTER_IMMUTABLE_RULES;
 
         const rulesData = await findRules({
           rulesClient,
-          filter: filterKQL,
+          filter: combinedKQL,
           perPage: MAX_PREBUILT_RULES_COUNT,
           page: 1,
           sortField,
@@ -151,6 +167,7 @@ export const createPrebuiltRuleObjectsClient = (
           fields: ['params.ruleId', 'params.version', 'tags'],
         });
         return rulesData.data.map((rule) => ({
+          id: rule.id,
           rule_id: rule.params.ruleId,
           version: rule.params.version,
           tags: rule.tags,

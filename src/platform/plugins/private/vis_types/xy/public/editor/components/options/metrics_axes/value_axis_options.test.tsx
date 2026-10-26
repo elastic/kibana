@@ -14,9 +14,11 @@ import { Position } from '@elastic/charts';
 
 import { TextInputOption } from '@kbn/vis-default-editor-plugin/public';
 
-import { ValueAxis, ScaleType } from '../../../../types';
+import type { ValueAxis } from '../../../../types';
+import { ScaleType } from '../../../../types';
 import { LabelOptions } from './label_options';
-import { ValueAxisOptions, ValueAxisOptionsParams } from './value_axis_options';
+import type { ValueAxisOptionsParams } from './value_axis_options';
+import { ValueAxisOptions } from './value_axis_options';
 import { valueAxis } from './mocks';
 
 const POSITION = 'position';
@@ -63,7 +65,7 @@ describe('ValueAxisOptions component', () => {
     const comp = shallow(<ValueAxisOptions {...defaultProps} />);
     comp.find({ paramName: POSITION }).prop('setValue')(POSITION, value);
 
-    expect(onValueAxisPositionChanged).toBeCalledWith(defaultProps.index, value);
+    expect(onValueAxisPositionChanged).toHaveBeenCalledWith(defaultProps.index, value);
   });
 
   it('should call setValueAxis when title is changed', () => {
@@ -72,7 +74,7 @@ describe('ValueAxisOptions component', () => {
     const comp = shallow(<ValueAxisOptions {...defaultProps} />);
     comp.find(TextInputOption).prop('setValue')('text', textValue);
 
-    expect(setParamByIndex).toBeCalledWith('valueAxes', defaultProps.index, 'title', {
+    expect(setParamByIndex).toHaveBeenCalledWith('valueAxes', defaultProps.index, 'title', {
       text: textValue,
     });
   });
@@ -82,7 +84,7 @@ describe('ValueAxisOptions component', () => {
     const comp = shallow(<ValueAxisOptions {...defaultProps} />);
     comp.find({ paramName: 'type' }).prop('setValue')('type', scaleValue);
 
-    expect(setParamByIndex).toBeCalledWith('valueAxes', defaultProps.index, 'scale', {
+    expect(setParamByIndex).toHaveBeenCalledWith('valueAxes', defaultProps.index, 'scale', {
       ...defaultProps.axis.scale,
       type: scaleValue,
     });

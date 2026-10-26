@@ -7,8 +7,9 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiPanel, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { SearchEmptyPrompt, DecorativeHorizontalStepper } from '@kbn/search-shared-ui';
+import { SearchEmptyPrompt } from '@kbn/search-shared-ui';
 import { SERVERLESS_ES_WEB_CRAWLERS_ID } from '@kbn/deeplinks-search/constants';
+import { DecorativeHorizontalStepper } from '@kbn/search-connectors';
 import { BACK_LABEL, COMING_SOON_LABEL } from '../../../../common/i18n_string';
 import { useKibanaServices } from '../../hooks/use_kibana';
 
@@ -59,7 +60,7 @@ export const ElasticManagedWebCrawlersEmptyPrompt = () => {
                         gutterSize="s"
                       >
                         <EuiFlexItem grow={false}>
-                          <EuiIcon color="primary" size="l" type="globe" />
+                          <EuiIcon color="primary" size="l" type="globe" aria-hidden />
                         </EuiFlexItem>
                       </EuiFlexGroup>
                     </EuiFlexItem>
@@ -87,10 +88,10 @@ export const ElasticManagedWebCrawlersEmptyPrompt = () => {
                         justifyContent="center"
                       >
                         <EuiFlexItem>
-                          <EuiIcon color="primary" size="l" type="web" />
+                          <EuiIcon color="primary" size="l" type="web" aria-hidden />
                         </EuiFlexItem>
                         <EuiFlexItem>
-                          <EuiIcon color="primary" size="l" type="logoElastic" />
+                          <EuiIcon color="primary" size="l" type="logoElastic" aria-hidden />
                         </EuiFlexItem>
                       </EuiFlexGroup>
                     </EuiFlexItem>

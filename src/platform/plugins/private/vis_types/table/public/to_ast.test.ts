@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Vis } from '@kbn/visualizations-plugin/public';
+import type { Vis } from '@kbn/visualizations-plugin/public';
 import { toExpressionAst } from './to_ast';
-import { AggTypes, TableVisParams } from '../common';
+import type { TableVisParams } from '../common';
+import { AggTypes } from '../common';
 import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
 
 const mockSchemas = {
@@ -72,11 +73,11 @@ describe('table vis toExpressionAst function', () => {
 
     expect(buildExpressionFunction).toHaveBeenCalledTimes(3);
     // prepare metrics dimensions
-    expect(buildExpressionFunction).nthCalledWith(1, 'visdimension', { accessor: 1 });
+    expect(buildExpressionFunction).toHaveBeenNthCalledWith(1, 'visdimension', { accessor: 1 });
     // prepare buckets dimensions
-    expect(buildExpressionFunction).nthCalledWith(2, 'visdimension', { accessor: 0 });
+    expect(buildExpressionFunction).toHaveBeenNthCalledWith(2, 'visdimension', { accessor: 0 });
     // prepare table expression function
-    expect(buildExpressionFunction).nthCalledWith(3, 'kibana_table', {
+    expect(buildExpressionFunction).toHaveBeenNthCalledWith(3, 'kibana_table', {
       buckets: [mockTableExpression],
       metrics: [mockTableExpression],
       perPage: 20,
@@ -95,7 +96,7 @@ describe('table vis toExpressionAst function', () => {
     // @ts-expect-error
     vis.params.sort = { columnIndex: null };
     toExpressionAst(vis, {} as any);
-    expect(buildExpressionFunction).nthCalledWith(
+    expect(buildExpressionFunction).toHaveBeenNthCalledWith(
       2,
       expect.anything(),
       expect.not.objectContaining({ sort: expect.anything() })

@@ -1,0 +1,698 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+# NOTE: Keep this Buildkite *step* script mostly bash + orchestration.
+# - If you need non-trivial logic (parsing/transforming JSON, label/model selection, connector merging, etc),
+#   put it in a standalone script under `x-pack/platform/packages/shared/kbn-evals/scripts/ci/`
+#   and call it from here (see `get_fanout_matrix.js`, `merge_ai_connectors.js`, `generate_eis_connectors.js`).
+# - Avoid inline `node - <<'NODE'` heredocs in this file; ops/reviewers will ask to extract them anyway.
+
+EVAL_SUITE_ID="${EVAL_SUITE_ID:-}"
+if [[ -z "$EVAL_SUITE_ID" ]]; then
+  echo "EVAL_SUITE_ID is required"
+  exit 1
+fi
+
+# Optional boot disk override (GB) for the fanout agents. Unset means the image default.
+EVAL_AGENT_DISK_SIZE_GB="${EVAL_AGENT_DISK_SIZE_GB:-}"
+
+# Tag inference traffic with `X-Elastic-Product-Use-Case` (forwarded from inference connector telemetry).
+# The value should be the platform-level `pluginId` use-case identifier.
+# `@kbn/evals` defaults this to `kbn_evals`, but you can override via KBN_EVALS_TELEMETRY_PLUGIN_ID.
+
+# Set a base build run ID from the Buildkite build. This is used as a seed for
+# generating deterministic per-task experiment IDs (not as the experiment_id itself)
+# and feeds metadata.execution_id, the key the Experiments listing groups by
+# (see buildExecutionId in @kbn/evals for how the suite and model are combined).
+if [[ -z "${TEST_RUN_ID:-}" ]] && [[ -n "${BUILDKITE_BUILD_ID:-}" ]]; then
+  export TEST_RUN_ID="bk-${BUILDKITE_BUILD_ID}"
+fi
+
+# Bootstrap workspace deps + download build artifacts (same setup as FTR/Scout CI steps)
+source .buildkite/scripts/steps/functional/common.sh
+
+EVAL_SUITE_INFO="$(
+  node x-pack/platform/packages/shared/kbn-evals/scripts/ci/get_suite_info.js "$EVAL_SUITE_ID" || true
+)"
+EVAL_SUITE_NAME="$(printf '%s' "${EVAL_SUITE_INFO}" | jq -r '.name // empty' 2>/dev/null || true)"
+EVAL_SUITE_SLACK_CHANNEL="$(printf '%s' "${EVAL_SUITE_INFO}" | jq -r '.slackChannel // empty' 2>/dev/null || true)"
+# Per-suite step timeout for suites that legitimately need longer than the 120m default.
+EVAL_SUITE_STEP_TIMEOUT="$(printf '%s' "${EVAL_SUITE_INFO}" | jq -r '.stepTimeoutInMinutes // empty' 2>/dev/null || true)"
+# The suite's Scout arch/domain, for steps (e.g. the weekly pipeline) that don't pass them. The
+# suite's domain only applies to its own arch, so an EVAL_SCOUT_ARCH override falls back to the
+# run_suite.sh default domain for that arch instead of e.g. `stateful/observability_complete`.
+_suite_scout_arch="$(printf '%s' "${EVAL_SUITE_INFO}" | jq -r '.scoutArch // "stateful"' 2>/dev/null || echo stateful)"
+EVAL_SCOUT_ARCH="${EVAL_SCOUT_ARCH:-$(printf '%s' "${EVAL_SUITE_INFO}" | jq -r '.scoutArch // empty' 2>/dev/null || true)}"
+if [[ -z "${EVAL_SCOUT_DOMAIN:-}" && "${EVAL_SCOUT_ARCH:-stateful}" == "$_suite_scout_arch" ]]; then
+  EVAL_SCOUT_DOMAIN="$(printf '%s' "${EVAL_SUITE_INFO}" | jq -r '.scoutDomain // empty' 2>/dev/null || true)"
+fi
+unset _suite_scout_arch
+
+cleanup() {
+  if [[ -n "${SCOUT_PID:-}" ]]; then
+    kill "$SCOUT_PID" 2>/dev/null || true
+  fi
+  if [[ -n "${FANOUT_PIPELINE_FILE:-}" ]]; then
+    rm -f "$FANOUT_PIPELINE_FILE" 2>/dev/null || true
+  fi
+}
+
+record_suite_failure() {
+  local exit_status="$1"
+  if [[ "$exit_status" -eq 0 ]]; then
+    return 0
+  fi
+  if [[ "${KBN_EVALS:-}" != "1" ]]; then
+    return 0
+  fi
+  if [[ -z "${EVAL_SUITE_ID:-}" || -z "${EVAL_PROJECT:-}" ]]; then
+    return 0
+  fi
+  if ! command -v buildkite-agent >/dev/null 2>&1; then
+    return 0
+  fi
+
+  local suite_key_safe
+  suite_key_safe="$(printf '%s' "$EVAL_SUITE_ID" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9_-]+/-/g; s/-+/-/g; s/^-|-$//g')"
+  local project_key_safe
+  project_key_safe="$(printf '%s' "$EVAL_PROJECT" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9_-]+/-/g; s/-+/-/g; s/^-|-$//g')"
+
+  # Use one key per failing project to avoid non-atomic read/modify/write races when fanout steps fail concurrently.
+  local failure_key="kbn-evals:suite-failures:${suite_key_safe}:${project_key_safe}"
+  buildkite-agent meta-data set "$failure_key" "${EVAL_PROJECT}" >/dev/null 2>&1 || true
+
+  # Shards of one model run as separate steps but share EVAL_PROJECT, and each records a
+  # different excerpt, so the log needs a key per shard or the last step to fail wins.
+  local failure_log_key="kbn-evals:suite-failure-log:${suite_key_safe}:${project_key_safe}"
+  if [[ -n "${EVAL_SHARD_ID:-}" ]]; then
+    local shard_key_safe
+    shard_key_safe="$(printf '%s' "$EVAL_SHARD_ID" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9_-]+/-/g; s/-+/-/g; s/^-|-$//g')"
+    failure_log_key="${failure_log_key}:${shard_key_safe}"
+  fi
+
+  if [[ -n "${KBN_EVALS_RUN_LOG:-}" && -f "${KBN_EVALS_RUN_LOG}" ]]; then
+    local excerpt
+    excerpt="$(
+      tail -c 4000 "${KBN_EVALS_RUN_LOG}" | sed -E 's/\x1b\[[0-9;]*[a-zA-Z]//g' || true
+    )"
+    if [[ -n "${excerpt}" ]]; then
+      buildkite-agent meta-data set "$failure_log_key" "${excerpt}" >/dev/null 2>&1 || true
+    fi
+  fi
+}
+
+on_exit() {
+  local exit_status=$?
+  trap - EXIT
+  # The pre-run snapshot is only a baseline; ES fills `.es` while the suite runs, so these are the
+  # numbers that show a watermark breach. Skipped in the parent fanout step, which never starts ES.
+  # Diagnostics must never abort the trap under `set -e`, or the steps below are skipped and the
+  # failure goes unrecorded for triage.
+  if [[ -d .es ]]; then
+    echo "--- Disk usage after the run"
+    df -h . || true
+    du -sh .es 2>/dev/null || true
+  fi
+  cleanup
+  record_suite_failure "$exit_status"
+  exit "$exit_status"
+}
+
+trap on_exit EXIT
+
+# Generate OpenRouter connectors (or skip when only EIS models are requested).
+# This must run after bootstrap so Node is available for the generator script.
+source .buildkite/scripts/steps/evals/setup_connectors.sh
+
+# Fan out into one Buildkite step per connector project when requested.
+# This is the only practical way to run all connector projects within the 1h job timeout.
+EVAL_FANOUT="${EVAL_FANOUT:-}"
+EVAL_PROJECT="${EVAL_PROJECT:-}"
+EVAL_FANOUT_CONCURRENCY="${EVAL_FANOUT_CONCURRENCY:-4}"
+
+# Optional: extend eval connectors with EIS models (Elastic Inference Service).
+# This is intentionally done here (post-bootstrap) so Node scripts can import repo packages if needed.
+if [[ "${FTR_EIS_CCM:-}" =~ ^(1|true)$ ]]; then
+  NEED_EIS_CONNECTORS="false"
+  if [[ "${EVAL_INCLUDE_EIS_MODELS:-}" =~ ^(1|true)$ ]]; then
+    NEED_EIS_CONNECTORS="true"
+  fi
+  # Fanout child steps only need EIS connectors when running an EIS project.
+  if [[ -n "${EVAL_PROJECT:-}" ]] && [[ "${EVAL_PROJECT}" == eis-* ]]; then
+    NEED_EIS_CONNECTORS="true"
+  fi
+  # If the judge connector is EIS-backed, we still need EIS connectors even when running an OpenRouter project.
+  if [[ -n "${EVAL_CONNECTOR_ID:-}" ]] && [[ "${EVAL_CONNECTOR_ID}" == eis-* ]]; then
+    NEED_EIS_CONNECTORS="true"
+  fi
+
+  if [[ "${NEED_EIS_CONNECTORS}" == "true" ]]; then
+    if [[ -z "${KIBANA_EIS_CCM_API_KEY:-}" ]]; then
+      echo "FTR_EIS_CCM was set but KIBANA_EIS_CCM_API_KEY is missing"
+      exit 1
+    fi
+
+    echo "--- Discovering EIS models for eval connectors"
+    node scripts/discover_eis_models.js
+
+    echo "--- Generating EIS connectors"
+    EIS_CONNECTORS_B64="$(
+      node x-pack/platform/packages/shared/kbn-evals/scripts/ci/generate_eis_connectors.js
+    )"
+
+    export EIS_CONNECTORS_B64
+
+    echo "--- Merging OpenRouter + EIS connectors"
+    export KIBANA_TESTING_INFERENCE_ENDPOINTS="$(
+      node x-pack/platform/packages/shared/kbn-evals/scripts/ci/merge_ai_connectors.js
+    )"
+  fi
+fi
+
+if [[ "${EVAL_FANOUT:-}" == "1" ]] && [[ -z "${EVAL_PROJECT:-}" ]]; then
+  if ! command -v buildkite-agent >/dev/null 2>&1; then
+    echo "EVAL_FANOUT=1 requires buildkite-agent; falling back to running all projects in-process"
+  else
+    # One JSON object per line: { connectorId, shardId, specFiles }. Read below with `jq`.
+    # Weekly runs apply specModelGroups[] so a connector only gets the specs in a shard that asked for it.
+    FANOUT_MATRIX="$(
+      EVAL_SUITE_INFO="${EVAL_SUITE_INFO}" \
+        node x-pack/platform/packages/shared/kbn-evals/scripts/ci/get_fanout_matrix.js
+    )"
+
+    if [[ -z "${FANOUT_MATRIX:-}" ]]; then
+      echo "No connectors found in KIBANA_TESTING_INFERENCE_ENDPOINTS; falling back to evaluation connector only"
+      if [[ -n "${EVAL_CONNECTOR_ID:-}" ]]; then
+        export EVAL_PROJECT="${EVAL_CONNECTOR_ID}"
+      fi
+    else
+      echo "--- Uploading eval connector fanout steps"
+
+      # Buildkite YAML fragment (steps only) uploaded dynamically.
+      # NOTE: we re-invoke this script with EVAL_FANOUT=0 and EVAL_PROJECT=<connector-id>
+      # to avoid recursive fanout.
+      group_key_safe="$(printf '%s' "$EVAL_SUITE_ID" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9_-]+/-/g; s/-+/-/g; s/^-|-$//g')"
+
+      # NOTE: Avoid building YAML via command substitution, because it strips trailing newlines.
+      # That can accidentally concatenate lines (producing invalid YAML) when appending blocks.
+      FANOUT_PIPELINE_FILE="$(mktemp -t kbn-evals-fanout.XXXXXX.yml)"
+      cat >"$FANOUT_PIPELINE_FILE" <<EOF
+steps:
+  - group: "LLM Evals: ${EVAL_SUITE_ID}"
+    key: "kbn-evals-${group_key_safe}-fanout"
+    steps:
+EOF
+
+      fanout_preemptible=true
+      if [[ "$(printf '%s' "${EVAL_PREEMPTIBLE:-1}" | tr '[:upper:]' '[:lower:]')" =~ ^(0|false|no)$ ]]; then
+        fanout_preemptible=false
+      fi
+
+      # Each matrix row is a JSON object { connectorId, shardId, specFiles }; specFiles lists the spec
+      # files that step runs (empty for a whole-suite step). A moved or renamed spec would otherwise
+      # just stop running with the step still green, so check every referenced file here, before any
+      # stack is booted, and fail fast.
+      suite_root="$(dirname "$(printf '%s' "${EVAL_SUITE_INFO}" | jq -r '.configPath // ""')")"
+      if [[ -n "${suite_root}" && "${suite_root}" != "." ]]; then
+        missing_spec_files=()
+        while IFS= read -r row; do
+          [[ -z "$row" ]] && continue
+          row_spec_files="$(jq -r '.specFiles | join(" ")' <<<"$row")"
+          [[ -z "$row_spec_files" ]] && continue
+          read -r -a row_spec_file_list <<<"$row_spec_files"
+          for spec_file in ${row_spec_file_list[@]+"${row_spec_file_list[@]}"}; do
+            if [[ ! -f "${suite_root}/${spec_file}" ]]; then
+              missing_spec_files+=("${spec_file}")
+            fi
+          done
+        done <<<"$FANOUT_MATRIX"
+        if ((${#missing_spec_files[@]} > 0)); then
+          echo "Spec files missing from ${suite_root}/:" >&2
+          printf '  %s\n' "${missing_spec_files[@]}" | sort -u >&2
+          echo "Update the suite's shards/specModelGroups in .buildkite/pipelines/evals/evals.suites.json." >&2
+          exit 1
+        fi
+      fi
+
+      # Explicit env override wins, then the suite's own budget, then the 120m default that lets
+      # most suite/model combinations through without per-suite special-casing.
+      timeout_in_minutes="${EVAL_STEP_TIMEOUT_IN_MINUTES:-${EVAL_SUITE_STEP_TIMEOUT:-120}}"
+
+      fanout_step_keys=()
+      fanout_connector_ids=()
+      # Each matrix row is one step, a JSON object { connectorId, shardId, specFiles }. shardId is ""
+      # for an unsharded whole-suite step; specFiles is the (possibly empty) space-joined spec list.
+      while IFS= read -r row; do
+        [[ -z "$row" ]] && continue
+        connector_id="$(jq -r '.connectorId' <<<"$row")"
+        shard_id="$(jq -r '.shardId' <<<"$row")"
+        shard_spec_file_args="$(jq -r '.specFiles | join(" ")' <<<"$row")"
+        [[ -z "$connector_id" ]] && continue
+        key_safe="$(printf '%s' "$connector_id" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9_-]+/-/g; s/-+/-/g; s/^-|-$//g')"
+        fanout_connector_ids+=("$connector_id")
+
+        step_key="kbn-evals-${group_key_safe}-${key_safe}"
+        step_label="LLM Evals: ${EVAL_SUITE_ID} / ${connector_id}"
+        if [[ -n "$shard_id" ]]; then
+          shard_key_safe="$(printf '%s' "$shard_id" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9_-]+/-/g; s/-+/-/g; s/^-|-$//g')"
+          step_key="${step_key}-${shard_key_safe}"
+          step_label="${step_label} [${shard_id}]"
+        fi
+        fanout_step_keys+=("$step_key")
+
+        cat >>"$FANOUT_PIPELINE_FILE" <<EOF
+      - label: "${step_label}"
+        key: "${step_key}"
+        command: "bash .buildkite/scripts/steps/evals/run_suite.sh"
+        env:
+          KBN_EVALS: "1"
+          KBN_EVALS_WEEKLY: "${KBN_EVALS_WEEKLY:-}"
+          FTR_EIS_CCM: "${FTR_EIS_CCM:-}"
+          EVAL_INCLUDE_EIS_MODELS: "${EVAL_INCLUDE_EIS_MODELS:-}"
+          EVAL_MODEL_GROUPS: "${EVAL_MODEL_GROUPS:-}"
+          EVAL_CONNECTOR_ID: "${EVAL_CONNECTOR_ID:-}"
+          EVAL_SUITE_ID: "${EVAL_SUITE_ID}"
+          EVAL_SUITE_NAME: "${EVAL_SUITE_NAME:-}"
+          EVAL_SUITE_SLACK_CHANNEL: "${EVAL_SUITE_SLACK_CHANNEL:-}"
+          EVAL_PROJECT: "${connector_id}"
+          EVAL_SHARD_ID: "${shard_id}"
+          EVAL_FANOUT: "0"
+          TEST_RUN_ID: "${TEST_RUN_ID:-}"
+          EVAL_SERVER_CONFIG_SET: "${EVAL_SERVER_CONFIG_SET:-}"
+          EVAL_SCOUT_ARCH: "${EVAL_SCOUT_ARCH:-}"
+          EVAL_SCOUT_DOMAIN: "${EVAL_SCOUT_DOMAIN:-}"
+          EVAL_GREP: "${EVAL_GREP:-}"
+          EVAL_GREP_INVERT: "${EVAL_GREP_INVERT:-}"
+          EVAL_SPEC_FILES: "${shard_spec_file_args}"
+          EVAL_REPETITIONS: "${EVAL_REPETITIONS:-}"
+          EVAL_CONCURRENCY: "${EVAL_CONCURRENCY:-}"
+        timeout_in_minutes: ${timeout_in_minutes}
+        concurrency_group: "kbn-evals-${group_key_safe}"
+        concurrency: ${EVAL_FANOUT_CONCURRENCY}
+        agents:
+          image: family/kibana-ubuntu-2404
+          imageProject: elastic-images-prod
+          provider: gcp
+          machineType: n2-standard-8
+EOF
+
+          if [[ -n "$EVAL_AGENT_DISK_SIZE_GB" ]]; then
+            cat >>"$FANOUT_PIPELINE_FILE" <<EOF
+          diskSizeGb: ${EVAL_AGENT_DISK_SIZE_GB}
+EOF
+          fi
+
+        if [[ "$fanout_preemptible" == "true" ]]; then
+          cat >>"$FANOUT_PIPELINE_FILE" <<EOF
+          preemptible: true
+        retry:
+          automatic:
+            - exit_status: "-1"
+              limit: 3
+EOF
+        fi
+      done <<<"$FANOUT_MATRIX"
+
+      # Resolve a PR number (if any) so triage can be posted as a PR comment:
+      # GITHUB_PR_NUMBER (PR-label CI) -> BUILDKITE_PULL_REQUEST -> refs/pull/<N>/head
+      # branch (how on-demand selects a PR via the New Build form).
+      resolved_pr_number=""
+      if [[ -n "${GITHUB_PR_NUMBER:-}" ]]; then
+        resolved_pr_number="${GITHUB_PR_NUMBER}"
+      elif [[ -n "${BUILDKITE_PULL_REQUEST:-}" && "${BUILDKITE_PULL_REQUEST}" != "false" ]]; then
+        resolved_pr_number="${BUILDKITE_PULL_REQUEST}"
+      elif [[ "${BUILDKITE_BRANCH:-}" =~ ^refs/pull/([0-9]+)/head$ ]]; then
+        resolved_pr_number="${BASH_REMATCH[1]}"
+      fi
+
+      # Only ping suite owners on the pipeline's default branch (main). Manual rebuilds
+      # from feature branches still run the evals but skip the Slack notification, so we
+      # don't spam suite owners with results from in-progress/experimental branches.
+      EVAL_NOTIFY_BRANCH="${BUILDKITE_PIPELINE_DEFAULT_BRANCH:-main}"
+      
+      # Enable the suite owner notify step when there is somewhere to send triage:
+      # - weekly: the suite's team channel
+      # - any run: a PR comment (PR context) or EVAL_SLACK_NOTIFICATION_CHANNEL
+      enable_suite_owner_notify="false"
+      if [[ "${KBN_EVALS_WEEKLY:-}" =~ ^(1|true)$ ]] && [[ -n "${EVAL_SUITE_SLACK_CHANNEL:-}" ]] && [[ "${BUILDKITE_BRANCH:-}" == "${EVAL_NOTIFY_BRANCH}" ]]; then
+        enable_suite_owner_notify="true"
+      elif [[ -n "${resolved_pr_number}" ]]; then
+        enable_suite_owner_notify="true"
+      elif [[ -n "${EVAL_SLACK_NOTIFICATION_CHANNEL:-}" ]]; then
+        enable_suite_owner_notify="true"
+      fi
+
+      if [[ "${enable_suite_owner_notify}" == "true" ]]; then
+        cat >>"$FANOUT_PIPELINE_FILE" <<EOF
+      - label: "LLM Evals: ${EVAL_SUITE_ID} (suite owner notify)"
+        key: "kbn-evals-${group_key_safe}-suite-owner-notify"
+        command: "bash .buildkite/scripts/steps/evals/suite_owner_notify.sh"
+        env:
+          KBN_EVALS: "1"
+          KBN_EVALS_WEEKLY: "${KBN_EVALS_WEEKLY:-}"
+          EVAL_SUITE_ID: "${EVAL_SUITE_ID}"
+          EVAL_SUITE_SLACK_CHANNEL: "${EVAL_SUITE_SLACK_CHANNEL:-}"
+          EVAL_SLACK_NOTIFICATION_CHANNEL: "${EVAL_SLACK_NOTIFICATION_CHANNEL:-}"
+          EVAL_PR_NUMBER: "${resolved_pr_number}"
+          EVAL_SUITE_NAME: "${EVAL_SUITE_NAME:-}"
+        depends_on:
+EOF
+        for key in "${fanout_step_keys[@]}"; do
+          printf '          - "%s"\n' "$key" >>"$FANOUT_PIPELINE_FILE"
+        done
+
+        cat >>"$FANOUT_PIPELINE_FILE" <<EOF
+        timeout_in_minutes: 10
+        allow_dependency_failure: true
+        soft_fail: true
+        agents:
+          image: family/kibana-ubuntu-2404
+          imageProject: elastic-images-prod
+          provider: gcp
+          machineType: n2-standard-2
+          preemptible: true
+EOF
+      fi
+
+      # PR-only steps: post-comparison comment + refresh baseline block/trigger.
+      # Both live here in the fanout so they start only after all model steps
+      # complete and execution IDs are written by evaluate.ts.
+      if [[ -n "${BUILDKITE_PULL_REQUEST:-}" && "${BUILDKITE_PULL_REQUEST}" != "false" ]]; then
+        suite_display_name="${EVAL_SUITE_NAME:-$EVAL_SUITE_ID}"
+
+        # Post-comparison step (inside the fanout group — 6-space indent).
+        cat >>"$FANOUT_PIPELINE_FILE" <<EOF
+      - label: "LLM Evals: ${EVAL_SUITE_ID} (post comparison)"
+        key: "kbn-evals-${group_key_safe}-post-comparison"
+        command: "bash .buildkite/scripts/steps/evals/post_eval_comment.sh"
+        env:
+          KBN_EVALS: "1"
+          EVAL_SUITE_ID: "${EVAL_SUITE_ID}"
+          EVAL_SUITE_IDS: "${EVAL_SUITE_ID}"
+        depends_on:
+EOF
+        for key in "${fanout_step_keys[@]}"; do
+          printf '          - "%s"\n' "$key" >>"$FANOUT_PIPELINE_FILE"
+        done
+        cat >>"$FANOUT_PIPELINE_FILE" <<EOF
+        timeout_in_minutes: 10
+        allow_dependency_failure: true
+        agents:
+          image: family/kibana-ubuntu-2404
+          imageProject: elastic-images-prod
+          provider: gcp
+          machineType: n2-standard-2
+          preemptible: true
+EOF
+        # Refresh baseline block + trigger (top-level — 2-space indent).
+        # The trigger fires a fresh main eval run so the PR comment is updated
+        # with a same-day baseline when the auto-discovered one is stale.
+        cat >>"$FANOUT_PIPELINE_FILE" <<EOF
+  - block: "LLM Evals: Refresh ${suite_display_name}"
+    key: "kbn-evals-${group_key_safe}-refresh-block"
+    depends_on:
+      - "kbn-evals-${group_key_safe}-post-comparison"
+    allow_dependency_failure: true
+  - trigger: kibana-evals-on-demand-llm-evals
+    label: "LLM Evals: Refresh ${suite_display_name}"
+    key: "kbn-evals-${group_key_safe}-refresh-trigger"
+    async: true
+    soft_fail: true
+    depends_on:
+      - "kbn-evals-${group_key_safe}-refresh-block"
+    build:
+      branch: main
+      message: "Fresh baseline for PR #${BUILDKITE_PULL_REQUEST}: ${EVAL_SUITE_ID}"
+      env:
+        EVAL_SUITE_ID: "${EVAL_SUITE_ID}"
+        EVAL_SUITE_IDS: "${EVAL_SUITE_ID}"
+        FRESH_BASELINE_PR_EXPERIMENT_ID: "bk-${BUILDKITE_BUILD_ID}"
+        EVAL_PR_NUMBER: "${BUILDKITE_PULL_REQUEST}"
+        EVAL_CONNECTOR_ID: "${EVAL_CONNECTOR_ID:-}"
+        EVAL_INCLUDE_EIS_MODELS: "${EVAL_INCLUDE_EIS_MODELS:-}"
+        EVAL_MODEL_GROUPS: "${EVAL_MODEL_GROUPS:-}"
+        EVAL_SERVER_CONFIG_SET: "${EVAL_SERVER_CONFIG_SET:-}"
+        EVAL_SCOUT_ARCH: "${EVAL_SCOUT_ARCH:-}"
+        EVAL_SCOUT_DOMAIN: "${EVAL_SCOUT_DOMAIN:-}"
+EOF
+      elif [[ -n "${FRESH_BASELINE_PR_EXPERIMENT_ID:-}" ]]; then
+        # Fresh-baseline mode: emit the post-comparison step inside the fanout so
+        # it starts only after all model steps have written their execution IDs to
+        # Buildkite metadata.
+        cat >>"$FANOUT_PIPELINE_FILE" <<EOF
+      - label: "LLM Evals: ${EVAL_SUITE_ID} (fresh baseline comparison)"
+        key: "kbn-evals-${group_key_safe}-fresh-compare"
+        command: "bash .buildkite/scripts/steps/evals/post_eval_comment.sh"
+        env:
+          KBN_EVALS: "1"
+          EVAL_SUITE_ID: "${EVAL_SUITE_ID}"
+          EVAL_SUITE_IDS: "${EVAL_SUITE_ID}"
+          GITHUB_PR_NUMBER: "${EVAL_PR_NUMBER:-}"
+          FRESH_BASELINE_PR_EXPERIMENT_ID: "${FRESH_BASELINE_PR_EXPERIMENT_ID}"
+        depends_on:
+EOF
+        for key in "${fanout_step_keys[@]}"; do
+          printf '          - "%s"\n' "$key" >>"$FANOUT_PIPELINE_FILE"
+        done
+        cat >>"$FANOUT_PIPELINE_FILE" <<EOF
+        timeout_in_minutes: 10
+        allow_dependency_failure: true
+        agents:
+          image: family/kibana-ubuntu-2404
+          imageProject: elastic-images-prod
+          provider: gcp
+          machineType: n2-standard-2
+          preemptible: true
+EOF
+      fi
+
+      if ! buildkite-agent pipeline upload "$FANOUT_PIPELINE_FILE"; then
+        echo "Fanout pipeline upload failed. Dumping generated YAML with line numbers:"
+        nl -ba "$FANOUT_PIPELINE_FILE" || true
+        exit 1
+      fi
+
+      # Publish the connector list so the post-comparison step can discover
+      # which models ran without querying the experiments API. Dedup because per-spec fanout can
+      # emit the same connector across several shards.
+      _connectors_csv="$(
+        printf '%s\n' ${fanout_connector_ids[@]+"${fanout_connector_ids[@]}"} \
+          | awk 'NF && !seen[$0]++' | tr '\n' ',' | sed 's/,$//'
+      )"
+      buildkite-agent meta-data set "kbn-evals:connectors:${EVAL_SUITE_ID}" "$_connectors_csv" 2>/dev/null || true
+
+      echo "Fanout uploaded. Exiting parent step."
+      exit 0
+    fi
+  fi
+fi
+
+# Free space on the ES data path drives the merge scheduler's disk watermark: once it drops below
+# `min(5% of total, 100GB)` Elasticsearch stops merging segments and only says so in a repeated
+# warning. Record the numbers up front so a recurrence is diagnosable from the build log alone.
+echo "--- Disk usage before starting Scout"
+df -h .
+du -sh .es node_modules "${KIBANA_BUILD_LOCATION:-}" 2>/dev/null || true
+
+# A suite's `scoutHook` reads the evals config on stdin and prints `{ env }`, exported for Scout and
+# Playwright so the suite's server config set can read it. A suite with a `vaultSecret` gets its own
+# secret instead of the general config, so its credentials rotate without touching other suites.
+EVAL_SUITE_SCOUT_HOOK="$(printf '%s' "${EVAL_SUITE_INFO}" | jq -r '.scoutHook // empty' 2>/dev/null || true)"
+EVAL_SUITE_VAULT_SECRET="$(printf '%s' "${EVAL_SUITE_INFO}" | jq -r '.vaultSecret // empty' 2>/dev/null || true)"
+if [[ -n "$EVAL_SUITE_SCOUT_HOOK" ]]; then
+  if [[ -n "$EVAL_SUITE_VAULT_SECRET" ]]; then
+    if [[ ! "$EVAL_SUITE_VAULT_SECRET" =~ ^[a-z0-9][a-z0-9_-]*$ ]]; then
+      echo "Invalid vaultSecret \"$EVAL_SUITE_VAULT_SECRET\" in evals.suites.json" >&2
+      exit 1
+    fi
+    _scout_hook_config="$(retry 5 5 vault kv get -field=config "kv/ci-shared/kbn-evals/$EVAL_SUITE_VAULT_SECRET" | base64 -d)"
+  elif [[ -n "${KBN_EVALS_CONFIG_B64:-}" ]]; then
+    _scout_hook_config="$(printf '%s' "$KBN_EVALS_CONFIG_B64" | base64 -d)"
+  else
+    _scout_hook_config='{}'
+  fi
+  _scout_hook_output="$(printf '%s' "$_scout_hook_config" | bash "$EVAL_SUITE_SCOUT_HOOK")"
+  # The native evals CLI invokes this hook again; give it the same suite-owned input.
+  KBN_EVALS_SCOUT_HOOK_CONFIG_B64="$(printf '%s' "$_scout_hook_config" | base64)"
+  export KBN_EVALS_SCOUT_HOOK_CONFIG_B64
+  # Piped, not `<<<`: older bash backs here-strings with a temp file, and this holds the private key.
+  while IFS= read -r _scout_hook_name; do
+    [[ -z "$_scout_hook_name" ]] && continue
+    export "$_scout_hook_name=$(printf '%s' "$_scout_hook_output" | jq -r --arg name "$_scout_hook_name" '.env[$name]')"
+  done < <(printf '%s' "$_scout_hook_output" | jq -r '(.env // {}) | keys[]')
+  unset _scout_hook_config _scout_hook_output _scout_hook_name
+fi
+
+# Scout arch/domain come from the suite's scoutArch/scoutDomain (EVAL_SCOUT_ARCH/EVAL_SCOUT_DOMAIN),
+# stateful/classic by default.
+SCOUT_ARCH="${EVAL_SCOUT_ARCH:-stateful}"
+SCOUT_DOMAIN="${EVAL_SCOUT_DOMAIN:-classic}"
+echo "Scout target: ${SCOUT_ARCH}/${SCOUT_DOMAIN}"
+
+# Serverless ES serves https with the dev CA and authenticates as elastic_serverless, so read the
+# credentials Scout wrote to local.json instead of assuming elastic:changeme.
+es_curl() {
+  local user password
+  user="$(jq -r '.auth.username // "elastic"' .scout/servers/local.json)"
+  password="$(jq -r '.auth.password // "changeme"' .scout/servers/local.json)"
+  curl --cacert src/platform/packages/shared/kbn-dev-utils/certs/ca.crt -u "${user}:${password}" "$@"
+}
+
+# Start Scout server in background (run Kibana from the distributable)
+SCOUT_SERVER_ARGS=(start-server --location local --arch "$SCOUT_ARCH" --domain "$SCOUT_DOMAIN" --kibanaInstallDir "${KIBANA_BUILD_LOCATION:?}")
+if [[ -n "${EVAL_SERVER_CONFIG_SET:-}" ]]; then
+  SCOUT_SERVER_ARGS+=(--serverConfigSet "$EVAL_SERVER_CONFIG_SET")
+else
+  SCOUT_SERVER_ARGS+=(--serverConfigSet evals_tracing)
+fi
+
+node scripts/scout "${SCOUT_SERVER_ARGS[@]}" &
+SCOUT_PID=$!
+
+# Wait for Scout to write servers config (and fail fast if the Scout server process exits)
+for _ in {1..60}; do
+  if [[ -f .scout/servers/local.json ]]; then
+    break
+  fi
+  if ! kill -0 "$SCOUT_PID" 2>/dev/null; then
+    echo "Scout server exited before writing .scout/servers/local.json"
+    wait "$SCOUT_PID" || true
+    exit 1
+  fi
+  sleep 1
+done
+
+if [[ ! -f .scout/servers/local.json ]]; then
+  echo "Timed out waiting for .scout/servers/local.json"
+  exit 1
+fi
+
+# Enable EIS Cloud Connected Mode (CCM) on the Scout ES cluster so EIS-backed
+# inference endpoints are available for `.inference` connectors.
+if [[ "${FTR_EIS_CCM:-}" =~ ^(1|true)$ ]]; then
+  NEED_EIS_RUNTIME="false"
+  if [[ -n "${EVAL_PROJECT:-}" ]] && [[ "${EVAL_PROJECT}" == eis-* ]]; then
+    NEED_EIS_RUNTIME="true"
+  fi
+  if [[ -n "${EVAL_CONNECTOR_ID:-}" ]] && [[ "${EVAL_CONNECTOR_ID}" == eis-* ]]; then
+    NEED_EIS_RUNTIME="true"
+  fi
+  if [[ "${EVAL_MODEL_GROUPS:-}" == *"eis/"* ]]; then
+    NEED_EIS_RUNTIME="true"
+  fi
+
+  if [[ "${NEED_EIS_RUNTIME}" != "true" ]]; then
+    echo "EIS CCM enabled but not required for this run; skipping CCM setup"
+  else
+    if [[ -z "${KIBANA_EIS_CCM_API_KEY:-}" ]]; then
+      echo "FTR_EIS_CCM was set but KIBANA_EIS_CCM_API_KEY is missing"
+      exit 1
+    fi
+
+    ES_URL="$(jq -r '.hosts.elasticsearch' .scout/servers/local.json | sed 's:/*$::')"
+
+    echo "--- Waiting for Elasticsearch to be ready at $ES_URL"
+    ES_READY="false"
+    # Serverless starts three ES containers (and may pull the image) before it is ready.
+    ES_READY_ATTEMPTS=120
+    [[ "$SCOUT_ARCH" == "serverless" ]] && ES_READY_ATTEMPTS=600
+    for (( _attempt = 1; _attempt <= ES_READY_ATTEMPTS; _attempt++ )); do
+      if ! kill -0 "$SCOUT_PID" 2>/dev/null; then
+        echo "Scout server exited before Elasticsearch became ready"
+        wait "$SCOUT_PID" || true
+        exit 1
+      fi
+
+      if es_curl -sSf \
+        "$ES_URL/_cluster/health?wait_for_status=yellow&timeout=1s" >/dev/null 2>&1; then
+        ES_READY="true"
+        break
+      fi
+
+      sleep 1
+    done
+
+    if [[ "${ES_READY}" != "true" ]]; then
+      echo "Timed out waiting for Elasticsearch at $ES_URL"
+      exit 1
+    fi
+
+    echo "--- Enabling EIS Cloud Connected Mode (CCM) on $ES_URL"
+
+    es_curl -sSf \
+      -H 'content-type: application/json' \
+      -X PUT "$ES_URL/_inference/_ccm" \
+      -d "{\"api_key\":\"${KIBANA_EIS_CCM_API_KEY:?}\"}" >/dev/null
+
+    echo "--- Waiting for EIS inference endpoints"
+    for attempt in {1..10}; do
+      if es_curl -sSf "$ES_URL/_inference/_all" \
+        | jq -e '.endpoints | any(.task_type=="chat_completion" and .service=="elastic")' >/dev/null; then
+        echo "✅ EIS endpoints available"
+        break
+      fi
+      if [[ "$attempt" == "10" ]]; then
+        echo "❌ Timed out waiting for EIS endpoints"
+        es_curl -sSf "$ES_URL/_inference/_all" || true
+        exit 1
+      fi
+      sleep 3
+    done
+  fi
+fi
+
+# Wait for Kibana to be ready (and fail fast if the Scout server process exits)
+KIBANA_URL="$(jq -r '.hosts.kibana' .scout/servers/local.json)"
+KIBANA_URL="$(printf '%s' "$KIBANA_URL" | sed 's:/*$::')"
+
+for _ in {1..180}; do
+  if ! kill -0 "$SCOUT_PID" 2>/dev/null; then
+    echo "Scout server exited before Kibana became ready"
+    wait "$SCOUT_PID" || true
+    exit 1
+  fi
+
+  if curl -sSf "$KIBANA_URL/api/status" >/dev/null; then
+    echo "Kibana is ready at $KIBANA_URL"
+    break
+  fi
+
+  sleep 5
+done
+
+# Run eval suite via @kbn/evals CLI (internal executor by default).
+# If EVAL_PROJECT is set, run a single Playwright project (used by CI fanout steps).
+# If EVAL_GREP / EVAL_GREP_INVERT are set, pass Playwright --grep / --grep-invert to filter tests
+# by name/pattern. This is the manual override for ad-hoc runs.
+# If EVAL_SPEC_FILES is set, pass those paths as Playwright file filters. Sharded suites use this
+# to split one suite across several steps; the fanout step has already checked the paths exist.
+# Otherwise, Playwright will run all projects defined by the suite config (useful locally).
+EVAL_RUN_ARGS=()
+if [[ -n "${EVAL_GREP:-}" ]]; then
+  EVAL_RUN_ARGS+=(--grep "${EVAL_GREP}")
+fi
+if [[ -n "${EVAL_GREP_INVERT:-}" ]]; then
+  EVAL_RUN_ARGS+=(--grep-invert "${EVAL_GREP_INVERT}")
+fi
+if [[ -n "${EVAL_SPEC_FILES:-}" ]]; then
+  read -r -a EVAL_SPEC_FILE_LIST <<<"${EVAL_SPEC_FILES}"
+  EVAL_RUN_ARGS+=(${EVAL_SPEC_FILE_LIST[@]+"${EVAL_SPEC_FILE_LIST[@]}"})
+fi
+
+run_eval_suite() {
+  if [[ -n "${EVAL_PROJECT:-}" ]]; then
+    KBN_EVALS_RUN_LOG="$(mktemp -t kbn-evals-run.XXXXXX.log)"
+    export KBN_EVALS_RUN_LOG
+    set +e
+    node scripts/evals run --suite "$EVAL_SUITE_ID" --project "$EVAL_PROJECT" "${EVAL_RUN_ARGS[@]}" 2>&1 | tee "$KBN_EVALS_RUN_LOG"
+    local eval_exit="${PIPESTATUS[0]}"
+    set -e
+    return "${eval_exit}"
+  fi
+
+  node scripts/evals run --suite "$EVAL_SUITE_ID" "${EVAL_RUN_ARGS[@]}"
+}
+
+run_eval_suite
+

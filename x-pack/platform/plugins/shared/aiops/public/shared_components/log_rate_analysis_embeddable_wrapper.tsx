@@ -40,7 +40,7 @@ export type LogRateAnalysisPropsWithDeps = LogRateAnalysisEmbeddableWrapperProps
 export type LogRateAnalysisEmbeddableWrapper = FC<LogRateAnalysisEmbeddableWrapperProps>;
 
 export interface LogRateAnalysisEmbeddableWrapperProps {
-  dataViewId: string;
+  dataViewId?: string;
   timeRange: TimeRange;
   /**
    * Component to render if there are no significant items found
@@ -61,6 +61,7 @@ export interface LogRateAnalysisEmbeddableWrapperProps {
   onError: (error: Error) => void;
   windowParameters?: WindowParameters;
   filtersApi?: PublishesFilters;
+  parentApi: unknown;
 }
 
 const LogRateAnalysisEmbeddableWrapperWithDeps: FC<LogRateAnalysisPropsWithDeps> = ({
@@ -74,10 +75,20 @@ const LogRateAnalysisEmbeddableWrapperWithDeps: FC<LogRateAnalysisPropsWithDeps>
   lastReloadRequestTime,
   windowParameters,
   filtersApi,
+  parentApi,
 }) => {
   const deps = useMemo(() => {
-    const { lens, data, usageCollection, fieldFormats, charts, share, storage, unifiedSearch } =
-      pluginStart;
+    const {
+      lens,
+      data,
+      usageCollection,
+      fieldFormats,
+      charts,
+      share,
+      storage,
+      unifiedSearch,
+      cps,
+    } = pluginStart;
 
     return {
       data,
@@ -88,12 +99,22 @@ const LogRateAnalysisEmbeddableWrapperWithDeps: FC<LogRateAnalysisPropsWithDeps>
       share,
       storage,
       unifiedSearch,
+      cps,
       ...coreStart,
     };
   }, [coreStart, pluginStart]);
 
   const datePickerDeps = {
-    ...pick(deps, ['data', 'http', 'notifications', 'theme', 'uiSettings', 'userProfile', 'i18n']),
+    ...pick(deps, [
+      'data',
+      'http',
+      'notifications',
+      'theme',
+      'uiSettings',
+      'userProfile',
+      'i18n',
+      'cps',
+    ]),
     uiSettingsKeys: UI_SETTINGS,
   };
 
@@ -138,10 +159,8 @@ const LogRateAnalysisEmbeddableWrapperWithDeps: FC<LogRateAnalysisPropsWithDeps>
   }, [dataViewId, prevDataViewId]);
   const showComponent = prevDataViewId === undefined || prevDataViewId === dataViewId;
 
-  // TODO: Remove data-shared-item as part of https://github.com/elastic/kibana/issues/179376>
   return (
     <div
-      data-shared-item=""
       data-test-subj="aiopsEmbeddableLogRateAnalysis"
       css={{
         width: '100%',
@@ -160,7 +179,7 @@ const LogRateAnalysisEmbeddableWrapperWithDeps: FC<LogRateAnalysisPropsWithDeps>
               >
                 <FilterQueryContextProvider timeRange={timeRange} filtersApi={filtersApi}>
                   <LogRateAnalysisReduxProvider initialAnalysisStart={windowParameters}>
-                    <LogRateAnalysisForEmbeddable timeRange={timeRange} />
+                    <LogRateAnalysisForEmbeddable timeRange={timeRange} parentApi={parentApi} />
                   </LogRateAnalysisReduxProvider>
                 </FilterQueryContextProvider>
               </DataSourceContextProvider>

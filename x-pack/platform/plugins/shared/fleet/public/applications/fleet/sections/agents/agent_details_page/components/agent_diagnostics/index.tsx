@@ -14,6 +14,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiIconTip,
   EuiLink,
   EuiLoadingSpinner,
   EuiText,
@@ -38,15 +39,25 @@ import {
   useStartServices,
   sendDeleteAgentUpload,
 } from '../../../../../hooks';
-import type { AgentDiagnostics, Agent } from '../../../../../../../../common/types/models';
+import type {
+  AgentDiagnostics,
+  Agent,
+  AgentPolicy,
+} from '../../../../../../../../common/types/models';
 import { AgentRequestDiagnosticsModal } from '../../../components/agent_request_diagnostics_modal';
 
 export interface AgentDiagnosticsProps {
   agent: Agent;
+  agentPolicy?: AgentPolicy;
 }
 
-export const AgentDiagnosticsTab: React.FunctionComponent<AgentDiagnosticsProps> = ({ agent }) => {
+export const AgentDiagnosticsTab: React.FunctionComponent<AgentDiagnosticsProps> = ({
+  agent,
+  agentPolicy,
+}) => {
   const authz = useAuthz();
+  // agentless agents are managed by Elastic: users can't request diagnostics for them
+  const isAgentless = agentPolicy?.supports_agentless === true;
   const { notifications } = useStartServices();
   const { getAbsolutePath } = useLink();
   const [isLoading, setIsLoading] = useState(true);
@@ -177,7 +188,7 @@ export const AgentDiagnosticsTab: React.FunctionComponent<AgentDiagnosticsProps>
         const currentItem = allDiagnosticsEntries.find((item) => item.id === id);
         return currentItem?.status === 'READY' ? (
           <EuiLink href={getAbsolutePath(currentItem?.filePath)} download target="_blank">
-            <EuiIcon type="download" /> &nbsp; {currentItem?.name}
+            <EuiIcon type="download" aria-hidden={true} /> &nbsp; {currentItem?.name}
           </EuiLink>
         ) : currentItem?.status === 'IN_PROGRESS' || currentItem?.status === 'AWAITING_UPLOAD' ? (
           <EuiLink color="subdued" disabled>
@@ -192,7 +203,7 @@ export const AgentDiagnosticsTab: React.FunctionComponent<AgentDiagnosticsProps>
             <EuiFlexGroup gutterSize="s" direction="row" alignItems="center">
               {currentItem?.error ? (
                 <EuiFlexItem grow={false}>
-                  <EuiToolTip
+                  <EuiIconTip
                     content={
                       <FormattedMessage
                         id="xpack.fleet.requestDiagnostics.errorGeneratingFileMessage"
@@ -200,15 +211,13 @@ export const AgentDiagnosticsTab: React.FunctionComponent<AgentDiagnosticsProps>
                         values={{ reason: currentItem.error }}
                       />
                     }
-                  >
-                    <EuiIcon type="warning" color="danger" />
-                  </EuiToolTip>
+                    type="warning"
+                    color="danger"
+                  />
                 </EuiFlexItem>
               ) : currentItem?.status ? (
                 <EuiFlexItem grow={false}>
-                  <EuiToolTip content={currentItem.status}>
-                    <EuiIcon type="warning" color="danger" />
-                  </EuiToolTip>
+                  <EuiIconTip content={currentItem.status} type="warning" color="danger" />
                 </EuiFlexItem>
               ) : null}
               <EuiFlexItem>{currentItem?.name}</EuiFlexItem>
@@ -274,7 +283,9 @@ export const AgentDiagnosticsTab: React.FunctionComponent<AgentDiagnosticsProps>
       onClick={() => {
         setIsRequestDiagnosticsModalOpen(true);
       }}
-      disabled={!isAgentRequestDiagnosticsSupported(agent) || !authz.fleet.readAgents}
+      disabled={
+        isAgentless || !isAgentRequestDiagnosticsSupported(agent) || !authz.fleet.readAgents
+      }
     >
       <FormattedMessage
         id="xpack.fleet.requestDiagnostics.diagnosticsOneButton"
@@ -313,7 +324,18 @@ export const AgentDiagnosticsTab: React.FunctionComponent<AgentDiagnosticsProps>
         justifyContent="spaceBetween"
       >
         <EuiFlexItem grow={false}>
-          {isAgentRequestDiagnosticsSupported(agent) ? (
+          {isAgentless ? (
+            <EuiToolTip
+              content={
+                <FormattedMessage
+                  id="xpack.fleet.requestDiagnostics.agentlessNotSupportedTooltip"
+                  defaultMessage="Requesting agent diagnostics is not supported for managed agents."
+                />
+              }
+            >
+              {requestDiagnosticsButton}
+            </EuiToolTip>
+          ) : isAgentRequestDiagnosticsSupported(agent) ? (
             requestDiagnosticsButton
           ) : (
             <EuiToolTip
@@ -347,7 +369,16 @@ export const AgentDiagnosticsTab: React.FunctionComponent<AgentDiagnosticsProps>
       {isLoading ? (
         <EuiSkeletonText lines={3} />
       ) : (
-        <EuiBasicTable<AgentDiagnostics> items={visibleDiagnosticsEntries} columns={columns} />
+        <EuiBasicTable<AgentDiagnostics>
+          items={visibleDiagnosticsEntries}
+          columns={columns}
+          tableCaption={i18n.translate(
+            'xpack.fleet.requestDiagnostics.agentDiagnosticsUploads.tableCaption',
+            {
+              defaultMessage: 'Agent diagnostics uploads',
+            }
+          )}
+        />
       )}
     </>
   );

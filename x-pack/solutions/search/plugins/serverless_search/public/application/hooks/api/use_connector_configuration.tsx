@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useMutation } from '@tanstack/react-query';
+import { useMutation } from '@kbn/react-query';
 import { useKibanaServices } from '../use_kibana';
 
 export const useEditConnectorConfiguration = (connectorId: string) => {
@@ -14,7 +14,7 @@ export const useEditConnectorConfiguration = (connectorId: string) => {
     mutationFn: async (configuration: Record<string, string | number | boolean | null>) => {
       const body = { configuration };
       const result = await http.post(
-        `/internal/serverless_search/connectors/${connectorId}/configuration`,
+        `/internal/serverless_search/connectors/${encodeURIComponent(connectorId)}/configuration`,
         {
           body: JSON.stringify(body),
         }

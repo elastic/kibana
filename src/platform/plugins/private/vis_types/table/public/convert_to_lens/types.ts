@@ -7,10 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { TimefilterContract } from '@kbn/data-plugin/public';
-import { NavigateToLensContext, TableVisConfiguration } from '@kbn/visualizations-plugin/common';
-import { Vis } from '@kbn/visualizations-plugin/public';
-import { TableVisParams } from '../../common';
+import type { TimefilterContract } from '@kbn/data-plugin/public';
+import type {
+  NavigateToLensContext,
+  DatatableVisualizationState as TableVisConfiguration,
+} from '@kbn/lens-common';
+import type { Vis } from '@kbn/visualizations-plugin/public';
+import type { TableVisParams } from '../../common';
 
 export type ConvertTableToLensVisualization = (
   vis: Vis<TableVisParams>,

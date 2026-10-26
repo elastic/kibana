@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type {
+  EndpointAppContextService,
+  ScopedEndpointServices,
+} from '../../endpoint_app_context_services';
 import { fetchActionRequests } from './utils/fetch_action_requests';
 import type { FetchActionResponsesResult } from './utils/fetch_action_responses';
 import { fetchActionResponses } from './utils/fetch_action_responses';
@@ -25,10 +28,14 @@ import {
   mapResponsesByActionId,
   mapToNormalizedActionRequest,
 } from './utils';
-import type { EndpointMetadataService } from '../metadata';
 import { ACTIONS_SEARCH_PAGE_SIZE } from './constants';
 
 interface OptionalFilterParams {
+  /**
+   * Required for these reads to fan out under CPS. Optional because the pending-actions summary
+   * reaches this from a path with no scoped services.
+   */
+  scoped?: ScopedEndpointServices;
   agentTypes?: ResponseActionAgentType[];
   commands?: string[];
   elasticAgentIds?: string[];
@@ -51,13 +58,13 @@ interface OptionalFilterParams {
  * filter out action details based on statuses filter options
  */
 export const getActionListByStatus = async ({
+  endpointService,
+  spaceId,
+  scoped,
   agentTypes,
   commands,
   elasticAgentIds,
-  esClient,
   endDate,
-  logger,
-  metadataService,
   page: _page,
   pageSize,
   startDate,
@@ -68,22 +75,21 @@ export const getActionListByStatus = async ({
   withOutputs,
 }: OptionalFilterParams & {
   statuses: ResponseActionStatus[];
-  esClient: ElasticsearchClient;
-  logger: Logger;
-  metadataService: EndpointMetadataService;
+  spaceId: string;
+  endpointService: EndpointAppContextService;
 }): Promise<ActionListApiResponse> => {
   const size = pageSize ?? ENDPOINT_DEFAULT_PAGE_SIZE;
   const page = _page ?? 1;
 
   const { actionDetails: allActionDetails } = await getActionDetailsList({
+    endpointService,
+    spaceId,
+    scoped,
     agentTypes,
     commands,
     elasticAgentIds,
-    esClient,
     endDate,
     from: 0,
-    logger,
-    metadataService,
     size: ACTIONS_SEARCH_PAGE_SIZE,
     startDate,
     userIds,
@@ -117,13 +123,13 @@ export const getActionListByStatus = async ({
  * Retrieve a list of Actions (`ActionDetails`)
  */
 export const getActionList = async ({
+  endpointService,
+  spaceId,
+  scoped,
   agentTypes,
   commands,
   elasticAgentIds,
-  esClient,
   endDate,
-  logger,
-  metadataService,
   page: _page,
   pageSize,
   startDate,
@@ -132,9 +138,8 @@ export const getActionList = async ({
   withOutputs,
   types,
 }: OptionalFilterParams & {
-  esClient: ElasticsearchClient;
-  logger: Logger;
-  metadataService: EndpointMetadataService;
+  spaceId: string;
+  endpointService: EndpointAppContextService;
 }): Promise<ActionListApiResponse> => {
   const size = pageSize ?? ENDPOINT_DEFAULT_PAGE_SIZE;
   const page = _page ?? 1;
@@ -142,14 +147,14 @@ export const getActionList = async ({
   const from = (page - 1) * size;
 
   const { actionDetails, totalRecords } = await getActionDetailsList({
+    spaceId,
+    endpointService,
+    scoped,
     agentTypes,
     commands,
     elasticAgentIds,
-    esClient,
     endDate,
     from,
-    logger,
-    metadataService,
     size,
     startDate,
     userIds,
@@ -174,20 +179,18 @@ export const getActionList = async ({
 };
 
 export type GetActionDetailsListParam = OptionalFilterParams & {
-  esClient: ElasticsearchClient;
   from: number;
-  logger: Logger;
   size: number;
 };
 const getActionDetailsList = async ({
+  endpointService,
+  spaceId,
+  scoped,
   agentTypes,
   commands,
   elasticAgentIds,
-  esClient,
   endDate,
   from,
-  logger,
-  metadataService,
   size,
   startDate,
   userIds,
@@ -195,19 +198,23 @@ const getActionDetailsList = async ({
   withOutputs,
   types,
 }: GetActionDetailsListParam & {
-  metadataService: EndpointMetadataService;
+  spaceId: string;
+  endpointService: EndpointAppContextService;
 }): Promise<{
   actionDetails: ActionListApiResponse['data'];
   totalRecords: number;
 }> => {
+  const logger = endpointService.createLogger('GetActionDetailsList');
   let actionRequests: LogsEndpointAction[] = [];
   let totalRecords: number = 0;
 
   try {
     const { data, total } = await fetchActionRequests({
+      spaceId,
+      endpointService,
+      scoped,
       agentTypes,
       commands: commands as ResponseActionsApiCommandNames[],
-      esClient,
       elasticAgentIds,
       startDate,
       endDate,
@@ -216,7 +223,6 @@ const getActionDetailsList = async ({
       userIds,
       unExpiredOnly,
       types: types as ResponseActionType[],
-      logger,
     });
 
     actionRequests = data;
@@ -238,24 +244,33 @@ const getActionDetailsList = async ({
   }
 
   const normalizedActionRequests = actionRequests.map(mapToNormalizedActionRequest);
-  const agentIds: string[] = [];
+  const agentIds: string[] = []; // Endpoint agent IDs only
   const actionReqIds = normalizedActionRequests.map((actionReq) => {
-    agentIds.push(...actionReq.agents);
+    if (actionReq.agentType === 'endpoint') {
+      agentIds.push(...actionReq.agents);
+    }
+
     return actionReq.id;
   });
   let actionResponses: FetchActionResponsesResult;
   let agentsHostInfo: { [id: string]: string };
 
   try {
-    // get all responses for given action Ids and agent Ids
-    // and get host metadata info with queried agents
+    // get all responses for the action IDs retrieved
     [actionResponses, agentsHostInfo] = await Promise.all([
-      fetchActionResponses({ esClient, agentIds: elasticAgentIds, actionIds: actionReqIds }),
+      fetchActionResponses({
+        esClient: endpointService.getInternalEsClient(),
+        endpointService,
+        scoped,
+        actionIds: actionReqIds,
+      }),
 
+      // Get the host names for Elastic Endpoint agents
       getAgentHostNamesWithIds({
-        esClient,
-        metadataService,
+        endpointService,
+        spaceId,
         agentIds,
+        scoped,
       }),
     ]);
   } catch (error) {

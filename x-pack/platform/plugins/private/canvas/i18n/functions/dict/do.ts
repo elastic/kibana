@@ -7,8 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 import type { doFn } from '../../../canvas_plugin_src/functions/common/do';
-import { FunctionHelp } from '../function_help';
-import { FunctionFactory } from '../../../types';
+import type { FunctionHelp } from '../function_help';
+import type { FunctionFactory } from '../../../types';
 import { CONTEXT } from '../../constants';
 
 export const help: FunctionHelp<FunctionFactory<typeof doFn>> = {

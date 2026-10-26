@@ -10,14 +10,15 @@ import type { ConsolePluginStart } from '@kbn/console-plugin/public';
 import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/public';
 import type { ManagementSetup, ManagementStart } from '@kbn/management-plugin/public';
 import type { SecurityPluginStart } from '@kbn/security-plugin/public';
+import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import type { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverless/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { IndexManagementPluginStart } from '@kbn/index-management-plugin/public';
 import type { DiscoverSetup } from '@kbn/discover-plugin/public';
 import type {
-  SearchIndicesPluginSetup,
-  SearchIndicesPluginStart,
-} from '@kbn/search-indices/public';
+  SearchHomepagePluginSetup,
+  SearchHomepagePluginStart,
+} from '@kbn/search-homepage/public';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ServerlessSearchPluginSetup {}
@@ -30,7 +31,7 @@ export interface ServerlessSearchPluginSetupDependencies {
   management: ManagementSetup;
   serverless: ServerlessPluginSetup;
   discover: DiscoverSetup;
-  searchIndices: SearchIndicesPluginSetup;
+  searchHomepage?: SearchHomepagePluginSetup;
 }
 
 export interface ServerlessSearchPluginStartDependencies {
@@ -38,9 +39,10 @@ export interface ServerlessSearchPluginStartDependencies {
   console: ConsolePluginStart;
   searchInferenceEndpoints?: SearchInferenceEndpointsPluginStart;
   management: ManagementStart;
+  navigation: NavigationPublicPluginStart;
   security: SecurityPluginStart;
   serverless: ServerlessPluginStart;
   share: SharePluginStart;
   indexManagement?: IndexManagementPluginStart;
-  searchIndices: SearchIndicesPluginStart;
+  searchHomepage?: SearchHomepagePluginStart;
 }

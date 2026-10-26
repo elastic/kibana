@@ -5,13 +5,11 @@
  * 2.0.
  */
 
-import { SavedObject } from '@kbn/core-saved-objects-server';
+import type { SavedObject } from '@kbn/core-saved-objects-server';
 import type { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server';
-import { Logger } from '@kbn/logging';
-import {
-  type PrivateLocationAttributes,
-  SyntheticsPrivateLocationsAttributes,
-} from '../../../runtime_types/private_locations';
+import type { Logger } from '@kbn/logging';
+import type { SyntheticsPrivateLocationsAttributes } from '../../../runtime_types/private_locations';
+import { type PrivateLocationAttributes } from '../../../runtime_types/private_locations';
 import {
   legacyPrivateLocationsSavedObjectId,
   legacyPrivateLocationsSavedObjectName,
@@ -64,7 +62,7 @@ export const migrateLegacyPrivateLocations = async (
         {}
       );
     }
-  } catch (e) {
-    logger.error(`Error migrating legacy private locations: ${e}`);
+  } catch (error) {
+    logger.error(`Error migrating legacy private locations: ${error.message}`, { error });
   }
 };

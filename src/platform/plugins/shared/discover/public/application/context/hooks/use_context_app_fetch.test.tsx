@@ -9,7 +9,6 @@
 
 import React from 'react';
 import { renderHook, act } from '@testing-library/react';
-import { createFilterManagerMock } from '@kbn/data-plugin/public/query/filter_manager/filter_manager.mock';
 import { CONTEXT_TIE_BREAKER_FIELDS_SETTING } from '@kbn/discover-utils';
 import type { DiscoverServices } from '../../../build_services';
 import { FailureReason, LoadingStatus } from '../services/context_query_state';
@@ -22,33 +21,23 @@ import {
 } from '../__mocks__/use_context_app_fetch';
 import { dataViewWithTimefieldMock } from '../../../__mocks__/data_view_with_timefield';
 import { searchResponseIncompleteWarningLocalCluster } from '@kbn/search-response-warnings/src/__mocks__/search_response_warnings';
-import { createContextSearchSourceStub } from '../services/_stubs';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { themeServiceMock } from '@kbn/core/public/mocks';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { DiscoverTestProvider } from '../../../__mocks__/test_provider';
+import { createDiscoverServicesMock } from '../../../__mocks__/services';
 
 const mockInterceptedWarning = {
   originalWarning: searchResponseIncompleteWarningLocalCluster,
 };
 
-const mockFilterManager = createFilterManagerMock();
-
 let mockOverrideInterceptedWarnings = false;
+const mockFetchSurroundingDocs = jest.fn();
 
 jest.mock('../services/context', () => {
   const originalModule = jest.requireActual('../services/context');
   return {
     ...originalModule,
 
-    fetchSurroundingDocs: (type: string, dataView: DataView) => {
-      if (!dataView || !dataView.id) {
-        throw new Error();
-      }
-      return {
-        rows: type === 'predecessors' ? mockPredecessorHits : mockSuccessorHits,
-        interceptedWarnings: mockOverrideInterceptedWarnings ? [mockInterceptedWarning] : undefined,
-      };
-    },
+    fetchSurroundingDocs: (...args: unknown[]) => mockFetchSurroundingDocs(...args),
   };
 });
 
@@ -64,53 +53,49 @@ jest.mock('../services/anchor', () => ({
   },
 }));
 
-const initDefaults = (tieBreakerFields: string[], dataViewId = 'the-data-view-id') => {
-  const dangerNotification = jest.fn();
-  const mockSearchSource = createContextSearchSourceStub('timestamp');
+const initDefaults = (
+  tieBreakerFields: string[],
+  dataViewId = 'the-data-view-id',
+  predecessorCount = 2,
+  successorCount = 2
+) => {
+  const services = createDiscoverServicesMock();
 
-  const services = {
-    data: {
-      search: {
-        searchSource: {
-          createEmpty: jest.fn().mockImplementation(() => mockSearchSource),
-        },
-      },
-    },
-    toastNotifications: { addDanger: dangerNotification },
-    core: {
-      notifications: { toasts: [] },
-      theme: { theme$: themeServiceMock.createStartContract().theme$ },
-    },
-    history: () => {},
-    filterManager: mockFilterManager,
-    uiSettings: {
-      get: (key: string) => {
-        if (key === CONTEXT_TIE_BREAKER_FIELDS_SETTING) {
-          return tieBreakerFields;
-        }
-      },
-    },
-  } as unknown as DiscoverServices;
+  services.uiSettings.get = ((key: string) => {
+    if (key === CONTEXT_TIE_BREAKER_FIELDS_SETTING) {
+      return tieBreakerFields;
+    }
+  }) as unknown as DiscoverServices['uiSettings']['get'];
 
   const props = {
-    dangerNotification,
     props: {
       anchorId: 'mock_anchor_id',
       dataView: { ...dataViewWithTimefieldMock, id: dataViewId },
       appState: {
-        predecessorCount: 2,
-        successorCount: 2,
+        predecessorCount,
+        successorCount,
       },
     } as ContextAppFetchProps,
   };
 
+  // Reset and setup mock implementation
+  mockFetchSurroundingDocs.mockReset();
+  mockFetchSurroundingDocs.mockImplementation((type: string, dataView: DataView) => {
+    if (!dataView || !dataView.id) {
+      throw new Error();
+    }
+    return {
+      rows: type === 'predecessors' ? mockPredecessorHits : mockSuccessorHits,
+      interceptedWarnings: mockOverrideInterceptedWarnings ? [mockInterceptedWarning] : undefined,
+    };
+  });
+
   return {
     result: renderHook(() => useContextAppFetch(props.props), {
       wrapper: ({ children }: React.PropsWithChildren) => (
-        <KibanaContextProvider services={services}>{children}</KibanaContextProvider>
+        <DiscoverTestProvider services={services}>{children}</DiscoverTestProvider>
       ),
     }).result,
-    dangerNotification,
   };
 };
 
@@ -154,7 +139,7 @@ describe('test useContextAppFetch', () => {
   });
 
   it('should set anchorStatus to failed when invalid dataViewId provided', async () => {
-    const { result, dangerNotification } = initDefaults(['_doc'], '');
+    const { result } = initDefaults(['_doc'], '');
 
     expect(result.current.fetchedState.anchorStatus.value).toBe(LoadingStatus.UNINITIALIZED);
 
@@ -162,9 +147,9 @@ describe('test useContextAppFetch', () => {
       await result.current.fetchAllRows();
     });
 
-    expect(dangerNotification.mock.calls.length).toBe(1);
     expect(result.current.fetchedState.anchorStatus.value).toBe(LoadingStatus.FAILED);
     expect(result.current.fetchedState.anchorStatus.reason).toBe(FailureReason.UNKNOWN);
+    expect(result.current.fetchedState.anchorStatus.error).toBeInstanceOf(Error);
     expect(result.current.fetchedState.anchor).toEqual({});
     expect(result.current.fetchedState.predecessors).toEqual([]);
     expect(result.current.fetchedState.successors).toEqual([]);
@@ -187,7 +172,7 @@ describe('test useContextAppFetch', () => {
   });
 
   it('should set context rows statuses to failed when invalid dataViewId provided', async () => {
-    const { result, dangerNotification } = initDefaults(['_doc'], '');
+    const { result } = initDefaults(['_doc'], '');
 
     expect(result.current.fetchedState.predecessorsStatus.value).toBe(LoadingStatus.UNINITIALIZED);
     expect(result.current.fetchedState.successorsStatus.value).toBe(LoadingStatus.UNINITIALIZED);
@@ -196,11 +181,36 @@ describe('test useContextAppFetch', () => {
       await result.current.fetchContextRows(mockAnchorHit);
     });
 
-    expect(dangerNotification.mock.calls.length).toBe(2); // for successors and predecessors
     expect(result.current.fetchedState.predecessorsStatus.value).toBe(LoadingStatus.FAILED);
     expect(result.current.fetchedState.successorsStatus.value).toBe(LoadingStatus.FAILED);
+    expect(result.current.fetchedState.predecessorsStatus.reason).toBe(FailureReason.UNKNOWN);
     expect(result.current.fetchedState.successorsStatus.reason).toBe(FailureReason.UNKNOWN);
-    expect(result.current.fetchedState.successorsStatus.reason).toBe(FailureReason.UNKNOWN);
+    expect(result.current.fetchedState.predecessorsStatus.error).toBeInstanceOf(Error);
+    expect(result.current.fetchedState.successorsStatus.error).toBeInstanceOf(Error);
+    expect(result.current.fetchedState.predecessors).toEqual([]);
+    expect(result.current.fetchedState.successors).toEqual([]);
+  });
+
+  it('should clear previously fetched context rows when fetching fails', async () => {
+    const { result } = initDefaults(['_doc']);
+
+    await act(async () => {
+      await result.current.fetchContextRows(mockAnchorHit);
+    });
+
+    expect(result.current.fetchedState.predecessors).toEqual(mockPredecessorHits);
+    expect(result.current.fetchedState.successors).toEqual(mockSuccessorHits);
+
+    mockFetchSurroundingDocs.mockImplementation(() => {
+      throw new Error('Something went wrong');
+    });
+
+    await act(async () => {
+      await result.current.fetchContextRows(mockAnchorHit);
+    });
+
+    expect(result.current.fetchedState.predecessorsStatus.value).toBe(LoadingStatus.FAILED);
+    expect(result.current.fetchedState.successorsStatus.value).toBe(LoadingStatus.FAILED);
     expect(result.current.fetchedState.predecessors).toEqual([]);
     expect(result.current.fetchedState.successors).toEqual([]);
   });
@@ -231,5 +241,29 @@ describe('test useContextAppFetch', () => {
       mockInterceptedWarning,
     ]);
     expect(result.current.fetchedState.anchorInterceptedWarnings).toEqual([mockInterceptedWarning]);
+  });
+
+  it('should pass correct size parameter from appState to fetchSurroundingDocs', async () => {
+    const predecessorCount = 7;
+    const successorCount = 3;
+    const { result } = initDefaults(['_doc'], 'the-data-view-id', predecessorCount, successorCount);
+
+    await act(async () => {
+      await result.current.fetchAllRows();
+    });
+
+    // Verify fetchSurroundingDocs was called with correct size for predecessors
+    const predecessorCalls = mockFetchSurroundingDocs.mock.calls.filter(
+      (call) => call[0] === 'predecessors'
+    );
+    expect(predecessorCalls.length).toBeGreaterThan(0);
+    expect(predecessorCalls[0][5]).toBe(predecessorCount); // size is the 6th parameter (index 5)
+
+    // Verify fetchSurroundingDocs was called with correct size for successors
+    const successorCalls = mockFetchSurroundingDocs.mock.calls.filter(
+      (call) => call[0] === 'successors'
+    );
+    expect(successorCalls.length).toBeGreaterThan(0);
+    expect(successorCalls[0][5]).toBe(successorCount); // size is the 6th parameter (index 5)
   });
 });

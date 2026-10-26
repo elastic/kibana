@@ -44,3 +44,8 @@ export const DEPRECATION_LOGS_ORIGIN_FIELD = 'elasticsearch.elastic_product_orig
 
 export const APP_LOGS_COUNT_INDEX_PRIVILEGES = ['read', 'view_index_metadata'];
 export const APP_LOGS_COUNT_CLUSTER_PRIVILEGES = ['manage_security'];
+
+/**
+ * Duration for the "recent" time period (24 hours in milliseconds)
+ */
+export const RECENT_DURATION_MS = 24 * 60 * 60 * 1000;

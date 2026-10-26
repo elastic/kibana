@@ -5,17 +5,18 @@
  * 2.0.
  */
 
-import React, { useEffect, useCallback, useState, useMemo, FC } from 'react';
+import type { FC } from 'react';
+import React, { useEffect, useCallback, useState, useMemo } from 'react';
 import { Subject } from 'rxjs';
 import useMount from 'react-use/lib/useMount';
 import { Query } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ChromeBreadcrumb, CoreStart } from '@kbn/core/public';
+import type { ChromeBreadcrumb, CoreStart } from '@kbn/core/public';
 import { EuiSpacer } from '@elastic/eui';
-import { TagsCapabilities } from '../../common';
+import type { TagsCapabilities } from '../../common';
 import type { TagWithRelations } from '../../common/types';
 import { getCreateModalOpener } from '../components/edition_modal';
-import { ITagInternalClient, ITagAssignmentService, ITagsCache } from '../services';
+import type { ITagInternalClient, ITagAssignmentService, ITagsCache } from '../services';
 import type { TagBulkAction } from './types';
 import { Header, TagTable, ActionBar } from './components';
 import { getTableActions } from './actions';

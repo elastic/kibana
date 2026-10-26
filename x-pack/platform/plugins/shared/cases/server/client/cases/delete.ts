@@ -10,10 +10,9 @@ import { chunk } from 'lodash';
 import type { SavedObjectsBulkDeleteObject } from '@kbn/core/server';
 import type { FileServiceStart } from '@kbn/files-plugin/server';
 import type { CasesDeleteRequest } from '../../../common/types/api';
-import { CasesDeleteRequestRt } from '../../../common/types/api';
-import { decodeWithExcessOrThrow } from '../../common/runtime_types';
+import { CasesDeleteRequestSchema } from '../../../common/types/api';
+import { decodeWithExcessOrThrowZod } from '../../common/runtime_types';
 import {
-  CASE_COMMENT_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
   CASE_USER_ACTION_SAVED_OBJECT,
   MAX_FILES_PER_CASE,
@@ -40,7 +39,7 @@ export async function deleteCases(
   } = clientArgs;
 
   try {
-    const caseIds = decodeWithExcessOrThrow(CasesDeleteRequestRt)(ids);
+    const caseIds = decodeWithExcessOrThrowZod(CasesDeleteRequestSchema)(ids);
     const cases = await caseService.getCases({ caseIds });
     const entities = new Map<string, OwnerEntity>();
 
@@ -63,7 +62,7 @@ export async function deleteCases(
       entities: [...Array.from(entities.values()), ...fileEntities],
     });
 
-    const attachmentIds = await attachmentService.getter.getAttachmentIdsForCases({
+    const attachmentIdTypePairs = await attachmentService.getter.getAttachmentIdsForCases({
       caseIds: ids,
     });
 
@@ -71,7 +70,7 @@ export async function deleteCases(
 
     const bulkDeleteEntities: SavedObjectsBulkDeleteObject[] = [
       ...ids.map((id) => ({ id, type: CASE_SAVED_OBJECT })),
-      ...attachmentIds.map((id) => ({ id, type: CASE_COMMENT_SAVED_OBJECT })),
+      ...attachmentIdTypePairs.map(({ id, type }) => ({ id, type })),
       ...userActionIds.map((id) => ({ id, type: CASE_USER_ACTION_SAVED_OBJECT })),
     ];
 

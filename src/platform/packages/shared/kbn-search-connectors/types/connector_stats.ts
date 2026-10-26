@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ConnectorStatus } from '..';
+import type { ConnectorStatus } from '..';
 
 export interface ConnectorStats {
   id: string;

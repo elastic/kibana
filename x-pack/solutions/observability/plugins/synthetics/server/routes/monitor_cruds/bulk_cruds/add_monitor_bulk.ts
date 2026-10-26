@@ -4,24 +4,27 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { SavedObject } from '@kbn/core/server';
+import type { SavedObject } from '@kbn/core/server';
+import { isSavedObjectErrorResult } from '@kbn/core/server';
 import pMap from 'p-map';
-import { SavedObjectsBulkResponse } from '@kbn/core-saved-objects-api-server';
+import type { SavedObjectsBulkResponse } from '@kbn/core-saved-objects-api-server';
 import { v4 as uuidV4 } from 'uuid';
-import { NewPackagePolicy } from '@kbn/fleet-plugin/common';
-import { SavedObjectError } from '@kbn/core-saved-objects-common';
-import { SyntheticsServerSetup } from '../../../types';
-import { RouteContext } from '../../types';
+import type { NewPackagePolicy } from '@kbn/fleet-plugin/common';
+import type { MaintenanceWindow } from '@kbn/maintenance-windows-plugin/common';
+import { getPackagePolicySavedObjectType } from '@kbn/fleet-plugin/server/services/package_policy';
+import type { SavedObjectError } from '@kbn/core-saved-objects-common';
+import type { SyntheticsServerSetup } from '../../../types';
+import type { RouteContext } from '../../types';
 import { formatTelemetryEvent, sendTelemetryEvents } from '../../telemetry/monitor_upgrade_sender';
-import {
-  ConfigKey,
+import type {
   EncryptedSyntheticsMonitorAttributes,
   MonitorFields,
   ServiceLocationErrors,
   SyntheticsMonitor,
-  type SyntheticsPrivateLocations,
 } from '../../../../common/runtime_types';
+import { ConfigKey, type SyntheticsPrivateLocations } from '../../../../common/runtime_types';
 import { DeleteMonitorAPI } from '../services/delete_monitor_api';
+import { AddEditMonitorAPI, isPackagePolicyConflictFailure } from '../add_monitor/add_monitor_api';
 
 type MonitorSavedObject = SavedObject<EncryptedSyntheticsMonitorAttributes>;
 
@@ -32,36 +35,72 @@ export const syncNewMonitorBulk = async ({
   routeContext,
   normalizedMonitors,
   privateLocations,
+  maintenanceWindows,
   spaceId,
+  hydrateNamespace = false,
 }: {
   routeContext: RouteContext;
   normalizedMonitors: SyntheticsMonitor[];
   privateLocations: SyntheticsPrivateLocations;
+  maintenanceWindows?: MaintenanceWindow[];
   spaceId: string;
+  hydrateNamespace?: boolean;
 }) => {
-  const { server, syntheticsMonitorClient, monitorConfigRepository } = routeContext;
+  const { server, syntheticsMonitorClient, monitorConfigRepository, request } = routeContext;
+  const { query } = request;
   let newMonitors: CreatedMonitors | null = null;
 
+  const packagePolicySoType = await getPackagePolicySavedObjectType();
   const monitorsToCreate = normalizedMonitors.map((monitor) => {
     const monitorSavedObjectId = uuidV4();
+    const monitorWithIds = {
+      ...monitor,
+      [ConfigKey.MONITOR_QUERY_ID]: monitor[ConfigKey.CUSTOM_HEARTBEAT_ID] || monitorSavedObjectId,
+      [ConfigKey.CONFIG_ID]: monitorSavedObjectId,
+    } as SyntheticsMonitor;
+    const monitorWithNamespace = hydrateNamespace
+      ? new AddEditMonitorAPI(routeContext).hydrateMonitorFields({
+          normalizedMonitor: monitor,
+          newMonitorId: monitorSavedObjectId,
+        })
+      : monitorWithIds;
+    const monitorPrivateLocations = monitorWithNamespace[ConfigKey.LOCATIONS].filter(
+      (loc) => !loc.isServiceManaged
+    );
+    const references = monitorPrivateLocations.map((loc) => ({
+      id: `${monitorSavedObjectId}-${loc.id}`,
+      name: `${monitorSavedObjectId}-${loc.id}`,
+      type: packagePolicySoType,
+    }));
     return {
       id: monitorSavedObjectId,
       monitor: {
-        ...monitor,
-        [ConfigKey.CONFIG_ID]: monitorSavedObjectId,
-        [ConfigKey.MONITOR_QUERY_ID]:
-          monitor[ConfigKey.CUSTOM_HEARTBEAT_ID] || monitorSavedObjectId,
+        ...monitorWithNamespace,
       } as MonitorFields,
+      ...(references.length > 0 && { references }),
     };
   });
 
   try {
-    const [createdMonitors, [policiesResult, syncErrors]] = await Promise.all([
-      monitorConfigRepository.createBulk({
-        monitors: monitorsToCreate,
-      }),
-      syntheticsMonitorClient.addMonitors(monitorsToCreate, privateLocations, spaceId),
-    ]);
+    const createdMonitors = await monitorConfigRepository.createBulk({
+      monitors: monitorsToCreate,
+      savedObjectType: query.savedObjectType,
+    });
+    const createdMonitorIds = new Set(
+      createdMonitors
+        .filter((monitor) => !isSavedObjectErrorResult(monitor))
+        .map((monitor) => monitor.id)
+    );
+    const monitorsToSync = monitorsToCreate.filter(({ id }) => createdMonitorIds.has(id));
+    const [policiesResult, syncErrors] =
+      monitorsToSync.length > 0
+        ? await syntheticsMonitorClient.addMonitors(
+            monitorsToSync,
+            privateLocations,
+            spaceId,
+            maintenanceWindows
+          )
+        : [{ created: [], failed: [] }, []];
 
     let failedMonitors: FailedMonitorConfig[] = [];
 
@@ -69,11 +108,23 @@ export const syncNewMonitorBulk = async ({
 
     newMonitors = createdMonitors;
 
-    if (failedPolicies && failedPolicies?.length > 0 && newMonitors) {
-      failedMonitors = await handlePrivateConfigErrors(routeContext, newMonitors, failedPolicies);
+    const nonConflictFailedPolicies = failedPolicies?.filter(
+      ({ error }) => !isPackagePolicyConflictFailure(error)
+    );
+    if (nonConflictFailedPolicies && nonConflictFailedPolicies.length > 0 && newMonitors) {
+      failedMonitors = await handlePrivateConfigErrors(
+        routeContext,
+        newMonitors,
+        nonConflictFailedPolicies
+      );
     }
 
-    sendNewMonitorTelemetry(server, newMonitors, syncErrors);
+    sendNewMonitorTelemetry(
+      server,
+      newMonitors,
+      syncErrors,
+      new Set(failedMonitors.map(({ monitor }) => monitor.id))
+    );
 
     return { errors: syncErrors, newMonitors, failedMonitors };
   } catch (e) {
@@ -93,6 +144,7 @@ const handlePrivateConfigErrors = async (
   failedPolicies: Array<{ packagePolicy: NewPackagePolicy; error?: Error | SavedObjectError }>
 ) => {
   const failedMonitors: FailedMonitorConfig[] = [];
+  const failedMonitorIds = new Set<string>();
 
   await pMap(failedPolicies, async ({ packagePolicy, error }) => {
     const { inputs } = packagePolicy;
@@ -101,15 +153,17 @@ const handlePrivateConfigErrors = async (
     const vars = stream?.vars;
     const monitorId = vars?.[ConfigKey.CONFIG_ID]?.value;
     const monitor = createdMonitors.find(
-      (savedObject) => savedObject.attributes[ConfigKey.CONFIG_ID] === monitorId
+      (savedObject): savedObject is MonitorSavedObject =>
+        !isSavedObjectErrorResult(savedObject) &&
+        savedObject.attributes[ConfigKey.CONFIG_ID] === monitorId
     );
-    if (monitor) {
+    if (monitor && !failedMonitorIds.has(monitor.id)) {
+      failedMonitorIds.add(monitor.id);
       failedMonitors.push({ monitor, error });
       await deleteMonitorIfCreated({
         routeContext,
         newMonitorId: monitor.id,
       });
-      createdMonitors.splice(createdMonitors.indexOf(monitor), 1);
     }
   });
   return failedMonitors;
@@ -125,18 +179,22 @@ const rollBackNewMonitorBulk = async (
     await deleteMonitorAPI.execute({
       monitorIds: monitorsToCreate.map(({ id }) => id),
     });
-  } catch (e) {
+  } catch (error) {
     // ignore errors here
-    server.logger.error(e);
+    server.logger.error(`Unable to rollback new monitors, Error: ${error.message}`, { error });
   }
 };
 
 const sendNewMonitorTelemetry = (
   server: SyntheticsServerSetup,
-  monitors: Array<SavedObject<EncryptedSyntheticsMonitorAttributes>>,
-  errors?: ServiceLocationErrors | null
+  monitors: CreatedMonitors,
+  errors?: ServiceLocationErrors | null,
+  failedMonitorIds: Set<string> = new Set()
 ) => {
   for (const monitor of monitors) {
+    if (isSavedObjectErrorResult(monitor) || failedMonitorIds.has(monitor.id)) {
+      continue;
+    }
     sendTelemetryEvents(
       server.logger,
       server.telemetry,
@@ -169,6 +227,6 @@ export const deleteMonitorIfCreated = async ({
     }
   } catch (e) {
     // ignore errors here
-    server.logger.error(e);
+    server.logger.error(`Unable to delete monitor with id ${newMonitorId}`, { error: e });
   }
 };

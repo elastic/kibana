@@ -22,6 +22,7 @@ export const config: PluginConfigDescriptor<ConfigSchema> = {
     enableExperimental: true,
     prebuiltRulesPackageVersion: true,
     offeringSettings: true,
+    entityAnalytics: true,
   },
   schema: configSchema,
   deprecations: ({ renameFromRoot, unused }) => [
@@ -58,6 +59,6 @@ export const config: PluginConfigDescriptor<ConfigSchema> = {
 };
 
 export type { ConfigType, PluginSetup, PluginStart };
-export { Plugin };
+export type { Plugin };
 export { AppClient };
 export type { SecuritySolutionApiRequestHandlerContext } from './types';

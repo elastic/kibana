@@ -20,8 +20,12 @@ import {
 
 import type { Agent } from '../../types';
 
-import { HostedAgentPolicyRestrictionRelatedError, FleetError } from '../../errors';
-
+import {
+  AgentlessAgentRestrictionError,
+  HostedAgentPolicyRestrictionRelatedError,
+  FleetError,
+} from '../../errors';
+import { getValidSpaceId } from '../spaces/helpers';
 import { appContextService } from '../app_context';
 
 import { ActionRunner } from './action_runner';
@@ -29,7 +33,7 @@ import { ActionRunner } from './action_runner';
 import type { GetAgentsOptions } from './crud';
 import { bulkUpdateAgents } from './crud';
 import { createErrorActionResults, createAgentAction } from './actions';
-import { getHostedPolicies, isHostedAgent } from './hosted_agent';
+import { getAgentPolicyRestrictions, isAgentlessAgent, isHostedAgent } from './hosted_agent';
 import { BulkActionTaskType } from './bulk_action_types';
 import { getCancelledActions } from './action_status';
 import { getLatestAvailableAgentVersion } from './versions';
@@ -41,7 +45,7 @@ export class UpgradeActionRunner extends ActionRunner {
       agents,
       {},
       this.actionParams! as any,
-      this.actionParams?.spaceId
+      this.actionParams?.spaceId ? [this.actionParams?.spaceId] : undefined
     );
   }
 
@@ -74,18 +78,18 @@ export async function upgradeBatch(
     total?: number;
     isAutomatic?: boolean;
   },
-  spaceId?: string
+  spaceIds?: string[]
 ): Promise<{ actionId: string }> {
-  const soClient = appContextService.getInternalUserSOClientForSpaceId(spaceId);
+  const soClient = appContextService.getInternalUserSOClientForSpaceId(getValidSpaceId(spaceIds));
   const errors: Record<Agent['id'], Error> = { ...outgoingErrors };
 
-  const hostedPolicies = await getHostedPolicies(soClient, givenAgents);
+  const restrictions = await getAgentPolicyRestrictions(soClient, givenAgents);
 
   // results from getAgents with options.kuery '' (or even 'active:false') may include hosted agents
   // filter them out unless options.force
   const agentsToCheckUpgradeable =
     'kuery' in options && !options.force
-      ? givenAgents.filter((agent: Agent) => !isHostedAgent(hostedPolicies, agent))
+      ? givenAgents.filter((agent: Agent) => !isHostedAgent(restrictions, agent))
       : givenAgents;
 
   const latestAgentVersion = await getLatestAvailableAgentVersion();
@@ -113,10 +117,14 @@ export async function upgradeBatch(
         );
       }
 
-      if (!options.force && isHostedAgent(hostedPolicies, agent)) {
+      if (!options.force && isHostedAgent(restrictions, agent)) {
         throw new HostedAgentPolicyRestrictionRelatedError(
           `Cannot upgrade agent in hosted agent policy ${agent.policy_id}`
         );
+      }
+      // force skips the hosted validation, but never the agentless one
+      if (isAgentlessAgent(restrictions, agent)) {
+        throw new AgentlessAgentRestrictionError(`Cannot upgrade managed agent ${agent.id}`);
       }
       return agent;
     })
@@ -181,9 +189,9 @@ export async function upgradeBatch(
 
   const actionId = options.actionId ?? uuidv4();
   const total = options.total ?? givenAgents.length;
-  const namespaces = spaceId ? [spaceId] : [];
+  const namespaces = spaceIds ? spaceIds : [];
 
-  await createAgentAction(esClient, {
+  await createAgentAction(esClient, soClient, {
     id: actionId,
     created_at: now,
     data,
@@ -214,35 +222,28 @@ export const EXPIRATION_DURATION_SECONDS = 60 * 60 * 24 * 30; // 1 month
 
 export const getRollingUpgradeOptions = (startTime?: string, upgradeDurationSeconds?: number) => {
   const now = new Date().toISOString();
+  // Expiration time is set to a very long value (1 month) to allow upgrading agents staying offline for long time
+  const expiration = moment(startTime).add(EXPIRATION_DURATION_SECONDS, 'seconds').toISOString();
   // Perform a rolling upgrade
   if (upgradeDurationSeconds) {
     const minExecutionDuration = Math.min(
       MINIMUM_EXECUTION_DURATION_SECONDS,
       upgradeDurationSeconds
     );
+
     return {
       start_time: startTime ?? now,
       rollout_duration_seconds: upgradeDurationSeconds,
       minimum_execution_duration: minExecutionDuration,
-      // expiration will not be taken into account with Fleet Server version >=8.7, it is kept for BWC
-      // in the next major, expiration and minimum_execution_duration should be removed
-      expiration: moment(startTime ?? now)
-        .add(
-          upgradeDurationSeconds <= MINIMUM_EXECUTION_DURATION_SECONDS
-            ? minExecutionDuration * 2
-            : upgradeDurationSeconds,
-          'seconds'
-        )
-        .toISOString(),
+      expiration,
     };
   }
   // Schedule without rolling upgrade (Immediately after start_time)
-  // Expiration time is set to a very long value (1 month) to allow upgrading agents staying offline for long time
   if (startTime && !upgradeDurationSeconds) {
     return {
       start_time: startTime ?? now,
       minimum_execution_duration: MINIMUM_EXECUTION_DURATION_SECONDS,
-      expiration: moment(startTime).add(EXPIRATION_DURATION_SECONDS, 'seconds').toISOString(),
+      expiration,
     };
   } else {
     // Regular bulk upgrade (non scheduled, non rolling)

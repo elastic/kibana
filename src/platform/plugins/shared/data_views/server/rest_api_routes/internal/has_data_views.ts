@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { IRouter, RequestHandlerContext } from '@kbn/core/server';
+import type { IRouter, RequestHandlerContext } from '@kbn/core/server';
 import type { VersionedRoute } from '@kbn/core-http-server';
 import { schema } from '@kbn/config-schema';
 import { getDataViews, hasUserDataView } from '../../has_user_data_view';

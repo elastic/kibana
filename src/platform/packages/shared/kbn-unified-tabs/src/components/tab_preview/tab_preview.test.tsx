@@ -18,7 +18,7 @@ const tabItem: TabItem = {
   label: 'test-label',
 };
 
-const previewTestSubj = `unifiedTabs_tabPreview_${tabItem.id}`;
+const previewTestSubj = `unifiedTabs_tabPreview_outerPanel_${tabItem.id}`;
 
 describe('TabPreview', () => {
   it('should call setShowPreview when mouse enters and change opacity after a delay', async () => {
@@ -28,7 +28,7 @@ describe('TabPreview', () => {
       <TabPreview
         showPreview={false}
         setShowPreview={setShowPreview}
-        getPreviewData={getPreviewDataMock}
+        previewData={getPreviewDataMock(tabItem)}
         tabItem={tabItem}
         stopPreviewOnHover={false}
         previewDelay={0}
@@ -56,7 +56,7 @@ describe('TabPreview', () => {
       <TabPreview
         showPreview={true}
         setShowPreview={setShowPreview}
-        getPreviewData={getPreviewDataMock}
+        previewData={getPreviewDataMock(tabItem)}
         tabItem={tabItem}
         stopPreviewOnHover={false}
       >
@@ -83,7 +83,7 @@ describe('TabPreview', () => {
       <TabPreview
         showPreview={false}
         setShowPreview={setShowPreview}
-        getPreviewData={getPreviewDataMock}
+        previewData={getPreviewDataMock(tabItem)}
         tabItem={tabItem}
         stopPreviewOnHover={true}
       >

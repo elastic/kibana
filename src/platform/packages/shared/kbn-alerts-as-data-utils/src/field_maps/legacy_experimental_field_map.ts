@@ -10,8 +10,10 @@
 import {
   ALERT_CONTEXT,
   ALERT_EVALUATION_THRESHOLD,
+  ALERT_EVALUATION_TIME_RANGE,
   ALERT_EVALUATION_VALUE,
   ALERT_EVALUATION_VALUES,
+  ALERT_GROUPING,
   ALERT_GROUP,
   ALERT_GROUP_FIELD,
   ALERT_GROUP_VALUE,
@@ -23,6 +25,7 @@ export const legacyExperimentalFieldMap = {
     scaling_factor: 100,
     required: false,
   },
+  [ALERT_EVALUATION_TIME_RANGE]: { type: 'date_range', array: false, required: false },
   [ALERT_EVALUATION_VALUE]: { type: 'scaled_float', scaling_factor: 100, required: false },
   [ALERT_CONTEXT]: { type: 'object', array: false, required: false },
   [ALERT_EVALUATION_VALUES]: {
@@ -30,6 +33,12 @@ export const legacyExperimentalFieldMap = {
     scaling_factor: 100,
     required: false,
     array: true,
+  },
+  [ALERT_GROUPING]: {
+    type: 'object',
+    dynamic: true,
+    array: false,
+    required: false,
   },
   [ALERT_GROUP]: {
     type: 'object',

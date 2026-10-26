@@ -8,8 +8,16 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
+// What remains here audits the data view management screens, which belong to
+// @elastic/kibana-data-discovery; their Scout home is
+// src/platform/plugins/shared/data_view_management/test/scout/ui/.
+//
+// The management landing page and the advanced settings page moved to Scout as
+// part of https://github.com/elastic/kibana/issues/281240:
+//   src/platform/plugins/shared/management/test/scout/ui/tests/management_plugin.spec.ts (landing-page scan)
+//   src/platform/plugins/private/advanced_settings/test/scout/ui/tests/advanced_settings_a11y.spec.ts
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects([
     'common',
@@ -21,12 +29,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const a11y = getService('a11y');
   const testSubjects = getService('testSubjects');
+  const flyout = getService('flyout');
 
   describe('Management', () => {
-    it('main view', async () => {
-      await a11y.testAppSnapshot();
-    });
-
     describe('data views', () => {
       before(async () => {
         await esArchiver.loadIfNeeded(
@@ -88,7 +93,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.settings.clickAddNewIndexPatternButton();
         await PageObjects.header.waitUntilLoadingHasFinished();
         await a11y.testAppSnapshot();
-        await testSubjects.click('closeFlyoutButton');
+        await flyout.closeFlyout();
       });
 
       // We are navigating back to index pattern page to test field formatters
@@ -102,11 +107,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.settings.clickEditFieldFormat();
         await a11y.testAppSnapshot();
         await PageObjects.settings.closeIndexPatternFieldEditor();
-      });
-
-      it('Advanced settings', async () => {
-        await PageObjects.settings.clickKibanaSettings();
-        await a11y.testAppSnapshot();
       });
     });
   });

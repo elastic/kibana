@@ -19,10 +19,7 @@ import * as useAppDataViewHook from './use_app_data_view';
 import * as theme from '@kbn/observability-shared-plugin/public/hooks/use_theme';
 import { dataTypes, obsvReportConfigMap, reportTypesList } from '../obsv_exploratory_view';
 import { ExploratoryViewContextProvider } from '../contexts/exploratory_view_config';
-import { coreMock, themeServiceMock } from '@kbn/core/public/mocks';
-import * as lensHook from './use_lens_formula_helper';
-import { lensPluginMock } from '@kbn/lens-plugin/public/mocks';
-import { FormulaPublicApi } from '@kbn/lens-plugin/public';
+import { coreMock } from '@kbn/core/public/mocks';
 
 const mockSingleSeries = [
   {
@@ -57,15 +54,6 @@ describe('useExpViewTimeRange', function () {
     },
   });
 
-  let formulaHelper: FormulaPublicApi;
-
-  beforeAll(async () => {
-    const lensPluginMockStart = lensPluginMock.createStartContract();
-    formulaHelper = (await lensPluginMockStart.stateHelperApi()).formula;
-
-    jest.spyOn(lensHook, 'useLensFormulaHelper').mockReturnValue(formulaHelper);
-  });
-
   const lensAttributesSpy = jest
     .spyOn(lensAttributes, 'LensAttributes')
     .mockImplementation(function (...args) {
@@ -80,8 +68,6 @@ describe('useExpViewTimeRange', function () {
         reportTypes={reportTypesList}
         dataTypes={dataTypes}
         reportConfigMap={obsvReportConfigMap}
-        setHeaderActionMenu={jest.fn()}
-        theme$={themeServiceMock.createTheme$()}
         {...coreMock.createStart()}
       >
         <UrlStorageContextProvider storage={storage}>
@@ -99,14 +85,13 @@ describe('useExpViewTimeRange', function () {
       wrapper: Wrapper,
     });
 
-    expect(lensAttributesSpy).toBeCalledWith(
+    expect(lensAttributesSpy).toHaveBeenCalledWith(
       expect.arrayContaining([
         expect.objectContaining({
           seriesConfig: expect.objectContaining({ reportType: ReportTypes.KPI }),
         }),
       ]),
-      'kpi-over-time',
-      formulaHelper
+      'kpi-over-time'
     );
   });
 });

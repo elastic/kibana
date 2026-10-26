@@ -47,6 +47,8 @@ export const INPUT_VAR_NAME_TO_SCHEMA_PATH: Record<string, string> = {
   tail_sampling_enabled: 'apm-server.sampling.tail.enabled',
   tail_sampling_interval: 'apm-server.sampling.tail.interval',
   tail_sampling_policies: 'apm-server.sampling.tail.policies',
+  tail_sampling_ttl: 'apm-server.sampling.tail.ttl',
+  tail_sampling_discard_on_write_failure: 'apm-server.sampling.tail.discard_on_write_failure',
 };
 
 export const LEGACY_TO_CURRENT_SCHEMA_PATHS: Record<string, string> = {

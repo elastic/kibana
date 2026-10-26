@@ -5,7 +5,8 @@
  * 2.0.
  */
 import { get, pick } from 'lodash';
-import { ConfigKey, MonitorTypeEnum, FormMonitorType, MonitorFields, ScheduleUnit } from '../types';
+import type { MonitorTypeEnum, MonitorFields } from '../types';
+import { ConfigKey, FormMonitorType, ScheduleUnit } from '../types';
 import { DEFAULT_FIELDS } from '../constants';
 
 export const serializeNestedFormField = (fields: Record<string, any>) => {
@@ -56,6 +57,18 @@ export const format = (fields: Record<string, unknown>, readOnly: boolean = fals
         },
       },
       [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorType.MULTISTEP,
+    },
+    [FormMonitorType.API]: {
+      ...formattedFields,
+      [ConfigKey.METADATA]: {
+        script_source: {
+          // API journeys are never produced by the recorder; this stays in the
+          // shape only because the SO schema is shared with BROWSER monitors.
+          is_generated_script: get(fields, 'source.inline.type') === 'recorder' ? true : false,
+          file_name: get(fields, 'source.inline.fileName') || '',
+        },
+      },
+      [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorType.API,
     },
     [FormMonitorType.HTTP]: {
       ...formattedFields,

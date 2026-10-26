@@ -14,9 +14,9 @@ import { FilterManager } from '@kbn/data-plugin/public';
 import { createMockStore, mockGlobalState, TestProviders } from '../../common/mock';
 import { inputsActions } from '../../common/store/inputs';
 import {
-  setSearchBarFilter,
   setAbsoluteRangeDatePicker,
   setRelativeRangeDatePicker,
+  setSearchBarFilter,
 } from '../../common/store/inputs/actions';
 import { coreMock } from '@kbn/core/public/mocks';
 import type { Filter } from '@kbn/es-query';
@@ -79,6 +79,16 @@ jest.mock('react-router-dom', () => {
     useLocation: jest.fn().mockReturnValue({ pathname: '/test', search: '?' }),
   };
 });
+
+// HomePage wires up flyoutV2 URL restoration/interop, whose restore logic (including its
+// `useEsDocSearch` calls) is covered by dedicated unit tests in `flyout_v2/shared/url_state`.
+// Mocked here as no-ops so this suite doesn't need a `UnifiedDocViewerServices` registration.
+jest.mock('../../flyout_v2/shared/url_state/use_flyout_v2_restore', () => ({
+  useFlyoutV2RestoreFromUrl: jest.fn(),
+}));
+jest.mock('../../flyout_v2/shared/url_state/use_expandable_flyout_url_interop', () => ({
+  useLegacyFlyoutUrlInterop: jest.fn(),
+}));
 
 const mockQueryTimelineById = jest.fn();
 jest.mock('../../timelines/components/open_timeline/helpers', () => {
@@ -203,8 +213,8 @@ jest.mock('../../common/lib/kibana', () => {
 
 const mockDispatch = jest.fn();
 
-jest.mock('react-redux', () => {
-  const original = jest.requireActual('react-redux');
+jest.mock('react-redux-v7', () => {
+  const original = jest.requireActual('react-redux-v7');
   return {
     ...original,
     useDispatch: () => mockDispatch,
@@ -408,6 +418,10 @@ describe('HomePage', () => {
           [URL_PARAM_KEY.timerange]: timerange,
           linkTo: [InputsModelId.global],
         },
+        valueReport: {
+          [URL_PARAM_KEY.timerange]: timerange,
+          linkTo: [],
+        },
       };
 
       mockUseInitializeUrlParam(URL_PARAM_KEY.timerange, state);
@@ -452,6 +466,10 @@ describe('HomePage', () => {
         timeline: {
           [URL_PARAM_KEY.timerange]: timerange,
           linkTo: [InputsModelId.global],
+        },
+        valueReport: {
+          [URL_PARAM_KEY.timerange]: timerange,
+          linkTo: [],
         },
       };
 
@@ -641,8 +659,11 @@ describe('HomePage', () => {
 
       expect(mockUpdateUrlParam).toHaveBeenCalledWith({
         activeTab: 'query',
-        graphEventId: '',
         isOpen: false,
+        query: {
+          expression: '',
+          kind: 'kuery',
+        },
       });
     });
 

@@ -13,7 +13,7 @@ import { schema } from '@kbn/config-schema';
 
 import type { ExperimentalFeatures } from '../common/experimental_features';
 
-import { productTypes } from '../common/config';
+import { commonConfigSchema, exposeToBrowser } from '../common/config';
 import { parseExperimentalConfigValue } from '../common/experimental_features';
 import { METERING_TASK as ENDPOINT_METERING_TASK } from './endpoint/constants/metering';
 import { METERING_TASK as AI4SOC_METERING_TASK } from './ai4soc/constants/metering';
@@ -21,7 +21,7 @@ import { METERING_TASK as AI4SOC_METERING_TASK } from './ai4soc/constants/meteri
 const tlsConfig = schema.object({
   certificate: schema.string(),
   key: schema.string(),
-  ca: schema.string(),
+  ca: schema.maybe(schema.string()),
 });
 export type TlsConfigSchema = TypeOf<typeof tlsConfig>;
 
@@ -32,25 +32,34 @@ const usageApiConfig = schema.object({
 });
 export type UsageApiConfigSchema = TypeOf<typeof usageApiConfig>;
 
-export const configSchema = schema.object({
+export const serverConfigSchema = schema.object({
   enabled: schema.boolean({ defaultValue: false }),
-  productTypes,
   /**
    * Usage Reporting: the interval between runs of the endpoint task
    */
-
   usageReportingTaskInterval: schema.string({ defaultValue: ENDPOINT_METERING_TASK.INTERVAL }),
 
   /**
    * Usage Reporting: the interval between runs of the cloud security task
    */
-
   cloudSecurityUsageReportingTaskInterval: schema.string({ defaultValue: '30m' }),
+
+  /**
+   * Cloud security usage reporting. Set `cspm.enabled` to `false` to stop
+   * CSPM billing records. KSPM and CNVM metering are unaffected.
+   *
+   * @example
+   * xpack.securitySolutionServerless.cloudSecurityMetering.cspm.enabled: false
+   */
+  cloudSecurityMetering: schema.object({
+    cspm: schema.object({
+      enabled: schema.boolean({ defaultValue: true }),
+    }),
+  }),
 
   /**
    * Usage Reporting: the interval between runs of the ai4soc metering task
    */
-
   ai4SocUsageReportingTaskInterval: schema.string({ defaultValue: AI4SOC_METERING_TASK.INTERVAL }),
 
   /**
@@ -58,31 +67,15 @@ export const configSchema = schema.object({
    */
   usageReportingTaskTimeout: schema.string({ defaultValue: '1m' }),
 
-  /**
-   * For internal use. A list of string values (comma delimited) that will enable experimental
-   * type of functionality that is not yet released. Valid values for this settings need to
-   * be defined in:
-   * `x-pack/solutions/security/plugins/security_solution_serverless/common/experimental_features.ts`
-   * under the `allowedExperimentalValues` object
-   *
-   * @example
-   * xpack.securitySolutionServerless.enableExperimental:
-   *   - someCrazyServerlessFeature
-   *   - someEvenCrazierServerlessFeature
-   */
-  enableExperimental: schema.arrayOf(schema.string(), {
-    defaultValue: () => [],
-  }),
-
+  // @deprecated: This config is deprecated and will be removed in the future in favor of the new Usage API plugin.
   usageApi: usageApiConfig,
 });
+const configSchema = schema.allOf([commonConfigSchema, serverConfigSchema]);
+
 export type ServerlessSecuritySchema = TypeOf<typeof configSchema>;
 
 export const config: PluginConfigDescriptor<ServerlessSecuritySchema> = {
-  exposeToBrowser: {
-    enableExperimental: true,
-    productTypes: true,
-  },
+  exposeToBrowser,
   schema: configSchema,
   deprecations: ({ renameFromRoot }) => [
     renameFromRoot(

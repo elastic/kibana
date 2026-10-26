@@ -82,7 +82,7 @@ describe('ITelemetryReceiver', () => {
       const docs = mockedDocs(numOfDocs);
       await bulkInsert(esClient, TEST_INDEX, docs);
 
-      const results = telemetryReceiver.paginate(TEST_INDEX, testQuery());
+      const results = telemetryReceiver.paginate(TEST_INDEX, testQuery(), undefined);
 
       const pages = await getPages(results);
 
@@ -103,7 +103,7 @@ describe('ITelemetryReceiver', () => {
       await bulkInsert(esClient, TEST_INDEX, batchTwo);
       await bulkInsert(esClient, TEST_INDEX, batchOne);
 
-      const results = telemetryReceiver.paginate(TEST_INDEX, testQuery(from, to));
+      const results = telemetryReceiver.paginate(TEST_INDEX, testQuery(from, to), undefined);
 
       const pages = await getPages(results);
 
@@ -115,7 +115,11 @@ describe('ITelemetryReceiver', () => {
     it('should manage empty response', async () => {
       await bulkInsert(esClient, TEST_INDEX, mockedDocs(numOfDocs));
 
-      const results = telemetryReceiver.paginate(TEST_INDEX, testQuery('now-2d', 'now-1d'));
+      const results = telemetryReceiver.paginate(
+        TEST_INDEX,
+        testQuery('now-2d', 'now-1d'),
+        undefined
+      );
 
       const pages = await getPages(results);
       expect(pages.length).toEqual(0);

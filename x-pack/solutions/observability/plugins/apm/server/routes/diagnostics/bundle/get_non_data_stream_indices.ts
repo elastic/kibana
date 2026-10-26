@@ -8,6 +8,7 @@
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { APMIndices } from '@kbn/apm-sources-access-plugin/server';
 import { getApmIndexPatterns } from './get_indices';
+import { compactMap } from '../../../utils/compact_map';
 
 export async function getNonDataStreamIndices({
   esClient,
@@ -30,9 +31,14 @@ export async function getNonDataStreamIndices({
     ignore_unavailable: true,
   });
 
-  const nonDataStreamIndices = Object.entries(nonDataStreamIndicesResponse)
-    .filter(([indexName, { data_stream: dataStream }]): boolean => !dataStream)
-    .map(([indexName]): string => indexName);
+  const nonDataStreamIndices = compactMap(
+    Object.entries(nonDataStreamIndicesResponse),
+    ([indexName, { data_stream: dataStream }]) => {
+      if (!dataStream) {
+        return indexName;
+      }
+    }
+  );
 
   return nonDataStreamIndices;
 }

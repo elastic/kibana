@@ -1,14 +1,14 @@
 openapi: 3.0.3
 info:
-  title: Kibana APIs
+  title: Kibana API
   description: |
-    The Kibana REST APIs enable you to manage resources such as connectors, data views, and saved objects.
+    The Kibana REST API enables you to manage resources such as connectors, data views, and saved objects.
     The API calls are stateless.
     Each request that you make happens in isolation from other calls and must include all of the necessary information for Kibana to fulfill the
     request.
     API requests return JSON output, which is a format that is machine-readable and works well for automation.
 
-    To interact with Kibana APIs, use the following operations:
+    To interact with the Kibana API, use the following operations:
 
     - GET: Fetches the information.
     - PATCH: Applies partial modifications to the existing information.
@@ -23,7 +23,7 @@ info:
     GET kbn:/api/data_views
     ```
 
-    For more information about the console, refer to [Run API requests](https://www.elastic.co/guide/en/kibana/current/console-kibana.html).
+    For more information about the console, refer to [Run API requests](https://www.elastic.co/docs/explore-analyze/query-filter/tools/console).
 
     NOTE: Access to internal Kibana API endpoints will be restricted in Kibana version 9.0. Please move any integrations to publicly documented APIs.
 
@@ -33,7 +33,7 @@ info:
     It is provided under license [Attribution-NonCommercial-NoDerivatives 4.0 International](https://creativecommons.org/licenses/by-nc-nd/4.0/).
 
     This documentation contains work-in-progress information for future Elastic Stack releases.
-  version: '1.0.2'
+  version: '' # Leave empty
   x-doc-license:
     name: Attribution-NonCommercial-NoDerivatives 4.0 International
     url: https://creativecommons.org/licenses/by-nc-nd/4.0/

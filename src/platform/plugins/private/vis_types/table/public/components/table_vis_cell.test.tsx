@@ -9,9 +9,9 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
-import { EuiDataGridCellValueElementProps } from '@elastic/eui';
+import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
 import { createTableVisCell } from './table_vis_cell';
-import { FormattedColumns } from '../types';
+import type { FormattedColumns } from '../types';
 
 describe('table vis cell', () => {
   it('should return a cell component with data in scope', () => {
@@ -19,7 +19,7 @@ describe('table vis cell', () => {
     const formattedColumns = {
       second: {
         formatter: {
-          convert: jest.fn(),
+          convertToReact: jest.fn().mockReturnValue('formatted value'),
         },
       },
     } as unknown as FormattedColumns;
@@ -32,6 +32,30 @@ describe('table vis cell', () => {
     const comp = shallow(<Cell {...cellProps} />);
 
     expect(comp).toMatchSnapshot();
-    expect(formattedColumns.second.formatter.convert).toHaveBeenLastCalledWith(2, 'html');
+    expect(formattedColumns.second.formatter.convertToReact).toHaveBeenLastCalledWith(2, {
+      isInteractive: true,
+    });
+  });
+
+  it('passes isInteractive through to the formatter so it can suppress live content (e.g. links) when false', () => {
+    const rows = [{ first: 1, second: 2 }];
+    const formattedColumns = {
+      second: {
+        formatter: {
+          convertToReact: jest.fn().mockReturnValue('formatted value'),
+        },
+      },
+    } as unknown as FormattedColumns;
+    const Cell = createTableVisCell(rows, formattedColumns, undefined, false);
+    const cellProps = {
+      rowIndex: 0,
+      columnId: 'second',
+    } as EuiDataGridCellValueElementProps;
+
+    shallow(<Cell {...cellProps} />);
+
+    expect(formattedColumns.second.formatter.convertToReact).toHaveBeenLastCalledWith(2, {
+      isInteractive: false,
+    });
   });
 });

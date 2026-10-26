@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './customization_types';
+export type * from './customization_types';
 export * from './customization_provider';
-export * from './types';
+export type * from './types';
 export type { DiscoverCustomization, DiscoverCustomizationService } from './customization_service';

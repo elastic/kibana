@@ -8,7 +8,7 @@
 import type { Plugin } from 'unified';
 import type { RemarkTokenizer } from '@elastic/eui';
 import { safeDecode } from '@kbn/rison';
-import { parse } from 'query-string';
+import queryString from 'query-string';
 
 import { ID, PREFIX } from './constants';
 import * as i18n from './translations';
@@ -72,14 +72,12 @@ export const TimelineParser: Plugin = function () {
 
     try {
       const timelineSearch = timelineUrl.split('?');
-      const parseTimelineUrlSearch = parse(timelineSearch[1]) as { timeline: string };
+      const parseTimelineUrlSearch = queryString.parse(timelineSearch[1]) as { timeline: string };
       const decodedTimeline = safeDecode(parseTimelineUrlSearch.timeline ?? '') as {
         id?: string;
-        graphEventId?: string;
       } | null;
-      const { id: timelineId = '', graphEventId = '' } = decodedTimeline ?? {
+      const { id: timelineId = '' } = decodedTimeline ?? {
         id: null,
-        graphEventId: '',
       };
 
       if (!timelineId) {
@@ -94,7 +92,6 @@ export const TimelineParser: Plugin = function () {
         type: ID,
         id: timelineId,
         title: timelineTitle,
-        graphEventId,
       });
     } catch {
       this.file.info(i18n.TIMELINE_URL_IS_NOT_VALID(timelineUrl), {

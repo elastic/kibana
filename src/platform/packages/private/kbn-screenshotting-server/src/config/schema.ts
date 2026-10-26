@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { schema, TypeOf, offeringBasedSchema } from '@kbn/config-schema';
+import type { TypeOf } from '@kbn/config-schema';
+import { schema, offeringBasedSchema } from '@kbn/config-schema';
 import moment from 'moment';
 
 const RulesSchema = schema.object({
@@ -32,6 +33,7 @@ export const ConfigSchema = schema.object({
   networkPolicy: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
     rules: schema.arrayOf(RulesSchema, {
+      maxSize: 100,
       defaultValue: [
         { host: undefined, allow: true, protocol: 'http:' },
         { host: undefined, allow: true, protocol: 'https:' },
@@ -62,7 +64,7 @@ export const ConfigSchema = schema.object({
         bypass: schema.conditional(
           schema.siblingRef('enabled'),
           true,
-          schema.arrayOf(schema.string()),
+          schema.arrayOf(schema.string(), { maxSize: 100 }),
           schema.maybe(schema.never())
         ),
       }),

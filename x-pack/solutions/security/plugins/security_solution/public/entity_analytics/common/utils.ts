@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import { euiThemeVars } from '@kbn/ui-theme'; // eslint-disable-line @elastic/eui/no-restricted-eui-imports
 import { RiskSeverity } from '../../../common/search_strategy';
-import { SEVERITY_COLOR } from '../../overview/components/detection_response/utils';
+import type { SeverityCount } from '../components/severity/types';
 export { RISK_LEVEL_RANGES as RISK_SCORE_RANGES } from '../../../common/entity_analytics/risk_engine';
 
 export const SEVERITY_UI_SORT_ORDER = [
@@ -17,16 +18,16 @@ export const SEVERITY_UI_SORT_ORDER = [
   RiskSeverity.Critical,
 ];
 
-// Migration to tokens from EUI during the Borealis theme migration is blocked until new severity palette is agreed upon.
-// We keep using hardcoded colors until security severity palette is ready https://github.com/elastic/kibana/issues/203387
-// TODO: Borealis migration - move from hardcoded values to severity palette, which should instead use shared hook across security:
-// https://github.com/elastic/security-team/issues/11516 hook - https://github.com/elastic/kibana/pull/206276
-export const RISK_SEVERITY_COLOUR: { [k in RiskSeverity]: string } = {
-  [RiskSeverity.Unknown]: '#aaa', // euiThemeVars no longer in use. Hard coded temporarily, see above.
-  [RiskSeverity.Low]: SEVERITY_COLOR.low,
-  [RiskSeverity.Moderate]: SEVERITY_COLOR.medium,
-  [RiskSeverity.High]: SEVERITY_COLOR.high,
-  [RiskSeverity.Critical]: SEVERITY_COLOR.critical,
+/*
+ * Map Risk severity to EUI severity color pattern as per spec:
+ * https://eui.elastic.co/docs/patterns/severity/index.html#use-cases
+ */
+export const RISK_SEVERITY_COLOUR = {
+  [RiskSeverity.Unknown]: euiThemeVars.euiColorSeverityUnknown,
+  [RiskSeverity.Low]: euiThemeVars.euiColorSeverityNeutral,
+  [RiskSeverity.Moderate]: euiThemeVars.euiColorSeverityWarning,
+  [RiskSeverity.High]: euiThemeVars.euiColorSeverityRisk,
+  [RiskSeverity.Critical]: euiThemeVars.euiColorSeverityDanger,
 };
 
 type SnakeToCamelCaseString<S extends string> = S extends `${infer T}_${infer U}`
@@ -67,7 +68,56 @@ export enum HostRiskScoreQueryId {
 export const formatRiskScore = (riskScore: number) =>
   (Math.round(riskScore * 100) / 100).toFixed(2);
 
+export const formatRiskScoreWholeNumber = (riskScore: number) =>
+  (Math.round(riskScore * 100) / 100).toFixed(0);
+
 export const FIRST_RECORD_PAGINATION = {
   cursorStart: 0,
   querySize: 1,
+};
+
+/**
+ * Extracts a human-readable message from Kibana HTTP response errors,
+ * which nest the message under `error.body.message`.
+ */
+export function safeErrorMessage(error: unknown, fallback: string): string;
+export function safeErrorMessage(error: unknown): string | undefined;
+export function safeErrorMessage(error: unknown, fallback?: string): string | undefined {
+  if (error && typeof error === 'object' && 'body' in error) {
+    const body = (error as { body?: { message?: string } }).body;
+    if (body && typeof body.message === 'string') return body.message;
+  }
+  return fallback;
+}
+
+/**
+ * Shape of a single row returned by the watchlist/entity risk-levels ES|QL
+ * query. The query groups by `entity.risk.calculated_level`, which can be a
+ * named severity string (e.g. "Critical", "Unknown") or `null` for entities
+ * without a calculated level.
+ */
+export interface EsqlSeverityRecord {
+  count: number;
+  level: string | null;
+}
+
+/**
+ * Aggregates ES|QL records grouped by `entity.risk.calculated_level` into a
+ * {@link SeverityCount}. Rows where `level` is `null` are summed together
+ * with rows where `level === 'Unknown'`, because both represent entities
+ * whose risk is not yet classified. This prevents silent undercounting when
+ * the same bucket is represented twice in a single response (observed when
+ * some entities have an explicit "Unknown" level while others have `null`).
+ */
+export const esqlRecordsToSeverityCount = (records: EsqlSeverityRecord[]): SeverityCount => {
+  const sumWhere = (predicate: (r: EsqlSeverityRecord) => boolean) =>
+    records.filter(predicate).reduce((acc, r) => acc + (r.count ?? 0), 0);
+
+  return {
+    [RiskSeverity.Critical]: sumWhere((r) => r.level === RiskSeverity.Critical),
+    [RiskSeverity.High]: sumWhere((r) => r.level === RiskSeverity.High),
+    [RiskSeverity.Moderate]: sumWhere((r) => r.level === RiskSeverity.Moderate),
+    [RiskSeverity.Low]: sumWhere((r) => r.level === RiskSeverity.Low),
+    [RiskSeverity.Unknown]: sumWhere((r) => r.level === RiskSeverity.Unknown || r.level === null),
+  };
 };

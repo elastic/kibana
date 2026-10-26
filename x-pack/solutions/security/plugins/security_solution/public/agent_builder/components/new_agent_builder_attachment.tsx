@@ -1,0 +1,109 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { EuiButtonColor } from '@elastic/eui';
+import { EuiToolTip } from '@elastic/eui';
+import { AiButton, type AiButtonIconType } from '@kbn/shared-ux-ai-components';
+import React, { memo, useCallback } from 'react';
+import type { EuiButtonEmptySizes } from '@elastic/eui/src/components/button/button_empty/button_empty';
+import type { AgentBuilderAddToChatTelemetry } from '../hooks/use_report_add_to_chat';
+import { useReportAddToChat } from '../hooks/use_report_add_to_chat';
+import * as i18n from './translations';
+import { useAgentBuilderAvailability } from '../hooks/use_agent_builder_availability';
+
+export interface NewAgentBuilderAttachmentProps {
+  /**
+   * Optionally specify color of empty button.
+   * @default 'primary'
+   */
+  color?: EuiButtonColor;
+  /**
+   * Callback when button is clicked
+   */
+  onClick: () => void;
+  /**
+   * Size of the button
+   */
+  size?: EuiButtonEmptySizes;
+  /**
+   * Whether the button is disabled
+   */
+  disabled?: boolean;
+  /**
+   * Optionally override the button text.
+   * @default 'Add to chat'
+   */
+  label?: string;
+  /**
+   * Icon shown beside the label.
+   * @default 'productAgent'
+   */
+  iconType?: AiButtonIconType;
+  /**
+   * Telemetry data for tracking "Add to Chat" clicks
+   */
+  telemetry?: AgentBuilderAddToChatTelemetry;
+}
+
+/**
+ * `NewAgentBuilderAttachment` displays a button that opens the agent builder flyout
+ * with attachment data. You may optionally override the default text.
+ */
+export const NewAgentBuilderAttachment = memo(function NewAgentBuilderAttachment({
+  color = 'primary',
+  onClick,
+  size = 'm',
+  disabled = false,
+  label,
+  iconType = 'productAgent',
+  telemetry: telemetryData,
+}: NewAgentBuilderAttachmentProps) {
+  const { hasAgentBuilderPrivilege, isAgentChatExperienceEnabled, hasValidAgentBuilderLicense } =
+    useAgentBuilderAvailability();
+  const reportAddToChatClick = useReportAddToChat();
+
+  const handleClick = useCallback(() => {
+    if (telemetryData) {
+      reportAddToChatClick({
+        pathway: telemetryData.pathway,
+        attachments: telemetryData.attachments,
+        item_count: telemetryData.item_count,
+      });
+    }
+    onClick();
+  }, [onClick, reportAddToChatClick, telemetryData]);
+
+  const isDisabled = disabled || !hasValidAgentBuilderLicense;
+  const shouldShowLicenseTooltip = !hasValidAgentBuilderLicense;
+  const buttonLabel = label ?? i18n.ADD_TO_CHAT;
+
+  if (!hasAgentBuilderPrivilege || !isAgentChatExperienceEnabled) {
+    return null;
+  }
+
+  const button = (
+    <AiButton
+      aria-label={buttonLabel}
+      variant="empty"
+      data-test-subj="newAgentBuilderAttachment"
+      onClick={handleClick}
+      size={size}
+      iconType={iconType}
+      isDisabled={isDisabled}
+    >
+      {buttonLabel}
+    </AiButton>
+  );
+
+  if (!shouldShowLicenseTooltip) {
+    return button;
+  }
+
+  return (
+    <EuiToolTip content={i18n.UPGRADE_TO_ENTERPRISE_TO_USE_AGENT_BUILDER_CHAT}>{button}</EuiToolTip>
+  );
+});

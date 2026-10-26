@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { useMutation } from '@tanstack/react-query';
+import { useMutation } from '@kbn/react-query';
+import { useObservablesDeletedEBT } from '../analytics/observables';
 import { deleteObservable } from './api';
 import * as i18n from './translations';
 import type { ServerError } from '../types';
@@ -17,6 +18,7 @@ export const useDeleteObservable = (caseId: string, observableId: string) => {
   const { showErrorToast } = useCasesToast();
   const refreshCaseViewPage = useRefreshCaseViewPage();
   const { showSuccessToast } = useCasesToast();
+  const reportObservablesDeleted = useObservablesDeletedEBT();
 
   return useMutation(
     () => {
@@ -30,6 +32,7 @@ export const useDeleteObservable = (caseId: string, observableId: string) => {
       onSuccess: () => {
         showSuccessToast(i18n.OBSERVABLE_REMOVED);
         refreshCaseViewPage();
+        reportObservablesDeleted({ deleteScope: 'single' });
       },
     }
   );

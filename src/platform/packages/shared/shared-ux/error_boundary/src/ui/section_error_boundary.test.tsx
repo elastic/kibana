@@ -8,13 +8,14 @@
  */
 
 import { render } from '@testing-library/react';
-import React, { FC, PropsWithChildren } from 'react';
+import userEvent from '@testing-library/user-event';
+import type { FC, PropsWithChildren } from 'react';
+import React from 'react';
 import { apm } from '@elastic/apm-rum';
 
 import { BadComponent, ChunkLoadErrorComponent, getServicesMock } from '../../mocks';
-import { KibanaErrorBoundaryServices } from '../../types';
-import { KibanaErrorBoundaryDepsProvider } from '../services/error_boundary_services';
-import { KibanaErrorService } from '../services/error_service';
+import type { KibanaErrorBoundaryServices } from '../../types';
+import { KibanaErrorBoundaryDepsProvider } from '../services/error_boundary_provider';
 import { KibanaSectionErrorBoundary } from './section_error_boundary';
 import { errorMessageStrings as strings } from './message_strings';
 
@@ -22,16 +23,30 @@ jest.mock('@elastic/apm-rum');
 
 describe('<KibanaSectionErrorBoundary>', () => {
   let services: KibanaErrorBoundaryServices;
+  let user: ReturnType<typeof userEvent.setup>;
   beforeEach(() => {
     jest.spyOn(console, 'error').mockImplementation(() => {});
+    jest.useFakeTimers();
     services = getServicesMock();
     (apm.captureError as jest.Mock).mockClear();
+    user = userEvent.setup({
+      advanceTimers: async (ms) => {
+        await jest.advanceTimersByTimeAsync(ms);
+      },
+    });
   });
 
-  const Template: FC<PropsWithChildren<unknown>> = ({ children }) => {
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
+  const Template: FC<PropsWithChildren<{ maxRetries?: number }>> = ({
+    children,
+    maxRetries = 0,
+  }) => {
     return (
       <KibanaErrorBoundaryDepsProvider {...services}>
-        <KibanaSectionErrorBoundary sectionName="test section name">
+        <KibanaSectionErrorBoundary sectionName="test section name" maxRetries={maxRetries}>
           {children}
         </KibanaSectionErrorBoundary>
       </KibanaErrorBoundaryDepsProvider>
@@ -44,7 +59,7 @@ describe('<KibanaSectionErrorBoundary>', () => {
     expect(res.getByText(inputText)).toBeInTheDocument();
   });
 
-  it('renders a recoverable prompt when a recoverable error is caught', () => {
+  it('renders a recoverable prompt when a recoverable error is caught', async () => {
     const reloadSpy = jest.spyOn(services, 'onClickRefresh');
 
     const { getByTestId, getByText } = render(
@@ -52,71 +67,28 @@ describe('<KibanaSectionErrorBoundary>', () => {
         <ChunkLoadErrorComponent />
       </Template>
     );
-    getByTestId('clickForErrorBtn').click();
+    await user.click(getByTestId('clickForErrorBtn'));
 
     expect(getByText(strings.section.callout.recoverable.title('test section name'))).toBeVisible();
     expect(getByText(strings.section.callout.recoverable.body('test section name'))).toBeVisible();
     expect(getByText(strings.section.callout.recoverable.pageReloadButton())).toBeVisible();
 
-    getByTestId('sectionErrorBoundaryRecoverBtn').click();
+    await user.click(getByTestId('sectionErrorBoundaryRecoverBtn'));
 
     expect(reloadSpy).toHaveBeenCalledTimes(1);
   });
 
-  it('renders a fatal prompt when a fatal error is caught', () => {
+  it('renders a fatal prompt when a fatal error is caught', async () => {
     const { getByTestId, getByText } = render(
       <Template>
         <BadComponent />
       </Template>
     );
-    getByTestId('clickForErrorBtn').click();
+    await user.click(getByTestId('clickForErrorBtn'));
 
     expect(getByText(strings.section.callout.fatal.title('test section name'))).toBeVisible();
     expect(getByText(strings.section.callout.fatal.body('test section name'))).toBeVisible();
     expect(getByText(strings.section.callout.fatal.showDetailsButton())).toBeVisible();
-  });
-
-  it('captures the error event for telemetry', async () => {
-    const mockDeps = {
-      analytics: { reportEvent: jest.fn() },
-    };
-    services.errorService = new KibanaErrorService(mockDeps);
-
-    const { findByTestId } = render(
-      <Template>
-        <BadComponent />
-      </Template>
-    );
-    (await findByTestId('clickForErrorBtn')).click();
-
-    expect(mockDeps.analytics.reportEvent.mock.calls[0][0]).toBe('fatal-error-react');
-    expect(mockDeps.analytics.reportEvent.mock.calls[0][1]).toMatchObject({
-      component_name: 'BadComponent',
-      error_message: 'FatalReactError: This is an error to show the test user!',
-    });
-  });
-
-  it('captures component and error stack traces in telemetry', async () => {
-    const mockDeps = {
-      analytics: { reportEvent: jest.fn() },
-    };
-    services.errorService = new KibanaErrorService(mockDeps);
-
-    const { findByTestId } = render(
-      <Template>
-        <BadComponent />
-      </Template>
-    );
-    (await findByTestId('clickForErrorBtn')).click();
-
-    expect(
-      mockDeps.analytics.reportEvent.mock.calls[0][1].component_stack.includes('at BadComponent')
-    ).toBe(true);
-    expect(
-      mockDeps.analytics.reportEvent.mock.calls[0][1].error_stack.startsWith(
-        'FatalReactError: This is an error to show the test user!'
-      )
-    ).toBe(true);
   });
 
   it('integrates with apm to capture the error', async () => {
@@ -125,19 +97,47 @@ describe('<KibanaSectionErrorBoundary>', () => {
         <BadComponent />
       </Template>
     );
-    (await findByTestId('clickForErrorBtn')).click();
+    await user.click(await findByTestId('clickForErrorBtn'));
 
     expect(apm.captureError).toHaveBeenCalledTimes(1);
     expect(apm.captureError).toHaveBeenCalledWith(
-      new Error('This is an error to show the test user!')
+      new Error('This is an error to show the test user!'),
+      { labels: { error_type: 'SectionFatalReactError' } }
     );
-    expect(Object.keys((apm.captureError as jest.Mock).mock.calls[0][0])).toEqual([
-      'react_error_type',
-      'original_name',
-      'name',
-    ]);
-    expect((apm.captureError as jest.Mock).mock.calls[0][0].react_error_type).toEqual(
-      'fatal-error-react'
-    );
+  });
+
+  describe('maxRetries behavior', () => {
+    it('defaults to maxRetries=0 and shows error immediately', async () => {
+      const { getByTestId, getByText } = render(
+        <Template>
+          <BadComponent />
+        </Template>
+      );
+      await user.click(getByTestId('clickForErrorBtn'));
+
+      // Error prompt should be visible immediately with no retries
+      expect(getByText(strings.section.callout.fatal.title('test section name'))).toBeVisible();
+    });
+
+    it('shows error prompt after maxRetries exhausted', async () => {
+      const { getByTestId, getByText, queryByText } = render(
+        <Template maxRetries={1}>
+          <BadComponent />
+        </Template>
+      );
+
+      // Trigger first error (will retry)
+      await user.click(getByTestId('clickForErrorBtn'));
+
+      // Error prompt should NOT be visible yet (it's retrying)
+      expect(queryByText(strings.section.callout.fatal.title('test section name'))).toBeNull();
+
+      // Trigger error again (second error, exceeds maxRetries)
+      // Since we're in a retried state, clicking the button again triggers another error
+      await user.click(getByTestId('clickForErrorBtn'));
+
+      // Now error prompt should be visible (retries exhausted)
+      expect(getByText(strings.section.callout.fatal.title('test section name'))).toBeVisible();
+    });
   });
 });

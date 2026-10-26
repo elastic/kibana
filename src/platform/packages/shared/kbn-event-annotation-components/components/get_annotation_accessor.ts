@@ -9,25 +9,29 @@
 
 import type { AccessorConfig } from '@kbn/visualization-ui-components';
 import type { EventAnnotationConfig } from '@kbn/event-annotation-common';
-import {
-  defaultAnnotationColor,
-  defaultAnnotationRangeColor,
-  isRangeAnnotationConfig,
-} from '@kbn/event-annotation-common';
+import { getResolvedAnnotationColor, isRangeAnnotationConfig } from '@kbn/event-annotation-common';
+import { resolveVisIcon } from '@kbn/chart-icons';
 import { annotationsIconSet } from './annotation_editor_controls/icon_set';
 
-export const getAnnotationAccessor = (annotation: EventAnnotationConfig): AccessorConfig => {
+export const getAnnotationAccessor = (
+  annotation: EventAnnotationConfig,
+  isDarkMode = false
+): AccessorConfig => {
   const annotationIcon = !isRangeAnnotationConfig(annotation)
     ? annotationsIconSet.find((option) => option.value === annotation?.icon) ||
       annotationsIconSet.find((option) => option.value === 'triangle')
     : undefined;
-  const icon = annotationIcon?.icon ?? annotationIcon?.value;
+
+  const icon = annotationIcon ? resolveVisIcon(annotationIcon.value) : undefined;
+
   return {
     columnId: annotation.id,
     triggerIconType: annotation.isHidden ? 'invisible' : icon ? 'custom' : 'color',
     customIcon: icon,
-    color:
-      annotation?.color ||
-      (isRangeAnnotationConfig(annotation) ? defaultAnnotationRangeColor : defaultAnnotationColor),
+    color: getResolvedAnnotationColor({
+      color: annotation?.color,
+      isDarkMode,
+      isRange: isRangeAnnotationConfig(annotation),
+    }),
   };
 };

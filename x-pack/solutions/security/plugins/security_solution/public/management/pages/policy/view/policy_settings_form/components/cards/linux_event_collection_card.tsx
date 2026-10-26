@@ -10,33 +10,41 @@ import { OperatingSystem } from '@kbn/securitysolution-utils';
 import { i18n } from '@kbn/i18n';
 import type { PolicyFormComponentCommonProps } from '../../types';
 import type { UIPolicyConfig } from '../../../../../../../../common/endpoint/types';
+import { constrainLinuxTtyIo } from '../../../../../../../../common/endpoint/models/policy_config_helpers';
+import { POLICY_EVENT_COLLECTION_LABELS } from '../../../../../../../../common/endpoint/models/policy_settings_ui_labels';
 import type { EventFormOption, SupplementalEventFormOption } from '../event_collection_card';
 import { EventCollectionCard } from '../event_collection_card';
+import { useIsExperimentalFeatureEnabled } from '../../../../../../../common/hooks/use_experimental_features';
 
-const OPTIONS: ReadonlyArray<EventFormOption<OperatingSystem.LINUX>> = [
+type LinuxEventCollectionField = (typeof POLICY_EVENT_COLLECTION_LABELS.linux)[number]['field'];
+
+const getLinuxEventLabel = (field: LinuxEventCollectionField): string => {
+  const label = POLICY_EVENT_COLLECTION_LABELS.linux.find((entry) => entry.field === field)?.label;
+
+  if (label === undefined) {
+    throw new Error(`No event collection label found for field: ${field}`);
+  }
+
+  return label;
+};
+
+const DNS_OPTION: EventFormOption<OperatingSystem.LINUX> = {
+  name: getLinuxEventLabel('dns'),
+  protectionField: 'dns',
+};
+
+const BASE_OPTIONS: ReadonlyArray<EventFormOption<OperatingSystem.LINUX>> = [
   {
-    name: i18n.translate('xpack.securitySolution.endpoint.policyDetailsConfig.linux.events.file', {
-      defaultMessage: 'File',
-    }),
+    name: getLinuxEventLabel('file'),
     protectionField: 'file',
   },
   {
-    name: i18n.translate(
-      'xpack.securitySolution.endpoint.policyDetailsConfig.linux.events.network',
-      {
-        defaultMessage: 'Network',
-      }
-    ),
-    protectionField: 'network',
+    name: getLinuxEventLabel('process'),
+    protectionField: 'process',
   },
   {
-    name: i18n.translate(
-      'xpack.securitySolution.endpoint.policyDetailsConfig.linux.events.process',
-      {
-        defaultMessage: 'Process',
-      }
-    ),
-    protectionField: 'process',
+    name: getLinuxEventLabel('network'),
+    protectionField: 'network',
   },
 ];
 
@@ -56,24 +64,14 @@ const SUPPLEMENTAL_OPTIONS: ReadonlyArray<SupplementalEventFormOption<OperatingS
           'Turn this on to capture the extended process data required for Session View. Session View provides you a visual representation of session and process execution data. Session View data is organized according to the Linux process model to help you investigate process, user, and service activity on your Linux infrastructure.',
       }
     ),
-    name: i18n.translate(
-      'xpack.securitySolution.endpoint.policyDetailsConfig.linux.events.session_data.label',
-      {
-        defaultMessage: 'Collect session data',
-      }
-    ),
+    name: getLinuxEventLabel('session_data'),
     protectionField: 'session_data',
     isDisabled: (config: UIPolicyConfig) => {
       return !config.linux.events.process;
     },
   },
   {
-    name: i18n.translate(
-      'xpack.securitySolution.endpoint.policyDetailsConfig.linux.events.tty_io.label',
-      {
-        defaultMessage: 'Capture terminal output',
-      }
-    ),
+    name: getLinuxEventLabel('tty_io'),
     protectionField: 'tty_io',
     tooltipText: i18n.translate(
       'xpack.securitySolution.endpoint.policyDetailsConfig.linux.events.tty_io.tooltip',
@@ -93,6 +91,15 @@ export type LinuxEventCollectionCardProps = PolicyFormComponentCommonProps;
 
 export const LinuxEventCollectionCard = memo<LinuxEventCollectionCardProps>(
   ({ onChange, mode, ...restProps }) => {
+    const isLinuxDnsEnabled = useIsExperimentalFeatureEnabled('linuxDnsEvents');
+
+    const options = useMemo(() => {
+      if (isLinuxDnsEnabled) {
+        return [DNS_OPTION, ...BASE_OPTIONS];
+      }
+      return BASE_OPTIONS;
+    }, [isLinuxDnsEnabled]);
+
     const supplementalOptions = useMemo(() => {
       if (mode === 'edit') {
         return SUPPLEMENTAL_OPTIONS;
@@ -113,8 +120,8 @@ export const LinuxEventCollectionCard = memo<LinuxEventCollectionCardProps>(
 
     const changeHandler: PolicyFormComponentCommonProps['onChange'] = useCallback(
       ({ isValid, updatedPolicy }) => {
-        if (isValid && updatedPolicy.linux.events.session_data === false) {
-          updatedPolicy.linux.events.tty_io = false;
+        if (isValid) {
+          constrainLinuxTtyIo(updatedPolicy);
         }
 
         onChange({ isValid, updatedPolicy });
@@ -130,7 +137,7 @@ export const LinuxEventCollectionCard = memo<LinuxEventCollectionCardProps>(
         os={OperatingSystem.LINUX}
         selection={restProps.policy.linux.events}
         supplementalOptions={supplementalOptions}
-        options={OPTIONS}
+        options={options}
       />
     );
   }

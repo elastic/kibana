@@ -10,8 +10,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { isSettingsFormValid, OPTIONAL_LABEL } from '../settings_form/utils';
 import type { PackagePolicyVars, SettingsRow } from '../typings';
-import { getDurationRt } from '../../../../../common/agent_configuration/runtime_types/duration_rt';
-import { getStorageSizeRt } from '../../../../../common/agent_configuration/runtime_types/storage_size_rt';
+import { getDurationSchema } from '../../../../../common/agent_configuration/runtime_types/duration_rt';
+import { getStorageSizeSchema } from '../../../../../common/agent_configuration/runtime_types/storage_size_rt';
 
 export const TAIL_SAMPLING_ENABLED_KEY = 'tail_sampling_enabled';
 
@@ -51,7 +51,7 @@ export function getTailSamplingSettings(docsLinks?: string): SettingsRow[] {
           ),
           labelAppend: OPTIONAL_LABEL,
           required: false,
-          validation: getDurationRt({ min: '1s' }),
+          validation: getDurationSchema({ min: '1s' }),
         },
         {
           key: 'tail_sampling_policies',
@@ -117,7 +117,53 @@ export function getTailSamplingSettings(docsLinks?: string): SettingsRow[] {
           ),
           labelAppend: OPTIONAL_LABEL,
           required: false,
-          validation: getStorageSizeRt({ min: '0GB' }),
+          validation: getStorageSizeSchema({ min: '0GB' }),
+        },
+        {
+          key: 'tail_sampling_ttl',
+          type: 'duration',
+          label: i18n.translate(
+            'xpack.apm.fleet_integration.settings.tailSampling.tailSamplingTTL',
+            {
+              defaultMessage: 'Tail sampling TTL (Time-to-live)',
+            }
+          ),
+          rowTitle: i18n.translate(
+            'xpack.apm.fleet_integration.settings.tailSampling.tailSamplingTTLTitle',
+            { defaultMessage: 'TTL (Time-to-live)' }
+          ),
+          rowDescription: i18n.translate(
+            'xpack.apm.fleet_integration.settings.tailSampling.tailSamplingTTLDescription',
+            {
+              defaultMessage:
+                'Time-to-live (TTL) for trace events stored in the local storage of the APM Server during tail-based sampling. This TTL determines how long trace events are retained in the local storage while waiting for a sampling decision to be made. A greater TTL value increases storage space requirements. Should be at least 2 * Interval.',
+            }
+          ),
+          labelAppend: OPTIONAL_LABEL,
+          required: false,
+          validation: getDurationSchema({ min: '1s' }),
+        },
+        {
+          key: 'tail_sampling_discard_on_write_failure',
+          type: 'boolean',
+          label: i18n.translate(
+            'xpack.apm.fleet_integration.settings.tailSampling.tailSamplingDiscardOnWriteFailure',
+            {
+              defaultMessage: 'Tail sampling discard on write failure',
+            }
+          ),
+          rowTitle: i18n.translate(
+            'xpack.apm.fleet_integration.settings.tailSampling.tailSamplingDiscardOnWriteFailureTitle',
+            { defaultMessage: 'Discard on write failure' }
+          ),
+          rowDescription: i18n.translate(
+            'xpack.apm.fleet_integration.settings.tailSampling.tailSamplingDiscardOnWriteFailureDescription',
+            {
+              defaultMessage:
+                'Defines the indexing behavior when trace events fail to be written to storage (for example, when the storage limit is reached). When set to `false`, traces bypass sampling and are always indexed, which significantly increases the indexing load. When set to `true`, traces are discarded, causing data loss which can result in broken traces.',
+            }
+          ),
+          required: false,
         },
       ],
     },

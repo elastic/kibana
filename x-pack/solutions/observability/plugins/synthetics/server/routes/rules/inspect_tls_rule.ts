@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import { TLSRuleParams, tlsRuleParamsSchema } from '@kbn/response-ops-rule-params/synthetics_tls';
-import { SyntheticsRestApiRouteFactory } from '../types';
+import type { TLSRuleParams } from '@kbn/response-ops-rule-params/synthetics_tls';
+import { tlsRuleParamsSchema } from '@kbn/response-ops-rule-params/synthetics_tls';
+import type { SyntheticsRestApiRouteFactory } from '../types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { TLSRuleExecutor } from '../../alert_rules/tls_rule/tls_rule_executor';
+import { WRITE_SYNTHETICS_DEFAULT_RULES_API } from '../../feature';
 
 export const syntheticsInspectTLSRuleRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'POST',
@@ -16,6 +18,9 @@ export const syntheticsInspectTLSRuleRoute: SyntheticsRestApiRouteFactory = () =
   validate: {
     body: tlsRuleParamsSchema,
   },
+  // Inspecting rule params is a read-only preview, not a monitor mutation.
+  writeAccess: false,
+  anyRequiredPrivileges: ['uptime-write', WRITE_SYNTHETICS_DEFAULT_RULES_API],
   handler: async ({
     request,
     server,
@@ -24,7 +29,7 @@ export const syntheticsInspectTLSRuleRoute: SyntheticsRestApiRouteFactory = () =
     context,
     spaceId,
   }) => {
-    const { elasticsearch } = await context.core;
+    const { elasticsearch, uiSettings } = await context.core;
 
     const tlsRule = new TLSRuleExecutor(
       new Date(),
@@ -34,7 +39,8 @@ export const syntheticsInspectTLSRuleRoute: SyntheticsRestApiRouteFactory = () =
       server,
       syntheticsMonitorClient,
       spaceId,
-      'Inspect TLS Rule'
+      'Inspect TLS Rule',
+      uiSettings.client
     );
 
     return tlsRule.getRuleThresholdOverview();

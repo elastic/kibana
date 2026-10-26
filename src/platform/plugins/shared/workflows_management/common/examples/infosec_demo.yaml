@@ -1,0 +1,1556 @@
+# Agentic Enrichment Triage (Demo) — Workflow 1 of 2 [DEMO — PII anonymized]
+# Identical to the production enrichment triage workflow but with user.email, host.name, and
+# source.ip replaced by anonymized labels (User1, Host1, IP1) in the enrichment note passed to
+# Workflow 2. Safe for customer-facing demonstrations.
+name: Agentic Enrichment Triage (Demo)
+version: '1'
+enabled: true
+description: >
+  [DEMO — PII anonymized] Alert-triggered workflow (Workflow 1 of 2): Identical to the production
+  Enrichment Triage workflow but replaces user.email, host.name, and source.ip with anonymized
+  labels in the enrichment note passed to Workflow 2. ES|QL queries use real field values for data
+  retrieval; only the rendered note output is anonymized. Safe for customer-facing demonstrations.
+
+tags:
+  - security
+  - triage
+  - detection
+
+consts:
+  space_id: 'infosec-detections'
+  signals_index: '.siem-signals-infosec-detections'
+  wf2_id: ''
+  wf2_id_name: 'Agentic L1-L3 Triage (Demo)'
+
+triggers:
+  - type: alert
+
+steps:
+  # =========================================================================
+  # Severity gate: skip low severity alerts
+  # =========================================================================
+  - name: severity_gate
+    type: if
+    condition: 'not event.alerts[0].kibana.alert.severity: low'
+    steps:
+      # =========================================================================
+      # Phase 1a: Source IP enrichment (FIRST — runs for any alert with source.ip)
+      # Activity summaries across all data sources + Elastic-owned IP benign checks
+      # =========================================================================
+      - name: enrich_if_source_ip
+        type: if
+        condition: 'event.alerts[0].source.ip:*'
+        steps:
+          # --- Benign check: low-risk Okta session (run FIRST — strong benign signal) ---
+          - name: ip_okta_low_risk_session
+            type: elasticsearch.esql.query
+            with:
+              query: |
+                FROM infosec_zocalo:logs-okta*
+                | WHERE source.ip == "{{ event.alerts[0].source.ip }}"
+                  AND event.action == "policy.evaluate_sign_on"
+                  AND okta.debug_context.debug_data.risk_level == "LOW"
+                  AND @timestamp > NOW() - 24h
+                | KEEP @timestamp, source.ip, user.email, okta.debug_context.debug_data.risk_level, event.action
+                | LIMIT 1
+            on-failure:
+              continue: true
+              retry:
+                max-attempts: 2
+                delay: 2s
+          - name: console_ip_okta_low_risk_session
+            type: if
+            condition: '${{ steps.ip_okta_low_risk_session.output.values != empty }}'
+            steps:
+              - name: log_ip_okta_low_risk_session
+                type: console
+                with:
+                  message: 'Low-risk Okta session [@timestamp, source.ip, user.email, okta.debug_context.debug_data.risk_level, event.action]: {{ steps.ip_okta_low_risk_session.output.values | json }}'
+
+          # --- Activity summaries (one per data source) ---
+          - name: ip_admin_activity
+            type: elasticsearch.esql.query
+            with:
+              query: |
+                FROM infosec_zocalo:adminconsole-auditlogs-*
+                | WHERE @timestamp > NOW() - 24h AND client.address == "{{ event.alerts[0].source.ip }}"
+                | STATS event_count = COUNT(*), users = VALUES(user.email), user_names = VALUES(user.name), actions = VALUES(url.original), methods = VALUES(http.request.method) BY client.address
+                | LIMIT 1
+            on-failure:
+              continue: true
+              retry:
+                max-attempts: 2
+                delay: 2s
+          - name: console_ip_admin_activity
+            type: if
+            condition: '${{ steps.ip_admin_activity.output.values != empty }}'
+            steps:
+              - name: log_ip_admin_activity
+                type: console
+                with:
+                  message: 'Admin console activity [event_count, users, user_names, actions, methods, client.address]: {{ steps.ip_admin_activity.output.values | json }}'
+
+          - name: ip_okta_summary
+            type: elasticsearch.esql.query
+            with:
+              query: |
+                FROM infosec_zocalo:logs-okta*
+                | WHERE @timestamp > NOW() - 24h AND source.ip == "{{ event.alerts[0].source.ip }}"
+                | STATS event_count = COUNT(*), distinct_users = COUNT_DISTINCT(user.email), users = VALUES(user.email), event_actions = VALUES(event.action) BY source.ip
+                | LIMIT 1
+            on-failure:
+              continue: true
+              retry:
+                max-attempts: 2
+                delay: 2s
+          - name: console_ip_okta_summary
+            type: if
+            condition: '${{ steps.ip_okta_summary.output.values != empty }}'
+            steps:
+              - name: log_ip_okta_summary
+                type: console
+                with:
+                  message: 'Okta IP summary [event_count, distinct_users, users, event_actions, source.ip]: {{ steps.ip_okta_summary.output.values | json }}'
+
+          - name: ip_aws_summary
+            type: elasticsearch.esql.query
+            with:
+              query: |
+                FROM infosec_zocalo:logs-aws*
+                | WHERE @timestamp > NOW() - 24h AND source.ip == "{{ event.alerts[0].source.ip }}"
+                | STATS event_count = COUNT(*), distinct_identities = COUNT_DISTINCT(user.name), users = VALUES(user.name), user_emails = VALUES(user.email), event_actions = VALUES(event.action) BY source.ip
+                | LIMIT 1
+            on-failure:
+              continue: true
+              retry:
+                max-attempts: 2
+                delay: 2s
+          - name: console_ip_aws_summary
+            type: if
+            condition: '${{ steps.ip_aws_summary.output.values != empty }}'
+            steps:
+              - name: log_ip_aws_summary
+                type: console
+                with:
+                  message: 'AWS IP summary [event_count, distinct_identities, users, user_emails, event_actions, source.ip]: {{ steps.ip_aws_summary.output.values | json }}'
+
+          - name: ip_azure_summary
+            type: elasticsearch.esql.query
+            with:
+              query: |
+                FROM infosec_zocalo:logs-azure.*
+                | WHERE @timestamp > NOW() - 24h AND source.ip == "{{ event.alerts[0].source.ip }}"
+                | STATS event_count = COUNT(*), distinct_users = COUNT_DISTINCT(user.name), users = VALUES(user.name), user_emails = VALUES(user.email), operations = VALUES(event.action) BY source.ip
+                | LIMIT 1
+            on-failure:
+              continue: true
+              retry:
+                max-attempts: 2
+                delay: 2s
+          - name: console_ip_azure_summary
+            type: if
+            condition: '${{ steps.ip_azure_summary.output.values != empty }}'
+            steps:
+              - name: log_ip_azure_summary
+                type: console
+                with:
+                  message: 'Azure IP summary [event_count, distinct_users, users, user_emails, operations, source.ip]: {{ steps.ip_azure_summary.output.values | json }}'
+
+          - name: ip_gcp_summary
+            type: elasticsearch.esql.query
+            with:
+              query: |
+                FROM infosec_zocalo:logs-gcp*
+                | WHERE @timestamp > NOW() - 24h AND source.ip == "{{ event.alerts[0].source.ip }}"
+                | STATS event_count = COUNT(*), distinct_users = COUNT_DISTINCT(user.email), users = VALUES(user.email), client_users = VALUES(client.user.email), event_actions = VALUES(event.action) BY source.ip
+                | LIMIT 1
+            on-failure:
+              continue: true
+              retry:
+                max-attempts: 2
+                delay: 2s
+          - name: console_ip_gcp_summary
+            type: if
+            condition: '${{ steps.ip_gcp_summary.output.values != empty }}'
+            steps:
+              - name: log_ip_gcp_summary
+                type: console
+                with:
+                  message: 'GCP IP summary [event_count, distinct_users, users, client_users, event_actions, source.ip]: {{ steps.ip_gcp_summary.output.values | json }}'
+
+          - name: ip_google_workspace_summary
+            type: elasticsearch.esql.query
+            with:
+              query: |
+                FROM infosec_zocalo:logs-google_workspace*
+                | WHERE @timestamp > NOW() - 24h AND source.ip == "{{ event.alerts[0].source.ip }}"
+                | STATS event_count = COUNT(*), distinct_users = COUNT_DISTINCT(user.email), users = VALUES(user.email), user_names = VALUES(user.name), event_actions = VALUES(event.action) BY source.ip
+                | LIMIT 1
+            on-failure:
+              continue: true
+              retry:
+                max-attempts: 2
+                delay: 2s
+          - name: console_ip_google_workspace_summary
+            type: if
+            condition: '${{ steps.ip_google_workspace_summary.output.values != empty }}'
+            steps:
+              - name: log_ip_google_workspace_summary
+                type: console
+                with:
+                  message: 'Google Workspace IP summary [event_count, distinct_users, users, user_names, event_actions, source.ip]: {{ steps.ip_google_workspace_summary.output.values | json }}'
+
+          - name: ip_o365_summary
+            type: elasticsearch.esql.query
+            with:
+              query: |
+                FROM infosec_zocalo:logs-o365*
+                | WHERE @timestamp > NOW() - 24h AND source.ip == "{{ event.alerts[0].source.ip }}"
+                | STATS event_count = COUNT(*), distinct_users = COUNT_DISTINCT(user.email), users = VALUES(user.email), user_names = VALUES(user.name), event_actions = VALUES(event.action) BY source.ip
+                | LIMIT 1
+            on-failure:
+              continue: true
+              retry:
+                max-attempts: 2
+                delay: 2s
+          - name: console_ip_o365_summary
+            type: if
+            condition: '${{ steps.ip_o365_summary.output.values != empty }}'
+            steps:
+              - name: log_ip_o365_summary
+                type: console
+                with:
+                  message: 'O365 IP summary [event_count, distinct_users, users, user_names, event_actions, source.ip]: {{ steps.ip_o365_summary.output.values | json }}'
+
+          - name: ip_salesforce_summary
+            type: elasticsearch.esql.query
+            with:
+              query: |
+                FROM infosec_zocalo:salesforce_auditlogs-*
+                | WHERE @timestamp > NOW() - 24h AND source.ip == "{{ event.alerts[0].source.ip }}"
+                | STATS event_count = COUNT(*), distinct_users = COUNT_DISTINCT(user.email), users = VALUES(user.email), user_names = VALUES(user.name), event_actions = VALUES(event.action) BY source.ip
+                | LIMIT 1
+            on-failure:
+              continue: true
+              retry:
+                max-attempts: 2
+                delay: 2s
+          - name: console_ip_salesforce_summary
+            type: if
+            condition: '${{ steps.ip_salesforce_summary.output.values != empty }}'
+            steps:
+              - name: log_ip_salesforce_summary
+                type: console
+                with:
+                  message: 'Salesforce IP summary [event_count, distinct_users, users, user_names, event_actions, source.ip]: {{ steps.ip_salesforce_summary.output.values | json }}'
+
+          - name: ip_github_summary
+            type: elasticsearch.esql.query
+            with:
+              query: |
+                FROM infosec_zocalo:github_streaming_audit*
+                | WHERE @timestamp > NOW() - 24h AND source.ip == "{{ event.alerts[0].source.ip }}"
+                | STATS event_count = COUNT(*), distinct_users = COUNT_DISTINCT(user.name), users = VALUES(user.name), user_emails = VALUES(user.email), event_actions = VALUES(event.action) BY source.ip
+                | LIMIT 1
+            on-failure:
+              continue: true
+              retry:
+                max-attempts: 2
+                delay: 2s
+          - name: console_ip_github_summary
+            type: if
+            condition: '${{ steps.ip_github_summary.output.values != empty }}'
+            steps:
+              - name: log_ip_github_summary
+                type: console
+                with:
+                  message: 'GitHub IP summary [event_count, distinct_users, users, user_emails, event_actions, source.ip]: {{ steps.ip_github_summary.output.values | json }}'
+
+          - name: ip_endpoint_network_summary
+            type: elasticsearch.esql.query
+            with:
+              query: |
+                FROM infosec_redsector:logs-endpoint.events.network-*
+                | WHERE @timestamp > NOW() - 24h AND (source.ip == "{{ event.alerts[0].source.ip }}" OR destination.ip == "{{ event.alerts[0].source.ip }}")
+                | STATS event_count = COUNT(*), distinct_processes = COUNT_DISTINCT(process.name), processes = VALUES(process.name) BY source.ip, host.id
+                | LIMIT 10
+            on-failure:
+              continue: true
+              retry:
+                max-attempts: 2
+                delay: 2s
+          - name: console_ip_endpoint_network_summary
+            type: if
+            condition: '${{ steps.ip_endpoint_network_summary.output.values != empty }}'
+            steps:
+              - name: log_ip_endpoint_network_summary
+                type: console
+                with:
+                  message: 'Endpoint network summary [event_count, distinct_processes, processes, source.ip, host.id]: {{ steps.ip_endpoint_network_summary.output.values | json }}'
+
+          # --- Elastic-owned IP / benign checks (LIMIT 1 each; hit = known infrastructure) ---
+          - name: ip_fleet_agent_checkin
+            type: elasticsearch.esql.query
+            with:
+              query: |
+                FROM infosec_draal:filebeat-*
+                | WHERE source.ip == "{{ event.alerts[0].source.ip }}"
+                  AND (url.path LIKE "/api/fleet/agents/*/checkin" OR url.path == "/_bulk")
+                  AND http.response.status_code == 200
+                  AND @timestamp > NOW() - 48h
+                | KEEP @timestamp, source.ip, url.path
+                | LIMIT 1
+            on-failure:
+              continue: true
+              retry:
+                max-attempts: 2
+                delay: 2s
+          - name: console_ip_fleet_agent_checkin
+            type: if
+            condition: '${{ steps.ip_fleet_agent_checkin.output.values != empty }}'
+            steps:
+              - name: log_ip_fleet_agent_checkin
+                type: console
+                with:
+                  message: 'Fleet agent check-in [@timestamp, source.ip, url.path]: {{ steps.ip_fleet_agent_checkin.output.values | json }}'
+
+          - name: ip_auditbeat_server
+            type: elasticsearch.esql.query
+            with:
+              query: |
+                FROM infosec_draal:filebeat-*
+                | WHERE source.address == "{{ event.alerts[0].source.ip }}"
+                  AND event.dataset == "nginx.ingress_controller"
+                  AND http.response.status_code == 200
+                  AND http.response.body.bytes != 0
+                  AND @timestamp > NOW() - 24h
+                | KEEP @timestamp, source.address, event.dataset
+                | LIMIT 1
+            on-failure:
+              continue: true
+              retry:
+                max-attempts: 2
+                delay: 2s
+          - name: console_ip_auditbeat_server
+            type: if
+            condition: '${{ steps.ip_auditbeat_server.output.values != empty }}'
+            steps:
+              - name: log_ip_auditbeat_server
+                type: console
+                with:
+                  message: 'Auditbeat server [@timestamp, source.address, event.dataset]: {{ steps.ip_auditbeat_server.output.values | json }}'
+
+          - name: ip_jamf_checkin
+            type: elasticsearch.esql.query
+            with:
+              query: |
+                FROM infosec_zocalo:logs-jamf_pro*
+                | WHERE jamf_pro.events.event.computer.ip_address == "{{ event.alerts[0].source.ip }}"
+                  AND @timestamp > NOW() - 24h
+                | KEEP @timestamp, jamf_pro.events.event.computer.ip_address, jamf_pro.events.event.computer.serial_number
+                | LIMIT 1
+            on-failure:
+              continue: true
+              retry:
+                max-attempts: 2
+                delay: 2s
+          - name: console_ip_jamf_checkin
+            type: if
+            condition: '${{ steps.ip_jamf_checkin.output.values != empty }}'
+            steps:
+              - name: log_ip_jamf_checkin
+                type: console
+                with:
+                  message: 'Jamf check-in [@timestamp, jamf_pro.events.event.computer.ip_address, jamf_pro.events.event.computer.serial_number]: {{ steps.ip_jamf_checkin.output.values | json }}'
+
+          - name: ip_github_bot
+            type: elasticsearch.esql.query
+            with:
+              query: |
+                FROM infosec_zocalo:github_streaming_audit*
+                | WHERE source.ip == "{{ event.alerts[0].source.ip }}"
+                  AND user.name LIKE "*[bot]"
+                  AND @timestamp > NOW() - 24h
+                | KEEP @timestamp, source.ip, user.name
+                | LIMIT 1
+            on-failure:
+              continue: true
+              retry:
+                max-attempts: 2
+                delay: 2s
+          - name: console_ip_github_bot
+            type: if
+            condition: '${{ steps.ip_github_bot.output.values != empty }}'
+            steps:
+              - name: log_ip_github_bot
+                type: console
+                with:
+                  message: 'GitHub bot [@timestamp, source.ip, user.name]: {{ steps.ip_github_bot.output.values | json }}'
+
+          - name: ip_aws_lambda_role
+            type: elasticsearch.esql.query
+            with:
+              query: |
+                FROM infosec_zocalo:logs-aws*
+                | WHERE source.ip == "{{ event.alerts[0].source.ip }}"
+                  AND user.name LIKE "*lambdaRole"
+                  AND user_agent.original LIKE "*AWS_Lambda*"
+                  AND @timestamp > NOW() - 24h
+                | KEEP @timestamp, source.ip, user.name, user_agent.original
+                | LIMIT 1
+            on-failure:
+              continue: true
+              retry:
+                max-attempts: 2
+                delay: 2s
+          - name: console_ip_aws_lambda_role
+            type: if
+            condition: '${{ steps.ip_aws_lambda_role.output.values != empty }}'
+            steps:
+              - name: log_ip_aws_lambda_role
+                type: console
+                with:
+                  message: 'AWS Lambda role [@timestamp, source.ip, user.name, user_agent.original]: {{ steps.ip_aws_lambda_role.output.values | json }}'
+
+          - name: ip_aws_lambda
+            type: elasticsearch.esql.query
+            with:
+              query: |
+                FROM infosec_zocalo:logs-aws*
+                | WHERE source.ip == "{{ event.alerts[0].source.ip }}"
+                  AND user_agent.original LIKE "awslambda-worker*"
+                  AND @timestamp > NOW() - 24h
+                | KEEP @timestamp, source.ip, user_agent.original
+                | LIMIT 1
+            on-failure:
+              continue: true
+              retry:
+                max-attempts: 2
+                delay: 2s
+          - name: console_ip_aws_lambda
+            type: if
+            condition: '${{ steps.ip_aws_lambda.output.values != empty }}'
+            steps:
+              - name: log_ip_aws_lambda
+                type: console
+                with:
+                  message: 'AWS Lambda worker [@timestamp, source.ip, user_agent.original]: {{ steps.ip_aws_lambda.output.values | json }}'
+
+          - name: ip_cloud_deploy_key
+            type: elasticsearch.esql.query
+            with:
+              query: |
+                FROM infosec_zocalo:github_streaming_audit*
+                | WHERE source.ip == "{{ event.alerts[0].source.ip }}"
+                  AND user.name == "deploy_key"
+                  AND (github.repo == "elastic/cloud" OR github.repo == "elastic/synthetics")
+                  AND @timestamp > NOW() - 24h
+                | KEEP @timestamp, source.ip, user.name, github.repo
+                | LIMIT 1
+            on-failure:
+              continue: true
+              retry:
+                max-attempts: 2
+                delay: 2s
+          - name: console_ip_cloud_deploy_key
+            type: if
+            condition: '${{ steps.ip_cloud_deploy_key.output.values != empty }}'
+            steps:
+              - name: log_ip_cloud_deploy_key
+                type: console
+                with:
+                  message: 'Cloud deploy key [@timestamp, source.ip, user.name, github.repo]: {{ steps.ip_cloud_deploy_key.output.values | json }}'
+
+          - name: ip_cloud_tooling
+            type: elasticsearch.esql.query
+            with:
+              query: |
+                FROM infosec_zocalo:github_streaming_audit*
+                | WHERE source.ip == "{{ event.alerts[0].source.ip }}"
+                  AND user.name IN ("elastictoolingmachine", "elasticcloudmachine")
+                  AND github.repo == "elastic/argocd-tooling"
+                  AND @timestamp > NOW() - 24h
+                | KEEP @timestamp, source.ip, user.name, github.repo
+                | LIMIT 1
+            on-failure:
+              continue: true
+              retry:
+                max-attempts: 2
+                delay: 2s
+          - name: console_ip_cloud_tooling
+            type: if
+            condition: '${{ steps.ip_cloud_tooling.output.values != empty }}'
+            steps:
+              - name: log_ip_cloud_tooling
+                type: console
+                with:
+                  message: 'Cloud tooling [@timestamp, source.ip, user.name, github.repo]: {{ steps.ip_cloud_tooling.output.values | json }}'
+
+          - name: ip_ci_system_destination
+            type: elasticsearch.esql.query
+            with:
+              query: |
+                FROM infosec_bluesector:auditbeat-*
+                | WHERE destination.ip == "{{ event.alerts[0].source.ip }}"
+                  AND event.action == "connected-to"
+                  AND cloud.project.id == "elastic-ci-prod"
+                  AND @timestamp > NOW() - 24h
+                | KEEP @timestamp, destination.ip, event.action, cloud.project.id
+                | LIMIT 1
+            on-failure:
+              continue: true
+              retry:
+                max-attempts: 2
+                delay: 2s
+          - name: console_ip_ci_system_destination
+            type: if
+            condition: '${{ steps.ip_ci_system_destination.output.values != empty }}'
+            steps:
+              - name: log_ip_ci_system_destination
+                type: console
+                with:
+                  message: 'CI system destination [@timestamp, destination.ip, event.action, cloud.project.id]: {{ steps.ip_ci_system_destination.output.values | json }}'
+
+          - name: ip_docs_automation
+            type: elasticsearch.esql.query
+            with:
+              query: |
+                FROM infosec_zocalo:github_streaming_audit*
+                | WHERE source.ip == "{{ event.alerts[0].source.ip }}"
+                  AND ((user.name == "elasticdocs" AND github.repo IN ("elastic/docs.elastic.dev", "elastic/wordlake"))
+                    OR (user.name == "kibanamachine" AND github.repo == "elastic/docs.elastic.dev"))
+                  AND @timestamp > NOW() - 24h
+                | KEEP @timestamp, source.ip, user.name, github.repo
+                | LIMIT 1
+            on-failure:
+              continue: true
+              retry:
+                max-attempts: 2
+                delay: 2s
+          - name: console_ip_docs_automation
+            type: if
+            condition: '${{ steps.ip_docs_automation.output.values != empty }}'
+            steps:
+              - name: log_ip_docs_automation
+                type: console
+                with:
+                  message: 'Docs automation [@timestamp, source.ip, user.name, github.repo]: {{ steps.ip_docs_automation.output.values | json }}'
+
+          - name: ip_buildkite_agent
+            type: elasticsearch.esql.query
+            with:
+              query: |
+                FROM infosec_zocalo:buildkite_receiver*
+                | WHERE buildkite.agent.ip_address == "{{ event.alerts[0].source.ip }}"
+                  AND @timestamp > NOW() - 48h
+                | KEEP @timestamp, buildkite.agent.ip_address, buildkite.agent.name
+                | LIMIT 1
+            on-failure:
+              continue: true
+              retry:
+                max-attempts: 2
+                delay: 2s
+          - name: console_ip_buildkite_agent
+            type: if
+            condition: '${{ steps.ip_buildkite_agent.output.values != empty }}'
+            steps:
+              - name: log_ip_buildkite_agent
+                type: console
+                with:
+                  message: 'Buildkite agent [@timestamp, buildkite.agent.ip_address, buildkite.agent.name]: {{ steps.ip_buildkite_agent.output.values | json }}'
+
+          - name: ip_asset_inventory_non_workstation
+            type: elasticsearch.esql.query
+            with:
+              query: |
+                FROM infosec_data_warehouse:asset_*
+                | WHERE (host.ip == "{{ event.alerts[0].source.ip }}" OR asset.ip == "{{ event.alerts[0].source.ip }}")
+                  AND asset.type != "workstation"
+                  AND @timestamp > NOW() - 24h
+                | KEEP @timestamp, asset.name, asset.type, asset.ip, host.ip
+                | LIMIT 1
+            on-failure:
+              continue: true
+              retry:
+                max-attempts: 2
+                delay: 2s
+          - name: console_ip_asset_inventory_non_workstation
+            type: if
+            condition: '${{ steps.ip_asset_inventory_non_workstation.output.values != empty }}'
+            steps:
+              - name: log_ip_asset_inventory_non_workstation
+                type: console
+                with:
+                  message: 'Asset inventory (non-workstation) [@timestamp, asset.name, asset.type, asset.ip, host.ip]: {{ steps.ip_asset_inventory_non_workstation.output.values | json }}'
+
+          - name: ip_qualys_agent
+            type: elasticsearch.esql.query
+            with:
+              query: |
+                FROM infosec_zocalo:logs-qualys*
+                | WHERE related.ip == "{{ event.alerts[0].source.ip }}"
+                  AND @timestamp > NOW() - 7d
+                | KEEP @timestamp, related.ip, host.name
+                | LIMIT 1
+            on-failure:
+              continue: true
+              retry:
+                max-attempts: 2
+                delay: 2s
+          - name: console_ip_qualys_agent
+            type: if
+            condition: '${{ steps.ip_qualys_agent.output.values != empty }}'
+            steps:
+              - name: log_ip_qualys_agent
+                type: console
+                with:
+                  message: 'Qualys agent [@timestamp, related.ip, host.name]: {{ steps.ip_qualys_agent.output.values | json }}'
+
+          - name: ip_vault_plugin
+            type: elasticsearch.esql.query
+            with:
+              query: |
+                FROM infosec_zocalo:github_streaming_audit*
+                | WHERE source.ip == "{{ event.alerts[0].source.ip }}"
+                  AND event.action == "git.clone"
+                  AND github.repo == "elastic/vault-buildkite-plugin"
+                  AND @timestamp > NOW() - 24h
+                | KEEP @timestamp, source.ip, event.action, github.repo
+                | LIMIT 1
+            on-failure:
+              continue: true
+              retry:
+                max-attempts: 2
+                delay: 2s
+          - name: console_ip_vault_plugin
+            type: if
+            condition: '${{ steps.ip_vault_plugin.output.values != empty }}'
+            steps:
+              - name: log_ip_vault_plugin
+                type: console
+                with:
+                  message: 'Vault plugin [@timestamp, source.ip, event.action, github.repo]: {{ steps.ip_vault_plugin.output.values | json }}'
+
+          - name: ip_snyk
+            type: elasticsearch.esql.query
+            with:
+              query: |
+                FROM infosec_zocalo:github_streaming_audit*
+                | WHERE source.ip == "{{ event.alerts[0].source.ip }}"
+                  AND user.name == "prodsecmachine"
+                  AND event.action == "api.request"
+                  AND @timestamp > NOW() - 7d
+                | KEEP @timestamp, source.ip, user.name, event.action
+                | LIMIT 1
+            on-failure:
+              continue: true
+              retry:
+                max-attempts: 2
+                delay: 2s
+          - name: console_ip_snyk
+            type: if
+            condition: '${{ steps.ip_snyk.output.values != empty }}'
+            steps:
+              - name: log_ip_snyk
+                type: console
+                with:
+                  message: 'Snyk [@timestamp, source.ip, user.name, event.action]: {{ steps.ip_snyk.output.values | json }}'
+
+          - name: ip_ec2_ssm_agent
+            type: elasticsearch.esql.query
+            with:
+              query: |
+                FROM infosec_zocalo:logs-aws.cloudtrail*
+                | WHERE source.ip == "{{ event.alerts[0].source.ip }}"
+                  AND event.action == "RegisterManagedInstance"
+                  AND @timestamp > NOW() - 48h
+                | KEEP @timestamp, source.ip, event.action
+                | LIMIT 1
+            on-failure:
+              continue: true
+              retry:
+                max-attempts: 2
+                delay: 2s
+          - name: console_ip_ec2_ssm_agent
+            type: if
+            condition: '${{ steps.ip_ec2_ssm_agent.output.values != empty }}'
+            steps:
+              - name: log_ip_ec2_ssm_agent
+                type: console
+                with:
+                  message: 'EC2 SSM agent [@timestamp, source.ip, event.action]: {{ steps.ip_ec2_ssm_agent.output.values | json }}'
+
+          - name: ip_servicenow_intune
+            type: elasticsearch.esql.query
+            with:
+              query: |
+                FROM infosec_zocalo:logs-azure*
+                | WHERE source.ip == "{{ event.alerts[0].source.ip }}"
+                  AND azure.signinlogs.properties.service_principal_name == "ServiceNow Intune Integration"
+                  AND event.outcome == "success"
+                  AND azure.signinlogs.operation_name == "Sign-in activity"
+                  AND @timestamp > NOW() - 24h
+                | KEEP @timestamp, source.ip, azure.signinlogs.properties.service_principal_name
+                | LIMIT 1
+            on-failure:
+              continue: true
+              retry:
+                max-attempts: 2
+                delay: 2s
+          - name: console_ip_servicenow_intune
+            type: if
+            condition: '${{ steps.ip_servicenow_intune.output.values != empty }}'
+            steps:
+              - name: log_ip_servicenow_intune
+                type: console
+                with:
+                  message: 'ServiceNow Intune [@timestamp, source.ip, azure.signinlogs.properties.service_principal_name]: {{ steps.ip_servicenow_intune.output.values | json }}'
+
+          - name: ip_whopper_api
+            type: elasticsearch.esql.query
+            with:
+              query: |
+                FROM infosec_zocalo:logs-okta*
+                | WHERE source.ip == "{{ event.alerts[0].source.ip }}"
+                  AND client.user.name == "whopper.office365@elastic.co"
+                  AND event.action == "group.user_membership.add"
+                  AND @timestamp > NOW() - 24h
+                | KEEP @timestamp, source.ip, client.user.name, event.action
+                | LIMIT 1
+            on-failure:
+              continue: true
+              retry:
+                max-attempts: 2
+                delay: 2s
+          - name: console_ip_whopper_api
+            type: if
+            condition: '${{ steps.ip_whopper_api.output.values != empty }}'
+            steps:
+              - name: log_ip_whopper_api
+                type: console
+                with:
+                  message: 'Whopper API [@timestamp, source.ip, client.user.name, event.action]: {{ steps.ip_whopper_api.output.values | json }}'
+
+      # =========================================================================
+      # Phase 1b: Endpoint branch - Jamf/workstation owner lookup
+      # =========================================================================
+      - name: enrich_if_endpoint
+        type: if
+        condition: 'event.alerts[0].agent.type: endpoint'
+        steps:
+          - name: workstation_lookup_macos
+            type: if
+            condition: 'event.alerts[0].host.os.type: macos'
+            steps:
+              - name: jamf_workstation_lookup
+                type: elasticsearch.esql.query
+                with:
+                  query: |
+                    FROM infosec_data_warehouse:asset_infrastructure_workstations*
+                    | WHERE host.id == "{{ event.alerts[0].host.id }}" AND @timestamp > NOW() - 24h
+                    | KEEP user.email, asset.type, asset.name, host.id, host.os.name, host.os.version, jamf.jamf_details.general.lastContactTime, lastSyncDateTime
+                    | LIMIT 10
+                on-failure:
+                  continue: true
+                  retry:
+                    max-attempts: 2
+                    delay: 2s
+              - name: console_jamf_workstation_lookup
+                type: if
+                condition: '${{ steps.jamf_workstation_lookup.output.values != empty }}'
+                steps:
+                  - name: log_jamf_workstation_lookup
+                    type: console
+                    with:
+                      message: 'Jamf workstation lookup [user.email, asset.type, asset.name, host.id, host.os.name, host.os.version]: {{ steps.jamf_workstation_lookup.output.values | json }}'
+            else:
+              - name: workstation_lookup
+                type: elasticsearch.esql.query
+                with:
+                  query: |
+                    FROM infosec_data_warehouse:asset_infrastructure_workstations*
+                    | WHERE asset.name == "{{ event.alerts[0].host.name }}" AND @timestamp > NOW() - 24h
+                    | KEEP user.email, asset.type, asset.name, host.id, host.os.name, host.os.version, lastSyncDateTime
+                    | LIMIT 10
+                on-failure:
+                  continue: true
+                  retry:
+                    max-attempts: 2
+                    delay: 2s
+              - name: console_workstation_lookup
+                type: if
+                condition: '${{ steps.workstation_lookup.output.values != empty }}'
+                steps:
+                  - name: log_workstation_lookup
+                    type: console
+                    with:
+                      message: 'Workstation lookup [user.email, asset.type, asset.name, host.id, host.os.name, host.os.version, lastSyncDateTime]: {{ steps.workstation_lookup.output.values | json }}'
+
+          - name: host_alerts_24h
+            type: elasticsearch.esql.query
+            with:
+              query: |
+                FROM .siem-signals-infosec-detections
+                | WHERE host.id == "{{ event.alerts[0].host.id }}" AND @timestamp > NOW() - 24h
+                | STATS alert_count = COUNT(*), process_names = VALUES(process.name) BY kibana.alert.rule.name, kibana.alert.severity
+                | SORT alert_count DESC
+            on-failure:
+              continue: true
+              retry:
+                max-attempts: 2
+                delay: 2s
+          - name: console_host_alerts_24h
+            type: if
+            condition: '${{ steps.host_alerts_24h.output.values != empty }}'
+            steps:
+              - name: log_host_alerts_24h
+                type: console
+                with:
+                  message: 'Host alerts 24h [alert_count, process_names, kibana.alert.rule.name, kibana.alert.severity]: {{ steps.host_alerts_24h.output.values | json }}'
+
+      # =========================================================================
+      # Phase 1c: User email branch - Okta stats, user asset lookup, Okta user creation
+      # =========================================================================
+      - name: enrich_if_user_email
+        type: if
+        condition: 'event.alerts[0].user.email:* or event.alerts[0].agent.type: endpoint'
+        steps:
+          - name: okta_login_stats_24h
+            type: elasticsearch.esql.query
+            with:
+              query: |
+                FROM infosec_zocalo:logs-okta*
+                | WHERE @timestamp >= NOW() - 24h AND user.email == "{{ event.alerts[0].user.email | default: steps.jamf_workstation_lookup.output.values[0][0] | default: steps.workstation_lookup.output.values[0][0] }}"
+                | STATS login_count = COUNT(*), distinct_ips = COUNT_DISTINCT(source.ip), distinct_sessions = COUNT_DISTINCT(okta.authentication_context.root_session_id), target_apps = VALUES(okta.target_app.display_name), geo_countries = VALUES(source.geo.country_name), source_orgs = VALUES(source.as.organization.name) BY user.email
+                | LIMIT 10
+            on-failure:
+              continue: true
+              retry:
+                max-attempts: 2
+                delay: 2s
+          - name: console_okta_login_stats_24h
+            type: if
+            condition: '${{ steps.okta_login_stats_24h.output.values != empty }}'
+            steps:
+              - name: log_okta_login_stats_24h
+                type: console
+                with:
+                  message: 'Okta login stats 24h [login_count, distinct_ips, distinct_sessions, target_apps, geo_countries, source_orgs, user.email]: {{ steps.okta_login_stats_24h.output.values | json }}'
+
+          - name: user_asset_inventory
+            type: elasticsearch.esql.query
+            with:
+              query: |
+                FROM infosec_data_warehouse:asset_entities_users_combined
+                | WHERE user.email == "{{ event.alerts[0].user.email | default: steps.jamf_workstation_lookup.output.values[0][0] | default: steps.workstation_lookup.output.values[0][0] }}" AND @timestamp > NOW() - 24h
+                | KEEP user.email, okta.profile.firstName, okta.profile.lastName, okta.profile.title, okta.profile.manager_name, okta.profile.location, okta.status, workday_enrichment.workday.Cost_Center
+                | LIMIT 5
+            on-failure:
+              continue: true
+              retry:
+                max-attempts: 2
+                delay: 2s
+          - name: console_user_asset_inventory
+            type: if
+            condition: '${{ steps.user_asset_inventory.output.values != empty }}'
+            steps:
+              - name: log_user_asset_inventory
+                type: console
+                with:
+                  message: 'User asset inventory [user.email, okta.profile.firstName, okta.profile.lastName, okta.profile.title, okta.profile.manager_name, okta.profile.location, okta.status, workday_enrichment.workday.Cost_Center]: {{ steps.user_asset_inventory.output.values | json }}'
+
+          - name: okta_user_recently_created
+            type: elasticsearch.esql.query
+            with:
+              query: |
+                FROM infosec_zocalo:logs-okta*
+                | WHERE event.action == "user.lifecycle.create"
+                  AND okta.target_users == "{{ event.alerts[0].user.email | default: steps.jamf_workstation_lookup.output.values[0][0] | default: steps.workstation_lookup.output.values[0][0] }}"
+                  AND okta.actor.type == "SystemPrincipal"
+                  AND tags == "okta-prod-corp"
+                  AND @timestamp > NOW() - 8d
+                | KEEP @timestamp, okta.target_users, event.action, okta.actor.type
+                | LIMIT 1
+            on-failure:
+              continue: true
+              retry:
+                max-attempts: 2
+                delay: 2s
+          - name: console_okta_user_recently_created
+            type: if
+            condition: '${{ steps.okta_user_recently_created.output.values != empty }}'
+            steps:
+              - name: log_okta_user_recently_created
+                type: console
+                with:
+                  message: 'Okta user recently created [@timestamp, okta.target_users, event.action, okta.actor.type]: {{ steps.okta_user_recently_created.output.values | json }}'
+
+      # =========================================================================
+      # Phase 1d: Cloud data warehouse enrichment (AWS, Azure, GCP)
+      # =========================================================================
+      - name: enrich_if_aws
+        type: if
+        condition: 'event.alerts[0].event.dataset: *aws*'
+        steps:
+          - name: aws_cloud_account_name
+            type: elasticsearch.esql.query
+            with:
+              query: |
+                FROM infosec_data_warehouse:asset_*
+                | WHERE asset.id == "{{ event.alerts[0].cloud.account.id | default: '' }}"
+                  AND asset.type == "account"
+                  AND @timestamp > NOW() - 24h
+                | KEEP asset.name, asset.id, asset.type
+                | LIMIT 1
+            on-failure:
+              continue: true
+              retry:
+                max-attempts: 2
+                delay: 2s
+          - name: console_aws_cloud_account_name
+            type: if
+            condition: '${{ steps.aws_cloud_account_name.output.values != empty }}'
+            steps:
+              - name: log_aws_cloud_account_name
+                type: console
+                with:
+                  message: 'AWS cloud account name [asset.name, asset.id, asset.type]: {{ steps.aws_cloud_account_name.output.values | json }}'
+
+          - name: aws_api_key_info
+            type: elasticsearch.esql.query
+            with:
+              query: |
+                FROM infosec_data_warehouse:asset_*
+                | WHERE asset.name == "{{ event.alerts[0].aws.cloudtrail.user_identity.access_key_id | default: '' }}"
+                  AND asset.type == "access_key"
+                  AND asset.category == "identity"
+                  AND cloud.provider == "aws"
+                  AND @timestamp > NOW() - 24h
+                | KEEP asset.name, asset.type, asset.category, cloud.provider
+                | LIMIT 1
+            on-failure:
+              continue: true
+              retry:
+                max-attempts: 2
+                delay: 2s
+          - name: console_aws_api_key_info
+            type: if
+            condition: '${{ steps.aws_api_key_info.output.values != empty }}'
+            steps:
+              - name: log_aws_api_key_info
+                type: console
+                with:
+                  message: 'AWS API key info [asset.name, asset.type, asset.category, cloud.provider]: {{ steps.aws_api_key_info.output.values | json }}'
+
+          - name: aws_user_account_name
+            type: elasticsearch.esql.query
+            with:
+              query: |
+                FROM infosec_data_warehouse:asset_*
+                | WHERE user.id == "{{ event.alerts[0].user.id | default: '' }}"
+                  AND @timestamp > NOW() - 24h
+                | KEEP asset.name, user.id, asset.type
+                | LIMIT 1
+            on-failure:
+              continue: true
+              retry:
+                max-attempts: 2
+                delay: 2s
+          - name: console_aws_user_account_name
+            type: if
+            condition: '${{ steps.aws_user_account_name.output.values != empty }}'
+            steps:
+              - name: log_aws_user_account_name
+                type: console
+                with:
+                  message: 'AWS user account name [asset.name, user.id, asset.type]: {{ steps.aws_user_account_name.output.values | json }}'
+
+      - name: enrich_if_azure
+        type: if
+        condition: 'event.alerts[0].event.dataset: *azure*'
+        steps:
+          - name: azure_subscription_owner
+            type: elasticsearch.esql.query
+            with:
+              query: |
+                FROM infosec_data_warehouse:asset_*
+                | WHERE cloud.project.id == LOWER("{{ event.alerts[0].azure.subscription_id | default: '' }}")
+                  AND @timestamp > NOW() - 24h
+                | KEEP asset.name, cloud.project.id, asset.type
+                | LIMIT 1
+            on-failure:
+              continue: true
+              retry:
+                max-attempts: 2
+                delay: 2s
+          - name: console_azure_subscription_owner
+            type: if
+            condition: '${{ steps.azure_subscription_owner.output.values != empty }}'
+            steps:
+              - name: log_azure_subscription_owner
+                type: console
+                with:
+                  message: 'Azure subscription owner [asset.name, cloud.project.id, asset.type]: {{ steps.azure_subscription_owner.output.values | json }}'
+
+      - name: enrich_if_gcp
+        type: if
+        condition: 'event.alerts[0].event.dataset: *gcp*'
+        steps:
+          - name: gcp_project_owner
+            type: elasticsearch.esql.query
+            with:
+              query: |
+                FROM infosec_data_warehouse:asset_*
+                | WHERE cloud.project.id == "{{ event.alerts[0].cloud.project.id | default: '' }}"
+                  AND asset.type == "account"
+                  AND @timestamp > NOW() - 24h
+                | KEEP asset.name, cloud.project.id, asset.type
+                | LIMIT 1
+            on-failure:
+              continue: true
+              retry:
+                max-attempts: 2
+                delay: 2s
+          - name: console_gcp_project_owner
+            type: if
+            condition: '${{ steps.gcp_project_owner.output.values != empty }}'
+            steps:
+              - name: log_gcp_project_owner
+                type: console
+                with:
+                  message: 'GCP project owner [asset.name, cloud.project.id, asset.type]: {{ steps.gcp_project_owner.output.values | json }}'
+
+      # =========================================================================
+      # Phase 1e: Correlated alerts (72h)
+      # =========================================================================
+      - name: correlated_alerts_72h
+        type: elasticsearch.esql.query
+        with:
+          query: |
+            FROM .siem-signals-infosec-detections
+            | WHERE @timestamp > NOW() - 72h
+              AND ({% if event.alerts[0].user.email %}user.email == "{{ event.alerts[0].user.email }}"{% else %}false{% endif %}
+                   OR {% if event.alerts[0].host.id %}host.id == "{{ event.alerts[0].host.id }}"{% else %}false{% endif %}
+                   OR {% if event.alerts[0].source.ip %}source.ip == "{{ event.alerts[0].source.ip }}"{% else %}false{% endif %})
+            | STATS alert_count = COUNT(*), process_names = VALUES(process.name) BY kibana.alert.rule.name, kibana.alert.severity
+            | SORT alert_count DESC
+        on-failure:
+          continue: true
+          retry:
+            max-attempts: 2
+            delay: 2s
+      - name: console_correlated_alerts_72h
+        type: if
+        condition: '${{ steps.correlated_alerts_72h.output.values != empty }}'
+        steps:
+          - name: log_correlated_alerts_72h
+            type: console
+            with:
+              message: 'Correlated alerts 72h [alert_count, process_names, kibana.alert.rule.name, kibana.alert.severity]: {{ steps.correlated_alerts_72h.output.values | json }}'
+
+      # =========================================================================
+      # Phase 1f: Threshold contributing alerts (replaces l2_threshold_agent)
+      # Fetches raw contributing events for threshold rules from the signals index.
+      # =========================================================================
+      - name: threshold_check
+        type: if
+        condition: "event.alerts[0].kibana.alert.rule.type == 'threshold' AND event.alerts[0].kibana.alert.rule.indices: '.siem-signals-infosec-detections'"
+        steps:
+          - name: threshold_contributing_alerts
+            type: kibana.request
+            with:
+              use_server_info: true
+              fetcher:
+                skip_ssl_verification: true
+              method: POST
+              path: '/s/{{ consts.space_id }}/api/search_with_session'
+              body: |
+                {
+                  "params": {
+                    "index": "{{ event.alerts[0].kibana.alert.rule.parameters.index | join: ',' }}",
+                    "query": {{ event.alerts[0].kibana.alert.rule.parameters.query | json }},
+                    "filters": {{ event.alerts[0].kibana.alert.rule.parameters.filters | json }},
+                    "body": {
+                      "size": 100,
+                      "_source": [
+                        "{{ event.alerts[0].kibana.alert.rule.parameters.timestamp_override | default: '@timestamp' }}",
+                        "kibana.alert.rule.name",
+                        "kibana.alert.rule.tags",
+                        "kibana.alert.severity",
+                        "kibana.alert.workflow_status",
+                        "source.ip",
+                        "user.id",
+                        "user.email",
+                        "host.name",
+                        "event.action",
+                        "event.dataset",
+                        "cloud.region",
+                        "aws.cloudtrail.user_identity.arn"
+                      ],
+                      "query": {
+                        "bool": {
+                          "must": [
+                            {"term": {"{{ event.alerts[0].kibana.alert.threshold_result.terms[0].field }}": "{{ event.alerts[0].kibana.alert.threshold_result.terms[0].value }}"}},
+                            {"range": {"{{ event.alerts[0].kibana.alert.rule.parameters.timestamp_override | default: '@timestamp' }}": {"gte": "{{ event.alerts[0].kibana.alert.threshold_result.from }}", "lte": "{{ event.alerts[0].kibana.alert.start }}"}}}{%- if event.alerts[0].kibana.alert.threshold_result.terms[1] %},
+                            {"term": {"{{ event.alerts[0].kibana.alert.threshold_result.terms[1].field }}": "{{ event.alerts[0].kibana.alert.threshold_result.terms[1].value }}"}}{%- endif %}{%- if event.alerts[0].kibana.alert.threshold_result.terms[2] %},
+                            {"term": {"{{ event.alerts[0].kibana.alert.threshold_result.terms[2].field }}": "{{ event.alerts[0].kibana.alert.threshold_result.terms[2].value }}"}}{%- endif %}
+                          ]
+                        }
+                      }
+                    }
+                  }
+                }
+            on-failure:
+              retry:
+                max-attempts: 2
+                delay: 2s
+              continue: true
+
+      # =========================================================================
+      # Phase 1g_b: Log formatted enrichment note to workflow console (penultimate)
+      # =========================================================================
+      - name: console_enrichment_note
+        type: console
+        with:
+          message: |
+            === Enrichment Note ===
+            Alert: {{ event.alerts[0].kibana.alert.rule.name }} | {{ event.alerts[0].kibana.alert.severity }} | {{ event.alerts[0].id | default: event.alerts[0].kibana.alert.uuid }}
+
+            {% if steps.ip_admin_activity.output.values or steps.ip_okta_summary.output.values or steps.ip_aws_summary.output.values or steps.ip_azure_summary.output.values or steps.ip_gcp_summary.output.values or steps.ip_google_workspace_summary.output.values or steps.ip_o365_summary.output.values or steps.ip_salesforce_summary.output.values or steps.ip_github_summary.output.values or steps.ip_endpoint_network_summary.output.values %}
+            ### Source IP Activity (24h)
+            {% if steps.ip_okta_summary.output.values %}- Okta: {{ steps.ip_okta_summary.output.values[0][0] }} events · {{ steps.ip_okta_summary.output.values[0][1] }} distinct users · actions: {{ steps.ip_okta_summary.output.values[0][3] }}
+            {% endif %}
+            {% if steps.ip_aws_summary.output.values %}- AWS: {{ steps.ip_aws_summary.output.values[0][0] }} events · {{ steps.ip_aws_summary.output.values[0][1] }} distinct identities · actions: {{ steps.ip_aws_summary.output.values[0][4] }}
+            {% endif %}
+            {% if steps.ip_azure_summary.output.values %}- Azure: {{ steps.ip_azure_summary.output.values[0][0] }} events · {{ steps.ip_azure_summary.output.values[0][1] }} distinct users · operations: {{ steps.ip_azure_summary.output.values[0][4] }}
+            {% endif %}
+            {% if steps.ip_gcp_summary.output.values %}- GCP: {{ steps.ip_gcp_summary.output.values[0][0] }} events · {{ steps.ip_gcp_summary.output.values[0][1] }} distinct users · actions: {{ steps.ip_gcp_summary.output.values[0][4] }}
+            {% endif %}
+            {% if steps.ip_google_workspace_summary.output.values %}- Google Workspace: {{ steps.ip_google_workspace_summary.output.values[0][0] }} events · {{ steps.ip_google_workspace_summary.output.values[0][1] }} distinct users · actions: {{ steps.ip_google_workspace_summary.output.values[0][4] }}
+            {% endif %}
+            {% if steps.ip_o365_summary.output.values %}- O365: {{ steps.ip_o365_summary.output.values[0][0] }} events · {{ steps.ip_o365_summary.output.values[0][1] }} distinct users · actions: {{ steps.ip_o365_summary.output.values[0][4] }}
+            {% endif %}
+            {% if steps.ip_salesforce_summary.output.values %}- Salesforce: {{ steps.ip_salesforce_summary.output.values[0][0] }} events · {{ steps.ip_salesforce_summary.output.values[0][1] }} distinct users · actions: {{ steps.ip_salesforce_summary.output.values[0][4] }}
+            {% endif %}
+            {% if steps.ip_github_summary.output.values %}- GitHub: {{ steps.ip_github_summary.output.values[0][0] }} events · {{ steps.ip_github_summary.output.values[0][1] }} distinct users · actions: {{ steps.ip_github_summary.output.values[0][4] }}
+            {% endif %}
+            {% if steps.ip_admin_activity.output.values %}- Admin console: {{ steps.ip_admin_activity.output.values[0][0] }} events · actions: {{ steps.ip_admin_activity.output.values[0][3] }}
+            {% endif %}
+            {% if steps.ip_endpoint_network_summary.output.values %}- Endpoint network: {{ steps.ip_endpoint_network_summary.output.values[0][0] }} events · {{ steps.ip_endpoint_network_summary.output.values[0][1] }} distinct processes · processes: {{ steps.ip_endpoint_network_summary.output.values[0][2] }}
+            {% endif %}
+            {% endif %}
+            {% if steps.ip_okta_low_risk_session.output.values or steps.ip_fleet_agent_checkin.output.values or steps.ip_auditbeat_server.output.values or steps.ip_jamf_checkin.output.values or steps.ip_github_bot.output.values or steps.ip_aws_lambda_role.output.values or steps.ip_aws_lambda.output.values or steps.ip_cloud_deploy_key.output.values or steps.ip_cloud_tooling.output.values or steps.ip_ci_system_destination.output.values or steps.ip_docs_automation.output.values or steps.ip_buildkite_agent.output.values or steps.ip_asset_inventory_non_workstation.output.values or steps.ip_qualys_agent.output.values or steps.ip_vault_plugin.output.values or steps.ip_snyk.output.values or steps.ip_ec2_ssm_agent.output.values or steps.ip_servicenow_intune.output.values or steps.ip_whopper_api.output.values %}
+            ### Source IP Known-Good Checks
+            {% if steps.ip_okta_low_risk_session.output.values %}- Low-risk Okta session: YES
+            {% endif %}
+            {% if steps.ip_fleet_agent_checkin.output.values %}- Fleet agent check-in: YES
+            {% endif %}
+            {% if steps.ip_auditbeat_server.output.values %}- Auditbeat server: YES
+            {% endif %}
+            {% if steps.ip_jamf_checkin.output.values %}- Jamf check-in: YES
+            {% endif %}
+            {% if steps.ip_github_bot.output.values %}- GitHub bot: YES ({{ steps.ip_github_bot.output.values[0][2] }})
+            {% endif %}
+            {% if steps.ip_aws_lambda_role.output.values %}- AWS Lambda role: YES ({{ steps.ip_aws_lambda_role.output.values[0][2] }})
+            {% endif %}
+            {% if steps.ip_aws_lambda.output.values %}- AWS Lambda worker: YES
+            {% endif %}
+            {% if steps.ip_cloud_deploy_key.output.values %}- Cloud deploy key: YES (repo: {{ steps.ip_cloud_deploy_key.output.values[0][3] }})
+            {% endif %}
+            {% if steps.ip_cloud_tooling.output.values %}- Cloud tooling: YES
+            {% endif %}
+            {% if steps.ip_ci_system_destination.output.values %}- CI system destination: YES
+            {% endif %}
+            {% if steps.ip_docs_automation.output.values %}- Docs automation: YES
+            {% endif %}
+            {% if steps.ip_buildkite_agent.output.values %}- Buildkite agent: YES
+            {% endif %}
+            {% if steps.ip_asset_inventory_non_workstation.output.values %}- Asset inventory (non-workstation): YES — {{ steps.ip_asset_inventory_non_workstation.output.values[0][1] }} ({{ steps.ip_asset_inventory_non_workstation.output.values[0][2] }})
+            {% endif %}
+            {% if steps.ip_qualys_agent.output.values %}- Qualys agent: YES
+            {% endif %}
+            {% if steps.ip_vault_plugin.output.values %}- Vault plugin: YES
+            {% endif %}
+            {% if steps.ip_snyk.output.values %}- Snyk: YES
+            {% endif %}
+            {% if steps.ip_ec2_ssm_agent.output.values %}- EC2 SSM agent: YES
+            {% endif %}
+            {% if steps.ip_servicenow_intune.output.values %}- ServiceNow Intune: YES
+            {% endif %}
+            {% if steps.ip_whopper_api.output.values %}- Whopper API: YES
+            {% endif %}
+            {% endif %}
+            {% if steps.jamf_workstation_lookup.output.values or steps.workstation_lookup.output.values %}
+            ### Workstation
+            {% if steps.jamf_workstation_lookup.output.values %}- User: User1 · Asset: Host1 ({{ steps.jamf_workstation_lookup.output.values[0][1] }}) · OS: {{ steps.jamf_workstation_lookup.output.values[0][4] }} {{ steps.jamf_workstation_lookup.output.values[0][5] }} · Last Jamf contact: {{ steps.jamf_workstation_lookup.output.values[0][6] }}
+            {% elsif steps.workstation_lookup.output.values %}- User: User1 · Asset: Host1 ({{ steps.workstation_lookup.output.values[0][1] }}) · OS: {{ steps.workstation_lookup.output.values[0][4] }} {{ steps.workstation_lookup.output.values[0][5] }} · Last sync: {{ steps.workstation_lookup.output.values[0][6] }}
+            {% endif %}
+            {% endif %}
+            {% if steps.host_alerts_24h.output.values %}
+            ### Host Alerts (24h)
+            {% if steps.host_alerts_24h.output.values[0] %}- {{ steps.host_alerts_24h.output.values[0][2] }} ({{ steps.host_alerts_24h.output.values[0][3] }}): {{ steps.host_alerts_24h.output.values[0][0] }} alerts
+            {% endif %}
+            {% if steps.host_alerts_24h.output.values[1] %}- {{ steps.host_alerts_24h.output.values[1][2] }} ({{ steps.host_alerts_24h.output.values[1][3] }}): {{ steps.host_alerts_24h.output.values[1][0] }} alerts
+            {% endif %}
+            {% if steps.host_alerts_24h.output.values[2] %}- {{ steps.host_alerts_24h.output.values[2][2] }} ({{ steps.host_alerts_24h.output.values[2][3] }}): {{ steps.host_alerts_24h.output.values[2][0] }} alerts
+            {% endif %}
+            {% endif %}
+            {% if steps.okta_login_stats_24h.output.values %}
+            ### Okta Activity (24h)
+            - User1 · {{ steps.okta_login_stats_24h.output.values[0][0] }} logins · {{ steps.okta_login_stats_24h.output.values[0][1] }} distinct IPs · {{ steps.okta_login_stats_24h.output.values[0][2] }} sessions · apps: {{ steps.okta_login_stats_24h.output.values[0][3] }} · countries: {{ steps.okta_login_stats_24h.output.values[0][4] }} · orgs: {{ steps.okta_login_stats_24h.output.values[0][5] }}
+            {% endif %}
+            {% if steps.user_asset_inventory.output.values %}
+            ### User Profile
+            - User1 · Title: [anonymized] · Manager: [anonymized] · Location: [anonymized] · Status: {{ steps.user_asset_inventory.output.values[0][6] }} · Cost Center: [anonymized]
+            {% endif %}
+            {% if steps.okta_user_recently_created.output.values %}
+            ### New User Alert
+            - User account created within the last 8 days ({{ steps.okta_user_recently_created.output.values[0][0] }})
+            {% endif %}
+            {% if steps.aws_cloud_account_name.output.values or steps.aws_api_key_info.output.values or steps.aws_user_account_name.output.values or steps.azure_subscription_owner.output.values or steps.gcp_project_owner.output.values %}
+            ### Cloud Account / Identity
+            {% if steps.aws_cloud_account_name.output.values %}- AWS account: {{ steps.aws_cloud_account_name.output.values[0][0] }} (id: {{ steps.aws_cloud_account_name.output.values[0][1] }})
+            {% endif %}
+            {% if steps.aws_api_key_info.output.values %}- AWS API key: {{ steps.aws_api_key_info.output.values[0][0] }} ({{ steps.aws_api_key_info.output.values[0][2] }})
+            {% endif %}
+            {% if steps.aws_user_account_name.output.values %}- AWS user: {{ steps.aws_user_account_name.output.values[0][0] }}
+            {% endif %}
+            {% if steps.azure_subscription_owner.output.values %}- Azure subscription: {{ steps.azure_subscription_owner.output.values[0][0] }} ({{ steps.azure_subscription_owner.output.values[0][1] }})
+            {% endif %}
+            {% if steps.gcp_project_owner.output.values %}- GCP project: {{ steps.gcp_project_owner.output.values[0][0] }} ({{ steps.gcp_project_owner.output.values[0][1] }})
+            {% endif %}
+            {% endif %}
+            {% if steps.correlated_alerts_72h.output.values %}
+            ### Correlated Alerts (72h)
+            {% if steps.correlated_alerts_72h.output.values[0] %}- {{ steps.correlated_alerts_72h.output.values[0][2] }} ({{ steps.correlated_alerts_72h.output.values[0][3] }}): {{ steps.correlated_alerts_72h.output.values[0][0] }} alerts
+            {% endif %}
+            {% if steps.correlated_alerts_72h.output.values[1] %}- {{ steps.correlated_alerts_72h.output.values[1][2] }} ({{ steps.correlated_alerts_72h.output.values[1][3] }}): {{ steps.correlated_alerts_72h.output.values[1][0] }} alerts
+            {% endif %}
+            {% if steps.correlated_alerts_72h.output.values[2] %}- {{ steps.correlated_alerts_72h.output.values[2][2] }} ({{ steps.correlated_alerts_72h.output.values[2][3] }}): {{ steps.correlated_alerts_72h.output.values[2][0] }} alerts
+            {% endif %}
+            {% endif %}
+            {% if steps.threshold_contributing_alerts.output.hits.hits %}
+            ### Threshold Contributors
+            Rule: {{ event.alerts[0].kibana.alert.rule.name }} · severity: {{ event.alerts[0].kibana.alert.severity }} · contributing hits: {{ steps.threshold_contributing_alerts.output.hits.total.value }} · group-by: {{ event.alerts[0].kibana.alert.threshold_result.terms | json }}
+            {% endif %}
+
+      # =========================================================================
+      # Phase 1g: Tag-based auto-close (checked first)
+      # Closes alert immediately when rule Triage tags + source.ip enrichment match:
+      #   Triage: All         -> any Elastic infrastructure IP check hit
+      #   Triage: PMFA        -> low-risk Okta session from source IP
+      #   Triage: Workstation -> Fleet or Jamf check-in from source IP
+      #   Triage: Asset       -> asset inventory (non-workstation) match
+      # Falls through to early benign circuit breaker (Phase 1g_b), then Workflow 2.
+      # =========================================================================
+      - name: check_tag_based_close
+        type: if
+        condition: '(event.alerts[0].kibana.alert.rule.tags: "Triage: All" and (steps.ip_fleet_agent_checkin.output.values:* or steps.ip_auditbeat_server.output.values:* or steps.ip_jamf_checkin.output.values:* or steps.ip_github_bot.output.values:* or steps.ip_aws_lambda_role.output.values:* or steps.ip_aws_lambda.output.values:* or steps.ip_cloud_deploy_key.output.values:* or steps.ip_cloud_tooling.output.values:* or steps.ip_ci_system_destination.output.values:* or steps.ip_docs_automation.output.values:* or steps.ip_buildkite_agent.output.values:* or steps.ip_asset_inventory_non_workstation.output.values:* or steps.ip_qualys_agent.output.values:* or steps.ip_vault_plugin.output.values:* or steps.ip_snyk.output.values:* or steps.ip_ec2_ssm_agent.output.values:* or steps.ip_servicenow_intune.output.values:* or steps.ip_whopper_api.output.values:* or steps.ip_okta_low_risk_session.output.values:*)) or (event.alerts[0].kibana.alert.rule.tags: "Triage: PMFA" and steps.ip_okta_low_risk_session.output.values:*) or (event.alerts[0].kibana.alert.rule.tags: "Triage: Workstation" and (steps.ip_fleet_agent_checkin.output.values:* or steps.ip_jamf_checkin.output.values:*)) or (event.alerts[0].kibana.alert.rule.tags: "Triage: Asset" and steps.ip_asset_inventory_non_workstation.output.values:*)'
+        steps:
+          - name: close_alert_tag_based
+            type: kibana.request
+            with:
+              use_server_info: true
+              fetcher:
+                skip_ssl_verification: true
+              method: POST
+              path: '/s/{{ consts.space_id }}/api/detection_engine/signals/status'
+              body:
+                signal_ids:
+                  - '{{ event.alerts[0].id | default: event.alerts[0].kibana.alert.uuid }}'
+                status: closed
+            on-failure:
+              retry:
+                max-attempts: 2
+                delay: 2s
+              continue: true
+
+          # Add workflow_tag for each matching Triage tag (multiple may apply)
+          - name: tag_if_pmfa
+            type: if
+            condition: 'event.alerts[0].kibana.alert.rule.tags: "Triage: PMFA" and steps.ip_okta_low_risk_session.output.values:*'
+            steps:
+              - name: tag_alert_pmfa
+                type: kibana.request
+                with:
+                  use_server_info: true
+                  fetcher:
+                    skip_ssl_verification: true
+                  method: POST
+                  path: '/s/{{ consts.space_id }}/api/detection_engine/signals/tags'
+                  body:
+                    tags:
+                      tags_to_add:
+                        - 'auto-closed:triage-pmfa'
+                    signal_ids:
+                      - '{{ event.alerts[0].id | default: event.alerts[0].kibana.alert.uuid }}'
+                on-failure:
+                  continue: true
+                  retry:
+                    max-attempts: 2
+                    delay: 2s
+
+          - name: tag_if_workstation
+            type: if
+            condition: 'event.alerts[0].kibana.alert.rule.tags: "Triage: Workstation" and (steps.ip_fleet_agent_checkin.output.values:* or steps.ip_jamf_checkin.output.values:*)'
+            steps:
+              - name: tag_alert_workstation
+                type: kibana.request
+                with:
+                  use_server_info: true
+                  fetcher:
+                    skip_ssl_verification: true
+                  method: POST
+                  path: '/s/{{ consts.space_id }}/api/detection_engine/signals/tags'
+                  body:
+                    tags:
+                      tags_to_add:
+                        - 'auto-closed:triage-workstation'
+                    signal_ids:
+                      - '{{ event.alerts[0].id | default: event.alerts[0].kibana.alert.uuid }}'
+                on-failure:
+                  continue: true
+                  retry:
+                    max-attempts: 2
+                    delay: 2s
+
+          - name: tag_if_asset
+            type: if
+            condition: 'event.alerts[0].kibana.alert.rule.tags: "Triage: Asset" and steps.ip_asset_inventory_non_workstation.output.values:*'
+            steps:
+              - name: tag_alert_asset
+                type: kibana.request
+                with:
+                  use_server_info: true
+                  fetcher:
+                    skip_ssl_verification: true
+                  method: POST
+                  path: '/s/{{ consts.space_id }}/api/detection_engine/signals/tags'
+                  body:
+                    tags:
+                      tags_to_add:
+                        - 'auto-closed:triage-asset'
+                    signal_ids:
+                      - '{{ event.alerts[0].id | default: event.alerts[0].kibana.alert.uuid }}'
+                on-failure:
+                  continue: true
+                  retry:
+                    max-attempts: 2
+                    delay: 2s
+
+          - name: tag_if_all
+            type: if
+            condition: 'event.alerts[0].kibana.alert.rule.tags: "Triage: All" and (steps.ip_fleet_agent_checkin.output.values:* or steps.ip_auditbeat_server.output.values:* or steps.ip_jamf_checkin.output.values:* or steps.ip_github_bot.output.values:* or steps.ip_aws_lambda_role.output.values:* or steps.ip_aws_lambda.output.values:* or steps.ip_cloud_deploy_key.output.values:* or steps.ip_cloud_tooling.output.values:* or steps.ip_ci_system_destination.output.values:* or steps.ip_docs_automation.output.values:* or steps.ip_buildkite_agent.output.values:* or steps.ip_asset_inventory_non_workstation.output.values:* or steps.ip_qualys_agent.output.values:* or steps.ip_vault_plugin.output.values:* or steps.ip_snyk.output.values:* or steps.ip_ec2_ssm_agent.output.values:* or steps.ip_servicenow_intune.output.values:* or steps.ip_whopper_api.output.values:* or steps.ip_okta_low_risk_session.output.values:*)'
+            steps:
+              - name: tag_alert_all
+                type: kibana.request
+                with:
+                  use_server_info: true
+                  fetcher:
+                    skip_ssl_verification: true
+                  method: POST
+                  path: '/s/{{ consts.space_id }}/api/detection_engine/signals/tags'
+                  body:
+                    tags:
+                      tags_to_add:
+                        - 'auto-closed:triage-all'
+                    signal_ids:
+                      - '{{ event.alerts[0].id | default: event.alerts[0].kibana.alert.uuid }}'
+                on-failure:
+                  continue: true
+                  retry:
+                    max-attempts: 2
+                    delay: 2s
+
+          - name: console_tag_based_close
+            type: console
+            with:
+              message: >
+                Tag-based auto-close. Alert {{ event.alerts[0].rule.name }} closed.
+                Rule tags: {{ event.alerts[0].kibana.alert.rule.tags | json }}.
+                Source IP: {{ event.alerts[0].source.ip }}.
+        else:
+          # =========================================================================
+          # Phase 1g_b: Early benign exit (circuit breaker)
+          # Skips Workflow 2 entirely when strong benign signals are present.
+          # Only applies to web-based/SaaS alerts (Okta, AWS, Azure, GCP, etc.).
+          # Endpoint and auditbeat alerts always come from managed devices, so
+          # "known infrastructure IP" is not a meaningful benign signal for them.
+          # =========================================================================
+          - name: check_early_benign_exit
+            type: if
+            condition: 'not event.alerts[0].agent.type: (endpoint or auditbeat) and steps.ip_okta_low_risk_session.output.values:* and (steps.ip_fleet_agent_checkin.output.values:* or steps.ip_jamf_checkin.output.values:* or steps.ip_asset_inventory_non_workstation.output.values:*)'
+            steps:
+              - name: close_alert_early_benign
+                type: kibana.request
+                with:
+                  use_server_info: true
+                  fetcher:
+                    skip_ssl_verification: true
+                  method: POST
+                  path: '/s/{{ consts.space_id }}/api/detection_engine/signals/status'
+                  body:
+                    signal_ids:
+                      - '{{ event.alerts[0].id | default: event.alerts[0].kibana.alert.uuid }}'
+                    status: closed
+                on-failure:
+                  retry:
+                    max-attempts: 2
+                    delay: 2s
+                  continue: true
+
+              - name: console_early_benign
+                type: console
+                with:
+                  message: >
+                    Early benign exit. Alert {{ event.alerts[0].rule.name }} closed.
+                    Low-risk Okta session confirmed + known infrastructure IP (Fleet/Jamf/Asset).
+                    Source IP: {{ event.alerts[0].source.ip }}.
+            else:
+              # =====================================================================
+              # Trigger Workflow 2: agentic-l1-l3-triage
+              # Alert was not auto-closed; hand off to L1/L2/L3 triage workflow.
+              # =====================================================================
+              - name: send_to_dev_gate
+                type: if
+                condition: 'not event.alerts[0].kibana.alert.rule.tags: "SEND_TO_DEV"'
+                steps:
+                  - name: trigger_l1_triage
+                    type: kibana.request
+                    with:
+                      use_server_info: true
+                      headers:
+                        x-elastic-internal-origin: kibana
+                      fetcher:
+                        skip_ssl_verification: true
+                      method: POST
+                      path: '/s/{{ consts.space_id }}/api/workflows/{{ consts.wf2_id }}/run'
+                      body:
+                        inputs:
+                          alertId: '{{ event.alerts[0].kibana.alert.uuid }}'
+                          enrichmentNote: |
+                            === Enrichment Note ===
+                            Alert: {{ event.alerts[0].kibana.alert.rule.name }} | {{ event.alerts[0].kibana.alert.severity }} | {{ event.alerts[0].kibana.alert.uuid }}
+
+                            {% if steps.ip_admin_activity.output.values or steps.ip_okta_summary.output.values or steps.ip_aws_summary.output.values or steps.ip_azure_summary.output.values or steps.ip_gcp_summary.output.values or steps.ip_google_workspace_summary.output.values or steps.ip_o365_summary.output.values or steps.ip_salesforce_summary.output.values or steps.ip_github_summary.output.values or steps.ip_endpoint_network_summary.output.values %}
+                            ### Source IP Activity (24h)
+                            {% if steps.ip_okta_summary.output.values %}- Okta: {{ steps.ip_okta_summary.output.values[0][0] }} events · {{ steps.ip_okta_summary.output.values[0][1] }} distinct users · actions: {{ steps.ip_okta_summary.output.values[0][3] }}
+                            {% endif %}
+                            {% if steps.ip_aws_summary.output.values %}- AWS: {{ steps.ip_aws_summary.output.values[0][0] }} events · {{ steps.ip_aws_summary.output.values[0][1] }} distinct identities · actions: {{ steps.ip_aws_summary.output.values[0][4] }}
+                            {% endif %}
+                            {% if steps.ip_azure_summary.output.values %}- Azure: {{ steps.ip_azure_summary.output.values[0][0] }} events · {{ steps.ip_azure_summary.output.values[0][1] }} distinct users · operations: {{ steps.ip_azure_summary.output.values[0][4] }}
+                            {% endif %}
+                            {% if steps.ip_gcp_summary.output.values %}- GCP: {{ steps.ip_gcp_summary.output.values[0][0] }} events · {{ steps.ip_gcp_summary.output.values[0][1] }} distinct users · actions: {{ steps.ip_gcp_summary.output.values[0][4] }}
+                            {% endif %}
+                            {% if steps.ip_google_workspace_summary.output.values %}- Google Workspace: {{ steps.ip_google_workspace_summary.output.values[0][0] }} events · {{ steps.ip_google_workspace_summary.output.values[0][1] }} distinct users · actions: {{ steps.ip_google_workspace_summary.output.values[0][4] }}
+                            {% endif %}
+                            {% if steps.ip_o365_summary.output.values %}- O365: {{ steps.ip_o365_summary.output.values[0][0] }} events · {{ steps.ip_o365_summary.output.values[0][1] }} distinct users · actions: {{ steps.ip_o365_summary.output.values[0][4] }}
+                            {% endif %}
+                            {% if steps.ip_salesforce_summary.output.values %}- Salesforce: {{ steps.ip_salesforce_summary.output.values[0][0] }} events · {{ steps.ip_salesforce_summary.output.values[0][1] }} distinct users · actions: {{ steps.ip_salesforce_summary.output.values[0][4] }}
+                            {% endif %}
+                            {% if steps.ip_github_summary.output.values %}- GitHub: {{ steps.ip_github_summary.output.values[0][0] }} events · {{ steps.ip_github_summary.output.values[0][1] }} distinct users · actions: {{ steps.ip_github_summary.output.values[0][4] }}
+                            {% endif %}
+                            {% if steps.ip_admin_activity.output.values %}- Admin console: {{ steps.ip_admin_activity.output.values[0][0] }} events · actions: {{ steps.ip_admin_activity.output.values[0][3] }}
+                            {% endif %}
+                            {% if steps.ip_endpoint_network_summary.output.values %}- Endpoint network: {{ steps.ip_endpoint_network_summary.output.values[0][0] }} events · {{ steps.ip_endpoint_network_summary.output.values[0][1] }} distinct processes · processes: {{ steps.ip_endpoint_network_summary.output.values[0][2] }}
+                            {% endif %}
+                            {% endif %}
+                            {% if steps.ip_okta_low_risk_session.output.values or steps.ip_fleet_agent_checkin.output.values or steps.ip_auditbeat_server.output.values or steps.ip_jamf_checkin.output.values or steps.ip_github_bot.output.values or steps.ip_aws_lambda_role.output.values or steps.ip_aws_lambda.output.values or steps.ip_cloud_deploy_key.output.values or steps.ip_cloud_tooling.output.values or steps.ip_ci_system_destination.output.values or steps.ip_docs_automation.output.values or steps.ip_buildkite_agent.output.values or steps.ip_asset_inventory_non_workstation.output.values or steps.ip_qualys_agent.output.values or steps.ip_vault_plugin.output.values or steps.ip_snyk.output.values or steps.ip_ec2_ssm_agent.output.values or steps.ip_servicenow_intune.output.values or steps.ip_whopper_api.output.values %}
+                            ### Source IP Known-Good Checks
+                            {% if steps.ip_okta_low_risk_session.output.values %}- Low-risk Okta session: YES
+                            {% endif %}
+                            {% if steps.ip_fleet_agent_checkin.output.values %}- Fleet agent check-in: YES
+                            {% endif %}
+                            {% if steps.ip_auditbeat_server.output.values %}- Auditbeat server: YES
+                            {% endif %}
+                            {% if steps.ip_jamf_checkin.output.values %}- Jamf check-in: YES
+                            {% endif %}
+                            {% if steps.ip_github_bot.output.values %}- GitHub bot: YES ({{ steps.ip_github_bot.output.values[0][2] }})
+                            {% endif %}
+                            {% if steps.ip_aws_lambda_role.output.values %}- AWS Lambda role: YES ({{ steps.ip_aws_lambda_role.output.values[0][2] }})
+                            {% endif %}
+                            {% if steps.ip_aws_lambda.output.values %}- AWS Lambda worker: YES
+                            {% endif %}
+                            {% if steps.ip_cloud_deploy_key.output.values %}- Cloud deploy key: YES (repo: {{ steps.ip_cloud_deploy_key.output.values[0][3] }})
+                            {% endif %}
+                            {% if steps.ip_cloud_tooling.output.values %}- Cloud tooling: YES
+                            {% endif %}
+                            {% if steps.ip_ci_system_destination.output.values %}- CI system destination: YES
+                            {% endif %}
+                            {% if steps.ip_docs_automation.output.values %}- Docs automation: YES
+                            {% endif %}
+                            {% if steps.ip_buildkite_agent.output.values %}- Buildkite agent: YES
+                            {% endif %}
+                            {% if steps.ip_asset_inventory_non_workstation.output.values %}- Asset inventory (non-workstation): YES — {{ steps.ip_asset_inventory_non_workstation.output.values[0][1] }} ({{ steps.ip_asset_inventory_non_workstation.output.values[0][2] }})
+                            {% endif %}
+                            {% if steps.ip_qualys_agent.output.values %}- Qualys agent: YES
+                            {% endif %}
+                            {% if steps.ip_vault_plugin.output.values %}- Vault plugin: YES
+                            {% endif %}
+                            {% if steps.ip_snyk.output.values %}- Snyk: YES
+                            {% endif %}
+                            {% if steps.ip_ec2_ssm_agent.output.values %}- EC2 SSM agent: YES
+                            {% endif %}
+                            {% if steps.ip_servicenow_intune.output.values %}- ServiceNow Intune: YES
+                            {% endif %}
+                            {% if steps.ip_whopper_api.output.values %}- Whopper API: YES
+                            {% endif %}
+                            {% endif %}
+                            {% if steps.jamf_workstation_lookup.output.values or steps.workstation_lookup.output.values %}
+                            ### Workstation
+                            {% if steps.jamf_workstation_lookup.output.values %}- User: User1 · Asset: Host1 ({{ steps.jamf_workstation_lookup.output.values[0][1] }}) · OS: {{ steps.jamf_workstation_lookup.output.values[0][4] }} {{ steps.jamf_workstation_lookup.output.values[0][5] }} · Last Jamf contact: {{ steps.jamf_workstation_lookup.output.values[0][6] }}
+                            {% elsif steps.workstation_lookup.output.values %}- User: User1 · Asset: Host1 ({{ steps.workstation_lookup.output.values[0][1] }}) · OS: {{ steps.workstation_lookup.output.values[0][4] }} {{ steps.workstation_lookup.output.values[0][5] }} · Last sync: {{ steps.workstation_lookup.output.values[0][6] }}
+                            {% endif %}
+                            {% endif %}
+                            {% if steps.host_alerts_24h.output.values %}
+                            ### Host Alerts (24h)
+                            {% if steps.host_alerts_24h.output.values[0] %}- {{ steps.host_alerts_24h.output.values[0][2] }} ({{ steps.host_alerts_24h.output.values[0][3] }}): {{ steps.host_alerts_24h.output.values[0][0] }} alerts
+                            {% endif %}
+                            {% if steps.host_alerts_24h.output.values[1] %}- {{ steps.host_alerts_24h.output.values[1][2] }} ({{ steps.host_alerts_24h.output.values[1][3] }}): {{ steps.host_alerts_24h.output.values[1][0] }} alerts
+                            {% endif %}
+                            {% if steps.host_alerts_24h.output.values[2] %}- {{ steps.host_alerts_24h.output.values[2][2] }} ({{ steps.host_alerts_24h.output.values[2][3] }}): {{ steps.host_alerts_24h.output.values[2][0] }} alerts
+                            {% endif %}
+                            {% endif %}
+                            {% if steps.okta_login_stats_24h.output.values %}
+                            ### Okta Activity (24h)
+                            - User1 · {{ steps.okta_login_stats_24h.output.values[0][0] }} logins · {{ steps.okta_login_stats_24h.output.values[0][1] }} distinct IPs · {{ steps.okta_login_stats_24h.output.values[0][2] }} sessions · apps: {{ steps.okta_login_stats_24h.output.values[0][3] }} · countries: {{ steps.okta_login_stats_24h.output.values[0][4] }} · orgs: {{ steps.okta_login_stats_24h.output.values[0][5] }}
+                            {% endif %}
+                            {% if steps.user_asset_inventory.output.values %}
+                            ### User Profile
+                            - User1 · Title: [anonymized] · Manager: [anonymized] · Location: [anonymized] · Status: {{ steps.user_asset_inventory.output.values[0][6] }} · Cost Center: [anonymized]
+                            {% endif %}
+                            {% if steps.okta_user_recently_created.output.values %}
+                            ### New User Alert
+                            - User account created within the last 8 days ({{ steps.okta_user_recently_created.output.values[0][0] }})
+                            {% endif %}
+                            {% if steps.aws_cloud_account_name.output.values or steps.aws_api_key_info.output.values or steps.aws_user_account_name.output.values or steps.azure_subscription_owner.output.values or steps.gcp_project_owner.output.values %}
+                            ### Cloud Account / Identity
+                            {% if steps.aws_cloud_account_name.output.values %}- AWS account: {{ steps.aws_cloud_account_name.output.values[0][0] }} (id: {{ steps.aws_cloud_account_name.output.values[0][1] }})
+                            {% endif %}
+                            {% if steps.aws_api_key_info.output.values %}- AWS API key: {{ steps.aws_api_key_info.output.values[0][0] }} ({{ steps.aws_api_key_info.output.values[0][2] }})
+                            {% endif %}
+                            {% if steps.aws_user_account_name.output.values %}- AWS user: {{ steps.aws_user_account_name.output.values[0][0] }}
+                            {% endif %}
+                            {% if steps.azure_subscription_owner.output.values %}- Azure subscription: {{ steps.azure_subscription_owner.output.values[0][0] }} ({{ steps.azure_subscription_owner.output.values[0][1] }})
+                            {% endif %}
+                            {% if steps.gcp_project_owner.output.values %}- GCP project: {{ steps.gcp_project_owner.output.values[0][0] }} ({{ steps.gcp_project_owner.output.values[0][1] }})
+                            {% endif %}
+                            {% endif %}
+                            {% if steps.correlated_alerts_72h.output.values %}
+                            ### Correlated Alerts (72h)
+                            {% if steps.correlated_alerts_72h.output.values[0] %}- {{ steps.correlated_alerts_72h.output.values[0][2] }} ({{ steps.correlated_alerts_72h.output.values[0][3] }}): {{ steps.correlated_alerts_72h.output.values[0][0] }} alerts
+                            {% endif %}
+                            {% if steps.correlated_alerts_72h.output.values[1] %}- {{ steps.correlated_alerts_72h.output.values[1][2] }} ({{ steps.correlated_alerts_72h.output.values[1][3] }}): {{ steps.correlated_alerts_72h.output.values[1][0] }} alerts
+                            {% endif %}
+                            {% if steps.correlated_alerts_72h.output.values[2] %}- {{ steps.correlated_alerts_72h.output.values[2][2] }} ({{ steps.correlated_alerts_72h.output.values[2][3] }}): {{ steps.correlated_alerts_72h.output.values[2][0] }} alerts
+                            {% endif %}
+                            {% endif %}
+                            {% if steps.threshold_contributing_alerts.output.hits.hits %}
+                            ### Threshold Contributors
+                            Rule: {{ event.alerts[0].kibana.alert.rule.name }} · severity: {{ event.alerts[0].kibana.alert.severity }} · contributing hits: {{ steps.threshold_contributing_alerts.output.hits.total.value }} · group-by: {{ event.alerts[0].kibana.alert.threshold_result.terms | json }}
+                            {% endif %}
+                    on-failure:
+                      retry:
+                        max-attempts: 2
+                        delay: 3s
+                      continue: true

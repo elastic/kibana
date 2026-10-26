@@ -7,5 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-require('../src/setup_node_env');
-require('@kbn/ts-type-check-cli');
+require('@kbn/setup-node-env');
+
+if (require('@kbn/dev-validation-runner').hasValidationRunFlags(process.argv.slice(2))) {
+  require('@kbn/ts-type-check-cli').runTypeCheckContractCli();
+} else {
+  require('@kbn/ts-type-check-cli').runLegacyTypeCheckCli();
+}

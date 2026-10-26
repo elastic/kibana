@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { MobilePropertyType } from '../../../common/mobile_types';
-import { MobileProperty } from '../../../common/mobile_types';
+import { type MobilePropertyType, type MobileErrorType, MobileProperty } from '@kbn/apm-types';
 import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import { getDeviceOSApp } from './get_device_os_app';
 import { getNCT } from './get_nct';
@@ -21,6 +20,7 @@ export async function getMobileFilters({
   apmEventClient,
   serviceName,
   transactionType,
+  errorType,
   environment,
   start,
   end,
@@ -29,6 +29,7 @@ export async function getMobileFilters({
   apmEventClient: APMEventClient;
   serviceName: string;
   transactionType?: string;
+  errorType?: MobileErrorType;
   environment: string;
   start: number;
   end: number;
@@ -39,43 +40,41 @@ export async function getMobileFilters({
     apmEventClient,
     serviceName,
     transactionType,
+    errorType,
     environment,
     start,
     end,
     size: MAX_ITEMS,
   };
 
-  const [mobileTransactionEventsFiltersResponse, mobileNetworkConnectionTypeFiltersResponse] =
-    await Promise.all([getDeviceOSApp(commonProps), getNCT(commonProps)]);
+  const [deviceOsAppResponse, nctResponse] = await Promise.all([
+    getDeviceOSApp(commonProps),
+    getNCT(commonProps),
+  ]);
 
   return [
     {
       key: MobileProperty.Device,
       options:
-        mobileTransactionEventsFiltersResponse.aggregations?.devices?.buckets?.map(
-          ({ key }) => key as string
-        ) || [],
+        deviceOsAppResponse.aggregations?.devices?.buckets?.map(({ key }) => key as string) || [],
     },
     {
       key: MobileProperty.OsVersion,
       options:
-        mobileTransactionEventsFiltersResponse.aggregations?.osVersions?.buckets?.map(
-          ({ key }) => key as string
-        ) || [],
+        deviceOsAppResponse.aggregations?.osVersions?.buckets?.map(({ key }) => key as string) ||
+        [],
     },
     {
       key: MobileProperty.AppVersion,
       options:
-        mobileTransactionEventsFiltersResponse.aggregations?.appVersions?.buckets?.map(
-          ({ key }) => key as string
-        ) || [],
+        deviceOsAppResponse.aggregations?.appVersions?.buckets?.map(({ key }) => key as string) ||
+        [],
     },
     {
       key: MobileProperty.NetworkConnectionType,
       options:
-        mobileNetworkConnectionTypeFiltersResponse.aggregations?.netConnectionTypes?.buckets?.map(
-          ({ key }) => key as string
-        ) || [],
+        nctResponse.aggregations?.netConnectionTypes?.buckets?.map(({ key }) => key as string) ||
+        [],
     },
   ];
 }

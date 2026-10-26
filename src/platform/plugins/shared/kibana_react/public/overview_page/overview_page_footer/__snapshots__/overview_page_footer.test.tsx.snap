@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`OverviewPageFooter render 1`] = `
-<_EuiPageSection
+<EuiPageTemplate.Section
   className="kbnOverviewPageFooter"
   component="footer"
 >
@@ -14,6 +14,7 @@ exports[`OverviewPageFooter render 1`] = `
       <div>
         <EuiButtonEmpty
           className="kbnOverviewPageFooter__button"
+          data-test-subj="kbnOverviewPageFooterButton"
           flush="both"
           iconType="home"
           onClick={[Function]}
@@ -27,5 +28,5 @@ exports[`OverviewPageFooter render 1`] = `
       </div>
     </EuiFlexItem>
   </EuiFlexGroup>
-</_EuiPageSection>
+</EuiPageTemplate.Section>
 `;

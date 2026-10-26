@@ -14,21 +14,33 @@ import {
   EVENT_FILTERS_LABELS,
   HOST_ISOLATION_EXCEPTIONS_LABELS,
   TRUSTED_APPS_LABELS,
+  TRUSTED_DEVICES_LABELS,
+  ENDPOINT_EXCEPTIONS_LABELS,
+  CUSTOM_YARA_SIGNATURES_LABELS,
 } from '../translations';
 import { useCanAccessSomeArtifacts } from '../../hooks/use_can_access_some_artifacts';
 import { BlocklistsApiClient } from '../../../../../blocklist/services';
+import { TrustedDevicesApiClient } from '../../../../../trusted_devices/service/api_client';
 import { HostIsolationExceptionsApiClient } from '../../../../../host_isolation_exceptions/host_isolation_exceptions_api_client';
 import { EventFiltersApiClient } from '../../../../../event_filters/service/api_client';
 import { TrustedAppsApiClient } from '../../../../../trusted_apps/service';
+import { EndpointExceptionsApiClient } from '../../../../../endpoint_exceptions/service/api_client';
+import { CustomYaraSignaturesApiClient } from '../../../../../custom_yara_signatures/service/api_client';
 import {
   getBlocklistsListPath,
   getEventFiltersListPath,
   getHostIsolationExceptionsListPath,
   getPolicyBlocklistsPath,
+  getPolicyCustomYaraSignaturesPath,
   getPolicyEventFiltersPath,
   getPolicyHostIsolationExceptionsPath,
   getPolicyTrustedAppsPath,
+  getPolicyTrustedDevicesPath,
+  getPolicyEndpointExceptionsPath,
   getTrustedAppsListPath,
+  getTrustedDevicesListPath,
+  getEndpointExceptionsListPath,
+  getCustomYaraSignaturesListPath,
 } from '../../../../../../common/routing';
 import { SEARCHABLE_FIELDS as TRUSTED_APPS_SEARCHABLE_FIELDS } from '../../../../../trusted_apps/constants';
 import type { FleetIntegrationArtifactCardProps } from './fleet_integration_artifacts_card';
@@ -36,7 +48,12 @@ import { FleetIntegrationArtifactsCard } from './fleet_integration_artifacts_car
 import { SEARCHABLE_FIELDS as EVENT_FILTERS_SEARCHABLE_FIELDS } from '../../../../../event_filters/constants';
 import { SEARCHABLE_FIELDS as HOST_ISOLATION_EXCEPTIONS_SEARCHABLE_FIELDS } from '../../../../../host_isolation_exceptions/constants';
 import { SEARCHABLE_FIELDS as BLOCKLIST_SEARCHABLE_FIELDS } from '../../../../../blocklist/constants';
+import { SEARCHABLE_FIELDS as TRUSTED_DEVICES_SEARCHABLE_FIELDS } from '../../../../../trusted_devices/constants';
+import { SEARCHABLE_FIELDS as CUSTOM_YARA_SIGNATURES_SEARCHABLE_FIELDS } from '../../../../../custom_yara_signatures/constants';
+import { ENDPOINT_EXCEPTIONS_SEARCHABLE_FIELDS } from '../../../../../endpoint_exceptions/constants';
+import { useIsExperimentalFeatureEnabled } from '../../../../../../../common/hooks/use_experimental_features';
 import { useHttp } from '../../../../../../../common/lib/kibana';
+import { useLicense } from '../../../../../../../common/hooks/use_license';
 
 interface PolicyArtifactCardProps {
   policyId: string;
@@ -71,6 +88,36 @@ const TrustedAppsPolicyCard = memo<PolicyArtifactCardProps>(({ policyId }) => {
   );
 });
 TrustedAppsPolicyCard.displayName = 'TrustedAppsPolicyCard';
+
+const TrustedDevicesPolicyCard = memo<PolicyArtifactCardProps>(({ policyId }) => {
+  const http = useHttp();
+  const trustedDevicesApiClientInstance = useMemo(
+    () => TrustedDevicesApiClient.getInstance(http),
+    [http]
+  );
+  const { canReadPolicyManagement } = useUserPrivileges().endpointPrivileges;
+
+  const getArtifactPathHandler: FleetIntegrationArtifactCardProps['getArtifactsPath'] =
+    useCallback(() => {
+      if (canReadPolicyManagement) {
+        return getPolicyTrustedDevicesPath(policyId);
+      }
+
+      return getTrustedDevicesListPath({ includedPolicies: `${policyId},global` });
+    }, [canReadPolicyManagement, policyId]);
+
+  return (
+    <FleetIntegrationArtifactsCard
+      policyId={policyId}
+      artifactApiClientInstance={trustedDevicesApiClientInstance}
+      getArtifactsPath={getArtifactPathHandler}
+      searchableFields={TRUSTED_DEVICES_SEARCHABLE_FIELDS}
+      labels={TRUSTED_DEVICES_LABELS}
+      data-test-subj="trustedDevices"
+    />
+  );
+});
+TrustedDevicesPolicyCard.displayName = 'TrustedDevicesPolicyCard';
 
 const EventFiltersPolicyCard = memo<PolicyArtifactCardProps>(({ policyId }) => {
   const http = useHttp();
@@ -132,6 +179,36 @@ const HostIsolationExceptionsPolicyCard = memo<PolicyArtifactCardProps>(({ polic
 });
 HostIsolationExceptionsPolicyCard.displayName = 'HostIsolationExceptionsPolicyCard';
 
+const EndpointExceptionsPolicyCard = memo<PolicyArtifactCardProps>(({ policyId }) => {
+  const http = useHttp();
+  const endpointExceptionsApiClientInstance = useMemo(
+    () => EndpointExceptionsApiClient.getInstance(http),
+    [http]
+  );
+  const { canReadPolicyManagement } = useUserPrivileges().endpointPrivileges;
+
+  const getArtifactPathHandler: FleetIntegrationArtifactCardProps['getArtifactsPath'] =
+    useCallback(() => {
+      if (canReadPolicyManagement) {
+        return getPolicyEndpointExceptionsPath(policyId);
+      }
+
+      return getEndpointExceptionsListPath({ includedPolicies: `${policyId},global` });
+    }, [canReadPolicyManagement, policyId]);
+
+  return (
+    <FleetIntegrationArtifactsCard
+      policyId={policyId}
+      artifactApiClientInstance={endpointExceptionsApiClientInstance}
+      getArtifactsPath={getArtifactPathHandler}
+      searchableFields={ENDPOINT_EXCEPTIONS_SEARCHABLE_FIELDS}
+      labels={ENDPOINT_EXCEPTIONS_LABELS}
+      data-test-subj="endpointExceptions"
+    />
+  );
+});
+EndpointExceptionsPolicyCard.displayName = 'EndpointExceptionsPolicyCard';
+
 const BlocklistPolicyCard = memo<PolicyArtifactCardProps>(({ policyId }) => {
   const http = useHttp();
   const blocklistsApiClientInstance = useMemo(() => BlocklistsApiClient.getInstance(http), [http]);
@@ -158,6 +235,36 @@ const BlocklistPolicyCard = memo<PolicyArtifactCardProps>(({ policyId }) => {
 });
 BlocklistPolicyCard.displayName = 'BlocklistPolicyCard';
 
+const CustomYaraSignaturesPolicyCard = memo<PolicyArtifactCardProps>(({ policyId }) => {
+  const http = useHttp();
+  const customYaraSignaturesApiClientInstance = useMemo(
+    () => CustomYaraSignaturesApiClient.getInstance(http),
+    [http]
+  );
+  const { canReadPolicyManagement } = useUserPrivileges().endpointPrivileges;
+
+  const getArtifactPathHandler: FleetIntegrationArtifactCardProps['getArtifactsPath'] =
+    useCallback(() => {
+      if (canReadPolicyManagement) {
+        return getPolicyCustomYaraSignaturesPath(policyId);
+      }
+
+      return getCustomYaraSignaturesListPath({ includedPolicies: `${policyId},global` });
+    }, [canReadPolicyManagement, policyId]);
+
+  return (
+    <FleetIntegrationArtifactsCard
+      policyId={policyId}
+      artifactApiClientInstance={customYaraSignaturesApiClientInstance}
+      getArtifactsPath={getArtifactPathHandler}
+      searchableFields={CUSTOM_YARA_SIGNATURES_SEARCHABLE_FIELDS}
+      labels={CUSTOM_YARA_SIGNATURES_LABELS}
+      data-test-subj="customYaraSignatures"
+    />
+  );
+});
+CustomYaraSignaturesPolicyCard.displayName = 'CustomYaraSignaturesPolicyCard';
+
 export interface EndpointPolicyArtifactCardsProps {
   policyId: string;
 }
@@ -174,8 +281,22 @@ export const EndpointPolicyArtifactCards = memo<EndpointPolicyArtifactCardsProps
       canReadEventFilters,
       canReadTrustedApplications,
       canReadHostIsolationExceptions,
+      canReadTrustedDevices,
+      canReadEndpointExceptions,
+      canReadCustomYaraSignatures,
     } = useUserPrivileges().endpointPrivileges;
     const canAccessArtifactContent = useCanAccessSomeArtifacts();
+    const isEnterprise = useLicense().isEnterprise();
+
+    const trustedDevicesVisible =
+      useIsExperimentalFeatureEnabled('trustedDevices') && canReadTrustedDevices && isEnterprise;
+
+    const endpointExceptionsVisible =
+      useIsExperimentalFeatureEnabled('endpointExceptionsMovedUnderManagement') &&
+      canReadEndpointExceptions;
+
+    const customYaraSignaturesVisible =
+      useIsExperimentalFeatureEnabled('customYaraSignaturesEnabled') && canReadCustomYaraSignatures;
 
     if (loading) {
       return <EuiSkeletonText lines={4} />;
@@ -205,9 +326,23 @@ export const EndpointPolicyArtifactCards = memo<EndpointPolicyArtifactCardsProps
             </>
           )}
 
+          {trustedDevicesVisible && (
+            <>
+              <TrustedDevicesPolicyCard policyId={policyId} />
+              <EuiSpacer size="s" />
+            </>
+          )}
+
           {canReadEventFilters && (
             <>
               <EventFiltersPolicyCard policyId={policyId} />
+              <EuiSpacer size="s" />
+            </>
+          )}
+
+          {endpointExceptionsVisible && (
+            <>
+              <EndpointExceptionsPolicyCard policyId={policyId} />
               <EuiSpacer size="s" />
             </>
           )}
@@ -219,7 +354,14 @@ export const EndpointPolicyArtifactCards = memo<EndpointPolicyArtifactCardsProps
             </>
           )}
 
-          {canReadBlocklist && <BlocklistPolicyCard policyId={policyId} />}
+          {canReadBlocklist && (
+            <>
+              <BlocklistPolicyCard policyId={policyId} />
+              <EuiSpacer size="s" />
+            </>
+          )}
+
+          {customYaraSignaturesVisible && <CustomYaraSignaturesPolicyCard policyId={policyId} />}
         </div>
 
         <EuiSpacer size="l" />

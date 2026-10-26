@@ -7,17 +7,15 @@
 
 import React, { useMemo } from 'react';
 import { isEmpty, pick } from 'lodash/fp';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import type { TimerangeInput } from '@kbn/timelines-plugin/common';
 import { EuiPanel } from '@elastic/eui';
-import { useEnableExperimental } from '../../../../common/hooks/use_experimental_features';
+import { PageScope } from '../../../../data_view_manager/constants';
 import { useBrowserFields } from '../../../../data_view_manager/hooks/use_browser_fields';
 import { TimelineId } from '../../../../../common/types';
 import type { State } from '../../../../common/store';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
-import { useSourcererDataView } from '../../../../sourcerer/containers';
-import { SourcererScopeName } from '../../../../sourcerer/store/model';
 import { TimelineKPIs } from './kpis';
 import { useTimelineKpis } from '../../../containers/kpis';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -29,27 +27,16 @@ import {
   startSelector,
 } from '../../../../common/components/super_date_picker/selectors';
 import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
-import { useDataViewSpec } from '../../../../data_view_manager/hooks/use_data_view_spec';
+import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
 
 interface KpiExpandedProps {
   timelineId: string;
 }
 
 export const TimelineKpisContainer = ({ timelineId }: KpiExpandedProps) => {
-  const { newDataViewPickerEnabled } = useEnableExperimental();
-  const experimentalBrowserFields = useBrowserFields(SourcererScopeName.timeline);
-  const { dataViewSpec: experimentalDataView } = useDataViewSpec(SourcererScopeName.timeline);
-  const experimentalSelectedPatterns = useSelectedPatterns(SourcererScopeName.timeline);
-
-  let { browserFields, sourcererDataView, selectedPatterns } = useSourcererDataView(
-    SourcererScopeName.timeline
-  );
-
-  if (newDataViewPickerEnabled) {
-    browserFields = experimentalBrowserFields;
-    sourcererDataView = experimentalDataView;
-    selectedPatterns = experimentalSelectedPatterns;
-  }
+  const { dataView } = useDataView(PageScope.timeline);
+  const browserFields = useBrowserFields(dataView);
+  const selectedPatterns = useSelectedPatterns(dataView);
 
   const { uiSettings } = useKibana().services;
   const esQueryConfig = useMemo(() => getEsQueryConfig(uiSettings), [uiSettings]);
@@ -97,13 +84,13 @@ export const TimelineKpisContainer = ({ timelineId }: KpiExpandedProps) => {
       combineQueries({
         config: esQueryConfig,
         dataProviders,
-        dataViewSpec: sourcererDataView,
+        dataView,
         browserFields,
         filters: filters ? filters : [],
         kqlQuery,
         kqlMode,
       }),
-    [browserFields, dataProviders, esQueryConfig, filters, sourcererDataView, kqlMode, kqlQuery]
+    [esQueryConfig, dataProviders, dataView, browserFields, filters, kqlQuery, kqlMode]
   );
 
   const isBlankTimeline: boolean = useMemo(

@@ -1,0 +1,9 @@
+{
+  "type": "shared-browser",
+  "id": "@kbn/cps-utils",
+  "owner": [
+    "@elastic/appex-sharedux"
+  ],
+  "group": "platform",
+  "visibility": "shared"
+}

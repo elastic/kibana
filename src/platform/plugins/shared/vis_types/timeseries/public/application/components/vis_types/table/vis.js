@@ -14,7 +14,7 @@ import PropTypes from 'prop-types';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { getMetricsField } from '../../lib/get_metrics_field';
 import { createTickFormatter } from '../../lib/tick_formatter';
-import { createFieldFormatter } from '../../lib/create_field_formatter';
+import { createReactFieldFormatter } from '../../lib/create_field_formatter';
 import { isSortable } from './is_sortable';
 import { EuiToolTip, EuiIcon } from '@elastic/eui';
 import { replaceVars } from '../../lib/replace_vars';
@@ -23,9 +23,10 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { getFieldFormats, getCoreStart } from '../../../../services';
 import { DATA_FORMATTERS } from '../../../../../common/enums';
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
+import { visStyles } from '../_vis_types';
 
 import {
-  createCachedFieldValueFormatter,
+  createCachedReactFieldValueFormatter,
   getFieldsForTerms,
   getMultiFieldLabel,
   MULTI_FIELD_VALUES_SEPARATOR,
@@ -87,10 +88,9 @@ class TableVis extends Component {
       rowDisplay = pivotIds
         .map((item, index) => {
           const value = [row.key ?? null].flat()[index];
-          const formatted = fieldValuesFormatter(item, value, 'html');
+          const formatted = fieldValuesFormatter(item, value);
 
-          // eslint-disable-next-line react/no-danger
-          return <span dangerouslySetInnerHTML={{ __html: formatted ?? value }} />;
+          return <span>{formatted ?? value}</span>;
         })
         .reduce((prev, curr) => [prev, MULTI_FIELD_VALUES_SEPARATOR, curr]);
     }
@@ -119,11 +119,12 @@ class TableVis extends Component {
         );
         const formatter =
           column.formatter === DATA_FORMATTERS.DEFAULT
-            ? createFieldFormatter(
+            ? createReactFieldFormatter(
                 getMetricsField(column.metrics),
                 fieldFormatMap,
-                'html',
-                hasColorRules
+                hasColorRules,
+                undefined,
+                this.props.isInteractive
               )
             : createTickFormatter(column.formatter, column.value_template, getConfig);
         const value = formatter(item.last);
@@ -132,7 +133,7 @@ class TableVis extends Component {
           const trendIcon = item.slope > 0 ? 'sortUp' : 'sortDown';
           trend = (
             <span>
-              &nbsp; <EuiIcon type={trendIcon} color="subdued" />
+              &nbsp; <EuiIcon type={trendIcon} color="subdued" aria-hidden={true} />
             </span>
           );
         }
@@ -144,8 +145,7 @@ class TableVis extends Component {
             className="eui-textRight"
             style={style}
           >
-            {/* eslint-disable-next-line react/no-danger */}
-            <span dangerouslySetInnerHTML={{ __html: value }} />
+            <span>{value}</span>
             {trend}
           </td>
         );
@@ -173,7 +173,7 @@ class TableVis extends Component {
       const metric = last(item.metrics);
       const label = calculateHeaderLabel(metric, item);
       const handleClick = () => {
-        if (!isSortable(metric)) return;
+        if (!onUiState || !isSortable(metric)) return;
         let order;
         if (sort.column === item.id) {
           order = sort.order === 'asc' ? 'desc' : 'asc';
@@ -183,14 +183,14 @@ class TableVis extends Component {
         onUiState(stateKey, { column: item.id, order });
       };
       let sortComponent;
-      if (isSortable(metric)) {
+      if (onUiState && isSortable(metric)) {
         let sortIcon;
         if (sort.column === item.id) {
           sortIcon = sort.order === 'asc' ? 'sortUp' : 'sortDown';
         } else {
           sortIcon = 'empty';
         }
-        sortComponent = <EuiIcon type={sortIcon} />;
+        sortComponent = <EuiIcon type={sortIcon} aria-hidden={true} />;
       }
       let headerContent = (
         <span>
@@ -225,8 +225,9 @@ class TableVis extends Component {
     } else {
       sortIcon = 'empty';
     }
-    const sortComponent = <EuiIcon type={sortIcon} />;
+    const sortComponent = <EuiIcon type={sortIcon} aria-hidden={true} />;
     const handleSortClick = () => {
+      if (!onUiState) return;
       let order;
       if (sort.column === '_default_') {
         order = sort.order === 'asc' ? 'desc' : 'asc';
@@ -248,7 +249,7 @@ class TableVis extends Component {
   closeExternalUrlErrorModal = () => this.setState({ accessDeniedDrilldownUrl: null });
 
   render() {
-    const { visData, model, indexPattern, initialRender } = this.props;
+    const { visData, model, indexPattern, initialRender, isInteractive } = this.props;
     const { accessDeniedDrilldownUrl } = this.state;
     const fields = (model.pivot_type ? [model.pivot_type ?? null].flat() : []).map(
       (type, index) => ({
@@ -256,12 +257,12 @@ class TableVis extends Component {
         type,
       })
     );
-    const fieldValuesFormatter = createCachedFieldValueFormatter(
+    const fieldValuesFormatter = createCachedReactFieldValueFormatter(
       indexPattern,
       fields,
       this.fieldFormatsService,
-      undefined,
-      model.drilldown_url ? [FIELD_FORMAT_IDS.URL] : []
+      model.drilldown_url ? [FIELD_FORMAT_IDS.URL] : [],
+      isInteractive
     );
     const pivotIds = getFieldsForTerms(model.pivot_id);
     const header = this.renderHeader(pivotIds);
@@ -274,7 +275,7 @@ class TableVis extends Component {
     return (
       <RenderCounter initialRender={initialRender}>
         <RedirectAppLinks coreStart={getCoreStart()} className="tvbVis" data-test-subj="tableView">
-          <div className="tvbVis" data-test-subj="tableView">
+          <div className="tvbVis" css={visStyles} data-test-subj="tableView">
             <table className="table">
               <thead>{header}</thead>
               <tbody>{rows}</tbody>
@@ -294,6 +295,7 @@ class TableVis extends Component {
 
 TableVis.defaultProps = {
   sort: {},
+  isInteractive: true,
 };
 
 TableVis.propTypes = {
@@ -306,6 +308,7 @@ TableVis.propTypes = {
   pageNumber: PropTypes.number,
   getConfig: PropTypes.func,
   indexPattern: PropTypes.object,
+  isInteractive: PropTypes.bool,
 };
 
 // default export required for React.Lazy

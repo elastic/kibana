@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiThemeComputed } from '@elastic/eui/src/services/theme/types';
+import type { EuiThemeComputed } from '@elastic/eui/src/services/theme/types';
 
 export const AnalyticsCollectionTableStyles = (euiTheme: EuiThemeComputed) => {
   return {

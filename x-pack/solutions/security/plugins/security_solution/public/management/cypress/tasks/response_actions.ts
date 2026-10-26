@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { inputConsoleCommand, submitCommand } from './response_console';
 import type { UserAuthzAccessLevel } from '../screens';
-import { loadPage, request } from './common';
+import { request } from './common';
 import { resolvePathVariables } from '../../../common/utils/resolve_path_variables';
 import {
   ACTION_DETAILS_ROUTE,
@@ -21,119 +20,11 @@ import {
   SUSPEND_PROCESS_ROUTE,
   UNISOLATE_HOST_ROUTE_V2,
   UPLOAD_ROUTE,
+  CANCEL_ROUTE,
+  MEMORY_DUMP_ROUTE,
 } from '../../../../common/endpoint/constants';
 import type { ActionDetails, ActionDetailsApiResponse } from '../../../../common/endpoint/types';
 import type { ResponseActionsApiCommandNames } from '../../../../common/endpoint/service/response_actions/constants';
-import { ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS } from '../../../../common/endpoint/service/response_actions/constants';
-
-export const validateAvailableCommands = () => {
-  // TODO: TC- use ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS when we go GA with automated process actions
-  const config = Cypress.config();
-  const automatedActionsPAttern = /automatedProcessActionsEnabled/;
-  const automatedProcessActionsEnabled =
-    config.env.ftrConfig.kbnServerArgs[0].match(automatedActionsPAttern);
-
-  const enabledActions = [
-    ...ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS,
-    ...(automatedProcessActionsEnabled ? ['kill-process', 'suspend-process'] : []),
-  ];
-
-  cy.get('[data-test-subj^="command-type"]').should('have.length', enabledActions.length);
-  enabledActions.forEach((command) => {
-    cy.getByTestSubj(`command-type-${command}`);
-  });
-};
-export const selectIsolateAndSaveWithoutEnabling = (ruleName: string) => {
-  cy.getByTestSubj(`command-type-isolate`).click();
-  cy.getByTestSubj('create-enabled-false').click();
-  cy.contains(`${ruleName} was created`);
-};
-
-export const addEndpointResponseAction = () => {
-  cy.getByTestSubj('response-actions-wrapper').within(() => {
-    cy.getByTestSubj('Elastic Defend-response-action-type-selection-option').click();
-  });
-};
-export const focusAndOpenCommandDropdown = (number = 0) => {
-  cy.getByTestSubj(`response-actions-list-item-${number}`).within(() => {
-    cy.getByTestSubj('input').type(`example${number}`);
-    cy.getByTestSubj('commandTypeField').click();
-  });
-};
-export const fillUpNewRule = (name = 'Test', description = 'Test') => {
-  loadPage('app/security/rules/management');
-  cy.getByTestSubj('create-new-rule').click();
-  cy.getByTestSubj('stepDefineRule').within(() => {
-    cy.getByTestSubj('queryInput').first().type('_id:*{enter}');
-  });
-  cy.getByTestSubj('define-continue').click();
-  cy.getByTestSubj('detectionEngineStepAboutRuleName').within(() => {
-    cy.getByTestSubj('input').type(name);
-  });
-  cy.getByTestSubj('detectionEngineStepAboutRuleDescription').within(() => {
-    cy.getByTestSubj('input').type(description);
-  });
-  cy.getByTestSubj('about-continue').click();
-  cy.getByTestSubj('schedule-continue').click();
-};
-export const fillUpNewEsqlRule = (name = 'Test', description = 'Test', query: string) => {
-  loadPage('app/security/rules/management');
-  cy.getByTestSubj('create-new-rule').click();
-  cy.getByTestSubj('stepDefineRule').within(() => {
-    cy.getByTestSubj('esqlRuleType').click();
-    cy.getByTestSubj('ruleEsqlQueryBar').within(() => {
-      cy.getByTestSubj('globalQueryBar').click();
-      cy.getByTestSubj('kibanaCodeEditor').type(query);
-    });
-  });
-  cy.getByTestSubj('define-continue').click();
-  cy.getByTestSubj('detectionEngineStepAboutRuleName').within(() => {
-    cy.getByTestSubj('input').type(name);
-  });
-  cy.getByTestSubj('detectionEngineStepAboutRuleDescription').within(() => {
-    cy.getByTestSubj('input').type(description);
-  });
-  cy.getByTestSubj('about-continue').click();
-  cy.getByTestSubj('schedule-continue').click();
-};
-export const visitRuleActions = (ruleId: string) => {
-  loadPage(`app/security/rules/id/${ruleId}/edit`);
-  cy.getByTestSubj('edit-rule-actions-tab').should('exist');
-  cy.getByTestSubj('globalLoadingIndicator').should('not.exist');
-  cy.getByTestSubj('stepPanelProgress').should('not.exist');
-};
-
-export const getRunningProcesses = (command: string): Cypress.Chainable<number> => {
-  inputConsoleCommand('processes');
-  submitCommand();
-  cy.contains('Action pending.').should('exist');
-
-  // on success
-  // find pid of process
-  // traverse back from last column to the second column that has pid
-  return cy
-    .getByTestSubj('processesOutput-processListTable', { timeout: 120000 })
-    .findByTestSubj('processesOutput-command')
-    .contains(command)
-    .parents('tr')
-    .findByTestSubj('processesOutput-pid')
-    .find('.euiTableCellContent')
-    .then((cellContent) => {
-      // get pid
-      return Number(cellContent.text());
-    });
-};
-
-export const tryAddingDisabledResponseAction = (itemNumber = 0) => {
-  cy.getByTestSubj('response-actions-wrapper').within(() => {
-    cy.getByTestSubj('Elastic Defend-response-action-type-selection-option').should('be.disabled');
-  });
-  // Try adding new action, should not add list item.
-  cy.getByTestSubj('Elastic Defend-response-action-type-selection-option').click({
-    force: true,
-  });
-  cy.getByTestSubj(`response-actions-list-item-${itemNumber}`).should('not.exist');
-};
 
 /**
  * Continuously checks an Response Action until it completes (or timeout is reached)
@@ -278,6 +169,16 @@ export const ensureResponseActionAuthzAccess = (
     case 'runscript':
       url = RUN_SCRIPT_ROUTE;
       Object.assign(apiPayload, { parameters: { Raw: 'ls' } });
+      break;
+
+    case 'cancel':
+      url = CANCEL_ROUTE;
+      Object.assign(apiPayload, { action_id: 'some-action-id' });
+      break;
+
+    case 'memory-dump':
+      url = MEMORY_DUMP_ROUTE;
+      Object.assign(apiPayload, { parameters: { type: 'kernel' } });
       break;
 
     default:

@@ -9,16 +9,8 @@ import React, { useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
 import type { EuiBadgeProps } from '@elastic/eui';
-import {
-  EuiBadge,
-  EuiButton,
-  EuiCallOut,
-  EuiIcon,
-  EuiLink,
-  EuiPortal,
-  EuiSpacer,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiBadge, EuiIcon, EuiLink, EuiPortal, EuiSpacer, EuiToolTip } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 
 import { euiLightVars as euiVars } from '@kbn/ui-theme';
 
@@ -38,13 +30,17 @@ import { AgentUpgradeAgentModal } from './agent_upgrade_modal';
 type Props = EuiBadgeProps & {
   agent: Agent;
   fromDetails?: boolean;
+  /** Shown in the check-in tooltip, after the check-in details. */
+  tooltipExtraContent?: React.ReactNode;
 };
 
 function getStatusComponent({
   status,
+  upgradeDetails,
   ...restOfProps
 }: {
   status: Agent['status'];
+  upgradeDetails?: Agent['upgrade_details'];
 } & EuiBadgeProps): React.ReactElement {
   switch (status) {
     case 'error':
@@ -97,7 +93,14 @@ function getStatusComponent({
     case 'unenrolling':
     case 'enrolling':
     case 'updating':
-      return (
+      return isAgentInFailedUpgradeState(upgradeDetails) ? (
+        <EuiBadge color="danger" {...restOfProps}>
+          <FormattedMessage
+            id="xpack.fleet.agentHealth.upgradingFailedStatusText"
+            defaultMessage="Upgrade failed"
+          />
+        </EuiBadge>
+      ) : (
         <EuiBadge color="primary" {...restOfProps}>
           <FormattedMessage
             id="xpack.fleet.agentHealth.updatingStatusText"
@@ -126,13 +129,14 @@ function getStatusComponent({
   }
 }
 
-const WrappedEuiCallOut = styled(EuiCallOut)`
+const WrappedWarningCallout = styled(KbnWarningCallout)`
   white-space: wrap !important;
 `;
 
 export const AgentHealth: React.FunctionComponent<Props> = ({
   agent,
   fromDetails,
+  tooltipExtraContent,
   ...restOfProps
 }) => {
   const { last_checkin: lastCheckIn, last_checkin_message: lastCheckInMessage } = agent;
@@ -176,6 +180,33 @@ export const AgentHealth: React.FunctionComponent<Props> = ({
 
   const { docLinks } = useStartServices();
 
+  const badge =
+    isStuckInUpdating(agent) && !fromDetails ? (
+      <div className="eui-textNoWrap">
+        {getStatusComponent({
+          status: agent.status,
+          upgradeDetails: agent.upgrade_details,
+          ...restOfProps,
+        })}
+        &nbsp;
+        <EuiIcon type="warning" color="warning" aria-hidden={true} />
+      </div>
+    ) : (
+      <>
+        {getStatusComponent({
+          status: agent.status,
+          upgradeDetails: agent.upgrade_details,
+          ...restOfProps,
+        })}
+        {previousToOfflineStatus
+          ? getStatusComponent({
+              status: previousToOfflineStatus,
+              ...restOfProps,
+            })
+          : null}
+      </>
+    );
+
   return (
     <>
       <EuiToolTip
@@ -185,7 +216,7 @@ export const AgentHealth: React.FunctionComponent<Props> = ({
             <p>{lastCheckinText}</p>
             <p>{lastCheckInMessageText}</p>
             {isStuckInUpdating(agent) ? (
-              isAgentInFailedUpgradeState(agent) ? (
+              isAgentInFailedUpgradeState(agent.upgrade_details) ? (
                 <FormattedMessage
                   id="xpack.fleet.agentHealth.failedUpgradeTooltipText"
                   defaultMessage="Agent upgrade failed. Consider restarting the upgrade."
@@ -199,42 +230,19 @@ export const AgentHealth: React.FunctionComponent<Props> = ({
                 </p>
               )
             ) : null}
+            {tooltipExtraContent}
           </>
         }
       >
-        {isStuckInUpdating(agent) && !fromDetails ? (
-          <div className="eui-textNoWrap">
-            {getStatusComponent({
-              status: agent.status,
-              ...restOfProps,
-            })}
-            &nbsp;
-            <EuiIcon type="warning" color="warning" />
-          </div>
-        ) : (
-          <>
-            {getStatusComponent({
-              status: agent.status,
-              ...restOfProps,
-            })}
-            {previousToOfflineStatus
-              ? getStatusComponent({
-                  status: previousToOfflineStatus,
-                  ...restOfProps,
-                })
-              : null}
-          </>
-        )}
+        {badge}
       </EuiToolTip>
       {fromDetails && isStuckInUpdating(agent) ? (
         <>
           <EuiSpacer size="m" />
-          <WrappedEuiCallOut
-            iconType="warning"
+          <WrappedWarningCallout
             size="m"
-            color="warning"
             title={
-              isAgentInFailedUpgradeState(agent) ? (
+              isAgentInFailedUpgradeState(agent.upgrade_details) ? (
                 <FormattedMessage
                   id="xpack.fleet.agentHealth.failedUpgradeTitle"
                   defaultMessage="Agent upgrade is stuck in failed state."
@@ -246,13 +254,27 @@ export const AgentHealth: React.FunctionComponent<Props> = ({
                 />
               )
             }
+            actionProps={{
+              primary: {
+                onClick: () => {
+                  setIsUpgradeModalOpen(true);
+                },
+                'data-test-subj': 'restartUpgradeBtn',
+                children: (
+                  <FormattedMessage
+                    id="xpack.fleet.agentHealth.restartUpgradeBtn"
+                    defaultMessage="Restart upgrade"
+                  />
+                ),
+              },
+            }}
           >
             <p>
               <FormattedMessage
                 id="xpack.fleet.agentHealth.stuckUpdatingText"
                 defaultMessage="{stuckMessage} Consider restarting the upgrade. {learnMore}"
                 values={{
-                  stuckMessage: isAgentInFailedUpgradeState(agent)
+                  stuckMessage: isAgentInFailedUpgradeState(agent.upgrade_details)
                     ? 'Agent upgrade failed.'
                     : 'Agent has been updating for a while, and may be stuck.',
                   learnMore: (
@@ -268,19 +290,7 @@ export const AgentHealth: React.FunctionComponent<Props> = ({
                 }}
               />
             </p>
-            <EuiButton
-              color="warning"
-              onClick={() => {
-                setIsUpgradeModalOpen(true);
-              }}
-              data-test-subj="restartUpgradeBtn"
-            >
-              <FormattedMessage
-                id="xpack.fleet.agentHealth.restartUpgradeBtn"
-                defaultMessage="Restart upgrade"
-              />
-            </EuiButton>
-          </WrappedEuiCallOut>
+          </WrappedWarningCallout>
         </>
       ) : null}
       {isUpgradeModalOpen && (

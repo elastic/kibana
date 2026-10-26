@@ -4,16 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { ReactNode, useCallback, useState } from 'react';
+import type { ReactNode } from 'react';
+import React, { useCallback, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { PROXY_MODE, SNIFF_MODE } from '../../../../../../common/constants';
+import type { PROXY_MODE, SNIFF_MODE } from '../../../../../../common/constants';
 import {
   EuiButton,
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
 } from '../../../../../shared_imports';
-import { ClusterPayload } from '../../../../../../common/lib';
+import type { ClusterPayload } from '../../../../../../common/lib';
 import { RequestFlyout } from './request_flyout';
 
 interface Props {

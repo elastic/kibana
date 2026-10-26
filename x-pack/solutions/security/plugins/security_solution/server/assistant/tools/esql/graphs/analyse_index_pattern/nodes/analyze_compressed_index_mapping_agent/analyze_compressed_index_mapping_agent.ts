@@ -5,26 +5,29 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { Command } from '@langchain/langgraph';
 import { HumanMessage, SystemMessage } from '@langchain/core/messages';
+import type { BaseChatModel } from '@langchain/core/language_models/chat_models';
 import { mapFieldDescriptorToNestedObject } from '../../../../tools/inspect_index_mapping_tool/inspect_index_utils';
 import type { CreateLlmInstance } from '../../../../utils/common';
 import type { AnalyzeIndexPatternAnnotation } from '../../state';
 import { compressMapping } from './compress_mapping';
 
-const structuredOutput = z.object({
-  containsRequiredFieldsForQuery: z
-    .boolean()
-    .describe('Whether the index pattern contains the required fields for the query'),
-});
+const structuredOutput = lazySchema(() =>
+  z.object({
+    containsRequiredFieldsForQuery: z
+      .boolean()
+      .describe('Whether the index pattern contains the required fields for the query'),
+  })
+);
 
-export const getAnalyzeCompressedIndexMappingAgent = ({
+export const getAnalyzeCompressedIndexMappingAgent = async ({
   createLlmInstance,
 }: {
   createLlmInstance: CreateLlmInstance;
 }) => {
-  const llm = createLlmInstance();
+  const llm = await createLlmInstance();
   return async (state: typeof AnalyzeIndexPatternAnnotation.State) => {
     const { fieldDescriptors, input } = state;
     if (fieldDescriptors === undefined) {
@@ -41,7 +44,7 @@ export const getAnalyzeCompressedIndexMappingAgent = ({
     const nestedObject = mapFieldDescriptorToNestedObject(prunedFields);
     const compressedIndexMapping = compressMapping(nestedObject);
 
-    const result = await llm
+    const result = await (llm as BaseChatModel)
       .withStructuredOutput(structuredOutput, { name: 'indexMappingAnalysis' })
       .invoke([
         new SystemMessage({

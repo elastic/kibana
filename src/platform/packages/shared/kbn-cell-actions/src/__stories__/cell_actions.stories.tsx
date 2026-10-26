@@ -9,7 +9,7 @@
 
 import React from 'react';
 import type { StoryFn } from '@storybook/react';
-import type { FieldSpec } from '@kbn/data-views-plugin/common';
+import type { FieldSpec } from '@kbn/data-views-types';
 import { CellActionsProvider } from '../context/cell_actions_context';
 import { makeAction } from '../mocks/helpers';
 import { CellActions } from '../components/cell_actions';
@@ -28,8 +28,8 @@ const FIELD: FieldSpec = {
 
 const getCompatibleActions = () =>
   Promise.resolve([
-    makeAction('Filter in', 'plusInCircle', 2),
-    makeAction('Filter out', 'minusInCircle', 3),
+    makeAction('Filter in', 'plusCircle', 2),
+    makeAction('Filter out', 'minusCircle', 3),
     makeAction('Minimize', 'minimize', 1),
     makeAction('Send email', 'email', 4),
     makeAction('Pin field', 'pin', 5),

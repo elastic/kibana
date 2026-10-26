@@ -18,16 +18,17 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
-  EuiCallOut,
   EuiLoadingSpinner,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 
-import { SerializedPolicy } from '../../../../../common/types';
+import type { SerializedPolicy } from '../../../../../common/types';
 
 import { useFormContext, useFormData } from '../../../../shared_imports';
 
 import { i18nTexts } from '../i18n_texts';
-import { FormInternal } from '../types';
+import type { FormInternal } from '../types';
 
 type PolicyJson = Omit<SerializedPolicy, 'name'>;
 interface Props {
@@ -53,6 +54,8 @@ const prettifyFormJson = (policy: SerializedPolicy): PolicyJson => {
 };
 
 export const PolicyJsonFlyout: React.FunctionComponent<Props> = ({ policyName, close }) => {
+  const flyoutTitleId = useGeneratedHtmlId();
+
   /**
    * policy === undefined: we are checking validity
    * policy === null: we have determined the policy is invalid
@@ -88,19 +91,19 @@ export const PolicyJsonFlyout: React.FunctionComponent<Props> = ({ policyName, c
       break;
     case null:
       content = (
-        <EuiCallOut
+        <KbnDangerCallout
           data-test-subj="policyRequestInvalidAlert"
-          iconType="warning"
-          color="danger"
           title={i18n.translate(
             'xpack.indexLifecycleMgmt.policyJsonFlyout.validationErrorCallout.title',
             { defaultMessage: 'Invalid policy' }
           )}
-        >
-          {i18n.translate('xpack.indexLifecycleMgmt.policyJsonFlyout.validationErrorCallout.body', {
-            defaultMessage: 'To view the JSON for this policy address all validation errors.',
-          })}
-        </EuiCallOut>
+          text={i18n.translate(
+            'xpack.indexLifecycleMgmt.policyJsonFlyout.validationErrorCallout.body',
+            {
+              defaultMessage: 'To view the JSON for this policy address all validation errors.',
+            }
+          )}
+        />
       );
       break;
     default:
@@ -136,10 +139,10 @@ export const PolicyJsonFlyout: React.FunctionComponent<Props> = ({ policyName, c
   }
 
   return (
-    <EuiFlyout maxWidth={480} onClose={close}>
+    <EuiFlyout maxWidth={480} onClose={close} aria-labelledby={flyoutTitleId}>
       <EuiFlyoutHeader>
         <EuiTitle>
-          <h2>
+          <h2 id={flyoutTitleId}>
             {policyName ? (
               <FormattedMessage
                 id="xpack.indexLifecycleMgmt.policyJsonFlyout.namedTitle"

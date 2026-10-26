@@ -107,8 +107,15 @@ export const EventSchema = schema.maybe(
         task: schema.maybe(
           schema.object({
             id: ecsString(),
+            type: ecsString(),
             scheduled: ecsDate(),
             schedule_delay: ecsStringOrNumber(),
+            execution: schema.maybe(
+              schema.object({
+                uuid: ecsString(),
+              })
+            ),
+            data: ecsFlattened(),
           })
         ),
         alerting: schema.maybe(
@@ -144,6 +151,11 @@ export const EventSchema = schema.maybe(
             flapping: ecsBoolean(),
             maintenance_window_ids: ecsStringMulti(),
             uuid: ecsString(),
+            deletion: schema.maybe(
+              schema.object({
+                num_deleted: ecsStringOrNumber(),
+              })
+            ),
             rule: schema.maybe(
               schema.object({
                 consumer: ecsString(),
@@ -158,6 +170,14 @@ export const EventSchema = schema.maybe(
                     filled_duration_ms: ecsStringOrNumber(),
                     unfilled_duration_ms: ecsStringOrNumber(),
                     in_progress_duration_ms: ecsStringOrNumber(),
+                    deleted: ecsBoolean(),
+                    updated_at: ecsDate(),
+                    failed_auto_fill_attempts: ecsStringOrNumber(),
+                    reason: schema.maybe(
+                      schema.object({
+                        type: ecsString(),
+                      })
+                    ),
                   })
                 ),
                 execution: schema.maybe(
@@ -190,6 +210,13 @@ export const EventSchema = schema.maybe(
                         total_search_duration_ms: ecsStringOrNumber(),
                         execution_gap_duration_s: ecsStringOrNumber(),
                         gap_range: ecsDateRange(),
+                        gap_reason: schema.maybe(
+                          schema.object({
+                            type: ecsString(),
+                          })
+                        ),
+                        matched_indices_count: ecsStringOrNumber(),
+                        frozen_indices_queried_count: ecsStringOrNumber(),
                         rule_type_run_duration_ms: ecsStringOrNumber(),
                         process_alerts_duration_ms: ecsStringOrNumber(),
                         trigger_actions_duration_ms: ecsStringOrNumber(),
@@ -199,6 +226,9 @@ export const EventSchema = schema.maybe(
                         prepare_rule_duration_ms: ecsStringOrNumber(),
                         total_run_duration_ms: ecsStringOrNumber(),
                         total_enrichment_duration_ms: ecsStringOrNumber(),
+                        update_alerts_duration_ms: ecsStringOrNumber(),
+                        alerts_candidate_count: ecsStringOrNumber(),
+                        alerts_suppressed_count: ecsStringOrNumber(),
                       })
                     ),
                   })
@@ -210,6 +240,7 @@ export const EventSchema = schema.maybe(
           })
         ),
         saved_objects: schema.maybe(
+          // codeql[js/kibana/unbounded-array-in-schema] internal validation — not route input
           schema.arrayOf(
             schema.object({
               rel: ecsString(),
@@ -218,9 +249,12 @@ export const EventSchema = schema.maybe(
               type: ecsString(),
               type_id: ecsString(),
               space_agnostic: ecsBoolean(),
-            })
+            }),
+            { maxSize: 1000 }
           )
         ),
+        cps_scope_expression: ecsString(),
+        cps_scope_linked_projects: ecsFlattened(),
         space_ids: ecsStringMulti(),
         version: ecsVersion(),
         action: schema.maybe(
@@ -258,12 +292,69 @@ export const EventSchema = schema.maybe(
             name: ecsString(),
           })
         ),
+        gap_auto_fill: schema.maybe(
+          schema.object({
+            execution: schema.maybe(
+              schema.object({
+                status: ecsString(),
+                start: ecsDate(),
+                end: ecsDate(),
+                duration_ms: ecsStringOrNumber(),
+                rule_ids: ecsStringMulti(),
+                task_params: schema.maybe(
+                  schema.object({
+                    name: ecsString(),
+                    num_retries: ecsStringOrNumber(),
+                    gap_fill_range: ecsString(),
+                    interval: ecsString(),
+                    max_backfills: ecsStringOrNumber(),
+                  })
+                ),
+                results: schema.maybe(
+                  // codeql[js/kibana/unbounded-array-in-schema] internal validation — not route input
+                  schema.arrayOf(
+                    schema.object({
+                      rule_id: ecsString(),
+                      processed_gaps: ecsStringOrNumber(),
+                      status: ecsString(),
+                      error: ecsString(),
+                    }),
+                    { maxSize: 1000 }
+                  )
+                ),
+              })
+            ),
+          })
+        ),
+        alerting_v2: schema.maybe(
+          schema.object({
+            dispatcher: schema.maybe(
+              schema.object({
+                failure_reason: ecsString(),
+                alert_count: ecsStringOrNumber(),
+                alert_ids: ecsStringMulti(),
+                rule_count: ecsStringOrNumber(),
+                rule_ids: ecsStringMulti(),
+                action_group_count: ecsStringOrNumber(),
+                action_group_ids: ecsStringMulti(),
+                workflow_ids: ecsStringMulti(),
+                workflow_execution_ids: ecsStringMulti(),
+                execution: schema.maybe(
+                  schema.object({
+                    uuid: ecsString(),
+                  })
+                ),
+              })
+            ),
+          })
+        ),
       })
     ),
   })
 );
 
 function ecsStringMulti() {
+  // codeql[js/kibana/unbounded-array-in-schema] internal validation — not route input
   return schema.maybe(schema.arrayOf(schema.string()));
 }
 
@@ -296,7 +387,12 @@ function ecsDateRange() {
 }
 
 function ecsDateRangeMulti() {
+  // codeql[js/kibana/unbounded-array-in-schema] internal validation — not route input
   return schema.maybe(schema.arrayOf(ecsDateRangeBase()));
+}
+
+function ecsFlattened() {
+  return schema.maybe(schema.any());
 }
 
 const ISO_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;

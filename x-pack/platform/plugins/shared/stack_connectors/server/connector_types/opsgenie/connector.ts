@@ -11,15 +11,21 @@ import { SubActionConnector } from '@kbn/actions-plugin/server';
 import type { AxiosError } from 'axios';
 import { isEmpty } from 'lodash';
 import type { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
-import { OpsgenieSubActions } from '../../../common';
-import { CreateAlertParamsSchema, CloseAlertParamsSchema, Response } from './schema';
+import {
+  SUB_ACTION,
+  CreateAlertParamsSchema,
+  CloseAlertParamsSchema,
+  MESSAGE_MAX_LENGTH,
+  Response,
+} from '@kbn/connector-schemas/opsgenie';
 import type {
   CloseAlertParams,
   Config,
   CreateAlertParams,
   FailureResponseType,
   Secrets,
-} from './types';
+} from '@kbn/connector-schemas/opsgenie';
+import { truncateMessage as truncateToMaxLength } from '../lib/truncate_message';
 import * as i18n from './translations';
 
 export class OpsgenieConnector extends SubActionConnector<Config, Secrets> {
@@ -28,13 +34,13 @@ export class OpsgenieConnector extends SubActionConnector<Config, Secrets> {
 
     this.registerSubAction({
       method: this.createAlert.name,
-      name: OpsgenieSubActions.CreateAlert,
+      name: SUB_ACTION.CreateAlert,
       schema: CreateAlertParamsSchema,
     });
 
     this.registerSubAction({
       method: this.closeAlert.name,
-      name: OpsgenieSubActions.CloseAlert,
+      name: SUB_ACTION.CloseAlert,
       schema: CloseAlertParamsSchema,
     });
   }
@@ -83,7 +89,11 @@ export class OpsgenieConnector extends SubActionConnector<Config, Secrets> {
       {
         method: 'post',
         url: this.concatPathToURL('v2/alerts').toString(),
-        data: { ...params, ...OpsgenieConnector.createAliasObj(params.alias) },
+        data: {
+          ...params,
+          message: this.truncateMessage(params.message),
+          ...OpsgenieConnector.createAliasObj(params.alias),
+        },
         headers: this.createHeaders(),
         responseSchema: Response,
       },
@@ -101,6 +111,18 @@ export class OpsgenieConnector extends SubActionConnector<Config, Secrets> {
     const newAlias = OpsgenieConnector.createAlias(alias);
 
     return { alias: newAlias };
+  }
+
+  private truncateMessage(message: string): string {
+    const { originalLength, truncated, value } = truncateToMaxLength(message, MESSAGE_MAX_LENGTH);
+
+    if (truncated) {
+      this.logger.warn(
+        `connector "${this.connector.id}" message length ${originalLength} exceeds ${MESSAGE_MAX_LENGTH} and has been truncated`
+      );
+    }
+
+    return value;
   }
 
   private static createAlias(alias: string) {

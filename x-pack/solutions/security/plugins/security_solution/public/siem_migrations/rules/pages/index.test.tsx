@@ -9,23 +9,28 @@ import React from 'react';
 import hash from 'object-hash';
 import { createMemoryHistory } from 'history';
 import { render, screen, waitFor } from '@testing-library/react';
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
+import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
+import { openAppMenuOverflow } from '@kbn/app-header/test_helpers';
 import { MigrationRulesPage, type MigrationRulesPageProps } from '.';
 import * as useLatestStatsModule from '../service/hooks/use_latest_stats';
 import * as useNavigationModule from '@kbn/security-solution-navigation/src/navigation';
 import * as useGetIntegrationsModule from '../service/hooks/use_get_integrations';
 import * as useGetMigrationRulesModule from '../logic/use_get_migration_rules';
 import * as useGetMigrationTranslationStatsModule from '../logic/use_get_migration_translation_stats';
-import * as useMissingPrivilegesModule from '../../../detections/components/callouts/missing_privileges_callout/use_missing_privileges';
+import * as useMissingPrivilegesModule from '../../../common/hooks/use_missing_privileges';
 import * as useGetMigrationMissingPrivilegesModule from '../logic/use_get_migration_privileges';
 import * as useCallOutStorageModule from '../../../common/components/callouts/use_callout_storage';
 import { TestProviders } from '../../../common/mock';
+import { createStartServicesMock } from '../../../common/lib/kibana/kibana_react.mock';
 import {
   mockedLatestStats,
   mockedLatestStatsEmpty,
   mockedMigrationResultsObj,
   mockedMigrationTranslationStats,
 } from '../../common/mocks/migration_result.data';
-import * as useGetMissingResourcesModule from '../service/hooks/use_get_missing_resources';
+import * as useGetMissingResourcesModule from '../../common/hooks/use_get_missing_resources';
+import type { SiemMigrationsService } from '../../service';
 
 jest.mock('../../../common/components/page_wrapper', () => {
   return {
@@ -102,6 +107,26 @@ const mockHiddenCallStorageResult = {
   getVisibleMessageIds: jest.fn(() => []),
 };
 
+const defaultStartServicesMock = createStartServicesMock();
+
+const startServicesMock = {
+  ...defaultStartServicesMock,
+  siemMigrations: {
+    ...defaultStartServicesMock.siemMigrations,
+    rules: {
+      ...defaultStartServicesMock.siemMigrations.rules,
+      hasMissingCapabilities: jest.fn().mockReturnValue(false),
+      getMissingCapabilities: jest.fn().mockReturnValue([]),
+    },
+  } as unknown as SiemMigrationsService,
+};
+
+const TestProviderWrapper: React.FC<React.PropsWithChildren<{}>> = ({ children }) => (
+  <MockAppHeaderProvider>
+    <TestProviders startServices={startServicesMock}>{children}</TestProviders>
+  </MockAppHeaderProvider>
+);
+
 function renderTestComponent(args?: { migrationId?: string; wrapper?: React.ComponentType }) {
   const finalProps = {
     ...defaultProps,
@@ -112,9 +137,14 @@ function renderTestComponent(args?: { migrationId?: string; wrapper?: React.Comp
       },
     },
   };
-  return render(<MigrationRulesPage {...finalProps} />, {
-    wrapper: args?.wrapper,
-  });
+  return render(
+    <TestProviderWrapper>
+      <MigrationRulesPage {...finalProps} />
+    </TestProviderWrapper>,
+    {
+      wrapper: args?.wrapper,
+    }
+  );
 }
 
 const mockUseMigrationRuleTransationStats: typeof useGetMigrationTranslationStatsModule.useGetMigrationTranslationStats =
@@ -133,7 +163,7 @@ const mockUseGetMigrationRules: typeof useGetMigrationRulesModule.useGetMigratio
     const { data, total } = mockedMigrationResultsObj[migrationId];
     return {
       data: {
-        ruleMigrations: data,
+        migrationRules: data,
         total,
       },
       isLoading: false,
@@ -174,7 +204,7 @@ describe('Migrations: Translated Rules Page', () => {
   describe('With No MigrationId', () => {
     test('should render empty page when no translated rules are available', () => {
       renderTestComponent({
-        wrapper: TestProviders,
+        wrapper: TestProviderWrapper,
       });
 
       expect(screen.getByTestId('siemMigrationsTranslatedRulesEmptyPageHeader')).toBeVisible();
@@ -211,7 +241,7 @@ describe('Migrations: Translated Rules Page', () => {
       const missingPrivilegesHash = hash(mockMissingPrivileges);
 
       renderTestComponent({
-        wrapper: TestProviders,
+        wrapper: TestProviderWrapper,
       });
 
       expect(useCalloutStorageSpy).toHaveBeenCalled();
@@ -232,12 +262,72 @@ describe('Migrations: Translated Rules Page', () => {
     });
   });
 
+  describe('App header', () => {
+    test('should render the page title', () => {
+      renderTestComponent();
+
+      expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent(
+        'Translated rules'
+      );
+    });
+
+    test('should not render a vendor badge in the header', () => {
+      useLatestStatsSpy.mockReturnValue(mockedLatestStats);
+      renderTestComponent({ migrationId: '1' });
+
+      expect(screen.queryByTestId('migrationVendorBadge')).toBeNull();
+    });
+
+    test('should render the add another migration menu action', async () => {
+      useLatestStatsSpy.mockReturnValue(mockedLatestStats);
+      renderTestComponent({ migrationId: '1' });
+
+      await openAppMenuOverflow();
+
+      expect(await screen.findByTestId('addAnotherMigrationButton')).toBeInTheDocument();
+      expect(screen.getByTestId('addIntegrationsButton')).toBeInTheDocument();
+      expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.menuDocumentation)).toBeInTheDocument();
+    });
+
+    test('should render integrations and documentation when no migrations exist', async () => {
+      renderTestComponent();
+
+      await openAppMenuOverflow();
+
+      expect(await screen.findByTestId('addIntegrationsButton')).toBeInTheDocument();
+      expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.menuDocumentation)).toBeInTheDocument();
+      expect(screen.queryByTestId('addAnotherMigrationButton')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('Migration selector', () => {
+    test('should render the migration selector combo box when migrations exist', () => {
+      useLatestStatsSpy.mockReturnValue(mockedLatestStats);
+      renderTestComponent({ migrationId: '1' });
+
+      expect(screen.getByTestId('siemMigrationsSelectMigrationButton')).toBeInTheDocument();
+    });
+
+    test('should not render the migration selector when no migrations exist', () => {
+      renderTestComponent();
+
+      expect(screen.queryByTestId('siemMigrationsSelectMigrationButton')).toBeNull();
+    });
+
+    test('should render the migration selector combo box when a migration is selected', () => {
+      useLatestStatsSpy.mockReturnValue(mockedLatestStats);
+      renderTestComponent({ migrationId: '1' });
+
+      expect(screen.getByTestId('siemMigrationsSelectMigrationButton')).toBeInTheDocument();
+    });
+  });
+
   describe('With MigrationId', () => {
     test('should render migration table successfully if migrationId is provided', async () => {
       useLatestStatsSpy.mockReturnValue(mockedLatestStats);
       renderTestComponent({
         migrationId: '1',
-        wrapper: TestProviders,
+        wrapper: TestProviderWrapper,
       });
 
       await waitFor(() => {
@@ -247,8 +337,8 @@ describe('Migrations: Translated Rules Page', () => {
       expect(screen.getAllByTestId(/ruleName/)).toHaveLength(2);
       expect(screen.getAllByTestId(/ruleName/)[0]).toHaveTextContent(/Converted Splunk Rule -/);
       // only successful is selectable
-      expect(screen.getAllByTitle(/Select row 1/)).toHaveLength(1);
-      expect(screen.getByTitle(/Not fully translated migration rule/)).toBeDisabled();
+      expect(screen.getAllByLabelText(/Select row 1/)).toHaveLength(1);
+      expect(screen.getByLabelText(/Not fully translated migration rule/)).toBeDisabled();
     });
   });
 });

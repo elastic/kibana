@@ -24,6 +24,7 @@ export function registerCapabilitiesRoutes(router: IRouter, resolver: Capabiliti
         },
         authc: {
           enabled: 'optional',
+          reason: 'This route can be accessed by both authenticated and unauthenticated users',
         },
       },
       validate: {
@@ -33,12 +34,16 @@ export function registerCapabilitiesRoutes(router: IRouter, resolver: Capabiliti
         body: schema.object({
           applications: schema.arrayOf(
             schema.string({
+              maxLength: 1024,
               validate: (appName) => {
                 if (!applicationIdRegexp.test(appName)) {
-                  return 'Invalid application id';
+                  return `Invalid application id: ${
+                    appName.length > 20 ? `${appName.substring(0, 20)}...` : appName
+                  }`;
                 }
               },
-            })
+            }),
+            { maxSize: 500 }
           ),
         }),
       },

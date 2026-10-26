@@ -8,17 +8,17 @@
  */
 
 import { runStartServer } from './start_server';
-import { initLogsDir } from '@kbn/test';
-import { FlagsReader } from '@kbn/dev-cli-runner';
-import { ToolingLog } from '@kbn/tooling-log';
-import { startServers, parseServerFlags } from '../servers';
+import { initLogsDir } from './init_logs_dir';
+import type { FlagsReader } from '@kbn/dev-cli-runner';
+import type { ToolingLog } from '@kbn/tooling-log';
+import { startServers, parseStartServerFlags } from '../servers';
 
-jest.mock('@kbn/test', () => ({
+jest.mock('./init_logs_dir', () => ({
   initLogsDir: jest.fn(),
 }));
 
 jest.mock('../servers', () => ({
-  parseServerFlags: jest.fn().mockReturnValue({ logsDir: 'path/to/logs/directory' }),
+  parseStartServerFlags: jest.fn().mockReturnValue({ logsDir: 'path/to/logs/directory' }),
   startServers: jest.fn().mockResolvedValue(undefined),
 }));
 
@@ -39,9 +39,9 @@ describe('runStartServer', () => {
     } as any;
   });
 
-  it('calls parseServerFlags with the correct flagsReader', async () => {
+  it('calls parseStartServerFlags with the correct flagsReader', async () => {
     await runStartServer(flagsReader, log);
-    expect(parseServerFlags).toHaveBeenCalledWith(flagsReader);
+    expect(parseStartServerFlags).toHaveBeenCalledWith(flagsReader);
   });
 
   it('initializes log directory if logsDir is provided', async () => {

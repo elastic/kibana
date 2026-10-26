@@ -49,6 +49,7 @@ interface OptionListWithFieldStatsProps
   isClearable?: boolean;
   isInvalid?: boolean;
   'data-test-subj'?: string;
+  titleId?: string;
 }
 
 export const OptionListWithFieldStats: FC<OptionListWithFieldStatsProps> = ({
@@ -65,11 +66,13 @@ export const OptionListWithFieldStats: FC<OptionListWithFieldStatsProps> = ({
   compressed,
   'aria-label': ariaLabel,
   'data-test-subj': dataTestSubj,
+  titleId,
 }) => {
   const { renderOption } = useFieldStatsTrigger<DropDownLabel>();
   const [isPopoverOpen, setPopoverOpen] = useState(false);
 
   const popoverId = useMemo(() => htmlIdGenerator()(), []);
+  const popoverPanelId = useMemo(() => htmlIdGenerator()(), []);
   const comboBoxOptions: DropDownLabel[] = useMemo(
     () =>
       Array.isArray(options)
@@ -112,14 +115,18 @@ export const OptionListWithFieldStats: FC<OptionListWithFieldStatsProps> = ({
             role="combobox"
             controlOnly
             aria-expanded={isPopoverOpen ? 'true' : 'false'}
-            aria-label={
-              placeholder ??
-              i18n.translate('xpack.ml.controls.optionsList.popover.selectOptionAriaLabel', {
-                defaultMessage: 'Select an option',
-              })
-            }
+            aria-controls={popoverPanelId}
             onChange={() => {}}
             value={value}
+            aria-labelledby={titleId}
+            aria-label={ariaLabel}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === 'ArrowDown') {
+                e.preventDefault();
+                e.stopPropagation();
+                setPopoverOpen.bind(null, true)();
+              }
+            }}
           />
         </EuiFormControlLayout>
       }
@@ -131,6 +138,7 @@ export const OptionListWithFieldStats: FC<OptionListWithFieldStatsProps> = ({
       initialFocus={'[data-test-subj=optionsList-control-search-input]'}
       closePopover={setPopoverOpen.bind(null, false)}
       panelProps={{
+        id: popoverPanelId,
         'aria-label': i18n.translate('xpack.ml.controls.optionsList.popover.ariaLabel', {
           defaultMessage: 'Popover for {ariaLabel}',
           values: { ariaLabel },

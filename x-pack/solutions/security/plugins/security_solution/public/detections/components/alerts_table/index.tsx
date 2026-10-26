@@ -5,62 +5,72 @@
  * 2.0.
  */
 
-import React, { useEffect, useState, useCallback, useMemo, memo, type FC } from 'react';
+import React, { type FC, memo, useCallback, useEffect, useMemo, useState } from 'react';
 import type { EuiDataGridRowHeightsOptions, EuiDataGridStyle } from '@elastic/eui';
 import { EuiFlexGroup } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
-import type { AlertsTableProps, RenderContext } from '@kbn/response-ops-alerts-table/types';
+import type {
+  AlertsTableProps as ResponseOpsAlertsTableProps,
+  BulkActionsConfig,
+  RenderContext as ResponseOpsRenderContext,
+} from '@kbn/response-ops-alerts-table/types';
 import { ALERT_BUILDING_BLOCK_TYPE, AlertConsumers } from '@kbn/rule-data-utils';
 import { SECURITY_SOLUTION_RULE_TYPE_IDS } from '@kbn/securitysolution-rules';
 import styled from 'styled-components';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import { getEsQueryConfig } from '@kbn/data-plugin/public';
-import { dataTableActions, dataTableSelectors, TableId } from '@kbn/securitysolution-data-table';
+import {
+  dataTableActions,
+  dataTableSelectors,
+  tableDefaults,
+  TableId,
+} from '@kbn/securitysolution-data-table';
 import type { SetOptional } from 'type-fest';
-import { noop } from 'lodash';
+import { isEmpty, noop } from 'lodash';
 import type { Alert } from '@kbn/alerting-types';
-import { AlertsTable } from '@kbn/response-ops-alerts-table';
+import { AlertsTable as ResponseOpsAlertsTable } from '@kbn/response-ops-alerts-table';
+import {
+  SECURITY_CELL_ACTIONS_CASE_EVENTS,
+  SECURITY_CELL_ACTIONS_DETAILS_FLYOUT,
+} from '@kbn/ui-actions-plugin/common/trigger_ids';
+import { PROJECT_ROUTING } from '@kbn/cps-utils';
+import { FLYOUT_ORIGIN } from '../../../common/lib/telemetry';
+import { PageScope } from '../../../data_view_manager/constants';
+import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
+import { documentFlyoutHistoryKey } from '../../../flyout_v2/shared/constants/flyout_history';
+import { PaginatedDocumentFlyout } from '../../../flyout_v2/document/pagination/paginated_document_flyout';
+import { usePaginatedFlyout } from '../../../flyout_v2/document/pagination/use_paginated_flyout';
+import type { ScopedPaginationSlice } from '../../../flyout_v2/document/pagination/types';
+import { createCellActionRenderer } from '../../../flyout_v2/shared/components/cell_actions';
 import { useAlertsContext } from './alerts_context';
 import { useBulkActionsByTableType } from '../../hooks/trigger_actions_alert_table/use_bulk_actions';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import type {
-  SecurityAlertsTableContext,
   GetSecurityAlertsTableProp,
+  SecurityAlertsTableContext,
   SecurityAlertsTableProps,
 } from './types';
 import { ActionsCell } from './actions_cell';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { useLicense } from '../../../common/hooks/use_license';
-import {
-  APP_ID,
-  CASES_FEATURE_ID,
-  ENABLE_VISUALIZATIONS_IN_FLYOUT_SETTING,
-  VIEW_SELECTION,
-} from '../../../../common/constants';
+import { APP_ID, CASES_FEATURE_ID, VIEW_SELECTION } from '../../../../common/constants';
+import { useBulkAddToChatConfig } from '../../../agent_builder/hooks/use_bulk_add_to_chat_config';
+import { useAgentBuilderAvailability } from '../../../agent_builder/hooks/use_agent_builder_availability';
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../../../timelines/components/timeline/body/constants';
 import { defaultRowRenderers } from '../../../timelines/components/timeline/body/renderers';
 import { eventsDefaultModel } from '../../../common/components/events_viewer/default_model';
-import { GraphOverlay } from '../../../timelines/components/graph_overlay';
-import {
-  useSessionView,
-  useSessionViewNavigation,
-} from '../../../timelines/components/timeline/tabs/session/use_session_view';
 import type { State } from '../../../common/store';
 import { inputsSelectors } from '../../../common/store';
 import { combineQueries } from '../../../common/lib/kuery';
 import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_query';
 import { StatefulEventContext } from '../../../common/components/events_viewer/stateful_event_context';
-import { useSourcererDataView } from '../../../sourcerer/containers';
-import type { RunTimeMappings } from '../../../sourcerer/store/model';
-import { SourcererScopeName } from '../../../sourcerer/store/model';
-import { useKibana, useUiSetting$ } from '../../../common/lib/kibana';
+import { useKibana, KibanaServices } from '../../../common/lib/kibana';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
-import { getColumns, CellValue } from '../../configurations/security_solution_detections';
+import { CellValue, getColumns } from '../../configurations/security_solution_detections';
 import { buildTimeRangeFilter } from './helpers';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
 import * as i18n from './translations';
 import { eventRenderedViewColumns } from '../../configurations/security_solution_detections/columns';
-import { getAlertsDefaultModel } from './default_config';
+import { ALERTS_TABLE_DEFAULT_ITEMS_PER_PAGE, getAlertsDefaultModel } from './default_config';
 import { useFetchNotes } from '../../../notes/hooks/use_fetch_notes';
 import { getDefaultControlColumn } from '../../../timelines/components/timeline/body/control_columns';
 import { AdditionalToolbarControls } from './additional_toolbar_controls';
@@ -68,8 +78,10 @@ import { useFetchUserProfilesFromAlerts } from '../../configurations/security_so
 import { useCellActionsOptions } from '../../hooks/trigger_actions_alert_table/use_cell_actions';
 import { useAlertsTableFieldsBrowserOptions } from '../../hooks/trigger_actions_alert_table/use_trigger_actions_browser_fields_options';
 import { AlertTableCellContextProvider } from '../../configurations/security_solution_detections/cell_value_context';
+import { useBrowserFields } from '../../../data_view_manager/hooks/use_browser_fields';
+import { DETECTIONS_TABLE_IDS } from '../../constants';
 
-const { updateIsLoading, updateTotalCount } = dataTableActions;
+const { updateIsLoading, updateItemsPerPage, updateTotalCount } = dataTableActions;
 
 // we show a maximum of 6 action buttons
 // - open flyout
@@ -81,7 +93,7 @@ const { updateIsLoading, updateTotalCount } = dataTableActions;
 const MAX_ACTION_BUTTON_COUNT = 6;
 const DEFAULT_DATA_GRID_HEIGHT = 600;
 
-const ALERT_TABLE_CONSUMERS: AlertsTableProps['consumers'] = [AlertConsumers.SIEM];
+const ALERT_TABLE_CONSUMERS: ResponseOpsAlertsTableProps['consumers'] = [AlertConsumers.SIEM];
 
 // Highlight rows with building block alerts
 const shouldHighlightRow = (alert: Alert) => !!alert[ALERT_BUILDING_BLOCK_TYPE];
@@ -90,10 +102,10 @@ interface GridContainerProps {
   hideLastPage: boolean;
 }
 
-export const FullWidthFlexGroupTable = styled(EuiFlexGroup)<{ $visible: boolean }>`
+export const FullWidthFlexGroupTable = styled(EuiFlexGroup)`
   overflow: hidden;
   margin: 0;
-  display: ${({ $visible }) => ($visible ? 'flex' : 'none')};
+  display: flex;
 `;
 
 const EuiDataGridContainer = styled.div<GridContainerProps>`
@@ -128,49 +140,68 @@ const EuiDataGridContainer = styled.div<GridContainerProps>`
   width: 100%;
 `;
 
-interface DetectionEngineAlertTableProps
+interface AlertTableProps
   extends SetOptional<SecurityAlertsTableProps, 'id' | 'ruleTypeIds' | 'query'> {
   inputFilters?: Filter[];
   tableType?: TableId;
-  sourcererScope?: SourcererScopeName;
+  pageScope?: PageScope;
   isLoading?: boolean;
   onRuleChange?: () => void;
+  disableAdditionalToolbarControls?: boolean;
+  /** Appended to the security bulk actions, unlike `additionalBulkActions`, which replaces them. */
+  additionalBulkActionItems?: BulkActionsConfig[];
+  /** Adds a "Remove from case" item to each row's more actions menu. */
+  onRemoveFromCase?: (alertId: string) => void;
 }
 
-const initialSort: GetSecurityAlertsTableProp<'initialSort'> = [
+const sort: GetSecurityAlertsTableProp<'sort'> = [
   {
     '@timestamp': {
       order: 'desc',
     },
   },
 ];
-const casesConfiguration = { featureId: CASES_FEATURE_ID, owner: [APP_ID], syncAlerts: true };
+const casesConfiguration = {
+  featureId: CASES_FEATURE_ID,
+  owner: [APP_ID],
+};
+
+/** Elasticsearch default `index.max_result_window`. `from + size` cannot exceed it. */
+const ES_MAX_RESULT_WINDOW = 10_000;
+
+const getReachableDocumentCount = (total: number, pageSize: number): number => {
+  if (total <= 0 || pageSize <= 0) return 0;
+  const reachable = Math.floor(ES_MAX_RESULT_WINDOW / pageSize) * pageSize;
+  return Math.min(total, reachable);
+};
 const emptyInputFilters: Filter[] = [];
 
-const DetectionEngineAlertsTableComponent: FC<Omit<DetectionEngineAlertTableProps, 'services'>> = ({
+const AlertsTableComponent: FC<Omit<AlertTableProps, 'services' | 'isMutedAlertsEnabled'>> = ({
   inputFilters = emptyInputFilters,
   tableType = TableId.alertsOnAlertsPage,
-  sourcererScope = SourcererScopeName.detections,
+  pageScope = PageScope.alerts,
   isLoading,
   onRuleChange,
+  disableAdditionalToolbarControls,
+  additionalBulkActionItems,
+  onRemoveFromCase,
   ...tablePropsOverrides
 }) => {
   const { id } = tablePropsOverrides;
+  const { services: kibanaServices } = useKibana();
   const {
     data,
     http,
     notifications,
+    rendering,
     fieldFormats,
     application,
     licensing,
     uiSettings,
     settings,
     cases,
-  } = useKibana().services;
-  const [visualizationInFlyoutEnabled] = useUiSetting$<boolean>(
-    ENABLE_VISUALIZATIONS_IN_FLYOUT_SETTING
-  );
-  const { alertsTableRef } = useAlertsContext();
+    agentBuilder,
+  } = kibanaServices;
 
   const { from, to, setQuery } = useGlobalTime();
 
@@ -185,7 +216,10 @@ const DetectionEngineAlertsTableComponent: FC<Omit<DetectionEngineAlertTableProp
     enableIpDetailsFlyout: true,
     onRuleChange,
   });
-  const { browserFields, sourcererDataView } = useSourcererDataView(sourcererScope);
+  const { dataView } = useDataView(pageScope);
+  const browserFields = useBrowserFields(dataView);
+  const runtimeMappings = useMemo(() => dataView.getRuntimeMappings(), [dataView]);
+
   const license = useLicense();
   const isEnterprisePlus = license.isEnterprise();
 
@@ -201,11 +235,10 @@ const DetectionEngineAlertsTableComponent: FC<Omit<DetectionEngineAlertTableProp
 
   const {
     initialized: isDataTableInitialized,
-    graphEventId,
-    sessionViewConfig,
     viewMode: tableView = eventsDefaultModel.viewMode,
     columns,
     totalCount: count,
+    itemsPerPage: reduxItemsPerPage = tableDefaults.itemsPerPage,
   } = useSelector((state: State) => getTable(state, tableType) ?? licenseDefaults);
 
   const timeRangeFilter = useMemo(() => buildTimeRangeFilter(from, to), [from, to]);
@@ -215,11 +248,11 @@ const DetectionEngineAlertsTableComponent: FC<Omit<DetectionEngineAlertTableProp
   }, [inputFilters, globalFilters, timeRangeFilter]);
 
   const combinedQuery = useMemo(() => {
-    if (browserFields != null && sourcererDataView) {
+    if (browserFields != null) {
       return combineQueries({
         config: getEsQueryConfig(uiSettings),
         dataProviders: [],
-        dataViewSpec: sourcererDataView,
+        dataView,
         browserFields,
         filters: [...allFilters],
         kqlQuery: globalQuery,
@@ -227,7 +260,7 @@ const DetectionEngineAlertsTableComponent: FC<Omit<DetectionEngineAlertTableProp
       });
     }
     return null;
-  }, [browserFields, globalQuery, sourcererDataView, uiSettings, allFilters]);
+  }, [browserFields, uiSettings, dataView, allFilters, globalQuery]);
 
   useInvalidFilterQuery({
     id: tableType,
@@ -238,7 +271,7 @@ const DetectionEngineAlertsTableComponent: FC<Omit<DetectionEngineAlertTableProp
     endDate: to,
   });
 
-  const finalBoolQuery: AlertsTableProps['query'] = useMemo(() => {
+  const finalBoolQuery: ResponseOpsAlertsTableProps['query'] = useMemo(() => {
     if (combinedQuery?.kqlError || !combinedQuery?.filterQuery) {
       return { bool: {} };
     }
@@ -268,14 +301,19 @@ const DetectionEngineAlertsTableComponent: FC<Omit<DetectionEngineAlertTableProp
   }, [isEventRenderedView]);
 
   const alertColumns = useMemo(
-    () => (columns.length ? columns : getColumns(license)),
+    () => (columns?.length ? columns : getColumns(license)),
     [columns, license]
   );
 
-  const finalBrowserFields = useMemo(
-    () => (isEventRenderedView ? {} : browserFields),
-    [isEventRenderedView, browserFields]
-  );
+  // Pass undefined (not {}) when browserFields is empty so the shared alerts table can fall back to
+  // its own /internal/rac/alerts/browser_fields fetch, recovering the field browser independently.
+  // Keep the deliberate {} for event-rendered view where browser fields are intentionally suppressed.
+  const finalBrowserFields = useMemo(() => {
+    if (isEventRenderedView) {
+      return {};
+    }
+    return isEmpty(browserFields) ? undefined : browserFields;
+  }, [isEventRenderedView, browserFields]);
 
   const finalColumns = useMemo(
     () => (isEventRenderedView ? eventRenderedViewColumns : alertColumns),
@@ -283,7 +321,83 @@ const DetectionEngineAlertsTableComponent: FC<Omit<DetectionEngineAlertTableProp
   );
 
   const { onLoad } = useFetchNotes();
-  const [tableContext, setTableContext] = useState<RenderContext<SecurityAlertsTableContext>>();
+  const [tableContext, setTableContext] =
+    useState<ResponseOpsRenderContext<SecurityAlertsTableContext>>();
+
+  const { alertsTableRef } = useAlertsContext();
+
+  // Follows the flyout when it steps onto another page. The response-ops table
+  // fetches that page itself, so the flyout does not run a second search.
+  const [tablePageIndex, setTablePageIndex] = useState(0);
+
+  // `sort` is controlled. Keep the user's choice here so the table query stays
+  // in the order they picked.
+  const [liftedSort, setLiftedSort] = useState<GetSecurityAlertsTableProp<'sort'>>(
+    () => tablePropsOverrides.sort ?? sort
+  );
+
+  // The new document details flyout must render alert field cell actions on the details-flyout
+  // trigger so the "Toggle column in table" action is available (it is not registered on the
+  // default trigger), and forward `alertsTableRef` so that action can target this imperatively
+  // controlled table. The alerts table on the Cases page uses the case-events trigger instead.
+  const renderFlyoutCellActions = useMemo(
+    () =>
+      createCellActionRenderer(tableType, {
+        triggerId:
+          tableType === TableId.alertsOnCasePage
+            ? SECURITY_CELL_ACTIONS_CASE_EVENTS
+            : SECURITY_CELL_ACTIONS_DETAILS_FLYOUT,
+        visibleCellActions: 6,
+        alertsTableRef,
+      }),
+    [alertsTableRef, tableType]
+  );
+
+  const handleFlyoutAlertUpdated = useCallback(() => {
+    alertsTableRef.current?.refresh();
+  }, [alertsTableRef]);
+
+  const getDocumentFlyoutBody = useCallback(
+    () => (
+      <PaginatedDocumentFlyout
+        renderCellActions={renderFlyoutCellActions}
+        onAlertUpdated={handleFlyoutAlertUpdated}
+      />
+    ),
+    [handleFlyoutAlertUpdated, renderFlyoutCellActions]
+  );
+
+  // Resolves the identity of the alert at an absolute index from the page the
+  // table is showing. Returns null when that page is not loaded yet; the effect
+  // below writes the identity once the table fetch settles. Only `_id` and
+  // `_index` are handed over: the flyout fetches the document itself.
+  const resolveDocument = useCallback(
+    (alertIndex: number) => {
+      if (reduxItemsPerPage <= 0 || !tableContext) return null;
+      // `tableContext.pageIndex` is what `tableContext.alerts` actually belongs to.
+      // `tablePageIndex` can update (via `onPageIndexChange`) a render ahead of
+      // `onUpdate` replacing `tableContext`, so resolving against `tablePageIndex`
+      // while reading `tableContext.alerts` can pair the new page's offset with
+      // the previous page's rows. Gating on `tableContext.pageIndex` instead
+      // means we return null (stay loading) until the context actually catches up.
+      const targetPageIndex = Math.floor(alertIndex / reduxItemsPerPage);
+      const isInPage = targetPageIndex === tableContext.pageIndex;
+      const offset = alertIndex - tableContext.pageIndex * reduxItemsPerPage;
+      const alert = isInPage ? (tableContext.alerts?.[offset] as Alert | undefined) : undefined;
+      if (!alert) return null;
+      return getDocumentIdentity(alert);
+    },
+    [reduxItemsPerPage, tableContext]
+  );
+
+  const { openDocumentFlyout, slice, setState } = usePaginatedFlyout({
+    resolveDocument,
+    renderBody: getDocumentFlyoutBody,
+    historyKey: documentFlyoutHistoryKey,
+    origin: FLYOUT_ORIGIN.ALERTS_TABLE,
+  });
+
+  const { flyoutDocumentIndex, flyoutDocumentId, hasFlyoutQueryError } = slice;
 
   const onUpdate: GetSecurityAlertsTableProp<'onUpdate'> = useCallback(
     (context) => {
@@ -300,6 +414,9 @@ const DetectionEngineAlertsTableComponent: FC<Omit<DetectionEngineAlertTableProp
           totalCount: context.alertsCount ?? -1,
         })
       );
+      setState({
+        totalDocumentCount: getReachableDocumentCount(context.alertsCount ?? 0, reduxItemsPerPage),
+      });
       setQuery({
         id: tableType,
         loading: context.isLoading ?? true,
@@ -307,8 +424,48 @@ const DetectionEngineAlertsTableComponent: FC<Omit<DetectionEngineAlertTableProp
         inspect: null,
       });
     },
-    [dispatch, setQuery, tableType]
+    [dispatch, reduxItemsPerPage, setQuery, setState, tableType]
   );
+
+  const flyoutPageIndex =
+    flyoutDocumentIndex != null && reduxItemsPerPage > 0
+      ? Math.floor(flyoutDocumentIndex / reduxItemsPerPage)
+      : null;
+
+  const onPageSizeChange = useCallback(
+    (newPageSize: number) => {
+      dispatch(updateItemsPerPage({ id: tableType, itemsPerPage: newPageSize }));
+    },
+    [dispatch, tableType]
+  );
+
+  // The pager stepped onto a row the table does not have yet: bring the table to that page, then
+  // read the identity from it. Only runs while the identity is missing, so a later refetch never
+  // repoints a flyout that has already resolved.
+  useEffect(() => {
+    if (flyoutDocumentIndex == null || flyoutPageIndex == null) return;
+    if (flyoutDocumentId != null || hasFlyoutQueryError) return;
+
+    if (tablePageIndex !== flyoutPageIndex) {
+      setTablePageIndex(flyoutPageIndex);
+      return;
+    }
+    // `tableContext` is only trustworthy once it describes the page that was asked for.
+    if (tableContext?.pageIndex !== flyoutPageIndex || tableContext.isLoadingAlerts) return;
+
+    const alert = tableContext.alerts?.[flyoutDocumentIndex - flyoutPageIndex * reduxItemsPerPage];
+    setState(alert ? getDocumentIdentity(alert) : { hasFlyoutQueryError: true });
+  }, [
+    flyoutDocumentId,
+    flyoutDocumentIndex,
+    flyoutPageIndex,
+    hasFlyoutQueryError,
+    reduxItemsPerPage,
+    setState,
+    tableContext,
+    tablePageIndex,
+  ]);
+
   const userProfiles = useFetchUserProfilesFromAlerts({
     alerts: tableContext?.alerts ?? [],
     columns: tableContext?.columns ?? [],
@@ -330,21 +487,8 @@ const DetectionEngineAlertsTableComponent: FC<Omit<DetectionEngineAlertTableProp
     ACTION_BUTTON_COUNT--;
   }
 
-  // remove space if add notes icon shouldn't be displayed
-  const securitySolutionNotesDisabled = useIsExperimentalFeatureEnabled(
-    'securitySolutionNotesDisabled'
-  );
-  if (!canReadNotes || securitySolutionNotesDisabled) {
+  if (!canReadNotes) {
     ACTION_BUTTON_COUNT--;
-  }
-  // we do not show the analyzer graph and session view icons on the cases alerts tab alerts table
-  // if the visualization in flyout advanced settings is disabled because these aren't supported inside the table
-  if (tableType === TableId.alertsOnCasePage) {
-    if (!isEnterprisePlus && !visualizationInFlyoutEnabled) {
-      ACTION_BUTTON_COUNT -= 1;
-    } else if (isEnterprisePlus && !visualizationInFlyoutEnabled) {
-      ACTION_BUTTON_COUNT -= 2;
-    }
   }
 
   const leadingControlColumn = useMemo(
@@ -361,9 +505,11 @@ const DetectionEngineAlertsTableComponent: FC<Omit<DetectionEngineAlertTableProp
       leadingControlColumn,
       userProfiles,
       tableType,
-      sourcererScope,
+      pageScope,
+      openDocumentFlyout,
+      onRemoveFromCase,
     }),
-    [leadingControlColumn, sourcererScope, tableType, userProfiles]
+    [leadingControlColumn, pageScope, openDocumentFlyout, onRemoveFromCase, tableType, userProfiles]
   );
 
   const refreshAlertsTable = useCallback(() => {
@@ -371,11 +517,25 @@ const DetectionEngineAlertsTableComponent: FC<Omit<DetectionEngineAlertTableProp
   }, [alertsTableRef]);
 
   const fieldsBrowserOptions = useAlertsTableFieldsBrowserOptions(
-    SourcererScopeName.detections,
+    pageScope,
     alertsTableRef.current?.toggleColumn
   );
   const cellActionsOptions = useCellActionsOptions(tableType, tableContext);
-  const bulkActions = useBulkActionsByTableType(tableType, finalBoolQuery, refreshAlertsTable);
+  const bulkActions = useBulkActionsByTableType(
+    tableType,
+    finalBoolQuery,
+    refreshAlertsTable,
+    runtimeMappings,
+    // A host's `query` (e.g. a case's attached alert ids) replaces finalBoolQuery on the table.
+    tablePropsOverrides.query ?? finalBoolQuery
+  );
+  const tableBulkActions = useMemo(() => {
+    if (!additionalBulkActionItems?.length) {
+      return bulkActions;
+    }
+    const [{ items, ...itemsPanel }, ...panels] = bulkActions;
+    return [{ ...itemsPanel, items: [...items, ...additionalBulkActionItems] }, ...panels];
+  }, [additionalBulkActionItems, bulkActions]);
 
   useEffect(() => {
     if (isDataTableInitialized) return;
@@ -389,23 +549,10 @@ const DetectionEngineAlertsTableComponent: FC<Omit<DetectionEngineAlertTableProp
         })),
       })
     );
+    dispatch(
+      updateItemsPerPage({ id: tableType, itemsPerPage: ALERTS_TABLE_DEFAULT_ITEMS_PER_PAGE })
+    );
   }, [dispatch, tableType, finalColumns, isDataTableInitialized]);
-
-  const { Navigation } = useSessionViewNavigation({
-    scopeId: tableType,
-  });
-
-  const { SessionView } = useSessionView({
-    scopeId: tableType,
-  });
-
-  const graphOverlay = useMemo(() => {
-    const shouldShowOverlay =
-      (graphEventId != null && graphEventId.length > 0) || sessionViewConfig != null;
-    return shouldShowOverlay ? (
-      <GraphOverlay scopeId={tableType} SessionView={SessionView} Navigation={Navigation} />
-    ) : null;
-  }, [graphEventId, tableType, sessionViewConfig, SessionView, Navigation]);
 
   const toolbarVisibility = useMemo(
     () => ({
@@ -420,13 +567,26 @@ const DetectionEngineAlertsTableComponent: FC<Omit<DetectionEngineAlertTableProp
       data,
       http,
       notifications,
+      rendering,
       fieldFormats,
       application,
       licensing,
       settings,
       cases,
+      agentBuilder,
     }),
-    [application, data, fieldFormats, http, licensing, notifications, settings, cases]
+    [
+      application,
+      data,
+      fieldFormats,
+      http,
+      licensing,
+      notifications,
+      rendering,
+      settings,
+      cases,
+      agentBuilder,
+    ]
   );
 
   /**
@@ -448,65 +608,92 @@ const DetectionEngineAlertsTableComponent: FC<Omit<DetectionEngineAlertTableProp
     [count, isEventRenderedView]
   );
 
+  const onLoaded = useCallback(({ alerts }: { alerts: Alert[] }) => onLoad(alerts), [onLoad]);
+
+  const { isAgentBuilderEnabled } = useAgentBuilderAvailability();
+  const pathway =
+    tableType === TableId.alertsOnRuleDetailsPage
+      ? ('bulk_alerts_rule_details' as const)
+      : ('bulk_alerts_alerts_page' as const);
+  const bulkAddToChatConfig = useBulkAddToChatConfig(pathway);
+
+  /**
+   * We want to hide additional controls (like grouping) if the table is being rendered
+   * in the cases page OR if the user of the table explicitly set `disableAdditionalToolbarControls`
+   * to true
+   */
+  const shouldRenderAdditionalToolbarControls =
+    disableAdditionalToolbarControls || tableType === TableId.alertsOnCasePage;
+
   if (isLoading) {
     return null;
   }
 
   return (
-    <div>
-      {graphOverlay}
-      <FullWidthFlexGroupTable $visible={!graphEventId && graphOverlay == null} gutterSize="none">
-        <StatefulEventContext.Provider value={activeStatefulEventContext}>
-          <EuiDataGridContainer hideLastPage={false}>
-            <AlertTableCellContextProvider
-              tableId={tableType}
-              sourcererScope={SourcererScopeName.detections}
-            >
-              <AlertsTable<SecurityAlertsTableContext>
-                ref={alertsTableRef}
-                // Stores separate configuration based on the view of the table
-                id={id ?? `detection-engine-alert-table-${tableType}-${tableView}`}
-                ruleTypeIds={SECURITY_SOLUTION_RULE_TYPE_IDS}
-                consumers={ALERT_TABLE_CONSUMERS}
-                query={finalBoolQuery}
-                initialSort={initialSort}
-                casesConfiguration={casesConfiguration}
-                gridStyle={gridStyle}
-                shouldHighlightRow={shouldHighlightRow}
-                rowHeightsOptions={rowHeightsOptions}
-                columns={finalColumns}
-                browserFields={finalBrowserFields}
-                onUpdate={onUpdate}
-                onLoaded={onLoad}
-                additionalContext={additionalContext}
-                height={alertTableHeight}
-                initialPageSize={50}
-                runtimeMappings={sourcererDataView?.runtimeFieldMap as RunTimeMappings}
-                toolbarVisibility={toolbarVisibility}
-                renderCellValue={CellValue}
-                renderActionsCell={ActionsCell}
-                renderAdditionalToolbarControls={
-                  tableType !== TableId.alertsOnCasePage ? AdditionalToolbarControls : undefined
-                }
-                actionsColumnWidth={leadingControlColumn.width}
-                additionalBulkActions={bulkActions}
-                fieldsBrowserOptions={
-                  tableType === TableId.alertsOnAlertsPage ||
-                  tableType === TableId.alertsOnRuleDetailsPage
-                    ? fieldsBrowserOptions
-                    : undefined
-                }
-                cellActionsOptions={cellActionsOptions}
-                showInspectButton
-                services={services}
-                {...tablePropsOverrides}
-              />
-            </AlertTableCellContextProvider>
-          </EuiDataGridContainer>
-        </StatefulEventContext.Provider>
-      </FullWidthFlexGroupTable>
-    </div>
+    <FullWidthFlexGroupTable gutterSize="none">
+      <StatefulEventContext.Provider value={activeStatefulEventContext}>
+        <EuiDataGridContainer hideLastPage={false}>
+          <AlertTableCellContextProvider tableId={tableType} sourcererScope={pageScope}>
+            <ResponseOpsAlertsTable<SecurityAlertsTableContext>
+              key={isEventRenderedView ? 'eventRenderedView' : 'defaultView'}
+              ref={alertsTableRef}
+              // Stores separate configuration based on the view of the table
+              id={id ?? `detection-engine-alert-table-${tableType}-${tableView}`}
+              ruleTypeIds={SECURITY_SOLUTION_RULE_TYPE_IDS}
+              consumers={ALERT_TABLE_CONSUMERS}
+              projectRouting={PROJECT_ROUTING.ORIGIN}
+              query={finalBoolQuery}
+              sort={liftedSort}
+              onSortChange={setLiftedSort}
+              casesConfiguration={casesConfiguration}
+              gridStyle={gridStyle}
+              shouldHighlightRow={shouldHighlightRow}
+              rowHeightsOptions={rowHeightsOptions}
+              columns={finalColumns}
+              browserFields={finalBrowserFields}
+              onUpdate={onUpdate}
+              onLoaded={onLoaded}
+              additionalContext={additionalContext}
+              height={alertTableHeight}
+              isMutedAlertsEnabled={false}
+              pageSize={reduxItemsPerPage}
+              onPageSizeChange={onPageSizeChange}
+              pageIndex={tablePageIndex}
+              onPageIndexChange={setTablePageIndex}
+              expandedAlertIndex={flyoutDocumentIndex}
+              renderExpandedAlertView={null}
+              runtimeMappings={runtimeMappings}
+              toolbarVisibility={toolbarVisibility}
+              renderCellValue={CellValue}
+              renderActionsCell={ActionsCell}
+              renderAdditionalToolbarControls={
+                shouldRenderAdditionalToolbarControls ? undefined : AdditionalToolbarControls
+              }
+              actionsColumnWidth={leadingControlColumn.width}
+              additionalBulkActions={tableBulkActions}
+              fieldsBrowserOptions={
+                DETECTIONS_TABLE_IDS.some((tableId) => tableId === tableType)
+                  ? fieldsBrowserOptions
+                  : undefined
+              }
+              cellActionsOptions={cellActionsOptions}
+              showInspectButton
+              showCsvExportButton
+              kibanaVersion={KibanaServices.getKibanaVersion()}
+              services={services}
+              bulkAddToChatConfig={isAgentBuilderEnabled ? bulkAddToChatConfig : undefined}
+              {...tablePropsOverrides}
+            />
+          </AlertTableCellContextProvider>
+        </EuiDataGridContainer>
+      </StatefulEventContext.Provider>
+    </FullWidthFlexGroupTable>
   );
 };
 
-export const DetectionEngineAlertsTable = memo(DetectionEngineAlertsTableComponent);
+const getDocumentIdentity = (alert: Alert): Partial<ScopedPaginationSlice> => ({
+  flyoutDocumentId: alert._id,
+  flyoutDocumentIndexName: alert._index,
+});
+
+export const AlertsTable = memo(AlertsTableComponent);

@@ -22,16 +22,22 @@ import {
   MANAGEMENT_PAGE_SIZE_OPTIONS,
   MANAGEMENT_ROUTING_BLOCKLIST_PATH,
   MANAGEMENT_ROUTING_ENDPOINTS_PATH,
+  MANAGEMENT_ROUTING_ENDPOINT_EXCEPTIONS_PATH,
   MANAGEMENT_ROUTING_EVENT_FILTERS_PATH,
   MANAGEMENT_ROUTING_HOST_ISOLATION_EXCEPTIONS_PATH,
   MANAGEMENT_ROUTING_POLICIES_PATH,
   MANAGEMENT_ROUTING_POLICY_DETAILS_BLOCKLISTS_PATH,
+  MANAGEMENT_ROUTING_POLICY_DETAILS_CUSTOM_YARA_SIGNATURES_PATH,
+  MANAGEMENT_ROUTING_POLICY_DETAILS_ENDPOINT_EXCEPTIONS_PATH,
   MANAGEMENT_ROUTING_POLICY_DETAILS_EVENT_FILTERS_PATH,
   MANAGEMENT_ROUTING_POLICY_DETAILS_FORM_PATH,
   MANAGEMENT_ROUTING_POLICY_DETAILS_HOST_ISOLATION_EXCEPTIONS_PATH,
   MANAGEMENT_ROUTING_POLICY_DETAILS_PROTECTION_UPDATES_PATH,
   MANAGEMENT_ROUTING_POLICY_DETAILS_TRUSTED_APPS_PATH,
+  MANAGEMENT_ROUTING_POLICY_DETAILS_TRUSTED_DEVICES_PATH,
   MANAGEMENT_ROUTING_TRUSTED_APPS_PATH,
+  MANAGEMENT_ROUTING_TRUSTED_DEVICES_PATH,
+  MANAGEMENT_ROUTING_CUSTOM_YARA_SIGNATURES_PATH,
 } from './constants';
 import { isDefaultOrMissing, getArtifactListPageUrlPath } from './url_routing';
 
@@ -137,6 +143,18 @@ export const getPolicyTrustedAppsPath = (policyId: string, search?: string) => {
   })}${appendSearch(search)}`;
 };
 
+export const getPolicyTrustedDevicesPath = (
+  policyId: string,
+  location?: Partial<PolicyDetailsArtifactsPageLocation>
+) => {
+  return `${generatePath(MANAGEMENT_ROUTING_POLICY_DETAILS_TRUSTED_DEVICES_PATH, {
+    tabName: AdministrationSubTab.policies,
+    policyId,
+  })}${appendSearch(
+    querystring.stringify(normalizePolicyDetailsArtifactsListPageLocation(location))
+  )}`;
+};
+
 export const getPolicyEventFiltersPath = (
   policyId: string,
   location?: Partial<PolicyDetailsArtifactsPageLocation>
@@ -212,6 +230,16 @@ export const getTrustedAppsListPath = (location?: Partial<ArtifactListPageUrlPar
   return getArtifactListPageUrlPath(path, location);
 };
 
+export const getTrustedDevicesListPath = (
+  location?: Partial<ArtifactListPageUrlParams>
+): string => {
+  const path = generatePath(MANAGEMENT_ROUTING_TRUSTED_DEVICES_PATH, {
+    tabName: AdministrationSubTab.trustedDevices,
+  });
+
+  return getArtifactListPageUrlPath(path, location);
+};
+
 export const extractPolicyDetailsArtifactsListPageLocation = (
   query: querystring.ParsedUrlQuery
 ): PolicyDetailsArtifactsPageLocation => {
@@ -281,6 +309,29 @@ export const getBlocklistsListPath = (location?: Partial<ArtifactListPageUrlPara
   return getArtifactListPageUrlPath(path, location);
 };
 
+export const getCustomYaraSignaturesListPath = (
+  location?: Partial<ArtifactListPageUrlParams>
+): string => {
+  const path = generatePath(MANAGEMENT_ROUTING_CUSTOM_YARA_SIGNATURES_PATH, {
+    tabName: AdministrationSubTab.customYaraSignatures,
+  });
+
+  return getArtifactListPageUrlPath(path, location);
+};
+
+export const getPolicyCustomYaraSignaturesPath = (
+  policyId: string,
+  location?: Partial<PolicyDetailsArtifactsPageLocation>
+) => {
+  const path = generatePath(MANAGEMENT_ROUTING_POLICY_DETAILS_CUSTOM_YARA_SIGNATURES_PATH, {
+    tabName: AdministrationSubTab.policies,
+    policyId,
+  });
+  return `${path}${appendSearch(
+    querystring.stringify(normalizePolicyDetailsArtifactsListPageLocation(location))
+  )}`;
+};
+
 export const getPolicyBlocklistsPath = (
   policyId: string,
   location?: Partial<PolicyDetailsArtifactsPageLocation>
@@ -290,6 +341,28 @@ export const getPolicyBlocklistsPath = (
     policyId,
   });
   return `${path}${appendSearch(
+    querystring.stringify(normalizePolicyDetailsArtifactsListPageLocation(location))
+  )}`;
+};
+
+export const getEndpointExceptionsListPath = (
+  location?: Partial<ArtifactListPageUrlParams>
+): string => {
+  const path = generatePath(MANAGEMENT_ROUTING_ENDPOINT_EXCEPTIONS_PATH, {
+    tabName: AdministrationSubTab.endpointExceptions,
+  });
+
+  return getArtifactListPageUrlPath(path, location);
+};
+
+export const getPolicyEndpointExceptionsPath = (
+  policyId: string,
+  location?: Partial<PolicyDetailsArtifactsPageLocation>
+) => {
+  return `${generatePath(MANAGEMENT_ROUTING_POLICY_DETAILS_ENDPOINT_EXCEPTIONS_PATH, {
+    tabName: AdministrationSubTab.policies,
+    policyId,
+  })}${appendSearch(
     querystring.stringify(normalizePolicyDetailsArtifactsListPageLocation(location))
   )}`;
 };

@@ -11,7 +11,7 @@ import React, { Component } from 'react';
 import type { estypes } from '@elastic/elasticsearch';
 import { EuiSearchBar, type EuiSearchBarOnChangeArgs, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Request } from '../../../../../../common/adapters/request/types';
+import type { Request } from '../../../../../../common/adapters/request/types';
 import type { DetailViewProps } from '../types';
 import { ClusterHealth, ClustersHealth } from './clusters_health';
 import { ClustersTable } from './clusters_table';
@@ -23,11 +23,15 @@ interface State {
 }
 
 export class ClustersView extends Component<DetailViewProps, State> {
-  static shouldShow = (request: Request) =>
-    Boolean(
-      (request.response?.json as { rawResponse?: estypes.SearchResponse })?.rawResponse?._shards ||
-        (request.response?.json as { rawResponse?: estypes.SearchResponse })?.rawResponse?._clusters
-    );
+  static shouldShow = (request: Request, isCpsMultiProject?: boolean) =>
+    isCpsMultiProject
+      ? false
+      : Boolean(
+          (request.response?.json as { rawResponse?: estypes.SearchResponse })?.rawResponse
+            ?._shards ||
+            (request.response?.json as { rawResponse?: estypes.SearchResponse })?.rawResponse
+              ?._clusters
+        );
 
   constructor(props: DetailViewProps) {
     super(props);
@@ -39,7 +43,7 @@ export class ClustersView extends Component<DetailViewProps, State> {
   }
 
   _onSearchChange = ({ query, error }: EuiSearchBarOnChangeArgs) => {
-    if (!error) {
+    if (!error && query) {
       this.setState({ clusters: findClusters(this.props.request, query) });
     }
   };

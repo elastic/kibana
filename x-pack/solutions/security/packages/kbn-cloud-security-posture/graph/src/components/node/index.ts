@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+export { EntityCardNode } from './entity_card_node';
 export { DiamondNode } from './diamond_node';
 export { EllipseNode } from './ellipse_node';
 export { HexagonNode } from './hexagon_node';
 export { PentagonNode } from './pentagon_node';
 export { RectangleNode } from './rectangle_node';
-export { LabelNode } from './label_node';
+export { LabelNode } from './label_node/label_node';
 export { EdgeGroupNode } from './edge_group_node';
+export { RelationshipNode } from './relationship_node/relationship_node';

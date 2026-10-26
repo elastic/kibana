@@ -7,18 +7,16 @@
 
 import { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import { getWorkpad } from '../../../state/selectors/workpad';
 import { setWorkpad } from '../../../state/actions/workpad';
 // @ts-expect-error
 import { setAssets } from '../../../state/actions/assets';
 // @ts-expect-error
 import { setZoomScale } from '../../../state/actions/transient';
-import { CanvasWorkpad } from '../../../../types';
-import {
-  ResolveWorkpadResponse,
-  getCanvasWorkpadService,
-} from '../../../services/canvas_workpad_service';
+import type { CanvasWorkpad } from '../../../../types';
+import type { ResolveWorkpadResponse } from '../../../services/canvas_workpad_service';
+import { getCanvasWorkpadService } from '../../../services/canvas_workpad_service';
 import { spacesService } from '../../../services/kibana_services';
 
 const getWorkpadLabel = () =>

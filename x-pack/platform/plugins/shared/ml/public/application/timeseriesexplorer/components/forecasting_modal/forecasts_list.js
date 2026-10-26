@@ -12,7 +12,14 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 
-import { useEuiTheme, EuiButtonIcon, EuiIconTip, EuiInMemoryTable, EuiText } from '@elastic/eui';
+import {
+  useEuiTheme,
+  EuiButtonIcon,
+  EuiIconTip,
+  EuiInMemoryTable,
+  EuiText,
+  EuiToolTip,
+} from '@elastic/eui';
 
 import { formatHumanReadableDateTimeSeconds } from '@kbn/ml-date-utils';
 import { i18n } from '@kbn/i18n';
@@ -64,11 +71,13 @@ function getColumns(viewForecast) {
         );
 
         return (
-          <EuiButtonIcon
-            onClick={() => viewForecast(forecast.forecast_id)}
-            iconType="singleMetricViewer"
-            aria-label={viewForecastAriaLabel}
-          />
+          <EuiToolTip content={viewForecastAriaLabel} disableScreenReaderOutput>
+            <EuiButtonIcon
+              onClick={() => viewForecast(forecast.forecast_id)}
+              iconType="singleMetricViewer"
+              aria-label={viewForecastAriaLabel}
+            />
+          </EuiToolTip>
         );
       },
     },
@@ -101,7 +110,7 @@ export function ForecastsList({ forecasts, viewForecast, selectedForecastId }) {
         &nbsp;
         <EuiIconTip
           size="s"
-          type="questionInCircle"
+          type="question"
           content={
             <FormattedMessage
               id="xpack.ml.timeSeriesExplorer.forecastsList.listsOfFiveRecentlyRunForecastsTooltip"
@@ -116,6 +125,12 @@ export function ForecastsList({ forecasts, viewForecast, selectedForecastId }) {
         pagination={false}
         data-test-subj="mlModalForecastTable"
         rowProps={getRowProps}
+        tableCaption={i18n.translate(
+          'xpack.ml.timeSeriesExplorer.forecastsList.previousForecastsTableCaption',
+          {
+            defaultMessage: 'Previously run forecasts',
+          }
+        )}
       />
     </EuiText>
   );

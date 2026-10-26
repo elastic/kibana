@@ -8,7 +8,8 @@
 import { SavedObjectsUtils } from '@kbn/core/server';
 
 import type { Owner } from '../../../common/constants/types';
-import { FileAttachmentMetadataPayloadRt, type Case } from '../../../common/types/domain';
+import type { Case } from '../../../common/types/domain';
+import { FileAttachmentMetadataPayloadSchema } from '../../../common/types/domain';
 import type { CasesClient, CasesClientArgs } from '..';
 import type { AddFileArgs } from './types';
 
@@ -17,9 +18,9 @@ import { createCaseError } from '../../common/error';
 import { validateMaxUserActions } from '../../common/validators';
 import { constructFileKindIdByOwner } from '../../../common/files';
 import { Operations } from '../../authorization';
-import { validateRegisteredAttachments } from './validators';
+import { validateUnifiedAttachments } from './validators';
 import { buildAttachmentRequestFromFileJSON } from '../utils';
-import { decodeWithExcessOrThrow } from '../../common/runtime_types';
+import { decodeWithExcessOrThrowZod } from '../../common/runtime_types';
 
 /**
  * Create a file attachment to a case.
@@ -33,8 +34,7 @@ export const addFile = async (
   const {
     logger,
     authorization,
-    persistableStateAttachmentTypeRegistry,
-    externalReferenceAttachmentTypeRegistry,
+    unifiedAttachmentTypeRegistry,
     services: { userActionService },
     fileService,
   } = clientArgs;
@@ -42,7 +42,7 @@ export const addFile = async (
   let createdFile;
 
   try {
-    decodeWithExcessOrThrow(FileAttachmentMetadataPayloadRt)({
+    decodeWithExcessOrThrowZod(FileAttachmentMetadataPayloadSchema)({
       filename,
       mimeType,
     });
@@ -78,10 +78,9 @@ export const addFile = async (
       fileMetadata: createdFile.toJSON(),
     });
 
-    validateRegisteredAttachments({
+    validateUnifiedAttachments({
       query: commentReq,
-      persistableStateAttachmentTypeRegistry,
-      externalReferenceAttachmentTypeRegistry,
+      unifiedAttachmentTypeRegistry,
     });
 
     const createdDate = new Date().toISOString();

@@ -6,13 +6,14 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Observable, from, takeUntil } from 'rxjs';
-import { TagWithRelations } from '../../../common/types';
+import type { Observable } from 'rxjs';
+import { from, takeUntil } from 'rxjs';
+import type { TagWithRelations } from '../../../common/types';
 import { getAssignFlyoutOpener } from '../../components/assign_flyout';
-import { ITagAssignmentService } from '../../services/assignments';
-import { ITagsCache } from '../../services/tags';
-import { StartServices } from '../../types';
-import { TagAction } from './types';
+import type { ITagAssignmentService } from '../../services/assignments';
+import type { ITagsCache } from '../../services/tags';
+import type { StartServices } from '../../types';
+import type { TagAction } from './types';
 
 interface GetAssignActionOptions extends StartServices {
   tagCache: ITagsCache;

@@ -6,9 +6,8 @@
  */
 import React, { useCallback, useMemo, useState } from 'react';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
+import type { CriteriaWithPagination, EuiBasicTableColumn, EuiSearchBarProps } from '@elastic/eui';
 import {
-  CriteriaWithPagination,
-  EuiBasicTableColumn,
   EuiButtonEmpty,
   EuiCheckbox,
   EuiContextMenuItem,
@@ -18,10 +17,9 @@ import {
   EuiHorizontalRule,
   EuiInMemoryTable,
   EuiPopover,
-  EuiSearchBarProps,
   EuiText,
 } from '@elastic/eui';
-import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SESSION_STORAGE_FIELDS_MODAL_SHOW_SELECTED } from '../../../common/constants';
@@ -50,6 +48,13 @@ const VIEW_VALUE_SELECTED = i18n.translate('xpack.csp.dataTable.fieldsModal.view
 const VIEW_VALUE_ALL = i18n.translate('xpack.csp.dataTable.fieldsModal.viewAll', {
   defaultMessage: 'all',
 });
+
+const VIEW_SELECTOR_ARIA_LABEL = i18n.translate(
+  'xpack.csp.dataTable.fieldsModal.viewSelectorAriaLabel',
+  {
+    defaultMessage: 'Field view options',
+  }
+);
 
 export interface FieldsSelectorTableProps {
   dataView: DataView;
@@ -144,6 +149,10 @@ export const FieldsSelectorTable = ({
           checked={columns.includes(id)}
           id={`cloud-security-fields-selector-item-${id}`}
           data-test-subj={`cloud-security-fields-selector-item-${id}`}
+          aria-label={i18n.translate('xpack.csp.dataTable.fieldsModal.toggleFieldColumnAriaLabel', {
+            defaultMessage: 'Toggle {fieldName} column',
+            values: { fieldName: id },
+          })}
           onChange={(e) => {
             const isChecked = e.target.checked;
             return isChecked ? onAddColumn(id) : onRemoveColumn(id);
@@ -201,6 +210,7 @@ export const FieldsSelectorTable = ({
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiPopover
+            aria-label={VIEW_SELECTOR_ARIA_LABEL}
             panelPaddingSize="none"
             anchorPosition="downRight"
             isOpen={isPopoverOpen}
@@ -209,7 +219,7 @@ export const FieldsSelectorTable = ({
               <EuiButtonEmpty
                 data-test-subj="viewSelectorButton"
                 size="xs"
-                iconType="arrowDown"
+                iconType="chevronSingleDown"
                 iconSide="right"
                 onClick={togglePopover}
               >
@@ -219,7 +229,6 @@ export const FieldsSelectorTable = ({
           >
             <EuiContextMenuPanel
               data-test-subj="viewSelectorMenu"
-              size="s"
               items={[
                 <EuiContextMenuItem
                   data-test-subj="viewSelectorOption-all"

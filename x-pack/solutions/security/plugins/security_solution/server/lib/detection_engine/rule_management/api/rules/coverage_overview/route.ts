@@ -6,7 +6,8 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
-import type { IKibanaResponse } from '@kbn/core/server';
+import type { IKibanaResponse, Logger } from '@kbn/core/server';
+import { RULES_API_READ } from '@kbn/security-solution-features/constants';
 import type { CoverageOverviewResponse } from '../../../../../../../common/api/detection_engine';
 import {
   CoverageOverviewRequestBody,
@@ -17,14 +18,14 @@ import { buildRouteValidation } from '../../../../../../utils/build_validation/r
 import { buildSiemResponse } from '../../../../routes/utils';
 import { handleCoverageOverviewRequest } from './handle_coverage_overview_request';
 
-export const getCoverageOverviewRoute = (router: SecuritySolutionPluginRouter) => {
+export const getCoverageOverviewRoute = (router: SecuritySolutionPluginRouter, logger: Logger) => {
   router.versioned
     .post({
       access: 'internal',
       path: RULE_MANAGEMENT_COVERAGE_OVERVIEW_URL,
       security: {
         authz: {
-          requiredPrivileges: ['securitySolution'],
+          requiredPrivileges: [RULES_API_READ],
         },
       },
     })
@@ -42,10 +43,16 @@ export const getCoverageOverviewRoute = (router: SecuritySolutionPluginRouter) =
 
         try {
           const ctx = await context.resolve(['alerting']);
+          const securitySolution = await context.securitySolution;
+          const mitreDataClient = securitySolution.getMitreDataClient();
 
           const responseData = await handleCoverageOverviewRequest({
             params: request.body,
-            deps: { rulesClient: await ctx.alerting.getRulesClient() },
+            deps: {
+              rulesClient: await ctx.alerting.getRulesClient(),
+              mitreDataClient,
+              logger,
+            },
           });
 
           return response.ok({

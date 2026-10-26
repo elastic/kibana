@@ -10,6 +10,7 @@ import moment from 'moment-timezone';
 moment.tz.setDefault('UTC');
 
 import { getFormattedCheckTime } from './get_formatted_check_time';
+import { EMPTY_STAT } from '../../../../../constants';
 
 describe('getFormattedCheckTime', () => {
   it('returns formatted check time', () => {
@@ -21,6 +22,13 @@ describe('getFormattedCheckTime', () => {
     it('returns -- string', () => {
       const formattedCheckTime = getFormattedCheckTime(Infinity);
       expect(formattedCheckTime).toBe('--');
+    });
+  });
+
+  describe('when check time is not provided', () => {
+    it(`returns ${EMPTY_STAT} string`, () => {
+      const formattedCheckTime = getFormattedCheckTime();
+      expect(formattedCheckTime).toBe(EMPTY_STAT);
     });
   });
 });

@@ -9,11 +9,11 @@ import sinon from 'sinon';
 import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
 import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
+import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { TaskRunnerFactory } from './task_runner_factory';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import {
   loggingSystemMock,
-  httpServiceMock,
   savedObjectsServiceMock,
   elasticsearchServiceMock,
   uiSettingsServiceMock,
@@ -32,6 +32,7 @@ import { alertsServiceMock } from '../alerts_service/alerts_service.mock';
 import { schema } from '@kbn/config-schema';
 import { ConnectorAdapterRegistry } from '../connector_adapters/connector_adapter_registry';
 import type { TaskRunnerContext } from './types';
+import { ApiKeyType } from './types';
 import { backfillClientMock } from '../backfill_client/backfill_client.mock';
 import { rulesSettingsServiceMock } from '../rules_settings/rules_settings_service.mock';
 import { maintenanceWindowsServiceMock } from './maintenance_windows/maintenance_windows_service.mock';
@@ -110,7 +111,6 @@ describe('Task Runner Factory', () => {
     actionsPlugin: actionsMock.createStart(),
     alertsService: mockAlertService,
     backfillClient,
-    basePathService: httpServiceMock.createBasePath(),
     cancelAlertsOnRuleTimeout: true,
     connectorAdapterRegistry,
     data: dataPlugin,
@@ -132,6 +132,7 @@ describe('Task Runner Factory', () => {
     usageCounter: mockUsageCounter,
     isServerless: false,
     getEventLogClient: jest.fn().mockReturnValue(eventLogClientMock.create()),
+    apiKeyType: ApiKeyType.ES,
   };
 
   beforeEach(() => {
@@ -149,14 +150,18 @@ describe('Task Runner Factory', () => {
   test(`throws an error if create is called when factory isn't initialized`, () => {
     const factory = new TaskRunnerFactory();
     expect(() =>
-      factory.create(ruleType, { taskInstance: mockedTaskInstance }, inMemoryMetrics)
+      factory.create(
+        ruleType,
+        taskManagerMock.createRunContext({ taskInstance: mockedTaskInstance }),
+        inMemoryMetrics
+      )
     ).toThrowErrorMatchingInlineSnapshot(`"TaskRunnerFactory not initialized"`);
   });
 
   test(`throws an error if createAdHoc is called when factory isn't initialized`, () => {
     const factory = new TaskRunnerFactory();
     expect(() =>
-      factory.createAdHoc({ taskInstance: mockedTaskInstance })
+      factory.createAdHoc(taskManagerMock.createRunContext({ taskInstance: mockedTaskInstance }))
     ).toThrowErrorMatchingInlineSnapshot(`"TaskRunnerFactory not initialized"`);
   });
 });

@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import type { PropsWithChildren } from 'react';
+import type { ReactElement } from 'react';
 import React, { memo, useMemo } from 'react';
 import type { CommonProps } from '@elastic/eui';
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiIcon, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 import styled from 'styled-components';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import {
   GLOBAL_EFFECT_SCOPE,
@@ -30,11 +29,6 @@ import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 //          So something like: `<EffectScope perPolicyCount={3} />`
 //          This should display it as "Applied to 3 policies", but NOT as a menu with links
 
-const POLICY_DETAILS_NOT_ACCESSIBLE = i18n.translate(
-  'xpack.securitySolution.effectScope.policyDetailsNotAccessible',
-  { defaultMessage: 'Policy is no longer accessible' }
-);
-
 const POLICY_DETAILS_NOT_ACCESSIBLE_IN_ACTIVE_SPACE = i18n.translate(
   'xpack.securitySolution.effectScope.policyDetailsNotAccessibleInActiveSpace',
   { defaultMessage: 'Policy is not accessible from the current space' }
@@ -44,9 +38,6 @@ const StyledWithContextMenuShiftedWrapper = styled('div')`
   margin-left: -10px;
 `;
 
-const StyledEuiButtonEmpty = styled(EuiButtonEmpty)`
-  height: 10px !important;
-`;
 export interface EffectScopeProps extends Pick<CommonProps, 'data-test-subj'> {
   /** If set (even if empty), then effect scope will be policy specific. Else, it shows as global */
   policies?: ContextMenuItemNavByRouterProps[];
@@ -73,7 +64,7 @@ export const EffectScope = memo<EffectScopeProps>(
         data-test-subj={dataTestSubj}
       >
         <EuiFlexItem grow={false}>
-          <EuiIcon type={icon} size="s" />
+          <EuiIcon type={icon} size="s" aria-hidden={true} />
         </EuiFlexItem>
         <EuiFlexItem grow={false} data-test-subj={getTestId('value')}>
           <TextValueDisplay size="xs">{label}</TextValueDisplay>
@@ -89,7 +80,9 @@ export const EffectScope = memo<EffectScopeProps>(
           canReadPolicies={canReadPolicyManagement}
           data-test-subj={getTestId('popupMenu')}
         >
-          {effectiveScopeLabel}
+          <EuiButtonEmpty size="xs" data-test-subj={getTestId('popupMenu-button')}>
+            {effectiveScopeLabel}
+          </EuiButtonEmpty>
         </WithContextMenu>
       </StyledWithContextMenuShiftedWrapper>
     ) : (
@@ -99,15 +92,14 @@ export const EffectScope = memo<EffectScopeProps>(
 );
 EffectScope.displayName = 'EffectScope';
 
-type WithContextMenuProps = Pick<CommonProps, 'data-test-subj'> &
-  PropsWithChildren<{
-    policies: Required<EffectScopeProps>['policies'];
-  }> & {
-    canReadPolicies: boolean;
-    loadingPoliciesList?: boolean;
-  };
+type WithContextMenuProps = Pick<CommonProps, 'data-test-subj'> & {
+  policies: Required<EffectScopeProps>['policies'];
+  canReadPolicies: boolean;
+  loadingPoliciesList?: boolean;
+  children: ReactElement;
+};
 
-const WithContextMenu = memo<WithContextMenuProps>(
+export const WithContextMenu = memo<WithContextMenuProps>(
   ({
     policies,
     loadingPoliciesList = false,
@@ -115,9 +107,21 @@ const WithContextMenu = memo<WithContextMenuProps>(
     children,
     'data-test-subj': dataTestSubj,
   }) => {
-    const getTestId = useTestIdGenerator(dataTestSubj);
-    const isSpacesEnabled = useIsExperimentalFeatureEnabled(
-      'endpointManagementSpaceAwarenessEnabled'
+    const { euiTheme } = useEuiTheme();
+    const policyLinkCss = useMemo(
+      () => css`
+        &:is(a):not([aria-disabled='true']) {
+          color: ${euiTheme.colors.textPrimary};
+          background-color: transparent;
+
+          &:hover,
+          &:focus {
+            background-color: transparent;
+            text-decoration: underline;
+          }
+        }
+      `,
+      [euiTheme]
     );
 
     const menuItems: ContextMenuItemNavByRouterProps[] = useMemo(() => {
@@ -126,26 +130,12 @@ const WithContextMenu = memo<WithContextMenuProps>(
 
         return {
           ...policyMenuItem,
-          hoverInfo:
-            hasHref && canReadPolicies ? (
-              <StyledEuiButtonEmpty flush="right" size="s" iconSide="right" iconType="popout">
-                <FormattedMessage
-                  id="xpack.securitySolution.contextMenuItemByRouter.viewDetails"
-                  defaultMessage="View details"
-                />
-              </StyledEuiButtonEmpty>
-            ) : undefined,
+          css: policyLinkCss,
           disabled: !hasHref,
-          toolTipContent: !hasHref ? (
-            <>
-              {isSpacesEnabled
-                ? POLICY_DETAILS_NOT_ACCESSIBLE_IN_ACTIVE_SPACE
-                : POLICY_DETAILS_NOT_ACCESSIBLE}
-            </>
-          ) : undefined,
+          toolTipContent: !hasHref ? POLICY_DETAILS_NOT_ACCESSIBLE_IN_ACTIVE_SPACE : undefined,
         };
       });
-    }, [canReadPolicies, isSpacesEnabled, policies]);
+    }, [policies, policyLinkCss]);
 
     return (
       <ContextMenuWithRouterSupport
@@ -156,11 +146,7 @@ const WithContextMenu = memo<WithContextMenuProps>(
         anchorPosition={policies.length > 1 ? 'rightCenter' : 'rightUp'}
         data-test-subj={dataTestSubj}
         loading={loadingPoliciesList}
-        button={
-          <EuiButtonEmpty size="xs" data-test-subj={getTestId('button')}>
-            {children}
-          </EuiButtonEmpty>
-        }
+        button={children}
         title={POLICY_EFFECT_SCOPE_TITLE(policies.length)}
         isNavigationDisabled={!canReadPolicies}
       />

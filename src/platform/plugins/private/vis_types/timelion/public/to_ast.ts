@@ -8,8 +8,8 @@
  */
 
 import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/public';
-import { Vis } from '@kbn/visualizations-plugin/public';
-import { TimelionExpressionFunctionDefinition, TimelionVisParams } from './timelion_vis_fn';
+import type { Vis } from '@kbn/visualizations-plugin/public';
+import type { TimelionExpressionFunctionDefinition, TimelionVisParams } from './timelion_vis_fn';
 
 export const toExpressionAst = (vis: Vis<TimelionVisParams>) => {
   const { expression, interval } = vis.params;

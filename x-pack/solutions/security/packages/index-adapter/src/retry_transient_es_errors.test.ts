@@ -52,7 +52,7 @@ describe('retryTransientEsErrors', () => {
   });
 
   it('should throw non-transient errors', async () => {
-    const error = new EsErrors.ResponseError({ statusCode: 429 } as DiagnosticResult);
+    const error = new EsErrors.ResponseError({ statusCode: 403 } as DiagnosticResult);
     const mockFn = jest.fn();
     mockFn.mockRejectedValueOnce(error);
 

@@ -31,7 +31,7 @@ export const BackToInvestigatedAlert = ({
     <div css={styles.container}>
       <EuiBadge
         css={css([styles.jumpBackBadge, styles.buttonStyle])}
-        iconType={isDisplayedAbove ? 'arrowUp' : 'arrowDown'}
+        iconType={isDisplayedAbove ? 'chevronSingleUp' : 'chevronSingleDown'}
         iconSide="right"
         onClick={onClick}
         onClickAriaLabel="Back to investigated alert"

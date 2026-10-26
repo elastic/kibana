@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
-import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
+import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 
 export function getTimeZone(uiSettings?: IUiSettingsClient) {
   const kibanaTimeZone = uiSettings?.get<'Browser' | string>(UI_SETTINGS.DATEFORMAT_TZ);

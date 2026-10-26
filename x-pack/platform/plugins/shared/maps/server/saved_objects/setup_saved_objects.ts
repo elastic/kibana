@@ -11,11 +11,11 @@ import type { SavedObjectMigrationMap } from '@kbn/core/server';
 import type { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
 import { mergeSavedObjectMigrationMaps } from '@kbn/core/server';
 import { ANALYTICS_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
-import { APP_ICON, getFullPath } from '../../common/constants';
+import { getFullPath } from '../../common/constants';
 import { CONTENT_ID } from '../../common/content_management';
 import { migrateDataPersistedState } from '../../common/migrations/migrate_data_persisted_state';
 import { migrateDataViewsPersistedState } from '../../common/migrations/migrate_data_view_persisted_state';
-import type { MapAttributes } from '../../common/content_management';
+import type { StoredMapAttributes } from './types';
 import { savedObjectMigrations } from './saved_object_migrations';
 
 export function setupSavedObjects(
@@ -23,7 +23,7 @@ export function setupSavedObjects(
   getFilterMigrations: () => MigrateFunctionsObject,
   getDataViewMigrations: () => MigrateFunctionsObject
 ) {
-  core.savedObjects.registerType<MapAttributes>({
+  core.savedObjects.registerType<StoredMapAttributes>({
     name: CONTENT_ID,
     indexPattern: ANALYTICS_SAVED_OBJECT_INDEX,
     hidden: false,
@@ -41,7 +41,7 @@ export function setupSavedObjects(
       },
     },
     management: {
-      icon: APP_ICON,
+      icon: 'map',
       defaultSearchField: 'title',
       importableAndExportable: true,
       getTitle(obj) {
@@ -74,7 +74,7 @@ export const getMapsFilterMigrations = (
 ): MigrateFunctionsObject =>
   mapValues(
     filterMigrations,
-    (filterMigration) => (doc: SavedObjectUnsanitizedDoc<MapAttributes>) => {
+    (filterMigration) => (doc: SavedObjectUnsanitizedDoc<StoredMapAttributes>) => {
       try {
         const attributes = migrateDataPersistedState(doc, filterMigration);
 
@@ -96,7 +96,7 @@ export const getMapsFilterMigrations = (
 export const getMapsDataViewMigrations = (
   migrations: MigrateFunctionsObject
 ): MigrateFunctionsObject =>
-  mapValues(migrations, (migration) => (doc: SavedObjectUnsanitizedDoc<MapAttributes>) => {
+  mapValues(migrations, (migration) => (doc: SavedObjectUnsanitizedDoc<StoredMapAttributes>) => {
     try {
       const attributes = migrateDataViewsPersistedState(doc, migration);
 

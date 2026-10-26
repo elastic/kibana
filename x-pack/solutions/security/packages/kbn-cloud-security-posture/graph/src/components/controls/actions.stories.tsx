@@ -6,26 +6,16 @@
  */
 
 import React from 'react';
-import type { Meta, StoryFn, StoryObj } from '@storybook/react';
-import { ThemeProvider, css } from '@emotion/react';
+import type { Meta, StoryObj } from '@storybook/react';
+import { css } from '@emotion/react';
 import { action } from '@storybook/addon-actions';
 import { Actions as ActionsComponent, type ActionsProps } from './actions';
 import { GlobalStylesStorybookDecorator } from '../../../.storybook/decorators';
 
 export default {
   title: 'Components/Graph Components/Additional Components',
-  description: 'CDR - Graph visualization',
-  argTypes: {
-    searchWarningMessage: {
-      control: 'object',
-    },
-  },
-  decorators: [GlobalStylesStorybookDecorator],
-} as Meta;
-
-const Template: StoryFn<ActionsProps> = (props) => {
-  return (
-    <ThemeProvider theme={{ darkMode: false }}>
+  render: (props) => {
+    return (
       <ActionsComponent
         css={css`
           width: 42px;
@@ -34,13 +24,17 @@ const Template: StoryFn<ActionsProps> = (props) => {
         onSearchToggle={action('searchToggle')}
         {...props}
       />
-    </ThemeProvider>
-  );
-};
+    );
+  },
+  argTypes: {
+    searchWarningMessage: {
+      control: 'object',
+    },
+  },
+  decorators: [GlobalStylesStorybookDecorator],
+} satisfies Meta<typeof ActionsComponent>;
 
 export const Actions: StoryObj<ActionsProps> = {
-  render: Template,
-
   args: {
     showToggleSearch: true,
     searchFilterCounter: 0,

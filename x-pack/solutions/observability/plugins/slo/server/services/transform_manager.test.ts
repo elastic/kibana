@@ -6,28 +6,28 @@
  */
 /* eslint-disable max-classes-per-file */
 
-import {
-  ScopedClusterClientMock,
-  elasticsearchServiceMock,
-  loggingSystemMock,
-} from '@kbn/core/server/mocks';
-import { MockedLogger } from '@kbn/logging-mocks';
-import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
+jest.mock('timers/promises');
+import type { ScopedClusterClientMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import type { MockedLogger } from '@kbn/logging-mocks';
+import type { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
 import { errors as EsErrors } from '@elastic/elasticsearch';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
 import { DefaultTransformManager } from './transform_manager';
 import {
   ApmTransactionErrorRateTransformGenerator,
   TransformGenerator,
 } from './transform_generators';
-import { SLODefinition, IndicatorTypes } from '../domain/models';
+import { createTransformGenerators } from './transform_generators/transform_generators_factory';
+import type { SLODefinition, IndicatorTypes } from '../domain/models';
 import {
   createAPMTransactionDurationIndicator,
   createAPMTransactionErrorRateIndicator,
   createSLO,
 } from './fixtures/slo';
 import { dataViewsService } from '@kbn/data-views-plugin/server/mocks';
-import { DataViewsService } from '@kbn/data-views-plugin/common';
+import type { DataViewsService } from '@kbn/data-views-plugin/common';
 
 describe('TransformManager', () => {
   let scopedClusterClientMock: ScopedClusterClientMock;
@@ -54,7 +54,7 @@ describe('TransformManager', () => {
 
         await expect(
           service.install(createSLO({ indicator: createAPMTransactionErrorRateIndicator() }))
-        ).rejects.toThrowError('Unsupported indicator type [sli.apm.transactionErrorRate]');
+        ).rejects.toThrow('Unsupported indicator type [sli.apm.transactionErrorRate]');
       });
 
       it('throws when transform generator fails', async () => {
@@ -72,7 +72,7 @@ describe('TransformManager', () => {
           transformManager.install(
             createSLO({ indicator: createAPMTransactionDurationIndicator() })
           )
-        ).rejects.toThrowError('Some error');
+        ).rejects.toThrow('Some error');
       });
     });
 
@@ -98,6 +98,50 @@ describe('TransformManager', () => {
         scopedClusterClientMock.asSecondaryAuthUser.transform.putTransform
       ).toHaveBeenCalledTimes(1);
       expect(transformId).toBe(`slo-${slo.id}-${slo.revision}`);
+    });
+  });
+
+  describe('Install idempotency', () => {
+    const alreadyExistsError = new EsErrors.ResponseError(
+      elasticsearchClientMock.createApiResponse({
+        statusCode: 400,
+        body: {
+          error: {
+            type: 'resource_already_exists_exception',
+            reason: 'Transform with id [slo-id-1] already exists',
+          },
+        },
+      })
+    );
+    const createManager = () =>
+      new DefaultTransformManager(
+        createTransformGenerators(spaceId, dataViewsService, false),
+        scopedClusterClientMock,
+        loggerMock
+      );
+
+    it('succeeds when a retry finds the transform created by a timed out attempt', async () => {
+      scopedClusterClientMock.asSecondaryAuthUser.transform.putTransform
+        .mockRejectedValueOnce(new EsErrors.TimeoutError('timeout'))
+        .mockRejectedValueOnce(alreadyExistsError);
+      const slo = createSLO({ indicator: createAPMTransactionErrorRateIndicator() });
+
+      await expect(createManager().install(slo)).resolves.toBe(`slo-${slo.id}-${slo.revision}`);
+      expect(
+        scopedClusterClientMock.asSecondaryAuthUser.transform.putTransform
+      ).toHaveBeenCalledTimes(2);
+    });
+
+    it('fails when the transform already exists on the first attempt', async () => {
+      scopedClusterClientMock.asSecondaryAuthUser.transform.putTransform.mockRejectedValueOnce(
+        alreadyExistsError
+      );
+      const slo = createSLO({ indicator: createAPMTransactionErrorRateIndicator() });
+
+      await expect(createManager().install(slo)).rejects.toBe(alreadyExistsError);
+      expect(
+        scopedClusterClientMock.asSecondaryAuthUser.transform.putTransform
+      ).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -219,6 +263,102 @@ describe('TransformManager', () => {
       expect(
         scopedClusterClientMock.asSecondaryAuthUser.transform.deleteTransform
       ).toHaveBeenCalledTimes(2);
+    });
+  });
+
+  describe('GetVersion', () => {
+    it('handles inexistant transforms', async () => {
+      // @ts-ignore defining only a subset of the possible SLI
+      const generators: Record<IndicatorTypes, TransformGenerator> = {
+        'sli.apm.transactionErrorRate': new ApmTransactionErrorRateTransformGenerator(
+          spaceId,
+          dataViewsService,
+          false
+        ),
+      };
+      const transformManager = new DefaultTransformManager(
+        generators,
+        scopedClusterClientMock,
+        loggerMock
+      );
+
+      scopedClusterClientMock.asSecondaryAuthUser.transform.getTransform.mockRejectedValue({
+        meta: { body: { error: { type: 'resource_not_found_exception' } } },
+      });
+
+      const version = await transformManager.getVersion('inexistant');
+
+      expect(version).toBe(undefined);
+    });
+
+    it('handles transform without meta version', async () => {
+      // @ts-ignore defining only a subset of the possible SLI
+      const generators: Record<IndicatorTypes, TransformGenerator> = {
+        'sli.apm.transactionErrorRate': new ApmTransactionErrorRateTransformGenerator(
+          spaceId,
+          dataViewsService,
+          false
+        ),
+      };
+      const transformManager = new DefaultTransformManager(
+        generators,
+        scopedClusterClientMock,
+        loggerMock
+      );
+
+      scopedClusterClientMock.asSecondaryAuthUser.transform.getTransform.mockResolvedValue({
+        count: 1,
+        transforms: [
+          {
+            dest: { index: 'irrelevant' },
+            source: { index: 'irrelevant' },
+            id: 'slo-id-1',
+            // No _meta version
+            _meta: {
+              other: 'field',
+            },
+          },
+        ],
+      });
+
+      const version = await transformManager.getVersion('slo-id-1');
+
+      expect(version).toBe(undefined);
+    });
+
+    it('handles transform with version specified', async () => {
+      // @ts-ignore defining only a subset of the possible SLI
+      const generators: Record<IndicatorTypes, TransformGenerator> = {
+        'sli.apm.transactionErrorRate': new ApmTransactionErrorRateTransformGenerator(
+          spaceId,
+          dataViewsService,
+          false
+        ),
+      };
+      const transformManager = new DefaultTransformManager(
+        generators,
+        scopedClusterClientMock,
+        loggerMock
+      );
+
+      scopedClusterClientMock.asSecondaryAuthUser.transform.getTransform.mockResolvedValue({
+        count: 1,
+        transforms: [
+          {
+            dest: { index: 'irrelevant' },
+            source: { index: 'irrelevant' },
+            id: 'slo-id-1',
+            // No _meta version
+            _meta: {
+              version: 3.4,
+            },
+          },
+        ],
+      });
+
+      const version = await transformManager.getVersion('slo-id-1');
+
+      expect(version).toBe(3.4);
     });
   });
 });

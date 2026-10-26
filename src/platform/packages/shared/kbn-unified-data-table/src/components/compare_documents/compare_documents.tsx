@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  EuiDataGrid,
+import type {
   EuiDataGridColumnVisibility,
   EuiDataGridInMemory,
   EuiDataGridProps,
@@ -16,15 +15,12 @@ import {
   EuiDataGridSchemaDetector,
   EuiDataGridStyle,
   EuiDataGridToolBarVisibilityOptions,
-  useGeneratedHtmlId,
 } from '@elastic/eui';
+import { EuiDataGrid, useGeneratedHtmlId } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { AdditionalFieldGroups } from '@kbn/unified-field-list';
-import { memoize } from 'lodash';
-import React, { useMemo, useState } from 'react';
-import useLocalStorage from 'react-use/lib/useLocalStorage';
+import React, { useCallback, useMemo, useState } from 'react';
+import type { DataSource } from '@kbn/data-source';
 import { DATA_GRID_STYLE_DEFAULT } from '../../constants';
 import { ComparisonControls } from './comparison_controls';
 import { renderComparisonToolbar } from './comparison_toolbar';
@@ -32,7 +28,8 @@ import { useComparisonCellValue } from './hooks/use_comparison_cell_value';
 import { useComparisonColumns } from './hooks/use_comparison_columns';
 import { useComparisonCss } from './hooks/use_comparison_css';
 import { useComparisonFields } from './hooks/use_comparison_fields';
-import type { DocumentDiffMode } from './types';
+import { useRestorableLocalStorage } from '../../restorable_state';
+import type { DocMap } from '../../types';
 
 export interface CompareDocumentsProps {
   id: string;
@@ -41,17 +38,16 @@ export interface CompareDocumentsProps {
   ariaDescribedBy: string;
   ariaLabelledBy: string;
   dataView: DataView;
-  isPlainRecord: boolean;
+  dataSource?: DataSource;
   selectedFieldNames: string[];
   selectedDocIds: string[];
   schemaDetectors: EuiDataGridSchemaDetector[];
   forceShowAllFields: boolean;
   showFullScreenButton?: boolean;
   fieldFormats: FieldFormatsStart;
-  getDocById: (id: string) => DataTableRecord | undefined;
+  docMap: DocMap;
   replaceSelectedDocs: (docIds: string[]) => void;
   setIsCompareActive: (isCompareActive: boolean) => void;
-  additionalFieldGroups?: AdditionalFieldGroups;
 }
 
 const COMPARISON_ROW_HEIGHT: EuiDataGridRowHeightsOptions = { defaultHeight: 'auto' };
@@ -71,35 +67,50 @@ const CompareDocuments = ({
   ariaDescribedBy,
   ariaLabelledBy,
   dataView,
-  isPlainRecord,
+  dataSource,
   selectedFieldNames,
-  additionalFieldGroups,
-  selectedDocIds,
+  selectedDocIds: originalSelectedDocIds,
   schemaDetectors,
   forceShowAllFields,
   showFullScreenButton,
   fieldFormats,
-  getDocById,
-  replaceSelectedDocs,
+  docMap: originalDocMap,
+  replaceSelectedDocs: originalReplaceSelectedDocs,
   setIsCompareActive,
 }: CompareDocumentsProps) => {
-  // Memoize getDocById to ensure we don't lose access to the comparison docs if, for example,
-  // a time range change or auto refresh causes the previous docs to no longer be available
-  const [memoizedGetDocById] = useState(() => memoize(getDocById));
-  const [showDiff, setShowDiff] = useLocalStorage(getStorageKey(consumer, 'ShowDiff'), true);
-  const [diffMode, setDiffMode] = useLocalStorage<DocumentDiffMode>(
+  // Snapshot docMap and selectedDocIds to ensure we don't lose access to the comparison docs
+  // or their selection state if, for example, a time range change or auto refresh changes them.
+  const [docMap] = useState<DocMap>(originalDocMap);
+  const [selectedDocIds, setSelectedDocIds] = useState(originalSelectedDocIds);
+  const replaceSelectedDocs = useCallback(
+    (docIds: string[]) => {
+      setSelectedDocIds(docIds);
+      originalReplaceSelectedDocs(docIds);
+    },
+    [originalReplaceSelectedDocs]
+  );
+  const [showDiff, setShowDiff] = useRestorableLocalStorage(
+    'comparisonSettingShowDiff',
+    getStorageKey(consumer, 'ShowDiff'),
+    true
+  );
+  const [diffMode, setDiffMode] = useRestorableLocalStorage(
+    'comparisonSettingDiffMode',
     getStorageKey(consumer, 'DiffMode'),
     'basic'
   );
-  const [showDiffDecorations, setShowDiffDecorations] = useLocalStorage(
+  const [showDiffDecorations, setShowDiffDecorations] = useRestorableLocalStorage(
+    'comparisonSettingShowDiffDecorations',
     getStorageKey(consumer, 'ShowDiffDecorations'),
     true
   );
-  const [showAllFields, setShowAllFields] = useLocalStorage(
+  const [showAllFields, setShowAllFields] = useRestorableLocalStorage(
+    'comparisonSettingShowAllFields',
     getStorageKey(consumer, 'ShowAllFields'),
     false
   );
-  const [showMatchingValues, setShowMatchingValues] = useLocalStorage(
+  const [showMatchingValues, setShowMatchingValues] = useRestorableLocalStorage(
+    'comparisonSettingShowMatchingValues',
     getStorageKey(consumer, 'ShowMatchingValues'),
     true
   );
@@ -107,19 +118,19 @@ const CompareDocuments = ({
   const fieldColumnId = useGeneratedHtmlId({ prefix: 'fields' });
   const { comparisonFields, totalFields } = useComparisonFields({
     dataView,
+    dataSource,
     selectedFieldNames,
-    additionalFieldGroups,
     selectedDocIds,
     showAllFields: Boolean(forceShowAllFields || showAllFields),
     showMatchingValues: Boolean(showMatchingValues),
-    getDocById: memoizedGetDocById,
+    docMap,
   });
   const comparisonColumns = useComparisonColumns({
     wrapper,
-    isPlainRecord,
+    dataSource,
     fieldColumnId,
     selectedDocIds,
-    getDocById: memoizedGetDocById,
+    docMap,
     replaceSelectedDocs,
   });
   const comparisonColumnVisibility = useMemo<EuiDataGridColumnVisibility>(
@@ -135,7 +146,7 @@ const CompareDocuments = ({
   const additionalControls = useMemo(
     () => (
       <ComparisonControls
-        isPlainRecord={isPlainRecord}
+        dataSource={dataSource}
         selectedDocIds={selectedDocIds}
         showDiff={showDiff}
         diffMode={diffMode}
@@ -154,7 +165,7 @@ const CompareDocuments = ({
     [
       diffMode,
       forceShowAllFields,
-      isPlainRecord,
+      dataSource,
       selectedDocIds,
       setDiffMode,
       setIsCompareActive,
@@ -187,13 +198,13 @@ const CompareDocuments = ({
   );
   const renderCellValue = useComparisonCellValue({
     dataView,
+    dataSource,
     comparisonFields,
     fieldColumnId,
     selectedDocIds,
     diffMode: showDiff ? diffMode : undefined,
     fieldFormats,
-    getDocById: memoizedGetDocById,
-    additionalFieldGroups,
+    docMap,
   });
   const comparisonCss = useComparisonCss({
     diffMode: showDiff ? diffMode : undefined,

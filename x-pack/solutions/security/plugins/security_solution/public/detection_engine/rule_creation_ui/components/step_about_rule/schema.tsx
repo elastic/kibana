@@ -118,6 +118,7 @@ export const schema: FormSchema<AboutStepRule> = {
     ],
   },
   isAssociatedToEndpointList: {
+    defaultValue: false,
     type: FIELD_TYPES.CHECKBOX,
     label: i18n.translate(
       'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldAssociatedToEndpointListLabel',
@@ -231,7 +232,7 @@ export const schema: FormSchema<AboutStepRule> = {
     label: i18n.translate(
       'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldMitreThreatLabel',
       {
-        defaultMessage: 'MITRE ATT&CK\u2122',
+        defaultMessage: 'Threat mappings',
       }
     ),
     labelAppend: OptionalFieldLabel,

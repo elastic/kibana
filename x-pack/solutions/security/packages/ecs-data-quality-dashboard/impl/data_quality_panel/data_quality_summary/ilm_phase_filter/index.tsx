@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiComboBox,
-  EuiComboBoxOptionOption,
   EuiFormControlLayout,
   EuiFormLabel,
   EuiToolTip,
@@ -25,17 +25,24 @@ import {
 import { useDataQualityContext } from '../../data_quality_context';
 import { formControlLayoutCss, optionCss, optionLabelCss } from './styles';
 
+const getPhaseKey = (
+  option: EuiComboBoxOptionOption<string | number | string[] | undefined>
+): string => (typeof option.value === 'string' ? option.value : '');
+
 const renderOption = (
   option: EuiComboBoxOptionOption<string | number | string[] | undefined>
-): React.ReactNode => (
-  <EuiToolTip content={`${option.label}: ${getIlmPhaseDescription(option.label)}`}>
-    <div css={optionCss}>
-      <span css={optionLabelCss}>{`${option.label}`}</span>
-      {': '}
-      <span>{getIlmPhaseDescription(option.label)}</span>
-    </div>
-  </EuiToolTip>
-);
+): React.ReactNode => {
+  const phaseKey = getPhaseKey(option);
+  return (
+    <EuiToolTip content={`${option.label}: ${getIlmPhaseDescription(phaseKey)}`}>
+      <div css={optionCss} tabIndex={0}>
+        <span css={optionLabelCss}>{`${option.label}`}</span>
+        {': '}
+        <span>{getIlmPhaseDescription(phaseKey)}</span>
+      </div>
+    </EuiToolTip>
+  );
+};
 
 const IlmPhaseFilterComponent: React.FC = () => {
   const { selectedIlmPhaseOptions, setSelectedIlmPhaseOptions } = useDataQualityContext();
@@ -64,6 +71,7 @@ const IlmPhaseFilterComponent: React.FC = () => {
           selectedOptions={selectedIlmPhaseOptions}
           options={ilmPhaseOptionsStatic}
           onChange={handleSetSelectedOptions}
+          aria-label={ILM_PHASE}
         />
       </EuiFormControlLayout>
     </EuiToolTip>

@@ -5,28 +5,17 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod/v4';
 import { transformConnectorsForExport } from './transform_connectors_for_export';
 import { actionTypeRegistryMock } from '../action_type_registry.mock';
-import type { ActionType, ActionTypeRegistryContract, ActionTypeSecrets } from '../types';
+import type { ActionTypeRegistryContract } from '../types';
+import { getConnectorType } from '../fixtures';
 
 describe('transform connector for export', () => {
-  const connectorType: jest.Mocked<ActionType> = {
+  const connectorType = getConnectorType({
     id: 'test',
     name: 'Test',
-    minimumLicenseRequired: 'basic',
-    supportedFeatureIds: ['alerting'],
-    executor: jest.fn(),
-    validate: {
-      config: { schema: schema.object({}) },
-      params: { schema: schema.object({}) },
-      secrets: {
-        schema: {
-          validate: (value: unknown) => value as ActionTypeSecrets,
-        },
-      },
-    },
-  };
+  });
   const actionTypeRegistry: jest.Mocked<ActionTypeRegistryContract> =
     actionTypeRegistryMock.create();
 
@@ -239,6 +228,9 @@ describe('transform connector for export', () => {
         attributes: {
           ...connector.attributes,
           secrets: {},
+          apiKey: null,
+          uiamApiKey: null,
+          hasInboundEventIdentity: false,
         },
       }))
     );
@@ -248,14 +240,10 @@ describe('transform connector for export', () => {
     actionTypeRegistry.get.mockReturnValue({
       ...connectorType,
       validate: {
-        config: { schema: schema.object({}) },
-        params: { schema: schema.object({}) },
+        config: { schema: z.object({}) },
+        params: { schema: z.object({}) },
         secrets: {
-          schema: {
-            validate: (value: unknown) => {
-              throw new Error('i need secrets!');
-            },
-          },
+          schema: z.object({}).refine(() => false, { message: 'i need secrets!' }),
         },
       },
     });
@@ -266,8 +254,49 @@ describe('transform connector for export', () => {
           ...connector.attributes,
           secrets: {},
           isMissingSecrets: true,
+          apiKey: null,
+          uiamApiKey: null,
+          hasInboundEventIdentity: false,
         },
       }))
     );
+  });
+
+  it('clears last-saver identity fields on export', () => {
+    actionTypeRegistry.get.mockReturnValue(connectorType);
+    const connector = {
+      id: 'inbound-1',
+      type: 'action',
+      attributes: {
+        actionTypeId: '.inboundWebhook',
+        name: 'inbound',
+        isMissingSecrets: false,
+        config: {},
+        secrets: 'asbqw4tqbef',
+        apiKey: 'encrypted-api-key',
+        uiamApiKey: 'encrypted-uiam-key',
+        uiamApiKeyExternal: false,
+      },
+      references: [],
+    };
+
+    expect(transformConnectorsForExport([connector], actionTypeRegistry)).toEqual([
+      {
+        ...connector,
+        attributes: {
+          actionTypeId: '.inboundWebhook',
+          name: 'inbound',
+          isMissingSecrets: false,
+          config: {},
+          secrets: {},
+          apiKey: null,
+          uiamApiKey: null,
+          hasInboundEventIdentity: false,
+        },
+      },
+    ]);
+    expect(
+      transformConnectorsForExport([connector], actionTypeRegistry)[0].attributes
+    ).not.toHaveProperty('uiamApiKeyExternal');
   });
 });

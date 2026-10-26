@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { TagcloudToolbar } from './tagcloud_toolbar';
+export { TagcloudAppearanceSettings } from './appearance_settings';

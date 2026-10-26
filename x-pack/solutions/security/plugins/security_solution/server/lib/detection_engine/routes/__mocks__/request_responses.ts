@@ -27,17 +27,18 @@ import {
   DETECTION_ENGINE_RULES_BULK_ACTION,
   DETECTION_ENGINE_RULES_URL_FIND,
   DETECTION_ENGINE_RULES_IMPORT_URL,
+  DETECTION_ENGINE_SEARCH_UNIFIED_ALERTS_URL,
 } from '../../../../../common/constants';
 import { RULE_MANAGEMENT_FILTERS_URL } from '../../../../../common/api/detection_engine/rule_management/urls';
 
 import {
-  BOOTSTRAP_PREBUILT_RULES_URL,
   PREBUILT_RULES_STATUS_URL,
   PREBUILT_RULES_URL,
 } from '../../../../../common/api/detection_engine/prebuilt_rules';
 import {
   getBulkDisableRuleActionSchemaMock,
   getPerformBulkActionEditSchemaMock,
+  getPerformBulkActionEditAlertSuppressionSchemaMock,
 } from '../../../../../common/api/detection_engine/rule_management/mocks';
 
 import { getCreateRulesSchemaMock } from '../../../../../common/api/detection_engine/model/rule_schema/mocks';
@@ -128,6 +129,13 @@ export const getBulkActionEditRequest = () =>
     body: getPerformBulkActionEditSchemaMock(),
   });
 
+export const getBulkActionEditAlertSuppressionRequest = () =>
+  requestMock.create({
+    method: 'patch',
+    path: DETECTION_ENGINE_RULES_BULK_ACTION,
+    body: getPerformBulkActionEditAlertSuppressionSchemaMock(),
+  });
+
 export const getPrivilegeRequest = (options: { auth?: { isAuthenticated: boolean } } = {}) =>
   requestMock.create({
     method: 'get',
@@ -151,12 +159,6 @@ export const getRuleManagementFiltersRequest = () =>
   requestMock.create({
     method: 'get',
     path: RULE_MANAGEMENT_FILTERS_URL,
-  });
-
-export const getBootstrapRulesRequest = () =>
-  requestMock.create({
-    method: 'post',
-    path: BOOTSTRAP_PREBUILT_RULES_URL,
   });
 
 export interface FindHit<T = RuleAlertType> {
@@ -302,6 +304,27 @@ export const getSignalsAggsAndQueryRequest = () =>
   requestMock.create({
     method: 'post',
     path: DETECTION_ENGINE_QUERY_SIGNALS_URL,
+    body: { ...typicalSignalsQuery(), ...typicalSignalsQueryAggs() },
+  });
+
+export const getUnifiedAlertsQueryRequest = () =>
+  requestMock.create({
+    method: 'post',
+    path: DETECTION_ENGINE_SEARCH_UNIFIED_ALERTS_URL,
+    body: typicalSignalsQuery(),
+  });
+
+export const getUnifiedAlertsAggsQueryRequest = () =>
+  requestMock.create({
+    method: 'post',
+    path: DETECTION_ENGINE_SEARCH_UNIFIED_ALERTS_URL,
+    body: typicalSignalsQueryAggs(),
+  });
+
+export const getUnifiedAlertsAggsAndQueryRequest = () =>
+  requestMock.create({
+    method: 'post',
+    path: DETECTION_ENGINE_SEARCH_UNIFIED_ALERTS_URL,
     body: { ...typicalSignalsQuery(), ...typicalSignalsQueryAggs() },
   });
 

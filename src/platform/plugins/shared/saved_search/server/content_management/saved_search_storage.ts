@@ -9,9 +9,8 @@
 
 import { SOContentStorage } from '@kbn/content-management-utils';
 import type { Logger } from '@kbn/logging';
-
+import { SavedSearchType } from '@kbn/discover-session-constants';
 import type { SavedSearchCrudTypes } from '../../common/content_management';
-import { SavedSearchType } from '../../common/content_management';
 import { cmServicesDefinition } from './schema/cm_services';
 
 export class SavedSearchStorage extends SOContentStorage<SavedSearchCrudTypes> {
@@ -26,29 +25,7 @@ export class SavedSearchStorage extends SOContentStorage<SavedSearchCrudTypes> {
       savedObjectType: SavedSearchType,
       cmServicesDefinition,
       enableMSearch: true,
-      allowedSavedObjectAttributes: [
-        'title',
-        'sort',
-        'columns',
-        'description',
-        'grid',
-        'hideChart',
-        'isTextBasedQuery',
-        'usesAdHocDataView',
-        'kibanaSavedObjectMeta',
-        'viewMode',
-        'hideAggregatedPreview',
-        'rowHeight',
-        'headerRowHeight',
-        'timeRestore',
-        'timeRange',
-        'refreshInterval',
-        'rowsPerPage',
-        'breakdownField',
-        'sampleSize',
-        'density',
-        'visContext',
-      ],
+      allowedSavedObjectAttributes: ['title', 'description', 'tabs'],
       logger,
       throwOnResultValidationError,
     });

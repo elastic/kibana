@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import { EuiPopover, EuiButtonEmpty, EuiContextMenu } from '@elastic/eui';
-import React, { useState, useCallback, useMemo } from 'react';
+import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
+import { EuiPopover, EuiButtonEmpty } from '@elastic/eui';
+import React, { useState, useCallback, useEffect } from 'react';
 import styled from 'styled-components';
-import type { AlertTableContextMenuItem } from '../../../../detections/components/alerts_table/types';
+import { EventsTableBulkActionMenu } from './events_table_bulk_action_menu';
+import type { BulkActionGroups } from './use_bulk_action_items';
 
 interface OwnProps {
   selectText: string;
@@ -16,7 +18,9 @@ interface OwnProps {
   showClearSelection: boolean;
   onSelectAll: () => void;
   onClearSelection: () => void;
-  bulkActionItems: AlertTableContextMenuItem[];
+  bulkActionPanels: EuiContextMenuPanelDescriptor[];
+  bulkActionGroups: BulkActionGroups;
+  closePopoverRef?: React.MutableRefObject<() => void>;
 }
 
 const BulkActionsContainer = styled.div`
@@ -35,7 +39,9 @@ const BulkActionsComponent: React.FC<OwnProps> = ({
   showClearSelection,
   onSelectAll,
   onClearSelection,
-  bulkActionItems,
+  bulkActionPanels,
+  bulkActionGroups,
+  closePopoverRef,
 }) => {
   const [isActionsPopoverOpen, setIsActionsPopoverOpen] = useState(false);
 
@@ -47,11 +53,11 @@ const BulkActionsComponent: React.FC<OwnProps> = ({
     setIsActionsPopoverOpen(false);
   }, [setIsActionsPopoverOpen]);
 
-  const closeIfPopoverIsOpen = useCallback(() => {
-    if (isActionsPopoverOpen) {
-      setIsActionsPopoverOpen(false);
+  useEffect(() => {
+    if (closePopoverRef) {
+      closePopoverRef.current = closeActionPopover;
     }
-  }, [isActionsPopoverOpen]);
+  }, [closePopoverRef, closeActionPopover]);
 
   const toggleSelectAll = useCallback(() => {
     if (!showClearSelection) {
@@ -61,22 +67,10 @@ const BulkActionsComponent: React.FC<OwnProps> = ({
     }
   }, [onClearSelection, onSelectAll, showClearSelection]);
 
-  const panels = useMemo(
-    () => [
-      {
-        id: 0,
-        items: bulkActionItems,
-      },
-    ],
-    [bulkActionItems]
-  );
-
   return (
-    <BulkActionsContainer
-      onClick={closeIfPopoverIsOpen}
-      data-test-subj="bulk-actions-button-container"
-    >
+    <BulkActionsContainer data-test-subj="bulk-actions-button-container">
       <EuiPopover
+        aria-label={selectText}
         isOpen={isActionsPopoverOpen}
         anchorPosition="upCenter"
         panelPaddingSize="none"
@@ -85,7 +79,7 @@ const BulkActionsComponent: React.FC<OwnProps> = ({
             aria-label="selectedShowBulkActions"
             data-test-subj="selectedShowBulkActionsButton"
             size="xs"
-            iconType="arrowDown"
+            iconType="chevronSingleDown"
             iconSide="right"
             color="primary"
             onClick={toggleIsActionOpen}
@@ -95,7 +89,7 @@ const BulkActionsComponent: React.FC<OwnProps> = ({
         }
         closePopover={closeActionPopover}
       >
-        <EuiContextMenu size="s" panels={panels} initialPanelId={0} />
+        <EventsTableBulkActionMenu panels={bulkActionPanels} groups={bulkActionGroups} />
       </EuiPopover>
 
       <EuiButtonEmpty

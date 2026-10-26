@@ -7,9 +7,9 @@
 
 import Boom from '@hapi/boom';
 import { schema } from '@kbn/config-schema';
-import { pipe } from 'fp-ts/lib/pipeable';
-import { fold } from 'fp-ts/lib/Either';
-import { identity } from 'fp-ts/lib/function';
+import { pipe } from 'fp-ts/pipeable';
+import { fold } from 'fp-ts/Either';
+import { identity } from 'fp-ts/function';
 import { throwErrors } from '@kbn/io-ts-utils';
 import type { InfraBackendLibs } from '../../lib/infra_types';
 import { UsageCollector } from '../../usage/usage_collector';
@@ -35,7 +35,15 @@ export const initNodeDetailsRoute = (libs: InfraBackendLibs) => {
     },
     async (requestContext, request, response) => {
       try {
-        const { nodeId, cloudId, nodeType, metrics, timerange, sourceId } = pipe(
+        const {
+          nodeId,
+          cloudId,
+          nodeType,
+          metrics,
+          timerange,
+          sourceId,
+          schema: dataSchema,
+        } = pipe(
           NodeDetailsRequestRT.decode(request.body),
           fold(throwErrors(Boom.badRequest), identity)
         );
@@ -53,6 +61,7 @@ export const initNodeDetailsRoute = (libs: InfraBackendLibs) => {
           sourceConfiguration: source.configuration,
           metrics,
           timerange,
+          schema: dataSchema,
         };
         return response.ok({
           body: NodeDetailsMetricDataResponseRT.encode({

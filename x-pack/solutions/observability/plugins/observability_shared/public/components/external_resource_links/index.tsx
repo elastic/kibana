@@ -7,27 +7,45 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import type { FunctionComponent } from 'react';
+import type { FunctionComponent, ReactElement } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { URL_DEMO_ENV } from '@kbn/home-sample-data-tab/src/constants';
-import { EuiAvatar, EuiFlexGroup, EuiFlexItem, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIllustration,
+  EuiLink,
+  EuiSpacer,
+  EuiText,
+  useEuiTheme,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
+import {
+  globalPeopleNetwork,
+  observabilityVideo,
+  projectsGear,
+  supportLaptop,
+} from '@elastic/eui-illustrations';
+import type { EuiIllustrationSource } from '@elastic/eui-illustrations';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { ChromeStart, DocLinksStart } from '@kbn/core/public';
-import supportIconUrl from './support_icon.svg';
-import demoIconUrl from './demo_icon.svg';
-import docsIconUrl from './docs_icon.svg';
-import forumIconUrl from './forum_icon.svg';
+import type { ChromeStart, DocLinksStart } from '@kbn/core/public';
 
 const URL_FORUM = 'https://discuss.elastic.co/';
+
+const linkIllustration = (type: EuiIllustrationSource, maxSize: string): ReactElement => (
+  <EuiIllustration type={type} alt="" fullWidth={false} css={{ maxInlineSize: maxSize }} />
+);
 
 export const ExternalResourceLinks: FunctionComponent = () => {
   const {
     services: { docLinks, chrome },
   } = useKibana<{ docLinks: DocLinksStart; chrome: ChromeStart }>();
+  const { euiTheme } = useEuiTheme();
   const helpSupportUrl = useObservable(chrome.getHelpSupportUrl$());
+  const illustrationMaxSize = `calc(${euiTheme.size.base} * 3)`;
   const sections = [
     {
-      iconUrl: demoIconUrl,
+      icon: linkIllustration(observabilityVideo, illustrationMaxSize),
       title: i18n.translate(
         'xpack.observabilityShared.experimentalOnboardingFlow.demoEnvironmentFlexItemLabel',
         { defaultMessage: 'Demo environment' }
@@ -46,7 +64,7 @@ export const ExternalResourceLinks: FunctionComponent = () => {
       testSubject: 'observabilityOnboardingFooterExploreDemoLink',
     },
     {
-      iconUrl: forumIconUrl,
+      icon: linkIllustration(globalPeopleNetwork, illustrationMaxSize),
       title: i18n.translate(
         'xpack.observabilityShared.experimentalOnboardingFlow.exploreForumFlexItemLabel',
         { defaultMessage: 'Explore forum' }
@@ -63,13 +81,13 @@ export const ExternalResourceLinks: FunctionComponent = () => {
       ),
       linkARIALabel: i18n.translate(
         'xpack.observabilityShared.experimentalOnboardingFlow.exploreForumFlexItemLinkARIALabel',
-        { defaultMessage: 'Open Elastic Discuss forum' }
+        { defaultMessage: 'Discuss forum. Open Elastic forum' }
       ),
       link: URL_FORUM,
       testSubject: 'observabilityOnboardingFooterDiscussForumLink',
     },
     {
-      iconUrl: docsIconUrl,
+      icon: linkIllustration(projectsGear, illustrationMaxSize),
       title: i18n.translate(
         'xpack.observabilityShared.experimentalOnboardingFlow.browseDocumentationFlexItemLabel',
         { defaultMessage: 'Browse documentation' }
@@ -92,7 +110,7 @@ export const ExternalResourceLinks: FunctionComponent = () => {
       testSubject: 'observabilityOnboardingFooterLearnMoreLink',
     },
     {
-      iconUrl: supportIconUrl,
+      icon: linkIllustration(supportLaptop, illustrationMaxSize),
       title: i18n.translate(
         'xpack.observabilityShared.experimentalOnboardingFlow.supportHubFlexItemLabel',
         { defaultMessage: 'Support Hub' }
@@ -112,39 +130,44 @@ export const ExternalResourceLinks: FunctionComponent = () => {
     },
   ];
 
+  const observabilityOnboardingSectionPrefix = useGeneratedHtmlId({
+    suffix: 'observabilityOnboardingSection',
+  });
+
   return (
-    <>
-      <EuiSpacer size="l" />
-      <EuiFlexGroup gutterSize="xl" justifyContent="center" alignItems="center">
-        {sections.map((section, index) => (
-          <EuiFlexItem key={index} grow={false}>
-            <EuiAvatar size="l" name="" imageUrl={section.iconUrl} color="subdued" />
-            <EuiSpacer size="m" />
-            <EuiText size="s">
-              <strong>{section.title}</strong>
-            </EuiText>
-            <EuiSpacer size="s" />
-            <EuiText size="xs">
-              <p>{section.description}</p>
-            </EuiText>
-            <EuiSpacer size="s" />
-            <EuiText size="xs">
-              <p>
-                <EuiLink
-                  data-test-subj={section.testSubject}
-                  aria-label={section.linkARIALabel}
-                  href={section.link}
-                  target="_blank"
-                  external
-                >
-                  {section.linkLabel}
-                </EuiLink>
-              </p>
-            </EuiText>
-          </EuiFlexItem>
-        ))}
-      </EuiFlexGroup>
-      <EuiSpacer size="xl" />
-    </>
+    <EuiFlexGroup gutterSize="xl" justifyContent="center" alignItems="center">
+      {sections.map((section, index) => (
+        <EuiFlexItem
+          key={index}
+          grow={false}
+          role="group"
+          aria-labelledby={`${observabilityOnboardingSectionPrefix}_${index}`}
+        >
+          {section.icon}
+          <EuiSpacer size="m" />
+          <EuiText size="s">
+            <strong id={`${observabilityOnboardingSectionPrefix}_${index}`}>{section.title}</strong>
+          </EuiText>
+          <EuiSpacer size="s" />
+          <EuiText size="xs">
+            <p>{section.description}</p>
+          </EuiText>
+          <EuiSpacer size="s" />
+          <EuiText size="xs">
+            <p>
+              <EuiLink
+                data-test-subj={section.testSubject}
+                aria-label={section.linkARIALabel}
+                href={section.link}
+                target="_blank"
+                external
+              >
+                {section.linkLabel}
+              </EuiLink>
+            </p>
+          </EuiText>
+        </EuiFlexItem>
+      ))}
+    </EuiFlexGroup>
   );
 };

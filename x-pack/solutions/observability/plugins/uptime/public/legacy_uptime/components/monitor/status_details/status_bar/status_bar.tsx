@@ -15,7 +15,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import { ENABLE_STATUS_ALERT } from '../../../overview/monitor_list/columns/translations';
 import { monitorStatusSelector } from '../../../../state/selectors';
 import { EnableMonitorAlert } from '../../../overview/monitor_list/columns/enable_alert';
@@ -29,7 +29,7 @@ import {
   TAGS_LABEL,
   URL_LABEL,
 } from '../../../../../../common/translations/translations';
-import { MonitorLocations } from '../../../../../../common/runtime_types/monitor';
+import type { MonitorLocations } from '../../../../../../common/runtime_types/monitor';
 import { formatAvailabilityValue } from '../availability_reporting/availability_reporting';
 import { MonitorRedirects } from './monitor_redirects';
 import { MonitorTags } from '../../../common/monitor_tags';

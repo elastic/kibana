@@ -6,48 +6,58 @@
  */
 
 import { renderHook } from '@testing-library/react';
-import { TestProviders } from '../../common/mock';
+import { DataView } from '@kbn/data-views-plugin/common';
 import { useBrowserFields } from './use_browser_fields';
-import { DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID, DataViewManagerScopeName } from '../constants';
-import { useDataViewSpec } from './use_data_view_spec';
-import { type FieldSpec } from '@kbn/data-views-plugin/common';
+import { DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID } from '../constants';
 
-jest.mock('./use_data_view_spec', () => ({
-  useDataViewSpec: jest.fn(),
-}));
-
-describe('useBrowserFields', () => {
-  beforeAll(() => {
-    jest.mocked(useDataViewSpec).mockReturnValue({
-      dataViewSpec: {
-        id: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID,
-        fields: {
-          '@timestamp': {
-            type: 'date',
-            name: '@timestamp',
-          } as FieldSpec,
+const buildDataView = () =>
+  new DataView({
+    spec: {
+      id: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID,
+      title: 'security-solution-data-view',
+      fields: {
+        '@timestamp': {
+          name: '@timestamp',
+          type: 'date',
+          esTypes: ['date'],
+          aggregatable: true,
+          searchable: true,
+          scripted: false,
         },
       },
-      status: 'ready',
-    });
+    },
+    // @ts-expect-error: DataView constructor expects more, but this is enough for our test
+    fieldFormats: { getDefaultInstance: () => ({}) },
   });
 
-  it('should call the useDataView hook and return browser fields map', () => {
-    const wrapper = renderHook(() => useBrowserFields(DataViewManagerScopeName.default), {
-      wrapper: TestProviders,
-    });
+describe('useBrowserFields', () => {
+  it('should return browser fields map built from the provided dataView', () => {
+    const wrapper = renderHook(() => useBrowserFields(buildDataView()));
 
     expect(wrapper.result.current).toMatchInlineSnapshot(`
       Object {
         "base": Object {
           "fields": Object {
             "@timestamp": Object {
+              "aggregatable": true,
+              "esTypes": Array [
+                "date",
+              ],
               "name": "@timestamp",
+              "scripted": false,
+              "searchable": true,
+              "shortDotsEnable": false,
               "type": "date",
             },
           },
         },
       }
     `);
+  });
+
+  it('should return empty browser fields when no dataView is provided', () => {
+    const wrapper = renderHook(() => useBrowserFields(undefined as unknown as DataView));
+
+    expect(wrapper.result.current).toEqual({});
   });
 });

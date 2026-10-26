@@ -11,19 +11,20 @@
  */
 
 import PropTypes from 'prop-types';
-import React, { Component, useContext } from 'react';
+import React, { Component, useContext, useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { isEqual, reduce, each, get } from 'lodash';
 import d3 from 'd3';
 import moment from 'moment';
 
-import { EuiPopover } from '@elastic/eui';
+import { EuiPopover, useEuiTheme } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import {
   getFormattedSeverityScore,
   getSeverityWithLow,
-  ML_SEVERITY_COLORS,
+  getThemeResolvedSeverityColor,
+  ML_ANOMALY_THRESHOLD,
 } from '@kbn/ml-anomaly-utils';
 import { formatHumanReadableDateTimeSeconds } from '@kbn/ml-date-utils';
 import { context } from '@kbn/kibana-react-plugin/public';
@@ -62,6 +63,8 @@ import { MlAnnotationUpdatesContext } from '../../../contexts/ml/ml_annotation_u
 
 import { LinksMenuUI } from '../../../components/anomalies_table/links_menu';
 import { RuleEditorFlyout } from '../../../components/rule_editor';
+import { MlAnomalyAlertFlyout } from '../../../../alerting/ml_alerting_flyout';
+import { buildAlertParamsFromAnomaly } from '../../../components/anomalies_table/build_alert_params_from_anomaly';
 
 const percentFocusChartHeight = 0.634;
 const minSvgHeight = 350;
@@ -86,24 +89,6 @@ const ZOOM_INTERVAL_OPTIONS = [
   { duration: moment.duration(2, 'w'), label: '2w' },
   { duration: moment.duration(1, 'M'), label: '1M' },
 ];
-
-// Set up the color scale to use for indicating score.
-const anomalyColorScale = d3.scale
-  .threshold()
-  .domain([3, 25, 50, 75, 100])
-  .range([
-    ML_SEVERITY_COLORS.LOW,
-    ML_SEVERITY_COLORS.WARNING,
-    ML_SEVERITY_COLORS.MINOR,
-    ML_SEVERITY_COLORS.MAJOR,
-    ML_SEVERITY_COLORS.CRITICAL,
-  ]);
-
-// Create a gray-toned version of the color scale to use under the context chart mask.
-const anomalyGrayScale = d3.scale
-  .threshold()
-  .domain([3, 25, 50, 75, 100])
-  .range(['#dce7ed', '#b0c5d6', '#b1a34e', '#b17f4e', '#c88686']);
 
 function getChartHeights(height) {
   const actualHeight = height < minSvgHeight ? minSvgHeight : height;
@@ -138,6 +123,7 @@ function getSvgHeight(showAnnotations, incomingHeight) {
 class TimeseriesChartIntl extends Component {
   static propTypes = {
     annotation: PropTypes.object,
+    anomalyColorScale: PropTypes.func.isRequired,
     autoZoomDuration: PropTypes.number,
     bounds: PropTypes.object,
     contextAggregationInterval: PropTypes.object,
@@ -151,6 +137,7 @@ class TimeseriesChartIntl extends Component {
     focusChartData: PropTypes.array,
     focusForecastData: PropTypes.array,
     modelPlotEnabled: PropTypes.bool.isRequired,
+    isInteractive: PropTypes.bool,
     renderFocusChartOnly: PropTypes.bool.isRequired,
     selectedJob: PropTypes.object,
     showForecast: PropTypes.bool.isRequired,
@@ -175,7 +162,13 @@ class TimeseriesChartIntl extends Component {
 
   constructor(props, constructorContext) {
     super(props);
-    this.state = { popoverData: null, popoverCoords: [0, 0], showRuleEditorFlyout: () => {} };
+    this.state = {
+      popoverData: null,
+      popoverCoords: [0, 0],
+      showRuleEditorFlyout: () => {},
+      alertFlyoutVisible: false,
+      alertFlyoutParams: undefined,
+    };
 
     this.mlTimeSeriesExplorer = timeSeriesExplorerServiceFactory(
       constructorContext.services.uiSettings,
@@ -413,7 +406,7 @@ class TimeseriesChartIntl extends Component {
       .append('text')
       .text((d) => {
         if (fieldFormat !== undefined) {
-          return fieldFormat.convert(d, 'text');
+          return fieldFormat.convertToText(d);
         } else {
           return focusYScale.tickFormat()(d);
         }
@@ -554,7 +547,7 @@ class TimeseriesChartIntl extends Component {
       .attr('width', fcsWidth)
       .attr('height', focusZoomPanelHeight)
       .attr('class', 'chart-border');
-    this.createZoomInfoElements(zoomGroup, fcsWidth);
+    if (this.props.isInteractive !== false) this.createZoomInfoElements(zoomGroup, fcsWidth);
 
     // Create the elements for annotations
     const annotateBrush = this.annotateBrush.bind(this);
@@ -577,8 +570,6 @@ class TimeseriesChartIntl extends Component {
       .attr('y', focusZoomPanelHeight)
       .attr('width', brushWidth)
       .attr('height', focusChartIncoming ?? focusChartHeight);
-
-    fcsGroup.append('g').classed('ml-annotations', true);
 
     // Add border round plot area.
     fcsGroup
@@ -623,6 +614,9 @@ class TimeseriesChartIntl extends Component {
       .attr('transform', 'translate(0,' + fcsHeight + ')');
     axes.append('g').attr('class', 'y axis');
 
+    // Appended after axes so that annotation chips paint above the y-axis gridlines.
+    fcsGroup.append('g').classed('ml-annotations', true);
+
     // Create the elements for the metric value line and model bounds area.
     fcsGroup.append('path').attr('class', 'area bounds');
     fcsGroup.append('path').attr('class', 'values-line');
@@ -661,6 +655,7 @@ class TimeseriesChartIntl extends Component {
       focusChartData,
       focusForecastData,
       modelPlotEnabled,
+      isInteractive = true,
       selectedJob,
       showAnnotations,
       showForecast,
@@ -722,7 +717,7 @@ class TimeseriesChartIntl extends Component {
       (focusForecastData !== undefined && focusForecastData.length > 0)
     ) {
       if (this.fieldFormat !== undefined) {
-        this.focusYAxis.tickFormat((d) => this.fieldFormat.convert(d, 'text'));
+        this.focusYAxis.tickFormat((d) => this.fieldFormat.convertToText(d));
       } else {
         // Use default tick formatter.
         this.focusYAxis.tickFormat(null);
@@ -864,15 +859,15 @@ class TimeseriesChartIntl extends Component {
     // Remove dots that are no longer needed i.e. if number of chart points has decreased.
     dots.exit().remove();
     // Create any new dots that are needed i.e. if number of chart points has increased.
-    dots
-      .enter()
-      .append('circle')
-      .attr('r', LINE_CHART_ANOMALY_RADIUS)
-      .on('click', function (d) {
+    const dot = dots.enter().append('circle').attr('r', LINE_CHART_ANOMALY_RADIUS);
+    if (isInteractive) {
+      dot.on('click', function (d) {
         d3.event.preventDefault();
         if (d.anomalyScore === undefined) return;
         showAnomalyPopover(d, this);
-      })
+      });
+    }
+    dot
       .on('mouseover', function (d) {
         // Show the tooltip only if the actions menu isn't active
         if (that.state.popoverData === null) {
@@ -910,15 +905,18 @@ class TimeseriesChartIntl extends Component {
     multiBucketMarkers.exit().remove();
 
     // Add any new markers that are needed i.e. if number of multi-bucket points has increased.
-    multiBucketMarkers
+    const marker = multiBucketMarkers
       .enter()
       .append('path')
-      .attr('d', d3.svg.symbol().size(MULTI_BUCKET_SYMBOL_SIZE).type('cross'))
-      .on('click', function (d) {
+      .attr('d', d3.svg.symbol().size(MULTI_BUCKET_SYMBOL_SIZE).type('cross'));
+    if (isInteractive) {
+      marker.on('click', function (d) {
         d3.event.preventDefault();
         if (d.anomalyScore === undefined) return;
         showAnomalyPopover(d, this);
-      })
+      });
+    }
+    marker
       .on('mouseover', function (d) {
         showFocusChartTooltip(d, this);
       })
@@ -1441,16 +1439,6 @@ class TimeseriesChartIntl extends Component {
         return;
       }
 
-      // Set the color of the swimlane cells according to whether they are inside the selection.
-      contextGroup.selectAll('.swimlane-cell').style('fill', (d) => {
-        const cellMs = d.date.getTime();
-        if (cellMs < selectionMin || cellMs > selectionMax) {
-          return anomalyGrayScale(d.score);
-        } else {
-          return anomalyColorScale(d.score);
-        }
-      });
-
       that.selectedBounds = { min: moment(selectionMin), max: moment(selectionMax) };
       contextChartSelected({ from: selectedBounds[0], to: selectedBounds[1] });
     }
@@ -1525,7 +1513,7 @@ class TimeseriesChartIntl extends Component {
       .attr('width', cellWidth)
       .attr('height', swlHeight)
       .style('fill', (d) => {
-        return anomalyColorScale(d.score);
+        return this.props.anomalyColorScale(d.score);
       });
   };
 
@@ -1632,7 +1620,7 @@ class TimeseriesChartIntl extends Component {
           defaultMessage: 'anomaly score',
         }),
         value: getFormattedSeverityScore(score),
-        color: anomalyColorScale(score),
+        color: this.props.anomalyColorScale(score),
         seriesIdentifier: {
           key: seriesKey,
         },
@@ -2016,14 +2004,28 @@ class TimeseriesChartIntl extends Component {
     });
   };
 
+  handleShowAnomalyAlertFlyout = (anomaly) => {
+    const initialParams = buildAlertParamsFromAnomaly(anomaly);
+    this.setState({
+      alertFlyoutParams: initialParams,
+      alertFlyoutVisible: true,
+    });
+  };
+
   render() {
     return (
       <>
         <RuleEditorFlyout
-          selectedJob={this.props.selectedJob}
           setShowFunction={this.setShowRuleEditorFlyoutFunction}
           unsetShowFunction={this.unsetShowRuleEditorFlyoutFunction}
+          telemetrySource={this.props.telemetrySource}
         />
+        {this.state.alertFlyoutVisible && this.state.alertFlyoutParams && (
+          <MlAnomalyAlertFlyout
+            onCloseFlyout={() => this.setState({ alertFlyoutVisible: false })}
+            initialParams={this.state.alertFlyoutParams}
+          />
+        )}
         {this.state.popoverData !== null && (
           <div
             style={{
@@ -2037,6 +2039,12 @@ class TimeseriesChartIntl extends Component {
               closePopover={() => this.closePopover()}
               panelPaddingSize="none"
               anchorPosition="upLeft"
+              aria-label={i18n.translate(
+                'xpack.ml.timeSeriesExplorer.timeSeriesChart.anomalyActionsPopoverAriaLabel',
+                {
+                  defaultMessage: 'Anomaly actions',
+                }
+              )}
             >
               <LinksMenuUI
                 anomaly={this.state.popoverData}
@@ -2047,6 +2055,7 @@ class TimeseriesChartIntl extends Component {
                 isAggregatedData={this.props.tableData.interval !== 'second'}
                 interval={this.props.tableData.interval}
                 showRuleEditorFlyout={this.state.showRuleEditorFlyout}
+                showAnomalyAlertFlyout={this.handleShowAnomalyAlertFlyout}
                 onItemClick={() => this.closePopover()}
                 sourceIndicesWithGeoFields={this.props.sourceIndicesWithGeoFields}
               />
@@ -2062,6 +2071,27 @@ class TimeseriesChartIntl extends Component {
 export const TimeseriesChart = (props) => {
   const annotationUpdatesService = useContext(MlAnnotationUpdatesContext);
   const annotationProp = useObservable(annotationUpdatesService.isAnnotationInitialized$());
+  const { euiTheme } = useEuiTheme();
+
+  const anomalyColorScale = useMemo(
+    () =>
+      d3.scale
+        .threshold()
+        .domain([
+          ML_ANOMALY_THRESHOLD.WARNING,
+          ML_ANOMALY_THRESHOLD.MINOR,
+          ML_ANOMALY_THRESHOLD.MAJOR,
+          ML_ANOMALY_THRESHOLD.CRITICAL,
+        ])
+        .range([
+          getThemeResolvedSeverityColor(ML_ANOMALY_THRESHOLD.LOW, euiTheme),
+          getThemeResolvedSeverityColor(ML_ANOMALY_THRESHOLD.WARNING, euiTheme),
+          getThemeResolvedSeverityColor(ML_ANOMALY_THRESHOLD.MINOR, euiTheme),
+          getThemeResolvedSeverityColor(ML_ANOMALY_THRESHOLD.MAJOR, euiTheme),
+          getThemeResolvedSeverityColor(ML_ANOMALY_THRESHOLD.CRITICAL, euiTheme),
+        ]),
+    [euiTheme]
+  );
 
   if (annotationProp === undefined) {
     return null;
@@ -2070,6 +2100,7 @@ export const TimeseriesChart = (props) => {
   return (
     <TimeseriesChartIntl
       annotation={annotationProp}
+      anomalyColorScale={anomalyColorScale}
       {...props}
       annotationUpdatesService={annotationUpdatesService}
     />

@@ -7,15 +7,16 @@
 
 import moment from 'moment';
 import sinon from 'sinon';
-import type { TransportResult } from '@elastic/elasticsearch';
+import type { TransportResult, estypes } from '@elastic/elasticsearch';
+import type { FieldCapsResponse } from '@elastic/elasticsearch/lib/api/types';
 import { ALERT_REASON, ALERT_RULE_PARAMETERS, ALERT_UUID, TIMESTAMP } from '@kbn/rule-data-utils';
 
 import type { SanitizedRuleAction } from '@kbn/alerting-plugin/common';
+import { gapReasonType } from '@kbn/alerting-plugin/common';
 
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import { listMock } from '@kbn/lists-plugin/server/mocks';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
-import { RuleExecutionStatusEnum } from '../../../../../common/api/detection_engine/rule_monitoring';
 import { getListArrayMock } from '../../../../../common/detection_engine/schemas/types/lists.mock';
 import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
 
@@ -25,11 +26,13 @@ import {
   generateId,
   parseInterval,
   getGapBetweenRuns,
+  getGapReason,
   getNumCatchupIntervals,
   getRuleRangeTuples,
   getExceptions,
   hasTimestampFields,
   createErrorsFromShard,
+  createWarningsFromClusters,
   createSearchAfterReturnTypeFromResponse,
   createSearchAfterReturnType,
   mergeReturns,
@@ -43,6 +46,8 @@ import {
   getDisabledActionsWarningText,
   calculateFromValue,
   stringifyAfterKey,
+  getUnusableCursorWarning,
+  getSafeNanosSortIds,
 } from './utils';
 import type { SearchAfterAndBulkCreateReturnType } from '../types';
 import {
@@ -57,7 +62,7 @@ import {
 import type { ShardError } from '../../../types';
 import { ruleExecutionLogMock } from '../../rule_monitoring/mocks';
 import type { GenericBulkCreateResponse } from '../factories';
-import type { BaseFieldsLatest } from '../../../../../common/api/detection_engine/model/alerts';
+import type { DetectionAlertLatest } from '../../../../../common/api/detection_engine/model/alerts';
 import type { AlertingServerSetup } from '@kbn/alerting-plugin/server';
 
 describe('utils', () => {
@@ -204,6 +209,127 @@ describe('utils', () => {
     });
   });
 
+  describe('getGapReason', () => {
+    test('returns rule_disabled when rule was disabled for a long time and ran promptly after re-enable', () => {
+      const previousStartedAt = new Date('2024-01-01T14:30:00.000Z');
+      const lastEnabledAt = new Date('2024-01-01T16:00:00.000Z');
+      const startedAt = new Date('2024-01-01T16:05:00.000Z');
+      const originalFrom = moment(startedAt).subtract(6, 'minutes');
+      const originalTo = moment(startedAt);
+
+      const reason = getGapReason({
+        previousStartedAt,
+        startedAt,
+        lastEnabledAt,
+        originalFrom,
+        originalTo,
+      });
+      expect(reason).toEqual({ type: gapReasonType.RULE_DISABLED });
+    });
+
+    test('returns rule_did_not_run when rule was disabled briefly but TM delayed significantly', () => {
+      const previousStartedAt = new Date('2024-01-01T14:30:00.000Z');
+      const lastEnabledAt = new Date('2024-01-01T14:32:00.000Z');
+      const startedAt = new Date('2024-01-01T16:00:00.000Z');
+      const originalFrom = moment(startedAt).subtract(6, 'minutes');
+      const originalTo = moment(startedAt);
+
+      const reason = getGapReason({
+        previousStartedAt,
+        startedAt,
+        lastEnabledAt,
+        originalFrom,
+        originalTo,
+      });
+      expect(reason).toEqual({ type: gapReasonType.RULE_DID_NOT_RUN });
+    });
+
+    test('returns rule_did_not_run when rule was never disabled (lastEnabledAt before previousStartedAt)', () => {
+      const previousStartedAt = new Date('2024-01-01T14:30:00.000Z');
+      const lastEnabledAt = new Date('2024-01-01T09:00:00.000Z');
+      const startedAt = new Date('2024-01-01T16:00:00.000Z');
+      const originalFrom = moment(startedAt).subtract(6, 'minutes');
+      const originalTo = moment(startedAt);
+
+      const reason = getGapReason({
+        previousStartedAt,
+        startedAt,
+        lastEnabledAt,
+        originalFrom,
+        originalTo,
+      });
+      expect(reason).toEqual({ type: gapReasonType.RULE_DID_NOT_RUN });
+    });
+
+    test('returns rule_did_not_run when lastEnabledAt is null', () => {
+      const reason = getGapReason({
+        previousStartedAt: new Date('2024-01-01T14:30:00.000Z'),
+        startedAt: new Date('2024-01-01T16:00:00.000Z'),
+        lastEnabledAt: null,
+        originalFrom: moment('2024-01-01T15:54:00.000Z'),
+        originalTo: moment('2024-01-01T16:00:00.000Z'),
+      });
+      expect(reason).toEqual({ type: gapReasonType.RULE_DID_NOT_RUN });
+    });
+
+    test('returns rule_did_not_run when previousStartedAt is null', () => {
+      const reason = getGapReason({
+        previousStartedAt: null,
+        startedAt: new Date('2024-01-01T16:00:00.000Z'),
+        lastEnabledAt: new Date('2024-01-01T15:58:00.000Z'),
+        originalFrom: moment('2024-01-01T15:54:00.000Z'),
+        originalTo: moment('2024-01-01T16:00:00.000Z'),
+      });
+      expect(reason).toEqual({ type: gapReasonType.RULE_DID_NOT_RUN });
+    });
+
+    test('returns rule_disabled when post-enable delay equals drift tolerance exactly', () => {
+      const previousStartedAt = new Date('2024-01-01T14:30:00.000Z');
+      const lastEnabledAt = new Date('2024-01-01T15:54:00.000Z');
+      const startedAt = new Date('2024-01-01T16:00:00.000Z');
+      const originalFrom = moment(startedAt).subtract(6, 'minutes');
+      const originalTo = moment(startedAt);
+
+      const reason = getGapReason({
+        previousStartedAt,
+        startedAt,
+        lastEnabledAt,
+        originalFrom,
+        originalTo,
+      });
+      expect(reason).toEqual({ type: gapReasonType.RULE_DISABLED });
+    });
+
+    test('returns rule_did_not_run when post-enable delay exceeds drift tolerance by 1ms', () => {
+      const startedAt = new Date('2024-01-01T16:00:00.000Z');
+      const originalFrom = moment(startedAt).subtract(6, 'minutes');
+      const originalTo = moment(startedAt);
+      const driftToleranceMs = originalTo.diff(originalFrom);
+      const lastEnabledAt = new Date(startedAt.getTime() - driftToleranceMs - 1);
+
+      const reason = getGapReason({
+        previousStartedAt: new Date('2024-01-01T14:30:00.000Z'),
+        startedAt,
+        lastEnabledAt,
+        originalFrom,
+        originalTo,
+      });
+      expect(reason).toEqual({ type: gapReasonType.RULE_DID_NOT_RUN });
+    });
+
+    test('returns rule_did_not_run when lastEnabledAt equals previousStartedAt', () => {
+      const previousStartedAt = new Date('2024-01-01T14:30:00.000Z');
+      const reason = getGapReason({
+        previousStartedAt,
+        startedAt: new Date('2024-01-01T16:00:00.000Z'),
+        lastEnabledAt: previousStartedAt,
+        originalFrom: moment('2024-01-01T15:54:00.000Z'),
+        originalTo: moment('2024-01-01T16:00:00.000Z'),
+      });
+      expect(reason).toEqual({ type: gapReasonType.RULE_DID_NOT_RUN });
+    });
+  });
+
   describe('getRuleRangeTuples', () => {
     let alerting: AlertingServerSetup;
 
@@ -222,6 +348,7 @@ describe('utils', () => {
         maxSignals: 20,
         ruleExecutionLogger,
         alerting,
+        lastEnabledAt: undefined,
       });
       const someTuple = tuples[0];
       expect(moment(someTuple.to).diff(moment(someTuple.from), 's')).toEqual(30);
@@ -240,6 +367,7 @@ describe('utils', () => {
         maxSignals: 20,
         ruleExecutionLogger,
         alerting,
+        lastEnabledAt: undefined,
       });
       const someTuple = tuples[0];
       expect(moment(someTuple.to).diff(moment(someTuple.from), 's')).toEqual(30);
@@ -260,6 +388,7 @@ describe('utils', () => {
         maxSignals: 20,
         ruleExecutionLogger,
         alerting,
+        lastEnabledAt: undefined,
       });
       const someTuple = tuples[1];
       expect(moment(someTuple.to).diff(moment(someTuple.from), 's')).toEqual(55);
@@ -280,6 +409,7 @@ describe('utils', () => {
         maxSignals: 20,
         ruleExecutionLogger,
         alerting,
+        lastEnabledAt: undefined,
       });
       expect(tuples.length).toEqual(5);
       tuples.forEach((item, index) => {
@@ -296,6 +426,56 @@ describe('utils', () => {
       expect(gap?.lte).toEqual(moment(previousStartedAt).add(remainingGap, 'ms').toISOString());
     });
 
+    test('should return gapReason as rule_did_not_run when gap exists and lastEnabledAt is undefined', async () => {
+      const previousStartedAt = moment().subtract(65, 's').toDate();
+      const startedAt = moment().toDate();
+      const { gapReason } = await getRuleRangeTuples({
+        previousStartedAt,
+        startedAt,
+        interval: '10s',
+        from: 'now-13s',
+        to: 'now',
+        maxSignals: 20,
+        ruleExecutionLogger,
+        alerting,
+        lastEnabledAt: undefined,
+      });
+      expect(gapReason).toEqual({ type: gapReasonType.RULE_DID_NOT_RUN });
+    });
+
+    test('should return gapReason as rule_disabled when gap exists and rule was recently re-enabled', async () => {
+      const previousStartedAt = moment().subtract(65, 's').toDate();
+      const startedAt = moment().toDate();
+      const lastEnabledAt = moment().subtract(5, 's').toDate();
+      const { gapReason } = await getRuleRangeTuples({
+        previousStartedAt,
+        startedAt,
+        interval: '10s',
+        from: 'now-13s',
+        to: 'now',
+        maxSignals: 20,
+        ruleExecutionLogger,
+        alerting,
+        lastEnabledAt,
+      });
+      expect(gapReason).toEqual({ type: gapReasonType.RULE_DISABLED });
+    });
+
+    test('should not return gapReason when there is no gap', async () => {
+      const { gapReason } = await getRuleRangeTuples({
+        previousStartedAt: moment().subtract(30, 's').toDate(),
+        startedAt: moment().subtract(30, 's').toDate(),
+        interval: '30s',
+        from: 'now-30s',
+        to: 'now',
+        maxSignals: 20,
+        ruleExecutionLogger,
+        alerting,
+        lastEnabledAt: undefined,
+      });
+      expect(gapReason).toBeUndefined();
+    });
+
     test('should return a single tuple when give a negative gap (rule ran sooner than expected)', async () => {
       const { tuples, remainingGap, warningStatusMessage } = await getRuleRangeTuples({
         previousStartedAt: moment().subtract(-15, 's').toDate(),
@@ -306,6 +486,7 @@ describe('utils', () => {
         maxSignals: 20,
         ruleExecutionLogger,
         alerting,
+        lastEnabledAt: undefined,
       });
       expect(tuples.length).toEqual(1);
       const someTuple = tuples[0];
@@ -325,6 +506,7 @@ describe('utils', () => {
         maxSignals: 20,
         ruleExecutionLogger,
         alerting,
+        lastEnabledAt: undefined,
       });
       const someTuple = tuples[0];
       expect(someTuple.maxSignals).toEqual(10);
@@ -344,11 +526,30 @@ describe('utils', () => {
         maxSignals: 20,
         ruleExecutionLogger,
         alerting,
+        lastEnabledAt: undefined,
       });
       const someTuple = tuples[0];
       expect(someTuple.maxSignals).toEqual(20);
       expect(tuples.length).toEqual(1);
       expect(warningStatusMessage).toEqual(undefined);
+    });
+
+    test('should return originalFrom and originalTo in response', async () => {
+      const { originalFrom, originalTo } = await getRuleRangeTuples({
+        previousStartedAt: moment().subtract(30, 's').toDate(),
+        startedAt: moment().toDate(),
+        interval: '30s',
+        from: 'now-30s',
+        to: 'now',
+        maxSignals: 20,
+        ruleExecutionLogger,
+        alerting,
+        lastEnabledAt: undefined,
+      });
+
+      expect(originalFrom).toBeDefined();
+      expect(originalTo).toBeDefined();
+      expect(moment.duration(originalTo.diff(originalFrom)).asSeconds()).toEqual(30);
     });
   });
 
@@ -409,12 +610,13 @@ describe('utils', () => {
       const exceptions = await getExceptions({
         client,
         lists: getListArrayMock(),
+        shouldFilterOutEndpointExceptions: true,
       });
 
       expect(client.findExceptionListsItemPointInTimeFinder).toHaveBeenCalledWith(
         expect.objectContaining({
-          listId: ['list_id_single', 'endpoint_list'],
-          namespaceType: ['single', 'agnostic'],
+          listId: ['list_id_single'],
+          namespaceType: ['single'],
           perPage: 1_000,
           filter: [],
           maxSize: undefined,
@@ -436,8 +638,9 @@ describe('utils', () => {
         getExceptions({
           client: listMock.getExceptionListClient(),
           lists: getListArrayMock(),
+          shouldFilterOutEndpointExceptions: true,
         })
-      ).rejects.toThrowError(
+      ).rejects.toThrow(
         'unable to fetch exception list items, message: "error fetching list" full error: "Error: error fetching list"'
       );
     });
@@ -451,6 +654,7 @@ describe('utils', () => {
       const exceptions = await getExceptions({
         client: listMock.getExceptionListClient(),
         lists: [],
+        shouldFilterOutEndpointExceptions: true,
       });
 
       expect(exceptions).toEqual([]);
@@ -460,8 +664,7 @@ describe('utils', () => {
   describe('hasTimestampFields', () => {
     test('returns true when missing timestamp override field', async () => {
       const timestampField = 'event.ingested';
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const timestampFieldCapsResponse: Partial<TransportResult<Record<string, any>, unknown>> = {
+      const timestampFieldCapsResponse: Partial<TransportResult<FieldCapsResponse, unknown>> = {
         body: {
           indices: ['myfakeindex-1', 'myfakeindex-2', 'myfakeindex-3', 'myfakeindex-4'],
           fields: {
@@ -483,28 +686,24 @@ describe('utils', () => {
         },
       };
 
-      const { foundNoIndices } = await hasTimestampFields({
+      const { foundNoIndices, warningMessage } = await hasTimestampFields({
         timestampField,
         timestampFieldCapsResponse: timestampFieldCapsResponse as TransportResult<
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          Record<string, any>
+          FieldCapsResponse,
+          unknown
         >,
-        inputIndices: ['myfa*'],
         ruleExecutionLogger,
       });
 
       expect(foundNoIndices).toBeFalsy();
-      expect(ruleExecutionLogger.logStatusChange).toHaveBeenCalledWith({
-        newStatus: RuleExecutionStatusEnum['partial failure'],
-        message:
-          'The following indices are missing the timestamp override field "event.ingested": ["myfakeindex-1","myfakeindex-2"]',
-      });
+      expect(warningMessage).toBe(
+        'The following indices are missing the timestamp override field "event.ingested": ["myfakeindex-1","myfakeindex-2"]'
+      );
     });
 
     test('returns true when missing timestamp field', async () => {
       const timestampField = '@timestamp';
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const timestampFieldCapsResponse: Partial<TransportResult<Record<string, any>, unknown>> = {
+      const timestampFieldCapsResponse: Partial<TransportResult<FieldCapsResponse, unknown>> = {
         body: {
           indices: ['myfakeindex-1', 'myfakeindex-2', 'myfakeindex-3', 'myfakeindex-4'],
           fields: {
@@ -526,87 +725,110 @@ describe('utils', () => {
         },
       };
 
-      const { foundNoIndices } = await hasTimestampFields({
+      const { foundNoIndices, warningMessage } = await hasTimestampFields({
         timestampField,
         timestampFieldCapsResponse: timestampFieldCapsResponse as TransportResult<
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          Record<string, any>
+          FieldCapsResponse,
+          unknown
         >,
-        inputIndices: ['myfa*'],
         ruleExecutionLogger,
       });
 
       expect(foundNoIndices).toBeFalsy();
-      expect(ruleExecutionLogger.logStatusChange).toHaveBeenCalledWith({
-        newStatus: RuleExecutionStatusEnum['partial failure'],
-        message:
-          'The following indices are missing the timestamp field "@timestamp": ["myfakeindex-1","myfakeindex-2"]',
-      });
+      expect(warningMessage).toBe(
+        'The following indices are missing the timestamp field "@timestamp": ["myfakeindex-1","myfakeindex-2"]'
+      );
+    });
+  });
+
+  describe('createWarningsFromClusters', () => {
+    const skippedFailure: estypes.ShardFailure = {
+      shard: -1,
+      index: 'kayak:logs-a-000001',
+      node: 'node-1',
+      reason: {
+        type: 'security_exception',
+        reason: 'action [indices:data/read/search] is unauthorized',
+      },
+    };
+
+    test('returns an empty array without a _clusters section', () => {
+      expect(createWarningsFromClusters({ clusters: undefined, shardErrors: [] })).toEqual([]);
     });
 
-    test('returns true when missing logs-endpoint.alerts-* index and rule name is Endpoint Security', async () => {
-      const timestampField = '@timestamp';
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const timestampFieldCapsResponse: Partial<TransportResult<Record<string, any>, unknown>> = {
-        body: {
-          indices: [],
-          fields: {},
+    test('reports per-cluster failures as warnings naming the cluster and its status', () => {
+      const warnings = createWarningsFromClusters({
+        clusters: {
+          total: 2,
+          successful: 1,
+          skipped: 1,
+          running: 0,
+          partial: 0,
+          failed: 0,
+          details: {
+            kayak: {
+              status: 'skipped',
+              indices: 'logs-a-*',
+              timed_out: false,
+              failures: [skippedFailure],
+            },
+          },
         },
-      };
-
-      ruleExecutionLogger = ruleExecutionLogMock.forExecutors.create({
-        ruleName: 'Endpoint Security',
+        shardErrors: [],
       });
 
-      const { foundNoIndices } = await hasTimestampFields({
-        timestampField,
-        timestampFieldCapsResponse: timestampFieldCapsResponse as TransportResult<
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          Record<string, any>
-        >,
-        inputIndices: ['logs-endpoint.alerts-*'],
-        ruleExecutionLogger,
-      });
-
-      expect(foundNoIndices).toBeTruthy();
-      expect(ruleExecutionLogger.logStatusChange).toHaveBeenCalledWith({
-        newStatus: RuleExecutionStatusEnum['partial failure'],
-        message:
-          'This rule is attempting to query data from Elasticsearch indices listed in the "Index patterns" section of the rule definition, however no index matching: ["logs-endpoint.alerts-*"] was found. This warning will continue to appear until a matching index is created or this rule is disabled. If you have recently enrolled agents enabled with Endpoint Security through Fleet, this warning should stop once an alert is sent from an agent.',
-      });
+      expect(warnings).toEqual([
+        'Cluster "kayak" is "skipped" and its data may be missing from this rule run: index: "kayak:logs-a-000001" reason: "action [indices:data/read/search] is unauthorized" type: "security_exception"',
+      ]);
     });
 
-    test('returns true when missing logs-endpoint.alerts-* index and rule name is NOT Endpoint Security', async () => {
-      const timestampField = '@timestamp';
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const timestampFieldCapsResponse: Partial<TransportResult<Record<string, any>, unknown>> = {
-        body: {
-          indices: [],
-          fields: {},
+    test('omits failures already reported in _shards.failures', () => {
+      const shardErrors = createErrorsFromShard({ errors: [skippedFailure] });
+      const warnings = createWarningsFromClusters({
+        clusters: {
+          total: 1,
+          successful: 1,
+          skipped: 0,
+          running: 0,
+          partial: 0,
+          failed: 0,
+          details: {
+            '(local)': {
+              status: 'successful',
+              indices: 'logs-a-*',
+              timed_out: false,
+              failures: [skippedFailure],
+            },
+          },
         },
-      };
-
-      // SUT uses rule execution logger's context to check the rule name
-      ruleExecutionLogger = ruleExecutionLogMock.forExecutors.create({
-        ruleName: 'NOT Endpoint Security',
+        shardErrors,
       });
 
-      const { foundNoIndices } = await hasTimestampFields({
-        timestampField,
-        timestampFieldCapsResponse: timestampFieldCapsResponse as TransportResult<
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          Record<string, any>
-        >,
-        inputIndices: ['logs-endpoint.alerts-*'],
-        ruleExecutionLogger,
+      expect(warnings).toEqual([]);
+    });
+
+    test('reports skipped and failed clusters that carry no failures', () => {
+      const warnings = createWarningsFromClusters({
+        clusters: {
+          total: 2,
+          successful: 0,
+          skipped: 1,
+          running: 0,
+          partial: 0,
+          failed: 1,
+          details: {
+            kayak: { status: 'skipped', indices: 'logs-a-*', timed_out: false },
+            booking: { status: 'failed', indices: 'logs-a-*', timed_out: false },
+            opentable: { status: 'successful', indices: 'logs-a-*', timed_out: false },
+          },
+        },
+        shardErrors: [],
       });
 
-      expect(foundNoIndices).toBeTruthy();
-      expect(ruleExecutionLogger.logStatusChange).toHaveBeenCalledWith({
-        newStatus: RuleExecutionStatusEnum['partial failure'],
-        message:
-          'This rule is attempting to query data from Elasticsearch indices listed in the "Index patterns" section of the rule definition, however no index matching: ["logs-endpoint.alerts-*"] was found. This warning will continue to appear until a matching index is created or this rule is disabled.',
-      });
+      expect(warnings).toEqual([
+        'Cluster "kayak" is "skipped" and its data is missing from this rule run (indices: "logs-a-*").',
+        'Cluster "booking" is "failed" and its data is missing from this rule run (indices: "logs-a-*").',
+      ]);
     });
   });
 
@@ -739,6 +961,7 @@ describe('utils', () => {
       const expected: SearchAfterAndBulkCreateReturnType = {
         bulkCreateTimes: [],
         enrichmentTimes: [],
+        alertsCandidateCount: 0,
         createdSignalsCount: 0,
         createdSignals: [],
         errors: [],
@@ -760,6 +983,7 @@ describe('utils', () => {
       const expected: SearchAfterAndBulkCreateReturnType = {
         bulkCreateTimes: [],
         enrichmentTimes: [],
+        alertsCandidateCount: 1,
         createdSignalsCount: 0,
         createdSignals: [],
         errors: [],
@@ -1037,6 +1261,7 @@ describe('utils', () => {
         warning: false,
         warningMessages: [],
         suppressedAlertsCount: 0,
+        totalEventsFound: 0,
       };
       expect(merged).toEqual(expected);
     });
@@ -1092,6 +1317,7 @@ describe('utils', () => {
         warning: true,
         warningMessages: ['warning1', 'warning2'],
         suppressedAlertsCount: 0,
+        totalEventsFound: 0,
       };
       expect(merged).toEqual(expected);
     });
@@ -1100,7 +1326,7 @@ describe('utils', () => {
   describe('addToSearchAfterReturn', () => {
     test('merges the values from bulk create response into search after return type', () => {
       const current = createSearchAfterReturnType();
-      const next: GenericBulkCreateResponse<BaseFieldsLatest> = {
+      const next: GenericBulkCreateResponse<DetectionAlertLatest> = {
         success: false,
         bulkCreateDuration: '100',
         enrichmentDuration: '0',
@@ -1118,7 +1344,7 @@ describe('utils', () => {
 
     test('does not duplicate error messages', () => {
       const current = createSearchAfterReturnType({ errors: ['error 1'] });
-      const next: GenericBulkCreateResponse<BaseFieldsLatest> = {
+      const next: GenericBulkCreateResponse<DetectionAlertLatest> = {
         success: true,
         bulkCreateDuration: '0',
         enrichmentDuration: '0',
@@ -1134,7 +1360,7 @@ describe('utils', () => {
 
     test('adds new error messages', () => {
       const current = createSearchAfterReturnType({ errors: ['error 1'] });
-      const next: GenericBulkCreateResponse<BaseFieldsLatest> = {
+      const next: GenericBulkCreateResponse<DetectionAlertLatest> = {
         success: true,
         bulkCreateDuration: '0',
         enrichmentDuration: '0',
@@ -1380,6 +1606,61 @@ describe('utils', () => {
       expect(warning).toEqual(
         'Rule action connector .webhook is not enabled. To send notifications, you need a higher Security Analytics license / tier'
       );
+    });
+  });
+
+  describe('getUnusableCursorWarning', () => {
+    const sortIds = ['2262-04-11T23:47:16.854775806Z', '2026-07-30T12:00:00.000000001Z'];
+
+    test('returns undefined when sort ids are undefined', () => {
+      expect(getUnusableCursorWarning(undefined, undefined)).toBeUndefined();
+    });
+
+    test('returns undefined when the cursor advanced with usable values', () => {
+      const prevSortIds = ['2262-04-11T23:47:16.854775805Z', '2026-07-30T11:00:00.000000001Z'];
+      expect(getUnusableCursorWarning(sortIds, prevSortIds)).toBeUndefined();
+    });
+
+    test('returns undefined on the first page when there is no previous cursor', () => {
+      expect(getUnusableCursorWarning(sortIds, undefined)).toBeUndefined();
+    });
+
+    test('returns a warning when a sort value is null', () => {
+      const warning = getUnusableCursorWarning([null, sortIds[1]], undefined);
+      expect(warning).toEqual(expect.stringContaining('Pagination stopped'));
+    });
+
+    test('returns a warning when a sort value is empty', () => {
+      const warning = getUnusableCursorWarning(['', sortIds[1]], undefined);
+      expect(warning).toEqual(expect.stringContaining('Pagination stopped'));
+    });
+
+    test('returns a warning when the cursor did not advance', () => {
+      const warning = getUnusableCursorWarning(sortIds, [...sortIds]);
+      expect(warning).toEqual(expect.stringContaining('Pagination stopped'));
+    });
+  });
+
+  describe('getSafeNanosSortIds', () => {
+    test('returns undefined when sort ids are undefined', () => {
+      expect(getSafeNanosSortIds(undefined)).toBeUndefined();
+    });
+
+    test('leaves formatted date_nanos values untouched', () => {
+      const sortIds = ['2262-04-11T23:47:16.854775806Z', '2026-07-30T12:00:00.000000001Z'];
+      expect(getSafeNanosSortIds(sortIds)).toEqual(sortIds);
+    });
+
+    test('replaces an oversized number with Long.MAX_VALUE', () => {
+      expect(getSafeNanosSortIds([Number('9223372036854775807')])).toEqual(['9223372036854775807']);
+    });
+
+    test('keeps null and empty values so callers can stop paging', () => {
+      expect(getSafeNanosSortIds([null, ''])).toEqual([null, '']);
+    });
+
+    test('leaves millisecond timestamps untouched', () => {
+      expect(getSafeNanosSortIds(['1234567891111'])).toEqual(['1234567891111']);
     });
   });
 });

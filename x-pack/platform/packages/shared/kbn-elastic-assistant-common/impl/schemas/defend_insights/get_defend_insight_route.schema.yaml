@@ -6,6 +6,13 @@ paths:
   /internal/elastic_assistant/defend_insights/{id}:
     get:
       x-codegen-enabled: true
+      x-codeSamples:
+        - lang: curl
+          label: Example request
+          source: |
+            curl \
+             --request GET 'http://localhost:5601/internal/elastic_assistant/defend_insights/insight-abc123' \
+             --header "Authorization: $API_KEY"
       x-labels: [ess, serverless]
       operationId: DefendInsightGet
       description: Get Defend insight by id
@@ -16,12 +23,13 @@ paths:
         - name: 'id'
           in: path
           required: true
-          description: The Defend insight id
+          description: The Defend insight id.
           schema:
             $ref: '../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
+          example: "insight-abc123"
       responses:
         '200':
-          description: Successful response
+          description: Indicates a successful call.
           content:
             application/json:
               schema:
@@ -30,8 +38,44 @@ paths:
                   data:
                     $ref: './common_attributes.schema.yaml#/components/schemas/DefendInsightsResponse'
                     nullable: true
+              examples:
+                DefendInsightGetResponse200Example:
+                  summary: A successful response containing a single Defend insight.
+                  value:
+                    data:
+                      id: "insight-abc123"
+                      status: succeeded
+                      insightType: incompatible_antivirus
+                      endpointIds:
+                        - "endpoint-id-1"
+                      insights:
+                        - group: "Windows Defender"
+                          events:
+                            - id: "event-1"
+                              endpointId: "endpoint-id-1"
+                              value: "Antivirus conflict detected"
+                      apiConfig:
+                        connectorId: my-connector-id
+                        actionTypeId: .gen-ai
+                      createdAt: "2024-01-15T10:00:00.000Z"
+                      updatedAt: "2024-01-15T10:05:00.000Z"
+                      lastViewedAt: "2024-01-15T10:06:00.000Z"
+                      users:
+                        - id: "user-1"
+                          name: "user@example.com"
+                      namespace: "default"
+                      backingIndex: ".kibana-elastic-ai-assistant-defend-insights-default"
+                      generationIntervals:
+                        - date: "2024-01-15T10:05:00.000Z"
+                          durationMs: 4800
+                      averageIntervalMs: 4800
+                      replacements: {}
+                DefendInsightGetResponse200NullExample:
+                  summary: A successful response when no insight is found for the given id.
+                  value:
+                    data: null
         '400':
-          description: Generic Error
+          description: Bad Request response.
           content:
             application/json:
               schema:
@@ -43,3 +87,10 @@ paths:
                     type: string
                   message:
                     type: string
+              examples:
+                DefendInsightGetResponse400Example:
+                  summary: A bad request response.
+                  value:
+                    statusCode: 400
+                    error: Bad Request
+                    message: "Invalid insight id."

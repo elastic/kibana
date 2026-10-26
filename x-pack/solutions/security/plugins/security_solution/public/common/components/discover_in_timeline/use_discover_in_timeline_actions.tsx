@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import type { DiscoverStateContainer } from '@kbn/discover-plugin/public';
+import type { ExtendedDiscoverStateContainer } from '@kbn/discover-plugin/public';
 import type { SaveSavedSearchOptions } from '@kbn/saved-search-plugin/public';
 import { isEqualWith } from 'lodash';
 import { useMemo, useCallback, useRef } from 'react';
 import type { RefObject } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useStore } from 'react-redux-v7';
 import type { SavedSearch } from '@kbn/saved-search-plugin/common';
-import type { DiscoverAppState } from '@kbn/discover-plugin/public/application/main/state_management/discover_app_state_container';
+import type { DiscoverAppState } from '@kbn/discover-plugin/public/application/main/state_management/redux';
 import type { TimeRange } from '@kbn/es-query';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@kbn/react-query';
 import { useDiscoverState } from '../../../timelines/components/timeline/tabs/esql/use_discover_state';
 import { timelineDefaults } from '../../../timelines/store/defaults';
 import { TimelineId } from '../../../../common/types';
@@ -22,7 +22,11 @@ import { timelineActions, timelineSelectors } from '../../../timelines/store';
 import { useAppToasts } from '../../hooks/use_app_toasts';
 import { useShallowEqualSelector } from '../../hooks/use_selector';
 import { useKibana } from '../../lib/kibana';
-import { savedSearchComparator } from '../../../timelines/components/timeline/tabs/esql/utils';
+import type { State } from '../../store';
+import {
+  savedSearchComparator,
+  hasNonEmptyEsqlQuery,
+} from '../../../timelines/components/timeline/tabs/esql/utils';
 import {
   DISCOVER_SEARCH_SAVE_ERROR_TITLE,
   DISCOVER_SEARCH_SAVE_ERROR_UNKNOWN,
@@ -49,7 +53,7 @@ export const defaultDiscoverTimeRange: TimeRange = {
 };
 
 export const useDiscoverInTimelineActions = (
-  discoverStateContainer: RefObject<DiscoverStateContainer | undefined>
+  discoverStateContainer: RefObject<ExtendedDiscoverStateContainer | undefined>
 ) => {
   const { setDiscoverAppState } = useDiscoverState();
   const { addError } = useAppToasts();
@@ -59,16 +63,33 @@ export const useDiscoverInTimelineActions = (
   } = useKibana();
 
   const dispatch = useDispatch();
+  const store = useStore<State>();
 
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
   const timeline = useShallowEqualSelector(
     (state) => getTimeline(state, TimelineId.active) ?? timelineDefaults
+  );
+
+  /**
+   * Reads the timeline currently occupying the active slot straight from the store, rather than
+   * from the render-time copy, so callers can compare it across an await without depending on
+   * React having re-rendered in the meantime.
+   */
+  const getActiveSavedObjectId = useCallback(
+    () => getTimeline(store.getState(), TimelineId.active)?.savedObjectId ?? null,
+    [getTimeline, store]
   );
   const { savedSearchId, version } = timeline;
 
   // We're using a ref here to prevent a cyclic hook-dependency chain of updateSavedSearch
   const timelineRef = useRef(timeline);
   timelineRef.current = timeline;
+
+  // Set when a timeline is restored while the ES|QL tab is not mounted, so there is no state
+  // container to restore into. The tab reads it on mount to tell "a different timeline was
+  // opened, take its state" from a plain remount of the timeline already on screen, where the
+  // in-session state has to survive.
+  const timelineRestorePending = useRef(false);
 
   const queryClient = useQueryClient();
 
@@ -102,8 +123,7 @@ export const useDiscoverInTimelineActions = (
    * */
   const getAppStateFromSavedSearch = useCallback(
     (savedSearch: SavedSearch) => {
-      const appState =
-        discoverStateContainer.current?.appState.getAppStateFromSavedSearch(savedSearch);
+      const appState = discoverStateContainer.current?.getAppStateFromSavedSearch(savedSearch);
       return {
         savedSearch,
         appState,
@@ -118,35 +138,105 @@ export const useDiscoverInTimelineActions = (
    * */
   const resetDiscoverAppState = useCallback(
     async (newSavedSearchId?: string | null) => {
-      if (newSavedSearchId && discoverStateContainer.current) {
+      // The ES|QL tab publishes its state container while it is mounted and releases it when it
+      // is not, so an absent container means the restore has to be deferred to its next mount.
+      timelineRestorePending.current = !discoverStateContainer.current;
+
+      if (newSavedSearchId) {
+        // Applying the default state below would empty the redux copy of the Discover state and
+        // move the timefilter to `now-15m`, even though the caller asked for a session to be
+        // restored. Leave both alone and let the tab restore itself when it mounts.
+        if (!discoverStateContainer.current) return;
+
         let savedSearch;
         try {
           savedSearch = await savedSearchService.get(newSavedSearchId);
           const savedSearchState = savedSearch ? getAppStateFromSavedSearch(savedSearch) : null;
-          discoverStateContainer.current?.appState.initAndSync();
-          await discoverStateContainer.current?.appState.replaceUrlState(
-            savedSearchState?.appState ?? {}
+          const currentContainer = discoverStateContainer.current;
+
+          if (
+            !currentContainer?.internalState?.dispatch ||
+            !currentContainer?.injectCurrentTab ||
+            !currentContainer?.internalActions
+          ) {
+            return;
+          }
+
+          const discoverDispatch = currentContainer.internalState.dispatch;
+          const injectCurrentTab = currentContainer.injectCurrentTab;
+          const internalActions = currentContainer.internalActions;
+
+          try {
+            discoverDispatch(injectCurrentTab(internalActions.stopSyncing)());
+            discoverDispatch(injectCurrentTab(internalActions.initializeAndSync)());
+          } catch {
+            // The tab has no data state container until Discover has finished mounting, and
+            // re-establishing the sync throws until then. Keep going: the state below is what
+            // the timeline is being restored to, and dropping it leaves the previously opened
+            // timeline's Discover session on screen.
+          }
+
+          await discoverDispatch(
+            injectCurrentTab(internalActions.updateAppStateAndReplaceUrl)({
+              appState: savedSearchState?.appState ?? {},
+            })
           );
           setDiscoverAppState(savedSearchState?.appState ?? defaultDiscoverAppState());
-          discoverStateContainer.current?.globalState.set({
-            ...discoverStateContainer.current?.globalState.get(),
-            time: savedSearch.timeRange ?? defaultDiscoverTimeRange,
-          });
+          const timeRange = savedSearch.timeRange ?? defaultDiscoverTimeRange;
+          discoverDispatch(
+            injectCurrentTab(internalActions.updateGlobalState)({
+              globalState: {
+                timeRange,
+              },
+            })
+          );
+          // `updateGlobalState` only writes Discover's own copy of the range, which is what the
+          // date picker renders. The ES|QL search reads the range from the timefilter service
+          // instead, so without this the picker shows the restored range while every query keeps
+          // running against this service's default one.
+          discoverDataService.query.timefilter.timefilter.setTime(timeRange);
         } catch (e) {
           /* empty */
         }
       } else {
         const defaultState = defaultDiscoverAppState();
-        discoverStateContainer.current?.appState.resetToState(defaultState);
-        await discoverStateContainer.current?.appState.replaceUrlState({});
+        const currentProfileState =
+          discoverStateContainer.current?.getCurrentTab().profileState ?? {};
+
+        discoverStateContainer.current?.internalState.dispatch(
+          discoverStateContainer.current.injectCurrentTab(
+            discoverStateContainer.current.internalActions.initializeTabState
+          )({
+            initialAppState: defaultState,
+            initialProfileState: currentProfileState,
+          })
+        );
+        await discoverStateContainer.current?.internalState.dispatch(
+          discoverStateContainer.current?.injectCurrentTab(
+            discoverStateContainer.current?.internalActions.updateAppStateAndReplaceUrl
+          )({
+            appState: {},
+          })
+        );
         setDiscoverAppState(defaultState);
-        discoverStateContainer.current?.globalState.set({
-          ...discoverStateContainer.current?.globalState.get(),
-          time: defaultDiscoverTimeRange,
-        });
+        const discoverState = discoverStateContainer.current;
+        discoverState?.internalState.dispatch(
+          discoverState.injectCurrentTab(discoverState.internalActions.updateGlobalState)({
+            globalState: {
+              timeRange: defaultDiscoverTimeRange,
+            },
+          })
+        );
+        discoverDataService.query.timefilter.timefilter.setTime(defaultDiscoverTimeRange);
       }
     },
-    [discoverStateContainer, getAppStateFromSavedSearch, savedSearchService, setDiscoverAppState]
+    [
+      discoverStateContainer,
+      getAppStateFromSavedSearch,
+      savedSearchService,
+      setDiscoverAppState,
+      discoverDataService,
+    ]
   );
 
   const persistSavedSearch = useCallback(
@@ -191,6 +281,23 @@ export const useDiscoverInTimelineActions = (
 
       // If there is already a saved search, only update the local state
       if (savedSearchId) {
+        // If an ES|QL query was explicitly cleared (query has `esql` key but value is blank),
+        // drop the savedSearchId link immediately so the next explicit timeline save sends
+        // savedSearchId: null to the server and the timeline appears compatible in the list
+        // without requiring a second save. Non-ES|QL queries (kuery/lucene) must not trigger
+        // this path — they have no `esql` key and are not related to the saved-search lifecycle.
+        const currentQuery = savedSearch.searchSource.getField('query');
+        const esqlQueryWasCleared =
+          currentQuery != null &&
+          typeof currentQuery === 'object' &&
+          'esql' in currentQuery &&
+          !hasNonEmptyEsqlQuery(currentQuery);
+        if (esqlQueryWasCleared) {
+          dispatch(
+            timelineActions.updateSavedSearchId({ id: TimelineId.active, savedSearchId: null })
+          );
+          return;
+        }
         savedSearch.id = savedSearchId;
         if (!timelineRef.current.savedSearch) {
           dispatch(
@@ -221,19 +328,38 @@ export const useDiscoverInTimelineActions = (
               id: TimelineId.active,
             })
           );
+          // `TimelineId.active` is a slot, not an identity: creating a new timeline replaces
+          // whatever occupies it. Remember which timeline this Discover session belongs to so
+          // the dispatches below can be skipped if the slot moved on while the save was in
+          // flight — otherwise they hand the session to the timeline that took its place.
+          const savedObjectIdBeingSaved = getActiveSavedObjectId();
           const response = await persistSavedSearch(savedSearch, {
-            onTitleDuplicate: () => {},
             copyOnSave: !savedSearchId,
           });
 
           const responseIsEmpty = !response || !response?.id;
           if (responseIsEmpty) {
             throw new Error('Response is empty');
-          } else if (!savedSearchId && !responseIsEmpty) {
+          } else if (
+            !savedSearchId &&
+            !responseIsEmpty &&
+            getActiveSavedObjectId() === savedObjectIdBeingSaved
+          ) {
             dispatch(
               timelineActions.updateSavedSearchId({
                 id: TimelineId.active,
                 savedSearchId: response.id,
+              })
+            );
+            // Seed the local saved search with the one that was just created. Without this the
+            // redux copy stays null: the sync effect that would normally initialize it
+            // short-circuits because the local and persisted states are already equal right
+            // after creation. A null copy makes every later timeline save skip persisting the
+            // Discover session, because `patchTimeline` is guarded on it.
+            dispatch(
+              timelineActions.initializeSavedSearch({
+                id: TimelineId.active,
+                savedSearch: { ...savedSearch, id: response.id },
               })
             );
             // Also save the timeline, this will only happen once, in case there is no saved search id yet
@@ -249,7 +375,14 @@ export const useDiscoverInTimelineActions = (
         }
       }
     },
-    [persistSavedSearch, savedSearchId, dispatch, discoverDataService, saveSavedSearchStatus]
+    [
+      persistSavedSearch,
+      savedSearchId,
+      dispatch,
+      discoverDataService,
+      saveSavedSearchStatus,
+      getActiveSavedObjectId,
+    ]
   );
 
   const initializeLocalSavedSearch = useCallback(
@@ -271,6 +404,7 @@ export const useDiscoverInTimelineActions = (
       initializeLocalSavedSearch,
       getAppStateFromSavedSearch,
       defaultDiscoverAppState: defaultDiscoverAppState(),
+      timelineRestorePending,
     }),
     [
       resetDiscoverAppState,

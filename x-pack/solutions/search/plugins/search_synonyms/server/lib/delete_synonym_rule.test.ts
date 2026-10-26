@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import { deleteSynonymRule } from './delete_synonym_rule';
 
 describe('delete synonym rule lib function', () => {

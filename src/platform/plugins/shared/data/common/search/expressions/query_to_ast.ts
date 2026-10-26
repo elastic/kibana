@@ -8,9 +8,9 @@
  */
 
 import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/common';
-import { Query } from '../../query';
-import { ExpressionFunctionKql } from './kql';
-import { ExpressionFunctionLucene } from './lucene';
+import type { Query } from '../../query';
+import type { ExpressionFunctionKql } from './kql';
+import type { ExpressionFunctionLucene } from './lucene';
 
 export const queryToAst = (query: Query) => {
   if (query.language === 'kuery') {

@@ -17,6 +17,7 @@ import {
   EuiPopoverTitle,
   EuiText,
   useEuiTheme,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import type { FC } from 'react';
 import React, { useMemo, useState } from 'react';
@@ -39,6 +40,7 @@ export const FieldTypesHelpPopover: FC<{
     const { services } = useDataVisualizerKibana();
     const { docLinks } = services;
     const { euiTheme } = useEuiTheme();
+    const popoverTitleId = useGeneratedHtmlId();
 
     const [isHelpOpen, setIsHelpOpen] = useState(false);
 
@@ -84,6 +86,7 @@ export const FieldTypesHelpPopover: FC<{
     const helpButton = (
       <EuiFilterButton
         grow={false}
+        isSelected={isHelpOpen}
         onClick={onHelpClick}
         data-test-subj="fieldTypesHelpButton"
         className="dataVisualizerFieldTypesHelp__button"
@@ -92,7 +95,7 @@ export const FieldTypesHelpPopover: FC<{
         })}
       >
         <EuiIcon
-          type="iInCircle"
+          type="info"
           color="primary"
           title={i18n.translate('xpack.dataVisualizer.fieldTypesPopover.iconTitle', {
             defaultMessage: 'Filter type help',
@@ -109,8 +112,9 @@ export const FieldTypesHelpPopover: FC<{
         panelPaddingSize="none"
         closePopover={closeHelp}
         initialFocus="dataVisualizerFieldTypesHelpBasicTableId"
+        aria-labelledby={popoverTitleId}
       >
-        <EuiPopoverTitle paddingSize="s">
+        <EuiPopoverTitle paddingSize="s" id={popoverTitleId}>
           {i18n.translate('xpack.dataVisualizer.fieldChooser.popoverTitle', {
             defaultMessage: 'Field types',
           })}

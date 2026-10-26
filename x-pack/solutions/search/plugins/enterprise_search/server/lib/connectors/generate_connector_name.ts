@@ -7,7 +7,7 @@
 
 import { v4 as uuidv4 } from 'uuid';
 
-import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
+import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 
 import { MANAGED_CONNECTOR_INDEX_PREFIX } from '@kbn/search-connectors';
 

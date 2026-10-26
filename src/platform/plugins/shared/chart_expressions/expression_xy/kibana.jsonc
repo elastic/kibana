@@ -2,7 +2,7 @@
   "type": "plugin",
   "id": "@kbn/expression-xy-plugin",
   "owner": [
-    "@elastic/kibana-visualizations"
+    "@elastic/kibana-dashboards"
   ],
   "group": "platform",
   "visibility": "shared",
@@ -23,6 +23,9 @@
     "optionalPlugins": [
       "usageCollection"
     ],
-    "requiredBundles": []
+    "requiredBundles": [],
+    "extraPublicDirs": [
+      "common",
+    ]
   }
 }

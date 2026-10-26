@@ -7,13 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
-import { i18n } from '@kbn/i18n';
-import { toMountPoint } from '@kbn/react-kibana-mount';
-import { Markdown } from '@kbn/shared-ux-markdown';
+import { useCallback, useMemo, useState } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { SortDirection } from '@kbn/data-plugin/public';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
+import { getEsQuerySort, getTieBreakerFieldName } from '@kbn/discover-utils';
 import { fetchAnchor } from '../services/anchor';
 import { fetchSurroundingDocs, SurrDocType } from '../services/context';
 import type { ContextFetchState } from '../services/context_query_state';
@@ -24,10 +22,7 @@ import {
 } from '../services/context_query_state';
 import type { AppState } from '../services/context_state';
 import { useDiscoverServices } from '../../../hooks/use_discover_services';
-import {
-  getTieBreakerFieldName,
-  getEsQuerySort,
-} from '../../../../common/utils/sorting/get_es_query_sort';
+import { useScopedServices } from '../../../components/scoped_services_provider';
 
 const createError = (statusKey: string, reason: FailureReason, error?: Error) => ({
   [statusKey]: { value: LoadingStatus.FAILED, error, reason },
@@ -40,8 +35,9 @@ export interface ContextAppFetchProps {
 }
 
 export function useContextAppFetch({ anchorId, dataView, appState }: ContextAppFetchProps) {
+  const { scopedProfilesManager } = useScopedServices();
   const services = useDiscoverServices();
-  const { uiSettings: config, data, toastNotifications, filterManager } = services;
+  const { uiSettings: config, data, filterManager } = services;
 
   const searchSource = useMemo(() => {
     return data.search.searchSource.createEmpty();
@@ -60,18 +56,8 @@ export function useContextAppFetch({ anchorId, dataView, appState }: ContextAppF
   }, []);
 
   const fetchAnchorRow = useCallback(async () => {
-    const errorTitle = i18n.translate('discover.context.unableToLoadAnchorDocumentDescription', {
-      defaultMessage: 'Unable to load the anchor document',
-    });
-
     if (!tieBreakerFieldName) {
       setState(createError('anchorStatus', FailureReason.INVALID_TIEBREAKER));
-      toastNotifications.addDanger({
-        title: errorTitle,
-        text: i18n.translate('discover.context.invalidTieBreakerFiledSetting', {
-          defaultMessage: 'Invalid tie breaker field setting',
-        }),
-      });
       return;
     }
 
@@ -83,7 +69,14 @@ export function useContextAppFetch({ anchorId, dataView, appState }: ContextAppF
         tieBreakerFieldName,
         isTimeNanosBased: dataView.isTimeNanosBased(),
       });
-      const result = await fetchAnchor(anchorId, dataView, searchSource, sort, services);
+      const result = await fetchAnchor(
+        anchorId,
+        dataView,
+        searchSource,
+        sort,
+        services,
+        scopedProfilesManager
+      );
       setState({
         anchor: result.anchorRow,
         anchorInterceptedWarnings: result.interceptedWarnings,
@@ -92,19 +85,15 @@ export function useContextAppFetch({ anchorId, dataView, appState }: ContextAppF
       return result.anchorRow;
     } catch (error) {
       setState(createError('anchorStatus', FailureReason.UNKNOWN, error));
-      toastNotifications.addDanger({
-        title: errorTitle,
-        text: toMountPoint(<Markdown readOnly>{error.message}</Markdown>, services),
-      });
     }
   }, [
-    services,
     tieBreakerFieldName,
     setState,
-    toastNotifications,
     dataView,
     anchorId,
     searchSource,
+    services,
+    scopedProfilesManager,
   ]);
 
   const fetchSurroundingRows = useCallback(
@@ -116,9 +105,6 @@ export function useContextAppFetch({ anchorId, dataView, appState }: ContextAppF
       const anchor = fetchedAnchor || fetchedState.anchor;
       const statusKey = `${type}Status`;
       const warningsKey = `${type}InterceptedWarnings`;
-      const errorTitle = i18n.translate('discover.context.unableToLoadDocumentDescription', {
-        defaultMessage: 'Unable to load documents',
-      });
 
       try {
         setState({ [statusKey]: { value: LoadingStatus.LOADING } });
@@ -132,7 +118,8 @@ export function useContextAppFetch({ anchorId, dataView, appState }: ContextAppF
               count,
               filters,
               data,
-              services
+              services,
+              scopedProfilesManager
             )
           : { rows: [], interceptedWarnings: undefined };
         setState({
@@ -141,23 +128,24 @@ export function useContextAppFetch({ anchorId, dataView, appState }: ContextAppF
           [statusKey]: { value: LoadingStatus.LOADED },
         });
       } catch (error) {
-        setState(createError(statusKey, FailureReason.UNKNOWN, error));
-        toastNotifications.addDanger({
-          title: errorTitle,
-          text: toMountPoint(<Markdown readOnly>{error.message}</Markdown>, services),
+        setState({
+          [type]: [],
+          [warningsKey]: undefined,
+          ...createError(statusKey, FailureReason.UNKNOWN, error),
         });
       }
     },
     [
-      services,
       filterManager,
-      appState,
+      appState.predecessorCount,
+      appState.successorCount,
       fetchedState.anchor,
-      tieBreakerFieldName,
       setState,
       dataView,
-      toastNotifications,
+      tieBreakerFieldName,
       data,
+      services,
+      scopedProfilesManager,
     ]
   );
 

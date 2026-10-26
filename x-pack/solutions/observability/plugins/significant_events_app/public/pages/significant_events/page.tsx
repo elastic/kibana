@@ -1,0 +1,250 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { EuiSpacer } from '@elastic/eui';
+import type { AppHeaderMenu } from '@kbn/app-header';
+import { NIGHTSHIFT_APP_ID, NIGHTSHIFT_SETTINGS_LOCATOR_ID } from '@kbn/deeplinks-observability';
+import { i18n } from '@kbn/i18n';
+import {
+  getNightshiftCapabilities,
+  type NightshiftSettingsLocatorParams,
+} from '@kbn/nightshift-shared';
+import { KbnDangerCallout, KbnInfoCallout } from '@kbn/ui-callout';
+import React, { useEffect, useMemo } from 'react';
+import { SIGNIFICANT_EVENTS_TAB } from '../../../common';
+import { isValidSignificantEventsTab } from './significant_events_tabs';
+import { useKibana } from '../../hooks/use_kibana';
+import { useDeveloperMode } from '../../hooks/use_developer_mode';
+import { useSignificantEventsAppParams } from '../../hooks/use_significant_events_app_params';
+import { useSignificantEventsAppRouter } from '../../hooks/use_significant_events_app_router';
+import { useSignificantEventsAvailability } from '../../hooks/use_significant_events_availability';
+import { useBlocksNewActivity } from '../../hooks/use_significant_events_maintenance';
+import { RedirectTo } from '../../components/redirect_to';
+import { SignificantEventsNotEnabledPrompt } from '../../components/not_enabled_prompt';
+import {
+  SignificantEventsAppHeader,
+  SignificantEventsAppLoading,
+  SignificantEventsAppPageTemplate,
+} from '../../components/page_template';
+import { SignificantEventsPageProvider } from './context/significant_events_page_context';
+import { QueriesTable } from './components/queries_table/queries_table';
+import { DetectionsTab } from './components/detections_tab';
+import { SignificantEventsTab } from './components/significant_events_tab';
+import { PausedActivityCallout } from './components/paused_activity_callout';
+import { RunLimitsBanner } from './components/run_limits_banner';
+
+export function SignificantEventsPage() {
+  const {
+    path: { tab },
+  } = useSignificantEventsAppParams('/{tab}');
+
+  const router = useSignificantEventsAppRouter();
+  const {
+    core: {
+      application: {
+        getUrlForApp,
+        capabilities: { nightshift },
+      },
+      chrome,
+    },
+    dependencies: {
+      start: { share },
+    },
+  } = useKibana();
+
+  const { canShow, canManageAndConfigure } = getNightshiftCapabilities(nightshift);
+  const { isDeveloperMode } = useDeveloperMode();
+
+  const { availability, isLoading: isAvailabilityLoading } = useSignificantEventsAvailability();
+  const {
+    isBlocked,
+    isLoading: isMaintenanceStatusLoading,
+    isError: isMaintenanceStatusError,
+    status: maintenanceStatus,
+  } = useBlocksNewActivity();
+
+  const pageTitle = i18n.translate('xpack.significantEventsApp.pageHeaderTitle', {
+    defaultMessage: 'Nightshift Management',
+  });
+
+  const nightshiftLabel = i18n.translate('xpack.significantEventsApp.nightshiftButtonLabel', {
+    defaultMessage: 'Nightshift',
+  });
+  const settingsLabel = i18n.translate('xpack.significantEventsApp.settingsPage.title', {
+    defaultMessage: 'Settings',
+  });
+  const nightshiftHref = getUrlForApp(NIGHTSHIFT_APP_ID);
+  const settingsLocator = share.url.locators.get<NightshiftSettingsLocatorParams>(
+    NIGHTSHIFT_SETTINGS_LOCATOR_ID
+  );
+  const settingsHref = settingsLocator?.getRedirectUrl({});
+  const detectionSettingsHref = settingsLocator?.getRedirectUrl({ tab: 'detections' });
+
+  const menu = useMemo<AppHeaderMenu | undefined>(
+    () =>
+      canManageAndConfigure && settingsHref
+        ? {
+            items: [
+              {
+                id: 'settings',
+                order: 1,
+                label: settingsLabel,
+                iconType: 'gear',
+                href: settingsHref,
+                testId: 'nightshiftSettingsLink',
+              },
+            ],
+          }
+        : undefined,
+    [canManageAndConfigure, settingsHref, settingsLabel]
+  );
+
+  useEffect(() => {
+    chrome.setBreadcrumbs([
+      {
+        text: i18n.translate('xpack.significantEventsApp.breadcrumb', {
+          defaultMessage: 'Nightshift Management',
+        }),
+      },
+    ]);
+  }, [chrome]);
+
+  const allTabs = useMemo(
+    () => [
+      {
+        id: 'queries',
+        label: i18n.translate('xpack.significantEventsApp.queriesTab', {
+          defaultMessage: 'Rules',
+        }),
+        href: router.link('/{tab}', { path: { tab: 'queries' } }),
+        isSelected: tab === 'queries',
+      },
+
+      {
+        id: 'detections',
+        label: i18n.translate('xpack.significantEventsApp.detectionsTab', {
+          defaultMessage: 'Detections',
+        }),
+        href: router.link('/{tab}', { path: { tab: 'detections' } }),
+        isSelected: tab === 'detections',
+        badge: { iconType: 'code' },
+      },
+      {
+        id: SIGNIFICANT_EVENTS_TAB,
+        label: i18n.translate('xpack.significantEventsApp.significantEventsTab', {
+          defaultMessage: 'Significant events',
+        }),
+        href: router.link('/{tab}', { path: { tab: SIGNIFICANT_EVENTS_TAB } }),
+        isSelected: tab === SIGNIFICANT_EVENTS_TAB,
+      },
+    ],
+    [tab, router]
+  );
+  const tabs = useMemo(
+    () => allTabs.filter((item) => item.id !== 'detections' || isDeveloperMode),
+    [allTabs, isDeveloperMode]
+  );
+
+  if (isAvailabilityLoading) {
+    return <SignificantEventsAppLoading />;
+  }
+
+  if (!availability || !availability.available) {
+    const reason = availability?.reason ?? 'unknown';
+    return (
+      <SignificantEventsAppPageTemplate.Body grow>
+        <SignificantEventsNotEnabledPrompt reason={reason} />
+      </SignificantEventsAppPageTemplate.Body>
+    );
+  }
+
+  if (tab === 'discoveries') {
+    return <RedirectTo path="/{tab}" params={{ path: { tab: SIGNIFICANT_EVENTS_TAB } }} />;
+  }
+
+  if (!isValidSignificantEventsTab(tab) || !tabs.some((item) => item.id === tab)) {
+    return <RedirectTo path="/{tab}" params={{ path: { tab: tabs[0]?.id ?? 'queries' } }} />;
+  }
+
+  return (
+    <>
+      <SignificantEventsAppHeader
+        title={pageTitle}
+        back={{ href: nightshiftHref, label: nightshiftLabel }}
+        menu={menu}
+        tabs={tabs}
+      />
+      <SignificantEventsPageProvider>
+        <SignificantEventsAppPageTemplate.Body grow>
+          {isMaintenanceStatusLoading && (
+            <>
+              <KbnInfoCallout
+                announceOnMount
+                size="s"
+                data-test-subj="significantEventsStatusLoadingBanner"
+                title={i18n.translate('xpack.significantEventsApp.statusLoadingBannerTitle', {
+                  defaultMessage: 'Checking significant events activity status',
+                })}
+                text={i18n.translate('xpack.significantEventsApp.statusLoadingBannerBody', {
+                  defaultMessage: 'Manual triggers stay disabled until activity status is known.',
+                })}
+              />
+              <EuiSpacer />
+            </>
+          )}
+          {isMaintenanceStatusError && (
+            <>
+              <KbnDangerCallout
+                announceOnMount
+                size="s"
+                data-test-subj="significantEventsStatusErrorBanner"
+                title={i18n.translate('xpack.significantEventsApp.statusErrorBannerTitle', {
+                  defaultMessage: 'Could not load significant events activity status',
+                })}
+                text={i18n.translate('xpack.significantEventsApp.statusErrorBannerBody', {
+                  defaultMessage:
+                    'Manual triggers stay disabled until status can be loaded. Open settings to retry, or refresh the page.',
+                })}
+                actionProps={
+                  canManageAndConfigure && detectionSettingsHref
+                    ? {
+                        primary: {
+                          children: i18n.translate(
+                            'xpack.significantEventsApp.statusErrorBannerSettingsButton',
+                            {
+                              defaultMessage: 'Open settings',
+                            }
+                          ),
+                          href: detectionSettingsHref,
+                          'data-test-subj': 'significantEventsStatusErrorBannerSettingsLink',
+                        },
+                      }
+                    : undefined
+                }
+              />
+              <EuiSpacer />
+            </>
+          )}
+          {isBlocked && maintenanceStatus && (
+            <>
+              <PausedActivityCallout
+                status={maintenanceStatus}
+                canManageAndConfigure={canManageAndConfigure}
+                settingsHref={detectionSettingsHref}
+              />
+              <EuiSpacer />
+            </>
+          )}
+          {!isBlocked && <RunLimitsBanner />}
+          {canShow && tab === 'queries' && <QueriesTable />}
+          {tab === 'detections' && <DetectionsTab />}
+          {tab === SIGNIFICANT_EVENTS_TAB && <SignificantEventsTab />}
+        </SignificantEventsAppPageTemplate.Body>
+      </SignificantEventsPageProvider>
+    </>
+  );
+}

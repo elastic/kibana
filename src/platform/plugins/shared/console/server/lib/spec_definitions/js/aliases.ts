@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SpecDefinitionsService } from '../../../services';
+import type { SpecDefinitionsService } from '../../../services';
 
 export const aliases = (specService: SpecDefinitionsService) => {
   const aliasRules = {
-    filter: {},
+    filter: { __scope_link: 'GLOBAL.query' },
     routing: '1',
     search_routing: '1,2',
     index_routing: '1',

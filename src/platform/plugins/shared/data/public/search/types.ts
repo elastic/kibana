@@ -8,15 +8,16 @@
  */
 
 import type { PackageInfo } from '@kbn/core/server';
-import { DataViewsContract } from '@kbn/data-views-plugin/common';
-import { RequestAdapter } from '@kbn/inspector-plugin/public';
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import type { DataViewsContract } from '@kbn/data-views-plugin/common';
+import type { RequestAdapter } from '@kbn/inspector-plugin/public';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { WarningHandlerCallback } from '@kbn/search-response-warnings';
-import type { ISearchGeneric } from '@kbn/search-types';
-import { ISearchStartSearchSource } from '../../common/search';
-import { AggsSetup, AggsSetupDependencies, AggsStart, AggsStartDependencies } from './aggs';
-import { SearchUsageCollector } from './collectors';
-import { ISessionsClient, ISessionService } from './session';
+import type { ISearchGeneric, ISearchMethods } from '@kbn/search-types';
+import type { ISearchStartSearchSource } from '../../common/search';
+import type { AggsSetup, AggsSetupDependencies, AggsStart, AggsStartDependencies } from './aggs';
+import type { SearchUsageCollector } from './collectors';
+import type { ISearchSessionEBTManager, ISessionsClient, ISessionService } from './session';
+import type { SearchSessionsConfigSchema } from '../../server/config';
 
 export { SEARCH_EVENT_TYPE } from './collectors';
 export type { ISearchStartSearchSource, SearchUsageCollector };
@@ -27,7 +28,7 @@ export type { ISearchStartSearchSource, SearchUsageCollector };
  */
 export interface ISearchSetup {
   aggs: AggsSetup;
-  usageCollector?: SearchUsageCollector;
+  usageCollector: SearchUsageCollector;
   /**
    * Current session management
    * {@link ISessionService}
@@ -38,13 +39,21 @@ export interface ISearchSetup {
    * {@link ISessionsClient}
    */
   sessionsClient: ISessionsClient;
+  /**
+   * Search sessions (background search) config, i.e. `data.search.sessions.*`
+   */
+  sessionsConfig: SearchSessionsConfigSchema;
+  /**
+   * Search sessions telemetry
+   */
+  ebtManager: ISearchSessionEBTManager;
 }
 
 /**
  * search service
  * @public
  */
-export interface ISearchStart {
+export interface ISearchStart extends ISearchMethods {
   /**
    * agg config sub service
    * {@link AggsStart}
@@ -67,6 +76,10 @@ export interface ISearchStart {
    * @param cb WarningHandlerCallback - optional callback to intercept warnings
    */
   showWarnings: (adapter: RequestAdapter, cb?: WarningHandlerCallback) => void;
+  /**
+   * Feature flag value to make it easier to use in different plugins
+   */
+  isBackgroundSearchEnabled: boolean;
   /**
    * high level search
    * {@link ISearchStartSearchSource}

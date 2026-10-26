@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-require('../src/setup_node_env');
+require('@kbn/setup-node-env');
 
 var Path = require('path');
 
-require('@kbn/optimizer').runKbnOptimizerCli({
+require('@kbn/rspack-optimizer').runRspackCli({
   defaultLimitsPath: Path.resolve(
     require('@kbn/repo-info').REPO_ROOT,
-    'packages/kbn-optimizer/limits.yml'
+    'packages/kbn-rspack-optimizer/limits.yml'
   ),
 });

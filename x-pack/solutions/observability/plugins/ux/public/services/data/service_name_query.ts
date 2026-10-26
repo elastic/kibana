@@ -5,12 +5,17 @@
  * 2.0.
  */
 
+import type { ESSearchRequest } from '@kbn/es-types';
 import { SERVICE_NAME } from '../../../common/elasticsearch_fieldnames';
 import { mergeProjection } from '../../../common/utils/merge_projection';
-import { SetupUX, UxUIFilters } from '../../../typings/ui_filters';
+import type { SetupUX, UxUIFilters } from '../../../typings/ui_filters';
 import { getRumPageLoadTransactionsProjection } from './projections';
 
-export function serviceNameQuery(start: number, end: number, uiFilters?: UxUIFilters) {
+export function serviceNameQuery(
+  start: number,
+  end: number,
+  uiFilters?: UxUIFilters
+): Omit<ESSearchRequest, 'index'> {
   const setup: SetupUX = { uiFilters: uiFilters ? uiFilters : {} };
   const projection = getRumPageLoadTransactionsProjection({
     setup,
@@ -34,3 +39,11 @@ export function serviceNameQuery(start: number, end: number, uiFilters?: UxUIFil
 
   return params;
 }
+
+interface ServicesAggregation {
+  services?: { buckets?: Array<{ key: string }> };
+}
+
+/** The service names in a `serviceNameQuery` response's aggregations. */
+export const getServiceNames = (aggregations?: ServicesAggregation): string[] =>
+  aggregations?.services?.buckets?.map(({ key }) => key) ?? [];

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { RequiredPaletteParamTypes } from '@kbn/coloring';
 import {
   DEFAULT_PALETTE_NAME,
   FIXED_PROGRESSION,
@@ -13,7 +14,6 @@ import {
   DEFAULT_MIN_STOP,
   DEFAULT_MAX_STOP,
   DEFAULT_COLOR_STEPS,
-  RequiredPaletteParamTypes,
 } from '@kbn/coloring';
 
 export const defaultPaletteParams: RequiredPaletteParamTypes = {
@@ -28,3 +28,8 @@ export const defaultPaletteParams: RequiredPaletteParamTypes = {
   colorStops: [],
   continuity: DEFAULT_CONTINUITY,
 };
+
+/**
+ * Editor only cap on how many color ranges the custom palette UI allows.
+ */
+export const LENS_PALETTE_MAX_COLOR_RANGES = 5;

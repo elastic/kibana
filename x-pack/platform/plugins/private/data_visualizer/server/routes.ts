@@ -7,9 +7,9 @@
 
 import type { CoreSetup, Logger } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
+import type { TestGrokPatternResponse } from '@kbn/file-upload-common';
 import type { StartDeps } from './types';
 import { wrapError } from './utils/error_wrapper';
-import type { TestGrokPatternResponse } from '../common/types/test_grok_pattern';
 
 /**
  * @apiGroup DataVisualizer
@@ -20,7 +20,6 @@ import type { TestGrokPatternResponse } from '../common/types/test_grok_pattern'
  */
 export function routes(coreSetup: CoreSetup<StartDeps, unknown>, logger: Logger) {
   const router = coreSetup.http.createRouter();
-
   router.versioned
     .post({
       path: '/internal/data_visualizer/test_grok_pattern',
@@ -37,9 +36,9 @@ export function routes(coreSetup: CoreSetup<StartDeps, unknown>, logger: Logger)
         validate: {
           request: {
             body: schema.object({
-              grokPattern: schema.string(),
-              text: schema.arrayOf(schema.string()),
-              ecsCompatibility: schema.maybe(schema.string()),
+              grokPattern: schema.string({ maxLength: 10000 }),
+              text: schema.arrayOf(schema.string({ maxLength: 10000 }), { maxSize: 10000 }),
+              ecsCompatibility: schema.maybe(schema.string({ maxLength: 10000 })),
             }),
           },
         },
@@ -134,10 +133,10 @@ export function routes(coreSetup: CoreSetup<StartDeps, unknown>, logger: Logger)
         validate: {
           request: {
             params: schema.object({
-              inferenceId: schema.string(),
+              inferenceId: schema.string({ maxLength: 10000 }),
             }),
             body: schema.object({
-              input: schema.string(),
+              input: schema.string({ maxLength: 10000 }),
             }),
           },
         },

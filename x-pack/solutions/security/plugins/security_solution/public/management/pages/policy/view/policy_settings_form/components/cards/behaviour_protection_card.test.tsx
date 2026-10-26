@@ -15,11 +15,11 @@ import { useLicense as _useLicense } from '../../../../../../../common/hooks/use
 import { createLicenseServiceMock } from '../../../../../../../../common/license/mocks';
 import { set } from '@kbn/safer-lodash-set';
 import { ProtectionModes } from '../../../../../../../../common/endpoint/types';
-import type { BehaviourProtectionCardProps } from './protection_seetings_card/behaviour_protection_card';
+import type { BehaviourProtectionCardProps } from './protection_settings_card/behaviour_protection_card';
 import {
   BehaviourProtectionCard,
   LOCKED_CARD_BEHAVIOR_TITLE,
-} from './protection_seetings_card/behaviour_protection_card';
+} from './protection_settings_card/behaviour_protection_card';
 
 jest.mock('../../../../../../../common/hooks/use_license');
 

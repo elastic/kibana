@@ -2,23 +2,15 @@
 
 exports[`Netflow renders correctly against snapshot 1`] = `
 <DocumentFragment>
-  .c1 > span.euiToolTipAnchor {
-  display: block;
-}
-
-.c1 > span.euiToolTipAnchor.eui-textTruncate {
-  display: inline-block;
-}
-
-.c4 {
-  margin-right: 5px;
-}
-
-.c3 {
+  .c3 {
   margin-right: 5px;
 }
 
 .c2 {
+  margin-right: 5px;
+}
+
+.c1 {
   margin-right: 3px;
   position: relative;
   top: -1px;
@@ -50,21 +42,21 @@ exports[`Netflow renders correctly against snapshot 1`] = `
               class="euiFlexItem emotion-euiFlexItem-growZero"
             >
               <div
-                data-test-subj="mock-cell-action-wrapper"
+                data-test-subj="mock-security-cell-actions"
               >
                 <div
-                  data-provider-id="draggableId.content.draggable-badge-default-draggable-test-abcd-user_name-first_last"
                   tabindex="-1"
                 >
                   <span
-                    class="c1"
+                    class="css-1s7tdhk-ProviderContentWrapper e14kwmf30"
                     data-test-subj="render-content-user.name"
                   >
                     <span
                       class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                      id="generated-id-wrapper"
                     >
                       <span
-                        class="euiBadge eb5dvw90 emotion-euiBadge-hollow-Badge"
+                        class="euiBadge e1tqya0j0 emotion-euiBadge-hollow-Badge"
                         title=""
                       >
                         <span
@@ -91,21 +83,21 @@ exports[`Netflow renders correctly against snapshot 1`] = `
               class="euiFlexItem emotion-euiFlexItem-growZero"
             >
               <div
-                data-test-subj="mock-cell-action-wrapper"
+                data-test-subj="mock-security-cell-actions"
               >
                 <div
-                  data-provider-id="draggableId.content.draggable-badge-default-draggable-test-abcd-process_name-rat"
                   tabindex="-1"
                 >
                   <span
-                    class="c1"
+                    class="css-1s7tdhk-ProviderContentWrapper e14kwmf30"
                     data-test-subj="render-content-process.name"
                   >
                     <span
                       class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                      id="generated-id-wrapper"
                     >
                       <span
-                        class="euiBadge eb5dvw90 emotion-euiBadge-hollow-Badge"
+                        class="euiBadge e1tqya0j0 emotion-euiBadge-hollow-Badge"
                         title=""
                       >
                         <span
@@ -114,7 +106,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                           <span
                             class="euiBadge__icon emotion-euiBadge__icon-left"
                             color="inherit"
-                            data-euiicon-type="console"
+                            data-euiicon-type="commandLine"
                           />
                           <span
                             class="euiBadge__text emotion-euiBadge__text"
@@ -141,25 +133,25 @@ exports[`Netflow renders correctly against snapshot 1`] = `
               class="euiFlexItem emotion-euiFlexItem-growZero"
             >
               <div
-                data-test-subj="mock-cell-action-wrapper"
+                data-test-subj="mock-security-cell-actions"
               >
                 <div
-                  data-provider-id="draggableId.content.duration-event-start-end-default-draggable-test-abcd-event_duration-1000000"
                   tabindex="-1"
                 >
                   <span
-                    class="c1"
+                    class="css-1s7tdhk-ProviderContentWrapper e14kwmf30"
                     data-test-subj="render-content-event.duration"
                   >
                     <div
                       class="euiText emotion-euiText-xs"
                     >
                       <span
-                        class="c2"
+                        class="c1"
                         data-euiicon-type="clock"
                       />
                       <span
                         class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                        id="generated-id-wrapper"
                       >
                         <div
                           data-test-subj="formatted-duration"
@@ -176,25 +168,25 @@ exports[`Netflow renders correctly against snapshot 1`] = `
               class="euiFlexItem emotion-euiFlexItem-growZero"
             >
               <div
-                data-test-subj="mock-cell-action-wrapper"
+                data-test-subj="mock-security-cell-actions"
               >
                 <div
-                  data-provider-id="draggableId.content.duration-event-start-end-default-draggable-test-abcd-event_start-2018-11-12T19:03:25_836Z"
                   tabindex="-1"
                 >
                   <span
-                    class="c1"
+                    class="css-1s7tdhk-ProviderContentWrapper e14kwmf30"
                     data-test-subj="render-content-event.start"
                   >
                     <div
                       class="euiText emotion-euiText-xs"
                     >
                       <span
-                        class="c2"
+                        class="c1"
                         data-euiicon-type="clock"
                       />
                       <span
                         class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                        id="generated-id-wrapper"
                       >
                         Nov 12, 2018 @ 19:03:25.836
                       </span>
@@ -207,25 +199,25 @@ exports[`Netflow renders correctly against snapshot 1`] = `
               class="euiFlexItem emotion-euiFlexItem-growZero"
             >
               <div
-                data-test-subj="mock-cell-action-wrapper"
+                data-test-subj="mock-security-cell-actions"
               >
                 <div
-                  data-provider-id="draggableId.content.duration-event-start-end-default-draggable-test-abcd-event_end-2018-11-12T19:03:25_936Z"
                   tabindex="-1"
                 >
                   <span
-                    class="c1"
+                    class="css-1s7tdhk-ProviderContentWrapper e14kwmf30"
                     data-test-subj="render-content-event.end"
                   >
                     <div
                       class="euiText emotion-euiText-xs"
                     >
                       <span
-                        class="c2"
+                        class="c1"
                         data-euiicon-type="clock"
                       />
                       <span
                         class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                        id="generated-id-wrapper"
                       >
                         Nov 12, 2018 @ 19:03:25.936
                       </span>
@@ -249,24 +241,24 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                 class="euiFlexGroup emotion-euiFlexGroup-responsive-none-center-center-row"
               >
                 <div
-                  class="euiFlexItem e1kgdg111 emotion-euiFlexItem-growZero-EuiFlexItemMarginRight"
+                  class="euiFlexItem e1u78ynk0 emotion-euiFlexItem-growZero-EuiFlexItemMarginRight"
                 >
                   <div
-                    data-test-subj="mock-cell-action-wrapper"
+                    data-test-subj="mock-security-cell-actions"
                   >
                     <div
-                      data-provider-id="draggableId.content.draggable-badge-default-draggable-test-abcd-network_direction-outgoing"
                       tabindex="-1"
                     >
                       <span
-                        class="c1"
+                        class="css-1s7tdhk-ProviderContentWrapper e14kwmf30"
                         data-test-subj="render-content-network.direction"
                       >
                         <span
                           class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                          id="generated-id-wrapper"
                         >
                           <span
-                            class="euiBadge eb5dvw90 emotion-euiBadge-hollow-Badge"
+                            class="euiBadge e1tqya0j0 emotion-euiBadge-hollow-Badge"
                             title=""
                           >
                             <span
@@ -275,7 +267,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                               <span
                                 class="euiBadge__icon emotion-euiBadge__icon-left"
                                 color="inherit"
-                                data-euiicon-type="arrowUp"
+                                data-euiicon-type="chevronSingleUp"
                               />
                               <span
                                 class="euiBadge__text emotion-euiBadge__text"
@@ -290,24 +282,24 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                   </div>
                 </div>
                 <div
-                  class="euiFlexItem e1kgdg111 emotion-euiFlexItem-growZero-EuiFlexItemMarginRight"
+                  class="euiFlexItem e1u78ynk0 emotion-euiFlexItem-growZero-EuiFlexItemMarginRight"
                 >
                   <div
-                    data-test-subj="mock-cell-action-wrapper"
+                    data-test-subj="mock-security-cell-actions"
                   >
                     <div
-                      data-provider-id="draggableId.content.draggable-badge-default-draggable-test-abcd-network_protocol-http"
                       tabindex="-1"
                     >
                       <span
-                        class="c1"
+                        class="css-1s7tdhk-ProviderContentWrapper e14kwmf30"
                         data-test-subj="render-content-network.protocol"
                       >
                         <span
                           class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                          id="generated-id-wrapper"
                         >
                           <span
-                            class="euiBadge eb5dvw90 emotion-euiBadge-hollow-Badge"
+                            class="euiBadge e1tqya0j0 emotion-euiBadge-hollow-Badge"
                             title=""
                           >
                             <span
@@ -326,24 +318,24 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                   </div>
                 </div>
                 <div
-                  class="euiFlexItem e1kgdg111 emotion-euiFlexItem-growZero-EuiFlexItemMarginRight"
+                  class="euiFlexItem e1u78ynk0 emotion-euiFlexItem-growZero-EuiFlexItemMarginRight"
                 >
                   <div
-                    data-test-subj="mock-cell-action-wrapper"
+                    data-test-subj="mock-security-cell-actions"
                   >
                     <div
-                      data-provider-id="draggableId.content.network-default-draggable-test-abcd-network_bytes-100"
                       tabindex="-1"
                     >
                       <span
-                        class="c1"
+                        class="css-1s7tdhk-ProviderContentWrapper e14kwmf30"
                         data-test-subj="render-content-network.bytes"
                       >
                         <span
                           class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                          id="generated-id-wrapper"
                         >
                           <div
-                            class="euiText e1kgdg110 emotion-euiText-xs-Stats"
+                            class="euiText e1u78ynk1 emotion-euiText-xs-Stats"
                           >
                             <span>
                               100B
@@ -355,24 +347,24 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                   </div>
                 </div>
                 <div
-                  class="euiFlexItem e1kgdg111 emotion-euiFlexItem-growZero-EuiFlexItemMarginRight"
+                  class="euiFlexItem e1u78ynk0 emotion-euiFlexItem-growZero-EuiFlexItemMarginRight"
                 >
                   <div
-                    data-test-subj="mock-cell-action-wrapper"
+                    data-test-subj="mock-security-cell-actions"
                   >
                     <div
-                      data-provider-id="draggableId.content.network-default-draggable-test-abcd-network_packets-3"
                       tabindex="-1"
                     >
                       <span
-                        class="c1"
+                        class="css-1s7tdhk-ProviderContentWrapper e14kwmf30"
                         data-test-subj="render-content-network.packets"
                       >
                         <span
                           class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                          id="generated-id-wrapper"
                         >
                           <div
-                            class="euiText e1kgdg110 emotion-euiText-xs-Stats"
+                            class="euiText e1u78ynk1 emotion-euiText-xs-Stats"
                           >
                             <span>
                               3 pkts
@@ -384,24 +376,24 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                   </div>
                 </div>
                 <div
-                  class="euiFlexItem e1kgdg111 emotion-euiFlexItem-growZero-EuiFlexItemMarginRight"
+                  class="euiFlexItem e1u78ynk0 emotion-euiFlexItem-growZero-EuiFlexItemMarginRight"
                 >
                   <div
-                    data-test-subj="mock-cell-action-wrapper"
+                    data-test-subj="mock-security-cell-actions"
                   >
                     <div
-                      data-provider-id="draggableId.content.draggable-badge-default-draggable-test-abcd-network_transport-tcp"
                       tabindex="-1"
                     >
                       <span
-                        class="c1"
+                        class="css-1s7tdhk-ProviderContentWrapper e14kwmf30"
                         data-test-subj="render-content-network.transport"
                       >
                         <span
                           class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                          id="generated-id-wrapper"
                         >
                           <span
-                            class="euiBadge eb5dvw90 emotion-euiBadge-hollow-Badge"
+                            class="euiBadge e1tqya0j0 emotion-euiBadge-hollow-Badge"
                             title=""
                           >
                             <span
@@ -423,21 +415,21 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                   class="euiFlexItem emotion-euiFlexItem-growZero"
                 >
                   <div
-                    data-test-subj="mock-cell-action-wrapper"
+                    data-test-subj="mock-security-cell-actions"
                   >
                     <div
-                      data-provider-id="draggableId.content.draggable-badge-default-draggable-test-abcd-network_community_id-we_live_in_a"
                       tabindex="-1"
                     >
                       <span
-                        class="c1"
+                        class="css-1s7tdhk-ProviderContentWrapper e14kwmf30"
                         data-test-subj="render-content-network.community_id"
                       >
                         <span
                           class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                          id="generated-id-wrapper"
                         >
                           <span
-                            class="euiBadge eb5dvw90 emotion-euiBadge-hollow-Badge"
+                            class="euiBadge e1tqya0j0 emotion-euiBadge-hollow-Badge"
                             title=""
                           >
                             <span
@@ -458,7 +450,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
               </div>
             </div>
             <div
-              class="euiFlexItem e1ikjo0y0 emotion-euiFlexItem-growZero-EuiFlexItemMarginTop"
+              class="euiFlexItem e5f8nf60 emotion-euiFlexItem-growZero-EuiFlexItemMarginTop"
             >
               <div
                 class="euiFlexGroup emotion-euiFlexGroup-responsive-none-center-stretch-row"
@@ -485,7 +477,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                             class="euiFlexItem emotion-euiFlexItem-growZero"
                           >
                             <div
-                              class="css-u90o0n-Label egdhtzu0"
+                              class="css-u90o0n-Label ecpgoij0"
                             >
                               Source
                             </div>
@@ -505,14 +497,13 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                                   <div
                                     class="euiFlexItem emotion-euiFlexItem-growZero"
                                   >
-                                    <a
-                                      class="euiLink emotion-euiLink-primary"
+                                    <button
+                                      class="euiLink emotion-euiLink-text"
                                       data-test-subj="network-details"
-                                      href="/ip/192.168.1.2/source/events"
-                                      rel="noreferrer"
+                                      type="button"
                                     >
                                       192.168.1.2
-                                    </a>
+                                    </button>
                                   </div>
                                   <div
                                     class="euiFlexItem emotion-euiFlexItem-grow-1"
@@ -524,7 +515,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                                         class="euiFlexItem emotion-euiFlexItem-growZero"
                                       >
                                         <span
-                                          class="css-1jvb4f-IpPortSeparator e1h8j3wk0"
+                                          class="css-1jvb4f-IpPortSeparator eooupwg0"
                                           data-test-subj="ip-port-separator"
                                         >
                                           :
@@ -534,10 +525,10 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                                         class="euiFlexItem emotion-euiFlexItem-growZero"
                                       >
                                         <div
-                                          class="css-q5yr96-PortContainer etea1110"
+                                          class="css-p0iey-PortContainer equgoob1"
                                         >
                                           <a
-                                            class="euiLink emotion-euiLink-primary"
+                                            class="euiLink emotion-euiLink-text"
                                             data-test-subj="port-or-service-name-link"
                                             href="https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml?search=9987"
                                             rel="noopener noreferrer"
@@ -545,8 +536,8 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                                           >
                                             9987
                                             <span
-                                              class="emotion-EuiExternalLinkIcon"
-                                              data-euiicon-type="popout"
+                                              class="css-1j75qc1"
+                                              data-euiicon-type="external"
                                               role="presentation"
                                             />
                                             <span
@@ -570,7 +561,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                               class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row"
                             >
                               <div
-                                class="euiFlexItem esjk1ht0 emotion-euiFlexItem-growZero-GeoFlexItem"
+                                class="euiFlexItem e751pt60 emotion-euiFlexItem-growZero-GeoFlexItem"
                               >
                                 <div
                                   class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row"
@@ -579,18 +570,18 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                                     class="euiFlexItem emotion-euiFlexItem-growZero"
                                   >
                                     <div
-                                      data-test-subj="mock-cell-action-wrapper"
+                                      data-test-subj="mock-security-cell-actions"
                                     >
                                       <div
-                                        data-provider-id="draggableId.content.geo-field-values-default-draggable-test-abcd-source_geo_continent_name-North America"
                                         tabindex="-1"
                                       >
                                         <span
-                                          class="c1"
+                                          class="css-1s7tdhk-ProviderContentWrapper e14kwmf30"
                                           data-test-subj="render-content-source.geo.continent_name"
                                         >
                                           <span
                                             class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                                            id="generated-id-wrapper"
                                           >
                                             North America
                                           </span>
@@ -601,7 +592,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                                 </div>
                               </div>
                               <div
-                                class="euiFlexItem esjk1ht0 emotion-euiFlexItem-growZero-GeoFlexItem"
+                                class="euiFlexItem e751pt60 emotion-euiFlexItem-growZero-GeoFlexItem"
                               >
                                 <div
                                   class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row"
@@ -610,18 +601,18 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                                     class="euiFlexItem emotion-euiFlexItem-growZero"
                                   >
                                     <div
-                                      data-test-subj="mock-cell-action-wrapper"
+                                      data-test-subj="mock-security-cell-actions"
                                     >
                                       <div
-                                        data-provider-id="draggableId.content.geo-field-values-default-draggable-test-abcd-source_geo_country_name-United States"
                                         tabindex="-1"
                                       >
                                         <span
-                                          class="c1"
+                                          class="css-1s7tdhk-ProviderContentWrapper e14kwmf30"
                                           data-test-subj="render-content-source.geo.country_name"
                                         >
                                           <span
                                             class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                                            id="generated-id-wrapper"
                                           >
                                             United States
                                           </span>
@@ -632,7 +623,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                                 </div>
                               </div>
                               <div
-                                class="euiFlexItem esjk1ht0 emotion-euiFlexItem-growZero-GeoFlexItem"
+                                class="euiFlexItem e751pt60 emotion-euiFlexItem-growZero-GeoFlexItem"
                               >
                                 <div
                                   class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row"
@@ -641,7 +632,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                                     class="euiFlexItem emotion-euiFlexItem-growZero"
                                   >
                                     <span
-                                      class="css-purdnl-FlagWrapper e1v8vkkw0"
+                                      class="css-purdnl-FlagWrapper e1nywon80"
                                       data-test-subj="country-flag"
                                     >
                                       🇺🇸
@@ -651,18 +642,18 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                                     class="euiFlexItem emotion-euiFlexItem-growZero"
                                   >
                                     <div
-                                      data-test-subj="mock-cell-action-wrapper"
+                                      data-test-subj="mock-security-cell-actions"
                                     >
                                       <div
-                                        data-provider-id="draggableId.content.geo-field-values-default-draggable-test-abcd-source_geo_country_iso_code-US"
                                         tabindex="-1"
                                       >
                                         <span
-                                          class="c1"
+                                          class="css-1s7tdhk-ProviderContentWrapper e14kwmf30"
                                           data-test-subj="render-content-source.geo.country_iso_code"
                                         >
                                           <span
                                             class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                                            id="generated-id-wrapper"
                                           >
                                             US
                                           </span>
@@ -673,7 +664,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                                 </div>
                               </div>
                               <div
-                                class="euiFlexItem esjk1ht0 emotion-euiFlexItem-growZero-GeoFlexItem"
+                                class="euiFlexItem e751pt60 emotion-euiFlexItem-growZero-GeoFlexItem"
                               >
                                 <div
                                   class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row"
@@ -682,18 +673,18 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                                     class="euiFlexItem emotion-euiFlexItem-growZero"
                                   >
                                     <div
-                                      data-test-subj="mock-cell-action-wrapper"
+                                      data-test-subj="mock-security-cell-actions"
                                     >
                                       <div
-                                        data-provider-id="draggableId.content.geo-field-values-default-draggable-test-abcd-source_geo_region_name-Georgia"
                                         tabindex="-1"
                                       >
                                         <span
-                                          class="c1"
+                                          class="css-1s7tdhk-ProviderContentWrapper e14kwmf30"
                                           data-test-subj="render-content-source.geo.region_name"
                                         >
                                           <span
                                             class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                                            id="generated-id-wrapper"
                                           >
                                             Georgia
                                           </span>
@@ -704,7 +695,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                                 </div>
                               </div>
                               <div
-                                class="euiFlexItem esjk1ht0 emotion-euiFlexItem-growZero-GeoFlexItem"
+                                class="euiFlexItem e751pt60 emotion-euiFlexItem-growZero-GeoFlexItem"
                               >
                                 <div
                                   class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row"
@@ -713,18 +704,18 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                                     class="euiFlexItem emotion-euiFlexItem-growZero"
                                   >
                                     <div
-                                      data-test-subj="mock-cell-action-wrapper"
+                                      data-test-subj="mock-security-cell-actions"
                                     >
                                       <div
-                                        data-provider-id="draggableId.content.geo-field-values-default-draggable-test-abcd-source_geo_city_name-Atlanta"
                                         tabindex="-1"
                                       >
                                         <span
-                                          class="c1"
+                                          class="css-1s7tdhk-ProviderContentWrapper e14kwmf30"
                                           data-test-subj="render-content-source.geo.city_name"
                                         >
                                           <span
                                             class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                                            id="generated-id-wrapper"
                                           >
                                             Atlanta
                                           </span>
@@ -742,7 +733,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                   </span>
                 </div>
                 <div
-                  class="euiFlexGroup e1jag3831 emotion-euiFlexGroup-none-center-center-column-SourceDestinationArrowsContainer"
+                  class="euiFlexGroup e1ooes7d1 emotion-euiFlexGroup-none-center-center-column-SourceDestinationArrowsContainer"
                 >
                   <div
                     class="euiFlexItem emotion-euiFlexItem-growZero"
@@ -754,7 +745,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                         class="euiFlexItem emotion-euiFlexItem-growZero"
                       >
                         <span
-                          class="css-438b4r-ArrowBody e1do9oav0"
+                          class="css-438b4r-ArrowBody ett86g80"
                           height="2.8"
                         />
                       </div>
@@ -762,24 +753,24 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                         class="euiFlexItem emotion-euiFlexItem-growZero"
                       >
                         <div
-                          data-test-subj="mock-cell-action-wrapper"
+                          data-test-subj="mock-security-cell-actions"
                         >
                           <div
-                            data-provider-id="draggableId.content.source-arrow-default-draggable-test-abcd-source_bytes-60"
                             tabindex="-1"
                           >
                             <span
-                              class="c1"
+                              class="css-1s7tdhk-ProviderContentWrapper e14kwmf30"
                               data-test-subj="render-content-source.bytes"
                             >
                               <span
                                 class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                                id="generated-id-wrapper"
                               >
                                 <div
-                                  class="euiText e1jag3830 emotion-euiText-xs-Data"
+                                  class="euiText e1ooes7d2 emotion-euiText-xs-Data"
                                 >
                                   <span
-                                    class="css-1ioglsa-Percent e1jag3832"
+                                    class="css-1ioglsa-Percent e1ooes7d0"
                                   >
                                     (60.00%)
                                   </span>
@@ -796,7 +787,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                         class="euiFlexItem emotion-euiFlexItem-growZero"
                       >
                         <span
-                          class="css-438b4r-ArrowBody e1do9oav0"
+                          class="css-438b4r-ArrowBody ett86g80"
                           height="2.8"
                         />
                       </div>
@@ -804,21 +795,21 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                         class="euiFlexItem emotion-euiFlexItem-growZero"
                       >
                         <div
-                          data-test-subj="mock-cell-action-wrapper"
+                          data-test-subj="mock-security-cell-actions"
                         >
                           <div
-                            data-provider-id="draggableId.content.source-arrow-default-draggable-test-abcd-source_packets-2"
                             tabindex="-1"
                           >
                             <span
-                              class="c1"
+                              class="css-1s7tdhk-ProviderContentWrapper e14kwmf30"
                               data-test-subj="render-content-source.packets"
                             >
                               <span
                                 class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                                id="generated-id-wrapper"
                               >
                                 <div
-                                  class="euiText e1jag3830 emotion-euiText-xs-Data"
+                                  class="euiText e1ooes7d2 emotion-euiText-xs-Data"
                                 >
                                   <span>
                                     2 pkts
@@ -833,7 +824,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                         class="euiFlexItem emotion-euiFlexItem-growZero"
                       >
                         <span
-                          class="css-438b4r-ArrowBody e1do9oav0"
+                          class="css-438b4r-ArrowBody ett86g80"
                           height="2.8"
                         />
                       </div>
@@ -841,8 +832,9 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                         class="euiFlexItem emotion-euiFlexItem-growZero"
                       >
                         <span
+                          aria-hidden="true"
                           color="subdued"
-                          data-euiicon-type="arrowRight"
+                          data-euiicon-type="chevronSingleRight"
                           data-test-subj="arrow-icon"
                         />
                       </div>
@@ -858,8 +850,9 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                         class="euiFlexItem emotion-euiFlexItem-growZero"
                       >
                         <span
+                          aria-hidden="true"
                           color="subdued"
-                          data-euiicon-type="arrowLeft"
+                          data-euiicon-type="chevronSingleLeft"
                           data-test-subj="arrow-icon"
                         />
                       </div>
@@ -867,7 +860,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                         class="euiFlexItem emotion-euiFlexItem-growZero"
                       >
                         <span
-                          class="css-sm8vet-ArrowBody e1do9oav0"
+                          class="css-sm8vet-ArrowBody ett86g80"
                           height="2.2"
                         />
                       </div>
@@ -875,24 +868,24 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                         class="euiFlexItem emotion-euiFlexItem-growZero"
                       >
                         <div
-                          data-test-subj="mock-cell-action-wrapper"
+                          data-test-subj="mock-security-cell-actions"
                         >
                           <div
-                            data-provider-id="draggableId.content.destination-arrow-default-draggable-test-abcd-destination_bytes-40"
                             tabindex="-1"
                           >
                             <span
-                              class="c1"
+                              class="css-1s7tdhk-ProviderContentWrapper e14kwmf30"
                               data-test-subj="render-content-destination.bytes"
                             >
                               <span
                                 class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                                id="generated-id-wrapper"
                               >
                                 <div
-                                  class="euiText e1jag3830 emotion-euiText-xs-Data"
+                                  class="euiText e1ooes7d2 emotion-euiText-xs-Data"
                                 >
                                   <span
-                                    class="css-1ioglsa-Percent e1jag3832"
+                                    class="css-1ioglsa-Percent e1ooes7d0"
                                   >
                                     (40.00%)
                                   </span>
@@ -909,7 +902,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                         class="euiFlexItem emotion-euiFlexItem-growZero"
                       >
                         <span
-                          class="css-sm8vet-ArrowBody e1do9oav0"
+                          class="css-sm8vet-ArrowBody ett86g80"
                           height="2.2"
                         />
                       </div>
@@ -917,21 +910,21 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                         class="euiFlexItem emotion-euiFlexItem-growZero"
                       >
                         <div
-                          data-test-subj="mock-cell-action-wrapper"
+                          data-test-subj="mock-security-cell-actions"
                         >
                           <div
-                            data-provider-id="draggableId.content.destination-arrow-default-draggable-test-abcd-destination_packets-1"
                             tabindex="-1"
                           >
                             <span
-                              class="c1"
+                              class="css-1s7tdhk-ProviderContentWrapper e14kwmf30"
                               data-test-subj="render-content-destination.packets"
                             >
                               <span
                                 class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                                id="generated-id-wrapper"
                               >
                                 <div
-                                  class="euiText e1jag3830 emotion-euiText-xs-Data"
+                                  class="euiText e1ooes7d2 emotion-euiText-xs-Data"
                                 >
                                   <span>
                                     1 pkts
@@ -946,7 +939,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                         class="euiFlexItem emotion-euiFlexItem-growZero"
                       >
                         <span
-                          class="css-sm8vet-ArrowBody e1do9oav0"
+                          class="css-sm8vet-ArrowBody ett86g80"
                           height="2.2"
                         />
                       </div>
@@ -975,7 +968,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                             class="euiFlexItem emotion-euiFlexItem-growZero"
                           >
                             <div
-                              class="css-u90o0n-Label egdhtzu0"
+                              class="css-u90o0n-Label ecpgoij0"
                             >
                               Destination
                             </div>
@@ -995,14 +988,13 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                                   <div
                                     class="euiFlexItem emotion-euiFlexItem-growZero"
                                   >
-                                    <a
-                                      class="euiLink emotion-euiLink-primary"
+                                    <button
+                                      class="euiLink emotion-euiLink-text"
                                       data-test-subj="network-details"
-                                      href="/ip/10.1.2.3/source/events"
-                                      rel="noreferrer"
+                                      type="button"
                                     >
                                       10.1.2.3
-                                    </a>
+                                    </button>
                                   </div>
                                   <div
                                     class="euiFlexItem emotion-euiFlexItem-grow-1"
@@ -1014,7 +1006,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                                         class="euiFlexItem emotion-euiFlexItem-growZero"
                                       >
                                         <span
-                                          class="css-1jvb4f-IpPortSeparator e1h8j3wk0"
+                                          class="css-1jvb4f-IpPortSeparator eooupwg0"
                                           data-test-subj="ip-port-separator"
                                         >
                                           :
@@ -1024,10 +1016,10 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                                         class="euiFlexItem emotion-euiFlexItem-growZero"
                                       >
                                         <div
-                                          class="css-q5yr96-PortContainer etea1110"
+                                          class="css-p0iey-PortContainer equgoob1"
                                         >
                                           <a
-                                            class="euiLink emotion-euiLink-primary"
+                                            class="euiLink emotion-euiLink-text"
                                             data-test-subj="port-or-service-name-link"
                                             href="https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml?search=80"
                                             rel="noopener noreferrer"
@@ -1035,8 +1027,8 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                                           >
                                             80
                                             <span
-                                              class="emotion-EuiExternalLinkIcon"
-                                              data-euiicon-type="popout"
+                                              class="css-1j75qc1"
+                                              data-euiicon-type="external"
                                               role="presentation"
                                             />
                                             <span
@@ -1060,7 +1052,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                               class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row"
                             >
                               <div
-                                class="euiFlexItem esjk1ht0 emotion-euiFlexItem-growZero-GeoFlexItem"
+                                class="euiFlexItem e751pt60 emotion-euiFlexItem-growZero-GeoFlexItem"
                               >
                                 <div
                                   class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row"
@@ -1069,18 +1061,18 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                                     class="euiFlexItem emotion-euiFlexItem-growZero"
                                   >
                                     <div
-                                      data-test-subj="mock-cell-action-wrapper"
+                                      data-test-subj="mock-security-cell-actions"
                                     >
                                       <div
-                                        data-provider-id="draggableId.content.geo-field-values-default-draggable-test-abcd-destination_geo_continent_name-North America"
                                         tabindex="-1"
                                       >
                                         <span
-                                          class="c1"
+                                          class="css-1s7tdhk-ProviderContentWrapper e14kwmf30"
                                           data-test-subj="render-content-destination.geo.continent_name"
                                         >
                                           <span
                                             class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                                            id="generated-id-wrapper"
                                           >
                                             North America
                                           </span>
@@ -1091,7 +1083,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                                 </div>
                               </div>
                               <div
-                                class="euiFlexItem esjk1ht0 emotion-euiFlexItem-growZero-GeoFlexItem"
+                                class="euiFlexItem e751pt60 emotion-euiFlexItem-growZero-GeoFlexItem"
                               >
                                 <div
                                   class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row"
@@ -1100,18 +1092,18 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                                     class="euiFlexItem emotion-euiFlexItem-growZero"
                                   >
                                     <div
-                                      data-test-subj="mock-cell-action-wrapper"
+                                      data-test-subj="mock-security-cell-actions"
                                     >
                                       <div
-                                        data-provider-id="draggableId.content.geo-field-values-default-draggable-test-abcd-destination_geo_country_name-United States"
                                         tabindex="-1"
                                       >
                                         <span
-                                          class="c1"
+                                          class="css-1s7tdhk-ProviderContentWrapper e14kwmf30"
                                           data-test-subj="render-content-destination.geo.country_name"
                                         >
                                           <span
                                             class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                                            id="generated-id-wrapper"
                                           >
                                             United States
                                           </span>
@@ -1122,7 +1114,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                                 </div>
                               </div>
                               <div
-                                class="euiFlexItem esjk1ht0 emotion-euiFlexItem-growZero-GeoFlexItem"
+                                class="euiFlexItem e751pt60 emotion-euiFlexItem-growZero-GeoFlexItem"
                               >
                                 <div
                                   class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row"
@@ -1131,7 +1123,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                                     class="euiFlexItem emotion-euiFlexItem-growZero"
                                   >
                                     <span
-                                      class="css-purdnl-FlagWrapper e1v8vkkw0"
+                                      class="css-purdnl-FlagWrapper e1nywon80"
                                       data-test-subj="country-flag"
                                     >
                                       🇺🇸
@@ -1141,18 +1133,18 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                                     class="euiFlexItem emotion-euiFlexItem-growZero"
                                   >
                                     <div
-                                      data-test-subj="mock-cell-action-wrapper"
+                                      data-test-subj="mock-security-cell-actions"
                                     >
                                       <div
-                                        data-provider-id="draggableId.content.geo-field-values-default-draggable-test-abcd-destination_geo_country_iso_code-US"
                                         tabindex="-1"
                                       >
                                         <span
-                                          class="c1"
+                                          class="css-1s7tdhk-ProviderContentWrapper e14kwmf30"
                                           data-test-subj="render-content-destination.geo.country_iso_code"
                                         >
                                           <span
                                             class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                                            id="generated-id-wrapper"
                                           >
                                             US
                                           </span>
@@ -1163,7 +1155,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                                 </div>
                               </div>
                               <div
-                                class="euiFlexItem esjk1ht0 emotion-euiFlexItem-growZero-GeoFlexItem"
+                                class="euiFlexItem e751pt60 emotion-euiFlexItem-growZero-GeoFlexItem"
                               >
                                 <div
                                   class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row"
@@ -1172,18 +1164,18 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                                     class="euiFlexItem emotion-euiFlexItem-growZero"
                                   >
                                     <div
-                                      data-test-subj="mock-cell-action-wrapper"
+                                      data-test-subj="mock-security-cell-actions"
                                     >
                                       <div
-                                        data-provider-id="draggableId.content.geo-field-values-default-draggable-test-abcd-destination_geo_region_name-New York"
                                         tabindex="-1"
                                       >
                                         <span
-                                          class="c1"
+                                          class="css-1s7tdhk-ProviderContentWrapper e14kwmf30"
                                           data-test-subj="render-content-destination.geo.region_name"
                                         >
                                           <span
                                             class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                                            id="generated-id-wrapper"
                                           >
                                             New York
                                           </span>
@@ -1194,7 +1186,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                                 </div>
                               </div>
                               <div
-                                class="euiFlexItem esjk1ht0 emotion-euiFlexItem-growZero-GeoFlexItem"
+                                class="euiFlexItem e751pt60 emotion-euiFlexItem-growZero-GeoFlexItem"
                               >
                                 <div
                                   class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row"
@@ -1203,18 +1195,18 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                                     class="euiFlexItem emotion-euiFlexItem-growZero"
                                   >
                                     <div
-                                      data-test-subj="mock-cell-action-wrapper"
+                                      data-test-subj="mock-security-cell-actions"
                                     >
                                       <div
-                                        data-provider-id="draggableId.content.geo-field-values-default-draggable-test-abcd-destination_geo_city_name-New York"
                                         tabindex="-1"
                                       >
                                         <span
-                                          class="c1"
+                                          class="css-1s7tdhk-ProviderContentWrapper e14kwmf30"
                                           data-test-subj="render-content-destination.geo.city_name"
                                         >
                                           <span
                                             class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                                            id="generated-id-wrapper"
                                           >
                                             New York
                                           </span>
@@ -1248,21 +1240,85 @@ exports[`Netflow renders correctly against snapshot 1`] = `
           class="euiFlexItem emotion-euiFlexItem-growZero"
         >
           <div
-            data-test-subj="mock-cell-action-wrapper"
+            data-test-subj="mock-security-cell-actions"
           >
             <div
-              data-provider-id="draggableId.content.draggable-badge-default-draggable-test-abcd-tls_fingerprints_ja3_hash-tls_fingerprints_ja3_hash-value"
               tabindex="-1"
             >
               <span
-                class="c1"
+                class="css-1s7tdhk-ProviderContentWrapper e14kwmf30"
                 data-test-subj="render-content-tls.fingerprints.ja3.hash"
               >
                 <span
                   class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                  id="generated-id-wrapper"
                 >
                   <span
-                    class="euiBadge eb5dvw90 emotion-euiBadge-hollow-Badge"
+                    class="euiBadge e1tqya0j0 emotion-euiBadge-hollow-Badge"
+                    title=""
+                  >
+                    <span
+                      class="euiBadge__content emotion-euiBadge__content"
+                    >
+                      <span
+                        class="euiBadge__icon emotion-euiBadge__icon-left"
+                        color="inherit"
+                        data-euiicon-type="snowflake"
+                      />
+                      <span
+                        class="euiBadge__text emotion-euiBadge__text"
+                      >
+                        <span
+                          class="c2"
+                        >
+                          ja3
+                        </span>
+                        <a
+                          class="euiLink emotion-euiLink-text"
+                          data-test-subj="ja3-fingerprint-link"
+                          href="https://sslbl.abuse.ch/ja3-fingerprints/tls.fingerprints.ja3.hash-value"
+                          rel="noopener noreferrer"
+                          target="_blank"
+                        >
+                          tls.fingerprints.ja3.hash-value
+                          <span
+                            class="css-1j75qc1"
+                            data-euiicon-type="external"
+                            role="presentation"
+                          />
+                          <span
+                            class="emotion-euiScreenReaderOnly"
+                          >
+                            (external, opens in a new tab or window)
+                          </span>
+                        </a>
+                      </span>
+                    </span>
+                  </span>
+                </span>
+              </span>
+            </div>
+          </div>
+        </div>
+        <div
+          class="euiFlexItem emotion-euiFlexItem-growZero"
+        >
+          <div
+            data-test-subj="mock-security-cell-actions"
+          >
+            <div
+              tabindex="-1"
+            >
+              <span
+                class="css-1s7tdhk-ProviderContentWrapper e14kwmf30"
+                data-test-subj="render-content-tls.client_certificate.fingerprint.sha1"
+              >
+                <span
+                  class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                  id="generated-id-wrapper"
+                >
+                  <span
+                    class="euiBadge e1tqya0j0 emotion-euiBadge-hollow-Badge"
                     title=""
                   >
                     <span
@@ -1279,74 +1335,10 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                         <span
                           class="c3"
                         >
-                          ja3
-                        </span>
-                        <a
-                          class="euiLink emotion-euiLink-primary"
-                          data-test-subj="ja3-fingerprint-link"
-                          href="https://sslbl.abuse.ch/ja3-fingerprints/tls.fingerprints.ja3.hash-value"
-                          rel="noopener noreferrer"
-                          target="_blank"
-                        >
-                          tls.fingerprints.ja3.hash-value
-                          <span
-                            class="emotion-EuiExternalLinkIcon"
-                            data-euiicon-type="popout"
-                            role="presentation"
-                          />
-                          <span
-                            class="emotion-euiScreenReaderOnly"
-                          >
-                            (external, opens in a new tab or window)
-                          </span>
-                        </a>
-                      </span>
-                    </span>
-                  </span>
-                </span>
-              </span>
-            </div>
-          </div>
-        </div>
-        <div
-          class="euiFlexItem emotion-euiFlexItem-growZero"
-        >
-          <div
-            data-test-subj="mock-cell-action-wrapper"
-          >
-            <div
-              data-provider-id="draggableId.content.draggable-badge-default-draggable-test-abcd-tls_client_certificate_fingerprint_sha1-tls_client_certificate_fingerprint_sha1-value"
-              tabindex="-1"
-            >
-              <span
-                class="c1"
-                data-test-subj="render-content-tls.client_certificate.fingerprint.sha1"
-              >
-                <span
-                  class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
-                >
-                  <span
-                    class="euiBadge eb5dvw90 emotion-euiBadge-hollow-Badge"
-                    title=""
-                  >
-                    <span
-                      class="euiBadge__content emotion-euiBadge__content"
-                    >
-                      <span
-                        class="euiBadge__icon emotion-euiBadge__icon-left"
-                        color="inherit"
-                        data-euiicon-type="snowflake"
-                      />
-                      <span
-                        class="euiBadge__text emotion-euiBadge__text"
-                      >
-                        <span
-                          class="c4"
-                        >
                           client cert
                         </span>
                         <a
-                          class="euiLink emotion-euiLink-primary"
+                          class="euiLink emotion-euiLink-text"
                           data-test-subj="certificate-fingerprint-link"
                           href="https://sslbl.abuse.ch/ssl-certificates/sha1/tls.client_certificate.fingerprint.sha1-value"
                           rel="noopener noreferrer"
@@ -1354,8 +1346,8 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                         >
                           tls.client_certificate.fingerprint.sha1-value
                           <span
-                            class="emotion-EuiExternalLinkIcon"
-                            data-euiicon-type="popout"
+                            class="css-1j75qc1"
+                            data-euiicon-type="external"
                             role="presentation"
                           />
                           <span
@@ -1376,21 +1368,21 @@ exports[`Netflow renders correctly against snapshot 1`] = `
           class="euiFlexItem emotion-euiFlexItem-growZero"
         >
           <div
-            data-test-subj="mock-cell-action-wrapper"
+            data-test-subj="mock-security-cell-actions"
           >
             <div
-              data-provider-id="draggableId.content.draggable-badge-default-draggable-test-abcd-tls_server_certificate_fingerprint_sha1-tls_server_certificate_fingerprint_sha1-value"
               tabindex="-1"
             >
               <span
-                class="c1"
+                class="css-1s7tdhk-ProviderContentWrapper e14kwmf30"
                 data-test-subj="render-content-tls.server_certificate.fingerprint.sha1"
               >
                 <span
                   class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                  id="generated-id-wrapper"
                 >
                   <span
-                    class="euiBadge eb5dvw90 emotion-euiBadge-hollow-Badge"
+                    class="euiBadge e1tqya0j0 emotion-euiBadge-hollow-Badge"
                     title=""
                   >
                     <span
@@ -1405,12 +1397,12 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                         class="euiBadge__text emotion-euiBadge__text"
                       >
                         <span
-                          class="c4"
+                          class="c3"
                         >
                           server cert
                         </span>
                         <a
-                          class="euiLink emotion-euiLink-primary"
+                          class="euiLink emotion-euiLink-text"
                           data-test-subj="certificate-fingerprint-link"
                           href="https://sslbl.abuse.ch/ssl-certificates/sha1/tls.server_certificate.fingerprint.sha1-value"
                           rel="noopener noreferrer"
@@ -1418,8 +1410,8 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                         >
                           tls.server_certificate.fingerprint.sha1-value
                           <span
-                            class="emotion-EuiExternalLinkIcon"
-                            data-euiicon-type="popout"
+                            class="css-1j75qc1"
+                            data-euiicon-type="external"
                             role="presentation"
                           />
                           <span

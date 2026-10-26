@@ -8,13 +8,13 @@
 import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
+import { TruncateWithTooltip } from '@kbn/apm-ui-shared';
 import type { ConnectionStatsItemWithComparisonData } from '../../../../common/connections';
 import { useBreakpoints } from '../../../hooks/use_breakpoints';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { EmptyMessage } from '../empty_message';
 import { type ITableColumn, ManagedTable } from '../managed_table';
 import { OverviewTableContainer } from '../overview_table_container';
-import { TruncateWithTooltip } from '../truncate_with_tooltip';
 import type { SpanMetricGroup } from './get_span_metric_columns';
 import { getSpanMetricColumns } from './get_span_metric_columns';
 
@@ -37,6 +37,7 @@ interface Props {
   showPerPageOptions?: boolean;
   showSparkPlots?: boolean;
   onChangeRenderedItems?: (items: FormattedSpanMetricGroup[]) => void;
+  saveTableOptionsToUrl?: boolean;
 }
 
 export type FormattedSpanMetricGroup = SpanMetricGroup & {
@@ -56,6 +57,7 @@ export function DependenciesTable({
   initialPageSize,
   showSparkPlots,
   onChangeRenderedItems,
+  saveTableOptionsToUrl = true,
 }: Props) {
   const { isLarge } = useBreakpoints();
   const shouldShowSparkPlots = showSparkPlots ?? !isLarge;
@@ -95,7 +97,7 @@ export function DependenciesTable({
         return <TruncateWithTooltip text={name} content={itemLink} />;
       },
       sortable: true,
-      width: '30%',
+      minWidth: '14em', // Will grow to fill the space
     },
     ...getSpanMetricColumns({
       shouldShowSparkPlots,
@@ -144,6 +146,8 @@ export function DependenciesTable({
             showPerPageOptions={showPerPageOptions}
             initialPageSize={initialPageSize}
             onChangeRenderedItems={onChangeRenderedItems}
+            saveTableOptionsToUrl={saveTableOptionsToUrl}
+            tableLayout="auto"
           />
         </OverviewTableContainer>
       </EuiFlexItem>

@@ -13,7 +13,8 @@ import {
 } from '../../../common/mocks/constants/session_view_process.mock';
 import { sessionViewProcessEventsMock } from '../../../common/mocks/responses/session_view_process_events.mock';
 import { sessionViewProcessEventsMergedMock } from '../../../common/mocks/responses/session_view_process_events_merged.mock';
-import { AppContextTestRender, createAppRootMockRenderer } from '../../test';
+import type { AppContextTestRender } from '../../test';
+import { createAppRootMockRenderer } from '../../test';
 import { SessionView } from '.';
 import userEvent from '@testing-library/user-event';
 import { useDateFormat } from '../../hooks';
@@ -38,6 +39,8 @@ describe('SessionView component', () => {
           sessionStartTime={TEST_SESSION_START_TIME}
           sessionEntityId="test-entity-id"
           trackEvent={jest.fn()}
+          openDetails={jest.fn()}
+          closeDetails={jest.fn()}
         />
       ));
     mockUseDateFormat.mockImplementation(() => 'MMM D, YYYY @ HH:mm:ss.SSS');
@@ -127,19 +130,6 @@ describe('SessionView component', () => {
         await waitFor(() => {
           expect(renderResult.getAllByTestId('sessionView:processTreeNode')).toBeTruthy();
         });
-      });
-
-      it('should toggle detail panel visibilty when detail button clicked', async () => {
-        render();
-
-        await waitFor(() => {
-          expect(renderResult.getByTestId('sessionView:sessionViewDetailPanelToggle')).toBeTruthy();
-        });
-
-        await userEvent.click(renderResult.getByTestId('sessionView:sessionViewDetailPanelToggle'));
-        expect(renderResult.getByText('Process')).toBeTruthy();
-        expect(renderResult.getByText('Metadata')).toBeTruthy();
-        expect(renderResult.getByText('Alerts')).toBeTruthy();
       });
 
       it('should render session view options button and its options when clicked', async () => {

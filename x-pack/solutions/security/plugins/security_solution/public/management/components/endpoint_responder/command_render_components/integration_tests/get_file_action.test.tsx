@@ -31,8 +31,8 @@ import {
   INSUFFICIENT_PRIVILEGES_FOR_COMMAND,
   UPGRADE_AGENT_FOR_RESPONDER,
 } from '../../../../../common/translations';
-import type { HttpFetchOptionsWithPath } from '@kbn/core-http-browser';
 import { endpointActionResponseCodes } from '../../lib/endpoint_action_response_codes';
+import { EndpointActionGenerator } from '../../../../../../common/endpoint/data_generators/endpoint_action_generator';
 
 jest.mock('../../../../../common/components/user_privileges');
 
@@ -166,21 +166,20 @@ describe('When using get-file action from response actions console', () => {
     );
   });
 
-  it('should display download link once action completes', async () => {
-    const actionDetailsApiResponseMock: ReturnType<typeof apiMocks.responseProvider.actionDetails> =
-      {
-        data: {
-          ...apiMocks.responseProvider.actionDetails({
-            path: '/1',
-          } as HttpFetchOptionsWithPath).data,
-
-          completedAt: new Date().toISOString(),
-          command: 'get-file',
+  it('should display pending status while action is not yet complete', async () => {
+    apiMocks.responseProvider.actionDetails.mockReturnValue({
+      data: new EndpointActionGenerator('seed').generateActionDetails({
+        command: 'get-file',
+        agents: ['a.b.c'],
+        isCompleted: false,
+        wasSuccessful: false,
+        agentState: {
+          'a.b.c': { isCompleted: false, wasSuccessful: false },
         },
-      };
-    apiMocks.responseProvider.actionDetails.mockReturnValue(actionDetailsApiResponseMock);
+      }),
+    });
 
-    await render();
+    const { getByTestId } = await render();
     await enterConsoleCommand(renderResult, user, 'get-file --path="one/two"');
 
     await waitFor(() => {
@@ -188,13 +187,46 @@ describe('When using get-file action from response actions console', () => {
     });
 
     await waitFor(() => {
-      expect(renderResult.getByTestId('getFileSuccess').textContent).toEqual(
-        'File retrieved from the host.Click here to download(ZIP file passcode: elastic).Files are periodically deleted to clear storage space. Download and save file locally if needed.'
+      expect(getByTestId('getFile-pending')).toBeTruthy();
+    });
+
+    expect(getByTestId('getFile-actionResult-hostStatus')).toHaveTextContent('get-file is pending');
+  });
+
+  it('should display download link once action completes', async () => {
+    apiMocks.responseProvider.actionDetails.mockReturnValue({
+      data: new EndpointActionGenerator('seed').generateActionDetails({
+        command: 'get-file',
+        agents: ['a.b.c'],
+      }),
+    });
+
+    const { getByTestId } = await render();
+    await enterConsoleCommand(renderResult, user, 'get-file --path="one/two"');
+
+    await waitFor(() => {
+      expect(apiMocks.responseProvider.actionDetails).toHaveBeenCalled();
+    });
+
+    await waitFor(() => {
+      expect(getByTestId('getFile-success')).toBeTruthy();
+    });
+
+    expect(getByTestId('getFile-actionResult-hostStatus')).toHaveTextContent(
+      'get-file completed successfully'
+    );
+
+    await waitFor(() => {
+      expect(
+        getByTestId('getFile-actionResult-getFileResults-getFileDownloadLink').textContent
+      ).toEqual(
+        'Click here to download(ZIP file passcode: elastic).Files are periodically deleted to clear storage space. Download and save file locally if needed.'
       );
     });
   });
 
   it.each([
+    'ra_get-file_error_canceled',
     'ra_get-file_error_not-found',
     'ra_get-file_error_is-directory',
     'ra_get-file_error_invalid-input',
@@ -205,6 +237,7 @@ describe('When using get-file action from response actions console', () => {
     'ra_get-file_error_upload-api-unreachable',
     'ra_get-file_error_upload-timeout',
     'ra_get-file_error_queue-timeout',
+    'ra_get-file_error_not-enough-free-space',
   ])('should show detailed error if get-file failure returned code: %s', async (outputCode) => {
     const pendingDetailResponse = apiMocks.responseProvider.actionDetails({
       path: '/api/endpoint/action/a.b.c',
@@ -217,6 +250,7 @@ describe('When using get-file action from response actions console', () => {
       'agent-a': {
         isCompleted: true,
         wasSuccessful: false,
+        wasCanceled: false,
         errors: ['not found'],
         completedAt: new Date().toISOString(),
       },
@@ -239,26 +273,20 @@ describe('When using get-file action from response actions console', () => {
         new RegExp(endpointActionResponseCodes[outputCode].replace(/[|\\{}()[\]^$+*?.]/g, '\\$&'))
       );
     });
+
+    expect(renderResult.getByTestId('getFile-actionResult-hostStatus')).toHaveTextContent(
+      'get-file failed'
+    );
+    expect(
+      renderResult.getByTestId(
+        'getFile-actionResult-getFileResults-failure-response-action-failure-info'
+      )
+    ).toHaveTextContent(endpointActionResponseCodes[outputCode]);
   });
 
   describe('And agent type is SentinelOne', () => {
     beforeEach(() => {
       getConsoleCommandsOptions.agentType = 'sentinel_one';
-      mockedContext.setExperimentalFlag({
-        responseActionsSentinelOneGetFileEnabled: true,
-      });
-    });
-
-    it('should display error if feature flag is not enabled', async () => {
-      mockedContext.setExperimentalFlag({
-        responseActionsSentinelOneGetFileEnabled: false,
-      });
-      await render();
-      await enterConsoleCommand(renderResult, user, 'get-file --path="one/two"');
-
-      expect(renderResult.getByTestId('test-validationError-message').textContent).toEqual(
-        UPGRADE_AGENT_FOR_RESPONDER('sentinel_one', 'get-file')
-      );
     });
 
     it('should call API with `agent_type` set to `sentinel_one`', async () => {
@@ -285,6 +313,9 @@ describe('When using get-file action from response actions console', () => {
     });
 
     it('should display pending message', async () => {
+      apiMocks.responseProvider.getFile.mockDelay.mockImplementation(
+        () => new Promise((r) => setTimeout(r, 100))
+      );
       await render();
       await enterConsoleCommand(renderResult, user, 'get-file --path="one/two"');
 

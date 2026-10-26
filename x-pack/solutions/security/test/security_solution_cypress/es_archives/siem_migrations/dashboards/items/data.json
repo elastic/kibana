@@ -1,0 +1,317 @@
+
+      {
+        "type": "doc",
+        "value": {
+          "index": ".kibana-siem-dashboard-migrations-dashboards-default",
+          "id": "ZsUEoJkBugLoUq-2Lybd",
+          "source": {
+            "migration_id": "fa1d1636-3842-44db-8404-8d1d4e93be77",
+            "original_dashboard": {
+              "id": "https://127.0.0.1:8089/servicesNS/nobody/Splunk_Security_Essentials/data/ui/views/data_inventory_overview",
+              "title": "Data Inventory Overview",
+              "description": "",
+              "data": "original test dashboard data",
+              "format": "xml",
+              "vendor": "splunk",
+              "last_updated": "1970-01-01T00:00:00+00:00",
+              "splunk_properties": {
+                "app": "Splunk_Security_Essentials",
+                "owner": "nobody",
+                "sharing": "app"
+              }
+            },
+            "@timestamp": "2025-10-01T13:44:13.019Z",
+            "status": "failed",
+            "created_by": "u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0",
+            "updated_by": "u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0",
+            "updated_at": "2025-10-01T13:47:35.273Z",
+            "comments": [
+              {
+                "created_at": "2025-10-01T13:47:35.273Z",
+                "message": "Error migrating document: Aborted",
+                "created_by": "assistant"
+              }
+            ]
+          }
+        }
+      }
+
+      {
+        "type": "doc",
+        "value": {
+          "index": ".kibana-siem-dashboard-migrations-dashboards-default",
+          "id": "ZcUEoJkBugLoUq-2Lybd",
+          "source": {
+            "migration_id": "fa1d1636-3842-44db-8404-8d1d4e93be77",
+            "original_dashboard": {
+              "id": "https://127.0.0.1:8089/servicesNS/nobody/search/data/ui/views/dashboards_extraction",
+              "title": "Dashboards extraction",
+              "description": "",
+              "data": "original test dashboard data",
+              "format": "xml",
+              "vendor": "splunk",
+              "last_updated": "2025-02-20T13:12:30+00:00",
+              "splunk_properties": {
+                "app": "search",
+                "owner": "admin",
+                "sharing": "app"
+              }
+            },
+            "@timestamp": "2025-10-01T13:44:13.019Z",
+            "status": "failed",
+            "created_by": "u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0",
+            "updated_by": "u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0",
+            "updated_at": "2025-10-01T13:47:35.295Z",
+            "comments": [
+              {
+                "created_at": "2025-10-01T13:47:35.295Z",
+                "message": "Error migrating document: Aborted",
+                "created_by": "assistant"
+              }
+            ]
+          }
+        }
+      }
+
+      {
+        "type": "doc",
+        "value": {
+          "index": ".kibana-siem-dashboard-migrations-dashboards-default",
+          "id": "ZMUEoJkBugLoUq-2Lybd",
+          "source": {
+            "migration_id": "fa1d1636-3842-44db-8404-8d1d4e93be77",
+            "original_dashboard": {
+              "id": "https://127.0.0.1:8089/servicesNS/nobody/Splunk_Security_Essentials/data/ui/views/content_overview",
+              "title": "Content Overview",
+              "description": "Each number represents a piece of content. Follow the headlines 1, 2 and 3 to find and drill down into the content.",
+              "data": "original test dashboard data",
+              "format": "xml",
+              "vendor": "splunk",
+              "last_updated": "1970-01-01T00:00:00+00:00",
+              "splunk_properties": {
+                "app": "Splunk_Security_Essentials",
+                "owner": "nobody",
+                "sharing": "app"
+              }
+            },
+            "@timestamp": "2025-10-01T13:44:13.019Z",
+            "status": "failed",
+            "created_by": "u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0",
+            "updated_by": "u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0",
+            "updated_at": "2025-10-01T13:47:35.329Z",
+            "comments": [
+              {
+                "created_at": "2025-10-01T13:47:35.329Z",
+                "message": "Error migrating document: Aborted",
+                "created_by": "assistant"
+              }
+            ]
+          }
+        }
+      }
+
+      {
+        "type": "doc",
+        "value": {
+          "index": ".kibana-siem-dashboard-migrations-dashboards-default",
+          "id": "Z8UEoJkBugLoUq-2Lybd",
+          "source": {
+            "migration_id": "fa1d1636-3842-44db-8404-8d1d4e93be77",
+            "original_dashboard": {
+              "id": "https://127.0.0.1:8089/servicesNS/nobody/SplunkEnterpriseSecuritySuite/data/ui/views/access_analyzer_data",
+              "title": "access_analyzer_data",
+              "description": "",
+              "data": "original test dashboard data",
+              "format": "xml",
+              "vendor": "splunk",
+              "last_updated": "1970-01-01T00:00:00+00:00",
+              "splunk_properties": {
+                "app": "SplunkEnterpriseSecuritySuite",
+                "owner": "nobody",
+                "sharing": "global"
+              }
+            },
+            "@timestamp": "2025-10-01T13:44:13.019Z",
+            "status": "completed",
+            "created_by": "u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0",
+            "updated_by": "u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0",
+            "updated_at": "2025-10-01T13:47:40.550Z",
+            "elastic_dashboard": {
+              "description": "",
+              "title": "access_analyzer_data"
+            },
+            "comments": [
+              {
+                "created_at": "2025-10-01T13:47:40.142Z",
+                "message": "Unsupported Splunk XML: Unsupported version. Only version 1.1 is supported.",
+                "created_by": "assistant"
+              },
+              {
+                "created_at": "2025-10-01T13:47:40.387Z",
+                "message": "No panels found",
+                "created_by": "assistant"
+              }
+            ],
+            "translation_result": "untranslatable"
+          }
+        }
+      }
+
+      {
+        "type": "doc",
+        "value": {
+          "index": ".kibana-siem-dashboard-migrations-dashboards-default",
+          "id": "aMUEoJkBugLoUq-2Lybd",
+          "source": {
+            "migration_id": "fa1d1636-3842-44db-8404-8d1d4e93be77",
+            "original_dashboard": {
+              "id": "https://127.0.0.1:8089/servicesNS/nobody/DA-ESS-AccessProtection/data/ui/views/access_anomalies_data",
+              "title": "access_anomalies_data",
+              "description": "",
+              "data": "original test dashboard data",
+              "format": "xml",
+              "vendor": "splunk",
+              "last_updated": "1970-01-01T00:00:00+00:00",
+              "splunk_properties": {
+                "app": "DA-ESS-AccessProtection",
+                "owner": "nobody",
+                "sharing": "global"
+              }
+            },
+            "@timestamp": "2025-10-01T13:44:13.019Z",
+            "status": "completed",
+            "created_by": "u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0",
+            "updated_by": "u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0",
+            "updated_at": "2025-10-01T13:47:45.554Z",
+            "elastic_dashboard": {
+              "description": "",
+              "title": "access_anomalies_data"
+            },
+            "comments": [
+              {
+                "created_at": "2025-10-01T13:47:45.125Z",
+                "message": "Unsupported Splunk XML: Unsupported version. Only version 1.1 is supported.",
+                "created_by": "assistant"
+              },
+              {
+                "created_at": "2025-10-01T13:47:45.391Z",
+                "message": "No panels found",
+                "created_by": "assistant"
+              }
+            ],
+            "translation_result": "untranslatable"
+          }
+        }
+      }
+
+      {
+        "type": "doc",
+        "value": {
+          "index": ".kibana-siem-dashboard-migrations-dashboards-default",
+          "id": "YsUEoJkBugLoUq-2Lybd",
+          "source": {
+            "migration_id": "fa1d1636-3842-44db-8404-8d1d4e93be77",
+            "original_dashboard": {
+              "id": "https://127.0.0.1:8089/servicesNS/nobody/splunk_monitoring_console/data/ui/views/admission_control_monitoring_distributed",
+              "title": "Workload Management Admission Control: Distributed",
+              "description": "",
+              "data": "original test dashboard data",
+              "format": "xml",
+              "vendor": "splunk",
+              "last_updated": "1970-01-01T00:00:00+00:00",
+              "splunk_properties": {
+                "app": "splunk_monitoring_console",
+                "owner": "nobody",
+                "sharing": "app"
+              }
+            },
+            "@timestamp": "2025-10-01T13:44:13.019Z",
+            "status": "completed",
+            "created_by": "u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0",
+            "updated_by": "u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0",
+            "updated_at": "2025-10-01T13:50:09.140Z",
+            "elastic_dashboard": {
+              "data": "Translated test dashboard data",
+              "description": "Tracks distributed workload admission control by monitoring prefiltered searches, both adhoc and scheduled, over time.",
+              "title": "Workload Management Admission Control: Distributed"
+            },
+            "comments": [
+              {
+                "created_at": "2025-10-01T13:50:08.978Z",
+                "message": "# Panel \"Total Searches Prefiltered (Last Hour)\"",
+                "created_by": "assistant"
+              },
+              {
+                "created_at": "2025-10-01T13:50:08.978Z",
+                "message": "# Panel \"Adhoc Searches Prefiltered (Last Hour)\"",
+                "created_by": "assistant"
+              },
+              {
+                "created_at": "2025-10-01T13:50:08.978Z",
+                "message": "# Panel \"Scheduled Searches Prefiltered (Last Hour)\"",
+                "created_by": "assistant"
+              },
+              {
+                "created_at": "2025-10-01T13:50:08.978Z",
+                "message": "# Panel \"Scheduled Searches Prefiltered\"",
+                "created_by": "assistant"
+              },
+              {
+                "created_at": "2025-10-01T13:50:08.978Z",
+                "message": "# Panel \"Scheduled Searches Prefiltered Drilldown: $scheduled_search_drilldown$\"",
+                "created_by": "assistant"
+              }
+            ],
+            "translation_result": "partial"
+          }
+        }
+      }
+
+      {
+        "type": "doc",
+        "value": {
+          "index": ".kibana-siem-dashboard-migrations-dashboards-default",
+          "id": "Y8UEoJkBugLoUq-2Lybd",
+          "source": {
+            "migration_id": "fa1d1636-3842-44db-8404-8d1d4e93be77",
+            "original_dashboard": {
+              "id": "https://127.0.0.1:8089/servicesNS/nobody/Splunk_Security_Essentials/data/ui/views/mitre_focused_content_recommendation",
+              "title": "MITRE ATT&CK-Driven Content Recommendation",
+              "description": "",
+              "data": "original test dashboard data",
+              "format": "xml",
+              "vendor": "splunk",
+              "last_updated": "1970-01-01T00:00:00+00:00",
+              "splunk_properties": {
+                "app": "Splunk_Security_Essentials",
+                "owner": "nobody",
+                "sharing": "app"
+              }
+            },
+            "@timestamp": "2025-10-01T13:44:13.019Z",
+            "status": "completed",
+            "created_by": "u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0",
+            "updated_by": "u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0",
+            "updated_at": "2025-10-07T09:06:32.141Z",
+            "elastic_dashboard": {
+              "data": "Translated test dashboard data",
+              "description": "Provides recommendations for security content based on MITRE ATT&CK framework alignment and user-defined criteria.",
+              "title": "MITRE ATT&CK-Driven Content Recommendation",
+              "id": "Y8UEoJkBugLoUq-2Lybd"
+            },
+            "comments": [
+              {
+                "created_at": "2025-10-01T13:49:03.268Z",
+                "message": "# Panel \"Total Content\"",
+                "created_by": "assistant"
+              },
+              {
+                "created_at": "2025-10-01T13:49:03.268Z",
+                "message": "# Panel \"Content that Meets Your Criteria\"",
+                "created_by": "assistant"
+              }
+            ],
+            "translation_result": "full"
+          }
+        }
+      }

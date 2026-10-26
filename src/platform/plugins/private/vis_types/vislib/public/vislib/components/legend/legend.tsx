@@ -7,29 +7,43 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { BaseSyntheticEvent, KeyboardEvent, PureComponent } from 'react';
+import type { BaseSyntheticEvent, KeyboardEvent } from 'react';
+import React, { PureComponent } from 'react';
 import classNames from 'classnames';
 import { compact, uniqBy, map, every, isUndefined } from 'lodash';
 
 import { i18n } from '@kbn/i18n';
 import { asyncForEach } from '@kbn/std';
-import { EuiPopoverProps, EuiIcon, keys, htmlIdGenerator } from '@elastic/eui';
+import {
+  type EuiPopoverProps,
+  EuiIcon,
+  keys,
+  htmlIdGenerator,
+  type UseEuiTheme,
+  euiScrollBarStyles,
+  euiFontSize,
+} from '@elastic/eui';
 
-import { PersistedState } from '@kbn/visualizations-plugin/public';
-import { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/public';
+import type { PersistedState } from '@kbn/visualizations-plugin/public';
+import type { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/public';
 
-import { getDataActions } from '../../../services';
-import { CUSTOM_LEGEND_VIS_TYPES, LegendItem } from './models';
+import { css } from '@emotion/react';
+import chroma from 'chroma-js';
+import { ON_CLICK_VALUE } from '@kbn/ui-actions-plugin/common/trigger_ids';
+import type { LegendItem } from './models';
+import { CUSTOM_LEGEND_VIS_TYPES } from './models';
 import { VisLegendItem } from './legend_item';
-import { BasicVislibParams } from '../../../types';
+import type { BasicVislibParams } from '../../../types';
 
 export interface VisLegendProps {
   vislibVis: any;
   visData: unknown;
   uiState?: PersistedState;
   fireEvent: IInterpreterRenderHandlers['event'];
+  hasCompatibleActions: IInterpreterRenderHandlers['hasCompatibleActions'];
   addLegend: BasicVislibParams['addLegend'];
   position: 'top' | 'bottom' | 'left' | 'right';
+  isInteractive?: boolean;
 }
 
 export interface VisLegendState {
@@ -38,6 +52,98 @@ export interface VisLegendState {
   filterableLabels: Set<string>;
   selectedLabel: string | null;
 }
+
+const visLegendStyles = {
+  inEmbPanel: css({
+    '.embPanel &': {
+      borderBottomRightRadius: 0,
+      borderTopLeftRadius: 0,
+      opacity: 0, // Fix overflow of vis's specifically for inside embeddable panels, lets the panel decide the overflow
+
+      '&:focus': {
+        opacity: 1,
+      },
+    },
+    '.embPanel:hover &': {
+      opacity: 1,
+    },
+    '.embPanel--editing &': {
+      opacity: 1, // Always show in editing mode
+    },
+  }),
+  base: css({
+    display: `flex`,
+    minHeight: 0,
+    height: `100%`,
+  }),
+  toggle: ({ euiTheme }: UseEuiTheme) =>
+    css`
+      border-radius: ${euiTheme.border.radius.medium};
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      display: flex;
+      padding: ${euiTheme.size.xs};
+      margin: ${euiTheme.size.s};
+      background-color: ${euiTheme.colors.backgroundBasePlain};
+      transition: opacity ${euiTheme.animation.fast} ${euiTheme.animation.resistance},
+        background-color ${euiTheme.animation.fast} ${euiTheme.animation.resistance}
+          ${euiTheme.animation.extraSlow};
+
+      &:focus {
+        box-shadow: none;
+        background-color: ${euiTheme.focus.backgroundColor} !important;
+      }
+    `,
+  openToggle: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      backgroundColor: chroma(euiTheme.colors.darkestShade).alpha(0.1).css(),
+      opacity: 1,
+    }),
+  list: (euiThemeContext: UseEuiTheme) => css`
+    display: flex;
+    width: 150px; // Must be a hard-coded width for the chart to get its correct dimensions
+    flex: 1 1 auto;
+    flex-direction: column;
+    overflow-x: hidden;
+    overflow-y: auto;
+
+    ${euiScrollBarStyles(euiThemeContext)}
+    .visLegend__button {
+      font-size: ${euiFontSize(euiThemeContext, 'xs').fontSize};
+      text-align: left;
+      overflow: hidden; // Ensures scrollbars don't appear because EuiButton__text has a high line-height
+
+      .visLegend__valueTitle {
+        vertical-align: middle;
+      }
+    }
+
+    .vislib--legend-top &,
+    .vislib--legend-bottom & {
+      width: auto;
+      flex-direction: row;
+      flex-wrap: wrap;
+
+      .visLegend__value {
+        flex-grow: 0;
+        max-width: 150px;
+      }
+    }
+
+    .vislib--legend-left & {
+      margin-bottom: ${euiThemeContext.euiTheme.size.l};
+    }
+
+    .vislib--legend-bottom & {
+      margin-left: ${euiThemeContext.euiTheme.size.xl};
+    }
+
+    &.hidden {
+      visibility: hidden;
+    }
+  `,
+};
 
 export class VisLegend extends PureComponent<VisLegendProps, VisLegendState> {
   legendId = htmlIdGenerator()('legend');
@@ -104,8 +210,13 @@ export class VisLegend extends PureComponent<VisLegendProps, VisLegendState> {
       return false;
     }
 
-    const filters = await getDataActions().createFiltersFromValueClickAction({ data: item.values });
-    return Boolean(filters.length);
+    const filters = this.props.hasCompatibleActions
+      ? await this.props.hasCompatibleActions({
+          name: ON_CLICK_VALUE,
+          data: item.values,
+        })
+      : false;
+    return filters;
   };
 
   toggleDetails = (label: string | null) => (event?: BaseSyntheticEvent) => {
@@ -234,7 +345,7 @@ export class VisLegend extends PureComponent<VisLegendProps, VisLegendState> {
   };
 
   renderLegend = (anchorPosition: EuiPopoverProps['anchorPosition']) => (
-    <ul className="visLegend__list" id={this.legendId}>
+    <ul className="visLegend__list" id={this.legendId} css={visLegendStyles.list}>
       {this.state.labels.map((item) => (
         <VisLegendItem
           item={item}
@@ -248,6 +359,7 @@ export class VisLegend extends PureComponent<VisLegendProps, VisLegendState> {
           getColor={this.getColor}
           onHighlight={this.highlight}
           onUnhighlight={this.unhighlight}
+          isInteractive={this.props.isInteractive}
         />
       ))}
     </ul>
@@ -258,25 +370,32 @@ export class VisLegend extends PureComponent<VisLegendProps, VisLegendState> {
     const anchorPosition = this.getAnchorPosition();
 
     return (
-      <div className="visLegend">
-        <button
-          type="button"
-          onClick={this.toggleLegend}
-          className={classNames('visLegend__toggle kbn-resetFocusState', {
-            'visLegend__toggle--isOpen': open,
-          })}
-          aria-label={i18n.translate('visTypeVislib.vislib.legend.toggleLegendButtonAriaLabel', {
-            defaultMessage: 'Toggle legend',
-          })}
-          aria-expanded={Boolean(open)}
-          aria-controls={this.legendId}
-          data-test-subj="vislibToggleLegend"
-          title={i18n.translate('visTypeVislib.vislib.legend.toggleLegendButtonTitle', {
-            defaultMessage: 'Toggle legend',
-          })}
-        >
-          <EuiIcon color="text" type="list" />
-        </button>
+      <div className="visLegend" css={visLegendStyles.base}>
+        {this.props.isInteractive && (
+          <button
+            type="button"
+            onClick={this.toggleLegend}
+            className={classNames('visLegend__toggle kbn-resetFocusState', {
+              'visLegend__toggle--isOpen': open,
+            })}
+            aria-label={i18n.translate('visTypeVislib.vislib.legend.toggleLegendButtonAriaLabel', {
+              defaultMessage: 'Toggle legend',
+            })}
+            aria-expanded={Boolean(open)}
+            aria-controls={this.legendId}
+            data-test-subj="vislibToggleLegend"
+            title={i18n.translate('visTypeVislib.vislib.legend.toggleLegendButtonTitle', {
+              defaultMessage: 'Toggle legend',
+            })}
+            css={[
+              visLegendStyles.inEmbPanel,
+              visLegendStyles.toggle,
+              open && visLegendStyles.openToggle,
+            ]}
+          >
+            <EuiIcon color="text" type="listBullet" aria-hidden={true} />
+          </button>
+        )}
         {open && this.renderLegend(anchorPosition)}
       </div>
     );

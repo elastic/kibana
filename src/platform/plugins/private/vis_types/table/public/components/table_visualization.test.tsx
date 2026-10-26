@@ -24,14 +24,11 @@ jest.mock('../utils', () => ({
 import React from 'react';
 import { shallow } from 'enzyme';
 import { render } from '@testing-library/react';
-import { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/common';
+import type { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/common';
 import { coreMock } from '@kbn/core/public/mocks';
-import { matchers } from '@emotion/jest';
-import { FormattedColumns, TableVisConfig, TableVisData } from '../types';
+import type { FormattedColumns, TableVisConfig, TableVisData } from '../types';
 import TableVisualizationComponent from './table_visualization';
 import { useUiState } from '../utils';
-
-expect.extend(matchers);
 
 describe('TableVisualizationComponent', () => {
   const coreStartMock = coreMock.createStart();
@@ -39,6 +36,7 @@ describe('TableVisualizationComponent', () => {
     done: jest.fn(),
     uiState: 'uiState',
     event: 'event',
+    isInteractive: jest.fn(),
   } as unknown as IInterpreterRenderHandlers;
   const visData: TableVisData = {
     table: {
@@ -63,6 +61,24 @@ describe('TableVisualizationComponent', () => {
     );
     expect(useUiState).toHaveBeenLastCalledWith(handlers.uiState);
     expect(comp.find('.tbvChart__splitColumns').exists()).toBeFalsy();
+  });
+
+  it('should pass isInteractive=false to TableVisBasic when handlers.isInteractive() returns false', () => {
+    const nonInteractiveHandlers = {
+      ...handlers,
+      isInteractive: jest.fn().mockReturnValue(false),
+    } as unknown as IInterpreterRenderHandlers;
+    const comp = shallow(
+      <TableVisualizationComponent
+        core={coreStartMock}
+        handlers={nonInteractiveHandlers}
+        visData={visData}
+        visConfig={visConfig}
+        renderComplete={renderComplete}
+      />
+    );
+    expect(nonInteractiveHandlers.isInteractive).toHaveBeenCalled();
+    expect(comp.find('[data-test-subj="tbvChart"]').children().prop('isInteractive')).toBe(false);
   });
 
   it('should render split table', () => {

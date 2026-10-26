@@ -1,6 +1,6 @@
 # TRIM
 
-The TRIM function removes leading and trailing whitespaces from a string.
+Removes leading and trailing whitespaces from a string.
 
 ## Syntax
 
@@ -10,18 +10,14 @@ The TRIM function removes leading and trailing whitespaces from a string.
 
 #### string
 
-This is the string expression that you want to trim.
+String expression to be trimmed. If the value is `null`, the function returns `null`.
 
 ## Examples
+
+Removes leading and trailing spaces from the `message` and `color` columns in a single row.
 
 ```esql
 ROW message = "   some text  ",  color = " red "
 | EVAL message = TRIM(message)
 | EVAL color = TRIM(color)
-```
-
-```esql
-ROW text = "   example text  ",  label = " label "
-| EVAL text = TRIM(text)
-| EVAL label = TRIM(label)
 ```

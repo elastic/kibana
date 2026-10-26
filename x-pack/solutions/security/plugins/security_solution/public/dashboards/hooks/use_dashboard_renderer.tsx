@@ -5,21 +5,35 @@
  * 2.0.
  */
 
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { DashboardApi } from '@kbn/dashboard-plugin/public';
+import type { DashboardInternalApi } from '@kbn/dashboard-plugin/public/dashboard_api/types';
 
-export const useDashboardRenderer = () => {
+export const useDashboardRenderer = (savedObjectId?: string) => {
   const [dashboardContainer, setDashboardContainer] = useState<DashboardApi>();
+  const [dashboardInternalApi, setDashboardInternalApi] = useState<DashboardInternalApi>();
 
-  const handleDashboardLoaded = useCallback((container: DashboardApi) => {
-    setDashboardContainer(container);
-  }, []);
+  // Reset while a different saved object loads so consumers drop the previous `DashboardApi`
+  // before the next one mounts (avoids stale title/breadcrumb during navigation).
+  useEffect(() => {
+    setDashboardContainer(undefined);
+    setDashboardInternalApi(undefined);
+  }, [savedObjectId]);
+
+  const handleDashboardLoaded = useCallback(
+    (container: DashboardApi, internalApi: DashboardInternalApi) => {
+      setDashboardContainer(container);
+      setDashboardInternalApi(internalApi);
+    },
+    []
+  );
 
   return useMemo(
     () => ({
       dashboardContainer,
+      dashboardInternalApi,
       handleDashboardLoaded,
     }),
-    [dashboardContainer, handleDashboardLoaded]
+    [dashboardContainer, dashboardInternalApi, handleDashboardLoaded]
   );
 };

@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import './overview.scss';
-
 import { snakeCase } from 'lodash';
-import React, { FC, useState, useEffect, useMemo } from 'react';
-import useObservable from 'react-use/lib/useObservable';
+import type { FC } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { css } from '@emotion/react';
+import type { UseEuiTheme } from '@elastic/eui';
 import {
   EuiCard,
   EuiFlexGroup,
@@ -20,29 +20,27 @@ import {
   EuiSpacer,
   EuiTitle,
   EuiLoadingSpinner,
+  useEuiMinBreakpoint,
+  useEuiTheme,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { CoreStart } from '@kbn/core/public';
-import {
-  useKibana,
-  overviewPageActions,
-  OverviewPageFooter,
-} from '@kbn/kibana-react-plugin/public';
+import { AppHeader, type AppHeaderMenu } from '@kbn/app-header';
+import type { CoreStart } from '@kbn/core/public';
+import { useKibana, OverviewPageFooter } from '@kbn/kibana-react-plugin/public';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { KibanaSolutionAvatar } from '@kbn/shared-ux-avatar-solution';
-import {
-  RedirectAppLinksContainer as RedirectAppLinks,
-  RedirectAppLinksKibanaProvider,
-} from '@kbn/shared-ux-link-redirect-app';
-import { FetchResult } from '@kbn/newsfeed-plugin/public';
-import {
+import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
+import type { FetchResult } from '@kbn/newsfeed-plugin/public';
+import type {
   FeatureCatalogueEntry,
   FeatureCatalogueSolution,
   FeatureCatalogueCategory,
 } from '@kbn/home-plugin/public';
 import { withSuspense } from '@kbn/shared-ux-utility';
+import classNames from 'classnames';
 import { PLUGIN_ID, PLUGIN_PATH } from '../../../common';
-import { AppPluginStartDependencies } from '../../types';
+import type { AppPluginStartDependencies } from '../../types';
 import { AddData } from '../add_data';
 import { ManageData } from '../manage_data';
 import { NewsFeed } from '../news_feed';
@@ -63,22 +61,13 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
   const [hasDataView, setHasDataView] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const { services } = useKibana<CoreStart & AppPluginStartDependencies>();
-  const {
-    http,
-    docLinks,
-    dataViews,
-    share,
-    application,
-    chrome,
-    dataViewEditor,
-    customBranding,
-    theme,
-  } = services;
+  const { http, docLinks, dataViews, share, application, chrome, dataViewEditor, customBranding } =
+    services;
   const addBasePath = http.basePath.prepend;
-  const currentTheme = useObservable(theme.theme$, { darkMode: false, name: 'amsterdam' });
+  const { euiTheme } = useEuiTheme();
+  const isDarkMode = useKibanaIsDarkMode();
+  const minBreakpointM = useEuiMinBreakpoint('m');
 
-  // Home does not have a locator implemented, so hard-code it here.
-  const addDataHref = addBasePath('/app/integrations/browse');
   const devToolsHref = share.url.locators.get('CONSOLE_APP_LOCATOR')?.useUrl({});
   const managementHref = share.url.locators
     .get('MANAGEMENT_APP_LOCATOR')
@@ -97,7 +86,6 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
   const addDataFeatures = getFeaturesByCategory('data');
   const manageDataFeatures = getFeaturesByCategory('admin');
   const devTools = findFeatureById('console');
-
   // Show card for console if none of the manage data plugins are available, most likely in OSS
   if (manageDataFeatures.length < 1 && devTools) {
     manageDataFeatures.push(devTools);
@@ -106,10 +94,10 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
   useEffect(() => {
     const fetchIsNewKibanaInstance = async () => {
       const checkData = async () => {
-        const hasUserDataViewValue = await dataViews.hasData.hasUserDataView();
+        const hasDataViewValue = await dataViews.hasData.hasDataView();
         const hasESDataValue = await dataViews.hasData.hasESData();
-        setNewKibanaInstance((!hasUserDataViewValue && hasESDataValue) || !hasESDataValue);
-        setHasDataView(hasUserDataViewValue);
+        setNewKibanaInstance((!hasDataViewValue && hasESDataValue) || !hasESDataValue);
+        setHasDataView(hasDataViewValue);
         setHasESData(hasESDataValue);
       };
 
@@ -130,34 +118,24 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
     const app = kibanaApps.find(({ id }) => id === appId);
 
     return app ? (
-      <EuiFlexItem className="kbnOverviewApps__item" key={appId}>
-        <RedirectAppLinksKibanaProvider
-          coreStart={{
-            application: {
-              currentAppId$: application.currentAppId$,
-              navigateToUrl: application.navigateToUrl,
-            },
+      <EuiFlexItem
+        className="kbnOverviewApps__item"
+        key={appId}
+        data-test-subj={`kbnOverviewAppCard-${appId}`}
+      >
+        <EuiCard
+          description={app?.subtitle || ''}
+          href={addBasePath(app.path)}
+          onClick={() => {
+            trackUiMetric(METRIC_TYPE.CLICK, `app_card_${appId}`);
           }}
-          {...application}
-        >
-          <RedirectAppLinks>
-            <EuiCard
-              description={app?.subtitle || ''}
-              href={addBasePath(app.path)}
-              onClick={() => {
-                trackUiMetric(METRIC_TYPE.CLICK, `app_card_${appId}`);
-              }}
-              image={addBasePath(
-                `/plugins/${PLUGIN_ID}/assets/kibana_${appId}_${
-                  currentTheme.darkMode ? 'dark' : 'light'
-                }.svg`
-              )}
-              title={app.title}
-              titleElement="h3"
-              titleSize="s"
-            />
-          </RedirectAppLinks>
-        </RedirectAppLinksKibanaProvider>
+          image={addBasePath(
+            `/plugins/${PLUGIN_ID}/assets/kibana_${appId}_${isDarkMode ? 'dark' : 'light'}.svg`
+          )}
+          title={app.title}
+          titleElement="h3"
+          titleSize="s"
+        />
       </EuiFlexItem>
     ) : null;
   };
@@ -177,6 +155,46 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
 
     return applications;
   }, [application.capabilities]);
+
+  // `fileUpload.show` is resolved from the user's privileges to create data views, which file upload
+  // and sample data both need.
+  const canIngestData =
+    application.capabilities.navLinks.integrations === true ||
+    application.capabilities.fileUpload?.show === true;
+
+  const menu = useMemo<AppHeaderMenu>(() => {
+    const { management: isManagementEnabled, dev_tools: isDevToolsEnabled } =
+      application.capabilities.navLinks;
+    const items: NonNullable<AppHeaderMenu['items']> = [];
+
+    if (managementHref && isManagementEnabled) {
+      items.push({
+        id: 'manage',
+        label: i18n.translate('kibanaOverview.header.stackManagementButtonLabel', {
+          defaultMessage: 'Manage',
+        }),
+        iconType: 'gear',
+        href: managementHref,
+        testId: 'homeManage',
+        order: 0,
+      });
+    }
+
+    if (devToolsHref && !!devTools && isDevToolsEnabled) {
+      items.push({
+        id: 'devTools',
+        label: i18n.translate('kibanaOverview.header.devToolsButtonLabel', {
+          defaultMessage: 'Dev tools',
+        }),
+        iconType: 'wrench',
+        href: devToolsHref,
+        testId: 'homeDevTools',
+        order: 1,
+      });
+    }
+
+    return { items };
+  }, [application.capabilities.navLinks, devTools, devToolsHref, managementHref]);
 
   const onDataViewCreated = () => {
     setNewKibanaInstance(false);
@@ -209,7 +227,7 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
           // We've already called this, so we can optimize the analytics services to
           // use the already-retrieved data to avoid a double-call.
           hasESData: () => Promise.resolve(hasESData),
-          hasUserDataView: () => Promise.resolve(hasDataView),
+          hasDataView: () => Promise.resolve(hasDataView),
         },
       },
       dataViewEditor,
@@ -240,27 +258,22 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
   }
 
   return (
-    <KibanaPageTemplate
-      pageHeader={{
-        iconType: 'logoKibana',
-        pageTitle: <FormattedMessage defaultMessage="Analytics" id="kibanaOverview.header.title" />,
-        rightSideItems: overviewPageActions({
-          addDataHref,
-          application,
-          devToolsHref,
-          hidden: isNewKibanaInstance,
-          managementHref,
-          showDevToolsLink: !!devTools,
-          showManagementLink: !!manageDataFeatures,
-        }),
-        bottomBorder: true,
-      }}
-      panelled={false}
-    >
+    <KibanaPageTemplate panelled={false}>
+      <AppHeader
+        title={i18n.translate('kibanaOverview.header.title', { defaultMessage: 'Analytics' })}
+        menu={menu}
+        showAddIntegrations
+      />
+
       <KibanaPageTemplate.Section
+        css={styles(euiTheme, minBreakpointM)}
         bottomBorder
         aria-labelledby="kbnOverviewApps__title"
-        className="kbnOverviewApps"
+        contentProps={{
+          css: css({
+            paddingTop: euiTheme.size.xl,
+          }),
+        }}
       >
         <EuiScreenReaderOnly>
           <h2 id="kbnOverviewApps__title">
@@ -270,10 +283,7 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
 
         {mainAppsUserHasAccessTo.length ? (
           <>
-            <EuiFlexGroup
-              className="kbnOverviewApps__group kbnOverviewApps__group--primary"
-              justifyContent="center"
-            >
+            <EuiFlexGroup className="kbnOverviewMainApps" justifyContent="center">
               {mainAppsUserHasAccessTo.map(renderAppCard)}
             </EuiFlexGroup>
 
@@ -282,23 +292,22 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
         ) : null}
 
         {remainingApps.length ? (
-          <EuiFlexGroup
-            className="kbnOverviewApps__group kbnOverviewApps__group--secondary"
-            justifyContent="center"
-          >
+          <EuiFlexGroup className="kbnOverviewRemainingApps" justifyContent="center">
             {remainingApps.map(renderAppCard)}
           </EuiFlexGroup>
         ) : null}
       </KibanaPageTemplate.Section>
 
-      <KibanaPageTemplate.Section bottomBorder paddingSize="xl">
+      <KibanaPageTemplate.Section
+        css={styles(euiTheme, minBreakpointM)}
+        bottomBorder
+        paddingSize="xl"
+      >
         <EuiFlexGroup
           alignItems="flexStart"
-          className={`kbnOverviewSupplements ${
-            newsFetchResult && newsFetchResult.feedItems.length
-              ? 'kbnOverviewSupplements--hasNews'
-              : 'kbnOverviewSupplements--noNews'
-          }`}
+          className={classNames({
+            'kbnOverviewSupplements--noNews': !newsFetchResult?.feedItems?.length,
+          })}
         >
           {newsFetchResult && newsFetchResult.feedItems.length ? (
             <EuiFlexItem grow={1}>
@@ -308,7 +317,7 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
 
           <EuiFlexItem grow={3}>
             {solutions.length ? (
-              <section aria-labelledby="kbnOverviewMore__title" className="kbnOverviewMore">
+              <section aria-labelledby="kbnOverviewMore__title">
                 <EuiTitle size="s">
                   <h2 id="kbnOverviewMore__title">
                     <FormattedMessage
@@ -320,49 +329,43 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
 
                 <EuiSpacer size="m" />
 
-                <EuiFlexGroup className="kbnOverviewMore__content">
+                <EuiFlexGroup>
                   {solutions.map(({ id, title, description, icon, path }) => (
-                    <EuiFlexItem className="kbnOverviewMore__item" key={id}>
-                      <RedirectAppLinksKibanaProvider
-                        coreStart={{
-                          application: {
-                            currentAppId$: application.currentAppId$,
-                            navigateToUrl: application.navigateToUrl,
-                          },
+                    <EuiFlexItem
+                      data-test-subj="kbnOverviewItem"
+                      key={id}
+                      className="kbnOverviewItemSolution"
+                    >
+                      <EuiCard
+                        className={`kbnOverviewSolution--${id} kbnRedirectAppLinkImage`}
+                        description={description ? description : ''}
+                        href={addBasePath(path)}
+                        icon={<KibanaSolutionAvatar name={title} iconType={icon} size="xl" />}
+                        image={addBasePath(getSolutionGraphicURL(snakeCase(id)))}
+                        title={title}
+                        titleElement="h3"
+                        titleSize="xs"
+                        onClick={() => {
+                          trackUiMetric(METRIC_TYPE.CLICK, `solution_panel_${id}`);
                         }}
-                        {...application}
-                      >
-                        <RedirectAppLinks>
-                          <EuiCard
-                            className={`kbnOverviewSolution ${id}`}
-                            description={description ? description : ''}
-                            href={addBasePath(path)}
-                            icon={<KibanaSolutionAvatar name={title} iconType={icon} size="xl" />}
-                            image={addBasePath(getSolutionGraphicURL(snakeCase(id)))}
-                            title={title}
-                            titleElement="h3"
-                            titleSize="xs"
-                            onClick={() => {
-                              trackUiMetric(METRIC_TYPE.CLICK, `solution_panel_${id}`);
-                            }}
-                          />
-                        </RedirectAppLinks>
-                      </RedirectAppLinksKibanaProvider>
+                      />
                     </EuiFlexItem>
                   ))}
                 </EuiFlexGroup>
               </section>
             ) : (
               <EuiFlexGroup
-                className={`kbnOverviewData ${
-                  addDataFeatures.length === 1 && manageDataFeatures.length === 1
-                    ? 'kbnOverviewData--compressed'
-                    : 'kbnOverviewData--expanded'
-                }`}
+                css={css({
+                  ...(addDataFeatures.length > 1 && manageDataFeatures.length > 1
+                    ? { flexDirection: 'column' }
+                    : {}),
+                })}
               >
-                <EuiFlexItem>
-                  <AddData addBasePath={addBasePath} features={addDataFeatures} />
-                </EuiFlexItem>
+                {canIngestData ? (
+                  <EuiFlexItem>
+                    <AddData addBasePath={addBasePath} features={addDataFeatures} />
+                  </EuiFlexItem>
+                ) : null}
 
                 <EuiFlexItem>
                   <ManageData addBasePath={addBasePath} features={manageDataFeatures} />
@@ -386,3 +389,48 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
     </KibanaPageTemplate>
   );
 };
+
+const styles = (euiTheme: UseEuiTheme['euiTheme'], minBreakpointM: string) =>
+  css({
+    '.kbnRedirectAppLinkImage': {
+      '.enterpriseSearch': {
+        '.euiCard__image': {
+          backgroundColor: euiTheme.colors.warning,
+        },
+      },
+      '.observability': {
+        '.euiCard__image': {
+          backgroundColor: euiTheme.colors.accent,
+        },
+      },
+      '.securitySolution': {
+        '.euiCard__image': {
+          backgroundColor: euiTheme.colors.accentSecondary,
+        },
+      },
+    },
+    '.kbnOverviewItemSolution': {
+      [minBreakpointM]: {
+        maxWidth: `calc(33.333% - ${euiTheme.size.l})`,
+      },
+    },
+    '.kbnOverviewRemainingApps': {
+      '.kbnOverviewApps__item': {
+        [minBreakpointM]: {
+          maxWidth: `calc(25% - ${euiTheme.size.l})`,
+        },
+      },
+    },
+    '.kbnOverviewMainApps': {
+      '.kbnOverviewApps__item': {
+        [minBreakpointM]: {
+          maxWidth: `calc(50% - ${euiTheme.size.l})`,
+        },
+      },
+    },
+    '.kbnOverviewSupplements--noNews h2': {
+      [minBreakpointM]: {
+        textAlign: 'center',
+      },
+    },
+  });

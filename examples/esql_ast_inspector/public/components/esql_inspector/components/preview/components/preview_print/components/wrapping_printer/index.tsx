@@ -9,7 +9,6 @@
 
 import * as React from 'react';
 import {
-  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
@@ -23,13 +22,19 @@ export interface WrappingPrinterProps {
   src: string;
 }
 
+const defaultIndent = ' ';
+
 export const WrappingPrinter: React.FC<WrappingPrinterProps> = ({ src }) => {
   const [lowercase, setLowercase] = React.useState(false);
-  const [multiline, setMultiline] = React.useState(false);
+  const [multiline, setMultiline] = React.useState(true);
   const [wrap, setWrap] = React.useState(80);
-  const [tab, setTab] = React.useState('  ');
-  const [pipeTab, setPipeTab] = React.useState('  ');
-  const [indent, setIndent] = React.useState('');
+  const [initialIndent, setInitialIndent] = React.useState(0);
+  const [tabValue, setTab] = React.useState(2);
+  const [pipeTabValue, setPipeTab] = React.useState(2);
+
+  const indent = defaultIndent.repeat(initialIndent);
+  const tab = defaultIndent.repeat(tabValue);
+  const pipeTab = defaultIndent.repeat(pipeTabValue);
 
   return (
     <EuiFlexGroup style={{ maxWidth: 1200 }} alignItems={'flexStart'}>
@@ -55,6 +60,7 @@ export const WrappingPrinter: React.FC<WrappingPrinterProps> = ({ src }) => {
                 checked={multiline}
                 onChange={() => setMultiline((x) => !x)}
                 compressed
+                disabled
               />
             </EuiFormRow>
           </EuiFlexItem>
@@ -74,15 +80,45 @@ export const WrappingPrinter: React.FC<WrappingPrinterProps> = ({ src }) => {
         </EuiFormRow>
 
         <EuiFormRow label="Initial indentation" helpText="Indentation applied to all lines">
-          <EuiFieldText compressed value={indent} onChange={(e) => setIndent(e.target.value)} />
+          <EuiRange
+            min={0}
+            max={10}
+            value={initialIndent}
+            onChange={(e) => {
+              const inputValue = Number(e.currentTarget.value);
+              setInitialIndent(inputValue);
+            }}
+            showInput
+            aria-label="Initial indentation"
+          />
         </EuiFormRow>
 
         <EuiFormRow label="Tab" helpText="Tabbing for each new indentation level">
-          <EuiFieldText compressed value={tab} onChange={(e) => setTab(e.target.value)} />
+          <EuiRange
+            min={0}
+            max={10}
+            value={tabValue}
+            onChange={(e) => {
+              const inputValue = Number(e.currentTarget.value);
+              setTab(inputValue);
+            }}
+            showInput
+            aria-label="Nested indentation"
+          />
         </EuiFormRow>
 
         <EuiFormRow label="Pipe tab" helpText="Tabbing before command pipe">
-          <EuiFieldText compressed value={pipeTab} onChange={(e) => setPipeTab(e.target.value)} />
+          <EuiRange
+            min={0}
+            max={10}
+            value={pipeTabValue}
+            onChange={(e) => {
+              const inputValue = Number(e.currentTarget.value);
+              setPipeTab(inputValue);
+            }}
+            showInput
+            aria-label="Indentation before pipe"
+          />
         </EuiFormRow>
       </EuiFlexItem>
     </EuiFlexGroup>

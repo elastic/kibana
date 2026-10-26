@@ -6,13 +6,13 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import { type TimeRange } from '@kbn/es-query';
-import type { PublishesUnifiedSearch } from '@kbn/presentation-publishing';
+import { fetch$ } from '@kbn/presentation-publishing';
 import {
   BehaviorSubject,
   catchError,
   combineLatest,
   debounceTime,
+  distinctUntilChanged,
   EMPTY,
   from,
   map,
@@ -20,14 +20,11 @@ import {
   of,
   shareReplay,
   skipWhile,
-  startWith,
   switchMap,
   tap,
 } from 'rxjs';
-import {
-  ANOMALY_SWIM_LANE_HARD_LIMIT,
-  SWIMLANE_TYPE,
-} from '../../application/explorer/explorer_constants';
+import { SWIMLANE_TYPE } from '@kbn/ml-common-types/embeddables/swimlane_type';
+import { ANOMALY_SWIM_LANE_HARD_LIMIT } from '../../../common/constants/explorer';
 import type { OverallSwimlaneData } from '../../application/explorer/explorer_utils';
 import { CONTROLLED_BY_SWIM_LANE_FILTER } from '../../ui_actions/constants';
 import { getJobsObservable } from '../common/get_jobs_observable';
@@ -42,10 +39,6 @@ export const initializeSwimLaneDataFetcher = (
   chartWidth$: Observable<number | undefined>,
   dataLoading$: BehaviorSubject<boolean | undefined>,
   blockingError$: BehaviorSubject<Error | undefined>,
-  appliedTimeRange$: Observable<TimeRange | undefined>,
-  query$: PublishesUnifiedSearch['query$'],
-  filters$: PublishesUnifiedSearch['filters$'],
-  refresh$: Observable<void>,
   services: AnomalySwimlaneServices
 ) => {
   const { anomalyTimelineService, anomalyDetectorService } = services;
@@ -62,14 +55,23 @@ export const initializeSwimLaneDataFetcher = (
     viewBy: swimLaneApi.viewBy,
     perPage: swimLaneApi.perPage,
     fromPage: swimLaneApi.fromPage,
+    severityThreshold: swimLaneApi.severityThreshold,
   });
 
-  const bucketInterval$ = combineLatest([selectedJobs$, chartWidth$, appliedTimeRange$]).pipe(
+  const fetchContext$ = fetch$(swimLaneApi).pipe(shareReplay(1));
+
+  const bucketInterval$ = combineLatest([
+    selectedJobs$,
+    chartWidth$.pipe(distinctUntilChanged()),
+    fetchContext$,
+  ]).pipe(
     skipWhile(([jobs, width]) => {
       return !Array.isArray(jobs) || !width;
     }),
-    tap(([, , timeRange]) => {
-      anomalyTimelineService.setTimeRange(timeRange!);
+    tap(([, , fetchContext]) => {
+      if (fetchContext.timeRange) {
+        anomalyTimelineService.setTimeRange(fetchContext.timeRange);
+      }
     }),
     map(([jobs, width]) => anomalyTimelineService.getSwimlaneBucketInterval(jobs!, width!))
   );
@@ -77,23 +79,24 @@ export const initializeSwimLaneDataFetcher = (
   const subscription = combineLatest([
     selectedJobs$,
     swimLaneInput$,
-    query$,
-    filters$,
+    fetchContext$,
     bucketInterval$,
-    refresh$.pipe(startWith(null)),
   ])
     .pipe(
       tap(() => {
         dataLoading$.next(true);
       }),
       debounceTime(FETCH_RESULTS_DEBOUNCE_MS),
-      switchMap(([explorerJobs, input, query, filters, bucketInterval]) => {
+      switchMap(([explorerJobs, input, fetchContext, bucketInterval]) => {
+        const { query, filters } = fetchContext;
         if (!explorerJobs) {
           // couldn't load the list of jobs
           return of(undefined);
         }
 
-        const { viewBy, swimlaneType, perPage, fromPage } = input;
+        const { viewBy, swimlaneType, perPage, fromPage, severityThreshold } = input;
+        const severityThresholds =
+          severityThreshold !== undefined ? [{ min: severityThreshold }] : undefined;
 
         let appliedFilters: estypes.QueryDslQueryContainer;
         try {
@@ -107,7 +110,12 @@ export const initializeSwimLaneDataFetcher = (
         }
 
         return from(
-          anomalyTimelineService.loadOverallData(explorerJobs, undefined, bucketInterval)
+          anomalyTimelineService.loadOverallData(
+            explorerJobs,
+            undefined,
+            bucketInterval,
+            severityThresholds
+          )
         ).pipe(
           switchMap((overallSwimlaneData) => {
             const { earliest, latest } = overallSwimlaneData;
@@ -126,7 +134,8 @@ export const initializeSwimLaneDataFetcher = (
                   fromPage,
                   undefined,
                   appliedFilters,
-                  bucketInterval
+                  bucketInterval,
+                  severityThresholds
                 )
               ).pipe(
                 map((viewBySwimlaneData) => {

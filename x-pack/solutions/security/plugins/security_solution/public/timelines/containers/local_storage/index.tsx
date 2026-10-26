@@ -8,8 +8,8 @@
 import { isEmpty } from 'lodash/fp';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type {
-  DataTableState,
   DataTableModel,
+  DataTableState,
   TableIdLiteral,
 } from '@kbn/securitysolution-data-table';
 import { tableEntity, TableEntityType, TableId } from '@kbn/securitysolution-data-table';
@@ -50,8 +50,6 @@ export const migrateLegacyTimelinesToSecurityDataTable = (legacyTimelineTables: 
         itemsPerPage: timelineModel.itemsPerPage,
         itemsPerPageOptions: timelineModel.itemsPerPageOptions,
         showCheckboxes: timelineModel.showCheckboxes,
-        graphEventId: timelineModel.graphEventId,
-        sessionViewConfig: timelineModel.sessionViewConfig,
         selectAll: timelineModel.selectAll,
         id: timelineModel.id,
         title: timelineModel.title,
@@ -110,7 +108,7 @@ export const migrateAlertTableStateToTriggerActionsState = (
       return {
         [newKey]: {
           columns: legacyDataTableState[tableKey].columns,
-          sort: legacyDataTableState[tableKey].sort.map((sortCandidate) => ({
+          sort: legacyDataTableState[tableKey].sort?.map((sortCandidate) => ({
             [sortCandidate.columnId]: { order: sortCandidate.sortDirection },
           })),
           visibleColumns: legacyDataTableState[tableKey].columns,
@@ -280,6 +278,36 @@ export const addAssigneesSpecsToSecurityDataTableIfNeeded = (
   }
 };
 
+const ALERTS_TABLE_PAGE_SIZE_MIGRATION_KEY = 'securityAlertsTablePageSizeMigrated_v1';
+
+const migrateAlertsTablePageSize = (
+  storage: Storage,
+  dataTableState: DataTableState['dataTable']['tableById']
+) => {
+  if (storage.get(ALERTS_TABLE_PAGE_SIZE_MIGRATION_KEY)) return;
+
+  const alertTableIds = [
+    TableId.alertsOnAlertsPage,
+    TableId.alertsOnAttacksPage,
+    TableId.alertsOnRuleDetailsPage,
+  ];
+
+  let updated = false;
+  for (const tableId of alertTableIds) {
+    const table = dataTableState[tableId];
+    if (table?.itemsPerPage === 25) {
+      dataTableState[tableId] = { ...table, itemsPerPage: 50 };
+      updated = true;
+    }
+  }
+
+  if (updated) {
+    storage.set(LOCAL_STORAGE_TABLE_KEY, dataTableState);
+  }
+
+  storage.set(ALERTS_TABLE_PAGE_SIZE_MIGRATION_KEY, true);
+};
+
 export const getDataTablesInStorageByIds = (storage: Storage, tableIds: TableIdLiteral[]) => {
   let allDataTables = storage.get(LOCAL_STORAGE_TABLE_KEY);
   const legacyTimelineTables = storage.get(LOCAL_STORAGE_TIMELINE_KEY_LEGACY);
@@ -296,6 +324,7 @@ export const getDataTablesInStorageByIds = (storage: Storage, tableIds: TableIdL
   migrateTriggerActionsVisibleColumnsAlertTable88xTo89(storage);
   addAssigneesSpecsToSecurityDataTableIfNeeded(storage, allDataTables);
   migrateEntityRiskLevelColumnTitle(storage, allDataTables);
+  migrateAlertsTablePageSize(storage, allDataTables);
 
   return tableIds.reduce((acc, tableId) => {
     const tableModel = allDataTables[tableId];

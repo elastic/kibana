@@ -9,7 +9,7 @@
 
 import expect from '@kbn/expect';
 import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -25,7 +25,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(resp.body).to.be.an('array');
 
-        expect(resp.body.length).to.be(20);
+        expect(resp.body.length).to.be(19);
 
         // Test for sample data card
         expect(resp.body.findIndex((c: { id: string }) => c.id === 'sample_data_all')).to.be.above(

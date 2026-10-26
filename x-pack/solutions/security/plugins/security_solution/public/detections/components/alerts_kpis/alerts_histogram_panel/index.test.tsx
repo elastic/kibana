@@ -8,16 +8,19 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 import { mount } from 'enzyme';
+// Necessary until components being tested are migrated of styled-components https://github.com/elastic/kibana/issues/219037
+import 'jest-styled-components';
 import type { Filter } from '@kbn/es-query';
 
 import { SecurityPageName } from '../../../../app/types';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
 import { TestProviders } from '../../../../common/mock';
-import { mockAlertSearchResponse } from './mock_data';
 import { VisualizationEmbeddable } from '../../../../common/components/visualization_actions/visualization_embeddable';
 
 import { AlertsHistogramPanel } from '.';
 import { useVisualizationResponse } from '../../../../common/components/visualization_actions/use_visualization_response';
+import { useVisualizationResponseMock } from '../../../../common/components/visualization_actions/use_visualization_response.mock';
+import type { UseVisualizationResponseMock } from '../../../../common/components/visualization_actions/use_visualization_response.mock';
 
 jest.mock('../../../../common/containers/query_toggle');
 
@@ -56,6 +59,7 @@ jest.mock('../../../../common/lib/kibana/kibana_react', () => {
             addWarning: jest.fn(),
             addError: jest.fn(),
             addSuccess: jest.fn(),
+            addInfo: jest.fn(),
             remove: jest.fn(),
           },
         },
@@ -75,16 +79,6 @@ jest.mock('../../../../common/lib/kibana', () => {
 
 jest.mock('../../../../common/components/visualization_actions/visualization_embeddable');
 
-jest.mock('../../../../common/components/visualization_actions/use_visualization_response', () => {
-  const original = jest.requireActual(
-    '../../../../common/components/visualization_actions/use_visualization_response'
-  );
-  return {
-    ...original,
-    useVisualizationResponse: jest.fn().mockReturnValue({ loading: false }),
-  };
-});
-
 jest.mock('../common/hooks', () => {
   const actual = jest.requireActual('../common/hooks');
   return {
@@ -93,20 +87,15 @@ jest.mock('../common/hooks', () => {
   };
 });
 
-jest.mock('../../../hooks/alerts_visualization/use_alert_histogram_count', () => ({
-  useAlertHistogramCount: jest.fn().mockReturnValue(999),
-}));
-
 jest.mock('../../../../common/components/visualization_actions/use_visualization_response', () => ({
-  useVisualizationResponse: jest.fn().mockReturnValue({
-    responses: [
-      {
-        hits: { total: 0 },
-        aggregations: { myAgg: { buckets: [{ key: 'A' }, { key: 'B' }, { key: 'C' }] } },
-      },
-    ],
-    loading: false,
-  }),
+  ...jest.requireActual(
+    '../../../../common/components/visualization_actions/use_visualization_response'
+  ),
+  useVisualizationResponse: jest
+    .requireActual(
+      '../../../../common/components/visualization_actions/use_visualization_response.mock'
+    )
+    .useVisualizationResponseMock.create(),
 }));
 
 const mockSetIsExpanded = jest.fn();
@@ -122,7 +111,7 @@ const defaultProps = {
 };
 const mockSetToggle = jest.fn();
 const mockUseQueryToggle = useQueryToggle as jest.Mock;
-const mockUseVisualizationResponse = useVisualizationResponse as jest.Mock;
+const mockUseVisualizationResponse = useVisualizationResponse as UseVisualizationResponseMock;
 
 describe('AlertsHistogramPanel', () => {
   beforeEach(() => {
@@ -141,21 +130,14 @@ describe('AlertsHistogramPanel', () => {
   });
 
   describe('legend counts', () => {
-    beforeEach(() => {
-      mockUseVisualizationResponse.mockReturnValue({
-        loading: false,
-        responses: mockAlertSearchResponse,
-      });
-    });
-
     test('it does NOT render counts in the legend by default', () => {
-      const wrapper = mount(
+      render(
         <TestProviders>
           <AlertsHistogramPanel {...defaultProps} />
         </TestProviders>
       );
 
-      expect(wrapper.find('[data-test-subj="legendItemCount"]').exists()).toBe(false);
+      expect(screen.queryByTestId('legendItemCount')).not.toBeInTheDocument();
     });
   });
 
@@ -187,11 +169,6 @@ describe('AlertsHistogramPanel', () => {
     const onFieldSelected = jest.fn();
     const optionToSelect = 'agent.hostname';
 
-    mockUseVisualizationResponse.mockReturnValue({
-      loading: false,
-      responses: mockAlertSearchResponse,
-    });
-
     render(
       <TestProviders>
         <AlertsHistogramPanel {...defaultProps} onFieldSelected={onFieldSelected} />
@@ -204,7 +181,7 @@ describe('AlertsHistogramPanel', () => {
     const option = await screen.findByText(optionToSelect);
     fireEvent.click(option);
 
-    expect(onFieldSelected).toBeCalledWith(optionToSelect);
+    expect(onFieldSelected).toHaveBeenCalledWith(optionToSelect);
   });
 
   describe('stackByLabel', () => {
@@ -356,7 +333,7 @@ describe('AlertsHistogramPanel', () => {
           preventDefault: jest.fn(),
         });
 
-      expect(mockNavigateToApp).toBeCalledWith('securitySolutionUI', {
+      expect(mockNavigateToApp).toHaveBeenCalledWith('securitySolutionUI', {
         deepLinkId: SecurityPageName.alerts,
         path: '',
       });
@@ -434,8 +411,8 @@ describe('AlertsHistogramPanel', () => {
         );
 
         wrapper.find('[data-test-subj="query-toggle-header"]').first().simulate('click');
-        expect(mockSetIsExpanded).toBeCalledWith(false);
-        expect(mockSetToggle).not.toBeCalled();
+        expect(mockSetIsExpanded).toHaveBeenCalledWith(false);
+        expect(mockSetToggle).not.toHaveBeenCalled();
         wrapper.unmount();
       });
 
@@ -464,6 +441,24 @@ describe('AlertsHistogramPanel', () => {
         );
         wrapper.unmount();
       });
+
+      it('when isExpanded is true, uses the expanded panel height', () => {
+        const { getByTestId } = render(
+          <TestProviders>
+            <AlertsHistogramPanel {...defaultProps} isExpanded={true} panelHeight={375} />
+          </TestProviders>
+        );
+        expect(getByTestId('alerts-histogram-panel')).toHaveStyleRule('height', '375px');
+      });
+
+      it('when isExpanded is false, uses the collapsed panel height', () => {
+        const { getByTestId } = render(
+          <TestProviders>
+            <AlertsHistogramPanel {...defaultProps} isExpanded={false} panelHeight={375} />
+          </TestProviders>
+        );
+        expect(getByTestId('alerts-histogram-panel')).toHaveStyleRule('height', '64px');
+      });
     });
 
     describe('When setIsExpanded is not available, use toggleQuery', () => {
@@ -476,7 +471,7 @@ describe('AlertsHistogramPanel', () => {
           </TestProviders>
         );
         wrapper.find('[data-test-subj="query-toggle-header"]').first().simulate('click');
-        expect(mockSetToggle).toBeCalledWith(false);
+        expect(mockSetToggle).toHaveBeenCalledWith(false);
         wrapper.unmount();
       });
 
@@ -510,28 +505,14 @@ describe('AlertsHistogramPanel', () => {
   });
 
   describe('VisualizationEmbeddable', () => {
-    test('it renders the header with alerts count', () => {
-      const wrapper = mount(
+    test('it renders the header subtitle with alerts count', () => {
+      render(
         <TestProviders>
           <AlertsHistogramPanel {...defaultProps} alignHeader="flexEnd" />
         </TestProviders>
       );
 
-      mockUseVisualizationResponse.mockReturnValue({
-        loading: false,
-        responses: [
-          {
-            hits: { total: 0 },
-            aggregations: { myAgg: { buckets: [{ key: 'A' }, { key: 'B' }, { key: 'C' }] } },
-          },
-        ],
-      });
-
-      wrapper.setProps({ filters: [] });
-      wrapper.update();
-
-      expect(wrapper.find(`[data-test-subj="header-section-subtitle"]`).text()).toContain('999');
-      wrapper.unmount();
+      expect(screen.getByTestId('header-section-subtitle')).toHaveTextContent('Showing: 1 alert');
     });
 
     it('renders LensEmbeddable', () => {
@@ -557,35 +538,18 @@ describe('AlertsHistogramPanel', () => {
       wrapper.unmount();
     });
 
-    it('should render correct subtitle with alert count', () => {
-      const wrapper = mount(
-        <TestProviders>
-          <AlertsHistogramPanel {...defaultProps} />
-        </TestProviders>
-      );
-
-      expect(wrapper.find(`[data-test-subj="header-section-subtitle"]`).text()).toContain('999');
-      wrapper.unmount();
-    });
-
     it('should render correct subtitle with empty string', () => {
-      (useVisualizationResponse as jest.Mock).mockReturnValue({
-        responses: [
-          {
-            hits: { total: 0 },
-            aggregations: { myAgg: { buckets: [] } },
-          },
-        ],
-        loading: false,
-      });
-      const wrapper = mount(
+      mockUseVisualizationResponse.mockReturnValue(
+        useVisualizationResponseMock.buildEmptyOkResponse()
+      );
+
+      render(
         <TestProviders>
           <AlertsHistogramPanel {...defaultProps} />
         </TestProviders>
       );
 
-      expect(wrapper.find(`[data-test-subj="header-section-subtitle"]`).text()).toEqual('');
-      wrapper.unmount();
+      expect(screen.getByTestId('header-section-subtitle').textContent).toBe('');
     });
   });
 });

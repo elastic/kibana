@@ -7,8 +7,8 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { isEmpty } from 'lodash';
-import type { FormHook } from '../../../shared_imports';
-import { useForm, type FormConfig, type FormData } from '../../../shared_imports';
+import { useForm, type FormConfig, type FormData, type FormHook } from '../../../shared_imports';
+import { waitForNextPaint } from '../../utils/wait_for_next_paint';
 import type { FormHookWithWarnings } from './form_hook_with_warnings';
 import { extractValidationResults } from './extract_validation_results';
 import type { ValidationResults } from './validation_results';
@@ -30,6 +30,24 @@ interface FormWithWarningsConfig<T extends FormData = FormData, I extends FormDa
 interface UseFormWithWarningsReturn<T extends FormData = FormData, I extends FormData = T> {
   form: FormHookWithWarnings<T, I>;
 }
+
+const MAX_WAIT_FOR_PENDING_VALIDATIONS_MS = 10000;
+const PENDING_VALIDATIONS_POLL_INTERVAL_MS = 50;
+
+/**
+ * Only the latest validation of a field updates its errors, so warnings read while a newer
+ * validation is still running are incomplete. Waits, up to a limit, until none is running.
+ */
+const waitForPendingValidations = async (getFields: FormHook['getFields']): Promise<void> => {
+  const deadline = Date.now() + MAX_WAIT_FOR_PENDING_VALIDATIONS_MS;
+
+  while (
+    Object.values(getFields()).some(({ isValidating }) => isValidating) &&
+    Date.now() < deadline
+  ) {
+    await new Promise((resolve) => setTimeout(resolve, PENDING_VALIDATIONS_POLL_INTERVAL_MS));
+  }
+};
 
 /**
  * Form lib implements warning functionality via non blocking validators. `validations` allows to
@@ -89,6 +107,7 @@ export function useFormWithWarnings<T extends FormData = FormData, I extends For
 
   const validate: FormHook<T, I>['validate'] = useCallback(async () => {
     await originalValidate();
+    await waitForPendingValidations(getFields);
 
     validationResultsRef.current = extractValidationResults(
       Object.values(getFields()),
@@ -110,6 +129,8 @@ export function useFormWithWarnings<T extends FormData = FormData, I extends For
 
       setIsSubmitted(true);
       setSubmitting(true);
+      // Let the browser paint the submitting state before heavy synchronous validation runs
+      await waitForNextPaint();
 
       const isFormValid = await validate();
       const formData = isFormValid ? getFormData() : ({} as T);

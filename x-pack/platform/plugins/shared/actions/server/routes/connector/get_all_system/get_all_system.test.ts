@@ -11,6 +11,14 @@ import { licenseStateMock } from '../../../lib/license_state.mock';
 import { mockHandlerArguments } from '../../_mock_handler_arguments';
 import { verifyAccessAndContext } from '../../verify_access_and_context';
 import { actionsClientMock } from '../../../actions_client/actions_client.mock';
+import { createMockConnectorFindResult } from '../../../application/connector/mocks';
+import { actionsConfigMock } from '../../../actions_config.mock';
+
+const actionsConfigUtils = (inboundEventsEnabled = false) => {
+  const utils = actionsConfigMock.create();
+  utils.isInboundEventsEnabled.mockReturnValue(inboundEventsEnabled);
+  return utils;
+};
 
 jest.mock('../../verify_access_and_context', () => ({
   verifyAccessAndContext: jest.fn(),
@@ -26,7 +34,7 @@ describe('getAllConnectorsIncludingSystemRoute', () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    getAllConnectorsIncludingSystemRoute(router, licenseState);
+    getAllConnectorsIncludingSystemRoute(router, licenseState, actionsConfigUtils());
 
     const [config, handler] = router.get.mock.calls[0];
 
@@ -34,17 +42,14 @@ describe('getAllConnectorsIncludingSystemRoute', () => {
 
     const actionsClient = actionsClientMock.create();
     actionsClient.getAll.mockResolvedValueOnce([
-      {
+      createMockConnectorFindResult({
         id: '.system-action-id',
-        isPreconfigured: false,
         isSystemAction: true,
-        isDeprecated: false,
         name: 'my system action',
         actionTypeId: '.system-action-type',
         isMissingSecrets: false,
         config: {},
-        referencedByCount: 0,
-      },
+      }),
     ]);
 
     const [context, req, res] = mockHandlerArguments({ actionsClient }, {}, ['ok']);
@@ -56,6 +61,7 @@ describe('getAllConnectorsIncludingSystemRoute', () => {
             "config": Object {},
             "connector_type_id": ".system-action-type",
             "id": ".system-action-id",
+            "is_connector_type_deprecated": false,
             "is_deprecated": false,
             "is_missing_secrets": false,
             "is_preconfigured": false,
@@ -81,6 +87,7 @@ describe('getAllConnectorsIncludingSystemRoute', () => {
           is_system_action: true,
           name: 'my system action',
           referenced_by_count: 0,
+          is_connector_type_deprecated: false,
         },
       ],
     });
@@ -90,7 +97,7 @@ describe('getAllConnectorsIncludingSystemRoute', () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    getAllConnectorsIncludingSystemRoute(router, licenseState);
+    getAllConnectorsIncludingSystemRoute(router, licenseState, actionsConfigUtils());
 
     const [config, handler] = router.get.mock.calls[0];
 
@@ -114,7 +121,7 @@ describe('getAllConnectorsIncludingSystemRoute', () => {
       throw new Error('OMG');
     });
 
-    getAllConnectorsIncludingSystemRoute(router, licenseState);
+    getAllConnectorsIncludingSystemRoute(router, licenseState, actionsConfigUtils());
 
     const [config, handler] = router.get.mock.calls[0];
 

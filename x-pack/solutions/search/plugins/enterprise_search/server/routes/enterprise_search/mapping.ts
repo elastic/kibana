@@ -27,7 +27,7 @@ export function registerMappingRoute({ router, log }: RouteDependencies) {
       },
       validate: {
         params: schema.object({
-          index_name: schema.string(),
+          index_name: schema.string({ maxLength: 1024 }),
         }),
       },
     },
@@ -45,7 +45,7 @@ export function registerMappingRoute({ router, log }: RouteDependencies) {
         if (isIndexNotFoundException(error)) {
           return createError({
             errorCode: ErrorCode.INDEX_NOT_FOUND,
-            message: 'Could not found index',
+            message: 'Could not find index',
             response,
             statusCode: 404,
           });

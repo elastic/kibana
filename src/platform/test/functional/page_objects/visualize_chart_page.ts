@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Position } from '@elastic/charts';
+import type { Position } from '@elastic/charts';
 import chroma from 'chroma-js';
 
 import { FtrService } from '../ftr_provider_context';
@@ -154,12 +154,10 @@ export class VisualizeChartPageObject extends FtrService {
   }
 
   private async toggleLegend() {
-    await this.retry.try(async () => {
-      const isVisible = await this.find.existsByCssSelector('.echLegend');
-      if (!isVisible) {
-        await this.testSubjects.click('vislibToggleLegend');
-      }
-    });
+    const isVisible = await this.find.existsByCssSelector('.echLegend');
+    if (!isVisible) {
+      await this.testSubjects.click('vislibToggleLegend');
+    }
   }
 
   public async filterLegend(name: string) {
@@ -320,20 +318,7 @@ export class VisualizeChartPageObject extends FtrService {
       await filterBtn.click();
     });
   }
-
-  public async getMarkdownText() {
-    const markdownContainer = await this.testSubjects.find('markdownBody');
-    return markdownContainer.getVisibleText();
-  }
-
-  public async getMarkdownBodyDescendentText(selector: string) {
-    const markdownContainer = await this.testSubjects.find('markdownBody');
-    const element = await this.find.descendantDisplayedByCssSelector(selector, markdownContainer);
-    return element.getVisibleText();
-  }
-
   // Table visualization
-
   public async getTableVisNoResult() {
     return await this.testSubjects.find('tbvChartContainer>visNoResult');
   }

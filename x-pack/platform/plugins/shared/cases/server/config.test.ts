@@ -12,6 +12,28 @@ describe('config validation', () => {
     it('sets the defaults correctly', () => {
       expect(ConfigSchema.validate({})).toMatchInlineSnapshot(`
         Object {
+          "analytics": Object {
+            "index": Object {
+              "enabled": false,
+            },
+          },
+          "analyticsV2": Object {
+            "enableAdminRoutes": false,
+            "enabled": true,
+            "reconciliationIntervalMinutes": 30,
+            "resetPageDelayMs": 0,
+            "resetTaskTimeoutMinutes": 60,
+          },
+          "assigneeIdentity": Object {
+            "enabled": true,
+          },
+          "attachments": Object {
+            "enabled": true,
+          },
+          "chat": Object {
+            "enabled": true,
+          },
+          "enabled": true,
           "files": Object {
             "allowedMimeTypes": Array [
               "image/aces",
@@ -95,6 +117,7 @@ describe('config validation', () => {
               "text/json",
               "application/json",
               "application/zip",
+              "application/x-zip-compressed",
               "application/gzip",
               "application/x-bzip",
               "application/x-bzip2",
@@ -103,14 +126,85 @@ describe('config validation', () => {
               "application/pdf",
             ],
           },
+          "incrementalId": Object {
+            "enabled": true,
+            "taskIntervalMinutes": 10,
+            "taskStartDelayMinutes": 10,
+          },
           "markdownPlugins": Object {
             "lens": true,
+          },
+          "runWorkflows": Object {
+            "enabled": true,
           },
           "stack": Object {
             "enabled": true,
           },
+          "templates": Object {
+            "enabled": true,
+          },
         }
       `);
+    });
+
+    it('sets attachments.enabled default to true', () => {
+      const config = ConfigSchema.validate({});
+      expect(config.attachments.enabled).toBe(true);
+    });
+
+    it('allows attachments.enabled to be set to true', () => {
+      const config = ConfigSchema.validate({ attachments: { enabled: true } });
+      expect(config.attachments.enabled).toBe(true);
+    });
+
+    it('allows attachments.enabled to be set to false explicitly', () => {
+      const config = ConfigSchema.validate({ attachments: { enabled: false } });
+      expect(config.attachments.enabled).toBe(false);
+    });
+
+    it('sets chat.enabled default to true', () => {
+      const config = ConfigSchema.validate({});
+      expect(config.chat.enabled).toBe(true);
+    });
+
+    it('allows chat.enabled to be set to false', () => {
+      const config = ConfigSchema.validate({ chat: { enabled: false } });
+      expect(config.chat.enabled).toBe(false);
+    });
+
+    it('sets analyticsV2.enabled default to true', () => {
+      const config = ConfigSchema.validate({});
+      expect(config.analyticsV2.enabled).toBe(true);
+    });
+
+    it('allows analyticsV2.enabled to be set to true', () => {
+      const config = ConfigSchema.validate({ analyticsV2: { enabled: true } });
+      expect(config.analyticsV2.enabled).toBe(true);
+    });
+
+    it('allows analyticsV2.enabled to be set to false explicitly', () => {
+      const config = ConfigSchema.validate({ analyticsV2: { enabled: false } });
+      expect(config.analyticsV2.enabled).toBe(false);
+    });
+
+    it('sets templates.enabled default to true', () => {
+      const config = ConfigSchema.validate({});
+      expect(config.templates.enabled).toBe(true);
+    });
+
+    it('allows templates.enabled to be set to false explicitly', () => {
+      const config = ConfigSchema.validate({ templates: { enabled: false } });
+      expect(config.templates.enabled).toBe(false);
+    });
+
+    it('sets runWorkflows.enabled default to true', () => {
+      const config = ConfigSchema.validate({});
+      expect(config.runWorkflows.enabled).toBe(true);
+    });
+
+    it('allows runWorkflows.enabled to be set to false explicitly', () => {
+      const config = ConfigSchema.validate({ runWorkflows: { enabled: false } });
+      expect(config.runWorkflows.enabled).toBe(false);
     });
   });
 });

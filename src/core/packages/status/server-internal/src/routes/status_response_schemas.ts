@@ -55,6 +55,7 @@ const statusInfoCoreStatus: () => Type<StatusInfoCoreStatus> = () =>
   schema.object(
     {
       elasticsearch: statusInfoServiceStatus(),
+      http: schema.maybe(statusInfoServiceStatus()),
       savedObjects: statusInfoServiceStatus(),
     },
     { meta: { description: 'Statuses of core Kibana services.' } }
@@ -165,7 +166,7 @@ const redactedStatusResponse = () =>
     {
       meta: {
         id: 'core_status_redactedResponse',
-        description: `A minimal representation of Kibana's operational status.`,
+        description: `A minimal representation of Kibana's operational status. Returned when the caller is unauthenticated or lacks the \`monitor\` cluster privilege.`,
       },
     }
   );

@@ -10,7 +10,8 @@ import { render } from '@testing-library/react';
 import { TestProvider } from './test/provider';
 import { UrlSynchronizer } from './provider';
 import * as actions from './store/actions';
-import { initialUiState, State } from './store/state';
+import type { State } from './store/state';
+import { initialUiState } from './store/state';
 import { of } from 'rxjs';
 
 const mockGet = jest.fn();
@@ -22,6 +23,14 @@ const { createKbnUrlStateStorage } = jest.requireMock('@kbn/kibana-utils-plugin/
 const urlKey = 'urlKey';
 
 describe('UrlSynchronizer', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockGet.mockReset();
+    mockSet.mockReset();
+    mockChange$.mockReset();
+    mockChange$.mockReturnValue(of({}));
+  });
+
   it(`should not dispatch any actions or update url if urlKey isn't passed`, () => {
     const urlChangedAction = jest.spyOn(actions, 'urlChangedAction');
 
@@ -81,9 +90,9 @@ describe('UrlSynchronizer', () => {
     const urlChangedAction = jest.spyOn(actions, 'urlChangedAction');
 
     (createKbnUrlStateStorage as jest.Mock).mockReturnValue({
-      get: mockGet,
+      get: jest.fn().mockReturnValue({}),
       set: mockSet,
-      change$: mockChange$,
+      change$: jest.fn().mockReturnValue(of({})),
     });
     const initialState: State = {
       panels: {
@@ -110,6 +119,41 @@ describe('UrlSynchronizer', () => {
       id: urlKey,
       preview: undefined,
     });
+    expect(urlChangedAction).toHaveBeenCalledTimes(2);
     expect(mockSet).toHaveBeenCalled();
+  });
+
+  it('should clear panels when url state is missing', () => {
+    const urlChangedAction = jest.spyOn(actions, 'urlChangedAction');
+
+    (createKbnUrlStateStorage as jest.Mock).mockReturnValue({
+      get: jest.fn().mockReturnValue(undefined),
+      set: mockSet,
+      change$: jest.fn().mockReturnValue(of(undefined)),
+    });
+
+    const initialState: State = {
+      panels: {
+        byId: {
+          [urlKey]: {
+            right: { id: 'key1' },
+            left: { id: 'key2' },
+            preview: undefined,
+            history: [{ lastOpen: Date.now(), panel: { id: 'key1' } }],
+          },
+        },
+        needsSync: false,
+      },
+      ui: initialUiState,
+    };
+
+    render(
+      <TestProvider urlKey={urlKey} state={initialState}>
+        <UrlSynchronizer />
+      </TestProvider>
+    );
+
+    expect(urlChangedAction).toHaveBeenCalledWith({ id: urlKey });
+    expect(urlChangedAction).toHaveBeenCalledTimes(2);
   });
 });

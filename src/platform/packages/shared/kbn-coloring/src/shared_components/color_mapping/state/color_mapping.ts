@@ -7,10 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { createSlice } from '@reduxjs/toolkit';
-import type { PayloadAction } from '@reduxjs/toolkit';
+import { createSlice } from 'redux-toolkit-v1';
+import type { PayloadAction } from 'redux-toolkit-v1';
+import { KbnPalette } from '@kbn/palettes';
 import type { ColorMapping } from '../config';
-import { DEFAULT_OTHER_ASSIGNMENT_INDEX } from '../config/default_color_mapping';
+import {
+  DEFAULT_OTHER_ASSIGNMENT_INDEX,
+  DEFAULT_OTHER_ASSIGNMENT,
+} from '../config/default_color_mapping';
 
 export interface RootState {
   colorMapping: ColorMapping.Config;
@@ -26,7 +30,7 @@ export interface RootState {
 const initialState: RootState['colorMapping'] = {
   assignments: [],
   specialAssignments: [],
-  paletteId: 'eui',
+  paletteId: KbnPalette.Default,
   colorMode: { type: 'categorical' },
 };
 
@@ -39,6 +43,9 @@ export const colorMappingSlice = createSlice({
       state.specialAssignments = [...action.payload.specialAssignments];
       state.paletteId = action.payload.paletteId;
       state.colorMode = { ...action.payload.colorMode };
+      if (state.assignments.length === 0) {
+        state.specialAssignments[DEFAULT_OTHER_ASSIGNMENT_INDEX] = { ...DEFAULT_OTHER_ASSIGNMENT };
+      }
     },
     updatePalette: (
       state,
@@ -52,57 +59,68 @@ export const colorMappingSlice = createSlice({
       state.assignments = [...action.payload.assignments];
       state.colorMode = { ...action.payload.colorMode };
     },
-    assignStatically: (state, action: PayloadAction<ColorMapping.Config['assignments']>) => {
-      state.assignments = [...action.payload];
-    },
-    assignAutomatically: (state) => {
-      state.assignments = [];
-    },
 
-    addNewAssignment: (
-      state,
-      action: PayloadAction<ColorMapping.Config['assignments'][number]>
-    ) => {
+    addNewAssignment: (state, action: PayloadAction<ColorMapping.Assignment>) => {
+      if (state.assignments.length === 0) {
+        state.specialAssignments[DEFAULT_OTHER_ASSIGNMENT_INDEX] = { ...DEFAULT_OTHER_ASSIGNMENT };
+      }
       state.assignments.push({ ...action.payload });
     },
     addNewAssignments: (state, action: PayloadAction<ColorMapping.Config['assignments']>) => {
+      if (state.assignments.length === 0) {
+        state.specialAssignments[DEFAULT_OTHER_ASSIGNMENT_INDEX] = { ...DEFAULT_OTHER_ASSIGNMENT };
+      }
       state.assignments.push(...action.payload);
     },
     updateAssignment: (
       state,
       action: PayloadAction<{
         assignmentIndex: number;
-        assignment: ColorMapping.Config['assignments'][number];
+        assignment: ColorMapping.Assignment;
       }>
     ) => {
-      state.assignments[action.payload.assignmentIndex] = {
-        ...action.payload.assignment,
-        touched: true,
-      };
+      state.assignments[action.payload.assignmentIndex] = { ...action.payload.assignment };
     },
     updateAssignmentRule: (
       state,
       action: PayloadAction<{
         assignmentIndex: number;
-        rule: ColorMapping.Config['assignments'][number]['rule'];
+        ruleIndex: number;
+        rule: ColorMapping.ColorRule;
+      }>
+    ) => {
+      const assignment = state.assignments[action.payload.assignmentIndex];
+      state.assignments[action.payload.assignmentIndex] = {
+        ...assignment,
+        rules: [
+          ...assignment.rules.slice(0, action.payload.ruleIndex),
+          action.payload.rule,
+          ...assignment.rules.slice(action.payload.ruleIndex + 1),
+        ],
+      };
+    },
+    updateAssignmentRules: (
+      state,
+      action: PayloadAction<{
+        assignmentIndex: number;
+        rules: ColorMapping.ColorRule[];
       }>
     ) => {
       state.assignments[action.payload.assignmentIndex] = {
         ...state.assignments[action.payload.assignmentIndex],
-        rule: action.payload.rule,
+        rules: action.payload.rules,
       };
     },
     updateAssignmentColor: (
       state,
       action: PayloadAction<{
         assignmentIndex: number;
-        color: ColorMapping.Config['assignments'][number]['color'];
+        color: ColorMapping.Assignment['color'];
       }>
     ) => {
       state.assignments[action.payload.assignmentIndex] = {
         ...state.assignments[action.payload.assignmentIndex],
         color: action.payload.color,
-        touched: true,
       };
     },
 
@@ -116,29 +134,17 @@ export const colorMappingSlice = createSlice({
       state.specialAssignments[action.payload.assignmentIndex] = {
         ...state.specialAssignments[action.payload.assignmentIndex],
         color: action.payload.color,
-        touched: true,
       };
     },
     removeAssignment: (state, action: PayloadAction<number>) => {
       state.assignments.splice(action.payload, 1);
       if (state.assignments.length === 0) {
-        state.specialAssignments[DEFAULT_OTHER_ASSIGNMENT_INDEX] = {
-          ...state.specialAssignments[DEFAULT_OTHER_ASSIGNMENT_INDEX],
-          color: { type: 'loop' },
-          touched: true,
-        };
+        state.specialAssignments[DEFAULT_OTHER_ASSIGNMENT_INDEX] = { ...DEFAULT_OTHER_ASSIGNMENT };
       }
     },
     removeAllAssignments: (state) => {
       state.assignments = [];
-      state.specialAssignments[DEFAULT_OTHER_ASSIGNMENT_INDEX] = {
-        ...state.specialAssignments[DEFAULT_OTHER_ASSIGNMENT_INDEX],
-        color: { type: 'loop' },
-        touched: true,
-      };
-    },
-    changeColorMode: (state, action: PayloadAction<ColorMapping.Config['colorMode']>) => {
-      state.colorMode = { ...action.payload };
+      state.specialAssignments[DEFAULT_OTHER_ASSIGNMENT_INDEX] = { ...DEFAULT_OTHER_ASSIGNMENT };
     },
     updateGradientColorStep: (
       state,
@@ -154,9 +160,7 @@ export const colorMappingSlice = createSlice({
       state.colorMode = {
         ...state.colorMode,
         steps: state.colorMode.steps.map((step, index) => {
-          return index === action.payload.index
-            ? { ...action.payload.color, touched: true }
-            : { ...step, touched: false };
+          return index === action.payload.index ? { ...action.payload.color } : step;
         }),
       };
     },
@@ -201,7 +205,7 @@ export const colorMappingSlice = createSlice({
         ...state.colorMode,
         steps: [
           ...state.colorMode.steps.slice(0, action.payload.at),
-          { ...action.payload.color, touched: false },
+          { ...action.payload.color },
           ...state.colorMode.steps.slice(action.payload.at),
         ],
       };
@@ -219,20 +223,19 @@ export const colorMappingSlice = createSlice({
     },
   },
 });
+
 // Action creators are generated for each case reducer function
 export const {
   updatePalette,
-  assignStatically,
-  assignAutomatically,
   addNewAssignment,
   addNewAssignments,
   updateAssignment,
   updateAssignmentColor,
   updateSpecialAssignmentColor,
   updateAssignmentRule,
+  updateAssignmentRules,
   removeAssignment,
   removeAllAssignments,
-  changeColorMode,
   updateGradientColorStep,
   removeGradientColorStep,
   addGradientColorStep,

@@ -9,11 +9,16 @@ import React, { useMemo, useRef, useState } from 'react';
 import { Provider } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { Workspace } from '../types';
-import { createGraphStore } from '../state_management';
+import type { Workspace } from '../types';
+import {
+  createGraphStore,
+  createWorkspaceState,
+  workspaceChanged,
+  type GraphStore,
+} from '../state_management';
 import { createWorkspace } from '../services/workspace/graph_client_workspace';
 import { WorkspaceLayout } from '../components/workspace_layout';
-import { GraphServices } from '../application';
+import type { GraphServices } from '../application';
 import { useWorkspaceLoader } from '../helpers/use_workspace_loader';
 import { useGraphLoader } from '../helpers/use_graph_loader';
 import { createCachedIndexPatternProvider } from '../services/index_pattern_cache';
@@ -30,16 +35,14 @@ export const WorkspaceRoute = ({
     graphSavePolicy,
     canEditDrillDownUrls,
     overlays,
-    navigation,
     capabilities,
     storage,
     data,
-    unifiedSearch,
+    kql,
     getBasePath,
     addBasePath,
-    setHeaderActionMenu,
     spaces,
-    indexPatterns: getIndexPatternProvider,
+    dataViews,
     inspect,
     savedObjectsManagement,
     contentManagement,
@@ -52,6 +55,9 @@ export const WorkspaceRoute = ({
    * `workspace.changeHandler()`.
    */
   const workspaceRef = useRef<Workspace>();
+  // Callbacks retained during store initialization need access to the completed store.
+  // This ref is a temporary bridge until further workspace state optimizations remove that dependency.
+  const storeRef = useRef<GraphStore>();
   /**
    * Providing `workspaceRef.current` to the hook dependencies or components itself
    * will not leads to updates, therefore `renderCounter` is used to update react state.
@@ -60,8 +66,8 @@ export const WorkspaceRoute = ({
   const history = useHistory();
 
   const indexPatternProvider = useMemo(
-    () => createCachedIndexPatternProvider(getIndexPatternProvider.get),
-    [getIndexPatternProvider.get]
+    () => createCachedIndexPatternProvider(dataViews.get),
+    [dataViews.get]
   );
 
   const services = useMemo(
@@ -69,12 +75,12 @@ export const WorkspaceRoute = ({
       appName: 'graph',
       storage,
       data,
-      unifiedSearch,
+      kql,
       savedObjectsManagement,
       contentManagement,
       ...coreStart,
     }),
-    [coreStart, data, storage, unifiedSearch, savedObjectsManagement, contentManagement]
+    [coreStart, data, storage, kql, savedObjectsManagement, contentManagement]
   );
 
   const { loading, requestAdapter, callNodeProxy, callSearchNodeProxy, handleSearchQueryError } =
@@ -82,6 +88,14 @@ export const WorkspaceRoute = ({
       toastNotifications,
       coreStart,
     });
+
+  const notifyWorkspaceChanged = () => {
+    const workspace = workspaceRef.current;
+    if (workspace) {
+      storeRef.current?.dispatch(workspaceChanged(createWorkspaceState(workspace)));
+    }
+    setRenderCounter((current) => current + 1);
+  };
 
   const [store] = useState(() =>
     createGraphStore({
@@ -96,7 +110,8 @@ export const WorkspaceRoute = ({
           nodeLabeller() {
             // console.log(newNodes);
           },
-          changeHandler: () => setRenderCounter((cur) => cur + 1),
+          changeHandler: () => setRenderCounter((current) => current + 1),
+          topologyChangeHandler: notifyWorkspaceChanged,
           graphExploreProxy: callNodeProxy,
           searchProxy: callSearchNodeProxy,
           exploreControls,
@@ -108,11 +123,12 @@ export const WorkspaceRoute = ({
       savePolicy: graphSavePolicy,
       contentClient,
       changeUrl: (newUrl) => history.push(newUrl),
-      notifyReact: () => setRenderCounter((cur) => cur + 1),
+      notifyReact: notifyWorkspaceChanged,
       handleSearchQueryError,
       ...coreStart,
     })
   );
+  storeRef.current = store;
 
   const loaded = useWorkspaceLoader({
     workspaceRef,
@@ -138,9 +154,7 @@ export const WorkspaceRoute = ({
           renderCounter={renderCounter}
           workspace={workspaceRef.current}
           loading={loading}
-          setHeaderActionMenu={setHeaderActionMenu}
           graphSavePolicy={graphSavePolicy}
-          navigation={navigation}
           capabilities={capabilities}
           coreStart={coreStart}
           canEditDrillDownUrls={canEditDrillDownUrls}

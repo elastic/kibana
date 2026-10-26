@@ -7,7 +7,7 @@
 
 import datemath from '@elastic/datemath';
 
-function getParsedDate(rawDate?: string, options = {}) {
+export function getParsedDate(rawDate?: string, options = {}) {
   if (rawDate) {
     const parsed = datemath.parse(rawDate, options);
     if (parsed && parsed.isValid()) {

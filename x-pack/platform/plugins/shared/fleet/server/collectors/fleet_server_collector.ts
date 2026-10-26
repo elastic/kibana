@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import type { SavedObjectsClient, ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../constants';
 
 import { packagePolicyService } from '../services';
 import { getAgentStatusForAgentPolicy } from '../services/agents';
 import { fleetServerHostService } from '../services/fleet_server_host';
+import { buildPolicyBaseIdsWithFallbackKuery } from '../../common/services/version_specific_policies_utils';
 
 const DEFAULT_USAGE = {
   total_all_statuses: 0,
@@ -38,14 +39,14 @@ export interface FleetServerUsage {
 }
 
 export const getFleetServerUsage = async (
-  soClient?: SavedObjectsClient,
+  soClient?: SavedObjectsClientContract,
   esClient?: ElasticsearchClient
 ): Promise<any> => {
   if (!soClient || !esClient) {
     return DEFAULT_USAGE;
   }
 
-  const fleetServerHosts = await fleetServerHostService.list(soClient);
+  const fleetServerHosts = await fleetServerHostService.list();
   const numHostsUrls = fleetServerHosts.items.flatMap((host) => host.host_urls).length;
 
   // Find all policies with Fleet server than query agent status
@@ -56,7 +57,7 @@ export const getFleetServerUsage = async (
     const res = await packagePolicyService.list(soClient, {
       page: page++,
       perPage: 20,
-      kuery: 'ingest-package-policies.package.name:fleet_server',
+      kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:fleet_server`,
     });
 
     for (const item of res.items) {
@@ -77,9 +78,7 @@ export const getFleetServerUsage = async (
       esClient,
       soClient,
       undefined,
-      Array.from(policyIds)
-        .map((policyId) => `(policy_id:"${policyId}")`)
-        .join(' or ')
+      buildPolicyBaseIdsWithFallbackKuery(Array.from(policyIds))
     );
 
   return {
@@ -95,7 +94,7 @@ export const getFleetServerUsage = async (
   };
 };
 
-export const getFleetServerConfig = async (soClient: SavedObjectsClient): Promise<any> => {
+export const getFleetServerConfig = async (soClient: SavedObjectsClientContract): Promise<any> => {
   const res = await packagePolicyService.list(soClient, {
     page: 1,
     perPage: SO_SEARCH_LIMIT,

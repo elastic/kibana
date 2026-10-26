@@ -7,14 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DataView } from '@kbn/data-views-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import React, { useEffect, useState } from 'react';
-import { RouteComponentProps, withRouter } from 'react-router-dom';
-import { EditIndexPattern } from '.';
-import { IndexPatternManagmentContext } from '../../types';
-import { getEditBreadcrumbs } from '../breadcrumbs';
+import type { RouteComponentProps } from 'react-router-dom';
+import { withRouter } from 'react-router-dom';
+import { AppHeader } from '@kbn/app-header';
+import { EditIndexPattern } from './edit_index_pattern';
+import type { IndexPatternManagmentContext } from '../../types';
+import { dataViewsListTitle, getEditBreadcrumbs } from '../breadcrumbs';
 
 const EditIndexPatternCont: React.FC<RouteComponentProps<{ id: string }>> = ({ ...props }) => {
   const { dataViews, setBreadcrumbs, notifications, dataViewMgmtService } =
@@ -54,7 +56,20 @@ const EditIndexPatternCont: React.FC<RouteComponentProps<{ id: string }>> = ({ .
     props.history.push('/');
   }
 
-  return indexPattern != null ? <EditIndexPattern indexPattern={indexPattern} /> : null;
+  if (indexPattern == null) {
+    return (
+      <AppHeader
+        title={dataViewsListTitle}
+        back={{
+          href: props.history.createHref({ pathname: '/' }),
+          label: dataViewsListTitle,
+        }}
+        spacing="bleed"
+      />
+    );
+  }
+
+  return <EditIndexPattern indexPattern={indexPattern} />;
 };
 
 export const EditIndexPatternContainer = withRouter(EditIndexPatternCont);

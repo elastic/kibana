@@ -6,7 +6,7 @@
  */
 
 import React, { memo, useCallback, useState, useRef } from 'react';
-import {
+import type {
   RulesSettingsFlappingProperties,
   RulesSettingsProperties,
   RulesSettingsQueryDelayProperties,
@@ -14,6 +14,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
+  EuiBadge,
   EuiButton,
   EuiButtonEmpty,
   EuiCallOut,
@@ -30,6 +31,8 @@ import {
 } from '@elastic/eui';
 import { useFetchFlappingSettings } from '@kbn/alerts-ui-shared/src/common/hooks/use_fetch_flapping_settings';
 import { css } from '@emotion/react';
+import type { AlertDeleteCategoryIds } from '@kbn/alerting-plugin/common/constants/alert_delete';
+import { AlertDeleteDescriptiveFormGroup } from '@kbn/response-ops-alerts-delete/components/descriptive_form_group';
 import { useKibana } from '../../../common/lib/kibana';
 import { RulesSettingsFlappingSection } from './flapping/rules_settings_flapping_section';
 import { RulesSettingsQueryDelaySection } from './query_delay/rules_settings_query_delay_section';
@@ -78,8 +81,12 @@ const useResettableState: <T>(
   };
   const updateValue = (next: typeof value, shouldUpdateInitialValue = false) => {
     setValue(next);
-    setHasChanged(true);
-    if (shouldUpdateInitialValue) initialValueRef.current = next;
+    if (shouldUpdateInitialValue) {
+      initialValueRef.current = next;
+      setHasChanged(false);
+    } else {
+      setHasChanged(true);
+    }
   };
   return [value, hasChanged, updateValue, reset];
 };
@@ -89,6 +96,7 @@ export interface RulesSettingsFlyoutProps {
   setUpdatingRulesSettings?: (isUpdating: boolean) => void;
   onClose: () => void;
   onSave?: () => void;
+  alertDeleteCategoryIds?: AlertDeleteCategoryIds[];
 }
 
 export const RulesSettingsFlyout = memo((props: RulesSettingsFlyoutProps) => {
@@ -96,8 +104,10 @@ export const RulesSettingsFlyout = memo((props: RulesSettingsFlyoutProps) => {
 
   const {
     application: { capabilities },
+    notifications,
     isServerless,
     http,
+    showClassicBadge,
   } = useKibana().services;
   const {
     rulesSettings: {
@@ -105,6 +115,8 @@ export const RulesSettingsFlyout = memo((props: RulesSettingsFlyoutProps) => {
       readFlappingSettingsUI,
       writeQueryDelaySettingsUI,
       readQueryDelaySettingsUI,
+      readAlertDeleteSettingsUI,
+      writeAlertDeleteSettingsUI,
     },
   } = capabilities;
 
@@ -164,6 +176,11 @@ export const RulesSettingsFlyout = memo((props: RulesSettingsFlyoutProps) => {
   const canShowFlappingSettings = readFlappingSettingsUI;
   const canWriteQueryDelaySettings = writeQueryDelaySettingsUI && !hasQueryDelayError;
   const canShowQueryDelaySettings = readQueryDelaySettingsUI;
+  const canShowAlertDeleteSettings = readAlertDeleteSettingsUI;
+
+  const isChanged = hasFlappingChanged || hasQueryDelayChanged;
+  const hasMinimumWritePermissions = canWriteFlappingSettings || canWriteQueryDelaySettings;
+  const shouldDisableSaveButton = !isChanged || !hasMinimumWritePermissions;
 
   const handleSettingsChange = (
     setting: keyof RulesSettingsProperties,
@@ -217,7 +234,7 @@ export const RulesSettingsFlyout = memo((props: RulesSettingsFlyoutProps) => {
   }
 
   const maybeRenderForm = () => {
-    if (!canShowFlappingSettings && !canShowQueryDelaySettings) {
+    if (!canShowFlappingSettings && !canShowQueryDelaySettings && !canShowAlertDeleteSettings) {
       return <RulesSettingsErrorPrompt />;
     }
     if (isFlappingLoading || isQueryDelayLoading) {
@@ -237,7 +254,6 @@ export const RulesSettingsFlyout = memo((props: RulesSettingsFlyoutProps) => {
             hasError={hasFlappingError}
           />
         )}
-        {isAlertDeletionSettingsEnabled && <div>Alert Deletion Settings Placeholder</div>}
         {isServerless && queryDelaySettings && (
           <>
             <EuiSpacer />
@@ -250,21 +266,55 @@ export const RulesSettingsFlyout = memo((props: RulesSettingsFlyoutProps) => {
             />
           </>
         )}
+        {isAlertDeletionSettingsEnabled &&
+          readAlertDeleteSettingsUI &&
+          props.alertDeleteCategoryIds && (
+            <>
+              <EuiSpacer />
+              <AlertDeleteDescriptiveFormGroup
+                services={{ http, notifications }}
+                categoryIds={props.alertDeleteCategoryIds}
+                isDisabled={!writeAlertDeleteSettingsUI}
+              />
+            </>
+          )}
       </>
     );
   };
 
   return (
-    <EuiFlyout type="push" data-test-subj="rulesSettingsFlyout" onClose={onCloseFlyout} size="s">
+    <EuiFlyout
+      type="push"
+      data-test-subj="rulesSettingsFlyout"
+      onClose={onCloseFlyout}
+      size="s"
+      aria-label={i18n.translate('xpack.triggersActionsUI.rulesSettings.flyout.ruleSettingsLabel', {
+        defaultMessage: 'Classic rule settings',
+      })}
+    >
       <EuiFlyoutHeader>
-        <EuiTitle>
-          <h3>
-            <FormattedMessage
-              id="xpack.triggersActionsUI.rulesSettings.flyout.title"
-              defaultMessage="Rule settings"
-            />
-          </h3>
-        </EuiTitle>
+        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiTitle>
+              <h3>
+                <FormattedMessage
+                  id="xpack.triggersActionsUI.rulesSettings.flyout.title"
+                  defaultMessage="Settings"
+                />
+              </h3>
+            </EuiTitle>
+          </EuiFlexItem>
+          {showClassicBadge && (
+            <EuiFlexItem grow={false}>
+              <EuiBadge color="hollow" data-test-subj="rulesSettingsFlyoutClassicBadge">
+                <FormattedMessage
+                  id="xpack.triggersActionsUI.rulesSettings.flyout.classicBadge"
+                  defaultMessage="Classic"
+                />
+              </EuiBadge>
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
         <EuiSpacer size="m" />
       </EuiFlyoutHeader>
       <EuiHorizontalRule margin="none" />
@@ -272,7 +322,7 @@ export const RulesSettingsFlyout = memo((props: RulesSettingsFlyoutProps) => {
       <EuiCallOut
         size="m"
         title={i18n.translate('xpack.triggersActionsUI.rulesSettings.flyout.calloutMessage', {
-          defaultMessage: 'Apply to all rules within the current space.',
+          defaultMessage: 'Apply to all classic rules within the current space.',
         })}
         css={css`
           position: sticky;
@@ -298,7 +348,7 @@ export const RulesSettingsFlyout = memo((props: RulesSettingsFlyoutProps) => {
               fill
               data-test-subj="rulesSettingsFlyoutSaveButton"
               onClick={handleSave}
-              disabled={!canWriteFlappingSettings && !canWriteQueryDelaySettings}
+              disabled={shouldDisableSaveButton}
             >
               <FormattedMessage
                 id="xpack.triggersActionsUI.rulesSettings.flyout.saveButton"

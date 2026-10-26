@@ -13,15 +13,21 @@ import { AlertsTooltipContent } from '../../components/alerts_tooltip_content';
 import { ServicesTooltipContent } from '../../components/services_tooltip_content';
 import { ContainerMetricsExplanationContent } from '../../../lens/metric_explanation/container_metrics_explanation_content';
 
-export const MetricsSectionTitle = ({ assetType }: { assetType: InventoryItemType }) => {
+export const MetricsSectionTitle = ({ entityType }: { entityType: InventoryItemType }) => {
   return (
     <TitleWithTooltip
+      tooltipAriaLabel={i18n.translate(
+        'xpack.infra.assetDetails.overview.metricsSectionTitle.areaLabel',
+        {
+          defaultMessage: 'Metrics information',
+        }
+      )}
       title={i18n.translate('xpack.infra.assetDetails.overview.metricsSectionTitle', {
         defaultMessage: 'Metrics',
       })}
       data-test-subj="infraAssetDetailsMetricsTitle"
       tooltipTestSubj="infraAssetDetailsMetricsPopoverButton"
-      tooltipContent={getTooltipContent(assetType)}
+      tooltipContent={getTooltipContent(entityType)}
     />
   );
 };
@@ -29,6 +35,12 @@ export const MetricsSectionTitle = ({ assetType }: { assetType: InventoryItemTyp
 export const AlertsSectionTitle = () => {
   return (
     <TitleWithTooltip
+      tooltipAriaLabel={i18n.translate(
+        'xpack.infra.assetDetails.overview.alertsSectionTitle.areaLabel',
+        {
+          defaultMessage: 'Alerts information',
+        }
+      )}
       title={i18n.translate('xpack.infra.assetDetails.overview.alertsSectionTitle', {
         defaultMessage: 'Alerts',
       })}
@@ -41,6 +53,12 @@ export const AlertsSectionTitle = () => {
 
 export const ServicesSectionTitle = () => (
   <TitleWithTooltip
+    tooltipAriaLabel={i18n.translate(
+      'xpack.infra.assetDetails.overview.servicesSectionTitle.areaLabel',
+      {
+        defaultMessage: 'Services information',
+      }
+    )}
     title={i18n.translate('xpack.infra.assetDetails.overview.servicesSectionTitle', {
       defaultMessage: 'Services',
     })}
@@ -50,8 +68,8 @@ export const ServicesSectionTitle = () => (
   />
 );
 
-function getTooltipContent(assetType: InventoryItemType) {
-  switch (assetType) {
+function getTooltipContent(entityType: InventoryItemType) {
+  switch (entityType) {
     case 'host':
       return <HostMetricsExplanationContent />;
     default:

@@ -35,8 +35,7 @@ import {
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { ElasticCuratedModelName } from '@kbn/ml-trained-models-utils';
 import { isDefined } from '@kbn/ml-is-defined';
-import { DEFAULT_TRAINED_MODELS_PAGE_SIZE } from '../../../common/constants/trained_models';
-import type { MlFeatures } from '../../../common/constants/app';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type {
   DFAModelItem,
   ExistingModelBase,
@@ -45,8 +44,8 @@ import type {
   TrainedModelItem,
   TrainedModelUIItem,
   TrainedModelWithPipelines,
-} from '../../../common/types/trained_models';
-import { isBuiltInModel, isExistingModel } from '../../../common/types/trained_models';
+} from '@kbn/ml-common-types/trained_models';
+import { isBuiltInModel, isExistingModel } from '@kbn/ml-common-types/trained_models';
 import {
   isDFAModelItem,
   isElasticModel,
@@ -54,7 +53,9 @@ import {
   type ModelDownloadState,
   type PipelineDefinition,
   type TrainedModelConfigResponse,
-} from '../../../common/types/trained_models';
+} from '@kbn/ml-common-types/trained_models';
+import type { MlFeatures } from '../../../common/constants/app';
+import { DEFAULT_TRAINED_MODELS_PAGE_SIZE } from '../../../common/constants/trained_models';
 import type { MlClient } from '../../lib/ml_client';
 import type { MLSavedObjectService } from '../../saved_objects';
 import { filterForEnabledFeatureModels } from '../../routes/trained_models';
@@ -157,7 +158,9 @@ export class ModelsProvider {
 
       const inferenceAPIMap = groupBy(
         endpoints,
-        (endpoint) => endpoint.service === 'elser' && endpoint.service_settings.model_id
+        (endpoint) =>
+          (endpoint.service === 'elser' || endpoint.service === 'elasticsearch') &&
+          endpoint.service_settings.model_id
       );
 
       for (const model of trainedModels) {
@@ -232,10 +235,15 @@ export class ModelsProvider {
     const idMap = new Map<string, TrainedModelUIItem>(
       resultItems.map((model) => [model.model_id, model])
     );
-    /**
-     * Fetches model definitions available for download
-     */
-    const forDownload = await this.getModelDownloads();
+
+    const [rawModels, forDownload] = await Promise.all([
+      this._client.asCurrentUser.ml.getTrainedModels({
+        size: 1000,
+      }),
+      this.getModelDownloads(),
+    ]);
+
+    const allExistingModelIds = new Set(rawModels.trained_model_configs.map((m) => m.model_id));
 
     const notDownloaded: TrainedModelUIItem[] = forDownload
       .filter(({ model_id: modelId, hidden, recommended, supported, disclaimer, techPreview }) => {
@@ -253,13 +261,18 @@ export class ModelsProvider {
         return !idMap.has(modelId) && !hidden;
       })
       .map<ModelDownloadItem>((modelDefinition) => {
+        // Check if this downloadable model already exists in the system, but not in current space
+        const isDownloadedWithinDifferentSpace = allExistingModelIds.has(modelDefinition.model_id);
+
         return {
           model_id: modelDefinition.model_id,
           type: modelDefinition.type,
           tags: modelDefinition.type?.includes(ELASTIC_MODEL_TAG) ? [ELASTIC_MODEL_TAG] : [],
           putModelConfig: modelDefinition.config,
           description: modelDefinition.description,
-          state: MODEL_STATE.NOT_DOWNLOADED,
+          state: isDownloadedWithinDifferentSpace
+            ? MODEL_STATE.DOWNLOADED_IN_DIFFERENT_SPACE
+            : MODEL_STATE.NOT_DOWNLOADED,
           recommended: !!modelDefinition.recommended,
           modelName: modelDefinition.modelName,
           os: modelDefinition.os,
@@ -467,34 +480,23 @@ export class ModelsProvider {
    *
    */
   async createInferencePipeline(pipelineConfig: IngestPipeline, pipelineName: string) {
-    let result = {};
-
-    result = await this._client.asCurrentUser.ingest.putPipeline({
+    return await this._client.asCurrentUser.ingest.putPipeline({
       id: pipelineName,
       ...pipelineConfig,
     });
-
-    return result;
   }
 
   /**
    * Retrieves existing pipelines.
    *
    */
-  async getPipelines() {
-    let result = {};
-    try {
-      result = await this._client.asCurrentUser.ingest.getPipeline();
-    } catch (error) {
-      if (error.statusCode === 404) {
-        // ES returns 404 when there are no pipelines
-        // Instead, we should return an empty response and a 200
-        return result;
-      }
-      throw error;
-    }
+  async getPipelines(): Promise<string[]> {
+    const result = await this._client.asCurrentUser.ingest.getPipeline(
+      { summary: true },
+      { ignore: [404] }
+    );
 
-    return result;
+    return Object.keys(result);
   }
 
   /**
@@ -517,10 +519,10 @@ export class ModelsProvider {
           const id = processor.inference?.model_id;
           if (modelIdsMap.has(id)) {
             const obj = modelIdsMap.get(id);
-            if (obj === null) {
-              modelIdsMap.set(id, { [pipelineName]: pipelineDefinition });
+            if (obj == null) {
+              modelIdsMap.set(id, { [pipelineName]: pipelineDefinition as PipelineDefinition });
             } else {
-              obj![pipelineName] = pipelineDefinition;
+              obj[pipelineName] = pipelineDefinition as PipelineDefinition;
             }
           }
         }
@@ -547,7 +549,24 @@ export class ModelsProvider {
     let indicesSettings;
 
     try {
-      indicesSettings = await this._client.asInternalUser.indices.getSettings();
+      indicesSettings = await this._client.asInternalUser.indices.getSettings({
+        expand_wildcards: ['open', 'closed'],
+        filter_path: '**.index.default_pipeline',
+        master_timeout: '30s',
+      });
+    } catch (e) {
+      // Possible that the user doesn't have permissions to view
+      if (e.meta?.statusCode !== 403) {
+        mlLog.error(e);
+      }
+      indicesSettings = {};
+    }
+
+    if (isPopulatedObject(indicesSettings) === false) {
+      return pipelineIdsToDestinationIndices;
+    }
+
+    try {
       const hasPrivilegesResponse = await this._client.asCurrentUser.security.hasPrivileges({
         index: [
           {
@@ -700,6 +719,10 @@ export class ModelsProvider {
               // 5. If any of the transforms use these indices as source , find the destination indices to complete the map
               if (foundTransform) {
                 const transformDestIndex = foundTransform.dest.index;
+                // Destination index is optional on the transform API; skip nodes we cannot name.
+                if (!isDefined(transformDestIndex)) {
+                  continue;
+                }
                 const transformNodeId = `${foundTransform.id}-${JOB_MAP_NODE_TYPES.TRANSFORM}`;
                 const transformDestIndexNodeId = `${transformDestIndex}-${JOB_MAP_NODE_TYPES.INDEX}`;
 

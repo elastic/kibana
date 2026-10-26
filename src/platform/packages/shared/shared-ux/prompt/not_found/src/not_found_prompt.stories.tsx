@@ -9,7 +9,7 @@
 
 import { EuiButton, EuiPageTemplate } from '@elastic/eui';
 import React from 'react';
-import { StoryObj, StoryFn, Meta } from '@storybook/react';
+import type { StoryObj, StoryFn, Meta } from '@storybook/react';
 import mdx from '../README.mdx';
 
 import { NotFoundPrompt } from './not_found_prompt';
@@ -58,7 +58,7 @@ export const CustomActions: StoryObj<{ onClick: () => void }> = {
                 <EuiButton fill color="primary" onClick={args.onClick}>
                   Go home
                 </EuiButton>
-                <EuiButton iconType="search" onClick={args.onClick}>
+                <EuiButton iconType="magnify" onClick={args.onClick}>
                   Go to discover
                 </EuiButton>
               </>

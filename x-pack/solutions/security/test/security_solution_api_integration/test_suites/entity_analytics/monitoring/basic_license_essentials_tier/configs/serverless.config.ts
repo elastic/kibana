@@ -1,0 +1,26 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { createTestConfig } from '../../../../../config/serverless/config.base';
+
+export default createTestConfig({
+  kbnTestServerArgs: [
+    `--xpack.securitySolutionServerless.productTypes=${JSON.stringify([
+      { product_line: 'security', product_tier: 'essentials' },
+      { product_line: 'endpoint', product_tier: 'essentials' },
+      { product_line: 'cloud', product_tier: 'essentials' },
+    ])}`,
+    '--xpack.securitySolution.entityAnalytics.monitoring.privileges.users.maxPrivilegedUsersAllowed=100',
+  ],
+  // Entity analytics tests do not exercise prebuilt-rule management endpoints.
+  installMockPrebuiltRulesPackage: false,
+  testFiles: [require.resolve('..')],
+  junit: {
+    reportName:
+      'Entity Analytics - Privilege Monitoring Integration Tests - Serverless Env - Essentials Tier',
+  },
+});

@@ -95,7 +95,7 @@ export const InfluencersCell: FC<InfluencerCellProps> = ({
                       '+'
                     );
                   })}
-                  iconType="plusInCircle"
+                  iconType="plusCircle"
                   aria-label={i18n.translate(
                     'xpack.ml.anomaliesTable.influencersCell.addFilterAriaLabel',
                     {
@@ -122,7 +122,7 @@ export const InfluencersCell: FC<InfluencerCellProps> = ({
                       '-'
                     );
                   })}
-                  iconType="minusInCircle"
+                  iconType="minusCircle"
                   aria-label={i18n.translate(
                     'xpack.ml.anomaliesTable.influencersCell.removeFilterAriaLabel',
                     {

@@ -19,17 +19,17 @@ import {
   EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
-import { CoreStart } from '@kbn/core-lifecycle-browser';
-import { Filter } from '@kbn/es-query';
+import type { CoreStart } from '@kbn/core-lifecycle-browser';
+import type { Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import { GroupSummary } from '@kbn/slo-schema';
+import type { GroupSummary } from '@kbn/slo-schema';
+import { paths } from '@kbn/slo-shared-plugin/common/locators/paths';
 import React, { memo, useState } from 'react';
-import { paths } from '../../../../../common/locators/paths';
 import { useFetchSloList } from '../../../../hooks/use_fetch_slo_list';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useSloFormattedSLIValue } from '../../hooks/use_slo_summary';
+import type { GroupByField, SortDirection, SortField, ViewType } from '../../types';
 import { SlosView } from '../slos_view';
-import type { ViewType, GroupByField, SortDirection, SortField } from '../../types';
 import { useGroupName } from './hooks/use_group_name';
 
 interface Props {
@@ -41,6 +41,7 @@ interface Props {
   groupBy: GroupByField;
   summary?: GroupSummary;
   filters?: Filter[];
+  isInteractive?: boolean;
 }
 
 export function GroupListView({
@@ -52,6 +53,7 @@ export function GroupListView({
   groupBy,
   summary,
   filters,
+  isInteractive = true,
 }: Props) {
   const groupQuery = `"${groupBy}": "${group}"`;
   const query = kqlQuery ? `${groupQuery} and ${kqlQuery}` : groupQuery;
@@ -173,9 +175,18 @@ export function GroupListView({
                     >
                       <EuiLink
                         data-test-subj="o11yGroupListViewLink"
-                        href={basePath.prepend(
-                          paths.sloDetails(summary!.worst.slo?.id, summary!.worst.slo?.instanceId)
-                        )}
+                        {...(!isInteractive
+                          ? {
+                              disabled: true,
+                            }
+                          : {
+                              href: basePath.prepend(
+                                paths.sloDetails(
+                                  summary!.worst.slo?.id,
+                                  summary!.worst.slo?.instanceId
+                                )
+                              ),
+                            })}
                       >
                         {i18n.translate('xpack.slo.group.worstPerforming', {
                           defaultMessage: 'Worst performing: ',
@@ -202,6 +213,7 @@ export function GroupListView({
                   loading={isLoading || isRefetching}
                   error={isError}
                   view={view}
+                  isInteractive={isInteractive}
                 />
                 <EuiSpacer size="m" />
                 {total > 0 && total > itemsPerPage ? (

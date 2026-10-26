@@ -10,8 +10,10 @@ import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-m
 import type {
   IndicesGetDataStreamResponse,
   IndicesDataStreamIndex,
+  IndicesDataStream,
 } from '@elastic/elasticsearch/lib/api/types';
 import { errors as EsErrors } from '@elastic/elasticsearch';
+import { LockAcquisitionError } from '@kbn/lock-manager';
 import { ReplaySubject, Subject, of } from 'rxjs';
 import { AlertsService } from './alerts_service';
 import type { IRuleTypeAlerts } from '../types';
@@ -81,10 +83,7 @@ interface EsError extends Error {
 const GetAliasResponse = {
   '.internal.alerts-test.alerts-default-000001': {
     aliases: {
-      alias_1: {
-        is_hidden: true,
-      },
-      alias_2: {
+      '.alerts-test.alerts-default': {
         is_hidden: true,
       },
     },
@@ -104,7 +103,7 @@ const GetDataStreamResponse: IndicesGetDataStreamResponse = {
       next_generation_managed_by: 'Index Lifecycle Management',
       prefer_ilm: false,
       rollover_on_write: false,
-    },
+    } as Partial<IndicesDataStream> as IndicesDataStream,
   ],
 };
 
@@ -112,6 +111,7 @@ const IlmPutBody = {
   policy: {
     _meta: {
       managed: true,
+      content_hash: expect.stringMatching(/^[0-9a-f]{16}$/),
     },
     phases: {
       hot: {
@@ -173,7 +173,7 @@ const getIndexTemplatePutBody = (opts?: GetIndexTemplatePutBodyOpts) => {
               },
             }),
         'index.mapping.ignore_malformed': true,
-        'index.mapping.total_fields.limit': 2500,
+        'index.mapping.total_fields.limit': 2800,
         'index.mapping.total_fields.ignore_dynamic_beyond_limit': true,
       },
       mappings: {
@@ -198,6 +198,7 @@ const getIndexTemplatePutBody = (opts?: GetIndexTemplatePutBodyOpts) => {
       kibana: { version: '8.8.0' },
       managed: true,
       namespace,
+      content_hash: expect.stringMatching(/^[0-9a-f]{16}$/),
     },
   };
 };
@@ -303,6 +304,62 @@ describe('Alerts Service', () => {
           expect(componentTemplate2.name).toEqual('.alerts-legacy-alert-mappings');
           const componentTemplate3 = clusterClient.cluster.putComponentTemplate.mock.calls[2][0];
           expect(componentTemplate3.name).toEqual('.alerts-ecs-mappings');
+        });
+
+        test('should install common resources under a cluster-wide lock when a lock manager is provided', async () => {
+          const withLock = jest.fn(async (_lockId: string, cb: () => Promise<void>) => cb());
+          const alertsService = new AlertsService({
+            logger,
+            elasticsearchClientPromise: Promise.resolve(clusterClient),
+            pluginStop$,
+            kibanaVersion: '8.8.0',
+            dataStreamAdapter,
+            elasticsearchAndSOAvailability$,
+            isServerless: false,
+            lockManager: { withLock },
+          });
+
+          await retryUntil(
+            'alert service initialized',
+            async () => alertsService.isInitialized() === true
+          );
+
+          // The common install ran inside the lock...
+          expect(withLock).toHaveBeenCalledWith(
+            'alerting:resource-install:common',
+            expect.any(Function)
+          );
+          // ...and the resources were still installed.
+          expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(3);
+        });
+
+        test('should retry common resource installation once the cluster-wide lock is released', async () => {
+          const withLock = jest
+            .fn()
+            .mockRejectedValueOnce(new LockAcquisitionError('held'))
+            .mockImplementation(async (_lockId: string, cb: () => Promise<void>) => cb());
+          const alertsService = new AlertsService({
+            logger,
+            elasticsearchClientPromise: Promise.resolve(clusterClient),
+            pluginStop$,
+            kibanaVersion: '8.8.0',
+            serverUuid: 'server-1',
+            dataStreamAdapter,
+            elasticsearchAndSOAvailability$,
+            isServerless: false,
+            lockManager: { withLock },
+          });
+
+          await retryUntil(
+            'alert service initialized',
+            async () => alertsService.isInitialized() === true
+          );
+
+          expect(withLock).toHaveBeenCalledTimes(2);
+          expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(3);
+          expect(logger.info).toHaveBeenCalledWith(
+            'Kibana node server-1 waiting for install lock "alerting:resource-install:common" held by another node; retrying in 1s (attempt 1)'
+          );
         });
 
         test('should not initialize common resources if ES is not ready', async () => {
@@ -479,7 +536,7 @@ describe('Alerts Service', () => {
               ...existingIndexTemplate.index_template.template,
               settings: {
                 ...existingIndexTemplate.index_template.template?.settings,
-                'index.mapping.total_fields.limit': 2500,
+                'index.mapping.total_fields.limit': 2800,
                 'index.mapping.total_fields.ignore_dynamic_beyond_limit': true,
               },
             },
@@ -539,15 +596,9 @@ describe('Alerts Service', () => {
           expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalledWith(
             getIndexTemplatePutBody({ useDataStream: useDataStreamForAlerts })
           );
-          expect(clusterClient.indices.putSettings).toHaveBeenCalledTimes(
-            useDataStreamForAlerts ? 1 : 2
-          );
-          expect(clusterClient.indices.simulateIndexTemplate).toHaveBeenCalledTimes(
-            useDataStreamForAlerts ? 1 : 2
-          );
-          expect(clusterClient.indices.putMapping).toHaveBeenCalledTimes(
-            useDataStreamForAlerts ? 1 : 2
-          );
+          expect(clusterClient.indices.putSettings).toHaveBeenCalledTimes(1);
+          expect(clusterClient.indices.simulateIndexTemplate).toHaveBeenCalledTimes(1);
+          expect(clusterClient.indices.putMapping).toHaveBeenCalledTimes(1);
 
           if (useDataStreamForAlerts) {
             expect(clusterClient.indices.createDataStream).not.toHaveBeenCalled();
@@ -556,20 +607,14 @@ describe('Alerts Service', () => {
               name: '.alerts-test.alerts-default',
             });
           } else {
-            expect(clusterClient.indices.create).toHaveBeenCalledWith({
-              index: '.internal.alerts-test.alerts-default-000001',
-              aliases: {
-                '.alerts-test.alerts-default': {
-                  is_write_index: true,
-                },
-              },
-            });
+            expect(clusterClient.indices.create).not.toHaveBeenCalled();
             expect(clusterClient.indices.getAlias).toHaveBeenCalledWith({
               index: [
                 '.internal.alerts-test.alerts-default-*',
                 `.reindexed-v8-internal.alerts-test.alerts-default-*`,
               ],
-              name: '.alerts-test.alerts-*',
+              name: '.alerts-test.alerts-default',
+              expand_wildcards: ['open', 'hidden'],
             });
           }
         });
@@ -603,15 +648,9 @@ describe('Alerts Service', () => {
               useDataStream: useDataStreamForAlerts,
             })
           );
-          expect(clusterClient.indices.putSettings).toHaveBeenCalledTimes(
-            useDataStreamForAlerts ? 1 : 2
-          );
-          expect(clusterClient.indices.simulateIndexTemplate).toHaveBeenCalledTimes(
-            useDataStreamForAlerts ? 1 : 2
-          );
-          expect(clusterClient.indices.putMapping).toHaveBeenCalledTimes(
-            useDataStreamForAlerts ? 1 : 2
-          );
+          expect(clusterClient.indices.putSettings).toHaveBeenCalledTimes(1);
+          expect(clusterClient.indices.simulateIndexTemplate).toHaveBeenCalledTimes(1);
+          expect(clusterClient.indices.putMapping).toHaveBeenCalledTimes(1);
 
           if (useDataStreamForAlerts) {
             expect(clusterClient.indices.createDataStream).not.toHaveBeenCalled();
@@ -620,20 +659,14 @@ describe('Alerts Service', () => {
               name: '.alerts-test.alerts-default',
             });
           } else {
-            expect(clusterClient.indices.create).toHaveBeenCalledWith({
-              index: '.internal.alerts-test.alerts-default-000001',
-              aliases: {
-                '.alerts-test.alerts-default': {
-                  is_write_index: true,
-                },
-              },
-            });
+            expect(clusterClient.indices.create).not.toHaveBeenCalled();
             expect(clusterClient.indices.getAlias).toHaveBeenCalledWith({
               index: [
                 '.internal.alerts-test.alerts-default-*',
                 `.reindexed-v8-internal.alerts-test.alerts-default-*`,
               ],
-              name: '.alerts-test.alerts-*',
+              name: '.alerts-test.alerts-default',
+              expand_wildcards: ['open', 'hidden'],
             });
           }
         });
@@ -664,15 +697,9 @@ describe('Alerts Service', () => {
           expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalledWith(
             getIndexTemplatePutBody({ useEcs: true, useDataStream: useDataStreamForAlerts })
           );
-          expect(clusterClient.indices.putSettings).toHaveBeenCalledTimes(
-            useDataStreamForAlerts ? 1 : 2
-          );
-          expect(clusterClient.indices.simulateIndexTemplate).toHaveBeenCalledTimes(
-            useDataStreamForAlerts ? 1 : 2
-          );
-          expect(clusterClient.indices.putMapping).toHaveBeenCalledTimes(
-            useDataStreamForAlerts ? 1 : 2
-          );
+          expect(clusterClient.indices.putSettings).toHaveBeenCalledTimes(1);
+          expect(clusterClient.indices.simulateIndexTemplate).toHaveBeenCalledTimes(1);
+          expect(clusterClient.indices.putMapping).toHaveBeenCalledTimes(1);
           if (useDataStreamForAlerts) {
             expect(clusterClient.indices.createDataStream).not.toHaveBeenCalled();
             expect(clusterClient.indices.getDataStream).toHaveBeenNthCalledWith(1, {
@@ -680,22 +707,46 @@ describe('Alerts Service', () => {
               name: '.alerts-test.alerts-default',
             });
           } else {
-            expect(clusterClient.indices.create).toHaveBeenCalledWith({
-              index: '.internal.alerts-test.alerts-default-000001',
-              aliases: {
-                '.alerts-test.alerts-default': {
-                  is_write_index: true,
-                },
-              },
-            });
+            expect(clusterClient.indices.create).not.toHaveBeenCalled();
             expect(clusterClient.indices.getAlias).toHaveBeenCalledWith({
               index: [
                 '.internal.alerts-test.alerts-default-*',
                 `.reindexed-v8-internal.alerts-test.alerts-default-*`,
               ],
-              name: '.alerts-test.alerts-*',
+              name: '.alerts-test.alerts-default',
+              expand_wildcards: ['open', 'hidden'],
             });
           }
+        });
+
+        test('should save the dynamic_templates', async () => {
+          const dynamicTemplates = [
+            {
+              strings_as_keywords: {
+                path_match: 'test-path',
+                match_mapping_type: 'string',
+                mapping: {
+                  type: 'keyword',
+                  ignore_above: 1024,
+                },
+              },
+            },
+          ] satisfies IRuleTypeAlerts['mappings']['dynamicTemplates'];
+
+          alertsService.register({
+            ...TestRegistrationContext,
+            mappings: {
+              ...TestRegistrationContext.mappings,
+              dynamicTemplates,
+            },
+          });
+          await retryUntil(
+            'context initialized',
+            async () => (await getContextInitialized(alertsService)) === true
+          );
+
+          const componentTemplate = clusterClient.cluster.putComponentTemplate.mock.calls[3][0];
+          expect(componentTemplate.template.mappings?.dynamic_templates).toEqual(dynamicTemplates);
         });
 
         test('should correctly install resources for custom namespace on demand when isSpaceAware is true', async () => {
@@ -723,35 +774,24 @@ describe('Alerts Service', () => {
               name: '.alerts-test.alerts-default',
             });
           } else {
-            expect(clusterClient.indices.create).toHaveBeenNthCalledWith(1, {
-              index: '.internal.alerts-test.alerts-default-000001',
-              aliases: {
-                '.alerts-test.alerts-default': {
-                  is_write_index: true,
-                },
-              },
-            });
+            expect(clusterClient.indices.create).not.toHaveBeenCalled();
             expect(clusterClient.indices.getAlias).toHaveBeenNthCalledWith(1, {
               index: [
                 '.internal.alerts-test.alerts-default-*',
                 `.reindexed-v8-internal.alerts-test.alerts-default-*`,
               ],
-              name: '.alerts-test.alerts-*',
+              name: '.alerts-test.alerts-default',
+              expand_wildcards: ['open', 'hidden'],
             });
           }
-          expect(clusterClient.indices.putSettings).toHaveBeenCalledTimes(
-            useDataStreamForAlerts ? 1 : 2
-          );
-          expect(clusterClient.indices.simulateIndexTemplate).toHaveBeenCalledTimes(
-            useDataStreamForAlerts ? 1 : 2
-          );
-          expect(clusterClient.indices.putMapping).toHaveBeenCalledTimes(
-            useDataStreamForAlerts ? 1 : 2
-          );
+          expect(clusterClient.indices.putSettings).toHaveBeenCalledTimes(1);
+          expect(clusterClient.indices.simulateIndexTemplate).toHaveBeenCalledTimes(1);
+          expect(clusterClient.indices.putMapping).toHaveBeenCalledTimes(1);
 
           clusterClient.indices.getDataStream.mockImplementationOnce(async () => ({
             data_streams: [],
           }));
+          clusterClient.indices.getAlias.mockImplementationOnce(async () => ({}));
 
           await retryUntil(
             'context in namespace initialized',
@@ -770,15 +810,9 @@ describe('Alerts Service', () => {
               useDataStream: useDataStreamForAlerts,
             })
           );
-          expect(clusterClient.indices.putSettings).toHaveBeenCalledTimes(
-            useDataStreamForAlerts ? 1 : 4
-          );
-          expect(clusterClient.indices.simulateIndexTemplate).toHaveBeenCalledTimes(
-            useDataStreamForAlerts ? 1 : 4
-          );
-          expect(clusterClient.indices.putMapping).toHaveBeenCalledTimes(
-            useDataStreamForAlerts ? 1 : 4
-          );
+          expect(clusterClient.indices.putSettings).toHaveBeenCalledTimes(1);
+          expect(clusterClient.indices.simulateIndexTemplate).toHaveBeenCalledTimes(1);
+          expect(clusterClient.indices.putMapping).toHaveBeenCalledTimes(1);
           if (useDataStreamForAlerts) {
             expect(clusterClient.indices.createDataStream).toHaveBeenNthCalledWith(1, {
               name: '.alerts-test.alerts-another-namespace',
@@ -788,11 +822,12 @@ describe('Alerts Service', () => {
               name: '.alerts-test.alerts-another-namespace',
             });
           } else {
-            expect(clusterClient.indices.create).toHaveBeenNthCalledWith(2, {
+            expect(clusterClient.indices.create).toHaveBeenNthCalledWith(1, {
               index: '.internal.alerts-test.alerts-another-namespace-000001',
               aliases: {
                 '.alerts-test.alerts-another-namespace': {
                   is_write_index: true,
+                  is_hidden: true,
                 },
               },
             });
@@ -801,7 +836,8 @@ describe('Alerts Service', () => {
                 '.internal.alerts-test.alerts-another-namespace-*',
                 '.reindexed-v8-internal.alerts-test.alerts-another-namespace-*',
               ],
-              name: '.alerts-test.alerts-*',
+              name: '.alerts-test.alerts-another-namespace',
+              expand_wildcards: ['open', 'hidden'],
             });
           }
         });
@@ -838,19 +874,13 @@ describe('Alerts Service', () => {
               '.internal.alerts-test.alerts-default-*',
               '.reindexed-v8-internal.alerts-test.alerts-default-*',
             ],
-            name: '.alerts-test.alerts-*',
+            name: '.alerts-test.alerts-default',
+            expand_wildcards: ['open', 'hidden'],
           });
-          expect(clusterClient.indices.putSettings).toHaveBeenCalledTimes(2);
-          expect(clusterClient.indices.simulateIndexTemplate).toHaveBeenCalledTimes(2);
-          expect(clusterClient.indices.putMapping).toHaveBeenCalledTimes(2);
-          expect(clusterClient.indices.create).toHaveBeenCalledWith({
-            index: '.internal.alerts-test.alerts-default-000001',
-            aliases: {
-              '.alerts-test.alerts-default': {
-                is_write_index: true,
-              },
-            },
-          });
+          expect(clusterClient.indices.putSettings).toHaveBeenCalledTimes(1);
+          expect(clusterClient.indices.simulateIndexTemplate).toHaveBeenCalledTimes(1);
+          expect(clusterClient.indices.putMapping).toHaveBeenCalledTimes(1);
+          expect(clusterClient.indices.create).not.toHaveBeenCalled();
         });
 
         test('should not install component template for context if fieldMap is empty', async () => {
@@ -902,7 +932,7 @@ describe('Alerts Service', () => {
                     }),
                 'index.mapping.ignore_malformed': true,
                 'index.mapping.total_fields.ignore_dynamic_beyond_limit': true,
-                'index.mapping.total_fields.limit': 2500,
+                'index.mapping.total_fields.limit': 2800,
               },
               mappings: {
                 _meta: {
@@ -917,44 +947,33 @@ describe('Alerts Service', () => {
               kibana: { version: '8.8.0' },
               managed: true,
               namespace: 'default',
+              content_hash: expect.stringMatching(/^[0-9a-f]{16}$/),
             },
           };
 
           expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalledWith(template);
 
           if (useDataStreamForAlerts) {
-            expect(clusterClient.indices.createDataStream).not.toHaveBeenCalledWith({});
+            expect(clusterClient.indices.createDataStream).not.toHaveBeenCalled();
             expect(clusterClient.indices.getDataStream).toHaveBeenCalledWith({
               expand_wildcards: 'all',
               name: '.alerts-empty.alerts-default',
             });
           } else {
-            expect(clusterClient.indices.create).toHaveBeenCalledWith({
-              index: '.internal.alerts-empty.alerts-default-000001',
-              aliases: {
-                '.alerts-empty.alerts-default': {
-                  is_write_index: true,
-                },
-              },
-            });
+            expect(clusterClient.indices.create).not.toHaveBeenCalled();
             expect(clusterClient.indices.getAlias).toHaveBeenCalledWith({
               index: [
                 '.internal.alerts-empty.alerts-default-*',
                 '.reindexed-v8-internal.alerts-empty.alerts-default-*',
               ],
-              name: '.alerts-empty.alerts-*',
+              name: '.alerts-empty.alerts-default',
+              expand_wildcards: ['open', 'hidden'],
             });
           }
 
-          expect(clusterClient.indices.putSettings).toHaveBeenCalledTimes(
-            useDataStreamForAlerts ? 1 : 2
-          );
-          expect(clusterClient.indices.simulateIndexTemplate).toHaveBeenCalledTimes(
-            useDataStreamForAlerts ? 1 : 2
-          );
-          expect(clusterClient.indices.putMapping).toHaveBeenCalledTimes(
-            useDataStreamForAlerts ? 1 : 2
-          );
+          expect(clusterClient.indices.putSettings).toHaveBeenCalledTimes(1);
+          expect(clusterClient.indices.simulateIndexTemplate).toHaveBeenCalledTimes(1);
+          expect(clusterClient.indices.putMapping).toHaveBeenCalledTimes(1);
         });
 
         test('should skip initialization if context already exists', async () => {
@@ -1031,7 +1050,7 @@ describe('Alerts Service', () => {
             expect(clusterClient.indices.createDataStream).not.toHaveBeenCalled();
             expect(clusterClient.indices.getDataStream).toHaveBeenCalled();
           } else {
-            expect(clusterClient.indices.create).toHaveBeenCalled();
+            expect(clusterClient.indices.create).not.toHaveBeenCalled();
             expect(clusterClient.indices.getAlias).toHaveBeenCalled();
           }
         });
@@ -1168,8 +1187,8 @@ describe('Alerts Service', () => {
           }
         });
 
-        test('should log error and set initialized to false if updating index settings for existing indices throws error', async () => {
-          clusterClient.indices.putSettings.mockRejectedValueOnce(new Error('fail'));
+        test('should log error but set initialized to true if updating index settings for existing indices throws error', async () => {
+          clusterClient.indices.putSettings.mockRejectedValue(new Error('fail'));
 
           alertsService.register(TestRegistrationContext);
           await retryUntil('error logger called', async () => logger.error.mock.calls.length > 0);
@@ -1179,12 +1198,10 @@ describe('Alerts Service', () => {
               TestRegistrationContext.context,
               DEFAULT_NAMESPACE_STRING
             )
-          ).toEqual({ error: 'Failure during installation. fail', result: false });
+          ).toEqual({ result: true });
 
           expect(logger.error).toHaveBeenCalledWith(
-            useDataStreamForAlerts
-              ? `Failed to PUT index.mapping.total_fields.limit settings for .alerts-test.alerts-default: fail`
-              : `Failed to PUT index.mapping.total_fields.limit settings for alias_1: fail`
+            `Failed to PUT index.mapping.total_fields.limit settings for .alerts-test.alerts-default: fail`
           );
 
           expect(clusterClient.ilm.putLifecycle).toHaveBeenCalledTimes(
@@ -1194,7 +1211,7 @@ describe('Alerts Service', () => {
           expect(clusterClient.indices.simulateTemplate).toHaveBeenCalled();
           expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalled();
           expect(clusterClient.indices.putSettings).toHaveBeenCalled();
-          expect(clusterClient.indices.simulateIndexTemplate).not.toHaveBeenCalled();
+          expect(clusterClient.indices.simulateIndexTemplate).toHaveBeenCalled();
           expect(clusterClient.indices.putMapping).not.toHaveBeenCalled();
 
           if (useDataStreamForAlerts) {
@@ -1218,7 +1235,7 @@ describe('Alerts Service', () => {
           expect(logger.error).toHaveBeenCalledWith(
             useDataStreamForAlerts
               ? `Ignored PUT mappings for .alerts-test.alerts-default; error generating simulated mappings: fail`
-              : `Ignored PUT mappings for alias_1; error generating simulated mappings: fail`
+              : `Ignored PUT mappings for .internal.alerts-test.alerts-default-000001; error generating simulated mappings: fail`
           );
 
           expect(clusterClient.ilm.putLifecycle).toHaveBeenCalledTimes(
@@ -1227,22 +1244,22 @@ describe('Alerts Service', () => {
           expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(4);
           expect(clusterClient.indices.simulateTemplate).toHaveBeenCalled();
           expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalled();
-          expect(clusterClient.indices.putSettings).toHaveBeenCalled();
+          expect(clusterClient.indices.putSettings).not.toHaveBeenCalled();
           expect(clusterClient.indices.simulateIndexTemplate).toHaveBeenCalled();
 
           if (useDataStreamForAlerts) {
             expect(clusterClient.indices.createDataStream).not.toHaveBeenCalled();
             expect(clusterClient.indices.getDataStream).toHaveBeenCalled();
           } else {
-            expect(clusterClient.indices.create).toHaveBeenCalled();
+            expect(clusterClient.indices.create).not.toHaveBeenCalled();
             expect(clusterClient.indices.getAlias).toHaveBeenCalled();
 
             // this is called to update backing indices, so not used with data streams
-            expect(clusterClient.indices.putMapping).toHaveBeenCalled();
+            expect(clusterClient.indices.putMapping).not.toHaveBeenCalled();
           }
         });
 
-        test('should log error and set initialized to false if updating index mappings for existing indices throws error', async () => {
+        test('should log error but set initialized to true if updating index mappings for existing indices throws error', async () => {
           clusterClient.indices.putMapping.mockRejectedValueOnce(new Error('fail'));
 
           alertsService.register(TestRegistrationContext);
@@ -1252,15 +1269,11 @@ describe('Alerts Service', () => {
               TestRegistrationContext.context,
               DEFAULT_NAMESPACE_STRING
             )
-          ).toEqual({ error: 'Failure during installation. fail', result: false });
+          ).toEqual({ result: true });
 
-          if (useDataStreamForAlerts) {
-            expect(logger.error).toHaveBeenCalledWith(
-              `Failed to PUT mapping for .alerts-test.alerts-default: fail`
-            );
-          } else {
-            expect(logger.error).toHaveBeenCalledWith(`Failed to PUT mapping for alias_1: fail`);
-          }
+          expect(logger.error).toHaveBeenCalledWith(
+            `Failed to PUT mapping for .alerts-test.alerts-default: fail`
+          );
 
           expect(clusterClient.ilm.putLifecycle).toHaveBeenCalledTimes(
             useDataStreamForAlerts ? 0 : 1
@@ -1281,7 +1294,46 @@ describe('Alerts Service', () => {
           }
         });
 
-        test('does not updating settings or mappings if no existing concrete indices', async () => {
+        test('should log error and set initialized to false if updating index mappings and rolling over both fail', async () => {
+          clusterClient.indices.putMapping.mockRejectedValue(new Error('fail'));
+          clusterClient.indices.rollover.mockRejectedValue(new Error('rollover failure'));
+
+          alertsService.register(TestRegistrationContext);
+          await retryUntil('error logger called', async () => logger.error.mock.calls.length > 0);
+          expect(
+            await alertsService.getContextInitializationPromise(
+              TestRegistrationContext.context,
+              DEFAULT_NAMESPACE_STRING
+            )
+          ).toEqual({ error: 'Failure during installation. rollover failure', result: false });
+
+          expect(logger.error).toHaveBeenCalledWith(
+            `Failed to PUT mapping for .alerts-test.alerts-default: fail`
+          );
+          expect(logger.error).toHaveBeenCalledWith(
+            'Error initializing context test - Failure during installation. rollover failure'
+          );
+
+          expect(clusterClient.ilm.putLifecycle).toHaveBeenCalledTimes(
+            useDataStreamForAlerts ? 0 : 1
+          );
+          expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(4);
+          expect(clusterClient.indices.simulateTemplate).toHaveBeenCalled();
+          expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalled();
+          expect(clusterClient.indices.putSettings).toHaveBeenCalled();
+          expect(clusterClient.indices.simulateIndexTemplate).toHaveBeenCalled();
+          expect(clusterClient.indices.putMapping).toHaveBeenCalled();
+
+          if (useDataStreamForAlerts) {
+            expect(clusterClient.indices.createDataStream).not.toHaveBeenCalled();
+            expect(clusterClient.indices.getDataStream).toHaveBeenCalled();
+          } else {
+            expect(clusterClient.indices.create).not.toHaveBeenCalled();
+            expect(clusterClient.indices.getAlias).toHaveBeenCalled();
+          }
+        });
+
+        test('does not update settings or mappings if no existing concrete indices', async () => {
           clusterClient.indices.getAlias.mockImplementationOnce(async () => ({}));
           clusterClient.indices.getDataStream.mockImplementationOnce(async () => ({
             data_streams: [],
@@ -1341,7 +1393,7 @@ describe('Alerts Service', () => {
           ).toEqual({ result: true });
 
           expect(logger.debug).toHaveBeenCalledWith(
-            `Indices matching pattern .internal.alerts-test.alerts-default-* exist but none are set as the write index for alias .alerts-test.alerts-default`
+            `Indices for alias .alerts-test.alerts-default exist but none are set as the write index`
           );
 
           expect(clusterClient.ilm.putLifecycle).toHaveBeenCalled();
@@ -1401,6 +1453,8 @@ describe('Alerts Service', () => {
           // not applicable for data streams
           if (useDataStreamForAlerts) return;
 
+          clusterClient.indices.getAlias.mockImplementationOnce(async () => ({}));
+
           clusterClient.indices.create.mockRejectedValueOnce(new Error('fail'));
           clusterClient.indices.createDataStream.mockRejectedValueOnce(new Error('fail'));
 
@@ -1420,9 +1474,9 @@ describe('Alerts Service', () => {
           expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(4);
           expect(clusterClient.indices.simulateTemplate).toHaveBeenCalled();
           expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalled();
-          expect(clusterClient.indices.putSettings).toHaveBeenCalled();
-          expect(clusterClient.indices.simulateIndexTemplate).toHaveBeenCalled();
-          expect(clusterClient.indices.putMapping).toHaveBeenCalled();
+          expect(clusterClient.indices.putSettings).not.toHaveBeenCalled();
+          expect(clusterClient.indices.simulateIndexTemplate).not.toHaveBeenCalled();
+          expect(clusterClient.indices.putMapping).not.toHaveBeenCalled();
 
           if (useDataStreamForAlerts) {
             expect(clusterClient.indices.createDataStream).toHaveBeenCalled();
@@ -1436,6 +1490,8 @@ describe('Alerts Service', () => {
         test('should not throw error if create concrete index throws resource_already_exists_exception error and write index already exists', async () => {
           // not applicable for data streams
           if (useDataStreamForAlerts) return;
+
+          clusterClient.indices.getAlias.mockImplementationOnce(async () => ({}));
 
           const error = new Error(`fail`) as EsError;
           error.meta = {
@@ -1465,9 +1521,9 @@ describe('Alerts Service', () => {
           expect(clusterClient.indices.simulateTemplate).toHaveBeenCalled();
           expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalled();
           expect(clusterClient.indices.getAlias).toHaveBeenCalled();
-          expect(clusterClient.indices.putSettings).toHaveBeenCalled();
-          expect(clusterClient.indices.simulateIndexTemplate).toHaveBeenCalled();
-          expect(clusterClient.indices.putMapping).toHaveBeenCalled();
+          expect(clusterClient.indices.putSettings).not.toHaveBeenCalled();
+          expect(clusterClient.indices.simulateIndexTemplate).not.toHaveBeenCalled();
+          expect(clusterClient.indices.putMapping).not.toHaveBeenCalled();
           expect(clusterClient.indices.get).toHaveBeenCalled();
           expect(clusterClient.indices.create).toHaveBeenCalled();
         });
@@ -1475,6 +1531,8 @@ describe('Alerts Service', () => {
         test('should log error and set initialized to false if create concrete index throws resource_already_exists_exception error and write index does not already exists', async () => {
           // not applicable for data streams
           if (useDataStreamForAlerts) return;
+
+          clusterClient.indices.getAlias.mockImplementationOnce(async () => ({}));
 
           const error = new Error(`fail`) as EsError;
           error.meta = {
@@ -1511,9 +1569,9 @@ describe('Alerts Service', () => {
           expect(clusterClient.indices.simulateTemplate).toHaveBeenCalled();
           expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalled();
           expect(clusterClient.indices.getAlias).toHaveBeenCalled();
-          expect(clusterClient.indices.putSettings).toHaveBeenCalled();
-          expect(clusterClient.indices.simulateIndexTemplate).toHaveBeenCalled();
-          expect(clusterClient.indices.putMapping).toHaveBeenCalled();
+          expect(clusterClient.indices.putSettings).not.toHaveBeenCalled();
+          expect(clusterClient.indices.simulateIndexTemplate).not.toHaveBeenCalled();
+          expect(clusterClient.indices.putMapping).not.toHaveBeenCalled();
           expect(clusterClient.indices.get).toHaveBeenCalled();
           expect(clusterClient.indices.create).toHaveBeenCalled();
         });
@@ -1566,6 +1624,8 @@ describe('Alerts Service', () => {
               spaceId: 'default',
               tags: ['rule-', '-tags'],
               alertDelay: 0,
+              muteAll: false,
+              mutedInstanceIds: [],
             },
           });
 
@@ -1581,6 +1641,8 @@ describe('Alerts Service', () => {
             spaceId: 'default',
             isServerless: true,
             rule: {
+              muteAll: false,
+              mutedInstanceIds: [],
               consumer: 'bar',
               executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
               id: '1',
@@ -1621,6 +1683,8 @@ describe('Alerts Service', () => {
             namespace: 'default',
             spaceId: 'default',
             rule: {
+              muteAll: false,
+              mutedInstanceIds: [],
               consumer: 'bar',
               executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
               id: '1',
@@ -1676,6 +1740,8 @@ describe('Alerts Service', () => {
             namespace: 'default',
             spaceId: 'default',
             rule: {
+              muteAll: false,
+              mutedInstanceIds: [],
               consumer: 'bar',
               executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
               id: '1',
@@ -1700,7 +1766,7 @@ describe('Alerts Service', () => {
             expect(clusterClient.indices.createDataStream).not.toHaveBeenCalled();
             expect(clusterClient.indices.getDataStream).toHaveBeenCalled();
           } else {
-            expect(clusterClient.indices.create).toHaveBeenCalled();
+            expect(clusterClient.indices.create).not.toHaveBeenCalled();
             expect(clusterClient.indices.getAlias).toHaveBeenCalled();
           }
 
@@ -1716,6 +1782,8 @@ describe('Alerts Service', () => {
             spaceId: 'default',
             isServerless: false,
             rule: {
+              muteAll: false,
+              mutedInstanceIds: [],
               consumer: 'bar',
               executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
               id: '1',
@@ -1787,6 +1855,8 @@ describe('Alerts Service', () => {
               namespace: 'default',
               spaceId: 'default',
               rule: {
+                muteAll: false,
+                mutedInstanceIds: [],
                 consumer: 'bar',
                 executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
                 id: '1',
@@ -1809,6 +1879,8 @@ describe('Alerts Service', () => {
               namespace: 'default',
               spaceId: 'default',
               rule: {
+                muteAll: false,
+                mutedInstanceIds: [],
                 consumer: 'bar',
                 executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
                 id: '1',
@@ -1834,7 +1906,7 @@ describe('Alerts Service', () => {
             expect(clusterClient.indices.createDataStream).not.toHaveBeenCalled();
             expect(clusterClient.indices.getDataStream).toHaveBeenCalled();
           } else {
-            expect(clusterClient.indices.create).toHaveBeenCalled();
+            expect(clusterClient.indices.create).not.toHaveBeenCalled();
             expect(clusterClient.indices.getAlias).toHaveBeenCalled();
           }
           expect(AlertsClient).toHaveBeenCalledWith({
@@ -1849,6 +1921,8 @@ describe('Alerts Service', () => {
             spaceId: 'default',
             isServerless: false,
             rule: {
+              muteAll: false,
+              mutedInstanceIds: [],
               consumer: 'bar',
               executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
               id: '1',
@@ -1912,6 +1986,8 @@ describe('Alerts Service', () => {
             namespace: 'default',
             spaceId: 'default',
             rule: {
+              muteAll: false,
+              mutedInstanceIds: [],
               consumer: 'bar',
               executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
               id: '1',
@@ -1938,6 +2014,8 @@ describe('Alerts Service', () => {
             spaceId: 'default',
             isServerless: false,
             rule: {
+              muteAll: false,
+              mutedInstanceIds: [],
               consumer: 'bar',
               executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
               id: '1',
@@ -2009,6 +2087,8 @@ describe('Alerts Service', () => {
               namespace: 'default',
               spaceId: 'default',
               rule: {
+                muteAll: false,
+                mutedInstanceIds: [],
                 consumer: 'bar',
                 executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
                 id: '1',
@@ -2042,6 +2122,8 @@ describe('Alerts Service', () => {
             spaceId: 'default',
             isServerless: false,
             rule: {
+              muteAll: false,
+              mutedInstanceIds: [],
               consumer: 'bar',
               executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
               id: '1',
@@ -2118,6 +2200,8 @@ describe('Alerts Service', () => {
               namespace: 'default',
               spaceId: 'default',
               rule: {
+                muteAll: false,
+                mutedInstanceIds: [],
                 consumer: 'bar',
                 executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
                 id: '1',
@@ -2190,6 +2274,8 @@ describe('Alerts Service', () => {
             namespace: 'default',
             spaceId: 'default',
             rule: {
+              muteAll: false,
+              mutedInstanceIds: [],
               consumer: 'bar',
               executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
               id: '1',
@@ -2262,6 +2348,8 @@ describe('Alerts Service', () => {
             namespace: 'default',
             spaceId: 'default',
             rule: {
+              muteAll: false,
+              mutedInstanceIds: [],
               consumer: 'bar',
               executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
               id: '1',
@@ -2332,6 +2420,8 @@ describe('Alerts Service', () => {
             namespace: 'default',
             spaceId: 'default',
             rule: {
+              muteAll: false,
+              mutedInstanceIds: [],
               consumer: 'bar',
               executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
               id: '1',
@@ -2461,11 +2551,7 @@ describe('Alerts Service', () => {
             async () => (await getContextInitialized(alertsService)) === true
           );
 
-          if (useDataStreamForAlerts) {
-            expect(clusterClient.indices.putSettings).toHaveBeenCalledTimes(3);
-          } else {
-            expect(clusterClient.indices.putSettings).toHaveBeenCalledTimes(4);
-          }
+          expect(clusterClient.indices.putSettings).toHaveBeenCalledTimes(3);
         });
 
         test('should retry updating index mappings for existing indices for transient ES errors', async () => {
@@ -2494,15 +2580,14 @@ describe('Alerts Service', () => {
             async () => (await getContextInitialized(alertsService)) === true
           );
 
-          expect(clusterClient.indices.putMapping).toHaveBeenCalledTimes(
-            useDataStreamForAlerts ? 3 : 4
-          );
+          expect(clusterClient.indices.putMapping).toHaveBeenCalledTimes(3);
         });
 
         test('should retry creating concrete index for transient ES errors', async () => {
           clusterClient.indices.getDataStream.mockImplementationOnce(async () => ({
             data_streams: [],
           }));
+          clusterClient.indices.getAlias.mockImplementationOnce(async () => ({}));
           clusterClient.indices.createDataStream
             .mockRejectedValueOnce(new EsErrors.ConnectionError('foo'))
             .mockRejectedValueOnce(new EsErrors.TimeoutError('timeout'))
@@ -2580,6 +2665,640 @@ describe('Alerts Service', () => {
           expect(logger.debug).toHaveBeenCalledWith(
             `Server is stopping; must stop all async operations`
           );
+        });
+      });
+
+      describe('muteAlertInstance', () => {
+        test('should throw an error if no indices are provided', async () => {
+          const alertsService = new AlertsService({
+            logger,
+            elasticsearchClientPromise: Promise.resolve(clusterClient),
+            pluginStop$,
+            kibanaVersion: '8.8.0',
+            dataStreamAdapter,
+            elasticsearchAndSOAvailability$,
+            isServerless: false,
+          });
+
+          await expect(
+            alertsService.muteAlertInstance({
+              ruleId: 'rule-1',
+              alertInstanceId: 'alert-1',
+              indices: [],
+              logger,
+            })
+          ).rejects.toThrowErrorMatchingInlineSnapshot(
+            `"Unable to update mute state for rules (example: {\\"ruleId\\":\\"rule-1\\",\\"alertInstanceIds\\":[\\"alert-1\\"]}) - no alert indices available"`
+          );
+        });
+
+        test('should call updateByQuery with the correct parameters', async () => {
+          const alertsService = new AlertsService({
+            logger,
+            elasticsearchClientPromise: Promise.resolve(clusterClient),
+            pluginStop$,
+            kibanaVersion: '8.8.0',
+            dataStreamAdapter,
+            elasticsearchAndSOAvailability$,
+            isServerless: false,
+          });
+
+          await alertsService.muteAlertInstance({
+            ruleId: 'rule-1',
+            alertInstanceId: 'alert-1',
+            indices: ['.alerts-default'],
+            logger,
+          });
+
+          expect(clusterClient.updateByQuery).toHaveBeenCalledWith({
+            index: ['.alerts-default'],
+            conflicts: 'proceed',
+            wait_for_completion: false,
+            refresh: true,
+            ignore_unavailable: true,
+            query: {
+              bool: {
+                minimum_should_match: 1,
+                must: [{ term: { 'kibana.alert.status': 'active' } }],
+                should: [
+                  {
+                    bool: {
+                      must: [
+                        { term: { 'kibana.alert.rule.uuid': 'rule-1' } },
+                        { terms: { 'kibana.alert.instance.id': ['alert-1'] } },
+                      ],
+                    },
+                  },
+                ],
+              },
+            },
+            script: {
+              source: `ctx._source['kibana.alert.muted'] = params.muted;`,
+              lang: 'painless',
+              params: { muted: true },
+            },
+          });
+        });
+
+        test('should re-throw an error if updateByQuery fails', async () => {
+          clusterClient.updateByQuery.mockRejectedValueOnce(new Error('ES connection failed'));
+          const alertsService = new AlertsService({
+            logger,
+            elasticsearchClientPromise: Promise.resolve(clusterClient),
+            pluginStop$,
+            kibanaVersion: '8.8.0',
+            dataStreamAdapter,
+            elasticsearchAndSOAvailability$,
+            isServerless: false,
+          });
+
+          await expect(
+            alertsService.muteAlertInstance({
+              ruleId: 'rule-1',
+              alertInstanceId: 'alert-1',
+              indices: ['.alerts-default'],
+              logger,
+            })
+          ).rejects.toThrowErrorMatchingInlineSnapshot(`"ES connection failed"`);
+        });
+      });
+
+      describe('unmuteAlertInstance', () => {
+        test('should throw an error if no indices are provided', async () => {
+          const alertsService = new AlertsService({
+            logger,
+            elasticsearchClientPromise: Promise.resolve(clusterClient),
+            pluginStop$,
+            kibanaVersion: '8.8.0',
+            dataStreamAdapter,
+            elasticsearchAndSOAvailability$,
+            isServerless: false,
+          });
+
+          await expect(
+            alertsService.unmuteAlertInstance({
+              ruleId: 'rule-1',
+              alertInstanceId: 'alert-1',
+              indices: [],
+              logger,
+            })
+          ).rejects.toThrowErrorMatchingInlineSnapshot(
+            `"Unable to update mute state for rules (example: {\\"ruleId\\":\\"rule-1\\",\\"alertInstanceIds\\":[\\"alert-1\\"]}) - no alert indices available"`
+          );
+        });
+
+        test('should call updateByQuery with the correct parameters', async () => {
+          const alertsService = new AlertsService({
+            logger,
+            elasticsearchClientPromise: Promise.resolve(clusterClient),
+            pluginStop$,
+            kibanaVersion: '8.8.0',
+            dataStreamAdapter,
+            elasticsearchAndSOAvailability$,
+            isServerless: false,
+          });
+
+          await alertsService.unmuteAlertInstance({
+            ruleId: 'rule-1',
+            alertInstanceId: 'alert-1',
+            indices: ['.alerts-default'],
+            logger,
+          });
+
+          expect(clusterClient.updateByQuery).toHaveBeenCalledWith({
+            index: ['.alerts-default'],
+            conflicts: 'proceed',
+            wait_for_completion: false,
+            refresh: true,
+            ignore_unavailable: true,
+            query: {
+              bool: {
+                minimum_should_match: 1,
+                must: [{ term: { 'kibana.alert.status': 'active' } }],
+                should: [
+                  {
+                    bool: {
+                      must: [
+                        { term: { 'kibana.alert.rule.uuid': 'rule-1' } },
+                        { terms: { 'kibana.alert.instance.id': ['alert-1'] } },
+                      ],
+                    },
+                  },
+                ],
+              },
+            },
+            script: {
+              source: `ctx._source['kibana.alert.muted'] = params.muted;`,
+              lang: 'painless',
+              params: { muted: false },
+            },
+          });
+        });
+
+        test('should re-throw an error if updateByQuery fails', async () => {
+          clusterClient.updateByQuery.mockRejectedValueOnce(new Error('ES connection failed'));
+          const alertsService = new AlertsService({
+            logger,
+            elasticsearchClientPromise: Promise.resolve(clusterClient),
+            pluginStop$,
+            kibanaVersion: '8.8.0',
+            dataStreamAdapter,
+            elasticsearchAndSOAvailability$,
+            isServerless: false,
+          });
+
+          await expect(
+            alertsService.unmuteAlertInstance({
+              ruleId: 'rule-1',
+              alertInstanceId: 'alert-1',
+              indices: ['.alerts-default'],
+              logger,
+            })
+          ).rejects.toThrowErrorMatchingInlineSnapshot(`"ES connection failed"`);
+        });
+      });
+
+      describe('muteAllAlerts', () => {
+        test('should throw an error if no indices are provided', async () => {
+          const alertsService = new AlertsService({
+            logger,
+            elasticsearchClientPromise: Promise.resolve(clusterClient),
+            pluginStop$,
+            kibanaVersion: '8.8.0',
+            dataStreamAdapter,
+            elasticsearchAndSOAvailability$,
+            isServerless: false,
+          });
+
+          await expect(
+            alertsService.muteAllAlerts({
+              ruleId: 'rule-1',
+              indices: [],
+              logger,
+            })
+          ).rejects.toThrowErrorMatchingInlineSnapshot(
+            `"Unable to update mute state for rules (example: {\\"ruleId\\":\\"rule-1\\"}) - no alert indices available"`
+          );
+        });
+
+        test('should call updateByQuery with the correct parameters', async () => {
+          const alertsService = new AlertsService({
+            logger,
+            elasticsearchClientPromise: Promise.resolve(clusterClient),
+            pluginStop$,
+            kibanaVersion: '8.8.0',
+            dataStreamAdapter,
+            elasticsearchAndSOAvailability$,
+            isServerless: false,
+          });
+
+          await alertsService.muteAllAlerts({
+            ruleId: 'rule-1',
+            indices: ['.alerts-default'],
+            logger,
+          });
+
+          expect(clusterClient.updateByQuery).toHaveBeenCalledWith({
+            index: ['.alerts-default'],
+            conflicts: 'proceed',
+            wait_for_completion: false,
+            refresh: true,
+            ignore_unavailable: true,
+            query: {
+              bool: {
+                minimum_should_match: 1,
+                must: [{ term: { 'kibana.alert.status': 'active' } }],
+                should: [
+                  {
+                    bool: {
+                      must: [{ term: { 'kibana.alert.rule.uuid': 'rule-1' } }],
+                    },
+                  },
+                ],
+              },
+            },
+            script: {
+              source: `ctx._source['kibana.alert.muted'] = params.muted;`,
+              lang: 'painless',
+              params: { muted: true },
+            },
+          });
+        });
+
+        test('should re-throw an error if updateByQuery fails', async () => {
+          clusterClient.updateByQuery.mockRejectedValueOnce(new Error('ES connection failed'));
+          const alertsService = new AlertsService({
+            logger,
+            elasticsearchClientPromise: Promise.resolve(clusterClient),
+            pluginStop$,
+            kibanaVersion: '8.8.0',
+            dataStreamAdapter,
+            elasticsearchAndSOAvailability$,
+            isServerless: false,
+          });
+
+          await expect(
+            alertsService.muteAllAlerts({
+              ruleId: 'rule-1',
+              indices: ['.alerts-default'],
+              logger,
+            })
+          ).rejects.toThrowErrorMatchingInlineSnapshot(`"ES connection failed"`);
+        });
+      });
+
+      describe('unmuteAllAlerts', () => {
+        test('should throw an error if no indices are provided', async () => {
+          const alertsService = new AlertsService({
+            logger,
+            elasticsearchClientPromise: Promise.resolve(clusterClient),
+            pluginStop$,
+            kibanaVersion: '8.8.0',
+            dataStreamAdapter,
+            elasticsearchAndSOAvailability$,
+            isServerless: false,
+          });
+
+          await expect(
+            alertsService.unmuteAllAlerts({
+              ruleId: 'rule-1',
+              indices: [],
+              logger,
+            })
+          ).rejects.toThrowErrorMatchingInlineSnapshot(
+            `"Unable to update mute state for rules (example: {\\"ruleId\\":\\"rule-1\\"}) - no alert indices available"`
+          );
+        });
+
+        test('should call updateByQuery with the correct parameters', async () => {
+          const alertsService = new AlertsService({
+            logger,
+            elasticsearchClientPromise: Promise.resolve(clusterClient),
+            pluginStop$,
+            kibanaVersion: '8.8.0',
+            dataStreamAdapter,
+            elasticsearchAndSOAvailability$,
+            isServerless: false,
+          });
+
+          await alertsService.unmuteAllAlerts({
+            ruleId: 'rule-1',
+            indices: ['.alerts-default'],
+            logger,
+          });
+
+          expect(clusterClient.updateByQuery).toHaveBeenCalledWith({
+            index: ['.alerts-default'],
+            conflicts: 'proceed',
+            wait_for_completion: false,
+            refresh: true,
+            ignore_unavailable: true,
+            query: {
+              bool: {
+                minimum_should_match: 1,
+                must: [{ term: { 'kibana.alert.status': 'active' } }],
+                should: [
+                  {
+                    bool: {
+                      must: [{ term: { 'kibana.alert.rule.uuid': 'rule-1' } }],
+                    },
+                  },
+                ],
+              },
+            },
+            script: {
+              source: `ctx._source['kibana.alert.muted'] = params.muted;`,
+              lang: 'painless',
+              params: { muted: false },
+            },
+          });
+        });
+
+        test('should re-throw an error if updateByQuery fails', async () => {
+          clusterClient.updateByQuery.mockRejectedValueOnce(new Error('ES connection failed'));
+          const alertsService = new AlertsService({
+            logger,
+            elasticsearchClientPromise: Promise.resolve(clusterClient),
+            pluginStop$,
+            kibanaVersion: '8.8.0',
+            dataStreamAdapter,
+            elasticsearchAndSOAvailability$,
+            isServerless: false,
+          });
+
+          await expect(
+            alertsService.unmuteAllAlerts({
+              ruleId: 'rule-1',
+              indices: ['.alerts-default'],
+              logger,
+            })
+          ).rejects.toThrowErrorMatchingInlineSnapshot(`"ES connection failed"`);
+        });
+      });
+
+      describe('getAlertSnoozeSnapshot', () => {
+        test('should fetch and return the requested snapshot fields', async () => {
+          clusterClient.search.mockResponseOnce({
+            hits: {
+              total: 1,
+              hits: [
+                {
+                  _index: '.alerts-default',
+                  _id: 'alert-1',
+                  _source: {
+                    'host.name': 'web-01',
+                    'kibana.alert.severity': 'high',
+                  },
+                },
+              ],
+            },
+            took: 0,
+            timed_out: false,
+            _shards: { total: 0, successful: 0, skipped: 0, failed: 0 },
+          });
+
+          const alertsService = new AlertsService({
+            logger,
+            elasticsearchClientPromise: Promise.resolve(clusterClient),
+            pluginStop$,
+            kibanaVersion: '8.8.0',
+            dataStreamAdapter,
+            elasticsearchAndSOAvailability$,
+            isServerless: false,
+          });
+
+          const result = await alertsService.getAlertSnoozeSnapshot({
+            indices: ['.alerts-default'],
+            alertId: 'alert-1',
+            ruleId: 'rule-1',
+            fields: ['host.name', 'kibana.alert.severity'],
+          });
+
+          expect(result).toEqual({
+            'host.name': 'web-01',
+            'kibana.alert.severity': 'high',
+          });
+          expect(clusterClient.search).toHaveBeenCalledWith({
+            index: ['.alerts-default'],
+            allow_no_indices: true,
+            size: 1,
+            _source: ['host.name', 'kibana.alert.severity'],
+            query: {
+              bool: {
+                must: [
+                  { term: { 'kibana.alert.rule.uuid': 'rule-1' } },
+                  { term: { 'kibana.alert.status': 'active' } },
+                ],
+                filter: [{ term: { 'kibana.alert.instance.id': 'alert-1' } }],
+              },
+            },
+          });
+        });
+      });
+
+      describe('muteAlertInstances', () => {
+        test('should throw an error if no indices are provided', async () => {
+          const alertsService = new AlertsService({
+            logger,
+            elasticsearchClientPromise: Promise.resolve(clusterClient),
+            pluginStop$,
+            kibanaVersion: '8.8.0',
+            dataStreamAdapter,
+            elasticsearchAndSOAvailability$,
+            isServerless: false,
+          });
+
+          await expect(
+            alertsService.muteAlertInstances({
+              targets: [{ ruleId: 'rule-1', alertInstanceIds: ['alert-1'] }],
+              indices: [],
+              logger,
+            })
+          ).rejects.toThrowErrorMatchingInlineSnapshot(
+            `"Unable to update mute state for rules (example: {\\"ruleId\\":\\"rule-1\\",\\"alertInstanceIds\\":[\\"alert-1\\"]}) - no alert indices available"`
+          );
+        });
+
+        test('should call updateByQuery with the correct parameters', async () => {
+          const alertsService = new AlertsService({
+            logger,
+            elasticsearchClientPromise: Promise.resolve(clusterClient),
+            pluginStop$,
+            kibanaVersion: '8.8.0',
+            dataStreamAdapter,
+            elasticsearchAndSOAvailability$,
+            isServerless: false,
+          });
+
+          await alertsService.muteAlertInstances({
+            targets: [
+              { ruleId: 'rule-1', alertInstanceIds: ['alert-1-1', 'alert-1-2'] },
+              { ruleId: 'rule-2', alertInstanceIds: ['alert-2'] },
+            ],
+            indices: ['.alerts-default'],
+            logger,
+          });
+
+          expect(clusterClient.updateByQuery).toHaveBeenCalledWith({
+            index: ['.alerts-default'],
+            conflicts: 'proceed',
+            wait_for_completion: false,
+            refresh: true,
+            ignore_unavailable: true,
+            query: {
+              bool: {
+                minimum_should_match: 1,
+                must: [{ term: { 'kibana.alert.status': 'active' } }],
+                should: [
+                  {
+                    bool: {
+                      must: [
+                        { term: { 'kibana.alert.rule.uuid': 'rule-1' } },
+                        { terms: { 'kibana.alert.instance.id': ['alert-1-1', 'alert-1-2'] } },
+                      ],
+                    },
+                  },
+                  {
+                    bool: {
+                      must: [
+                        { term: { 'kibana.alert.rule.uuid': 'rule-2' } },
+                        { terms: { 'kibana.alert.instance.id': ['alert-2'] } },
+                      ],
+                    },
+                  },
+                ],
+              },
+            },
+            script: {
+              source: `ctx._source['kibana.alert.muted'] = params.muted;`,
+              lang: 'painless',
+              params: { muted: true },
+            },
+          });
+        });
+
+        test('should re-throw an error if updateByQuery fails', async () => {
+          clusterClient.updateByQuery.mockRejectedValueOnce(new Error('ES connection failed'));
+          const alertsService = new AlertsService({
+            logger,
+            elasticsearchClientPromise: Promise.resolve(clusterClient),
+            pluginStop$,
+            kibanaVersion: '8.8.0',
+            dataStreamAdapter,
+            elasticsearchAndSOAvailability$,
+            isServerless: false,
+          });
+
+          await expect(
+            alertsService.muteAlertInstances({
+              targets: [{ ruleId: 'rule-1', alertInstanceIds: ['alert-1'] }],
+              indices: ['.alerts-default'],
+              logger,
+            })
+          ).rejects.toThrowErrorMatchingInlineSnapshot(`"ES connection failed"`);
+        });
+      });
+
+      describe('unmuteAlertInstances', () => {
+        test('should throw an error if no indices are provided', async () => {
+          const alertsService = new AlertsService({
+            logger,
+            elasticsearchClientPromise: Promise.resolve(clusterClient),
+            pluginStop$,
+            kibanaVersion: '8.8.0',
+            dataStreamAdapter,
+            elasticsearchAndSOAvailability$,
+            isServerless: false,
+          });
+
+          await expect(
+            alertsService.unmuteAlertInstances({
+              targets: [{ ruleId: 'rule-1', alertInstanceIds: ['alert-1'] }],
+              indices: [],
+              logger,
+            })
+          ).rejects.toThrowErrorMatchingInlineSnapshot(
+            `"Unable to update mute state for rules (example: {\\"ruleId\\":\\"rule-1\\",\\"alertInstanceIds\\":[\\"alert-1\\"]}) - no alert indices available"`
+          );
+        });
+
+        test('should call updateByQuery with the correct parameters', async () => {
+          const alertsService = new AlertsService({
+            logger,
+            elasticsearchClientPromise: Promise.resolve(clusterClient),
+            pluginStop$,
+            kibanaVersion: '8.8.0',
+            dataStreamAdapter,
+            elasticsearchAndSOAvailability$,
+            isServerless: false,
+          });
+
+          await alertsService.unmuteAlertInstances({
+            targets: [
+              { ruleId: 'rule-1', alertInstanceIds: ['alert-1-1', 'alert-1-2'] },
+              { ruleId: 'rule-2', alertInstanceIds: ['alert-2'] },
+            ],
+            indices: ['.alerts-default'],
+            logger,
+          });
+
+          expect(clusterClient.updateByQuery).toHaveBeenCalledWith({
+            index: ['.alerts-default'],
+            conflicts: 'proceed',
+            wait_for_completion: false,
+            refresh: true,
+            ignore_unavailable: true,
+            query: {
+              bool: {
+                minimum_should_match: 1,
+                must: [{ term: { 'kibana.alert.status': 'active' } }],
+                should: [
+                  {
+                    bool: {
+                      must: [
+                        { term: { 'kibana.alert.rule.uuid': 'rule-1' } },
+                        { terms: { 'kibana.alert.instance.id': ['alert-1-1', 'alert-1-2'] } },
+                      ],
+                    },
+                  },
+                  {
+                    bool: {
+                      must: [
+                        { term: { 'kibana.alert.rule.uuid': 'rule-2' } },
+                        { terms: { 'kibana.alert.instance.id': ['alert-2'] } },
+                      ],
+                    },
+                  },
+                ],
+              },
+            },
+            script: {
+              source: `ctx._source['kibana.alert.muted'] = params.muted;`,
+              lang: 'painless',
+              params: { muted: false },
+            },
+          });
+        });
+
+        test('should re-throw an error if updateByQuery fails', async () => {
+          clusterClient.updateByQuery.mockRejectedValueOnce(new Error('ES connection failed'));
+          const alertsService = new AlertsService({
+            logger,
+            elasticsearchClientPromise: Promise.resolve(clusterClient),
+            pluginStop$,
+            kibanaVersion: '8.8.0',
+            dataStreamAdapter,
+            elasticsearchAndSOAvailability$,
+            isServerless: false,
+          });
+
+          await expect(
+            alertsService.unmuteAlertInstances({
+              targets: [{ ruleId: 'rule-1', alertInstanceIds: ['alert-1'] }],
+              indices: ['.alerts-default'],
+              logger,
+            })
+          ).rejects.toThrowErrorMatchingInlineSnapshot(`"ES connection failed"`);
         });
       });
     });

@@ -15,17 +15,23 @@ import {
   FieldFinalSideMode,
   useFieldUpgradeContext,
 } from '../../rule_upgrade/field_upgrade_context';
+import { useFieldEditFormContext } from '../context/field_edit_form_context';
 import * as i18n from './translations';
 
 export function FieldFinalSideContent(): JSX.Element {
   const { rightSideMode, setEditMode, setReadOnlyMode } = useFieldUpgradeContext();
+  const { form } = useFieldEditFormContext();
 
   switch (rightSideMode) {
     case FieldFinalSideMode.Readonly:
       return (
         <>
           <EuiFlexGroup justifyContent="flexEnd">
-            <EuiButtonEmpty iconType="pencil" onClick={setEditMode}>
+            <EuiButtonEmpty
+              iconType="pencil"
+              onClick={setEditMode}
+              data-test-subj="prebuilt-rule-upgrade-flyout-field-edit"
+            >
               {i18n.EDIT}
             </EuiButtonEmpty>
           </EuiFlexGroup>
@@ -41,7 +47,12 @@ export function FieldFinalSideContent(): JSX.Element {
       return (
         <>
           <EuiFlexGroup justifyContent="flexEnd">
-            <EuiButtonEmpty iconType="cross" onClick={setReadOnlyMode}>
+            <EuiButtonEmpty
+              iconType="cross"
+              onClick={setReadOnlyMode}
+              isDisabled={form?.isSubmitting}
+              data-test-subj="prebuilt-rule-upgrade-flyout-field-cancel"
+            >
               {i18n.CANCEL}
             </EuiButtonEmpty>
           </EuiFlexGroup>

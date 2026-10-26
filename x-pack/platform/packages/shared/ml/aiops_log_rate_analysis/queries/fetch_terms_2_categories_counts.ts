@@ -77,7 +77,7 @@ export async function fetchTerms2CategoriesCounts(
   abortSignal?: AbortSignal
 ): Promise<FetchFrequentItemSetsResponse> {
   const searches: Array<
-    | estypes.MsearchMultisearchBody
+    | estypes.SearchSearchRequestBody
     | {
         index: string;
       }
@@ -86,7 +86,10 @@ export async function fetchTerms2CategoriesCounts(
 
   significantCategories.forEach((category) => {
     significantTerms.forEach((term) => {
-      searches.push({ index: params.index });
+      searches.push({
+        index: params.index,
+        ...(params.projectRouting ? { project_routing: params.projectRouting } : {}),
+      });
       searches.push(
         getTerm2CategoryCountRequest(
           params,
@@ -95,7 +98,7 @@ export async function fetchTerms2CategoriesCounts(
           { key: `${category.key}`, count: category.doc_count, examples: [], regex: '' },
           from,
           to
-        ) as estypes.MsearchMultisearchBody
+        ) as estypes.SearchSearchRequestBody
       );
       results.push({
         set: [
@@ -111,7 +114,10 @@ export async function fetchTerms2CategoriesCounts(
     });
 
     itemSets.forEach((itemSet) => {
-      searches.push({ index: params.index });
+      searches.push({
+        index: params.index,
+        ...(params.projectRouting ? { project_routing: params.projectRouting } : {}),
+      });
       searches.push(
         getTerm2CategoryCountRequest(
           params,
@@ -120,7 +126,7 @@ export async function fetchTerms2CategoriesCounts(
           { key: `${category.key}`, count: category.doc_count, examples: [], regex: '' },
           from,
           to
-        ) as estypes.MsearchMultisearchBody
+        ) as estypes.SearchSearchRequestBody
       );
       results.push({
         set: [...itemSet.set, { fieldName: category.fieldName, fieldValue: category.fieldValue }],

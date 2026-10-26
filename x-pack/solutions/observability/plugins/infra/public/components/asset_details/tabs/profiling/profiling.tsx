@@ -11,12 +11,14 @@ import React, { useCallback } from 'react';
 import {
   EmbeddableProfilingSearchBar,
   ProfilingEmptyState,
+  useProfilingSchemaState,
 } from '@kbn/observability-shared-plugin/public';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { ProfilingStatus } from '@kbn/profiling-utils';
+import type { ProfilingSchemasStatus } from '@kbn/profiling-utils';
+import { hasUsableProfilingData } from '@kbn/profiling-utils';
 import { isPending, useFetcher } from '../../../../hooks/use_fetcher';
 import { Flamegraph } from './flamegraph';
 import { Functions } from './functions';
@@ -24,20 +26,23 @@ import { useTabSwitcherContext } from '../../hooks/use_tab_switcher';
 import { ErrorPrompt } from './error_prompt';
 import { Threads } from './threads';
 import { DescriptionCallout } from './description_callout';
+import { ProfilingCpsCallout } from './profiling_cps_callout';
+import { ProfilingSchemaSelector } from './profiling_schema_selector';
 import { Popover } from '../common/popover';
 import { useDatePickerContext } from '../../hooks/use_date_picker';
 import { useProfilingKuery } from '../../hooks/use_profiling_kuery';
 import { useRequestObservable } from '../../hooks/use_request_observable';
 
-export function Profiling() {
+export function Profiling({ showSearchBar = true }: { showSearchBar?: boolean }) {
   const { isActiveTab } = useTabSwitcherContext();
   const { dateRange, setDateRange } = useDatePickerContext();
   const { fullKuery, customKuery, setCustomKuery } = useProfilingKuery();
-  const { request$ } = useRequestObservable<ProfilingStatus>();
+  const { schema } = useProfilingSchemaState();
+  const { request$ } = useRequestObservable<ProfilingSchemasStatus>();
 
   const { data, status, error } = useFetcher(
     async (callApi) => {
-      return callApi<ProfilingStatus>(`/api/infra/profiling/status`, {
+      return callApi<ProfilingSchemasStatus>(`/api/infra/profiling/status`, {
         method: 'GET',
       });
     },
@@ -68,11 +73,11 @@ export function Profiling() {
       content: (
         <>
           <EuiSpacer />
-          <Flamegraph kuery={fullKuery} />
+          <Flamegraph kuery={fullKuery} schema={schema} />
         </>
       ),
       append: (
-        <Popover iconSize="s" iconColor="subdued" icon="questionInCircle">
+        <Popover iconSize="s" iconColor="subdued" icon="question">
           <EuiText size="xs">
             <FormattedMessage
               id="xpack.infra.profiling.flamegraphInfoPopoverBody"
@@ -104,11 +109,11 @@ export function Profiling() {
       content: (
         <>
           <EuiSpacer />
-          <Functions kuery={fullKuery} />
+          <Functions kuery={fullKuery} schema={schema} />
         </>
       ),
       append: (
-        <Popover iconSize="s" iconColor="subdued" icon="questionInCircle">
+        <Popover iconSize="s" iconColor="subdued" icon="question">
           <EuiText size="xs">
             <FormattedMessage
               id="xpack.infra.profiling.functionsInfoPopoverBody"
@@ -140,11 +145,11 @@ export function Profiling() {
       content: (
         <>
           <EuiSpacer />
-          <Threads kuery={fullKuery} />
+          <Threads kuery={fullKuery} schema={schema} />
         </>
       ),
       append: (
-        <Popover iconSize="s" iconColor="subdued" icon="questionInCircle">
+        <Popover iconSize="s" iconColor="subdued" icon="question">
           <EuiText size="xs">
             <FormattedMessage
               id="xpack.infra.profiling.threadsInfoPopoverBody"
@@ -175,19 +180,27 @@ export function Profiling() {
 
   return (
     <>
-      {data?.has_setup === false ? (
+      <ProfilingCpsCallout />
+      {data && !hasUsableProfilingData(data) ? (
         <ProfilingEmptyState />
       ) : (
         <>
-          <EmbeddableProfilingSearchBar
-            kuery={customKuery}
-            rangeFrom={dateRange.from}
-            rangeTo={dateRange.to}
-            onQuerySubmit={onSearchSubmit}
-            onRefresh={onSearchRefresh}
-          />
-          <EuiSpacer />
+          {showSearchBar && (
+            <>
+              <EmbeddableProfilingSearchBar
+                kuery={customKuery}
+                rangeFrom={dateRange.from}
+                rangeTo={dateRange.to}
+                schema={schema}
+                onQuerySubmit={onSearchSubmit}
+                onRefresh={onSearchRefresh}
+              />
+              <EuiSpacer />
+            </>
+          )}
           <DescriptionCallout />
+          <ProfilingSchemaSelector kuery={fullKuery} />
+          <EuiSpacer />
           <EuiTabbedContent tabs={tabs} initialSelectedTab={tabs[0]} />
         </>
       )}

@@ -5,8 +5,17 @@
  * 2.0.
  */
 
-export { downloadToDisk } from './download';
+export { downloadToDisk, checkArtifactAvailable, ArtifactNotFoundError } from './download';
+export {
+  resolveArtifactsFolderPath,
+  removeArtifactFile,
+  logArtifactsFolderUsage,
+  purgeArtifactsFolder,
+} from './artifacts_folder';
 export { openZipArchive, type ZipArchive } from './zip_archive';
 export { loadManifestFile, loadMappingFile } from './archive_accessors';
-export { ensureDefaultElserDeployed } from './ensure_default_elser_deployed';
+export {
+  ensureDefaultElserDeployed,
+  ensureInferenceDeployed,
+} from './ensure_default_elser_deployed';
 export { isLegacySemanticTextVersion } from './manifest_versions';

@@ -9,7 +9,8 @@
 
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
-import { SelectInput, SelectInputProps } from './select_input';
+import type { SelectInputProps } from './select_input';
+import { SelectInput } from './select_input';
 import { TEST_SUBJ_PREFIX_FIELD } from '.';
 import { wrap } from '../mocks';
 
@@ -74,7 +75,7 @@ describe('SelectInput', () => {
       optionValues: [],
     } as SelectInputProps;
 
-    expect(() => render(wrap(<SelectInput {...props} />))).toThrowError(
+    expect(() => render(wrap(<SelectInput {...props} />))).toThrow(
       'non-empty `optionValues` are required for `SelectInput`.'
     );
     consoleMock.mockRestore();
@@ -98,5 +99,21 @@ describe('SelectInput', () => {
     const { container } = render(wrap(<SelectInput {...props} />));
 
     expect(container).toBeInTheDocument();
+  });
+
+  it('renders with an error message when isInvalid is true', () => {
+    const props = {
+      ...defaultProps,
+      optionValues: ['option1', 'option2', 'option3'],
+    } as SelectInputProps;
+
+    const { getByTestId, getByText } = render(
+      wrap(<SelectInput {...props} field={{ ...props.field, defaultValue: 'invalidOption' }} />)
+    );
+
+    const input = getByTestId(`${TEST_SUBJ_PREFIX_FIELD}-${id}`) as HTMLSelectElement;
+    expect(input).toBeInvalid();
+    expect(input.options[0].value).toBe('');
+    expect(getByText('The saved option is unavailable. Select a new option')).toBeInTheDocument();
   });
 });

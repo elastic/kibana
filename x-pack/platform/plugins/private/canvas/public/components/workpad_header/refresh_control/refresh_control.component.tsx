@@ -6,16 +6,15 @@
  */
 
 import React, { useCallback } from 'react';
-import PropTypes from 'prop-types';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 
 // @ts-expect-error untyped local
 import { fetchAllRenderables } from '../../../state/actions/elements';
 import { getInFlight } from '../../../state/selectors/resolved_args';
 import { ToolTipShortcut } from '../../tool_tip_shortcut';
-import { useCanvasApi } from '../../hooks/use_canvas_api';
+import { forceReload } from '../../hooks/use_canvas_api';
 
 const strings = {
   getRefreshAriaLabel: () =>
@@ -31,11 +30,10 @@ const strings = {
 export const RefreshControl = () => {
   const dispatch = useDispatch();
   const inFlight = useSelector(getInFlight);
-  const canvasApi = useCanvasApi();
   const doRefresh = useCallback(() => {
-    canvasApi.reload();
+    forceReload();
     dispatch(fetchAllRenderables());
-  }, [canvasApi, dispatch]);
+  }, [dispatch]);
 
   return (
     <EuiToolTip
@@ -56,9 +54,4 @@ export const RefreshControl = () => {
       />
     </EuiToolTip>
   );
-};
-
-RefreshControl.propTypes = {
-  doRefresh: PropTypes.func.isRequired,
-  inFlight: PropTypes.bool,
 };

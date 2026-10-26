@@ -5,7 +5,16 @@
  * 2.0.
  */
 
-import { apiKeyAsAlertAttributes } from './api_key_as_alert_attributes';
+import {
+  apiKeyAsAlertAttributes,
+  apiKeyAsRuleDomainProperties,
+  updateMissingUiamKeyTag,
+} from './api_key_as_alert_attributes';
+import {
+  LEGACY_MISSING_UIAM_API_KEY_TAG,
+  MISSING_UIAM_API_KEY_TAG,
+} from '../../application/rule/constants';
+import { ApiKeyType } from '../../task_runner/types';
 
 describe('apiKeyAsAlertAttributes', () => {
   test('return attributes', () => {
@@ -20,11 +29,13 @@ describe('apiKeyAsAlertAttributes', () => {
           },
         },
         'test',
-        false
+        false,
+        'u_profile_test'
       )
     ).toEqual({
       apiKey: 'MTIzOmFiYw==',
       apiKeyOwner: 'test',
+      apiKeyOwnerProfileUid: 'u_profile_test',
       apiKeyCreatedByUser: false,
     });
   });
@@ -36,11 +47,13 @@ describe('apiKeyAsAlertAttributes', () => {
           apiKeysEnabled: false,
         },
         'test',
-        false
+        false,
+        'u_profile_test'
       )
     ).toEqual({
       apiKey: null,
       apiKeyOwner: null,
+      apiKeyOwnerProfileUid: null,
       apiKeyCreatedByUser: null,
     });
   });
@@ -57,12 +70,256 @@ describe('apiKeyAsAlertAttributes', () => {
           },
         },
         'test',
-        true
+        true,
+        'u_profile_test'
       )
     ).toEqual({
       apiKey: 'MTIzOmFiYw==',
       apiKeyOwner: 'test',
+      apiKeyOwnerProfileUid: 'u_profile_test',
       apiKeyCreatedByUser: true,
     });
+  });
+
+  test('returns UIAM API Key as well', () => {
+    expect(
+      apiKeyAsRuleDomainProperties(
+        {
+          apiKeysEnabled: true,
+          result: {
+            id: '123',
+            name: '123',
+            api_key: 'abc',
+          },
+          uiamResult: {
+            id: '456',
+            name: '456',
+            api_key: 'def',
+          },
+        },
+        'test',
+        false,
+        'u_profile_test'
+      )
+    ).toEqual({
+      apiKey: 'MTIzOmFiYw==',
+      apiKeyOwner: 'test',
+      apiKeyOwnerProfileUid: 'u_profile_test',
+      apiKeyCreatedByUser: false,
+      uiamApiKey: 'NDU2OmRlZg==',
+      uiamApiKeyExternal: false,
+    });
+  });
+
+  test('returns only UIAM API Key when ES API Key is not provided', () => {
+    expect(
+      apiKeyAsRuleDomainProperties(
+        {
+          apiKeysEnabled: true,
+          uiamResult: {
+            id: '456',
+            name: '456',
+            api_key: 'def',
+          },
+        },
+        'test',
+        true,
+        'u_profile_test'
+      )
+    ).toEqual({
+      apiKey: null,
+      apiKeyOwner: 'test',
+      apiKeyOwnerProfileUid: 'u_profile_test',
+      apiKeyCreatedByUser: true,
+      uiamApiKey: 'NDU2OmRlZg==',
+      uiamApiKeyExternal: false,
+    });
+  });
+
+  test('returns only the granted UIAM API key for a UIAM service account', () => {
+    expect(
+      apiKeyAsAlertAttributes(
+        {
+          apiKeysEnabled: true,
+          uiamResult: { id: '456', name: '456', api_key: 'def' },
+        },
+        'service-account-id',
+        false,
+        null
+      )
+    ).toEqual({
+      apiKey: null,
+      apiKeyOwner: 'service-account-id',
+      apiKeyOwnerProfileUid: null,
+      apiKeyCreatedByUser: false,
+      uiamApiKey: 'NDU2OmRlZg==',
+      uiamApiKeyExternal: false,
+    });
+  });
+
+  test('stores the raw UIAM API key as-is when it has no id and is created by the user', () => {
+    expect(
+      apiKeyAsRuleDomainProperties(
+        {
+          apiKeysEnabled: true,
+          uiamResult: {
+            name: 'uiam-test',
+            api_key: 'essu_user_created_key',
+          },
+        },
+        'test',
+        true,
+        'u_profile_test'
+      )
+    ).toEqual({
+      apiKey: null,
+      apiKeyOwner: 'test',
+      apiKeyOwnerProfileUid: 'u_profile_test',
+      apiKeyCreatedByUser: true,
+      uiamApiKey: 'essu_user_created_key',
+      uiamApiKeyExternal: false,
+    });
+  });
+
+  test('persists uiamApiKeyExternal when UIAM reported the key as external', () => {
+    expect(
+      apiKeyAsRuleDomainProperties(
+        {
+          apiKeysEnabled: true,
+          uiamResult: {
+            name: 'uiam-test',
+            api_key: 'essu_user_created_key',
+            external: true,
+          },
+        },
+        'test',
+        true,
+        'u_profile_test'
+      )
+    ).toEqual({
+      apiKey: null,
+      apiKeyOwner: 'test',
+      apiKeyOwnerProfileUid: 'u_profile_test',
+      apiKeyCreatedByUser: true,
+      uiamApiKey: 'essu_user_created_key',
+      uiamApiKeyExternal: true,
+    });
+  });
+
+  test('writes uiamApiKeyExternal: false alongside an internal key so a stale true cannot survive', () => {
+    // `updateRuleApiKey` and `enableRule` persist through a partial saved-object update, which
+    // merges: omitting the attribute would leave a previously stored `true` in place and the run
+    // would then withhold the UIAM shared secret from this freshly granted internal key.
+    const properties = apiKeyAsRuleDomainProperties(
+      {
+        apiKeysEnabled: true,
+        uiamResult: { id: '456', name: '456', api_key: 'def' },
+      },
+      'test',
+      false,
+      'u_profile_test'
+    );
+
+    expect(properties.uiamApiKeyExternal).toBe(false);
+  });
+
+  test('does not store a UIAM API key without an id when it is not created by the user', () => {
+    expect(
+      apiKeyAsRuleDomainProperties(
+        {
+          apiKeysEnabled: true,
+          uiamResult: {
+            name: 'uiam-test',
+            api_key: 'essu_framework_key_without_id',
+          },
+        },
+        'test',
+        false,
+        'u_profile_test'
+      )
+    ).toEqual({
+      apiKey: null,
+      apiKeyOwner: 'test',
+      apiKeyOwnerProfileUid: 'u_profile_test',
+      apiKeyCreatedByUser: false,
+    });
+  });
+
+  test('does not create both API keys when createdByUser is true', () => {
+    expect(() =>
+      apiKeyAsRuleDomainProperties(
+        {
+          apiKeysEnabled: true,
+          result: {
+            id: '123',
+            name: '123',
+            api_key: 'abc',
+          },
+          uiamResult: {
+            id: '456',
+            name: '456',
+            api_key: 'def',
+          },
+        },
+        'test',
+        true,
+        'u_profile_test'
+      )
+    ).toThrow(
+      'Both ES and UIAM API keys were created for a rule, but only one should be created when the API key is created by a user. This should never happen.'
+    );
+  });
+});
+
+describe('updateMissingUiamKeyTag', () => {
+  test('adds tag when all conditions are met', () => {
+    const tags = ['existing-tag'];
+    expect(updateMissingUiamKeyTag(tags, null, true, true, ApiKeyType.UIAM)).toEqual([
+      'existing-tag',
+      MISSING_UIAM_API_KEY_TAG,
+    ]);
+  });
+
+  test('removes the current and legacy tags when the UIAM API key exists', () => {
+    const tags = ['existing-tag', LEGACY_MISSING_UIAM_API_KEY_TAG, MISSING_UIAM_API_KEY_TAG];
+    expect(updateMissingUiamKeyTag(tags, 'some-key', true, true, ApiKeyType.UIAM)).toEqual([
+      'existing-tag',
+    ]);
+  });
+
+  test('replaces the legacy tag when the UIAM API key is missing', () => {
+    const tags = ['existing-tag', LEGACY_MISSING_UIAM_API_KEY_TAG];
+    expect(updateMissingUiamKeyTag(tags, null, true, true, ApiKeyType.UIAM)).toEqual([
+      'existing-tag',
+      MISSING_UIAM_API_KEY_TAG,
+    ]);
+  });
+
+  test('does not duplicate the current tag', () => {
+    const tags = ['existing-tag', MISSING_UIAM_API_KEY_TAG];
+    expect(updateMissingUiamKeyTag(tags, null, true, true, ApiKeyType.UIAM)).toBe(tags);
+  });
+
+  test('preserves the current tag position', () => {
+    const tags = [MISSING_UIAM_API_KEY_TAG, 'existing-tag'];
+    expect(updateMissingUiamKeyTag(tags, null, true, true, ApiKeyType.UIAM)).toBe(tags);
+  });
+
+  test.each([
+    ['non-serverless deployments', false, true, ApiKeyType.UIAM],
+    ['deployments that do not grant UIAM keys', true, false, ApiKeyType.UIAM],
+    ['deployments where rules use ES API keys', true, true, ApiKeyType.ES],
+  ])('leaves tags unchanged in %s', (_description, isServerless, shouldGrantUiam, apiKeyType) => {
+    const tags = ['existing-tag', LEGACY_MISSING_UIAM_API_KEY_TAG];
+    expect(updateMissingUiamKeyTag(tags, null, isServerless, shouldGrantUiam, apiKeyType)).toBe(
+      tags
+    );
+  });
+
+  test('does not mutate original tags array', () => {
+    const tags = ['existing-tag', LEGACY_MISSING_UIAM_API_KEY_TAG];
+    const result = updateMissingUiamKeyTag(tags, null, true, true, ApiKeyType.UIAM);
+    expect(tags).toEqual(['existing-tag', LEGACY_MISSING_UIAM_API_KEY_TAG]);
+    expect(result).not.toBe(tags);
   });
 });

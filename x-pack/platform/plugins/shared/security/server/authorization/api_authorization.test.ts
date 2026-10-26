@@ -32,7 +32,15 @@ describe('initAPIAuthorization', () => {
     const mockRequest = httpServerMock.createKibanaRequest({
       method: 'get',
       path: '/foo/bar',
-      routeTags: ['access:foo'],
+      kibanaRouteOptions: {
+        xsrfRequired: true,
+        access: 'internal',
+        security: {
+          authz: {
+            requiredPrivileges: ['foo'],
+          },
+        },
+      },
     });
     const mockResponse = httpServerMock.createResponseFactory();
     const mockPostAuthToolkit = httpServiceMock.createOnPostAuthToolkit();
@@ -61,6 +69,16 @@ describe('initAPIAuthorization', () => {
       method: 'get',
       path: '/foo/bar',
       routeTags: ['not-access:foo'],
+      kibanaRouteOptions: {
+        xsrfRequired: true,
+        access: 'internal',
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'Used in test suite',
+          },
+        },
+      },
     });
     const mockResponse = httpServerMock.createResponseFactory();
     const mockPostAuthToolkit = httpServiceMock.createOnPostAuthToolkit();
@@ -90,12 +108,25 @@ describe('initAPIAuthorization', () => {
       method: 'get',
       path: '/foo/bar',
       headers,
-      routeTags: ['access:foo'],
+      kibanaRouteOptions: {
+        xsrfRequired: true,
+        access: 'internal',
+        security: {
+          authz: {
+            requiredPrivileges: ['foo'],
+          },
+        },
+      },
     });
     const mockResponse = httpServerMock.createResponseFactory();
     const mockPostAuthToolkit = httpServiceMock.createOnPostAuthToolkit();
 
-    const mockCheckPrivileges = jest.fn().mockReturnValue({ hasAllRequested: true });
+    const mockCheckPrivileges = jest.fn().mockReturnValue({
+      privileges: {
+        kibana: [{ privilege: 'api:foo', authorized: true }],
+      },
+      hasAllRequested: true,
+    });
     mockAuthz.mode.useRbacForRequest.mockReturnValue(true);
     mockAuthz.checkPrivilegesDynamicallyWithRequest.mockImplementation((request) => {
       // hapi conceals the actual "request" from us, so we make sure that the headers are passed to
@@ -105,10 +136,22 @@ describe('initAPIAuthorization', () => {
       return mockCheckPrivileges;
     });
 
+    mockAuthz.checkPrivilegesWithRequest.mockImplementation((request) => {
+      expect(request.headers).toMatchObject(headers);
+
+      return {
+        globally: () => ({
+          privileges: {
+            kibana: [{ privilege: 'api:foo', authorized: true }],
+          },
+        }),
+      };
+    });
+
     await postAuthHandler(mockRequest, mockResponse, mockPostAuthToolkit);
 
     expect(mockResponse.notFound).not.toHaveBeenCalled();
-    expect(mockPostAuthToolkit.next).toHaveBeenCalledTimes(1);
+    expect(mockPostAuthToolkit.authzResultNext).toHaveBeenCalledTimes(1);
     expect(mockCheckPrivileges).toHaveBeenCalledWith({
       kibana: [mockAuthz.actions.api.get('foo')],
     });
@@ -131,12 +174,25 @@ describe('initAPIAuthorization', () => {
       method: 'get',
       path: '/foo/bar',
       headers,
-      routeTags: ['access:foo'],
+      kibanaRouteOptions: {
+        xsrfRequired: true,
+        access: 'internal',
+        security: {
+          authz: {
+            requiredPrivileges: ['foo'],
+          },
+        },
+      },
     });
     const mockResponse = httpServerMock.createResponseFactory();
     const mockPostAuthToolkit = httpServiceMock.createOnPostAuthToolkit();
 
-    const mockCheckPrivileges = jest.fn().mockReturnValue({ hasAllRequested: false });
+    const mockCheckPrivileges = jest.fn().mockReturnValue({
+      privileges: {
+        kibana: [{ privilege: 'api:foo', authorized: false }],
+      },
+      hasAllRequested: false,
+    });
     mockAuthz.mode.useRbacForRequest.mockReturnValue(true);
     mockAuthz.checkPrivilegesDynamicallyWithRequest.mockImplementation((request) => {
       // hapi conceals the actual "request" from us, so we make sure that the headers are passed to
@@ -144,6 +200,18 @@ describe('initAPIAuthorization', () => {
       expect(request.headers).toMatchObject(headers);
 
       return mockCheckPrivileges;
+    });
+
+    mockAuthz.checkPrivilegesWithRequest.mockImplementation((request) => {
+      expect(request.headers).toMatchObject(headers);
+
+      return {
+        globally: () => ({
+          privileges: {
+            kibana: [{ privilege: 'api:foo', authorized: false }],
+          },
+        }),
+      };
     });
 
     await postAuthHandler(mockRequest, mockResponse, mockPostAuthToolkit);
@@ -179,6 +247,8 @@ describe('initAPIAuthorization', () => {
         };
         asserts: {
           forbidden?: boolean;
+          forbiddenMessageIncludes?: string[];
+          forbiddenMessageExcludes?: string[];
           authzResult?: Record<string, boolean>;
           authzDisabled?: boolean;
         };
@@ -252,6 +322,17 @@ describe('initAPIAuthorization', () => {
         if (asserts.forbidden) {
           expect(mockResponse.forbidden).toHaveBeenCalled();
           expect(mockPostAuthToolkit.authzResultNext).not.toHaveBeenCalled();
+
+          const forbiddenBody = mockResponse.forbidden.mock.calls[0]?.[0]?.body as
+            | { message?: string }
+            | undefined;
+          const forbiddenMessage = forbiddenBody?.message;
+          for (const included of asserts.forbiddenMessageIncludes ?? []) {
+            expect(forbiddenMessage).toContain(included);
+          }
+          for (const excluded of asserts.forbiddenMessageExcludes ?? []) {
+            expect(forbiddenMessage).not.toContain(excluded);
+          }
         }
 
         if (asserts.authzResult) {
@@ -806,5 +887,350 @@ describe('initAPIAuthorization', () => {
         authzDisabled: true,
       },
     });
+
+    testSecurityConfig(
+      `protected route returns "authzResult" including extended privileges when required privileges are granted`,
+      {
+        security: {
+          authz: {
+            requiredPrivileges: ['privilege1'],
+            extendedPrivileges: ['privilege2', 'privilege3'],
+          },
+        },
+        kibanaPrivilegesResponse: {
+          privileges: {
+            kibana: [
+              { privilege: 'api:privilege1', authorized: true },
+              { privilege: 'api:privilege2', authorized: true },
+              { privilege: 'api:privilege3', authorized: false },
+            ],
+          },
+        },
+        kibanaPrivilegesRequestActions: ['privilege1', 'privilege2', 'privilege3'],
+        asserts: {
+          authzResult: {
+            privilege1: true,
+            privilege2: true,
+            privilege3: false,
+          },
+        },
+      }
+    );
+
+    testSecurityConfig(
+      `protected route returns "authzResult" when extended privileges are missing but required privileges are granted`,
+      {
+        security: {
+          authz: {
+            requiredPrivileges: ['privilege1'],
+            extendedPrivileges: ['privilege2'],
+          },
+        },
+        kibanaPrivilegesResponse: {
+          privileges: {
+            kibana: [
+              { privilege: 'api:privilege1', authorized: true },
+              { privilege: 'api:privilege2', authorized: false },
+            ],
+          },
+        },
+        kibanaPrivilegesRequestActions: ['privilege1', 'privilege2'],
+        asserts: {
+          authzResult: {
+            privilege1: true,
+            privilege2: false,
+          },
+        },
+      }
+    );
+
+    testSecurityConfig(
+      `protected route returns forbidden when required privileges are missing even if extended privileges are granted`,
+      {
+        security: {
+          authz: {
+            requiredPrivileges: ['privilege1'],
+            extendedPrivileges: ['privilege2'],
+          },
+        },
+        kibanaPrivilegesResponse: {
+          privileges: {
+            kibana: [
+              { privilege: 'api:privilege1', authorized: false },
+              { privilege: 'api:privilege2', authorized: true },
+            ],
+          },
+        },
+        kibanaPrivilegesRequestActions: ['privilege1', 'privilege2'],
+        asserts: {
+          forbidden: true,
+          forbiddenMessageIncludes: ['privilege1'],
+          // Extended privileges must not appear to grant access in the 403 body.
+          forbiddenMessageExcludes: ['privilege2'],
+        },
+      }
+    );
+
+    testSecurityConfig(
+      `protected route 403 body lists only missing required privileges, not denied extended privileges`,
+      {
+        security: {
+          authz: {
+            requiredPrivileges: ['privilege1'],
+            extendedPrivileges: ['privilege2', 'privilege3'],
+          },
+        },
+        kibanaPrivilegesResponse: {
+          privileges: {
+            kibana: [
+              { privilege: 'api:privilege1', authorized: false },
+              { privilege: 'api:privilege2', authorized: false },
+              { privilege: 'api:privilege3', authorized: false },
+            ],
+          },
+        },
+        kibanaPrivilegesRequestActions: ['privilege1', 'privilege2', 'privilege3'],
+        asserts: {
+          forbidden: true,
+          forbiddenMessageIncludes: ['privilege1'],
+          forbiddenMessageExcludes: ['privilege2', 'privilege3'],
+        },
+      }
+    );
+
+    testSecurityConfig(
+      `protected route returns "authzResult" including extended privileges when combined with anyRequired privilege set`,
+      {
+        security: {
+          authz: {
+            requiredPrivileges: [{ anyRequired: ['privilege1', 'privilege2'] }],
+            extendedPrivileges: ['privilege3'],
+          },
+        },
+        kibanaPrivilegesResponse: {
+          privileges: {
+            kibana: [
+              { privilege: 'api:privilege1', authorized: false },
+              { privilege: 'api:privilege2', authorized: true },
+              { privilege: 'api:privilege3', authorized: false },
+            ],
+          },
+        },
+        kibanaPrivilegesRequestActions: ['privilege1', 'privilege2', 'privilege3'],
+        asserts: {
+          authzResult: {
+            privilege1: false,
+            privilege2: true,
+            privilege3: false,
+          },
+        },
+      }
+    );
+
+    testSecurityConfig(
+      `protected route returns forbidden when anyRequired privileges are missing even if extended privileges are granted`,
+      {
+        security: {
+          authz: {
+            requiredPrivileges: [{ anyRequired: ['privilege1', 'privilege2'] }],
+            extendedPrivileges: ['privilege3'],
+          },
+        },
+        kibanaPrivilegesResponse: {
+          privileges: {
+            kibana: [
+              { privilege: 'api:privilege1', authorized: false },
+              { privilege: 'api:privilege2', authorized: false },
+              { privilege: 'api:privilege3', authorized: true },
+            ],
+          },
+        },
+        kibanaPrivilegesRequestActions: ['privilege1', 'privilege2', 'privilege3'],
+        asserts: {
+          forbidden: true,
+          forbiddenMessageIncludes: ['privilege1', 'privilege2'],
+          // Extended privileges must not appear to grant access in the 403 body.
+          forbiddenMessageExcludes: ['privilege3'],
+        },
+      }
+    );
+
+    testSecurityConfig(
+      `protected route returns "authzResult" including extended privileges when combined with complex anyRequired config`,
+      {
+        security: {
+          authz: {
+            requiredPrivileges: [
+              {
+                anyRequired: [
+                  { allOf: ['privilege1', 'privilege2'] },
+                  { allOf: ['privilege3', 'privilege4'] },
+                ],
+              },
+            ],
+            extendedPrivileges: ['privilege5'],
+          },
+        },
+        kibanaPrivilegesResponse: {
+          privileges: {
+            kibana: [
+              { privilege: 'api:privilege1', authorized: true },
+              { privilege: 'api:privilege2', authorized: false },
+              { privilege: 'api:privilege3', authorized: true },
+              { privilege: 'api:privilege4', authorized: true },
+              { privilege: 'api:privilege5', authorized: false },
+            ],
+          },
+        },
+        kibanaPrivilegesRequestActions: [
+          'privilege1',
+          'privilege2',
+          'privilege3',
+          'privilege4',
+          'privilege5',
+        ],
+        asserts: {
+          authzResult: {
+            privilege1: true,
+            privilege2: false,
+            privilege3: true,
+            privilege4: true,
+            privilege5: false,
+          },
+        },
+      }
+    );
+
+    testSecurityConfig(
+      `protected route returns forbidden when no complex anyRequired branch is satisfied even if extended privileges are granted`,
+      {
+        security: {
+          authz: {
+            requiredPrivileges: [
+              {
+                anyRequired: [
+                  { allOf: ['privilege1', 'privilege2'] },
+                  { allOf: ['privilege3', 'privilege4'] },
+                ],
+              },
+            ],
+            extendedPrivileges: ['privilege5'],
+          },
+        },
+        kibanaPrivilegesResponse: {
+          privileges: {
+            kibana: [
+              { privilege: 'api:privilege1', authorized: true },
+              { privilege: 'api:privilege2', authorized: false },
+              { privilege: 'api:privilege3', authorized: false },
+              { privilege: 'api:privilege4', authorized: false },
+              { privilege: 'api:privilege5', authorized: true },
+            ],
+          },
+        },
+        kibanaPrivilegesRequestActions: [
+          'privilege1',
+          'privilege2',
+          'privilege3',
+          'privilege4',
+          'privilege5',
+        ],
+        asserts: {
+          forbidden: true,
+          forbiddenMessageIncludes: ['privilege2', 'privilege3', 'privilege4'],
+          // Granted privileges and extended privileges must not appear in the 403 body.
+          forbiddenMessageExcludes: ['privilege1', 'privilege5'],
+        },
+      }
+    );
+
+    testSecurityConfig(
+      `protected route returns "authzResult" including extended privileges when combined with complex allRequired config`,
+      {
+        security: {
+          authz: {
+            requiredPrivileges: [
+              {
+                allRequired: [
+                  { anyOf: ['privilege1', 'privilege2'] },
+                  { anyOf: ['privilege3', 'privilege4'] },
+                ],
+              },
+            ],
+            extendedPrivileges: ['privilege5'],
+          },
+        },
+        kibanaPrivilegesResponse: {
+          privileges: {
+            kibana: [
+              { privilege: 'api:privilege1', authorized: true },
+              { privilege: 'api:privilege2', authorized: false },
+              { privilege: 'api:privilege3', authorized: false },
+              { privilege: 'api:privilege4', authorized: true },
+              { privilege: 'api:privilege5', authorized: true },
+            ],
+          },
+        },
+        kibanaPrivilegesRequestActions: [
+          'privilege1',
+          'privilege2',
+          'privilege3',
+          'privilege4',
+          'privilege5',
+        ],
+        asserts: {
+          authzResult: {
+            privilege1: true,
+            privilege2: false,
+            privilege3: false,
+            privilege4: true,
+            privilege5: true,
+          },
+        },
+      }
+    );
+
+    testSecurityConfig(
+      `protected route returns forbidden when complex allRequired config is not satisfied even if extended privileges are granted`,
+      {
+        security: {
+          authz: {
+            requiredPrivileges: [
+              {
+                allRequired: [
+                  { anyOf: ['privilege1', 'privilege2'] },
+                  { anyOf: ['privilege3', 'privilege4'] },
+                ],
+              },
+            ],
+            extendedPrivileges: ['privilege5'],
+          },
+        },
+        kibanaPrivilegesResponse: {
+          privileges: {
+            kibana: [
+              { privilege: 'api:privilege1', authorized: true },
+              { privilege: 'api:privilege2', authorized: false },
+              { privilege: 'api:privilege3', authorized: false },
+              { privilege: 'api:privilege4', authorized: false },
+              { privilege: 'api:privilege5', authorized: true },
+            ],
+          },
+        },
+        kibanaPrivilegesRequestActions: [
+          'privilege1',
+          'privilege2',
+          'privilege3',
+          'privilege4',
+          'privilege5',
+        ],
+        asserts: {
+          forbidden: true,
+          forbiddenMessageIncludes: ['privilege2', 'privilege3', 'privilege4'],
+          // Granted privileges and extended privileges must not appear in the 403 body.
+          forbiddenMessageExcludes: ['privilege1', 'privilege5'],
+        },
+      }
+    );
   });
 });

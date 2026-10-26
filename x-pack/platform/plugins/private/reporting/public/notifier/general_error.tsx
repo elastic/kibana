@@ -6,7 +6,7 @@
  */
 
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
-import { CoreStart, ToastInput } from '@kbn/core/public';
+import type { CoreStart, ToastInput } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import React from 'react';

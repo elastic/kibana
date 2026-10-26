@@ -5,36 +5,56 @@
  * 2.0.
  */
 
-import { KibanaRequest } from '@kbn/core-http-server';
-import { DefaultRouteHandlerResources } from '@kbn/server-route-repository';
-import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
-import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import { InferenceClient } from '@kbn/inference-plugin/server';
-import { StreamsServer } from '../types';
-import { AssetService } from '../lib/streams/assets/asset_service';
-import { AssetClient } from '../lib/streams/assets/asset_client';
-import { StreamsClient } from '../lib/streams/client';
-import { StreamsTelemetryClient } from '../lib/telemetry/client';
+import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
+import type { KibanaRequest } from '@kbn/core-http-server';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import type { InferenceClient } from '@kbn/inference-common';
+import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
+import type { DefaultRouteHandlerResources } from '@kbn/server-route-repository';
+import type { IUiSettingsClient } from '@kbn/core/server';
+import type { IFieldsMetadataClient } from '@kbn/fields-metadata-plugin/server/services/fields_metadata/types';
+import type { RulesClientCreateOptions } from '@kbn/alerting-plugin/server';
+import type { ContentClient } from '../lib/content/content_client';
+import type { AttachmentClient } from '../lib/streams/attachments/attachment_client';
+import type { StreamsClient } from '../lib/streams/client';
+import type { EbtTelemetryClient } from '../lib/telemetry';
+import type { StreamsServer } from '../types';
+import type { ProcessorSuggestionsService } from '../lib/streams/ingest_pipelines/processor_suggestions_service';
+import type { IPatternExtractionService } from '../lib/pattern_extraction/pattern_extraction_service';
+import type { StreamsSettingsStorageClient } from '../lib/streams/storage/streams_settings_storage_client';
+import type { UnitConfigHooks } from '../lib/unit_config/types';
 
-type GetScopedClients = ({
-  request,
-}: {
+export type GetScopedClients = (params: {
   request: KibanaRequest;
+  rulesClientOptions?: RulesClientCreateOptions;
 }) => Promise<RouteHandlerScopedClients>;
 
 export interface RouteHandlerScopedClients {
   scopedClusterClient: IScopedClusterClient;
   soClient: SavedObjectsClientContract;
-  assetClient: AssetClient;
+  encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
+  canEncrypt: boolean;
+  attachmentClient: AttachmentClient;
   streamsClient: StreamsClient;
   inferenceClient: InferenceClient;
+  contentClient: ContentClient;
+  licensing: LicensingPluginStart;
+  uiSettingsClient: IUiSettingsClient;
+  globalUiSettingsClient: IUiSettingsClient;
+  fieldsMetadataClient: IFieldsMetadataClient;
+  streamsSettingsStorageClient: StreamsSettingsStorageClient;
+  isSecurityEnabled: boolean;
 }
 
 export interface RouteDependencies {
-  assets: AssetService;
   server: StreamsServer;
-  telemetry: StreamsTelemetryClient;
+  telemetry: EbtTelemetryClient;
   getScopedClients: GetScopedClients;
+  processorSuggestions: ProcessorSuggestionsService;
+  patternExtractionService: IPatternExtractionService;
+  getSpaceId: (request: KibanaRequest) => Promise<string>;
+  unitConfigHooks: UnitConfigHooks;
 }
 
 export type StreamsRouteHandlerResources = RouteDependencies & DefaultRouteHandlerResources;

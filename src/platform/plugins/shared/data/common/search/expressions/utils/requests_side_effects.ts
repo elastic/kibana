@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Adapters } from '@kbn/inspector-plugin/common';
+import type { Adapters } from '@kbn/inspector-plugin/common';
 
 const collectSideEffectsData = (adapters: Adapters) => {
   return adapters.requests?.getRequestEntries();

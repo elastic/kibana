@@ -31,7 +31,7 @@ export const FIELD_TYPE = i18n.translate(
 export const OPEN_HELP_POPOVER_ARIA_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDescription.requiredFields.openHelpPopoverAriaLabel',
   {
-    defaultMessage: 'Open help popover',
+    defaultMessage: 'Required fields help',
   }
 );
 
@@ -46,6 +46,22 @@ export const REMOVE_REQUIRED_FIELD_BUTTON_ARIA_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDescription.requiredFields.removeRequiredFieldButtonAriaLabel',
   {
     defaultMessage: 'Remove required field',
+  }
+);
+
+export const SHOW_MORE_REQUIRED_FIELDS = (count: number) =>
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.ruleDescription.requiredFields.showMoreButtonLabel',
+    {
+      values: { count },
+      defaultMessage: 'Show {count} more',
+    }
+  );
+
+export const SHOW_LESS_REQUIRED_FIELDS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDescription.requiredFields.showLessButtonLabel',
+  {
+    defaultMessage: 'Show less',
   }
 );
 

@@ -14,10 +14,16 @@ import type {
 } from '../../../types';
 
 const rewriteBodyRequest: RewriteResponseCase<
-  Pick<ActionConnectorWithoutId, 'actionTypeId' | 'name' | 'config' | 'secrets'>
-> = ({ actionTypeId, ...res }) => ({
+  Pick<
+    ActionConnectorWithoutId,
+    'actionTypeId' | 'name' | 'config' | 'secrets' | 'isInboundEventsEnabled'
+  >
+> = ({ actionTypeId, isInboundEventsEnabled, ...res }) => ({
   ...res,
   connector_type_id: actionTypeId,
+  ...(isInboundEventsEnabled !== undefined
+    ? { is_inbound_events_enabled: isInboundEventsEnabled }
+    : {}),
 });
 
 const rewriteBodyRes: RewriteRequestCase<
@@ -28,6 +34,9 @@ const rewriteBodyRes: RewriteRequestCase<
   is_deprecated: isDeprecated,
   is_missing_secrets: isMissingSecrets,
   is_system_action: isSystemAction,
+  is_connector_type_deprecated: isConnectorTypeDeprecated,
+  auth_mode: authMode,
+  is_inbound_events_enabled: isInboundEventsEnabled,
   ...res
 }) => ({
   ...res,
@@ -36,18 +45,29 @@ const rewriteBodyRes: RewriteRequestCase<
   isDeprecated,
   isMissingSecrets,
   isSystemAction,
+  isConnectorTypeDeprecated,
+  ...(authMode !== undefined ? { authMode } : {}),
+  ...(isInboundEventsEnabled !== undefined ? { isInboundEventsEnabled } : {}),
 });
 
 export async function createActionConnector({
   http,
   connector,
+  id,
 }: {
   http: HttpSetup;
-  connector: Pick<ActionConnectorWithoutId, 'actionTypeId' | 'name' | 'config' | 'secrets'>;
+  connector: Pick<
+    ActionConnectorWithoutId,
+    'actionTypeId' | 'name' | 'config' | 'secrets' | 'isInboundEventsEnabled'
+  >;
+  id?: string;
 }): Promise<ActionConnector> {
-  const res = await http.post<Parameters<typeof rewriteBodyRes>[0]>(
-    `${BASE_ACTION_API_PATH}/connector`,
-    { body: JSON.stringify(rewriteBodyRequest(connector)) }
-  );
+  const path = id
+    ? `${BASE_ACTION_API_PATH}/connector/${encodeURIComponent(id)}`
+    : `${BASE_ACTION_API_PATH}/connector`;
+
+  const res = await http.post<Parameters<typeof rewriteBodyRes>[0]>(path, {
+    body: JSON.stringify(rewriteBodyRequest(connector)),
+  });
   return rewriteBodyRes(res) as ActionConnector;
 }

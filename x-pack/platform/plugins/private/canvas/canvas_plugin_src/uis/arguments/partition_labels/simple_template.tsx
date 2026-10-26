@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useCallback, useEffect } from 'react';
-import PropTypes from 'prop-types';
-import { EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
-import { ExpressionAstExpression } from '@kbn/expressions-plugin/common';
+import type { FunctionComponent } from 'react';
+import React, { useCallback, useEffect } from 'react';
+import type { EuiSwitchEvent } from '@elastic/eui';
+import { EuiSwitch } from '@elastic/eui';
+import type { ExpressionAstExpression } from '@kbn/expressions-plugin/common';
 import { set } from '@kbn/safer-lodash-set';
 import { defaultExpression } from './default_expression';
 import { getFieldPath, getFieldValue } from './utils';
@@ -44,11 +45,6 @@ export const SimpleTemplate: FunctionComponent<Props> = ({ onValueChange, argVal
   return (
     <EuiSwitch compressed checked={showLabels} onChange={onToggle} showLabel={false} label="" />
   );
-};
-
-SimpleTemplate.propTypes = {
-  onValueChange: PropTypes.func.isRequired,
-  argValue: PropTypes.oneOfType([PropTypes.bool, PropTypes.object]).isRequired,
 };
 
 SimpleTemplate.displayName = 'PartitionLabelsSimpleArg';

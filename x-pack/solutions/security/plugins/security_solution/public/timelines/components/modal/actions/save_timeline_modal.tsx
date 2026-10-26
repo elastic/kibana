@@ -5,26 +5,27 @@
  * 2.0.
  */
 
+import type { EuiSwitchEvent } from '@elastic/eui';
 import {
   EuiButton,
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiModal,
   EuiModalBody,
   EuiModalHeader,
-  EuiSpacer,
   EuiProgress,
-  EuiCallOut,
+  EuiSpacer,
   EuiSwitch,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
-import type { EuiSwitchEvent } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import usePrevious from 'react-use/lib/usePrevious';
 
 import type { State } from '../../../../common/store';
 import { selectTimelineById } from '../../../store/selectors';
-import { getUseField, Field, Form, useForm } from '../../../../shared_imports';
+import { Field, Form, getUseField, useForm } from '../../../../shared_imports';
 import { TimelineId } from '../../../../../common/types/timeline';
 import { TimelineStatusEnum, TimelineTypeEnum } from '../../../../../common/api/timeline';
 import { timelineActions } from '../../../store';
@@ -33,9 +34,9 @@ import * as i18n from './translations';
 import { useStartTransaction } from '../../../../common/lib/apm/use_start_transaction';
 import { TIMELINE_ACTIONS } from '../../../../common/lib/apm/user_actions';
 import { useCreateTimeline } from '../../../hooks/use_create_timeline';
-import { NOTES_PANEL_WIDTH } from '../../timeline/properties/notes_size';
 import { formSchema } from './schema';
 
+const NOTES_PANEL_WIDTH = 1024;
 const CommonUseField = getUseField({ component: Field });
 
 const descriptionLabel = `${i18n.TIMELINE_DESCRIPTION} (${i18n.OPTIONAL})`;
@@ -66,6 +67,7 @@ interface SaveTimelineModalProps {
 export const SaveTimelineModal = React.memo<SaveTimelineModalProps>(
   ({ closeSaveTimeline, initialFocusOn, timelineId, showWarning }) => {
     const { startTransaction } = useStartTransaction();
+    const modalTitleId = useGeneratedHtmlId();
 
     const dispatch = useDispatch();
     const { isSaving, description, status, title, timelineType } = useSelector((state: State) =>
@@ -207,6 +209,7 @@ export const SaveTimelineModal = React.memo<SaveTimelineModalProps>(
 
     return (
       <EuiModal
+        aria-labelledby={modalTitleId}
         data-test-subj="save-timeline-modal"
         maxWidth={NOTES_PANEL_WIDTH}
         onClose={closeSaveTimeline}
@@ -214,12 +217,15 @@ export const SaveTimelineModal = React.memo<SaveTimelineModalProps>(
         {isSaving && (
           <EuiProgress size="s" color="primary" position="absolute" data-test-subj="progress-bar" />
         )}
-        <EuiModalHeader data-test-subj="save-timeline-modal-header">{modalHeader}</EuiModalHeader>
+        <EuiModalHeader data-test-subj="save-timeline-modal-header" id={modalTitleId}>
+          {modalHeader}
+        </EuiModalHeader>
 
         <EuiModalBody>
           {showWarning && (
             <EuiFlexItem grow={true}>
               <EuiCallOut
+                announceOnMount
                 title={calloutMessage}
                 color="danger"
                 iconType="warning"

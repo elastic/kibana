@@ -1,0 +1,146 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React, { useMemo } from 'react';
+import { type FlyoutPanelProps, useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { LeftPanelContent } from '../shared/components/left_panel/left_panel_content';
+import { LeftPanelHeader } from '../shared/components/left_panel/left_panel_header';
+import type {
+  EntityDetailsPath,
+  EntityDetailsLeftPanelTab,
+  LeftPanelTabsType,
+} from '../shared/components/left_panel/left_panel_header';
+import type { UseGetGenericEntityParams } from '../generic_right/hooks/use_get_generic_entity';
+import { useGetGenericEntity } from '../generic_right/hooks/use_get_generic_entity';
+import {
+  getInsightsInputTab,
+  getFieldsTableTab,
+} from '../../../entity_analytics/components/entity_details_flyout';
+import { GENERIC_FLYOUT_STORAGE_KEYS } from '../generic_right/constants';
+import type { IdentityFields } from '../../document_details/shared/utils';
+
+interface BaseGenericEntityDetailsPanelProps {
+  identityFields: IdentityFields;
+  scopeId: string;
+  hasMisconfigurationFindings?: boolean;
+  hasVulnerabilitiesFindings?: boolean;
+  hasNonClosedAlerts?: boolean;
+  path?: Partial<EntityDetailsPath>;
+}
+
+export type GenericEntityDetailsPanelProps = BaseGenericEntityDetailsPanelProps &
+  UseGetGenericEntityParams &
+  Record<string, unknown>;
+
+export interface GenericEntityDetailsExpandableFlyoutProps extends FlyoutPanelProps {
+  key: 'generic_entity_details';
+  params: GenericEntityDetailsPanelProps;
+}
+
+export const GenericEntityDetailsPanelKey: GenericEntityDetailsExpandableFlyoutProps['key'] =
+  'generic_entity_details';
+
+const useSelectedTab = (params: GenericEntityDetailsPanelProps, tabs: LeftPanelTabsType) => {
+  const { openLeftPanel } = useExpandableFlyoutApi();
+  const path = params.path;
+
+  const selectedTabId = useMemo(() => {
+    const defaultTab = tabs.length > 0 ? tabs[0].id : undefined;
+    if (!path) return defaultTab;
+    return tabs.find((tab) => tab.id === path.tab)?.id ?? defaultTab;
+  }, [path, tabs]);
+
+  const setSelectedTabId = (tabId: EntityDetailsLeftPanelTab) => {
+    openLeftPanel({
+      id: GenericEntityDetailsPanelKey,
+      params: {
+        ...params,
+        path: {
+          tab: tabId,
+        },
+      },
+    });
+  };
+
+  return { setSelectedTabId, selectedTabId };
+};
+
+export const GenericEntityDetailsPanel = (params: GenericEntityDetailsPanelProps) => {
+  const {
+    identityFields,
+    hasMisconfigurationFindings,
+    hasVulnerabilitiesFindings,
+    hasNonClosedAlerts,
+    scopeId,
+  } = params;
+
+  // By passing the entire params object, we maintain the union type constraints that enforce
+  // either entityDocId or entityId to be present
+  // Destructuring of the params to extract the relevant fields happens internally in useGetGenericEntity
+  const { getGenericEntity } = useGetGenericEntity(params);
+  const source = getGenericEntity.data?._source;
+
+  const tabs: LeftPanelTabsType = useMemo(() => {
+    const fields = identityFields ?? {};
+    const field = Object.keys(fields)[0] ?? 'host.name';
+    const value = fields['host.name'] ?? fields['user.name'] ?? Object.values(fields)[0] ?? '';
+    const entityIdForInsights =
+      fields['host.entity.id'] ?? fields['user.entity.id'] ?? fields['service.entity.id'] ?? '';
+    const entityType: 'host' | 'user' | 'service' =
+      field === 'user.name' || fields['user.entity.id'] !== undefined
+        ? 'user'
+        : String(field).startsWith('service.')
+        ? 'service'
+        : 'host';
+
+    const insightsTab =
+      hasMisconfigurationFindings || hasVulnerabilitiesFindings || hasNonClosedAlerts
+        ? [
+            getInsightsInputTab({
+              field,
+              value,
+              entityId: entityIdForInsights,
+              scopeId,
+              entityType,
+            }),
+          ]
+        : [];
+
+    const fieldsTableTab = getFieldsTableTab({
+      document: source || {},
+      tableStorageKey: GENERIC_FLYOUT_STORAGE_KEYS.OVERVIEW_FIELDS_TABLE_PINS,
+    });
+
+    return [fieldsTableTab, ...insightsTab];
+  }, [
+    hasMisconfigurationFindings,
+    hasVulnerabilitiesFindings,
+    hasNonClosedAlerts,
+    identityFields,
+    scopeId,
+    source,
+  ]);
+
+  const { selectedTabId, setSelectedTabId } = useSelectedTab(params, tabs);
+
+  if (!selectedTabId) {
+    return null;
+  }
+
+  return (
+    <>
+      <LeftPanelHeader
+        selectedTabId={selectedTabId}
+        setSelectedTabId={setSelectedTabId}
+        tabs={tabs}
+      />
+      <LeftPanelContent selectedTabId={selectedTabId} tabs={tabs} />
+    </>
+  );
+};
+
+GenericEntityDetailsPanel.displayName = 'GenericEntityDetailsPanel';

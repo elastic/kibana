@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ILicense } from '@kbn/licensing-plugin/common/types';
+import type { ILicense } from '@kbn/licensing-types';
 import type { GetAgentStatusResponse } from '@kbn/fleet-plugin/common/types/rest_spec';
 import type { PolicyData, UIPolicyConfig } from '../../../../../../../common/endpoint/types';
 import type { ServerApiError } from '../../../../../../common/types';
@@ -35,13 +35,6 @@ export interface UserChangedPolicyConfig {
 
 export interface UserChangedAntivirusRegistration {
   type: 'userChangedAntivirusRegistration';
-  payload: {
-    enabled: boolean;
-  };
-}
-
-export interface UserChangedCredentialHardening {
-  type: 'userChangedCredentialHardening';
   payload: {
     enabled: boolean;
   };
@@ -85,5 +78,4 @@ export type PolicySettingsAction =
   | ServerFailedToReturnPolicyDetailsData
   | UserChangedPolicyConfig
   | UserChangedAntivirusRegistration
-  | UserChangedCredentialHardening
   | LicenseChanged;

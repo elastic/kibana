@@ -221,37 +221,36 @@ describe('Log threshold executor', () => {
           index: 'filebeat-*',
           allow_no_indices: true,
           ignore_unavailable: true,
-          body: {
-            track_total_hits: true,
-            aggregations: {},
-            query: {
-              bool: {
-                filter: [
-                  {
-                    range: {
-                      '@timestamp': {
-                        gte: expect.any(Number),
-                        lte: expect.any(Number),
-                        format: 'epoch_millis',
-                      },
+
+          track_total_hits: true,
+          aggregations: {},
+          query: {
+            bool: {
+              filter: [
+                {
+                  range: {
+                    '@timestamp': {
+                      gte: expect.any(Number),
+                      lte: expect.any(Number),
+                      format: 'epoch_millis',
                     },
                   },
-                  ...expectedPositiveFilterClauses,
-                ],
-                must_not: [...expectedNegativeFilterClauses],
-              },
-            },
-            runtime_mappings: {
-              runtime_field: {
-                type: 'keyword',
-                script: {
-                  lang: 'painless',
-                  source: 'emit("a runtime value")',
                 },
+                ...expectedPositiveFilterClauses,
+              ],
+              must_not: [...expectedNegativeFilterClauses],
+            },
+          },
+          runtime_mappings: {
+            runtime_field: {
+              type: 'keyword',
+              script: {
+                lang: 'painless',
+                source: 'emit("a runtime value")',
               },
             },
-            size: 0,
           },
+          size: 0,
         });
       });
 
@@ -496,7 +495,7 @@ describe('Log threshold executor', () => {
 
         processUngroupedResults(results, ruleParams, alertReporterMock, alertsClientMock);
 
-        expect(alertReporterMock).toBeCalledTimes(1);
+        expect(alertReporterMock).toHaveBeenCalledTimes(1);
         expect(alertsClientMock.setAlertLimitReached).toHaveBeenCalledWith(true);
       });
 
@@ -525,7 +524,7 @@ describe('Log threshold executor', () => {
 
         processUngroupedResults(results, ruleParams, alertReporterMock, alertsClientMock);
 
-        expect(alertReporterMock).toBeCalledTimes(1);
+        expect(alertReporterMock).toHaveBeenCalledTimes(1);
         expect(alertsClientMock.setAlertLimitReached).toHaveBeenCalledWith(false);
       });
 

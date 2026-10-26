@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { css } from '@emotion/react';
-import { TopNType } from '@kbn/profiling-utils';
+import type { ProfilingSchema, TopNType } from '@kbn/profiling-utils';
 import { EMBEDDABLE_STACK_TRACES } from '.';
 import { getProfilingComponent } from '../helpers/component_registry';
 
@@ -16,6 +16,7 @@ interface Props {
   kuery: string;
   rangeFrom: number;
   rangeTo: number;
+  schema?: ProfilingSchema;
   onClick: (category: string) => void;
   onChartBrushEnd: (range: { rangeFrom: string; rangeTo: string }) => void;
 }

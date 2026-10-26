@@ -6,14 +6,9 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
-import { DataViewsService } from '@kbn/data-views-plugin/common';
-import {
-  ALL_VALUE,
-  occurrencesBudgetingMethodSchema,
-  SyntheticsAvailabilityIndicator,
-  syntheticsAvailabilityIndicatorSchema,
-} from '@kbn/slo-schema';
+import type { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
+import type { SyntheticsAvailabilityIndicator } from '@kbn/slo-schema';
+import { ALL_VALUE, is, syntheticsAvailabilityIndicatorSchemaZod } from '@kbn/slo-schema';
 import { getElasticsearchQueryOrThrow, TransformGenerator } from '.';
 import {
   getSLOPipelineId,
@@ -23,17 +18,13 @@ import {
   SYNTHETICS_INDEX_PATTERN,
 } from '../../../common/constants';
 import { getSLOTransformTemplate } from '../../assets/transform_templates/slo_transform_template';
-import { SLODefinition } from '../../domain/models';
+import type { SLODefinition } from '../../domain/models';
 import { InvalidTransformError } from '../../errors';
-import { getFilterRange } from './common';
+import { getFilterRange, getTimesliceTargetComparator } from './common';
 
 export class SyntheticsAvailabilityTransformGenerator extends TransformGenerator {
-  constructor(spaceId: string, dataViewService: DataViewsService, isServerless: boolean) {
-    super(spaceId, dataViewService, isServerless);
-  }
-
   public async getTransformParams(slo: SLODefinition): Promise<TransformPutTransformRequest> {
-    if (!syntheticsAvailabilityIndicatorSchema.is(slo.indicator)) {
+    if (!is(syntheticsAvailabilityIndicatorSchemaZod, slo.indicator)) {
       throw new InvalidTransformError(`Cannot handle SLO of indicator type: ${slo.indicator.type}`);
     }
 
@@ -45,7 +36,8 @@ export class SyntheticsAvailabilityTransformGenerator extends TransformGenerator
       this.buildGroupBy(slo, slo.indicator),
       this.buildAggregations(slo),
       this.buildSettings(slo, this.isServerless ? '@timestamp' : 'event.ingested'),
-      slo
+      slo,
+      this.getProjectRouting(slo)
     );
   }
 
@@ -108,6 +100,7 @@ export class SyntheticsAvailabilityTransformGenerator extends TransformGenerator
   }
 
   private async buildSource(slo: SLODefinition, indicator: SyntheticsAvailabilityIndicator) {
+    const dataView = await this.getIndicatorDataView(indicator.params.dataViewId);
     const queryFilter: estypes.QueryDslQueryContainer[] = [
       { term: { 'summary.final_attempt': true } },
       { term: { 'meta.space_id': this.spaceId } },
@@ -144,10 +137,8 @@ export class SyntheticsAvailabilityTransformGenerator extends TransformGenerator
     }
 
     if (!!indicator.params.filter) {
-      queryFilter.push(getElasticsearchQueryOrThrow(indicator.params.filter));
+      queryFilter.push(getElasticsearchQueryOrThrow(indicator.params.filter, dataView));
     }
-
-    const dataView = await this.getIndicatorDataView(indicator.params.dataViewId);
 
     return {
       index: SYNTHETICS_INDEX_PATTERN,
@@ -168,12 +159,6 @@ export class SyntheticsAvailabilityTransformGenerator extends TransformGenerator
   }
 
   private buildAggregations(slo: SLODefinition) {
-    if (!occurrencesBudgetingMethodSchema.is(slo.budgetingMethod)) {
-      throw new Error(
-        "The sli.synthetics.availability indicator MUST have an 'Occurrences' budgeting method."
-      );
-    }
-
     return {
       'slo.numerator': {
         filter: {
@@ -189,6 +174,19 @@ export class SyntheticsAvailabilityTransformGenerator extends TransformGenerator
           },
         },
       },
+      ...(slo.budgetingMethod === 'timeslices' && {
+        'slo.isGoodSlice': {
+          bucket_script: {
+            buckets_path: {
+              goodEvents: 'slo.numerator>_count',
+              totalEvents: 'slo.denominator>_count',
+            },
+            script: `if (params.totalEvents == 0) { return 1 } else { return params.goodEvents / params.totalEvents ${getTimesliceTargetComparator(
+              slo.objective.timesliceTarget!
+            )} ${slo.objective.timesliceTarget} ? 1 : 0 }`,
+          },
+        },
+      }),
     };
   }
 }

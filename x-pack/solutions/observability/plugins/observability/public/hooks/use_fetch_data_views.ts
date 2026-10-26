@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { useQuery } from '@tanstack/react-query';
-import { DataViewListItem } from '@kbn/data-views-plugin/public';
+import { useQuery } from '@kbn/react-query';
+import type { DataViewListItem } from '@kbn/data-views-plugin/public';
 import { useKibana } from '../utils/kibana_react';
 
 export interface UseFetchDataViewsResponse {

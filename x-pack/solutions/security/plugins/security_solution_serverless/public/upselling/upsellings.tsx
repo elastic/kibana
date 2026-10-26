@@ -12,24 +12,28 @@ import {
   UPGRADE_INVESTIGATION_GUIDE_INTERACTIONS,
   PREBUILT_RULE_CUSTOMIZATION,
   PREBUILT_RULE_CUSTOMIZATION_DESCRIPTION,
+  ENDPOINT_CUSTOM_YARA_SIGNATURES,
+  ENDPOINT_REGISTRY_CREDENTIAL_HARDENING,
 } from '@kbn/security-solution-upselling/messages';
 import type {
   UpsellingMessageId,
   UpsellingSectionId,
 } from '@kbn/security-solution-upselling/service/types';
 import React from 'react';
+import { CloudDefendIntegrationPliBlockLazy } from './sections/cloud_defend';
 import { CloudSecurityPostureIntegrationPliBlockLazy } from './sections/cloud_security_posture';
 import {
   EndpointAgentTamperProtectionLazy,
   EndpointCustomNotificationLazy,
   EndpointPolicyProtectionsLazy,
   EndpointProtectionUpdatesLazy,
+  EndpointDeviceControlLazy,
   RuleDetailsEndpointExceptionsLazy,
 } from './sections/endpoint_management';
 import { getProductTypeByPLI } from './hooks/use_product_type_by_pli';
 import {
   AttackDiscoveryUpsellingPageLazy,
-  EndpointExceptionsDetailsUpsellingLazy,
+  AttacksUpsellingPageLazy,
   EntityAnalyticsUpsellingPageLazy,
   EntityAnalyticsUpsellingSectionLazy,
   OsqueryResponseActionsUpsellingSectionLazy,
@@ -76,16 +80,14 @@ export const upsellingPages: UpsellingPages = [
     ),
   },
   {
-    pageName: SecurityPageName.exceptions,
-    pli: ProductFeatureKey.endpointExceptions,
-    component: () => (
-      <EndpointExceptionsDetailsUpsellingLazy requiredPLI={ProductFeatureKey.endpointExceptions} />
-    ),
-  },
-  {
     pageName: SecurityPageName.attackDiscovery,
     pli: ProductFeatureKey.attackDiscovery,
     component: () => <AttackDiscoveryUpsellingPageLazy />,
+  },
+  {
+    pageName: SecurityPageName.attacks,
+    pli: ProductFeatureKey.attackDiscovery,
+    component: () => <AttacksUpsellingPageLazy />,
   },
   {
     pageName: SecurityPageName.siemMigrationsRules,
@@ -129,9 +131,19 @@ export const upsellingSections: UpsellingSections = [
     component: RuleDetailsEndpointExceptionsLazy,
   },
   {
+    id: 'endpoint_device_control',
+    pli: ProductFeatureKey.endpointTrustedDevices,
+    component: EndpointDeviceControlLazy,
+  },
+  {
     id: 'endpoint_protection_updates',
     pli: ProductFeatureKey.endpointProtectionUpdates,
     component: EndpointProtectionUpdatesLazy,
+  },
+  {
+    id: 'cloud_defend_integration_installation',
+    pli: ProductFeatureKey.cloudDefend,
+    component: CloudDefendIntegrationPliBlockLazy,
   },
   {
     id: 'cloud_security_posture_integration_installation',
@@ -190,6 +202,20 @@ export const upsellingMessages: UpsellingMessages = [
     message: PREBUILT_RULE_CUSTOMIZATION_DESCRIPTION(
       getProductTypeByPLI(ProductFeatureKey.prebuiltRuleCustomization) ?? '',
       'feature tier'
+    ),
+  },
+  {
+    id: 'endpoint_custom_yara_signatures',
+    pli: ProductFeatureKey.endpointCustomYaraSignatures,
+    message: ENDPOINT_CUSTOM_YARA_SIGNATURES(
+      getProductTypeByPLI(ProductFeatureKey.endpointCustomYaraSignatures) ?? ''
+    ),
+  },
+  {
+    id: 'endpoint_registry_credential_hardening',
+    pli: ProductFeatureKey.endpointRegistryCredentialHardening,
+    message: ENDPOINT_REGISTRY_CREDENTIAL_HARDENING(
+      getProductTypeByPLI(ProductFeatureKey.endpointRegistryCredentialHardening) ?? ''
     ),
   },
 ];

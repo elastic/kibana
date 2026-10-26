@@ -121,11 +121,11 @@ For more detailed instructions you can check [apm-server dev documentation](http
 - Install golang and set go path properly
 - Run Elasticsearch locally
   ```
-  yarn es snapshot
+  pnpm es snapshot
   ```
 - Run Kibana locally
   ```
-  yarn start
+  pnpm start
   ```
 - Git Clone APM Server locally
   ```
@@ -216,7 +216,7 @@ For more detailed instructions you can check [apm-server dev documentation](http
 
 - Run `sh service_max_group` to generate the data
 
-This would start generating events to APM Server. Now open Service Inventory Page on Kibana to observe the `_other` bucket.
+This would start generating events to APM Server. Now open Service inventory Page on Kibana to observe the `_other` bucket.
 
 ### Known Issues
 

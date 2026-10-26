@@ -4,27 +4,32 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { DefaultEmbeddableApi, ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
-import { initializeTitleManager, useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
+import type {
+  DefaultEmbeddableApi,
+  EmbeddablePublicDefinition,
+} from '@kbn/embeddable-plugin/public';
+import {
+  initializeTitleManager,
+  titleComparators,
+  useBatchedPublishingSubjects,
+} from '@kbn/presentation-publishing';
+import { initializeStateApi } from '@kbn/presentation-publishing';
 import React from 'react';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, map, merge, skip } from 'rxjs';
+import { APM_ALERTING_THROUGHPUT_CHART_EMBEDDABLE } from '@kbn/apm-embeddable-common';
 import { ApmEmbeddableContext } from '../../embeddable_context';
 import type { EmbeddableDeps } from '../../types';
-import { APM_ALERTING_THROUGHPUT_CHART_EMBEDDABLE } from '../constants';
 import type { EmbeddableApmAlertingVizProps } from '../types';
 import { APMAlertingThroughputChart } from './chart';
 
 export const getApmAlertingThroughputChartEmbeddableFactory = (deps: EmbeddableDeps) => {
-  const factory: ReactEmbeddableFactory<
-    EmbeddableApmAlertingVizProps,
+  const factory: EmbeddablePublicDefinition<
     EmbeddableApmAlertingVizProps,
     DefaultEmbeddableApi<EmbeddableApmAlertingVizProps>
   > = {
     type: APM_ALERTING_THROUGHPUT_CHART_EMBEDDABLE,
-    deserializeState: (state) => {
-      return state.rawState as EmbeddableApmAlertingVizProps;
-    },
-    buildEmbeddable: async (state, buildApi, uuid, parentApi) => {
+    buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
+      const state = initialState;
       const titleManager = initializeTitleManager(state);
       const serviceName$ = new BehaviorSubject(state.serviceName);
       const transactionType$ = new BehaviorSubject(state.transactionType);
@@ -37,41 +42,97 @@ export const getApmAlertingThroughputChartEmbeddableFactory = (deps: EmbeddableD
       const kuery$ = new BehaviorSubject(state.kuery);
       const filters$ = new BehaviorSubject(state.filters);
 
-      const api = buildApi(
-        {
-          ...titleManager.api,
-          serializeState: () => {
-            return {
-              rawState: {
-                ...titleManager.serialize(),
-                serviceName: serviceName$.getValue(),
-                transactionType: transactionType$.getValue(),
-                transactionName: transactionName$.getValue(),
-                environment: environment$.getValue(),
-                rangeFrom: rangeFrom$.getValue(),
-                rangeTo: rangeTo$.getValue(),
-                rule: rule$.getValue(),
-                alert: alert$.getValue(),
-                kuery: kuery$.getValue(),
-                filters: filters$.getValue(),
-              },
-            };
-          },
+      const stateApi = initializeStateApi<EmbeddableApmAlertingVizProps>({
+        parentApi,
+        uuid,
+        serializeState: () => ({
+          ...titleManager.getLatestState(),
+          serviceName: serviceName$.getValue(),
+          transactionType: transactionType$.getValue(),
+          transactionName: transactionName$.getValue(),
+          environment: environment$.getValue(),
+          rangeFrom: rangeFrom$.getValue(),
+          rangeTo: rangeTo$.getValue(),
+          rule: rule$.getValue(),
+          alert: alert$.getValue(),
+          kuery: kuery$.getValue(),
+          filters: filters$.getValue(),
+        }),
+        anyStateChange$: merge(
+          titleManager.anyStateChange$,
+          serviceName$.pipe(
+            skip(1),
+            map(() => undefined)
+          ),
+          transactionType$.pipe(
+            skip(1),
+            map(() => undefined)
+          ),
+          transactionName$.pipe(
+            skip(1),
+            map(() => undefined)
+          ),
+          environment$.pipe(
+            skip(1),
+            map(() => undefined)
+          ),
+          rangeFrom$.pipe(
+            skip(1),
+            map(() => undefined)
+          ),
+          rangeTo$.pipe(
+            skip(1),
+            map(() => undefined)
+          ),
+          rule$.pipe(
+            skip(1),
+            map(() => undefined)
+          ),
+          alert$.pipe(
+            skip(1),
+            map(() => undefined)
+          ),
+          kuery$.pipe(
+            skip(1),
+            map(() => undefined)
+          ),
+          filters$.pipe(
+            skip(1),
+            map(() => undefined)
+          )
+        ),
+        getComparators: () => ({
+          ...titleComparators,
+          serviceName: 'referenceEquality',
+          transactionType: 'referenceEquality',
+          transactionName: 'referenceEquality',
+          environment: 'referenceEquality',
+          rangeFrom: 'referenceEquality',
+          rangeTo: 'referenceEquality',
+          rule: 'referenceEquality',
+          alert: 'referenceEquality',
+          kuery: 'referenceEquality',
+          filters: 'referenceEquality',
+        }),
+        applySerializedState: (nextState) => {
+          titleManager.reinitializeState(nextState);
+          serviceName$.next(nextState.serviceName ?? '');
+          transactionType$.next(nextState.transactionType);
+          transactionName$.next(nextState.transactionName);
+          environment$.next(nextState.environment);
+          rangeFrom$.next(nextState.rangeFrom);
+          rangeTo$.next(nextState.rangeTo);
+          rule$.next(nextState.rule as EmbeddableApmAlertingVizProps['rule']);
+          alert$.next(nextState.alert as EmbeddableApmAlertingVizProps['alert']);
+          kuery$.next(nextState.kuery);
+          filters$.next(nextState.filters);
         },
-        {
-          serviceName: [serviceName$, (value) => serviceName$.next(value)],
-          transactionType: [transactionType$, (value) => transactionType$.next(value)],
-          transactionName: [transactionName$, (value) => transactionName$.next(value)],
-          environment: [environment$, (value) => environment$.next(value)],
-          rangeFrom: [rangeFrom$, (value) => rangeFrom$.next(value)],
-          rangeTo: [rangeTo$, (value) => rangeTo$.next(value)],
-          rule: [rule$, (value) => rule$.next(value)],
-          alert: [alert$, (value) => alert$.next(value)],
-          kuery: [kuery$, (value) => kuery$.next(value)],
-          filters: [filters$, (value) => filters$.next(value)],
-          ...titleManager.comparators,
-        }
-      );
+      });
+
+      const api = finalizeApi({
+        ...titleManager.api,
+        ...stateApi,
+      });
 
       return {
         api,

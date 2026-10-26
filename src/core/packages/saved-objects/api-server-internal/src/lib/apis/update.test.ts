@@ -15,18 +15,20 @@ import type { estypes } from '@elastic/elasticsearch';
 import {
   type SavedObjectUnsanitizedDoc,
   type SavedObjectReference,
-  SavedObjectsRawDocSource,
   SavedObjectsErrorHelpers,
 } from '@kbn/core-saved-objects-server';
 import { ALL_NAMESPACES_STRING } from '@kbn/core-saved-objects-utils-server';
 import { SavedObjectsRepository } from '../repository';
 import { loggerMock } from '@kbn/logging-mocks';
-import {
-  SavedObjectsSerializer,
-  encodeHitVersion,
-} from '@kbn/core-saved-objects-base-server-internal';
+import type { SavedObjectsSerializer } from '@kbn/core-saved-objects-base-server-internal';
+import { encodeHitVersion } from '@kbn/core-saved-objects-base-server-internal';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { kibanaMigratorMock } from '../../mocks';
+import { savedObjectsExtensionsMock } from '../../mocks/saved_objects_extensions.mock';
+import type {
+  ISavedObjectsSecurityExtension,
+  SavedObjectsRawDocSource,
+} from '@kbn/core-saved-objects-server';
 import {
   NAMESPACE_AGNOSTIC_TYPE,
   MULTI_NAMESPACE_ISOLATED_TYPE,
@@ -37,6 +39,7 @@ import {
   mappings,
   mockVersion,
   createRegistry,
+  createType,
   createDocumentMigrator,
   getMockGetResponse,
   createSpySerializer,
@@ -45,7 +48,13 @@ import {
   createGenericNotFoundErrorPayload,
   updateSuccess,
   mockTimestampFieldsWithCreated,
+  ACCESS_CONTROL_TYPE,
+  MULTI_NAMESPACE_TYPE,
 } from '../../test_helpers/repository.test.common';
+import { mockAuthenticatedUser } from '@kbn/core-security-common/mocks';
+import { schema } from '@kbn/config-schema';
+
+const UPDATE_SCHEMA_TYPE = 'update-schema-type';
 
 describe('#update', () => {
   let client: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;
@@ -53,8 +62,21 @@ describe('#update', () => {
   let migrator: ReturnType<typeof kibanaMigratorMock.create>;
   let logger: ReturnType<typeof loggerMock.create>;
   let serializer: jest.Mocked<SavedObjectsSerializer>;
+  let securityExtension: jest.Mocked<ISavedObjectsSecurityExtension>;
 
   const registry = createRegistry();
+  const updateSchema = schema.object(
+    { title: schema.string(), count: schema.maybe(schema.number()) },
+    { unknowns: 'ignore' }
+  );
+  registry.registerType(
+    createType(UPDATE_SCHEMA_TYPE, {
+      migrations: {},
+      modelVersions: {
+        1: { changes: [], schemas: { create: updateSchema, update: updateSchema } },
+      },
+    })
+  );
   const documentMigrator = createDocumentMigrator(registry);
 
   const expectMigrationArgs = (args: unknown, contains = true, n = 1) => {
@@ -75,6 +97,7 @@ describe('#update', () => {
     migrator.migrateDocument = jest.fn().mockImplementation(documentMigrator.migrate);
     migrator.runMigrations = jest.fn().mockResolvedValue([{ status: 'skipped' }]);
     logger = loggerMock.create();
+    securityExtension = savedObjectsExtensionsMock.createSecurityExtension();
 
     // create a mock serializer "shim" so we can track function calls, but use the real serializer's implementation
     serializer = createSpySerializer(registry);
@@ -92,6 +115,9 @@ describe('#update', () => {
       serializer,
       allowedTypes,
       logger,
+      extensions: {
+        securityExtension,
+      },
     });
 
     mockGetCurrentTime.mockReturnValue(mockTimestamp);
@@ -523,7 +549,10 @@ describe('#update', () => {
       });
 
       it(`prepends namespace to the id when providing namespace for single-namespace type`, async () => {
-        await updateSuccess(client, repository, registry, type, id, attributes, { namespace });
+        const res = await updateSuccess(client, repository, registry, type, id, attributes, {
+          namespace,
+        });
+        expect(res.namespaces).toEqual([namespace]);
         expect(client.get).toHaveBeenCalledTimes(1);
         expect(mockPreflightCheckForCreate).not.toHaveBeenCalled();
         expect(client.index).toHaveBeenCalledWith(
@@ -533,7 +562,10 @@ describe('#update', () => {
       });
 
       it(`doesn't prepend namespace to the id when providing no namespace for single-namespace type`, async () => {
-        await updateSuccess(client, repository, registry, type, id, attributes, { references });
+        const res = await updateSuccess(client, repository, registry, type, id, attributes, {
+          references,
+        });
+        expect(res.namespaces).toEqual(['default']);
         expect(client.index).toHaveBeenCalledWith(
           expect.objectContaining({ id: expect.stringMatching(`${type}:${id}`) }),
           expect.anything()
@@ -541,14 +573,19 @@ describe('#update', () => {
       });
 
       it(`normalizes options.namespace from 'default' to undefined`, async () => {
-        await updateSuccess(client, repository, registry, type, id, attributes, {
+        const res = await updateSuccess(client, repository, registry, type, id, attributes, {
           references,
           namespace: 'default',
         });
+        expect(res.namespaces).toEqual(['default']);
         expect(client.index).toHaveBeenCalledWith(
-          expect.objectContaining({ id: expect.stringMatching(`${type}:${id}`) }),
+          expect.objectContaining({
+            id: expect.stringMatching(`${type}:${id}`),
+          }),
           expect.anything()
         );
+        // Assert that 'namespace' does not exist at all
+        expect(client.index.mock.calls[0][0]).not.toHaveProperty('namespace');
       });
 
       it(`doesn't prepend namespace to the id when using agnostic-namespace type`, async () => {
@@ -587,13 +624,13 @@ describe('#update', () => {
       const expectNotFoundError = async (type: string, id: string) => {
         await expect(
           repository.update(type, id, {}, { migrationVersionCompatibility: 'raw' })
-        ).rejects.toThrowError(createGenericNotFoundErrorPayload(type, id));
+        ).rejects.toThrow(createGenericNotFoundErrorPayload(type, id));
       };
 
       it(`throws when options.namespace is '*'`, async () => {
         await expect(
           repository.update(type, id, attributes, { namespace: ALL_NAMESPACES_STRING })
-        ).rejects.toThrowError(createBadRequestErrorPayload('"options.namespace" cannot be "*"'));
+        ).rejects.toThrow(createBadRequestErrorPayload('"options.namespace" cannot be "*"'));
       });
 
       it(`throws when type is invalid`, async () => {
@@ -607,7 +644,7 @@ describe('#update', () => {
       });
 
       it(`throws when id is empty`, async () => {
-        await expect(repository.update(type, '', attributes)).rejects.toThrowError(
+        await expect(repository.update(type, '', attributes)).rejects.toThrow(
           createBadRequestErrorPayload('id cannot be empty')
         );
         expect(client.index).not.toHaveBeenCalled();
@@ -668,7 +705,7 @@ describe('#update', () => {
               },
             }
           )
-        ).rejects.toThrowError(createConflictErrorPayload(MULTI_NAMESPACE_ISOLATED_TYPE, id));
+        ).rejects.toThrow(createConflictErrorPayload(MULTI_NAMESPACE_ISOLATED_TYPE, id));
         expect(client.get).toHaveBeenCalledTimes(1);
         expect(mockPreflightCheckForCreate).toHaveBeenCalledTimes(1);
         expect(client.index).not.toHaveBeenCalled();
@@ -696,6 +733,45 @@ describe('#update', () => {
       it(`does not throw when the document does not exist`, async () => {
         expect(client.create).not.toHaveBeenCalled();
         await expectNotFoundError(type, id);
+      });
+    });
+
+    describe('update schema validation', () => {
+      it('indexes the document when the merged document is valid', async () => {
+        await updateSuccess(client, repository, registry, UPDATE_SCHEMA_TYPE, id, { count: 5 });
+        expect(client.index).toHaveBeenCalledTimes(1);
+      });
+
+      it('ignores unknown fields', async () => {
+        await updateSuccess(client, repository, registry, UPDATE_SCHEMA_TYPE, id, {
+          legacyFlag: true,
+        });
+        expect(client.index).toHaveBeenCalledTimes(1);
+      });
+
+      it('throws when a known field is invalid', async () => {
+        client.get.mockResponseOnce(getMockGetResponse(registry, { type: UPDATE_SCHEMA_TYPE, id }));
+        await expect(
+          repository.update(UPDATE_SCHEMA_TYPE, id, { count: 'lots' })
+        ).rejects.toThrowErrorMatchingInlineSnapshot(
+          `"[attributes.count]: expected value of type [number] but got [string]: Bad Request"`
+        );
+        expect(client.index).not.toHaveBeenCalled();
+      });
+
+      it('validates the provided attributes when mergeAttributes is false', async () => {
+        client.get.mockResponseOnce(getMockGetResponse(registry, { type: UPDATE_SCHEMA_TYPE, id }));
+        await expect(
+          repository.update(UPDATE_SCHEMA_TYPE, id, { count: 5 }, { mergeAttributes: false })
+        ).rejects.toThrowErrorMatchingInlineSnapshot(
+          `"[attributes.title]: expected value of type [string] but got [undefined]: Bad Request"`
+        );
+        expect(client.index).not.toHaveBeenCalled();
+      });
+
+      it('does not validate types without an update schema', async () => {
+        await updateSuccess(client, repository, registry, 'dashboard', id, { title: 123 });
+        expect(client.index).toHaveBeenCalledTimes(1);
       });
     });
 
@@ -790,6 +866,152 @@ describe('#update', () => {
           { originId }
         );
         expect(result).toMatchObject({ originId });
+      });
+    });
+
+    describe('security', () => {
+      it('correctly passes params to securityExtension.authorizeUpdate', async () => {
+        await updateSuccess(
+          client,
+          repository,
+          registry,
+          MULTI_NAMESPACE_ISOLATED_TYPE,
+          id,
+          attributes,
+          { references }
+        );
+
+        expect(securityExtension.authorizeUpdate).toHaveBeenCalledWith(
+          expect.objectContaining({
+            object: {
+              existingNamespaces: ['default'],
+              id: 'logstash-*',
+              name: 'Testing',
+              type: 'multiNamespaceIsolatedType',
+            },
+          })
+        );
+      });
+
+      describe('access control', () => {
+        it('should define access control metadata when upserting a supporting type', async () => {
+          securityExtension.getCurrentUser.mockReturnValue(
+            mockAuthenticatedUser({ profile_uid: 'u_test_user_version' })
+          );
+
+          const options = { upsert: { title: 'foo', description: 'bar' } };
+          migrator.migrateDocument.mockImplementationOnce((doc) => ({ ...doc }));
+          await updateSuccess(
+            client,
+            repository,
+            registry,
+            ACCESS_CONTROL_TYPE,
+            id,
+            attributes,
+            {
+              upsert: {
+                title: 'foo',
+                description: 'bar',
+              },
+            },
+            {
+              mockGetResponseAsNotFound: { found: false } as estypes.GetResponse,
+            }
+          );
+          await repository.update(ACCESS_CONTROL_TYPE, id, attributes, options);
+          expect(client.get).toHaveBeenCalledTimes(2);
+          const expectedType = {
+            accessControlType: { description: 'bar', title: 'foo' },
+            namespaces: ['default'],
+            type: 'accessControlType',
+            accessControl: {
+              accessMode: 'default',
+              owner: 'u_test_user_version',
+            },
+            created_by: 'u_test_user_version',
+            updated_by: 'u_test_user_version',
+            ...mockTimestampFieldsWithCreated,
+          };
+          expect(
+            (client.create.mock.calls[0][0] as estypes.CreateRequest<SavedObjectsRawDocSource>)
+              .document!
+          ).toEqual(expectedType);
+        });
+
+        it('should not define access control metadata when upserting a supporting type but there is no active user profile', async () => {
+          securityExtension.getCurrentUser.mockReturnValue(null);
+          const options = { upsert: { title: 'foo', description: 'bar' } };
+          migrator.migrateDocument.mockImplementationOnce((doc) => ({ ...doc }));
+          await updateSuccess(
+            client,
+            repository,
+            registry,
+            ACCESS_CONTROL_TYPE,
+            id,
+            attributes,
+            {
+              upsert: {
+                title: 'foo',
+                description: 'bar',
+              },
+            },
+            {
+              mockGetResponseAsNotFound: { found: false } as estypes.GetResponse,
+            }
+          );
+          await repository.update(ACCESS_CONTROL_TYPE, id, attributes, options);
+          expect(client.get).toHaveBeenCalledTimes(2);
+          const expectedType = {
+            accessControlType: { description: 'bar', title: 'foo' },
+            namespaces: ['default'],
+            type: 'accessControlType',
+            ...mockTimestampFieldsWithCreated,
+          };
+          expect(
+            (client.create.mock.calls[0][0] as estypes.CreateRequest<SavedObjectsRawDocSource>)
+              .document!
+          ).toEqual(expectedType);
+        });
+
+        it('should not define access control metadata when upserting a non-supporting type', async () => {
+          securityExtension.getCurrentUser.mockReturnValue(
+            mockAuthenticatedUser({ profile_uid: 'u_test_user_version' })
+          );
+
+          const options = { upsert: { title: 'foo', description: 'bar' } };
+          migrator.migrateDocument.mockImplementationOnce((doc) => ({ ...doc }));
+          await updateSuccess(
+            client,
+            repository,
+            registry,
+            MULTI_NAMESPACE_TYPE,
+            id,
+            attributes,
+            {
+              upsert: {
+                title: 'foo',
+                description: 'bar',
+              },
+            },
+            {
+              mockGetResponseAsNotFound: { found: false } as estypes.GetResponse,
+            }
+          );
+          await repository.update(MULTI_NAMESPACE_TYPE, id, attributes, options);
+          expect(client.get).toHaveBeenCalledTimes(2);
+          const expectedType = {
+            multiNamespaceType: { description: 'bar', title: 'foo' },
+            namespaces: ['default'],
+            type: 'multiNamespaceType',
+            created_by: 'u_test_user_version',
+            updated_by: 'u_test_user_version',
+            ...mockTimestampFieldsWithCreated,
+          };
+          expect(
+            (client.create.mock.calls[0][0] as estypes.CreateRequest<SavedObjectsRawDocSource>)
+              .document!
+          ).toEqual(expectedType);
+        });
       });
     });
   });

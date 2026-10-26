@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MlInferenceHistoryResponse } from '../../../../../common/types/pipelines';
+import type { MlInferenceHistoryResponse } from '../../../../../common/types/pipelines';
 import { createApiLogic } from '../../../shared/api_logic/create_api_logic';
 import { HttpLogic } from '../../../shared/http';
 
@@ -17,7 +17,9 @@ export type FetchMlInferencePipelineHistoryApiLogicResponse = MlInferenceHistory
 export const fetchMlInferencePipelineHistory = async ({
   indexName,
 }: FetchMlInferencePipelineHistoryApiLogicArgs) => {
-  const route = `/internal/enterprise_search/indices/${indexName}/ml_inference/history`;
+  const route = `/internal/enterprise_search/indices/${encodeURIComponent(
+    indexName
+  )}/ml_inference/history`;
 
   return await HttpLogic.values.http.get<FetchMlInferencePipelineHistoryApiLogicResponse>(route);
 };

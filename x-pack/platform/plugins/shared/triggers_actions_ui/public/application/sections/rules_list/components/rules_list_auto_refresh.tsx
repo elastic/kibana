@@ -9,17 +9,13 @@ import { i18n } from '@kbn/i18n';
 import React, { useCallback, useEffect, useState, useRef } from 'react';
 import moment from 'moment';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiAutoRefreshButton } from '@elastic/eui';
-import { OnRefreshChangeProps } from '@elastic/eui/src/components/date_picker/types';
+import type { OnRefreshChangeProps } from '@elastic/eui/src/components/date_picker/types';
 
 interface RulesListAutoRefreshProps {
   lastUpdate: string;
   initialUpdateInterval?: number;
   onRefresh: () => void;
 }
-
-const flexGroupStyle = {
-  marginLeft: 'auto',
-};
 
 const getLastUpdateText = (lastUpdate: string) => {
   if (!moment(lastUpdate).isValid()) {
@@ -104,8 +100,13 @@ export const RulesListAutoRefresh = (props: RulesListAutoRefreshProps) => {
   );
 
   return (
-    <EuiFlexGroup data-test-subj="rulesListAutoRefresh" alignItems="center">
-      <EuiFlexItem grow={false} style={flexGroupStyle}>
+    <EuiFlexGroup
+      data-test-subj="rulesListAutoRefresh"
+      alignItems="center"
+      gutterSize="s"
+      responsive={false}
+    >
+      <EuiFlexItem grow={false}>
         <EuiText data-test-subj="rulesListAutoRefresh-lastUpdateText" size="s" color="subdued">
           {lastUpdateText}
         </EuiText>

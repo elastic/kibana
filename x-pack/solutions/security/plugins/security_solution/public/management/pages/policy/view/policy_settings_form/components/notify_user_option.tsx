@@ -19,42 +19,23 @@ import {
   EuiText,
   EuiTextArea,
 } from '@elastic/eui';
-import { PROTECTION_NOTICE_SUPPORTED_ENDPOINT_VERSION } from '../protection_notice_supported_endpoint_version';
+import { getProtectionNoticeSupportedEndpointVersion } from '../protection_notice_supported_endpoint_version';
 import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
 import { getEmptyValue } from '../../../../../../common/components/empty_value';
 import { useLicense } from '../../../../../../common/hooks/use_license';
 import { SettingCardHeader } from './setting_card';
 import type { PolicyFormComponentCommonProps } from '../types';
 import type { ImmutableArray, UIPolicyConfig } from '../../../../../../../common/endpoint/types';
-import { ProtectionModes } from '../../../../../../../common/endpoint/types';
+import { PolicyOperatingSystem, ProtectionModes } from '../../../../../../../common/endpoint/types';
+import { setPopupEnabled } from '../../../../../../../common/endpoint/models/policy_config_helpers';
 import type { PolicyProtection, MacPolicyProtection, LinuxPolicyProtection } from '../../../types';
 import { useGetCustomNotificationUnavailableComponent } from '../hooks/use_get_custom_notification_unavailable_component';
-
-export const NOTIFY_USER_SECTION_TITLE = i18n.translate(
-  'xpack.securitySolution.endpoint.policyDetailsConfig.userNotification',
-  { defaultMessage: 'User notification' }
-);
-
-export const NOTIFY_USER_CHECKBOX_LABEL = i18n.translate(
-  'xpack.securitySolution.endpoint.policyDetail.notifyUser',
-  {
-    defaultMessage: 'Notify user',
-  }
-);
-
-const NOTIFICATION_MESSAGE_LABEL = i18n.translate(
-  'xpack.securitySolution.endpoint.policyDetailsConfig.notificationMessage',
-  {
-    defaultMessage: 'Notification message',
-  }
-);
-
-export const CUSTOMIZE_NOTIFICATION_MESSAGE_LABEL = i18n.translate(
-  'xpack.securitySolution.endpoint.policyDetailsConfig.customizeUserNotification',
-  {
-    defaultMessage: 'Customize notification message',
-  }
-);
+import {
+  NOTIFY_USER_SECTION_TITLE,
+  NOTIFY_USER_CHECKBOX_LABEL,
+  NOTIFICATION_MESSAGE_LABEL,
+  CUSTOMIZE_NOTIFICATION_MESSAGE_LABEL,
+} from './shared_translations';
 
 export interface NotifyUserOptionProps extends PolicyFormComponentCommonProps {
   protection: PolicyProtection;
@@ -82,17 +63,7 @@ export const NotifyUserOption = React.memo(
     const handleUserNotificationCheckbox = useCallback<EuiCheckboxProps['onChange']>(
       (event) => {
         const newPayload = cloneDeep(policy);
-
-        for (const os of osList) {
-          if (os === 'windows') {
-            newPayload[os].popup[protection].enabled = event.target.checked;
-          } else if (os === 'mac') {
-            newPayload[os].popup[protection as MacPolicyProtection].enabled = event.target.checked;
-          } else if (os === 'linux') {
-            newPayload[os].popup[protection as LinuxPolicyProtection].enabled =
-              event.target.checked;
-          }
-        }
+        setPopupEnabled(newPayload, protection, osList, event.target.checked);
 
         onChange({ isValid: true, updatedPolicy: newPayload });
       },
@@ -103,12 +74,15 @@ export const NotifyUserOption = React.memo(
       (event) => {
         const newPayload = cloneDeep(policy);
         for (const os of osList) {
-          if (os === 'windows') {
+          if (os === PolicyOperatingSystem.windows) {
             newPayload[os].popup[protection].message = event.target.value;
-          } else if (os === 'mac') {
+          } else if (os === PolicyOperatingSystem.mac) {
             newPayload[os].popup[protection as MacPolicyProtection].message = event.target.value;
-          } else if (os === 'linux') {
-            newPayload[os].popup[protection as LinuxPolicyProtection].message = event.target.value;
+          } else if (os === PolicyOperatingSystem.linux) {
+            const linuxPopup = newPayload[os].popup[protection as LinuxPolicyProtection];
+            if (linuxPopup) {
+              linuxPopup.message = event.target.value;
+            }
           }
         }
 
@@ -276,16 +250,18 @@ NotifyUserOption.displayName = 'NotifyUserOption';
 export const SupportedVersionForProtectionNotice = React.memo(
   ({
     protection,
+    os,
     'data-test-subj': dataTestSubj,
   }: {
     protection: string;
+    /** Set when the notice describes a single OS row rather than the whole protection. */
+    os?: keyof UIPolicyConfig;
     'data-test-subj'?: string;
   }) => {
-    const version = useMemo(() => {
-      return PROTECTION_NOTICE_SUPPORTED_ENDPOINT_VERSION[
-        protection as keyof typeof PROTECTION_NOTICE_SUPPORTED_ENDPOINT_VERSION
-      ];
-    }, [protection]);
+    const version = useMemo(
+      () => getProtectionNoticeSupportedEndpointVersion(protection, os),
+      [protection, os]
+    );
 
     if (!version) {
       return null;

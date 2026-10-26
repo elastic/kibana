@@ -12,7 +12,8 @@ import {
 } from '../../../common';
 import { addBasePath } from '../helpers';
 import { registerRepositoriesRoutes } from './repositories';
-import { RouterMock, routeDependencies, RequestMock } from '../../test/helpers';
+import type { RequestMock } from '../../test/helpers';
+import { RouterMock, routeDependencies } from '../../test/helpers';
 
 describe('[Snapshot and Restore API Routes] Repositories', () => {
   const managedRepositoryName = 'myManagedRepository';
@@ -119,7 +120,7 @@ describe('[Snapshot and Restore API Routes] Repositories', () => {
       clusterSettingsFn.mockResolvedValue(mockSnapshotGetManagedRepositoryEsResponse);
       getRepoFn.mockRejectedValue(new Error());
 
-      await expect(router.runRequest(mockRequest)).rejects.toThrowError();
+      await expect(router.runRequest(mockRequest)).rejects.toThrow();
     });
   });
 
@@ -213,7 +214,7 @@ describe('[Snapshot and Restore API Routes] Repositories', () => {
 
       getRepoFn.mockRejectedValue(new Error());
 
-      await expect(router.runRequest(mockRequest)).rejects.toThrowError();
+      await expect(router.runRequest(mockRequest)).rejects.toThrow();
     });
   });
 
@@ -315,9 +316,7 @@ describe('[Snapshot and Restore API Routes] Repositories', () => {
     it('should throw if ES error', async () => {
       nodesInfoFn.mockRejectedValueOnce(new Error('Error getting cluster stats'));
 
-      await expect(router.runRequest(mockRequest)).rejects.toThrowError(
-        'Error getting cluster stats'
-      );
+      await expect(router.runRequest(mockRequest)).rejects.toThrow('Error getting cluster stats');
     });
   });
 
@@ -353,7 +352,7 @@ describe('[Snapshot and Restore API Routes] Repositories', () => {
       getRepoFn.mockResolvedValue({});
       createRepoFn.mockRejectedValue(error);
 
-      await expect(router.runRequest(mockRequest)).rejects.toThrowError(error);
+      await expect(router.runRequest(mockRequest)).rejects.toThrow(error);
     });
   });
 
@@ -405,7 +404,7 @@ describe('[Snapshot and Restore API Routes] Repositories', () => {
 
     it('should throw if ES error', async () => {
       getRepoFn.mockRejectedValue(new Error());
-      await expect(router.runRequest(mockRequest)).rejects.toThrowError();
+      await expect(router.runRequest(mockRequest)).rejects.toThrow();
     });
   });
 

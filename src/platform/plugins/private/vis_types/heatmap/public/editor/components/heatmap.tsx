@@ -13,13 +13,15 @@ import { Position } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import type {
+  SetColorRangeValue,
+  SetColorSchemaOptionsValue,
+} from '@kbn/vis-default-editor-plugin/public';
 import {
   BasicOptions,
   SelectOption,
   SwitchOption,
   ColorRanges,
-  SetColorRangeValue,
-  SetColorSchemaOptionsValue,
   ColorSchemaOptions,
   NumberInputOption,
   PercentageModeOption,
@@ -27,8 +29,9 @@ import {
   LegendSizeSettings,
 } from '@kbn/vis-default-editor-plugin/public';
 import { colorSchemas } from '@kbn/charts-plugin/public';
-import { LegendSize, VisEditorOptionsProps } from '@kbn/visualizations-plugin/public';
-import { HeatmapVisParams, HeatmapTypeProps, ValueAxis } from '../../types';
+import type { VisEditorOptionsProps } from '@kbn/visualizations-plugin/public';
+import type { LegendSize } from '@kbn/chart-expressions-common';
+import type { HeatmapVisParams, HeatmapTypeProps, ValueAxis } from '../../types';
 import { LabelsPanel } from './labels_panel';
 import { legendPositions, scaleTypes } from '../collections';
 
@@ -44,7 +47,6 @@ const HeatmapOptions = (props: HeatmapOptionsProps) => {
   const [isColorRangesValid, setIsColorRangesValid] = useState(false);
 
   const legendSize = stateParams.legendSize;
-  const [hadAutoLegendSize] = useState(() => legendSize === LegendSize.AUTO);
 
   const setValueAxisScale = useCallback(
     <T extends keyof ValueAxis['scale']>(paramName: T, value: ValueAxis['scale'][T]) =>
@@ -104,7 +106,6 @@ const HeatmapOptions = (props: HeatmapOptionsProps) => {
                 stateParams.legendPosition === Position.Left ||
                 stateParams.legendPosition === Position.Right
               }
-              showAutoOption={hadAutoLegendSize}
             />
           </>
         )}
@@ -162,7 +163,6 @@ const HeatmapOptions = (props: HeatmapOptionsProps) => {
                 })
               : null
           }
-          delay="long"
           position="right"
         >
           <SelectOption

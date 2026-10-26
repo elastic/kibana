@@ -6,7 +6,7 @@
  */
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { EuiButton } from '@elastic/eui';
+import { EuiButtonEmpty } from '@elastic/eui';
 import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { FilterStateStore, buildCustomFilter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
@@ -55,7 +55,7 @@ export const DiscoverLink = React.memo(
             filter.filter,
             false,
             false,
-            filter.meta?.name ?? categorizedLogsFilterLabel,
+            filter.meta?.name ?? contextualLogsFilterLabel,
             FilterStateStore.APP_STATE
           )
         ),
@@ -89,14 +89,14 @@ export const DiscoverLink = React.memo(
     });
 
     return (
-      <EuiButton
+      <EuiButtonEmpty
         {...discoverLinkProps}
-        color="primary"
         iconType="discoverApp"
+        aria-label={discoverLinkTitle}
         data-test-subj="logsExplorerDiscoverFallbackLink"
       >
         {discoverLinkTitle}
-      </EuiButton>
+      </EuiButtonEmpty>
     );
   }
 );
@@ -104,13 +104,13 @@ export const DiscoverLink = React.memo(
 export const discoverLinkTitle = i18n.translate(
   'xpack.observabilityLogsOverview.discoverLinkTitle',
   {
-    defaultMessage: 'Open in Discover',
+    defaultMessage: 'Open logs in Discover',
   }
 );
 
-export const categorizedLogsFilterLabel = i18n.translate(
-  'xpack.observabilityLogsOverview.categorizedLogsFilterLabel',
+export const contextualLogsFilterLabel = i18n.translate(
+  'xpack.observabilityLogsOverview.contextualLogsFilterLabel',
   {
-    defaultMessage: 'Categorized log entries',
+    defaultMessage: 'Contextual log entries',
   }
 );

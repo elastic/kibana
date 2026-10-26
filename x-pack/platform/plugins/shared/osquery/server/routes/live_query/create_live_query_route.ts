@@ -19,8 +19,18 @@ import { PARAMETER_NOT_FOUND } from '../../../common/translations/errors';
 import { replaceParamsQuery } from '../../../common/utils/replace_params_query';
 import { buildRouteValidation } from '../../utils/build_validation/route_validation';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
+import type { StartPlugins } from '../../types';
 import { createActionHandler } from '../../handlers';
 import { parser as OsqueryParser } from './osquery_parser';
+import { getUserInfo } from '../../lib/get_user_info';
+import type { AuthorizeOsqueryResponseActionResult } from '../../lib/check_response_action_authz';
+import {
+  getOsqueryCapabilities,
+  authorizeOsqueryResponseAction,
+} from '../../lib/check_response_action_authz';
+import { createLiveQueryResponseSchema } from './response_schemas';
+import { toEcsMappingRecord } from '../../lib/resolve_query_reference';
+import type { DispatchSource } from '../../handlers/action/dispatch_source';
 
 export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.versioned
@@ -30,8 +40,7 @@ export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryApp
       security: {
         authz: {
           enabled: false,
-          reason:
-            'We do the check for 2 different scenarios below (const isInvalid): writeLiveQueries and runSavedQueries with saved_query_id, or pack_id',
+          reason: 'Authorization depends on the request body; see authorizeOsqueryResponseAction.',
         },
       },
     })
@@ -45,88 +54,185 @@ export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryApp
               CreateLiveQueryRequestBodySchema
             >(createLiveQueryRequestBodySchema),
           },
+          response: {
+            200: {
+              body: () => createLiveQueryResponseSchema,
+            },
+          },
         },
       },
       async (context, request, response) => {
-        const [coreStartServices] = await osqueryContext.getStartServices();
-        const coreContext = await context.core;
-        const soClient = coreContext.savedObjects.client;
+        const [coreStartServices, startPlugins] = await osqueryContext.getStartServices();
 
-        const {
-          osquery: { writeLiveQueries, runSavedQueries },
-        } = await coreStartServices.capabilities.resolveCapabilities(request, {
-          capabilityPath: 'osquery.*',
-        });
-
-        const isInvalid = !(
-          writeLiveQueries ||
-          (runSavedQueries && (request.body.saved_query_id || request.body.pack_id))
-        );
+        const logger = osqueryContext.logFactory.get('liveQuery');
 
         const client = await osqueryContext.service
           .getRuleRegistryService()
           ?.getRacClientWithRequest(request);
 
-        const alertData = request.body.alert_ids?.length
-          ? ((await client?.get({ id: request.body.alert_ids[0] })) as ParsedTechnicalFields & {
-              _index: string;
-            })
-          : undefined;
+        // Unreadable/missing alert on the deny path is 403, not 500.
+        let alertData: (ParsedTechnicalFields & { _index: string }) | undefined;
+        let alertError: unknown;
+        try {
+          alertData = request.body.alert_ids?.length
+            ? ((await client?.get({ id: request.body.alert_ids[0] })) as ParsedTechnicalFields & {
+                _index: string;
+              })
+            : undefined;
+        } catch (error) {
+          alertError = error;
+        }
+
+        // Space, capabilities, and reference resolution all read ES/SO. A transient failure
+        // must not escape as an unhandled rejection on a request that only asked for an authz
+        // decision.
+        let space: { id: string } | undefined;
+        let writeLiveQueries: boolean;
+        let runSavedQueries: boolean;
+        let authorization: AuthorizeOsqueryResponseActionResult;
+        try {
+          space = await osqueryContext.service.getActiveSpace(request);
+          ({ writeLiveQueries, runSavedQueries } = await getOsqueryCapabilities(
+            coreStartServices,
+            request
+          ));
+          authorization = await authorizeOsqueryResponseAction(
+            coreStartServices,
+            request,
+            {
+              saved_query_id: request.body.saved_query_id,
+              pack_id: request.body.pack_id,
+              query: request.body.query,
+              queries: request.body.queries,
+              ecs_mapping: request.body.ecs_mapping,
+            },
+            space?.id,
+            alertData
+          );
+        } catch (error) {
+          logger.error(`Failed to authorize osquery live query request: ${error.message}`, {
+            error,
+          });
+
+          return response.customError({
+            statusCode: 500,
+            body: new Error('Error occurred while authorizing the live query request'),
+          });
+        }
+
+        const { resolved } = authorization;
+        const isInvalid = !authorization.authorized;
 
         if (isInvalid) {
-          if (request.body.alert_ids?.length) {
-            try {
-              if (alertData?.['kibana.alert.rule.note']) {
-                const parsedAlertInvestigationGuide = unified()
-                  .use([[markdown, {}], OsqueryParser])
-                  .parse(alertData?.['kibana.alert.rule.note']);
-
-                const osqueryQueries = filter(parsedAlertInvestigationGuide?.children as object, [
-                  'type',
-                  'osquery',
-                ]);
-
-                const requestQueryExistsInTheInvestigationGuide = some(
-                  osqueryQueries,
-                  (payload: {
-                    configuration: { query: string; ecs_mapping: ECSMappingOrUndefined };
-                  }) => {
-                    const { result: replacedConfigurationQuery } = replaceParamsQuery(
-                      payload.configuration.query,
-                      alertData
-                    );
-
-                    return (
-                      replacedConfigurationQuery === request.body.query &&
-                      deepEqual(payload.configuration.ecs_mapping, request.body.ecs_mapping)
-                    );
-                  }
-                );
-
-                if (!requestQueryExistsInTheInvestigationGuide) throw new Error();
-              }
-            } catch (error) {
-              return response.forbidden();
-            }
-          } else {
+          // Investigation-guide match requires runSavedQueries; it is not a grant of its own.
+          if (!runSavedQueries || !request.body.alert_ids?.length || alertError) {
             return response.forbidden();
           }
+
+          // Recovery only ever vouches for the singular `query`. A `queries[]` alongside it
+          // would be dispatched unchecked by createDynamicQueries, so fail closed here.
+          if (request.body.queries?.length) {
+            return response.forbidden();
+          }
+
+          // Investigation guides embed inline SQL and never name a pack or saved query. A denied
+          // reference must not be recovered here, or the action document would attribute the run
+          // to an object the caller cannot read.
+          if (request.body.pack_id?.trim() || request.body.saved_query_id?.trim()) {
+            return response.forbidden();
+          }
+
+          try {
+            const justifyingAlert = alertData;
+            const investigationGuide = justifyingAlert?.['kibana.alert.rule.note'];
+
+            if (!justifyingAlert || !investigationGuide) {
+              return response.forbidden();
+            }
+
+            const parsedAlertInvestigationGuide = unified()
+              .use([[markdown, {}], OsqueryParser])
+              .parse(investigationGuide);
+
+            const osqueryQueries = filter(parsedAlertInvestigationGuide?.children as object, [
+              'type',
+              'osquery',
+            ]);
+
+            const requestQueryExistsInTheInvestigationGuide = some(
+              osqueryQueries,
+              (payload: {
+                configuration: { query: string; ecs_mapping: ECSMappingOrUndefined };
+              }) => {
+                const { result: replacedConfigurationQuery } = replaceParamsQuery(
+                  payload.configuration.query,
+                  justifyingAlert
+                );
+
+                return (
+                  replacedConfigurationQuery === request.body.query &&
+                  deepEqual(
+                    toEcsMappingRecord(payload.configuration.ecs_mapping),
+                    toEcsMappingRecord(request.body.ecs_mapping)
+                  )
+                );
+              }
+            );
+
+            if (!requestQueryExistsInTheInvestigationGuide) throw new Error();
+          } catch (error) {
+            return response.forbidden();
+          }
+        } else if (alertError) {
+          throw alertError;
         }
 
         try {
-          const currentUser = coreContext.security.authc.getCurrentUser()?.username;
+          const securityStart = (startPlugins as StartPlugins).security;
+          const currentUser = await getUserInfo({
+            request,
+            security: securityStart,
+            logger,
+          });
+          const username = currentUser?.username ?? undefined;
+          const userProfileUid = currentUser?.profile_uid ?? undefined;
+
+          // Build the dispatch source once after authorization.
+          let liveDispatchSource: Exclude<DispatchSource, { kind: 'unresolved' }>;
+          if (writeLiveQueries) {
+            liveDispatchSource = { kind: 'caller' };
+          } else if (isInvalid) {
+            // investigation_guide recovery path
+            liveDispatchSource = { kind: 'investigation_guide' };
+          } else if (resolved?.isPack) {
+            liveDispatchSource = { kind: 'pack', packSavedObjectId: resolved.savedObjectId };
+          } else if (resolved) {
+            liveDispatchSource = {
+              kind: 'saved_query',
+              savedQueryId: request.body.saved_query_id?.trim() ?? '',
+              stored: resolved,
+            };
+          } else {
+            liveDispatchSource = { kind: 'caller' };
+          }
+
           const { response: osqueryAction, fleetActionsCount } = await createActionHandler(
             osqueryContext,
             request.body,
             {
-              soClient,
-              metadata: { currentUser },
+              metadata: { currentUser: username, userProfileUid },
               alertData,
+              space,
+              dispatch: { entryPoint: 'live_query', source: liveDispatchSource },
             }
           );
+
           if (!fleetActionsCount) {
+            // Return the first errored row's message rather than always PARAMETER_NOT_FOUND.
+            const firstError = (osqueryAction.queries as Array<{ error?: string }>)?.[0]?.error;
+
             return response.badRequest({
-              body: PARAMETER_NOT_FOUND,
+              body: firstError ?? PARAMETER_NOT_FOUND,
             });
           }
 

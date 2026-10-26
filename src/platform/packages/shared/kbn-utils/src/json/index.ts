@@ -7,6 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { readFileSync } from 'fs';
+
+/**
+ * Synchronously reads and parses a JSON file at the given path.
+ *
+ * @param path Absolute path to the JSON file.
+ */
+export function loadJsonFile<T = unknown>(path: string): T {
+  return JSON.parse(readFileSync(path, 'utf-8')) as T;
+}
+
 /**
  * Given a JS object, will return a JSON.stringified result with consistently
  * sorted keys.

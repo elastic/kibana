@@ -5,13 +5,8 @@
  * 2.0.
  */
 import React from 'react';
-import {
-  EuiSelectable,
-  EuiPopoverTitle,
-  EuiSelectableOption,
-  EuiSelectableProps,
-  IconType,
-} from '@elastic/eui';
+import type { EuiSelectableOption, EuiSelectableProps, IconType } from '@elastic/eui';
+import { EuiSelectable, EuiPopoverTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
@@ -68,6 +63,7 @@ export const ChartSwitchSelectable = ({
         showIcons: false,
         onFocusBadge: false,
         isVirtualized: false,
+        paddingSize: 's',
       }}
       renderOption={(option, searchValue) => (
         <ChartOption option={option} searchValue={searchValue} />

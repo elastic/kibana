@@ -7,16 +7,20 @@
 
 import React, { useEffect, useRef } from 'react';
 import useMountedState from 'react-use/lib/useMountedState';
-import { Subscription } from 'rxjs';
-import { ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
+import { BehaviorSubject, type Subscription } from 'rxjs';
+import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
+import type { ViewMode } from '@kbn/presentation-publishing';
 import type { LayerDescriptor } from '../../common/descriptor_types';
+import type { MapEmbeddableState } from '../../common';
 import { INITIAL_LOCATION, MAP_SAVED_OBJECT_TYPE } from '../../common';
 import { createBasemapLayerDescriptor } from '../classes/layers/create_basemap_layer_descriptor';
-import { MapApi, MapRuntimeState, MapSerializedState } from '../react_embeddable/types';
+import type { MapApi } from '../react_embeddable/types';
 
 export interface Props {
   passiveLayer: LayerDescriptor;
   onRenderComplete?: () => void;
+  interactive?: boolean;
+  viewMode: ViewMode;
 }
 
 /*
@@ -50,34 +54,33 @@ export function PassiveMap(props: Props) {
 
   return (
     <div className="mapEmbeddableContainer">
-      <ReactEmbeddableRenderer<MapSerializedState, MapRuntimeState, MapApi>
+      <EmbeddableRenderer<MapEmbeddableState, MapApi>
         type={MAP_SAVED_OBJECT_TYPE}
         getParentApi={() => ({
+          // the passive map is never independently editable, regardless of the host's view mode
+          viewMode$: new BehaviorSubject(props.viewMode === 'edit' ? 'view' : props.viewMode),
+          disableTriggers$: new BehaviorSubject(!(props.interactive ?? true)),
           hideFilterActions: true,
           getSerializedStateForChild: () => {
             const basemapLayerDescriptor = createBasemapLayerDescriptor();
             const intialLayers = basemapLayerDescriptor ? [basemapLayerDescriptor] : [];
             return {
-              rawState: {
-                attributes: {
-                  title: '',
-                  layerListJSON: JSON.stringify([...intialLayers, props.passiveLayer]),
-                },
-                filters: [],
-                hidePanelTitles: true,
-                viewMode: 'view',
-                isLayerTOCOpen: false,
-                mapSettings: {
-                  disableInteractive: false,
-                  hideToolbarOverlay: false,
-                  hideLayerControl: false,
-                  hideViewControl: false,
-                  initialLocation: INITIAL_LOCATION.AUTO_FIT_TO_BOUNDS, // this will startup based on data-extent
-                  autoFitToDataBounds: true, // this will auto-fit when there are changes to the filter and/or query
-                },
-                isSharable: false,
+              attributes: {
+                title: '',
+                layers: [...intialLayers, props.passiveLayer],
               },
-              references: [],
+              filters: [],
+              hidePanelTitles: true,
+              viewMode: 'view',
+              isLayerTOCOpen: false,
+              mapSettings: {
+                disableInteractive: false,
+                hideToolbarOverlay: false,
+                hideLayerControl: false,
+                hideViewControl: false,
+                initialLocation: INITIAL_LOCATION.AUTO_FIT_TO_BOUNDS, // this will startup based on data-extent
+                autoFitToDataBounds: true, // this will auto-fit when there are changes to the filter and/or query
+              },
             };
           },
         })}

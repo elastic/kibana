@@ -6,7 +6,7 @@
  */
 
 import { urlFiltersToKueryString } from './stringify_kueries';
-import { UrlFilter } from '../types';
+import type { UrlFilter } from '../types';
 import { USER_AGENT_NAME } from '../configurations/constants/elasticsearch_fieldnames';
 
 describe('stringifyKueries', () => {
@@ -143,6 +143,32 @@ describe('stringifyKueries', () => {
     ];
     expect(urlFiltersToKueryString(filters)).toMatchInlineSnapshot(
       `"url: (\\"https://elastic.co\\" or \\"https://example.com\\") and url: (\\"https://elastic.co\\" or \\"https://example.com\\")"`
+    );
+  });
+
+  it('stringifies a notExists filter as a missing-field clause', () => {
+    filters = [
+      {
+        field: 'observer.geo.name',
+        notExists: true,
+      },
+    ];
+    expect(urlFiltersToKueryString(filters)).toMatchInlineSnapshot(`"not (observer.geo.name: *)"`);
+  });
+
+  it('combines a notExists filter with other clauses', () => {
+    filters = [
+      {
+        field: USER_AGENT_NAME,
+        values: ['Chrome'],
+      },
+      {
+        field: 'observer.geo.name',
+        notExists: true,
+      },
+    ];
+    expect(urlFiltersToKueryString(filters)).toMatchInlineSnapshot(
+      `"user_agent.name: \\"Chrome\\" and not (observer.geo.name: *)"`
     );
   });
 });

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CreateExceptionListItemSchema } from '.';
+import type { CreateExceptionListItemSchema } from '.';
 import {
   COMMENTS,
   DESCRIPTION,

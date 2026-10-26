@@ -71,7 +71,7 @@ Some notes:
 Example:
 
 ```shell
-yarn --cwd x-pack/solutions/security/plugins/security_solution
+pnpm --dir x-pack/solutions/security/plugins/security_solution
 CYPRESS_BASE_URL=http://localhost:5601 \
 CYPRESS_KIBANA_URL=http://localhost:5601 \
 CYPRESS_KIBANA_USERNAME=elastic \
@@ -102,7 +102,7 @@ finished.
 
 This is the configuration used by CI. It uses the FTR to spawn both a Kibana instance (http://localhost:5620) and an
 Elasticsearch instance (http://localhost:9220) with a preloaded minimum set of data (see preceding "Test data" section),
-and then executes cypress against this stack. You can find this configuration in `x-pack/test/defend_workflows_cypress`
+and then executes cypress against this stack. You can find this configuration in `x-pack/solutions/security/test/defend_workflows_cypress`
 
 ### Test Execution: Examples
 
@@ -113,13 +113,13 @@ failures locally, etc.
 
 ```shell
 # bootstrap kibana from the project root and build the plugins/assets that cypress will execute against
-yarn kbn bootstrap && node scripts/build_kibana_platform_plugins
+pnpm kbn bootstrap && node scripts/build_kibana_platform_plugins
 
 # launch the cypress test runner against ESS
-yarn --cwd x-pack/solutions/security/plugins/security_solution cypress:dw:run
+pnpm --dir x-pack/solutions/security/plugins/security_solution cypress:dw:run
 
 # or against Serverless
-yarn --cwd x-pack/solutions/security/plugins/security_solution cypress:dw:serverless:run
+pnpm --dir x-pack/solutions/security/plugins/security_solution cypress:dw:serverless:run
 ```
 
 #### Cypress
@@ -128,13 +128,13 @@ This is the preferred mode for developing new tests against mocked data
 
 ```shell
 # bootstrap kibana from the project root and build the plugins/assets that cypress will execute against
-yarn kbn bootstrap && node scripts/build_kibana_platform_plugins
+pnpm kbn bootstrap && node scripts/build_kibana_platform_plugins
 
 # launch the cypress test runner against ESS
-yarn --cwd x-pack/solutions/security/plugins/security_solution cypress:dw:open
+pnpm --dir x-pack/solutions/security/plugins/security_solution cypress:dw:open
 
 # or against Serverless
-yarn --cwd x-pack/solutions/security/plugins/security_solution cypress:dw:serverless:open
+pnpm --dir x-pack/solutions/security/plugins/security_solution cypress:dw:serverless:open
 ```
 
 ## Folder Structure

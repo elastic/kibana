@@ -19,8 +19,9 @@ import type { estypes } from '@elastic/elasticsearch';
 
 import { SavedObjectsRepository } from '../repository';
 import { loggerMock } from '@kbn/logging-mocks';
-import { SavedObjectsSerializer } from '@kbn/core-saved-objects-base-server-internal';
-import { apiContextMock, ApiExecutionContextMock, kibanaMigratorMock } from '../../mocks';
+import type { SavedObjectsSerializer } from '@kbn/core-saved-objects-base-server-internal';
+import type { ApiExecutionContextMock } from '../../mocks';
+import { apiContextMock, kibanaMigratorMock } from '../../mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
 import {
@@ -209,7 +210,7 @@ describe('SavedObjectsRepository', () => {
           ],
         });
 
-        await expect(repository.removeReferencesTo(type, id, defaultOptions)).rejects.toThrowError(
+        await expect(repository.removeReferencesTo(type, id, defaultOptions)).rejects.toThrow(
           createConflictErrorPayload(type, id)
         );
       });

@@ -7,7 +7,7 @@
 
 import { MockRouter, mockDependencies } from '../../__mocks__';
 
-import { RequestHandlerContext } from '@kbn/core/server';
+import type { RequestHandlerContext } from '@kbn/core/server';
 
 import { fetchSearchResults } from '@kbn/search-index-documents/lib';
 

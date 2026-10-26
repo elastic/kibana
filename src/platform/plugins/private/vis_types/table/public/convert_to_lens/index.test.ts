@@ -59,7 +59,7 @@ describe('convertToLens', () => {
   test('should return null if getColumnsFromVis returns null', async () => {
     mockGetColumnsFromVis.mockReturnValue(null);
     const result = await convertToLens(vis, timefilter);
-    expect(mockGetColumnsFromVis).toBeCalledTimes(1);
+    expect(mockGetColumnsFromVis).toHaveBeenCalledTimes(1);
     expect(result).toBeNull();
   });
 
@@ -79,9 +79,9 @@ describe('convertToLens', () => {
     });
     mockGetPercentageColumnFormulaColumn.mockReturnValue(null);
     const result = await convertToLens(vis, timefilter);
-    expect(mockGetColumnsFromVis).toBeCalledTimes(1);
-    expect(mockGetVisSchemas).toBeCalledTimes(1);
-    expect(mockGetPercentageColumnFormulaColumn).toBeCalledTimes(1);
+    expect(mockGetColumnsFromVis).toHaveBeenCalledTimes(1);
+    expect(mockGetVisSchemas).toHaveBeenCalledTimes(1);
+    expect(mockGetPercentageColumnFormulaColumn).toHaveBeenCalledTimes(1);
     expect(result).toBeNull();
   });
 
@@ -101,9 +101,9 @@ describe('convertToLens', () => {
     });
     mockGetPercentageColumnFormulaColumn.mockReturnValue({ columnId: 'percentage-column-1' });
     const result = await convertToLens(vis, timefilter);
-    expect(mockGetColumnsFromVis).toBeCalledTimes(1);
-    expect(mockGetVisSchemas).toBeCalledTimes(1);
-    expect(mockGetPercentageColumnFormulaColumn).toBeCalledTimes(1);
+    expect(mockGetColumnsFromVis).toHaveBeenCalledTimes(1);
+    expect(mockGetVisSchemas).toHaveBeenCalledTimes(1);
+    expect(mockGetPercentageColumnFormulaColumn).toHaveBeenCalledTimes(1);
     expect(result?.type).toEqual('lnsDatatable');
     expect(result?.layers.length).toEqual(1);
     expect(result?.layers[0]).toEqual(

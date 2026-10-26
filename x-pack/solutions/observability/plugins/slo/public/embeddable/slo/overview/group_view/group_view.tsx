@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { Filter } from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
 import React, { useEffect, useState } from 'react';
-import { Subject } from 'rxjs';
+import type { Subject } from 'rxjs';
 import { GroupView } from '../../../../pages/slos/components/grouped_slos/group_view';
 import type { ViewType, GroupByField, SortField } from '../../../../pages/slos/types';
 import { buildCombinedKqlQuery } from './helpers/build_kql_query';
@@ -20,6 +20,7 @@ interface Props {
   sort?: SortField;
   filters?: Filter[];
   reloadSubject: Subject<boolean>;
+  isInteractive?: boolean;
 }
 
 export function GroupSloView({
@@ -29,6 +30,7 @@ export function GroupSloView({
   kqlQuery = '',
   filters = [],
   reloadSubject,
+  isInteractive = true,
 }: Props) {
   const [lastRefreshTime, setLastRefreshTime] = useState<number | undefined>(undefined);
   const combinedKqlQuery = buildCombinedKqlQuery({ groups, groupBy, kqlQuery });
@@ -50,6 +52,7 @@ export function GroupSloView({
       kqlQuery={combinedKqlQuery}
       filters={filters}
       lastRefreshTime={lastRefreshTime}
+      isInteractive={isInteractive}
     />
   );
 }

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { NewLocation } from '../../components/settings/private_locations/add_location_flyout';
-import { AgentPolicyInfo } from '../../../../../common/types';
+import type { NewLocation } from '../../components/settings/private_locations/add_or_edit_location_flyout';
+import type { AgentPolicyInfo } from '../../../../../common/types';
 import { INITIAL_REST_VERSION, SYNTHETICS_API_URLS } from '../../../../../common/constants';
-import { SyntheticsPrivateLocations } from '../../../../../common/runtime_types';
+import type { SyntheticsPrivateLocations } from '../../../../../common/runtime_types';
 import { apiService } from '../../../../utils/api_service/api_service';
 
 export const fetchAgentPolicies = async (): Promise<AgentPolicyInfo[]> => {
@@ -18,7 +18,7 @@ export const fetchAgentPolicies = async (): Promise<AgentPolicyInfo[]> => {
 export const addSyntheticsPrivateLocations = async (
   newLocation: NewLocation
 ): Promise<SyntheticsPrivateLocations> => {
-  return await apiService.post(SYNTHETICS_API_URLS.PRIVATE_LOCATIONS, newLocation, undefined, {
+  return await apiService.post(SYNTHETICS_API_URLS.PRIVATE_LOCATIONS, newLocation, {
     version: INITIAL_REST_VERSION,
   });
 };

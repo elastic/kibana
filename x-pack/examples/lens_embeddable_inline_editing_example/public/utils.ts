@@ -5,10 +5,7 @@
  * 2.0.
  */
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type {
-  LensConfig,
-  LensConfigOptions,
-} from '@kbn/lens-embeddable-utils/config_builder/types';
+import type { LensConfig, LensConfigOptions } from '@kbn/lens-embeddable-utils';
 
 export const getConfigOptions = (dataView: DataView, isESQL?: boolean) => {
   const index = dataView.getIndexPattern();

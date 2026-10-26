@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { EuiButton, EuiCallOut, EuiLink } from '@elastic/eui';
+import { EuiLink } from '@elastic/eui';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
-import { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { createRemoteSloDetailsUrl } from '../../../utils/slo/remote_slo_urls';
 import { useSpace } from '../../../hooks/use_space';
 
@@ -22,12 +23,11 @@ export function SloRemoteCallout({ slo }: { slo: SLOWithSummaryResponse }) {
   }
 
   return (
-    <EuiCallOut
+    <KbnInfoCallout
       title={i18n.translate('xpack.slo.sloDetails.headerTitle.calloutMessage', {
         defaultMessage: 'Remote SLO',
       })}
-    >
-      <p>
+      text={
         <FormattedMessage
           id="xpack.slo.sloDetails.headerTitle.calloutDescription"
           defaultMessage="This is a remote SLO which belongs to another Kibana instance. It is fetched from the remote cluster: {remoteName} with Kibana URL {kibanaUrl}."
@@ -44,19 +44,19 @@ export function SloRemoteCallout({ slo }: { slo: SLOWithSummaryResponse }) {
             ),
           }}
         />
-      </p>
-      <EuiButton
-        data-test-subj="o11yHeaderTitleLinkButtonButton"
-        href={sloDetailsUrl}
-        color="primary"
-        target="_blank"
-        iconType="popout"
-        iconSide="right"
-      >
-        {i18n.translate('xpack.slo.headerTitle.linkButtonButtonLabel', {
-          defaultMessage: 'View remote SLO details',
-        })}
-      </EuiButton>
-    </EuiCallOut>
+      }
+      actionProps={{
+        primary: {
+          'data-test-subj': 'o11yHeaderTitleLinkButtonButton',
+          href: sloDetailsUrl,
+          target: '_blank',
+          iconType: 'external',
+          iconSide: 'right',
+          children: i18n.translate('xpack.slo.headerTitle.linkButtonButtonLabel', {
+            defaultMessage: 'View remote SLO details',
+          }),
+        },
+      }}
+    />
   );
 }

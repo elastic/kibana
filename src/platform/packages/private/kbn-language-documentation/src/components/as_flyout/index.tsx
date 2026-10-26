@@ -6,7 +6,10 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import React, { useCallback, useEffect, useState, useRef, useMemo, ComponentProps } from 'react';
+import type { ComponentProps } from 'react';
+import React, { useCallback, useEffect, useState, useRef, useMemo } from 'react';
+import useDebounce from 'react-use/lib/useDebounce';
+import type { EuiFlyoutProps } from '@elastic/eui';
 import {
   EuiFlyout,
   useEuiTheme,
@@ -17,7 +20,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { getFilteredGroups } from '../../utils/get_filtered_groups';
-import { DocumentationMainContent, DocumentationNavigation } from '../shared';
+import { DocumentationMainContent, DocumentationNavigation, SEARCH_DEBOUNCE_TIME } from '../shared';
 import { getESQLDocsSections } from '../../sections';
 import type { LanguageDocumentationSections } from '../../types';
 
@@ -26,6 +29,11 @@ interface DocumentationFlyoutProps {
   onHelpMenuVisibilityChange: (status: boolean) => void;
   searchInDescription?: boolean;
   linkToDocumentation?: string;
+  /**
+   * Flyout width. Defaults to a fixed pixel width. Pass a named size (e.g. `'s'`)
+   * when this flyout is opened as a child of another flyout.
+   */
+  size?: EuiFlyoutProps['size'];
 }
 
 function DocumentationFlyout({
@@ -33,6 +41,7 @@ function DocumentationFlyout({
   linkToDocumentation,
   isHelpMenuOpen,
   onHelpMenuVisibilityChange,
+  size,
 }: DocumentationFlyoutProps) {
   const [documentationSections, setDocumentationSections] =
     useState<LanguageDocumentationSections>();
@@ -42,6 +51,15 @@ function DocumentationFlyout({
 
   const [selectedSection, setSelectedSection] = useState<string | undefined>();
   const [searchText, setSearchText] = useState('');
+  const [debouncedSearchText, setDebouncedSearchText] = useState('');
+
+  useDebounce(
+    () => {
+      setDebouncedSearchText(searchText);
+    },
+    SEARCH_DEBOUNCE_TIME,
+    [searchText]
+  );
 
   const scrollTargets = useRef<Record<string, HTMLElement>>({});
 
@@ -70,8 +88,8 @@ function DocumentationFlyout({
   }, [documentationSections]);
 
   const filteredGroups = useMemo(() => {
-    return getFilteredGroups(searchText, searchInDescription, documentationSections, 1);
-  }, [documentationSections, searchText, searchInDescription]);
+    return getFilteredGroups(debouncedSearchText, searchInDescription, documentationSections, 1);
+  }, [documentationSections, debouncedSearchText, searchInDescription]);
 
   return (
     <>
@@ -83,12 +101,13 @@ function DocumentationFlyout({
           data-test-subj="esqlInlineDocumentationFlyout"
           css={{ zIndex: 1 }}
           type="push"
-          size={DEFAULT_WIDTH}
+          size={size ?? DEFAULT_WIDTH}
           paddingSize="m"
+          className="esqlInlineDocumentationFlyout"
         >
           <EuiFlyoutHeader hasBorder>
             <EuiTitle size="s">
-              <h3>
+              <h3 id="esqlInlineDocumentationFlyout">
                 {i18n.translate('languageDocumentation.documentationFlyoutTitle', {
                   defaultMessage: 'ES|QL quick reference',
                 })}
@@ -106,7 +125,7 @@ function DocumentationFlyout({
           </EuiFlyoutHeader>
           <EuiFlyoutBody>
             <DocumentationMainContent
-              searchText={searchText}
+              searchText={debouncedSearchText}
               scrollTargets={scrollTargets}
               filteredGroups={filteredGroups}
               sections={documentationSections}

@@ -7,4 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './src/encrypted_saved_objects_client_types';
+export type * from './src/encrypted_saved_objects_client_types';

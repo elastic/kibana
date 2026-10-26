@@ -12,12 +12,13 @@ import React from 'react';
 import { visWithSplits } from '../../vis_with_splits';
 import { getMetricsField } from '../../lib/get_metrics_field';
 import { createTickFormatter } from '../../lib/tick_formatter';
-import { createFieldFormatter } from '../../lib/create_field_formatter';
+import { createReactFieldFormatter } from '../../lib/create_field_formatter';
 import { get, isUndefined, assign, includes } from 'lodash';
 import { Gauge } from '../../../visualizations/views/gauge';
 import { getLastValue } from '../../../../../common/last_value_utils';
 import { DATA_FORMATTERS } from '../../../../../common/enums';
 import { getOperator, shouldOperate } from '../../../../../common/operators_utils';
+import { visStyles } from '../_vis_types';
 
 function getColors(props) {
   const { model, visData } = props;
@@ -39,7 +40,7 @@ function getColors(props) {
 }
 
 function GaugeVisualization(props) {
-  const { backgroundColor, model, visData, fieldFormatMap, getConfig } = props;
+  const { backgroundColor, model, visData, fieldFormatMap, getConfig, isInteractive } = props;
   const colors = getColors(props);
 
   const series = get(visData, `${model.id}.series`, [])
@@ -51,11 +52,12 @@ function GaugeVisualization(props) {
         const hasTextColorRules = model.gauge_color_rules.some(({ text }) => text);
         newProps.formatter =
           seriesDef.formatter === DATA_FORMATTERS.DEFAULT
-            ? createFieldFormatter(
+            ? createReactFieldFormatter(
                 getMetricsField(seriesDef.metrics),
                 fieldFormatMap,
-                'html',
-                hasTextColorRules
+                hasTextColorRules,
+                undefined,
+                isInteractive
               )
             : createTickFormatter(seriesDef.formatter, seriesDef.value_template, getConfig);
       }
@@ -84,13 +86,14 @@ function GaugeVisualization(props) {
   if (model.gauge_max != null) params.max = model.gauge_max;
 
   return (
-    <div className="tvbVis" style={style}>
+    <div className="tvbVis" css={visStyles} style={style}>
       <Gauge {...params} />
     </div>
   );
 }
 
 GaugeVisualization.propTypes = {
+  isInteractive: PropTypes.bool,
   backgroundColor: PropTypes.string,
   className: PropTypes.string,
   additionalLabel: PropTypes.string,

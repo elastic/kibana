@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { monaco } from '@kbn/monaco';
+import { monaco } from '@kbn/code-editor';
 import { getFlattenedObject } from '@kbn/std';
 import type { Filter, AggregateQuery, Query, TimeRange } from '@kbn/es-query';
 import type {
@@ -19,10 +19,9 @@ import type {
   PublishesDataViews,
 } from '@kbn/presentation-publishing';
 import { getTitle } from '@kbn/presentation-publishing';
-import type { UrlTemplateEditorVariable } from '@kbn/kibana-react-plugin/public';
+import type { UrlTemplateEditorVariable } from '../components/url_template_editor';
 import { txtValue } from './i18n';
 import { deleteUndefinedKeys } from './util';
-import type { ActionFactoryContext } from '../url_drilldown';
 
 /**
  * Part of context scope extracted from an api
@@ -215,7 +214,7 @@ const getPanelVariableList = (values: PanelValues): UrlTemplateEditorVariable[] 
 };
 
 export const getContextVariableList = (
-  context: ActionFactoryContext
+  context: Partial<EmbeddableApiContext>
 ): UrlTemplateEditorVariable[] => {
   const values = getContextScopeValues(context);
   const variables: UrlTemplateEditorVariable[] = getPanelVariableList(values.panel);

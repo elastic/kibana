@@ -9,50 +9,47 @@ import { reducerWithInitialState } from 'typescript-fsa-reducers';
 
 import {
   applyDeltaToColumnWidth,
+  changeViewMode,
   clearEventsDeleted,
   clearEventsLoading,
   clearSelected,
   createDataTable,
   initializeDataTableSettings,
   removeColumn,
+  setDataTableSelectAll,
   setEventsDeleted,
   setEventsLoading,
-  setDataTableSelectAll,
   setSelected,
+  setTableUpdatedAt,
   updateColumnOrder,
   updateColumns,
   updateColumnWidth,
   updateIsLoading,
   updateItemsPerPage,
   updateItemsPerPageOptions,
-  updateSort,
-  upsertColumn,
-  updateGraphEventId,
-  updateSessionViewConfig,
-  setTableUpdatedAt,
-  updateTotalCount,
-  changeViewMode,
   updateShowBuildingBlockAlertsFilter,
   updateShowThreatIndicatorAlertsFilter,
+  updateSort,
+  updateTotalCount,
+  upsertColumn,
 } from './actions';
 
 import {
   applyDeltaToTableColumnWidth,
   createInitDataTable,
-  setInitializeDataTableSettings,
   removeTableColumn,
   setDeletedTableEvents,
+  setInitializeDataTableSettings,
   setLoadingTableEvents,
   setSelectedTableEvents,
   updateDataTableColumnOrder,
   updateDataTableColumnWidth,
+  updateTableAdditionalFilters,
   updateTableColumns,
   updateTableItemsPerPage,
   updateTablePerPageOptions,
   updateTableSort,
   upsertTableColumn,
-  updateTableGraphEventId,
-  updateTableSessionViewConfig,
 } from './helpers';
 
 import type { TableState } from './types';
@@ -226,18 +223,6 @@ export const dataTableReducer = reducerWithInitialState(initialDataTableState)
       },
     },
   }))
-  .case(updateGraphEventId, (state, { id, graphEventId }) => ({
-    ...state,
-    tableById: updateTableGraphEventId({ id, graphEventId, tableById: state.tableById }),
-  }))
-  .case(updateSessionViewConfig, (state, { id, sessionViewConfig }) => ({
-    ...state,
-    tableById: updateTableSessionViewConfig({
-      id,
-      sessionViewConfig,
-      tableById: state.tableById,
-    }),
-  }))
   .case(setTableUpdatedAt, (state, { id, updated }) => ({
     ...state,
     tableById: {
@@ -268,30 +253,22 @@ export const dataTableReducer = reducerWithInitialState(initialDataTableState)
       },
     },
   }))
-  .case(updateShowBuildingBlockAlertsFilter, (state, { id, showBuildingBlockAlerts }) => ({
-    ...state,
-    tableById: {
-      ...state.tableById,
-      [id]: {
-        ...state.tableById[id],
-        additionalFilters: {
-          ...state.tableById[id].additionalFilters,
-          showBuildingBlockAlerts,
-        },
-      },
-    },
-  }))
-  .case(updateShowThreatIndicatorAlertsFilter, (state, { id, showOnlyThreatIndicatorAlerts }) => ({
-    ...state,
-    tableById: {
-      ...state.tableById,
-      [id]: {
-        ...state.tableById[id],
-        additionalFilters: {
-          ...state.tableById[id].additionalFilters,
-          showOnlyThreatIndicatorAlerts,
-        },
-      },
-    },
-  }))
+  .case(updateShowBuildingBlockAlertsFilter, (state, { id, showBuildingBlockAlerts }) => {
+    const tableById = updateTableAdditionalFilters({
+      id,
+      tableById: state.tableById,
+      additionalFilters: { showBuildingBlockAlerts },
+    });
+
+    return tableById === state.tableById ? state : { ...state, tableById };
+  })
+  .case(updateShowThreatIndicatorAlertsFilter, (state, { id, showOnlyThreatIndicatorAlerts }) => {
+    const tableById = updateTableAdditionalFilters({
+      id,
+      tableById: state.tableById,
+      additionalFilters: { showOnlyThreatIndicatorAlerts },
+    });
+
+    return tableById === state.tableById ? state : { ...state, tableById };
+  })
   .build();

@@ -5,13 +5,16 @@
  * 2.0.
  */
 
-/* eslint-disable complexity */
+/* eslint-disable complexity,@typescript-eslint/no-non-null-assertion */
 
 import type { Client } from '@elastic/elasticsearch';
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import { basename } from 'path';
 import { encode } from '@kbn/cbor';
 import { AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX } from '@kbn/fleet-plugin/common';
+import { endpointActionResponseCodes } from '../../../public/management/components/endpoint_responder/lib/endpoint_action_response_codes';
+import { isCancelAction } from '../../../common/endpoint/service/response_actions/type_guards';
+import { catchHttpErrorFormatAndThrow } from '../../../common/endpoint/format_http_error';
 import { FleetActionGenerator } from '../../../common/endpoint/data_generators/fleet_action_generator';
 import { EndpointActionGenerator } from '../../../common/endpoint/data_generators/endpoint_action_generator';
 import type {
@@ -28,10 +31,15 @@ import type {
   EndpointActionResponseDataOutput,
   ResponseActionScanOutputContent,
   ResponseActionRunScriptOutputContent,
+  LogsEndpointAction,
+  ResponseActionMemoryDumpParameters,
+  ResponseActionParametersWithPid,
+  ResponseActionParametersWithProcessData,
 } from '../../../common/endpoint/types';
 import { getFileDownloadId } from '../../../common/endpoint/service/response_actions/get_file_download_id';
 import {
   ENDPOINT_ACTION_RESPONSES_INDEX,
+  ENDPOINT_ACTIONS_INDEX,
   FILE_STORAGE_DATA_INDEX,
   FILE_STORAGE_METADATA_INDEX,
 } from '../../../common/endpoint/constants';
@@ -50,8 +58,11 @@ export const sendFleetActionResponse = async (
   { state }: { state?: 'success' | 'failure' } = {}
 ): Promise<EndpointActionResponse> => {
   let fleetResponse: EndpointActionResponse;
+  const pendingAgentIds = action.agents.filter(
+    (agentId) => !action.agentState[agentId].isCompleted
+  );
 
-  for (const agentId of action.agents) {
+  for (const agentId of pendingAgentIds) {
     fleetResponse = fleetActionGenerator.generateResponse({
       action_id: action.id,
       agent_id: agentId,
@@ -67,14 +78,16 @@ export const sendFleetActionResponse = async (
       delete fleetResponse.error;
     }
 
-    await esClient.index(
-      {
-        index: AGENT_ACTIONS_RESULTS_INDEX,
-        body: fleetResponse,
-        refresh: 'wait_for',
-      },
-      ES_INDEX_OPTIONS
-    );
+    await esClient
+      .index(
+        {
+          index: AGENT_ACTIONS_RESULTS_INDEX,
+          body: fleetResponse,
+          refresh: 'wait_for',
+        },
+        ES_INDEX_OPTIONS
+      )
+      .catch(catchHttpErrorFormatAndThrow);
   }
 
   // @ts-expect-error
@@ -83,11 +96,14 @@ export const sendFleetActionResponse = async (
 export const sendEndpointActionResponse = async (
   esClient: Client,
   action: ActionDetails,
-  { state }: { state?: 'success' | 'failure' } = {}
+  { state, responseCode }: { state?: 'success' | 'failure'; responseCode?: string } = {}
 ): Promise<LogsEndpointActionResponse> => {
   let endpointResponse: LogsEndpointActionResponse;
+  const pendingAgentIds = action.agents.filter(
+    (agentId) => !action.agentState[agentId].isCompleted
+  );
 
-  for (const actionAgentId of action.agents) {
+  for (const actionAgentId of pendingAgentIds) {
     endpointResponse = endpointActionGenerator.generateResponse<EndpointActionResponseDataOutput>({
       agent: { id: actionAgentId },
       EndpointActions: {
@@ -95,9 +111,10 @@ export const sendEndpointActionResponse = async (
         data: {
           command: action.command as EndpointActionData['command'],
           comment: '',
-          ...getOutputDataIfNeeded(action),
+          ...getOutputDataIfNeeded(action, state, responseCode),
         },
         started_at: action.startedAt,
+        ...(state === 'failure' ? { error: { message: 'Action failed' } } : {}),
       },
     });
 
@@ -148,13 +165,23 @@ export const sendEndpointActionResponse = async (
             .content as unknown as ResponseActionRunScriptOutputContent
         ).stderr = 'runscript command timed out';
       }
+
+      if (
+        endpointResponse.EndpointActions.data.command === 'cancel' &&
+        endpointResponse.EndpointActions.data.output
+      ) {
+        (endpointResponse.EndpointActions.data.output.content as unknown as { code: string }).code =
+          'ra_cancel_error';
+      }
     }
 
-    await esClient.index({
-      index: ENDPOINT_ACTION_RESPONSES_INDEX,
-      body: endpointResponse,
-      refresh: 'wait_for',
-    });
+    await esClient
+      .index({
+        index: ENDPOINT_ACTION_RESPONSES_INDEX,
+        body: endpointResponse,
+        refresh: 'wait_for',
+      })
+      .catch(catchHttpErrorFormatAndThrow);
 
     // ------------------------------------------
     // Post Action Response tasks
@@ -184,19 +211,20 @@ export const sendEndpointActionResponse = async (
 
     // For `get-file`, upload a file to ES
     if (
-      (action.command === 'execute' || action.command === 'get-file') &&
+      (action.command === 'execute' ||
+        action.command === 'get-file' ||
+        action.command === 'runscript') &&
       !endpointResponse.error
     ) {
       const filePath =
         action.command === 'execute'
           ? '/execute/file/path'
-          : // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            (
+          : (
               action as unknown as ActionDetails<
                 ResponseActionGetFileOutputContent,
                 ResponseActionGetFileParameters
               >
-            )?.parameters?.path!;
+            )?.parameters?.path ?? '/execute/file/path';
 
       const fileName = basename(filePath.replace(/\\/g, '/'));
       const fileMetaDoc: FileUploadMetadata = generateFileMetadataDocumentMock({
@@ -230,13 +258,15 @@ export const sendEndpointActionResponse = async (
       });
 
       // Index the file's metadata
-      const fileMeta = await esClient.index({
-        index: FILE_STORAGE_METADATA_INDEX,
-        id: getFileDownloadId(action, actionAgentId),
-        op_type: 'create',
-        refresh: 'wait_for',
-        body: fileMetaDoc,
-      });
+      const fileMeta = await esClient
+        .index({
+          index: FILE_STORAGE_METADATA_INDEX,
+          id: getFileDownloadId(action, actionAgentId),
+          op_type: 'create',
+          refresh: 'wait_for',
+          body: fileMetaDoc,
+        })
+        .catch(catchHttpErrorFormatAndThrow);
 
       // Index the file content (just one chunk)
       // call to `.index()` copied from File plugin here:
@@ -265,7 +295,56 @@ export const sendEndpointActionResponse = async (
             },
           }
         )
+        .catch(catchHttpErrorFormatAndThrow)
         .then(() => sleep(2000));
+    }
+
+    // For `cancel` of an `agentType` of `endpoint` - also send a response for the action that was canceled
+    if (isCancelAction(action) && state !== 'failure') {
+      const canceledActionId = action.parameters!.id;
+      const canceledActionCommandName = await esClient
+        .search<LogsEndpointAction>({
+          index: ENDPOINT_ACTIONS_INDEX,
+          query: {
+            match: {
+              'EndpointActions.action_id': canceledActionId,
+            },
+          },
+        })
+        .then(
+          (response) => response.hits?.hits[0]?._source?.EndpointActions.data.command || 'runscript'
+        )
+        .catch(catchHttpErrorFormatAndThrow);
+
+      const canceledActionResponse =
+        endpointActionGenerator.generateResponse<EndpointActionResponseDataOutput>({
+          agent: { id: actionAgentId },
+          error: { message: 'action was canceled' },
+          EndpointActions: {
+            action_id: canceledActionId,
+            started_at: action.startedAt,
+            data: {
+              command: canceledActionCommandName,
+              comment: '',
+              output: {
+                type: 'json',
+                content: {
+                  code: `ra_${canceledActionCommandName}_error_canceled`,
+                  canceled_by: 'action',
+                  canceled_id: action.id,
+                },
+              },
+            },
+          },
+        });
+
+      await esClient
+        .index({
+          index: ENDPOINT_ACTION_RESPONSES_INDEX,
+          body: canceledActionResponse,
+          refresh: 'wait_for',
+        })
+        .catch(catchHttpErrorFormatAndThrow);
     }
   }
 
@@ -277,7 +356,11 @@ type ResponseOutput<
   TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput
 > = Pick<LogsEndpointActionResponse<TOutputContent>['EndpointActions']['data'], 'output'>;
 
-const getOutputDataIfNeeded = (action: ActionDetails): ResponseOutput => {
+const getOutputDataIfNeeded = (
+  action: ActionDetails,
+  state: 'success' | 'failure' = 'success',
+  responseCode?: string
+): ResponseOutput => {
   const commentUppercase = (action?.comment ?? '').toUpperCase();
 
   switch (action.command) {
@@ -317,6 +400,7 @@ const getOutputDataIfNeeded = (action: ActionDetails): ResponseOutput => {
       } as unknown as ResponseOutput<ResponseActionGetFileOutputContent>;
 
     case 'execute':
+    case 'runscript':
       const executeOutput: Partial<ResponseActionExecuteOutputContent> = {
         output_file_id: getFileDownloadId(action, action.agents[0]),
       };
@@ -338,6 +422,70 @@ const getOutputDataIfNeeded = (action: ActionDetails): ResponseOutput => {
         }),
       } as unknown as ResponseOutput<ResponseActionExecuteOutputContent>;
 
+    case 'cancel': {
+      const successCodes = Object.keys(endpointActionResponseCodes).filter((key) =>
+        key.startsWith('ra_cancel_success')
+      );
+
+      return {
+        output: {
+          type: 'json',
+          content: {
+            code: endpointActionGenerator.randomChoice(successCodes) ?? 'ra_cancel_success_done',
+          },
+        },
+      } as unknown as ResponseOutput;
+    }
+
+    case 'memory-dump':
+      return {
+        output: {
+          type: 'json',
+          content: {
+            code: 'ra_memory-dump_success_done',
+            file_size: 2_322_000,
+            path: `/tmp/elastic_defend/memory_dump/dump.${new Date().toISOString()}.zip`,
+            disk_free_space: 123_045_678_009,
+            ...((action.parameters as ResponseActionMemoryDumpParameters)?.type === 'raw'
+              ? {
+                  total_memory_size: 4_000_000_000,
+                  total_bytes_captured: 3_999_900_000,
+                  success_ratio: 3_999_998_000 / 4_000_000_000,
+                }
+              : {}),
+            ...((action.parameters as ResponseActionMemoryDumpParameters)?.type === 'kernel'
+              ? {
+                  dump_executed_from_driver: endpointActionGenerator.randomChoice([true, false]),
+                  user_space_included: endpointActionGenerator.randomChoice([true, false]),
+                }
+              : {}),
+          },
+        },
+      } as unknown as ResponseOutput;
+
+    case 'kill-process':
+      return {
+        output: endpointActionGenerator.generateKillProcessOutputResponse(
+          {
+            content: {
+              ...(responseCode ? { code: responseCode } : {}),
+              ...(state === 'success' &&
+              (action.parameters as ResponseActionParametersWithPid).kill_descendants
+                ? {
+                    descendants: endpointActionGenerator.createProcessDescendants(
+                      (action.parameters as ResponseActionParametersWithPid)?.pid ??
+                        endpointActionGenerator.randomN(50)
+                    ),
+                  }
+                : {}),
+            },
+          },
+          {
+            parameters: action.parameters as ResponseActionParametersWithProcessData,
+            atError: state === 'failure',
+          }
+        ),
+      } as unknown as ResponseOutput;
     default:
       return { output: undefined };
   }
@@ -347,21 +495,23 @@ export async function getLatestActionDoc(
   esClient: Client
 ): Promise<SearchHit<EndpointAction> | undefined> {
   return (
-    await esClient.search<EndpointAction>({
-      index: AGENT_ACTIONS_INDEX,
-      ignore_unavailable: true,
-      query: {
-        match: {
-          type: 'INPUT_ACTION',
+    await esClient
+      .search<EndpointAction>({
+        index: AGENT_ACTIONS_INDEX,
+        ignore_unavailable: true,
+        query: {
+          match: {
+            type: 'INPUT_ACTION',
+          },
         },
-      },
-      sort: {
-        '@timestamp': {
-          order: 'desc',
+        sort: {
+          '@timestamp': {
+            order: 'desc',
+          },
         },
-      },
-      size: 1,
-    })
+        size: 1,
+      })
+      .catch(catchHttpErrorFormatAndThrow)
   ).hits.hits.at(0);
 }
 
@@ -386,10 +536,12 @@ export async function waitForNewActionDoc(
 }
 
 export function updateActionDoc<T = unknown>(esClient: Client, id: string, doc: T) {
-  return esClient.update({
-    index: AGENT_ACTIONS_INDEX,
-    id,
-    doc,
-    refresh: 'wait_for',
-  });
+  return esClient
+    .update({
+      index: AGENT_ACTIONS_INDEX,
+      id,
+      doc,
+      refresh: 'wait_for',
+    })
+    .catch(catchHttpErrorFormatAndThrow);
 }

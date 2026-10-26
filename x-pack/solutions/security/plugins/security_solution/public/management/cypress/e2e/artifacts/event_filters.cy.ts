@@ -6,7 +6,7 @@
  */
 import { APP_EVENT_FILTERS_PATH } from '../../../../../common/constants';
 import type { ArtifactsFixtureType } from '../../fixtures/artifacts_page';
-import { getArtifactsListTestsData } from '../../fixtures/artifacts_page';
+import { getArtifactsListTestDataForArtifact } from '../../fixtures/artifacts_page';
 import {
   createArtifactList,
   createPerPolicyArtifact,
@@ -46,9 +46,7 @@ describe('Event Filters', { tags: ['@ess', '@serverless', '@skipInServerlessMKI'
     beforeEach(() => {
       login();
 
-      eventFiltersMock = getArtifactsListTestsData().find(
-        ({ tabId }) => tabId === 'eventFilters'
-      ) as ArtifactsFixtureType;
+      eventFiltersMock = getArtifactsListTestDataForArtifact('eventFilters');
 
       createArtifactList(eventFiltersMock.createRequestBody.list_id);
       createPerPolicyArtifact(eventFiltersMock.artifactName, eventFiltersMock.createRequestBody);
@@ -79,10 +77,10 @@ describe('Event Filters', { tags: ['@ess', '@serverless', '@skipInServerlessMKI'
     it('should show suggestions when filter value is cleared', () => {
       cy.getByTestSubj(CONDITION_VALUE).clear();
       cy.getByTestSubj(CONDITION_VALUE).type('aaaaaaaaaaaaaa as custom input');
-      cy.get('button[role="option"]').should('have.length', 0);
+      cy.get('.euiComboBoxOption').should('have.length', 0);
 
       cy.getByTestSubj(CONDITION_VALUE).find('input').clear();
-      cy.get('button[role="option"]').should('have.length.above', 1);
+      cy.get('.euiComboBoxOption').should('have.length.above', 1);
     });
   });
 });

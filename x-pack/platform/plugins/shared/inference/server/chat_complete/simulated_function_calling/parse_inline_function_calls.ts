@@ -6,13 +6,12 @@
  */
 
 import { Observable } from 'rxjs';
-import { Logger } from '@kbn/logging';
-import {
-  createInferenceInternalError,
+import type { Logger } from '@kbn/logging';
+import type {
   ChatCompletionChunkEvent,
   ChatCompletionTokenCountEvent,
-  ChatCompletionEventType,
 } from '@kbn/inference-common';
+import { createInferenceInternalError, ChatCompletionEventType } from '@kbn/inference-common';
 import { TOOL_USE_END, TOOL_USE_START } from './constants';
 
 function matchOnSignalStart(buffer: string) {
@@ -64,6 +63,10 @@ export function parseInlineFunctionCalls({ logger }: { logger: Logger }) {
           if (!parsedFunctionCall.name) {
             throw createInferenceInternalError(`Missing name for tool use`);
           }
+          let input = parsedFunctionCall.input;
+          if (typeof input === 'string') {
+            input = { input };
+          }
 
           subscriber.next({
             content: '',
@@ -73,7 +76,7 @@ export function parseInlineFunctionCalls({ logger }: { logger: Logger }) {
                 toolCallId: parsedFunctionCall.name,
                 function: {
                   name: parsedFunctionCall.name,
-                  arguments: JSON.stringify(parsedFunctionCall.input || {}),
+                  arguments: JSON.stringify(input || {}),
                 },
               },
             ],
@@ -88,14 +91,17 @@ export function parseInlineFunctionCalls({ logger }: { logger: Logger }) {
               return;
             }
 
-            const { type, content } = event;
+            const { type, content, reasoning } = event;
+            let pendingReasoning = reasoning;
 
             function next(contentToEmit: string) {
               subscriber.next({
                 type,
                 content: contentToEmit,
+                reasoning: pendingReasoning,
                 tool_calls: [],
               });
+              pendingReasoning = undefined;
             }
 
             const match = matchOnSignalStart(functionCallBuffer + content);
@@ -116,11 +122,16 @@ export function parseInlineFunctionCalls({ logger }: { logger: Logger }) {
                   next(afterEndSignal);
                 } catch (error) {
                   subscriber.error(error);
+                  return;
                 }
               }
             } else {
               functionCallBuffer = '';
               next(content);
+            }
+
+            if (pendingReasoning) {
+              next('');
             }
           },
           complete: () => {

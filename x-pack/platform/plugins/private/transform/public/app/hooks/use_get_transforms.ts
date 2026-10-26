@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import { isDefined } from '@kbn/ml-is-defined';
 
 import type { GetTransformsResponseSchema } from '../../../server/routes/api_schemas/transforms';
 import {
-  addInternalBasePath,
   DEFAULT_REFRESH_INTERVAL_MS,
   TRANSFORM_REACT_QUERY_KEYS,
   TRANSFORM_MODE,
@@ -46,7 +45,7 @@ export const useGetTransforms = ({ enabled }: UseGetTransformsOptions = {}) => {
       const update = getInitialData();
 
       const transformConfigs = await http.get<GetTransformsResponseSchema>(
-        addInternalBasePath('transforms'),
+        '/internal/transform/transforms',
         {
           version: '1',
           asSystemRequest: true,

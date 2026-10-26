@@ -5,16 +5,25 @@
  * 2.0.
  */
 
-import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import type {
+  AppUpdater,
+  CoreSetup,
+  CoreStart,
+  Plugin,
+  PluginInitializerContext,
+} from '@kbn/core/public';
+import { BehaviorSubject, type Subscription } from 'rxjs';
+import { AppStatus } from '@kbn/core-application-browser';
 
 import { getDashboardsLandingCallout } from './components/dashboards_landing_callout';
+import type { ServerlessSecurityPublicConfig } from '../common/config';
 import type {
   SecuritySolutionServerlessPluginSetup,
   SecuritySolutionServerlessPluginStart,
   SecuritySolutionServerlessPluginSetupDeps,
   SecuritySolutionServerlessPluginStartDeps,
-  ServerlessSecurityPublicConfig,
 } from './types';
+import { isAlertZeroAvailable } from '../common/alertzero_availability';
 import { registerUpsellings } from './upselling';
 import { createServices } from './common/services/create_services';
 import { startNavigation } from './navigation';
@@ -37,6 +46,7 @@ export class SecuritySolutionServerlessPlugin
 {
   private config: ServerlessSecurityPublicConfig;
   private experimentalFeatures: ExperimentalFeatures;
+  private managementCardsSubscription?: Subscription;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config = this.initializerContext.config.get<ServerlessSecurityPublicConfig>();
@@ -48,14 +58,17 @@ export class SecuritySolutionServerlessPlugin
     setupDeps: SecuritySolutionServerlessPluginSetupDeps
   ): SecuritySolutionServerlessPluginSetup {
     const { securitySolution } = setupDeps;
-    const { productTypes } = this.config;
+    const { productTypes, enableExperimental, inaccessibleApps } = this.config;
 
     this.experimentalFeatures = parseExperimentalConfigValue(
-      this.config.enableExperimental,
+      enableExperimental,
       securitySolution.experimentalFeatures
     ).features;
 
     securitySolution.setProductFeatureKeys(getEnabledProductFeatures(productTypes));
+
+    updateInaccessibleApps(inaccessibleApps, core);
+
     return {};
   }
 
@@ -67,6 +80,7 @@ export class SecuritySolutionServerlessPlugin
     const { productTypes } = this.config;
     const services = createServices(core, startDeps, this.experimentalFeatures);
 
+    startDeps.alertzero?.setServerlessTierAvailable(isAlertZeroAvailable(productTypes));
     registerUpsellings(productTypes, services);
 
     securitySolution.setComponents({
@@ -75,10 +89,32 @@ export class SecuritySolutionServerlessPlugin
     });
 
     setOnboardingSettings(services);
-    startNavigation(services, productTypes);
+    this.managementCardsSubscription = startNavigation(services, productTypes);
 
     return {};
   }
 
-  public stop() {}
+  public stop() {
+    this.managementCardsSubscription?.unsubscribe();
+  }
 }
+
+/**
+ * Disables apps that are inaccessible based on the provided configuration.
+ * It updates the app status to 'inaccessible' for those apps.
+ * The apps will still execute their lifecycle methods, but it will remain inaccessible in the UI.
+ */
+const updateInaccessibleApps = (inaccessibleApps: string[], core: CoreSetup) => {
+  if (!inaccessibleApps?.length) {
+    return;
+  }
+
+  const inaccessibleAppsSet = new Set(inaccessibleApps);
+  const appUpdater$ = new BehaviorSubject<AppUpdater>((app) => {
+    if (inaccessibleAppsSet.has(app.id)) {
+      return { status: AppStatus.inaccessible };
+    }
+  });
+
+  core.application.registerAppUpdater(appUpdater$);
+};

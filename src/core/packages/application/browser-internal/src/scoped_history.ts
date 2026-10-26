@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
+import type {
   History,
   Path,
   LocationDescriptorObject,
@@ -80,7 +80,6 @@ export class CoreScopedHistory<HistoryLocationState = unknown>
    * The number of entries in the history stack, including all entries forwards and backwards from the current location.
    */
   public get length() {
-    this.verifyActive();
     return this.locationKeys.length;
   }
 
@@ -88,7 +87,6 @@ export class CoreScopedHistory<HistoryLocationState = unknown>
    * The current location of the history stack.
    */
   public get location() {
-    this.verifyActive();
     return this.stripBasePath(this.parentHistory.location);
   }
 
@@ -96,7 +94,6 @@ export class CoreScopedHistory<HistoryLocationState = unknown>
    * The last action dispatched on the history stack.
    */
   public get action() {
-    this.verifyActive();
     return this.parentHistory.action;
   }
 

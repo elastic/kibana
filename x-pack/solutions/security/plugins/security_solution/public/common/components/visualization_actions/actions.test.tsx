@@ -4,18 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import React from 'react';
 import { EuiContextMenu } from '@elastic/eui';
-
 import { fireEvent, render, waitFor } from '@testing-library/react';
-
 import { getDnsTopDomainsLensAttributes } from './lens_attributes/network/dns_top_domains';
 import { VisualizationActions } from './actions';
 import { TestProviders } from '../../mock';
-
 import type { VisualizationActionsProps } from './types';
 import * as useLensAttributesModule from './use_lens_attributes';
-import { SourcererScopeName } from '../../../sourcerer/store/model';
+import { PageScope } from '../../../data_view_manager/constants';
 
 jest.mock('./use_actions');
 
@@ -64,7 +62,7 @@ describe('VisualizationActions', () => {
         extraOptions: props.extraOptions,
         getLensAttributes: props.getLensAttributes,
         lensAttributes: props.lensAttributes,
-        scopeId: SourcererScopeName.default,
+        scopeId: PageScope.default,
         stackByField: props.stackByField,
         title: '',
       })
@@ -98,11 +96,8 @@ describe('VisualizationActions', () => {
 
     expect(getByTestId('viz-actions-menu')).toBeInTheDocument();
     expect(mockContextMenu.mock.calls[0][0].panels[0].items[0].name).toEqual('Inspect');
-    expect(mockContextMenu.mock.calls[0][0].panels[0].items[1].name).toEqual('Add to new case');
-    expect(mockContextMenu.mock.calls[0][0].panels[0].items[2].name).toEqual(
-      'Add to existing case'
-    );
-    expect(mockContextMenu.mock.calls[0][0].panels[1].items[0].name).toEqual('Added to library');
-    expect(mockContextMenu.mock.calls[0][0].panels[1].items[1].name).toEqual('Open in Lens');
+    expect(mockContextMenu.mock.calls[0][0].panels[0].items[1].name).toEqual('Add to case');
+    expect(mockContextMenu.mock.calls[0][0].panels[0].items[2].name).toEqual('Added to library');
+    expect(mockContextMenu.mock.calls[0][0].panels[0].items[3].name).toEqual('Open in Lens');
   });
 });

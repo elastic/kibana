@@ -5,17 +5,22 @@
  * 2.0.
  */
 
+import type { MetricCustomIndicator, TimesliceMetricIndicator } from '@kbn/slo-schema';
 import {
-  metricCustomBasicMetric,
-  metricCustomDocCountMetric,
-  MetricCustomIndicator,
-  timesliceMetricBasicMetricWithField,
-  TimesliceMetricIndicator,
-  timesliceMetricPercentileMetric,
+  is,
+  metricCustomBasicMetricZod,
+  metricCustomDocCountMetricZod,
+  timesliceMetricBasicMetricWithFieldZod,
+  timesliceMetricPercentileMetricZod,
 } from '@kbn/slo-schema';
-import { FormState, UseFormGetFieldState, UseFormGetValues, UseFormWatch } from 'react-hook-form';
-import { isObject } from 'lodash';
-import { CreateSLOForm } from '../types';
+import type {
+  FormState,
+  UseFormGetFieldState,
+  UseFormGetValues,
+  UseFormWatch,
+} from 'react-hook-form';
+import { isEmpty, isObject } from 'lodash';
+import type { CreateSLOForm } from '../types';
 
 interface Props {
   getFieldState: UseFormGetFieldState<CreateSLOForm>;
@@ -35,10 +40,11 @@ export function useSectionFormValidation({ getFieldState, getValues, formState, 
         const areMetricsValid =
           isObject(data) &&
           (data.metrics ?? []).every((metric) => {
-            if (metricCustomDocCountMetric.is(metric)) {
+            if (is(metricCustomDocCountMetricZod, metric)) {
               return true;
             }
-            if (metricCustomBasicMetric.is(metric) && metric.field != null) {
+
+            if (is(metricCustomBasicMetricZod, metric) && !isEmpty(metric.field)) {
               return true;
             }
             return false;
@@ -54,10 +60,10 @@ export function useSectionFormValidation({ getFieldState, getValues, formState, 
         const areMetricsValid =
           isObject(data) &&
           (data.metrics ?? []).every((metric) => {
-            if (metricCustomDocCountMetric.is(metric)) {
+            if (is(metricCustomDocCountMetricZod, metric)) {
               return true;
             }
-            if (metricCustomBasicMetric.is(metric) && metric.field != null) {
+            if (is(metricCustomBasicMetricZod, metric) && !isEmpty(metric.field)) {
               return true;
             }
             return false;
@@ -88,10 +94,10 @@ export function useSectionFormValidation({ getFieldState, getValues, formState, 
         const areMetricsValid =
           isObject(data) &&
           (data.metrics ?? []).every((metric) => {
-            if (timesliceMetricBasicMetricWithField.is(metric)) {
+            if (is(timesliceMetricBasicMetricWithFieldZod, metric)) {
               return Boolean(metric.field);
             }
-            if (timesliceMetricPercentileMetric.is(metric)) {
+            if (is(timesliceMetricPercentileMetricZod, metric)) {
               return Boolean(metric.field) && Boolean(metric.percentile);
             }
             return true;

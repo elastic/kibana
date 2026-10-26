@@ -8,7 +8,7 @@
 /* eslint-disable no-console */
 
 import { difference, union } from 'lodash';
-import { Elasticsearch, Kibana } from '..';
+import type { Elasticsearch, Kibana } from '..';
 import { callKibana, isAxiosError } from './call_kibana';
 
 interface User {

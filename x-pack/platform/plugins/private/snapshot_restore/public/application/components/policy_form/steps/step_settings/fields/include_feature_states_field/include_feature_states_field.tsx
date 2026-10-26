@@ -5,23 +5,17 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useMemo } from 'react';
+import type { FunctionComponent } from 'react';
+import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import {
-  EuiDescribedFormGroup,
-  EuiFormRow,
-  EuiSwitch,
-  EuiSwitchEvent,
-  EuiTitle,
-  EuiCallOut,
-  EuiSpacer,
-  EuiComboBoxOptionOption,
-} from '@elastic/eui';
+import type { EuiSwitchEvent, EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiDescribedFormGroup, EuiFormRow, EuiSwitch, EuiTitle, EuiSpacer } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 
 import { FEATURE_STATES_NONE_OPTION } from '../../../../../../../../common/constants';
-import { SlmPolicyPayload } from '../../../../../../../../common/types';
-import { PolicyValidation } from '../../../../../../services/validation';
+import type { SlmPolicyPayload } from '../../../../../../../../common/types';
+import type { PolicyValidation } from '../../../../../../services/validation';
 import { useLoadFeatures } from '../../../../../../services/http/policy_requests';
 import { FeatureStatesFormField } from '../../../../../feature_states_form_field';
 
@@ -107,9 +101,8 @@ export const IncludeFeatureStatesField: FunctionComponent<Props> = ({ policy, on
               onUpdateFormSettings={onUpdate}
             />
           ) : (
-            <EuiCallOut
-              color="warning"
-              iconType="warning"
+            <KbnWarningCallout
+              announceOnMount={false}
               title={
                 <FormattedMessage
                   id="xpack.snapshotRestore.errorLoadingFeatureStatesLabel"

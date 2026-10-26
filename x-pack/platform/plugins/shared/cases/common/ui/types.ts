@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { ResolvedSimpleSavedObject } from '@kbn/core/public';
+import type { SavedObjectsResolveResponse } from '@kbn/core-saved-objects-api-server';
+
 import type {
   CREATE_CASES_CAPABILITY,
   DELETE_CASES_CAPABILITY,
@@ -14,6 +15,7 @@ import type {
   CREATE_COMMENT_CAPABILITY,
   CASES_REOPEN_CAPABILITY,
   ASSIGN_CASE_CAPABILITY,
+  MANAGE_TEMPLATES_CAPABILITY,
 } from '..';
 import type {
   CASES_CONNECTORS_CAPABILITY,
@@ -34,10 +36,13 @@ import type {
   PersistableStateAttachment,
   Configuration,
   CustomFieldTypes,
+  EventAttachment,
+  UnifiedAttachment,
+  AttachmentV2,
 } from '../types/domain';
 import type {
   CasePatchRequest,
-  CasesFindResponse,
+  CasesSearchResponse,
   CaseUserActionStatsResponse,
   GetCaseConnectorsResponse,
   GetCaseUsersResponse,
@@ -52,7 +57,10 @@ import type {
 type DeepRequired<T> = { [K in keyof T]: DeepRequired<T[K]> } & Required<T>;
 
 export interface CasesContextFeatures {
-  alerts: { sync?: boolean; enabled?: boolean; isExperimental?: boolean };
+  alerts: {
+    read?: boolean;
+    all?: boolean;
+  };
   metrics: SingleCaseMetricsFeature[];
 }
 
@@ -61,6 +69,12 @@ export type CasesFeaturesAllRequired = DeepRequired<CasesContextFeatures>;
 export type CasesFeatures = Partial<CasesContextFeatures>;
 
 export interface CasesUiConfigType {
+  attachments?: {
+    enabled: boolean;
+  };
+  chat?: {
+    enabled: boolean;
+  };
   markdownPlugins: {
     lens: boolean;
   };
@@ -69,6 +83,15 @@ export interface CasesUiConfigType {
     allowedMimeTypes: string[];
   };
   stack: {
+    enabled: boolean;
+  };
+  incrementalId: {
+    enabled: boolean;
+  };
+  templates: {
+    enabled: boolean;
+  };
+  runWorkflows: {
     enabled: boolean;
   };
 }
@@ -91,6 +114,9 @@ export type CaseViewRefreshPropInterface = null | {
 };
 
 export type AttachmentUI = SnakeToCamelCase<Attachment>;
+export type UnifiedAttachmentUI = SnakeToCamelCase<UnifiedAttachment>;
+export type AttachmentUIV2 = SnakeToCamelCase<AttachmentV2>;
+
 export type AlertAttachmentUI = SnakeToCamelCase<AlertAttachment>;
 export type ExternalReferenceAttachmentUI = SnakeToCamelCase<ExternalReferenceAttachment>;
 export type PersistableStateAttachmentUI = SnakeToCamelCase<PersistableStateAttachment>;
@@ -98,19 +124,23 @@ export type UserActionUI = SnakeToCamelCase<UserAction>;
 export type FindCaseUserActions = Omit<SnakeToCamelCase<UserActionFindResponse>, 'userActions'> & {
   userActions: UserActionUI[];
 };
+export type EventAttachmentUI = SnakeToCamelCase<EventAttachment>;
 
 export interface InternalFindCaseUserActions extends FindCaseUserActions {
-  latestAttachments: AttachmentUI[];
+  latestAttachments: AttachmentUIV2[];
 }
 
 export type CaseUserActionsStats = SnakeToCamelCase<CaseUserActionStatsResponse>;
 export type CaseUI = Omit<SnakeToCamelCase<CaseSnakeCase>, 'comments'> & {
-  comments: AttachmentUI[];
+  comments: AttachmentUIV2[];
 };
 export type ObservableUI = CaseUI['observables'][0];
 
 export type CasesUI = CaseUI[];
-export type CasesFindResponseUI = Omit<SnakeToCamelCase<CasesFindResponse>, 'cases'> & {
+// Derived from the internal `_search` response superset (not the public `_find` response) so the
+// list UI type carries the optional `mttr` the metrics bar reads. The public `_find` path simply
+// leaves `mttr` undefined.
+export type CasesFindResponseUI = Omit<SnakeToCamelCase<CasesSearchResponse>, 'cases'> & {
   cases: CasesUI;
 };
 export type CasesMetrics = SnakeToCamelCase<CasesMetricsResponse>;
@@ -124,9 +154,9 @@ export type SimilarCasesUI = SimilarCaseUI[];
 
 export interface ResolvedCase {
   case: CaseUI;
-  outcome: ResolvedSimpleSavedObject['outcome'];
-  aliasTargetId?: ResolvedSimpleSavedObject['alias_target_id'];
-  aliasPurpose?: ResolvedSimpleSavedObject['alias_purpose'];
+  outcome: SavedObjectsResolveResponse['outcome'];
+  aliasTargetId?: SavedObjectsResolveResponse['alias_target_id'];
+  aliasPurpose?: SavedObjectsResolveResponse['alias_purpose'];
 }
 
 export type CasesConfigurationUI = Pick<
@@ -140,6 +170,8 @@ export type CasesConfigurationUI = Pick<
   | 'version'
   | 'owner'
   | 'observableTypes'
+  | 'extractObservables'
+  | 'workflowTags'
 >;
 
 export type CasesConfigurationUICustomField = CasesConfigurationUI['customFields'][number];
@@ -171,6 +203,11 @@ export interface SystemFilterOptions {
   category: string[];
 }
 
+export interface ExtendedFieldFilter {
+  label: string;
+  value: string;
+}
+
 export interface FilterOptions extends SystemFilterOptions {
   customFields: {
     [key: string]: {
@@ -178,6 +215,9 @@ export interface FilterOptions extends SystemFilterOptions {
       options: string[];
     };
   };
+  extendedFieldFilters: ExtendedFieldFilter[];
+  from: string;
+  to: string;
 }
 
 export type SingleCaseMetrics = SingleCaseMetricsResponse;
@@ -208,6 +248,8 @@ export interface SimilarCasesProps extends ApiProps {
   caseId: string;
   perPage: number;
   page: number;
+  sortField?: SortFieldCase;
+  sortOrder?: SortOrder;
 }
 
 export interface ApiProps {
@@ -239,6 +281,7 @@ export type UpdateKey = keyof Pick<
   | 'assignees'
   | 'category'
   | 'customFields'
+  | 'extended_fields'
 >;
 
 export interface UpdateByKey {
@@ -313,8 +356,6 @@ export interface Ecs {
 
 export type CaseActionConnector = ActionConnector;
 
-export type UseFetchAlertData = (alertIds: string[]) => [boolean, Record<string, unknown>];
-
 export interface CasesPermissions {
   all: boolean;
   create: boolean;
@@ -327,6 +368,7 @@ export interface CasesPermissions {
   reopenCase: boolean;
   createComment: boolean;
   assign: boolean;
+  manageTemplates: boolean;
 }
 
 export interface CasesCapabilities {
@@ -340,4 +382,5 @@ export interface CasesCapabilities {
   [CREATE_COMMENT_CAPABILITY]: boolean;
   [CASES_REOPEN_CAPABILITY]: boolean;
   [ASSIGN_CASE_CAPABILITY]: boolean;
+  [MANAGE_TEMPLATES_CAPABILITY]: boolean;
 }

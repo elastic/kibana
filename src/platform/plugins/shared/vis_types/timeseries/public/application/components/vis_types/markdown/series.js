@@ -17,6 +17,7 @@ import {
   EuiFlexItem,
   EuiFieldText,
   EuiButtonIcon,
+  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import { AddDeleteButtons } from '../../add_delete_buttons';
@@ -26,6 +27,7 @@ import { createTextHandler } from '../../lib/create_text_handler';
 import { Aggs } from '../../aggs/aggs';
 import { SeriesDragHandler } from '../../series_drag_handler';
 import { tsvbEditorRowStyles, aggRowSplitStyles } from '../../../styles/common.styles';
+import { useSeriesBodyStyles } from '../../_series_editor';
 
 function MarkdownSeriesUi(props) {
   const {
@@ -44,14 +46,20 @@ function MarkdownSeriesUi(props) {
   } = props;
 
   const { euiTheme } = useEuiTheme();
+  const seriesBodyStyles = useSeriesBodyStyles();
 
   const defaults = { label: '', var_name: '' };
   const model = { ...defaults, ...props.model };
 
   const handleChange = createTextHandler(onChange);
 
-  let caretIcon = 'arrowDown';
-  if (!visible) caretIcon = 'arrowRight';
+  const toggleEditorLabel = intl.formatMessage({
+    id: 'visTypeTimeseries.markdown.editor.toggleEditorAriaLabel',
+    defaultMessage: 'Toggle series editor',
+  });
+
+  let caretIcon = 'chevronSingleDown';
+  if (!visible) caretIcon = 'chevronSingleRight';
 
   let body = null;
   if (visible) {
@@ -91,7 +99,7 @@ function MarkdownSeriesUi(props) {
       );
     }
     body = (
-      <div className="tvbSeries__body">
+      <div className="tvbSeries__body" css={seriesBodyStyles}>
         <EuiTabs size="s">
           <EuiTab isSelected={selectedTab === 'metrics'} onClick={() => props.switchTab('metrics')}>
             <FormattedMessage
@@ -119,16 +127,15 @@ function MarkdownSeriesUi(props) {
     <div className={`${props.className}`} style={props.style}>
       <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
         <EuiFlexItem grow={false}>
-          <EuiButtonIcon
-            iconType={caretIcon}
-            color="text"
-            onClick={props.toggleVisible}
-            aria-label={intl.formatMessage({
-              id: 'visTypeTimeseries.markdown.editor.toggleEditorAriaLabel',
-              defaultMessage: 'Toggle series editor',
-            })}
-            aria-expanded={props.visible}
-          />
+          <EuiToolTip content={toggleEditorLabel} disableScreenReaderOutput>
+            <EuiButtonIcon
+              iconType={caretIcon}
+              color="text"
+              onClick={props.toggleVisible}
+              aria-label={toggleEditorLabel}
+              aria-expanded={props.visible}
+            />
+          </EuiToolTip>
         </EuiFlexItem>
 
         <EuiFlexItem>

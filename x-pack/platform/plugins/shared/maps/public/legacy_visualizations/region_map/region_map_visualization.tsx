@@ -10,7 +10,7 @@ import useMountedState from 'react-use/lib/useMountedState';
 import { first } from 'rxjs';
 import type { Filter } from '@kbn/es-query';
 import type { Query, TimeRange } from '@kbn/es-query';
-import { RegionMapVisConfig } from './types';
+import type { RegionMapVisConfig } from './types';
 import { MapRenderer } from '../../react_embeddable/map_renderer/map_renderer';
 import { createRegionMapLayerDescriptor } from '../../classes/layers/create_region_map_layer_descriptor';
 
@@ -20,9 +20,10 @@ interface Props {
   timeRange?: TimeRange;
   visConfig: RegionMapVisConfig;
   onInitialRenderComplete: () => void;
+  interactive?: boolean;
 }
 
-export function RegionMapVisualization(props: Props) {
+export function RegionMapVisualization({ interactive, ...props }: Props) {
   const isMounted = useMountedState();
   const initialMapCenter = useMemo(() => {
     return {
@@ -48,6 +49,7 @@ export function RegionMapVisualization(props: Props) {
       mapCenter={initialMapCenter}
       isLayerTOCOpen={true}
       layerList={initialLayerList}
+      interactive={interactive}
       onApiAvailable={(api) => {
         api.onRenderComplete$.pipe(first()).subscribe(() => {
           if (isMounted()) {
@@ -55,7 +57,6 @@ export function RegionMapVisualization(props: Props) {
           }
         });
       }}
-      isSharable={false}
     />
   );
 }

@@ -5,45 +5,49 @@
  * 2.0.
  */
 
-import { BehaviorSubject, debounceTime, filter, map, Subscription } from 'rxjs';
+import type { Subscription } from 'rxjs';
+import { first } from 'rxjs';
+import { BehaviorSubject, debounceTime, filter, map, merge, skip } from 'rxjs';
 import fastIsEqual from 'fast-deep-equal';
-import { PublishingSubject, StateComparators } from '@kbn/presentation-publishing';
-import { KibanaExecutionContext } from '@kbn/core-execution-context-common';
-import { PaletteRegistry } from '@kbn/coloring';
-import { AggregateQuery, Filter, Query } from '@kbn/es-query';
-import { MapCenterAndZoom } from '../../common/descriptor_types';
-import { APP_ID, getEditPath, RENDER_TIMEOUT } from '../../common/constants';
-import { MapStoreState } from '../reducers/store';
+import type { PublishingSubject, StateComparators } from '@kbn/presentation-publishing';
+import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
+import type { PaletteRegistry } from '@kbn/coloring';
+import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
+import { debounce } from 'lodash';
+import type { MapCenterAndZoom } from '../../common/descriptor_types';
+import { APP_ID, getEditPath } from '../../common/constants';
+import type { MapStoreState } from '../reducers/store';
 import { getIsLayerTOCOpen, getOpenTOCDetails } from '../selectors/ui_selectors';
 import {
   getLayerList,
   getLayerListRaw,
   getMapBuffer,
   getMapCenter,
-  getMapReady,
+  getMapInitError,
   getMapZoom,
   isMapLoading,
 } from '../selectors/map_selectors';
 import {
   setEmbeddableSearchContext,
   setExecutionContext,
-  setGotoWithCenter,
-  setHiddenLayers,
-  setIsLayerTOCOpen,
   setMapSettings,
-  setOpenTOCDetails,
   setQuery,
   setReadOnly,
 } from '../actions';
-import type { MapSerializedState } from './types';
+import type { MapByReferenceState, MapEmbeddableState } from '../../common';
 import { getCharts, getExecutionContextService } from '../kibana_services';
+import type { EventHandlers } from '../reducers/non_serializable_instances';
 import {
-  EventHandlers,
   getInspectorAdapters,
   setChartsPaletteServiceGetColor,
   setEventHandlers,
+  getMapReady,
 } from '../reducers/non_serializable_instances';
-import { SavedMap } from '../routes';
+import type { SavedMap } from '../routes';
+
+// Maplibre does not provide any feedback when rendering is complete.
+// Workaround is hard-coded timeout period.
+export const RENDER_TIMEOUT = 1000;
 
 function getMapCenterAndZoom(state: MapStoreState) {
   return {
@@ -58,6 +62,28 @@ function getHiddenLayerIds(state: MapStoreState) {
     .map((layer) => layer.id);
 }
 
+export const reduxSyncComparators: StateComparators<
+  Pick<
+    MapEmbeddableState,
+    'hiddenLayers' | 'isLayerTOCOpen' | 'mapCenter' | 'mapBuffer' | 'openTOCDetails'
+  >
+> = {
+  hiddenLayers: 'deepEquality',
+  isLayerTOCOpen: 'referenceEquality',
+  mapCenter: (a, b) => {
+    if (!a || !b) {
+      return a === b;
+    }
+
+    if (a.lat !== b.lat) return false;
+    if (a.lon !== b.lon) return false;
+    // Map may not restore reset zoom exactly
+    return Math.abs(a.zoom - b.zoom) < 0.05;
+  },
+  mapBuffer: 'skip',
+  openTOCDetails: 'deepEquality',
+};
+
 export function initializeReduxSync({
   savedMap,
   state,
@@ -65,7 +91,7 @@ export function initializeReduxSync({
   uuid,
 }: {
   savedMap: SavedMap;
-  state: MapSerializedState;
+  state: MapEmbeddableState;
   syncColors$?: PublishingSubject<boolean | undefined>;
   uuid: string;
 }) {
@@ -86,8 +112,10 @@ export function initializeReduxSync({
     state.openTOCDetails ?? getOpenTOCDetails(store.getState())
   );
   const dataLoading$ = new BehaviorSubject<boolean | undefined>(undefined);
+  const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
 
-  const unsubscribeFromStore = store.subscribe(() => {
+  // sync embeddable state with map redux store
+  function syncWithStore() {
     if (!getMapReady(store.getState())) {
       return;
     }
@@ -115,7 +143,16 @@ export function initializeReduxSync({
     if (nextIsMapLoading !== dataLoading$.value) {
       dataLoading$.next(nextIsMapLoading);
     }
-  });
+
+    const nextMapInitError = getMapInitError(store.getState());
+    if (nextMapInitError && !blockingError$.value) {
+      blockingError$.next(new Error(nextMapInitError));
+    } else if (!nextMapInitError && blockingError$.value) {
+      blockingError$.next(undefined);
+    }
+  }
+
+  const unsubscribeFromStore = store.subscribe(debounce(syncWithStore, 100));
 
   store.dispatch(setReadOnly(true));
   store.dispatch(
@@ -124,30 +161,25 @@ export function initializeReduxSync({
       showTimesliderToggleButton: false,
     })
   );
-  store.dispatch(setExecutionContext(getExecutionContext(uuid, state.savedObjectId)));
+  store.dispatch(
+    setExecutionContext(getExecutionContext(uuid, (state as MapByReferenceState).savedObjectId))
+  );
 
   const filters$ = new BehaviorSubject<Filter[] | undefined>(undefined);
   const query$ = new BehaviorSubject<AggregateQuery | Query | undefined>(undefined);
-  const mapStateJSON = savedMap.getAttributes().mapStateJSON;
-  if (mapStateJSON) {
-    try {
-      const mapState = JSON.parse(mapStateJSON);
-      if (mapState.filters) {
-        filters$.next(mapState.filters);
-      }
-      if (mapState.query) {
-        query$.next(mapState.query);
-      }
-      store.dispatch(
-        setEmbeddableSearchContext({
-          filters: mapState.filters,
-          query: mapState.query,
-        })
-      );
-    } catch (e) {
-      // ignore malformed mapStateJSON, not a critical error for viewing map - map will just use defaults
-    }
+  const { filters, query } = savedMap.getAttributes();
+  if (filters) {
+    filters$.next(filters);
   }
+  if (query) {
+    query$.next(query);
+  }
+  store.dispatch(
+    setEmbeddableSearchContext({
+      filters: filters ?? [],
+      query,
+    })
+  );
 
   let syncColorsSubscription: Subscription | undefined;
   let syncColorsSymbol: symbol | undefined;
@@ -164,12 +196,27 @@ export function initializeReduxSync({
     });
   }
 
+  const onRenderComplete$ = dataLoading$.pipe(
+    filter((isDataLoading) => typeof isDataLoading === 'boolean' && !isDataLoading),
+    debounceTime(RENDER_TIMEOUT),
+    map(() => {
+      // Observable notifies subscriber when rendering is complete
+      // Return void to not expose internal implemenation details of observabale
+      return;
+    })
+  );
+  const rendered$ = new BehaviorSubject(false);
+  onRenderComplete$.pipe(first()).subscribe(() => {
+    rendered$.next(true);
+  });
+
   return {
     cleanup: () => {
       if (syncColorsSubscription) syncColorsSubscription.unsubscribe();
       unsubscribeFromStore();
     },
     api: {
+      blockingError$,
       dataLoading$,
       filters$,
       getInspectorAdapters: () => {
@@ -178,15 +225,8 @@ export function initializeReduxSync({
       getLayerList: () => {
         return getLayerList(store.getState());
       },
-      onRenderComplete$: dataLoading$.pipe(
-        filter((isDataLoading) => typeof isDataLoading === 'boolean' && !isDataLoading),
-        debounceTime(RENDER_TIMEOUT),
-        map(() => {
-          // Observable notifies subscriber when rendering is complete
-          // Return void to not expose internal implemenation details of observabale
-          return;
-        })
-      ),
+      rendered$,
+      onRenderComplete$,
       query$,
       reload: () => {
         store.dispatch<any>(
@@ -199,54 +239,34 @@ export function initializeReduxSync({
         store.dispatch(setEventHandlers(eventHandlers));
       },
     },
-    comparators: {
-      // mapBuffer comparator intentionally omitted and is not part of unsaved changes check
-      hiddenLayers: [
-        hiddenLayers$,
-        (nextValue: string[]) => {
-          store.dispatch<any>(setHiddenLayers(nextValue));
-        },
-        fastIsEqual,
-      ],
-      isLayerTOCOpen: [
-        isLayerTOCOpen$,
-        (nextValue: boolean) => {
-          store.dispatch(setIsLayerTOCOpen(nextValue));
-        },
-      ],
-      mapCenter: [
-        mapCenterAndZoom$,
-        (nextValue: MapCenterAndZoom) => {
-          store.dispatch(setGotoWithCenter(nextValue));
-        },
-        (a, b) => {
-          if (!a || !b) {
-            return a === b;
-          }
-
-          if (a.lat !== b.lat) return false;
-          if (a.lon !== b.lon) return false;
-          // Map may not restore reset zoom exactly
-          return Math.abs(a.zoom - b.zoom) < 0.05;
-        },
-      ],
-      openTOCDetails: [
-        openTOCDetails$,
-        (nextValue: string[]) => {
-          store.dispatch(setOpenTOCDetails(nextValue));
-        },
-        fastIsEqual,
-      ],
-    } as StateComparators<
-      Pick<MapSerializedState, 'hiddenLayers' | 'isLayerTOCOpen' | 'mapCenter' | 'openTOCDetails'>
-    >,
-    serialize: () => {
+    internalApi: {
+      syncWithStore,
+    },
+    anyStateChange$: merge(
+      hiddenLayers$.pipe(
+        skip(1),
+        map(() => undefined)
+      ),
+      isLayerTOCOpen$.pipe(
+        skip(1),
+        map(() => undefined)
+      ),
+      mapCenterAndZoom$.pipe(
+        skip(1),
+        map(() => undefined)
+      ),
+      openTOCDetails$.pipe(
+        skip(1),
+        map(() => undefined)
+      )
+    ),
+    getLatestState: () => {
       return {
-        hiddenLayers: getHiddenLayerIds(store.getState()),
-        isLayerTOCOpen: getIsLayerTOCOpen(store.getState()),
+        hiddenLayers: hiddenLayers$.value,
+        isLayerTOCOpen: isLayerTOCOpen$.value,
         mapBuffer: getMapBuffer(store.getState()),
-        mapCenter: getMapCenterAndZoom(store.getState()),
-        openTOCDetails: getOpenTOCDetails(store.getState()),
+        mapCenter: mapCenterAndZoom$.value,
+        openTOCDetails: openTOCDetails$.value,
       };
     },
   };

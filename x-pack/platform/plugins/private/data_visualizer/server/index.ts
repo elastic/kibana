@@ -6,7 +6,8 @@
  */
 
 import type { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
-import type { ConfigSchema } from '../common/app';
+
+import type { ConfigSchema } from '@kbn/file-upload-common';
 import { configSchema } from './config_schema';
 
 export const plugin = async (initializerContext: PluginInitializerContext<ConfigSchema>) => {

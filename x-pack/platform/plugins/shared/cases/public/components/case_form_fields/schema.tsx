@@ -10,6 +10,7 @@ import type { FormSchema } from '@kbn/es-ui-shared-plugin/static/forms/hook_form
 import { VALIDATION_TYPES } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import type { CasePostRequest } from '../../../common';
 import {
+  CASE_EXTENDED_FIELDS,
   MAX_DESCRIPTION_LENGTH,
   MAX_LENGTH_PER_TAG,
   MAX_TAGS_PER_CASE,
@@ -30,7 +31,10 @@ export type CaseFormFieldsSchemaProps = Omit<
   connectorId: string;
   fields: ConnectorTypeFields['fields'];
   syncAlerts: boolean;
+  extractObservables: boolean;
   customFields: Record<string, string | boolean>;
+  templateId?: string;
+  templateVersion?: number;
 };
 
 export const schema: FormSchema<CaseFormFieldsSchemaProps> = {
@@ -98,6 +102,10 @@ export const schema: FormSchema<CaseFormFieldsSchemaProps> = {
     helpText: i18n.SYNC_ALERTS_HELP,
     defaultValue: true,
   },
+  extractObservables: {
+    helpText: i18n.EXTRACT_OBSERVABLES_HELP,
+    defaultValue: true,
+  },
   customFields: {},
   connectorId: {
     label: i18n.CONNECTORS,
@@ -106,5 +114,14 @@ export const schema: FormSchema<CaseFormFieldsSchemaProps> = {
   },
   fields: {
     defaultValue: null,
+  },
+  templateId: {
+    defaultValue: '',
+  },
+  templateVersion: {
+    defaultValue: 1,
+  },
+  [CASE_EXTENDED_FIELDS]: {
+    defaultValue: {},
   },
 };

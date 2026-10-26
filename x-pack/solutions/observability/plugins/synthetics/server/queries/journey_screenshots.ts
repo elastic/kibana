@@ -4,10 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { IKibanaResponse } from '@kbn/core-http-server';
-import { getJourneyScreenshot, ScreenshotReturnTypesUnion } from './get_journey_screenshot';
-import { isRefResult, RefResult } from '../../common/runtime_types';
-import { RouteContext } from '../routes/types';
+import type { IKibanaResponse } from '@kbn/core-http-server';
+import type { ScreenshotReturnTypesUnion } from './get_journey_screenshot';
+import { getJourneyScreenshot } from './get_journey_screenshot';
+import type { RefResult } from '../../common/runtime_types';
+
+import type { RouteContext } from '../routes/types';
+import { isRefResult } from '../../common/runtime_types/schemas/ping_guards';
 
 export interface ClientContract {
   screenshotRef: RefResult;
@@ -27,11 +30,14 @@ export const journeyScreenshotHandler = async ({
   syntheticsEsClient,
 }: RouteContext): Promise<IKibanaResponse<ClientContract>> => {
   const { checkGroup, stepIndex } = request.params;
+  const { remoteName, timestamp } = request.query as { remoteName?: string; timestamp?: string };
 
   const result: ScreenshotReturnTypesUnion | null = await getJourneyScreenshot({
     syntheticsEsClient,
     checkGroup,
     stepIndex,
+    remoteName,
+    timestamp,
   });
 
   if (result === null) {

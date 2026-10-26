@@ -9,28 +9,35 @@ import { useMemo } from 'react';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { inputsSelectors } from '../../../../common/store';
 import { useQueryInspector } from '../../../../common/components/page/manage_query';
-import type { ObservedEntityData } from '../../shared/components/observed_entity/types';
+import type { ObservedEntityData } from '../../../../flyout_v2/entity/shared/components/observed_entity/types';
 import type { ServiceItem } from '../../../../../common/search_strategy';
 import { Direction, NOT_EVENT_KIND_ASSET_FILTER } from '../../../../../common/search_strategy';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
+import { getScopeFlyoutTimeRange } from '../../../../entity_analytics/common/scope_time_ranges';
 import { useFirstLastSeen } from '../../../../common/containers/use_first_last_seen';
 import { isActiveTimeline } from '../../../../helpers';
-import { useTimelineDataFilters } from '../../../../timelines/containers/use_timeline_data_filters';
+import { useSecurityDefaultPatterns } from '../../../../data_view_manager/hooks/use_security_default_patterns';
 import { useObservedServiceDetails } from './observed_service_details';
 
+const getServiceNameFromEntityIdentifiers = (identityFields: Record<string, string>): string =>
+  identityFields['service.name'] || Object.values(identityFields)[0] || '';
+
 export const useObservedService = (
-  serviceName: string,
+  identityFields: Record<string, string>,
   scopeId: string
 ): Omit<ObservedEntityData<ServiceItem>, 'anomalies'> => {
   const timelineTime = useDeepEqualSelector((state) =>
     inputsSelectors.timelineTimeRangeSelector(state)
   );
   const globalTime = useGlobalTime();
+  const flyoutTimeRange = getScopeFlyoutTimeRange(scopeId);
   const isActiveTimelines = isActiveTimeline(scopeId);
-  const { to, from } = isActiveTimelines ? timelineTime : globalTime;
+  // A scope that pins a time range (new Entity Analytics home) wins over timeline / global time.
+  const { to, from } = flyoutTimeRange ?? (isActiveTimelines ? timelineTime : globalTime);
   const { isInitializing, setQuery, deleteQuery } = globalTime;
+  const serviceName = getServiceNameFromEntityIdentifiers(identityFields);
 
-  const { selectedPatterns } = useTimelineDataFilters(isActiveTimeline(scopeId));
+  const { indexPatterns } = useSecurityDefaultPatterns();
 
   const [
     loadingObservedService,
@@ -39,7 +46,7 @@ export const useObservedService = (
     endDate: to,
     startDate: from,
     serviceName,
-    indexNames: selectedPatterns,
+    indexNames: indexPatterns,
     skip: isInitializing,
   });
 
@@ -55,7 +62,7 @@ export const useObservedService = (
   const [loadingFirstSeen, { firstSeen }] = useFirstLastSeen({
     field: 'service.name',
     value: serviceName,
-    defaultIndex: selectedPatterns,
+    defaultIndex: indexPatterns,
     order: Direction.asc,
     filterQuery: NOT_EVENT_KIND_ASSET_FILTER,
   });
@@ -63,7 +70,7 @@ export const useObservedService = (
   const [loadingLastSeen, { lastSeen }] = useFirstLastSeen({
     field: 'service.name',
     value: serviceName,
-    defaultIndex: selectedPatterns,
+    defaultIndex: indexPatterns,
     order: Direction.desc,
     filterQuery: NOT_EVENT_KIND_ASSET_FILTER,
   });

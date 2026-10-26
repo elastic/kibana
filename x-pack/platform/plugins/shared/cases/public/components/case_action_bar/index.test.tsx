@@ -94,13 +94,14 @@ describe('CaseActionBar', () => {
       key: 'settings',
       value: {
         syncAlerts: false,
+        extractObservables: true,
       },
     });
   });
 
   it('should not show the sync alerts toggle when alerting is disabled', () => {
     renderWithTestingProviders(<CaseActionBar {...defaultProps} />, {
-      wrapperProps: { features: { alerts: { sync: false, enabled: true }, metrics: [] } },
+      wrapperProps: { owner: ['observability'], features: { metrics: [] } },
     });
 
     expect(screen.queryByText('Sync alerts')).not.toBeInTheDocument();
@@ -156,7 +157,7 @@ describe('CaseActionBar', () => {
     await userEvent.click(screen.getByTestId('property-actions-case-ellipses'));
     expect(screen.queryByText('Delete case')).not.toBeInTheDocument();
     expect(screen.queryByTestId('property-actions-case-trash')).not.toBeInTheDocument();
-    expect(screen.getByTestId('property-actions-case-copyClipboard')).toBeInTheDocument();
+    expect(screen.getByTestId('property-actions-case-copy')).toBeInTheDocument();
   });
 
   it('should show the the delete item in the menu when the user does have delete privileges', async () => {
@@ -182,7 +183,7 @@ describe('CaseActionBar', () => {
     await userEvent.click(screen.getByTestId('property-actions-case-ellipses'));
 
     await waitFor(() => {
-      expect(screen.getByTestId('property-actions-case-popout')).toBeInTheDocument();
+      expect(screen.getByTestId('property-actions-case-external')).toBeInTheDocument();
     });
   });
 
@@ -191,6 +192,6 @@ describe('CaseActionBar', () => {
 
     await userEvent.click(screen.getByTestId('property-actions-case-ellipses'));
 
-    expect(screen.queryByTestId('property-actions-case-popout')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('property-actions-case-external')).not.toBeInTheDocument();
   });
 });

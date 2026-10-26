@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SearchHit } from '@elastic/elasticsearch/lib/api/types';
-import { ESClient, TransactionDocument, Headers, SpanDocument } from './es_client';
-import { Request } from './types';
+import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
+import type { ESClient, TransactionDocument, Headers, SpanDocument } from './es_client';
+import type { Request } from './types';
 
 const httpMethodRegExp = /(GET|POST|DELETE|HEAD|PUT|OPTIONS)/;
 const httpPathRegExp = /(?<=GET|POST|DELETE|HEAD|PUT|OPTIONS).*/;

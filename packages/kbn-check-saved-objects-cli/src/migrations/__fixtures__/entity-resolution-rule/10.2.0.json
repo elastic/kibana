@@ -1,0 +1,30 @@
+{
+  "10.1.0": [
+    {
+      "id": "email_exact_match",
+      "kind": "same_field",
+      "managed": true,
+      "enabled": true
+    },
+    {
+      "id": "related_user_alias_resolution",
+      "kind": "related_user_alias_resolution",
+      "managed": true,
+      "enabled": false
+    }
+  ],
+  "10.2.0": [
+    {
+      "id": "email_exact_match",
+      "kind": "same_field",
+      "managed": true,
+      "enabled": true
+    },
+    {
+      "id": "related_user_alias_resolution",
+      "kind": "related_user_alias_resolution",
+      "managed": true,
+      "enabled": false
+    }
+  ]
+}

@@ -1,0 +1,54 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+export type {
+  AttachmentTypeDefinition,
+  AttachmentRepresentation,
+  TextAttachmentRepresentation,
+  ImageAttachmentRepresentation,
+  AttachmentValidationResult,
+  AgentFormattedAttachment,
+  AttachmentFormatContext,
+  AttachmentResolveContext,
+  AttachmentOriginUpdatedContext,
+  AttachmentValidateContext,
+  SurfaceComposition,
+  SurfaceNode,
+  AttachmentSurfaceCompositionContext,
+  MarkdownNode,
+} from './type_definition';
+export type {
+  AttachmentBoundedTool,
+  BuiltinAttachmentBoundedTool,
+  IndexSearchAttachmentBoundedTool,
+  WorkflowAttachmentBoundedTool,
+  StaticEsqlAttachmentBoundedTool,
+} from './tools';
+export type {
+  AttachmentChange,
+  AttachmentSnapshot,
+  AttachmentStateManager,
+  AttachmentUpdateInput,
+  ResolvedAttachmentRef,
+} from './attachment_state_manager';
+export { createAttachmentStateManager } from './attachment_state_manager';
+export type { AttachmentChangesToEventsOptions } from './attachment_change_events';
+export { attachmentChangesToEvents } from './attachment_change_events';
+export type {
+  AttachmentPublicClient,
+  AttachmentWriteAccess,
+  ListAttachmentsResult,
+  CreateAttachmentArgs,
+  GetAttachmentArgs,
+  UpdateAttachmentArgs,
+  DeleteAttachmentArgs,
+  ListAttachmentsArgs,
+  BulkCreateAttachmentInput,
+  BulkCreateAttachmentError,
+  BulkCreateAttachmentsResult,
+  BulkCreateAttachmentsArgs,
+} from './public_client';

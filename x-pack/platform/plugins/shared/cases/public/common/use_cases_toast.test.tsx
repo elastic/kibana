@@ -6,14 +6,16 @@
  */
 
 import { useKibana, useToasts } from './lib/kibana';
-import { TestProviders, renderWithTestingProviders } from './mock';
-import { CaseToastSuccessContent, useCasesToast } from './use_cases_toast';
-import { alertComment, basicComment, mockCase } from '../containers/mock';
-import React from 'react';
-import userEvent from '@testing-library/user-event';
+import { TestProviders } from './mock';
+import { useCasesToast } from './use_cases_toast';
+import { mockCase } from '../containers/mock';
 import type { SupportedCaseAttachment } from '../types';
-import { screen, renderHook, getByTestId, queryByTestId } from '@testing-library/react';
-import { OWNER_INFO } from '../../common/constants';
+import { renderHook } from '@testing-library/react';
+import { OWNER_INFO, SECURITY_SOLUTION_OWNER } from '../../common/constants';
+import {
+  COMMENT_ATTACHMENT_TYPE,
+  SECURITY_ALERT_ATTACHMENT_TYPE,
+} from '../../common/constants/attachments';
 import { useApplication } from './lib/kibana/use_application';
 
 jest.mock('./lib/kibana');
@@ -22,6 +24,19 @@ jest.mock('./lib/kibana/use_application');
 const useToastsMock = useToasts as jest.Mock;
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 const useApplicationMock = useApplication as jest.Mock;
+
+const unifiedAlert: SupportedCaseAttachment = {
+  type: SECURITY_ALERT_ATTACHMENT_TYPE,
+  owner: SECURITY_SOLUTION_OWNER,
+  attachmentId: 'alert-id-1',
+  metadata: { index: 'alert-index' },
+};
+
+const unifiedComment: SupportedCaseAttachment = {
+  type: COMMENT_ATTACHMENT_TYPE,
+  owner: SECURITY_SOLUTION_OWNER,
+  data: { content: 'a comment' },
+};
 
 describe('Use cases toast hook', () => {
   const successMock = jest.fn();
@@ -32,25 +47,17 @@ describe('Use cases toast hook', () => {
 
   function validateTitle(title: string) {
     const mockParams = successMock.mock.calls[0][0];
-    const el = document.createElement('div');
-    mockParams.title(el);
-    expect(el).toHaveTextContent(title);
+    expect(mockParams.title).toBe(title);
   }
 
   function validateContent(content: string) {
     const mockParams = successMock.mock.calls[0][0];
-    const el = document.createElement('div');
-    mockParams.text(el);
-    expect(el).toHaveTextContent(content);
+    expect(mockParams.text).toBe(content);
   }
 
   async function navigateToCase() {
     const mockParams = successMock.mock.calls[0][0];
-    const el = document.createElement('div');
-    mockParams.text(el);
-    // eslint-disable-next-line testing-library/prefer-screen-queries
-    const button = getByTestId(el, 'toaster-content-case-view-link');
-    await userEvent.click(button);
+    mockParams.actionProps.primary.onClick();
   }
 
   useToastsMock.mockImplementation(() => {
@@ -100,37 +107,48 @@ describe('Use cases toast hook', () => {
         validateTitle('Custom title');
       });
 
-      it('should display the alert sync title when called with an alert attachment (1 alert)', () => {
+      it('should display the alert sync title when called with multiple alert attachments', () => {
         const { result } = renderHook(
           () => {
             return useCasesToast();
           },
           { wrapper: TestProviders }
         );
+
         result.current.showSuccessAttach({
           theCase: mockCase,
-          attachments: [alertComment as SupportedCaseAttachment],
+          attachments: [unifiedAlert, { ...unifiedAlert, attachmentId: 'alert-id-2' }],
         });
-        validateTitle('An alert was added to "Another horrible breach!!');
+        validateTitle('Alerts were added to "Another horrible breach!!"');
       });
 
-      it('should display the alert sync title when called with an alert attachment (multiple alerts)', () => {
+      it('should display the alert sync title when called with a unified alert attachment (1 alert)', () => {
         const { result } = renderHook(
           () => {
             return useCasesToast();
           },
           { wrapper: TestProviders }
         );
-        const alert = {
-          ...alertComment,
-          alertId: ['1234', '54321'],
-        } as SupportedCaseAttachment;
 
         result.current.showSuccessAttach({
           theCase: mockCase,
-          attachments: [alert],
+          attachments: [unifiedAlert],
         });
-        validateTitle('Alerts were added to "Another horrible breach!!');
+        validateTitle('An alert was added to "Another horrible breach!!"');
+      });
+
+      it('should display the alert sync title when called with a unified alert attachment (multiple alerts)', () => {
+        const { result } = renderHook(
+          () => {
+            return useCasesToast();
+          },
+          { wrapper: TestProviders }
+        );
+        result.current.showSuccessAttach({
+          theCase: mockCase,
+          attachments: [{ ...unifiedAlert, attachmentId: ['alert-id-1', 'alert-id-2'] }],
+        });
+        validateTitle('Alerts were added to "Another horrible breach!!"');
       });
 
       it('should display a generic title when called with a non-alert attachament', () => {
@@ -142,7 +160,7 @@ describe('Use cases toast hook', () => {
         );
         result.current.showSuccessAttach({
           theCase: mockCase,
-          attachments: [basicComment as SupportedCaseAttachment],
+          attachments: [unifiedComment],
         });
         validateTitle('Case Another horrible breach!! updated');
       });
@@ -174,10 +192,10 @@ describe('Use cases toast hook', () => {
           { wrapper: TestProviders }
         );
         result.current.showSuccessAttach({
-          theCase: mockCase,
-          attachments: [alertComment as SupportedCaseAttachment],
+          theCase: { ...mockCase, settings: { syncAlerts: true } },
+          attachments: [unifiedAlert],
         });
-        validateContent('The alert statuses are synched with the case status.');
+        validateContent("Alert statuses were synced with the case's status.");
       });
 
       it('renders empty content when called with an alert attachment and sync off', () => {
@@ -188,39 +206,15 @@ describe('Use cases toast hook', () => {
           { wrapper: TestProviders }
         );
         result.current.showSuccessAttach({
-          theCase: { ...mockCase, settings: { ...mockCase.settings, syncAlerts: false } },
-          attachments: [alertComment as SupportedCaseAttachment],
+          theCase: {
+            ...mockCase,
+            settings: { ...mockCase.settings, syncAlerts: false, extractObservables: false },
+          },
+          attachments: [unifiedAlert],
         });
-        validateContent('View case');
-      });
-
-      it('renders a correct successful message content', () => {
-        renderWithTestingProviders(
-          <CaseToastSuccessContent content={'my content'} onViewCaseClick={onViewCaseClick} />
-        );
-        expect(screen.getByTestId('toaster-content-sync-text')).toHaveTextContent('my content');
-        expect(screen.getByTestId('toaster-content-case-view-link')).toHaveTextContent('View case');
-        expect(onViewCaseClick).not.toHaveBeenCalled();
-      });
-
-      it('renders a correct successful message without content', () => {
-        renderWithTestingProviders(<CaseToastSuccessContent onViewCaseClick={onViewCaseClick} />);
-        expect(screen.queryByTestId('toaster-content-sync-text')).toBeFalsy();
-        expect(screen.getByTestId('toaster-content-case-view-link')).toHaveTextContent('View case');
-        expect(onViewCaseClick).not.toHaveBeenCalled();
-      });
-
-      it('Calls the onViewCaseClick when clicked', async () => {
-        renderWithTestingProviders(<CaseToastSuccessContent onViewCaseClick={onViewCaseClick} />);
-
-        await userEvent.click(screen.getByTestId('toaster-content-case-view-link'));
-        expect(onViewCaseClick).toHaveBeenCalled();
-      });
-
-      it('hides the view case link when onViewCaseClick is not defined', () => {
-        <CaseToastSuccessContent />;
-
-        expect(screen.queryByTestId('toaster-content-case-view-link')).not.toBeInTheDocument();
+        const mockParams = successMock.mock.calls[0][0];
+        expect(mockParams.text).toBeUndefined();
+        expect(mockParams.actionProps.primary).toMatchObject({ children: 'View case' });
       });
     });
 
@@ -293,12 +287,7 @@ describe('Use cases toast hook', () => {
         });
 
         const mockParams = successMock.mock.calls[0][0];
-        const el = document.createElement('div');
-        mockParams.text(el);
-        // eslint-disable-next-line testing-library/prefer-screen-queries
-        const button = queryByTestId(el, 'toaster-content-case-view-link');
-
-        expect(button).toBeNull();
+        expect(mockParams.actionProps).toBeUndefined();
         expect(getUrlForApp).not.toHaveBeenCalled();
         expect(navigateToUrl).not.toHaveBeenCalled();
       });
@@ -385,6 +374,7 @@ describe('Use cases toast hook', () => {
 
       expect(successMock).toHaveBeenCalledWith({
         className: 'eui-textBreakWord',
+        text: undefined,
         title: 'my title',
       });
     });

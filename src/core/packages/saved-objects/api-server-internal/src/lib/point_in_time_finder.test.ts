@@ -9,8 +9,8 @@
 
 import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 import type {
-  SavedObjectsFindResult,
   SavedObjectsCreatePointInTimeFinderOptions,
+  SavedObjectsFindResult,
 } from '@kbn/core-saved-objects-api-server';
 import { savedObjectsPointInTimeFinderMock } from '../mocks';
 
@@ -311,6 +311,50 @@ describe('createPointInTimeFinder()', () => {
     expect(hits.length).toEqual(0);
   });
 
+  test('forwards an explicit sort list and does not replace it with the single-field default', async () => {
+    repository.openPointInTimeForType.mockResolvedValueOnce({
+      id: 'abc123',
+    });
+    repository.find.mockResolvedValueOnce({
+      total: 2,
+      saved_objects: mockHits,
+      pit_id: 'abc123',
+      per_page: 2,
+      page: 0,
+    });
+
+    const sort = [
+      { field: 'updated_at', order: 'desc' as const },
+      { field: '_shard_doc', order: 'asc' as const },
+    ];
+    const findOptions: SavedObjectsCreatePointInTimeFinderOptions = {
+      type: ['visualization'],
+      search: 'foo*',
+      sort,
+    };
+
+    const finder = new PointInTimeFinder(findOptions, {
+      logger,
+      client: repository,
+    });
+    const hits: SavedObjectsFindResult[] = [];
+    for await (const result of finder.find()) {
+      hits.push(...result.saved_objects);
+    }
+
+    expect(hits.length).toBe(2);
+    expect(repository.find).toHaveBeenCalledWith(
+      expect.objectContaining({
+        sort,
+        type: ['visualization'],
+      }),
+      undefined
+    );
+    const [{ sortField, sortOrder }] = repository.find.mock.calls[0];
+    expect(sortField).toBeUndefined();
+    expect(sortOrder).toBeUndefined();
+  });
+
   test('still applies the defaults in the mandatory fields even when `undefined` is explicitly provided', async () => {
     repository.openPointInTimeForType.mockResolvedValueOnce({
       id: 'abc123',
@@ -352,6 +396,7 @@ describe('createPointInTimeFinder()', () => {
         sortField: 'updated_at',
         sortOrder: 'desc',
         type: ['visualization'],
+        perPage: 1000,
       }),
       internalOptions
     );
@@ -515,6 +560,41 @@ describe('createPointInTimeFinder()', () => {
       expect(repository.openPointInTimeForType).toHaveBeenCalledTimes(2);
       expect(repository.find).toHaveBeenCalledTimes(2);
       expect(repository.closePointInTime).toHaveBeenCalledTimes(2);
+    });
+
+    test('applies defaults as expected', async () => {
+      repository.openPointInTimeForType.mockResolvedValueOnce({
+        id: 'abc123',
+      });
+      repository.find.mockResolvedValueOnce({
+        total: 2,
+        saved_objects: mockHits,
+        pit_id: 'abc123',
+        per_page: 2,
+        page: 0,
+      });
+
+      const findOptions: SavedObjectsCreatePointInTimeFinderOptions = {
+        type: ['visualization'],
+        search: 'foo*',
+      };
+
+      const finder = new PointInTimeFinder(findOptions, {
+        logger,
+        client: repository,
+      });
+      await finder.find().next();
+
+      expect(repository.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          pit: expect.objectContaining({ id: 'abc123', keepAlive: '2m' }),
+          sortField: 'updated_at',
+          sortOrder: 'desc',
+          type: ['visualization'],
+          perPage: 1000,
+        }),
+        undefined
+      );
     });
   });
 });

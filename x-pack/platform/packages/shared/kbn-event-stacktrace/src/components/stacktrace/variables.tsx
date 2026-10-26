@@ -9,7 +9,7 @@ import { EuiAccordion } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { KeyValueTable, getFlattenedKeyValuePairs } from '@kbn/key-value-metadata-table';
-import { Stackframe } from '@kbn/apm-types';
+import type { Stackframe } from '@kbn/apm-types';
 import styled from '@emotion/styled';
 
 const VariablesContainer = styled.div`
@@ -29,23 +29,20 @@ export function Variables({ vars }: Props) {
   }
   const flattenedVariables = getFlattenedKeyValuePairs(vars);
   return (
-    <React.Fragment>
-      <VariablesContainer>
-        <EuiAccordion
-          id="local-variables"
-          className="euiAccordion"
-          buttonContent={i18n.translate(
-            'xpack.eventStacktrace.stacktraceTab.localVariablesToogleButtonLabel',
-            {
-              defaultMessage: 'Local variables',
-            }
-          )}
-        >
-          <React.Fragment>
-            <KeyValueTable keyValuePairs={flattenedVariables} />
-          </React.Fragment>
-        </EuiAccordion>
-      </VariablesContainer>
-    </React.Fragment>
+    <VariablesContainer>
+      <EuiAccordion
+        id="local-variables"
+        data-test-subj="stacktraceLocalVariables"
+        className="euiAccordion"
+        buttonContent={i18n.translate(
+          'xpack.eventStacktrace.stacktraceTab.localVariablesToogleButtonLabel',
+          {
+            defaultMessage: 'Local variables',
+          }
+        )}
+      >
+        <KeyValueTable keyValuePairs={flattenedVariables} />
+      </EuiAccordion>
+    </VariablesContainer>
   );
 }

@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import React, { ReactNode, KeyboardEvent } from 'react';
-import PropTypes from 'prop-types';
+import type { ReactNode, KeyboardEvent } from 'react';
+import React from 'react';
 // @ts-expect-error no @types definition
 import { Shortcuts } from 'react-shortcuts';
 import { isTextInput } from '../../../lib/is_text_input';
+import { forceReload } from '../../hooks/use_canvas_api';
 
 interface ChildrenProps {
   isFullscreen: boolean;
@@ -33,12 +34,6 @@ interface Props {
 }
 
 export class FullscreenControl extends React.PureComponent<Props> {
-  static propTypes = {
-    setFullscreen: PropTypes.func.isRequired,
-    isFullscreen: PropTypes.bool.isRequired,
-    children: PropTypes.func.isRequired,
-  };
-
   /*
     We need these instance functions because ReactShortcuts bind the handlers on it's mount, 
     but then does no rebinding if it's props change. Using these instance functions will 
@@ -64,7 +59,10 @@ export class FullscreenControl extends React.PureComponent<Props> {
 
   // handle keypress events for presentation events
   _keyMap: { [key: string]: (...args: any[]) => void } = {
-    REFRESH: this.props.fetchAllRenderables,
+    REFRESH: () => {
+      forceReload();
+      this.props.fetchAllRenderables();
+    },
     PREV: this.previousPage,
     NEXT: this.nextPage,
     FULLSCREEN: this._toggleFullscreen,

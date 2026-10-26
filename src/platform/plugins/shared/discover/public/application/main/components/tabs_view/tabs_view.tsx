@@ -7,74 +7,156 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type TabItem, UnifiedTabs, TabStatus } from '@kbn/unified-tabs';
-import React, { useState } from 'react';
-import { pick } from 'lodash';
-import { isOfAggregateQueryType } from '@kbn/es-query';
-import { DiscoverSessionView, type DiscoverSessionViewProps } from '../session_view';
+import React, { useCallback, useMemo } from 'react';
+import { UnifiedTabs, type UnifiedTabsProps } from '@kbn/unified-tabs';
+import { i18n } from '@kbn/i18n';
+import { AppMenuComponent } from '@kbn/core-chrome-app-menu-components';
+import { MAX_DISCOVER_SESSION_TABS } from '@kbn/saved-search-plugin/common';
+import { css } from '@emotion/react';
+import { useEuiTheme } from '@elastic/eui';
+import { ChromeAppHeader, useIsProjectChromeStyle } from '../chrome_app_header';
+import { SingleTabView, type SingleTabViewProps } from '../single_tab_view';
 import {
-  CurrentTabProvider,
   createTabItem,
   internalStateActions,
   selectAllTabs,
-  selectTabRuntimeState,
+  selectRecentlyClosedTabs,
+  selectIsTabsBarHidden,
   useInternalStateDispatch,
   useInternalStateSelector,
+  getDataViewOfSource,
+  useCurrentTabRuntimeState,
 } from '../../state_management/redux';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
-import { FetchStatus } from '../../../types';
+import { usePreviewData } from './use_preview_data';
+import { useAppMenuData } from './use_app_menu_data';
 
-export const TabsView = (props: DiscoverSessionViewProps) => {
+export const TabsView = (props: SingleTabViewProps) => {
   const services = useDiscoverServices();
   const dispatch = useInternalStateDispatch();
-  const allTabs = useInternalStateSelector(selectAllTabs);
+  const items = useInternalStateSelector(selectAllTabs);
+  const recentlyClosedItems = useInternalStateSelector(selectRecentlyClosedTabs);
   const currentTabId = useInternalStateSelector((state) => state.tabs.unsafeCurrentId);
-  const [initialItems] = useState<TabItem[]>(() => allTabs.map((tab) => pick(tab, 'id', 'label')));
+  const { getPreviewData } = usePreviewData(props.runtimeStateManager);
+  const hideTabsBar = useInternalStateSelector(selectIsTabsBarHidden);
+  const unsavedTabIds = useInternalStateSelector((state) => state.tabs.unsavedIds);
+  const currentDataSource = useCurrentTabRuntimeState((tab) => tab.currentDataSource$);
+  const currentDataView = useMemo(
+    () => getDataViewOfSource(currentDataSource),
+    [currentDataSource]
+  );
+  const scopedEbtManager = useCurrentTabRuntimeState((tab) => tab.scopedEbtManager$);
+  const isProjectChromeStyle = useIsProjectChromeStyle();
+  const { euiTheme } = useEuiTheme();
+
+  const { getTopTabMenuItems, getAdditionalTabMenuItems, topNavMenuItems, shareAction } =
+    useAppMenuData({
+      currentDataView,
+    });
+
+  const onEvent: UnifiedTabsProps['onEBTEvent'] = useCallback(
+    (event) => {
+      void scopedEbtManager.trackTabsEvent(event);
+    },
+    [scopedEbtManager]
+  );
+
+  const onChanged: UnifiedTabsProps['onChanged'] = useCallback(
+    (updateState) => dispatch(internalStateActions.updateTabs(updateState)),
+    [dispatch]
+  );
+
+  const onClearRecentlyClosed: UnifiedTabsProps['onClearRecentlyClosed'] = useCallback(
+    () => dispatch(internalStateActions.clearRecentlyClosedTabs()),
+    [dispatch]
+  );
+
+  const createItem: UnifiedTabsProps['createItem'] = useCallback(
+    () => createTabItem(items),
+    [items]
+  );
+
+  const renderContent: UnifiedTabsProps['renderContent'] = useCallback(
+    () => <SingleTabView key={currentTabId} {...props} />,
+    [currentTabId, props]
+  );
+
+  const wrapTabsBar = useMemo((): UnifiedTabsProps['wrapTabsBar'] => {
+    if (isProjectChromeStyle) {
+      return (tabsBar) => {
+        // Vertical rule separator.
+        const tabsBarWithDelimiter = (
+          <>
+            {tabsBar}
+            {tabsBar && (
+              <span
+                aria-hidden="true"
+                css={css`
+                  width: ${euiTheme.border.width.thin};
+                  height: ${euiTheme.size.base};
+                  background-color: ${euiTheme.colors.borderBasePlain};
+                  margin-left: ${euiTheme.size.xs};
+                `}
+              />
+            )}
+          </>
+        );
+        return (
+          <ChromeAppHeader
+            menu={topNavMenuItems}
+            share={shareAction}
+            tabsBar={tabsBarWithDelimiter}
+          />
+        );
+      };
+    }
+  }, [isProjectChromeStyle, topNavMenuItems, shareAction, euiTheme]);
+
+  const appendRight = useMemo(() => {
+    if (!isProjectChromeStyle) {
+      return <AppMenuComponent config={topNavMenuItems} />;
+    }
+    return undefined;
+  }, [isProjectChromeStyle, topNavMenuItems]);
+
+  const onTabLimitReached: UnifiedTabsProps['onTabLimitReached'] = useCallback(
+    (droppedCount: number) => {
+      services.toastNotifications.addWarning({
+        title: i18n.translate('discover.tabs.tabLimitReachedWarningTitle', {
+          defaultMessage: 'Tab limit reached',
+        }),
+        text: i18n.translate('discover.tabs.tabLimitReachedWarningText', {
+          defaultMessage:
+            'The last {droppedCount, plural, one {# tab} other {# tabs}} in the group {droppedCount, plural, one {was} other {were}} not restored because the maximum number of {maxTabs} tabs has been reached.',
+          values: { droppedCount, maxTabs: MAX_DISCOVER_SESSION_TABS },
+        }),
+      });
+    },
+    [services.toastNotifications]
+  );
 
   return (
-    <UnifiedTabs
-      services={services}
-      initialItems={initialItems}
-      onChanged={(updateState) => {
-        const updateTabsAction = internalStateActions.updateTabs(updateState);
-        return dispatch(updateTabsAction);
-      }}
-      createItem={() => createTabItem(allTabs)}
-      getPreviewData={(item) => {
-        const defaultQuery = { language: 'kuery', query: '(Empty query)' };
-        const stateContainer = selectTabRuntimeState(
-          props.runtimeStateManager,
-          item.id
-        ).stateContainer$.getValue();
-
-        if (!stateContainer) {
-          return {
-            query: defaultQuery,
-            status: TabStatus.RUNNING,
-          };
-        }
-
-        const fetchStatus = stateContainer.dataState.data$.main$.getValue().fetchStatus;
-        const query = stateContainer.appState.getState().query;
-
-        return {
-          query: isOfAggregateQueryType(query)
-            ? { esql: query.esql.trim() || defaultQuery.query }
-            : query
-            ? { ...query, query: query.query.trim() || defaultQuery.query }
-            : defaultQuery,
-          status: [FetchStatus.UNINITIALIZED, FetchStatus.COMPLETE].includes(fetchStatus)
-            ? TabStatus.SUCCESS
-            : fetchStatus === FetchStatus.ERROR
-            ? TabStatus.ERROR
-            : TabStatus.RUNNING,
-        };
-      }}
-      renderContent={() => (
-        <CurrentTabProvider currentTabId={currentTabId}>
-          <DiscoverSessionView key={currentTabId} {...props} />
-        </CurrentTabProvider>
-      )}
-    />
+    <div className="eui-fullHeight">
+      <UnifiedTabs
+        services={services}
+        items={items}
+        selectedItemId={currentTabId}
+        recentlyClosedItems={recentlyClosedItems}
+        unsavedItemIds={unsavedTabIds}
+        maxItemsCount={MAX_DISCOVER_SESSION_TABS}
+        hideTabsBar={hideTabsBar}
+        createItem={createItem}
+        getPreviewData={getPreviewData}
+        renderContent={renderContent}
+        onChanged={onChanged}
+        onEBTEvent={onEvent}
+        onClearRecentlyClosed={onClearRecentlyClosed}
+        onTabLimitReached={onTabLimitReached}
+        getTopTabMenuItems={getTopTabMenuItems}
+        getAdditionalTabMenuItems={getAdditionalTabMenuItems}
+        wrapTabsBar={wrapTabsBar}
+        appendRight={appendRight}
+      />
+    </div>
   );
 };

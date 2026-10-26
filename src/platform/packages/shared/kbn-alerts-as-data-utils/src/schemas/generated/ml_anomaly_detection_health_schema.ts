@@ -10,7 +10,7 @@
 // this file was generated, and should not be edited by hand
 // ---------------------------------- WARNING ----------------------------------
 import * as rt from 'io-ts';
-import type { Either } from 'fp-ts/lib/Either';
+import type { Either } from 'fp-ts/Either';
 import { AlertSchema } from './alert_schema';
 const ISO_DATE_PATTERN = /^d{4}-d{2}-d{2}Td{2}:d{2}:d{2}.d{3}Z$/;
 export const IsoDateString = new rt.Type<string, string, unknown>(
@@ -85,6 +85,7 @@ const MlAnomalyDetectionHealthAlertOptional = rt.partial({
       end_timestamp: schemaDate,
       job_id: schemaString,
       missed_docs_count: schemaStringOrNumber,
+      missed_docs_percentage: schemaNumber,
     })
   ),
   'kibana.alert.job_errors_results': rt.array(

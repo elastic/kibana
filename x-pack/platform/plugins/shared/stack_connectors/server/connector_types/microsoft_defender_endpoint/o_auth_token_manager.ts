@@ -9,12 +9,12 @@ import type { ServiceParams, SubActionConnector } from '@kbn/actions-plugin/serv
 import type { ConnectorUsageCollector } from '@kbn/actions-plugin/server/usage';
 import type { ConnectorToken } from '@kbn/actions-plugin/server/types';
 import type { Logger } from '@kbn/logging';
-import { MicrosoftDefenderEndpointDoNotValidateResponseSchema } from '../../../common/microsoft_defender_endpoint/schema';
+import { MicrosoftDefenderEndpointDoNotValidateResponseSchema } from '@kbn/connector-schemas/microsoft_defender_endpoint';
 import type {
   MicrosoftDefenderEndpointConfig,
   MicrosoftDefenderEndpointSecrets,
   MicrosoftDefenderEndpointApiTokenResponse,
-} from '../../../common/microsoft_defender_endpoint/types';
+} from '@kbn/connector-schemas/microsoft_defender_endpoint';
 
 export class OAuthTokenManager {
   private connectorToken: ConnectorToken | null = null;
@@ -47,7 +47,7 @@ export class OAuthTokenManager {
     const now = new Date();
     now.setSeconds(now.getSeconds() - 5); // Allows for a threshold of -5s before considering the token expired
 
-    const isExpired = token.expiresAt < now.toISOString();
+    const isExpired = token.expiresAt ? token.expiresAt < now.toISOString() : true;
 
     if (isExpired) {
       this.logger.debug(`Cached access token expired at [${token.expiresAt}]`);

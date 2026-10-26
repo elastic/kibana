@@ -7,15 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Position } from '@elastic/charts';
-import { prepareLogTable, validateAccessor } from '@kbn/visualizations-plugin/common/utils';
-import { DEFAULT_LEGEND_SIZE, LegendSize } from '@kbn/visualizations-plugin/common/constants';
+import {
+  validateAccessor,
+  DEFAULT_LEGEND_SIZE,
+  LegendSize,
+  ChartPosition,
+} from '@kbn/chart-expressions-common';
+import { prepareLogTable } from '@kbn/visualizations-common';
 import {
   LegendDisplay,
   type PartitionChartProps,
   type PartitionVisParams,
 } from '../types/expression_renderers';
-import { ChartTypes, TreemapVisExpressionFunctionDefinition } from '../types';
+import type { TreemapVisExpressionFunctionDefinition } from '../types';
+import { ChartTypes } from '../types';
 import {
   PARTITION_LABELS_FUNCTION,
   PARTITION_LABELS_VALUE,
@@ -69,9 +74,9 @@ export const treemapVisFunction = (): TreemapVisExpressionFunctionDefinition => 
     },
     legendPosition: {
       types: ['string'],
-      default: Position.Right,
+      default: ChartPosition.Right,
       help: strings.getLegendPositionArgHelp(),
-      options: [Position.Top, Position.Right, Position.Bottom, Position.Left],
+      options: [ChartPosition.Top, ChartPosition.Right, ChartPosition.Bottom, ChartPosition.Left],
       strict: true,
     },
     legendSize: {

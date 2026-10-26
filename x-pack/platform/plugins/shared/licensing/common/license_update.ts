@@ -18,8 +18,8 @@ import {
   finalize,
   startWith,
 } from 'rxjs';
+import type { ILicense } from '@kbn/licensing-types';
 import { hasLicenseInfoChanged } from './has_license_info_changed';
-import type { ILicense } from './types';
 
 export function createLicenseUpdate(
   triggerRefresh$: Observable<unknown>,

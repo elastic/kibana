@@ -8,18 +8,19 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 
 import type { Datatable, ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import { buildExpressionFunction } from '@kbn/expressions-plugin/common';
 
-import { IndexPatternExpressionType } from '@kbn/data-views-plugin/common/expressions';
-import { DataViewsContract } from '@kbn/data-views-plugin/common';
+import type { IndexPatternExpressionType } from '@kbn/data-views-plugin/common/expressions';
+import type { DataViewsContract } from '@kbn/data-views-plugin/common';
 
-import { AggsStart, AggExpressionType, aggCountFnName } from '../../aggs';
-import { ISearchStartSearchSource } from '../../search_source';
+import type { AggsStart, AggExpressionType } from '../../aggs';
+import { aggCountFnName } from '../../aggs';
+import type { ISearchStartSearchSource } from '../../search_source';
 
-import { KibanaContext } from '../kibana_context_type';
+import type { KibanaContext } from '../kibana_context_type';
 import { handleRequest } from './request_handler';
 
 const name = 'esaggs';
@@ -48,7 +49,7 @@ export type EsaggsExpressionFunctionDefinition = ExpressionFunctionDefinition<
 /** @internal */
 export interface EsaggsStartDependencies {
   aggs: AggsStart;
-  indexPatterns: DataViewsContract;
+  dataViews: DataViewsContract;
   searchSource: ISearchStartSearchSource;
   getNow?: () => Date;
 }

@@ -5,21 +5,16 @@
  * 2.0.
  */
 
-import React, { FC, ReactNode } from 'react';
-import {
-  EuiInMemoryTable,
-  EuiBasicTableColumn,
-  EuiLink,
-  Query,
-  EuiIconTip,
-  useEuiTheme,
-} from '@elastic/eui';
+import type { FC, ReactNode } from 'react';
+import React from 'react';
+import type { EuiBasicTableColumn, Query } from '@elastic/eui';
+import { EuiInMemoryTable, EuiLink, EuiIconTip, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { TagsCapabilities } from '../../../common';
+import type { TagsCapabilities } from '../../../common';
 import type { TagWithRelations } from '../../../common/types';
 import { TagBadge } from '../../components';
-import { TagAction } from '../actions';
+import type { TagAction } from '../actions';
 
 interface TagTableProps {
   loading: boolean;
@@ -66,6 +61,12 @@ export const TagTable: FC<TagTableProps> = ({
   actions,
 }) => {
   const { euiTheme } = useEuiTheme();
+  const connectionsLabel = i18n.translate(
+    'xpack.savedObjectsTagging.management.table.columns.connections',
+    {
+      defaultMessage: 'Connections',
+    }
+  );
   const columns: Array<EuiBasicTableColumn<TagWithRelations>> = [
     {
       field: 'name',
@@ -77,12 +78,19 @@ export const TagTable: FC<TagTableProps> = ({
       render: (name: string, tag: TagWithRelations) => {
         return (
           <>
-            <TagBadge tag={tag} />
+            <TagBadge tag={tag} data-test-subj="tagsTableRowTagName" />
             {tag.managed && (
               <div css={{ marginLeft: euiTheme.size.s }}>
                 <EuiIconTip
                   type="lock"
-                  content="This tag is managed by Elastic and cannot be deleted, edited, or assigned to objects."
+                  content={i18n.translate(
+                    'xpack.savedObjectsTagging.management.table.managedTagTooltip',
+                    {
+                      defaultMessage:
+                        'This {tagName} is managed by Elastic and cannot be deleted, edited, or assigned to objects.',
+                      values: { tagName: tag.name },
+                    }
+                  )}
                 />
               </div>
             )}
@@ -100,9 +108,7 @@ export const TagTable: FC<TagTableProps> = ({
     },
     {
       field: 'relationCount',
-      name: i18n.translate('xpack.savedObjectsTagging.management.table.columns.connections', {
-        defaultMessage: 'Connections',
-      }),
+      name: connectionsLabel,
       sortable: (tag: TagWithRelations) => tag.relationCount,
       'data-test-subj': 'tagsTableRowConnections',
       render: (relationCount: number, tag: TagWithRelations) => {
@@ -121,7 +127,6 @@ export const TagTable: FC<TagTableProps> = ({
         );
 
         return capabilities.viewConnections ? (
-          // eslint-disable-next-line @elastic/eui/href-or-on-click
           <EuiLink
             data-test-subj="tagsTableRowConnectionsLink"
             href={getTagRelationUrl(tag)}
@@ -131,6 +136,13 @@ export const TagTable: FC<TagTableProps> = ({
                 onShowRelations(tag);
               }
             }}
+            aria-label={i18n.translate(
+              'xpack.savedObjectsTagging.management.table.connectionsAriaLabel',
+              {
+                defaultMessage: `{connectionsLabel} of {tagName} tag`,
+                values: { connectionsLabel, tagName: tag.name },
+              }
+            )}
           >
             {columnText}
           </EuiLink>

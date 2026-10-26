@@ -7,17 +7,25 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import './source.scss';
-
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import { css } from '@emotion/react';
+import { omit } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { monaco } from '@kbn/monaco';
-import { EuiButton, EuiEmptyPrompt, EuiLoadingSpinner, EuiSpacer, EuiText } from '@elastic/eui';
+import type { monaco } from '@kbn/monaco';
+import {
+  EuiButton,
+  EuiEmptyPrompt,
+  EuiLoadingSpinner,
+  EuiSpacer,
+  EuiText,
+  type UseEuiTheme,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { ElasticRequestState } from '@kbn/unified-doc-viewer';
-import { omit } from 'lodash';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import { createRestorableStateProvider } from '@kbn/restorable-state';
 import { useEsDocSearch } from '../../hooks';
 import { getHeight, DEFAULT_MARGIN_BOTTOM } from './get_height';
 import { JSONCodeEditorCommonMemoized } from '../json_code_editor';
@@ -32,10 +40,20 @@ interface SourceViewerProps {
   onRefresh: () => void;
 }
 
+interface SourceViewerRestorableState {
+  // Fetched JSON for the current doc
+  jsonValue: string;
+  // JSON viewer scroll position
+  viewerScrollTop: number;
+}
+
 // Minimum height for the source content to guarantee minimum space when the flyout is scrollable.
 export const MIN_HEIGHT = 400;
 
-export const DocViewerSource = ({
+const { withRestorableState, useRestorableState, useRestorableRef } =
+  createRestorableStateProvider<SourceViewerRestorableState>();
+
+const InternalDocViewerSource = ({
   id,
   index,
   dataView,
@@ -44,21 +62,27 @@ export const DocViewerSource = ({
   decreaseAvailableHeightBy,
   onRefresh,
 }: SourceViewerProps) => {
+  const styles = useMemoCss(componentStyles);
+
   const [editor, setEditor] = useState<monaco.editor.IStandaloneCodeEditor>();
   const [editorHeight, setEditorHeight] = useState<number>();
-  const [jsonValue, setJsonValue] = useState<string>('');
+  const [jsonValue, setJsonValue] = useRestorableState('jsonValue', '');
   const [requestState, hit] = useEsDocSearch({
     id,
     index,
     dataView,
     esqlHit,
+    skip: jsonValue !== '',
   });
+
+  const scrollTopRef = useRestorableRef('viewerScrollTop', 0);
+  const isScrollRestored = useRef(false);
 
   useEffect(() => {
     if (requestState === ElasticRequestState.Found && hit) {
       setJsonValue(JSON.stringify(omit(hit.raw, '_score'), undefined, 2));
     }
-  }, [requestState, hit]);
+  }, [requestState, hit, setJsonValue]);
 
   // setting editor height to fill the available space of the document flyout
   useEffect(() => {
@@ -83,9 +107,38 @@ export const DocViewerSource = ({
     }
   }, [editor, jsonValue, setEditorHeight, decreaseAvailableHeightBy]);
 
+  // Restore scroll position after editor, content, and height are ready
+  useEffect(() => {
+    if (!editor || !jsonValue || !editorHeight || isScrollRestored.current) {
+      return;
+    }
+
+    const frameId = requestAnimationFrame(() => {
+      isScrollRestored.current = true;
+      editor.setScrollTop(scrollTopRef.current);
+    });
+
+    return () => cancelAnimationFrame(frameId);
+  }, [editor, jsonValue, editorHeight, scrollTopRef]);
+
+  // Persist scroll position on scroll changes
+  useEffect(() => {
+    if (!editor) {
+      return;
+    }
+
+    const disposable = editor.onDidScrollChange(() => {
+      if (isScrollRestored.current) {
+        scrollTopRef.current = editor.getScrollTop();
+      }
+    });
+
+    return () => disposable.dispose();
+  }, [editor, scrollTopRef]);
+
   const loadingState = (
-    <div className="sourceViewer__loading">
-      <EuiLoadingSpinner className="sourceViewer__loadingSpinner" />
+    <div css={styles.loading}>
+      <EuiLoadingSpinner css={styles.loadingSpinner} />
       <EuiText size="xs" color="subdued">
         <FormattedMessage id="unifiedDocViewer.loadingJSON" defaultMessage="Loading JSON" />
       </EuiText>
@@ -134,4 +187,24 @@ export const DocViewerSource = ({
       onEditorDidMount={(editorNode: monaco.editor.IStandaloneCodeEditor) => setEditor(editorNode)}
     />
   );
+};
+
+export const DocViewerSource = withRestorableState(InternalDocViewerSource);
+
+const componentStyles = {
+  loading: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      display: 'flex',
+      flexDirection: 'row',
+      justifyContent: 'left',
+      flex: '1 0 100%',
+      textAlign: 'center',
+      height: '100%',
+      width: '100%',
+      marginTop: euiTheme.size.s,
+    }),
+  loadingSpinner: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      marginRight: euiTheme.size.s,
+    }),
 };

@@ -12,24 +12,26 @@ import {
   type InternalOverlayBannersStart,
   type OverlayBannersService,
 } from '@kbn/core-overlays-browser-internal';
+import { lazyObject } from '@kbn/lazy-object';
 
 const createStartContractMock = () => {
-  const startContract: jest.Mocked<InternalOverlayBannersStart> = {
+  const startContract: jest.Mocked<InternalOverlayBannersStart> = lazyObject({
     add: jest.fn(),
     remove: jest.fn(),
     replace: jest.fn(),
     get$: jest.fn(),
     getComponent: jest.fn(),
-  };
+  });
+
   return startContract;
 };
 
 const createMock = () => {
-  const mocked: jest.Mocked<PublicMethodsOf<OverlayBannersService>> = {
-    start: jest.fn(),
+  const mocked: jest.Mocked<PublicMethodsOf<OverlayBannersService>> = lazyObject({
+    start: jest.fn().mockReturnValue(createStartContractMock()),
     stop: jest.fn(),
-  };
-  mocked.start.mockReturnValue(createStartContractMock());
+  });
+
   return mocked;
 };
 

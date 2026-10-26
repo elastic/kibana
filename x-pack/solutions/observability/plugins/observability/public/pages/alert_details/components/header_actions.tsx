@@ -7,38 +7,83 @@
 
 import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import { EBT_CLICK_ACTIONS, getEbtProps } from '@kbn/ebt-click';
 import { noop } from 'lodash';
-import { RuleFormFlyout } from '@kbn/response-ops-rule-form/flyout';
-import { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public/types';
-import { AttachmentType } from '@kbn/cases-plugin/common';
 import {
-  EuiButton,
   EuiButtonEmpty,
   EuiButtonIcon,
+  EuiContextMenuPanel,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
   EuiPopover,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
+import type { AlertStatus } from '@kbn/rule-data-utils';
 import {
-  AlertStatus,
+  ALERT_RULE_CONSUMER,
+  ALERT_RULE_TYPE_ID,
   ALERT_RULE_UUID,
   ALERT_STATUS_ACTIVE,
   ALERT_UUID,
 } from '@kbn/rule-data-utils';
+import { RuleQueryInspector } from '@kbn/triggers-actions-ui-plugin/public';
+import type { HttpStart } from '@kbn/core-http-browser';
+import { AlertSnoozePanelInline, useAlertSnooze } from '@kbn/response-ops-alert-snooze';
+import type { AlertSnoozePayload } from '@kbn/response-ops-alert-snooze';
+import { useAlertFieldNames } from '@kbn/alerts-ui-shared/src/common/hooks/use_alert_field_names';
 
 import { useKibana } from '../../../utils/kibana_react';
-import { useFetchRule } from '../../../hooks/use_fetch_rule';
+import { useInvestigateAlert } from '../../../hooks/use_investigate_alert';
 import type { TopAlert } from '../../../typings/alerts';
+import { useAuthorizedToReadRuleType } from '../../../hooks/use_authorized_to_read_rule_type';
+import { observabilityFeatureId } from '../../../../common';
 import { paths } from '../../../../common/locators/paths';
 import { useBulkUntrackAlerts } from '../hooks/use_bulk_untrack_alerts';
+import { useAlertSnoozeState } from '../hooks/use_alert_snooze_state';
+import {
+  AlertDetailsRuleFormFlyout,
+  type AlertDetailsRuleFormFlyoutBaseProps,
+} from './alert_details_rule_form_flyout';
+import { ObsCasesContext } from './obs_cases_context';
+import { AddToCaseButton } from './add_to_case_button';
+import { useDiscoverUrl } from '../hooks/use_discover_url/use_discover_url';
+import { ALERT_DETAILS_EBT_ELEMENTS } from '../ebt_constants';
 
-export interface HeaderActionsProps {
+export interface HeaderActionsProps extends AlertDetailsRuleFormFlyoutBaseProps {
   alert: TopAlert | null;
   alertIndex?: string;
   alertStatus?: AlertStatus;
   onUntrackAlert: () => void;
+}
+
+/**
+ * Inline snooze form with its `field_change` dropdown wired to the alert index
+ * fields for the alert's rule type. Kept as a small component so the fields are
+ * only fetched when the snooze form is actually opened. The `alert-snooze`
+ * package stays data-agnostic; this consumer owns the fetching.
+ */
+function AlertSnoozeForm({
+  http,
+  ruleTypeIds,
+  onApply,
+  onBack,
+}: {
+  http: HttpStart;
+  ruleTypeIds: string[];
+  onApply: (payload: AlertSnoozePayload) => void;
+  onBack: () => void;
+}) {
+  const { fieldNames, isLoading } = useAlertFieldNames({ http, ruleTypeIds });
+  return (
+    <AlertSnoozePanelInline
+      onApply={onApply}
+      onBack={onBack}
+      fieldOptions={fieldNames}
+      isLoadingFields={isLoading}
+    />
+  );
 }
 
 export function HeaderActions({
@@ -46,207 +91,425 @@ export function HeaderActions({
   alertIndex,
   alertStatus,
   onUntrackAlert,
+  onUpdate,
+  rule,
+  refetch,
 }: HeaderActionsProps) {
   const { services } = useKibana();
   const {
-    cases: {
-      hooks: { useCasesAddToExistingCaseModal },
-    },
-    triggersActionsUi: {
-      ruleTypeRegistry,
-      actionTypeRegistry,
-      getRuleSnoozeModal: RuleSnoozeModal,
-    },
+    cases,
+    triggersActionsUi: { getRuleSnoozeModal: RuleSnoozeModal },
     http,
+    notifications,
   } = services;
+  const alertId = alert?.fields[ALERT_UUID];
 
-  const { rule, refetch } = useFetchRule({
-    ruleId: alert?.fields[ALERT_RULE_UUID] || '',
-  });
+  const { authorizedToReadRuleType } = useAuthorizedToReadRuleType();
+
+  const canReadAlertRule = authorizedToReadRuleType(
+    alert?.fields[ALERT_RULE_TYPE_ID],
+    alert?.fields[ALERT_RULE_CONSUMER]
+  );
+
+  // Attaching an alert to a case requires both reading cases and adding comments
+  // to them, so gate the "Add to case" button on those case privileges rather
+  // than merely on the cases plugin being present.
+  const casesPermissions = cases?.helpers.canUseCases([observabilityFeatureId]);
+  const canAddToCase = Boolean(casesPermissions?.read && casesPermissions?.createComment);
 
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
-  const [ruleConditionsFlyoutOpen, setRuleConditionsFlyoutOpen] = useState<boolean>(false);
-  const [snoozeModalOpen, setSnoozeModalOpen] = useState<boolean>(false);
-
-  const selectCaseModal = useCasesAddToExistingCaseModal();
+  const [isRuleSnoozeModalOpen, setRuleSnoozeModalOpen] = useState<boolean>(false);
+  const [isAlertSnoozeFormOpen, setIsAlertSnoozeFormOpen] = useState<boolean>(false);
 
   const { mutateAsync: untrackAlerts } = useBulkUntrackAlerts();
 
+  const {
+    ruleId,
+    instanceId,
+    isMuted,
+    isSnoozed,
+    refetch: refetchSnoozeState,
+  } = useAlertSnoozeState(alert);
+
+  const { snoozeAlert, unsnoozeAlert } = useAlertSnooze({
+    http,
+    notifications,
+    ruleId,
+    instanceId,
+    isMuted,
+    isSnoozed,
+    onSuccess: refetchSnoozeState,
+    skipAlertsQueryContext: true,
+  });
+
+  const handleSnoozeAlertApply = useCallback(
+    async (payload: AlertSnoozePayload) => {
+      const applied = await snoozeAlert(payload);
+      if (applied) {
+        setIsAlertSnoozeFormOpen(false);
+        setIsPopoverOpen(false);
+      }
+    },
+    [snoozeAlert]
+  );
+
+  const handleUnsnoozeAlert = useCallback(async () => {
+    const done = await unsnoozeAlert();
+    if (done) {
+      setIsPopoverOpen(false);
+    }
+  }, [unsnoozeAlert]);
+
+  const { discoverUrl } = useDiscoverUrl({ alert, rule });
+
   const handleUntrackAlert = useCallback(async () => {
-    if (alert) {
+    if (alert && alertIndex) {
       await untrackAlerts({
-        indices: ['.internal.alerts-observability.*'],
+        indices: [alertIndex],
         alertUuids: [alert.fields[ALERT_UUID]],
       });
       onUntrackAlert();
     }
-  }, [alert, untrackAlerts, onUntrackAlert]);
+  }, [alert, alertIndex, untrackAlerts, onUntrackAlert]);
+
+  const {
+    showInvestigateButton,
+    showViewInvestigation,
+    handleInvestigate,
+    isInvestigating,
+    investigateActionLabel,
+    investigateEbtProps,
+    viewInvestigationUrl,
+    viewInvestigationActionLabel,
+    viewInvestigationEbtProps,
+    markInvestigationViewed,
+  } = useInvestigateAlert({
+    alertId,
+    ebtElement: 'alertDetailsPageActions',
+    enabled: isPopoverOpen,
+    onInvestigate: () => setIsPopoverOpen(false),
+  });
+
+  const [alertDetailsRuleFormFlyoutOpen, setAlertDetailsRuleFormFlyoutOpen] = useState(false);
 
   const handleTogglePopover = () => setIsPopoverOpen(!isPopoverOpen);
-  const handleClosePopover = () => setIsPopoverOpen(false);
-
-  const attachments: CaseAttachmentsWithoutOwner =
-    alert && rule
-      ? [
-          {
-            alertId: alert?.fields[ALERT_UUID] || '',
-            index: alertIndex || '',
-            rule: {
-              id: rule.id,
-              name: rule.name,
-            },
-            type: AttachmentType.alert,
-          },
-        ]
-      : [];
-
-  const handleAddToCase = () => {
+  const handleClosePopover = () => {
     setIsPopoverOpen(false);
-    selectCaseModal.open({ getAttachments: () => attachments });
-  };
-
-  const handleEditRuleDetails = () => {
-    setIsPopoverOpen(false);
-    setRuleConditionsFlyoutOpen(true);
+    setIsAlertSnoozeFormOpen(false);
   };
 
   const handleOpenSnoozeModal = () => {
     setIsPopoverOpen(false);
-    setSnoozeModalOpen(true);
+    setRuleSnoozeModalOpen(true);
   };
 
   return (
-    <>
+    <ObsCasesContext>
       <EuiFlexGroup direction="row" gutterSize="s" justifyContent="flexEnd">
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            fill
-            iconType="bellSlash"
-            onClick={handleOpenSnoozeModal}
-            disabled={!alert?.fields[ALERT_RULE_UUID] || !rule}
-            data-test-subj="snooze-rule-button"
-          >
-            <EuiText size="s">
-              {i18n.translate('xpack.observability.alertDetails.editSnoozeRule', {
-                defaultMessage: 'Snooze the rule',
-              })}
-            </EuiText>
-          </EuiButton>
-        </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiPopover
             panelPaddingSize="none"
             isOpen={isPopoverOpen}
             closePopover={handleClosePopover}
+            panelStyle={
+              isAlertSnoozeFormOpen ? { maxHeight: '50vh', overflowY: 'auto' } : undefined
+            }
+            aria-label={i18n.translate('xpack.observability.alertDetails.actionsButtonLabel', {
+              defaultMessage: 'Actions',
+            })}
             button={
-              <EuiButtonIcon
-                display="base"
-                size="m"
-                iconType="boxesVertical"
-                data-test-subj="alert-details-header-actions-menu-button"
-                onClick={handleTogglePopover}
-                aria-label={i18n.translate('xpack.observability.alertDetails.actionsButtonLabel', {
+              <EuiToolTip
+                content={i18n.translate('xpack.observability.alertDetails.actionsButtonLabel', {
                   defaultMessage: 'Actions',
                 })}
-              />
+                disableScreenReaderOutput
+              >
+                <EuiButtonIcon
+                  display="base"
+                  size="m"
+                  iconType="boxesVertical"
+                  data-test-subj="alert-details-header-actions-menu-button"
+                  onClick={handleTogglePopover}
+                  aria-label={i18n.translate(
+                    'xpack.observability.alertDetails.actionsButtonLabel',
+                    {
+                      defaultMessage: 'Actions',
+                    }
+                  )}
+                />
+              </EuiToolTip>
             }
           >
-            <div style={{ width: '220px' }}>
-              <EuiFlexGroup direction="column" alignItems="flexStart" gutterSize="s">
-                <div />
+            {isAlertSnoozeFormOpen ? (
+              <EuiContextMenuPanel>
+                <AlertSnoozeForm
+                  http={http}
+                  ruleTypeIds={
+                    alert?.fields[ALERT_RULE_TYPE_ID] ? [alert.fields[ALERT_RULE_TYPE_ID]] : []
+                  }
+                  onApply={handleSnoozeAlertApply}
+                  onBack={() => setIsAlertSnoozeFormOpen(false)}
+                />
+              </EuiContextMenuPanel>
+            ) : (
+              <EuiContextMenuPanel>
+                <div style={{ width: '220px' }}>
+                  <EuiFlexGroup direction="column" alignItems="flexStart" gutterSize="s">
+                    <div />
 
-                <EuiButtonEmpty
-                  size="s"
-                  color="text"
-                  iconType="plus"
-                  onClick={handleAddToCase}
-                  data-test-subj="add-to-case-button"
-                >
-                  <EuiText size="s">
-                    {i18n.translate('xpack.observability.alertDetails.addToCase', {
-                      defaultMessage: 'Add to case',
-                    })}
-                  </EuiText>
-                </EuiButtonEmpty>
+                    {isInvestigating && (
+                      <EuiButtonEmpty
+                        size="s"
+                        color="text"
+                        isLoading
+                        disabled
+                        data-test-subj="alertDetailsInvestigate"
+                      >
+                        <EuiText size="s">{investigateActionLabel}</EuiText>
+                      </EuiButtonEmpty>
+                    )}
 
-                <EuiButtonEmpty
-                  size="s"
-                  color="text"
-                  iconType="pencil"
-                  onClick={handleEditRuleDetails}
-                  disabled={!alert?.fields[ALERT_RULE_UUID] || !rule}
-                  data-test-subj="edit-rule-button"
-                >
-                  <EuiText size="s">
-                    {i18n.translate('xpack.observability.alertDetails.editRule', {
-                      defaultMessage: 'Edit rule',
-                    })}
-                  </EuiText>
-                </EuiButtonEmpty>
+                    {!isInvestigating && (
+                      <>
+                        {showViewInvestigation && (
+                          <EuiButtonEmpty
+                            size="s"
+                            color="text"
+                            iconType="eye"
+                            href={viewInvestigationUrl}
+                            onClick={() => {
+                              markInvestigationViewed();
+                              handleClosePopover();
+                            }}
+                            data-test-subj="alertDetailsViewInvestigation"
+                            {...viewInvestigationEbtProps}
+                          >
+                            <EuiText size="s">{viewInvestigationActionLabel}</EuiText>
+                          </EuiButtonEmpty>
+                        )}
 
-                <EuiButtonEmpty
-                  size="s"
-                  color="text"
-                  iconType="eyeClosed"
-                  onClick={handleUntrackAlert}
-                  data-test-subj="untrack-alert-button"
-                  disabled={alertStatus !== ALERT_STATUS_ACTIVE}
-                >
-                  <EuiText size="s">
-                    {i18n.translate('xpack.observability.alertDetails.untrackAlert', {
-                      defaultMessage: 'Mark as untracked',
-                    })}
-                  </EuiText>
-                </EuiButtonEmpty>
+                        {showInvestigateButton && (
+                          <EuiButtonEmpty
+                            size="s"
+                            color="text"
+                            iconType="inspect"
+                            onClick={handleInvestigate}
+                            data-test-subj="alertDetailsInvestigate"
+                            {...investigateEbtProps}
+                          >
+                            <EuiText size="s">{investigateActionLabel}</EuiText>
+                          </EuiButtonEmpty>
+                        )}
+                      </>
+                    )}
 
-                <EuiHorizontalRule margin="none" />
+                    {cases && canAddToCase && (
+                      <AddToCaseButton
+                        alert={alert}
+                        alertIndex={alertIndex}
+                        rule={rule}
+                        setIsPopoverOpen={setIsPopoverOpen}
+                      />
+                    )}
 
-                <EuiButtonEmpty
-                  size="s"
-                  color="text"
-                  iconType="link"
-                  disabled={!alert?.fields[ALERT_RULE_UUID] || !rule}
-                  data-test-subj="view-rule-details-button"
-                  href={rule ? http.basePath.prepend(paths.observability.ruleDetails(rule.id)) : ''}
-                  target="_blank"
-                >
-                  <EuiText size="s">
-                    {i18n.translate('xpack.observability.alertDetails.viewRuleDetails', {
-                      defaultMessage: 'Go to rule details',
-                    })}
-                  </EuiText>
-                </EuiButtonEmpty>
+                    {discoverUrl && (
+                      <EuiButtonEmpty
+                        size="s"
+                        color="text"
+                        href={discoverUrl}
+                        iconType="productDiscover"
+                        target="_blank"
+                        onClick={handleClosePopover}
+                        data-test-subj={`alertDetailsPage_viewInDiscover${
+                          rule ? `_${rule.ruleTypeId}` : ''
+                        }`}
+                        {...getEbtProps({
+                          action: EBT_CLICK_ACTIONS.OPEN_IN_DISCOVER,
+                          element: ALERT_DETAILS_EBT_ELEMENTS.HEADER,
+                          detail: rule?.ruleTypeId,
+                        })}
+                      >
+                        <EuiText size="s">
+                          {i18n.translate('xpack.observability.alertDetails.viewInDiscover', {
+                            defaultMessage: 'View in Discover',
+                          })}
+                        </EuiText>
+                      </EuiButtonEmpty>
+                    )}
 
-                <div />
-              </EuiFlexGroup>
-            </div>
+                    <EuiButtonEmpty
+                      size="s"
+                      color="text"
+                      iconType="bellSlash"
+                      onClick={handleOpenSnoozeModal}
+                      disabled={!alert?.fields[ALERT_RULE_UUID] || !rule}
+                      data-test-subj="snooze-rule-button"
+                    >
+                      <EuiText size="s">
+                        {i18n.translate('xpack.observability.alertDetails.editSnoozeRule', {
+                          defaultMessage: 'Snooze the rule',
+                        })}
+                      </EuiText>
+                    </EuiButtonEmpty>
+
+                    <SnoozeAlertAction
+                      ruleId={ruleId}
+                      instanceId={instanceId}
+                      isMuted={isMuted}
+                      isSnoozed={isSnoozed}
+                      onUnsnooze={handleUnsnoozeAlert}
+                      onSnooze={() => setIsAlertSnoozeFormOpen(true)}
+                    />
+
+                    <EuiButtonEmpty
+                      size="s"
+                      color="text"
+                      iconType="pencil"
+                      onClick={() => {
+                        setIsPopoverOpen(false);
+                        setAlertDetailsRuleFormFlyoutOpen(true);
+                      }}
+                      disabled={!alert?.fields[ALERT_RULE_UUID] || !rule}
+                      data-test-subj="edit-rule-button"
+                    >
+                      <EuiText size="s">
+                        {i18n.translate('xpack.observability.alertDetails.editRule', {
+                          defaultMessage: 'Edit rule',
+                        })}
+                      </EuiText>
+                    </EuiButtonEmpty>
+
+                    <EuiButtonEmpty
+                      size="s"
+                      color="text"
+                      iconType="eyeSlash"
+                      onClick={handleUntrackAlert}
+                      data-test-subj="untrack-alert-button"
+                      disabled={alertStatus !== ALERT_STATUS_ACTIVE}
+                    >
+                      <EuiText size="s">
+                        {i18n.translate('xpack.observability.alertDetails.untrackAlert', {
+                          defaultMessage: 'Mark as untracked',
+                        })}
+                      </EuiText>
+                    </EuiButtonEmpty>
+
+                    {canReadAlertRule && (
+                      <>
+                        <EuiHorizontalRule margin="none" />
+
+                        {alert?.fields[ALERT_RULE_UUID] && alert?.fields[ALERT_RULE_TYPE_ID] && (
+                          <RuleQueryInspector
+                            ruleId={alert.fields[ALERT_RULE_UUID]}
+                            ruleTypeId={alert.fields[ALERT_RULE_TYPE_ID]}
+                            alertId={alert.fields[ALERT_UUID]}
+                            size="s"
+                            color="text"
+                          />
+                        )}
+
+                        <EuiButtonEmpty
+                          size="s"
+                          color="text"
+                          iconType="link"
+                          disabled={!alert?.fields[ALERT_RULE_UUID] || !rule}
+                          data-test-subj="view-rule-details-button"
+                          href={
+                            rule
+                              ? http.basePath.prepend(paths.observability.ruleDetails(rule.id))
+                              : ''
+                          }
+                          target="_blank"
+                        >
+                          <EuiText size="s">
+                            {i18n.translate('xpack.observability.alertDetails.viewRuleDetails', {
+                              defaultMessage: 'Go to rule details',
+                            })}
+                          </EuiText>
+                        </EuiButtonEmpty>
+                      </>
+                    )}
+
+                    <div />
+                  </EuiFlexGroup>
+                </div>
+              </EuiContextMenuPanel>
+            )}
           </EuiPopover>
         </EuiFlexItem>
       </EuiFlexGroup>
-      {rule && ruleConditionsFlyoutOpen ? (
-        <RuleFormFlyout
-          plugins={{ ...services, ruleTypeRegistry, actionTypeRegistry }}
-          id={rule.id}
-          onCancel={() => {
-            setRuleConditionsFlyoutOpen(false);
-          }}
-          onSubmit={() => {
-            setRuleConditionsFlyoutOpen(false);
-            refetch();
-          }}
+      {rule && (
+        <AlertDetailsRuleFormFlyout
+          isRuleFormFlyoutOpen={alertDetailsRuleFormFlyoutOpen}
+          setIsRuleFormFlyoutOpen={setAlertDetailsRuleFormFlyoutOpen}
+          onUpdate={onUpdate}
+          refetch={refetch}
+          rule={rule}
         />
-      ) : null}
+      )}
 
-      {rule && snoozeModalOpen ? (
+      {rule && isRuleSnoozeModalOpen ? (
         <RuleSnoozeModal
           rule={rule}
-          onClose={() => setSnoozeModalOpen(false)}
+          onClose={() => setRuleSnoozeModalOpen(false)}
           onRuleChanged={async () => {
             refetch();
           }}
           onLoading={noop}
         />
       ) : null}
-    </>
+    </ObsCasesContext>
+  );
+}
+
+function SnoozeAlertAction({
+  ruleId,
+  instanceId,
+  isMuted,
+  isSnoozed,
+  onUnsnooze,
+  onSnooze,
+}: {
+  ruleId?: string;
+  instanceId?: string;
+  isMuted: boolean;
+  isSnoozed: boolean;
+  onUnsnooze: () => void;
+  onSnooze: () => void;
+}) {
+  if (!ruleId || !instanceId) return null;
+
+  if (isMuted || isSnoozed) {
+    return (
+      <EuiButtonEmpty
+        size="s"
+        color="text"
+        iconType="bell"
+        onClick={onUnsnooze}
+        data-test-subj="unsnooze-alert-button"
+      >
+        <EuiText size="s">
+          {i18n.translate('xpack.observability.alertDetails.unsnoozeAlert', {
+            defaultMessage: 'Unsnooze the alert',
+          })}
+        </EuiText>
+      </EuiButtonEmpty>
+    );
+  }
+
+  return (
+    <EuiButtonEmpty
+      size="s"
+      color="text"
+      iconType="bellSlash"
+      onClick={onSnooze}
+      data-test-subj="snooze-alert-button"
+    >
+      <EuiText size="s">
+        {i18n.translate('xpack.observability.alertDetails.snoozeAlert', {
+          defaultMessage: 'Snooze the alert',
+        })}
+      </EuiText>
+    </EuiButtonEmpty>
   );
 }

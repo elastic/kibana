@@ -12,8 +12,8 @@ const features = [
   { id: 'feature1', category: { id: 'observability' } },
   { id: 'feature2', category: { id: 'enterpriseSearch' } },
   { id: 'feature3', category: { id: 'securitySolution' } },
-  { id: 'feature5', category: { id: 'chat' } },
   { id: 'feature4', category: { id: 'should_not_be_returned' } }, // not a solution, it should never appeared in the disabled features
+  { id: 'feature6', category: { id: 'securitySolution' }, deprecated: true },
 ] as KibanaFeature[];
 
 describe('#withSpaceSolutionDisabledFeatures', () => {
@@ -43,7 +43,7 @@ describe('#withSpaceSolutionDisabledFeatures', () => {
   });
 
   describe('when the space solution is "es"', () => {
-    test('it removes the "oblt", "security" and "chat" features', () => {
+    test('it removes the "oblt" and "security" features', () => {
       const spaceDisabledFeatures: string[] = ['foo'];
       const spaceSolution = 'es';
 
@@ -54,12 +54,12 @@ describe('#withSpaceSolutionDisabledFeatures', () => {
       );
 
       // merges the spaceDisabledFeatures with the disabledFeatureKeysFromSolution
-      expect(result).toEqual(['feature1', 'feature3', 'feature5']); // "foo" from the spaceDisabledFeatures should not be removed
+      expect(result).toEqual(['feature1', 'feature3']); // "foo" from the spaceDisabledFeatures should not be removed
     });
   });
 
   describe('when the space solution is "oblt"', () => {
-    test('it removes the "security" and "chat" features', () => {
+    test('it removes the "enterpriseSearch" and "security" features', () => {
       const spaceDisabledFeatures: string[] = [];
       const spaceSolution = 'oblt';
 
@@ -69,12 +69,12 @@ describe('#withSpaceSolutionDisabledFeatures', () => {
         spaceSolution
       );
 
-      expect(result).toEqual(['feature3', 'feature5']);
+      expect(result).toEqual(['feature2', 'feature3']);
     });
   });
 
   describe('when the space solution is "security"', () => {
-    test('it removes the "observability", "enterpriseSearch" and "chat" features', () => {
+    test('it removes the "observability" and "enterpriseSearch" features', () => {
       const spaceDisabledFeatures: string[] = ['baz'];
       const spaceSolution = 'security';
 
@@ -84,14 +84,14 @@ describe('#withSpaceSolutionDisabledFeatures', () => {
         spaceSolution
       );
 
-      expect(result).toEqual(['feature1', 'feature2', 'feature5']); // "baz" from the spaceDisabledFeatures should not be removed
+      expect(result).toEqual(['feature1', 'feature2']); // "baz" from the spaceDisabledFeatures should not be removed
     });
   });
 
-  describe('when the space solution is "chat"', () => {
-    test('it removes the "oblt", "es" and "security" features', () => {
+  describe('when the space solution is "vectordb"', () => {
+    test('it removes the "oblt" and "security" features', () => {
       const spaceDisabledFeatures: string[] = ['foo'];
-      const spaceSolution = 'chat';
+      const spaceSolution = 'vectordb';
 
       const result = withSpaceSolutionDisabledFeatures(
         features,
@@ -100,7 +100,20 @@ describe('#withSpaceSolutionDisabledFeatures', () => {
       );
 
       // merges the spaceDisabledFeatures with the disabledFeatureKeysFromSolution
-      expect(result).toEqual(['feature1', 'feature2', 'feature3']); // "foo" from the spaceDisabledFeatures should not be removed
+      expect(result).toEqual(['feature1', 'feature3']); // "foo" from the spaceDisabledFeatures should not be removed
+    });
+
+    test('it does not include deprecated features in space disabled features', () => {
+      const spaceDisabledFeatures: string[] = [];
+      const spaceSolution = 'vectordb';
+
+      const result = withSpaceSolutionDisabledFeatures(
+        features,
+        spaceDisabledFeatures,
+        spaceSolution
+      );
+
+      expect(result).not.toContain('feature6');
     });
   });
 });

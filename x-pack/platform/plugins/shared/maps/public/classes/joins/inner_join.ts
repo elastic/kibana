@@ -7,24 +7,23 @@
 
 import type { KibanaExecutionContext } from '@kbn/core/public';
 import type { Query } from '@kbn/es-query';
-import { Feature, GeoJsonProperties } from 'geojson';
+import type { Feature, GeoJsonProperties } from 'geojson';
 import { getComputedFieldNamePrefix } from '../styles/vector/style_util';
 import {
   FORMATTERS_DATA_REQUEST_ID_SUFFIX,
   META_DATA_REQUEST_ID_SUFFIX,
   SOURCE_TYPES,
 } from '../../../common/constants';
-import {
+import type {
   ESDistanceSourceDescriptor,
   ESTermSourceDescriptor,
   JoinDescriptor,
   JoinSourceDescriptor,
-  TableSourceDescriptor,
 } from '../../../common/descriptor_types';
-import { IVectorSource } from '../sources/vector_source';
-import { IField } from '../fields/field';
-import { PropertiesMap } from '../../../common/elasticsearch_util';
-import { IJoinSource } from '../sources/join_sources';
+import type { IVectorSource } from '../sources/vector_source';
+import type { IField } from '../fields/field';
+import type { PropertiesMap } from '../../../common/elasticsearch_util';
+import type { IJoinSource } from '../sources/join_sources';
 import {
   ESDistanceSource,
   isSpatialSourceComplete,
@@ -32,6 +31,7 @@ import {
   isTermSourceComplete,
   TableSource,
 } from '../sources/join_sources';
+import type { TableSourceDescriptor } from '../sources/join_sources/table_source/table_source';
 
 export function createJoinSource(
   descriptor: Partial<JoinSourceDescriptor> | undefined
@@ -40,16 +40,22 @@ export function createJoinSource(
     return;
   }
 
-  if (descriptor.type === SOURCE_TYPES.ES_DISTANCE_SOURCE && isSpatialSourceComplete(descriptor)) {
+  if (
+    descriptor.type === SOURCE_TYPES.ES_DISTANCE_SOURCE &&
+    isSpatialSourceComplete(descriptor as Partial<ESDistanceSourceDescriptor>)
+  ) {
     return new ESDistanceSource(descriptor as ESDistanceSourceDescriptor);
   }
 
-  if (descriptor.type === SOURCE_TYPES.ES_TERM_SOURCE && isTermSourceComplete(descriptor)) {
+  if (
+    descriptor.type === SOURCE_TYPES.ES_TERM_SOURCE &&
+    isTermSourceComplete(descriptor as Partial<ESTermSourceDescriptor>)
+  ) {
     return new ESTermSource(descriptor as ESTermSourceDescriptor);
   }
 
   if (descriptor.type === SOURCE_TYPES.TABLE_SOURCE) {
-    return new TableSource(descriptor as TableSourceDescriptor);
+    return new TableSource(descriptor as Partial<TableSourceDescriptor>);
   }
 }
 

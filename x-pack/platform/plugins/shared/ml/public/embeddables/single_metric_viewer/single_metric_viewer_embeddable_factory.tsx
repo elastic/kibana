@@ -6,110 +6,131 @@
  */
 
 import type { StartServicesAccessor } from '@kbn/core/public';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { i18n } from '@kbn/i18n';
+import { openLazyFlyout } from '@kbn/presentation-util';
 
-import type { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
 import React from 'react';
 import useUnmount from 'react-use/lib/useUnmount';
+import type { SingleMetricViewerEmbeddableState } from '@kbn/ml-server-schemas/embeddables/single_metric_viewer';
 import {
   apiHasExecutionContext,
-  initializeTimeRange,
+  getViewModeSubject,
+  initializeTimeRangeManager,
   initializeTitleManager,
+  timeRangeComparators,
+  titleComparators,
+  useBatchedPublishingSubjects,
   useStateFromPublishingSubject,
+  type ViewMode,
 } from '@kbn/presentation-publishing';
-import { BehaviorSubject, Subscription } from 'rxjs';
-import { ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE } from '..';
+import { BehaviorSubject, Subscription, merge } from 'rxjs';
+import { initializeStateApi } from '@kbn/presentation-publishing';
+import { ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE } from '@kbn/ml-common-types/embeddables/single_metric_viewer';
 import type { MlPluginStart, MlStartDependencies } from '../../plugin';
-import type {
-  SingleMetricViewerRuntimeState,
-  SingleMetricViewerEmbeddableApi,
-  SingleMetricViewerEmbeddableState,
-} from '../types';
-import { initializeSingleMetricViewerControls } from './single_metric_viewer_controls_initializer';
+import type { SingleMetricViewerEmbeddableApi } from '../types';
+import {
+  initializeSingleMetricViewerControls,
+  singleMetricViewerComparators,
+} from './single_metric_viewer_controls_initializer';
 import { initializeSingleMetricViewerDataFetcher } from './single_metric_viewer_data_fetcher';
 import { getServices } from './get_services';
 import { useReactEmbeddableExecutionContext } from '../common/use_embeddable_execution_context';
 import { getSingleMetricViewerComponent } from '../../shared_components/single_metric_viewer';
+import { EmbeddableSingleMetricViewerUserInput } from './single_metric_viewer_setup_flyout';
+import { checkPermissionAsync } from '../../application/capabilities/check_capabilities';
 
 export const getSingleMetricViewerEmbeddableFactory = (
-  getStartServices: StartServicesAccessor<MlStartDependencies, MlPluginStart>
+  getStartServices: StartServicesAccessor<MlStartDependencies, MlPluginStart>,
+  usageCollection?: UsageCollectionSetup
 ) => {
-  const factory: ReactEmbeddableFactory<
+  const factory: EmbeddablePublicDefinition<
     SingleMetricViewerEmbeddableState,
-    SingleMetricViewerRuntimeState,
     SingleMetricViewerEmbeddableApi
   > = {
     type: ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE,
-    deserializeState: (state) => state.rawState,
-    buildEmbeddable: async (state, buildApi, uuid, parentApi) => {
-      const services = await getServices(getStartServices);
+    buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
+      await checkPermissionAsync(getStartServices, 'canGetJobs', true);
+      const services = await getServices(getStartServices, usageCollection);
       const subscriptions = new Subscription();
-      const titleManager = initializeTitleManager(state);
-      const timeRangeManager = initializeTimeRange(state);
+      const titleManager = initializeTitleManager(initialState);
+      const timeRangeManager = initializeTimeRangeManager(initialState);
 
-      const {
-        singleMetricViewerControlsApi,
-        serializeSingleMetricViewerState,
-        singleMetricViewerComparators,
-        onSingleMetricViewerDestroy,
-      } = initializeSingleMetricViewerControls(state, titleManager.api);
+      const singleMetricManager = initializeSingleMetricViewerControls(
+        initialState,
+        titleManager.api
+      );
 
       const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
       const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
 
-      const api = buildApi(
-        {
-          isEditingEnabled: () => true,
-          getTypeDisplayName: () =>
-            i18n.translate('xpack.ml.singleMetricViewerEmbeddable.typeDisplayName', {
-              defaultMessage: 'single metric viewer',
-            }),
-          onEdit: async () => {
-            try {
-              const { resolveEmbeddableSingleMetricViewerUserInput } = await import(
-                './single_metric_viewer_setup_flyout'
-              );
-              const [coreStart, { data, share }, { mlApi }] = services;
-              const result = await resolveEmbeddableSingleMetricViewerUserInput(
-                coreStart,
-                parentApi,
-                uuid,
-                { data, share },
-                mlApi,
-                {
-                  ...titleManager.serialize(),
-                  ...serializeSingleMetricViewerState(),
-                }
-              );
-
-              singleMetricViewerControlsApi.updateUserInput(result);
-            } catch (e) {
-              return Promise.reject();
-            }
-          },
-          ...titleManager.api,
-          ...timeRangeManager.api,
-          ...singleMetricViewerControlsApi,
-          dataLoading$,
-          blockingError$,
-          serializeState: () => {
-            return {
-              rawState: {
-                timeRange: undefined,
-                ...titleManager.serialize(),
-                ...timeRangeManager.serialize(),
-                ...serializeSingleMetricViewerState(),
-              },
-              references: [],
-            };
-          },
-        },
-        {
-          ...timeRangeManager.comparators,
-          ...titleManager.comparators,
+      const stateApi = initializeStateApi<SingleMetricViewerEmbeddableState>({
+        uuid,
+        parentApi,
+        serializeState: () => ({
+          ...titleManager.getLatestState(),
+          ...timeRangeManager.getLatestState(),
+          ...singleMetricManager.getLatestState(),
+        }),
+        anyStateChange$: merge(
+          titleManager.anyStateChange$,
+          timeRangeManager.anyStateChange$,
+          singleMetricManager.anyStateChange$
+        ),
+        getComparators: () => ({
+          ...titleComparators,
+          ...timeRangeComparators,
           ...singleMetricViewerComparators,
-        }
-      );
+        }),
+        applySerializedState: (nextState) => {
+          timeRangeManager.reinitializeState(nextState);
+          titleManager.reinitializeState(nextState);
+          singleMetricManager.reinitializeState(nextState);
+        },
+      });
+
+      const api = finalizeApi({
+        isEditingEnabled: () => true,
+        getTypeDisplayName: () =>
+          i18n.translate('xpack.ml.singleMetricViewerEmbeddable.typeDisplayName', {
+            defaultMessage: 'single metric viewer',
+          }),
+        onEdit: async () => {
+          const [coreStart, { data, share }, { mlApi }] = services;
+          openLazyFlyout({
+            core: coreStart,
+            parentApi,
+            flyoutProps: {
+              focusedPanelId: uuid,
+            },
+            loadContent: async ({ closeFlyout }) => {
+              return (
+                <EmbeddableSingleMetricViewerUserInput
+                  coreStart={coreStart}
+                  services={{ data, share }}
+                  mlApi={mlApi}
+                  onConfirm={(result) => {
+                    singleMetricManager.api.updateUserInput(result);
+                    closeFlyout();
+                  }}
+                  onCancel={closeFlyout}
+                  input={{
+                    ...titleManager.getLatestState(),
+                    ...singleMetricManager.getLatestState(),
+                  }}
+                />
+              );
+            },
+          });
+        },
+        ...titleManager.api,
+        ...timeRangeManager.api,
+        ...singleMetricManager.api,
+        ...stateApi,
+        dataLoading$,
+        blockingError$,
+      });
 
       const { singleMetricViewerData$, onDestroy } = initializeSingleMetricViewerDataFetcher(
         api,
@@ -117,6 +138,7 @@ export const getSingleMetricViewerEmbeddableFactory = (
       );
 
       const SingleMetricViewerComponent = getSingleMetricViewerComponent(...services, api);
+      const viewMode$ = getViewModeSubject(api) ?? new BehaviorSubject<ViewMode>('view');
 
       return {
         api,
@@ -127,6 +149,11 @@ export const getSingleMetricViewerEmbeddableFactory = (
 
           const { singleMetricViewerData, bounds, lastRefresh } =
             useStateFromPublishingSubject(singleMetricViewerData$);
+          const [isLoading, error, viewMode] = useBatchedPublishingSubjects(
+            dataLoading$,
+            blockingError$,
+            viewMode$
+          );
 
           useReactEmbeddableExecutionContext(
             services[0].executionContext,
@@ -136,7 +163,7 @@ export const getSingleMetricViewerEmbeddableFactory = (
           );
 
           useUnmount(() => {
-            onSingleMetricViewerDestroy();
+            singleMetricManager.cleanup();
             onDestroy();
             subscriptions.unsubscribe();
           });
@@ -151,16 +178,26 @@ export const getSingleMetricViewerEmbeddableFactory = (
           return (
             <SingleMetricViewerComponent
               shouldShowForecastButton={true}
+              isInteractive={viewMode !== 'non-interactive'}
               bounds={bounds}
               functionDescription={functionDescription}
               lastRefresh={lastRefresh}
-              onError={(error) => blockingError$.next(error)}
+              onError={(err) => {
+                blockingError$.next(err);
+                if (err) {
+                  dataLoading$.next(false);
+                }
+              }}
               selectedDetectorIndex={singleMetricViewerData?.selectedDetectorIndex}
               selectedEntities={singleMetricViewerData?.selectedEntities}
               selectedJobId={singleMetricViewerData?.jobIds[0]}
               forecastId={singleMetricViewerData?.forecastId}
               uuid={api.uuid}
               onForecastIdChange={api.updateForecastId}
+              isRenderComplete={error ? true : !isLoading}
+              onLoading={(loading) => {
+                dataLoading$.next(loading);
+              }}
               onRenderComplete={() => {
                 dataLoading$.next(false);
               }}

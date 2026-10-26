@@ -3,6 +3,8 @@
   "id": "@kbn/user-profile-examples-plugin",
   "owner": "@elastic/kibana-security",
   "description": "Demo of how to implement a suggest user functionality",
+  "group": "platform",
+  "visibility": "private",
   "plugin": {
     "id": "userProfileExamples",
     "server": true,

@@ -130,11 +130,15 @@ const TagsFormComponent = ({ editAction, rulesCount, onClose, onConfirm }: TagsF
       ) : null}
       {overwrite && (
         <EuiFormRow>
-          <EuiCallOut color="warning" size="s" data-test-subj="bulkEditRulesTagsWarning">
+          <EuiCallOut
+            announceOnMount
+            color="warning"
+            size="s"
+            data-test-subj="bulkEditRulesTagsWarning"
+          >
             <FormattedMessage
               id="xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.setTagsWarningCallout"
-              defaultMessage="You’re about to overwrite tags for {rulesCount, plural, one {# selected rule} other {# selected rules}}, press Save to
-              apply changes."
+              defaultMessage="You’re about to overwrite tags for {rulesCount, plural, one {# selected rule} other {# selected rules}}, press Save to apply changes."
               values={{ rulesCount }}
             />
           </EuiCallOut>

@@ -18,7 +18,7 @@ export function TimeoutPrompt({ isGlobalServiceMap }: { isGlobalServiceMap: bool
       title={
         <h2>
           {i18n.translate('xpack.apm.serviceMap.timeoutPromptTitle', {
-            defaultMessage: 'Service Map timeout',
+            defaultMessage: 'Service map timeout',
           })}
         </h2>
       }

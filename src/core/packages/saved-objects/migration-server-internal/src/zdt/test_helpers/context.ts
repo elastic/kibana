@@ -8,10 +8,8 @@
  */
 
 import { ByteSizeValue } from '@kbn/config-schema';
-import {
-  ElasticsearchClientMock,
-  elasticsearchClientMock,
-} from '@kbn/core-elasticsearch-client-server-mocks';
+import type { ElasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import {
   SavedObjectTypeRegistry,
@@ -42,6 +40,7 @@ export const createMigrationConfigMock = (
     metaPickupSyncDelaySec: 120,
     runOnRoles: ['migrator'],
   },
+  useCumulativeLogger: false,
   ...parts,
 });
 

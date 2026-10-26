@@ -6,6 +6,17 @@
  */
 
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
+import type { PageScope } from '../constants';
+
+/**
+ * Shape of the data view manager selection persisted in the URL, keyed by page scope.
+ */
+export type DataViewManagerUrlState = Partial<{
+  [id in PageScope]: {
+    id: string;
+    selectedPatterns: string[];
+  };
+}>;
 
 export interface ScopedDataViewSelectionState {
   dataViewId: string | null;
@@ -23,6 +34,14 @@ export interface SharedDataViewSelectionState {
   dataViews: DataViewSpec[];
   adhocDataViews: DataViewSpec[];
   status: 'pristine' | 'loading' | 'error' | 'ready';
+  defaultDataViewId: string | null;
+  alertDataViewId: string | null;
+  signalIndex: SignalIndexMetadata | null;
+}
+
+export interface SignalIndexMetadata {
+  name: string;
+  isOutdated: boolean;
 }
 
 export { type DataViewSpec };

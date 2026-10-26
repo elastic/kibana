@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 import type { CloudProvider } from '@kbn/custom-icons';
 import { getAgentIcon, getCloudProviderIcon, getServerlessIcon } from '@kbn/custom-icons';
 import type { ReactChild } from 'react';
@@ -27,6 +28,8 @@ interface Props {
   environment: string;
   start: string;
   end: string;
+  /** Icon button size next to the page title. Defaults to `m` (legacy header). */
+  size?: 's' | 'm';
 }
 
 function getServerlessTitle(serverlessType?: ServerlessType): string {
@@ -74,11 +77,11 @@ export interface PopoverItem {
   component: ReactChild;
 }
 
-export function ServiceIcons({ start, end, serviceName, environment }: Props) {
+export function ServiceIcons({ start, end, serviceName, environment, size = 'm' }: Props) {
+  const isDarkMode = useKibanaIsDarkMode();
   const [selectedIconPopover, setSelectedIconPopover] = useState<Icons | null>();
-
-  const { colorMode } = useEuiTheme();
-  const isDarkMode = colorMode === 'DARK';
+  const iconSize = size === 's' ? 'm' : 'l';
+  const buttonSize = size;
 
   const { data: icons, status: iconsFetchStatus } = useFetcher(
     (callApmApi) => {
@@ -86,12 +89,12 @@ export function ServiceIcons({ start, end, serviceName, environment }: Props) {
         return callApmApi('GET /internal/apm/services/{serviceName}/metadata/icons', {
           params: {
             path: { serviceName },
-            query: { start, end },
+            query: { start, end, environment },
           },
         });
       }
     },
-    [serviceName, start, end]
+    [serviceName, start, end, environment]
   );
 
   const { data: details, status: detailsFetchStatus } = useFetcher(
@@ -119,7 +122,7 @@ export function ServiceIcons({ start, end, serviceName, environment }: Props) {
     {
       key: 'service',
       icon: {
-        type: getAgentIcon(icons?.agentName, isDarkMode) || 'node',
+        type: getAgentIcon(icons?.agentName, isDarkMode) || 'vectorTriangle',
       },
       isVisible: !!icons?.agentName,
       title: i18n.translate('xpack.apm.serviceIcons.service', {
@@ -154,7 +157,7 @@ export function ServiceIcons({ start, end, serviceName, environment }: Props) {
     {
       key: 'serverless',
       icon: {
-        type: getServerlessIcon(icons?.serverlessType) || 'node',
+        type: getServerlessIcon(icons?.serverlessType) || 'vectorTriangle',
       },
       isVisible: !!icons?.serverlessType,
       title: getServerlessTitle(icons?.serverlessType),
@@ -181,7 +184,8 @@ export function ServiceIcons({ start, end, serviceName, environment }: Props) {
             <EuiFlexItem grow={false} data-test-subj={item.key} key={item.key}>
               <IconPopover
                 isOpen={selectedIconPopover === item.key}
-                icon={item.icon}
+                icon={{ ...item.icon, size: iconSize }}
+                buttonSize={buttonSize}
                 detailsFetchStatus={detailsFetchStatus}
                 title={item.title}
                 onClick={() => {

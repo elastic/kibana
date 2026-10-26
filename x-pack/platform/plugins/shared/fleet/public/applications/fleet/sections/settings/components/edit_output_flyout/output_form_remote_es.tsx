@@ -7,7 +7,6 @@
 
 import React, { useEffect } from 'react';
 import {
-  EuiCallOut,
   EuiCodeBlock,
   EuiFieldText,
   EuiFormRow,
@@ -18,14 +17,17 @@ import {
   EuiCode,
   EuiFieldPassword,
 } from '@elastic/eui';
+import { KbnInfoCallout, KbnWarningCallout } from '@kbn/ui-callout';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+
+import { snakeCase } from 'lodash';
 
 import { MultiRowInput } from '../multi_row_input';
 
 import { ExperimentalFeaturesService } from '../../../../services';
 
-import { useStartServices } from '../../../../hooks';
+import { licenseService, useStartServices } from '../../../../hooks';
 
 import type { OutputFormInputsType } from './use_output_form';
 import { SecretFormRow } from './output_form_secret_form_row';
@@ -52,6 +54,8 @@ export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props)
     sslKey: false,
   });
   const { enableSyncIntegrationsOnRemote, enableSSLSecrets } = ExperimentalFeaturesService.get();
+  const enableSyncIntegrations = enableSyncIntegrationsOnRemote && licenseService.isEnterprise();
+
   const [isRemoteClusterInstructionsOpen, setIsRemoteClusterInstructionsOpen] =
     React.useState(false);
 
@@ -126,7 +130,7 @@ export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props)
             defaultMessage: 'Specify host URL',
           }
         )}
-        {...inputs.elasticsearchUrlInput.props}
+        {...inputs.remoteElasticsearchUrlInput.props}
         isUrl
       />
       <EuiSpacer size="m" />
@@ -181,7 +185,7 @@ export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props)
         </SecretFormRow>
       )}
       <EuiSpacer size="m" />
-      <EuiCallOut
+      <KbnInfoCallout
         title={
           <FormattedMessage
             id="xpack.fleet.settings.editOutputFlyout.serviceTokenCalloutText"
@@ -196,7 +200,7 @@ export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props)
   "remote": true
 }`}
         </EuiCodeBlock>
-      </EuiCallOut>
+      </KbnInfoCallout>
       <EuiSpacer size="m" />
       <SSLFormSection
         type={inputs.typeInput.value as FormType}
@@ -206,8 +210,22 @@ export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props)
         onToggleSecretAndClearValue={onToggleSecretAndClearValue}
       />
       <EuiSpacer size="m" />
-      {enableSyncIntegrationsOnRemote ? (
+      {enableSyncIntegrations ? (
         <>
+          <KbnWarningCallout
+            announceOnMount
+            data-test-subj="syncIntegrationsServerlessCallout"
+            title={i18n.translate(
+              'xpack.fleet.settings.editOutputFlyout.syncIntegrationsServerlessCallout',
+              {
+                defaultMessage:
+                  'Integration sync is not supported when the remote cluster is a serverless project.',
+              }
+            )}
+            size="s"
+            heading="p"
+          />
+          <EuiSpacer size="m" />
           <EuiFormRow
             fullWidth
             helpText={
@@ -254,8 +272,8 @@ export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props)
                 />
               </EuiFormRow>
               <EuiSpacer size="m" />
-              <EuiCallOut
-                iconType="iInCircle"
+              <KbnInfoCallout
+                announceOnMount
                 title={
                   <FormattedMessage
                     id="xpack.fleet.settings.editOutputFlyout.remoteClusterConfigurationCalloutTitle"
@@ -287,7 +305,11 @@ export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props)
                       defaultMessage="To sync integrations from this cluster, the remote Elasticsearch output needs additional configuration. {documentationLink}."
                       values={{
                         documentationLink: (
-                          <EuiLink external={true} href={docLinks.links.fleet.remoteESOoutput}>
+                          <EuiLink
+                            external={true}
+                            target="_blank"
+                            href={docLinks.links.fleet.remoteESOoutput}
+                          >
                             <FormattedMessage
                               id="xpack.fleet.settings.remoteClusterConfiguration.documentationLink"
                               defaultMessage="Learn more"
@@ -332,7 +354,7 @@ export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props)
                             followerIndex: (
                               <EuiCode>
                                 fleet-synced-integrations-ccr-
-                                {inputs.nameInput.props.value || '<output name>'}
+                                {snakeCase(inputs.nameInput.props.value) || '<output name>'}
                               </EuiCode>
                             ),
                           }}
@@ -346,9 +368,27 @@ export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props)
                         />
                       </li>
                     </ol>
+                    <EuiSpacer size="s" />
+                    <FormattedMessage
+                      id="xpack.fleet.settings.remoteClusterConfiguration.ccsDescription"
+                      defaultMessage="To search accross remote clusters from this cluster, see the {prerequisites}. Once the remote cluster is added, CCS Data Views will be created automatically."
+                      values={{
+                        prerequisites: (
+                          <EuiLink
+                            target="_blank"
+                            href={`${docLinks.links.ccs.guide}#_prerequisites`}
+                          >
+                            <FormattedMessage
+                              id="xpack.fleet.settings.remoteClusterConfiguration.ccsDocumentationLink"
+                              defaultMessage="CCS prerequisites"
+                            />
+                          </EuiLink>
+                        ),
+                      }}
+                    />
                   </>
                 )}
-              </EuiCallOut>
+              </KbnInfoCallout>
               <EuiSpacer size="m" />
               <EuiFormRow
                 fullWidth
@@ -392,14 +432,15 @@ export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props)
                   placeholder={i18n.translate(
                     'xpack.fleet.settings.editOutputFlyout.kibanaAPIKeyPlaceholder',
                     {
-                      defaultMessage: 'Specify Kibana API Key',
+                      defaultMessage: 'Specify encoded Kibana API Key',
                     }
                   )}
                 />
               </EuiFormRow>
 
               <EuiSpacer size="m" />
-              <EuiCallOut
+              <KbnInfoCallout
+                announceOnMount
                 title={
                   <FormattedMessage
                     id="xpack.fleet.settings.editOutputFlyout.kibanaAPIKeyCalloutText"
@@ -425,7 +466,7 @@ export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props)
      }
    }`}
                 </EuiCodeBlock>
-              </EuiCallOut>
+              </KbnInfoCallout>
               <EuiSpacer size="m" />
             </>
           )}

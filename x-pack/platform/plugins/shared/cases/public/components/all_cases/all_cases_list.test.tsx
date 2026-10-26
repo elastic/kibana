@@ -16,16 +16,23 @@ import {
   noCreateCasesPermissions,
   noDeleteCasesPermissions,
   readCasesPermissions,
+  buildCasesPermissions,
   renderWithTestingProviders,
 } from '../../common/mock';
 import { useGetCasesMockState, connectorsMock } from '../../containers/mock';
 
 import { SortFieldCase } from '../../../common/ui/types';
 import { CaseSeverity, CaseStatuses } from '../../../common/types/domain';
-import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
+import {
+  CASES_LIST_PAGE_VIEW_EVENT_TYPE,
+  CASES_LIST_VIEW_MODE_CHANGED_EVENT_TYPE,
+  SECURITY_SOLUTION_OWNER,
+} from '../../../common/constants';
 import { useKibana } from '../../common/lib/kibana';
 import { AllCasesList } from './all_cases_list';
-import { useCasesColumns } from './use_cases_columns';
+import { VIEW_TOGGLE_LIST_ID, VIEW_TOGGLE_TABLE_ID, type ViewToggleId } from './constants';
+import * as useViewModeModule from './hooks/use_view_mode';
+import { useCasesColumns } from './hooks/use_cases_columns';
 import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
 import { registerConnectorsToMockActionRegistry } from '../../common/mock/register_connectors';
 import { createStartServicesMock } from '../../common/lib/kibana/kibana_react.mock';
@@ -48,10 +55,10 @@ import * as api from '../../containers/api';
 import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
 import { useCaseConfigureResponse } from '../configure_cases/__mock__';
 import { useSuggestUserProfiles } from '../../containers/user_profiles/use_suggest_user_profiles';
+import * as i18n from './translations';
 
 jest.mock('../../containers/configure/use_get_case_configuration');
 jest.mock('../../containers/use_get_cases');
-jest.mock('../../containers/use_get_action_license');
 jest.mock('../../containers/use_get_tags');
 jest.mock('../../containers/use_get_categories');
 jest.mock('../../containers/user_profiles/use_get_current_user_profile');
@@ -65,6 +72,11 @@ jest.mock('../app/use_available_owners', () => ({
 jest.mock('../../containers/use_update_case');
 jest.mock('../../common/use_license');
 jest.mock('../../containers/user_profiles/use_suggest_user_profiles');
+jest.mock('./hooks/use_view_mode', () => ({
+  useViewMode: jest.fn(),
+}));
+
+const useViewModeMock = useViewModeModule.useViewMode as jest.Mock;
 
 const useGetCaseConfigurationMock = useGetCaseConfiguration as jest.Mock;
 const useGetCasesMock = useGetCases as jest.Mock;
@@ -87,6 +99,16 @@ const mockKibana = () => {
       triggersActionsUi: mockTriggersActionsUiService,
     },
   } as unknown as ReturnType<typeof useKibana>);
+};
+
+const mockEarliestCaseParams = {
+  filterOptions: { from: undefined, to: undefined, owner: [] },
+  queryParams: {
+    page: 1,
+    perPage: 1,
+    sortField: SortFieldCase.createdAt,
+    sortOrder: 'asc',
+  },
 };
 
 // eslint-disable-next-line prefer-object-spread
@@ -151,7 +173,10 @@ describe('AllCasesListGeneric', () => {
   beforeAll(() => {
     patchGetComputedStyle();
     mockKibana();
-    const actionTypeRegistry = useKibanaMock().services.triggersActionsUi.actionTypeRegistry;
+    const {
+      triggersActionsUi: { actionTypeRegistry },
+    } = useKibanaMock().services;
+
     registerConnectorsToMockActionRegistry(actionTypeRegistry, connectorsMock);
   });
 
@@ -162,6 +187,10 @@ describe('AllCasesListGeneric', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
+    useViewModeMock.mockReturnValue({
+      viewMode: VIEW_TOGGLE_TABLE_ID,
+      setViewMode: jest.fn(),
+    });
     useGetCasesMock.mockReturnValue(defaultGetCases);
     useGetTagsMock.mockReturnValue({ data: ['coke', 'pepsi'], isLoading: false });
     useGetCategoriesMock.mockReturnValue({ data: ['twix', 'snickers'], isLoading: false });
@@ -170,7 +199,7 @@ describe('AllCasesListGeneric', () => {
     useGetCaseConfigurationMock.mockImplementation(() => useCaseConfigureResponse);
     useBulkGetUserProfilesMock.mockReturnValue({ data: userProfilesMap });
     useUpdateCaseMock.mockReturnValue({ mutate: updateCaseProperty });
-    useLicenseMock.mockReturnValue({ isAtLeastPlatinum: () => false });
+    useLicenseMock.mockReturnValue({ isAtLeastGold: () => false, isAtLeastPlatinum: () => false });
     useSuggestUserProfilesMock.mockReturnValue({ data: userProfiles, isLoading: false });
     mockKibana();
     moment.tz.setDefault('UTC');
@@ -182,7 +211,7 @@ describe('AllCasesListGeneric', () => {
   });
 
   it('should render AllCasesList', async () => {
-    useLicenseMock.mockReturnValue({ isAtLeastPlatinum: () => true });
+    useLicenseMock.mockReturnValue({ isAtLeastGold: () => true, isAtLeastPlatinum: () => true });
     renderWithTestingProviders(<AllCasesList />);
 
     const caseDetailsLinks = await screen.findAllByTestId('case-details-link');
@@ -192,6 +221,10 @@ describe('AllCasesListGeneric', () => {
     expect(
       (await screen.findAllByTestId('case-user-profile-avatar-damaged_raccoon'))[0]
     ).toHaveTextContent('DR');
+
+    const incrementalIdTextElements = screen.getAllByTestId('cases-incremental-id-text');
+    expect(incrementalIdTextElements).toHaveLength(1);
+    expect(incrementalIdTextElements[0]).toHaveTextContent('#1');
 
     expect((await screen.findAllByTestId('case-table-column-tags-coke'))[0]).toHaveAttribute(
       'title',
@@ -207,7 +240,7 @@ describe('AllCasesListGeneric', () => {
     ).toBeInTheDocument();
 
     expect(await screen.findByTestId('case-table-case-count')).toHaveTextContent(
-      `Showing 10 of ${useGetCasesMockState.data.total} cases`
+      `Showing 10 of ${useGetCasesMockState.data.total}`
     );
 
     expect(screen.queryByTestId('all-cases-maximum-limit-warning')).not.toBeInTheDocument();
@@ -215,7 +248,7 @@ describe('AllCasesListGeneric', () => {
   });
 
   it("should show a tooltip with the assignee's email when hover over the assignee avatar", async () => {
-    useLicenseMock.mockReturnValue({ isAtLeastPlatinum: () => true });
+    useLicenseMock.mockReturnValue({ isAtLeastGold: () => true, isAtLeastPlatinum: () => true });
 
     renderWithTestingProviders(<AllCasesList />);
 
@@ -225,7 +258,11 @@ describe('AllCasesListGeneric', () => {
       )[0]
     );
 
-    expect(await screen.findByText('damaged_raccoon@elastic.co')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByRole('tooltip')).toHaveTextContent(
+        'Damaged Raccoon (damaged_raccoon@elastic.co)'
+      );
+    });
   });
 
   it('should show a tooltip with all tags when hovered', async () => {
@@ -301,7 +338,7 @@ describe('AllCasesListGeneric', () => {
     await userEvent.click((await screen.findAllByTestId('tableHeaderSortButton'))[0]);
 
     await waitFor(() => {
-      expect(useGetCasesMock).toBeCalledWith(
+      expect(useGetCasesMock).toHaveBeenCalledWith(
         expect.objectContaining({
           queryParams: {
             ...DEFAULT_QUERY_PARAMS,
@@ -358,6 +395,18 @@ describe('AllCasesListGeneric', () => {
     expect(screen.queryByTestId('cases-metrics-stats')).not.toBeInTheDocument();
   });
 
+  it('should force table view when isSelectorView=true even if stored preference is list', async () => {
+    useViewModeMock.mockReturnValue({
+      viewMode: VIEW_TOGGLE_LIST_ID,
+      setViewMode: jest.fn(),
+    });
+
+    renderWithTestingProviders(<AllCasesList isSelectorView={true} />);
+
+    expect(await screen.findByTestId('cases-table')).toBeInTheDocument();
+    expect(screen.queryByTestId('cases-list-view')).not.toBeInTheDocument();
+  });
+
   it('should call onRowClick with no cases and isSelectorView=true when create case is clicked', async () => {
     renderWithTestingProviders(<AllCasesList isSelectorView={true} onRowClick={onRowClick} />);
     await userEvent.click(await screen.findByTestId('cases-table-add-case-filter-bar'));
@@ -367,7 +416,19 @@ describe('AllCasesListGeneric', () => {
       expect(onRowClick).toHaveBeenCalled();
     });
 
-    expect(onRowClick).toBeCalledWith(undefined, isCreateCase);
+    expect(onRowClick).toHaveBeenCalledWith(undefined, isCreateCase);
+  });
+
+  it('should disable the create case button without create privileges', async () => {
+    renderWithTestingProviders(<AllCasesList isSelectorView={true} onRowClick={onRowClick} />, {
+      wrapperProps: { permissions: noCreateCasesPermissions() },
+    });
+
+    const createCaseButton = await screen.findByTestId('cases-table-add-case-filter-bar');
+    expect(createCaseButton).toBeDisabled();
+
+    await userEvent.click(createCaseButton);
+    expect(onRowClick).not.toHaveBeenCalled();
   });
 
   it('should not render the create new case link when the user does not have create privileges', async () => {
@@ -392,6 +453,32 @@ describe('AllCasesListGeneric', () => {
     });
   });
 
+  it('should disable select and not call onRowClick for closed cases with modal=true', async () => {
+    const theCase = {
+      ...defaultGetCases.data.cases[0],
+      status: CaseStatuses.closed,
+    };
+    useGetCasesMock.mockReturnValue({
+      ...defaultGetCases,
+      data: {
+        ...defaultGetCases.data,
+        cases: [theCase, ...defaultGetCases.data.cases.slice(1)],
+      },
+    });
+
+    renderWithTestingProviders(<AllCasesList isSelectorView={true} onRowClick={onRowClick} />);
+
+    const selectButton = await screen.findByTestId(`cases-table-row-select-${theCase.id}`);
+    expect(selectButton).toBeDisabled();
+    expect(selectButton).toHaveTextContent('Select');
+    expect(selectButton).not.toHaveTextContent('Added');
+
+    await userEvent.click(selectButton);
+    await waitFor(() => {
+      expect(onRowClick).not.toHaveBeenCalled();
+    });
+  });
+
   it('should NOT call onRowClick when clicking a case with modal=true', async () => {
     renderWithTestingProviders(<AllCasesList isSelectorView={false} />);
 
@@ -409,7 +496,7 @@ describe('AllCasesListGeneric', () => {
     await userEvent.click((await screen.findAllByTitle('Status'))[1]);
 
     await waitFor(() => {
-      expect(useGetCasesMock).toHaveBeenLastCalledWith(
+      expect(useGetCasesMock).toHaveBeenCalledWith(
         expect.objectContaining({
           queryParams: {
             ...DEFAULT_QUERY_PARAMS,
@@ -418,6 +505,9 @@ describe('AllCasesListGeneric', () => {
           },
         })
       );
+    });
+    await waitFor(() => {
+      expect(useGetCasesMock).toHaveBeenCalledWith(mockEarliestCaseParams);
     });
   });
 
@@ -438,7 +528,7 @@ describe('AllCasesListGeneric', () => {
     await userEvent.click((await screen.findAllByTitle('Severity'))[1]);
 
     await waitFor(() => {
-      expect(useGetCasesMock).toHaveBeenLastCalledWith(
+      expect(useGetCasesMock).toHaveBeenCalledWith(
         expect.objectContaining({
           queryParams: {
             ...DEFAULT_QUERY_PARAMS,
@@ -448,6 +538,9 @@ describe('AllCasesListGeneric', () => {
         })
       );
     });
+    await waitFor(() => {
+      expect(useGetCasesMock).toHaveBeenCalledWith(mockEarliestCaseParams);
+    });
   });
 
   it('should sort by title', async () => {
@@ -456,7 +549,7 @@ describe('AllCasesListGeneric', () => {
     await userEvent.click(await screen.findByTitle('Name'));
 
     await waitFor(() => {
-      expect(useGetCasesMock).toHaveBeenLastCalledWith(
+      expect(useGetCasesMock).toHaveBeenCalledWith(
         expect.objectContaining({
           queryParams: {
             ...DEFAULT_QUERY_PARAMS,
@@ -466,6 +559,10 @@ describe('AllCasesListGeneric', () => {
         })
       );
     });
+
+    await waitFor(() => {
+      expect(useGetCasesMock).toHaveBeenCalledWith(mockEarliestCaseParams);
+    });
   });
 
   it('should sort by updatedOn', async () => {
@@ -474,7 +571,7 @@ describe('AllCasesListGeneric', () => {
     await userEvent.click(await screen.findByTitle('Updated on'));
 
     await waitFor(() => {
-      expect(useGetCasesMock).toHaveBeenLastCalledWith(
+      expect(useGetCasesMock).toHaveBeenCalledWith(
         expect.objectContaining({
           queryParams: {
             ...DEFAULT_QUERY_PARAMS,
@@ -484,6 +581,10 @@ describe('AllCasesListGeneric', () => {
         })
       );
     });
+
+    await waitFor(() => {
+      expect(useGetCasesMock).toHaveBeenCalledWith(mockEarliestCaseParams);
+    });
   });
 
   it('should sort by category', async () => {
@@ -492,7 +593,7 @@ describe('AllCasesListGeneric', () => {
     await userEvent.click(await screen.findByTitle('Category'));
 
     await waitFor(() => {
-      expect(useGetCasesMock).toHaveBeenLastCalledWith(
+      expect(useGetCasesMock).toHaveBeenCalledWith(
         expect.objectContaining({
           queryParams: {
             ...DEFAULT_QUERY_PARAMS,
@@ -501,6 +602,10 @@ describe('AllCasesListGeneric', () => {
           },
         })
       );
+    });
+
+    await waitFor(() => {
+      expect(useGetCasesMock).toHaveBeenCalledWith(mockEarliestCaseParams);
     });
   });
 
@@ -512,14 +617,17 @@ describe('AllCasesListGeneric', () => {
     await userEvent.click(await screen.findByTestId('options-filter-popover-item-twix'));
 
     await waitFor(() => {
-      expect(useGetCasesMock).toHaveBeenLastCalledWith({
+      expect(useGetCasesMock).toHaveBeenCalledWith({
         filterOptions: {
           ...DEFAULT_FILTER_OPTIONS,
-          searchFields: ['title', 'description'],
           category: ['twix'],
         },
         queryParams: DEFAULT_QUERY_PARAMS,
       });
+    });
+
+    await waitFor(() => {
+      expect(useGetCasesMock).toHaveBeenCalledWith(mockEarliestCaseParams);
     });
   });
 
@@ -600,25 +708,6 @@ describe('AllCasesListGeneric', () => {
     await waitForComponentToUpdate();
   });
 
-  it('should hide the alerts column if the alert feature is disabled', async () => {
-    renderWithTestingProviders(<AllCasesList />, {
-      wrapperProps: { features: { alerts: { enabled: false } } },
-    });
-
-    expect(await screen.findByTestId('cases-table')).toBeInTheDocument();
-    expect(screen.queryAllByTestId('case-table-column-alertsCount').length).toBe(0);
-  });
-
-  it('should show the alerts column if the alert feature is enabled', async () => {
-    renderWithTestingProviders(<AllCasesList />, {
-      wrapperProps: { features: { alerts: { enabled: true } } },
-    });
-
-    const alertCounts = await screen.findAllByTestId('case-table-column-alertsCount');
-
-    expect(alertCounts.length).toBeGreaterThan(0);
-  });
-
   it('should show the alerts column if the alert object is empty', async () => {
     renderWithTestingProviders(<AllCasesList />, { wrapperProps: { features: { alerts: {} } } });
 
@@ -628,7 +717,7 @@ describe('AllCasesListGeneric', () => {
   });
 
   it('should clear the filters correctly', async () => {
-    useLicenseMock.mockReturnValue({ isAtLeastPlatinum: () => true });
+    useLicenseMock.mockReturnValue({ isAtLeastGold: () => true, isAtLeastPlatinum: () => true });
 
     renderWithTestingProviders(<AllCasesList />);
 
@@ -637,9 +726,12 @@ describe('AllCasesListGeneric', () => {
     await userEvent.click(await screen.findByTestId('options-filter-popover-item-twix'));
 
     await userEvent.click(await screen.findByTestId('all-cases-clear-filters-link-icon'));
+    await waitFor(() => {
+      expect(useGetCasesMock).toHaveBeenCalledWith(DEFAULT_CASES_TABLE_STATE);
+    });
 
     await waitFor(() => {
-      expect(useGetCasesMock).toHaveBeenLastCalledWith(DEFAULT_CASES_TABLE_STATE);
+      expect(useGetCasesMock).toHaveBeenCalledWith(mockEarliestCaseParams);
     });
   });
 
@@ -691,12 +783,24 @@ describe('AllCasesListGeneric', () => {
 
           await userEvent.click(await screen.findByTestId(`cases-bulk-action-status-${status}`));
 
+          if (status === CaseStatuses.closed) {
+            await waitFor(() => {
+              expect(
+                screen.getByRole('dialog', { name: i18n.CLOSE_CASE_MODAL_TITLE })
+              ).toBeInTheDocument();
+            });
+
+            await userEvent.click(screen.getByText(i18n.CLOSE_CASE_MODAL_REASON_DUPLICATE));
+            await userEvent.click(screen.getByText(i18n.CLOSE_CASE_MODAL_CONFIRM));
+          }
+
           await waitFor(() => {
-            expect(updateCasesSpy).toBeCalledWith({
+            expect(updateCasesSpy).toHaveBeenCalledWith({
               cases: useGetCasesMockState.data.cases.map(({ id, version }) => ({
                 id,
                 version,
                 status,
+                ...(status === CaseStatuses.closed ? { closeReason: 'duplicate' } : {}),
               })),
             });
           });
@@ -728,7 +832,7 @@ describe('AllCasesListGeneric', () => {
         await userEvent.click(await screen.findByTestId(`cases-bulk-action-severity-${severity}`));
 
         await waitFor(() => {
-          expect(updateCasesSpy).toBeCalledWith({
+          expect(updateCasesSpy).toHaveBeenCalledWith({
             cases: useGetCasesMockState.data.cases.map(({ id, version }) => ({
               id,
               version,
@@ -774,6 +878,55 @@ describe('AllCasesListGeneric', () => {
       it('should disable the checkboxes when the user has read only permissions', async () => {
         renderWithTestingProviders(<AllCasesList />, {
           wrapperProps: { permissions: readCasesPermissions() },
+        });
+
+        expect(await screen.findByTestId('checkboxSelectAll')).toBeDisabled();
+
+        for (const theCase of defaultGetCases.data.cases) {
+          expect(await screen.findByTestId(`checkboxSelectRow-${theCase.id}`)).toBeDisabled();
+        }
+      });
+
+      it('should disable the checkboxes for non-closed cases when the user has only reopenCase permission', async () => {
+        renderWithTestingProviders(<AllCasesList />, {
+          wrapperProps: {
+            permissions: buildCasesPermissions({
+              read: true,
+              reopenCase: true,
+              create: false,
+              update: false,
+              delete: false,
+              push: false,
+              assign: false,
+              createComment: false,
+              manageTemplates: false,
+            }),
+          },
+        });
+
+        // Default mock cases are all open/in-progress, so none are selectable for reopenCase-only users
+        expect(await screen.findByTestId('checkboxSelectAll')).toBeDisabled();
+
+        for (const theCase of defaultGetCases.data.cases) {
+          expect(await screen.findByTestId(`checkboxSelectRow-${theCase.id}`)).toBeDisabled();
+        }
+      });
+
+      it('should disable the checkboxes when the user has read + manageTemplates but no bulk-action permissions', async () => {
+        renderWithTestingProviders(<AllCasesList />, {
+          wrapperProps: {
+            permissions: buildCasesPermissions({
+              read: true,
+              manageTemplates: true,
+              create: false,
+              update: false,
+              delete: false,
+              push: false,
+              assign: false,
+              createComment: false,
+              reopenCase: false,
+            }),
+          },
         });
 
         expect(await screen.findByTestId('checkboxSelectAll')).toBeDisabled();
@@ -906,7 +1059,10 @@ describe('AllCasesListGeneric', () => {
 
     describe('Assignees', () => {
       it('should hide the assignees column on basic license', async () => {
-        useLicenseMock.mockReturnValue({ isAtLeastPlatinum: () => false });
+        useLicenseMock.mockReturnValue({
+          isAtLeastGold: () => false,
+          isAtLeastPlatinum: () => false,
+        });
 
         renderWithTestingProviders(<AllCasesList />);
 
@@ -915,7 +1071,10 @@ describe('AllCasesListGeneric', () => {
       });
 
       it('should show the assignees column on platinum license', async () => {
-        useLicenseMock.mockReturnValue({ isAtLeastPlatinum: () => true });
+        useLicenseMock.mockReturnValue({
+          isAtLeastGold: () => true,
+          isAtLeastPlatinum: () => true,
+        });
 
         renderWithTestingProviders(<AllCasesList />);
 
@@ -924,7 +1083,10 @@ describe('AllCasesListGeneric', () => {
       });
 
       it('should hide the assignees filters on basic license', async () => {
-        useLicenseMock.mockReturnValue({ isAtLeastPlatinum: () => false });
+        useLicenseMock.mockReturnValue({
+          isAtLeastGold: () => false,
+          isAtLeastPlatinum: () => false,
+        });
 
         renderWithTestingProviders(<AllCasesList />);
 
@@ -933,7 +1095,10 @@ describe('AllCasesListGeneric', () => {
       });
 
       it('should show the assignees filters on platinum license', async () => {
-        useLicenseMock.mockReturnValue({ isAtLeastPlatinum: () => true });
+        useLicenseMock.mockReturnValue({
+          isAtLeastGold: () => true,
+          isAtLeastPlatinum: () => true,
+        });
 
         renderWithTestingProviders(<AllCasesList />);
 
@@ -944,7 +1109,10 @@ describe('AllCasesListGeneric', () => {
       });
 
       it('should reset the assignees when deactivating the filter', async () => {
-        useLicenseMock.mockReturnValue({ isAtLeastPlatinum: () => true });
+        useLicenseMock.mockReturnValue({
+          isAtLeastGold: () => true,
+          isAtLeastPlatinum: () => true,
+        });
 
         renderWithTestingProviders(<AllCasesList />);
 
@@ -959,18 +1127,24 @@ describe('AllCasesListGeneric', () => {
         ).toBeInTheDocument();
 
         // Deactivates assignees filter
-        await userEvent.click(await screen.findByRole('button', { name: 'More' }));
+        await userEvent.click(
+          await screen.findByTestId('options-filter-popover-button-more-filters')
+        );
         await waitForEuiPopoverOpen();
         await userEvent.click(await screen.findByRole('option', { name: 'Assignees' }));
 
-        expect(useGetCasesMock).toHaveBeenLastCalledWith({
-          filterOptions: {
-            ...DEFAULT_FILTER_OPTIONS,
-            assignees: [],
-          },
-          queryParams: DEFAULT_QUERY_PARAMS,
+        await waitFor(() => {
+          expect(useGetCasesMock).toHaveBeenCalledWith(mockEarliestCaseParams);
         });
-
+        await waitFor(() => {
+          expect(useGetCasesMock).toHaveBeenCalledWith({
+            filterOptions: {
+              ...DEFAULT_FILTER_OPTIONS,
+              assignees: [],
+            },
+            queryParams: DEFAULT_QUERY_PARAMS,
+          });
+        });
         // Reopens assignees filter
         await userEvent.click(await screen.findByRole('option', { name: 'Assignees' }));
         // Opens the assignees popup
@@ -992,10 +1166,332 @@ describe('AllCasesListGeneric', () => {
       expect(await screen.findByTestId('column-selection-popover-button')).toBeInTheDocument();
     });
 
-    it('does not render the columns popover when isSelectorView=true', () => {
+    it('does not render the columns button when isSelectorView=true', async () => {
       renderWithTestingProviders(<AllCasesList isSelectorView={true} />);
 
+      await screen.findByTestId('cases-table');
+
       expect(screen.queryByTestId('column-selection-popover-button')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('List view mode', () => {
+    beforeEach(() => {
+      useViewModeMock.mockReturnValue({
+        viewMode: VIEW_TOGGLE_LIST_ID,
+        setViewMode: jest.fn(),
+      });
+    });
+
+    it('should render the list view', async () => {
+      renderWithTestingProviders(<AllCasesList />);
+
+      expect(await screen.findByTestId('cases-list-view')).toBeInTheDocument();
+      expect(screen.queryByTestId('cases-table')).not.toBeInTheDocument();
+    });
+
+    it('should show the clear filters button when filters differ from defaults', async () => {
+      useLicenseMock.mockReturnValue({ isAtLeastGold: () => true, isAtLeastPlatinum: () => true });
+
+      renderWithTestingProviders(<AllCasesList />);
+
+      await userEvent.click(await screen.findByTestId('options-filter-popover-button-category'));
+      await waitForEuiPopoverOpen();
+      await userEvent.click(await screen.findByTestId('options-filter-popover-item-twix'));
+
+      expect(await screen.findByTestId('all-cases-clear-filters-link-icon')).toBeInTheDocument();
+      expect(screen.queryByTestId('cases-table')).not.toBeInTheDocument();
+    });
+
+    it('should show case count in the utility bar', async () => {
+      renderWithTestingProviders(<AllCasesList />);
+
+      expect(await screen.findByTestId('case-table-case-count')).toHaveTextContent(
+        `Showing 10 of ${useGetCasesMockState.data.total}`
+      );
+    });
+
+    it('should show bulk actions when a case is selected in list view', async () => {
+      renderWithTestingProviders(<AllCasesList />);
+
+      await userEvent.click(
+        await screen.findByTestId(
+          `cases-list-item-checkbox-${useGetCasesMockState.data.cases[0].id}`
+        )
+      );
+
+      expect(await screen.findByText('Selected 1 case')).toBeInTheDocument();
+      expect(await screen.findByTestId('case-table-bulk-actions-link-icon')).toBeInTheDocument();
+      expect(await screen.findByTestId('all-cases-select-all-link')).toBeInTheDocument();
+      expect(await screen.findByTestId('all-cases-clear-selection-link')).toBeInTheDocument();
+    });
+
+    it('should not clear selection when switching from list to table view', async () => {
+      let currentViewMode: ViewToggleId = VIEW_TOGGLE_LIST_ID;
+      const setViewMode = jest.fn((mode: ViewToggleId) => {
+        currentViewMode = mode;
+      });
+      useViewModeMock.mockImplementation(() => ({
+        viewMode: currentViewMode,
+        setViewMode,
+      }));
+
+      const { rerender } = renderWithTestingProviders(
+        <AllCasesList hiddenStatuses={[CaseStatuses.closed]} />
+      );
+
+      const caseToSelect = useGetCasesMockState.data.cases[0];
+      await userEvent.click(
+        await screen.findByTestId(`cases-list-item-checkbox-${caseToSelect.id}`)
+      );
+
+      expect(await screen.findByText('Selected 1 case')).toBeInTheDocument();
+
+      await userEvent.click(screen.getByRole('button', { name: /table view/i }));
+      expect(setViewMode).toHaveBeenCalledWith(VIEW_TOGGLE_TABLE_ID);
+      expect(currentViewMode).toBe(VIEW_TOGGLE_TABLE_ID);
+
+      rerender(<AllCasesList hiddenStatuses={[]} />);
+      await waitForComponentToUpdate();
+
+      expect(await screen.findByTestId('cases-table')).toBeInTheDocument();
+      expect(await screen.findByTestId(`checkboxSelectRow-${caseToSelect.id}`)).toBeChecked();
+      expect(await screen.findByText('Selected 1 case')).toBeInTheDocument();
+    });
+
+    it('should not clear selection when switching from table to list while sorted by createdAt', async () => {
+      let currentViewMode: ViewToggleId = VIEW_TOGGLE_TABLE_ID;
+      const setViewMode = jest.fn((mode: ViewToggleId) => {
+        currentViewMode = mode;
+      });
+      useViewModeMock.mockImplementation(() => ({
+        viewMode: currentViewMode,
+        setViewMode,
+      }));
+
+      // hiddenStatuses must change on rerender so React.memo re-renders and picks up the new viewMode
+      const { rerender } = renderWithTestingProviders(
+        <AllCasesList hiddenStatuses={[CaseStatuses.closed]} />
+      );
+
+      const caseToSelect = useGetCasesMockState.data.cases[0];
+      await userEvent.click(await screen.findByTestId(`checkboxSelectRow-${caseToSelect.id}`));
+
+      expect(await screen.findByText('Selected 1 case')).toBeInTheDocument();
+
+      await userEvent.click(screen.getByRole('button', { name: /list view/i }));
+      expect(setViewMode).toHaveBeenCalledWith(VIEW_TOGGLE_LIST_ID);
+      expect(currentViewMode).toBe(VIEW_TOGGLE_LIST_ID);
+
+      rerender(<AllCasesList hiddenStatuses={[]} />);
+      await waitForComponentToUpdate();
+
+      expect(await screen.findByTestId('cases-list-view')).toBeInTheDocument();
+      expect(
+        await screen.findByTestId(`cases-list-item-checkbox-${caseToSelect.id}`)
+      ).toBeChecked();
+      expect(await screen.findByText('Selected 1 case')).toBeInTheDocument();
+    });
+
+    it('should clear selection when switching from table to list while sorted by a non-createdAt field', async () => {
+      let currentViewMode: ViewToggleId = VIEW_TOGGLE_TABLE_ID;
+      const setViewMode = jest.fn((mode: ViewToggleId) => {
+        currentViewMode = mode;
+      });
+      useViewModeMock.mockImplementation(() => ({
+        viewMode: currentViewMode,
+        setViewMode,
+      }));
+
+      const { rerender } = renderWithTestingProviders(
+        <AllCasesList hiddenStatuses={[CaseStatuses.closed]} />
+      );
+
+      // Sort by title so list-mode entry must normalize to createdAt
+      await userEvent.click(await screen.findByTitle('Name'));
+      await waitFor(() => {
+        expect(useGetCasesMock).toHaveBeenCalledWith(
+          expect.objectContaining({
+            queryParams: {
+              ...DEFAULT_QUERY_PARAMS,
+              sortField: SortFieldCase.title,
+              sortOrder: 'asc',
+            },
+          })
+        );
+      });
+
+      const caseToSelect = useGetCasesMockState.data.cases[0];
+      await userEvent.click(await screen.findByTestId(`checkboxSelectRow-${caseToSelect.id}`));
+
+      expect(await screen.findByText('Selected 1 case')).toBeInTheDocument();
+
+      await userEvent.click(screen.getByRole('button', { name: /list view/i }));
+      expect(setViewMode).toHaveBeenCalledWith(VIEW_TOGGLE_LIST_ID);
+      expect(currentViewMode).toBe(VIEW_TOGGLE_LIST_ID);
+
+      rerender(<AllCasesList hiddenStatuses={[]} />);
+      await waitForComponentToUpdate();
+
+      expect(await screen.findByTestId('cases-list-view')).toBeInTheDocument();
+      expect(screen.queryByText('Selected 1 case')).not.toBeInTheDocument();
+    });
+
+    it('should not render list checkboxes or bulk actions for read-only users', async () => {
+      renderWithTestingProviders(<AllCasesList />, {
+        wrapperProps: { permissions: readCasesPermissions() },
+      });
+
+      expect(await screen.findByTestId('cases-list-view')).toBeInTheDocument();
+
+      for (const theCase of useGetCasesMockState.data.cases) {
+        expect(
+          screen.queryByTestId(`cases-list-item-checkbox-${theCase.id}`)
+        ).not.toBeInTheDocument();
+      }
+
+      expect(screen.queryByTestId('case-table-bulk-actions-link-icon')).not.toBeInTheDocument();
+    });
+
+    it('should clear bulk actions when unchecking a selected case in list view', async () => {
+      renderWithTestingProviders(<AllCasesList />);
+
+      const caseToSelect = useGetCasesMockState.data.cases[0];
+      const checkbox = await screen.findByTestId(`cases-list-item-checkbox-${caseToSelect.id}`);
+
+      await userEvent.click(checkbox);
+
+      expect(await screen.findByText('Selected 1 case')).toBeInTheDocument();
+      expect(await screen.findByTestId('case-table-bulk-actions-link-icon')).toBeInTheDocument();
+
+      await userEvent.click(checkbox);
+
+      expect(screen.queryByText('Selected 1 case')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('case-table-bulk-actions-link-icon')).not.toBeInTheDocument();
+    });
+
+    it('should clear selection when sort order changes in list view', async () => {
+      renderWithTestingProviders(<AllCasesList />);
+
+      await userEvent.click(
+        await screen.findByTestId(
+          `cases-list-item-checkbox-${useGetCasesMockState.data.cases[0].id}`
+        )
+      );
+
+      expect(await screen.findByText('Selected 1 case')).toBeInTheDocument();
+
+      await userEvent.selectOptions(await screen.findByTestId('cases-list-sort-select'), 'asc');
+
+      expect(screen.queryByText('Selected 1 case')).not.toBeInTheDocument();
+    });
+
+    describe('Bulk actions', () => {
+      const updateCasesSpy = jest.spyOn(api, 'updateCases');
+
+      afterEach(() => {
+        updateCasesSpy.mockClear();
+      });
+
+      it('bulk update status from list view selection', async () => {
+        renderWithTestingProviders(<AllCasesList />);
+
+        await userEvent.click(
+          await screen.findByTestId(
+            `cases-list-item-checkbox-${useGetCasesMockState.data.cases[0].id}`
+          )
+        );
+
+        await userEvent.click(await screen.findByText('Bulk actions'));
+        await userEvent.click(await screen.findByTestId('case-bulk-action-status'), {
+          pointerEventsCheck: 0,
+        });
+        await userEvent.click(await screen.findByTestId('cases-bulk-action-status-open'));
+
+        await waitFor(() => {
+          expect(updateCasesSpy).toHaveBeenCalledWith({
+            cases: [
+              {
+                id: useGetCasesMockState.data.cases[0].id,
+                version: useGetCasesMockState.data.cases[0].version,
+                status: CaseStatuses.open,
+              },
+            ],
+          });
+        });
+      });
+    });
+  });
+
+  describe('Telemetry', () => {
+    it('reports a cases_list_page_view EBT event on load with the view mode, columns, and page size', async () => {
+      renderWithTestingProviders(<AllCasesList />);
+
+      await screen.findByTestId('cases-table');
+
+      expect(useKibanaMock().services.analytics.reportEvent).toHaveBeenCalledWith(
+        CASES_LIST_PAGE_VIEW_EVENT_TYPE,
+        expect.objectContaining({
+          owner: SECURITY_SOLUTION_OWNER,
+          view_mode: VIEW_TOGGLE_TABLE_ID,
+          selected_columns: expect.arrayContaining(['title', 'status', 'severity']),
+          per_page: DEFAULT_QUERY_PARAMS.perPage,
+          sort_field: DEFAULT_QUERY_PARAMS.sortField,
+          sort_order: DEFAULT_QUERY_PARAMS.sortOrder,
+          active_filter_dimensions: [],
+        })
+      );
+    });
+
+    it('reports a cases_list_page_view EBT event on load in list view mode with the selected fields', async () => {
+      useViewModeMock.mockReturnValue({
+        viewMode: VIEW_TOGGLE_LIST_ID,
+        setViewMode: jest.fn(),
+      });
+
+      renderWithTestingProviders(<AllCasesList />);
+
+      await screen.findByTestId('cases-list-view');
+
+      expect(useKibanaMock().services.analytics.reportEvent).toHaveBeenCalledWith(
+        CASES_LIST_PAGE_VIEW_EVENT_TYPE,
+        expect.objectContaining({
+          owner: SECURITY_SOLUTION_OWNER,
+          view_mode: VIEW_TOGGLE_LIST_ID,
+          // No optional fields are checked in the list view by default.
+          selected_columns: [],
+          per_page: DEFAULT_QUERY_PARAMS.perPage,
+        })
+      );
+    });
+
+    it('does not report a cases_list_page_view EBT event in the selector view', async () => {
+      renderWithTestingProviders(<AllCasesList isSelectorView={true} />);
+
+      await screen.findByTestId('cases-table');
+
+      expect(useKibanaMock().services.analytics.reportEvent).not.toHaveBeenCalledWith(
+        CASES_LIST_PAGE_VIEW_EVENT_TYPE,
+        expect.anything()
+      );
+    });
+
+    it('reports a cases_list_view_mode_changed EBT event when the view toggle is clicked', async () => {
+      const setViewMode = jest.fn();
+      useViewModeMock.mockReturnValue({
+        viewMode: VIEW_TOGGLE_TABLE_ID,
+        setViewMode,
+      });
+
+      renderWithTestingProviders(<AllCasesList />);
+
+      await userEvent.click(await screen.findByRole('button', { name: /list view/i }));
+
+      expect(setViewMode).toHaveBeenCalledWith(VIEW_TOGGLE_LIST_ID);
+      expect(useKibanaMock().services.analytics.reportEvent).toHaveBeenCalledWith(
+        CASES_LIST_VIEW_MODE_CHANGED_EVENT_TYPE,
+        expect.objectContaining({ view_mode: VIEW_TOGGLE_LIST_ID })
+      );
     });
   });
 });

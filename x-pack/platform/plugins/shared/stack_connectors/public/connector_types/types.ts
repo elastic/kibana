@@ -6,6 +6,7 @@
  */
 
 import type { EuiIconProps } from '@elastic/eui';
+import type { WebhookMethods } from '@kbn/connector-schemas/common/auth/constants';
 import type { UserConfiguredActionConnector } from '@kbn/triggers-actions-ui-plugin/public/types';
 
 export interface EmailActionParams {
@@ -14,6 +15,7 @@ export interface EmailActionParams {
   bcc: string[];
   subject: string;
   message: string;
+  replyTo?: string[];
 }
 
 export enum EventActionOptions {
@@ -87,6 +89,7 @@ export interface EmailConfig {
   service: string;
   clientId?: string;
   tenantId?: string;
+  allowHtml?: boolean;
 }
 
 export interface EmailSecrets {
@@ -125,7 +128,7 @@ export interface SlackSecrets {
 export type SlackActionConnector = UserConfiguredActionConnector<unknown, SlackSecrets>;
 
 export interface WebhookConfig {
-  method: string;
+  method: WebhookMethods;
   url: string;
   headers: Record<string, string>;
   hasAuth: boolean;

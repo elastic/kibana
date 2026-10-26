@@ -8,7 +8,7 @@
  */
 
 import { readFileSync } from 'fs';
-import { Server } from '@hapi/hapi';
+import type { Server } from '@hapi/hapi';
 import { EMPTY } from 'rxjs';
 import moment from 'moment';
 import supertest from 'supertest';
@@ -16,7 +16,8 @@ import { KBN_CERT_PATH, KBN_KEY_PATH } from '@kbn/dev-utils';
 import { getServerOptions, createServer, type IHttpConfig } from '@kbn/server-http-tools';
 import { ByteSizeValue } from '@kbn/config-schema';
 
-import { Http2BasePathProxyServer, BasePathProxyServerOptions } from '../base_path_proxy';
+import type { BasePathProxyServerOptions } from '../base_path_proxy';
+import { Http2BasePathProxyServer } from '../base_path_proxy';
 import { DevConfig } from '../config/dev_config';
 import { TestLog } from '../log';
 

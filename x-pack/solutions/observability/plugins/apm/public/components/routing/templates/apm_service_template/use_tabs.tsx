@@ -5,12 +5,9 @@
  * 2.0.
  */
 
-import type { EuiPageHeaderProps } from '@elastic/eui';
-import { EuiBadge, EuiToolTip } from '@elastic/eui';
+import type { AppHeaderTab } from '@kbn/app-header';
 import { i18n } from '@kbn/i18n';
-import { enableAwsLambdaMetrics } from '@kbn/observability-plugin/common';
 import { keyBy, omit } from 'lodash';
-import React from 'react';
 import {
   isAWSLambdaAgentName,
   isAzureFunctionsAgentName,
@@ -25,69 +22,49 @@ import { useApmServiceContext } from '../../../../context/apm_service/use_apm_se
 import { useApmFeatureFlag } from '../../../../hooks/use_apm_feature_flag';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
-import { useFetcher } from '../../../../hooks/use_fetcher';
-import { useProfilingIntegrationSetting } from '../../../../hooks/use_profiling_integration_setting';
-import { useTimeRange } from '../../../../hooks/use_time_range';
-import { isApmSignal, isLogsSignal } from '../../../../utils/get_signal_type';
+import { useProfilingPluginSetting } from '../../../../hooks/use_profiling_integration_setting';
 import { getAlertingCapabilities } from '../../../alerting/utils/get_alerting_capabilities';
-import { BetaBadge } from '../../../shared/beta_badge';
-import { TechnicalPreviewBadge } from '../../../shared/technical_preview_badge';
 
-export type Tab = NonNullable<EuiPageHeaderProps['tabs']>[0] & {
-  key:
-    | 'overview'
-    | 'transactions'
-    | 'dependencies'
-    | 'errors'
-    | 'metrics'
-    | 'nodes'
-    | 'infrastructure'
-    | 'service-map'
-    | 'logs'
-    | 'alerts'
-    | 'profiling'
-    | 'dashboards';
-  hidden?: boolean;
-};
+export type TabKey =
+  | 'overview'
+  | 'transactions'
+  | 'dependencies'
+  | 'errors'
+  | 'metrics'
+  | 'nodes'
+  | 'infrastructure'
+  | 'logs'
+  | 'alerts'
+  | 'profiling'
+  | 'dashboards';
 
-const apmOrderedTabs: Array<Tab['key']> = [
+const technicalPreviewTooltip = i18n.translate('xpack.apm.technicalPreviewBadgeDescription', {
+  defaultMessage:
+    'This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.',
+});
+
+const apmOrderedTabs: TabKey[] = [
   'overview',
   'transactions',
   'dependencies',
   'errors',
   'metrics',
   'infrastructure',
-  'service-map',
   'logs',
   'alerts',
   'profiling',
   'dashboards',
-];
-const logsOnlyOrderedTabs: Array<Tab['key']> = [
-  'overview',
-  'logs',
-  'dashboards',
-  'transactions',
-  'dependencies',
-  'errors',
-  'metrics',
-  'infrastructure',
-  'service-map',
-  'alerts',
-  'profiling',
 ];
 
 export function isMetricsTabHidden({
   agentName,
   serverlessType,
-  isAwsLambdaEnabled,
 }: {
   agentName?: string;
   serverlessType?: ServerlessType;
-  isAwsLambdaEnabled?: boolean;
 }) {
   if (isAWSLambdaAgentName(serverlessType)) {
-    return !isAwsLambdaEnabled;
+    return false;
   }
   return !agentName || isRumAgentName(agentName) || isAzureFunctionsAgentName(serverlessType);
 }
@@ -109,45 +86,30 @@ export function isInfraTabHidden({
   );
 }
 
-export function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
+type ServiceTabDefinition = AppHeaderTab & {
+  key: TabKey;
+  hidden?: boolean;
+  isTechnicalPreview?: boolean;
+};
+
+export function useTabs({ selectedTab }: { selectedTab: TabKey }): AppHeaderTab[] {
   const router = useApmRouter();
-  const { agentName, serverlessType, serviceEntitySummary } = useApmServiceContext();
+  const { agentName, serverlessType } = useApmServiceContext();
   const { core, plugins } = useApmPluginContext();
   const { capabilities } = core.application;
-  const isAwsLambdaEnabled = core.uiSettings.get<boolean>(enableAwsLambdaMetrics, true);
   const { isAlertingAvailable, canReadAlerts } = getAlertingCapabilities(plugins, capabilities);
   const isInfraTabAvailable = useApmFeatureFlag(ApmFeatureFlagName.InfrastructureTabAvailable);
-  const isProfilingIntegrationEnabled = useProfilingIntegrationSetting();
+  const isProfilingPluginEnabled = useProfilingPluginSetting();
   const {
     path: { serviceName },
     query: queryFromUrl,
   } = useApmParams(`/services/{serviceName}/${selectedTab}` as const);
   const query = omit(queryFromUrl, 'page', 'pageSize', 'sortField', 'sortDirection');
 
-  const { rangeFrom, rangeTo, environment } = queryFromUrl;
-  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
-
-  const { data: serviceAlertsCount = { alertsCount: 0 } } = useFetcher(
-    (callApmApi) => {
-      return callApmApi('GET /internal/apm/services/{serviceName}/alerts_count', {
-        params: {
-          path: {
-            serviceName,
-          },
-          query: {
-            start,
-            end,
-            environment,
-          },
-        },
-      });
-    },
-    [serviceName, start, end, environment]
-  );
-
-  const allTabsDefinitions: Tab[] = [
+  const allTabsDefinitions: ServiceTabDefinition[] = [
     {
       key: 'overview',
+      id: 'overview',
       href: router.link('/services/{serviceName}/overview', {
         path: { serviceName },
         query,
@@ -158,6 +120,7 @@ export function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
     },
     {
       key: 'transactions',
+      id: 'transactions',
       href: router.link('/services/{serviceName}/transactions', {
         path: { serviceName },
         query,
@@ -168,6 +131,7 @@ export function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
     },
     {
       key: 'dependencies',
+      id: 'dependencies',
       href: router.link('/services/{serviceName}/dependencies', {
         path: { serviceName },
         query,
@@ -179,6 +143,7 @@ export function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
     },
     {
       key: 'errors',
+      id: 'errors',
       href: router.link('/services/{serviceName}/errors', {
         path: { serviceName },
         query,
@@ -189,6 +154,7 @@ export function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
     },
     {
       key: 'metrics',
+      id: 'metrics',
       href: router.link('/services/{serviceName}/metrics', {
         path: { serviceName },
         query,
@@ -196,20 +162,19 @@ export function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
       label: i18n.translate('xpack.apm.serviceDetails.metricsTabLabel', {
         defaultMessage: 'Metrics',
       }),
-      append: isServerlessAgentName(serverlessType) && <TechnicalPreviewBadge icon="beaker" />,
+      isTechnicalPreview: isServerlessAgentName(serverlessType),
       hidden: isMetricsTabHidden({
         agentName,
         serverlessType,
-        isAwsLambdaEnabled,
       }),
     },
     {
       key: 'infrastructure',
+      id: 'infrastructure',
       href: router.link('/services/{serviceName}/infrastructure', {
         path: { serviceName },
         query,
       }),
-      append: <BetaBadge icon="beta" />,
       label: i18n.translate('xpack.apm.home.infraTabLabel', {
         defaultMessage: 'Infrastructure',
       }),
@@ -220,17 +185,8 @@ export function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
       }),
     },
     {
-      key: 'service-map',
-      href: router.link('/services/{serviceName}/service-map', {
-        path: { serviceName },
-        query,
-      }),
-      label: i18n.translate('xpack.apm.home.serviceMapTabLabel', {
-        defaultMessage: 'Service Map',
-      }),
-    },
-    {
       key: 'logs',
+      id: 'logs',
       href: router.link('/services/{serviceName}/logs', {
         path: { serviceName },
         query,
@@ -238,29 +194,16 @@ export function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
       label: i18n.translate('xpack.apm.home.serviceLogsTabLabel', {
         defaultMessage: 'Logs',
       }),
-      append: isServerlessAgentName(serverlessType) && <TechnicalPreviewBadge icon="beaker" />,
+      isTechnicalPreview: isServerlessAgentName(serverlessType),
       hidden: !agentName || isRumAgentName(agentName) || isAzureFunctionsAgentName(serverlessType),
     },
     {
       key: 'alerts',
+      id: 'alerts',
       href: router.link('/services/{serviceName}/alerts', {
         path: { serviceName },
         query,
       }),
-      append:
-        serviceAlertsCount.alertsCount > 0 ? (
-          <EuiToolTip
-            position="bottom"
-            content={i18n.translate(
-              'xpack.apm.home.serviceAlertsTable.tooltip.activeAlertsExplanation',
-              {
-                defaultMessage: 'Active alerts',
-              }
-            )}
-          >
-            <EuiBadge color="danger">{serviceAlertsCount.alertsCount}</EuiBadge>
-          </EuiToolTip>
-        ) : null,
       label: i18n.translate('xpack.apm.home.alertsTabLabel', {
         defaultMessage: 'Alerts',
       }),
@@ -268,21 +211,22 @@ export function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
     },
     {
       key: 'profiling',
+      id: 'profiling',
       href: router.link('/services/{serviceName}/profiling', {
         path: { serviceName },
         query,
       }),
       label: i18n.translate('xpack.apm.home.profilingTabLabel', {
-        defaultMessage: 'Universal Profiling',
+        defaultMessage: 'Profiling',
       }),
-
       hidden:
-        !isProfilingIntegrationEnabled ||
+        !isProfilingPluginEnabled ||
         isRumOrMobileAgentName(agentName) ||
         isAWSLambdaAgentName(serverlessType),
     },
     {
       key: 'dashboards',
+      id: 'dashboards',
       href: router.link('/services/{serviceName}/dashboards', {
         path: { serviceName },
         query,
@@ -290,30 +234,28 @@ export function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
       label: i18n.translate('xpack.apm.home.dashboardsTabLabel', {
         defaultMessage: 'Dashboards',
       }),
-      append: <TechnicalPreviewBadge icon="beaker" />,
+      isTechnicalPreview: true,
     },
   ];
 
-  const hasLogsSignal =
-    serviceEntitySummary?.dataStreamTypes && isLogsSignal(serviceEntitySummary.dataStreamTypes);
-
-  const hasApmSignal =
-    serviceEntitySummary?.dataStreamTypes && isApmSignal(serviceEntitySummary.dataStreamTypes);
-
-  const isLogsOnlyView = hasLogsSignal && !hasApmSignal;
-
   const tabsGroupedByKey = keyBy(allTabsDefinitions, 'key');
-  const tabKeys = isLogsOnlyView ? logsOnlyOrderedTabs : apmOrderedTabs;
 
-  return tabKeys
+  return apmOrderedTabs
     .map((key) => tabsGroupedByKey[key])
     .filter((t) => !t.hidden)
-    .map(({ href, key, label, prepend, append }) => ({
+    .map(({ href, key, id, label, isTechnicalPreview }) => ({
+      id,
       href,
       label,
-      prepend,
-      append,
       isSelected: key === selectedTab,
       'data-test-subj': `${key}Tab`,
+      ...(isTechnicalPreview
+        ? {
+            badge: {
+              iconType: 'flask',
+              tooltip: technicalPreviewTooltip,
+            },
+          }
+        : {}),
     }));
 }

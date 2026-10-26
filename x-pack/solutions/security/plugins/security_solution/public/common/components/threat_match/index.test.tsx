@@ -13,9 +13,8 @@ import { render, screen } from '@testing-library/react';
 import { fields } from '@kbn/data-plugin/common/mocks';
 
 import { useKibana } from '../../lib/kibana';
-
+import type { ThreatMapping } from '../../../../common/api/detection_engine/model/rule_schema';
 import { ThreatMatchComponent } from '.';
-import type { ThreatMapEntries } from './types';
 import type { DataViewBase } from '@kbn/es-query';
 import { getMockTheme } from '../../lib/kibana/kibana_react.mock';
 import { createOrNewEntryItem } from './helpers';
@@ -27,8 +26,11 @@ const mockTheme = getMockTheme({
 });
 
 jest.mock('../../lib/kibana');
+jest.mock('../../hooks/use_experimental_features', () => ({
+  useIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(false),
+}));
 
-const getDoublePayLoad = (): ThreatMapEntries[] => [
+const getDoublePayLoad = (): ThreatMapping => [
   { entries: [{ field: 'host.name', type: 'mapping', value: 'host.name' }] },
   { entries: [{ field: 'host.name', type: 'mapping', value: 'host.name' }] },
 ];
@@ -86,7 +88,7 @@ describe('ThreatMatchComponent', () => {
   });
 
   test('it displays field values for "listItems" that are passed in', async () => {
-    const mapping: ThreatMapEntries[] = [
+    const mapping: ThreatMapping = [
       { entries: [{ field: 'host.name', type: 'mapping', value: 'host.name' }] },
     ];
 
@@ -197,7 +199,7 @@ describe('ThreatMatchComponent', () => {
   });
 
   test('it shows two AND entries', () => {
-    const mappingEntries: ThreatMapEntries[] = [
+    const mappingEntries: ThreatMapping = [
       {
         entries: [
           {
@@ -305,7 +307,7 @@ describe('ThreatMatchComponent', () => {
   });
 
   test('it shows two OR entries', () => {
-    const mappingEntries: ThreatMapEntries[] = [
+    const mappingEntries: ThreatMapping = [
       {
         entries: [
           {
@@ -398,7 +400,7 @@ describe('ThreatMatchComponent', () => {
   });
 
   test('it displays "and" badge if at least one item includes more than one entry', () => {
-    const mappingEntries: ThreatMapEntries[] = [
+    const mappingEntries: ThreatMapping = [
       {
         entries: [
           {

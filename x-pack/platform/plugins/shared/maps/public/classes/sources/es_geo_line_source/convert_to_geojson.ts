@@ -6,7 +6,7 @@
  */
 
 import _ from 'lodash';
-import { Feature, FeatureCollection } from 'geojson';
+import type { Feature, FeatureCollection } from 'geojson';
 import { extractPropertiesFromBucket } from '../../../../common/elasticsearch_util';
 
 const KEYS_TO_IGNORE = ['key', 'path'];

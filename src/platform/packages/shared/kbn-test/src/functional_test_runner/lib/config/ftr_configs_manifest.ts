@@ -11,7 +11,7 @@ import Path from 'path';
 import Fs from 'fs';
 
 import { REPO_ROOT } from '@kbn/repo-info';
-import JsYaml from 'js-yaml';
+import { parse } from 'yaml';
 
 interface FtrConfigWithOptions {
   [configPath: string]: {
@@ -25,7 +25,7 @@ interface FtrConfigsManifest {
   enabled: Array<string | FtrConfigWithOptions>;
 }
 
-const FTR_CONFIGS_MANIFEST_SOURCE_REL = '.buildkite/ftr_configs_manifests.json';
+const FTR_CONFIGS_MANIFEST_SOURCE_REL = '.buildkite/ftr-manifests/ftr_configs_manifests.json';
 
 const getAllFtrConfigsManifests = () => {
   const ftrConfigsManifestsSourcePath = Path.resolve(REPO_ROOT, FTR_CONFIGS_MANIFEST_SOURCE_REL);
@@ -42,10 +42,10 @@ const getAllFtrConfigsManifests = () => {
 
 export const getAllFtrConfigsAndManifests = () => {
   const manifestPaths = getAllFtrConfigsManifests();
-  const allFtrConfigs: string[] = [];
+  const ftrConfigEntries = new Map<string, string[]>();
 
   for (const manifestRelPath of manifestPaths.all) {
-    const manifest = JsYaml.load(
+    const manifest = parse(
       Fs.readFileSync(Path.resolve(REPO_ROOT, manifestRelPath), 'utf8')
     ) as FtrConfigsManifest;
 
@@ -59,8 +59,13 @@ export const getAllFtrConfigsAndManifests = () => {
         return Path.resolve(REPO_ROOT, rel);
       });
 
-    allFtrConfigs.push(...ftrConfigsInManifest);
+    for (const config of ftrConfigsInManifest) {
+      if (!ftrConfigEntries.has(config)) {
+        ftrConfigEntries.set(config, []);
+      }
+      ftrConfigEntries.get(config)!.push(manifestRelPath);
+    }
   }
 
-  return { allFtrConfigs, manifestPaths };
+  return { ftrConfigEntries, manifestPaths };
 };

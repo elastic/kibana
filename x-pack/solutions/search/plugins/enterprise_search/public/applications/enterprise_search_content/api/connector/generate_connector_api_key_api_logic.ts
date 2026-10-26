@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { Actions, createApiLogic } from '../../../shared/api_logic/create_api_logic';
+import type { Actions } from '../../../shared/api_logic/create_api_logic';
+import { createApiLogic } from '../../../shared/api_logic/create_api_logic';
 import { HttpLogic } from '../../../shared/http';
 
 export interface ApiKey {
@@ -20,7 +21,7 @@ export interface GenerateConnectorApiKeyApiArgs {
 }
 
 export const generateApiKey = async ({ indexName, isNative }: GenerateConnectorApiKeyApiArgs) => {
-  const route = `/internal/enterprise_search/indices/${indexName}/api_key`;
+  const route = `/internal/enterprise_search/indices/${encodeURIComponent(indexName)}/api_key`;
   const params = {
     is_native: isNative,
   };

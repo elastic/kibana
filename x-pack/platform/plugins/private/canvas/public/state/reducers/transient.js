@@ -6,9 +6,7 @@
  */
 
 import { handleActions } from 'redux-actions';
-import immutable from 'object-path-immutable';
-
-const { set, del } = immutable;
+import { set, del } from '../../../common/lib/object_path_immutable';
 
 export const transientReducer = handleActions(
   {

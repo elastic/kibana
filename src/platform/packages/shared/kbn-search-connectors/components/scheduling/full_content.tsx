@@ -9,19 +9,21 @@
 
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import type { EuiSwitchProps } from '@elastic/eui';
 import {
-  EuiSwitchProps,
-  EuiSwitch,
   EuiAccordion,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
+  EuiSwitch,
   EuiText,
   EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
 
-import { Connector, SchedulingConfiguraton, SyncJobType } from '../../types/connectors';
+import type { Connector, SchedulingConfiguraton } from '../../types/connectors';
+import { SyncJobType } from '../../types/connectors';
 import { PlatinumLicensePopover } from '../configuration/platinum_license_popover';
 import { ConnectorCronEditor } from './connector_cron_editor';
 export interface ConnectorContentSchedulingProps {
@@ -158,16 +160,26 @@ export const ConnectorContentScheduling: React.FC<ConnectorContentSchedulingProp
                     isPopoverOpen={isPlatinumPopoverOpen}
                     closePopover={() => setIsPlatinumPopoverOpen(!isPlatinumPopoverOpen)}
                     button={
-                      <EuiButtonIcon
-                        aria-label={i18n.translate(
+                      <EuiToolTip
+                        content={i18n.translate(
                           'searchConnectors.selectConnector.openPopoverLabel',
                           {
                             defaultMessage: 'Open licensing popover',
                           }
                         )}
-                        iconType="questionInCircle"
-                        onClick={() => setIsPlatinumPopoverOpen(!isPlatinumPopoverOpen)}
-                      />
+                        disableScreenReaderOutput
+                      >
+                        <EuiButtonIcon
+                          aria-label={i18n.translate(
+                            'searchConnectors.selectConnector.openPopoverLabel',
+                            {
+                              defaultMessage: 'Open licensing popover',
+                            }
+                          )}
+                          iconType="question"
+                          onClick={() => setIsPlatinumPopoverOpen(!isPlatinumPopoverOpen)}
+                        />
+                      </EuiToolTip>
                     }
                   />
                 </EuiFlexItem>

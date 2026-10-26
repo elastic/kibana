@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { RecursiveReadonly } from '@kbn/utility-types';
+import type { RecursiveReadonly } from '@kbn/utility-types';
 import { deepFreeze } from '@kbn/std';
-import {
+import type {
   CoreSetup,
   CoreStart,
   SavedObjectsServiceStart,
@@ -16,12 +16,13 @@ import {
   PluginInitializerContext,
   Capabilities as UICapabilities,
 } from '@kbn/core/server';
-import { ConfigType } from './config';
-import { FeatureRegistry, GetKibanaFeaturesParams } from './feature_registry';
+import type { ConfigType } from './config';
+import type { GetKibanaFeaturesParams } from './feature_registry';
+import { FeatureRegistry } from './feature_registry';
 import { uiCapabilitiesForFeatures } from './ui_capabilities_for_features';
 import { buildOSSFeatures } from './oss_features';
 import { defineRoutes } from './routes';
-import {
+import type {
   ElasticsearchFeatureConfig,
   ElasticsearchFeature,
   KibanaFeature,

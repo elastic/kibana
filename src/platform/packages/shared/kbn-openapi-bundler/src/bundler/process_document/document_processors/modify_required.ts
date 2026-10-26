@@ -12,7 +12,7 @@ import { logger } from '../../../logger';
 import { isPlainObjectType } from '../../../utils/is_plain_object_type';
 import { hasProp } from '../../../utils/has_prop';
 import { X_MODIFY } from '../../known_custom_props';
-import { DocumentNodeProcessor } from './types/document_node_processor';
+import type { DocumentNodeProcessor } from './types/document_node_processor';
 import { inlineRef } from './utils/inline_ref';
 
 /**

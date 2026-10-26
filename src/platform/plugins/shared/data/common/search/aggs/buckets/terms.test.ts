@@ -110,9 +110,6 @@ describe('Terms Agg', () => {
                 "missingBucket": Array [
                   false,
                 ],
-                "missingBucketLabel": Array [
-                  "Missing",
-                ],
                 "order": Array [
                   "desc",
                 ],

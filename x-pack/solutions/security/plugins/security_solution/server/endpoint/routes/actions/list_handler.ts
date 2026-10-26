@@ -12,7 +12,6 @@
  */
 
 import type { RequestHandler } from '@kbn/core/server';
-import { CustomHttpRequestError } from '../../../utils/custom_http_request_error';
 import type { EndpointActionListRequestQuery } from '../../../../common/api/endpoint';
 import { ENDPOINT_ACTIONS_INDEX } from '../../../../common/endpoint/constants';
 import { getActionList, getActionListByStatus } from '../../services';
@@ -63,45 +62,42 @@ export const actionListHandler = (
       },
     } = req;
     const esClient = (await context.core).elasticsearch.client.asInternalUser;
+    const activeSpaceId = (await context.securitySolution).getSpaceId();
+    const scoped = await endpointContext.service.asScoped(req);
 
     try {
-      const indexExists = await doesLogsEndpointActionsIndexExist({
-        esClient,
-        logger,
-        indexName: ENDPOINT_ACTIONS_INDEX,
-      });
-
-      if (!indexExists) {
-        return res.notFound({ body: 'index_not_found_exception' });
-      }
-
-      // verify feature flag for sentinel_one `aaentType`
-      const agentTypes = formatRequestParams(_agentTypes);
-      if (
-        !endpointContext.experimentalFeatures.responseActionsSentinelOneV1Enabled &&
-        agentTypes?.includes('sentinel_one')
-      ) {
-        return errorHandler(
+      // The probe is origin-only, so under CPS an origin that has never dispatched an action would
+      // 404 the whole list even when linked projects hold history. The search tolerates the missing
+      // index on its own.
+      if (!scoped.isCpsRead()) {
+        const indexExists = await doesLogsEndpointActionsIndexExist({
+          esClient,
           logger,
-          res,
-          new CustomHttpRequestError('[request body.agentTypes]: sentinel_one is disabled', 400)
-        );
+          indexName: ENDPOINT_ACTIONS_INDEX,
+        });
+
+        if (!indexExists) {
+          return res.notFound({ body: 'index_not_found_exception' });
+        }
       }
 
-      const requestParams = {
+      // verify feature flag for sentinel_one `agentType`
+      const agentTypes = formatRequestParams(_agentTypes);
+      const requestParams: Parameters<typeof getActionList>[0] = {
         agentTypes,
         withOutputs: formatRequestParams(withOutputs),
         types: formatRequestParams(types),
         commands: formatRequestParams(commands),
-        esClient,
         elasticAgentIds: formatRequestParams(elasticAgentIds),
-        metadataService: endpointContext.service.getEndpointMetadataService(),
+        userIds: formatRequestParams(userIds),
         page,
         pageSize,
         startDate,
         endDate,
-        userIds: formatRequestParams(userIds),
-        logger,
+
+        spaceId: activeSpaceId,
+        endpointService: endpointContext.service,
+        scoped,
       };
       // wrapper method to branch logic for
       // normal paged search via page, size

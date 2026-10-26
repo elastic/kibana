@@ -73,7 +73,9 @@ describe('Endpoint artifact packager task', () => {
       const createTaskRunner =
         mockTaskManager.registerTaskDefinitions.mock.calls[0][0][ManifestTaskConstants.TYPE]
           .createTaskRunner;
-      const taskRunner = createTaskRunner({ taskInstance: MOCK_TASK_INSTANCE });
+      const taskRunner = createTaskRunner(
+        taskManagerMock.createRunContext({ taskInstance: MOCK_TASK_INSTANCE })
+      );
       await taskRunner.run();
       expect(mockManifestTask.runTask).toHaveBeenCalled();
     });
@@ -96,7 +98,9 @@ describe('Endpoint artifact packager task', () => {
       const createTaskRunner =
         mockTaskManager.registerTaskDefinitions.mock.calls[0][0][ManifestTaskConstants.TYPE]
           .createTaskRunner;
-      const taskRunner = createTaskRunner({ taskInstance: MOCK_TASK_INSTANCE });
+      const taskRunner = createTaskRunner(
+        taskManagerMock.createRunContext({ taskInstance: MOCK_TASK_INSTANCE })
+      );
       await taskRunner.run();
     };
 

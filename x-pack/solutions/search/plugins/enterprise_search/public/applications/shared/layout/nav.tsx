@@ -18,7 +18,6 @@ import { SEARCH_APPLICATIONS_PATH, SearchApplicationViewTabs } from '../../appli
 
 import { KibanaLogic } from '../kibana';
 
-import { buildBaseClassicNavItems } from './base_nav';
 import { generateSideNavItems } from './classic_nav_helpers';
 import { generateNavLink } from './nav_link_helpers';
 
@@ -29,10 +28,10 @@ import { generateNavLink } from './nav_link_helpers';
  * @returns The Enterprise Search navigation items
  */
 export const useEnterpriseSearchNav = (alwaysReturn = false) => {
-  const { isSidebarEnabled, getNavLinks } = useValues(KibanaLogic);
+  const { isSidebarEnabled, getNavLinks, searchNavigation } = useValues(KibanaLogic);
 
   const navItems: Array<EuiSideNavItemTypeEnhanced<unknown>> = useMemo(() => {
-    const baseNavItems = buildBaseClassicNavItems();
+    const baseNavItems = searchNavigation.getBaseClassicNavItems();
     const deepLinks = getNavLinks().reduce((links, link) => {
       links[link.id] = link;
       return links;
@@ -98,7 +97,16 @@ export const useEnterpriseSearchApplicationNav = (
                   {i18n.translate('xpack.enterpriseSearch.nav.searchApplication.contentTitle', {
                     defaultMessage: 'Content',
                   })}
-                  {hasSchemaConflicts && <EuiIcon type="warning" color="danger" />}
+                  {hasSchemaConflicts && (
+                    <EuiIcon
+                      type="warning"
+                      color="danger"
+                      aria-label={i18n.translate(
+                        'xpack.enterpriseSearch.nav.schemaConflictsWarning',
+                        { defaultMessage: 'Schema conflicts' }
+                      )}
+                    />
+                  )}
                 </EuiFlexGroup>
               ),
               // Required for the new side nav

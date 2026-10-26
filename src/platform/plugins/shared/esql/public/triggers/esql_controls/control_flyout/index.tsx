@@ -7,26 +7,35 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useMemo, useState, useEffect } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { EuiFlyoutBody } from '@elastic/eui';
-import { css } from '@emotion/react';
-import { ESQLVariableType, type ESQLControlVariable } from '@kbn/esql-types';
+import type { ESQLEditorTelemetryService } from '@kbn/esql-editor';
+import type { TimeRange } from '@kbn/es-query';
+import {
+  ESQLVariableType,
+  EsqlControlType,
+  VariableNamePrefix,
+  TelemetryControlCancelledReason,
+  type ESQLControlVariable,
+  type ControlTriggerSource,
+  isQueryESQLControl,
+} from '@kbn/esql-types';
+import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 import { getValuesFromQueryField } from '@kbn/esql-utils';
+import { getVariableNamePrefix } from '@kbn/esql-controls-utils';
 import type { ISearchGeneric } from '@kbn/search-types';
-import { monaco } from '@kbn/monaco';
-import { type ESQLControlState, EsqlControlType, VariableNamePrefix } from '../types';
+import type { monaco } from '@kbn/code-editor';
 import { ValueControlForm } from './value_control_form';
 import { Header, ControlType, VariableName, Footer } from './shared_form_components';
 import { IdentifierControlForm } from './identifier_control_form';
 import {
   updateQueryStringWithVariable,
-  getFlyoutStyling,
+  flyoutStyles,
   getVariableSuggestion,
   getRecurrentVariableName,
   validateVariableName,
   areValuesIntervalsValid,
   getVariableTypeFromQuery,
-  getVariableNamePrefix,
   checkVariableExistence,
 } from './helpers';
 
@@ -35,37 +44,52 @@ interface ESQLControlsFlyoutProps {
   initialVariableType: ESQLVariableType;
   queryString: string;
   esqlVariables: ESQLControlVariable[];
-  onSaveControl?: (controlState: ESQLControlState, updatedQuery: string) => Promise<void>;
+  timeRange?: TimeRange;
+  onSaveControl?: (
+    controlState: OptionsListESQLControlState,
+    updatedQuery: string
+  ) => Promise<void>;
   onCancelControl?: () => void;
   cursorPosition?: monaco.Position;
-  initialState?: ESQLControlState;
+  initialState?: OptionsListESQLControlState;
   closeFlyout: () => void;
+  ariaLabelledBy: string;
+  currentApp?: string;
+  telemetryTriggerSource?: ControlTriggerSource;
+  telemetryService: ESQLEditorTelemetryService;
 }
+
+const isValuesType = (type: ESQLVariableType) =>
+  type === ESQLVariableType.VALUES || type === ESQLVariableType.MULTI_VALUES;
 
 export function ESQLControlsFlyout({
   search,
   initialVariableType,
   queryString,
   esqlVariables,
+  timeRange,
   onSaveControl,
   onCancelControl,
   cursorPosition,
   initialState,
   closeFlyout,
+  ariaLabelledBy,
+  currentApp,
+  telemetryTriggerSource,
+  telemetryService,
 }: ESQLControlsFlyoutProps) {
   // ?? or ?
   const [variableNamePrefix, setVariableNamePrefix] = useState(
     getVariableNamePrefix(initialVariableType)
   );
   const valuesField = useMemo(() => {
-    if (initialVariableType === ESQLVariableType.VALUES) {
+    if (isValuesType(initialVariableType)) {
       return getValuesFromQueryField(queryString, cursorPosition);
     }
     return undefined;
   }, [cursorPosition, initialVariableType, queryString]);
 
   const isControlInEditMode = useMemo(() => !!initialState, [initialState]);
-  const styling = useMemo(() => getFlyoutStyling(), []);
   const suggestedVariableName = useMemo(() => {
     const existingVariables = new Set(
       esqlVariables
@@ -74,12 +98,12 @@ export function ESQLControlsFlyout({
     );
 
     if (initialState) {
-      return `${variableNamePrefix}${initialState.variableName}`;
+      return `${variableNamePrefix}${initialState.variable_name}`;
     }
 
     let variableNameSuggestion = getVariableSuggestion(initialVariableType);
 
-    if (valuesField && initialVariableType === ESQLVariableType.VALUES) {
+    if (valuesField && isValuesType(initialVariableType)) {
       // variables names can't have special characters, only underscore
       const fieldVariableName = valuesField.replace(/[^a-zA-Z0-9]/g, '_');
       variableNameSuggestion = fieldVariableName;
@@ -92,23 +116,26 @@ export function ESQLControlsFlyout({
   }, [esqlVariables, initialState, valuesField, variableNamePrefix, initialVariableType]);
 
   const [controlFlyoutType, setControlFlyoutType] = useState<EsqlControlType>(
-    initialState?.controlType ??
-      (initialVariableType === ESQLVariableType.VALUES
+    (initialState?.control_type ??
+      (isValuesType(initialVariableType)
         ? EsqlControlType.VALUES_FROM_QUERY
-        : EsqlControlType.STATIC_VALUES)
+        : EsqlControlType.STATIC_VALUES)) as EsqlControlType
   );
   const [variableName, setVariableName] = useState(suggestedVariableName);
   const [variableType, setVariableType] = useState<ESQLVariableType>(initialVariableType);
 
-  const [formIsInvalid, setFormIsInvalid] = useState(false);
-  const [controlState, setControlState] = useState<ESQLControlState | undefined>(initialState);
+  const [isValid, setIsValid] = useState(false);
+  const [controlState, setControlState] = useState<OptionsListESQLControlState | undefined>(
+    initialState
+  );
 
   const areValuesValid = useMemo(() => {
-    const available = controlState?.availableOptions ?? [];
+    if (!controlState || isQueryESQLControl(controlState)) return true;
+    const available = controlState.available_options;
     return variableType === ESQLVariableType.TIME_LITERAL
       ? areValuesIntervalsValid(available.map((option) => option))
       : true;
-  }, [variableType, controlState?.availableOptions]);
+  }, [variableType, controlState]);
 
   const onVariableNameChange = useCallback(
     (e: { target: { value: React.SetStateAction<string> } }) => {
@@ -117,33 +144,35 @@ export function ESQLControlsFlyout({
       const newType = getVariableTypeFromQuery(text, variableType);
       setVariableType(newType);
       setVariableNamePrefix(getVariableNamePrefix(newType));
-      if (
-        controlFlyoutType === EsqlControlType.VALUES_FROM_QUERY &&
-        newType !== ESQLVariableType.VALUES
-      ) {
+      if (controlFlyoutType === EsqlControlType.VALUES_FROM_QUERY && !isValuesType(newType)) {
         setControlFlyoutType(EsqlControlType.STATIC_VALUES);
       }
     },
     [controlFlyoutType, variableNamePrefix, variableType]
   );
 
-  useEffect(() => {
+  const formIsInvalid = useMemo(() => {
     const variableNameWithoutQuestionmark = variableName.replace(/^\?+/, '');
     const variableExists =
       checkVariableExistence(esqlVariables, variableName) && !isControlInEditMode;
-    setFormIsInvalid(
+    const { available_options } = { available_options: [], ...controlState };
+    const isInvalid = controlFlyoutType === EsqlControlType.VALUES_FROM_QUERY && !isValid;
+
+    return (
       !variableNameWithoutQuestionmark ||
-        variableExists ||
-        !areValuesValid ||
-        !controlState?.availableOptions.length
+      variableExists ||
+      !areValuesValid ||
+      isInvalid ||
+      !available_options.length
     );
   }, [
     isControlInEditMode,
     areValuesValid,
-    controlState?.availableOptions.length,
+    controlState,
+    controlFlyoutType,
     esqlVariables,
     variableName,
-    variableType,
+    isValid,
   ]);
 
   const onFlyoutTypeChange = useCallback((controlType: EsqlControlType) => {
@@ -151,14 +180,26 @@ export function ESQLControlsFlyout({
   }, []);
 
   const onCreateControl = useCallback(async () => {
-    if (controlState && controlState.availableOptions.length) {
+    if (
+      controlState &&
+      'available_options' in controlState &&
+      controlState.available_options.length
+    ) {
       if (!isControlInEditMode) {
         if (cursorPosition) {
           const query = updateQueryStringWithVariable(queryString, variableName, cursorPosition);
           await onSaveControl?.(controlState, query);
+        } else {
+          await onSaveControl?.(controlState, queryString);
         }
       } else {
         await onSaveControl?.(controlState, '');
+      }
+      if (!isControlInEditMode) {
+        telemetryService.trackEsqlControlConfigSaved(
+          variableType,
+          telemetryTriggerSource as ControlTriggerSource
+        );
       }
     }
     closeFlyout();
@@ -170,7 +211,18 @@ export function ESQLControlsFlyout({
     queryString,
     variableName,
     onSaveControl,
+    variableType,
+    telemetryTriggerSource,
+    telemetryService,
   ]);
+
+  const onCloseFlyout = useCallback(() => {
+    telemetryService.trackEsqlControlConfigCancelled(
+      initialVariableType,
+      TelemetryControlCancelledReason.CANCEL_BUTTON
+    );
+    closeFlyout();
+  }, [closeFlyout, initialVariableType, telemetryService]);
 
   const formBody =
     variableNamePrefix === VariableNamePrefix.VALUE ? (
@@ -181,31 +233,32 @@ export function ESQLControlsFlyout({
         variableType={variableType}
         initialState={initialState}
         setControlState={setControlState}
+        setIsValid={setIsValid}
         search={search}
         valuesRetrieval={valuesField}
+        timeRange={timeRange}
+        esqlVariables={esqlVariables}
       />
     ) : (
       <IdentifierControlForm
         variableType={variableType}
+        esqlVariables={esqlVariables}
         variableName={variableName}
         queryString={queryString}
         setControlState={setControlState}
         initialState={initialState}
         search={search}
         cursorPosition={cursorPosition}
+        currentApp={currentApp}
       />
     );
 
   return (
     <>
-      <Header isInEditMode={isControlInEditMode} />
-      <EuiFlyoutBody
-        css={css`
-          ${styling}
-        `}
-      >
+      <Header isInEditMode={isControlInEditMode} ariaLabelledBy={ariaLabelledBy} />
+      <EuiFlyoutBody css={flyoutStyles}>
         <ControlType
-          isDisabled={variableType !== ESQLVariableType.VALUES}
+          isDisabled={!isValuesType(variableType)}
           initialControlFlyoutType={controlFlyoutType}
           onFlyoutTypeChange={onFlyoutTypeChange}
         />
@@ -219,11 +272,10 @@ export function ESQLControlsFlyout({
         {formBody}
       </EuiFlyoutBody>
       <Footer
-        isControlInEditMode={isControlInEditMode}
-        variableName={variableName}
+        type={controlFlyoutType}
         onCancelControl={onCancelControl}
         isSaveDisabled={formIsInvalid}
-        closeFlyout={closeFlyout}
+        closeFlyout={onCloseFlyout}
         onCreateControl={onCreateControl}
       />
     </>

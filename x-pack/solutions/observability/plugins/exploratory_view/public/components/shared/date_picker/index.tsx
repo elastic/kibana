@@ -10,7 +10,7 @@ import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import React, { useCallback } from 'react';
 import { useUiSetting } from '@kbn/kibana-react-plugin/public';
 import { useDatePickerContext } from '../../../hooks/use_date_picker_context';
-import { TimePickerQuickRange } from './typings';
+import type { TimePickerQuickRange } from './typings';
 
 export interface DatePickerProps {
   rangeFrom?: string;

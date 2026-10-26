@@ -7,14 +7,21 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import {
-  replaceAnonymizedValuesWithOriginalValues,
   type AttackDiscovery,
+  replaceAnonymizedValuesWithOriginalValues,
   type Replacements,
 } from '@kbn/elastic-assistant-common';
 import React, { useMemo } from 'react';
 
+import { SECURITY_FEATURE_ID } from '../../../../../../common';
+import { useKibana } from '../../../../../common/lib/kibana';
 import { AttackDiscoveryMarkdownFormatter } from '../../attack_discovery_markdown_formatter';
+import { getOriginalAlertIds } from '../../../../helpers';
 import { ViewInAiAssistant } from '../view_in_ai_assistant';
+import { useAgentBuilderAvailability } from '../../../../../agent_builder/hooks/use_agent_builder_availability';
+import { NewAgentBuilderAttachment } from '../../../../../agent_builder/components/new_agent_builder_attachment';
+import { useAttackDiscoveryAttachment } from '../../use_attack_discovery_attachment';
+import { isAttackDiscoveryAlert } from '../../../utils/is_attack_discovery_alert';
 
 interface Props {
   attackDiscovery: AttackDiscovery;
@@ -27,6 +34,17 @@ const ActionableSummaryComponent: React.FC<Props> = ({
   replacements,
   showAnonymized = false,
 }) => {
+  const {
+    application: { capabilities },
+  } = useKibana().services;
+  // TODO We shouldn't have to check capabilities here, this should be done at a much higher level.
+  //  https://github.com/elastic/kibana/issues/218731
+  //  For EASE we need to hide cell actions and all preview links that could open non-EASE flyouts
+  const disabledActions = useMemo(
+    () => showAnonymized || Boolean(capabilities[SECURITY_FEATURE_ID].configurations),
+    [capabilities, showAnonymized]
+  );
+
   const entitySummary = useMemo(
     () =>
       showAnonymized
@@ -55,22 +73,53 @@ const ActionableSummaryComponent: React.FC<Props> = ({
   const entitySummaryOrTitle =
     entitySummary != null && entitySummary.length > 0 ? entitySummary : title;
 
+  const { isAgentChatExperienceEnabled } = useAgentBuilderAvailability();
+
+  // Only a persisted discovery can be attached, so "Add to chat" is not offered otherwise.
+  const persistedAttackDiscovery = isAttackDiscoveryAlert(attackDiscovery)
+    ? attackDiscovery
+    : undefined;
+
+  const openAgentBuilderFlyout = useAttackDiscoveryAttachment(
+    persistedAttackDiscovery,
+    replacements
+  );
+
+  const originalAlertIds = useMemo(
+    () => getOriginalAlertIds(attackDiscovery.alertIds, replacements),
+    [attackDiscovery.alertIds, replacements]
+  );
+
   return (
     <EuiPanel color="subdued" data-test-subj="actionableSummary">
       <EuiFlexGroup alignItems="center" gutterSize="none" justifyContent="spaceBetween">
         <EuiFlexItem data-test-subj="entitySummaryMarkdown" grow={false}>
           <AttackDiscoveryMarkdownFormatter
-            disableActions={showAnonymized}
+            disableActions={disabledActions}
             markdown={entitySummaryOrTitle}
+            alertIds={originalAlertIds}
           />
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
-          <ViewInAiAssistant
-            compact={true}
-            attackDiscovery={attackDiscovery}
-            replacements={replacements}
-          />
+          {isAgentChatExperienceEnabled ? (
+            persistedAttackDiscovery != null && (
+              <NewAgentBuilderAttachment
+                onClick={openAgentBuilderFlyout}
+                size="xs"
+                telemetry={{
+                  pathway: 'attack_discovery_bottom',
+                  attachments: ['attack_discovery'],
+                }}
+              />
+            )
+          ) : (
+            <ViewInAiAssistant
+              compact={true}
+              attackDiscovery={attackDiscovery}
+              replacements={replacements}
+            />
+          )}
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>

@@ -10,7 +10,7 @@
 import { updateFields } from './update_fields';
 import { dataViewsService } from '../../../mocks';
 import { getUsageCollection } from '../test_utils';
-import { DataViewLazy } from '../../../../common';
+import type { DataViewLazy } from '../../../../common';
 
 describe('create runtime field', () => {
   it('call usageCollection', async () => {
@@ -35,6 +35,6 @@ describe('create runtime field', () => {
       id: 'dataViewId',
       fields: { thisField: { count: 1 } },
     });
-    expect(usageCollection.incrementCounter).toBeCalledTimes(1);
+    expect(usageCollection.incrementCounter).toHaveBeenCalledTimes(1);
   });
 });

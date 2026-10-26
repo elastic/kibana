@@ -17,7 +17,7 @@ const assetCriticalityMapping = {
 };
 
 // Upgrade this value to force a mappings update on the next Kibana startup
-export const ASSET_CRITICALITY_MAPPINGS_VERSIONS = 3;
+export const ASSET_CRITICALITY_MAPPINGS_VERSIONS = 4;
 
 export const assetCriticalityFieldMap: FieldMap = {
   '@timestamp': {
@@ -69,6 +69,12 @@ export const assetCriticalityFieldMap: FieldMap = {
     required: false,
   },
   'service.asset.criticality': assetCriticalityMapping,
+  'entity.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'entity.asset.criticality': assetCriticalityMapping,
 } as const;
 
 export const CRITICALITY_VALUES: { readonly [K in CriticalityValues as Uppercase<K>]: K } = {

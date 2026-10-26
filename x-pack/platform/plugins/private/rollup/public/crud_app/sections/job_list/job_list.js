@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Component, Fragment } from 'react';
+import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -160,7 +160,7 @@ export class JobListUi extends Component {
             <EuiButtonEmpty
               href={documentationLinks.rollupJobs}
               target="_blank"
-              iconType="help"
+              iconType="question"
               data-test-subj="documentationLink"
             >
               <FormattedMessage

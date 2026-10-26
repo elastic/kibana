@@ -12,4 +12,7 @@ export type {
   DocInstallOptions,
   DocUpdateOptions,
   DocGetStatusResponse,
+  SecurityLabsInstallOptions,
+  SecurityLabsUninstallOptions,
+  SecurityLabsStatusResponse,
 } from './types';

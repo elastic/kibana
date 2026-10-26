@@ -125,6 +125,7 @@ describe('Monitor migrations v8.7.0 -> v8.8.0', () => {
           hash: '',
           id: '311cf324-2fc9-4453-9ba5-5e745fd81722',
           ignore_https_errors: false,
+          certificate_error_spki_allowlist: [],
           journey_id: '',
           locations: [
             {
@@ -164,6 +165,8 @@ describe('Monitor migrations v8.7.0 -> v8.8.0', () => {
           'url.port': null,
           urls: 'https://elastic.co',
           labels: {},
+          maintenance_windows: [],
+          spaces: [],
         },
         coreMigrationVersion: '8.8.0',
         created_at: '2023-03-31T20:31:24.177Z',

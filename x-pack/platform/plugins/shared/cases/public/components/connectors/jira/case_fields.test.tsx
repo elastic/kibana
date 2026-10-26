@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import '@kbn/code-editor-mock/jest_helper';
 import React from 'react';
 import { omit } from 'lodash/fp';
 import { screen, fireEvent, within } from '@testing-library/react';
@@ -110,6 +111,7 @@ describe('Jira Fields', () => {
 
     expect(await screen.findByTestId('prioritySelect')).toBeInTheDocument();
     expect(await screen.findByTestId('issueTypeSelect')).toBeInTheDocument();
+    expect(await screen.findByTestId('otherFieldsEditor')).toBeInTheDocument();
 
     expect(await screen.findByTestId('search-parent-issues')).toBeInTheDocument();
   });

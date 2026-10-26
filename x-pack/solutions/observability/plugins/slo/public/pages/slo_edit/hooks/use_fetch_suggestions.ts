@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 import { usePluginContext } from '../../../hooks/use_plugin_context';
 
 export function useFetchSLOSuggestions() {
@@ -14,13 +14,9 @@ export function useFetchSLOSuggestions() {
   const { isLoading, isError, isSuccess, data } = useQuery({
     queryKey: ['fetchSLOSuggestions'],
     queryFn: async ({ signal }) => {
-      try {
-        return await sloClient.fetch('GET /internal/observability/slos/suggestions', {
-          signal,
-        });
-      } catch (error) {
-        // ignore error
-      }
+      return sloClient.fetch('GET /internal/observability/slos/suggestions', {
+        signal,
+      });
     },
     refetchOnWindowFocus: false,
     keepPreviousData: true,

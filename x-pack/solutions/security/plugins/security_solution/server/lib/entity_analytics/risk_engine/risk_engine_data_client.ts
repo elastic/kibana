@@ -56,6 +56,7 @@ export class RiskEngineDataClient {
 
     try {
       await riskScoreDataClient.init();
+      await riskScoreDataClient.initLegacyTransforms();
       result.riskEngineResourcesInstalled = true;
     } catch (e) {
       result.errors.push(e.message);
@@ -90,12 +91,16 @@ export class RiskEngineDataClient {
 
   public getConfiguration = () =>
     getConfiguration({
+      logger: this.options.logger,
       savedObjectsClient: this.options.soClient,
+      namespace: this.options.namespace,
     });
 
   public updateConfiguration = (config: Partial<RiskEngineConfiguration>) =>
     updateSavedObjectAttribute({
+      logger: this.options.logger,
       savedObjectsClient: this.options.soClient,
+      namespace: this.options.namespace,
       attributes: config,
     });
 
@@ -132,7 +137,9 @@ export class RiskEngineDataClient {
   public async enableRiskEngine({ taskManager }: { taskManager: TaskManagerStartContract }) {
     try {
       const configurationResult = await updateSavedObjectAttribute({
+        logger: this.options.logger,
         savedObjectsClient: this.options.soClient,
+        namespace: this.options.namespace,
         attributes: {
           enabled: true,
         },
@@ -194,7 +201,9 @@ export class RiskEngineDataClient {
     });
 
     return updateSavedObjectAttribute({
+      logger: this.options.logger,
       savedObjectsClient: this.options.soClient,
+      namespace: this.options.namespace,
       attributes: {
         enabled: false,
       },
@@ -244,7 +253,11 @@ export class RiskEngineDataClient {
       logger: this.options.logger,
     }).catch(addError);
 
-    await deleteSavedObjects({ savedObjectsClient: this.options.soClient }).catch(addError);
+    await deleteSavedObjects({
+      logger: this.options.logger,
+      savedObjectsClient: this.options.soClient,
+      namespace: this.options.namespace,
+    }).catch(addError);
     const riskScoreErrors = await riskScoreDataClient.tearDown();
 
     return errors.concat(riskScoreErrors);
@@ -270,7 +283,9 @@ export class RiskEngineDataClient {
         });
       }
       return await updateSavedObjectAttribute({
+        logger: this.options.logger,
         savedObjectsClient: this.options.soClient,
+        namespace: this.options.namespace,
         attributes,
       });
     } catch (e) {

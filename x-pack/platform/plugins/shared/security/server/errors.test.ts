@@ -114,8 +114,35 @@ describe('lib/errors', () => {
       ).toBe(JSON.stringify({ field1: 'value-1', field2: 'value-2' }));
     });
 
+    it('extracts `cause` property', () => {
+      expect(errors.getDetailedErrorMessage(new Error('some-message', { cause: 'oops' }))).toBe(
+        'some-message (cause: oops)'
+      );
+
+      expect(
+        errors.getDetailedErrorMessage(new Error('some-message', { cause: { oh: 'no' } }))
+      ).toBe(`some-message (cause: { oh: 'no' })`);
+
+      expect(
+        errors.getDetailedErrorMessage(
+          new TypeError('fetch failed', {
+            cause: new Error('unable to get local issuer certificate'),
+          })
+        )
+      ).toBe('fetch failed (cause: unable to get local issuer certificate)');
+    });
+
     it('extracts `message` property', () => {
       expect(errors.getDetailedErrorMessage(new Error('some-message'))).toBe('some-message');
+    });
+
+    it.each([
+      [null, 'null'],
+      [undefined, 'undefined'],
+      ['some-message', 'some-message'],
+      [42, '42'],
+    ])('reports a thrown %p that is not an object as is', (thrown, message) => {
+      expect(errors.getDetailedErrorMessage(thrown)).toBe(message);
     });
   });
 });

@@ -26,7 +26,7 @@ export const SearchApplicationHeaderDocsAction: React.FC = () => (
       {i18n.translate(
         'xpack.enterpriseSearch.searchApplications.searchApplication.header.searchApplicationsDoc',
         {
-          defaultMessage: 'Search Applications Doc',
+          defaultMessage: 'Search applications doc',
         }
       )}
     </EuiButtonEmpty>

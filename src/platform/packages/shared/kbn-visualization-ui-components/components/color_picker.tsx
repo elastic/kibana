@@ -10,7 +10,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { TooltipWrapper } from '@kbn/visualization-utils';
-import { EuiFormRow, EuiColorPicker, EuiColorPickerProps, EuiToolTip, EuiIcon } from '@elastic/eui';
+import type { EuiColorPickerProps } from '@elastic/eui';
+import { EuiFormRow, EuiColorPicker, EuiToolTip, EuiIcon } from '@elastic/eui';
 import { getColorAlpha, makeColorWithAlpha } from '@kbn/coloring';
 
 const tooltipContent = {
@@ -51,19 +52,20 @@ export const ColorPicker = ({
   const unflushedChanges = useRef(false);
 
   const isDisabled = Boolean(disabledMessage);
+  const isCustomColor = Boolean(overwriteColor);
 
   useEffect(() => {
     //  only the changes from outside the color picker should be applied
     if (!unflushedChanges.current) {
+      const nextColor = overwriteColor || defaultColor;
       // something external changed the color that is currently selected (switching from annotation line to annotation range)
       if (
-        overwriteColor &&
-        validatedColor &&
-        overwriteColor.toUpperCase() !== validatedColor.toUpperCase()
+        nextColor &&
+        (!validatedColor || nextColor.toUpperCase() !== validatedColor.toUpperCase())
       ) {
-        setColorText(overwriteColor);
-        setValidatedColor(overwriteColor.toUpperCase());
-        setCurrentColorAlpha(getColorAlpha(overwriteColor));
+        setColorText(nextColor);
+        setValidatedColor(nextColor.toUpperCase());
+        setCurrentColorAlpha(getColorAlpha(nextColor));
       }
     }
     unflushedChanges.current = false;
@@ -119,9 +121,10 @@ export const ColorPicker = ({
       fullWidth
       label={
         <TooltipWrapper
-          delay="long"
           position="top"
-          tooltipContent={colorText && !isDisabled ? tooltipContent.custom : tooltipContent.auto}
+          tooltipContent={
+            isCustomColor && !isDisabled ? tooltipContent.custom : tooltipContent.auto
+          }
           condition={!disableHelpTooltip}
         >
           <span>
@@ -129,10 +132,11 @@ export const ColorPicker = ({
             {!disableHelpTooltip && (
               <>
                 <EuiIcon
-                  type="questionInCircle"
+                  type="question"
                   color="subdued"
                   size="s"
                   className="eui-alignTop"
+                  aria-hidden={true}
                 />
               </>
             )}
@@ -141,12 +145,7 @@ export const ColorPicker = ({
       }
     >
       {isDisabled ? (
-        <EuiToolTip
-          position="top"
-          content={disabledMessage}
-          delay="long"
-          anchorClassName="eui-displayBlock"
-        >
+        <EuiToolTip position="top" content={disabledMessage} anchorClassName="eui-displayBlock">
           {colorPicker}
         </EuiToolTip>
       ) : (

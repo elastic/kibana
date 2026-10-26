@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import tinycolor from 'tinycolor2';
+import chroma from 'chroma-js';
+import type { EuiColorPalettePickerPaletteProps } from '@elastic/eui';
 import {
   colorPalette as colorPaletteGenerator,
   euiPaletteForStatus,
@@ -16,15 +16,14 @@ import {
   euiPaletteGreen,
   euiPaletteGray,
   euiPaletteColorBlind,
-  EuiColorPalettePickerPaletteProps,
 } from '@elastic/eui';
-import { PercentilesFieldMeta } from '../../../common/descriptor_types';
+import type { PercentilesFieldMeta } from '../../../common/descriptor_types';
 
 export const DEFAULT_HEATMAP_COLOR_RAMP_NAME = 'theclassic';
 
 export const DEFAULT_FILL_COLORS: string[] = euiPaletteColorBlind();
 export const DEFAULT_LINE_COLORS: string[] = [
-  ...DEFAULT_FILL_COLORS.map((color: string) => tinycolor(color).darken().toHexString()),
+  ...DEFAULT_FILL_COLORS.map((color: string) => chroma(color).darken().hex()),
   // Explicitly add black & white as border color options
   '#000',
   '#FFF',

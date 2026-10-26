@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { z } from '@kbn/zod';
+import type { z } from '@kbn/zod/v4';
 import type {
   EqlRuleCreateFields,
   QueryRuleCreateFields,
@@ -33,6 +33,7 @@ export const getPrebuiltRuleMock = (rewrites?: Partial<PrebuiltRuleAsset>): Preb
     version: 1,
     author: [],
     license: 'Elastic License v2',
+    index: ['index-1', 'index-2'],
     ...rewrites,
   });
 };
@@ -90,6 +91,7 @@ export const getPrebuiltThreatMatchRuleMock = (): PrebuiltRuleAsset => ({
   name: 'Query with a rule id',
   severity: 'high',
   risk_score: 55,
+  max_signals: 100,
   rule_id: 'rule-1',
   version: 1,
   author: [],

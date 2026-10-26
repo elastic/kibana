@@ -6,18 +6,22 @@
  */
 
 import Boom from '@hapi/boom';
+import type { SavedObject } from '@kbn/core/server';
 import { AlertConsumers } from '@kbn/rule-data-utils';
+import { RuleChangeTrackingAction } from '@kbn/alerting-types';
 import type { RawRule } from '../../../../types';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../../../authorization';
 import { retryIfConflicts } from '../../../../lib/retry_if_conflicts';
 import { bulkMarkApiKeysForInvalidation } from '../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
 import type { RulesClientContext } from '../../../../rules_client/types';
-import { untrackRuleAlerts, migrateLegacyActions } from '../../../../rules_client/lib';
+import { untrackRuleAlerts, bulkMigrateLegacyActions } from '../../../../rules_client/lib';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import type { DeleteRuleParams } from './types';
 import { deleteRuleParamsSchema } from './schemas';
 import { deleteRuleSo, getDecryptedRuleSo, getRuleSo } from '../../../../data/rule';
+import { softDeleteGaps } from '../../../../lib/rule_gaps/soft_delete/soft_delete_gaps';
+import { logRuleChanges } from '../common_utils/log_rule_changes';
 
 export async function deleteRule(context: RulesClientContext, params: DeleteRuleParams) {
   try {
@@ -26,20 +30,25 @@ export async function deleteRule(context: RulesClientContext, params: DeleteRule
     throw Boom.badRequest(`Error validating delete params - ${error.message}`);
   }
 
-  const { id } = params;
+  const { id, invalidateApiKeyNow } = params;
 
   return await retryIfConflicts(
     context.logger,
     `rulesClient.delete('${id}')`,
-    async () => await deleteRuleWithOCC(context, { id })
+    async () => await deleteRuleWithOCC(context, { id, invalidateApiKeyNow })
   );
 }
 
-async function deleteRuleWithOCC(context: RulesClientContext, { id }: { id: string }) {
+async function deleteRuleWithOCC(
+  context: RulesClientContext,
+  { id, invalidateApiKeyNow }: { id: string; invalidateApiKeyNow?: boolean }
+) {
   let taskIdToRemove: string | undefined | null;
   let apiKeyToInvalidate: string | null = null;
+  let uiamApiKeyToInvalidate: string | null = null;
   let apiKeyCreatedByUser: boolean | undefined | null = false;
   let attributes: RawRule;
+  let rule: SavedObject<RawRule>;
 
   try {
     const decryptedRule = await getDecryptedRuleSo({
@@ -49,10 +58,17 @@ async function deleteRuleWithOCC(context: RulesClientContext, { id }: { id: stri
         namespace: context.namespace,
       },
     });
-    apiKeyToInvalidate = decryptedRule.attributes.apiKey;
+
+    const { uiamApiKey, apiKey } = decryptedRule.attributes;
+
+    apiKeyToInvalidate = apiKey;
+    if (uiamApiKey) {
+      uiamApiKeyToInvalidate = uiamApiKey;
+    }
     apiKeyCreatedByUser = decryptedRule.attributes.apiKeyCreatedByUser;
     taskIdToRemove = decryptedRule.attributes.scheduledTaskId;
     attributes = decryptedRule.attributes;
+    rule = decryptedRule;
   } catch (e) {
     // We'll skip invalidating the API key since we failed to load the decrypted saved object
     context.logger.error(
@@ -60,7 +76,7 @@ async function deleteRuleWithOCC(context: RulesClientContext, { id }: { id: stri
     );
 
     // Still attempt to load the scheduledTaskId using SOC
-    const rule = await getRuleSo({
+    rule = await getRuleSo({
       savedObjectsClient: context.unsecuredSavedObjectsClient,
       id,
     });
@@ -92,11 +108,7 @@ async function deleteRuleWithOCC(context: RulesClientContext, { id }: { id: stri
   // TODO (http-versioning): Remove this cast, this enables us to move forward
   // without fixing all of other solution types
   if (attributes.consumer === AlertConsumers.SIEM) {
-    await migrateLegacyActions(context, {
-      ruleId: id,
-      attributes: attributes as RawRule,
-      skipActionsValidation: true,
-    });
+    await bulkMigrateLegacyActions({ context, rules: [rule], skipActionsValidation: true });
   }
 
   context.auditLogger?.log(
@@ -106,9 +118,37 @@ async function deleteRuleWithOCC(context: RulesClientContext, { id }: { id: stri
       savedObject: { type: RULE_SAVED_OBJECT_TYPE, id, name: attributes.name },
     })
   );
+
+  try {
+    const eventLogClient = await context.getEventLogClient();
+
+    await softDeleteGaps({
+      ruleIds: [id],
+      logger: context.logger,
+      eventLogClient,
+      eventLogger: context.eventLogger,
+    });
+  } catch (error) {
+    // Failing to soft delete gaps should not block the rule deletion
+    context.logger.error(`delete(): Failed to soft delete gaps for rule ${id}: ${error.message}`);
+  }
+
   const removeResult = await deleteRuleSo({
     savedObjectsClient: context.unsecuredSavedObjectsClient,
     id,
+  });
+  const deleteTime = Date.now();
+
+  await logRuleChanges({
+    ruleSOs: [rule],
+    encryptedFieldsMap: new Map([
+      [id, { apiKey: apiKeyToInvalidate, uiamApiKey: uiamApiKeyToInvalidate }],
+    ]),
+    rulesClientContext: context,
+    changesContext: {
+      action: RuleChangeTrackingAction.ruleDelete,
+      timestamp: deleteTime,
+    },
   });
 
   await Promise.all([
@@ -118,14 +158,66 @@ async function deleteRuleWithOCC(context: RulesClientContext, { id }: { id: stri
       namespace: context.namespace,
       unsecuredSavedObjectsClient: context.unsecuredSavedObjectsClient,
     }),
-    apiKeyToInvalidate && !apiKeyCreatedByUser
-      ? bulkMarkApiKeysForInvalidation(
-          { apiKeys: [apiKeyToInvalidate] },
-          context.logger,
-          context.unsecuredSavedObjectsClient
-        )
-      : null,
+    invalidateRuleApiKeys({
+      context,
+      ruleId: id,
+      ruleName: attributes.name,
+      apiKey: apiKeyToInvalidate,
+      uiamApiKey: uiamApiKeyToInvalidate,
+      apiKeyCreatedByUser,
+      invalidateNow: invalidateApiKeyNow,
+    }),
   ]);
 
   return removeResult;
+}
+
+/**
+ * Routes a rule's API keys to either synchronous or queued invalidation.
+ *
+ * - Returns `null` (no-op) if the rule has no keys to invalidate or the user owns the key.
+ * - Calls {@link RulesClientContext.invalidateApiKeyNow} when the caller requested it
+ *   *and* the context supports it.
+ * - Otherwise queues the keys via {@link bulkMarkApiKeysForInvalidation}; if sync was
+ *   requested but the context did not wire it (test contexts), logs a warning so we
+ *   never silently skip invalidation.
+ */
+function invalidateRuleApiKeys({
+  context,
+  ruleId,
+  ruleName,
+  apiKey,
+  uiamApiKey,
+  apiKeyCreatedByUser,
+  invalidateNow,
+}: {
+  context: RulesClientContext;
+  ruleId: string;
+  ruleName: string;
+  apiKey: string | null;
+  uiamApiKey: string | null;
+  apiKeyCreatedByUser?: boolean | null;
+  invalidateNow?: boolean;
+}): Promise<unknown> | null {
+  if (apiKeyCreatedByUser || (!apiKey && !uiamApiKey)) {
+    return null;
+  }
+
+  if (invalidateNow && context.invalidateApiKeyNow) {
+    return context.invalidateApiKeyNow({ ruleName, apiKey, uiamApiKey });
+  }
+
+  if (invalidateNow) {
+    context.logger.warn(
+      `delete(): invalidateApiKeyNow=true requested for rule ${ruleId} but the rules client context does not support synchronous invalidation; falling back to queued invalidation.`
+    );
+  }
+
+  return bulkMarkApiKeysForInvalidation(
+    {
+      apiKeys: [...(apiKey ? [apiKey] : []), ...(uiamApiKey ? [uiamApiKey] : [])],
+    },
+    context.logger,
+    context.unsecuredSavedObjectsClient
+  );
 }

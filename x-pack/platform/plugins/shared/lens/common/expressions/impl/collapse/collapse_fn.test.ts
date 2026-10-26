@@ -7,7 +7,8 @@
 
 import type { Datatable, ExecutionContext } from '@kbn/expressions-plugin/common';
 import { functionWrapper } from '@kbn/expressions-plugin/common/expression_functions/specs/tests/utils';
-import { CollapseArgs, collapse } from '../../defs/collapse';
+import type { CollapseArgs } from '../../defs/collapse';
+import { collapse } from '../../defs/collapse';
 
 describe('collapse_fn', () => {
   const fn = functionWrapper(collapse);
@@ -37,6 +38,25 @@ describe('collapse_fn', () => {
     );
 
     expect(result.rows).toEqual([{ val: 1 + 2 + 3 + 4 + 5 + 6 + 7 + 8 }]);
+  });
+
+  it('drops all non-metric columns when no `by` column is given', async () => {
+    const result = await runFn(
+      {
+        type: 'datatable',
+        columns: [
+          { id: 'val', name: 'val', meta: { type: 'number' } },
+          { id: 'split', name: 'split', meta: { type: 'string' } },
+        ],
+        rows: [
+          { val: 1, split: 'A' },
+          { val: 2, split: 'B' },
+        ],
+      },
+      { metric: ['val'], fn: ['sum'] }
+    );
+
+    expect(result.columns).toEqual([{ id: 'val', name: 'val', meta: { type: 'number' } }]);
   });
 
   it('can use a single function for multiple metrics', async () => {

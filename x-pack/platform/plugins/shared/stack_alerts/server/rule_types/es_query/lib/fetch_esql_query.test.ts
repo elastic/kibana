@@ -7,13 +7,35 @@
 
 import type { OnlyEsqlQueryRuleParams } from '../types';
 import { Comparator } from '../../../../common/comparator_types';
-import { fetchEsqlQuery, getEsqlQuery, getSourceFields, generateLink } from './fetch_esql_query';
+import { fetchEsqlQuery, getEsqlQuery, generateLink } from './fetch_esql_query';
 import { getErrorSource, TaskErrorSource } from '@kbn/task-manager-plugin/server/task_running';
 import type { SharePluginStart } from '@kbn/share-plugin/server';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { publicRuleResultServiceMock } from '@kbn/alerting-plugin/server/monitoring/rule_result_service.mock';
+import { getEsqlQueryHits } from '../../../../common';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
+import type {
+  EsqlEsqlClusterInfo,
+  EsqlEsqlShardFailure,
+} from '@elastic/elasticsearch/lib/api/types';
+import { errors, type TransportResult } from '@elastic/elasticsearch';
+
+const createVerificationError = (reason: string) =>
+  new errors.ResponseError({
+    statusCode: 400,
+    headers: {},
+    warnings: [],
+    meta: {} as TransportResult['meta'],
+    body: {
+      error: {
+        type: 'verification_exception',
+        reason,
+        root_cause: [{ type: 'verification_exception', reason }],
+      },
+    },
+  } as TransportResult);
 
 const getTimeRange = () => {
   const date = Date.now();
@@ -36,7 +58,18 @@ const defaultParams: OnlyEsqlQueryRuleParams = {
   groupBy: 'all',
   timeField: 'time',
 };
+
+jest.mock('../../../../common', () => {
+  const original = jest.requireActual('../../../../common');
+  return {
+    ...original,
+    getEsqlQueryHits: jest.fn(),
+  };
+});
+
 const logger = loggingSystemMock.create().get();
+const mockRuleResultService = publicRuleResultServiceMock.create();
+const scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
 
 describe('fetchEsqlQuery', () => {
   afterAll(() => {
@@ -50,21 +83,65 @@ describe('fetchEsqlQuery', () => {
     global.Date.now = jest.fn(() => fakeNow.getTime());
   });
 
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
   describe('fetch', () => {
     it('should throw a user error when the error is a verification_exception error', async () => {
-      const scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
-
-      scopedClusterClient.asCurrentUser.transport.request.mockRejectedValueOnce(
+      scopedClusterClient.asCurrentUser.esql.query.mockRejectedValueOnce(
         new Error(
           'verification_exception: Found 1 problem line 1:23: Unknown column [user_agent.original]'
         )
       );
 
-      try {
-        await fetchEsqlQuery({
+      const error = await fetchEsqlQuery({
+        ruleId: 'testRuleId',
+        alertLimit: 1,
+        params: defaultParams,
+        services: {
+          logger,
+          scopedClusterClient,
+          // @ts-expect-error
+          share: {
+            url: {
+              locators: {
+                get: jest.fn().mockReturnValue({
+                  getRedirectUrl: jest.fn(() => '/app/r?l=DISCOVER_APP_LOCATOR'),
+                } as unknown as LocatorPublic<DiscoverAppLocatorParams>),
+              },
+            },
+          } as SharePluginStart,
+          ruleResultService: mockRuleResultService,
+        },
+        spacePrefix: '',
+        dateStart: new Date().toISOString(),
+        dateEnd: new Date().toISOString(),
+        sourceFields: [],
+      }).catch((e) => e);
+
+      expect(error).toBeInstanceOf(Error);
+      expect(getErrorSource(error)).toBe(TaskErrorSource.USER);
+      expect(mockRuleResultService.addLastRunWarning).not.toHaveBeenCalled();
+    });
+
+    it.each([
+      ['all', [{ count: 0, group: 'all documents', hits: [], sourceFields: {} }]],
+      ['row', []],
+    ])(
+      'should return an empty run with a warning when the index is unknown (groupBy: %s)',
+      async (groupBy, expectedResults) => {
+        scopedClusterClient.asCurrentUser.esql.query.mockRejectedValueOnce(
+          createVerificationError('Found 1 problem\nline 1:1: Unknown index [logs-missing]')
+        );
+        (getEsqlQueryHits as jest.Mock).mockImplementationOnce(
+          jest.requireActual('../../../../common').getEsqlQueryHits
+        );
+
+        const result = await fetchEsqlQuery({
           ruleId: 'testRuleId',
           alertLimit: 1,
-          params: defaultParams,
+          params: { ...defaultParams, groupBy, esqlQuery: { esql: 'from logs-missing' } },
           services: {
             logger,
             scopedClusterClient,
@@ -78,14 +155,308 @@ describe('fetchEsqlQuery', () => {
                 },
               },
             } as SharePluginStart,
+            ruleResultService: mockRuleResultService,
           },
           spacePrefix: '',
           dateStart: new Date().toISOString(),
           dateEnd: new Date().toISOString(),
+          sourceFields: [],
         });
-      } catch (e) {
-        expect(getErrorSource(e)).toBe(TaskErrorSource.USER);
+
+        expect(result).toEqual({
+          index: null,
+          link: '/app/r?l=DISCOVER_APP_LOCATOR',
+          parsedResults: { results: expectedResults, truncated: false },
+        });
+        const warning =
+          'The target index [logs-missing] does not exist. The query returned no results.';
+        expect(mockRuleResultService.addLastRunWarning).toHaveBeenCalledWith(warning);
+        expect(mockRuleResultService.setLastRunOutcomeMessage).toHaveBeenCalledWith(warning);
+        const debugMessages = jest
+          .mocked(logger.debug)
+          .mock.calls.map(([message]) => (typeof message === 'function' ? message() : message));
+        expect(debugMessages).toContainEqual(
+          expect.stringContaining('Unknown index [logs-missing]')
+        );
       }
+    );
+
+    it.each([
+      ['multiple indices', 'from logs-exists, logs-missing'],
+      ['a TS source command', 'ts logs-missing'],
+      ['a quoted index', 'from "logs-missing"'],
+      ['a FROM subquery', 'from logs-exists, (from logs-missing)'],
+    ])(
+      'should return an empty run with a warning when the index is unknown and the query uses %s',
+      async (_, esql) => {
+        scopedClusterClient.asCurrentUser.esql.query.mockRejectedValueOnce(
+          createVerificationError('Found 1 problem\nline 1:1: Unknown index [logs-missing]')
+        );
+        (getEsqlQueryHits as jest.Mock).mockImplementationOnce(
+          jest.requireActual('../../../../common').getEsqlQueryHits
+        );
+
+        const result = await fetchEsqlQuery({
+          ruleId: 'testRuleId',
+          alertLimit: 1,
+          params: { ...defaultParams, esqlQuery: { esql } },
+          services: {
+            logger,
+            scopedClusterClient,
+            // @ts-expect-error
+            share: {
+              url: {
+                locators: {
+                  get: jest.fn().mockReturnValue({
+                    getRedirectUrl: jest.fn(() => '/app/r?l=DISCOVER_APP_LOCATOR'),
+                  } as unknown as LocatorPublic<DiscoverAppLocatorParams>),
+                },
+              },
+            } as SharePluginStart,
+            ruleResultService: mockRuleResultService,
+          },
+          spacePrefix: '',
+          dateStart: new Date().toISOString(),
+          dateEnd: new Date().toISOString(),
+          sourceFields: [],
+        });
+
+        expect(result.parsedResults.results).toEqual([
+          { count: 0, group: 'all documents', hits: [], sourceFields: {} },
+        ]);
+        expect(mockRuleResultService.addLastRunWarning).toHaveBeenCalledWith(
+          'The target index [logs-missing] does not exist. The query returned no results.'
+        );
+      }
+    );
+
+    it.each([
+      [
+        'a lookup join',
+        'from logs-exists | lookup join logs-missing on host.name',
+        'Found 1 problem\nline 1:32: Unknown index [logs-missing]',
+      ],
+      [
+        'a WHERE subquery',
+        'from logs-exists | where host.name in (from logs-missing)',
+        'Found 1 problem\nline 1:45: Unknown index [logs-missing]',
+      ],
+      [
+        'a source index and a lookup join',
+        'from logs-missing | lookup join lookup-missing on host.name',
+        'Found 2 problems\nline 1:6: Unknown index [logs-missing]\nline 1:33: Unknown index [lookup-missing]',
+      ],
+    ])(
+      'should throw a user error when the unknown index is not a top-level source and the query uses %s',
+      async (_, esql, reason) => {
+        scopedClusterClient.asCurrentUser.esql.query.mockRejectedValueOnce(
+          createVerificationError(reason)
+        );
+
+        const error = await fetchEsqlQuery({
+          ruleId: 'testRuleId',
+          alertLimit: 1,
+          params: { ...defaultParams, esqlQuery: { esql } },
+          services: {
+            logger,
+            scopedClusterClient,
+            // @ts-expect-error
+            share: {
+              url: {
+                locators: {
+                  get: jest.fn().mockReturnValue({
+                    getRedirectUrl: jest.fn(() => '/app/r?l=DISCOVER_APP_LOCATOR'),
+                  } as unknown as LocatorPublic<DiscoverAppLocatorParams>),
+                },
+              },
+            } as SharePluginStart,
+            ruleResultService: mockRuleResultService,
+          },
+          spacePrefix: '',
+          dateStart: new Date().toISOString(),
+          dateEnd: new Date().toISOString(),
+          sourceFields: [],
+        }).catch((e) => e);
+
+        expect(error).toBeInstanceOf(Error);
+        expect(getErrorSource(error)).toBe(TaskErrorSource.USER);
+        expect(mockRuleResultService.addLastRunWarning).not.toHaveBeenCalled();
+      }
+    );
+
+    it('should add a warning when is_partial is true', async () => {
+      const shardFailure: EsqlEsqlShardFailure = {
+        reason: { type: 'test_failure', reason: 'too big data' },
+        shard: 0,
+        index: 'test-index',
+      };
+
+      scopedClusterClient.asCurrentUser.esql.query.mockResolvedValueOnce({
+        columns: [],
+        values: [],
+        is_partial: true,
+        _clusters: {
+          details: {
+            'cluster-1': {
+              failures: [shardFailure],
+            },
+          },
+        } as unknown as EsqlEsqlClusterInfo,
+      });
+
+      (getEsqlQueryHits as jest.Mock).mockReturnValue({
+        results: {
+          esResult: {
+            _shards: { failed: 0, successful: 0, total: 0 },
+            aggregations: {},
+            hits: { hits: [] },
+            timed_out: false,
+            took: 0,
+          },
+          isCountAgg: false,
+          isGroupAgg: true,
+        },
+      });
+
+      await fetchEsqlQuery({
+        ruleId: 'testRuleId',
+        alertLimit: 1,
+        params: { ...defaultParams, groupBy: 'row' },
+        services: {
+          logger,
+          scopedClusterClient,
+          // @ts-expect-error
+          share: {
+            url: {
+              locators: {
+                get: jest.fn().mockReturnValue({
+                  getRedirectUrl: jest.fn(() => '/app/r?l=DISCOVER_APP_LOCATOR'),
+                } as unknown as LocatorPublic<DiscoverAppLocatorParams>),
+              },
+            },
+          } as SharePluginStart,
+          ruleResultService: mockRuleResultService,
+        },
+        spacePrefix: '',
+        dateStart: new Date().toISOString(),
+        dateEnd: new Date().toISOString(),
+        sourceFields: [],
+      });
+
+      const warning =
+        'The query returned partial results. Some clusters may have been skipped due to timeouts or other issues. Failures: [{"reason":{"type":"test_failure","reason":"too big data"},"shard":0,"index":"test-index"}]';
+      expect(mockRuleResultService.addLastRunWarning).toHaveBeenCalledWith(warning);
+      expect(mockRuleResultService.setLastRunOutcomeMessage).toHaveBeenCalledWith(warning);
+    });
+
+    it('should add a warning when is_partial is true but there is no shard failure', async () => {
+      scopedClusterClient.asCurrentUser.esql.query.mockResolvedValueOnce({
+        columns: [],
+        values: [],
+        is_partial: true,
+        _clusters: {
+          details: {},
+        } as unknown as EsqlEsqlClusterInfo,
+      });
+
+      (getEsqlQueryHits as jest.Mock).mockReturnValue({
+        results: {
+          esResult: {
+            _shards: { failed: 0, successful: 0, total: 0 },
+            aggregations: {},
+            hits: { hits: [] },
+            timed_out: false,
+            took: 0,
+          },
+          isCountAgg: false,
+          isGroupAgg: true,
+        },
+      });
+
+      await fetchEsqlQuery({
+        ruleId: 'testRuleId',
+        alertLimit: 1,
+        params: { ...defaultParams, groupBy: 'row' },
+        services: {
+          logger,
+          scopedClusterClient,
+          // @ts-expect-error
+          share: {
+            url: {
+              locators: {
+                get: jest.fn().mockReturnValue({
+                  getRedirectUrl: jest.fn(() => '/app/r?l=DISCOVER_APP_LOCATOR'),
+                } as unknown as LocatorPublic<DiscoverAppLocatorParams>),
+              },
+            },
+          } as SharePluginStart,
+          ruleResultService: mockRuleResultService,
+        },
+        spacePrefix: '',
+        dateStart: new Date().toISOString(),
+        dateEnd: new Date().toISOString(),
+        sourceFields: [],
+      });
+
+      const warning =
+        'The query returned partial results. Some clusters may have been skipped due to timeouts or other issues.';
+      expect(mockRuleResultService.addLastRunWarning).toHaveBeenCalledWith(warning);
+      expect(mockRuleResultService.setLastRunOutcomeMessage).toHaveBeenCalledWith(warning);
+    });
+
+    it('should not add a warning when is_partial is false', async () => {
+      scopedClusterClient.asCurrentUser.esql.query.mockResolvedValueOnce({
+        columns: [],
+        values: [],
+        is_partial: false,
+      });
+
+      (getEsqlQueryHits as jest.Mock).mockReturnValue({
+        results: {
+          esResult: {
+            _shards: { failed: 0, successful: 0, total: 0 },
+            aggregations: {},
+            hits: { hits: [{ foo: 'bar' }] }, // has data
+            timed_out: false,
+            took: 0,
+          },
+          isCountAgg: false,
+          isGroupAgg: true,
+        },
+      });
+
+      const result = await fetchEsqlQuery({
+        ruleId: 'testRuleId',
+        alertLimit: 1,
+        params: defaultParams,
+        services: {
+          logger,
+          scopedClusterClient,
+          // @ts-expect-error
+          share: {
+            url: {
+              locators: {
+                get: jest.fn().mockReturnValue({
+                  getRedirectUrl: jest.fn(() => '/app/r?l=DISCOVER_APP_LOCATOR'),
+                } as unknown as LocatorPublic<DiscoverAppLocatorParams>),
+              },
+            },
+          } as SharePluginStart,
+          ruleResultService: mockRuleResultService,
+        },
+        spacePrefix: '',
+        dateStart: new Date().toISOString(),
+        dateEnd: new Date().toISOString(),
+        sourceFields: [],
+      });
+
+      expect(result).toEqual({
+        index: null,
+        link: '/app/r?l=DISCOVER_APP_LOCATOR',
+        parsedResults: { results: [], truncated: false },
+      });
+      expect(mockRuleResultService.addLastRunWarning).not.toHaveBeenCalled();
+      expect(mockRuleResultService.setLastRunOutcomeMessage).not.toHaveBeenCalled();
     });
   });
 
@@ -93,7 +464,7 @@ describe('fetchEsqlQuery', () => {
     it('should generate the correct query', async () => {
       const params = defaultParams;
       const { dateStart, dateEnd } = getTimeRange();
-      const query = getEsqlQuery(params, undefined, dateStart, dateEnd);
+      const query = getEsqlQuery(params, 1000, dateStart, dateEnd);
 
       expect(query).toMatchInlineSnapshot(`
         Object {
@@ -112,7 +483,49 @@ describe('fetchEsqlQuery', () => {
               ],
             },
           },
-          "query": "from test",
+          "query": "from test
+        | LIMIT 1000",
+        }
+      `);
+    });
+
+    it('should generate the correct query with parameters', async () => {
+      const params = {
+        ...defaultParams,
+        esqlQuery: {
+          esql: 'from test | where event.action == "execute" AND event.duration > 0 AND @timestamp > ?_tstart | stats duration = AVG(event.duration) BY BUCKET(@timestamp, 30, ?_tstart, ?_tend), event.provider | where duration > 0',
+        },
+      };
+      const { dateStart, dateEnd } = getTimeRange();
+      const query = getEsqlQuery(params, 1000, dateStart, dateEnd);
+
+      expect(query).toMatchInlineSnapshot(`
+        Object {
+          "filter": Object {
+            "bool": Object {
+              "filter": Array [
+                Object {
+                  "range": Object {
+                    "time": Object {
+                      "format": "strict_date_optional_time",
+                      "gt": "2020-02-09T23:10:41.941Z",
+                      "lte": "2020-02-09T23:15:41.941Z",
+                    },
+                  },
+                },
+              ],
+            },
+          },
+          "params": Array [
+            Object {
+              "_tstart": "2020-02-09T23:10:41.941Z",
+            },
+            Object {
+              "_tend": "2020-02-09T23:15:41.941Z",
+            },
+          ],
+          "query": "from test | where event.action == \\"execute\\" AND event.duration > 0 AND @timestamp > ?_tstart | stats duration = AVG(event.duration) BY BUCKET(@timestamp, 30, ?_tstart, ?_tend), event.provider | where duration > 0
+        | LIMIT 1000",
         }
       `);
     });
@@ -139,36 +552,117 @@ describe('fetchEsqlQuery', () => {
               ],
             },
           },
-          "query": "from test | limit 100",
+          "query": "from test
+        | LIMIT 100",
         }
       `);
     });
   });
 
-  describe('getSourceFields', () => {
-    it('should generate the correct source fields', async () => {
-      const sourceFields = getSourceFields({
-        columns: [
-          { name: '@timestamp', type: 'date' },
-          { name: 'ecs.version', type: 'keyword' },
-          { name: 'error.code', type: 'keyword' },
-        ],
-        values: [['2023-07-12T13:32:04.174Z', '1.8.0', null]],
-      });
-
-      expect(sourceFields).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "label": "ecs.version",
-            "searchPath": "ecs.version",
-          },
-          Object {
-            "label": "error.code",
-            "searchPath": "error.code",
-          },
-        ]
-      `);
+  it('should bubble up warnings if there are duplicate alerts', async () => {
+    scopedClusterClient.asCurrentUser.esql.query.mockResolvedValueOnce({
+      columns: [],
+      values: [],
     });
+
+    (getEsqlQueryHits as jest.Mock).mockReturnValue({
+      results: {
+        esResult: {
+          _shards: { failed: 0, successful: 0, total: 0 },
+          aggregations: {
+            groupAgg: {
+              buckets: [
+                {
+                  doc_count: 1,
+                  key: '1.8.0',
+                  topHitsAgg: {
+                    hits: {
+                      hits: [
+                        {
+                          _id: '1.8.0',
+                          _index: '',
+                          _source: {
+                            '@timestamp': '2023-07-12T13:32:04.174Z',
+                            'ecs.version': '1.8.0',
+                            'error.code': null,
+                          },
+                        },
+                      ],
+                    },
+                  },
+                },
+                {
+                  doc_count: 2,
+                  key: '1.2.0',
+                  topHitsAgg: {
+                    hits: {
+                      hits: [
+                        {
+                          _id: '1.2.0',
+                          _index: '',
+                          _source: {
+                            '@timestamp': '2025-07-12T13:32:04.174Z',
+                            'ecs.version': '1.2.0',
+                            'error.code': '400',
+                          },
+                        },
+                        {
+                          _id: '1.2.0',
+                          _index: '',
+                          _source: {
+                            '@timestamp': '2025-07-12T13:32:04.174Z',
+                            'ecs.version': '1.2.0',
+                            'error.code': '200',
+                          },
+                        },
+                      ],
+                    },
+                  },
+                },
+              ],
+            },
+          },
+          hits: { hits: [] },
+          timed_out: false,
+          took: 0,
+        },
+        isCountAgg: false,
+        isGroupAgg: true,
+      },
+      duplicateAlertIds: new Set<string>(['1.2.0']),
+    });
+
+    await fetchEsqlQuery({
+      ruleId: 'testRuleId',
+      alertLimit: 1,
+      params: defaultParams,
+      services: {
+        logger,
+        scopedClusterClient,
+        // @ts-expect-error
+        share: {
+          url: {
+            locators: {
+              get: jest.fn().mockReturnValue({
+                getRedirectUrl: jest.fn(() => '/app/r?l=DISCOVER_APP_LOCATOR'),
+              } as unknown as LocatorPublic<DiscoverAppLocatorParams>),
+            },
+          },
+        } as SharePluginStart,
+        ruleResultService: mockRuleResultService,
+      },
+      spacePrefix: '',
+      dateStart: new Date().toISOString(),
+      dateEnd: new Date().toISOString(),
+      sourceFields: [],
+    });
+
+    expect(mockRuleResultService.addLastRunWarning).toHaveBeenCalledWith(
+      'The query returned multiple rows with the same alert ID. There are duplicate results for alert IDs: 1.2.0'
+    );
+    expect(mockRuleResultService.setLastRunOutcomeMessage).toHaveBeenCalledWith(
+      'The query returned multiple rows with the same alert ID. There are duplicate results for alert IDs: 1.2.0'
+    );
   });
 
   describe('generateLink', () => {

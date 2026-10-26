@@ -7,11 +7,13 @@
 
 import { ByteSizeValue } from '@kbn/config-schema';
 import type { ActionsConfig } from './config';
-import { DEFAULT_USAGE_API_URL } from './config';
+import { defaultInboundEventsLimitConfigs } from './config';
 import {
   DEFAULT_MICROSOFT_EXCHANGE_URL,
   DEFAULT_MICROSOFT_GRAPH_API_SCOPE,
   DEFAULT_MICROSOFT_GRAPH_API_URL,
+  MAX_EMAIL_BODY_LENGTH,
+  DEFAULT_EMAIL_BODY_LENGTH,
 } from '../common';
 import {
   getActionsConfigurationUtilities,
@@ -41,9 +43,22 @@ const defaultActionsConfig: ActionsConfig = {
   microsoftGraphApiUrl: DEFAULT_MICROSOFT_GRAPH_API_URL,
   microsoftGraphApiScope: DEFAULT_MICROSOFT_GRAPH_API_SCOPE,
   microsoftExchangeUrl: DEFAULT_MICROSOFT_EXCHANGE_URL,
-  usage: {
-    url: DEFAULT_USAGE_API_URL,
+  auth: {
+    oauth_authorization_code: {
+      rate_limits: {
+        authorize: { lookbackWindow: '1h', limit: 100 },
+        callback: { lookbackWindow: '1h', limit: 100 },
+      },
+    },
+    ears: { enabled: false, enableExperimental: false },
   },
+  inboundEvents: {
+    enabled: false,
+    maxBodyBytes: new ByteSizeValue(1024 * 1024),
+    maxEmitted: 25,
+    ...defaultInboundEventsLimitConfigs,
+  },
+  connectorSigningKeys: { enabled: false },
 };
 
 describe('ensureUriAllowed', () => {
@@ -177,6 +192,59 @@ describe('isUriAllowed', () => {
       getActionsConfigurationUtilities(config).isUriAllowed('https://github.com/elastic/kibana')
     ).toEqual(true);
   });
+
+  test('returns false when an encoded dot hides the real hostname', () => {
+    const config: ActionsConfig = {
+      ...defaultActionsConfig,
+      allowedHosts: ['github.com'],
+    };
+    expect(
+      getActionsConfigurationUtilities(config).isUriAllowed(
+        'http://github.com%2e127.0.0.1.nip.io:18080/internal'
+      )
+    ).toEqual(false);
+  });
+
+  test('uses the decoded hostname for allowlist checks', () => {
+    const config: ActionsConfig = {
+      ...defaultActionsConfig,
+      allowedHosts: ['github.com.127.0.0.1.nip.io'],
+    };
+    expect(
+      getActionsConfigurationUtilities(config).isUriAllowed(
+        'http://github.com%2e127.0.0.1.nip.io:18080/internal'
+      )
+    ).toEqual(true);
+  });
+
+  test('uses the normalized IPv4 address for allowlist checks', () => {
+    const config: ActionsConfig = {
+      ...defaultActionsConfig,
+      allowedHosts: ['0x7f.1'],
+    };
+    expect(getActionsConfigurationUtilities(config).isUriAllowed('http://0x7f.1/')).toEqual(false);
+  });
+
+  test('returns true for IPv6 hostnames in the allowedHosts', () => {
+    const config: ActionsConfig = {
+      ...defaultActionsConfig,
+      allowedHosts: ['::1'],
+    };
+    expect(getActionsConfigurationUtilities(config).isUriAllowed('http://[::1]:8080/foo')).toEqual(
+      true
+    );
+  });
+
+  test('returns true for non-compressed IPv6 hostnames in the allowedHosts', () => {
+    const config: ActionsConfig = {
+      ...defaultActionsConfig,
+      allowedHosts: ['2001:DB8:0:0:0:0:0:1'],
+    };
+    const { isUriAllowed } = getActionsConfigurationUtilities(config);
+    expect(isUriAllowed('http://[2001:db8:0:0:0:0:0:1]/')).toEqual(true);
+    expect(isUriAllowed('http://[2001:db8::1]/')).toEqual(true);
+    expect(isUriAllowed('http://[2001:db8::2]/')).toEqual(false);
+  });
 });
 
 describe('isHostnameAllowed', () => {
@@ -201,6 +269,17 @@ describe('isHostnameAllowed', () => {
       enabledActionTypes: [],
     };
     expect(getActionsConfigurationUtilities(config).isHostnameAllowed('github.com')).toEqual(true);
+  });
+
+  test('matches equivalent IPv6 representations', () => {
+    const config: ActionsConfig = {
+      ...defaultActionsConfig,
+      allowedHosts: ['2001:db8::1'],
+    };
+    const { isHostnameAllowed } = getActionsConfigurationUtilities(config);
+    expect(isHostnameAllowed('2001:db8:0:0:0:0:0:1')).toEqual(true);
+    expect(isHostnameAllowed('[2001:DB8::1]')).toEqual(true);
+    expect(isHostnameAllowed('2001:db8::2')).toEqual(false);
   });
 });
 
@@ -454,7 +533,19 @@ describe('getProxySettings', () => {
   });
 });
 
+jest.mock('fs', () => {
+  const actual = jest.requireActual<typeof import('fs')>('fs');
+  return { ...actual, readFileSync: jest.fn().mockImplementation(actual.readFileSync) };
+});
+
+import { readFileSync } from 'fs';
+const mockReadFileSync = readFileSync as jest.MockedFunction<typeof readFileSync>;
+
 describe('getSSLSettings', () => {
+  beforeEach(() => {
+    mockReadFileSync.mockClear();
+  });
+
   test('returns proper verificationMode value, based on the SSL proxy configuration', () => {
     const configTrue: ActionsConfig = {
       ...defaultActionsConfig,
@@ -476,16 +567,182 @@ describe('getSSLSettings', () => {
   });
 });
 
+describe('getEARSSSLSettings', () => {
+  beforeEach(() => {
+    mockReadFileSync.mockClear();
+  });
+
+  const configWithEarsSsl = (ssl: NonNullable<NonNullable<ActionsConfig['auth']['ears']>['ssl']>) =>
+    ({
+      ...defaultActionsConfig,
+      auth: {
+        ...defaultActionsConfig.auth,
+        ears: { enabled: true, enableExperimental: false, ssl },
+      },
+    } as ActionsConfig);
+
+  test('returns verificationMode from the EARS ssl configuration', () => {
+    let sslSettings = getActionsConfigurationUtilities(
+      configWithEarsSsl({ verificationMode: 'full' })
+    ).getEARSSSLSettings();
+    expect(sslSettings.verificationMode).toBe('full');
+
+    sslSettings = getActionsConfigurationUtilities(
+      configWithEarsSsl({ verificationMode: 'none' })
+    ).getEARSSSLSettings();
+    expect(sslSettings.verificationMode).toBe('none');
+  });
+
+  test('reads cert and key buffers from configured EARS ssl file paths', () => {
+    mockReadFileSync
+      .mockReturnValueOnce(Buffer.from('cert-pem'))
+      .mockReturnValueOnce(Buffer.from('key-pem'));
+
+    const sslSettings = getActionsConfigurationUtilities(
+      configWithEarsSsl({
+        verificationMode: 'full',
+        certificate: '/path/to/cert.pem',
+        key: '/path/to/key.pem',
+      })
+    ).getEARSSSLSettings();
+
+    expect(sslSettings.cert).toEqual(Buffer.from('cert-pem'));
+    expect(sslSettings.key).toEqual(Buffer.from('key-pem'));
+    expect(mockReadFileSync).toHaveBeenNthCalledWith(1, '/path/to/cert.pem');
+    expect(mockReadFileSync).toHaveBeenNthCalledWith(2, '/path/to/key.pem');
+  });
+
+  test('returns undefined cert and key when EARS ssl paths are not configured', () => {
+    const sslSettings = getActionsConfigurationUtilities(defaultActionsConfig).getEARSSSLSettings();
+
+    expect(sslSettings.cert).toBeUndefined();
+    expect(sslSettings.key).toBeUndefined();
+    expect(mockReadFileSync).not.toHaveBeenCalled();
+  });
+
+  test('caches the SSL settings and reads files only once across multiple calls', () => {
+    mockReadFileSync
+      .mockReturnValueOnce(Buffer.from('cert-pem'))
+      .mockReturnValueOnce(Buffer.from('key-pem'));
+
+    const configUtils = getActionsConfigurationUtilities(
+      configWithEarsSsl({
+        verificationMode: 'full',
+        certificate: '/path/to/cert.pem',
+        key: '/path/to/key.pem',
+      })
+    );
+
+    const first = configUtils.getEARSSSLSettings();
+    const second = configUtils.getEARSSSLSettings();
+
+    expect(first).toBe(second);
+    expect(mockReadFileSync).toHaveBeenCalledTimes(2);
+  });
+
+  test('throws a descriptive config error when the EARS ssl.certificate file cannot be read', () => {
+    mockReadFileSync.mockImplementationOnce(() => {
+      throw new Error("ENOENT: no such file or directory, open '/path/to/missing-cert.pem'");
+    });
+
+    const sslConfigUtils = getActionsConfigurationUtilities(
+      configWithEarsSsl({
+        verificationMode: 'full',
+        certificate: '/path/to/missing-cert.pem',
+        key: '/path/to/key.pem',
+      })
+    );
+
+    expect(() => sslConfigUtils.getEARSSSLSettings()).toThrow(
+      "EARS SSL configuration error: failed to read certificate file: ENOENT: no such file or directory, open '/path/to/missing-cert.pem'"
+    );
+  });
+
+  test('throws a descriptive config error when the EARS ssl.key file cannot be read', () => {
+    mockReadFileSync
+      // certificate reads fine, key cannot be read
+      .mockReturnValueOnce(Buffer.from('cert-pem'))
+      .mockImplementationOnce(() => {
+        throw new Error("EACCES: permission denied, open '/path/to/key.pem'");
+      });
+
+    const sslConfigUtils = getActionsConfigurationUtilities(
+      configWithEarsSsl({
+        verificationMode: 'full',
+        certificate: '/path/to/cert.pem',
+        key: '/path/to/key.pem',
+      })
+    );
+
+    expect(() => sslConfigUtils.getEARSSSLSettings()).toThrow(
+      "EARS SSL configuration error: failed to read key file: EACCES: permission denied, open '/path/to/key.pem'"
+    );
+  });
+});
+
+describe('getRelaySSLSettings', () => {
+  beforeEach(() => {
+    mockReadFileSync.mockReset();
+  });
+
+  test('reads and caches Relay certificate, key, and CA files', () => {
+    mockReadFileSync.mockImplementation((filePath) => Buffer.from(String(filePath)));
+    const configUtils = getActionsConfigurationUtilities({
+      ...defaultActionsConfig,
+      relay: {
+        url: 'https://relay.test',
+        ssl: {
+          verificationMode: 'full',
+          certificate: '/path/to/cert.pem',
+          key: '/path/to/key.pem',
+          certificateAuthorities: ['/path/to/ca-1.pem', '/path/to/ca-2.pem'],
+        },
+      },
+    });
+
+    const first = configUtils.getRelaySSLSettings();
+    const second = configUtils.getRelaySSLSettings();
+
+    expect(first).toBe(second);
+    expect(first).toMatchObject({
+      verificationMode: 'full',
+      cert: Buffer.from('/path/to/cert.pem'),
+      key: Buffer.from('/path/to/key.pem'),
+      allowPartialTrustChain: true,
+    });
+    expect(first.ca).toEqual(expect.any(Buffer));
+    expect(first.ca?.includes(Buffer.from('/path/to/ca-1.pem'))).toBe(true);
+    expect(first.ca?.includes(Buffer.from('/path/to/ca-2.pem'))).toBe(true);
+    expect(mockReadFileSync).toHaveBeenCalledTimes(4);
+  });
+
+  test('does not enable partial trust chains without Relay SSL configuration', () => {
+    const sslSettings = getActionsConfigurationUtilities({
+      ...defaultActionsConfig,
+      relay: { url: 'https://relay.test' },
+    }).getRelaySSLSettings();
+
+    expect(sslSettings).not.toHaveProperty('allowPartialTrustChain');
+    expect(mockReadFileSync).not.toHaveBeenCalled();
+  });
+});
+
 const testEmailsOk = ['bob@elastic.co', 'jim@elastic.co'];
 const testEmailsNotAllowed = ['hal@bad.com', 'lou@notgood.org'];
 const testEmailsInvalid = ['invalid-email-address', '(garbage)'];
 const testEmailsAll = testEmailsOk.concat(testEmailsNotAllowed).concat(testEmailsInvalid);
 
 describe('validateEmailAddresses()', () => {
-  test('all domains allowed if config not set', () => {
+  test('all domains allowed if config not set, but format still validated', () => {
     const acu = getActionsConfigurationUtilities(defaultActionsConfig);
-    const message = acu.validateEmailAddresses(testEmailsAll);
+    const message = acu.validateEmailAddresses(testEmailsOk.concat(testEmailsNotAllowed));
     expect(message).toEqual(undefined);
+  });
+
+  test('invalid format rejected even without domain allowlist', () => {
+    const acu = getActionsConfigurationUtilities(defaultActionsConfig);
+    const message = acu.validateEmailAddresses(testEmailsInvalid);
+    expect(message).toMatchInlineSnapshot(`"not valid emails: invalid-email-address, (garbage)"`);
   });
 
   test('only filtered domains allowed if config set', () => {
@@ -517,6 +774,109 @@ describe('validateEmailAddresses()', () => {
     expect(message).toMatchInlineSnapshot(
       `"not valid emails: invalid-email-address, (garbage); not allowed emails: bob@elastic.co, jim@elastic.co, hal@bad.com, lou@notgood.org"`
     );
+  });
+
+  describe('recipient_allowlist', () => {
+    const recipientAllowlist = ['dev.*@company.co'];
+    const validRecipientEmails = ['dev.team@company.co', 'dev.backend@company.co'];
+
+    test('return no error message when only valid emails are present', () => {
+      const acu = getActionsConfigurationUtilities({
+        ...defaultActionsConfig,
+        email: {
+          recipient_allowlist: recipientAllowlist,
+        },
+      });
+
+      const message = acu.validateEmailAddresses(validRecipientEmails);
+      expect(message).toBe(undefined);
+    });
+
+    test('return no error message when the recipient_allowlist is all', () => {
+      const acu = getActionsConfigurationUtilities({
+        ...defaultActionsConfig,
+        email: {
+          recipient_allowlist: ['*'],
+        },
+      });
+
+      const message = acu.validateEmailAddresses([...testEmailsOk, ...testEmailsNotAllowed]);
+      expect(message).toBe(undefined);
+    });
+
+    test('return error message when invalid and not allowed emails are present', () => {
+      const acu = getActionsConfigurationUtilities({
+        ...defaultActionsConfig,
+        email: {
+          recipient_allowlist: recipientAllowlist,
+        },
+      });
+
+      const message = acu.validateEmailAddresses([...testEmailsAll, ...validRecipientEmails]);
+      expect(message).toMatchInlineSnapshot(
+        `"not valid emails: invalid-email-address, (garbage); not allowed emails: bob@elastic.co, jim@elastic.co, hal@bad.com, lou@notgood.org"`
+      );
+    });
+
+    test('no allowed recipient emails if config set to empty array', () => {
+      const acu = getActionsConfigurationUtilities({
+        ...defaultActionsConfig,
+        email: {
+          recipient_allowlist: [],
+        },
+      });
+
+      const message = acu.validateEmailAddresses([...testEmailsAll, ...validRecipientEmails]);
+      expect(message).toMatchInlineSnapshot(
+        `"not valid emails: invalid-email-address, (garbage); not allowed emails: bob@elastic.co, jim@elastic.co, hal@bad.com, lou@notgood.org, dev.team@company.co, dev.backend@company.co"`
+      );
+    });
+  });
+});
+
+describe('getMaxEmailBodyLength() ', () => {
+  function getAcu(maxEmailBodyLength?: number) {
+    const actionsConfig =
+      maxEmailBodyLength == null
+        ? defaultActionsConfig
+        : {
+            ...defaultActionsConfig,
+            email: {
+              maximum_body_length: maxEmailBodyLength,
+            },
+          };
+
+    return getActionsConfigurationUtilities(actionsConfig);
+  }
+
+  test('default value is as expected', async () => {
+    const acu = getAcu();
+    const actual = acu.getMaxEmailBodyLength();
+    expect(actual).toBe(DEFAULT_EMAIL_BODY_LENGTH);
+  });
+
+  test('value coerced to minimum of range if below', async () => {
+    const acu = getAcu(-100);
+    const actual = acu.getMaxEmailBodyLength();
+    expect(actual).toBe(0);
+  });
+
+  test('value of 0 accepted', async () => {
+    const acu = getAcu(0);
+    const actual = acu.getMaxEmailBodyLength();
+    expect(actual).toBe(0);
+  });
+
+  test('value within range is passed through', async () => {
+    const acu = getAcu(100);
+    const actual = acu.getMaxEmailBodyLength();
+    expect(actual).toBe(100);
+  });
+
+  test('value coerced to maximum of range if above', async () => {
+    const acu = getAcu(MAX_EMAIL_BODY_LENGTH + 100);
+    const actual = acu.getMaxEmailBodyLength();
+    expect(actual).toBe(MAX_EMAIL_BODY_LENGTH);
   });
 });
 
@@ -569,5 +929,323 @@ describe('getMaxQueued()', () => {
     const acu = getActionsConfigurationUtilities(defaultActionsConfig);
     const max = acu.getMaxQueued();
     expect(max).toEqual(1000000);
+  });
+});
+
+describe('getWebhookSettings()', () => {
+  test('returns the webhook settings from config', () => {
+    const config: ActionsConfig = {
+      ...defaultActionsConfig,
+      webhook: {
+        ssl: {
+          pfx: {
+            enabled: true,
+          },
+        },
+      },
+    };
+    const webhookSettings = getActionsConfigurationUtilities(config).getWebhookSettings();
+    expect(webhookSettings).toEqual({
+      ssl: {
+        pfx: {
+          enabled: true,
+        },
+      },
+    });
+  });
+
+  test('returns the webhook settings from config when pfx is false', () => {
+    const config: ActionsConfig = {
+      ...defaultActionsConfig,
+      webhook: {
+        ssl: {
+          pfx: {
+            enabled: false,
+          },
+        },
+      },
+    };
+    const webhookSettings = getActionsConfigurationUtilities(config).getWebhookSettings();
+    expect(webhookSettings).toEqual({
+      ssl: {
+        pfx: {
+          enabled: false,
+        },
+      },
+    });
+  });
+
+  test('returns true when no webhook settings are defined', () => {
+    const config: ActionsConfig = defaultActionsConfig;
+    const webhookSettings = getActionsConfigurationUtilities(config).getWebhookSettings();
+    expect(webhookSettings).toEqual({ ssl: { pfx: { enabled: true } } });
+  });
+});
+
+describe('getAwsSesConfig()', () => {
+  test('returns null when no email config set', () => {
+    const acu = getActionsConfigurationUtilities(defaultActionsConfig);
+    expect(acu.getAwsSesConfig()).toEqual(null);
+  });
+
+  test('returns null when no email.services config set', () => {
+    const acu = getActionsConfigurationUtilities({ ...defaultActionsConfig, email: {} });
+    expect(acu.getAwsSesConfig()).toEqual(null);
+  });
+
+  test('returns null when no email.services.ses config set', () => {
+    const acu = getActionsConfigurationUtilities({
+      ...defaultActionsConfig,
+      email: { services: {} },
+    });
+    expect(acu.getAwsSesConfig()).toEqual(null);
+  });
+
+  test('returns config if set', () => {
+    const acu = getActionsConfigurationUtilities({
+      ...defaultActionsConfig,
+      email: {
+        services: {
+          ses: {
+            host: 'https://email.us-east-1.amazonaws.com',
+            port: 1234,
+          },
+        },
+      },
+    });
+    expect(acu.getAwsSesConfig()).toEqual({
+      host: 'https://email.us-east-1.amazonaws.com',
+      port: 1234,
+      secure: true,
+    });
+  });
+});
+
+describe('getEarsUrl()', () => {
+  test('returns undefined when ears.url is not set in config', () => {
+    const acu = getActionsConfigurationUtilities(defaultActionsConfig);
+    expect(acu.getEarsUrl()).toBeUndefined();
+  });
+
+  test('returns the configured URL when auth.ears.url is set', () => {
+    const acu = getActionsConfigurationUtilities({
+      ...defaultActionsConfig,
+      auth: {
+        ...defaultActionsConfig.auth,
+        ears: { enabled: false, enableExperimental: false, url: 'https://ears.example.com' },
+      },
+    });
+    expect(acu.getEarsUrl()).toBe('https://ears.example.com');
+  });
+});
+
+describe('isEarsEnabled()', () => {
+  test('returns false when ears is not configured at all', () => {
+    const acu = getActionsConfigurationUtilities({
+      ...defaultActionsConfig,
+      auth: { ...defaultActionsConfig.auth, ears: undefined },
+    });
+    expect(acu.isEarsEnabled()).toBe(false);
+  });
+
+  test('returns false when ears.url is not set even if enabled is true', () => {
+    const acu = getActionsConfigurationUtilities({
+      ...defaultActionsConfig,
+      auth: {
+        ...defaultActionsConfig.auth,
+        ears: { enabled: true, enableExperimental: false },
+      },
+    });
+    expect(acu.isEarsEnabled()).toBe(false);
+  });
+
+  test('returns true when ears.url is set and enabled is not specified', () => {
+    const acu = getActionsConfigurationUtilities({
+      ...defaultActionsConfig,
+      auth: {
+        ...defaultActionsConfig.auth,
+        ears: { enabled: true, enableExperimental: false, url: 'https://ears.example.com' },
+      },
+    });
+    expect(acu.isEarsEnabled()).toBe(true);
+  });
+
+  test('returns false when ears.url is set but enabled is false', () => {
+    const acu = getActionsConfigurationUtilities({
+      ...defaultActionsConfig,
+      auth: {
+        ...defaultActionsConfig.auth,
+        ears: { enabled: false, enableExperimental: false, url: 'https://ears.example.com' },
+      },
+    });
+    expect(acu.isEarsEnabled()).toBe(false);
+  });
+});
+
+describe('isEarsExperimentalEnabled()', () => {
+  test('returns false when neither config key is set', () => {
+    const acu = getActionsConfigurationUtilities(defaultActionsConfig);
+    expect(acu.isEarsExperimentalEnabled()).toBe(false);
+  });
+
+  test('returns true when auth.ears.enableExperimental is true', () => {
+    const acu = getActionsConfigurationUtilities({
+      ...defaultActionsConfig,
+      auth: {
+        ...defaultActionsConfig.auth,
+        ears: { enabled: true, enableExperimental: true },
+      },
+    });
+    expect(acu.isEarsExperimentalEnabled()).toBe(true);
+  });
+});
+
+describe('isInboundEventsEnabled()', () => {
+  test('returns false when inboundEvents.enabled is false', () => {
+    const acu = getActionsConfigurationUtilities(defaultActionsConfig);
+    expect(acu.isInboundEventsEnabled()).toBe(false);
+  });
+
+  test('returns true when inboundEvents.enabled is true', () => {
+    const acu = getActionsConfigurationUtilities({
+      ...defaultActionsConfig,
+      inboundEvents: {
+        ...defaultActionsConfig.inboundEvents,
+        enabled: true,
+      },
+    });
+    expect(acu.isInboundEventsEnabled()).toBe(true);
+  });
+});
+
+describe('isConnectorSigningKeysEnabled()', () => {
+  test('returns false by default', () => {
+    const acu = getActionsConfigurationUtilities(defaultActionsConfig);
+    expect(acu.isConnectorSigningKeysEnabled()).toBe(false);
+  });
+
+  test('returns true when connectorSigningKeys.enabled is true', () => {
+    const acu = getActionsConfigurationUtilities({
+      ...defaultActionsConfig,
+      connectorSigningKeys: { enabled: true },
+    });
+    expect(acu.isConnectorSigningKeysEnabled()).toBe(true);
+  });
+});
+
+describe('getInboundEventsMaxBodyBytes()', () => {
+  test('returns 1mb by default', () => {
+    const acu = getActionsConfigurationUtilities(defaultActionsConfig);
+    expect(acu.getInboundEventsMaxBodyBytes()).toBe(1024 * 1024);
+  });
+
+  test('returns configured maxBodyBytes in bytes', () => {
+    const acu = getActionsConfigurationUtilities({
+      ...defaultActionsConfig,
+      inboundEvents: {
+        ...defaultActionsConfig.inboundEvents,
+        maxBodyBytes: new ByteSizeValue(512 * 1024),
+      },
+    });
+    expect(acu.getInboundEventsMaxBodyBytes()).toBe(512 * 1024);
+  });
+});
+
+describe('getInboundEventsMaxEmitted()', () => {
+  test('returns 25 by default', () => {
+    const acu = getActionsConfigurationUtilities(defaultActionsConfig);
+    expect(acu.getInboundEventsMaxEmitted()).toBe(25);
+  });
+
+  test('returns configured maxEmitted', () => {
+    const acu = getActionsConfigurationUtilities({
+      ...defaultActionsConfig,
+      inboundEvents: {
+        ...defaultActionsConfig.inboundEvents,
+        maxEmitted: 100,
+      },
+    });
+    expect(acu.getInboundEventsMaxEmitted()).toBe(100);
+  });
+});
+
+describe('getInboundEventsAdmission()', () => {
+  test('returns the process and per-connector caps', () => {
+    const acu = getActionsConfigurationUtilities(defaultActionsConfig);
+    expect(acu.getInboundEventsAdmission()).toEqual({
+      enabled: true,
+      maxInFlight: 50,
+      maxInFlightPerConnector: 10,
+    });
+  });
+});
+
+describe('getInboundEventsRateLimit()', () => {
+  test('parses the default windows to milliseconds', () => {
+    const acu = getActionsConfigurationUtilities(defaultActionsConfig);
+    expect(acu.getInboundEventsRateLimit()).toEqual({
+      enabled: true,
+      maxKeys: 10000,
+      remoteAddress: { limit: 10, windowMs: 60_000 },
+      connector: { limit: 300, windowMs: 60_000 },
+    });
+  });
+
+  test('parses a custom window once', () => {
+    const acu = getActionsConfigurationUtilities({
+      ...defaultActionsConfig,
+      inboundEvents: {
+        ...defaultActionsConfig.inboundEvents,
+        rateLimit: {
+          ...defaultActionsConfig.inboundEvents.rateLimit,
+          remoteAddress: { limit: 10, window: '30s' },
+        },
+      },
+    });
+    expect(acu.getInboundEventsRateLimit().remoteAddress.windowMs).toBe(30_000);
+  });
+});
+
+describe('getEnabledEmailServices()', () => {
+  test('returns all services when no email config set', () => {
+    const acu = getActionsConfigurationUtilities(defaultActionsConfig);
+    expect(acu.getEnabledEmailServices()).toEqual(['*']);
+  });
+
+  test('returns all services when no email.services config set', () => {
+    const acu = getActionsConfigurationUtilities({ ...defaultActionsConfig, email: {} });
+    expect(acu.getEnabledEmailServices()).toEqual(['*']);
+  });
+
+  test('returns all services when no email.services.enabled config set', () => {
+    const acu = getActionsConfigurationUtilities({
+      ...defaultActionsConfig,
+      email: { services: {} },
+    });
+    expect(acu.getEnabledEmailServices()).toEqual(['*']);
+  });
+
+  test('returns only enabled services', () => {
+    const acu = getActionsConfigurationUtilities({
+      ...defaultActionsConfig,
+      email: {
+        services: {
+          enabled: ['google-mail', 'microsoft-exchange'],
+        },
+      },
+    });
+    expect(acu.getEnabledEmailServices()).toEqual(['google-mail', 'microsoft-exchange']);
+  });
+
+  test('returns all services when enabled is set to "*" in config', () => {
+    const acu = getActionsConfigurationUtilities({
+      ...defaultActionsConfig,
+      email: {
+        services: {
+          enabled: ['*'],
+        },
+      },
+    });
+    expect(acu.getEnabledEmailServices()).toEqual(['*']);
   });
 });

@@ -26,6 +26,8 @@ import {
   DEFAULT_TRANSFORM_FREQUENCY,
   DEFAULT_TRANSFORM_SETTINGS_DOCS_PER_SECOND,
   DEFAULT_TRANSFORM_SETTINGS_MAX_PAGE_SEARCH_SIZE,
+  DEFAULT_TRANSFORM_SETTINGS_MAX_PAGE_SEARCH_SIZE_LATEST,
+  TRANSFORM_FUNCTION,
 } from '../../../common/constants';
 import type {
   DateHistogramAgg,
@@ -126,7 +128,8 @@ export function getPreviewTransformRequestBody(
   transformConfigQuery: TransformConfigQuery,
   partialRequest?: StepDefineExposedState['previewRequest'],
   runtimeMappings?: StepDefineExposedState['runtimeMappings'],
-  timeRangeMs?: StepDefineExposedState['timeRangeMs']
+  timeRangeMs?: StepDefineExposedState['timeRangeMs'],
+  projectRouting?: PostTransformsPreviewRequestSchema['source']['project_routing']
 ): PostTransformsPreviewRequestSchema {
   const dataViewTitle = dataView.getIndexPattern();
   const index = dataViewTitle.split(',').map((name: string) => name.trim());
@@ -156,19 +159,20 @@ export function getPreviewTransformRequestBody(
       index,
       ...(isDefaultQuery(query) ? {} : { query }),
       ...(isPopulatedObject(runtimeMappings) ? { runtime_mappings: runtimeMappings } : {}),
+      ...(projectRouting !== undefined ? { project_routing: projectRouting } : {}),
     },
     ...(partialRequest ?? {}),
   };
 }
 
 export const getCreateTransformSettingsRequestBody = (
-  transformDetailsState: Partial<StepDetailsExposedState>
+  transformDetailsState: Partial<StepDetailsExposedState>,
+  defaultMaxPageSearchSize: number = DEFAULT_TRANSFORM_SETTINGS_MAX_PAGE_SEARCH_SIZE
 ): { settings?: PutTransformsRequestSchema['settings'] } => {
   const settings: PutTransformsRequestSchema['settings'] = {
     // conditionally add optional max_page_search_size, skip if default value
     ...(transformDetailsState.transformSettingsMaxPageSearchSize &&
-    transformDetailsState.transformSettingsMaxPageSearchSize !==
-      DEFAULT_TRANSFORM_SETTINGS_MAX_PAGE_SEARCH_SIZE
+    transformDetailsState.transformSettingsMaxPageSearchSize !== defaultMaxPageSearchSize
       ? { max_page_search_size: transformDetailsState.transformSettingsMaxPageSearchSize }
       : {}),
     // conditionally add optional docs_per_second, skip if default value
@@ -187,7 +191,8 @@ export const getCreateTransformSettingsRequestBody = (
 export const getCreateTransformRequestBody = (
   dataView: DataView,
   transformConfigState: StepDefineExposedState,
-  transformDetailsState: StepDetailsExposedState
+  transformDetailsState: StepDetailsExposedState,
+  projectRouting: PutTransformsRequestSchema['source']['project_routing'] = transformConfigState.projectRouting
 ): PutTransformsPivotRequestSchema | PutTransformsLatestRequestSchema => ({
   ...getPreviewTransformRequestBody(
     dataView,
@@ -196,7 +201,8 @@ export const getCreateTransformRequestBody = (
     transformConfigState.runtimeMappings,
     transformConfigState.isDatePickerApplyEnabled && transformConfigState.timeRangeMs
       ? transformConfigState.timeRangeMs
-      : undefined
+      : undefined,
+    projectRouting
   ),
   // conditionally add optional description
   ...(transformDetailsState.transformDescription !== ''
@@ -243,5 +249,10 @@ export const getCreateTransformRequestBody = (
     : {}),
   ...(transformDetailsState._meta ? { _meta: transformDetailsState._meta } : {}),
   // conditionally add additional settings
-  ...getCreateTransformSettingsRequestBody(transformDetailsState),
+  ...getCreateTransformSettingsRequestBody(
+    transformDetailsState,
+    transformConfigState.transformFunction === TRANSFORM_FUNCTION.LATEST
+      ? DEFAULT_TRANSFORM_SETTINGS_MAX_PAGE_SEARCH_SIZE_LATEST
+      : DEFAULT_TRANSFORM_SETTINGS_MAX_PAGE_SEARCH_SIZE
+  ),
 });

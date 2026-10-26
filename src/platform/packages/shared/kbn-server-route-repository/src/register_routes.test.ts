@@ -7,15 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CoreSetup, kibanaResponseFactory } from '@kbn/core/server';
+import type { CoreSetup } from '@kbn/core/server';
+import { kibanaResponseFactory } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import * as t from 'io-ts';
 import { NEVER } from 'rxjs';
 import * as makeZodValidationObject from './make_zod_validation_object';
 import { registerRoutes } from './register_routes';
 import { passThroughValidationObject, noParamsValidationObject } from './validation_objects';
-import { ServerRouteRepository } from '@kbn/server-route-repository-utils';
+import type { ServerRouteRepository } from '@kbn/server-route-repository-utils';
 
 const disabledAuthz = {
   authz: {
@@ -168,7 +169,7 @@ describe('registerRoutes', () => {
             \\"unexpectedKey\\"
           ],
           \\"path\\": [],
-          \\"message\\": \\"Unrecognized key(s) in object: 'unexpectedKey'\\"
+          \\"message\\": \\"Unrecognized key: \\\\\\"unexpectedKey\\\\\\"\\"
         }
       ]"
     `);
@@ -180,7 +181,7 @@ describe('registerRoutes', () => {
             \\"unexpectedKey\\"
           ],
           \\"path\\": [],
-          \\"message\\": \\"Unrecognized key(s) in object: 'unexpectedKey'\\"
+          \\"message\\": \\"Unrecognized key: \\\\\\"unexpectedKey\\\\\\"\\"
         }
       ]"
     `);
@@ -192,7 +193,7 @@ describe('registerRoutes', () => {
             \\"unexpectedKey\\"
           ],
           \\"path\\": [],
-          \\"message\\": \\"Unrecognized key(s) in object: 'unexpectedKey'\\"
+          \\"message\\": \\"Unrecognized key: \\\\\\"unexpectedKey\\\\\\"\\"
         }
       ]"
     `);
@@ -211,7 +212,7 @@ describe('registerRoutes', () => {
     const [_, wrappedHandler] = post.mock.calls[0];
     await wrappedHandler(mockContext, mockRequest, kibanaResponseFactory);
 
-    expect(handler).toBeCalledTimes(1);
+    expect(handler).toHaveBeenCalledTimes(1);
     const [args] = handler.mock.calls[0];
     expect(Object.keys(args).sort()).toEqual(
       ['aService', 'request', 'response', 'context', 'params', 'logger'].sort()
@@ -350,7 +351,7 @@ describe('registerRoutes', () => {
         kibanaResponseFactory
       );
 
-      expect(handler).toBeCalledTimes(1);
+      expect(handler).toHaveBeenCalledTimes(1);
       const [args] = handler.mock.calls[0];
       const { params } = args;
       expect(params).toEqual({
@@ -422,7 +423,7 @@ describe('registerRoutes', () => {
         kibanaResponseFactory
       );
 
-      expect(handler).toBeCalledTimes(1);
+      expect(handler).toHaveBeenCalledTimes(1);
       const [args] = handler.mock.calls[0];
       const { params } = args;
       expect(params).toEqual({

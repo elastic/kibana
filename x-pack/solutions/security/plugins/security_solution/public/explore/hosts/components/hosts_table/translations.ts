@@ -17,10 +17,6 @@ export const UNIT = (totalCount: number) =>
     defaultMessage: `{totalCount, plural, =1 {host} other {hosts}}`,
   });
 
-export const RISK_SCORE = i18n.translate('xpack.securitySolution.hostsRiskTable.tableTitle', {
-  defaultMessage: 'Host risk',
-});
-
 export const NAME = i18n.translate('xpack.securitySolution.hostsTable.nameTitle', {
   defaultMessage: 'Host name',
 });
@@ -65,5 +61,12 @@ export const ASSET_CRITICALITY = i18n.translate(
   'xpack.securitySolution.hostsTable.assetCriticality',
   {
     defaultMessage: 'Asset criticality',
+  }
+);
+
+export const OS_TOOLTIP_ARIA_LABEL = i18n.translate(
+  'xpack.securitySolution.hostsTable.osToolTipAriaLabel',
+  {
+    defaultMessage: 'More information about the operating system column',
   }
 );

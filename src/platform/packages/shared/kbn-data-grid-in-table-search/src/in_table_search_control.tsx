@@ -14,16 +14,16 @@ import { i18n } from '@kbn/i18n';
 import { css, type SerializedStyles } from '@emotion/react';
 import { useFindMatches } from './matches/use_find_matches';
 import { InTableSearchInput } from './in_table_search_input';
-import { UseFindMatchesProps } from './types';
-import {
-  CELL_MATCH_INDEX_ATTRIBUTE,
-  HIGHLIGHT_CLASS_NAME,
-  BUTTON_TEST_SUBJ,
-  INPUT_TEST_SUBJ,
-} from './constants';
+import type { UseFindMatchesProps } from './types';
+import { BUTTON_TEST_SUBJ, INPUT_TEST_SUBJ } from './constants';
 import { getHighlightColors } from './get_highlight_colors';
+import { getActiveMatchCss } from './get_active_match_css';
 
-const innerCss = css`
+const inputWrapperCss = css`
+  /* ensure nested search input borders are visible */
+  position: relative;
+  z-index: 1;
+
   .dataGridInTableSearch__matchesCounter {
     font-variant-numeric: tabular-nums;
   }
@@ -34,22 +34,14 @@ const innerCss = css`
   }
 
   .euiFormControlLayout__append {
-    padding-inline: 0 !important;
     background: none;
-  }
-
-  /* override borders style only if it's under the custom grid toolbar */
-  .unifiedDataTableToolbarControlIconButton & .euiFormControlLayout,
-  .unifiedDataTableToolbarControlIconButton & .dataGridInTableSearch__input {
-    border-top-right-radius: 0;
-    border-bottom-right-radius: 0;
-    border-right: 0;
   }
 `;
 
-export interface InTableSearchControlProps
+export interface UseInTableSearchControlProps
   extends Omit<UseFindMatchesProps, 'onScrollToActiveMatch'> {
-  pageSize: number | null; // null when the pagination is disabled
+  enabled?: boolean;
+  pageSize: number | null;
   getColumnIndexFromId: (columnId: string) => number;
   scrollToCell: (params: { rowIndex: number; columnIndex: number; align: 'center' }) => void;
   shouldOverrideCmdF: (element: HTMLElement) => boolean;
@@ -58,7 +50,15 @@ export interface InTableSearchControlProps
   onChangeToExpectedPage: (pageIndex: number) => void;
 }
 
-export const InTableSearchControl: React.FC<InTableSearchControlProps> = ({
+export interface UseInTableSearchControlReturn {
+  searchButton: React.ReactNode;
+  searchInput: React.ReactNode;
+  isInputVisible: boolean;
+}
+
+export const useInTableSearchControl = ({
+  enabled = true,
+  initialState,
   pageSize,
   getColumnIndexFromId,
   scrollToCell,
@@ -67,49 +67,40 @@ export const InTableSearchControl: React.FC<InTableSearchControlProps> = ({
   onChangeCss,
   onChangeToExpectedPage,
   ...props
-}) => {
+}: UseInTableSearchControlProps): UseInTableSearchControlReturn => {
   const { euiTheme } = useEuiTheme();
   const colors = useMemo(() => getHighlightColors(euiTheme), [euiTheme]);
-  const containerRef = useRef<HTMLDivElement | null>(null);
   const buttonRef = useRef<HTMLButtonElement | null>(null);
+  const containerRef = useRef<HTMLDivElement | null>(null);
   const shouldReturnFocusToButtonRef = useRef<boolean>(false);
   const [isInputVisible, setIsInputVisible] = useState<boolean>(Boolean(props.inTableSearchTerm));
 
   const onScrollToActiveMatch: UseFindMatchesProps['onScrollToActiveMatch'] = useCallback(
-    ({ rowIndex, columnId, matchIndexWithinCell }) => {
-      if (typeof pageSize === 'number') {
+    (activeMatch, animate) => {
+      const { rowIndex, columnId } = activeMatch;
+
+      if (typeof pageSize === 'number' && animate) {
         const expectedPageIndex = Math.floor(rowIndex / pageSize);
         onChangeToExpectedPage(expectedPageIndex);
       }
 
-      // Defines highlight styles for the active match.
-      // The cell border is useful when the active match is not visible due to the limited cell boundaries.
-      onChangeCss(css`
-        .euiDataGridRowCell[data-gridcell-row-index='${rowIndex}'][data-gridcell-column-id='${columnId}'] {
-          &:after {
-            content: '';
-            z-index: 2;
-            pointer-events: none;
-            position: absolute;
-            inset: 0;
-            border: 2px solid ${colors.activeHighlightBorderColor} !important;
-            border-radius: 3px;
-          }
-          .${HIGHLIGHT_CLASS_NAME}[${CELL_MATCH_INDEX_ATTRIBUTE}='${matchIndexWithinCell}'] {
-            color: ${colors.activeHighlightColor} !important;
-            background-color: ${colors.activeHighlightBackgroundColor} !important;
-          }
-        }
-      `);
+      onChangeCss(
+        getActiveMatchCss({
+          activeMatch,
+          colors,
+        })
+      );
 
-      // getting rowIndex for the visible page
-      const visibleRowIndex = typeof pageSize === 'number' ? rowIndex % pageSize : rowIndex;
+      if (animate) {
+        // getting rowIndex for the visible page
+        const visibleRowIndex = typeof pageSize === 'number' ? rowIndex % pageSize : rowIndex;
 
-      scrollToCell({
-        rowIndex: visibleRowIndex,
-        columnIndex: getColumnIndexFromId(columnId),
-        align: 'center',
-      });
+        scrollToCell({
+          rowIndex: visibleRowIndex,
+          columnIndex: getColumnIndexFromId(columnId),
+          align: 'center',
+        });
+      }
     },
     [getColumnIndexFromId, scrollToCell, onChangeCss, onChangeToExpectedPage, pageSize, colors]
   );
@@ -122,11 +113,11 @@ export const InTableSearchControl: React.FC<InTableSearchControlProps> = ({
     goToNextMatch,
     renderCellsShadowPortal,
     resetState,
-  } = useFindMatches({ ...props, onScrollToActiveMatch });
+  } = useFindMatches({ ...props, initialState, onScrollToActiveMatch });
 
   const showInput = useCallback(() => {
     setIsInputVisible(true);
-  }, [setIsInputVisible]);
+  }, []);
 
   const hideInput = useCallback(
     (shouldReturnFocusToButton: boolean = false) => {
@@ -134,13 +125,14 @@ export const InTableSearchControl: React.FC<InTableSearchControlProps> = ({
       resetState();
       shouldReturnFocusToButtonRef.current = shouldReturnFocusToButton;
     },
-    [setIsInputVisible, resetState]
+    [resetState]
   );
 
   // listens for the cmd+f or ctrl+f keydown event to open the input
   const handleGlobalKeyDown = useCallback(
     (event: KeyboardEvent) => {
       if (
+        enabled &&
         (event.metaKey || event.ctrlKey) &&
         event.key === 'f' &&
         shouldOverrideCmdF(event.target as HTMLElement)
@@ -156,7 +148,7 @@ export const InTableSearchControl: React.FC<InTableSearchControlProps> = ({
         )?.focus();
       }
     },
-    [showInput, shouldOverrideCmdF]
+    [enabled, showInput, shouldOverrideCmdF]
   );
 
   useEvent('keydown', handleGlobalKeyDown);
@@ -169,48 +161,46 @@ export const InTableSearchControl: React.FC<InTableSearchControlProps> = ({
     }
   }, [isInputVisible]);
 
-  return (
-    <div ref={(node) => (containerRef.current = node)} css={innerCss}>
-      {isInputVisible ? (
-        <>
-          <InTableSearchInput
-            matchesCount={matchesCount}
-            activeMatchPosition={activeMatchPosition}
-            isProcessing={isProcessing}
-            goToPrevMatch={goToPrevMatch}
-            goToNextMatch={goToNextMatch}
-            onChangeSearchTerm={onChange}
-            onHideInput={hideInput}
-          />
-          {/* We include it here so the same parent contexts (like KibanaRenderContextProvider, UnifiedDataTableContext etc) will be applied to the portal components too */}
-          {/* as they do for the current component */}
-          {renderCellsShadowPortal ? renderCellsShadowPortal() : null}
-        </>
-      ) : (
-        <EuiToolTip
-          content={i18n.translate('dataGridInTableSearch.inputPlaceholder', {
+  const searchButton =
+    enabled && !isInputVisible ? (
+      <EuiToolTip
+        content={i18n.translate('dataGridInTableSearch.inputPlaceholder', {
+          defaultMessage: 'Find in table',
+        })}
+      >
+        <EuiButtonIcon
+          data-test-subj={BUTTON_TEST_SUBJ}
+          buttonRef={buttonRef}
+          iconType="magnify"
+          size="xs"
+          color="text"
+          className="dataGridInTableSearch__button"
+          aria-label={i18n.translate('dataGridInTableSearch.buttonSearch', {
             defaultMessage: 'Find in table',
           })}
-          delay="long"
-        >
-          <EuiButtonIcon
-            data-test-subj={BUTTON_TEST_SUBJ}
-            buttonRef={buttonRef}
-            iconType="search"
-            size="xs"
-            color="text"
-            className="dataGridInTableSearch__button"
-            aria-label={i18n.translate('dataGridInTableSearch.buttonSearch', {
-              defaultMessage: 'Find in table',
-            })}
-            css={css`
-              /* to make the transition between the button and input more seamless for cases where a custom toolbar is not used */
-              min-height: calc(2 * ${euiTheme.size.base}); // input height
-            `}
-            onClick={showInput}
-          />
-        </EuiToolTip>
-      )}
-    </div>
-  );
+          onClick={showInput}
+        />
+      </EuiToolTip>
+    ) : null;
+
+  const searchInput =
+    enabled && isInputVisible ? (
+      <div ref={containerRef} css={inputWrapperCss}>
+        <InTableSearchInput
+          initialInTableSearchTerm={initialState?.searchTerm}
+          matchesCount={matchesCount}
+          activeMatchPosition={activeMatchPosition}
+          isProcessing={isProcessing}
+          goToPrevMatch={goToPrevMatch}
+          goToNextMatch={goToNextMatch}
+          onChangeSearchTerm={onChange}
+          onHideInput={hideInput}
+        />
+        {/* We include it here so the same parent contexts (like KibanaRenderContextProvider, UnifiedDataTableContext etc) will be applied to the portal components too */}
+        {/* as they do for the current component */}
+        {renderCellsShadowPortal ? renderCellsShadowPortal() : null}
+      </div>
+    ) : null;
+
+  return { searchButton, searchInput, isInputVisible };
 };

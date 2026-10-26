@@ -5,18 +5,21 @@
  * 2.0.
  */
 
-import { useCallback } from 'react';
-import { parse, stringify } from 'query-string';
+import { useCallback, useMemo } from 'react';
+import queryString from 'query-string';
 import { useLocation, useHistory } from 'react-router-dom';
-import { SyntheticsUrlParams, getSupportedUrlParams } from '../utils/url_params';
+import type { SyntheticsUrlParams } from '../utils/url_params';
+import { getSupportedUrlParams } from '../utils/url_params';
 
 function getParsedParams(search: string) {
-  return search ? parse(search[0] === '?' ? search.slice(1) : search, { sort: false }) : {};
+  return search
+    ? queryString.parse(search[0] === '?' ? search.slice(1) : search, { sort: false })
+    : {};
 }
 
 export type GetUrlParams = () => SyntheticsUrlParams;
 export type UpdateUrlParams = (
-  updatedParams: Partial<SyntheticsUrlParams> | null,
+  updatedParams: Partial<Record<keyof SyntheticsUrlParams, string>> | null,
   replaceState?: boolean
 ) => void;
 
@@ -25,7 +28,9 @@ export type SyntheticsUrlParamsHook = () => [GetUrlParams, UpdateUrlParams];
 export const useGetUrlParams: GetUrlParams = () => {
   const { search } = useLocation();
 
-  return getSupportedUrlParams(getParsedParams(search));
+  const urlParams = useMemo(() => getSupportedUrlParams(getParsedParams(search)), [search]);
+
+  return urlParams;
 };
 
 export const useUrlParams: SyntheticsUrlParamsHook = () => {
@@ -43,7 +48,7 @@ export const useUrlParams: SyntheticsUrlParamsHook = () => {
       const urlKeys = Object.keys(mergedParams) as Array<keyof SyntheticsUrlParams>;
 
       const updatedSearch = updatedParams
-        ? stringify(
+        ? queryString.stringify(
             // drop any parameters that have no value
             urlKeys.reduce((params, key) => {
               const value = mergedParams[key];

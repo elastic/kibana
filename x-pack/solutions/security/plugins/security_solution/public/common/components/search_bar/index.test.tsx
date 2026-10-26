@@ -7,53 +7,57 @@
 
 import React from 'react';
 import { createMockStore, mockGlobalState, TestProviders } from '../../mock';
-import { render, fireEvent, waitFor } from '@testing-library/react';
+import { act, render, waitFor } from '@testing-library/react';
 import { SearchBarComponent } from '.';
 import type { SavedQuery } from '@kbn/data-plugin/public';
 import { FilterManager } from '@kbn/data-plugin/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import { inputsActions } from '../../store/inputs';
 import { InputsModelId } from '../../store/inputs/constants';
+import { useKibana } from '../../lib/kibana';
+import { useKibana as mockUseKibana } from '../../lib/kibana/__mocks__';
+import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
+import { createStubDataView } from '@kbn/data-views-plugin/common/data_views/data_view.stub';
 
 const mockSetAppFilters = jest.fn();
 const mockFilterManager = new FilterManager(coreMock.createStart().uiSettings);
 mockFilterManager.setAppFilters = mockSetAppFilters;
-jest.mock('../../lib/kibana', () => {
-  const original = jest.requireActual('../../lib/kibana');
-  return {
-    useKibana: () => ({
-      services: {
-        ...original.useKibana().services,
-        data: {
-          ...original.useKibana().services.data,
-          query: {
-            ...original.useKibana().services.data.query,
-            filterManager: mockFilterManager,
-          },
-        },
-        unifiedSearch: {
-          ui: {
-            SearchBar: jest.fn().mockImplementation((props) => (
-              <button
-                data-test-subj="querySubmitButton"
-                onClick={() => props.onQuerySubmit({ dateRange: { from: 'now', to: 'now' } })}
-                type="button"
-              >
-                {'Hello world'}
-              </button>
-            )),
-          },
-        },
-      },
-    }),
-  };
-});
+jest.mock('../../lib/kibana');
 
 const mockUpdateUrlParam = jest.fn();
 jest.mock('../../utils/global_query_string', () => ({
   useUpdateUrlParam: () => mockUpdateUrlParam,
 }));
 
+const dataView: DataView = createStubDataView({ spec: {} });
+const dataViewSpec: DataViewSpec = dataView.toSpec();
+
+const original = mockUseKibana();
+const useKibanaMock = {
+  services: {
+    ...original.services,
+    data: {
+      ...original.services.data,
+      query: {
+        ...original.services.data.query,
+        filterManager: mockFilterManager,
+      },
+    },
+    unifiedSearch: {
+      ui: {
+        SearchBar: jest.fn().mockImplementation((props) => (
+          <button
+            data-test-subj="querySubmitButton"
+            onClick={() => props.onQuerySubmit({ dateRange: { from: 'now', to: 'now' } })}
+            type="button"
+          >
+            {'Hello world'}
+          </button>
+        )),
+      },
+    },
+  },
+};
 describe('SearchBarComponent', () => {
   const props = {
     id: InputsModelId.global as const,
@@ -61,7 +65,8 @@ describe('SearchBarComponent', () => {
       fields: [],
       title: '',
     },
-    sourcererDataView: {},
+    dataView,
+    sourcererDataViewSpec: dataViewSpec,
     updateSearch: jest.fn(),
     setSavedQuery: jest.fn(),
     setSearchBarFilter: jest.fn(),
@@ -78,29 +83,63 @@ describe('SearchBarComponent', () => {
     savedQuery: undefined,
   };
 
-  const pollForSignalIndex = jest.fn();
   beforeEach(() => {
     jest.clearAllMocks();
+
+    (useKibana as jest.Mock).mockReturnValue(useKibanaMock);
   });
 
-  it('calls pollForSignalIndex on Refresh button click', () => {
-    const { getByTestId } = render(
-      <TestProviders>
-        <SearchBarComponent {...props} pollForSignalIndex={pollForSignalIndex} />
+  it('passes dashboard data views to the filter bar with the page data view', () => {
+    const panelDataView = createStubDataView({
+      spec: { id: 'panel-data-view', title: 'kibana_sample_data_ecommerce' },
+    });
+    const store = createMockStore();
+
+    render(
+      <TestProviders store={store}>
+        <SearchBarComponent {...props} additionalDataViews={[panelDataView]} />
       </TestProviders>
     );
-    fireEvent.click(getByTestId('querySubmitButton'));
-    expect(pollForSignalIndex).toHaveBeenCalled();
+
+    expect(useKibanaMock.services.unifiedSearch.ui.SearchBar).toHaveBeenCalledWith(
+      expect.objectContaining({
+        indexPatterns: [dataView, panelDataView],
+      }),
+      expect.anything()
+    );
   });
 
-  it('does not call pollForSignalIndex on Refresh button click if pollForSignalIndex not passed', () => {
-    const { getByTestId } = render(
-      <TestProviders>
-        <SearchBarComponent {...props} />
+  it('deduplicates dashboard data views that repeat the page data view or each other', () => {
+    const pageDataView = createStubDataView({
+      spec: { id: 'page-data-view', title: 'security-solution-*' },
+    });
+    const duplicatePageDataView = createStubDataView({
+      spec: { id: 'page-data-view', title: 'security-solution-*' },
+    });
+    const panelDataView = createStubDataView({
+      spec: { id: 'panel-data-view', title: 'kibana_sample_data_ecommerce' },
+    });
+    const repeatedPanelDataView = createStubDataView({
+      spec: { id: 'panel-data-view', title: 'kibana_sample_data_ecommerce' },
+    });
+    const store = createMockStore();
+
+    render(
+      <TestProviders store={store}>
+        <SearchBarComponent
+          {...props}
+          dataView={pageDataView}
+          additionalDataViews={[duplicatePageDataView, panelDataView, repeatedPanelDataView]}
+        />
       </TestProviders>
     );
-    fireEvent.click(getByTestId('querySubmitButton'));
-    expect(pollForSignalIndex).not.toHaveBeenCalled();
+
+    expect(useKibanaMock.services.unifiedSearch.ui.SearchBar).toHaveBeenCalledWith(
+      expect.objectContaining({
+        indexPatterns: [pageDataView, panelDataView],
+      }),
+      expect.anything()
+    );
   });
 
   it('calls useUpdateUrlParam for filter and query', () => {
@@ -187,15 +226,16 @@ describe('SearchBarComponent', () => {
       </TestProviders>
     );
 
-    jest.clearAllMocks();
     const newQuery = { query: 'testQuery', language: 'new testLanguage' };
 
-    store.dispatch(
-      inputsActions.setFilterQuery({
-        id: InputsModelId.global,
-        ...newQuery,
-      })
-    );
+    act(() => {
+      store.dispatch(
+        inputsActions.setFilterQuery({
+          id: InputsModelId.global,
+          ...newQuery,
+        })
+      );
+    });
 
     await waitFor(() => {
       expect(mockUpdateUrlParam).toHaveBeenCalledWith(newQuery);
@@ -210,7 +250,6 @@ describe('SearchBarComponent', () => {
       </TestProviders>
     );
 
-    jest.clearAllMocks();
     const filters = [
       {
         meta: {
@@ -223,13 +262,14 @@ describe('SearchBarComponent', () => {
         query: { match_phrase: { 'host.name': 'testValue' } },
       },
     ];
-
-    store.dispatch(
-      inputsActions.setSearchBarFilter({
-        id: InputsModelId.global,
-        filters,
-      })
-    );
+    act(() => {
+      store.dispatch(
+        inputsActions.setSearchBarFilter({
+          id: InputsModelId.global,
+          filters,
+        })
+      );
+    });
 
     await waitFor(() => {
       expect(mockUpdateUrlParam).toHaveBeenCalledWith(filters);
@@ -244,7 +284,6 @@ describe('SearchBarComponent', () => {
       </TestProviders>
     );
 
-    jest.clearAllMocks();
     const savedQuery: SavedQuery = {
       id: 'testSavedQuery123',
       namespaces: ['default'],
@@ -254,13 +293,14 @@ describe('SearchBarComponent', () => {
         query: { query: 'testQuery', language: 'kuery' },
       },
     };
-
-    store.dispatch(
-      inputsActions.setSavedQuery({
-        id: InputsModelId.global,
-        savedQuery,
-      })
-    );
+    act(() => {
+      store.dispatch(
+        inputsActions.setSavedQuery({
+          id: InputsModelId.global,
+          savedQuery,
+        })
+      );
+    });
 
     await waitFor(() => {
       expect(mockUpdateUrlParam).toHaveBeenCalledWith(savedQuery.id);
@@ -276,8 +316,6 @@ describe('SearchBarComponent', () => {
         </TestProviders>
       );
 
-      jest.clearAllMocks();
-
       const newTimerange = {
         from: '2020-07-07T08:20:18.966Z',
         fromStr: 'now-24h',
@@ -286,15 +324,17 @@ describe('SearchBarComponent', () => {
         toStr: 'now',
       };
 
-      store.dispatch(
-        inputsActions.setRelativeRangeDatePicker({ id: InputsModelId.global, ...newTimerange })
-      );
+      act(() => {
+        store.dispatch(
+          inputsActions.setRelativeRangeDatePicker({ id: InputsModelId.global, ...newTimerange })
+        );
+      });
 
       await waitFor(() => {
         expect(mockUpdateUrlParam).toHaveBeenCalledWith(
           expect.objectContaining({
             global: {
-              linkTo: [InputsModelId.timeline, InputsModelId.socTrends],
+              linkTo: [InputsModelId.timeline],
               timerange: newTimerange,
             },
           })
@@ -310,8 +350,6 @@ describe('SearchBarComponent', () => {
         </TestProviders>
       );
 
-      jest.clearAllMocks();
-
       const newTimerange = {
         from: '2020-07-07T08:20:18.966Z',
         fromStr: 'now-24h',
@@ -319,19 +357,20 @@ describe('SearchBarComponent', () => {
         to: '2020-07-08T08:20:18.966Z',
         toStr: 'now',
       };
-
-      store.dispatch(
-        inputsActions.setRelativeRangeDatePicker({
-          id: InputsModelId.timeline,
-          ...newTimerange,
-        })
-      );
+      act(() => {
+        store.dispatch(
+          inputsActions.setRelativeRangeDatePicker({
+            id: InputsModelId.timeline,
+            ...newTimerange,
+          })
+        );
+      });
 
       await waitFor(() => {
         expect(mockUpdateUrlParam).toHaveBeenCalledWith(
           expect.objectContaining({
             timeline: {
-              linkTo: [InputsModelId.global, InputsModelId.socTrends],
+              linkTo: [InputsModelId.global],
               timerange: newTimerange,
             },
           })
@@ -340,7 +379,6 @@ describe('SearchBarComponent', () => {
     });
 
     it('initializes timerange URL param with redux date on mount', async () => {
-      jest.clearAllMocks();
       render(
         <TestProviders>
           <SearchBarComponent {...props} />
@@ -356,6 +394,39 @@ describe('SearchBarComponent', () => {
           timeline: {
             timerange: mockGlobalState.inputs.timeline.timerange,
             linkTo: mockGlobalState.inputs.timeline.linkTo,
+          },
+          valueReport: {
+            timerange: mockGlobalState.inputs.valueReport.timerange,
+            linkTo: mockGlobalState.inputs.valueReport.linkTo,
+          },
+        },
+      ]);
+    });
+
+    it('initializes timerange URL param with redux date on mount -- serverless', async () => {
+      (useKibana as jest.Mock).mockReturnValue({
+        ...useKibanaMock,
+        services: { ...useKibanaMock.services, serverless: {} },
+      });
+      render(
+        <TestProviders>
+          <SearchBarComponent {...props} />
+        </TestProviders>
+      );
+
+      expect(mockUpdateUrlParam.mock.calls[3]).toEqual([
+        {
+          global: {
+            timerange: mockGlobalState.inputs.global.timerange,
+            linkTo: mockGlobalState.inputs.global.linkTo,
+          },
+          timeline: {
+            timerange: mockGlobalState.inputs.timeline.timerange,
+            linkTo: mockGlobalState.inputs.timeline.linkTo,
+          },
+          valueReport: {
+            timerange: mockGlobalState.inputs.valueReport.timerange,
+            linkTo: mockGlobalState.inputs.valueReport.linkTo,
           },
         },
       ]);

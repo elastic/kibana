@@ -7,22 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { memo, useState, BaseSyntheticEvent, KeyboardEvent } from 'react';
+import type { BaseSyntheticEvent, KeyboardEvent } from 'react';
+import React, { memo, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
-import {
-  EuiPopover,
-  keys,
-  EuiIcon,
-  EuiSpacer,
-  EuiButtonEmpty,
-  EuiPopoverProps,
-  EuiButtonGroup,
-  EuiButtonGroupOptionProps,
-} from '@elastic/eui';
+import type { EuiPopoverProps, EuiButtonGroupOptionProps } from '@elastic/eui';
+import { EuiPopover, keys, EuiIcon, EuiSpacer, EuiButtonEmpty, EuiButtonGroup } from '@elastic/eui';
 
 import { ColorPicker } from '@kbn/charts-plugin/public';
-import { LegendItem } from './models';
+import type { LegendItem } from './models';
 
 interface Props {
   item: LegendItem;
@@ -35,6 +28,7 @@ interface Props {
   onUnhighlight: (event: BaseSyntheticEvent) => void;
   setColor: (label: string, color: string | null, event: BaseSyntheticEvent) => void;
   getColor: (label: string) => string;
+  isInteractive?: boolean;
 }
 
 const VisLegendItemComponent = ({
@@ -48,6 +42,7 @@ const VisLegendItemComponent = ({
   onUnhighlight,
   setColor,
   getColor,
+  isInteractive = true,
 }: Props) => {
   const [idToSelectedMap, setIdToSelectedMap] = useState({});
   /**
@@ -69,7 +64,7 @@ const VisLegendItemComponent = ({
         defaultMessage: 'Filter for {legendDataLabel}',
         values: { legendDataLabel: item.label },
       }),
-      iconType: 'plusInCircle',
+      iconType: 'plusCircle',
       'data-test-subj': `legend-${item.label}-filterIn`,
     },
     {
@@ -78,7 +73,7 @@ const VisLegendItemComponent = ({
         defaultMessage: 'Filter out {legendDataLabel}',
         values: { legendDataLabel: item.label },
       }),
-      iconType: 'minusInCircle',
+      iconType: 'minusCircle',
       'data-test-subj': `legend-${item.label}-filterOut`,
     },
   ];
@@ -116,7 +111,7 @@ const VisLegendItemComponent = ({
       onKeyDown={onLegendEntryKeydown}
       onMouseEnter={onHighlight}
       onFocus={onHighlight}
-      onClick={onSelect(item.label)}
+      onClick={isInteractive ? onSelect(item.label) : undefined}
       onMouseLeave={onUnhighlight}
       onBlur={onUnhighlight}
       data-label={item.label}
@@ -130,6 +125,7 @@ const VisLegendItemComponent = ({
       <EuiIcon
         size="l"
         type="dot"
+        aria-hidden={true}
         color={getColor(item.label)}
         data-test-subj={`legendSelectedColor-${getColor(item.label)}`}
       />
@@ -139,6 +135,10 @@ const VisLegendItemComponent = ({
 
   const renderDetails = () => (
     <EuiPopover
+      aria-label={i18n.translate('visTypeVislib.vislib.legend.toggleOptionsPopoverAriaLabel', {
+        defaultMessage: '{legendDataLabel}, legend options',
+        values: { legendDataLabel: item.label },
+      })}
       display="block"
       button={button}
       isOpen={selected}

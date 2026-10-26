@@ -14,7 +14,7 @@ import { registerActivateRoute } from './register_activate_route';
 import { registerDeactivateRoute } from './register_deactivate_route';
 import { registerVisualizeRoute } from './register_visualize_route';
 import { registerActionRoutes } from './action';
-import { RouteDependencies } from '../../../types';
+import type { RouteDependencies } from '../../../types';
 
 export function registerWatchRoutes(deps: RouteDependencies) {
   registerDeleteRoute(deps);

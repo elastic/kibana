@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiBadge } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { SerializedHotPhase } from '../../../../../../common/types';
+import type { SerializedHotPhase } from '../../../../../../common/types';
 import { i18nTexts } from '../../../edit_policy/i18n_texts';
 import { ActionDescription } from './action_description';
 import type { ActionComponentProps } from './types';
@@ -63,6 +63,51 @@ export const Rollover = ({ phase, phases }: ActionComponentProps) => {
             defaultMessage="Deprecated"
           />
         </EuiBadge>
+      </>
+    );
+  }
+
+  if (rollover?.min_primary_shard_size) {
+    descriptionItems.push(
+      <>
+        {`${i18nTexts.editPolicy.minPrimaryShardSizeLabel}: `}
+        <strong>{rollover.min_primary_shard_size}</strong>
+      </>
+    );
+  }
+
+  if (rollover?.min_primary_shard_docs) {
+    descriptionItems.push(
+      <>
+        {`${i18nTexts.editPolicy.minPrimaryShardDocsLabel}: `}
+        <strong>{rollover.min_primary_shard_docs}</strong>
+      </>
+    );
+  }
+
+  if (rollover?.min_age) {
+    descriptionItems.push(
+      <>
+        {`${i18nTexts.editPolicy.minRolloverAgeLabel}: `}
+        <strong>{rollover.min_age}</strong>
+      </>
+    );
+  }
+
+  if (rollover?.min_docs !== undefined) {
+    descriptionItems.push(
+      <>
+        {`${i18nTexts.editPolicy.minDocsLabel}: `}
+        <strong>{rollover.min_docs}</strong>
+      </>
+    );
+  }
+
+  if (rollover?.min_size) {
+    descriptionItems.push(
+      <>
+        {`${i18nTexts.editPolicy.minSizeLabel}: `}
+        <strong>{rollover.min_size}</strong>
       </>
     );
   }

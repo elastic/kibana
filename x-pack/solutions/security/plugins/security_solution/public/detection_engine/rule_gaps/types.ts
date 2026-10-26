@@ -15,6 +15,7 @@ export type BackfillStatus = Backfill['status'];
 
 export type Gap = FindGapsResponseBody['data']['0'];
 export type GapStatus = Gap['status'];
+export type GapReasonType = NonNullable<Gap['reason']>['type'];
 
 export interface BackfillStats {
   total: number;
@@ -35,4 +36,43 @@ export interface TimeRange {
 export interface ScheduleBackfillProps {
   ruleIds: string[];
   timeRange: TimeRange;
+}
+
+export interface GapAutoFillSchedulerBase {
+  id: string;
+  name: string;
+  scope: string[];
+  schedule: { interval: string };
+  ruleTypes: { type: string; consumer: string }[];
+  gapFillRange: string;
+  maxBackfills: number;
+  numRetries: number;
+  enabled: boolean;
+  excludedReasons?: string[];
+}
+
+export type GapAutoFillSchedulerResponse = GapAutoFillSchedulerBase & {
+  createdBy: string | null;
+  updatedBy: string | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export interface GapAutoFillSchedulerLogEntry {
+  timestamp: string;
+  status: string;
+  message: string;
+  results: {
+    ruleId: string;
+    processedGaps: number;
+    status: string;
+    error: string;
+  }[];
+}
+
+export interface GapAutoFillSchedulerLogsResponse {
+  data: GapAutoFillSchedulerLogEntry[];
+  total: number;
+  page: number;
+  perPage: number;
 }

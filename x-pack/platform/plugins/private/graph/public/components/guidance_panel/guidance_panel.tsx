@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { ReactNode, useEffect, useState } from 'react';
+import type { ReactNode } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   EuiPanel,
   EuiFlexGroup,
@@ -21,17 +22,17 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { connect } from 'react-redux';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { IUnifiedSearchPluginServices } from '@kbn/unified-search-plugin/public/types';
-import { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
+import type { IUnifiedSearchPluginServices } from '@kbn/unified-search-plugin/public/types';
+import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import { css } from '@emotion/react';
+import type { GraphState } from '../../state_management';
 import {
-  GraphState,
   hasDatasourceSelector,
   hasFieldsSelector,
   requestDatasource,
   fillWorkspace,
 } from '../../state_management';
-import { IndexPatternSavedObject } from '../../types';
+import type { IndexPatternSavedObject } from '../../types';
 import { openSourceModal } from '../../services/source_modal';
 
 export interface GuidancePanelProps {
@@ -52,15 +53,15 @@ function ListItem({
   const isDisabled = state === 'disabled';
 
   return (
-    // eslint-disable-next-line jsx-a11y/role-supports-aria-props
     <li
       css={[styles.listItem, isDisabled && styles.disabledListItem]}
+      // eslint-disable-next-line jsx-a11y/role-supports-aria-props
       aria-disabled={isDisabled}
       aria-current={state === 'active' ? 'step' : undefined}
     >
       {!isDisabled && (
         <span css={[styles.itemIcon, state === 'done' && styles.doneIcon]} aria-hidden={true}>
-          <EuiIcon type={state === 'active' ? 'sortRight' : 'check'} />
+          <EuiIcon type={state === 'active' ? 'sortRight' : 'check'} aria-hidden={true} />
         </span>
       )}
       <EuiText>{children}</EuiText>
@@ -81,7 +82,7 @@ function GuidancePanelComponent(props: GuidancePanelProps) {
 
   useEffect(() => {
     const checkIfDataViewsExist = async () => {
-      setHasDataViews(await data.dataViews.hasData.hasUserDataView());
+      setHasDataViews(await data.dataViews.hasData.hasDataView());
     };
     checkIfDataViewsExist();
   }, [setHasDataViews, data.dataViews]);
@@ -96,7 +97,7 @@ function GuidancePanelComponent(props: GuidancePanelProps) {
     <EuiPanel data-test-subj="graphGuidancePanel">
       <EuiFlexGroup direction="column" alignItems="center">
         <EuiFlexItem grow={false}>
-          <EuiIcon type="graphApp" size="xxl" />
+          <EuiIcon type="graphApp" size="xxl" aria-hidden={true} />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiText>
@@ -155,8 +156,9 @@ function GuidancePanelComponent(props: GuidancePanelProps) {
     content = (
       <EuiPanel paddingSize="none">
         <EuiCallOut
+          announceOnMount={false}
           color="warning"
-          iconType="help"
+          iconType="question"
           title={i18n.translate('xpack.graph.noDataSourceNotificationMessageTitle', {
             defaultMessage: 'No data source',
           })}

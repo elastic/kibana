@@ -7,17 +7,28 @@
 
 import * as React from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { shallow } from 'enzyme';
-import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
-import { act } from 'react-dom/test-utils';
+import { render, waitFor, screen } from '@testing-library/react';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { createMemoryHistory, createLocation } from 'history';
-import { ToastsApi } from '@kbn/core/public';
+import type { ToastsApi } from '@kbn/core/public';
 import { RuleDetailsRoute, getRuleData } from './rule_details_route';
-import { Rule } from '../../../../types';
-import { CenterJustifiedSpinner } from '../../../components/center_justified_spinner';
+import type { Rule } from '../../../../types';
+import { STACK_MANAGEMENT_RULES_HOST, getRulesAppDetailsRoute } from '@kbn/rule-data-utils';
 import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
 import { useKibana } from '../../../../common/lib/kibana';
+import { ProjectRoutingAccess, useRouteBasedCpsPickerAccess } from '@kbn/cps-utils';
+import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 jest.mock('../../../../common/lib/kibana');
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: false,
+      cacheTime: 0,
+    },
+  },
+});
 
 jest.mock('@kbn/response-ops-rule-form/src/common/apis/fetch_ui_config', () => ({
   fetchUiConfig: jest
@@ -29,26 +40,53 @@ jest.mock('../../../../common/get_experimental_features', () => ({
   getIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(true),
 }));
 
+jest.mock('react-router-dom', () => ({
+  useHistory: () => ({
+    push: jest.fn(),
+    createHref: jest.fn(({ pathname }: { pathname: string }) => pathname),
+  }),
+  useLocation: () => ({
+    pathname: '/triggersActions/rules/',
+  }),
+}));
+
+jest.mock('@kbn/cps-utils', () => ({
+  ...jest.requireActual('@kbn/cps-utils'),
+  useRouteBasedCpsPickerAccess: jest.fn(),
+}));
+const mockUseRouteBasedCpsPickerAccess = jest.mocked(useRouteBasedCpsPickerAccess);
+
+function renderWithIntl(ui: React.ReactElement) {
+  return render(
+    <QueryClientProvider client={queryClient}>
+      <IntlProvider locale="en" messages={{}}>
+        <MockAppHeaderProvider>{ui}</MockAppHeaderProvider>
+      </IntlProvider>
+    </QueryClientProvider>
+  );
+}
+
 describe('rule_details_route', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    queryClient.clear();
   });
 
   const spacesMock = spacesPluginMock.createStartContract();
   async function setup() {
     const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
     // eslint-disable-next-line react-hooks/rules-of-hooks
-    useKibanaMock().services.spaces = spacesMock;
+    const services = useKibanaMock().services;
+    services.spaces = spacesMock;
+    services.host = undefined;
   }
 
-  it('render a loader while fetching data', () => {
+  it('render a loader while fetching data', async () => {
     const rule = mockRule();
 
-    expect(
-      shallow(
-        <RuleDetailsRoute {...mockRouterProps(rule)} {...mockApis()} />
-      ).containsMatchingElement(<CenterJustifiedSpinner />)
-    ).toBeTruthy();
+    renderWithIntl(<RuleDetailsRoute {...mockRouterProps(rule)} {...mockApis()} />);
+
+    expect(await screen.findByRole('progressbar')).toBeInTheDocument();
   });
 
   it('redirects to another page if fetched rule is an aliasMatch', async () => {
@@ -63,16 +101,51 @@ describe('rule_details_route', () => {
       alias_target_id: rule.id,
       alias_purpose: 'savedObjectConversion',
     }));
-    const wrapper = mountWithIntl(
+
+    renderWithIntl(
       <RuleDetailsRoute {...mockRouterProps(rule)} {...{ ...mockApis(), resolveRule }} />
     );
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
+
+    await waitFor(() => {
+      expect(resolveRule).toHaveBeenCalledWith(rule.id);
     });
-    expect(resolveRule).toHaveBeenCalledWith(rule.id);
+
     expect((spacesMock as any).ui.redirectLegacyUrl).toHaveBeenCalledWith({
-      path: 'insightsAndAlerting/triggersActions/rule/new_id',
+      path: `${STACK_MANAGEMENT_RULES_HOST.pathPrefix}${getRulesAppDetailsRoute('new_id')}`,
+      aliasPurpose: 'savedObjectConversion',
+      objectNoun: 'rule',
+    });
+  });
+
+  it('uses the mount host path prefix for aliasMatch redirects', async () => {
+    await setup();
+    const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
+
+    useKibanaMock().services.host = {
+      app: 'observabilityAlerting',
+      pathPrefix: '/rules/v1',
+    };
+    const rule = mockRule();
+    const { resolveRule } = mockApis();
+
+    resolveRule.mockImplementationOnce(async () => ({
+      ...rule,
+      id: 'new_id',
+      outcome: 'aliasMatch',
+      alias_target_id: rule.id,
+      alias_purpose: 'savedObjectConversion',
+    }));
+
+    renderWithIntl(
+      <RuleDetailsRoute {...mockRouterProps(rule)} {...{ ...mockApis(), resolveRule }} />
+    );
+
+    await waitFor(() => {
+      expect(resolveRule).toHaveBeenCalledWith(rule.id);
+    });
+
+    expect((spacesMock as any).ui.redirectLegacyUrl).toHaveBeenCalledWith({
+      path: '/rules/v1/rule/new_id',
       aliasPurpose: 'savedObjectConversion',
       objectNoun: 'rule',
     });
@@ -96,24 +169,57 @@ describe('rule_details_route', () => {
       outcome: 'conflict',
       alias_target_id: rule.id,
     }));
-    const wrapper = mountWithIntl(
+
+    renderWithIntl(
       <RuleDetailsRoute
         {...mockRouterProps(rule)}
         {...{ ...mockApis(), loadRuleTypes, loadActionTypes, resolveRule }}
       />
     );
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
+
+    await waitFor(() => {
+      expect(resolveRule).toHaveBeenCalledWith(rule.id);
     });
 
-    expect(resolveRule).toHaveBeenCalledWith(rule.id);
     expect((spacesMock as any).ui.components.getLegacyUrlConflict).toHaveBeenCalledWith({
       currentObjectId: 'new_id',
       objectNoun: 'rule',
       otherObjectId: rule.id,
-      otherObjectPath: `insightsAndAlerting/triggersActions/rule/${rule.id}`,
+      otherObjectPath: `${STACK_MANAGEMENT_RULES_HOST.pathPrefix}${getRulesAppDetailsRoute(
+        rule.id
+      )}`,
     });
+  });
+
+  it('sets the CPS picker access to READONLY', async () => {
+    await setup();
+    const rule = mockRule();
+    const ruleType = {
+      id: rule.ruleTypeId,
+      name: 'type name',
+      authorizedConsumers: ['consumer'],
+    };
+    const { loadRuleTypes, loadActionTypes, resolveRule } = mockApis();
+
+    loadRuleTypes.mockImplementationOnce(async () => [ruleType]);
+    loadActionTypes.mockImplementation(async () => []);
+    resolveRule.mockImplementationOnce(async () => ({ ...rule, uiamApiKey: 'uiam_api_key' }));
+
+    renderWithIntl(
+      <RuleDetailsRoute
+        {...mockRouterProps(rule)}
+        {...{ ...mockApis(), loadRuleTypes, loadActionTypes, resolveRule }}
+      />
+    );
+
+    await waitFor(() => {
+      expect(resolveRule).toHaveBeenCalledWith(rule.id);
+    });
+
+    expect(mockUseRouteBasedCpsPickerAccess).toHaveBeenCalledWith(
+      ProjectRoutingAccess.READONLY,
+      expect.any(Object)
+    );
   });
 });
 

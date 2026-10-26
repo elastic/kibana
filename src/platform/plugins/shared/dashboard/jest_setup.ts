@@ -16,8 +16,6 @@
  */
 import {
   mockDashboardBackupService,
-  mockDashboardContentManagementCache,
-  mockDashboardContentManagementService,
   setStubKibanaServices,
   setStubLogger,
 } from './public/services/mocks';
@@ -26,26 +24,21 @@ setStubLogger();
 // Start the kibana services with stubs
 setStubKibanaServices();
 
-// Mock the dashboard services
-jest.mock('./public/services/dashboard_content_management_service', () => {
-  return {
-    getDashboardContentManagementCache: () => mockDashboardContentManagementCache,
-    getDashboardContentManagementService: () => mockDashboardContentManagementService,
-  };
-});
-
-jest.mock('./public/services/dashboard_backup_service', () => {
+jest.mock('./public/services/dashboard_api_services', () => {
   return {
     getDashboardBackupService: () => mockDashboardBackupService,
+    initializeDashboardApiServices: () => jest.fn(),
   };
 });
 
 jest.mock('./public/services/dashboard_recently_accessed_service', () => {
+  const recentlyAccessed = {
+    add: jest.fn(),
+    remove: jest.fn(),
+    get: jest.fn(),
+    get$: jest.fn(),
+  };
   return {
-    getDashboardRecentlyAccessedService: () => ({
-      add: jest.fn(),
-      get: jest.fn(),
-      get$: jest.fn(),
-    }),
+    getDashboardRecentlyAccessedService: () => recentlyAccessed,
   };
 });

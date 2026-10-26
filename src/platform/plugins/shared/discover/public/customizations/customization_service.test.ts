@@ -19,9 +19,9 @@ describe('createCustomizatonService', () => {
   describe('set', () => {
     it('should add a customization', async () => {
       const service = createCustomizationService();
-      const customization: DiscoverCustomization = { id: 'top_nav' };
+      const customization: DiscoverCustomization = { id: 'search_bar' };
       let current: DiscoverCustomization | undefined;
-      service.get$('top_nav').subscribe((value) => {
+      service.get$('search_bar').subscribe((value) => {
         current = value;
       });
       expect(current).toBe(undefined);
@@ -32,18 +32,18 @@ describe('createCustomizatonService', () => {
     it('should update a customization', async () => {
       const service = createCustomizationService();
       const customization: DiscoverCustomization = {
-        id: 'top_nav',
-        defaultMenu: { newItem: { disabled: true } },
+        id: 'search_bar',
+        hideDataViewPicker: true,
       };
       service.set(customization);
       let current: DiscoverCustomization | undefined;
-      service.get$('top_nav').subscribe((value) => {
+      service.get$('search_bar').subscribe((value) => {
         current = value;
       });
       expect(current).toBe(customization);
       const updatedCustomization: DiscoverCustomization = {
         ...customization,
-        defaultMenu: { newItem: { disabled: false } },
+        hideDataViewPicker: false,
       };
       service.set(updatedCustomization);
       expect(current).toBe(updatedCustomization);
@@ -52,20 +52,20 @@ describe('createCustomizatonService', () => {
     it('should remain disabled when updating a customization', async () => {
       const service = createCustomizationService();
       const customization: DiscoverCustomization = {
-        id: 'top_nav',
-        defaultMenu: { newItem: { disabled: true } },
+        id: 'search_bar',
+        hideDataViewPicker: true,
       };
       service.set(customization);
       let current: DiscoverCustomization | undefined;
-      service.get$('top_nav').subscribe((value) => {
+      service.get$('search_bar').subscribe((value) => {
         current = value;
       });
       expect(current).toBe(customization);
-      service.disable('top_nav');
+      service.disable('search_bar');
       expect(current).toBeUndefined();
       const updatedCustomization: DiscoverCustomization = {
         ...customization,
-        defaultMenu: { newItem: { disabled: false } },
+        hideDataViewPicker: false,
       };
       service.set(updatedCustomization);
       expect(current).toBeUndefined();
@@ -75,24 +75,24 @@ describe('createCustomizatonService', () => {
   describe('get', () => {
     it('should return a customization', async () => {
       const service = createCustomizationService();
-      const customization: DiscoverCustomization = { id: 'top_nav' };
+      const customization: DiscoverCustomization = { id: 'search_bar' };
       service.set(customization);
-      const current = service.get('top_nav');
+      const current = service.get('search_bar');
       expect(current).toBe(customization);
     });
 
     it('should return undefined if customization is disabled', async () => {
       const service = createCustomizationService();
-      const customization: DiscoverCustomization = { id: 'top_nav' };
+      const customization: DiscoverCustomization = { id: 'search_bar' };
       service.set(customization);
-      service.disable('top_nav');
-      const current = service.get('top_nav');
+      service.disable('search_bar');
+      const current = service.get('search_bar');
       expect(current).toBeUndefined();
     });
 
     it('should return undefined if customization does not exist', async () => {
       const service = createCustomizationService();
-      const current = service.get('top_nav');
+      const current = service.get('search_bar');
       expect(current).toBeUndefined();
     });
   });
@@ -100,10 +100,10 @@ describe('createCustomizatonService', () => {
   describe('get$', () => {
     it('should return a customization', async () => {
       const service = createCustomizationService();
-      const customization: DiscoverCustomization = { id: 'top_nav' };
+      const customization: DiscoverCustomization = { id: 'search_bar' };
       service.set(customization);
       let current: DiscoverCustomization | undefined;
-      service.get$('top_nav').subscribe((value) => {
+      service.get$('search_bar').subscribe((value) => {
         current = value;
       });
       expect(current).toBe(customization);
@@ -111,21 +111,21 @@ describe('createCustomizatonService', () => {
 
     it('should return undefined if customization is disabled', async () => {
       const service = createCustomizationService();
-      const customization: DiscoverCustomization = { id: 'top_nav' };
+      const customization: DiscoverCustomization = { id: 'search_bar' };
       service.set(customization);
       let current: DiscoverCustomization | undefined;
-      service.get$('top_nav').subscribe((value) => {
+      service.get$('search_bar').subscribe((value) => {
         current = value;
       });
       expect(current).toBe(customization);
-      service.disable('top_nav');
+      service.disable('search_bar');
       expect(current).toBeUndefined();
     });
 
     it('should return undefined if customization does not exist', async () => {
       const service = createCustomizationService();
       let current: DiscoverCustomization | undefined;
-      service.get$('top_nav').subscribe((value) => {
+      service.get$('search_bar').subscribe((value) => {
         current = value;
       });
       expect(current).toBeUndefined();
@@ -135,42 +135,42 @@ describe('createCustomizatonService', () => {
   describe('disable', () => {
     it('should disable a customization', async () => {
       const service = createCustomizationService();
-      const customization: DiscoverCustomization = { id: 'top_nav' };
+      const customization: DiscoverCustomization = { id: 'search_bar' };
       service.set(customization);
       let current: DiscoverCustomization | undefined;
-      service.get$('top_nav').subscribe((value) => {
+      service.get$('search_bar').subscribe((value) => {
         current = value;
       });
       expect(current).toBe(customization);
-      service.disable('top_nav');
+      service.disable('search_bar');
       expect(current).toBeUndefined();
     });
 
     it('should not throw if customization does not exist', async () => {
       const service = createCustomizationService();
-      service.disable('top_nav');
+      service.disable('search_bar');
     });
   });
 
   describe('enable', () => {
     it('should enable a customization', async () => {
       const service = createCustomizationService();
-      const customization: DiscoverCustomization = { id: 'top_nav' };
+      const customization: DiscoverCustomization = { id: 'search_bar' };
       service.set(customization);
       let current: DiscoverCustomization | undefined;
-      service.get$('top_nav').subscribe((value) => {
+      service.get$('search_bar').subscribe((value) => {
         current = value;
       });
       expect(current).toBe(customization);
-      service.disable('top_nav');
+      service.disable('search_bar');
       expect(current).toBeUndefined();
-      service.enable('top_nav');
+      service.enable('search_bar');
       expect(current).toBe(customization);
     });
 
     it('should not throw if customization does not exist', async () => {
       const service = createCustomizationService();
-      service.enable('top_nav');
+      service.enable('search_bar');
     });
   });
 });

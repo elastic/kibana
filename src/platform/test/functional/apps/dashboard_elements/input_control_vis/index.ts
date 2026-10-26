@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const browser = getService('browser');
@@ -23,16 +23,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
         'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
       );
       await esArchiver.loadIfNeeded(
-        'src/platform/test/functional/fixtures/es_archiver/long_window_logstash'
-      );
-    });
-
-    after(async () => {
-      await kibanaServer.savedObjects.cleanStandardList();
-      await esArchiver.unload(
-        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
-      );
-      await esArchiver.unload(
         'src/platform/test/functional/fixtures/es_archiver/long_window_logstash'
       );
     });

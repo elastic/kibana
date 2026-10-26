@@ -5,10 +5,14 @@
  * 2.0.
  */
 
-import { conditionSchema } from '@kbn/streams-schema';
-import { z } from '@kbn/zod';
-import { ResyncStreamsResponse } from '../../../lib/streams/client';
+import { z } from '@kbn/zod/v4';
+import { isNeverCondition } from '@kbn/streamlang';
+import { MAX_STREAM_NAME_LENGTH, routingStatus } from '@kbn/streams-schema';
+import { boundedConditionSchema } from '../../utils/bounded_condition_schema';
+import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
+import type { ResyncStreamsResponse } from '../../../lib/streams/client';
 import { createServerRoute } from '../../create_server_route';
+import { forkStreamRequest } from '../../../oas_examples';
 
 export const forkStreamsRoute = createServerRoute({
   endpoint: 'POST /api/streams/{name}/_fork 2023-10-31',
@@ -17,31 +21,62 @@ export const forkStreamsRoute = createServerRoute({
     description: 'Forks a wired stream and creates a child stream',
     summary: 'Fork a stream',
     availability: {
+      since: '9.1.0',
       stability: 'experimental',
     },
+    oasOperationObject: () => ({
+      requestBody: {
+        content: {
+          'application/json': {
+            examples: {
+              forkStream: { value: forkStreamRequest },
+            },
+          },
+        },
+      },
+      responses: {
+        200: {
+          description: 'The stream was forked successfully.',
+        },
+      },
+    }),
   },
   security: {
     authz: {
-      enabled: false,
-      reason:
-        'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
     },
   },
   params: z.object({
     path: z.object({
-      name: z.string(),
+      name: z
+        .string()
+        .max(MAX_STREAM_NAME_LENGTH)
+        .describe('The name of the parent stream to fork from.'),
     }),
-    body: z.object({ stream: z.object({ name: z.string() }), if: conditionSchema }),
+    body: z.object({
+      stream: z.object({ name: z.string().max(MAX_STREAM_NAME_LENGTH) }),
+      where: boundedConditionSchema,
+      status: routingStatus.optional(),
+      draft: z.boolean().optional(),
+    }),
   }),
   handler: async ({ params, request, getScopedClients }): Promise<{ acknowledged: true }> => {
     const { streamsClient } = await getScopedClients({
       request,
     });
 
+    const conditionStatus = params.body.status
+      ? params.body.status
+      : isNeverCondition(params.body.where)
+      ? 'disabled'
+      : 'enabled';
+
     return await streamsClient.forkStream({
       parent: params.path.name,
-      if: params.body.if,
+      where: params.body.where,
       name: params.body.stream.name,
+      status: conditionStatus,
+      draft: params.body.draft,
     });
   },
 });
@@ -53,14 +88,27 @@ export const resyncStreamsRoute = createServerRoute({
     description: 'Resyncs all streams, making sure that Elasticsearch assets are up to date',
     summary: 'Resync streams',
     availability: {
+      since: '9.1.0',
       stability: 'experimental',
     },
+    oasOperationObject: () => ({
+      requestBody: {
+        content: {
+          'application/json': {
+            examples: {},
+          },
+        },
+      },
+      responses: {
+        200: {
+          description: 'Streams were resynced successfully.',
+        },
+      },
+    }),
   },
   security: {
     authz: {
-      enabled: false,
-      reason:
-        'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
     },
   },
   params: z.object({}),
@@ -78,17 +126,54 @@ export const getStreamsStatusRoute = createServerRoute({
   },
   security: {
     authz: {
-      enabled: false,
-      reason:
-        'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
-  handler: async ({ request, getScopedClients }): Promise<{ enabled: boolean }> => {
+  handler: async ({
+    request,
+    getScopedClients,
+  }): Promise<{
+    logs: boolean | 'conflict';
+    'logs.otel': boolean | 'conflict';
+    'logs.ecs': boolean | 'conflict';
+    can_manage: boolean;
+  }> => {
     const { streamsClient } = await getScopedClients({ request });
 
+    const privileges = await streamsClient.getPrivileges('logs,logs.*');
+    const streamStatus = await streamsClient.checkStreamStatus();
+
     return {
-      enabled: await streamsClient.isStreamsEnabled(),
+      ...streamStatus,
+      can_manage: privileges.manage,
     };
+  },
+});
+
+export const getClassicStreamsStatusRoute = createServerRoute({
+  endpoint: 'GET /internal/streams/_classic_status',
+  options: {
+    access: 'internal',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+    },
+  },
+  handler: async ({ request, getScopedClients }): Promise<{ can_manage: boolean }> => {
+    const { scopedClusterClient, isSecurityEnabled } = await getScopedClients({ request });
+
+    if (!isSecurityEnabled) {
+      return { can_manage: true };
+    }
+
+    const REQUIRED_MANAGE_PRIVILEGES = ['manage_index_templates'];
+
+    const privileges = await scopedClusterClient.asCurrentUser.security.hasPrivileges({
+      cluster: REQUIRED_MANAGE_PRIVILEGES,
+    });
+
+    return { can_manage: privileges.cluster.manage_index_templates === true };
   },
 });
 
@@ -96,4 +181,5 @@ export const managementRoutes = {
   ...forkStreamsRoute,
   ...resyncStreamsRoute,
   ...getStreamsStatusRoute,
+  ...getClassicStreamsStatusRoute,
 };

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { Fragment, FunctionComponent } from 'react';
+import type { FunctionComponent } from 'react';
+import React, { Fragment } from 'react';
 import {
   EuiPage,
   EuiPageBody,
@@ -72,7 +73,7 @@ class LicenseStatus extends React.PureComponent<LicenseStatusProps> {
     let title;
     let message;
     if (isExpired) {
-      icon = <EuiIcon color="danger" type="warning" />;
+      icon = <EuiIcon color="danger" type="warning" aria-hidden={true} />;
       message = (
         <Fragment>
           <FormattedMessage
@@ -94,7 +95,7 @@ class LicenseStatus extends React.PureComponent<LicenseStatusProps> {
         />
       );
     } else {
-      icon = <EuiIcon color="success" type="checkInCircleFilled" size="l" />;
+      icon = <EuiIcon color="success" type="checkCircleFill" size="l" aria-hidden={true} />;
       message = expiryDate ? (
         <Fragment>
           <FormattedMessage

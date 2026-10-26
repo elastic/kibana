@@ -23,6 +23,9 @@ export const mockDataAsNestedObject: Ecs = {
   host: {
     name: ['host-name'],
   },
+  user: {
+    name: ['user1'],
+  },
   kibana: {
     alert: {
       rule: {

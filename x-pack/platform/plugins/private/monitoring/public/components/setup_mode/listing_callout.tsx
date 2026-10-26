@@ -37,6 +37,7 @@ export function ListingCallOut({ setupModeData, productName, customRenderer }: P
       return (
         <Fragment>
           <EuiCallOut
+            announceOnMount={false}
             title={i18n.translate('xpack.monitoring.setupMode.detectedNodeTitle', {
               defaultMessage: '{product} {identifier} detected',
               values: {
@@ -45,7 +46,7 @@ export function ListingCallOut({ setupModeData, productName, customRenderer }: P
               },
             })}
             color="warning"
-            iconType="flag"
+            iconType="pencil"
           >
             <p>
               {i18n.translate('xpack.monitoring.setupMode.detectedNodeDescription', {
@@ -63,6 +64,7 @@ export function ListingCallOut({ setupModeData, productName, customRenderer }: P
     return (
       <Fragment>
         <EuiCallOut
+          announceOnMount={false}
           title={i18n.translate('xpack.monitoring.setupMode.noMonitoringDataFound', {
             defaultMessage: 'No {product} {identifier} detected',
             values: {
@@ -70,7 +72,7 @@ export function ListingCallOut({ setupModeData, productName, customRenderer }: P
               identifier: getIdentifier(productName, true),
             },
           })}
-          iconType="flag"
+          iconType="pencil"
         >
           <p>
             {i18n.translate('xpack.monitoring.setupMode.netNewUserDescription', {
@@ -87,6 +89,7 @@ export function ListingCallOut({ setupModeData, productName, customRenderer }: P
     return (
       <Fragment>
         <EuiCallOut
+          announceOnMount={false}
           title={i18n.translate('xpack.monitoring.setupMode.metricbeatAllNodes', {
             defaultMessage: 'Metricbeat is monitoring all {identifier}.',
             values: {
@@ -94,7 +97,7 @@ export function ListingCallOut({ setupModeData, productName, customRenderer }: P
             },
           })}
           color="success"
-          iconType="flag"
+          iconType="pencil"
         />
         <EuiSpacer size="m" />
       </Fragment>
@@ -105,11 +108,12 @@ export function ListingCallOut({ setupModeData, productName, customRenderer }: P
     return (
       <Fragment>
         <EuiCallOut
+          announceOnMount={false}
           title={i18n.translate('xpack.monitoring.setupMode.disableInternalCollectionTitle', {
             defaultMessage: 'Disable self monitoring',
           })}
           color="warning"
-          iconType="flag"
+          iconType="pencil"
         >
           <p>
             {i18n.translate('xpack.monitoring.setupMode.disableInternalCollectionDescription', {
@@ -133,7 +137,12 @@ export function ListingCallOut({ setupModeData, productName, customRenderer }: P
     ) {
       return (
         <Fragment>
-          <EuiCallOut title={MIGRATE_TO_MB_LABEL} color="danger" iconType="flag">
+          <EuiCallOut
+            announceOnMount={false}
+            title={MIGRATE_TO_MB_LABEL}
+            color="danger"
+            iconType="pencil"
+          >
             <p>
               {i18n.translate('xpack.monitoring.setupMode.migrateToMetricbeatDescription', {
                 defaultMessage: `These {product} {identifier} are self monitored.
@@ -152,7 +161,12 @@ export function ListingCallOut({ setupModeData, productName, customRenderer }: P
 
     return (
       <Fragment>
-        <EuiCallOut title={MIGRATE_TO_MB_LABEL} color="danger" iconType="flag">
+        <EuiCallOut
+          announceOnMount={false}
+          title={MIGRATE_TO_MB_LABEL}
+          color="danger"
+          iconType="pencil"
+        >
           <p>
             {i18n.translate('xpack.monitoring.setupMode.migrateSomeToMetricbeatDescription', {
               defaultMessage: `Some {product} {identifier} are monitored through self monitoring. Migrate to monitor with Metricbeat.`,

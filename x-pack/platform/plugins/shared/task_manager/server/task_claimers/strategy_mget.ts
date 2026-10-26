@@ -7,24 +7,28 @@
 
 // Basic operation of this task claimer:
 // - search for candidate tasks to run, more than we actually can run
-// - initial search returns a slimmer task document for I/O efficiency (no params or state)
+// - initial search returns a slimmer task document for I/O efficiency (no params, state or
+//   API keys), so candidates are TaskClaimCandidate rather than ConcreteTaskInstance
 // - for each task found, do an mget to get the current seq_no and primary_term
 // - if the mget result doesn't match the search result, the task is stale
 // - from the non-stale search results, return as many as we can run based on available
 //   capacity and the cost of each task type to run
+// - the tasks we successfully claim are then hydrated into full task documents with a bulkGet
 
 import type { Logger } from 'elastic-apm-node';
 import apm from 'elastic-apm-node';
+import { withActiveSpan } from '@kbn/tracing-utils';
 import type { Subject } from 'rxjs';
 import { createWrappedLogger } from '../lib/wrapped_logger';
 
-import type { TaskTypeDictionary } from '../task_type_dictionary';
+import { sharedConcurrencyTaskTypes, type TaskTypeDictionary } from '../task_type_dictionary';
 import type { TaskClaimerOpts, ClaimOwnershipResult } from '.';
 import { getEmptyClaimOwnershipResult, getExcludedTaskTypes } from '.';
 import type {
   ConcreteTaskInstance,
   ConcreteTaskInstanceVersion,
   PartialConcreteTaskInstance,
+  TaskClaimCandidate,
 } from '../task';
 import { TaskStatus, TaskCost } from '../task';
 import { TASK_MANAGER_TRANSACTION_TYPE } from '../task_running';
@@ -47,6 +51,7 @@ import {
 import type { TaskStore, SearchOpts } from '../task_store';
 import { isOk, asOk } from '../lib/result_type';
 import { selectTasksByCapacity } from './lib/task_selector_by_capacity';
+import { getTaskCost } from './lib/get_task_cost';
 import type { TaskPartitioner } from '../lib/task_partitioner';
 import { getRetryAt } from '../lib/get_retry_at';
 
@@ -69,19 +74,29 @@ const SIZE_MULTIPLIER_FOR_TASK_FETCH = 4;
 export async function claimAvailableTasksMget(
   opts: TaskClaimerOpts
 ): Promise<ClaimOwnershipResult> {
-  const apmTrans = apm.startTransaction(
-    TASK_MANAGER_MARK_AS_CLAIMED,
-    TASK_MANAGER_TRANSACTION_TYPE
-  );
+  return withActiveSpan(
+    'mark-task-as-claimed',
+    {
+      attributes: { 'transaction.type': TASK_MANAGER_TRANSACTION_TYPE },
+      // Make sure that this is a parent transaction (not a child of any other ongoing transaction)
+      root: true,
+    },
+    async () => {
+      const apmTrans = apm.startTransaction(
+        TASK_MANAGER_MARK_AS_CLAIMED,
+        TASK_MANAGER_TRANSACTION_TYPE
+      );
 
-  try {
-    const result = await claimAvailableTasks(opts);
-    apmTrans.end('success');
-    return result;
-  } catch (err) {
-    apmTrans.end('failure');
-    throw err;
-  }
+      try {
+        const result = await claimAvailableTasks(opts);
+        apmTrans.end('success');
+        return result;
+      } catch (err) {
+        apmTrans.end('failure');
+        throw err;
+      }
+    }
+  );
 }
 
 async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershipResult> {
@@ -119,9 +134,9 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
   const docLatestVersions = await taskStore.getDocVersions(docs.map((doc) => `task:${doc.id}`));
 
   // filter out stale and missing tasks
-  const currentTasks: ConcreteTaskInstance[] = [];
-  const staleTasks: ConcreteTaskInstance[] = [];
-  const missingTasks: ConcreteTaskInstance[] = [];
+  const currentTasks: TaskClaimCandidate[] = [];
+  const staleTasks: TaskClaimCandidate[] = [];
+  const missingTasks: TaskClaimCandidate[] = [];
 
   for (const searchDoc of docs) {
     const searchVersion = versionMap.get(searchDoc.id);
@@ -144,15 +159,16 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
   }
 
   // apply limited concurrency limits (TODO: can currently starve other tasks)
-  const candidateTasks = selectTasksByCapacity(currentTasks, batches);
+  const candidateTasks = selectTasksByCapacity({ definitions, tasks: currentTasks, batches });
 
   // apply capacity constraint to candidate tasks
-  const tasksToRun: ConcreteTaskInstance[] = [];
-  const leftOverTasks: ConcreteTaskInstance[] = [];
+  const tasksToRun: TaskClaimCandidate[] = [];
+  const leftOverTasks: TaskClaimCandidate[] = [];
+  const tasksWithMalformedData: TaskClaimCandidate[] = [];
 
   let capacityAccumulator = 0;
   for (const task of candidateTasks) {
-    const taskCost = definitions.get(task.taskType)?.cost ?? TaskCost.Normal;
+    const taskCost = getTaskCost(task, definitions);
     if (capacityAccumulator + taskCost <= initialCapacity) {
       tasksToRun.push(task);
       capacityAccumulator += taskCost;
@@ -166,19 +182,28 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
   const now = new Date();
   const taskUpdates: PartialConcreteTaskInstance[] = [];
   for (const task of tasksToRun) {
-    taskUpdates.push({
-      id: task.id,
-      version: task.version,
-      scheduledAt:
-        task.retryAt != null && new Date(task.retryAt).getTime() < Date.now()
-          ? task.retryAt
-          : task.runAt,
-      status: TaskStatus.Running,
-      startedAt: now,
-      attempts: task.attempts + 1,
-      retryAt: getRetryAt(task, definitions.get(task.taskType)) ?? null,
-      ownerId: taskStore.taskManagerId,
-    });
+    try {
+      taskUpdates.push({
+        id: task.id,
+        version: task.version,
+        scheduledAt:
+          task.retryAt != null && new Date(task.retryAt).getTime() < Date.now()
+            ? task.retryAt
+            : task.runAt,
+        status: TaskStatus.Running,
+        startedAt: now,
+        attempts: task.attempts + 1,
+        retryAt: getRetryAt(task, definitions.get(task.taskType)) ?? null,
+        ownerId: taskStore.taskManagerId,
+      });
+    } catch (error) {
+      logger.error(
+        `Error validating task schema ${task.id}:${task.taskType} during claim: ${JSON.stringify(
+          error.message
+        )}`
+      );
+      tasksWithMalformedData.push(task);
+    }
   }
 
   // perform the task object updates, deal with errors
@@ -224,7 +249,7 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
   }, []);
 
   // TODO: need a better way to generate stats
-  const message = `task claimer claimed: ${fullTasksToRun.length}; stale: ${staleTasks.length}; conflicts: ${conflicts}; missing: ${missingTasks.length}; capacity reached: ${leftOverTasks.length}; updateErrors: ${bulkUpdateErrors}; getErrors: ${bulkGetErrors};`;
+  const message = `task claimer claimed: ${fullTasksToRun.length}; stale: ${staleTasks.length}; conflicts: ${conflicts}; missing: ${missingTasks.length}; capacity reached: ${leftOverTasks.length}; updateErrors: ${bulkUpdateErrors}; getErrors: ${bulkGetErrors}; malformed data errors: ${tasksWithMalformedData.length}`;
   logger.debug(message);
 
   // build results
@@ -234,7 +259,7 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
       tasksConflicted: conflicts,
       tasksClaimed: fullTasksToRun.length,
       tasksLeftUnclaimed: leftOverTasks.length,
-      tasksErrors: bulkUpdateErrors + bulkGetErrors,
+      tasksErrors: bulkUpdateErrors + bulkGetErrors + tasksWithMalformedData.length,
       staleTasks: staleTasks.length,
     },
     docs: fullTasksToRun,
@@ -249,7 +274,7 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
 }
 
 interface SearchAvailableTasksResponse {
-  docs: ConcreteTaskInstance[];
+  docs: TaskClaimCandidate[];
   versionMap: Map<string, ConcreteTaskInstanceVersion>;
 }
 
@@ -325,12 +350,12 @@ async function searchAvailableTasks({
   }
 
   // add searches for limited types
-  for (const [type, capacity] of claimPartitions.limitedTypes) {
+  for (const [types, capacity] of claimPartitions.limitedTypes) {
     const queryForLimitedTasks = mustBeAllOf(
       // Task must be enabled
       EnabledTask,
       // Specific task type
-      OneOfTaskTypes('task.taskType', [type]),
+      OneOfTaskTypes('task.taskType', types.split(',')),
       // Either a task with idle status and runAt <= now or
       // status running or claiming with a retryAt <= now.
       shouldBeOneOf(IdleTaskWithExpiredRunAt, RunningOrClaimingTaskWithExpiredRetryAt),
@@ -356,6 +381,14 @@ async function searchAvailableTasks({
 
 interface ClaimPartitions {
   unlimitedTypes: string[];
+  // Map where key is a limited concurrency task type and value is the current capacity
+  // Key can also be a comma-delimited list of limited concurrency task types that share the same concurrency.
+  //   In this case, the value is the minimum available capacity across all shared concurrency task types.
+  //   For example, if taskTypeA and taskTypeB share concurrency and taskTypeA has a capacity of 2 while taskTypeB
+  //     has a capacity of 4, the Map value will be
+  //     Map {
+  //       'taskTypeA,taskTypeB' => 2
+  //     }
   limitedTypes: Map<string, number>;
 }
 
@@ -384,9 +417,30 @@ function buildClaimPartitions(opts: BuildClaimPartitionsOpts): ClaimPartitions {
       continue;
     }
 
-    const capacity = getCapacity(definition.type) / definition.cost;
-    if (capacity !== 0) {
-      result.limitedTypes.set(definition.type, capacity);
+    // task type has maxConcurrency defined
+
+    const isSharingConcurrency = sharedConcurrencyTaskTypes(type);
+    if (isSharingConcurrency) {
+      let minCapacity = null;
+      for (const sharedType of isSharingConcurrency) {
+        const def = definitions.get(sharedType);
+        if (def) {
+          const capacity = getCapacity(def.type) / def.cost;
+          if (minCapacity == null) {
+            minCapacity = capacity;
+          } else if (capacity < minCapacity) {
+            minCapacity = capacity;
+          }
+        }
+      }
+      if (minCapacity) {
+        result.limitedTypes.set(isSharingConcurrency.join(','), minCapacity);
+      }
+    } else {
+      const capacity = getCapacity(definition.type) / definition.cost;
+      if (capacity !== 0) {
+        result.limitedTypes.set(definition.type, capacity);
+      }
     }
   }
 

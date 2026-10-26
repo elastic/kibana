@@ -6,7 +6,8 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import {
+import { lazyObject } from '@kbn/lazy-object';
+import type {
   LicensingPluginSetup,
   LicensingPluginStart,
   LicensingApiRequestHandlerContext,
@@ -16,30 +17,31 @@ import { featureUsageMock } from './services/feature_usage_service.mock';
 
 const createSetupMock = (): jest.Mocked<LicensingPluginSetup> => {
   const license = licenseMock.createLicense();
-  const mock = {
+  const mock = lazyObject({
     license$: new BehaviorSubject(license),
-    refresh: jest.fn(),
+    refresh: jest.fn().mockResolvedValue(license),
     featureUsage: featureUsageMock.createSetup(),
-  };
-  mock.refresh.mockResolvedValue(license);
+  });
 
   return mock;
 };
 
 const createStartMock = (): jest.Mocked<LicensingPluginStart> => {
   const license = licenseMock.createLicense();
-  const mock = {
-    license$: new BehaviorSubject(license),
-    getLicense: jest.fn(),
-    refresh: jest.fn(),
-    createLicensePoller: jest.fn(),
-    featureUsage: featureUsageMock.createStart(),
-  };
 
-  mock.refresh.mockResolvedValue(license);
-  mock.createLicensePoller.mockReturnValue({
-    license$: mock.license$,
-    refresh: mock.refresh,
+  const license$ = new BehaviorSubject(license);
+
+  const refresh = jest.fn().mockResolvedValue(license);
+
+  const mock = lazyObject({
+    license$,
+    getLicense: jest.fn(),
+    refresh,
+    createLicensePoller: jest.fn().mockReturnValue({
+      license$,
+      refresh,
+    }),
+    featureUsage: featureUsageMock.createStart(),
   });
 
   return mock;
@@ -48,10 +50,10 @@ const createStartMock = (): jest.Mocked<LicensingPluginStart> => {
 const createRequestHandlerContextMock = (
   ...options: Parameters<typeof licenseMock.createLicense>
 ): jest.Mocked<LicensingApiRequestHandlerContext> => {
-  const mock: jest.Mocked<LicensingApiRequestHandlerContext> = {
+  const mock: jest.Mocked<LicensingApiRequestHandlerContext> = lazyObject({
     license: licenseMock.createLicense(...options),
     featureUsage: featureUsageMock.createStart(),
-  };
+  });
 
   return mock;
 };

@@ -10,7 +10,7 @@
 import 'jest-canvas-mock';
 
 import { VegaMapView } from './view';
-import { VegaViewParams } from '../vega_base_view';
+import type { VegaViewParams } from '../vega_base_view';
 import { VegaParser } from '../../data_model/vega_parser';
 import { TimeCache } from '../../data_model/time_cache';
 import { SearchAPI } from '../../data_model/search_api';
@@ -129,10 +129,10 @@ describe('vega_map_view/view', () => {
       await vegaParser.parseAsync();
       return new VegaMapView({
         serviceSettings: await mockGetServiceSettings(),
-        vegaParser,
-        filterManager: dataPluginStart.query.filterManager,
-        timefilter: dataPluginStart.query.timefilter.timefilter,
-        fireEvent: (event: any) => {},
+        descriptor: vegaParser.toRenderDescriptor(),
+        onError: jest.fn(),
+        onViewCreated: jest.fn(),
+        onFilterAction: jest.fn(),
         parentEl: document.createElement('div'),
         vegaStateRestorer: {
           save: jest.fn(),
@@ -171,7 +171,7 @@ describe('vega_map_view/view', () => {
       const vegaMapView = await createVegaMapView();
       await vegaMapView.init();
 
-      const { longitude, latitude, scrollWheelZoom } = vegaMapView._parser.mapConfig;
+      const { longitude, latitude, scrollWheelZoom } = vegaMapView._descriptor.mapConfig ?? {};
       expect(maplibregl.Map).toHaveBeenCalledWith({
         attributionControl: {
           customAttribution: 'tilemap-attribution',
@@ -197,7 +197,7 @@ describe('vega_map_view/view', () => {
       const vegaMapView = await createVegaMapView();
       await vegaMapView.init();
 
-      const { longitude, latitude, scrollWheelZoom } = vegaMapView._parser.mapConfig;
+      const { longitude, latitude, scrollWheelZoom } = vegaMapView._descriptor.mapConfig ?? {};
       expect(maplibregl.Map).toHaveBeenCalledWith({
         attributionControl: {
           customAttribution: ['<a rel="noreferrer noopener" href="tms_attributions"></a>'],

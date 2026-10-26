@@ -17,12 +17,16 @@ interface SuppressionFieldsSelectorProps {
   suppressibleFields: DataViewFieldBase[];
   labelAppend?: React.ReactNode;
   disabled?: boolean;
+  fullWidth?: boolean;
+  isLoading?: boolean;
 }
 
 export function SuppressionFieldsSelector({
   suppressibleFields,
   labelAppend,
   disabled,
+  fullWidth,
+  isLoading,
 }: SuppressionFieldsSelectorProps): JSX.Element {
   return (
     <EuiFormRow
@@ -38,6 +42,9 @@ export function SuppressionFieldsSelector({
           componentProps={{
             browserFields: suppressibleFields,
             isDisabled: disabled,
+            fullWidth,
+            ariaLabel: i18n.ALERT_SUPPRESSION_SUPPRESS_BY_FIELD_LABEL,
+            isLoading,
           }}
         />
       </>

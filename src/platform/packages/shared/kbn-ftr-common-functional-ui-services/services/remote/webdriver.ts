@@ -12,10 +12,11 @@ import Fs from 'fs';
 
 import * as Rx from 'rxjs';
 import { mergeMap, map, catchError, ignoreElements, takeWhile } from 'rxjs';
-import { Lifecycle } from '@kbn/test';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { Lifecycle } from '@kbn/test';
+import type { ToolingLog } from '@kbn/tooling-log';
 import chromeDriver from 'chromedriver';
-import { Builder, logging, WebDriver } from 'selenium-webdriver';
+import type { WebDriver } from 'selenium-webdriver';
+import { Builder, logging } from 'selenium-webdriver';
 import chrome from 'selenium-webdriver/chrome';
 import firefox from 'selenium-webdriver/firefox';
 import edge from 'selenium-webdriver/edge';
@@ -23,15 +24,14 @@ import edge from 'selenium-webdriver/edge';
 import { Executor } from 'selenium-webdriver/lib/http';
 // @ts-ignore internal modules are not typed
 import { getLogger } from 'selenium-webdriver/lib/logging';
-import { installDriver } from 'ms-chromium-edge-driver';
-
 import { REPO_ROOT } from '@kbn/repo-info';
 import { FINAL_LOG_ENTRY_PREFIX, pollForLogEntry$ } from './poll_for_log_entry';
 import { createStdoutSocket } from './create_stdout_stream';
 import { preventParallelCalls } from './prevent_parallel_calls';
 
 import { Browsers } from './browsers';
-import { NetworkProfile, NETWORK_PROFILES } from './network_profiles';
+import type { NetworkProfile } from './network_profiles';
+import { NETWORK_PROFILES } from './network_profiles';
 
 interface Configuration {
   throttleOption: string;
@@ -122,14 +122,29 @@ function initChromiumOptions(browserType: Browsers, acceptInsecureCerts: boolean
     // Do not show "Choose your search engine" dialog (> Chrome v127)
     'disable-search-engine-choice-screen',
     // Disable component updater used for Chrome Certificate Verifier
-    'disable-component-update'
+    'disable-component-update',
+    // Enables the SwiftShader software renderer used to render web content when no GPU is available or when GPU acceleration is disabled.
+    'enable-unsafe-swiftshader'
   );
+
+  if (process.env.USE_CITADEL_PROXY === 'true') {
+    // Chromium strips credentials embedded in HTTP(S)_PROXY, so it cannot use
+    // Citadel's per-job authenticated proxy URL. Keep only the browser direct;
+    // the FTR process and the rest of the job remain proxied.
+    options.addArguments('no-proxy-server');
+  }
 
   if (process.platform === 'linux') {
     // The /dev/shm partition is too small in certain VM environments, causing
     // Chrome to fail or crash. Use this flag to work-around this issue
     // (a temporary directory will always be used to create anonymous shared memory files).
     options.addArguments('disable-dev-shm-usage');
+  }
+
+  if (process.env.KIBANA_TEST_IPV6_ONLY === 'true') {
+    // Chrome needs this even though the agent maps localhost to ::1; see setup_ipv6_only.sh.
+    // The address must be bracketed or the rule parser silently drops it.
+    options.addArguments('host-resolver-rules=MAP localhost [::1]');
   }
 
   if (headlessBrowser === '1') {
@@ -170,6 +185,7 @@ function initChromiumOptions(browserType: Browsers, acceptInsecureCerts: boolean
   options.setUserPreferences(chromiumUserPrefs);
   options.setLoggingPrefs(prefs);
   options.set('unexpectedAlertBehaviour', 'accept');
+  options.set('unhandledPromptBehavior', 'accept');
   options.setAcceptInsecureCerts(acceptInsecureCerts);
 
   return options;
@@ -188,7 +204,6 @@ function pollForChromiumLogs$(session: WebDriver, logPollingMs: number) {
 }
 
 let attemptCounter = 0;
-let edgePaths: { driverPath: string | undefined; browserPath: string | undefined };
 async function attemptToCreateCommand(
   log: ToolingLog,
   browserType: Browsers,
@@ -201,6 +216,25 @@ async function attemptToCreateCommand(
   const { headlessBrowser, throttleOption, noCache } = getConfiguration();
 
   const buildDriverInstance = async () => {
+    // Strip FIPS-related env vars so browser subprocesses (chromedriver, geckodriver) don't
+    // inherit NODE_OPTIONS="--enable-fips" or OpenSSL FIPS config, which causes SIGTRAP crashes
+    // in browsers that weren't compiled with FIPS support.
+    const driverEnv = Object.entries(process.env).reduce<Record<string, string>>(
+      (env, [key, value]) => {
+        if (
+          value !== undefined &&
+          key !== 'NODE_OPTIONS' &&
+          key !== 'OPENSSL_CONF' &&
+          key !== 'OPENSSL_MODULES'
+        ) {
+          env[key] = value;
+        }
+
+        return env;
+      },
+      {}
+    );
+
     switch (browserType) {
       case 'chrome': {
         const chromeOptions = initChromiumOptions(
@@ -218,7 +252,11 @@ async function attemptToCreateCommand(
           session = await new Builder()
             .forBrowser(browserType)
             .setChromeOptions(chromeOptions)
-            .setChromeService(new chrome.ServiceBuilder(chromeDriver.path).enableVerboseLogging())
+            .setChromeService(
+              new chrome.ServiceBuilder(process.env.TEST_CHROMEDRIVER_PATH || chromeDriver.path)
+                .enableVerboseLogging()
+                .setEnvironment(driverEnv)
+            )
             .build();
         }
 
@@ -229,27 +267,20 @@ async function attemptToCreateCommand(
       }
 
       case 'msedge': {
-        if (edgePaths && edgePaths.browserPath && edgePaths.driverPath) {
-          const edgeOptions = initChromiumOptions(
-            browserType,
-            config.acceptInsecureCerts
-          ) as edge.Options;
-          const session = await new Builder()
-            .forBrowser('MicrosoftEdge')
-            .setEdgeOptions(edgeOptions)
-            .setEdgeService(new edge.ServiceBuilder(edgePaths.driverPath))
-            .build();
-          return {
-            session,
-            consoleLog$: pollForChromiumLogs$(session, config.logPollingMs),
-          };
-        } else {
-          throw new Error(
-            `Chromium Edge session requires browser or driver path to be defined: ${JSON.stringify(
-              edgePaths
-            )}`
-          );
-        }
+        const edgeOptions = initChromiumOptions(
+          browserType,
+          config.acceptInsecureCerts
+        ) as edge.Options;
+        // without an explicit driver path, Selenium Manager resolves and caches msedgedriver
+        const session = await new Builder()
+          .forBrowser('MicrosoftEdge')
+          .setEdgeOptions(edgeOptions)
+          .setEdgeService(new edge.ServiceBuilder().setEnvironment(driverEnv))
+          .build();
+        return {
+          session,
+          consoleLog$: pollForChromiumLogs$(session, config.logPollingMs),
+        };
       }
 
       case 'firefox': {
@@ -277,7 +308,7 @@ async function attemptToCreateCommand(
           const session = await new Builder()
             .forBrowser(browserType)
             .setFirefoxOptions(firefoxOptions)
-            .setFirefoxService(new firefox.ServiceBuilder())
+            .setFirefoxService(new firefox.ServiceBuilder().setEnvironment(driverEnv))
             .build();
           return {
             session,
@@ -291,7 +322,11 @@ async function attemptToCreateCommand(
         const session = await new Builder()
           .forBrowser(browserType)
           .setFirefoxOptions(firefoxOptions)
-          .setFirefoxService(new firefox.ServiceBuilder().setStdio(['ignore', input, 'ignore']))
+          .setFirefoxService(
+            new firefox.ServiceBuilder()
+              .setEnvironment(driverEnv)
+              .setStdio(['ignore', input, 'ignore'])
+          )
           .build();
 
         const CONSOLE_LINE_RE = /^console\.([a-z]+): ([\s\S]+)/;
@@ -377,11 +412,6 @@ export async function initWebDriver(
 
   // create browser download folder
   Fs.mkdirSync(downloadDir, { recursive: true });
-
-  // download Edge driver only in case of usage
-  if (browserType === Browsers.ChromiumEdge) {
-    edgePaths = await installDriver();
-  }
 
   let attempt = 1;
   return await Rx.firstValueFrom(

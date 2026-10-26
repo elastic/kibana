@@ -6,7 +6,7 @@
  */
 
 import { createAction } from 'redux-actions';
-import {
+import type {
   FetchMonitorStatesQueryArgs,
   MonitorSummariesResult,
 } from '../../../../common/runtime_types';

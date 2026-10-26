@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import './json_code_editor.scss';
-
 import React from 'react';
 import { JsonCodeEditorCommon } from './json_code_editor_common';
 
@@ -17,6 +15,7 @@ export interface JsonCodeEditorProps {
   width?: string | number;
   height?: string | number;
   hasLineNumbers?: boolean;
+  enableFindAction?: boolean;
 }
 
 // Required for usage in React.lazy
@@ -26,6 +25,7 @@ export default function JsonCodeEditor({
   width,
   height,
   hasLineNumbers,
+  enableFindAction,
 }: JsonCodeEditorProps) {
   const jsonValue = JSON.stringify(json, null, 2);
 
@@ -37,6 +37,7 @@ export default function JsonCodeEditor({
       hasLineNumbers={hasLineNumbers}
       onEditorDidMount={() => void 0}
       hideCopyButton={true}
+      enableFindAction={enableFindAction}
     />
   );
 }

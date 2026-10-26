@@ -1,16 +1,21 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
-    "types": ["jest", "node"]
+    "types": ["jest", "node"],
+    "allowJs": true
   },
-  "include": ["src/**/*", "**/*.ts", "src/languages/painless/autocomplete_definitions/*.json"],
+  "include": [
+    "src/**/*",
+    "**/*.ts",
+    "src/languages/definitions/painless/autocomplete_definitions/*.json"
+  ],
   "kbn_references": [
     "@kbn/i18n",
     "@kbn/repo-info",
-    "@kbn/esql-ast",
-    "@kbn/esql-validation-autocomplete",
-    "@kbn/esql-types"
+    "@kbn/esql-language",
+    "@kbn/esql-types",
+    "@kbn/std"
   ],
   "exclude": ["target/**/*"]
 }

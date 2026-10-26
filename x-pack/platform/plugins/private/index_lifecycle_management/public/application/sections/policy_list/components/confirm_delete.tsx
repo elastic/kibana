@@ -8,9 +8,10 @@
 import React, { Component } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiCallOut, EuiCheckbox, EuiConfirmModal } from '@elastic/eui';
+import { EuiCheckbox, EuiConfirmModal, htmlIdGenerator } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 
-import { PolicyFromES } from '../../../../../common/types';
+import type { PolicyFromES } from '../../../../../common/types';
 import { toasts } from '../../../services/notification';
 import { showApiError } from '../../../services/api_errors';
 import { deletePolicy } from '../../../services/api';
@@ -63,10 +64,13 @@ export class ConfirmDelete extends Component<Props> {
       defaultMessage: 'Delete policy "{name}"',
       values: { name: policyToDelete.name },
     });
+    const modalTitleId = htmlIdGenerator()('confirmModalTitle');
     return (
       <EuiConfirmModal
         data-test-subj="deletePolicyModal"
         title={title}
+        aria-labelledby={modalTitleId}
+        titleProps={{ id: modalTitleId }}
         onCancel={onCancel}
         onConfirm={this.deletePolicy}
         cancelButtonText={
@@ -85,24 +89,23 @@ export class ConfirmDelete extends Component<Props> {
         confirmButtonDisabled={isManagedPolicy ? !isDeleteConfirmed : false}
       >
         {isManagedPolicy ? (
-          <EuiCallOut
+          <KbnDangerCallout
+            announceOnMount={false}
             title={
               <FormattedMessage
                 id="xpack.indexLifecycleMgmt.deletePolicyModal.proceedWithCautionCallOutTitle"
                 defaultMessage="Deleting a managed policy can break Kibana"
               />
             }
-            color="danger"
-            iconType="warning"
             data-test-subj="deleteManagedPolicyCallOut"
-          >
-            <p>
+            text={
               <FormattedMessage
                 id="xpack.indexLifecycleMgmt.deletePolicyModal.proceedWithCautionCallOutDescription"
                 defaultMessage="Managed policies are critical for internal operations.
                   If you delete this managed policy, you can’t recover it."
               />
-            </p>
+            }
+          >
             <EuiCheckbox
               id="confirmDeletePolicyCheckbox"
               label={
@@ -114,7 +117,7 @@ export class ConfirmDelete extends Component<Props> {
               checked={isDeleteConfirmed}
               onChange={(e) => this.setIsDeleteConfirmed(e.target.checked)}
             />
-          </EuiCallOut>
+          </KbnDangerCallout>
         ) : (
           <div>
             <FormattedMessage
