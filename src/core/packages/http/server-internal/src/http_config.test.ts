@@ -997,6 +997,19 @@ describe('HttpConfig', () => {
       expect(csp.header).toContain(`media-src 'self' kibana.estccdn.com`);
     });
 
+    it('keeps a configured csp.img_src as the only img-src allowlist on traditional', () => {
+      const { csp } = new HttpConfig(
+        config.schema.validate({}, {}),
+        cspConfig.schema.validate({ img_src: ['logos.example.test'] }),
+        ExternalUrlConfig.DEFAULT,
+        permissionsPolicyConfig.schema.validate({}),
+        'traditional'
+      );
+
+      expect(csp.header).toContain(`img-src 'self' logos.example.test;`);
+      expect(csp.header).not.toContain('https: http:');
+    });
+
     it('defaults to the traditional flavor when none is given', () => {
       expect(build().csp.header).toEqual(build('traditional').csp.header);
     });

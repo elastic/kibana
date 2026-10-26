@@ -23,7 +23,7 @@ describe('csp collector', () => {
   // changed for consistency with expected implementation
   const mockedFetchContext = createCollectorFetchContextMock();
 
-  function updateCsp(config: Partial<ICspConfig>) {
+  function updateCsp(config: Partial<ICspConfig> & { img_src?: string[] }) {
     httpMock.csp = new CspConfig({
       ...CspConfig.DEFAULT,
       form_action: [],
@@ -46,10 +46,11 @@ describe('csp collector', () => {
 
   beforeEach(() => {
     httpMock = httpServiceMock.createSetupContract();
+    httpMock.csp = CspConfig.forBuildFlavor('traditional');
   });
 
   test('fetches whether strict mode is enabled', async () => {
-    const collector = new Collector(logger, createCspCollector(httpMock));
+    const collector = new Collector(logger, createCspCollector(httpMock, 'traditional'));
 
     expect((await collector.fetch(mockedFetchContext)).strict).toEqual(true);
 
@@ -58,7 +59,7 @@ describe('csp collector', () => {
   });
 
   test('fetches whether the legacy browser warning is enabled', async () => {
-    const collector = new Collector(logger, createCspCollector(httpMock));
+    const collector = new Collector(logger, createCspCollector(httpMock, 'traditional'));
 
     expect((await collector.fetch(mockedFetchContext)).warnLegacyBrowsers).toEqual(true);
 
@@ -67,7 +68,7 @@ describe('csp collector', () => {
   });
 
   test("fetches whether the csp directives's rules have been changed or not", async () => {
-    const collector = new Collector(logger, createCspCollector(httpMock));
+    const collector = new Collector(logger, createCspCollector(httpMock, 'traditional'));
 
     expect((await collector.fetch(mockedFetchContext)).rulesChangedFromDefault).toEqual(false);
 
@@ -75,8 +76,24 @@ describe('csp collector', () => {
     expect((await collector.fetch(mockedFetchContext)).rulesChangedFromDefault).toEqual(true);
   });
 
+  test('treats the build flavor defaults as unchanged', async () => {
+    const serverless = new Collector(logger, createCspCollector(httpMock, 'serverless'));
+    httpMock.csp = CspConfig.forBuildFlavor('serverless');
+    expect((await serverless.fetch(mockedFetchContext)).rulesChangedFromDefault).toEqual(false);
+
+    const traditional = new Collector(logger, createCspCollector(httpMock, 'traditional'));
+    expect((await traditional.fetch(mockedFetchContext)).rulesChangedFromDefault).toEqual(true);
+  });
+
+  test('flags a configured csp.img_src as changed from the default', async () => {
+    const collector = new Collector(logger, createCspCollector(httpMock, 'traditional'));
+
+    updateCsp({ img_src: ['logos.example.test'] });
+    expect((await collector.fetch(mockedFetchContext)).rulesChangedFromDefault).toEqual(true);
+  });
+
   test('does not include raw csp rules under any property names', async () => {
-    const collector = new Collector(logger, createCspCollector(httpMock));
+    const collector = new Collector(logger, createCspCollector(httpMock, 'traditional'));
 
     // It's important that we do not send the raw values of csp cirectives here as they
     // can be customized with values that can be identifiable to given

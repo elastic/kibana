@@ -12,24 +12,33 @@ import { cspConfig } from './config';
 import { CspConfig } from './csp_config';
 
 describe('getBuildFlavorCspConfig', () => {
+  const noConfig = cspConfig.schema.validate({});
+
   it('returns nothing for serverless', () => {
-    expect(getBuildFlavorCspConfig('serverless')).toEqual({});
+    expect(getBuildFlavorCspConfig('serverless', noConfig)).toEqual({});
   });
 
   it('returns the enforced img-src, font-src and media-src sources for traditional', () => {
-    expect(getBuildFlavorCspConfig('traditional')).toEqual({
+    expect(getBuildFlavorCspConfig('traditional', noConfig)).toEqual({
       font_src: ['data:'],
       img_src: ['data:', 'blob:', 'https:', 'http:'],
       media_src: [`'self'`, 'kibana.estccdn.com'],
     });
   });
 
+  it('skips the img-src defaults when csp.img_src is configured', () => {
+    const configured = cspConfig.schema.validate({ img_src: ['logos.example.test'] });
+
+    expect(getBuildFlavorCspConfig('traditional', configured)).toEqual({
+      font_src: ['data:'],
+      img_src: [],
+      media_src: [`'self'`, 'kibana.estccdn.com'],
+    });
+  });
+
   describe('applied to CspConfig', () => {
     it('leaves the serverless headers unchanged', () => {
-      const withFlavor = new CspConfig(
-        cspConfig.schema.validate({}),
-        getBuildFlavorCspConfig('serverless')
-      );
+      const withFlavor = new CspConfig(noConfig, getBuildFlavorCspConfig('serverless', noConfig));
 
       expect(withFlavor.header).toEqual(CspConfig.DEFAULT.header);
       expect(withFlavor.reportOnlyHeader).toEqual(CspConfig.DEFAULT.reportOnlyHeader);
@@ -37,8 +46,8 @@ describe('getBuildFlavorCspConfig', () => {
 
     it('enforces the three directives on traditional and mirrors them into report-only', () => {
       const { header, reportOnlyHeader } = new CspConfig(
-        cspConfig.schema.validate({}),
-        getBuildFlavorCspConfig('traditional')
+        noConfig,
+        getBuildFlavorCspConfig('traditional', noConfig)
       );
 
       expect(header).toMatchInlineSnapshot(
@@ -49,17 +58,18 @@ describe('getBuildFlavorCspConfig', () => {
       );
     });
 
-    it('appends to values set through the csp.* settings on traditional', () => {
+    it('appends font-src and media-src to values set through csp.* and keeps a configured img-src', () => {
+      const configured = cspConfig.schema.validate({
+        img_src: ['logos.example.test'],
+        font_src: ['fonts.example.test'],
+        media_src: ['media.example.test'],
+      });
       const { header } = new CspConfig(
-        cspConfig.schema.validate({
-          img_src: ['logos.example.test'],
-          font_src: ['fonts.example.test'],
-          media_src: ['media.example.test'],
-        }),
-        getBuildFlavorCspConfig('traditional')
+        configured,
+        getBuildFlavorCspConfig('traditional', configured)
       );
 
-      expect(header).toContain(`img-src 'self' logos.example.test data: blob: https: http:`);
+      expect(header).toContain(`img-src 'self' logos.example.test;`);
       expect(header).toContain(`font-src 'self' fonts.example.test data:`);
       expect(header).toContain(`media-src media.example.test 'self' kibana.estccdn.com`);
     });

@@ -510,7 +510,7 @@ export class HttpConfig implements IHttpConfig {
     this.csp = new CspConfig(
       { ...rawCspConfig, disableEmbedding },
       this.cdn.getCspConfig(),
-      getBuildFlavorCspConfig(buildFlavor)
+      getBuildFlavorCspConfig(buildFlavor, rawCspConfig)
     );
     this.prototypeHardening = rawHttpConfig.prototypeHardening;
     this.externalUrl = rawExternalUrlConfig;

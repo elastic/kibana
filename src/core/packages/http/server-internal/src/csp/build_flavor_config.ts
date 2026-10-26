@@ -8,30 +8,35 @@
  */
 
 import type { BuildFlavor } from '@kbn/config';
-import type { CspAdditionalConfig } from './config';
+import type { CspAdditionalConfig, CspConfigType } from './config';
 
 /**
  * Enforced CSP directives that depend on the build flavor.
  *
  * Serverless configures these directives itself, so it receives nothing here. Traditional
  * builds enforce the directives below. Their values append to the defaults in `csp_directives.ts`
- * and to anything set through the matching `csp.*` settings.
+ * and to anything set through the matching `csp.*` settings, except `img-src`.
  *
  * - `img-src`: image sources are mostly deployment specific (custom logos, authentication provider
  *   icons, tile servers), so any network origin is allowed rather than requiring every deployment
- *   to configure its own list. `blob:` covers the Maps legend icons.
+ *   to configure its own list. `blob:` covers the Maps legend icons. These defaults only apply
+ *   when `csp.img_src` is not set, so an administrator's allowlist is never widened.
  * - `font-src`: Kibana ships its own fonts and inlines the small ones as data URIs.
  * - `media-src`: Kibana has no media source other than itself and the Elastic CDN.
  *
  * @internal
  */
-export const getBuildFlavorCspConfig = (buildFlavor: BuildFlavor): CspAdditionalConfig => {
+export const getBuildFlavorCspConfig = (
+  buildFlavor: BuildFlavor,
+  { img_src: configuredImgSrc }: Pick<CspConfigType, 'img_src'>
+): CspAdditionalConfig => {
   if (buildFlavor === 'serverless') {
     return {};
   }
+  const hasConfiguredImgSrc = configuredImgSrc.length > 0;
   return {
     font_src: ['data:'],
-    img_src: ['data:', 'blob:', 'https:', 'http:'],
+    img_src: hasConfiguredImgSrc ? [] : ['data:', 'blob:', 'https:', 'http:'],
     media_src: [`'self'`, 'kibana.estccdn.com'],
   };
 };
