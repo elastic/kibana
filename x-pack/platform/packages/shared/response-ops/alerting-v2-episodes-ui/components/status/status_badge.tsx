@@ -9,7 +9,7 @@ import { EuiBadge, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { ALERT_EPISODE_STATUS, type AlertEpisodeStatus } from '@kbn/alerting-v2-schemas';
-import { alertTimelineStatusColor } from '../../alert_timeline/alert_timeline_status_palette';
+import { AlertTimelineStatusDot } from '../../alert_timeline/alert_timeline_status_dot';
 
 export interface AlertEpisodeStatusBadgeProps {
   status: AlertEpisodeStatus;
@@ -53,26 +53,18 @@ export const getEpisodeStatusBadgeLabel = (status: AlertEpisodeStatus): string =
 
 /**
  * Lifecycle-colored dot and status label, for hosts that already own the hollow badge chrome.
+ * Draws the dot directly instead of using EuiHealth, whose dot glyph is inset within a 16px icon
+ * box and shifts the badge content off-center.
  */
 export function AlertEpisodeStatusHealth({
   status,
   children,
 }: Pick<AlertEpisodeStatusBadgeProps, 'status' | 'children'>) {
   const { euiTheme } = useEuiTheme();
-  const color = alertTimelineStatusColor(euiTheme, status);
 
   return (
-    <span css={{ display: 'flex', alignItems: 'center', gap: euiTheme.size.xs }}>
-      <span
-        aria-hidden
-        css={{
-          width: euiTheme.size.s,
-          height: euiTheme.size.s,
-          borderRadius: '50%',
-          backgroundColor: color,
-          flexShrink: 0,
-        }}
-      />
+    <span css={{ display: 'flex', alignItems: 'center', gap: euiTheme.size.s }}>
+      <AlertTimelineStatusDot status={status} data-test-subj="alertEpisodeStatusDot" />
       {children ?? getEpisodeStatusBadgeLabel(status)}
     </span>
   );
