@@ -11,7 +11,7 @@ import { SavedObjectsUtils } from '@kbn/core/server';
 
 import type { Case, CustomFieldsConfiguration, User } from '../../../common/types/domain';
 import { CaseSeverity, UserActionTypes } from '../../../common/types/domain';
-import { decodeWithExcessOrThrow, decodeOrThrow } from '../../common/runtime_types';
+import { decodeWithExcessOrThrowZod, decodeOrThrowZod } from '../../common/runtime_types';
 
 import { Operations } from '../../authorization';
 import { createCaseError, isSODecoratedError, isSOError } from '../../common/error';
@@ -25,7 +25,10 @@ import type {
   BulkCreateCasesResponse,
   CasePostRequest,
 } from '../../../common/types/api';
-import { BulkCreateCasesResponseRt, BulkCreateCasesRequestRt } from '../../../common/types/api';
+import {
+  BulkCreateCasesResponseSchema,
+  BulkCreateCasesRequestSchema,
+} from '../../../common/types/api';
 import {
   validateCustomFieldsStructure,
   validateRequiredCustomFields,
@@ -121,7 +124,7 @@ export const bulkCreate = async (
   } = clientArgs;
 
   try {
-    const decodedData = decodeWithExcessOrThrow(BulkCreateCasesRequestRt)(data);
+    const decodedData = decodeWithExcessOrThrowZod(BulkCreateCasesRequestSchema)(data);
     const configurations = await casesClient.configure.get();
 
     const customFieldsConfigurationMap: Map<string, CustomFieldsConfiguration> = new Map(
@@ -412,7 +415,9 @@ export const bulkCreate = async (
       })
     );
 
-    const createdCasesResponse = decodeOrThrow(BulkCreateCasesResponseRt)({ cases: res });
+    const createdCasesResponse = decodeOrThrowZod(BulkCreateCasesResponseSchema)({
+      cases: res,
+    });
 
     createdCasesResponse.cases.forEach((createdCase) => {
       clientArgs.casesEventBus?.emitCaseCreated(clientArgs.request, {

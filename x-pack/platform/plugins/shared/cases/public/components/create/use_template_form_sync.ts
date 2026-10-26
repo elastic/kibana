@@ -12,7 +12,7 @@ import { useFormContext, useFormData } from '@kbn/es-ui-shared-plugin/static/for
 import type { ParsedTemplate } from '../../../common/types/domain/template/v1';
 import { CASE_EXTENDED_FIELDS, NONE_CONNECTOR_ID } from '../../../common/constants';
 import { ConnectorTypes } from '../../../common/types/domain';
-import type { CaseConnectorWithoutName } from '../../../common/types/domain_zod/connector/v1';
+import type { CaseConnectorWithoutName } from '../../../common/types/domain/connector/v1';
 import { useGetTemplate } from '../templates_v2/hooks/use_get_template';
 import {
   buildExtendedFieldsDefaults,

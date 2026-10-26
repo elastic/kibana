@@ -91,6 +91,9 @@ export async function hydrateOnboardingSession(
       getOnboardingSessionKey(integrationId, 'serviceSettingsStep'),
       JSON.stringify({
         globalRegion: item.globalRegion ?? '',
+        // Absent on onboardings saved before these fields existed; the default is then prefilled.
+        ...(item.integrationName ? { integrationName: item.integrationName } : {}),
+        ...(item.description ? { description: item.description } : {}),
         serviceVars: item.serviceVars ?? {},
       })
     );
