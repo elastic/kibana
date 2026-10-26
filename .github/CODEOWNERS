@@ -2637,7 +2637,7 @@ x-pack/platform/plugins/shared/actions/server/inbound/ @elastic/workflows-eng @e
 x-pack/platform/plugins/shared/connector_events_bridge/ @elastic/workflows-eng
 
 ## Relay
-x-pack/platform/plugins/shared/actions/server/lib/relay @elastic/nightshift-context-and-research-team
+x-pack/platform/plugins/shared/actions/server/lib/relay @elastic/nightshift
 
 
 ## Bearer with TLS / Kubernetes auth
