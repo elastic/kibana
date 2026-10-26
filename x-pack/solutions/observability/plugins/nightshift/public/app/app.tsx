@@ -87,10 +87,12 @@ export function NightshiftApp(): React.ReactElement {
     sections,
     severityCounts,
     areSeverityCountsLoading,
+    areSeverityCountsFetching,
     hasActiveInvestigations,
     isInitialLoading,
     isFetching,
     totalCount,
+    matchedCount,
     loadedCount,
     refetchAll,
   } = useInvestigationSections({ query: debouncedSearchQuery });
@@ -280,15 +282,17 @@ export function NightshiftApp(): React.ReactElement {
       reportedSearchQuery.current = undefined;
       return;
     }
-    if (isFetching || reportedSearchQuery.current === query) {
+    // `matchedCount` is built from the severity counts query, so that has to have landed too.
+    if (isFetching || areSeverityCountsFetching || reportedSearchQuery.current === query) {
       return;
     }
     reportedSearchQuery.current = query;
     reportNightshiftInvestigationsSearched(analytics, {
       queryLength: query.length,
-      resultCount: totalCount,
+      // Each matching investigation once: the section totals overlap.
+      resultCount: matchedCount,
     });
-  }, [analytics, debouncedSearchQuery, isFetching, totalCount]);
+  }, [analytics, areSeverityCountsFetching, debouncedSearchQuery, isFetching, matchedCount]);
 
   usePageReady({
     isReady: !isInitialLoading && !allFailed,

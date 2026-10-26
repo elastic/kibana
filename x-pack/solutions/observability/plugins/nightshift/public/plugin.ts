@@ -18,7 +18,6 @@ import { i18n } from '@kbn/i18n';
 import { BehaviorSubject, type Subscription } from 'rxjs';
 import { NIGHTSHIFT_APP_ROUTE } from '../common/constants';
 import { NightshiftSettingsLocatorDefinition } from '../common/locators';
-import { registerNightshiftEbtEvents } from './common/ebt_events';
 import type {
   NightshiftPublicSetup,
   NightshiftPublicStart,
@@ -38,6 +37,7 @@ export class NightshiftPlugin
   private readonly appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({ visibleIn: [] }));
   private availabilitySubscription?: Subscription;
   private stopped = false;
+  private ebtEventsRegistered = false;
 
   constructor(private readonly context: PluginInitializerContext) {}
 
@@ -46,8 +46,6 @@ export class NightshiftPlugin
     pluginsSetup: NightshiftSetupDependencies
   ): NightshiftPublicSetup {
     const startServicesPromise = coreSetup.getStartServices();
-
-    registerNightshiftEbtEvents(coreSetup.analytics);
 
     pluginsSetup.share.url.locators.create(new NightshiftSettingsLocatorDefinition());
 
@@ -88,10 +86,19 @@ export class NightshiftPlugin
       ],
       updater$: this.appUpdater$,
       mount: async (appMountParameters: AppMountParameters) => {
-        const [[coreStart, pluginsStart], { renderApp }] = await Promise.all([
-          startServicesPromise,
-          import('./application/render_app'),
-        ]);
+        // Registered here rather than in setup so the event schemas stay out of the page load
+        // bundle: only the app reports them, and it cannot render before this resolves.
+        const [[coreStart, pluginsStart], { renderApp }, { registerNightshiftEbtEvents }] =
+          await Promise.all([
+            startServicesPromise,
+            import('./application/render_app'),
+            import('./common/ebt_events'),
+          ]);
+
+        if (!this.ebtEventsRegistered) {
+          this.ebtEventsRegistered = true;
+          registerNightshiftEbtEvents(coreSetup.analytics);
+        }
 
         return renderApp({
           appMountParameters,
