@@ -246,6 +246,26 @@ describe('floor_alert_triage_review — live revision', () => {
   });
 });
 
+// `kibana.SetAlertTags` validates its body: both lists are required, even when one is empty. A call
+// that only adds a tag fails with HTTP 400 at run time, and `continue: true` hides it.
+describe('floor_alert_triage_review — kibana.SetAlertTags calls', () => {
+  it('send both tag lists, so none is rejected by the route', () => {
+    const calls = allSteps.filter((step) => step.type === 'kibana.SetAlertTags');
+    expect(calls.length).toBeGreaterThan(0);
+    calls.forEach((step) => {
+      const tags = step.with?.tags as Record<string, unknown>;
+      expect({ step: step.name, add: Array.isArray(tags?.tags_to_add) }).toEqual({
+        step: step.name,
+        add: true,
+      });
+      expect({ step: step.name, remove: Array.isArray(tags?.tags_to_remove) }).toEqual({
+        step: step.name,
+        remove: true,
+      });
+    });
+  });
+});
+
 // ---------------------------------------------------------------------------
 // Dismiss mapping: map_dismiss_reason_to_tag
 // ---------------------------------------------------------------------------

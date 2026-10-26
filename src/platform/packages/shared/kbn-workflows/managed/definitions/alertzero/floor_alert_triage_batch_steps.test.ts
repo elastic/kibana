@@ -406,6 +406,26 @@ describe('floor_alert_triage_batch — batch summary', () => {
   });
 });
 
+// `kibana.SetAlertTags` validates its body: both lists are required, even when one is empty. A call
+// that only adds a tag fails with HTTP 400 at run time, and `continue: true` hides it.
+describe('floor_alert_triage_batch — kibana.SetAlertTags calls', () => {
+  it('send both tag lists, so none is rejected by the route', () => {
+    const calls = allSteps.filter((step) => step.type === 'kibana.SetAlertTags');
+    expect(calls.length).toBeGreaterThan(0);
+    calls.forEach((step) => {
+      const tags = step.with?.tags as Record<string, unknown>;
+      expect({ step: step.name, add: Array.isArray(tags?.tags_to_add) }).toEqual({
+        step: step.name,
+        add: true,
+      });
+      expect({ step: step.name, remove: Array.isArray(tags?.tags_to_remove) }).toEqual({
+        step: step.name,
+        remove: true,
+      });
+    });
+  });
+});
+
 describe('floor_alert_triage_batch — if-conditions', () => {
   it('keeps every if-condition free of Liquid filters', () => {
     const ifSteps = allSteps.filter((step) => step.type === 'if');
@@ -1254,6 +1274,7 @@ describe('floor_alert_triage_batch — grouping', () => {
     );
     expect(stepByName('tag_mint_alert_chunk')?.with?.tags).toEqual({
       tags_to_add: ['az:proposal:{{ steps.process_mints.item.proposal_id }}'],
+      tags_to_remove: [],
     });
   });
 
@@ -1279,6 +1300,7 @@ describe('floor_alert_triage_batch — grouping', () => {
     );
     expect(stepByName('tag_joined_alert_chunk')?.with?.tags).toEqual({
       tags_to_add: ['az:proposal:{{ steps.process_joins.item.owner_proposal_id }}'],
+      tags_to_remove: [],
     });
     expect(flatten(loop?.steps ?? []).map((step) => step.name)).toContain(
       'post_comment_joined_owner'

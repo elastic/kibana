@@ -784,6 +784,7 @@ steps:
               tags:
                 tags_to_add:
                   - "az:proposal:{{ steps.process_mints.item.proposal_id }}"
+                tags_to_remove: []
 
   # Alerts added to an open proposal go into its Investigation, which already has its review.
   - name: process_joins
@@ -825,6 +826,7 @@ steps:
               tags:
                 tags_to_add:
                   - "az:proposal:{{ steps.process_joins.item.owner_proposal_id }}"
+                tags_to_remove: []
 
       - name: post_comment_joined_owner
         type: ai.conversation.add_user_message
