@@ -8,4 +8,5 @@
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { EntityInventoryAppServices } from '../../types';
 
+/** Binds `useKibana` to this plugin's services type so callers get typed `services` without repeating the generic. */
 export const useEntityInventoryKibana = () => useKibana<EntityInventoryAppServices>();
