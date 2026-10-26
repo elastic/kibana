@@ -9,7 +9,7 @@ import { z } from '@kbn/zod/v4';
 import { FILE_SO_TYPE } from '@kbn/files-plugin/common';
 import { FILE_ATTACHMENT_TYPE } from '../../../../constants/attachments';
 import { MAX_TITLE_LENGTH } from '../../../../constants';
-import { SingleFileAttachmentMetadataSchema } from '../../../domain/attachment/v1';
+import { SingleFileAttachmentMetadataSchema } from '../v1';
 
 export const FileAttachmentMetadataSchema = z
   .object({
