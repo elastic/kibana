@@ -123,6 +123,27 @@ describe('IndicatorReader overview counts', () => {
     expect(query).toContain(IS_NOT_EXPIRED_FRAGMENT);
   });
 
+  it('counts distinct live entity slugs across sources, without the list limit', async () => {
+    const { reader } = makeReader();
+    (executeCountQuery as jest.Mock).mockResolvedValueOnce(1500);
+
+    await expect(reader.countEntities([SOURCE, 'logs-other'])).resolves.toBe(1500);
+
+    const query = (executeCountQuery as jest.Mock).mock.calls[0][0].query.print('basic');
+    expect(query).toContain(`\`source.id\` IN ("${SOURCE}", "logs-other")`);
+    expect(query).toContain('`feature.type` IN ("entity")');
+    expect(query).toContain('deleted IS NULL OR deleted == FALSE');
+    expect(query).toContain('excluded IS NULL OR excluded == FALSE');
+    expect(query).toContain(IS_NOT_EXPIRED_FRAGMENT);
+    // Distinct slugs merge the same entity learned from two sources; the type filter runs after
+    // picking the latest revision, so a revision that changed type isn't counted.
+    expect(query).toContain('STATS total = COUNT_DISTINCT(`feature.slug`)');
+    expect(query.indexOf('`feature.type` IN ("entity")')).toBeGreaterThan(
+      query.indexOf('INLINE STATS tiebreaker_id')
+    );
+    expect(query).not.toContain('LIMIT 1000');
+  });
+
   it('counts active unbacked queries for the requested sources', async () => {
     const { reader } = makeReader();
     (executeCountQuery as jest.Mock).mockResolvedValueOnce(4);

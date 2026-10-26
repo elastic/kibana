@@ -204,7 +204,7 @@ pageLoadAssetSize:
   spaces: 25351
   stackAlerts: 1985
   stackConnectors: 63548
-  streams: 6955
+  streams: 8350
   streamsApp: 55882
   subscriptionStatus: 5000
   synthetics: 20839
@@ -240,4 +240,4 @@ pageLoadAssetSize:
   visualizations: 1147
   watcher: 5497
   workflowsExtensions: 38186
-  workflowsManagement: 36613
+  workflowsManagement: 41727

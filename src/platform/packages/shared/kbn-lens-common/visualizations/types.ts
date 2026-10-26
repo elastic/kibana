@@ -162,6 +162,11 @@ export interface LensEditContextMapping {
 
 export type LensEditSupportedActions = keyof LensEditContextMapping;
 
+/** Consumer defaults per visualization id, used only when the visualization has no current state. */
+export interface DefaultVisualizationOverrides {
+  lnsXY?: Pick<Partial<XYVisualizationState>, 'legend'>;
+}
+
 export type LensEditPayload<T extends LensEditSupportedActions> = {
   action: T;
 } & LensEditContextMapping[T];
