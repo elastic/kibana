@@ -88,6 +88,30 @@ describe('sampleSchema', () => {
     expect(sampleSchema(schema, {})).toEqual(expected);
   });
 
+  it.each([false, true])(
+    'samples object items as independent copies (uniqueItems: %s)',
+    (uniqueItems) => {
+      const schema = {
+        type: 'array',
+        minItems: 2,
+        uniqueItems,
+        items: {
+          type: 'object',
+          properties: {
+            id: { type: 'integer' },
+            tags: { type: 'array', items: { type: 'string' } },
+          },
+        },
+      };
+
+      const [first, second] = sampleSchema(schema, {}) as Array<{ tags: string[] }>;
+      first.tags.push('changed');
+
+      expect(second).not.toBe(first);
+      expect(second.tags).not.toContain('changed');
+    }
+  );
+
   it('skips the null that nullable enums end with in boundary mode', () => {
     expect(
       sampleSchema({ type: ['string', 'null'], enum: ['a', 'b', null] }, {}, { boundary: true })

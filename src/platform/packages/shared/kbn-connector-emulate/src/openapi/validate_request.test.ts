@@ -165,7 +165,15 @@ describe('validateRequest', () => {
                 'application/x-www-form-urlencoded': {
                   schema: {
                     type: 'object',
-                    properties: { tags: { type: 'array', items: { type: 'integer' } } },
+                    properties: {
+                      tags: { type: 'array', items: { type: 'integer' } },
+                      scope: {
+                        oneOf: [
+                          { type: 'string', enum: ['all'] },
+                          { type: 'array', items: { type: 'integer' }, minItems: 2 },
+                        ],
+                      },
+                    },
                   },
                 },
               },
@@ -203,6 +211,11 @@ describe('validateRequest', () => {
     it('reads a form field sent once as a one-item array when its property is an array', () => {
       expect(check({}, 'tags=1')).toEqual([]);
       expect(check({}, 'tags=1&tags=2')).toEqual([]);
+    });
+
+    it('keeps a form field sent once as a scalar when its property also allows one', () => {
+      expect(check({}, 'scope=all')).toEqual([]);
+      expect(check({}, 'scope=1&scope=2')).toEqual([]);
     });
   });
 });

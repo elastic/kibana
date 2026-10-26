@@ -150,6 +150,41 @@ describe('sampleResponse', () => {
     }
   );
 
+  it.each([undefined, 'application/json'])(
+    'prefers declared application/json over an earlier */* for Accept %s',
+    async (accept) => {
+      const { fetch: anyFetch } = createEmulatorFetch({
+        specs: [
+          {
+            ...spec,
+            paths: {
+              '/any': {
+                get: {
+                  responses: {
+                    '200': {
+                      description: 'ok',
+                      content: {
+                        '*/*': { schema: { type: 'string', example: 'wildcard' } },
+                        'application/json': { schema: { type: 'string', example: 'json' } },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        ],
+      });
+
+      const response = await anyFetch('https://api.example.com/any', {
+        headers: accept ? { accept } : {},
+      });
+
+      expect(response.headers.get('content-type')).toBe('application/json');
+      expect(await response.json()).toBe('json');
+    }
+  );
+
   it('answers vendor JSON types the spec does not declare with its JSON content', async () => {
     const response = await fetch('https://api.example.com/report', {
       headers: { accept: 'application/vnd.github+json' },

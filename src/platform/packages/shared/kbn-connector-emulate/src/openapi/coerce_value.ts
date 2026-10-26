@@ -77,7 +77,10 @@ const findSubschema = (
   pick: (node: SchemaNode) => unknown
 ): unknown => collectParts(schema, document).map(pick).find(isRecord);
 
-/** Reads a field sent once as a one-item array when its property is an array, as in `tags=1`. */
+/**
+ * Reads a field sent once as a one-item array when its property can only be an array, as in
+ * `tags=1`. A property that also allows a scalar, such as `all` or a list of IDs, keeps it.
+ */
 export const wrapFormArrays = (
   fields: Readonly<Record<string, string | string[]>>,
   schema: unknown,
@@ -88,8 +91,9 @@ export const wrapFormArrays = (
       const property = findSubschema(schema, document, ({ properties }) =>
         isRecord(properties) ? properties[key] : undefined
       );
-      const isArray = getSchemaTypes(property, document).has('array');
-      return [key, typeof value === 'string' && isArray ? [value] : value];
+      const types = getSchemaTypes(property, document);
+      const onlyArray = types.size === 1 && types.has('array');
+      return [key, typeof value === 'string' && onlyArray ? [value] : value];
     })
   );
 

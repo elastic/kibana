@@ -337,13 +337,15 @@ export const sampleSchema = (
           return node.items.map((item, index) => child(item, 'items', index));
         }
         const item = child(node.items, 'items');
+        // Each entry is its own copy, so changing one item (as a responder might) leaves the rest.
+        const copyOf = (index: number) => (index === 0 ? item : structuredClone(item));
         if (node.uniqueItems === true) {
           const itemSchema = resolve(node.items, document);
           return Array.from({ length: count }, (_, index) =>
-            index === 0 ? item : vary(item, index, itemSchema, document)
+            index === 0 ? item : vary(copyOf(index), index, itemSchema, document)
           );
         }
-        return Array.from({ length: count }, () => item);
+        return Array.from({ length: count }, (_, index) => copyOf(index));
       }
       case 'string':
         return placeholderString(node, boundary);

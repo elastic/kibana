@@ -36,6 +36,7 @@ import type { ContractOperation, OpenApiDocument } from '../openapi';
 import { loadContractOperations } from '../openapi';
 import { createOpenApiAdapter } from '../openapi/openapi_adapter';
 import { findTokenEndpoints, respondToTokenRequest } from '../openapi/token_endpoints';
+import { isJsonMediaType } from '../openapi/validate_content';
 import { insufficientScopeChallenge } from '../openapi/validate_security';
 
 /** One request the mock received, for assertions in tests. */
@@ -128,7 +129,8 @@ const toContractRequest = async (request: Request): Promise<ContractRequest> => 
   let bodyError: string | undefined;
   if (text) {
     headers['content-length'] ??= String(Buffer.byteLength(text));
-    if (/json/.test(headers['content-type'] ?? '')) {
+    // NDJSON and JSON text sequences are several documents, so they stay text.
+    if (isJsonMediaType(headers['content-type'])) {
       try {
         body = JSON.parse(text);
       } catch (error) {
@@ -209,7 +211,7 @@ const NULL_BODY_STATUSES = new Set([101, 204, 205, 304]);
 // JSON bodies are serialized whatever their value, so a JSON string or `null` stays JSON.
 const isJsonContent = (headers: ContractResponse['headers'] = {}): boolean =>
   Object.entries(headers).some(
-    ([name, value]) => name.toLowerCase() === 'content-type' && /[/+]json\b/i.test(value)
+    ([name, value]) => name.toLowerCase() === 'content-type' && isJsonMediaType(value)
   );
 
 const toResponse = ({ statusCode, headers, body }: ContractResponse): Response => {

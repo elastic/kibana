@@ -102,9 +102,15 @@ const concreteTypes = (declared: string, ranges: readonly MediaRange[]): string[
   return fallback ? [...accepted, fallback] : accepted;
 };
 
+// OpenAPI: a concrete media type declared by the spec takes precedence over a range covering it.
+const declaredSpecificity = (mediaType: string): number => {
+  const [type, subtype = ''] = baseType(mediaType).split('/');
+  return specificity({ type, subtype, q: 1 });
+};
+
 /**
  * Picks the response content that best satisfies the `Accept` header: the highest quality, then
- * JSON, then the spec's order. Content the spec declares for a media range, such as `text/*`,
+ * JSON, then the most specific declaration, then the spec's order. Content the spec declares for a media range, such as `text/*`,
  * is sent as a concrete type the client accepts. A vendor JSON type such as
  * `application/vnd.github+json` that the spec doesn't declare gets its JSON content, as vendors
  * answer those with `application/json`. Returns undefined when the response has contents but
@@ -121,11 +127,15 @@ export const negotiateContent = (
         content: { ...content, mediaType },
         q: qualityOf(ranges, mediaType),
         json: isJson(mediaType),
+        declared: declaredSpecificity(content.mediaType),
         order,
       }))
     )
     .filter(({ q }) => q > 0)
-    .sort((a, b) => b.q - a.q || Number(b.json) - Number(a.json) || a.order - b.order);
+    .sort(
+      (a, b) =>
+        b.q - a.q || Number(b.json) - Number(a.json) || b.declared - a.declared || a.order - b.order
+    );
   if (candidates.length > 0) {
     return candidates[0].content;
   }

@@ -18,6 +18,10 @@ const SUBJECTS = { request: 'Request', response: 'Response' } as const;
 
 const getMediaType = (contentType = ''): string => contentType.split(';')[0].trim().toLowerCase();
 
+/** Whether a content type is one JSON document: `application/json` or a `+json` type. */
+export const isJsonMediaType = (contentType?: string): boolean =>
+  /[/+]json$/.test(getMediaType(contentType));
+
 // Specs key content by media type, by range such as `text/*`, or by `*/*`.
 const findContent = (contents: readonly MediaTypeContent[], mediaType: string) => {
   const [type] = mediaType.split('/');
@@ -28,7 +32,7 @@ const findContent = (contents: readonly MediaTypeContent[], mediaType: string) =
 
 // Multipart, binary and XML bodies arrive as text that their schemas don't describe.
 const canValidate = (mediaType: string): boolean =>
-  /[/+]json$/.test(mediaType) || mediaType === FORM_MEDIA_TYPE || mediaType.startsWith('text/');
+  isJsonMediaType(mediaType) || mediaType === FORM_MEDIA_TYPE || mediaType.startsWith('text/');
 
 const toFormFields = (body: string): Record<string, string | string[]> => {
   const fields: Record<string, string | string[]> = {};
