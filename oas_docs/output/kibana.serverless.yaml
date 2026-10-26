@@ -8647,12 +8647,13 @@ paths:
             maximum: 100
             minimum: 1
             type: integer
-        - description: 'A KQL filter to apply to the action policies. Supported fields: id, name, description, enabled.'
+        - description: 'A KQL filter to apply to the action policies. Supported fields: id, name, description, enabled. Cannot be empty. Omit it to list every action policy.'
           in: query
           name: filter
           required: false
           schema:
             maxLength: 4096
+            minLength: 1
             type: string
         - description: A text string to search across action policy fields.
           in: query
@@ -8921,7 +8922,7 @@ paths:
                     message: The current user does not have the required privileges for this request.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the user does not have the required privileges, or the current license does not support action policies. Creating, updating, and enabling action policies requires an active Enterprise license.
+          description: Indicates the user does not have the required privileges, or the current license does not support action policies. Creating, updating, upserting, and enabling action policies requires an active Enterprise license. Reading, disabling, snoozing, deleting, and rotating the API key of an existing policy do not, so existing policies can still be maintained after a license lapses.
         '500':
           content:
             application/json:
@@ -9300,7 +9301,7 @@ paths:
                     message: The current user does not have the required privileges for this request.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the user does not have the required privileges, or the current license does not support action policies. Creating, updating, and enabling action policies requires an active Enterprise license.
+          description: Indicates the user does not have the required privileges, or the current license does not support action policies. Creating, updating, upserting, and enabling action policies requires an active Enterprise license. Reading, disabling, snoozing, deleting, and rotating the API key of an existing policy do not, so existing policies can still be maintained after a license lapses.
         '500':
           content:
             application/json:
@@ -9363,7 +9364,7 @@ paths:
                   ids:
                     - action-policy-1
                     - action-policy-2
-                  snoozed_until: '2026-01-16T12:00:00.000Z'
+                  snoozed_until: '2099-01-16T12:00:00.000Z'
             schema:
               $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_snooze_action_policies_request'
       responses:
@@ -10103,7 +10104,7 @@ paths:
                     message: The current user does not have the required privileges for this request.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the user does not have the required privileges, or the current license does not support action policies. Creating, updating, and enabling action policies requires an active Enterprise license.
+          description: Indicates the user does not have the required privileges, or the current license does not support action policies. Creating, updating, upserting, and enabling action policies requires an active Enterprise license. Reading, disabling, snoozing, deleting, and rotating the API key of an existing policy do not, so existing policies can still be maintained after a license lapses.
         '404':
           content:
             application/json:
@@ -10332,7 +10333,7 @@ paths:
                     message: The current user does not have the required privileges for this request.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the user does not have the required privileges, or the current license does not support action policies. Creating, updating, and enabling action policies requires an active Enterprise license.
+          description: Indicates the user does not have the required privileges, or the current license does not support action policies. Creating, updating, upserting, and enabling action policies requires an active Enterprise license. Reading, disabling, snoozing, deleting, and rotating the API key of an existing policy do not, so existing policies can still be maintained after a license lapses.
         '409':
           content:
             application/json:
@@ -10663,7 +10664,7 @@ paths:
                     message: The current user does not have the required privileges for this request.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the user does not have the required privileges, or the current license does not support action policies. Creating, updating, and enabling action policies requires an active Enterprise license.
+          description: Indicates the user does not have the required privileges, or the current license does not support action policies. Creating, updating, upserting, and enabling action policies requires an active Enterprise license. Reading, disabling, snoozing, deleting, and rotating the API key of an existing policy do not, so existing policies can still be maintained after a license lapses.
         '404':
           content:
             application/json:
@@ -10762,7 +10763,7 @@ paths:
               snoozeActionPolicyRequest:
                 summary: Snooze until a specific timestamp
                 value:
-                  snoozed_until: '2026-01-16T12:00:00.000Z'
+                  snoozed_until: '2099-01-16T12:00:00.000Z'
             schema:
               $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_snooze_action_policy_request'
       responses:
@@ -10788,7 +10789,7 @@ paths:
                       tags:
                         - production
                     name: Notify on production alerts
-                    snoozed_until: '2026-01-16T12:00:00.000Z'
+                    snoozed_until: '2099-01-16T12:00:00.000Z'
                     throttle:
                       strategy: on_status_change
                     updated_at: '2026-01-15T12:00:00.000Z'
@@ -12888,7 +12889,7 @@ paths:
             maximum: 100
             minimum: 1
             type: integer
-        - description: Inclusive ISO datetime lower bound on the event timestamp; overrides the default 24-hour window. Independent of alert_ids — e.g. set it to an alert’s start time to scope results to that alert’s lifetime.
+        - description: Inclusive ISO datetime lower bound on the event timestamp. Defaults to 24 hours before `to`, or before the request when `to` is omitted. Independent of alert_ids — e.g. set it to an alert’s start time to scope results to that alert’s lifetime.
           in: query
           name: from
           required: false
@@ -12998,7 +12999,7 @@ paths:
                     per_page: 20
                     total: 1
               schema:
-                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_policy_execution_history_response'
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_action_policy_execution_history_response'
           description: Returns a paginated list of execution history events.
         '400':
           content:
@@ -13121,7 +13122,7 @@ paths:
             maxItems: 2
             minItems: 1
             type: array
-        - description: Inclusive ISO datetime lower bound on event.start.
+        - description: Inclusive ISO datetime lower bound on event.start. Defaults to 24 hours before `to`, or before the request when `to` is omitted. Set it to see older executions.
           in: query
           name: from
           required: false
@@ -13190,7 +13191,6 @@ paths:
                         rule:
                           id: rule-1
                           version: 3
-                        space_id: default
                         started_at: '2026-01-15T12:00:00.000Z'
                         timings:
                           duration_ms: 1250
@@ -13199,7 +13199,7 @@ paths:
                     per_page: 20
                     total: 1
               schema:
-                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_executions_response'
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_execution_history_response'
           description: Returns a paginated list of rule execution events.
         '400':
           content:
@@ -13305,12 +13305,13 @@ paths:
             maximum: 100
             minimum: 1
             type: integer
-        - description: The filter to apply to the rules.
+        - description: 'A KQL filter to apply to the rules. Supported fields: id, kind, enabled, metadata.name, metadata.description, metadata.tags, metadata.routing_tags. Cannot be empty. Omit it to list every rule.'
           in: query
           name: filter
           required: false
           schema:
             maxLength: 4096
+            minLength: 1
             type: string
         - description: The field to sort rules by.
           in: query
@@ -14275,7 +14276,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        [Required authorization] Route required privileges: read_alerting-v2-rules.
+        Returns the requested rules. Ids that match no rule are reported per item in `errors` as `RULE_NOT_FOUND`. The request itself succeeds as long as it is valid.<br/><br/>[Required authorization] Route required privileges: read_alerting-v2-rules.
       operationId: post-alerting-v2-rules-bulk-get
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -14303,8 +14304,15 @@ paths:
             application/json:
               examples:
                 bulkGetRulesResponse:
-                  summary: Returned the requested rules
+                  summary: Returned one rule and reported the other id as not found
                   value:
+                    errors:
+                      - error:
+                          code: RULE_NOT_FOUND
+                          details:
+                            rule_id: rule-id-2
+                          message: Rule with id "rule-id-2" not found
+                        id: rule-id-2
                     items:
                       - created_at: '2026-01-15T12:00:00.000Z'
                         created_by:
@@ -14346,7 +14354,7 @@ paths:
                         version: 1
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_get_rules_response'
-          description: Returns the requested rules.
+          description: Returns the rules that were found in `items` and a per-item error in `errors` for every id that matched no rule.
         '400':
           content:
             application/json:
@@ -14390,19 +14398,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates the user does not have the required privileges to perform the request.
-        '404':
-          content:
-            application/json:
-              examples:
-                rulesNotFound:
-                  summary: One or more requested rule ids could not be found
-                  value:
-                    code: NOT_FOUND
-                    error: Not Found
-                    message: Saved object [alerting_rule/rule-1] not found
-              schema:
-                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: One or more rule ids could not be found.
         '500':
           content:
             application/json:
@@ -15214,8 +15209,6 @@ paths:
                       tags:
                         - production
                         - infra
-                      template:
-                        id: host-cpu-high
                     no_data:
                       strategy: keep_last
                     query:
@@ -48087,9 +48080,17 @@ paths:
                     - ecs
                     - otel
                   type: string
+                description:
+                  description: Integration description from the Service settings step.
+                  maxLength: 2048
+                  type: string
                 globalRegion:
                   description: Global AWS region from the Service Settings step.
                   maxLength: 64
+                  type: string
+                integrationName:
+                  description: Integration name as entered in the Service settings step, before any per-package suffix is applied.
+                  maxLength: 160
                   type: string
                 mechanisms:
                   description: Delivery mechanisms active in this deployment.
@@ -48247,6 +48248,9 @@ paths:
                       deploymentName:
                         description: Opaque deployment name; for AWS, the CFN stack name.
                         type: string
+                      description:
+                        description: Integration description from the Service settings step.
+                        type: string
                       ecfStacks:
                         description: ECF CloudFormation stacks launched as part of this deployment. Written by the wizard after the user clicks Launch.
                         items:
@@ -48293,6 +48297,9 @@ paths:
                         description: Global AWS region from the Service Settings step.
                         type: string
                       id:
+                        type: string
+                      integrationName:
+                        description: Integration name as entered in the Service settings step, before any per-package suffix is applied.
                         type: string
                       mechanisms:
                         items:
@@ -48594,6 +48601,9 @@ paths:
                       deploymentName:
                         description: Opaque deployment name; for AWS, the CFN stack name.
                         type: string
+                      description:
+                        description: Integration description from the Service settings step.
+                        type: string
                       ecfStacks:
                         description: ECF CloudFormation stacks launched as part of this deployment. Written by the wizard after the user clicks Launch.
                         items:
@@ -48640,6 +48650,9 @@ paths:
                         description: Global AWS region from the Service Settings step.
                         type: string
                       id:
+                        type: string
+                      integrationName:
+                        description: Integration name as entered in the Service settings step, before any per-package suffix is applied.
                         type: string
                       mechanisms:
                         items:
@@ -48834,6 +48847,11 @@ paths:
                 deploymentName:
                   maxLength: 255
                   type: string
+                description:
+                  description: Integration description from the Service settings step. Send null to clear it.
+                  maxLength: 2048
+                  nullable: true
+                  type: string
                 ecfStacks:
                   description: ECF CloudFormation stacks to record for this deployment.
                   items:
@@ -48876,6 +48894,10 @@ paths:
                       - templateVersion
                   maxItems: 10
                   type: array
+                integrationName:
+                  description: Integration name used by the last deploy, before any per-package suffix. Refreshed on each deploy because an unedited default name follows the service selection.
+                  maxLength: 160
+                  type: string
                 mechanisms:
                   description: Delivery mechanisms active in this deployment. Replaces the stored mechanisms array.
                   items:
@@ -49001,6 +49023,9 @@ paths:
                       deploymentName:
                         description: Opaque deployment name; for AWS, the CFN stack name.
                         type: string
+                      description:
+                        description: Integration description from the Service settings step.
+                        type: string
                       ecfStacks:
                         description: ECF CloudFormation stacks launched as part of this deployment. Written by the wizard after the user clicks Launch.
                         items:
@@ -49047,6 +49072,9 @@ paths:
                         description: Global AWS region from the Service Settings step.
                         type: string
                       id:
+                        type: string
+                      integrationName:
+                        description: Integration name as entered in the Service settings step, before any per-package suffix is applied.
                         type: string
                       mechanisms:
                         items:
@@ -49275,6 +49303,9 @@ paths:
                         deploymentName:
                           description: Opaque deployment name; for AWS, the CFN stack name.
                           type: string
+                        description:
+                          description: Integration description from the Service settings step.
+                          type: string
                         ecfStacks:
                           description: ECF CloudFormation stacks launched as part of this deployment. Written by the wizard after the user clicks Launch.
                           items:
@@ -49321,6 +49352,9 @@ paths:
                           description: Global AWS region from the Service Settings step.
                           type: string
                         id:
+                          type: string
+                        integrationName:
+                          description: Integration name as entered in the Service settings step, before any per-package suffix is applied.
                           type: string
                         mechanisms:
                           items:
@@ -148275,6 +148309,154 @@ components:
         propertyName: type
       oneOf:
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_workflow_action_policy_destination'
+    Kibana_HTTP_APIs_alerting_action_policy_execution_history_item:
+      additionalProperties: false
+      type: object
+      properties:
+        action_group_count:
+          type: number
+        alert_count:
+          type: number
+        alerts:
+          description: Alert IDs referenced by this event, bounded to 50. Empty when the event references no alerts. Use `alert_count` for the true total.
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+            required:
+              - id
+          maxItems: 50
+          type: array
+        dispatched_at:
+          format: date-time
+          maxLength: 64
+          type: string
+        error:
+          additionalProperties: false
+          description: Failure details. Omitted when the dispatch did not fail.
+          type: object
+          properties:
+            message:
+              type: string
+            stack_trace:
+              description: Omitted when the source recorded no trace.
+              type: string
+          required:
+            - message
+        failure_reason:
+          enum:
+            - missing_api_key
+            - workflow_not_found
+            - workflow_disabled
+            - schedule_error
+            - license_not_supported
+          type: string
+        outcome:
+          enum:
+            - success
+            - throttled
+            - failure
+          type: string
+        policy:
+          additionalProperties: false
+          type: object
+          properties:
+            id:
+              type: string
+            name:
+              description: Omitted when the referenced resource could not be resolved.
+              type: string
+          required:
+            - id
+        rule_count:
+          description: Number of rules referenced by this event after search or rule-filter narrowing. Unlike `total` on a list response, this is an exact count and it can exceed `rules.length` when the embedded array is truncated to the cap.
+          type: number
+        rules:
+          description: Rules referenced by this event, bounded to 20. When a search or rule filter narrows the match, this array is intersected with the matched subset server-side. Use `rule_count` for the full count.
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              name:
+                description: Omitted when the referenced resource could not be resolved.
+                type: string
+            required:
+              - id
+          maxItems: 20
+          type: array
+        workflows:
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              name:
+                description: Omitted when the referenced resource could not be resolved.
+                type: string
+            required:
+              - id
+          maxItems: 100
+          type: array
+      required:
+        - dispatched_at
+        - policy
+        - outcome
+        - alert_count
+        - alerts
+        - action_group_count
+        - rules
+        - rule_count
+        - workflows
+    Kibana_HTTP_APIs_alerting_action_policy_execution_history_response:
+      additionalProperties: false
+      type: object
+      properties:
+        items:
+          items:
+            $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_action_policy_execution_history_item'
+          type: array
+        page:
+          maximum: 9007199254740991
+          minimum: 1
+          type: integer
+        per_page:
+          maximum: 9007199254740991
+          minimum: 1
+          type: integer
+        search_matches:
+          additionalProperties: false
+          description: Per-type match counts for the active search. Omitted when no search was provided. When is_truncated is true the server ID filter was capped and the result may be truncated.
+          type: object
+          properties:
+            is_truncated:
+              description: True when the server filter cap was reached and results may be truncated.
+              type: boolean
+            policy_count:
+              description: 'The number of action policies matching the search. This count is an estimate: results above 10,000 may be reported as 10,000.'
+              maximum: 9007199254740991
+              minimum: 0
+              type: integer
+            rule_count:
+              description: 'The number of rules matching the search. This count is an estimate: results above 10,000 may be reported as 10,000.'
+              maximum: 9007199254740991
+              minimum: 0
+              type: integer
+          required:
+            - policy_count
+            - rule_count
+            - is_truncated
+        total:
+          description: 'The number of action policy events matching the query. This count is an estimate: results above 10,000 may be reported as 10,000.'
+          maximum: 9007199254740991
+          minimum: 0
+          type: integer
+      required:
+        - items
+        - page
+        - per_page
+        - total
     Kibana_HTTP_APIs_alerting_action_policy_grouping:
       discriminator:
         mapping:
@@ -148599,7 +148781,7 @@ components:
       type: object
       properties:
         ids:
-          description: Explicit list of IDs to operate on.
+          description: Explicit list of IDs to operate on. Each id can appear at most once.
           items:
             maxLength: 150
             minLength: 1
@@ -148633,6 +148815,38 @@ components:
           maxLength: 256
           minLength: 1
           type: string
+    Kibana_HTTP_APIs_alerting_bulk_create_error:
+      additionalProperties: false
+      type: object
+      properties:
+        error:
+          additionalProperties: false
+          type: object
+          properties:
+            code:
+              description: Stable error code you can branch on, for example `INVALID_SCHEDULE` or `RULE_ALREADY_EXISTS`.
+              type: string
+            details:
+              additionalProperties: {}
+              description: Optional structured context whose keys depend on `code`. Identifier keys such as `rule_id`, `action_policy_id` and `group_hash` are stable, permanent public identifiers. On a 400 request-validation error, `details.source` (`params`, `query`, or `body`) names the failing part and is the only guaranteed key. The sibling `details.errors` may change. Do not branch on it.
+              type: object
+            message:
+              description: A readable explanation of the error. The wording can change without notice. Do not parse this field.
+              type: string
+          required:
+            - code
+            - message
+        id:
+          description: The client-supplied `id` of the failed item. Omitted when the item had none.
+          type: string
+        index:
+          description: Zero-based position of the failed item in the request `items`.
+          maximum: 9007199254740991
+          minimum: 0
+          type: integer
+      required:
+        - error
+        - index
     Kibana_HTTP_APIs_alerting_bulk_create_rule_item:
       additionalProperties: false
       type: object
@@ -148708,32 +148922,9 @@ components:
       type: object
       properties:
         errors:
-          description: Errors for rules that could not be created. Each entry includes the rule `id` and the error. Empty when every requested rule was created.
+          description: Errors for rules that could not be created. Each entry carries the `index` of the item in the request, its `id` when one was supplied, and the error. Empty when every requested rule was created.
           items:
-            type: object
-            properties:
-              error:
-                type: object
-                properties:
-                  code:
-                    description: Stable error code you can branch on, for example `INVALID_SCHEDULE` or `RULE_ALREADY_EXISTS`.
-                    type: string
-                  details:
-                    additionalProperties: {}
-                    description: Optional extra information about the error, for example field validation issues or the `rule_id` when that ID already exists.
-                    type: object
-                  message:
-                    description: A readable explanation of the error. The wording can change without notice. Do not parse this field.
-                    type: string
-                required:
-                  - code
-                  - message
-              id:
-                description: The identifier of the resource that failed.
-                type: string
-            required:
-              - id
-              - error
+            $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_create_error'
           type: array
         items:
           description: Rules that were created. Rules listed in `errors` are not included.
@@ -148796,13 +148987,42 @@ components:
       additionalProperties: false
       type: object
       properties:
+        errors:
+          description: Errors for rules that could not be returned, keyed by the requested `id`. A rule that does not exist is reported as `RULE_NOT_FOUND`. Empty when every requested rule was found.
+          items:
+            type: object
+            properties:
+              error:
+                type: object
+                properties:
+                  code:
+                    description: Stable error code you can branch on, for example `INVALID_SCHEDULE` or `RULE_ALREADY_EXISTS`.
+                    type: string
+                  details:
+                    additionalProperties: {}
+                    description: Optional structured context whose keys depend on `code`. Identifier keys such as `rule_id`, `action_policy_id` and `group_hash` are stable, permanent public identifiers. On a 400 request-validation error, `details.source` (`params`, `query`, or `body`) names the failing part and is the only guaranteed key. The sibling `details.errors` may change. Do not branch on it.
+                    type: object
+                  message:
+                    description: A readable explanation of the error. The wording can change without notice. Do not parse this field.
+                    type: string
+                required:
+                  - code
+                  - message
+              id:
+                description: The identifier of the resource that failed.
+                type: string
+            required:
+              - id
+              - error
+          type: array
         items:
-          description: The requested rules, in the same order as the requested ids.
+          description: The rules that were found, in the same order as the requested ids. Rules listed in `errors` are not included.
           items:
             $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_response'
           type: array
       required:
         - items
+        - errors
     Kibana_HTTP_APIs_alerting_bulk_operation_response:
       additionalProperties: false
       description: Result of an executed bulk operation.
@@ -148826,7 +149046,7 @@ components:
                     type: string
                   details:
                     additionalProperties: {}
-                    description: Optional extra information about the error, for example field validation issues or the `rule_id` when that ID already exists.
+                    description: Optional structured context whose keys depend on `code`. Identifier keys such as `rule_id`, `action_policy_id` and `group_hash` are stable, permanent public identifiers. On a 400 request-validation error, `details.source` (`params`, `query`, or `body`) names the failing part and is the only guaranteed key. The sibling `details.errors` may change. Do not branch on it.
                     type: object
                   message:
                     description: A readable explanation of the error. The wording can change without notice. Do not parse this field.
@@ -148849,7 +149069,7 @@ components:
       type: object
       properties:
         ids:
-          description: Explicit list of IDs to operate on.
+          description: Explicit list of IDs to operate on. Each id can appear at most once.
           items:
             maxLength: 150
             minLength: 1
@@ -148859,7 +149079,7 @@ components:
           minItems: 1
           type: array
         snoozed_until:
-          description: The ISO datetime until which the targeted action policies should be snoozed.
+          description: The ISO datetime until which the targeted action policies should be snoozed. Must be in the future. A past or current instant is rejected with 400.
           format: date-time
           maxLength: 64
           type: string
@@ -148876,12 +149096,14 @@ components:
           minLength: 1
           type: string
         tags:
-          description: Replaces the alert's tags. Send `[]` to clear.
+          description: Replaces the alert's tags. Send `null` to clear them. An empty array is rejected.
           items:
             maxLength: 128
             minLength: 1
             type: string
           maxItems: 20
+          minItems: 1
+          nullable: true
           type: array
       required:
         - tags
@@ -148932,7 +149154,7 @@ components:
           type: string
         details:
           additionalProperties: {}
-          description: Optional extra information about the error, for example field validation issues or the `rule_id` when that ID already exists.
+          description: Optional structured context whose keys depend on `code`. Identifier keys such as `rule_id`, `action_policy_id` and `group_hash` are stable, permanent public identifiers. On a 400 request-validation error, `details.source` (`params`, `query`, or `body`) names the failing part and is the only guaranteed key. The sibling `details.errors` may change. Do not branch on it.
           type: object
         error:
           description: A short human-readable summary of the error category (e.g., "Not Found", "Bad Request"). Subject to change without notice. Do not parse or rely on its content.
@@ -148958,7 +149180,7 @@ components:
           minLength: 1
           type: string
         destinations:
-          description: The list of destinations. At least one is required.
+          description: The list of destinations. At least one is required. Each one can appear at most once.
           items:
             $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_action_policy_destination'
           maxItems: 10
@@ -149083,12 +149305,14 @@ components:
       type: object
       properties:
         tags:
-          description: Replaces the alert's tags. Send `[]` to clear.
+          description: Replaces the alert's tags. Send `null` to clear them. An empty array is rejected.
           items:
             maxLength: 128
             minLength: 1
             type: string
           maxItems: 20
+          minItems: 1
+          nullable: true
           type: array
       required:
         - tags
@@ -149096,150 +149320,6 @@ components:
       additionalProperties: false
       type: object
       properties: {}
-    Kibana_HTTP_APIs_alerting_policy_execution_history_item:
-      additionalProperties: false
-      type: object
-      properties:
-        action_group_count:
-          type: number
-        alert_count:
-          type: number
-        alerts:
-          description: Alert IDs referenced by this event, bounded to 50. Empty when the event references no alerts. Use `alert_count` for the true total.
-          items:
-            type: object
-            properties:
-              id:
-                type: string
-            required:
-              - id
-          maxItems: 50
-          type: array
-        dispatched_at:
-          format: date-time
-          maxLength: 64
-          type: string
-        error:
-          additionalProperties: false
-          description: Failure details. Omitted when the dispatch did not fail.
-          type: object
-          properties:
-            message:
-              type: string
-            stack_trace:
-              description: Omitted when the source recorded no trace.
-              type: string
-          required:
-            - message
-        failure_reason:
-          enum:
-            - missing_api_key
-            - workflow_not_found
-            - workflow_disabled
-            - schedule_error
-            - license_not_supported
-          type: string
-        outcome:
-          enum:
-            - success
-            - throttled
-            - failure
-          type: string
-        policy:
-          additionalProperties: false
-          type: object
-          properties:
-            id:
-              type: string
-            name:
-              description: Omitted when the referenced resource could not be resolved.
-              type: string
-          required:
-            - id
-        rule_count:
-          description: Number of rules referenced by this event after search or rule-filter narrowing. Unlike `total` on a list response, this is an exact count and it can exceed `rules.length` when the embedded array is truncated to the cap.
-          type: number
-        rules:
-          description: Rules referenced by this event, bounded to 20. When a search or rule filter narrows the match, this array is intersected with the matched subset server-side. Use `rule_count` for the full count.
-          items:
-            type: object
-            properties:
-              id:
-                type: string
-              name:
-                description: Omitted when the referenced resource could not be resolved.
-                type: string
-            required:
-              - id
-          maxItems: 20
-          type: array
-        workflows:
-          items:
-            type: object
-            properties:
-              id:
-                type: string
-              name:
-                description: Omitted when the referenced resource could not be resolved.
-                type: string
-            required:
-              - id
-          maxItems: 100
-          type: array
-      required:
-        - dispatched_at
-        - policy
-        - outcome
-        - alert_count
-        - alerts
-        - action_group_count
-        - rules
-        - rule_count
-        - workflows
-    Kibana_HTTP_APIs_alerting_policy_execution_history_response:
-      additionalProperties: false
-      type: object
-      properties:
-        items:
-          items:
-            $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_policy_execution_history_item'
-          type: array
-        page:
-          maximum: 9007199254740991
-          minimum: 1
-          type: integer
-        per_page:
-          maximum: 9007199254740991
-          minimum: 1
-          type: integer
-        search_matches:
-          additionalProperties: false
-          description: Per-type match counts for the active search. Omitted when no search was provided. When is_truncated is true the server ID filter was capped and the result may be truncated.
-          type: object
-          properties:
-            is_truncated:
-              description: True when the server filter cap was reached and results may be truncated.
-              type: boolean
-            policies:
-              description: 'Policies matching the search. This count is an estimate: results above 10,000 may be reported as 10,000.'
-              type: number
-            rules:
-              description: 'Rules matching the search. This count is an estimate: results above 10,000 may be reported as 10,000.'
-              type: number
-          required:
-            - policies
-            - rules
-            - is_truncated
-        total:
-          description: 'The number of action policy events matching the query. This count is an estimate: results above 10,000 may be reported as 10,000.'
-          maximum: 9007199254740991
-          minimum: 0
-          type: integer
-      required:
-        - items
-        - page
-        - per_page
-        - total
     Kibana_HTTP_APIs_alerting_put_action_policy:
       additionalProperties: false
       type: object
@@ -149250,7 +149330,7 @@ components:
           minLength: 1
           type: string
         destinations:
-          description: The list of destinations. At least one is required.
+          description: The list of destinations. At least one is required. Each one can appear at most once.
           items:
             $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_action_policy_destination'
           maxItems: 10
@@ -149383,7 +149463,7 @@ components:
           maxLength: 10000
           minLength: 1
           type: string
-    Kibana_HTTP_APIs_alerting_rule_execution:
+    Kibana_HTTP_APIs_alerting_rule_execution_history_item:
       additionalProperties: false
       type: object
       properties:
@@ -149426,8 +149506,6 @@ components:
               type: integer
           required:
             - id
-        space_id:
-          type: string
         started_at:
           format: date-time
           maxLength: 64
@@ -149452,18 +149530,17 @@ components:
       required:
         - id
         - rule
-        - space_id
         - started_at
         - ended_at
         - timings
         - outcome
-    Kibana_HTTP_APIs_alerting_rule_executions_response:
+    Kibana_HTTP_APIs_alerting_rule_execution_history_response:
       additionalProperties: false
       type: object
       properties:
         items:
           items:
-            $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_execution'
+            $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_execution_history_item'
           type: array
         page:
           maximum: 9007199254740991
@@ -149481,11 +149558,13 @@ components:
             is_truncated:
               description: True when more than 500 rules matched the search. Only the executions of the first 500 matching rules are returned, so the results are incomplete. Narrow the search to see the rest.
               type: boolean
-            rules:
-              description: 'Rules matching the search. This count is an estimate: results above 10,000 may be reported as 10,000.'
-              type: number
+            rule_count:
+              description: 'The number of rules matching the search. This count is an estimate: results above 10,000 may be reported as 10,000.'
+              maximum: 9007199254740991
+              minimum: 0
+              type: integer
           required:
-            - rules
+            - rule_count
             - is_truncated
         total:
           description: 'The number of rule executions matching the query. This count is an estimate: results above 10,000 may be reported as 10,000.'
@@ -149860,62 +149939,7 @@ components:
               type: string
           description: Whether the rule creates alerts (`alert`) or only stores matching events (`signal`).
         metadata:
-          additionalProperties: false
-          description: Rule metadata.
-          type: object
-          properties:
-            builder:
-              additionalProperties: false
-              description: Identifies the rule builder that authored this rule (e.g. "threshold"). Absent for rules authored directly in ES|QL; send `null` on PATCH to clear it.
-              type: object
-              properties:
-                type:
-                  description: Rule builder type.
-                  maxLength: 64
-                  minLength: 1
-                  type: string
-              required:
-                - type
-            description:
-              description: Human-readable description of the rule. Omit to leave it unset; send `null` on PATCH to clear it. An empty string is rejected.
-              maxLength: 1024
-              minLength: 1
-              type: string
-            name:
-              description: Rule name (must be unique within the space).
-              maxLength: 256
-              minLength: 1
-              type: string
-            routing_tags:
-              description: Routing tags that link alerts from this rule to action policies. An action policy applies when its `matcher.tags` contains at least one of these tags. Only allowed when kind is "alert".
-              items:
-                maxLength: 128
-                minLength: 1
-                type: string
-              maxItems: 20
-              minItems: 1
-              type: array
-            tags:
-              description: Tags for categorization, e.g. ["production", "infra"].
-              items:
-                maxLength: 128
-                minLength: 1
-                type: string
-              maxItems: 20
-              minItems: 1
-              type: array
-            template:
-              additionalProperties: false
-              description: The rule template this rule was created from.
-              type: object
-              properties:
-                id:
-                  description: Id of the rule template.
-                  type: string
-              required:
-                - id
-          required:
-            - name
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_metadata'
         no_data:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_no_data'
         query:
@@ -150101,7 +150125,7 @@ components:
       type: object
       properties:
         snoozed_until:
-          description: The ISO datetime until which the action policy should be snoozed.
+          description: The ISO datetime until which the action policy should be snoozed. Must be in the future. A past or current instant is rejected with 400.
           format: date-time
           maxLength: 64
           type: string
@@ -150118,7 +150142,7 @@ components:
           nullable: true
           type: string
         destinations:
-          description: The list of destinations. At least one is required.
+          description: The list of destinations. At least one is required. Each one can appear at most once.
           items:
             $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_action_policy_destination'
           maxItems: 10
