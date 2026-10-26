@@ -62,6 +62,16 @@ dependsOn:
   - '@kbn/alerting-v2-constants'
   - '@kbn/share-plugin'
   - '@kbn/utility-types'
+  - '@kbn/alerting-v2-episodes-ui'
+  - '@kbn/alerts-ui-shared'
+  - '@kbn/data-plugin'
+  - '@kbn/data-views-plugin'
+  - '@kbn/expressions-plugin'
+  - '@kbn/unified-doc-viewer-plugin'
+  - '@kbn/rule-data-utils'
+  - '@kbn/alerting-types'
+  - '@kbn/charts-plugin'
+  - '@kbn/flyout-template'
 tags:
   - plugin
   - prod
