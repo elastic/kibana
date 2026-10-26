@@ -100,8 +100,7 @@ export const TuningSection = ({
 
       {isFlyoutOpen && (
         <EuiFlyout
-          type="push"
-          ownFocus={false}
+          type="overlay"
           size="50%"
           onClose={closeFlyout}
           aria-labelledby={flyoutTitleId}
