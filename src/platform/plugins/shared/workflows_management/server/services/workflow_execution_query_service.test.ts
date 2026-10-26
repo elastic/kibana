@@ -202,7 +202,9 @@ describe('WorkflowExecutionQueryService', () => {
 
       await service.getWorkflowExecutions({ workflowId: 'wf-1', runName: '   ' }, 'default');
 
-      expect(mockWorkflowDataClient.search.mock.calls[0][0]?.query?.bool?.must).toHaveLength(2);
+      expect(mockWorkflowDataClient.search.mock.calls[0][0]?.query?.bool?.must).not.toEqual(
+        expect.arrayContaining([expect.objectContaining({ wildcard: expect.anything() })])
+      );
     });
 
     it('adds collapse while preserving other filters', async () => {

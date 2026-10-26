@@ -154,6 +154,12 @@ export const WorkflowExecutionList = ({
     }
   }, [filters.statuses, filters.executionTypes, filters.executedBy, filters.runName]);
 
+  const hasActiveFilters =
+    filters.statuses.length > 0 ||
+    filters.executionTypes.length > 0 ||
+    (showExecutor && filters.executedBy.length > 0) ||
+    Boolean(filters.runName?.trim());
+
   let content: React.ReactNode = null;
 
   if (isInitialLoading) {
@@ -205,10 +211,17 @@ export const WorkflowExecutionList = ({
         }
         body={
           <p>
-            <FormattedMessage
-              id="workflows.workflowExecutionList.noExecutionsFoundDescription"
-              defaultMessage="Workflow has not been executed yet."
-            />
+            {hasActiveFilters ? (
+              <FormattedMessage
+                id="workflows.workflowExecutionList.noExecutionsMatchFiltersDescription"
+                defaultMessage="No executions match the filters."
+              />
+            ) : (
+              <FormattedMessage
+                id="workflows.workflowExecutionList.noExecutionsFoundDescription"
+                defaultMessage="Workflow has not been executed yet."
+              />
+            )}
           </p>
         }
       />

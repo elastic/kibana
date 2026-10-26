@@ -204,6 +204,24 @@ describe('useWorkflowExecutions', () => {
     expect(result.current.hasNextPage).toBe(false);
   });
 
+  it('keeps the same result set when only surrounding spaces change', async () => {
+    const { rerender } = renderHook(
+      ({ runName }) => useWorkflowExecutions({ workflowId: 'wf-1', runName }, { retry: false }),
+      {
+        initialProps: { runName: 'staging' },
+        wrapper: createQueryClientWrapper(queryClient),
+      }
+    );
+    await waitForExecutionsFetch();
+
+    rerender({ runName: ' staging ' });
+
+    expect(queryClient.getQueryCache().findAll(['workflows', 'wf-1', 'executions'])).toHaveLength(
+      1
+    );
+    expect(mockGetWorkflowExecutions).toHaveBeenCalledTimes(1);
+  });
+
   it('omits a blank execution name filter', async () => {
     renderExecutionsHook({ workflowId: 'wf-1', runName: '   ' });
     await waitForExecutionsFetch();

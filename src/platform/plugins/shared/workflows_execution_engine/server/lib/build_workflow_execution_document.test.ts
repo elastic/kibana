@@ -7,16 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { WorkflowExecutionEngineModel } from '@kbn/workflows';
-import { ExecutionStatus } from '@kbn/workflows';
+import { ExecutionStatus, WORKFLOW_RUN_NAME_MAX_LENGTH } from '@kbn/workflows';
 import { buildWorkflowExecutionDocument } from './build_workflow_execution_document';
 import {
   MISSING_EXECUTION_IDENTITY_ERROR_TYPE,
   MISSING_EXECUTION_IDENTITY_MESSAGE,
   UNKNOWN_EXECUTION_IDENTITY,
 } from './execution_identity';
+import { getWorkflowExecutionName } from './get_workflow_execution_name';
+import type { WorkflowExecutionForInputRendering } from '../workflow_context_manager/build_workflow_context';
 
-const baseWorkflow: WorkflowExecutionEngineModel = {
+const baseWorkflow = {
   id: 'workflow-1',
   name: 'Test Workflow',
   enabled: true,
@@ -29,7 +32,9 @@ const baseWorkflow: WorkflowExecutionEngineModel = {
   },
   yaml: 'name: Test Workflow',
   isTestRun: false,
-};
+} satisfies WorkflowExecutionEngineModel;
+
+const logger = loggingSystemMock.createLogger();
 
 const baseParams = {
   workflow: baseWorkflow,
@@ -40,9 +45,90 @@ const baseParams = {
   now: new Date('2024-06-01T12:00:00.000Z'),
   maxEventChainDepth: 10,
   getConcurrencyGroupKey: () => null,
+  getRunName: (execution: WorkflowExecutionForInputRendering) =>
+    getWorkflowExecutionName(execution, logger),
 };
 
 describe('buildWorkflowExecutionDocument', () => {
+  describe('run-name', () => {
+    const createExecution = (
+      template: string | undefined,
+      context: Record<string, unknown> = { inputs: { target: 'production' } }
+    ) =>
+      buildWorkflowExecutionDocument({
+        ...baseParams,
+        context,
+        workflow: {
+          ...baseWorkflow,
+          definition: {
+            ...baseWorkflow.definition,
+            'run-name': template,
+            consts: { prefix: 'Release' },
+            triggers: [
+              {
+                type: 'manual',
+                inputs: { properties: { target: { type: 'string', default: 'staging' } } },
+              },
+            ],
+          },
+        },
+      });
+
+    it('names the pending execution using its initial context', () => {
+      const execution = createExecution(
+        '  {{ consts.prefix }} {{ workflow.name }} to {{ inputs.target }} / {{ event.inputs.target }} by {{ execution.executedBy }}  '
+      );
+
+      expect(execution.status).toBe(ExecutionStatus.PENDING);
+      expect(execution.runName).toBe('Release Test Workflow to production / production by user-1');
+    });
+
+    it('uses static input defaults before inputs are validated', () => {
+      expect(createExecution('Deploy {{ inputs.target }}', {}).runName).toBe('Deploy staging');
+    });
+
+    it('uses the creation time before the execution starts', () => {
+      expect(createExecution('{{ execution.startedAt | date: "%Y-%m-%d" }}').runName).toBe(
+        '2024-06-01'
+      );
+    });
+
+    it('renders event data for event-driven executions', () => {
+      expect(
+        createExecution('{{ event.title }}', { event: { type: 'alert', title: 'High CPU' } })
+          .runName
+      ).toBe('High CPU');
+    });
+
+    it.each([undefined, '', '  ', '{{ inputs.missing }}', '${{ inputs }}'])(
+      'keeps the default label for %j',
+      (template) => {
+        const execution = createExecution(template);
+        expect(execution.status).toBe(ExecutionStatus.PENDING);
+        expect(execution.runName).toBeUndefined();
+      }
+    );
+
+    it('logs a template failure and still creates the execution', () => {
+      logger.warn.mockClear();
+      const execution = createExecution('{{ inputs.target | invalid_filter }}');
+
+      expect(execution.status).toBe(ExecutionStatus.PENDING);
+      expect(execution.runName).toBeUndefined();
+      expect(logger.warn).toHaveBeenCalledWith(
+        'Could not evaluate run-name; using the default execution label.'
+      );
+    });
+
+    it('bounds names produced by runtime data', () => {
+      expect(
+        createExecution('{{ inputs.target }}', {
+          inputs: { target: 'x'.repeat(WORKFLOW_RUN_NAME_MAX_LENGTH + 1) },
+        }).runName
+      ).toBe('x'.repeat(WORKFLOW_RUN_NAME_MAX_LENGTH));
+    });
+  });
+
   it.each([undefined, 'child-account'])(
     'persists inherited identity instead of child identity (%s), without modifying its definition',
     (childAccount) => {

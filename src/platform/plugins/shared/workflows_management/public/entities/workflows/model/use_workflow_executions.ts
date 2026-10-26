@@ -74,6 +74,7 @@ export function useWorkflowExecutions(
 ) {
   const api = useWorkflowsApi();
   const currentSize = params.size ?? DEFAULT_PAGE_SIZE;
+  const runName = params.runName?.trim() || undefined;
 
   const queryFn = useCallback(
     async ({ pageParam }: { pageParam?: ExecutionsPageParam }) => {
@@ -84,7 +85,7 @@ export function useWorkflowExecutions(
       return api.getWorkflowExecutions(params.workflowId, {
         statuses: params.statuses,
         executionTypes: params.executionTypes,
-        ...(params.runName?.trim() ? { runName: params.runName.trim() } : {}),
+        ...(runName ? { runName } : {}),
         ...(params.executedBy && params.executedBy.length > 0
           ? { executedBy: params.executedBy }
           : {}),
@@ -111,7 +112,7 @@ export function useWorkflowExecutions(
       params.statuses,
       params.executionTypes,
       params.executedBy,
-      params.runName,
+      runName,
       params.omitStepRuns,
       params.startedAfter,
       params.startedBefore,
@@ -152,7 +153,7 @@ export function useWorkflowExecutions(
       params.statuses,
       params.executionTypes,
       params.executedBy,
-      params.runName,
+      runName,
       params.omitStepRuns,
       params.startedAfter,
       params.startedBefore,

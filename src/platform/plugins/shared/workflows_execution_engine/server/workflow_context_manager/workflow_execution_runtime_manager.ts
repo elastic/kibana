@@ -15,7 +15,6 @@ import {
   ExecutionStatus,
   isEventDrivenWorkflowTriggerSource,
   isTerminalStatus,
-  WORKFLOW_RUN_NAME_MAX_LENGTH,
 } from '@kbn/workflows';
 import type { GraphNodeUnion } from '@kbn/workflows/graph';
 import { ExecutionError } from '@kbn/workflows/server';
@@ -26,7 +25,7 @@ import {
   getTraceId,
   setCurrentTransaction,
 } from './apm_internal';
-import { buildWorkflowContext, buildWorkflowRenderContext } from './build_workflow_context';
+import { buildWorkflowContext } from './build_workflow_context';
 import type { StepExecutionRuntimeFactory } from './step_execution_runtime_factory';
 import type { StepIoService } from './step_io_service';
 import type { ContextDependencies } from './types';
@@ -36,7 +35,6 @@ import type { WorkflowRuntimeGraph } from './workflow_runtime_graph';
 import type { ScopeData } from './workflow_scope_stack';
 import { WorkflowScopeStack } from './workflow_scope_stack';
 import type { WorkflowExecutionTelemetryClient } from '../lib/telemetry/workflow_execution_telemetry_client';
-import { WorkflowTemplatingEngine } from '../templating_engine';
 import type { IWorkflowEventLogger } from '../workflow_event_logger';
 
 interface WorkflowExecutionRuntimeManagerInit {
@@ -469,29 +467,6 @@ export class WorkflowExecutionRuntimeManager {
       status: ExecutionStatus.RUNNING,
       startedAt: new Date().toISOString(),
     };
-    const runNameTemplate = this.workflowExecution.workflowDefinition?.['run-name'];
-    if (runNameTemplate) {
-      try {
-        const templateEngine = new WorkflowTemplatingEngine({
-          liquidSettings: this.workflowExecution.workflowDefinition.settings?.liquid,
-        });
-        const runName = templateEngine.render(
-          runNameTemplate,
-          buildWorkflowRenderContext(
-            { ...this.workflowExecution, ...updatedWorkflowExecution },
-            this.coreStart,
-            this.dependencies
-          )
-        );
-        if (typeof runName === 'string' && runName.trim()) {
-          updatedWorkflowExecution.runName = runName.trim().slice(0, WORKFLOW_RUN_NAME_MAX_LENGTH);
-        }
-      } catch {
-        this.workflowLogger?.logWarn(
-          'Could not evaluate run-name; using the default execution label.'
-        );
-      }
-    }
     this.workflowExecutionState.updateWorkflowExecution(updatedWorkflowExecution);
     this.logWorkflowStart();
     await this.stepIoService.flush();

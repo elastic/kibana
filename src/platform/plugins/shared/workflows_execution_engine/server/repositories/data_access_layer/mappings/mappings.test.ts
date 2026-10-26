@@ -116,6 +116,7 @@ describe('ES FLS allowlist cross-repo sync', () => {
     const javaGrantedFields = [
       'spaceId',
       'id',
+      'runName',
       'workflowId',
       'managed',
       'managedBy',

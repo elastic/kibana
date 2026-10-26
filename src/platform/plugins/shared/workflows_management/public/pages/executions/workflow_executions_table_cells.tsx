@@ -65,6 +65,10 @@ const workflowLinkCss = css`
   min-width: 0;
 `;
 
+const runNameCellCss = css`
+  width: 100%;
+`;
+
 const durationCellCss = css`
   font-variant-numeric: tabular-nums;
   width: 100%;
@@ -84,11 +88,17 @@ export const WorkflowExecutionRunNameCell = ({
   execution,
 }: {
   execution: WorkflowExecutionListItemDto;
-}) => (
-  <div css={css({ width: '100%' })}>
-    <EuiTextTruncate text={execution.runName ?? '\u2014'} data-test-subj="executionsTableRunName" />
-  </div>
-);
+}) => {
+  if (!execution.runName) {
+    return null;
+  }
+
+  return (
+    <div css={runNameCellCss}>
+      <EuiTextTruncate text={execution.runName} data-test-subj="executionsTableRunName" />
+    </div>
+  );
+};
 
 export const WorkflowExecutionWorkflowCell = ({
   execution,

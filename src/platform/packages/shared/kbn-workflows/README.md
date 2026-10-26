@@ -95,9 +95,11 @@ steps:
       message: "Deploy to {{ inputs.target }}"
 ```
 
-The template is evaluated once when the execution starts. It can use the initial workflow
-context, including `inputs`, `event`, `consts`, `workflow`, and `execution`. Step outputs are
-not available. The stored name does not change when the execution resumes or the workflow
+The template is evaluated once when the execution is created, including queued and skipped
+executions. It can use the initial workflow context, including `inputs`, `event`, `consts`,
+`workflow`, and `execution`. Step outputs are not available. Static input defaults are available,
+but templated input defaults and input expressions have not been evaluated yet. At this point, `execution.startedAt` uses the creation
+time. The stored name does not change when the execution starts, resumes, or the workflow
 definition changes.
 
 The template can contain up to 1,024 characters. The result is trimmed and limited to 1,024

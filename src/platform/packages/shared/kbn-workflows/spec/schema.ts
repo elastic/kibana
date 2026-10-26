@@ -1332,7 +1332,7 @@ const WorkflowSchemaBase = z.object({
     .string()
     .max(WORKFLOW_RUN_NAME_MAX_LENGTH)
     .optional()
-    .describe('Execution name, evaluated once at start using Liquid and the workflow context.'),
+    .describe('Execution name, evaluated once at creation using Liquid and the workflow context.'),
   description: z.string().optional(),
   settings: WorkflowSettingsSchema.optional(),
   enabled: z.boolean().default(true),

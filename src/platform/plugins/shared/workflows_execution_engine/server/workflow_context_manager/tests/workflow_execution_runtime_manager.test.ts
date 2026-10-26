@@ -22,14 +22,9 @@ import type {
   WorkflowContext,
   WorkflowExecutionContext,
 } from '@kbn/workflows';
-import {
-  ExecutionStatus,
-  TerminalExecutionStatuses,
-  WORKFLOW_RUN_NAME_MAX_LENGTH,
-} from '@kbn/workflows';
+import { ExecutionStatus, TerminalExecutionStatuses } from '@kbn/workflows';
 import type { GraphNodeUnion } from '@kbn/workflows/graph';
 import type { WorkflowYaml } from '@kbn/workflows/spec/schema';
-import { WorkflowSchema } from '@kbn/workflows/spec/schema';
 import { WorkflowExecutionTelemetryEventTypes } from '../../lib/telemetry/events/workflows_execution/types';
 import { WorkflowExecutionTelemetryClient } from '../../lib/telemetry/workflow_execution_telemetry_client';
 import type { IWorkflowEventLogger } from '../../workflow_event_logger';
@@ -276,105 +271,25 @@ describe('WorkflowExecutionRuntimeManager', () => {
       mockDateNow = new Date('2025-08-05T20:00:00.000Z');
     });
 
-    describe('run-name', () => {
-      beforeEach(() => {
-        workflowExecution.workflowDefinition = WorkflowSchema.parse({
-          name: 'Deploy',
-          consts: { prefix: 'Release' },
-          triggers: [
-            {
-              type: 'manual',
-              inputs: { properties: { target: { type: 'string', default: 'staging' } } },
-            },
-          ],
-          steps: [{ name: 'log', type: 'console', with: { message: 'done' } }],
-        });
-        workflowExecution.spaceId = 'default';
-        workflowExecution.executedBy = 'elastic';
-        workflowExecution.context = { inputs: { target: 'production' }, event: { type: 'manual' } };
-      });
+    it('preserves the name assigned at creation when starting and resuming', async () => {
+      workflowExecution.runName = 'Deploy staging';
+      workflowExecution.workflowDefinition = {
+        name: 'Deploy',
+        version: '1',
+        enabled: true,
+        'run-name': 'A different name',
+        triggers: [{ type: 'manual' }],
+        steps: [],
+      };
 
-      it('renders the initial context and persists the name with the start state', async () => {
-        workflowExecution.workflowDefinition['run-name'] =
-          '  {{ consts.prefix }} {{ workflow.name }} to {{ inputs.target }} / {{ event.inputs.target }} by {{ execution.executedBy }}  ';
+      await underTest.start();
+      workflowExecution.currentNodeId = 'node2';
+      await underTest.resume();
 
-        await underTest.start();
-
-        expect(workflowExecutionState.updateWorkflowExecution).toHaveBeenCalledWith(
-          expect.objectContaining({
-            status: ExecutionStatus.RUNNING,
-            runName: 'Release Deploy to production / production by elastic',
-          })
-        );
-      });
-
-      it('uses input defaults when inputs are omitted', async () => {
-        workflowExecution.context = { event: { type: 'manual' } };
-        workflowExecution.workflowDefinition['run-name'] = 'Deploy {{ inputs.target }}';
-
-        await underTest.start();
-
-        expect(workflowExecutionState.updateWorkflowExecution).toHaveBeenCalledWith(
-          expect.objectContaining({ runName: 'Deploy staging' })
-        );
-      });
-
-      it('renders event data for event-driven executions', async () => {
-        workflowExecution.context = { event: { type: 'alert', title: 'High CPU' } };
-        workflowExecution.workflowDefinition['run-name'] = '{{ event.title }}';
-
-        await underTest.start();
-
-        expect(workflowExecutionState.updateWorkflowExecution).toHaveBeenCalledWith(
-          expect.objectContaining({ runName: 'High CPU' })
-        );
-      });
-
-      it.each([
-        undefined,
-        '',
-        '  ',
-        '{{ inputs.missing }}',
-        '${{ inputs }}',
-        '{{ inputs.target | invalid_filter }}',
-      ])('keeps the default label for %j', async (template) => {
-        workflowExecution.workflowDefinition['run-name'] = template;
-
-        await underTest.start();
-
-        expect(workflowExecutionState.updateWorkflowExecution).toHaveBeenCalledWith(
-          expect.objectContaining({ status: ExecutionStatus.RUNNING })
-        );
-        expect(workflowExecutionState.updateWorkflowExecution).not.toHaveBeenCalledWith(
-          expect.objectContaining({ runName: expect.anything() })
-        );
-      });
-
-      it('bounds names produced by runtime data', async () => {
-        workflowExecution.context = {
-          inputs: { target: 'x'.repeat(WORKFLOW_RUN_NAME_MAX_LENGTH + 1) },
-        };
-        workflowExecution.workflowDefinition['run-name'] = '{{ inputs.target }}';
-
-        await underTest.start();
-
-        expect(workflowExecutionState.updateWorkflowExecution).toHaveBeenCalledWith(
-          expect.objectContaining({ runName: 'x'.repeat(WORKFLOW_RUN_NAME_MAX_LENGTH) })
-        );
-      });
-
-      it('does not evaluate the name again on resume', async () => {
-        workflowExecution.runName = 'Deploy staging';
-        workflowExecution.currentNodeId = 'node2';
-        workflowExecution.workflowDefinition['run-name'] = 'Deploy {{ inputs.target }}';
-
-        await underTest.resume();
-
-        expect(workflowExecutionState.updateWorkflowExecution).toHaveBeenCalledWith({
-          status: ExecutionStatus.RUNNING,
-        });
-        expect(underTest.getWorkflowExecution().runName).toBe('Deploy staging');
-      });
+      expect(workflowExecutionState.updateWorkflowExecution).not.toHaveBeenCalledWith(
+        expect.objectContaining({ runName: expect.anything() })
+      );
+      expect(underTest.getWorkflowExecution().runName).toBe('Deploy staging');
     });
 
     it('should set current step to the first node in the workflow', async () => {

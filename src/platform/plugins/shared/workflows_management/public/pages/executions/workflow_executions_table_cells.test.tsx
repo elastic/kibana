@@ -42,15 +42,23 @@ const createExecution = (
 });
 
 describe('WorkflowExecutionRunNameCell', () => {
-  it.each([
-    ['Deploy staging', 'Deploy staging'],
-    [undefined, '\u2014'],
-  ])('renders the execution name %s with a fallback for unnamed runs', (runName, expected) => {
-    render(<WorkflowExecutionRunNameCell execution={createExecution({ runName })} />, {
+  it('renders the execution name', () => {
+    render(
+      <WorkflowExecutionRunNameCell execution={createExecution({ runName: 'Deploy staging' })} />,
+      {
+        wrapper: getTestProvider({}),
+      }
+    );
+
+    expect(screen.getByTestId('executionsTableRunName')).toHaveTextContent('Deploy staging');
+  });
+
+  it('renders nothing for unnamed runs, like the other empty cells', () => {
+    render(<WorkflowExecutionRunNameCell execution={createExecution({ runName: undefined })} />, {
       wrapper: getTestProvider({}),
     });
 
-    expect(screen.getByTestId('executionsTableRunName')).toHaveTextContent(expected);
+    expect(screen.queryByTestId('executionsTableRunName')).not.toBeInTheDocument();
   });
 });
 

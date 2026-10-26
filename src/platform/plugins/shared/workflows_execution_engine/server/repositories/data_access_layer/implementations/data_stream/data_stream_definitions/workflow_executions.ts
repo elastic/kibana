@@ -38,7 +38,7 @@ const DATASTREAM_WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS = {
 
 export const WORKFLOW_EXECUTIONS_DATA_STREAM_DEFINITION = {
   name: WORKFLOWS_EXECUTIONS_DATA_STREAM,
-  version: 1,
+  version: 2,
   hidden: true,
   settings: {
     auto_expand_replicas: '0-1',
