@@ -439,6 +439,28 @@ describe('Discover state', () => {
 
       expect(services.dataViews.getIdsWithTitle).toHaveBeenCalledTimes(1);
     });
+
+    test('retries loading the data view list after a failed request', async () => {
+      const { internalState, services } = getDiscoverInternalStateMock({
+        persistedDataViews: [dataViewMock],
+      });
+
+      jest
+        .mocked(services.dataViews.getIdsWithTitle)
+        .mockRejectedValueOnce(new Error('Failed to load data views'));
+
+      await internalState.dispatch(internalStateActions.loadDataViewListOnce());
+
+      expect(services.dataViews.getIdsWithTitle).toHaveBeenCalledTimes(1);
+      expect(internalState.getState().savedDataViews).toEqual([]);
+
+      await internalState.dispatch(internalStateActions.loadDataViewListOnce());
+
+      expect(services.dataViews.getIdsWithTitle).toHaveBeenCalledTimes(2);
+      expect(internalState.getState().savedDataViews).toEqual([
+        expect.objectContaining({ id: dataViewMock.id }),
+      ]);
+    });
   });
 
   describe('Loading a session with an inline data view', () => {
