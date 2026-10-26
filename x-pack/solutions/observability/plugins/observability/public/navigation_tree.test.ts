@@ -13,6 +13,32 @@ import { STACK_MANAGEMENT_NAV_ID } from '@kbn/deeplinks-management';
 import { createDefinition } from './navigation_tree';
 import type { ObservabilityPublicPluginsStart } from './plugin';
 
+const buildPluginsStart = (
+  entityInventoryApp?: ObservabilityPublicPluginsStart['entityInventoryApp']
+) =>
+  ({
+    streams: { navigationStatus$: of({ status: 'disabled' as const }) },
+    ingestHub: { navigationAvailable$: of(false) },
+    cloud: { isCloudEnabled: false },
+    entityInventoryApp,
+  } as unknown as ObservabilityPublicPluginsStart);
+
+const getInfrastructureSectionChildren = async (
+  entityInventoryApp?: ObservabilityPublicPluginsStart['entityInventoryApp']
+): Promise<NodeDefinition[]> => {
+  const coreStart = coreMock.createStart();
+  coreStart.featureFlags.getBooleanValue$ = jest.fn().mockReturnValue(of(false));
+  coreStart.settings.client.get$ = jest.fn().mockReturnValue(of(AIChatExperience.Classic));
+  coreStart.settings.globalClient.get.mockReturnValue(false);
+  coreStart.settings.globalClient.isDeclared.mockReturnValue(true);
+
+  const definition = createDefinition(coreStart, buildPluginsStart(entityInventoryApp));
+
+  const { body } = (await firstValueFrom(definition.navigationTree$)) as NavigationTreeDefinition;
+  const metricsSection = body?.find((item) => item.id === 'metrics') as NodeDefinition | undefined;
+  return (metricsSection?.children as NodeDefinition[]) ?? [];
+};
+
 const getStackManagementSectionLinks = async (
   sectionId: string,
   alertingV2Enabled = false
@@ -69,5 +95,40 @@ describe('Observability solution navigation tree', () => {
     const securityLinks = await getStackManagementSectionLinks('security');
 
     expect(securityLinks).toContain('management:service_accounts');
+  });
+
+  describe('Entity Inventory navigation group', () => {
+    it('does not include the Entity Inventory group when the plugin is absent', async () => {
+      const children = await getInfrastructureSectionChildren(undefined);
+
+      const entityGroup = children.find((item) => item.title === 'Entity Inventory');
+      expect(entityGroup).toBeUndefined();
+    });
+
+    it('includes the Entity Inventory group with its three links when the plugin is present', async () => {
+      const navTreeChildren: NodeDefinition[] = [
+        { link: 'entityInventoryApp:allResources' as const },
+        { link: 'entityInventoryApp:hosts' as const },
+        { link: 'entityInventoryApp:kubernetes' as const },
+      ];
+
+      const children = await getInfrastructureSectionChildren({
+        navTreeChildren,
+      } as unknown as ObservabilityPublicPluginsStart['entityInventoryApp']);
+
+      const entityGroup = children.find((item) => item.title === 'Entity Inventory');
+      expect(entityGroup).toBeDefined();
+      expect(entityGroup?.children).toEqual(navTreeChildren);
+    });
+
+    it('keeps the original Infrastructure links regardless of entity inventory plugin state', async () => {
+      const children = await getInfrastructureSectionChildren(undefined);
+
+      const infraGroup = children[0] as NodeDefinition;
+      const infraLinks = (infraGroup?.children as NodeDefinition[])?.map((item) => item.link);
+      expect(infraLinks).toContain('metrics:inventory');
+      expect(infraLinks).toContain('metrics:hosts');
+      expect(infraLinks).toContain('metrics:metrics-explorer');
+    });
   });
 });
