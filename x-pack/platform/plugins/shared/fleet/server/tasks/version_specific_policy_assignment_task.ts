@@ -734,7 +734,8 @@ export class VersionSpecificPolicyAssignmentTask {
           getVariants(baseId).push({ policyId, agentVersions });
         }
       }
-      afterKey = (agg?.buckets.length ?? 0) > 0 ? agg?.after_key : undefined;
+      // A composite aggregation returns `after_key` with any bucket: a page that is not full is the last one
+      afterKey = (agg?.buckets.length ?? 0) < POLICY_IDS_PAGE_SIZE ? undefined : agg?.after_key;
     } while (afterKey);
 
     return candidates;

@@ -173,18 +173,16 @@ describe('VersionSpecificPolicyAssignmentTask', () => {
   // The search of phase 1 that tells which agent policies have agents to look at (one per page of
   // agent policies). By default every agent policy of the page has agents on its plain policy id: pass
   // the ids to limit them. `agentVersionsByPolicyId` are other policy ids of agents, e.g. variants, with
-  // the versions of their agents. The policy ids are returned in pages of `pageSize`, the size of the
-  // request by default.
+  // the versions of their agents. The policy ids are returned in pages of the size of the request, with an
+  // `after_key` whenever a page has buckets, like Elasticsearch does.
   const mockCandidateAgentPolicies = async ({
     policyIdsWithCandidates,
     agentVersionsByPolicyId = {},
     otherAgentVersions = 0,
-    pageSize,
   }: {
     policyIdsWithCandidates?: string[];
     agentVersionsByPolicyId?: Record<string, string[]>;
     otherAgentVersions?: number;
-    pageSize?: number;
   } = {}) => {
     const [coreStart] = await mockCore.getStartServices();
     const esClient = coreStart.elasticsearch.client.asInternalUser as any;
@@ -210,7 +208,7 @@ describe('VersionSpecificPolicyAssignmentTask', () => {
       const start = after
         ? buckets.findIndex((bucket) => bucket.key.policy_id === after.policy_id) + 1
         : 0;
-      const page = buckets.slice(start, start + (pageSize ?? size));
+      const page = buckets.slice(start, start + size);
       return {
         aggregations: {
           policy_ids: {
@@ -848,8 +846,8 @@ describe('VersionSpecificPolicyAssignmentTask', () => {
         const candidateSearches = esClient.search.mock.calls.filter(
           ([request]: any) => request.aggs?.policy_ids
         );
-        // a page with the policy ids, and a last empty one
-        expect(candidateSearches).toHaveLength(2);
+        // the page with the policy ids is not full: it is the last one
+        expect(candidateSearches).toHaveLength(1);
         const [[request]] = candidateSearches;
         expect(request.index).toBe('.fleet-agents');
         expect(request.size).toBe(0);
@@ -987,14 +985,17 @@ describe('VersionSpecificPolicyAssignmentTask', () => {
       });
 
       it('pages through the policy ids of the agents', async () => {
+        // more than a page: the first one is full, the second one is the last
+        const otherPolicyIds = Object.fromEntries(
+          Array.from({ length: 1000 }, (_, i) => [`another-policy-${i}`, ['8.18.0']])
+        );
         const esClient = await mockCandidateAgentPolicies({
           policyIdsWithCandidates: [],
           agentVersionsByPolicyId: {
-            'another-policy': ['8.18.0'],
+            ...otherPolicyIds,
             'another-policy#9.4': ['9.5.0'],
             'policy-2#9.4': ['9.5.0'],
           },
-          pageSize: 2,
         });
 
         await runTask();
@@ -1002,10 +1003,9 @@ describe('VersionSpecificPolicyAssignmentTask', () => {
         const candidateSearches = esClient.search.mock.calls.filter(
           ([request]: any) => request.aggs?.policy_ids
         );
-        // two pages with policy ids, and a last empty one
-        expect(candidateSearches).toHaveLength(3);
+        expect(candidateSearches).toHaveLength(2);
         expect(candidateSearches[1][0].aggs.policy_ids.composite.after).toEqual({
-          policy_id: 'another-policy#9.4',
+          policy_id: 'another-policy-999',
         });
         expect(policyIdsQueried().flat()).toEqual(['policy-2']);
         expect(mockedGetAgentsByKuery.mock.calls[0][2].kuery).toContain(
