@@ -463,11 +463,27 @@ const withoutRejectedMentions = (text: string, rejected: ReadonlySet<string>): s
  * `LIKE "*https://github.com/*"` or `LIKE "*github.co*"` hunts only the rejected root.
  * Blanking rejected terms out of both the eligible IOC and the candidate requires the
  * candidate to include a distinguishing segment of the eligible IOC outside the rejected root.
+ *
+ * `eligible` maps each eligible IOC to its already-scrubbed form, computed once per gate call
+ * rather than per candidate.
  */
+type ScrubbedEligibleIocs = ReadonlyMap<string, string>;
+
+const scrubEligibleIocs = (
+  eligible: Iterable<string>,
+  rejected: ReadonlySet<string>
+): ScrubbedEligibleIocs =>
+  new Map(
+    Array.from(eligible, (ioc) => [
+      ioc,
+      rejected.size > 0 ? withoutRejectedMentions(ioc, rejected) : ioc,
+    ])
+  );
+
 const isSpecificToEligibleIoc = (
   value: string,
   rejected: ReadonlySet<string>,
-  eligible: ReadonlySet<string>
+  eligible: ScrubbedEligibleIocs
 ): boolean => {
   const scrubbedValue = withoutRejectedMentions(value, rejected);
   const hasMeaningfulPart = scrubbedValue
@@ -478,8 +494,8 @@ const isSpecificToEligibleIoc = (
         part.replace(/^[^\p{L}\p{N}_]+|[^\p{L}\p{N}_]+$/gu, '').length >= MIN_GROUNDING_LENGTH
     );
   if (!hasMeaningfulPart) return false;
-  for (const ioc of eligible) {
-    if (ioc.includes(value) && withoutRejectedMentions(ioc, rejected).includes(scrubbedValue)) {
+  for (const [ioc, scrubbedIoc] of eligible) {
+    if (ioc.includes(value) && scrubbedIoc.includes(scrubbedValue)) {
       return true;
     }
   }
@@ -542,7 +558,7 @@ const literalArgsOf = (fn: ESQLFunction): ESQLLiteral[] =>
 const rejectedValueCarriedBy = (
   query: ESQLAstQueryExpression,
   rejected: ReadonlySet<string>,
-  eligible: ReadonlySet<string>
+  eligible: ScrubbedEligibleIocs
 ): string | undefined => {
   const exactLiterals = new Set<ESQLLiteral>();
   const tokenizedLiterals = new Set<ESQLLiteral>();
@@ -734,8 +750,9 @@ export const assertEsqlGroundedInReport = (
       .map(normalize)
       .filter((value) => value.length >= MIN_GROUNDING_LENGTH && !groundingIocs.has(value))
   );
+  const scrubbedEligible = scrubEligibleIocs(groundingIocs, excludedSet);
   const rejected =
-    excludedSet.size > 0 ? rejectedValueCarriedBy(root, excludedSet, groundingIocs) : undefined;
+    excludedSet.size > 0 ? rejectedValueCarriedBy(root, excludedSet, scrubbedEligible) : undefined;
   if (rejected !== undefined) {
     return {
       ok: false,
@@ -762,7 +779,7 @@ export const assertEsqlGroundedInReport = (
       if (groundingIocs.has(value)) {
         return true;
       }
-      if (!standalone && isSpecificToEligibleIoc(value, excludedSet, groundingIocs)) {
+      if (!standalone && isSpecificToEligibleIoc(value, excludedSet, scrubbedEligible)) {
         return true;
       }
       return standalone

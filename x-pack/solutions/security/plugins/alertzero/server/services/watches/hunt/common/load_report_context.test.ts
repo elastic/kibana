@@ -88,7 +88,7 @@ describe('loadReportHuntContext', () => {
       expect(context?.excluded_iocs).toBeUndefined();
     });
 
-    it('drops reference, denied, and deferred IOCs from iocs and reports them on excluded_iocs', async () => {
+    it('drops reference, denied, and deferred IOCs from iocs and reports reference and deferred on excluded_iocs', async () => {
       esClient.search.mockResolvedValue(
         withIocs([
           { type: 'hash', value: 'a'.repeat(64), tier: 'discriminating' },
@@ -109,13 +109,29 @@ describe('loadReportHuntContext', () => {
       });
       expect(context?.iocs).toEqual([{ type: 'hash', value: 'a'.repeat(64) }]);
       expect(context?.excluded_iocs).toEqual({
-        count: 3,
+        count: 2,
         values: [
           { type: 'ip', value: '169.254.169.254' },
-          { type: 'domain', value: 'process.name' },
           { type: 'url', value: 'https://pending.example/' },
         ],
       });
+    });
+
+    it('keeps denied code-shaped tokens off the denylist so Tier 2 may still filter on them', async () => {
+      esClient.search.mockResolvedValue(
+        withIocs([
+          { type: 'hash', value: 'a'.repeat(64), tier: 'discriminating' },
+          { type: 'domain', value: 'install.sh', tier: 'denied' },
+          { type: 'domain', value: 'loader.py', tier: 'denied' },
+        ])
+      );
+      const context = await loadReportHuntContext({
+        esClient,
+        spaceId: 'hunt-a',
+        reportId: 'rpt-1',
+      });
+      expect(context?.iocs).toEqual([{ type: 'hash', value: 'a'.repeat(64) }]);
+      expect(context?.excluded_iocs).toBeUndefined();
     });
 
     it('deduplicates excluded IOCs and skips values also present as eligible', async () => {
@@ -123,7 +139,7 @@ describe('loadReportHuntContext', () => {
         withIocs([
           { type: 'ip', value: '192.0.2.30', tier: 'discriminating' },
           { type: 'ip', value: '192.0.2.30', tier: 'reference' },
-          { type: 'domain', value: 'noise.example', tier: 'denied' },
+          { type: 'domain', value: 'noise.example', tier: 'reference', deferred_unreviewed: true },
           { type: 'domain', value: 'noise.example', tier: 'reference' },
         ])
       );
@@ -145,7 +161,7 @@ describe('loadReportHuntContext', () => {
         withIocs([
           { type: 'ip', value: '192.0.2.30', tier: 'discriminating' },
           { type: 'url', value: longUrl, tier: 'reference' },
-          { type: 'domain', value: 'noise.example', tier: 'denied' },
+          { type: 'domain', value: 'noise.example', tier: 'reference' },
         ])
       );
       const context = await loadReportHuntContext({

@@ -188,7 +188,10 @@ const describeTier1 = (tier1: HuntForThreatResult, excludedIocCount = 0): string
   if (tier1.status === 'no_searchable_terms') {
     lines.push(
       excludedIocCount > 0
-        ? 'Tier 1 had nothing to search: all extracted indicators were excluded by adjudication and the report exposed no searchable techniques.'
+        ? `Tier 1 had nothing to search: no eligible indicators remained (${plural(
+            excludedIocCount,
+            'indicator'
+          )} excluded by adjudication) and the report exposed no searchable techniques.`
         : 'Tier 1 had nothing to search: the report exposed no indicators or techniques that map to a searchable field.'
     );
     return lines;

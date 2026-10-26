@@ -17,12 +17,15 @@ export interface ReportHuntContext {
   techniques: string[];
   text?: string;
   /**
-   * Searchable report IOCs this run will not hunt because adjudication rejected
-   * them (or left them `deferred_unreviewed`). Present only when at least one
-   * such IOC remains after dedupe. `count` is the full deduped ineligible set;
-   * `values` carries every one within the value-length bound, up to the stored
-   * IOC ceiling, since a rejected value missing from the Tier 2 denylist is one
-   * the gate would let a query filter on. The prompt caps its own copy.
+   * Searchable report IOCs this run will not hunt because adjudication left them
+   * `reference` or `deferred_unreviewed`. `denied` values are not here: that tier
+   * means "not an indicator of this kind" (a `.sh` or `.py` token the extractor
+   * saw as a domain), not "not evidence", and Tier 2 may still filter on
+   * `install.sh`. Present only when at least one such IOC remains after dedupe.
+   * `count` is the full deduped set; `values` carries every one within the
+   * value-length bound, up to the stored IOC ceiling, since a rejected value
+   * missing from the Tier 2 denylist is one the gate would let a query filter
+   * on. The prompt caps its own copy.
    */
   excluded_iocs?: { count: number; values: HuntIoc[] };
   /**
@@ -194,7 +197,12 @@ export const loadReportHuntContext = async ({
   // ATT&CK id is a third of the bound, so those stay uncounted.
   const searchableIocs = (source.extracted?.iocs ?? []).filter(isSearchableIoc);
   const eligibleSearchableIocs = searchableIocs.filter(isHuntEligibleIoc);
-  const ineligibleSearchableIocs = searchableIocs.filter((ioc) => !isHuntEligibleIoc(ioc));
+  // `denied` is dropped from the hunt but not denylisted: it is an extraction verdict on the
+  // IOC kind, and the value itself (`install.sh`, `loader.py`) may be the artifact Tier 2
+  // should filter on. Only a model rejection (`reference`) or a pending review is excluded.
+  const ineligibleSearchableIocs = searchableIocs.filter(
+    (ioc) => !isHuntEligibleIoc(ioc) && ioc.tier !== 'denied'
+  );
   const mappableIocs = eligibleSearchableIocs.filter(isWithinIocValueBound);
   const oversizedIocs = eligibleSearchableIocs.length - mappableIocs.length;
   const eligibleKeys = new Set(eligibleSearchableIocs.map((ioc) => `${ioc.type}:${ioc.value}`));

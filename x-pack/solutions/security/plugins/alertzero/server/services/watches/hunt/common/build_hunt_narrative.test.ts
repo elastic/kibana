@@ -284,7 +284,7 @@ describe('buildHuntNarrative', () => {
         ctx
       )
     ).toContain(
-      'Tier 1 had nothing to search: all extracted indicators were excluded by adjudication and the report exposed no searchable techniques.'
+      'Tier 1 had nothing to search: no eligible indicators remained (7 indicators excluded by adjudication) and the report exposed no searchable techniques.'
     );
   });
 
