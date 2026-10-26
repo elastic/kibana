@@ -23,7 +23,9 @@ export const NUDGE_CLAIM_BUDGET_MS = 5_000;
 export const NUDGE_SIGNAL_READY_TIMEOUT_MS = 65_000;
 
 export const POLL_CYCLE_READY_TIMEOUT_MS = 3 * POLL_INTERVAL_MS;
-export const POLL_CYCLE_MAX_AGE_MS = 2_000;
+// Leaves 20s of the interval for the nudge under test, which needs ~7s, so a loaded CI agent
+// reading the cycle clock a few seconds late doesn't have to wait for another interval.
+export const POLL_CYCLE_MAX_AGE_MS = 10_000;
 
 export const NUDGE_TEST_TIMEOUT_MS = 180_000;
 
