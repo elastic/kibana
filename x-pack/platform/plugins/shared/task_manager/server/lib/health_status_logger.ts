@@ -62,7 +62,7 @@ export class HealthStatusLogger implements Logger {
 
   unhealthy(reason: string, esBackpressureActive?: boolean) {
     const now = Date.now();
-    if (esBackpressureActive || (now - this.lastUnhealthyWarnAt < UNHEALTHY_LOG_THROTTLE_MS)) {
+    if (esBackpressureActive || now - this.lastUnhealthyWarnAt < UNHEALTHY_LOG_THROTTLE_MS) {
       this.logger.debug(reason);
       return;
     }
