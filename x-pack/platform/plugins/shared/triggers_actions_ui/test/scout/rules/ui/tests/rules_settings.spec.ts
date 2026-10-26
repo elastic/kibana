@@ -16,6 +16,8 @@ const FLAPPING_TOGGLE_SUBJ = 'rulesSettingsFlappingEnableSwitch';
 const LOOK_BACK_INPUT_SUBJ = 'lookBackWindowRangeInput';
 const STATUS_CHANGE_INPUT_SUBJ = 'statusChangeThresholdRangeInput';
 
+const SAVE_SUCCESS_MESSAGE = 'Rules settings updated successfully.';
+
 const DEFAULT_LOOK_BACK = 10;
 const DEFAULT_STATUS_CHANGE_THRESHOLD = 10;
 
@@ -88,6 +90,10 @@ test.describe('Rules settings page', { tag: tags.stateful.classic }, () => {
       await expect(settingsPage.getByTestId(FLAPPING_OFF_PROMPT_SUBJ)).toBeVisible();
 
       await page.testSubj.click('rulesSettingsPageSaveButton');
+      // Wait for the write to succeed before reopening: reopening refetches the settings.
+      await expect(page.testSubj.locator('euiToastHeader__title')).toContainText(
+        SAVE_SUCCESS_MESSAGE
+      );
       await expect(settingsPage).toBeHidden();
 
       const reopenedPage = await openRulesSettingsPage(page);
