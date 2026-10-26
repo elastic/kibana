@@ -53,7 +53,7 @@ const getVisibleCriteriaDescription = (queryRule: QueryRulesQueryRule): string =
 
     if (queryRule.criteria.length > MAX_VISIBLE_CRITERIA) {
       const moreText = i18n.translate(
-        'xpack.search.queryRulesetDetail.draggableList.dragHandle.moreCriteria',
+        'xpack.queryRules.queryRulesetDetail.draggableList.dragHandle.moreCriteria',
         {
           defaultMessage: 'and {count} more',
           values: { count: queryRule.criteria.length - MAX_VISIBLE_CRITERIA },
@@ -130,7 +130,7 @@ export const QueryRuleListItemContent: React.FC<QueryRuleListItemContentProps> =
                 paddingSize="s"
                 {...dragHandleProps}
                 aria-label={i18n.translate(
-                  'xpack.search.queryRulesetDetail.draggableList.dragHandle.aria.label',
+                  'xpack.queryRules.queryRulesetDetail.draggableList.dragHandle.aria.label',
                   {
                     defaultMessage:
                       'Drag handle for {actionType} rule with ID: {ruleId}. ' +
@@ -182,7 +182,7 @@ export const QueryRuleListItemContent: React.FC<QueryRuleListItemContentProps> =
                         <EuiFlexItem grow={false}>
                           <EuiText size="s">
                             <FormattedMessage
-                              id="xpack.search.queryRulesetDetail.draggableList.queryRulesCriteriaMoreLabel"
+                              id="xpack.queryRules.queryRulesetDetail.draggableList.queryRulesCriteriaMoreLabel"
                               defaultMessage="+{count} more"
                               values={{ count: queryRule.criteria.length - 3 }}
                             />
@@ -203,14 +203,14 @@ export const QueryRuleListItemContent: React.FC<QueryRuleListItemContentProps> =
               <EuiFlexItem grow={false}>
                 <EuiPopover
                   aria-label={i18n.translate(
-                    'xpack.search.queryRulesetDetail.draggableList.actionsPopover.ariaLabel',
+                    'xpack.queryRules.queryRulesetDetail.draggableList.actionsPopover.ariaLabel',
                     { defaultMessage: 'Rule actions' }
                   )}
                   id="queryRuleActionsPopover"
                   button={
                     <EuiToolTip
                       content={i18n.translate(
-                        'xpack.search.queryRulesetDetail.draggableList.actionsButton.tooltip',
+                        'xpack.queryRules.queryRulesetDetail.draggableList.actionsButton.tooltip',
                         {
                           defaultMessage: 'Delete rule',
                         }
@@ -221,7 +221,7 @@ export const QueryRuleListItemContent: React.FC<QueryRuleListItemContentProps> =
                         aria-label={
                           isDraggable
                             ? i18n.translate(
-                                'xpack.search.queryRulesetDetail.draggableList.actionsButton.aria.label.draggable',
+                                'xpack.queryRules.queryRulesetDetail.draggableList.actionsButton.aria.label.draggable',
                                 {
                                   defaultMessage: 'Click to reach actions menu for rule {ruleId}',
                                   values: {
@@ -230,7 +230,7 @@ export const QueryRuleListItemContent: React.FC<QueryRuleListItemContentProps> =
                                 }
                               )
                             : i18n.translate(
-                                'xpack.search.queryRulesetDetail.draggableList.actionsButton.aria.label.searchResult',
+                                'xpack.queryRules.queryRulesetDetail.draggableList.actionsButton.aria.label.searchResult',
                                 {
                                   defaultMessage:
                                     'Click to reach actions menu for {actionType} rule with ID: {ruleId}. ' +
@@ -276,7 +276,7 @@ export const QueryRuleListItemContent: React.FC<QueryRuleListItemContentProps> =
                         }}
                       >
                         <FormattedMessage
-                          id="xpack.search.queryRulesetDetail.draggableList.actions.edit"
+                          id="xpack.queryRules.queryRulesetDetail.draggableList.actions.edit"
                           defaultMessage="Edit rule"
                         />
                       </EuiContextMenuItem>,
@@ -284,7 +284,7 @@ export const QueryRuleListItemContent: React.FC<QueryRuleListItemContentProps> =
                         toolTipContent={
                           rules.length === 1
                             ? i18n.translate(
-                                'xpack.search.queryRulesetDetail.draggableList.actions.deleteTooltip',
+                                'xpack.queryRules.queryRulesetDetail.draggableList.actions.deleteTooltip',
                                 {
                                   defaultMessage: 'The ruleset must contains at least 1 rule.',
                                 }
@@ -307,7 +307,7 @@ export const QueryRuleListItemContent: React.FC<QueryRuleListItemContentProps> =
                         }}
                       >
                         <FormattedMessage
-                          id="xpack.search.queryRulesetDetail.draggableList.actions.delete"
+                          id="xpack.queryRules.queryRulesetDetail.draggableList.actions.delete"
                           defaultMessage="Delete rule"
                         />
                       </EuiContextMenuItem>,

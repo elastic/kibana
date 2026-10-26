@@ -148,6 +148,35 @@ describe('useQueuePolling', () => {
     expect(queryFn.mock.calls.map(([{ pageParam }]) => pageParam ?? 0)).toEqual([0, 10, 0]);
   });
 
+  it('refetches every loaded page of the queries under its all-pages keys', async () => {
+    const queryFn = jest.fn(async ({ pageParam = 0 }: { pageParam?: number }) => ({
+      from: pageParam,
+    }));
+    const { Wrapper, queryClient } = createWrapper();
+
+    const { result } = renderHook(
+      () => {
+        useQueuePolling([], POLLED);
+        return useInfiniteQuery({
+          queryKey: ['queue', 'polled', 'pages'],
+          queryFn,
+          getNextPageParam: (_last, pages) => pages.length * 10,
+        });
+      },
+      { wrapper: Wrapper }
+    );
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    await act(async () => {
+      await result.current.fetchNextPage();
+    });
+    expect(queryFn).toHaveBeenCalledTimes(2);
+
+    await tick();
+    await waitFor(() => expect(queryClient.isFetching()).toBe(0));
+
+    expect(queryFn.mock.calls.map(([{ pageParam }]) => pageParam ?? 0)).toEqual([0, 10, 0, 10]);
+  });
+
   it('does nothing while the tab is hidden', async () => {
     const queryFn = jest.fn().mockResolvedValue('ok');
     const { Wrapper } = createWrapper();

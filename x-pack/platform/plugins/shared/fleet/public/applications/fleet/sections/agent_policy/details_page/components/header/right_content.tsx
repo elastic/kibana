@@ -221,7 +221,8 @@ export const HeaderRightContent: React.FunctionComponent<HeaderRightContentProps
               ...(canEnableAutomaticAgentUpgrades &&
               authz.fleet.allAgentPolicies &&
               authz.fleet.allAgents &&
-              !agentPolicy.is_managed
+              !agentPolicy.is_managed &&
+              !agentPolicy.supports_agentless
                 ? [
                     {
                       label: i18n.translate('xpack.fleet.policyDetails.summary.autoUpgrade', {

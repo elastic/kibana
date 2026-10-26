@@ -22,6 +22,16 @@ export {
   streamsUnitResponseSchema,
   streamsUnitSchema,
   streamsUnitSecretsSchema,
+  MAX_STREAMS_UNIT_STATS_COMPONENTS,
+  streamsUnitStatsComponentRefSchema,
+  streamsUnitStatsDestinationResultSchema,
+  streamsUnitStatsErrorSchema,
+  streamsUnitStatsFilterSchema,
+  streamsUnitStatsMetaSchema,
+  streamsUnitStatsProcessorResultSchema,
+  streamsUnitStatsRequestSchema,
+  streamsUnitStatsResponseSchema,
+  streamsUnitStatsSeriesSchema,
   streamsUnitUiMetadataSchema,
   streamsUnitUpsertRequestSchema,
 } from './src/models/unit';
@@ -228,6 +238,8 @@ export {
   type StreamNameValidationResult,
   MAX_STREAM_NAME_LENGTH,
   INVALID_STREAM_NAME_CHARACTERS,
+  INVALID_STREAM_NAME_PREFIXES,
+  RESERVED_STREAM_NAMES,
 } from './src/helpers/stream_name_validation';
 
 export {

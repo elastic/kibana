@@ -25,14 +25,14 @@ import {
   getKnowledgeIndicatorsLabel,
   getRulesLabel,
   getSignificantEventsLabel,
-  getSourcesLabel,
+  getEntitiesLabel,
   OVERVIEW_ERROR_MESSAGE,
   OVERVIEW_ERROR_TITLE,
   OVERVIEW_RETRY_LABEL,
 } from './translations';
 
 export interface DetectionOverviewCounts {
-  sources: number;
+  entities: number;
   knowledge_indicators: number;
   active_rules: number;
   detections: number;
@@ -68,11 +68,11 @@ export const DetectionOverview = ({
       testSubject: 'nightshiftDetectionOverviewKnowledgeIndicators',
     },
     {
-      icon: 'database',
+      icon: 'cube',
       tone: 'neutral',
-      value: counts?.sources,
-      getLabel: getSourcesLabel,
-      testSubject: 'nightshiftDetectionOverviewSources',
+      value: counts?.entities,
+      getLabel: getEntitiesLabel,
+      testSubject: 'nightshiftDetectionOverviewEntities',
     },
     {
       icon: 'radar',
@@ -98,7 +98,12 @@ export const DetectionOverview = ({
   ];
 
   return (
-    <EuiPanel hasBorder hasShadow={false} paddingSize="m">
+    <EuiPanel
+      hasBorder
+      hasShadow={false}
+      paddingSize="m"
+      data-test-subj="nightshiftDetectionOverview"
+    >
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
         <EuiFlexItem grow={false}>
           <EuiTitle size="xxs">

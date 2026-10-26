@@ -21,6 +21,7 @@ import {
   MAX_PROPOSALS_PAGE_SIZE,
   PROPOSALS_API_VERSION,
   PROPOSALS_INTERNAL_URL,
+  PROPOSAL_REOPEN_URL,
   PROPOSAL_SETTLING_POLL_INTERVAL_MS,
   isProposalSettling,
 } from '@kbn/proposals-common';
@@ -279,6 +280,27 @@ export const useDismissProposal = () => {
 };
 
 /**
+ * Marks a to-do proposal that was marked as applied as not applied. The server re-offers it as a
+ * pending successor before it answers, so the proposals are refetched right away.
+ */
+export const useReopenProposal = () => {
+  const { services } = useKibana();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationKey: mutationKeys.proposals.reopen,
+    mutationFn: ({ id }: { id: string }): Promise<{ proposalId: string }> =>
+      services.http!.post<{ proposalId: string }>(
+        PROPOSAL_REOPEN_URL.replace('{id}', encodeURIComponent(id)),
+        { version: PROPOSALS_API_VERSION }
+      ),
+    onSuccess: async () => {
+      await invalidateProposals(queryClient);
+    },
+  });
+};
+
+/**
  * Tracks a decline that was issued elsewhere — a bulk close of an investigation releases each
  * pending proposal's gate server-side — until its decision lands. Shares the decline
  * `mutationKey`, so `useIsDecliningProposal` reads "Declining" for the row while it settles.
@@ -336,6 +358,12 @@ export const useSettleDeclinedProposal = () => {
 export const useIsApprovingProposal = (id: string | undefined): boolean =>
   useIsMutating({
     mutationKey: mutationKeys.proposals.approve,
+    predicate: (mutation) => id !== undefined && mutation.state.variables?.id === id,
+  }) > 0;
+
+export const useIsReopeningProposal = (id: string | undefined): boolean =>
+  useIsMutating({
+    mutationKey: mutationKeys.proposals.reopen,
     predicate: (mutation) => id !== undefined && mutation.state.variables?.id === id,
   }) > 0;
 

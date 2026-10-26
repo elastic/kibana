@@ -8,9 +8,10 @@
 import type { KibanaRequest } from '@kbn/core/server';
 import { CaseResponseProperties as CaseResponsePropertiesSchema } from '../../../common/bundled-types.gen';
 import type { UpdateCaseStepInput } from '../../../common/workflows/steps/update_case';
-import { CasePatchRequestRt } from '../../../common/types/api';
+import type { CasePatchRequest } from '../../../common/types/api';
+import { CasePatchRequestSchema } from '../../../common/types/api';
 import type { CasesClient } from '../../client';
-import { decodeWithExcessOrThrow } from '../../common/runtime_types';
+import { decodeWithExcessOrThrowZod } from '../../common/runtime_types';
 import { UPDATE_CASE_FAILED_MESSAGE } from './translations';
 import {
   createCasesStepHandler,
@@ -52,11 +53,11 @@ export const prepareCasePatch = async (
 ) => {
   const resolvedVersion = await resolveCaseVersion(client, caseId, version);
 
-  return decodeWithExcessOrThrow(CasePatchRequestRt)({
+  return decodeWithExcessOrThrowZod(CasePatchRequestSchema)({
     id: caseId,
     version: resolvedVersion,
     ...normalizeCaseStepUpdatesForBulkPatch(updates),
-  });
+  }) as CasePatchRequest;
 };
 
 export const updateSingleCase = async (

@@ -25,9 +25,12 @@ import type { AlertsTableSortCombinations } from './types';
 
 const columns = [
   {
-    displayAsText: i18n.translate('xpack.triggersActionsUI.alertsTable.statusColumnDescription', {
-      defaultMessage: 'Alert Status',
-    }),
+    displayAsText: i18n.translate(
+      'xpack.responseOpsAlertsTable.alertsTable.statusColumnDescription',
+      {
+        defaultMessage: 'Alert Status',
+      }
+    ),
     id: ALERT_STATUS,
     initialWidth: 120,
   },
@@ -39,7 +42,7 @@ const columns = [
   },
   {
     displayAsText: i18n.translate(
-      'xpack.triggersActionsUI.alertsTable.lastUpdatedColumnDescription',
+      'xpack.responseOpsAlertsTable.alertsTable.lastUpdatedColumnDescription',
       {
         defaultMessage: 'Last updated',
       }
@@ -49,16 +52,19 @@ const columns = [
     schema: 'datetime',
   },
   {
-    displayAsText: i18n.translate('xpack.triggersActionsUI.alertsTable.startedColumnDescription', {
-      defaultMessage: 'Started',
-    }),
+    displayAsText: i18n.translate(
+      'xpack.responseOpsAlertsTable.alertsTable.startedColumnDescription',
+      {
+        defaultMessage: 'Started',
+      }
+    ),
     id: ALERT_START,
     initialWidth: 200,
     schema: 'datetime',
   },
   {
     displayAsText: i18n.translate(
-      'xpack.triggersActionsUI.alertsTable.ruleCategoryColumnDescription',
+      'xpack.responseOpsAlertsTable.alertsTable.ruleCategoryColumnDescription',
       {
         defaultMessage: 'Rule category',
       }
@@ -67,22 +73,28 @@ const columns = [
     initialWidth: 160,
   },
   {
-    displayAsText: i18n.translate('xpack.triggersActionsUI.alertsTable.ruleColumnDescription', {
-      defaultMessage: 'Rule',
-    }),
+    displayAsText: i18n.translate(
+      'xpack.responseOpsAlertsTable.alertsTable.ruleColumnDescription',
+      {
+        defaultMessage: 'Rule',
+      }
+    ),
     id: ALERT_RULE_NAME,
     initialWidth: 230,
   },
   {
-    displayAsText: i18n.translate('xpack.triggersActionsUI.alertsTable.ruleTagsColumnDescription', {
-      defaultMessage: 'Rule tags',
-    }),
+    displayAsText: i18n.translate(
+      'xpack.responseOpsAlertsTable.alertsTable.ruleTagsColumnDescription',
+      {
+        defaultMessage: 'Rule tags',
+      }
+    ),
     id: ALERT_RULE_TAGS,
     initialWidth: 120,
   },
   {
     displayAsText: i18n.translate(
-      'xpack.triggersActionsUI.alertsTable.evaluationValuesColumnDescription',
+      'xpack.responseOpsAlertsTable.alertsTable.evaluationValuesColumnDescription',
       {
         defaultMessage: 'Evaluation values',
       }
@@ -92,7 +104,7 @@ const columns = [
   },
   {
     displayAsText: i18n.translate(
-      'xpack.triggersActionsUI.alertsTable.evaluationThresholdColumnDescription',
+      'xpack.responseOpsAlertsTable.alertsTable.evaluationThresholdColumnDescription',
       {
         defaultMessage: 'Evaluation threshold',
       }
@@ -101,16 +113,19 @@ const columns = [
     initialWidth: 120,
   },
   {
-    displayAsText: i18n.translate('xpack.triggersActionsUI.alertsTable.reasonColumnDescription', {
-      defaultMessage: 'Reason',
-    }),
+    displayAsText: i18n.translate(
+      'xpack.responseOpsAlertsTable.alertsTable.reasonColumnDescription',
+      {
+        defaultMessage: 'Reason',
+      }
+    ),
     id: ALERT_REASON,
     linkField: '*',
     initialWidth: 260,
   },
   {
     displayAsText: i18n.translate(
-      'xpack.triggersActionsUI.alertsTable.workflowTagsColumnDescription',
+      'xpack.responseOpsAlertsTable.alertsTable.workflowTagsColumnDescription',
       {
         defaultMessage: 'Workflow tags',
       }
@@ -120,7 +135,7 @@ const columns = [
   },
   {
     displayAsText: i18n.translate(
-      'xpack.triggersActionsUI.alertsTable.maintenanceWindowsColumnDescription',
+      'xpack.responseOpsAlertsTable.alertsTable.maintenanceWindowsColumnDescription',
       {
         defaultMessage: 'Maintenance windows',
       }

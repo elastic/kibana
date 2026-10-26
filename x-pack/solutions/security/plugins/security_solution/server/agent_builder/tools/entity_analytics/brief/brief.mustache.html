@@ -1,0 +1,66 @@
+<style>{{{css}}}</style>
+<div class="brief">
+  <header class="header">
+    <p class="eyebrow">Entity Analytics AI brief</p>
+    <h1>{{title}}</h1>
+    <p class="meta">{{meta}}. Numbers are the page's own.</p>
+    {{#notes}}<p class="meta">{{.}}</p>{{/notes}}
+  </header>
+  {{#summary}}
+  <section class="section">
+    <h2>What needs attention</h2>
+    <p class="prose">{{summary}}</p>
+  </section>
+  {{/summary}}
+  {{#hasCounts}}
+  <section class="section">
+    <h2>This period at a glance <span class="meta">vs previous {{periodLabel}}</span></h2>
+    <div class="counts">
+      {{#counts}}
+      <div class="count" data-tile="{{tileId}}">
+        <div class="count-label">{{title}}</div>
+        <div class="count-value">{{value}}</div>
+        <div class="count-change {{changeClass}}">{{change}}</div>
+      </div>
+      {{/counts}}
+    </div>
+  </section>
+  {{/hasCounts}}
+  {{#recommendation}}
+  <section class="callout">
+    <h2>Recommended next step</h2>
+    <p class="prose">{{recommendation}}</p>
+  </section>
+  {{/recommendation}}
+  {{#hasPrioritiesSection}}
+  <section class="section">
+    <h2>Priorities</h2>
+    {{^priorities}}<p class="meta">{{noPrioritiesLine}}</p>{{/priorities}}
+    {{#hasPriorities}}
+    <ol class="priorities">
+      {{#priorities}}
+      <li class="priority">
+        <span class="rank">{{rank}}</span>
+        <div class="head">
+        <div class="who">
+          <div class="name">{{name}}</div>
+          <div class="meta">{{meta}}</div>
+        </div>
+        <div class="pills">
+          {{#risk}}<span class="pill {{levelClass}}">Risk {{score}} {{level}}{{#isGroup}} <svg viewBox="0 0 16 16" width="12" height="12" role="img" aria-label="resolution group"><path fill="currentColor" fill-rule="evenodd" clip-rule="evenodd" d="M11.984 9.63a2 2 0 1 1-.707.707L8.5 7.56v3.857a2 2 0 1 1-1 0V7.56l-2.777 2.777a2 2 0 1 1-.707-.707L7.5 6.147V2.56L5.353 4.707 4.646 4 8 .646 11.353 4l-.707.707L8.5 2.56v3.586l3.484 3.485Zm1.016.724a1 1 0 1 0 0 2 1 1 0 0 0 0-2Zm-6 3a1 1 0 1 1 2 0 1 1 0 0 1-2 0Zm-5-2a1 1 0 1 1 2 0 1 1 0 0 1-2 0Z"/></svg>{{/isGroup}}</span>{{/risk}}
+          {{#criticality}}<span class="pill"><span class="dot" data-level="{{key}}"></span>{{text}}</span>{{/criticality}}
+          {{#watchlists}}<span class="pill watchlist" title="Watchlist: {{.}}">{{.}}</span>{{/watchlists}}
+          {{#moreWatchlists}}<span class="pill">+{{.}} more</span>{{/moreWatchlists}}
+        </div>
+        </div>
+        <p class="prose">{{assessment}}</p>
+        <p class="prose why">{{whyFirst}}</p>
+        <p class="prose"><span class="label">Next</span>{{nextStep}}</p>
+        {{#riskHistory}}{{> riskHistoryChart}}{{/riskHistory}}
+      </li>
+      {{/priorities}}
+    </ol>
+    {{/hasPriorities}}
+  </section>
+  {{/hasPrioritiesSection}}
+</div>

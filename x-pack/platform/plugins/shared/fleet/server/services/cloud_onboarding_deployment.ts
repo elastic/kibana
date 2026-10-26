@@ -98,9 +98,18 @@ class CloudOnboardingDeploymentService {
       CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE,
       id
     );
+    // A null description clears it. The saved object schema has no null for it, so the key is
+    // removed rather than stored.
+    const { description, ...rest } = update;
+    const attributes: CloudOnboardingDeploymentSOAttributes = {
+      ...existing.attributes,
+      ...rest,
+      ...(description ? { description } : {}),
+    };
+    if (description === null || description === '') delete attributes.description;
     await soClient.create<CloudOnboardingDeploymentSOAttributes>(
       CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE,
-      { ...existing.attributes, ...update },
+      attributes,
       { id, overwrite: true, references: existing.references }
     );
 

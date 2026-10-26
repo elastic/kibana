@@ -17,6 +17,7 @@ export const dockerContainerName = (
     : `scout-synthetics-agent-e2e-${kind}-${index}-${runId}`;
 
 const DOCKER_TIMEOUT_MS = 15 * 60 * 1000;
+const MANIFEST_INSPECT_TIMEOUT_MS = 60 * 1000;
 const ERROR_TAIL_CHARS = 4000;
 const SECRET_ENV_RE = /(FLEET_SERVER_SERVICE_TOKEN|FLEET_ENROLLMENT_TOKEN)=[^\s]+/g;
 
@@ -40,6 +41,14 @@ const runDocker = (args: string[]): string => {
 
 export const pullImage = (image: string): void => {
   runDocker(['pull', image]);
+};
+
+export const isImageAvailableInRegistry = (image: string): boolean => {
+  const result = spawnSync('docker', ['manifest', 'inspect', image], {
+    encoding: 'utf8',
+    timeout: MANIFEST_INSPECT_TIMEOUT_MS,
+  });
+  return result.status === 0;
 };
 
 export const removeContainer = (name: string): void => {

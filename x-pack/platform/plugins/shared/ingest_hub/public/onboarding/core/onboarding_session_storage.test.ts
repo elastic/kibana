@@ -10,6 +10,8 @@ import {
   getOnboardingSessionKey,
   getOnboardingSessionKeys,
   clearOnboardingSession,
+  discardMarkedSessions,
+  discardSessionOnUnmount,
 } from './onboarding_session_storage';
 
 describe('getOnboardingSessionKey', () => {
@@ -85,6 +87,28 @@ describe('clearOnboardingSession', () => {
 
     expect(storage['unrelated.key']).toBe('keep-me');
     expect(storage['onboarding.aws.servicesStep']).toBeUndefined();
+  });
+
+  it('keeps a session marked for discard until the marked sessions are discarded', () => {
+    storage['onboarding.aws.servicesStep'] = 'value';
+    storage['onboarding.azure.servicesStep'] = 'other';
+
+    discardSessionOnUnmount('aws');
+    expect(storage['onboarding.aws.servicesStep']).toBe('value');
+
+    discardMarkedSessions();
+    expect(storage['onboarding.aws.servicesStep']).toBeUndefined();
+    expect(storage['onboarding.azure.servicesStep']).toBe('other');
+  });
+
+  it('only discards a marked session once', () => {
+    discardSessionOnUnmount('aws');
+    discardMarkedSessions();
+
+    storage['onboarding.aws.servicesStep'] = 'new-run';
+    discardMarkedSessions();
+
+    expect(storage['onboarding.aws.servicesStep']).toBe('new-run');
   });
 
   it('does not throw when sessionStorage access fails', () => {

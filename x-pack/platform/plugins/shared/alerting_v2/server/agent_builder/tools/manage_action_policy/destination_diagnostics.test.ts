@@ -851,7 +851,7 @@ steps:
   // Workflow validation service (variable refs)
   // -------------------------------------------------------------------------
   describe('validateWorkflowRefs', () => {
-    it('surfaces error-severity diagnostics from the validation service as warnings', async () => {
+    it('throws on error-severity diagnostics from the validation service in blocking mode', async () => {
       const validateWorkflow = jest.fn().mockResolvedValue({
         valid: false,
         diagnostics: [
@@ -864,7 +864,11 @@ steps:
           },
         ],
       });
-      const validator = createValidator({ validateWorkflow, request: mockRequest });
+      const validator = createValidator({
+        blockOnStructuralErrors: true,
+        validateWorkflow,
+        request: mockRequest,
+      });
 
       await validator.validateWorkflowRefs('wf-1', YAML_MANUAL_TRIGGER_WITH_PAYLOAD_REF);
 
@@ -873,6 +877,32 @@ steps:
         'default',
         mockRequest
       );
+      expect(() => validator.finalize()).toThrow(
+        /\[1\] \[error\] \[invalidVariablePath\] Unknown path "episodez" \(at steps\.0\.with\.message\)/
+      );
+    });
+
+    it('records error-severity diagnostics from the validation service as warnings when blockOnStructuralErrors is false', async () => {
+      const validateWorkflow = jest.fn().mockResolvedValue({
+        valid: false,
+        diagnostics: [
+          {
+            severity: 'error',
+            ruleId: 'invalidVariablePath',
+            message: 'Unknown path "episodez"',
+            source: 'variables',
+            path: ['steps', 0, 'with', 'message'],
+          },
+        ],
+      });
+      const validator = createValidator({
+        blockOnStructuralErrors: false,
+        validateWorkflow,
+        request: mockRequest,
+      });
+
+      await validator.validateWorkflowRefs('wf-1', YAML_MANUAL_TRIGGER_WITH_PAYLOAD_REF);
+
       const { diagnostics } = validator.finalize();
       expect(diagnostics).toEqual([
         expect.objectContaining({
@@ -1077,7 +1107,7 @@ steps:
         ],
       });
       const validator = createValidator({
-        blockOnStructuralErrors: true,
+        blockOnStructuralErrors: false,
         validateWorkflow,
         request: mockRequest,
       });
@@ -1178,7 +1208,7 @@ steps:
       expect(caught).toBeInstanceOf(ActionPolicyOperationValidationError);
       const msg = caught!.message;
 
-      expect(msg).toMatch(/^Destination validation failed \(8 errors, 4 warnings\):/);
+      expect(msg).toMatch(/^Destination validation failed \(12 errors\):/);
 
       // destination-resolution errors
       expect(msg).toContain(
@@ -1199,16 +1229,16 @@ steps:
         '[5] [error] Workflow "wf-alert-only" does not have a "manual" trigger'
       );
       expect(msg).toContain('[6] [error] Workflow "wf-no-ref" does not declare `inputs.payload`');
-      expect(msg).toContain('[7] [warning] [invalidVariablePath]');
+      expect(msg).toContain('[7] [error] [invalidVariablePath]');
       expect(msg).toContain(
         '[8] [error] Workflow "wf-wrong-ref" does not declare `inputs.payload`'
       );
-      expect(msg).toContain('[9] [warning] [invalidVariablePath]');
+      expect(msg).toContain('[9] [error] [invalidVariablePath]');
       expect(msg).toContain(
         '[10] [error] Workflow "wf-plain-payload" does not declare `inputs.payload`'
       );
-      expect(msg).toContain('[11] [warning] [invalidVariablePath]');
-      expect(msg).toContain('[12] [warning] [invalidVariablePath]');
+      expect(msg).toContain('[11] [error] [invalidVariablePath]');
+      expect(msg).toContain('[12] [error] [invalidVariablePath]');
       expect(msg).toContain('episodez');
       expect(msg).toContain(`Referenced content: ${WORKFLOW_DISPATCH_PAYLOAD_SKILL_REF}`);
     });

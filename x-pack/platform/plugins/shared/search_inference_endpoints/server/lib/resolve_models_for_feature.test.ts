@@ -163,6 +163,33 @@ describe('resolveModelsForFeature', () => {
     });
   });
 
+  it('returns the default connector without declared parameters when defaultConnectorOnly is set', async () => {
+    const defaultConnector = inferenceConnector('claude-1');
+    getConnectorById.mockResolvedValue(defaultConnector);
+
+    const result = await resolve({ defaultConnectorId: 'claude-1', defaultConnectorOnly: true });
+
+    expect(getForFeature).not.toHaveBeenCalled();
+    expect(result.connectors).toEqual([defaultConnector]);
+    expect(result.connectors[0]).not.toHaveProperty('parameters');
+  });
+
+  it('attaches the declared parameters to the default connector when defaultConnectorOnly is not set', async () => {
+    const parameters = { reasoning: { effort: 'medium' as const } };
+    const defaultConnector = inferenceConnector('claude-1');
+    getForFeature.mockResolvedValue({
+      endpoints: [{ ...defaultConnector, parameters }],
+      warnings: [],
+      soEntryFound: false,
+    });
+    getConnectorList.mockResolvedValue([defaultConnector]);
+    getConnectorById.mockResolvedValue(defaultConnector);
+
+    const result = await resolve({ defaultConnectorId: 'claude-1', defaultConnectorOnly: false });
+
+    expect(result.connectors).toEqual([{ ...defaultConnector, parameters }]);
+  });
+
   it('returns an empty list when defaultConnectorOnly is set but no default is configured', async () => {
     const result = await resolve({ defaultConnectorOnly: true });
 
@@ -238,6 +265,43 @@ describe('resolveModelsForFeature', () => {
       warnings: [],
       soEntryFound: false,
     });
+  });
+
+  it('attaches the recommended parameters to the prepended default connector', async () => {
+    const parameters = { reasoning: { effort: 'low' as const } };
+    const recommended = inferenceConnector('rec');
+    const defaultConnector = inferenceConnector('default');
+    getForFeature.mockResolvedValue({
+      endpoints: [recommended, { ...defaultConnector, parameters }],
+      warnings: [],
+      soEntryFound: false,
+    });
+    getConnectorList.mockResolvedValue([recommended, defaultConnector]);
+    getConnectorById.mockResolvedValue(defaultConnector);
+
+    const result = await resolve({ defaultConnectorId: 'default' });
+
+    expect(result.connectors).toEqual([
+      { ...defaultConnector, parameters },
+      { ...recommended, isRecommended: true },
+    ]);
+  });
+
+  it('prepends the default connector without parameters when it is not recommended', async () => {
+    const recommended = { ...inferenceConnector('rec'), parameters: { temperature: 0.2 } };
+    const defaultConnector = inferenceConnector('default');
+    getForFeature.mockResolvedValue({
+      endpoints: [recommended],
+      warnings: [],
+      soEntryFound: false,
+    });
+    getConnectorList.mockResolvedValue([inferenceConnector('rec'), defaultConnector]);
+    getConnectorById.mockResolvedValue(defaultConnector);
+
+    const result = await resolve({ defaultConnectorId: 'default' });
+
+    expect(result.connectors).toEqual([defaultConnector, { ...recommended, isRecommended: true }]);
+    expect(result.connectors[0]).not.toHaveProperty('parameters');
   });
 
   it('ignores the default connector when soEntryFound is true', async () => {

@@ -101,7 +101,7 @@ describe('VegaVisualizations', () => {
           theme
         );
         await vegaParser.parseAsync();
-        await vegaVis.render(vegaParser);
+        await vegaVis.render(vegaParser.toRenderDescriptor());
         expect(domNode.innerHTML).toMatchSnapshot();
 
         mockedWidthValue = 256;
@@ -134,7 +134,7 @@ describe('VegaVisualizations', () => {
           theme
         );
         await vegaParser.parseAsync();
-        await vegaVis.render(vegaParser);
+        await vegaVis.render(vegaParser.toRenderDescriptor());
         expect(domNode.innerHTML).toMatchSnapshot();
       } finally {
         vegaVis.destroy();

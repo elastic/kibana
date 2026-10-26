@@ -11,13 +11,13 @@ import {
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutFooter,
-  EuiFlyoutHeader,
-  EuiText,
-  EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DeleteDestinationConfirmation } from './delete_destination_confirmation';
+import { DestinationIndicesList } from './destination_indices_list';
+import type { ResolvedIndicesStatus } from './state_machines/destinations_state_machine';
+import type { DestinationViewModel } from './types';
 
 const DestinationDeleteFooter = ({
   destinationName,
@@ -58,14 +58,22 @@ const DestinationDeleteFooter = ({
 };
 
 export const UnitDestinationFlyout = ({
-  destinationName,
+  destination,
+  indices,
+  indicesStatus,
+  indicesError,
   onClose,
   onDelete,
+  onIndexClick,
   isDeleteDisabled = false,
 }: {
-  destinationName: string;
+  destination: DestinationViewModel;
+  indices: string[];
+  indicesStatus: ResolvedIndicesStatus;
+  indicesError?: string;
   onClose: () => void;
   onDelete: () => void;
+  onIndexClick: (indexName: string) => void;
   isDeleteDisabled?: boolean;
 }) => {
   const flyoutTitleId = useGeneratedHtmlId({ prefix: 'streamsUnitDestinationFlyoutTitle' });
@@ -78,24 +86,20 @@ export const UnitDestinationFlyout = ({
       size="m"
       data-test-subj="streamsUnitDestinationFlyout"
     >
-      <EuiFlyoutHeader hasBorder>
-        <EuiTitle size="s">
-          <h2 id={flyoutTitleId}>{destinationName}</h2>
-        </EuiTitle>
-      </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        <EuiText data-test-subj="streamsUnitDestinationFlyoutPlaceholder">
-          <p>
-            <FormattedMessage
-              id="xpack.streams.destinations.flyout.provisioningPlaceholderDescription"
-              defaultMessage="Placeholder until destination resources can be provisioned locally"
-            />
-          </p>
-        </EuiText>
+        <DestinationIndicesList
+          destination={destination}
+          indices={indices}
+          status={indicesStatus}
+          error={indicesError}
+          showHeader={true}
+          titleId={flyoutTitleId}
+          onIndexClick={onIndexClick}
+        />
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <DestinationDeleteFooter
-          destinationName={destinationName}
+          destinationName={destination.name}
           isDisabled={isDeleteDisabled}
           onDelete={onDelete}
         />

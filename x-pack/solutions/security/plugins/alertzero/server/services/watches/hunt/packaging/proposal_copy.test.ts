@@ -18,6 +18,7 @@ const host: CurrentRunHost = {
   enrolled: true,
   agentId: 'agent-1',
   capabilities: [],
+  capabilitiesSource: 'reported',
 };
 const hostSubject: Subject = { kind: 'host', value: host.name, reachable: true, host };
 const processSubject = (processSelector: ProcessSelector): Subject => ({

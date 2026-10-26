@@ -31,7 +31,7 @@ export const getColumnTypeConflictQuickFixes = (message: QuickFixMessage): Quick
   const { columnName, types } = data;
 
   return getTypeConversions(types).map(({ functionName, targetType }) => ({
-    title: i18n.translate('kbn-esql-language.esql.quickFix.convertColumnTypeConflict', {
+    title: i18n.translate('esqlLanguage.esql.quickFix.convertColumnTypeConflict', {
       defaultMessage: 'Convert {columnName} to {type}',
       values: {
         columnName,

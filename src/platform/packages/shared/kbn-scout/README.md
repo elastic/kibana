@@ -593,6 +593,8 @@ Scout uses Playwright's [projects concept](https://playwright.dev/docs/test-proj
 }
 ```
 
+Custom roles (`custom_role_worker_<n>`) can't be assigned to Cloud users on ECH. If the deployment has a SAML realm that trusts Kibana's mock IdP (QAF adds one named `qaf` with `--add-custom-saml-realm`), set `"customSamlProviderName": "qaf"` and custom roles log in through it. Predefined roles still use the users from `cloudUsersFilePath`.
+
 - **`mki`**: Tests are executed against a Serverless project created in Elastic Cloud (MKI). Configuration is **manually** defined in `KIBANA_REPO_ROOT/.scout/servers/cloud_mki.json`.
 
 ```json
@@ -641,6 +643,7 @@ For `security` and `oblt` MKI projects, `productTier` is **required** (one of `c
 - `projectType` (serverless only) must be one of `es | oblt | security | vectordb`.
 - Stateful configs (`serverless: false`) must not set `projectType`, `productTier`, `organizationId`, or `linkedProject`.
 - `license` is optional and defaults to `"trial"`.
+- `customSamlProviderName` is only allowed in `cloud_ech.json`.
 - You don't need to set `uiam` or `http2` — Scout manages them; the schema rejects inconsistent values.
 
 #### Starting Servers Only

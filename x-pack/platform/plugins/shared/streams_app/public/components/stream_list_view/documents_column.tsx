@@ -26,6 +26,7 @@ import {
 } from '@elastic/charts';
 import { useElasticChartsTheme } from '@kbn/charts-theme';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import useAsync from 'react-use/lib/useAsync';
 import type { UnparsedEsqlResponse } from '@kbn/traced-es-client';
 import { esqlResultToTimeseries } from '../../util/esql_result_to_timeseries';
@@ -40,6 +41,7 @@ export function DocumentsColumn({
   retainHistogramQueryFetch,
   timeState,
   numDataPoints,
+  layout = 'horizontal',
 }: {
   indexPattern: string;
   histogramQueryFetch: Promise<UnparsedEsqlResponse>;
@@ -47,6 +49,8 @@ export function DocumentsColumn({
   retainHistogramQueryFetch?: (histogramFetch: Promise<UnparsedEsqlResponse>) => () => void;
   timeState: ReturnType<typeof useTimefilter>['timeState'];
   numDataPoints: number;
+  /** `stacked` puts the sparkline above the count (destinations indices list). */
+  layout?: 'horizontal' | 'stacked';
 }) {
   const chartBaseTheme = useElasticChartsTheme();
   const { euiTheme } = useEuiTheme();
@@ -105,12 +109,85 @@ export function DocumentsColumn({
         values: { indexPattern },
       });
 
+  const isStacked = layout === 'stacked';
+  const stackedSparklineWidth = `calc(${euiTheme.size.xxl} + ${euiTheme.size.xl})`;
+  const count = (
+    <EuiFlexItem
+      grow={isStacked ? false : 2}
+      aria-hidden="true"
+      className={css`
+        text-align: ${isStacked ? 'center' : 'right'};
+        font-family: 'Roboto mono', sans-serif;
+      `}
+      data-test-subj={`streamsDocCount-${indexPattern}`}
+    >
+      {hasData ? (
+        isStacked ? (
+          <FormattedMessage
+            id="xpack.streams.documentsColumn.stackedCountLabel"
+            defaultMessage="{docCount} docs"
+            values={{ docCount: <EuiI18nNumber value={docCount} /> }}
+          />
+        ) : (
+          <EuiI18nNumber value={docCount} />
+        )
+      ) : (
+        noDocCountData
+      )}
+    </EuiFlexItem>
+  );
+  const sparkline = (
+    <EuiFlexItem
+      grow={isStacked ? false : 3}
+      aria-hidden="true"
+      className={css`
+        border-bottom: ${hasData ? '1px solid' : 'none'} ${euiTheme.colors.lightShade};
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        inline-size: ${isStacked ? stackedSparklineWidth : 'auto'};
+      `}
+    >
+      {hasData ? (
+        <Chart size={{ width: '100%', height: euiTheme.size.l }}>
+          <Settings
+            locale={i18n.getLocale()}
+            baseTheme={chartBaseTheme}
+            theme={{ background: { color: 'transparent' } }}
+            xDomain={{ min: timeState.start, max: timeState.end, minInterval }}
+            noResults={<div />}
+          />
+          <Tooltip
+            stickTo={TooltipStickTo.Middle}
+            headerFormatter={({ value }) => xFormatter(value)}
+          />
+          {allTimeseries.map((serie) => (
+            <BarSeries
+              key={serie.id}
+              id={serie.id}
+              xScaleType={ScaleType.Time}
+              yScaleType={ScaleType.Linear}
+              xAccessor="x"
+              yAccessors={['doc_count']}
+              data={serie.data}
+              enableHistogramMode
+            />
+          ))}
+        </Chart>
+      ) : (
+        noHistogramData
+      )}
+    </EuiFlexItem>
+  );
+
   return (
     <EuiFlexGroup
       alignItems="center"
-      gutterSize="m"
+      direction={isStacked ? 'column' : 'row'}
+      gutterSize={isStacked ? 'xs' : 'm'}
       className={css`
-        height: ${euiTheme.size.xl};
+        height: ${isStacked ? 'auto' : euiTheme.size.xl};
+        min-block-size: ${euiTheme.size.xl};
         white-space: nowrap;
       `}
       role="group"
@@ -118,59 +195,15 @@ export function DocumentsColumn({
     >
       {histogramQueryResult.loading ? (
         <LoadingPlaceholder />
+      ) : isStacked ? (
+        <>
+          {sparkline}
+          {count}
+        </>
       ) : (
         <>
-          <EuiFlexItem
-            grow={2}
-            aria-hidden="true"
-            className={css`
-              text-align: right;
-              font-family: 'Roboto mono', sans-serif;
-            `}
-            data-test-subj={`streamsDocCount-${indexPattern}`}
-          >
-            {hasData ? <EuiI18nNumber value={docCount} /> : noDocCountData}
-          </EuiFlexItem>
-          <EuiFlexItem
-            grow={3}
-            aria-hidden="true"
-            className={css`
-              border-bottom: ${hasData ? '1px solid' : 'none'} ${euiTheme.colors.lightShade};
-              display: flex;
-              justify-content: center;
-              align-items: center;
-            `}
-          >
-            {hasData ? (
-              <Chart size={{ width: '100%', height: euiTheme.size.l }}>
-                <Settings
-                  locale={i18n.getLocale()}
-                  baseTheme={chartBaseTheme}
-                  theme={{ background: { color: 'transparent' } }}
-                  xDomain={{ min: timeState.start, max: timeState.end, minInterval }}
-                  noResults={<div />}
-                />
-                <Tooltip
-                  stickTo={TooltipStickTo.Middle}
-                  headerFormatter={({ value }) => xFormatter(value)}
-                />
-                {allTimeseries.map((serie) => (
-                  <BarSeries
-                    key={serie.id}
-                    id={serie.id}
-                    xScaleType={ScaleType.Time}
-                    yScaleType={ScaleType.Linear}
-                    xAccessor="x"
-                    yAccessors={['doc_count']}
-                    data={serie.data}
-                    enableHistogramMode
-                  />
-                ))}
-              </Chart>
-            ) : (
-              noHistogramData
-            )}
-          </EuiFlexItem>
+          {count}
+          {sparkline}
         </>
       )}
     </EuiFlexGroup>

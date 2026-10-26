@@ -111,8 +111,12 @@ const dedupContextDataset: EvaluationDataset<DedupContextExample> = {
           id: 'checkout-service',
           title: 'Checkout API',
           description: 'Checkout API service handling checkout requests',
+          type: 'entity',
+          subtype: 'service',
+          properties: { name: 'checkout-api' },
           // Feature confidence is 0-100; the hit is handed to the model verbatim.
           confidence: 99,
+          sources: ['checkout-logs'],
         },
       },
       output: {

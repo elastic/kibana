@@ -345,6 +345,7 @@ describe('buildHistoricThreatReportDoc', () => {
     expect(doc.content.title).toEqual(scenario.title);
     expect(doc.content.body_text.startsWith(scenario.body)).toBe(true);
     expect(doc.source.name).toEqual(scenario.name);
+    expect(doc.content.published_at).toEqual(doc['@timestamp']);
   });
 
   it('introduces emerging source names only on the newest historic slots', () => {

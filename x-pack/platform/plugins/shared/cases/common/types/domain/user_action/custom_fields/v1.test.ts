@@ -6,10 +6,10 @@
  */
 
 import { UserActionTypes } from '../action/v1';
-import { CustomFieldsUserActionPayloadRt, CustomFieldsUserActionRt } from './v1';
+import { CustomFieldsUserActionPayloadSchema, CustomFieldsUserActionSchema } from './v1';
 
 describe('Custom field', () => {
-  describe('CustomFieldsUserActionPayloadRt', () => {
+  describe('CustomFieldsUserActionPayloadSchema', () => {
     const defaultRequest = {
       customFields: [
         {
@@ -21,25 +21,22 @@ describe('Custom field', () => {
     };
 
     it('has expected attributes in request', () => {
-      const query = CustomFieldsUserActionPayloadRt.decode(defaultRequest);
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
+      const result = CustomFieldsUserActionPayloadSchema.safeParse(defaultRequest);
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
     });
 
-    it('removes foo:bar attributes from request', () => {
-      const query = CustomFieldsUserActionPayloadRt.decode({ ...defaultRequest, foo: 'bar' });
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
+    it('strips unknown fields', () => {
+      const result = CustomFieldsUserActionPayloadSchema.safeParse({
+        ...defaultRequest,
+        foo: 'bar',
       });
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
     });
   });
 
-  describe('CustomFieldsUserActionRt', () => {
+  describe('CustomFieldsUserActionSchema', () => {
     const defaultRequest = {
       type: UserActionTypes.customFields,
       payload: {
@@ -54,37 +51,29 @@ describe('Custom field', () => {
     };
 
     it('has expected attributes in request', () => {
-      const query = CustomFieldsUserActionRt.decode(defaultRequest);
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
+      const result = CustomFieldsUserActionSchema.safeParse(defaultRequest);
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
     });
 
-    it('removes foo:bar attributes from request', () => {
-      const query = CustomFieldsUserActionRt.decode({ ...defaultRequest, foo: 'bar' });
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
+    it('strips unknown fields', () => {
+      const result = CustomFieldsUserActionSchema.safeParse({ ...defaultRequest, foo: 'bar' });
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
     });
 
-    it('removes foo:bar attributes from payload', () => {
-      const query = CustomFieldsUserActionRt.decode({
+    it('strips unknown fields from payload', () => {
+      const result = CustomFieldsUserActionSchema.safeParse({
         ...defaultRequest,
         payload: { ...defaultRequest.payload, foo: 'bar' },
       });
 
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
     });
 
-    it('removes foo:bar attributes from the field', () => {
-      const query = CustomFieldsUserActionRt.decode({
+    it('strips unknown fields from the field', () => {
+      const result = CustomFieldsUserActionSchema.safeParse({
         ...defaultRequest,
         payload: {
           ...defaultRequest.payload,
@@ -92,10 +81,8 @@ describe('Custom field', () => {
         },
       });
 
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
     });
   });
 });

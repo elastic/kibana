@@ -15,6 +15,8 @@ import { INSTALL_STATES } from '../../../../../../common/types';
 
 export async function stepInstallTransforms(context: InstallContext) {
   const { packageInstallContext, esClient, savedObjectsClient, logger, force, request } = context;
+  // installSource decides whether transforms may run as kibana_system; see install_source.ts.
+  const { installSource } = context;
   let esReferences = context.esReferences ?? [];
 
   ({ esReferences } = await withPackageSpan('Install transforms', () =>
@@ -26,6 +28,7 @@ export async function stepInstallTransforms(context: InstallContext) {
       esReferences,
       force,
       request,
+      installSource,
     })
   ));
   return { esReferences };

@@ -373,3 +373,17 @@ export const REMOVE_FROM_CASE = i18n.translate(
     defaultMessage: 'Remove from case',
   }
 );
+
+export const RUN_WORKFLOW_SELECTION_TOO_LARGE = (maxItems: number) =>
+  i18n.translate('xpack.securitySolution.detectionEngine.alerts.workflow.selectionTooLarge', {
+    values: { maxItems },
+    defaultMessage:
+      'A workflow can run on up to {maxItems} items at a time. Narrow your selection to run a workflow.',
+  });
+
+export const RUN_WORKFLOW_SELECTION_FAILED = i18n.translate(
+  'xpack.securitySolution.detectionEngine.alerts.workflow.selectionFailed',
+  {
+    defaultMessage: 'Could not load the selected alerts. Try again.',
+  }
+);

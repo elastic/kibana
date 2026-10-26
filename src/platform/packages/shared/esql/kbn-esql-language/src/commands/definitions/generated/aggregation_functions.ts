@@ -35,7 +35,7 @@ import { EsqlFunctionNames } from './function_names';
 const absentDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.AGG,
   name: EsqlFunctionNames.ABSENT,
-  description: i18n.translate('kbn-esql-language.esql.definitions.absent', {
+  description: i18n.translate('esqlLanguage.esql.definitions.absent', {
     defaultMessage:
       'Returns true if the input expression yields no non-null values within the current aggregation context. Otherwise it returns false.',
   }),
@@ -341,7 +341,7 @@ const absentDefinition: FunctionDefinition = {
 const avgDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.AGG,
   name: EsqlFunctionNames.AVG,
-  description: i18n.translate('kbn-esql-language.esql.definitions.avg', {
+  description: i18n.translate('esqlLanguage.esql.definitions.avg', {
     defaultMessage: 'The average of a numeric field.',
   }),
   preview: false,
@@ -427,7 +427,7 @@ const avgDefinition: FunctionDefinition = {
 const countDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.AGG,
   name: EsqlFunctionNames.COUNT,
-  description: i18n.translate('kbn-esql-language.esql.definitions.count', {
+  description: i18n.translate('esqlLanguage.esql.definitions.count', {
     defaultMessage: 'Returns the total number (count) of input values.',
   }),
   preview: false,
@@ -790,7 +790,7 @@ const countDefinition: FunctionDefinition = {
 const countDistinctDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.AGG,
   name: EsqlFunctionNames.COUNT_DISTINCT,
-  description: i18n.translate('kbn-esql-language.esql.definitions.count_distinct', {
+  description: i18n.translate('esqlLanguage.esql.definitions.count_distinct', {
     defaultMessage: 'Returns the approximate number of distinct values.',
   }),
   preview: false,
@@ -1845,7 +1845,7 @@ const countDistinctDefinition: FunctionDefinition = {
 const earliestDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.AGG,
   name: EsqlFunctionNames.EARLIEST,
-  description: i18n.translate('kbn-esql-language.esql.definitions.earliest', {
+  description: i18n.translate('esqlLanguage.esql.definitions.earliest', {
     defaultMessage:
       'An alias for `FIRST` where\nthe sort field (the second parameter) is implicit and is set to `@timestamp`.',
   }),
@@ -2105,7 +2105,7 @@ const earliestDefinition: FunctionDefinition = {
 const firstDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.AGG,
   name: EsqlFunctionNames.FIRST,
-  description: i18n.translate('kbn-esql-language.esql.definitions.first', {
+  description: i18n.translate('esqlLanguage.esql.definitions.first', {
     defaultMessage:
       'This function calculates the earliest occurrence of the search field\n(the first parameter), where sorting order is determined by the sort\nfield (the second parameter). This sorting order is always ascending\nand null values always sort last. Both fields support null,\nsingle-valued, and multi-valued input. If the earliest sort field\nvalue appears in multiple documents, this function is allowed to\nreturn any corresponding search field value.',
   }),
@@ -3619,7 +3619,7 @@ const firstDefinition: FunctionDefinition = {
 const lastDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.AGG,
   name: EsqlFunctionNames.LAST,
-  description: i18n.translate('kbn-esql-language.esql.definitions.last', {
+  description: i18n.translate('esqlLanguage.esql.definitions.last', {
     defaultMessage:
       'This function calculates the latest occurrence of the search field\n(the first parameter), where sorting order is determined by the sort\nfield (the second parameter). This sorting order is always ascending\nand null values always sort last. Both fields support null,\nsingle-valued, and multi-valued input. If the latest sort field\nvalue appears in multiple documents, this function is allowed to\nreturn any corresponding search field value.',
   }),
@@ -5133,7 +5133,7 @@ const lastDefinition: FunctionDefinition = {
 const latestDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.AGG,
   name: EsqlFunctionNames.LATEST,
-  description: i18n.translate('kbn-esql-language.esql.definitions.latest', {
+  description: i18n.translate('esqlLanguage.esql.definitions.latest', {
     defaultMessage:
       'An alias for `LAST` where\nthe sort field (the second parameter) is implicit and is set to `@timestamp`.',
   }),
@@ -5393,7 +5393,7 @@ const latestDefinition: FunctionDefinition = {
 const maxDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.AGG,
   name: EsqlFunctionNames.MAX,
-  description: i18n.translate('kbn-esql-language.esql.definitions.max', {
+  description: i18n.translate('esqlLanguage.esql.definitions.max', {
     defaultMessage: 'The maximum value of a field.',
   }),
   preview: false,
@@ -5567,7 +5567,7 @@ const maxDefinition: FunctionDefinition = {
 const medianDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.AGG,
   name: EsqlFunctionNames.MEDIAN,
-  description: i18n.translate('kbn-esql-language.esql.definitions.median', {
+  description: i18n.translate('esqlLanguage.esql.definitions.median', {
     defaultMessage:
       'The value that is greater than half of all values and less than half of all values, also known as the 50% `PERCENTILE`.',
   }),
@@ -5643,7 +5643,7 @@ const medianDefinition: FunctionDefinition = {
 const medianAbsoluteDeviationDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.AGG,
   name: EsqlFunctionNames.MEDIAN_ABSOLUTE_DEVIATION,
-  description: i18n.translate('kbn-esql-language.esql.definitions.median_absolute_deviation', {
+  description: i18n.translate('esqlLanguage.esql.definitions.median_absolute_deviation', {
     defaultMessage:
       'Returns the median absolute deviation, a measure of variability. It is a robust statistic, meaning that it is useful for describing data that may have outliers, or may not be normally distributed. For such data it can be more descriptive than standard deviation.\n\nIt is calculated as the median of each data point’s deviation from the median of the entire sample. That is, for a random variable `X`, the median absolute deviation is `median(|median(X) - X|)`.',
   }),
@@ -5695,7 +5695,7 @@ const medianAbsoluteDeviationDefinition: FunctionDefinition = {
 const minDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.AGG,
   name: EsqlFunctionNames.MIN,
-  description: i18n.translate('kbn-esql-language.esql.definitions.min', {
+  description: i18n.translate('esqlLanguage.esql.definitions.min', {
     defaultMessage: 'The minimum value of a field.',
   }),
   preview: false,
@@ -5869,7 +5869,7 @@ const minDefinition: FunctionDefinition = {
 const percentileDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.AGG,
   name: EsqlFunctionNames.PERCENTILE,
-  description: i18n.translate('kbn-esql-language.esql.definitions.percentile', {
+  description: i18n.translate('esqlLanguage.esql.definitions.percentile', {
     defaultMessage:
       'Returns the value at which a certain percentage of observed values occur. For example, the 95th percentile is the value which is greater than 95% of the observed values and the 50th percentile is the `MEDIAN`.',
   }),
@@ -6190,7 +6190,7 @@ const percentileDefinition: FunctionDefinition = {
 const presentDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.AGG,
   name: EsqlFunctionNames.PRESENT,
-  description: i18n.translate('kbn-esql-language.esql.definitions.present', {
+  description: i18n.translate('esqlLanguage.esql.definitions.present', {
     defaultMessage:
       'Returns true if the input expression yields any non-null values within the current aggregation context. Otherwise it returns false.',
   }),
@@ -6496,7 +6496,7 @@ const presentDefinition: FunctionDefinition = {
 const sampleDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.AGG,
   name: EsqlFunctionNames.SAMPLE,
-  description: i18n.translate('kbn-esql-language.esql.definitions.sample', {
+  description: i18n.translate('esqlLanguage.esql.definitions.sample', {
     defaultMessage: 'Collects sample values for a field.',
   }),
   preview: false,
@@ -6894,7 +6894,7 @@ const sampleDefinition: FunctionDefinition = {
 const sparklineDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.AGG,
   name: EsqlFunctionNames.SPARKLINE,
-  description: i18n.translate('kbn-esql-language.esql.definitions.sparkline', {
+  description: i18n.translate('esqlLanguage.esql.definitions.sparkline', {
     defaultMessage:
       'The values representing the y-axis values of a sparkline graph for a given aggregation over a period of time.',
   }),
@@ -7030,7 +7030,7 @@ const sparklineDefinition: FunctionDefinition = {
 const stCentroidAggDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.AGG,
   name: EsqlFunctionNames.ST_CENTROID_AGG,
-  description: i18n.translate('kbn-esql-language.esql.definitions.st_centroid_agg', {
+  description: i18n.translate('esqlLanguage.esql.definitions.st_centroid_agg', {
     defaultMessage:
       'Calculate the spatial centroid over a field with spatial geometry type.\nSupports `geo_point` and `cartesian_point`, as well as `geo_shape` and `cartesian_shape`.',
   }),
@@ -7092,7 +7092,7 @@ const stCentroidAggDefinition: FunctionDefinition = {
 const stExtentAggDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.AGG,
   name: EsqlFunctionNames.ST_EXTENT_AGG,
-  description: i18n.translate('kbn-esql-language.esql.definitions.st_extent_agg', {
+  description: i18n.translate('esqlLanguage.esql.definitions.st_extent_agg', {
     defaultMessage:
       'Calculate the spatial extent over a field with geometry type. Returns a bounding box for all values of the field.',
   }),
@@ -7154,7 +7154,7 @@ const stExtentAggDefinition: FunctionDefinition = {
 const stdDevDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.AGG,
   name: EsqlFunctionNames.STD_DEV,
-  description: i18n.translate('kbn-esql-language.esql.definitions.std_dev', {
+  description: i18n.translate('esqlLanguage.esql.definitions.std_dev', {
     defaultMessage: 'The population standard deviation of a numeric field.',
   }),
   preview: false,
@@ -7205,7 +7205,7 @@ const stdDevDefinition: FunctionDefinition = {
 const sumDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.AGG,
   name: EsqlFunctionNames.SUM,
-  description: i18n.translate('kbn-esql-language.esql.definitions.sum', {
+  description: i18n.translate('esqlLanguage.esql.definitions.sum', {
     defaultMessage: 'The sum of a numeric expression.',
   }),
   preview: false,
@@ -7302,7 +7302,7 @@ const sumDefinition: FunctionDefinition = {
 const topDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.AGG,
   name: EsqlFunctionNames.TOP,
-  description: i18n.translate('kbn-esql-language.esql.definitions.top', {
+  description: i18n.translate('esqlLanguage.esql.definitions.top', {
     defaultMessage: 'Collects the top values for a field. Includes repeated values.',
   }),
   preview: false,
@@ -9095,7 +9095,7 @@ const topDefinition: FunctionDefinition = {
 const valuesDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.AGG,
   name: EsqlFunctionNames.VALUES,
-  description: i18n.translate('kbn-esql-language.esql.definitions.values', {
+  description: i18n.translate('esqlLanguage.esql.definitions.values', {
     defaultMessage:
       'Returns unique (deduplicated) values as a multivalued field. The order of the returned values isn’t guaranteed.\nIf you need the values returned in order use\n`MV_SORT`.',
   }),
@@ -9344,7 +9344,7 @@ const valuesDefinition: FunctionDefinition = {
 const varianceDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.AGG,
   name: EsqlFunctionNames.VARIANCE,
-  description: i18n.translate('kbn-esql-language.esql.definitions.variance', {
+  description: i18n.translate('esqlLanguage.esql.definitions.variance', {
     defaultMessage: 'The population variance of a numeric field.',
   }),
   preview: false,
@@ -9392,7 +9392,7 @@ const varianceDefinition: FunctionDefinition = {
 const weightedAvgDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.AGG,
   name: EsqlFunctionNames.WEIGHTED_AVG,
-  description: i18n.translate('kbn-esql-language.esql.definitions.weighted_avg', {
+  description: i18n.translate('esqlLanguage.esql.definitions.weighted_avg', {
     defaultMessage: 'The weighted average of a numeric expression.',
   }),
   preview: false,

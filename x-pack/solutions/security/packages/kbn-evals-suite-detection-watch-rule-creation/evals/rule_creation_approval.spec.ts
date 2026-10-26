@@ -76,7 +76,8 @@ const sweepCreatedRules = async (
   createdRuleIds.clear();
 };
 
-evaluate.describe(
+// https://github.com/elastic/security-team/issues/20396
+evaluate.describe.skip(
   'Rule Creation Worker — approval gate',
   { tag: tags.serverless.security.complete },
   () => {

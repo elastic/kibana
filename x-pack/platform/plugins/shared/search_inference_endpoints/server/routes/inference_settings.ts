@@ -20,7 +20,7 @@ import type { InferenceSettingsAttributes, InferenceSettingsResponse } from '../
 import { APIRoutes } from '../../common/types';
 import { inferenceSettingsSchemaV1 } from '../saved_objects/schema/v1';
 import type { InferenceFeatureRegistry } from '../inference_feature_registry';
-import { resolveFeatureEndpointIds } from '../inference_endpoints';
+import { resolveFeatureEndpoints } from '../inference_endpoints';
 import { errorHandler } from '../utils/error_handler';
 import { parseInferenceSettingsSO, validateInferenceSettings } from '../utils/inference_settings';
 
@@ -39,8 +39,10 @@ const resolveAllEndpointIds = (
   const resolvedEndpointIds = featureRegistry
     .getAll()
     .filter((f) => f.parentFeatureId !== undefined)
-    .flatMap(
-      (f) => resolveFeatureEndpointIds(featureRegistry, soFeaturesMap, f.featureId, logger).ids
+    .flatMap((f) =>
+      resolveFeatureEndpoints(featureRegistry, soFeaturesMap, f.featureId, logger).endpoints.map(
+        ({ id }) => id
+      )
     );
 
   return [...new Set(resolvedEndpointIds)];

@@ -6,7 +6,7 @@
  */
 
 import type { SavedObject } from '@kbn/core-saved-objects-server';
-import { CaseIdIncrementerAttributesRt } from '../../../common/types/domain/incremental_id/latest';
+import { CaseIdIncrementerAttributesSchema } from '../../../common/types/domain/incremental_id/v1';
 
 export interface CaseIdIncrementerPersistedAttributes {
   '@timestamp': number;
@@ -16,6 +16,6 @@ export interface CaseIdIncrementerPersistedAttributes {
 
 export type CaseIdIncrementerTransformedAttributes = CaseIdIncrementerPersistedAttributes;
 
-export const CaseIdIncrementerTransformedAttributesRt = CaseIdIncrementerAttributesRt;
+export const CaseIdIncrementerTransformedAttributesSchema = CaseIdIncrementerAttributesSchema;
 
 export type CaseIdIncrementerSavedObject = SavedObject<CaseIdIncrementerPersistedAttributes>;

@@ -5,15 +5,11 @@
  * 2.0.
  */
 
+import { useMemo } from 'react';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { useQuery } from '@kbn/react-query';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
-import { rowsFromEsql } from '@kbn/alerting-v2-common-queries';
-import { buildEpisodeEventDataQuery } from '../queries/episode_event_data_query';
-import { QUERY_STALE_TIME } from '../constants';
-import { runEsqlAsyncSearch } from '../utils/run_esql_async_search';
-import { queryKeys } from '../query_keys';
-import { useSpaceId } from './use_space_id';
+import { useFetchEpisodeDataQuery } from './use_fetch_episode_data_query';
+import { useFetchEpisodeQuery } from './use_fetch_episode_query';
 
 export interface UseFetchEpisodeEventDataQueryOptions {
   episodeId: string | undefined;
@@ -33,50 +29,55 @@ export interface EpisodeEventData {
   isStale: boolean;
 }
 
+export interface UseFetchEpisodeEventDataQueryResult {
+  /** `null` when no event with non-empty data is available yet. */
+  data: EpisodeEventData | null | undefined;
+  isLoading: boolean;
+  isError: boolean;
+}
+
+const parseEventData = (episodeData: string | null): Record<string, unknown> | null => {
+  if (!episodeData) return null;
+  try {
+    return JSON.parse(episodeData) as Record<string, unknown>;
+  } catch {
+    return null;
+  }
+};
+
 /**
- * Fetches the alert `data` object from the latest non-empty event for an episode,
- * along with the timestamp of that event and a flag indicating whether a more
- * recent event without data exists. Returns `null` when no event with non-empty
- * data is available yet.
+ * Derives the alert `data` object from the latest non-empty event for an
+ * episode, along with the timestamp of that event and a flag indicating
+ * whether a more recent event without data exists. It reuses the episode data
+ * and episode row queries, so it adds no requests of its own.
  */
 export const useFetchEpisodeEventDataQuery = ({
   episodeId,
   services,
-}: UseFetchEpisodeEventDataQueryOptions) => {
-  const { data } = services;
-  const spaceId = useSpaceId(services.spaces);
-
-  return useQuery({
-    queryKey: queryKeys.episodeEventData(spaceId, episodeId ?? ''),
-    queryFn: async ({ signal }): Promise<EpisodeEventData | null> => {
-      const query = buildEpisodeEventDataQuery(spaceId, episodeId!);
-      const raw = await runEsqlAsyncSearch({
-        data,
-        params: {
-          query: query.print('basic'),
-          time_zone: 'UTC',
-        },
-        abortSignal: signal,
-      });
-      const row = rowsFromEsql(query, raw)[0];
-      if (!row || !row.last_data || !row.last_data_timestamp) return null;
-
-      let parsed: Record<string, unknown>;
-      try {
-        parsed = JSON.parse(row.last_data) as Record<string, unknown>;
-      } catch {
-        return null;
-      }
-
-      return {
-        data: parsed,
-        dataTimestamp: row.last_data_timestamp,
-        isStale: Boolean(
-          row.last_event_timestamp && row.last_event_timestamp !== row.last_data_timestamp
-        ),
-      };
-    },
-    enabled: Boolean(episodeId),
-    staleTime: QUERY_STALE_TIME,
+}: UseFetchEpisodeEventDataQueryOptions): UseFetchEpisodeEventDataQueryResult => {
+  const dataQuery = useFetchEpisodeDataQuery({ episodeId, services });
+  const { data: episode, isLoading: isLoadingEpisode } = useFetchEpisodeQuery({
+    episodeId,
+    services,
   });
+
+  const dataRow = dataQuery.data;
+  const lastEventTimestamp = episode?.last_timestamp;
+  const eventData = useMemo((): EpisodeEventData | null | undefined => {
+    if (dataRow === undefined) return undefined;
+    const parsed = parseEventData(dataRow?.episode_data ?? null);
+    if (!dataRow || !parsed) return null;
+    return {
+      data: parsed,
+      dataTimestamp: dataRow['@timestamp'],
+      isStale: Boolean(lastEventTimestamp && lastEventTimestamp !== dataRow['@timestamp']),
+    };
+  }, [dataRow, lastEventTimestamp]);
+
+  return {
+    data: eventData,
+    // The stale flag needs the episode row, so wait for both.
+    isLoading: dataQuery.isLoading || isLoadingEpisode,
+    isError: dataQuery.isError,
+  };
 };

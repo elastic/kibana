@@ -12,9 +12,12 @@ import {
   AGENTIC_INVESTIGATIONS_API_VERSION,
   INVESTIGATION_ASSIGN_URL,
   INVESTIGATION_STATUS_URL,
+  INVESTIGATION_SEVERITY_URL,
   INVESTIGATION_CLOSE_PREVIEW_URL,
 } from '../../../common';
 import type {
+  SetInvestigationSeverityRequest,
+  SetInvestigationSeverityResponse,
   SetInvestigationStatusRequest,
   SetInvestigationStatusResponse,
   InvestigationClosePreviewResponse,
@@ -42,6 +45,28 @@ export const useAssignInvestigation = () => {
     // No query invalidation: the investigation flyout polls its own isolated QueryClient
     // every 5 s (Agent Builder's snapshot interval). The caller is responsible for triggering
     // a refetch via `refetchConversation` after a successful mutation.
+  });
+};
+
+/** Sets the severity a user chose for an investigation. */
+export const useSetInvestigationSeverity = () => {
+  const { services } = useKibana<CoreStart>();
+
+  return useMutation({
+    mutationFn: ({
+      investigationId,
+      body,
+    }: {
+      investigationId: string;
+      body: SetInvestigationSeverityRequest;
+    }): Promise<SetInvestigationSeverityResponse> =>
+      services.http.put<SetInvestigationSeverityResponse>(
+        INVESTIGATION_SEVERITY_URL.replace('{id}', encodeURIComponent(investigationId)),
+        {
+          version: AGENTIC_INVESTIGATIONS_API_VERSION,
+          body: JSON.stringify(body),
+        }
+      ),
   });
 };
 

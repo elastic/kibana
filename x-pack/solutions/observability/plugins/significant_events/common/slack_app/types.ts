@@ -74,6 +74,8 @@ export interface SlackChannelBinding {
   channel?: string;
   /** Human-readable channel name from the Relay's persisted display snapshot. */
   displayName?: string;
+  /** Absent for legacy rows; a private channel has no `displayName`. */
+  visibility?: 'public' | 'private';
   /** Binding status for this entry; always `bound_to_self` for the connected-channel list. */
   status: SlackChannelBindingStatus;
 }

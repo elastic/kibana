@@ -122,12 +122,7 @@ async function runOxlintShards(args: string[]) {
 
   const results = await Promise.all(
     getShardPaths(files, shardCount).map((shardPaths) =>
-      execa('oxlint', [...args, `--threads=${THREADS_PER_SHARD}`, ...shardPaths], {
-        cwd: REPO_ROOT,
-        preferLocal: true,
-        reject: false,
-        all: true,
-      })
+      runOxlintShard([...args, `--threads=${THREADS_PER_SHARD}`, ...shardPaths])
     )
   );
 
@@ -142,6 +137,35 @@ async function runOxlintShards(args: string[]) {
   }
   if (results.some(({ exitCode }) => exitCode !== 0)) {
     throw createFailError('oxlint found errors');
+  }
+}
+
+// oxlint sometimes segfaults in its native code on Linux while exiting, after it has finished
+// linting, so a shard killed by a crash signal is re-run once instead of failing the whole run.
+// Other signals (OOM kills, cancelled jobs) fail right away.
+const CRASH_SIGNALS: Record<string, true> = {
+  SIGSEGV: true,
+  SIGBUS: true,
+  SIGABRT: true,
+  SIGILL: true,
+};
+
+async function runOxlintShard(args: string[]) {
+  for (let attempt = 1; ; attempt++) {
+    const result = await execa('oxlint', args, {
+      cwd: REPO_ROOT,
+      preferLocal: true,
+      reject: false,
+      all: true,
+      // The shards start together and would all write the plugin sources to the same
+      // @kbn/swc-register LMDB cache, which has crashed a shard with `MDB_BAD_TXN`. Transpiling
+      // the plugins without the cache is no slower.
+      env: { DISABLE_SWC_REGISTER_CACHE: 'true' },
+    });
+    if (result.signal === undefined || !CRASH_SIGNALS[result.signal] || attempt === 2) {
+      return result;
+    }
+    process.stdout.write(`An oxlint shard was killed by ${result.signal}, re-running it once\n`);
   }
 }
 

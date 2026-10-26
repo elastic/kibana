@@ -18,12 +18,12 @@ import {
   listRuleExecutionsResponseSchema,
   ruleExecutionOutcomeSchema,
   ruleExecutionViewSchema,
+  ruleSearchMatchCountsSchema,
 } from './rule_execution_history_schema';
 
 const validView = {
   id: 'doc-1',
   rule: { id: 'rule-1' },
-  space_id: 'default',
   started_at: '2026-06-01T00:00:00.000Z',
   ended_at: '2026-06-01T00:00:01.500Z',
   timings: { duration_ms: 1500, scheduled_delay_ms: 250 },
@@ -523,5 +523,20 @@ describe('rule_execution_history_schema', () => {
         }).success
       ).toBe(false);
     });
+  });
+});
+
+describe('ruleSearchMatchCountsSchema', () => {
+  it('accepts a rule count with the truncation flag', () => {
+    expect(ruleSearchMatchCountsSchema.parse({ rule_count: 3, is_truncated: false })).toEqual({
+      rule_count: 3,
+      is_truncated: false,
+    });
+  });
+
+  it('rejects negative counts', () => {
+    expect(
+      ruleSearchMatchCountsSchema.safeParse({ rule_count: -1, is_truncated: false }).success
+    ).toBe(false);
   });
 });

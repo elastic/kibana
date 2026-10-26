@@ -72,6 +72,37 @@ describe('addUserMessageStepDefinition', () => {
     expect(result).toEqual({ output: { conversation_id: conversationId } });
   });
 
+  it('passes a trimmed author_name as the author decoration', async () => {
+    const { execution, definition } = buildDefinition();
+
+    await definition.handler(
+      createStepHandlerContext({
+        input: { ...baseInput, author_name: '  Attack Discovery Review  ' },
+      })
+    );
+
+    expect(execution.maybeExecuteAgent).toHaveBeenCalledWith({
+      mode: AgentExecutionMode.conversation,
+      request: expect.any(Object),
+      params: {
+        conversationId,
+        nextInput: { message: 'Deployment finished' },
+        triggerMode: ChatTriggerMode.Never,
+        author: { full_name: 'Attack Discovery Review' },
+      },
+    });
+  });
+
+  it('omits the author when author_name is blank', async () => {
+    const { execution, definition } = buildDefinition();
+
+    await definition.handler(
+      createStepHandlerContext({ input: { ...baseInput, author_name: '   ' } })
+    );
+
+    expect(execution.maybeExecuteAgent.mock.calls[0][0].params).not.toHaveProperty('author');
+  });
+
   it('propagates a not-found error for a missing conversation', async () => {
     const { definition } = buildDefinition({
       maybeExecuteAgent: jest
@@ -103,6 +134,20 @@ describe('addUserMessageStepDefinition', () => {
       expect(schema.safeParse({ conversation_id: conversationId, message: '  ' }).success).toBe(
         false
       );
+    });
+
+    it.each([
+      { label: 'absent', authorName: undefined, success: true },
+      { label: 'a name', authorName: 'Attack Discovery Review', success: true },
+      { label: 'exactly 256 characters', authorName: 'a'.repeat(256), success: true },
+      { label: 'empty', authorName: '', success: false },
+      { label: 'blank', authorName: '   ', success: false },
+      { label: '257 characters', authorName: 'a'.repeat(257), success: false },
+    ])('author_name $label -> success $success', ({ authorName, success }) => {
+      const input =
+        authorName === undefined ? baseInput : { ...baseInput, author_name: authorName };
+
+      expect(schema.safeParse(input).success).toBe(success);
     });
   });
 });

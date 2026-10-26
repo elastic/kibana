@@ -11,6 +11,7 @@ import { createConversationNotFoundError } from '@kbn/agent-builder-common';
 import {
   INVESTIGATION_ASSIGN_URL,
   INVESTIGATION_BY_ID_URL,
+  INVESTIGATION_SEVERITY_URL,
   INVESTIGATIONS_INTERNAL_URL,
   INVESTIGATIONS_PRIVILEGES_URL,
   INVESTIGATIONS_SEVERITY_COUNTS_URL,
@@ -83,6 +84,15 @@ describe('investigation routes', () => {
     it('marks the assign route as internal', () => {
       const { byPath, puts } = registerAndCollect(jest.fn());
       expect(byPath(puts, INVESTIGATION_ASSIGN_URL).config.access).toBe('internal');
+    });
+
+    it('gates the internal severity route on INVESTIGATIONS_API_PRIVILEGE_MANAGE', () => {
+      const { byPath, puts } = registerAndCollect(jest.fn());
+      const { config } = byPath(puts, INVESTIGATION_SEVERITY_URL);
+      expect(config.security?.authz?.requiredPrivileges).toEqual([
+        INVESTIGATIONS_API_PRIVILEGE_MANAGE,
+      ]);
+      expect(config.access).toBe('internal');
     });
   });
 

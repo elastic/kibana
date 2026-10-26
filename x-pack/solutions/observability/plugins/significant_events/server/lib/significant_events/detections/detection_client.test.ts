@@ -260,6 +260,23 @@ describe('DetectionClient', () => {
     });
   });
 
+  describe('findByIds', () => {
+    it('limits the lookup to the number of requested detection IDs', async () => {
+      const { client, query } = createClient({
+        detections: [
+          createDetection({ '@timestamp': '2026-01-02T00:00:00.000Z', detection_id: 'f-1' }),
+          createDetection({ '@timestamp': '2026-01-02T00:00:00.000Z', detection_id: 'f-2' }),
+        ],
+        processedIds: [],
+      });
+
+      await client.findByIds(['f-1', 'f-2']);
+
+      const dataQuery = queriesFrom(query).find((q) => !q.includes('processed_by'));
+      expect(dataQuery).toContain('LIMIT 2');
+    });
+  });
+
   describe('findSkippedForEvent', () => {
     const detection = (id: string) =>
       createDetection({ '@timestamp': '2026-01-02T00:00:00.000Z', detection_id: id });

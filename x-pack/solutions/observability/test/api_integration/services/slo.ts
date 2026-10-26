@@ -12,16 +12,14 @@ import type {
   FetchHistoricalSummaryResponse,
   FindSLODefinitionsResponse,
 } from '@kbn/slo-schema';
-import type * as t from 'io-ts';
+import type { z } from '@kbn/zod';
 import type { Client } from '@elastic/elasticsearch';
 import type { AggregationsAggregate, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { retryForSuccess } from '@kbn/ftr-common-functional-services';
 import { ToolingLog } from '@kbn/tooling-log';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
-type FetchHistoricalSummaryParams = t.OutputOf<
-  typeof fetchHistoricalSummaryParamsSchema.props.body
->;
+type FetchHistoricalSummaryParams = z.input<typeof fetchHistoricalSummaryParamsSchema.shape.body>;
 
 const debugLog = ToolingLog.bind(ToolingLog, { level: 'debug', writeTo: process.stdout });
 

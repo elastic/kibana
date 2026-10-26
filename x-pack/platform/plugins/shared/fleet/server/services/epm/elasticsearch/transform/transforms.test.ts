@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { errors } from '@elastic/elasticsearch';
+
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 
@@ -22,7 +24,8 @@ import { getESAssetMetadata } from '../meta';
 
 import { createArchiveIteratorFromMap } from '../../archive/archive_iterator';
 import { createAppContextStartContractMock } from '../../../../mocks';
-import type { PackageInstallContext } from '../../../../../common/types';
+import type { InstallSource, PackageInstallContext } from '../../../../../common/types';
+import { FleetUnauthorizedError } from '../../../../errors';
 
 import { installTransforms } from './install';
 
@@ -262,6 +265,7 @@ _meta:
     });
 
     await installTransforms({
+      installSource: 'registry',
       packageInstallContext: {
         packageInfo: {
           name: 'endpoint',
@@ -548,6 +552,7 @@ _meta:
     esClient.transform.getTransform.mockResponseOnce({ count: 0, transforms: [] });
 
     await installTransforms({
+      installSource: 'registry',
       packageInstallContext: {
         packageInfo: { name: 'endpoint', version: '0.16.0-dev.0' },
         paths: [
@@ -626,6 +631,7 @@ _meta:
     esClient.transform.getTransform.mockResponseOnce({ count: 0, transforms: [] });
 
     await installTransforms({
+      installSource: 'registry',
       packageInstallContext: {
         packageInfo: { name: 'endpoint', version: '0.16.0-dev.0' },
         paths: [
@@ -726,6 +732,7 @@ _meta:
     });
 
     await installTransforms({
+      installSource: 'registry',
       packageInstallContext: {
         packageInfo: {
           name: 'endpoint',
@@ -1014,6 +1021,7 @@ _meta:
     });
 
     await installTransforms({
+      installSource: 'registry',
       packageInstallContext: {
         packageInfo: {
           name: 'endpoint',
@@ -1249,6 +1257,7 @@ _meta:
     currentAttributes = { installed_es: [] };
 
     await installTransforms({
+      installSource: 'registry',
       packageInstallContext: {
         packageInfo: {
           name: 'endpoint',
@@ -1348,6 +1357,7 @@ _meta:
     );
 
     await installTransforms({
+      installSource: 'registry',
       packageInstallContext: {
         packageInfo: {
           name: 'endpoint',
@@ -1437,6 +1447,7 @@ _meta:
     currentAttributes = { installed_es: currentInstallation.installed_es };
 
     await installTransforms({
+      installSource: 'registry',
       packageInstallContext: {
         packageInfo: {
           name: 'endpoint',
@@ -1514,6 +1525,7 @@ _meta:
     });
 
     await installTransforms({
+      installSource: 'registry',
       packageInstallContext: {
         packageInfo: { name: 'endpoint', version: '0.16.0-dev.0' },
         paths: [
@@ -1552,6 +1564,335 @@ _meta:
   });
 });
 
+describe('installTransforms - install source trust', () => {
+  let esClient: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;
+  let savedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
+  let appContextMock: ReturnType<typeof createAppContextStartContractMock>;
+
+  const transformPath = 'my_upload-1.0.0/elasticsearch/transform/policy_discovery/transform.yml';
+  // Mirrors the reported attack archive: a transform that reads a restricted Fleet index and
+  // leaves `run_as_kibana_system` at its implicit `true`.
+  const transformYml = `source:
+  index: [".fleet-policies"]
+dest:
+  index: "attacker_readable_index"
+frequency: 1s
+latest:
+  unique_key: ["policy_id"]
+  sort: "revision_idx"
+_meta:
+  fleet_transform_version: 1.0.0
+  managed: true`;
+
+  const installUploadedTransform = (installSource: InstallSource) =>
+    installTransforms({
+      installSource,
+      packageInstallContext: {
+        packageInfo: { name: 'my_upload', version: '1.0.0' },
+        paths: [transformPath],
+        archiveIterator: createArchiveIteratorFromMap(
+          new Map([[transformPath, Buffer.from(transformYml)]])
+        ),
+      } as unknown as PackageInstallContext,
+      esClient,
+      savedObjectsClient,
+      logger: loggerMock.create(),
+      esReferences: [],
+      request: httpServerMock.createKibanaRequest(),
+    });
+
+  const grantApiKeyMock = () =>
+    appContextMock.securityStart.authc.apiKeys.grantAsInternalUser as jest.Mock;
+
+  const putTransformOptions = () =>
+    (esClient.transform.putTransform.mock.calls[0] as unknown as any[])[1];
+
+  const putTransformPayload = () =>
+    (esClient.transform.putTransform.mock.calls[0] as unknown as any[])[0];
+
+  beforeEach(() => {
+    appContextMock = createAppContextStartContractMock();
+    appContextService.start(appContextMock);
+    grantApiKeyMock().mockResolvedValue({ id: 'key-id', api_key: 'key', encoded: 'encoded-key' });
+
+    esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
+    savedObjectsClient = savedObjectsClientMock.create();
+    let currentAttributes: Partial<Installation> = { installed_es: [] };
+    savedObjectsClient.get.mockImplementation(
+      async () =>
+        ({
+          type: PACKAGES_SAVED_OBJECT_TYPE,
+          id: 'my_upload',
+          attributes: currentAttributes,
+          references: [],
+        } as any)
+    );
+    savedObjectsClient.update.mockImplementation(async (type, id, attributes) => {
+      currentAttributes = { ...currentAttributes, ...(attributes as Partial<Installation>) };
+      return {
+        type: PACKAGES_SAVED_OBJECT_TYPE,
+        id: 'my_upload',
+        attributes,
+        references: [],
+      };
+    });
+    (getInstallation as jest.MockedFunction<typeof getInstallation>).mockReset();
+    (getInstallation as jest.MockedFunction<typeof getInstallation>).mockResolvedValue(undefined);
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it.each(['upload', 'custom'] as const)(
+    'binds a %s transform to the installing user even when the package asks for kibana_system',
+    async (installSource) => {
+      await installUploadedTransform(installSource);
+
+      expect(esClient.transform.putTransform).toHaveBeenCalledTimes(1);
+      expect(putTransformOptions()).toEqual(
+        expect.objectContaining({
+          headers: { 'es-secondary-authorization': 'ApiKey encoded-key' },
+        })
+      );
+    }
+  );
+
+  it('persists run_as_kibana_system: false so the reauthorize flow stays caller-bound', async () => {
+    await installUploadedTransform('upload');
+
+    expect(putTransformPayload()._meta.run_as_kibana_system).toBe(false);
+  });
+
+  it('passes the caller credentials to transform deletion as well', async () => {
+    (getInstallation as jest.MockedFunction<typeof getInstallation>).mockResolvedValue({
+      installed_es: [
+        {
+          id: 'logs-my_upload.policy_discovery-default-0.1.0',
+          type: ElasticsearchAssetType.transform,
+        },
+      ],
+    } as unknown as Installation);
+
+    await installUploadedTransform('upload');
+
+    expect(esClient.transform.deleteTransform).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        headers: { 'es-secondary-authorization': 'ApiKey encoded-key' },
+      })
+    );
+  });
+
+  it('keeps the internal identity for registry packages', async () => {
+    await installUploadedTransform('registry');
+
+    expect(esClient.transform.putTransform).toHaveBeenCalledTimes(1);
+    expect(putTransformOptions()).not.toHaveProperty('headers');
+    expect(putTransformPayload()._meta.run_as_kibana_system).toBe(true);
+  });
+
+  it('fails the install instead of falling back to kibana_system when no API key can be granted', async () => {
+    grantApiKeyMock().mockResolvedValue(undefined);
+
+    await expect(installUploadedTransform('upload')).rejects.toThrow(FleetUnauthorizedError);
+    expect(esClient.transform.putTransform).not.toHaveBeenCalled();
+  });
+
+  it('fails the install for a legacy JSON transform with no caller credentials', async () => {
+    grantApiKeyMock().mockResolvedValue(undefined);
+    const legacyPath = 'my_upload-1.0.0/elasticsearch/transform/policy_discovery/default.json';
+
+    await expect(
+      installTransforms({
+        installSource: 'upload',
+        packageInstallContext: {
+          packageInfo: { name: 'my_upload', version: '1.0.0' },
+          paths: [legacyPath],
+          archiveIterator: createArchiveIteratorFromMap(
+            new Map([
+              [
+                legacyPath,
+                Buffer.from(
+                  JSON.stringify({
+                    source: { index: ['.fleet-policies'] },
+                    dest: { index: 'attacker_readable_index' },
+                  })
+                ),
+              ],
+            ])
+          ),
+        } as unknown as PackageInstallContext,
+        esClient,
+        savedObjectsClient,
+        logger: loggerMock.create(),
+        esReferences: [],
+        request: httpServerMock.createKibanaRequest(),
+      })
+    ).rejects.toThrow(FleetUnauthorizedError);
+    expect(esClient.transform.putTransform).not.toHaveBeenCalled();
+  });
+
+  it('binds a legacy JSON transform from an upload to the installing user', async () => {
+    const legacyPath = 'my_upload-1.0.0/elasticsearch/transform/policy_discovery/default.json';
+
+    await installTransforms({
+      installSource: 'upload',
+      packageInstallContext: {
+        packageInfo: { name: 'my_upload', version: '1.0.0' },
+        paths: [legacyPath],
+        archiveIterator: createArchiveIteratorFromMap(
+          new Map([
+            [
+              legacyPath,
+              Buffer.from(
+                JSON.stringify({
+                  source: { index: ['.fleet-policies'] },
+                  dest: { index: 'attacker_readable_index' },
+                })
+              ),
+            ],
+          ])
+        ),
+      } as unknown as PackageInstallContext,
+      esClient,
+      savedObjectsClient,
+      logger: loggerMock.create(),
+      esReferences: [],
+      request: httpServerMock.createKibanaRequest(),
+    });
+
+    expect(esClient.transform.putTransform).toHaveBeenCalledTimes(1);
+    expect(putTransformOptions()).toEqual(
+      expect.objectContaining({
+        headers: { 'es-secondary-authorization': 'ApiKey encoded-key' },
+      })
+    );
+  });
+
+  describe('deleting the previous installation', () => {
+    const legacyPath = 'my_upload-1.0.0/elasticsearch/transform/policy_discovery/default.json';
+
+    const installLegacyOverExisting = (installSource: InstallSource = 'upload') => {
+      (getInstallation as jest.MockedFunction<typeof getInstallation>).mockResolvedValue({
+        installed_es: [
+          {
+            id: 'my_upload.policy_discovery-default-0.1.0',
+            type: ElasticsearchAssetType.transform,
+          },
+        ],
+      } as unknown as Installation);
+
+      return installTransforms({
+        installSource,
+        packageInstallContext: {
+          packageInfo: { name: 'my_upload', version: '1.0.0' },
+          paths: [legacyPath],
+          archiveIterator: createArchiveIteratorFromMap(
+            new Map([
+              [
+                legacyPath,
+                Buffer.from(
+                  JSON.stringify({
+                    source: { index: ['ordinary-index'] },
+                    dest: { index: 'attacker_readable_index' },
+                  })
+                ),
+              ],
+            ])
+          ),
+        } as unknown as PackageInstallContext,
+        esClient,
+        savedObjectsClient,
+        logger: loggerMock.create(),
+        esReferences: [],
+        request: httpServerMock.createKibanaRequest(),
+      });
+    };
+
+    // Legacy deletes pass delete_dest_index, so running them on the internal client would let an
+    // uploader have Fleet drop a destination index their own privileges cannot reach.
+    it('deletes the previous legacy transform with the caller credentials', async () => {
+      await installLegacyOverExisting();
+
+      expect(esClient.transform.deleteTransform).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          headers: { 'es-secondary-authorization': 'ApiKey encoded-key' },
+        })
+      );
+    });
+
+    // delete_dest_index is authorized against the identity stored on the transform, which for an
+    // uploaded package is the uploader's API key. Requesting it would fail the upgrade, so the
+    // destination index is kept and only the transform is removed.
+    it('does not ask Elasticsearch to delete the destination index', async () => {
+      await installLegacyOverExisting();
+
+      expect(esClient.transform.deleteTransform).toHaveBeenCalledWith(
+        expect.objectContaining({ delete_dest_index: false }),
+        expect.anything()
+      );
+    });
+
+    // The incoming source does not say who the previous transforms are bound to: an uploaded
+    // package upgraded from the registry still owns transforms bound to the uploader's API key,
+    // and Elasticsearch authorizes delete_dest_index against that stored identity.
+    it('keeps the destination index when a trusted upgrade replaces an API-key-bound transform', async () => {
+      esClient.transform.getTransform.mockResponse({
+        count: 1,
+        transforms: [
+          {
+            id: 'my_upload.policy_discovery-default-0.1.0',
+            authorization: { api_key: { id: 'k' } },
+          },
+        ],
+      } as any);
+
+      await installLegacyOverExisting('registry');
+
+      expect(esClient.transform.deleteTransform).toHaveBeenCalledWith(
+        expect.objectContaining({ delete_dest_index: false }),
+        expect.anything()
+      );
+    });
+
+    it('still deletes the destination index when a trusted upgrade replaces a kibana_system transform', async () => {
+      esClient.transform.getTransform.mockResponse({
+        count: 1,
+        transforms: [
+          {
+            id: 'my_upload.policy_discovery-default-0.1.0',
+            authorization: { roles: ['kibana_system'] },
+          },
+        ],
+      } as any);
+
+      await installLegacyOverExisting('registry');
+
+      expect(esClient.transform.deleteTransform).toHaveBeenCalledWith(
+        expect.objectContaining({ delete_dest_index: true }),
+        expect.anything()
+      );
+    });
+
+    // A package installed before this change owns transforms created as kibana_system. An
+    // uploader without rights over them now fails the install rather than silently cleaning up
+    // with Kibana's own privileges. Failing closed here is deliberate.
+    it('fails the install when the caller cannot delete the previous transform', async () => {
+      esClient.transform.deleteTransform.mockRejectedValue(
+        new errors.ResponseError({
+          statusCode: 403,
+          body: { error: { type: 'security_exception', reason: 'action [...] is unauthorized' } },
+        } as any)
+      );
+
+      await expect(installLegacyOverExisting()).rejects.toThrow();
+      expect(esClient.transform.putTransform).not.toHaveBeenCalled();
+    });
+  });
+});
+
 describe('installTransforms - cross-cluster source indices', () => {
   let esClient: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;
   let savedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
@@ -1571,6 +1912,7 @@ describe('installTransforms - cross-cluster source indices', () => {
 
   const installLegacyEndpointTransform = () =>
     installTransforms({
+      installSource: 'registry',
       packageInstallContext: {
         packageInfo: { name: 'endpoint', version: '9.5.0-prerelease.1' },
         paths: [legacyTransformPath],

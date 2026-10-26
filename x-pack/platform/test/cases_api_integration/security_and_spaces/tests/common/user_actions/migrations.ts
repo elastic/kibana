@@ -6,12 +6,22 @@
  */
 
 import expect from '@kbn/expect';
-import { SECURITY_SOLUTION_OWNER } from '@kbn/cases-plugin/common/constants';
+import {
+  COMMENT_ATTACHMENT_TYPE,
+  NO_ACTION_SOURCE_FILTERING_KEYWORD,
+  SECURITY_SOLUTION_OWNER,
+} from '@kbn/cases-plugin/common/constants';
 import type { UserActions } from '@kbn/cases-plugin/common/types/domain';
 import { AttachmentType } from '@kbn/cases-plugin/common/types/domain';
 import { UserActionTypes } from '@kbn/cases-plugin/common/types/domain';
 import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
-import { deleteAllCaseItems, findCaseUserActions } from '../../../../common/lib/api';
+import {
+  createComment,
+  deleteAllCaseItems,
+  findCaseUserActions,
+  findInternalCaseUserActions,
+} from '../../../../common/lib/api';
+import { postCommentUserReq } from '../../../../common/lib/mock';
 
 export default function createGetTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -1443,6 +1453,109 @@ export default function createGetTests({ getService }: FtrProviderContext) {
             expect(userAction.payload).not.to.have.property('assignees');
           }
         });
+      });
+    });
+
+    describe('9.6.0', () => {
+      const ARCHIVE =
+        'x-pack/platform/test/functional/fixtures/kbn_archives/cases/9.5.0/user_actions.json';
+      const CASE_ID = 'c0a9e5f0-5f1a-11f1-9c3e-1d2b3c4d5e01';
+      const COMMENT_ID = 'c0a9e5f0-5f1a-11f1-9c3e-1d2b3c4d5e02';
+      const LEGACY_USER_ACTION_IDS = [
+        'c0a9e5f0-5f1a-11f1-9c3e-1d2b3c4d5e03',
+        'c0a9e5f0-5f1a-11f1-9c3e-1d2b3c4d5e04',
+        'c0a9e5f0-5f1a-11f1-9c3e-1d2b3c4d5e05',
+      ];
+
+      before(async () => {
+        await kibanaServer.importExport.load(ARCHIVE);
+      });
+
+      after(async () => {
+        await kibanaServer.importExport.unload(ARCHIVE);
+        await deleteAllCaseItems(es);
+      });
+
+      it('reads user actions written before action sources with their original payload', async () => {
+        const { userActions } = await findCaseUserActions({
+          supertest,
+          caseID: CASE_ID,
+          options: { sortOrder: 'asc' },
+        });
+
+        expect(userActions.map(({ id }) => id)).to.eql(LEGACY_USER_ACTION_IDS);
+
+        for (const userAction of userActions) {
+          expect(userAction).not.to.have.property('source');
+        }
+
+        const [, createCommentAction, updateCommentAction] = userActions;
+        expect(createCommentAction.comment_id).to.be(COMMENT_ID);
+        expect(createCommentAction.payload).to.eql({
+          comment: {
+            comment: 'a comment from before action sources',
+            owner: 'securitySolutionFixture',
+            type: AttachmentType.user,
+          },
+        });
+        expect(updateCommentAction.comment_id).to.be(COMMENT_ID);
+        expect(updateCommentAction.payload).to.eql({
+          comment: {
+            comment: 'an edited comment from before action sources',
+            owner: 'securitySolutionFixture',
+            type: AttachmentType.user,
+          },
+        });
+      });
+
+      it('returns the legacy comment user actions in the unified shape for the activity feed', async () => {
+        const { userActions, latestAttachments } = await findInternalCaseUserActions({
+          supertest,
+          caseID: CASE_ID,
+          options: { sortOrder: 'asc', types: [UserActionTypes.comment] },
+        });
+
+        expect(userActions.map(({ payload }) => payload)).to.eql([
+          {
+            comment: {
+              type: COMMENT_ATTACHMENT_TYPE,
+              data: { content: 'a comment from before action sources' },
+              owner: 'securitySolutionFixture',
+            },
+          },
+          {
+            comment: {
+              type: COMMENT_ATTACHMENT_TYPE,
+              data: { content: 'an edited comment from before action sources' },
+              owner: 'securitySolutionFixture',
+            },
+          },
+        ]);
+
+        expect(latestAttachments.length).to.be(1);
+        const [attachment] = latestAttachments;
+        expect(attachment.id).to.be(COMMENT_ID);
+        expect(attachment.type).to.be(COMMENT_ATTACHMENT_TYPE);
+      });
+
+      it('matches user actions written before action sources with the none source filter', async () => {
+        await createComment({ supertest, caseId: CASE_ID, params: postCommentUserReq });
+
+        const { userActions: withoutSource } = await findInternalCaseUserActions({
+          supertest,
+          caseID: CASE_ID,
+          options: { sortOrder: 'asc', sources: [NO_ACTION_SOURCE_FILTERING_KEYWORD] },
+        });
+        expect(withoutSource.map(({ id }) => id)).to.eql(LEGACY_USER_ACTION_IDS);
+
+        const { userActions: withApiSource } = await findInternalCaseUserActions({
+          supertest,
+          caseID: CASE_ID,
+          options: { sortOrder: 'asc', sources: ['api'] },
+        });
+        expect(withApiSource.length).to.be(1);
+        expect(withApiSource[0].comment_id).not.to.be(COMMENT_ID);
+        expect(withApiSource[0].action).to.be('create');
       });
     });
   });

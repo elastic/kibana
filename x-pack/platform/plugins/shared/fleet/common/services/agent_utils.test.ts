@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import { getSortConfig, removeSOAttributes } from './agent_utils';
+import {
+  extractAgentIdsWithData,
+  filterIncomingDataWithData,
+  getSortConfig,
+  removeSOAttributes,
+} from './agent_utils';
+import type { IncomingDataList } from '../types/rest_spec/agent';
 
 describe('Agent utils', () => {
   it('should get sort config', () => {
@@ -35,5 +41,29 @@ describe('Agent utils', () => {
     const kuery = 'attributes.test AND fleet-agents.test';
     const result = removeSOAttributes(kuery);
     expect(result).toEqual('test AND test');
+  });
+});
+
+describe('incoming data helpers', () => {
+  const items: IncomingDataList[] = [
+    { a1: { data: true } },
+    { a2: { data: false } },
+    { a3: { data: true } },
+  ];
+
+  it('keeps only the items of agents with data', () => {
+    expect(filterIncomingDataWithData(items)).toEqual([
+      { a1: { data: true } },
+      { a3: { data: true } },
+    ]);
+  });
+
+  it('lists the ids of agents with data', () => {
+    expect(extractAgentIdsWithData(items)).toEqual(['a1', 'a3']);
+  });
+
+  it('returns nothing for no items or no data', () => {
+    expect(extractAgentIdsWithData([])).toEqual([]);
+    expect(extractAgentIdsWithData([{ a2: { data: false } }])).toEqual([]);
   });
 });

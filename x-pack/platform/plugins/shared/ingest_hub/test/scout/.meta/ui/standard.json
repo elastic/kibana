@@ -1,5 +1,5 @@
 {
-  "sha1": "0578ebaf627e03f128e2db3a16bc0ab656a41193",
+  "sha1": "d77928bb43ab5e37612dbfaccb44920b60bf7209",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -47,8 +47,8 @@
       }
     },
     {
-      "id": "a002a5dadd7e00b-8088fa7b6e5b8b3",
-      "title": "Onboarding Authenticate and Deploy step ecf-only services: switching to agent-based warns first, then removes them on Save",
+      "id": "a002a5dadd7e00b-57aa2b50c5614a2",
+      "title": "Onboarding Authenticate and Deploy step ecf-only services: switching to agent-based warns first, then removes them on confirm",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -56,8 +56,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_authenticate_and_deploy_step.spec.ts",
-        "line": 456,
-        "column": 24
+        "line": 457,
+        "column": 11
       }
     },
     {
@@ -70,7 +70,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_authenticate_and_deploy_step.spec.ts",
-        "line": 487,
+        "line": 485,
         "column": 24
       }
     },
@@ -84,7 +84,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_authenticate_and_deploy_step.spec.ts",
-        "line": 507,
+        "line": 502,
         "column": 24
       }
     },
@@ -397,8 +397,8 @@
       }
     },
     {
-      "id": "f11cb343b6e8637-579fcdc671b7aba",
-      "title": "Onboarding Service Settings step renders table with Service Name, Collects, Category, Region columns",
+      "id": "f11cb343b6e8637-d690c39e0d1ddad",
+      "title": "Onboarding Service Settings step renders table with Service Name, Collects, Region columns",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -602,13 +602,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_service_settings_step.spec.ts",
-        "line": 484,
-        "column": 8
+        "line": 486,
+        "column": 11
       }
     },
     {
-      "id": "f11cb343b6e8637-8ae52c79d80cb5b",
-      "title": "Onboarding Service Settings step duplicate modal pre-fills name as \"Service [Duplicate]\"",
+      "id": "f11cb343b6e8637-c6d0c8a9181be4a",
+      "title": "Onboarding Service Settings step duplicate modal pre-fills the name of the source policy plus \"[Duplicate]\"",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -616,8 +616,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_service_settings_step.spec.ts",
-        "line": 493,
-        "column": 30
+        "line": 497,
+        "column": 15
       }
     },
     {
@@ -630,7 +630,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_service_settings_step.spec.ts",
-        "line": 501,
+        "line": 506,
         "column": 24
       }
     },
@@ -644,7 +644,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_service_settings_step.spec.ts",
-        "line": 514,
+        "line": 519,
         "column": 93
       }
     },
@@ -658,7 +658,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_service_settings_step.spec.ts",
-        "line": 553,
+        "line": 558,
         "column": 11
       }
     },
@@ -672,7 +672,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_service_settings_step.spec.ts",
-        "line": 593,
+        "line": 598,
         "column": 20
       }
     },
@@ -686,7 +686,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_service_settings_step.spec.ts",
-        "line": 622,
+        "line": 627,
         "column": 7
       }
     },
@@ -700,7 +700,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_service_settings_step.spec.ts",
-        "line": 687,
+        "line": 692,
         "column": 24
       }
     },
@@ -714,7 +714,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_service_settings_step.spec.ts",
-        "line": 758,
+        "line": 760,
         "column": 24
       }
     },
@@ -728,13 +728,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_service_settings_step.spec.ts",
-        "line": 786,
+        "line": 788,
         "column": 24
       }
     },
     {
-      "id": "240d7a094dcfd2b-345f674a3ce3ecd",
-      "title": "Onboarding services step renders step header and default category view",
+      "id": "240d7a094dcfd2b-fa1e9cfc4d4435c",
+      "title": "Onboarding services step renders step header, data schema cards and the service list",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -742,7 +742,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_services_step.spec.ts",
-        "line": 22,
+        "line": 21,
         "column": 14
       }
     },
@@ -756,13 +756,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_services_step.spec.ts",
-        "line": 31,
-        "column": 24
+        "line": 36,
+        "column": 5
       }
     },
     {
-      "id": "240d7a094dcfd2b-34b2946ab4f92b6",
-      "title": "Onboarding services step per-category select all and deselect all",
+      "id": "240d7a094dcfd2b-7c841fb30b782af",
+      "title": "Onboarding services step select all and deselect all",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -770,7 +770,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_services_step.spec.ts",
-        "line": 41,
+        "line": 46,
         "column": 74
       }
     },
@@ -784,13 +784,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_services_step.spec.ts",
-        "line": 57,
-        "column": 23
+        "line": 63,
+        "column": 24
       }
     },
     {
-      "id": "240d7a094dcfd2b-d189ec3bbd08bf3",
-      "title": "Onboarding services step signal-type filter hides categories with no matching services",
+      "id": "240d7a094dcfd2b-275006fe865896e",
+      "title": "Onboarding services step signal-type filter hides services with no matching signal",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -798,7 +798,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_services_step.spec.ts",
-        "line": 67,
+        "line": 73,
         "column": 11
       }
     },
@@ -812,8 +812,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_services_step.spec.ts",
-        "line": 90,
-        "column": 5
+        "line": 94,
+        "column": 24
       }
     },
     {
@@ -826,7 +826,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_services_step.spec.ts",
-        "line": 105,
+        "line": 107,
         "column": 11
       }
     },
@@ -994,7 +994,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_stored_secrets_same_session.spec.ts",
-        "line": 64,
+        "line": 65,
         "column": 10
       }
     },

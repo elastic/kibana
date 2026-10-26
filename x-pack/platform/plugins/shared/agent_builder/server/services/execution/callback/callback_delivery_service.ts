@@ -6,7 +6,9 @@
  */
 
 import pRetry, { AbortError } from 'p-retry';
+import type { Logger } from '@kbn/core/server';
 import type { PluginSetupContract as ActionsPluginSetup } from '@kbn/actions-plugin/server';
+import { isConversationNotFoundError } from '@kbn/agent-builder-common';
 import type {
   CallbackConversationResolver,
   CallbackConversationResolverContext,
@@ -17,6 +19,12 @@ import { isCallbackDeliveryError, throwIfNotDelivered } from '@kbn/agent-builder
 import type { ChatCallbackResponse } from '../../../../common/http_api/chat_callback';
 import type { ConversationClient } from '../../conversation';
 
+/** The conversation a turn continues, and the agent it runs on when the conversation decides it. */
+export interface ConversationResolution {
+  conversationId: string;
+  agentId?: string;
+}
+
 const callbackRetryOptions = {
   retries: 2,
   minTimeout: 200,
@@ -26,11 +34,13 @@ const callbackRetryOptions = {
 
 export class CallbackDeliveryService {
   private readonly actions: ActionsPluginSetup;
+  private readonly logger: Logger;
   private readonly transports: CallbackTransportDefinition[];
   private readonly conversationResolvers: CallbackConversationResolver[] = [];
 
-  constructor({ actions }: { actions: ActionsPluginSetup }) {
+  constructor({ actions, logger }: { actions: ActionsPluginSetup; logger: Logger }) {
     this.actions = actions;
+    this.logger = logger;
     this.transports = [this.createRelayTransport()];
   }
 
@@ -46,18 +56,33 @@ export class CallbackDeliveryService {
   }
 
   /**
-   * The conversation an external conversation continues: the first registered resolver's answer,
-   * else the conversation that has the origin. An error from a registered resolver propagates.
+   * The conversation an external conversation continues: the first registered resolver's answer the
+   * caller can converse in, on its own agent, else the conversation that has the origin. An error
+   * from a registered resolver propagates.
    */
   async resolveConversation(
     context: CallbackConversationResolverContext,
     conversationClient: ConversationClient
-  ): Promise<string | undefined> {
+  ): Promise<ConversationResolution | undefined> {
     for (const resolver of this.conversationResolvers) {
       const resolved = await resolver(context);
 
-      if (resolved) {
-        return resolved.conversationId;
+      if (!resolved) {
+        continue;
+      }
+
+      try {
+        const conversation = await conversationClient.get(resolved.conversationId);
+
+        return { conversationId: conversation.id, agentId: conversation.agent_id };
+      } catch (error) {
+        if (!isConversationNotFoundError(error)) {
+          throw error;
+        }
+
+        this.logger.debug(
+          `Resolved conversation [${resolved.conversationId}] is missing or not available to the caller; skipping it`
+        );
       }
     }
 
@@ -65,7 +90,7 @@ export class CallbackDeliveryService {
       external_conversation_id: context.origin.external_conversation_id,
     });
 
-    return conversation?.id;
+    return conversation ? { conversationId: conversation.id } : undefined;
   }
 
   validateCallbackUrl(callbackUrl: string): void {

@@ -48,8 +48,10 @@ const ESTIMATED_ROW_HEIGHT = 41;
 /** Rows rendered above and below the visible ones, so fast scrolling doesn't show gaps. */
 const OVERSCAN_ROWS = 5;
 
+// Grouped grids have no height to fill, so the cap keeps their rows virtualized.
 const scrollContainerCss = css`
-  max-block-size: 70vh;
+  block-size: 100%;
+  max-block-size: var(--kbn-application--content-height);
   overflow: auto;
 `;
 

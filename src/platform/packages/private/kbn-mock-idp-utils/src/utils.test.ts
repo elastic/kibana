@@ -23,6 +23,7 @@ import {
   MOCK_IDP_LOGOUT_PATH,
   MOCK_IDP_REALM_NAME,
   MOCK_IDP_ROLE_MAPPING_NAME,
+  MOCK_IDP_UIAM_OAUTH_SIGNING_SECRET,
   MOCK_IDP_UIAM_SIGNING_SECRET,
 } from './constants';
 import { decodeWithChecksum } from './jwt-codecs/encoder-checksum';
@@ -30,6 +31,7 @@ import { removePrefixEssuDev } from './jwt-codecs/encoder-prefix';
 import {
   createMockIdpMetadata,
   createSAMLResponse,
+  createUiamOAuthAccessToken,
   ensureSAMLRoleMapping,
   getSAMLRequestId,
 } from './utils';
@@ -396,6 +398,44 @@ describe('mock-idp-utils', () => {
         expect(decoded).not.toContain(`Name="${MOCK_IDP_ATTRIBUTE_UIAM_ACCESS_TOKEN}"`);
         expect(decoded).not.toContain(`Name="${MOCK_IDP_ATTRIBUTE_UIAM_REFRESH_TOKEN}"`);
       });
+    });
+  });
+
+  describe('createUiamOAuthAccessToken', () => {
+    it('should sign the token with the OAuth key set and name it in the `kid` header', async () => {
+      const wrappedToken = await createUiamOAuthAccessToken({
+        username: 'user1',
+        organizationId: 'org1234567890',
+        projectType: 'security',
+        roles: ['admin'],
+        audience: 'https://localhost:5620',
+      });
+      expect(wrappedToken).toMatch(/^essu_dev_/);
+
+      const [header, payload, signature] = decodeWithChecksum(
+        removePrefixEssuDev(wrappedToken)
+      ).split('.');
+
+      expect(JSON.parse(Buffer.from(header, 'base64url').toString())).toEqual({
+        typ: 'JWT',
+        alg: 'HS256',
+        kid: 'ot',
+      });
+
+      const claims = JSON.parse(Buffer.from(payload, 'base64url').toString());
+      expect(claims.typ).toBe('oauth-access-token');
+      expect(claims.aud).toBe('https://localhost:5620');
+
+      expect(signature).toBe(
+        createHmac('sha256', MOCK_IDP_UIAM_OAUTH_SIGNING_SECRET)
+          .update(`${header}.${payload}`)
+          .digest('base64url')
+      );
+      expect(signature).not.toBe(
+        createHmac('sha256', MOCK_IDP_UIAM_SIGNING_SECRET)
+          .update(`${header}.${payload}`)
+          .digest('base64url')
+      );
     });
   });
 

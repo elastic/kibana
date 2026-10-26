@@ -12,6 +12,7 @@
       "set_commit_status": true,
       "commit_status_context": "kibana-ci",
       "build_on_commit": true,
+      "build_stack_depth": 1,
       "build_on_comment": true,
       "build_drafts": false,
       "build_drafts_label": "ci:build-draft",

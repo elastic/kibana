@@ -91,6 +91,41 @@ describe('getWorkflowConnectorTypes', () => {
     expect(getWorkflowConnectorTypes(definition)).toEqual(['email', 'elasticsearch', 'slack']);
   });
 
+  it('includes console steps', () => {
+    const definition = {
+      steps: [{ type: 'console', name: 'log' }],
+    } as unknown as WorkflowYaml;
+
+    expect(getWorkflowConnectorTypes(definition)).toEqual(['console']);
+  });
+
+  it('keeps console in first-seen order alongside other connectors', () => {
+    const definition = {
+      steps: [
+        { type: 'console', name: 'log' },
+        { type: '.slack', name: 'slack' },
+        { type: 'console', name: 'log again' },
+      ],
+    } as unknown as WorkflowYaml;
+
+    expect(getWorkflowConnectorTypes(definition)).toEqual(['console', 'slack']);
+  });
+
+  it('collects console steps nested in foreach', () => {
+    const definition = {
+      steps: [
+        {
+          type: 'foreach',
+          name: 'loop',
+          foreach: '{{ items }}',
+          steps: [{ type: 'console', name: 'log' }],
+        },
+      ],
+    } as unknown as WorkflowYaml;
+
+    expect(getWorkflowConnectorTypes(definition)).toEqual(['console']);
+  });
+
   it('returns [] for null definition', () => {
     expect(getWorkflowConnectorTypes(null)).toEqual([]);
   });

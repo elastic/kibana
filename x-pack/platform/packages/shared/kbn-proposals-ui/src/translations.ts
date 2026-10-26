@@ -11,6 +11,14 @@ export const APPROVAL_MODAL_TRANSLATIONS = Object.freeze({
   approve: i18n.translate('xpack.proposals.approvalModal.approve', {
     defaultMessage: 'Approve',
   }),
+  /** The single decision a to-do proposal offers: the human did what it proposes. */
+  markApplied: i18n.translate('xpack.proposals.approvalModal.markApplied', {
+    defaultMessage: "I've applied",
+  }),
+  /** Takes back a to-do proposal's "I've applied", re-offering it. */
+  markNotApplied: i18n.translate('xpack.proposals.approvalModal.markNotApplied', {
+    defaultMessage: 'Mark as not applied',
+  }),
   dismiss: i18n.translate('xpack.proposals.approvalModal.dismiss', {
     defaultMessage: 'Decline',
   }),
@@ -42,6 +50,10 @@ export const APPROVAL_MODAL_TRANSLATIONS = Object.freeze({
    */
   noActionBadge: i18n.translate('xpack.proposals.approvalModal.noActionBadge', {
     defaultMessage: 'Approved',
+  }),
+  /** A to-do proposal the analyst marked as applied: they carried it out, nothing automated ran. */
+  markedAppliedBadge: i18n.translate('xpack.proposals.approvalModal.markedAppliedBadge', {
+    defaultMessage: 'Applied',
   }),
   expiredBadge: i18n.translate('xpack.proposals.approvalModal.expiredBadge', {
     defaultMessage: 'Expired',
@@ -75,6 +87,14 @@ export const APPROVAL_MODAL_TRANSLATIONS = Object.freeze({
   }),
   noActionBannerTitle: i18n.translate('xpack.proposals.approvalModal.outcome.noActionTitle', {
     defaultMessage: 'Approved',
+  }),
+  markedAppliedBannerTitle: i18n.translate(
+    'xpack.proposals.approvalModal.outcome.markedAppliedTitle',
+    { defaultMessage: 'Marked as applied' }
+  ),
+  /** The caption's name for the to-do category, which reads oddly sentence-cased as "Todo". */
+  todoCategory: i18n.translate('xpack.proposals.approvalModal.caption.todoCategory', {
+    defaultMessage: 'To do',
   }),
   actionErrorTitle: i18n.translate('xpack.proposals.approvalModal.outcome.actionError', {
     defaultMessage: 'Could not record the decision. Try again.',

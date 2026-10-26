@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { sloTemplateSchema, storedSloTemplateSchema } from '@kbn/slo-schema';
-import type * as t from 'io-ts';
+import type { sloTemplateSchemaZod, storedSloTemplateSchemaZod } from '@kbn/slo-schema';
+import type { z } from '@kbn/zod';
 
-type SLOTemplate = t.TypeOf<typeof sloTemplateSchema>;
-type StoredSLOTemplate = t.TypeOf<typeof storedSloTemplateSchema>;
+type SLOTemplate = z.output<typeof sloTemplateSchemaZod>;
+type StoredSLOTemplate = z.output<typeof storedSloTemplateSchemaZod>;
 
 export type { SLOTemplate, StoredSLOTemplate };

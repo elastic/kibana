@@ -56,8 +56,7 @@ export interface ReportHuntContext {
 }
 
 interface StoredReportSource {
-  '@timestamp'?: string;
-  content?: { title?: string; body_text?: string };
+  content?: { title?: string; body_text?: string; published_at?: string };
   source?: { name?: string };
   lineage?: { extraction_method?: string };
   severity?: { level?: string };
@@ -143,7 +142,7 @@ export const loadReportHuntContext = async ({
       },
     },
     _source: [
-      '@timestamp',
+      'content.published_at',
       'content.title',
       'content.body_text',
       'source.name',
@@ -200,7 +199,9 @@ export const loadReportHuntContext = async ({
 
   const title = asLabel(source.content?.title);
   const sourceName = asLabel(source.source?.name);
-  const publishedAt = asLabel(source['@timestamp']);
+  // Publication date only. Ingest time is not a fallback: showing it as "Published" is the
+  // defect, and candidate selection keeps its own fallback for reports without a date.
+  const publishedAt = asLabel(source.content?.published_at);
   const severity = asLabel(source.severity?.level);
   const method =
     typeof source.lineage?.extraction_method === 'string'

@@ -116,7 +116,7 @@ const resolveSortField = (sortField: string): string => {
 
 export const addEpisodeAggregation = (query: ComposerQuery) => {
   /* This will be simplified when the `$.alerting-episodes` ES|QL view works.
-   * Matches `buildEpisodeEventDataQuery`.
+   * Matches `buildEpisodeDataRequest`.
    */
 
   // prettier-ignore

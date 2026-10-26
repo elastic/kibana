@@ -88,4 +88,10 @@ export {
   serverlessSloSettingsSchema as serverlessSloSettingsSchemaZod,
   sloSettingsSchema as sloSettingsSchemaZod,
   storedSloSettingsSchema as storedSloSettingsSchemaZod,
+  // health
+  sloHealthSchema as sloHealthSchemaZod,
+  transformHealthSchema as transformHealthSchemaZod,
+  // slo_template
+  sloTemplateSchema as sloTemplateSchemaZod,
+  storedSloTemplateSchema as storedSloTemplateSchemaZod,
 } from './zod';

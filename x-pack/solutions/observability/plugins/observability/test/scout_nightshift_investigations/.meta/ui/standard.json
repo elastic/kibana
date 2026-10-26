@@ -1,12 +1,12 @@
 {
-  "sha1": "7c8a9a9160b969814b4cf841c551353156b2f158",
+  "sha1": "7dedbb371363763b1147799cd393681aed2007df",
   "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
     {
-      "id": "4dd4f954d8f8955-4b7e12f3b348967",
-      "title": "Observability alert investigation action sends an investigation request from an alert row action",
+      "id": "4dd4f954d8f8955-9906765a2c5c4c4",
+      "title": "Observability alert investigation action starts and views an investigation from an alert row action",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -21,8 +21,8 @@
       }
     },
     {
-      "id": "4dd4f954d8f8955-ea2b693e093542e",
-      "title": "Observability alert investigation action sends an investigation request from the alert detail action menu",
+      "id": "4dd4f954d8f8955-b10f3d5a1c9352d",
+      "title": "Observability alert investigation action starts and views an investigation from the alert detail action menu",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -32,8 +32,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout_nightshift_investigations/ui/tests/alert_investigation_action.spec.ts",
-        "line": 90,
-        "column": 18
+        "line": 91,
+        "column": 9
       }
     },
     {
@@ -48,8 +48,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout_nightshift_investigations/ui/tests/alert_investigation_action.spec.ts",
-        "line": 101,
-        "column": 13
+        "line": 114,
+        "column": 33
       }
     },
     {
@@ -64,7 +64,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout_nightshift_investigations/ui/tests/alert_investigation_action.spec.ts",
-        "line": 121,
+        "line": 131,
         "column": 18
       }
     },

@@ -46,7 +46,36 @@ describe('InferenceFeatureRegistry', () => {
       const result = registry.register(feature);
 
       expect(result).toEqual({ ok: true });
-      expect(registry.get(feature.featureId)).toEqual(feature);
+      expect(registry.get(feature.featureId)).toEqual({
+        ...feature,
+        recommendedEndpoints: [{ id: 'endpoint1' }, { id: 'endpoint2' }],
+      });
+    });
+
+    it('stores recommended endpoints declared with model parameters', () => {
+      const parameters = { reasoning: { effort: 'low' as const }, temperature: 0 };
+      registry.register(
+        createValidFeature({
+          featureId: 'my_feature',
+          recommendedEndpoints: [{ id: 'with_params', parameters }, 'plain'],
+        })
+      );
+
+      expect(registry.get('my_feature')?.recommendedEndpoints).toEqual([
+        { id: 'with_params', parameters },
+        { id: 'plain' },
+      ]);
+    });
+
+    it('returns error for recommended endpoints with invalid model parameters', () => {
+      const result = registry.register(
+        createValidFeature({
+          recommendedEndpoints: [{ id: 'ep', parameters: { temperature: 5 } }],
+        })
+      );
+
+      expect(result).toEqual({ ok: false, error: expect.stringContaining('temperature') });
+      expect(registry.getAll()).toHaveLength(0);
     });
 
     it('returns error and does not store invalid features', () => {
@@ -150,7 +179,35 @@ describe('InferenceFeatureRegistry', () => {
 
       registry.updateRecommendedEndpoints('my_feature', ['ep-1', 'ep-2']);
 
-      expect(registry.get('my_feature')?.recommendedEndpoints).toEqual(['ep-1', 'ep-2']);
+      expect(registry.get('my_feature')?.recommendedEndpoints).toEqual([
+        { id: 'ep-1' },
+        { id: 'ep-2' },
+      ]);
+    });
+
+    it('accepts entries with model parameters', () => {
+      const parameters = { reasoning: { effort: 'high' as const } };
+      registry.register(createValidFeature({ featureId: 'my_feature' }));
+
+      registry.updateRecommendedEndpoints('my_feature', [{ id: 'ep-1', parameters }, 'ep-2']);
+
+      expect(registry.get('my_feature')?.recommendedEndpoints).toEqual([
+        { id: 'ep-1', parameters },
+        { id: 'ep-2' },
+      ]);
+    });
+
+    it('throws and does not update when an entry has invalid model parameters', () => {
+      registry.register(
+        createValidFeature({ featureId: 'my_feature', recommendedEndpoints: ['original'] })
+      );
+
+      expect(() =>
+        registry.updateRecommendedEndpoints('my_feature', [
+          { id: 'ep-1', parameters: { temperature: -1 } },
+        ])
+      ).toThrow('temperature');
+      expect(registry.get('my_feature')?.recommendedEndpoints).toEqual([{ id: 'original' }]);
     });
 
     it('replaces endpoints on successive calls (does not append)', () => {
@@ -161,7 +218,7 @@ describe('InferenceFeatureRegistry', () => {
       registry.updateRecommendedEndpoints('my_feature', ['new-1', 'new-2']);
       registry.updateRecommendedEndpoints('my_feature', ['final']);
 
-      expect(registry.get('my_feature')?.recommendedEndpoints).toEqual(['final']);
+      expect(registry.get('my_feature')?.recommendedEndpoints).toEqual([{ id: 'final' }]);
     });
 
     it('does not mutate other fields on the feature', () => {
@@ -185,7 +242,7 @@ describe('InferenceFeatureRegistry', () => {
       );
 
       expect(() => registry.updateRecommendedEndpoints('my_feature', [])).toThrow('not be empty');
-      expect(registry.get('my_feature')?.recommendedEndpoints).toEqual(['original']);
+      expect(registry.get('my_feature')?.recommendedEndpoints).toEqual([{ id: 'original' }]);
     });
 
     it('throws and does not update when endpoints contain an empty string', () => {
@@ -196,7 +253,7 @@ describe('InferenceFeatureRegistry', () => {
       expect(() => registry.updateRecommendedEndpoints('my_feature', ['ep-1', ''])).toThrow(
         'empty strings'
       );
-      expect(registry.get('my_feature')?.recommendedEndpoints).toEqual(['original']);
+      expect(registry.get('my_feature')?.recommendedEndpoints).toEqual([{ id: 'original' }]);
     });
 
     it('throws and does not update when endpoints contain a whitespace-only string', () => {
@@ -207,7 +264,7 @@ describe('InferenceFeatureRegistry', () => {
       expect(() => registry.updateRecommendedEndpoints('my_feature', ['ep-1', '   '])).toThrow(
         'empty strings'
       );
-      expect(registry.get('my_feature')?.recommendedEndpoints).toEqual(['original']);
+      expect(registry.get('my_feature')?.recommendedEndpoints).toEqual([{ id: 'original' }]);
     });
 
     it('logs a debug message on success', () => {

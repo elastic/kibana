@@ -18,6 +18,7 @@ import type { GetAgentsOptions } from './crud';
 import { openPointInTime } from './crud';
 import { getAgentsByKuery } from './crud';
 import { getAgentsById, updateAgent, getAgentPolicyForAgent } from './crud';
+import { throwIfAgentlessAgentPolicy } from './hosted_agent';
 import { UpgradeActionRunner, upgradeBatch } from './upgrade_action_runner';
 
 export async function sendUpgradeAgentAction({
@@ -45,6 +46,7 @@ export async function sendUpgradeAgentAction({
       `Cannot upgrade agent ${agentId} in hosted agent policy ${agentPolicy.id}`
     );
   }
+  throwIfAgentlessAgentPolicy(agentPolicy, `Cannot upgrade managed agent ${agentId}`);
 
   const currentSpaceId = getCurrentNamespace(soClient);
 

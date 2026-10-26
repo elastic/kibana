@@ -166,4 +166,32 @@ describe('AgentSettings', () => {
     expect(resetLogLevelBtn).toBeInTheDocument();
     expect(resetLogLevelBtn).not.toHaveAttribute('disabled');
   });
+
+  it('should make the log level read-only for an agentless agent', () => {
+    mockStartServices();
+    const renderer = createFleetTestRendererMock();
+    const agent = {
+      id: 'agent1',
+      local_metadata: { elastic: { agent: { version: '8.15.0', log_level: 'debug' } } },
+    } as any;
+
+    const regular = renderer.render(
+      <AgentSettings
+        agent={agent}
+        agentPolicy={{ id: 'policy1', supports_agentless: false } as any}
+      />
+    );
+    expect(regular.getByTestId('selectAgentLogLevel')).toBeEnabled();
+    expect(regular.getByTestId('resetLogLevelBtn')).toBeEnabled();
+    regular.unmount();
+
+    const agentless = renderer.render(
+      <AgentSettings
+        agent={agent}
+        agentPolicy={{ id: 'policy1', supports_agentless: true } as any}
+      />
+    );
+    expect(agentless.getByTestId('selectAgentLogLevel')).toBeDisabled();
+    expect(agentless.getByTestId('resetLogLevelBtn')).toBeDisabled();
+  });
 });

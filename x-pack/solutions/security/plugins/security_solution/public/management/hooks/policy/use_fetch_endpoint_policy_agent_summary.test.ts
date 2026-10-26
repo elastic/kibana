@@ -90,7 +90,12 @@ describe('When using the `useFetchEndpointPolicyAgentSummary()` hook', () => {
 
     expect(apiMocks.responseProvider.agentStatus).toHaveBeenCalledWith({
       path: agentRouteService.getStatusPath(),
-      query: { kuery: 'policy_id:1 OR policy_id:2 OR policy_id:3' },
+      // by the base policy id, which the agents on a version specific or the sentinel policy have, with
+      // the exact policy id for the agents that do not have it
+      query: {
+        kuery:
+          '(policy_base_id:(1 or 2 or 3) or (policy_id:(1 or 2 or 3) and not policy_base_id:*))',
+      },
       version: API_VERSIONS.public.v1,
     });
   });

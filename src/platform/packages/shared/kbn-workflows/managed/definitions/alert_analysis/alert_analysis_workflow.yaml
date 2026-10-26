@@ -136,6 +136,14 @@ triggers:
             results without leaving the Investigation. Absent on the standalone path —
             no comments are posted. Bounded to 1–256 chars to match Agent Builder
             CONVERSATION_ID_MAX_LENGTH.
+        authorName:
+          type: string
+          minLength: 1
+          maxLength: 256
+          description: >
+            Display name for the progress comments posted into the Investigation when the
+            Worker runs as a service account, e.g. "Alert Triage worker". Temporary until
+            service accounts carry a display name. Defaults to this workflow's name.
 
 # Structured output emitted by the `emit_workflow_output` step at the end of each run.
 # Always present, even when analysis is skipped (empty arrays / zero counts).
@@ -1732,6 +1740,7 @@ steps:
                 on-failure:
                   continue: true
                 with:
+                  author_name: "{{ inputs.authorName | default: workflow.name }}"
                   conversation_id: "{{ variables.investigation_conversation_id }}"
                   message: |-
                     Batch {{ foreach.index | plus: 1 }} of {{ foreach.total }} ({{ foreach.item.size }} alert{% if foreach.item.size != 1 %}s{% endif %}) failed after retries and returned no verdicts. {% if foreach.item.size == 1 %}This alert will not get a verdict tag or note; an error note will record the miss, and a Worker re-run will retry it.{% else %}These alerts will not get verdict tags or notes; an error note will record the miss, and a Worker re-run will retry them.{% endif %}
@@ -1867,6 +1876,7 @@ steps:
                 on-failure:
                   continue: true
                 with:
+                  author_name: "{{ inputs.authorName | default: workflow.name }}"
                   conversation_id: "{{ variables.investigation_conversation_id }}"
                   message: >-
                     Batch {{ foreach.index | plus: 1 }} of {{ foreach.total }} complete

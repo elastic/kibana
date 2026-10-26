@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type React from 'react';
+
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface EntityInventoryAppSetupDependencies {}
 
@@ -14,5 +16,6 @@ export interface EntityInventoryAppStartDependencies {}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface EntityInventoryAppPublicSetup {}
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface EntityInventoryAppPublicStart {}
+export interface EntityInventoryAppPublicStart {
+  getAppComponent: () => React.ComponentType;
+}

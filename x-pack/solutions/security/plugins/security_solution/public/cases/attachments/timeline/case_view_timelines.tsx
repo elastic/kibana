@@ -16,6 +16,7 @@ import type { CommonAttachmentListViewProps } from '@kbn/cases-plugin/public/cli
 
 import { TimelineTypeEnum, type SortFieldTimeline } from '../../../../common/api/timeline';
 import type {
+  ActionTimelineToShow,
   OnOpenTimeline,
   OnTableChange,
   OpenTimelineResult,
@@ -43,6 +44,8 @@ import { NO_TIMELINES_ATTACHED, TIMELINE_DISPLAY_NAME } from './translations';
 const DEFAULT_PAGE_SIZE = 10;
 const DEFAULT_SORT_FIELD: SortFieldTimeline = 'updated';
 const DEFAULT_SORT_ORDER: 'asc' | 'desc' = 'desc';
+const ACTIONS: ActionTimelineToShow[] = ['selectable'];
+const ACTIONS_WITH_REMOVE: ActionTimelineToShow[] = ['selectable', 'removeFromCase'];
 
 const extractTimelineIds = (caseData: CommonAttachmentListViewProps['caseData']): string[] => {
   const ids: string[] = [];
@@ -60,7 +63,10 @@ const extractTimelineIds = (caseData: CommonAttachmentListViewProps['caseData'])
   return ids;
 };
 
-export const CaseViewTimelines: React.FC<CommonAttachmentListViewProps> = ({ caseData }) => {
+export const CaseViewTimelines: React.FC<CommonAttachmentListViewProps> = ({
+  caseData,
+  onRemove,
+}) => {
   const timelineIds = useMemo(() => extractTimelineIds(caseData), [caseData]);
 
   const [pageIndex, setPageIndex] = useState(1);
@@ -96,7 +102,28 @@ export const CaseViewTimelines: React.FC<CommonAttachmentListViewProps> = ({ cas
     setSelectedItems(items);
   }, []);
 
+  const onRemoveSelectedFromCase = useMemo(() => {
+    if (!onRemove) {
+      return undefined;
+    }
+    return () =>
+      onRemove(
+        {
+          attachmentIds: selectedItems.flatMap(({ savedObjectId }) =>
+            savedObjectId ? [savedObjectId] : []
+          ),
+        },
+        { onSuccess: () => tableRef.current?.changeSelection([]) }
+      );
+  }, [onRemove, selectedItems]);
+
+  const onRemoveFromCase = useMemo(
+    () => onRemove && ((timelineId: string) => onRemove({ attachmentIds: [timelineId] })),
+    [onRemove]
+  );
+
   const { getBatchItemsPopoverContent } = useEditTimelineBatchActions({
+    onRemoveSelectedFromCase,
     selectedItems,
     showExportAction: false,
     tableRef,
@@ -177,11 +204,12 @@ export const CaseViewTimelines: React.FC<CommonAttachmentListViewProps> = ({ cas
       </EuiFlexItem>
       <EuiFlexItem>
         <TimelinesTable
-          actionTimelineToShow={['selectable']}
+          actionTimelineToShow={onRemoveFromCase ? ACTIONS_WITH_REMOVE : ACTIONS}
           defaultPageSize={DEFAULT_PAGE_SIZE}
           loading={loading}
           itemIdToExpandedNotesRowMap={itemIdToExpandedNotesRowMap}
           onOpenTimeline={onOpenTimeline}
+          onRemoveFromCase={onRemoveFromCase}
           onSelectionChange={onSelectionChange}
           onTableChange={onTableChange}
           onToggleShowNotes={setItemIdToExpandedNotesRowMap}

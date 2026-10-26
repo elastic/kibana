@@ -7,32 +7,22 @@
 
 import React from 'react';
 import { act, render, screen, fireEvent, waitFor, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { EuiProvider } from '@elastic/eui';
-import type { FlyoutTemplateProps } from '@kbn/flyout-template';
 import { I18nProvider } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { UseInvestigationResult } from '@kbn/investigation-output';
 import type { Investigation } from '@kbn/agentic-investigations-plugin/common';
 import { EventFlyout } from './event_flyout';
-import type { InvestigationRunStatus, SignificantEvent } from '@kbn/significant-events-schema';
+import type {
+  InvestigationRunStatus,
+  SignificantEventResponse,
+} from '@kbn/significant-events-schema';
+import { SIGNIFICANT_EVENTS_LIST_QUERY_KEY } from '../../../data/query_keys';
+import { clearPendingInvestigationCompletionsForTests } from '../../../hooks/use_fetch_significant_events';
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { retry: false } },
-});
-
-let mockFlyoutTemplateProps: FlyoutTemplateProps | undefined;
-
-jest.mock('@kbn/flyout-template', () => {
-  const actual = jest.requireActual<typeof import('@kbn/flyout-template')>('@kbn/flyout-template');
-  const react = jest.requireActual<typeof import('react')>('react');
-  const CapturingFlyoutTemplate = (props: FlyoutTemplateProps) => {
-    mockFlyoutTemplateProps = props;
-    return react.createElement(actual.FlyoutTemplate, props);
-  };
-  return {
-    ...actual,
-    FlyoutTemplate: Object.assign(CapturingFlyoutTemplate, actual.FlyoutTemplate),
-  };
 });
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
@@ -45,9 +35,6 @@ const mockUseInvestigation = jest.fn<UseInvestigationResult, [unknown]>();
 jest.mock('@kbn/investigation-output', () => ({
   // Avoid requireActual — it pulls a deep Kibana React graph that is brittle in unit tests.
   useInvestigation: (args: unknown) => mockUseInvestigation(args),
-  InvestigationOutput: ({ status }: { status: string }) => (
-    <div data-test-subj="investigationOutput">{status}</div>
-  ),
 }));
 
 const investigationDetails = {
@@ -180,8 +167,9 @@ jest.mock('../../../hooks/use_kibana', () => ({
   }),
 }));
 
-const mockEvent: SignificantEvent = {
+const mockEvent: SignificantEventResponse = {
   '@timestamp': '2026-07-10T12:00:00Z',
+  created_at: '2026-07-10T12:00:00Z',
   event_id: 'evt-001',
   status: 'active',
   source_ids: ['logs.web-frontend', 'logs.api-gateway'],
@@ -194,6 +182,8 @@ const mockEvent: SignificantEvent = {
 
 describe('EventFlyout', () => {
   beforeEach(() => {
+    queryClient.clear();
+    clearPendingInvestigationCompletionsForTests();
     mockOpenChat.mockClear();
     mockAddSuccess.mockClear();
     mockInvestigationRunStatuses = undefined;
@@ -212,49 +202,24 @@ describe('EventFlyout', () => {
   });
 
   const renderFlyout = (props: Partial<React.ComponentProps<typeof EventFlyout>> = {}) =>
-    render(
-      <I18nProvider>
-        <QueryClientProvider client={queryClient}>
-          <EuiProvider>
-            <EventFlyout event={mockEvent} onClose={jest.fn()} {...props} />
-          </EuiProvider>
-        </QueryClientProvider>
-      </I18nProvider>
-    );
-
-  it('renders the event title and badges', () => {
-    renderFlyout();
-
-    expect(screen.getByText(mockEvent.title)).toBeInTheDocument();
-    expect(screen.getByText('Critical')).toBeInTheDocument();
-    expect(screen.getByText('Active')).toBeInTheDocument();
-    expect(screen.queryByText('Investigating')).not.toBeInTheDocument();
-  });
-
-  it('hides the investigation badge when the event has no investigations', () => {
-    renderFlyout({ event: { ...mockEvent, status: 'inactive' } });
-
-    expect(screen.getByText('Inactive')).toBeInTheDocument();
-    expect(screen.queryByText('Investigating')).not.toBeInTheDocument();
-    expect(screen.queryByText('Investigated')).not.toBeInTheDocument();
-  });
-
-  it('shows Investigated when the latest investigation has completed', () => {
-    renderFlyout({
-      event: {
-        ...mockEvent,
-        status: 'inactive',
-        investigations: [
-          {
-            workflow_execution_id: 'exec-1',
-            started_at: '2026-07-10T12:00:00Z',
-            completed_at: '2026-07-10T12:05:00Z',
-          },
-        ],
-      },
+    render(<EventFlyout event={mockEvent} onClose={jest.fn()} {...props} />, {
+      wrapper: ({ children }) => (
+        <I18nProvider>
+          <QueryClientProvider client={queryClient}>
+            <EuiProvider>{children}</EuiProvider>
+          </QueryClientProvider>
+        </I18nProvider>
+      ),
     });
 
-    expect(screen.getAllByText('Investigated').length).toBeGreaterThan(0);
+  it('renders the event title and badges', () => {
+    renderFlyout({ event: { ...mockEvent, confidence: 0.8 } });
+
+    expect(screen.getByText(mockEvent.title)).toBeInTheDocument();
+    expect(screen.getByText('Critical severity')).toBeInTheDocument();
+    expect(screen.getByText('Confidence 80%')).toBeInTheDocument();
+    expect(screen.getByText('Active')).toBeInTheDocument();
+    expect(screen.queryByText('Investigating')).not.toBeInTheDocument();
   });
 
   it('formats the event timestamp using the dateFormat advanced setting', () => {
@@ -263,7 +228,7 @@ describe('EventFlyout', () => {
     expect(screen.getAllByText(/Jul 10, 2026 @ \d{2}:\d{2}:\d{2}/).length).toBeGreaterThan(0);
   });
 
-  it('renders the footer chat button and opens a new chat when clicked', () => {
+  it('opens a new chat from the Actions menu', async () => {
     renderFlyout({
       event: {
         ...mockEvent,
@@ -277,8 +242,8 @@ describe('EventFlyout', () => {
       },
     });
 
-    fireEvent.click(screen.getByTestId('nightshiftEventFlyoutChatButton'));
-    fireEvent.click(screen.getByTestId('nightshiftEventFlyoutStartNewChatItem'));
+    await userEvent.click(screen.getByRole('button', { name: 'Actions' }));
+    await userEvent.click(screen.getByTestId('nightshiftEventFlyoutStartNewChatItem'));
     expect(mockOpenChat).toHaveBeenCalledWith(
       expect.objectContaining({
         newConversation: true,
@@ -287,7 +252,7 @@ describe('EventFlyout', () => {
     );
   });
 
-  it('uses a plain chat button while the latest investigation is still running', () => {
+  it('offers a new chat instead of the investigation chat while it is running', async () => {
     mockUseInvestigation.mockReturnValue({ status: 'running' });
     renderFlyout({
       event: {
@@ -296,8 +261,11 @@ describe('EventFlyout', () => {
       },
     });
 
-    fireEvent.click(screen.getByTestId('nightshiftEventFlyoutChatButton'));
-    expect(screen.queryByTestId('nightshiftEventFlyoutStartNewChatItem')).not.toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button', { name: 'Actions' }));
+    expect(
+      screen.queryByTestId('nightshiftEventFlyoutOpenInvestigationChatItem')
+    ).not.toBeInTheDocument();
+    await userEvent.click(screen.getByTestId('nightshiftEventFlyoutStartNewChatItem'));
     expect(mockOpenChat).toHaveBeenCalledWith(expect.objectContaining({ newConversation: true }));
   });
 
@@ -305,7 +273,8 @@ describe('EventFlyout', () => {
     mockCanManage = true;
     renderFlyout();
 
-    fireEvent.click(screen.getByTestId('nightshiftEventFlyoutRunInvestigationButton'));
+    await userEvent.click(screen.getByRole('button', { name: 'Actions' }));
+    await userEvent.click(screen.getByTestId('nightshiftEventFlyoutRunInvestigationButton'));
 
     await waitFor(() =>
       expect(mockSignificantEventsFetch).toHaveBeenCalledWith(
@@ -318,15 +287,14 @@ describe('EventFlyout', () => {
     );
   });
 
-  it('marks an active event inactive from the flyout menu', async () => {
+  it('marks an active event inactive from the Actions menu', async () => {
     mockCanManage = true;
     const onClose = jest.fn();
     renderFlyout({ onClose });
 
-    const markInactiveAction = mockFlyoutTemplateProps?.flyoutMenuProps?.trailingActions?.find(
-      (action) => action['aria-label'] === 'Mark significant event inactive'
-    );
-    act(() => markInactiveAction?.onClick?.({} as React.MouseEvent<HTMLElement>));
+    expect(screen.queryByRole('menuitem', { name: 'Mark inactive' })).not.toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button', { name: 'Actions' }));
+    await userEvent.click(screen.getByRole('menuitem', { name: 'Mark inactive' }));
     fireEvent.change(screen.getByTestId('nightshiftMarkSignificantEventInactiveReason'), {
       target: { value: 'Known maintenance' },
     });
@@ -347,10 +315,202 @@ describe('EventFlyout', () => {
     await waitFor(() => expect(onClose).toHaveBeenCalled());
   });
 
+  it('only offers Mark inactive for live events with manage access', async () => {
+    mockCanManage = true;
+    const event: SignificantEventResponse = {
+      ...mockEvent,
+      status: 'recovering',
+      investigations: [
+        {
+          workflow_execution_id: 'conv-1',
+          started_at: '2026-07-10T12:00:00Z',
+          completed_at: '2026-07-10T12:05:00Z',
+        },
+      ],
+    };
+    const { rerender } = renderFlyout({ event });
+    await userEvent.click(screen.getByRole('button', { name: 'Actions' }));
+    expect(await screen.findByRole('menuitem', { name: 'Mark inactive' })).toBeInTheDocument();
+
+    await act(async () => {
+      rerender(<EventFlyout event={{ ...event, status: 'inactive' }} onClose={jest.fn()} />);
+    });
+    expect(screen.queryByRole('menuitem', { name: 'Mark inactive' })).not.toBeInTheDocument();
+
+    mockCanManage = false;
+    await act(async () => {
+      rerender(<EventFlyout event={event} onClose={jest.fn()} />);
+    });
+    expect(screen.queryByRole('menuitem', { name: 'Mark inactive' })).not.toBeInTheDocument();
+    expect(screen.getByTestId('nightshiftEventFlyoutStartNewChatItem')).toBeInTheDocument();
+  });
+
+  it('waits for the event outcome before completing each investigation round', () => {
+    const key = [...SIGNIFICANT_EVENTS_LIST_QUERY_KEY, 'follow-up'];
+    const firstRound: SignificantEventResponse = {
+      ...mockEvent,
+      investigations: [
+        {
+          workflow_execution_id: 'conv-1',
+          started_at: new Date(Date.now() - 60_000).toISOString(),
+        },
+      ],
+    };
+    queryClient.setQueryData(key, { hits: [firstRound] });
+    mockUseInvestigation.mockReturnValue({
+      status: 'running',
+      investigation: investigationDetails,
+    });
+    const onClose = jest.fn();
+    const { rerender } = renderFlyout({ event: firstRound, onClose });
+
+    mockUseInvestigation.mockReturnValue({
+      status: 'complete',
+      investigation: investigationDetails,
+    });
+    rerender(<EventFlyout event={firstRound} onClose={onClose} />);
+    expect(queryClient.getQueryData(key)).toEqual({ hits: [firstRound] });
+
+    const followUp: SignificantEventResponse = {
+      ...firstRound,
+      investigations: [{ workflow_execution_id: 'conv-1', started_at: new Date().toISOString() }],
+    };
+    act(() => queryClient.setQueryData(key, { hits: [followUp] }));
+    rerender(<EventFlyout event={followUp} onClose={onClose} />);
+    expect(
+      queryClient.getQueryData<{ hits: SignificantEventResponse[] }>(key)?.hits[0]
+        .investigations?.[0].completed_at
+    ).toBeUndefined();
+
+    mockUseInvestigation.mockReturnValue({
+      status: 'running',
+      investigation: investigationDetails,
+    });
+    rerender(<EventFlyout event={followUp} onClose={onClose} />);
+    mockUseInvestigation.mockReturnValue({
+      status: 'complete',
+      investigation: investigationDetails,
+    });
+    rerender(<EventFlyout event={followUp} onClose={onClose} />);
+    expect(queryClient.getQueryData(key)).toEqual({ hits: [followUp] });
+
+    const finishedFollowUp: SignificantEventResponse = {
+      ...followUp,
+      investigations: followUp.investigations?.map((investigation) => ({
+        ...investigation,
+        completed_at: new Date().toISOString(),
+        outcome: 'failed',
+      })),
+    };
+    act(() => queryClient.setQueryData(key, { hits: [finishedFollowUp] }));
+    rerender(<EventFlyout event={finishedFollowUp} onClose={onClose} />);
+    expect(screen.getByTestId('nightshiftEventInvestigationCard')).toHaveTextContent(
+      'Investigation · Failed'
+    );
+  });
+
+  it.each([
+    { phase: 'the initial read', minutesAgo: 1, wasRunning: false },
+    { phase: 'a running investigation', minutesAgo: 1, wasRunning: true },
+    { phase: 'the polling cutoff', minutesAgo: 66, wasRunning: false },
+  ])(
+    'does not complete an investigation after a read error during $phase',
+    ({ minutesAgo, wasRunning }) => {
+      const key = [...SIGNIFICANT_EVENTS_LIST_QUERY_KEY, 'read-error'];
+      const event: SignificantEventResponse = {
+        ...mockEvent,
+        investigations: [
+          {
+            workflow_execution_id: 'conv-1',
+            started_at: new Date(Date.now() - minutesAgo * 60_000).toISOString(),
+          },
+        ],
+      };
+      const readError: UseInvestigationResult = {
+        status: 'unavailable',
+        error: 'Internal Server Error',
+      };
+      queryClient.setQueryData(key, { hits: [event] });
+      mockUseInvestigation.mockReturnValue(wasRunning ? { status: 'running' } : readError);
+      const onClose = jest.fn();
+      const { rerender } = renderFlyout({ event, onClose });
+
+      mockUseInvestigation.mockReturnValue(readError);
+      rerender(<EventFlyout event={event} onClose={onClose} />);
+
+      expect(queryClient.getQueryData(key)).toEqual({ hits: [event] });
+      expect(screen.getByTestId('nightshiftEventInvestigationCard')).toHaveTextContent(
+        'Investigation · In progress'
+      );
+    }
+  );
+
+  it('shows a failed outcome and clears it when a follow-up starts', () => {
+    const key = [...SIGNIFICANT_EVENTS_LIST_QUERY_KEY, 'failed-follow-up'];
+    const failedEvent: SignificantEventResponse = {
+      ...mockEvent,
+      investigations: [
+        {
+          workflow_execution_id: 'conv-1',
+          started_at: new Date(Date.now() - 60_000).toISOString(),
+          completed_at: new Date().toISOString(),
+          outcome: 'failed',
+        },
+      ],
+    };
+    const onClose = jest.fn();
+    const { rerender } = renderFlyout({ event: failedEvent, onClose });
+    expect(screen.getByTestId('nightshiftEventInvestigationCard')).toHaveTextContent(
+      'Investigation · Failed'
+    );
+
+    const followUp: SignificantEventResponse = {
+      ...failedEvent,
+      investigations: [{ workflow_execution_id: 'conv-1', started_at: new Date().toISOString() }],
+    };
+    act(() => queryClient.setQueryData(key, { hits: [followUp] }));
+    rerender(<EventFlyout event={followUp} onClose={onClose} />);
+
+    expect(screen.getByTestId('nightshiftEventInvestigationCard')).toHaveTextContent(
+      'Investigation · In progress'
+    );
+    expect(queryClient.getQueryData(key)).toEqual({ hits: [followUp] });
+  });
+
+  it.each([
+    { outcome: 'completed', label: 'Completed' },
+    { outcome: 'failed', label: 'Failed' },
+  ] as const)(
+    'shows the latest $outcome outcome despite an older unfinished investigation',
+    ({ outcome, label }) => {
+      renderFlyout({
+        event: {
+          ...mockEvent,
+          investigations: [
+            {
+              workflow_execution_id: 'older-investigation',
+              started_at: '2026-07-10T11:00:00Z',
+            },
+            {
+              workflow_execution_id: 'conv-1',
+              started_at: '2026-07-10T12:00:00Z',
+              completed_at: '2026-07-10T12:05:00Z',
+              outcome,
+            },
+          ],
+        },
+      });
+
+      expect(screen.getByTestId('nightshiftEventInvestigationCard')).toHaveTextContent(
+        `Investigation · ${label}`
+      );
+    }
+  );
+
   it('renders the summary section with the summary text', () => {
     renderFlyout();
 
-    expect(screen.getByText('Summary')).toBeInTheDocument();
+    expect(screen.getByText('What happened?')).toBeInTheDocument();
     expect(screen.getByText(/P95 latency jumped from 120ms to 890ms/)).toBeInTheDocument();
   });
 
@@ -370,11 +530,10 @@ describe('EventFlyout', () => {
     expect(screen.getByText('Spike')).toBeInTheDocument();
   });
 
-  it('renders the investigation section with an empty state', () => {
+  it('hides the investigation section when the event has no investigation', () => {
     renderFlyout();
 
-    expect(screen.getByText('Investigation')).toBeInTheDocument();
-    expect(screen.getByText('No investigation yet.')).toBeInTheDocument();
+    expect(screen.queryByTestId('nightshiftEventInvestigationCard')).not.toBeInTheDocument();
   });
 
   it('renders the investigation from the shared API and opens its conversation details', () => {
@@ -391,17 +550,14 @@ describe('EventFlyout', () => {
       },
     });
 
-    expect(mockUseInvestigation).toHaveBeenCalledWith(
-      expect.objectContaining({ investigationId: 'conv-1' })
+    expect(screen.getByTestId('nightshiftEventInvestigationCard')).toHaveTextContent(
+      'Web latency spike'
     );
-    expect(screen.getByTestId('investigationOutput')).toHaveTextContent('complete');
-    expect(screen.queryByText('No investigation yet.')).not.toBeInTheDocument();
-
-    fireEvent.click(screen.getByTestId('nightshiftInvestigationShowDetailsButton'));
+    fireEvent.click(screen.getByTestId('nightshiftEventInvestigationCard'));
     expect(mockOpenConversationDetails).toHaveBeenCalledWith({ conversationId: 'conv-1' });
   });
 
-  it('marks an unavailable investigation and withholds the details button', () => {
+  it('renders an unavailable investigation as a non-interactive card', () => {
     mockUseInvestigation.mockReturnValue({
       status: 'unavailable',
       error: "You don't have permission to view this investigation.",
@@ -420,10 +576,10 @@ describe('EventFlyout', () => {
       },
     });
 
-    expect(screen.getByText('Investigation unavailable')).toBeInTheDocument();
-    expect(
-      screen.queryByTestId('nightshiftInvestigationShowDetailsButton')
-    ).not.toBeInTheDocument();
+    const card = screen.getByTestId('nightshiftEventInvestigationCard');
+    expect(card.tagName).toBe('DIV');
+    fireEvent.click(card);
+    expect(mockOpenConversationDetails).not.toHaveBeenCalled();
   });
 
   it('shows no investigation when the investigation does not exist', () => {
@@ -442,10 +598,7 @@ describe('EventFlyout', () => {
       },
     });
 
-    expect(screen.getByText('No investigation yet.')).toBeInTheDocument();
-    expect(mockUseInvestigation).toHaveBeenCalledWith(
-      expect.objectContaining({ investigationId: undefined })
-    );
+    expect(screen.queryByTestId('nightshiftEventInvestigationCard')).not.toBeInTheDocument();
   });
 
   it('calls onClose when flyout is closed', () => {

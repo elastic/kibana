@@ -296,25 +296,11 @@ describe('floor_alert_triage_batch — post_comment_triage_started', () => {
 // ---------------------------------------------------------------------------
 
 describe('floor_alert_triage_batch — create_investigation severity', () => {
-  const renderSeverity = (alerts: Array<Record<string, unknown>>): string => {
+  it('does not set a severity; Alert Analysis leaves it to the user', () => {
     const create = stepByName('create_investigation');
-    const template = (create?.with as { metadata?: { severity?: string } } | undefined)?.metadata
-      ?.severity;
-    return renderString(template ?? '', {
-      steps: { load_alerts: { output: { alerts } } },
-    }).trim();
-  };
-
-  it('reads the severity off the first alert, since the rule input carries none', () => {
-    expect(renderSeverity([{ 'kibana.alert.severity': 'high' }])).toBe('high');
-  });
-
-  it('reads a nested alert document too', () => {
-    expect(renderSeverity([{ kibana: { alert: { severity: 'critical' } } }])).toBe('critical');
-  });
-
-  it('falls back to medium when the alert has no severity', () => {
-    expect(renderSeverity([{}])).toBe('medium');
+    const metadata = (create?.with as { metadata?: Record<string, unknown> } | undefined)?.metadata;
+    expect(metadata).toBeDefined();
+    expect(metadata).not.toHaveProperty('severity');
   });
 });
 

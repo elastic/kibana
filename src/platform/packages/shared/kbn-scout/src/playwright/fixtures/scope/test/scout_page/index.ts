@@ -32,10 +32,15 @@ export type ScoutPage = Page & {
   /**
    * Navigates to the specified Kibana application.
    * @param appName - The name of the Kibana app (e.g., 'discover', 'dashboard').
+   * @param pathOptions - Optional query string parameters and hash to apply to the app URL.
    * @param options - Additional navigation options, passed directly to Playwright's `goto` method.
    * @returns A Promise resolving to a Playwright `Response` or `null`.
    */
-  gotoApp: (appName: string, pathOptions?: PathOptions) => ReturnType<Page['goto']>;
+  gotoApp: (
+    appName: string,
+    pathOptions?: PathOptions,
+    options?: Parameters<Page['goto']>[1]
+  ) => ReturnType<Page['goto']>;
   /**
    * Presses a key until the element with the css selector is in focus. If multiple elements match it will
    * press the key until the first occurrence of the element is focused.

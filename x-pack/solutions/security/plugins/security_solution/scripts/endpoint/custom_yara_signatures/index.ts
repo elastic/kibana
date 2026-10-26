@@ -8,13 +8,13 @@
 import type { RunFn } from '@kbn/dev-cli-runner';
 import { run } from '@kbn/dev-cli-runner';
 import { createFailError } from '@kbn/dev-cli-errors';
-import { KbnClient } from '@kbn/test';
 import { Client, HttpConnection } from '@elastic/elasticsearch';
 import pMap from 'p-map';
 import { EXCEPTION_LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { randomPolicyIdGenerator } from '../common/random_policy_id_generator';
+import { createKbnClient } from '../common/stack_services';
 import { ExceptionsListItemGenerator } from '../../../common/endpoint/data_generators/exceptions_list_item_generator';
 import {
   BY_POLICY_ARTIFACT_TAG_PREFIX,
@@ -44,20 +44,24 @@ export const cli = () => {
     {
       description: 'Load Endpoint Custom YARA Signatures',
       flags: {
-        string: ['kibana', 'elasticsearch'],
+        string: ['kibana', 'es', 'username', 'password'],
         boolean: ['withAlerts'],
         default: {
           count: 10,
-          kibana: 'http://elastic:changeme@127.0.0.1:5601',
-          elasticsearch: 'http://elastic:changeme@127.0.0.1:9200',
+          kibana: 'http://127.0.0.1:5601',
+          es: 'http://127.0.0.1:9200',
+          username: 'elastic',
+          password: 'changeme',
           withAlerts: true,
         },
         help: `
         Requires xpack.securitySolution.enableExperimental.customYaraSignaturesEnabled feature flag to be enabled.
 
         --count            Number of custom YARA signatures to create. Default: 10
-        --kibana           The URL to kibana including credentials. Default: http://elastic:changeme@127.0.0.1:5601
-        --elasticsearch    The URL to elasticsearch including credentials. Default: http://elastic:changeme@127.0.0.1:9200
+        --kibana           The URL to kibana. Default: http://127.0.0.1:5601
+        --es               The URL to elasticsearch. Default: http://127.0.0.1:9200
+        --username         The username to use for authentication. Default: elastic
+        --password         The password to use for authentication. Default: changeme
         --withAlerts       Index a matching memory-signature alert per created signature so CYS highlighted fields can be tested. Default: true
       `,
       },
@@ -144,7 +148,12 @@ const createCustomYaraSignatures = async ({
   log,
 }: Parameters<RunFn>[0]): Promise<{ alertsIndexed: boolean }> => {
   const generator = new ExceptionsListItemGenerator();
-  const kbn = new KbnClient({ log, url: flags.kibana as string });
+  const kbn = createKbnClient({
+    log,
+    url: flags.kibana as string,
+    username: flags.username as string,
+    password: flags.password as string,
+  });
 
   await ensureArtifactListExists(kbn, 'customYaraSignatures');
 
@@ -187,7 +196,11 @@ const createCustomYaraSignatures = async ({
   }
 
   const esClient = new Client({
-    node: flags.elasticsearch as string,
+    node: flags.es as string,
+    auth: {
+      username: flags.username as string,
+      password: flags.password as string,
+    },
     Connection: HttpConnection,
   });
 

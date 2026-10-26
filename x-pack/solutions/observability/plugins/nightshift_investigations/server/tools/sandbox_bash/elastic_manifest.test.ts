@@ -44,6 +44,10 @@ describe('renderElasticManifest', () => {
     expect(content).toContain('@timestamp');
     expect(content).toContain('Name each remote explicitly');
     expect(content).toContain('never use wildcard remote names');
+    expect(content).toContain("jq -n --arg q '<ES|QL>'");
+    expect(content).toContain('there is no `python`');
+    expect(content).toContain('`Unknown column [x]` means no index in the `FROM` pattern');
+    expect(content).toContain('include_unmapped=true');
   });
 
   it('steers remote queries to a specific data stream instead of logs-*', () => {

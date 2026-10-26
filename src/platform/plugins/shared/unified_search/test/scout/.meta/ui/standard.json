@@ -1,5 +1,5 @@
 {
-  "sha1": "d0222717199643b5a88ae7b4bbdb0f6e7305f79e",
+  "sha1": "a36b013d16c68f2e813f8dd1bfe52500e5172a4b",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -39,6 +39,19 @@
         "file": "src/platform/plugins/shared/unified_search/test/scout/ui/tests/date_range_picker_presets_persistence.spec.ts",
         "line": 43,
         "column": 22
+      }
+    },
+    {
+      "id": "2057e9a561582c9-a23d254e469faac",
+      "title": "Date range picker UI settings honors the configured week start and time zone when selecting a calendar day",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/unified_search/test/scout/ui/tests/date_range_picker_ui_settings.spec.ts",
+        "line": 38,
+        "column": 13
       }
     },
     {

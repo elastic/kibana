@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import type { InvestigationAttachmentDocument } from '../../../common/investigation_attachments';
 import { IMPACT_ATTACHMENT_TYPE } from '../../../common/impact/attachment';
 import { impactSchema, type Impact, type ImpactEntity } from '../../../common/impact/impact';
 import {
   defineInvestigationAttachment,
   formatEvidenceForAgent,
 } from '../../investigation_attachments';
+import { sameInvestigationAttachmentDocument } from '../../investigation_attachments/same_document';
 import {
   impactStorageSettings,
   type ImpactDocument,
@@ -52,6 +54,22 @@ export const formatImpactForAgent = (data: Impact): string => {
  * `investigation_impact`: one document per space and conversation in
  * `.kibana-investigation-impact`. Origin and attachment id are the document id.
  */
+const withoutStorageOnlyFields = ({
+  entityIds: _entityIds,
+  updatedAt: _updatedAt,
+  ...document
+}: InvestigationAttachmentDocument<ImpactDocument>): object => document;
+
+/** Compares what the conversation holds, so the storage-only `entityIds` never reads as a change. */
+export const isImpactStale = (
+  stored: InvestigationAttachmentDocument<ImpactDocument>,
+  current: InvestigationAttachmentDocument<ImpactDocument>
+): boolean =>
+  !sameInvestigationAttachmentDocument(
+    withoutStorageOnlyFields(stored),
+    withoutStorageOnlyFields(current)
+  );
+
 export const impactAttachment = defineInvestigationAttachment<
   typeof IMPACT_ATTACHMENT_TYPE,
   ImpactStorageSettings,
@@ -64,6 +82,7 @@ export const impactAttachment = defineInvestigationAttachment<
   schema: impactSchema,
   // The investigation overview shows impact; the chat does not.
   hiddenInConversation: true,
+  isStale: isImpactStale,
   format: formatImpactForAgent,
   agentDescription:
     'Investigation impact is what an investigation found was affected: a summary, its evidence, and the entities (users, hosts, services) involved.\n\n' +

@@ -154,7 +154,7 @@ export function fetchAll(
         }) => {
           fetchAllRequestsOnlyTracker.reportEvent({
             requestAdapter: inspectorAdapters.requests,
-            approximation: approximationApplied,
+            approximationApplied,
           });
 
           if (isEsqlQuery) {

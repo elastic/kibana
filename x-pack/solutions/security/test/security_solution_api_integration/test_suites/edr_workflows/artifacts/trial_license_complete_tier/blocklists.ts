@@ -357,6 +357,38 @@ export default function ({ getService }: FtrProviderContext) {
               .expect(200);
           });
         }
+
+        for (const { field, value } of [
+          { field: 'file.path.caseless', value: 'C:\\foo\\*.exe' },
+          { field: 'file.name.caseless', value: '*.exe' },
+        ]) {
+          it(`should not error on [post] - [create single item] with a wildcard entry on ${field}`, async () => {
+            const { body } = await endpointPolicyManagerSupertest
+              .post(EXCEPTION_LIST_ITEM_URL)
+              .set('kbn-xsrf', 'true')
+              .send(
+                exceptionsGenerator.generateBlocklistForCreate({
+                  tags: [GLOBAL_ARTIFACT_TAG],
+                  os_types: ['windows'],
+                  entries: [{ field, operator: 'included', type: 'wildcard', value }],
+                })
+              )
+              .expect(200);
+
+            try {
+              expect(body.entries).to.eql([
+                { field, operator: 'included', type: 'wildcard', value },
+              ]);
+            } finally {
+              await endpointPolicyManagerSupertest
+                .delete(
+                  `${EXCEPTION_LIST_ITEM_URL}?item_id=${body.item_id}&namespace_type=${body.namespace_type}`
+                )
+                .set('kbn-xsrf', 'true')
+                .expect(200);
+            }
+          });
+        }
       });
 
       describe('and user has authorization to read blocklist', function () {

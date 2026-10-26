@@ -21,7 +21,11 @@ import { ActionRunner } from './action_runner';
 
 import { BulkActionTaskType } from './bulk_action_types';
 import { filterHostedPolicies } from './filter_hosted_agents';
-import { bulkCreateAgentActionResults, createAgentAction } from './actions';
+import {
+  bulkCreateAgentActionResults,
+  createAgentAction,
+  createErrorActionResults,
+} from './actions';
 import { MAX_RETRY_COUNT } from './retry_helper';
 
 export class UpdateAgentTagsActionRunner extends ActionRunner {
@@ -65,20 +69,45 @@ export async function updateTagsBatch(
     spaceId?: string;
   }
 ): Promise<{ actionId: string; updated?: number; took?: number }> {
-  const errors: Record<Agent['id'], Error> = { ...outgoingErrors };
+  // Only the restriction errors of agents the caller can access are persisted in the action results.
+  // `outgoingErrors` (for example agents not found, or in another space) are deliberately not
+  // published, as the action status enrichment would expose their hostnames across spaces.
+  const errors: Record<Agent['id'], Error> = {};
   const hostedAgentError = `Cannot modify tags on a hosted agent`;
 
   const filteredAgents = await filterHostedPolicies(
     soClient,
     givenAgents,
     errors,
-    hostedAgentError
+    hostedAgentError,
+    `Cannot modify tags on a managed agent`
   );
   const agentIds = filteredAgents.map((agent) => agent.id);
 
   const actionId = options.actionId ?? uuidv4();
+  const spaceId = options.spaceId;
+  const namespaces = spaceId ? [spaceId] : [];
+  // agents that failed validation (hosted, agentless): reported in the action results
+  const errorAgentIds = Object.keys(errors);
+
   if (agentIds.length === 0) {
     appContextService.getLogger().debug('No agents to update tags, returning');
+    if (errorAgentIds.length > 0) {
+      await createAgentAction(esClient, soClient, {
+        id: actionId,
+        agents: errorAgentIds,
+        namespaces,
+        created_at: new Date().toISOString(),
+        type: 'UPDATE_TAGS',
+        total: options.total ?? errorAgentIds.length,
+      });
+      await createErrorActionResults(
+        esClient,
+        actionId,
+        errors,
+        'agent is not eligible for tags update'
+      );
+    }
     return { actionId, updated: 0, took: 0 };
   }
 
@@ -151,9 +180,6 @@ export async function updateTagsBatch(
   const versionConflictCount = res.version_conflicts ?? 0;
   const versionConflictIds = isLastRetry ? getUuidArray(versionConflictCount) : [];
 
-  const spaceId = options.spaceId;
-  const namespaces = spaceId ? [spaceId] : [];
-
   // creating an action doc so that update tags  shows up in activity
   // the logic only saves agent count in the action that updated, failed or in case of last retry, conflicted
   // this ensures that the action status count will be accurate
@@ -161,12 +187,20 @@ export async function updateTagsBatch(
     id: actionId,
     agents: updatedIds
       .concat(failures.map((failure) => failure.id))
-      .concat(isLastRetry ? versionConflictIds : []),
+      .concat(isLastRetry ? versionConflictIds : [])
+      .concat(errorAgentIds),
     namespaces,
     created_at: new Date().toISOString(),
     type: 'UPDATE_TAGS',
-    total: options.total ?? res.total,
+    total:
+      options.total ?? (res.total !== undefined ? res.total + errorAgentIds.length : undefined),
   });
+  await createErrorActionResults(
+    esClient,
+    actionId,
+    errors,
+    'agent is not eligible for tags update'
+  );
   appContextService
     .getLogger()
     .debug(

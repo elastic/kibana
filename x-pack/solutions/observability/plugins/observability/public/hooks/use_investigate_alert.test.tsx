@@ -7,7 +7,9 @@
 
 import type { PropsWithChildren } from 'react';
 import React from 'react';
-import { act, renderHook, waitFor } from '@testing-library/react';
+import { act, fireEvent, renderHook, screen, waitFor } from '@testing-library/react';
+import type { ToastInputFields } from '@kbn/core-notifications-browser';
+import { renderingServiceMock } from '@kbn/core-rendering-browser-mocks';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type {
   NightshiftInvestigationsRepositoryClient,
@@ -32,8 +34,9 @@ jest.mock('../utils/kibana_react');
 const useKibanaMock = useKibana as jest.Mock;
 const fetchMock = jest.fn();
 const httpGet = jest.fn();
-const addSuccess = jest.fn();
+const addSuccess = jest.fn<void, [ToastInputFields]>();
 const addDanger = jest.fn();
+const getLocator = jest.fn<InvestigationLocator | undefined, []>(() => mockLocator);
 const mockLocator = {
   getRedirectUrl: jest.fn(({ investigationId }: { investigationId: string }) =>
     investigationId ? `/app/nightshift?investigationId=${investigationId}` : ''
@@ -41,6 +44,7 @@ const mockLocator = {
 } as unknown as InvestigationLocator;
 
 let queryClient: QueryClient;
+let unmountToasts: Array<() => void>;
 
 const wrapper = ({ children }: PropsWithChildren) => (
   <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
@@ -93,6 +97,18 @@ describe('useInvestigateAlert', () => {
   beforeEach(() => {
     window.localStorage.clear();
     jest.clearAllMocks();
+    getLocator.mockReturnValue(mockLocator);
+    unmountToasts = [];
+    addSuccess.mockImplementation(({ text }) => {
+      if (typeof text !== 'function') return;
+      const container = document.createElement('div');
+      document.body.appendChild(container);
+      const unmount = text(container);
+      unmountToasts.push(() => {
+        unmount();
+        container.remove();
+      });
+    });
     queryClient = new QueryClient({
       defaultOptions: { queries: { retry: false } },
       logger: { log: () => {}, warn: () => {}, error: () => {} },
@@ -103,11 +119,12 @@ describe('useInvestigateAlert', () => {
         share: {
           url: {
             locators: {
-              get: jest.fn(() => mockLocator),
+              get: getLocator,
             },
           },
         },
         notifications: { toasts: { addSuccess, addDanger } },
+        rendering: renderingServiceMock.create(),
       },
     });
     setInvestigationsClient({
@@ -117,6 +134,7 @@ describe('useInvestigateAlert', () => {
   });
 
   afterEach(() => {
+    act(() => unmountToasts.forEach((unmount) => unmount()));
     window.localStorage.clear();
     queryClient.clear();
   });
@@ -288,14 +306,54 @@ describe('useInvestigateAlert', () => {
       'POST /internal/nightshift/investigations',
       expect.objectContaining({
         params: {
-          body: { subject: { type: 'alert', id: 'alert-1' } },
+          body: { subject: { type: 'alert', ids: ['alert-1'] } },
         },
       })
     );
-    expect(addSuccess).toHaveBeenCalledWith({ title: 'Investigation started' });
+    expect(addSuccess).toHaveBeenCalledWith({
+      title: 'Investigation started',
+      text: expect.any(Function),
+    });
+    expect(screen.getByText('You will find it in Nightshift')).toBeVisible();
+    const viewLink = screen.getByRole('link', { name: 'View investigation' });
+    expect(viewLink).toHaveAttribute('href', '/app/nightshift?investigationId=investigation-1');
     // The list does not show the started investigation yet: it counts as in progress anyway.
     expect(result.current.investigateActionLabel).toBe('Investigating…');
     expect(result.current.isInvestigating).toBe(true);
+
+    viewLink.addEventListener('click', (event) => event.preventDefault());
+    fireEvent.click(viewLink);
+    expect(
+      JSON.parse(window.localStorage.getItem(VIEWED_INVESTIGATIONS_STORAGE_KEY) || '[]')
+    ).toEqual(['investigation-1']);
+  });
+
+  it('links to and marks the returned investigation as viewed when an older one is listed', async () => {
+    mockInvestigationsApi({ listed: list(summary('older-investigation')) });
+    const { result } = renderInvestigateAlert();
+    await waitFor(() => expect(result.current.showViewInvestigation).toBe(true));
+    act(() => result.current.markInvestigationViewed());
+
+    await act(() => result.current.handleInvestigate());
+
+    const viewLink = screen.getByRole('link', { name: 'View investigation' });
+    expect(viewLink).toHaveAttribute('href', '/app/nightshift?investigationId=investigation-1');
+    viewLink.addEventListener('click', (event) => event.preventDefault());
+    fireEvent.click(viewLink);
+    expect(
+      JSON.parse(window.localStorage.getItem(VIEWED_INVESTIGATIONS_STORAGE_KEY) || '[]')
+    ).toEqual(['investigation-1', 'older-investigation']);
+  });
+
+  it('keeps the title-only success toast when the investigation locator is unavailable', async () => {
+    getLocator.mockReturnValue(undefined);
+    const { result } = renderInvestigateAlert();
+    await waitFor(() => expect(result.current.showInvestigateAction).toBe(true));
+
+    await act(() => result.current.handleInvestigate());
+
+    expect(addSuccess).toHaveBeenCalledWith({ title: 'Investigation started' });
+    expect(screen.queryByRole('link', { name: 'View investigation' })).not.toBeInTheDocument();
   });
 
   it('stops waiting for a started investigation once the list shows it', async () => {
@@ -326,6 +384,8 @@ describe('useInvestigateAlert', () => {
       title: 'Failed to start investigation',
       text: 'Request failed',
     });
+    expect(addSuccess).not.toHaveBeenCalled();
+    expect(screen.queryByRole('link', { name: 'View investigation' })).not.toBeInTheDocument();
   });
 
   it('does not fetch alert investigations when enabled is false', async () => {

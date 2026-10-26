@@ -211,7 +211,7 @@ export const AzureSql: ConnectorSpec = {
   metadata: {
     id: '.azure_sql',
     displayName: 'Azure SQL',
-    description: i18n.translate('core.kibanaConnectorSpecs.azureSql.metadata.description', {
+    description: i18n.translate('connectorSpecs.azureSql.metadata.description', {
       defaultMessage:
         'Query tables, search rows, explore schema, and execute SQL in an Azure SQL Database',
     }),
@@ -234,17 +234,17 @@ export const AzureSql: ConnectorSpec = {
           message: 'Host must be a hostname or IP address, without a protocol prefix',
         })
         .describe(
-          i18n.translate('core.kibanaConnectorSpecs.azureSql.config.host.description', {
+          i18n.translate('connectorSpecs.azureSql.config.host.description', {
             defaultMessage: 'The Azure SQL server hostname',
           })
         )
         .meta({
           widget: 'text',
-          label: i18n.translate('core.kibanaConnectorSpecs.azureSql.config.host.label', {
+          label: i18n.translate('connectorSpecs.azureSql.config.host.label', {
             defaultMessage: 'Server',
           }),
           placeholder: 'myserver.database.windows.net',
-          helpText: i18n.translate('core.kibanaConnectorSpecs.azureSql.config.host.helpText', {
+          helpText: i18n.translate('connectorSpecs.azureSql.config.host.helpText', {
             defaultMessage:
               'The fully qualified server name from the Azure portal, for example myserver.database.windows.net (no ' +
               'protocol prefix).',
@@ -257,17 +257,17 @@ export const AzureSql: ConnectorSpec = {
         .max(65535)
         .default(1433)
         .describe(
-          i18n.translate('core.kibanaConnectorSpecs.azureSql.config.port.description', {
+          i18n.translate('connectorSpecs.azureSql.config.port.description', {
             defaultMessage: 'The Azure SQL server port',
           })
         )
         .meta({
           widget: 'number',
-          label: i18n.translate('core.kibanaConnectorSpecs.azureSql.config.port.label', {
+          label: i18n.translate('connectorSpecs.azureSql.config.port.label', {
             defaultMessage: 'Port',
           }),
           placeholder: '1433',
-          helpText: i18n.translate('core.kibanaConnectorSpecs.azureSql.config.port.helpText', {
+          helpText: i18n.translate('connectorSpecs.azureSql.config.port.helpText', {
             defaultMessage: 'The port number of the Azure SQL server (default: 1433)',
           }),
         }),
@@ -276,17 +276,17 @@ export const AzureSql: ConnectorSpec = {
         .min(1)
         .max(128)
         .describe(
-          i18n.translate('core.kibanaConnectorSpecs.azureSql.config.database.description', {
+          i18n.translate('connectorSpecs.azureSql.config.database.description', {
             defaultMessage: 'The database to connect to',
           })
         )
         .meta({
           widget: 'text',
-          label: i18n.translate('core.kibanaConnectorSpecs.azureSql.config.database.label', {
+          label: i18n.translate('connectorSpecs.azureSql.config.database.label', {
             defaultMessage: 'Database',
           }),
           placeholder: 'my_database',
-          helpText: i18n.translate('core.kibanaConnectorSpecs.azureSql.config.database.helpText', {
+          helpText: i18n.translate('connectorSpecs.azureSql.config.database.helpText', {
             defaultMessage:
               'The name of the database to query. Azure SQL cannot switch databases within a connection, so create ' +
               'one connector per database.',
@@ -464,7 +464,7 @@ export const AzureSql: ConnectorSpec = {
   },
 
   test: {
-    description: i18n.translate('core.kibanaConnectorSpecs.azureSql.test.description', {
+    description: i18n.translate('connectorSpecs.azureSql.test.description', {
       defaultMessage: 'Verifies the Azure SQL connection by running a lightweight query',
     }),
     enabled: true,

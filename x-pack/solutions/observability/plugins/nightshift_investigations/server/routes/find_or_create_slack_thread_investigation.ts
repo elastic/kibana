@@ -12,9 +12,10 @@ import { rethrowInvestigationClientError } from './rethrow_investigation_client_
 const MAX_SLACK_TEXT_LENGTH = 40_000;
 
 /**
- * Bounds that keep the thread key (`team:<T>/channel:<C>/thread:<ts>`, at most 470 characters)
- * within a subject id and fit the thread subject's `channel`, timestamp, and recorded event
- * fields. Real Slack ids, timestamps, and execution ids are far shorter.
+ * Bounds that keep the thread key (`slack:<T>:<C>:<ts>`, at most 6 + 128 + 1 + 256 + 1 + 64 = 456
+ * characters, as Slack ids and timestamps need no escaping) within a subject id (500) and fit the
+ * thread subject's `channel`, timestamp, and recorded event fields. Real Slack ids, timestamps,
+ * and execution ids are far shorter.
  */
 const MAX_SLACK_WORKSPACE_LENGTH = 128;
 const MAX_SLACK_CHANNEL_LENGTH = 256;
@@ -29,7 +30,7 @@ export const findOrCreateSlackThreadInvestigationRoute = createNightshiftInvesti
     summary: "Find or create a Slack thread's investigation",
     description:
       'Returns the investigation and status message for a Slack thread, found by its ' +
-      '`slack_thread` subject (`team:<T>/channel:<C>/thread:<ts>`). With `create`, a thread ' +
+      '`slack_thread` subject (`slack:<T>:<C>:<ts>`, the Relay thread key). With `create`, a thread ' +
       'without one gets a new investigation conversation with the thread as its subject; ' +
       'otherwise the response is ' +
       'empty. With `status_message_ts`, records that message as the thread status message on the ' +

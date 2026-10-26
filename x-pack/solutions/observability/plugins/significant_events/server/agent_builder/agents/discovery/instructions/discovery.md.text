@@ -13,6 +13,20 @@ tool result, or a KI; with no source, make no claim.
   grounding verdict decides whether a signal is real.
 - `flaky_probe: true` → apply `<chronic_and_recurring>` rule 1. Otherwise ignore
   `recent_detection_count` when deciding whether to emit.
+- **`classifier`** (per detection; only while the classifier is enforcing) — why the detection reached
+  you and where its rule already sits. You only see a change the agent has not already reviewed.
+  `live_events` lists the events its rule is in (`event_id`, `status`, `stored_verdict`). It points at
+  what to verify and where to route; it is never evidence. `reason`:
+  - `state_changed` — the rule's query now contradicts the verdict a live event stores: see
+    `probe_has_rows`, `live_events[].stored_verdict` and `evidence_found`.
+  - `above_normal` — its match count is above its own normal: see `baseline`.
+  - `below_judged` — a possible recovery: a live event's verdict was made while the count was above
+    normal, and it is back at or below that baseline: see `baseline`.
+  - `series_too_old`, `member_joining`, `not_live_member` — the live event's verdict is stale, another
+    rule is joining it, or the rule is in no live event.
+  - `flaky_probe` — the rule fires often and its oldest unprocessed detection is older than the
+    suppression age, so it is let through: apply `<chronic_and_recurring>` rule 1.
+  - `unjudged_member`, `over_cap`, `probe_unavailable` — it could not be judged.
 
 </inputs>
 
@@ -24,7 +38,8 @@ the batch holds. Read each entry as a whole, and use any other field it returns 
 - `verdict`: the skill's gating result. `confirms` lets the detection open or continue an event;
   `refutes` only records recovery on an event that already holds the rule (`<eligibility>`);
   `off_topic` may carry an observed error of its own, which is a separate candidate; `inconclusive`
-  and `not_checked` establish nothing and are not event-eligible on their own.
+  establishes nothing unless its rows point to an error, and `not_checked` establishes nothing
+  (`<eligibility>`).
 - `description`: the observed failure, its target, what it affects, and its measured size and
   duration. Use it to judge whether detections share a mechanism, and for severity and narrative.
 - `evidence`: the query result and time range, when the description leaves a question open.
@@ -44,10 +59,12 @@ asks whether something is written points here.
 | Grounding verdict | Outcome |
 |---|---|
 | `confirms`, event-aligned (an on-topic failure sample is enough) | Write. A continuation if routed to a live event (a breach must still pass `<incident_matching>`), otherwise a new event. |
-| `off_topic` with a concrete error the system does not demonstrably tolerate | Write as its own event. The rule's signal keeps `off_topic`. |
-| `off_topic` otherwise | Not event-eligible. |
-| `refutes` | Recovery only, per the checklist below. Never a new event, and never pairs or groups. |
-| `inconclusive`, `not_checked` | Not event-eligible. |
+| `off_topic` with a concrete error the system does not demonstrably tolerate | Its own event. The rule's signal keeps `off_topic`. |
+| `off_topic` otherwise (benign) | Not written. |
+| `refutes` | A continuation of the live event that holds the rule, per the recovery checklist below; otherwise not written. It never pairs or groups. |
+| `inconclusive`, the query found rows that point to an error | Its own event when its rule is in no live event, never grouped with a breach; otherwise not written (the live event keeps its stored verdict). |
+| `inconclusive` otherwise (empty or errored) | Not written. |
+| `not_checked` | Not written. |
 
 **Recovery.** A `refutes` detection is written as a continuation item, with its `event_id` and the
 `refutes` signal, only when all hold:
@@ -161,9 +178,9 @@ Compare one current detection against one active event using that event's compac
 1. Either side's `<grounding_evidence>` verdict is `off_topic`, unless it is an observed-error
    `off_topic` detection, which is its own event.
 2. Either side has no matched query KI, or its `<grounding_evidence>` has verdict
-   `inconclusive`/`not_checked` (`<eligibility>`). A detection that fails this check is not
-   event-eligible: do not emit an event item, do not add it to the grouping graph or confirmed
-   signal map, and include its `rule_uuid` in `written_rule_uuids`.
+   `inconclusive`/`not_checked` (`<eligibility>`). A detection that fails this check is never paired
+   or grouped: do not add it to the grouping graph or confirmed signal map, and, unless
+   `<eligibility>` writes it on its own, include its `rule_uuid` in `written_rule_uuids`.
 3. The event holds no confirming signal: its `signal_counts.confirms` is 0.
    - Non-confirming signals never establish a continuation. The detection must pass the checks below
      against the event's compact fields.
@@ -175,8 +192,8 @@ Compare one current detection against one active event using that event's compac
 
 **Impact check**
 - Use the affected operation when evaluating a match; different or uncertain effects do not reject a
-  topology-supported match unless independent or contradictory. The affected operation alone cannot
-  create a match.
+  topology-supported match unless the grounded evidence shows them independent or contradictory. The
+  affected operation alone cannot create a match.
 
 **Match eligible pairs**
 - Accept when any criterion below holds. Read each side's `<grounding_evidence>` as a whole.
@@ -190,16 +207,20 @@ Compare one current detection against one active event using that event's compac
      - resolved dependency, entity, or infrastructure candidates from grounding; ignore raw,
        unresolved query-feature IDs.
    - Create a topology connection when any of the following holds:
-     - `causal_features` intersect, or
+     - any of the `causal_features` nodes intersect, or
      - one side's `blast_radius` dependency edge touches the other side's `causal_features` node
        (`source` or `target` equals that node), or
      - both sides have dependency edges with the same `source` and different `target` nodes
        (shared caller / fan-out), or
-     - both sides share at least one node in `blast_radius` by `feature_id` or normalized name —
-       including the `target` of a dependency edge that both paths converge on.
+     - both sides share at least one node by `feature_id` or normalized name, counting their
+       `blast_radius` entity nodes and the `source` and `target` of every dependency edge —
+       including a `target` both paths converge on, and a chain where one edge's `target` is the
+       other's `source`.
    - Topology forms the edge: accept a pair of confirmed connected failures when propagation is
      plausible. Different signatures or effects do not reject unless they show an independent path
-     or failure class. Use **Impact** to qualify, not require identical operations.
+     or failure class. A rule's authored text (name, KI description, **Alert symptom**) never makes a
+     connected pair independent; only the grounded evidence can, by showing an independent failure.
+     Use **Impact check** to qualify, not require identical operations.
    - A pair with no connection above is rejected when `<grounding_evidence>` identifies a distinct
      resource or dependency path. A pair that has a connection above is never rejected for its
      different downstream targets.
@@ -217,8 +238,8 @@ Compare one current detection against one active event using that event's compac
    - Also compare each side's **Alert symptom**, mechanism, and failure keywords; different wording
      alone is not a rejection.
    - **Multi-service bridge:** `<grounding_evidence>` verdict is `confirms`, the matched query KI's
-     `features[]` names topology nodes present on both sides, accept the pair even when their found
-     rows name different services or mechanisms.
+     `features[]` names fetched topology nodes present on both sides, accept the pair even when their
+     found rows name different services or mechanisms.
    - **Domain** or source name alone is not sufficient convergence.
 
 Example:
@@ -366,8 +387,7 @@ Match never skips it, and a Topology hit is not waiting for a rule-uuid match.
      returned topology and compact summary context (`title`, `summary`, `symptom_hypothesis`).
      Compact search has no per-signal prose. Reuse that `event_id`. Compact `signal_rule_uuids` need
      not contain the new rule.
-   - Reject when `<incident_matching>` rejects, or when `<grounding_evidence>` identifies a distinct
-     resource or dependency path. On accept, bind topology as in Rule Match.
+   - Reject when `<incident_matching>` rejects. On accept, bind topology as in Rule Match.
 
 Every continuation item must carry its recorded exact `event_id`.
 
@@ -380,10 +400,13 @@ Step 4.
 1. Build the grouping graph before any ownership, titles, or narratives:
    - One node per detection not excluded by `<incident_matching>` pre-check rule 2, and not a new
      candidate that `<eligibility>` does not write; a concrete off-topic observed error remains its
-     own candidate. Excluded detections never enter the graph or any later assignment.
+     own candidate, as does an `inconclusive` detection whose rows point to an error (never
+     grouped). Other excluded detections never enter the graph or any later assignment.
    - **Index first.** List each confirmed detection with the `features[].id` values of its matched
-     query KI and the services its signal names. A detection whose list reaches another
-     detection's services or features is a bridge candidate; check each one below.
+     query KI and the services its signal names. A `features[].id` counts only when the Step 1
+     feature search returned it; any other id never does, so a rule that lists only those, or whose
+     rows span many services, bridges nothing. A detection whose list reaches another detection's
+     services or features is a bridge candidate; check each one below.
    - **Bridge edges first.** When a detection's matched query KI `features[]` names topology nodes
      present in two or more confirmed detections, add a direct edge between every pair of those
      detections before pairwise matching, and record every induced edge. Example: detection A's KI
@@ -450,7 +473,7 @@ For each event candidate, decide from all signals that will appear in the final 
    verdict, evidence result. Then read the narrative fields and state the strongest case for each
    alternative outcome (event ↔ no event). If the challenge surfaces a more credible alternative,
    adopt it. Resolve remaining uncertainty with the write gate in `<eligibility>`: a new candidate
-   with no confirming signal is not written. Only a continuation records refuting verdicts.
+   whose signals point to no error is not written. Only a continuation records refuting verdicts.
 2. **Decide whether each candidate is written.** Classify each event from the verdicts in
    `signals[]` alone, before reading `symptom_hypothesis`, `summary`, or `title`. Then read them
    and state the strongest case for the alternative outcome (event ↔ no event); adopt it if it is
@@ -478,7 +501,8 @@ For each event candidate, decide from all signals that will appear in the final 
    - Add up to +0.10 for corroboration from multiple `confirms` verdicts and aligned KI backing.
      Subtract 0.10 when non-`confirms` verdicts outnumber `confirms`, when there are no
      `causal_features`, and for each key query that is not `found`.
-   - Cap confidence at 0.55 with no `confirms` verdict, 0.65 with prior-cycle-only confirmation, no
+   - Cap confidence at 0.30 with no `confirms` verdict (a new event whose signals establish nothing
+     is rejected above it); set 0.10 when nothing at all is grounded. Cap at 0.65 with prior-cycle-only confirmation, no
      KI backing, or a figure the descriptions state as not measured (breadth, share, duration), and
      0.85 when any other evidence gap exists. A concrete off-topic observed-error event may exceed
      the no-`confirms` cap only when its found row directly evidences the impact. Confidence
@@ -500,7 +524,8 @@ rules were written.
    item here, because a failed attempt costs a full regeneration.
    - Each `rule_uuid` appears once in the whole request, including within an item.
    - A `confirms` item contains no `not_checked` signal; leave those detections out of the write.
-   - Each new-event item has a `confirms` or observed-error `off_topic` signal and satisfies
+   - Each new-event item has a `confirms`, observed-error `off_topic`, or error-pointing
+     `inconclusive` signal and satisfies
      `<incident_matching>` pre-check rules 1–3; otherwise drop it and add its `rule_uuid`s to
      `written_rule_uuids`. Do not split a Topology Match continuation to satisfy the pre-check.
    - No two items carry the same `event_id`; merge continuations bound to one event into one item.

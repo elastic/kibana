@@ -22,7 +22,7 @@ import { css } from '@emotion/react';
 import { useElasticChartsTheme } from '@kbn/charts-theme';
 import type { TimeState } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import type { IlmPolicyPhases, PhaseName, Streams } from '@kbn/streams-schema';
+import type { IlmPolicyPhases, PhaseName } from '@kbn/streams-schema';
 import { capitalize } from 'lodash';
 import moment from 'moment';
 import React, { useMemo } from 'react';
@@ -49,7 +49,6 @@ interface IngestionRateTieredBuckets {
 }
 
 interface ChartComponentProps {
-  definition: Streams.ingest.all.GetResponse;
   timeState: TimeState;
   isLoadingStats: boolean;
   stats?: CalculatedStats;
@@ -303,17 +302,18 @@ function ChartBarPhasesSeriesBase({
 }
 
 export function ChartBarPhasesSeries({
-  definition,
+  indexName,
+  isIlm,
   stats,
   timeState,
   isLoadingStats,
-}: ChartComponentProps) {
+}: ChartComponentProps & { indexName: string; isIlm: boolean }) {
   const { timeState: defaultTimeState } = useTimefilter();
   const currentTimeState = timeState || defaultTimeState;
 
-  // Use the appropriate hook based on isFailureStore flag
   const mainStreamResult = useIngestionRatePerTier({
-    definition,
+    indexName,
+    isIlm,
     calculatedStats: stats,
     timeState: currentTimeState,
   });

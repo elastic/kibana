@@ -12,8 +12,8 @@ import { spaceIdToNamespace } from '@kbn/spaces-plugin/server/lib/utils/namespac
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import type { CustomFieldsConfiguration } from '../../../common/types/domain';
 import type { CasesSearchRequest, CasesSearchResponse } from '../../../common/types/api';
-import { CasesSearchRequestRt, CasesSearchResponseRt } from '../../../common/types/api';
-import { decodeWithExcessOrThrow, decodeOrThrow } from '../../common/runtime_types';
+import { CasesSearchRequestSchema, CasesSearchResponseSchema } from '../../../common/types/api';
+import { decodeWithExcessOrThrowZod, decodeOrThrowZod } from '../../common/runtime_types';
 
 import { createCaseError } from '../../common/error';
 import { asArray, transformCases } from '../../common/utils';
@@ -50,7 +50,7 @@ export const search = async (
   } = clientArgs;
 
   try {
-    const paramArgs = decodeWithExcessOrThrow(CasesSearchRequestRt)(params);
+    const paramArgs = decodeWithExcessOrThrowZod(CasesSearchRequestSchema)(params);
     const configArgs = paramArgs.owner ? { owner: paramArgs.owner } : {};
     const configurations = await casesClient.configure.get(configArgs);
     const customFieldsConfiguration: CustomFieldsConfiguration = configurations
@@ -210,7 +210,7 @@ export const search = async (
 
     res.cases = enrichCasesWithFieldLabels(res.cases, templateSOs, globalFields);
 
-    return decodeOrThrow(CasesSearchResponseRt)(res);
+    return decodeOrThrowZod(CasesSearchResponseSchema)(res);
   } catch (error) {
     throw createCaseError({
       message: `Failed to find cases: ${JSON.stringify(params)}: ${error}`,

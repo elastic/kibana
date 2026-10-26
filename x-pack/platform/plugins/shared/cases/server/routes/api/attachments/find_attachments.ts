@@ -8,13 +8,13 @@
 import { schema } from '@kbn/config-schema';
 import { CASE_ATTACHMENTS_URL, MAX_CASE_ID_LENGTH } from '../../../../common/constants';
 import {
-  UnifiedAttachmentsFindQueryParamsRt,
+  UnifiedAttachmentsFindQueryParamsSchema,
   type UnifiedAttachmentsFindQueryParams,
   type UnifiedAttachmentsFindResponse,
 } from '../../../../common/types/api';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
-import { createIoTsRouteValidation } from '../utils';
+import { createZodRouteValidation } from '../utils';
 import { DEFAULT_CASES_ROUTE_SECURITY } from '../constants';
 
 // Authorization filters the query rather than checking each result, so a user with
@@ -32,7 +32,7 @@ export const findAttachmentsRoute = createCasesRoute<
     params: schema.object({
       case_id: schema.string({ maxLength: MAX_CASE_ID_LENGTH }),
     }),
-    query: createIoTsRouteValidation(UnifiedAttachmentsFindQueryParamsRt),
+    query: createZodRouteValidation(UnifiedAttachmentsFindQueryParamsSchema),
   },
   routerOptions: {
     // TODO(security-team#15572): flip to 'public' once this API is ready to ship.

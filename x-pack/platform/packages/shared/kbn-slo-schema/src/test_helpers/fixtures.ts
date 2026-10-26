@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import type * as t from 'io-ts';
+import type { z } from '@kbn/zod';
 import { Duration, DurationUnit } from '../models/duration';
-import type { sloDefinitionSchema } from '../schema/slo';
-import type { sloWithDataResponseSchema } from '../rest_specs/slo';
+import type { sloDefinitionSchema } from '../schema/zod/slo';
+import type { sloWithDataResponseSchemaZod } from '../rest_specs/slo';
 
 // Artifact-free base: assignable to both the definition schema (dashboards with
 // `id`) and the stored schema (dashboards with `refId`) decoded types.
-type BaseSLODefinition = Omit<t.TypeOf<typeof sloDefinitionSchema>, 'artifacts'>;
-type SLOWithData = t.TypeOf<typeof sloWithDataResponseSchema>;
+type BaseSLODefinition = Omit<z.output<typeof sloDefinitionSchema>, 'artifacts'>;
+type SLOWithData = z.output<typeof sloWithDataResponseSchemaZod>;
 
 export const FIXED_DATE_ISO = '2024-01-01T00:00:00.000Z';
 

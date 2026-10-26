@@ -8,15 +8,19 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { VegaParser } from './data_model/vega_parser';
+import type { View } from 'vega';
+import type { VegaRenderDescriptor } from './data_model/types';
 import type { VegaVisualizationDependencies } from './plugin';
 import type { VegaEventHandler } from './types';
+import type { VegaInspectorAdapters } from './vega_inspector';
+import type { DebugValues } from './vega_inspector/vega_adapter';
 import { getNotifications, getData } from './services';
 import type { VegaView } from './vega_view/vega_view';
 import { createVegaStateRestorer } from './lib/vega_state_restorer';
+import { createVegaFilterActionHandler } from './vega_view/vega_filter_action_handler';
 
 export type VegaVisType = new (el: HTMLDivElement, fireEvent: VegaEventHandler) => {
-  render(visData: VegaParser): Promise<void>;
+  render(visData: VegaRenderDescriptor, inspectorAdapters?: VegaInspectorAdapters): Promise<void>;
   resize(dimensions?: { height: number; width: number }): Promise<void>;
   destroy(): void;
 };
@@ -29,12 +33,12 @@ export const createVegaVisualization = (
     private readonly dataPlugin = getData();
     private vegaView: InstanceType<typeof VegaView> | null = null;
     private vegaStateRestorer = createVegaStateRestorer({
-      isActive: () => Boolean(this.vegaView?._parser?.restoreSignalValuesOnRefresh),
+      isActive: () => Boolean(this.vegaView?._descriptor?.restoreSignalValuesOnRefresh),
     });
 
     constructor(private el: HTMLDivElement, private fireEvent: VegaEventHandler) {}
 
-    async render(visData: VegaParser) {
+    async render(visData: VegaRenderDescriptor, inspectorAdapters?: VegaInspectorAdapters) {
       const { toasts } = getNotifications();
 
       if (!visData && !this.vegaView) {
@@ -47,7 +51,7 @@ export const createVegaVisualization = (
       }
 
       try {
-        await this._render(visData);
+        await this._render(visData, inspectorAdapters);
       } catch (error) {
         if (this.vegaView) {
           this.vegaView.onError(error);
@@ -61,9 +65,9 @@ export const createVegaVisualization = (
       }
     }
 
-    async _render(vegaParser: VegaParser) {
-      if (vegaParser) {
-        vegaParser.searchAPI.inspectorAdapters?.vega.clearError();
+    async _render(descriptor: VegaRenderDescriptor, inspectorAdapters?: VegaInspectorAdapters) {
+      if (descriptor) {
+        inspectorAdapters?.vega.clearError();
         // New data received, rebuild the graph
         if (this.vegaView) {
           await this.vegaView.destroy();
@@ -71,21 +75,28 @@ export const createVegaVisualization = (
         }
 
         const serviceSettings = await getServiceSettings();
-        const { filterManager } = this.dataPlugin.query;
-        const { timefilter } = this.dataPlugin.query.timefilter;
         const vegaViewParams = {
           externalUrl: core.http.externalUrl,
           parentEl: this.el,
-          fireEvent: this.fireEvent,
           vegaStateRestorer: this.vegaStateRestorer,
-          vegaParser,
+          descriptor,
+          onError: (message: string) => inspectorAdapters?.vega.setError(message),
+          onViewCreated: (view: View) =>
+            inspectorAdapters?.vega.bindInspectValues({
+              // The inspector reads Vega's internal `_runtime`, which the public View type omits.
+              view: view as DebugValues['view'],
+              spec: descriptor.vlspec || descriptor.spec,
+            }),
+          onFilterAction: createVegaFilterActionHandler({
+            spec: descriptor.isVegaLite && descriptor.vlspec ? descriptor.vlspec : descriptor.spec,
+            filterManager: this.dataPlugin.query.filterManager,
+            fireEvent: this.fireEvent,
+          }),
           serviceSettings,
-          filterManager,
-          timefilter,
           showWarnings,
         };
 
-        if (vegaParser.useMap) {
+        if (descriptor.useMap) {
           const { VegaMapView } = await import('./vega_view/vega_map_view/view');
           this.vegaView = new VegaMapView(vegaViewParams);
         } else {

@@ -18,6 +18,7 @@ import { useStreamsAppFetch } from '../../../../../hooks/use_streams_app_fetch';
 import type { CalculatedStats } from '../helpers/get_calculated_stats';
 import { getCalculatedStats } from '../helpers/get_calculated_stats';
 import { getAggregations } from './use_ingestion_rate';
+import { getFailureStoreIndexName } from '../helpers/failure_store_index_name';
 import { formatBytes } from '../helpers/format_bytes';
 
 export type DataStreamStats = DataStreamStatServiceResponse['dataStreamsStats'][number] & {
@@ -79,9 +80,15 @@ export const useDataStreamStats = ({
 
       const canReadFailureStore = definition.privileges?.read_failure_store ?? false;
       const [dsAggregations, fsAggregations] = await Promise.all([
-        getAggregations({ definition, timeState, core, search, signal }),
+        getAggregations({ indexName: definition.stream.name, timeState, core, search, signal }),
         canReadFailureStore && isEnabledFailureStore(definition.effective_failure_store)
-          ? getAggregations({ definition, timeState, core, search, signal, isFailureStore: true })
+          ? getAggregations({
+              indexName: getFailureStoreIndexName(definition.stream.name),
+              timeState,
+              core,
+              search,
+              signal,
+            })
           : undefined,
       ]);
 

@@ -83,6 +83,7 @@ export const getRuleDetailMenu = ({
       'data-test-subj': 'ruleDetailsEnabledSwitch',
     },
     // Order mirrors the rules list overflow: Run / Clone | View change history / Update API key | Delete.
+    // View details is omitted here because it links to this page.
     // Feedback stays a global static item (app menu draws its own separator above it).
     items: [
       {

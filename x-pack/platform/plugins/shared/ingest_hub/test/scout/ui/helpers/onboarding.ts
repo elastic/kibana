@@ -111,6 +111,8 @@ export async function navigateToOnboardingStep(
     /** Data format to seed. Omitted leaves it unset, so the solution default applies. */
     dataFormat?: 'ecs' | 'otel';
     globalRegion?: string;
+    /** Integration name to seed. Omitted leaves it for the app to prefill (`aws-<n>`). */
+    integrationName?: string;
     serviceVars?: Record<string, ServiceVars>;
     instances?: unknown[];
     /** Optional ECF launch step to seed — sets the post-launch state without clicking the button. */
@@ -135,6 +137,7 @@ export async function navigateToOnboardingStep(
     selectedServiceIds,
     dataFormat,
     globalRegion = 'us-east-1',
+    integrationName,
     serviceVars = {},
     instances,
     ecfLaunchStep,
@@ -150,6 +153,7 @@ export async function navigateToOnboardingStep(
       ids,
       format,
       region,
+      name,
       vars,
       insts,
       ecfStep,
@@ -164,6 +168,7 @@ export async function navigateToOnboardingStep(
       ids: string[];
       format: 'ecs' | 'otel' | undefined;
       region: string;
+      name: string | undefined;
       vars: Record<string, ServiceVars>;
       insts: unknown[] | undefined;
       ecfStep: PersistedEcfLaunchStep | undefined;
@@ -191,6 +196,7 @@ export async function navigateToOnboardingStep(
         JSON.stringify({ selectedServiceIds: ids, ...(format ? { dataFormat: format } : {}) })
       );
       const settingsPayload: Record<string, unknown> = { globalRegion: region, serviceVars: vars };
+      if (name !== undefined) settingsPayload.integrationName = name;
       if (insts !== undefined) settingsPayload.instances = insts;
       sessionStorage.setItem(settingsKey, JSON.stringify(settingsPayload));
       if (ecfStep !== undefined) {
@@ -214,6 +220,7 @@ export async function navigateToOnboardingStep(
       ids: selectedServiceIds,
       format: dataFormat,
       region: globalRegion,
+      name: integrationName,
       vars: serviceVars,
       insts: instances,
       ecfStep: ecfLaunchStep,
@@ -228,6 +235,18 @@ export async function navigateToOnboardingStep(
   );
   await page.gotoApp(`onboarding/aws#${step}`);
   await expectOnboardingStepVisible(page, step);
+}
+
+/**
+ * Picks the "Access keys" credential method. The radio input is visually hidden, so the click is
+ * forced, which clicks at the element's coordinates whatever is on top. Scroll it to the middle of
+ * the viewport first: at the bottom edge the sticky step footer covers it and the click would land
+ * on the footer's Back button.
+ */
+export async function selectStaticKeysAuth(page: ScoutPage): Promise<void> {
+  const accessKeysRadio = page.getByRole('radio', { name: /access keys/i });
+  await accessKeysRadio.evaluate((el) => el.scrollIntoView({ block: 'center' }));
+  await accessKeysRadio.click({ force: true });
 }
 
 /** Enables the onboarding flag plus any extra overrides for the describe block; afterAll removes them (null deletes an override). */

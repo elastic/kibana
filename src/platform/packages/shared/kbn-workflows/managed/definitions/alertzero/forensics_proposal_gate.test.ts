@@ -13,7 +13,7 @@ import {
   ALERTZERO_FORENSICS_PROPOSAL_GATE_WORKFLOW,
   ALERTZERO_FORENSICS_PROPOSAL_GATE_WORKFLOW_ID,
 } from './forensics_proposal_gate';
-import { ALERTZERO_HUNT_PROPOSAL_GATE_WORKFLOW } from './hunt_proposal_gate';
+import { ALERTZERO_HUNT_PROPOSAL_GATE_WORKFLOW } from './hunt';
 import { createWorkflowLiquidEngine } from '../../../common/utils';
 
 interface YamlStep {
@@ -21,7 +21,7 @@ interface YamlStep {
   type: string;
   if?: string;
   with?: Record<string, unknown>;
-  'on-failure'?: { continue?: boolean };
+  'on-failure'?: { continue?: boolean; retry?: { 'max-attempts'?: number; delay?: string } };
 }
 
 interface YamlWorkflow {
@@ -89,6 +89,7 @@ describe('Forensics proposal gate', () => {
       const inputs = wrap?.with?.inputs as Record<string, string>;
       const forwarded = [
         'conversationId',
+        'proposalId',
         'title',
         'comment',
         'actionWorkflowId',
@@ -102,6 +103,150 @@ describe('Forensics proposal gate', () => {
       }
       expect(inputs.impact).toBeUndefined();
       expect(inputs.category).toBeUndefined();
+    });
+  });
+
+  // Two runs that reach one host at the same time can both resolve the subject as free.
+  // The service creates one Proposal under the shared id and refuses the other, whose
+  // gate would otherwise carry on in silence.
+  describe('a lost race', () => {
+    const fetchStep = stepIn(gate.steps, 'fetch_existing_proposal');
+    const resolveStep = stepIn(gate.steps, 'resolve_lost_race');
+    const journalStep = stepIn(gate.steps, 'journal_lost_race');
+    const wrapFailedStep = stepIn(gate.steps, 'journal_wrap_failed');
+    const lostRaceWith = resolveStep?.with as Record<string, string>;
+    const liquid = createWorkflowLiquidEngine();
+
+    const context = (overrides: {
+      fetched?: Record<string, unknown>;
+      spaceId?: string;
+      title?: string | undefined;
+    }) => ({
+      inputs: {
+        conversationId: 'conv-1',
+        ...(overrides.title === undefined ? {} : { title: overrides.title }),
+      },
+      workflow: { spaceId: overrides.spaceId ?? 'default' },
+      steps:
+        overrides.fetched === undefined
+          ? {}
+          : { fetch_existing_proposal: { output: overrides.fetched } },
+    });
+
+    it('only reads the existing Proposal after a create under a caller-derived id failed', () => {
+      expect(fetchStep?.type).toBe('kibana.request');
+      expect(fetchStep?.with?.method).toBe('GET');
+      expect(fetchStep?.with?.path).toBe(
+        '/s/{{ workflow.spaceId }}/internal/proposals/{{ inputs.proposalId }}'
+      );
+
+      const reads = (error: Record<string, unknown> | undefined, proposalId?: string) =>
+        evaluateExpression(String(fetchStep?.if), {
+          inputs: proposalId === undefined ? {} : { proposalId },
+          steps: { create_and_gate_proposal: error === undefined ? {} : { error } },
+        });
+      expect(reads({ message: 'conflict' }, 'p-1')).toBe(true);
+      expect(reads(undefined, 'p-1')).toBe(false);
+      expect(reads({ message: '' }, 'p-1')).toBe(false);
+      // No id was derived: nothing to look up, and the path would be the list route.
+      expect(reads({ message: 'conflict' })).toBe(false);
+      expect(reads({ message: 'conflict' }, '')).toBe(false);
+    });
+
+    it('retries that read, since the winner may not be searchable yet, and carries on if it still fails', () => {
+      expect(fetchStep?.['on-failure']).toEqual({
+        retry: { 'max-attempts': 3, delay: '1s' },
+        continue: true,
+      });
+    });
+
+    it('is a lost race only when the Proposal under the id belongs to another conversation', () => {
+      const isLost = (fetched: Record<string, unknown> | undefined) =>
+        evaluateExpression(lostRaceWith.lost_race, context({ fetched }));
+
+      expect(isLost({ conversationId: 'conv-other' })).toBe(true);
+      // The gate itself failed on this Investigation's own Proposal: not a race.
+      expect(isLost({ conversationId: 'conv-1' })).toBe(false);
+      // The read was skipped, or failed: nothing true can be said, so nothing is written.
+      expect(isLost(undefined)).toBe(false);
+      expect(isLost({})).toBe(false);
+      expect(isLost({ conversationId: '' })).toBe(false);
+    });
+
+    it('says where the finding went, and that this Investigation stays open', () => {
+      const note = liquid.parseAndRenderSync(
+        lostRaceWith.lost_race_note,
+        context({ fetched: { conversationId: 'conv-other' }, title: 'Isolate web-01' })
+      );
+
+      expect(note).toBe(
+        'A containment proposal for "Isolate web-01" was raised by [another Investigation](/app/alertzero?selectedConversationId=conv-other) at the same moment as this one, so no second Proposal was created and this finding is covered by that one. This Investigation stays open until an analyst closes it.'
+      );
+    });
+
+    it('links the space the Investigation is in', () => {
+      const note = liquid.parseAndRenderSync(
+        lostRaceWith.lost_race_note,
+        context({ fetched: { conversationId: 'conv-other' }, spaceId: 'sec' })
+      );
+      expect(note).toContain('(/s/sec/app/alertzero?selectedConversationId=conv-other)');
+    });
+
+    it('names the action when the gate was given no title', () => {
+      const note = liquid.parseAndRenderSync(
+        lostRaceWith.lost_race_note,
+        context({ fetched: { conversationId: 'conv-other' } })
+      );
+      expect(note).toContain('"the proposed action"');
+    });
+
+    it('writes it on this Investigation through the journal workflow, and never fails the gate over it', () => {
+      expect(journalStep?.if).toBe('${{ variables.lost_race == true }}');
+      expect(journalStep?.with).toEqual({
+        'workflow-id': 'system-alertzero-journal-note',
+        'run-as-mode': 'inherit',
+        inputs: {
+          author_name: '{{ consts.author_name }}',
+          conversation_id: '{{ inputs.investigationConversationId }}',
+          message: '{{ variables.lost_race_note }}',
+        },
+      });
+      expect(journalStep?.['on-failure']).toEqual({ continue: true });
+    });
+
+    // The generic "ran into an error" note would otherwise follow the lost-race note
+    // and contradict it: the race is a known outcome, not a problem to look into.
+    it('does not also write the generic wrap-failed note for a lost race', () => {
+      const fires = (lostRace: boolean) =>
+        evaluateExpression(String(wrapFailedStep?.if), {
+          steps: { create_and_gate_proposal: { error: { message: 'conflict' } } },
+          variables: { lost_race: lostRace },
+        });
+      expect(fires(false)).toBe(true);
+      expect(fires(true)).toBe(false);
+      expect(
+        evaluateExpression(String(wrapFailedStep?.if), {
+          steps: { create_and_gate_proposal: {} },
+          variables: { lost_race: false },
+        })
+      ).toBe(false);
+    });
+
+    it('happens after the create and before the settlement requery that closes the Investigation', () => {
+      const order = gate.steps.map((step) => step.name);
+      expect(order.indexOf('fetch_existing_proposal')).toBeGreaterThan(
+        order.indexOf('create_and_gate_proposal')
+      );
+      expect(order.indexOf('resolve_lost_race')).toBeGreaterThan(
+        order.indexOf('fetch_existing_proposal')
+      );
+      expect(order.indexOf('journal_lost_race')).toBeGreaterThan(
+        order.indexOf('resolve_lost_race')
+      );
+      expect(order.indexOf('journal_wrap_failed')).toBeGreaterThan(
+        order.indexOf('resolve_lost_race')
+      );
+      expect(order.indexOf('journal_lost_race')).toBeLessThan(order.indexOf('requery_created'));
     });
   });
 
@@ -122,6 +267,13 @@ describe('Forensics proposal gate', () => {
     it('types autoApprove as a boolean and expectedProposalCount as a number', () => {
       expect(inputs?.properties?.autoApprove).toMatchObject({ type: 'boolean' });
       expect(inputs?.properties?.expectedProposalCount).toMatchObject({ type: 'number' });
+    });
+
+    // The run resolves each Proposal's id before dispatching, so two runs racing over one
+    // subject create one Proposal. Optional: a caller may still raise an always-new one.
+    it('accepts the deterministic proposalId the run resolved, without requiring it', () => {
+      expect(inputs?.properties?.proposalId).toMatchObject({ type: 'string' });
+      expect(inputs?.required).not.toContain('proposalId');
     });
   });
 

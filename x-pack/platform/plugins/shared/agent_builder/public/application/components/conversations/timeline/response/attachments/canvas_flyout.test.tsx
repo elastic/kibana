@@ -210,12 +210,15 @@ describe('CanvasFlyout', () => {
       });
     });
 
-    it('does not invoke openSidebarConversationInternal when rendered inside the sidebar', () => {
+    it('invokes openSidebarConversationInternal with the active conversationId when rendered inside the sidebar', () => {
       renderWithFakeCanvas({ isSidebar: true });
 
       fireEvent.click(screen.getByRole('button', { name: TRIGGER_LABEL }));
 
-      expect(mockOpenSidebarConversation).not.toHaveBeenCalled();
+      expect(mockOpenSidebarConversation).toHaveBeenCalledTimes(1);
+      expect(mockOpenSidebarConversation).toHaveBeenCalledWith({
+        conversationId: 'conversation-1',
+      });
     });
   });
 

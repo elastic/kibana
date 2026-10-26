@@ -57,8 +57,6 @@ const UNTITLED_INVESTIGATION = i18n.translate(
  * - `template_id`      fabricated `'investigation'`; a proposal is not an investigation.
  * - `worker_execution_ids` empty; no equivalent on a proposal.
  * - `events`           `[]`; proposals have no timeline. The flyout renders an empty list.
- * - `affectedSurface`  first Impact entity id, when hydrated; otherwise undefined.
- * - `entityIds`        from the conversation's Impact document; omitted when none.
  * - `status`           deliberately `undefined`. A proposal status (`'pending'`, `'succeeded'`, …)
  *                      is not an investigation status. The bucket gives the queue what it
  *                      needs: a settled proposal goes to `closed`. An approved proposal that
@@ -117,10 +115,5 @@ export const proposalToInvestigation = (proposal: ProposalItem): Investigation =
     assignee: proposal.conversationAssignees[0] ?? null,
     assignees: proposal.conversationAssignees,
     events: [],
-    entityIds: proposal.entityIds,
-    entityTypes: proposal.entityTypes,
-    // First id feeds the flyout Overview "Compromised" row until that surface
-    // reads `entityIds` directly. Pills and the queue filter use `entityIds`.
-    affectedSurface: proposal.entityIds?.[0],
   };
 };

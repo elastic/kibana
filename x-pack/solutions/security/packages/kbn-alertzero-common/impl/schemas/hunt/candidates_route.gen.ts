@@ -28,6 +28,19 @@ export const CandidatesRequestBody = lazySchema(() =>
     .object({
       report_ids: z.array(z.string().min(1).max(512)).max(10).optional(),
       limit: z.number().int().min(1).max(10).optional(),
+      /**
+       * Maximum age in days of a report eligible on a request without report_ids, measured on content.published_at, or on @timestamp for a report that has no content.published_at. Ignored when report_ids is supplied.
+       */
+      lookback_days: z
+        .number()
+        .int()
+        .min(1)
+        .max(3650)
+        .optional()
+        .default(30)
+        .describe(
+          'Maximum age in days of a report eligible on a request without report_ids, measured on content.published_at, or on @timestamp for a report that has no content.published_at. Ignored when report_ids is supplied.'
+        ),
     })
     .strict()
 );

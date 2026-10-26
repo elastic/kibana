@@ -41,6 +41,11 @@ describe('bulkByIdsSchema', () => {
     expect(parsed.success).toBe(false);
   });
 
+  it('rejects a repeated id and points at its position', () => {
+    const result = bulkByIdsSchema.safeParse({ ids: ['a', 'b', 'a'] });
+    expect(result.success).toBe(false);
+  });
+
   it('rejects id arrays longer than MAX_BULK_ITEMS', () => {
     const parsed = bulkByIdsSchema.safeParse({
       ids: Array.from({ length: MAX_BULK_ITEMS + 1 }, (_, i) => `id-${i}`),

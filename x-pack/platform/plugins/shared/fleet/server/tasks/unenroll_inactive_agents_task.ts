@@ -258,6 +258,7 @@ export class UnenrollInactiveAgentsTask {
 
       const scheduledBatch = await unenrollBatch(soClient, esClient, agentsToSchedule, {
         force: true,
+        skipAgentlessValidation: true,
         actionId,
         startTime,
       });
@@ -355,7 +356,9 @@ export class UnenrollInactiveAgentsTask {
         page: 1,
         perPage: action.agents.length,
       });
-      const stillInactiveAgents = agentDocs.filter((a) => a.active && !a.unenrolled_at);
+      // Only `active` is checked: legacy docs (Fleet Server 8.16.0-8.17.0 audit/unenroll bug) can be
+      // `active: true` with a stale `unenrolled_at`. Force unenroll below deactivates them and revokes keys.
+      const stillInactiveAgents = agentDocs.filter((a) => a.active);
 
       if (!stillInactiveAgents.length) {
         this.logger.debug(
@@ -374,6 +377,7 @@ export class UnenrollInactiveAgentsTask {
       await unenrollBatch(soClient, esClient, stillInactiveAgents, {
         revoke: true,
         force: true,
+        skipAgentlessValidation: true,
         actionId: action.action_id,
         skipActionCreation: true,
       });

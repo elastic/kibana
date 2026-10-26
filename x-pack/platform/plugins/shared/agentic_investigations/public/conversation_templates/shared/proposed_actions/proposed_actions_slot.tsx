@@ -42,9 +42,8 @@ interface ProposedActionRowProps {
  * inside the list's `.map`.
  */
 const ProposedActionRow = ({ proposal, onDecisionError }: ProposedActionRowProps) => {
-  const { readOnly, isSubmitting, currentActorName, approve, dismiss } = useProposalDecision(
-    proposal.id
-  );
+  const { readOnly, isSubmitting, currentActorName, approve, dismiss, reopen, isReopening } =
+    useProposalDecision(proposal.id);
 
   return (
     <ProposedActionButton
@@ -67,6 +66,15 @@ const ProposedActionRow = ({ proposal, onDecisionError }: ProposedActionRowProps
           throw err;
         }
       }}
+      onReopen={async () => {
+        try {
+          await reopen();
+        } catch (err) {
+          onDecisionError(err);
+          throw err;
+        }
+      }}
+      isReopening={isReopening}
       currentActorName={currentActorName}
       data-test-subj={`investigationFlyoutProposedAction-${proposal.id}`}
     />

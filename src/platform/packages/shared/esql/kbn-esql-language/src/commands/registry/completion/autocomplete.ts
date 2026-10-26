@@ -188,7 +188,7 @@ export async function autocomplete(
       return [
         {
           ...withCompleteItem,
-          detail: i18n.translate('kbn-esql-ast.esql.definitions.completionWithDoc', {
+          detail: i18n.translate('esqlLanguage.esql.definitions.completionWithDoc', {
             defaultMessage: 'Provide additional parameters for the LLM prompt.',
           }),
         },

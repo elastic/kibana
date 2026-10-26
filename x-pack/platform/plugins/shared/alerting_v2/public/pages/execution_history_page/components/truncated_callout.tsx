@@ -10,11 +10,11 @@ import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import type { SearchMatchCounts } from '@kbn/alerting-v2-schemas';
 import { i18n } from '@kbn/i18n';
 
-type MatchedType = 'policies' | 'rules';
+type MatchedType = 'policy_count' | 'rule_count';
 
-// The Rules tab only reports rule matches, so `policies` is optional.
-type SearchMatches = Omit<SearchMatchCounts, 'policies'> &
-  Partial<Pick<SearchMatchCounts, 'policies'>>;
+// The Rules tab only reports rule matches, so `policy_count` is optional.
+type SearchMatches = Omit<SearchMatchCounts, 'policy_count'> &
+  Partial<Pick<SearchMatchCounts, 'policy_count'>>;
 
 interface Props {
   searchParam?: string;
@@ -26,7 +26,7 @@ interface Props {
 export const TruncatedCallout = ({ data, searchParam }: Props) => {
   const searchMatches = data?.search_matches;
   const matchedTypes: MatchedType[] = searchMatches
-    ? (['policies', 'rules'] as const).filter((t) => (searchMatches[t] ?? 0) > 0)
+    ? (['policy_count', 'rule_count'] as const).filter((t) => (searchMatches[t] ?? 0) > 0)
     : [];
   const showSearchTruncatedCallout =
     searchParam !== undefined &&
@@ -49,14 +49,14 @@ export const TruncatedCallout = ({ data, searchParam }: Props) => {
 };
 
 const renderMatchedPart = (matches: SearchMatches, type: MatchedType): string =>
-  type === 'policies'
+  type === 'policy_count'
     ? i18n.translate('xpack.alertingV2.executionHistory.searchTruncatedCallout.policiesPart', {
         defaultMessage: '{total} matching action policies',
-        values: { total: matches.policies ?? 0 },
+        values: { total: matches.policy_count ?? 0 },
       })
     : i18n.translate('xpack.alertingV2.executionHistory.searchTruncatedCallout.rulesPart', {
         defaultMessage: '{total} matching rules',
-        values: { total: matches.rules },
+        values: { total: matches.rule_count },
       });
 
 const buildSearchTruncatedCalloutTitle = (

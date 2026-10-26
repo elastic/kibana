@@ -27,7 +27,7 @@ export const fromCommand = {
   metadata: {
     type: 'source' as const,
     subquerySource: true,
-    description: i18n.translate('kbn-esql-language.esql.definitions.fromDoc', {
+    description: i18n.translate('esqlLanguage.esql.definitions.fromDoc', {
       defaultMessage:
         'Retrieves data from one or more data streams, indices, or aliases. In a query or subquery, you must use the from command first and it does not need a leading pipe. For example, to retrieve data from an index:',
     }),

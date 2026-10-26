@@ -35,7 +35,7 @@ import { EsqlFunctionNames } from '../function_names';
 const mvInRangeDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: EsqlFunctionNames.MV_IN_RANGE,
-  description: i18n.translate('kbn-esql-language.esql.definitions.mv_in_range', {
+  description: i18n.translate('esqlLanguage.esql.definitions.mv_in_range', {
     defaultMessage:
       'Returns `true` if at least one value of `field` is within the range `[lower, upper]`, using the natural order of the type. A null or empty field returns `false`, as does a null bound. Both bounds are inclusive by default; set `include_lower` or `include_upper` to `false` in the optional `options` map to make either bound exclusive, covering all four interval forms. Works on any ordered type: numbers, dates, IPs, versions, and strings (compared by their UTF-8 bytes).',
   }),
@@ -658,7 +658,7 @@ const mvInRangeDefinition: FunctionDefinition = {
 const mvIntersectionDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: EsqlFunctionNames.MV_INTERSECTION,
-  description: i18n.translate('kbn-esql-language.esql.definitions.mv_intersection', {
+  description: i18n.translate('esqlLanguage.esql.definitions.mv_intersection', {
     defaultMessage:
       'Returns the values that appear in both input fields. Returns `null` if either field is null or if no values match.',
   }),
@@ -1094,7 +1094,7 @@ const mvIntersectionDefinition: FunctionDefinition = {
 const mvIntersectsDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: EsqlFunctionNames.MV_INTERSECTS,
-  description: i18n.translate('kbn-esql-language.esql.definitions.mv_intersects', {
+  description: i18n.translate('esqlLanguage.esql.definitions.mv_intersects', {
     defaultMessage:
       'Checks if any value yielded by the second multivalue expression is present in the values yielded by the first multivalue expression. Returns a boolean. Null values are treated as an empty set.',
   }),
@@ -1486,7 +1486,7 @@ const mvIntersectsDefinition: FunctionDefinition = {
 const mvLastDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: EsqlFunctionNames.MV_LAST,
-  description: i18n.translate('kbn-esql-language.esql.definitions.mv_last', {
+  description: i18n.translate('esqlLanguage.esql.definitions.mv_last', {
     defaultMessage:
       'Converts a multivalue expression into a single valued column containing the last\nvalue. This is most useful when reading from a function that emits multivalued\ncolumns in a known order like `SPLIT`.',
   }),
@@ -1748,7 +1748,7 @@ const mvLastDefinition: FunctionDefinition = {
 const mvLessDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: EsqlFunctionNames.MV_LESS,
-  description: i18n.translate('kbn-esql-language.esql.definitions.mv_less', {
+  description: i18n.translate('esqlLanguage.esql.definitions.mv_less', {
     defaultMessage:
       'Returns `true` if at least one value of `field` is less than `bound`, using the natural order of the type. A null or empty field returns `false`, as does a null or multivalued bound. The comparison is strict (`<`) by default; set `include_bound` to `true` in the optional `options` map to make it inclusive (`<=`). Works on any ordered type: numbers, dates, IPs, versions, and strings (compared by their UTF-8 bytes).',
   }),
@@ -2146,7 +2146,7 @@ const mvLessDefinition: FunctionDefinition = {
 const mvLikeDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: EsqlFunctionNames.MV_LIKE,
-  description: i18n.translate('kbn-esql-language.esql.definitions.mv_like', {
+  description: i18n.translate('esqlLanguage.esql.definitions.mv_like', {
     defaultMessage:
       'Returns `true` when any value yielded by `field` matches `pattern`, using the same wildcard syntax as `LIKE`.\n`LIKE` is a single-value scalar: applied to a multivalue field it emits a warning and returns `null`, so this\nis how you match a wildcard pattern against a multivalue field. A null or empty `field` returns `false`, and\nbecause the result is never null the predicate composes under `AND`/`OR`/`NOT`.',
   }),
@@ -2269,7 +2269,7 @@ const mvLikeDefinition: FunctionDefinition = {
 const mvMaxDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: EsqlFunctionNames.MV_MAX,
-  description: i18n.translate('kbn-esql-language.esql.definitions.mv_max', {
+  description: i18n.translate('esqlLanguage.esql.definitions.mv_max', {
     defaultMessage:
       'Converts a multivalued expression into a single valued column containing the maximum value.',
   }),
@@ -2424,7 +2424,7 @@ const mvMaxDefinition: FunctionDefinition = {
 const mvMedianDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: EsqlFunctionNames.MV_MEDIAN,
-  description: i18n.translate('kbn-esql-language.esql.definitions.mv_median', {
+  description: i18n.translate('esqlLanguage.esql.definitions.mv_median', {
     defaultMessage:
       'Converts a multivalued field into a single valued field containing the median value.',
   }),
@@ -2502,7 +2502,7 @@ const mvMedianDefinition: FunctionDefinition = {
 const mvMedianAbsoluteDeviationDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: EsqlFunctionNames.MV_MEDIAN_ABSOLUTE_DEVIATION,
-  description: i18n.translate('kbn-esql-language.esql.definitions.mv_median_absolute_deviation', {
+  description: i18n.translate('esqlLanguage.esql.definitions.mv_median_absolute_deviation', {
     defaultMessage:
       'Converts a multivalued field into a single valued field containing the median absolute deviation.\n\nIt is calculated as the median of each data point’s deviation from the median of the entire sample. That is, for a random variable `X`, the median absolute deviation is `median(|median(X) - X|)`.',
   }),
@@ -2579,7 +2579,7 @@ const mvMedianAbsoluteDeviationDefinition: FunctionDefinition = {
 const mvMinDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: EsqlFunctionNames.MV_MIN,
-  description: i18n.translate('kbn-esql-language.esql.definitions.mv_min', {
+  description: i18n.translate('esqlLanguage.esql.definitions.mv_min', {
     defaultMessage:
       'Converts a multivalued expression into a single valued column containing the minimum value.',
   }),
@@ -2734,7 +2734,7 @@ const mvMinDefinition: FunctionDefinition = {
 const mvPercentileDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: EsqlFunctionNames.MV_PERCENTILE,
-  description: i18n.translate('kbn-esql-language.esql.definitions.mv_percentile', {
+  description: i18n.translate('esqlLanguage.esql.definitions.mv_percentile', {
     defaultMessage:
       'Converts a multivalued field into a single valued field containing the value at which a certain percentage of observed values occur.',
   }),
@@ -2929,7 +2929,7 @@ const mvPercentileDefinition: FunctionDefinition = {
 const mvPseriesWeightedSumDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: EsqlFunctionNames.MV_PSERIES_WEIGHTED_SUM,
-  description: i18n.translate('kbn-esql-language.esql.definitions.mv_pseries_weighted_sum', {
+  description: i18n.translate('esqlLanguage.esql.definitions.mv_pseries_weighted_sum', {
     defaultMessage:
       'Converts a multivalued expression into a single-valued column by multiplying every element on the input list by its corresponding term in P-Series and computing the sum.',
   }),
@@ -2983,7 +2983,7 @@ const mvPseriesWeightedSumDefinition: FunctionDefinition = {
 const mvRlikeDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: EsqlFunctionNames.MV_RLIKE,
-  description: i18n.translate('kbn-esql-language.esql.definitions.mv_rlike', {
+  description: i18n.translate('esqlLanguage.esql.definitions.mv_rlike', {
     defaultMessage:
       'Returns `true` when any value yielded by `field` matches `pattern`, using the same regular-expression syntax\nas `RLIKE`. The pattern must match a value in full, as with `RLIKE`. `RLIKE` is a single-value scalar:\napplied to a multivalue field it emits a warning and returns `null`, so this is how you match a regular\nexpression against a multivalue field. A null or empty `field` returns `false`, and because the result is\nnever null the predicate composes under `AND`/`OR`/`NOT`.',
   }),
@@ -3105,7 +3105,7 @@ const mvRlikeDefinition: FunctionDefinition = {
 const mvSliceDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: EsqlFunctionNames.MV_SLICE,
-  description: i18n.translate('kbn-esql-language.esql.definitions.mv_slice', {
+  description: i18n.translate('esqlLanguage.esql.definitions.mv_slice', {
     defaultMessage:
       'Returns a subset of the multivalued field using the start and end index values. Indexes are 0-based.\nThis is most useful when reading from a function that emits multivalued columns\nin a known order like `SPLIT` or `MV_SORT`.',
   }),
@@ -3633,7 +3633,7 @@ const mvSliceDefinition: FunctionDefinition = {
 const mvSortDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: EsqlFunctionNames.MV_SORT,
-  description: i18n.translate('kbn-esql-language.esql.definitions.mv_sort', {
+  description: i18n.translate('esqlLanguage.esql.definitions.mv_sort', {
     defaultMessage: 'Sorts a multivalued field in lexicographical order.',
   }),
   preview: false,
@@ -4037,7 +4037,7 @@ const mvSortDefinition: FunctionDefinition = {
 const mvSumDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: EsqlFunctionNames.MV_SUM,
-  description: i18n.translate('kbn-esql-language.esql.definitions.mv_sum', {
+  description: i18n.translate('esqlLanguage.esql.definitions.mv_sum', {
     defaultMessage:
       'Converts a multivalued field into a single valued field containing the sum of all of the values.',
   }),
@@ -4112,7 +4112,7 @@ const mvSumDefinition: FunctionDefinition = {
 const mvUnionDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: EsqlFunctionNames.MV_UNION,
-  description: i18n.translate('kbn-esql-language.esql.definitions.mv_union', {
+  description: i18n.translate('esqlLanguage.esql.definitions.mv_union', {
     defaultMessage:
       'Returns all unique values from the combined input fields (set union). Null values are treated as empty sets; returns `null` only if both fields are null.',
   }),
@@ -4548,7 +4548,7 @@ const mvUnionDefinition: FunctionDefinition = {
 const mvZipDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: EsqlFunctionNames.MV_ZIP,
-  description: i18n.translate('kbn-esql-language.esql.definitions.mv_zip', {
+  description: i18n.translate('esqlLanguage.esql.definitions.mv_zip', {
     defaultMessage:
       'Combines the values from two multivalued fields with a delimiter that joins them together.',
   }),
@@ -4833,7 +4833,7 @@ const mvZipDefinition: FunctionDefinition = {
 const networkDirectionDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: EsqlFunctionNames.NETWORK_DIRECTION,
-  description: i18n.translate('kbn-esql-language.esql.definitions.network_direction', {
+  description: i18n.translate('esqlLanguage.esql.definitions.network_direction', {
     defaultMessage:
       'Returns the direction type (inbound, outbound, internal, external) given a source IP address, destination IP address, and a list of internal networks.',
   }),
@@ -4914,7 +4914,7 @@ const networkDirectionDefinition: FunctionDefinition = {
 const nowDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: EsqlFunctionNames.NOW,
-  description: i18n.translate('kbn-esql-language.esql.definitions.now', {
+  description: i18n.translate('esqlLanguage.esql.definitions.now', {
     defaultMessage: 'Returns current date and time.',
   }),
   preview: false,
@@ -4948,7 +4948,7 @@ const nowDefinition: FunctionDefinition = {
 const piDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: EsqlFunctionNames.PI,
-  description: i18n.translate('kbn-esql-language.esql.definitions.pi', {
+  description: i18n.translate('esqlLanguage.esql.definitions.pi', {
     defaultMessage: 'Returns Pi, the ratio of a circle’s circumference to its diameter.',
   }),
   preview: false,
@@ -4982,7 +4982,7 @@ const piDefinition: FunctionDefinition = {
 const powDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: EsqlFunctionNames.POW,
-  description: i18n.translate('kbn-esql-language.esql.definitions.pow', {
+  description: i18n.translate('esqlLanguage.esql.definitions.pow', {
     defaultMessage: 'Returns the value of `base` raised to the power of `exponent`.',
   }),
   preview: false,
@@ -5303,7 +5303,7 @@ const powDefinition: FunctionDefinition = {
 const qstrDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: EsqlFunctionNames.QSTR,
-  description: i18n.translate('kbn-esql-language.esql.definitions.qstr', {
+  description: i18n.translate('esqlLanguage.esql.definitions.qstr', {
     defaultMessage:
       'Performs a query string query. Returns true if the provided query string matches the row.',
   }),
@@ -5381,7 +5381,7 @@ const qstrDefinition: FunctionDefinition = {
 const rangeContainsDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: EsqlFunctionNames.RANGE_CONTAINS,
-  description: i18n.translate('kbn-esql-language.esql.definitions.range_contains', {
+  description: i18n.translate('esqlLanguage.esql.definitions.range_contains', {
     defaultMessage:
       'Returns true if the first argument\ncontains the second argument.\nThis is the inverse of RANGE_WITHIN; equivalent to `RANGE_WITHIN(b, a)`.\nSupports (date_range, date) and (date_range, date_range). The first argument must be a date_range.',
   }),
@@ -5482,7 +5482,7 @@ const rangeContainsDefinition: FunctionDefinition = {
 const rangeIntersectsDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: EsqlFunctionNames.RANGE_INTERSECTS,
-  description: i18n.translate('kbn-esql-language.esql.definitions.range_intersects', {
+  description: i18n.translate('esqlLanguage.esql.definitions.range_intersects', {
     defaultMessage:
       'Returns true if the two arguments overlap. The relation is symmetric — argument order does not matter. Supports all combinations of ranges and corresponding scalar types. When both arguments are scalar values, this is equivalent to `a == b`.',
   }),
@@ -5651,7 +5651,7 @@ const rangeIntersectsDefinition: FunctionDefinition = {
 const rangeMaxDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: EsqlFunctionNames.RANGE_MAX,
-  description: i18n.translate('kbn-esql-language.esql.definitions.range_max', {
+  description: i18n.translate('esqlLanguage.esql.definitions.range_max', {
     defaultMessage: 'Returns the maximum (end) value of a range. For a range [x, y), it returns y.',
   }),
   preview: true,
@@ -5705,7 +5705,7 @@ const rangeMaxDefinition: FunctionDefinition = {
 const rangeMinDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: EsqlFunctionNames.RANGE_MIN,
-  description: i18n.translate('kbn-esql-language.esql.definitions.range_min', {
+  description: i18n.translate('esqlLanguage.esql.definitions.range_min', {
     defaultMessage:
       'Returns the minimum (start) value of a range. For a range [x, y), it returns x.',
   }),
@@ -5760,7 +5760,7 @@ const rangeMinDefinition: FunctionDefinition = {
 const rangeWithinDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: EsqlFunctionNames.RANGE_WITHIN,
-  description: i18n.translate('kbn-esql-language.esql.definitions.range_within', {
+  description: i18n.translate('esqlLanguage.esql.definitions.range_within', {
     defaultMessage:
       'Returns true if the first argument is within the second argument. Supports (date, date_range) and (date_range, date_range). The second argument must be a date_range.',
   }),
@@ -5861,7 +5861,7 @@ const rangeWithinDefinition: FunctionDefinition = {
 const repeatDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: EsqlFunctionNames.REPEAT,
-  description: i18n.translate('kbn-esql-language.esql.definitions.repeat', {
+  description: i18n.translate('esqlLanguage.esql.definitions.repeat', {
     defaultMessage:
       'Returns a string constructed by concatenating `string` with itself the specified `number` of times.',
   }),
@@ -5926,7 +5926,7 @@ const repeatDefinition: FunctionDefinition = {
 const replaceDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: EsqlFunctionNames.REPLACE,
-  description: i18n.translate('kbn-esql-language.esql.definitions.replace', {
+  description: i18n.translate('esqlLanguage.esql.definitions.replace', {
     defaultMessage:
       'The function substitutes in the string `str` any match of the regular expression `regex`\nwith the replacement string `newStr`.',
   }),
@@ -6144,7 +6144,7 @@ const replaceDefinition: FunctionDefinition = {
 const reverseDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: EsqlFunctionNames.REVERSE,
-  description: i18n.translate('kbn-esql-language.esql.definitions.reverse', {
+  description: i18n.translate('esqlLanguage.esql.definitions.reverse', {
     defaultMessage: 'Returns a new string representing the input string in reverse order.',
   }),
   preview: false,
@@ -6199,7 +6199,7 @@ const reverseDefinition: FunctionDefinition = {
 const rightDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: EsqlFunctionNames.RIGHT,
-  description: i18n.translate('kbn-esql-language.esql.definitions.right', {
+  description: i18n.translate('esqlLanguage.esql.definitions.right', {
     defaultMessage:
       'Return the substring that extracts *length* chars from *str* starting from the right.',
   }),
@@ -6264,7 +6264,7 @@ const rightDefinition: FunctionDefinition = {
 const roundDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: EsqlFunctionNames.ROUND,
-  description: i18n.translate('kbn-esql-language.esql.definitions.round', {
+  description: i18n.translate('esqlLanguage.esql.definitions.round', {
     defaultMessage:
       'Rounds a number to the specified number of decimal places.\nDefaults to 0, which returns the nearest integer. If the\nprecision is a negative number, rounds to the number of digits left\nof the decimal point.',
   }),
@@ -6509,7 +6509,7 @@ const roundDefinition: FunctionDefinition = {
 const roundToDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: EsqlFunctionNames.ROUND_TO,
-  description: i18n.translate('kbn-esql-language.esql.definitions.round_to', {
+  description: i18n.translate('esqlLanguage.esql.definitions.round_to', {
     defaultMessage: 'Rounds down to one of a list of fixed points.',
   }),
   preview: true,
@@ -6772,7 +6772,7 @@ const roundToDefinition: FunctionDefinition = {
 const rtrimDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: EsqlFunctionNames.RTRIM,
-  description: i18n.translate('kbn-esql-language.esql.definitions.rtrim', {
+  description: i18n.translate('esqlLanguage.esql.definitions.rtrim', {
     defaultMessage: 'Removes trailing whitespaces from a string.',
   }),
   preview: false,
@@ -6826,7 +6826,7 @@ const rtrimDefinition: FunctionDefinition = {
 const scalbDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: EsqlFunctionNames.SCALB,
-  description: i18n.translate('kbn-esql-language.esql.definitions.scalb', {
+  description: i18n.translate('esqlLanguage.esql.definitions.scalb', {
     defaultMessage:
       "Returns the result of `d * 2 ^ scaleFactor`,\nSimilar to Java's `scalb` function. Result is rounded as if\nperformed by a single correctly rounded floating-point multiply\nto a member of the double value set.",
   }),
@@ -7009,7 +7009,7 @@ const scalbDefinition: FunctionDefinition = {
 const scoreDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: EsqlFunctionNames.SCORE,
-  description: i18n.translate('kbn-esql-language.esql.definitions.score', {
+  description: i18n.translate('esqlLanguage.esql.definitions.score', {
     defaultMessage:
       'Scores an expression. Only full text functions will be scored. Returns scores for all the resulting docs.',
   }),
@@ -7053,7 +7053,7 @@ const scoreDefinition: FunctionDefinition = {
 const sha1Definition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: EsqlFunctionNames.SHA1,
-  description: i18n.translate('kbn-esql-language.esql.definitions.sha1', {
+  description: i18n.translate('esqlLanguage.esql.definitions.sha1', {
     defaultMessage: 'Computes the SHA1 hash of the input.',
   }),
   preview: false,
@@ -7107,7 +7107,7 @@ const sha1Definition: FunctionDefinition = {
 const sha256Definition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: EsqlFunctionNames.SHA256,
-  description: i18n.translate('kbn-esql-language.esql.definitions.sha256', {
+  description: i18n.translate('esqlLanguage.esql.definitions.sha256', {
     defaultMessage: 'Computes the SHA256 hash of the input.',
   }),
   preview: false,
@@ -7161,7 +7161,7 @@ const sha256Definition: FunctionDefinition = {
 const signumDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: EsqlFunctionNames.SIGNUM,
-  description: i18n.translate('kbn-esql-language.esql.definitions.signum', {
+  description: i18n.translate('esqlLanguage.esql.definitions.signum', {
     defaultMessage:
       'Returns the sign of the given number.\nIt returns `-1` for negative numbers, `0` for `0` and `1` for positive numbers.',
   }),
@@ -7236,7 +7236,7 @@ const signumDefinition: FunctionDefinition = {
 const sinDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: EsqlFunctionNames.SIN,
-  description: i18n.translate('kbn-esql-language.esql.definitions.sin', {
+  description: i18n.translate('esqlLanguage.esql.definitions.sin', {
     defaultMessage: 'Returns the sine of an angle.',
   }),
   preview: false,
@@ -7310,7 +7310,7 @@ const sinDefinition: FunctionDefinition = {
 const sinhDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: EsqlFunctionNames.SINH,
-  description: i18n.translate('kbn-esql-language.esql.definitions.sinh', {
+  description: i18n.translate('esqlLanguage.esql.definitions.sinh', {
     defaultMessage: 'Returns the hyperbolic sine of a number.',
   }),
   preview: false,
@@ -7384,7 +7384,7 @@ const sinhDefinition: FunctionDefinition = {
 const spaceDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: EsqlFunctionNames.SPACE,
-  description: i18n.translate('kbn-esql-language.esql.definitions.space', {
+  description: i18n.translate('esqlLanguage.esql.definitions.space', {
     defaultMessage: 'Returns a string made of `number` spaces.',
   }),
   preview: false,
@@ -7425,7 +7425,7 @@ const spaceDefinition: FunctionDefinition = {
 const splitDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: EsqlFunctionNames.SPLIT,
-  description: i18n.translate('kbn-esql-language.esql.definitions.split', {
+  description: i18n.translate('esqlLanguage.esql.definitions.split', {
     defaultMessage: 'Split a single valued string into multiple strings.',
   }),
   preview: false,
@@ -7523,7 +7523,7 @@ const splitDefinition: FunctionDefinition = {
 const sqrtDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: EsqlFunctionNames.SQRT,
-  description: i18n.translate('kbn-esql-language.esql.definitions.sqrt', {
+  description: i18n.translate('esqlLanguage.esql.definitions.sqrt', {
     defaultMessage:
       'Returns the square root of a number. The input can be any numeric value, the return value is always a double.\nSquare roots of negative numbers and infinities are null.',
   }),
@@ -7598,7 +7598,7 @@ const sqrtDefinition: FunctionDefinition = {
 const stBufferDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: EsqlFunctionNames.ST_BUFFER,
-  description: i18n.translate('kbn-esql-language.esql.definitions.st_buffer', {
+  description: i18n.translate('esqlLanguage.esql.definitions.st_buffer', {
     defaultMessage:
       'Computes a buffer area around the input geometry at the specified distance. The distance is in the units of the input spatial reference system. Positive distances expand the geometry, negative distances shrink it. A distance of zero will return the input geometry unchanged. Points and lines become polygons when buffered, unless a zero distance is provided.',
   }),
@@ -7968,7 +7968,7 @@ const stBufferDefinition: FunctionDefinition = {
 const stContainsDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: EsqlFunctionNames.ST_CONTAINS,
-  description: i18n.translate('kbn-esql-language.esql.definitions.st_contains', {
+  description: i18n.translate('esqlLanguage.esql.definitions.st_contains', {
     defaultMessage:
       'Returns whether the first geometry contains the second geometry.\nThis is the inverse of the ST_WITHIN function.',
   }),
@@ -8153,7 +8153,7 @@ const stContainsDefinition: FunctionDefinition = {
 const stDifferenceDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: EsqlFunctionNames.ST_DIFFERENCE,
-  description: i18n.translate('kbn-esql-language.esql.definitions.st_difference', {
+  description: i18n.translate('esqlLanguage.esql.definitions.st_difference', {
     defaultMessage:
       'Returns the part of `geomA` that does not intersect with `geomB`. This is equivalent to subtracting `geomB` from `geomA`. Both geometries must share the same coordinate reference system.',
   }),
@@ -8338,7 +8338,7 @@ const stDifferenceDefinition: FunctionDefinition = {
 const stDimensionDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: EsqlFunctionNames.ST_DIMENSION,
-  description: i18n.translate('kbn-esql-language.esql.definitions.st_dimension', {
+  description: i18n.translate('esqlLanguage.esql.definitions.st_dimension', {
     defaultMessage:
       'Returns the topological dimension of the supplied geometry.\nPoints and multi-points return `0`, lines and multi-lines return `1`, polygons and multi-polygons return `2`, and geometry collections return the maximum dimension of their components.',
   }),
@@ -8419,7 +8419,7 @@ const stDimensionDefinition: FunctionDefinition = {
 const stDisjointDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: EsqlFunctionNames.ST_DISJOINT,
-  description: i18n.translate('kbn-esql-language.esql.definitions.st_disjoint', {
+  description: i18n.translate('esqlLanguage.esql.definitions.st_disjoint', {
     defaultMessage:
       'Returns whether the two geometries or geometry columns are disjoint.\nThis is the inverse of the ST_INTERSECTS function.\nIn mathematical terms: ST_Disjoint(A, B) ⇔ A ⋂ B = ∅',
   }),
@@ -8718,7 +8718,7 @@ const stDisjointDefinition: FunctionDefinition = {
 const stDistanceDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: EsqlFunctionNames.ST_DISTANCE,
-  description: i18n.translate('kbn-esql-language.esql.definitions.st_distance', {
+  description: i18n.translate('esqlLanguage.esql.definitions.st_distance', {
     defaultMessage:
       'Computes the distance between two points.\nFor cartesian geometries, this is the pythagorean distance in the same units as the original coordinates.\nFor geographic geometries, this is the circular distance along the great circle in meters.',
   }),
@@ -8789,7 +8789,7 @@ const stDistanceDefinition: FunctionDefinition = {
 const stEnvelopeDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: EsqlFunctionNames.ST_ENVELOPE,
-  description: i18n.translate('kbn-esql-language.esql.definitions.st_envelope', {
+  description: i18n.translate('esqlLanguage.esql.definitions.st_envelope', {
     defaultMessage: 'Determines the minimum bounding box of the supplied geometry.',
   }),
   preview: true,
@@ -8869,7 +8869,7 @@ const stEnvelopeDefinition: FunctionDefinition = {
 const stGeohashDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: EsqlFunctionNames.ST_GEOHASH,
-  description: i18n.translate('kbn-esql-language.esql.definitions.st_geohash', {
+  description: i18n.translate('esqlLanguage.esql.definitions.st_geohash', {
     defaultMessage:
       'Calculates the `geohash` of the supplied `geo_point` or `geo_shape` at the specified precision.\nFor `geo_shape` inputs, all intersecting geohash cells are returned as multi-values.\nThe result is long encoded.\nUse `TO_STRING`\nto convert the result to a string,\n`TO_LONG`\nto convert it to a `long`, or\n`TO_GEOSHAPE`\nto calculate the `geo_shape` bounding geometry.\n\nThese functions are related to the `geo_grid` query\nand the `geohash_grid` aggregation.',
   }),
@@ -9012,7 +9012,7 @@ const stGeohashDefinition: FunctionDefinition = {
 const stGeohexDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: EsqlFunctionNames.ST_GEOHEX,
-  description: i18n.translate('kbn-esql-language.esql.definitions.st_geohex', {
+  description: i18n.translate('esqlLanguage.esql.definitions.st_geohex', {
     defaultMessage:
       'Calculates the `geohex`, the H3 cell-id, of the supplied `geo_point` or `geo_shape` at the specified precision.\nFor `geo_shape` inputs, all intersecting H3 cells are returned as multi-values.\nThe result is long encoded.\nUse `TO_STRING`\nto convert the result to a string,\n`TO_LONG`\nto convert it to a `long`, or\n`TO_GEOSHAPE`\nto calculate the `geo_shape` bounding geometry.\n\nThese functions are related to the `geo_grid` query\nand the `geohex_grid` aggregation.',
   }),
@@ -9158,7 +9158,7 @@ const stGeohexDefinition: FunctionDefinition = {
 const stGeometrytypeDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: EsqlFunctionNames.ST_GEOMETRYTYPE,
-  description: i18n.translate('kbn-esql-language.esql.definitions.st_geometrytype', {
+  description: i18n.translate('esqlLanguage.esql.definitions.st_geometrytype', {
     defaultMessage:
       'Returns the geometry type of the supplied geometry, as a string.\nFor example: `ST_Point`, `ST_LineString`, `ST_Polygon`, `ST_MultiPoint`, `ST_MultiLineString`, `ST_MultiPolygon`, or `ST_GeometryCollection`.',
   }),
@@ -9239,7 +9239,7 @@ const stGeometrytypeDefinition: FunctionDefinition = {
 const stGeotileDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: EsqlFunctionNames.ST_GEOTILE,
-  description: i18n.translate('kbn-esql-language.esql.definitions.st_geotile', {
+  description: i18n.translate('esqlLanguage.esql.definitions.st_geotile', {
     defaultMessage:
       'Calculates the `geotile` of the supplied `geo_point` or `geo_shape` at the specified precision.\nFor `geo_shape` inputs, all intersecting geotile cells are returned as multi-values.\nThe result is long encoded.\nUse `TO_STRING`\nto convert the result to a string,\n`TO_LONG`\nto convert it to a `long`, or\n`TO_GEOSHAPE`\nto calculate the `geo_shape` bounding geometry.\n\nThese functions are related to the `geo_grid` query\nand the `geotile_grid` aggregation.',
   }),
@@ -9382,7 +9382,7 @@ const stGeotileDefinition: FunctionDefinition = {
 const stIntersectionDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: EsqlFunctionNames.ST_INTERSECTION,
-  description: i18n.translate('kbn-esql-language.esql.definitions.st_intersection', {
+  description: i18n.translate('esqlLanguage.esql.definitions.st_intersection', {
     defaultMessage:
       'Returns the geometric intersection of two geometries. The result is a geometry representing the portion that both input geometries have in common. Returns an empty geometry if the inputs do not intersect. Both geometries must share the same coordinate reference system.',
   }),
@@ -9567,7 +9567,7 @@ const stIntersectionDefinition: FunctionDefinition = {
 const stIntersectsDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: EsqlFunctionNames.ST_INTERSECTS,
-  description: i18n.translate('kbn-esql-language.esql.definitions.st_intersects', {
+  description: i18n.translate('esqlLanguage.esql.definitions.st_intersects', {
     defaultMessage:
       'Returns true if two geometries intersect.\nThey intersect if they have any point in common, including their interior points\n(points along lines or within polygons).\nThis is the inverse of the ST_DISJOINT function.\nIn mathematical terms: ST_Intersects(A, B) ⇔ A ⋂ B ≠ ∅',
   }),
@@ -9866,7 +9866,7 @@ const stIntersectsDefinition: FunctionDefinition = {
 const stIsemptyDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: EsqlFunctionNames.ST_ISEMPTY,
-  description: i18n.translate('kbn-esql-language.esql.definitions.st_isempty', {
+  description: i18n.translate('esqlLanguage.esql.definitions.st_isempty', {
     defaultMessage:
       'Returns true if the supplied geometry is empty.\nAn empty geometry is one that has no points, such as an empty geometry collection or an empty linestring.',
   }),
@@ -9947,7 +9947,7 @@ const stIsemptyDefinition: FunctionDefinition = {
 const stNpointsDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: EsqlFunctionNames.ST_NPOINTS,
-  description: i18n.translate('kbn-esql-language.esql.definitions.st_npoints', {
+  description: i18n.translate('esqlLanguage.esql.definitions.st_npoints', {
     defaultMessage: 'Counts the number of points in the supplied geometry.',
   }),
   preview: true,
@@ -10027,7 +10027,7 @@ const stNpointsDefinition: FunctionDefinition = {
 const stSimplifyDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: EsqlFunctionNames.ST_SIMPLIFY,
-  description: i18n.translate('kbn-esql-language.esql.definitions.st_simplify', {
+  description: i18n.translate('esqlLanguage.esql.definitions.st_simplify', {
     defaultMessage:
       'Simplifies the input geometry by applying the Douglas-Peucker algorithm with a specified tolerance. Vertices that fall within the tolerance distance from the simplified shape are removed. Note that the resulting geometry may be invalid, even if the original input was valid.',
   }),
@@ -10396,7 +10396,7 @@ const stSimplifyDefinition: FunctionDefinition = {
 const stSimplifypreservetopologyDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: EsqlFunctionNames.ST_SIMPLIFYPRESERVETOPOLOGY,
-  description: i18n.translate('kbn-esql-language.esql.definitions.st_simplifypreservetopology', {
+  description: i18n.translate('esqlLanguage.esql.definitions.st_simplifypreservetopology', {
     defaultMessage:
       'Simplifies the input geometry by applying a topology-preserving variant of the Douglas-Peucker algorithm with a specified tolerance. Vertices that fall within the tolerance distance from the simplified shape are removed. Unlike `ST_SIMPLIFY`, the resulting geometry is guaranteed to be topologically valid.',
   }),
@@ -10765,7 +10765,7 @@ const stSimplifypreservetopologyDefinition: FunctionDefinition = {
 const stSymdifferenceDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: EsqlFunctionNames.ST_SYMDIFFERENCE,
-  description: i18n.translate('kbn-esql-language.esql.definitions.st_symdifference', {
+  description: i18n.translate('esqlLanguage.esql.definitions.st_symdifference', {
     defaultMessage:
       'Returns the symmetric difference of two geometries, that is the parts of each geometry that are not shared by both. This is equivalent to the union of the two differences: `ST_UNION(ST_DIFFERENCE(geomA, geomB), ST_DIFFERENCE(geomB, geomA))`. Both geometries must share the same coordinate reference system.',
   }),
@@ -10950,7 +10950,7 @@ const stSymdifferenceDefinition: FunctionDefinition = {
 const stUnionDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: EsqlFunctionNames.ST_UNION,
-  description: i18n.translate('kbn-esql-language.esql.definitions.st_union', {
+  description: i18n.translate('esqlLanguage.esql.definitions.st_union', {
     defaultMessage:
       'Returns the geometric union of two geometries. The result is a geometry that covers all points covered by either input geometry. Both geometries must share the same coordinate reference system.',
   }),
@@ -11183,7 +11183,7 @@ const stUnionDefinition: FunctionDefinition = {
 const stWithinDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: EsqlFunctionNames.ST_WITHIN,
-  description: i18n.translate('kbn-esql-language.esql.definitions.st_within', {
+  description: i18n.translate('esqlLanguage.esql.definitions.st_within', {
     defaultMessage:
       'Returns whether the first geometry is within the second geometry.\nThis is the inverse of the ST_CONTAINS function.',
   }),
@@ -11368,7 +11368,7 @@ const stWithinDefinition: FunctionDefinition = {
 const stXDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: EsqlFunctionNames.ST_X,
-  description: i18n.translate('kbn-esql-language.esql.definitions.st_x', {
+  description: i18n.translate('esqlLanguage.esql.definitions.st_x', {
     defaultMessage:
       'Extracts the `x` coordinate from the supplied point.\nIf the point is of type `geo_point` this is equivalent to extracting the `longitude` value.',
   }),
@@ -11425,7 +11425,7 @@ const stXDefinition: FunctionDefinition = {
 const stXmaxDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: EsqlFunctionNames.ST_XMAX,
-  description: i18n.translate('kbn-esql-language.esql.definitions.st_xmax', {
+  description: i18n.translate('esqlLanguage.esql.definitions.st_xmax', {
     defaultMessage:
       'Extracts the maximum value of the `x` coordinates from the supplied geometry.\nIf the geometry is of type `geo_point` or `geo_shape` this is equivalent to extracting the maximum `longitude` value.',
   }),
@@ -11506,7 +11506,7 @@ const stXmaxDefinition: FunctionDefinition = {
 const stXminDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: EsqlFunctionNames.ST_XMIN,
-  description: i18n.translate('kbn-esql-language.esql.definitions.st_xmin', {
+  description: i18n.translate('esqlLanguage.esql.definitions.st_xmin', {
     defaultMessage:
       'Extracts the minimum value of the `x` coordinates from the supplied geometry.\nIf the geometry is of type `geo_point` or `geo_shape` this is equivalent to extracting the minimum `longitude` value.',
   }),
@@ -11587,7 +11587,7 @@ const stXminDefinition: FunctionDefinition = {
 const stYDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: EsqlFunctionNames.ST_Y,
-  description: i18n.translate('kbn-esql-language.esql.definitions.st_y', {
+  description: i18n.translate('esqlLanguage.esql.definitions.st_y', {
     defaultMessage:
       'Extracts the `y` coordinate from the supplied point.\nIf the point is of type `geo_point` this is equivalent to extracting the `latitude` value.',
   }),
@@ -11644,7 +11644,7 @@ const stYDefinition: FunctionDefinition = {
 const stYmaxDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: EsqlFunctionNames.ST_YMAX,
-  description: i18n.translate('kbn-esql-language.esql.definitions.st_ymax', {
+  description: i18n.translate('esqlLanguage.esql.definitions.st_ymax', {
     defaultMessage:
       'Extracts the maximum value of the `y` coordinates from the supplied geometry.\nIf the geometry is of type `geo_point` or `geo_shape` this is equivalent to extracting the maximum `latitude` value.',
   }),
@@ -11725,7 +11725,7 @@ const stYmaxDefinition: FunctionDefinition = {
 const stYminDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: EsqlFunctionNames.ST_YMIN,
-  description: i18n.translate('kbn-esql-language.esql.definitions.st_ymin', {
+  description: i18n.translate('esqlLanguage.esql.definitions.st_ymin', {
     defaultMessage:
       'Extracts the minimum value of the `y` coordinates from the supplied geometry.\nIf the geometry is of type `geo_point` or `geo_shape` this is equivalent to extracting the minimum `latitude` value.',
   }),
@@ -11806,7 +11806,7 @@ const stYminDefinition: FunctionDefinition = {
 const startsWithDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: EsqlFunctionNames.STARTS_WITH,
-  description: i18n.translate('kbn-esql-language.esql.definitions.starts_with', {
+  description: i18n.translate('esqlLanguage.esql.definitions.starts_with', {
     defaultMessage:
       'Returns a boolean that indicates whether a keyword string starts with another string.',
   }),
@@ -11905,7 +11905,7 @@ const startsWithDefinition: FunctionDefinition = {
 const substringDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: EsqlFunctionNames.SUBSTRING,
-  description: i18n.translate('kbn-esql-language.esql.definitions.substring', {
+  description: i18n.translate('esqlLanguage.esql.definitions.substring', {
     defaultMessage:
       'Returns a substring of a string, specified by a start position and an optional length.',
   }),
@@ -11988,7 +11988,7 @@ const substringDefinition: FunctionDefinition = {
 const tanDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: EsqlFunctionNames.TAN,
-  description: i18n.translate('kbn-esql-language.esql.definitions.tan', {
+  description: i18n.translate('esqlLanguage.esql.definitions.tan', {
     defaultMessage: 'Returns the tangent of an angle.',
   }),
   preview: false,
@@ -12062,7 +12062,7 @@ const tanDefinition: FunctionDefinition = {
 const tanhDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: EsqlFunctionNames.TANH,
-  description: i18n.translate('kbn-esql-language.esql.definitions.tanh', {
+  description: i18n.translate('esqlLanguage.esql.definitions.tanh', {
     defaultMessage: 'Returns the hyperbolic tangent of a number.',
   }),
   preview: false,
@@ -12136,7 +12136,7 @@ const tanhDefinition: FunctionDefinition = {
 const tauDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: EsqlFunctionNames.TAU,
-  description: i18n.translate('kbn-esql-language.esql.definitions.tau', {
+  description: i18n.translate('esqlLanguage.esql.definitions.tau', {
     defaultMessage: 'Returns the ratio of a circle’s circumference to its radius.',
   }),
   preview: false,
@@ -12170,7 +12170,7 @@ const tauDefinition: FunctionDefinition = {
 const textEmbeddingDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: EsqlFunctionNames.TEXT_EMBEDDING,
-  description: i18n.translate('kbn-esql-language.esql.definitions.text_embedding', {
+  description: i18n.translate('esqlLanguage.esql.definitions.text_embedding', {
     defaultMessage:
       'Generates dense vector embeddings from text input using a specified inference endpoint. Use this function to generate query vectors for KNN searches against your vectorized data or others dense vector based operations.',
   }),
@@ -12237,7 +12237,7 @@ const textEmbeddingDefinition: FunctionDefinition = {
 const toAggregateMetricDoubleDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: EsqlFunctionNames.TO_AGGREGATE_METRIC_DOUBLE,
-  description: i18n.translate('kbn-esql-language.esql.definitions.to_aggregate_metric_double', {
+  description: i18n.translate('esqlLanguage.esql.definitions.to_aggregate_metric_double', {
     defaultMessage: 'Encode a numeric to an aggregate_metric_double.',
   }),
   preview: true,
@@ -12330,7 +12330,7 @@ const toAggregateMetricDoubleDefinition: FunctionDefinition = {
 const toBase64Definition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: EsqlFunctionNames.TO_BASE64,
-  description: i18n.translate('kbn-esql-language.esql.definitions.to_base64', {
+  description: i18n.translate('esqlLanguage.esql.definitions.to_base64', {
     defaultMessage: 'Encode a string to a base64 string.',
   }),
   preview: false,
@@ -12382,7 +12382,7 @@ const toBase64Definition: FunctionDefinition = {
 const toBooleanDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: EsqlFunctionNames.TO_BOOLEAN,
-  description: i18n.translate('kbn-esql-language.esql.definitions.to_boolean', {
+  description: i18n.translate('esqlLanguage.esql.definitions.to_boolean', {
     defaultMessage:
       'Converts an input value to a boolean value.\nA string value of `true` will be case-insensitive converted to the Boolean `true`.\nFor anything else, including the empty string, the function will return `false`.\nThe numerical value of `0` will be converted to `false`, anything else will be converted to `true`.',
   }),
@@ -12497,7 +12497,7 @@ const toBooleanDefinition: FunctionDefinition = {
 const toCartesianpointDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: EsqlFunctionNames.TO_CARTESIANPOINT,
-  description: i18n.translate('kbn-esql-language.esql.definitions.to_cartesianpoint', {
+  description: i18n.translate('esqlLanguage.esql.definitions.to_cartesianpoint', {
     defaultMessage:
       'Converts an input value to a `cartesian_point` value.\nA string will only be successfully converted if it respects the\nWKT Point format.',
   }),
@@ -12566,7 +12566,7 @@ const toCartesianpointDefinition: FunctionDefinition = {
 const toCartesianshapeDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: EsqlFunctionNames.TO_CARTESIANSHAPE,
-  description: i18n.translate('kbn-esql-language.esql.definitions.to_cartesianshape', {
+  description: i18n.translate('esqlLanguage.esql.definitions.to_cartesianshape', {
     defaultMessage:
       'Converts an input value to a `cartesian_shape` value.\nA string will only be successfully converted if it respects the\nWKT format.',
   }),
@@ -12647,7 +12647,7 @@ const toCartesianshapeDefinition: FunctionDefinition = {
 const toCounterDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: EsqlFunctionNames.TO_COUNTER,
-  description: i18n.translate('kbn-esql-language.esql.definitions.to_counter', {
+  description: i18n.translate('esqlLanguage.esql.definitions.to_counter', {
     defaultMessage:
       'Converts a numeric value to its counter equivalent. The output type is determined by the input:\n`long` converts to `counter_long`, `integer` to `counter_integer`, and `double` to `counter_double`.\nNo values are modified; only the type annotation changes. If the input is already a counter, the function is a no-op. This is useful when a metric field was misclassified as a plain numeric type instead of a counter in the index mapping.\nThis function is also available as the `::counter` cast operator.',
   }),
@@ -12752,7 +12752,7 @@ const toCounterDefinition: FunctionDefinition = {
 const toDateNanosDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: EsqlFunctionNames.TO_DATE_NANOS,
-  description: i18n.translate('kbn-esql-language.esql.definitions.to_date_nanos', {
+  description: i18n.translate('esqlLanguage.esql.definitions.to_date_nanos', {
     defaultMessage: 'Converts an input to a nanosecond-resolution date value (aka date_nanos).',
   }),
   preview: false,
@@ -12868,7 +12868,7 @@ const toDateNanosDefinition: FunctionDefinition = {
 const toDateRangeDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: EsqlFunctionNames.TO_DATE_RANGE,
-  description: i18n.translate('kbn-esql-language.esql.definitions.to_date_range', {
+  description: i18n.translate('esqlLanguage.esql.definitions.to_date_range', {
     defaultMessage:
       'Converts an input value to a `date_range` value.\nStrings are parsed as a date range in the format `start..end`, where `start` and `end` are dates in ISO format. The range is half-open `[start, end)`.',
   }),
@@ -12937,7 +12937,7 @@ const toDateRangeDefinition: FunctionDefinition = {
 const toDateperiodDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: EsqlFunctionNames.TO_DATEPERIOD,
-  description: i18n.translate('kbn-esql-language.esql.definitions.to_dateperiod', {
+  description: i18n.translate('esqlLanguage.esql.definitions.to_dateperiod', {
     defaultMessage: 'Converts an input value into a `date_period` value.',
   }),
   preview: false,
@@ -13011,7 +13011,7 @@ const toDateperiodDefinition: FunctionDefinition = {
 const toDatetimeDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: EsqlFunctionNames.TO_DATETIME,
-  description: i18n.translate('kbn-esql-language.esql.definitions.to_datetime', {
+  description: i18n.translate('esqlLanguage.esql.definitions.to_datetime', {
     defaultMessage:
       "Converts an input value to a date value.\nA string will only be successfully converted if it’s respecting the format `yyyy-MM-dd'T'HH:mm:ss.SSS'Z'`.\nTo convert dates in other formats, use `DATE_PARSE`.",
   }),
@@ -13141,7 +13141,7 @@ const toDatetimeDefinition: FunctionDefinition = {
 const toDegreesDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: EsqlFunctionNames.TO_DEGREES,
-  description: i18n.translate('kbn-esql-language.esql.definitions.to_degrees', {
+  description: i18n.translate('esqlLanguage.esql.definitions.to_degrees', {
     defaultMessage: 'Converts a number in radians to degrees.',
   }),
   preview: false,
@@ -13219,7 +13219,7 @@ const toDegreesDefinition: FunctionDefinition = {
 const toDenseVectorDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: EsqlFunctionNames.TO_DENSE_VECTOR,
-  description: i18n.translate('kbn-esql-language.esql.definitions.to_dense_vector', {
+  description: i18n.translate('esqlLanguage.esql.definitions.to_dense_vector', {
     defaultMessage:
       'Converts a multi-valued input of numbers, or a hexadecimal string, to a dense_vector.',
   }),
@@ -13294,7 +13294,7 @@ const toDenseVectorDefinition: FunctionDefinition = {
 const toDoubleDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: EsqlFunctionNames.TO_DOUBLE,
-  description: i18n.translate('kbn-esql-language.esql.definitions.to_double', {
+  description: i18n.translate('esqlLanguage.esql.definitions.to_double', {
     defaultMessage:
       'Converts an input value to a double value. If the input parameter is of a date type,\nits value will be interpreted as milliseconds since the Unix epoch,\nconverted to double. Boolean `true` will be converted to double `1.0`, `false` to `0.0`.',
   }),
@@ -13459,7 +13459,7 @@ const toDoubleDefinition: FunctionDefinition = {
 const toDoubleRangeDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: EsqlFunctionNames.TO_DOUBLE_RANGE,
-  description: i18n.translate('kbn-esql-language.esql.definitions.to_double_range', {
+  description: i18n.translate('esqlLanguage.esql.definitions.to_double_range', {
     defaultMessage:
       'Converts an input value to a `double_range` value.\nStrings are parsed as a double range in the format `start..end`, where `start` and `end` are double-precision floating-point numbers. The range is half-open `[start, end)`.',
   }),
@@ -13526,7 +13526,7 @@ const toDoubleRangeDefinition: FunctionDefinition = {
 const toExponentialHistogramDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: EsqlFunctionNames.TO_EXPONENTIAL_HISTOGRAM,
-  description: i18n.translate('kbn-esql-language.esql.definitions.to_exponential_histogram', {
+  description: i18n.translate('esqlLanguage.esql.definitions.to_exponential_histogram', {
     defaultMessage: 'Converts histogram-like values to an exponential histogram.',
   }),
   preview: false,
@@ -13591,7 +13591,7 @@ const toExponentialHistogramDefinition: FunctionDefinition = {
 const toGaugeDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: EsqlFunctionNames.TO_GAUGE,
-  description: i18n.translate('kbn-esql-language.esql.definitions.to_gauge', {
+  description: i18n.translate('esqlLanguage.esql.definitions.to_gauge', {
     defaultMessage:
       'Converts a counter value to its gauge (plain numeric) equivalent. The output type is determined by the input:\n`counter_long` converts to `long`, `counter_integer` to `integer`, and `counter_double` to `double`.\nNo values are modified; only the type annotation changes. If the input is already a plain numeric or `aggregate_metric_double`, the function is a no-op. This is useful when a metric field was misclassified as a counter type instead of a plain numeric (gauge) in the index mapping.\nThis function is also available as the `::gauge` cast operator.',
   }),
@@ -13708,7 +13708,7 @@ const toGaugeDefinition: FunctionDefinition = {
 const toGeohashDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: EsqlFunctionNames.TO_GEOHASH,
-  description: i18n.translate('kbn-esql-language.esql.definitions.to_geohash', {
+  description: i18n.translate('esqlLanguage.esql.definitions.to_geohash', {
     defaultMessage:
       'Converts an input value to a `geohash` value.\nA string will only be successfully converted if it respects the\n`geohash` format, as described for the\ngeohash grid aggregation.',
   }),
@@ -13787,7 +13787,7 @@ const toGeohashDefinition: FunctionDefinition = {
 const toGeohexDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: EsqlFunctionNames.TO_GEOHEX,
-  description: i18n.translate('kbn-esql-language.esql.definitions.to_geohex', {
+  description: i18n.translate('esqlLanguage.esql.definitions.to_geohex', {
     defaultMessage:
       'Converts an input value to a `geohex` value.\nA string will only be successfully converted if it respects the\n`geohex` format, as described for the\ngeohex grid aggregation.',
   }),
@@ -13866,7 +13866,7 @@ const toGeohexDefinition: FunctionDefinition = {
 const toGeopointDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: EsqlFunctionNames.TO_GEOPOINT,
-  description: i18n.translate('kbn-esql-language.esql.definitions.to_geopoint', {
+  description: i18n.translate('esqlLanguage.esql.definitions.to_geopoint', {
     defaultMessage:
       'Converts an input value to a `geo_point` value.\nA string will only be successfully converted if it respects the\nWKT Point format.',
   }),
@@ -13933,7 +13933,7 @@ const toGeopointDefinition: FunctionDefinition = {
 const toGeoshapeDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: EsqlFunctionNames.TO_GEOSHAPE,
-  description: i18n.translate('kbn-esql-language.esql.definitions.to_geoshape', {
+  description: i18n.translate('esqlLanguage.esql.definitions.to_geoshape', {
     defaultMessage:
       'Converts an input value to a `geo_shape` value.\nA string will only be successfully converted if it respects the\nWKT format.',
   }),
@@ -14050,7 +14050,7 @@ const toGeoshapeDefinition: FunctionDefinition = {
 const toGeotileDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: EsqlFunctionNames.TO_GEOTILE,
-  description: i18n.translate('kbn-esql-language.esql.definitions.to_geotile', {
+  description: i18n.translate('esqlLanguage.esql.definitions.to_geotile', {
     defaultMessage:
       'Converts an input value to a `geotile` value.\nA string will only be successfully converted if it respects the\n`geotile` format, as described for the\ngeotile grid aggregation.',
   }),

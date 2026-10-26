@@ -35,8 +35,11 @@ export const scoutPageParallelFixture = base.extend<
     const extendedPage = extendPlaywrightPage({ page, kbnUrl });
 
     // Overriding navigation to specific Kibana apps: url should respect the Kibana Space id
-    extendedPage.gotoApp = (appName: string, pathOptions?: PathOptions) =>
-      page.goto(kbnUrl.app(appName, { space: scoutSpace.id, pathOptions }));
+    extendedPage.gotoApp = (
+      appName: string,
+      pathOptions?: PathOptions,
+      options?: Parameters<Page['goto']>[1]
+    ) => page.goto(kbnUrl.app(appName, { space: scoutSpace.id, pathOptions }), options);
 
     log.serviceLoaded(`scoutPage`);
     await use(extendedPage);

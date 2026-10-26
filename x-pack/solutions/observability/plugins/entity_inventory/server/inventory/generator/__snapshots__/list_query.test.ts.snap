@@ -1,0 +1,225 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`buildListQuery inventory_host under FROM builds the list query of plan 0 1`] = `
+Object {
+  "esql": "SET unmapped_fields=\\"nullify\\";
+FROM metrics-system.*
+| WHERE \`@timestamp\` >= ?from AND \`@timestamp\` < ?to
+    AND (TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\" OR TO_STRING(host.name) IS NOT NULL AND TO_STRING(host.name) != \\"\\")
+| STATS \`os\` = LAST(\`host.os.name\`, \`@timestamp\`) WHERE \`host.os.name\` IS NOT NULL,
+    \`last_seen\` = MAX(\`@timestamp\`)
+    BY \`host.id\`, \`host.name\`
+| EVAL host_id_present = TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\",
+ host_name_present = TO_STRING(host.name) IS NOT NULL AND TO_STRING(host.name) != \\"\\",
+ host_id_present_or_null = CASE(host_id_present, TO_STRING(host.id)),
+ host_name_present_or_null = CASE(host_name_present, TO_STRING(host.name)),
+ entity.id = CONCAT(\\"inventory_host:\\", COALESCE(host_id_present_or_null, host_name_present_or_null))
+| KEEP \`entity.id\`, \`host.id\`, \`host.name\`, \`os\`, \`last_seen\`
+| SORT \`last_seen\` DESC NULLS LAST
+| LIMIT 10000",
+  "params": Array [
+    Object {
+      "from": "2026-10-19T10:00:00.000Z",
+    },
+    Object {
+      "to": "2026-10-19T11:00:00.000Z",
+    },
+  ],
+}
+`;
+
+exports[`buildListQuery inventory_host under TS builds the list query of plan 0 1`] = `
+Object {
+  "esql": "SET unmapped_fields=\\"nullify\\";
+TS metrics-system.*
+| WHERE \`@timestamp\` >= ?from AND \`@timestamp\` < ?to
+    AND (TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\" OR TO_STRING(host.name) IS NOT NULL AND TO_STRING(host.name) != \\"\\")
+| STATS \`os\` = LAST(\`host.os.name\`, \`@timestamp\`) WHERE \`host.os.name\` IS NOT NULL,
+    \`last_seen\` = MAX(\`@timestamp\`)
+    BY \`host.id\`, \`host.name\`
+| EVAL host_id_present = TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\",
+ host_name_present = TO_STRING(host.name) IS NOT NULL AND TO_STRING(host.name) != \\"\\",
+ host_id_present_or_null = CASE(host_id_present, TO_STRING(host.id)),
+ host_name_present_or_null = CASE(host_name_present, TO_STRING(host.name)),
+ entity.id = CONCAT(\\"inventory_host:\\", COALESCE(host_id_present_or_null, host_name_present_or_null))
+| KEEP \`entity.id\`, \`host.id\`, \`host.name\`, \`os\`, \`last_seen\`
+| SORT \`last_seen\` DESC NULLS LAST
+| LIMIT 10000",
+  "params": Array [
+    Object {
+      "from": "2026-10-19T10:00:00.000Z",
+    },
+    Object {
+      "to": "2026-10-19T11:00:00.000Z",
+    },
+  ],
+}
+`;
+
+exports[`buildListQuery k8s.deployment under FROM builds the list query of plan 0 1`] = `
+Object {
+  "esql": "SET unmapped_fields=\\"nullify\\";
+FROM metrics-kubeletstatsreceiver.otel-default
+| WHERE \`@timestamp\` >= ?from AND \`@timestamp\` < ?to
+    AND (TO_STRING(kubernetes.namespace) IS NOT NULL AND TO_STRING(kubernetes.namespace) != \\"\\" AND TO_STRING(kubernetes.deployment.name) IS NOT NULL AND TO_STRING(kubernetes.deployment.name) != \\"\\")
+| STATS \`cluster\` = LAST(\`orchestrator.cluster.name\`, \`@timestamp\`) WHERE \`orchestrator.cluster.name\` IS NOT NULL,
+    \`last_seen\` = MAX(\`@timestamp\`)
+    BY \`kubernetes.namespace\`, \`kubernetes.deployment.name\`
+| EVAL kubernetes_namespace_present = TO_STRING(kubernetes.namespace) IS NOT NULL AND TO_STRING(kubernetes.namespace) != \\"\\",
+ kubernetes_deployment_name_present = TO_STRING(kubernetes.deployment.name) IS NOT NULL AND TO_STRING(kubernetes.deployment.name) != \\"\\",
+ kubernetes_namespace_present_or_null = CASE(kubernetes_namespace_present, TO_STRING(kubernetes.namespace)),
+ kubernetes_deployment_name_present_or_null = CASE(kubernetes_deployment_name_present, TO_STRING(kubernetes.deployment.name)),
+ entity.id = CONCAT(\\"k8s.deployment:\\", CONCAT(kubernetes_namespace_present_or_null, \\"/\\", kubernetes_deployment_name_present_or_null))
+| KEEP \`entity.id\`, \`kubernetes.namespace\`, \`kubernetes.deployment.name\`, \`cluster\`, \`last_seen\`
+| SORT \`last_seen\` DESC NULLS LAST
+| LIMIT 10000",
+  "params": Array [
+    Object {
+      "from": "2026-10-19T10:00:00.000Z",
+    },
+    Object {
+      "to": "2026-10-19T11:00:00.000Z",
+    },
+  ],
+}
+`;
+
+exports[`buildListQuery k8s.deployment under FROM builds the list query of plan 1 1`] = `
+Object {
+  "esql": "SET unmapped_fields=\\"nullify\\";
+FROM metrics-kubernetes.state_deployment-*
+| WHERE \`@timestamp\` >= ?from AND \`@timestamp\` < ?to
+    AND (metricset.name == \\"state_deployment\\")
+    AND (TO_STRING(kubernetes.namespace) IS NOT NULL AND TO_STRING(kubernetes.namespace) != \\"\\" AND TO_STRING(kubernetes.deployment.name) IS NOT NULL AND TO_STRING(kubernetes.deployment.name) != \\"\\")
+| STATS \`cluster\` = LAST(\`orchestrator.cluster.name\`, \`@timestamp\`) WHERE \`orchestrator.cluster.name\` IS NOT NULL,
+    \`paused\` = LAST(\`kubernetes.deployment.paused\`, \`@timestamp\`) WHERE \`kubernetes.deployment.paused\` IS NOT NULL,
+    \`last_seen\` = MAX(\`@timestamp\`)
+    BY \`kubernetes.namespace\`, \`kubernetes.deployment.name\`
+| EVAL kubernetes_namespace_present = TO_STRING(kubernetes.namespace) IS NOT NULL AND TO_STRING(kubernetes.namespace) != \\"\\",
+ kubernetes_deployment_name_present = TO_STRING(kubernetes.deployment.name) IS NOT NULL AND TO_STRING(kubernetes.deployment.name) != \\"\\",
+ kubernetes_namespace_present_or_null = CASE(kubernetes_namespace_present, TO_STRING(kubernetes.namespace)),
+ kubernetes_deployment_name_present_or_null = CASE(kubernetes_deployment_name_present, TO_STRING(kubernetes.deployment.name)),
+ entity.id = CONCAT(\\"k8s.deployment:\\", CONCAT(kubernetes_namespace_present_or_null, \\"/\\", kubernetes_deployment_name_present_or_null))
+| KEEP \`entity.id\`, \`kubernetes.namespace\`, \`kubernetes.deployment.name\`, \`cluster\`, \`paused\`, \`last_seen\`
+| SORT \`last_seen\` DESC NULLS LAST
+| LIMIT 10000",
+  "params": Array [
+    Object {
+      "from": "2026-10-19T10:00:00.000Z",
+    },
+    Object {
+      "to": "2026-10-19T11:00:00.000Z",
+    },
+  ],
+}
+`;
+
+exports[`buildListQuery k8s.deployment under TS builds the list query of plan 0 1`] = `
+Object {
+  "esql": "SET unmapped_fields=\\"nullify\\";
+TS metrics-kubeletstatsreceiver.otel-default
+| WHERE \`@timestamp\` >= ?from AND \`@timestamp\` < ?to
+    AND (TO_STRING(kubernetes.namespace) IS NOT NULL AND TO_STRING(kubernetes.namespace) != \\"\\" AND TO_STRING(kubernetes.deployment.name) IS NOT NULL AND TO_STRING(kubernetes.deployment.name) != \\"\\")
+| STATS \`cluster\` = LAST(\`orchestrator.cluster.name\`, \`@timestamp\`) WHERE \`orchestrator.cluster.name\` IS NOT NULL,
+    \`last_seen\` = MAX(\`@timestamp\`)
+    BY \`kubernetes.namespace\`, \`kubernetes.deployment.name\`
+| EVAL kubernetes_namespace_present = TO_STRING(kubernetes.namespace) IS NOT NULL AND TO_STRING(kubernetes.namespace) != \\"\\",
+ kubernetes_deployment_name_present = TO_STRING(kubernetes.deployment.name) IS NOT NULL AND TO_STRING(kubernetes.deployment.name) != \\"\\",
+ kubernetes_namespace_present_or_null = CASE(kubernetes_namespace_present, TO_STRING(kubernetes.namespace)),
+ kubernetes_deployment_name_present_or_null = CASE(kubernetes_deployment_name_present, TO_STRING(kubernetes.deployment.name)),
+ entity.id = CONCAT(\\"k8s.deployment:\\", CONCAT(kubernetes_namespace_present_or_null, \\"/\\", kubernetes_deployment_name_present_or_null))
+| KEEP \`entity.id\`, \`kubernetes.namespace\`, \`kubernetes.deployment.name\`, \`cluster\`, \`last_seen\`
+| SORT \`last_seen\` DESC NULLS LAST
+| LIMIT 10000",
+  "params": Array [
+    Object {
+      "from": "2026-10-19T10:00:00.000Z",
+    },
+    Object {
+      "to": "2026-10-19T11:00:00.000Z",
+    },
+  ],
+}
+`;
+
+exports[`buildListQuery k8s.deployment under TS builds the list query of plan 1 1`] = `
+Object {
+  "esql": "SET unmapped_fields=\\"nullify\\";
+TS metrics-kubernetes.state_deployment-*
+| WHERE \`@timestamp\` >= ?from AND \`@timestamp\` < ?to
+    AND (metricset.name == \\"state_deployment\\")
+    AND (TO_STRING(kubernetes.namespace) IS NOT NULL AND TO_STRING(kubernetes.namespace) != \\"\\" AND TO_STRING(kubernetes.deployment.name) IS NOT NULL AND TO_STRING(kubernetes.deployment.name) != \\"\\")
+| STATS \`cluster\` = LAST(\`orchestrator.cluster.name\`, \`@timestamp\`) WHERE \`orchestrator.cluster.name\` IS NOT NULL,
+    \`paused\` = LAST(\`kubernetes.deployment.paused\`, \`@timestamp\`) WHERE \`kubernetes.deployment.paused\` IS NOT NULL,
+    \`last_seen\` = MAX(\`@timestamp\`)
+    BY \`kubernetes.namespace\`, \`kubernetes.deployment.name\`
+| EVAL kubernetes_namespace_present = TO_STRING(kubernetes.namespace) IS NOT NULL AND TO_STRING(kubernetes.namespace) != \\"\\",
+ kubernetes_deployment_name_present = TO_STRING(kubernetes.deployment.name) IS NOT NULL AND TO_STRING(kubernetes.deployment.name) != \\"\\",
+ kubernetes_namespace_present_or_null = CASE(kubernetes_namespace_present, TO_STRING(kubernetes.namespace)),
+ kubernetes_deployment_name_present_or_null = CASE(kubernetes_deployment_name_present, TO_STRING(kubernetes.deployment.name)),
+ entity.id = CONCAT(\\"k8s.deployment:\\", CONCAT(kubernetes_namespace_present_or_null, \\"/\\", kubernetes_deployment_name_present_or_null))
+| KEEP \`entity.id\`, \`kubernetes.namespace\`, \`kubernetes.deployment.name\`, \`cluster\`, \`paused\`, \`last_seen\`
+| SORT \`last_seen\` DESC NULLS LAST
+| LIMIT 10000",
+  "params": Array [
+    Object {
+      "from": "2026-10-19T10:00:00.000Z",
+    },
+    Object {
+      "to": "2026-10-19T11:00:00.000Z",
+    },
+  ],
+}
+`;
+
+exports[`buildListQuery k8s.node under FROM builds the list query of plan 0 1`] = `
+Object {
+  "esql": "SET unmapped_fields=\\"nullify\\";
+FROM metrics-kubeletstatsreceiver.otel-default
+| WHERE \`@timestamp\` >= ?from AND \`@timestamp\` < ?to
+    AND ((TO_STRING(kubernetes.node.name) IS NOT NULL AND TO_STRING(kubernetes.node.name) != \\"\\"))
+| STATS \`cluster\` = LAST(\`orchestrator.cluster.name\`, \`@timestamp\`) WHERE \`orchestrator.cluster.name\` IS NOT NULL,
+    \`os\` = LAST(\`host.os.name\`, \`@timestamp\`) WHERE \`host.os.name\` IS NOT NULL,
+    \`os.type\` = LAST(\`host.os.type\`, \`@timestamp\`) WHERE \`host.os.type\` IS NOT NULL,
+    \`last_seen\` = MAX(\`@timestamp\`)
+    BY \`kubernetes.node.name\`
+| EVAL entity.id = CONCAT(\\"k8s.node:\\", TO_STRING(kubernetes.node.name))
+| KEEP \`entity.id\`, \`kubernetes.node.name\`, \`cluster\`, \`os\`, \`os.type\`, \`last_seen\`
+| SORT \`last_seen\` DESC NULLS LAST
+| LIMIT 10000",
+  "params": Array [
+    Object {
+      "from": "2026-10-19T10:00:00.000Z",
+    },
+    Object {
+      "to": "2026-10-19T11:00:00.000Z",
+    },
+  ],
+}
+`;
+
+exports[`buildListQuery k8s.node under TS builds the list query of plan 0 1`] = `
+Object {
+  "esql": "SET unmapped_fields=\\"nullify\\";
+TS metrics-kubeletstatsreceiver.otel-default
+| WHERE \`@timestamp\` >= ?from AND \`@timestamp\` < ?to
+    AND ((TO_STRING(kubernetes.node.name) IS NOT NULL AND TO_STRING(kubernetes.node.name) != \\"\\"))
+| STATS \`cluster\` = LAST(\`orchestrator.cluster.name\`, \`@timestamp\`) WHERE \`orchestrator.cluster.name\` IS NOT NULL,
+    \`os\` = LAST(\`host.os.name\`, \`@timestamp\`) WHERE \`host.os.name\` IS NOT NULL,
+    \`os.type\` = LAST(\`host.os.type\`, \`@timestamp\`) WHERE \`host.os.type\` IS NOT NULL,
+    \`last_seen\` = MAX(\`@timestamp\`)
+    BY \`kubernetes.node.name\`
+| EVAL entity.id = CONCAT(\\"k8s.node:\\", TO_STRING(kubernetes.node.name))
+| KEEP \`entity.id\`, \`kubernetes.node.name\`, \`cluster\`, \`os\`, \`os.type\`, \`last_seen\`
+| SORT \`last_seen\` DESC NULLS LAST
+| LIMIT 10000",
+  "params": Array [
+    Object {
+      "from": "2026-10-19T10:00:00.000Z",
+    },
+    Object {
+      "to": "2026-10-19T11:00:00.000Z",
+    },
+  ],
+}
+`;

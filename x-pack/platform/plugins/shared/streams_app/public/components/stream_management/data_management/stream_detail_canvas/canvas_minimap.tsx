@@ -33,7 +33,7 @@ const getNodeColor =
       case DESTINATION_NODE_TYPE:
         return euiTheme.colors.success;
       default:
-        return euiTheme.colors.warning; // fallback
+        return euiTheme.colors.warning;
     }
   };
 
@@ -121,7 +121,7 @@ export function CanvasMinimap() {
         pannable
         zoomable
         ariaLabel={i18n.translate('xpack.streams.canvas.minimap.ariaLabel', {
-          defaultMessage: 'Canvas minimap',
+          defaultMessage: 'Map minimap',
         })}
         nodeColor={getNodeColor(euiTheme)}
         nodeStrokeWidth={2}

@@ -14,9 +14,15 @@ import type { SecurityCanvasEmbeddedBundle } from '../../components/security_red
 import { TIMELINE_TITLE } from '../grouped_attachments';
 import { ConversationFlyoutHost } from '../grouped_attachments/conversation_flyout_host';
 import { InvestigationTimelineFlyout } from './timeline_flyout';
-import type { InvestigationTimelineEvent } from './types';
+import type { InvestigationTimelineEvent, InvestigationTimelineWindow } from './types';
 
-const OpenTimelineOnMount = ({ events }: { events: InvestigationTimelineEvent[] }) => {
+const OpenTimelineOnMount = ({
+  events,
+  window,
+}: {
+  events: InvestigationTimelineEvent[];
+  window?: InvestigationTimelineWindow;
+}) => {
   const openFlyout = useOpenFlyout();
   const { session, historyKey } = useFlyoutSessionContext();
   const defaultProperties = useDefaultDocumentFlyoutProperties();
@@ -30,7 +36,7 @@ const OpenTimelineOnMount = ({ events }: { events: InvestigationTimelineEvent[] 
     // A new push flyout on the conversation history, so Back
     // returns to the conversation flyout.
     openFlyout(
-      <InvestigationTimelineFlyout events={events} />,
+      <InvestigationTimelineFlyout events={events} window={window} />,
       {
         ...defaultProperties,
         historyKey,
@@ -47,22 +53,24 @@ const OpenTimelineOnMount = ({ events }: { events: InvestigationTimelineEvent[] 
         origin: FLYOUT_ORIGIN.ATTACHMENTS_OVERVIEW,
       }
     );
-  }, [defaultProperties, events, historyKey, openFlyout, session]);
+  }, [defaultProperties, events, historyKey, openFlyout, session, window]);
 
   return null;
 };
 
 export interface InvestigationTimelineFlyoutOpenerProps {
   events: InvestigationTimelineEvent[];
+  window?: InvestigationTimelineWindow;
   resolveSecurityCanvasContext: () => Promise<SecurityCanvasEmbeddedBundle>;
 }
 
 /** Opens the timeline flyout from the conversation overview. Timeline does not query, so it skips the data-view bootstrap. */
 export const InvestigationTimelineFlyoutOpener = ({
   events,
+  window,
   resolveSecurityCanvasContext,
 }: InvestigationTimelineFlyoutOpenerProps) => (
   <ConversationFlyoutHost resolveSecurityCanvasContext={resolveSecurityCanvasContext}>
-    <OpenTimelineOnMount events={events} />
+    <OpenTimelineOnMount events={events} window={window} />
   </ConversationFlyoutHost>
 );

@@ -52,8 +52,8 @@ import {
 import { normalizeTemplateCaseDefaultsYaml } from '../utils/normalize_template_case_defaults';
 import { seedRequiredTemplateBlocks } from '../utils/seed_template_definition';
 import { reorderTemplateDefinitionKeys } from '../utils/reorder_template_definition_keys';
-import type { CaseConnectorWithoutName } from '../../../../common/types/domain_zod/connector/v1';
-import type { CaseAssignees } from '../../../../common/types/domain_zod/user/v1';
+import type { CaseConnectorWithoutName } from '../../../../common/types/domain/connector/v1';
+import type { CaseAssignees } from '../../../../common/types/domain/user/v1';
 import type { TemplateSettings } from '../../../../common/types/domain/template/v1';
 import {
   type TemplateMetadata,

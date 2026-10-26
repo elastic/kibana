@@ -6,8 +6,8 @@
  */
 
 import type { CaseUserActionStatsResponse } from '../../../common/types/api';
-import { CaseUserActionStatsResponseRt } from '../../../common/types/api';
-import { decodeOrThrow } from '../../common/runtime_types';
+import { CaseUserActionStatsResponseSchema } from '../../../common/types/api';
+import { decodeOrThrowZod } from '../../common/runtime_types';
 import { createCaseError } from '../../common/error';
 import type { CasesClientArgs } from '..';
 import type { UserActionGet } from './types';
@@ -29,7 +29,7 @@ export const getStats = async (
       caseId,
     });
 
-    return decodeOrThrow(CaseUserActionStatsResponseRt)(totals);
+    return decodeOrThrowZod(CaseUserActionStatsResponseSchema)(totals);
   } catch (error) {
     throw createCaseError({
       message: `Failed to retrieve user action stats for case id: ${caseId}: ${error}`,

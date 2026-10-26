@@ -8,6 +8,7 @@
 import type { PluginInitializerContext } from '@kbn/core/server';
 
 export { config } from './config';
+export type { EntityInventoryAppServerSetup } from './plugin';
 
 export const plugin = async (_context: PluginInitializerContext) => {
   const { EntityInventoryAppPlugin } = await import('./plugin');

@@ -84,7 +84,7 @@ const investigationCompleted = parse(SIGNIFICANT_EVENTS_INVESTIGATION_COMPLETED_
 
 describe('significant events persistence workflow contracts', () => {
   it('bumps managed workflow versions for the bulk persistence contract', () => {
-    expect(SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW.version).toBe(25);
+    expect(SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW.version).toBe(27);
     expect(SIGNIFICANT_EVENTS_ORCHESTRATOR_WORKFLOW.version).toBe(4);
   });
 
@@ -92,15 +92,10 @@ describe('significant events persistence workflow contracts', () => {
     const schema = requireStep(discovery, 'run_discovery_agent').with?.schema;
     const properties = schema?.properties;
     const eventProperties = properties?.significant_events?.items?.properties;
-    const nonWrittenReasons = [
-      'bulk_error',
-      'duplicate_in_batch',
-      'existing_active_event',
-      'unchanged_outcome',
-      'unknown_event_id',
-    ];
 
-    expect(eventProperties?.reason?.enum).toEqual(nonWrittenReasons);
+    // Any reason the tool returns is echoed as is: the schema does not enumerate them.
+    expect(eventProperties?.reason).toEqual(expect.objectContaining({ type: 'string' }));
+    expect(eventProperties?.reason?.enum).toBeUndefined();
     expect(properties?.written_rule_uuids?.description).toContain('unknown_event_id');
     expect(properties?.written_rule_uuids?.description).toContain(
       'intentionally determined not event-eligible'
@@ -242,10 +237,14 @@ describe('significant events persistence workflow contracts', () => {
     expect(engine.parseAndRenderSync(template, makeContext([{ id: 'inv-1' }]))).toBe('false');
   });
 
-  it('attaches completed investigations only to Significant Events', () => {
+  it('attaches completed or failed investigations only to Significant Events', () => {
     expect(investigationCompleted.triggers).toEqual([
       {
         type: 'nightshift-investigations.completed',
+        on: { condition: 'event.subject.type: "significant_event"' },
+      },
+      {
+        type: 'nightshift-investigations.failed',
         on: { condition: 'event.subject.type: "significant_event"' },
       },
     ]);
@@ -255,6 +254,7 @@ describe('significant events persistence workflow contracts', () => {
       workflow_execution_id: '{{ event.investigation_id }}',
       started_at: '{{ event.started_at }}',
       completed_at: '{{ event.completed_at }}',
+      outcome: '{{ event.status }}',
     });
   });
 });

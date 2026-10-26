@@ -168,7 +168,7 @@ export const canvasStateMachine = setup({
     notifyUnitFailure: getPlaceholderFor(createNotifyUnitFailureAction),
     notifyUnitSaved: getPlaceholderFor(createNotifyUnitSavedAction),
     holdCreateHistory: getPlaceholderFor(createHoldCreateHistoryAction),
-    commitCreateHistory: getPlaceholderFor(createCommitCreateHistoryAction),
+    resetHistory: getPlaceholderFor(createResetHistoryAction),
     discardCreateHistory: getPlaceholderFor(createDiscardCreateHistoryAction),
     notifySourcesUnitSaveStarted: sendTo(
       ({ context }) => context.sourcesRef,
@@ -364,6 +364,7 @@ export const canvasStateMachine = setup({
                 urlState: {
                   ...context.urlState,
                   flyoutName: event.flyoutName,
+                  flyoutKind: event.flyoutKind ?? null,
                   flyoutTab: 'overview',
                 },
               }),
@@ -393,6 +394,7 @@ export const canvasStateMachine = setup({
                 urlState: {
                   ...context.urlState,
                   flyoutName: null,
+                  flyoutKind: null,
                   flyoutTab: null,
                 },
               }),
@@ -542,9 +544,9 @@ export const canvasStateMachine = setup({
                     'syncSavedUnitToOriginator',
                     'syncSavedUnitToPeer',
                     'notifyUnitSaved',
-                    // Commit while the create intent is still set. storePersistedUnitDefinition
-                    // clears it.
-                    'commitCreateHistory',
+                    // Reset after a successful persist so undo cannot restore a destination / source
+                    // whose API key was already revoked on save.
+                    'resetHistory',
                     'storePersistedUnitDefinition',
                   ],
                 },
@@ -611,14 +613,12 @@ export const canvasStateMachine = setup({
         input: {
           unitDefinition,
           metadataBySourceId: {},
-          includeUnconfiguredNodeOnCreate: true,
           parentRef: self,
         },
       }),
       destinationsRef: spawn('destinationsMachine', {
         input: {
           unitDefinition,
-          includeUnconfiguredNodeOnCreate: true,
           parentRef: self,
         },
       }),
@@ -646,7 +646,7 @@ export function createCanvasMachineImplementations({
         apiKeyGenerationDeps,
         loadSourceEnvironment,
       }),
-      destinationsMachine: createDestinationsMachineActor({ core }),
+      destinationsMachine: createDestinationsMachineActor({ core, apiKeyGenerationDeps }),
       loadUnitDefinition: createLoadUnitDefinitionActor({ loadUnitDefinition }),
       validateUnitDefinition: createValidateUnitDefinitionActor({ validateUnitDefinition }),
       persistUnitDefinition: createPersistUnitDefinitionActor({ persistUnitDefinition }),
@@ -656,7 +656,7 @@ export function createCanvasMachineImplementations({
       notifyUnitFailure: createNotifyUnitFailureAction({ core }),
       notifyUnitSaved: createNotifyUnitSavedAction({ core }),
       holdCreateHistory: createHoldCreateHistoryAction(createHistoryRef),
-      commitCreateHistory: createCommitCreateHistoryAction(createHistoryRef),
+      resetHistory: createResetHistoryAction(createHistoryRef),
       discardCreateHistory: createDiscardCreateHistoryAction(createHistoryRef),
     },
   };
@@ -676,10 +676,14 @@ function createSourcesMachineActor({
   );
 }
 
-function createDestinationsMachineActor({ core }: Pick<CanvasStateServiceDeps, 'core'>) {
+function createDestinationsMachineActor({
+  core,
+  apiKeyGenerationDeps,
+}: Pick<CanvasStateServiceDeps, 'core' | 'apiKeyGenerationDeps'>) {
   return destinationsStateMachine.provide(
     createDestinationsMachineImplementations({
       toasts: core.notifications.toasts,
+      apiKeyGenerationDeps,
     })
   );
 }
@@ -737,11 +741,9 @@ function createHoldCreateHistoryAction(createHistoryRef: CanvasCreateHistoryRef)
   };
 }
 
-function createCommitCreateHistoryAction(createHistoryRef: CanvasCreateHistoryRef) {
-  return ({ context }: ActionArgs<CanvasState, CanvasUrlEvent, CanvasUrlEvent>) => {
-    if (context.savingComponentIntent === 'create') {
-      createHistoryRef.current.commit();
-    }
+function createResetHistoryAction(createHistoryRef: CanvasCreateHistoryRef) {
+  return () => {
+    createHistoryRef.current.reset();
   };
 }
 
@@ -819,11 +821,12 @@ function createUrlInitializerActor({
     const urlState = canvasUrlSchema.safeParse(urlStateValues);
 
     if (urlState.success) {
-      const { flyoutName, flyoutTab, query } = urlState.data;
+      const { flyoutName, flyoutKind, flyoutTab, query } = urlState.data;
       sendBack({
         type: 'url.init',
         urlState: {
           flyoutName,
+          flyoutKind: flyoutKind ?? null,
           flyoutTab: flyoutName && !flyoutTab ? 'overview' : flyoutTab,
           query: query || null,
         },

@@ -7,77 +7,69 @@
 
 import { lazySchema, z } from '@kbn/zod/v4';
 
-/** Maximum length of an app id carried on a rule-change event. */
-export const RULE_EVENT_APP_MAX_LENGTH = 64;
+/** Maximum length of an app id carried on an event origin. */
+export const EVENT_ORIGIN_APP_MAX_LENGTH = 64;
 
 /**
- * Channels a rule change can be made through.
+ * Channels an event can be published through.
  *
  * - `system`: Kibana acting on its own behalf (for example a task).
  * - `ui`: a request made by the Kibana browser app.
  * - `api`: any other request.
  */
-export const RULE_EVENT_CHANNELS = ['system', 'ui', 'api'] as const;
+export const EVENT_ORIGIN_CHANNELS = ['system', 'ui', 'api'] as const;
 
-export const ruleEventChannelSchema = lazySchema(() => z.enum(RULE_EVENT_CHANNELS));
+export const eventOriginChannelSchema = lazySchema(() => z.enum(EVENT_ORIGIN_CHANNELS));
 
-export type RuleEventChannel = z.infer<typeof ruleEventChannelSchema>;
+export type EventOriginChannel = z.infer<typeof eventOriginChannelSchema>;
 
 /**
- * App id carried on a rule-change event. Bounded so telemetry cannot
+ * App id carried on an event origin. Bounded so telemetry cannot
  * record an arbitrary or very long value.
  */
-export const ruleEventAppSchema = lazySchema(() =>
+export const eventOriginAppSchema = lazySchema(() =>
   z
     .string()
     .min(1)
-    .max(RULE_EVENT_APP_MAX_LENGTH)
+    .max(EVENT_ORIGIN_APP_MAX_LENGTH)
     .regex(
       /^[A-Za-z0-9_.:-]+$/,
       'Must contain only letters, digits, underscores, dots, colons, and hyphens.'
     )
-    .describe('App the rule change was made from.')
+    .describe('App the event was published from.')
 );
 
-export type RuleEventApp = z.infer<typeof ruleEventAppSchema>;
+export type EventOriginApp = z.infer<typeof eventOriginAppSchema>;
 
-/** Who made a rule change. Matches the rules client's event origin. */
-export const RULE_EVENT_ACTORS = ['user', 'internal'] as const;
+/** Who published an event. */
+export const EVENT_ORIGIN_ACTORS = ['user', 'internal'] as const;
 
-export const ruleEventActorSchema = lazySchema(() =>
+export const eventOriginActorSchema = lazySchema(() =>
   z
-    .enum(RULE_EVENT_ACTORS)
+    .enum(EVENT_ORIGIN_ACTORS)
     .describe(
-      'Who made the change: `user` for a request carrying credentials, or `internal` for the Kibana internal user acting on its own.'
+      'Who published the event: `user` for a request carrying credentials, or `internal` for the Kibana internal user acting on its own.'
     )
 );
 
-export type RuleEventActor = z.infer<typeof ruleEventActorSchema>;
+export type EventOriginActor = z.infer<typeof eventOriginActorSchema>;
 
 /**
- * Channel, app, and optional actor derived from the request. Actor is optional
- * because the rules client may not yet know who made the change at resolve time.
+ * Who published an alerting event, and where it came from.
+ *
+ * `channel` is derived from the request. `app` is set when a caller configures
+ * one, or when a UI request names one in the execution context. Publishers
+ * attach the actor.
  */
-export const ruleEventOriginSchema = lazySchema(() =>
+export const eventOriginSchema = lazySchema(() =>
   z.object({
-    channel: ruleEventChannelSchema,
-    app: ruleEventAppSchema.optional(),
-    actor: ruleEventActorSchema.optional(),
+    actor: eventOriginActorSchema,
+    channel: eventOriginChannelSchema,
+    app: eventOriginAppSchema.optional(),
   })
 );
 
-export type RuleEventOrigin = z.infer<typeof ruleEventOriginSchema>;
+export type EventOrigin = z.infer<typeof eventOriginSchema>;
 
-/**
- * Origin recorded on a rule-change event. Adds {@link RuleEventActor}
- * to the request-derived channel and app.
- */
-export const ruleChangedEventOriginSchema = lazySchema(() =>
-  z.object({
-    actor: ruleEventActorSchema,
-    channel: ruleEventChannelSchema,
-    app: ruleEventAppSchema.optional(),
-  })
-);
-
-export type RuleChangedEventOrigin = z.infer<typeof ruleChangedEventOriginSchema>;
+/** Channel and optional app derived from a request, before the actor is attached. */
+export type RequestEventOrigin = Omit<EventOrigin, 'actor'>;

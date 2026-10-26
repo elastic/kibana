@@ -47,12 +47,14 @@ export {
   IMPACT_ESCALATION_SUMMARY_URL,
   IMPACT_INDEX_NAME,
   IMPACT_INTERNAL_URL,
+  IMPACT_PILLS_PAGE_SIZE,
   IMPACT_PROPOSAL_SUMMARY_URL,
   MAX_ENTITY_ID_LENGTH,
   MAX_ENTITY_IDS,
   MAX_ENTITY_NAME_LENGTH,
   MAX_IMPACT_CONVERSATION_IDS,
   MAX_IMPACT_ID_LENGTH,
+  MAX_IMPACT_PILLS_REACH,
   MAX_IMPACT_TOOL_ENTITIES,
   SET_IMPACT_TOOL_ID,
   attachImpactRequestSchema,
@@ -145,6 +147,7 @@ export {
   INVESTIGATION_BY_ID_URL,
   INVESTIGATION_CLOSE_PREVIEW_URL,
   INVESTIGATION_SEVERITIES,
+  INVESTIGATION_SEVERITY_URL,
   INVESTIGATION_STATUS_URL,
   INVESTIGATIONS_INTERNAL_URL,
   INVESTIGATIONS_PRIVILEGES_URL,
@@ -197,6 +200,12 @@ export type {
   SetEscalationStatusResponse,
   EscalationClosePreviewResponse,
 } from './investigations/status';
+
+export type {
+  SetInvestigationSeverityRequest,
+  SetInvestigationSeverityResponse,
+  InvestigationSeverityChangedEventData,
+} from './investigations/severity_change';
 
 export {
   assignConversationRequestBodySchema,

@@ -22,6 +22,7 @@ import {
 } from '../../../lib/workflow_history_pagination_error';
 import { ManagedWorkflowDeleteForbiddenError } from '../../managed_workflow_delete_error';
 import { ManagedWorkflowUpdateForbiddenError } from '../../managed_workflow_errors';
+import { WorkflowTriggerInputError } from '../../workflow_trigger_input_error';
 
 describe('handleRouteError', () => {
   it('preserves service-account authorization errors', () => {
@@ -130,6 +131,22 @@ describe('handleRouteError', () => {
     });
     expect(logger.error).not.toHaveBeenCalled();
     expect(logger.warn).not.toHaveBeenCalled();
+  });
+
+  it('returns bad request for trigger input errors without logging', () => {
+    const response = httpServerMock.createResponseFactory();
+    const logger = loggingSystemMock.createLogger();
+    const inputError = new WorkflowTriggerInputError('No documents found with the provided IDs');
+
+    handleRouteError(response, inputError, {
+      logger,
+      logContext: { route: 'POST /api/workflows/workflow/{id}/run', workflowId: 'wf-1' },
+    });
+
+    expect(response.badRequest).toHaveBeenCalledWith({
+      body: { message: 'No documents found with the provided IDs' },
+    });
+    expect(logger.error).not.toHaveBeenCalled();
   });
 
   it('logs and returns 500 for unexpected errors when logger is provided', () => {

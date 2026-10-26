@@ -1,9 +1,51 @@
 {
-  "sha1": "05fb9c3fed50ffda5294fa9b609a738653cef399",
+  "sha1": "067fc6032315a95edc6906281c760932fbd365c7",
   "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
+    {
+      "id": "e5572111b35abfa-189112067cf5840",
+      "title": "Entity Analytics AI brief - the brief tool bound to a captured view posts a brief with one priority from the tile entities",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/ai_brief/generate_brief.spec.ts",
+        "line": 139,
+        "column": 7
+      }
+    },
+    {
+      "id": "e5572111b35abfa-175a2a8cfdbc296",
+      "title": "Entity Analytics AI brief - the brief tool bound to a captured view posts the quiet brief without a model call when no tile is flagged",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/ai_brief/generate_brief.spec.ts",
+        "line": 186,
+        "column": 24
+      }
+    },
+    {
+      "id": "e5572111b35abfa-e5b003b94668909",
+      "title": "Entity Analytics AI brief - the brief tool bound to a captured view sends the model only the entities of the request's space",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/ai_brief/generate_brief.spec.ts",
+        "line": 212,
+        "column": 41
+      }
+    },
     {
       "id": "dddf9b8fd4cf2bb-567a2f8074b6032",
       "title": "Entity AI Summary permissions admin can generate and read back the persisted summary (canRead: true)",
@@ -2915,8 +2957,8 @@
       }
     },
     {
-      "id": "ff1db85b2923667-0571d50f5279240",
-      "title": "Risk score maintainer resolution inputs scores only the group's members, with each alert's own timestamp",
+      "id": "ff1db85b2923667-8512a3f54433c1f",
+      "title": "Risk score maintainer resolution inputs scores only the group's members, stamped or not, with each alert's own timestamp",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -2926,8 +2968,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/risk_score/resolution_inputs.spec.ts",
-        "line": 158,
-        "column": 11
+        "line": 183,
+        "column": 23
       }
     },
     {

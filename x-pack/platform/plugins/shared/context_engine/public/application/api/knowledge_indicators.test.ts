@@ -69,7 +69,7 @@ describe('listKis', () => {
       query: {
         size: 50,
         type: 'playbook',
-        lifecycle_status: ['active', 'deleted'],
+        lifecycle_status: ['active', 'deleted', 'verification_failed'],
       },
     });
   });

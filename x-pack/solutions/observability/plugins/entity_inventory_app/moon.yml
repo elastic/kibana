@@ -27,6 +27,7 @@ tags:
   - private
 fileGroups:
   src:
+    - common/**/*
     - public/**/*
     - server/**/*
     - '!target/**/*'

@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { EuiText } from '@elastic/eui';
 import React from 'react';
-import { ALL_VALUE } from '@kbn/slo-schema';
+import { ALL_VALUE } from '@kbn/slo-constants';
 import type { Annotation } from '../../../common/annotations';
 
 export function AnnotationApplyTo({ annotation }: { annotation: Annotation }) {

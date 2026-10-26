@@ -16,7 +16,6 @@ import {
   isMap,
   isStringLiteral,
   LeafPrinter,
-  Parser,
   Walker,
 } from '@elastic/esql';
 
@@ -29,6 +28,7 @@ import type {
 } from '@elastic/esql/types';
 import { deriveQueryFieldNames } from '@kbn/esql-language';
 import { getArgsFromRenameFunction, replaceColumnNamesIfRenamed } from './query_parsing_helpers';
+import { parseEsqlCached } from './parse_esql_cached';
 
 export const DEFAULT_HIGHLIGHT_PRE_TAG = '<em>';
 export const DEFAULT_HIGHLIGHT_POST_TAG = '</em>';
@@ -91,7 +91,7 @@ export function getColumnsWithHighlights(
   availableColumnNames: string[] = []
 ): ESQLColumnsWithHighlights {
   const columnsWithHighlights: ESQLColumnsWithHighlights = {};
-  const { root } = Parser.parse(query);
+  const { root } = parseEsqlCached(query);
 
   const highlightFunctionsCandidates = Walker.findAll(
     root,

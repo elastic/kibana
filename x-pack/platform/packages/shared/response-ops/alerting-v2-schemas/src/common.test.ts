@@ -103,6 +103,13 @@ describe('durationSchema', () => {
     expect(durationSchema.parse(value)).toBe(value);
   });
 
+  it.each(['0s', '0ms', '0m', '007m', '05s'])(
+    'accepts the zero or zero-padded duration "%s"',
+    (value) => {
+      expect(durationSchema.parse(value)).toBe(value);
+    }
+  );
+
   it('rejects an over-long value on length alone, without running format validation', () => {
     const value = 'x'.repeat(MAX_DURATION_LENGTH + 1);
     const result = durationSchema.safeParse(value);

@@ -32,7 +32,15 @@ const state = (overrides: Partial<CurrentRunState> = {}): CurrentRunState => ({
   allEventsActionable: false,
   hasProcessBearingEvent: false,
   manualRemediation: [],
-  hosts: [{ name: 'WIN-ANALYST01', enrolled: true, agentId: 'a1', capabilities: [] }],
+  hosts: [
+    {
+      name: 'WIN-ANALYST01',
+      enrolled: true,
+      agentId: 'a1',
+      capabilities: [],
+      capabilitiesSource: 'reported',
+    },
+  ],
   processSelectors: [],
   evidence: { tier1HitCount: 0, tier2Confirmed: [{ techniqueId: 'T1078.004', rowCount: 2 }] },
   ...overrides,

@@ -10,7 +10,10 @@
 import type { Logger } from '@kbn/core/server';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 
-import { registerPrivilegesWithCluster } from './register_privileges_with_cluster';
+import {
+  DELETE_PRIVILEGES_BATCH_MAX_BYTES,
+  registerPrivilegesWithCluster,
+} from './register_privileges_with_cluster';
 import type { RawKibanaPrivileges } from '../../common';
 import type { SecurityTelemetryAttributes } from '../otel/instrumentation';
 import { securityTelemetry } from '../otel/instrumentation';
@@ -29,27 +32,54 @@ const registerPrivilegesWithClusterTest = (
     privilegeMap,
     existingPrivileges,
     throwErrorWhenGettingPrivileges,
+    throwErrorWhenDeletingPrivileges,
+    alreadyDeletedPrivileges = [],
     throwErrorWhenPuttingPrivileges,
     assert,
   }: {
     privilegeMap: RawKibanaPrivileges;
     existingPrivileges?: Record<string, Record<string, any>> | null;
     throwErrorWhenGettingPrivileges?: Error;
+    throwErrorWhenDeletingPrivileges?: Error;
+    alreadyDeletedPrivileges?: string[];
     throwErrorWhenPuttingPrivileges?: Error;
     assert: (arg: {
-      expectUpdatedPrivileges: (postPrivilegesBody: any, deletedPrivileges?: string[]) => void;
+      expectUpdatedPrivileges: (
+        postPrivilegesBody: any,
+        deletedPrivilegeBatches?: string[][]
+      ) => void;
       expectDidntUpdatePrivileges: () => void;
+      expectDeletedPrivilegesWithoutPut: (deletedPrivilegeBatches: string[][]) => void;
       expectErrorThrown: (expectedErrorMessage: string) => void;
       expectTelemetryRecorded: (attributes: SecurityTelemetryAttributes) => void;
     }) => void;
   }
 ) => {
+  const expectDeletedPrivilegeBatches = (
+    mockClusterClient: ReturnType<typeof elasticsearchServiceMock.createClusterClient>,
+    mockLogger: jest.Mocked<Logger>,
+    deletedPrivilegeBatches: string[][]
+  ) => {
+    const { deletePrivileges } = mockClusterClient.asInternalUser.security;
+    expect(deletePrivileges).toHaveBeenCalledTimes(deletedPrivilegeBatches.length);
+    deletedPrivilegeBatches.forEach((batch, index) => {
+      expect(mockLogger.debug).toHaveBeenCalledWith(
+        `Deleting Kibana Privileges ${batch.join(', ')} from Elasticsearch for ${application}`
+      );
+      expect(deletePrivileges).toHaveBeenNthCalledWith(
+        index + 1,
+        { application, name: batch },
+        { ignore: [404] }
+      );
+    });
+  };
+
   const createExpectUpdatedPrivileges = (
     mockClusterClient: ReturnType<typeof elasticsearchServiceMock.createClusterClient>,
     mockLogger: jest.Mocked<Logger>,
     error: Error
   ) => {
-    return (postPrivilegesBody: any, deletedPrivileges: string[] = []) => {
+    return (postPrivilegesBody: any, deletedPrivilegeBatches: string[][] = []) => {
       expect(error).toBeUndefined();
       expect(mockClusterClient.asInternalUser.security.getPrivileges).toHaveBeenCalledTimes(1);
       expect(mockClusterClient.asInternalUser.security.getPrivileges).toHaveBeenCalledWith({
@@ -61,18 +91,7 @@ const registerPrivilegesWithClusterTest = (
         body: postPrivilegesBody,
       });
 
-      expect(mockClusterClient.asInternalUser.security.deletePrivileges).toHaveBeenCalledTimes(
-        deletedPrivileges.length
-      );
-      for (const deletedPrivilege of deletedPrivileges) {
-        expect(mockLogger.debug).toHaveBeenCalledWith(
-          `Deleting Kibana Privilege ${deletedPrivilege} from Elasticsearch for ${application}`
-        );
-        expect(mockClusterClient.asInternalUser.security.deletePrivileges).toHaveBeenCalledWith({
-          application,
-          name: deletedPrivilege,
-        });
-      }
+      expectDeletedPrivilegeBatches(mockClusterClient, mockLogger, deletedPrivilegeBatches);
 
       expect(mockLogger.debug).toHaveBeenCalledWith(
         `Registering Kibana Privileges with Elasticsearch for ${application}`
@@ -101,6 +120,16 @@ const registerPrivilegesWithClusterTest = (
       expect(mockLogger.debug).toHaveBeenCalledWith(
         `Kibana Privileges already registered with Elasticsearch for ${application}`
       );
+    };
+  };
+
+  const createExpectDeletedPrivilegesWithoutPut = (
+    mockClusterClient: ReturnType<typeof elasticsearchServiceMock.createClusterClient>,
+    mockLogger: jest.Mocked<Logger>
+  ) => {
+    return (deletedPrivilegeBatches: string[][]) => {
+      expectDeletedPrivilegeBatches(mockClusterClient, mockLogger, deletedPrivilegeBatches);
+      expect(mockClusterClient.asInternalUser.security.putPrivileges).not.toHaveBeenCalled();
     };
   };
 
@@ -140,6 +169,24 @@ const registerPrivilegesWithClusterTest = (
 
       return existingPrivileges;
     }) as any);
+    mockClusterClient.asInternalUser.security.deletePrivileges.mockImplementation((async ({
+      name,
+    }: {
+      name: string[];
+    }) => {
+      if (throwErrorWhenDeletingPrivileges) {
+        throw throwErrorWhenDeletingPrivileges;
+      }
+
+      return {
+        [application]: Object.fromEntries(
+          name.map((privilegeName) => [
+            privilegeName,
+            { found: !alreadyDeletedPrivileges.includes(privilegeName) },
+          ])
+        ),
+      };
+    }) as any);
     mockClusterClient.asInternalUser.security.putPrivileges.mockImplementation((async () => {
       if (throwErrorWhenPuttingPrivileges) {
         throw throwErrorWhenPuttingPrivileges;
@@ -166,6 +213,10 @@ const registerPrivilegesWithClusterTest = (
         mockClusterClient,
         mockLogger,
         error
+      ),
+      expectDeletedPrivilegesWithoutPut: createExpectDeletedPrivilegesWithoutPut(
+        mockClusterClient,
+        mockLogger
       ),
       expectErrorThrown: createExpectErrorThrown(mockLogger, error),
       expectTelemetryRecorded: createExpectTelemetryRecorded(),
@@ -301,13 +352,131 @@ registerPrivilegesWithClusterTest(`deletes no-longer specified privileges`, {
           },
         },
       },
-      ['read', 'space_baz', 'reserved_customApplication']
+      [['read', 'space_baz', 'reserved_customApplication']]
     );
 
     expectTelemetryRecorded({
       application,
       outcome: 'success',
       deletedPrivileges: 3,
+    });
+  },
+});
+
+// Builds a privilege name whose URL-encoded form is exactly `length` bytes long.
+const privilegeNameOfLength = (prefix: string, length: number) =>
+  `${prefix}${'x'.repeat(length - prefix.length)}`;
+
+const toExistingPrivileges = (names: string[]) => ({
+  [application]: Object.fromEntries(
+    names.map((name) => [name, { application, name, actions: ['action:old'], metadata: {} }])
+  ),
+});
+
+const globalAllOnly = {
+  privilegeMap: { features: {}, global: { all: ['action:all'] }, space: {}, reserved: {} },
+  expectedPutBody: {
+    [application]: { all: { application, name: 'all', actions: ['action:all'], metadata: {} } },
+  },
+};
+
+{
+  // 19 names of 100 bytes plus 18 `%2C` separators come to 1954 bytes. A 20th name would make 2057.
+  const orphanedNames = Array.from({ length: 45 }, (_, index) =>
+    privilegeNameOfLength(`feature_orphan${index}.`, 100)
+  );
+
+  registerPrivilegesWithClusterTest(`deletes orphaned privileges in batches that fit the budget`, {
+    privilegeMap: globalAllOnly.privilegeMap,
+    existingPrivileges: toExistingPrivileges(['all', ...orphanedNames]),
+    assert: ({ expectUpdatedPrivileges, expectTelemetryRecorded }) => {
+      expect(DELETE_PRIVILEGES_BATCH_MAX_BYTES).toBe(2048);
+      expectUpdatedPrivileges(globalAllOnly.expectedPutBody, [
+        orphanedNames.slice(0, 19),
+        orphanedNames.slice(19, 38),
+        orphanedNames.slice(38),
+      ]);
+
+      expectTelemetryRecorded({
+        application,
+        outcome: 'success',
+        deletedPrivileges: 45,
+      });
+    },
+  });
+}
+
+{
+  // 1022 + 3 + 1023 is exactly the 2048 byte budget, so the first two names share a batch.
+  const exactFit = [
+    privilegeNameOfLength('feature_a.', 1022),
+    privilegeNameOfLength('feature_b.', 1023),
+  ];
+  const nextName = 'feature_c.all';
+
+  registerPrivilegesWithClusterTest(`fills a delete batch up to exactly the budget`, {
+    privilegeMap: globalAllOnly.privilegeMap,
+    existingPrivileges: toExistingPrivileges(['all', ...exactFit, nextName]),
+    assert: ({ expectUpdatedPrivileges }) => {
+      expectUpdatedPrivileges(globalAllOnly.expectedPutBody, [exactFit, [nextName]]);
+    },
+  });
+}
+
+{
+  const oversizedName = privilegeNameOfLength('feature_oversized.', 3000);
+
+  registerPrivilegesWithClusterTest(`deletes a privilege name larger than the budget on its own`, {
+    privilegeMap: globalAllOnly.privilegeMap,
+    existingPrivileges: toExistingPrivileges([
+      'all',
+      'feature_a.all',
+      oversizedName,
+      'feature_b.all',
+    ]),
+    assert: ({ expectUpdatedPrivileges }) => {
+      expectUpdatedPrivileges(globalAllOnly.expectedPutBody, [
+        ['feature_a.all'],
+        [oversizedName],
+        ['feature_b.all'],
+      ]);
+    },
+  });
+}
+
+registerPrivilegesWithClusterTest(`only counts privileges that Elasticsearch actually deleted`, {
+  privilegeMap: globalAllOnly.privilegeMap,
+  existingPrivileges: toExistingPrivileges([
+    'all',
+    'feature_a.all',
+    'feature_a.read',
+    'feature_b.all',
+  ]),
+  alreadyDeletedPrivileges: ['feature_a.read', 'feature_b.all'],
+  assert: ({ expectUpdatedPrivileges, expectTelemetryRecorded }) => {
+    expectUpdatedPrivileges(globalAllOnly.expectedPutBody, [
+      ['feature_a.all', 'feature_a.read', 'feature_b.all'],
+    ]);
+
+    expectTelemetryRecorded({
+      application,
+      outcome: 'success',
+      deletedPrivileges: 1,
+    });
+  },
+});
+
+registerPrivilegesWithClusterTest(`doesn't put privileges when deleting privileges fails`, {
+  privilegeMap: globalAllOnly.privilegeMap,
+  existingPrivileges: toExistingPrivileges(['all', 'feature_a.all', 'feature_a.read']),
+  throwErrorWhenDeletingPrivileges: new Error('Error deleting privileges'),
+  assert: ({ expectDeletedPrivilegesWithoutPut, expectErrorThrown, expectTelemetryRecorded }) => {
+    expectDeletedPrivilegesWithoutPut([['feature_a.all', 'feature_a.read']]);
+    expectErrorThrown('Error deleting privileges');
+
+    expectTelemetryRecorded({
+      application,
+      outcome: 'failure',
     });
   },
 });

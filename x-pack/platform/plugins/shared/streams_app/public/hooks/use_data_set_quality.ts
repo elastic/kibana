@@ -12,15 +12,21 @@ import {
 } from './use_streams_doc_counts_fetch';
 import { calculateDataQuality } from '../util/calculate_data_quality';
 
-export function useDataSetQuality(streamId: string, definition: Streams.all.GetResponse) {
+export function useDataSetQuality(
+  streamId: string,
+  definition?: Streams.all.GetResponse,
+  canReadFailureStore?: boolean
+) {
   const isDraft = definition ? isDraftGetResponse(definition) : false;
+  const readFailureStore =
+    canReadFailureStore ??
+    (definition && Streams.ingest.all.GetResponse.is(definition)
+      ? definition.privileges.read_failure_store
+      : false);
 
   const { getStreamDocCounts } = useStreamDocCountsFetch({
     groupTotalCountByTimestamp: false,
-    getCanReadFailureStore: () =>
-      definition && Streams.ingest.all.GetResponse.is(definition)
-        ? definition.privileges.read_failure_store
-        : false,
+    getCanReadFailureStore: () => readFailureStore,
     numDataPoints: STREAMS_HISTOGRAM_NUM_DATA_POINTS,
     // Detail view never renders the Ingestion column, so skip the unused ingestion request.
     fetchIngestionDocCounts: false,
@@ -55,6 +61,8 @@ export function useDataSetQuality(streamId: string, definition: Streams.all.GetR
   });
   const isQualityLoading =
     countResult?.loading || failedDocsResult?.loading || degradedDocsResult.loading;
+  // Without a readable failure store (or when its count fails) `quality` assumes zero failed docs.
+  const isFailedDocCountKnown = readFailureStore && !failedDocsResult.error;
 
-  return { quality, isQualityLoading };
+  return { quality, isQualityLoading, isFailedDocCountKnown };
 }

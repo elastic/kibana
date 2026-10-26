@@ -94,7 +94,7 @@ export class EmailAction extends BaseAction {
   static typeName = i18n.translate('xpack.watcher.models.emailAction.typeName', {
     defaultMessage: 'Email',
   });
-  static iconClass = 'email';
+  static iconClass = 'mail';
   static selectMessage = i18n.translate('xpack.watcher.models.emailAction.selectMessageText', {
     defaultMessage: 'Send an email from your server.',
   });

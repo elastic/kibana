@@ -55,7 +55,8 @@
       "agentBuilder",
       "licenseManagement",
       "serverless",
-      "cps"
+      "cps",
+      "entityInventoryApp"
     ],
     "requiredBundles": [
       "observability",

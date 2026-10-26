@@ -14,7 +14,7 @@ interface UseStreamsIngestionRatesProps {
    * `useStreamDocCountsFetch`). Resolving one promise for all streams avoids firing one query
    * per stream, which exhausts the browser's connection pool on large stream sets.
    */
-  ingestionDocCount: Promise<StreamDocsStat[]>;
+  ingestionDocCount: Promise<StreamDocsStat[]> | undefined;
   timeStart: number;
   timeEnd: number;
 }
@@ -47,6 +47,9 @@ export const useStreamsIngestionRates = ({
   });
 
   useEffect(() => {
+    if (!ingestionDocCount) {
+      return;
+    }
     let cancelled = false;
     setState((prev) => ({ ...prev, loaded: false, error: false }));
 

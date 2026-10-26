@@ -22,20 +22,17 @@ export const alertAckedTriggerCommonDefinition: CommonTriggerDefinition<
   id: ALERT_ACKED_TRIGGER_ID,
   stability: 'tech_preview',
   eventSchema: alertAckedPayloadSchema,
-  title: i18n.translate('xpack.alertingVTwo.workflowTriggers.alertAcked.title', {
+  title: i18n.translate('xpack.alertingV2.workflowTriggers.alertAcked.title', {
     defaultMessage: 'Alerting - Alert acknowledged',
   }),
-  description: i18n.translate('xpack.alertingVTwo.workflowTriggers.alertAcked.description', {
+  description: i18n.translate('xpack.alertingV2.workflowTriggers.alertAcked.description', {
     defaultMessage: 'Emitted when an alert is acknowledged.',
   }),
   documentation: {
-    details: i18n.translate(
-      'xpack.alertingVTwo.workflowTriggers.alertAcked.documentation.details',
-      {
-        defaultMessage:
-          'Emitted after an alert ack action is persisted. The payload includes event.alertId, event.ruleId, and event.spaceId for trigger conditions.',
-      }
-    ),
+    details: i18n.translate('xpack.alertingV2.workflowTriggers.alertAcked.documentation.details', {
+      defaultMessage:
+        'Emitted after an alert ack action is persisted. The payload includes event.alertId, event.ruleId, and event.spaceId for trigger conditions.',
+    }),
   },
   snippets: {
     condition: 'event.ruleId: "my-rule-id"',

@@ -34,7 +34,9 @@ export const ToolCallStep: React.FC<ToolCallStepProps> = ({ step, isAborted = fa
         onClick={handleClick}
         ebtAction={AGENT_BUILDER_UI_EBT.action.conversation.VIEW_TOOL_RESPONSE}
       />
-      {isFlyoutOpen && <ToolResponseFlyout step={step} onClose={closeFlyout} />}
+      {isFlyoutOpen && (
+        <ToolResponseFlyout step={step} isAborted={isAborted} onClose={closeFlyout} />
+      )}
     </div>
   );
 };

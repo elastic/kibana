@@ -21,3 +21,12 @@ export interface VegaEvent {
 }
 
 export type VegaEventHandler = (event: VegaEvent) => void;
+
+/** An unvalidated call to one of the `VEGA_FUNCTION_NAMES`, forwarded by the view to its parent. */
+export interface VegaFilterAction {
+  fn: string;
+  args: readonly unknown[];
+}
+
+/** Validates and applies a filter action; rejects with the error the view should display. */
+export type VegaFilterActionHandler = (action: VegaFilterAction) => Promise<void>;

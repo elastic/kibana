@@ -174,6 +174,39 @@ describe('Slack inbound events', () => {
     });
   });
 
+  it.each<[string, unknown, string | undefined]>([
+    [
+      "the Relay's Slack thread key",
+      { origin: { type: 'slack', external_conversation_id: 'slack:T123:C123:1355517523.000005' } },
+      'slack:T123:C123:1355517523.000005',
+    ],
+    ['no key without a Relay block', undefined, undefined],
+    [
+      'no key from another surface',
+      { origin: { type: 'teams', external_conversation_id: 'teams:1' } },
+      undefined,
+    ],
+    [
+      'no oversized key',
+      { origin: { type: 'slack', external_conversation_id: 'x'.repeat(129) } },
+      undefined,
+    ],
+  ])('emits a message with %s', async (_, relay, externalConversationId) => {
+    const result = expectEmit(
+      await events.handleEvents(
+        createContext(
+          callback(
+            { type: 'message', channel: 'C123', text: 'hello', ts: '1355517523.000005' },
+            relay === undefined ? {} : { relay }
+          )
+        )
+      )
+    );
+
+    expect(result.events[0]?.payload.externalConversationId).toBe(externalConversationId);
+    expect(validateEmittedEvents(events.definitions, result.events)).toEqual({ ok: true });
+  });
+
   it('uses the original message id when a message is changed', async () => {
     const result = expectEmit(
       await events.handleEvents(

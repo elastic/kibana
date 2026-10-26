@@ -280,7 +280,7 @@ export const AgentPolicyActionMenu = memo<{
             copyPolicyItem,
             deletePolicyItem,
           ];
-          const agentlessMenuItems = [viewPolicyItem, deletePolicyItem];
+          const agentlessMenuItems = [viewPolicyItem];
 
           let menuItems;
 

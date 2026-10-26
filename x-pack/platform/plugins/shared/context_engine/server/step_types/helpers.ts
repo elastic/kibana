@@ -12,15 +12,14 @@ import type { StepContext } from '@kbn/workflows';
 import { ExecutionError } from '@kbn/workflows/server';
 import { CONTEXT_ENGINE_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import { isIndexPattern, validateAiIndexId } from '../../common/ai_index_dest';
-import type { KiLifecycleStatus } from '../../common/step_types/ki';
 import type { AiIndexDest } from '../../common/http_api/ai_indices';
+import type { KiWriter } from '../ai_indices/ki_revision';
 import {
   AiIndexAlreadyExistsError,
   AiIndexManagedError,
   AiIndexNotFoundError,
 } from '../ai_indices/errors';
 import type { AiIndexService } from '../ai_indices/service';
-import { REVISION_TIE_WINDOW, kiIdQuery, pickCurrentRevision } from '../ai_indices/ki_get';
 import type { ImprovementsServiceApi } from '../improvements/service';
 import type { KiVerificationSummary } from '../ki_verification';
 import { WORKFLOW_VERIFIER_ID_PREFIX } from '../ki_verification';
@@ -59,31 +58,6 @@ export interface ResolvedAiIndex {
   managed: boolean;
 }
 
-/** A writer as recorded under `governance.provenance`. */
-export interface KiWriter {
-  uri: string;
-  metadata: Record<string, string | number>;
-}
-
-/** A stored KI document. */
-export interface StoredKi {
-  id?: string;
-  governance?: {
-    provenance?: { created_by?: KiWriter; updated_by?: KiWriter };
-    lifecycle?: { status?: KiLifecycleStatus };
-  };
-  [key: string]: unknown;
-}
-
-/** The current revision of a KI. */
-export interface KiRevision {
-  index: string;
-  documentId: string;
-  seqNo?: number;
-  primaryTerm?: number;
-  source: StoredKi;
-}
-
 /** The workflow executing the step, as recorded in provenance. */
 export const kiWriterFromContext = ({ workflow, execution }: StepContext): KiWriter => ({
   uri: `workflow://${workflow.id}`,
@@ -94,70 +68,11 @@ export const kiWriterFromContext = ({ workflow, execution }: StepContext): KiWri
   },
 });
 
-/** Fields stamped on every revision a step writes. */
-export interface KiRevisionChanges {
-  updated_at: string;
-  governance: {
-    provenance: { updated_by: KiWriter };
-    lifecycle?: { status: KiLifecycleStatus };
-  };
-  [key: string]: unknown;
-}
-
-const isPlainObject = (value: unknown): value is Record<string, unknown> =>
-  typeof value === 'object' && value !== null && !Array.isArray(value);
-
-/** Merges like the update API's `doc`: objects merge, other values are replaced. */
-export const mergeKiDoc = (
-  source: Record<string, unknown>,
-  changes: Record<string, unknown>
-): Record<string, unknown> => {
-  const merged = { ...source };
-  for (const [key, value] of Object.entries(changes)) {
-    const current = merged[key];
-    merged[key] =
-      isPlainObject(current) && isPlainObject(value) ? mergeKiDoc(current, value) : value;
-  }
-  return merged;
-};
-
-/** Appends a new revision of a KI to a data stream. */
-export const appendKiRevision = async ({
-  esClient,
-  destValue,
-  kiId,
-  source,
-  changes,
-  refresh,
-  abortSignal,
-}: {
-  esClient: ElasticsearchClient;
-  destValue: string;
-  kiId: string;
-  source: StoredKi;
-  changes: KiRevisionChanges;
-  refresh: boolean;
-  abortSignal: AbortSignal;
-}): Promise<void> => {
-  await esClient.index(
-    {
-      index: destValue,
-      document: {
-        ...mergeKiDoc(source, changes),
-        '@timestamp': changes.updated_at,
-        id: source.id ?? kiId,
-      },
-      op_type: 'create',
-      ...(refresh && { refresh: 'wait_for' as const }),
-    },
-    { signal: abortSignal }
-  );
-};
-
 const KI_WRITE_SUCCESS_VERB: Record<KiWriteAction, string> = {
   create: 'created in',
   update: 'updated in',
   delete: 'deleted from',
+  restore: 'restored in',
 };
 
 /**
@@ -389,84 +304,4 @@ export const assertWritableDest = (aiIndexId: string, dest: AiIndexDest): void =
       message: `Cannot create a KI in AI index '${aiIndexId}': its dest is an index pattern, not a single write target`,
     });
   }
-};
-
-/** The typed error for a KI that does not exist in the given AI index. */
-export const kiNotFoundError = (aiIndexId: string, kiId: string): ExecutionError =>
-  new ExecutionError({
-    type: 'NotFoundError',
-    message: `KI '${kiId}' not found in AI index '${aiIndexId}'`,
-  });
-
-export const isKiDeleted = (source: StoredKi): boolean =>
-  source.governance?.lifecycle?.status === 'deleted';
-
-/** The typed error for an update to a KI whose lifecycle status is deleted. */
-export const kiDeletedError = (aiIndexId: string, kiId: string): ExecutionError =>
-  new ExecutionError({
-    type: 'ConflictError',
-    message: `KI '${kiId}' in AI index '${aiIndexId}' has lifecycle status deleted; pass force: true to update it`,
-  });
-
-/** The typed error for a write that lost an optimistic concurrency check. */
-export const kiConflictError = (aiIndexId: string, kiId: string): ExecutionError =>
-  new ExecutionError({
-    type: 'ConflictError',
-    message: `KI '${kiId}' in AI index '${aiIndexId}' was modified concurrently`,
-  });
-
-/** Finds the current revision of a KI. */
-export const findKiRevision = async ({
-  esClient,
-  aiIndexId,
-  dest,
-  kiId,
-  abortSignal,
-}: {
-  esClient: ElasticsearchClient;
-  aiIndexId: string;
-  dest: AiIndexDest;
-  kiId: string;
-  abortSignal: AbortSignal;
-}): Promise<KiRevision | undefined> => {
-  const isDataStream = dest.type === 'data_stream';
-  // A dest with no physical backing index yet must resolve to empty hits, not an error.
-  const response = await esClient.search<StoredKi>(
-    {
-      index: dest.value,
-      ignore_unavailable: true,
-      allow_no_indices: true,
-      query: kiIdQuery(kiId),
-      ...(isDataStream && {
-        sort: [{ '@timestamp': { order: 'desc' as const, unmapped_type: 'date' as const } }],
-      }),
-      size: isDataStream ? REVISION_TIE_WINDOW : 2,
-      seq_no_primary_term: true,
-      _source: isDataStream ? true : ['id', 'governance'],
-    },
-    { signal: abortSignal }
-  );
-
-  const { hits } = response.hits;
-  // An index-pattern dest can hold the same _id in multiple indices; refuse to pick one arbitrarily.
-  if (!isDataStream && hits.length > 1) {
-    const indices = hits.flatMap((hit) => (hit._index ? [hit._index] : []));
-    throw new ExecutionError({
-      type: 'ValidationError',
-      message: `KI '${kiId}' is ambiguous in AI index '${aiIndexId}': it exists in multiple backing indices`,
-      details: { indices },
-    });
-  }
-
-  const hit = isDataStream ? pickCurrentRevision(hits) : hits[0];
-  if (!hit?._index) {
-    return undefined;
-  }
-  return {
-    index: hit._index,
-    documentId: hit._id ?? kiId,
-    seqNo: hit._seq_no,
-    primaryTerm: hit._primary_term,
-    source: hit._source ?? {},
-  };
 };

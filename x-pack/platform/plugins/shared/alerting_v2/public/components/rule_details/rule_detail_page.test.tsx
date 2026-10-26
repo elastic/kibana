@@ -32,6 +32,7 @@ import { AlertingV2RulesLocatorDefinition } from '../../locators';
 const mockLocators = createMockLocators();
 
 let mockCanWriteRules = true;
+let mockCanReadExecutionHistory = true;
 
 jest.mock('@kbn/alerting-v2-browser-shared', () => ({
   ...jest.requireActual('@kbn/alerting-v2-browser-shared'),
@@ -48,7 +49,8 @@ jest.mock('@kbn/core-di-browser', () => {
         // UserCapabilities service token
         return {
           canWrite: (feature: string) => (feature === 'rules' ? mockCanWriteRules : true),
-          canRead: () => true,
+          canRead: (feature: string) =>
+            feature === 'executionHistory' ? mockCanReadExecutionHistory : true,
           can: () => mockCanWriteRules,
         };
       }
@@ -99,6 +101,11 @@ jest.mock('../../hooks/use_compose_discover_flyout', () => ({
 const mockUseRuleAuditMetadata = jest.fn();
 jest.mock('../../hooks/use_rule_audit_metadata', () => ({
   useRuleAuditMetadata: () => mockUseRuleAuditMetadata(),
+}));
+
+const mockUseFetchRuleExecutions = jest.fn();
+jest.mock('../../hooks/use_fetch_rule_executions', () => ({
+  useFetchRuleExecutions: (...args: unknown[]) => mockUseFetchRuleExecutions(...args),
 }));
 
 const mockAppHeaderRender = jest.fn();
@@ -184,6 +191,12 @@ describe('RuleDetailPage', () => {
       updatedAtFormatted: 'Mar 4, 2026',
     });
     mockCanWriteRules = true;
+    mockCanReadExecutionHistory = true;
+    mockUseFetchRuleExecutions.mockReturnValue({
+      data: { items: [], total: 0, page: 1, per_page: 1 },
+      isLoading: false,
+      isError: false,
+    });
   });
 
   it('wires breadcrumbs with the rule name', () => {
@@ -214,6 +227,96 @@ describe('RuleDetailPage', () => {
     expect(metadataSection).toHaveTextContent('Mar 1, 2026');
     expect(metadataSection).toHaveTextContent('Bob Example');
     expect(metadataSection).toHaveTextContent('Mar 4, 2026');
+  });
+
+  describe('Last execution metadata', () => {
+    it('requests the single most recent execution and renders it first, as text', () => {
+      mockUseFetchRuleExecutions.mockReturnValue({
+        data: { items: [{ outcome: 'success' }], total: 1, page: 1, per_page: 1 },
+        isLoading: false,
+        isError: false,
+      });
+      renderPage(baseRule);
+
+      expect(mockUseFetchRuleExecutions).toHaveBeenCalledWith({
+        ruleIds: ['rule-1'],
+        perPage: 1,
+        sortField: 'startedAt',
+        sortOrder: 'desc',
+        enabled: true,
+        keepPreviousData: false,
+      });
+
+      const metadataSection = screen.getByTestId(APP_HEADER_TEST_SUBJECTS.metadata);
+      const metadataText = metadataSection.textContent ?? '';
+      expect(metadataText.indexOf('Last execution')).toBeLessThan(
+        metadataText.indexOf('Created by')
+      );
+
+      const lastExecution = screen.getByTestId('ruleDetailsLastExecutionMetadata');
+      expect(lastExecution).toHaveTextContent('Last execution Succeeded');
+      expect(lastExecution.querySelector('span')).toHaveTextContent('Succeeded');
+      expect(lastExecution.querySelector('.euiHealth')).toBeNull();
+    });
+
+    it('shows Failed when the last execution failed', () => {
+      mockUseFetchRuleExecutions.mockReturnValue({
+        data: { items: [{ outcome: 'failure' }], total: 1, page: 1, per_page: 1 },
+        isLoading: false,
+        isError: false,
+      });
+      renderPage(baseRule);
+
+      const lastExecution = screen.getByTestId('ruleDetailsLastExecutionMetadata');
+      expect(lastExecution).toHaveTextContent('Last execution Failed');
+      expect(lastExecution.querySelector('span')).toHaveTextContent('Failed');
+    });
+
+    it('shows a placeholder when the rule has no executions yet', () => {
+      renderPage(baseRule);
+
+      expect(screen.getByTestId('ruleDetailsLastExecutionMetadata')).toHaveTextContent(
+        'Last execution -'
+      );
+    });
+
+    it('shows Unavailable when the request fails', () => {
+      mockUseFetchRuleExecutions.mockReturnValue({
+        data: undefined,
+        isLoading: false,
+        isError: true,
+      });
+      renderPage(baseRule);
+
+      const lastExecution = screen.getByTestId('ruleDetailsLastExecutionMetadata');
+      expect(lastExecution).toHaveTextContent('Last execution Unavailable');
+      expect(lastExecution).not.toHaveTextContent('-');
+    });
+
+    it('omits the outcome value while the fetch is in flight', () => {
+      mockUseFetchRuleExecutions.mockReturnValue({
+        data: undefined,
+        isLoading: true,
+        isError: false,
+      });
+      renderPage(baseRule);
+
+      const lastExecution = screen.getByTestId('ruleDetailsLastExecutionMetadata');
+      expect(lastExecution).toHaveTextContent('Last execution');
+      expect(lastExecution.querySelector('span')).not.toBeInTheDocument();
+      expect(lastExecution).not.toHaveTextContent('-');
+    });
+
+    it('omits the item and disables the fetch when the user cannot read execution history', () => {
+      mockCanReadExecutionHistory = false;
+      renderPage(baseRule);
+
+      expect(screen.queryByTestId('ruleDetailsLastExecutionMetadata')).not.toBeInTheDocument();
+      expect(screen.getByTestId('ruleDetailsCreatedByMetadata')).toBeInTheDocument();
+      expect(mockUseFetchRuleExecutions).toHaveBeenCalledWith(
+        expect.objectContaining({ enabled: false })
+      );
+    });
   });
 
   it('handles missing audit values gracefully', () => {
@@ -283,6 +386,12 @@ describe('RuleDetailPage', () => {
     renderPage(baseRule);
     fireEvent.click(screen.getByTestId('openEditRuleFlyoutButton'));
     expect(mockOpenEditFlyout).toHaveBeenCalledWith(baseRule);
+  });
+
+  it('does not include View details in the overflow menu', async () => {
+    renderPage(baseRule);
+    await openAppMenuOverflow();
+    expect(screen.queryByText('View details')).not.toBeInTheDocument();
   });
 
   it('does not render enable/disable options in the overflow menu', async () => {

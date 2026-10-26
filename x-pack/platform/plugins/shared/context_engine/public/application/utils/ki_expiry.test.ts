@@ -47,6 +47,12 @@ describe('ki_expiry', () => {
       expect(resolveKiStatus('deleted', '2000-01-01T00:00:00.000Z')).toBe('deleted');
     });
 
+    it('prefers verification_failed over expired', () => {
+      expect(resolveKiStatus('verification_failed', '2000-01-01T00:00:00.000Z')).toBe(
+        'verification_failed'
+      );
+    });
+
     it('returns expired for active lifecycle with past expires_at', () => {
       expect(resolveKiStatus(undefined, '2000-01-01T00:00:00.000Z')).toBe('expired');
     });

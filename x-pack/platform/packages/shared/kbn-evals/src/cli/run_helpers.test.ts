@@ -28,6 +28,7 @@ const mockedReadSuiteSecret = jest.mocked(readSuiteSecretFromDevVault);
 const readFlags = (argv: string[]): FlagsReader => new FlagsReader(getFlags(argv, evalRunFlags));
 
 describe('loadScoutHookConfig', () => {
+  const originalCiHookConfig = process.env.KBN_EVALS_SCOUT_HOOK_CONFIG_B64;
   const generalConfig = {
     evaluationsKbn: { url: 'https://kbn.example' },
     sandbox: { apiKey: 'from-general' },
@@ -35,8 +36,55 @@ describe('loadScoutHookConfig', () => {
   const suiteSecret = { sandbox: { apiKey: 'from-suite-secret' } };
 
   beforeEach(() => {
+    delete process.env.KBN_EVALS_SCOUT_HOOK_CONFIG_B64;
     mockedLoadVaultConfig.mockReset().mockReturnValue(generalConfig);
     mockedReadSuiteSecret.mockReset().mockReturnValue(suiteSecret);
+  });
+
+  afterEach(() => {
+    if (originalCiHookConfig === undefined) {
+      delete process.env.KBN_EVALS_SCOUT_HOOK_CONFIG_B64;
+    } else {
+      process.env.KBN_EVALS_SCOUT_HOOK_CONFIG_B64 = originalCiHookConfig;
+    }
+  });
+
+  it('reuses the suite config CI supplied to the initial hook when the CLI runs it again', () => {
+    const ciConfig = {
+      ...suiteSecret,
+      nightshiftOrcaEs: { url: 'https://orca.example', apiKey: 'orca-key' },
+    };
+    process.env.KBN_EVALS_SCOUT_HOOK_CONFIG_B64 = Buffer.from(JSON.stringify(ciConfig)).toString(
+      'base64'
+    );
+    mockedLoadVaultConfig.mockReturnValue(undefined);
+
+    expect(loadScoutHookConfig('/repo', undefined, { vaultSecret: 'nightshift' })).toEqual(
+      ciConfig
+    );
+    expect(mockedLoadVaultConfig).not.toHaveBeenCalled();
+    expect(mockedReadSuiteSecret).not.toHaveBeenCalled();
+  });
+
+  it.each(['not-json-with-private-value', '[]', 'null', '"private-value"'])(
+    'rejects an invalid CI hook config without exposing its contents (%s)',
+    (config) => {
+      process.env.KBN_EVALS_SCOUT_HOOK_CONFIG_B64 = Buffer.from(config).toString('base64');
+
+      expect(() => loadScoutHookConfig('/repo', undefined, {})).toThrow(
+        'CI scout-hook config must encode a JSON object'
+      );
+    }
+  );
+
+  it('keeps an explicit file profile ahead of the inherited CI hook config', () => {
+    process.env.KBN_EVALS_SCOUT_HOOK_CONFIG_B64 = Buffer.from(JSON.stringify(suiteSecret)).toString(
+      'base64'
+    );
+
+    expect(loadScoutHookConfig('/repo', 'local', { vaultSecret: 'nightshift' })).toBe(
+      generalConfig
+    );
   });
 
   it("gives the hook the suite's own secret with the dev-vault profile", () => {

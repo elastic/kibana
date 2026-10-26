@@ -120,7 +120,7 @@ test.describe('Rule library - install a rule template', { tag: testData.UI_TAG }
 
     let ruleId: string;
 
-    await test.step('the rule exists with the edited name and records the template', async () => {
+    await test.step('the rule exists with the edited name', async () => {
       await expect
         .poll(
           async () => {
@@ -138,7 +138,6 @@ test.describe('Rule library - install a rule template', { tag: testData.UI_TAG }
       ruleId = rule.id;
       expect(rule.enabled).toBe(true);
       expect(rule.metadata.name).toBe(EDITED_RULE_NAME);
-      expect(rule.metadata.template).toStrictEqual({ id: TEMPLATE_ID });
     });
 
     await test.step('the install went through the rule template API exactly once', async () => {

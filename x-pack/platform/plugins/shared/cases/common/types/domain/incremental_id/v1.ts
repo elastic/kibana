@@ -4,10 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as rt from 'io-ts';
 
-export const CaseIdIncrementerAttributesRt = rt.strict({
-  '@timestamp': rt.number,
-  updated_at: rt.number,
-  last_id: rt.number,
+import { z } from '@kbn/zod/v4';
+
+export const CaseIdIncrementerAttributesSchema = z.object({
+  '@timestamp': z.number(),
+  updated_at: z.number(),
+  last_id: z.number(),
 });
+
+export type CaseIdIncrementerAttributes = z.infer<typeof CaseIdIncrementerAttributesSchema>;

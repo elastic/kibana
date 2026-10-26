@@ -330,6 +330,7 @@ export const WorkflowExecutionsTable = React.memo<WorkflowExecutionsTableProps>(
             {isGrouped ? (
               <WorkflowExecutionsGroupedView
                 executions={executions}
+                totalHits={total}
                 groupBy={groupBy}
                 onOpenExecution={handleOpenExecution}
                 onReRunExecution={onReRunExecution}
