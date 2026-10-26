@@ -8,8 +8,13 @@
  */
 
 import type { DashboardState } from '@kbn/as-code-dashboard-schema';
-import { apiComparesSerializedState, diffComparators } from '@kbn/presentation-publishing';
+import {
+  apiComparesSerializedState,
+  apiHasType,
+  diffComparators,
+} from '@kbn/presentation-publishing';
 import deepEqual from 'fast-deep-equal';
+import { isDashboardSection } from '../../common';
 import {
   arePanelLayoutsEqual,
   arePinnedPanelLayoutsEqual,
@@ -46,29 +51,57 @@ const diffOtherState = (baseline: DashboardState, current: DashboardState) => {
   );
 };
 
+// ids are optional, so panels without one are matched by position instead of a random id
+const deserializeComparableLayout = ({ panels, pinned_panels: pinnedPanels }: DashboardState) =>
+  deserializeLayout(
+    panels?.map((widget, index) => {
+      const id = widget.id ?? `__position_${index}`;
+      return isDashboardSection(widget)
+        ? {
+            ...widget,
+            id,
+            panels: widget.panels.map((panel, panelIndex) => ({
+              ...panel,
+              id: panel.id ?? `${id}_${panelIndex}`,
+            })),
+          }
+        : { ...widget, id };
+    }),
+    pinnedPanels?.map((panel, index) => ({ ...panel, id: panel.id ?? `__pinned_${index}` }))
+  );
+
+const getRefId = (config?: object) => (config && 'ref_id' in config ? config.ref_id : undefined);
+
 const diffLayout = (
   baseline: DashboardState,
   current: DashboardState,
   children?: { [id: string]: unknown }
 ): Partial<Pick<DashboardState, 'panels' | 'pinned_panels'>> => {
-  const baselineLayout = deserializeLayout(baseline.panels, baseline.pinned_panels);
-  const currentLayout = deserializeLayout(current.panels, current.pinned_panels);
+  const baselineLayout = deserializeComparableLayout(baseline);
+  const currentLayout = deserializeComparableLayout(current);
 
-  const panelChanged = (panelId: string) => {
+  const panelChanged = (panelId: string, baselineType?: string, currentType?: string) => {
+    if (baselineType !== currentType) return true;
     const baselinePanel = baselineLayout.childState[panelId];
     const currentPanel = currentLayout.childState[panelId];
+    // live panel comparators skip ref_id since it is fixed for a loaded panel
+    if (getRefId(baselinePanel) !== getRefId(currentPanel)) return true;
     const child = children?.[panelId];
-    return apiComparesSerializedState(child)
+    return apiComparesSerializedState(child) && apiHasType(child) && child.type === currentType
       ? !child.compareSerializedState(baselinePanel, currentPanel)
       : !deepEqual(baselinePanel, currentPanel);
   };
 
   const hasPanelChanges =
     !arePanelLayoutsEqual(baselineLayout.layout, currentLayout.layout) ||
-    Object.keys(currentLayout.layout.panels).some(panelChanged);
+    Object.entries(currentLayout.layout.panels).some(([panelId, { type }]) =>
+      panelChanged(panelId, baselineLayout.layout.panels[panelId]?.type, type)
+    );
   const hasPinnedPanelChanges =
     !arePinnedPanelLayoutsEqual(baselineLayout.layout, currentLayout.layout) ||
-    Object.keys(currentLayout.layout.pinnedPanels).some(panelChanged);
+    Object.entries(currentLayout.layout.pinnedPanels).some(([panelId, { type }]) =>
+      panelChanged(panelId, baselineLayout.layout.pinnedPanels[panelId]?.type, type)
+    );
 
   return {
     ...(hasPanelChanges && { panels: current.panels ?? [] }),
