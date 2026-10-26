@@ -533,7 +533,7 @@ describe('resolveResource', () => {
         esClient,
       });
 
-      expect(result.type).toBe(EsResourceType.dataStream);
+      expect(result.type).toBe(EsResourceType.indexPattern);
       expect(result.fields).toEqual([expect.objectContaining({ path: 'user.name' })]);
     });
 
@@ -549,8 +549,34 @@ describe('resolveResource', () => {
         esClient,
       });
 
-      expect(result.type).toBe(EsResourceType.index);
+      expect(result.type).toBe(EsResourceType.indexPattern);
       expect(result.fields).toEqual([expect.objectContaining({ path: 'user.name' })]);
+    });
+
+    it('rethrows errors other than 403', async () => {
+      esClient.indices.resolveIndex.mockResolvedValue({
+        indices: [{ name: 'logs-okta-legacy', attributes: ['open'] }],
+        aliases: [],
+        data_streams: [],
+      });
+      esClient.indices.getMapping.mockRejectedValue(new Error('connection reset'));
+      esClient.indices.getSettings.mockResolvedValue({});
+
+      await expect(
+        resolveResourceForEsql({ resourceName: 'logs-okta-legacy', esClient })
+      ).rejects.toThrow('connection reset');
+    });
+
+    it('does not change resolveResource, which needs exact mapping types', async () => {
+      esClient.indices.resolveIndex.mockResolvedValue({
+        indices: [{ name: 'logs-okta-legacy', attributes: ['open'] }],
+        aliases: [],
+        data_streams: [],
+      });
+
+      await expect(resolveResource({ resourceName: 'logs-okta-legacy', esClient })).rejects.toThrow(
+        'security_exception'
+      );
     });
   });
 
