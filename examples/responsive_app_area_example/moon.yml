@@ -21,6 +21,7 @@ dependsOn:
   - '@kbn/developer-examples-plugin'
   - '@kbn/core-chrome-sidebar'
   - '@kbn/core-chrome-sidebar-components'
+  - '@kbn/developer-toolbar-plugin'
 tags:
   - plugin
   - prod
