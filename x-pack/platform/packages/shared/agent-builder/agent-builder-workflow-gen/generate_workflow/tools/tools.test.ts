@@ -165,6 +165,37 @@ describe('dispatchToolCall', () => {
     expect(result.yaml).toContain('message: hi');
   });
 
+  it('sets a nested path on modify_workflow_property', async () => {
+    const result = await dispatchToolCall(
+      { yaml: twoStepYaml },
+      {
+        toolCallId: 't1',
+        toolName: 'modify_workflow_property',
+        args: { property: 'consts.url', value: 'https://example.com' },
+      },
+      baseDeps
+    );
+
+    expect(result.message.success).toBe(true);
+    expect(result.yaml).toContain('url: https://example.com');
+  });
+
+  it('rejects modify_workflow_property on an unknown top-level key', async () => {
+    const result = await dispatchToolCall(
+      { yaml: twoStepYaml },
+      {
+        toolCallId: 't1',
+        toolName: 'modify_workflow_property',
+        args: { property: 'trigger.0.with.every', value: '1h' },
+      },
+      baseDeps
+    );
+
+    expect(result.message.success).toBe(false);
+    expect(result.message.error).toContain('"trigger" is not a top-level workflow key');
+    expect(result.yaml).toBeUndefined();
+  });
+
   it('rejects modify_workflow_property on steps', async () => {
     const result = await dispatchToolCall(
       { yaml: twoStepYaml },

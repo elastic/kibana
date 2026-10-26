@@ -8,8 +8,9 @@
  */
 
 import { isEqual } from 'lodash';
-import { Document, isMap, isPair, isScalar, isSeq, parseDocument, stringify } from 'yaml';
+import { Document, isMap, isPair, isScalar, isSeq, parseDocument, Scalar, stringify } from 'yaml';
 import type { Node, YAMLMap, YAMLSeq } from 'yaml';
+import { WorkflowSchema } from '@kbn/workflows';
 import { WORKFLOW_DEFINITION_KEYS_ORDER } from '../../common/yaml/stringify_workflow_definition';
 import { getStepNode } from './get_step_node';
 
@@ -411,65 +412,136 @@ export const modifyStep = (
   });
 };
 
-const resolveDotNotationProperty = (
+const isIndexSegment = (segment: string): boolean => /^\d+$/.test(segment);
+
+/** Wraps `value` in nested maps, e.g. (['a', 'b'], 1) -> { a: { b: 1 } }. */
+const nestValue = (path: string[], value: unknown): unknown =>
+  path.reduceRight<unknown>((acc, key) => ({ [key]: acc }), value);
+
+/**
+ * Sets `value` at a dot path (e.g. `with.inputs.owner`, `triggers.0.with.every`)
+ * under `base`. An existing value is replaced in place. Missing map keys are
+ * created. List indexes must already exist.
+ */
+const setValueAtPath = (
   yaml: string,
-  stepNode: YAMLMap,
-  property: string,
+  base: YAMLMap,
+  path: string[],
   value: unknown,
   indentUnit: number,
   scope: EditScope
-): EditResult | null => {
-  const dotIdx = property.indexOf('.');
-  const parentKey = property.slice(0, dotIdx);
-  const childKey = property.slice(dotIdx + 1);
-  const parentPair = findPairInMap(stepNode, parentKey);
-  if (!parentPair || !isMap(parentPair.value)) {
-    return null;
-  }
+): EditResult => {
+  let parent: YAMLMap | YAMLSeq = base;
+  for (let i = 0; i < path.length; i++) {
+    const segment = path[i];
+    let node: unknown;
 
-  const childPair = findPairInMap(parentPair.value as YAMLMap, childKey);
-  if (childPair && childPair.value && (childPair.value as { range?: unknown }).range) {
-    const valRange = nodeRange(childPair.value as { range?: [number, number, number] | null });
-    if (valRange) {
-      const precedingNewline = yaml.lastIndexOf('\n', valRange[0] - 1);
-      const valueIndent = precedingNewline >= 0 ? valRange[0] - precedingNewline - 1 : valRange[0];
-      const depth = Math.floor(valueIndent / indentUnit);
-      const valStr = stringifyValuePreservingFormat(
-        value,
-        indentUnit,
-        depth,
-        childPair.value as Node
-      ).trimEnd();
-      return checkedResult(yaml, spliceYaml(yaml, valRange[0], valRange[1], `${valStr}\n`), scope);
+    if (isSeq(parent)) {
+      const index = Number(segment);
+      if (!isIndexSegment(segment) || index >= parent.items.length) {
+        return {
+          success: false,
+          yaml,
+          error: `"${path.slice(0, i).join('.')}" is a list with ${
+            parent.items.length
+          } items; index "${segment}" does not exist`,
+        };
+      }
+      node = parent.items[index];
+    } else {
+      const pair = findPairInMap(parent, segment);
+      node = pair?.value;
+      if (node == null || (isScalar(node) && node.value == null)) {
+        return insertAtPath(yaml, parent, path.slice(i), value, indentUnit, scope);
+      }
     }
-  }
 
-  if (!childPair) {
-    const parentRange = nodeRange(
-      parentPair.value as unknown as { range?: [number, number, number] | null }
-    );
-    if (parentRange) {
-      const raw = stringify({ [childKey]: value }, { indent: indentUnit, lineWidth: 0 }).trimEnd();
-      const precedingNewline = yaml.lastIndexOf('\n', parentRange[0] - 1);
-      const parentIndent =
-        precedingNewline >= 0 ? parentRange[0] - precedingNewline - 1 : parentRange[0];
-      const childIndent = parentIndent + indentUnit;
-      const pad = ' '.repeat(childIndent);
-      const valStr = raw
-        .split('\n')
-        .map((line) => (line.length > 0 ? `${pad}${line}` : line))
-        .join('\n');
-      const needsNewline = parentRange[1] > 0 && yaml[parentRange[1] - 1] !== '\n';
-      const insertion = `${needsNewline ? '\n' : ''}${valStr}\n`;
-      return checkedResult(
+    if (i === path.length - 1) {
+      return replaceNode(yaml, node as Node | null, value, indentUnit, scope);
+    }
+    if (!isMap(node) && !isSeq(node)) {
+      return {
+        success: false,
         yaml,
-        spliceYaml(yaml, parentRange[1], parentRange[1], insertion),
-        scope
-      );
+        error: `"${path.slice(0, i + 1).join('.')}" is not a map or a list`,
+      };
     }
+    parent = node;
+  }
+  return { success: false, yaml, error: 'Empty property path' };
+};
+
+const replaceNode = (
+  yaml: string,
+  node: Node | null,
+  value: unknown,
+  indentUnit: number,
+  scope: EditScope
+): EditResult => {
+  const valRange = node && nodeRange(node as { range?: [number, number, number] | null });
+  if (!node || !valRange) return { success: false, yaml, error: 'Cannot determine value range' };
+
+  const precedingNewline = yaml.lastIndexOf('\n', valRange[0] - 1);
+  const valueIndent = precedingNewline >= 0 ? valRange[0] - precedingNewline - 1 : valRange[0];
+  const depth = Math.floor(valueIndent / indentUnit);
+  const valStr = stringifyValuePreservingFormat(value, indentUnit, depth, node).trimEnd();
+
+  // A single-line scalar ends before its inline comment, so replace only the value.
+  const isInlineScalar =
+    isScalar(node) && node.type !== Scalar.BLOCK_FOLDED && node.type !== Scalar.BLOCK_LITERAL;
+  if (isInlineScalar && node.range && !valStr.includes('\n')) {
+    return checkedResult(yaml, spliceYaml(yaml, node.range[0], node.range[1], valStr), scope);
+  }
+  return checkedResult(yaml, spliceYaml(yaml, valRange[0], valRange[1], `${valStr}\n`), scope);
+};
+
+/** Adds `path` (missing keys only) as a new entry at the end of the block map `parent`. */
+const insertAtPath = (
+  yaml: string,
+  parent: YAMLMap,
+  path: string[],
+  value: unknown,
+  indentUnit: number,
+  scope: EditScope
+): EditResult => {
+  if (path.some(isIndexSegment)) {
+    return {
+      success: false,
+      yaml,
+      error: `Cannot create list index "${path.find(
+        isIndexSegment
+      )}"; list indexes must already exist`,
+    };
+  }
+  const parentRange = nodeRange(parent as { range?: [number, number, number] | null });
+  if (!parentRange || parent.flow) {
+    return { success: false, yaml, error: 'Cannot add a key to an inline (flow) map' };
   }
 
-  return null;
+  // Drop an existing empty entry (`key:` with no value) so the new one replaces it.
+  const emptyPair = findPairInMap(parent, path[0]);
+  const emptyPairRange = emptyPair
+    ? nodeRange(emptyPair.key as { range?: [number, number, number] | null })
+    : null;
+
+  const raw = stringify(nestValue(path, value), { indent: indentUnit, lineWidth: 0 }).trimEnd();
+  const lineStart = yaml.lastIndexOf('\n', parentRange[0] - 1) + 1;
+  const pad = ' '.repeat(parentRange[0] - lineStart);
+  const entry = raw
+    .split('\n')
+    .map((line) => (line.length > 0 ? `${pad}${line}` : line))
+    .join('\n');
+
+  if (emptyPairRange) {
+    const entryStart = yaml.lastIndexOf('\n', emptyPairRange[0] - 1) + 1;
+    const entryEnd = yaml.indexOf('\n', emptyPairRange[0]);
+    const end = entryEnd === -1 ? yaml.length : entryEnd + 1;
+    return checkedResult(yaml, spliceYaml(yaml, entryStart, end, `${entry}\n`), scope);
+  }
+
+  const needsNewline = parentRange[1] > 0 && yaml[parentRange[1] - 1] !== '\n';
+  const insertion = `${needsNewline ? '\n' : ''}${entry}\n`;
+  return checkedResult(yaml, spliceYaml(yaml, parentRange[1], parentRange[1], insertion), scope);
 };
 
 export const modifyStepProperty = (
@@ -495,17 +567,7 @@ export const modifyStepProperty = (
   };
 
   if (ENABLE_DOT_NOTATION_PATHS && property.includes('.')) {
-    const dotResult = resolveDotNotationProperty(
-      yaml,
-      stepNode,
-      property,
-      value,
-      indentUnit,
-      scope
-    );
-    if (dotResult) {
-      return dotResult;
-    }
+    return setValueAtPath(yaml, stepNode, property.split('.'), value, indentUnit, scope);
   }
 
   const pair = findPairInMap(stepNode, property);
@@ -601,16 +663,50 @@ const findCanonicalInsertOffset = (map: YAMLMap, property: string): number | nul
   return insertAfterEnd ?? insertBeforeStart ?? null;
 };
 
+/** Top-level keys `modifyWorkflowProperty` can set. Steps have their own edit functions. */
+export const WORKFLOW_PROPERTY_KEYS: readonly string[] = Object.keys(
+  WorkflowSchema.in.shape
+).filter((key) => key !== 'steps');
+
 export const modifyWorkflowProperty = (
   yaml: string,
   property: string,
   value: unknown
 ): EditResult => {
+  const [rootKey, ...nestedPath] = property.split('.');
+  if (!WORKFLOW_PROPERTY_KEYS.includes(rootKey)) {
+    return {
+      success: false,
+      yaml,
+      error: `"${rootKey}" is not a top-level workflow key. Use one of: ${WORKFLOW_PROPERTY_KEYS.join(
+        ', '
+      )}. To change steps, use the step edit functions.`,
+    };
+  }
+
   const { doc, error } = parseForEditing(yaml);
   if (error) return { success: false, yaml, error };
 
   if (!isMap(doc.contents)) {
     return { success: false, yaml, error: 'YAML root is not a mapping' };
+  }
+  if (nestedPath.length > 0) {
+    const rootPair = findPairInMap(doc.contents, rootKey);
+    if (!rootPair) {
+      if (nestedPath.some(isIndexSegment)) {
+        return {
+          success: false,
+          yaml,
+          error: `"${rootKey}" does not exist; list indexes must already exist`,
+        };
+      }
+      // Missing root key: add it in canonical order with the nested value.
+      return modifyWorkflowProperty(yaml, rootKey, nestValue(nestedPath, value));
+    }
+    return setValueAtPath(yaml, doc.contents, [rootKey, ...nestedPath], value, detectIndent(yaml), {
+      type: 'property',
+      key: rootKey,
+    });
   }
 
   const pair = findPairInMap(doc.contents, property);

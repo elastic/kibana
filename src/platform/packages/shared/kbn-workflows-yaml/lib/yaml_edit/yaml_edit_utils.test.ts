@@ -130,7 +130,7 @@ steps:
   - name: step1
     type: console
 `;
-      const result = modifyWorkflowProperty(yamlWithoutInputs, 'inputs', {
+      const result = modifyWorkflowProperty(yamlWithoutInputs, 'outputs', {
         alert_id: { type: 'string' },
       });
 
@@ -138,9 +138,11 @@ steps:
 
       const lines = result.yaml.split('\n');
       const triggersLine = lines.findIndex((l) => l === 'triggers:');
+      const outputsLine = lines.findIndex((l) => l === 'outputs:');
       const stepsLine = lines.findIndex((l) => l === 'steps:');
 
-      expect(stepsLine).toBeGreaterThan(triggersLine);
+      expect(outputsLine).toBeGreaterThan(triggersLine);
+      expect(stepsLine).toBeGreaterThan(outputsLine);
     });
 
     it('inserts enabled between name and steps when intermediate properties are absent', () => {
@@ -180,11 +182,13 @@ steps:
       expect(versionLine).toBeLessThan(nameLine);
     });
 
-    it('appends non-canonical properties at the end', () => {
-      const result = modifyWorkflowProperty(SAMPLE_WORKFLOW, 'custom_field', 'custom_value');
-
-      expect(result.success).toBe(true);
-      expect(result.yaml.trimEnd().endsWith('custom_field: custom_value')).toBe(true);
+    it('rejects keys that are not top-level workflow keys', () => {
+      for (const property of ['custom_field', 'trigger.0.with.every', 'steps']) {
+        const result = modifyWorkflowProperty(SAMPLE_WORKFLOW, property, 'x');
+        expect(result.success).toBe(false);
+        expect(result.error).toContain('is not a top-level workflow key');
+        expect(result.yaml).toBe(SAMPLE_WORKFLOW);
+      }
     });
   });
 
@@ -1270,6 +1274,85 @@ steps:
       const step = parsed.steps.find((s: any) => s.name === 'search_data');
       expect(step.with.index).toBe('new-index');
       expect(step['with.index']).toBeUndefined();
+    });
+  });
+
+  describe('dot paths deeper than one level', () => {
+    const PATH_WORKFLOW = `# owner: soc
+name: paths
+triggers:
+  - type: scheduled
+    with:
+      every: 5m # keep this comment
+  - type: manual
+steps:
+  - name: call_child
+    type: workflow.execute
+    with:
+      workflow-id: child
+      inputs:
+        incident_id: "{{ variables.incident }}"
+        dry_run: "\${{ consts.dry_run }}"
+`;
+
+    it('adds a key inside a nested map of a step', () => {
+      const result = modifyStepProperty(
+        PATH_WORKFLOW,
+        'call_child',
+        'with.inputs.owner',
+        '{{ inputs.owner }}'
+      );
+      expect(result.success).toBe(true);
+      const step = parseDocument(result.yaml).toJSON().steps[0];
+      expect(step.with.inputs.owner).toBe('{{ inputs.owner }}');
+      expect(step.with['inputs.owner']).toBeUndefined();
+      expect(result.yaml).toContain('dry_run: "${{ consts.dry_run }}"');
+    });
+
+    it('replaces a value inside a list by index', () => {
+      const result = modifyWorkflowProperty(PATH_WORKFLOW, 'triggers.0.with.every', '30m');
+      expect(result.success).toBe(true);
+      expect(parseDocument(result.yaml).toJSON().triggers[0].with.every).toBe('30m');
+      expect(result.yaml).toContain('# owner: soc');
+      expect(result.yaml).toContain('# keep this comment');
+    });
+
+    it('creates a missing root key with the nested value', () => {
+      const result = modifyWorkflowProperty(PATH_WORKFLOW, 'consts.url', 'https://example.com');
+      expect(result.success).toBe(true);
+      const parsed = parseDocument(result.yaml).toJSON();
+      expect(parsed.consts).toEqual({ url: 'https://example.com' });
+      expect(parsed.steps).toHaveLength(1);
+    });
+
+    it('adds a key to an existing root map', () => {
+      const withConsts = PATH_WORKFLOW.replace('triggers:', 'consts:\n  a: 1\ntriggers:');
+      const result = modifyWorkflowProperty(withConsts, 'consts.url', 'https://example.com');
+      expect(result.success).toBe(true);
+      expect(parseDocument(result.yaml).toJSON().consts).toEqual({
+        a: 1,
+        url: 'https://example.com',
+      });
+    });
+
+    it('fills an empty root key', () => {
+      const withEmpty = PATH_WORKFLOW.replace('triggers:', 'consts:\ntriggers:');
+      const result = modifyWorkflowProperty(withEmpty, 'consts.url', 'https://example.com');
+      expect(result.success).toBe(true);
+      expect(parseDocument(result.yaml).toJSON().consts).toEqual({ url: 'https://example.com' });
+    });
+
+    it('rejects a list index that does not exist', () => {
+      const result = modifyWorkflowProperty(PATH_WORKFLOW, 'triggers.5.with.every', '30m');
+      expect(result.success).toBe(false);
+      expect(result.error).toContain('2 items');
+      expect(result.yaml).toBe(PATH_WORKFLOW);
+    });
+
+    it('rejects a path through a scalar', () => {
+      const result = modifyWorkflowProperty(PATH_WORKFLOW, 'name.first', 'x');
+      expect(result.success).toBe(false);
+      expect(result.yaml).toBe(PATH_WORKFLOW);
     });
   });
 

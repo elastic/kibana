@@ -54,7 +54,7 @@ ${formatConnectorsBlock(prefetched.connectors)}
 
 - Pick the editing approach from the task:
  - New workflow (no \`<workflow-to-edit>\` block): emit the entire workflow in one \`set_yaml\` call.
- - Existing workflow (a \`<workflow-to-edit>\` block is present): use \`insert_step\` / \`modify_step\` / \`modify_step_property\` / \`delete_step\`. These tools find steps by name at any depth (inside \`if\`, \`else\`, \`foreach\`), change only the target step, and keep YAML comments. To change a top-level property (\`triggers\`, including manual trigger inputs, \`name\`, \`description\`, \`consts\`, \`settings\`), use \`modify_workflow_property\` with the full new value of that property.
+ - Existing workflow (a \`<workflow-to-edit>\` block is present): use \`insert_step\` / \`modify_step\` / \`modify_step_property\` / \`delete_step\`. These tools find steps by name at any depth (inside \`if\`, \`else\`, \`foreach\`), change only the target step, and keep YAML comments. To change anything outside \`steps\` (\`triggers\`, including manual trigger inputs, \`name\`, \`description\`, \`consts\`, \`settings\`), use \`modify_workflow_property\` with a dot path, e.g. \`triggers.0.with.every\` or \`consts.url\`.
  - Do not use \`set_yaml\` on an existing workflow unless the user asks to rewrite most of it. It re-emits the whole file, often loses YAML comments, and on large workflows it can run longer than the time limit for one response.
  - Make one focused edit per tool call. To change only part of a step, prefer \`modify_step_property\` over \`modify_step\`.
 

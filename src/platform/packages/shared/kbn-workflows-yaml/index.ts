@@ -117,5 +117,6 @@ export {
   modifyStepProperty,
   modifyWorkflowProperty,
   deleteStep,
+  WORKFLOW_PROPERTY_KEYS,
 } from './lib/yaml_edit';
 export type { StepDefinition } from './lib/yaml_edit';

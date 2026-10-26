@@ -15,6 +15,7 @@ import {
   modifyStepProperty,
   modifyWorkflowProperty,
   deleteStep,
+  WORKFLOW_PROPERTY_KEYS,
   type StepDefinition,
 } from '@kbn/workflows-yaml';
 import { lookupStepDefinitions, lookupTriggerDefinitions, type LookupDeps } from './lookup';
@@ -79,6 +80,16 @@ const stepDefinitionSchema = z
   })
   .passthrough();
 
+// Typed so the JSON schema has a type: with `z.unknown()`, models send objects and arrays as strings.
+const jsonValueSchema = z.union([
+  z.array(z.unknown()),
+  z.record(z.string(), z.unknown()),
+  z.string(),
+  z.number(),
+  z.boolean(),
+  z.null(),
+]);
+
 /* ---------- Tool definitions ---------- */
 
 const setYamlTool = defineTool({
@@ -131,11 +142,12 @@ const modifyStepTool = defineTool({
 
 const modifyStepPropertyTool = defineTool({
   name: 'modify_step_property',
-  description: 'Modify a single property of an existing step',
+  description:
+    'Set one property of an existing step by dot path. Missing keys are created; list indexes must exist.',
   schema: z.object({
     stepName: z.string(),
-    property: z.string().describe('Property key (e.g. "with.message", "type")'),
-    value: z.unknown(),
+    property: z.string().describe('Dot path (e.g. "type", "with.message", "with.inputs.owner")'),
+    value: jsonValueSchema,
   }),
   mutatesYaml: true,
   execute: async ({ stepName, property, value }, { state }) => {
@@ -148,34 +160,15 @@ const modifyStepPropertyTool = defineTool({
 
 const modifyWorkflowPropertyTool = defineTool({
   name: 'modify_workflow_property',
-  description:
-    'Replace the value of a top-level workflow property (e.g. "triggers", "name", "description", "consts", "settings"). Not for "steps".',
+  description: `Set a workflow property by dot path (e.g. "description", "consts.url", "triggers.0.with.every"). The first segment must be a top-level key: ${WORKFLOW_PROPERTY_KEYS.join(
+    ', '
+  )}. Missing keys are created; list indexes must exist. Not for steps.`,
   schema: z.object({
-    property: z.string().describe('Top-level property key'),
-    // A typed union: with `z.unknown()` the JSON schema has no type, and models send arrays as strings.
-    value: z
-      .union([
-        z.array(z.unknown()),
-        z.record(z.string(), z.unknown()),
-        z.string(),
-        z.number(),
-        z.boolean(),
-      ])
-      .describe(
-        'New value for the whole property (e.g. an array of trigger objects for "triggers")'
-      ),
+    property: z.string().describe('Dot path starting with a top-level key'),
+    value: jsonValueSchema.describe('New value at that path'),
   }),
   mutatesYaml: true,
   execute: async ({ property, value }, { state }) => {
-    if (property === 'steps') {
-      return {
-        message: {
-          success: false,
-          error:
-            'Use insert_step / modify_step / modify_step_property / delete_step to change steps',
-        },
-      };
-    }
     const result = modifyWorkflowProperty(state.yaml, property, value);
     return result.success
       ? { yaml: result.yaml, message: { success: true } }
