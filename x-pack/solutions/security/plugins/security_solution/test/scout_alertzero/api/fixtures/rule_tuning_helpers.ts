@@ -44,6 +44,52 @@ export const listTuningProposals = async (api: AlertZeroApi): Promise<TuningProp
     'list pending proposals'
   ).proposals as TuningProposal[];
 
+/** The rule a proposal's action points at, by either id field the flows write. */
+export const actionTarget = (input: Record<string, unknown> | undefined): unknown =>
+  input?.rule_id ?? input?.id;
+
+/**
+ * Dismisses the tuning proposals this run left pending: the review-gate entry proposal and the
+ * tuning proposal itself, tied to the run by the rules it seeded (the entry proposal names the
+ * rule, the tuning proposal targets it). Dismissal — not approval — releases the parked review
+ * behind it on its declined branch, so it must run while the service account the review executes
+ * as still exists. A 409 means the proposal was decided concurrently (its spec approved or
+ * dismissed it, or a teardown cancel already ended its run), which teardown accepts.
+ */
+export const dismissRunTuningProposals = async (
+  api: AlertZeroApi,
+  rules: ReadonlyArray<{ ruleId: string; runMarker: string }>
+): Promise<void> => {
+  for (const proposal of await listTuningProposals(api)) {
+    const fromThisRun = rules.some(
+      (rule) =>
+        actionTarget(proposal.actionInput) === rule.ruleId ||
+        proposal.comment.includes(rule.runMarker)
+    );
+    if (fromThisRun) {
+      const response = await api.internal(
+        'POST',
+        `${PROPOSALS_URL}/${encodeURIComponent(proposal.id)}/dismiss`,
+        {
+          body: {
+            dismissReason: 'handled_elsewhere',
+            rationale: 'AlertZero rule-tuning e2e teardown',
+          },
+        }
+      );
+      // `api.internal` resolves non-2xx responses as values; only a concurrent decision is
+      // acceptable.
+      if (response.statusCode >= 300 && response.statusCode !== 409) {
+        throw new Error(
+          `dismiss proposal ${proposal.id} failed: ${response.statusCode} ${JSON.stringify(
+            response.body
+          )}`
+        );
+      }
+    }
+  }
+};
+
 /**
  * Approves a proposal exactly as the approval modal does, but only once the execution backing it
  * has parked in `waiting_for_input`. The route answers 409 earlier; retrying the 409 blindly would

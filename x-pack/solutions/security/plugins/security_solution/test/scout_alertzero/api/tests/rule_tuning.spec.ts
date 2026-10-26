@@ -10,6 +10,7 @@ import type { EsClient } from '@kbn/scout-security';
 import {
   apiTest,
   assertExecutionCompleted,
+  cancelNewExecutions,
   createServiceAccount,
   deleteServiceAccount,
   getAdminApi,
@@ -28,8 +29,10 @@ import {
 import type { AlertZeroApi } from '../fixtures';
 import {
   ADD_RULE_EXCEPTION_ACTION_ID,
+  actionTarget,
   approveTuningProposal,
   dismissTuningProposal,
+  dismissRunTuningProposals,
   EDIT_RULE_ACTION_ID,
   explainMissingTuningProposal,
   listTuningProposals,
@@ -87,9 +90,12 @@ const seededRules: SeededRule[] = [];
 let tunedRule: SeededRule | undefined;
 /** Control index the negative control points the tuned rule at, for teardown. */
 let controlIndex: string | undefined;
-
-const actionTarget = (input: Record<string, unknown> | undefined): unknown =>
-  input?.rule_id ?? input?.id;
+/**
+ * Execution ids that predate each sweep this suite started, per workflow: `runTuningSweep`
+ * records them right before enabling the worker, so `afterAll` can cancel and drain exactly
+ * the runs this suite started before the service accounts are deleted.
+ */
+const executionBaselines: Map<string, string[]> = new Map();
 
 const entryValues = (entry: ExceptionEntry): string[] => {
   const values: string[] = [];
@@ -207,6 +213,10 @@ const seedNoisyRule = async (adminApi: AlertZeroApi, esClient: EsClient): Promis
     }),
     'create the detection rule'
   );
+  // Registered before the alert bulk: a partially written bulk (or a throw while indexing) must
+  // not orphan the rule, because teardown only visits what `seededRules` holds.
+  const seeded = { ruleId: rule.id, revision: rule.revision, runMarker };
+  seededRules.push(seeded);
 
   const alertDoc = (closed: boolean, number: number) => ({
     '@timestamp': new Date(Date.now() - number * 60_000).toISOString(),
@@ -238,9 +248,6 @@ const seedNoisyRule = async (adminApi: AlertZeroApi, esClient: EsClient): Promis
   if (response.errors) {
     throw new Error(`Seeding rule alerts failed: ${JSON.stringify(response.items.slice(0, 3))}`);
   }
-
-  const seeded = { ruleId: rule.id, revision: rule.revision, runMarker };
-  seededRules.push(seeded);
   return seeded;
 };
 
@@ -271,10 +278,22 @@ const runTuningSweep = async (adminApi: AlertZeroApi): Promise<string> => {
   if (!workerWorkflowId) {
     throw new Error(`Worker ${WORKER_ID} has no workflow installed`);
   }
-  const knownExecutionIds = [
-    ...(await listExecutionIds(adminApi, workerWorkflowId)),
-    ...(await listExecutionIds(adminApi, RULE_TUNING_REVIEW_WORKFLOW_ID)),
-  ];
+  const workflowBaselines = [
+    [workerWorkflowId, await listExecutionIds(adminApi, workerWorkflowId)],
+    [
+      RULE_TUNING_REVIEW_WORKFLOW_ID,
+      await listExecutionIds(adminApi, RULE_TUNING_REVIEW_WORKFLOW_ID),
+    ],
+  ] as const;
+  const knownExecutionIds = workflowBaselines.flatMap(([, ids]) => ids);
+  // Keep the FIRST baseline per workflow: a later sweep's snapshot must not absorb the execution
+  // an earlier sweep started, or teardown would classify that run as pre-existing and leave it
+  // uncanceled when the service account is deleted.
+  for (const [workflowId, ids] of workflowBaselines) {
+    if (!executionBaselines.has(workflowId)) {
+      executionBaselines.set(workflowId, [...ids]);
+    }
+  }
   expect((await updateWorker(adminApi, WORKER_ID, { enabled: true })).enabled).toBe(true);
   const sweepExecutionId = await waitForNewExecution(
     adminApi,
@@ -390,6 +409,49 @@ const assertPersistedScopedException = async (
 };
 
 const FP_RATE_SENTENCE = /Analysts closed (\d+) of (\d+) alerts \((\d+(?:\.\d+)?)%\)/;
+
+/**
+ * Seeds the noisy rule and drives the sweep through both gates — the review's entry proposal and
+ * the tuning proposal itself — leaving the approved exception persisted on the rule. Both tests
+ * that need a tuned rule run this, so each is self-sufficient: running either by title, or after
+ * a red restarted the Playwright worker and cost the suite its module state, still exercises the
+ * full flow instead of failing on a variable it can no longer read.
+ */
+const applyScopedExceptionToRule = async (
+  adminApi: AlertZeroApi,
+  esClient: EsClient
+): Promise<SeededRule> => {
+  const rule = await seedNoisyRule(adminApi, esClient);
+  const startedAt = new Date().toISOString();
+  const sweepExecutionId = await runTuningSweep(adminApi);
+
+  const entryProposal = await waitForEntryProposal(adminApi, rule, startedAt, sweepExecutionId);
+  await approveTuningProposal(adminApi, entryProposal);
+
+  const tuningProposal = await waitForTuningProposal(adminApi, rule, startedAt, sweepExecutionId);
+  if (tuningProposal.actionWorkflowId !== ADD_RULE_EXCEPTION_ACTION_ID) {
+    throw new Error(
+      `the tuning proposed ${String(
+        tuningProposal.actionWorkflowId
+      )} instead of an exception: ${JSON.stringify(tuningProposal.actionInput)}`
+    );
+  }
+  if (actionTarget(tuningProposal.actionInput) !== rule.ruleId) {
+    throw new Error(
+      `the tuning proposal targets ${String(
+        actionTarget(tuningProposal.actionInput)
+      )} instead of the seeded rule ${rule.ruleId}`
+    );
+  }
+  assertScopedToFpPattern(
+    readEntries(tuningProposal.actionInput, 'the tuning proposal'),
+    'the tuning proposal'
+  );
+
+  await approveTuningProposal(adminApi, tuningProposal);
+  await assertPersistedScopedException(adminApi, rule);
+  return rule;
+};
 
 /**
  * security-team#19992: the review's own false-positive sentence has to render the rate rounded.
@@ -576,6 +638,32 @@ apiTest.describe('AlertZero e2e - rule tuning', { tag: [...tags.stateful.classic
     await attempt(async () => {
       api = await getAdminApi(apiClient, samlAuth);
     });
+    // Stop new sweeps first: while the worker is enabled its schedule keeps starting runs, and a
+    // sweep fired mid-teardown would raise another review that either outlives the drain below
+    // or starts after it and survives the account deletion (in-flight runs execute as it).
+    await attempt(async () => {
+      if (api && (await getWorker(api, WORKER_ID)).enabled) {
+        await updateWorker(api, WORKER_ID, { enabled: false });
+      }
+    });
+    // Drain the sweep before the reviews it dispatches: a sweep that is still live when the
+    // reviews are drained could start a fresh review right after. Map iteration is insertion
+    // order, so sorting only moves the review workflow last when both were recorded.
+    const drainOrder = [...executionBaselines.entries()].sort(
+      ([a], [b]) =>
+        Number(a === RULE_TUNING_REVIEW_WORKFLOW_ID) - Number(b === RULE_TUNING_REVIEW_WORKFLOW_ID)
+    );
+    for (const [workflowId, knownIds] of drainOrder) {
+      await attempt(async () => {
+        if (api) await cancelNewExecutions(api, workflowId, knownIds);
+      });
+    }
+    // Settle what is only waiting for a human: dismissal releases the parked review behind each
+    // pending proposal on its declined branch, and that run may still need the service account,
+    // so this belongs before the account teardown.
+    await attempt(async () => {
+      if (api && seededRules.length > 0) await dismissRunTuningProposals(api, seededRules);
+    });
     await attempt(async () => {
       if (api) await resetWorker(api, WORKER_ID);
     });
@@ -594,11 +682,21 @@ apiTest.describe('AlertZero e2e - rule tuning', { tag: [...tags.stateful.classic
     for (const rule of seededRules) {
       await attempt(async () => {
         if (api) {
-          // A rule with an exception cannot always be deleted in one shot; ignore the error so
-          // cleanup of the rest still runs. The rule is inert without its seeded alerts.
-          await api
-            .public('DELETE', `/api/detection_engine/rules?id=${encodeURIComponent(rule.ruleId)}`)
-            .catch(() => undefined);
+          // A 404 means an earlier teardown already removed it; anything else fails loudly —
+          // `api.public` resolves HTTP failures as values, so discarding the response would
+          // make a failed delete look successful and leak the rule, which the control
+          // explicitly enabled, so it would keep firing on the shared stack.
+          const response = await api.public(
+            'DELETE',
+            `/api/detection_engine/rules?id=${encodeURIComponent(rule.ruleId)}`
+          );
+          if (response.statusCode !== 200 && response.statusCode !== 404) {
+            throw new Error(
+              `delete rule ${rule.ruleId} failed: ${response.statusCode} ${JSON.stringify(
+                response.body
+              )}`
+            );
+          }
         }
       });
     }
@@ -627,46 +725,17 @@ apiTest.describe('AlertZero e2e - rule tuning', { tag: [...tags.stateful.classic
   apiTest(
     'tunes a noisy rule with an exception scoped to the FP pattern',
     async ({ apiClient, samlAuth, esClient }) => {
-      apiTest.setTimeout(testData.GENERATION_TIMEOUT_MS + 2 * testData.PROPOSAL_TIMEOUT_MS);
+      apiTest.setTimeout(
+        testData.GENERATION_TIMEOUT_MS +
+          2 * testData.PROPOSAL_TIMEOUT_MS +
+          testData.ACTION_TIMEOUT_MS
+      );
       const adminApi = await getAdminApi(apiClient, samlAuth);
       api = adminApi;
       esClientRef = esClient;
       await skipWithoutChatConnector(adminApi);
 
-      const rule = await seedNoisyRule(adminApi, esClient);
-      const startedAt = new Date().toISOString();
-      const sweepExecutionId = await runTuningSweep(adminApi);
-
-      const entryProposal = await waitForEntryProposal(adminApi, rule, startedAt, sweepExecutionId);
-      await approveTuningProposal(adminApi, entryProposal);
-
-      const tuningProposal = await waitForTuningProposal(
-        adminApi,
-        rule,
-        startedAt,
-        sweepExecutionId
-      );
-      if (tuningProposal.actionWorkflowId !== ADD_RULE_EXCEPTION_ACTION_ID) {
-        throw new Error(
-          `the tuning proposed ${String(
-            tuningProposal.actionWorkflowId
-          )} instead of an exception: ${JSON.stringify(tuningProposal.actionInput)}`
-        );
-      }
-      if (actionTarget(tuningProposal.actionInput) !== rule.ruleId) {
-        throw new Error(
-          `the tuning proposal targets ${String(
-            actionTarget(tuningProposal.actionInput)
-          )} instead of the seeded rule ${rule.ruleId}`
-        );
-      }
-      assertScopedToFpPattern(
-        readEntries(tuningProposal.actionInput, 'the tuning proposal'),
-        'the tuning proposal'
-      );
-
-      await approveTuningProposal(adminApi, tuningProposal);
-      await assertPersistedScopedException(adminApi, rule);
+      const rule = await applyScopedExceptionToRule(adminApi, esClient);
       tunedRule = rule;
     }
   );
@@ -674,18 +743,21 @@ apiTest.describe('AlertZero e2e - rule tuning', { tag: [...tags.stateful.classic
   apiTest(
     'keeps alerting on a true positive from another user after the tuning',
     async ({ apiClient, samlAuth, esClient }) => {
-      apiTest.setTimeout(2 * testData.ACTION_TIMEOUT_MS);
+      apiTest.setTimeout(
+        testData.GENERATION_TIMEOUT_MS +
+          2 * testData.PROPOSAL_TIMEOUT_MS +
+          2 * testData.ACTION_TIMEOUT_MS
+      );
       const adminApi = await getAdminApi(apiClient, samlAuth);
       api = adminApi;
       esClientRef = esClient;
       await skipWithoutChatConnector(adminApi);
 
-      const rule = tunedRule;
-      if (!rule) {
-        throw new Error(
-          'the scoped-exception test must run first: it is what applies the exception this control verifies'
-        );
-      }
+      // Self-sufficient by design: the control needs a rule with the exception applied, and it
+      // gets it the same way the first test does instead of reading module state that a red
+      // between the two (which restarts the Playwright worker) wipes. When the tuning test ran
+      // first in this worker its rule is reused, so the shared-space cost is one extra sweep.
+      const rule = tunedRule ?? (await applyScopedExceptionToRule(adminApi, esClient));
       const marker = controlMarker(rule);
       const index = controlIndexName(rule);
       controlIndex = index;
