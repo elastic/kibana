@@ -10,7 +10,7 @@ import { act, renderHook, waitFor } from '@testing-library/react';
 import { focusManager, QueryClient, QueryClientProvider, useQuery } from '@kbn/react-query';
 import { PROPOSAL_SETTLING_POLL_INTERVAL_MS } from '@kbn/proposals-common';
 import type { Proposal } from '@kbn/proposals-common';
-import { queryKeys as platformQueryKeys } from '@kbn/proposals-plugin/public';
+import { RETRY_WAIT_MS, queryKeys as platformQueryKeys } from '@kbn/proposals-plugin/public';
 import { useSettlingProposalsPolling } from './use_settling_proposals_polling';
 
 const createWrapper = () => {
@@ -25,10 +25,15 @@ const createWrapper = () => {
 };
 
 const proposal = (overrides: Partial<Proposal>) => overrides as Proposal;
-const executing = proposal({ decision: 'approved', status: 'executing' });
-const settled = proposal({ decision: 'approved', status: 'failed', supersededBy: 'retry-1' });
-const awaitingRetry = proposal({ decision: 'approved', status: 'failed' });
-const pending = proposal({ status: 'pending' });
+const executing = proposal({ id: 'p-run', decision: 'approved', status: 'executing' });
+const settled = proposal({
+  id: 'p-done',
+  decision: 'approved',
+  status: 'failed',
+  supersededBy: 'retry-1',
+});
+const awaitingRetry = proposal({ id: 'p-wait', decision: 'approved', status: 'failed' });
+const pending = proposal({ id: 'p-pend', status: 'pending' });
 
 const tick = async () => {
   await act(async () => {
@@ -58,7 +63,7 @@ describe('useSettlingProposalsPolling', () => {
     );
   });
 
-  it('polls while a failed proposal has no retry yet, and stops once it has one', async () => {
+  it('polls while a failed proposal has no new action (retry) yet, and stops once it has one', async () => {
     const { Wrapper, invalidate } = createWrapper();
     const { rerender } = renderHook(({ list }) => useSettlingProposalsPolling(list), {
       wrapper: Wrapper,
@@ -70,6 +75,23 @@ describe('useSettlingProposalsPolling', () => {
     rerender({ list: [settled] });
     await tick();
     expect(invalidate).toHaveBeenCalledTimes(1);
+  });
+
+  it('stops waiting for a new action (retry) that never arrives', async () => {
+    const { Wrapper, invalidate } = createWrapper();
+    renderHook(() => useSettlingProposalsPolling([awaitingRetry]), { wrapper: Wrapper });
+
+    await act(async () => {
+      jest.advanceTimersByTime(RETRY_WAIT_MS + PROPOSAL_SETTLING_POLL_INTERVAL_MS);
+    });
+    const callsAtTheEnd = invalidate.mock.calls.length;
+    expect(callsAtTheEnd).toBeGreaterThan(0);
+
+    await act(async () => {
+      jest.advanceTimersByTime(RETRY_WAIT_MS);
+    });
+
+    expect(invalidate).toHaveBeenCalledTimes(callsAtTheEnd);
   });
 
   it('does not poll when every proposal is pending or settled', async () => {

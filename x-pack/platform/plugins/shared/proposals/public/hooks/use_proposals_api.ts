@@ -37,9 +37,21 @@ import { mutationKeys, queryKeys } from '../query_keys';
 import { proposalDecisionSignal } from './proposal_decision_signal';
 import { useProposalDecisionSignal } from './use_proposal_decision_signal';
 
-/** Running, or failed with no retry yet. Poll while this is true. */
-const isInFlux = (proposal: Pick<Proposal, 'decision' | 'status' | 'supersededBy'>): boolean =>
-  isProposalSettling(proposal) || isAwaitingRetry(proposal);
+/** How long to wait for the retry of a failed action. After that, the failed action is final. */
+export const RETRY_WAIT_MS = 30_000;
+
+const awaitingRetrySince = new Map<string, number>();
+
+/** Running, or failed with no retry yet for up to `RETRY_WAIT_MS`. Poll while this is true. */
+export const isInFlux = (
+  proposal: Pick<Proposal, 'id' | 'decision' | 'status' | 'supersededBy'>
+): boolean => {
+  if (isProposalSettling(proposal)) return true;
+  if (!isAwaitingRetry(proposal)) return false;
+  const since = awaitingRetrySince.get(proposal.id) ?? Date.now();
+  awaitingRetrySince.set(proposal.id, since);
+  return Date.now() - since < RETRY_WAIT_MS;
+};
 
 const hasSettlingProposal = (response: ListProposalsResponse | undefined): boolean =>
   response?.proposals.some(isInFlux) ?? false;

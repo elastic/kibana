@@ -11,6 +11,8 @@ import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import {
+  RETRY_WAIT_MS,
+  isInFlux,
   retryOnTransientError,
   useConversationProposals,
   usePendingProposals,
@@ -155,6 +157,41 @@ describe('usePendingProposals', () => {
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
     expect(result.current.data).toEqual(mockResponse);
+  });
+});
+
+describe('isInFlux', () => {
+  afterEach(() => jest.restoreAllMocks());
+
+  it('is true while an approved action runs', () => {
+    expect(isInFlux({ id: 'run-1', decision: 'approved', status: 'executing' })).toBe(true);
+  });
+
+  it('is true for a failed action with no new action (retry) yet, until the wait is over', () => {
+    const failed = { id: 'fail-1', decision: 'approved', status: 'failed' } as const;
+    const now = jest.spyOn(Date, 'now').mockReturnValue(1_000_000);
+    expect(isInFlux(failed)).toBe(true);
+
+    now.mockReturnValue(1_000_000 + RETRY_WAIT_MS - 1);
+    expect(isInFlux(failed)).toBe(true);
+
+    now.mockReturnValue(1_000_000 + RETRY_WAIT_MS);
+    expect(isInFlux(failed)).toBe(false);
+  });
+
+  it('times each failed action from when it was first seen', () => {
+    const now = jest.spyOn(Date, 'now').mockReturnValue(2_000_000);
+    expect(isInFlux({ id: 'fail-a', decision: 'approved', status: 'failed' })).toBe(true);
+
+    now.mockReturnValue(2_000_000 + RETRY_WAIT_MS * 2);
+    expect(isInFlux({ id: 'fail-b', decision: 'approved', status: 'failed' })).toBe(true);
+    expect(isInFlux({ id: 'fail-a', decision: 'approved', status: 'failed' })).toBe(false);
+  });
+
+  it('is false once the new action (retry) has replaced the failed action', () => {
+    expect(
+      isInFlux({ id: 'fail-2', decision: 'approved', status: 'failed', supersededBy: 'retry' })
+    ).toBe(false);
   });
 });
 
