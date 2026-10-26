@@ -12,7 +12,6 @@ import type { BaseStream } from './base';
 import { IngestStream } from './ingest';
 import { ClassicStream as nClassicStream } from './ingest/classic';
 import { WiredStream as nWiredStream } from './ingest/wired';
-import { QueryStream as nQueryStream } from './query';
 
 /* eslint-disable @typescript-eslint/no-namespace */
 
@@ -29,14 +28,13 @@ export namespace Streams {
 
   export import WiredStream = nWiredStream;
   export import ClassicStream = nClassicStream;
-  export import QueryStream = nQueryStream;
 
   export namespace all {
-    export type Model = ingest.all.Model | QueryStream.Model;
-    export type Source = ingest.all.Source | QueryStream.Source;
-    export type Definition = ingest.all.Definition | QueryStream.Definition;
-    export type GetResponse = ingest.all.GetResponse | QueryStream.GetResponse;
-    export type UpsertRequest = ingest.all.UpsertRequest | QueryStream.UpsertRequest;
+    export type Model = ingest.all.Model;
+    export type Source = ingest.all.Source;
+    export type Definition = ingest.all.Definition;
+    export type GetResponse = ingest.all.GetResponse;
+    export type UpsertRequest = ingest.all.UpsertRequest;
   }
 }
 
@@ -44,26 +42,13 @@ export namespace Streams {
   const allDefinitionSchema = z.union([
     nWiredStream.Definition.right,
     nClassicStream.Definition.right,
-    nQueryStream.Definition.right,
   ]);
-  const allSourceSchema = z.union([
-    nWiredStream.Source.right,
-    nClassicStream.Source.right,
-    nQueryStream.Source.right,
-  ]);
+  const allSourceSchema = z.union([nWiredStream.Source.right, nClassicStream.Source.right]);
   const allGetResponseSchema = z
-    .union([
-      nWiredStream.GetResponse.right,
-      nClassicStream.GetResponse.right,
-      nQueryStream.GetResponse.right,
-    ])
+    .union([nWiredStream.GetResponse.right, nClassicStream.GetResponse.right])
     .meta({ id: 'StreamGetResponse' });
   const allUpsertRequestSchema = z
-    .union([
-      nWiredStream.UpsertRequest.right,
-      nClassicStream.UpsertRequest.right,
-      nQueryStream.UpsertRequest.right,
-    ])
+    .union([nWiredStream.UpsertRequest.right, nClassicStream.UpsertRequest.right])
     .meta({ id: 'StreamUpsertRequest' });
 
   export const all: {
@@ -97,21 +82,16 @@ Object.assign(Streams, {
   ingest: IngestStream,
   WiredStream: nWiredStream,
   ClassicStream: nClassicStream,
-  QueryStream: nQueryStream,
-} satisfies Pick<typeof Streams, 'ingest' | 'WiredStream' | 'ClassicStream' | 'QueryStream'>);
+} satisfies Pick<typeof Streams, 'ingest' | 'WiredStream' | 'ClassicStream'>);
 
 /**
- * Union of all three stream definition schemas, discriminated by the `type`
+ * Union of the stream definition schemas, discriminated by the `type`
  * literal field. Registered as a named OAS component (`StreamDefinition`) with
  * a `discriminator` extension so code generators can produce properly typed
  * sealed-class / tagged-union structs.
  */
 export const streamDefinitionSchema = z
-  .union([
-    nWiredStream.Definition.right,
-    nClassicStream.Definition.right,
-    nQueryStream.Definition.right,
-  ])
+  .union([nWiredStream.Definition.right, nClassicStream.Definition.right])
   .meta({
     id: 'StreamDefinition',
     openapi: {
@@ -120,7 +100,6 @@ export const streamDefinitionSchema = z
         mapping: {
           wired: '#/components/schemas/WiredStreamDefinition',
           classic: '#/components/schemas/ClassicStreamDefinition',
-          query: '#/components/schemas/QueryStreamDefinition',
         },
       },
     },

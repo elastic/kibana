@@ -117,10 +117,6 @@ export function StreamDetailContextProvider({
             };
           }
 
-          if (Streams.QueryStream.GetResponse.is(response)) {
-            return response;
-          }
-
           // Both strict (DeepStrict) type guards failed — delegate to shared handler.
           handleStrictSchemaFailure(
             response,
@@ -197,6 +193,7 @@ export function useStreamDetail() {
 
 export function useStreamDetailAsIngestStream() {
   const ctx = useStreamDetail();
+  const streamName = ctx.definition.stream.name;
   if (
     !Streams.WiredStream.GetResponse.is(ctx.definition) &&
     !Streams.ClassicStream.GetResponse.is(ctx.definition)
@@ -205,7 +202,7 @@ export function useStreamDetailAsIngestStream() {
     handleStrictSchemaFailure(
       ctx.definition,
       Streams.ingest.all.GetResponse.right,
-      `[Streams] useStreamDetailAsIngestStream: definition for stream "${ctx.definition.stream.name}" failed strict schema validation.`
+      `[Streams] useStreamDetailAsIngestStream: definition for stream "${streamName}" failed strict schema validation.`
     );
   }
   return ctx as {
