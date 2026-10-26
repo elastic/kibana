@@ -6,8 +6,9 @@ CLIs that turn CI test results into GitHub issues on `elastic/kibana`.
 
 Reads the JUnit and Scout reports of a CI job and files or updates one `failed-test` issue per
 failing test. Run by `.buildkite/scripts/lifecycle/post_command.sh` after every job. With
-`--consistent-failure-issues owner/name` it also files one `Failing … suite` issue per test file
-whose tests started failing every attempt build after build, by the Scout test events.
+`--report-failing-suites` it also files one `Failing … suite` issue per test file whose tests
+started failing every attempt build after build, by the Scout test events, in `elastic/kibana` or
+the `--failing-suites-repo owner/name` given.
 
 Issues for FTR, Jest (unit and integration) and Scout tests link to the
 [Single test history](https://ops.kibana.dev/s/ci/app/dashboards#/view/test-failure-history)

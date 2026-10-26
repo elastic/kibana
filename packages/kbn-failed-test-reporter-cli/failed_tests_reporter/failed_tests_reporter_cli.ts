@@ -99,12 +99,13 @@ export function runFailedTestsReporterCli() {
         );
       }
 
-      const consistentFailureRepo = flags['consistent-failure-issues'] || undefined;
+      const reportFailingSuites = Boolean(flags['report-failing-suites']);
+      const failingSuitesRepo = flags['failing-suites-repo'];
       if (
-        consistentFailureRepo !== undefined &&
-        (typeof consistentFailureRepo !== 'string' || !REPO_PATTERN.test(consistentFailureRepo))
+        reportFailingSuites &&
+        (typeof failingSuitesRepo !== 'string' || !REPO_PATTERN.test(failingSuitesRepo))
       ) {
-        throw createFlagError('--consistent-failure-issues must be of the form owner/name');
+        throw createFlagError('--failing-suites-repo must be of the form owner/name');
       }
 
       let branch: string = '';
@@ -190,13 +191,16 @@ export function runFailedTestsReporterCli() {
           // Generate Scout test failure artifacts after reports are updated (GH issue info, html reports, etc.)
           await generateScoutTestFailureArtifacts({ log, bkMeta });
 
-          if (consistentFailureRepo) {
+          if (reportFailingSuites && typeof failingSuitesRepo === 'string') {
+            log.info(
+              `Failing suite issues: on, filed in ${failingSuitesRepo} after the per-test issues`
+            );
             // the per-test issues above are filed, the annotations still to come: never fail the job's reporting over this
             try {
               await checkConsistentFailures({
                 log,
                 failures: [...junitFailures, ...scoutFailures],
-                repo: consistentFailureRepo,
+                repo: failingSuitesRepo,
                 dryRun: !updateGithub,
               });
             } catch (error) {
@@ -222,24 +226,29 @@ export function runFailedTestsReporterCli() {
     {
       description: `a cli that opens issues or updates existing issues based on junit reports`,
       flags: {
-        boolean: ['github-update', 'report-update'],
-        string: ['build-url', 'consistent-failure-issues'],
+        boolean: ['github-update', 'report-update', 'report-failing-suites'],
+        string: ['build-url', 'failing-suites-repo'],
         default: {
           'github-update': true,
           'report-update': true,
           'index-errors': true,
           'build-url': process.env.BUILD_URL,
-          'consistent-failure-issues': process.env.CONSISTENT_FAILURE_ISSUES_REPO,
+          'report-failing-suites': process.env.REPORT_FAILING_SUITES === 'true',
+          'failing-suites-repo': process.env.FAILING_SUITES_REPO || 'elastic/kibana',
         },
         help: `
-        --no-github-update Execute the CLI without writing to Github
-        --no-report-update Execute the CLI without writing to the JUnit reports
-        --no-index-errors  Execute the CLI without indexing failures into Elasticsearch
-        --build-url        URL of the failed build, defaults to process.env.BUILD_URL
-        --consistent-failure-issues  owner/name of the repository to file an issue in for each
-                           test file whose tests failed every attempt of the latest builds of this
-                           pipeline and branch after passing before, defaults to
-                           process.env.CONSISTENT_FAILURE_ISSUES_REPO; unset, nothing is checked
+        --no-github-update       Execute the CLI without writing to Github
+        --no-report-update       Execute the CLI without writing to the JUnit reports
+        --no-index-errors        Execute the CLI without indexing failures into Elasticsearch
+        --build-url              URL of the failed build, defaults to process.env.BUILD_URL
+
+        Failing suite issues, filed in addition to the per-test issues above. Off unless
+        process.env.REPORT_FAILING_SUITES is 'true'; writes follow --github-update.
+        --report-failing-suites  Also file one issue per test file whose tests failed every attempt of
+                                 the latest builds of this pipeline and branch after passing before,
+                                 by the Scout test events
+        --failing-suites-repo    owner/name of the repository those issues go to, defaults to
+                                 process.env.FAILING_SUITES_REPO, then elastic/kibana
       `,
       },
     }
