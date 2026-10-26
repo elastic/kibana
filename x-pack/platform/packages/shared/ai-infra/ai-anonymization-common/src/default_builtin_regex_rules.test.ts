@@ -239,14 +239,31 @@ describe.each(ENGINES)('built-in regex rules on %s', (engine) => {
     });
   });
 
-  describe('public domain allow-list', () => {
+  describe('public site allow-list', () => {
     it.each([
       'https://github.com/elastic/kibana',
-      'https://attack.mitre.org/techniques/T1053/',
-      'see ss64.com for syntax',
       'docs.github.com and GITHUB.COM',
+      'raw.githubusercontent.com',
+      'https://attack.mitre.org/techniques/T1053/',
+      'https://nvd.nist.gov/vuln/detail/CVE-2024-1234',
+      'learn.microsoft.com',
+      'https://www.elastic.co/docs/solutions/security',
+      'docs.elastic.co and elastic.co',
+      'see ss64.com for syntax',
     ])('leaves public sites in %s unmasked', (input) => {
       expectKept('builtin-host-name', input, []);
+    });
+
+    // An organisation's website is public, but its internal hosts live under the same domain and the
+    // organisation can be a customer: only the exact public hosts are allowed, never a wildcard.
+    it.each([
+      'corp.mitre.org',
+      'intranet.nist.gov',
+      'mail.cisa.gov',
+      'build.microsoft.com',
+      'jenkins.elastic.co',
+    ])('masks %s, an internal host under an organisation domain', (host) => {
+      expectKept('builtin-host-name', host, [host]);
     });
 
     it('still masks private hosts and look-alikes of public sites', () => {

@@ -5,27 +5,44 @@
  * 2.0.
  */
 
-// Well-known public sites. A model gains context from seeing them and they identify nothing about
-// the customer, so a host match equal to one of these (or a subdomain of one) is left in the clear.
-// Keep this short: a customer's own domain on the list would never be masked.
-const PUBLIC_DOMAINS = [
+// Public sites a model gains context from and that identify nothing about the customer, so a host
+// match for one of them is left in the clear. Two lists, because the risk differs:
+//
+// - Services that are public by nature: the domain and every subdomain. Nobody runs internal hosts
+//   under github.com, so the wildcard is safe.
+// - Websites of organisations, which also have internal hosts under the same domain (and can be
+//   customers): only these exact hosts. `corp.mitre.org` or `intranet.nist.gov` stay masked.
+//
+// Keep both short and document every entry (the plugin README lists them and a test checks it).
+export const PUBLIC_SERVICE_DOMAINS = [
   'github.com',
   'githubusercontent.com',
   'gitlab.com',
   'stackoverflow.com',
-  'mitre.org',
-  'nist.gov',
-  'cisa.gov',
-  'owasp.org',
-  'virustotal.com',
-  'microsoft.com',
-  'ss64.com',
   'wikipedia.org',
+  'virustotal.com',
+  'owasp.org',
+  'ss64.com',
 ];
 
-const isPublicDomain = (host: string): boolean => {
+export const PUBLIC_HOSTS = [
+  'attack.mitre.org',
+  'nvd.nist.gov',
+  'www.cisa.gov',
+  'learn.microsoft.com',
+  'docs.microsoft.com',
+  'www.microsoft.com',
+  'elastic.co',
+  'www.elastic.co',
+  'docs.elastic.co',
+];
+
+const isPublicHost = (host: string): boolean => {
   const lower = host.toLowerCase();
-  return PUBLIC_DOMAINS.some((domain) => lower === domain || lower.endsWith(`.${domain}`));
+  return (
+    PUBLIC_HOSTS.includes(lower) ||
+    PUBLIC_SERVICE_DOMAINS.some((domain) => lower === domain || lower.endsWith(`.${domain}`))
+  );
 };
 
 const WORD_CHAR = /\w/;
@@ -60,7 +77,7 @@ const FILTERS: Record<string, (text: string, start: number, end: number) => Matc
     // A match followed by more host characters (`secret.github.com.network`) is a prefix of a
     // longer private name, not the public site itself, so it is masked.
     'builtin-host-name': (text, start, end) =>
-      !HOST_CONTINUES.test(text.slice(end, end + 2)) && isPublicDomain(text.slice(start, end))
+      !HOST_CONTINUES.test(text.slice(end, end + 2)) && isPublicHost(text.slice(start, end))
         ? undefined
         : { start, end },
     // `std::string` and `a::int` are code, not addresses: a real address is not glued to a word.

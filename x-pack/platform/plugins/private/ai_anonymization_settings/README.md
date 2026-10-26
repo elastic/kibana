@@ -67,12 +67,17 @@ disables its controls for users who cannot save. The difference is intentional.
   Because only `DOMAIN\name` is matched, the same name written **bare** (for example a model
   repeating it in its own output, which a later request such as a migration fix loop then sends
   back) is not masked again: no built-in rule matches a bare user name.
-- **Well-known public sites are not masked as host names** (`github.com`, `mitre.org`, `nist.gov`,
-  `cisa.gov`, `owasp.org`, `virustotal.com`, `microsoft.com`, `ss64.com`, ... and their
-  subdomains). The list is `PUBLIC_DOMAINS` in `@kbn/ai-anonymization-common`
-  (`builtin_match_filters.ts`); keep it short, because a customer's own domain on it would never be
-  masked. Such filters apply to built-in rules only: a pattern cannot express them because it must
-  also run on RE2, which has no lookbehind.
+- **Well-known public sites are not masked as host names.** There are two lists in
+  `@kbn/ai-anonymization-common` (`builtin_match_filters.ts`). Services that are public by nature
+  are left readable **with all their subdomains**: `github.com`, `githubusercontent.com`,
+  `gitlab.com`, `stackoverflow.com`, `wikipedia.org`, `virustotal.com`, `owasp.org`, `ss64.com`.
+  Websites of organisations are left readable **only as these exact hosts**, because the same
+  organisation can be a customer with internal hosts under its domain: `attack.mitre.org`,
+  `nvd.nist.gov`, `www.cisa.gov`, `learn.microsoft.com`, `docs.microsoft.com`,
+  `www.microsoft.com`, `elastic.co`, `www.elastic.co`, `docs.elastic.co`. Everything else under
+  those organisation domains (for example `corp.mitre.org`) is masked. Keep the lists short, and a
+  test checks that every entry is listed here. Such filters apply to built-in rules only: a
+  pattern cannot express them because it must also run on RE2, which has no lookbehind.
 - **The pattern tester needs the `manage_advanced_settings` privilege** and runs on its own small
   worker pool with a short timeout, separate from the pool serving AI requests. It can be turned off
   with `xpack.aiAnonymizationSettings.patternTester.enabled: false` (default `true`), in which case
