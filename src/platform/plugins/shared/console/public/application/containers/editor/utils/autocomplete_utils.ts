@@ -281,6 +281,8 @@ export const getUrlParamsCompletionItems = (
  */
 interface BodyCompletionOptions {
   isInsideTripleQuotedString?: boolean;
+  // Text after the cursor captured when completion was requested; defaults to the live model.
+  lineContentAfterPosition?: string;
 }
 
 export const getBodyCompletionItems = async (
@@ -291,7 +293,7 @@ export const getBodyCompletionItems = async (
   // Column where the request starts on its first line; skips a block-comment prefix
   // (e.g. `/* note */ GET _search`) so `parseLine` sees the method first.
   requestStartColumn = 1,
-  { isInsideTripleQuotedString = false }: BodyCompletionOptions = {}
+  { isInsideTripleQuotedString = false, lineContentAfterPosition }: BodyCompletionOptions = {}
 ): Promise<monaco.languages.CompletionItem[]> => {
   const { lineNumber, column } = position;
 
@@ -334,7 +336,8 @@ export const getBodyCompletionItems = async (
       context,
       bodyContentBeforePosition,
       bodyTokens,
-      isInsideTripleQuotedString
+      isInsideTripleQuotedString,
+      lineContentAfterPosition
     );
   }
   return getSuggestions(
@@ -344,7 +347,8 @@ export const getBodyCompletionItems = async (
     context,
     bodyContentBeforePosition,
     bodyTokens,
-    isInsideTripleQuotedString
+    isInsideTripleQuotedString,
+    lineContentAfterPosition
   );
 };
 
@@ -548,7 +552,8 @@ const getCompletionEndColumn = (
 const getCompletionLineState = (
   model: monaco.editor.ITextModel,
   position: monaco.Position,
-  bodyContentBeforePosition: string
+  bodyContentBeforePosition: string,
+  requestedLineContentAfterPosition?: string
 ) => {
   const lineContentBeforePosition = model.getValueInRange({
     startLineNumber: position.lineNumber,
@@ -556,12 +561,14 @@ const getCompletionLineState = (
     endLineNumber: position.lineNumber,
     endColumn: position.column,
   });
-  const lineContentAfterPosition = model.getValueInRange({
-    startLineNumber: position.lineNumber,
-    startColumn: position.column,
-    endLineNumber: position.lineNumber,
-    endColumn: model.getLineMaxColumn(position.lineNumber),
-  });
+  const lineContentAfterPosition =
+    requestedLineContentAfterPosition ??
+    model.getValueInRange({
+      startLineNumber: position.lineNumber,
+      startColumn: position.column,
+      endLineNumber: position.lineNumber,
+      endColumn: model.getLineMaxColumn(position.lineNumber),
+    });
   // Expand templates only when nothing except an auto-closed quote and closing delimiters follows.
   const canInsertTemplate = shouldInsertAutocompleteTemplate(
     getLineRemainderWithoutConsoleComments(bodyContentBeforePosition, lineContentAfterPosition)
@@ -589,12 +596,18 @@ const getSuggestions = (
   context: AutoCompleteContext,
   bodyContentBeforePosition: string,
   bodyTokens: string[],
-  isInsideTripleQuotedString: boolean
+  isInsideTripleQuotedString: boolean,
+  requestedLineContentAfterPosition?: string
 ) => {
   // get the word before suggestions to replace when selecting a suggestion from the list
   const wordUntilPosition = model.getWordUntilPosition(position);
   const { canInsertTemplate, endColumn, isInsideQuotedString, lineContentBeforePosition } =
-    getCompletionLineState(model, position, bodyContentBeforePosition);
+    getCompletionLineState(
+      model,
+      position,
+      bodyContentBeforePosition,
+      requestedLineContentAfterPosition
+    );
   context.addTemplate = canInsertTemplate;
   const completionSite = getCompletionSite(
     lineContentBeforePosition,

@@ -1756,7 +1756,7 @@ describe('Editor actions provider', () => {
 
   describe('provideCompletionItems', () => {
     const mockModel = {
-      getVersionId: () => 1,
+      getLineMaxColumn: () => 1,
       getWordAtPosition: () => {
         return {
           word: 'GET',
@@ -2641,7 +2641,7 @@ describe('Editor actions provider', () => {
         expect(suggestions[0].label).toBe('false');
       });
 
-      it('returns an incomplete empty list when the model changes while body suggestions are computed', async () => {
+      it('computes body suggestions against the text after the cursor at request time', async () => {
         let resolveParsedRequests: (requests: typeof unterminatedRequest) => void = () => {};
         mockGetParsedRequests.mockReturnValue(
           new Promise<typeof unterminatedRequest>((resolve) => {
@@ -2650,15 +2650,22 @@ describe('Editor actions provider', () => {
         );
         mockPopulateContext.mockImplementation((...args) => {
           const context = args[0][1];
-          context.autoCompleteSet = [{ name: 'aggs' }];
+          context.autoCompleteSet = [{ name: 'aggs', template: {} }];
         });
-        const model = setup(['GET _search', '{', '  "ag'], 3, 7);
+        const lines = ['GET _search', '{', '  ""'];
+        const model = setup(lines, 3, 4);
 
-        const pending = provideCompletionItems(model, { lineNumber: 3, column: 7 });
-        model.getVersionId.mockReturnValue(2);
+        const pending = provideCompletionItems(model, { lineNumber: 3, column: 4 });
+        // keystrokes typed while the parser worker is answering
+        lines[2] = '  "ag"';
         resolveParsedRequests(unterminatedRequest);
 
-        expect(await pending).toEqual({ suggestions: [], incomplete: true });
+        const { suggestions } = await pending;
+
+        expect(suggestions).toHaveLength(1);
+        // the template is still expanded and only the auto-closed quote is replaced
+        expect(suggestions[0].insertText).toContain('aggs": {');
+        expect((suggestions[0].range as monaco.IRange).endColumn).toBe(5);
       });
 
       it('still returns method completion items on an empty line outside triple quotes', async () => {
