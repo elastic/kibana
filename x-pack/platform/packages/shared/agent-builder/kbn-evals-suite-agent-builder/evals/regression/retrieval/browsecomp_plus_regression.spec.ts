@@ -12,8 +12,8 @@ import {
   createSpanLatencyEvaluator,
 } from '@kbn/evals';
 import type { ExperimentTask, TaskOutput } from '@kbn/evals';
-import { createGcsRepository, restoreSnapshot } from '@kbn/es-snapshot-loader';
 import { evaluate } from '../../../src/evaluate';
+import { ensureCorpusRestored } from '../../../src/ensure_corpus_restored';
 import { runJudgeAnalyses } from '../../../src/regression_analyses';
 import type { BrowsecompPlusRegressionExample } from './browsecomp_plus_regression_dataset';
 import { BROWSECOMP_PLUS_REGRESSION_DATASET } from './browsecomp_plus_regression_dataset';
@@ -42,61 +42,15 @@ evaluate.describe(
   'Agent Builder regression: browsecomp-plus retrieval',
   { tag: tags.serverless.search },
   () => {
-    // The ground-truth doc ids are literal `_id`s from the pinned corpus snapshot, so
-    // running against a cluster without (or with a different build of) the corpus would
-    // score garbage into the regression baselines. Restore what is missing; fail fast
-    // when that is not possible.
     evaluate.beforeAll(async ({ esClient, log }) => {
-      const unknownIndices = getDatasetIndices().filter(
-        (index) => !CORPUS_INDICES.includes(index as (typeof CORPUS_INDICES)[number])
-      );
-      if (unknownIndices.length > 0) {
-        throw new Error(
-          `[browsecomp-plus-regression] dataset references indices not in the corpus snapshot: ${unknownIndices.join(
-            ', '
-          )}`
-        );
-      }
-
-      const missing: string[] = [];
-      for (const index of CORPUS_INDICES) {
-        if (!(await esClient.indices.exists({ index }))) {
-          missing.push(index);
-        }
-      }
-      if (missing.length === 0) {
-        log.info(
-          `[browsecomp-plus-regression] all ${CORPUS_INDICES.length} corpus indices present`
-        );
-        return;
-      }
-      if (!process.env.GCS_CREDENTIALS) {
-        throw new Error(
-          `[browsecomp-plus-regression] corpus indices missing (${missing.join(', ')}) and ` +
-            'GCS_CREDENTIALS is not set, so the snapshot cannot be restored. Load the ' +
-            `"${CORPUS_SNAPSHOT.snapshotName}" snapshot or run through \`node scripts/evals start\` ` +
-            'with a profile that provides GCS credentials.'
-        );
-      }
-      log.info(
-        `[browsecomp-plus-regression] restoring ${missing.length} corpus indices from snapshot ` +
-          `"${CORPUS_SNAPSHOT.snapshotName}"`
-      );
-      const result = await restoreSnapshot({
+      await ensureCorpusRestored({
         esClient,
         log,
-        repository: createGcsRepository({
-          bucket: CORPUS_SNAPSHOT.bucket,
-          basePath: CORPUS_SNAPSHOT.basePath,
-        }),
-        snapshotName: CORPUS_SNAPSHOT.snapshotName,
-        indices: missing,
+        suite: 'browsecomp-plus-regression',
+        snapshot: CORPUS_SNAPSHOT,
+        corpusIndices: CORPUS_INDICES,
+        datasetIndices: getDatasetIndices(),
       });
-      if (!result.success) {
-        throw new Error(
-          `[browsecomp-plus-regression] snapshot restore failed: ${result.errors.join('; ')}`
-        );
-      }
     });
 
     evaluate(
