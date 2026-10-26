@@ -29,6 +29,7 @@ import {
 } from './app/app_header';
 import { AutomationsPage } from './automations/automations_page';
 import { useKibana } from './hooks/use_kibana';
+import { useDeveloperMode } from './hooks/use_developer_mode';
 import { useSignificantEventsAvailability } from './hooks/use_significant_events_availability';
 import { StartInvestigationPanel } from './investigation/start_investigation_panel';
 import { SandboxSecretsFlyout } from './sandbox_secrets/sandbox_secrets_flyout';
@@ -52,15 +53,16 @@ const DetectionPage = React.lazy(() =>
   import('./pages/detection/page').then(({ DetectionPage: Page }) => ({ default: Page }))
 );
 
-const DetectionRoute = ({
+export const DetectionRoute = ({
   headerProps,
 }: {
   headerProps: React.ComponentProps<typeof DetectionPage>['headerProps'];
 }) => {
   const { tab } = useParams<{ tab?: string }>();
   const { search } = useLocation();
+  const { isDeveloperMode } = useDeveloperMode();
 
-  if (!tab || !isDetectionTabId(tab)) {
+  if (!tab || !isDetectionTabId(tab) || (tab === 'signals' && !isDeveloperMode)) {
     return <Redirect to={{ pathname: '/detections/events', search }} />;
   }
 
@@ -252,8 +254,34 @@ export function NightshiftPage(): React.ReactElement | null {
     <ObservabilityPageTemplate
       data-test-subj="nightshiftPage"
       restrictWidth={false}
+      css={
+        isDetectionPage
+          ? css`
+              height: 100%;
+              min-height: 0;
+              overflow: hidden;
+            `
+          : undefined
+      }
       pageSectionProps={{
         paddingSize: 'none',
+        ...(isDetectionPage
+          ? {
+              css: css`
+                min-height: 0;
+                overflow: hidden;
+              `,
+              contentProps: {
+                css: css`
+                  display: flex;
+                  flex: 1 1 auto;
+                  flex-direction: column;
+                  min-height: 0;
+                  height: 100%;
+                `,
+              },
+            }
+          : {}),
         ...(isHomePage
           ? {
               css: css`

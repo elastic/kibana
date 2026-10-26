@@ -5,18 +5,12 @@
  * 2.0.
  */
 
-import { css } from '@emotion/react';
-import type { EuiSelectableOption } from '@elastic/eui';
 import {
   EuiFieldSearch,
-  EuiFilterButton,
   EuiFilterGroup,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
-  EuiNotificationBadge,
-  EuiPopover,
-  EuiSelectable,
   EuiSuperDatePicker,
   useEuiTheme,
 } from '@elastic/eui';
@@ -32,12 +26,13 @@ import {
   type Severity,
   type SignificantEventStatus,
 } from '@kbn/significant-events-schema';
-import React, { useState } from 'react';
+import React from 'react';
 import {
   SIGNIFICANT_EVENT_INVESTIGATION_STATE_LABELS,
   SIGNIFICANT_EVENT_STATUS_ICONS,
   SIGNIFICANT_EVENT_STATUS_LABELS,
 } from '../../../components/entities/significant_event/significant_event_status';
+import { FilterPopover } from '../../../components/ui/filter_popover';
 import { SIGNIFICANT_EVENT_SEVERITY } from '../../../components/ui/severity_badge';
 import type { DetectionTimeRange } from '../use_detection_time_range';
 import {
@@ -46,86 +41,6 @@ import {
   SEVERITY_LABEL,
   STATUS_LABEL,
 } from './translations';
-
-interface EventsFilterPopoverProps<Value extends string> {
-  label: string;
-  options: readonly Value[];
-  selected: Value[];
-  counts: Record<Value, number> | undefined;
-  getLabel: (value: Value) => string;
-  getPrepend?: (value: Value) => React.ReactNode;
-  onChange: (selected: Value[]) => void;
-  testSubject: string;
-}
-
-const EventsFilterPopover = <Value extends string>({
-  label,
-  options,
-  selected,
-  counts,
-  getLabel,
-  getPrepend,
-  onChange,
-  testSubject,
-}: EventsFilterPopoverProps<Value>) => {
-  const { euiTheme } = useEuiTheme();
-  const [isOpen, setIsOpen] = useState(false);
-  const selectableOptions: Array<EuiSelectableOption<{ value: Value }>> = options.map((value) => ({
-    key: value,
-    value,
-    label: getLabel(value),
-    checked: selected.includes(value) ? 'on' : undefined,
-    prepend: getPrepend?.(value),
-    // No counts while facets load or after they fail; a 0 would read as "no matches".
-    append: counts ? (
-      <EuiNotificationBadge color="subdued" size="s">
-        {counts[value]}
-      </EuiNotificationBadge>
-    ) : undefined,
-    'data-test-subj': `${testSubject}Option-${value}`,
-  }));
-
-  return (
-    <EuiPopover
-      aria-label={label}
-      button={
-        <EuiFilterButton
-          data-test-subj={`${testSubject}Button`}
-          iconType="chevronSingleDown"
-          isSelected={isOpen}
-          numFilters={options.length}
-          hasActiveFilters={selected.length > 0}
-          numActiveFilters={selected.length}
-          onClick={() => setIsOpen((current) => !current)}
-        >
-          {label}
-        </EuiFilterButton>
-      }
-      isOpen={isOpen}
-      closePopover={() => setIsOpen(false)}
-      panelPaddingSize="none"
-    >
-      <EuiSelectable<{ value: Value }>
-        aria-label={label}
-        options={selectableOptions}
-        onChange={(nextOptions) =>
-          onChange(nextOptions.filter(({ checked }) => checked === 'on').map(({ value }) => value))
-        }
-        listProps={{ isVirtualized: false }}
-      >
-        {(list) => (
-          <div
-            css={css`
-              min-inline-size: ${euiTheme.base * 15}px;
-            `}
-          >
-            {list}
-          </div>
-        )}
-      </EuiSelectable>
-    </EuiPopover>
-  );
-};
 
 export interface EventsFiltersProps {
   timeRange: DetectionTimeRange;
@@ -183,7 +98,7 @@ export const EventsFilters = ({
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiFilterGroup compressed>
-          <EventsFilterPopover
+          <FilterPopover
             label={SEVERITY_LABEL}
             options={SEVERITY_OPTIONS}
             selected={severity}
@@ -199,7 +114,7 @@ export const EventsFilters = ({
             onChange={onSeverityChange}
             testSubject="nightshiftDetectionEventsSeverityFilter"
           />
-          <EventsFilterPopover
+          <FilterPopover
             label={STATUS_LABEL}
             options={SIGNIFICANT_EVENT_STATUS_OPTIONS}
             selected={status}
@@ -215,7 +130,7 @@ export const EventsFilters = ({
             onChange={onStatusChange}
             testSubject="nightshiftDetectionEventsStatusFilter"
           />
-          <EventsFilterPopover
+          <FilterPopover
             label={INVESTIGATION_LABEL}
             options={SIGNIFICANT_EVENT_INVESTIGATION_STATES}
             selected={investigation}

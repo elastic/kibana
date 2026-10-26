@@ -45,6 +45,27 @@ export function getChangePointLabel(type?: ChangePointType): string {
   return CHANGE_POINT_LABELS[type] ?? UNKNOWN_CHANGE_POINT_LABEL;
 }
 
+export const formatPValue = (pValue?: number | string): string => {
+  if (pValue === undefined || pValue === null) return '-';
+  const value = Number(pValue);
+  if (Number.isNaN(value)) return '-';
+  if (value === 0) {
+    return i18n.translate('xpack.nightshift.detectionDetailsFlyout.pValue.zero', {
+      defaultMessage: 'p=0',
+    });
+  }
+  if (value < 0.0001) {
+    return i18n.translate('xpack.nightshift.detectionDetailsFlyout.pValue.scientific', {
+      defaultMessage: 'p={value}',
+      values: { value: value.toExponential(2) },
+    });
+  }
+  return i18n.translate('xpack.nightshift.detectionDetailsFlyout.pValue.decimal', {
+    defaultMessage: 'p={value}',
+    values: { value: value.toFixed(4) },
+  });
+};
+
 export interface OccurrencePoint {
   x: number;
   y: number;

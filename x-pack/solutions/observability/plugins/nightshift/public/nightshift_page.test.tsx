@@ -103,6 +103,13 @@ jest.mock('./settings/page', () => ({
   },
 }));
 jest.mock('./hooks/use_kibana', () => ({ useKibana: jest.fn() }));
+jest.mock('./hooks/use_developer_mode', () => ({
+  useDeveloperMode: () => ({
+    isDeveloperMode: false,
+    isSaving: false,
+    setDeveloperMode: jest.fn(),
+  }),
+}));
 jest.mock('./hooks/use_significant_events_availability');
 
 const mockUseKibana = useKibana as jest.Mock;
@@ -392,6 +399,14 @@ describe('NightshiftPage', () => {
       expect(history.location.pathname).toBe('/detections/events');
     }
   );
+
+  it('redirects Signals to Events with the current params outside developer mode', async () => {
+    const { history } = renderPage('/detections/signals?entity=checkout&signalsSearch=latency');
+
+    expect(await screen.findByTestId('detectionPageStub')).toBeInTheDocument();
+    expect(history.location.pathname).toBe('/detections/events');
+    expect(history.location.search).toBe('?entity=checkout&signalsSearch=latency');
+  });
 
   it('shows Sources and detection Settings in the Detections header', async () => {
     renderPage('/detections/events');
