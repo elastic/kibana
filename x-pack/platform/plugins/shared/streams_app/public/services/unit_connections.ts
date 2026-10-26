@@ -89,6 +89,37 @@ const withRoutes = (config: PipelineConfig, routes: readonly RouteRule[]): Pipel
 const routeDestinationIds = (route: RouteRule): readonly string[] =>
   'destinations' in route ? route.destinations : [];
 
+const isCatchAllDestinationRoute = (route: RouteRule): boolean =>
+  route.when === undefined && 'destinations' in route;
+
+/** A catch-all that delegates to child pipelines already consumes every record. */
+const catchAllBlocksDestination = (routes: readonly RouteRule[]): boolean => {
+  const catchAll = routes.find((route) => route.when === undefined);
+  return catchAll !== undefined && !('destinations' in catchAll);
+};
+
+const routesIncludeDestination = (routes: readonly RouteRule[], destinationId: string): boolean =>
+  routes.some((route) => routeDestinationIds(route).includes(destinationId));
+
+const addDestinationToRoutes = (
+  routes: readonly RouteRule[],
+  destinationId: string
+): RouteRule[] => {
+  const catchAllIndex = routes.findIndex(isCatchAllDestinationRoute);
+  if (catchAllIndex === -1) {
+    return [...routes, { destinations: [destinationId] }];
+  }
+  return routes.map((route, index) => {
+    if (index !== catchAllIndex || !('destinations' in route)) {
+      return route;
+    }
+    if (route.destinations.includes(destinationId)) {
+      return route;
+    }
+    return { ...route, destinations: [...route.destinations, destinationId] };
+  });
+};
+
 const removeDestinationFromRoutes = (
   routes: readonly RouteRule[],
   destinationId: string
