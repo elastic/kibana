@@ -36,6 +36,12 @@ describe('getBuildFlavorCspConfig', () => {
     });
   });
 
+  it('applies the img-src defaults when the config has no img_src key', () => {
+    expect(getBuildFlavorCspConfig('traditional', {})).toEqual(
+      getBuildFlavorCspConfig('traditional', noConfig)
+    );
+  });
+
   describe('applied to CspConfig', () => {
     it('leaves the serverless headers unchanged', () => {
       const withFlavor = new CspConfig(noConfig, getBuildFlavorCspConfig('serverless', noConfig));

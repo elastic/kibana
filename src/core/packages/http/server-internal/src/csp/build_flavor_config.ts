@@ -28,7 +28,7 @@ import type { CspAdditionalConfig, CspConfigType } from './config';
  */
 export const getBuildFlavorCspConfig = (
   buildFlavor: BuildFlavor,
-  { img_src: configuredImgSrc }: Pick<CspConfigType, 'img_src'>
+  { img_src: configuredImgSrc = [] }: Partial<Pick<CspConfigType, 'img_src'>>
 ): CspAdditionalConfig => {
   if (buildFlavor === 'serverless') {
     return {};
