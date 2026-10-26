@@ -685,7 +685,7 @@ describe('estimateCapacity', () => {
     const unhealthyReason =
       'Task Manager is unhealthy, the assumedAverageRecurringRequiredThroughputPerMinutePerKibana (210) > capacityPerMinutePerKibana (200)';
 
-    const estimate = estimateCapacity(logger, unhealthyStats(), 1, true);
+    const estimate = estimateCapacity(healthStatusLogger, unhealthyStats(), 1, true);
 
     expect(estimate).toMatchObject({ status: 'OK', reason: unhealthyReason });
     expect(logger.warn).not.toHaveBeenCalled();
