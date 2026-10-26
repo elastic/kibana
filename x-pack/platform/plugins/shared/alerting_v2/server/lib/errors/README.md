@@ -26,9 +26,34 @@ on `code`. The `message` field is intentionally NOT part of the API contract. Do
 
 - Branch on `code`, not on `message`.
 - Treat `message` as human-facing text only.
-- Treat `details` as structured context whose shape depends on `code`.
+- Treat `details` as structured context whose keys depend on `code`. The
+  identifier keys are stable; the request-validation `errors` tree is not. See
+  [`details` stability](#details-stability).
 - Prefer a domain-specific code from `ALERTING_ERROR_CODES` over a generic
   fallback.
+
+## `details` stability
+
+`details` is a per-`code` bag, not one fixed shape. Two rules fix what a client
+may rely on:
+
+- **Identifier keys are permanent public identifiers.** `rule_id`,
+  `action_policy_id`, `insight_id`, `event_id`, `series_id`, `alert_id`,
+  `group_hash`, and the context keys in the catalog tables below are stable: a
+  client may read and branch on them. In particular `group_hash` — present on
+  every alert-verb `409` (`ALERT_NOT_LATEST`, `INVALID_ALERT_STATE_TRANSITION`,
+  `ALERT_ACTION_NO_OP`), single and per item — is a permanent identifier. It is
+  the same `group_hash` that is public grammar in the action-policy matcher, and
+  the series-identity design holds it immutable; it will not be dropped or
+  renamed. A `series_id` may be added alongside it later, additively.
+- **The request-validation `errors` tree is not a contract.** A `400` from
+  schema validation carries `details.source` (`params`, `query`, or `body`) —
+  the one guaranteed key, naming which part of the request failed — and a
+  sibling `details.errors`. `details.errors` is produced by the validation
+  library (`treeifyError`) and its internal shape (`errors`, `properties`, …) is
+  owned by that library, not by this API: a dependency upgrade can change it. Do
+  not branch on `details.errors`; use `code`, `source`, and the human-readable
+  `message` instead.
 
 ## How error codes are produced
 
@@ -58,7 +83,7 @@ backwards compatible. Renaming or removing a code is a breaking change.
 
 | Code                                | Status | When                                                                                                                                | `details`                                  |
 | ----------------------------------- | ------ | ----------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------ |
-| `RULE_NOT_FOUND`                    | 404    | `getRule` / `updateRule` / `deleteRule` cannot find a rule by id                                                                    | `{ rule_id }`                              |
+| `RULE_NOT_FOUND`                    | 404 / 200 (per-item) | `getRule` / `updateRule` / `deleteRule` cannot find a rule by id; `_bulk_get` reports it per item in `errors[]`                      | `{ rule_id }`                              |
 | `RULE_ALREADY_EXISTS`               | 409 / 200 (per-item) | `createRule` collides with an existing id; bulk create reports it per item                                                          | `{ rule_id }` (single create)              |
 | `RULE_VERSION_CONFLICT`             | 409    | An update / delete races another writer (`if_seq_no` mismatch)                                                                      | `{ rule_id }`                              |
 | `INVALID_RULE_DATA`                 | 400    | The submitted body fails the domain-level schema check. In-process callers only (HTTP callers are rejected at the route)                                                                              | `{ context, errors }` (tree-shaped errors) |
@@ -91,7 +116,7 @@ backwards compatible. Renaming or removing a code is a breaking change.
 | `INVALID_ACTION_POLICY_DATA`     | 400                  | The submitted body fails the domain-level schema check. In-process callers only (HTTP callers are rejected at the route)                                                                                                                                                                                                                  | `{ context, errors }`                  |
 | `INVALID_DATE_STRING`            | 400                  | A user-supplied date (e.g. `snoozed_until`) fails ISO-8601 parsing                                                                                                                                                                                                      | `{ value }`                            |
 | `API_KEY_INVALIDATION_FAILED`    | 500 / 200 (per-item) | Delete-only. The policy's API key could not be queued for invalidation, so the policy was deliberately left in place — deleting it would strand a valid key with nothing referencing it. Safe to retry. The single delete returns 500; bulk delete reports it per item. | `{ action_policy_id }` (single delete) |
-| `ACTION_POLICY_LICENSE_NOT_SUPPORTED` | 403             | Create / update / upsert / enable / bulk enable is rejected because the current license is not an active Enterprise license (action policies dispatch to Workflows). Checked before any side effect. Get / list / disable / snooze / delete stay available so existing policies can be cleaned up. | `{ required_license, current_license, license_status }` |
+| `ACTION_POLICY_LICENSE_NOT_SUPPORTED` | 403             | Create / update / upsert / enable / bulk enable is rejected because the current license is not an active Enterprise license (action policies dispatch to Workflows). Checked before any side effect. Get / list / disable / snooze / delete and API-key rotation (`_update_api_key` / `_bulk_update_api_key`) stay available so existing policies can be maintained — rotating or invalidating a credential is security hygiene a lapsed license must not block, so rotation is deliberately outside the gate and declares no 403. | `{ required_license, current_license, license_status }` |
 | `ACTION_POLICY_CLOUD_API_KEY_NOT_SUPPORTED` | 400 | Create / update / upsert / API key rotation is rejected because the request is authenticated with a user-created Cloud API key (a raw `essu_` credential), which has no key id and cannot be stored or used by the dispatcher. `bulk_update_api_key` reports it per item. | — |
 
 ### Alert actions (`server/lib/alert_actions_client/`)
@@ -180,7 +205,9 @@ where no route validation has run:
 | `INVALID_RULE_DATA`          | In-process `RulesClient` callers |
 | `INVALID_ACTION_POLICY_DATA` | In-process `ActionPolicyClient` callers |
 
-All three carry the same treeified `details.errors`.
+All three carry the same treeified `details.errors`. Only `details.source` is a
+stable key; the `details.errors` tree is library-owned and must not be branched
+on (see [`details` stability](#details-stability)).
 
 ## How to throw a domain error
 

@@ -525,7 +525,9 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services' | 'isMutedAlerts
     tableType,
     finalBoolQuery,
     refreshAlertsTable,
-    runtimeMappings
+    runtimeMappings,
+    // A host's `query` (e.g. a case's attached alert ids) replaces finalBoolQuery on the table.
+    tablePropsOverrides.query ?? finalBoolQuery
   );
   const tableBulkActions = useMemo(() => {
     if (!additionalBulkActionItems?.length) {

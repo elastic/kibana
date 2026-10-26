@@ -8,7 +8,8 @@
  */
 
 import { i18n as kbnI18n } from '@kbn/i18n';
-import { BehaviorSubject } from 'rxjs';
+import type { Subscription } from 'rxjs';
+import { BehaviorSubject, catchError, map, merge, of } from 'rxjs';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
@@ -20,6 +21,7 @@ import type {
   AppMountParameters,
   AppUpdater,
   AppDeepLink,
+  AppDeepLinkLocations,
 } from '@kbn/core/public';
 import { DEFAULT_APP_CATEGORIES, AppStatus } from '@kbn/core/public';
 import type { CPSPluginStart } from '@kbn/cps/public';
@@ -39,7 +41,12 @@ import {
   ManagementSectionsService,
   getSectionsServiceStartPrivate,
 } from './management_sections_service';
-import type { ManagementSection } from './utils';
+import type { ManagementApp, ManagementSection } from './utils';
+
+interface VisibleInUpdate {
+  app: ManagementApp;
+  visibleIn: AppDeepLinkLocations[] | undefined;
+}
 
 const defaultAutoOpsStatusResult: AutoOpsStatusResult = {
   isCloudConnectAutoopsEnabled: false,
@@ -72,7 +79,10 @@ export class ManagementPlugin
 {
   private readonly managementSections = new ManagementSectionsService();
 
-  private readonly appUpdater = new BehaviorSubject<AppUpdater>(() => {
+  /** Latest `visibleIn$` emission per app; takes precedence over the registered `visibleIn`. */
+  private readonly runtimeVisibleIn = new Map<ManagementApp, AppDeepLinkLocations[]>();
+
+  private readonly createDeepLinksUpdater = (): AppUpdater => () => {
     const deepLinks: AppDeepLink[] = this.managementSections
       .getAllSections()
       .map((section: ManagementSection) => ({
@@ -80,18 +90,26 @@ export class ManagementPlugin
         title: section.title,
         deepLinks: section
           .getAppsEnabled()
-          .filter((mgmtApp) => mgmtApp.visibleIn || !mgmtApp.hideFromGlobalSearch)
           .map((mgmtApp) => ({
+            mgmtApp,
+            visibleIn: this.runtimeVisibleIn.get(mgmtApp) ?? mgmtApp.visibleIn,
+          }))
+          .filter(({ mgmtApp, visibleIn }) => visibleIn || !mgmtApp.hideFromGlobalSearch)
+          .map(({ mgmtApp, visibleIn }) => ({
             id: mgmtApp.id,
             title: mgmtApp.title,
             path: mgmtApp.basePath,
             keywords: mgmtApp.keywords,
-            visibleIn: mgmtApp.visibleIn ?? ['globalSearch', 'projectSideNav'],
+            visibleIn: visibleIn ?? ['globalSearch', 'projectSideNav'],
           })),
       }));
 
     return { deepLinks };
-  });
+  };
+
+  private readonly appUpdater = new BehaviorSubject<AppUpdater>(this.createDeepLinksUpdater());
+
+  private visibleInSubscription?: Subscription;
 
   private hasAnyEnabledApps = true;
 
@@ -222,6 +240,8 @@ export class ManagementPlugin
           visibleIn: [],
         };
       });
+    } else {
+      this.subscribeToVisibleInUpdates();
     }
 
     plugins.cps?.cpsManager?.registerAppAccess('management', (location: string) =>
@@ -234,5 +254,39 @@ export class ManagementPlugin
       setupCardsNavigation: ({ enabled, hideLinksTo, extendCardNavDefinitions }) =>
         this.cardsNavigationConfig$.next({ enabled, hideLinksTo, extendCardNavDefinitions }),
     };
+  }
+
+  public stop() {
+    this.visibleInSubscription?.unsubscribe();
+  }
+
+  private subscribeToVisibleInUpdates() {
+    const visibleInUpdates$ = this.managementSections
+      .getAllSections()
+      .flatMap((section) => section.apps)
+      .flatMap((app) => {
+        const { visibleIn$ } = app;
+        return visibleIn$ ? [{ app, visibleIn$ }] : [];
+      })
+      .map(({ app, visibleIn$ }) =>
+        visibleIn$.pipe(
+          map((visibleIn): VisibleInUpdate => ({ app, visibleIn })),
+          // A failing source falls back to the registered `visibleIn` without stopping the others.
+          catchError(() => of<VisibleInUpdate>({ app, visibleIn: undefined }))
+        )
+      );
+
+    if (visibleInUpdates$.length === 0) {
+      return;
+    }
+
+    this.visibleInSubscription = merge(...visibleInUpdates$).subscribe(({ app, visibleIn }) => {
+      if (visibleIn !== undefined) {
+        this.runtimeVisibleIn.set(app, visibleIn);
+      } else {
+        this.runtimeVisibleIn.delete(app);
+      }
+      this.appUpdater.next(this.createDeepLinksUpdater());
+    });
   }
 }
