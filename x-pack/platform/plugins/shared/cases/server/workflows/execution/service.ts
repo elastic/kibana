@@ -219,7 +219,7 @@ export class CasesWorkflowRunService {
       }
       // Only attachment origins consume `theCase.comments`; fetching them for every other
       // origin type would load all case attachments from ES (up to MAX_DOCS_PER_PAGE) and
-      // io-ts-decode the full case, only to discard the result immediately.
+      // zod-decode the full case, only to discard the result immediately.
       const needsComments =
         body.origin.type === ATTACHMENT_WORKFLOW_ORIGIN_TYPE ||
         body.origin.type === ATTACHMENTS_WORKFLOW_ORIGIN_TYPE;

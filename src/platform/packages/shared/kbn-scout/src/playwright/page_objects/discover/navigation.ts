@@ -25,8 +25,8 @@ export abstract class DiscoverNavigation extends DiscoverAppBase {
     await this.page.gotoApp(
       'discover',
       options.savedSearchId ? { hash: `/view/${options.savedSearchId}` } : undefined,
-      // Kibana's bootstrap defers `load` past app mount; let `dscPage` own the readiness budget.
-      { waitUntil: 'domcontentloaded' }
+      // Resolve on 'commit': `waitForDiscoverPage()` is a stronger gate, with a longer budget.
+      { waitUntil: 'commit' }
     );
     await this.waitForDiscoverPage({ timeout: APP_BOOT_TIMEOUT });
     if (options.queryMode === 'esql') {
