@@ -300,7 +300,10 @@ describe('Expression', () => {
     it('clears a stored schema back to omitted when the unset option is selected', () => {
       const { wrapper, params } = renderShallow({ nodeType: 'host', schema: 'semconv' });
 
-      wrapper.find('[data-test-subj="schemaExpressionSelect"]').prop('onChange')!(undefined);
+      const onChange = wrapper
+        .find('[data-test-subj="schemaExpressionSelect"]')
+        .prop('onChange') as (value: DataSchemaFormat | undefined) => void;
+      onChange(undefined);
 
       expect(params.schema).toBeUndefined();
     });
