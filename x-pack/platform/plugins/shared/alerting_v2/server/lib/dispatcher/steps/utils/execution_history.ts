@@ -5,31 +5,25 @@
  * 2.0.
  */
 
-import { inject, injectable } from 'inversify';
 import type { IEvent } from '@kbn/event-log-plugin/server';
 import { SAVED_OBJECT_REL_PRIMARY } from '@kbn/event-log-plugin/server';
-import { ACTION_POLICY_SAVED_OBJECT_TYPE, RULE_SAVED_OBJECT_TYPE } from '../../../saved_objects';
-import type { EventLogServiceContract } from '../../services/event_log_service/event_log_service';
-import { EventLogServiceToken } from '../../services/event_log_service/tokens';
-import type { LoggerServiceContract } from '../../services/logger_service/logger_service';
-import { DispatchOutcome, DispatchPlan, AlertTriage, RuleCatalog } from '../state';
+import { ACTION_POLICY_SAVED_OBJECT_TYPE, RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
+import type { EventLogServiceContract } from '../../../services/event_log_service/event_log_service';
+import { DispatchOutcome, type RuleCatalog } from '../../state';
 import type {
   ActionGroup,
   ActionGroupId,
   ActionPolicyId,
   Alert,
   DispatchFailure,
-  DispatcherPipelineState,
-  DispatcherStep,
-  DispatcherStepOutput,
   RuleId,
-} from '../types';
+} from '../../types';
 import {
   ACTION_POLICY_EVENT_ACTIONS,
   type ActionPolicyEventAction,
   type DispatchFailureReason,
-} from './constants';
-import { alertSubject } from './utils/subject';
+} from '../constants';
+import { alertSubject } from './subject';
 
 const RULE_REF_CAP = 50;
 
@@ -89,185 +83,184 @@ interface UnmatchedGroup {
   ruleId: RuleId | null;
 }
 
-@injectable()
-export class StoreExecutionHistoryStep implements DispatcherStep {
-  public readonly name = 'store_execution_history';
-
-  constructor(
-    @inject(EventLogServiceToken)
-    private readonly eventLogService: EventLogServiceContract
-  ) {}
-
-  public async execute(
-    state: Readonly<DispatcherPipelineState>,
-    _: LoggerServiceContract
-  ): Promise<DispatcherStepOutput> {
-    const {
-      plan = DispatchPlan.empty(),
-      triage = AlertTriage.empty(),
-      outcome = DispatchOutcome.empty(),
-      rules = RuleCatalog.empty(),
-      input,
-    } = state;
-
-    if (plan.isEmpty() && !triage.hasDispatchable() && !outcome.hasFailures()) {
-      return { type: 'continue' };
-    }
-
-    const timestamp = input.startedAt.toISOString();
-    const { executionUuid } = input;
-
-    for (const summary of aggregateByPolicy(plan.toDispatch, outcome).values()) {
-      this.emitPolicySummary({
-        timestamp,
-        executionUuid,
-        summary,
-        action: ACTION_POLICY_EVENT_ACTIONS.DISPATCHED,
-        rules,
-      });
-    }
-
-    for (const summary of aggregateByPolicy(plan.throttled, DispatchOutcome.empty()).values()) {
-      this.emitPolicySummary({
-        timestamp,
-        executionUuid,
-        summary,
-        action: ACTION_POLICY_EVENT_ACTIONS.THROTTLED,
-        rules,
-      });
-    }
-
-    // `plan.unmatched` excludes every planned group — including fully-failed
-    // ones — so their alerts are not double-reported as `unmatched`. Those
-    // alerts did match a policy; `dispatch_failed` already carries their ids.
-    const unmatched = aggregateUnmatchedBySubject(plan.unmatched);
-    for (const group of unmatched) {
-      this.emitUnmatchedSummary({ timestamp, executionUuid, group });
-    }
-
-    for (const failure of outcome.failures) {
-      this.emitDispatchFailure({ timestamp, executionUuid, failure, rules });
-    }
-
-    return { type: 'continue' };
+/**
+ * Emits the tick's per-policy `dispatched` / `throttled`, per-subject `unmatched` and per-failure
+ * `dispatch_failed` event-log entries.
+ */
+export function emitExecutionHistory({
+  eventLogService,
+  dispatched,
+  throttled,
+  unmatched,
+  outcome,
+  rules,
+  timestamp,
+  executionUuid,
+}: {
+  eventLogService: EventLogServiceContract;
+  dispatched: readonly ActionGroup[];
+  throttled: readonly ActionGroup[];
+  unmatched: readonly Alert[];
+  outcome: DispatchOutcome;
+  rules: RuleCatalog;
+  timestamp: string;
+  executionUuid: string;
+}): void {
+  for (const summary of aggregateByPolicy(dispatched, outcome).values()) {
+    emitPolicySummary({
+      eventLogService,
+      timestamp,
+      executionUuid,
+      summary,
+      action: ACTION_POLICY_EVENT_ACTIONS.DISPATCHED,
+      rules,
+    });
   }
 
-  private emitPolicySummary({
-    timestamp,
-    executionUuid,
-    summary,
-    action,
-    rules,
-  }: {
-    timestamp: string;
-    executionUuid: string;
-    summary: PolicySummary;
-    action: ActionPolicyEventAction;
-    rules: RuleCatalog;
-  }): void {
-    const ruleIds = Array.from(summary.ruleIds);
-    const { refs, spillOver } = buildPolicyAndRuleRefs(
-      summary.policyId,
-      summary.spaceId,
-      ruleIds,
-      rules
-    );
-
-    this.eventLogService.logEvent(
-      buildEvent({
-        timestamp,
-        executionUuid,
-        action,
-        spaceId: summary.spaceId,
-        savedObjects: refs,
-        dispatcherFields: {
-          alert_count: summary.alertIds.size,
-          alert_ids: Array.from(summary.alertIds),
-          rule_count: summary.ruleIds.size,
-          rule_ids: spillOver.length > 0 ? spillOver : undefined,
-          action_group_count: summary.actionGroupIds.size,
-          action_group_ids: Array.from(summary.actionGroupIds),
-          workflow_ids: Array.from(summary.workflowIds),
-          workflow_execution_ids: Array.from(summary.workflowExecutionIds),
-        },
-      })
-    );
+  for (const summary of aggregateByPolicy(throttled, DispatchOutcome.empty()).values()) {
+    emitPolicySummary({
+      eventLogService,
+      timestamp,
+      executionUuid,
+      summary,
+      action: ACTION_POLICY_EVENT_ACTIONS.THROTTLED,
+      rules,
+    });
   }
 
-  private emitUnmatchedSummary({
-    timestamp,
-    executionUuid,
-    group,
-  }: {
-    timestamp: string;
-    executionUuid: string;
-    group: UnmatchedGroup;
-  }): void {
-    const savedObjects: SavedObjectRef[] =
-      group.ruleId != null ? [ruleRef({ id: group.ruleId, spaceId: group.space_id })] : [];
-    this.eventLogService.logEvent(
-      buildEvent({
-        timestamp,
-        executionUuid,
-        action: ACTION_POLICY_EVENT_ACTIONS.UNMATCHED,
-        spaceId: group.space_id,
-        savedObjects,
-        dispatcherFields: {
-          alert_count: group.alertIds.size,
-          alert_ids: Array.from(group.alertIds),
-        },
-      })
-    );
+  // `plan.unmatched` excludes every planned group — including fully-failed
+  // ones — so their alerts are not double-reported as `unmatched`. Those
+  // alerts did match a policy; `dispatch_failed` already carries their ids.
+  for (const group of aggregateUnmatchedBySubject(unmatched)) {
+    emitUnmatchedSummary({ eventLogService, timestamp, executionUuid, group });
   }
 
-  private emitDispatchFailure({
-    timestamp,
-    executionUuid,
-    failure,
-    rules,
-  }: {
-    timestamp: string;
-    executionUuid: string;
-    failure: DispatchFailure;
-    rules: RuleCatalog;
-  }): void {
-    const ruleIdSet = new Set<string>();
-    const alertIdSet = new Set<string>();
-    for (const { rule_id, alert_id } of failure.alerts) {
-      if (rule_id != null) ruleIdSet.add(rule_id);
-      alertIdSet.add(alert_id);
-    }
-    const ruleIds = Array.from(ruleIdSet);
-    const alertIds = Array.from(alertIdSet);
-    const { refs, spillOver } = buildPolicyAndRuleRefs(
-      failure.policyId,
-      failure.spaceId,
-      ruleIds,
-      rules
-    );
-
-    this.eventLogService.logEvent(
-      buildEvent({
-        timestamp,
-        executionUuid,
-        action: ACTION_POLICY_EVENT_ACTIONS.DISPATCH_FAILED,
-        outcome: 'failure',
-        error: failure.message,
-        spaceId: failure.spaceId,
-        savedObjects: refs,
-        dispatcherFields: {
-          failure_reason: failure.reason,
-          action_group_count: 1,
-          action_group_ids: [failure.actionGroupId],
-          workflow_ids: [failure.workflowId],
-          alert_count: alertIds.length,
-          alert_ids: alertIds,
-          rule_count: ruleIds.length,
-          rule_ids: spillOver.length > 0 ? spillOver : undefined,
-        },
-      })
-    );
+  for (const failure of outcome.failures) {
+    emitDispatchFailure({ eventLogService, timestamp, executionUuid, failure, rules });
   }
+}
+
+function emitPolicySummary({
+  eventLogService,
+  timestamp,
+  executionUuid,
+  summary,
+  action,
+  rules,
+}: {
+  eventLogService: EventLogServiceContract;
+  timestamp: string;
+  executionUuid: string;
+  summary: PolicySummary;
+  action: ActionPolicyEventAction;
+  rules: RuleCatalog;
+}): void {
+  const ruleIds = Array.from(summary.ruleIds);
+  const { refs, spillOver } = buildPolicyAndRuleRefs(
+    summary.policyId,
+    summary.spaceId,
+    ruleIds,
+    rules
+  );
+
+  eventLogService.logEvent(
+    buildEvent({
+      timestamp,
+      executionUuid,
+      action,
+      spaceId: summary.spaceId,
+      savedObjects: refs,
+      dispatcherFields: {
+        alert_count: summary.alertIds.size,
+        alert_ids: Array.from(summary.alertIds),
+        rule_count: summary.ruleIds.size,
+        rule_ids: spillOver.length > 0 ? spillOver : undefined,
+        action_group_count: summary.actionGroupIds.size,
+        action_group_ids: Array.from(summary.actionGroupIds),
+        workflow_ids: Array.from(summary.workflowIds),
+        workflow_execution_ids: Array.from(summary.workflowExecutionIds),
+      },
+    })
+  );
+}
+
+function emitUnmatchedSummary({
+  eventLogService,
+  timestamp,
+  executionUuid,
+  group,
+}: {
+  eventLogService: EventLogServiceContract;
+  timestamp: string;
+  executionUuid: string;
+  group: UnmatchedGroup;
+}): void {
+  const savedObjects: SavedObjectRef[] =
+    group.ruleId != null ? [ruleRef({ id: group.ruleId, spaceId: group.space_id })] : [];
+  eventLogService.logEvent(
+    buildEvent({
+      timestamp,
+      executionUuid,
+      action: ACTION_POLICY_EVENT_ACTIONS.UNMATCHED,
+      spaceId: group.space_id,
+      savedObjects,
+      dispatcherFields: {
+        alert_count: group.alertIds.size,
+        alert_ids: Array.from(group.alertIds),
+      },
+    })
+  );
+}
+
+function emitDispatchFailure({
+  eventLogService,
+  timestamp,
+  executionUuid,
+  failure,
+  rules,
+}: {
+  eventLogService: EventLogServiceContract;
+  timestamp: string;
+  executionUuid: string;
+  failure: DispatchFailure;
+  rules: RuleCatalog;
+}): void {
+  const ruleIdSet = new Set<string>();
+  const alertIdSet = new Set<string>();
+  for (const { rule_id, alert_id } of failure.alerts) {
+    if (rule_id != null) ruleIdSet.add(rule_id);
+    alertIdSet.add(alert_id);
+  }
+  const ruleIds = Array.from(ruleIdSet);
+  const alertIds = Array.from(alertIdSet);
+  const { refs, spillOver } = buildPolicyAndRuleRefs(
+    failure.policyId,
+    failure.spaceId,
+    ruleIds,
+    rules
+  );
+
+  eventLogService.logEvent(
+    buildEvent({
+      timestamp,
+      executionUuid,
+      action: ACTION_POLICY_EVENT_ACTIONS.DISPATCH_FAILED,
+      outcome: 'failure',
+      error: failure.message,
+      spaceId: failure.spaceId,
+      savedObjects: refs,
+      dispatcherFields: {
+        failure_reason: failure.reason,
+        action_group_count: 1,
+        action_group_ids: [failure.actionGroupId],
+        workflow_ids: [failure.workflowId],
+        alert_count: alertIds.length,
+        alert_ids: alertIds,
+        rule_count: ruleIds.length,
+        rule_ids: spillOver.length > 0 ? spillOver : undefined,
+      },
+    })
+  );
 }
 
 /**

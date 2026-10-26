@@ -6,8 +6,8 @@
  */
 
 import type { eventLoggerMock } from '@kbn/event-log-plugin/server/mocks';
-import { ACTION_POLICY_SAVED_OBJECT_TYPE, RULE_SAVED_OBJECT_TYPE } from '../../../saved_objects';
-import { createEventLogService } from '../../services/event_log_service/event_log_service.mock';
+import { ACTION_POLICY_SAVED_OBJECT_TYPE, RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
+import { createEventLogService } from '../../../services/event_log_service/event_log_service.mock';
 import {
   createActionGroup,
   createActionPolicy,
@@ -16,25 +16,45 @@ import {
   createDispatcherPipelineInput,
   createDispatcherPipelineState,
   createRule,
-  createStepLogger,
-} from '../fixtures/test_utils';
-import type { ActionPolicy, ActionPolicyId, DispatchFailure, Rule, RuleId } from '../types';
-import { StoreExecutionHistoryStep } from './store_execution_history_step';
-import { DISPATCH_FAILURE_REASONS } from './constants';
+} from '../../fixtures/test_utils';
+import type {
+  ActionPolicy,
+  ActionPolicyId,
+  DispatchFailure,
+  DispatcherPipelineState,
+  Rule,
+  RuleId,
+} from '../../types';
+import { DispatchOutcome, DispatchPlan, RuleCatalog } from '../../state';
+import { emitExecutionHistory } from './execution_history';
+import { DISPATCH_FAILURE_REASONS } from '../constants';
 
-const logger = createStepLogger();
-
-describe('StoreExecutionHistoryStep', () => {
+describe('emitExecutionHistory', () => {
   let eventLogger: ReturnType<typeof eventLoggerMock.create>;
-  let step: StoreExecutionHistoryStep;
+  let emitFromState: (state: DispatcherPipelineState) => void;
 
   beforeEach(() => {
     const { eventLogService, mockEventLogger } = createEventLogService();
     eventLogger = mockEventLogger;
-    step = new StoreExecutionHistoryStep(eventLogService);
+    emitFromState = ({
+      plan = DispatchPlan.empty(),
+      outcome = DispatchOutcome.empty(),
+      rules = RuleCatalog.empty(),
+      input,
+    }) =>
+      emitExecutionHistory({
+        eventLogService,
+        dispatched: plan.toDispatch,
+        throttled: plan.throttled,
+        unmatched: plan.unmatched,
+        outcome,
+        rules,
+        timestamp: input.startedAt.toISOString(),
+        executionUuid: input.executionUuid,
+      });
   });
 
-  it('emits one dispatched summary per policy with aggregated alert/rule/group counts', async () => {
+  it('emits one dispatched summary per policy with aggregated alert/rule/group counts', () => {
     const ruleA = createRule({ id: 'rule-a', spaceId: 'default' });
     const ruleB = createRule({ id: 'rule-b', spaceId: 'default' });
     const policy = createActionPolicy({ id: 'policy-1', spaceId: 'default' });
@@ -58,7 +78,7 @@ describe('StoreExecutionHistoryStep', () => {
       destinations: [{ type: 'workflow', id: 'wf-b' }],
     });
 
-    await step.execute(
+    emitFromState(
       createDispatcherPipelineState({
         dispatch: [group1, group2],
         dispatchable: alerts,
@@ -71,8 +91,7 @@ describe('StoreExecutionHistoryStep', () => {
           ['group-1', ['exec-a']],
           ['group-2', ['exec-b']],
         ]),
-      }),
-      logger
+      })
     );
 
     expect(eventLogger.logEvent).toHaveBeenCalledTimes(1);
@@ -113,7 +132,7 @@ describe('StoreExecutionHistoryStep', () => {
     });
   });
 
-  it('emits separate summaries per policy when multiple policies dispatched in one run', async () => {
+  it('emits separate summaries per policy when multiple policies dispatched in one run', () => {
     const rule = createRule({ id: 'rule-1' });
     const policyA = createActionPolicy({ id: 'policy-a' });
     const policyB = createActionPolicy({ id: 'policy-b' });
@@ -121,7 +140,7 @@ describe('StoreExecutionHistoryStep', () => {
     const groupA = createActionGroup({ id: 'g-a', policyId: 'policy-a', alerts: [alert] });
     const groupB = createActionGroup({ id: 'g-b', policyId: 'policy-b', alerts: [alert] });
 
-    await step.execute(
+    emitFromState(
       createDispatcherPipelineState({
         dispatch: [groupA, groupB],
         dispatchable: [alert],
@@ -130,8 +149,7 @@ describe('StoreExecutionHistoryStep', () => {
           [policyA.id, policyA],
           [policyB.id, policyB],
         ]),
-      }),
-      logger
+      })
     );
 
     expect(eventLogger.logEvent).toHaveBeenCalledTimes(2);
@@ -141,7 +159,7 @@ describe('StoreExecutionHistoryStep', () => {
     expect(new Set(policyIds)).toEqual(new Set(['policy-a', 'policy-b']));
   });
 
-  it('emits a throttled summary with the same shape as dispatched', async () => {
+  it('emits a throttled summary with the same shape as dispatched', () => {
     const rule = createRule({ id: 'rule-1' });
     const policy = createActionPolicy({ id: 'policy-1' });
     const alert = createAlert({ rule_id: 'rule-1', alert_id: 'ep-1' });
@@ -152,14 +170,13 @@ describe('StoreExecutionHistoryStep', () => {
       destinations: [{ type: 'workflow', id: 'wf-a' }],
     });
 
-    await step.execute(
+    emitFromState(
       createDispatcherPipelineState({
         throttled: [group],
         dispatchable: [alert],
         rules: new Map<RuleId, Rule>([[rule.id, rule]]),
         policies: new Map<ActionPolicyId, ActionPolicy>([[policy.id, policy]]),
-      }),
-      logger
+      })
     );
 
     expect(eventLogger.logEvent).toHaveBeenCalledTimes(1);
@@ -178,22 +195,21 @@ describe('StoreExecutionHistoryStep', () => {
     });
   });
 
-  it('emits one unmatched summary per rule with alert_ids for that rule', async () => {
+  it('emits one unmatched summary per rule with alert_ids for that rule', () => {
     const ruleA = createRule({ id: 'rule-a' });
     const ruleB = createRule({ id: 'rule-b' });
     const unmatchedA1 = createAlert({ rule_id: 'rule-a', alert_id: 'ep-a1' });
     const unmatchedA2 = createAlert({ rule_id: 'rule-a', alert_id: 'ep-a2' });
     const unmatchedB1 = createAlert({ rule_id: 'rule-b', alert_id: 'ep-b1' });
 
-    await step.execute(
+    emitFromState(
       createDispatcherPipelineState({
         dispatchable: [unmatchedA1, unmatchedA2, unmatchedB1],
         rules: new Map<RuleId, Rule>([
           [ruleA.id, ruleA],
           [ruleB.id, ruleB],
         ]),
-      }),
-      logger
+      })
     );
 
     expect(eventLogger.logEvent).toHaveBeenCalledTimes(2);
@@ -227,22 +243,21 @@ describe('StoreExecutionHistoryStep', () => {
     expect(eventB?.kibana?.saved_objects?.[0]?.type_id).toBe('alert');
   });
 
-  it('excludes alerts handled by dispatch or throttled from the unmatched set', async () => {
+  it('excludes alerts handled by dispatch or throttled from the unmatched set', () => {
     const rule = createRule({ id: 'rule-1' });
     const policy = createActionPolicy({ id: 'policy-1' });
     const dispatched = createAlert({ rule_id: 'rule-1', alert_id: 'ep-dispatched' });
     const throttledEp = createAlert({ rule_id: 'rule-1', alert_id: 'ep-throttled' });
     const unmatchedEp = createAlert({ rule_id: 'rule-1', alert_id: 'ep-unmatched' });
 
-    await step.execute(
+    emitFromState(
       createDispatcherPipelineState({
         dispatch: [createActionGroup({ id: 'g1', policyId: 'policy-1', alerts: [dispatched] })],
         throttled: [createActionGroup({ id: 'g2', policyId: 'policy-1', alerts: [throttledEp] })],
         dispatchable: [dispatched, throttledEp, unmatchedEp],
         rules: new Map<RuleId, Rule>([[rule.id, rule]]),
         policies: new Map<ActionPolicyId, ActionPolicy>([[policy.id, policy]]),
-      }),
-      logger
+      })
     );
 
     expect(eventLogger.logEvent).toHaveBeenCalledTimes(3);
@@ -254,7 +269,7 @@ describe('StoreExecutionHistoryStep', () => {
     expect(unmatchedEvent?.kibana?.alerting_v2?.dispatcher?.alert_ids).toEqual(['ep-unmatched']);
   });
 
-  it('stamps the same execution.uuid on every event emitted in a single run', async () => {
+  it('stamps the same execution.uuid on every event emitted in a single run', () => {
     const rule = createRule({ id: 'rule-1' });
     const policy = createActionPolicy({ id: 'policy-1' });
     const dispatched = createAlert({ rule_id: 'rule-1', alert_id: 'ep-dispatched' });
@@ -262,7 +277,7 @@ describe('StoreExecutionHistoryStep', () => {
     const unmatchedEp = createAlert({ rule_id: 'rule-1', alert_id: 'ep-unmatched' });
     const executionUuid = 'a1b2c3d4-e5f6-4789-9abc-def012345678';
 
-    await step.execute(
+    emitFromState(
       createDispatcherPipelineState({
         input: createDispatcherPipelineInput({ executionUuid }),
         dispatch: [createActionGroup({ id: 'g1', policyId: 'policy-1', alerts: [dispatched] })],
@@ -270,8 +285,7 @@ describe('StoreExecutionHistoryStep', () => {
         dispatchable: [dispatched, throttledEp, unmatchedEp],
         rules: new Map<RuleId, Rule>([[rule.id, rule]]),
         policies: new Map<ActionPolicyId, ActionPolicy>([[policy.id, policy]]),
-      }),
-      logger
+      })
     );
 
     expect(eventLogger.logEvent).toHaveBeenCalledTimes(3);
@@ -281,14 +295,13 @@ describe('StoreExecutionHistoryStep', () => {
     expect(uuids).toEqual([executionUuid, executionUuid, executionUuid]);
   });
 
-  it('returns continue without emitting events when there is nothing to record', async () => {
-    const result = await step.execute(createDispatcherPipelineState({}), logger);
+  it('short-circuits when there is nothing to record', () => {
+    emitFromState(createDispatcherPipelineState({}));
 
-    expect(result).toEqual({ type: 'continue' });
     expect(eventLogger.logEvent).not.toHaveBeenCalled();
   });
 
-  it('emits a dispatch_failed event for a failed action-group → workflow attempt', async () => {
+  it('emits a dispatch_failed event for a failed action-group → workflow attempt', () => {
     const ruleA = createRule({ id: 'rule-a', spaceId: 'default' });
     const ruleB = createRule({ id: 'rule-b', spaceId: 'default' });
     const failure: DispatchFailure = {
@@ -304,15 +317,14 @@ describe('StoreExecutionHistoryStep', () => {
       message: 'Workflow wf-a is disabled, enable it to dispatch for group group-1',
     };
 
-    await step.execute(
+    emitFromState(
       createDispatcherPipelineState({
         dispatchFailures: [failure],
         rules: new Map<RuleId, Rule>([
           [ruleA.id, ruleA],
           [ruleB.id, ruleB],
         ]),
-      }),
-      logger
+      })
     );
 
     expect(eventLogger.logEvent).toHaveBeenCalledTimes(1);
@@ -356,7 +368,7 @@ describe('StoreExecutionHistoryStep', () => {
     });
   });
 
-  it('sets namespace and space_ids on dispatch_failed events for non-default spaces', async () => {
+  it('sets namespace and space_ids on dispatch_failed events for non-default spaces', () => {
     const rule = createRule({ id: 'rule-1', spaceId: 'my-space' });
     const failure: DispatchFailure = {
       policyId: 'policy-1',
@@ -368,12 +380,11 @@ describe('StoreExecutionHistoryStep', () => {
       message: 'not found',
     };
 
-    await step.execute(
+    emitFromState(
       createDispatcherPipelineState({
         dispatchFailures: [failure],
         rules: new Map<RuleId, Rule>([[rule.id, rule]]),
-      }),
-      logger
+      })
     );
 
     const [[event]] = eventLogger.logEvent.mock.calls;
@@ -382,7 +393,7 @@ describe('StoreExecutionHistoryStep', () => {
     expect(event?.kibana?.saved_objects?.[1]?.namespace).toBe('my-space');
   });
 
-  it('spills failure rule ids beyond the SO-ref cap into dispatcher.rule_ids', async () => {
+  it('spills failure rule ids beyond the SO-ref cap into dispatcher.rule_ids', () => {
     const ruleIds = Array.from({ length: 55 }, (_, i) => `rule-${i}`);
     const rules = new Map<RuleId, Rule>(
       ruleIds.map((id) => [id, createRule({ id, spaceId: 'default' })])
@@ -397,10 +408,7 @@ describe('StoreExecutionHistoryStep', () => {
       message: 'boom',
     };
 
-    await step.execute(
-      createDispatcherPipelineState({ dispatchFailures: [failure], rules }),
-      logger
-    );
+    emitFromState(createDispatcherPipelineState({ dispatchFailures: [failure], rules }));
 
     const [[event]] = eventLogger.logEvent.mock.calls;
     const refs = event?.kibana?.saved_objects ?? [];
@@ -416,7 +424,7 @@ describe('StoreExecutionHistoryStep', () => {
     ]);
   });
 
-  it('sets namespace and space_ids for non-default spaces', async () => {
+  it('sets namespace and space_ids for non-default spaces', () => {
     const rule = createRule({ id: 'rule-1', spaceId: 'my-space' });
     const policy = createActionPolicy({ id: 'policy-1', spaceId: 'my-space' });
     const alert = createAlert({ rule_id: 'rule-1' });
@@ -426,14 +434,13 @@ describe('StoreExecutionHistoryStep', () => {
       alerts: [alert],
     });
 
-    await step.execute(
+    emitFromState(
       createDispatcherPipelineState({
         dispatch: [group],
         dispatchable: [alert],
         rules: new Map<RuleId, Rule>([[rule.id, rule]]),
         policies: new Map<ActionPolicyId, ActionPolicy>([[policy.id, policy]]),
-      }),
-      logger
+      })
     );
 
     const [[event]] = eventLogger.logEvent.mock.calls;
@@ -442,7 +449,7 @@ describe('StoreExecutionHistoryStep', () => {
     expect(event?.kibana?.saved_objects?.[1]?.namespace).toBe('my-space');
   });
 
-  it('deduplicates workflow_ids across an active policy multiple action groups', async () => {
+  it('deduplicates workflow_ids across an active policy multiple action groups', () => {
     const rule = createRule({ id: 'rule-1' });
     const policy = createActionPolicy({ id: 'policy-1' });
     const alert = createAlert({ rule_id: 'rule-1' });
@@ -465,25 +472,24 @@ describe('StoreExecutionHistoryStep', () => {
       ],
     });
 
-    await step.execute(
+    emitFromState(
       createDispatcherPipelineState({
         dispatch: [group1, group2],
         dispatchable: [alert],
         rules: new Map<RuleId, Rule>([[rule.id, rule]]),
         policies: new Map<ActionPolicyId, ActionPolicy>([[policy.id, policy]]),
-      }),
-      logger
+      })
     );
 
     const [[event]] = eventLogger.logEvent.mock.calls;
     expect(event?.kibana?.alerting_v2?.dispatcher?.workflow_ids).toEqual(['wf-a', 'wf-b', 'wf-c']);
   });
 
-  it('stamps @timestamp from pipeline input.startedAt', async () => {
+  it('stamps @timestamp from pipeline input.startedAt', () => {
     const rule = createRule({ id: 'rule-1' });
     const alert = createAlert({ rule_id: 'rule-1' });
 
-    await step.execute(
+    emitFromState(
       createDispatcherPipelineState({
         input: createDispatcherPipelineInput({
           startedAt: new Date('2027-06-01T12:34:56.789Z'),
@@ -491,15 +497,14 @@ describe('StoreExecutionHistoryStep', () => {
         }),
         dispatchable: [alert],
         rules: new Map<RuleId, Rule>([[rule.id, rule]]),
-      }),
-      logger
+      })
     );
 
     const [[event]] = eventLogger.logEvent.mock.calls;
     expect(event?.['@timestamp']).toBe('2027-06-01T12:34:56.789Z');
   });
 
-  it('spills rule ids beyond the SO-ref cap into kibana.alerting_v2.dispatcher.rule_ids', async () => {
+  it('spills rule ids beyond the SO-ref cap into kibana.alerting_v2.dispatcher.rule_ids', () => {
     const policy = createActionPolicy({ id: 'policy-1' });
     const ruleIds = Array.from({ length: 55 }, (_, i) => `rule-${i}`);
     const rules = new Map<RuleId, Rule>(
@@ -512,14 +517,13 @@ describe('StoreExecutionHistoryStep', () => {
       alerts,
     });
 
-    await step.execute(
+    emitFromState(
       createDispatcherPipelineState({
         dispatch: [group],
         dispatchable: alerts,
         rules,
         policies: new Map<ActionPolicyId, ActionPolicy>([[policy.id, policy]]),
-      }),
-      logger
+      })
     );
 
     const [[event]] = eventLogger.logEvent.mock.calls;
@@ -534,7 +538,7 @@ describe('StoreExecutionHistoryStep', () => {
   });
 
   describe('partial and total dispatch failures', () => {
-    it('partial group failure: excludes the failed workflow from the dispatched summary', async () => {
+    it('partial group failure: excludes the failed workflow from the dispatched summary', () => {
       const rule = createRule({ id: 'rule-1' });
       const policy = createActionPolicy({ id: 'policy-1' });
       const alert = createAlert({ rule_id: 'rule-1', alert_id: 'ep-1' });
@@ -556,7 +560,7 @@ describe('StoreExecutionHistoryStep', () => {
         message: 'Workflow wf-b is disabled',
       });
 
-      await step.execute(
+      emitFromState(
         createDispatcherPipelineState({
           dispatch: [group],
           dispatchable: [alert],
@@ -564,8 +568,7 @@ describe('StoreExecutionHistoryStep', () => {
           dispatchFailures: [failure],
           rules: new Map<RuleId, Rule>([[rule.id, rule]]),
           policies: new Map<ActionPolicyId, ActionPolicy>([[policy.id, policy]]),
-        }),
-        logger
+        })
       );
 
       expect(eventLogger.logEvent).toHaveBeenCalledTimes(2);
@@ -582,7 +585,7 @@ describe('StoreExecutionHistoryStep', () => {
       expect(failed?.kibana?.alerting_v2?.dispatcher?.workflow_ids).toEqual(['wf-b']);
     });
 
-    it('total group failure: emits no dispatched event and no unmatched event', async () => {
+    it('total group failure: emits no dispatched event and no unmatched event', () => {
       const rule = createRule({ id: 'rule-1' });
       const alert = createAlert({ rule_id: 'rule-1', alert_id: 'ep-1' });
       const group = createActionGroup({
@@ -599,14 +602,13 @@ describe('StoreExecutionHistoryStep', () => {
         createDispatchFailure({ actionGroupId: 'g1', workflowId: 'wf-b', alerts: [alert] }),
       ];
 
-      await step.execute(
+      emitFromState(
         createDispatcherPipelineState({
           dispatch: [group],
           dispatchable: [alert],
           dispatchFailures: failures,
           rules: new Map<RuleId, Rule>([[rule.id, rule]]),
-        }),
-        logger
+        })
       );
 
       const actions = eventLogger.logEvent.mock.calls.map(([event]) => event?.event?.action);
@@ -615,7 +617,7 @@ describe('StoreExecutionHistoryStep', () => {
       expect(actions.filter((a) => a === 'dispatch_failed')).toHaveLength(2);
     });
 
-    it('same workflow in two groups: success for g1 is not suppressed by g2 failure', async () => {
+    it('same workflow in two groups: success for g1 is not suppressed by g2 failure', () => {
       const rule = createRule({ id: 'rule-1' });
       const policy = createActionPolicy({ id: 'policy-1' });
       const alert1 = createAlert({ rule_id: 'rule-1', alert_id: 'ep-1' });
@@ -641,7 +643,7 @@ describe('StoreExecutionHistoryStep', () => {
         message: 'Workflow wf-a not found',
       });
 
-      await step.execute(
+      emitFromState(
         createDispatcherPipelineState({
           dispatch: [group1, group2],
           dispatchable: [alert1, alert2],
@@ -649,8 +651,7 @@ describe('StoreExecutionHistoryStep', () => {
           dispatchFailures: [failure],
           rules: new Map<RuleId, Rule>([[rule.id, rule]]),
           policies: new Map<ActionPolicyId, ActionPolicy>([[policy.id, policy]]),
-        }),
-        logger
+        })
       );
 
       const calls = eventLogger.logEvent.mock.calls;
@@ -664,7 +665,7 @@ describe('StoreExecutionHistoryStep', () => {
       });
     });
 
-    it('mixed groups in one policy: fully-failed group alerts excluded from dispatched summary', async () => {
+    it('mixed groups in one policy: fully-failed group alerts excluded from dispatched summary', () => {
       const rule = createRule({ id: 'rule-1' });
       const policy = createActionPolicy({ id: 'policy-1' });
       const alert1 = createAlert({ rule_id: 'rule-1', alert_id: 'ep-1' });
@@ -688,7 +689,7 @@ describe('StoreExecutionHistoryStep', () => {
         alerts: [alert1],
       });
 
-      await step.execute(
+      emitFromState(
         createDispatcherPipelineState({
           dispatch: [failedGroup, successGroup],
           dispatchable: [alert1, alert2],
@@ -696,8 +697,7 @@ describe('StoreExecutionHistoryStep', () => {
           dispatchFailures: [failure],
           rules: new Map<RuleId, Rule>([[rule.id, rule]]),
           policies: new Map<ActionPolicyId, ActionPolicy>([[policy.id, policy]]),
-        }),
-        logger
+        })
       );
 
       const calls = eventLogger.logEvent.mock.calls;
@@ -714,7 +714,7 @@ describe('StoreExecutionHistoryStep', () => {
       });
     });
 
-    it('throttled summary is not affected by dispatch failures referencing the same group id', async () => {
+    it('throttled summary is not affected by dispatch failures referencing the same group id', () => {
       const rule = createRule({ id: 'rule-1' });
       const policy = createActionPolicy({ id: 'policy-1' });
       const alert = createAlert({ rule_id: 'rule-1', alert_id: 'ep-1' });
@@ -736,15 +736,14 @@ describe('StoreExecutionHistoryStep', () => {
         alerts: [alert],
       });
 
-      await step.execute(
+      emitFromState(
         createDispatcherPipelineState({
           throttled: [throttledGroup],
           dispatchable: [alert],
           dispatchFailures: [failure],
           rules: new Map<RuleId, Rule>([[rule.id, rule]]),
           policies: new Map<ActionPolicyId, ActionPolicy>([[policy.id, policy]]),
-        }),
-        logger
+        })
       );
 
       const calls = eventLogger.logEvent.mock.calls;
@@ -758,7 +757,7 @@ describe('StoreExecutionHistoryStep', () => {
   });
 
   describe('external alert handling', () => {
-    it('two external alerts from different vendors produce separate unmatched events', async () => {
+    it('two external alerts from different vendors produce separate unmatched events', () => {
       const pdAlert = createAlert({
         source: 'pagerduty',
         rule_id: null,
@@ -772,11 +771,10 @@ describe('StoreExecutionHistoryStep', () => {
         alert_id: 'dd-1',
       });
 
-      await step.execute(
+      emitFromState(
         createDispatcherPipelineState({
           dispatchable: [pdAlert, ddAlert],
-        }),
-        logger
+        })
       );
 
       expect(eventLogger.logEvent).toHaveBeenCalledTimes(2);
@@ -789,7 +787,7 @@ describe('StoreExecutionHistoryStep', () => {
       expect(alertSets).toContainEqual(['dd-1']);
     });
 
-    it('same vendor in two spaces produces separate unmatched events', async () => {
+    it('same vendor in two spaces produces separate unmatched events', () => {
       const alerts = ['space-a', 'space-b'].map((spaceId) =>
         createAlert({
           source: 'pagerduty',
@@ -799,14 +797,14 @@ describe('StoreExecutionHistoryStep', () => {
         })
       );
 
-      await step.execute(createDispatcherPipelineState({ dispatchable: alerts }), logger);
+      emitFromState(createDispatcherPipelineState({ dispatchable: alerts }));
 
       expect(eventLogger.logEvent).toHaveBeenCalledTimes(2);
       const spaces = eventLogger.logEvent.mock.calls.map(([event]) => event?.kibana?.space_ids);
       expect(spaces).toEqual([['space-a'], ['space-b']]);
     });
 
-    it('external alert uses alert.space_id for the event space, not a rule space', async () => {
+    it('external alert uses alert.space_id for the event space, not a rule space', () => {
       const pdAlert = createAlert({
         source: 'pagerduty',
         rule_id: null,
@@ -814,16 +812,66 @@ describe('StoreExecutionHistoryStep', () => {
         alert_id: 'pd-1',
       });
 
-      await step.execute(
+      emitFromState(
         createDispatcherPipelineState({
           dispatchable: [pdAlert],
-        }),
-        logger
+        })
       );
 
       const [[event]] = eventLogger.logEvent.mock.calls;
       expect(event?.kibana?.space_ids).toEqual(['my-space']);
       expect(event?.kibana?.saved_objects).toEqual([]);
     });
+  });
+
+  it('emits dispatched, throttled, unmatched and dispatch_failed events in that order', () => {
+    const dispatched = createActionGroup({
+      id: 'g1',
+      policyId: 'p1',
+      alerts: [createAlert({ alert_id: 'alert-1' })],
+    });
+    const throttled = createActionGroup({
+      id: 'g2',
+      policyId: 'p2',
+      alerts: [createAlert({ alert_id: 'alert-2' })],
+    });
+    const failed = createActionGroup({
+      id: 'g3',
+      policyId: 'p3',
+      alerts: [createAlert({ alert_id: 'alert-4' })],
+    });
+
+    emitFromState(
+      createDispatcherPipelineState({
+        input: createDispatcherPipelineInput({ executionUuid: 'execution-1' }),
+        dispatch: [dispatched, failed],
+        throttled: [throttled],
+        dispatchable: [
+          ...dispatched.alerts,
+          ...throttled.alerts,
+          ...failed.alerts,
+          createAlert({ alert_id: 'alert-3' }),
+        ],
+        dispatchedExecutions: new Map([['g1', ['exec-1']]]),
+        dispatchFailures: [
+          createDispatchFailure({ policyId: 'p3', actionGroupId: 'g3', alerts: failed.alerts }),
+        ],
+      })
+    );
+
+    expect(eventLogger.logEvent.mock.calls.map(([event]) => event?.event?.action)).toEqual([
+      'dispatched',
+      'throttled',
+      'unmatched',
+      'dispatch_failed',
+    ]);
+    const [[dispatchedEvent]] = eventLogger.logEvent.mock.calls;
+    expect(dispatchedEvent?.kibana?.alerting_v2?.dispatcher).toMatchObject({
+      alert_ids: ['alert-1'],
+      action_group_ids: ['g1'],
+      workflow_execution_ids: ['exec-1'],
+      execution: { uuid: 'execution-1' },
+    });
+    expect(dispatchedEvent?.['@timestamp']).toBe('2026-01-22T08:00:00.000Z');
   });
 });
