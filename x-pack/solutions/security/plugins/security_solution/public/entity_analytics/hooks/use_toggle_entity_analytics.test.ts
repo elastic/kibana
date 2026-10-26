@@ -172,6 +172,70 @@ describe('useToggleEntityAnalytics', () => {
     });
   });
 
+  describe('pendingAction', () => {
+    it('reports as "enable" while the store is installing', async () => {
+      let resolveInstall: () => void = () => undefined;
+      mockInstallEntityStore.mockReturnValue(
+        new Promise<void>((resolve) => {
+          resolveInstall = resolve;
+        })
+      );
+
+      const { result, rerender } = renderHook(() => useToggleEntityAnalytics(defaultOptions));
+
+      let togglePromise: Promise<void> = Promise.resolve();
+      await act(async () => {
+        togglePromise = result.current.toggle();
+      });
+
+      expect(result.current.pendingAction).toBe('enable');
+
+      mockEntityStoreStatusReturn = {
+        data: { status: 'running', engines: [] },
+        isLoading: false,
+      };
+      rerender();
+
+      expect(result.current.pendingAction).toBe('enable');
+
+      await act(async () => {
+        resolveInstall();
+        await togglePromise;
+      });
+
+      expect(result.current.pendingAction).toBeNull();
+    });
+
+    it('reports as "disable" while the store is stopping', async () => {
+      let resolveStop: () => void = () => undefined;
+      mockStopEntityStore.mockReturnValueOnce(
+        new Promise<void>((resolve) => {
+          resolveStop = resolve;
+        })
+      );
+      mockEntityStoreStatusReturn = {
+        data: { status: 'running', engines: [] },
+        isLoading: false,
+      };
+
+      const { result } = renderHook(() => useToggleEntityAnalytics(defaultOptions));
+
+      let togglePromise: Promise<void> = Promise.resolve();
+      await act(async () => {
+        togglePromise = result.current.toggle();
+      });
+
+      expect(result.current.pendingAction).toBe('disable');
+
+      await act(async () => {
+        resolveStop();
+        await togglePromise;
+      });
+
+      expect(result.current.pendingAction).toBeNull();
+    });
+  });
+
   describe('isLoading guard', () => {
     it('is a no-op when isSavingSettings makes isLoading true', async () => {
       const { result } = renderHook(() =>

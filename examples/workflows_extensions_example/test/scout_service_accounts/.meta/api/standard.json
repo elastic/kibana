@@ -1,5 +1,5 @@
 {
-  "sha1": "6046f34202f1c33034bb5eba8418ea72867d3886",
+  "sha1": "60ba9b4c717a5a5d0a706def0e687af4ec1bc98a",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -28,7 +28,7 @@
       ],
       "location": {
         "file": "examples/workflows_extensions_example/test/scout_service_accounts/api/tests/managed_service_accounts.spec.ts",
-        "line": 45,
+        "line": 49,
         "column": 37
       }
     }

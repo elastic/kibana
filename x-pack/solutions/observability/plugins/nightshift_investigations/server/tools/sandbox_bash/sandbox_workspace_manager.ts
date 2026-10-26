@@ -12,7 +12,11 @@ import type { SandboxSecretsClient } from '../../sandbox_secrets';
 import type { SandboxCallContext } from './tool_utils';
 import { authorizeConnector } from './connector_authorization';
 import { writeConnectorManifest } from './connector_manifest';
-import { writeElasticManifest } from './elastic_manifest';
+import {
+  findElasticSecretCredentials,
+  writeElasticManifest,
+  type ElasticCredentials,
+} from './elastic_manifest';
 
 /**
  * Tracks per-conversation workspace state (connector IDs and sandbox secret keys) and writes the
@@ -31,7 +35,10 @@ export const createSandboxWorkspaceManager = ({
     actions?: ActionsPluginStart;
     sandboxSecretsClient?: Pick<SandboxSecretsClient, 'listKeysForSandbox'>;
   };
-  /** When set, `/workspace/elastic.md` is (re-)seeded alongside the connector manifest. */
+  /**
+   * When set, `/workspace/elastic.md` is (re-)seeded alongside the connector manifest. Without a
+   * usable connector it documents the Elasticsearch sandbox secrets instead, when both exist.
+   */
   telemetryConnectorId?: string;
   telemetryReadableIndices?: string;
   logger: Logger;
@@ -76,7 +83,21 @@ export const createSandboxWorkspaceManager = ({
         canUseTelemetry,
       });
       const lastKey = lastWorkspaceKeys.get(session);
-      if (!session.isReset && lastKey === currentKey) return;
+      if (!session.isReset && lastKey === currentKey) {
+        // `isReset` is an edge-triggered signal and another sandbox RPC (for example the
+        // before-agent allocation step) may consume it before tools run. Verify the actual
+        // workspace invariant before trusting the connector cache.
+        const manifests = await session.statFiles([
+          '/workspace/elastic.md',
+          '/workspace/connectors.md',
+        ]);
+        const workspaceReady =
+          manifests.length === 2 &&
+          manifests.every(({ exists, is_dir: isDirectory }) => exists && !isDirectory);
+        if (workspaceReady) {
+          return;
+        }
+      }
 
       if (!canUseTelemetry) {
         lastWorkspaceKeys.delete(session);
@@ -98,11 +119,17 @@ export const createSandboxWorkspaceManager = ({
           secretKeys,
           logger,
         });
-        if (telemetryConnectorId && canUseTelemetry) {
+        const credentials: ElasticCredentials | undefined =
+          telemetryConnectorId && canUseTelemetry
+            ? { kind: 'connector', connectorId: telemetryConnectorId }
+            : findElasticSecretCredentials(secretKeys);
+        if (credentials) {
           await writeElasticManifest({
             session,
-            connectorId: telemetryConnectorId,
-            readableIndices: telemetryReadableIndices,
+            credentials,
+            // Connector-specific guidance must stay gated on connector authorization.
+            readableIndices:
+              credentials.kind === 'connector' ? telemetryReadableIndices : undefined,
             logger,
           });
         }

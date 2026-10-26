@@ -14,7 +14,7 @@ import type {
 } from '@kbn/data-views-plugin/public';
 import { keyBy } from 'lodash';
 import type { HttpStart } from '@kbn/core/public';
-import { getESQLTimeField } from '@kbn/esql-utils';
+import { EsqlSource } from '@kbn/data-source';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import type {
   IndexPattern,
@@ -167,7 +167,7 @@ function onRestrictionMapping(agg: string): string {
  * corresponding ad-hoc DataView spec already has a `timeFieldName`. If not, the time
  * field is resolved via the TIMEFIELD_ROUTE and patched onto the existing spec in-place.
  *
- * Uses `getESQLTimeField` directly instead of `getESQLAdHocDataview` to avoid
+ * Uses `EsqlSource.resolveDataset` instead of creating a DataView to avoid
  * creating a DataView instance (which would pollute the DataViewsService cache with a
  * field-less entry due to `skipFetchFields`) and to avoid generating a new DataView ID
  * that would mismatch the `layer.index` key used by downstream consumers.
@@ -202,7 +202,7 @@ export async function ensureESQLTimeFieldOnAdHocDataViews({
       continue;
     }
 
-    const timeFieldName = await getESQLTimeField({
+    const { timeFieldName } = await EsqlSource.resolveDataset({
       query: layer.query.esql,
       http,
       projectRouting,

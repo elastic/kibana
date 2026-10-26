@@ -1,5 +1,5 @@
 {
-  "sha1": "f96785135c5976ea4c50f885ee3efa88cbe565a7",
+  "sha1": "0a5a461ece2240e6ab2b5bf7b0769a7f7aebaec4",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -334,8 +334,6 @@
         "@cloud-serverless-security_essentials",
         "@local-serverless-security_ease",
         "@cloud-serverless-security_ease",
-        "@local-serverless-workplaceai",
-        "@cloud-serverless-workplaceai",
         "@local-serverless-vectordb",
         "@cloud-serverless-vectordb"
       ],
@@ -361,8 +359,6 @@
         "@cloud-serverless-security_essentials",
         "@local-serverless-security_ease",
         "@cloud-serverless-security_ease",
-        "@local-serverless-workplaceai",
-        "@cloud-serverless-workplaceai",
         "@local-serverless-vectordb",
         "@cloud-serverless-vectordb"
       ],
@@ -388,8 +384,6 @@
         "@cloud-serverless-security_essentials",
         "@local-serverless-security_ease",
         "@cloud-serverless-security_ease",
-        "@local-serverless-workplaceai",
-        "@cloud-serverless-workplaceai",
         "@local-serverless-vectordb",
         "@cloud-serverless-vectordb"
       ],

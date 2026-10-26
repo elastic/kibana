@@ -19,14 +19,20 @@ import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { fieldsMetadataPluginPublicMock } from '@kbn/fields-metadata-plugin/public/mocks';
 import type { UnifiedHistogramFetch$ } from '@kbn/unified-histogram/types';
 import type { UnifiedMetricsGridProps } from '../../../types';
-import { createESQLQuery } from '../../../common/utils';
-import { openAfterDismissingOtherFlyouts } from '@kbn/discover-utils';
+import { createESQLQuery, getMetricUniqueKey } from '../../../common/utils';
+import { FEATURE_FLAGS } from '../../../common/constants';
+import { useFeatureFlag } from '../../../hooks/use_feature_flag';
+import { dismissAllFlyoutsExceptFor } from '@kbn/discover-utils';
 import {
   MetricsExperienceStateProvider,
   useMetricsExperienceState,
 } from './context/metrics_experience_state_provider';
 import { withRestorableState } from '../../../restorable_state';
 import type { FlyoutState } from '../../../restorable_state';
+
+jest.mock('./hooks/use_fetch_exemplars', () => ({
+  useFetchExemplars: jest.fn(() => undefined),
+}));
 
 jest.mock('@kbn/discover-utils', () => {
   const {
@@ -38,7 +44,8 @@ jest.mock('@kbn/discover-utils', () => {
 
   return {
     DiscoverFlyouts: { metricInsights: 'metricInsights' },
-    openAfterDismissingOtherFlyouts: jest.fn((_flyout: string, open: () => void) => open()),
+    dismissAllFlyoutsExceptFor: jest.fn(),
+    fieldConstants: jest.requireActual('@kbn/discover-utils/src/field_constants'),
     METRICS_GRID_HISTOGRAM_PERCENTILES,
     METRICS_GRID_SETTINGS_DEFAULTS,
     METRICS_GRID_SIMPLE_AGGREGATIONS,
@@ -57,6 +64,14 @@ jest.mock('@elastic/eui', () => {
 jest.mock('../../chart', () => ({
   Chart: jest.fn(() => <div data-test-subj="chart" />),
 }));
+
+jest.mock('../../../hooks/use_feature_flag', () => {
+  const actual = jest.requireActual('../../../hooks/use_feature_flag');
+  return {
+    ...actual,
+    useFeatureFlag: jest.fn((_flag: string, fallback: boolean) => fallback),
+  };
+});
 
 jest.mock('../../../common/utils', () => ({
   ...jest.requireActual('../../../common/utils'),
@@ -119,6 +134,7 @@ describe('MetricsGrid', () => {
     services,
     actions,
     isTabSelected: true,
+    isComponentVisible: true,
   };
 
   const renderMetricsGrid = (props: Partial<MetricsGridProps> = {}) => {
@@ -154,6 +170,7 @@ describe('MetricsGrid', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    jest.mocked(useFeatureFlag).mockImplementation((_flag, fallback) => fallback);
     discoverFetch$ = getFetch$Mock(fetchParams);
   });
 
@@ -368,8 +385,8 @@ describe('MetricsGrid', () => {
     );
   });
 
-  // Regression coverage for issue #262360: the user-typed source must be threaded
-  // from `fetchParams.query` through `MetricsGrid` into `createESQLQuery` as
+  // Regression coverage for issue #262360: the user-typed source, computed once
+  // by the parent and passed as `userSource`, must reach `createESQLQuery` as
   // `originalSource`, so backing-index queries stay at the same scope METRICS_INFO
   // scanned (avoiding cross-backing-index field-type conflicts being re-introduced
   // when the chart query widens back to the parent data stream).
@@ -398,7 +415,7 @@ describe('MetricsGrid', () => {
     });
 
     it('forwards the user-typed backing index as originalSource', () => {
-      renderMetricsGrid({ fetchParams: backingIndexFetchParams });
+      renderMetricsGrid({ fetchParams: backingIndexFetchParams, userSource: backingIndex });
 
       expect(createESQLQuery).toHaveBeenCalledWith(
         expect.objectContaining({ originalSource: backingIndex })
@@ -406,7 +423,10 @@ describe('MetricsGrid', () => {
     });
 
     it('forwards the user-typed data stream as originalSource', () => {
-      renderMetricsGrid({ fetchParams: sourceFetchParams });
+      renderMetricsGrid({
+        fetchParams: sourceFetchParams,
+        userSource: 'edge-case-gauge-to-counter',
+      });
 
       expect(createESQLQuery).toHaveBeenCalledWith(
         expect.objectContaining({ originalSource: 'edge-case-gauge-to-counter' })
@@ -414,7 +434,7 @@ describe('MetricsGrid', () => {
     });
 
     it('forwards the raw glob pattern as originalSource (createESQLQuery falls back to indexName)', () => {
-      renderMetricsGrid({ fetchParams: globFetchParams });
+      renderMetricsGrid({ fetchParams: globFetchParams, userSource: 'edge-case-*' });
 
       expect(createESQLQuery).toHaveBeenCalledWith(
         expect.objectContaining({ originalSource: 'edge-case-*' })
@@ -616,9 +636,9 @@ describe('MetricsGrid', () => {
     });
   });
 
-  describe('flyout dismissal before opening', () => {
-    it('should open the insights flyout through the other flyouts being dismissed first', () => {
-      renderMetricsGrid();
+  describe('flyout dismissal on open', () => {
+    it('dismisses the other flyouts when View details opens the insights flyout', () => {
+      const { queryByTestId } = renderMetricsGrid();
 
       // Get the onViewDetails callback passed to the first Chart
       const chartCalls = (Chart as jest.Mock).mock.calls;
@@ -627,29 +647,20 @@ describe('MetricsGrid', () => {
       const firstChartProps = chartCalls[0][0];
       expect(firstChartProps.onViewDetails).toBeDefined();
 
-      (openAfterDismissingOtherFlyouts as jest.Mock).mockClear();
+      (dismissAllFlyoutsExceptFor as jest.Mock).mockClear();
 
       // Trigger the onViewDetails callback
       act(() => {
         firstChartProps.onViewDetails();
       });
 
-      // The flyout must only be opened by the sequencing helper, so it never mounts while
-      // another push flyout still owns the shared offset.
-      expect(openAfterDismissingOtherFlyouts).toHaveBeenCalledTimes(1);
-      expect(openAfterDismissingOtherFlyouts).toHaveBeenCalledWith(
-        'metricInsights',
-        expect.any(Function)
-      );
+      expect(dismissAllFlyoutsExceptFor).toHaveBeenCalledTimes(1);
+      expect(dismissAllFlyoutsExceptFor).toHaveBeenCalledWith('metricInsights');
+      expect(queryByTestId('metricsExperienceFlyout')).toBeInTheDocument();
     });
 
-    it('keeps a restored flyout unmounted until the other flyouts have been dismissed', () => {
-      let openFlyout: (() => void) | undefined;
-      (openAfterDismissingOtherFlyouts as jest.Mock).mockImplementationOnce(
-        (_flyout: string, open: () => void) => {
-          openFlyout = open;
-        }
-      );
+    it('dismisses the other flyouts when a tab restores its insights flyout', () => {
+      (dismissAllFlyoutsExceptFor as jest.Mock).mockClear();
 
       const initialFlyoutState: FlyoutState = {
         gridPosition: 1,
@@ -668,7 +679,8 @@ describe('MetricsGrid', () => {
         />
       );
 
-      expect(openAfterDismissingOtherFlyouts).not.toHaveBeenCalled();
+      expect(dismissAllFlyoutsExceptFor).not.toHaveBeenCalled();
+      expect(queryByTestId('metricsExperienceFlyout')).not.toBeInTheDocument();
 
       rerender(
         <MetricsGridWithRestorableState
@@ -680,14 +692,7 @@ describe('MetricsGrid', () => {
         />
       );
 
-      expect(openAfterDismissingOtherFlyouts).toHaveBeenCalledWith(
-        'metricInsights',
-        expect.any(Function)
-      );
-      expect(queryByTestId('metricsExperienceFlyout')).not.toBeInTheDocument();
-
-      act(() => openFlyout?.());
-
+      expect(dismissAllFlyoutsExceptFor).toHaveBeenCalledWith('metricInsights');
       expect(queryByTestId('metricsExperienceFlyout')).toBeInTheDocument();
     });
   });
@@ -1257,6 +1262,166 @@ describe('MetricsGrid', () => {
       fireEvent.click(container.querySelector('[data-chart-index="0"]') as HTMLElement);
 
       expect(onMetricExplored).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('histogram heatmaps', () => {
+    const histogramItem: MetricsGridProps['metricItems'][number] = {
+      metricName: 'latency.exp',
+      indexName: 'metrics-a',
+      units: ['ms'],
+      metricTypes: ['histogram'],
+      fieldTypes: [ES_FIELD_TYPES.EXPONENTIAL_HISTOGRAM],
+      dimensionFields: [{ name: 'host.name' }],
+    };
+    const bounds = new Map([[getMetricUniqueKey(histogramItem), { bounds: { min: 1, max: 9 } }]]);
+
+    const enableHeatmaps = () => {
+      jest
+        .mocked(useFeatureFlag)
+        .mockImplementation((flag, fallback) =>
+          flag === FEATURE_FLAGS.IS_HEATMAPS_ENABLED ? true : fallback
+        );
+    };
+
+    it('keeps the percentile chart when the heatmaps flag is off', () => {
+      renderMetricsGrid({ metricItems: [histogramItem], histogramBounds: bounds });
+
+      expect(createESQLQuery).toHaveBeenCalled();
+      expect(Chart).toHaveBeenCalledWith(
+        expect.objectContaining({ heatmapConfig: undefined, isLoading: false }),
+        expect.anything()
+      );
+    });
+
+    it('draws a heatmap from the distribution query when bounds exist', () => {
+      enableHeatmaps();
+      renderMetricsGrid({
+        metricItems: [histogramItem],
+        histogramBounds: bounds,
+      });
+
+      expect(createESQLQuery).not.toHaveBeenCalled();
+      expect(Chart).toHaveBeenCalledWith(
+        expect.objectContaining({
+          esqlQuery: expect.stringContaining('BUCKET(latency.exp, 10, 1, 9)'),
+          chartLayers: [],
+          heatmapConfig: expect.objectContaining({
+            chartType: 'heatmap',
+            title: histogramItem.metricName,
+            dataset: { esql: expect.stringContaining('SORT bucket DESC') },
+          }),
+        }),
+        expect.anything()
+      );
+    });
+
+    it('draws a heatmap when the upper and lower bounds are the same', () => {
+      enableHeatmaps();
+      renderMetricsGrid({
+        metricItems: [histogramItem],
+        histogramBounds: new Map([
+          [getMetricUniqueKey(histogramItem), { bounds: { min: 5, max: 5 } }],
+        ]),
+      });
+
+      expect(createESQLQuery).not.toHaveBeenCalled();
+      expect(Chart).toHaveBeenCalledWith(
+        expect.objectContaining({
+          esqlQuery: expect.stringContaining('BUCKET(latency.exp, 10, 5, 5.000005)'),
+          chartLayers: [],
+          heatmapConfig: expect.objectContaining({ chartType: 'heatmap' }),
+        }),
+        expect.anything()
+      );
+    });
+
+    it('uses the series chart when a breakdown applies to the histogram', () => {
+      enableHeatmaps();
+      renderMetricsGrid({
+        metricItems: [histogramItem],
+        dimensions: [{ name: 'host.name' }],
+        histogramBounds: bounds,
+      });
+
+      expect(createESQLQuery).toHaveBeenCalledWith(
+        expect.objectContaining({ splitAccessors: ['host.name'] })
+      );
+      expect(Chart).toHaveBeenCalledWith(
+        expect.objectContaining({
+          heatmapConfig: undefined,
+          esqlQuery: expect.stringContaining('`host.name`'),
+        }),
+        expect.anything()
+      );
+    });
+
+    it('keeps gauge and counter charts on the percentile path while the flag is on', () => {
+      enableHeatmaps();
+      renderMetricsGrid({
+        metricItems: [metricItems[0], histogramItem],
+        histogramBounds: bounds,
+      });
+
+      expect(createESQLQuery).toHaveBeenCalledTimes(1);
+      expect(Chart).toHaveBeenNthCalledWith(
+        2,
+        expect.objectContaining({
+          heatmapConfig: expect.objectContaining({ chartType: 'heatmap' }),
+        }),
+        expect.anything()
+      );
+    });
+
+    it('waits for bounds before drawing a histogram', () => {
+      enableHeatmaps();
+      renderMetricsGrid({
+        metricItems: [histogramItem],
+        histogramBoundsLoading: true,
+      });
+
+      expect(createESQLQuery).not.toHaveBeenCalled();
+      expect(Chart).toHaveBeenCalledWith(
+        expect.objectContaining({
+          isLoading: true,
+          esqlQuery: '',
+          heatmapConfig: undefined,
+        }),
+        expect.anything()
+      );
+    });
+
+    it('uses the series chart when bounds are missing', () => {
+      enableHeatmaps();
+      renderMetricsGrid({
+        metricItems: [histogramItem],
+        histogramBounds: new Map(),
+        histogramBoundsLoading: false,
+      });
+
+      expect(createESQLQuery).toHaveBeenCalled();
+      expect(Chart).toHaveBeenCalledWith(
+        expect.objectContaining({
+          heatmapConfig: undefined,
+          isLoading: false,
+          error: undefined,
+        }),
+        expect.anything()
+      );
+    });
+
+    it('passes a bounds error to the chart', () => {
+      enableHeatmaps();
+      const error = new Error('bounds failed');
+      renderMetricsGrid({
+        metricItems: [histogramItem],
+        histogramBounds: new Map([[getMetricUniqueKey(histogramItem), { error }]]),
+      });
+
+      expect(Chart).toHaveBeenCalledWith(
+        expect.objectContaining({ error, heatmapConfig: undefined }),
+        expect.anything()
+      );
     });
   });
 });

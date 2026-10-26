@@ -5,7 +5,27 @@
  * 2.0.
  */
 
-import { alertEventSchema, buildRuleEventDocument } from './alert_events';
+import {
+  alertEventSchema,
+  buildRuleEventDocument,
+  getAlertEventsResourceDefinition,
+} from './alert_events';
+
+describe('getAlertEventsResourceDefinition', () => {
+  it('has no retention by default', () => {
+    expect(getAlertEventsResourceDefinition().lifecycle).toEqual({});
+  });
+
+  it('manages its lifecycle so retention changes reach existing data streams', () => {
+    expect(getAlertEventsResourceDefinition().manageLifecycle).toBe(true);
+  });
+
+  it('sets data_retention when a retention is provided', () => {
+    expect(getAlertEventsResourceDefinition({ dataRetention: '90d' }).lifecycle).toEqual({
+      data_retention: '90d',
+    });
+  });
+});
 
 describe('buildRuleEventDocument', () => {
   const baseParams = {
@@ -42,26 +62,26 @@ describe('buildRuleEventDocument', () => {
   });
 
   it('includes episode only when provided', () => {
-    expect(buildRuleEventDocument(baseParams)).not.toHaveProperty('episode');
+    expect(buildRuleEventDocument(baseParams)).not.toHaveProperty('alert');
 
-    const episode = buildRuleEventDocument({
+    const alert = buildRuleEventDocument({
       ...baseParams,
       type: 'alert',
       status: 'recovered',
-      episode: { id: 'episode-1', status: 'inactive' },
-    }).episode;
+      alert: { id: 'episode-1', status: 'inactive' },
+    }).alert;
 
-    expect(episode).toEqual({ id: 'episode-1', status: 'inactive' });
-    expect(episode).not.toHaveProperty('status_count');
+    expect(alert).toEqual({ id: 'episode-1', status: 'inactive' });
+    expect(alert).not.toHaveProperty('status_count');
   });
 
-  it('includes episode.status_count only when the episode status_count is provided', () => {
+  it('includes alert.status_count only when the alert status_count is provided', () => {
     expect(
       buildRuleEventDocument({
         ...baseParams,
         type: 'alert',
-        episode: { id: 'episode-1', status: 'pending', status_count: 2 },
-      }).episode
+        alert: { id: 'episode-1', status: 'pending', status_count: 2 },
+      }).alert
     ).toEqual({ id: 'episode-1', status: 'pending', status_count: 2 });
   });
 
@@ -82,7 +102,7 @@ describe('alertEventSchema', () => {
       source: 'pagerduty',
       type: 'alert' as const,
       space_id: 'default',
-      episode: { id: 'pd-episode-1', status: 'active' as const },
+      alert: { id: 'pd-episode-1', status: 'active' as const },
     };
 
     const result = alertEventSchema.safeParse(externalEvent);

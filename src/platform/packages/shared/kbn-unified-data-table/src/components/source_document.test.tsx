@@ -13,7 +13,7 @@ import React from 'react';
 import SourceDocument from './source_document';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import {
-  columnsMetaOverridingBytesType,
+  esqlSourceOverridingBytesType,
   createDataViewWithBytesField,
   createFormatFieldValueReactSpy,
   dataViewMock,
@@ -21,6 +21,7 @@ import {
 } from '@kbn/discover-utils/src/__mocks__';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { screen, within } from '@testing-library/react';
+import { createMockEsqlSource } from '@kbn/data-source/src/__mocks__/esql_source.mock';
 
 const mockServices = {
   fieldFormats: {
@@ -51,10 +52,9 @@ describe('Unified data table source document cell rendering', () => {
     renderWithI18n(
       <SourceDocument
         columnId="_source"
-        columnsMeta={undefined}
+        dataSource={createMockEsqlSource()}
         dataView={dataViewMock}
         fieldFormats={mockServices.fieldFormats as unknown as FieldFormatsStart}
-        isPlainRecord={true}
         maxEntries={100}
         row={rows[0]}
         shouldShowFieldHandler={() => false}
@@ -87,10 +87,9 @@ describe('Unified data table source document cell rendering', () => {
     renderWithI18n(
       <SourceDocument
         columnId="foo"
-        columnsMeta={undefined}
+        dataSource={createMockEsqlSource()}
         dataView={dataViewMock}
         fieldFormats={mockFieldFormats as unknown as FieldFormatsStart}
-        isPlainRecord={true}
         maxEntries={100}
         row={row}
         shouldShowFieldHandler={() => true}
@@ -104,6 +103,43 @@ describe('Unified data table source document cell rendering', () => {
     expect(mockConvertToReact).toHaveBeenCalled();
   });
 
+  it('formats only the first `maxEntries` pairs when `useTopLevelObjectColumns` is true', () => {
+    const mockConvertToReact = jest.fn((value: unknown) => `${value}`);
+    const mockFieldFormats = {
+      getDefaultInstance: jest.fn(() => ({ convertToReact: mockConvertToReact })),
+    };
+
+    const row = build({
+      _id: '1',
+      _index: 'test',
+      _score: 1,
+      fields: {
+        'foo.a': ['value a'],
+        'foo.b': ['value b'],
+        'foo.c': ['value c'],
+      },
+    });
+
+    renderWithI18n(
+      <SourceDocument
+        columnId="foo"
+        dataSource={createMockEsqlSource()}
+        dataView={dataViewMock}
+        fieldFormats={mockFieldFormats as unknown as FieldFormatsStart}
+        maxEntries={2}
+        row={row}
+        shouldShowFieldHandler={() => true}
+        useTopLevelObjectColumns={true}
+      />
+    );
+
+    const descriptionList = screen.getByTestId('discoverCellDescriptionList');
+    expect(within(descriptionList).getByText('value a')).toBeVisible();
+    expect(within(descriptionList).getByText('value b')).toBeVisible();
+    expect(within(descriptionList).queryByText('value c')).not.toBeInTheDocument();
+    expect(mockConvertToReact).toHaveBeenCalledTimes(2);
+  });
+
   it('renders a dash in ES|QL mode when all field values are null', () => {
     const row = build({
       _id: '1',
@@ -115,10 +151,9 @@ describe('Unified data table source document cell rendering', () => {
     renderWithI18n(
       <SourceDocument
         columnId="_source"
-        columnsMeta={undefined}
+        dataSource={createMockEsqlSource()}
         dataView={dataViewMock}
         fieldFormats={mockServices.fieldFormats as unknown as FieldFormatsStart}
-        isPlainRecord={true}
         maxEntries={100}
         row={row}
         shouldShowFieldHandler={() => false}
@@ -146,10 +181,9 @@ describe('Unified data table source document cell rendering', () => {
     renderWithI18n(
       <SourceDocument
         columnId="_source"
-        columnsMeta={undefined}
+        dataSource={createMockEsqlSource()}
         dataView={dataViewMock}
         fieldFormats={mockServices.fieldFormats as unknown as FieldFormatsStart}
-        isPlainRecord={true}
         maxEntries={2}
         row={row}
         shouldShowFieldHandler={() => true}
@@ -166,8 +200,8 @@ describe('Unified data table source document cell rendering', () => {
     expect(within(descriptionList).queryByText(/and \d+ more fields/)).not.toBeInTheDocument();
   });
 
-  describe('with columnsMeta', () => {
-    it('should use data view field type when columnsMeta is undefined', () => {
+  describe('with ES|QL columns', () => {
+    it('should use data view field type without ES|QL columns', () => {
       const formatFieldValueReactSpy = createFormatFieldValueReactSpy();
       const testDataView = createDataViewWithBytesField();
 
@@ -184,10 +218,9 @@ describe('Unified data table source document cell rendering', () => {
       renderWithI18n(
         <SourceDocument
           columnId="_source"
-          columnsMeta={undefined}
+          dataSource={createMockEsqlSource()}
           dataView={testDataView}
           fieldFormats={mockServices.fieldFormats as unknown as FieldFormatsStart}
-          isPlainRecord={true}
           maxEntries={100}
           row={row}
           shouldShowFieldHandler={() => true}
@@ -204,7 +237,7 @@ describe('Unified data table source document cell rendering', () => {
       formatFieldValueReactSpy.mockRestore();
     });
 
-    it('should use columnsMeta type instead of data view field type when provided', () => {
+    it('should use the ES|QL column type instead of the data view field type', () => {
       const formatFieldValueReactSpy = createFormatFieldValueReactSpy();
       const testDataView = createDataViewWithBytesField();
 
@@ -221,10 +254,9 @@ describe('Unified data table source document cell rendering', () => {
       renderWithI18n(
         <SourceDocument
           columnId="_source"
-          columnsMeta={columnsMetaOverridingBytesType}
+          dataSource={esqlSourceOverridingBytesType}
           dataView={testDataView}
           fieldFormats={mockServices.fieldFormats as unknown as FieldFormatsStart}
-          isPlainRecord={true}
           maxEntries={100}
           row={row}
           shouldShowFieldHandler={() => true}

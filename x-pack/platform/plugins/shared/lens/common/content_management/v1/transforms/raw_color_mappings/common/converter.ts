@@ -53,7 +53,6 @@ export function convertToRawColorMappings(
 
       return {
         color: newColor,
-        touched: oldAssignment.touched,
         rules: [oldAssignment.rule],
       };
     }),
@@ -66,7 +65,6 @@ function convertColorMappingAssignment(
 ): ColorMapping.Assignment {
   return {
     color: oldAssignment.color as ColorMapping.Assignment['color'],
-    touched: oldAssignment.touched,
     rules: convertColorMappingRule(oldAssignment.rule, columnMeta),
   };
 }

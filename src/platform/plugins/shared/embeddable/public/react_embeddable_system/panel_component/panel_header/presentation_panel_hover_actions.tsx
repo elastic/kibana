@@ -381,7 +381,7 @@ export const PresentationPanelHoverActions = ({
     );
   }
 
-  return (
+  return viewMode === 'non-interactive' ? null : (
     <>
       {api && (quickActionElements.length || showContextMenu) && (
         <div

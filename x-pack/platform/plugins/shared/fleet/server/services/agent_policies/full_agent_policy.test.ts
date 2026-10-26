@@ -3239,6 +3239,220 @@ ssl.test: 123
     `);
   });
 
+  describe('kafka output with Kerberos authentication', () => {
+    const baseKafkaOutput = {
+      id: 'id123',
+      hosts: ['test:9999'],
+      topic: 'test',
+      is_default: false,
+      is_default_monitoring: false,
+      name: 'test output',
+      type: 'kafka',
+      config_yaml: '',
+      client_id: 'Elastic',
+      version: '1.0.0',
+      compression: 'none',
+      partition: 'random',
+      random: { group_events: 1 },
+      headers: [{ key: '', value: '' }],
+      timeout: 30,
+      broker_timeout: 30,
+      required_acks: 1,
+    } as const;
+
+    it('should emit the kerberos settings, without a sasl mechanism or top-level credentials, and the password secret as it is', () => {
+      const policyOutput = transformOutputToFullPolicyOutput({
+        ...baseKafkaOutput,
+        auth_type: 'kerberos',
+        // not used with Kerberos
+        username: 'user',
+        password: 'pass',
+        sasl: { mechanism: 'PLAIN' },
+        kerberos: {
+          auth_type: 'password',
+          config_path: '/etc/krb5.conf',
+          username: 'kafka',
+          service_name: 'kafka',
+          realm: 'EXAMPLE.COM',
+          enable_krb5_fast: false,
+        },
+        secrets: { kerberos: { password: { id: 'password-id' } } },
+      } as any);
+
+      expect(policyOutput).toEqual({
+        type: 'kafka',
+        hosts: ['test:9999'],
+        client_id: 'Elastic',
+        version: '1.0.0',
+        compression: 'none',
+        key: undefined,
+        topic: 'test',
+        headers: [],
+        partition: { random: { group_events: 1 } },
+        timeout: 30,
+        broker_timeout: 30,
+        required_acks: 1,
+        kerberos: {
+          enabled: true,
+          auth_type: 'password',
+          config_path: '/etc/krb5.conf',
+          username: 'kafka',
+          service_name: 'kafka',
+          realm: 'EXAMPLE.COM',
+          enable_krb5_fast: false,
+        },
+        // Fleet Server writes the secret at kerberos.password
+        secrets: { kerberos: { password: { id: 'password-id' } } },
+      });
+    });
+
+    it('should keep emitting the timeout, the agent runs Kerberos on the Beats runtime when it cannot translate it', () => {
+      const policyOutput = transformOutputToFullPolicyOutput({
+        ...baseKafkaOutput,
+        auth_type: 'kerberos',
+        kerberos: {
+          auth_type: 'keytab',
+          config_path: '/etc/krb5.conf',
+          keytab: '/etc/kafka.keytab',
+          realm: 'EXAMPLE.COM',
+        },
+      } as any);
+
+      expect(policyOutput.timeout).toEqual(30);
+      expect(policyOutput.kerberos).toEqual({
+        enabled: true,
+        auth_type: 'keytab',
+        keytab: '/etc/kafka.keytab',
+        config_path: '/etc/krb5.conf',
+        realm: 'EXAMPLE.COM',
+      });
+    });
+
+    it('should not emit anything for an output with the kerberos type and no settings, as before', () => {
+      const policyOutput = transformOutputToFullPolicyOutput({
+        ...baseKafkaOutput,
+        auth_type: 'kerberos',
+      } as any);
+
+      expect(policyOutput).not.toHaveProperty('kerberos');
+      expect(policyOutput).not.toHaveProperty('sasl');
+    });
+  });
+
+  describe('kafka output with OAuth2 authentication', () => {
+    const baseKafkaOutput = {
+      id: 'id123',
+      hosts: ['test:9999'],
+      topic: 'test',
+      is_default: false,
+      is_default_monitoring: false,
+      name: 'test output',
+      type: 'kafka',
+      config_yaml: '',
+      client_id: 'Elastic',
+      version: '1.0.0',
+      compression: 'none',
+      partition: 'random',
+      random: { group_events: 1 },
+      headers: [{ key: '', value: '' }],
+      timeout: 30,
+      broker_timeout: 30,
+      required_acks: 1,
+    } as const;
+
+    it('should emit the oauthbearer mechanism, the oauth2client settings and the remapped secrets', () => {
+      const policyOutput = transformOutputToFullPolicyOutput({
+        ...baseKafkaOutput,
+        auth_type: 'oauth2',
+        // not used with OAuth2
+        username: 'user',
+        password: 'pass',
+        sasl: { mechanism: 'PLAIN' },
+        oauth2: {
+          client_id: 'my-client',
+          token_url: 'https://idp.example.com/oauth2/token',
+          scopes: ['read'],
+          endpoint_params: { audience: ['kafka'] },
+        },
+        secrets: {
+          oauth2: { client_secret: { id: 'client-secret-id' } },
+        },
+      } as any);
+
+      expect(policyOutput).toEqual({
+        type: 'kafka',
+        hosts: ['test:9999'],
+        client_id: 'Elastic',
+        version: '1.0.0',
+        compression: 'none',
+        key: undefined,
+        topic: 'test',
+        headers: [],
+        partition: { random: { group_events: 1 } },
+        broker_timeout: 30,
+        required_acks: 1,
+        sasl: { mechanism: 'OAUTHBEARER' },
+        auth: {
+          oauth2client: {
+            client_id: 'my-client',
+            token_url: 'https://idp.example.com/oauth2/token',
+            scopes: ['read'],
+            endpoint_params: { audience: ['kafka'] },
+          },
+        },
+        // Fleet Server writes the secret at auth.oauth2client.client_secret
+        secrets: { auth: { oauth2client: { client_secret: { id: 'client-secret-id' } } } },
+      });
+    });
+
+    it('should not emit the timeout, the agent cannot run OAuth2 with it', () => {
+      const policyOutput = transformOutputToFullPolicyOutput({
+        ...baseKafkaOutput,
+        auth_type: 'oauth2',
+        oauth2: { client_id: 'my-client', token_url: 'https://idp.example.com/oauth2/token' },
+      } as any);
+
+      expect(policyOutput).not.toHaveProperty('timeout');
+      expect(policyOutput.broker_timeout).toEqual(30);
+    });
+
+    it('should emit the client certificate key of the jwt-bearer grant as a secret', () => {
+      const policyOutput = transformOutputToFullPolicyOutput({
+        ...baseKafkaOutput,
+        auth_type: 'oauth2',
+        oauth2: {
+          grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer',
+          client_id: 'my-client',
+          token_url: 'https://idp.example.com/oauth2/token',
+        },
+        secrets: { oauth2: { client_certificate_key: { id: 'key-id' } } },
+      } as any);
+
+      expect(policyOutput.secrets).toEqual({
+        auth: { oauth2client: { client_certificate_key: { id: 'key-id' } } },
+      });
+      expect(policyOutput.auth.oauth2client.grant_type).toEqual(
+        'urn:ietf:params:oauth:grant-type:jwt-bearer'
+      );
+    });
+
+    it('should keep the timeout and the secrets of the other authentication methods as they are', () => {
+      const policyOutput = transformOutputToFullPolicyOutput({
+        ...baseKafkaOutput,
+        auth_type: 'user_pass',
+        username: 'user',
+        sasl: { mechanism: 'PLAIN' },
+        secrets: { password: { id: 'password-id' } },
+      } as any);
+
+      expect(policyOutput.timeout).toEqual(30);
+      expect(policyOutput.username).toEqual('user');
+      expect(policyOutput.sasl).toEqual({ mechanism: 'PLAIN' });
+      expect(policyOutput.secrets).toEqual({ password: { id: 'password-id' } });
+      expect(policyOutput).not.toHaveProperty('auth');
+    });
+  });
+
   it('should not write proxy fields into kafka output even when a proxy is provided', () => {
     const proxy = {
       id: 'proxy-1',

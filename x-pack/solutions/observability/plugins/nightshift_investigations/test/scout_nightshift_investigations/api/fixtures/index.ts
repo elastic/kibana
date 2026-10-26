@@ -12,17 +12,25 @@ export {
   INVESTIGATIONS_WRITE_ROLE,
   NO_AGENT_BUILDER_ROLE,
 } from './constants';
+export { ensureInvestigation, uniqueId } from './helpers';
 export {
-  seedInvestigation,
-  deleteInvestigation,
-  getInvestigation,
-  listInvestigations,
-  updateInvestigation,
-  ensureInvestigation,
-  uniqueId,
-  seedTimeWindow,
-} from './helpers';
-export type { SeedTimeWindow } from './helpers';
+  cancelRunsOf,
+  cancelWorkflowRuns,
+  createAlertStartWorkflow,
+  deleteWorkflow,
+  findInvestigationBySubject,
+  findOrCreateSlackThread,
+  getSharedInvestigation,
+  listSharedInvestigations,
+  makeAlertSnapshot,
+  runAlertStartWorkflow,
+  setInvestigationStatus,
+  startInvestigation,
+  startUnresponsiveLlm,
+  waitForInvestigation,
+  waitForInvestigationInProgress,
+} from './write_path';
+export type { SharedInvestigation, SharedInvestigationSubject } from './write_path';
 export {
   NIGHTSHIFT_MANAGE_ROLE,
   NIGHTSHIFT_READ_ROLE,
@@ -31,3 +39,17 @@ export {
   putSandboxSecrets,
   replaceSandboxSecrets,
 } from './sandbox_secrets';
+export { getCustomContext, putCustomContext, replaceCustomContext } from './custom_context';
+export {
+  archiveMemoryPage,
+  deleteMemories,
+  deleteMemoryPage,
+  getMemoryPage,
+  MEMORY_CONFIGURE_ROLE,
+  MEMORY_INDEX,
+  MEMORY_MANAGER_ROLE,
+  MEMORY_READER_ROLE,
+  seedMemory,
+  storedMemoryId,
+} from './memory';
+export type { SeededMemory } from './memory';

@@ -182,7 +182,7 @@ export const markCommonFields = (
         detail += ' ';
       }
 
-      detail += i18n.translate('kbn-esql-language.esql.autocomplete.join.commonFieldNote', {
+      detail += i18n.translate('esqlLanguage.esql.autocomplete.join.commonFieldNote', {
         defaultMessage: '(common field)',
       });
 
@@ -191,7 +191,7 @@ export const markCommonFields = (
         detail,
         category: SuggestionCategory.LOOKUP_COMMON_FIELD,
         documentation: {
-          value: i18n.translate('kbn-esql-language.esql.autocomplete.join.sharedField', {
+          value: i18n.translate('esqlLanguage.esql.autocomplete.join.sharedField', {
             defaultMessage: 'Field shared between the source and the lookup index',
           }),
         },

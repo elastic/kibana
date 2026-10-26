@@ -10,12 +10,14 @@ import { BehaviorSubject, map, merge, skip } from 'rxjs';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
 import {
+  getViewModeSubject,
   initializeTimeRangeManager,
   initializeTitleManager,
   timeRangeComparators,
   titleComparators,
+  useBatchedPublishingSubjects,
   useFetchContext,
-  useStateFromPublishingSubject,
+  type ViewMode,
 } from '@kbn/presentation-publishing';
 import { QueryClientProvider } from '@kbn/react-query';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -125,11 +127,13 @@ export const getAlertsTableEmbeddableFactory = (
       },
     });
 
+    const viewMode$ = getViewModeSubject(api) ?? new BehaviorSubject<ViewMode>('view');
+
     return {
       api,
       Component: () => {
         const fetchContext = useFetchContext(api);
-        const tableConfig = useStateFromPublishingSubject(tableConfig$);
+        const [tableConfig, viewMode] = useBatchedPublishingSubjects(tableConfig$, viewMode$);
         const [lastReloadRequestTime, setLastReloadRequestTime] = useState<number | undefined>();
 
         useEffect(() => {
@@ -153,6 +157,7 @@ export const getAlertsTableEmbeddableFactory = (
                 solution={tableConfig?.solution}
                 query={tableConfig?.query}
                 services={services}
+                viewMode={viewMode}
               />
             </QueryClientProvider>
           </KibanaContextProvider>

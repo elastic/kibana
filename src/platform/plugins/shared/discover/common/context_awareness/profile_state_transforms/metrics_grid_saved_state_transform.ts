@@ -8,6 +8,7 @@
  */
 
 import { DiscoverTabType } from '@kbn/discover-session-constants';
+import { METRICS_GRID_SORT_DEFAULTS } from '@kbn/discover-utils';
 import { createProfileSavedStateTransform } from '../profile_state';
 import { METRICS_STATE_DEF } from '../profile_state_definitions/metrics_grid_profile_state';
 
@@ -20,6 +21,16 @@ export const METRICS_GRID_SAVED_STATE_TRANSFORM = createProfileSavedStateTransfo
     counterAggregation: settings.counterAggregation,
     gaugeAggregation: settings.gaugeAggregation,
     histogramPercentile: settings.histogramPercentile,
+    gridSortField: settings.sortField,
+    gridSortDirection: settings.sortDirection,
   }),
-  fromSavedState: (settings) => [settings],
+  // Sessions saved before sort was persisted omit the sort fields. Fill in the defaults so a reset
+  // replaces the current sort instead of keeping it.
+  fromSavedState: ({ gridSortField, gridSortDirection, ...settings }) => [
+    {
+      ...settings,
+      sortField: gridSortField ?? METRICS_GRID_SORT_DEFAULTS.sortField,
+      sortDirection: gridSortDirection ?? METRICS_GRID_SORT_DEFAULTS.sortDirection,
+    },
+  ],
 });

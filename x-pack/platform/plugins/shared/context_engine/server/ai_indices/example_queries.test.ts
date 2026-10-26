@@ -6,10 +6,17 @@
  */
 
 import { Parser } from '@elastic/esql';
-import { buildExampleQueries } from './example_queries';
+import { buildExampleQueries, EXCLUDE_MEMORY_KI_TYPES_FILTER } from './example_queries';
+
+const LIFECYCLE =
+  '| WHERE governance.lifecycle.status IS NULL OR governance.lifecycle.status == "active"\n| WHERE expires_at IS NULL OR expires_at > NOW()';
 
 describe('buildExampleQueries', () => {
-  const queries = buildExampleQueries('ai-index-idx-support*');
+  const queries = buildExampleQueries({ type: 'index', value: 'ai-index-idx-support*' });
+  const queriesExcludingMemory = buildExampleQueries(
+    { type: 'index', value: 'ai-index-idx-support*' },
+    { excludeMemory: true }
+  );
 
   it('returns the three fixed shapes, targeting the given index', () => {
     expect(queries.map(({ title }) => title)).toEqual([
@@ -18,13 +25,45 @@ describe('buildExampleQueries', () => {
       'Count by type',
     ]);
     for (const { esql } of queries) {
-      expect(esql.startsWith('FROM ai-index-idx-support*')).toBe(true);
+      expect(
+        esql.startsWith(`FROM ai-index-idx-support* METADATA _id, _index, _score\n${LIFECYCLE}\n`)
+      ).toBe(true);
     }
   });
 
+  it('collapses to the latest revision before the lifecycle filters on a data stream', () => {
+    const [{ esql }] = buildExampleQueries({ type: 'data_stream', value: 'ai-index-ds-support' });
+
+    expect(
+      esql.startsWith(
+        [
+          'FROM ai-index-ds-support METADATA _id, _index, _score',
+          '| EVAL id = COALESCE(id, _id)',
+          '| INLINE STATS latest = MAX(@timestamp) BY id',
+          '| WHERE @timestamp == latest',
+          '| INLINE STATS latest_doc = MAX(_id) BY id',
+          '| WHERE _id == latest_doc',
+          '| DROP latest, latest_doc',
+          LIFECYCLE,
+          '| FORK',
+        ].join('\n')
+      )
+    ).toBe(true);
+    expect(Parser.parse(esql).errors).toEqual([]);
+  });
+
   it('parses as valid ES|QL', () => {
-    for (const { esql } of queries) {
+    for (const { esql } of [...queries, ...queriesExcludingMemory]) {
       expect(Parser.parse(esql).errors).toEqual([]);
+    }
+  });
+
+  it('does not expose memory types unless exclusion is requested', () => {
+    for (const { esql } of queries) {
+      expect(esql).not.toContain('memory.session');
+    }
+    for (const { esql } of queriesExcludingMemory) {
+      expect(esql).toContain(EXCLUDE_MEMORY_KI_TYPES_FILTER);
     }
   });
 
@@ -35,7 +74,7 @@ describe('buildExampleQueries', () => {
     expect(filter).toContain('type == ?type AND MATCH(tags, ?tag)');
     expect(count).not.toContain('?');
     for (const esql of [hybrid, filter, count]) {
-      expect(esql).not.toMatch(/"[^"]+"/);
+      expect(esql.replace(LIFECYCLE, '')).not.toMatch(/"[^"]+"/);
     }
   });
 });

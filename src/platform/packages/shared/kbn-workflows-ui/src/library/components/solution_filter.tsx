@@ -41,7 +41,7 @@ export const SolutionFilter = React.memo<SolutionFilterProps>(
       return [
         {
           value: '',
-          text: i18n.translate('workflows.library.solutionFilter.allSolutions', {
+          text: i18n.translate('workflowsUi.library.solutionFilter.allSolutions', {
             defaultMessage: 'All solutions',
           }),
         },
@@ -58,7 +58,7 @@ export const SolutionFilter = React.memo<SolutionFilterProps>(
       <EuiSelect
         disabled={disabled}
         data-test-subj="workflowLibrarySolutionFilter"
-        aria-label={i18n.translate('workflows.library.solutionFilter.ariaLabel', {
+        aria-label={i18n.translate('workflowsUi.library.solutionFilter.ariaLabel', {
           defaultMessage: 'Filter templates by solution',
         })}
         options={options}

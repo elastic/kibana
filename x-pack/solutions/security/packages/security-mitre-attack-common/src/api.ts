@@ -8,6 +8,8 @@
 import { z } from '@kbn/zod';
 import { ArrayFromString } from '@kbn/zod-helpers';
 import type { MitreFramework, MitreEntityType } from './schema';
+import { mitreFrameworkSchema } from './schema';
+import { DEFAULT_MITRE_FRAMEWORK } from './constants';
 import type { MitreEntityStatus, MitreEntitySummaryBuckets } from './types';
 
 // -------------------------------------------------------------------------
@@ -16,8 +18,8 @@ import type { MitreEntityStatus, MitreEntitySummaryBuckets } from './types';
 
 /** Zod schema for the GET /internal/mitre/entities request query parameters. */
 export const GetMitreEntitiesRequestQuery = z.object({
-  /** MITRE framework to query. Currently only 'enterprise' is supported. */
-  framework: z.enum(['enterprise']).optional().default('enterprise'),
+  /** MITRE framework to query. One framework per request; defaults to ATT&CK Enterprise. */
+  framework: mitreFrameworkSchema.optional().default(DEFAULT_MITRE_FRAMEWORK),
   /** Pin results to a specific framework version. Defaults to the latest indexed version. */
   framework_version: z.string().min(1).max(32).optional(),
   /**
@@ -50,7 +52,7 @@ export interface GetMitreEntitiesRequestParams {
 // Response type
 // -------------------------------------------------------------------------
 
-/** Response body for GET /internal/mitre/entities. */
+/** Response body for GET /internal/mitre/entities. Bucket order is guaranteed: tactics ascending by position, techniques and subtechniques ascending by name. */
 export interface GetMitreEntitiesResponse extends MitreEntitySummaryBuckets {
   framework: MitreFramework;
   /**

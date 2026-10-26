@@ -7,7 +7,6 @@
 
 import { encode as encodeRison } from '@kbn/rison';
 import type { KibanaLocation } from '@kbn/share-plugin/public';
-import { MANAGEMENT_HOST, pageHost } from './locator_host';
 import type {
   AlertingV2ActionPoliciesLocatorParams,
   AlertingV2EpisodesLocatorParams,
@@ -16,8 +15,15 @@ import type {
   AlertingV2RulesLocatorParams,
 } from './locators';
 
+/**
+ * The rules list search text that filters to the rules created from the given template. The
+ * `template` field name must match `TEMPLATE_FILTER_ID` on the rules list page.
+ */
+const buildTemplateQuery = (templateId: string): string =>
+  `template:"${templateId.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`;
+
 export const getRulesLocation = (params: AlertingV2RulesLocatorParams): KibanaLocation => {
-  const { app, pathPrefix } = pageHost(params, MANAGEMENT_HOST.rules);
+  const { app, pathPrefix } = params.host;
 
   if (params.page === 'sequence_create') {
     return { app, path: `${pathPrefix}/sequence/create`, state: {} };
@@ -25,12 +31,9 @@ export const getRulesLocation = (params: AlertingV2RulesLocatorParams): KibanaLo
   if (params.ruleId) {
     return { app, path: `${pathPrefix}/${encodeURIComponent(params.ruleId)}`, state: {} };
   }
-  if (params.templateId) {
-    return {
-      app,
-      path: `${pathPrefix}?templateId=${encodeURIComponent(params.templateId)}`,
-      state: {},
-    };
+  if (params.derivedFromTemplateId) {
+    const search = new URLSearchParams({ q: buildTemplateQuery(params.derivedFromTemplateId) });
+    return { app, path: `${pathPrefix}?${search.toString()}`, state: {} };
   }
   return { app, path: pathPrefix, state: {} };
 };
@@ -38,7 +41,7 @@ export const getRulesLocation = (params: AlertingV2RulesLocatorParams): KibanaLo
 export const getRuleLibraryLocation = (
   params: AlertingV2RuleLibraryLocatorParams
 ): KibanaLocation => {
-  const { app, pathPrefix } = pageHost(params, MANAGEMENT_HOST.ruleLibrary);
+  const { app, pathPrefix } = params.host;
 
   if (params.templateId) {
     return {
@@ -51,14 +54,14 @@ export const getRuleLibraryLocation = (
 };
 
 export const getEpisodesLocation = (params: AlertingV2EpisodesLocatorParams): KibanaLocation => {
-  const { app, pathPrefix } = pageHost(params, MANAGEMENT_HOST.episodes);
+  const { app, pathPrefix } = params.host;
 
   if (params.episodeId) {
     return { app, path: `${pathPrefix}/${encodeURIComponent(params.episodeId)}`, state: {} };
   }
 
   if (params.filters || params.timeRange) {
-    const episodesList = Object.fromEntries(
+    const alertsList = Object.fromEntries(
       Object.entries({
         ruleId: params.filters?.ruleId,
         groupHash: params.filters?.groupHash,
@@ -72,9 +75,9 @@ export const getEpisodesLocation = (params: AlertingV2EpisodesLocatorParams): Ki
       }).filter(([, value]) => value != null)
     );
 
-    if (Object.keys(episodesList).length > 0) {
+    if (Object.keys(alertsList).length > 0) {
       const search = new URLSearchParams();
-      search.set('_a', encodeRison({ episodesList }));
+      search.set('_a', encodeRison({ alertsList }));
       return { app, path: `${pathPrefix}?${search.toString()}`, state: {} };
     }
   }
@@ -85,7 +88,7 @@ export const getEpisodesLocation = (params: AlertingV2EpisodesLocatorParams): Ki
 export const getActionPoliciesLocation = (
   params: AlertingV2ActionPoliciesLocatorParams
 ): KibanaLocation => {
-  const { app, pathPrefix } = pageHost(params, MANAGEMENT_HOST.actionPolicies);
+  const { app, pathPrefix } = params.host;
 
   if (params.page === 'create') {
     return { app, path: `${pathPrefix}/create`, state: {} };
@@ -103,6 +106,6 @@ export const getActionPoliciesLocation = (
 export const getExecutionHistoryLocation = (
   params: AlertingV2ExecutionHistoryLocatorParams
 ): KibanaLocation => {
-  const { app, pathPrefix } = pageHost(params, MANAGEMENT_HOST.executionHistory);
+  const { app, pathPrefix } = params.host;
   return { app, path: pathPrefix, state: {} };
 };

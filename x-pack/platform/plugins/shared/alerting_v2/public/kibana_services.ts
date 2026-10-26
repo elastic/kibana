@@ -46,3 +46,6 @@ export const untilPluginStartServicesReady = (): Promise<AlertingV2KibanaService
 export const setKibanaServices = (services: AlertingV2KibanaServices) => {
   servicesReady$.next(services);
 };
+
+export const getMinimumScheduleInterval = (): string | undefined =>
+  servicesReady$.value?.minimumScheduleInterval;

@@ -14,3 +14,7 @@ export {
 export { renderTagParser, createRenderRenderer } from './render_plugin';
 export { loadingCursorPlugin, Cursor } from './cursor_plugin';
 export { esqlLanguagePlugin } from './esql_plugin';
+export {
+  createConversationMarkdownComponents,
+  MARKDOWN_BLOCK_SPACER_CLASS_NAME,
+} from './conversation_markdown_components';

@@ -19,6 +19,7 @@ import { trackPerformanceMeasureEntries } from './track_performance_measure_entr
 import { trackClicks } from './track_clicks';
 
 import { getSessionId } from './get_session_id';
+import { trackBrowserPageTranslation } from './track_browser_page_translation';
 import { trackViewportSize } from './track_viewport_size';
 
 /** @internal */
@@ -35,9 +36,10 @@ export class AnalyticsService {
   private readonly subscriptionsHandler = new Subscription();
 
   constructor(core: CoreContext) {
+    const logger = core.logger.get('analytics');
     this.analyticsClient = createAnalytics({
       isDev: core.env.mode.dev,
-      logger: core.logger.get('analytics'),
+      logger,
       getTraceContext: () => ({
         id: (apm.getCurrentTransaction() as TransactionWithUndocumentedProps | undefined)?.traceId,
       }),
@@ -55,6 +57,7 @@ export class AnalyticsService {
       trackPerformanceMeasureEntries(this.analyticsClient, core.env.mode.dev)
     );
     this.subscriptionsHandler.add(trackViewportSize(this.analyticsClient));
+    this.subscriptionsHandler.add(trackBrowserPageTranslation(this.analyticsClient, logger));
 
     // Register a flush method in the browser so CI can explicitly call it before closing the browser.
     window.__kbnAnalytics = { flush: () => this.analyticsClient.flush() };

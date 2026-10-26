@@ -33,8 +33,6 @@ export interface DiscoveredDataset {
   search_patterns: string[];
 }
 
-export const HUNT_DISCOVERY_PATTERN = 'logs-*';
-
 /** Agent-internal datasets never worth hunting; dropped from discovery. */
 export const INTERNAL_DATASET_PREFIXES = ['elastic_agent', 'fleet_server'];
 
@@ -77,7 +75,7 @@ export const parseDataStreamName = (
 // the vendor token ends at the first of either. Stopping at '-' too means a dashed
 // namespace that leaked into the dataset (see `parseDataStreamName`) cannot hide the
 // vendor: `logs-okta-prod-eu` still yields `okta`.
-const vendorToken = (dataset: string): string => {
+export const vendorToken = (dataset: string): string => {
   const end = dataset.search(/[.-]/);
   return end === -1 ? dataset : dataset.slice(0, end);
 };
@@ -85,21 +83,30 @@ const vendorToken = (dataset: string): string => {
 const isInternalDataset = (dataset: string): boolean =>
   INTERNAL_DATASET_PREFIXES.some((prefix) => dataset.startsWith(prefix));
 
+/** The part of a `_resolve/index` response discovery reads. */
+export interface ResolvedDataStreams {
+  data_streams: Array<{ name: string }>;
+}
+
 /**
- * Discovers the datasets actually present in the space by listing the data
- * streams matching `pattern` and collapsing them across namespaces. Each entry
+ * Discovers the datasets actually present inside the hunt universe by listing the
+ * data streams matching `patterns` and collapsing them across namespaces. Each entry
  * is one `{type}-{dataset}-*` glob a hunt can search, sorted by pattern.
- * Agent-internal datasets are dropped. Errors from Elasticsearch are logged
- * and rethrown so the caller decides how to fail.
+ * Agent-internal datasets are dropped. `patterns` may carry `-pattern` exclusions, which
+ * `_resolve/index` honours. A caller that already holds the `_resolve/index` response
+ * for the same patterns passes it as `resolved` and no second call is made. Errors from
+ * Elasticsearch are logged and rethrown so the caller decides how to fail.
  */
 export const discoverHuntDatasets = async ({
   esClient,
-  pattern = HUNT_DISCOVERY_PATTERN,
+  patterns,
   logger,
+  resolved,
 }: {
   esClient: ElasticsearchClient;
-  pattern?: string;
+  patterns: string[];
   logger?: Logger;
+  resolved?: ResolvedDataStreams;
 }): Promise<DiscoveredDataset[]> => {
   let dataStreamNames: string[];
   try {
@@ -108,17 +115,19 @@ export const discoverHuntDatasets = async ({
     // would let a broad scope read as complete while the dataset holding the hit was
     // never seen. The resolve API returns every stream the caller may see; hidden
     // (dot-prefixed) streams are the only ones dropped.
-    const resolved = await esClient.indices.resolveIndex({
-      name: [pattern],
-      allow_no_indices: true,
-      expand_wildcards: ['open'],
-    });
-    dataStreamNames = resolved.data_streams
+    const response =
+      resolved ??
+      (await esClient.indices.resolveIndex({
+        name: patterns,
+        allow_no_indices: true,
+        expand_wildcards: ['open'],
+      }));
+    dataStreamNames = response.data_streams
       .map((stream) => stream.name)
       .filter((name) => !name.startsWith('.'));
   } catch (err) {
     logger?.warn(
-      `Hunt dataset discovery failed for pattern "${pattern}": ${
+      `Hunt dataset discovery failed for pattern(s) "${patterns.join(',')}": ${
         err instanceof Error ? err.message : String(err)
       }`
     );

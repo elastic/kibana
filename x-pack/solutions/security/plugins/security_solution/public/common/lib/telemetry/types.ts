@@ -85,6 +85,7 @@ import type {
   SiemReadinessTelemetryEventsMap,
 } from './events/siem_readiness/types';
 import type { FlyoutV2EventTypes, FlyoutV2TelemetryEventsMap } from './events/flyout_v2/types';
+import type { GraphEventTypes, GraphTelemetryEventsMap } from './events/graph/types';
 // Stub: AttackDiscoveryEventTypes + AttackDiscoveryTelemetryEventsMap added
 // in PR3 (purely-additive) so consumers can pass the enum to
 // `telemetryService.reportEvent`. The full telemetry event schema is added
@@ -111,6 +112,7 @@ export * from './events/preview_rule/types';
 export * from './events/notes/types';
 export * from './events/rule_deprecation/types';
 export * from './events/flyout_v2/types';
+export * from './events/graph/types';
 export * from '@kbn/agent-builder-common/telemetry';
 
 export interface TelemetryServiceSetupParams {
@@ -168,6 +170,8 @@ export type TelemetryEventTypeData<T extends TelemetryEventTypes> = T extends Ru
   ? SiemReadinessTelemetryEventsMap[T]
   : T extends FlyoutV2EventTypes
   ? FlyoutV2TelemetryEventsMap[T]
+  : T extends GraphEventTypes
+  ? GraphTelemetryEventsMap[T]
   : never;
 
 export type TelemetryEventTypes =
@@ -195,4 +199,5 @@ export type TelemetryEventTypes =
   | AttackDiscoveryEventTypes
   | AttackDiscoverySchedulesEventTypes
   | SiemReadinessEventTypes
-  | FlyoutV2EventTypes;
+  | FlyoutV2EventTypes
+  | GraphEventTypes;

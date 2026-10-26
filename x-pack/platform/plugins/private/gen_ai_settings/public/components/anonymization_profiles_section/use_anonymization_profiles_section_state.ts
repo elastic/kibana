@@ -109,7 +109,7 @@ export const useAnonymizationProfilesSectionState = ({
 
   const onCreateSuccess = useCallback(() => {
     notifications.toasts.addSuccess(
-      i18n.translate('genAiSettings.anonymizationProfiles.create.success', {
+      i18n.translate('xpack.genAiSettings.anonymizationProfiles.create.success', {
         defaultMessage: 'Profile created',
       })
     );
@@ -117,7 +117,7 @@ export const useAnonymizationProfilesSectionState = ({
 
   const onUpdateSuccess = useCallback(() => {
     notifications.toasts.addSuccess(
-      i18n.translate('genAiSettings.anonymizationProfiles.update.success', {
+      i18n.translate('xpack.genAiSettings.anonymizationProfiles.update.success', {
         defaultMessage: 'Profile updated',
       })
     );
@@ -125,7 +125,7 @@ export const useAnonymizationProfilesSectionState = ({
 
   const onDeleteSuccess = useCallback(() => {
     notifications.toasts.addSuccess(
-      i18n.translate('genAiSettings.anonymizationProfiles.delete.success', {
+      i18n.translate('xpack.genAiSettings.anonymizationProfiles.delete.success', {
         defaultMessage: 'Profile deleted',
       })
     );
@@ -133,7 +133,7 @@ export const useAnonymizationProfilesSectionState = ({
 
   const onCreateConflict = useCallback(() => {
     notifications.toasts.addWarning(
-      i18n.translate('genAiSettings.anonymizationProfiles.create.conflict', {
+      i18n.translate('xpack.genAiSettings.anonymizationProfiles.create.conflict', {
         defaultMessage: 'A profile already exists for this target.',
       })
     );
@@ -144,7 +144,7 @@ export const useAnonymizationProfilesSectionState = ({
       const normalizedError = error instanceof Error ? error : new Error(String(error));
 
       notifications.toasts.addError(normalizedError, {
-        title: i18n.translate('genAiSettings.anonymizationProfiles.conflict.openFailed', {
+        title: i18n.translate('xpack.genAiSettings.anonymizationProfiles.conflict.openFailed', {
           defaultMessage: 'Unable to open conflicting profile',
         }),
       });

@@ -7,6 +7,8 @@
 
 import { schema } from '@kbn/config-schema';
 
+import { CLOUD_ONBOARDING_INTEGRATION_NAME_MAX_LENGTH } from '../../../common/constants';
+
 // --- Shared primitives ---
 
 const EcfFamilySchema = schema.oneOf(
@@ -26,6 +28,19 @@ const EcfStackSchema = schema.object({
     maxLength: 32,
     meta: { description: 'ECF semantic version resolved at launch time, e.g. "1.10.0".' },
   }),
+  stackArn: schema.maybe(
+    schema.string({
+      minLength: 1,
+      maxLength: 2048,
+      meta: { description: 'CloudFormation stack ARN pasted by the user post-launch.' },
+    })
+  ),
+  serviceIds: schema.maybe(
+    schema.arrayOf(schema.string({ minLength: 1, maxLength: 128 }), {
+      maxSize: 1000,
+      meta: { description: 'Service IDs active when the stack was last launched or updated.' },
+    })
+  ),
 });
 
 const CloudOnboardingDeploymentProviderSchema = schema.oneOf(
@@ -118,6 +133,19 @@ const CloudOnboardingDeploymentItemSchema = schema.object({
       meta: {
         description: 'Global AWS region from the Service Settings step.',
       },
+    })
+  ),
+  integrationName: schema.maybe(
+    schema.string({
+      meta: {
+        description:
+          'Integration name as entered in the Service settings step, before any per-package suffix is applied.',
+      },
+    })
+  ),
+  description: schema.maybe(
+    schema.string({
+      meta: { description: 'Integration description from the Service settings step.' },
     })
   ),
   dataFormat: schema.maybe(DataFormatSchema),
@@ -219,6 +247,21 @@ export const CreateCloudOnboardingDeploymentRequestSchema = {
         meta: { description: 'Global AWS region from the Service Settings step.' },
       })
     ),
+    integrationName: schema.maybe(
+      schema.string({
+        maxLength: CLOUD_ONBOARDING_INTEGRATION_NAME_MAX_LENGTH,
+        meta: {
+          description:
+            'Integration name as entered in the Service settings step, before any per-package suffix is applied.',
+        },
+      })
+    ),
+    description: schema.maybe(
+      schema.string({
+        maxLength: 2048,
+        meta: { description: 'Integration description from the Service settings step.' },
+      })
+    ),
     dataFormat: schema.maybe(DataFormatSchema),
     authMethod: schema.maybe(
       schema.oneOf(
@@ -291,6 +334,26 @@ export const UpdateCloudOnboardingDeploymentRequestSchema = {
       })
     ),
     deploymentName: schema.maybe(schema.string({ maxLength: 255 })),
+    integrationName: schema.maybe(
+      schema.string({
+        maxLength: CLOUD_ONBOARDING_INTEGRATION_NAME_MAX_LENGTH,
+        meta: {
+          description:
+            'Integration name used by the last deploy, before any per-package suffix. Refreshed on each deploy because an unedited default name follows the service selection.',
+        },
+      })
+    ),
+    description: schema.maybe(
+      schema.nullable(
+        schema.string({
+          maxLength: 2048,
+          meta: {
+            description:
+              'Integration description from the Service settings step. Send null to clear it.',
+          },
+        })
+      )
+    ),
     serviceVars: schema.maybe(RequestServiceVarsSchema),
     services: schema.maybe(
       schema.arrayOf(schema.string({ minLength: 1, maxLength: 256 }), {

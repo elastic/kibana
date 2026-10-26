@@ -73,6 +73,50 @@ describe('All users query tab body', () => {
     expect(mockUseEntityStoreRiskScoreKpi.mock.calls[0][0].skip).toEqual(false);
   });
 
+  it('labels the risk score and KPI queries with the users page execution context', () => {
+    render(
+      <TestProviders>
+        <UserRiskScoreQueryTabBody {...defaultProps} />
+      </TestProviders>
+    );
+    expect(mockUseEntityStoreRiskScore).toHaveBeenCalledWith(
+      expect.objectContaining({
+        executionContext: {
+          child: {
+            type: 'security_solution',
+            name: 'entity_analytics:explore-users_page',
+            id: 'users_risk_score',
+          },
+        },
+        statusExecutionContext: {
+          child: {
+            type: 'security_solution',
+            name: 'entity_analytics:explore-users_page',
+            id: 'users_risk_score_status',
+          },
+        },
+      })
+    );
+    expect(mockUseEntityStoreRiskScoreKpi).toHaveBeenCalledWith(
+      expect.objectContaining({
+        executionContext: {
+          child: {
+            type: 'security_solution',
+            name: 'entity_analytics:explore-users_page',
+            id: 'users_risk_score_kpi',
+          },
+        },
+        statusExecutionContext: {
+          child: {
+            type: 'security_solution',
+            name: 'entity_analytics:explore-users_page',
+            id: 'users_risk_score_status',
+          },
+        },
+      })
+    );
+  });
+
   it('toggleStatus=false, skip', () => {
     mockUseQueryToggle.mockReturnValue({ toggleStatus: false, setToggleStatus: jest.fn() });
     render(

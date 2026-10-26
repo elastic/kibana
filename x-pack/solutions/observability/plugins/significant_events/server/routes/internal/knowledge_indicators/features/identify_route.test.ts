@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+import { NightshiftModelNotFoundError } from '@kbn/significant-events-schema';
 import type { SignificantEventsMaintenanceState } from '../../../../../common/maintenance/state_machine';
+import { FEATURE_IDENTIFICATION_AGENT_ID } from '../../../../agent_builder/agents/feature_identification';
 import {
   MAX_INFERENCE_DOCUMENT_BYTES,
   MAX_INFERENCE_DOCUMENT_FIELDS,
@@ -23,6 +25,9 @@ const mockGetStreamTypeFromDefinition = jest.fn();
 const mockIdentifyInferredFeatures = jest.fn();
 const mockIdentifyComputedFeatures = jest.fn();
 const mockShouldIdentifyFeatures = jest.fn();
+const mockResolveNightshiftModelForRequest = jest.fn(
+  async ({ requestedId }: { requestedId?: string }) => requestedId ?? 'default-connector'
+);
 
 jest.mock('@kbn/streams-schema', () => ({
   getStreamSamplingSource: (...args: unknown[]) => mockGetStreamSamplingSource(...args),
@@ -45,6 +50,12 @@ jest.mock('../../../../lib/significant_events/features/should_identify_features'
   shouldIdentifyFeatures: (...args: unknown[]) => mockShouldIdentifyFeatures(...args),
 }));
 
+jest.mock('@kbn/nightshift-ai', () => ({
+  ...jest.requireActual('@kbn/nightshift-ai'),
+  resolveNightshiftModelForRequest: (options: { requestedId?: string }) =>
+    mockResolveNightshiftModelForRequest(options),
+}));
+
 jest.mock(
   '../../../../lib/semantic_code_search_grounding/is_significant_events_semantic_code_search_grounding_enabled',
   () => ({
@@ -54,18 +65,14 @@ jest.mock(
 
 const prepareRoute =
   internalIdentifyKIFeaturesRoutes[
-    'POST /internal/streams/{streamName}/features/_identify/inferred/prepare'
+    'POST /internal/streams/{sourceId}/features/_identify/inferred/prepare'
   ];
 const inferredRoute =
-  internalIdentifyKIFeaturesRoutes[
-    'POST /internal/streams/{streamName}/features/_identify/inferred'
-  ];
+  internalIdentifyKIFeaturesRoutes['POST /internal/streams/{sourceId}/features/_identify/inferred'];
 const computedRoute =
-  internalIdentifyKIFeaturesRoutes[
-    'POST /internal/streams/{streamName}/features/_identify/computed'
-  ];
+  internalIdentifyKIFeaturesRoutes['POST /internal/streams/{sourceId}/features/_identify/computed'];
 const shouldIdentifyRoute =
-  internalIdentifyKIFeaturesRoutes['GET /internal/streams/{streamName}/features/_should_identify'];
+  internalIdentifyKIFeaturesRoutes['GET /internal/streams/{sourceId}/features/_should_identify'];
 
 type InferredHandlerParams = Parameters<typeof inferredRoute.handler>[0];
 type ComputedHandlerParams = Parameters<typeof computedRoute.handler>[0];
@@ -74,7 +81,7 @@ type ShouldIdentifyHandlerParams = Parameters<typeof shouldIdentifyRoute.handler
 const createInferredParams = (
   documents: Array<{ _id: string; fields: Record<string, unknown> }>
 ) => ({
-  path: { streamName: 'logs.test' },
+  path: { sourceId: 'logs.test' },
   body: {
     documents,
     samplingTelemetry: {
@@ -90,6 +97,7 @@ const makeMaintenanceService = (state: SignificantEventsMaintenanceState = 'enab
 });
 
 const makeRequest = () => ({
+  spaceId: 'space-a',
   events: {
     aborted$: {
       subscribe: jest.fn(),
@@ -109,12 +117,18 @@ const makeInferredHandlerParams = ({
 } = {}) => {
   const request = makeRequest();
   const routeLogger = makeRouteLogger();
-  const stream = { name: 'logs.test' };
+  const source = {
+    id: 'logs.test',
+    title: 'logs.test',
+    description: 'Checkout logs',
+    view_name: '$.nightshift.sources.default.logs',
+  };
   const kiClient = {};
-  const agentBuilder = {};
+  const agentBuilder = { agents: { ensure: jest.fn().mockResolvedValue(undefined) } };
   const server = {
-    searchInferenceEndpoints: {},
     agentBuilder,
+    inference: {},
+    core: { savedObjects: {}, uiSettings: {} },
   };
   const licensing = {};
   const maintenanceService = makeMaintenanceService();
@@ -126,7 +140,7 @@ const makeInferredHandlerParams = ({
 
   const handlerParams = {
     params: {
-      path: { streamName: 'logs.test' },
+      path: { sourceId: 'logs.test' },
       body: {
         connectorId: 'connector-1',
         runId: 'run-1',
@@ -145,7 +159,7 @@ const makeInferredHandlerParams = ({
     getScopedClients: jest.fn().mockResolvedValue({
       scopedClusterClient: { asCurrentUser: {} },
       streamDataEsClient: {},
-      streamsClient: { getStream: jest.fn().mockResolvedValue(stream) },
+      sourcesClient: { get: jest.fn().mockResolvedValue({ source }) },
       soClient: {},
       tuningConfig: {},
       licensing,
@@ -162,7 +176,7 @@ const makeInferredHandlerParams = ({
     handlerParams,
     request,
     routeLogger,
-    stream,
+    source,
     kiClient,
     agentBuilder,
     server,
@@ -177,7 +191,12 @@ const makeInferredHandlerParams = ({
 const makeComputedHandlerParams = () => {
   const request = makeRequest();
   const routeLogger = makeRouteLogger();
-  const stream = { name: 'logs.test' };
+  const source = {
+    id: 'logs.test',
+    title: 'logs.test',
+    description: 'Checkout logs',
+    view_name: '$.nightshift.sources.default.logs',
+  };
   const kiClient = {};
   const streamDataEsClient = {};
   const server = { agentBuilder: undefined };
@@ -192,7 +211,7 @@ const makeComputedHandlerParams = () => {
 
   const handlerParams = {
     params: {
-      path: { streamName: 'logs.test' },
+      path: { sourceId: 'logs.test' },
       body: {
         start: 100,
         end: 200,
@@ -203,7 +222,7 @@ const makeComputedHandlerParams = () => {
     request,
     getScopedClients: jest.fn().mockResolvedValue({
       streamDataEsClient,
-      streamsClient: { getStream: jest.fn().mockResolvedValue(stream) },
+      sourcesClient: { get: jest.fn().mockResolvedValue({ source }) },
       tuningConfig: {},
       licensing,
       getKnowledgeIndicatorClient: jest.fn().mockResolvedValue(kiClient),
@@ -218,7 +237,7 @@ const makeComputedHandlerParams = () => {
     handlerParams,
     request,
     routeLogger,
-    stream,
+    source,
     kiClient,
     streamDataEsClient,
     server,
@@ -231,7 +250,7 @@ const makeComputedHandlerParams = () => {
 describe('feature identification route schemas', () => {
   it('bounds ratios and timeouts', () => {
     const prepareParams = {
-      path: { streamName: 'logs.test' },
+      path: { sourceId: 'logs.test' },
       body: {
         entityFilteredRatio: 0,
         diverseRatio: 1,
@@ -260,7 +279,7 @@ describe('feature identification route schemas', () => {
     ).toBe(false);
     expect(
       computedRoute.params.safeParse({
-        path: { streamName: 'logs.test' },
+        path: { sourceId: 'logs.test' },
         body: { computedFeaturesTimeoutMs: 240_001 },
       }).success
     ).toBe(false);
@@ -326,7 +345,7 @@ describe('inferred feature identification route', () => {
   it('rejects _identify/inferred with 409 while paused before touching inference', async () => {
     const getKnowledgeIndicatorClient = jest.fn();
     const handlerParams = {
-      params: { path: { streamName: 'logs.test' }, body: null },
+      params: { path: { sourceId: 'logs.test' }, body: null },
       request: {},
       getScopedClients: jest.fn().mockResolvedValue({
         licensing: {},
@@ -347,7 +366,6 @@ describe('inferred feature identification route', () => {
     const {
       handlerParams,
       request,
-      stream,
       kiClient,
       agentBuilder,
       server,
@@ -370,8 +388,7 @@ describe('inferred feature identification route', () => {
         agentBuilder,
         request,
         kiClient,
-        streamName: 'logs.test',
-        streamType: 'logs',
+        sourceId: 'logs.test',
         connectorId: 'connector-1',
         runId: 'run-1',
         iteration: 2,
@@ -386,9 +403,32 @@ describe('inferred feature identification route', () => {
         trackFeaturesIdentified: expect.any(Function),
       })
     );
-    expect(mockGetStreamTypeFromDefinition).toHaveBeenCalledWith(stream);
     expect(telemetry.trackFeaturesIdentified).not.toHaveBeenCalled();
-    expect(ensureEnabled).toHaveBeenCalledWith({ request });
+    expect(ensureEnabled).toHaveBeenCalledWith({ request, spaceId: 'space-a' });
+  });
+
+  it('installs the feature identification agent in the request space before identifying', async () => {
+    const { handlerParams, agentBuilder } = makeInferredHandlerParams();
+
+    await inferredRoute.handler(handlerParams);
+
+    expect(agentBuilder.agents.ensure).toHaveBeenCalledWith(
+      expect.objectContaining({
+        spaceId: 'space-a',
+        agent: expect.objectContaining({ id: FEATURE_IDENTIFICATION_AGENT_ID }),
+      })
+    );
+    expect(agentBuilder.agents.ensure.mock.invocationCallOrder[0]).toBeLessThan(
+      mockIdentifyInferredFeatures.mock.invocationCallOrder[0]
+    );
+  });
+
+  it('fails the request when the agent cannot be installed', async () => {
+    const { handlerParams, agentBuilder } = makeInferredHandlerParams();
+    agentBuilder.agents.ensure.mockRejectedValue(new Error('agents index unavailable'));
+
+    await expect(inferredRoute.handler(handlerParams)).rejects.toThrow('agents index unavailable');
+    expect(mockIdentifyInferredFeatures).not.toHaveBeenCalled();
   });
 
   it('normalizes a blank run id before identifying inferred features', async () => {
@@ -416,6 +456,19 @@ describe('inferred feature identification route', () => {
       'Failed to ensure KI sync workflow is enabled: workflow unavailable'
     );
   });
+
+  it('maps an unknown connector override to a 400 response', async () => {
+    const { handlerParams } = makeInferredHandlerParams();
+    mockResolveNightshiftModelForRequest.mockRejectedValueOnce(
+      new NightshiftModelNotFoundError('missing-model')
+    );
+    handlerParams.params.body.connectorId = 'missing-model';
+
+    await expect(inferredRoute.handler(handlerParams)).rejects.toMatchObject({
+      output: { statusCode: 400 },
+    });
+    expect(mockIdentifyInferredFeatures).not.toHaveBeenCalled();
+  });
 });
 
 describe('computed feature identification route', () => {
@@ -426,7 +479,7 @@ describe('computed feature identification route', () => {
   it('rejects _identify/computed with 409 while paused', async () => {
     const getKnowledgeIndicatorClient = jest.fn();
     const handlerParams = {
-      params: { path: { streamName: 'logs.test' }, body: null },
+      params: { path: { sourceId: 'logs.test' }, body: null },
       request: {},
       getScopedClients: jest.fn().mockResolvedValue({
         licensing: {},
@@ -446,7 +499,6 @@ describe('computed feature identification route', () => {
     const {
       handlerParams,
       request,
-      stream,
       kiClient,
       streamDataEsClient,
       server,
@@ -465,8 +517,14 @@ describe('computed feature identification route', () => {
     expect(maintenanceService.getState).toHaveBeenCalledWith({ request });
     expect(mockIdentifyComputedFeatures).toHaveBeenCalledWith(
       expect.objectContaining({
-        stream,
-        streamName: 'logs.test',
+        sourceId: 'logs.test',
+        target: {
+          id: 'logs.test',
+          name: 'logs.test',
+          description: 'Checkout logs',
+          sources: ['$.nightshift.sources.default.logs'],
+          samplingSource: '$.nightshift.sources.default.logs',
+        },
         start: 100,
         end: 200,
         esClient: streamDataEsClient,
@@ -490,12 +548,13 @@ describe('should identify features route', () => {
     mockShouldIdentifyFeatures.mockResolvedValue(true);
     const handlerParams = {
       params: {
-        path: { streamName: 'logs.test' },
+        path: { sourceId: 'logs.test' },
         query: { thresholdHours: 24 },
       },
       request: {},
       getScopedClients: jest.fn().mockResolvedValue({
         licensing: {},
+        sourcesClient: { get: jest.fn().mockResolvedValue({ source: { id: 'logs.test' } }) },
         getKnowledgeIndicatorClient: jest.fn().mockResolvedValue(kiClient),
       }),
       server: {},
@@ -506,7 +565,7 @@ describe('should identify features route', () => {
     expect(maintenanceService.getState).not.toHaveBeenCalled();
     expect(mockShouldIdentifyFeatures).toHaveBeenCalledWith({
       kiClient,
-      streamName: 'logs.test',
+      sourceId: 'logs.test',
       thresholdHours: 24,
     });
   });

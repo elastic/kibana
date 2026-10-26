@@ -33,20 +33,21 @@ spaceTest.describe(
     });
 
     spaceTest('should apply Search all metrics recommended query', async ({ pageObjects }) => {
-      const { discover } = pageObjects;
+      const { discover, esqlEditor } = pageObjects;
 
       await spaceTest.step('submit a TS query to enable extensions fetch', async () => {
         await discover.writeAndSubmitEsqlQuery(`${testData.ESQL_QUERIES.TS} | LIMIT 100`);
       });
 
       await spaceTest.step('verify Search all metrics is available and apply it', async () => {
-        await discover.runRecommendedEsqlQuery(
+        await esqlEditor.selectRecommendedQuery(
           testData.RECOMMENDED_QUERY_LABELS.SEARCH_ALL_METRICS
         );
+        await discover.waitUntilSearchingHasFinished();
       });
 
       await spaceTest.step('verify the recommended query popover closed', async () => {
-        await expect(discover.esqlMenuPopover).toBeHidden();
+        await expect(esqlEditor.menuPopover).toBeHidden();
       });
 
       await spaceTest.step(

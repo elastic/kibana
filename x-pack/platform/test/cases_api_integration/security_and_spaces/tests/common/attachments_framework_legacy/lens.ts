@@ -8,17 +8,18 @@
 import { omit } from 'lodash/fp';
 import expect from '@kbn/expect';
 
-import { AttachmentType } from '@kbn/cases-plugin/common/types/domain';
 import {
   CASE_COMMENT_SAVED_OBJECT,
   CASE_USER_ACTION_SAVED_OBJECT,
+  LENS_ATTACHMENT_TYPE,
 } from '@kbn/cases-plugin/common/constants';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
   defaultUser,
   persistableStateAttachment,
   postCaseReq,
-  postCommentUserReq,
+  postUnifiedCommentReq,
+  postUnifiedLensReq,
 } from '../../../../common/lib/mock';
 import {
   deleteAllCaseItems,
@@ -33,10 +34,10 @@ import {
 
 /**
  * FF-OFF byte-clean coverage for persistable-state attachments, exercised through the
- * migrated `lens` type (`persistableStateAttachment` posts `persistableStateAttachmentTypeId: '.lens'`).
+ * mapped `lens` type (`persistableStateAttachment` posts `persistableStateAttachmentTypeId: '.lens'`).
  * The legacy wire shape is routed to the unified lens validator and stored byte-clean, so the
  * legacy round-trip must stay lossless. Ports the coverage of the former `.test`-based
- * `persistable_state.ts` onto a real migrated type.
+ * `persistable_state.ts` onto a real mapped type.
  */
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
@@ -136,11 +137,11 @@ export default ({ getService }: FtrProviderContext): void => {
       const patchedCase = await bulkCreateAttachments({
         supertest,
         caseId: postedCase.id,
-        params: [postCommentUserReq, persistableStateAttachment],
+        params: [postUnifiedCommentReq, postUnifiedLensReq],
       });
 
       const persistableStateComment = patchedCase.comments?.find(
-        (comment) => comment.type === AttachmentType.persistableState
+        (comment) => comment.type === LENS_ATTACHMENT_TYPE
       );
 
       const esResponse = await getSOFromKibanaIndex({
@@ -237,15 +238,12 @@ export default ({ getService }: FtrProviderContext): void => {
       });
     });
 
-    it('400s when bulk creating a non registered persistable state attachment type', async () => {
+    it('400s when bulk creating a non registered attachment type', async () => {
       const postedCase = await createCase(supertest, postCaseReq);
       await bulkCreateAttachments({
         supertest,
         caseId: postedCase.id,
-        params: [
-          persistableStateAttachment,
-          { ...persistableStateAttachment, persistableStateAttachmentTypeId: 'not-exists' },
-        ],
+        params: [postUnifiedLensReq, { ...postUnifiedLensReq, type: 'not-exists' }],
         expectedHttpCode: 400,
       });
     });

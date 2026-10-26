@@ -151,7 +151,7 @@ export const chatCompleteSuite = (
 
         expect(tokens.prompt).to.be.greaterThan(0);
         expect(tokens.completion).to.be.greaterThan(0);
-        expect(tokens.total).eql(tokens.prompt + tokens.completion);
+        expect(tokens.total).eql(tokens.prompt + tokens.completion + (tokens.thinking ?? 0));
       });
 
       it('returns an error with the expected shape in case of error', async () => {
@@ -269,13 +269,11 @@ export const chatCompleteSuite = (
         );
         expect(tokenEvent.tokens.prompt).to.be.greaterThan(0);
         expect(tokenEvent.tokens.completion).to.be.greaterThan(0);
-        // can include thinking token depending on the model
-        const totalIsPromptAndCompletion =
-          tokenEvent.tokens.total === tokenEvent.tokens.prompt + tokenEvent.tokens.completion;
-        const totalIsPromptCompletionAndThinking =
-          tokenEvent.tokens.total ===
-          tokenEvent.tokens.prompt + tokenEvent.tokens.completion + tokenEvent.tokens.thinking;
-        expect(totalIsPromptAndCompletion || totalIsPromptCompletionAndThinking).to.be(true);
+        expect(tokenEvent.tokens.total).eql(
+          tokenEvent.tokens.prompt +
+            tokenEvent.tokens.completion +
+            (tokenEvent.tokens.thinking ?? 0)
+        );
         // Model field is optional and may be present if provided by the connector
         if (tokenEvent.model !== undefined) {
           expect(tokenEvent.model).to.be.a('string');

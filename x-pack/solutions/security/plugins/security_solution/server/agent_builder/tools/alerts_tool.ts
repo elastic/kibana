@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolType, ToolResultType } from '@kbn/agent-builder-common';
 import { runSearchTool } from '@kbn/agent-builder-genai-utils/tools';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
@@ -16,27 +16,29 @@ import { DEFAULT_ALERTS_INDEX, ESSENTIAL_ALERT_FIELDS } from '../../../common/co
 import { securityTool } from './constants';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../plugin_contract';
 
-const alertsSchema = z.object({
-  query: z
-    .string()
-    .max(4000)
-    .describe('A natural language query expressing the search request for security alerts'),
-  isCount: z
-    .boolean()
-    .optional()
-    .describe(
-      'Set to true when the user is asking for a count of alerts (e.g., "how many alerts", "count alerts", "total number of alerts"). When true, the query will be optimized to return a count result instead of individual alert documents.'
-    ),
-  time_window_hours: z
-    .number()
-    .int()
-    .min(1)
-    .max(168)
-    .optional()
-    .describe(
-      'How many hours back from now to search (1-168, default 24). Increase (e.g. 72 or 168) when the user asks about a longer period or a 24h search returns no alerts.'
-    ),
-});
+const alertsSchema = lazySchema(() =>
+  z.object({
+    query: z
+      .string()
+      .max(4000)
+      .describe('A natural language query expressing the search request for security alerts'),
+    isCount: z
+      .boolean()
+      .optional()
+      .describe(
+        'Set to true when the user is asking for a count of alerts (e.g., "how many alerts", "count alerts", "total number of alerts"). When true, the query will be optimized to return a count result instead of individual alert documents.'
+      ),
+    time_window_hours: z
+      .number()
+      .int()
+      .min(1)
+      .max(168)
+      .optional()
+      .describe(
+        'How many hours back from now to search (1-168, default 24). Increase (e.g. 72 or 168) when the user asks about a longer period or a 24h search returns no alerts.'
+      ),
+  })
+);
 
 export const SECURITY_ALERTS_TOOL_ID = securityTool('alerts');
 

@@ -6,8 +6,9 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
+import { css } from '@emotion/react';
 import { FormProvider } from 'react-hook-form';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { PluginStart } from '@kbn/core-di';
 import { CoreStart, useService } from '@kbn/core-di-browser';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -18,6 +19,7 @@ import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { CPSPluginStart } from '@kbn/cps/public';
 import { RuleFormProvider } from '@kbn/alerting-v2-rule-form';
 import type { RuleFormServices } from '@kbn/alerting-v2-rule-form';
+import { getMinimumScheduleInterval } from '../../kibana_services';
 import { useAlertingLocators } from '../../application/locator_context';
 import { useSequenceBuilderForm, useSequenceBuilderState } from './use_sequence_builder_form';
 import { SequenceBuilderHeader } from './sequence_builder_header';
@@ -57,6 +59,7 @@ const useRuleFormServicesBag = (): RuleFormServices => {
       uiActions,
       dashboard,
       cps,
+      minimumScheduleInterval: getMinimumScheduleInterval(),
     }),
     [
       http,
@@ -75,6 +78,7 @@ const useRuleFormServicesBag = (): RuleFormServices => {
 };
 
 export const SequenceBuilderPage: React.FC = () => {
+  const { euiTheme } = useEuiTheme();
   const ruleFormServices = useRuleFormServicesBag();
   const { rulesLocators } = useAlertingLocators();
 
@@ -134,7 +138,13 @@ export const SequenceBuilderPage: React.FC = () => {
         <EuiFlexGroup
           direction="column"
           gutterSize="none"
-          style={{ height: '100%', overflow: 'hidden' }}
+          css={css`
+            /* EuiPageSection padding is size.l on each side; percentage height cannot fill it. */
+            block-size: calc(
+              var(--kbn-application--content-height, 100vh) - ${euiTheme.size.l} * 2
+            );
+            overflow: hidden;
+          `}
         >
           <EuiFlexItem grow={false}>
             <SequenceBuilderHeader
@@ -148,7 +158,15 @@ export const SequenceBuilderPage: React.FC = () => {
             />
           </EuiFlexItem>
 
-          <EuiFlexItem style={{ minHeight: 0 }}>{canvasContent}</EuiFlexItem>
+          <EuiFlexItem
+            css={css`
+              min-block-size: 0;
+              display: flex;
+              flex-direction: column;
+            `}
+          >
+            {canvasContent}
+          </EuiFlexItem>
         </EuiFlexGroup>
       </FormProvider>
     </RuleFormProvider>

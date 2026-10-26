@@ -13,12 +13,38 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useNlToEsqlCheck } from '../hooks/use_nl_to_esql_check';
 import { reportEsqlError } from '../report_error';
 import { nlErrorMessage } from './visor_i18n';
-import type { ESQLEditorDeps } from '../types';
+import type { ESQLEditorDeps, VisorNlResultHandler } from '../types';
 import type { ESQLEditorTelemetryService } from '../telemetry/telemetry_service';
+
+const INFERENCE_CONNECTORS_ROUTE = '/internal/inference/connectors';
+
+let hasInferenceConnector: boolean | undefined;
+let inferenceConnectorRequest: Promise<boolean> | undefined;
+
+const loadHasInferenceConnector = (http: ESQLEditorDeps['core']['http']): Promise<boolean> => {
+  inferenceConnectorRequest ??= http
+    .get<{ connectors: unknown[] }>(INFERENCE_CONNECTORS_ROUTE)
+    .then((res) => {
+      hasInferenceConnector = res.connectors.length > 0;
+      return hasInferenceConnector;
+    })
+    .catch(() => {
+      hasInferenceConnector = false;
+      return false;
+    });
+  return inferenceConnectorRequest;
+};
+
+/** Drops the cached connector lookup so tests can change the result. */
+export const clearInferenceConnectorCache = (): void => {
+  hasInferenceConnector = undefined;
+  inferenceConnectorRequest = undefined;
+};
 
 interface UseNlGenerationParams {
   query: string;
-  onNlResult?: (generatedQuery: string) => void;
+  onNlResult?: VisorNlResultHandler;
+  onNlReject?: () => void;
   onUpdateAndSubmitQuery: (query: string) => void;
   telemetryService?: ESQLEditorTelemetryService;
 }
@@ -26,6 +52,7 @@ interface UseNlGenerationParams {
 export const useNlGeneration = ({
   query,
   onNlResult,
+  onNlReject,
   onUpdateAndSubmitQuery,
   telemetryService,
 }: UseNlGenerationParams) => {
@@ -34,15 +61,20 @@ export const useNlGeneration = ({
 
   const [nlValue, setNlValue] = useState('');
   const [isNlLoading, setIsNlLoading] = useState(false);
-  const [hasConnector, setHasConnector] = useState<boolean | undefined>(undefined);
+  const [hasConnector, setHasConnector] = useState<boolean | undefined>(hasInferenceConnector);
   const abortControllerRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
     if (!isNlToEsqlEnabled) return;
-    core.http
-      .get<{ connectors: unknown[] }>('/internal/inference/connectors')
-      .then((res) => setHasConnector(res.connectors.length > 0))
-      .catch(() => setHasConnector(false));
+    let cancelled = false;
+    loadHasInferenceConnector(core.http).then((available) => {
+      if (!cancelled) {
+        setHasConnector(available);
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
   }, [isNlToEsqlEnabled, core.http]);
 
   const trackNlResult = useCallback(
@@ -87,7 +119,6 @@ export const useNlGeneration = ({
       });
       if (abortController.signal.aborted) return;
       if (result.content) {
-        appliedContent = true;
         trackNlResult(
           trimmed.length,
           query.length,
@@ -97,8 +128,10 @@ export const useNlGeneration = ({
           result.content.length
         );
         if (onNlResult) {
-          onNlResult(result.content);
+          // The prompt stays until the generated query is kept
+          onNlResult(result.content, { onAccept: () => setNlValue(''), onReject: onNlReject });
         } else {
+          appliedContent = true;
           onUpdateAndSubmitQuery(result.content);
         }
       }
@@ -127,6 +160,7 @@ export const useNlGeneration = ({
     core.http,
     core.notifications.toasts,
     onNlResult,
+    onNlReject,
     onUpdateAndSubmitQuery,
     trackNlResult,
   ]);

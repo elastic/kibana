@@ -74,6 +74,7 @@ dependsOn:
   - '@kbn/flyout-template'
   - '@kbn/flyout-sections'
   - '@kbn/response-ops-alerts-apis'
+  - '@kbn/connector-specs'
 tags:
   - shared-browser
   - package
@@ -86,6 +87,4 @@ fileGroups:
     - '**/*.ts'
     - '**/*.tsx'
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

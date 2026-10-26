@@ -6,22 +6,25 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { fireEvent, render, screen } from '@testing-library/react';
 
 import { TestProviders } from '../../../common/mock';
 import { StatefulRowRenderersBrowser } from '.';
 import * as i18n from './translations';
 
+jest.mock('./row_renderers_browser', () => ({
+  RowRenderersBrowser: () => null,
+}));
+
 describe('StatefulRowRenderersBrowser', () => {
-  it('names the modal dialog with its visible title', async () => {
+  it('names the modal dialog with its visible title', () => {
     render(
       <TestProviders>
         <StatefulRowRenderersBrowser timelineId="timeline-test" />
       </TestProviders>
     );
 
-    await userEvent.click(screen.getByTestId('show-row-renderers-gear'));
+    fireEvent.click(screen.getByTestId('show-row-renderers-gear'));
 
     expect(
       screen.getByRole('dialog', { name: i18n.CUSTOMIZE_EVENT_RENDERERS_TITLE })

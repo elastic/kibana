@@ -10,29 +10,35 @@ jest.mock('../../significant_events/latest_source_query', () => {
   return {
     ...actual,
     executeAndDecodeSource: jest.fn(),
+    executeCountQuery: jest.fn(),
   };
 });
 
 import { loggerMock } from '@kbn/logging-mocks';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { executeAndDecodeSource } from '../../significant_events/latest_source_query';
+import {
+  executeAndDecodeSource,
+  executeCountQuery,
+} from '../../significant_events/latest_source_query';
 import { RevisionReader } from './revision_reader';
 import { IndicatorReader } from './indicator_reader';
 import type { StoredQueryKnowledgeIndicator } from '../data_stream';
-import { KI_TYPE_QUERY } from '../fields';
+import { KI_TYPE_FEATURE, KI_TYPE_QUERY } from '../fields';
 
 const IS_NOT_EXPIRED_FRAGMENT = 'expires_at IS NULL OR expires_at >= NOW()';
-const STREAM = 'logs-app';
+const SPACE = 'marketing';
+const SOURCE = 'logs-app';
 
 function makeReader(): {
   reader: IndicatorReader;
+  revisionReader: RevisionReader;
   runEsql: jest.Mock;
 } {
   const runEsql = executeAndDecodeSource as jest.Mock;
   const logger = loggerMock.create();
-  const revisionReader = new RevisionReader({} as ElasticsearchClient, logger);
+  const revisionReader = new RevisionReader({} as ElasticsearchClient, logger, SPACE);
   const reader = new IndicatorReader(revisionReader);
-  return { reader, runEsql };
+  return { reader, revisionReader, runEsql };
 }
 
 function createQueryDoc(
@@ -42,7 +48,7 @@ function createQueryDoc(
     '@timestamp': '2026-01-01T00:00:00.000Z',
     id: 'query-1',
     type: KI_TYPE_QUERY,
-    'stream.name': STREAM,
+    'source.id': SOURCE,
     title: 'Test Query',
     description: 'Test Query',
     query: {
@@ -64,6 +70,160 @@ function capturedQueryString(runEsql: jest.Mock): string {
 
 beforeEach(() => {
   (executeAndDecodeSource as jest.Mock).mockReset();
+  (executeCountQuery as jest.Mock).mockReset();
+});
+
+describe('IndicatorReader.countKnowledgeIndicators', () => {
+  it('counts latest non-deleted revisions without the revision fetch limit', async () => {
+    const { reader } = makeReader();
+    (executeCountQuery as jest.Mock).mockResolvedValueOnce(25_001);
+
+    await expect(reader.countKnowledgeIndicators(KI_TYPE_FEATURE)).resolves.toBe(25_001);
+
+    const query = (executeCountQuery as jest.Mock).mock.calls[0][0].query.print('basic');
+    const latestRevisionGroupingIndex = query.lastIndexOf('INLINE STATS');
+    const deletionFilterIndex = query.indexOf('deleted IS NULL OR deleted == FALSE');
+    const countIndex = query.indexOf('STATS total = COUNT(*)');
+
+    expect(query).toContain('STATS total = COUNT(*)');
+    expect(query).toContain('deleted IS NULL OR deleted == FALSE');
+    expect(query).toContain('"feature"');
+    expect(query).toContain('LIMIT 1');
+    expect(query).not.toContain('LIMIT 10000');
+    expect(deletionFilterIndex).toBeGreaterThan(latestRevisionGroupingIndex);
+    expect(countIndex).toBeGreaterThan(deletionFilterIndex);
+  });
+
+  it('counts within the client space, grouped by source id', async () => {
+    const { reader } = makeReader();
+    (executeCountQuery as jest.Mock).mockResolvedValueOnce(3);
+
+    await reader.countKnowledgeIndicators(KI_TYPE_QUERY);
+
+    const query = (executeCountQuery as jest.Mock).mock.calls[0][0].query.print('basic');
+    expect(query).toContain(`"${SPACE}"`);
+    expect(query).toContain('BY `source.id`, type, id');
+    expect(query).not.toContain('stream.name');
+  });
+});
+
+describe('IndicatorReader overview counts', () => {
+  it('counts active features for the requested sources', async () => {
+    const { reader } = makeReader();
+    (executeCountQuery as jest.Mock).mockResolvedValueOnce(12);
+
+    await expect(reader.countFeatures([SOURCE, 'logs-other'])).resolves.toBe(12);
+
+    const query = (executeCountQuery as jest.Mock).mock.calls[0][0].query.print('basic');
+    expect(query).toContain(`\`source.id\` IN ("${SOURCE}", "logs-other")`);
+    expect(query).toContain('"feature"');
+    expect(query).toContain('deleted IS NULL OR deleted == FALSE');
+    expect(query).toContain('excluded IS NULL OR excluded == FALSE');
+    expect(query).toContain(IS_NOT_EXPIRED_FRAGMENT);
+  });
+
+  it('counts distinct live entity slugs across sources, without the list limit', async () => {
+    const { reader } = makeReader();
+    (executeCountQuery as jest.Mock).mockResolvedValueOnce(1500);
+
+    await expect(reader.countEntities([SOURCE, 'logs-other'])).resolves.toBe(1500);
+
+    const query = (executeCountQuery as jest.Mock).mock.calls[0][0].query.print('basic');
+    expect(query).toContain(`\`source.id\` IN ("${SOURCE}", "logs-other")`);
+    expect(query).toContain('`feature.type` IN ("entity")');
+    expect(query).toContain('deleted IS NULL OR deleted == FALSE');
+    expect(query).toContain('excluded IS NULL OR excluded == FALSE');
+    expect(query).toContain(IS_NOT_EXPIRED_FRAGMENT);
+    // Distinct slugs merge the same entity learned from two sources; the type filter runs after
+    // picking the latest revision, so a revision that changed type isn't counted.
+    expect(query).toContain('STATS total = COUNT_DISTINCT(`feature.slug`)');
+    expect(query.indexOf('`feature.type` IN ("entity")')).toBeGreaterThan(
+      query.indexOf('INLINE STATS tiebreaker_id')
+    );
+    expect(query).not.toContain('LIMIT 1000');
+  });
+
+  it('counts active unbacked queries for the requested sources', async () => {
+    const { reader } = makeReader();
+    (executeCountQuery as jest.Mock).mockResolvedValueOnce(4);
+
+    await expect(reader.countUnbackedQueries([SOURCE])).resolves.toBe(4);
+
+    const query = (executeCountQuery as jest.Mock).mock.calls[0][0].query.print('basic');
+    expect(query).toContain(`\`source.id\` IN ("${SOURCE}")`);
+    expect(query).toContain('"query"');
+    expect(query).toContain('deleted IS NULL OR deleted == FALSE');
+    expect(query).toContain(IS_NOT_EXPIRED_FRAGMENT);
+    expect(query).toContain('`query.rule_backed` == FALSE');
+  });
+
+  it('counts rule-backed queries for the requested sources', async () => {
+    const { reader } = makeReader();
+    (executeCountQuery as jest.Mock).mockResolvedValueOnce(8);
+
+    await expect(reader.countRuleBackedQueries([SOURCE])).resolves.toBe(8);
+
+    const query = (executeCountQuery as jest.Mock).mock.calls[0][0].query.print('basic');
+    expect(query).toContain(`\`source.id\` IN ("${SOURCE}")`);
+    expect(query).toContain('"query"');
+    expect(query).toContain('deleted IS NULL OR deleted == FALSE');
+    expect(query).toContain(IS_NOT_EXPIRED_FRAGMENT);
+    expect(query).toContain('`query.rule_backed` == TRUE');
+  });
+});
+
+describe('IndicatorReader space scoping', () => {
+  it('retains the Elasticsearch IDs of the selected latest revisions', async () => {
+    const { revisionReader, runEsql } = makeReader();
+    const doc = createQueryDoc();
+    runEsql.mockResolvedValueOnce({ hits: [doc], esIds: ['latest-es-id'] });
+
+    await expect(revisionReader.fetchLatestRevisionEntries()).resolves.toEqual([
+      { esId: 'latest-es-id', doc },
+    ]);
+    expect(capturedQueryString(runEsql)).toContain('KEEP _id, _source');
+  });
+
+  it('filters every read by the client space with no IS NULL fallback', async () => {
+    const { reader, runEsql } = makeReader();
+    runEsql.mockResolvedValueOnce({ hits: [] });
+
+    await reader.getQueryLinks([SOURCE]);
+
+    const query = capturedQueryString(runEsql);
+    expect(query).toContain(`\`kibana.space_ids\` == "${SPACE}"`);
+    expect(query).not.toContain('kibana.space_ids` IS NULL');
+  });
+
+  it('applies the space filter before the latest-revision grouping', async () => {
+    const { reader, runEsql } = makeReader();
+    runEsql.mockResolvedValueOnce({ hits: [] });
+
+    await reader.getFeatures(SOURCE);
+
+    const query = capturedQueryString(runEsql);
+    expect(query.indexOf('kibana.space_ids')).toBeLessThan(query.indexOf('INLINE STATS'));
+  });
+
+  it('groups latest revisions by (source.id, type, id)', async () => {
+    const { reader, runEsql } = makeReader();
+    runEsql.mockResolvedValueOnce({ hits: [] });
+
+    await reader.getFeatures(SOURCE);
+
+    expect(capturedQueryString(runEsql)).toContain('BY `source.id`, type, id');
+  });
+
+  it('filters by source.id rather than stream.name', async () => {
+    const { reader, runEsql } = makeReader();
+    runEsql.mockResolvedValueOnce({ hits: [] });
+
+    await reader.getFeatures([SOURCE, 'logs-other']);
+
+    const query = capturedQueryString(runEsql);
+    expect(query).toContain(`\`source.id\` IN ("${SOURCE}", "logs-other")`);
+    expect(query).not.toContain('stream.name');
+  });
 });
 
 describe('IndicatorReader.getQueryLinks', () => {
@@ -71,7 +231,7 @@ describe('IndicatorReader.getQueryLinks', () => {
     const { reader, runEsql } = makeReader();
     runEsql.mockResolvedValueOnce({ hits: [] });
 
-    await reader.getQueryLinks([STREAM]);
+    await reader.getQueryLinks([SOURCE]);
 
     expect(capturedQueryString(runEsql)).toContain(IS_NOT_EXPIRED_FRAGMENT);
   });
@@ -80,7 +240,7 @@ describe('IndicatorReader.getQueryLinks', () => {
     const { reader, runEsql } = makeReader();
     runEsql.mockResolvedValueOnce({ hits: [] });
 
-    await reader.getQueryLinks([STREAM], { includeExpired: true });
+    await reader.getQueryLinks([SOURCE], { includeExpired: true });
 
     expect(capturedQueryString(runEsql)).not.toContain(IS_NOT_EXPIRED_FRAGMENT);
   });
@@ -90,7 +250,7 @@ describe('IndicatorReader.getQueryLinks', () => {
     const doc = createQueryDoc({ expires_at: '2099-01-01T00:00:00.000Z' });
     runEsql.mockResolvedValueOnce({ hits: [doc] });
 
-    const links = await reader.getQueryLinks([STREAM]);
+    const links = await reader.getQueryLinks([SOURCE]);
 
     expect(links).toHaveLength(1);
     expect(links[0].query.id).toBe('query-1');
@@ -102,7 +262,7 @@ describe('IndicatorReader.getQueryLinks', () => {
     const doc = createQueryDoc();
     runEsql.mockResolvedValueOnce({ hits: [doc] });
 
-    const links = await reader.getQueryLinks([STREAM]);
+    const links = await reader.getQueryLinks([SOURCE]);
 
     expect(links).toHaveLength(1);
     expect(links[0].expires_at).toBeUndefined();
@@ -112,7 +272,7 @@ describe('IndicatorReader.getQueryLinks', () => {
     const { reader, runEsql } = makeReader();
     runEsql.mockResolvedValueOnce({ hits: [] });
 
-    await reader.getQueryLinks([STREAM], {
+    await reader.getQueryLinks([SOURCE], {
       queryTypes: ['match'],
       ruleIds: ['rule-1'],
     });
@@ -130,7 +290,7 @@ describe('IndicatorReader.getFeatures', () => {
     const { reader, runEsql } = makeReader();
     runEsql.mockResolvedValueOnce({ hits: [] });
 
-    await reader.getFeatures(STREAM, {
+    await reader.getFeatures(SOURCE, {
       featureIds: ['payment'],
       type: ['entity'],
     });
@@ -143,12 +303,58 @@ describe('IndicatorReader.getFeatures', () => {
   });
 });
 
-describe('IndicatorReader.getStreamToQueryLinksMap', () => {
+describe('IndicatorReader.getFeatureSourcesBySlug', () => {
+  const featureDoc = (sourceId: string, slug: string) => ({
+    '@timestamp': '2026-01-01T00:00:00.000Z',
+    id: `${sourceId}-${slug}`,
+    type: KI_TYPE_FEATURE,
+    'source.id': sourceId,
+    title: slug,
+    description: slug,
+    feature: { slug, type: 'technology', subtype: 'cache', properties: {}, confidence: 90 },
+  });
+
+  it('groups active latest holders by slug', async () => {
+    const { reader, runEsql } = makeReader();
+    runEsql.mockResolvedValueOnce({
+      hits: [
+        featureDoc('src-a', 'redis'),
+        featureDoc('src-b', 'redis'),
+        featureDoc('src-b', 'redis'),
+        featureDoc('src-c', 'kafka'),
+      ],
+    });
+
+    const holders = await reader.getFeatureSourcesBySlug(
+      ['src-a', 'src-b', 'src-c'],
+      'technology',
+      ['redis', 'kafka']
+    );
+
+    expect(holders).toEqual(
+      new Map([
+        ['redis', ['src-a', 'src-b']],
+        ['kafka', ['src-c']],
+      ])
+    );
+    const query = capturedQueryString(runEsql);
+    expect(query).toContain('`source.id` IN ("src-a", "src-b", "src-c")');
+    expect(query).toContain('(excluded IS NULL OR excluded == FALSE)');
+    expect(query).toContain(IS_NOT_EXPIRED_FRAGMENT);
+    const grouping = query.indexOf('INLINE STATS');
+    expect(query.indexOf('`source.id` IN ("src-a", "src-b", "src-c")')).toBeLessThan(grouping);
+    expect(query.indexOf('`feature.slug` IN ("redis", "kafka")')).toBeGreaterThan(grouping);
+    expect(query.indexOf('`feature.type` IN ("technology")')).toBeGreaterThan(grouping);
+    expect(query.indexOf('deleted IS NULL')).toBeGreaterThan(grouping);
+  });
+});
+
+describe('IndicatorReader.getSourceToQueryLinksMap', () => {
   it('omits IS_NOT_EXPIRED when includeExpired is true', async () => {
     const { reader, runEsql } = makeReader();
     runEsql.mockResolvedValueOnce({ hits: [] });
 
-    await reader.getStreamToQueryLinksMap([STREAM], { includeExpired: true });
+    await reader.getSourceToQueryLinksMap([SOURCE], { includeExpired: true });
 
     expect(capturedQueryString(runEsql)).not.toContain(IS_NOT_EXPIRED_FRAGMENT);
   });
@@ -158,10 +364,10 @@ describe('IndicatorReader.getStreamToQueryLinksMap', () => {
     const doc = createQueryDoc({ expires_at: '2020-01-01T00:00:00.000Z' });
     runEsql.mockResolvedValueOnce({ hits: [doc] });
 
-    const map = await reader.getStreamToQueryLinksMap([STREAM], { includeExpired: true });
+    const map = await reader.getSourceToQueryLinksMap([SOURCE], { includeExpired: true });
 
-    expect(map[STREAM]).toHaveLength(1);
-    expect(map[STREAM][0].query.id).toBe('query-1');
+    expect(map[SOURCE]).toHaveLength(1);
+    expect(map[SOURCE][0].query.id).toBe('query-1');
   });
 });
 

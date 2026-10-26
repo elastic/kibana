@@ -1,5 +1,5 @@
 {
-  "sha1": "2bbbd98d6f7224d87d4e31cfa1ab65fa9a09bf6e",
+  "sha1": "3b887248d9231af5fa03f8cddb531e123a0b63a6",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -17,15 +17,13 @@
         "@cloud-serverless-security_complete",
         "@local-serverless-observability_complete",
         "@cloud-serverless-observability_complete",
-        "@local-serverless-workplaceai",
-        "@cloud-serverless-workplaceai",
         "@local-serverless-vectordb",
         "@cloud-serverless-vectordb"
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_extensions/test/scout/api/tests/step_definitions_approval.spec.ts",
-        "line": 68,
-        "column": 20
+        "line": 66,
+        "column": 26
       }
     }
   ]

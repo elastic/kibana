@@ -7,14 +7,11 @@
 
 import { useCallback, useState } from 'react';
 import type { WorkflowListItemDto } from '@kbn/workflows';
-import type { RunWorkflowExecutor } from '@kbn/workflows-ui';
+import type { RunWorkflowExecutor, RunWorkflowTelemetry } from '@kbn/workflows-ui';
 import type { CasesUI } from '../../containers/types';
-import {
-  untaggedCaseWorkflowFilter,
-  untaggedCaseWorkflowComparator,
-  useCanRunCaseWorkflow,
-} from './use_run_case_workflow';
+import { useCaseWorkflowFilters, useCanRunCaseWorkflow } from './use_run_case_workflow';
 import { useRunWorkflowOnCases } from './use_run_workflow_on_cases';
+import { useCasesListWorkflowRunTelemetry } from '../../analytics/use_case_workflow_run_telemetry';
 
 interface UseRunCasesWorkflowResult {
   /** Whether the current user is allowed to run a workflow from a case. */
@@ -27,6 +24,8 @@ interface UseRunCasesWorkflowResult {
   selectedCases: CasesUI;
   /** Executor that starts one workflow execution covering all selected cases. */
   runWorkflow: RunWorkflowExecutor;
+  /** Telemetry context for the run panel; cases-list runs carry no case origin. */
+  telemetry: RunWorkflowTelemetry;
   /** Predicate limiting the workflow selector to configured tags. */
   filterWorkflow: (workflow: WorkflowListItemDto) => boolean;
   /** Comparator prioritising tagged then context-relevant workflows. */
@@ -41,6 +40,7 @@ interface UseRunCasesWorkflowResult {
  */
 export const useRunCasesWorkflow = (): UseRunCasesWorkflowResult => {
   const canRunWorkflow = useCanRunCaseWorkflow();
+  const { filterWorkflow, sortWorkflow } = useCaseWorkflowFilters();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedCases, setSelectedCases] = useState<CasesUI>([]);
@@ -56,6 +56,7 @@ export const useRunCasesWorkflow = (): UseRunCasesWorkflowResult => {
   }, []);
 
   const runWorkflow = useRunWorkflowOnCases({ cases: selectedCases });
+  const telemetry = useCasesListWorkflowRunTelemetry(selectedCases.length);
 
   return {
     canRunWorkflow,
@@ -64,7 +65,8 @@ export const useRunCasesWorkflow = (): UseRunCasesWorkflowResult => {
     closeModal,
     selectedCases,
     runWorkflow,
-    filterWorkflow: untaggedCaseWorkflowFilter,
-    sortWorkflow: untaggedCaseWorkflowComparator,
+    telemetry,
+    filterWorkflow,
+    sortWorkflow,
   };
 };

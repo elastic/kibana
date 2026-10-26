@@ -8,11 +8,13 @@
 import Boom from '@hapi/boom';
 import { Parser } from '@elastic/esql';
 import { ALERTING_ERROR_CODES } from '@kbn/alerting-v2-plugin/server';
+import { MAX_BULK_ITEMS } from '@kbn/alerting-v2-schemas';
 import { PROJECT_ROUTING_ALL } from '@kbn/cps-server-utils';
 import { RulesAdapterV2, type RulesAdapterV2Params } from './v2_rules_adapter';
 import {
   BulkCreateRulesError,
-  STREAMS_RULE_STREAM_TAG_PREFIX,
+  LEGACY_RULE_STREAM_TAG_PREFIX,
+  NIGHTSHIFT_RULE_SOURCE_TAG_PREFIX,
   type SignificantEventsRuleDefinition,
 } from './rules_management_client';
 import {
@@ -28,6 +30,8 @@ function makeRulesClientMock() {
     bulkCreateRules: jest.fn(),
     updateRule: jest.fn(),
     bulkDeleteRules: jest.fn(),
+    bulkEnableRules: jest.fn().mockResolvedValue({ errors: [] }),
+    bulkDisableRules: jest.fn().mockResolvedValue({ errors: [] }),
     ruleExists: jest.fn(),
     findRules: jest.fn().mockResolvedValue({ items: [], total: 0, page: 1, perPage: 500 }),
     getTags: jest.fn().mockResolvedValue([]),
@@ -36,9 +40,9 @@ function makeRulesClientMock() {
 
 function makeAdapter(
   mock: ReturnType<typeof makeRulesClientMock>,
-  { isServerless }: Pick<RulesAdapterV2Params, 'isServerless'> = { isServerless: false }
+  { cpsEnabled }: Pick<RulesAdapterV2Params, 'cpsEnabled'> = { cpsEnabled: false }
 ) {
-  return new RulesAdapterV2({ rulesClient: mock, isServerless });
+  return new RulesAdapterV2({ rulesClient: mock, cpsEnabled });
 }
 
 function lastCreateCall(mock: ReturnType<typeof makeRulesClientMock>) {
@@ -53,7 +57,7 @@ function lastUpdateCall(mock: ReturnType<typeof makeRulesClientMock>) {
 
 const createDefinition: SignificantEventsRuleDefinition = {
   name: 'High error rate (match count)',
-  streamName: 'my-stream',
+  sourceId: 'my-stream',
   timestampField: '@timestamp',
   esqlQuery: 'FROM logs-* | WHERE level == "error"',
   schedule: { interval: METRIC_SERIES_EVERY },
@@ -61,7 +65,7 @@ const createDefinition: SignificantEventsRuleDefinition = {
 
 const updateDefinition: SignificantEventsRuleDefinition = {
   name: 'Updated title (match count)',
-  streamName: 'my-stream',
+  sourceId: 'my-stream',
   timestampField: '@timestamp',
   esqlQuery: 'FROM logs-* | WHERE level == "error"',
   schedule: { interval: METRIC_SERIES_EVERY },
@@ -80,6 +84,36 @@ function expectMetricSeriesBreach(query: string) {
 describe('RulesAdapterV2', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+  });
+
+  describe('findRuleEnabledStates', () => {
+    it('finds states by id in pages of at most 500', async () => {
+      const mock = makeRulesClientMock();
+      mock.findRules.mockImplementation(async ({ filter }: { filter: string }) => ({
+        items: [...filter.matchAll(/id: "([^"]+)"/g)].map(([, id]) => ({
+          id,
+          enabled: id !== 'rule-0',
+        })),
+      }));
+      const ids = Array.from({ length: 501 }, (_, index) => `rule-${index}`);
+      const result = await makeAdapter(mock).findRuleEnabledStates(ids);
+
+      expect(mock.findRules).toHaveBeenCalledTimes(2);
+      expect(mock.findRules.mock.calls[0][0]).toMatchObject({ perPage: 500 });
+      expect(mock.findRules.mock.calls[1][0]).toMatchObject({
+        filter: 'id: "rule-500"',
+        perPage: 1,
+      });
+      expect(result.size).toBe(501);
+      expect(result.get('rule-0')).toBe(false);
+      expect(result.get('rule-500')).toBe(true);
+    });
+
+    it('skips the lookup for an empty set', async () => {
+      const mock = makeRulesClientMock();
+      expect(await makeAdapter(mock).findRuleEnabledStates([])).toEqual(new Map());
+      expect(mock.findRules).not.toHaveBeenCalled();
+    });
   });
 
   describe('v2 body mapping', () => {
@@ -101,7 +135,7 @@ describe('RulesAdapterV2', () => {
       expect(data.kind).toBe('signal');
       expect(data.metadata).toEqual({
         name: 'High error rate (match count)',
-        tags: ['sigevents:stream:my-stream', METRIC_SERIES_RULE_TAG],
+        tags: ['nightshift:source:my-stream', METRIC_SERIES_RULE_TAG],
       });
       expect(data.time_field).toBe('@timestamp');
       expect(data.schedule).toEqual({
@@ -111,6 +145,17 @@ describe('RulesAdapterV2', () => {
       expect(data.grouping).toEqual({ fields: ['bucket'] });
       expectMetricSeriesBreach(data.query.base);
       expect(lastCreateCall(mock).options).toEqual({ id: 'rule-1' });
+    });
+
+    it('keeps the source id in the ownership tag, including dots', async () => {
+      const mock = makeRulesClientMock();
+      mock.createRule.mockResolvedValue({} as never);
+      const adapter = makeAdapter(mock);
+
+      await adapter.createRule('rule-1', { ...createDefinition, sourceId: 'logs.nginx' });
+
+      const data = lastCreateCall(mock).data as { metadata: { tags: string[] } };
+      expect(data.metadata.tags).toEqual(['nightshift:source:logs.nginx', METRIC_SERIES_RULE_TAG]);
     });
 
     it('rejects STATS queries until rule-on-rule provisioning', async () => {
@@ -143,7 +188,7 @@ describe('RulesAdapterV2', () => {
       };
 
       expect(data.metadata.name).toBe('Updated title (match count)');
-      expect(data.metadata.tags).toEqual(['sigevents:stream:my-stream', METRIC_SERIES_RULE_TAG]);
+      expect(data.metadata.tags).toEqual(['nightshift:source:my-stream', METRIC_SERIES_RULE_TAG]);
       expect(data.schedule).toEqual({
         every: METRIC_SERIES_EVERY,
         lookback: METRIC_SERIES_LOOKBACK,
@@ -170,22 +215,22 @@ describe('RulesAdapterV2', () => {
     });
   });
 
-  describe('serverless project routing', () => {
+  describe('CPS project routing', () => {
     const SET_DIRECTIVE = `SET project_routing="${PROJECT_ROUTING_ALL}";`;
 
-    it('omits the project routing directive on stateful', async () => {
+    it('omits the project routing directive when CPS is disabled', async () => {
       const mock = makeRulesClientMock();
       mock.createRule.mockResolvedValue({} as never);
-      const adapter = makeAdapter(mock, { isServerless: false });
+      const adapter = makeAdapter(mock, { cpsEnabled: false });
       await adapter.createRule('rule-1', createDefinition);
 
       expect(lastCreateCall(mock).data.query.base).not.toContain('SET project_routing');
     });
 
-    it('scopes the create breach query across all projects on serverless', async () => {
+    it('scopes the create breach query across all projects when CPS is enabled', async () => {
       const mock = makeRulesClientMock();
       mock.createRule.mockResolvedValue({} as never);
-      const adapter = makeAdapter(mock, { isServerless: true });
+      const adapter = makeAdapter(mock, { cpsEnabled: true });
       await adapter.createRule('rule-1', createDefinition);
 
       const query = lastCreateCall(mock).data.query.base;
@@ -193,10 +238,10 @@ describe('RulesAdapterV2', () => {
       expectMetricSeriesBreach(query);
     });
 
-    it('scopes the update breach query across all projects on serverless', async () => {
+    it('scopes the update breach query across all projects when CPS is enabled', async () => {
       const mock = makeRulesClientMock();
       mock.updateRule.mockResolvedValue({} as never);
-      const adapter = makeAdapter(mock, { isServerless: true });
+      const adapter = makeAdapter(mock, { cpsEnabled: true });
       await adapter.updateRule('rule-1', updateDefinition);
 
       const query = lastUpdateCall(mock).data.query.base;
@@ -207,7 +252,7 @@ describe('RulesAdapterV2', () => {
     it('emits a query Alerting v2 rule validation accepts', async () => {
       const mock = makeRulesClientMock();
       mock.createRule.mockResolvedValue({} as never);
-      const adapter = makeAdapter(mock, { isServerless: true });
+      const adapter = makeAdapter(mock, { cpsEnabled: true });
       await adapter.createRule('rule-1', createDefinition);
 
       expect(Parser.parseErrors(lastCreateCall(mock).data.query.base)).toEqual([]);
@@ -250,14 +295,14 @@ describe('RulesAdapterV2', () => {
 
       expect(result).toEqual({ createdIds: ['rule-1'] });
       expect(mock.bulkCreateRules).toHaveBeenCalledWith({
-        rules: [
+        items: [
           expect.objectContaining({
             id: 'rule-1',
             enabled: true,
             kind: 'signal',
             metadata: {
               name: createDefinition.name,
-              tags: ['sigevents:stream:my-stream', METRIC_SERIES_RULE_TAG],
+              tags: ['nightshift:source:my-stream', METRIC_SERIES_RULE_TAG],
             },
           }),
         ],
@@ -460,7 +505,7 @@ describe('RulesAdapterV2', () => {
       ).resolves.toEqual({ createdIds: ['rule-new'] });
 
       expect(mock.bulkCreateRules).toHaveBeenCalledTimes(2);
-      const retryRules = mock.bulkCreateRules.mock.calls[1][0].rules as Array<{ id: string }>;
+      const retryRules = mock.bulkCreateRules.mock.calls[1][0].items as Array<{ id: string }>;
       expect(retryRules.map(({ id }) => id)).toEqual(['rule-new']);
       expect(mock.updateRule).toHaveBeenCalledTimes(1);
       expect(mock.updateRule).toHaveBeenCalledWith({
@@ -662,12 +707,17 @@ describe('RulesAdapterV2', () => {
   });
 
   describe('findOwnedRuleIds', () => {
-    it('returns an empty list when no rules match the stream tag', async () => {
+    it('looks up both the source tag and the legacy stream tag for the source', async () => {
       const mock = makeRulesClientMock();
       mock.findRules.mockResolvedValue({ items: [], total: 0, page: 1, perPage: 500 });
       const adapter = makeAdapter(mock);
 
       await expect(adapter.findOwnedRuleIds('my-stream')).resolves.toEqual([]);
+      expect(mock.findRules).toHaveBeenCalledWith({
+        filter: 'metadata.tags: "nightshift:source:my-stream"',
+        perPage: 500,
+        page: 1,
+      });
       expect(mock.findRules).toHaveBeenCalledWith({
         filter: 'metadata.tags: "sigevents:stream:my-stream"',
         perPage: 500,
@@ -675,27 +725,57 @@ describe('RulesAdapterV2', () => {
       });
     });
 
+    it('looks up the raw source id on both the current and legacy tags', async () => {
+      const mock = makeRulesClientMock();
+      mock.findRules.mockResolvedValue({ items: [], total: 0, page: 1, perPage: 500 });
+      const adapter = makeAdapter(mock);
+
+      await adapter.findOwnedRuleIds('logs.nginx');
+
+      expect(mock.findRules).toHaveBeenCalledWith({
+        filter: 'metadata.tags: "nightshift:source:logs.nginx"',
+        perPage: 500,
+        page: 1,
+      });
+      expect(mock.findRules).toHaveBeenCalledWith({
+        filter: 'metadata.tags: "sigevents:stream:logs.nginx"',
+        perPage: 500,
+        page: 1,
+      });
+    });
+
+    it('unions current and legacy owned rules so pre-upgrade rules are reconciled as orphans', async () => {
+      const mock = makeRulesClientMock();
+      mock.findRules.mockImplementation(async ({ filter }: { filter: string }) => ({
+        items: filter.includes('nightshift:source:')
+          ? [{ id: 'new-1' }]
+          : [{ id: 'legacy-1' }, { id: 'new-1' }],
+        total: filter.includes('nightshift:source:') ? 1 : 2,
+        page: 1,
+        perPage: 500,
+      }));
+      const adapter = makeAdapter(mock);
+
+      await expect(adapter.findOwnedRuleIds('my-stream')).resolves.toEqual(['new-1', 'legacy-1']);
+    });
+
     it('pages until all owned rule ids are collected', async () => {
       const mock = makeRulesClientMock();
-      mock.findRules
-        .mockResolvedValueOnce({
-          items: [{ id: 'r1' }, { id: 'r2' }],
-          total: 3,
-          page: 1,
-          perPage: 500,
-        })
-        .mockResolvedValueOnce({
-          items: [{ id: 'r3' }],
-          total: 3,
-          page: 2,
-          perPage: 500,
-        });
+      mock.findRules.mockImplementation(
+        async ({ filter, page }: { filter: string; page: number }) => {
+          if (filter.includes('sigevents:stream:')) {
+            return { items: [], total: 0, page: 1, perPage: 500 };
+          }
+          return page === 1
+            ? { items: [{ id: 'r1' }, { id: 'r2' }], total: 3, page: 1, perPage: 500 }
+            : { items: [{ id: 'r3' }], total: 3, page: 2, perPage: 500 };
+        }
+      );
       const adapter = makeAdapter(mock);
 
       await expect(adapter.findOwnedRuleIds('my-stream')).resolves.toEqual(['r1', 'r2', 'r3']);
-      expect(mock.findRules).toHaveBeenCalledTimes(2);
-      expect(mock.findRules).toHaveBeenNthCalledWith(2, {
-        filter: 'metadata.tags: "sigevents:stream:my-stream"',
+      expect(mock.findRules).toHaveBeenCalledWith({
+        filter: 'metadata.tags: "nightshift:source:my-stream"',
         perPage: 500,
         page: 2,
       });
@@ -784,27 +864,121 @@ describe('RulesAdapterV2', () => {
       const adapter = makeAdapter(mock);
       await expect(adapter.bulkDeleteRules(['x'])).rejects.toThrow(/V2 bulk delete failed/);
     });
+
+    it('batches source rule cleanup at the Alerting bulk limit', async () => {
+      const mock = makeRulesClientMock();
+      mock.bulkDeleteRules.mockImplementation(async ({ ids }: { ids: string[] }) => ({
+        affected_count: ids.length,
+        errors: [],
+      }));
+      const ids = Array.from({ length: MAX_BULK_ITEMS + 1 }, (_, index) => `rule-${index}`);
+
+      await expect(makeAdapter(mock).bulkDeleteRules(ids)).resolves.toBeUndefined();
+      expect(mock.bulkDeleteRules.mock.calls).toEqual([
+        [{ ids: ids.slice(0, MAX_BULK_ITEMS) }],
+        [{ ids: ids.slice(MAX_BULK_ITEMS) }],
+      ]);
+    });
+
+    it('continues after a rejected batch and throws an error identifying every failed rule', async () => {
+      const mock = makeRulesClientMock();
+      mock.bulkDeleteRules
+        .mockRejectedValueOnce(new Error('Request failed'))
+        .mockResolvedValueOnce({ affected_count: 1, errors: [] });
+      const ids = Array.from({ length: MAX_BULK_ITEMS + 1 }, (_, index) => `rule-${index}`);
+      const detail = ids
+        .slice(0, MAX_BULK_ITEMS)
+        .map((id) => `${id}: Request failed`)
+        .join('; ');
+
+      await expect(makeAdapter(mock).bulkDeleteRules(ids)).rejects.toThrow(
+        `V2 bulk delete failed for ${MAX_BULK_ITEMS} rule(s): ${detail}`
+      );
+      expect(mock.bulkDeleteRules).toHaveBeenCalledTimes(2);
+    });
   });
 
-  describe('findStreamNamesWithOwnedRules', () => {
-    it('derives distinct stream names from ownership tags, ignoring unrelated tags', async () => {
+  describe('findSourceIdsWithOwnedRules', () => {
+    it('derives distinct source ids from both ownership tags, ignoring unrelated tags', async () => {
       const mock = makeRulesClientMock();
-      mock.getTags.mockResolvedValueOnce([
-        'sigevents:stream:logs.nginx',
-        'production',
-        'sigevents:stream:logs.apache',
-        'sigevents:stream:logs.nginx',
-      ]);
+      mock.getTags.mockImplementation(async ({ search }: { search: string }) =>
+        search === NIGHTSHIFT_RULE_SOURCE_TAG_PREFIX
+          ? [
+              'nightshift:source:logs.nginx',
+              'production',
+              'nightshift:source:logs.apache',
+              'nightshift:source:logs.nginx',
+            ]
+          : ['sigevents:stream:logs.legacy', 'sigevents:stream:logs.nginx', 'production']
+      );
       const adapter = makeAdapter(mock);
 
-      const streamNames = await adapter.findStreamNamesWithOwnedRules();
+      const sourceIds = await adapter.findSourceIdsWithOwnedRules();
 
-      expect(new Set(streamNames)).toEqual(new Set(['logs.nginx', 'logs.apache']));
+      expect(new Set(sourceIds)).toEqual(new Set(['logs.nginx', 'logs.apache', 'logs.legacy']));
       expect(mock.getTags).toHaveBeenCalledWith({
-        search: STREAMS_RULE_STREAM_TAG_PREFIX,
+        search: NIGHTSHIFT_RULE_SOURCE_TAG_PREFIX,
         kind: 'signal',
         size: 10000,
       });
+      expect(mock.getTags).toHaveBeenCalledWith({
+        search: LEGACY_RULE_STREAM_TAG_PREFIX,
+        kind: 'signal',
+        size: 10000,
+      });
+    });
+  });
+
+  describe('findRuleIdsByTagPrefix', () => {
+    it('collects the rule ids behind every tag that starts with the prefix', async () => {
+      const mock = makeRulesClientMock();
+      mock.getTags.mockResolvedValueOnce([
+        'sigevents:stream:logs.nginx',
+        'sigevents:stream:logs.apache',
+        'nightshift:source:logs.nginx',
+      ]);
+      mock.findRules
+        .mockResolvedValueOnce({
+          items: [{ id: 'r1' }, { id: 'r2' }],
+          total: 2,
+          page: 1,
+          perPage: 500,
+        })
+        .mockResolvedValueOnce({
+          items: [{ id: 'r2' }, { id: 'r3' }],
+          total: 2,
+          page: 1,
+          perPage: 500,
+        });
+      const adapter = makeAdapter(mock);
+
+      const ruleIds = await adapter.findRuleIdsByTagPrefix(LEGACY_RULE_STREAM_TAG_PREFIX);
+
+      expect(new Set(ruleIds)).toEqual(new Set(['r1', 'r2', 'r3']));
+      expect(mock.getTags).toHaveBeenCalledWith({
+        search: LEGACY_RULE_STREAM_TAG_PREFIX,
+        kind: 'signal',
+        size: 10000,
+      });
+      // Only the two legacy tags are queried; the current-prefix tag is skipped.
+      expect(mock.findRules).toHaveBeenCalledTimes(2);
+      expect(mock.findRules).toHaveBeenCalledWith(
+        expect.objectContaining({ filter: 'metadata.tags: "sigevents:stream:logs.nginx"' })
+      );
+      expect(mock.findRules).toHaveBeenCalledWith(
+        expect.objectContaining({ filter: 'metadata.tags: "sigevents:stream:logs.apache"' })
+      );
+    });
+
+    it('returns an empty list when no tag matches the prefix', async () => {
+      const mock = makeRulesClientMock();
+      mock.getTags.mockResolvedValueOnce(['production']);
+      const adapter = makeAdapter(mock);
+
+      await expect(adapter.findRuleIdsByTagPrefix(LEGACY_RULE_STREAM_TAG_PREFIX)).resolves.toEqual(
+        []
+      );
+      expect(mock.findRules).not.toHaveBeenCalled();
     });
   });
 });

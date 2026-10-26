@@ -49,6 +49,15 @@ describe('rule_request_mappers', () => {
       });
     });
 
+    it('maps routing tags when present', () => {
+      const result = mapFormValuesToRuleRequest({
+        ...baseFormValues,
+        metadata: { ...baseFormValues.metadata, routingTags: ['sre'] },
+      });
+
+      expect(result.metadata.routing_tags).toEqual(['sre']);
+    });
+
     it('keeps the breach block when the segment is non-empty', () => {
       const result = mapFormValuesToRuleRequest({
         ...baseFormValues,
@@ -208,8 +217,8 @@ describe('rule_request_mappers', () => {
       };
 
       expect(mapFormValuesToUpdateRequest(formValues).state_transition).toEqual({
-        pending: { count: 0 },
-        recovering: { count: 3 },
+        pending: { count: 0, timeframe: null, operator: null },
+        recovering: { count: 3, timeframe: null, operator: null },
       });
     });
 
@@ -248,6 +257,102 @@ describe('rule_request_mappers', () => {
         recovering: { count: 3 },
       });
       expect(result.state_transition?.recovering).not.toHaveProperty('timeframe');
+    });
+
+    it.each(['and', 'or'] as const)('preserves an explicit pending.operator of %s', (operator) => {
+      const formValues: FormValues = {
+        ...baseFormValues,
+        kind: 'alert',
+        recovery: { strategy: recoveryStrategy.no_breach },
+        stateTransitionAlertDelayMode: 'duration',
+        stateTransitionRecoveryDelayMode: 'immediate',
+        stateTransition: {
+          pendingCount: 3,
+          pendingTimeframe: '5m',
+          pendingOperator: operator,
+        },
+      };
+
+      const result = mapFormValuesToRuleRequest(formValues);
+
+      expect(result.state_transition?.pending).toEqual({
+        count: 3,
+        timeframe: '5m',
+        operator,
+      });
+    });
+
+    it.each(['and', 'or'] as const)(
+      'preserves an explicit recovering.operator of %s when recovery is automatic',
+      (operator) => {
+        const formValues: FormValues = {
+          ...baseFormValues,
+          kind: 'alert',
+          recovery: { strategy: recoveryStrategy.no_breach },
+          stateTransitionAlertDelayMode: 'immediate',
+          stateTransitionRecoveryDelayMode: 'duration',
+          stateTransition: {
+            recoveringCount: 4,
+            recoveringTimeframe: '20m',
+            recoveringOperator: operator,
+          },
+        };
+
+        const result = mapFormValuesToRuleRequest(formValues);
+
+        expect(result.state_transition?.recovering).toEqual({
+          count: 4,
+          timeframe: '20m',
+          operator,
+        });
+      }
+    );
+
+    it('does not default an operator when both thresholds are set without one', () => {
+      const formValues: FormValues = {
+        ...baseFormValues,
+        kind: 'alert',
+        recovery: { strategy: recoveryStrategy.no_breach },
+        stateTransitionAlertDelayMode: 'duration',
+        stateTransitionRecoveryDelayMode: 'duration',
+        stateTransition: {
+          pendingCount: 3,
+          pendingTimeframe: '5m',
+          recoveringCount: 2,
+          recoveringTimeframe: '10m',
+        },
+      };
+
+      const result = mapFormValuesToRuleRequest(formValues);
+
+      expect(result.state_transition?.pending).toEqual({ count: 3, timeframe: '5m' });
+      expect(result.state_transition?.recovering).toEqual({ count: 2, timeframe: '10m' });
+      expect(result.state_transition?.pending).not.toHaveProperty('operator');
+      expect(result.state_transition?.recovering).not.toHaveProperty('operator');
+    });
+
+    it('drops a recovering operator when recovery is manual', () => {
+      const formValues: FormValues = {
+        ...baseFormValues,
+        kind: 'alert',
+        recovery: { strategy: recoveryStrategy.manual },
+        stateTransitionAlertDelayMode: 'duration',
+        stateTransitionRecoveryDelayMode: 'duration',
+        stateTransition: {
+          pendingCount: 2,
+          pendingTimeframe: '5m',
+          pendingOperator: 'or',
+          recoveringCount: 4,
+          recoveringTimeframe: '20m',
+          recoveringOperator: 'and',
+        },
+      };
+
+      const result = mapFormValuesToRuleRequest(formValues);
+
+      expect(result.state_transition).toEqual({
+        pending: { count: 2, timeframe: '5m', operator: 'or' },
+      });
     });
 
     it('maps state_transition with both pending and recovering phases', () => {
@@ -660,6 +765,17 @@ describe('rule_request_mappers', () => {
       expect(result.metadata.description).toBe('Create rule description');
     });
 
+    it('omits a description the user never typed rather than sending an empty string', () => {
+      const formValues: FormValues = {
+        ...baseFormValues,
+        metadata: { ...baseFormValues.metadata, description: '' },
+      };
+
+      const result = mapFormValuesToCreateRequest(formValues);
+
+      expect(result.metadata).not.toHaveProperty('description');
+    });
+
     it('produces a superset of mapFormValuesToRuleRequest', () => {
       const common = mapFormValuesToRuleRequest(baseFormValues);
       const create = mapFormValuesToCreateRequest(baseFormValues);
@@ -717,8 +833,8 @@ describe('rule_request_mappers', () => {
       expect(result.recovery).toEqual({ strategy: 'no_breach' });
       expect(result.no_data).toEqual({ strategy: 'resolve' });
       expect(result.state_transition).toEqual({
-        pending: { count: 2, timeframe: '5m' },
-        recovering: { count: 0 },
+        pending: { count: 2, timeframe: '5m', operator: null },
+        recovering: { count: 0, timeframe: null, operator: null },
       });
     });
 
@@ -763,11 +879,13 @@ describe('rule_request_mappers', () => {
 
       expect(result.metadata).toEqual({
         name: 'Test Rule',
+        description: null,
         tags: ['tag1', 'tag2'],
+        routing_tags: null,
       });
       expect(result.time_field).toBe('@timestamp');
       expect(result.schedule).toEqual({ every: '5m', lookback: '1m' });
-      expect(result.query).toEqual({ base: 'FROM logs-* | LIMIT 10' });
+      expect(result.query).toEqual({ base: 'FROM logs-* | LIMIT 10', breach: null });
     });
 
     it('coerces empty artifacts array to null for explicit removal', () => {
@@ -822,6 +940,134 @@ describe('rule_request_mappers', () => {
 
       expect(result.recovery).toBeUndefined();
     });
+
+    it('nullifies tags the user emptied rather than omitting them', () => {
+      const formValues: FormValues = {
+        ...baseFormValues,
+        metadata: { ...baseFormValues.metadata, description: 'kept', tags: [] },
+      };
+
+      const result = mapFormValuesToUpdateRequest(formValues);
+
+      expect(result.metadata).toEqual({
+        name: 'Test Rule',
+        description: 'kept',
+        tags: null,
+        routing_tags: null,
+      });
+    });
+
+    it('nullifies routing tags the user emptied rather than omitting them', () => {
+      const formValues: FormValues = {
+        ...baseFormValues,
+        metadata: { ...baseFormValues.metadata, routingTags: [] },
+      };
+
+      const result = mapFormValuesToUpdateRequest(formValues);
+
+      expect(result.metadata?.routing_tags).toBeNull();
+    });
+
+    it('passes through routing tags the user kept', () => {
+      const formValues: FormValues = {
+        ...baseFormValues,
+        metadata: { ...baseFormValues.metadata, routingTags: ['sre'] },
+      };
+
+      const result = mapFormValuesToUpdateRequest(formValues);
+
+      expect(result.metadata?.routing_tags).toEqual(['sre']);
+    });
+
+    it('nullifies a description the user emptied rather than sending an empty string', () => {
+      const formValues: FormValues = {
+        ...baseFormValues,
+        metadata: { ...baseFormValues.metadata, description: '' },
+      };
+
+      const result = mapFormValuesToUpdateRequest(formValues);
+
+      expect(result.metadata?.description).toBeNull();
+    });
+
+    it('passes through a description and tags the user kept', () => {
+      const formValues: FormValues = {
+        ...baseFormValues,
+        metadata: { ...baseFormValues.metadata, description: 'still here', tags: ['keep'] },
+      };
+
+      const result = mapFormValuesToUpdateRequest(formValues);
+
+      expect(result.metadata).toEqual({
+        name: 'Test Rule',
+        description: 'still here',
+        tags: ['keep'],
+        routing_tags: null,
+      });
+    });
+
+    it('passes through a breach segment the user authored', () => {
+      const formValues: FormValues = {
+        ...baseFormValues,
+        query: { base: 'FROM logs-*', breach: { segment: 'WHERE count > 100' } },
+      };
+
+      const result = mapFormValuesToUpdateRequest(formValues);
+
+      expect(result.query).toEqual({
+        base: 'FROM logs-*',
+        breach: { segment: 'WHERE count > 100' },
+      });
+    });
+
+    it.each([
+      [
+        'cleared',
+        {
+          ...baseFormValues,
+          metadata: { name: 'Test Rule', enabled: true },
+          query: { base: 'FROM logs-*', breach: { segment: '' } },
+        } satisfies FormValues,
+        { name: 'Test Rule', description: null, tags: null, routing_tags: null },
+        { base: 'FROM logs-*', breach: null },
+      ],
+      [
+        'populated',
+        {
+          ...baseFormValues,
+          metadata: { ...baseFormValues.metadata, description: 'desc', tags: ['a'] },
+          query: { base: 'FROM logs-*', breach: { segment: 'WHERE count > 1' } },
+        } satisfies FormValues,
+        { name: 'Test Rule', description: 'desc', tags: ['a'], routing_tags: null },
+        { base: 'FROM logs-*', breach: { segment: 'WHERE count > 1' } },
+      ],
+    ])(
+      'spells out every leaf of the merged objects when they are %s',
+      (_, formValues, expectedMetadata, expectedQuery) => {
+        const result = mapFormValuesToUpdateRequest(formValues);
+
+        expect(result.metadata).toStrictEqual(expectedMetadata);
+        expect(result.query).toStrictEqual(expectedQuery);
+      }
+    );
+
+    it.each([
+      ['an immediate', 'immediate' as const, { count: 0, timeframe: null, operator: null }],
+      ['a breach-count', 'breaches' as const, { count: 2, timeframe: null, operator: null }],
+    ])('clears the pending leaves %s delay does not own', (_, mode, expectedPending) => {
+      const result = mapFormValuesToUpdateRequest({
+        ...baseFormValues,
+        kind: 'alert',
+        recovery: { strategy: recoveryStrategy.manual },
+        stateTransitionAlertDelayMode: mode,
+        stateTransition: { pendingCount: 2, pendingTimeframe: '5m', pendingOperator: 'or' },
+      });
+
+      expect(result.state_transition).toStrictEqual({
+        pending: expectedPending,
+        recovering: null,
+      });
+    });
   });
 
   describe('mapRuleResponseToFormValues', () => {
@@ -842,6 +1088,15 @@ describe('rule_request_mappers', () => {
         base: 'FROM logs-* | STATS count() BY host',
       },
     } as RuleResponse;
+
+    it('loads routing tags from the rule', () => {
+      const result = mapRuleResponseToFormValues({
+        ...baseRuleResponse,
+        metadata: { ...baseRuleResponse.metadata, routing_tags: ['sre'] },
+      });
+
+      expect(result.metadata?.routingTags).toEqual(['sre']);
+    });
 
     it('maps basic required fields', () => {
       const result = mapRuleResponseToFormValues(baseRuleResponse);
@@ -959,8 +1214,10 @@ describe('rule_request_mappers', () => {
       expect(result.stateTransition).toEqual({
         pendingCount: 3,
         pendingTimeframe: '10m',
+        pendingOperator: null,
         recoveringCount: null,
         recoveringTimeframe: null,
+        recoveringOperator: null,
       });
       expect(result.stateTransitionAlertDelayMode).toBe('duration');
       expect(result.stateTransitionRecoveryDelayMode).toBe('immediate');
@@ -977,8 +1234,10 @@ describe('rule_request_mappers', () => {
       expect(result.stateTransition).toEqual({
         pendingCount: null,
         pendingTimeframe: null,
+        pendingOperator: null,
         recoveringCount: 5,
         recoveringTimeframe: '15m',
+        recoveringOperator: null,
       });
       expect(result.stateTransitionAlertDelayMode).toBe('immediate');
       expect(result.stateTransitionRecoveryDelayMode).toBe('duration');
@@ -998,8 +1257,10 @@ describe('rule_request_mappers', () => {
       expect(result.stateTransition).toEqual({
         pendingCount: 2,
         pendingTimeframe: null,
+        pendingOperator: null,
         recoveringCount: 4,
         recoveringTimeframe: '20m',
+        recoveringOperator: null,
       });
       expect(result.stateTransitionAlertDelayMode).toBe('breaches');
       expect(result.stateTransitionRecoveryDelayMode).toBe('duration');
@@ -1011,8 +1272,10 @@ describe('rule_request_mappers', () => {
       expect(result.stateTransition).toEqual({
         pendingCount: null,
         pendingTimeframe: null,
+        pendingOperator: null,
         recoveringCount: null,
         recoveringTimeframe: null,
+        recoveringOperator: null,
       });
       expect(result.stateTransitionAlertDelayMode).toBe('immediate');
       expect(result.stateTransitionRecoveryDelayMode).toBe('immediate');
@@ -1058,6 +1321,27 @@ describe('rule_request_mappers', () => {
       expect(result.noData).toBeUndefined();
     });
 
+    it.each(['and', 'or'] as const)(
+      'maps an explicit %s operator on pending and recovering back onto the form',
+      (operator) => {
+        const rule = {
+          ...baseRuleResponse,
+          recovery: { strategy: recoveryStrategy.no_breach },
+          state_transition: {
+            pending: { count: 3, timeframe: '5m', operator },
+            recovering: { count: 4, timeframe: '20m', operator },
+          },
+        } as RuleResponse;
+
+        const result = mapRuleResponseToFormValues(rule);
+
+        expect(result.stateTransition?.pendingOperator).toBe(operator);
+        expect(result.stateTransition?.recoveringOperator).toBe(operator);
+        expect(result.stateTransition?.pendingCount).toBe(3);
+        expect(result.stateTransition?.recoveringTimeframe).toBe('20m');
+      }
+    );
+
     it('treats pending and recovering counts of 0 as immediate mode', () => {
       const rule = {
         ...baseRuleResponse,
@@ -1069,8 +1353,10 @@ describe('rule_request_mappers', () => {
       expect(result.stateTransition).toEqual({
         pendingCount: 0,
         pendingTimeframe: null,
+        pendingOperator: null,
         recoveringCount: 0,
         recoveringTimeframe: null,
+        recoveringOperator: null,
       });
       expect(result.stateTransitionAlertDelayMode).toBe('immediate');
       expect(result.stateTransitionRecoveryDelayMode).toBe('immediate');

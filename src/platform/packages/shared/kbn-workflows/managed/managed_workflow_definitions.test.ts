@@ -16,12 +16,16 @@ import {
   ALERTZERO_ACTION_KILL_PROCESS_WORKFLOW_ID,
   ALERTZERO_ACTION_SUSPEND_PROCESS_WORKFLOW_ID,
   ALERTZERO_ACTION_WORKFLOW_IDS,
+  ALERTZERO_ALERT_TRIAGE_WORKFLOW_IDS,
   ALERTZERO_ATTACK_DISCOVERY_WORKFLOW_IDS,
+  ALERTZERO_FLOOR_ALERT_TRIAGE_BATCH_WORKFLOW_ID,
+  ALERTZERO_FLOOR_ALERT_TRIAGE_REVIEW_WORKFLOW_ID,
+  ALERTZERO_FORENSICS_PROPOSAL_GATE_WORKFLOW_ID,
   ALERTZERO_FORENSICS_RUN_ENDPOINT_ANALYSIS_WORKFLOW_ID,
   ALERTZERO_FORENSICS_WORKFLOW_IDS,
   ALERTZERO_MANAGED_WORKER_WORKFLOW_IDS,
   ALERTZERO_RULE_WORKFLOW_IDS,
-  ALERTZERO_WORKER_DETECTION_RULE_CREATION_WORKFLOW_ID,
+  ALERTZERO_WORKER_DETECTION_RULE_COVERAGE_WORKFLOW_ID,
   ALERTZERO_WORKER_DETECTION_RULE_TUNING_WORKFLOW_ID,
   ALERTZERO_WORKER_FLOOR_ALERT_TRIAGE_WORKFLOW_ID,
   ALERTZERO_WORKER_FLOOR_ATTACK_DISCOVERY_WORKFLOW_ID,
@@ -30,6 +34,7 @@ import {
   CONTEXT_ENGINE_FEEDBACK_ANALYSIS_WORKFLOW_ID,
   EXAMPLE_MANAGED_WORKFLOW_ID,
   EXAMPLE_SERVICE_ACCOUNT_WORKFLOW_ID,
+  NIGHTSHIFT_BOUND_INVESTIGATION_WORKFLOW_ID,
   SECURITY_ALERT_ANALYSIS_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID,
@@ -37,13 +42,23 @@ import {
 import ACTION_ISOLATE_HOST_YAML from './definitions/alertzero/actions/defend/action_isolate_host.yaml';
 import ACTION_KILL_PROCESS_YAML from './definitions/alertzero/actions/defend/action_kill_process.yaml';
 import ACTION_SUSPEND_PROCESS_YAML from './definitions/alertzero/actions/defend/action_suspend_process.yaml';
-import DETECTION_RULE_CREATION_YAML from './definitions/alertzero/detection_rule_creation.yaml';
+import DETECTION_RULE_COVERAGE_YAML from './definitions/alertzero/detection_rule_coverage.yaml';
 import DETECTION_RULE_TUNING_YAML from './definitions/alertzero/detection_rule_tuning.yaml';
 import FLOOR_ALERT_TRIAGE_YAML from './definitions/alertzero/floor_alert_triage.yaml';
+import FLOOR_ALERT_TRIAGE_BATCH_YAML from './definitions/alertzero/floor_alert_triage_batch.yaml';
+import FLOOR_ALERT_TRIAGE_REVIEW_YAML from './definitions/alertzero/floor_alert_triage_review.yaml';
 import FLOOR_ATTACK_DISCOVERY_YAML from './definitions/alertzero/floor_attack_discovery.yaml';
 import FORENSICS_ENDPOINT_ANALYSIS_YAML from './definitions/alertzero/forensics_endpoint_analysis.yaml';
+import FORENSICS_PROPOSAL_GATE_YAML from './definitions/alertzero/forensics_proposal_gate.yaml';
 import FORENSICS_RUN_ENDPOINT_ANALYSIS_YAML from './definitions/alertzero/forensics_run_endpoint_analysis.yaml';
-import HUNT_CONTINUOUS_THREAT_HUNT_YAML from './definitions/alertzero/hunt_continuous_threat_hunt.yaml';
+import {
+  ALERT_TRIAGE_WORKER_SETTINGS_DEFAULTS,
+  ATTACK_DISCOVERY_WORKER_SETTINGS_DEFAULTS,
+  ENDPOINT_ANALYSIS_WORKER_SETTINGS_DEFAULTS,
+  RULE_COVERAGE_WORKER_SETTINGS_DEFAULTS,
+  RULE_TUNING_WORKER_SETTINGS_DEFAULTS,
+  type WorkerSettingsDefaults,
+} from './definitions/alertzero/worker_settings_defaults';
 import type { ManagedWorkflowDefinition, ManagedWorkflowTemplateValues } from './types';
 import { WorkflowSchemaBase } from '../spec/schema';
 
@@ -65,6 +80,7 @@ type YamlTemplateManagedWorkflowDefinition = ManagedWorkflowDefinition & {
 
 const templateRepresentativeValuesById: ManagedWorkflowTemplateValuesById = {
   [EXAMPLE_SERVICE_ACCOUNT_WORKFLOW_ID]: { serviceAccountId: 'example-account' },
+  [NIGHTSHIFT_BOUND_INVESTIGATION_WORKFLOW_ID]: { serviceAccountId: 'kibana/nightshift_agent' },
   [EXAMPLE_MANAGED_WORKFLOW_ID]: {
     recipient: 'World',
   },
@@ -73,8 +89,17 @@ const templateRepresentativeValuesById: ManagedWorkflowTemplateValuesById = {
     intervalMinutes: 1440,
   },
   [ALERTZERO_WORKER_FLOOR_ALERT_TRIAGE_WORKFLOW_ID]: {
-    settingsVersion: 1,
+    settingsVersion: 2,
     autonomyLevel: 'manual',
+    scheduleInterval: '15m',
+    extras: {
+      autoCloseConfidenceScoreMinThreshold: 0.85,
+      budgetPerHour: 1300,
+      lookbackHours: 24,
+      minSeverity: 'low',
+      excludeBuildingBlocks: false,
+      excludedRuleTags: [],
+    },
   },
   [ALERTZERO_WORKER_FLOOR_ATTACK_DISCOVERY_WORKFLOW_ID]: {
     settingsVersion: 1,
@@ -88,6 +113,7 @@ const templateRepresentativeValuesById: ManagedWorkflowTemplateValuesById = {
   [ALERTZERO_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID]: {
     settingsVersion: 1,
     autonomyLevel: 'manual',
+    scheduleInterval: '4h',
   },
   [ALERTZERO_WORKER_DETECTION_RULE_TUNING_WORKFLOW_ID]: {
     settingsVersion: 1,
@@ -95,9 +121,11 @@ const templateRepresentativeValuesById: ManagedWorkflowTemplateValuesById = {
     scheduleInterval: '2h',
     extras: { analysisWindowDays: 7, fpCountThreshold: 10, fpRateThresholdPct: 50 },
   },
-  [ALERTZERO_WORKER_DETECTION_RULE_CREATION_WORKFLOW_ID]: {
+  [ALERTZERO_WORKER_DETECTION_RULE_COVERAGE_WORKFLOW_ID]: {
     settingsVersion: 1,
     autonomyLevel: 'manual',
+    scheduleInterval: '1h',
+    extras: { lookbackDays: 14, maxGapsPerRun: 5 },
   },
   [SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID]: {
     detectionIntervalMinutes: 30,
@@ -133,6 +161,7 @@ const alertZeroWorkflowIds = new Set<string>([
   ...ALERTZERO_RULE_WORKFLOW_IDS,
   ...ALERTZERO_ATTACK_DISCOVERY_WORKFLOW_IDS,
   ...ALERTZERO_FORENSICS_WORKFLOW_IDS,
+  ...ALERTZERO_ALERT_TRIAGE_WORKFLOW_IDS,
   ...ALERTZERO_ACTION_WORKFLOW_IDS,
 ]);
 
@@ -184,45 +213,62 @@ function createContentFingerprint(content: string): string {
   return fingerprint.toString(16).padStart(8, '0');
 }
 
+/**
+ * What the platform's `yamlTemplate` hash cannot see but the render depends on: the imported YAML
+ * and, for AlertZero Workers, the settings defaults their renderer fills stored values from.
+ */
+const renderInputs = (importedYaml: string, defaults?: WorkerSettingsDefaults): string =>
+  defaults === undefined ? importedYaml : `${importedYaml}\n${JSON.stringify(defaults)}`;
+
 it.each([
-  [ALERTZERO_WORKER_FLOOR_ALERT_TRIAGE_WORKFLOW_ID, FLOOR_ALERT_TRIAGE_YAML, '5:74170b32'],
-  [ALERTZERO_WORKER_FLOOR_ATTACK_DISCOVERY_WORKFLOW_ID, FLOOR_ATTACK_DISCOVERY_YAML, '4:ceae137f'],
+  [
+    ALERTZERO_WORKER_FLOOR_ALERT_TRIAGE_WORKFLOW_ID,
+    renderInputs(FLOOR_ALERT_TRIAGE_YAML, ALERT_TRIAGE_WORKER_SETTINGS_DEFAULTS),
+    '16:22930b80',
+  ],
+  [ALERTZERO_FLOOR_ALERT_TRIAGE_BATCH_WORKFLOW_ID, FLOOR_ALERT_TRIAGE_BATCH_YAML, '8:fb0bfa0d'],
+  [ALERTZERO_FLOOR_ALERT_TRIAGE_REVIEW_WORKFLOW_ID, FLOOR_ALERT_TRIAGE_REVIEW_YAML, '9:a4d63b9f'],
+  [
+    ALERTZERO_WORKER_FLOOR_ATTACK_DISCOVERY_WORKFLOW_ID,
+    renderInputs(FLOOR_ATTACK_DISCOVERY_YAML, ATTACK_DISCOVERY_WORKER_SETTINGS_DEFAULTS),
+    '7:81e93c9b',
+  ],
   [
     ALERTZERO_WORKER_FORENSICS_ENDPOINT_ANALYSIS_WORKFLOW_ID,
-    FORENSICS_ENDPOINT_ANALYSIS_YAML,
-    '2:733b12b2',
+    renderInputs(FORENSICS_ENDPOINT_ANALYSIS_YAML, ENDPOINT_ANALYSIS_WORKER_SETTINGS_DEFAULTS),
+    '6:4084021c',
   ],
+  [ALERTZERO_FORENSICS_PROPOSAL_GATE_WORKFLOW_ID, FORENSICS_PROPOSAL_GATE_YAML, '4:020e6b4e'],
   [
     ALERTZERO_FORENSICS_RUN_ENDPOINT_ANALYSIS_WORKFLOW_ID,
     FORENSICS_RUN_ENDPOINT_ANALYSIS_YAML,
-    '3:9e2d9e84',
+    '14:5619153f',
   ],
   [
-    ALERTZERO_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID,
-    HUNT_CONTINUOUS_THREAT_HUNT_YAML,
-    '1:83a50923',
+    ALERTZERO_WORKER_DETECTION_RULE_TUNING_WORKFLOW_ID,
+    renderInputs(DETECTION_RULE_TUNING_YAML, RULE_TUNING_WORKER_SETTINGS_DEFAULTS),
+    '11:8f08f83c',
   ],
-  [ALERTZERO_WORKER_DETECTION_RULE_TUNING_WORKFLOW_ID, DETECTION_RULE_TUNING_YAML, '7:f3649616'],
   [
-    ALERTZERO_WORKER_DETECTION_RULE_CREATION_WORKFLOW_ID,
-    DETECTION_RULE_CREATION_YAML,
-    '1:a6804a44',
+    ALERTZERO_WORKER_DETECTION_RULE_COVERAGE_WORKFLOW_ID,
+    renderInputs(DETECTION_RULE_COVERAGE_YAML, RULE_COVERAGE_WORKER_SETTINGS_DEFAULTS),
+    '4:d2801f59',
   ],
-  [ALERTZERO_ACTION_ISOLATE_HOST_WORKFLOW_ID, ACTION_ISOLATE_HOST_YAML, '3:20440aaf'],
-  [ALERTZERO_ACTION_KILL_PROCESS_WORKFLOW_ID, ACTION_KILL_PROCESS_YAML, '3:39ab48da'],
-  [ALERTZERO_ACTION_SUSPEND_PROCESS_WORKFLOW_ID, ACTION_SUSPEND_PROCESS_YAML, '3:5bff8110'],
+  [ALERTZERO_ACTION_ISOLATE_HOST_WORKFLOW_ID, ACTION_ISOLATE_HOST_YAML, '4:fa71b87b'],
+  [ALERTZERO_ACTION_KILL_PROCESS_WORKFLOW_ID, ACTION_KILL_PROCESS_YAML, '5:ec92e281'],
+  [ALERTZERO_ACTION_SUSPEND_PROCESS_WORKFLOW_ID, ACTION_SUSPEND_PROCESS_YAML, '4:5c86922d'],
 ] as const)(
-  'requires bumping %s definition.version together with the imported YAML fingerprint',
-  (workflowId, importedYaml, expectedFingerprint) => {
+  'requires bumping %s definition.version together with the fingerprint of its render inputs',
+  (workflowId, inputs, expectedFingerprint) => {
     const definition = managedWorkflowDefinitions.find(({ id }) => id === workflowId);
     if (!definition) throw new Error(`Managed worker "${workflowId}" is not registered`);
-    const actualFingerprint = `${definition.version}:${createContentFingerprint(importedYaml)}`;
+    const actualFingerprint = `${definition.version}:${createContentFingerprint(inputs)}`;
     if (actualFingerprint === expectedFingerprint) {
       return;
     }
     throw new Error(
-      `Imported YAML for '${workflowId}' changed (${actualFingerprint}, expected ${expectedFingerprint}). ` +
-        `yamlTemplate hashing covers only the function source, not this imported string, so already-installed spaces will not receive the edit until definition.version is bumped. ` +
+      `Render inputs for '${workflowId}' changed (${actualFingerprint}, expected ${expectedFingerprint}). ` +
+        `yamlTemplate hashing covers only the function source, not the imported YAML or the settings defaults in worker_settings_defaults.ts, so already-installed spaces will not receive the edit until definition.version is bumped. ` +
         `Bump version in the worker module and update this expected fingerprint in the same change.`
     );
   }
@@ -262,7 +308,11 @@ const ALERTZERO_ROLLUP_ID = 'alertzero_parent';
  * Matching the exact set matters: an unregistered id resolves to the deployment default at runtime
  * exactly as an absent one does, so accepting any string would let a typo through the guard.
  */
-const ALERTZERO_TIER_IDS = new Set(['alertzero_fast', 'alertzero_reasoning', 'alertzero_agentic']);
+const ALERTZERO_TIER_IDS = new Set([
+  'alertzero_efficient',
+  'alertzero_frontier',
+  'alertzero_balanced',
+]);
 
 /**
  * Collects steps of a given type from anywhere in a parsed workflow, walking the whole tree rather
@@ -292,6 +342,20 @@ function collectStepsOfType(
   }
 
   return collected;
+}
+
+/**
+ * A step is pinned when its connector field is a tier id, or a list that includes one.
+ * The list form can lead with another feature and keeps the tier as the fallback.
+ */
+function namesAlertZeroTier(value: unknown): boolean {
+  if (typeof value === 'string') {
+    return ALERTZERO_TIER_IDS.has(value);
+  }
+  if (!Array.isArray(value)) {
+    return false;
+  }
+  return value.some((entry) => typeof entry === 'string' && ALERTZERO_TIER_IDS.has(entry));
 }
 
 /** The tier a step names, whether it is an `ai.agent` field or a custom step's `with` input. */
@@ -364,6 +428,16 @@ describe('managedWorkflowDefinitions', () => {
     }
   );
 
+  // Asset criticality is the customer's to set: appearing in an attack does not change how much an
+  // identity matters. No managed workflow, including the Workers, may write it, so a change has to
+  // be made by an analyst in Entity Analytics. Templated definitions are rendered first: their
+  // `yamlTemplate` is a function, so the text to scan only exists after it runs.
+  it.each(managedDefinitionsById)('%s never writes asset criticality', (_id, definition) => {
+    expect(renderWorkflowYaml(definition)).not.toMatch(
+      /api\/asset_criticality|entityStore\.updateAssetCriticality/
+    );
+  });
+
   it.each(managedTemplateDefinitionsById)(
     '%s yamlTemplate renders cleanly with representative values',
     (id, definition) => {
@@ -394,7 +468,7 @@ describe('managedWorkflowDefinitions', () => {
         parse(renderWorkflowYaml(definition))
       );
       const unpinnedStepNames = aiAgentSteps
-        .filter((step) => !ALERTZERO_TIER_IDS.has(step[CONNECTOR_ID_BY_FEATURE] as string))
+        .filter((step) => !namesAlertZeroTier(step[CONNECTOR_ID_BY_FEATURE]))
         .map((step) => (typeof step.name === 'string' ? step.name : '<unnamed>'));
 
       expect(unpinnedStepNames).toEqual([]);
@@ -412,7 +486,7 @@ describe('managedWorkflowDefinitions', () => {
         parse(renderWorkflowYaml(definition))
       );
       const unpinnedStepNames = runSteps
-        .filter((step) => !ALERTZERO_TIER_IDS.has(getNamedTier(step, FEATURE_ID) as string))
+        .filter((step) => !namesAlertZeroTier(getNamedTier(step, FEATURE_ID)))
         .map((step) => (typeof step.name === 'string' ? step.name : '<unnamed>'));
 
       expect(unpinnedStepNames).toEqual([]);

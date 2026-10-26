@@ -41,6 +41,13 @@ as a manual verification checklist.">
   a destructive/admin-only action weren't available, the scenario requires state that's hard to set up
   (e.g. a paid tier feature) — mark it `⚠️ Not validated — needs manual verification` and say briefly why.
   Never mark something `✅ Pass` without having actually observed it work.
+- **A pass means the connector made the call.** Only a call through the connector — `_execute`, the Test
+  tab, or an agent invoking the tool — counts. Calling the vendor API directly (`curl`, the vendor CLI, a
+  REST client) proves the vendor works, not the handler. The first AKS PR marked `runCommand` as passing
+  after testing the ARM API directly, while the handler's request body was rejected on every real call.
+- **For a mutating action, confirm the effect, not only the response.** Read the resource back
+  (`get...`, or the vendor's CLI/UI) and state what changed, e.g. "`az aks nodepool show` reports
+  `count: 2`". An asynchronous API accepts a request and can still fail the operation later.
 - **If an action failed and the failure is unresolved**, mark it `❌ Fail`, describe what broke, and link
   to a follow-up issue or note if it's a known limitation rather than silently dropping the row.
 - Place the `## Validated` section directly above `## Test plan` in the PR body.

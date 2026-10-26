@@ -95,8 +95,8 @@ jest.mock('../../../hooks/use_fetch_rules', () => ({
   useFetchRules: () => ({ data: { items: [], total: 0 }, isLoading: false }),
 }));
 
-jest.mock('../../../hooks/use_fetch_rule_tags', () => ({
-  useFetchRuleTags: () => ({ data: [], isLoading: false }),
+jest.mock('../../../hooks/use_fetch_rule_routing_tags', () => ({
+  useFetchRuleRoutingTags: () => ({ data: [], isLoading: false }),
 }));
 
 jest.mock('../../../hooks/use_fetch_workflows', () => ({
@@ -197,11 +197,22 @@ describe('ActionPolicyFormFlyout', () => {
     expect(screen.getByTestId(TEST_SUBJ.submitButton)).toBeDisabled();
   });
 
-  it('renders the inline simple workflow builder alongside the existing-workflow selector', () => {
+  it('keeps submit enabled and reveals the errors instead of saving an incomplete form', async () => {
+    const onSave = jest.fn();
+    renderFlyout({ onClose: jest.fn(), onSave });
+
+    const saveButton = screen.getByTestId(TEST_SUBJ.submitButton);
+    expect(saveButton).toBeEnabled();
+    fireEvent.click(saveButton);
+
+    expect(await screen.findByText('Name is required.')).toBeInTheDocument();
+    expect(screen.getByText('At least one destination is required')).toBeInTheDocument();
+    expect(onSave).not.toHaveBeenCalled();
+  });
+
+  it('collapses the notification controls section by default', () => {
     renderFlyout({ onClose: jest.fn(), onSave: jest.fn() });
 
-    expect(screen.getByTestId('simpleWorkflowBuilder')).toBeInTheDocument();
-    expect(screen.getByTestId('destinationsInput')).toBeInTheDocument();
     expect(
       within(screen.getByTestId('actionPolicyFormSection-notificationControls'))
         .getByText('Notification controls')
@@ -230,31 +241,32 @@ describe('ActionPolicyFormFlyout', () => {
   });
 
   it('forwards the raw form state (not a payload) to onSave so the host can build it', async () => {
-    const user = userEvent.setup({ delay: null });
     const onSave = jest.fn();
 
     renderFlyout({ onClose: jest.fn(), onSave });
 
-    await user.type(screen.getByTestId(TEST_SUBJ.nameInput), 'Policy from test');
-    await user.tab();
-    await user.type(screen.getByTestId(TEST_SUBJ.descriptionInput), 'Description from test');
-    await user.tab();
+    fireEvent.change(screen.getByTestId(TEST_SUBJ.nameInput), {
+      target: { value: 'Policy from test' },
+    });
+    fireEvent.change(screen.getByTestId(TEST_SUBJ.descriptionInput), {
+      target: { value: 'Description from test' },
+    });
 
     // Select a workflow destination (required field)
     const destinationsCombo = screen.getByTestId('destinationsInput');
-    await user.click(within(destinationsCombo).getByRole('combobox'));
-    await user.click(await screen.findByRole('option', { name: 'Test Workflow' }));
+    fireEvent.click(within(destinationsCombo).getByRole('combobox'));
+    fireEvent.click(await screen.findByRole('option', { name: 'Test Workflow' }));
 
     const saveButton = screen.getByTestId(TEST_SUBJ.submitButton);
-    await waitFor(() => expect(saveButton).toBeEnabled());
-    await user.click(saveButton);
+    expect(saveButton).toBeEnabled();
+    fireEvent.click(saveButton);
 
     await waitFor(() => expect(onSave).toHaveBeenCalledTimes(1));
     expect(onSave).toHaveBeenCalledWith({
       name: 'Policy from test',
       description: 'Description from test',
       matcher: null,
-      groupingMode: 'per_episode',
+      groupingMode: 'per_alert',
       groupBy: [],
       throttleStrategy: 'on_status_change',
       throttleInterval: '',
@@ -264,20 +276,20 @@ describe('ActionPolicyFormFlyout', () => {
   });
 
   it('forwards inline "simple workflow" drafts to onSave instead of dropping them', async () => {
-    const user = userEvent.setup({ delay: null });
     const onSave = jest.fn();
 
     renderFlyout({ onClose: jest.fn(), onSave });
 
-    await user.type(screen.getByTestId(TEST_SUBJ.nameInput), 'Inline policy');
-    await user.tab();
+    fireEvent.change(screen.getByTestId(TEST_SUBJ.nameInput), {
+      target: { value: 'Inline policy' },
+    });
 
     // Add an inline Slack workflow draft (no existing destination selected).
-    await user.click(screen.getByTestId('simpleWorkflowAdd-slack'));
+    fireEvent.click(screen.getByTestId('simpleWorkflowAdd-slack'));
 
     const saveButton = screen.getByTestId(TEST_SUBJ.submitButton);
-    await waitFor(() => expect(saveButton).toBeEnabled());
-    await user.click(saveButton);
+    expect(saveButton).toBeEnabled();
+    fireEvent.click(saveButton);
 
     await waitFor(() => expect(onSave).toHaveBeenCalledTimes(1));
     expect(onSave).toHaveBeenCalledWith(
@@ -288,20 +300,17 @@ describe('ActionPolicyFormFlyout', () => {
     );
   });
 
-  it('renders edit mode and submits update payload with optional fields and version', async () => {
+  it('renders edit mode and submits update payload with optional fields', async () => {
     const user = userEvent.setup({ delay: null });
     const onUpdate = jest.fn();
     const initialValues: ActionPolicyResponse = {
       id: 'policy-1',
-      version: 'WzEsMV0=',
       name: 'Critical production alerts',
       description: 'Routes critical alerts',
       enabled: true,
       matcher: { expression: 'data.severity : "critical"' },
-      group_by: ['host.name', 'service.name'],
-      grouping_mode: 'per_field',
+      grouping: { mode: 'per_field', fields: ['host.name', 'service.name'] },
       throttle: { strategy: 'time_interval', interval: '5m' },
-      snoozed_until: null,
       destinations: [{ type: 'workflow', id: 'workflow-2' }],
       created_by: { profile_uid: 'elastic' },
       created_at: '2026-03-01T10:00:00.000Z',
@@ -324,20 +333,16 @@ describe('ActionPolicyFormFlyout', () => {
     await user.click(updateButton);
 
     await waitFor(() => expect(onUpdate).toHaveBeenCalledTimes(1));
-    expect(onUpdate).toHaveBeenCalledWith(
-      'policy-1',
-      {
-        name: 'Critical production alerts',
-        description: 'Routes critical alerts',
-        matcher: { expression: 'data.severity : "critical"' },
-        groupingMode: 'per_field',
-        groupBy: ['host.name', 'service.name'],
-        throttleStrategy: 'time_interval',
-        throttleInterval: '5m',
-        destinations: [{ type: 'workflow', id: 'workflow-2' }],
-        inlineActions: [],
-      },
-      'WzEsMV0='
-    );
+    expect(onUpdate).toHaveBeenCalledWith('policy-1', {
+      name: 'Critical production alerts',
+      description: 'Routes critical alerts',
+      matcher: { expression: 'data.severity : "critical"' },
+      groupingMode: 'per_field',
+      groupBy: ['host.name', 'service.name'],
+      throttleStrategy: 'time_interval',
+      throttleInterval: '5m',
+      destinations: [{ type: 'workflow', id: 'workflow-2' }],
+      inlineActions: [],
+    });
   });
 });

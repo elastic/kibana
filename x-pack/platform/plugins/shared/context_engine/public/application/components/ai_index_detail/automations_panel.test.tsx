@@ -38,18 +38,21 @@ jest.mock('@kbn/workflows-ui', () => ({
     mgetWorkflows: jest.fn(),
     createWorkflow: jest.fn(),
   }),
+  useWorkflowsCapabilities: () => ({
+    canExecuteWorkflow: true,
+  }),
 }));
 
 jest.mock('./automation_row', () => ({
   AutomationRow: ({
-    name,
+    workflowSummary,
     onDelete,
   }: {
-    name: string | undefined;
+    workflowSummary?: { name?: string };
     onDelete: () => Promise<void>;
   }) => (
     <div data-test-subj="contextAiIndexAutomationRow">
-      {name}
+      {workflowSummary?.name}
       <button type="button" data-test-subj="stubAutomationRowDelete" onClick={() => onDelete()}>
         Delete
       </button>
@@ -95,6 +98,7 @@ const summariesResult = (
 const aiIndex: GetAiIndexResponse = {
   id: 'my-ai-index',
   managed: false,
+  memory_enabled: false,
   dest: { type: 'data_stream', value: 'ai-index-ds-my-ai-index' },
   automations: [],
   sources: [{ type: 'esql', value: 'FROM My view' }],
@@ -105,10 +109,24 @@ const aiIndex: GetAiIndexResponse = {
 
 type PanelProps = React.ComponentProps<typeof AutomationsPanel>;
 
+interface RenderPanelOptions {
+  canCreateWorkflow?: boolean;
+}
+
 /** Rerender re-wraps in the same providers so tests can flip the mocked hook and re-render in one call. */
-const renderPanel = (props: Partial<PanelProps> = {}) => {
+const renderPanel = (
+  props: Partial<PanelProps> = {},
+  { canCreateWorkflow = true }: RenderPanelOptions = {}
+) => {
   const onSaved = jest.fn();
   const services = coreMock.createStart();
+  services.application.capabilities = {
+    ...services.application.capabilities,
+    workflowsManagement: {
+      ...services.application.capabilities.workflowsManagement,
+      createWorkflow: canCreateWorkflow,
+    },
+  };
   const wrap = (overrides: Partial<PanelProps> = {}) => (
     <I18nProvider>
       <EuiProvider>
@@ -175,11 +193,9 @@ describe('AutomationsPanel', () => {
     renderPanel();
 
     expect(screen.getByTestId('contextAiIndexAutomationsEmpty')).toBeInTheDocument();
-    expect(screen.getByText('No automations yet')).toBeInTheDocument();
+    expect(screen.getByText('No automations configured.')).toBeInTheDocument();
     expect(
-      screen.getByText(
-        'Create a Workflow to generate and refresh Knowledge Indicators from source data.'
-      )
+      screen.getByText('Automations keep Knowledge Indicators current as your sources change.')
     ).toBeInTheDocument();
     expect(screen.queryByTestId('contextAiIndexAutomationRow')).not.toBeInTheDocument();
   });
@@ -188,10 +204,7 @@ describe('AutomationsPanel', () => {
     renderPanel({ isManaged: true });
 
     expect(screen.getByTestId('contextAiIndexAutomationsEmpty')).toBeInTheDocument();
-    expect(
-      screen.getByText('No automations are configured for this AI index.')
-    ).toBeInTheDocument();
-    expect(screen.queryByText('No automations yet')).not.toBeInTheDocument();
+    expect(screen.getByText('No automations configured.')).toBeInTheDocument();
     expect(screen.queryByTestId('contextAddAutomationButton')).not.toBeInTheDocument();
   });
 
@@ -234,6 +247,19 @@ describe('AutomationsPanel', () => {
     openAddAutomationMenu();
 
     expect(screen.queryByTestId('contextSuggestAutomationButton')).not.toBeInTheDocument();
+  });
+
+  it('disables create workflow when the user lacks the workflows create privilege', async () => {
+    const createAndAttach = jest.fn().mockResolvedValue('wf-created');
+    mockUseAutomationsEditor.mockReturnValue(editorResult({ createAndAttach }));
+
+    renderPanel({}, { canCreateWorkflow: false });
+    openAddAutomationMenu();
+
+    const createButton = screen.getByTestId('contextCreateAutomationButton');
+    expect(createButton).toBeDisabled();
+    fireEvent.click(createButton);
+    expect(createAndAttach).not.toHaveBeenCalled();
   });
 
   it('opens the created workflow in the Workflows app', async () => {
@@ -304,7 +330,9 @@ describe('AutomationsPanel', () => {
       editorResult({ automations: oneAutomation, workflowIds: ['wf-1'] })
     );
     mockUseWorkflowSummaries.mockReturnValue(
-      summariesResult([['wf-1', { id: 'wf-1', name: 'My workflow', enabled: true }]])
+      summariesResult([
+        ['wf-1', { id: 'wf-1', name: 'My workflow', enabled: true, definition: undefined }],
+      ])
     );
 
     renderPanel();

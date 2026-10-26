@@ -7,11 +7,12 @@
 
 import { schema } from '@kbn/config-schema';
 import type { IRouter } from '@kbn/core/server';
+import type { License } from '@kbn/license-api-guard-plugin/server';
 
 import { DATA_SET_BY_ID_ROUTE_PATH } from '../../../common';
 import { DataSetsClient } from '../../data_sets_client';
 
-export function registerGetDataset(router: IRouter): void {
+export function registerGetDataset(router: IRouter, license: License): void {
   router.get(
     {
       path: DATA_SET_BY_ID_ROUTE_PATH,
@@ -30,12 +31,14 @@ export function registerGetDataset(router: IRouter): void {
         }),
       },
     },
-    router.handleLegacyErrors(async (context, request, response) => {
-      const { id } = request.params;
-      const { client } = (await context.core).elasticsearch;
-      const dataSetsClient = new DataSetsClient(client.asCurrentUser);
-      const body = await dataSetsClient.get(id);
-      return response.ok({ body });
-    })
+    router.handleLegacyErrors(
+      license.guardApiRoute(async (context, request, response) => {
+        const { id } = request.params;
+        const { client } = (await context.core).elasticsearch;
+        const dataSetsClient = new DataSetsClient(client.asCurrentUser);
+        const body = await dataSetsClient.get(id);
+        return response.ok({ body });
+      })
+    )
   );
 }

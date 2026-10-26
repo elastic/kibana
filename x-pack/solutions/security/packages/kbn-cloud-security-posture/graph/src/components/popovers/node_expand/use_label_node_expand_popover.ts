@@ -11,6 +11,7 @@ import type { NodeProps, NodeViewModel } from '../../types';
 import { GRAPH_LABEL_EXPAND_POPOVER_TEST_ID } from '../../test_ids';
 import { getLabelExpandItems } from './get_label_expand_items';
 import { getNodeDocumentMode } from '../../utils';
+import type { GraphTelemetryHandler } from '../../graph_telemetry';
 import { emitFilterToggle, isFilterActiveForScope } from '../../filters/filter_store';
 
 /**
@@ -23,11 +24,13 @@ import { emitFilterToggle, isFilterActiveForScope } from '../../filters/filter_s
  * @param scopeId - The unique identifier for the graph instance (used to scope filter state)
  * @param onOpenEventPreview - Optional callback to open event preview with full node data.
  *                             If provided, clicking "Show event details" calls this callback.
+ * @param onTelemetryEvent - Optional callback invoked when the user triggers a popover action.
  * @returns The label node expand popover.
  */
 export const useLabelNodeExpandPopover = (
   scopeId: string,
-  onOpenEventPreview?: (node: NodeViewModel) => void
+  onOpenEventPreview?: (node: NodeViewModel) => void,
+  onTelemetryEvent?: GraphTelemetryHandler
 ) => {
   const itemsFn = useCallback(
     (node: NodeProps) => {
@@ -42,9 +45,30 @@ export const useLabelNodeExpandPopover = (
 
       return getLabelExpandItems({
         nodeLabel,
-        onShowEventDetails: onOpenEventPreview ? () => onOpenEventPreview(node.data) : undefined,
+        onShowEventDetails: onOpenEventPreview
+          ? () => {
+              onTelemetryEvent?.(
+                isGroupedEvents
+                  ? {
+                      type: 'node_action',
+                      nodeType: 'grouped_event',
+                      action: 'show_grouped_events',
+                    }
+                  : { type: 'node_action', nodeType: 'event', action: 'show_details' }
+              );
+              onOpenEventPreview(node.data);
+            }
+          : undefined,
         isFilterActive: (field, value) => isFilterActiveForScope(scopeId, field, value),
-        toggleFilter: (field, value, action) => emitFilterToggle(scopeId, field, value, action),
+        toggleFilter: (field, value, action) => {
+          onTelemetryEvent?.({
+            type: 'node_action',
+            nodeType: isGroupedEvents ? 'grouped_event' : 'event',
+            action: 'show_related_events',
+            state: action,
+          });
+          emitFilterToggle(scopeId, field, value, action);
+        },
         shouldRender: {
           // Always show filter action for label nodes
           showEventsWithAction: true,
@@ -55,7 +79,7 @@ export const useLabelNodeExpandPopover = (
         isSingleAlert,
       });
     },
-    [scopeId, onOpenEventPreview]
+    [scopeId, onOpenEventPreview, onTelemetryEvent]
   );
 
   const labelNodeExpandPopover = useNodeExpandPopover({

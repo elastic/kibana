@@ -207,6 +207,15 @@ export const Popover = ({
     [trigger, hasContent, open]
   );
 
+  // Clicking inside pins a persistent popover like a trigger click does, so content that shrinks
+  // out from under the cursor (e.g. a shorter nested panel) does not close it on mouseleave.
+  // Capture phase lets an item's own `closePopover` call run after and win.
+  const handlePopoverClickCapture = useCallback(() => {
+    if (persistent) {
+      setOpenedByClick();
+    }
+  }, [persistent, setOpenedByClick]);
+
   const handlePopoverKeyDown: KeyboardEventHandler<HTMLDivElement> = useCallback(
     (e) => {
       if (e.key === 'Escape') {
@@ -356,6 +365,7 @@ export const Popover = ({
               }
             }
           }}
+          onClickCapture={handlePopoverClickCapture}
           onKeyDown={handlePopoverKeyDown}
           css={popoverContentStyles}
         >

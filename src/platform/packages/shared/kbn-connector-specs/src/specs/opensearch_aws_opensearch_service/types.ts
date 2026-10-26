@@ -23,41 +23,55 @@ const boundedRecord = (maxEntries: number) =>
       message: `Must contain at most ${maxEntries} top-level keys.`,
     });
 
-const MonitorIdSchema = z
-  .string()
-  .min(1)
-  .max(200)
-  .describe('The OpenSearch Alerting monitor ID, e.g. as returned by searchMonitors or getAlerts.');
+const MonitorIdSchema = lazySchema(() =>
+  z
+    .string()
+    .min(1)
+    .max(200)
+    .describe(
+      'The OpenSearch Alerting monitor ID, e.g. as returned by searchMonitors or getAlerts.'
+    )
+);
 
-const DetectorIdSchema = z
-  .string()
-  .min(1)
-  .max(200)
-  .describe(
-    'The Security Analytics detector ID, e.g. as returned by getDetectorFindings or the OpenSearch Dashboards detector list.'
-  );
+const DetectorIdSchema = lazySchema(() =>
+  z
+    .string()
+    .min(1)
+    .max(200)
+    .describe(
+      'The Security Analytics detector ID, e.g. as returned by getDetectorFindings or the OpenSearch Dashboards detector list.'
+    )
+);
 
-const AlertIdsSchema = z
-  .array(z.string().min(1).max(200))
-  .min(1)
-  .max(100)
-  .describe(
-    'One or more alert IDs to acknowledge. Only alerts currently in the ACTIVE state are acknowledged; alerts already ERROR, COMPLETED, or ACKNOWLEDGED are reported back as failed.'
-  );
+const AlertIdsSchema = lazySchema(() =>
+  z
+    .array(z.string().min(1).max(200))
+    .min(1)
+    .max(100)
+    .describe(
+      'One or more alert IDs to acknowledge. Only alerts currently in the ACTIVE state are acknowledged; alerts already ERROR, COMPLETED, or ACKNOWLEDGED are reported back as failed.'
+    )
+);
 
-export const AlertStateSchema = z
-  .enum(['ALL', 'ACTIVE', 'ACKNOWLEDGED', 'COMPLETED', 'ERROR'])
-  .describe('Filter by alert state. Defaults to "ALL".');
+export const AlertStateSchema = lazySchema(() =>
+  z
+    .enum(['ALL', 'ACTIVE', 'ACKNOWLEDGED', 'COMPLETED', 'ERROR'])
+    .describe('Filter by alert state. Defaults to "ALL".')
+);
 
-const SortOrderSchema = z.enum(['asc', 'desc']).describe('Sort order: "asc" or "desc".');
+const SortOrderSchema = lazySchema(() =>
+  z.enum(['asc', 'desc']).describe('Sort order: "asc" or "desc".')
+);
 
-const MonitorTypeSchema = z
-  .enum(['query_level_monitor', 'bucket_level_monitor', 'doc_level_monitor'])
-  .describe(
-    'The monitor type: "query_level_monitor" (a single search query with a script-based trigger condition), ' +
-      '"bucket_level_monitor" (aggregates results into buckets and evaluates each bucket), or ' +
-      '"doc_level_monitor" (matches individual documents against percolator-style queries).'
-  );
+const MonitorTypeSchema = lazySchema(() =>
+  z
+    .enum(['query_level_monitor', 'bucket_level_monitor', 'doc_level_monitor'])
+    .describe(
+      'The monitor type: "query_level_monitor" (a single search query with a script-based trigger condition), ' +
+        '"bucket_level_monitor" (aggregates results into buckets and evaluates each bucket), or ' +
+        '"doc_level_monitor" (matches individual documents against percolator-style queries).'
+    )
+);
 
 const ScheduleSchema = lazySchema(() =>
   z
@@ -291,9 +305,11 @@ export type UpdateMonitorInput = z.infer<typeof UpdateMonitorInputSchema>;
 // Security Analytics detectors, detector alerts, and findings
 // ============================================================================
 
-const DetectorTypeSchema = z
-  .enum(['linux', 'network', 'windows', 'ad_ldap', 'apache_access', 'cloudtrail', 'dns', 's3'])
-  .describe("The detector's log type.");
+const DetectorTypeSchema = lazySchema(() =>
+  z
+    .enum(['linux', 'network', 'windows', 'ad_ldap', 'apache_access', 'cloudtrail', 'dns', 's3'])
+    .describe("The detector's log type.")
+);
 
 export const SearchDetectorsInputSchema = lazySchema(() =>
   z.object({

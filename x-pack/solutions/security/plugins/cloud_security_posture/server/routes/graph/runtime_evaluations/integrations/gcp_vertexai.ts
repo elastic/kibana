@@ -46,6 +46,11 @@ export const gcp_vertexaiEvaluations = {
     data_stream.dataset == "gcp_vertexai.auditlogs" AND client.user.email IS NOT NULL, client.user.email,
     null
   ),
+  entity.id = CASE(
+    entity.id IS NOT NULL, entity.id,
+    data_stream.dataset == "gcp_vertexai.auditlogs" AND gcp.vertexai.audit.authentication_info.principal_subject IS NOT NULL AND gcp.vertexai.audit.authentication_info.principal_subject != "", gcp.vertexai.audit.authentication_info.principal_subject,
+    null
+  ),
   host.ip = CASE(
     host.ip IS NOT NULL, host.ip,
     data_stream.dataset == "gcp_vertexai.auditlogs" AND source.ip IS NOT NULL, source.ip,
@@ -76,6 +81,7 @@ export const gcp_vertexaiEvaluations = {
   entity.target.id = CASE(
     entity.target.id IS NOT NULL, entity.target.id,
     data_stream.dataset == "gcp_vertexai.prompt_response_logs" AND gcp.vertexai.prompt_response_logs.request_id IS NOT NULL, gcp.vertexai.prompt_response_logs.request_id,
+    data_stream.dataset == "gcp_vertexai.auditlogs" AND gcp.vertexai.audit.resource_name IS NOT NULL, gcp.vertexai.audit.resource_name,
     null
   ),
   entity.target.sub_type = CASE(

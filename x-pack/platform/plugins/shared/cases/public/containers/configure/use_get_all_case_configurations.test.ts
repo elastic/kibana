@@ -44,6 +44,7 @@ describe('Use get all case configurations hook', () => {
         version: '',
         owner: '',
         observableTypes: [],
+        workflowTags: [],
       },
     ]);
 
@@ -77,6 +78,7 @@ describe('Use get all case configurations hook', () => {
           version: '',
           owner: '',
           observableTypes: [],
+          workflowTags: [],
         },
       ])
     );

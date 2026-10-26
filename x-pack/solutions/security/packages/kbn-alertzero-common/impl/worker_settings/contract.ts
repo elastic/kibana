@@ -7,10 +7,9 @@
 
 import { isEqual } from 'lodash';
 import { z } from '@kbn/zod/v4';
-import { WATCH_AUTONOMY_LEVELS } from '../../constants';
 import type { WatchAutonomyLevel, WorkerSettingsWrite } from '../schemas';
 import { WorkerScheduleInterval, WorkerSettings } from '../schemas';
-import type { WorkerSettingsDeclaration } from './types';
+import type { WorkerSettingsDeclaration, WorkerSettingsIssue } from './types';
 
 /**
  * Complete, closed settings schema for one Worker; the only place its shape is spelled out. The
@@ -30,6 +29,7 @@ export const buildCompleteWorkerSettingsSchema = (
   if (declaration.extras) {
     shape.extras = declaration.extras.schema;
   }
+  shape.serviceAccountId = z.string().min(1).max(1024).optional();
   return z.object(shape).strict().pipe(WorkerSettings);
 };
 
@@ -39,34 +39,6 @@ export const getDefaultAutonomyLevel = (
   declaration.allowedAutonomyLevels.includes('manual')
     ? 'manual'
     : declaration.allowedAutonomyLevels[0];
-
-const isWatchAutonomyLevel = (value: unknown): value is WatchAutonomyLevel =>
-  typeof value === 'string' && (WATCH_AUTONOMY_LEVELS as readonly string[]).includes(value);
-
-/**
- * Reads a stored autonomy level down to the closest level the Worker still offers, so narrowing a
- * declaration does not strand documents written under the wider set. Never projects upwards: with
- * nothing at or below the stored level the value is returned as-is for validation to reject.
- */
-export const projectStoredAutonomyLevel = (
-  declaration: WorkerSettingsDeclaration,
-  stored: unknown
-): unknown => {
-  if (!isWatchAutonomyLevel(stored) || declaration.allowedAutonomyLevels.includes(stored)) {
-    return stored;
-  }
-  const storedIndex = WATCH_AUTONOMY_LEVELS.indexOf(stored);
-  const atOrBelow = declaration.allowedAutonomyLevels.filter(
-    (level) => WATCH_AUTONOMY_LEVELS.indexOf(level) <= storedIndex
-  );
-  if (atOrBelow.length === 0) {
-    return stored;
-  }
-  // Declared order is not guaranteed, so rank by position on the shared scale.
-  return atOrBelow.reduce((highest, level) =>
-    WATCH_AUTONOMY_LEVELS.indexOf(level) > WATCH_AUTONOMY_LEVELS.indexOf(highest) ? level : highest
-  );
-};
 
 export const buildDefaultWorkerSettings = (
   declaration: WorkerSettingsDeclaration
@@ -86,12 +58,23 @@ export const buildDefaultWorkerSettings = (
 export const applyWorkerSettingsWrite = (
   settings: WorkerSettings,
   patch: WorkerSettingsWrite
-): WorkerSettings => ({
-  ...settings,
-  ...(patch.autonomy === undefined ? {} : { autonomy: patch.autonomy }),
-  ...(patch.scheduleInterval === undefined ? {} : { scheduleInterval: patch.scheduleInterval }),
-  ...(patch.extras === undefined ? {} : { extras: patch.extras }),
-});
+): WorkerSettings => {
+  const next: WorkerSettings = {
+    ...settings,
+    ...(patch.autonomy === undefined ? {} : { autonomy: patch.autonomy }),
+    ...(patch.scheduleInterval === undefined ? {} : { scheduleInterval: patch.scheduleInterval }),
+    ...(patch.extras === undefined ? {} : { extras: patch.extras }),
+  };
+  if (patch.serviceAccountId === undefined) {
+    return next;
+  }
+  if (patch.serviceAccountId === null) {
+    const withoutAccount = { ...next };
+    delete withoutAccount.serviceAccountId;
+    return withoutAccount;
+  }
+  return { ...next, serviceAccountId: patch.serviceAccountId };
+};
 
 /** The minimal patch that turns `saved` into `draft`, or undefined when nothing changed. */
 export const diffWorkerSettings = (
@@ -106,6 +89,9 @@ export const diffWorkerSettings = (
     ...(draft.extras !== undefined && !isEqual(draft.extras, saved.extras)
       ? { extras: draft.extras }
       : {}),
+    ...(draft.serviceAccountId !== saved.serviceAccountId
+      ? { serviceAccountId: draft.serviceAccountId ?? null }
+      : {}),
   };
   return Object.keys(patch).length > 0 ? patch : undefined;
 };
@@ -113,6 +99,10 @@ export const diffWorkerSettings = (
 export const touchesWorkerSettings = (patch: {
   settings?: WorkerSettingsWrite | undefined;
 }): boolean => patch.settings != null;
+
+/** The same shape as `formatWorkerSettingsIssues`, for the cross-field rules a write checks. */
+export const formatCrossFieldIssues = (issues: readonly WorkerSettingsIssue[]): string =>
+  issues.map(({ path, message }) => `${path.join('.')}: ${message}`).join('; ');
 
 /** One line per issue, each prefixed with the field path so the caller can name the field. */
 export const formatWorkerSettingsIssues = (error: z.ZodError): string =>

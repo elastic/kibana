@@ -83,6 +83,29 @@ import { searchParamNames } from './application/search_param_names';
 import { storageKeys } from './application/storage_keys';
 import { AGENTBUILDER_APP_ID } from '../common/features';
 
+const getConversationPath = ({
+  conversationId,
+  agentId,
+  openDetails,
+  collapseSidebar,
+}: {
+  conversationId: string;
+  agentId: string;
+  openDetails?: boolean;
+  collapseSidebar?: boolean;
+}): string => {
+  const basePath = appPaths.agent.conversations.byId({ agentId, conversationId });
+  const searchParams = new URLSearchParams();
+  if (openDetails) {
+    searchParams.set(searchParamNames.openConversationDetails, 'true');
+  }
+  if (collapseSidebar) {
+    searchParams.set(searchParamNames.sidebarCollapsed, 'true');
+  }
+  const search = searchParams.toString();
+  return search ? `${basePath}?${search}` : basePath;
+};
+
 export class AgentBuilderPlugin
   implements
     Plugin<
@@ -366,14 +389,17 @@ export class AgentBuilderPlugin
           openSidebarConversation: (conversationId) => {
             openSidebarInternal({ conversationId });
           },
-          openFullscreenConversation: ({ conversationId, agentId, openDetails }) => {
+          openFullscreenConversation: (location) => {
             agentBuilderSidebar.close();
-            const basePath = appPaths.agent.conversations.byId({ agentId, conversationId });
-            const path = openDetails
-              ? `${basePath}?${searchParamNames.openConversationDetails}=true`
-              : basePath;
-            return core.application.navigateToApp(AGENTBUILDER_APP_ID, { path });
+            return core.application.navigateToApp(AGENTBUILDER_APP_ID, {
+              path: getConversationPath(location),
+            });
           },
+          getConversationUrl: (location) =>
+            core.application.getUrlForApp(AGENTBUILDER_APP_ID, {
+              path: getConversationPath(location),
+              absolute: true,
+            }),
         },
       }),
       renderers: createPublicRenderersContract({ renderersService }),

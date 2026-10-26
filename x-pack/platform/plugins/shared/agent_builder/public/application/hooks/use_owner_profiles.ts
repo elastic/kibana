@@ -7,7 +7,7 @@
 
 import { useMemo } from 'react';
 import { useQuery } from '@kbn/react-query';
-import type { AgentDefinition } from '@kbn/agent-builder-common';
+import { isUserProfileId, type AgentDefinition } from '@kbn/agent-builder-common';
 import { useKibana } from './use_kibana';
 import { queryKeys } from '../query_keys';
 
@@ -19,8 +19,9 @@ export const useOwnerProfiles = (agents: AgentDefinition[]): Map<string, string>
   const { uids, sortedUids } = useMemo(() => {
     const set = new Set<string>();
     for (const agent of agents) {
-      if (agent.created_by?.id) set.add(agent.created_by.id);
-      if (agent.updated_by?.id) set.add(agent.updated_by.id);
+      for (const id of [agent.created_by?.id, agent.updated_by?.id]) {
+        if (isUserProfileId(id)) set.add(id);
+      }
     }
     return { uids: set, sortedUids: [...set].sort() };
   }, [agents]);

@@ -16,6 +16,7 @@ export {
   asCodeQuerySchema,
   asCodeRelatedItemSchema,
   asCodeSearchRequestSchema,
+  getAsCodeSearchRequestSchema,
   getAsCodeTagsSchema,
   getMeta,
   type AsCodeMeta,

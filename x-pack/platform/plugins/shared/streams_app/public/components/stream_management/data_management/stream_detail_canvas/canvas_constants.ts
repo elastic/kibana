@@ -50,13 +50,13 @@ export const PAN_MARGIN = 500;
 /** Fixed card widths (px) for each node kind; the single source of truth used
  * by both the node components and the pan-bound estimate below. */
 export const SOURCE_NODE_WIDTH = 246;
-export const DESTINATION_NODE_WIDTH = 184;
+export const DESTINATION_NODE_WIDTH = 220;
 
 /**
  * Revisit whenever a card gains or loses a content row.
  */
 export const SOURCE_NODE_HEIGHT = 74;
-export const DESTINATION_NODE_HEIGHT = 50;
+export const DESTINATION_NODE_HEIGHT = 78;
 
 export const NODE_HEIGHT_BY_TYPE: Readonly<Record<string, number>> = {
   [SOURCE_NODE_TYPE]: SOURCE_NODE_HEIGHT,

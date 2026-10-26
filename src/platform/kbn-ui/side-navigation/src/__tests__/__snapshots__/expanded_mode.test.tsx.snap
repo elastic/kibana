@@ -23,6 +23,7 @@ exports[`Expanded mode should render the side navigation 1`] = `
       <nav
         aria-label="Main"
         class="css-52o7j-getPrimaryMenuStyles"
+        data-overflow-measured="false"
         data-test-subj="kbnChromeNav-primaryNavigation"
         id="kbnChromeNav-primaryNavigation"
       >

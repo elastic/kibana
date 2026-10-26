@@ -43,6 +43,7 @@ export const DraggableItem = ({ item, index, toggleItemVisibility }: Props) => (
     customDragHandle
     hasInteractiveChildren
     usePortal
+    spacing="s"
   >
     {(provided) => (
       <EuiPanel

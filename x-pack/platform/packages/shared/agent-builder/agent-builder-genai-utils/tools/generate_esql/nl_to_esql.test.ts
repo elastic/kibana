@@ -35,7 +35,12 @@ jest.mock('./documentation', () => ({
   loadDocumentation: jest.fn(),
   // EsqlDocEntry is imported by prompts.ts (not nl_to_esql.ts); the mock must export it
   // so that createRequestDocumentationPromptNoResource can call documentation.getDocContent(entry).
-  EsqlDocEntry: { syntax: 'syntax', tsQueries: 'tsQueries', examples: 'examples' },
+  EsqlDocEntry: {
+    syntax: 'syntax',
+    tsQueries: 'tsQueries',
+    promqlQueries: 'promqlQueries',
+    examples: 'examples',
+  },
 }));
 
 import { EsqlDocumentBase } from '@kbn/inference-plugin/server/tasks/nl_to_esql/doc_base';

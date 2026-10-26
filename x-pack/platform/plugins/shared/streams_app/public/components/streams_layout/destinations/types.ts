@@ -5,47 +5,77 @@
  * 2.0.
  */
 
-import type { IndicesIndexMode } from '@elastic/elasticsearch/lib/api/types';
-import type { QualityIndicators } from '@kbn/dataset-quality-plugin/common';
-import type { IngestStreamEffectiveLifecycle, Streams } from '@kbn/streams-schema';
+import type { DestinationNameValidationError } from './destination_helpers';
 
 /**
- * Destination types targeted by V1. Only `elasticsearch` is backed by real
- * data today; `s3` and `remote_elasticsearch` land with the destinations
- * backend (see https://github.com/elastic/ingest-dev/issues/8131 and /8340).
+ * Destination storage choices shown in the create form.
+ * Only `local_elasticsearch` is persisted today. Add a kind here, a fields
+ * component, and a registry entry to introduce another type.
  */
-export type DestinationType = 'elasticsearch' | 's3' | 'remote_elasticsearch';
+export type DestinationStorageKind = 'local_elasticsearch' | 'external_storage';
 
-/**
- * View model for a row of the Destinations table, decoupled from
- * `ListStreamDetail` so the fetch actor and mapper are the only places to
- * update once the destinations CRUD API replaces the streams list endpoint.
- */
-export interface Destination {
+/** Unit destination types the UI can list and create. */
+export type DestinationType = 'elasticsearch';
+
+export type DestinationSignal = 'logs' | 'metrics' | 'traces';
+
+/** Default write-role globs for auto destinations, one per ingest signal. */
+export const AUTO_INDEX_PATTERNS: readonly string[] = ['logs-*-*', 'metrics-*-*', 'traces-*-*'];
+
+/** How an Elasticsearch destination chooses its indices. */
+export type DestinationIndexMode = 'static' | 'auto';
+
+export type StaticIndexValidationError =
+  | 'template'
+  | 'invalidName'
+  | 'uppercase'
+  | 'invalidCharacter'
+  | 'signalPattern';
+
+export type AutoWritePatternValidationError =
+  | 'required'
+  | 'uppercase'
+  | 'invalidCharacter'
+  | 'signalPattern';
+
+export interface DestinationViewModel {
+  id: string;
   name: string;
   type: DestinationType;
-  description: string;
-  tags: string[];
-  isManaged: boolean;
-  isInternal: boolean;
-  hasDataStream: boolean;
-  canReadFailureStore: boolean;
-  /** Undefined when the destination has no meaningful retention. */
-  retention: IngestStreamEffectiveLifecycle | undefined;
-  /**
-   * Numeric retention used for sorting; Infinity for indefinite retention and
-   * undefined when it cannot be determined (ILM, unparseable duration).
-   */
-  retentionMs: number | undefined;
-  /** Backing stream definition, powering stream-based actions like Discover. */
-  streamDefinition: Streams.ClassicStream.Definition;
-  indexMode: IndicesIndexMode;
+  signals: DestinationSignal[];
+  mode: DestinationIndexMode;
+  index?: string;
+  /** User-defined write-role globs stored as unit `index_patterns`. */
+  indexPatterns?: string[];
 }
 
-/** Destination enriched with the metrics the sortable columns need. */
-export type DestinationRow = Destination & {
-  documentsCount: number;
-  ingestionRate: number;
-  storageBytes: number;
-  dataQuality?: QualityIndicators;
+/** Per-type form state. Each destination type owns its own slice. */
+export interface ElasticsearchDestinationFormData {
+  /** When true, omit `index` so ES composes names from document metadata. */
+  auto: boolean;
+  /** Static index, or auto write-target glob, for logs. Empty in auto = no user pattern. */
+  logsIndex: string;
+  metricsIndex: string;
+  tracesIndex: string;
+}
+
+export interface DestinationCreationFormData {
+  storageKind: DestinationStorageKind;
+  destinationName: string;
+  elasticsearch: ElasticsearchDestinationFormData;
+}
+
+export interface DestinationCreationFormErrors {
+  destinationName?: DestinationNameValidationError;
+  staticIndexes?: 'required';
+  logsIndex?: StaticIndexValidationError | AutoWritePatternValidationError;
+  metricsIndex?: StaticIndexValidationError | AutoWritePatternValidationError;
+  tracesIndex?: StaticIndexValidationError | AutoWritePatternValidationError;
+}
+
+export const EMPTY_ELASTICSEARCH_DESTINATION_FORM: ElasticsearchDestinationFormData = {
+  auto: true,
+  logsIndex: '',
+  metricsIndex: '',
+  tracesIndex: '',
 };

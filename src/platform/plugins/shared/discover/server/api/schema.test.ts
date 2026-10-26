@@ -31,8 +31,8 @@ import { discoverSessionInternalDataSchema } from './internal_schema';
 // Keep these values independent from the schema constants so contract changes require an explicit
 // test update.
 const CURRENT_API_LIMITS = {
-  titleLength: 256,
-  descriptionLength: 1000,
+  titleLength: 1_000,
+  descriptionLength: 10_000,
   tabLabelLength: 120,
   tabs: 25,
   breakdownFieldLength: 1000,
@@ -40,6 +40,7 @@ const CURRENT_API_LIMITS = {
   columnOrder: 100,
   sort: 100,
   filters: 100,
+  controlPanels: 1_000,
   rowsPerPage: { min: 1, max: 10_000 },
   sampleSize: { min: 10, max: 10_000 },
   headerRowHeight: { min: 1, max: 5 },
@@ -111,7 +112,6 @@ describe('discoverSessionApiDataSchema', () => {
         {
           ...esqlTab,
           rows_per_page: 25,
-          sample_size: 500,
         },
       ],
     });
@@ -121,7 +121,29 @@ describe('discoverSessionApiDataSchema', () => {
     expect(tab.data_source.type).toBe(AS_CODE_ESQL_DATA_SOURCE_TYPE);
     expect(tab.data_source.query).toBe('FROM logs-* | LIMIT 10');
     expect(tab.rows_per_page).toBe(25);
-    expect(tab.sample_size).toBe(500);
+  });
+
+  it.each([
+    ['sample_size', 500],
+    ['hide_aggregated_preview', true],
+    ['chart_interval', 'auto'],
+    ['chart_interval', 'h'],
+  ])('rejects %s on an ES|QL tab', (field, value) => {
+    expect(() =>
+      discoverSessionApiDataSchema.parse({
+        title: 'ES|QL only',
+        tabs: [{ ...esqlTab, [field]: value }],
+      })
+    ).toThrow();
+  });
+
+  it('rejects chart_interval on a metrics tab', () => {
+    expect(() =>
+      discoverSessionApiDataSchema.parse({
+        title: 'Metrics',
+        tabs: [{ ...metricsTab, chart_interval: 'auto' }],
+      })
+    ).toThrow();
   });
 
   it('accepts plain string tab types in the exported TypeScript types', () => {
@@ -714,6 +736,35 @@ describe('discoverSessionApiDataSchema', () => {
       expect(validated.tabs[0].label).toHaveLength(CURRENT_API_LIMITS.tabLabelLength);
     });
 
+    it('pins the current control panel limit', () => {
+      const parseWithControlPanels = (count: number) =>
+        discoverSessionApiDataSchema.parse({
+          title: 'Controls',
+          tabs: [
+            {
+              ...esqlTab,
+              control_panels: Array.from({ length: count }, (_, index) => ({
+                id: `control-${index}`,
+                type: 'esql_control',
+                config: {
+                  control_type: 'STATIC_VALUES',
+                  variable_name: `variable${index}`,
+                  variable_type: 'values',
+                  available_options: ['bar'],
+                  selected_options: ['bar'],
+                  single_select: true,
+                },
+              })),
+            },
+          ],
+        });
+
+      expect(
+        parseWithControlPanels(CURRENT_API_LIMITS.controlPanels).tabs[0].control_panels
+      ).toHaveLength(CURRENT_API_LIMITS.controlPanels);
+      expect(() => parseWithControlPanels(CURRENT_API_LIMITS.controlPanels + 1)).toThrow();
+    });
+
     it.each([
       ['rows_per_page', CURRENT_API_LIMITS.rowsPerPage],
       ['sample_size', CURRENT_API_LIMITS.sampleSize],
@@ -831,7 +882,7 @@ describe('discoverSessionApiDataSchema', () => {
           ],
         });
 
-        expect(validated.tabs[0].chart_interval).toBe(chartInterval);
+        expect(validated.tabs[0]).toHaveProperty('chart_interval', chartInterval);
       }
     });
 

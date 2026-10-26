@@ -29,12 +29,13 @@ describe('recent anomalies ES|QL sources', () => {
     mockUseEntityStoreEuidApi.mockReturnValue({
       euid: {
         esql: {
-          getFieldEvaluations: (entityType: string) =>
-            `${entityType}_field = TO_STRING(${entityType}.name)`,
-          getEuidEvaluation: (entityType: string, target: string) =>
-            `${target} = CONCAT("${entityType}:", ${entityType}.name)`,
+          getFieldEvaluations: ({ type }: { type: string }) =>
+            `${type}_field = TO_STRING(${type}.name)`,
+          getEuidEvaluation: ({ type }: { type: string }, target: string) =>
+            `${target} = CONCAT("${type}:", ${type}.name)`,
         },
       },
+      getBuiltInEntityDefinition: (type: string) => ({ type }),
     });
   });
 

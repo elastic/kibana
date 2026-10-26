@@ -227,6 +227,7 @@ describe('getCasesConnectorType', () => {
                 },
               ],
               "autoPushCase": null,
+              "extractObservables": undefined,
               "groupedAlerts": null,
               "groupingBy": Array [],
               "maximumCasesToOpen": 5,
@@ -276,6 +277,7 @@ describe('getCasesConnectorType', () => {
                 },
               ],
               "autoPushCase": null,
+              "extractObservables": undefined,
               "groupedAlerts": null,
               "groupingBy": Array [],
               "maximumCasesToOpen": 10,
@@ -325,6 +327,7 @@ describe('getCasesConnectorType', () => {
                 },
               ],
               "autoPushCase": null,
+              "extractObservables": undefined,
               "groupedAlerts": null,
               "groupingBy": Array [],
               "maximumCasesToOpen": 5,
@@ -372,6 +375,7 @@ describe('getCasesConnectorType', () => {
                 },
               ],
               "autoPushCase": null,
+              "extractObservables": undefined,
               "groupedAlerts": null,
               "groupingBy": Array [],
               "maximumCasesToOpen": 5,
@@ -392,6 +396,38 @@ describe('getCasesConnectorType', () => {
             },
           }
         `);
+      });
+
+      it.each([
+        ['true', true],
+        ['false', false],
+        ['null', null],
+      ])('forwards an extractObservables override of %s', (_, extractObservables) => {
+        const adapter = getCasesConnectorAdapter({ logger: mockLogger });
+
+        const connectorParams = adapter.buildActionParams({
+          // @ts-expect-error: not all fields are needed
+          alerts,
+          rule,
+          params: getParams({ extractObservables }),
+          spaceId: 'default',
+        });
+
+        expect(connectorParams.subActionParams.extractObservables).toBe(extractObservables);
+      });
+
+      it('forwards extractObservables as undefined when the rule omits it', () => {
+        const adapter = getCasesConnectorAdapter({ logger: mockLogger });
+
+        const connectorParams = adapter.buildActionParams({
+          // @ts-expect-error: not all fields are needed
+          alerts,
+          rule,
+          params: getParams(),
+          spaceId: 'default',
+        });
+
+        expect(connectorParams.subActionParams.extractObservables).toBeUndefined();
       });
 
       it('maps observability consumers to the correct owner', () => {

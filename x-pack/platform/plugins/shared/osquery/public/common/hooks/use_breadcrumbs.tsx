@@ -146,8 +146,9 @@ const breadcrumbGetters: {
       }),
     },
     {
-      text: i18n.translate('xpack.osquery.breadcrumbs.addpacksPageTitle', {
-        defaultMessage: 'Add',
+      // Matches the "Create pack" page title, so the browser tab reads "Create - Packs".
+      text: i18n.translate('xpack.osquery.breadcrumbs.createPackPageTitle', {
+        defaultMessage: 'Create',
       }),
     },
   ],

@@ -51,7 +51,6 @@
     "@kbn/deeplinks-management",
     "@kbn/connector-schemas",
     "@kbn/management-settings-ids",
-    "@kbn/alerting-v2-utils",
     "@kbn/ai-assistant-common",
     "@kbn/deeplinks-workflows",
     "@kbn/workflows",
@@ -59,5 +58,6 @@
     "@kbn/workflows-management-plugin",
     "@kbn/navigation-plugin",
     "@kbn/scout-security",
+    "@kbn/deeplinks-security",
   ]
 }

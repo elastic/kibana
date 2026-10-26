@@ -5,14 +5,23 @@
  * 2.0.
  */
 
+import { forbidden } from '@hapi/boom';
 import { SignificantEventsWorkflowStatus } from '@kbn/significant-events-schema';
 import { ExecutionStatus } from '@kbn/workflows';
 import { SignificantEventsKIsOnboardingClient } from '../../../lib/workflows/onboarding_workflow_client';
 import { createKiIdentificationStatusTool } from './tool';
-import { createMockToolContext } from '../../utils/test_helpers';
+import {
+  createMockToolContext,
+  createSignificantEventsServer,
+  mockSourcesClient,
+  type NightshiftFeaturePrivilege,
+} from '../../utils/test_helpers';
 
 describe('createKiIdentificationStatusTool', () => {
-  const setup = () => {
+  const setup = ({
+    featurePrivilege = 'read',
+    readable = true,
+  }: { featurePrivilege?: NightshiftFeaturePrivilege; readable?: boolean } = {}) => {
     const managementApi = {
       getWorkflowExecutions: jest.fn().mockResolvedValue({
         results: [
@@ -41,10 +50,21 @@ describe('createKiIdentificationStatusTool', () => {
     const streamsKIsOnboardingClient = new SignificantEventsKIsOnboardingClient({
       managementApi: { ...managementApi, getClient: jest.fn(() => managementApi) } as never,
       telemetry: { trackOnboardingScheduled: jest.fn() } as never,
+      getSourcesClient: jest.fn().mockResolvedValue({
+        get: jest.fn().mockResolvedValue({ source: { id: 'logs.nginx', slug: 'logs-nginx' } }),
+      }),
     });
 
+    const sourcesClient = mockSourcesClient(['logs.nginx']);
+    if (!readable) {
+      sourcesClient.assertReadable.mockRejectedValue(forbidden('Cannot read source'));
+    }
     const tool = createKiIdentificationStatusTool({
+      server: createSignificantEventsServer({ featurePrivilege }),
       streamsKIsOnboardingClient,
+      getScopedClients: jest.fn().mockResolvedValue({
+        sourcesClient,
+      }) as never,
     });
     const context = createMockToolContext();
     return { tool, context, managementApi };
@@ -53,13 +73,13 @@ describe('createKiIdentificationStatusTool', () => {
   it('returns onboarding status for stream', async () => {
     const { tool, context } = setup();
 
-    const result = await tool.handler({ stream_name: 'logs.nginx' }, context);
+    const result = await tool.handler({ slug: 'logs.nginx' }, context);
 
     if ('results' in result) {
       expect(result.results[0].type).toBe('other');
       expect(result.results[0].data).toEqual(
         expect.objectContaining({
-          stream_name: 'logs.nginx',
+          slug: 'logs.nginx',
           status: SignificantEventsWorkflowStatus.Completed,
         })
       );
@@ -70,7 +90,7 @@ describe('createKiIdentificationStatusTool', () => {
     const { tool, context, managementApi } = setup();
     managementApi.getWorkflowExecutions.mockRejectedValueOnce(new Error('boom'));
 
-    const result = await tool.handler({ stream_name: 'logs.nginx' }, context);
+    const result = await tool.handler({ slug: 'logs.nginx' }, context);
 
     if ('results' in result) {
       expect(result.results[0].type).toBe('error');
@@ -78,5 +98,23 @@ describe('createKiIdentificationStatusTool', () => {
       expect(data.message).toContain('Failed to get KI identification background task status');
       expect(data.operation).toBe('ki_identification_status');
     }
+  });
+
+  it('does not read onboarding status without the Nightshift read privilege', async () => {
+    const { tool, context, managementApi } = setup({ featurePrivilege: 'none' });
+
+    const result = await tool.handler({ slug: 'logs.nginx' }, context);
+
+    expect(managementApi.getWorkflowExecutions).not.toHaveBeenCalled();
+    expect(result).toMatchObject({ results: [{ type: 'error' }] });
+  });
+
+  it('does not read onboarding status for a source the caller cannot read', async () => {
+    const { tool, context, managementApi } = setup({ readable: false });
+
+    const result = await tool.handler({ slug: 'logs.nginx' }, context);
+
+    expect(managementApi.getWorkflowExecutions).not.toHaveBeenCalled();
+    expect(result).toMatchObject({ results: [{ type: 'error' }] });
   });
 });

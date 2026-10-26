@@ -16,6 +16,7 @@ import { licenseService as licenseServiceMocked } from '../../../../../../common
 import type { AdvancedSectionProps } from './advanced_section';
 import { AdvancedSection } from './advanced_section';
 import userEvent from '@testing-library/user-event';
+import { cloneDeep } from 'lodash';
 import { AdvancedPolicySchema } from '../../../../../../../common/endpoint/service/policy/advanced_policy_schema';
 import { within } from '@testing-library/react';
 import { set } from '@kbn/safer-lodash-set';
@@ -30,6 +31,9 @@ const CUSTOM_YARA_RESCAN_INTERVAL_KEYS = [
   'mac.advanced.memory_protection.user_yara_rescan_interval_seconds',
   'linux.advanced.memory_protection.user_yara_rescan_interval_seconds',
 ] as const;
+
+const REGISTRY_CREDENTIAL_HARDENING_KEY =
+  'windows.advanced.kernel.registry_credential_hardening.descendants';
 
 describe('Policy Advanced Settings section', () => {
   const testSubj = getPolicySettingsFormTestSubjects('test').advancedSection;
@@ -222,8 +226,71 @@ describe('Policy Advanced Settings section', () => {
     });
   });
 
+  describe('agent connection_delay', () => {
+    const connectionDelayKeys = [
+      'linux.advanced.agent.connection_delay',
+      'mac.advanced.agent.connection_delay',
+      'windows.advanced.agent.connection_delay',
+    ] as const;
+
+    const updatedPolicyFromLastChange = () =>
+      (formProps.onChange as jest.Mock).mock.calls.at(-1)[0].updatedPolicy;
+
+    const rerenderWithPolicy = (policy: AdvancedSectionProps['policy']) => {
+      formProps.policy = policy;
+      renderResult.rerender(<AdvancedSection {...formProps} />);
+    };
+
+    const setConnectionDelayOnEveryOs = async () => {
+      let policy = formProps.policy;
+      for (const key of connectionDelayKeys) {
+        (formProps.onChange as jest.Mock).mockClear();
+        await userEvent.click(renderResult.getByTestId(key));
+        await userEvent.paste('66');
+        policy = updatedPolicyFromLastChange();
+        rerenderWithPolicy(policy);
+      }
+      return policy;
+    };
+
+    it('writes connection_delay for every OS without dropping existing advanced settings', async () => {
+      await render(true);
+
+      expect(formProps.policy.linux.advanced).not.toHaveProperty('agent');
+      expect(formProps.policy.mac.advanced).not.toHaveProperty('agent');
+      expect(formProps.policy.windows.advanced).toBeUndefined();
+
+      const expectedPolicy = cloneDeep(formProps.policy);
+      for (const key of connectionDelayKeys) {
+        set(expectedPolicy, key, '66');
+      }
+
+      expect(await setConnectionDelayOnEveryOs()).toEqual(expectedPolicy);
+    });
+
+    it('removes connection_delay when cleared', async () => {
+      await render(true);
+      const policyBeforeEdit = cloneDeep(formProps.policy);
+
+      await setConnectionDelayOnEveryOs();
+
+      let policy = formProps.policy;
+      for (const key of connectionDelayKeys) {
+        (formProps.onChange as jest.Mock).mockClear();
+        await userEvent.clear(renderResult.getByTestId(key));
+        policy = updatedPolicyFromLastChange();
+        rerenderWithPolicy(policy);
+      }
+
+      expect(policy.linux.advanced).toEqual(policyBeforeEdit.linux.advanced);
+      expect(policy.mac.advanced).toEqual(policyBeforeEdit.mac.advanced);
+      expect(policy.windows.advanced).toBeUndefined();
+    });
+  });
+
   describe('custom YARA signatures advanced settings', () => {
     it('should hide custom YARA rescan interval options when the experimental flag is off', async () => {
+      mockedContext.setExperimentalFlag({ customYaraSignaturesEnabled: false });
       await render(true);
 
       for (const key of CUSTOM_YARA_RESCAN_INTERVAL_KEYS) {
@@ -290,6 +357,60 @@ describe('Policy Advanced Settings section', () => {
         for (const key of CUSTOM_YARA_RESCAN_INTERVAL_KEYS) {
           expect(renderResult.queryByTestId(getCysRowContainer(key))).toBeNull();
         }
+      });
+    });
+  });
+
+  describe('registry credential hardening advanced setting', () => {
+    const getRchRowContainer = () =>
+      testSubj.settingRowTestSubjects(REGISTRY_CREDENTIAL_HARDENING_KEY).container;
+
+    it('should hide the registry credential hardening option when the experimental flag is off', async () => {
+      mockedContext.setExperimentalFlag({ registryCredentialHardening: false });
+      await render(true);
+
+      expect(renderResult.queryByTestId(getRchRowContainer())).toBeNull();
+    });
+
+    describe('and the registryCredentialHardening experimental flag is enabled', () => {
+      beforeEach(() => {
+        mockedContext.setExperimentalFlag({ registryCredentialHardening: true });
+      });
+
+      it('should show the registry credential hardening option on Enterprise when no PLI upsell is present', async () => {
+        await render(true);
+
+        expect(renderResult.getByTestId(getRchRowContainer())).toBeInTheDocument();
+      });
+
+      describe('and license is lower than Enterprise', () => {
+        beforeEach(() => {
+          const licenseServiceMock = createLicenseServiceMock();
+          licenseServiceMock.isEnterprise.mockReturnValue(false);
+
+          useLicenseMock.mockReturnValue(licenseServiceMock);
+        });
+
+        afterEach(() => {
+          useLicenseMock.mockReturnValue(licenseServiceMocked);
+        });
+
+        it('should hide the registry credential hardening option when license is below Enterprise', async () => {
+          await render(true);
+
+          expect(renderResult.queryByTestId(getRchRowContainer())).toBeNull();
+        });
+      });
+
+      it('should hide the registry credential hardening option when a PLI upsell message is present', async () => {
+        mockedContext.startServices.upselling.setMessages({
+          endpoint_registry_credential_hardening:
+            'To apply registry credential hardening, you must add Endpoint Complete to your project.',
+        });
+
+        await render(true);
+
+        expect(renderResult.queryByTestId(getRchRowContainer())).toBeNull();
       });
     });
   });

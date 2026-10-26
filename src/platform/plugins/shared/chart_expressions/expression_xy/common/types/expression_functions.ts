@@ -28,6 +28,7 @@ import type {
   LegendSize,
   XYLegendValue,
 } from '@kbn/chart-expressions-common';
+import type { AxisFormatPolicy } from '../axis_format_policy_types';
 import type {
   AxisExtentModes,
   FillStyles,
@@ -340,6 +341,7 @@ export interface XYProps {
   singleTable?: boolean;
   annotations?: ExpressionAnnotationResult;
   pointVisibility?: PointVisibility;
+  axisFormatPolicies?: AxisFormatPolicy[];
 }
 
 export interface AnnotationLayerArgs {

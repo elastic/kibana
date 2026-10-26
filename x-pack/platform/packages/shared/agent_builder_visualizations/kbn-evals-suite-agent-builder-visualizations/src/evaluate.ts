@@ -17,14 +17,27 @@ export const evaluate = evalsBase.extend<
   }
 >({
   evaluateDataset: [
-    ({ agentBuilderClient, evaluators, executorClient, inferenceClient, esClient, log }, use) => {
+    (
+      {
+        agentBuilderClient,
+        evaluators,
+        executorClient,
+        inferenceClient,
+        evaluationConnector,
+        esClient,
+        log,
+      },
+      use
+    ) => {
       use(
         createEvaluateDataset({
           agentBuilderClient,
           agentId: agentBuilderDefaultAgentId,
           evaluators,
           executorClient,
-          inferenceClient,
+          // LLM judges run on the --judge connector, not the model under test.
+          inferenceClient: inferenceClient.bindTo({ connectorId: evaluationConnector.id }),
+          judgeConnector: evaluationConnector,
           esClient,
           log,
         })

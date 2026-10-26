@@ -20,8 +20,23 @@ const explained = async <T>(request: Promise<T>): Promise<T> => {
   }
 };
 
+/** Resolves with `undefined` where the server answers that there is no such thing. */
+const orNotFound = async <T>(request: Promise<T>): Promise<T | undefined> => {
+  try {
+    return await request;
+  } catch (error) {
+    if ((error as IHttpFetchError).response?.status === 404) {
+      return undefined;
+    }
+    throw error;
+  }
+};
+
 export const createCommentsApi = (http: HttpSetup): CommentsApi => ({
   list: () => explained(http.get<Comment[]>(COMMENTS_API_PATH)),
+
+  get: (id) =>
+    explained(orNotFound(http.get<Comment>(buildPath(`${COMMENTS_API_PATH}/{id}`, { id })))),
 
   getSnapshot: (id) =>
     explained(http.get<CommentSnapshot>(buildPath(`${COMMENTS_API_PATH}/{id}/snapshot`, { id }))),

@@ -84,6 +84,37 @@ describe('useEntityStoreRiskScore', () => {
     );
   });
 
+  it('uses statusExecutionContext for useRiskEngineStatus and executionContext for the list fetch', async () => {
+    const statusExecutionContext = {
+      child: {
+        type: 'security_solution',
+        name: 'entity_analytics:entity_details_flyout',
+        id: 'host_risk_score_status',
+      },
+    };
+
+    renderHook(
+      () =>
+        useEntityStoreRiskScore({
+          riskEntity: EntityType.host,
+          pagination: { cursorStart: 0, querySize: 10 },
+          executionContext,
+          statusExecutionContext,
+        }),
+      { wrapper: TestWrapper }
+    );
+
+    expect(mockUseRiskEngineStatus).toHaveBeenCalledWith(
+      {},
+      { executionContext: statusExecutionContext }
+    );
+    await waitFor(() =>
+      expect(mockFetchEntitiesListV2).toHaveBeenCalledWith(
+        expect.objectContaining({ context: executionContext })
+      )
+    );
+  });
+
   it('forwards executionContext to fetchEntitiesListV2', async () => {
     renderHook(
       () =>

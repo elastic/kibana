@@ -13,6 +13,7 @@ import type { ConnectorTokenClientContract } from '../../types';
 
 export interface AuthStrategyDeps {
   connectorId: string;
+  connectorTypeId?: string;
   secrets: Record<string, unknown>;
   connectorTokenClient?: ConnectorTokenClientContract;
   logger: Logger;

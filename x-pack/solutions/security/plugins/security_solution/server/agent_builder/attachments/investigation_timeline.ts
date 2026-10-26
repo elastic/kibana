@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
 import { SecurityAgentBuilderAttachments } from '../../../common/constants';
 import { securityAttachmentDataSchema } from './security_attachment_data_schema';
@@ -16,30 +16,45 @@ import { securityAttachmentDataSchema } from './security_attachment_data_schema'
  */
 export const MAX_TIMELINE_EVENTS = 50;
 
-const investigationTimelineEventSchema = z.object({
-  /** Event time as an ISO-8601 string, taken verbatim from `@timestamp` in the telemetry. */
-  timestamp: z.string().min(1).max(64),
-  /** Host the event occurred on. Required per event so a multi-host chain reads unambiguously. */
-  host: z.string().min(1).max(256),
-  /**
-   * What happened, with the specifics an analyst needs to act: process and parent names, PIDs,
-   * acting user, command lines, file paths, addresses, accounts. A bare classification
-   * ("lateral movement") is not enough on its own.
-   */
-  description: z.string().min(1).max(2000),
-});
+const investigationTimelineEventSchema = lazySchema(() =>
+  z.object({
+    /** Event time as an ISO-8601 string, taken verbatim from `@timestamp` in the telemetry. */
+    timestamp: z.string().min(1).max(64),
+    /** Host the event occurred on. Required per event so a multi-host chain reads unambiguously. */
+    host: z.string().min(1).max(256),
+    /**
+     * What happened, with the specifics an analyst needs to act: process and parent names, PIDs,
+     * acting user, command lines, file paths, addresses, accounts. A bare classification
+     * ("lateral movement") is not enough on its own.
+     */
+    description: z.string().min(1).max(2000),
+  })
+);
 
-export const investigationTimelineAttachmentDataSchema = securityAttachmentDataSchema.extend({
-  events: z.array(investigationTimelineEventSchema).max(MAX_TIMELINE_EVENTS),
-});
+/** The time range the telemetry was searched over, so an empty or sparse timeline says what it covers. */
+const investigationTimelineWindowSchema = lazySchema(() =>
+  z.object({
+    start: z.string().min(1).max(64),
+    end: z.string().min(1).max(64),
+  })
+);
+
+export const investigationTimelineAttachmentDataSchema = lazySchema(() =>
+  securityAttachmentDataSchema.extend({
+    events: z.array(investigationTimelineEventSchema).max(MAX_TIMELINE_EVENTS),
+    window: investigationTimelineWindowSchema.optional(),
+  })
+);
 
 export type InvestigationTimelineAttachmentData = z.infer<
   typeof investigationTimelineAttachmentDataSchema
 >;
 
 const formatTimelineForAgent = (data: InvestigationTimelineAttachmentData): string => {
-  const header = 'Forensic attack timeline';
-  const { events } = data;
+  const { events, window } = data;
+  const header = window
+    ? `Forensic attack timeline (searched ${window.start} to ${window.end})`
+    : 'Forensic attack timeline';
 
   if (events.length === 0) {
     return `${header}\nNo events were reconstructed from the available telemetry.`;
@@ -77,11 +92,11 @@ export const createInvestigationTimelineAttachmentType = (): AttachmentTypeDefin
     getAgentDescription: () => {
       return `A ${SecurityAgentBuilderAttachments.investigationTimeline} attachment holds the chronological attack reconstruction for an investigation.
 
-The payload is an object \`{ events }\`. \`events\` is the ordered event list, earliest first: an array of { timestamp, host, description }.
+The payload is an object \`{ events, window? }\`. \`events\` is the ordered event list, earliest first: an array of { timestamp, host, description }. \`window\` is the { start, end } range the telemetry was searched over. Most events fall inside it. An event can be earlier or later when it was reached by following a tie from in-window evidence (process tree, file, hash, destination, account, or initial access), and its \`description\` names that tie. Patient zero is often before the window. Treat those events as part of the incident.
 
 Every event names the host it occurred on, so a chain that moves between hosts can be read directly. \`description\` already carries the specifics (processes, PIDs, users, paths, command lines, addresses) — quote it rather than re-summarizing it into a classification.
 
-The events are already ordered and already scoped to the investigation — present them as a timeline and do not reorder or re-derive them.`;
+The events are already ordered and already scoped to the investigation, not necessarily to \`window\` — present them as a timeline and do not reorder or re-derive them.`;
     },
   };
 };

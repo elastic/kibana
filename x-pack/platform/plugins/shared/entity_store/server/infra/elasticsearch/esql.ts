@@ -55,6 +55,10 @@ const doExecuteEsqlQuery = async ({
   return response;
 };
 
+/** True when Elasticsearch answered with `allow_partial_results` and some shards failed. */
+export const isPartialEsqlResponse = (response: ESQLSearchResponse): boolean =>
+  (response as ESQLSearchResponse & { is_partial?: boolean }).is_partial === true;
+
 export const executeEsqlQuery = async ({
   telemetry,
   ...params

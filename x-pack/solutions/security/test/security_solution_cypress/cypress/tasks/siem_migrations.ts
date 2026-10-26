@@ -16,6 +16,7 @@ import * as SELECTORS from '../screens/siem_migrations';
 import { TRANSLATED_RULES_PAGE_URL } from '../urls/navigation';
 import { visit } from './navigation';
 import { bedrockConnectorAPIPayload } from './api_calls/connectors';
+import { setCodeEditorValue } from './common/monaco';
 
 export const navigateToTranslatedRulesPage = (isClassicNavUpdateEnabled: boolean) => {
   if (Cypress.env('IS_SERVERLESS')) {
@@ -134,12 +135,12 @@ export const updateTranslatedRuleQuery = (newQuery: string) => {
   cy.get(SELECTORS.TRANSLATED_RULE_EDIT_BTN).click();
   cy.get(SELECTORS.TRANSLATED_RULE_SAVE_BTN).should('be.visible');
 
-  cy.get(SELECTORS.TRANSLATED_RULE_QUERY_EDITOR_INPUT).type(
-    Cypress.platform === 'darwin' ? '{cmd+a}' : '{ctrl+a}',
-    { force: true }
+  setCodeEditorValue(
+    SELECTORS.TRANSLATED_RULE_QUERY_EDITOR_PARENT,
+    Cypress.platform === 'darwin' ? '{cmd+a}' : '{ctrl+a}'
   );
 
-  cy.get(SELECTORS.TRANSLATED_RULE_QUERY_EDITOR_INPUT).type(newQuery, { force: true });
+  setCodeEditorValue(SELECTORS.TRANSLATED_RULE_QUERY_EDITOR_PARENT, newQuery);
 };
 
 export const editTranslatedRuleByRow = (rowNum: number) => {

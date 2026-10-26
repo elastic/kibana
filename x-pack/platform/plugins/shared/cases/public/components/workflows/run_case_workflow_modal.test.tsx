@@ -9,6 +9,12 @@ import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import type { RunWorkflowExecutor } from '@kbn/workflows-ui';
 import { RunCaseWorkflowModal } from './run_case_workflow_modal';
+import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
+import { useCaseConfigureResponse } from '../configure_cases/__mock__';
+
+jest.mock('../../containers/configure/use_get_case_configuration');
+
+const useGetCaseConfigurationMock = useGetCaseConfiguration as jest.Mock;
 
 // Mock the RunWorkflowPanel from the workflows-ui package.
 jest.mock('@kbn/workflows-ui', () => ({
@@ -18,12 +24,14 @@ jest.mock('@kbn/workflows-ui', () => ({
     inputs,
     runWorkflow,
     showSuccessToast,
+    telemetry,
   }: {
     onClose: () => void;
     onExecutionSettled?: () => void;
     inputs: unknown;
     runWorkflow?: RunWorkflowExecutor;
     showSuccessToast?: boolean;
+    telemetry?: unknown;
   }) => (
     <div data-test-subj="run-workflow-panel-mock">
       <span data-test-subj="panel-inputs">{JSON.stringify(inputs)}</span>
@@ -40,6 +48,7 @@ jest.mock('@kbn/workflows-ui', () => ({
       </button>
       <span data-test-subj="panel-has-executor">{runWorkflow ? 'yes' : 'no'}</span>
       <span data-test-subj="panel-show-success-toast">{String(showSuccessToast)}</span>
+      <span data-test-subj="panel-telemetry">{JSON.stringify(telemetry)}</span>
     </div>
   ),
 }));
@@ -53,6 +62,33 @@ describe('RunCaseWorkflowModal', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    useGetCaseConfigurationMock.mockReturnValue(useCaseConfigureResponse);
+  });
+
+  describe('case configuration gate', () => {
+    it('shows a loading state instead of the workflow list until the configuration is fetched', () => {
+      useGetCaseConfigurationMock.mockReturnValue({
+        ...useCaseConfigureResponse,
+        isFetched: false,
+      });
+
+      render(<RunCaseWorkflowModal inputs={inputs} runWorkflow={mockExecutor} onClose={onClose} />);
+
+      expect(screen.getByTestId('cases-run-workflow-modal-loading')).toBeInTheDocument();
+      expect(screen.queryByTestId('run-workflow-panel-mock')).not.toBeInTheDocument();
+    });
+
+    it('shows an error instead of the workflow list when the configuration fails to load', () => {
+      useGetCaseConfigurationMock.mockReturnValue({
+        ...useCaseConfigureResponse,
+        isError: true,
+      });
+
+      render(<RunCaseWorkflowModal inputs={inputs} runWorkflow={mockExecutor} onClose={onClose} />);
+
+      expect(screen.getByTestId('cases-run-workflow-modal-error')).toBeInTheDocument();
+      expect(screen.queryByTestId('run-workflow-panel-mock')).not.toBeInTheDocument();
+    });
   });
 
   it('renders the modal with the expected title', () => {
@@ -114,5 +150,19 @@ describe('RunCaseWorkflowModal', () => {
     render(<RunCaseWorkflowModal inputs={inputs} runWorkflow={mockExecutor} onClose={onClose} />);
 
     expect(screen.getByTestId('panel-show-success-toast').textContent).toBe('false');
+  });
+
+  it('forwards the telemetry context to RunWorkflowPanel', () => {
+    const telemetry = { origin: 'cases.case', itemCount: 1, owner: 'securitySolution' };
+    render(
+      <RunCaseWorkflowModal
+        inputs={inputs}
+        runWorkflow={mockExecutor}
+        onClose={onClose}
+        telemetry={telemetry}
+      />
+    );
+
+    expect(screen.getByTestId('panel-telemetry').textContent).toBe(JSON.stringify(telemetry));
   });
 });

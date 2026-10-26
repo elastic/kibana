@@ -33,8 +33,10 @@ const createLanguageService = (schema: z.core.JSONSchema.JSONSchema | null) => {
   return service;
 };
 
+let documentVersion = 0;
+
 const complete = async (schema: z.core.JSONSchema.JSONSchema | null, yaml: string) => {
-  const document = TextDocument.create('file:///workflow.yaml', 'yaml', 1, yaml);
+  const document = TextDocument.create('file:///workflow.yaml', 'yaml', ++documentVersion, yaml);
   const service = createLanguageService(schema);
   return service.doComplete(document, document.positionAt(yaml.length), false);
 };
@@ -94,3 +96,87 @@ describe.each([false, true])('service account schema completions (loose=%s)', (l
     expect(await service.doValidation(document, false)).toEqual([]);
   });
 });
+
+describe.each(['workflow.execute', 'workflow.executeAsync'])(
+  '%s identity completions',
+  (stepType) => {
+    const services = createStartServicesMock();
+    const yaml = `name: Child execution
+enabled: true
+triggers:
+  - type: manual
+steps:
+  - name: child
+    type: ${stepType}
+    with:
+      workflow-id: child-id
+`;
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      jest.mocked(useAvailableConnectors).mockReturnValue(undefined);
+      jest.mocked(useKibana).mockReturnValue(createUseKibanaMockValue(services));
+    });
+
+    it.each([
+      [false, false],
+      [false, true],
+      [true, false],
+      [true, true],
+    ])('never suggests identity fields (SA=%s, loose=%s)', async (enabled, loose) => {
+      services.security.serviceAccounts.isEnabled.mockReturnValue(enabled);
+      const { result } = renderHook(() => useWorkflowJsonSchema({ loose }));
+      const completions = await complete(result.current.jsonSchema, `${yaml}      `);
+      const labels = completions?.items.map(({ label }) => label);
+      expect(labels).toContain('inputs');
+      expect(labels).not.toContain('inheritRunAs');
+      expect(labels).not.toContain('run-as-mode');
+    });
+
+    it('rejects the removed inheritRunAs YAML property', async () => {
+      services.security.serviceAccounts.isEnabled.mockReturnValue(true);
+      const { result } = renderHook(() => useWorkflowJsonSchema());
+      const service = createLanguageService(result.current.jsonSchema);
+      const document = TextDocument.create(
+        'file:///removed-alias.yaml',
+        'yaml',
+        ++documentVersion,
+        `${yaml}      inheritRunAs: true\n`
+      );
+      const diagnostics = await service.doValidation(document, false);
+      expect(diagnostics.some(({ message }) => message.includes('inheritRunAs'))).toBe(true);
+    });
+
+    it.each([false, true])('never suggests nested identity fields (SA=%s)', async (enabled) => {
+      services.security.serviceAccounts.isEnabled.mockReturnValue(enabled);
+      const { result } = renderHook(() => useWorkflowJsonSchema());
+      const nestedYaml = yaml
+        .replace(
+          'steps:\n',
+          'steps:\n  - name: loop\n    type: foreach\n    foreach: "{{ inputs.items }}"\n    steps:\n'
+        )
+        .replace(
+          /^(  - name: child|    type: workflow\.execute.*|    with:|      workflow-id:.*)$/gm,
+          '    $1'
+        );
+      const completions = await complete(result.current.jsonSchema, `${nestedYaml}          `);
+      const labels = completions?.items.map(({ label }) => label);
+      expect(labels).toContain('inputs');
+      expect(labels).not.toContain('run-as-mode');
+      expect(labels).not.toContain('inheritRunAs');
+    });
+
+    it('preserves validation of saved identity fields when suggestions are hidden', async () => {
+      services.security.serviceAccounts.isEnabled.mockReturnValue(false);
+      const { result } = renderHook(() => useWorkflowJsonSchema());
+      const service = createLanguageService(result.current.jsonSchema);
+      const document = TextDocument.create(
+        'file:///existing.yaml',
+        'yaml',
+        1,
+        `${yaml}      run-as-mode: inherit\n`
+      );
+      expect(await service.doValidation(document, false)).toEqual([]);
+    });
+  }
+);

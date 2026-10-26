@@ -1,0 +1,230 @@
+version: '1'
+name: Nightshift Slack Thread Investigation
+description: >
+  Keeps one Nightshift investigation per Slack thread. Every human reply in a thread that already
+  has an investigation re-runs it in the same conversation. The thread has one status
+  message: the first run posts it, and every run edits it with the findings or the failure. A
+  later run leaves it showing the previous findings until its own are ready.
+enabled: true
+settings:
+  # Longer than the investigation's own timeout, since this run waits for it.
+  timeout: '65m'
+  # One run per thread at a time, in arrival order, so replies build on each other and a
+  # redelivered event is recognised against the events the thread recorded. The investigation
+  # workflow also runs one execution per investigation at a time, so a run started some other way
+  # waits its turn there.
+  concurrency:
+    key: 'nightshift-slack-thread-{{ event.connectorId }}-{{ event.channel }}-{{ event.threadId | default: event.messageId }}'
+    strategy: queue
+    max: 1
+tags:
+  - observability
+  - investigation
+  - nightshift
+
+triggers:
+  # Only human replies with text in a thread. The Relay drops the app's own posts and edits, but a
+  # connector that receives events straight from Slack does not: its posts carry botId, and its
+  # edits carry a message_changed subtype that may lack botId. A reply also sent to the channel
+  # carries the thread_broadcast subtype, and a reply with attached files the file_share subtype;
+  # only its text is investigated. The thread is looked up by workspace, so an event without one
+  # is ignored.
+  - type: slack2.message
+    connector-id: elastic-apps-slack
+    on:
+      condition: 'event.threadId:* and event.workspace:* and event.text:* and not event.botId:* and (not event.subtype:* or event.subtype:thread_broadcast or event.subtype:file_share)'
+
+steps:
+  # A reply only continues an existing investigation; this workflow never creates one. Delivery
+  # is at least once, so the thread records each event with the execution handling it, and skips
+  # an event another execution already handled. A retry within this execution is not a duplicate.
+  - name: find_investigation
+    type: kibana.request
+    with:
+      method: POST
+      path: '/s/{{ workflow.spaceId }}/internal/nightshift/investigations/_slack_thread'
+      headers:
+        x-elastic-internal-origin: 'kibana'
+      body:
+        workspace: '${{ event.workspace }}'
+        channel: '{{ event.channel }}'
+        thread_ts: '{{ event.threadId | default: event.messageId }}'
+        text: '${{ event.text }}'
+        create: false
+        event_id: '${{ event.correlationKey }}'
+        execution_id: '{{ execution.id }}'
+
+  - name: in_investigation_thread
+    type: if
+    condition: '${{ steps.find_investigation.output.investigation_id != null and steps.find_investigation.output.duplicate != true }}'
+    steps:
+      - name: set_investigation_url
+        type: data.set
+        with:
+          investigation_url: "{{ kibanaUrl }}{% if workflow.spaceId != 'default' %}/s/{{ workflow.spaceId }}{% endif %}/app/nightshift?investigationId={{ steps.find_investigation.output.investigation_id }}"
+
+      # Only the first run announces itself, so a later run leaves the thread's status message
+      # showing the previous findings rather than blanking it for as long as the run takes.
+      - name: render_started
+        type: nightshift.renderSlackMessage
+        if: '${{ steps.find_investigation.output.status_message_ts == null }}'
+        with:
+          investigation_id: '{{ steps.find_investigation.output.investigation_id }}'
+          phase: started
+        on-failure:
+          continue: true
+
+      - name: post_started
+        type: slack2.sendMessage
+        if: '${{ steps.find_investigation.output.status_message_ts == null }}'
+        connector-id: '{{ event.connectorId }}'
+        with:
+          channel: '{{ event.channel }}'
+          threadTs: '{{ event.threadId | default: event.messageId }}'
+          text: '{% if steps.render_started.output.text %}{{ steps.render_started.output.text }}{% else %}Investigation started. <{{ variables.investigation_url }}|View the investigation>{% endif %}'
+          blocks: '${{ steps.render_started.output.blocks | default: [] }}'
+        on-failure:
+          continue: true
+
+      # Recorded before the investigation runs so a failed first run still leaves later runs a
+      # message to edit.
+      - name: record_status_message
+        type: kibana.request
+        if: '${{ steps.post_started.output.ts != null }}'
+        with:
+          method: POST
+          path: '/s/{{ workflow.spaceId }}/internal/nightshift/investigations/_slack_thread'
+          headers:
+            x-elastic-internal-origin: 'kibana'
+          body:
+            workspace: '${{ event.workspace }}'
+            channel: '{{ event.channel }}'
+            thread_ts: '{{ event.threadId | default: event.messageId }}'
+            create: false
+            status_message_ts: '{{ steps.post_started.output.ts }}'
+        on-failure:
+          retry:
+            max-attempts: 3
+            delay: 5s
+            strategy: exponential
+          continue: true
+
+      # A failed investigation is reported in the thread below rather than failing this run.
+      - name: investigate
+        type: workflow.execute
+        with:
+          workflow-id: system-nightshift-investigation
+          inputs:
+            # ai.agent has no input for the round's author, so the Slack author goes in the text.
+            message: |
+              Slack user <@{{ event.sender }}> wrote in the investigation's thread:
+
+              {{ event.text }}
+            investigation_id: '{{ steps.find_investigation.output.investigation_id }}'
+        on-failure:
+          continue: true
+
+      # The investigation keeps no run status, so this run's own investigate step decides whether
+      # the thread gets the findings or the failure. Rendered the same way as an automation's
+      # notifications.
+      - name: render_result
+        type: nightshift.renderSlackMessage
+        with:
+          investigation_id: '{{ steps.find_investigation.output.investigation_id }}'
+          phase: "{% if steps.investigate.error == null %}completed{% else %}failed{% endif %}"
+        on-failure:
+          continue: true
+
+      # A run whose investigation failed did not act on the event, so it gives the event back and a
+      # redelivery is handled.
+      - name: release_event
+        type: kibana.request
+        if: '${{ steps.investigate.error != null }}'
+        with:
+          method: POST
+          path: '/s/{{ workflow.spaceId }}/internal/nightshift/investigations/_slack_thread'
+          headers:
+            x-elastic-internal-origin: 'kibana'
+          body:
+            workspace: '${{ event.workspace }}'
+            channel: '{{ event.channel }}'
+            thread_ts: '{{ event.threadId | default: event.messageId }}'
+            create: false
+            event_id: '${{ event.correlationKey }}'
+            execution_id: '{{ execution.id }}'
+            release_event: true
+        on-failure:
+          retry:
+            max-attempts: 3
+            delay: 5s
+            strategy: exponential
+          continue: true
+
+      - name: set_result
+        type: data.set
+        with:
+          # This run's own message on the first run, the recorded one on every later run.
+          status_message_ts: '${{ steps.post_started.output.ts | default: steps.find_investigation.output.status_message_ts }}'
+          # The renderer keeps the text within the 4,000 characters Slack edits take.
+          result_text: |-
+            {% if steps.render_result.output.text %}{{ steps.render_result.output.text }}{% else %}{% if steps.investigate.error == null %}The investigation finished.{% else %}Investigation failed.{% endif %} <{{ variables.investigation_url }}|View the investigation>{% endif %}
+          result_blocks: '${{ steps.render_result.output.blocks | default: [] }}'
+
+      - name: update_result
+        type: slack2.updateMessage
+        if: '${{ variables.status_message_ts != null }}'
+        connector-id: '{{ event.connectorId }}'
+        with:
+          channel: '{{ event.channel }}'
+          messageTs: '{{ variables.status_message_ts }}'
+          text: '{{ variables.result_text }}'
+          blocks: '${{ variables.result_blocks }}'
+        # Retried so that a transient failure does not leave the thread a second status message.
+        on-failure:
+          retry:
+            max-attempts: 3
+            delay: 5s
+            strategy: exponential
+          continue: true
+
+      # The thread has no status message, or it could not be edited, for example because someone
+      # deleted it, so the result goes in a new message that later runs edit instead.
+      - name: post_result
+        type: slack2.sendMessage
+        if: '${{ steps.update_result.output.ts == null }}'
+        connector-id: '{{ event.connectorId }}'
+        with:
+          channel: '{{ event.channel }}'
+          threadTs: '{{ event.threadId | default: event.messageId }}'
+          text: '{{ variables.result_text }}'
+          blocks: '${{ variables.result_blocks }}'
+        on-failure:
+          continue: true
+
+      - name: set_result_message
+        type: data.set
+        with:
+          result_message_ts: '${{ steps.post_result.output.ts | default: steps.update_result.output.ts }}'
+
+      # Records the message now holding the result when it is a new one or when recording the first
+      # run's message failed, so the thread keeps a single status message for later runs to edit.
+      - name: record_result_message
+        type: kibana.request
+        if: '${{ variables.result_message_ts != null and (variables.result_message_ts != variables.status_message_ts or steps.record_status_message.error != null) }}'
+        with:
+          method: POST
+          path: '/s/{{ workflow.spaceId }}/internal/nightshift/investigations/_slack_thread'
+          headers:
+            x-elastic-internal-origin: 'kibana'
+          body:
+            workspace: '${{ event.workspace }}'
+            channel: '{{ event.channel }}'
+            thread_ts: '{{ event.threadId | default: event.messageId }}'
+            create: false
+            status_message_ts: '{{ variables.result_message_ts }}'
+        on-failure:
+          retry:
+            max-attempts: 3
+            delay: 5s
+            strategy: exponential
+          continue: true

@@ -321,7 +321,7 @@ describe('getRuleEventsTool', () => {
         results: [
           {
             type: ToolResultType.error,
-            data: { message: 'Episode "ep-1" not found' },
+            data: { message: 'Alert "ep-1" not found' },
           },
         ],
       });
@@ -340,7 +340,7 @@ describe('getRuleEventsTool', () => {
           {
             type: ToolResultType.error,
             data: {
-              message: 'Failed to fetch rule events for episode "ep-1": boom',
+              message: 'Failed to fetch rule events for alert "ep-1": boom',
             },
           },
         ],
@@ -349,7 +349,7 @@ describe('getRuleEventsTool', () => {
         'Failed to fetch rule events for episode',
         expect.objectContaining({
           labels: {
-            episode_id: 'ep-1',
+            alert_id: 'ep-1',
             space_id: 'default',
             code: ALERTING_LOG_CODES.AGENT_BUILDER_EPISODE_GET_RULE_EVENTS_FAILED,
           },
@@ -375,7 +375,7 @@ describe('getRuleEventsTool', () => {
           {
             type: ToolResultType.error,
             data: {
-              message: 'Failed to look up episode "ep-1": timeout',
+              message: 'Failed to look up alert "ep-1": timeout',
             },
           },
         ],
@@ -384,7 +384,7 @@ describe('getRuleEventsTool', () => {
         'Failed to look up episode while fetching rule events',
         expect.objectContaining({
           labels: {
-            episode_id: 'ep-1',
+            alert_id: 'ep-1',
             space_id: 'default',
             code: ALERTING_LOG_CODES.AGENT_BUILDER_EPISODE_LOOKUP_FAILED,
           },

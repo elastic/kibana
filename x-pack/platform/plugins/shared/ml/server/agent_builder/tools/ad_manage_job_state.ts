@@ -220,12 +220,22 @@ export const createAdManageJobStateTool = (
         }
 
         case 'delete_job': {
-          // "Scratch" jobs are temporary batch jobs created for the user to initially preview/confirm configurations with historical data
-          // before creating a permanent job, real time job
-          // So in specific operations, we only want agent to only be able to delete these temporary "scratch" jobs
-          const jobApi = mlClient ?? ml;
+          await hasMlCapabilities(['canDeleteJob']);
+
+          // Scratch jobs are temporary batch jobs used to preview a configuration
+          // against historical data before creating a permanent job. Only those
+          // jobs may be deleted unless allow_non_scratch is set.
+          // Spaces and saved objects are the isolation boundary. Elasticsearch ML
+          // privileges are not space-scoped, so this path must not fall back to
+          // the raw ML client when the space-scoped client cannot be built.
+          if (!mlClient) {
+            return {
+              results: [createErrorResult('ML client is unavailable — service not yet started')],
+            };
+          }
+
           if (!allowNonScratch) {
-            const jobInfo = await jobApi.getJobs({ job_id: jobId });
+            const jobInfo = await mlClient.getJobs({ job_id: jobId });
             const job = jobInfo.jobs?.[0];
             const groups: string[] = Array.isArray(job?.groups) ? job.groups : [];
             if (!groups.includes(SCRATCH_GROUP)) {
@@ -241,20 +251,20 @@ export const createAdManageJobStateTool = (
 
           // Stop datafeed (ignore 404 — may already be stopped or never created)
           try {
-            await jobApi.stopDatafeed({ datafeed_id: datafeedId, body: { force: true } as any });
+            await mlClient.stopDatafeed({ datafeed_id: datafeedId, force: true });
           } catch {
             // datafeed not running or does not exist — proceed
           }
 
           // Delete datafeed (ignore 404)
           try {
-            await jobApi.deleteDatafeed({ datafeed_id: datafeedId });
+            await mlClient.deleteDatafeed({ datafeed_id: datafeedId });
           } catch {
             // datafeed does not exist — proceed
           }
 
-          // Delete the job; mlClient enforces space-scoping and audit logging
-          const response = await jobApi.deleteJob({
+          // mlClient enforces space-scoping and audit logging
+          const response = await mlClient.deleteJob({
             job_id: jobId,
             delete_user_annotations: deleteUserAnnotations,
           });
@@ -263,14 +273,20 @@ export const createAdManageJobStateTool = (
 
         case 'await_batch_completion': {
           await hasMlCapabilities(['canGetJobs']);
+          // Require the space-scoped client so datafeed/job stat reads are restricted
+          // to the current Space. The raw current-user client lacks filterJobsForSpace.
+          if (!mlClient) {
+            return {
+              results: [createErrorResult('ML client is unavailable — service not yet started')],
+            };
+          }
           const waitSeconds = clampWaitSeconds(maxWaitSeconds);
           const deadlineMs = Date.now() + waitSeconds * 1000;
-          const statsApi = mlClient ?? ml;
 
           while (true) {
             const [datafeedStats, jobStats] = await Promise.all([
-              statsApi.getDatafeedStats({ datafeed_id: datafeedId }),
-              statsApi.getJobStats({ job_id: jobId }),
+              mlClient.getDatafeedStats({ datafeed_id: datafeedId }),
+              mlClient.getJobStats({ job_id: jobId }),
             ]);
 
             const datafeedState: string | undefined = datafeedStats.datafeeds?.[0]?.state;

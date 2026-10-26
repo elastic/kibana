@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { of } from 'rxjs';
 import type { KibanaRequest } from '@kbn/core/server';
 import {
   markExternalUiamCredential,
@@ -38,7 +39,7 @@ describe('KibanaActionStepImpl', () => {
   let runtime: StepExecutionRuntime;
   let step: KibanaActionStepImpl;
   let workflowLogger: { logInfo: jest.Mock; logError: jest.Mock; logWarn: jest.Mock };
-  const mockGetBooleanValue = jest.fn().mockResolvedValue(true);
+  const mockGetBooleanValue$ = jest.fn().mockReturnValue(of(true));
 
   const createStep = (withValue: any, stepType = 'kibana.request', maxStepSize = 1000) => {
     const node = {
@@ -95,7 +96,7 @@ describe('KibanaActionStepImpl', () => {
     global.fetch = jest
       .fn()
       .mockImplementation(() => Promise.resolve(jsonResponse({ ok: true, success: true })));
-    mockGetBooleanValue.mockResolvedValue(true);
+    mockGetBooleanValue$.mockReturnValue(of(true));
     workflowLogger = {
       logInfo: jest.fn(),
       logError: jest.fn(),
@@ -111,7 +112,7 @@ describe('KibanaActionStepImpl', () => {
         url: 'http://localhost:5601/api/test',
       }),
       getCoreStart: jest.fn().mockReturnValue({
-        featureFlags: { getBooleanValue: mockGetBooleanValue },
+        featureFlags: { getBooleanValue$: mockGetBooleanValue$ },
         security: { authc: { apiKeys: {} } },
         http: {
           basePath: {
@@ -133,6 +134,7 @@ describe('KibanaActionStepImpl', () => {
     runtime = {
       contextManager,
       abortController: new AbortController(),
+      getStepTimeoutMs: jest.fn(),
     } as unknown as StepExecutionRuntime;
   });
 
@@ -143,7 +145,7 @@ describe('KibanaActionStepImpl', () => {
 
   describe('Core self-client (kibana.request flag on)', () => {
     beforeEach(() => {
-      mockGetBooleanValue.mockResolvedValue(true);
+      mockGetBooleanValue$.mockReturnValue(of(true));
     });
 
     it('calls the context manager adapter and never global fetch', async () => {
@@ -189,6 +191,15 @@ describe('KibanaActionStepImpl', () => {
           signal: runtime.abortController.signal,
           timeout: 300_000,
         })
+      );
+    });
+
+    it('uses the step timeout as the headers timeout when set', async () => {
+      jest.mocked(runtime.getStepTimeoutMs).mockReturnValue(600_000);
+      step = createStep({ request: { method: 'GET', path: '/api/test' } });
+      await (step as any)._run();
+      expect(contextManager.callKibanaApi).toHaveBeenCalledWith(
+        expect.objectContaining({ timeout: 600_000 })
       );
     });
 
@@ -345,14 +356,14 @@ describe('KibanaActionStepImpl', () => {
         '/s/custom/api/cases',
       ],
     ])('sends %s to the same route as legacy fetch', async (_, withValue, stepType, routePath) => {
-      mockGetBooleanValue.mockResolvedValue(false);
+      mockGetBooleanValue$.mockReturnValue(of(false));
       await (createStep(withValue, stepType) as any)._run();
       expect(global.fetch).toHaveBeenCalledWith(
         `https://localhost:5601${routePath}`,
         expect.any(Object)
       );
 
-      mockGetBooleanValue.mockResolvedValue(true);
+      mockGetBooleanValue$.mockReturnValue(of(true));
       const result = await (createStep(withValue, stepType) as any)._run();
       expect(result.error).toBeUndefined();
       expect(selfFetch).toHaveBeenCalledTimes(1);
@@ -417,7 +428,7 @@ describe('KibanaActionStepImpl', () => {
 
   describe('legacy fetch (kibana.request flag off)', () => {
     beforeEach(() => {
-      mockGetBooleanValue.mockResolvedValue(false);
+      mockGetBooleanValue$.mockReturnValue(of(false));
     });
 
     it('forwards only Core-generated UIAM attestation headers', async () => {
@@ -524,6 +535,59 @@ describe('KibanaActionStepImpl', () => {
       expect(requestBody.title).toBe('Test');
       expect(requestBody.description).toBe('Test Description');
       expect(requestBody.owner).toBe('securitySolution');
+    });
+
+    it('bounds the fetch by the step abort signal', async () => {
+      step = createStep({ request: { method: 'GET', path: '/api/test' } });
+      await (step as any)._run();
+      const fetchOptions = (global.fetch as jest.Mock).mock.calls[0][1] as RequestInit;
+      expect(fetchOptions.signal).toBe(runtime.abortController.signal);
+    });
+
+    it('uses a step timeout above 300s as the Agent headers timeout', async () => {
+      const { Agent } = await import('undici');
+      const MockedAgent = Agent as jest.MockedClass<typeof Agent>;
+      MockedAgent.mockClear();
+
+      jest.mocked(runtime.getStepTimeoutMs).mockReturnValue(600_000);
+      step = createStep({ request: { method: 'GET', path: '/api/test' } });
+      await (step as any)._run();
+
+      expect(MockedAgent).toHaveBeenCalledWith({ headersTimeout: 600_000 });
+      const fetchOptions = (global.fetch as jest.Mock).mock.calls[0][1] as RequestInit;
+      expect((fetchOptions as any).dispatcher).toBeDefined();
+    });
+
+    it('does not create an Agent for a step timeout of 300s or less', async () => {
+      const { Agent } = await import('undici');
+      const MockedAgent = Agent as jest.MockedClass<typeof Agent>;
+      MockedAgent.mockClear();
+
+      jest.mocked(runtime.getStepTimeoutMs).mockReturnValue(60_000);
+      step = createStep({ request: { method: 'GET', path: '/api/test' } });
+      await (step as any)._run();
+
+      expect(MockedAgent).not.toHaveBeenCalled();
+    });
+
+    it('lets fetcher options override the step headers timeout', async () => {
+      const { Agent } = await import('undici');
+      const MockedAgent = Agent as jest.MockedClass<typeof Agent>;
+      MockedAgent.mockClear();
+
+      jest.mocked(runtime.getStepTimeoutMs).mockReturnValue(600_000);
+      step = createStep({
+        request: { method: 'GET', path: '/api/test' },
+        fetcher: { headersTimeout: 1000, skip_ssl_verification: true },
+      });
+      await (step as any)._run();
+
+      expect(MockedAgent).toHaveBeenCalledWith(
+        expect.objectContaining({
+          headersTimeout: 1000,
+          connect: expect.objectContaining({ rejectUnauthorized: false }),
+        })
+      );
     });
 
     it('works without fetcher options and does not attach a dispatcher', async () => {
@@ -930,7 +994,7 @@ describe('KibanaActionStepImpl', () => {
 
   describe('other kibana.* step types', () => {
     it('uses legacy fetch and applies YAML fetcher when the flag is off', async () => {
-      mockGetBooleanValue.mockResolvedValue(false);
+      mockGetBooleanValue$.mockReturnValue(of(false));
       step = createStep(
         {
           title: 'Test Case',
@@ -947,20 +1011,20 @@ describe('KibanaActionStepImpl', () => {
         'https://localhost:5601/api/cases',
         expect.objectContaining({ method: 'POST', redirect: 'manual' })
       );
-      expect(mockGetBooleanValue).toHaveBeenCalled();
+      expect(mockGetBooleanValue$).toHaveBeenCalled();
     });
 
     it('uses Core self-client when the flag is on', async () => {
-      mockGetBooleanValue.mockResolvedValue(true);
+      mockGetBooleanValue$.mockReturnValue(of(true));
       step = createStep({ request: { method: 'GET', path: '/api/status' } }, 'kibana.getCase');
       await (step as any)._run();
       expect(contextManager.callKibanaApi).toHaveBeenCalled();
       expect(global.fetch).not.toHaveBeenCalled();
-      expect(mockGetBooleanValue).toHaveBeenCalled();
+      expect(mockGetBooleanValue$).toHaveBeenCalled();
     });
 
     it('builds generated connector requests through the self-client adapter', async () => {
-      mockGetBooleanValue.mockResolvedValue(true);
+      mockGetBooleanValue$.mockReturnValue(of(true));
       step = createStep(
         { title: 'Test Case', description: 'Test Description', owner: 'securitySolution' },
         'kibana.createCase'
@@ -981,7 +1045,7 @@ describe('KibanaActionStepImpl', () => {
     });
 
     it('does not forward use_server_info, use_localhost, or debug on generated connectors', async () => {
-      mockGetBooleanValue.mockResolvedValue(true);
+      mockGetBooleanValue$.mockReturnValue(of(true));
       step = createStep(
         {
           title: 'Test Case',
@@ -1002,7 +1066,7 @@ describe('KibanaActionStepImpl', () => {
     });
 
     it('warns and ignores YAML fetcher when the flag is on', async () => {
-      mockGetBooleanValue.mockResolvedValue(true);
+      mockGetBooleanValue$.mockReturnValue(of(true));
       step = createStep(
         {
           request: { method: 'GET', path: '/api/status' },

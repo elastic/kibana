@@ -15,6 +15,7 @@ import type {
 import type { ProfilingConfig } from '.';
 import { registerServices } from './services/register_services';
 import { createProfilingEsClient } from './utils/create_profiling_es_client';
+import type { CreateProfilingEsClient } from './utils/profiling_es_client';
 import type { ProfilingPluginStartDeps } from './types';
 
 export type ProfilingDataAccessPluginSetup = ReturnType<ProfilingDataAccessPlugin['setup']>;
@@ -39,15 +40,19 @@ export class ProfilingDataAccessPlugin implements Plugin {
         })
       : undefined;
 
-    const services = registerServices({
-      createProfilingEsClient: ({ esClient: defaultEsClient }) => {
-        const esClient = profilingSpecificEsClient
-          ? profilingSpecificEsClient.asInternalUser
-          : defaultEsClient;
+    const createProfilingEsClientWithRedirect: CreateProfilingEsClient = ({
+      esClient: defaultEsClient,
+      abortSignal,
+    }) =>
+      createProfilingEsClient({
+        esClient: profilingSpecificEsClient?.asInternalUser ?? defaultEsClient,
+        abortSignal,
+      });
 
-        return createProfilingEsClient({ esClient });
-      },
+    const services = registerServices({
+      createProfilingEsClient: createProfilingEsClientWithRedirect,
       logger: this.logger,
+      buildFlavor: this.initializerContext.env.packageInfo.buildFlavor,
       deps: {
         fleet: plugins.fleet,
         cloud: plugins.cloud,
@@ -57,6 +62,7 @@ export class ProfilingDataAccessPlugin implements Plugin {
     // called after all plugins are set up
     return {
       services,
+      createProfilingEsClient: createProfilingEsClientWithRedirect,
     };
   }
 }

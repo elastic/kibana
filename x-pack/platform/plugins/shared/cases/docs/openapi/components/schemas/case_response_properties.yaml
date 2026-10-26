@@ -81,11 +81,14 @@ properties:
     $ref: 'case_response_created_by_properties.yaml'
   customFields:
     type: array
-    description: Custom field values for the case.
+    deprecated: true
+    description: Deprecated. Use `extended_fields` instead. Custom field values for the case.
     items:
       type: object
       properties:
         $ref: 'case_customfields.yaml'
+  extended_fields_labels:
+    $ref: 'case_extended_fields_labels.yaml'
   description:
     type: string
     example: A case description.

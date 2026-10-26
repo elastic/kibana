@@ -12,16 +12,10 @@
  * plugins, so this functional-tests package takes no runtime dependency on them. They
  * mirror:
  *   - the managed FP/TP analysis workflow id (@kbn/workflows/managed, #19282)
- *   - ALERTZERO_REASONING_INFERENCE_FEATURE_ID (@kbn/alertzero-common)
+ *   - ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID (@kbn/alertzero-common)
  *   - the workflows_management and agent_builder public API versions
  *   - APIRoutes.GET/PUT_INFERENCE_SETTINGS (search_inference_endpoints common)
  */
-
-/**
- * Which workflow the suite runs. `managed` runs the shipped analysis.
- * `sample` installs the YAML in `src/sample_workflow/` for the run.
- */
-export const FP_TP_WORKFLOW_SOURCE: 'sample' | 'managed' = 'managed';
 
 export const FP_TP_MANAGED_WORKFLOW_ID = 'system-security-attack-discovery-fp-tp-analysis';
 
@@ -33,7 +27,7 @@ export const INFERENCE_SETTINGS_ROUTE = '/internal/search_inference_endpoints/se
 export const INFERENCE_SETTINGS_API_VERSION = '1';
 
 /** Inference feature the analysis's `ai.agent` step resolves its connector from. */
-export const FP_TP_INFERENCE_FEATURE_ID = 'alertzero_reasoning';
+export const FP_TP_INFERENCE_FEATURE_ID = 'alertzero_frontier';
 
 export const FP_TP_VERDICTS = ['true_positive', 'false_positive', 'inconclusive'] as const;
 

@@ -10,27 +10,35 @@ import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { UpdateWorkerResponse } from '@kbn/alertzero-common';
 import {
   ListWorkersResponse,
+  isWorkerEnableBlocked,
   SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID,
+  SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID,
   touchesWorkerSettings,
   type UpdateWorkerRequestBody,
   type Worker,
+  type WorkerBlockingReason,
 } from '@kbn/alertzero-common';
 import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
 import type { WorkflowYaml } from '@kbn/workflows';
 import { WorkflowSchema } from '@kbn/workflows';
 import type { AgentTypeDefinition } from '@kbn/agent-builder-server/agents';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
-import type { ManagedWorkflowDefinition } from '@kbn/workflows/managed';
+import type {
+  ManagedWorkflowDefinition,
+  ManagedWorkflowTemplateValues,
+} from '@kbn/workflows/managed';
 import { getManagedWorkflowDefinition } from '@kbn/workflows/managed';
 import { parseWorkflowYamlToJSON } from '@kbn/workflows-yaml';
-import {
-  installRegisteredWorker,
-  workerRegistry,
-  type WorkerRegistration,
-} from '../../managed_workflows/worker_registry';
+import { workerRegistry, type WorkerRegistration } from '../../managed_workflows/worker_registry';
 import type { WatchWorkflowsManagementClient } from '../watches/watch_workflows_management_client';
 import type { AgentLookup } from '../utils';
 import { buildAgentLookup, projectSkillsFromDefinition } from '../utils';
+import {
+  ThreatIntelSupplyHardGateError,
+  ThreatIntelSupplyNotInstalledError,
+  type ThreatIntelSupplyService,
+} from '../threat_intel_supply';
+import type { GetWorkerBlockingReasons } from './worker_blocking_reasons';
 
 /**
  * Workers hidden until the named skill is registered. These skills may be
@@ -61,10 +69,41 @@ const templateValuesEqual = (
   left != null &&
   Object.keys(right).every((key) => Object.hasOwn(left, key) && isEqual(left[key], right[key]));
 
+/** Why enabling any Worker in the space was refused before anything was written. */
+export type SpaceEnableBlockedReason = 'noModel';
+
+/** Why Continuous Threat Hunt enable was refused before anything was written. */
+export type HuntSupplyEnableBlockedReason =
+  | 'huntSupplyPrerequisitesUnmet'
+  | 'huntSupplyReportsIndexUnmanaged'
+  | 'huntSupplyNotInstalled';
+
+/** Why a Worker enable was refused before anything was written. */
+export type WorkerEnableBlockedReason = SpaceEnableBlockedReason | HuntSupplyEnableBlockedReason;
+
+const readServiceAccountId = (
+  values: Record<string, unknown> | null | undefined
+): string | undefined => {
+  const id = values?.serviceAccountId;
+  return typeof id === 'string' && id.length > 0 ? id : undefined;
+};
+
+/** User saves install through the request-scoped workflows client so `run_as` can bind. */
+export type InstallWorkerForRequest = (
+  request: KibanaRequest,
+  registration: WorkerRegistration,
+  options: {
+    spaceId: string;
+    workflowIdSuffix?: string;
+    values?: ManagedWorkflowTemplateValues;
+  }
+) => Promise<void>;
+
 export type WorkerUpdateResult =
   | { outcome: 'updated'; response: UpdateWorkerResponse }
   | { outcome: 'not-found' }
   | { outcome: 'rejected'; what: string }
+  | { outcome: 'blocked'; reason: WorkerEnableBlockedReason }
   | { outcome: 'invalid'; message: string }
   | { outcome: 'conflict' }
   | { outcome: 'unavailable' }
@@ -85,7 +124,10 @@ export class WorkersService {
       agentBuilder?: AgentBuilderPluginStart;
       /** Code-registered agent types owned by this plugin, used for skill base resolution. */
       agentTypes?: readonly AgentTypeDefinition[];
-    } = {}
+    } = {},
+    private readonly installWorkerForRequest: InstallWorkerForRequest,
+    private readonly getBlockingReasons: GetWorkerBlockingReasons,
+    private readonly threatIntelSupply?: ThreatIntelSupplyService
   ) {
     this.agentTypeMap = new Map((agentOpts.agentTypes ?? []).map((t) => [t.id, t]));
   }
@@ -106,6 +148,18 @@ export class WorkersService {
       throw new Error('Managed Workflows API is not available');
     }
     return managedWorkflows;
+  }
+
+  private async persistWorker(
+    request: KibanaRequest,
+    registration: WorkerRegistration,
+    options: {
+      spaceId: string;
+      workflowIdSuffix: string;
+      values: ManagedWorkflowTemplateValues;
+    }
+  ): Promise<void> {
+    await this.installWorkerForRequest(request, registration, options);
   }
 
   private async ensureAgent(spaceId: string): Promise<void> {
@@ -149,13 +203,18 @@ export class WorkersService {
   async list(request: KibanaRequest, spaceId: string): Promise<ListWorkersResponse> {
     await this.ensureAgent(spaceId);
 
-    const agentLookup = await this.buildAgentLookup(request);
-    const hiddenWorkerIds = await this.hiddenWorkerIds(request);
+    const [agentLookup, hiddenWorkerIds, blockingReasons] = await Promise.all([
+      this.buildAgentLookup(request),
+      this.hiddenWorkerIds(request),
+      this.getBlockingReasons(request),
+    ]);
     const workers = await Promise.all(
       workerRegistry
         .list()
         .filter((registration) => !hiddenWorkerIds.has(registration.id))
-        .map((registration) => this.projectWorker(registration, spaceId, request, agentLookup))
+        .map((registration) =>
+          this.projectWorker(registration, spaceId, request, blockingReasons, agentLookup)
+        )
     );
     return ListWorkersResponse.parse({ workers });
   }
@@ -174,8 +233,11 @@ export class WorkersService {
       return undefined;
     }
 
-    const agentLookup = await this.buildAgentLookup(request);
-    return this.projectWorker(registration, spaceId, request, agentLookup);
+    const [agentLookup, blockingReasons] = await Promise.all([
+      this.buildAgentLookup(request),
+      this.getBlockingReasons(request),
+    ]);
+    return this.projectWorker(registration, spaceId, request, blockingReasons, agentLookup);
   }
 
   async update(
@@ -191,6 +253,10 @@ export class WorkersService {
     if ((await this.hiddenWorkerIds(request)).has(registration.id)) {
       return { outcome: 'not-found' };
     }
+    const blockingReasons = await this.getBlockingReasons(request);
+    if (patch.enabled === true && isWorkerEnableBlocked(blockingReasons)) {
+      return { outcome: 'blocked', reason: 'noModel' };
+    }
 
     const touchesSettings = touchesWorkerSettings(patch);
     const managedWorkflows = await this.requireManagedWorkflows();
@@ -200,6 +266,25 @@ export class WorkersService {
       workflowIdSuffix: spaceId,
     });
 
+    const isHuntWorker = workerId === SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID;
+
+    const currentState = status.installed
+      ? await managedWorkflows.getInstalledWorkflowState(status.workflowId, spaceId)
+      : null;
+    if (status.installed && !currentState) return { outcome: 'unavailable' };
+    const requestedAccount = patch.settings?.serviceAccountId;
+    const nextAccount =
+      requestedAccount === undefined
+        ? readServiceAccountId(currentState?.templateValues)
+        : requestedAccount ?? undefined;
+    const nextEnabled = patch.enabled ?? Boolean(status.enabled);
+    if (nextEnabled && !nextAccount) {
+      return { outcome: 'rejected', what: 'a worker that is enabled without a service account' };
+    }
+
+    // Validate settings (revision + patch) before Hunt supply ensure so a rejected
+    // account/settings update cannot leave ingest/enrich/attribute already on.
+    let pendingSettingsValues: ManagedWorkflowTemplateValues | null = null;
     if (touchesSettings) {
       if (patch.settingsRevision === undefined) {
         return { outcome: 'rejected', what: 'a settings update without its revision' };
@@ -217,64 +302,156 @@ export class WorkersService {
       if ('invalid' in applied) {
         return { outcome: 'invalid', message: applied.invalid };
       }
-
-      await installRegisteredWorker(managedWorkflows, registration, {
-        spaceId,
-        workflowIdSuffix: spaceId,
-        values: applied.values,
-      });
-      status = await managedWorkflows.getWorkflowStatus(registration.id, {
-        spaceId,
-        workflowIdSuffix: spaceId,
-      });
-      if (!status.installed) return { outcome: 'unavailable' };
-      const persisted = await managedWorkflows.getInstalledWorkflowState(
-        status.workflowId,
-        spaceId
-      );
-      if (!persisted || !templateValuesEqual(persisted.templateValues, applied.values)) {
-        this.logger.error(
-          `Worker "${registration.id}" settings write could not be confirmed after save`
-        );
-        return { outcome: 'failed' };
-      }
-
-      await management.updateWorkflow(
-        status.workflowId,
-        { enabled: Boolean(status.enabled) },
-        spaceId,
-        request
-      );
-      status = await managedWorkflows.getWorkflowStatus(registration.id, {
-        spaceId,
-        workflowIdSuffix: spaceId,
-      });
+      pendingSettingsValues = applied.values;
     }
 
-    if (patch.enabled != null) {
-      if (!status.installed) {
-        await installRegisteredWorker(managedWorkflows, registration, {
+    // Hunt supply: hard-gate + ensure TI after request validation and before enabling
+    // CTH so a failed ensure never leaves Hunt on without reports. If Hunt never ends up
+    // enabled after this ensure, roll supply back (Restore only shows when Hunt is on).
+    let huntSupplyEnsured = false;
+    const rollbackHuntSupplyIfNeeded = async (): Promise<void> => {
+      if (!huntSupplyEnsured || !this.threatIntelSupply) {
+        return;
+      }
+      huntSupplyEnsured = false;
+      try {
+        await this.threatIntelSupply.teardownSupplyForSpace(spaceId, request);
+      } catch (err) {
+        this.logger.error(
+          `Hunt Watch: threat intel supply rollback failed: ${
+            err instanceof Error ? err.message : String(err)
+          }`
+        );
+      }
+    };
+
+    if (isHuntWorker && patch.enabled === true && this.threatIntelSupply) {
+      try {
+        await this.threatIntelSupply.assertHardGate(request);
+        await this.threatIntelSupply.ensureSupplyForSpace(spaceId, request);
+        huntSupplyEnsured = true;
+      } catch (err) {
+        if (err instanceof ThreatIntelSupplyHardGateError) {
+          return {
+            outcome: 'blocked',
+            reason: err.reasonCodes.includes('reports_index_unmanaged')
+              ? 'huntSupplyReportsIndexUnmanaged'
+              : 'huntSupplyPrerequisitesUnmet',
+          };
+        }
+        if (err instanceof ThreatIntelSupplyNotInstalledError) {
+          return { outcome: 'blocked', reason: 'huntSupplyNotInstalled' };
+        }
+        throw err;
+      }
+    }
+
+    try {
+      if (pendingSettingsValues) {
+        await this.persistWorker(request, registration, {
           spaceId,
           workflowIdSuffix: spaceId,
-          values: registration.settings.createDefaultValues(),
+          values: pendingSettingsValues,
         });
         status = await managedWorkflows.getWorkflowStatus(registration.id, {
           spaceId,
           workflowIdSuffix: spaceId,
         });
-        if (!status.installed) return { outcome: 'unavailable' };
+        if (!status.installed) {
+          await rollbackHuntSupplyIfNeeded();
+          return { outcome: 'unavailable' };
+        }
+        const persisted = await managedWorkflows.getInstalledWorkflowState(
+          status.workflowId,
+          spaceId
+        );
+        if (!persisted || !templateValuesEqual(persisted.templateValues, pendingSettingsValues)) {
+          this.logger.error(
+            `Worker "${registration.id}" settings write could not be confirmed after save`
+          );
+          await rollbackHuntSupplyIfNeeded();
+          return { outcome: 'failed' };
+        }
+
+        await management.updateWorkflow(
+          status.workflowId,
+          { enabled: Boolean(status.enabled) },
+          spaceId,
+          request
+        );
+        status = await managedWorkflows.getWorkflowStatus(registration.id, {
+          spaceId,
+          workflowIdSuffix: spaceId,
+        });
       }
 
-      await management.updateWorkflow(
-        status.workflowId,
-        { enabled: patch.enabled },
-        spaceId,
-        request
-      );
+      if (patch.enabled != null) {
+        if (!status.installed) {
+          await this.persistWorker(request, registration, {
+            spaceId,
+            workflowIdSuffix: spaceId,
+            values: registration.settings.createDefaultValues(),
+          });
+          status = await managedWorkflows.getWorkflowStatus(registration.id, {
+            spaceId,
+            workflowIdSuffix: spaceId,
+          });
+          if (!status.installed) {
+            await rollbackHuntSupplyIfNeeded();
+            return { outcome: 'unavailable' };
+          }
+        }
+
+        await management.updateWorkflow(
+          status.workflowId,
+          { enabled: patch.enabled },
+          spaceId,
+          request
+        );
+
+        if (isHuntWorker && patch.enabled === true && this.threatIntelSupply) {
+          // Hunt is on: do not roll supply back if later projection fails. Re-ensure so a
+          // concurrent teardown in another space cannot leave this space hunting without
+          // shared ingest/enrich (that other space ensured before its Hunt write finished).
+          huntSupplyEnsured = false;
+          try {
+            await this.threatIntelSupply.ensureSupplyForSpace(spaceId, request);
+          } catch (err) {
+            this.logger.error(
+              `Hunt Watch: threat intel supply re-ensure after enable failed: ${
+                err instanceof Error ? err.message : String(err)
+              }`
+            );
+          }
+        }
+
+        if (isHuntWorker && !patch.enabled && this.threatIntelSupply) {
+          try {
+            await this.threatIntelSupply.teardownSupplyForSpace(spaceId, request);
+          } catch (err) {
+            // Hunt is already off; log and continue so disable still succeeds when TI
+            // docs are missing or a global update races another space.
+            this.logger.error(
+              `Hunt Watch: threat intel supply teardown failed: ${
+                err instanceof Error ? err.message : String(err)
+              }`
+            );
+          }
+        }
+      }
+    } catch (err) {
+      await rollbackHuntSupplyIfNeeded();
+      throw err;
     }
 
     const agentLookup = await this.buildAgentLookup(request);
-    const worker = await this.projectWorker(registration, spaceId, request, agentLookup);
+    const worker = await this.projectWorker(
+      registration,
+      spaceId,
+      request,
+      blockingReasons,
+      agentLookup
+    );
     return { outcome: 'updated', response: { worker } };
   }
 
@@ -282,6 +459,7 @@ export class WorkersService {
     registration: WorkerRegistration,
     spaceId: string,
     request: KibanaRequest,
+    blockingReasons: WorkerBlockingReason[],
     agentLookupCallback?: AgentLookup
   ): Promise<Worker> {
     const managedWorkflows = await this.requireManagedWorkflows();
@@ -355,6 +533,7 @@ export class WorkersService {
       settingsRevision,
       // `installed` is any document at this id, including a user workflow that is not ours.
       workflowId: status.installed && status.status !== 'not_managed' ? status.workflowId : null,
+      blockingReasons,
       skills: projectSkillsFromDefinition(definition, agentLookupCallback),
     };
   }

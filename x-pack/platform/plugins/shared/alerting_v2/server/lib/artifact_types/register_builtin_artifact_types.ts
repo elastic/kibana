@@ -11,7 +11,7 @@ import {
   RUNBOOK_ARTIFACT_TYPE,
   RUNBOOK_CONTENT_LIMIT,
 } from '@kbn/alerting-v2-constants';
-import { z } from '@kbn/zod/v4';
+import { lazySchema, z } from '@kbn/zod/v4';
 import type { ArtifactTypeRegistry } from './artifact_type_registry';
 
 /**
@@ -32,7 +32,9 @@ const nonBlankString = (max: number) =>
  * Also reused by the agent-builder `set_dashboards` operation so tool-level
  * validation stays in sync with the registered dashboard schema.
  */
-export const dashboardIdSchema = nonBlankString(DEFAULT_ARTIFACT_DATA_FIELD_LIMIT);
+export const dashboardIdSchema = lazySchema(() =>
+  nonBlankString(DEFAULT_ARTIFACT_DATA_FIELD_LIMIT)
+);
 
 /**
  * Registers the RnA-owned built-in artifact types (runbook, dashboard).

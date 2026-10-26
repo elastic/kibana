@@ -31,12 +31,15 @@ interface Props {
   onClose: () => void;
   /** Managed-flyout session. Use `inherit` when this flyout opens on top of another. */
   session?: EuiFlyoutProps['session'];
+  /** Use a size distinct from the parent flyout's when `session` is `inherit`. */
+  size?: EuiFlyoutProps['size'];
 }
 
 export const ActionPolicyDetailsFlyoutContainer = ({
   policyId,
   onClose,
   session = 'start',
+  size = 'm',
 }: Props) => {
   const { actionPolicyLocators } = useAlertingLocators();
   const canWrite = useService(UserCapabilities).canWrite('actionPolicies');
@@ -67,22 +70,13 @@ export const ActionPolicyDetailsFlyoutContainer = ({
   };
 
   const clonePolicy = (source: ActionPolicyResponse) => {
-    const {
-      name,
-      description,
-      destinations,
-      matcher,
-      group_by: groupBy,
-      throttle,
-      grouping_mode: groupingMode,
-    } = source;
+    const { name, description, destinations, matcher, grouping, throttle } = source;
     const data: CreateActionPolicyData = {
       name: `${name} [clone]`,
       description,
       destinations,
-      grouping_mode: groupingMode ?? 'per_episode',
+      grouping: grouping ?? { mode: 'per_alert' },
       ...(matcher != null && { matcher }),
-      ...(groupBy != null && { group_by: groupBy }),
       ...(throttle != null && { throttle }),
     };
     createActionPolicy(data);
@@ -138,6 +132,7 @@ export const ActionPolicyDetailsFlyoutContainer = ({
           isSnoozeLoading={isSnoozing || isUnsnoozing}
           session={session}
           ownFocus={false}
+          size={size}
         />
       )}
       {policyToDelete && (

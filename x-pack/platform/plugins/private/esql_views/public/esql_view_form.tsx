@@ -6,7 +6,7 @@
  */
 
 import type { ComponentType, FormEvent, FunctionComponent, ReactNode } from 'react';
-import React, { Suspense, useId, useState } from 'react';
+import React, { Suspense, useId, useRef, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -22,6 +22,7 @@ import {
   EuiFormRow,
   EuiIconTip,
   EuiLoadingSpinner,
+  EuiScreenReaderLive,
   EuiSpacer,
   EuiText,
   EuiTextArea,
@@ -32,20 +33,23 @@ import type { EsqlView } from '@kbn/esql-types';
 import {
   ESQL_VIEW_ALREADY_EXISTS_ERROR_TYPE,
   EsqlViewsClientError,
-  type EsqlViewsClient,
-} from '@kbn/esql-utils';
-import {
-  getEsqlViewQuerySyntaxError,
   MAX_ESQL_VIEW_DESCRIPTION_LENGTH,
   MAX_ESQL_VIEW_QUERY_LENGTH,
-  validateEsqlViewName,
+  type EsqlViewsClient,
   type EsqlViewNameValidationError,
-} from './esql_view_validation';
+  validateEsqlViewName,
+} from '@kbn/esql-utils';
+import { EsqlViewPreviewResults } from './esql_view_preview_results';
+import { getEsqlViewQuerySyntaxError } from './esql_view_validation';
+import type { EsqlViewsTelemetryClient } from './telemetry';
 import { translations } from './translations';
+import { useEsqlViewPreview, type EsqlViewPreviewDependencies } from './use_esql_view_preview';
 
 interface EsqlViewFormProps {
   client: EsqlViewsClient;
   EsqlEditor: ComponentType<Omit<ESQLEditorProps, 'ref'>>;
+  previewDependencies: EsqlViewPreviewDependencies;
+  telemetryClient?: EsqlViewsTelemetryClient;
   view?: EsqlView;
   onClose: () => void;
   onSave: () => Promise<void>;
@@ -73,6 +77,8 @@ const getNameValidationMessage = (
 export const EsqlViewForm: FunctionComponent<EsqlViewFormProps> = ({
   client,
   EsqlEditor,
+  previewDependencies,
+  telemetryClient,
   view,
   onClose,
   onSave,
@@ -83,11 +89,14 @@ export const EsqlViewForm: FunctionComponent<EsqlViewFormProps> = ({
   const [name, setName] = useState(view?.name ?? '');
   const [description, setDescription] = useState(view?.description ?? '');
   const [query, setQuery] = useState(view?.query ?? DEFAULT_ESQL_VIEW_QUERY);
+  const queryRef = useRef(query);
   const [isNameTouched, setIsNameTouched] = useState(false);
   const [queryError, setQueryError] = useState<string>();
   const [nameConflict, setNameConflict] = useState<NameConflict>();
   const [saveError, setSaveError] = useState<string>();
   const [isSaving, setIsSaving] = useState(false);
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const preview = useEsqlViewPreview(previewDependencies);
 
   const handleClose = () => {
     if (!isSaving) {
@@ -101,6 +110,7 @@ export const EsqlViewForm: FunctionComponent<EsqlViewFormProps> = ({
     description.length > MAX_ESQL_VIEW_DESCRIPTION_LENGTH
       ? translations.descriptionTooLongErrorMessage
       : undefined;
+  const isQueryEmpty = query.trim().length === 0;
 
   const nameError: ReactNode =
     nameConflict?.type === 'existingView' ? (
@@ -159,8 +169,13 @@ export const EsqlViewForm: FunctionComponent<EsqlViewFormProps> = ({
       };
       if (isEditing) {
         await client.updateView(request);
+        telemetryClient?.trackViewEdited();
       } else {
         await client.createView(request);
+        telemetryClient?.trackViewCreated({
+          hasDescription: request.description !== undefined,
+          queryLength: query.length,
+        });
       }
 
       await onSave();
@@ -188,7 +203,7 @@ export const EsqlViewForm: FunctionComponent<EsqlViewFormProps> = ({
       data-test-subj="esqlViewFormFlyout"
       onClose={handleClose}
       ownFocus
-      size="l"
+      size="m"
     >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
@@ -204,19 +219,10 @@ export const EsqlViewForm: FunctionComponent<EsqlViewFormProps> = ({
 
       <EuiFlyoutBody>
         <EuiForm component="form" id={formId} onSubmit={handleSubmit}>
-          <EuiTitle size="s">
-            <h3>{translations.viewDetailsTitle}</h3>
-          </EuiTitle>
-          <EuiText color="subdued" size="s">
-            <p>{translations.viewDetailsDescription}</p>
-          </EuiText>
-
-          <EuiSpacer size="m" />
-
           <EuiFormRow
             error={nameError}
             fullWidth
-            helpText={translations.viewNameDescription}
+            helpText={isEditing ? undefined : translations.viewNameDescription}
             isInvalid={Boolean(nameError)}
             label={translations.viewNameLabel}
           >
@@ -260,76 +266,106 @@ export const EsqlViewForm: FunctionComponent<EsqlViewFormProps> = ({
               value={description}
             />
           </EuiFormRow>
-
-          <EuiSpacer size="l" />
-
-          <EuiTitle size="s">
-            <h3>{translations.viewQueryTitle}</h3>
-          </EuiTitle>
-          <EuiText color="subdued" size="s">
-            <p>{translations.viewQueryDescription}</p>
-          </EuiText>
-
-          <EuiSpacer size="m" />
-
-          <EuiFormRow error={queryError} fullWidth isInvalid={Boolean(queryError)}>
-            <Suspense
-              fallback={
-                <EuiFlexGroup
-                  alignItems="center"
-                  data-test-subj="esqlViewEditorLoading"
-                  gutterSize="s"
-                  justifyContent="center"
-                  responsive={false}
-                  css={{ minHeight: 180 }}
-                >
-                  <EuiFlexItem grow={false}>
-                    <EuiLoadingSpinner size="l" />
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiText color="subdued" size="s">
-                      {translations.loadingEditorTitle}
-                    </EuiText>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              }
-            >
-              <EsqlEditor
-                dataTestSubj="esqlViewQueryEditor"
-                disableAutoFocus
-                editorIsInline
-                errors={queryError ? [new Error(queryError)] : []}
-                hasOutline
-                hideQueryHistory
-                hideRunQueryButton
-                isDisabled={isSaving}
-                mergeExternalMessages
-                onTextLangQueryChange={(nextQuery) => {
-                  setQuery(nextQuery.esql);
-                  setQueryError(undefined);
-                  setSaveError(undefined);
-                }}
-                onTextLangQuerySubmit={async () => {}}
-                query={{ esql: query }}
-              />
-            </Suspense>
-          </EuiFormRow>
-
-          {saveError && (
-            <>
-              <EuiSpacer size="m" />
-              <EuiCallOut
-                announceOnMount
-                color="danger"
-                data-test-subj="esqlViewSaveError"
-                iconType="warning"
-                title={translations.saveErrorTitle}
-              >
-                <p>{saveError}</p>
-              </EuiCallOut>
-            </>
-          )}
         </EuiForm>
+
+        <EuiSpacer size="l" />
+
+        <EuiTitle size="s">
+          <h3>{translations.viewQueryTitle}</h3>
+        </EuiTitle>
+        <EuiText color="subdued" size="s">
+          <p>{translations.viewQueryDescription}</p>
+        </EuiText>
+
+        <EuiSpacer size="m" />
+
+        <EuiFormRow error={queryError} fullWidth isInvalid={Boolean(queryError)}>
+          <Suspense
+            fallback={
+              <EuiFlexGroup
+                alignItems="center"
+                data-test-subj="esqlViewEditorLoading"
+                gutterSize="s"
+                justifyContent="center"
+                responsive={false}
+                css={{ minHeight: 180 }}
+              >
+                <EuiFlexItem grow={false}>
+                  <EuiLoadingSpinner size="l" />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiText color="subdued" size="s">
+                    {translations.loadingEditorTitle}
+                  </EuiText>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            }
+          >
+            <EsqlEditor
+              allowQueryCancellation={!isQueryEmpty}
+              dataTestSubj="esqlViewQueryEditor"
+              disableAutoFocus
+              disableSubmitAction={isQueryEmpty}
+              editorIsInline
+              errors={[
+                ...(queryError ? [new Error(queryError)] : []),
+                ...(preview.error ? [preview.error] : []),
+              ]}
+              hasOutline
+              isDisabled={isSaving}
+              isLoading={preview.isLoading}
+              mergeExternalMessages
+              onTextLangQueryChange={(nextQuery) => {
+                queryRef.current = nextQuery.esql;
+                setQuery(nextQuery.esql);
+                setQueryError(undefined);
+                setSaveError(undefined);
+                preview.clearPreviewErrorIfQueryChanged(nextQuery.esql);
+              }}
+              onTextLangQuerySubmit={async (_submittedQuery, abortController) => {
+                const currentQuery = queryRef.current;
+                if (currentQuery.trim().length === 0) {
+                  return;
+                }
+
+                setIsPreviewOpen(true);
+                await preview.runPreview({ esql: currentQuery }, abortController);
+              }}
+              query={{ esql: query }}
+              queryStats={preview.result?.queryStats}
+            />
+          </Suspense>
+        </EuiFormRow>
+        {preview.error && (
+          <EuiScreenReaderLive aria-live="assertive" aria-atomic="true">
+            {preview.error.message}
+          </EuiScreenReaderLive>
+        )}
+
+        <EuiSpacer size="m" />
+
+        <EsqlViewPreviewResults
+          hasRun={preview.hasRun}
+          isLoading={preview.isLoading}
+          isOpen={isPreviewOpen}
+          onToggle={setIsPreviewOpen}
+          result={preview.result}
+        />
+
+        {saveError && (
+          <>
+            <EuiSpacer size="m" />
+            <EuiCallOut
+              announceOnMount
+              color="danger"
+              data-test-subj="esqlViewSaveError"
+              iconType="warning"
+              title={translations.saveErrorTitle}
+            >
+              <p>{saveError}</p>
+            </EuiCallOut>
+          </>
+        )}
       </EuiFlyoutBody>
 
       <EuiFlyoutFooter>

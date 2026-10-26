@@ -40,6 +40,9 @@ export interface FilterGroupProps {
   filters?: Filter[];
   timeRange?: TimeRange;
 
+  /**
+   * Current Kibana space. Scopes option aggregations to this space and namespaces stored control state.
+   */
   spaceId?: string;
   dataViewId: string | null;
   /**

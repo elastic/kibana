@@ -13,6 +13,13 @@
 export const MAX_ALERT_ID_LENGTH = 256;
 
 /**
+ * Maximum number of alert IDs a single step call may reference.
+ * Matches the 1000-alert ceiling the Attack Discovery Worker already works within, and
+ * prevents unbounded array input (DoS).
+ */
+export const MAX_ALERT_IDS = 1000;
+
+/**
  * Maximum length for workflow message strings.
  * Workflow messages are typically short text strings (~1000 characters).
  * We use 1000 here to safely accommodate them while preventing unbounded string input (DoS).

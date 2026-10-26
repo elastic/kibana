@@ -21,6 +21,7 @@ import type {
   OnPreResponseHandler,
   OnPreRoutingHandler,
 } from './lifecycle';
+import type { HttpSelfUnauthorizedErrorHandler } from './self_client_unauthorized_error_handler';
 import type { IBasePath } from './base_path';
 import type { IStaticAssets } from './static_assets';
 import type { ICspConfig } from './csp';
@@ -83,6 +84,17 @@ export interface HttpSelfFetchOptions<TRequestBody = unknown> {
    * redirects Core follows. Defaults to 60 seconds.
    */
   timeout?: number;
+  /**
+   * Timeout in milliseconds for receiving the response headers, applied to each request
+   * including followed same-origin redirects. Maps to Undici's per-request
+   * `headersTimeout` (5 minutes by default); must be a positive integer or `0`, which
+   * disables it. Enforced with roughly one-second granularity (Undici fast timers), so
+   * sub-second values may never fire — intended for timeouts on the order of seconds or
+   * minutes. Note the whole-call `timeout` (60 seconds by default) still applies: raise
+   * it as well when setting a `headersTimeout` beyond that budget, or the call aborts
+   * first.
+   */
+  headersTimeout?: number;
   /**
    * When `true` (default), prefix `path` with the scoped request's base path (server
    * base path plus space). Fake requests use `server.basePath` and the request's space.
@@ -465,6 +477,15 @@ export interface HttpServiceSetup<
    * @returns {RouterDeprecatedApiDetails[]}
    */
   getDeprecatedRoutes: () => RouterDeprecatedApiDetails[];
+
+  /**
+   * Set the {@link HttpSelfUnauthorizedErrorHandler | handler} consulted when a Kibana self HTTP
+   * call is rejected by the authentication lifecycle, giving its owner a chance to refresh a
+   * short-lived credential so the call can be replayed once.
+   *
+   * Can only be called once, and is reserved for the security plugin.
+   */
+  setSelfClientUnauthorizedErrorHandler: (handler: HttpSelfUnauthorizedErrorHandler) => void;
 }
 
 /** @public */

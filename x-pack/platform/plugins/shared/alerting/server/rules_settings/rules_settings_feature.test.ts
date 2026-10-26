@@ -20,7 +20,7 @@ test('returns rule settings feature with query delay subfeature if serverless', 
     management: {
       insightsAndAlerting: ['triggersActionsRules', 'triggersActionsAlerts'],
     },
-    name: 'Rules Settings',
+    name: 'Classic Rules Settings',
     privileges: {
       all: {
         api: [],
@@ -161,7 +161,7 @@ test('returns rule settings feature without query delay subfeature if not server
     management: {
       insightsAndAlerting: ['triggersActionsRules', 'triggersActionsAlerts'],
     },
-    name: 'Rules Settings',
+    name: 'Classic Rules Settings',
     privileges: {
       all: {
         api: [],

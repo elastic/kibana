@@ -14,6 +14,7 @@ import {
   LOG_EXTRACTION_CAP_BEHAVIOR_DEFAULT,
   DEFAULT_HISTORY_SNAPSHOT_RETENTION_DAYS,
   MAX_HISTORY_SNAPSHOT_RETENTION_DAYS,
+  MAX_EXCLUDED_USER_NAMES,
 } from './constants';
 
 export const EntityStoreGlobalStateTypeName = 'entity-store-global-state';
@@ -175,11 +176,34 @@ const version5: SavedObjectsFullModelVersion = {
   },
 };
 
+const globalStateSchemaV6 = globalStateSchemaV5.extends({
+  excludedUserNames: schema.maybe(
+    schema.arrayOf(schema.string(), { maxSize: MAX_EXCLUDED_USER_NAMES })
+  ),
+});
+
+const version6: SavedObjectsFullModelVersion = {
+  changes: [
+    {
+      type: 'data_backfill',
+      backfillFn: () => ({
+        attributes: {
+          excludedUserNames: [],
+        },
+      }),
+    },
+  ],
+  schemas: {
+    create: globalStateSchemaV6,
+    forwardCompatibility: globalStateSchemaV6.extends({}, { unknowns: 'ignore' }),
+  },
+};
+
 export const EntityStoreGlobalStateType: SavedObjectsType = {
   name: EntityStoreGlobalStateTypeName,
   hidden: false,
   namespaceType: 'multiple-isolated',
   mappings: EntityStoreGlobalStateTypeMappings,
-  modelVersions: { 1: version1, 2: version2, 3: version3, 4: version4, 5: version5 },
+  modelVersions: { 1: version1, 2: version2, 3: version3, 4: version4, 5: version5, 6: version6 },
   hiddenFromHttpApis: true,
 };

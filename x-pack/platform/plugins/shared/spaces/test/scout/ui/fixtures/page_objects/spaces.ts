@@ -8,6 +8,7 @@
 import { CHROME_HEADER_TEST_SUBJECTS } from '@kbn/core-chrome-browser-components';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { ScoutPage } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
 
 export type SpaceSolution = 'es' | 'oblt' | 'security' | 'classic';
 
@@ -365,11 +366,27 @@ export class SpacesPage {
     return await this.spaceAvatarLocator(spaceId).innerText();
   }
 
+  /**
+   * The avatar preview in the "Define an avatar" panel, rendered straight from the
+   * form's `imageUrl`. The space id is omitted so this also works while creating a
+   * space, where the id is still being derived from the name.
+   */
+  avatarPreviewLocator() {
+    return this.page.locator(
+      '[data-test-subj="customizeAvatarSection"] [data-test-subj^="space-avatar-"]'
+    );
+  }
+
   /** Uploads an avatar image via the hidden file input behind the "image" trigger. */
   async uploadAvatar(filePath: string) {
     await this.page.testSubj.click('image');
     // The file input is rendered alongside the "image" trigger; target it directly.
     await this.page.locator('input[type="file"]').setInputFiles(filePath);
+    // The file is read async: the submit is rejected until `imageUrl` lands in form state.
+    await expect(this.avatarPreviewLocator()).toHaveCSS(
+      'background-image',
+      /^url\(["']?data:image\//
+    );
   }
 
   async toggleFeatureCategoryCheckbox(category: string) {

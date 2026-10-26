@@ -17,13 +17,14 @@ import {
 import type { LocatorHost } from '@kbn/rule-data-utils';
 
 export type { AlertingV2HostApp } from './locator_host';
-export { createAlertingV2HostApp, MANAGEMENT_HOST } from './locator_host';
+export { createAlertingV2HostApp } from './locator_host';
 
 export interface AlertingV2RulesLocatorParams extends SerializableRecord {
   ruleId?: string;
   page?: 'list' | 'details' | 'sequence_create';
-  templateId?: string;
-  host?: LocatorHost;
+  /** Opens the list filtered to the rules that were created from this rule template. */
+  derivedFromTemplateId?: string;
+  host: LocatorHost;
 }
 
 export const AlertingV2RulesLocatorDefinition: LocatorDefinition<AlertingV2RulesLocatorParams> = {
@@ -36,7 +37,7 @@ export const AlertingV2RulesLocatorDefinition: LocatorDefinition<AlertingV2Rules
 
 export interface AlertingV2RuleLibraryLocatorParams extends SerializableRecord {
   templateId?: string;
-  host?: LocatorHost;
+  host: LocatorHost;
 }
 
 export const AlertingV2RuleLibraryLocatorDefinition: LocatorDefinition<AlertingV2RuleLibraryLocatorParams> =
@@ -57,7 +58,7 @@ export interface AlertingV2EpisodesLocatorParams extends SerializableRecord {
     groupingValues?: Record<string, string | null>;
   };
   timeRange?: { from: string; to: string };
-  host?: LocatorHost;
+  host: LocatorHost;
 }
 
 export const AlertingV2EpisodesLocatorDefinition: LocatorDefinition<AlertingV2EpisodesLocatorParams> =
@@ -72,7 +73,7 @@ export const AlertingV2EpisodesLocatorDefinition: LocatorDefinition<AlertingV2Ep
 export interface AlertingV2ActionPoliciesLocatorParams extends SerializableRecord {
   page?: 'list' | 'create' | 'edit';
   actionPolicyId?: string;
-  host?: LocatorHost;
+  host: LocatorHost;
 }
 
 export const AlertingV2ActionPoliciesLocatorDefinition: LocatorDefinition<AlertingV2ActionPoliciesLocatorParams> =
@@ -85,7 +86,7 @@ export const AlertingV2ActionPoliciesLocatorDefinition: LocatorDefinition<Alerti
   };
 
 export interface AlertingV2ExecutionHistoryLocatorParams extends SerializableRecord {
-  host?: LocatorHost;
+  host: LocatorHost;
 }
 
 export const AlertingV2ExecutionHistoryLocatorDefinition: LocatorDefinition<AlertingV2ExecutionHistoryLocatorParams> =

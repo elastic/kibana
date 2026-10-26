@@ -18,22 +18,26 @@ const MAX_SEARCH_LENGTH = 512;
 const MAX_LOG_LIMIT = 1000;
 const MAX_USER_LIMIT = 200;
 
-export const UserIdSchema = z
-  .string()
-  .min(1)
-  .max(MAX_USER_ID_LENGTH)
-  .describe(
-    'Okta user id (for example 00u1a2b3c4d5e6f7g8h9), login, or unambiguous login shortname. Prefer the id returned by getUser, listUsers, or searchUsers for write actions.'
-  );
+export const UserIdSchema = lazySchema(() =>
+  z
+    .string()
+    .min(1)
+    .max(MAX_USER_ID_LENGTH)
+    .describe(
+      'Okta user id (for example 00u1a2b3c4d5e6f7g8h9), login, or unambiguous login shortname. Prefer the id returned by getUser, listUsers, or searchUsers for write actions.'
+    )
+);
 
-export const GroupIdSchema = z
-  .string()
-  .min(1)
-  .max(MAX_GROUP_ID_LENGTH)
-  .regex(/^[A-Za-z0-9_-]+$/, {
-    message: 'Group id must contain only letters, numbers, underscores, and hyphens',
-  })
-  .describe('Okta group id (for example 00g1a2b3c4d5e6f7g8h9).');
+export const GroupIdSchema = lazySchema(() =>
+  z
+    .string()
+    .min(1)
+    .max(MAX_GROUP_ID_LENGTH)
+    .regex(/^[A-Za-z0-9_-]+$/, {
+      message: 'Group id must contain only letters, numbers, underscores, and hyphens',
+    })
+    .describe('Okta group id (for example 00g1a2b3c4d5e6f7g8h9).')
+);
 
 export const GetUserInputSchema = lazySchema(() =>
   z.object({

@@ -15,7 +15,10 @@ import type {
 } from '@kbn/core-elasticsearch-server';
 import type { AgentStatsProvider } from '@kbn/core-elasticsearch-client-server-internal';
 import type { ServiceStatus } from '@kbn/core-status-common';
-import type { NodesVersionCompatibility, NodeInfo } from './version_check/ensure_es_version';
+import type {
+  NodesVersionCompatibility,
+  NodeInfo,
+} from './version_check/nodes_version_compatibility';
 import type { ClusterInfo } from './get_cluster_info';
 
 /** @internal */

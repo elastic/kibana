@@ -44,18 +44,16 @@ export const SettingRow: React.FC<SettingRowProps> = ({
       css={css`
         display: grid;
         grid-template-columns: ${LABEL_COL_PX}px minmax(0, 1fr);
+        @media (max-width: 960px) {
+          grid-template-columns: minmax(0, 1fr);
+        }
         column-gap: ${LABEL_CONTROL_GAP_PX}px;
         align-items: start;
         padding-block: ${ROW_PAD_BLOCK_PX}px;
       `}
     >
       <div>
-        <EuiText
-          size="s"
-          css={css`
-            white-space: nowrap;
-          `}
-        >
+        <EuiText size="s">
           <strong id={labelId}>{label}</strong>
         </EuiText>
         {labelHelp ? (

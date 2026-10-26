@@ -69,6 +69,7 @@ export {
   LEGACY_INDICATOR_ATTACHMENT_TYPE,
   SECURITY_ENTITY_ATTACHMENT_TYPE,
   SECURITY_TIMELINE_ATTACHMENT_TYPE,
+  SECURITY_ATTACK_ATTACHMENT_TYPE,
   MANAGE_TEMPLATES_CAPABILITY,
   ML_ANOMALY_SWIMLANE_ATTACHMENT_TYPE,
   ML_ANOMALY_CHARTS_ATTACHMENT_TYPE,
@@ -81,7 +82,7 @@ export {
 
 export type { AttachmentAttributes } from './types/domain';
 export { ConnectorTypes, AttachmentType, ExternalReferenceStorageType } from './types/domain';
-export { getCasesFromAlertsUrl, getCaseFindUserActionsUrl, throwErrors } from './api';
+export { getCasesFromAlertsUrl, getCaseFindUserActionsUrl } from './api';
 export { createUICapabilities, type CasesUiCapabilities } from './utils/capabilities';
 export { getApiTags, type CasesApiTags } from './utils/api_tags';
 export { CaseMetricsFeature } from './types/api';
@@ -94,9 +95,11 @@ export { getSavedObjectsTypes } from './utils/saved_object_types';
 export {
   isEventAttachmentType,
   isAlertAttachmentType,
+  isAttackAttachmentType,
   isLegacyAttachmentRequest,
   isUnifiedEventAttachment,
   isUnifiedAlertAttachment,
+  isUnifiedCommentAttachment,
   isIndexMetadata,
   toStringArray,
   toStringOrStringArray,

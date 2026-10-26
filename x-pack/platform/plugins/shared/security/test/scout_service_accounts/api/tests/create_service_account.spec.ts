@@ -11,6 +11,7 @@ import { expect } from '@kbn/scout/api';
 import {
   ES_SERVICE_ACCOUNT_NAMESPACE,
   ES_SERVICE_ACCOUNT_TOKEN_NAME,
+  SERVICE_ACCOUNT_DESCRIPTION_MAX_LENGTH,
 } from '../../../../common/service_accounts';
 import {
   deleteServiceAccounts,
@@ -247,6 +248,95 @@ apiTest.describe('Create Elasticsearch service accounts', { tag: LOCAL_ONLY }, (
     });
     expect(second.statusCode).toBe(409);
   });
+
+  apiTest(
+    'stores a trimmed description with the account and reports it',
+    async ({ apiClient, esClient, samlAuth }) => {
+      const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
+      const name = uniqueName('described');
+      created.push({ namespace: ES_SERVICE_ACCOUNT_NAMESPACE, name });
+
+      const response = await apiClient.post(CREATE_ENDPOINT, {
+        headers: { ...cookieHeader, ...REQUEST_HEADERS },
+        responseType: 'json',
+        body: { name, roles: ['viewer'], description: '  Relays the nightshift alerts.\n' },
+      });
+
+      expect(response.statusCode).toBe(200);
+      expect(response.body).toStrictEqual({
+        id: `${ES_SERVICE_ACCOUNT_NAMESPACE}/${name}`,
+        name,
+        roles: ['viewer'],
+        description: 'Relays the nightshift alerts.',
+      });
+
+      const account = await esClient.transport.request<Record<string, { description?: string }>>({
+        method: 'GET',
+        path: `/_security/service/${ES_SERVICE_ACCOUNT_NAMESPACE}/${name}`,
+      });
+      expect(account[`${ES_SERVICE_ACCOUNT_NAMESPACE}/${name}`].description).toBe(
+        'Relays the nightshift alerts.'
+      );
+    }
+  );
+
+  apiTest(
+    'creates the account without a description when the one sent is blank',
+    async ({ apiClient, esClient, samlAuth }) => {
+      const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
+      const name = uniqueName('blank-description');
+      created.push({ namespace: ES_SERVICE_ACCOUNT_NAMESPACE, name });
+
+      const response = await apiClient.post(CREATE_ENDPOINT, {
+        headers: { ...cookieHeader, ...REQUEST_HEADERS },
+        responseType: 'json',
+        body: { name, roles: ['viewer'], description: '   ' },
+      });
+
+      expect(response.statusCode).toBe(200);
+      expect(response.body).toStrictEqual({
+        id: `${ES_SERVICE_ACCOUNT_NAMESPACE}/${name}`,
+        name,
+        roles: ['viewer'],
+      });
+
+      const account = await esClient.transport.request<Record<string, { description?: string }>>({
+        method: 'GET',
+        path: `/_security/service/${ES_SERVICE_ACCOUNT_NAMESPACE}/${name}`,
+      });
+      expect(account[`${ES_SERVICE_ACCOUNT_NAMESPACE}/${name}`].description).toBeUndefined();
+    }
+  );
+
+  apiTest(
+    `refuses a description longer than ${SERVICE_ACCOUNT_DESCRIPTION_MAX_LENGTH} characters without writing anything`,
+    async ({ apiClient, esClient, samlAuth }) => {
+      const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
+      // Registered up front even though the request is expected to fail: if the limit ever
+      // regresses, the account it creates has to be cleaned up like any other.
+      const name = uniqueName('long-description');
+      created.push({ namespace: ES_SERVICE_ACCOUNT_NAMESPACE, name });
+
+      const response = await apiClient.post(CREATE_ENDPOINT, {
+        headers: { ...cookieHeader, ...REQUEST_HEADERS },
+        responseType: 'json',
+        body: {
+          name,
+          roles: ['viewer'],
+          description: 'a'.repeat(SERVICE_ACCOUNT_DESCRIPTION_MAX_LENGTH + 1),
+        },
+      });
+
+      expect(response.statusCode).toBe(400);
+      expect(response.body.message).toContain('description');
+
+      const account = await esClient.transport.request<Record<string, unknown>>({
+        method: 'GET',
+        path: `/_security/service/${ES_SERVICE_ACCOUNT_NAMESPACE}/${name}`,
+      });
+      expect(account).toStrictEqual({});
+    }
+  );
 
   apiTest(
     'rejects a name that could escape the Elasticsearch path',

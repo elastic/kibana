@@ -90,8 +90,18 @@ export const HuntBehaviorResponse = lazySchema(() =>
         reference: z.string(),
         tactic_ids: z.array(z.string()),
         parent_technique_id: z.string().optional(),
-        proposed_esql_rule: z.string(),
-        rule_name: z.string(),
+        /**
+         * The query Tier 2 generated and validated (and, when grounded, executed) to hunt this technique.
+         */
+        validated_esql: z
+          .string()
+          .describe(
+            'The query Tier 2 generated and validated (and, when grounded, executed) to hunt this technique.'
+          ),
+        /**
+         * Display title for this hunted finding.
+         */
+        title: z.string().describe('Display title for this hunted finding.'),
         severity: z.enum(['critical', 'high', 'medium', 'low']),
         risk_score: z.number(),
         execution: z

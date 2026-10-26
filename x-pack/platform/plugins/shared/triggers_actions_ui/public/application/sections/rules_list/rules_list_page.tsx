@@ -10,18 +10,15 @@ import { rulesAppDetailsRoute } from '@kbn/rule-data-utils';
 import { useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared';
 import { i18n } from '@kbn/i18n';
 import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
-import { ALERTING_V2_RULES_BASE_PATH } from '@kbn/alerting-v2-constants';
 import { useHistory } from 'react-router-dom';
 import { useKibana } from '../../../common/lib/kibana';
 import { getAlertingSectionBreadcrumb } from '../../lib/breadcrumb';
 import { getCurrentDocTitle } from '../../lib/doc_title';
 import { RulesPageHeader } from '../rules_page/rules_page_header';
 import { getClassicTabs } from '../rules_page/get_classic_tabs';
-import { getV1RulesPageTabs } from '../rules_page/get_v1_rules_page_tabs';
 import { getRulesPageMenu } from '../rules_page/get_rules_page_menu';
 import { useRulesPageActions } from '../rules_page/rules_page_actions';
 import { RULES_PAGE_MODE, useRulesPageMode } from '../rules_page/use_rules_page_mode';
-import { useLocators } from '../../locator_context';
 
 const RulesList = lazy(() => import('./components/rules_list'));
 
@@ -40,7 +37,6 @@ export const RulesListContainer = () => {
     hideListBackButton,
     tabs: hostTabs,
   } = useKibana().services;
-  const { rules } = useLocators();
   const { authorizedToReadAnyRules, authorizedToCreateAnyRules } = useGetRuleTypesPermissions({
     http,
     toasts,
@@ -66,26 +62,20 @@ export const RulesListContainer = () => {
     docTitle.change(getCurrentDocTitle('rules'));
   }, [docTitle, setBreadcrumbs]);
 
-  const v1ListHref = rules.useUrl({});
-
   const rulesListTabs = useMemo(() => {
     if (hostTabs) {
       return hostTabs;
     }
 
-    if (mode === RULES_PAGE_MODE.v1AndV2Tabs) {
-      return getV1RulesPageTabs({
-        v1Href: v1ListHref,
-        v2Href: http.basePath.prepend(ALERTING_V2_RULES_BASE_PATH),
-      });
-    }
-
-    if (mode === RULES_PAGE_MODE.noTabs) {
+    // Stack Management does not show the V2 rules tab. A host such as
+    // Observability passes its own V1/V2 tabs via `hostTabs`. With alerting v2
+    // enabled, classic Rules/Logs tabs stay suppressed and Logs stays in the menu.
+    if (mode !== RULES_PAGE_MODE.triggersActionsTabs) {
       return [];
     }
 
     return getClassicTabs('rules', authorizedToReadAnyRules, history);
-  }, [hostTabs, mode, authorizedToReadAnyRules, history, http.basePath, v1ListHref]);
+  }, [hostTabs, mode, authorizedToReadAnyRules, history]);
 
   const rulesListMenu = useMemo<AppMenuConfig>(() => {
     const extraItems: NonNullable<AppMenuConfig['items']> =

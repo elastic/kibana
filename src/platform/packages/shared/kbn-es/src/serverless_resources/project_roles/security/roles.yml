@@ -3,8 +3,8 @@
 # modeled after the t1_analyst minus osquery run saved queries privilege, plus endpoint exceptions read
 viewer:
   metadata:
-    public: true
-    reserved: true
+    _public: true
+    _reserved: true
   cluster:
     - 'read_project_routing'
   indices:
@@ -80,6 +80,7 @@ viewer:
         - feature_siemV5.read
         - feature_siemV5.endpoint_list_read
         - feature_siemV5.endpoint_exceptions_read
+        - feature_siemV5.custom_yara_signatures_read
         - feature_siemV5.scripts_management_read
         - feature_securitySolutionRulesV2.read
         - feature_securitySolutionCases.read
@@ -110,8 +111,8 @@ viewer:
 # modeled after t3_analyst
 editor:
   metadata:
-    public: true
-    reserved: true
+    _public: true
+    _reserved: true
   cluster:
     - 'read_project_routing'
   indices:
@@ -224,6 +225,7 @@ editor:
         - feature_siemV5.host_isolation_exceptions_all
         - feature_siemV5.blocklist_all
         - feature_siemV5.endpoint_exceptions_all
+        - feature_siemV5.custom_yara_signatures_all
         - feature_siemV5.policy_management_read # Elastic Defend Policy Management
         - feature_siemV5.host_isolation_all
         - feature_siemV5.process_operations_all
@@ -258,8 +260,8 @@ editor:
 
 t1_analyst:
   metadata:
-    public: true
-    reserved: true
+    _public: true
+    _reserved: true
   cluster:
     - 'read_project_routing'
   indices:
@@ -340,6 +342,7 @@ t1_analyst:
         - feature_ml.read
         - feature_siemV5.read
         - feature_siemV5.endpoint_list_read
+        - feature_siemV5.custom_yara_signatures_read
         - feature_siemV5.scripts_management_read
         - feature_securitySolutionRulesV2.read
         - feature_securitySolutionCases.read
@@ -368,8 +371,8 @@ t1_analyst:
 
 t2_analyst:
   metadata:
-    public: true
-    reserved: true
+    _public: true
+    _reserved: true
   cluster:
     - 'read_project_routing'
   indices:
@@ -451,6 +454,7 @@ t2_analyst:
         - feature_ml.read
         - feature_siemV5.read
         - feature_siemV5.endpoint_list_read
+        - feature_siemV5.custom_yara_signatures_read
         - feature_siemV5.scripts_management_read
         - feature_securitySolutionRulesV2.read
         - feature_securitySolutionTimeline.read
@@ -480,8 +484,8 @@ t2_analyst:
 
 t3_analyst:
   metadata:
-    public: true
-    reserved: true
+    _public: true
+    _reserved: true
   cluster:
     - 'read_project_routing'
   indices:
@@ -581,6 +585,7 @@ t3_analyst:
         - feature_siemV5.host_isolation_exceptions_all
         - feature_siemV5.blocklist_all
         - feature_siemV5.endpoint_exceptions_all
+        - feature_siemV5.custom_yara_signatures_all
         - feature_siemV5.policy_management_read # Elastic Defend Policy Management
         - feature_siemV5.host_isolation_all
         - feature_siemV5.process_operations_all
@@ -615,8 +620,8 @@ t3_analyst:
 
 threat_intelligence_analyst:
   metadata:
-    public: true
-    reserved: true
+    _public: true
+    _reserved: true
   cluster:
     - 'read_project_routing'
   indices:
@@ -704,6 +709,7 @@ threat_intelligence_analyst:
         - feature_siemV5.global_artifact_management_all
         - feature_siemV5.blocklist_all
         - feature_siemV5.endpoint_exceptions_all
+        - feature_siemV5.custom_yara_signatures_read
         - feature_securitySolutionRulesV2.all
         - feature_securitySolutionTimeline.all
         - feature_securitySolutionNotes.all
@@ -729,8 +735,8 @@ threat_intelligence_analyst:
 
 rule_author:
   metadata:
-    public: true
-    reserved: true
+    _public: true
+    _reserved: true
   cluster:
     - 'read_project_routing'
   indices:
@@ -825,6 +831,7 @@ rule_author:
         - feature_siemV5.host_isolation_exceptions_read
         - feature_siemV5.blocklist_all # Elastic Defend Policy Management
         - feature_siemV5.endpoint_exceptions_all
+        - feature_siemV5.custom_yara_signatures_all
         - feature_siemV5.actions_log_management_read
         - feature_siemV5.workflow_insights_all
         - feature_securitySolutionRulesV2.all
@@ -852,8 +859,8 @@ rule_author:
 
 soc_manager:
   metadata:
-    public: true
-    reserved: true
+    _public: true
+    _reserved: true
   cluster:
     - 'read_project_routing'
   indices:
@@ -953,6 +960,7 @@ soc_manager:
         - feature_siemV5.host_isolation_exceptions_all
         - feature_siemV5.blocklist_all
         - feature_siemV5.endpoint_exceptions_all
+        - feature_siemV5.custom_yara_signatures_all
         - feature_siemV5.host_isolation_all
         - feature_siemV5.process_operations_all
         - feature_siemV5.actions_log_management_all
@@ -989,8 +997,8 @@ soc_manager:
 
 detections_admin:
   metadata:
-    public: true
-    reserved: true
+    _public: true
+    _reserved: true
   cluster: ['manage_index_templates', 'manage_transform', 'read_project_routing']
   indices:
     - names:
@@ -1061,6 +1069,7 @@ detections_admin:
         - feature_siemV5.all
         - feature_siemV5.global_artifact_management_all
         - feature_siemV5.endpoint_exceptions_all
+        - feature_siemV5.custom_yara_signatures_all
         - feature_securitySolutionRulesV2.all
         - feature_securitySolutionTimeline.all
         - feature_securitySolutionNotes.all
@@ -1086,8 +1095,8 @@ detections_admin:
 
 platform_engineer:
   metadata:
-    public: true
-    reserved: true
+    _public: true
+    _reserved: true
   cluster:
     - manage
     - 'read_project_routing'
@@ -1181,6 +1190,7 @@ platform_engineer:
         - feature_siemV5.host_isolation_exceptions_all
         - feature_siemV5.blocklist_all # Elastic Defend Policy Management
         - feature_siemV5.endpoint_exceptions_all
+        - feature_siemV5.custom_yara_signatures_read
         - feature_siemV5.actions_log_management_read
         - feature_siemV5.scripts_management_read
         - feature_siemV5.workflow_insights_all
@@ -1212,8 +1222,8 @@ platform_engineer:
 
 endpoint_operations_analyst:
   metadata:
-    public: true
-    reserved: true
+    _public: true
+    _reserved: true
   cluster:
     - 'read_project_routing'
   indices:
@@ -1311,6 +1321,7 @@ endpoint_operations_analyst:
         - feature_siemV5.host_isolation_exceptions_all
         - feature_siemV5.blocklist_all
         - feature_siemV5.endpoint_exceptions_all
+        - feature_siemV5.custom_yara_signatures_read
         - feature_siemV5.host_isolation_all
         - feature_siemV5.process_operations_all
         - feature_siemV5.actions_log_management_all
@@ -1347,8 +1358,8 @@ endpoint_operations_analyst:
 
 endpoint_policy_manager:
   metadata:
-    public: true
-    reserved: true
+    _public: true
+    _reserved: true
   cluster:
     - 'read_project_routing'
   indices:
@@ -1438,6 +1449,7 @@ endpoint_policy_manager:
         - feature_siemV5.host_isolation_exceptions_all
         - feature_siemV5.blocklist_all # Elastic Defend Policy Management
         - feature_siemV5.endpoint_exceptions_all
+        - feature_siemV5.custom_yara_signatures_all
         - feature_siemV5.workflow_insights_all
         - feature_securitySolutionRulesV2.all
         - feature_securitySolutionCases.all
@@ -1464,8 +1476,393 @@ endpoint_policy_manager:
         - feature_proposals.all
       resources: '*'
 
+# AlertZero worker roles: each is assigned only to its worker's service account (alertzero_<worker>),
+# which AlertZero creates when the worker is enabled. Not meant for users.
+_alertzero_alert_triage:
+  description: 'Privileges for the service account of the AlertZero Alert Triage worker. Assigned by AlertZero; do not assign to users.'
+  metadata:
+    _public: true
+    _reserved: true
+  cluster:
+    - 'monitor_inference'
+    - 'read_project_routing'
+  indices:
+    - names:
+        - ai-index-idx-security-investigations
+      privileges:
+        - read
+        - view_index_metadata
+        - index
+        - auto_configure
+      allow_restricted_indices: false
+    - names:
+        - .ai-index-idx-elastic-index
+      privileges:
+        - view_index_metadata
+      allow_restricted_indices: false
+    - names:
+        - .alerts-security.alerts-*
+      privileges:
+        - read
+        - index
+        - maintenance
+      allow_restricted_indices: false
+    - names:
+        - .internal.alerts-security.alerts-*
+      privileges:
+        - index
+        - maintenance
+      allow_restricted_indices: false
+  applications:
+    - application: 'kibana-.kibana'
+      privileges:
+        - feature_alertzero.all
+        - feature_agentBuilder.read
+        - feature_contextEngine.all
+        - feature_proposals.all
+        - feature_actions.read
+        - feature_workflowsManagement.minimal_read
+        - feature_workflowsManagement.workflow_read
+        - feature_workflowsManagement.workflow_read_managed
+        - feature_workflowsManagement.workflow_execution_read
+        - feature_workflowsManagement.workflow_execution_read_managed
+        - feature_workflowsManagement.workflow_execute
+        - feature_workflowsManagement.workflow_execution_cancel
+        - feature_securitySolutionRulesV4.minimal_read
+        - feature_securitySolutionNotes.all
+        - feature_securitySolutionAlertsV1.all
+      resources: '*'
+
+_alertzero_attack_discovery:
+  description: 'Privileges for the service account of the AlertZero Attack Discovery worker. Assigned by AlertZero; do not assign to users.'
+  metadata:
+    _public: true
+    _reserved: true
+  cluster:
+    - 'monitor_inference'
+    - 'read_project_routing'
+  indices:
+    - names:
+        - ai-index-idx-security-investigations
+        - ai-index-idx-security-attack-fingerprints
+      privileges:
+        - read
+        - view_index_metadata
+        - index
+        - auto_configure
+      allow_restricted_indices: false
+    - names:
+        - .ai-index-idx-elastic-index
+      privileges:
+        - view_index_metadata
+      allow_restricted_indices: false
+    - names:
+        - .alerts-security.attack.discovery.alerts-*
+        - .adhoc.alerts-security.attack.discovery.alerts-*
+      privileges:
+        - read
+        - view_index_metadata
+        - index
+        - maintenance
+      allow_restricted_indices: false
+    - names:
+        - .internal.alerts-security.attack.discovery.alerts-*
+        - .internal.adhoc.alerts-security.attack.discovery.alerts-*
+      privileges:
+        - index
+        - maintenance
+      allow_restricted_indices: false
+    - names:
+        - .alerts-security.alerts-*
+      privileges:
+        - read
+        - view_index_metadata
+        - index
+        - maintenance
+      allow_restricted_indices: false
+    - names:
+        - .internal.alerts-security.alerts-*
+      privileges:
+        - index
+        - maintenance
+      allow_restricted_indices: false
+    - names:
+        - .kibana-elastic-ai-assistant-anonymization-fields-*
+      privileges:
+        - read
+      allow_restricted_indices: false
+    - names:
+        - logs-endpoint.events.*
+        - entities-latest-*
+      privileges:
+        - read
+      allow_restricted_indices: false
+    - names:
+        - apm-*-transaction*
+        - auditbeat-*
+        - endgame-*
+        - filebeat-*
+        - logs-*
+        - packetbeat-*
+        - traces-apm*
+        - winlogbeat-*
+      privileges:
+        - read
+      allow_restricted_indices: false
+  applications:
+    - application: 'kibana-.kibana'
+      privileges:
+        - feature_alertzero.all
+        - feature_agentBuilder.read
+        - feature_contextEngine.all
+        - feature_proposals.all
+        - feature_actions.read
+        - feature_workflowsManagement.minimal_read
+        - feature_workflowsManagement.workflow_read
+        - feature_workflowsManagement.workflow_read_managed
+        - feature_workflowsManagement.workflow_execution_read
+        - feature_workflowsManagement.workflow_execution_read_managed
+        - feature_workflowsManagement.workflow_execute
+        - feature_securitySolutionAttackDiscovery.all
+        - feature_securitySolutionAlertsV1.all
+      resources: '*'
+
+_alertzero_endpoint_analysis:
+  description: 'Privileges for the service account of the AlertZero Endpoint analysis worker. Assigned by AlertZero; do not assign to users.'
+  metadata:
+    _public: true
+    _reserved: true
+  cluster:
+    - 'monitor_inference'
+    - 'read_project_routing'
+  indices:
+    - names:
+        - ai-index-idx-security-investigations
+      privileges:
+        - read
+        - view_index_metadata
+        - index
+        - auto_configure
+      allow_restricted_indices: false
+    - names:
+        - .ai-index-idx-elastic-index
+      privileges:
+        - view_index_metadata
+      allow_restricted_indices: false
+    - names:
+        - .alerts-security.attack.discovery.alerts-*
+        - .adhoc.alerts-security.attack.discovery.alerts-*
+      privileges:
+        - read
+      allow_restricted_indices: false
+    - names:
+        - .alerts-security.alerts-*
+      privileges:
+        - read
+      allow_restricted_indices: false
+    - names:
+        - logs-endpoint.events.process-*
+        - logs-endpoint.events.network-*
+        - logs-endpoint.events.file-*
+        - logs-endpoint.events.registry-*
+      privileges:
+        - read
+        - view_index_metadata
+      allow_restricted_indices: false
+  applications:
+    - application: 'kibana-.kibana'
+      privileges:
+        - feature_alertzero.all
+        - feature_agentBuilder.read
+        - feature_contextEngine.all
+        - feature_proposals.all
+        - feature_actions.read
+        - feature_siemV5.minimal_read
+        - feature_siemV5.host_isolation_all
+        - feature_siemV5.process_operations_all
+        - feature_siemV5.actions_log_management_read
+      resources: '*'
+
+_alertzero_threat_hunt:
+  description: 'Privileges for the service account of the AlertZero Continuous Threat Hunt worker. Assigned by AlertZero; do not assign to users.'
+  metadata:
+    _public: true
+    _reserved: true
+  cluster:
+    - 'monitor_inference'
+    - 'read_project_routing'
+  indices:
+    - names:
+        - ai-index-idx-security-investigations
+      privileges:
+        - read
+        - view_index_metadata
+        - index
+        - auto_configure
+      allow_restricted_indices: false
+    - names:
+        - .ai-index-idx-elastic-index
+      privileges:
+        - view_index_metadata
+      allow_restricted_indices: false
+    - names:
+        - apm-*-transaction*
+        - auditbeat-*
+        - endgame-*
+        - filebeat-*
+        - logs-*
+        - packetbeat-*
+        - traces-apm*
+        - winlogbeat-*
+      privileges:
+        - read
+      allow_restricted_indices: false
+    - names:
+        - metrics-endpoint.metadata_current_*
+      privileges:
+        - read
+      allow_restricted_indices: false
+  applications:
+    - application: 'kibana-.kibana'
+      privileges:
+        - feature_alertzero.all
+        - feature_agentBuilder.read
+        - feature_contextEngine.all
+        - feature_proposals.all
+        - feature_actions.read
+        - feature_siemV5.minimal_read
+        - feature_siemV5.host_isolation_all
+        - feature_siemV5.process_operations_all
+        - feature_siemV5.actions_log_management_read
+      resources: '*'
+
+_alertzero_rule_tuning:
+  description: 'Privileges for the service account of the AlertZero Rule Tuning worker. Assigned by AlertZero; do not assign to users.'
+  metadata:
+    _public: true
+    _reserved: true
+  cluster:
+    - 'monitor_inference'
+    - 'read_project_routing'
+  indices:
+    - names:
+        - ai-index-idx-security-investigations
+      privileges:
+        - read
+        - view_index_metadata
+        - index
+        - auto_configure
+      allow_restricted_indices: false
+    - names:
+        - .ai-index-idx-elastic-index
+      privileges:
+        - view_index_metadata
+      allow_restricted_indices: false
+    - names:
+        - .alerts-security.alerts-*
+      privileges:
+        - read
+        - index
+        - maintenance
+        - view_index_metadata
+      allow_restricted_indices: false
+    - names:
+        - .internal.alerts-security.alerts-*
+      privileges:
+        - index
+        - maintenance
+      allow_restricted_indices: false
+    - names:
+        - .preview.alerts-security.alerts-*
+        - .internal.preview.alerts-security.alerts-*
+      privileges:
+        - read
+      allow_restricted_indices: false
+    - names:
+        - apm-*-transaction*
+        - auditbeat-*
+        - endgame-*
+        - filebeat-*
+        - logs-*
+        - packetbeat-*
+        - traces-apm*
+        - winlogbeat-*
+      privileges:
+        - read
+        - view_index_metadata
+      allow_restricted_indices: false
+  applications:
+    - application: 'kibana-.kibana'
+      privileges:
+        - feature_alertzero.all
+        - feature_agentBuilder.read
+        - feature_contextEngine.all
+        - feature_proposals.all
+        - feature_actions.read
+        - feature_workflowsManagement.read
+        - feature_securitySolutionRulesV4.read
+        - feature_securitySolutionAlertsV1.all
+      resources: '*'
+
+_alertzero_rule_coverage:
+  description: 'Privileges for the service account of the AlertZero Rule Coverage worker. Assigned by AlertZero; do not assign to users.'
+  metadata:
+    _public: true
+    _reserved: true
+  cluster:
+    - 'monitor_inference'
+    - 'read_project_routing'
+  indices:
+    - names:
+        - ai-index-idx-security-investigations
+      privileges:
+        - read
+        - view_index_metadata
+        - index
+        - auto_configure
+      allow_restricted_indices: false
+    - names:
+        - .ai-index-idx-elastic-index
+      privileges:
+        - view_index_metadata
+      allow_restricted_indices: false
+    - names:
+        - .preview.alerts-security.alerts-*
+        - .internal.preview.alerts-security.alerts-*
+      privileges:
+        - read
+      allow_restricted_indices: false
+    - names:
+        - apm-*-transaction*
+        - auditbeat-*
+        - endgame-*
+        - filebeat-*
+        - logs-*
+        - packetbeat-*
+        - traces-apm*
+        - winlogbeat-*
+      privileges:
+        - read
+        - view_index_metadata
+      allow_restricted_indices: false
+  applications:
+    - application: 'kibana-.kibana'
+      privileges:
+        - feature_alertzero.all
+        - feature_agentBuilder.read
+        - feature_contextEngine.all
+        - feature_proposals.all
+        - feature_actions.read
+        - feature_workflowsManagement.read
+        - feature_securitySolutionRulesV4.all
+        - feature_fleet.read
+      resources: '*'
+
 # admin role defined in elasticsearch controller
 admin:
+  metadata:
+    _public: true
+    _reserved: true
   cluster: ['all']
   indices:
     - names: ['*']

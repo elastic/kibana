@@ -59,11 +59,16 @@ interface ExecuteToolResult {
 }
 
 export class AgentBuilderEvaluationChatClient {
+  private readonly apiBase: string;
+
   constructor(
     private readonly fetch: HttpHandler,
     private readonly log: ToolingLog,
-    private readonly connectorId: string
-  ) {}
+    private readonly connectorId: string,
+    spaceId?: string
+  ) {
+    this.apiBase = spaceId ? `/s/${spaceId}/api` : '/api';
+  }
 
   private async executeWithRetry<T>(operationName: string, fn: () => Promise<T>): Promise<T> {
     return pRetry(fn, {
@@ -113,7 +118,7 @@ export class AgentBuilderEvaluationChatClient {
       steps?: any[];
       traceId?: string;
     }> => {
-      const chatResponseRaw = await this.fetch('/api/agent_builder/converse', {
+      const chatResponseRaw = await this.fetch(`${this.apiBase}/agent_builder/converse`, {
         method: 'POST',
         version: '2023-10-31',
         body: JSON.stringify({
@@ -150,7 +155,7 @@ export class AgentBuilderEvaluationChatClient {
             );
           }
 
-          const continuation = (await this.fetch('/api/agent_builder/converse', {
+          const continuation = (await this.fetch(`${this.apiBase}/agent_builder/converse`, {
             method: 'POST',
             version: '2023-10-31',
             body: JSON.stringify({
@@ -214,7 +219,7 @@ export class AgentBuilderEvaluationChatClient {
     this.log.info(`Calling executeTool for ${toolId}`);
 
     const callExecuteToolApi = async (): Promise<ExecuteToolResult> => {
-      const response = await this.fetch('/api/agent_builder/tools/_execute', {
+      const response = await this.fetch(`${this.apiBase}/agent_builder/tools/_execute`, {
         method: 'POST',
         version: '2023-10-31',
         body: JSON.stringify({

@@ -63,6 +63,8 @@ describe('ElasticsearchActionStepImpl', () => {
       setInput: jest.fn().mockResolvedValue(undefined),
       stepExecutionId: 'test-step-exec-id',
       node: {},
+      abortController: new AbortController(),
+      getStepTimeoutMs: jest.fn(),
     } as unknown as jest.Mocked<StepExecutionRuntime>;
 
     mockWorkflowRuntime = {
@@ -309,6 +311,54 @@ describe('ElasticsearchActionStepImpl', () => {
           headers: { 'X-Custom-Header': 'value' },
         })
       );
+    });
+  });
+
+  describe('transport options', () => {
+    const stepWith = {
+      method: 'GET',
+      path: '/my-index/_search',
+      headers: { 'X-Custom-Header': 'value' },
+    };
+
+    const runRawStep = async (stepTimeoutMs?: number) => {
+      mockStepExecutionRuntime.getStepTimeoutMs.mockReturnValue(stepTimeoutMs);
+      const step = {
+        id: 'raw_step',
+        type: 'elasticsearch.request',
+        stepId: 'raw_step',
+        stepType: 'elasticsearch.request',
+        configuration: { name: 'raw_step', type: 'elasticsearch.request', with: stepWith },
+      } as unknown as ElasticsearchGraphNode;
+
+      const esStep = new ElasticsearchActionStepImpl(
+        step,
+        mockStepExecutionRuntime,
+        mockWorkflowRuntime,
+        mockWorkflowLogger
+      );
+
+      await (esStep as any)._run(stepWith);
+      return (mockEsClient.transport.request as jest.Mock).mock.calls[0][1];
+    };
+
+    it('should use the step timeout as the request timeout, with the abort signal and headers', async () => {
+      const options = await runRawStep(600_000);
+
+      expect(options).toEqual(
+        expect.objectContaining({
+          requestTimeout: 600_000,
+          signal: mockStepExecutionRuntime.abortController.signal,
+          headers: { 'X-Custom-Header': 'value' },
+        })
+      );
+    });
+
+    it('should keep the client request timeout when the step has no timeout', async () => {
+      const options = await runRawStep();
+
+      expect(options).not.toHaveProperty('requestTimeout');
+      expect(options.signal).toBe(mockStepExecutionRuntime.abortController.signal);
     });
   });
 
