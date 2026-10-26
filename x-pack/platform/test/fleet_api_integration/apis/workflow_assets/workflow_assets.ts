@@ -17,11 +17,13 @@ export default function (providerContext: FtrProviderContext) {
   const fleetAndAgents = getService('fleetAndAgents');
 
   const pkgName = 'workflow_assets';
-  const workflowIdPrefix = `system-fleet-package-workflow-${createHash('sha256')
-    .update('default')
-    .digest('hex')
-    .slice(0, 16)}-${pkgName.replace(/_/g, '-')}`;
-  const workflowId = (name: string) => `${workflowIdPrefix}-${name}`;
+  const hashIdSegment = (value: string) =>
+    createHash('sha256').update(value).digest('hex').slice(0, 16);
+  const workflowIdPrefix = `system-fleet-package-workflow-${hashIdSegment(
+    'default'
+  )}-${hashIdSegment(pkgName)}`;
+  // Fixture files are named `workflow_assets_<name>.yml`
+  const workflowId = (name: string) => `${workflowIdPrefix}-workflow-assets-${name}`;
 
   const installPackage = (version: string) =>
     supertest
