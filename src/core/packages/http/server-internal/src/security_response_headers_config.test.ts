@@ -214,6 +214,44 @@ describe('parseRawSecurityResponseHeadersConfig', () => {
     });
   });
 
+  // An endpoint name outside the token grammar would end the `report-to` parameter and inject
+  // `camera=*` as a further member, so it is dropped and never reaches a header.
+  describe('an invalid report_to', () => {
+    const INJECTING_REPORT_TO = ['violations, camera=*'];
+
+    it('is left out of the built Permissions-Policy header', () => {
+      const result = parse(
+        schema.validate({}),
+        permissionsPolicy({ report_to: INJECTING_REPORT_TO })
+      );
+      expect(result.securityResponseHeaders['Permissions-Policy']).toEqual(DEFAULT_POLICY);
+    });
+
+    it('is left out of the deprecated Permissions-Policy string', () => {
+      const result = parse(
+        schema.validate({ permissionsPolicy: 'camera=()' }),
+        permissionsPolicy({ report_to: INJECTING_REPORT_TO })
+      );
+      expect(result.securityResponseHeaders['Permissions-Policy']).toEqual('camera=()');
+    });
+
+    it('sends no built Permissions-Policy-Report-Only header', () => {
+      const result = parse(
+        schema.validate({}),
+        permissionsPolicy({ report_to: INJECTING_REPORT_TO, report_only: { camera: [] } })
+      );
+      expect(result.securityResponseHeaders['Permissions-Policy-Report-Only']).toBeUndefined();
+    });
+
+    it('sends no deprecated Permissions-Policy-Report-Only string', () => {
+      const result = parse(
+        schema.validate({ permissionsPolicyReportOnly: 'camera=()' }),
+        permissionsPolicy({ report_to: INJECTING_REPORT_TO })
+      );
+      expect(result.securityResponseHeaders['Permissions-Policy-Report-Only']).toBeUndefined();
+    });
+  });
+
   describe('validatePermissionsPolicyConfig', () => {
     it('allows the legacy policy on its own', () => {
       expect(() =>

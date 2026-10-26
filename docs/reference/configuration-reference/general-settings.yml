@@ -346,13 +346,13 @@ groups:
       - setting: permissionsPolicy.report_to
         id: permissionspolicy-report-to
         description: |
-          The reporting endpoint that [`Permissions-Policy`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Permissions-Policy) violation reports are sent to. This is the name of an endpoint group, not a URL. The group must also be declared through `server.customResponseHeaders.Reporting-Endpoints`, which is where its URL is set. Browsers use only the first endpoint in the list, because the `report-to` parameter holds a single token. {{kib}} logs a warning if you configure more than one.
+          The reporting endpoint that [`Permissions-Policy`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Permissions-Policy) violation reports are sent to. This is the name of an endpoint group, not a URL. The group must also be declared through `server.customResponseHeaders.Reporting-Endpoints`, which is where its URL is set. Endpoint names in that header must start with a lowercase letter or `*`, and contain only lowercase letters, digits, and `_`, `-`, `.`, `*`, so use a name such as `violations-endpoint`. Browsers use only the first endpoint in the list, because the `report-to` parameter holds a single token. {{kib}} logs a warning if you configure more than one, or if the first name cannot be declared in `Reporting-Endpoints`.
         datatype: array of strings
         applies_to:
           - "stack: ga"
           - "ech: ga"
           - "self: ga"
-        note: "Violation reports are only delivered when {{kib}} is served over TLS. Over plain HTTP, browsers apply the policy and generate reports but register no reporting endpoints, so nothing is ever sent. Reporting also depends on browser support for the Reporting API, which is currently implemented by Chromium-based browsers; Firefox sends no reports. {{kib}} does not start if a value is not a valid endpoint group name, because an invalid value corrupts the header rather than only disabling reporting."
+        note: "Violation reports are only delivered when {{kib}} is served over TLS. Over plain HTTP, browsers apply the policy and generate reports but register no reporting endpoints, so nothing is ever sent. Reporting also depends on browser support for the Reporting API, which is currently implemented by Chromium-based browsers; Firefox sends no reports. If the first value is not a valid endpoint group name, {{kib}} ignores it and logs a warning, because sending it would corrupt the header. Violation reports stay off until you fix the value."
 
       - setting: permissionsPolicy.camera
         id: permissionspolicy-camera

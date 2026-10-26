@@ -9,9 +9,25 @@
 
 import type { DeprecatedConfigDetails } from '@kbn/config';
 import { configDeprecationFactory } from '@kbn/config';
-import { permissionsPolicyConfig, permissionsPolicyDirectiveSettings } from './config';
+import {
+  getReportingEndpoint,
+  permissionsPolicyConfig,
+  permissionsPolicyDirectiveSettings,
+} from './config';
 
 const validate = (value: Record<string, unknown>) => permissionsPolicyConfig.schema.validate(value);
+
+// A reporting group name is serialized as a structured-field token. Anything outside that grammar
+// terminates the `report-to` parameter, and the remainder is parsed as further members of the
+// policy, which can grant a feature the policy is there to deny.
+const INVALID_REPORTING_GROUP_NAMES = [
+  ['a comma, which injects further policy members', 'violations, camera=*'],
+  ['whitespace', 'violations endpoint'],
+  ['a quote', 'violations"endpoint'],
+  ['a semicolon', 'violations;camera=*'],
+  ['a carriage return and line feed', 'violations\r\nX-Injected: 1'],
+  ['an empty value', ''],
+];
 
 describe('permissionsPolicyConfig', () => {
   it('is registered at the `permissionsPolicy` root path', () => {
@@ -165,23 +181,15 @@ describe('permissionsPolicyConfig', () => {
       expect(validate({ report_to: ['one', 'two'] }).report_to).toEqual(['one', 'two']);
     });
 
-    // A reporting group name is serialized as a structured-field token. Anything outside that
-    // grammar terminates the `report-to` parameter, and the remainder is parsed as further
-    // members of the policy, which can grant a feature the policy is there to deny.
-    it.each([
-      ['a comma, which injects further policy members', 'violations, camera=*'],
-      ['whitespace', 'violations endpoint'],
-      ['a quote', 'violations"endpoint'],
-      ['a semicolon', 'violations;camera=*'],
-      ['a carriage return and line feed', 'violations\r\nX-Injected: 1'],
-      ['an empty value', ''],
-    ])('rejects %s', (_, value) => {
-      expect(() => validate({ report_to: [value] })).toThrow(/must be a reporting group name/);
+    // A bad endpoint name only disables reporting, so it must not stop Kibana from starting. It is
+    // dropped before serialization (see `getReportingEndpoint`) and a deprecation warns.
+    it.each(INVALID_REPORTING_GROUP_NAMES)('accepts, without failing, %s', (_, value) => {
+      expect(validate({ report_to: [value] }).report_to).toEqual([value]);
     });
 
     // `:` and `/` are legal in a structured-field token, so a URL passes the grammar. Kibana
     // cannot tell a mistyped endpoint from a group name, because the names are declared in the
-    // free-form `server.customResponseHeaders.Reporting-Endpoints` header.
+    // free-form `server.customResponseHeaders.Reporting-Endpoints` header. A deprecation warns.
     it('accepts a URL, which is a valid token even though it is not a group name', () => {
       expect(validate({ report_to: ['https://example.com/reports'] }).report_to).toEqual([
         'https://example.com/reports',
@@ -223,6 +231,77 @@ describe('permissionsPolicyConfig', () => {
       expect(deprecation.level).toEqual('warning');
       expect(deprecation.configPath).toEqual('permissionsPolicy.report_to');
       expect(deprecation.message).toContain('use only the first one, "first"');
+    });
+
+    it.each(['violations-endpoint', 'csp_reports.v2', '*'])(
+      'emits nothing for an endpoint name that "Reporting-Endpoints" can declare: %s',
+      (name) => {
+        expect(collect({ report_to: [name] })).toEqual([]);
+      }
+    );
+
+    // These are valid tokens, so Kibana starts and the header is intact, but "Reporting-Endpoints"
+    // member names are lowercase structured-field keys, so no endpoint can ever match.
+    it.each([
+      ['an uppercase letter', 'Violations'],
+      ['a character outside the key grammar', 'violations~endpoint'],
+      ['a URL', 'https://example.com/reports'],
+    ])('warns, without failing, when the endpoint name contains %s', (_, name) => {
+      expect(() => validate({ report_to: [name] })).not.toThrow();
+      const [deprecation] = collect({ report_to: [name] });
+      expect(deprecation.level).toEqual('warning');
+      expect(deprecation.configPath).toEqual('permissionsPolicy.report_to');
+      expect(deprecation.message).toContain(`Browsers cannot match "${name}" to an endpoint`);
+    });
+
+    it('checks only the first endpoint, which is the one browsers use', () => {
+      const deprecations = collect({ report_to: ['violations-endpoint', 'Second'] });
+      expect(deprecations.map(({ title }) => title)).toEqual([
+        'Setting "permissionsPolicy.report_to" accepts only one reporting endpoint',
+      ]);
+    });
+
+    it.each(INVALID_REPORTING_GROUP_NAMES)(
+      'warns that the endpoint is ignored when it contains %s',
+      (_, name) => {
+        const [deprecation] = collect({ report_to: [name] });
+        expect(deprecation.level).toEqual('warning');
+        expect(deprecation.configPath).toEqual('permissionsPolicy.report_to');
+        expect(deprecation.title).toEqual('Setting "permissionsPolicy.report_to" is ignored');
+        expect(deprecation.message).toContain('Kibana ignores it');
+      }
+    );
+
+    it('warns about both an ignored first endpoint and the extra endpoints', () => {
+      const deprecations = collect({ report_to: ['bad name', 'good'] });
+      expect(deprecations.map(({ title }) => title)).toEqual([
+        'Setting "permissionsPolicy.report_to" accepts only one reporting endpoint',
+        'Setting "permissionsPolicy.report_to" is ignored',
+      ]);
+    });
+  });
+
+  describe('getReportingEndpoint', () => {
+    it('returns nothing when no endpoint is configured', () => {
+      expect(getReportingEndpoint(validate({}))).toBeUndefined();
+    });
+
+    it('returns the first endpoint', () => {
+      expect(getReportingEndpoint(validate({ report_to: ['first', 'second'] }))).toEqual('first');
+    });
+
+    // A name that cannot match an endpoint still serializes safely, so it is sent as configured.
+    it('returns a valid token even when it cannot match an endpoint', () => {
+      expect(getReportingEndpoint(validate({ report_to: ['Violations'] }))).toEqual('Violations');
+    });
+
+    it.each(INVALID_REPORTING_GROUP_NAMES)('drops an endpoint with %s', (_, name) => {
+      expect(getReportingEndpoint(validate({ report_to: [name] }))).toBeUndefined();
+    });
+
+    // Only the first endpoint was ever used, so a later valid one does not take its place.
+    it('does not fall back to a later endpoint when the first is dropped', () => {
+      expect(getReportingEndpoint(validate({ report_to: ['bad name', 'good'] }))).toBeUndefined();
     });
   });
 

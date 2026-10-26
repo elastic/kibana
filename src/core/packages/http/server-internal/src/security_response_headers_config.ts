@@ -15,6 +15,7 @@ import type {
   PermissionsPolicyDirectiveSetting,
 } from './permissions_policy';
 import {
+  getReportingEndpoint,
   PermissionsPolicyDirectives,
   permissionsPolicyDirectiveSettings,
 } from './permissions_policy';
@@ -153,7 +154,8 @@ export function parseRawSecurityResponseHeadersConfig(
     securityResponseHeaders['Referrer-Policy'] = raw.referrerPolicy;
   }
 
-  const reportTo = rawPermissionsPolicyConfig.report_to?.[0];
+  // An invalid endpoint name is dropped here, so it never reaches either header.
+  const reportTo = getReportingEndpoint(rawPermissionsPolicyConfig);
   const reportToParameter = reportTo ? `;report-to=${reportTo}` : '';
   const { enforceHeader, reportOnlyHeader } = PermissionsPolicyDirectives.fromConfig(
     rawPermissionsPolicyConfig

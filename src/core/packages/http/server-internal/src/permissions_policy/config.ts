@@ -105,23 +105,12 @@ const reportOnlyDirectiveSchema = () => schema.maybe(directiveArraySchema());
  */
 const REPORTING_GROUP_NAME = /^[A-Za-z*][A-Za-z0-9!#$%&'*+\-.^_`|~:/]*$/;
 
-const validateReportingGroupName = (value: string) => {
-  if (!REPORTING_GROUP_NAME.test(value)) {
-    return (
-      `"${value}" must be a reporting group name, which starts with a letter or * and ` +
-      "contains only letters, digits and !#$%&'*+-.^_`|~:/"
-    );
-  }
-};
-
-const reportingGroupNameValidator = (values: string[]) => {
-  for (const value of values) {
-    const error = validateReportingGroupName(value);
-    if (error) {
-      return error;
-    }
-  }
-};
+/**
+ * RFC 8941 sf-key, the grammar of a member name in the `Reporting-Endpoints` header. A token
+ * outside it, such as one with an uppercase letter, can never name a declared endpoint, so the
+ * browser sends no reports.
+ */
+const REPORTING_ENDPOINT_NAME = /^[a-z*][a-z0-9_\-.*]*$/;
 
 const directivesSchema = <T>(directive: () => T) => ({
   camera: directive(),
@@ -152,11 +141,11 @@ const configSchema = schema.object(
     enabled: schema.boolean({ defaultValue: true }),
     ...directivesSchema(directiveSchema),
     report_only: schema.maybe(schema.object(directivesSchema(reportOnlyDirectiveSchema))),
-    // `report_to` is GA, so only the token grammar is enforced: it rejects exactly the values that
-    // corrupt the header. Extra endpoints are ignored by browsers, and the deprecation below warns.
+    // `report_to` is GA, and a bad value only disables reporting, so no value is rejected here. A
+    // name that would corrupt the header is dropped by `getReportingEndpoint`, and the
+    // deprecations below warn about it.
     report_to: schema.arrayOf(schema.string(), {
       defaultValue: [],
-      validate: reportingGroupNameValidator,
     }),
   },
   {
@@ -183,6 +172,18 @@ const configSchema = schema.object(
  */
 export type PermissionsPolicyConfigType = TypeOf<typeof configSchema>;
 
+/**
+ * Returns the reporting endpoint to send in the `report-to` parameter, or `undefined` when there is
+ * none. Browsers use only the first endpoint, and a first endpoint that is not a token is dropped,
+ * because it would corrupt the header.
+ */
+export const getReportingEndpoint = ({
+  report_to: reportTo,
+}: Pick<PermissionsPolicyConfigType, 'report_to'>): string | undefined => {
+  const [name] = reportTo ?? [];
+  return name !== undefined && REPORTING_GROUP_NAME.test(name) ? name : undefined;
+};
+
 export const permissionsPolicyConfig: ServiceConfigDescriptor<PermissionsPolicyConfigType> = {
   path: 'permissionsPolicy',
   schema: configSchema,
@@ -201,6 +202,32 @@ export const permissionsPolicyConfig: ServiceConfigDescriptor<PermissionsPolicyC
           correctiveActions: {
             manualSteps: [
               `Set "${fromPath}.report_to" to a single endpoint, for example "${fromPath}.report_to: ['${reportTo[0]}']".`,
+            ],
+          },
+        });
+      }
+    },
+    (settings, fromPath, addDeprecation) => {
+      const reportTo = get(settings, `${fromPath}.report_to`);
+      const [name] = Array.isArray(reportTo) ? reportTo : [];
+      // Endpoint names in the "Reporting-Endpoints" header are lowercase structured-field keys, so
+      // a name outside that grammar never receives reports. A name that is not even a token would
+      // corrupt the header, so it is dropped as well. Warn rather than fail: this setting ships
+      // today, and a bad value does not stop Kibana from working.
+      if (typeof name === 'string' && !REPORTING_ENDPOINT_NAME.test(name)) {
+        const isDropped = !REPORTING_GROUP_NAME.test(name);
+        addDeprecation({
+          level: 'warning',
+          configPath: `${fromPath}.report_to`,
+          title: isDropped
+            ? `Setting "${fromPath}.report_to" is ignored`
+            : `Setting "${fromPath}.report_to" names an endpoint that browsers cannot match`,
+          message: isDropped
+            ? `"${fromPath}.report_to" is set to "${name}", which is not a valid reporting endpoint name and would corrupt the permissions policy. Kibana ignores it, so it sends no "report-to" parameter and no "Permissions-Policy-Report-Only" header, and no permissions policy violation reports are sent.`
+            : `"${fromPath}.report_to" is set to "${name}", but endpoint names in the "Reporting-Endpoints" header can contain only lowercase letters, digits, and _-.*, and must start with a lowercase letter or *. Browsers cannot match "${name}" to an endpoint, so they send no permissions policy violation reports.`,
+          correctiveActions: {
+            manualSteps: [
+              `Rename the endpoint in both "${fromPath}.report_to" and "server.customResponseHeaders.Reporting-Endpoints" to a name that uses only lowercase letters, digits, and _-.*, for example "violations-endpoint".`,
             ],
           },
         });
