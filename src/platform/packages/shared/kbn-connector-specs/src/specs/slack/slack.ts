@@ -204,7 +204,7 @@ async function slackRequestWithRateLimitRetry<TData>(params: {
  * - channels:read, groups:read, im:read, mpim:read - list public channels, private channels, DMs, and group DMs
  * - channels:history, groups:history, im:history, mpim:history - read message history from each conversation type
  * - chat:write - send messages and edit the messages it sent
- * - channels:manage - create public channels and invite users (bot tokens)
+ * - channels:write - create public channels and invite users (user tokens; channels:manage is bot-only)
  * - groups:write - create private channels and invite users
  * - search:read.public, search:read.private, search:read.im, search:read.mpim, search:read.files - search messages and files
  * - files:read - look up file metadata (getFileInfo, listFiles) and file references on messages
@@ -238,10 +238,10 @@ export const Slack: ConnectorSpec = {
         defaults: {
           provider: 'slack',
           // reactions:write needed for addReaction; files:write needed for uploadFile.
-          // channels:manage needed for createConversation/inviteToConversation on public channels (bot tokens).
+          // channels:write (user scope; channels:manage is bot-only) needed for createConversation/inviteToConversation on public channels.
           // groups:write needed for createConversation/inviteToConversation on private channels.
           scope:
-            'channels:manage channels:read channels:history chat:write files:read files:write groups:read groups:history groups:write im:read im:history mpim:read mpim:history reactions:write search:read.files search:read.im search:read.mpim search:read.private search:read.public users:read users:read.email',
+            'channels:write channels:read channels:history chat:write files:read files:write groups:read groups:history groups:write im:read im:history mpim:read mpim:history reactions:write search:read.files search:read.im search:read.mpim search:read.private search:read.public users:read users:read.email',
         },
       },
       {
@@ -1650,6 +1650,7 @@ export const Slack: ConnectorSpec = {
       }
       return {};
     },
+    enabled: true,
   },
 
   skill: [
