@@ -41,21 +41,23 @@ const checkParameters = (operation: ContractOperation, input: RequestInput): Vio
 
 // Schemas can't express these, but vendors reject such query strings.
 const checkQueryEncoding = (
-  { parameters, security }: ContractOperation,
+  { parameters, security, fixedQuery = [] }: ContractOperation,
   { query }: RequestInput
 ): Violation[] => {
   const declared = parameters.filter((parameter) => parameter.in === 'query');
-  // API keys sent in the query are declared by security schemes, not as parameters.
-  const credentials = new Set(
-    security
+  // API keys sent in the query are declared by security schemes, not as parameters, and the
+  // query parameters of `x-ms-paths` keys by the key.
+  const implied = new Set([
+    ...security
       .flat()
-      .flatMap(({ credential }) => (credential?.in === 'query' ? [credential.name] : []))
-  );
+      .flatMap(({ credential }) => (credential?.in === 'query' ? [credential.name] : [])),
+    ...fixedQuery.map(({ name }) => name),
+  ]);
   const undeclared = Object.keys(query)
     .filter(
       (key) =>
         key !== MOCK_PAGE_PARAM &&
-        !credentials.has(key) &&
+        !implied.has(key) &&
         !declared.some(
           ({ name, style }) =>
             key === name || (style === 'deepObject' && key.startsWith(`${name}[`))
