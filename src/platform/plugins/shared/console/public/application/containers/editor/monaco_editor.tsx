@@ -233,8 +233,12 @@ export const MonacoEditor = ({
   }, [fileToImport, requestToRestoreFromHistory, dispatch, context, editorDispatch]);
 
   useEffect(() => {
-    updateEditor();
-  }, [updateEditor]);
+    // `editorInstance` is set right after the actions provider, so gating on it keeps a
+    // request that arrived before the editor mounted pending instead of clearing it unapplied.
+    if (editorInstance) {
+      updateEditor();
+    }
+  }, [updateEditor, editorInstance]);
 
   return (
     <div
