@@ -492,6 +492,68 @@ describe('resolveResource', () => {
     });
   });
 
+  describe('resolveResourceForEsql with only the read index privilege', () => {
+    // `read` grants _resolve/index and _field_caps, but not the metadata APIs
+    // (_data_stream, _mapping, _settings), which need view_index_metadata.
+    const forbidden = (action: string) =>
+      new esErrors.ResponseError({
+        statusCode: 403,
+        body: {
+          error: { type: 'security_exception', reason: `action [${action}] is unauthorized` },
+        },
+      } as any);
+
+    beforeEach(() => {
+      esClient.fieldCaps.mockResolvedValue({
+        indices: ['.ds-logs-okta.system-default-001'],
+        fields: {
+          'user.name': { keyword: { type: 'keyword', searchable: true, aggregatable: true } },
+        },
+      });
+      esClient.indices.getDataStream.mockRejectedValue(forbidden('indices:admin/data_stream/get'));
+      esClient.indices.getMapping.mockRejectedValue(forbidden('indices:admin/mappings/get'));
+      esClient.indices.getSettings.mockRejectedValue(forbidden('indices:monitor/settings/get'));
+    });
+
+    it('resolves a pattern that matches a single data stream', async () => {
+      esClient.indices.resolveIndex.mockResolvedValue({
+        indices: [],
+        aliases: [],
+        data_streams: [
+          {
+            name: 'logs-okta.system-default',
+            backing_indices: ['.ds-logs-okta.system-default-001'],
+            timestamp_field: '@timestamp',
+          },
+        ],
+      });
+
+      const result = await resolveResourceForEsql({
+        resourceName: 'logs-okta.system-*',
+        esClient,
+      });
+
+      expect(result.type).toBe(EsResourceType.dataStream);
+      expect(result.fields).toEqual([expect.objectContaining({ path: 'user.name' })]);
+    });
+
+    it('resolves a pattern that matches a single index', async () => {
+      esClient.indices.resolveIndex.mockResolvedValue({
+        indices: [{ name: 'logs-okta-legacy', attributes: ['open'] }],
+        aliases: [],
+        data_streams: [],
+      });
+
+      const result = await resolveResourceForEsql({
+        resourceName: 'logs-okta-legacy*',
+        esClient,
+      });
+
+      expect(result.type).toBe(EsResourceType.index);
+      expect(result.fields).toEqual([expect.objectContaining({ path: 'user.name' })]);
+    });
+  });
+
   describe('isTsdb flag', () => {
     it('ignores field markers for concrete index and follows index.mode setting', async () => {
       // Index advertises time_series in settings, even with no field-level markers -> true
