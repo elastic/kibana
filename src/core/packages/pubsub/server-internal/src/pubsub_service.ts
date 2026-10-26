@@ -9,7 +9,7 @@
 
 import type { Logger } from '@kbn/logging';
 import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
-import { defineTopic, type Topic } from '@kbn/core-pubsub-server';
+import { assertTopicName, type Topic } from '@kbn/core-pubsub-server';
 import type { InternalPubSubSetup } from './internal_contracts';
 
 type Phase = 'created' | 'setup' | 'started' | 'stopped';
@@ -58,7 +58,7 @@ export class PubSubService implements CoreService<InternalPubSubSetup, void> {
     }
 
     // A cast can still skip `defineTopic`. Re-check the name here.
-    defineTopic(topic.name);
+    assertTopicName(topic.name);
 
     const registeredBy = this.topics.get(topic.name);
     if (registeredBy) {

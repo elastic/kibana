@@ -17,15 +17,15 @@ interface NamedData {
   name: string;
 }
 type NamedTopic = Topic<NamedData, 'cases.updated'>;
-const topicFromData = defineTopic<NamedData>('cases.updated');
+type OrdersTopic = Topic<never, 'orders'>;
+type AnyNameTopic = Topic<never, string>;
+
 const topicFromSharedType = defineTopic<NamedTopic>('cases.updated');
-const topicWithoutType = defineTopic('orders');
-const _typedName: Topic<NamedData, string> = topicFromData;
+const nameOnly = defineTopic<OrdersTopic>('orders');
 const _sharedType: Topic<NamedData, 'cases.updated'> = topicFromSharedType;
-const _untyped: Topic<never, string> = topicWithoutType;
-void _typedName;
+const _nameOnly: Topic<never, 'orders'> = nameOnly;
 void _sharedType;
-void _untyped;
+void _nameOnly;
 
 describe('PubSubService registration', () => {
   const createService = () => new PubSubService(mockCoreContext.create());
@@ -33,15 +33,17 @@ describe('PubSubService registration', () => {
   it('registers a topic during setup', () => {
     const setup = createService().setup();
 
-    expect(() => setup.registerTopic('ordersPlugin', defineTopic('orders'))).not.toThrow();
+    expect(() =>
+      setup.registerTopic('ordersPlugin', defineTopic<OrdersTopic>('orders'))
+    ).not.toThrow();
   });
 
   it('throws when the same topic name is registered twice, naming the first registrant', () => {
     const setup = createService().setup();
 
-    setup.registerTopic('ordersPlugin', defineTopic('orders'));
+    setup.registerTopic('ordersPlugin', defineTopic<OrdersTopic>('orders'));
 
-    expect(() => setup.registerTopic('shippingPlugin', defineTopic('orders'))).toThrow(
+    expect(() => setup.registerTopic('shippingPlugin', defineTopic<OrdersTopic>('orders'))).toThrow(
       'Topic "orders" is already registered by "ordersPlugin".'
     );
   });
@@ -49,9 +51,9 @@ describe('PubSubService registration', () => {
   it('throws when the same plugin registers the same topic twice', () => {
     const setup = createService().setup();
 
-    setup.registerTopic('ordersPlugin', defineTopic('orders'));
+    setup.registerTopic('ordersPlugin', defineTopic<OrdersTopic>('orders'));
 
-    expect(() => setup.registerTopic('ordersPlugin', defineTopic('orders'))).toThrow(
+    expect(() => setup.registerTopic('ordersPlugin', defineTopic<OrdersTopic>('orders'))).toThrow(
       'Topic "orders" is already registered by "ordersPlugin".'
     );
   });
@@ -61,18 +63,18 @@ describe('PubSubService registration', () => {
     const setup = service.setup();
     service.start();
 
-    expect(() => setup.registerTopic('ordersPlugin', defineTopic('orders'))).toThrow(
+    expect(() => setup.registerTopic('ordersPlugin', defineTopic<OrdersTopic>('orders'))).toThrow(
       'Cannot register topic "orders" outside of setup.'
     );
   });
 
   it('throws when a topic name has an empty segment, a trailing dot, or is too long', () => {
-    expect(() => defineTopic('')).toThrow(/invalid/i);
-    expect(() => defineTopic('has space')).toThrow(/invalid/i);
-    expect(() => defineTopic('a..b')).toThrow(/invalid/i);
-    expect(() => defineTopic('orders.')).toThrow(/invalid/i);
-    expect(() => defineTopic('a'.repeat(257))).toThrow(/invalid/i);
-    expect(() => defineTopic('cases.updated')).not.toThrow();
+    expect(() => defineTopic<AnyNameTopic>('')).toThrow(/invalid/i);
+    expect(() => defineTopic<AnyNameTopic>('has space')).toThrow(/invalid/i);
+    expect(() => defineTopic<AnyNameTopic>('a..b')).toThrow(/invalid/i);
+    expect(() => defineTopic<AnyNameTopic>('orders.')).toThrow(/invalid/i);
+    expect(() => defineTopic<AnyNameTopic>('a'.repeat(257))).toThrow(/invalid/i);
+    expect(() => defineTopic<NamedTopic>('cases.updated')).not.toThrow();
   });
 
   it('throws when a topic is registered without going through defineTopic', () => {

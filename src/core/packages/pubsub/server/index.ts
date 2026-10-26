@@ -7,6 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { defineTopic } from './src/topic';
+export { assertTopicName, defineTopic } from './src/topic';
 export type { Topic } from './src/topic';
 export type { PubSubSetup } from './src/contracts';

@@ -36,40 +36,40 @@ const TOPIC_NAME_MAX_LENGTH = 256;
  */
 const TOPIC_NAME_PATTERN = /^[a-zA-Z][a-zA-Z0-9_-]*(\.[a-zA-Z][a-zA-Z0-9_-]*)*$/;
 
-type DefineTopicName<T> = [T] extends [never]
-  ? string
-  : [T] extends [Topic<unknown, infer TName>]
-  ? TName
-  : string;
-
-type DefineTopicResult<T> = [T] extends [never]
-  ? Topic<never, string>
-  : [T] extends [Topic<infer TData, infer TName extends string>]
-  ? Topic<TData, TName>
-  : Topic<T, string>;
-
 /**
- * Returns a topic token. Registration is a separate setup call.
+ * Rejects a topic name that {@link defineTopic} would reject. Used when a caller can skip
+ * `defineTopic` with a cast.
  *
- * Pass the event data, or a shared {@link Topic} type so the name is checked too. Producers and
- * consumers each call this. Don't import another plugin's token. Share the topic type from a small
- * types-only package so the plugins don't reference each other.
- *
- * ```ts
- * type PingTopic = Topic<PingData, 'pubsubExample.ping'>;
- * defineTopic<PingData>('pubsubExample.ping');
- * defineTopic<PingTopic>('pubsubExample.ping');
- * ```
- *
- * With no type argument the data type is `never`.
+ * @internal
  */
-export const defineTopic = <T = never>(name: DefineTopicName<T>): DefineTopicResult<T> => {
+export const assertTopicName = (name: string): void => {
   if (name.length > TOPIC_NAME_MAX_LENGTH || !TOPIC_NAME_PATTERN.test(name)) {
     throw new Error(
       `Topic name "${name}" is invalid. Use dot-separated segments of letters, numbers, "_" or "-", each starting with a letter.`
     );
   }
+};
+
+/**
+ * Returns a topic token. Registration is a separate setup call.
+ *
+ * Pass a shared {@link Topic} type so the name is checked. Producers and consumers each call this.
+ * Don't import another plugin's token. Share the topic type from a small types-only package so the
+ * plugins don't reference each other.
+ *
+ * ```ts
+ * type PingTopic = Topic<PingData, 'pubsubExample.ping'>;
+ * defineTopic<PingTopic>('pubsubExample.ping');
+ * ```
+ *
+ * A type argument is required. `Topic` defaults to `never` data, so a name-only topic
+ * (`Topic<never, 'orders'>`) cannot be published on.
+ */
+export const defineTopic = <TTopic extends Topic<unknown, string> = never>(
+  name: [TTopic] extends [never] ? never : TTopic['name']
+): TTopic => {
+  assertTopicName(name);
 
   // The brand exists only in the type. The runtime token is the name.
-  return { name } as unknown as DefineTopicResult<T>;
+  return { name } as unknown as TTopic;
 };
