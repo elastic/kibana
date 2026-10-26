@@ -24,6 +24,7 @@ import {
   EuiAccordion,
   EuiIconTip,
   EuiButtonGroup,
+  useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -72,6 +73,9 @@ export const GridSettingsFlyout = ({
   onGridSettingsChange,
   onClose,
 }: GridSettingsFlyoutProps) => {
+  const { euiTheme } = useEuiTheme();
+  // EUI drops the size "s" width cap when maxWidth is omitted. This restores that cap.
+  const maxWidth = Math.round(euiTheme.breakpoint.s * 0.7);
   const { trackAggregationConfigChanged } = useTelemetry();
   const titleId = useGeneratedHtmlId({ prefix: 'metricsGridSettingsFlyoutTitle' });
   const aggregationAccordionId = useGeneratedHtmlId({
@@ -255,6 +259,7 @@ export const GridSettingsFlyout = ({
     <EuiFlyout
       onClose={onClose}
       size="s"
+      maxWidth={maxWidth}
       type="push"
       ownFocus
       data-test-subj="metricsExperienceGridSettingsFlyout"

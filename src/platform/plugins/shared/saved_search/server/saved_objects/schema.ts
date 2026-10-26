@@ -9,10 +9,7 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
-import {
-  HistogramPercentileValue,
-  METRICS_GRID_HISTOGRAM_VISUALIZATIONS,
-} from '@kbn/discover-utils';
+import { HistogramPercentileValue, HistogramVisualizationValue } from '@kbn/discover-utils';
 import { DataGridDensity, DiscoverTabType } from '@kbn/discover-session-constants';
 import { FunctionNames } from '@kbn/esql-language';
 import type { SavedObjectsModelVersionMap } from '@kbn/core-saved-objects-server';
@@ -208,8 +205,8 @@ const SCHEMA_SIMPLE_AGGREGATION = schema.oneOf([
 ]);
 
 const SCHEMA_HISTOGRAM_VISUALIZATION = schema.oneOf([
-  schema.literal(METRICS_GRID_HISTOGRAM_VISUALIZATIONS[0]),
-  schema.literal(METRICS_GRID_HISTOGRAM_VISUALIZATIONS[1]),
+  schema.literal(`${HistogramVisualizationValue.LnsXY}`),
+  schema.literal(`${HistogramVisualizationValue.LnsHeatmap}`),
 ]);
 
 const SCHEMA_HISTOGRAM_PERCENTILE = schema.oneOf([

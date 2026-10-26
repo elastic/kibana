@@ -31,6 +31,17 @@ export enum HistogramPercentileValue {
   P99 = 'p99',
 }
 
+/**
+ * How a histogram metric is drawn. Values match the Lens saved-object
+ * `visualizationType` for the same graph. Add a member here to offer another
+ * choice. Keep these values aligned with `METRICS_GRID_HISTOGRAM_VISUALIZATIONS`
+ * in `@kbn/discover-session-constants`, which the session API validates.
+ */
+export enum HistogramVisualizationValue {
+  LnsXY = 'lnsXY',
+  LnsHeatmap = 'lnsHeatmap',
+}
+
 export const METRICS_GRID_HISTOGRAM_PERCENTILES = [
   `${HistogramPercentileValue.P50}`,
   `${HistogramPercentileValue.P75}`,
@@ -49,16 +60,15 @@ export const METRICS_GRID_HISTOGRAM_PERCENTILES = [
  */
 export type HistogramPercentile = (typeof METRICS_GRID_HISTOGRAM_PERCENTILES)[number];
 
-/**
- * How a histogram metric is drawn. Values match the Lens saved-object
- * `visualizationType` for the same graph. Add a value here to offer another
- * choice. Kept off the public session API until these visualizations are released.
- */
-export const METRICS_GRID_HISTOGRAM_VISUALIZATIONS = ['lnsXY', 'lnsHeatmap'] as const;
+export const METRICS_GRID_HISTOGRAM_VISUALIZATIONS = [
+  `${HistogramVisualizationValue.LnsXY}`,
+  `${HistogramVisualizationValue.LnsHeatmap}`,
+] as const;
 
 export type HistogramVisualization = (typeof METRICS_GRID_HISTOGRAM_VISUALIZATIONS)[number];
 
-export const isHistogramVisualization = (value: string): value is HistogramVisualization =>
+export const isHistogramVisualization = (value: unknown): value is HistogramVisualization =>
+  typeof value === 'string' &&
   (METRICS_GRID_HISTOGRAM_VISUALIZATIONS as readonly string[]).includes(value);
 
 /** True when this visualization draws a heatmap instead of the percentile series. */

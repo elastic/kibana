@@ -429,7 +429,12 @@ describe('useLensProps', () => {
   it('builds a heatmap with the same config builder as XY charts', async () => {
     const chartRef = createMockChartRef();
     const query = 'TS metrics-a | STATS count = COUNT(latency) BY bucket, TBUCKET(100)';
-    const heatmapConfig = buildHistogramHeatmapConfig({ query, title: 'latency' });
+    const heatmapConfig = buildHistogramHeatmapConfig({
+      query,
+      title: 'latency',
+      seriesColor: '#1BA9F5',
+      backgroundColor: '#FFFFFF',
+    });
 
     const { result } = renderHook(() =>
       useLensProps({

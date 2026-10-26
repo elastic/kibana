@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { isTemplateRequiredConnector, type InferenceConnector } from '@kbn/inference-common';
 import { NO_DEFAULT_MODEL } from '../../../common/constants';
 import { getModelStatus } from '../../utils/eis_utils';
+import { isConnectorUnavailableUnderRegionPolicy } from '../../utils/is_unavailable_under_region_policy';
 import { EisModelStatus } from '../../types';
 
 export const noDefaultModelOption = (): EuiComboBoxOptionOption<string> => ({
@@ -57,14 +58,20 @@ export const getGlobalModelComboOptions = (
   connectors: InferenceConnector[] | undefined,
   includeNoDefaultOption: boolean
 ): EuiComboBoxOptionOption<string>[] => {
-  const selectable = connectors?.filter((connector) => !isTemplateRequiredConnector(connector));
-  const preconfigured =
-    selectable?.filter((c) => c.isPreconfigured).map(connectorToGlobalModelComboOption) ?? [];
+  const selectable =
+    connectors?.filter(
+      (connector) =>
+        !isTemplateRequiredConnector(connector) &&
+        !isConnectorUnavailableUnderRegionPolicy(connector)
+    ) ?? [];
 
-  const custom =
-    selectable
-      ?.filter((c) => !c.isPreconfigured)
-      .map((c) => ({ label: c.name, value: c.connectorId })) ?? [];
+  const preconfigured = selectable
+    .filter((c) => c.isPreconfigured)
+    .map(connectorToGlobalModelComboOption);
+
+  const custom = selectable
+    .filter((c) => !c.isPreconfigured)
+    .map((c) => ({ label: c.name, value: c.connectorId }));
 
   const connectorGroups: EuiComboBoxOptionOption<string>[] = [
     {

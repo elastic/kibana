@@ -30,23 +30,23 @@ export const alertTimelineStatusColor = (
 export const alertTimelineStatusLabel = (status: AlertEpisodeStatus): string => {
   switch (status) {
     case ALERT_EPISODE_STATUS.PENDING:
-      return i18n.translate('xpack.alertingV2.alertTimeline.status.pending', {
+      return i18n.translate('xpack.alertingV2EpisodesUi.alertTimeline.status.pending', {
         defaultMessage: 'Pending',
       });
     case ALERT_EPISODE_STATUS.ACTIVE:
-      return i18n.translate('xpack.alertingV2.alertTimeline.status.active', {
+      return i18n.translate('xpack.alertingV2EpisodesUi.alertTimeline.status.active', {
         defaultMessage: 'Active',
       });
     case ALERT_EPISODE_STATUS.RECOVERING:
-      return i18n.translate('xpack.alertingV2.alertTimeline.status.recovering', {
+      return i18n.translate('xpack.alertingV2EpisodesUi.alertTimeline.status.recovering', {
         defaultMessage: 'Recovering',
       });
     case ALERT_EPISODE_STATUS.INACTIVE:
-      return i18n.translate('xpack.alertingV2.alertTimeline.status.inactive', {
+      return i18n.translate('xpack.alertingV2EpisodesUi.alertTimeline.status.inactive', {
         defaultMessage: 'Inactive',
       });
     default:
-      return i18n.translate('xpack.alertingV2.alertTimeline.status.unknown', {
+      return i18n.translate('xpack.alertingV2EpisodesUi.alertTimeline.status.unknown', {
         defaultMessage: 'Unknown',
       });
   }

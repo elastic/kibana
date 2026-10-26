@@ -14,13 +14,15 @@ import { isHttpFetchError } from '@kbn/core-http-browser';
 import { ApprovalContent } from '@kbn/proposals-ui';
 import type { ApprovalAction, DeclineParams } from '@kbn/proposals-ui';
 import { getUserDisplayName } from '@kbn/user-profile-components';
-import { isAwaitingDecision } from '@kbn/proposals-common';
+import { isAwaitingDecision, isTodoProposal } from '@kbn/proposals-common';
 import {
   useApproveProposal,
   useDismissProposal,
   useIsApprovingProposal,
   useIsDecliningProposal,
+  useIsReopeningProposal,
   useProposal,
+  useReopenProposal,
 } from '../hooks/use_proposals_api';
 import { useCurrentUserProfile } from '../hooks/use_current_user_profile';
 
@@ -76,6 +78,8 @@ export const ProposalApprovalCard = memo<ProposalApprovalCardProps>(({ proposalI
   const proposalQuery = useProposal(proposalId);
   const approveMutation = useApproveProposal();
   const dismissMutation = useDismissProposal();
+  const reopenMutation = useReopenProposal();
+  const isReopening = useIsReopeningProposal(proposalId);
   const isApproving = useIsApprovingProposal(proposalId);
   const isDeclining = useIsDecliningProposal(proposalId);
   const isSubmitting = isApproving ? 'applying' : isDeclining ? 'declining' : undefined;
@@ -110,6 +114,14 @@ export const ProposalApprovalCard = memo<ProposalApprovalCardProps>(({ proposalI
     [dismissMutation, proposalId]
   );
 
+  const handleReopen = useCallback(async () => {
+    try {
+      await reopenMutation.mutateAsync({ id: proposalId });
+    } catch (err) {
+      throw toFriendlyError(err);
+    }
+  }, [reopenMutation, proposalId]);
+
   const liveProposal = proposalQuery.data;
 
   if (proposalQuery.isLoading) {
@@ -130,19 +142,27 @@ export const ProposalApprovalCard = memo<ProposalApprovalCardProps>(({ proposalI
   const isReplaced =
     liveProposal.supersededBy !== undefined || liveProposal.status === 'superseded';
   const isPending = isAwaitingDecision(liveProposal);
-  const secondaryActions: ApprovalAction[] | undefined = isReplaced
-    ? [
-        {
-          label: i18n.translate('xpack.proposals.proposalCard.dismiss', {
-            defaultMessage: 'Dismiss',
-          }),
-          color: 'danger',
-          onClick: () => undefined,
-          isDisabled: true,
-          'data-test-subj': `proposalDismiss-${proposalId}`,
-        },
-      ]
-    : undefined;
+  // Marked as applied, then as not applied: the successor card below it is the live one, and
+  // there is nothing on this one left to decide.
+  const isUnapplied =
+    isReplaced &&
+    isTodoProposal(liveProposal) &&
+    liveProposal.decision === 'approved' &&
+    liveProposal.status === 'no_action';
+  const secondaryActions: ApprovalAction[] | undefined =
+    isReplaced && !isUnapplied
+      ? [
+          {
+            label: i18n.translate('xpack.proposals.proposalCard.dismiss', {
+              defaultMessage: 'Dismiss',
+            }),
+            color: 'danger',
+            onClick: () => undefined,
+            isDisabled: true,
+            'data-test-subj': `proposalDismiss-${proposalId}`,
+          },
+        ]
+      : undefined;
 
   return (
     <div
@@ -156,9 +176,11 @@ export const ProposalApprovalCard = memo<ProposalApprovalCardProps>(({ proposalI
         readOnly={isReplaced}
         isSubmitting={isReplaced ? undefined : isSubmitting}
         currentActorName={currentActorName}
-        onApprove={isPending || isReplaced ? handleApprove : undefined}
+        onApprove={(isPending || isReplaced) && !isUnapplied ? handleApprove : undefined}
         secondaryActions={secondaryActions}
         onDismiss={isPending && !isReplaced ? handleDismiss : undefined}
+        onReopen={handleReopen}
+        isReopening={isReopening}
         data-test-subj={`proposalCard-${proposalId}`}
       />
       {isReplaced && (
@@ -168,9 +190,15 @@ export const ProposalApprovalCard = memo<ProposalApprovalCardProps>(({ proposalI
             <KbnInfoCallout
               announceOnMount
               size="s"
-              title={i18n.translate('xpack.proposals.proposalCard.replacedTitle', {
-                defaultMessage: 'This proposal has been replaced.',
-              })}
+              title={
+                isUnapplied
+                  ? i18n.translate('xpack.proposals.proposalCard.unappliedTitle', {
+                      defaultMessage: 'Marked as not applied. It is offered again below.',
+                    })
+                  : i18n.translate('xpack.proposals.proposalCard.replacedTitle', {
+                      defaultMessage: 'This proposal has been replaced.',
+                    })
+              }
             />
           </div>
           <EuiSpacer size="m" />

@@ -13,52 +13,46 @@ import type {
   MetricAggregationConfigMetricType,
 } from '../../observability/metrics/telemetry';
 
-type AggregationSetting = 'counterAggregation' | 'gaugeAggregation';
-
-const METRIC_TYPE_BY_SETTING: Record<AggregationSetting, MetricAggregationConfigMetricType> = {
-  counterAggregation: 'counter',
-  gaugeAggregation: 'gauge',
+const SETTINGS_BY_METRIC_TYPE: Record<
+  MetricAggregationConfigMetricType,
+  {
+    aggregation: 'counterAggregation' | 'gaugeAggregation' | 'histogramPercentile';
+    visualization?: 'histogramVisualization';
+  }
+> = {
+  counter: { aggregation: 'counterAggregation' },
+  gauge: { aggregation: 'gaugeAggregation' },
+  histogram: { aggregation: 'histogramPercentile', visualization: 'histogramVisualization' },
 };
 
 export const getAggregationConfigChanges = (
   gridSettings: MetricsGridSettings,
   update: Partial<MetricsGridSettings>
-): MetricAggregationConfigChangedEvent[] => {
-  const events: MetricAggregationConfigChangedEvent[] = (
-    Object.keys(METRIC_TYPE_BY_SETTING) as AggregationSetting[]
-  ).flatMap((setting) => {
-    const newAggregation = update[setting];
-
-    if (newAggregation === undefined) {
+): MetricAggregationConfigChangedEvent[] =>
+  (
+    Object.entries(SETTINGS_BY_METRIC_TYPE) as Array<
+      [
+        MetricAggregationConfigMetricType,
+        (typeof SETTINGS_BY_METRIC_TYPE)[MetricAggregationConfigMetricType]
+      ]
+    >
+  ).flatMap(([metricType, { aggregation, visualization }]) => {
+    if (
+      update[aggregation] === undefined &&
+      (!visualization || update[visualization] === undefined)
+    ) {
       return [];
     }
 
     return [
       {
-        metric_type: METRIC_TYPE_BY_SETTING[setting],
-        previous_aggregation: gridSettings[setting],
-        new_aggregation: newAggregation,
+        metric_type: metricType,
+        previous_aggregation: gridSettings[aggregation],
+        new_aggregation: update[aggregation] ?? gridSettings[aggregation],
+        ...(visualization && {
+          previous_visualization: gridSettings[visualization],
+          new_visualization: update[visualization] ?? gridSettings[visualization],
+        }),
       },
     ];
   });
-
-  const previousAggregation = gridSettings.histogramPercentile;
-  const nextAggregation = update.histogramPercentile ?? previousAggregation;
-  const previousVisualization = gridSettings.histogramVisualization;
-  const nextVisualization = update.histogramVisualization ?? previousVisualization;
-  const histogramChanged =
-    (update.histogramPercentile !== undefined || update.histogramVisualization !== undefined) &&
-    (nextAggregation !== previousAggregation || nextVisualization !== previousVisualization);
-
-  if (histogramChanged) {
-    events.push({
-      metric_type: 'histogram',
-      previous_aggregation: previousAggregation,
-      new_aggregation: nextAggregation,
-      previous_visualization: previousVisualization,
-      new_visualization: nextVisualization,
-    });
-  }
-
-  return events;
-};
