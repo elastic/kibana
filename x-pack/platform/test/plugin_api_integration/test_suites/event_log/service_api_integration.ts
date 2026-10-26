@@ -22,7 +22,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('should check if logging entries is enabled', async () => {
       const configValue = config
         .get('kbnTestServer.serverArgs')
-        .find((val: string) => val === '--xpack.eventLog.logEntries=true');
+        .find((val: string) => val === '--xpack.eventLog.logEntries=false');
       const result = await isEventLogServiceLoggingEntries();
       expect(configValue).to.be.eql(`--xpack.eventLog.logEntries=${result.body.isLoggingEntries}`);
     });
