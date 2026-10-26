@@ -392,7 +392,6 @@ export const DatePickerWrapper: FC<DatePickerWrapperProps> = (props) => {
             onChange={onDateRangeChange}
             onInputChange={onDateRangeInputChange}
             isInvalid={isDateRangeInvalid}
-            isLoading={isLoading}
             disabled={isDisabled}
             readOnly={isAutoRefreshOnlyMode}
             width={width}
