@@ -6,11 +6,11 @@
  */
 
 import type { EventTypeOpts } from '@kbn/core/server';
-import type { RuleChangedEventOrigin } from '../event_origin/origin_schemas';
+import type { EventOrigin } from '../event_origin/origin_schemas';
 
 /** EBT schema fragment for the `origin` property shared by every change-telemetry event. */
 export const eventOriginEbtSchema: NonNullable<
-  EventTypeOpts<{ origin: RuleChangedEventOrigin }>['schema']['origin']
+  EventTypeOpts<{ origin: EventOrigin }>['schema']['origin']
 > = {
   properties: {
     actor: {
@@ -43,14 +43,3 @@ export const eventOriginEbtSchema: NonNullable<
     optional: false,
   },
 };
-
-/** Drops `app` from the origin when it is empty. */
-export const toEventOrigin = ({
-  actor,
-  channel,
-  app,
-}: RuleChangedEventOrigin): RuleChangedEventOrigin => ({
-  actor,
-  channel,
-  ...(app ? { app } : {}),
-});

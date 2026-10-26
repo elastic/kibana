@@ -25,6 +25,7 @@ import type { HttpStart } from '@kbn/core-http-browser';
 import type { EsQueryConfig, Filter, Query, TimeRange } from '@kbn/es-query';
 import { getEsQueryConfig } from '@kbn/data-service';
 import { ESQLVariableType } from '@kbn/esql-types';
+import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { fetchEsqlData } from './fetch_esql_data';
 import { fillTemplate } from './fill_template';
 import { useCustomContentHtml } from './use_custom_content_html';
@@ -500,6 +501,42 @@ describe('useCustomContentHtml', () => {
       await waitFor(() => expect(mockFetchEsqlData).toHaveBeenCalledTimes(1));
 
       rerender({ isInteractive: false });
+
+      expect(mockFetchEsqlData).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('requestAdapter — Inspect', () => {
+    const esqlParams = {
+      ...baseParams,
+      esqlQuery: 'FROM logs | STATS revenue = SUM(amount)',
+      savedTemplate: '{% for row in rows %}{{ row["revenue"].value }}{% endfor %}',
+    };
+
+    it('passes the adapter to fetchEsqlData so the request can be inspected', async () => {
+      const requestAdapter = new RequestAdapter();
+      const { result } = renderHook(() => useCustomContentHtml({ ...esqlParams, requestAdapter }));
+
+      await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+      expect(mockFetchEsqlData).toHaveBeenCalledWith(
+        mockSearch,
+        mockHttp,
+        esqlParams.esqlQuery,
+        undefined,
+        expect.any(AbortSignal),
+        expect.objectContaining({ requestAdapter })
+      );
+    });
+
+    it('does not refetch when the component rerenders with the same adapter', async () => {
+      const requestAdapter = new RequestAdapter();
+      const { result, rerender } = renderHook(() =>
+        useCustomContentHtml({ ...esqlParams, requestAdapter })
+      );
+      await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+      rerender();
 
       expect(mockFetchEsqlData).toHaveBeenCalledTimes(1);
     });

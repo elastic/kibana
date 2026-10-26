@@ -24,7 +24,11 @@ writeFileSync(CA, 'CA');
 const runHook = (config: unknown, env: Record<string, string> = {}) => {
   const baseEnv = Object.fromEntries(
     Object.entries(process.env).filter(
-      ([name]) => !name.startsWith('SANDBOX_') && !name.startsWith('NIGHTSHIFT_')
+      ([name]) =>
+        !name.startsWith('SANDBOX_') &&
+        !name.startsWith('NIGHTSHIFT_') &&
+        !name.startsWith('EVAL_SHARD_') &&
+        name !== 'KBN_EVALS_CONFIG_B64'
     )
   );
   const result = spawnSync('bash', [HOOK], {
@@ -308,4 +312,86 @@ describe('nightshift-investigations scout hook', () => {
     expect(result.status).not.toBe(0);
     expect(result.stderr).toContain('requires sandbox credentials');
   });
+});
+
+describe('ORCA CI shard', () => {
+  const orca = { url: 'https://orca.example:443', apiKey: 'orca-key' };
+  const existing = {
+    sandbox: SANDBOX,
+    nightshift: { telemetry: { url: 'https://customer0.example', apiKey: 'customer0-key' } },
+  };
+  it('replaces only the telemetry target and preserves sandbox authentication', () => {
+    const { status, output, stderr } = runHook(
+      { ...existing, nightshiftOrcaEs: orca },
+      { EVAL_SHARD_ID: 'orcabench' }
+    );
+    expect(status).toBe(0);
+    expect(stderr).not.toContain(orca.apiKey);
+    expect(output.env).toMatchObject({
+      SANDBOX_API_KEY: SANDBOX.apiKey,
+      NIGHTSHIFT_SANDBOX_ELASTICSEARCH_URL: orca.url,
+      NIGHTSHIFT_SANDBOX_ELASTICSEARCH_API_KEY: orca.apiKey,
+      NIGHTSHIFT_DATASETS: 'orcabench',
+      NIGHTSHIFT_ORCA_TELEMETRY: '1',
+    });
+  });
+  it('takes the manifest hint from config, falling back to one that names no incident window', () => {
+    const configured = runHook(
+      { ...existing, nightshiftOrcaEs: { ...orca, readableIndices: 'Read orca indices.' } },
+      { EVAL_SHARD_ID: 'orcabench' }
+    );
+    expect(configured.output.env.NIGHTSHIFT_SANDBOX_READABLE_INDICES).toBe('Read orca indices.');
+    const fallback = runHook(
+      { ...existing, nightshiftOrcaEs: { ...orca, readableIndices: null } },
+      { EVAL_SHARD_ID: 'orcabench' }
+    );
+    expect(fallback.output.env.NIGHTSHIFT_SANDBOX_READABLE_INDICES).toContain(
+      'logs-orcabench.otel-*'
+    );
+    expect(fallback.output.env.NIGHTSHIFT_SANDBOX_READABLE_INDICES).not.toMatch(/2026|April/);
+  });
+  it('ignores a shared evals config, so the suite secret is the only source of the ORCA key', () => {
+    const { status, stderr } = runHook(existing, {
+      EVAL_SHARD_ID: 'orcabench',
+      KBN_EVALS_CONFIG_B64: Buffer.from(JSON.stringify({ nightshiftOrcaEs: orca })).toString(
+        'base64'
+      ),
+    });
+    expect(status).toBe(1);
+    expect(stderr).toContain('ORCA requires nightshiftOrcaEs');
+  });
+  it('keeps Customer-0 telemetry unchanged in the customer0 shard', () => {
+    const { output } = runHook(
+      { ...existing, nightshiftOrcaEs: orca },
+      { EVAL_SHARD_ID: 'customer0' }
+    );
+    expect(output.env.NIGHTSHIFT_SANDBOX_ELASTICSEARCH_URL).toBe(existing.nightshift.telemetry.url);
+    expect(output.env).not.toHaveProperty('NIGHTSHIFT_ORCA_TELEMETRY');
+  });
+  it('selects ORCA from NIGHTSHIFT_DATASETS for local runs outside CI', () => {
+    const { output, status } = runHook(
+      { ...existing, nightshiftOrcaEs: orca },
+      { NIGHTSHIFT_DATASETS: 'orcabench' }
+    );
+    expect(status).toBe(0);
+    expect(output.env.NIGHTSHIFT_SANDBOX_ELASTICSEARCH_API_KEY).toBe(orca.apiKey);
+  });
+  it.each([
+    undefined,
+    { url: orca.url },
+    { apiKey: orca.apiKey },
+    { ...orca, url: 'https://user:password@orca.example' },
+    { ...orca, readableIndices: '' },
+  ])(
+    'fails without a complete ORCA credential instead of using Customer-0 telemetry: %j',
+    (nightshiftOrcaEs) => {
+      const { status, stderr } = runHook(
+        { ...existing, nightshiftOrcaEs },
+        { EVAL_SHARD_ID: 'orcabench' }
+      );
+      expect(status).toBe(1);
+      expect(stderr).toContain('ORCA requires nightshiftOrcaEs');
+      expect(stderr).not.toContain('customer0-key');
+    }
+  );
 });

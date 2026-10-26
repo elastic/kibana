@@ -6,7 +6,7 @@
  */
 
 import type { ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
-import type { RuleChangedEventOrigin } from '../event_origin/origin_schemas';
+import type { EventOrigin } from '../event_origin/origin_schemas';
 import {
   actionPolicyChangedTelemetryDataSchema,
   type ActionPolicyEbtMatcherType,
@@ -18,7 +18,7 @@ import {
   buildActionPolicyChangedEventData,
 } from './action_policy_ebt_event';
 
-const apiUserOrigin: RuleChangedEventOrigin = { actor: 'user', channel: 'api' };
+const apiUserOrigin: EventOrigin = { actor: 'user', channel: 'api' };
 const SPACE_ID = 'space-1';
 
 const createActionPolicyResponse = (
@@ -186,12 +186,9 @@ describe('buildActionPolicyChangedEventData', () => {
     ).toBe(3);
   });
 
-  it('omits origin.app when it is empty and keeps it when set', () => {
+  it('reports the origin as given', () => {
     const policy = createActionPolicyResponse();
 
-    expect(
-      buildActionPolicyChangedEventData(policy, { ...apiUserOrigin, app: '' }, SPACE_ID).origin
-    ).not.toHaveProperty('app');
     expect(
       buildActionPolicyChangedEventData(
         policy,

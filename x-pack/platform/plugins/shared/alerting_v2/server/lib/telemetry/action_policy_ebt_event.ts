@@ -8,7 +8,7 @@
 import type { ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
 import type { EventTypeOpts } from '@kbn/core/server';
 import { PolicyMatcher } from '../dispatcher/state';
-import type { RuleChangedEventOrigin } from '../event_origin/origin_schemas';
+import type { EventOrigin } from '../event_origin/origin_schemas';
 import {
   ACTION_POLICY_CREATED_EBT_EVENT_TYPE,
   ACTION_POLICY_DELETED_EBT_EVENT_TYPE,
@@ -19,7 +19,7 @@ import {
   type ActionPolicyEbtEventType,
   type ActionPolicyEbtMatcherType,
 } from './action_policy_ebt_schema';
-import { eventOriginEbtSchema, toEventOrigin } from './event_origin';
+import { eventOriginEbtSchema } from './event_origin';
 
 /** Operations on an action policy that are reported as telemetry. */
 export const ACTION_POLICY_OPERATIONS = [
@@ -170,9 +170,9 @@ const buildActionPolicyFields = (
  */
 export const buildActionPolicyChangedEventData = (
   policy: ActionPolicyResponse,
-  origin: RuleChangedEventOrigin,
+  origin: EventOrigin,
   spaceId: string
 ): ActionPolicyChangedEbtData => ({
   ...buildActionPolicyFields(policy, spaceId),
-  origin: toEventOrigin(origin),
+  origin,
 });

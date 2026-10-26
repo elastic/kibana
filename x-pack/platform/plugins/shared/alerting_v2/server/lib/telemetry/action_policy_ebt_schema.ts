@@ -11,7 +11,7 @@ import {
   groupingModeSchema,
   throttleStrategySchema,
 } from '@kbn/alerting-v2-schemas';
-import { ruleChangedEventOriginSchema } from '../event_origin/origin_schemas';
+import { eventOriginSchema } from '../event_origin/origin_schemas';
 
 export const ACTION_POLICY_CREATED_EBT_EVENT_TYPE = 'alerting_v2_action_policy_created' as const;
 export const ACTION_POLICY_UPDATED_EBT_EVENT_TYPE = 'alerting_v2_action_policy_updated' as const;
@@ -97,7 +97,7 @@ export const actionPolicyChangedTelemetryDataSchema = lazySchema(() =>
       .describe(
         'Whether the action policy was snoozed at the time of the operation. An expired snooze is not reported as snoozed.'
       ),
-    origin: ruleChangedEventOriginSchema.describe('Where the change came from.'),
+    origin: eventOriginSchema.describe('Where the change came from.'),
   })
 );
 

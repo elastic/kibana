@@ -7,7 +7,7 @@
 
 import type { RuleResponse } from '@kbn/alerting-v2-schemas';
 import type { EventTypeOpts } from '@kbn/core/server';
-import type { RuleChangedEventOrigin } from '../event_origin/origin_schemas';
+import type { EventOrigin } from '../event_origin/origin_schemas';
 import {
   RULE_CREATED_EBT_EVENT_TYPE,
   RULE_DELETED_EBT_EVENT_TYPE,
@@ -24,7 +24,6 @@ import {
   RULE_ENABLED_EVENT_TYPE,
   RULE_UPDATED_EVENT_TYPE,
 } from '../events/rule_event_publisher/events';
-import { eventOriginEbtSchema, toEventOrigin } from './event_origin';
 
 /** Domain operations reported as telemetry. Each one is its own EBT event type. */
 export const RULE_OPERATIONS = [
@@ -92,7 +91,38 @@ const ruleChangedEventSchema: EventTypeOpts<RuleChangedEbtData>['schema'] = {
       optional: true,
     },
   },
-  origin: eventOriginEbtSchema,
+  origin: {
+    properties: {
+      actor: {
+        type: 'keyword',
+        _meta: {
+          description:
+            'Who made the change: `user` for a request carrying credentials, or `internal` for the Kibana internal user acting on its own.',
+          optional: false,
+        },
+      },
+      channel: {
+        type: 'keyword',
+        _meta: {
+          description:
+            'The channel the change was made through: `ui` for requests made by the Kibana browser app, `system` for Kibana acting on its own behalf, or `api` for any other request.',
+          optional: false,
+        },
+      },
+      app: {
+        type: 'keyword',
+        _meta: {
+          description:
+            'The app the change was made from: the app configured by the calling plugin or, for `ui` requests, the app named in the execution context. Absent otherwise.',
+          optional: true,
+        },
+      },
+    },
+    _meta: {
+      description: 'Where the change came from.',
+      optional: false,
+    },
+  },
 };
 
 /** One registered event per operation. Every event uses {@link RuleChangedEbtData}. */
@@ -102,20 +132,22 @@ export const ruleChangeTelemetryEvents: Array<EventTypeOpts<RuleChangedEbtData>>
     schema: ruleChangedEventSchema,
   }));
 
-/** Projects a rule-change telemetry payload. Rule fields are omitted when `rule` is absent. */
+/**
+ * Projects a rule-change telemetry payload. Rule fields are omitted when `rule`
+ * is absent. `templateId` is passed separately because the public response no
+ * longer carries `metadata.template`; the lifecycle event supplies it.
+ */
 export const buildRuleChangedEventData = (
   rule: RuleResponse | undefined,
-  origin: RuleChangedEventOrigin,
-  ruleId: string
+  origin: EventOrigin,
+  ruleId: string,
+  templateId?: string
 ): RuleChangedEbtData => {
-  const eventOrigin = toEventOrigin(origin);
-
   if (!rule) {
-    return { rule_id: ruleId, origin: eventOrigin };
+    return { rule_id: ruleId, origin };
   }
 
   const { kind, enabled, created_at: createdAt, metadata } = rule;
-  const templateId = metadata.template?.id;
   const builderType = metadata.builder?.type;
 
   return {
@@ -125,6 +157,6 @@ export const buildRuleChangedEventData = (
     kind,
     ...(builderType ? { builder_type: builderType } : {}),
     enabled,
-    origin: eventOrigin,
+    origin,
   };
 };

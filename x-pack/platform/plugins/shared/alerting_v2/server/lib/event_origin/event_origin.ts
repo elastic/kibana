@@ -7,7 +7,13 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
-import { ruleEventAppSchema, type RuleEventChannel, type RuleEventOrigin } from './origin_schemas';
+import {
+  eventOriginAppSchema,
+  type EventOrigin,
+  type EventOriginActor,
+  type EventOriginChannel,
+  type RequestEventOrigin,
+} from './origin_schemas';
 
 /**
  * Headers Core's `core.http.fetch` attaches to every request the Kibana browser app makes.
@@ -24,11 +30,11 @@ const toBoundedApp = (app: string | undefined): string | undefined => {
     return undefined;
   }
 
-  const parsed = ruleEventAppSchema.safeParse(app);
+  const parsed = eventOriginAppSchema.safeParse(app);
   return parsed.success ? parsed.data : undefined;
 };
 
-const getChannel = (request: KibanaRequest): RuleEventChannel => {
+const getChannel = (request: KibanaRequest): EventOriginChannel => {
   if (request.isFakeRequest) {
     return 'system';
   }
@@ -54,19 +60,29 @@ const getAppFromExecutionContext = (request: KibanaRequest): string | undefined 
 };
 
 /**
- * Resolves where a rule change came from: the channel is derived from the request, and
- * the app is the one configured by the calling plugin or, for UI requests, the one named in
- * the execution context. The app is omitted when it fails {@link ruleEventAppSchema}, and
- * undefined in every other case.
+ * Resolves the request-derived part of an event origin: the channel comes from the
+ * request, and the app is the one configured by the caller or, for UI requests, the
+ * one named in the execution context. The app is omitted when it fails
+ * {@link eventOriginAppSchema}, and is undefined in every other case.
  */
-export const resolveEventOrigin = (
+export const resolveRequestEventOrigin = (
   request: KibanaRequest,
   options?: { app?: string }
-): RuleEventOrigin => {
+): RequestEventOrigin => {
   const channel = getChannel(request);
   const app =
     toBoundedApp(options?.app) ||
     (channel === 'ui' ? getAppFromExecutionContext(request) : undefined);
 
   return { channel, ...(app ? { app } : {}) };
+};
+
+/** Publisher-context origin: the injected actor plus the request-derived channel and app. */
+export const toEventOrigin = (
+  actor: EventOriginActor,
+  request: KibanaRequest,
+  options?: { app?: string }
+): EventOrigin => {
+  const { channel, app } = resolveRequestEventOrigin(request, options);
+  return { actor, channel, ...(app ? { app } : {}) };
 };

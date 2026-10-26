@@ -7,7 +7,7 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
-import { resolveEventOrigin } from './event_origin';
+import { resolveRequestEventOrigin, toEventOrigin } from './event_origin';
 
 const UI_HEADERS = {
   'kbn-version': '9.0.0',
@@ -25,10 +25,32 @@ const createRequest = (
   isFakeRequest,
 });
 
-describe('resolveEventOrigin', () => {
+describe('toEventOrigin', () => {
+  it('attaches the actor to the channel derived from the request', () => {
+    expect(toEventOrigin('internal', createRequest({}, { isFakeRequest: true }))).toEqual({
+      actor: 'internal',
+      channel: 'system',
+    });
+  });
+
+  it('keeps a configured app ahead of the execution context', () => {
+    const request = createRequest({
+      ...UI_HEADERS,
+      'x-kbn-context': executionContextHeader({ name: 'discover' }),
+    });
+
+    expect(toEventOrigin('user', request, { app: 'nightshift' })).toEqual({
+      actor: 'user',
+      channel: 'ui',
+      app: 'nightshift',
+    });
+  });
+});
+
+describe('resolveRequestEventOrigin', () => {
   describe('channel', () => {
     it('is `system` for a fake request', () => {
-      expect(resolveEventOrigin(createRequest({}, { isFakeRequest: true }))).toEqual({
+      expect(resolveRequestEventOrigin(createRequest({}, { isFakeRequest: true }))).toEqual({
         channel: 'system',
       });
     });
@@ -36,21 +58,21 @@ describe('resolveEventOrigin', () => {
     it('is `system` for a fake request even when it carries the UI headers', () => {
       const request = createRequest(UI_HEADERS, { isFakeRequest: true });
 
-      expect(resolveEventOrigin(request).channel).toBe('system');
+      expect(resolveRequestEventOrigin(request).channel).toBe('system');
     });
 
     it('is `ui` when kbn-version, referer, and x-elastic-internal-origin are all present', () => {
-      expect(resolveEventOrigin(createRequest(UI_HEADERS)).channel).toBe('ui');
+      expect(resolveRequestEventOrigin(createRequest(UI_HEADERS)).channel).toBe('ui');
     });
 
     it.each(Object.keys(UI_HEADERS))('is `api` when %s is missing', (missingHeader) => {
       const { [missingHeader]: _omitted, ...headers } = UI_HEADERS as Record<string, string>;
 
-      expect(resolveEventOrigin(createRequest(headers)).channel).toBe('api');
+      expect(resolveRequestEventOrigin(createRequest(headers)).channel).toBe('api');
     });
 
     it('is `api` for a request with no UI headers', () => {
-      expect(resolveEventOrigin(createRequest({ authorization: 'ApiKey abc' }))).toEqual({
+      expect(resolveRequestEventOrigin(createRequest({ authorization: 'ApiKey abc' }))).toEqual({
         channel: 'api',
       });
     });
@@ -58,7 +80,7 @@ describe('resolveEventOrigin', () => {
 
   describe('app', () => {
     it('is the configured app when options.app is set', () => {
-      expect(resolveEventOrigin(createRequest(), { app: 'nightshift' })).toEqual({
+      expect(resolveRequestEventOrigin(createRequest(), { app: 'nightshift' })).toEqual({
         channel: 'api',
         app: 'nightshift',
       });
@@ -70,7 +92,7 @@ describe('resolveEventOrigin', () => {
         'x-kbn-context': executionContextHeader({ type: 'application', name: 'discover' }),
       });
 
-      expect(resolveEventOrigin(request, { app: 'nightshift' })).toEqual({
+      expect(resolveRequestEventOrigin(request, { app: 'nightshift' })).toEqual({
         channel: 'ui',
         app: 'nightshift',
       });
@@ -86,11 +108,11 @@ describe('resolveEventOrigin', () => {
         }),
       });
 
-      expect(resolveEventOrigin(request)).toEqual({ channel: 'ui', app: 'discover' });
+      expect(resolveRequestEventOrigin(request)).toEqual({ channel: 'ui', app: 'discover' });
     });
 
     it('is undefined on `ui` requests without an x-kbn-context header', () => {
-      expect(resolveEventOrigin(createRequest(UI_HEADERS))).toEqual({ channel: 'ui' });
+      expect(resolveRequestEventOrigin(createRequest(UI_HEADERS))).toEqual({ channel: 'ui' });
     });
 
     it.each([
@@ -102,13 +124,13 @@ describe('resolveEventOrigin', () => {
     ])('is undefined on `ui` requests when x-kbn-context %s', (_description, header) => {
       const request = createRequest({ ...UI_HEADERS, 'x-kbn-context': header });
 
-      expect(resolveEventOrigin(request)).toEqual({ channel: 'ui' });
+      expect(resolveRequestEventOrigin(request)).toEqual({ channel: 'ui' });
     });
 
     it.each(['observabilityAlerting', 'agent_builder', 'app.name:id'])(
       'keeps a configured app id of %s',
       (app) => {
-        expect(resolveEventOrigin(createRequest(), { app })).toEqual({
+        expect(resolveRequestEventOrigin(createRequest(), { app })).toEqual({
           channel: 'api',
           app,
         });
@@ -120,7 +142,7 @@ describe('resolveEventOrigin', () => {
       ['contains a slash', 'discover/app'],
       ['is longer than 64 characters', 'a'.repeat(65)],
     ])('omits a configured app that %s', (_description, app) => {
-      expect(resolveEventOrigin(createRequest(), { app })).toEqual({ channel: 'api' });
+      expect(resolveRequestEventOrigin(createRequest(), { app })).toEqual({ channel: 'api' });
     });
 
     it('uses the execution context when the configured app is outside the allowed set', () => {
@@ -129,7 +151,7 @@ describe('resolveEventOrigin', () => {
         'x-kbn-context': executionContextHeader({ name: 'discover' }),
       });
 
-      expect(resolveEventOrigin(request, { app: 'not an app' })).toEqual({
+      expect(resolveRequestEventOrigin(request, { app: 'not an app' })).toEqual({
         channel: 'ui',
         app: 'discover',
       });
@@ -141,7 +163,7 @@ describe('resolveEventOrigin', () => {
         'x-kbn-context': executionContextHeader({ name: 'discover/app' }),
       });
 
-      expect(resolveEventOrigin(request)).toEqual({ channel: 'ui' });
+      expect(resolveRequestEventOrigin(request)).toEqual({ channel: 'ui' });
     });
 
     it('ignores the execution context on `api` requests', () => {
@@ -149,7 +171,7 @@ describe('resolveEventOrigin', () => {
         'x-kbn-context': executionContextHeader({ type: 'application', name: 'discover' }),
       });
 
-      expect(resolveEventOrigin(request)).toEqual({ channel: 'api' });
+      expect(resolveRequestEventOrigin(request)).toEqual({ channel: 'api' });
     });
 
     it('ignores the execution context on `system` requests', () => {
@@ -158,7 +180,7 @@ describe('resolveEventOrigin', () => {
         { isFakeRequest: true }
       );
 
-      expect(resolveEventOrigin(request)).toEqual({ channel: 'system' });
+      expect(resolveRequestEventOrigin(request)).toEqual({ channel: 'system' });
     });
   });
 });

@@ -50,6 +50,7 @@ import {
 import type { InferenceCallbackManager } from '../inference_client/callback_manager';
 import { getRetryFilter } from '../../common/utils/error_retry_filter';
 import type { InferenceEndpointIdCache } from '../util/inference_endpoint_id_cache';
+import { anonymizeChatTemplate } from './anonymize_chat_template';
 import { prepareAnonymization } from './prepare_anonymization';
 import type { TokenUsageLogger } from '../token_usage';
 import { handleTokenUsageLogging, buildTokenUsageContext } from '../token_usage';
@@ -105,6 +106,8 @@ type SpanModel = Parameters<typeof withChatCompleteSpan>[0]['model'];
 interface ResolvedPipelineContext {
   callbackContext: ChatCompleteCallbackContext;
   getSpanModel: (modelName?: string) => SpanModel | undefined;
+  /** Inference endpoints can send `{ template }` instead of messages. */
+  supportsTemplates: boolean;
   chatComplete: (
     options: ChatCompletePipelineAdapterOptions
   ) => Observable<InferenceConnectorAdapterChatCompleteEvent>;
@@ -217,7 +220,7 @@ function createChatCompletePipeline({
     anonymizationRules: from(anonymizationRulesPromise),
   }).pipe(
     switchMap(({ context, anonymizationRules }) => {
-      const { callbackContext, getSpanModel, chatComplete } = context;
+      const { callbackContext, getSpanModel, chatComplete, supportsTemplates } = context;
 
       const {
         system,
@@ -233,7 +236,78 @@ function createChatCompletePipeline({
         maxContentLength,
         cacheControl,
         sessionId,
+        template,
       } = callback(callbackContext);
+
+      const logTokenUsage = tokenUsageLogger
+        ? handleTokenUsageLogging({
+            tokenUsageLogger,
+            getContext: () =>
+              buildTokenUsageContext({
+                connectorId,
+                model: callbackContext.model,
+                modelName,
+                featureId: metadata?.connectorTelemetry?.pluginId,
+                parentFeatureId: metadata?.connectorTelemetry?.aggregateBy,
+              }),
+            logger,
+            isEnabled: isTokenUsageTrackingEnabled,
+          })
+        : identity;
+
+      if (template) {
+        if (!supportsTemplates) {
+          throw createInferenceRequestError(
+            'Chat completion templates are only supported for inference endpoints',
+            400
+          );
+        }
+
+        // The endpoint renders the template and rejects caller messages, so the
+        // anonymization instruction cannot be attached. Masks echoed in the
+        // response are still restored.
+        return from(
+          anonymizeChatTemplate({
+            template,
+            namespace,
+            logger,
+            anonymizationRules,
+            regexWorker,
+            esClient,
+            replacementsEsClient: anonymization?.replacements?.esClient,
+            replacementsEncryptionKeyPromise: anonymization?.replacements?.encryptionKeyPromise,
+            usePersistentReplacements: anonymization?.replacements?.usePersistentReplacements,
+            requireReplacementsEncryptionKey: anonymization?.replacements?.requireEncryptionKey,
+            saltPromise: anonymization?.saltPromise,
+            onFailurePromise: anonymization?.onFailurePromise,
+            metadata,
+          })
+        ).pipe(
+          switchMap(({ template: maskedTemplate, anonymization: preparedAnonymization }) =>
+            chatComplete({
+              system,
+              messages: [],
+              template: maskedTemplate,
+              temperature,
+              reasoning,
+              logger,
+              functionCalling,
+              modelName,
+              abortSignal,
+              metadata,
+              timeout,
+              maxContentLength,
+              cacheControl,
+              sessionId,
+              stream,
+            }).pipe(
+              chunksIntoMessage({ toolOptions: { toolChoice, tools }, logger }),
+              deanonymizeMessage(preparedAnonymization, logger)
+            )
+          ),
+          logTokenUsage
+        );
+      }
 
       const messages = sanitizeMessages(givenMessages);
 
@@ -301,21 +375,7 @@ function createChatCompletePipeline({
             }
           ).pipe(deanonymizeMessage({ ...preparedAnonymization, replacementsId }, logger));
         }),
-        tokenUsageLogger
-          ? handleTokenUsageLogging({
-              tokenUsageLogger,
-              getContext: () =>
-                buildTokenUsageContext({
-                  connectorId,
-                  model: callbackContext.model,
-                  modelName,
-                  featureId: metadata?.connectorTelemetry?.pluginId,
-                  parentFeatureId: metadata?.connectorTelemetry?.aggregateBy,
-                }),
-              logger,
-              isEnabled: isTokenUsageTrackingEnabled,
-            })
-          : identity
+        logTokenUsage
       );
     })
   );
@@ -424,6 +484,7 @@ function resolveAndCreatePipeline({
                 family: getConnectorFamily(connector),
                 provider: getConnectorProvider(connector),
               }),
+              supportsTemplates: false,
               chatComplete: (options) => inferenceAdapter.chatComplete({ ...options, executor }),
             };
           };
@@ -491,6 +552,7 @@ async function resolveInferenceEndpointContext({
             provider: endpointMeta.provider,
           } as SpanModel)
         : undefined,
+    supportsTemplates: true,
     chatComplete: (options) =>
       inferenceEndpointAdapter.chatComplete({
         ...options,

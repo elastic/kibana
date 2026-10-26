@@ -685,7 +685,7 @@
       "observability"
     ],
     "github": {
-      "team": "elastic/observability-bi"
+      "team": "elastic/obs-bi-team"
     }
   },
   {
@@ -848,16 +848,6 @@
     "github": {
       "team": "elastic/security-detection-engineering",
       "label": "Team:Detection Engineering"
-    }
-  },
-  {
-    "id": "security-detection-platform",
-    "name": "Security Detection Platform",
-    "areas": [
-      "security"
-    ],
-    "github": {
-      "team": "elastic/security-detection-platform"
     }
   },
   {

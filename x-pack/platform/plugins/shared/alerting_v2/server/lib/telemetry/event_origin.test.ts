@@ -5,24 +5,7 @@
  * 2.0.
  */
 
-import { eventOriginEbtSchema, toEventOrigin } from './event_origin';
-
-describe('toEventOrigin', () => {
-  it('keeps actor, channel and app', () => {
-    expect(toEventOrigin({ actor: 'user', channel: 'ui', app: 'discover' })).toEqual({
-      actor: 'user',
-      channel: 'ui',
-      app: 'discover',
-    });
-  });
-
-  it.each([undefined, ''])('drops app when it is %p', (app) => {
-    const origin = toEventOrigin({ actor: 'internal', channel: 'system', app });
-
-    expect(origin).toEqual({ actor: 'internal', channel: 'system' });
-    expect(origin).not.toHaveProperty('app');
-  });
-});
+import { eventOriginEbtSchema } from './event_origin';
 
 describe('eventOriginEbtSchema', () => {
   it('declares actor and channel as required and app as optional', () => {

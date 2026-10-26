@@ -41,7 +41,8 @@ import {
   getInvalidActionPolicyDataMessage,
 } from '../errors/action_policy_error_messages';
 import { EncryptedSavedObjectsClientToken } from '../dispatcher/steps/dispatch_step_tokens';
-import { EventOriginToken, type EventOrigin } from '../event_origin/token';
+import { EventOriginActorToken } from '../event_origin/token';
+import type { EventOriginActor } from '../event_origin/origin_schemas';
 import { PolicyMatcher } from '../dispatcher/state';
 import { ActionPolicySavedObjectServiceScopedToken } from '../services/action_policy_saved_object_service/tokens';
 import type { ActionPolicySavedObjectServiceContract } from '../services/action_policy_saved_object_service/types';
@@ -60,7 +61,7 @@ import {
   buildActionPolicyChangedEventData,
   type ActionPolicyOperation,
 } from '../telemetry/action_policy_ebt_event';
-import { resolveEventOrigin } from '../event_origin/event_origin';
+import { toEventOrigin } from '../event_origin/event_origin';
 import { buildSoSearch } from '../build_so_search';
 import { savedObjectNamespacesToSpaceId } from '../space_id_to_namespace';
 import { applyPatch } from '../apply_patch';
@@ -170,7 +171,7 @@ export class ActionPolicyClient {
     @inject(LicenseServiceToken) private readonly licenseService: LicenseServiceContract,
     @inject(LoggerServiceToken) loggerService: LoggerServiceContract,
     @inject(Request) private readonly request: KibanaRequest,
-    @inject(EventOriginToken) private readonly actor: EventOrigin,
+    @inject(EventOriginActorToken) private readonly actor: EventOriginActor,
     @inject(EbtServiceToken) private readonly ebtService: EbtServiceContract
   ) {
     this.logger = loggerService.forSubsystem('actionPolicyClient');
@@ -190,7 +191,7 @@ export class ActionPolicyClient {
     }
 
     try {
-      const origin = { actor: this.actor, ...resolveEventOrigin(this.request) };
+      const origin = toEventOrigin(this.actor, this.request);
       const eventType = ACTION_POLICY_EBT_EVENT_TYPE_BY_OPERATION[operation];
       const spaceId = savedObjectNamespacesToSpaceId(this.namespace ? [this.namespace] : undefined);
 
