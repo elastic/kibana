@@ -146,6 +146,7 @@ export const buildCanaryReportDoc = (timestamp: string) => ({
       'Regular reviews, clear communication, and a culture of caution help teams respond well ' +
       'when something unusual happens. No specific activity is described in this note.',
     language: 'en',
+    published_at: timestamp,
   },
   severity: { level: 'low', score: 10 },
   extracted: {
@@ -195,6 +196,7 @@ export const buildIocDumpReportDoc = (timestamp: string) => ({
       'over the past week. Defenders should block or monitor traffic from the listed addresses. ' +
       'No specific intrusion activity, tooling, or affected organization is described.',
     language: 'en',
+    published_at: timestamp,
   },
   severity: { level: 'medium', score: 40 },
   extracted: {

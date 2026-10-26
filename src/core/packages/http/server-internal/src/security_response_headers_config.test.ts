@@ -97,6 +97,16 @@ describe('parseRawSecurityResponseHeadersConfig', () => {
       );
     });
 
+    // Without these, Maps' browser location, the Canvas `location()` function and the fullscreen
+    // toggle on Security Solution's embedded Vidyard videos are blocked by Kibana's own policy.
+    it('allows the features that Kibana itself uses by default', () => {
+      const result = parse(schema.validate({}), permissionsPolicy());
+      const policy = result.securityResponseHeaders['Permissions-Policy'];
+      expect(policy).toContain('geolocation=(self)');
+      expect(policy).toContain('fullscreen=(self "https://play.vidyard.com")');
+      expect(policy).toContain('camera=()');
+    });
+
     it('a null value removes the Permissions-Policy header', () => {
       const config = schema.validate({ permissionsPolicy: null });
       const result = parse(config, permissionsPolicy());

@@ -189,7 +189,7 @@ export const GmailConnector: ConnectorSpec = {
   metadata: {
     id: '.gmail',
     displayName: 'Gmail',
-    description: i18n.translate('core.kibanaConnectorSpecs.gmail.metadata.description', {
+    description: i18n.translate('connectorSpecs.gmail.metadata.description', {
       defaultMessage: 'Search, read, label, and send emails in Gmail',
     }),
     minimumLicense: 'enterprise',

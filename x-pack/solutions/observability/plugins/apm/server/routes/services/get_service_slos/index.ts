@@ -6,7 +6,7 @@
  */
 
 import type { ServiceSlosResponse, StatusCounts } from '@kbn/apm-api-shared';
-import { ALL_VALUE, SLO_GROUPINGS_PREFIX } from '@kbn/slo-schema';
+import { ALL_VALUE, SLO_GROUPINGS_PREFIX } from '@kbn/slo-constants';
 import { ALERT_STATUS, ALERT_STATUS_ACTIVE } from '@kbn/rule-data-utils';
 import type { ApmSloClient } from '../../../lib/helpers/get_apm_slo_client';
 import type { SloAlertsClient } from '../../../lib/helpers/get_slo_alerts_client';
