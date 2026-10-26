@@ -1184,7 +1184,7 @@ steps:
       candidates_found: "${{ variables.alert_count | default: 0 }}"
       items_dispatched: "${{ variables.verdict_count | default: 0 }}"
       items_failed: "${{ variables.alert_count | default: 0 | minus: variables.verdict_count | at_least: 0 }}"
-      items_in_flight: "{{ variables.started_alert_count | default: 0 }}"
+      items_in_flight: "{{ variables.started_alert_count | default: 0 | plus: steps.group_fp_candidates_call.output.alerts_joined | default: 0 }}"
       degraded_reason: |-
         {%- if variables.alert_count > 0 and variables.verdict_count == 0 -%}
         dependency_unavailable

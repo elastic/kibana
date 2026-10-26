@@ -97,6 +97,7 @@ describe('Alert Triage outcome reports', () => {
       alerts,
       fpCandidates = 0,
       startedAlerts = 0,
+      alertsJoined = 0,
       verdicts,
     }: {
       alerts: number;
@@ -111,6 +112,9 @@ describe('Alert Triage outcome reports', () => {
             inconclusive_count: verdicts.inconclusive,
             true_positive_count: verdicts.tp,
           },
+        },
+        group_fp_candidates_call: {
+          output: { alerts_joined: alertsJoined },
         },
       },
       variables: {
@@ -171,6 +175,23 @@ describe('Alert Triage outcome reports', () => {
           candidates_found: 40,
           degraded_reason: 'none',
           items_dispatched: 40,
+          items_failed: 0,
+          items_in_flight: '20',
+          run_outcome: 'produced',
+        },
+      ],
+      [
+        'a batch whose candidates all joined a waiting proposal',
+        {
+          alerts: 20,
+          fpCandidates: 20,
+          alertsJoined: 20,
+          verdicts: { fp: 20, inconclusive: 0, tp: 0 },
+        },
+        {
+          candidates_found: 20,
+          degraded_reason: 'none',
+          items_dispatched: 20,
           items_failed: 0,
           items_in_flight: '20',
           run_outcome: 'produced',
