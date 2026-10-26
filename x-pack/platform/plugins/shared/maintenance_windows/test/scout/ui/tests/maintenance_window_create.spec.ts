@@ -93,7 +93,9 @@ const openEditFlowByTitle = async (
 ) => {
   await page.goto(kbnUrl.get(MAINTENANCE_WINDOWS_APP_PATH));
   await page.locator(TABLE_LOADED_CSS).waitFor();
-  const searchBox = page.locator('.euiFieldSearch:not(.euiSelectableTemplateSitewide__search)');
+  const searchBox = page.locator(
+    'input[type="search"]:not(.euiSelectableTemplateSitewide__search)'
+  );
   await searchBox.fill(name);
   // The pre-search table is already loaded, so wait for the search request itself: acting on the
   // stale table lets the re-render close the actions popover.
