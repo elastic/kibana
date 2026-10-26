@@ -187,7 +187,6 @@ describe('useAttackFlyoutApi', () => {
       kind: FLYOUT_DESCRIPTOR_KIND.attackCorrelations,
       attackId: 'attack-id',
       indexName: 'attack-index',
-      alertIds: ['alert-1', 'alert-2'],
     });
     // A tool is a session:'start' root; closing it clears the param (no parent to revert to).
     expect(mockBuildOnClose).toHaveBeenCalledWith(null);
@@ -224,7 +223,6 @@ describe('useAttackFlyoutApi', () => {
       kind: FLYOUT_DESCRIPTOR_KIND.attackEntities,
       attackId: 'attack-id',
       indexName: 'attack-index',
-      alertIds: ['alert-1', 'alert-2'],
     });
     // A tool is a session:'start' root; closing it clears the param (no parent to revert to).
     expect(mockBuildOnClose).toHaveBeenCalledWith(null);

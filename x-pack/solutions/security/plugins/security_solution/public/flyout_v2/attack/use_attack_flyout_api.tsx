@@ -220,12 +220,7 @@ export const useAttackFlyoutApi = (): AttackFlyoutApi => {
   const openAttackCorrelations = useCallback(
     ({ hit, alertIds, onShowAlert, origin }: OpenAttackCorrelationsParams) => {
       const { attackId, indexName } = attackIdsFromHit(hit);
-      writeOnOpen({
-        kind: FLYOUT_DESCRIPTOR_KIND.attackCorrelations,
-        attackId,
-        indexName,
-        alertIds,
-      });
+      writeOnOpen({ kind: FLYOUT_DESCRIPTOR_KIND.attackCorrelations, attackId, indexName });
       // A tool flyout opens with session:'start' (a root, not a child of the attack): the attack is
       // not persisted alongside it, so closing the tool clears the param.
       const onClose = buildOnClose(null);
@@ -254,12 +249,7 @@ export const useAttackFlyoutApi = (): AttackFlyoutApi => {
   const openAttackEntities = useCallback(
     ({ hit, alertIds, origin }: OpenAttackEntitiesParams) => {
       const { attackId, indexName } = attackIdsFromHit(hit);
-      writeOnOpen({
-        kind: FLYOUT_DESCRIPTOR_KIND.attackEntities,
-        attackId,
-        indexName,
-        alertIds,
-      });
+      writeOnOpen({ kind: FLYOUT_DESCRIPTOR_KIND.attackEntities, attackId, indexName });
       // A tool flyout opens with session:'start' (a root, not a child of the attack): the attack is
       // not persisted alongside it, so closing the tool clears the param.
       const onClose = buildOnClose(null);

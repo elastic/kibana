@@ -158,8 +158,11 @@ describe('useFlyoutV2DocViewerState', () => {
       );
     });
 
-    it('reuses the displayed attack for its tools', () => {
-      const attackHit = createHit('attack-1', '.alerts-security.attack.discovery.alerts-default');
+    it('reuses the displayed attack for its tools, deriving their alert ids from it', () => {
+      const attackHit = {
+        ...createHit('attack-1', '.alerts-security.attack.discovery.alerts-default'),
+        flattened: { 'kibana.alert.attack_discovery.alert_ids': ['a'] },
+      } as DataTableRecord;
       renderHook(() =>
         useFlyoutV2DocViewerState({
           hit: attackHit,
@@ -169,7 +172,6 @@ describe('useFlyoutV2DocViewerState', () => {
                 kind: 'attackCorrelations',
                 attackId: 'attack-1',
                 indexName: '.alerts-security.attack.discovery.alerts-default',
-                alertIds: ['a'],
               },
             ],
           },

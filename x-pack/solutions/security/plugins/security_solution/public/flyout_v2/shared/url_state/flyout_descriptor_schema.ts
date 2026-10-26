@@ -121,18 +121,19 @@ export const attackDescriptorSchema = z.object({
   indexName: str,
 });
 
+// Attack tools derive their related alert ids from the restored attack record rather than carrying
+// them: the list is unbounded and would overflow the doc viewer's shareable-state size budget.
+
 export const attackCorrelationsDescriptorSchema = z.object({
   kind: z.literal('attackCorrelations'),
   attackId: str,
   indexName: str,
-  alertIds: strArray,
 });
 
 export const attackEntitiesDescriptorSchema = z.object({
   kind: z.literal('attackEntities'),
   attackId: str,
   indexName: str,
-  alertIds: strArray,
 });
 
 // --- Entity main flyouts ---

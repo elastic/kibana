@@ -22,6 +22,7 @@ import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import { PageScope } from '../../../data_view_manager/constants';
 import type { FlyoutApi } from '../../use_flyout_api';
 import { useFlyoutApi } from '../../use_flyout_api';
+import { getAttackAlertIds } from '../../attack/utils/get_attack_alert_ids';
 import type {
   AnalyzerDescriptor,
   AttackCorrelationsDescriptor,
@@ -394,7 +395,11 @@ export const openDescriptorAsStart = (
     case 'attackCorrelations': {
       const d = descriptor as AttackCorrelationsDescriptor;
       if (ctx.attackHit) {
-        api.openAttackCorrelations({ hit: ctx.attackHit, alertIds: d.alertIds, ...originParams });
+        api.openAttackCorrelations({
+          hit: ctx.attackHit,
+          alertIds: getAttackAlertIds(ctx.attackHit),
+          ...originParams,
+        });
       } else {
         api.openAttackFlyout({
           attackId: d.attackId,
@@ -407,7 +412,11 @@ export const openDescriptorAsStart = (
     case 'attackEntities': {
       const d = descriptor as AttackEntitiesDescriptor;
       if (ctx.attackHit) {
-        api.openAttackEntities({ hit: ctx.attackHit, alertIds: d.alertIds, ...originParams });
+        api.openAttackEntities({
+          hit: ctx.attackHit,
+          alertIds: getAttackAlertIds(ctx.attackHit),
+          ...originParams,
+        });
       } else {
         api.openAttackFlyout({
           attackId: d.attackId,

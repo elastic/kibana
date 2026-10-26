@@ -314,9 +314,9 @@ const attackLeftToToolDescriptor = (
   switch (tab) {
     case ATTACK_TAB_INSIGHTS:
       if (subTab === ATTACK_SUBTAB_CORRELATION)
-        return { kind: 'attackCorrelations', attackId, indexName, alertIds: [] };
+        return { kind: 'attackCorrelations', attackId, indexName };
       // 'entity' or no subTab → entities
-      return { kind: 'attackEntities', attackId, indexName, alertIds: [] };
+      return { kind: 'attackEntities', attackId, indexName };
 
     case ATTACK_TAB_NOTES:
       // Notes for attack: best-effort — use documentId=attackId

@@ -212,21 +212,11 @@ describe('flyoutV2 URL param', () => {
       ['attack', { kind: 'attack' as const, attackId: 'a1', indexName: '.alerts-*' }],
       [
         'attackCorrelations',
-        {
-          kind: 'attackCorrelations' as const,
-          attackId: 'a1',
-          indexName: '.alerts-*',
-          alertIds: ['id1', 'id2'],
-        },
+        { kind: 'attackCorrelations' as const, attackId: 'a1', indexName: '.alerts-*' },
       ],
       [
         'attackEntities',
-        {
-          kind: 'attackEntities' as const,
-          attackId: 'a1',
-          indexName: '.alerts-*',
-          alertIds: ['id1'],
-        },
+        { kind: 'attackEntities' as const, attackId: 'a1', indexName: '.alerts-*' },
       ],
       ['host', { kind: 'host' as const, hostName: 'my-host', entityId: 'eid', scopeId: 's' }],
       ['user', { kind: 'user' as const, userName: 'alice', entityId: 'eid' }],
@@ -337,12 +327,26 @@ describe('flyoutV2 URL param', () => {
 
     it('round-trips [attack tool, attack child]', () => {
       const value: FlyoutV2UrlParamValue = [
-        { kind: 'attackCorrelations', attackId: 'a1', indexName: '.alerts-*', alertIds: ['x'] },
+        { kind: 'attackCorrelations', attackId: 'a1', indexName: '.alerts-*' },
         { kind: 'attack', attackId: 'a1', indexName: '.alerts-*' },
       ];
       const encoded = encodeFlyoutV2UrlParam(value);
       const decoded = decodeFlyoutV2UrlParam(encoded);
       expect(decoded).toEqual(value);
+    });
+
+    it('still decodes attack tool links that carry the legacy alertIds field, dropping it', () => {
+      const encoded = encodeFlyoutV2UrlParam([
+        {
+          kind: 'attackEntities',
+          attackId: 'a1',
+          indexName: '.alerts-*',
+          alertIds: ['x'],
+        } as FlyoutV2UrlParamValue[number],
+      ]);
+      expect(decodeFlyoutV2UrlParam(encoded)).toEqual([
+        { kind: 'attackEntities', attackId: 'a1', indexName: '.alerts-*' },
+      ]);
     });
 
     it('preserves array order (first entry is the tool, second is the child)', () => {
