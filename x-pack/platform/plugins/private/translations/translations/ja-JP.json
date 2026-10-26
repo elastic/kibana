@@ -32506,7 +32506,6 @@
     "xpack.ml.jobsList.editJobModal.editManagedJobDescription": "編集中",
     "xpack.ml.jobsList.expandJobDetailsAriaLabel": "{itemId}の詳細を表示",
     "xpack.ml.jobsList.idLabel": "ID",
-    "xpack.ml.jobsList.jobActionsColumn.screenReaderDescription": "このカラムには、各ジョブで実行可能なメニューの追加アクションが含まれます",
     "xpack.ml.jobsList.jobActionsColumn.spaces": "スペース",
     "xpack.ml.jobsList.jobDetails.alertRulesTitle": "アラートルール",
     "xpack.ml.jobsList.jobDetails.analysisConfigTitle": "分析の構成",

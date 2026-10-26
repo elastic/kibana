@@ -32404,7 +32404,6 @@
     "xpack.ml.jobsList.editJobModal.editManagedJobDescription": "wird bearbeitet",
     "xpack.ml.jobsList.expandJobDetailsAriaLabel": "Details für {itemId} anzeigen",
     "xpack.ml.jobsList.idLabel": "ID",
-    "xpack.ml.jobsList.jobActionsColumn.screenReaderDescription": "Diese Spalte enthält zusätzliche Aktionen in einem Menü, die für jeden Job ausgeführt werden können",
     "xpack.ml.jobsList.jobActionsColumn.spaces": "Bereiche",
     "xpack.ml.jobsList.jobDetails.alertRulesTitle": "Alarmregeln",
     "xpack.ml.jobsList.jobDetails.analysisConfigTitle": "Analyse-Konfiguration",

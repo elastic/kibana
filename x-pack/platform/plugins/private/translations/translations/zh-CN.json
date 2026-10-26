@@ -32514,7 +32514,6 @@
     "xpack.ml.jobsList.editJobModal.editManagedJobDescription": "正在编辑",
     "xpack.ml.jobsList.expandJobDetailsAriaLabel": "显示 {itemId} 的详情",
     "xpack.ml.jobsList.idLabel": "ID",
-    "xpack.ml.jobsList.jobActionsColumn.screenReaderDescription": "此列在菜单中包含可对每个作业执行的更多操作",
     "xpack.ml.jobsList.jobActionsColumn.spaces": "空间",
     "xpack.ml.jobsList.jobDetails.alertRulesTitle": "告警规则",
     "xpack.ml.jobsList.jobDetails.analysisConfigTitle": "分析配置",
