@@ -7,7 +7,7 @@
 
 import type { RegexAnonymizationRule } from '@kbn/ai-anonymization-common';
 import { DEFAULT_BUILTIN_REGEX_RULES } from '@kbn/ai-anonymization-common';
-import { executeRegexRulesTask } from './execute_regex_rule_task';
+import { executeRegexRulesTask, usesNativeFallback } from './execute_regex_rule_task';
 
 describe('executeRegexRulesTask', () => {
   const emailRule: RegexAnonymizationRule = {
@@ -262,6 +262,37 @@ describe('executeRegexRulesTask', () => {
       const matches = executeRegexRulesTask({ rules: [custom], records: [{ content }] });
 
       expect(matches.map(({ matchValue }) => matchValue)).toContain('WINDOWS\\System32');
+    });
+  });
+
+  describe('usesNativeFallback', () => {
+    const custom = (pattern: string, overrides: Partial<RegexAnonymizationRule> = {}) =>
+      ({
+        type: 'RegExp',
+        enabled: true,
+        id: 'custom-1',
+        entityClass: 'MISC',
+        pattern,
+        ...overrides,
+      } as RegexAnonymizationRule);
+
+    it('is false for every shipped built-in rule and for a pattern RE2 can compile', () => {
+      DEFAULT_BUILTIN_REGEX_RULES.forEach((rule) => expect(usesNativeFallback(rule)).toBe(false));
+      expect(usesNativeFallback(custom('EMP-\\d+'))).toBe(false);
+    });
+
+    it.each([
+      ['lookahead', 'foo(?=bar)'],
+      ['a backreference', '(a)\\1'],
+      ['a \\u escape', '\\u00e9'],
+    ])('is true for a custom rule using %s', (_, pattern) => {
+      expect(usesNativeFallback(custom(pattern))).toBe(true);
+    });
+
+    it('is true for a rule that only claims to be built in', () => {
+      expect(
+        usesNativeFallback(custom('foo(?=bar)', { id: 'builtin-made-up', builtIn: true }))
+      ).toBe(true);
     });
   });
 });

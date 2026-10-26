@@ -57,49 +57,74 @@ const findSpansRe2 =
     return spans;
   };
 
+const re2CompileCache = new Map<string, boolean>();
+const RE2_CACHE_LIMIT = 500;
+
+const compilesOnRe2 = (pattern: string): boolean => {
+  const cached = re2CompileCache.get(pattern);
+  if (cached !== undefined) {
+    return cached;
+  }
+  let compiles = true;
+  try {
+    RE2JS.compile(pattern);
+  } catch {
+    compiles = false;
+  }
+  if (re2CompileCache.size >= RE2_CACHE_LIMIT) {
+    re2CompileCache.clear();
+  }
+  re2CompileCache.set(pattern, compiles);
+  return compiles;
+};
+
+type RuleEngine = 'shipped-native' | 're2' | 'legacy-native';
+
+/**
+ * The single place that decides which engine runs a rule, so that compiling a rule and deciding
+ * where to run it cannot drift apart.
+ *
+ * - Shipped built-in rules run on native `RegExp`: they are written to behave the same on both
+ *   engines and are bounded, so they cannot backtrack catastrophically. A rule only counts as
+ *   built-in when it is identical to a shipped one: the `builtIn` flag is stored in the setting,
+ *   which can be written through the API, and must not select the unprotected engine on its own.
+ * - Every other rule runs on RE2, which matches in linear time, so a pattern an admin saves (or an
+ *   attacker's input to it) cannot stall the worker and turn masking off for the request.
+ * - A rule that RE2 cannot compile (lookahead, lookbehind, backreferences, `\uXXXX`) falls back to
+ *   native `RegExp`, which is what custom rules always ran on before RE2: a customer's existing
+ *   rule must not stop masking, or fail every request, because of an engine change. The page only
+ *   lets new patterns be saved in RE2 syntax, so the fallback is only reachable for rules saved
+ *   earlier or written through the API.
+ */
+const chooseEngine = (rule: RegexAnonymizationRule): RuleEngine => {
+  if (isShippedBuiltInRule(rule)) {
+    return 'shipped-native';
+  }
+  return compilesOnRe2(rule.pattern) ? 're2' : 'legacy-native';
+};
+
+/**
+ * Whether the rule runs on the native `RegExp` fallback. Such a rule has no linear-time guarantee,
+ * so callers run it in a worker task of its own: when it stalls and the task is aborted, only its
+ * matches are lost, not those of the built-in and RE2 rules that would otherwise share the task.
+ */
+export const usesNativeFallback = (rule: RegexAnonymizationRule): boolean =>
+  chooseEngine(rule) === 'legacy-native';
+
 /**
  * Compiles a rule's pattern. A pattern that does not compile throws instead of being skipped,
  * so the pipeline's `onFailure` mode decides what happens: silently dropping the rule would
  * leave data the admin believes is masked going to the model.
- *
- * Shipped built-in rules run on native `RegExp`: they are written to behave the same on both
- * engines and are bounded, so they cannot backtrack catastrophically. A rule only counts as
- * built-in when it is identical to a shipped one: the `builtIn` flag is stored in the setting, which
- * can be written through the API, and must not select the unprotected engine on its own.
- *
- * Every other rule runs on RE2, which matches in linear time, so a pattern an admin saves (or an
- * attacker's input to it) cannot stall the worker and turn masking off for the request.
- *
- * A rule that RE2 cannot compile (lookahead, lookbehind, backreferences, `\uXXXX`) falls back to
- * native `RegExp`, which is what custom rules always ran on before RE2: a customer's existing rule
- * must not stop masking, or fail every request, because of an engine change. The page only lets
- * new patterns be saved in RE2 syntax, so the fallback is only reachable for rules saved earlier or
- * written through the API. It keeps the protection those rules always had, the worker timeout.
  */
 export const compileRulePattern = (rule: RegexAnonymizationRule): FindSpans => {
   const label = rule.name ?? rule.id ?? rule.entityClass;
-  const describe = (error: unknown) => (error instanceof Error ? error.message : String(error));
-  const invalid = (error: unknown) =>
-    new Error(
-      `Anonymization rule "${label}" has an invalid regular expression: ${describe(error)}`
-    );
-
-  if (isShippedBuiltInRule(rule)) {
-    try {
-      return findSpansNative(new RegExp(rule.pattern, 'g'));
-    } catch (error) {
-      throw invalid(error);
-    }
-  }
-
   try {
-    return findSpansRe2(RE2JS.compile(rule.pattern));
-  } catch {
-    try {
-      return findSpansNative(new RegExp(rule.pattern, 'g'));
-    } catch (error) {
-      throw invalid(error);
-    }
+    return chooseEngine(rule) === 're2'
+      ? findSpansRe2(RE2JS.compile(rule.pattern))
+      : findSpansNative(new RegExp(rule.pattern, 'g'));
+  } catch (error) {
+    const reason = error instanceof Error ? error.message : String(error);
+    throw new Error(`Anonymization rule "${label}" has an invalid regular expression: ${reason}`);
   }
 };
 
