@@ -262,8 +262,29 @@ describe('Detection Rule Creation worker', () => {
 
     it('declares every output the coverage review reads', () => {
       expect(worker.outputs?.map(({ name }) => name)).toEqual(
-        expect.arrayContaining(['created', 'reviewed', 'decision', 'rule_name', 'skip_reason'])
+        expect.arrayContaining([
+          'created',
+          'reviewed',
+          'decision',
+          'rule_name',
+          'skip_reason',
+          'no_rule',
+        ])
       );
+    });
+
+    // A draft that could not be copied to the investigation can pass on the next sweep,
+    // so only a draft the tool never built reports no_rule.
+    it.each([
+      ['a draft the tool did not build', { ok: false }, true],
+      ['a complete draft', { ok: true }, false],
+    ])('reports no_rule for %s', (_scenario, ready, expected) => {
+      const expression = emit.no_rule.trim().slice(3, -2).trim();
+      expect(
+        createWorkflowLiquidEngine().evalValueSync(expression, {
+          steps: { draft_ready: { output: ready } },
+        })
+      ).toBe(expected);
     });
 
     // The model's reason lives in the structured output, not only in its conversation,

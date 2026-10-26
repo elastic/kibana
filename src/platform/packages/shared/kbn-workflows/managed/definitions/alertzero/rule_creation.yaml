@@ -68,6 +68,8 @@ outputs:
     type: string
   - name: skip_reason
     type: string
+  - name: no_rule
+    type: boolean
 consts:
   # Temporary: service accounts have no display name, so the chat would show the raw account
   # id. Remove once they carry one (elastic/security-team#20422).
@@ -326,6 +328,11 @@ steps:
           or steps.propose_creation.output.decision == 'dismissed' }}
       decision: "{{ steps.propose_creation.output.decision }}"
       rule_name: "{{ steps.draft_creation.output.structured_output.rule.name }}"
+      # The tool built no rule, for example because no data source exists for the gap.
+      # A retry would fail the same way, so the caller stops asking about the gap. A
+      # draft that could not be copied to the investigation is not this case: that can
+      # pass on the next sweep.
+      no_rule: "${{ steps.draft_ready.output.ok != true }}"
       # Why nothing was proposed, so a gap that keeps coming back can be explained
       # without opening the agent conversation. Empty when the draft reached the gate.
       skip_reason: >-

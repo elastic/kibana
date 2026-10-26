@@ -150,6 +150,24 @@ export const SHIPPED_YAML_CONTRACTS: WorkerWorkflowContract[] = [
           },
         },
       },
+      {
+        steps: {
+          close_investigation_no_rule: { output: CHANGED_STATUS },
+          coverage_check: { output: { structured_output: { verdict: 'no_coverage' } } },
+          create_investigation: OPENED_INVESTIGATION,
+          mark_processed: { output: { result: 'updated' } },
+          record_decision: { output: { applied: false, approved: false, dismissed: false } },
+          resolve_outcome: { output: { creation_no_rule: true } },
+          run_rule_creation: {
+            output: {
+              created: false,
+              no_rule: true,
+              reviewed: false,
+              skip_reason: 'No data source exists for the gap.',
+            },
+          },
+        },
+      },
       { steps: { read_ki: { output: { hits: { total: { value: 0 } } } } } },
       {
         steps: {

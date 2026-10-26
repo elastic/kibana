@@ -6,10 +6,11 @@ description: >
   cheapest fix as a proposal on it: enable a disabled rule, install a prebuilt rule, or
   confirm an enabled rule already covers the gap. The action runs only once an analyst
   approves. Without a rule, drafts one and proposes it on the same investigation. After
-  a decision, marks the indicator processed. Without a decision, or when an approved
-  action changed nothing, the indicator stays pending. An indicator with no content is
-  marked invalid and is not retried. In manual mode, an analyst must approve the review
-  before the coverage check runs.
+  a decision, marks the indicator processed. When no rule can be drafted for the gap,
+  closes the investigation and marks the indicator processed. Without a decision, or
+  when an approved action changed nothing, the indicator stays pending. An indicator
+  with no content is marked invalid and is not retried. In manual mode, an analyst must
+  approve the review before the coverage check runs.
 enabled: true
 tags:
   - security
@@ -958,8 +959,10 @@ steps:
   # `decided` is the no-decision hole for the proposal paths: an expired gate
   # completes with neither `approved` nor `dismissed`. `creation_unreviewed` is the
   # same class of hole for the no_coverage path: the child can finish with
-  # `created: false` and no error without asking anyone when the draft is incomplete
-  # or could not be attached to the investigation.
+  # `created: false` and no error without asking anyone when the draft could not be
+  # attached to the investigation. `creation_no_rule` is the exception: the tool built
+  # no rule, for example because no data source exists for the gap. A retry fails the
+  # same way, so the review ends there and the gap does not come back.
   #
   # `no_content` retires the indicator: it has no content. A retry gives the same
   # result, so the sweep must not ask again.
@@ -975,9 +978,14 @@ steps:
           and not (steps.refetch_rule.error == null
             and steps.refetch_rule.output.id != null
             and steps.refetch_rule.output.enabled == true) }}
+      creation_no_rule: >-
+        ${{ steps.coverage_check.output.structured_output.verdict == 'no_coverage'
+          and steps.run_rule_creation.error == null
+          and steps.run_rule_creation.output.no_rule == true }}
       creation_unreviewed: >-
         ${{ steps.coverage_check.output.structured_output.verdict == 'no_coverage'
-          and steps.run_rule_creation.output.reviewed != true }}
+          and steps.run_rule_creation.output.reviewed != true
+          and steps.run_rule_creation.output.no_rule != true }}
       decided: >-
         ${{ steps.coverage_check.output.structured_output.verdict == 'no_coverage'
           or steps.record_decision.output.approved == true
@@ -988,14 +996,15 @@ steps:
 
   # Step 9 of 10: close the investigation. Metadata writes fire the
   # ai.conversation.metadataUpdated trigger, which is the emit point for downstream
-  # feedback signals. Two outcomes match neither case, and the investigation stays
-  # open on purpose: an expired gate, because nobody decided, and an approval whose
-  # change did not land, because the indicator stays pending and the gap is not
-  # resolved.
+  # feedback signals. A gap no rule can be drafted for closes without a proposal,
+  # because the indicator is marked processed and no later review would close it. Two
+  # outcomes match no case, and the investigation stays open on purpose: an expired
+  # gate, because nobody decided, and an approval whose change did not land, because
+  # the indicator stays pending and the gap is not resolved.
   - name: close_investigation
     type: switch
     if: "${{ steps.create_investigation.output.conversation_id != null }}"
-    expression: "{% if steps.record_decision.output.approved == true and steps.resolve_outcome.output.enable_approved_not_applied == false and steps.resolve_outcome.output.install_approved_not_applied == false %}approved{% elsif steps.record_decision.output.dismissed == true %}dismissed{% endif %}"
+    expression: "{% if steps.record_decision.output.approved == true and steps.resolve_outcome.output.enable_approved_not_applied == false and steps.resolve_outcome.output.install_approved_not_applied == false %}approved{% elsif steps.record_decision.output.dismissed == true %}dismissed{% elsif steps.resolve_outcome.output.creation_no_rule == true %}no_rule{% endif %}"
     cases:
       - match: approved
         steps:
@@ -1043,13 +1052,37 @@ steps:
               investigation_id: "{{ steps.create_investigation.output.conversation_id }}"
               close_reason: other
 
+      - match: no_rule
+        steps:
+          - name: close_investigation_no_rule
+            type: ai.conversation.metadata.patch
+            with:
+              conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+              updates:
+                status: closed
+                close_reason: other
+                verdict: "No rule could be drafted for the gap. {{ steps.run_rule_creation.output.skip_reason }}"
+            on-failure:
+              continue: true
+
+          - name: report_investigation_closed_no_rule
+            type: alertzero.reportWorkerOutcome
+            if: "${{ steps.close_investigation_no_rule.error == blank and steps.close_investigation_no_rule.output.changed_fields contains 'status' }}"
+            on-failure:
+              continue: true
+            with:
+              event: worker_investigation_closed
+              investigation_id: "{{ steps.create_investigation.output.conversation_id }}"
+              close_reason: other
+
   # Step 10 of 10: mark the indicator processed. Except for a declined entry gate,
   # this is the only write to the indicator. It runs only after an applied decision.
+  # A gap no rule can be drafted for is also marked processed, so it does not come back.
   # A check without a verdict asked nobody. An expired proposal decided nothing. A failed
-  # rule-creation run decided nothing, and one that asked nobody (an incomplete draft,
-  # or one that could not be attached) also decided nothing. An approved action that
-  # changed nothing did not apply the decision. In each case the indicator stays
-  # pending for the next sweep, except when `mark_invalid` retires it.
+  # rule-creation run decided nothing, and one whose draft could not be attached asked
+  # nobody. An approved action that changed nothing did not apply the decision. In each
+  # case the indicator stays pending for the next sweep, except when `mark_invalid`
+  # retires it.
   #
   # Only `attributes.status` is written. `attributes` merges on update. `tags` is a list,
   # and a partial update replaces the full list. This workflow does not write tags.
@@ -1256,8 +1289,10 @@ steps:
       rule_created: "${{ steps.run_rule_creation.output.created == true }}"
       created_rule_name: "{{ steps.run_rule_creation.output.rule_name }}"
       creation_error: "{{ steps.resolve_failure.output.creation_error }}"
-      # Set when the rule-creation run completed without proposing a rule, for example
-      # because no data source exists for the gap. The indicator stays pending.
+      # Set when the rule-creation run completed without proposing a rule. When no rule
+      # could be drafted, for example because no data source exists for the gap, the
+      # indicator is marked processed. When the draft could not be attached, it stays
+      # pending.
       creation_skip_reason: "{{ steps.run_rule_creation.output.skip_reason }}"
       # False after no decision, after a failed action, and after a failed write.
       ki_id: "{{ inputs.ki_id }}"

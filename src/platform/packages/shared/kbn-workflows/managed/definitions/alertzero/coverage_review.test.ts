@@ -139,6 +139,7 @@ const evaluateMarkProcessed = ({
   verdict = 'no_coverage',
   created = false,
   reviewed,
+  noRule,
   error = null,
   approved = false,
   dismissed = false,
@@ -146,6 +147,7 @@ const evaluateMarkProcessed = ({
   verdict?: string | null;
   created?: boolean;
   reviewed?: boolean;
+  noRule?: boolean;
   error?: unknown;
   approved?: boolean;
   dismissed?: boolean;
@@ -154,7 +156,7 @@ const evaluateMarkProcessed = ({
   const childContext = {
     steps: {
       coverage_check: { output: { structured_output: { verdict } } },
-      run_rule_creation: { error, output: { created, reviewed } },
+      run_rule_creation: { error, output: { created, reviewed, no_rule: noRule } },
       record_decision: { output: { approved, dismissed } },
     },
   };
@@ -509,6 +511,10 @@ describe('Detection Coverage review', () => {
         'close_investigation_dismissed',
         'report_investigation_closed_dismissed',
       ]);
+      expect(caseSteps('no_rule')).toEqual([
+        'close_investigation_no_rule',
+        'report_investigation_closed_no_rule',
+      ]);
 
       const resolved = stepByName('close_investigation_resolved');
       const dismissed = stepByName('close_investigation_dismissed');
@@ -557,6 +563,12 @@ describe('Detection Coverage review', () => {
       ],
       ['a dismissal', { approved: false, dismissed: true }, {}, 'dismissed'],
       ['an expired proposal', { approved: false, dismissed: false }, {}, ''],
+      [
+        'a gap no rule can be drafted for',
+        { approved: false, dismissed: false },
+        { creation_no_rule: true },
+        'no_rule',
+      ],
     ])('routes %s to the matching close', (_scenario, decision, outcome, expected) => {
       const rendered = createWorkflowLiquidEngine().parseAndRenderSync(
         String(stepByName('close_investigation')?.expression),
@@ -982,9 +994,26 @@ describe('Detection Coverage review', () => {
     });
 
     // The child can complete with `created: false` without asking anyone when the draft
-    // is incomplete or could not be attached. That must not drop the indicator.
+    // could not be attached. That must not drop the indicator.
     it('leaves the indicator pending when rule creation completes with created: false and no review', () => {
-      expect(evaluateMarkProcessed({ created: false, reviewed: false })).toBe(false);
+      expect(evaluateMarkProcessed({ created: false, reviewed: false, noRule: false })).toBe(false);
+    });
+
+    // No rule can be drafted, for example because no data source exists for the gap. A
+    // retry fails the same way, so the gap must not come back on every sweep.
+    it('marks the indicator processed when rule creation builds no rule', () => {
+      expect(evaluateMarkProcessed({ created: false, reviewed: false, noRule: true })).toBe(true);
+    });
+
+    it('leaves the indicator pending when a failed child run reports no rule', () => {
+      expect(
+        evaluateMarkProcessed({
+          created: false,
+          reviewed: false,
+          noRule: true,
+          error: { message: 'boom' },
+        })
+      ).toBe(false);
     });
 
     it.each([

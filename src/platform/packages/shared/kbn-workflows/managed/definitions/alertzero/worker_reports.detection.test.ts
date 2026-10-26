@@ -71,6 +71,12 @@ describe('Rule Tuning and Rule Coverage close reports', () => {
         definition: ALERTZERO_COVERAGE_REVIEW_WORKFLOW,
         reportStep: 'report_investigation_closed_declined',
       },
+      {
+        closeReason: 'other',
+        closeStep: 'close_investigation_no_rule',
+        definition: ALERTZERO_COVERAGE_REVIEW_WORKFLOW,
+        reportStep: 'report_investigation_closed_no_rule',
+      },
     ],
     definitions: [
       ALERTZERO_RULE_TUNING_WORKER_WORKFLOW,
@@ -1002,7 +1008,7 @@ describe('Rule Tuning and Rule Coverage managed versions', () => {
     [ALERTZERO_RULE_TUNING_WORKER_WORKFLOW.id, ALERTZERO_RULE_TUNING_WORKER_WORKFLOW.version, 31],
     [ALERTZERO_RULE_TUNING_REVIEW_WORKFLOW.id, ALERTZERO_RULE_TUNING_REVIEW_WORKFLOW.version, 34],
     [ALERTZERO_COVERAGE_WORKER_WORKFLOW.id, ALERTZERO_COVERAGE_WORKER_WORKFLOW.version, 6],
-    [ALERTZERO_COVERAGE_REVIEW_WORKFLOW.id, ALERTZERO_COVERAGE_REVIEW_WORKFLOW.version, 7],
+    [ALERTZERO_COVERAGE_REVIEW_WORKFLOW.id, ALERTZERO_COVERAGE_REVIEW_WORKFLOW.version, 8],
   ])('bumps %s to the version that carries its reports', (_id, version, expected) => {
     expect(version).toBe(expected);
   });
