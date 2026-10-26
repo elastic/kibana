@@ -6,6 +6,8 @@
  */
 
 import { type DiagnosticResult, errors } from '@elastic/elasticsearch';
+import Boom from '@hapi/boom';
+import { setTimeout as delay } from 'timers/promises';
 
 import { schema } from '@kbn/config-schema';
 import type {
@@ -28,10 +30,17 @@ import {
   type BulkUpdateTaskResult,
   type ConcreteTaskInstance,
   getUiamApiKeySecret,
+  TaskCost,
+  type TaskManagerSetupContract,
   type TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 
 import type { PluginStartDependencies } from '.';
+import {
+  CredentialRecovery,
+  credentialRecoverySchema,
+  runConcurrentOperations,
+} from './credential_recovery';
 
 export const SESSION_INDEX_CLEANUP_TASK_NAME = 'session_cleanup';
 
@@ -55,7 +64,8 @@ const getReceivedSelfCallHeaders = (headers: Headers, uiam: UiamAPIKeysType | nu
 
 export function initRoutes(
   initializerContext: PluginInitializerContext,
-  core: CoreSetup<PluginStartDependencies>
+  core: CoreSetup<PluginStartDependencies>,
+  taskManagerSetup: TaskManagerSetupContract
 ) {
   const logger = initializerContext.logger.get();
   // Capture once — reading esClient.openPointInTime on disable would recapture the mock.
@@ -441,6 +451,148 @@ export function initRoutes(
 
         throw err;
       }
+    }
+  );
+
+  router.post(
+    {
+      path: '/internal/test_endpoints/authentication/credential_recovery',
+      options: { access: 'internal', timeout: { idleSocket: 150_000 } },
+      security: {
+        authz: {
+          enabled: false,
+          reason:
+            'Test endpoint exercising session recovery through scoped calls and API key grants',
+        },
+      },
+      validate: { body: credentialRecoverySchema },
+    },
+    async (_context, request, response) => {
+      const [coreStart] = await core.getStartServices();
+      const recovery = new CredentialRecovery(coreStart, request, request.body);
+      let failure: Error | undefined;
+
+      try {
+        await recovery.run();
+      } catch (error) {
+        logger.error(
+          `Credential recovery scenario '${request.body.scenario}' failed: ${error.message}`
+        );
+        failure = error;
+      } finally {
+        await recovery.cleanup();
+      }
+
+      const body = recovery.getResult();
+      if (failure) {
+        return response.customError({
+          statusCode: Boom.isBoom(failure) ? failure.output.statusCode : 500,
+          bypassErrorFormat: true,
+          body: { ...body, message: failure.message },
+        });
+      }
+
+      return response.ok({ body });
+    }
+  );
+
+  const authenticationTaskType = 'securityTestEndpoints:authentication';
+  taskManagerSetup.registerTaskDefinitions({
+    [authenticationTaskType]: {
+      title: 'Authentication test no-op',
+      description: 'Tests API key grants during task scheduling without executing work.',
+      timeout: '10s',
+      cost: TaskCost.Tiny,
+      maxAttempts: 1,
+      createTaskRunner: () => ({ run: async () => undefined }),
+    },
+  });
+
+  router.post(
+    {
+      path: '/internal/test_endpoints/authentication/tasks',
+      options: { access: 'internal' },
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Test endpoint exercising session recovery during Task Manager API key grants',
+        },
+      },
+      validate: {
+        query: schema.object({
+          waitMs: schema.number({ min: 0, max: 20_000, defaultValue: 0 }),
+          count: schema.number({ min: 1, max: 3, defaultValue: 1 }),
+          concurrent: schema.boolean({ defaultValue: false }),
+          authenticateFirst: schema.boolean({ defaultValue: false }),
+        }),
+      },
+    },
+    async (context, request, response) => {
+      const [, { taskManager }] = await core.getStartServices();
+      const { waitMs, count, concurrent, authenticateFirst } = request.query;
+      const tasks: Array<{ id: string; apiKeyId: string | undefined }> = [];
+
+      const scheduleTask = async () => {
+        const task = await taskManager.schedule(
+          {
+            taskType: authenticationTaskType,
+            runAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
+            params: {},
+            state: {},
+          },
+          { request }
+        );
+        tasks.push({ id: task.id, apiKeyId: task.userScope?.apiKeyId });
+      };
+
+      try {
+        // Expire the token inside this request, after HTTP authentication has completed.
+        await delay(waitMs);
+        if (authenticateFirst) {
+          const { elasticsearch } = await context.core;
+          await elasticsearch.client.asCurrentUser.security.authenticate();
+        }
+
+        if (concurrent) {
+          await runConcurrentOperations(Array.from({ length: count }, scheduleTask));
+        } else {
+          for (let index = 0; index < count; index++) {
+            await scheduleTask();
+          }
+        }
+      } catch (error) {
+        await runConcurrentOperations(tasks.map(({ id }) => taskManager.removeIfExists(id)));
+        return response.customError({
+          statusCode: Boom.isBoom(error) ? error.output.statusCode : 500,
+          body: { message: error.message },
+        });
+      }
+
+      const [task, ...additionalTasks] = tasks;
+      return response.ok({
+        body: { ...task, ...(additionalTasks.length ? { additionalTasks } : {}) },
+      });
+    }
+  );
+
+  router.delete(
+    {
+      path: '/internal/test_endpoints/authentication/tasks/{taskId}',
+      options: { access: 'internal' },
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Test endpoint removing a task created by an authentication test',
+        },
+      },
+      validate: {
+        params: schema.object({ taskId: schema.string({ minLength: 1, maxLength: 128 }) }),
+      },
+    },
+    async (_context, request, response) => {
+      const [, { taskManager }] = await core.getStartServices();
+      await taskManager.removeIfExists(request.params.taskId);
+      return response.noContent();
     }
   );
 

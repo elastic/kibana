@@ -3281,12 +3281,12 @@ describe('Authenticator', () => {
       expect(mockOptions.authHeadersStorage.set).toHaveBeenCalledTimes(1);
     });
 
-    it('reuses the latest credential for a late failure and permits another token to expire', async () => {
+    it('checks the latest credential with the provider when an older transport fails late', async () => {
       await authenticator.reauthenticate(request, originalHeaders);
       await expect(authenticator.reauthenticate(request, originalHeaders)).resolves.toEqual(
         credentialsFor(renewedHeaders)
       );
-      expect(authenticateSession).toHaveBeenCalledTimes(1);
+      expect(authenticateSession).toHaveBeenCalledTimes(2);
       const newest = { authorization: 'Bearer newest' };
       authenticateSession.mockResolvedValue(
         AuthenticationResult.succeeded(user, { authHeaders: newest })
@@ -3294,7 +3294,34 @@ describe('Authenticator', () => {
       await expect(authenticator.reauthenticate(request, renewedHeaders)).resolves.toEqual(
         credentialsFor(newest)
       );
+      expect(authenticateSession).toHaveBeenCalledTimes(3);
+    });
+
+    it('renews again when an older transport is the first caller after a second expiry', async () => {
+      await authenticator.reauthenticate(request, originalHeaders);
+      const newest = { authorization: 'Bearer newest' };
+      authenticateSession.mockResolvedValue(
+        AuthenticationResult.succeeded(user, { authHeaders: newest })
+      );
+
+      const stale = authenticator.reauthenticate(request, originalHeaders);
+      const current = authenticator.reauthenticate(request, renewedHeaders);
+      await expect(Promise.all([stale, current])).resolves.toEqual([
+        credentialsFor(newest),
+        credentialsFor(newest),
+      ]);
       expect(authenticateSession).toHaveBeenCalledTimes(2);
+      expect(authenticator.getRequestCredentials(request)).toEqual(credentialsFor(newest));
+      expect(request.headers).toEqual(originalHeaders);
+    });
+
+    it('does not reuse a newer credential when the provider can no longer authenticate the session', async () => {
+      await authenticator.reauthenticate(request, originalHeaders);
+      authenticateSession.mockResolvedValue(AuthenticationResult.notHandled());
+
+      await expect(authenticator.reauthenticate(request, originalHeaders)).resolves.toBeNull();
+      expect(authenticateSession).toHaveBeenCalledTimes(2);
+      expect(mockOptions.authHeadersStorage.set).toHaveBeenCalledTimes(1);
     });
 
     it('never replaces an explicitly overridden credential with the session credential', async () => {

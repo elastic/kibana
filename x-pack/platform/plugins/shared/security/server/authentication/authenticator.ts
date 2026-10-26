@@ -611,7 +611,7 @@ export class Authenticator {
   /**
    * Renews an expired session token and stores the new authentication headers in Core.
    * Concurrent calls for the same request share one renewal attempt.
-   * A call that fails with an older token uses the latest token or waits for its renewal.
+   * Late failures also check the session, since a newer token may already have expired.
    * @param request The original incoming request whose session owns the credential.
    * @param failedAuthHeaders Headers sent by the failed call. Defaults to the latest headers.
    */
@@ -632,11 +632,6 @@ export class Authenticator {
     // Ignore credentials this request never owned, such as a per-call authorization override.
     if (!state.authorizationHistory.has(failedAuthorization)) {
       return null;
-    }
-
-    // Another call already replaced this token. Use the replacement, or wait for its renewal.
-    if (state.authHeaders.authorization !== failedAuthorization) {
-      return state.reauthentication ?? this.getRequestCredentials(request);
     }
 
     // Store the promise before calling the provider, so concurrent failures share one attempt.
@@ -719,8 +714,8 @@ export class Authenticator {
         }
 
         // New scoped clients and grants read these headers from Core. Calls that still hold the
-        // old headers keep the same state, so their late failures use this token instead of
-        // starting another renewal. Remember the new object for later KibanaRequest wrappers too.
+        // old headers keep the same state and share any pending renewal. Remember the new object
+        // for later KibanaRequest wrappers too.
         this.options.authHeadersStorage.set(request, authHeaders);
         state.authHeaders = authHeaders;
         state.authorizationHistory.add(authHeaders.authorization);

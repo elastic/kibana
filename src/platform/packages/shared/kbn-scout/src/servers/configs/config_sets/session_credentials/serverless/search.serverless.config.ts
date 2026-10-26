@@ -23,10 +23,9 @@ export const servers: ScoutServerConfig = {
     ...defaultConfig.kbnTestServer,
     serverArgs: [
       ...defaultConfig.kbnTestServer.serverArgs,
-      '--xpack.security.serviceAccounts.enabled=true',
       `--plugin-path=${resolve(
         REPO_ROOT,
-        'x-pack/platform/test/security_api_integration/plugins/service_accounts'
+        'x-pack/platform/test/security_functional/plugins/test_endpoints'
       )}`,
     ],
   },

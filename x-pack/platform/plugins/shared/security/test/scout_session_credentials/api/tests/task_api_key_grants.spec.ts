@@ -40,10 +40,10 @@ apiTest.describe(
             responseType: 'json',
           });
           expect(user).toHaveStatusCode(200);
-          // The stateful service_accounts config expires ES access tokens after 15 seconds.
+          // The stateful session_credentials config expires ES access tokens after 15 seconds.
           // Wait inside the handler, so HTTP authentication cannot renew the token first.
           const response = await apiClient.post(
-            `internal/service_accounts_test/_tasks?waitMs=20000${scenario.query}`,
+            `internal/test_endpoints/authentication/tasks?waitMs=20000${scenario.query}`,
             {
               headers,
               responseType: 'json',
@@ -78,7 +78,7 @@ apiTest.describe(
               tasks.map((task) =>
                 kbnClient.request({
                   method: 'DELETE',
-                  path: `/internal/service_accounts_test/_tasks/${task.id}`,
+                  path: `/internal/test_endpoints/authentication/tasks/${task.id}`,
                 })
               )
             );
