@@ -59,7 +59,7 @@ describe('ProfilesTab', () => {
     expect(screen.getByTestId('boostProfilesTable')).toHaveTextContent('Rows per page: 10');
     // Unused profiles have nothing to link to.
     expect(
-      screen.queryByRole('link', { name: /using boost profile "elastic-on-demand"/ })
+      screen.queryByRole('link', { name: /using boost profile "_on-demand"/ })
     ).not.toBeInTheDocument();
     // The count and the type filters say what's there: three built-in profiles of each type, and
     // the custom indices one.

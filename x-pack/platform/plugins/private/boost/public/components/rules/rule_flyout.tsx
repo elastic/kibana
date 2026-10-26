@@ -36,6 +36,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import {
   PROFILE_TYPE_BY_DATA_SOURCE,
+  findConflictingRule,
   matchesIndexPattern,
   resolveRule,
 } from '../../../common/resolution';
@@ -75,6 +76,7 @@ import {
   PICKED_REQUIRED_MESSAGES,
   PROFILE_REQUIRED_MESSAGE,
   RULE_NAME_ERROR_MESSAGES,
+  getPriorityConflictMessage,
 } from './rule_messages';
 
 interface RuleFlyoutProps {
@@ -259,9 +261,15 @@ export const RuleFlyout = ({ rule, duplicateOf, initialProfileName, onClose }: R
     !draftErrors.pattern &&
     patternPreview.length === 0 &&
     !isSavedPattern;
+  // Elasticsearch rejects a rule that ties with another, since neither would apply over the other.
+  const conflictingRule =
+    draftErrors.profile || draftErrors.pattern || draftErrors.picked
+      ? undefined
+      : findConflictingRule(draftRule, otherRules, profilesByName);
   const errors: RuleDraftErrors = {
     ...draftErrors,
     patternMatches: hasNoMatches ? 'none' : undefined,
+    conflictsWith: conflictingRule?.name,
   };
   const visibleErrors = showErrors ? errors : {};
 
@@ -563,8 +571,12 @@ export const RuleFlyout = ({ rule, duplicateOf, initialProfileName, onClose }: R
     </EuiFormRow>
   );
 
-  // Priority decides whether the targets follow this rule or a higher-ranked one. It has no errors:
-  // leaving the field corrects a priority that isn't usable.
+  // Priority decides whether the targets follow this rule or a higher-ranked one. Leaving the field
+  // corrects a priority that isn't usable, so its only error is a tie with another rule.
+  const priorityError =
+    visibleErrors.conflictsWith && type
+      ? getPriorityConflictMessage(type, visibleErrors.conflictsWith)
+      : undefined;
   const priorityRow = (
     <EuiFormRow
       display="rowCompressed"
@@ -574,6 +586,8 @@ export const RuleFlyout = ({ rule, duplicateOf, initialProfileName, onClose }: R
       helpText={i18n.translate('xpack.boost.ruleForm.priorityDescription', {
         defaultMessage: 'Highest number wins.',
       })}
+      isInvalid={Boolean(priorityError)}
+      error={priorityError}
       fullWidth
     >
       <EuiFieldNumber
@@ -592,6 +606,7 @@ export const RuleFlyout = ({ rule, duplicateOf, initialProfileName, onClose }: R
         onBlur={() => updateDraft({ priority: normalizePriority(draft.priority) })}
         // The arrows stop at 0. No step, so a pasted fraction isn't marked invalid either.
         min={0}
+        isInvalid={Boolean(priorityError)}
         disabled={isSaving}
         data-test-subj="boostRulePriority"
       />

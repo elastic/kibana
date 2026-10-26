@@ -18,6 +18,7 @@ import {
   DEFAULT_RULE_PROFILES,
   createDefaultRules,
 } from '../../common/presets';
+import { findConflictingRule } from '../../common/resolution';
 import type {
   BoostProfile,
   BoostProfileInput,
@@ -66,6 +67,19 @@ const DEFAULT_RULE_NAMES = [DEFAULT_INDICES_RULE_NAME, DEFAULT_DATA_STREAMS_RULE
 
 const BUILTIN_PROFILE_NAMES = BUILTIN_PROFILES.map(({ name }) => name);
 
+/** Built-in profiles' names before they took the `_` prefix Elasticsearch reserves for them. */
+const LEGACY_BUILTIN_PROFILE_NAMES: Readonly<Record<string, string>> = {
+  'elastic-on-demand': BUILTIN_INDICES_PROFILE_NAMES.on_demand,
+  'elastic-performant': BUILTIN_INDICES_PROFILE_NAMES.performant,
+  'elastic-high-availability': BUILTIN_INDICES_PROFILE_NAMES.high_availability,
+  'elastic-last-1-day': BUILTIN_DATA_STREAMS_PROFILE_NAMES.last_1_day,
+  'elastic-last-3-days': BUILTIN_DATA_STREAMS_PROFILE_NAMES.last_3_days,
+  'elastic-last-7-days': BUILTIN_DATA_STREAMS_PROFILE_NAMES.last_7_days,
+};
+
+/** A saved profile name, with a built-in profile's legacy name replaced by its current one. */
+const toCurrentProfileName = (name: string): string => LEGACY_BUILTIN_PROFILE_NAMES[name] ?? name;
+
 /**
  * The default rules' profiles from legacy settings: a custom profile where one was set, and
  * otherwise the simple-mode preset, as their advanced mode applied them.
@@ -97,7 +111,12 @@ const getSettings = async (client: SavedObjectsClientContract): Promise<BoostSet
     );
 
     return {
-      default_profiles: defaultProfiles ?? fromLegacySettings(legacy),
+      default_profiles: defaultProfiles
+        ? {
+            indices_profile: toCurrentProfileName(defaultProfiles.indices_profile),
+            data_streams_profile: toCurrentProfileName(defaultProfiles.data_streams_profile),
+          }
+        : fromLegacySettings(legacy),
       updated_at: updatedAt,
     };
   } catch (error) {
@@ -147,6 +166,7 @@ const getCustomRules = async (client: SavedObjectsClientContract): Promise<Boost
       }) => ({
         ...rule,
         index_patterns: indexPatterns ?? (legacyPattern ? [legacyPattern] : []),
+        boost_profile: toCurrentProfileName(rule.boost_profile),
         is_builtin: false,
       })
     )
@@ -293,6 +313,29 @@ const assertProfileExists = async (client: SavedObjectsClientContract, name: str
   }
 };
 
+/** Rejects a rule that would tie with another, which Elasticsearch rejects too. */
+const assertNoRuleConflict = async (client: SavedObjectsClientContract, rule: BoostRuleInput) => {
+  const [{ default_profiles: defaultProfiles }, customProfiles, customRules] = await Promise.all([
+    getSettings(client),
+    getCustomProfiles(client),
+    getCustomRules(client),
+  ]);
+  const conflictingRule = findConflictingRule(
+    rule,
+    [...customRules, ...createDefaultRules(defaultProfiles)],
+    new Map([...BUILTIN_PROFILES, ...customProfiles].map((profile) => [profile.name, profile]))
+  );
+  if (conflictingRule) {
+    throw new BoostRequestError(
+      400,
+      `Boost rule [${rule.name}] conflicts with boost rule [${conflictingRule.name}]: both can ` +
+        'match the same index or data stream, with the same priority and the same kind of pattern ' +
+        '(exact name, wildcard or match-all), so neither applies over the other. Use a different ' +
+        'priority or kind of pattern.'
+    );
+  }
+};
+
 const saveRule = async (
   client: SavedObjectsClientContract,
   rule: BoostRuleInput,
@@ -331,6 +374,7 @@ export const createRule = async (
     throw new BoostRequestError(409, `Boost rule [${rule.name}] already exists.`);
   }
   await assertProfileExists(client, rule.boost_profile);
+  await assertNoRuleConflict(client, rule);
   try {
     await saveRule(client, rule, false);
   } catch (error) {
@@ -341,10 +385,7 @@ export const createRule = async (
   }
 };
 
-/**
- * Replaces a custom rule. The name can't change, pending a decision on renaming rules. Elasticsearch
- * is adding a rule update endpoint in elastic/elasticsearch-serverless#7904.
- */
+/** Replaces a custom rule. The name can't change, pending a decision on renaming rules. */
 export const updateRule = async (
   client: SavedObjectsClientContract,
   name: string,
@@ -355,6 +396,7 @@ export const updateRule = async (
   }
   await assertCustomRuleExists(client, name);
   await assertProfileExists(client, rule.boost_profile);
+  await assertNoRuleConflict(client, rule);
   await saveRule(client, rule, true);
 };
 

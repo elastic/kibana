@@ -42,8 +42,8 @@ describe('profile drafts', () => {
   });
 
   it('rejects names that are already taken', () => {
-    const draft = { ...createEmptyDraft(), name: 'elastic-performant' };
-    expect(getDraftErrors(draft, ['elastic-performant']).name).toBe('already_exists');
+    const draft = { ...createEmptyDraft(), name: 'storefront' };
+    expect(getDraftErrors(draft, ['storefront']).name).toBe('already_exists');
   });
 
   it('only validates the fields of the selected type', () => {

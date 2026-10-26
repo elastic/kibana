@@ -33,9 +33,7 @@ describe('getProfileNameError', () => {
   });
 
   it('rejects names that are already taken', () => {
-    expect(getProfileNameError('elastic-performant', ['elastic-performant'])).toBe(
-      'already_exists'
-    );
+    expect(getProfileNameError('storefront', ['storefront'])).toBe('already_exists');
   });
 });
 

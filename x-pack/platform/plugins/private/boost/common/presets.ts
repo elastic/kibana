@@ -17,20 +17,28 @@ import type {
   IndicesPresetId,
 } from './types';
 
+// Built-in names start with `_`, which Elasticsearch reserves for them: custom profile and rule
+// names can't.
 export const BUILTIN_INDICES_PROFILE_NAMES: Readonly<Record<IndicesPresetId, string>> = {
-  on_demand: 'elastic-on-demand',
-  performant: 'elastic-performant',
-  high_availability: 'elastic-high-availability',
+  on_demand: '_on-demand',
+  performant: '_performant',
+  high_availability: '_high-availability',
 };
 
 export const BUILTIN_DATA_STREAMS_PROFILE_NAMES: Readonly<Record<DataStreamsWindowId, string>> = {
-  last_1_day: 'elastic-last-1-day',
-  last_3_days: 'elastic-last-3-days',
-  last_7_days: 'elastic-last-7-days',
+  last_1_day: '_last-1-day',
+  last_3_days: '_last-3-days',
+  last_7_days: '_last-7-days',
 };
 
-export const DEFAULT_INDICES_RULE_NAME = 'elastic-default-indices';
-export const DEFAULT_DATA_STREAMS_RULE_NAME = 'elastic-default-data-streams';
+export const DEFAULT_INDICES_RULE_NAME = '_default-indices';
+export const DEFAULT_DATA_STREAMS_RULE_NAME = '_default-data-streams';
+
+/**
+ * Below any custom rule's priority, since custom rules can't go below 0. Elasticsearch ranks its
+ * platform default rules the same way, so they never tie with a custom rule.
+ */
+export const DEFAULT_RULE_PRIORITY = -1;
 
 /** The default rule for each profile type, which applies to whatever no other rule matches. */
 export const DEFAULT_RULE_NAMES: Readonly<Record<BoostProfileType, string>> = {
@@ -130,14 +138,14 @@ export const createDefaultRules = ({
     name: DEFAULT_INDICES_RULE_NAME,
     index_patterns: ['*'],
     boost_profile: indicesProfile,
-    priority: 0,
+    priority: DEFAULT_RULE_PRIORITY,
     is_builtin: true,
   },
   {
     name: DEFAULT_DATA_STREAMS_RULE_NAME,
     index_patterns: ['*'],
     boost_profile: dataStreamsProfile,
-    priority: 0,
+    priority: DEFAULT_RULE_PRIORITY,
     is_builtin: true,
   },
 ];

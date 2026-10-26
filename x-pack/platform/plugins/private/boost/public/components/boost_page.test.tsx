@@ -153,17 +153,15 @@ describe('Project defaults', () => {
     await userEvent.click(screen.getByTestId('boostEditProjectDefault-indices'));
 
     const flyout = screen.getByTestId('boostProjectDefaultFlyout');
-    expect(getChoice('boostProjectDefaultPreset-elastic-performant')).toBeChecked();
+    expect(getChoice('boostProjectDefaultPreset-_performant')).toBeChecked();
     // Saving is always available, even before the choice changes.
     expect(within(flyout).getByTestId('boostProjectDefaultSave')).toBeEnabled();
 
-    await userEvent.click(
-      within(flyout).getByTestId('boostProjectDefaultPreset-elastic-on-demand')
-    );
+    await userEvent.click(within(flyout).getByTestId('boostProjectDefaultPreset-_on-demand'));
     await userEvent.click(within(flyout).getByTestId('boostProjectDefaultSave'));
 
     expect(mockUpdateDefaultRule).toHaveBeenCalledWith(
-      { type: 'indices', profileName: 'elastic-on-demand' },
+      { type: 'indices', profileName: '_on-demand' },
       expect.anything()
     );
   });

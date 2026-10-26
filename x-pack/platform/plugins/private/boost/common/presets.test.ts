@@ -19,8 +19,8 @@ import {
 describe('DEFAULT_RULE_PROFILES', () => {
   it('starts the project on Performant indices and the last 7 days of data streams', () => {
     expect(DEFAULT_RULE_PROFILES).toEqual({
-      indices_profile: 'elastic-performant',
-      data_streams_profile: 'elastic-last-7-days',
+      indices_profile: '_performant',
+      data_streams_profile: '_last-7-days',
     });
   });
 });
@@ -47,7 +47,7 @@ describe('getDefaultRuleType', () => {
 });
 
 describe('createDefaultRules', () => {
-  it('creates one locked `*` rule per profile type, with its project default', () => {
+  it('creates one locked `*` rule per profile type below any custom rule, with its project default', () => {
     const rules = createDefaultRules(DEFAULT_RULE_PROFILES);
 
     expect(
@@ -58,8 +58,8 @@ describe('createDefaultRules', () => {
         profile,
       ])
     ).toEqual([
-      [DEFAULT_INDICES_RULE_NAME, ['*'], 0, 'elastic-performant'],
-      [DEFAULT_DATA_STREAMS_RULE_NAME, ['*'], 0, 'elastic-last-7-days'],
+      [DEFAULT_INDICES_RULE_NAME, ['*'], -1, '_performant'],
+      [DEFAULT_DATA_STREAMS_RULE_NAME, ['*'], -1, '_last-7-days'],
     ]);
   });
 });

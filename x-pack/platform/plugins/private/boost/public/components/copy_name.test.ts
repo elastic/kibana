@@ -18,7 +18,7 @@ describe('getCopyName', () => {
     );
   });
 
-  it('drops the elastic- prefix from copies of Elastic-managed names', () => {
-    expect(getCopyName('elastic-performant', [])).toBe('performant-copy');
+  it('drops the _ prefix from copies of Elastic-managed names', () => {
+    expect(getCopyName('_performant', [])).toBe('performant-copy');
   });
 });

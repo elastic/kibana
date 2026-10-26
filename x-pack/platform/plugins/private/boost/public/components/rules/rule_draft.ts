@@ -33,6 +33,8 @@ export interface RuleDraftErrors {
   /** Set by the form when a valid pattern matches nothing, which needs the data sources to check. */
   patternMatches?: 'none';
   picked?: 'required';
+  /** Set by the form to the name of a rule the draft would tie with, which Elasticsearch rejects. */
+  conflictsWith?: string;
 }
 
 /** A new rule starts in pattern mode at priority 0, which Elasticsearch also defaults to. */

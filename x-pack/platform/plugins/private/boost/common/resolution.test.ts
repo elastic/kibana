@@ -8,9 +8,11 @@
 import { BUILTIN_PROFILES, DEFAULT_RULE_PROFILES, createDefaultRules } from './presets';
 import {
   countRulesByProfile,
+  findConflictingRule,
   getAppliedRules,
   getRuleCoverage,
   matchesIndexPattern,
+  patternsOverlap,
   resolveRule,
   splitByIndexPattern,
 } from './resolution';
@@ -93,11 +95,11 @@ describe('splitByIndexPattern', () => {
 describe('resolveRule', () => {
   it('falls back to the default rule for the data source type', () => {
     expect(resolveRule(index('users'), defaultRules, profilesByName)?.boost_profile).toBe(
-      'elastic-performant'
+      '_performant'
     );
     expect(
       resolveRule(dataStream('logs-checkout-default'), defaultRules, profilesByName)?.boost_profile
-    ).toBe('elastic-last-7-days');
+    ).toBe('_last-7-days');
   });
 
   it('only applies rules whose profile type matches the data source', () => {
@@ -107,18 +109,20 @@ describe('resolveRule', () => {
         [...defaultRules, rule('custom', 'products')],
         profilesByName
       )?.name
-    ).toBe('elastic-default-data-streams');
+    ).toBe('_default-data-streams');
   });
 
-  it('prefers higher priority, then exact names, then more specific wildcards', () => {
+  it('prefers higher priority, then exact names, then other patterns, then `*`', () => {
     const rules = [
       ...defaultRules,
+      rule('match-all', '*'),
       rule('wildcard', 'prod*'),
-      rule('specific-wildcard', 'products*'),
       rule('exact', 'products'),
     ];
     expect(resolveRule(index('products'), rules, profilesByName)?.name).toBe('exact');
-    expect(resolveRule(index('products-2'), rules, profilesByName)?.name).toBe('specific-wildcard');
+    expect(resolveRule(index('products-2'), rules, profilesByName)?.name).toBe('wildcard');
+    // The default rules rank below any custom rule, even a `*` one at the lowest priority.
+    expect(resolveRule(index('users'), rules, profilesByName)?.name).toBe('match-all');
     expect(
       resolveRule(index('products'), [...rules, rule('priority', '*', 10)], profilesByName)?.name
     ).toBe('priority');
@@ -133,6 +137,63 @@ describe('resolveRule', () => {
     expect(resolveRule(index('products'), rules, profilesByName)?.name).toBe('picked');
     expect(resolveRule(index('users'), rules, profilesByName)?.name).toBe('picked');
     expect(resolveRule(index('products-2'), rules, profilesByName)?.name).toBe('wildcard');
+  });
+});
+
+describe('patternsOverlap', () => {
+  it.each([
+    ['logs-*', '*-prod'],
+    ['prod*', 'products'],
+    ['a*', '*a'],
+    ['*', 'anything'],
+    ['products', 'products'],
+  ])('finds a name that both %p and %p match', (a, b) => {
+    expect(patternsOverlap(a, b)).toBe(true);
+    expect(patternsOverlap(b, a)).toBe(true);
+  });
+
+  it.each([
+    ['logs-*', 'metrics-*'],
+    ['a*b', 'a*c'],
+    ['ab*', 'b*'],
+    ['products', 'users'],
+  ])('finds no name that both %p and %p match', (a, b) => {
+    expect(patternsOverlap(a, b)).toBe(false);
+    expect(patternsOverlap(b, a)).toBe(false);
+  });
+});
+
+describe('findConflictingRule', () => {
+  const rules = [
+    ...defaultRules,
+    rule('products', 'prod*', 5),
+    rule('picked', ['users', 'orders']),
+  ];
+  const findConflict = (candidate: BoostRule) =>
+    findConflictingRule(candidate, rules, profilesByName)?.name;
+
+  it('finds a rule with the same priority and kind of pattern that can match the same name', () => {
+    expect(findConflict(rule('catalog', 'products*', 5))).toBe('products');
+    expect(findConflict(rule('accounts', ['users']))).toBe('picked');
+  });
+
+  it('allows rules that one of them would always win', () => {
+    // Another priority, or another kind of pattern, decides between them.
+    expect(findConflict(rule('catalog', 'products*', 6))).toBeUndefined();
+    expect(findConflict(rule('catalog', 'products', 5))).toBeUndefined();
+    // Custom rules rank above the default rules, even a `*` one at the lowest priority.
+    expect(findConflict(rule('everything', '*'))).toBeUndefined();
+  });
+
+  it("allows rules that can't match the same name", () => {
+    expect(findConflict(rule('catalog', 'catalog-*', 5))).toBeUndefined();
+    expect(
+      findConflict({ ...rule('product-logs', 'prod*', 5), boost_profile: '_last-7-days' })
+    ).toBeUndefined();
+  });
+
+  it("doesn't compare a rule with its own saved version", () => {
+    expect(findConflict(rule('products', 'products*', 5))).toBeUndefined();
   });
 });
 
@@ -161,7 +222,7 @@ describe('getRuleCoverage', () => {
       appliesTo: 1,
       supersededBy: new Map(),
     });
-    expect(coverage.get('elastic-default-indices')).toEqual({
+    expect(coverage.get('_default-indices')).toEqual({
       matches: 3,
       matchedNames: ['products', 'products-2', 'users'],
       appliesTo: 1,

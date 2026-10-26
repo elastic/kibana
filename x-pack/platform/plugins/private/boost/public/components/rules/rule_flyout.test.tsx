@@ -106,11 +106,12 @@ describe('RuleFlyout profile picker', () => {
     expect(screen.getByText('Data streams')).toBeInTheDocument();
     // The list is virtualized, so this checks the indices group, which renders first.
     const labels = screen.getAllByRole('option').map(({ textContent }) => textContent);
+    // Managed profiles' names start with `_`, which sorts first.
     expect(labels.slice(0, 5)).toEqual([
+      '_high-availabilityManaged',
+      '_on-demandManaged',
+      '_performantManaged',
       'alpha-search',
-      'elastic-high-availabilityManaged',
-      'elastic-on-demandManaged',
-      'elastic-performantManaged',
       'zeta-search',
     ]);
   });
@@ -469,7 +470,8 @@ describe('RuleFlyout priority', () => {
 });
 
 describe('RuleFlyout duplicate', () => {
-  it('copies a rule under a new name', async () => {
+  it('copies a rule under a new name, saving it once it no longer ties with the rule', async () => {
+    mutation.mutate.mockClear();
     render(
       <IntlProvider locale="en">
         <RuleFlyout duplicateOf={rule} onClose={jest.fn()} />
@@ -482,13 +484,22 @@ describe('RuleFlyout duplicate', () => {
     expect(screen.getByTestId('boostRuleName')).toHaveValue('catalogs-copy');
     expect(screen.getByTestId('boostRulePattern')).toHaveValue('catalog-*');
 
+    // An exact copy ties with the rule, which Elasticsearch rejects.
+    await userEvent.click(screen.getByTestId('boostRuleSave'));
+    expect(mutation.mutate).not.toHaveBeenCalled();
+    expect(
+      screen.getByText('Ties with rule "catalogs" on the same indices. Choose another priority.')
+    ).toBeInTheDocument();
+
+    await userEvent.clear(screen.getByTestId('boostRulePriority'));
+    await userEvent.type(screen.getByTestId('boostRulePriority'), '2');
     await userEvent.click(screen.getByTestId('boostRuleSave'));
     expect(mutation.mutate).toHaveBeenCalledWith(
       {
         name: 'catalogs-copy',
         index_patterns: ['catalog-*'],
         boost_profile: 'zeta-search',
-        priority: 1,
+        priority: 2,
       },
       expect.anything()
     );

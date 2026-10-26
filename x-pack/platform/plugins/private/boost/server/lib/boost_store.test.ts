@@ -8,18 +8,19 @@
 import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { DEFAULT_RULE_PROFILES } from '../../common/presets';
-import { getState, updateDefaultRule } from './boost_store';
+import { createRule, getState, updateDefaultRule, updateRule } from './boost_store';
+import { BoostRequestError } from './errors';
 
 const catalogsRule = {
   kind: 'rule',
   name: 'catalogs',
   index_patterns: ['catalog-*'],
-  boost_profile: 'elastic-on-demand',
+  boost_profile: '_on-demand',
   priority: 1,
 };
 
 /** A saved objects client holding these settings and one custom rule. */
-const createClient = (settings?: Record<string, unknown>) => {
+const createClient = (settings?: Record<string, unknown>, rule: object = catalogsRule) => {
   const client = savedObjectsClientMock.create();
   client.get.mockImplementation(async () => {
     if (!settings) {
@@ -35,7 +36,7 @@ const createClient = (settings?: Record<string, unknown>) => {
             type: 'boost_prototype',
             references: [],
             score: 1,
-            attributes: catalogsRule,
+            attributes: rule,
           },
         ]
       : [],
@@ -67,8 +68,8 @@ describe('getState', () => {
 
     expect(state.rules.map(({ name }) => name)).toEqual([
       'catalogs',
-      'elastic-default-indices',
-      'elastic-default-data-streams',
+      '_default-indices',
+      '_default-data-streams',
     ]);
   });
 
@@ -85,10 +86,67 @@ describe('getState', () => {
 
     expect(state.settings.default_profiles).toEqual({
       indices_profile: 'catalog-search',
-      data_streams_profile: 'elastic-last-1-day',
+      data_streams_profile: '_last-1-day',
     });
     // Simple mode suspended custom rules; they now apply.
     expect(state.rules.map(({ name }) => name)).toContain('catalogs');
+  });
+
+  it('reads built-in profiles saved under their names from before the `_` prefix', async () => {
+    const state = await getState(
+      createClient(
+        {
+          kind: 'settings',
+          default_profiles: {
+            indices_profile: 'elastic-on-demand',
+            data_streams_profile: 'elastic-last-3-days',
+          },
+        },
+        { ...catalogsRule, boost_profile: 'elastic-high-availability' }
+      ),
+      createEsClient()
+    );
+
+    expect(state.settings.default_profiles).toEqual({
+      indices_profile: '_on-demand',
+      data_streams_profile: '_last-3-days',
+    });
+    expect(state.rules.find(({ name }) => name === 'catalogs')?.boost_profile).toBe(
+      '_high-availability'
+    );
+  });
+});
+
+describe('rule conflicts', () => {
+  const settings = { kind: 'settings', default_profiles: DEFAULT_RULE_PROFILES };
+  const moreCatalogs = {
+    name: 'more-catalogs',
+    index_patterns: ['catalog-fall-*'],
+    boost_profile: '_performant',
+    priority: 1,
+  };
+
+  it('rejects a rule that would tie with another, as Elasticsearch does', async () => {
+    const client = createClient(settings);
+
+    const creating = createRule(client, moreCatalogs);
+    await expect(creating).rejects.toThrow(BoostRequestError);
+    await expect(creating).rejects.toThrow('conflicts with boost rule [catalogs]');
+    expect(client.create).not.toHaveBeenCalled();
+  });
+
+  it('saves a rule that another priority keeps from tying', async () => {
+    const client = createClient(settings);
+
+    await createRule(client, { ...moreCatalogs, priority: 2 });
+    expect(client.create).toHaveBeenCalled();
+  });
+
+  it("doesn't compare an updated rule with its saved version", async () => {
+    const client = createClient(settings);
+
+    await updateRule(client, 'catalogs', { ...catalogsRule, index_patterns: ['catalog-fall-*'] });
+    expect(client.create).toHaveBeenCalled();
   });
 });
 
@@ -96,15 +154,15 @@ describe('updateDefaultRule', () => {
   it("sets one type's project default, keeping the other's", async () => {
     const client = createClient({ kind: 'settings', default_profiles: DEFAULT_RULE_PROFILES });
 
-    await updateDefaultRule(client, 'data_streams', 'elastic-last-3-days');
+    await updateDefaultRule(client, 'data_streams', '_last-3-days');
 
     expect(client.create).toHaveBeenCalledWith(
       'boost_prototype',
       {
         kind: 'settings',
         default_profiles: {
-          indices_profile: 'elastic-performant',
-          data_streams_profile: 'elastic-last-3-days',
+          indices_profile: '_performant',
+          data_streams_profile: '_last-3-days',
         },
       },
       expect.objectContaining({ overwrite: true })

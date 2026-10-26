@@ -10,6 +10,7 @@ import type {
   BoostProfile,
   BoostProfileType,
   BoostRule,
+  BoostRuleInput,
   DataSourceType,
 } from './types';
 
@@ -45,17 +46,44 @@ export const splitByIndexPattern = (pattern: string, name: string): IndexPattern
     .filter(({ text }) => text.length > 0);
 };
 
-/** Ranks how specifically a pattern matches: exact names first, then longer literal patterns. */
-const getSpecificity = (pattern: string): [number, number] => [
-  pattern.includes('*') ? 0 : 1,
-  pattern.replace(/\*/g, '').length,
-];
+/**
+ * The kinds of pattern, from least to most specific, which Elasticsearch ranks rules of the same
+ * priority by: `*` alone, other patterns using `*`, then exact names.
+ */
+const PATTERN_KINDS = ['match_all', 'wildcard', 'exact'] as const;
+
+type PatternKind = (typeof PATTERN_KINDS)[number];
+
+const getPatternKind = (pattern: string): PatternKind =>
+  pattern === '*' ? 'match_all' : pattern.includes('*') ? 'wildcard' : 'exact';
 
 /** Sorts patterns from most to least specific. */
-const compareSpecificity = (a: string, b: string): number => {
-  const [aExact, aLength] = getSpecificity(a);
-  const [bExact, bLength] = getSpecificity(b);
-  return bExact - aExact || bLength - aLength;
+const compareSpecificity = (a: string, b: string): number =>
+  PATTERN_KINDS.indexOf(getPatternKind(b)) - PATTERN_KINDS.indexOf(getPatternKind(a));
+
+/** Whether some name matches both index patterns, each a concrete name or a pattern using `*`. */
+export const patternsOverlap = (a: string, b: string): boolean => {
+  // Whether the rest of each pattern, from a[i] and b[j], can match a common name.
+  const memo = new Map<string, boolean>();
+  const overlapsFrom = (i: number, j: number): boolean => {
+    const key = `${i},${j}`;
+    const memoized = memo.get(key);
+    if (memoized !== undefined) {
+      return memoized;
+    }
+    // A `*` matches nothing more, or takes the other pattern's next character, `*` or not.
+    const overlaps =
+      i === a.length && j === b.length
+        ? true
+        : a[i] === '*'
+        ? overlapsFrom(i + 1, j) || (j < b.length && overlapsFrom(i, j + 1))
+        : b[j] === '*'
+        ? overlapsFrom(i, j + 1) || (i < a.length && overlapsFrom(i + 1, j))
+        : i < a.length && j < b.length && a[i] === b[j] && overlapsFrom(i + 1, j + 1);
+    memo.set(key, overlaps);
+    return overlaps;
+  };
+  return overlapsFrom(0, 0);
 };
 
 /** Returns the rule's most specific pattern that matches the data source, if any. */
@@ -81,7 +109,8 @@ const isRuleMatch = (match: { rule: BoostRule; pattern?: string }): match is Rul
 /**
  * Returns the rule that applies to a data source, or `undefined` if none matches. Matching rules
  * are ordered the way the Elasticsearch boost rule resolver does: higher priority first, then exact
- * names over patterns, then more specific patterns. Rule name breaks remaining ties.
+ * names over other patterns, then those over `*`. Elasticsearch rejects rules that would still tie
+ * (see `findConflictingRule`), so the rule name only orders ties saved before the prototype checked.
  */
 export const resolveRule = (
   dataSource: BoostDataSource,
@@ -97,6 +126,33 @@ export const resolveRule = (
         compareSpecificity(a.pattern, b.pattern) ||
         a.rule.name.localeCompare(b.rule.name)
     )[0]?.rule;
+
+/**
+ * Returns a rule that would tie with the given one, which Elasticsearch rejects: one with the same
+ * priority and type of profile, and a pattern of the same kind that can match the same name, so
+ * neither rule would apply over the other. A rule doesn't conflict with its own saved version.
+ */
+export const findConflictingRule = (
+  { name, index_patterns: patterns, boost_profile: profileName, priority }: BoostRuleInput,
+  rules: readonly BoostRule[],
+  profilesByName: ReadonlyMap<string, BoostProfile>
+): BoostRule | undefined => {
+  const type = profilesByName.get(profileName)?.type;
+  return rules.find(
+    (rule) =>
+      rule.name !== name &&
+      rule.priority === priority &&
+      type !== undefined &&
+      profilesByName.get(rule.boost_profile)?.type === type &&
+      patterns.some((pattern) =>
+        rule.index_patterns.some(
+          (rulePattern) =>
+            getPatternKind(rulePattern) === getPatternKind(pattern) &&
+            patternsOverlap(rulePattern, pattern)
+        )
+      )
+  );
+};
 
 export interface RuleCoverage {
   /** Data sources of the rule's type that its patterns match. */

@@ -53,6 +53,19 @@ export const PATTERN_NO_MATCHES_MESSAGES: Readonly<Record<BoostProfileType, stri
   }),
 };
 
+/** A tie with another rule, which Elasticsearch rejects since neither rule would apply. */
+export const getPriorityConflictMessage = (type: BoostProfileType, ruleName: string): string =>
+  type === 'indices'
+    ? i18n.translate('xpack.boost.ruleForm.priorityConflict.indices', {
+        defaultMessage: 'Ties with rule "{ruleName}" on the same indices. Choose another priority.',
+        values: { ruleName },
+      })
+    : i18n.translate('xpack.boost.ruleForm.priorityConflict.dataStreams', {
+        defaultMessage:
+          'Ties with rule "{ruleName}" on the same data streams. Choose another priority.',
+        values: { ruleName },
+      });
+
 export const PICKED_REQUIRED_MESSAGES: Readonly<Record<BoostProfileType, string>> = {
   indices: i18n.translate('xpack.boost.ruleForm.pickedIndicesRequired', {
     defaultMessage: 'Select at least one index.',

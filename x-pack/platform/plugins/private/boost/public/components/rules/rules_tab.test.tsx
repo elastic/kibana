@@ -142,7 +142,7 @@ describe('RulesTab profile filter', () => {
     const order = () => getOptions().map(({ textContent }) => textContent?.split('. ')[0]);
     const before = order();
 
-    await clickOption('elastic-performant');
+    await clickOption('_performant');
 
     expect(order()).toEqual(before);
     expect(before).toEqual([...before].sort());
@@ -259,7 +259,7 @@ describe('RulesTab matches', () => {
   it('describes default rules without counting or listing what they match', () => {
     renderTab('/rules');
 
-    const defaults = getRow('elastic-default-indices');
+    const defaults = getRow('_default-indices');
     expect(defaults.getByText('All unmatched indices')).toBeInTheDocument();
     expect(defaults.queryByTestId('boostRuleMatches')).not.toBeInTheDocument();
   });
