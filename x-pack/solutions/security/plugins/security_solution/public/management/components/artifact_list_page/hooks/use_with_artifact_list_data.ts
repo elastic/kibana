@@ -73,12 +73,17 @@ export const useWithArtifactListData = (
     }
   );
 
-  const [uiPagination, setUiPagination] = useState<Pagination>({
-    totalItemCount: 0,
-    pageSize,
-    pageSizeOptions: [...MANAGEMENT_PAGE_SIZE_OPTIONS],
-    pageIndex: page - 1,
-  });
+  const [totalItemCount, setTotalItemCount] = useState(0);
+
+  const uiPagination = useMemo<Pagination>(
+    () => ({
+      totalItemCount,
+      pageSize,
+      pageSizeOptions: [...MANAGEMENT_PAGE_SIZE_OPTIONS],
+      pageIndex: page - 1,
+    }),
+    [page, pageSize, totalItemCount]
+  );
 
   const [isPageInitializing, setIsPageInitializing] = useState(true);
 
@@ -122,17 +127,10 @@ export const useWithArtifactListData = (
     }
   }, [isLoadingDataExists, isMounted, isPageInitializing]);
 
-  // Update the uiPagination once the query succeeds
+  // Update the total item count once the query succeeds
   useEffect(() => {
     if (isMounted() && listData && !isLoadingListData && isSuccessListData) {
-      setUiPagination((prevState) => {
-        return {
-          ...prevState,
-          pageIndex: listData.page - 1,
-          pageSize: listData.per_page,
-          totalItemCount: listData.total,
-        };
-      });
+      setTotalItemCount(listData.total);
     }
   }, [isLoadingListData, isMounted, isSuccessListData, listData]);
 

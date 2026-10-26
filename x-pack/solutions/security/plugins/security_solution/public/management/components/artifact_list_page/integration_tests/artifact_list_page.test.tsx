@@ -504,6 +504,77 @@ describe('When using the ArtifactListPage component', () => {
       });
     });
 
+    describe('and the only item on the last page is deleted', () => {
+      let isItemDeleted: boolean;
+
+      beforeEach(() => {
+        isItemDeleted = false;
+
+        const { trustedAppsList, trustedAppDelete } = mockedApi.responseProvider;
+        const defaultListImplementation = trustedAppsList.getMockImplementation();
+        const defaultDeleteImplementation = trustedAppDelete.getMockImplementation();
+
+        trustedAppDelete.mockImplementation((options) => {
+          isItemDeleted = true;
+          return defaultDeleteImplementation?.(options) as ReturnType<typeof trustedAppDelete>;
+        });
+
+        trustedAppsList.mockImplementation((options) => {
+          const response = defaultListImplementation?.(options) as ReturnType<
+            typeof trustedAppsList
+          >;
+          const total = isItemDeleted ? 20 : 21;
+          const isLastPage = response.page > Math.floor(total / response.per_page);
+
+          return {
+            ...response,
+            total,
+            data: isLastPage ? response.data.slice(0, total % response.per_page) : response.data,
+          };
+        });
+
+        history.push('somepage?page=3');
+      });
+
+      it('should navigate to the previous page when shown as cards', async () => {
+        const { getAllByTestId, getByTestId } = await renderWithListData();
+        await waitFor(() => {
+          expect(getAllByTestId('testPage-card')).toHaveLength(1);
+        });
+
+        await getFirstCard({ showActions: true });
+        await userEvent.click(getByTestId('testPage-card-cardDeleteAction'), {
+          pointerEventsCheck: 0,
+        });
+        await userEvent.click(getByTestId('testPage-deleteModal-submitButton'));
+
+        await waitFor(() => {
+          expect(history.location.search).toMatch(/page=2/);
+          expect(getAllByTestId('testPage-card')).toHaveLength(10);
+        });
+      });
+
+      it('should navigate to the previous page when shown as simple table', async () => {
+        const { getAllByTestId, getByTestId } = await renderWithListData({
+          showAsSimpleTable: true,
+        });
+        await waitFor(() => {
+          expect(getAllByTestId('testPage-simpleTable-rowActions-button')).toHaveLength(1);
+        });
+
+        await userEvent.click(getAllByTestId('testPage-simpleTable-rowActions-button')[0]);
+        await userEvent.click(getByTestId('testPage-simpleTable-cardDeleteAction'), {
+          pointerEventsCheck: 0,
+        });
+        await userEvent.click(getByTestId('testPage-deleteModal-submitButton'));
+
+        await waitFor(() => {
+          expect(history.location.search).toMatch(/page=2/);
+          expect(getAllByTestId('testPage-simpleTable-rowActions-button')).toHaveLength(10);
+        });
+      });
+    });
+
     it('should show per card decoration', async () => {
       const MockCardDecorator = memo<ArtifactEntryCardDecoratorProps>(({ item: actualItem }) => {
         return <p>{'mock decorator'}</p>;
