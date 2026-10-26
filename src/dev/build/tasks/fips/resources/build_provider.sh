@@ -15,8 +15,8 @@ unset OPENSSL_MODULES OPENSSL_CONF_INCLUDE
 
 ./Configure enable-fips
 build_jobs="$(getconf _NPROCESSORS_ONLN)"
-if [ "$build_jobs" -gt 4 ]; then
-  build_jobs=4
+if [ "$build_jobs" -gt 16 ]; then
+  build_jobs=16
 fi
 make -j"$build_jobs"
 make test TESTS='test_fipsinstall test_fipsload'
