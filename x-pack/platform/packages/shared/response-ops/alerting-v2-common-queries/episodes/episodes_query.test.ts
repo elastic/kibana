@@ -8,6 +8,7 @@
 import { ALERT_ACTIONS_DATA_STREAM, ALERT_EVENTS_DATA_STREAM } from '@kbn/alerting-v2-constants';
 import { PAGE_SIZE_ESQL_VARIABLE } from './constants';
 import { buildEpisodesBaseQuery, buildEpisodesQuery } from './episodes_query';
+import { SERIES_ID_EVAL } from './series_id_eval';
 
 const SPACE_ID = 'default';
 
@@ -42,7 +43,7 @@ describe('buildEpisodesBaseQuery', () => {
     expect(queryString).toContain('WHERE @timestamp == last_timestamp');
   });
 
-  it('computes last_snooze_action and snoozed_until grouped by group_hash', () => {
+  it('computes last_snooze_action and snoozed_until grouped by series_id', () => {
     const esql = buildEpisodesBaseQuery(SPACE_ID).print('basic');
     expect(esql).toMatch(
       /last_snooze_action\s*=\s*LAST\(action_type,\s*@timestamp\)\s*WHERE\s*\(action_type\s*IN\s*\("snooze",\s*"unsnooze"\)\)/
@@ -50,6 +51,17 @@ describe('buildEpisodesBaseQuery', () => {
     expect(esql).toMatch(
       /snoozed_until\s*=\s*LAST\(expiry,\s*@timestamp\)\s*WHERE\s*action_type\s*==\s*"snooze"/
     );
+  });
+
+  it('derives series_id from both data streams before the series action stats', () => {
+    const esql = buildEpisodesBaseQuery(SPACE_ID).print('basic');
+
+    expect(esql).toContain(SERIES_ID_EVAL);
+    expect(esql).toContain('COALESCE(`rule.id`, rule_id)');
+    expect(esql).toMatch(
+      /INLINE STATS last_snooze_action[^|]*first_series_event_timestamp[^|]*BY series_id/
+    );
+    expect(esql.indexOf(SERIES_ID_EVAL)).toBeLessThan(esql.indexOf('INLINE STATS'));
   });
 
   it('applies the ruleId filter on both rule.id and rule_id before the aggregations', () => {

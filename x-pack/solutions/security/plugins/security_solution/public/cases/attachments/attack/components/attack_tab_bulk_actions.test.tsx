@@ -21,6 +21,7 @@ import {
   ATTACK_INVESTIGATE_IN_TIMELINE_ACTION_ID,
   ATTACK_STATUS_ACTION_IDS,
   ATTACK_TAG_ACTION_ID,
+  REMOVE_FROM_CASE_ACTION_ID,
   RUN_ATTACK_WORKFLOW_ACTION_ID,
 } from '../../../../common/constants/action_ids';
 import { ACTION_MENU_GROUP_SEPARATOR_TEST_ID } from '../../../../common/utils/action_menu_items';
@@ -160,6 +161,7 @@ describe('AttackTabBulkActions', () => {
       totalAttacks: number;
       areAllAttacksSelected: boolean;
       onToggleSelectAll: () => void;
+      onRemove: (attackIds: string[]) => void;
     }> = {}
   ) =>
     render(
@@ -167,6 +169,7 @@ describe('AttackTabBulkActions', () => {
         <AttackTabBulkActions
           areAllAttacksSelected={overrides.areAllAttacksSelected ?? false}
           onActionSuccess={onActionSuccess}
+          onRemove={overrides.onRemove}
           onToggleSelectAll={overrides.onToggleSelectAll ?? jest.fn()}
           selectedAttacks={selectedAttacks}
           totalAttacks={overrides.totalAttacks ?? selectedAttacks.length}
@@ -345,13 +348,44 @@ describe('AttackTabBulkActions', () => {
     expect(screen.getByTestId(ATTACK_TAB_BULK_ACTIONS_POPOVER_TEST_ID)).toBeInTheDocument();
   });
 
-  it('offers no way to remove an attachment', async () => {
+  it('offers no way to remove an attachment when the user cannot remove', async () => {
     renderBar(resolvedSelection);
 
     const menu = await openMenu();
 
     expect(within(menu).queryByText(/remove/i)).not.toBeInTheDocument();
     expect(screen.getByTestId(ATTACK_TAB_BULK_ACTIONS_TEST_ID)).not.toHaveTextContent(/remove/i);
+  });
+
+  it('removes the selected attacks from the case, next to the case verbs', async () => {
+    const onRemove = jest.fn();
+    renderBar(resolvedSelection, { onRemove });
+
+    const menu = await openMenu();
+
+    expect(
+      within(menu)
+        .getAllByRole('menuitem')
+        .map(({ textContent }) => textContent)
+    ).toEqual([
+      ITEM_NAMES.workflowStatus,
+      ITEM_NAMES.assignees,
+      ITEM_NAMES.addToExistingCase,
+      ITEM_NAMES.addToNewCase,
+      'Remove from case',
+      ITEM_NAMES.tags,
+      ITEM_NAMES.runWorkflow,
+      ITEM_NAMES.investigateInTimeline,
+    ]);
+    expect(
+      within(menu)
+        .getByTestId(REMOVE_FROM_CASE_ACTION_ID)
+        .querySelector('[data-euiicon-type="trash"]')
+    ).toBeInTheDocument();
+
+    await userEvent.click(within(menu).getByTestId(REMOVE_FROM_CASE_ACTION_ID));
+
+    expect(onRemove).toHaveBeenCalledWith(resolvedSelection.map(({ attack }) => attack?.id));
   });
 
   it('renders no action at all when nothing the selection may do is permitted', () => {
@@ -571,7 +605,6 @@ describe('AttackTabBulkActions', () => {
       useAttackWorkflowStatusContextMenuItemsMock,
       useAttackTagsContextMenuItemsMock,
       useAttackAssigneesContextMenuItemsMock,
-      useAttackRunWorkflowContextMenuItemsMock,
       useAttackInvestigateInTimelineContextMenuItemsMock,
     ].forEach((hook) => {
       expect(hook).toHaveBeenCalledWith(

@@ -7,10 +7,20 @@
 
 import { isSpanContextValid, trace } from '@opentelemetry/api';
 import { ByteSizeValue } from '@kbn/config-schema';
-import type { CoreSetup } from '@kbn/core/server';
-import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
+import type { CoreSetup, KibanaRequest } from '@kbn/core/server';
 import type { ConnectorTelemetryMetadata } from '@kbn/inference-common';
-import { validateReasoningEffort } from '@kbn/inference-common';
+import {
+  isTemplateRequiredConnector,
+  MessageRole,
+  parseTemplateJson,
+  validateReasoningEffort,
+} from '@kbn/inference-common';
+import type { InferenceServerStart } from '@kbn/inference-plugin/server';
+import {
+  normalizeConnectorFeatureIds,
+  resolveConnectorIdFromFeatures,
+} from '@kbn/search-inference-endpoints/server';
+import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import {
   AGGREGATE_BY_REQUIRES_PLUGIN_ID_MESSAGE,
   AiPromptStepCommonDefinition,
@@ -67,15 +77,99 @@ export const parseMaxStepSize = (value: string | undefined): number | undefined 
   }
 };
 
+/**
+ * When the connector requires an EIS template, call chat completion directly.
+ * Returns undefined so the caller keeps the messages path.
+ */
+const completePromptWithTemplate = async ({
+  inference,
+  request,
+  connectorId,
+  templateId,
+  templateVersion,
+  templateVariables,
+  schema,
+  abortSignal,
+  telemetryMetadata,
+}: {
+  inference: InferenceServerStart | undefined;
+  request: KibanaRequest;
+  connectorId: string;
+  templateId: string | undefined;
+  templateVersion: number | undefined;
+  templateVariables: Record<string, unknown>;
+  schema: unknown;
+  abortSignal?: AbortSignal;
+  telemetryMetadata?: ConnectorTelemetryMetadata;
+}): Promise<{ content: unknown; metadata: Record<string, unknown> } | undefined> => {
+  if (!inference?.getClient) {
+    if (templateId) {
+      throw new Error('Inference is not available, so the prompt template cannot be sent');
+    }
+    return undefined;
+  }
+
+  // A messages call does not need the connector list. A template-only connector
+  // with no template fields fails at the gateway.
+  if (!templateId) {
+    return undefined;
+  }
+
+  const client = inference.getClient({ request });
+  let templateRequired = false;
+  try {
+    const connector = await client.getConnectorById(connectorId);
+    templateRequired = isTemplateRequiredConnector(connector);
+  } catch (error) {
+    if (templateId) {
+      throw error;
+    }
+    return undefined;
+  }
+
+  if (!templateRequired) {
+    return undefined;
+  }
+
+  if (templateVersion == null) {
+    throw new Error(
+      `Connector "${connectorId}" requires a prompt template and cannot be called with messages`
+    );
+  }
+
+  const response = await client.chatComplete({
+    connectorId,
+    stream: false,
+    messages: [{ role: MessageRole.User, content: '' }],
+    template: { id: templateId, version: templateVersion, variables: templateVariables },
+    abortSignal,
+    ...(telemetryMetadata ? { metadata: { connectorTelemetry: telemetryMetadata } } : {}),
+  });
+
+  const promptTokens = response.tokens?.prompt ?? 0;
+  const completionTokens = response.tokens?.completion ?? 0;
+  const content = schema ? parseTemplateJson(response.content) : response.content;
+
+  return {
+    content,
+    metadata: {
+      usage: {
+        inputTokens: promptTokens,
+        outputTokens: completionTokens,
+        ...(response.tokens?.cached !== undefined ? { cachedTokens: response.tokens.cached } : {}),
+        connectorId,
+      },
+    },
+  };
+};
+
 export const aiPromptStepDefinition = (coreSetup: CoreSetup<InferenceWorkflowsStartDeps>) =>
   createServerStepDefinition({
     ...AiPromptStepCommonDefinition,
     handler: async (context) => {
       const [, { inference, searchInferenceEndpoints }] = await coreSetup.getStartServices();
 
-      const connectorIdByFeature = normalizeOptionalConnectorParam(
-        context.config['connector-id-by-feature']
-      );
+      const featureIds = normalizeConnectorFeatureIds(context.config['connector-id-by-feature']);
       const connectorId = normalizeOptionalConnectorParam(context.config['connector-id']);
       const pluginId = normalizeOptionalConnectorParam(context.config['plugin-id']);
       const aggregateBy = normalizeOptionalConnectorParam(context.config['aggregate-by']);
@@ -85,34 +179,20 @@ export const aiPromptStepDefinition = (coreSetup: CoreSetup<InferenceWorkflowsSt
       }
       const request = context.contextManager.getFakeRequest();
 
-      let resolvedConnectorId: string;
-
-      if (connectorIdByFeature) {
-        if (connectorId) {
-          throw new Error(
-            'Cannot specify both connector-id and connector-id-by-feature on an ai.prompt step.'
-          );
-        }
-        const feature = searchInferenceEndpoints.features.get(connectorIdByFeature);
-        if (feature && feature.taskType !== 'chat_completion') {
-          throw new Error(
-            `Feature "${connectorIdByFeature}" is not a chat completion feature (task type "${feature.taskType}"). connector-id-by-feature requires a feature with task type "chat_completion".`
-          );
-        }
-        const { endpoints } = await searchInferenceEndpoints.endpoints.getForFeature(
-          connectorIdByFeature,
-          request
-        );
-        if (endpoints.length === 0) {
-          throw new Error(`No connector available for feature "${connectorIdByFeature}".`);
-        }
-        resolvedConnectorId = endpoints[0].connectorId;
-      } else {
-        resolvedConnectorId = await resolveConnectorId(connectorId, inference, request, {
+      const connectorIdFromFeatures = await resolveConnectorIdFromFeatures({
+        featureIds,
+        request,
+        searchInferenceEndpoints,
+        hasExplicitConnector: connectorId !== undefined,
+        conflictMessage:
+          'Cannot specify both connector-id and connector-id-by-feature on an ai.prompt step.',
+      });
+      const resolvedConnectorId =
+        connectorIdFromFeatures ??
+        (await resolveConnectorId(connectorId, inference, request, {
           featureId: AI_PROMPT_FEATURE_ID,
           searchInferenceEndpoints,
-        });
-      }
+        }));
 
       const reasoningLevel = context.config['reasoning-level'];
       const maxContentLength = parseMaxStepSize(context.config['max-step-size']);
@@ -136,6 +216,21 @@ export const aiPromptStepDefinition = (coreSetup: CoreSetup<InferenceWorkflowsSt
           ...(traceId ? { traceId } : {}),
         };
       }
+      const templateResult = await completePromptWithTemplate({
+        inference,
+        request,
+        connectorId: resolvedConnectorId,
+        templateId: normalizeOptionalConnectorParam(context.input.template_id),
+        templateVersion: context.input.template_version,
+        templateVariables: context.input.template_variables ?? {},
+        schema: context.input.schema,
+        abortSignal: context.abortSignal,
+        telemetryMetadata,
+      });
+      if (templateResult) {
+        return { output: templateResult };
+      }
+
       const chatModel = await inference.getChatModel({
         connectorId: resolvedConnectorId,
         request: context.contextManager.getFakeRequest(),

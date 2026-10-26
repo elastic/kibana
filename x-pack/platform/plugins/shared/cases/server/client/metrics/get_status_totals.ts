@@ -6,8 +6,8 @@
  */
 
 import type { CasesStatusRequest, CasesStatusResponse } from '../../../common/types/api';
-import { CasesStatusRequestRt, CasesStatusResponseRt } from '../../../common/types/api';
-import { decodeWithExcessOrThrow, decodeOrThrow } from '../../common/runtime_types';
+import { CasesStatusRequestSchema, CasesStatusResponseSchema } from '../../../common/types/api';
+import { decodeWithExcessOrThrowZod, decodeOrThrowZod } from '../../common/runtime_types';
 import type { CasesClientArgs } from '../types';
 import { Operations } from '../../authorization';
 import { constructQueryOptions } from '../utils';
@@ -24,7 +24,7 @@ export async function getStatusTotalsByType(
   } = clientArgs;
 
   try {
-    const queryParams = decodeWithExcessOrThrow(CasesStatusRequestRt)(params);
+    const queryParams = decodeWithExcessOrThrowZod(CasesStatusRequestSchema)(params);
 
     const { filter: authorizationFilter } = await authorization.getAuthorizationFilter(
       Operations.getCaseStatuses
@@ -46,7 +46,7 @@ export async function getStatusTotalsByType(
       count_closed_cases: statusStats.closed,
     };
 
-    return decodeOrThrow(CasesStatusResponseRt)(res);
+    return decodeOrThrowZod(CasesStatusResponseSchema)(res);
   } catch (error) {
     throw createCaseError({ message: `Failed to get status stats: ${error}`, error, logger });
   }

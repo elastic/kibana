@@ -89,6 +89,18 @@ jest.mock('../../hooks/use_alertzero_doc_title', () => ({
 const mockUseAssignEscalation = useAssignEscalation as jest.Mock;
 const mockUseListEscalations = useListEscalations as jest.Mock;
 const mockUseEscalationImpactPills = useEscalationImpactPills as jest.Mock;
+
+/** What the pills hook returns once the server has sent every pill. */
+const pagedPills = (pills: Array<{ entityId: string; count: number }>) => ({
+  pills,
+  total: pills.length,
+  remaining: 0,
+  canShowMore: true,
+  reachLimit: 10_000,
+  loadFailed: false,
+  isLoadingMore: false,
+  showMore: jest.fn(),
+});
 const mockUseUserProfiles = useUserProfiles as jest.Mock;
 const mockUseSuggestUserProfiles = useSuggestUserProfiles as jest.Mock;
 const mockUseOpenInChat = useOpenInChat as jest.Mock;
@@ -120,12 +132,19 @@ const closedEscalation = {
 const assignMutate = jest.fn().mockResolvedValue({});
 
 const renderPage = (
-  overrides: { capabilities?: { showEscalations?: boolean; manageEscalations?: boolean } } = {}
+  overrides: {
+    capabilities?: {
+      showEscalations?: boolean;
+      manageEscalations?: boolean;
+      canAccessAgentBuilder?: boolean;
+    };
+  } = {}
 ) => {
   mockUseCapabilities.mockReturnValue({
     showEscalations: true,
     manageEscalations: true,
     manageInvestigations: true,
+    canAccessAgentBuilder: true,
     ...overrides.capabilities,
   });
   const core = coreMock.createStart();
@@ -175,7 +194,7 @@ beforeEach(() => {
   });
   mockUseInvestigationDetails.mockImplementation(() => undefined);
   mockUseAssignEscalation.mockReturnValue({ mutateAsync: assignMutate });
-  mockUseEscalationImpactPills.mockReturnValue({ data: [] });
+  mockUseEscalationImpactPills.mockReturnValue(pagedPills([]));
   mockUseUserProfiles.mockReturnValue({ data: [], isLoading: false });
   mockUseSuggestUserProfiles.mockReturnValue({ data: [], isLoading: false });
 });
@@ -369,6 +388,36 @@ describe('EscalationsPage', () => {
     expect(screen.queryByTestId('mock-assign-esc-open-1')).not.toBeInTheDocument();
   });
 
+  describe('without the Agent Builder privilege', () => {
+    it('explains which features are unavailable in a callout', () => {
+      mockBothQueues([openEscalation], []);
+      renderPage({ capabilities: { canAccessAgentBuilder: false } });
+
+      expect(screen.getByTestId('alertZeroAgentBuilderPrivilegeCallout')).toHaveTextContent(
+        'You need the Agent Builder Kibana privilege to open investigations and chats'
+      );
+    });
+
+    it('leaves the cards inert and hides the assignees', () => {
+      mockBothQueues([openEscalation], []);
+      renderPage({ capabilities: { canAccessAgentBuilder: false } });
+
+      fireEvent.click(screen.getByTestId('escalationCard-esc-open-1'));
+
+      expect(openChat).not.toHaveBeenCalled();
+      expect(screen.queryByTestId('escalationCardLink-esc-open-1')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('mock-assign-esc-open-1')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('mock-assignees-readonly-esc-open-1')).not.toBeInTheDocument();
+    });
+  });
+
+  it('shows no privilege callout when Agent Builder is accessible', () => {
+    mockBothQueues([openEscalation], []);
+    renderPage();
+
+    expect(screen.queryByTestId('alertZeroAgentBuilderPrivilegeCallout')).not.toBeInTheDocument();
+  });
+
   it('shows the server total in the bucket badge even when the page holds fewer items', () => {
     // Server says there are 75 open escalations but only 50 are returned per page.
     mockBothQueues([openEscalation], [], { openTotal: 75 });
@@ -535,7 +584,7 @@ describe('EscalationsPage', () => {
     };
 
     beforeEach(() => {
-      mockUseEscalationImpactPills.mockReturnValue({ data: pills });
+      mockUseEscalationImpactPills.mockReturnValue(pagedPills(pills));
     });
 
     it('renders one pill per entity the pills query returns', () => {
@@ -547,7 +596,7 @@ describe('EscalationsPage', () => {
     });
 
     it('renders no pills when no escalation has an impact', () => {
-      mockUseEscalationImpactPills.mockReturnValue({ data: [] });
+      mockUseEscalationImpactPills.mockReturnValue(pagedPills([]));
       mockBothQueues([openEscalation], [closedEscalation]);
       renderPage();
 
@@ -583,6 +632,21 @@ describe('EscalationsPage', () => {
       fireEvent.click(screen.getByRole('button', { name: 'Sales-NAS' }));
 
       expect(screen.getByText(/7 open escalations/)).toBeInTheDocument();
+    });
+
+    it('loads the next page of pills from the +n pill', () => {
+      const showMore = jest.fn();
+      mockUseEscalationImpactPills.mockReturnValue({
+        ...pagedPills(pills),
+        remaining: 40,
+        showMore,
+      });
+      mockBothQueues([impactOpen], [impactClosed]);
+      renderPage();
+
+      fireEvent.click(screen.getByRole('button', { name: 'Show 40 more' }));
+
+      expect(showMore).toHaveBeenCalledTimes(1);
     });
 
     it('starts both queues over at page 1 when the filter changes', () => {

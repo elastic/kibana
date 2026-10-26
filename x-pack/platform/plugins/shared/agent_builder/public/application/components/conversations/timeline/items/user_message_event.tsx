@@ -25,7 +25,7 @@ const toRoundAuthor = (actor: UserMessageEventData['actor']): ConversationRoundA
   full_name: actor.full_name,
 });
 
-export const UserMessageEvent: React.FC<UserMessageEventProps> = ({
+const UserMessageEventComponent: React.FC<UserMessageEventProps> = ({
   event,
   isPending = false,
   conversationAttachments,
@@ -43,3 +43,6 @@ export const UserMessageEvent: React.FC<UserMessageEventProps> = ({
     />
   );
 };
+
+export const UserMessageEvent = React.memo(UserMessageEventComponent);
+UserMessageEvent.displayName = 'UserMessageEvent';

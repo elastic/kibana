@@ -9,7 +9,6 @@
 
 jest.mock('#pipeline-utils', () => ({
   upsertComment: jest.fn(),
-  BuildkiteClient: jest.fn(),
 }));
 
 import {

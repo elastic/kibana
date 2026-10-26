@@ -12,17 +12,17 @@ import type { KibanaReactContextValue } from '@kbn/kibana-react-plugin/public';
 import { withKibana } from '@kbn/kibana-react-plugin/public';
 import type { SuggestionsAbstraction } from '@kbn/kql/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
-import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { debounce } from 'lodash';
 
 import type { Filter } from '@kbn/es-query';
 import { buildQueryFromFilters } from '@kbn/es-query';
+import type { FilterableField, FilterableSource } from '@kbn/data-source';
 import type { IUnifiedSearchPluginServices } from '../../types';
 
 export interface PhraseSuggestorProps {
   kibana: KibanaReactContextValue<IUnifiedSearchPluginServices>;
-  indexPattern: DataView;
-  field: DataViewField;
+  indexPattern: FilterableSource;
+  field: FilterableField;
   timeRangeForSuggestionsOverride?: boolean;
   filtersForSuggestions?: Filter[];
   suggestionsAbstraction?: SuggestionsAbstraction;

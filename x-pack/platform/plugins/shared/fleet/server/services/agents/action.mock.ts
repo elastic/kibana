@@ -84,6 +84,30 @@ export function createClientMock() {
       status: ['online'],
     },
   };
+  const agentInAgentlessDoc = {
+    _id: 'agent-in-agentless-policy',
+    _index: 'index',
+    _source: {
+      active: true,
+      policy_id: 'agentless-agent-policy',
+      local_metadata: { elastic: { agent: { version: '9.6.0', upgradeable: true } } },
+    },
+    fields: {
+      status: ['online'],
+    },
+  };
+  const agentInAgentlessVariantDoc = {
+    _id: 'agent-in-agentless-policy-variant',
+    _index: 'index',
+    _source: {
+      active: true,
+      policy_id: 'agentless-agent-policy#9.6',
+      local_metadata: { elastic: { agent: { version: '9.6.0', upgradeable: true } } },
+    },
+    fields: {
+      status: ['online'],
+    },
+  };
   const regularAgentPolicySO = {
     id: 'regular-agent-policy',
     attributes: { is_managed: false, space_ids: ['space1'] },
@@ -97,6 +121,11 @@ export function createClientMock() {
     attributes: { is_managed: true },
   } as SavedObject<AgentPolicy>;
 
+  const agentlessAgentPolicySO = {
+    id: 'agentless-agent-policy',
+    attributes: { is_managed: false, supports_agentless: true, space_ids: ['space1'] },
+  } as SavedObject<AgentPolicy>;
+
   const soClientMock = savedObjectsClientMock.create();
 
   soClientMock.get.mockImplementation(async (_, id) => {
@@ -107,6 +136,8 @@ export function createClientMock() {
         return hostedAgentPolicySO;
       case regularAgentPolicySO2.id:
         return regularAgentPolicySO2;
+      case agentlessAgentPolicySO.id:
+        return agentlessAgentPolicySO;
       default:
         throw new Error('not found');
     }
@@ -141,6 +172,10 @@ export function createClientMock() {
         return { body: agentInRegularDocNewer };
       case agentInRegularDocNewer2._id:
         return { body: agentInRegularDocNewer2 };
+      case agentInAgentlessDoc._id:
+        return { body: agentInAgentlessDoc };
+      case agentInAgentlessVariantDoc._id:
+        return { body: agentInAgentlessVariantDoc };
       default:
         throw new Error('not found');
     }
@@ -173,6 +208,12 @@ export function createClientMock() {
           break;
         case agentInRegularDocNewer2._id:
           result = agentInRegularDocNewer2;
+          break;
+        case agentInAgentlessDoc._id:
+          result = agentInAgentlessDoc;
+          break;
+        case agentInAgentlessVariantDoc._id:
+          result = agentInAgentlessVariantDoc;
           break;
         default:
           throw new Error('not found');
@@ -220,8 +261,11 @@ export function createClientMock() {
     agentInRegularDoc2,
     agentInRegularDocNewer,
     agentInRegularDocNewer2,
+    agentInAgentlessDoc,
+    agentInAgentlessVariantDoc,
     regularAgentPolicySO,
     hostedAgentPolicySO,
     regularAgentPolicySO2,
+    agentlessAgentPolicySO,
   };
 }

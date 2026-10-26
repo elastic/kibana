@@ -39,6 +39,7 @@ describe('getAgenticInvestigationsCapabilities', () => {
       showEscalations: false,
       manageEscalations: false,
       manageInvestigations: false,
+      canAccessAgentBuilder: false,
     });
   });
 
@@ -78,6 +79,15 @@ describe('getAgenticInvestigationsCapabilities', () => {
       showEscalations: true,
       manageEscalations: true,
       manageInvestigations: true,
+      canAccessAgentBuilder: false,
     });
+  });
+
+  it('maps canAccessAgentBuilder correctly', () => {
+    const withAgentBuilder = (show: unknown) =>
+      getAgenticInvestigationsCapabilities({ agentBuilder: { show } } as unknown as Capabilities);
+
+    expect(withAgentBuilder(true).canAccessAgentBuilder).toBe(true);
+    expect(withAgentBuilder(false).canAccessAgentBuilder).toBe(false);
   });
 });
