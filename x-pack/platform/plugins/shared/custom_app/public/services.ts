@@ -23,8 +23,6 @@ interface Services {
   agentBuilder: AgentBuilderPluginStart | undefined;
   /** Absent when Share is not available, in which case a link to Discover cannot be made. */
   share: SharePluginStart | undefined;
-  /** Whether anything offers the editor, which a build can turn off to make apps only by chat. */
-  isEditorEnabled: boolean;
 }
 
 let services: Services | undefined;
@@ -36,10 +34,9 @@ export const setServices = (
   dataViews: DataViewsPublicPluginStart,
   lens: LensPublicStart,
   agentBuilder: AgentBuilderPluginStart | undefined,
-  share?: SharePluginStart,
-  isEditorEnabled = true
+  share?: SharePluginStart
 ) => {
-  services = { core, search, embeddable, dataViews, lens, agentBuilder, share, isEditorEnabled };
+  services = { core, search, embeddable, dataViews, lens, agentBuilder, share };
 };
 
 export const getServices = (): Services => {

@@ -31,11 +31,13 @@ jest.mock('./services', () => ({
     core: {
       http: {},
       application: { capabilities: {} },
+      featureFlags: {
+        getBooleanValue$: () => jest.requireActual('rxjs').of(true),
+      },
       notifications: { toasts: mockToasts },
       rendering: {},
     },
     search: jest.fn(),
-    isEditorEnabled: true,
     agentBuilder: mockAgentBuilder,
   }),
 }));

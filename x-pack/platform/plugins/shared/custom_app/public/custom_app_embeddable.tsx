@@ -55,6 +55,7 @@ import type {
   CustomAppByValueState,
   CustomAppEmbeddableState,
 } from '../server';
+import { EDITOR_FEATURE_FLAG } from '../common/feature_flags';
 import { isByReferenceState } from '../common/by_reference';
 import { createSavedAppsClient, type SavedAppsClient } from './application/saved_apps_client';
 import { AppFrame } from './components/app_frame';
@@ -116,7 +117,12 @@ export const customAppEmbeddableFactory: EmbeddablePublicDefinition<
 > = {
   type: CUSTOM_APP_EMBEDDABLE_TYPE,
   buildEmbeddable: async ({ initialState, finalizeApi, parentApi, uuid }) => {
-    const { core, search, agentBuilder, isEditorEnabled } = getServices();
+    const { core, search, agentBuilder } = getServices();
+    // Followed for as long as the panel is there, so that a change of the flag shows.
+    const editorEnabled$ = new BehaviorSubject(true);
+    const editorFlagSubscription = core.featureFlags
+      .getBooleanValue$(EDITOR_FEATURE_FLAG, true)
+      .subscribe((enabled) => editorEnabled$.next(enabled));
     const savedApps = createSavedAppsClient(core.http);
     // A panel is either an app of its own, or a link to one of the library.
     const libraryId = isByReferenceState(initialState) ? initialState.ref_id : undefined;
@@ -248,7 +254,7 @@ export const customAppEmbeddableFactory: EmbeddablePublicDefinition<
       defaultDescription$,
       dataLoading$: dataLayer.loading$,
       serializeState,
-      isEditingEnabled: () => isEditorEnabled,
+      isEditingEnabled: () => editorEnabled$.getValue(),
       getDocument: () => document$.getValue(),
       getLibraryId: () => libraryId,
       onEdit: async ({ returnFocus } = {}) => {
@@ -326,6 +332,7 @@ export const customAppEmbeddableFactory: EmbeddablePublicDefinition<
       Component: function CustomAppEmbeddableComponent() {
         const [document] = useBatchedPublishingSubjects(renderedDocument$);
         const viewMode = useStateFromPublishingSubject(viewMode$);
+        const isEditorEnabled = useStateFromPublishingSubject(editorEnabled$);
 
         // Subscribed here rather than when the panel is built so that the nodes below, whose
         // effects run first, have already declared the sources they read when the first fetch
@@ -372,6 +379,7 @@ export const customAppEmbeddableFactory: EmbeddablePublicDefinition<
             stateSubscription.unsubscribe();
             documentSubscription.unsubscribe();
             renderedSubscription.unsubscribe();
+            editorFlagSubscription.unsubscribe();
             dataLayer.destroy();
           },
           []

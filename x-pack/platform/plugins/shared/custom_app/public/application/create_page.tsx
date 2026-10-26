@@ -11,6 +11,7 @@ import { EuiFlyout, EuiPageTemplate } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { AppHeader, type AppHeaderMenu } from '@kbn/app-header';
 import { isEmptyDocument, type AppDocument } from '@kbn/custom-app-common';
+import { EDITOR_FEATURE_FLAG } from '../../common/feature_flags';
 import { EmptyApp } from '../components/empty_app';
 import { LiveApp } from '../components/live_app';
 import { createDefaultDocument, createEmptyDocument } from '../default_document';
@@ -34,10 +35,11 @@ export const CreatePage = ({
   client,
   chrome,
   notifications,
-  isEditorEnabled,
+  featureFlags,
   agentBuilder,
   onAppLeave,
 }: AppServices) => {
+  const isEditorEnabled = featureFlags.useBooleanValue(EDITOR_FEATURE_FLAG, true);
   const history = useHistory();
   const flyoutTitleId = useId();
   const [draft, setDraft] = useState<AppDocument>(() => createEmptyDocument());

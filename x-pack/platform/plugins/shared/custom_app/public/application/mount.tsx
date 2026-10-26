@@ -16,7 +16,7 @@ export const renderApp = (
   core: CoreStart,
   { element, history, onAppLeave }: AppMountParameters
 ) => {
-  const { agentBuilder, embeddable, isEditorEnabled } = getServices();
+  const { agentBuilder, embeddable } = getServices();
   const root = createRoot(element);
   root.render(
     core.rendering.addContext(
@@ -29,7 +29,7 @@ export const renderApp = (
         stateTransfer={embeddable.getStateTransfer()}
         canWriteDashboards={core.application.capabilities.dashboard_v2?.showWriteControls === true}
         canSave={core.application.capabilities.customApp?.save === true}
-        isEditorEnabled={isEditorEnabled}
+        featureFlags={core.featureFlags}
         agentBuilder={agentBuilder}
       />
     )

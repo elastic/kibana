@@ -23,11 +23,13 @@ jest.mock('./services', () => ({
     core: {
       http: {},
       application: { capabilities: {} },
+      featureFlags: {
+        getBooleanValue$: () => jest.requireActual('rxjs').of(mockIsEditorEnabled),
+      },
       notifications: { toasts: {} },
       rendering: {},
     },
     search: jest.fn(),
-    isEditorEnabled: mockIsEditorEnabled,
     agentBuilder: mockAgentBuilder,
   }),
 }));

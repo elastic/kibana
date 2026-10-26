@@ -11,8 +11,6 @@ export type {
   CustomAppEmbeddableState,
 } from './embeddable/schemas';
 
-export { config } from './config';
-
 export const plugin = async () => {
   const { CustomAppPlugin } = await import('./plugin');
   return new CustomAppPlugin();

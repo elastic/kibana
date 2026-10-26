@@ -229,7 +229,7 @@ const setup = ({
         chrome={chrome as never}
         notifications={notifications as never}
         canSave={canSave}
-        isEditorEnabled={isEditorEnabled}
+        featureFlags={{ useBooleanValue: () => isEditorEnabled } as never}
         agentBuilder={agentBuilder as never}
         onAppLeave={onAppLeave}
         stateTransfer={{ navigateToWithEmbeddablePackages } as never}

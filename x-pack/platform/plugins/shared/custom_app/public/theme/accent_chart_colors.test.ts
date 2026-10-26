@@ -51,8 +51,57 @@ describe('applyAccentToChart', () => {
     ]);
   });
 
+  it('colours the values of a breakdown in shades of the accent, keeping the rest of the mapping', () => {
+    const result = applyAccentToChart(
+      chart({
+        accessors: ['count'],
+        splitAccessor: 'service',
+        colorMapping: {
+          paletteId: 'default',
+          assignments: [{ rules: [] }],
+          specialAssignments: [],
+        },
+      }),
+      'purple',
+      false
+    );
+
+    expect(layerOf(result).colorMapping).toEqual({
+      paletteId: 'default',
+      assignments: [],
+      specialAssignments: [],
+      colorMode: {
+        type: 'gradient',
+        steps: [{ type: 'colorCode', colorCode: ACCENT_COLORS.purple.fill }],
+        sort: 'desc',
+      },
+    });
+    expect(layerOf(result).yConfig).toBeUndefined();
+  });
+
+  it('colours the slices of a donut the same way', () => {
+    const result = applyAccentToChart(
+      chart({
+        primaryGroups: ['service'],
+        metrics: ['count'],
+        colorMapping: { paletteId: 'default' },
+      }),
+      'teal',
+      true
+    );
+
+    expect((layerOf(result).colorMapping as { colorMode: unknown }).colorMode).toEqual({
+      type: 'gradient',
+      steps: [{ type: 'colorCode', colorCode: ACCENT_COLORS.teal.textOnDark }],
+      sort: 'desc',
+    });
+  });
+
   it.each([
-    ['a series split by a field', { accessors: ['count'], splitAccessor: 'service' }],
+    [
+      'a series split by a field, with a palette that is not a colour mapping',
+      { accessors: ['count'], splitAccessor: 'service' },
+    ],
     ['more than one series', { accessors: ['count', 'errors'] }],
     ['a layer that is not data', { accessors: ['count'], layerType: 'referenceLine' }],
   ])('leaves %s to the palette of Lens, which tells values apart', (_name, layer) => {

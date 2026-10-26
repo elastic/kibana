@@ -23,6 +23,7 @@ import { SavedObjectSaveModalDashboard } from '@kbn/presentation-util-plugin/pub
 import { EmptyApp } from '../components/empty_app';
 import { LiveApp } from '../components/live_app';
 import { createDefaultDocument, createEmptyDocument } from '../default_document';
+import { EDITOR_FEATURE_FLAG } from '../../common/feature_flags';
 import { InlineEditContext, type ChangeNodeWords } from '../runtime/inline_edit_context';
 import { EditorFlyout } from '../editor/editor_flyout';
 import { useChatWithPage } from './use_chat_with_page';
@@ -54,12 +55,13 @@ export const ViewPage = ({
   chrome,
   notifications,
   canSave,
-  isEditorEnabled,
+  featureFlags,
   agentBuilder,
   onAppLeave,
   stateTransfer,
   canWriteDashboards,
 }: AppServices) => {
+  const isEditorEnabled = featureFlags.useBooleanValue(EDITOR_FEATURE_FLAG, true);
   const canEdit = canSave && isEditorEnabled;
   const { id } = useParams<{ id: string }>();
   const history = useHistory();

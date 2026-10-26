@@ -12,6 +12,7 @@ import type { AppMountParameters, ScopedHistory } from '@kbn/core/public';
 import type { ChromeStart, NotificationsStart } from '@kbn/core/public';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
+import type { FeatureFlagsStart } from '@kbn/core/public';
 import { CreatePage } from './create_page';
 import { ListPage } from './list_page';
 import { ViewPage } from './view_page';
@@ -23,8 +24,8 @@ export interface AppServices {
   notifications: NotificationsStart;
   /** Whether the user may create, change and delete apps. */
   canSave: boolean;
-  /** Whether anything offers the editor; off, apps are made and changed by chat. */
-  isEditorEnabled: boolean;
+  /** Where the flag that turns the editor on or off is read. */
+  featureFlags: FeatureFlagsStart;
   /** Chat with the assistant. Absent when it is not available, and then nothing offers it. */
   agentBuilder?: AgentBuilderPluginStart;
   onAppLeave: AppMountParameters['onAppLeave'];

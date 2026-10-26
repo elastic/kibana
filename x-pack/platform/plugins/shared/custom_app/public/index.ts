@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import type { PluginInitializerContext } from '@kbn/core/public';
 import { CustomAppPlugin } from './plugin';
 
-export const plugin = (initializerContext: PluginInitializerContext) =>
-  new CustomAppPlugin(initializerContext);
+export const plugin = () => new CustomAppPlugin();
