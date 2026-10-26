@@ -280,7 +280,8 @@ steps:
 
       # `ki_id` is the automation name and the index, so a re-run replaces this profile in place,
       # and two installations on the same source index produce distinct, non-colliding KIs.
-      # A profile whose ES|QL fails the verifiers is not written; the results are in the step output.
+      # A profile whose ES|QL fails the verifiers is written as `verification_failed` and excluded
+      # from search; the results are in the step output.
       - name: create_ki
         type: context-engine.createKi
         with:

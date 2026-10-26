@@ -17,6 +17,7 @@ describe('resolveEvalSelection', () => {
       ['whitespace', '   '],
     ])('runs every eval with credentials (%s)', (_label, value) => {
       expect(resolveEvalSelection({ ...WITH_SANDBOX, NIGHTSHIFT_DATASETS: value })).toEqual({
+        runOrca: false,
         runSmoke: true,
         runInvestigations: true,
         runConnectorProbes: false,
@@ -27,6 +28,7 @@ describe('resolveEvalSelection', () => {
 
     it('falls back to smoke without credentials', () => {
       expect(resolveEvalSelection({})).toEqual({
+        runOrca: false,
         runSmoke: true,
         runInvestigations: false,
         runConnectorProbes: false,
@@ -39,6 +41,7 @@ describe('resolveEvalSelection', () => {
   it('treats all like unset, including inside a list', () => {
     for (const value of ['all', ' all ', 'synthetic-smoke,all']) {
       expect(resolveEvalSelection({ ...WITH_SANDBOX, NIGHTSHIFT_DATASETS: value })).toMatchObject({
+        runOrca: false,
         runSmoke: true,
         runInvestigations: true,
         smokeDatasetsRequest: undefined,
@@ -48,6 +51,7 @@ describe('resolveEvalSelection', () => {
 
   it('runs only the investigation eval for trace-only', () => {
     expect(resolveEvalSelection({ ...WITH_SANDBOX, NIGHTSHIFT_DATASETS: 'trace-only' })).toEqual({
+      runOrca: false,
       runSmoke: false,
       runInvestigations: true,
       runConnectorProbes: false,
@@ -58,6 +62,7 @@ describe('resolveEvalSelection', () => {
 
   it('runs only the named smoke datasets, trimmed, and needs no credentials', () => {
     expect(resolveEvalSelection({ NIGHTSHIFT_DATASETS: ' synthetic-smoke ' })).toEqual({
+      runOrca: false,
       runSmoke: true,
       runInvestigations: false,
       runConnectorProbes: false,
@@ -70,6 +75,7 @@ describe('resolveEvalSelection', () => {
     expect(
       resolveEvalSelection({ ...WITH_SANDBOX, NIGHTSHIFT_DATASETS: 'synthetic-smoke, trace-only' })
     ).toEqual({
+      runOrca: false,
       runSmoke: true,
       runInvestigations: true,
       runConnectorProbes: false,
@@ -82,6 +88,7 @@ describe('resolveEvalSelection', () => {
     expect(
       resolveEvalSelection({ ...WITH_SANDBOX, NIGHTSHIFT_DATASETS: 'connector-probe' })
     ).toEqual({
+      runOrca: false,
       runSmoke: false,
       runInvestigations: false,
       runConnectorProbes: true,
@@ -128,16 +135,41 @@ describe('resolveEvalSelection', () => {
   it('selects stored investigations by default without overriding explicit dataset selections', () => {
     expect(
       resolveEvalSelection({ ...WITH_SANDBOX, NIGHTSHIFT_DATASET_NAME: 'stored' })
-    ).toMatchObject({ runSmoke: false, runInvestigations: true });
+    ).toMatchObject({ runOrca: false, runSmoke: false, runInvestigations: true });
     expect(
       resolveEvalSelection({
         ...WITH_SANDBOX,
         NIGHTSHIFT_DATASET_NAME: 'stored',
         NIGHTSHIFT_DATASETS: 'synthetic-smoke',
       })
-    ).toMatchObject({ runSmoke: true, runInvestigations: false });
+    ).toMatchObject({ runOrca: false, runSmoke: true, runInvestigations: false });
     expect(() => resolveEvalSelection({ NIGHTSHIFT_DATASET_NAME: 'stored' })).toThrow(
       'SANDBOX_API_KEY is required'
     );
+  });
+});
+
+describe('ORCA selection', () => {
+  const orcaEnv = { ...WITH_SANDBOX, NIGHTSHIFT_ORCA_TELEMETRY: '1' };
+  it.each([{ EVAL_SHARD_ID: 'orcabench' }, { NIGHTSHIFT_DATASETS: 'orcabench' }])(
+    'isolates the ORCA job from existing coverage: %j',
+    (selection) => {
+      expect(resolveEvalSelection({ ...orcaEnv, ...selection })).toMatchObject({
+        runOrca: true,
+        runSmoke: false,
+        runInvestigations: false,
+        runConnectorProbes: false,
+      });
+    }
+  );
+  it('rejects an ORCA run on a reused server with another telemetry target', () => {
+    expect(() =>
+      resolveEvalSelection({ ...WITH_SANDBOX, NIGHTSHIFT_DATASETS: 'orcabench' })
+    ).toThrow('ORCA telemetry hook');
+  });
+  it('rejects mixed telemetry sources on one Scout server', () => {
+    expect(() =>
+      resolveEvalSelection({ ...orcaEnv, NIGHTSHIFT_DATASETS: 'trace-only,orcabench' })
+    ).toThrow('own Scout server');
   });
 });

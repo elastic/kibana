@@ -20,7 +20,7 @@ export const NotionConnector: ConnectorSpec = {
   metadata: {
     id: '.notion',
     displayName: 'Notion',
-    description: i18n.translate('core.kibanaConnectorSpecs.notion.metadata.description', {
+    description: i18n.translate('connectorSpecs.notion.metadata.description', {
       defaultMessage: 'Explore content and databases in Notion',
     }),
     minimumLicense: 'enterprise',
@@ -238,7 +238,7 @@ export const NotionConnector: ConnectorSpec = {
   ].join('\n'),
 
   test: {
-    description: i18n.translate('core.kibanaConnectorSpecs.notion.test.description', {
+    description: i18n.translate('connectorSpecs.notion.test.description', {
       defaultMessage: 'Verifies Notion connection by fetching metadata about given data source',
     }),
     // TODO: might need to accept some input here in order to pass to the API endpoint to test
