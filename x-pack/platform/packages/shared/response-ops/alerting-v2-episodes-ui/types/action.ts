@@ -27,8 +27,6 @@ export interface AlertEpisodeGroupAction {
   snoozedUntil: string | null;
   lastSnoozeActor: string | null;
   lastDeactivateActor: string | null;
-  snoozeConditions?: SnoozeCondition[];
-  snoozeConditionOperator?: 'any' | 'all';
 }
 
 export interface EpisodeStatusGroupAction {
