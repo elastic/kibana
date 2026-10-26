@@ -41,6 +41,9 @@ export const PROCESSED_LABEL = i18n.translate(
 export const PENDING_LABEL = i18n.translate('xpack.nightshift.detectionPage.signals.pendingLabel', {
   defaultMessage: 'Pending',
 });
+export const SKIPPED_LABEL = i18n.translate('xpack.nightshift.detectionPage.signals.skippedLabel', {
+  defaultMessage: 'Skipped',
+});
 export const TABLE_CAPTION = i18n.translate('xpack.nightshift.detectionPage.signals.tableCaption', {
   defaultMessage: 'Signals',
 });
