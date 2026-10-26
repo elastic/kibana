@@ -8,6 +8,7 @@
  */
 
 import Chance from 'chance';
+import { lastValueFrom, toArray } from 'rxjs';
 import { schema } from '@kbn/config-schema';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 
@@ -30,6 +31,24 @@ describe('ui settings defaults', () => {
         bar: { userValue: 'overridden bar', isOverridden: true },
         baz: { isOverridden: true },
       });
+    });
+  });
+
+  describe('#get$()', () => {
+    it('emits the default or overridden value once and completes', async () => {
+      const defaults = {
+        foo: { schema: schema.string(), value: 'default foo' },
+        bar: { schema: schema.string(), value: 'default bar' },
+      };
+      const overrides = { bar: 'overridden bar' };
+      const uiSettings = new UiSettingsDefaultsClient({ defaults, overrides, log: logger });
+
+      await expect(lastValueFrom(uiSettings.get$('foo').pipe(toArray()))).resolves.toEqual([
+        'default foo',
+      ]);
+      await expect(lastValueFrom(uiSettings.get$('bar').pipe(toArray()))).resolves.toEqual([
+        'overridden bar',
+      ]);
     });
   });
 

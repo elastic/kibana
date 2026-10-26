@@ -16,6 +16,7 @@ import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-ser
 import type { UiSettingsParams } from '@kbn/core-ui-settings-common';
 import type { Logger } from '@kbn/logging';
 import type { NamespacedCache } from './namespaced_cache';
+import type { UiSettingsWatcher } from './ui_settings_watcher';
 
 /** @internal */
 export interface InternalUiSettingsServicePreboot {
@@ -44,4 +45,5 @@ export interface UiSettingsServiceOptions {
   sharedUserProvidedCache?: NamespacedCache<Record<string, any>>;
   /** Namespace for cache keys (typically space ID) */
   namespace: string;
+  watcher: Pick<UiSettingsWatcher, 'watch' | 'notifyLocalWrite'>;
 }

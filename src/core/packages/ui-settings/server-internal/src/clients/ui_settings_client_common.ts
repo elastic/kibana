@@ -7,10 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Observable } from 'rxjs';
+import { map } from 'rxjs';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { createOrUpgradeSavedConfig } from '../create_or_upgrade_saved_config';
 import { CannotOverrideError } from '../ui_settings_errors';
 import type { UiSettingsServiceOptions } from '../types';
+import type { ConfigDocRef } from '../ui_settings_watcher';
+import { toConfigDocRef } from '../ui_settings_watcher';
 import { BaseUiSettingsClient } from './base_ui_settings_client';
 import type { UserProvided } from './user_provided';
 import { parseUserProvided, validateUserValue } from './user_provided';
@@ -29,16 +33,27 @@ export abstract class UiSettingsClientCommon extends BaseUiSettingsClient {
   private readonly savedObjectsClient: UiSettingsServiceOptions['savedObjectsClient'];
   private readonly sharedUserProvidedCache?: UiSettingsServiceOptions['sharedUserProvidedCache'];
   private readonly namespace: string;
+  private readonly watcher: UiSettingsServiceOptions['watcher'];
+  private readonly ref: ConfigDocRef;
 
   constructor(options: UiSettingsServiceOptions) {
     super(options);
-    const { savedObjectsClient, type, id, buildNum, sharedUserProvidedCache, namespace } = options;
+    const { savedObjectsClient, type, id, buildNum, sharedUserProvidedCache, namespace, watcher } =
+      options;
     this.type = type;
     this.id = id;
     this.buildNum = buildNum;
     this.savedObjectsClient = savedObjectsClient;
     this.sharedUserProvidedCache = sharedUserProvidedCache;
     this.namespace = namespace;
+    this.watcher = watcher;
+    this.ref = toConfigDocRef(type, namespace);
+  }
+
+  protected watchUserProvided(): Observable<UserProvided> {
+    return this.watcher
+      .watch(this.ref)
+      .pipe(map((userProvided) => this.applyOverrides(userProvided)));
   }
 
   async getUserProvided<T = unknown>(bypassCache = false): Promise<UserProvided<T>> {
@@ -110,6 +125,7 @@ export abstract class UiSettingsClientCommon extends BaseUiSettingsClient {
     // Invalidate again after the write commits: a concurrent read landing in the window between the
     // pre-write invalidation and the ES commit can re-cache the pre-write value for a fresh TTL.
     this.sharedUserProvidedCache?.del(this.namespace);
+    this.watcher.notifyLocalWrite(this.ref);
 
     this.log.debug(`[UiSettings] setMany ES write COMPLETED for namespace=${this.namespace}`);
   }

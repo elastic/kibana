@@ -30,6 +30,19 @@ export type ConfigDocRef =
   | { readonly type: 'config'; readonly namespace: string }
   | { readonly type: 'config-global'; readonly namespace: typeof GLOBAL_NAMESPACE };
 
+export const toConfigDocRef = (type: ConfigDocRef['type'], namespace: string): ConfigDocRef => {
+  switch (type) {
+    case 'config':
+      return { type, namespace };
+    case 'config-global':
+      return { type, namespace: GLOBAL_NAMESPACE };
+    default: {
+      const exhaustive: never = type;
+      throw new Error(`Unknown config type ${exhaustive}`);
+    }
+  }
+};
+
 type DocState =
   | { readonly kind: 'pending' }
   | { readonly kind: 'present'; readonly version?: string; readonly userProvided: UserProvided }

@@ -16,7 +16,10 @@ import { stripVersionQualifier } from '@kbn/std';
 import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
 import type { InternalHttpServiceSetup } from '@kbn/core-http-server-internal';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import type { InternalSavedObjectsServiceSetup } from '@kbn/core-saved-objects-server-internal';
+import type {
+  InternalSavedObjectsServiceSetup,
+  InternalSavedObjectsServiceStart,
+} from '@kbn/core-saved-objects-server-internal';
 import type {
   ReadonlyModeType,
   ThemeName,
@@ -37,11 +40,18 @@ import { uiSettingsType, uiSettingsGlobalType } from './saved_objects';
 import { registerRoutes, registerInternalRoutes } from './routes';
 import { getCoreSettings, getGlobalCoreSettings } from './settings';
 import { UiSettingsDefaultsClient } from './clients/ui_settings_defaults_client';
-import { NamespacedCache } from './namespaced_cache';
+import { NAMESPACED_CACHE_TTL, NamespacedCache } from './namespaced_cache';
+import type { ConfigDocRef } from './ui_settings_watcher';
+import { GLOBAL_NAMESPACE, UiSettingsWatcher } from './ui_settings_watcher';
+import { parseUserProvided } from './clients/user_provided';
 
 export interface SetupDeps {
   http: InternalHttpServiceSetup;
   savedObjects: InternalSavedObjectsServiceSetup;
+}
+
+export interface StartDeps {
+  savedObjects: InternalSavedObjectsServiceStart;
 }
 
 type ClientType<T> = T extends 'global'
@@ -64,6 +74,7 @@ export class UiSettingsService
   private globalOverrides: Record<string, any> = {};
   private allowlist: Set<string> | null = null;
   private readonly sharedUserProvidedCache = new NamespacedCache<Record<string, any>>();
+  private watcher?: UiSettingsWatcher;
 
   constructor(private readonly coreContext: CoreContext) {
     this.log = coreContext.logger.get('ui-settings-service');
@@ -123,7 +134,7 @@ export class UiSettingsService
     };
   }
 
-  public async start(): Promise<InternalUiSettingsServiceStart> {
+  public async start({ savedObjects }: StartDeps): Promise<InternalUiSettingsServiceStart> {
     if (this.allowlist) {
       // If we are in development mode, check if all settings in the allowlist are registered
       if (this.isDev) {
@@ -135,25 +146,56 @@ export class UiSettingsService
     this.validatesDefinitions();
     this.validatesOverrides();
 
+    const { version, buildNum } = this.coreContext.env.packageInfo;
+    const watcher = new UiSettingsWatcher({
+      repository: savedObjects.createInternalRepository(),
+      id: stripVersionQualifier(version),
+      buildNum,
+      cache: this.sharedUserProvidedCache,
+      pollInterval: NAMESPACED_CACHE_TTL,
+      parse: (ref, attributes) =>
+        parseUserProvided(attributes, this.getScopeDefinitions(ref.type), this.log),
+      log: this.log.get('watcher'),
+    });
+    this.watcher = watcher;
+
     return {
-      asScopedToClient: this.getScopedClientFactory('namespace'),
-      globalAsScopedToClient: this.getScopedClientFactory('global'),
+      asScopedToClient: this.getScopedClientFactory('namespace', watcher),
+      globalAsScopedToClient: this.getScopedClientFactory('global', watcher),
     };
   }
 
   public async stop() {
+    this.watcher?.stop();
     this.sharedUserProvidedCache.clear();
   }
 
+  private getScopeDefinitions(type: ConfigDocRef['type']) {
+    switch (type) {
+      case 'config':
+        return { defaults: mapToObject(this.uiSettingsDefaults), overrides: this.overrides };
+      case 'config-global':
+        return {
+          defaults: mapToObject(this.uiSettingsGlobalDefaults),
+          overrides: this.globalOverrides,
+        };
+      default: {
+        const exhaustive: never = type;
+        throw new Error(`Unknown config type ${exhaustive}`);
+      }
+    }
+  }
+
   private getScopedClientFactory<T extends UiSettingsScope>(
-    scope: UiSettingsScope
+    scope: UiSettingsScope,
+    watcher: UiSettingsWatcher
   ): (savedObjectsClient: SavedObjectsClientContract) => ClientType<T> {
     const { version, buildNum } = this.coreContext.env.packageInfo;
     return (savedObjectsClient: SavedObjectsClientContract): ClientType<T> => {
       const isNamespaceScope = scope === 'namespace';
       const namespace = isNamespaceScope
         ? savedObjectsClient.getCurrentNamespace() || 'default'
-        : '__global__';
+        : GLOBAL_NAMESPACE;
 
       const options = {
         type: (isNamespaceScope ? 'config' : 'config-global') as 'config' | 'config-global',
@@ -167,6 +209,7 @@ export class UiSettingsService
         log: this.log,
         sharedUserProvidedCache: this.sharedUserProvidedCache,
         namespace,
+        watcher,
       };
       return UiSettingsClientFactory.create(options) as ClientType<T>;
     };

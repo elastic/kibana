@@ -12,7 +12,10 @@ import { schema } from '@kbn/config-schema';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { mockCreateOrUpgradeSavedConfig } from './ui_settings_client.test.mock';
 import { SavedObjectsClient } from '@kbn/core-saved-objects-api-server-internal';
-import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import {
+  savedObjectsClientMock,
+  savedObjectsRepositoryMock,
+} from '@kbn/core-saved-objects-api-server-mocks';
 import { UiSettingsClient } from './ui_settings_client';
 import {
   CannotOverrideError,
@@ -20,6 +23,9 @@ import {
   ValidationSettingNotFoundError,
 } from '../ui_settings_errors';
 import { NAMESPACED_CACHE_TTL, NamespacedCache } from '../namespaced_cache';
+import { createWatcherMock } from '../ui_settings_watcher.mock';
+import { UiSettingsWatcher } from '../ui_settings_watcher';
+import { parseUserProvided } from './user_provided';
 
 const logger = loggingSystemMock.create().get();
 
@@ -51,6 +57,7 @@ describe('ui settings', () => {
       overrides,
       log: logger,
       namespace,
+      watcher: createWatcherMock(),
     });
 
     return {
@@ -881,6 +888,7 @@ describe('ui settings', () => {
         overrides,
         log: logger,
         namespace,
+        watcher: createWatcherMock(),
         sharedUserProvidedCache,
       });
 
@@ -963,6 +971,7 @@ describe('ui settings', () => {
           overrides: {},
           log: logger,
           namespace: 'default',
+          watcher: createWatcherMock(),
           sharedUserProvidedCache: sharedCache,
         });
 
@@ -1099,6 +1108,7 @@ describe('ui settings', () => {
           overrides: {},
           log: logger,
           namespace: 'default',
+          watcher: createWatcherMock(),
         });
 
         await uiSettings.getUserProvided();
@@ -1124,6 +1134,7 @@ describe('ui settings', () => {
           overrides: {},
           log: logger,
           namespace: 'default',
+          watcher: createWatcherMock(),
         });
 
         const client2 = new UiSettingsClient({
@@ -1135,6 +1146,7 @@ describe('ui settings', () => {
           overrides: {},
           log: logger,
           namespace: 'default',
+          watcher: createWatcherMock(),
         });
 
         await client1.getUserProvided();
@@ -1165,6 +1177,7 @@ describe('ui settings', () => {
           overrides: {},
           log: logger,
           namespace: 'default',
+          watcher: createWatcherMock(),
           sharedUserProvidedCache: sharedCache,
         });
 
@@ -1210,6 +1223,7 @@ describe('ui settings', () => {
           overrides: {},
           log: logger,
           namespace: 'default',
+          watcher: createWatcherMock(),
           sharedUserProvidedCache: sharedCache,
         });
 
@@ -1378,6 +1392,162 @@ describe('ui settings', () => {
         expect(result.overridden).toEqual({ isOverridden: true, userValue: 'override-value' });
         expect(savedObjectsClient.get).toHaveBeenCalledTimes(1);
       });
+    });
+  });
+
+  describe('#get$()', () => {
+    beforeEach(() => jest.useFakeTimers());
+    afterEach(() => jest.useRealTimers());
+
+    const flush = () => jest.advanceTimersByTimeAsync(0);
+
+    function setupWithWatcher({
+      defaults = {},
+      overrides = {},
+      esDocSource = {},
+    }: Omit<SetupOptions, 'namespace'> = {}) {
+      const savedObjectsClient = savedObjectsClientMock.create();
+      const repository = savedObjectsRepositoryMock.create();
+      let stored = { version: 'v0', attributes: esDocSource };
+      repository.bulkGet.mockImplementation(async () => ({
+        saved_objects: [{ type: TYPE, id: ID, references: [], ...stored }],
+      }));
+      savedObjectsClient.update.mockImplementation(async (type, id, changes) => {
+        stored = {
+          version: `${stored.version}+`,
+          attributes: { ...stored.attributes, ...changes },
+        };
+        return { type, id, references: [], attributes: changes };
+      });
+
+      const watcher = new UiSettingsWatcher({
+        repository,
+        id: ID,
+        buildNum: BUILD_NUM,
+        cache: new NamespacedCache(),
+        pollInterval: NAMESPACED_CACHE_TTL,
+        parse: (_ref, attributes) => parseUserProvided(attributes, { defaults, overrides }, logger),
+        log: logger,
+      });
+      const uiSettings = new UiSettingsClient({
+        type: TYPE,
+        id: ID,
+        buildNum: BUILD_NUM,
+        defaults,
+        savedObjectsClient,
+        overrides,
+        log: logger,
+        namespace: 'default',
+        watcher,
+      });
+
+      const collect = <T>(key: string) => {
+        const values: T[] = [];
+        let completed = false;
+        const subscription = uiSettings.get$<T>(key).subscribe({
+          next: (value) => values.push(value),
+          complete: () => {
+            completed = true;
+          },
+        });
+        return { values, subscription, isCompleted: () => completed };
+      };
+
+      return { uiSettings, repository, watcher, collect };
+    }
+
+    it('emits the user value, then the default once the user value is removed', async () => {
+      const { uiSettings, collect } = setupWithWatcher({
+        defaults: { foo: { value: 'default', schema: schema.string() } },
+        esDocSource: { foo: 'custom' },
+      });
+      const { values } = collect<string>('foo');
+      expect(values).toEqual([]);
+      await flush();
+      expect(values).toEqual(['custom']);
+
+      await uiSettings.remove('foo');
+      await flush();
+
+      expect(values).toEqual(['custom', 'default']);
+    });
+
+    it('emits a write made through this client without waiting for the next poll', async () => {
+      const { uiSettings, collect } = setupWithWatcher({
+        defaults: { foo: { value: 'default', schema: schema.string() } },
+      });
+      const { values } = collect<string>('foo');
+      await flush();
+
+      await uiSettings.set('foo', 'new');
+      await flush();
+
+      expect(values).toEqual(['default', 'new']);
+    });
+
+    it('does not emit when only other keys change', async () => {
+      const { uiSettings, collect } = setupWithWatcher({
+        defaults: {
+          foo: { value: 'default', schema: schema.string() },
+          bar: { value: 'default', schema: schema.string() },
+        },
+      });
+      const { values } = collect<string>('foo');
+      await flush();
+
+      await uiSettings.set('bar', 'new');
+      await flush();
+
+      expect(values).toEqual(['default']);
+    });
+
+    it('resolves dynamic defaults without a context', async () => {
+      const getValue = jest.fn().mockResolvedValue('dynamic');
+      const { collect } = setupWithWatcher({
+        defaults: { foo: { value: 'static', getValue, schema: schema.string() } },
+      });
+      const { values } = collect<string>('foo');
+      await flush();
+
+      expect(values).toEqual(['dynamic']);
+      expect(getValue).toHaveBeenCalledWith(undefined);
+    });
+
+    it('emits an overridden key once and completes without reading', async () => {
+      const { repository, collect } = setupWithWatcher({
+        defaults: { foo: { value: 'default', schema: schema.string() } },
+        overrides: { foo: 'overridden' },
+        esDocSource: { foo: 'custom' },
+      });
+      const { values, isCompleted } = collect<string>('foo');
+      await flush();
+
+      expect(values).toEqual(['overridden']);
+      expect(isCompleted()).toBe(true);
+      expect(repository.bulkGet).not.toHaveBeenCalled();
+    });
+
+    it('applies overrides of other keys to the watched values', async () => {
+      const { collect } = setupWithWatcher({
+        defaults: { foo: { value: 'default', schema: schema.string() } },
+        overrides: { bar: 'overridden' },
+        esDocSource: { foo: 'custom', bar: 'stored' },
+      });
+      const foo = collect<string>('foo');
+      await flush();
+
+      expect(foo.values).toEqual(['custom']);
+    });
+
+    it('completes when the watcher stops', async () => {
+      const { watcher, collect } = setupWithWatcher();
+      const { isCompleted } = collect<string>('foo');
+      await flush();
+
+      watcher.stop();
+      await flush();
+
+      expect(isCompleted()).toBe(true);
     });
   });
 });

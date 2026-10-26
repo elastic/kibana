@@ -7,9 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Observable } from 'rxjs';
+import { of } from 'rxjs';
 import type { Logger } from '@kbn/logging';
 import type { UiSettingsParams, UserProvidedValues } from '@kbn/core-ui-settings-common';
 import { BaseUiSettingsClient } from './base_ui_settings_client';
+import type { UserProvided } from './user_provided';
 
 export interface UiSettingsDefaultsClientOptions {
   overrides?: Record<string, any>;
@@ -23,6 +26,10 @@ export interface UiSettingsDefaultsClientOptions {
 export class UiSettingsDefaultsClient extends BaseUiSettingsClient {
   constructor(options: UiSettingsDefaultsClientOptions) {
     super(options);
+  }
+
+  protected watchUserProvided(): Observable<UserProvided> {
+    return of(this.overriddenUserProvided);
   }
 
   // The only "userProvided" settings `UiSettingsDefaultsClient` is aware about are explicit overrides.

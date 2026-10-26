@@ -7,7 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { omit } from 'lodash';
+import { isEqual, omit } from 'lodash';
+import type { Observable } from 'rxjs';
+import { distinctUntilChanged, of, switchMap } from 'rxjs';
 import type { Logger } from '@kbn/logging';
 import type {
   GetUiSettingsContext,
@@ -53,6 +55,18 @@ export abstract class BaseUiSettingsClient implements IUiSettingsClient {
   async get<T = any>(key: string, context?: GetUiSettingsContext): Promise<T> {
     return this.resolveValue<T>(key, await this.getUserProvided(), context);
   }
+
+  get$<T = any>(key: string): Observable<T> {
+    const userProvided$ = this.isOverridden(key)
+      ? of(this.overriddenUserProvided)
+      : this.watchUserProvided();
+    return userProvided$.pipe(
+      switchMap((userProvided) => this.resolveValue<T>(key, userProvided)),
+      distinctUntilChanged<T>(isEqual)
+    );
+  }
+
+  protected abstract watchUserProvided(): Observable<UserProvided>;
 
   protected async resolveValue<T>(
     key: string,

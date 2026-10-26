@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Observable } from 'rxjs';
 import type {
   UserProvidedValues,
   UiSettingsParams,
@@ -35,6 +36,29 @@ export interface IUiSettingsClient {
    * Retrieves uiSettings values set by the user with fallbacks to default values if not specified.
    */
   get: <T = any>(key: string, context?: GetUiSettingsContext) => Promise<T>;
+  /**
+   * Observes the value of `key` in this client's scope (the space of the saved objects client for `asScopedToClient`,
+   * the whole deployment for `globalAsScopedToClient`), including changes made on other Kibana nodes.
+   *
+   * - Emits the value `get(key)` without a context would return, first after the first successful read, then once
+   *   per change. Never emits synchronously, and two consecutive values are never deep-equal.
+   * - Changes written on this Kibana node are emitted right after the write. Changes written on other nodes are
+   *   emitted within one poll interval (10 seconds).
+   * - Never errors. While Elasticsearch is unreachable, the last value is kept.
+   * - Completes when Kibana stops. A key overridden in `kibana.yml` emits once and completes.
+   *
+   * The saved objects client the scoped client was created with only selects the space. Reads use Kibana's internal
+   * identity, so the subscription can outlive the request that created the client.
+   *
+   * @example
+   * ```ts
+   * core.uiSettings
+   *   .globalAsScopedToClient(core.savedObjects.createInternalRepository())
+   *   .get$<boolean>('myPlugin:enabled')
+   *   .subscribe((enabled) => (enabled ? start() : stop()));
+   * ```
+   */
+  get$: <T = any>(key: string) => Observable<T>;
   /**
    * Retrieves a set of all uiSettings values set by the user with fallbacks to default values if not specified.
    */

@@ -19,9 +19,12 @@ import {
   getCoreSettingsMock,
   getCoreGlobalSettingsMock,
 } from './ui_settings_service.test.mock';
-import type { SetupDeps } from './ui_settings_service';
+import type { SetupDeps, StartDeps } from './ui_settings_service';
 import { UiSettingsService } from './ui_settings_service';
-import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import {
+  savedObjectsClientMock,
+  savedObjectsRepositoryMock,
+} from '@kbn/core-saved-objects-api-server-mocks';
 import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
 import { uiSettingsType, uiSettingsGlobalType } from './saved_objects';
 import { UiSettingsDefaultsClient } from './clients/ui_settings_defaults_client';
@@ -47,6 +50,8 @@ const defaults = {
 describe('uiSettings', () => {
   let service: UiSettingsService;
   let setupDeps: SetupDeps;
+  let startDeps: StartDeps;
+  let repository: ReturnType<typeof savedObjectsRepositoryMock.create>;
   let savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>;
 
   beforeEach(() => {
@@ -57,6 +62,10 @@ describe('uiSettings', () => {
     const httpSetup = httpServiceMock.createInternalSetupContract();
     const savedObjectsSetup = savedObjectsServiceMock.createInternalSetupContract();
     setupDeps = { http: httpSetup, savedObjects: savedObjectsSetup };
+    const savedObjectsStart = savedObjectsServiceMock.createInternalStartContract();
+    repository = savedObjectsRepositoryMock.create();
+    savedObjectsStart.createInternalRepository.mockReturnValue(repository);
+    startDeps = { savedObjects: savedObjectsStart };
     savedObjectsClient = savedObjectsClientMock.create();
     service = new UiSettingsService(coreContext);
   });
@@ -151,7 +160,7 @@ describe('uiSettings', () => {
           },
         });
 
-        await expect(service.start()).rejects.toMatchInlineSnapshot(
+        await expect(service.start(startDeps)).rejects.toMatchInlineSnapshot(
           `[Error: Validation schema is not provided for [custom] UI Setting]`
         );
       });
@@ -165,7 +174,7 @@ describe('uiSettings', () => {
           },
         });
 
-        await expect(service.start()).rejects.toMatchInlineSnapshot(
+        await expect(service.start(startDeps)).rejects.toMatchInlineSnapshot(
           `[Error: Validation schema is not provided for [custom] Global UI Setting]`
         );
       });
@@ -179,7 +188,7 @@ describe('uiSettings', () => {
           },
         });
 
-        await expect(service.start()).rejects.toMatchInlineSnapshot(
+        await expect(service.start(startDeps)).rejects.toMatchInlineSnapshot(
           `[Error: [ui settings defaults [custom]]: expected value of type [string] but got [number]]`
         );
       });
@@ -193,7 +202,7 @@ describe('uiSettings', () => {
           },
         });
 
-        await expect(service.start()).rejects.toMatchInlineSnapshot(
+        await expect(service.start(startDeps)).rejects.toMatchInlineSnapshot(
           `[Error: expected value of type [string] but got [number]]`
         );
       });
@@ -217,7 +226,7 @@ describe('uiSettings', () => {
           },
         });
 
-        await expect(customizedService.start()).rejects.toMatchInlineSnapshot(
+        await expect(customizedService.start(startDeps)).rejects.toMatchInlineSnapshot(
           `[Error: [ui settings overrides [custom]]: expected value of type [string] but got [number]]`
         );
       });
@@ -241,7 +250,7 @@ describe('uiSettings', () => {
           },
         });
 
-        await expect(customizedService.start()).rejects.toMatchInlineSnapshot(
+        await expect(customizedService.start(startDeps)).rejects.toMatchInlineSnapshot(
           `[Error: [global ui settings overrides [custom]]: expected value of type [string] but got [number]]`
         );
       });
@@ -259,7 +268,7 @@ describe('uiSettings', () => {
         const customizedService = new UiSettingsService(coreContext);
         await customizedService.setup(setupDeps);
 
-        await customizedService.start();
+        await customizedService.start(startDeps);
       });
 
       it('does not throw on unknown global overrides', async () => {
@@ -275,14 +284,14 @@ describe('uiSettings', () => {
         const customizedService = new UiSettingsService(coreContext);
         await customizedService.setup(setupDeps);
 
-        await customizedService.start();
+        await customizedService.start(startDeps);
       });
 
       it('throws when the allowlist contains unregistered settings', async () => {
         const { setAllowlist } = await service.setup(setupDeps);
         setAllowlist(['mySetting']);
 
-        await expect(service.start()).rejects.toMatchInlineSnapshot(
+        await expect(service.start(startDeps)).rejects.toMatchInlineSnapshot(
           `[Error: The uiSetting with key [mySetting] is in the allowlist but is not registered. Make sure to remove it from the allowlist in /packages/serverless/settings]`
         );
       });
@@ -307,7 +316,7 @@ describe('uiSettings', () => {
           readonlyMode: 'ui',
         };
 
-        const start = await service.start();
+        const start = await service.start(startDeps);
         start.asScopedToClient(savedObjectsClient);
         expect(MockUiSettingsClientConstructor.mock.calls[0][0].defaults).toEqual({
           [settingId]: expectedSetting,
@@ -324,7 +333,7 @@ describe('uiSettings', () => {
           readonlyMode: 'strict',
         };
 
-        const start = await service.start();
+        const start = await service.start(startDeps);
         start.asScopedToClient(savedObjectsClient);
         expect(MockUiSettingsClientConstructor.mock.calls[0][0].defaults).toEqual({
           [settingId]: expectedSetting,
@@ -335,7 +344,7 @@ describe('uiSettings', () => {
     describe('#asScopedToClient', () => {
       it('passes saved object type "config" to UiSettingsClient', async () => {
         await service.setup(setupDeps);
-        const start = await service.start();
+        const start = await service.start(startDeps);
         start.asScopedToClient(savedObjectsClient);
 
         expect(MockUiSettingsClientConstructor).toHaveBeenCalledTimes(1);
@@ -344,7 +353,7 @@ describe('uiSettings', () => {
 
       it('passes overrides to UiSettingsClient', async () => {
         await service.setup(setupDeps);
-        const start = await service.start();
+        const start = await service.start(startDeps);
         start.asScopedToClient(savedObjectsClient);
         expect(MockUiSettingsClientConstructor).toHaveBeenCalledTimes(1);
         expect(MockUiSettingsClientConstructor.mock.calls[0][0].overrides).toBe(overrides);
@@ -354,7 +363,7 @@ describe('uiSettings', () => {
       it('passes a copy of set defaults to UiSettingsClient', async () => {
         const setup = await service.setup(setupDeps);
         setup.register(defaults);
-        const start = await service.start();
+        const start = await service.start(startDeps);
         start.asScopedToClient(savedObjectsClient);
 
         expect(MockUiSettingsClientConstructor).toHaveBeenCalledTimes(1);
@@ -366,7 +375,7 @@ describe('uiSettings', () => {
     describe('#asScopedToGlobalClient', () => {
       it('passes saved object type "config-global" to UiSettingsGlobalClient', async () => {
         await service.setup(setupDeps);
-        const start = await service.start();
+        const start = await service.start(startDeps);
         start.globalAsScopedToClient(savedObjectsClient);
 
         expect(MockUiSettingsGlobalClientConstructor).toHaveBeenCalledTimes(1);
@@ -375,7 +384,7 @@ describe('uiSettings', () => {
 
       it('passes overrides to UiSettingsGlobalClient', async () => {
         await service.setup(setupDeps);
-        const start = await service.start();
+        const start = await service.start(startDeps);
         start.globalAsScopedToClient(savedObjectsClient);
 
         expect(MockUiSettingsGlobalClientConstructor).toHaveBeenCalledTimes(1);
@@ -387,13 +396,49 @@ describe('uiSettings', () => {
       it('passes a copy of set global defaults to UiSettingsGlobalClient', async () => {
         const setup = await service.setup(setupDeps);
         setup.registerGlobal(defaults);
-        const start = await service.start();
+        const start = await service.start(startDeps);
         start.globalAsScopedToClient(savedObjectsClient);
 
         expect(MockUiSettingsGlobalClientConstructor).toHaveBeenCalledTimes(1);
         expect(MockUiSettingsGlobalClientConstructor.mock.calls[0][0].defaults).toEqual(defaults);
         expect(MockUiSettingsGlobalClientConstructor.mock.calls[0][0].defaults).not.toBe(defaults);
       });
+    });
+
+    describe('watcher', () => {
+      it('gives every scoped client one watcher that reads through the internal repository', async () => {
+        await service.setup(setupDeps);
+        const start = await service.start(startDeps);
+        savedObjectsClient.getCurrentNamespace.mockReturnValue('space-a');
+        start.asScopedToClient(savedObjectsClient);
+        start.globalAsScopedToClient(savedObjectsClient);
+
+        const [[{ watcher }]] = MockUiSettingsClientConstructor.mock.calls;
+        const [[{ watcher: globalWatcher }]] = MockUiSettingsGlobalClientConstructor.mock.calls;
+        expect(globalWatcher).toBe(watcher);
+
+        const subscription = watcher.watch({ type: 'config', namespace: 'space-a' }).subscribe();
+        expect(repository.bulkGet).toHaveBeenCalledWith([
+          expect.objectContaining({ type: 'config', namespaces: ['space-a'] }),
+        ]);
+        subscription.unsubscribe();
+      });
+    });
+  });
+
+  describe('#stop', () => {
+    it('completes the streams of the clients it created', async () => {
+      await service.preboot();
+      await service.setup(setupDeps);
+      const start = await service.start(startDeps);
+      start.asScopedToClient(savedObjectsClient);
+      const [[{ watcher }]] = MockUiSettingsClientConstructor.mock.calls;
+      const complete = jest.fn();
+      watcher.watch({ type: 'config', namespace: 'default' }).subscribe({ complete });
+
+      await service.stop();
+
+      expect(complete).toHaveBeenCalledTimes(1);
     });
   });
 });

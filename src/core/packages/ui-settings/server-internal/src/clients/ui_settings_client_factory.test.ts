@@ -12,6 +12,7 @@ import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks
 import { UiSettingsClientFactory } from './ui_settings_client_factory';
 import { UiSettingsGlobalClient } from './ui_settings_global_client';
 import { UiSettingsClient } from './ui_settings_client';
+import { createWatcherMock } from '../ui_settings_watcher.mock';
 
 describe('ui settings factory', () => {
   const logger = loggingSystemMock.create();
@@ -25,6 +26,7 @@ describe('ui settings factory', () => {
       savedObjectsClient,
       log: logger.get(),
       namespace: 'default',
+      watcher: createWatcherMock(),
     };
   };
 
