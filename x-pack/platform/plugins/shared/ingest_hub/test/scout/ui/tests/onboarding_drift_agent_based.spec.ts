@@ -391,9 +391,6 @@ test.describe(
             JSON.stringify({
               globalRegion: 'us-east-1',
               serviceVars: {},
-              instances: [
-                { instanceId: 'elb', serviceId: 'elb', name: 'AWS ELB', isDuplicate: false },
-              ],
             })
           );
           sessionStorage.setItem(

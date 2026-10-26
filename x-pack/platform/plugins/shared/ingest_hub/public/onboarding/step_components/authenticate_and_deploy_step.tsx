@@ -388,6 +388,11 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
   // Defined before handleNext so they can be referenced in the callback and dependency array.
   const showMiSection = !isAgentBased && miServiceIds.length > 0;
   const showAgentSection = isAgentBased && agentTargets.length > 0;
+  // On `?deploymentId` resume the services matrix loads after the hydrated session is read, so
+  // agentTargets is empty until it arrives. Without this guard Next would be enabled and skip the
+  // agent deploy / drift check, leaving the Fleet package policies stale.
+  const isAgentTargetsPending =
+    isAgentBased && selectedServiceIds.length > 0 && awsServicesMap === undefined;
 
   // True when at least one agent target's service declares configurable vars (e.g. credential
   // vars). False for services with no vars, so the credential form is skipped and the user
@@ -597,6 +602,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
   ]);
 
   const handleNext = useCallback(async () => {
+    if (isAgentTargetsPending) return;
     // If MI services were previously deployed but are no longer selected (e.g. user switched to
     // ECF-only), stale MI policies need cleanup. handleDeploy detects live-stale entries and runs
     // cleanup even when no new MI targets exist. onContinue is a no-op here so it won't navigate —
@@ -651,6 +657,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
     return handleMiNext();
   }, [
     isAgentBased,
+    isAgentTargetsPending,
     miServiceIds.length,
     hasAnyEcf,
     showAgentSection,
@@ -672,6 +679,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
   // Agent enrolment is non-blocking, but the deploy itself now happens here on Next.
   // The section stays visible with the error callout if deploy fails.
   const isNextDisabled =
+    isAgentTargetsPending ||
     hasUnloadedSelectedManifests ||
     hasSelectedManifestError ||
     (showMiSection && !isMiDone) ||
@@ -929,7 +937,9 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
           fill
           onClick={handleNext}
           isDisabled={isNextDisabled}
-          isLoading={hasUnloadedSelectedManifests || isSavingSO || isAgentDeploying}
+          isLoading={
+            isAgentTargetsPending || hasUnloadedSelectedManifests || isSavingSO || isAgentDeploying
+          }
           data-test-subj="authenticateAndDeployStep-nextButton"
         >
           <FormattedMessage

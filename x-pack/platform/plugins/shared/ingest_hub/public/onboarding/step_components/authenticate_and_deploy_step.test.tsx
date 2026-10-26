@@ -552,6 +552,34 @@ describe('AuthenticateAndDeployStep', () => {
       expect(screen.getByTestId('mock-agent-failed')).toBeInTheDocument();
     });
 
+    describe('Next button — services matrix not loaded yet (?deploymentId resume)', () => {
+      it('keeps Next disabled while awsServicesMap is undefined, enables it once loaded', () => {
+        const flow = mockUseOnboardingFlow();
+        mockUseOnboardingFlow.mockReturnValue({ ...flow, awsServicesMap: undefined });
+        const { rerender } = render(
+          <I18nProvider>
+            <AuthenticateAndDeployStep onContinue={jest.fn()} onBack={jest.fn()} />
+          </I18nProvider>
+        );
+        expect(screen.getByTestId('authenticateAndDeployStep-nextButton')).toBeDisabled();
+
+        mockUseOnboardingFlow.mockReturnValue(flow);
+        mockUseAgentBasedDeploy.mockReturnValue({
+          targets: [],
+          isDeploying: false,
+          failedInstances: [],
+          isAlreadyDeployed: true,
+          handleDeploy: jest.fn(),
+        });
+        rerender(
+          <I18nProvider>
+            <AuthenticateAndDeployStep onContinue={jest.fn()} onBack={jest.fn()} />
+          </I18nProvider>
+        );
+        expect(screen.getByTestId('authenticateAndDeployStep-nextButton')).not.toBeDisabled();
+      });
+    });
+
     describe('Next button — agent-based deploy', () => {
       const agentTargets = [
         {
