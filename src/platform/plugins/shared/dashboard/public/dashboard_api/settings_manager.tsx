@@ -8,11 +8,7 @@
  */
 
 import type { StateComparators, WithAllKeys } from '@kbn/presentation-publishing';
-import {
-  areComparatorsEqual,
-  diffComparators,
-  initializeStateManager,
-} from '@kbn/presentation-publishing';
+import { diffComparators, initializeStateManager } from '@kbn/presentation-publishing';
 import { BehaviorSubject } from 'rxjs';
 import { combineLatestWith, debounceTime, map, startWith } from 'rxjs';
 import type { DashboardState, DashboardOptions } from '@kbn/as-code-dashboard-schema';
@@ -62,17 +58,28 @@ function deserializeState(state: DashboardState) {
   };
 }
 
-/** Same settings diff the unsaved-changes manager runs, for any two dashboard states. */
-export const dashboardSettingsMatch = (
-  baseline: DashboardState,
-  current: DashboardState
-): boolean =>
-  areComparatorsEqual(
-    comparators,
-    deserializeState(baseline),
-    deserializeState(current),
-    DEFAULT_SETTINGS
-  );
+/** Same settings diff the unsaved-changes manager produces, for any two dashboard states. */
+export const diffDashboardSettings = (baseline: DashboardState, current: DashboardState) => {
+  const { description, tags, time_restore, project_routing_restore, title, ...optionDiffs } =
+    diffComparators(
+      comparators,
+      deserializeState(baseline),
+      deserializeState(current),
+      DEFAULT_SETTINGS
+    );
+  // options needs to contain all values and not just diffs since is spread into saved state
+  const options = Object.keys(optionDiffs).length
+    ? { ...DEFAULT_DASHBOARD_OPTIONS, ...current.options }
+    : undefined;
+  return {
+    ...(description && { description }),
+    ...(tags && { tags }),
+    ...(title && { title }),
+    ...(typeof time_restore === 'boolean' && { time_restore }),
+    ...(typeof project_routing_restore === 'boolean' && { project_routing_restore }),
+    ...(options && { options }),
+  };
+};
 
 export function initializeSettingsManager(initialState: DashboardState) {
   const stateManager = initializeStateManager(

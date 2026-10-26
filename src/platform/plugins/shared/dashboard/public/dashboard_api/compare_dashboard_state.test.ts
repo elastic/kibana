@@ -8,7 +8,8 @@
  */
 
 import type { DashboardState } from '@kbn/as-code-dashboard-schema';
-import { dashboardStatesMatch } from './compare_dashboard_state';
+import { DEFAULT_DASHBOARD_OPTIONS } from '../../common/constants';
+import { diffDashboardStates } from './compare_dashboard_state';
 
 const section = (collapsed: boolean) => ({
   id: 'section-1',
@@ -26,66 +27,92 @@ const state = (overrides: Partial<DashboardState> = {}): DashboardState =>
     ...overrides,
   } as DashboardState);
 
-describe('dashboardStatesMatch', () => {
-  it('treats a closed and reopened section as the same state', () => {
-    expect(dashboardStatesMatch(state(), state({ panels: [section(false)] }))).toBe(true);
+describe('diffDashboardStates', () => {
+  it('finds no changes between a closed and reopened section', () => {
+    expect(diffDashboardStates(state(), state({ panels: [section(false)] }))).toEqual({});
   });
 
-  it('treats a closed section as a different state', () => {
-    expect(dashboardStatesMatch(state(), state({ panels: [section(true)] }))).toBe(false);
+  it('returns the current panels when a section is closed', () => {
+    const current = state({ panels: [section(true)] });
+
+    expect(diffDashboardStates(state(), current)).toEqual({ panels: current.panels });
   });
 
   it('ignores fields the unsaved-changes manager does not compare', () => {
     expect(
-      dashboardStatesMatch(
+      diffDashboardStates(
         state(),
         state({
           access_control: { accessMode: 'read' },
         } as Partial<DashboardState>)
       )
-    ).toBe(true);
+    ).toEqual({});
+  });
+
+  it('returns a changed title', () => {
+    expect(diffDashboardStates(state(), state({ title: 'Errors' }))).toEqual({ title: 'Errors' });
+  });
+
+  it('returns all current options when one option changes', () => {
+    const options = {
+      ...DEFAULT_DASHBOARD_OPTIONS,
+      use_margins: !DEFAULT_DASHBOARD_OPTIONS.use_margins,
+    };
+
+    expect(diffDashboardStates(state(), state({ options }))).toEqual({ options });
   });
 
   it('treats a missing ES|QL approximation as off', () => {
-    expect(dashboardStatesMatch(state(), state({ esql_approximation: false }))).toBe(true);
-    expect(dashboardStatesMatch(state(), state({ esql_approximation: true }))).toBe(false);
+    expect(diffDashboardStates(state(), state({ esql_approximation: false }))).toEqual({});
+    expect(diffDashboardStates(state(), state({ esql_approximation: true }))).toEqual({
+      esql_approximation: true,
+    });
   });
 
-  it('compares the project routing', () => {
+  it('returns a changed project routing', () => {
     expect(
-      dashboardStatesMatch(
+      diffDashboardStates(
         state({ project_routing: '_alias:_origin' }),
         state({ project_routing: '_alias:_origin' })
       )
-    ).toBe(true);
+    ).toEqual({});
     expect(
-      dashboardStatesMatch(
+      diffDashboardStates(
         state({ project_routing: '_alias:_origin' }),
         state({ project_routing: '_alias:*' })
       )
-    ).toBe(false);
+    ).toEqual({ project_routing: '_alias:*' });
   });
 
   it('compares the time range and refresh interval only with time restore on', () => {
     const timeRange = { from: 'now-15m', to: 'now' };
     expect(
-      dashboardStatesMatch(
+      diffDashboardStates(
         state({ refresh_interval: { pause: false, value: 60000 } }),
         state({ refresh_interval: { pause: true, value: 60000 } })
       )
-    ).toBe(true);
+    ).toEqual({});
     expect(
-      dashboardStatesMatch(
+      diffDashboardStates(
         state({ time_range: timeRange, refresh_interval: { pause: false, value: 60000 } }),
         state({ time_range: timeRange, refresh_interval: { pause: true, value: 60000 } })
       )
-    ).toBe(false);
+    ).toEqual({ refresh_interval: { pause: true, value: 60000 } });
     expect(
-      dashboardStatesMatch(
+      diffDashboardStates(
         state({ time_range: timeRange }),
         state({ time_range: { from: 'now-1h', to: 'now' } })
       )
-    ).toBe(false);
+    ).toEqual({ time_range: { from: 'now-1h', to: 'now' } });
+  });
+
+  it('returns turning time restore on with the stored time range', () => {
+    const timeRange = { from: 'now-15m', to: 'now' };
+
+    expect(diffDashboardStates(state(), state({ time_range: timeRange }))).toEqual({
+      time_restore: true,
+      time_range: timeRange,
+    });
   });
 
   it('uses a panel comparator instead of the raw panel config', () => {
@@ -110,9 +137,9 @@ describe('dashboardStatesMatch', () => {
       ],
     });
 
-    expect(dashboardStatesMatch(baseline, current)).toBe(false);
+    expect(diffDashboardStates(baseline, current)).toEqual({ panels: current.panels });
     expect(
-      dashboardStatesMatch(baseline, current, {
+      diffDashboardStates(baseline, current, {
         'panel-1': {
           compareSerializedState: (
             left: { attributes?: { title?: string } } | undefined,
@@ -120,6 +147,6 @@ describe('dashboardStatesMatch', () => {
           ) => left?.attributes?.title === right?.attributes?.title,
         },
       })
-    ).toBe(true);
+    ).toEqual({});
   });
 });
