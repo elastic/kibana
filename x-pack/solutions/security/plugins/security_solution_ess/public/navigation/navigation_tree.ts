@@ -11,7 +11,6 @@ import { SecurityPageName } from '@kbn/security-solution-navigation';
 import { i18nStrings, securityLink } from '@kbn/security-solution-navigation/links';
 import { defaultNavigationTree } from '@kbn/security-solution-navigation/navigation_tree';
 import { STACK_MANAGEMENT_NAV_ID, DATA_MANAGEMENT_NAV_ID } from '@kbn/deeplinks-management';
-import { AGENT_BUILDER_NAV_AT_TOP_FLAG } from '@kbn/navigation-plugin/public';
 import { getWorkflowsNavPanel } from '@kbn/deeplinks-workflows';
 import { type Services } from '../common/services';
 
@@ -20,13 +19,6 @@ export const createNavigationTree = (
   chatExperience: AIChatExperience = AIChatExperience.Classic
 ): NavigationTreeDefinition => {
   const showAgentBuilder = chatExperience === AIChatExperience.Agent;
-  let agentBuilderNavAtTop = false;
-  services.featureFlags
-    .getBooleanValue$(AGENT_BUILDER_NAV_AT_TOP_FLAG, false)
-    .subscribe((enabled) => {
-      agentBuilderNavAtTop = enabled;
-    })
-    .unsubscribe();
 
   const agentBuilderLink = {
     icon: 'productAgent',
@@ -41,12 +33,9 @@ export const createNavigationTree = (
     body: [
       // AlertZero body (nodes omitted when securitySolution:enableAlertZero is off)
       ...defaultNavigationTree.alertZero(),
+      ...(showAgentBuilder ? [agentBuilderLink] : []),
       ...defaultNavigationTree.alertZeroSecondary(),
-      ...(showAgentBuilder && agentBuilderNavAtTop ? [agentBuilderLink] : []),
-      // Context Engine follows Agent Builder wherever it renders; it no longer has a
-      // fixed top position.
-      ...(showAgentBuilder && agentBuilderNavAtTop ? [contextEngineLink] : []),
-      ...(!showAgentBuilder ? [contextEngineLink] : []),
+      contextEngineLink,
       {
         link: 'inbox' as AppDeepLinkId,
         icon: 'mail',
@@ -65,9 +54,6 @@ export const createNavigationTree = (
             link: securityLink(SecurityPageName.alerts),
           },
       ...getWorkflowsNavPanel(services),
-      // TODO: remove this item when agentBuilderNavAtTop is enabled by default and the Agent Builder link is always at the top of the nav
-      ...(showAgentBuilder && !agentBuilderNavAtTop ? [agentBuilderLink] : []),
-      ...(showAgentBuilder && !agentBuilderNavAtTop ? [contextEngineLink] : []),
       {
         id: SecurityPageName.attackDiscovery,
         icon: 'bolt',

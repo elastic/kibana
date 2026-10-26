@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-import { of } from 'rxjs';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import type { NavigationTreeDefinition } from '@kbn/core-chrome-browser';
 import { STACK_MANAGEMENT_NAV_ID } from '@kbn/deeplinks-management';
-import { AGENT_BUILDER_NAV_AT_TOP_FLAG } from '@kbn/navigation-plugin/public';
 import { mockServices } from '../common/services/__mocks__/services.mock';
 import type { Services } from '../common/services';
 import { SecurityPageName } from '@kbn/deeplinks-security';
@@ -23,18 +21,8 @@ const containsLink = (nodes: NavigationTreeDefinition['body'], link: string): bo
   );
 
 describe('createNavigationTree', () => {
-  const createServices = (options?: { agentBuilderNavAtTop?: boolean }): Services => ({
+  const createServices = (): Services => ({
     ...mockServices,
-    featureFlags: {
-      ...mockServices.featureFlags,
-      getBooleanValue$: jest.fn((flag: string, defaultValue?: boolean) => {
-        if (flag === AGENT_BUILDER_NAV_AT_TOP_FLAG) {
-          return of(options?.agentBuilderNavAtTop ?? defaultValue ?? false);
-        }
-
-        return of(defaultValue ?? false);
-      }),
-    },
     uiSettings: {
       ...mockServices.uiSettings,
       get: jest.fn(<T>(_key: string, defaultValue?: T) => defaultValue as T),
@@ -76,37 +64,17 @@ describe('createNavigationTree', () => {
     expect(agentBuilderNode).toBeUndefined();
   });
 
-  it('keeps agent builder in its lower position and places context engine right after it when the nav-at-top flag is off', async () => {
+  it('places agent builder between Escalations and Watches when the chat experience is Agent', async () => {
     const { body } = (await createNavigationTree(
-      createServices({ agentBuilderNavAtTop: false }),
+      createServices(),
       AIChatExperience.Agent
     )) as NavigationTreeDefinition;
 
-    const agentBuilderIndex = body.findIndex((item) => item.link === 'agent_builder');
-    const contextEngineIndex = body.findIndex((item) => item.link === 'context_engine');
+    const links = body.map((item) => item.link);
+    const escalationsIndex = links.indexOf(alertZeroLink(SecurityPageName.alertZeroEscalations));
 
-    // Agent Builder stays in its existing (non-top) spot.
-    expect(agentBuilderIndex).toBeGreaterThan(0);
-    expect(contextEngineIndex).toBe(agentBuilderIndex + 1);
-  });
-
-  it('places agent builder and context engine together at the top when the nav-at-top flag is on', async () => {
-    const { body } = (await createNavigationTree(
-      createServices({ agentBuilderNavAtTop: true }),
-      AIChatExperience.Agent
-    )) as NavigationTreeDefinition;
-
-    const agentBuilderIndex = body.findIndex((item) => item.link === 'agent_builder');
-    const contextEngineIndex = body.findIndex((item) => item.link === 'context_engine');
-
-    const discoverIndex = body.findIndex((item) => item.link === 'discover');
-
-    expect(agentBuilderIndex).toBeLessThan(discoverIndex);
-    expect(contextEngineIndex).toBe(agentBuilderIndex + 1);
-    expect(body[contextEngineIndex]).toMatchObject({
-      icon: 'tableSparkles',
-      link: 'context_engine',
-    });
+    expect(links[escalationsIndex + 1]).toBe('agent_builder');
+    expect(links[escalationsIndex + 2]).toBe(alertZeroLink(SecurityPageName.alertZeroWatches));
   });
 
   it('includes Stack Rules in project settings > Alerts and Insights', async () => {
