@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { getEffectiveNamespace } from './effective_namespace';
+import type { AwsServiceMatrixEntry } from '../aws_service_matrix';
+import { deploysAsPolicy, getEffectiveNamespace } from './effective_namespace';
 
 describe('getEffectiveNamespace', () => {
   it('prefers the instance namespace over the global one', () => {
@@ -21,5 +22,30 @@ describe('getEffectiveNamespace', () => {
 
   it('is empty when neither is set', () => {
     expect(getEffectiveNamespace('ec2', {})).toBe('');
+  });
+});
+
+describe('deploysAsPolicy', () => {
+  const service = (deploymentMethods: unknown[]) =>
+    ({ deploymentMethods } as unknown as AwsServiceMatrixEntry);
+
+  it('is true for every service under agent-based', () => {
+    expect(deploysAsPolicy(service([{ method: 'ecf' }]), 'agent_based')).toBe(true);
+  });
+
+  it('is true under managed integration for a service that prefers it', () => {
+    expect(
+      deploysAsPolicy(
+        service([{ method: 'managed_integration', preferred: true }, { method: 'ecf' }]),
+        'managed_integration'
+      )
+    ).toBe(true);
+  });
+
+  it('is false for an ECF service under managed integration', () => {
+    expect(deploysAsPolicy(service([{ method: 'ecf' }]), 'managed_integration')).toBe(false);
+    expect(
+      deploysAsPolicy(service([{ method: 'managed_integration' }]), 'managed_integration')
+    ).toBe(false);
   });
 });

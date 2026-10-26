@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { toSOSettings, toSOSettingsUpdate } from './so_settings';
+import { toSOMetadataUpdate, toSOSettings, toSOSettingsUpdate } from './so_settings';
 
 describe('toSOSettings', () => {
   it('returns the trimmed name and description', () => {
@@ -63,6 +63,21 @@ describe('toSOSettingsUpdate', () => {
     expect(toSOSettingsUpdate({ integrationName: ' ', description: 'x' })).toEqual({
       description: 'x',
       namespace: null,
+    });
+  });
+});
+
+describe('toSOMetadataUpdate', () => {
+  it('returns the name and description without the namespace', () => {
+    expect(
+      toSOMetadataUpdate({ integrationName: ' my-aws ', description: ' x ', namespace: 'prod' })
+    ).toEqual({ integrationName: 'my-aws', description: 'x' });
+  });
+
+  it('still sends null for a cleared description', () => {
+    expect(toSOMetadataUpdate({ integrationName: 'my-aws', namespace: 'prod' })).toEqual({
+      integrationName: 'my-aws',
+      description: null,
     });
   });
 });

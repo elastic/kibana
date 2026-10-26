@@ -20,7 +20,7 @@ import { makeDsView } from '../../aws_service_matrix';
 import { getOnboardingSessionKey } from '../../core/onboarding_session_storage';
 import { useOnboardingFlow } from '../../onboarding_flow_context';
 import { useOnboardingSO } from '../authenticate_and_deploy_step/use_onboarding_so';
-import { toSOSettingsUpdate } from '../authenticate_and_deploy_step/so_settings';
+import { toSOMetadataUpdate } from '../authenticate_and_deploy_step/so_settings';
 import {
   getMissingSourceGroup,
   getRequiredTextFields,
@@ -574,10 +574,11 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
     setServiceSettingsMethod(deploymentMethod);
     // The name and description stay editable after a deploy, and a later deploy may find nothing
     // to do, so save them to the onboarding record here. Best-effort: the next deploy writes them
-    // again.
+    // again. Not the namespace: a changed one is detected against the saved one and applied by the
+    // next deploy, which saves it.
     const deploymentId = detectAndReviewStep?.onboardingDeploymentId;
     if (deploymentId) {
-      updateDeployment(deploymentId, toSOSettingsUpdate(persisted));
+      updateDeployment(deploymentId, toSOMetadataUpdate(persisted));
     }
     onContinue();
   }, [

@@ -139,17 +139,20 @@ export function detectAgentPoliciesDrift(
 }
 
 /**
- * Returns true when the global namespace differs from the one saved with the last deploy and an
- * original instance is deployed. Originals take the global namespace; a duplicate keeps its own,
- * which `detectServiceVarsDrift` already compares.
+ * Returns true when the global namespace differs from the one saved with the last deploy and a
+ * deployed instance follows it. Originals always do; a duplicate does unless it has a namespace of
+ * its own, which `detectServiceVarsDrift` already compares.
  */
 export function detectGlobalNamespaceDrift(
   sessionNamespace: string | undefined,
   soNamespace: string | undefined,
   deployedInstanceIds: Iterable<string>,
-  instances: ServiceInstance[] | undefined
+  instances: ServiceInstance[] | undefined,
+  serviceVars: Record<string, { namespace?: string }> = {}
 ): boolean {
   if ((sessionNamespace ?? '') === (soNamespace ?? '')) return false;
   const deployed = new Set(deployedInstanceIds);
-  return (instances ?? []).some((i) => !i.isDuplicate && deployed.has(i.instanceId));
+  return (instances ?? []).some(
+    (i) => deployed.has(i.instanceId) && !serviceVars[i.instanceId]?.namespace
+  );
 }

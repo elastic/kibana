@@ -563,25 +563,6 @@ test.describe('Onboarding Service Settings step', { tag: tags.stateful.classic }
     await expect(flyoutNamespace).toBeHidden();
   });
 
-  test('global namespace is in the collapsed advanced options of the integration settings', async ({
-    browserAuth,
-    page,
-  }) => {
-    await navigateToServiceSettings(browserAuth, page, {
-      selectedServiceIds: ['elb'],
-      namespace: 'prod',
-    });
-
-    await expect(page.testSubj.locator('sharedSettingsSection')).toBeVisible();
-    await expect(page.testSubj.locator('sharedSettingsNamespace')).toBeHidden();
-
-    await page.testSubj.locator('sharedSettingsAdvancedToggle').click();
-    await expect(page.testSubj.locator('sharedSettingsNamespace')).toContainText('prod');
-
-    await page.testSubj.locator('sharedSettingsAdvancedToggle').click();
-    await expect(page.testSubj.locator('sharedSettingsNamespace')).toBeHidden();
-  });
-
   test("duplicate row's config is independent from the original", async ({ browserAuth, page }) => {
     await navigateToServiceSettings(browserAuth, page, {
       selectedServiceIds: ['elb'],

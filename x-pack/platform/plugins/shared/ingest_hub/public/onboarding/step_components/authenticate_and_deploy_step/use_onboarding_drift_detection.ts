@@ -154,7 +154,8 @@ export function useOnboardingDriftDetection({
           serviceSettings?.namespace,
           item.namespace,
           deployedInstanceIds,
-          serviceSettings?.instances
+          serviceSettings?.instances,
+          serviceSettings?.serviceVars
         );
         const dirty = dirtyVarIds.length > 0 || namespaceDirty || authDirty || agentPoliciesDirty;
         driftDirtyRef.current = dirty;

@@ -167,8 +167,23 @@ describe('detectGlobalNamespaceDrift', () => {
     expect(detectGlobalNamespaceDrift('', 'prod', ['elb'], [original])).toBe(true);
   });
 
-  it('is clean when only duplicates are deployed, since they keep their own namespace', () => {
-    expect(detectGlobalNamespaceDrift('prod', 'dev', ['elb__dup-1'], [duplicate])).toBe(false);
+  it('is clean when only duplicates with a namespace of their own are deployed', () => {
+    expect(
+      detectGlobalNamespaceDrift('prod', 'dev', ['elb__dup-1'], [duplicate], {
+        'elb__dup-1': { namespace: 'staging' },
+      })
+    ).toBe(false);
+  });
+
+  it('is dirty when a deployed duplicate follows the global namespace and the original is not deployed', () => {
+    expect(detectGlobalNamespaceDrift('prod', 'dev', ['elb__dup-1'], [original, duplicate])).toBe(
+      true
+    );
+    expect(
+      detectGlobalNamespaceDrift('prod', 'dev', ['elb__dup-1'], [original, duplicate], {
+        'elb__dup-1': { namespace: '' },
+      })
+    ).toBe(true);
   });
 
   it('is clean when the original is not deployed yet', () => {

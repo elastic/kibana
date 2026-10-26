@@ -43,3 +43,15 @@ export const toSOSettingsUpdate = (
     namespace: namespace ?? null,
   };
 };
+
+/**
+ * The update for settings that need no deploy: the name and description. The namespace is left
+ * out on purpose. It is the last deployed value that drift detection compares the current one
+ * against, so it is saved only together with the policy changes that apply it.
+ */
+export const toSOMetadataUpdate = (
+  serviceSettings: SOSettingsSource | null | undefined
+): { integrationName?: string; description: string | null } => {
+  const { namespace, ...metadata } = toSOSettingsUpdate(serviceSettings);
+  return metadata;
+};

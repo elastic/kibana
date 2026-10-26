@@ -862,9 +862,19 @@ describe('useServiceSettings — integration name and description', () => {
       expect(mockUpdateDeployment).toHaveBeenCalledWith('dep-1', {
         integrationName: 'my-aws',
         description: 'Production',
-        namespace: null,
       });
       expect(onContinue).toHaveBeenCalled();
+    });
+
+    it('leaves the namespace to the deploy, so a change is still detected as drift', async () => {
+      withDeployment('dep-1');
+      const { result } = renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
+      await waitFor(() => expect(result.current.integrationName).toBe('aws-1'));
+      act(() => result.current.setNamespace('prod'));
+
+      act(() => result.current.handleNext());
+
+      expect(mockUpdateDeployment.mock.calls[0][1]).not.toHaveProperty('namespace');
     });
 
     it('writes nothing before the first deploy has created the record', async () => {
