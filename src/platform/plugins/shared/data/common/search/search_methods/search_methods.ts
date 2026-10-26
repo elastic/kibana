@@ -139,7 +139,12 @@ export class SearchMethodsService implements ISearchMethods {
     const request = this.buildDslRequest(dslParams, options);
     const searchOptions = this.mapDslOptions(options, params);
 
-    const response = await this.executeDslSearch(request, searchOptions, params, options?.inspector);
+    const response = await this.executeDslSearch(
+      request,
+      searchOptions,
+      params,
+      options?.inspector
+    );
 
     return {
       rawResponse: response.rawResponse,
