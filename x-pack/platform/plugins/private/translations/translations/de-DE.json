@@ -18268,7 +18268,6 @@
     "xpack.csp.rules.rulesTable.optionEnable": "Aktivieren",
     "xpack.csp.rules.rulesTable.ruleNumberColumnLabel": "Regelnummer",
     "xpack.csp.rules.rulesTable.searchPlaceholder": "Nach Regelname suchen",
-    "xpack.csp.rules.rulesTable.selectAllRulesAriaLabel": "Alle Regeln auf der aktuellen Seite auswählen",
     "xpack.csp.rules.rulesTable.selectAllRulesOption": "Alle auswählen {total, plural, one {# rule} other {# Regeln}}",
     "xpack.csp.rules.rulesTable.selectRuleAriaLabel": "Regel auswählen: {ruleName}",
     "xpack.csp.rules.rulesTable.showingPageOfTotalLabel": "Anzeigen {pageSize} von {total, plural, one {# rule} other {# Regeln}} {pipe} Ausgewählte {selectedRulesAmount, plural, one {# rule} other {# Regeln}}",

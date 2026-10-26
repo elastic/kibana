@@ -18330,7 +18330,6 @@
     "xpack.csp.rules.rulesTable.optionEnable": "启用",
     "xpack.csp.rules.rulesTable.ruleNumberColumnLabel": "规则编号",
     "xpack.csp.rules.rulesTable.searchPlaceholder": "按规则名称搜索",
-    "xpack.csp.rules.rulesTable.selectAllRulesAriaLabel": "选择当前页面上的所有规则",
     "xpack.csp.rules.rulesTable.selectAllRulesOption": "选择所有 {total, plural, one {# rule} other {# 个规则}}",
     "xpack.csp.rules.rulesTable.selectRuleAriaLabel": "选择规则：{ruleName}",
     "xpack.csp.rules.rulesTable.showingPageOfTotalLabel": "正在显示 {pageSize}/{total, plural, one {# rule} other {# 个规则}} {pipe} 已选择 {selectedRulesAmount, plural, one {# rule} other {# 个规则}}",
