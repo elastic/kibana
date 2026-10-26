@@ -68,9 +68,8 @@ export interface AlertEpisode extends BaseAlertEpisode {
    */
   is_flapping?: boolean;
   /**
-   * Conditions that lift the current snooze before its expiry, and how they are
-   * combined. Only set for source alert rows; native episodes cannot evaluate
-   * snooze conditions yet.
+   * Conditions that lift the current snooze before its expiry. Only set for source
+   * alert rows; native episodes cannot evaluate snooze conditions yet.
    */
   snooze_conditions?: SnoozeCondition[];
   snooze_condition_operator?: 'any' | 'all';

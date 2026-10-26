@@ -42,10 +42,7 @@ import {
 } from '../hooks/use_condition_field_names';
 import * as i18n from '../actions/translations';
 
-/**
- * What the snooze modal resolves with: an expiry (`null` for indefinite) plus the
- * optional conditions that lift the snooze before it expires.
- */
+/** An expiry (`null` for indefinite) plus the conditions that lift the snooze early. */
 export interface EpisodeSnoozePayload {
   snoozedUntil: string | null;
   conditions?: SnoozeCondition[];
@@ -60,17 +57,8 @@ export interface SnoozeModalDeps {
 }
 
 export interface SnoozeModalOptions {
-  /** Source backing the `field_change` condition dropdown. */
   dataSource?: ConditionFieldsSource;
-  /**
-   * Rule types of the rows being snoozed, so the `field_change` dropdown only
-   * offers fields those alerts actually have.
-   */
   ruleTypeIds?: string[];
-  /**
-   * Why the condition-based tab cannot be used for the current selection, which
-   * renders it disabled with the reason as its tooltip.
-   */
   conditionalTabDisabledReason?: string;
 }
 
@@ -86,8 +74,8 @@ const toSnoozePayload = ({
   conditionOperator,
 }: AlertSnoozePayload): EpisodeSnoozePayload => ({
   snoozedUntil: expiresAt ?? null,
-  // The panel's condition type is open ended so consumers can register their own
-  // descriptors; only the built-in ones are wired here, and they match the API shape.
+  // The panel's condition type is open ended; only the built-in ones are wired
+  // here, and they match the API shape.
   ...(conditions?.length ? { conditions: conditions as SnoozeCondition[], conditionOperator } : {}),
 });
 
@@ -168,9 +156,8 @@ export const openSnoozeModal = (
   return new Promise<EpisodeSnoozePayload | undefined>((resolve) => {
     const ref = deps.overlays.openModal(
       toMountPoint(
-        // `overlays.openModal` mounts in a separate React root, so the page-level
-        // `QueryClientProvider` is out of scope here. Re-wrap with the same client
-        // so the condition field lookup shares the page's cache.
+        // `openModal` mounts in a separate React root, so the page-level provider
+        // is out of scope; re-wrap to share the page's cache.
         <QueryClientProvider client={deps.queryClient}>
           <SnoozeModal
             http={deps.http}

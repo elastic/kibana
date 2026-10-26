@@ -22,8 +22,8 @@ import * as i18n from './translations';
 import { openSnoozeModal, type EpisodeSnoozePayload } from '../components/snooze_modal';
 
 /**
- * Universal (v2) episodes cannot evaluate snooze conditions yet; flip this once
- * https://github.com/elastic/kibana/pull/277051 lands.
+ * Flip once universal episodes can evaluate snooze conditions, mapping the
+ * panel's conditions onto the v2 schema in `nativeExecute`.
  */
 const NATIVE_EPISODES_SUPPORT_CONDITIONAL_SNOOZE = false;
 
@@ -39,11 +39,6 @@ export interface SnoozeActionDeps {
   >;
 }
 
-/**
- * Whether every selected episode is backed by a system that can evaluate snooze
- * conditions. A mixed selection fails, so the condition based tab stays disabled
- * rather than silently dropping the conditions for part of the selection.
- */
 const supportsConditions = (episodes: AlertEpisode[], sourceSupports: boolean): boolean =>
   episodes.every((ep) =>
     ep.source_id == null ? NATIVE_EPISODES_SUPPORT_CONDITIONAL_SNOOZE : sourceSupports
@@ -85,8 +80,6 @@ export const createSnoozeAction = (
 
     await executeCompositeAction<EpisodeSnoozePayload>({
       episodes,
-      // Conditions are gated to sources that support them, so the native path
-      // only ever receives an expiry.
       nativeExecute: (eps, http) =>
         bulkSnoozeSeriesActions(
           http,

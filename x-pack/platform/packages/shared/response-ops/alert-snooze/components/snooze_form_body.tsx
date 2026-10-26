@@ -28,10 +28,7 @@ export interface SnoozeFormBodyProps {
   /** Leaf-level scalar alert field names for the `field_change` condition dropdown. */
   fieldOptions?: string[];
   isLoadingFields?: boolean;
-  /**
-   * Why the condition-based tab cannot be used, which renders it disabled with
-   * the reason as its tooltip. Omit when conditions are available.
-   */
+  /** Renders the condition-based tab disabled, with this reason as its tooltip. */
   conditionalTabDisabledReason?: string;
 }
 

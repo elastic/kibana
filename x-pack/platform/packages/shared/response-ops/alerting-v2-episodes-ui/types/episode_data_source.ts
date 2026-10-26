@@ -63,10 +63,7 @@ export interface ResolveSourceRulesParams extends EpisodeDataSourceBaseParams {
 }
 
 export interface FetchSourceSearchFieldsParams extends EpisodeDataSourceBaseParams {
-  /**
-   * Narrows the fields to those of specific rule types. Defaults to every rule
-   * type the source covers.
-   */
+  /** Narrows the fields to specific rule types. Defaults to every type the source covers. */
   ruleTypeIds?: string[];
 }
 
@@ -131,10 +128,7 @@ export interface EpisodeDataSource {
    * condition based tab of the snooze modal. Defaults to `false` when omitted.
    */
   supportsConditionalSnooze?: boolean;
-  /**
-   * Rule types backing the given rows, read from the source's own action context,
-   * used to scope `fetchSearchFields` to just the rows being acted on.
-   */
+  /** Rule types backing the given rows, read from the source's own action context. */
   getRuleTypeIds?: (episodes: AlertEpisode[]) => string[];
   createActions?: (deps: EpisodeActionsDeps) => EpisodeAction[];
   severityExtensions?: SeverityExtension[];
