@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+import { internalTools } from '@kbn/agent-builder-common/tools';
 import {
   ACTION_POLICY_AUTHORING_SKILL_ID,
+  ALERTING_API_IDS,
   ALERTING_TOOL_IDS,
   RULE_AUTHORING_SKILL_ID,
 } from '@kbn/alerting-v2-constants';
@@ -72,6 +74,26 @@ describe('createRuleAuthoringSkill', () => {
 
     expect(inlineToolIds).toEqual([ALERTING_TOOL_IDS.manageRule]);
     expect(inlineToolIds).not.toContain(ALERTING_TOOL_IDS.manageActionPolicy);
+  });
+
+  it('points the agent to the Kibana API tools to discover existing rules', () => {
+    const skill = createRuleAuthoringSkill(createDeps());
+
+    expect(skill.content).toContain(ALERTING_API_IDS.listRules);
+    expect(skill.content).toContain(ALERTING_API_IDS.getRule);
+    expect(skill.content).toContain(internalTools.describeApi);
+    expect(skill.content).toContain(internalTools.executeApi);
+    expect(skill.content).not.toContain('sml_search');
+  });
+
+  it('references API operation ids that exist, and are read-only, in the Kibana API registry', async () => {
+    const { kibanaManifest } = await import('@elastic/schemas/kibana/tools/manifest.js');
+
+    Object.values(ALERTING_API_IDS).forEach((apiId) => {
+      expect(kibanaManifest.find(({ id }) => id === apiId)).toEqual(
+        expect.objectContaining({ readOnly: true, destructive: false })
+      );
+    });
   });
 
   it('defers notification and action policy setup to the action-policy-authoring skill', () => {
