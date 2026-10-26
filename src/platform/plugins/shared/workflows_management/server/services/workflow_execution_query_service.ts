@@ -908,8 +908,9 @@ export class WorkflowExecutionQueryService {
    *
    * Returns `true` when this caller won the claim, or `false` when the doc is
    * missing, belongs to another space or to an execution other than
-   * `executionId`, has already settled (terminal status or `finishedAt` set),
-   * or was already claimed. Unexpected ES failures are rethrown.
+   * `executionId`, is not a HITL wait step, has already settled (terminal
+   * status or `finishedAt` set), or was already claimed. Unexpected ES
+   * failures are rethrown.
    */
   async markStepAsResponded(
     stepExecutionId: string,

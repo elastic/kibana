@@ -1458,7 +1458,11 @@ describe('WorkflowExecutionQueryService', () => {
       const { updater } = mockStepDataClient.bulk.mock.calls[0][0].items[0] as unknown as {
         updater: (current: Record<string, unknown>) => unknown;
       };
-      const waitingStep = { spaceId: 'default', status: 'waiting_for_input' };
+      const waitingStep = {
+        spaceId: 'default',
+        stepType: 'waitForInput',
+        status: ExecutionStatus.WAITING_FOR_INPUT,
+      };
       expect(updater({ ...waitingStep, workflowRunId: 'run-1' })).toEqual(
         expect.objectContaining({ hitl: expect.objectContaining({ respondedBy: 'alice' }) })
       );

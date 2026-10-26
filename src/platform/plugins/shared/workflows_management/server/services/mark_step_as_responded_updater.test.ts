@@ -28,6 +28,7 @@ describe('createMarkStepAsRespondedUpdater', () => {
       updater({
         spaceId: 'default',
         workflowRunId: 'run-1',
+        stepType: 'waitForInput',
         finishedAt: undefined,
         status: ExecutionStatus.WAITING_FOR_INPUT,
         hitl: undefined,
@@ -57,6 +58,7 @@ describe('createMarkStepAsRespondedUpdater', () => {
       updater({
         spaceId: 'other',
         workflowRunId: 'run-1',
+        stepType: 'waitForInput',
         status: ExecutionStatus.WAITING_FOR_INPUT,
       })
     ).toBe('noop');
@@ -68,9 +70,37 @@ describe('createMarkStepAsRespondedUpdater', () => {
       updater({
         spaceId: 'default',
         workflowRunId: 'other-run',
+        stepType: 'waitForInput',
         status: ExecutionStatus.WAITING_FOR_INPUT,
       })
     ).toBe('noop');
+  });
+
+  it.each(['foreach', 'if'])(
+    'no-ops for a running %s container step of the same execution',
+    (stepType) => {
+      const updater = createMarkStepAsRespondedUpdater(audit, 'default', 'run-1');
+      expect(
+        updater({
+          spaceId: 'default',
+          workflowRunId: 'run-1',
+          stepType,
+          status: ExecutionStatus.RUNNING,
+        })
+      ).toBe('noop');
+    }
+  );
+
+  it('claims a waitForApproval step', () => {
+    const updater = createMarkStepAsRespondedUpdater(audit, 'default', 'run-1');
+    expect(
+      updater({
+        spaceId: 'default',
+        workflowRunId: 'run-1',
+        stepType: 'waitForApproval',
+        status: ExecutionStatus.WAITING_FOR_INPUT,
+      })
+    ).toEqual(expect.objectContaining({ hitl: expect.objectContaining({ respondedBy: 'alice' }) }));
   });
 
   it('no-ops when finishedAt is set', () => {
@@ -79,6 +109,7 @@ describe('createMarkStepAsRespondedUpdater', () => {
       updater({
         spaceId: 'default',
         workflowRunId: 'run-1',
+        stepType: 'waitForInput',
         finishedAt: '2026-04-29T10:00:00.000Z',
         status: ExecutionStatus.WAITING_FOR_INPUT,
       })
@@ -91,6 +122,7 @@ describe('createMarkStepAsRespondedUpdater', () => {
       updater({
         spaceId: 'default',
         workflowRunId: 'run-1',
+        stepType: 'waitForInput',
         status: ExecutionStatus.COMPLETED,
         finishedAt: undefined,
       })
@@ -103,6 +135,7 @@ describe('createMarkStepAsRespondedUpdater', () => {
       updater({
         spaceId: 'default',
         workflowRunId: 'run-1',
+        stepType: 'waitForInput',
         status: ExecutionStatus.WAITING_FOR_INPUT,
         hitl: { respondedAt: '2026-04-29T09:00:00.000Z', respondedBy: 'bob' },
       })

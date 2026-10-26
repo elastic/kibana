@@ -12,6 +12,7 @@ import {
   type EsWorkflowStepExecution,
   HITL_TOKEN_EXPIRES_AT_INPUT_FIELD,
   HITL_TOKEN_HASH_INPUT_FIELD,
+  isHitlWaitStepType,
   TerminalExecutionStatuses,
 } from '@kbn/workflows';
 
@@ -20,6 +21,7 @@ const SETTLED_STEP_STATUSES: readonly string[] = TerminalExecutionStatuses;
 export const MARK_STEP_AS_RESPONDED_SOURCE_FIELDS = [
   'spaceId',
   'workflowRunId',
+  'stepType',
   'finishedAt',
   'status',
   'hitl',
@@ -62,6 +64,10 @@ export const createMarkStepAsRespondedUpdater = (
     }
     // The caller was authorised against `executionId` only, so a step of another run must not be claimed.
     if (current.workflowRunId !== executionId) {
+      return 'noop';
+    }
+    // Container steps (foreach, if) stay `running` while a nested wait is paused and must not win the claim.
+    if (!isHitlWaitStepType(current.stepType)) {
       return 'noop';
     }
     if (current.finishedAt != null) {
