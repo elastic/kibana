@@ -6,8 +6,10 @@
  */
 
 import { ProposalConflictError } from '@kbn/proposals-plugin/server';
+import { asyncMapWithLimit } from '@kbn/std';
 import { buildProposalId } from '../services/proposals/dedup/proposal_id';
 import {
+  GROUPED_PROPOSAL_JOIN_CONCURRENCY,
   GROUPED_PROPOSAL_JOIN_MARGIN_MS,
   GROUPED_PROPOSAL_MAX_ALERTS,
   GROUPED_PROPOSAL_MAX_GENERATIONS,
@@ -49,11 +51,18 @@ export interface GroupingDeps {
   onError?: (message: string) => void;
 }
 
+/** The search for the open proposals matched more than it returned, so some heads are unknown. */
+export class HeadsTruncatedError extends Error {}
+
 export interface GroupedMint {
   proposalId: string;
   alertIds: string[];
-  /** `keyed`: a generation of the key. `pooled`: lone alerts of the batch. `overflow`: every generation is used. */
-  kind: 'keyed' | 'pooled' | 'overflow';
+  /**
+   * `keyed`: a generation of the key. `pooled`: lone alerts of the batch. `overflow`: every
+   * generation is used, or the heads could not be read in full, so the id is random.
+   * `failed_join`: the join failed, so the alerts got a proposal under a random id.
+   */
+  kind: 'keyed' | 'pooled' | 'overflow' | 'failed_join';
 }
 
 export interface GroupedJoin {
@@ -69,6 +78,8 @@ export interface GroupedJoin {
 export interface GroupingPlan {
   mints: GroupedMint[];
   joins: GroupedJoin[];
+  /** The proposal lookup was incomplete, so nothing was grouped and every key got a random id. */
+  lookupIncomplete?: boolean;
 }
 
 /** The ids of generations 0 to N of a key, in generation order. */
@@ -115,6 +126,16 @@ export const tryJoinHead = async ({
     if (!isJoinableHead(current, added.length, now) || !(await deps.canJoin(current))) {
       return undefined;
     }
+    // The alerts are already in the proposal: nothing to revise, and no card to add to the chat.
+    if (added.length === 0) {
+      return {
+        rootProposalId: current.rootProposalId,
+        proposalId: current.proposalId,
+        revision: current.revision,
+        conversationId: current.conversationId,
+        alertIds: [],
+      };
+    }
     try {
       const { proposalId, revision } = await deps.revise(current, union(current.alertIds, added));
       return {
@@ -155,8 +176,26 @@ export const groupFpCandidates = async ({
   for (const [keyHash, ids] of idsByKey) {
     ids.forEach((id, generation) => generationOf.set(id, { keyHash, generation }));
   }
+  let allHeads: GroupingHead[];
+  try {
+    allHeads = await deps.listHeads([...generationOf.keys()]);
+  } catch (error) {
+    if (!(error instanceof HeadsTruncatedError)) throw error;
+    // Some heads are unknown, so a join could miss the open proposal and a derived id could collide.
+    // Random ids keep every alert in a proposal, and the batch simply does not group.
+    deps.onError?.(error.message);
+    return {
+      mints: keys.map(({ alertIds }) => ({
+        proposalId: deps.newId(),
+        alertIds: [...alertIds],
+        kind: 'overflow' as const,
+      })),
+      joins: [],
+      lookupIncomplete: true,
+    };
+  }
   const headsByKey = new Map<string, Array<GroupingHead & { generation: number }>>();
-  for (const head of await deps.listHeads([...generationOf.keys()])) {
+  for (const head of allHeads) {
     const found = generationOf.get(head.rootProposalId);
     if (found) {
       headsByKey.set(found.keyHash, [
@@ -166,42 +205,58 @@ export const groupFpCandidates = async ({
     }
   }
 
-  const plan: GroupingPlan = { mints: [], joins: [] };
-  const pooled: string[] = [];
-  for (const { keyHash, alertIds } of keys) {
-    const heads = [...(headsByKey.get(keyHash) ?? [])].sort((a, b) => a.generation - b.generation);
-    let join: GroupedJoin | undefined;
-    let failed = false;
-    for (const head of heads) {
-      if (!isJoinableHead(head, alertIds.length, now)) continue;
-      try {
-        join = await tryJoinHead({ head, alertIds, now, deps });
-      } catch (error) {
-        // Not a conflict: the alerts still need a proposal, and a random id cannot collide.
-        deps.onError?.(`Could not join ${head.proposalId}: ${(error as Error).message}`);
-        failed = true;
+  // Two keys never share a proposal, so their joins are independent. The limit keeps a batch with
+  // many keys from opening that many searches and revises at once.
+  const outcomes = await asyncMapWithLimit(
+    keys,
+    GROUPED_PROPOSAL_JOIN_CONCURRENCY,
+    async ({ keyHash, alertIds }) => {
+      const heads = [...(headsByKey.get(keyHash) ?? [])].sort(
+        (a, b) => a.generation - b.generation
+      );
+      let join: GroupedJoin | undefined;
+      let failed = false;
+      for (const head of heads) {
+        try {
+          join = await tryJoinHead({ head, alertIds, now, deps });
+        } catch (error) {
+          // Not a conflict: the alerts still need a proposal, and a random id cannot collide.
+          deps.onError?.(`Could not join ${head.proposalId}: ${(error as Error).message}`);
+          failed = true;
+        }
+        if (join || failed) break;
       }
-      if (join || failed) break;
-    }
-    if (join) {
-      plan.joins.push(join);
-    } else if (pool && alertIds.length === 1 && !failed) {
-      pooled.push(...alertIds);
-    } else {
+      if (join) return { join };
+      if (pool && alertIds.length === 1 && !failed) return { pooled: alertIds };
       const taken = new Set(heads.map(({ generation }) => generation));
       const free = (idsByKey.get(keyHash) ?? []).findIndex(
         (_, generation) => !taken.has(generation)
       );
-      const proposalId =
-        failed || free === -1
-          ? deps.newId()
-          : buildProposalId({ spaceId, subjectKey: keyHash, generation: free });
-      plan.mints.push({
-        proposalId,
-        alertIds: [...alertIds],
-        kind: failed || free === -1 ? 'overflow' : 'keyed',
-      });
+      if (failed) {
+        return {
+          mint: { proposalId: deps.newId(), alertIds: [...alertIds], kind: 'failed_join' as const },
+        };
+      }
+      return {
+        mint:
+          free === -1
+            ? { proposalId: deps.newId(), alertIds: [...alertIds], kind: 'overflow' as const }
+            : {
+                proposalId: buildProposalId({ spaceId, subjectKey: keyHash, generation: free }),
+                alertIds: [...alertIds],
+                kind: 'keyed' as const,
+              },
+      };
     }
+  );
+
+  const plan: GroupingPlan = { mints: [], joins: [] };
+  const pooled: string[] = [];
+  for (const { join, mint, pooled: lone } of outcomes) {
+    // A join that added nothing means the alerts were already in the proposal: there is nothing to report.
+    if (join && join.alertIds.length > 0) plan.joins.push(join);
+    if (mint) plan.mints.push(mint);
+    if (lone) pooled.push(...lone);
   }
   if (pooled.length > 0) {
     plan.mints.push({ proposalId: deps.newId(), alertIds: pooled, kind: 'pooled' });

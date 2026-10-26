@@ -214,6 +214,44 @@ steps:
           message: >-
             Another closure proposal for the same pattern was created first. {{ variables.fp_candidate_count }} alert{% if variables.fp_candidate_count != 1 %}s were{% else %} was{% endif %} added to it, in Investigation {{ steps.join_on_collision.output.conversation_id }}, and its review decides.
 
+      # Same as a join made when the batch ran: the alerts go into the owner's Investigation and the
+      # owner hears why. Alerts the owner already held add nothing, so nothing is posted for them.
+      - name: count_joined_alerts
+        type: data.set
+        with:
+          joined_alert_count: "${{ steps.join_on_collision.output.alert_ids | size }}"
+
+      - name: attach_joined_alerts
+        type: foreach
+        foreach: "${{ steps.join_on_collision.output.alert_ids | chunk: 20 | json }}"
+        steps:
+          - name: attach_joined_alert_chunk
+            type: ai.attachment.add
+            on-failure:
+              retry:
+                max-attempts: 3
+                delay: 5s
+              continue: true
+            with:
+              conversation_id: "{{ steps.join_on_collision.output.conversation_id }}"
+              type: security.alerts
+              render_inline: true
+              data:
+                alertIds: "${{ foreach.item }}"
+              description: "Alerts added to this closure proposal"
+
+      - name: post_comment_joined_owner
+        type: ai.conversation.add_user_message
+        if: "${{ variables.joined_alert_count > 0 }}"
+        on-failure:
+          continue: true
+        with:
+          author_name: "{{ consts.author_name }}"
+          conversation_id: "{{ steps.join_on_collision.output.conversation_id }}"
+          message: >-
+            +{{ variables.joined_alert_count }} alert{% if variables.joined_alert_count != 1 %}s{% endif %} from rule "{{ inputs.rule_name }}" with the same pattern joined this proposal (revision {{ steps.join_on_collision.output.revision }}).
+            [View the added alert{% if variables.joined_alert_count != 1 %}s{% endif %}](/s/{{ workflow.spaceId }}/app/security/alerts{{ steps.join_on_collision.output.alerts_page_query }})
+
       - name: close_investigation_after_join
         type: ai.conversation.metadata.patch
         on-failure:

@@ -530,7 +530,10 @@ describe('floor_alert_triage_batch — az: tags', () => {
   });
 
   it('chunks each list at the size the closure review re-tags with', () => {
-    const reviewChunkSize = Number(/chunk: (\d+)/.exec(FLOOR_ALERT_TRIAGE_REVIEW_YAML)?.[1]);
+    // The re-tag loops, not the alert attachments, which are capped at 20 ids a call.
+    const reviewChunkSize = Number(
+      /live_alert_ids \| chunk: (\d+)/.exec(FLOOR_ALERT_TRIAGE_REVIEW_YAML)?.[1]
+    );
     expect(reviewChunkSize).toBeGreaterThan(0);
     AZ_TAG_STEPS.forEach((step) => expect(chunkSizeOf(step)).toBe(reviewChunkSize));
   });
@@ -1323,6 +1326,38 @@ describe('floor_alert_triage_batch — grouping', () => {
 
   it('sends no Investigation id with the batch classification, since the batch has none', () => {
     expect(stepByName('report_batch_classified')?.with).not.toHaveProperty('investigation_id');
+  });
+
+  // A truncated lookup must be visible to whoever reads the telemetry or the execution, not only
+  // in the server log.
+  it('reports whether the batch was grouped, and why not', () => {
+    const input = stepByName('report_batch_grouped')?.with as Record<string, string>;
+    const grouping = (output?: Record<string, unknown>) =>
+      renderString(input.grouping, { steps: { group_fp_candidates_call: { output } } }).trim();
+    expect(grouping({ grouping: 'lookup_incomplete' })).toBe('lookup_incomplete');
+    expect(grouping({ grouping: 'supervised' })).toBe('supervised');
+    expect(grouping(undefined)).toBe('no_candidates');
+  });
+
+  it('says in the batch summary whether the batch was grouped', () => {
+    const message = (stepByName('log_batch_summary')?.with as { message: string }).message;
+    const render = (output?: Record<string, unknown>) =>
+      renderString(message, {
+        inputs: { rule_name: 'R', rule_id: 'r' },
+        steps: {
+          classify_alerts: { output: { connector_id: '', agent_id: '' } },
+          group_fp_candidates_call: { output },
+        },
+        variables: {
+          alert_count: 1,
+          verdict_count: 1,
+          fp_candidate_count: 1,
+          group_mints: [],
+          group_joins: [],
+        },
+      });
+    expect(render({ grouping: 'lookup_incomplete' })).toContain('Grouping: lookup_incomplete.');
+    expect(render(undefined)).toContain('Grouping: no_candidates.');
   });
 
   it('reports the grouping outcome of the batch', () => {

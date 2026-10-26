@@ -101,6 +101,21 @@ export const WORKER_DEGRADED_REASONS = [
 
 export type WorkerDegradedReason = (typeof WORKER_DEGRADED_REASONS)[number];
 
+/**
+ * Whether Alert Triage grouped a batch's false positives: `on`, or why not. `supervised` never
+ * groups, `flag_off` is the kill switch, `lookup_incomplete` is a proposal lookup that returned
+ * fewer proposals than it matched, and `no_candidates` is a batch with nothing to propose.
+ */
+export const ALERT_TRIAGE_GROUPING_STATES = [
+  'on',
+  'supervised',
+  'flag_off',
+  'lookup_incomplete',
+  'no_candidates',
+] as const;
+
+export type AlertTriageGroupingState = (typeof ALERT_TRIAGE_GROUPING_STATES)[number];
+
 /** How the Alert Triage closure review's proposal settled; `unknown` is any other gate state. */
 export const ALERT_TRIAGE_CLOSURE_OUTCOMES = [
   'approved',

@@ -7,6 +7,7 @@
 
 import { ProposalConflictError } from '@kbn/proposals-plugin/server';
 import {
+  GROUPED_PROPOSAL_JOIN_CONCURRENCY,
   GROUPED_PROPOSAL_JOIN_MARGIN_MS,
   GROUPED_PROPOSAL_MAX_ALERTS,
   GROUPED_PROPOSAL_MAX_GENERATIONS,
@@ -15,6 +16,7 @@ import {
 import {
   generationIds,
   groupFpCandidates,
+  HeadsTruncatedError,
   isJoinableHead,
   type GroupingDeps,
   type GroupingHead,
@@ -226,7 +228,88 @@ describe('groupFpCandidates', () => {
       const { deps, run } = setup([head()], { revise });
       const plan = await run([{ keyHash: 'key-a', alertIds: ['a1'] }], true);
       expect(deps.onError).toHaveBeenCalledWith(expect.stringContaining('storage down'));
-      expect(plan.mints).toEqual([{ proposalId: 'random-0', alertIds: ['a1'], kind: 'overflow' }]);
+      expect(plan.mints).toEqual([
+        { proposalId: 'random-0', alertIds: ['a1'], kind: 'failed_join' },
+      ]);
+    });
+  });
+
+  describe('alerts the proposal already holds', () => {
+    it('revises nothing and reports no join, since there is nothing to add or to say', async () => {
+      const { deps, run } = setup([head({ alertIds: ['a1', 'a2'] })]);
+      const plan = await run([{ keyHash: 'key-a', alertIds: ['a1', 'a2'] }]);
+      expect(deps.revise).not.toHaveBeenCalled();
+      expect(plan).toEqual({ mints: [], joins: [] });
+    });
+
+    it('still refuses a head that cannot take alerts, so the alerts are not claimed by a dead proposal', async () => {
+      const { run } = setup([head({ alertIds: ['a1'], status: 'expired' })]);
+      const plan = await run([{ keyHash: 'key-a', alertIds: ['a1'] }]);
+      expect(plan.joins).toEqual([]);
+      expect(plan.mints).toHaveLength(1);
+    });
+  });
+
+  describe('when the heads cannot be read in full', () => {
+    it('mints every key under a random id, joins nothing and says so', async () => {
+      const listHeads = jest
+        .fn()
+        .mockRejectedValue(new HeadsTruncatedError('matched 12, returned 10'));
+      const { deps, run } = setup([head()], { listHeads });
+      const plan = await run(
+        [
+          { keyHash: 'key-a', alertIds: ['a1', 'a2'] },
+          { keyHash: 'key-b', alertIds: ['b1'] },
+        ],
+        true
+      );
+      expect(deps.onError).toHaveBeenCalledWith('matched 12, returned 10');
+      expect(deps.revise).not.toHaveBeenCalled();
+      expect(plan.joins).toEqual([]);
+      expect(plan.mints).toEqual([
+        { proposalId: 'random-0', alertIds: ['a1', 'a2'], kind: 'overflow' },
+        { proposalId: 'random-1', alertIds: ['b1'], kind: 'overflow' },
+      ]);
+    });
+
+    it('passes any other lookup error on', async () => {
+      const { run } = setup([], { listHeads: jest.fn().mockRejectedValue(new Error('down')) });
+      await expect(run([{ keyHash: 'key-a', alertIds: ['a1'] }])).rejects.toThrow('down');
+    });
+  });
+
+  describe('joins of many keys', () => {
+    it('run a few at a time, not all at once', async () => {
+      const keys = Array.from({ length: 12 }, (_, i) => `key-${i}`);
+      const heads = keys.map((key) => {
+        const [root] = generationIds(SPACE, key);
+        return head({ proposalId: root, rootProposalId: root });
+      });
+      let running = 0;
+      let peak = 0;
+      const revise = jest.fn(async () => {
+        running += 1;
+        peak = Math.max(peak, running);
+        await new Promise((resolve) => setTimeout(resolve, 5));
+        running -= 1;
+        return { proposalId: 'revision-id', revision: 2 };
+      });
+      const { run } = setup(heads, { revise });
+
+      const plan = await run(keys.map((keyHash) => ({ keyHash, alertIds: [`${keyHash}-a`] })));
+
+      expect(plan.joins).toHaveLength(12);
+      expect(peak).toBeGreaterThan(1);
+      expect(peak).toBeLessThanOrEqual(GROUPED_PROPOSAL_JOIN_CONCURRENCY);
+    });
+
+    it('keep the order of the keys in the plan', async () => {
+      const { run } = setup();
+      const plan = await run([
+        { keyHash: 'key-a', alertIds: ['a1', 'a2'] },
+        { keyHash: 'key-b', alertIds: ['b1', 'b2'] },
+      ]);
+      expect(plan.mints.map(({ alertIds }) => alertIds[0])).toEqual(['a1', 'b1']);
     });
   });
 });

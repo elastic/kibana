@@ -15,6 +15,7 @@ import {
   AD_WORKER_HANDOFF_OUTCOMES,
   AD_WORKER_RUN_OUTCOMES,
   ALERT_TRIAGE_CLOSURE_OUTCOMES,
+  ALERT_TRIAGE_GROUPING_STATES,
   DETECTION_RULE_SOURCES,
   DETECTION_RULE_TYPES,
   ENDPOINT_ANALYSIS_OUTCOMES,
@@ -227,6 +228,7 @@ const alertTriageBatchGroupedInputSchema = lazySchema(() =>
     fp_candidates_on_fallback: count(
       'False positives at or above the confidence floor with no strict key'
     ),
+    grouping: oneOf(ALERT_TRIAGE_GROUPING_STATES, 'Whether the batch was grouped, or why not'),
     proposals_created: count('New closure proposals the batch raised'),
     strict_keys: count('Distinct strict pattern keys among the classified alerts'),
     strict_keys_single_alert: count('Strict pattern keys that only one alert of the batch has'),

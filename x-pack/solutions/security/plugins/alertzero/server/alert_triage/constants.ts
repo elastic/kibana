@@ -73,6 +73,9 @@ export const GROUPED_PROPOSAL_MAX_REVISIONS = 20;
 /** A proposal this close to its deadline takes no joins, so a late alert still gets time to be reviewed. */
 export const GROUPED_PROPOSAL_JOIN_MARGIN_MS = 24 * 60 * 60 * 1000;
 
+/** Keys of one batch whose joins run at once. */
+export const GROUPED_PROPOSAL_JOIN_CONCURRENCY = 4;
+
 /**
  * Generations of one key the lookup reads. A key gains about one generation every 72 hours, so 200
  * cover about 18 months. Past that, the key gets random ids and no joins.

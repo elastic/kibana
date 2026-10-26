@@ -136,18 +136,18 @@ const setup = ({
 
 describe('triage group false positives step', () => {
   it.each([
-    ['at supervised autonomy', { autonomy: 'supervised' as const }, true],
-    ['when the kill switch is off', {}, false],
+    ['at supervised autonomy', { autonomy: 'supervised' as const }, true, 'supervised'],
+    ['when the kill switch is off', {}, false, 'flag_off'],
   ])(
     'mints one proposal under a random id and reads no proposals %s',
-    async (_, input, enabled) => {
+    async (_, input, enabled, grouping) => {
       const { group, service } = setup({ heads: [openHead()], groupingEnabled: enabled });
 
       const output = await group({ ...baseInput, ...input, fp_candidate_ids: ['a1', 'a2'] });
 
       expect(service.list).not.toHaveBeenCalled();
       expect(output).toEqual(
-        expect.objectContaining({ grouped: false, joins: [], proposals_created: 1 })
+        expect.objectContaining({ grouped: false, grouping, joins: [], proposals_created: 1 })
       );
       expect(output.mints).toEqual([
         expect.objectContaining({ kind: 'batch', alert_ids: ['a1', 'a2'] }),
@@ -172,6 +172,8 @@ describe('triage group false positives step', () => {
     );
     expect(output).toEqual(
       expect.objectContaining({
+        grouped: true,
+        grouping: 'on',
         mints: [],
         alerts_joined: 2,
         joins: [
@@ -258,6 +260,32 @@ describe('triage group false positives step', () => {
     });
   });
 
+  it('does not group a batch when the lookup returns fewer proposals than matched', async () => {
+    const { group, service } = setup({ heads: [openHead()] });
+    service.list.mockResolvedValue({ proposals: [openHead()], total: 3 });
+
+    const output = await group({ ...baseInput, fp_candidate_ids: ['a1', 'a2'] });
+
+    expect(service.revise).not.toHaveBeenCalled();
+    // The batch must show as not grouped, not only in the log: telemetry and the summary read this.
+    expect(output).toEqual(
+      expect.objectContaining({ grouped: false, grouping: 'lookup_incomplete' })
+    );
+    expect(output.mints).toEqual([
+      expect.objectContaining({ kind: 'overflow', alert_ids: ['a1', 'a2'] }),
+    ]);
+    expect(output.mints[0].proposal_id).not.toBe(GEN0);
+  });
+
+  it('tells the reviewer the alerts joined a proposal that failed to take them', async () => {
+    const { group, service } = setup({ heads: [openHead()] });
+    service.revise.mockRejectedValue(new Error('storage down'));
+
+    const output = await group({ ...baseInput, fp_candidate_ids: ['a1', 'a2'] });
+
+    expect(output.mints).toEqual([expect.objectContaining({ kind: 'failed_join' })]);
+  });
+
   it('pools a lone alert that joins nothing', async () => {
     const { group } = setup();
 
@@ -282,7 +310,20 @@ describe('triage join proposal step', () => {
       proposal_id: 'revision-id',
       conversation_id: 'conv-owner',
       revision: 2,
+      alert_ids: ['a1'],
+      alerts_page_query: expect.stringContaining('filters='),
     });
+  });
+
+  it('joins without a revise when the proposal already holds the alerts', async () => {
+    const { join, service } = setup({ heads: [openHead({ actionInput: { alertIds: ['a1'] } })] });
+
+    const output = await join(input);
+
+    expect(service.revise).not.toHaveBeenCalled();
+    expect(output).toEqual(
+      expect.objectContaining({ joined: true, alert_ids: [], alerts_page_query: '' })
+    );
   });
 
   it('does not join when the kill switch is off, so the review keeps its own failure path', async () => {

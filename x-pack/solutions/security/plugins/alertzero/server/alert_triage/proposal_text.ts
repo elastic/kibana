@@ -53,7 +53,7 @@ const programOf = (doc: AlertDocument): string | undefined => {
 
 const plural = (count: number, noun: string): string => `${count} ${noun}${count === 1 ? '' : 's'}`;
 
-export type ProposalKind = 'keyed' | 'pooled' | 'overflow' | 'batch';
+export type ProposalKind = 'keyed' | 'pooled' | 'overflow' | 'failed_join' | 'batch';
 
 /**
  * What is inside a proposal, so a reviewer can judge a grown one: how varied the alerts are, and

@@ -548,6 +548,7 @@ describe('alertzero.reportWorkerOutcome step', () => {
           conversation_created: 'false',
           event: 'alert_triage_batch_grouped',
           fp_candidates_on_fallback: '',
+          grouping: 'on',
           strict_keys: 12,
           wide_keys: 8,
         },

@@ -22,6 +22,7 @@ import { ALERTZERO_PROPOSAL_ORIGIN } from '../../../common/proposals/origin';
 import { hashKey, strictKeyTags } from '../../alert_triage/key_tags';
 import {
   groupFpCandidates,
+  HeadsTruncatedError,
   tryJoinHead,
   type GroupingDeps,
   type GroupingHead,
@@ -133,7 +134,7 @@ const createRuntime = async (
 
   const groupingDeps: GroupingDeps = {
     listHeads: async (rootIds) => {
-      const { proposals } = await service.list(
+      const { proposals, total } = await service.list(
         {
           rootProposalIds: rootIds,
           origin: ALERTZERO_PROPOSAL_ORIGIN,
@@ -145,6 +146,13 @@ const createRuntime = async (
         spaceId,
         request
       );
+      // A page that stops short of the total would hide heads, and a join or a derived id decided
+      // without them could duplicate a proposal.
+      if (total > proposals.length) {
+        throw new HeadsTruncatedError(
+          `The proposal lookup matched ${total} proposals and returned ${proposals.length}, so the batch is not grouped`
+        );
+      }
       return proposals.map(toHead);
     },
     // The gate check of `releaseGate`: a gate that no longer waits has been approved, and a revise
@@ -197,7 +205,7 @@ export const getTriageGroupFpCandidatesStepDefinition = (deps: GroupProposalsSte
         );
         const textFor = async (
           ids: readonly string[],
-          kind: 'keyed' | 'pooled' | 'overflow' | 'batch'
+          kind: 'keyed' | 'pooled' | 'overflow' | 'failed_join' | 'batch'
         ) => {
           const docs = ids.flatMap((id) => {
             const doc = byId.get(id);
@@ -230,6 +238,7 @@ export const getTriageGroupFpCandidatesStepDefinition = (deps: GroupProposalsSte
           mints: [],
           joins: [],
           grouped: false,
+          grouping: 'flag_off' as 'on' | 'supervised' | 'flag_off' | 'lookup_incomplete',
           alerts_joined: 0,
           alerts_pooled: 0,
           proposals_created: 0,
@@ -238,11 +247,13 @@ export const getTriageGroupFpCandidatesStepDefinition = (deps: GroupProposalsSte
         const foundIds = [...byId.keys()];
         if (foundIds.length === 0) return { output: empty };
 
-        const grouped = input.autonomy === 'manual' && (await deps.isGroupingEnabled());
+        const supervised = input.autonomy !== 'manual';
+        const grouped = !supervised && (await deps.isGroupingEnabled());
         if (!grouped) {
           return {
             output: {
               ...empty,
+              grouping: supervised ? ('supervised' as const) : ('flag_off' as const),
               mints: [
                 {
                   proposal_id: uuidv4(),
@@ -273,7 +284,8 @@ export const getTriageGroupFpCandidatesStepDefinition = (deps: GroupProposalsSte
         return {
           output: {
             ...empty,
-            grouped: true,
+            grouped: !plan.lookupIncomplete,
+            grouping: plan.lookupIncomplete ? ('lookup_incomplete' as const) : ('on' as const),
             mints: await Promise.all(
               plan.mints.map(async ({ proposalId, alertIds, kind }) => ({
                 proposal_id: proposalId,
@@ -310,7 +322,14 @@ export const getTriageJoinProposalStepDefinition = (deps: GroupProposalsStepDepe
     handler: async (context) => {
       try {
         const { input } = context;
-        const notJoined = { joined: false, proposal_id: '', conversation_id: '', revision: 0 };
+        const notJoined = {
+          joined: false,
+          proposal_id: '',
+          conversation_id: '',
+          revision: 0,
+          alert_ids: [] as string[],
+          alerts_page_query: '',
+        };
         if (!(await deps.isGroupingEnabled())) return { output: notJoined };
         const { groupingDeps } = await createRuntime(deps, context, {
           ruleName: input.rule_name,
@@ -338,6 +357,11 @@ export const getTriageJoinProposalStepDefinition = (deps: GroupProposalsStepDepe
                 proposal_id: join.proposalId,
                 conversation_id: join.conversationId,
                 revision: join.revision,
+                alert_ids: join.alertIds,
+                alerts_page_query:
+                  join.alertIds.length > 0
+                    ? buildAlertsPagePath(join.alertIds, new Date().toISOString())
+                    : '',
               }
             : notJoined,
         };

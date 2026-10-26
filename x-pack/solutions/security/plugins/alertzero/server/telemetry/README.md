@@ -224,6 +224,7 @@ Emitted by the Alert Triage Worker once for each classified batch, after it tagg
 | `wide_keys` | long | yes | Distinct wide keys among the classified alerts. Every alert has one |
 | `wide_keys_single_alert` | long | yes | Wide keys that only one alert of the batch has |
 | `fp_candidates_on_fallback` | long | yes | False positives at or above the confidence floor that have no strict key, so they group by rule and detection only |
+| `grouping` | keyword | yes | `on`, or why the batch was not grouped: `supervised` (supervised autonomy never groups), `flag_off` (the `alertzero.triageGrouping` kill switch), `lookup_incomplete` (the proposal lookup returned fewer proposals than it matched, so the batch got random proposal ids and no joins) or `no_candidates` (nothing to propose) |
 | `alerts_joined` | long | yes | Alerts that joined a proposal an earlier batch opened. `0` when grouping is off |
 | `proposals_created` | long | yes | New closure proposals the batch raised. `0` when grouping is off |
 | `alerts_pooled` | long | yes | Alerts pooled into one shared proposal. `0` when grouping is off |

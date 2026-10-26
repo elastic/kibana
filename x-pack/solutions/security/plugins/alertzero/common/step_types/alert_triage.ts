@@ -215,7 +215,7 @@ const groupFpCandidatesOutputSchema = lazySchema(() =>
         z.object({
           proposal_id: z.string().describe('The id the proposal is created under.'),
           alert_ids: z.array(z.string()),
-          kind: z.enum(['keyed', 'pooled', 'overflow', 'batch']),
+          kind: z.enum(['keyed', 'pooled', 'overflow', 'failed_join', 'batch']),
           title: z.string(),
           comment: z.string(),
           impacted_entities: z.array(
@@ -239,6 +239,9 @@ const groupFpCandidatesOutputSchema = lazySchema(() =>
       )
       .describe('Alerts added to an open proposal.'),
     grouped: z.boolean().describe('False when grouping is off, so the batch has one proposal.'),
+    grouping: z
+      .enum(['on', 'supervised', 'flag_off', 'lookup_incomplete'])
+      .describe('Whether the batch was grouped, or why not.'),
     alerts_joined: z.number(),
     alerts_pooled: z.number(),
     proposals_created: z.number(),
@@ -281,6 +284,12 @@ const joinProposalOutputSchema = lazySchema(() =>
     proposal_id: z.string().describe('The revision the join created, when it joined.'),
     conversation_id: z.string().describe("The owner's Investigation, when it joined."),
     revision: z.number(),
+    alert_ids: z
+      .array(z.string())
+      .describe('Only the alerts the proposal did not hold. Empty when it held them all.'),
+    alerts_page_query: z
+      .string()
+      .describe('Query string of the Alerts page link that shows just the added alerts.'),
   })
 );
 

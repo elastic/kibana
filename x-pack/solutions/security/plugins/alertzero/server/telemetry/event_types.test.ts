@@ -212,6 +212,7 @@ const FIXTURES: {
     alerts_with_strict_key: 36,
     conversation_created: false,
     fp_candidates_on_fallback: 4,
+    grouping: 'on',
     proposals_created: 0,
     strict_keys: 12,
     strict_keys_single_alert: 5,

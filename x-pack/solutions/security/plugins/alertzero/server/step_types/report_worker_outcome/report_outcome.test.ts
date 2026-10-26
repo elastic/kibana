@@ -103,6 +103,7 @@ describe('reportOutcome', () => {
         conversation_created: false,
         event: 'alert_triage_batch_grouped' as const,
         fp_candidates_on_fallback: 0,
+        grouping: 'on' as const,
         proposals_created: 0,
         strict_keys: 1,
         strict_keys_single_alert: 1,

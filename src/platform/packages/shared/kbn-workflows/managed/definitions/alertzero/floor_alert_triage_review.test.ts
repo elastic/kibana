@@ -167,6 +167,28 @@ describe('floor_alert_triage_review — create collision', () => {
     expect(names).toEqual(
       expect.arrayContaining(['post_comment_proposal_joined', 'close_investigation_after_join'])
     );
+    // The owner gets the alerts and the same join message as a join made when the batch ran.
+    expect(names).toEqual(
+      expect.arrayContaining(['attach_joined_alert_chunk', 'post_comment_joined_owner'])
+    );
+    expect(stepByName('attach_joined_alert_chunk')?.with?.conversation_id).toBe(
+      '{{ steps.join_on_collision.output.conversation_id }}'
+    );
+    const message = (stepByName('post_comment_joined_owner')?.with as { message: string }).message;
+    expect(
+      renderString(message, {
+        workflow: { spaceId: 'team' },
+        inputs: { rule_name: 'Rule A' },
+        variables: { joined_alert_count: 2 },
+        steps: { join_on_collision: { output: { revision: 3, alerts_page_query: '?filters=x' } } },
+      })
+    ).toContain('[View the added alerts](/s/team/app/security/alerts?filters=x)');
+    // Alerts the owner already held add nothing to say.
+    expect(
+      evalExpr(stepByName('post_comment_joined_owner')?.if as string, {
+        variables: { joined_alert_count: 0 },
+      })
+    ).toBe(false);
     const end = stepByName('end_joined') as YamlStep & { status?: string };
     expect(end.type).toBe('workflow.output');
     expect(end.status).toBe('completed');

@@ -700,6 +700,7 @@ steps:
       wide_keys: "${{ steps.tag_pattern_keys.output.wide_keys }}"
       wide_keys_single_alert: "${{ steps.tag_pattern_keys.output.wide_keys_single_alert }}"
       fp_candidates_on_fallback: "${{ steps.tag_pattern_keys.output.fp_candidates_on_fallback }}"
+      grouping: "{{ steps.group_fp_candidates_call.output.grouping | default: 'no_candidates' }}"
       alerts_joined: "${{ steps.group_fp_candidates_call.output.alerts_joined | default: 0 }}"
       proposals_created: "${{ steps.group_fp_candidates_call.output.proposals_created | default: 0 }}"
       alerts_pooled: "${{ steps.group_fp_candidates_call.output.alerts_pooled | default: 0 }}"
@@ -1137,6 +1138,7 @@ steps:
         Model: connector `{{ steps.classify_alerts.output.connector_id }}`{% if steps.classify_alerts.output.agent_id != '' %}, agent `{{ steps.classify_alerts.output.agent_id }}`{% endif %}.
         {%- endif %}
         Verdicts: {{ steps.classify_alerts.output.true_positive_count | default: 0 }} true positive, {{ variables.fp_candidate_count }} false positive at or above the floor, {{ steps.classify_alerts.output.false_positive_count | default: 0 | minus: variables.fp_candidate_count | at_least: 0 }} false positive below the floor, {{ steps.classify_alerts.output.inconclusive_count | default: 0 }} inconclusive, {{ variables.alert_count | minus: variables.verdict_count | at_least: 0 }} without a verdict.
+        Grouping: {{ steps.group_fp_candidates_call.output.grouping | default: 'no_candidates' }}.
         {%- if variables.group_mints.size == 0 and variables.group_joins.size == 0 %}
         No proposal created and no proposal joined.
         {%- endif %}

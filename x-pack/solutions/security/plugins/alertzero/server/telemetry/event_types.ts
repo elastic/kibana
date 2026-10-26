@@ -35,6 +35,8 @@ import {
   AD_WORKER_HANDOFF_OUTCOMES,
   AD_WORKER_RUN_OUTCOMES,
   ALERT_TRIAGE_CLOSURE_OUTCOMES,
+  ALERT_TRIAGE_GROUPING_STATES,
+  type AlertTriageGroupingState,
   DETECTION_RULE_SOURCES,
   DETECTION_RULE_TYPES,
   ENDPOINT_ANALYSIS_OUTCOMES,
@@ -139,6 +141,7 @@ export interface AlertZeroAlertTriageBatchGroupedPayload extends AlertZeroEnvelo
   alerts_with_strict_key: number;
   conversation_created: boolean;
   fp_candidates_on_fallback: number;
+  grouping: AlertTriageGroupingState;
   proposals_created: number;
   strict_keys: number;
   strict_keys_single_alert: number;
@@ -581,6 +584,10 @@ export const ALERTZERO_ALERT_TRIAGE_BATCH_GROUPED_EVENT: EventTypeOpts<AlertZero
       fp_candidates_on_fallback: countField(
         'False positives at or above the confidence floor that have no strict key, so they group by rule and detection only'
       ),
+      grouping: vocabularyField(
+        'Whether the batch was grouped, or why not: supervised autonomy, the kill switch, a proposal lookup that returned fewer proposals than it matched, or nothing to propose',
+        ALERT_TRIAGE_GROUPING_STATES
+      ),
       proposals_created: countField(
         'New closure proposals the batch raised; 0 when grouping is off'
       ),
@@ -609,7 +616,7 @@ export const ALERTZERO_ALERT_TRIAGE_CLOSURE_RESOLVED_EVENT: EventTypeOpts<AlertZ
         'Whether the review asked the gate to auto-approve (supervised autonomy)'
       ),
       investigation_id: investigationIdField(
-        'The Investigation of the batch the review settles; joins to the batch and its close'
+        'The Investigation of the proposal the review settles; joins to its close'
       ),
       outcome: vocabularyField(
         'How the closure proposal settled (`unknown` is any other gate state)',

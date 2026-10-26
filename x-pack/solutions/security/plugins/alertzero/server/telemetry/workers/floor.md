@@ -12,7 +12,7 @@ Each batch the sweep starts reports how its alerts were classified and how its r
 
 ## Investigations
 
-A batch has no Investigation of its own. A new proposal gets one, and a failure that does not end the run gets one. A batch of true positives, inconclusive verdicts or below-floor false positives creates none. So `alert_triage_batch_classified` sends no `investigation_id` (the field is optional), and `alert_triage_closure_resolved` sends the Investigation of the proposal it settled. `alert_triage_batch_grouped.conversation_created` says whether the batch created any.
+A batch has no Investigation of its own. A new proposal gets one, and a failure that does not end the run gets one. A batch of true positives, inconclusive verdicts or below-floor false positives creates none. So `alert_triage_batch_classified` sends no `investigation_id` (the field is optional), and `alert_triage_closure_resolved` sends the Investigation of the proposal it settled. `alert_triage_batch_grouped.conversation_created` says whether the batch created any, and `grouping` says whether the batch was grouped or why not (supervised autonomy, the kill switch, an incomplete proposal lookup, or nothing to propose). The batch summary in the execution log says the same.
 
 ## Runs
 
