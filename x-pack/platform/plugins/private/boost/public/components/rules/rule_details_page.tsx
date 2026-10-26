@@ -77,8 +77,7 @@ export const RuleDetailsPage = () => {
   const applied = matched.filter((dataSource) => appliedRules.get(dataSource.name)?.name === name);
   const sizeInBytes = applied.reduce((total, { size_in_bytes: bytes }) => total + bytes, 0);
   const vcus = profile ? estimateDataSourcesVcuRange(applied, profile) : { atRest: 0, atPeak: 0 };
-  // The whole project, which the rule's storage and search cost are each a share of.
-  const projectSize = dataSources.reduce((total, { size_in_bytes: bytes }) => total + bytes, 0);
+  // The whole project's search cost, which the rule's is a share of.
   const projectVcus = estimateProjectVcuRange(dataSources, appliedRules, profiles);
   const existingNames = new Set(dataSources.map(({ name: dataSourceName }) => dataSourceName));
   const [firstPattern = ''] = patterns;
@@ -230,15 +229,7 @@ export const RuleDetailsPage = () => {
                   title: i18n.translate('xpack.boost.ruleDetails.storageSize', {
                     defaultMessage: 'Storage size',
                   }),
-                  description: (
-                    <ShareMeter
-                      value={sizeInBytes}
-                      total={projectSize}
-                      data-test-subj="boostRuleStorageShare"
-                    >
-                      {formatSize(sizeInBytes)}
-                    </ShareMeter>
-                  ),
+                  description: formatSize(sizeInBytes),
                 },
                 // Only while the prototype shows estimates, which testers can turn off.
                 ...(showsEstimates

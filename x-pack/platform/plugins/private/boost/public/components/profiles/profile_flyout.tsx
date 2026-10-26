@@ -119,7 +119,7 @@ const TYPE_OPTIONS: ReadonlyArray<PresetOption<BoostProfileType>> = [
     id: 'indices',
     label: i18n.translate('xpack.boost.profileForm.indicesType', { defaultMessage: 'Indices' }),
     description: i18n.translate('xpack.boost.profileForm.indicesTypeDescription', {
-      defaultMessage: 'Regular indices. Supports an extra copy, prewarm, and pin.',
+      defaultMessage: 'Regular indices. Supports an extra copy, prewarm, and pinned data.',
     }),
     isDefault: false,
   },
@@ -160,18 +160,19 @@ export const INDEX_OPTIONS: ReadonlyArray<{
   },
   {
     key: 'pinned',
-    title: i18n.translate('xpack.boost.profileForm.pinTitle', { defaultMessage: 'Pin' }),
-    description: i18n.translate('xpack.boost.profileForm.pinDescription', {
-      defaultMessage: "Don't evict cached data.",
+    title: i18n.translate('xpack.boost.profileForm.pinnedTitle', { defaultMessage: 'Pinned' }),
+    // At a min boost of 1 or more, all cached data is kept from eviction; below 1, a share of it.
+    description: i18n.translate('xpack.boost.profileForm.pinnedDescription', {
+      defaultMessage: 'Protect cached data in proportion to min boost.',
     }),
   },
 ];
 
-// Pin, which the prewarm option holds, since it needs prewarm.
-const PIN_OPTION = INDEX_OPTIONS.find(({ key }) => key === 'pinned') ?? INDEX_OPTIONS[0];
+// Pinned, which the prewarm option holds, since it needs prewarm.
+const PINNED_OPTION = INDEX_OPTIONS.find(({ key }) => key === 'pinned') ?? INDEX_OPTIONS[0];
 
-const PIN_NEEDS_PREWARM = i18n.translate('xpack.boost.profileForm.pinNeedsPrewarm', {
-  defaultMessage: 'Turn on prewarm to pin cached data.',
+const PINNED_NEEDS_PREWARM = i18n.translate('xpack.boost.profileForm.pinnedNeedsPrewarm', {
+  defaultMessage: 'Turn on prewarm to protect cached data.',
 });
 
 /** The profile form's header, body, and footer, for a flyout of its own or a rule's. */
@@ -481,7 +482,7 @@ export const ProfileFlyoutContent = ({
                           indices: {
                             ...indices,
                             [key]: !indices[key],
-                            // Only prewarmed data can be pinned, so turning prewarm off turns pin
+                            // Only prewarmed data can be pinned, so turning prewarm off turns pinned
                             // off too.
                             ...(key === 'prewarm' && indices.prewarm ? { pinned: false } : {}),
                           },
@@ -490,7 +491,7 @@ export const ProfileFlyoutContent = ({
                       disabled={isSaving}
                       data-test-subj={`boostProfileOption-${key}`}
                     >
-                      {/* Pin is part of prewarm, in its card's body, usable once prewarm is on. */}
+                      {/* Pinned is part of prewarm, in its card's body, usable once prewarm is on. */}
                       {key === 'prewarm' && (
                         <EuiCheckbox
                           id={`${optionsId}-pinned`}
@@ -498,7 +499,7 @@ export const ProfileFlyoutContent = ({
                           // right below.
                           label={
                             <>
-                              {PIN_OPTION.title}
+                              {PINNED_OPTION.title}
                               <EuiText
                                 size="xs"
                                 color={
@@ -507,10 +508,10 @@ export const ProfileFlyoutContent = ({
                                     : 'subdued'
                                 }
                               >
-                                {PIN_OPTION.description}
+                                {PINNED_OPTION.description}
                                 {!indices.prewarm && (
                                   <EuiScreenReaderOnly>
-                                    <span> {PIN_NEEDS_PREWARM}</span>
+                                    <span> {PINNED_NEEDS_PREWARM}</span>
                                   </EuiScreenReaderOnly>
                                 )}
                               </EuiText>

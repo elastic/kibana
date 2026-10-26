@@ -60,7 +60,7 @@ describe('estimateIndicesVcuRange', () => {
     expect(extraCopy.atPeak).toBeCloseTo(single.atPeak * 2);
   });
 
-  it('raises the at-rest estimate with prewarm and pin, without lowering the peak below it', () => {
+  it('raises the at-rest estimate with prewarm and pinned data, without lowering the peak below it', () => {
     const estimate = estimateIndicesVcuRange(1, {
       ...base,
       maxBoost: 1,

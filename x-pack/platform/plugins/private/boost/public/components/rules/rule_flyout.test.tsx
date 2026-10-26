@@ -232,6 +232,11 @@ describe('RuleFlyout estimate', () => {
   const getEstimate = () => screen.queryByTestId('boostCostEstimate');
   const getPattern = () => screen.getByTestId('boostRulePattern');
 
+  // Estimates are off until a tester turns them on, and each tester's setting stays in their
+  // browser, so it's turned back off after each test.
+  beforeEach(() => setShowsEstimates(true));
+  afterEach(() => setShowsEstimates(false));
+
   it("estimates the rule's targets", () => {
     renderFlyout();
 
@@ -269,8 +274,10 @@ describe('RuleFlyout estimate', () => {
       expect(screen.getByTestId('boostCostEstimateTimeline-background')).toHaveTextContent(
         'Background2 GB'
       );
-      // The default profile's standard period ends where its recent period does, so it's left out.
-      expect(screen.queryByTestId('boostCostEstimateTimeline-standard')).not.toBeInTheDocument();
+      // The profile's standard period, from 1 to 7 days old, holds none of the data stream's data.
+      expect(screen.getByTestId('boostCostEstimateTimeline-standard')).toHaveTextContent(
+        'Standard0 GB'
+      );
     });
 
     it("shows a period's boost and cost in a tooltip", async () => {
@@ -285,9 +292,6 @@ describe('RuleFlyout estimate', () => {
       expect(tooltip).toHaveTextContent(/^Recent\d[\d,.]*–[\d,.]+ boost\$/);
       expect(tooltip).toHaveTextContent(/VCUs$/);
     });
-
-    // Each tester's setting stays in their browser, so it's turned back on after each test.
-    afterEach(() => setShowsEstimates(true));
 
     it("shows a period's boost without its cost while estimates are off", async () => {
       setShowsEstimates(false);

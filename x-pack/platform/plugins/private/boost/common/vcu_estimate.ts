@@ -24,9 +24,9 @@ const CACHE_FACTOR = 2;
 const CACHE_GB_PER_VCU = 8;
 // One extra copy keeps a second warmed copy, doubling the search resources.
 const EXTRA_COPY_MULTIPLIER = 2;
-// Prewarm and pin keep slightly more cached data ready at rest.
+// Prewarm and pinned data keep slightly more cached data ready at rest.
 const PREWARM_AT_REST_MULTIPLIER = 1.1;
-const PIN_AT_REST_MULTIPLIER = 1.1;
+const PINNED_AT_REST_MULTIPLIER = 1.1;
 // Share of each period's data kept cached at boost 1, loosely following the design doc's curves.
 const PERIOD_CACHE_RATIOS = { recent: 1, standard: 0.5, background: 0.05 } as const;
 
@@ -64,7 +64,7 @@ export const estimateIndicesVcuRange = (
 ): VcuRange => {
   const copies = extraCopy ? EXTRA_COPY_MULTIPLIER : 1;
   const atRestMultiplier =
-    (prewarm ? PREWARM_AT_REST_MULTIPLIER : 1) * (pinned ? PIN_AT_REST_MULTIPLIER : 1);
+    (prewarm ? PREWARM_AT_REST_MULTIPLIER : 1) * (pinned ? PINNED_AT_REST_MULTIPLIER : 1);
 
   const atRest = vcusForCachedData(dataGb, 1, minBoost) * copies * atRestMultiplier;
   const atPeak = vcusForCachedData(dataGb, 1, maxBoost) * copies;

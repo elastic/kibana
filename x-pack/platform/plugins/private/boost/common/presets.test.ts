@@ -36,6 +36,21 @@ describe('BUILTIN_PROFILES', () => {
       ])
     );
   });
+
+  it('keeps each data stream window Recent for a day, then Standard until the window ends', () => {
+    const maxAges = BUILTIN_PROFILES.flatMap((profile) =>
+      profile.type === 'data_streams'
+        ? [[profile.name, profile.recent.max_age, profile.standard.max_age]]
+        : []
+    );
+
+    // The 1-day window ends where Recent does, so it has no Standard period.
+    expect(maxAges).toEqual([
+      ['_last-1-day', '1d', '1d'],
+      ['_last-3-days', '1d', '3d'],
+      ['_last-7-days', '1d', '7d'],
+    ]);
+  });
 });
 
 describe('getDefaultRuleType', () => {

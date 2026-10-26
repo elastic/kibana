@@ -13,12 +13,15 @@ const STORAGE_KEY = 'xpack.boost.prototype.showsEstimates';
 const listeners = new Set<() => void>();
 
 // The choice when storage is unavailable, such as in some private windows, until the page reloads.
-let unstoredShowsEstimates = true;
+let unstoredShowsEstimates = false;
 
-/** Whether the prototype shows search cost and VCU estimates, which it does unless turned off. */
+/**
+ * Whether the prototype shows search cost and VCU estimates, which it doesn't unless turned on: they
+ * aren't planned for the initial release.
+ */
 export const getShowsEstimates = (): boolean => {
   try {
-    return window.localStorage.getItem(STORAGE_KEY) !== 'false';
+    return window.localStorage.getItem(STORAGE_KEY) === 'true';
   } catch {
     return unstoredShowsEstimates;
   }

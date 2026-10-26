@@ -13,22 +13,22 @@ beforeEach(() => {
 });
 
 describe('estimates setting', () => {
-  it('shows estimates until a tester turns them off, and keeps their choice in the browser', () => {
-    expect(getShowsEstimates()).toBe(true);
-
-    setShowsEstimates(false);
+  it('hides estimates until a tester turns them on, and keeps their choice in the browser', () => {
     expect(getShowsEstimates()).toBe(false);
-    expect(window.localStorage.getItem('xpack.boost.prototype.showsEstimates')).toBe('false');
 
     setShowsEstimates(true);
     expect(getShowsEstimates()).toBe(true);
+    expect(window.localStorage.getItem('xpack.boost.prototype.showsEstimates')).toBe('true');
+
+    setShowsEstimates(false);
+    expect(getShowsEstimates()).toBe(false);
   });
 
   it('updates what follows it when the setting changes', () => {
     const { result } = renderHook(() => useShowsEstimates());
-    expect(result.current).toBe(true);
-
-    act(() => setShowsEstimates(false));
     expect(result.current).toBe(false);
+
+    act(() => setShowsEstimates(true));
+    expect(result.current).toBe(true);
   });
 });

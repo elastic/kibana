@@ -127,8 +127,7 @@ export const ProfileDetailsPage = () => {
     .sort((a, b) => a.name.localeCompare(b.name));
   const sizeInBytes = usedBy.reduce((total, { size_in_bytes: bytes }) => total + bytes, 0);
   const vcus = estimateDataSourcesVcuRange(usedBy, profile);
-  // The whole project, which the profile's storage and search cost are each a share of.
-  const projectSize = dataSources.reduce((total, { size_in_bytes: bytes }) => total + bytes, 0);
+  // The whole project's search cost, which the profile's is a share of.
   const projectVcus = estimateProjectVcuRange(dataSources, appliedRules, profiles);
   const usedByDefaultRule = profileRules.some(({ is_builtin: isBuiltin }) => isBuiltin);
 
@@ -245,15 +244,7 @@ export const ProfileDetailsPage = () => {
                   title: i18n.translate('xpack.boost.profileDetails.storageSize', {
                     defaultMessage: 'Storage size',
                   }),
-                  description: (
-                    <ShareMeter
-                      value={sizeInBytes}
-                      total={projectSize}
-                      data-test-subj="boostProfileStorageShare"
-                    >
-                      {formatSize(sizeInBytes)}
-                    </ShareMeter>
-                  ),
+                  description: formatSize(sizeInBytes),
                 },
                 // Only while the prototype shows estimates, which testers can turn off.
                 ...(showsEstimates

@@ -58,15 +58,19 @@ export const DEFAULT_PROFILE_KEYS: Readonly<Record<BoostProfileType, keyof Defau
   data_streams: 'data_streams_profile',
 };
 
+/**
+ * A window's periods: Recent for the first day, Standard up to the window's end, and Background for
+ * the rest. A 1-day window has no Standard period, since it ends where Recent does.
+ */
 const createWindowPeriods = (
-  maxAge: string
+  windowMaxAge: string
 ): Pick<DataStreamsBoostProfile, 'recent' | 'standard' | 'background'> => {
-  const boostedPeriod: BoostPeriod = { min_boost: 1, max_boost: MAX_BOOST, max_age: maxAge };
+  const boost: BoostPeriod = { min_boost: 1, max_boost: MAX_BOOST };
 
   return {
-    recent: boostedPeriod,
-    standard: boostedPeriod,
-    background: { min_boost: 1, max_boost: MAX_BOOST },
+    recent: { ...boost, max_age: '1d' },
+    standard: { ...boost, max_age: windowMaxAge },
+    background: boost,
   };
 };
 

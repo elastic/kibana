@@ -97,13 +97,13 @@ describe('ProfileFlyout options', () => {
   // A checkbox card's test subject is on its checkbox.
   const getOption = (key: string) => screen.getByTestId(`boostProfileOption-${key}`);
 
-  it('only lets prewarmed data be pinned, and turns pin off with prewarm', async () => {
+  it('only lets prewarmed data be pinned, and turns pinned off with prewarm', async () => {
     renderFlyout();
 
-    // A new profile doesn't prewarm, so it can't pin either, and says why.
+    // A new profile doesn't prewarm, so it can't be pinned either, and says why.
     expect(getOption('pinned')).toBeDisabled();
     expect(getOption('pinned')).toHaveAccessibleName(
-      "Pin Don't evict cached data. Turn on prewarm to pin cached data."
+      'Pinned Protect cached data in proportion to min boost. Turn on prewarm to protect cached data.'
     );
 
     await userEvent.click(getOption('prewarm'));
@@ -115,13 +115,13 @@ describe('ProfileFlyout options', () => {
     expect(getOption('pinned')).not.toBeChecked();
     expect(getOption('pinned')).toBeDisabled();
 
-    // Turning prewarm back on leaves pin for the user to turn on again.
+    // Turning prewarm back on leaves pinned for the user to turn on again.
     await userEvent.click(getOption('prewarm'));
     expect(getOption('pinned')).toBeEnabled();
     expect(getOption('pinned')).not.toBeChecked();
   });
 
-  it('opens a saved profile that pins without prewarm with pin off', () => {
+  it('opens a saved profile that pins without prewarm with pinned off', () => {
     renderFlyout({ ...savedProfile, prewarm: false, pinned: true });
 
     expect(getOption('pinned')).not.toBeChecked();

@@ -22,6 +22,7 @@ import {
 } from '../../../common/presets';
 import type { BoostProfile, BoostRule, BoostState } from '../../../common/types';
 import { estimateDataSourceVcuRange } from '../../../common/vcu_estimate';
+import { setShowsEstimates } from '../../prototype/estimates_setting';
 import { formatCost, roundVcus } from '../cost_format';
 import { ProfileDetailsPage } from '../profiles/profile_details_page';
 import { RuleDetailsPage } from '../rules/rule_details_page';
@@ -183,6 +184,9 @@ const renderAt = (path: string) =>
 
 const getHeader = () => within(screen.getByTestId('mockAppHeader'));
 
+// Each tester's estimates setting stays in their browser, so it's turned back off after each test.
+afterEach(() => setShowsEstimates(false));
+
 describe('ProfileDetailsPage', () => {
   it("shows an indices profile's settings, the rules using it, and what it applies to", () => {
     renderAt('/profiles/catalog-search');
@@ -201,7 +205,7 @@ describe('ProfileDetailsPage', () => {
     expect(settings).toHaveTextContent('Boost2–50');
     expect(settings).toHaveTextContent('One extra copyOn');
     expect(settings).toHaveTextContent('PrewarmOn');
-    expect(settings).toHaveTextContent('PinOff');
+    expect(settings).toHaveTextContent('PinnedOff');
 
     expect(screen.getByTestId('boostProfileRules')).toHaveTextContent('catalogs');
     // Each rule shows where it applies the profile, not everything it matches.
@@ -224,7 +228,9 @@ describe('ProfileDetailsPage', () => {
     expect(screen.queryByTestId('boostProfileUsedBy')).not.toBeInTheDocument();
     expect(screen.getByTestId('boostProfileUsage')).toHaveTextContent('Rules using1');
     expect(screen.getByTestId('boostProfileUsage')).toHaveTextContent('Applies to1 index');
-    expect(screen.getByTestId('boostProfileStorageShare')).toHaveTextContent(/GB\d+% of project/);
+    // Its storage is shown as a size alone, not as a share of the project's.
+    expect(screen.getByTestId('boostProfileUsage')).toHaveTextContent(/Storage size[\d.]+ GB/);
+    expect(screen.getByTestId('boostProfileUsage')).not.toHaveTextContent(/GB\d+% of project/);
   });
 
   it('searches the rules using a profile by name', async () => {
@@ -272,16 +278,16 @@ describe('ProfileDetailsPage', () => {
   });
 
   it('marks a standard phase that ends where the recent one does as skipped', () => {
-    renderAt(`/profiles/${BUILTIN_DATA_STREAMS_PROFILE_NAMES.last_7_days}`);
+    renderAt(`/profiles/${BUILTIN_DATA_STREAMS_PROFILE_NAMES.last_1_day}`);
 
     expect(screen.getByTestId('boostProfilePhase-recent')).toHaveTextContent(
-      'Data up to 7 days old'
+      'Data up to 1 day old'
     );
     // Like the others, it shows its boost, with what data it holds, which is none.
     expect(screen.getByTestId('boostProfilePhase-standard')).toHaveTextContent('boostSkipped');
     // Background data starts where recent data ends.
     expect(screen.getByTestId('boostProfilePhase-background')).toHaveTextContent(
-      'Data older than 7 days'
+      'Data older than 1 day'
     );
   });
 
@@ -355,15 +361,11 @@ describe('RuleDetailsPage', () => {
     const usage = screen.getByTestId('boostRuleUsage');
     expect(usage).toHaveTextContent('Matches2 indices');
     expect(usage).toHaveTextContent('Applies to1 index');
-    expect(usage).toHaveTextContent(/Storage size\d/);
-    // Its storage and search cost at rest and at peak are each shown as a share of the project's.
-    expect(screen.getByTestId('boostRuleStorageShare')).toHaveTextContent(/GB\d+% of project/);
-    expect(screen.getByTestId('boostRuleRestCostShare')).toHaveTextContent(
-      /at rest<?\d+% of project/
-    );
-    expect(screen.getByTestId('boostRulePeakCostShare')).toHaveTextContent(
-      /at peak<?\d+% of project/
-    );
+    // Its storage is shown as a size alone, not as a share of the project's.
+    expect(usage).toHaveTextContent(/Storage size[\d.]+ GB/);
+    expect(usage).not.toHaveTextContent(/GB\d+% of project/);
+    // Search cost only shows once a tester turns on the prototype's estimates.
+    expect(usage).not.toHaveTextContent('Search cost per hour');
 
     const matched = screen.getByTestId('boostRuleMatched');
     expect(within(matched).getByRole('heading', { name: 'Matching indices' })).toBeInTheDocument();
@@ -493,7 +495,16 @@ describe('RuleDetailsPage', () => {
   });
 
   it('estimates the search cost of each match the rule applies to, at rest and at peak', () => {
+    setShowsEstimates(true);
     renderAt('/rules/catalogs');
+
+    // The rule's search cost at rest and at peak are each shown as a share of the project's.
+    expect(screen.getByTestId('boostRuleRestCostShare')).toHaveTextContent(
+      /at rest<?\d+% of project/
+    );
+    expect(screen.getByTestId('boostRulePeakCostShare')).toHaveTextContent(
+      /at peak<?\d+% of project/
+    );
     const matched = screen.getByTestId('boostRuleMatched');
     const [spring] = mockState.data_sources.filter(({ name }) => name === 'catalog-spring');
     const { atRest, atPeak } = estimateDataSourceVcuRange(spring, catalogSearch);
