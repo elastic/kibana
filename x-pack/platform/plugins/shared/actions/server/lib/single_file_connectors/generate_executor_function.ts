@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ConnectorSpec } from '@kbn/connector-specs';
+import type { ConnectorSpec, ConnectorSpecStackCompat } from '@kbn/connector-specs';
 import {
   authTypeUsesRelay,
   getAuthModeForAuthTypeId,
@@ -98,6 +98,7 @@ export const generateExecutorFunction = ({
   platform,
   clientTypes = defaultClientTypes,
   getJwtSigner,
+  stackCompat,
 }: {
   connectorTypeId?: string;
   actions: ConnectorSpec['actions'];
@@ -109,6 +110,11 @@ export const generateExecutorFunction = ({
   networkSettings: ConnectorNetworkSettings;
   platform: PlatformServices;
   clientTypes?: Readonly<Record<string, ClientTypeSpec<unknown>>>;
+  /**
+   * Legacy stack connector path. Builds pooled-client credentials from
+   * `getAuthHeaders`, skips per-user lease checks, and rethrows handler errors.
+   */
+  stackCompat?: Pick<ConnectorSpecStackCompat, 'getAuthHeaders' | 'classifyError'>;
 }) =>
   async function (
     execOptions: ConnectorTypeExecutorOptions<RecordUnknown, RecordUnknown, RecordUnknown>
@@ -125,6 +131,7 @@ export const generateExecutorFunction = ({
       authMode,
       profileUid,
       connectorVersion,
+      connectorUsageCollector,
     } = execOptions;
     const { subAction, subActionParams, fetchOptions } = params as ExecutorParams & {
       fetchOptions?: FetchOptions;
@@ -196,9 +203,11 @@ export const generateExecutorFunction = ({
       // The lease key uses this derived mode, not the persisted `authMode`: a per-user credential
       // leased under a `shared` identity would serve one user's warm client, and its captured
       // credential accessor, to every other user.
-      const derivedAuthMode = getAuthModeForAuthTypeId(authTypeId);
+      // Stack-compat connectors are shared. Skip the derivation so a legacy `secrets` object
+      // (no `authType`) cannot be treated as a per-user auth type.
+      const derivedAuthMode = stackCompat ? undefined : getAuthModeForAuthTypeId(authTypeId);
 
-      if (derivedAuthMode === 'per-user' && authMode !== 'per-user') {
+      if (!stackCompat && derivedAuthMode === 'per-user' && authMode !== 'per-user') {
         throw createTaskRunError(
           new Error(
             `[Action][ExternalService] Refusing to lease a pooled client: auth type "${authTypeId}" is per-user but connector "${connectorId}" resolved to "${
@@ -209,7 +218,7 @@ export const generateExecutorFunction = ({
         );
       }
 
-      if (derivedAuthMode === 'per-user' && !profileUid) {
+      if (!stackCompat && derivedAuthMode === 'per-user' && !profileUid) {
         throw createTaskRunError(
           new Error('A profile UID is required to lease a per-user connector client.'),
           TaskErrorSource.USER
@@ -226,22 +235,35 @@ export const generateExecutorFunction = ({
           profileUid,
           connectorVersion,
         });
+        const buildConfig = stackCompat
+          ? {
+              ...config,
+              // Legacy MCP names the pooled client after the connector id. Only the MCP
+              // client type reads `clientName`; other client types ignore the extra field.
+              clientName:
+                typeof config.clientName === 'string' && config.clientName !== ''
+                  ? config.clientName
+                  : `kibana-mcp-connector-${connectorId}`,
+            }
+          : config;
         const { promise, release } = pool.acquire(
           key,
           () =>
             clientType.build({
               logger,
-              config,
+              config: buildConfig,
               networkSettings,
               platform,
-              credential: getCredential({
-                connectorId,
-                connectorTypeId,
-                secrets,
-                connectorTokenClient,
-                authMode,
-                profileUid,
-              }),
+              credential: stackCompat
+                ? { getAuthHeaders: () => stackCompat.getAuthHeaders(config, secrets) }
+                : getCredential({
+                    connectorId,
+                    connectorTypeId,
+                    secrets,
+                    connectorTokenClient,
+                    authMode,
+                    profileUid,
+                  }),
             }),
           (client) => clientType.terminate(client)
         );
@@ -259,6 +281,8 @@ export const generateExecutorFunction = ({
       client: axiosInstance,
       secrets,
       config,
+      connectorId,
+      connectorUsageCollector,
       getClient: getClient as ActionContext['getClient'],
       relay: authTypeUsesRelay(authTypeId) ? getRelayClient?.() : undefined,
       signJwt: getJwtSigner?.(connectorId),
@@ -276,6 +300,17 @@ export const generateExecutorFunction = ({
     } catch (error) {
       releaseAcquiredClients();
       await invalidateAcquiredClientsForError(error);
+      if (stackCompat) {
+        const classification = stackCompat.classifyError?.(error);
+        if (classification === undefined) {
+          throw error;
+        }
+        const tagged = error instanceof Error ? error : new Error(String(error));
+        throw createTaskRunError(
+          tagged,
+          classification === 'user' ? TaskErrorSource.USER : TaskErrorSource.FRAMEWORK
+        );
+      }
       const errorSource = error instanceof Error ? getErrorSource(error) : undefined;
       if (errorSource === TaskErrorSource.FRAMEWORK) throw error;
       const errorMessage = error instanceof Error ? error.message : String(error);

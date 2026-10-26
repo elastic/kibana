@@ -9,6 +9,7 @@
 
 export * as connectorsSpecs from './src/all_specs';
 export type * from './src/connector_spec';
+export type { ConnectorSpecStackCompat, ConnectorUsageCollectorLike } from './src/connector_spec';
 export type { ConnectorActionErrorMeta } from './src/connector_utils';
 export * as authTypeSpecs from './src/all_auth_types';
 export { EARS_AUTH_ID, EARS_PROVIDERS } from './src/auth_types/ears';

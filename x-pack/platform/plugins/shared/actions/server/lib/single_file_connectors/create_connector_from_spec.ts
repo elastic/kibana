@@ -23,13 +23,36 @@ import type {
 import type { PluginSetupContract as ActionsPluginSetupContract } from '../../plugin';
 
 import { generateParamsSchema } from './generate_params_schema';
-import { generateSecretsSchema } from './generate_secrets_schema';
+import { generateCompatSecretsSchema, generateSecretsSchema } from './generate_secrets_schema';
 import { generateExecutorFunction } from './generate_executor_function';
-import { generateConfigSchema } from './generate_config_schema';
+import { generateCompatConfigSchema, generateConfigSchema } from './generate_config_schema';
 import {
   createConnectorNetworkSettings,
   createPlatformServices,
 } from './create_connector_network_settings';
+
+const assertStackCompatExclusive = (spec: ConnectorSpec): void => {
+  if (!spec.stackCompat) {
+    return;
+  }
+
+  const id = spec.metadata.id;
+  if (spec.test.enabled) {
+    throw new Error(`Connector spec "${id}" cannot combine stackCompat with test.enabled.`);
+  }
+  if (spec.auth) {
+    throw new Error(`Connector spec "${id}" cannot combine stackCompat with auth.`);
+  }
+  if (spec.schema) {
+    throw new Error(`Connector spec "${id}" cannot combine stackCompat with schema.`);
+  }
+  if (spec.events) {
+    throw new Error(`Connector spec "${id}" cannot combine stackCompat with events.`);
+  }
+  if (spec.signingKey) {
+    throw new Error(`Connector spec "${id}" cannot combine stackCompat with signingKey.`);
+  }
+};
 
 const buildExecutableActions = (spec: ConnectorSpec): ConnectorSpec['actions'] => {
   if (spec.actions?.[TEST_CONNECTOR_SUB_ACTION]) {
@@ -58,9 +81,12 @@ export const createConnectorTypeFromSpec = (
   spec: ConnectorSpec,
   actions: ActionsPluginSetupContract
 ): ActionType<ActionTypeConfig, ActionTypeSecrets, ActionTypeParams, unknown> => {
+  assertStackCompatExclusive(spec);
+
   const configUtils = actions.getActionsConfigurationUtilities();
   const networkSettings = createConnectorNetworkSettings(configUtils);
   const platform = createPlatformServices(configUtils);
+  const { stackCompat } = spec;
 
   const hasTest = Boolean(spec.test.enabled);
   const hasActions = Object.keys(spec.actions ?? {}).length > 0;
@@ -91,6 +117,7 @@ export const createConnectorTypeFromSpec = (
         getRelayClient: actions.getRelayClient,
         networkSettings,
         platform,
+        ...(stackCompat ? { stackCompat } : {}),
         ...(signingKey
           ? {
               getJwtSigner: (connectorId: string) =>
@@ -113,17 +140,25 @@ export const createConnectorTypeFromSpec = (
     name: spec.metadata.displayName,
     supportedFeatureIds: spec.metadata.supportedFeatureIds,
     validate: {
-      config: lazyImmutableGCableObject(() => generateConfigSchema(schemaForConfig, actionNames)),
-      secrets: lazyImmutableGCableObject(() => generateSecretsSchema(spec.auth, configUtils)),
+      config: lazyImmutableGCableObject(() =>
+        stackCompat
+          ? generateCompatConfigSchema(stackCompat.configSchema)
+          : generateConfigSchema(schemaForConfig, actionNames)
+      ),
+      secrets: lazyImmutableGCableObject(() =>
+        stackCompat
+          ? generateCompatSecretsSchema(stackCompat.secretsSchema)
+          : generateSecretsSchema(spec.auth, configUtils)
+      ),
       ...(paramsValidator ? { params: paramsValidator } : {}),
     },
     ...(executor ? { executor } : {}),
     globalAuthHeaders: spec.auth?.headers,
-    source: ACTION_TYPE_SOURCES.spec,
+    source: stackCompat ? ACTION_TYPE_SOURCES.stack : ACTION_TYPE_SOURCES.spec,
     spec,
     description: spec.metadata.description,
     isExperimental: spec.metadata.isTechnicalPreview,
     isTestable: Boolean(spec.test.enabled),
-    sandboxSupportedAuthTypes: getSandboxSupportedAuthTypeIds(spec.auth),
+    sandboxSupportedAuthTypes: stackCompat ? [] : getSandboxSupportedAuthTypeIds(spec.auth),
   };
 };

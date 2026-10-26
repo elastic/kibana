@@ -1677,4 +1677,198 @@ describe('generateExecutorFunction', () => {
       expect(handler2).toHaveBeenCalledTimes(1);
     });
   });
+
+  describe('stackCompat', () => {
+    const getAuthHeaders = jest.fn().mockResolvedValue({ Authorization: 'Bearer legacy' });
+    const classifyError = jest.fn();
+
+    const makeCompatExecutor = (
+      handler: jest.Mock,
+      clientTypes?: Readonly<
+        Record<
+          string,
+          {
+            id: string;
+            build: jest.Mock;
+            terminate: jest.Mock;
+            shouldInvalidateOnError?: (err: unknown) => boolean;
+          }
+        >
+      >,
+      compat: { getAuthHeaders: jest.Mock; classifyError?: jest.Mock } = {
+        getAuthHeaders,
+        classifyError,
+      }
+    ) =>
+      generateExecutorFunction({
+        actions: { testAction: { isTool: true, scope: 'read', input: {} as never, handler } },
+        getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
+        getCredential: mockGetCredential,
+        getClientLeasePool: () => fakeLeasePool,
+        networkSettings: mockNetwork,
+        platform: mockPlatform,
+        ...(clientTypes ? { clientTypes } : {}),
+        stackCompat: compat,
+      });
+
+    beforeEach(() => {
+      getAuthHeaders.mockClear();
+      getAuthHeaders.mockResolvedValue({ Authorization: 'Bearer legacy' });
+      classifyError.mockReset();
+    });
+
+    it('passes stackCompat auth headers and the legacy client name to clientType.build', async () => {
+      const fakeClient = { id: 'pooled' };
+      const fakeClientType = {
+        id: 'mcp',
+        build: jest.fn(async (ctx: BuildContext) => {
+          await ctx.credential.getAuthHeaders();
+          return fakeClient;
+        }),
+        terminate: jest.fn(),
+      };
+      const handler = jest.fn(async (ctx: ActionContext) => {
+        await (ctx.getClient as unknown as (id: string) => Promise<unknown>)('mcp');
+        return {};
+      });
+
+      const executor = makeCompatExecutor(handler, { mcp: fakeClientType });
+      const opts = makeExecOptions({ subAction: 'testAction', subActionParams: {} });
+      await executor({
+        ...opts,
+        config: { serverUrl: 'https://mcp.example.com' },
+        secrets: { token: 'legacy-token' },
+      });
+
+      expect(mockGetCredential).not.toHaveBeenCalled();
+      expect(getAuthHeaders).toHaveBeenCalledWith(
+        { serverUrl: 'https://mcp.example.com' },
+        { token: 'legacy-token' }
+      );
+      expect(fakeClientType.build).toHaveBeenCalledWith(
+        expect.objectContaining({
+          config: {
+            serverUrl: 'https://mcp.example.com',
+            clientName: `kibana-mcp-connector-${connectorId}`,
+          },
+        })
+      );
+    });
+
+    it('passes connectorId and connectorUsageCollector to the handler', async () => {
+      const usage = { addRequestBodyBytes: jest.fn() };
+      const handler = jest.fn().mockResolvedValue({});
+      const executor = makeCompatExecutor(handler);
+
+      const opts = makeExecOptions({ subAction: 'testAction', subActionParams: {} });
+      await executor({ ...opts, connectorUsageCollector: usage as never });
+
+      expect(handler).toHaveBeenCalledWith(
+        expect.objectContaining({
+          connectorId,
+          connectorUsageCollector: usage,
+        }),
+        {}
+      );
+    });
+
+    it('skips per-user lease checks for compat connectors', async () => {
+      const fakeClientType = {
+        id: 'mcp',
+        build: jest.fn().mockResolvedValue({}),
+        terminate: jest.fn(),
+      };
+      const handler = jest.fn(async (ctx: ActionContext) => {
+        await (ctx.getClient as unknown as (id: string) => Promise<unknown>)('mcp');
+        return {};
+      });
+      const executor = makeCompatExecutor(handler, { mcp: fakeClientType });
+
+      const result = await executor({
+        ...makeExecOptions({ subAction: 'testAction', subActionParams: {} }),
+        secrets: { authType: 'oauth_authorization_code' },
+        authMode: 'shared',
+      });
+
+      expect(result.status).toBe('ok');
+      expect(fakeClientType.build).toHaveBeenCalled();
+    });
+
+    it('rethrows a user error as a TaskRunError with USER source', async () => {
+      classifyError.mockReturnValue('user');
+      const handler = jest.fn().mockRejectedValue(new Error('bad token'));
+      const executor = makeCompatExecutor(handler);
+
+      const thrown = await executor(
+        makeExecOptions({ subAction: 'testAction', subActionParams: {} })
+      ).catch((err) => err);
+
+      expect(thrown).toBeInstanceOf(Error);
+      expect(thrown.message).toBe('bad token');
+      expect(getErrorSource(thrown)).toBe(TaskErrorSource.USER);
+    });
+
+    it('rethrows a framework error as a TaskRunError with FRAMEWORK source', async () => {
+      classifyError.mockReturnValue('framework');
+      const handler = jest.fn().mockRejectedValue(new Error('transport down'));
+      const executor = makeCompatExecutor(handler);
+
+      const thrown = await executor(
+        makeExecOptions({ subAction: 'testAction', subActionParams: {} })
+      ).catch((err) => err);
+
+      expect(thrown.message).toBe('transport down');
+      expect(getErrorSource(thrown)).toBe(TaskErrorSource.FRAMEWORK);
+    });
+
+    it('rethrows the raw error when classifyError returns undefined', async () => {
+      classifyError.mockReturnValue(undefined);
+      const raw = new Error('unclassified');
+      const handler = jest.fn().mockRejectedValue(raw);
+      const executor = makeCompatExecutor(handler);
+
+      const thrown = await executor(
+        makeExecOptions({ subAction: 'testAction', subActionParams: {} })
+      ).catch((err) => err);
+
+      expect(thrown).toBe(raw);
+      expect(getErrorSource(thrown)).toBeUndefined();
+    });
+
+    it('releases and invalidates the pooled client before rethrowing', async () => {
+      classifyError.mockReturnValue('framework');
+      const order: string[] = [];
+      const fakeClientType = {
+        id: 'mcp',
+        build: jest.fn().mockResolvedValue({ id: 'client' }),
+        terminate: jest.fn().mockImplementation(async () => {
+          order.push('terminate');
+        }),
+        shouldInvalidateOnError: () => true,
+      };
+      const handler = jest.fn(async (ctx: ActionContext) => {
+        await (ctx.getClient as unknown as (id: string) => Promise<unknown>)('mcp');
+        throw new Error('connection reset');
+      });
+
+      const originalAcquire = fakeLeasePool.acquire.bind(fakeLeasePool);
+      jest.spyOn(fakeLeasePool, 'acquire').mockImplementation((key, build, terminate) => {
+        const lease = originalAcquire(key, build, terminate);
+        const originalRelease = lease.release;
+        lease.release = () => {
+          order.push('release');
+          originalRelease();
+        };
+        return lease;
+      });
+      const executor = makeCompatExecutor(handler, { mcp: fakeClientType });
+
+      await expect(
+        executor(makeExecOptions({ subAction: 'testAction', subActionParams: {} }))
+      ).rejects.toThrow('connection reset');
+
+      expect(order[0]).toBe('release');
+      expect(order).toContain('terminate');
+    });
+  });
 });

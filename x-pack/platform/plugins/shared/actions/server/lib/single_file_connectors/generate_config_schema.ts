@@ -11,6 +11,27 @@ import { z } from '@kbn/zod/v4';
 import type { ActionTypeConfig, ValidatorType } from '../../types';
 import { getAllowedHostsKeysFromShape, validateAllowedHostsKeys } from './allowed_hosts_validation';
 
+/**
+ * Config validator for stack-compat specs. The schema is used as-is: no `authType`
+ * or `selectedActions` extension. Allowed-hosts checks still run for tagged URL fields.
+ */
+export const generateCompatConfigSchema = (
+  schema: z.ZodObject
+): ValidatorType<ActionTypeConfig> => {
+  const allowedHostsKeys = getAllowedHostsKeysFromShape(schema.shape);
+
+  return {
+    schema,
+    customValidator: (config, { configurationUtilities }) => {
+      validateAllowedHostsKeys(
+        config as Record<string, unknown>,
+        allowedHostsKeys,
+        configurationUtilities
+      );
+    },
+  };
+};
+
 export const generateConfigSchema = (
   schema: ConnectorSpec['schema'],
   actionNames: readonly string[] = []

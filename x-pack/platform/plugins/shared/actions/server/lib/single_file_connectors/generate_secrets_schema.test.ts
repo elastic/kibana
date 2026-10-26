@@ -6,7 +6,8 @@
  */
 
 import type { ConnectorSpec } from '@kbn/connector-specs';
-import { generateSecretsSchema } from './generate_secrets_schema';
+import { z } from '@kbn/zod/v4';
+import { generateCompatSecretsSchema, generateSecretsSchema } from './generate_secrets_schema';
 import { actionsConfigMock } from '../../actions_config.mock';
 
 const mockConfigUtils = actionsConfigMock.create();
@@ -404,6 +405,29 @@ describe('generateSecretsSchema', () => {
       expect(mockConfigUtils.ensureUriAllowed).not.toHaveBeenCalledWith(
         'https://not-allowed.example.com/token'
       );
+    });
+  });
+});
+
+describe('generateCompatSecretsSchema', () => {
+  it('parses secrets without authType', () => {
+    const result = generateCompatSecretsSchema(
+      z.object({
+        token: z.string().optional(),
+        apiKey: z.string().optional(),
+      })
+    );
+
+    expect(result.schema.parse({ token: 'abc' })).toEqual({ token: 'abc' });
+    expect(result.schema.parse({})).toEqual({});
+    expect(result.customValidator).toBeUndefined();
+  });
+
+  it('strips unknown keys and does not require an auth-type discriminator', () => {
+    const result = generateCompatSecretsSchema(z.object({ token: z.string().optional() }));
+
+    expect(result.schema.parse({ token: 'abc', authType: 'bearer', extra: 1 })).toEqual({
+      token: 'abc',
     });
   });
 });
