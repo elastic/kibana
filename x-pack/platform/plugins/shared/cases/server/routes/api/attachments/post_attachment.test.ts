@@ -24,16 +24,16 @@ describe('postAttachmentRoute', () => {
 
   const incrementAttachmentTypeCounters = jest.fn();
 
-  const callHandler = () =>
+  const callHandler = (body: object = request.body) =>
     postAttachmentRoute.handler({
       context,
-      request,
+      request: { ...request, body },
       response,
       incrementAttachmentTypeCounters,
     } as unknown as HandlerArgs);
 
-  const getHandlerError = () =>
-    callHandler().then(
+  const getHandlerError = (body?: object) =>
+    callHandler(body).then(
       () => {
         throw new Error('Expected the handler to throw');
       },
@@ -63,6 +63,18 @@ describe('postAttachmentRoute', () => {
 
     await getHandlerError();
 
+    expect(incrementAttachmentTypeCounters).not.toHaveBeenCalled();
+  });
+
+  it('rejects a file attachment with a 400 before calling the client', async () => {
+    const error = await getHandlerError({
+      type: 'file',
+      attachmentId: 'file-1',
+      owner: 'securitySolution',
+    });
+
+    expect(error.boomify().output.statusCode).toBe(400);
+    expect(casesClientMock.attachments.add).not.toHaveBeenCalled();
     expect(incrementAttachmentTypeCounters).not.toHaveBeenCalled();
   });
 
