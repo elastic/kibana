@@ -25,6 +25,9 @@ const INVALID_REPORTING_GROUP_NAMES = [
   ['whitespace', 'violations endpoint'],
   ['a quote', 'violations"endpoint'],
   ['a semicolon', 'violations;camera=*'],
+  // JavaScript's `$` only matches at the end of input, unlike PCRE, so a trailing newline fails the
+  // grammar. A YAML block scalar can produce one.
+  ['a trailing line feed', 'violations-endpoint\n'],
   ['a carriage return and line feed', 'violations\r\nX-Injected: 1'],
   ['an empty value', ''],
 ];
@@ -233,7 +236,7 @@ describe('permissionsPolicyConfig', () => {
       expect(deprecation.message).toContain('use only the first one, "first"');
     });
 
-    it.each(['violations-endpoint', 'csp_reports.v2', '*'])(
+    it.each(['violations-endpoint', 'policy_reports.v2', '*'])(
       'emits nothing for an endpoint name that "Reporting-Endpoints" can declare: %s',
       (name) => {
         expect(collect({ report_to: [name] })).toEqual([]);

@@ -357,7 +357,7 @@ groups:
       - setting: permissionsPolicy.camera
         id: permissionspolicy-camera
         description: |
-          Add sources to the [`camera`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Permissions-Policy/camera) directive of the [`Permissions-Policy`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Permissions-Policy) header. The sources are added to Kibana's built-in policy rather than replacing it. Allowed values are `self`, `*`, or an origin such as `https://example.com`. Origins cannot be percent-encoded. The default denies the feature to every origin.
+          Add sources to the [`camera`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Permissions-Policy/camera) directive of the [`Permissions-Policy`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Permissions-Policy) header. The sources are added to Kibana's built-in policy rather than replacing it, and cannot remove the sources it already allows. Allowed values are `self`, `*`, or an origin such as `https://example.com`. Origins cannot be percent-encoded. The default denies the feature to every origin.
         datatype: array of strings
         applies_to:
           - "stack: preview 9.7"
@@ -367,7 +367,7 @@ groups:
       - setting: permissionsPolicy.display_capture
         id: permissionspolicy-displaycapture
         description: |
-          Add sources to the [`display-capture`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Permissions-Policy/display-capture) directive of the [`Permissions-Policy`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Permissions-Policy) header. The sources are added to Kibana's built-in policy rather than replacing it. Allowed values are `self`, `*`, or an origin such as `https://example.com`. Origins cannot be percent-encoded. The default denies the feature to every origin.
+          Add sources to the [`display-capture`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Permissions-Policy/display-capture) directive of the [`Permissions-Policy`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Permissions-Policy) header. The sources are added to Kibana's built-in policy rather than replacing it, and cannot remove the sources it already allows. Allowed values are `self`, `*`, or an origin such as `https://example.com`. Origins cannot be percent-encoded. The default denies the feature to every origin.
         datatype: array of strings
         applies_to:
           - "stack: preview 9.7"
@@ -377,7 +377,7 @@ groups:
       - setting: permissionsPolicy.fullscreen
         id: permissionspolicy-fullscreen
         description: |
-          Add sources to the [`fullscreen`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Permissions-Policy/fullscreen) directive of the [`Permissions-Policy`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Permissions-Policy) header. The sources are added to Kibana's built-in policy rather than replacing it. Allowed values are `self`, `*`, or an origin such as `https://example.com`. Origins cannot be percent-encoded. By default, the feature is allowed for `self` and for `https://play.vidyard.com`, which {{kib}} uses to embed videos.
+          Add sources to the [`fullscreen`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Permissions-Policy/fullscreen) directive of the [`Permissions-Policy`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Permissions-Policy) header. The sources are added to Kibana's built-in policy rather than replacing it, and cannot remove the sources it already allows. Allowed values are `self`, `*`, or an origin such as `https://example.com`. Origins cannot be percent-encoded. By default, the feature is allowed for `self` and for `https://play.vidyard.com`, which {{kib}} uses to embed videos.
         datatype: array of strings
         applies_to:
           - "stack: preview 9.7"
@@ -387,7 +387,7 @@ groups:
       - setting: permissionsPolicy.geolocation
         id: permissionspolicy-geolocation
         description: |
-          Add sources to the [`geolocation`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Permissions-Policy/geolocation) directive of the [`Permissions-Policy`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Permissions-Policy) header. The sources are added to Kibana's built-in policy rather than replacing it. Allowed values are `self`, `*`, or an origin such as `https://example.com`. Origins cannot be percent-encoded. By default, the feature is allowed for `self`, because {{kib}} features such as the Maps browser location use it.
+          Add sources to the [`geolocation`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Permissions-Policy/geolocation) directive of the [`Permissions-Policy`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Permissions-Policy) header. The sources are added to Kibana's built-in policy rather than replacing it, and cannot remove the sources it already allows. Allowed values are `self`, `*`, or an origin such as `https://example.com`. Origins cannot be percent-encoded. By default, the feature is allowed for `self`, because {{kib}} features such as the Maps browser location use it.
         datatype: array of strings
         applies_to:
           - "stack: preview 9.7"
@@ -397,7 +397,7 @@ groups:
       - setting: permissionsPolicy.microphone
         id: permissionspolicy-microphone
         description: |
-          Add sources to the [`microphone`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Permissions-Policy/microphone) directive of the [`Permissions-Policy`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Permissions-Policy) header. The sources are added to Kibana's built-in policy rather than replacing it. Allowed values are `self`, `*`, or an origin such as `https://example.com`. Origins cannot be percent-encoded. The default denies the feature to every origin.
+          Add sources to the [`microphone`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Permissions-Policy/microphone) directive of the [`Permissions-Policy`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Permissions-Policy) header. The sources are added to Kibana's built-in policy rather than replacing it, and cannot remove the sources it already allows. Allowed values are `self`, `*`, or an origin such as `https://example.com`. Origins cannot be percent-encoded. The default denies the feature to every origin.
         datatype: array of strings
         applies_to:
           - "stack: preview 9.7"
@@ -407,7 +407,7 @@ groups:
       - setting: permissionsPolicy.web_share
         id: permissionspolicy-webshare
         description: |
-          Add sources to the [`web-share`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Permissions-Policy/web-share) directive of the [`Permissions-Policy`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Permissions-Policy) header. The sources are added to Kibana's built-in policy rather than replacing it. Allowed values are `self`, `*`, or an origin such as `https://example.com`. Origins cannot be percent-encoded. The default denies the feature to every origin.
+          Add sources to the [`web-share`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Permissions-Policy/web-share) directive of the [`Permissions-Policy`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Permissions-Policy) header. The sources are added to Kibana's built-in policy rather than replacing it, and cannot remove the sources it already allows. Allowed values are `self`, `*`, or an origin such as `https://example.com`. Origins cannot be percent-encoded. The default denies the feature to every origin.
         datatype: array of strings
         applies_to:
           - "stack: preview 9.7"
@@ -1481,7 +1481,7 @@ groups:
           - "stack: deprecated 9.7"
           - "ech: ga"
           - "self: ga"
-        deprecation_details: "Deprecated in 9.7.0 and removed in 10.0.0. This setting replaces Kibana's entire permissions policy, so later changes to the built-in policy are lost. Use the individual `permissionsPolicy.<directive>` settings instead, which are added to the built-in policy. If you set this to `null` to disable the header, use [`permissionsPolicy.enabled: false`](#permissionspolicy-enabled) instead."
+        deprecation_details: "Deprecated in 9.7.0 and removed in 10.0.0. This setting replaces Kibana's entire permissions policy, so later changes to the built-in policy are lost. Use the individual `permissionsPolicy.<directive>` settings instead, which are added to the built-in policy. They cannot remove sources from the built-in policy, so a policy stricter than the built-in policy is not supported after this setting is removed. If you set this to `null` to disable the header, use [`permissionsPolicy.enabled: false`](#permissionspolicy-enabled) instead."
 
       - setting: server.securityResponseHeaders.permissionsPolicyReportOnly
         id: server-securityresponseheaders-permissionspolicyreportonly

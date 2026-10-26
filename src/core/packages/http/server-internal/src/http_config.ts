@@ -417,11 +417,11 @@ export const config: ServiceConfigDescriptor<HttpConfigType> = {
           level: 'warning',
           configPath: `${fromPath}.securityResponseHeaders.permissionsPolicy`,
           title: `Setting "${fromPath}.securityResponseHeaders.permissionsPolicy" is deprecated`,
-          message: `"${fromPath}.securityResponseHeaders.permissionsPolicy" replaces Kibana's entire permissions policy, so later changes to the built-in policy are lost. It is deprecated and will be removed in 10.0.0.`,
+          message: `"${fromPath}.securityResponseHeaders.permissionsPolicy" replaces Kibana's entire permissions policy, so later changes to the built-in policy are lost. It is deprecated and will be removed in 10.0.0. The "permissionsPolicy.<directive>" settings that replace it can only add sources to the built-in policy, not remove them, so a policy stricter than the built-in policy is not supported after this setting is removed.`,
           correctiveActions: {
             manualSteps: [
               `Remove "${fromPath}.securityResponseHeaders.permissionsPolicy" from your Kibana configuration file.`,
-              `Add only the sources you need to the matching "permissionsPolicy.<directive>" setting, for example "permissionsPolicy.camera: ['self']". These are added to Kibana's built-in policy rather than replacing it.`,
+              `Add only the sources you need to the matching "permissionsPolicy.<directive>" setting, for example "permissionsPolicy.camera: ['self']". These are added to Kibana's built-in policy rather than replacing it, and cannot remove its sources.`,
             ],
           },
         });

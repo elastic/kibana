@@ -1016,8 +1016,16 @@ describe('config deprecations', () => {
     expect(deprecation.level).toEqual('warning');
     expect(deprecation.configPath).toEqual('server.securityResponseHeaders.permissionsPolicy');
     expect(deprecation.message).toContain("replaces Kibana's entire permissions policy");
+    // The built-in policy is a baseline the new settings can only add to, so a stricter legacy
+    // policy has no replacement, and administrators must be told before they remove it.
+    expect(deprecation.message).toContain(
+      'a policy stricter than the built-in policy is not supported after this setting is removed'
+    );
     expect(deprecation.correctiveActions?.manualSteps?.join(' ')).toContain(
       'permissionsPolicy.<directive>'
+    );
+    expect(deprecation.correctiveActions?.manualSteps?.join(' ')).toContain(
+      'cannot remove its sources'
     );
   });
 
