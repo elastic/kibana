@@ -63,12 +63,18 @@ import {
   ATTACK_DISCOVERY_VALIDATE_WORKFLOW,
 } from './discoveries';
 import { NIGHTSHIFT_AGENT_OPTIMIZE_WORKFLOW } from './nightshift_investigations/agent_optimize';
+import {
+  NIGHTSHIFT_BOUND_AGENT_OPTIMIZE_WORKFLOW,
+  NIGHTSHIFT_BOUND_DECISION_TREE_HYDRATE_WORKFLOW,
+  NIGHTSHIFT_BOUND_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW,
+} from './nightshift_investigations/bound_hooks';
 import { NIGHTSHIFT_DECISION_TREE_HYDRATE_WORKFLOW } from './nightshift_investigations/decision_tree_hydrate';
 import { NIGHTSHIFT_INVESTIGATION_WORKFLOW } from './nightshift_investigations/investigation';
 import { NIGHTSHIFT_BOUND_INVESTIGATION_WORKFLOW } from './nightshift_investigations/investigation/bound_investigation';
 import { NIGHTSHIFT_ONBOARDING_SUGGESTIONS_WORKFLOW } from './nightshift_investigations/onboarding_suggestions';
 import { NIGHTSHIFT_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW } from './nightshift_investigations/sandbox_materialize_workspace';
 import { NIGHTSHIFT_SLACK_THREAD_WORKFLOW } from './nightshift_investigations/slack_thread';
+import { NIGHTSHIFT_BOUND_SLACK_THREAD_WORKFLOW } from './nightshift_investigations/slack_thread/bound_slack_thread';
 import { CREATE_PROPOSAL_WORKFLOW } from './proposals';
 import {
   SIGNIFICANT_EVENTS_CLEANUP_WORKFLOW,
@@ -147,7 +153,19 @@ export {
   NIGHTSHIFT_INVESTIGATIONS_TRIGGER_SOURCE,
   type NightshiftBoundInvestigationTemplateValues,
 } from './nightshift_investigations/investigation/bound_investigation';
+export {
+  NIGHTSHIFT_BOUND_SLACK_THREAD_WORKFLOW_ID,
+  type NightshiftBoundSlackThreadTemplateValues,
+} from './nightshift_investigations/slack_thread/bound_slack_thread';
 export { NIGHTSHIFT_SLACK_THREAD_WORKFLOW_ID } from './nightshift_investigations/slack_thread';
+export {
+  getNightshiftBoundHookWorkflowId,
+  NIGHTSHIFT_BOUND_AGENT_OPTIMIZE_WORKFLOW_ID,
+  NIGHTSHIFT_BOUND_DECISION_TREE_HYDRATE_WORKFLOW_ID,
+  NIGHTSHIFT_BOUND_HOOK_TARGETS,
+  NIGHTSHIFT_BOUND_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW_ID,
+  type NightshiftBoundHookTemplateValues,
+} from './nightshift_investigations/bound_hooks';
 export { NIGHTSHIFT_ONBOARDING_SUGGESTIONS_WORKFLOW_ID } from './nightshift_investigations/onboarding_suggestions';
 export { CREATE_PROPOSAL_WORKFLOW_ID } from './proposals';
 export {
@@ -249,7 +267,11 @@ export const managedWorkflowDefinitions = [
   NIGHTSHIFT_AGENT_OPTIMIZE_WORKFLOW,
   NIGHTSHIFT_INVESTIGATION_WORKFLOW,
   NIGHTSHIFT_BOUND_INVESTIGATION_WORKFLOW,
+  NIGHTSHIFT_BOUND_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW,
+  NIGHTSHIFT_BOUND_AGENT_OPTIMIZE_WORKFLOW,
+  NIGHTSHIFT_BOUND_DECISION_TREE_HYDRATE_WORKFLOW,
   NIGHTSHIFT_SLACK_THREAD_WORKFLOW,
+  NIGHTSHIFT_BOUND_SLACK_THREAD_WORKFLOW,
   NIGHTSHIFT_ONBOARDING_SUGGESTIONS_WORKFLOW,
   SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW,
   SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW,

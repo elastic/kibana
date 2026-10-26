@@ -19,7 +19,7 @@ import { z, lazySchema } from '@kbn/zod/v4';
 import type { GetScopedClients } from '../../../../routes/types';
 import {
   loadSourceCatalog,
-  resolveSourcesBySlug,
+  resolveSourcesBySlugOrId,
   toSourceRef,
 } from '../../../utils/resolve_source_slugs';
 import { assertCanReadSignificantEvents } from '../../../../routes/utils/assert_can_manage_significant_events';
@@ -78,7 +78,7 @@ export const createGetFeaturesTool = ({
         const scopedClients = await getScopedClients({ request: context.request });
         await assertCanReadSignificantEvents({ request: context.request, server });
         const catalog = await loadSourceCatalog(scopedClients.sourcesClient);
-        const [source] = resolveSourcesBySlug(catalog, [slug]);
+        const [source] = resolveSourcesBySlugOrId(catalog, [slug]);
         // Stored features are read as the internal user, so check the caller's own data access first.
         await scopedClients.sourcesClient.assertReadable(source.id);
         const kiClient = await scopedClients.getKnowledgeIndicatorClient();

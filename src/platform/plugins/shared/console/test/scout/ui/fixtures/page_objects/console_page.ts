@@ -18,6 +18,9 @@ const MARGIN_CLICK_TIMEOUT_MS = 3_000;
 // `autocomplete_entities` fans out cluster-wide on a real Cloud project, so it outlasts the
 // default expect timeout. Kept well under the 60s per-test budget, which this shares.
 const AUTOCOMPLETE_ENTITIES_TIMEOUT_MS = 30_000;
+// Each test's browser context refetches Kibana's whole bundle graph, which on a Cloud
+// deployment regularly outlasts the default timeouts.
+const APP_BOOTSTRAP_TIMEOUT_MS = 30_000;
 
 export class ConsolePage {
   public readonly inputEditor: Locator;
@@ -198,8 +201,9 @@ export class ConsolePage {
   }
 
   async goto() {
-    await this.page.gotoApp('dev_tools', { hash: 'console' });
-    await this.inputEditor.waitFor({ state: 'visible' });
+    // 'commit' instead of the default `load`, which also waits for every bootstrap subresource.
+    await this.page.gotoApp('dev_tools', { hash: 'console' }, { waitUntil: 'commit' });
+    await this.inputEditor.waitFor({ state: 'visible', timeout: APP_BOOTSTRAP_TIMEOUT_MS });
   }
 
   /**
@@ -208,10 +212,12 @@ export class ConsolePage {
    */
   async gotoWithRequestLoaded(request: string) {
     const encoded = compressToEncodedURIComponent(request);
-    await this.page.gotoApp('dev_tools', {
-      hash: `console/shell?load_from=data:text/plain,${encoded}`,
-    });
-    await this.inputEditor.waitFor({ state: 'visible' });
+    await this.page.gotoApp(
+      'dev_tools',
+      { hash: `console/shell?load_from=data:text/plain,${encoded}` },
+      { waitUntil: 'commit' }
+    );
+    await this.inputEditor.waitFor({ state: 'visible', timeout: APP_BOOTSTRAP_TIMEOUT_MS });
     await this.sendRequestButton.waitFor({ state: 'visible' });
   }
 
