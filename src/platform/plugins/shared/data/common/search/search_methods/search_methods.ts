@@ -15,11 +15,7 @@ import {
   isOfQueryType,
   type EsQueryConfig,
 } from '@kbn/es-query';
-import {
-  fixESQLQueryWithVariables,
-  getEsqlInspectorStats,
-  getNamedParams,
-} from '@kbn/esql-utils';
+import { fixESQLQueryWithVariables, getEsqlInspectorStats, getNamedParams } from '@kbn/esql-utils';
 import type {
   ISearchMethods,
   IDslSearchParams,
