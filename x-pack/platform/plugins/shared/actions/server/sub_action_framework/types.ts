@@ -12,6 +12,7 @@ import type { LicenseType } from '@kbn/licensing-types';
 import type { Method, AxiosRequestConfig } from 'axios';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SSLSettings } from '@kbn/actions-utils';
+import type { AuthMode } from '@kbn/connector-specs';
 import type { ActionsConfigurationUtilities } from '../actions_config';
 import type {
   ActionTypeParams,
@@ -22,7 +23,6 @@ import type {
 import type { SubFeature } from '../../common';
 import type { SubActionConnector } from './sub_action_connector';
 import type { HookServices } from '../types';
-import type { AuthMode } from '@kbn/connector-specs';
 import type { ActionExecutionSourceType } from '../lib';
 
 export interface ServiceParams<Config, Secrets> {
