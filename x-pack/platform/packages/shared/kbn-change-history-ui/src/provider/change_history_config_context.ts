@@ -11,6 +11,7 @@ import type { ChangeHistoryBadgeRenderFn } from '../types/change_history_badge';
 import type { ChangeHistoryChangesSummaryRenderFn } from '../types/change_history_changes_summary';
 import type { ChangeHistorySupports } from '../types/change_history_features';
 import type { ChangeHistoryLabels } from '../types/change_history_labels';
+import type { ChangeHistoryListItem } from '../types/change_history_list_item';
 import type { ChangeHistoryPreviewRenderFn } from '../types/change_history_preview';
 import type { ChangeHistoryScope } from '../types/change_history_scope';
 import type { ChangeHistoryTelemetryReporter } from '../telemetry/types';
@@ -26,6 +27,8 @@ export interface ChangeHistoryConfigValue {
   adapter: ChangeHistoryAdapter;
   renderPreview: ChangeHistoryPreviewRenderFn;
   renderChangesSummary?: ChangeHistoryChangesSummaryRenderFn;
+  renderChanges?: ChangeHistoryChangesSummaryRenderFn;
+  onSelectChange?: (item: ChangeHistoryListItem) => void;
   renderBadge?: ChangeHistoryBadgeRenderFn;
   labels: ChangeHistoryResolvedLabels;
   supports: ChangeHistorySupports;

@@ -14,6 +14,7 @@ import type {
   ChangeHistoryPermissions,
 } from '../types/change_history_features';
 import type { ChangeHistoryLabels } from '../types/change_history_labels';
+import type { ChangeHistoryListItem } from '../types/change_history_list_item';
 import type { ChangeHistoryPreviewRenderFn } from '../types/change_history_preview';
 import type { ChangeHistoryAdapter } from '../types/change_history_adapter';
 import { createChangeHistoryTelemetryReporter } from '../telemetry/create_change_history_telemetry_reporter';
@@ -29,6 +30,9 @@ export interface ChangeHistoryProviderProps {
   adapter: ChangeHistoryAdapter;
   renderPreview: ChangeHistoryPreviewRenderFn;
   renderChangesSummary?: ChangeHistoryChangesSummaryRenderFn;
+  renderChanges?: ChangeHistoryChangesSummaryRenderFn;
+  /** Called whenever the user selects a change in the timeline. */
+  onSelectChange?: (item: ChangeHistoryListItem) => void;
   renderBadge?: ChangeHistoryBadgeRenderFn;
   labels: ChangeHistoryLabels;
   features?: ChangeHistoryFeatures;
@@ -43,6 +47,8 @@ export const ChangeHistoryProvider = ({
   objectId,
   adapter,
   renderPreview,
+  renderChanges,
+  onSelectChange,
   renderChangesSummary,
   renderBadge,
   labels,
@@ -94,6 +100,8 @@ export const ChangeHistoryProvider = ({
       objectId,
       adapter,
       renderPreview,
+      renderChanges,
+      onSelectChange,
       renderChangesSummary,
       renderBadge,
       labels: {
@@ -111,7 +119,9 @@ export const ChangeHistoryProvider = ({
       labels.previewTitle,
       listPageSize,
       objectId,
+      onSelectChange,
       renderBadge,
+      renderChanges,
       renderChangesSummary,
       renderPreview,
       scope,

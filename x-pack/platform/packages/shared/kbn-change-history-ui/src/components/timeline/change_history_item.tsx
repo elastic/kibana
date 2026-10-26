@@ -35,7 +35,8 @@ export const ChangeHistoryItem = memo(function ChangeHistoryItem({
   selected,
   onClick,
 }: ChangeHistoryItemProps): JSX.Element {
-  const { renderBadge, renderChangesSummary, supports } = useChangeHistoryConfig();
+  const { renderBadge, renderChangesSummary, renderChanges, supports } = useChangeHistoryConfig();
+  console.log({ renderChanges });
   const modalSelection = useContext(ChangeHistoryModalSelectionContext);
   const { euiTheme } = useEuiTheme();
   const timestamp = useMemo(() => new Date(item.timestamp), [item.timestamp]);
@@ -194,16 +195,26 @@ export const ChangeHistoryItem = memo(function ChangeHistoryItem({
                         {item.changes ? (
                           <>
                             {' • '}
-                            {changesSummaryTooltip ? (
-                              <EuiToolTip position="top" content={changesSummaryTooltip}>
-                                <span tabIndex={0} data-test-subj="changeHistoryItemChanges">
-                                  {i18n.N_CHANGES(item.changes.count)}
-                                </span>
-                              </EuiToolTip>
+                            {renderChanges ? (
+                              renderChanges({
+                                item,
+                                changes: item.changes,
+                                summary: item.changes.summary,
+                              })
                             ) : (
-                              <span data-test-subj="changeHistoryItemChanges">
-                                {i18n.N_CHANGES(item.changes.count)}
-                              </span>
+                              <>
+                                {changesSummaryTooltip ? (
+                                  <EuiToolTip position="top" content={changesSummaryTooltip}>
+                                    <span tabIndex={0} data-test-subj="changeHistoryItemChanges">
+                                      {i18n.N_CHANGES(item.changes.count)}
+                                    </span>
+                                  </EuiToolTip>
+                                ) : (
+                                  <span data-test-subj="changeHistoryItemChanges">
+                                    {i18n.N_CHANGES(item.changes.count)}
+                                  </span>
+                                )}{' '}
+                              </>
                             )}
                           </>
                         ) : null}

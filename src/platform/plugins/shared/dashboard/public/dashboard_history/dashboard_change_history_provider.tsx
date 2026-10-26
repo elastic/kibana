@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
+import type { ChangeHistoryListItem } from '@kbn/change-history-ui';
 import { ChangeHistoryModal, ChangeHistoryProvider } from '@kbn/change-history-ui';
 import { i18n } from '@kbn/i18n';
 
@@ -17,6 +18,7 @@ import { createDashboardChangeHistoryAdapter } from './dashboard_change_history_
 import { renderDashboardChangeHistoryBadge } from './dashboard_change_history_badge';
 import { DashboardChangeHistoryPreview } from './dashboard_change_history_preview';
 import { useDashboardApi } from '../dashboard_api/use_dashboard_api';
+import { EuiButtonEmpty } from '@elastic/eui';
 
 export interface DashboardChangeHistoryProviderProps {
   children: React.ReactNode;
@@ -30,6 +32,9 @@ export const DashboardChangeHistoryProvider = ({
 
   const { analytics } = coreServices;
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState<boolean>(false);
+  const [comparisonChangeId, setComparisonChangeId] = useState<string>();
+  // set by the "N changes" button, whose click bubbles up to the row and selects the change
+  const requestedComparisonIdRef = useRef<string>();
   const [previewTitle, setPreviewTitle] = useState<string>(
     dashboardApi?.title$.getValue() ?? dashboardId
   );
@@ -57,6 +62,12 @@ export const DashboardChangeHistoryProvider = ({
     [dashboardApi]
   );
 
+  const onSelectChange = useCallback((item: ChangeHistoryListItem) => {
+    const { id } = item;
+    setComparisonChangeId(requestedComparisonIdRef.current === id ? id : undefined);
+    requestedComparisonIdRef.current = undefined;
+  }, []);
+
   return (
     <ChangeHistoryProvider
       objectId={dashboardId}
@@ -65,10 +76,29 @@ export const DashboardChangeHistoryProvider = ({
         <DashboardChangeHistoryPreview
           previewProps={props}
           setPreviewTitle={setPreviewTitle}
+          comparisonChangeId={comparisonChangeId}
           inheritedTimeRange={dashboardApi?.timeRange$.getValue()}
         />
       )}
+      onSelectChange={onSelectChange}
       renderBadge={renderDashboardChangeHistoryBadge}
+      renderChanges={(props) => {
+        return (
+          <EuiButtonEmpty
+            data-test-subj="changeHistoryItemChanges"
+            size={'xs'}
+            flush={'both'}
+            onClick={() => {
+              requestedComparisonIdRef.current = props.item.id;
+            }}
+          >
+            {i18n.translate('xpack.changeHistoryUi.timeline.nChanges', {
+              defaultMessage: '{count, plural, one {# change} other {# changes}}',
+              values: { count: props.changes.count },
+            })}
+          </EuiButtonEmpty>
+        );
+      }}
       labels={{
         previewBackLabel: i18n.translate('dashboard.changeHistory.backToDashboard', {
           defaultMessage: 'Back to dashboard',

@@ -31,7 +31,14 @@ export const createDashboardChangeHistoryAdapter = (
           signal,
         }
       );
-      return response;
+      const test = response.items.map((item) => {
+        console.log({ item });
+        return item.changes
+          ? { ...item, changes: { ...item.changes, summary: 'This is a summary' } }
+          : item;
+      });
+      console.log({ test });
+      return { ...response, items: test };
     } catch (e) {
       throw mapChangeHistoryHttpError(e);
     }
