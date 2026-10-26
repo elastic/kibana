@@ -9,7 +9,6 @@
   "kbn_references": [
     "@kbn/data-source",
     "@kbn/es-query",
-    "@kbn/data-views-plugin",
     "@kbn/expressions-plugin",
     "@kbn/core-execution-context-common",
     "@kbn/utility-types",
