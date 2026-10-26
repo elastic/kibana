@@ -33,11 +33,11 @@ import type {
 } from '../../common/types/domain';
 import {
   AttachmentType,
-  ExternalReferenceSOAttachmentPayloadRt,
-  FileAttachmentMetadataRt,
   CaseSeverity,
   CaseStatuses,
   ConnectorTypes,
+  ExternalReferenceSOAttachmentPayloadSchema,
+  FileAttachmentMetadataSchema,
 } from '../../common/types/domain';
 import { isValidOwner } from '../../common/utils/owner';
 import {
@@ -77,8 +77,8 @@ import {
   toStringArray,
 } from '../../common/utils/attachments';
 import { toUnifiedAttributes } from '../services/attachments/operations/utils';
-import { AttachmentTransformedAttributesRt } from './types/attachments_v1';
-import { decodeOrThrow } from './runtime_types';
+import { AttachmentTransformedAttributesSchema } from './types/attachments_v1';
+import { decodeOrThrowZod } from './runtime_types';
 
 /**
  * Default sort field for querying saved objects.
@@ -224,7 +224,7 @@ export const flattenAttachmentSavedObject = (
   const transformed = toUnifiedAttributes({ attributes: savedObject.attributes });
   const attributes = transformed.isUnified
     ? transformed.attributes
-    : decodeOrThrow(AttachmentTransformedAttributesRt)(transformed.attributes);
+    : decodeOrThrowZod(AttachmentTransformedAttributesSchema)(transformed.attributes);
 
   return {
     id: savedObject.id,
@@ -421,9 +421,10 @@ export const isPersistableStateOrExternalReference = (context: AttachmentRequest
 export const isFileAttachmentRequest = (
   context: Partial<AttachmentRequest>
 ): context is FileAttachmentRequest => {
+  const parsed = ExternalReferenceSOAttachmentPayloadSchema.safeParse(context);
   return (
-    ExternalReferenceSOAttachmentPayloadRt.is(context) &&
-    FileAttachmentMetadataRt.is(context.externalReferenceMetadata)
+    parsed.success &&
+    FileAttachmentMetadataSchema.safeParse(parsed.data.externalReferenceMetadata).success
   );
 };
 
@@ -437,7 +438,7 @@ export const isUnifiedFileAttachmentRequest = (
   return (
     isUnifiedReferenceAttachmentRequest(context) &&
     context.type === FILE_ATTACHMENT_TYPE &&
-    FileAttachmentMetadataRt.is(context.metadata)
+    FileAttachmentMetadataSchema.safeParse(context.metadata).success
   );
 };
 
