@@ -14,7 +14,7 @@ import type {
   APMTransactionDurationIndicator,
   APMTransactionErrorRateIndicator,
 } from '@kbn/slo-schema';
-import { apmTransactionDurationIndicatorSchema } from '@kbn/slo-schema';
+import { is, apmTransactionDurationIndicatorSchemaZod } from '@kbn/slo-schema';
 import type {
   APM_ALERTING_FAILED_TRANSACTIONS_CHART_EMBEDDABLE,
   APM_ALERTING_LATENCY_CHART_EMBEDDABLE,
@@ -71,7 +71,7 @@ export function APMEmbeddableRoot({
     environment: environment !== '*' ? environment : undefined,
     rangeFrom: dataTimeRange.from.toISOString(),
     rangeTo: dataTimeRange.to.toISOString(),
-    latencyThresholdInMicroseconds: apmTransactionDurationIndicatorSchema.is(indicator)
+    latencyThresholdInMicroseconds: is(apmTransactionDurationIndicatorSchemaZod, indicator)
       ? indicator.params.threshold * 1000
       : undefined,
     kuery,

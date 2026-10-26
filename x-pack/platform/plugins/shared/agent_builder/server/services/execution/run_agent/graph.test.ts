@@ -13,6 +13,7 @@ import { ChatCompletionErrorCode, InferenceTaskError } from '@kbn/inference-comm
 import type { InferenceChatModel } from '@kbn/inference-langchain';
 import {
   ConversationRoundStepType,
+  ToolCallInvocation,
   createInjectedContextStep,
   type ConversationRoundStep,
 } from '@kbn/agent-builder-common';
@@ -777,5 +778,68 @@ describe('createAgentGraph cycle hooks', () => {
     // the note landed in its own super-step, so the last streamed state and the projection have it
     expect(tracker.latestState().steps).toEqual([note]);
     expect(tracker.executionProjection()).toEqual([note]);
+  });
+});
+
+describe('createAgentGraph - execute_dynamic_tool', () => {
+  const dynamicCall = (id: string) => ({
+    id,
+    name: internalTools.executeDynamicTool,
+    args: { tool_id: 'skill.tool', params: { q: 1 } },
+  });
+
+  it('interrupts the run on a prompt from the inner tool, with the step keyed on the inner tool', async () => {
+    const { graph, researchInvoke, toolManager } = createTestGraph();
+    researchInvoke.mockResolvedValueOnce(
+      new AIMessage({ content: '', tool_calls: [dynamicCall('c1')] })
+    );
+    const prompt = { id: 'p1', type: 'confirmation', title: 't', message: 'm' };
+    mockToolNodeOnce([new ToolMessage({ tool_call_id: 'c1', content: '', artifact: { prompt } })]);
+
+    const result = await graph.invoke({ cycleLimit: 5 });
+
+    expect(result.interrupted).toBe(true);
+    expect(result.prompts).toEqual([prompt]);
+    expect(result.pendingToolCallIds).toEqual(['c1']);
+    expect(result.steps[0]).toMatchObject({
+      tool_call_id: 'c1',
+      tool_id: 'skill.tool',
+      params: { q: 1 },
+      invocation: ToolCallInvocation.dynamic,
+      results: [],
+    });
+    // the render state keeps the outer name so the paused call is re-rendered as the model made it
+    expect(result.toolRenderState.c1).toMatchObject({
+      toolName: internalTools.executeDynamicTool,
+      kind: 'server',
+    });
+    // the outer call is what reached the tool node
+    expect(toolManager.recordToolUse).toHaveBeenCalledWith(internalTools.executeDynamicTool);
+  });
+
+  it('resolves the result under the inner tool id and completes the run', async () => {
+    const { graph, researchInvoke } = createTestGraph();
+    researchInvoke
+      .mockResolvedValueOnce(new AIMessage({ content: '', tool_calls: [dynamicCall('c1')] }))
+      .mockResolvedValueOnce(new AIMessage({ content: 'done' }));
+    const results = [{ tool_result_id: 'r1', type: 'other', data: { ok: true } }];
+    mockToolNodeOnce([
+      new ToolMessage({
+        tool_call_id: 'c1',
+        content: JSON.stringify({ results }),
+        artifact: { results },
+      }),
+    ]);
+
+    const result = await graph.invoke({ cycleLimit: 5 });
+
+    expect(result.finalAnswer).toBe('done');
+    expect(result.steps[0]).toMatchObject({
+      tool_call_id: 'c1',
+      tool_id: 'skill.tool',
+      invocation: ToolCallInvocation.dynamic,
+      results,
+    });
+    expect(result.pendingToolCallIds).toEqual([]);
   });
 });

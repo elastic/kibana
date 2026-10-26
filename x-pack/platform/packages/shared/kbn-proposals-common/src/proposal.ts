@@ -8,7 +8,7 @@
 import type { ActionMetadata } from '@kbn/workflows';
 import { actionCategorySchema, actionImpactSchema } from '@kbn/workflows';
 import { z } from '@kbn/zod/v4';
-import { MAX_CHARTS_SUMMARY_BUCKETS } from './constants';
+import { MAX_CHARTS_SUMMARY_BUCKETS, PROPOSAL_CATEGORY_TODO } from './constants';
 
 /**
  * What a human concluded. Absent until someone decides, which is what makes
@@ -417,6 +417,16 @@ export const isAwaitingDecision = (proposal: Pick<Proposal, 'status'>): boolean 
   proposal.status === 'pending';
 
 /**
+ * A to-do for a human: something the analyst carries out themselves, so approving it records that
+ * they did. Decision surfaces present it as "I've applied" rather than Approve/Decline, and as
+ * "Applied" once marked. Keyed on the category rather than on the absence of an action, so a
+ * producer states it explicitly, and a proposal without an action that still asks for permission
+ * (to run an analysis, say) keeps Approve/Decline.
+ */
+export const isTodoProposal = (proposal: Pick<Proposal, 'category'>): boolean =>
+  proposal.category === PROPOSAL_CATEGORY_TODO;
+
+/**
  * Approved, but the action it triggers has not finished running yet — `executing`, or briefly
  * still `pending` while the gate workflow's post-gate write is catching up with an approve call
  * that already returned. Declining has no action to run, so a decline never reads this; it
@@ -429,6 +439,16 @@ export const isAwaitingDecision = (proposal: Pick<Proposal, 'status'>): boolean 
 export const isProposalSettling = (proposal: Pick<Proposal, 'decision' | 'status'>): boolean =>
   proposal.decision === 'approved' &&
   (proposal.status === 'pending' || proposal.status === 'executing');
+
+/**
+ * The action failed and its retry does not exist yet. Poll until the original is superseded.
+ */
+export const isAwaitingRetry = (
+  proposal: Pick<Proposal, 'decision' | 'status' | 'supersededBy'>
+): boolean =>
+  proposal.decision === 'approved' &&
+  proposal.status === 'failed' &&
+  proposal.supersededBy === undefined;
 
 /** Settled by a deadline rather than a person.
  * `pending` reads as live even past `expiresAt` until the gate workflow sweeps it,

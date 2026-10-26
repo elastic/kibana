@@ -536,17 +536,26 @@ describe('policy_execution_history_schema', () => {
 
   describe('searchMatchCountsSchema', () => {
     it('accepts valid counts', () => {
-      const counts = { policies: 3, rules: 10, is_truncated: false };
+      const counts = { policy_count: 3, rule_count: 10, is_truncated: false };
       expect(searchMatchCountsSchema.parse(counts)).toEqual(counts);
     });
 
     it('requires the truncation flag alongside both counts', () => {
-      expect(searchMatchCountsSchema.safeParse({ policies: 3, rules: 10 }).success).toBe(false);
+      expect(searchMatchCountsSchema.safeParse({ policy_count: 3, rule_count: 10 }).success).toBe(
+        false
+      );
+    });
+
+    it('rejects the pre-GA count names', () => {
+      expect(
+        searchMatchCountsSchema.safeParse({ policies: 3, rules: 10, is_truncated: false }).success
+      ).toBe(false);
     });
 
     it('rejects a non-boolean truncation flag', () => {
       expect(
-        searchMatchCountsSchema.safeParse({ policies: 3, rules: 10, is_truncated: 500 }).success
+        searchMatchCountsSchema.safeParse({ policy_count: 3, rule_count: 10, is_truncated: 500 })
+          .success
       ).toBe(false);
     });
   });
@@ -569,7 +578,7 @@ describe('policy_execution_history_schema', () => {
         page: 1,
         per_page: 20,
         total: 1,
-        search_matches: { policies: 1, rules: 1, is_truncated: false },
+        search_matches: { policy_count: 1, rule_count: 1, is_truncated: false },
       });
       expect(parsed.items).toHaveLength(1);
     });
