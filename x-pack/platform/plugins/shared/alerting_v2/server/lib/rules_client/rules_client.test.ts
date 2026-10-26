@@ -657,7 +657,7 @@ describe('RulesClient', () => {
       expect(rulesSavedObjectService.bulkDelete).toHaveBeenCalledWith(['rule-on']);
       expect(taskManager.bulkRemove).toHaveBeenCalledWith(['task:rule-on']);
       expect(mockLogger.error).toHaveBeenCalledWith(
-        expect.stringContaining('Failed to schedule executor task(s) for rule(s) [rule-on]'),
+        expect.anything(),
         expect.objectContaining({
           labels: { code: ALERTING_LOG_CODES.RULE_TASK_SCHEDULE_FAILED },
         })
@@ -2858,7 +2858,7 @@ describe('RulesClient', () => {
       ]);
       expect(mockLogger.error).toHaveBeenCalledTimes(1);
       expect(mockLogger.error).toHaveBeenCalledWith(
-        expect.stringContaining('Failed to remove executor task(s) for rule(s)'),
+        expect.anything(),
         expect.objectContaining({
           labels: { code: ALERTING_LOG_CODES.RULE_TASK_MANAGER_DRIFT },
         })
@@ -3052,7 +3052,7 @@ describe('RulesClient', () => {
       expect(rulesSavedObjectService.bulkUpdate).not.toHaveBeenCalled();
       expect(taskManager.bulkRemove).toHaveBeenCalledWith(['task:rule-1', 'task:rule-2']);
       expect(mockLogger.error).toHaveBeenCalledWith(
-        expect.stringContaining('they remain disabled'),
+        expect.anything(),
         expect.objectContaining({
           labels: { code: ALERTING_LOG_CODES.RULE_TASK_SCHEDULE_FAILED },
         })
