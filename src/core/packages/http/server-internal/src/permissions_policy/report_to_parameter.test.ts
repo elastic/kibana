@@ -45,6 +45,38 @@ describe('addReportToParameter', () => {
     ).toEqual('camera=();report-to=elsewhere, microphone=();report-to=endpoint');
   });
 
+  // A parameter inside the inner list belongs to one origin, and browsers ignore it for reporting.
+  it('does not mistake a report-to on an origin for one on the directive', () => {
+    expect(
+      addReportToParameter('geolocation=("https://other.example";report-to=ignored)', 'endpoint')
+    ).toEqual('geolocation=("https://other.example";report-to=ignored);report-to=endpoint');
+  });
+
+  it('does not mistake a report-to on an origin for one on a later directive', () => {
+    expect(
+      addReportToParameter(
+        'camera=(), geolocation=(self "https://other.example";report-to=ignored)',
+        'endpoint'
+      )
+    ).toEqual(
+      'camera=();report-to=endpoint, geolocation=(self "https://other.example";report-to=ignored);report-to=endpoint'
+    );
+  });
+
+  // Browsers only honor a token. A later duplicate parameter wins, so ours takes effect.
+  it.each([
+    ['a quoted string', 'camera=();report-to="elsewhere"'],
+    ['a boolean', 'camera=();report-to'],
+  ])('attaches the parameter when an existing report-to is %s', (_, policy) => {
+    expect(addReportToParameter(policy, 'endpoint')).toEqual(`${policy};report-to=endpoint`);
+  });
+
+  it('leaves a directive alone when it reports somewhere and an origin also carries report-to', () => {
+    expect(
+      addReportToParameter('geolocation=(self;report-to=ignored);report-to=kept', 'endpoint')
+    ).toEqual('geolocation=(self;report-to=ignored);report-to=kept');
+  });
+
   it('is idempotent', () => {
     const once = addReportToParameter(DEFAULT_POLICY, 'endpoint');
     expect(addReportToParameter(once, 'endpoint')).toEqual(once);

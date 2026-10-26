@@ -13,19 +13,34 @@
  */
 const REPORTING_GROUP_NAME = /^[A-Za-z*][A-Za-z0-9!#$%&'*+\-.^_`|~:/]*$/;
 
-const QUOTED_STRING = /"(?:[^"\\]|\\.)*"/g;
-const REPORT_TO_PARAMETER = /;\s*report-to\s*=/;
+/**
+ * A `report-to` parameter whose value is a token, the only form browsers honor. Any other value is
+ * ignored, so the member still needs ours.
+ */
+const REPORT_TO_PARAMETER = /;\s*report-to=[A-Za-z*]/;
+
+interface PolicyMember {
+  /** The member as written. */
+  readonly text: string;
+  /**
+   * The member without its inner list and quoted strings. A parameter left here belongs to the
+   * member itself, which is the only place a browser reads `report-to` from. A parameter inside the
+   * inner list belongs to one origin and is ignored for reporting.
+   */
+  readonly topLevel: string;
+}
 
 /**
  * Splits a Permissions-Policy dictionary into its members on top-level commas, skipping commas
  * inside inner lists and quoted strings. Returns `undefined` when the policy is not a dictionary
  * that can be split unambiguously.
  */
-const splitMembers = (policy: string): string[] | undefined => {
-  const members: string[] = [];
+const splitMembers = (policy: string): PolicyMember[] | undefined => {
+  const members: PolicyMember[] = [];
   let depth = 0;
   let inString = false;
   let start = 0;
+  let topLevel = '';
 
   for (let i = 0; i < policy.length; i++) {
     const char = policy[i];
@@ -43,14 +58,19 @@ const splitMembers = (policy: string): string[] | undefined => {
       if (--depth < 0) {
         return undefined;
       }
-    } else if (char === ',' && depth === 0) {
-      members.push(policy.slice(start, i));
-      start = i + 1;
+    } else if (depth === 0) {
+      if (char === ',') {
+        members.push({ text: policy.slice(start, i), topLevel });
+        start = i + 1;
+        topLevel = '';
+      } else {
+        topLevel += char;
+      }
     }
   }
-  members.push(policy.slice(start));
+  members.push({ text: policy.slice(start), topLevel });
 
-  if (inString || depth !== 0 || members.some((member) => !member.trim())) {
+  if (inString || depth !== 0 || members.some(({ text }) => !text.trim())) {
     return undefined;
   }
   return members;
@@ -61,10 +81,10 @@ const splitMembers = (policy: string): string[] | undefined => {
  *
  * `report-to` is a parameter of each member, not of the header, so a single parameter appended to
  * the end only applies to the last directive. Browsers send violations of every other directive to
- * the `default` endpoint group, which is not declared, and drop them. See
+ * the `default` endpoint, and drop them unless one is declared. See
  * https://www.w3.org/TR/permissions-policy/#reporting
  *
- * A member that already carries `report-to` is left alone. When the endpoint name is not a valid
+ * A member that already carries its own `report-to` is left alone. When the endpoint name is not a valid
  * token, or the policy cannot be split unambiguously, the parameter is appended once to the end of
  * the header, which is how it was always sent.
  */
@@ -76,12 +96,12 @@ export const addReportToParameter = (policy: string, reportTo: string): string =
   }
 
   return members
-    .map((member) => {
-      if (REPORT_TO_PARAMETER.test(member.replace(QUOTED_STRING, '""'))) {
-        return member;
+    .map(({ text, topLevel }) => {
+      if (REPORT_TO_PARAMETER.test(topLevel)) {
+        return text;
       }
       // Keep the separator's whitespace, but put the parameter directly after the member.
-      return `${member.trimEnd()}${parameter}`;
+      return `${text.trimEnd()}${parameter}`;
     })
     .join(',');
 };
