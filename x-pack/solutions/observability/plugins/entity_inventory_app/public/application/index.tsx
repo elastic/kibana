@@ -7,11 +7,12 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { EuiPageSection } from '@elastic/eui';
+import { EuiBetaBadge, EuiPageSection } from '@elastic/eui';
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { Redirect, useLocation } from 'react-router-dom';
 import { AppHeader } from '@kbn/app-header';
+import type { AppHeaderBadge } from '@kbn/app-header';
 import type { ObservabilitySharedPluginStart } from '@kbn/observability-shared-plugin/public';
 
 interface EntityInventoryShellProps {
@@ -24,13 +25,28 @@ const PATH_TITLES: Record<string, string> = {
   '/kubernetes': 'Kubernetes',
 };
 
+const TECH_PREVIEW_BADGE: AppHeaderBadge[] = [
+  {
+    label: 'Technical preview',
+    renderCustomBadge: () => (
+      <EuiBetaBadge
+        label="Technical preview"
+        color="hollow"
+        size="s"
+        iconType="flask"
+        tooltipContent="This functionality is in technical preview and may be changed or removed in a future release."
+      />
+    ),
+  },
+];
+
 function EntityInventoryShell({ PageTemplate }: EntityInventoryShellProps) {
   const { pathname } = useLocation();
   const title = PATH_TITLES[pathname] ?? 'Entity Inventory';
 
   return (
     <PageTemplate isPageDataLoaded={true} pageSectionProps={{ paddingSize: 'none' }}>
-      <AppHeader title={title} menu={{}} spacing="standard" />
+      <AppHeader title={title} badges={TECH_PREVIEW_BADGE} menu={{}} spacing="standard" />
       <EuiPageSection paddingSize="m" grow restrictWidth={false}>
         <Routes>
           <Route path="/all-resources" component={EntityInventoryContent} />
