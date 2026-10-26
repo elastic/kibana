@@ -10,6 +10,8 @@ import {
   RenderCapacityTimeoutError,
   RenderFailedError,
   RenderRequestRejectedError,
+  RenderRetryAction,
+  RenderRetryReason,
   RenderServiceSaturatedError,
   RenderServiceUnavailableError,
 } from '@kbn/reporting-common';
@@ -34,8 +36,8 @@ describe('decideRenderRetry', () => {
 
   it('hands a report waiting for capacity straight back, as queuing', () => {
     expect(decide(new RenderServiceSaturatedError(), { unavailableRuns: 1 })).toEqual({
-      action: 'hand_back',
-      reason: 'saturated',
+      action: RenderRetryAction.HAND_BACK,
+      reason: RenderRetryReason.SATURATED,
       runAt: new Date(NOW),
       state: { unavailableRuns: 1, queued: true },
     });
@@ -46,8 +48,8 @@ describe('decideRenderRetry', () => {
     for (let run = 1; run < MAX_UNAVAILABLE_RUNS; run++) {
       const decision = decide(new RenderServiceUnavailableError(), state);
       expect(decision).toEqual({
-        action: 'reschedule',
-        reason: 'unavailable',
+        action: RenderRetryAction.RESCHEDULE,
+        reason: RenderRetryReason.UNAVAILABLE,
         runAt: new Date(NOW + RESCHEDULE_DELAY_MS),
         state: { unavailableRuns: run, queued: true },
       });
@@ -55,15 +57,15 @@ describe('decideRenderRetry', () => {
     }
 
     expect(decide(new RenderServiceUnavailableError(), state)).toEqual({
-      action: 'fail',
-      reason: 'unavailable',
+      action: RenderRetryAction.FAIL,
+      reason: RenderRetryReason.UNAVAILABLE,
     });
   });
 
   it('reschedules a failed render as another attempt, whose wait for a slot starts then', () => {
     expect(decide(new RenderFailedError(), { unavailableRuns: 2, queued: true }, 2)).toEqual({
-      action: 'reschedule',
-      reason: 'render_failure',
+      action: RenderRetryAction.RESCHEDULE,
+      reason: RenderRetryReason.RENDER_FAILURE,
       runAt: new Date(NOW + RESCHEDULE_DELAY_MS),
       state: { unavailableRuns: 2, queued: false, waitingSince: NOW + RESCHEDULE_DELAY_MS },
     });
@@ -78,22 +80,22 @@ describe('decideRenderRetry', () => {
 
   it('fails a failed render once the report has used its attempts', () => {
     expect(decide(new RenderFailedError(), {}, 3)).toEqual({
-      action: 'fail',
-      reason: 'render_failure',
+      action: RenderRetryAction.FAIL,
+      reason: RenderRetryReason.RENDER_FAILURE,
     });
   });
 
   it('fails a request the service rejected, without retrying', () => {
     expect(decide(new RenderRequestRejectedError())).toEqual({
-      action: 'fail',
-      reason: 'rejected',
+      action: RenderRetryAction.FAIL,
+      reason: RenderRetryReason.REJECTED,
     });
   });
 
   it('fails a report that waited out the capacity ceiling', () => {
     expect(decide(new RenderCapacityTimeoutError())).toEqual({
-      action: 'fail',
-      reason: 'saturated',
+      action: RenderRetryAction.FAIL,
+      reason: RenderRetryReason.SATURATED,
     });
   });
 

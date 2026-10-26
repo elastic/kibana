@@ -50,7 +50,10 @@ const createClient = (
   savedObjectsClient: SavedObjectsClientContract = savedObjectsClientMock.create()
 ) => {
   const { loggerService, mockLogger } = createLoggerService();
-  const rulesClient = { createRule: jest.fn() } as unknown as jest.Mocked<RulesClient>;
+  const rulesClient = {
+    createRule: jest.fn(),
+    getRuleCountsByTemplateId: jest.fn().mockResolvedValue({}),
+  } as unknown as jest.Mocked<RulesClient>;
   const client = new RuleTemplatesClient(savedObjectsClient, loggerService, rulesClient);
   return { client, savedObjectsClient, loggerService, mockLogger, rulesClient };
 };
@@ -151,10 +154,82 @@ describe('RuleTemplatesClient', () => {
         })
       );
       expect(result).toEqual({
-        items: [{ id: 'template-1', ...validTemplateAttributes }],
+        items: [{ id: 'template-1', ...validTemplateAttributes, rule_count: 0 }],
         total: 1,
         page: 1,
         per_page: 20,
+      });
+    });
+
+    describe('rule_count', () => {
+      const findResponse = (ids: string[]) => ({
+        saved_objects: ids.map((id) => ({
+          id,
+          type: RULE_TEMPLATE_SAVED_OBJECT_TYPE,
+          attributes: validTemplateAttributes,
+          references: [],
+          score: 1,
+        })),
+        total: ids.length,
+        page: 1,
+        per_page: 20,
+      });
+
+      it('sets the number of rules created from each template, defaulting to 0', async () => {
+        const savedObjectsClient = savedObjectsClientMock.create();
+        savedObjectsClient.find.mockResolvedValue(findResponse(['template-1', 'template-2']));
+        const { client, rulesClient } = createClient(savedObjectsClient);
+        rulesClient.getRuleCountsByTemplateId.mockResolvedValue({ 'template-1': 3 });
+
+        const result = await client.findRuleTemplates();
+
+        expect(result.items.map(({ id, rule_count: ruleCount }) => [id, ruleCount])).toEqual([
+          ['template-1', 3],
+          ['template-2', 0],
+        ]);
+      });
+
+      it('counts rules once, for the templates on the page only', async () => {
+        const savedObjectsClient = savedObjectsClientMock.create();
+        savedObjectsClient.find.mockResolvedValue({
+          ...findResponse(['valid']),
+          saved_objects: [
+            ...findResponse(['valid']).saved_objects,
+            {
+              id: 'invalid',
+              type: RULE_TEMPLATE_SAVED_OBJECT_TYPE,
+              attributes: { engine: 'v2', rule: { kind: 'alert' } },
+              references: [],
+              score: 1,
+            },
+          ],
+          total: 2,
+        });
+        const { client, rulesClient } = createClient(savedObjectsClient);
+
+        await client.findRuleTemplates();
+
+        expect(rulesClient.getRuleCountsByTemplateId).toHaveBeenCalledTimes(1);
+        expect(rulesClient.getRuleCountsByTemplateId).toHaveBeenCalledWith(['valid']);
+      });
+
+      it('lists the templates without rule_count and logs when counting the rules fails', async () => {
+        const savedObjectsClient = savedObjectsClientMock.create();
+        savedObjectsClient.find.mockResolvedValue(findResponse(['template-1']));
+        const { client, rulesClient, mockLogger } = createClient(savedObjectsClient);
+        rulesClient.getRuleCountsByTemplateId.mockRejectedValue(new Error('Unavailable'));
+
+        const result = await client.findRuleTemplates();
+
+        expect(result.items).toEqual([{ id: 'template-1', ...validTemplateAttributes }]);
+        expect(result.items[0]).not.toHaveProperty('rule_count');
+        expect(result.total).toBe(1);
+        expect(mockLogger.warn).toHaveBeenCalledWith(
+          'Failed to count the rules created from each rule template',
+          expect.objectContaining({
+            labels: { code: ALERTING_LOG_CODES.RULE_TEMPLATE_RULE_COUNT_FAILED },
+          })
+        );
       });
     });
 

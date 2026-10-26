@@ -127,7 +127,7 @@
       // not from an index/main entry. Declaring it as an entry lets knip follow its imports.
       "entry": ["generate.ts"]
     },
-    "src/platform/packages/shared/kbn-test": {
+    "src/platform/packages/shared/kbn-jest": {
       // Jest setup/polyfill/serializer files referenced from jest-preset.js via `<rootDir>/...`.
       // knip can't resolve `<rootDir>` inside a shared preset.
       "entry": ["**/*.{js,ts}"]

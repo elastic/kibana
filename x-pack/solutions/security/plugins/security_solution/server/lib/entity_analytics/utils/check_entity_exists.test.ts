@@ -9,6 +9,7 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import type { EntityStoreCRUDClient } from '@kbn/entity-store/server';
 import { checkEntityExists, EntityStoreAccessError, getEntityRecords } from './check_entity_exists';
 import {
+  RESOLUTION_GROUP_RISK_SORT_FIELD,
   RESOLVED_MODE_MAX_RECORDS,
   RESOLVED_TO_FIELD,
 } from '../../../../common/entity_analytics/entity_store/resolution_group';
@@ -187,7 +188,7 @@ describe('getEntityRecords', () => {
       }));
     };
 
-    it('runs a target lookup followed by a resolution group query', async () => {
+    it('runs a target lookup followed by a riskiest-first aliases query capped to the group size', async () => {
       mockTargetAndGroup([target], [target]);
 
       await getEntityRecords({
@@ -208,23 +209,16 @@ describe('getEntityRecords', () => {
       });
       expect(listEntities).toHaveBeenCalledWith({
         filter: [
-          {
-            bool: {
-              should: [
-                { term: { 'entity.id': 'host:target' } },
-                { term: { [RESOLVED_TO_FIELD]: 'host:target' } },
-              ],
-              minimum_should_match: 1,
-            },
-          },
+          { term: { [RESOLVED_TO_FIELD]: 'host:target' } },
           { term: { 'entity.EngineMetadata.Type': 'host' } },
         ],
-        size: RESOLVED_MODE_MAX_RECORDS,
+        size: RESOLVED_MODE_MAX_RECORDS - 1,
+        sort: [{ [RESOLUTION_GROUP_RISK_SORT_FIELD]: 'desc' }],
       });
     });
 
-    it('returns the target first followed by its aliases', async () => {
-      mockTargetAndGroup([target], [aliasA, target, aliasB]);
+    it('returns the target first followed by its aliases in the order they were returned', async () => {
+      mockTargetAndGroup([target], [aliasA, aliasB]);
 
       const result = await getEntityRecords({
         crudClient,
@@ -237,8 +231,8 @@ describe('getEntityRecords', () => {
       expect(result).toEqual([target, aliasA, aliasB]);
     });
 
-    it('returns the target even when the group query omits it', async () => {
-      mockTargetAndGroup([target], [aliasA]);
+    it('never lists the target twice if the aliases query returns it', async () => {
+      mockTargetAndGroup([target], [aliasA, target]);
 
       const result = await getEntityRecords({
         crudClient,

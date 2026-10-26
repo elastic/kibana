@@ -8,13 +8,13 @@
 import { EuiComment, EuiLoadingSpinner } from '@elastic/eui';
 import { FormattedRelative } from '@kbn/i18n-react';
 import React, { useEffect, useState, useMemo, memo } from 'react';
+import { ResponseActionDetails } from '../../../management/components/response_action';
 import { useGetActionDetails } from '../../../management/hooks/response_actions/use_get_action_details';
 import type {
   LogsEndpointActionWithHosts,
   ActionDetails,
 } from '../../../../common/endpoint/types/actions';
 import { useGetAutomatedActionResponseList } from '../../../management/hooks/response_actions/use_get_automated_action_list';
-import { ActionsLogExpandedTray } from '../../../management/components/endpoint_response_actions_list/components/action_log_expanded_tray';
 import { ENDPOINT_COMMANDS } from './translations';
 import { useUserPrivileges } from '../user_privileges';
 
@@ -114,7 +114,7 @@ const ResponseActionDetailsWorkaround = memo<{
 
   if (actionDetailsApiResult?.data) {
     return (
-      <ActionsLogExpandedTray action={actionDetailsApiResult.data} data-test-subj={dataTestSubj} />
+      <ResponseActionDetails action={actionDetailsApiResult.data} data-test-subj={dataTestSubj} />
     );
   }
 

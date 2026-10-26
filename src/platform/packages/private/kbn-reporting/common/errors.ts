@@ -9,6 +9,7 @@
 
 /* eslint-disable max-classes-per-file */
 import { i18n } from '@kbn/i18n';
+import { RenderServiceRetryClass } from './render_retry';
 
 export interface ReportingError {
   /**
@@ -167,20 +168,6 @@ export class ReportingSavedObjectNotFoundError extends ReportingError {
   }
 }
 
-/**
- * How the reporting task responds to a page-render-service failure (`render_retry.ts`).
- *
- * - `capacity`: no render slot within this run's wait budget; hand the worker back.
- * - `unavailable`: the service, or something in front of it, could not be reached.
- * - `render_failure`: the service tried and failed to render the page.
- * - `unrecoverable`: retrying cannot help.
- */
-export type RenderServiceRetryClass =
-  | 'capacity'
-  | 'unavailable'
-  | 'render_failure'
-  | 'unrecoverable';
-
 export abstract class RenderServiceError extends ReportingError {
   public abstract get retryClass(): RenderServiceRetryClass;
 }
@@ -191,7 +178,7 @@ export class RenderServiceSaturatedError extends RenderServiceError {
     return RenderServiceSaturatedError.code;
   }
   public get retryClass() {
-    return 'capacity' as const;
+    return RenderServiceRetryClass.CAPACITY as const;
   }
 
   public humanFriendlyMessage() {
@@ -207,7 +194,7 @@ export class RenderServiceUnavailableError extends RenderServiceError {
     return RenderServiceUnavailableError.code;
   }
   public get retryClass() {
-    return 'unavailable' as const;
+    return RenderServiceRetryClass.UNAVAILABLE as const;
   }
 
   public humanFriendlyMessage() {
@@ -223,7 +210,7 @@ export class RenderFailedError extends RenderServiceError {
     return RenderFailedError.code;
   }
   public get retryClass() {
-    return 'render_failure' as const;
+    return RenderServiceRetryClass.RENDER_FAILURE as const;
   }
 
   public humanFriendlyMessage() {
@@ -239,7 +226,7 @@ export class RenderRequestRejectedError extends RenderServiceError {
     return RenderRequestRejectedError.code;
   }
   public get retryClass() {
-    return 'unrecoverable' as const;
+    return RenderServiceRetryClass.UNRECOVERABLE as const;
   }
 
   public humanFriendlyMessage() {
@@ -256,7 +243,7 @@ export class RenderCapacityTimeoutError extends RenderServiceError {
     return RenderCapacityTimeoutError.code;
   }
   public get retryClass() {
-    return 'unrecoverable' as const;
+    return RenderServiceRetryClass.UNRECOVERABLE as const;
   }
 
   public humanFriendlyMessage() {

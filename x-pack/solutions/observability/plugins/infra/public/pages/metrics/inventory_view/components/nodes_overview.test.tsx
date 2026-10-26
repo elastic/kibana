@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
@@ -34,6 +35,11 @@ jest.mock('../hooks/use_asset_details_flyout_url_state', () => ({
 }));
 jest.mock('../../../../hooks/use_time_range_metadata', () => ({
   useTimeRangeMetadataContext: jest.fn(),
+}));
+jest.mock('../../../../hooks/use_kibana', () => ({
+  useKibanaContextForPlugin: () => ({
+    services: { telemetry: { reportSchemaSelectorInteraction: jest.fn() } },
+  }),
 }));
 
 jest.mock('../../../../components/empty_states', () => ({
@@ -107,9 +113,12 @@ const baseProps = {
   showLoading: true,
 };
 
+const mockChangePreferredSchema = jest.fn();
+
 const mockPreferredSchema = (preferredSchema: DataSchemaFormat | null) => {
   mockedUseWaffleOptionsContext.mockReturnValue({
     preferredSchema,
+    changePreferredSchema: mockChangePreferredSchema,
   });
 };
 
@@ -144,5 +153,21 @@ describe('NodesOverview', () => {
     expect(mockedUseWaffleOptionsContext()).toEqual(
       expect.objectContaining({ preferredSchema: 'semconv' })
     );
+  });
+
+  it('switches to the available schema when the empty state call to action is clicked', async () => {
+    renderOverview();
+
+    await userEvent.click(screen.getByTestId('infraInventoryViewNoDataInSelectedSchema'));
+
+    expect(mockChangePreferredSchema).toHaveBeenCalledWith('ecs');
+  });
+
+  it('does not offer schema documentation for pods', () => {
+    renderOverview();
+
+    expect(
+      screen.queryByTestId('infraInventoryViewNoDataInSelectedSchemaLearnMore')
+    ).not.toBeInTheDocument();
   });
 });

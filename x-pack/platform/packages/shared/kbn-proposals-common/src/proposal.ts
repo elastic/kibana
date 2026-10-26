@@ -8,7 +8,7 @@
 import type { ActionMetadata } from '@kbn/workflows';
 import { actionCategorySchema, actionImpactSchema } from '@kbn/workflows';
 import { z } from '@kbn/zod/v4';
-import { MAX_CHARTS_SUMMARY_BUCKETS } from './constants';
+import { MAX_CHARTS_SUMMARY_BUCKETS, PROPOSAL_CATEGORY_TODO } from './constants';
 
 /**
  * What a human concluded. Absent until someone decides, which is what makes
@@ -417,6 +417,16 @@ export const isAwaitingDecision = (proposal: Pick<Proposal, 'status'>): boolean 
   proposal.status === 'pending';
 
 /**
+ * A to-do for a human: something the analyst carries out themselves, so approving it records that
+ * they did. Decision surfaces present it as "I've applied" rather than Approve/Decline, and as
+ * "Applied" once marked. Keyed on the category rather than on the absence of an action, so a
+ * producer states it explicitly, and a proposal without an action that still asks for permission
+ * (to run an analysis, say) keeps Approve/Decline.
+ */
+export const isTodoProposal = (proposal: Pick<Proposal, 'category'>): boolean =>
+  proposal.category === PROPOSAL_CATEGORY_TODO;
+
+/**
  * Approved, but the action it triggers has not finished running yet — `executing`, or briefly
  * still `pending` while the gate workflow's post-gate write is catching up with an approve call
  * that already returned. Declining has no action to run, so a decline never reads this; it
@@ -430,6 +440,16 @@ export const isProposalSettling = (proposal: Pick<Proposal, 'decision' | 'status
   proposal.decision === 'approved' &&
   (proposal.status === 'pending' || proposal.status === 'executing');
 
+/**
+ * The action failed and its retry does not exist yet. Poll until the original is superseded.
+ */
+export const isAwaitingRetry = (
+  proposal: Pick<Proposal, 'decision' | 'status' | 'supersededBy'>
+): boolean =>
+  proposal.decision === 'approved' &&
+  proposal.status === 'failed' &&
+  proposal.supersededBy === undefined;
+
 /** Settled by a deadline rather than a person.
  * `pending` reads as live even past `expiresAt` until the gate workflow sweeps it,
  * so this is not a substitute for comparing `expiresAt` to `now`. */
@@ -437,16 +457,37 @@ export const isExpired = (proposal: Pick<Proposal, 'status'>): boolean =>
   proposal.status === 'expired';
 
 /**
- * A status that has settled. `pending` and `executing` are the only two a
- * proposal can still be moved out of.
+ * Gives the phase of each status. It is a `Record` over every `ProposalStatus`. If you add a
+ * status and do not place it here, the compiler reports an error. The groups below come from this
+ * map, so they cannot drift from it.
+ *
+ * - `open`: can still change. `pending` waits for a decision. `executing` is approved and running.
+ * - `settled`: the result is known. Nothing runs again.
+ * - `replaced`: not decided, but it cannot change. A superseded proposal is not the live
+ *   revision. A caller can still hold its id (a stale workflow variable or a retried step).
+ *   That caller must not revive it through `update()`.
  */
+const PROPOSAL_STATUS_PHASE = {
+  pending: 'open',
+  executing: 'open',
+  succeeded: 'settled',
+  failed: 'settled',
+  expired: 'settled',
+  no_action: 'settled',
+  superseded: 'replaced',
+} as const satisfies Record<ProposalStatus, 'open' | 'settled' | 'replaced'>;
+
+type ProposalStatusPhase = (typeof PROPOSAL_STATUS_PHASE)[ProposalStatus];
+
+const statusesInPhase = (phase: ProposalStatusPhase): ProposalStatus[] =>
+  proposalStatusSchema.options.filter((status) => PROPOSAL_STATUS_PHASE[status] === phase);
+
+/** Statuses that can still change: waiting for a decision, or approved and running. */
+export const OPEN_PROPOSAL_STATUSES = statusesInPhase('open');
+
+/** Statuses with a known result. `superseded` is not here: its successor represents it. */
+export const SETTLED_PROPOSAL_STATUSES = statusesInPhase('settled');
+
+/** Returns true for a settled or replaced status. Only `pending` and `executing` return false. */
 export const isTerminal = (status: ProposalStatus): boolean =>
-  status === 'succeeded' ||
-  status === 'failed' ||
-  status === 'expired' ||
-  status === 'no_action' ||
-  // Undecided, unlike the other four, but equally unable to move: a
-  // superseded proposal is not the live revision anymore, and a caller that
-  // still holds its id (a stale workflow variable, a retried step) must not
-  // be able to resurrect it via update().
-  status === 'superseded';
+  PROPOSAL_STATUS_PHASE[status] !== 'open';

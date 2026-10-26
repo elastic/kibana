@@ -25,6 +25,12 @@ export const REMOVED_VISUALIZATION = i18n.translate(
   }
 );
 
+export const VISUALIZATIONS_COUNT = (count: number) =>
+  i18n.translate('xpack.cases.attachments.lens.visualizationsCount', {
+    defaultMessage: '{count, plural, one {# visualization} other {# visualizations}}',
+    values: { count },
+  });
+
 export const OPEN_IN_VISUALIZATION = i18n.translate(
   'xpack.cases.attachments.lens.openVisualizationButtonLabel',
   {

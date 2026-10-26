@@ -9,6 +9,7 @@ import { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useMutation, useQueryClient } from '@kbn/react-query';
 import { useKibana } from './use_kibana';
+import { invalidateSignificantEventQueries } from '../data/significant_events/invalidate_significant_event_queries';
 import {
   NIGHTSHIFT_SIGNIFICANT_EVENTS_QUERY_KEY,
   type NightshiftSignificantEventsQueryData,
@@ -37,7 +38,11 @@ interface UseCloseSignificantEventResult {
   closingEventId?: string;
 }
 
-export const useCloseSignificantEvent = (): UseCloseSignificantEventResult => {
+export const useCloseSignificantEvent = ({
+  onClosed,
+}: {
+  onClosed?: () => void;
+} = {}): UseCloseSignificantEventResult => {
   const {
     notifications,
     significantEvents: { significantEventsRepositoryClient },
@@ -69,6 +74,7 @@ export const useCloseSignificantEvent = (): UseCloseSignificantEventResult => {
       // invalidation in `onSettled` refetches the list.
       if (updated === 0) {
         notifications.toasts.addInfo({ title: CLOSE_NO_CHANGE_TOAST_TITLE });
+        onClosed?.();
         return;
       }
       queryClient.setQueryData<NightshiftSignificantEventsQueryData>(
@@ -89,15 +95,14 @@ export const useCloseSignificantEvent = (): UseCloseSignificantEventResult => {
             : current
       );
       notifications.toasts.addSuccess({ title: CLOSE_SUCCESS_TOAST_TITLE });
+      onClosed?.();
     },
     onError: (error: unknown) => {
       notifications.toasts.addError(toError(error), { title: CLOSE_ERROR_TOAST_TITLE });
     },
     onSettled: async () => {
       setClosingEventId(undefined);
-      await queryClient.invalidateQueries({
-        queryKey: NIGHTSHIFT_SIGNIFICANT_EVENTS_QUERY_KEY,
-      });
+      await invalidateSignificantEventQueries(queryClient);
     },
   });
 

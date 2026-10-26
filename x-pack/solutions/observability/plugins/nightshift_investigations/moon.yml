@@ -49,8 +49,13 @@ dependsOn:
   - '@kbn/i18n'
   - '@kbn/core-saved-objects-server'
   - '@kbn/rule-data-utils'
+  - '@kbn/alerting-v2-constants'
+  - '@kbn/alerting-v2-common-queries'
+  - '@kbn/alerting-v2-plugin'
+  - '@kbn/es-types'
   - '@kbn/rule-registry-plugin'
   - '@kbn/actions-plugin'
+  - '@kbn/alerting-plugin'
   - '@kbn/sandbox-plugin'
   - '@kbn/context-engine-plugin'
   - '@kbn/inference-common'
@@ -82,6 +87,4 @@ fileGroups:
     - integration_tests/**/*
     - test/scout*/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

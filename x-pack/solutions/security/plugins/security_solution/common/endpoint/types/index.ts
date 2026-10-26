@@ -1059,6 +1059,7 @@ export interface PolicyConfig {
         enabled: boolean;
       };
     };
+    ai_data_collection?: AiDataCollectionFields;
   };
   mac: {
     advanced?: {};
@@ -1099,6 +1100,7 @@ export interface PolicyConfig {
     logging: {
       file: string;
     };
+    ai_data_collection?: AiDataCollectionFields;
   };
   linux: {
     advanced?: {};
@@ -1140,6 +1142,7 @@ export interface PolicyConfig {
     logging: {
       file: string;
     };
+    ai_data_collection?: AiDataCollectionFields;
   };
 }
 
@@ -1162,6 +1165,7 @@ export interface UIPolicyConfig {
     | 'behavior_protection'
     | 'attack_surface_reduction'
     | 'device_control'
+    | 'ai_data_collection'
   >;
   /**
    * Mac-specific policy configuration that is supported via the UI
@@ -1176,6 +1180,7 @@ export interface UIPolicyConfig {
     | 'behavior_protection'
     | 'memory_protection'
     | 'device_control'
+    | 'ai_data_collection'
   >;
   /**
    * Linux-specific policy configuration that is supported via the UI
@@ -1189,6 +1194,7 @@ export interface UIPolicyConfig {
     | 'advanced'
     | 'behavior_protection'
     | 'memory_protection'
+    | 'ai_data_collection'
   >;
 }
 
@@ -1245,6 +1251,11 @@ export type DeviceControlAccessLevel =
 export interface DeviceControlFields {
   enabled: boolean;
   usb_storage: DeviceControlAccessLevel;
+}
+
+/** Endpoint AI event enrichment. An absent block means never configured and is treated as disabled. */
+export interface AiDataCollectionFields {
+  enabled: boolean;
 }
 
 /**

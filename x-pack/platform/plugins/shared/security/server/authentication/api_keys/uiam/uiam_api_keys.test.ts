@@ -15,7 +15,7 @@ import {
 } from '@kbn/core/server/mocks';
 import { CLOUD_SERVICE_ACCOUNT_REALM_TYPE } from '@kbn/core-security-common';
 import { mockAuthenticatedUser } from '@kbn/core-security-common/mocks';
-import { HTTPAuthorizationHeader } from '@kbn/core-security-server';
+import { HTTPAuthorizationHeader, markExternalUiamCredential } from '@kbn/core-security-server';
 import type { Logger } from '@kbn/logging';
 
 import { UiamAPIKeys } from './uiam_api_keys';
@@ -246,7 +246,7 @@ describe('UiamAPIKeys', () => {
         expect(await grantWith(createMockRequest('Bearer essu_access_token_123'))).toBeUndefined();
       });
 
-      it('defers to Kibana client authentication for a fake request, which carries an internal API key', async () => {
+      it('defers to Kibana client authentication for an unmarked fake request', async () => {
         mockGetCurrentUser.mockReturnValue(null);
 
         const request = httpServerMock.createFakeKibanaRequest({
@@ -254,6 +254,17 @@ describe('UiamAPIKeys', () => {
         });
 
         expect(await grantWith(request)).toBeUndefined();
+      });
+
+      it('is omitted for a fake request marked as carrying an external API key', async () => {
+        mockGetCurrentUser.mockReturnValue(null);
+
+        const request = httpServerMock.createFakeKibanaRequest({
+          headers: { authorization: 'ApiKey essu_external_credential_123' },
+        });
+        markExternalUiamCredential(request);
+
+        expect(await grantWith(request)).toBeNull();
       });
     });
 
@@ -618,6 +629,25 @@ describe('UiamAPIKeys', () => {
       mockGetCurrentUser.mockReturnValue(null);
 
       expect(uiamApiKeys.isExternalApiKey(httpServerMock.createKibanaRequest())).toBe(false);
+    });
+
+    it('returns true for a fake request marked as carrying an external API key', () => {
+      mockGetCurrentUser.mockReturnValue(null);
+      const request = httpServerMock.createFakeKibanaRequest({
+        headers: { authorization: 'ApiKey essu_external_credential_123' },
+      });
+      markExternalUiamCredential(request);
+
+      expect(uiamApiKeys.isExternalApiKey(request)).toBe(true);
+    });
+
+    it('returns false for an unmarked fake request', () => {
+      mockGetCurrentUser.mockReturnValue(null);
+      const request = httpServerMock.createFakeKibanaRequest({
+        headers: { authorization: 'ApiKey essu_internal_credential_123' },
+      });
+
+      expect(uiamApiKeys.isExternalApiKey(request)).toBe(false);
     });
   });
 

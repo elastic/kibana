@@ -19,6 +19,7 @@ const makeEpisode = (overrides: Partial<AlertEpisode> = {}): AlertEpisode => ({
   'episode.status': 'active' as any,
   'rule.id': 'r1',
   group_hash: 'g1',
+  series_id: 's1',
   first_timestamp: '2026-04-23T00:00:00Z',
   last_timestamp: '2026-04-23T00:00:00Z',
   duration: 0,
@@ -68,7 +69,15 @@ describe('createSnoozeAction', () => {
     expect(createSnoozeAction(makeDeps()).isCompatible({ episodes: [] })).toBe(false);
   });
 
-  it('execute: opens modal, POSTs unique-by-group SNOOZE items, toasts, calls onSuccess', async () => {
+  it('not compatible when the episode has no series_id', () => {
+    expect(
+      createSnoozeAction(makeDeps()).isCompatible({
+        episodes: [makeEpisode({ series_id: null })],
+      })
+    ).toBe(false);
+  });
+
+  it('execute: opens modal, POSTs unique-by-series SNOOZE items, toasts, calls onSuccess', async () => {
     const deps = makeDeps();
     jest.spyOn(modal, 'openSnoozeExpiryModal').mockResolvedValue('2026-05-01T00:00:00Z');
     jest
@@ -80,10 +89,33 @@ describe('createSnoozeAction', () => {
       onSuccess,
     });
     expect(bulk.bulkSnoozeSeriesActions).toHaveBeenCalledWith(deps.http, [
-      { group_hash: 'g1', snoozed_until: '2026-05-01T00:00:00Z' },
+      { series_id: 's1', snoozed_until: '2026-05-01T00:00:00Z' },
     ]);
     expect(deps.notifications.toasts.add).toHaveBeenCalled();
     expect(onSuccess).toHaveBeenCalled();
+  });
+
+  it('execute: snoozes the series of every rule when episodes of two rules share a group_hash', async () => {
+    const deps = makeDeps();
+    jest.spyOn(modal, 'openSnoozeExpiryModal').mockResolvedValue('2026-05-01T00:00:00Z');
+    jest
+      .spyOn(bulk, 'bulkSnoozeSeriesActions')
+      .mockResolvedValue({ affected_count: 2, errors: [] });
+    await createSnoozeAction(deps).execute({
+      episodes: [
+        makeEpisode({ 'rule.id': 'r1', series_id: 's-r1', group_hash: 'shared' }),
+        makeEpisode({
+          'episode.id': 'e2',
+          'rule.id': 'r2',
+          series_id: 's-r2',
+          group_hash: 'shared',
+        }),
+      ],
+    });
+    expect(bulk.bulkSnoozeSeriesActions).toHaveBeenCalledWith(deps.http, [
+      { series_id: 's-r1', snoozed_until: '2026-05-01T00:00:00Z' },
+      { series_id: 's-r2', snoozed_until: '2026-05-01T00:00:00Z' },
+    ]);
   });
 
   it('execute: cancelled modal is a no-op', async () => {

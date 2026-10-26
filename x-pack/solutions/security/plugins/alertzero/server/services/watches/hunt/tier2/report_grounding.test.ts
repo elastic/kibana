@@ -6,6 +6,7 @@
  */
 
 import { isEvidenceQuoteGrounded, assertEsqlGroundedInReport } from './report_grounding';
+import { UNGROUNDED_QUERY_FIXTURES } from './ungrounded_query_fixtures';
 
 describe('isEvidenceQuoteGrounded', () => {
   const text = 'The actor called sts.AssumeRole into escalated-role and reached corp-prod-data.';
@@ -592,4 +593,19 @@ describe('assertEsqlGroundedInReport', () => {
       assertEsqlGroundedInReport(query, { reportText: 'we searched logs-aws.*', iocValues: [] }).ok
     ).toBe(false);
   });
+});
+
+describe('UNGROUNDED_QUERY_FIXTURES', () => {
+  it.each(UNGROUNDED_QUERY_FIXTURES)(
+    '$name: rejects the ungrounded query and accepts the rewrite',
+    ({ reportText, iocValues, query, expectedReasonIncludes, rewrittenQuery }) => {
+      const rejected = assertEsqlGroundedInReport(query, { reportText, iocValues });
+      expect(rejected.ok).toBe(false);
+      expect(rejected.ok === false && rejected.reason).toContain(expectedReasonIncludes);
+
+      expect(assertEsqlGroundedInReport(rewrittenQuery, { reportText, iocValues })).toEqual({
+        ok: true,
+      });
+    }
+  );
 });

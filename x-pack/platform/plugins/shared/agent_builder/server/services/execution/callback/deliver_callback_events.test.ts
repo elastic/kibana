@@ -7,6 +7,7 @@
 
 import { defer, of, throwError, concat } from 'rxjs';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
+import { isomerPluginMock } from '@kbn/isomer-plugin/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import {
   AgentBuilderErrorCode,
@@ -32,6 +33,7 @@ const surfacesDeps = {
   surfacesService: new SurfacesServiceImpl({
     attachmentsService: { getTypeDefinition } as unknown as AttachmentServiceStart,
     logger: loggerMock.create(),
+    isomer: isomerPluginMock.createStartContract(),
   }),
   request,
 };
@@ -134,13 +136,11 @@ const createExecutionAbortedEvent = (): ChatEvent =>
   } as unknown as ChatEvent);
 
 const createCallbackDeliveryServiceMock = () => {
-  const transport = jest.fn().mockResolvedValue({ status: 200 });
   const service = {
     validateCallbackUrl: jest.fn(),
-    createTransport: jest.fn().mockReturnValue(transport),
     makeCallbackRequest: jest.fn().mockResolvedValue(undefined),
   } as unknown as jest.Mocked<CallbackDeliveryService>;
-  return { service, transport };
+  return { service };
 };
 
 describe('deliverCallbackEvents', () => {
@@ -196,7 +196,7 @@ describe('deliverCallbackEvents', () => {
   });
 
   it('delivers one running envelope per event, in order, through a single request function', async () => {
-    const { service, transport } = createCallbackDeliveryServiceMock();
+    const { service } = createCallbackDeliveryServiceMock();
     const events = [
       createReasoningEvent('one'),
       createReasoningEvent('two'),
@@ -212,8 +212,6 @@ describe('deliverCallbackEvents', () => {
     });
 
     expect(service.validateCallbackUrl).toHaveBeenCalledWith(callbackUrl);
-    expect(service.createTransport).toHaveBeenCalledTimes(1);
-    expect(service.createTransport).toHaveBeenCalledWith(callbackUrl);
     expect(service.makeCallbackRequest.mock.calls).toEqual(
       events.map((event) => [
         {
@@ -221,7 +219,7 @@ describe('deliverCallbackEvents', () => {
             execution_id: 'execution-1',
             event,
           },
-          transport,
+          callbackUrl,
           retry: false,
         },
       ])
@@ -465,7 +463,7 @@ describe('deliverCallbackEvents', () => {
   });
 
   it('does not deliver round_complete when the stream errors after it, sending a failure instead', async () => {
-    const { service, transport } = createCallbackDeliveryServiceMock();
+    const { service } = createCallbackDeliveryServiceMock();
     const roundCompleteEvent = createRoundCompleteEvent();
 
     await deliverCallbackEvents({
@@ -493,7 +491,7 @@ describe('deliverCallbackEvents', () => {
         },
         idempotency_key: 'execution-1',
       },
-      transport,
+      callbackUrl,
       retry: true,
     });
   });
@@ -539,7 +537,7 @@ describe('deliverCallbackEvents', () => {
   });
 
   it('delivers a failure payload with a failure error code when the stream errors', async () => {
-    const { service, transport } = createCallbackDeliveryServiceMock();
+    const { service } = createCallbackDeliveryServiceMock();
 
     await deliverCallbackEvents({
       execution: createConversationExecution(),
@@ -562,7 +560,7 @@ describe('deliverCallbackEvents', () => {
         },
         idempotency_key: 'execution-1',
       },
-      transport,
+      callbackUrl,
       retry: true,
     });
   });
@@ -618,7 +616,7 @@ describe('deliverCallbackEvents', () => {
   });
 
   it('delivers a failure payload with the requestAborted error code for aborts', async () => {
-    const { service, transport } = createCallbackDeliveryServiceMock();
+    const { service } = createCallbackDeliveryServiceMock();
 
     await deliverCallbackEvents({
       execution: createConversationExecution(),
@@ -638,7 +636,7 @@ describe('deliverCallbackEvents', () => {
         },
         idempotency_key: 'execution-1',
       },
-      transport,
+      callbackUrl,
       retry: true,
     });
   });

@@ -47,8 +47,8 @@ describe('RiskScoreChangeCell', () => {
   });
 
   it.each([
-    ['a rise as an up arrow, said as an increase', 12.6, 'Increased by 13%', 'sortUp'],
-    ['a drop as a down arrow, said as a decrease', -7.2, 'Decreased by 7%', 'sortDown'],
+    ['a rise as an up arrow, said as an increase', 12.6, 'Increased by 13', 'sortUp'],
+    ['a drop as a down arrow, said as a decrease', -7.2, 'Decreased by 7', 'sortDown'],
   ])('renders %s', (_, value, text, icon) => {
     const { container } = renderInProviders(<RiskScoreChangeCell value={value} />);
     expect(container.textContent).toBe(text);

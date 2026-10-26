@@ -40,7 +40,10 @@ import {
 } from '@kbn/visualization-utils';
 import type { LegendSize } from '@kbn/chart-expressions-common';
 import { getRepresentativeQuery } from '@kbn/lens-common';
-import type { XYVisualizationState as XYConfiguration } from '@kbn/lens-common';
+import type {
+  DefaultVisualizationOverrides,
+  XYVisualizationState as XYConfiguration,
+} from '@kbn/lens-common';
 import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { fieldSupportsBreakdown } from '@kbn/field-utils';
@@ -67,6 +70,14 @@ import { enrichLensAttributesWithTablesData } from '../utils/lens_vis_from_table
 
 const UNIFIED_HISTOGRAM_LAYER_ID = 'unifiedHistogram';
 const ESQL_HISTOGRAM_RESULT_LIMIT = 10000;
+// The unified histogram has little vertical space, so its charts keep the legend on the right.
+const UNIFIED_HISTOGRAM_DEFAULT_LEGEND: XYConfiguration['legend'] = {
+  isVisible: true,
+  position: 'right',
+};
+const UNIFIED_HISTOGRAM_VISUALIZATION_OVERRIDES: DefaultVisualizationOverrides = {
+  lnsXY: { legend: UNIFIED_HISTOGRAM_DEFAULT_LEGEND },
+};
 
 /** Lens suggestions still take a DataView. Classic unwraps it; ES|QL uses the registered shim. */
 function resolveLensDataView(dataSource: DataSource): DataView | undefined {
@@ -91,6 +102,9 @@ export class LensVisService {
   prevUpdateContext:
     | {
         queryParams: QueryParams;
+        // Resolved on update: the ES|QL shim is unregistered as soon as the query changes,
+        // while the chart (and edits made on it) can still be based on the previous source.
+        dataView: DataView | undefined;
         timeInterval: string | undefined;
         breakdownField: DataViewField | undefined;
         table: Datatable | undefined;
@@ -147,6 +161,7 @@ export class LensVisService {
       attributes: TypedLensByValueInput['attributes']
     ) => TypedLensByValueInput['attributes'];
   }): LensVisServiceState => {
+    const dataView = resolveLensDataView(queryParams.dataSource);
     const suggestionState = this.getCurrentSuggestionState({
       externalVisContext,
       queryParams,
@@ -158,6 +173,7 @@ export class LensVisService {
       currentSuggestionContext: suggestionState.currentSuggestionContext,
       externalVisContext,
       queryParams,
+      dataView,
       timeInterval,
       breakdownField,
       table,
@@ -180,6 +196,7 @@ export class LensVisService {
 
     this.prevUpdateContext = {
       queryParams,
+      dataView,
       timeInterval,
       breakdownField,
       table,
@@ -199,13 +216,14 @@ export class LensVisService {
       return;
     }
 
-    const { queryParams, timeInterval, breakdownField, table, onVisContextChanged } =
+    const { queryParams, dataView, timeInterval, breakdownField, table, onVisContextChanged } =
       this.prevUpdateContext;
 
     const lensAttributesState = this.getLensAttributesState({
       currentSuggestionContext: editedSuggestionContext,
       externalVisContext: undefined,
       queryParams,
+      dataView,
       timeInterval,
       breakdownField,
       table,
@@ -464,8 +482,7 @@ export class LensVisService {
         },
       ],
       legend: {
-        isVisible: true,
-        position: 'right',
+        ...UNIFIED_HISTOGRAM_DEFAULT_LEGEND,
         legendSize,
         shouldTruncate: false,
       },
@@ -604,7 +621,8 @@ export class LensVisService {
           dataView,
           ['lnsDatatable'],
           ChartType.XY,
-          updatedAttributesWithQuery
+          updatedAttributesWithQuery,
+          UNIFIED_HISTOGRAM_VISUALIZATION_OVERRIDES
         ) ?? [];
       if (suggestions.length) {
         const suggestion = suggestions[0];
@@ -713,7 +731,8 @@ export class LensVisService {
         dataView,
         ['lnsDatatable'],
         preferredChartType,
-        visAttributes
+        visAttributes,
+        UNIFIED_HISTOGRAM_VISUALIZATION_OVERRIDES
       ) ?? []
     );
   };
@@ -722,6 +741,7 @@ export class LensVisService {
     currentSuggestionContext,
     externalVisContext,
     queryParams,
+    dataView,
     timeInterval,
     breakdownField,
     table,
@@ -730,6 +750,7 @@ export class LensVisService {
     currentSuggestionContext: UnifiedHistogramSuggestionContext;
     externalVisContext: UnifiedHistogramVisContext | undefined;
     queryParams: QueryParams;
+    dataView: DataView | undefined;
     timeInterval: string | undefined;
     breakdownField: DataViewField | undefined;
     table: Datatable | undefined;
@@ -754,7 +775,7 @@ export class LensVisService {
     const isTextBased = isOfAggregateQueryType(query);
     const requestData = {
       // The chart's data view, which is also the Lens layer index the session API derives it from.
-      dataViewId: resolveLensDataView(dataSource)?.id ?? dataSource.id,
+      dataViewId: dataView?.id ?? dataSource.id,
       timeField: timeFieldName,
       timeInterval: isTextBased ? undefined : timeInterval,
       breakdownField: breakdownField?.name,
@@ -807,7 +828,6 @@ export class LensVisService {
     }
 
     if (!visContext) {
-      const dataView = resolveLensDataView(dataSource);
       if (!dataView) {
         return {
           externalVisContextStatus,

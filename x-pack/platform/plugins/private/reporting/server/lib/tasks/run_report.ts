@@ -21,6 +21,7 @@ import {
   MissingAuthenticationError,
   numberToDuration,
   QueueTimeoutError,
+  RenderRetryAction,
 } from '@kbn/reporting-common';
 import type {
   ExecutionError,
@@ -781,7 +782,7 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
               reportingTelemetry.recordRenderRetry(renderRetry.reason, renderRetry.action);
             }
 
-            if (renderRetry?.action === 'hand_back') {
+            if (renderRetry?.action === RenderRetryAction.HAND_BACK) {
               // Not a failure: the report stays processing, and the next run waits again.
               eventLog.logRetry();
               cancellationToken?.cancel();
@@ -794,7 +795,7 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
 
             const attemptCount = attemptsMade(renderRetryState, taskAttempts ?? 0, attempts);
             const isLastAttempt = renderRetry
-              ? renderRetry.action === 'fail'
+              ? renderRetry.action === RenderRetryAction.FAIL
               : attemptCount
               ? attemptCount >= maxAttempts.maxTaskAttempts
               : true;
@@ -833,11 +834,11 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
               );
             }
 
-            if (renderRetry?.action === 'reschedule') {
+            if (renderRetry?.action === RenderRetryAction.RESCHEDULE) {
               return { runAt: renderRetry.runAt, state: renderRetry.state };
             }
             if (
-              renderRetry?.action === 'fail' ||
+              renderRetry?.action === RenderRetryAction.FAIL ||
               (isLastAttempt && attemptCount > (taskAttempts ?? 0))
             ) {
               // A reschedule may have restarted Task Manager's count: don't rerun a spent report.

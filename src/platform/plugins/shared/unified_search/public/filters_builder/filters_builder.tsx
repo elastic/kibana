@@ -10,9 +10,9 @@
 import React, { useEffect, useReducer, useCallback, useState, useRef } from 'react';
 import type { DragDropContextProps } from '@elastic/eui';
 import { EuiDragDropContext, useEuiPaddingSize } from '@elastic/eui';
-import type { DataView } from '@kbn/data-views-plugin/common';
 import { type Filter, BooleanRelation, compareFilters } from '@kbn/es-query';
 import type { SuggestionsAbstraction } from '@kbn/kql/public';
+import type { FilterableSource } from '@kbn/data-source';
 import { FiltersBuilderContextType } from './context';
 import { FilterGroup } from './filter_group';
 import { FiltersBuilderReducer } from './reducer';
@@ -22,7 +22,7 @@ import { filtersBuilderCss } from './filters_builder.styles';
 
 export interface FiltersBuilderProps {
   filters: Filter[];
-  dataView: DataView;
+  dataView: FilterableSource;
   onChange: (filters: Filter[]) => void;
   timeRangeForSuggestionsOverride?: boolean;
   filtersForSuggestions?: Filter[];

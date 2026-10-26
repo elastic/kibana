@@ -62,11 +62,32 @@ describe('SignalCard', () => {
   });
 
   it('shows the title, the description and the formatted count', () => {
-    renderCard();
+    renderCard({ value: 5678 });
     const tile = screen.getByTestId('eaFaceliftSignalCard-newEntity');
     expect(tile).toHaveTextContent('New entity');
     expect(tile).toHaveTextContent('First seen in the last 7 days');
-    expect(tile).toHaveTextContent((12345).toLocaleString());
+    expect(tile).toHaveTextContent('5,678');
+  });
+
+  it.each([
+    [9999, '9,999'],
+    [10000, '10K'],
+    [10500, '10.5K'],
+    [12345, '12.3K'],
+    [1234567, '1.2M'],
+  ])('shortens the count from 10,000 on: %d shows as %s', (value, shown) => {
+    renderCard({ value });
+    expect(screen.getByTestId('eaFaceliftSignalCard-newEntity')).toHaveTextContent(shown);
+  });
+
+  it.each([
+    [9999, '+9,999↑'],
+    [10000, '+10K↑'],
+    [10500, '+10.5K↑'],
+    [-12345, '-12.3K↓'],
+  ])('shortens the change from 10,000 on: %d shows as %s', (delta, shown) => {
+    renderCard({ value: 50000, delta });
+    expect(screen.getByTestId('eaFaceliftSignalCardDeltaBadge')).toHaveTextContent(shown);
   });
 
   it('shows an increase as +n with an up arrow, and a decrease as -n with a down arrow', () => {
@@ -156,6 +177,15 @@ describe('SignalCard', () => {
       );
     });
 
+    it('says the exact change where the badge shortens it', () => {
+      renderCard({ value: 50000, delta: 10512 });
+      expect(screen.getByTestId('eaFaceliftSignalCardDeltaBadge')).toHaveTextContent('+10.5K↑');
+      expect(tile()).toHaveAttribute(
+        'aria-label',
+        'New entity. Up 10,512 compared with the previous period'
+      );
+    });
+
     it('adds that the history is too short when the tile says so', () => {
       renderCard({ isDeltaUnavailable: true });
       expect(tile()).toHaveAttribute('aria-label', 'New entity. Not enough history to compare');
@@ -236,7 +266,13 @@ describe('SignalCard', () => {
     expect(tile).toHaveAttribute('aria-disabled', 'true');
   });
 
-  it('shows a dash and the no-data message at 0, with no delta, no sparkline and no click', () => {
+  it('shows a dash at 0 without a no-data message', () => {
+    renderCard({ value: 0 });
+
+    expect(screen.getByTestId('eaFaceliftSignalCard-newEntity')).toHaveTextContent('—');
+  });
+
+  it('shows the no-data message instead of the dash at 0, with no delta, no sparkline and no click', () => {
     const onToggle = jest.fn();
     renderCard(
       { value: 0, noDataMessage: 'No risk scores yet', delta: 5, trend: [1, 2, 3] },
@@ -244,7 +280,7 @@ describe('SignalCard', () => {
     );
     const tile = screen.getByTestId('eaFaceliftSignalCard-newEntity');
 
-    expect(tile).toHaveTextContent('—');
+    expect(tile).not.toHaveTextContent('—');
     expect(tile).toHaveTextContent('No risk scores yet');
     expect(screen.queryByTestId('eaFaceliftSignalCardDelta')).not.toBeInTheDocument();
     expect(mockSeriesData).toBeUndefined();

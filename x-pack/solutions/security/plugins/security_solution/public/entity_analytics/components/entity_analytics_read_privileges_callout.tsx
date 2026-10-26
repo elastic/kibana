@@ -23,6 +23,8 @@ interface EntityAnalyticsReadPrivilegesCalloutProps {
   entityEnginePrivileges: EntityAnalyticsPrivileges | undefined;
   leadGenerationPrivileges?: EntityAnalyticsPrivileges;
   anomalyPrivileges?: EntityAnalyticsPrivileges;
+  /** The alerts index privileges, for surfaces that read alerts. */
+  alertsIndexPrivileges?: IndexPrivileges;
   /**
    * Identifies the surface rendering the callout. Used as the dismissal storage
    * namespace and as the message id prefix, so ids stay unique and dismissals
@@ -51,6 +53,7 @@ export const EntityAnalyticsReadPrivilegesCallout = React.memo(
     entityEnginePrivileges,
     leadGenerationPrivileges,
     anomalyPrivileges,
+    alertsIndexPrivileges,
     id,
     dismissible = true,
   }: EntityAnalyticsReadPrivilegesCalloutProps) => {
@@ -60,6 +63,7 @@ export const EntityAnalyticsReadPrivilegesCallout = React.memo(
         ...getAnyMissingReadPrivileges(entityEnginePrivileges),
         ...getAnyMissingReadPrivileges(leadGenerationPrivileges),
         ...getAnyMissingReadPrivileges(anomalyPrivileges),
+        ...getIndexMissingReadPrivileges(alertsIndexPrivileges),
       ];
 
       const featurePrivileges: MissingFeaturePrivileges[] = [
@@ -86,6 +90,7 @@ export const EntityAnalyticsReadPrivilegesCallout = React.memo(
       entityEnginePrivileges,
       leadGenerationPrivileges,
       anomalyPrivileges,
+      alertsIndexPrivileges,
     ]);
 
     if (!message) return null;
@@ -101,12 +106,12 @@ EntityAnalyticsReadPrivilegesCallout.displayName = 'EntityAnalyticsPrivilegesCal
 
 const READ_RELEVANT_PRIVILEGES = new Set(['read', 'view_index_metadata']);
 
-const getAnyMissingReadPrivileges = (
-  privileges: EntityAnalyticsPrivileges | undefined
-): MissingIndexPrivileges[] => {
-  if (!privileges) return [];
+type IndexPrivileges = Readonly<Record<string, Readonly<Record<string, boolean>>>>;
 
-  return Object.entries(privileges.privileges.elasticsearch.index ?? {})
+const getIndexMissingReadPrivileges = (
+  index: IndexPrivileges | undefined
+): MissingIndexPrivileges[] =>
+  Object.entries(index ?? {})
     .map(
       ([indexName, privs]): MissingIndexPrivileges => [
         indexName,
@@ -116,7 +121,11 @@ const getAnyMissingReadPrivileges = (
       ]
     )
     .filter(([, missingPrivs]) => missingPrivs.length > 0);
-};
+
+const getAnyMissingReadPrivileges = (
+  privileges: EntityAnalyticsPrivileges | undefined
+): MissingIndexPrivileges[] =>
+  getIndexMissingReadPrivileges(privileges?.privileges.elasticsearch.index);
 
 const ML_KIBANA_READ_ACTION = 'ui:ml/canGetJobs';
 

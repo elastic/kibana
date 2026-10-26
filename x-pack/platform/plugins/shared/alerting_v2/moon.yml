@@ -28,6 +28,7 @@ dependsOn:
   - '@kbn/config-schema'
   - '@kbn/core-saved-objects-server'
   - '@kbn/core-http-server'
+  - '@kbn/core-http-common'
   - '@kbn/logging'
   - '@kbn/core-di'
   - '@kbn/core-di-browser'
@@ -108,6 +109,7 @@ dependsOn:
   - '@kbn/utility-types'
   - '@kbn/usage-collection-plugin'
   - '@kbn/share-plugin'
+  - '@kbn/router-utils'
   - '@kbn/deeplinks-analytics'
   - '@kbn/deeplinks-agent-builder'
   - '@kbn/deeplinks-observability'
@@ -157,7 +159,6 @@ dependsOn:
   - '@kbn/content-list-common'
   - '@kbn/core-ui-settings-server'
   - '@kbn/licensing-plugin'
-  - '@kbn/response-ops-alerts-table'
   - '@kbn/licensing-types'
   - '@kbn/workflows-yaml'
   - '@kbn/tooling-log'
@@ -166,6 +167,7 @@ dependsOn:
   - '@kbn/core-overlays-browser-mocks'
   - '@kbn/core-rendering-browser-mocks'
   - '@kbn/announcement-banner'
+  - '@kbn/ftr-llm-proxy'
 tags:
   - plugin
   - prod
@@ -180,9 +182,7 @@ fileGroups:
     - server/**/*.json
     - public/**/*
     - test/scout/**/*
-    - test/scout_alerting_v2/**/*
+    - test/scout_alerting_v2_custom_config/**/*
     - '!target/**/*'
     - '!.storybook/**/*.js'
-  jest-config:
-    - jest.config.js
 tasks: {}

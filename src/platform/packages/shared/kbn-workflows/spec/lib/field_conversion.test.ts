@@ -15,6 +15,7 @@ import {
   extractNormalizedInputsFromYaml,
   getInputsFromDefinition,
   normalizeFieldsToJsonSchema,
+  omitRequiredWithDefaults,
   resolveRef,
 } from './field_conversion';
 import { builtinWorkflowInputDefinitions } from '../builtin_workflow_input_definitions';
@@ -799,6 +800,63 @@ describe('applyInputDefaults', () => {
         notifyTeams: ['SOC', 'Management'],
       },
     });
+  });
+});
+
+describe('omitRequiredWithDefaults', () => {
+  it('drops required inputs that have a default and keeps the rest', () => {
+    const schema = {
+      type: 'object',
+      properties: {
+        who: { type: 'string', default: 'world' },
+        name: { type: 'string' },
+        count: { type: 'number', default: 2 },
+      },
+      required: ['who', 'name'],
+    } as JsonModelSchemaType;
+
+    expect(omitRequiredWithDefaults(schema)).toEqual({ ...schema, required: ['name'] });
+  });
+
+  it('treats a $ref whose resolved definition has a default as optional', () => {
+    const schema = {
+      type: 'object',
+      properties: { level: { $ref: '#/definitions/level' } },
+      required: ['level'],
+      definitions: { level: { type: 'string', default: 'low' } },
+    } as JsonModelSchemaType;
+
+    expect(omitRequiredWithDefaults(schema).required).toEqual([]);
+  });
+
+  it('ignores a $ref sibling default when the resolved definition has none', () => {
+    const schema = {
+      type: 'object',
+      properties: { level: { $ref: '#/definitions/level', default: 'low' } },
+      required: ['level'],
+      definitions: { level: { type: 'string' } },
+    } as JsonModelSchemaType;
+
+    expect(omitRequiredWithDefaults(schema).required).toEqual(['level']);
+  });
+
+  it('uses the $ref sibling default when the reference cannot be resolved', () => {
+    const schema = {
+      type: 'object',
+      properties: { level: { $ref: '#/definitions/missing', default: 'low' } },
+      required: ['level'],
+    } as JsonModelSchemaType;
+
+    expect(omitRequiredWithDefaults(schema).required).toEqual([]);
+  });
+
+  it('returns the schema unchanged when nothing is required', () => {
+    const schema = {
+      type: 'object',
+      properties: { who: { type: 'string', default: 'world' } },
+    } as JsonModelSchemaType;
+
+    expect(omitRequiredWithDefaults(schema)).toBe(schema);
   });
 });
 
