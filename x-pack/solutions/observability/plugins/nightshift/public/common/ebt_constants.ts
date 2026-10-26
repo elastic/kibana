@@ -9,6 +9,7 @@ import { EBT_CLICK_ACTIONS } from '@kbn/ebt-click';
 
 export const NIGHTSHIFT_EBT_ACTIONS = {
   CANCEL_AUTOMATION_EDIT: 'cancelAutomationEdit',
+  CLICK_TO_VIEW_INVESTIGATION: EBT_CLICK_ACTIONS.CLICK_TO_VIEW_INVESTIGATION,
   CLEAR_AUTOMATION_FILTERS: 'clearAutomationFilters',
   CANCEL_DETECTION_ENGINE_CHANGE: 'cancelDetectionEngineChange',
   CANCEL_SLACK_CONNECTION: 'cancelSlackConnection',
@@ -55,11 +56,11 @@ export const NIGHTSHIFT_EBT_ACTIONS = {
   VIEW_DETECTION: 'viewDetection',
   VIEW_DETECTION_TAB: 'viewDetectionTab',
   VIEW_ENTITY: 'viewEntity',
-  VIEW_INVESTIGATION: EBT_CLICK_ACTIONS.VIEW_INVESTIGATION,
   VIEW_KNOWLEDGE: 'viewKnowledge',
   VIEW_MANAGEMENT: 'viewManagement',
   VIEW_RULE: 'viewRule',
   VIEW_SETTINGS: 'viewSettings',
+  VIEW_SEVERITY_INVESTIGATIONS: 'viewSeverityInvestigations',
   VIEW_SIGNIFICANT_EVENT: 'viewSignificantEvent',
   VIEW_SIGNIFICANT_EVENTS: 'viewSignificantEvents',
   VIEW_SOURCES: 'viewSources',
@@ -85,6 +86,7 @@ export const NIGHTSHIFT_EBT_ELEMENTS = {
   EVENT_FLYOUT_INVESTIGATION: 'nightshiftEventFlyoutInvestigation',
   PAGE_HEADER: 'nightshiftPageHeader',
   SETTINGS: 'nightshiftSettings',
+  SEVERITY_TILES: 'nightshiftSeverityTiles',
   SIGNIFICANT_EVENTS_LIST: 'nightshiftSignificantEventsList',
   START_INVESTIGATION_PANEL: 'nightshiftStartInvestigationPanel',
   STATUS_SUMMARY: 'nightshiftStatusSummary',

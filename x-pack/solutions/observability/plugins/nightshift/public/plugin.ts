@@ -18,6 +18,7 @@ import { i18n } from '@kbn/i18n';
 import { BehaviorSubject, type Subscription } from 'rxjs';
 import { NIGHTSHIFT_APP_ROUTE } from '../common/constants';
 import { NightshiftSettingsLocatorDefinition } from '../common/locators';
+import { registerNightshiftEbtEvents } from './common/ebt_events';
 import type {
   NightshiftPublicSetup,
   NightshiftPublicStart,
@@ -45,6 +46,8 @@ export class NightshiftPlugin
     pluginsSetup: NightshiftSetupDependencies
   ): NightshiftPublicSetup {
     const startServicesPromise = coreSetup.getStartServices();
+
+    registerNightshiftEbtEvents(coreSetup.analytics);
 
     pluginsSetup.share.url.locators.create(new NightshiftSettingsLocatorDefinition());
 

@@ -25,6 +25,13 @@ import type { InvestigationSummary } from '@kbn/agentic-investigations-plugin/co
 import { SEVERITY_OPTIONS } from '@kbn/significant-events-schema';
 import { useKibana } from '../hooks/use_kibana';
 import { isHttpNotFoundError } from '../common/http_error';
+import {
+  INVESTIGATION_VIEW_SOURCES,
+  reportNightshiftHomepageViewed,
+  reportNightshiftInvestigationsSearched,
+  reportNightshiftInvestigationViewed,
+  type InvestigationViewSource,
+} from '../common/ebt_events';
 import { RETRY_BUTTON_LABEL } from '../common/messages';
 import { useInvestigationSections } from '../hooks/use_investigation_sections';
 import {
@@ -54,12 +61,18 @@ const INVESTIGATIONS_SEARCH_DEBOUNCE_MS = 300;
 
 export function NightshiftApp(): React.ReactElement {
   const { euiTheme } = useEuiTheme();
-  const { application, nightshiftInvestigations, agenticInvestigations, agentBuilder } =
+  const { analytics, application, nightshiftInvestigations, agenticInvestigations, agentBuilder } =
     useKibana().services;
   const history = useHistory();
   const { search } = useLocation();
   const sectionsRef = useRef<InvestigationListHandle>(null);
   const scrolledToSeverity = useRef<Severity | undefined>(undefined);
+  // A click sets this for the navigation it triggers; anything else is a deep link.
+  const investigationViewSource = useRef<InvestigationViewSource>(
+    INVESTIGATION_VIEW_SOURCES.DEEP_LINK
+  );
+  const hasReportedHomepageView = useRef(false);
+  const reportedSearchQuery = useRef<string | undefined>(undefined);
 
   // Read filter state from URL so it survives navigation and is shareable.
   const searchQuery = useMemo(() => getNightshiftSearchQueryFromSearch(search), [search]);
@@ -111,6 +124,7 @@ export function NightshiftApp(): React.ReactElement {
 
   const handleInvestigationClick = useCallback(
     (investigation: InvestigationSummary) => {
+      investigationViewSource.current = INVESTIGATION_VIEW_SOURCES.CLICK;
       const params = new URLSearchParams(history.location.search);
       setNightshiftInvestigationIdParam(params, investigation.id);
       history.replace({ search: params.toString() });
@@ -207,6 +221,60 @@ export function NightshiftApp(): React.ReactElement {
     () => sections.flatMap((section) => section.investigations),
     [sections]
   );
+  // Read by effects that must not re-run when the list refetches.
+  const loadedInvestigationsRef = useRef(loadedInvestigations);
+  loadedInvestigationsRef.current = loadedInvestigations;
+
+  // The landing page is "viewed" once its first load lands, with what it then shows.
+  useEffect(() => {
+    if (hasReportedHomepageView.current || isInitialLoading || allFailed) {
+      return;
+    }
+    hasReportedHomepageView.current = true;
+    reportNightshiftHomepageViewed(analytics, {
+      investigationCount: loadedCount,
+      severityCounts,
+      unratedCount: loadedInvestigationsRef.current.filter(
+        ({ metadata }) => metadata.severity === undefined
+      ).length,
+    });
+  }, [allFailed, analytics, isInitialLoading, loadedCount, severityCounts]);
+
+  // Clicks cannot carry an id, and a deep link is not a click: report the view itself so both
+  // paths join to the investigation they opened. Severity and status need the loaded list, so
+  // this waits for the first load.
+  useEffect(() => {
+    if (!selectedInvestigationId || isInitialLoading) {
+      return;
+    }
+    const source = investigationViewSource.current;
+    investigationViewSource.current = INVESTIGATION_VIEW_SOURCES.DEEP_LINK;
+    reportNightshiftInvestigationViewed(analytics, {
+      investigationId: selectedInvestigationId,
+      source,
+      investigation: loadedInvestigationsRef.current.find(
+        ({ id }) => id === selectedInvestigationId
+      ),
+    });
+  }, [analytics, isInitialLoading, selectedInvestigationId]);
+
+  // Searching is typing, not clicking. Reported once the debounced term's results have landed,
+  // so an empty result set is distinguishable from a hit. The term itself is never reported.
+  useEffect(() => {
+    const query = debouncedSearchQuery?.trim();
+    if (!query) {
+      reportedSearchQuery.current = undefined;
+      return;
+    }
+    if (isFetching || reportedSearchQuery.current === query) {
+      return;
+    }
+    reportedSearchQuery.current = query;
+    reportNightshiftInvestigationsSearched(analytics, {
+      queryLength: query.length,
+      resultCount: totalCount,
+    });
+  }, [analytics, debouncedSearchQuery, isFetching, totalCount]);
 
   usePageReady({
     isReady: !isInitialLoading && !allFailed,

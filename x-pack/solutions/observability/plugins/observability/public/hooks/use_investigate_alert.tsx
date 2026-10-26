@@ -265,7 +265,7 @@ export const useInvestigateAlert = ({
     viewInvestigationUrl,
     viewInvestigationActionLabel,
     viewInvestigationEbtProps: getEbtProps({
-      action: EBT_CLICK_ACTIONS.VIEW_INVESTIGATION,
+      action: EBT_CLICK_ACTIONS.CLICK_TO_VIEW_INVESTIGATION,
       element: ebtElement,
       detail: latestInvestigation ? viewedInvestigationState : undefined,
     }),
