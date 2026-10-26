@@ -21,10 +21,11 @@ import type { SignificantEventsServer } from '../../../types';
 import type { GetScopedClients } from '../../../routes/types';
 import { assertCanManageSignificantEvents } from '../../../routes/utils/assert_can_manage_significant_events';
 import { assertSignificantEventsAccess } from '../../../routes/utils/assert_significant_events_access';
+import { getSourceWriteConflictMetadata } from '../../../lib/errors/source_write_conflict_error';
 import type { EbtTelemetryClient } from '../../../lib/telemetry/ebt';
 import {
   loadSourceCatalog,
-  resolveSourcesBySlug,
+  resolveSourcesBySlugOrId,
   toSourceRef,
 } from '../../utils/resolve_source_slugs';
 import { createFeatureKnowledgeIndicatorToolHandler } from './handler';
@@ -133,7 +134,7 @@ export function createFeatureKnowledgeIndicatorTool({
         });
         await assertCanManageSignificantEvents({ request, server });
         const catalog = await loadSourceCatalog(scopedClients.sourcesClient);
-        const [source] = resolveSourcesBySlug(catalog, [slug]);
+        const [source] = resolveSourcesBySlugOrId(catalog, [slug]);
         sourceId = source.id;
 
         const kiClient = await scopedClients.getKnowledgeIndicatorClient(source);
@@ -189,6 +190,7 @@ export function createFeatureKnowledgeIndicatorTool({
               type: ToolResultType.error,
               data: {
                 message: `Failed to create feature knowledge indicator: ${message}`,
+                metadata: getSourceWriteConflictMetadata(error),
               },
             },
           ],

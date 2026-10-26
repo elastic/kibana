@@ -11,7 +11,7 @@ import {
   assertSourceEnabled,
   loadSourceCatalog,
   presentSlug,
-  resolveSourcesBySlug,
+  resolveSourcesBySlugOrId,
   SourceDisabledError,
   UnknownSourceSlugError,
 } from './resolve_source_slugs';
@@ -69,9 +69,9 @@ describe('loadSourceCatalog', () => {
   });
 });
 
-describe('resolveSourcesBySlug', () => {
+describe('resolveSourcesBySlugOrId', () => {
   it('returns sources in the caller order, repeating a slug that appears twice', () => {
-    expect(resolveSourcesBySlug(catalog, ['payments', 'checkout', 'payments'])).toEqual([
+    expect(resolveSourcesBySlugOrId(catalog, ['payments', 'checkout', 'payments'])).toEqual([
       payments,
       checkout,
       payments,
@@ -79,7 +79,7 @@ describe('resolveSourcesBySlug', () => {
   });
 
   it('resolves a source id the same as its slug', () => {
-    expect(resolveSourcesBySlug(catalog, ['source-checkout', 'payments'])).toEqual([
+    expect(resolveSourcesBySlugOrId(catalog, ['source-checkout', 'payments'])).toEqual([
       checkout,
       payments,
     ]);
@@ -95,13 +95,13 @@ describe('resolveSourcesBySlug', () => {
       ]),
     };
 
-    expect(resolveSourcesBySlug(collidingCatalog, [checkout.id])).toEqual([checkout]);
+    expect(resolveSourcesBySlugOrId(collidingCatalog, [checkout.id])).toEqual([checkout]);
   });
 
   it('throws UnknownSourceSlugError naming every missing slug', () => {
-    expect(() => resolveSourcesBySlug(catalog, ['checkout', 'missing', 'also-missing'])).toThrow(
-      new UnknownSourceSlugError(['missing', 'also-missing'])
-    );
+    expect(() =>
+      resolveSourcesBySlugOrId(catalog, ['checkout', 'missing', 'also-missing'])
+    ).toThrow(new UnknownSourceSlugError(['missing', 'also-missing']));
   });
 });
 

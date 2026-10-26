@@ -78,16 +78,21 @@ describe('findConsistentFailure', () => {
     });
   });
 
-  it('waits for a build right before the failures to settle', () => {
+  it('counts a build whose retry never reported neither as a failure nor against the history', () => {
     const history = passes(1, 20);
 
     expect(findConsistentFailure([...history, pending(21), failed(22)])).toBeUndefined();
-    expect(
-      findConsistentFailure([...history, pending(21), failed(22), failed(23)])
-    ).toBeUndefined();
-    expect(findConsistentFailure([...history, failed(21), failed(22), failed(23)])).toEqual({
-      failingBuilds: [failed(21), failed(22), failed(23)],
+    expect(findConsistentFailure([...history, pending(21), failed(22), failed(23)])).toEqual({
+      failingBuilds: [failed(22), failed(23)],
       lastPassingBuild: passed(20),
+    });
+    expect(findConsistentFailure([...history, failed(21), pending(22), failed(23)])).toEqual({
+      failingBuilds: [failed(21), failed(23)],
+      lastPassingBuild: passed(20),
+    });
+    expect(findConsistentFailure([...passes(1, 19), pending(20), failed(21), failed(22)])).toEqual({
+      failingBuilds: [failed(21), failed(22)],
+      lastPassingBuild: passed(19),
     });
   });
 
