@@ -19,18 +19,22 @@ import { linkSlackRenderer } from './link_slack';
 import { appLinkPath, reactLinkHref, staticLinkUrl } from './resolve_link';
 
 const ABSOLUTE_HTTP = /^https?:\/\//i;
-const PROBE_APP = 'app';
-const PROBE_PATH = appLinkPath({ app: PROBE_APP });
+// A path that climbs out of its app can only climb back into one fixed route, so it can't stay
+// inside two different apps.
+const PROBE_APPS = ['probe-a', 'probe-b'] as const;
 
-/** Whether `path` stays inside its app once a URL parser decodes and normalizes it, as hosts do. */
-const staysInApp = (path: string): boolean => {
+const staysInProbe = (app: string, path: string): boolean => {
+  const root = appLinkPath({ app });
   try {
-    const { pathname } = new URL(appLinkPath({ app: PROBE_APP, path }), 'http://kibana.invalid');
-    return pathname === PROBE_PATH || pathname.startsWith(`${PROBE_PATH}/`);
+    const { pathname } = new URL(appLinkPath({ app, path }), 'http://kibana.invalid');
+    return pathname === root || pathname.startsWith(`${root}/`);
   } catch {
     return false;
   }
 };
+
+/** Whether `path` stays inside its app once a URL parser decodes and normalizes it, as hosts do. */
+const staysInApp = (path: string): boolean => PROBE_APPS.every((app) => staysInProbe(app, path));
 
 const pathSchema = z
   .string()
