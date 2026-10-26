@@ -127,6 +127,22 @@ describe('buildWorkflowExecutionDocument', () => {
         }).runName
       ).toBe('x'.repeat(WORKFLOW_RUN_NAME_MAX_LENGTH));
     });
+
+    it('does not split a surrogate pair when truncating the name', () => {
+      const prefix = 'x'.repeat(WORKFLOW_RUN_NAME_MAX_LENGTH - 1);
+      expect(
+        createExecution('{{ inputs.target }}', { inputs: { target: `${prefix}🚀` } }).runName
+      ).toBe(prefix);
+    });
+
+    it('uses the initial context overrides for a single-step test', () => {
+      expect(
+        createExecution('{{ consts.prefix }} {{ inputs.target }}', {
+          inputs: { target: 'production' },
+          contextOverride: { inputs: { target: 'preview' }, consts: { prefix: 'Test' } },
+        }).runName
+      ).toBe('Test preview');
+    });
   });
 
   it.each([undefined, 'child-account'])(

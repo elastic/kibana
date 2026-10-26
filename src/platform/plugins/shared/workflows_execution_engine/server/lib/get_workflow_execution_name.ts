@@ -8,6 +8,7 @@
  */
 
 import type { CoreStart, Logger } from '@kbn/core/server';
+import type { WorkflowContext } from '@kbn/workflows';
 import { WORKFLOW_RUN_NAME_MAX_LENGTH } from '@kbn/workflows';
 import { WorkflowTemplatingEngine } from '../templating_engine';
 import {
@@ -31,12 +32,26 @@ export const getWorkflowExecutionName = (
     const engine = new WorkflowTemplatingEngine({
       liquidSettings: execution.workflowDefinition?.settings?.liquid,
     });
+    const context = buildWorkflowRenderContext(execution, coreStart, dependencies);
+    const overrides: Partial<WorkflowContext> | undefined = execution.context?.contextOverride;
     const result = engine.render(
       template,
-      buildWorkflowRenderContext(execution, coreStart, dependencies)
+      overrides
+        ? {
+            ...context,
+            consts: { ...context.consts, ...overrides.consts },
+            inputs: { ...context.inputs, ...overrides.inputs },
+            event: { ...context.event, ...overrides.event },
+            execution: { ...context.execution, ...overrides.execution },
+            workflow: { ...context.workflow, ...overrides.workflow },
+          }
+        : context
     );
     return typeof result === 'string'
-      ? result.trim().slice(0, WORKFLOW_RUN_NAME_MAX_LENGTH) || undefined
+      ? result
+          .trim()
+          .slice(0, WORKFLOW_RUN_NAME_MAX_LENGTH)
+          .replace(/[\uD800-\uDBFF]$/, '') || undefined
       : undefined;
   } catch {
     logger.warn('Could not evaluate run-name; using the default execution label.');

@@ -192,6 +192,33 @@ describe('WorkflowExecutionQueryService', () => {
       );
     });
 
+    it('bounds the wildcard and checks the full text for long name filters', async () => {
+      mockWorkflowDataClient.search.mockResolvedValue({
+        hits: { hits: [], total: { value: 0, relation: 'eq' } },
+        took: 0,
+        timed_out: false,
+        _shards: { total: 1, successful: 1, failed: 0 },
+      });
+      const runName = 'B'.repeat(1024);
+
+      await service.getWorkflowExecutions({ workflowId: 'wf-1', runName }, 'default');
+
+      expect(mockWorkflowDataClient.search.mock.calls[0][0]?.query?.bool?.must).toEqual(
+        expect.arrayContaining([
+          { wildcard: { runName: { value: `*${'B'.repeat(128)}*`, case_insensitive: true } } },
+          {
+            script: {
+              script: {
+                source:
+                  "doc['runName'].size() != 0 && doc['runName'].value.toLowerCase(Locale.ROOT).contains(params.runName)",
+                params: { runName: runName.toLowerCase() },
+              },
+            },
+          },
+        ])
+      );
+    });
+
     it('does not add a name filter for blank input', async () => {
       mockWorkflowDataClient.search.mockResolvedValue({
         hits: { hits: [], total: { value: 0, relation: 'eq' } },
