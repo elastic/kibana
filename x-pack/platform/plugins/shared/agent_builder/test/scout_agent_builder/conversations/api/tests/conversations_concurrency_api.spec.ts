@@ -14,7 +14,13 @@ import {
   deleteConnectorById,
 } from '../../../../scout_agent_builder_shared/lib/connector_kbn';
 import { setupAgentDirectAnswer } from '../../../../scout_agent_builder_shared/lib/proxy_scenario';
-import { apiTest, API_AGENT_BUILDER, getConversation, postConverse } from '../fixtures';
+import {
+  apiTest,
+  API_AGENT_BUILDER,
+  getConversation,
+  postConverse,
+  type ScoutAgentBuilderApiClient,
+} from '../fixtures';
 
 apiTest.describe(
   'Agent Builder — concurrent conversation writes API',
@@ -40,45 +46,41 @@ apiTest.describe(
       await deleteConnectorById(kbnClient, connectorId);
     });
 
+    const seedConversation = async (apiClient: ScoutAgentBuilderApiClient): Promise<string> => {
+      await setupAgentDirectAnswer({
+        proxy: llmProxy,
+        title: 'Concurrency test',
+        response: 'First round',
+      });
+      const seed = await postConverse(
+        apiClient,
+        adminCredentials.apiKeyHeader,
+        { input: 'Start the conversation', connector_id: connectorId },
+        'local'
+      );
+      expect(seed).toHaveStatusCode(200);
+
+      const { conversation_id: conversationId } = seed.body as { conversation_id: string };
+      conversationIds.push(conversationId);
+      await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
+
+      return conversationId;
+    };
+
     apiTest(
-      'keeps both rounds when two clients converse with the same conversation at once',
+      'refuses a second converse while a run is active on the same conversation',
       async ({ apiClient }) => {
-        const FIRST_ROUND = 'First round';
         const QUESTION_A = 'Question A';
         const QUESTION_B = 'Question B';
-        const CONCURRENT_A = 'Concurrent answer A';
-        const CONCURRENT_B = 'Concurrent answer B';
+        const ANSWER_A = 'Answer A';
 
-        // Seed a conversation with one round so both concurrent rounds are appends.
-        await setupAgentDirectAnswer({
-          proxy: llmProxy,
-          title: 'Concurrency test',
-          response: FIRST_ROUND,
+        const conversationId = await seedConversation(apiClient);
+
+        const answerA = llmProxy.intercept({
+          name: 'busy-answer-A',
+          when: (body) => JSON.stringify(body.messages).includes(QUESTION_A),
+          responseMock: ANSWER_A,
         });
-        const seed = await postConverse(
-          apiClient,
-          adminCredentials.apiKeyHeader,
-          { input: 'Start the conversation', connector_id: connectorId },
-          'local'
-        );
-        expect(seed).toHaveStatusCode(200);
-        const conversationId = (seed.body as { conversation_id: string }).conversation_id;
-        conversationIds.push(conversationId);
-        await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
-
-        // Matched on the prompt rather than on registration order, so each request
-        // deterministically gets its own interceptor. A `when: () => true` pair
-        // would let either request consume either — and would silently swallow an
-        // unexpected extra LLM call, leaving the other request hung on its wait.
-        const answerFor = (question: string, answer: string) =>
-          llmProxy.intercept({
-            name: `concurrent-answer-${question}`,
-            when: (body) => JSON.stringify(body.messages).includes(question),
-            responseMock: answer,
-          });
-
-        const answerA = answerFor(QUESTION_A, CONCURRENT_A);
-        const answerB = answerFor(QUESTION_B, CONCURRENT_B);
 
         const requestA = postConverse(
           apiClient,
@@ -86,26 +88,30 @@ apiTest.describe(
           { input: QUESTION_A, conversation_id: conversationId, connector_id: connectorId },
           'local'
         );
-        const requestB = postConverse(
+
+        // A is now mid-run and holds the conversation. B needs no interceptor: it must be
+        // refused before reaching the LLM, and an unexpected LLM call for it would find no
+        // matching interceptor and fail the request instead of hanging.
+        await answerA.waitForIntercept();
+
+        const responseB = await postConverse(
           apiClient,
           adminCredentials.apiKeyHeader,
           { input: QUESTION_B, conversation_id: conversationId, connector_id: connectorId },
           'local'
         );
 
-        // Both executions have now read the conversation, so both hold the same
-        // two-round snapshot — the window in which a round used to be lost.
-        await answerA.waitForIntercept();
-        await answerB.waitForIntercept();
+        // wrap_handler only serializes the message and trace id, so the error code and
+        // activeExecutionId are not part of the response body.
+        expect(responseB).toHaveStatusCode(409);
+        expect((responseB.body as { message: string }).message).toContain(
+          `Conversation ${conversationId} already has an execution in progress`
+        );
 
         await answerA.completeAfterIntercept();
-        await answerB.completeAfterIntercept();
 
-        const [responseA, responseB] = await Promise.all([requestA, requestB]);
-        // A 409 here means the losing writer exhausted its conflict retries rather
-        // than the test being wrong
+        const responseA = await requestA;
         expect(responseA).toHaveStatusCode(200);
-        expect(responseB).toHaveStatusCode(200);
 
         const conversation = await getConversation(
           apiClient,
@@ -113,17 +119,51 @@ apiTest.describe(
           conversationId
         );
 
-        expect(conversation.rounds).toHaveLength(3);
+        expect(conversation.rounds).toHaveLength(2);
+        expect(conversation.rounds[1].response.message).toBe(ANSWER_A);
+        expect(JSON.stringify(conversation.rounds)).not.toContain(QUESTION_B);
+      }
+    );
 
-        const messages = conversation.rounds.map(({ response }) => response.message);
-        // asserted as a set: which request got which answer is not pinned
-        expect(messages).toContain(FIRST_ROUND);
-        expect(messages).toContain(CONCURRENT_A);
-        expect(messages).toContain(CONCURRENT_B);
+    apiTest(
+      'reports active_execution on GET while a run is active and omits it after',
+      async ({ apiClient }) => {
+        const QUESTION = 'Question for the active run';
 
-        // Round ids stay unique, so a retried write cannot duplicate a round.
-        const roundIds = conversation.rounds.map(({ id }) => id);
-        expect(new Set(roundIds).size).toBe(roundIds.length);
+        const conversationId = await seedConversation(apiClient);
+
+        const answer = llmProxy.intercept({
+          name: 'active-execution-answer',
+          when: (body) => JSON.stringify(body.messages).includes(QUESTION),
+          responseMock: 'Active run answer',
+        });
+
+        const request = postConverse(
+          apiClient,
+          adminCredentials.apiKeyHeader,
+          { input: QUESTION, conversation_id: conversationId, connector_id: connectorId },
+          'local'
+        );
+
+        await answer.waitForIntercept();
+
+        const during = await getConversation(
+          apiClient,
+          adminCredentials.apiKeyHeader,
+          conversationId
+        );
+        expect(typeof during.active_execution?.execution_id).toBe('string');
+        expect(during.active_execution?.execution_id).not.toBe('');
+
+        await answer.completeAfterIntercept();
+        expect(await request).toHaveStatusCode(200);
+
+        const after = await getConversation(
+          apiClient,
+          adminCredentials.apiKeyHeader,
+          conversationId
+        );
+        expect(after.active_execution).toBeUndefined();
       }
     );
   }
