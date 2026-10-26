@@ -23,6 +23,14 @@ import {
   validateEsqlQuery,
 } from './validate_esql_query';
 
+/**
+ * How many ES|QL steps one validation checks. Each checked step can cost an
+ * Elasticsearch request, so a workflow with thousands of steps must not turn
+ * one validation into thousands of requests. Steps past the cap are listed in
+ * `notChecked` as one entry.
+ */
+export const MAX_VALIDATED_ESQL_STEPS = 100;
+
 /** One ES|QL diagnostic in YAML coordinates (1-based line and column). */
 export interface EsqlStepDiagnostic extends EsqlQueryDiagnostic {
   stepName: string;
@@ -52,7 +60,8 @@ export async function collectEsqlStepDiagnostics(
 
   const lineCounter = new LineCounter();
   const document = parseDocument(yaml, { lineCounter, keepSourceTokens: true });
-  const locations = collectEsqlStepsFromLookup(buildWorkflowLookup(document, lineCounter), yaml);
+  const allLocations = collectEsqlStepsFromLookup(buildWorkflowLookup(document, lineCounter), yaml);
+  const locations = allLocations.slice(0, MAX_VALIDATED_ESQL_STEPS);
   const results = await Promise.all(
     locations.map((location) =>
       validateEsqlQuery(getEsqlToValidate(location.region), callbacks, {
@@ -63,6 +72,12 @@ export async function collectEsqlStepDiagnostics(
 
   const diagnostics: EsqlStepDiagnostic[] = [];
   const notChecked: string[] = [];
+  const skippedCount = allLocations.length - locations.length;
+  if (skippedCount > 0) {
+    notChecked.push(
+      `ES|QL queries of ${skippedCount} steps: only the first ${MAX_VALIDATED_ESQL_STEPS} ES|QL steps are validated.`
+    );
+  }
   results.forEach((result, index) => {
     const {
       step: { stepId: stepName, path: stepPath },

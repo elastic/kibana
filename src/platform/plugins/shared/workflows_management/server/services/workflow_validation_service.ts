@@ -8,6 +8,7 @@
  */
 
 import { once } from 'lodash';
+import pLimit from 'p-limit';
 import { firstValueFrom } from 'rxjs';
 import type { KibanaRequest } from '@kbn/core/server';
 import { buildServerESQLCallbacks } from '@kbn/esql-server-utils';
@@ -31,6 +32,31 @@ import {
   getWorkflowZodSchemaFromConnectors,
 } from '../../common/schema';
 import { getAvailableConnectors } from '../api/lib/workflow_connectors';
+
+/** How many ES|QL column requests one validation sends to Elasticsearch at a time. */
+export const MAX_CONCURRENT_ESQL_COLUMNS_REQUESTS = 5;
+
+type GetColumnsFor = NonNullable<ESQLCallbacks['getColumnsFor']>;
+
+/**
+ * Wraps `getColumnsFor` for one validation: identical queries share one
+ * request, and at most {@link MAX_CONCURRENT_ESQL_COLUMNS_REQUESTS} requests
+ * run at a time. The memo lives only as long as the callbacks, so it never
+ * answers one user's validation with another user's columns.
+ */
+const shareColumnsRequests = (getColumnsFor: GetColumnsFor): GetColumnsFor => {
+  const limit = pLimit(MAX_CONCURRENT_ESQL_COLUMNS_REQUESTS);
+  const requests = new Map<string, ReturnType<GetColumnsFor>>();
+  return (ctx) => {
+    const key = ctx?.query ?? '';
+    let request = requests.get(key);
+    if (!request) {
+      request = limit(() => getColumnsFor(ctx));
+      requests.set(key, request);
+    }
+    return request;
+  };
+};
 
 export class WorkflowValidationService {
   constructor(private readonly deps: WorkflowValidationDeps) {}
@@ -133,7 +159,7 @@ export class WorkflowValidationService {
   /**
    * The callbacks the editor supplies (see `useWorkflowEsqlCallbacks`), backed
    * by the current user's ES client. Sources and policies are fetched once per
-   * validation, not once per ES|QL step.
+   * validation, not once per ES|QL step, and columns once per distinct query.
    */
   private createEsqlCallbacks(request: KibanaRequest): ESQLCallbacks {
     const esClient = this.deps.getCoreStart().elasticsearch.client.asScoped(request);
@@ -143,7 +169,7 @@ export class WorkflowValidationService {
     });
     return {
       getSources: getSources && once(getSources),
-      getColumnsFor,
+      getColumnsFor: getColumnsFor && shareColumnsRequests(getColumnsFor),
       getPolicies: getPolicies && once(getPolicies),
       getLicense: once(() => this.deps.licensing.getLicense()),
     };
