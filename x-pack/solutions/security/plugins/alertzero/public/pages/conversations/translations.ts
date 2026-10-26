@@ -28,6 +28,13 @@ export const COPY_LINK_TOASTS = Object.freeze({
   }),
 });
 
+export const AGENT_BUILDER_PRIVILEGE_REQUIRED = Object.freeze({
+  toast: i18n.translate('xpack.alertzero.queue.proposalsAgentBuilderPrivilegeRequired.toast', {
+    defaultMessage:
+      'You need the Agent Builder Kibana privilege to view this investigation. Ask an administrator to update your role.',
+  }),
+});
+
 export const IDLE_HEADER = {
   greeting: i18n.translate('xpack.alertzero.queue.idleHeader.greeting', {
     defaultMessage: 'Your Watches are running.',

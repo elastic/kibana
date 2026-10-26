@@ -105,6 +105,7 @@
     "@kbn/utility-types",
     "@kbn/usage-collection-plugin",
     "@kbn/share-plugin",
+    "@kbn/router-utils",
     "@kbn/deeplinks-analytics",
     "@kbn/deeplinks-agent-builder",
     "@kbn/deeplinks-observability",

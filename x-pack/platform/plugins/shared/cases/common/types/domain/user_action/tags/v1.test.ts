@@ -6,34 +6,28 @@
  */
 
 import { UserActionTypes } from '../action/v1';
-import { TagsUserActionPayloadRt, TagsUserActionRt } from './v1';
+import { TagsUserActionPayloadSchema, TagsUserActionSchema } from './v1';
 
 describe('Tags', () => {
-  describe('TagsUserActionPayloadRt', () => {
+  describe('TagsUserActionPayloadSchema', () => {
     const defaultRequest = {
       tags: ['one', 'two'],
     };
 
     it('has expected attributes in request', () => {
-      const query = TagsUserActionPayloadRt.decode(defaultRequest);
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
+      const result = TagsUserActionPayloadSchema.safeParse(defaultRequest);
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
     });
 
-    it('removes foo:bar attributes from request', () => {
-      const query = TagsUserActionPayloadRt.decode({ ...defaultRequest, foo: 'bar' });
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
+    it('strips unknown fields', () => {
+      const result = TagsUserActionPayloadSchema.safeParse({ ...defaultRequest, foo: 'bar' });
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
     });
   });
 
-  describe('TagsUserActionRt', () => {
+  describe('TagsUserActionSchema', () => {
     const defaultRequest = {
       type: UserActionTypes.tags,
       payload: {
@@ -42,33 +36,25 @@ describe('Tags', () => {
     };
 
     it('has expected attributes in request', () => {
-      const query = TagsUserActionRt.decode(defaultRequest);
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
+      const result = TagsUserActionSchema.safeParse(defaultRequest);
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
     });
 
-    it('removes foo:bar attributes from request', () => {
-      const query = TagsUserActionRt.decode({ ...defaultRequest, foo: 'bar' });
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
+    it('strips unknown fields', () => {
+      const result = TagsUserActionSchema.safeParse({ ...defaultRequest, foo: 'bar' });
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
     });
 
-    it('removes foo:bar attributes from payload', () => {
-      const query = TagsUserActionRt.decode({
+    it('strips unknown fields from payload', () => {
+      const result = TagsUserActionSchema.safeParse({
         ...defaultRequest,
         payload: { ...defaultRequest.payload, foo: 'bar' },
       });
 
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
     });
   });
 });

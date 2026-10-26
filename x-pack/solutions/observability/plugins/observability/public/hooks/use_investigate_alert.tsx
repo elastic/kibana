@@ -197,7 +197,7 @@ export const useInvestigateAlert = ({
         'POST /internal/nightshift/investigations',
         {
           signal: null,
-          params: { body: { subject: { type: 'alert', id: alertId } } },
+          params: { body: { subject: { type: 'alert', ids: [alertId] } } },
         }
       );
       setPendingStart({ id: startedId, at: Date.now() });
