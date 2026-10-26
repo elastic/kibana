@@ -85,7 +85,6 @@
     "@kbn/presentation-publishing",
     "@kbn/aiops-log-rate-analysis",
     "@kbn/data-view-field-editor-plugin",
-    "@kbn/securitysolution-io-ts-utils",
     "@kbn/core-elasticsearch-server-mocks",
     "@kbn/datemath",
     "@kbn/dashboard-plugin",
@@ -138,6 +137,7 @@
     "@kbn/cps-utils",
     "@kbn/cps-server-utils",
     "@kbn/app-header",
-    "@kbn/ui-callout"
+    "@kbn/ui-callout",
+    "@kbn/slo-constants"
   ]
 }

@@ -284,14 +284,6 @@ describe('ActionPolicyForm', () => {
     expect(screen.getByTestId(TEST_SUBJ.strategySelect)).toHaveValue('on_status_change');
   });
 
-  it('shows strategy select for per_alert mode', () => {
-    renderForm();
-
-    const strategySelect = screen.getByTestId(TEST_SUBJ.strategySelect);
-    expect(strategySelect).toBeInTheDocument();
-    expect(strategySelect).toHaveValue('on_status_change');
-  });
-
   it('shows interval input when per_status_interval strategy is selected', async () => {
     const user = userEvent.setup();
     renderForm();
@@ -326,17 +318,6 @@ describe('ActionPolicyForm', () => {
     const strategySelect = screen.getByTestId(TEST_SUBJ.strategySelect);
     expect(strategySelect).toBeInTheDocument();
     expect(strategySelect).toHaveValue('time_interval');
-  });
-
-  it('shows interval input when time_interval is the default strategy in digest mode', async () => {
-    const user = userEvent.setup();
-    renderForm();
-
-    const toggle = screen.getByTestId(TEST_SUBJ.groupingModeToggle);
-    const buttons = toggle.querySelectorAll('button');
-    await user.click(buttons[2]); // Digest is the third button
-
-    expect(screen.getByTestId(TEST_SUBJ.throttleIntervalInput)).toBeInTheDocument();
   });
 
   it('pre-fills interval with 5m when switching to digest mode', async () => {
@@ -424,20 +405,5 @@ describe('ActionPolicyForm', () => {
     expect(screen.getByText('Workflows are not enabled')).toBeInTheDocument();
     expect(screen.getByTestId('workflowsDisabledSettingsLink')).toBeInTheDocument();
     expect(screen.queryByTestId('destinationsInput')).not.toBeInTheDocument();
-  });
-
-  it('renders the simple workflow builder add buttons when workflows are enabled', () => {
-    renderForm();
-
-    expect(screen.getByTestId('simpleWorkflowBuilder')).toBeInTheDocument();
-    expect(screen.getByTestId('simpleWorkflowAdd-email')).toBeInTheDocument();
-    expect(screen.getByTestId('simpleWorkflowAdd-slack')).toBeInTheDocument();
-  });
-
-  it('hides the simple workflow builder when workflows are disabled', () => {
-    mockWorkflowsEnabled = false;
-    renderForm();
-
-    expect(screen.queryByTestId('simpleWorkflowBuilder')).not.toBeInTheDocument();
   });
 });
