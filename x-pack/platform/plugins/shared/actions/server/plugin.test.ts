@@ -36,6 +36,7 @@ import type {
   PluginStartContract,
 } from './plugin';
 import { ActionsPlugin } from './plugin';
+import { CatalogService } from './catalog';
 import {
   AlertHistoryEsIndexConnectorId,
   DEFAULT_MICROSOFT_EXCHANGE_URL,
@@ -1327,6 +1328,44 @@ describe('Actions Plugin', () => {
         expect(enabledContext.logger.get().warn).toHaveBeenCalledWith(
           expect.stringContaining('catalog index')
         );
+      });
+
+      it('registers a new catalog type once and skips an existing id', async () => {
+        const loadAtBoot = jest
+          .spyOn(CatalogService.prototype, 'loadAtBoot')
+          .mockResolvedValue(undefined);
+        const stop = jest.spyOn(CatalogService.prototype, 'stop');
+        const enabledPlugin = new ActionsPlugin(
+          coreMock.createPluginInitializerContext<ActionsConfig>({
+            ...getConfig(),
+            catalog: {
+              enabled: true,
+              url: DEFAULT_CATALOG_URL,
+              refreshInterval: moment.duration(5, 'm'),
+            },
+          })
+        );
+        const setupContract = await enabledPlugin.setup(coreSetup, pluginsSetup);
+        setupContract.registerType(serverLogConnectorType);
+        const startContract = enabledPlugin.start(coreStart, pluginsStart);
+        await new Promise((resolve) => setImmediate(resolve));
+        const deps = loadAtBoot.mock.calls[0][0];
+        const catalogType = getConnectorType({
+          id: '.catalog-test',
+          name: 'Catalog test',
+          minimumLicenseRequired: 'gold',
+        });
+        deps.registerType(catalogType);
+        deps.registerType(catalogType);
+        expect(startContract.listTypes().some((type) => type.id === '.catalog-test')).toBe(true);
+        expect(() => deps.registerType(serverLogConnectorType)).not.toThrow();
+        expect(startContract.listTypes().filter((type) => type.id === '.server-log')).toHaveLength(
+          1
+        );
+        enabledPlugin.stop();
+        expect(stop).toHaveBeenCalled();
+        loadAtBoot.mockRestore();
+        stop.mockRestore();
       });
     });
 

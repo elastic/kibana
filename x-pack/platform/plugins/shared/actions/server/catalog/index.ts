@@ -9,6 +9,8 @@ export { catalogConfigSchema, DEFAULT_CATALOG_URL } from './catalog_config';
 export type { CatalogConfig } from './catalog_config';
 export { CatalogService } from './catalog_service';
 export type { CatalogBootDeps } from './catalog_service';
+export { loadCatalogFromIndex, selectLatestPerId } from './catalog_loader';
+export type { CatalogTypeBuilder, RegisteredCatalogType } from './types';
 export { getCatalogPublicKeys } from './keys/catalog_public_keys';
 export { RemoteCatalogSource } from './remote_catalog_source';
 export { createLogOnce } from './log_once';

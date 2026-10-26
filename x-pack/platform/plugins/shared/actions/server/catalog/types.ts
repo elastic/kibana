@@ -6,6 +6,7 @@
  */
 
 import type { LicenseType } from '@kbn/licensing-types';
+import type { ActionType, ActionTypeConfig, ActionTypeParams, ActionTypeSecrets } from '../types';
 
 export type CatalogRefreshOutcome = 'replaced' | 'same' | 'stale' | 'failed';
 
@@ -75,4 +76,38 @@ export interface DefinitionHeader {
   schemaVersion: 1;
   id: string;
   version: string;
+}
+
+export type CatalogActionType = ActionType<
+  ActionTypeConfig,
+  ActionTypeSecrets,
+  ActionTypeParams,
+  unknown
+>;
+
+export interface CatalogTypeBuilderInput {
+  id: string;
+  version: string;
+  yaml: string;
+  metadata: CatalogTypeMetadata;
+  iconDataUrl?: string;
+}
+
+export type CatalogTypeBuilder = (input: CatalogTypeBuilderInput) => CatalogActionType;
+
+export interface CatalogRegistryDeps {
+  registerType: (actionType: CatalogActionType) => void;
+  isTypeRegistered: (actionTypeId: string) => boolean;
+}
+
+export interface LoadCatalogFromIndexResult {
+  registered: number;
+  manifestPresent: boolean;
+  definitions: number;
+}
+
+export interface RegisteredCatalogType {
+  id: string;
+  version: string;
+  contentHash: string;
 }

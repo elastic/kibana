@@ -1300,6 +1300,7 @@ export class ActionsPlugin
       refreshIntervalMs: this.actionsConfig.catalog.refreshInterval.asMilliseconds(),
     });
     registerCatalogRefreshTask(plugins.taskManager, () => this.catalogService);
+    // buildType is provided by the declarative runtime, elastic/kibana#289816.
   }
 
   private startCatalog(core: CoreStart, plugins: ActionsPluginsStart): void {
@@ -1309,7 +1310,17 @@ export class ActionsPlugin
     const catalogLogger = this.logger.get('catalog');
     void withCatalogTimeout(
       this.catalogService.loadAtBoot(
-        { esClient: core.elasticsearch.client.asInternalUser },
+        {
+          esClient: core.elasticsearch.client.asInternalUser,
+          registerType: (type) => {
+            if (this.actionTypeRegistry!.has(type.id)) {
+              return;
+            }
+            ensureSufficientLicense(type);
+            this.actionTypeRegistry!.register(type);
+          },
+          isTypeRegistered: (id) => this.actionTypeRegistry!.has(id),
+        },
         { timeoutMs: CATALOG_BOOT_FETCH_TIMEOUT_MS }
       ),
       CATALOG_BOOT_HARD_STOP_MS,

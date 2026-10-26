@@ -9,14 +9,22 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { ConnectorCatalogStorage } from './catalog_storage';
 import { createConnectorCatalogStorage } from './catalog_storage';
 import { runCatalogRefresh } from './catalog_refresh';
+import { loadCatalogFromIndex } from './catalog_loader';
 import type { CatalogLogOnce } from './log_once';
 import { verifyCatalogSignature } from './signature';
-import type { CatalogRefreshResult, CatalogSource } from './types';
+import type {
+  CatalogRefreshResult,
+  CatalogRegistryDeps,
+  CatalogSource,
+  CatalogTypeBuilder,
+  LoadCatalogFromIndexResult,
+  RegisteredCatalogType,
+} from './types';
 import { CATALOG_LOAD_TIMEOUT_MS, withCatalogTimeout } from './with_timeout';
 
 const BOOT_FETCH_CONCURRENCY = 20;
 
-export interface CatalogBootDeps {
+export interface CatalogBootDeps extends CatalogRegistryDeps {
   esClient: ElasticsearchClient;
 }
 
@@ -26,12 +34,18 @@ export interface CatalogServiceOptions {
   refreshIntervalMs: number;
   logger: Logger;
   logOnce: CatalogLogOnce;
+  buildType?: CatalogTypeBuilder;
   createStorage?: (esClient: ElasticsearchClient, logger: Logger) => ConnectorCatalogStorage;
 }
 
 export class CatalogService {
   private refreshing?: Promise<CatalogRefreshResult | undefined>;
+  private loading?: Promise<LoadCatalogFromIndexResult>;
   private storage?: ConnectorCatalogStorage;
+  private registryDeps?: CatalogRegistryDeps;
+  private indexPoll?: ReturnType<typeof setInterval>;
+  private readonly registered = new Map<string, RegisteredCatalogType>();
+  private readonly notices = new Set<string>();
   private readonly createStorage: (
     esClient: ElasticsearchClient,
     logger: Logger
@@ -42,7 +56,27 @@ export class CatalogService {
   }
 
   public async loadAtBoot(deps: CatalogBootDeps, bootFetch?: { timeoutMs: number }): Promise<void> {
+    this.registryDeps = deps;
     this.storage = this.createStorage(deps.esClient, this.options.logger);
+    this.startReloadInterval();
+    await withCatalogTimeout(
+      this.loadFromIndex(),
+      CATALOG_LOAD_TIMEOUT_MS,
+      () => {
+        this.options.logger.warn(
+          'Connector catalog load timed out; starting with in-tree types only'
+        );
+        return undefined;
+      },
+      (error) => {
+        this.options.logger.warn(
+          `Connector catalog index read failed: ${
+            error instanceof Error ? error.message : String(error)
+          }`
+        );
+        return undefined;
+      }
+    );
     const stored = await withCatalogTimeout(
       this.storage.getManifest(),
       CATALOG_LOAD_TIMEOUT_MS,
@@ -110,7 +144,52 @@ export class CatalogService {
     return this.refreshing;
   };
 
-  public stop(): void {}
+  public getRegisteredTypes(): ReadonlyMap<string, RegisteredCatalogType> {
+    return this.registered;
+  }
+
+  public stop(): void {
+    if (this.indexPoll) {
+      clearInterval(this.indexPoll);
+      this.indexPoll = undefined;
+    }
+  }
+
+  private startReloadInterval(): void {
+    if (this.indexPoll) {
+      return;
+    }
+    this.indexPoll = setInterval(() => {
+      void this.loadFromIndex();
+    }, this.options.refreshIntervalMs);
+    this.indexPoll.unref?.();
+  }
+
+  private loadFromIndex(): Promise<LoadCatalogFromIndexResult> {
+    if (this.loading) {
+      return this.loading;
+    }
+    this.loading = this.runLoad().finally(() => {
+      this.loading = undefined;
+    });
+    return this.loading;
+  }
+
+  private async runLoad(): Promise<LoadCatalogFromIndexResult> {
+    if (!this.storage || !this.registryDeps) {
+      return { registered: 0, manifestPresent: false, definitions: 0 };
+    }
+    return loadCatalogFromIndex({
+      storage: this.storage,
+      publicKeys: this.options.publicKeys,
+      registry: this.registryDeps,
+      buildType: this.options.buildType,
+      registered: this.registered,
+      logger: this.options.logger,
+      logOnce: this.options.logOnce,
+      notices: this.notices,
+    });
+  }
 
   private async runBootFetch(): Promise<void> {
     const refreshResult = await this.refresh({ fetchConcurrency: BOOT_FETCH_CONCURRENCY });
@@ -133,7 +212,7 @@ export class CatalogService {
       publicKeys: this.options.publicKeys,
       logOnce: this.options.logOnce,
       reload: async () => {
-        // Registration reload lands with the builder seam.
+        await this.loadFromIndex();
       },
       fetchConcurrency: options?.fetchConcurrency,
       signal: options?.signal,
