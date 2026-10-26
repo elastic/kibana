@@ -7,6 +7,7 @@
 
 import { setTimeout } from 'timers/promises';
 import type { HttpHandler } from '@kbn/core/public';
+import { ConversationRoundStatus } from '@kbn/agent-builder-common';
 import type { ConversationRound } from '@kbn/agent-builder-common';
 import type { EvalConnector } from '@kbn/evals';
 import { MAX_TEXT_LENGTH } from '@kbn/significant-events-schema';
@@ -21,9 +22,16 @@ import type {
   TrajectoryStep,
 } from './types';
 
-export const INVESTIGATION_TIMEOUT_MS = 20 * 60_000;
+/** Matches the investigation workflow's `investigate` step timeout. */
+export const INVESTIGATION_TIMEOUT_MS = 30 * 60_000;
+/** The execution error of a run that ended without a `verdict`; judges still grade its hypotheses. */
+export const NO_CONCLUSION_ERROR = 'Investigation finished without recording a conclusion';
+export const UNPERSISTED_CONVERSATION_ERROR =
+  'Investigation conversation still had an unfinished round after polling';
 const MAX_PERSISTED_REPORT_BYTES = 512 * 1024;
 const POLL_INTERVAL_MS = 1000;
+/** How many polls a finished investigation's conversation gets to persist its rounds. */
+const CONVERSATION_PERSIST_ATTEMPTS = 60;
 
 /** The shared investigations API; the investigation id is its Agent Builder conversation id. */
 const investigationPath = (id: string) =>
@@ -61,11 +69,12 @@ const boundOutput = (output: InvestigationTaskOutput): InvestigationTaskOutput =
 };
 
 const isNotFound = (error: unknown): boolean => {
-  const { response, body } = (error ?? {}) as {
+  const { status, response, body } = (error ?? {}) as {
+    status?: number;
     response?: { status?: number };
     body?: { statusCode?: number };
   };
-  return response?.status === 404 || body?.statusCode === 404;
+  return status === 404 || response?.status === 404 || body?.statusCode === 404;
 };
 
 /**
@@ -84,6 +93,52 @@ const readInvestigation = async (
     if (isNotFound(error)) return undefined;
     throw error;
   }
+};
+
+const readConversation = async (
+  fetch: HttpHandler,
+  id: string
+): Promise<{ rounds: ConversationRound[] } | undefined> => {
+  try {
+    return await fetch<{ rounds: ConversationRound[] }>(
+      `/api/agent_builder/conversations/${encodeURIComponent(id)}`,
+      { headers: { 'elastic-api-version': '2023-10-31' } }
+    );
+  } catch (error) {
+    if (isNotFound(error)) return undefined;
+    throw error;
+  }
+};
+
+const isPersisted = (conversation: { rounds: ConversationRound[] } | undefined): boolean =>
+  Boolean(
+    conversation &&
+      conversation.rounds.length > 0 &&
+      conversation.rounds.every(({ status }) => status !== ConversationRoundStatus.inProgress)
+  );
+
+/**
+ * Reads the investigation's conversation. A finished investigation can report done before Agent
+ * Builder persists its last round, so it waits for every round to be persisted and finished.
+ */
+const readFinishedConversation = async (
+  fetch: HttpHandler,
+  id: string,
+  waitForRounds: boolean
+): Promise<{ rounds: ConversationRound[] }> => {
+  let conversation = await readConversation(fetch, id);
+  for (
+    let attempt = 1;
+    waitForRounds && !isPersisted(conversation) && attempt < CONVERSATION_PERSIST_ATTEMPTS;
+    attempt++
+  ) {
+    await setTimeout(POLL_INTERVAL_MS);
+    conversation = await readConversation(fetch, id);
+  }
+  if (!conversation || conversation.rounds.length === 0) {
+    throw new Error('Investigation conversation has no persisted rounds');
+  }
+  return conversation;
 };
 
 /** What the investigation recorded, in the shape the judges read. */
@@ -131,10 +186,11 @@ export const runInvestigation = async (
     while (!investigation || investigation.in_progress) {
       output.workflow_status = 'running';
       if (Date.now() - started > INVESTIGATION_TIMEOUT_MS) {
+        const minutes = INVESTIGATION_TIMEOUT_MS / 60_000;
         throw new Error(
           investigation
-            ? 'Investigation was still in progress after 20 minutes'
-            : 'Investigation was not created within 20 minutes'
+            ? `Investigation was still in progress after ${minutes} minutes`
+            : `Investigation was not created within ${minutes} minutes`
         );
       }
       await setTimeout(POLL_INTERVAL_MS);
@@ -151,12 +207,16 @@ export const runInvestigation = async (
     output.structured_report = toInvestigationReport(investigation);
     if (!investigation.in_progress && !investigation.metadata.verdict) {
       // There is no failed state: a run that ended without a conclusion recorded none.
-      output.execution_error ??= 'Investigation finished without recording a conclusion';
+      output.execution_error ??= NO_CONCLUSION_ERROR;
     }
-    const conversation = await fetch<{ rounds: ConversationRound[] }>(
-      `/api/agent_builder/conversations/${encodeURIComponent(investigation.id)}`,
-      { headers: { 'elastic-api-version': '2023-10-31' } }
+    const conversation = await readFinishedConversation(
+      fetch,
+      investigation.id,
+      !investigation.in_progress
     );
+    if (!investigation.in_progress && !isPersisted(conversation)) {
+      output.execution_error = UNPERSISTED_CONVERSATION_ERROR;
+    }
     output.conversation_round_count = conversation.rounds.length;
     output.traceId = conversation.rounds
       .flatMap(({ trace_id: traceId }) => (typeof traceId === 'string' ? [traceId] : traceId ?? []))

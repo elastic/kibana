@@ -63,6 +63,36 @@ describe('HttpInfoSummaryItem', () => {
     const badge = screen.getByTestId(httpStatusCodeBadgeTestId);
     expect(badge).toHaveTextContent('700');
   });
+
+  describe('fitToContainer', () => {
+    it('renders the method, URL, and status', () => {
+      renderWithTheme(<HttpInfoSummaryItem {...baseProps} status={502} fitToContainer />);
+
+      expect(screen.getByTestId('apmHttpInfoRequestMethod')).toHaveTextContent('GET');
+      expect(screen.getByTestId('apmHttpInfoUrl')).toHaveTextContent(url);
+      expect(screen.getByTestId('apmHttpInfoRequestMethod').closest('.euiBadge')).toHaveTextContent(
+        `GET ${url}`
+      );
+      expect(screen.getByTestId(httpStatusCodeBadgeTestId)).toHaveTextContent('502');
+    });
+
+    it('lets the URL shrink to the container instead of the fixed cap', () => {
+      renderWithTheme(<HttpInfoSummaryItem {...baseProps} fitToContainer />);
+
+      const urlAnchor = screen.getByTestId('apmHttpInfoUrl').parentElement;
+      expect(urlAnchor).toHaveClass('apmHttpInfoUrlAnchor');
+      expect(screen.getByTestId('apmHttpInfoUrl')).not.toHaveStyleRule('max-width', '384px');
+    });
+
+    it('keeps the fixed URL cap without fitToContainer', () => {
+      renderWithTheme(<HttpInfoSummaryItem {...baseProps} />);
+
+      expect(screen.getByTestId('apmHttpInfoUrl').parentElement).not.toHaveClass(
+        'apmHttpInfoUrlAnchor'
+      );
+      expect(screen.getByTestId('apmHttpInfoUrl')).toHaveStyleRule('max-width', '384px');
+    });
+  });
 });
 
 // apmUiSharedHttpStatusCodeBadge

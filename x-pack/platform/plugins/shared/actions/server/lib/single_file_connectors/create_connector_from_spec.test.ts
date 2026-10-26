@@ -99,6 +99,13 @@ describe('createConnectorTypeFromSpec', () => {
     expect(connectorType.isExperimental).toBeUndefined();
   });
 
+  it('keeps a reference to the source spec', () => {
+    const spec = createMockSpec();
+    const result = createConnectorTypeFromSpec(spec, mockActionsPlugin);
+
+    expect(result.spec).toBe(spec);
+  });
+
   it('builds the connector network from the actions configuration utilities', () => {
     const createConnectorNetworkSettingsSpy = jest.spyOn(
       createConnectorNetworkSettingsModule,
@@ -138,6 +145,11 @@ describe('createConnectorTypeFromSpec', () => {
     });
     const connectorType = createConnectorTypeFromSpec(spec, mockActionsPlugin);
     expect(connectorType.sandboxSupportedAuthTypes).toEqual(['bearer', 'oauth_authorization_code']);
+  });
+
+  it('registers the shipped New Relic spec as sandbox capable for the API key header auth type', () => {
+    const connectorType = createConnectorTypeFromSpec(connectorsSpecs.NewRelic, mockActionsPlugin);
+    expect(connectorType.sandboxSupportedAuthTypes).toEqual(['api_key_header']);
   });
 
   it('sets description from metadata.description', () => {

@@ -7,6 +7,7 @@
 
 import {
   CASE_EXTENDED_FIELDS,
+  MAX_CASES_PER_PAGE,
   MAX_CATEGORY_FILTER_LENGTH,
   MAX_TAGS_FILTER_LENGTH,
   MAX_ASSIGNEES_FILTER_LENGTH,
@@ -46,6 +47,7 @@ import {
   CasesPatchRequestRt,
   CasesSearchRequestRt,
   CaseUpdateRequestTemplateRt,
+  SimilarCasesSearchRequestRt,
 } from './v1';
 import { CustomFieldTypes } from '../../domain/custom_field/v1';
 import {
@@ -722,6 +724,70 @@ describe('CasesSearchRequestRt', () => {
 
     expect(CasesSearchRequestRt.decode(request)._tag).toBe('Left');
     expect(CasesSearchRequestSchema.safeParse(request).success).toBe(false);
+  });
+});
+
+describe('SimilarCasesSearchRequestRt', () => {
+  it('decodes a request without pagination or sort params', () => {
+    expect(SimilarCasesSearchRequestRt.decode({})).toStrictEqual({ _tag: 'Right', right: {} });
+  });
+
+  it('decodes pagination params and keeps them as numbers', () => {
+    expect(SimilarCasesSearchRequestRt.decode({ page: '2', perPage: '25' })).toStrictEqual({
+      _tag: 'Right',
+      right: { page: 2, perPage: 25 },
+    });
+  });
+
+  it('decodes sortField and sortOrder together with pagination params', () => {
+    const request = { page: '1', perPage: '10', sortField: 'createdAt', sortOrder: 'desc' };
+
+    expect(SimilarCasesSearchRequestRt.decode(request)).toStrictEqual({
+      _tag: 'Right',
+      right: { ...request, page: 1, perPage: 10 },
+    });
+  });
+
+  it.each(Object.keys(CasesFindRequestSortFieldsRt.keys))(
+    'succeeds with %s as sortField',
+    (sortField) => {
+      expect(SimilarCasesSearchRequestRt.decode({ sortField })).toStrictEqual({
+        _tag: 'Right',
+        right: { sortField },
+      });
+    }
+  );
+
+  it.each(['asc', 'desc'])('succeeds with %s as sortOrder', (sortOrder) => {
+    expect(SimilarCasesSearchRequestRt.decode({ sortOrder })).toStrictEqual({
+      _tag: 'Right',
+      right: { sortOrder },
+    });
+  });
+
+  it('fails with an unsupported sortField', () => {
+    const query = SimilarCasesSearchRequestRt.decode({ sortField: 'not-a-field' });
+
+    expect(query._tag).toBe('Left');
+    expect(PathReporter.report(query)[0]).toContain('sortField');
+  });
+
+  it('fails with an unsupported sortOrder', () => {
+    const query = SimilarCasesSearchRequestRt.decode({ sortOrder: 'ascending' });
+
+    expect(query._tag).toBe('Left');
+    expect(PathReporter.report(query)[0]).toContain('sortOrder');
+  });
+
+  it('fails when perPage is above the maximum', () => {
+    const query = SimilarCasesSearchRequestRt.decode({
+      page: '1',
+      perPage: String(MAX_CASES_PER_PAGE + 1),
+      sortField: 'createdAt',
+    });
+
+    expect(query._tag).toBe('Left');
+    expect(PathReporter.report(query)[0]).toContain('The provided perPage value is too high');
   });
 });
 

@@ -12,15 +12,25 @@ export const escalationQueryKeys = {
    * them changes. Omitting page or perPage would cause a page flip to return
    * stale data from the previous page's cache entry.
    */
-  list: (status?: string, page?: number, perPage?: number, search?: string) =>
+  /** Prefix of every list variant, for refreshing all that are on screen. */
+  lists: () => [...escalationQueryKeys.all, 'list'] as const,
+  list: (
+    status?: string,
+    page?: number,
+    perPage?: number,
+    search?: string,
+    entity?: string | null
+  ) =>
     [
-      ...escalationQueryKeys.all,
-      'list',
+      ...escalationQueryKeys.lists(),
       status ?? 'open',
       page ?? 1,
       perPage ?? null,
       search ?? '',
+      entity ?? null,
     ] as const,
+  /** Entities across every escalation. Under `all`, so any escalation change refreshes it. */
+  impactPills: () => [...escalationQueryKeys.all, 'impactPills'] as const,
   /**
    * Key for the linked-investigations list of a single escalation.
    *

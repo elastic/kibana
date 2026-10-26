@@ -7,9 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DummyRuleMap } from 'oxlint';
+import type { DummyRuleMap, OxlintOverride } from 'oxlint';
 
 export const jestRules: DummyRuleMap = {
   'jest/no-focused-tests': 'error',
-  // 'jest/no-identical-title': 'error',
 };
+
+/** `@kbn/eslint-config`'s Jest rules. */
+export const jestOverrides: OxlintOverride[] = [
+  {
+    files: ['**/*.{test,test.mocks,mock}.{js,mjs,ts,tsx}', '**/__mocks__/**/*.{js,mjs,ts,tsx}'],
+    rules: {
+      'jest/no-identical-title': 'error',
+    },
+  },
+];

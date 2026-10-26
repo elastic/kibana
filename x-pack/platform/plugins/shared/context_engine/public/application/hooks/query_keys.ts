@@ -11,10 +11,23 @@ export const contextEngineQueryKeys = {
   aiIndex: {
     list: () => ['context_engine', 'ai_index', 'list'] as const,
     detail: (aiIndexId: string) => ['context_engine', 'ai_index', aiIndexId] as const,
-    kiList: (aiIndexId: string, size: number, type: string | undefined) =>
-      ['context_engine', 'ai_index', aiIndexId, 'ki_list', size, type ?? ''] as const,
-    ki: (aiIndexId: string, index: string, kiId: string) =>
-      ['context_engine', 'ai_index', aiIndexId, 'ki', index, kiId] as const,
+    listKi: (
+      aiIndexId: string,
+      size: number,
+      type: string | undefined,
+      query: string | undefined,
+      lifecycleStatus?: readonly KiLifecycleStatus[]
+    ) =>
+      [
+        'context_engine',
+        'ai_index',
+        aiIndexId,
+        'list_ki',
+        size,
+        type ?? '',
+        query ?? '',
+        lifecycleStatus?.join(',') ?? '',
+      ] as const,
     viewKi: (
       aiIndexId: string,
       index: string,

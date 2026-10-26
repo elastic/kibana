@@ -14,6 +14,7 @@ import type { ExecutionContext } from '../execution_context';
 import type { LoggerServiceContract } from '../services/logger_service/logger_service';
 import type { RuleExecutionCounter } from './metrics/counters';
 import type { ActiveAlertGroupHash } from './queries';
+import type { LatestAlertEventState } from '../director/queries';
 import type { AlertStatusTransition } from '../director/director';
 
 export interface RuleExecutorTaskParams {
@@ -42,6 +43,7 @@ export interface RulePipelineState {
   readonly alertStatusTransitions?: ReadonlyArray<AlertStatusTransition>;
   readonly storedAlertEvents?: ReadonlyArray<AlertEventDocument>;
   readonly activeGroups?: ReadonlyArray<ActiveAlertGroupHash>;
+  readonly previousAlertStateByGroupHash?: ReadonlyMap<string, LatestAlertEventState>;
 }
 
 export type HaltReason = 'rule_deleted' | 'rule_disabled' | 'state_not_ready';

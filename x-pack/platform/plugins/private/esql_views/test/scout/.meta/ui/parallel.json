@@ -1,0 +1,120 @@
+{
+  "sha1": "81cf5880440601bd589df784928a5f6978bcffab",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "a3033392f6f1e6a-34dcde5fed4642d",
+      "title": "ES|QL View create and edit creates, edits, and validates a view",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/esql_views/test/scout/ui/parallel_tests/crud.spec.ts",
+        "line": 24,
+        "column": 5
+      }
+    },
+    {
+      "id": "bd789b9d353aa65-9d68d1bb1c8160b",
+      "title": "ES|QL View deletion deletes one view and multiple selected views",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/esql_views/test/scout/ui/parallel_tests/delete.spec.ts",
+        "line": 33,
+        "column": 23
+      }
+    },
+    {
+      "id": "2fbe7943d155b4a-77ce6ddab8ad312",
+      "title": "ES|QL View query preview runs the form query and renders its real results",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/esql_views/test/scout/ui/parallel_tests/preview.spec.ts",
+        "line": 35,
+        "column": 31
+      }
+    },
+    {
+      "id": "ed7f73d9c6b69b8-beaa651e130987e",
+      "title": "ES|QL Views privilege gating hides the management navigation and rejects direct navigation without read access",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/esql_views/test/scout/ui/parallel_tests/privileges.spec.ts",
+        "line": 27,
+        "column": 13
+      }
+    },
+    {
+      "id": "ed7f73d9c6b69b8-c018211470e06f9",
+      "title": "ES|QL Views privilege gating shows the table without mutation controls with read-only access",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/esql_views/test/scout/ui/parallel_tests/privileges.spec.ts",
+        "line": 34,
+        "column": 15
+      }
+    },
+    {
+      "id": "ed7f73d9c6b69b8-e3864932f2860a8",
+      "title": "ES|QL Views privilege gating shows create and edit controls without delete controls with create access",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/esql_views/test/scout/ui/parallel_tests/privileges.spec.ts",
+        "line": 49,
+        "column": 27
+      }
+    },
+    {
+      "id": "ed7f73d9c6b69b8-092d030a984e0ca",
+      "title": "ES|QL Views privilege gating shows delete controls without create or edit controls with delete access",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/esql_views/test/scout/ui/parallel_tests/privileges.spec.ts",
+        "line": 62,
+        "column": 20
+      }
+    },
+    {
+      "id": "bfc9147d5c07e1a-8c480d2d5ecbf4d",
+      "title": "ES|QL Views table lists, searches, reloads, and opens a view in Discover",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/esql_views/test/scout/ui/parallel_tests/table.spec.ts",
+        "line": 53,
+        "column": 60
+      }
+    }
+  ]
+}

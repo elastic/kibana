@@ -31,6 +31,13 @@ export const triggerLabels = {
   anyone: i18n.translate('xpack.nightshift.automations.flyout.anyone', {
     defaultMessage: 'Anyone',
   }),
+  via: i18n.translate('xpack.nightshift.automations.flyout.via', { defaultMessage: 'via' }),
+  anyApp: i18n.translate('xpack.nightshift.automations.flyout.anyApp', {
+    defaultMessage: 'Any app',
+  }),
+  searchApps: i18n.translate('xpack.nightshift.automations.flyout.searchApps', {
+    defaultMessage: 'Exact app name, app ID or bot ID…',
+  }),
   slackDailyLimitHelp: i18n.translate('xpack.nightshift.automations.flyout.slackDailyLimitHelp', {
     defaultMessage:
       "When reached, new messages aren't investigated until the limit resets at 12:00 AM UTC. Skipped messages appear in this automation's history.",
@@ -59,9 +66,6 @@ export const triggerLabels = {
   every: i18n.translate('xpack.nightshift.automations.flyout.everyOption', {
     defaultMessage: 'Every…',
   }),
-  customCron: i18n.translate('xpack.nightshift.automations.flyout.customCronOption', {
-    defaultMessage: 'Custom cron…',
-  }),
   whenAnAlert: i18n.translate('xpack.nightshift.automations.flyout.whenAnAlert', {
     defaultMessage: 'When an alert',
   }),
@@ -69,21 +73,9 @@ export const triggerLabels = {
   changesTo: i18n.translate('xpack.nightshift.automations.flyout.changesTo', {
     defaultMessage: 'changes to',
   }),
+  active: i18n.translate('xpack.nightshift.automations.activeOption', { defaultMessage: 'Active' }),
   anyRule: i18n.translate('xpack.nightshift.automations.flyout.anyRule', {
     defaultMessage: 'Any rule',
-  }),
-  anyStatus: i18n.translate('xpack.nightshift.automations.anyStatusOption', {
-    defaultMessage: 'Any status',
-  }),
-  active: i18n.translate('xpack.nightshift.automations.activeOption', { defaultMessage: 'Active' }),
-  activeHelp: i18n.translate('xpack.nightshift.automations.flyout.activeHelp', {
-    defaultMessage: 'Rule conditions are currently met',
-  }),
-  recovered: i18n.translate('xpack.nightshift.automations.recoveredOption', {
-    defaultMessage: 'Recovered',
-  }),
-  recoveredHelp: i18n.translate('xpack.nightshift.automations.flyout.recoveredHelp', {
-    defaultMessage: 'Rule conditions are no longer met',
   }),
   everyLead: i18n.translate('xpack.nightshift.automations.flyout.everyLead', {
     defaultMessage: 'Every',
@@ -115,9 +107,6 @@ export const triggerLabels = {
   }),
   timezonePlaceholder: i18n.translate('xpack.nightshift.automations.flyout.timezonePlaceholder', {
     defaultMessage: 'City or timezone…',
-  }),
-  customCronLead: i18n.translate('xpack.nightshift.automations.flyout.customCronLead', {
-    defaultMessage: 'Custom cron',
   }),
   dailyLimit: i18n.translate('xpack.nightshift.automations.dailyLimitLabel', {
     defaultMessage: 'Daily trigger limit',

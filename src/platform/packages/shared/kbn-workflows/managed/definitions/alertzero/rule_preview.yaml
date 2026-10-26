@@ -62,9 +62,9 @@ steps:
     on-failure:
       continue: true
 
-  # Building blocks are left out, as in the tuning sweep: an EQL sequence writes one
-  # alert per matched event next to the sequence alert, so counting them would show a
-  # two-event sequence as three alerts.
+  # EQL sequence members are left out, as in the tuning sweep: a sequence writes one
+  # building-block alert per matched event next to the sequence alert, so counting them
+  # would show a two-event sequence as three alerts. Building-block rule alerts count.
   - name: count_preview_alerts
     type: elasticsearch.search
     if: "${{ steps.preview_rule.error == null and steps.preview_rule.output.previewId != null }}"
@@ -80,7 +80,7 @@ steps:
                 kibana.alert.rule.uuid: "{{ steps.preview_rule.output.previewId }}"
           must_not:
             - exists:
-                field: kibana.alert.building_block_type
+                field: kibana.alert.group.index
     on-failure:
       continue: true
 
@@ -127,7 +127,7 @@ steps:
                 kibana.alert.rule.uuid: "{{ steps.preview_proposed.output.previewId }}"
           must_not:
             - exists:
-                field: kibana.alert.building_block_type
+                field: kibana.alert.group.index
     on-failure:
       continue: true
 

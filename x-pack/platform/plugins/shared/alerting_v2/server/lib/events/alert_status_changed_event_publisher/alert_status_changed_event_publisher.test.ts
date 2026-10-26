@@ -33,12 +33,12 @@ describe('AlertStatusChangedEventPublisher', () => {
     expect(eventBus.publish).toHaveBeenNthCalledWith(
       1,
       { type: ALERT_STATUS_CHANGED_EVENT_TYPE, payload: firstPayload },
-      { request, origin: 'user' }
+      { request, origin: { actor: 'user', channel: 'api' } }
     );
     expect(eventBus.publish).toHaveBeenNthCalledWith(
       2,
       { type: ALERT_STATUS_CHANGED_EVENT_TYPE, payload: secondPayload },
-      { request, origin: 'user' }
+      { request, origin: { actor: 'user', channel: 'api' } }
     );
   });
 

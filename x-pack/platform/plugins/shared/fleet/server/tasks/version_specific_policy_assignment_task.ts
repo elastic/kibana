@@ -40,17 +40,21 @@ import {
 } from '../services/utils/version_specific_policies';
 import { fetchAllAgentsByKuery, getAgentsByKuery } from '../services/agents';
 import { reassignAgents } from '../services/agents/reassign';
+import { AgentAlreadyAssignedError } from '../errors';
 import {
   splitVersionSuffixFromPolicyId,
   classifyPolicyId,
   buildAgentVersionVariantsKueryFragment,
   getSentinelVersionPolicyId,
+  hasSentinelVersionPolicy,
   hasSentinelVersionSuffix,
 } from '../../common/services/version_specific_policies_utils';
 import {
   AGENT_POLICY_INDEX,
   AGENT_POLICY_VERSION_SEPARATOR,
+  AGENT_TYPE_OPAMP,
   AGENTS_INDEX,
+  NOT_OPAMP_AGENT_KUERY,
 } from '../../common/constants';
 import { RunMetrics } from './version_specific_policy_assignment_run_metrics';
 import { isSentinelPolicyVersionEnabled } from '../services/utils/sentinel_policy_version';
@@ -65,6 +69,10 @@ const DEFAULT_INTERVAL = '1m';
 const TIMEOUT = '5m';
 const AGENT_POLICIES_BATCHSIZE = 500;
 const AGENTS_BATCHSIZE = 1000;
+
+// OpAMP collectors have no policy to move between: they get no policy action to acknowledge, so a
+// reassigned collector would stay `updating` (its `policy_revision` is cleared). The task never selects them.
+const NOT_OPAMP_COLLECTOR_ES_FILTER = [{ term: { type: AGENT_TYPE_OPAMP } }];
 // Agents moved per reassignment: `reassignAgents` loads the agent documents of its ids and updates them in
 // one bulk request, so a group of tens of thousands of agents (e.g. inactive ones, the first time they are
 // selected) is moved in batches, with a pause point between them for the abort signal.
@@ -422,6 +430,7 @@ export class VersionSpecificPolicyAssignmentTask {
     const agentPolicyFetcher = await agentPolicyService.fetchAllAgentPolicies(soClient, {
       kuery: [
         `not ${AGENT_POLICY_SAVED_OBJECT_TYPE}.has_agent_version_conditions:true`,
+        // Keep in sync with `hasSentinelVersionPolicy`.
         `not ${AGENT_POLICY_SAVED_OBJECT_TYPE}.is_managed:true`,
         `not ${AGENT_POLICY_SAVED_OBJECT_TYPE}.supports_agentless:true`,
       ].join(' and '),
@@ -441,7 +450,7 @@ export class VersionSpecificPolicyAssignmentTask {
       const agentsFetcher = await fetchAllAgentsByKuery(esClient, soClient, {
         kuery: `policy_id:(${agentPolicyPageResults
           .map((p) => `"${escapeQuotes(p.id)}"`)
-          .join(' or ')})`,
+          .join(' or ')}) and ${NOT_OPAMP_AGENT_KUERY}`,
         perPage: AGENTS_BATCHSIZE,
         showInactive: false,
         ...LIGHT_AGENT_QUERY_OPTIONS,
@@ -492,9 +501,7 @@ export class VersionSpecificPolicyAssignmentTask {
               signal
             );
           } catch (error) {
-            this.logger.error(
-              `[VersionSpecificPolicyAssignmentTask] Error reassigning agents to ${targetPolicyId}: ${error}`
-            );
+            this.logReassignError(targetPolicyId, error);
           }
         },
         { concurrency: MAX_CONCURRENT_REASSIGNMENTS }
@@ -646,6 +653,7 @@ export class VersionSpecificPolicyAssignmentTask {
       query: {
         bool: {
           filter: [{ term: { active: true } }],
+          must_not: NOT_OPAMP_COLLECTOR_ES_FILTER,
           should: [
             // on the policy or on its `#sentinel` copy
             { terms: { policy_id: parentPolicyIds } },
@@ -744,7 +752,7 @@ export class VersionSpecificPolicyAssignmentTask {
     // Agents already on the correct versioned policy will receive updated revisions
     // automatically through fleet-server after deployPolicies updates .fleet-policies.
 
-    const combinedKuery = `(${parentPolicyKuery}) OR (${versionedPolicyKuery})`;
+    const combinedKuery = `((${parentPolicyKuery}) OR (${versionedPolicyKuery})) AND ${NOT_OPAMP_AGENT_KUERY}`;
 
     this.logger.debug(
       `[VersionSpecificPolicyAssignmentTask] Searching for agents with kuery: ${combinedKuery}`
@@ -977,9 +985,21 @@ export class VersionSpecificPolicyAssignmentTask {
         `[VersionSpecificPolicyAssignmentTask] Successfully reassigned agents to ${targetPolicyId}`
       );
     } catch (error) {
-      this.logger.error(
-        `[VersionSpecificPolicyAssignmentTask] Error reassigning agents to ${targetPolicyId}: ${error}`
-      );
+      this.logReassignError(targetPolicyId, error);
+    }
+  }
+
+  /**
+   * `AgentAlreadyAssignedError` means that the agents were already moved to the target policy since they
+   * were selected. That is expected, so it is not logged as an error. Other reassignment errors, e.g. hosted
+   * agents, are still logged as errors.
+   */
+  private logReassignError(targetPolicyId: string, error: unknown) {
+    const message = `[VersionSpecificPolicyAssignmentTask] Error reassigning agents to ${targetPolicyId}: ${error}`;
+    if (error instanceof AgentAlreadyAssignedError) {
+      this.logger.debug(message);
+    } else {
+      this.logger.error(message);
     }
   }
 
@@ -1267,9 +1287,12 @@ export class VersionSpecificPolicyAssignmentTask {
         parentPolicyId,
         agentOnlyVariantPolicyIds
       );
-      const variantAgentsKuery = sentinelVersionEnabled
-        ? `(${allVariantAgentsKuery}) and not policy_id:"${escapeQuotes(sentinelPolicyId)}"`
-        : allVariantAgentsKuery;
+      // OpAMP collectors are left alone, like in the assignment: they have no policy to move between
+      const variantAgentsKuery = `(${
+        sentinelVersionEnabled
+          ? `(${allVariantAgentsKuery}) and not policy_id:"${escapeQuotes(sentinelPolicyId)}"`
+          : allVariantAgentsKuery
+      }) and ${NOT_OPAMP_AGENT_KUERY}`;
 
       const agentIds: string[] = [];
       // Include inactive agents: reassignment is a metadata update on `.fleet-agents` that is valid
@@ -1293,12 +1316,7 @@ export class VersionSpecificPolicyAssignmentTask {
         // be left on a missing policy. Falling back to the base policy is always safe: the
         // sentinel assignment moves the agents later.
         let targetPolicyId = parentPolicyId;
-        // Managed and agentless policies are left on the plain id, like in `assignAgentsToSentinelPolicies`.
-        if (
-          sentinelVersionEnabled &&
-          !parentPolicy?.is_managed &&
-          !parentPolicy?.supports_agentless
-        ) {
+        if (sentinelVersionEnabled && (!parentPolicy || hasSentinelVersionPolicy(parentPolicy))) {
           const upToDatePolicyIds = await this.ensureSentinelPoliciesUpToDate(
             esClient,
             soClient,

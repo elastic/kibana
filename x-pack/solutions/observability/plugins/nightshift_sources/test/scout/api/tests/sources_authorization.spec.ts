@@ -28,11 +28,13 @@ import {
   testIndexName,
   uniqueSuffix,
   updateSource,
+  validateSourceQuery,
 } from '../fixtures';
 
 const TITLE_PREFIX = 'scout-sources-authz';
 
-apiTest.describe(
+// Failing: See https://github.com/elastic/kibana/issues/298822
+apiTest.describe.skip(
   'Nightshift sources authorization',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
@@ -81,6 +83,9 @@ apiTest.describe(
 
       expect(await createSource(apiClient, cookieHeader, body)).toHaveStatusCode(403);
       expect(
+        await validateSourceQuery(apiClient, cookieHeader, { esql: body.esql })
+      ).toHaveStatusCode(403);
+      expect(
         await updateSource(apiClient, cookieHeader, sourceId, { ...body, tags: [] })
       ).toHaveStatusCode(403);
       expect(await setSourceEnabled(apiClient, cookieHeader, sourceId, false)).toHaveStatusCode(
@@ -90,10 +95,7 @@ apiTest.describe(
       expect(await deleteSource(apiClient, cookieHeader, sourceId)).toHaveStatusCode(403);
     });
 
-    // Promoted ES still returns `unknown` for this role. The candidate snapshot
-    // (elastic/elasticsearch#161500) returns `ok`. Unskip once that snapshot is promoted.
-    // eslint-disable-next-line playwright/no-skipped-test -- unskip after the ES snapshot with #161500 is promoted
-    apiTest.skip(
+    apiTest(
       'reports ok health to a reader with only the implicit view grant',
       async ({ apiClient, samlAuth }) => {
         const { cookieHeader } = await samlAuth.asInteractiveUser(NIGHTSHIFT_READ_ONLY_NO_ES_ROLE);

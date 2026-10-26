@@ -5,7 +5,17 @@
  * 2.0.
  */
 
-import { createWorkspaceState } from '../../state_management/workspace';
+import {
+  createWorkspaceState,
+  deselectNode,
+  invertNodeSelection,
+  registerWorkspaceListeners,
+  selectAllNodes,
+  selectNeighborNodes,
+  toggleNodeSelection,
+  workspaceChanged,
+} from '../../state_management/workspace';
+import { createMockGraphStore } from '../../state_management/mocks';
 import { createWorkspace } from './graph_client_workspace';
 
 describe('graphui-workspace', function () {
@@ -249,6 +259,11 @@ describe('graphui-workspace', function () {
       workspace.simpleSearch('myquery', undefined, 2);
 
       expect(workspace.selectedNodes.length).toEqual(0);
+      const { store } = createMockGraphStore({
+        listeners: [registerWorkspaceListeners],
+        mockedDepsOverwrites: { getWorkspace: jest.fn(() => workspace) },
+      });
+      store.dispatch(workspaceChanged(createWorkspaceState(workspace)));
 
       const nodeA1 = workspace.getNode(workspace.makeNodeId('field1', 'a1'));
       expect(typeof nodeA1).toEqual('object');
@@ -260,24 +275,24 @@ describe('graphui-workspace', function () {
       expect(typeof nodeB2).toEqual('object');
 
       expect(workspace.selectedNodes.length).toEqual(0);
-      workspace.selectNode(nodeA1);
+      store.dispatch(toggleNodeSelection({ nodeId: nodeA1.id, replace: false }));
       expect(workspace.selectedNodes.length).toEqual(1);
-      workspace.selectInvert();
+      store.dispatch(invertNodeSelection());
       expect(workspace.selectedNodes.length).toEqual(3);
-      workspace.selectInvert();
+      store.dispatch(invertNodeSelection());
       expect(workspace.selectedNodes.length).toEqual(1);
-      workspace.deselectNode(nodeA1);
+      store.dispatch(deselectNode(nodeA1.id));
       expect(workspace.selectedNodes.length).toEqual(0);
-      workspace.selectAll();
+      store.dispatch(selectAllNodes());
       expect(workspace.selectedNodes.length).toEqual(4);
-      workspace.selectInvert();
+      store.dispatch(invertNodeSelection());
       expect(workspace.selectedNodes.length).toEqual(0);
 
-      workspace.selectNode(nodeA1);
+      store.dispatch(toggleNodeSelection({ nodeId: nodeA1.id, replace: false }));
       expect(workspace.selectedNodes.length).toEqual(1);
-      workspace.selectNeighbours();
+      store.dispatch(selectNeighborNodes());
       expect(workspace.selectedNodes.length).toEqual(2);
-      workspace.selectNeighbours();
+      store.dispatch(selectNeighborNodes());
       //Should have reached full extent of a1-a2 island.
       expect(workspace.selectedNodes.length).toEqual(2);
     });

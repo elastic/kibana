@@ -49,6 +49,16 @@ const expectedBodyTag = (route: SweepRoute, readUser: boolean): string => {
       : '[uptime-read,private-location-write,uptime-write]';
   }
 
+  const isSecretConnectionWrite =
+    (method === 'POST' || method === 'DELETE' || method === 'PUT') &&
+    path.includes('secret_connection');
+
+  if (isSecretConnectionWrite) {
+    return readUser
+      ? '[secret-connection-write,uptime-write]'
+      : '[uptime-read,secret-connection-write,uptime-write]';
+  }
+
   // Routes with an OR-set (e.g. run-test: `uptime-write` OR `monitor-run-manually`). A read
   // user is missing every OR member; a no-access user is additionally missing `uptime-read`.
   if (route.anyRequiredPrivileges?.length) {

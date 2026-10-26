@@ -17,7 +17,6 @@ const investigation: Investigation = {
   template_id: 'investigation',
   title: 'Impossible travel — exec account',
   createdAt: '2024-01-01T00:00:00Z',
-  updatedAt: '2024-01-01T00:00:00Z',
   worker_execution_ids: ['exec-1'],
   pendingProposalCount: 0,
   assignees: [],

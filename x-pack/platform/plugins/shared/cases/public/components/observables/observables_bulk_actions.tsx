@@ -20,6 +20,7 @@ import type { Observable } from '../../../common/types/domain/observable/v1';
 import type { CaseUI } from '../../containers/types';
 import { OBSERVABLES_WORKFLOW_ORIGIN_TYPE } from '../../../common/types/domain/user_action/workflow/constants';
 import { useCasesWorkflowExecutor } from '../workflows/use_cases_workflow_executor';
+import { useCaseWorkflowRunTelemetry } from '../../analytics/use_case_workflow_run_telemetry';
 import { useCaseWorkflowFilters } from '../workflows/use_run_case_workflow';
 import { RunCaseWorkflowModal } from '../workflows/run_case_workflow_modal';
 import { DeleteConfirmationModal } from '../configure_cases/delete_confirmation_modal';
@@ -73,6 +74,7 @@ export const ObservablesBulkActions: React.FC<ObservablesBulkActionsProps> = ({
   );
 
   const runWorkflow = useCasesWorkflowExecutor({ caseId: caseData.id, origin });
+  const workflowTelemetry = useCaseWorkflowRunTelemetry(origin);
   const { filterWorkflow, sortWorkflow } = useCaseWorkflowFilters();
 
   const handleBulkDeleteClick = useCallback(() => {
@@ -171,6 +173,7 @@ export const ObservablesBulkActions: React.FC<ObservablesBulkActionsProps> = ({
           filterWorkflow={filterWorkflow}
           sortWorkflow={sortWorkflow}
           onClose={() => setShowRunWorkflowModal(false)}
+          telemetry={workflowTelemetry}
         />
       )}
     </>

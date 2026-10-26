@@ -90,7 +90,7 @@ describe('AlertStatusChangedWorkflowSubscriber', () => {
 
       await handlerFor(bus, ALERT_STATUS_CHANGED_EVENT_TYPE)(ruleRunEvent, {
         request,
-        origin: 'user',
+        origin: { actor: 'user', channel: 'api' },
       });
 
       expect(workflowsExtensions.getClient).toHaveBeenCalledWith(request);
@@ -103,7 +103,7 @@ describe('AlertStatusChangedWorkflowSubscriber', () => {
 
       await handlerFor(bus, ALERT_STATUS_CHANGED_EVENT_TYPE)(clientEvent, {
         request,
-        origin: 'user',
+        origin: { actor: 'user', channel: 'api' },
       });
 
       expect(mockEmitEvent).toHaveBeenCalledWith(AlertStatusChangedTriggerId, clientEvent.payload);
@@ -116,7 +116,7 @@ describe('AlertStatusChangedWorkflowSubscriber', () => {
       await expect(
         handlerFor(bus, ALERT_STATUS_CHANGED_EVENT_TYPE)(ruleRunEvent, {
           request,
-          origin: 'user',
+          origin: { actor: 'user', channel: 'api' },
         })
       ).resolves.toBeUndefined();
 
@@ -139,7 +139,7 @@ describe('AlertStatusChangedWorkflowSubscriber', () => {
 
       await handlerFor(bus, ALERT_STATUS_CHANGED_EVENT_TYPE)(clientEvent, {
         request,
-        origin: 'user',
+        origin: { actor: 'user', channel: 'api' },
       });
 
       expect(mockLogger.error).toHaveBeenCalledWith('workflows unreachable', {

@@ -1,5 +1,5 @@
 {
-  "sha1": "385a9d3110fc6129b138916cbd956c5df9628f30",
+  "sha1": "1e5082e415fc811e15673b7436f1d52d8d1713fa",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -145,6 +145,136 @@
       }
     },
     {
+      "id": "e973271af1ca9cb-12d030eca4b386e",
+      "title": "Managed child service account inheritance sync allowlisted variable child inherits the worker SA after approval",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_inheritance.spec.ts",
+        "line": 214,
+        "column": 34
+      }
+    },
+    {
+      "id": "e973271af1ca9cb-e4b30bc81ba2ec5",
+      "title": "Managed child service account inheritance sync variable child outside the allowlist never starts",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_inheritance.spec.ts",
+        "line": 241,
+        "column": 8
+      }
+    },
+    {
+      "id": "e973271af1ca9cb-034b8de40a3339e",
+      "title": "Managed child service account inheritance async allowlisted variable child inherits the worker SA after approval",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_inheritance.spec.ts",
+        "line": 214,
+        "column": 34
+      }
+    },
+    {
+      "id": "e973271af1ca9cb-62d2b7d6869aa13",
+      "title": "Managed child service account inheritance async variable child outside the allowlist never starts",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_inheritance.spec.ts",
+        "line": 241,
+        "column": 8
+      }
+    },
+    {
+      "id": "e973271af1ca9cb-c5e441f1a41ca17",
+      "title": "Managed child service account inheritance sync tag-authorized child inherits after approval",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_inheritance.spec.ts",
+        "line": 303,
+        "column": 28
+      }
+    },
+    {
+      "id": "e973271af1ca9cb-c164b3ebe94074e",
+      "title": "Managed child service account inheritance sync tag-authorized child without matching tags never starts",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_inheritance.spec.ts",
+        "line": 321,
+        "column": 28
+      }
+    },
+    {
+      "id": "e973271af1ca9cb-b58b7f4023dc344",
+      "title": "Managed child service account inheritance async tag-authorized child inherits after approval",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_inheritance.spec.ts",
+        "line": 303,
+        "column": 28
+      }
+    },
+    {
+      "id": "e973271af1ca9cb-929067496a52f4b",
+      "title": "Managed child service account inheritance async tag-authorized child without matching tags never starts",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_inheritance.spec.ts",
+        "line": 321,
+        "column": 28
+      }
+    },
+    {
+      "id": "e973271af1ca9cb-8765f2244f778b0",
+      "title": "Managed child service account inheritance sync field-only tag removal revokes child delegation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_inheritance.spec.ts",
+        "line": 344,
+        "column": 24
+      }
+    },
+    {
+      "id": "e973271af1ca9cb-282afc38e2cae47",
+      "title": "Managed child service account inheritance async field-only tag removal revokes child delegation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_inheritance.spec.ts",
+        "line": 344,
+        "column": 24
+      }
+    },
+    {
       "id": "e973271af1ca9cb-c8d21ac3fd6381c",
       "title": "Managed child service account inheritance requires superuser privileges for global example mutations",
       "expectedStatus": "passed",
@@ -153,8 +283,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_inheritance.spec.ts",
-        "line": 164,
-        "column": 6
+        "line": 379,
+        "column": 18
       }
     },
     {
@@ -166,8 +296,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_inheritance.spec.ts",
-        "line": 220,
-        "column": 23
+        "line": 436,
+        "column": 25
       }
     },
     {
@@ -179,8 +309,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_inheritance.spec.ts",
-        "line": 250,
-        "column": 25
+        "line": 466,
+        "column": 16
       }
     },
     {
@@ -192,8 +322,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_inheritance.spec.ts",
-        "line": 250,
-        "column": 25
+        "line": 466,
+        "column": 16
       }
     },
     {
@@ -205,8 +335,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_inheritance.spec.ts",
-        "line": 304,
-        "column": 28
+        "line": 520,
+        "column": 13
       }
     },
     {
@@ -218,8 +348,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_inheritance.spec.ts",
-        "line": 304,
-        "column": 28
+        "line": 520,
+        "column": 13
       }
     },
     {
@@ -231,8 +361,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_inheritance.spec.ts",
-        "line": 339,
-        "column": 13
+        "line": 555,
+        "column": 30
       }
     },
     {
@@ -244,8 +374,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_inheritance.spec.ts",
-        "line": 339,
-        "column": 13
+        "line": 555,
+        "column": 30
       }
     },
     {
@@ -257,8 +387,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_inheritance.spec.ts",
-        "line": 362,
-        "column": 30
+        "line": 578,
+        "column": 32
       }
     },
     {
@@ -270,8 +400,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_inheritance.spec.ts",
-        "line": 362,
-        "column": 30
+        "line": 578,
+        "column": 32
       }
     },
     {
@@ -283,8 +413,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_inheritance.spec.ts",
-        "line": 405,
-        "column": 15
+        "line": 621,
+        "column": 19
       }
     },
     {
@@ -296,8 +426,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_inheritance.spec.ts",
-        "line": 429,
-        "column": 36
+        "line": 644,
+        "column": 23
       }
     },
     {
@@ -309,8 +439,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_inheritance.spec.ts",
-        "line": 437,
-        "column": 55
+        "line": 658,
+        "column": 26
       }
     },
     {
@@ -322,8 +452,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_inheritance.spec.ts",
-        "line": 470,
-        "column": 6
+        "line": 688,
+        "column": 16
       }
     },
     {
@@ -335,8 +465,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_inheritance.spec.ts",
-        "line": 477,
-        "column": 85
+        "line": 693,
+        "column": 27
       }
     },
     {
@@ -348,8 +478,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_inheritance.spec.ts",
-        "line": 486,
-        "column": 65
+        "line": 701,
+        "column": 27
       }
     },
     {
@@ -361,8 +491,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_inheritance.spec.ts",
-        "line": 516,
-        "column": 34
+        "line": 730,
+        "column": 57
       }
     },
     {

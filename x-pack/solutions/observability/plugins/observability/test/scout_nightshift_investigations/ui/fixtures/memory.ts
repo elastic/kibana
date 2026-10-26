@@ -13,11 +13,8 @@ import { join } from 'path';
 
 /** The plugin's Context Engine AI index, under the managed `ai-index-idx-*` prefix. */
 export const MEMORY_INDEX = 'ai-index-idx-nightshift-semantic-memory';
-/**
- * Significant Events registers this route; `/app/nightshift` is the separate
- * investigation console, and its `/{tab}` route does not serve the Memory page.
- */
-const SIGNIFICANT_EVENTS_APP_ROUTE = 'significant_events';
+/** Memory is a tab of the Nightshift app's Knowledge page. */
+const MEMORY_APP_PATH = 'app/nightshift/knowledge/memory';
 /** Agent Builder conversation the seeded memories claim to have come from. */
 export const SEEDED_AGENT_ID = 'nightshift.investigation';
 /** A second Space, so space isolation is a real second tenancy and not a label. */
@@ -28,20 +25,18 @@ export const OTHER_SPACE_ID = `memory-e2e-${randomUUID().slice(0, 8)}`;
  *
  * Built from `kbnUrl` rather than a literal, because Scout configures no Playwright
  * `baseURL` and the app is mounted at its registered `appRoute`
- * (`/app/significant_events`) rather than at its id.
+ * (`/app/nightshift`) rather than at its id.
  */
 export const memoryUrl = (kbnUrl: KibanaUrl, spaceId?: string): string =>
   kbnUrl.get(
-    spaceId === undefined
-      ? `app/${SIGNIFICANT_EVENTS_APP_ROUTE}/memory`
-      : `s/${encodeURIComponent(spaceId)}/app/${SIGNIFICANT_EVENTS_APP_ROUTE}/memory`
+    spaceId === undefined ? MEMORY_APP_PATH : `s/${encodeURIComponent(spaceId)}/${MEMORY_APP_PATH}`
   );
 
 /** What the Memory page's URL must contain once it has loaded. */
 export const memoryPath = (spaceId?: string): string =>
   spaceId === undefined
-    ? `/app/${SIGNIFICANT_EVENTS_APP_ROUTE}/memory`
-    : `/s/${encodeURIComponent(spaceId)}/app/${SIGNIFICANT_EVENTS_APP_ROUTE}/memory`;
+    ? `/${MEMORY_APP_PATH}`
+    : `/s/${encodeURIComponent(spaceId)}/${MEMORY_APP_PATH}`;
 
 /** The header entry that Memory renders once its availability gate has settled on. */
 export const memoryHeaderTab = (page: ScoutPage) => page.getByRole('tab', { name: 'Memory' });

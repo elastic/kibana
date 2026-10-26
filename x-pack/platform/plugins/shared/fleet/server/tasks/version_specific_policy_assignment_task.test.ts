@@ -13,6 +13,7 @@ import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
 
 import { createAppContextStartContractMock } from '../mocks';
+import { AgentAlreadyAssignedError, AgentReassignmentError } from '../errors';
 import { agentPolicyService, appContextService, packagePolicyService } from '../services';
 import { fetchAllAgentsByKuery, getAgentsByKuery } from '../services/agents';
 import { reassignAgents } from '../services/agents/reassign';
@@ -455,6 +456,53 @@ describe('VersionSpecificPolicyAssignmentTask', () => {
       }
     });
 
+    describe.each([
+      [
+        'logs at debug level when the agents are already assigned',
+        new AgentAlreadyAssignedError('x'),
+        false,
+      ],
+      [
+        'logs an error when the agents are hosted',
+        new AgentReassignmentError('No agents to reassign, already assigned or managed agents'),
+        true,
+      ],
+      ['logs an error when the reassignment fails', new Error('boom'), true],
+    ])('Reassignment failure: %s', (_name, reassignError, expectError) => {
+      it('logs with the expected level', async () => {
+        const logFactory = loggingSystemMock.create();
+        const logger = loggingSystemMock.createLogger();
+        logFactory.get.mockReturnValue(logger);
+        const task = new VersionSpecificPolicyAssignmentTask({
+          core: mockCore,
+          taskManager: mockTaskManagerSetup,
+          logFactory,
+          config: { taskInterval: '1m' },
+        });
+        const agents = generateAgents(1, 'policy-1');
+        mockAgentPolicyService.fetchAllAgentPolicies = getMockAgentPolicyFetchAllAgentPolicies([
+          { id: 'policy-1', revision: 5, has_agent_version_conditions: true },
+        ] as AgentPolicy[]);
+        mockAgentPolicyService.deployPolicies = jest.fn().mockResolvedValue(undefined);
+        mockedGetAgentsByKuery.mockResolvedValue({
+          total: agents.length,
+          agents,
+          page: 1,
+          perPage: agents.length,
+        });
+        mockedFetchAllAgentsByKuery.mockResolvedValue(getMockFetchAllAgentsByKuery(agents));
+        mockedReassignAgents.mockRejectedValueOnce(reassignError);
+
+        await task.start({ taskManager: tmStartMock() });
+        await task.runTask(MOCK_TASK_INSTANCE, mockCore, new AbortController().signal);
+
+        const isReassignLog = ([message]: unknown[]) =>
+          String(message).includes('Error reassigning agents to policy-1#8.18');
+        expect(logger.error.mock.calls.some(isReassignLog)).toBe(expectError);
+        expect(logger.debug.mock.calls.some(isReassignLog)).toBe(!expectError);
+      });
+    });
+
     it('Should not reassign more batches once the task is aborted', async () => {
       const agentPolicies = [
         { id: 'policy-1', revision: 5, has_agent_version_conditions: true },
@@ -684,6 +732,29 @@ describe('VersionSpecificPolicyAssignmentTask', () => {
       );
     });
 
+    it('Should not select OpAMP collectors', async () => {
+      const agentPolicies = [
+        { id: 'policy-1', revision: 5, has_agent_version_conditions: true },
+      ] as AgentPolicy[];
+      const agents = generateAgents(2, 'policy-1', '8.18.0');
+      mockAgentPolicyService.fetchAllAgentPolicies =
+        getMockAgentPolicyFetchAllAgentPolicies(agentPolicies);
+      mockAgentPolicyService.deployPolicies = jest.fn().mockResolvedValue(undefined);
+      mockedGetAgentsByKuery.mockResolvedValue({ total: 2, agents, page: 1, perPage: 2 });
+      mockedFetchAllAgentsByKuery.mockResolvedValue(getMockFetchAllAgentsByKuery(agents));
+
+      await runTask();
+
+      const notOpampCollector = 'not type:OPAMP';
+      for (const mocked of [mockedGetAgentsByKuery, mockedFetchAllAgentsByKuery]) {
+        expect(mocked).toHaveBeenCalledWith(
+          expect.anything(),
+          expect.anything(),
+          expect.objectContaining({ kuery: expect.stringContaining(notOpampCollector) })
+        );
+      }
+    });
+
     describe('agent policies with agents to look at', () => {
       const twoAgentPolicies = [
         { id: 'policy-1', revision: 5, has_agent_version_conditions: true },
@@ -725,6 +796,8 @@ describe('VersionSpecificPolicyAssignmentTask', () => {
         });
         // agents that are inactive by timeout are active in the stored field, like in the agent queries
         expect(request.query.bool.filter).toEqual([{ term: { active: true } }]);
+        // OpAMP collectors are never moved between policies
+        expect(request.query.bool.must_not).toEqual([{ term: { type: 'OPAMP' } }]);
         const [onPolicy, onVariant, withoutBaseId] = request.query.bool.should;
         // the policy and its #sentinel copy
         expect(onPolicy).toEqual({
@@ -1157,12 +1230,16 @@ describe('VersionSpecificPolicyAssignmentTask', () => {
       expect(mockedFetchAllAgentsByKuery).toHaveBeenCalledWith(
         expect.anything(),
         expect.anything(),
-        expect.objectContaining({ kuery })
+        // OpAMP collectors are left alone, like in the assignment
+        expect.objectContaining({ kuery: `(${kuery}) and not type:OPAMP` })
       );
       expect(mockedGetAgentsByKuery).toHaveBeenCalledWith(
         expect.anything(),
         expect.anything(),
-        expect.objectContaining({ kuery, includeStatusRuntimeField: false })
+        expect.objectContaining({
+          kuery: `(${kuery}) and not type:OPAMP`,
+          includeStatusRuntimeField: false,
+        })
       );
     });
 
@@ -1469,7 +1546,11 @@ describe('VersionSpecificPolicyAssignmentTask', () => {
         expect(mockedFetchAllAgentsByKuery).toHaveBeenCalledWith(
           expect.anything(),
           expect.anything(),
-          expect.objectContaining({ kuery: 'policy_id:("policy-1")' })
+          // OpAMP collectors are left on the plain policy: they cannot acknowledge a policy, so a
+          // reassigned collector would stay updating
+          expect.objectContaining({
+            kuery: 'policy_id:("policy-1") and not type:OPAMP',
+          })
         );
         expect(mockAgentPolicyService.deployPolicies).not.toHaveBeenCalled();
         expect(mockedReassignAgents).toHaveBeenCalledWith(
@@ -1727,7 +1808,8 @@ describe('VersionSpecificPolicyAssignmentTask', () => {
           expect.anything(),
           expect.anything(),
           expect.objectContaining({
-            kuery: '(policy_base_id:"policy-1") and not policy_id:"policy-1#sentinel"',
+            kuery:
+              '((policy_base_id:"policy-1") and not policy_id:"policy-1#sentinel") and not type:OPAMP',
           })
         );
         expect(mockedReassignAgents).toHaveBeenCalledWith(

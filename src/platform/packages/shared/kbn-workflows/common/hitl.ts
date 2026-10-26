@@ -98,6 +98,7 @@ export const HITL_CHANNEL_CONNECTOR_TYPES = {
   slack_api: 'slack_api',
   email: 'email',
   slack2: 'slack2.sendMessage',
+  teams: 'microsoft-teams.sendChannelMessage',
   servicenow: 'servicenow_search.addComment',
   http: 'http',
 } as const satisfies Record<string, string>;

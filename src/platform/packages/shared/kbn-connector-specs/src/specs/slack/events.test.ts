@@ -124,6 +124,89 @@ describe('Slack inbound events', () => {
     expect(validateEmittedEvents(events.definitions, result.events)).toEqual({ ok: true });
   });
 
+  describe('bot and app posts', () => {
+    const emitMessage = async (event: Record<string, unknown>) => {
+      const result = expectEmit(
+        await events.handleEvents(
+          createContext(callback({ type: 'message', channel: 'C123', ts: '1.000005', ...event }))
+        )
+      );
+      expect(validateEmittedEvents(events.definitions, result.events)).toEqual({ ok: true });
+      return result.events[0].payload;
+    };
+
+    it.each([
+      [
+        'the message and its bot_profile',
+        { bot_id: 'B123', app_id: 'A123', bot_profile: { app_id: 'A999', name: 'PagerDuty' } },
+        { botId: 'B123', appId: 'A123', botName: 'PagerDuty' },
+      ],
+      [
+        'bot_profile.app_id and the legacy username',
+        { bot_profile: { app_id: 'A999' }, username: 'Datadog' },
+        { appId: 'A999', botName: 'Datadog' },
+      ],
+      [
+        'the edited message',
+        {
+          subtype: 'message_changed',
+          message: { ts: '1.000001', bot_id: 'B1', bot_profile: { app_id: 'A1', name: 'Rootly' } },
+        },
+        { botId: 'B1', appId: 'A1', botName: 'Rootly' },
+      ],
+      [
+        'the deleted message',
+        {
+          subtype: 'message_deleted',
+          deleted_ts: '1.000001',
+          previous_message: { ts: '1.000001', bot_profile: { app_id: 'A1', name: 'Rootly' } },
+        },
+        { appId: 'A1', botName: 'Rootly' },
+      ],
+    ])('reads the bot identity from %s', async (_name, event, expected) => {
+      expect(await emitMessage(event)).toMatchObject(expected);
+    });
+
+    it('omits the identity when Slack sends none', async () => {
+      const payload = await emitMessage({ text: 'hello' });
+      expect(payload).not.toHaveProperty('appId');
+      expect(payload).not.toHaveProperty('botName');
+    });
+  });
+
+  it.each<[string, unknown, string | undefined]>([
+    [
+      "the Relay's Slack thread key",
+      { origin: { type: 'slack', external_conversation_id: 'slack:T123:C123:1355517523.000005' } },
+      'slack:T123:C123:1355517523.000005',
+    ],
+    ['no key without a Relay block', undefined, undefined],
+    [
+      'no key from another surface',
+      { origin: { type: 'teams', external_conversation_id: 'teams:1' } },
+      undefined,
+    ],
+    [
+      'no oversized key',
+      { origin: { type: 'slack', external_conversation_id: 'x'.repeat(129) } },
+      undefined,
+    ],
+  ])('emits a message with %s', async (_, relay, externalConversationId) => {
+    const result = expectEmit(
+      await events.handleEvents(
+        createContext(
+          callback(
+            { type: 'message', channel: 'C123', text: 'hello', ts: '1355517523.000005' },
+            relay === undefined ? {} : { relay }
+          )
+        )
+      )
+    );
+
+    expect(result.events[0]?.payload.externalConversationId).toBe(externalConversationId);
+    expect(validateEmittedEvents(events.definitions, result.events)).toEqual({ ok: true });
+  });
+
   it('uses the original message id when a message is changed', async () => {
     const result = expectEmit(
       await events.handleEvents(

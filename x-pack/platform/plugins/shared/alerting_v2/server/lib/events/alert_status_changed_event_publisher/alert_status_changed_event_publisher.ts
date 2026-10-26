@@ -15,7 +15,9 @@ import {
   type AlertingDomainEvent,
   type AlertingPublisherContext,
 } from '../domain_events';
-import { EventOriginToken, type EventOrigin } from '../../event_origin/token';
+import type { EventOriginActor } from '../../event_origin/origin_schemas';
+import { toEventOrigin } from '../../event_origin/event_origin';
+import { EventOriginActorToken } from '../../event_origin/token';
 import type { EventBus } from '../event_bus';
 import { ALERT_STATUS_CHANGED_EVENT_TYPE, type AlertStatusChangedEvent } from './events';
 
@@ -51,7 +53,7 @@ export class AlertStatusChangedEventPublisher implements AlertStatusChangedEvent
     @inject(AlertingDomainEventBusToken)
     private readonly eventBus: EventBus<AlertingDomainEvent, AlertingPublisherContext>,
     @inject(Request) private readonly request: KibanaRequest,
-    @inject(EventOriginToken) private readonly origin: EventOrigin,
+    @inject(EventOriginActorToken) private readonly actor: EventOriginActor,
     @inject(AlertStatusChangedOptIns) private readonly optIns: AlertStatusChangedOptIns
   ) {}
 
@@ -74,7 +76,10 @@ export class AlertStatusChangedEventPublisher implements AlertStatusChangedEvent
         payload,
       };
 
-      this.eventBus.publish(event, { request: this.request, origin: this.origin });
+      this.eventBus.publish(event, {
+        request: this.request,
+        origin: toEventOrigin(this.actor, this.request),
+      });
     }
   }
 }

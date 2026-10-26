@@ -655,6 +655,25 @@ export interface SlackFilesInfoResponse extends SlackErrorFields {
   response_metadata?: { next_cursor?: string };
 }
 
+const SLACK_MAX_MESSAGE_BLOCKS = 50;
+
+const slackMessageBlocksSchema = () =>
+  z
+    .array(
+      z.looseObject({
+        type: z
+          .string()
+          .min(1)
+          .max(50)
+          .describe('Block type, for example section, divider, or actions'),
+      })
+    )
+    .max(SLACK_MAX_MESSAGE_BLOCKS)
+    .optional()
+    .describe(
+      'Slack Block Kit blocks (https://docs.slack.dev/reference/block-kit/blocks) that lay out the message. When set, text is the notification and fallback text only.'
+    );
+
 export const SlackSendMessageInputSchema = lazySchema(() =>
   z.object({
     channel: z
@@ -665,6 +684,7 @@ export const SlackSendMessageInputSchema = lazySchema(() =>
         'Conversation ID (C.../G.../D...) or, on the Elastic Slack app, a connected channel name (e.g. "#general"). Use listChannels or resolveChannelId to look up an ID.'
       ),
     text: z.string().min(1).max(SLACK_MAX_MESSAGE_TEXT_LENGTH).describe('The message text to send'),
+    blocks: slackMessageBlocksSchema(),
     threadTs: z
       .string()
       .max(SLACK_MAX_TIMESTAMP_LENGTH)
@@ -700,8 +720,9 @@ export const SlackUpdateMessageInputSchema = lazySchema(() =>
       .min(1)
       .max(SLACK_MAX_UPDATE_MESSAGE_TEXT_LENGTH)
       .describe(
-        'The new message text, at most 4,000 characters. It replaces the current text of the message, and Slack removes any blocks the message had.'
+        'The new message text, at most 4,000 characters. It replaces the current text of the message, and without blocks Slack removes any blocks the message had.'
       ),
+    blocks: slackMessageBlocksSchema(),
   })
 );
 export type SlackUpdateMessageInput = z.infer<typeof SlackUpdateMessageInputSchema>;

@@ -11,16 +11,26 @@
 // version bumps.
 // Seeding at version 99.0 keeps the suite independent of the shared server's real artifact data: the managed route resolves the highest version, and server-side consumers read the data client on every call, so nothing is cached across suites.
 
-import { spaceTest, tags } from '@kbn/scout-security';
+import { spaceTest, tags, CUSTOM_QUERY_RULE } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/ui';
-import { SEEDED_TACTIC_ALPHA, SEEDED_TACTIC_BETA } from '../fixtures/mitre_fixtures';
+import {
+  SEEDED_ATLAS_TACTIC,
+  SEEDED_ATLAS_TECHNIQUE,
+  SEEDED_TACTIC_ALPHA,
+  SEEDED_TACTIC_BETA,
+} from '../fixtures/mitre_fixtures';
 
 spaceTest.describe(
   'Coverage Overview — managed MITRE source',
   { tag: tags.stateful.classic },
   () => {
-    spaceTest.beforeEach(async ({ browserAuth }) => {
+    spaceTest.beforeEach(async ({ apiServices, browserAuth }) => {
+      await apiServices.detectionRule.deleteAll();
       await browserAuth.loginAsPlatformEngineer();
+    });
+
+    spaceTest.afterAll(async ({ apiServices }) => {
+      await apiServices.detectionRule.deleteAll();
     });
 
     spaceTest(
@@ -72,6 +82,87 @@ spaceTest.describe(
         await expect(coverageOverviewPage.errorCallout).not.toBeAttached();
         await expect(coverageOverviewPage.tacticGroup(SEEDED_TACTIC_ALPHA.id)).toBeVisible();
         await expect(coverageOverviewPage.tacticGroup(SEEDED_TACTIC_BETA.id)).toBeVisible();
+      }
+    );
+
+    spaceTest(
+      'shows the ATLAS matrix on the MITRE ATLAS tab with seeded tactics in position order',
+      async ({ page, pageObjects: { coverageOverviewPage } }) => {
+        await coverageOverviewPage.navigate();
+
+        // EuiTab marks the selected tab with aria-selected="true".
+        await expect(coverageOverviewPage.frameworkTab('enterprise')).toHaveAttribute(
+          'aria-selected',
+          'true'
+        );
+        await expect(coverageOverviewPage.frameworkTab('atlas')).toHaveAttribute(
+          'aria-selected',
+          'false'
+        );
+
+        const { violations } = await page.checkA11y({
+          include: ['[data-test-subj="coverageOverviewFrameworkTabs"]'],
+        });
+        expect(violations).toHaveLength(0);
+
+        await coverageOverviewPage.selectFramework('atlas');
+        await expect(coverageOverviewPage.frameworkTab('atlas')).toHaveAttribute(
+          'aria-selected',
+          'true'
+        );
+        await expect(coverageOverviewPage.tacticGroup(SEEDED_ATLAS_TACTIC.id)).toBeVisible();
+        await expect(coverageOverviewPage.tacticGroup(SEEDED_TACTIC_ALPHA.id)).toHaveCount(0);
+        // The ATLAS fixture set holds a single tactic (position 0), so it must be the only column.
+        await expect(coverageOverviewPage.tacticPanels).toHaveText([
+          new RegExp(SEEDED_ATLAS_TACTIC.name),
+        ]);
+
+        await coverageOverviewPage.selectFramework('enterprise');
+        await expect(coverageOverviewPage.tacticGroup(SEEDED_TACTIC_ALPHA.id)).toBeVisible();
+        await expect(coverageOverviewPage.tacticGroup(SEEDED_ATLAS_TACTIC.id)).toHaveCount(0);
+      }
+    );
+
+    spaceTest(
+      'places a rule mapped only to ATLAS in its ATLAS technique cell',
+      async ({ apiServices, scoutSpace, page, pageObjects: { coverageOverviewPage } }) => {
+        const ruleName = `scout-coverage-atlas-${scoutSpace.id}`;
+        await apiServices.detectionRule.createCustomQueryRule({
+          ...CUSTOM_QUERY_RULE,
+          name: ruleName,
+          rule_id: ruleName,
+          enabled: false,
+          threat: [
+            {
+              framework: 'MITRE ATLAS',
+              tactic: {
+                id: SEEDED_ATLAS_TACTIC.id,
+                name: SEEDED_ATLAS_TACTIC.name,
+                reference: SEEDED_ATLAS_TACTIC.reference,
+              },
+              technique: [
+                {
+                  id: SEEDED_ATLAS_TECHNIQUE.id,
+                  name: SEEDED_ATLAS_TECHNIQUE.name,
+                  reference: SEEDED_ATLAS_TECHNIQUE.reference,
+                },
+              ],
+            },
+          ],
+        });
+
+        await coverageOverviewPage.navigate();
+        await coverageOverviewPage.selectActivityFilterOption('Disabled rules');
+
+        await coverageOverviewPage.selectFramework('atlas');
+        await coverageOverviewPage.openTechniquePopover(SEEDED_ATLAS_TECHNIQUE.id);
+        await expect(page.testSubj.locator('coverageOverviewDisabledRulesList')).toContainText(
+          ruleName
+        );
+        await page.keyboard.press('Escape');
+
+        await coverageOverviewPage.selectFramework('enterprise');
+        await expect(coverageOverviewPage.techniqueTitle(SEEDED_ATLAS_TECHNIQUE.id)).toHaveCount(0);
       }
     );
   }

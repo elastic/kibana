@@ -20,6 +20,7 @@ import {
   legacySyntheticsMonitorTypeSingle,
   syntheticsMonitorSavedObjectType,
   syntheticsParamType,
+  syntheticsSecretConnectionType,
 } from '../common/types/saved_objects';
 
 import { PLUGIN } from '../common/constants/plugin';
@@ -30,6 +31,7 @@ import {
 import { syntheticsApiKeyObjectType } from './saved_objects/service_api_key';
 
 export const PRIVATE_LOCATION_WRITE_API = 'private-location-write';
+export const SECRET_CONNECTION_WRITE_API = 'secret-connection-write';
 export const MONITOR_RUN_MANUALLY_API = 'monitor-run-manually';
 export const WRITE_SYNTHETICS_DEFAULT_RULES_API = 'write_synthetics_default_rules';
 
@@ -91,6 +93,25 @@ const canManagePrivateLocationsPrivilege: SubFeaturePrivilegeGroupConfig = {
         read: [],
       },
       ui: ['canManagePrivateLocations'],
+    },
+  ],
+};
+
+const canManageSecretConnectionsPrivilege: SubFeaturePrivilegeGroupConfig = {
+  groupType: 'independent' as SubFeaturePrivilegeGroupType,
+  privileges: [
+    {
+      id: 'can_manage_secret_connections',
+      name: i18n.translate('xpack.synthetics.features.canManageSecretConnections', {
+        defaultMessage: 'Can manage',
+      }),
+      includeIn: 'all',
+      api: [SECRET_CONNECTION_WRITE_API],
+      savedObject: {
+        all: [syntheticsSecretConnectionType],
+        read: [],
+      },
+      ui: ['canManageSecretConnections'],
     },
   ],
 };
@@ -176,7 +197,11 @@ export const syntheticsFeature = {
           // uptime settings object is also registered here since feature is shared between synthetics and uptime
           uptimeSettingsObjectType,
         ],
-        read: [privateLocationSavedObjectName, legacyPrivateLocationsSavedObjectName],
+        read: [
+          privateLocationSavedObjectName,
+          legacyPrivateLocationsSavedObjectName,
+          syntheticsSecretConnectionType,
+        ],
       },
       alerting: {
         rule: {
@@ -202,6 +227,7 @@ export const syntheticsFeature = {
         all: [],
         read: [
           syntheticsParamType,
+          syntheticsSecretConnectionType,
           syntheticsSettingsObjectType,
           syntheticsMonitorSavedObjectType,
           legacySyntheticsMonitorTypeSingle,
@@ -256,6 +282,16 @@ export const syntheticsFeature = {
           'This feature allows you to manage your private locations, for example adding, or deleting them.',
       }),
       privilegeGroups: [canManagePrivateLocationsPrivilege],
+    },
+    {
+      name: i18n.translate('xpack.synthetics.features.app.secretConnections', {
+        defaultMessage: 'Secret provider connections',
+      }),
+      description: i18n.translate('xpack.synthetics.features.app.secretConnections.description', {
+        defaultMessage:
+          'This feature allows you to manage connections to external secret managers, such as HashiCorp Vault, used to resolve secret references in monitors and global parameters.',
+      }),
+      privilegeGroups: [canManageSecretConnectionsPrivilege],
     },
     {
       name: i18n.translate('xpack.synthetics.features.app.params', {

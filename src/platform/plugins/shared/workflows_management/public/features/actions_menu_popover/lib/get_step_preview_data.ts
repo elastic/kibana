@@ -18,6 +18,9 @@ export interface StepPreviewData {
   documentationUrl?: string;
 }
 
+// Connector snippets are raw YAML; wrap them so they render like step examples (markdown).
+const toYamlExample = (snippet: string): string => `\`\`\`yaml\n${snippet}\n\`\`\``;
+
 /** Gets normalized preview data for a built-in, registered, or connector step. */
 export const getStepPreviewData = (stepId: string): StepPreviewData => {
   const builtInDefinition = getBuiltInStepDefinition(stepId);
@@ -44,7 +47,9 @@ export const getStepPreviewData = (stepId: string): StepPreviewData => {
   return {
     inputSchema: connectorDefinition?.paramsSchema,
     outputSchema: connectorDefinition?.outputSchema,
-    examples: connectorDefinition?.examples?.snippet ? [connectorDefinition.examples.snippet] : [],
+    examples: connectorDefinition?.examples?.snippet
+      ? [toYamlExample(connectorDefinition.examples.snippet)]
+      : [],
     documentationUrl: connectorDefinition?.documentation ?? undefined,
   };
 };

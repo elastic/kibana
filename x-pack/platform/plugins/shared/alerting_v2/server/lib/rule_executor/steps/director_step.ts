@@ -37,7 +37,7 @@ export class DirectorStep implements RuleExecutionStep {
         return;
       }
 
-      const { alertEvents, stats } = await step.director.run({
+      const { alertEvents, stats, previousAlertStateByGroupHash } = await step.director.run({
         rule,
         executionContext: input.executionContext,
         alertEvents: alertEventsBatch,
@@ -51,6 +51,7 @@ export class DirectorStep implements RuleExecutionStep {
           alertEventsBatch: alertEvents,
           newEpisodeIds: stats.newEpisodeIds,
           alertStatusTransitions: stats.statusTransitions,
+          previousAlertStateByGroupHash,
         },
       };
     });
