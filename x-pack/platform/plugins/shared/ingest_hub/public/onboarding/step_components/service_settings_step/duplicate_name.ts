@@ -53,15 +53,21 @@ export function isGeneratedDuplicateName(name: string, baseName: string): boolea
 /**
  * The new name of a duplicate whose namespace changed, when its name is still the generated one:
  * generated again from the base name for the new namespace. Undefined when the name stays.
+ *
+ * More than one previous base name can apply: a duplicate with no namespace of its own follows the
+ * global namespace, which may have changed since its name was generated.
  */
 export function getRenamedDuplicate(
   currentName: string,
-  previousBaseName: string,
+  /** The base names the current name may have been generated from. */
+  previousBaseNames: string[],
   nextBaseName: string,
   otherNames: string[]
 ): string | undefined {
-  if (previousBaseName === nextBaseName) return undefined;
-  if (!isGeneratedDuplicateName(currentName, previousBaseName)) return undefined;
+  const generatedFrom = previousBaseNames.find((base) =>
+    isGeneratedDuplicateName(currentName, base)
+  );
+  if (generatedFrom === undefined || generatedFrom === nextBaseName) return undefined;
   return buildDuplicateName(nextBaseName, otherNames);
 }
 
@@ -80,13 +86,15 @@ export interface DuplicateNamingContext {
 export function getDuplicateBaseName(
   service: AwsServiceMatrixEntry,
   namespace: string,
-  { integrationName, globalNamespace, bareNamePackage, deploymentMethod }: DuplicateNamingContext
+  { integrationName, globalNamespace, bareNamePackage, deploymentMethod }: DuplicateNamingContext,
+  /** Whether an empty namespace means the global one, as it does for the deployed policy. */
+  inheritGlobal: boolean = true
 ): string {
   return integrationName.trim() && supportsIntegrationSettings(service, deploymentMethod)
     ? getSourcePolicyName(
         integrationName,
         service.packageName,
-        namespace || globalNamespace,
+        namespace || (inheritGlobal ? globalNamespace : ''),
         bareNamePackage
       )
     : service.name;

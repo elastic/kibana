@@ -56,13 +56,13 @@ export function useDuplicates({
     : null;
 
   const getBaseName = useCallback(
-    (service: AwsServiceMatrixEntry, namespace: string): string =>
-      getDuplicateBaseName(service, namespace, {
-        integrationName,
-        globalNamespace,
-        bareNamePackage,
-        deploymentMethod,
-      }),
+    (service: AwsServiceMatrixEntry, namespace: string, inheritGlobal = true): string =>
+      getDuplicateBaseName(
+        service,
+        namespace,
+        { integrationName, globalNamespace, bareNamePackage, deploymentMethod },
+        inheritGlobal
+      ),
     [integrationName, globalNamespace, bareNamePackage, deploymentMethod]
   );
 
@@ -83,9 +83,17 @@ export function useDuplicates({
       const service = instance ? awsServicesMap?.get(instance.serviceId) : undefined;
       if (!instance?.isDuplicate || !service || nextNamespace === undefined) return undefined;
       if (policyIdsByInstance[instanceId]) return undefined;
+      // An empty namespace follows the global one, which may have changed since the name was
+      // generated, so the name may come from either reading of it.
+      const ownNamespace = getServiceVars(instanceId).namespace ?? '';
       return getRenamedDuplicate(
         instance.name,
-        getBaseName(service, getServiceVars(instanceId).namespace ?? ''),
+        [
+          ...new Set([
+            getBaseName(service, ownNamespace),
+            getBaseName(service, ownNamespace, false),
+          ]),
+        ],
         getBaseName(service, nextNamespace),
         allInstanceNames.filter((n) => n !== instance.name)
       );

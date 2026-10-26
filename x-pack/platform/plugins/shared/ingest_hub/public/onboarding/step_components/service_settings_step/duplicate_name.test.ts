@@ -78,24 +78,37 @@ describe('isGeneratedDuplicateName', () => {
 describe('getRenamedDuplicate', () => {
   it('generates the name again for the new base name', () => {
     expect(
-      getRenamedDuplicate('aws-1-staging [Duplicate]', 'aws-1-staging', 'aws-1-qa', ['aws-1'])
+      getRenamedDuplicate('aws-1-staging [Duplicate]', ['aws-1-staging'], 'aws-1-qa', ['aws-1'])
     ).toBe('aws-1-qa [Duplicate]');
   });
 
   it('keeps the new name unique', () => {
     expect(
-      getRenamedDuplicate('aws-1-staging [Duplicate]', 'aws-1-staging', 'aws-1-qa', [
+      getRenamedDuplicate('aws-1-staging [Duplicate]', ['aws-1-staging'], 'aws-1-qa', [
         'aws-1-qa [Duplicate]',
       ])
     ).toBe('aws-1-qa [Duplicate 2]');
   });
 
   it('keeps a name the user chose', () => {
-    expect(getRenamedDuplicate('my copy', 'aws-1-staging', 'aws-1-qa', [])).toBeUndefined();
+    expect(getRenamedDuplicate('my copy', ['aws-1-staging'], 'aws-1-qa', [])).toBeUndefined();
   });
 
   it('keeps the name when the base name did not change', () => {
-    expect(getRenamedDuplicate('aws-1 [Duplicate]', 'aws-1', 'aws-1', ['aws-1'])).toBeUndefined();
+    expect(getRenamedDuplicate('aws-1 [Duplicate]', ['aws-1'], 'aws-1', ['aws-1'])).toBeUndefined();
+  });
+
+  it('finds the generated name among several possible previous base names', () => {
+    // Generated with no namespace, while the global namespace has since become `prod`.
+    expect(
+      getRenamedDuplicate('aws-1 [Duplicate]', ['aws-1-prod', 'aws-1'], 'aws-1-qa', ['aws-1'])
+    ).toBe('aws-1-qa [Duplicate]');
+  });
+
+  it('keeps the name when it already is the one for the new namespace', () => {
+    expect(
+      getRenamedDuplicate('aws-1-prod [Duplicate]', ['aws-1-prod', 'aws-1'], 'aws-1-prod', [])
+    ).toBeUndefined();
   });
 });
 
@@ -118,6 +131,10 @@ describe('getDuplicateBaseName', () => {
 
   it('uses the global namespace when the duplicate has none', () => {
     expect(getDuplicateBaseName(service, '', context)).toBe('aws-1-staging');
+  });
+
+  it('leaves an empty namespace empty when it should not follow the global one', () => {
+    expect(getDuplicateBaseName(service, '', context, false)).toBe('aws-1');
   });
 
   it('keeps the bare integration name in the default namespace', () => {
