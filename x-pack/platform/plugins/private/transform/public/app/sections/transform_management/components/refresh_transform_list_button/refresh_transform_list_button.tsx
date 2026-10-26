@@ -7,8 +7,8 @@
 
 import React, { type FC } from 'react';
 
-import { EuiButton } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 interface RefreshTransformListButton {
   isLoading: boolean;
@@ -17,16 +17,23 @@ interface RefreshTransformListButton {
 export const RefreshTransformListButton: FC<RefreshTransformListButton> = ({
   onClick,
   isLoading,
-}) => (
-  <EuiButton
-    iconType="refresh"
-    data-test-subj={`transformRefreshTransformListButton${isLoading ? ' loading' : ' loaded'}`}
-    onClick={onClick}
-    isLoading={isLoading}
-  >
-    <FormattedMessage
-      id="xpack.transform.transformList.refreshButtonLabel"
-      defaultMessage="Reload"
-    />
-  </EuiButton>
-);
+}) => {
+  const label = i18n.translate('xpack.transform.transformList.refreshButtonLabel', {
+    defaultMessage: 'Refresh transforms',
+  });
+
+  return (
+    <EuiToolTip content={label} disableScreenReaderOutput>
+      <EuiButtonIcon
+        aria-label={label}
+        color="primary"
+        data-test-subj={`transformRefreshTransformListButton${isLoading ? ' loading' : ' loaded'}`}
+        display="base"
+        iconType="refresh"
+        isLoading={isLoading}
+        onClick={onClick}
+        size="m"
+      />
+    </EuiToolTip>
+  );
+};

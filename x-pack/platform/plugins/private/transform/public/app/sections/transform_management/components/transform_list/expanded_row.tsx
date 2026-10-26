@@ -20,10 +20,6 @@ import type { TransformListRow } from '../../../../common';
 const styles = {
   tabbedContent: css`
     width: 100%;
-
-    .euiTable {
-      background-color: transparent;
-    }
   `,
 };
 
@@ -116,7 +112,7 @@ export const ExpandedRow: FC<Props> = ({ item, onAlertEdit }) => {
   // even if the tab content wouldn't extend to the full width.
   return (
     <EuiTabbedContent
-      size="s"
+      size="m"
       tabs={tabs}
       initialSelectedTab={tabs[0]}
       onTabClick={() => {}}

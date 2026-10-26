@@ -145,6 +145,10 @@ interface AppMenuItemBase {
    */
   iconType: IconType;
   /**
+   * The side of the label where the icon is displayed. Defaults to `left`.
+   */
+  iconSide?: 'left' | 'right';
+  /**
    * A unique identifier for the item, used for testing purposes. Maps to `data-test-subj` attribute.
    */
   testId?: string;

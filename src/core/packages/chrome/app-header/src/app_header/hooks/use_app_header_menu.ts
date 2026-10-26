@@ -39,12 +39,21 @@ const createFeedbackMenuItem = (feedbackHandler: () => void): AppMenuStaticItem 
   testId: APP_HEADER_TEST_SUBJECTS.menuFeedback,
 });
 
-const createDocumentationMenuItem = (href: string): AppMenuStaticItem => ({
+const createDocumentationMenuItem = ({
+  href,
+  iconSide = 'left',
+  iconType = 'documentation',
+}: {
+  href: string;
+  iconSide?: AppMenuStaticItem['iconSide'];
+  iconType?: AppMenuStaticItem['iconType'];
+}): AppMenuStaticItem => ({
   label: i18n.translate('core.chrome.appHeader.documentationMenuItemLabel', {
     defaultMessage: 'Documentation',
   }),
   id: 'documentation',
-  iconType: 'documentation',
+  iconType,
+  iconSide,
   order: 2,
   href,
   target: '_blank',
@@ -53,9 +62,13 @@ const createDocumentationMenuItem = (href: string): AppMenuStaticItem => ({
 
 export const useAppHeaderStaticItems = ({
   docLink: explicitDocLink,
+  docLinkIconSide,
+  docLinkIconType,
   showAddIntegrations,
 }: {
   docLink?: string;
+  docLinkIconSide?: AppMenuStaticItem['iconSide'];
+  docLinkIconType?: AppMenuStaticItem['iconType'];
   showAddIntegrations?: boolean;
 }): AppMenuStaticItem[] => {
   const chrome = useChromeService();
@@ -79,7 +92,13 @@ export const useAppHeaderStaticItems = ({
       helpExtension?.links?.find((link) => link.linkType === 'documentation')?.href;
 
     if (docLink) {
-      staticItems.push(createDocumentationMenuItem(docLink));
+      staticItems.push(
+        createDocumentationMenuItem({
+          href: docLink,
+          iconSide: docLinkIconSide,
+          iconType: docLinkIconType,
+        })
+      );
     }
 
     if (showAddIntegrations && canAccessIntegrations) {
@@ -91,6 +110,8 @@ export const useAppHeaderStaticItems = ({
     basePath,
     canAccessIntegrations,
     explicitDocLink,
+    docLinkIconSide,
+    docLinkIconType,
     helpExtension,
     showAddIntegrations,
     feedbackHandler,

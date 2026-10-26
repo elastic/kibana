@@ -8,6 +8,7 @@
 import React, { type FC, type PropsWithChildren } from 'react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { waitFor, renderHook } from '@testing-library/react';
+import type { TransformListAction } from '../../../../common';
 
 jest.mock('../../../../app_dependencies');
 
@@ -27,10 +28,10 @@ describe('Transform: Transform List Actions', () => {
 
     const actions = result.current.actions;
 
-    // Using `any` for the callback. Somehow the EUI types don't pass
-    // on the `data-test-subj` attribute correctly. We're interested
-    // in the runtime result here anyway.
-    expect(actions.map((a: any) => a['data-test-subj'])).toStrictEqual([
+    const typedActions = actions as Array<
+      TransformListAction & { 'data-test-subj'?: string; icon?: string }
+    >;
+    expect(typedActions.map((action) => action['data-test-subj'])).toStrictEqual([
       'transformActionDiscover',
       'transformActionCreateAlertRule',
       'transformActionScheduleNow',
@@ -42,5 +43,8 @@ describe('Transform: Transform List Actions', () => {
       'transformActionReauthorize',
       'transformActionReset',
     ]);
+    expect(
+      typedActions.find((action) => action['data-test-subj'] === 'transformActionScheduleNow')?.icon
+    ).toBe('chevronDoubleRight');
   });
 });

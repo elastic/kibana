@@ -66,6 +66,7 @@ import {
 import { useColumns } from './use_columns';
 import { ExpandedRow } from './expanded_row';
 import { filterTransforms, transformFilters } from './transform_search_bar_filters';
+import { TransformStatsBar } from './transforms_stats_bar';
 import { useTableSettings } from './use_table_settings';
 import { useAlertRuleFlyout } from '../../../../../alerting/transform_alerting_flyout';
 import type { TransformHealthAlertRule } from '../../../../../../common/types/alerting';
@@ -127,7 +128,7 @@ export const TransformList: FC<TransformListProps> = ({
   const searchQueryText = pageState.queryText ?? '';
   const setSearchQueryText = useCallback(
     (value: string) => {
-      updatePageState({ queryText: value });
+      updatePageState({ queryText: value, pageIndex: 0 });
     },
     [updatePageState]
   );
@@ -328,13 +329,14 @@ export const TransformList: FC<TransformListProps> = ({
     </div>,
   ];
 
-  const renderToolsLeft = () => {
+  const renderBulkActions = () => {
     const bulkActionButton = (
       <EuiButton
         color="primary"
         data-test-subj="transformBulkActionsMenuButton"
         iconSide="right"
         iconType="chevronSingleDown"
+        size="s"
         onClick={() => {
           setIsActionsMenuOpen(true);
         }}
@@ -364,7 +366,7 @@ export const TransformList: FC<TransformListProps> = ({
       </EuiPopover>
     );
 
-    return [bulkActionIcon];
+    return bulkActionIcon;
   };
 
   const toolsRight = (
@@ -382,10 +384,11 @@ export const TransformList: FC<TransformListProps> = ({
   };
 
   const search = {
-    toolsLeft: transformSelection.length > 0 ? renderToolsLeft() : undefined,
     toolsRight,
     onChange: handleSearchOnChange,
+    compressed: true,
     box: {
+      compressed: true,
       incremental: true,
     },
     filters: transformFilters,
@@ -424,6 +427,18 @@ export const TransformList: FC<TransformListProps> = ({
         allowNeutralSort={false}
         className="transform__TransformTable"
         columns={columns}
+        childrenBetween={
+          transformSelection.length > 0 ? (
+            renderBulkActions()
+          ) : (
+            <TransformStatsBar
+              pageIndex={pagination.pageIndex ?? 0}
+              pageSize={pagination.pageSize ?? filteredTransforms.length}
+              transformNodes={transformNodes}
+              transformsList={filteredTransforms}
+            />
+          )
+        }
         error={searchError}
         items={filteredTransforms}
         itemId={TRANSFORM_LIST_COLUMN.ID}

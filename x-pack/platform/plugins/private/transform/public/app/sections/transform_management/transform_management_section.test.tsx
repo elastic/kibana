@@ -182,6 +182,11 @@ describe('Transform: <TransformManagementSection />', () => {
     renderSection();
 
     expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('Transforms');
+    expect(
+      screen.queryByText(
+        'Use transforms to pivot existing Elasticsearch indices into summarized entity-centric indices or to create an indexed view of the latest documents for fast access.'
+      )
+    ).not.toBeInTheDocument();
     expect(screen.getByTestId('transformButtonCreate')).toBeInTheDocument();
     expect(screen.getByTestId('mockedTransformList')).toBeInTheDocument();
   });

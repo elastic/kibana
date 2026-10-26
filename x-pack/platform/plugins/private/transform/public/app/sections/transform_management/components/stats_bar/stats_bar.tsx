@@ -5,55 +5,40 @@
  * 2.0.
  */
 
-import React, { useMemo, type FC } from 'react';
+import React, { type FC, type ReactNode } from 'react';
 import { css } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
-
-import type { StatsBarStat } from './stat';
-import { Stat } from './stat';
 
 const useStyles = () => {
   const { euiTheme } = useEuiTheme();
 
   return {
     statsBar: css`
-      height: 42px;
-      padding: 14px;
-      background-color: ${euiTheme.colors.lightestShade};
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: ${euiTheme.size.xs};
+      min-height: ${euiTheme.size.xl};
     `,
   };
 };
 
-interface Stats {
-  total: StatsBarStat;
-  failed: StatsBarStat;
-}
-
-export interface TransformStatsBarStats extends Stats {
-  batch: StatsBarStat;
-  continuous: StatsBarStat;
-  started: StatsBarStat;
-  nodes?: StatsBarStat;
-}
-
-type StatsBarStats = TransformStatsBarStats;
-
 interface StatsBarProps {
-  stats: StatsBarStats;
+  stats: ReadonlyArray<{ key: string; content: ReactNode }>;
   dataTestSub: string;
 }
 
 export const StatsBar: FC<StatsBarProps> = ({ stats, dataTestSub }) => {
   const styles = useStyles();
-  const statsList = useMemo(() => Object.values(stats), [stats]);
 
   return (
     <div css={styles.statsBar} data-test-subj={dataTestSub}>
-      {statsList
-        .filter((s: StatsBarStat) => s.show)
-        .map((s: StatsBarStat) => (
-          <Stat key={s.label} stat={s} />
-        ))}
+      {stats.map(({ key, content }, index) => (
+        <React.Fragment key={key}>
+          {index > 0 && <span aria-hidden="true">·</span>}
+          <span>{content}</span>
+        </React.Fragment>
+      ))}
     </div>
   );
 };

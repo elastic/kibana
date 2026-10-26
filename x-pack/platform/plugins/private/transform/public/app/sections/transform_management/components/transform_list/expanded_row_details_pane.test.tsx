@@ -18,7 +18,6 @@ import { ExpandedRowDetailsPane } from './expanded_row_details_pane';
 import transformListRow from '../../../../common/__mocks__/transform_list_row.json';
 
 import { useGetTransformStats } from '../../../../hooks';
-import { useEnabledFeatures } from '../../../../serverless_context';
 
 jest.mock('../../../../hooks', () => ({
   useGetTransformStats: jest.fn(),
@@ -26,21 +25,15 @@ jest.mock('../../../../hooks', () => ({
 
 jest.mock('../../../../app_dependencies');
 
-jest.mock('../../../../serverless_context', () => ({
-  useEnabledFeatures: jest.fn(),
-}));
-
 const mockUseGetTransformStats = useGetTransformStats as jest.MockedFunction<
   typeof useGetTransformStats
 >;
-const mockUseEnabledFeatures = useEnabledFeatures as jest.MockedFunction<typeof useEnabledFeatures>;
 
 describe('Transform: Transform List Expanded Row <ExpandedRowDetailsPane />', () => {
   const onAlertEdit = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUseEnabledFeatures.mockReturnValue({ showNodeInfo: false });
     appDependencies.useAppDependencies().cps = undefined;
 
     // Set timezone to US/Eastern for consistent test results.
@@ -58,29 +51,24 @@ describe('Transform: Transform List Expanded Row <ExpandedRowDetailsPane />', ()
       isLoading: false,
     } as unknown as ReturnType<typeof useGetTransformStats>);
 
-    // @ts-expect-error mock data is too loosely typed
-    const item: TransformListRow = transformListRow;
+    const item = transformListRow as unknown as TransformListRow;
 
     renderWithI18n(<ExpandedRowDetailsPane item={item} onAlertEdit={onAlertEdit} />);
 
     expect(screen.getByTestId('transformDetailsTabContent')).toBeInTheDocument();
 
     expect(screen.getByText('General')).toBeInTheDocument();
-    expect(screen.getByText('State')).toBeInTheDocument();
+    expect(screen.queryByText('State')).not.toBeInTheDocument();
     expect(screen.getByText('Checkpointing')).toBeInTheDocument();
 
-    expect(screen.getByText('transform_id')).toBeInTheDocument();
-    expect(screen.getAllByText(item.id).length).toBeGreaterThan(0);
-    expect(screen.getByText('source_index')).toBeInTheDocument();
+    expect(screen.getByText('Transform version')).toBeInTheDocument();
+    expect(screen.getByText('Source index')).toBeInTheDocument();
     expect(screen.getByText('farequote-2019')).toBeInTheDocument();
-    expect(screen.queryByText('project_routing')).not.toBeInTheDocument();
-    expect(screen.getByText('destination_index')).toBeInTheDocument();
+    expect(screen.queryByText('Project routing')).not.toBeInTheDocument();
+    expect(screen.getByText('Destination index')).toBeInTheDocument();
     expect(screen.getAllByText('fq_date_histogram_1m_1441').length).toBeGreaterThan(0);
 
-    expect(screen.getByText('state')).toBeInTheDocument();
-    expect(screen.getByText('stopped')).toBeInTheDocument();
-
-    expect(screen.getByText('last.timestamp_millis')).toBeInTheDocument();
+    expect(screen.getByText('Last timestamp (milliseconds)')).toBeInTheDocument();
     expect(screen.getByText('1564388281199')).toBeInTheDocument();
   });
 
@@ -104,7 +92,7 @@ describe('Transform: Transform List Expanded Row <ExpandedRowDetailsPane />', ()
 
     renderWithI18n(<ExpandedRowDetailsPane item={item} onAlertEdit={onAlertEdit} />);
 
-    expect(screen.getByText('source_index')).toBeInTheDocument();
+    expect(screen.getByText('Source index')).toBeInTheDocument();
     expect(screen.getByText('source-index-1')).toBeInTheDocument();
   });
 
@@ -135,7 +123,7 @@ describe('Transform: Transform List Expanded Row <ExpandedRowDetailsPane />', ()
 
     renderWithI18n(<ExpandedRowDetailsPane item={item} onAlertEdit={onAlertEdit} />);
 
-    expect(screen.getByText('project_routing')).toBeInTheDocument();
+    expect(screen.getByText('Project routing')).toBeInTheDocument();
     expect(screen.getByText('_alias:*')).toBeInTheDocument();
   });
 
@@ -179,7 +167,7 @@ describe('Transform: Transform List Expanded Row <ExpandedRowDetailsPane />', ()
     await waitFor(() => {
       expect(fetchProjects).toHaveBeenCalled();
     });
-    expect(screen.queryByText('project_routing')).not.toBeInTheDocument();
+    expect(screen.queryByText('Project routing')).not.toBeInTheDocument();
     expect(screen.queryByText('_alias:*')).not.toBeInTheDocument();
   });
 
@@ -215,7 +203,7 @@ describe('Transform: Transform List Expanded Row <ExpandedRowDetailsPane />', ()
     await waitFor(() => {
       expect(fetchProjects).toHaveBeenCalled();
     });
-    expect(screen.getByText('project_routing')).toBeInTheDocument();
+    expect(screen.getByText('Project routing')).toBeInTheDocument();
     expect(screen.getByText('_alias:*')).toBeInTheDocument();
   });
 
@@ -239,7 +227,7 @@ describe('Transform: Transform List Expanded Row <ExpandedRowDetailsPane />', ()
 
     renderWithI18n(<ExpandedRowDetailsPane item={item} onAlertEdit={onAlertEdit} />);
 
-    expect(screen.getByText('source_index')).toBeInTheDocument();
+    expect(screen.getByText('Source index')).toBeInTheDocument();
     expect(screen.getByText('source-a')).toBeInTheDocument();
     fireEvent.click(screen.getByTestId('transformSourceIndexBadge'));
 
@@ -257,8 +245,7 @@ describe('Transform: Transform List Expanded Row <ExpandedRowDetailsPane />', ()
       isLoading: false,
     } as unknown as ReturnType<typeof useGetTransformStats>);
 
-    // @ts-expect-error mock data is too loosely typed
-    const item: TransformListRow = transformListRow;
+    const item = transformListRow as unknown as TransformListRow;
 
     renderWithI18n(<ExpandedRowDetailsPane item={item} onAlertEdit={onAlertEdit} />);
 
@@ -267,49 +254,6 @@ describe('Transform: Transform List Expanded Row <ExpandedRowDetailsPane />', ()
         'An error occurred fetching the extended stats for this transform. Basic stats are displayed instead.'
       )
     ).toBeInTheDocument();
-  });
-
-  test('renders node info when enabled and available', () => {
-    mockUseEnabledFeatures.mockReturnValue({ showNodeInfo: true });
-    mockUseGetTransformStats.mockReturnValue({
-      data: undefined,
-      isError: false,
-      isLoading: false,
-    } as unknown as ReturnType<typeof useGetTransformStats>);
-
-    const item = {
-      ...transformListRow,
-      stats: {
-        ...transformListRow.stats,
-        node: { name: 'transform-node-1' },
-      },
-    } as unknown as TransformListRow;
-
-    renderWithI18n(<ExpandedRowDetailsPane item={item} onAlertEdit={onAlertEdit} />);
-
-    expect(screen.getByText('node.name')).toBeInTheDocument();
-    expect(screen.getByText('transform-node-1')).toBeInTheDocument();
-  });
-
-  test('renders health status when present', () => {
-    mockUseGetTransformStats.mockReturnValue({
-      data: undefined,
-      isError: false,
-      isLoading: false,
-    } as unknown as ReturnType<typeof useGetTransformStats>);
-
-    const item = {
-      ...transformListRow,
-      stats: {
-        ...transformListRow.stats,
-        health: { status: 'green' },
-      },
-    } as unknown as TransformListRow;
-
-    renderWithI18n(<ExpandedRowDetailsPane item={item} onAlertEdit={onAlertEdit} />);
-
-    expect(screen.getByText('health')).toBeInTheDocument();
-    expect(screen.getByTestId('transformListHealth')).toBeInTheDocument();
   });
 
   test('renders alert rules and calls onAlertEdit', () => {
@@ -324,11 +268,10 @@ describe('Transform: Transform List Expanded Row <ExpandedRowDetailsPane />', ()
       executionStatus: { status: 'active' },
     } as unknown as TransformHealthAlertRule;
 
-    // @ts-expect-error mock data is too loosely typed
-    const item: TransformListRow = {
+    const item = {
       ...transformListRow,
       alerting_rules: [rule],
-    };
+    } as unknown as TransformListRow;
 
     renderWithI18n(<ExpandedRowDetailsPane item={item} onAlertEdit={onAlertEdit} />);
 
@@ -338,6 +281,29 @@ describe('Transform: Transform List Expanded Row <ExpandedRowDetailsPane />', ()
     expect(onAlertEdit).toHaveBeenCalledWith(rule);
   });
 
+  test('renders authorization as formatted JSON', () => {
+    mockUseGetTransformStats.mockReturnValue({
+      data: undefined,
+      isError: false,
+      isLoading: false,
+    } as unknown as ReturnType<typeof useGetTransformStats>);
+
+    const item = {
+      ...transformListRow,
+      config: {
+        ...transformListRow.config,
+        authorization: { roles: ['transform-admin'] },
+      },
+    } as unknown as TransformListRow;
+
+    renderWithI18n(<ExpandedRowDetailsPane item={item} onAlertEdit={onAlertEdit} />);
+
+    expect(screen.getByText('Authorization')).toBeInTheDocument();
+    expect(screen.getByTestId('transformAuthorization')).toHaveTextContent(
+      '"roles": [ "transform-admin" ]'
+    );
+  });
+
   test('includes num_failure_retries when configured', () => {
     mockUseGetTransformStats.mockReturnValue({
       data: undefined,
@@ -345,18 +311,17 @@ describe('Transform: Transform List Expanded Row <ExpandedRowDetailsPane />', ()
       isLoading: false,
     } as unknown as ReturnType<typeof useGetTransformStats>);
 
-    // @ts-expect-error mock data is too loosely typed
-    const item: TransformListRow = {
+    const item = {
       ...transformListRow,
       config: {
         ...transformListRow.config,
         settings: { num_failure_retries: 7 },
       },
-    };
+    } as unknown as TransformListRow;
 
     renderWithI18n(<ExpandedRowDetailsPane item={item} onAlertEdit={onAlertEdit} />);
 
-    expect(screen.getByText('num_failure_retries')).toBeInTheDocument();
+    expect(screen.getByText('Number of failure retries')).toBeInTheDocument();
     expect(screen.getByText('7')).toBeInTheDocument();
   });
 });

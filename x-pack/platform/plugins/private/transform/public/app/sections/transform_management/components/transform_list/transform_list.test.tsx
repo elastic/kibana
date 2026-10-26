@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { render, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import '@kbn/react-query/mock';
 import { QueryClient, QueryClientProvider, type UseQueryResult } from '@kbn/react-query';
 import * as ReactQuery from '@kbn/react-query';
@@ -14,6 +15,8 @@ import * as ReactQuery from '@kbn/react-query';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
 import { TransformList } from './transform_list';
+import type { TransformListRow } from '../../../../common';
+import transformListRow from '../../../../common/__mocks__/transform_list_row.json';
 
 const useQueryMock = jest.spyOn(ReactQuery, 'useQuery').mockImplementation((queryKey) => {
   switch (queryKey[0]) {
@@ -29,6 +32,9 @@ const queryClient = new QueryClient();
 jest.mock('../../../../app_dependencies');
 jest.mock('../../../../hooks/use_get_transform_cps_enabled', () => ({
   useGetTransformCpsEnabled: () => ({ data: true }),
+}));
+jest.mock('../../../../serverless_context', () => ({
+  useEnabledFeatures: () => ({ showNodeInfo: false }),
 }));
 
 describe('Transform: Transform List <TransformList />', () => {
@@ -54,5 +60,34 @@ describe('Transform: Transform List <TransformList />', () => {
       expect(useQueryMock).toHaveBeenCalledTimes(5);
       expect(container.textContent).toContain('Create your first transform');
     });
+  });
+
+  test('replaces the filtered summary with bulk actions when a row is selected', async () => {
+    const item = transformListRow as unknown as TransformListRow;
+    render(
+      <IntlProvider locale="en">
+        <QueryClientProvider client={queryClient}>
+          <TransformList
+            isLoading={false}
+            onCreateTransform={jest.fn()}
+            transformNodes={1}
+            transforms={[item]}
+            transformsLoading={false}
+            transformsStatsLoading={false}
+            pageState={{ pageSize: 10, pageIndex: 0, sortField: 'id', sortDirection: 'asc' }}
+            updatePageState={jest.fn()}
+          />
+        </QueryClientProvider>
+      </IntlProvider>
+    );
+
+    expect(await screen.findByTestId('transformStatsBar')).toHaveTextContent(
+      'Showing 1–1 of 1 transform'
+    );
+    const checkboxes = screen.getAllByRole('checkbox');
+    await userEvent.click(checkboxes[1]);
+
+    expect(screen.queryByTestId('transformStatsBar')).not.toBeInTheDocument();
+    expect(screen.getByTestId('transformBulkActionsMenuButton')).toHaveTextContent('1 selected');
   });
 });

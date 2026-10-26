@@ -10,6 +10,7 @@
 import type { ReactNode } from 'react';
 import React from 'react';
 import type { DistributiveOmit } from '@elastic/eui';
+import type { AppMenuStaticItem } from '@kbn/app-menu';
 import {
   AppHeaderView as AppHeaderPresentation,
   type AppHeaderViewProps as AppHeaderPresentationProps,
@@ -29,6 +30,8 @@ export type AppHeaderViewProps = DistributiveOmit<
   'staticItems' | 'fallbackMenu' | 'titleAppend' | 'borderless'
 > & {
   docLink?: string;
+  docLinkIconSide?: AppMenuStaticItem['iconSide'];
+  docLinkIconType?: AppMenuStaticItem['iconType'];
   showAddIntegrations?: boolean;
 };
 
@@ -46,6 +49,8 @@ const getPublicAppHeaderViewProps = ({
   sticky,
   spacing,
   docLink,
+  docLinkIconSide,
+  docLinkIconType,
   showAddIntegrations,
 }: AppHeaderViewProps): AppHeaderViewProps => {
   const secondaryContent = description ? { description } : metadata ? { metadata } : {};
@@ -63,6 +68,8 @@ const getPublicAppHeaderViewProps = ({
     sticky,
     spacing,
     docLink,
+    docLinkIconSide,
+    docLinkIconType,
     showAddIntegrations,
   };
 };
@@ -76,10 +83,12 @@ const usePresentationProps = (
   const resolvedBadges = useResolvedBadges(publicProps.badges);
   const staticItems = useAppHeaderStaticItems({
     docLink: publicProps.docLink,
+    docLinkIconSide: publicProps.docLinkIconSide,
+    docLinkIconType: publicProps.docLinkIconType,
     showAddIntegrations: publicProps.showAddIntegrations,
   });
   const legacyActionMenu = useLegacyActionMenu();
-  const { docLink, showAddIntegrations, ...rest } = publicProps;
+  const { docLink, docLinkIconSide, docLinkIconType, showAddIntegrations, ...rest } = publicProps;
 
   return {
     ...rest,

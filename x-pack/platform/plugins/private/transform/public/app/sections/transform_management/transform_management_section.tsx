@@ -43,7 +43,6 @@ import { SECTION_SLUG } from '../../common/constants';
 
 import { TransformList } from './components/transform_list';
 import { getCreateTransformPrimaryActionItem } from './components/create_transform_button';
-import { TransformStatsBar } from './components/transform_list/transforms_stats_bar';
 import {
   AlertRulesManageContext,
   getAlertRuleManageContext,
@@ -199,11 +198,9 @@ export const TransformManagement: FC = () => {
         title={i18n.translate('xpack.transform.transformList.transformTitle', {
           defaultMessage: 'Transforms',
         })}
-        description={i18n.translate('xpack.transform.transformList.transformDescription', {
-          defaultMessage:
-            'Use transforms to pivot existing Elasticsearch indices into summarized entity-centric indices or to create an indexed view of the latest documents for fast access.',
-        })}
         docLink={esTransform}
+        docLinkIconType="popout"
+        docLinkIconSide="right"
         menu={menu}
         spacing="bleed"
       />
@@ -249,9 +246,6 @@ export const TransformManagement: FC = () => {
                 errorMessage={transformsStatsErrorMessage}
               />
             ) : null}
-            <EuiSpacer size="s" />
-
-            <TransformStatsBar transformNodes={transformNodes} transformsList={transforms} />
             <EuiSpacer size="s" />
 
             <AlertRulesManageContext.Provider value={getAlertRuleManageContext()}>
