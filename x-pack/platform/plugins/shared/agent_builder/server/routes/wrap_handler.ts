@@ -7,7 +7,7 @@
 
 import Boom from '@hapi/boom';
 import type { Logger, RequestHandler } from '@kbn/core/server';
-import { isAgentBuilderError } from '@kbn/agent-builder-common';
+import { isAgentBuilderError, isConversationBusyError } from '@kbn/agent-builder-common';
 import { isInferenceError } from '@kbn/inference-common';
 import { isValidLicense } from '../../common/license';
 import type { AgentBuilderHandlerContext } from '../request_handler_context';
@@ -73,7 +73,12 @@ export const getHandlerWrapper =
           }
         }
         if (isAgentBuilderError(e)) {
-          logger.error(e);
+          // A busy conversation is an expected refusal the caller retries, not a failure.
+          if (isConversationBusyError(e)) {
+            logger.warn(`Request refused: ${e.message}`);
+          } else {
+            logger.error(e);
+          }
           return res.customError({
             body: {
               message: e.message,

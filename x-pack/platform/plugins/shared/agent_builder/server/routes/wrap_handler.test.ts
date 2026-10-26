@@ -8,7 +8,7 @@
 import Boom from '@hapi/boom';
 import { kibanaResponseFactory } from '@kbn/core/server';
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import { createInternalError } from '@kbn/agent-builder-common';
+import { createConversationBusyError, createInternalError } from '@kbn/agent-builder-common';
 import { createInferenceRequestError, createInferenceProviderError } from '@kbn/inference-common';
 import { getHandlerWrapper } from './wrap_handler';
 
@@ -94,6 +94,32 @@ describe('getHandlerWrapper', () => {
       message: 'boom',
       attributes: { trace_id: 'trace-1' },
     });
+  });
+
+  it('logs a conversationBusy refusal as a warning', async () => {
+    const handler = wrapHandler(async () => {
+      throw createConversationBusyError({
+        conversationId: 'conversation-1',
+        activeExecutionId: 'exec-1',
+      });
+    });
+
+    const result: any = await handler(createCtx(), req, kibanaResponseFactory);
+
+    expect(result.status).toBe(409);
+    expect(logger.warn).toHaveBeenCalled();
+    expect(logger.error).not.toHaveBeenCalled();
+  });
+
+  it('logs other AgentBuilderErrors as errors', async () => {
+    const handler = wrapHandler(async () => {
+      throw createInternalError('boom');
+    });
+
+    await handler(createCtx(), req, kibanaResponseFactory);
+
+    expect(logger.error).toHaveBeenCalled();
+    expect(logger.warn).not.toHaveBeenCalled();
   });
 
   it('propagates the status of an InferenceTaskRequestError (e.g. 404 from connector lookup)', async () => {
