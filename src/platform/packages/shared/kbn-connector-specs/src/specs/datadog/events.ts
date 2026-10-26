@@ -51,10 +51,10 @@ export const datadogEvents: ConnectorSpecEvents = {
   definitions: {
     [DATADOG_ALERT_EVENT_KEY]: {
       eventId: DATADOG_ALERT_EVENT_ID,
-      title: i18n.translate('core.kibanaConnectorSpecs.datadog.events.alert.title', {
+      title: i18n.translate('connectorSpecs.datadog.events.alert.title', {
         defaultMessage: 'Alert',
       }),
-      description: i18n.translate('core.kibanaConnectorSpecs.datadog.events.alert.description', {
+      description: i18n.translate('connectorSpecs.datadog.events.alert.description', {
         defaultMessage: 'A Datadog alert webhook payload was accepted on the connector ingest URL.',
       }),
       eventSchema: DatadogReceivedEventSchema,

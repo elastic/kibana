@@ -89,7 +89,10 @@ export class ServiceManager {
         logger: logger.get('metering'),
       }),
       consumption: createConsumptionService(),
-      callbackDelivery: new CallbackDeliveryService({ actions }),
+      callbackDelivery: new CallbackDeliveryService({
+        actions,
+        logger: logger.get('callbacks'),
+      }),
       conversationTemplates: new ConversationTemplatesService(),
     };
 

@@ -57,6 +57,7 @@ const fullyMigratedReportMappings = () => ({
     content: {
       properties: {
         article_url: { ignore_above: 2048 },
+        published_at: {},
       },
     },
     lineage: { properties: { content_scrubbed_at: {} } },
@@ -298,6 +299,15 @@ describe('index_templates — migrations', () => {
     const { patchedPaths } = await runMigrations({ reportMappings: mappings });
 
     expect(patchedPaths).toContain('lineage.content_scrubbed_at');
+  });
+
+  it('adds content.published_at when absent', async () => {
+    const mappings = fullyMigratedReportMappings();
+    delete (mappings.properties.content.properties as Record<string, unknown>).published_at;
+
+    const { patchedPaths } = await runMigrations({ reportMappings: mappings });
+
+    expect(patchedPaths).toContain('content.published_at');
   });
 
   it('repairs a partial Diamond context mapping missing char leaves', async () => {
@@ -714,6 +724,19 @@ describe('index_templates — post-migration schema check', () => {
   it('passes when every migration-owned field is present', async () => {
     const { verificationError } = await runMigrations();
     expect(verificationError).toBeUndefined();
+  });
+
+  it('fails when content.published_at is still missing after migrating', async () => {
+    const mappings = fullyMigratedReportMappings();
+    delete (mappings.properties.content.properties as Record<string, unknown>).published_at;
+
+    const { verificationError } = await runMigrations({ reportMappings: mappings });
+
+    expect(verificationError?.message).toMatch(/content\.published_at/);
+  });
+
+  it('declares content.published_at as a date in the reports template', () => {
+    expect(src).toContain("published_at: { type: 'date' as const }");
   });
 
   it('fails when a report field is still missing after migrating', async () => {

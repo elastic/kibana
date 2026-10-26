@@ -16,10 +16,10 @@ import { inboundWebhookEvents } from './events';
 export const InboundWebhook: ConnectorSpec = {
   metadata: {
     id: INBOUND_WEBHOOK_CONNECTOR_TYPE_ID,
-    displayName: i18n.translate('core.kibanaConnectorSpecs.inboundWebhook.metadata.displayName', {
+    displayName: i18n.translate('connectorSpecs.inboundWebhook.metadata.displayName', {
       defaultMessage: 'Inbound Webhook',
     }),
-    description: i18n.translate('core.kibanaConnectorSpecs.inboundWebhook.metadata.description', {
+    description: i18n.translate('connectorSpecs.inboundWebhook.metadata.description', {
       defaultMessage: 'Receive HTTP events into Kibana workflows via a public ingest URL.',
     }),
     icon: 'plugs',

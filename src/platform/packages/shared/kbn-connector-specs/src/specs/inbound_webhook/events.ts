@@ -76,15 +76,12 @@ export const inboundWebhookEvents: ConnectorSpecEvents = {
   definitions: {
     [INBOUND_WEBHOOK_RECEIVED_EVENT_KEY]: {
       eventId: INBOUND_WEBHOOK_RECEIVED_EVENT_ID,
-      title: i18n.translate('core.kibanaConnectorSpecs.inboundWebhook.events.received.title', {
+      title: i18n.translate('connectorSpecs.inboundWebhook.events.received.title', {
         defaultMessage: 'Received',
       }),
-      description: i18n.translate(
-        'core.kibanaConnectorSpecs.inboundWebhook.events.received.description',
-        {
-          defaultMessage: 'An HTTP payload was accepted on the ingest URL for this connector.',
-        }
-      ),
+      description: i18n.translate('connectorSpecs.inboundWebhook.events.received.description', {
+        defaultMessage: 'An HTTP payload was accepted on the ingest URL for this connector.',
+      }),
       eventSchema: InboundWebhookReceivedEventSchema,
     },
   },

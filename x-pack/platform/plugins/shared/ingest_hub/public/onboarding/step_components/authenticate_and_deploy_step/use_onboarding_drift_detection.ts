@@ -91,8 +91,12 @@ export function useOnboardingDriftDetection({
     const thisId = ++driftCheckIdRef.current;
     // Nothing to fetch — leave driftSettled unchanged (already true for fresh deploys; remains
     // false for edit mode while awsServicesMap is still loading, allowing it to settle once the
-    // effect re-runs with a loaded map).
-    if (!onboardingDeploymentId || awsServicesMap === undefined) return;
+    // effect re-runs with a loaded map). Also wait for the manifests of the compared instances: a
+    // check before they load compares untyped vars against the saved ones, which can read as drift
+    // for a moment and flash the callout.
+    if (!onboardingDeploymentId || awsServicesMap === undefined || !comparedManifestsSettled) {
+      return;
+    }
     setDriftSettled(false);
     sendGetCloudOnboardingDeployment(onboardingDeploymentId)
       .then(({ item }) => {
