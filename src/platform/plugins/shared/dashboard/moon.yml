@@ -137,6 +137,10 @@ dependsOn:
   - '@kbn/ui-callout'
   - '@kbn/zod-helpers'
   - '@kbn/as-code-dashboard-schema'
+  - '@kbn/change-history'
+  - '@kbn/change-history-ui'
+  - '@kbn/spaces-plugin'
+  - '@kbn/core-http-server-mocks'
 tags:
   - plugin
   - prod
