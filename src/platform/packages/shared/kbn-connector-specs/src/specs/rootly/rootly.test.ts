@@ -64,6 +64,11 @@ describe('Rootly', () => {
     expect(types).toContain('bearer');
   });
 
+  it('marks the bearer auth type as sandbox capable', () => {
+    const types = Rootly.auth?.types ?? [];
+    expect(types).toEqual([expect.objectContaining({ type: 'bearer', supportsSandbox: true })]);
+  });
+
   describe('createIncident action', () => {
     it('should create an incident with required and optional fields', async () => {
       mockClient.post.mockResolvedValue({

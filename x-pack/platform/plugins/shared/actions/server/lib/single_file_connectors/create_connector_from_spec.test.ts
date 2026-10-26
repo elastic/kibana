@@ -152,6 +152,11 @@ describe('createConnectorTypeFromSpec', () => {
     expect(connectorType.sandboxSupportedAuthTypes).toEqual(['api_key_header']);
   });
 
+  it('registers the shipped Rootly spec as sandbox capable for the bearer auth type', () => {
+    const connectorType = createConnectorTypeFromSpec(connectorsSpecs.Rootly, mockActionsPlugin);
+    expect(connectorType.sandboxSupportedAuthTypes).toEqual(['bearer']);
+  });
+
   it('sets description from metadata.description', () => {
     const spec = createMockSpec({
       metadata: {
