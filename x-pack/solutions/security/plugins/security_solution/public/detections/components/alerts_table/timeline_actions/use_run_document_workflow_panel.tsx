@@ -11,7 +11,7 @@ import type {
   EuiContextMenuPanelDescriptor,
   EuiContextMenuPanelItemDescriptor,
 } from '@elastic/eui';
-import type { DocumentSelection, WorkflowListItemDto } from '@kbn/workflows';
+import type { WorkflowListItemDto } from '@kbn/workflows';
 import {
   RunWorkflowPanel,
   useWorkflowsCapabilities,
@@ -33,6 +33,11 @@ const sortManualWorkflow = (a: WorkflowListItemDto, b: WorkflowListItemDto) =>
   Number((a.definition?.triggers ?? []).some((t) => t.type === 'manual'));
 
 export type DocumentTableContextMenuItem = EuiContextMenuPanelItemDescriptor;
+
+export interface DocumentSelection {
+  _id: string;
+  _index: string;
+}
 
 export interface DocumentWorkflowsPanelProps {
   /** The selected documents; the server fetches each one's fields. */

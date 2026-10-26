@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { DocumentSelection } from '@kbn/workflows';
+import type { DocumentSelection } from './use_run_document_workflow_panel';
 
 /** Builds the `(id, index)` pairs to run on, dropping documents without an index, which the server rejects. */
 export const toDocumentSelections = (

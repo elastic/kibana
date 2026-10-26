@@ -9,9 +9,11 @@
 
 import { isPlainObject } from 'lodash';
 import type { Logger } from '@kbn/core/server';
-import type { DocumentSelection } from '@kbn/workflows';
 import { assertWithinRunLimit, fetchDocumentFieldsByIds } from './fetch_by_ids';
-import type { ExpandedDocument } from '../../../../../common/types/document_types';
+import type {
+  DocumentSelection,
+  ExpandedDocument,
+} from '../../../../../common/types/document_types';
 import { WorkflowTriggerInputError } from '../../../workflow_trigger_input_error';
 import type { AlertPreprocessingContext } from '../../../workflows_management_api';
 
