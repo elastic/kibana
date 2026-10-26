@@ -20,7 +20,7 @@ import {
   type HuntThreatIntelSupplyStatus,
 } from '@kbn/alertzero-common';
 import { THREAT_REPORTS_INDEX } from '../../../../common/threat_intel';
-import { HUNT_WORKER_URL, TI_HEADERS } from './constants';
+import { HUNT_WORKER_URL, INTERNAL_HEADERS, TI_HEADERS } from './constants';
 import { SUPPLY_WORKFLOW_IDS, type SupplyWorkflowKey } from './supply_workflow_ids';
 
 /** Minimal ES client surface these tests rely on. */
@@ -125,6 +125,17 @@ export interface HuntPrerequisites {
 
 const KIBANA_SETTINGS_PATH = 'internal/kibana/settings';
 
+/**
+ * The settings route is `access: 'internal'`, so under the alertzero config set
+ * (`--server.restrictInternalApis=true`) a bare cookie header gets a 400 before the
+ * per-space gate is ever read. Merging `INTERNAL_HEADERS` here keeps every caller —
+ * including ones passing plain cookie headers — working on both lanes.
+ */
+const alertZeroSettingsHeaders = (headers: Record<string, string>): Record<string, string> => ({
+  ...INTERNAL_HEADERS,
+  ...headers,
+});
+
 /** Reads the per-space AlertZero gate as the user set it; `undefined` when it is still the default. */
 export const readAlertZeroEnabledInSpace = async ({
   apiClient,
@@ -136,7 +147,7 @@ export const readAlertZeroEnabledInSpace = async ({
   spaceId: string;
 }): Promise<boolean | undefined> => {
   const response = await apiClient.get(spaceUrl(KIBANA_SETTINGS_PATH, spaceId), {
-    headers,
+    headers: alertZeroSettingsHeaders(headers),
     responseType: 'json',
   });
   if (response.statusCode !== 200) {
@@ -168,7 +179,7 @@ export const setAlertZeroEnabledInSpace = async ({
   enabled: boolean | undefined;
 }): Promise<void> => {
   const response = await apiClient.post(spaceUrl(KIBANA_SETTINGS_PATH, spaceId), {
-    headers: { ...headers, 'kbn-xsrf': 'true' },
+    headers: alertZeroSettingsHeaders(headers),
     responseType: 'json',
     body: { changes: { [ALERTZERO_ENABLED_SETTING_ID]: enabled ?? null } },
   });
