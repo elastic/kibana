@@ -1205,6 +1205,89 @@ describe('EsServiceAccounts', () => {
     });
   });
 
+  describe('#getAccountFactsAsInternalUser', () => {
+    const ACCOUNT_ID = 'kibana/nightshift-relay';
+    const signal = new AbortController().signal;
+
+    it('reads the account with Kibana’s own access, and reports when its credential was created', async () => {
+      clusterClient.asInternalUser.transport.request.mockResolvedValueOnce(accountEntry());
+      credentialStore.getDecrypted.mockResolvedValue(staleCredential());
+
+      await expect(
+        serviceAccounts.getAccountFactsAsInternalUser(ACCOUNT_ID, { signal })
+      ).resolves.toEqual({ status: 'present', credentialCreatedAt: '2026-09-21T00:00:00.000Z' });
+
+      expect(clusterClient.asInternalUser.transport.request).toHaveBeenCalledWith(READ_ACCOUNT, {
+        ignore: [404],
+        signal,
+      });
+      expect(clusterClient.asScoped).not.toHaveBeenCalled();
+      expect(credentialStore.getDecrypted).toHaveBeenCalledWith(ACCOUNT_ID);
+    });
+
+    it('reports an account without a stored credential as present', async () => {
+      clusterClient.asInternalUser.transport.request.mockResolvedValueOnce(accountEntry());
+
+      await expect(
+        serviceAccounts.getAccountFactsAsInternalUser(ACCOUNT_ID, { signal })
+      ).resolves.toEqual({ status: 'present' });
+    });
+
+    it('reports a missing account', async () => {
+      clusterClient.asInternalUser.transport.request.mockResolvedValueOnce({});
+
+      await expect(
+        serviceAccounts.getAccountFactsAsInternalUser(ACCOUNT_ID, { signal })
+      ).resolves.toEqual({ status: 'missing' });
+      expect(credentialStore.getDecrypted).not.toHaveBeenCalled();
+    });
+
+    it.each([
+      [
+        'the lookup fails',
+        () =>
+          clusterClient.asInternalUser.transport.request.mockRejectedValue(
+            new Error('unavailable')
+          ),
+      ],
+      [
+        'the credential fails integrity verification',
+        () => {
+          clusterClient.asInternalUser.transport.request.mockResolvedValueOnce(accountEntry());
+          credentialStore.getDecrypted.mockRejectedValue(
+            new Error('failed integrity verification')
+          );
+        },
+      ],
+      [
+        'the credential names another account',
+        () => {
+          clusterClient.asInternalUser.transport.request.mockResolvedValueOnce(accountEntry());
+          credentialStore.getDecrypted.mockResolvedValue({
+            ...staleCredential(),
+            serviceAccountId: 'kibana/other',
+          });
+        },
+      ],
+    ])('reports unknown when %s', async (_, arrange) => {
+      arrange();
+
+      await expect(
+        serviceAccounts.getAccountFactsAsInternalUser(ACCOUNT_ID, { signal })
+      ).resolves.toEqual({ status: 'unknown' });
+    });
+
+    it.each(['not-an-id', 'elastic/fleet-server'])(
+      'reports unknown for [%s], which no workload can run as',
+      async (id) => {
+        await expect(
+          serviceAccounts.getAccountFactsAsInternalUser(id, { signal })
+        ).resolves.toEqual({ status: 'unknown' });
+        expect(clusterClient.asInternalUser.transport.request).not.toHaveBeenCalled();
+      }
+    );
+  });
+
   describe('#get', () => {
     const ACCOUNT_ID = 'kibana/nightshift-relay';
 

@@ -7,7 +7,7 @@
 
 export { AuditService } from './audit_service';
 export type { AuditLogWriteAccess } from './audit_write_access';
-export type { ServiceAccountAuditEventParams } from './audit_events';
+export type { ServiceAccountAuditEventParams, ServiceAccountAuditReason } from './audit_events';
 export {
   userLoginEvent,
   userLogoutEvent,
