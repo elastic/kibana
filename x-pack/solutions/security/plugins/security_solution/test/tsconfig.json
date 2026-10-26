@@ -33,6 +33,8 @@
     "@kbn/workflows",
     "@kbn/agent-builder-common",
     "@kbn/core",
-    "@kbn/alertzero-common"
+    "@kbn/alertzero-common",
+    "@kbn/proposals-common",
+    "@kbn/evals-suite-attack-discovery-agent-builder"
   ]
 }
