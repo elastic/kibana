@@ -48,7 +48,7 @@ describe('SignificantEventsTuningConfigEditor', () => {
     );
 
     const editor = screen.getByTestId('tuning-yaml-code-editor');
-    expect(editor).toHaveTextContent('max_iterations');
+    expect(editor).toHaveTextContent('rrf_rank_constant');
     expect(editor).toHaveAttribute('data-height', '');
     expect(JSON.parse(editor.getAttribute('data-fit-to-content')!)).toEqual({ minLines: 1 });
     expect(editor).toHaveAttribute('data-vertical-scrollbar', 'hidden');
