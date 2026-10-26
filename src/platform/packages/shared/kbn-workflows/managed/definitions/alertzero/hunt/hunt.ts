@@ -26,10 +26,10 @@ export const ALERTZERO_HUNT_WORKFLOW_ID = 'system-security-hunt-execute';
  * `enforced` (a disabled child would silently break its parent).
  */
 export const ALERTZERO_HUNT_WORKFLOW = {
-  billable: false,
+  billable: true,
   id: ALERTZERO_HUNT_WORKFLOW_ID,
   management: ALERTZERO_INTERNAL_WORKFLOW_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 2,
+  version: 3,
   yaml: HUNT_YAML,
 } as const satisfies ManagedWorkflowDefinition;
