@@ -8,14 +8,17 @@
 import {
   RULE_CREATED_EBT_EVENT_TYPE,
   RULE_DELETED_EBT_EVENT_TYPE,
-} from '../../telemetry/rule_ebt_schema';
+} from '../../telemetry/rules/rule_ebt_schema';
 import type { KibanaRequest } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { EbtServiceContract } from '../../services/ebt_service/ebt_service';
 import { createMockEbtService } from '../../services/ebt_service/ebt_service.mock';
 import { createLoggerService } from '../../services/logger_service/logger_service.mock';
 import { createRuleResponse } from '../../test_utils';
-import { RULE_EBT_EVENT_TYPE_BY_OPERATION, RULE_OPERATIONS } from '../../telemetry/rule_ebt_event';
+import {
+  RULE_EBT_EVENT_TYPE_BY_OPERATION,
+  RULE_OPERATIONS,
+} from '../../telemetry/rules/rule_ebt_event';
 import {
   RULE_CREATED_EVENT_TYPE,
   RULE_DELETED_EVENT_TYPE,

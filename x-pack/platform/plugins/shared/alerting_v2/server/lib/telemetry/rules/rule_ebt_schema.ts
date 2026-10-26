@@ -7,7 +7,7 @@
 
 import { isoDateTime, lazySchema, z } from '@kbn/zod/v4';
 import { ID_MAX_LENGTH, ruleIdSchema, ruleKindSchema } from '@kbn/alerting-v2-schemas';
-import { eventOriginSchema } from '../event_origin/origin_schemas';
+import { eventOriginSchema } from '../../event_origin/origin_schemas';
 
 export const RULE_CREATED_EBT_EVENT_TYPE = 'alerting_v2_rule_created' as const;
 export const RULE_UPDATED_EBT_EVENT_TYPE = 'alerting_v2_rule_updated' as const;

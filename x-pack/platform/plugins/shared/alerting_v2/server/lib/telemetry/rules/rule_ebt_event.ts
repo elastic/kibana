@@ -7,7 +7,7 @@
 
 import type { RuleResponse } from '@kbn/alerting-v2-schemas';
 import type { EventTypeOpts } from '@kbn/core/server';
-import type { EventOrigin } from '../event_origin/origin_schemas';
+import type { EventOrigin } from '../../event_origin/origin_schemas';
 import {
   RULE_CREATED_EBT_EVENT_TYPE,
   RULE_DELETED_EBT_EVENT_TYPE,
@@ -23,7 +23,7 @@ import {
   RULE_DISABLED_EVENT_TYPE,
   RULE_ENABLED_EVENT_TYPE,
   RULE_UPDATED_EVENT_TYPE,
-} from '../events/rule_event_publisher/events';
+} from '../../events/rule_event_publisher/events';
 
 /** Domain operations reported as telemetry. Each one is its own EBT event type. */
 export const RULE_OPERATIONS = [

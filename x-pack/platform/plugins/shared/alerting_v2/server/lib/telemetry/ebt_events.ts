@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RuleChangedEbtData, RuleEbtEventType } from './rule_ebt_schema';
+import type { RuleChangedEbtData, RuleEbtEventType } from './rules/rule_ebt_schema';
 
 /**
  * Maps every EBT event type the plugin registers to the data it is reported with.

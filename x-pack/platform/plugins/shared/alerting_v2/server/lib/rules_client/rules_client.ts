@@ -38,7 +38,7 @@ import { treeifyError, type z } from '@kbn/zod/v4';
 import { inject, injectable } from 'inversify';
 import type { EventOriginActor } from '../event_origin/origin_schemas';
 import { toEventOrigin } from '../event_origin/event_origin';
-import { collectRuleUpdatedFields } from '../telemetry/rule_updated_fields';
+import { collectRuleUpdatedFields } from '../telemetry/rules/rule_updated_fields';
 import { type RuleSavedObjectAttributes } from '../../saved_objects';
 import { withApm as withApmDecorator } from '../apm/with_apm_decorator';
 import {

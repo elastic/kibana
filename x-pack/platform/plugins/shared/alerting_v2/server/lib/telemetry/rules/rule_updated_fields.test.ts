@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createRuleResponse } from '../test_utils';
+import { createRuleResponse } from '../../test_utils';
 import { collectRuleUpdatedFields } from './rule_updated_fields';
 
 describe('collectRuleUpdatedFields', () => {

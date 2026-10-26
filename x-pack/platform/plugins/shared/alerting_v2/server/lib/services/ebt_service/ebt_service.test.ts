@@ -8,7 +8,7 @@
 import {
   RULE_CREATED_EBT_EVENT_TYPE,
   type RuleChangedEbtData,
-} from '../../telemetry/rule_ebt_schema';
+} from '../../telemetry/rules/rule_ebt_schema';
 import type { AnalyticsServiceStart, Logger } from '@kbn/core/server';
 import { analyticsServiceMock } from '@kbn/core/server/mocks';
 import { ALERTING_LOG_CODES } from '../../errors/error_codes';

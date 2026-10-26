@@ -20,7 +20,7 @@ import {
   RULE_DISABLED_EBT_EVENT_TYPE,
   RULE_ENABLED_EBT_EVENT_TYPE,
   RULE_UPDATED_EBT_EVENT_TYPE,
-} from '../../../../../server/lib/telemetry/rule_ebt_schema';
+} from '../../../../../server/lib/telemetry/rules/rule_ebt_schema';
 import { apiTest, buildCreateRuleData } from '../fixtures';
 
 // The rules service sends a non-UI request, reported on the `api` channel with no app.
