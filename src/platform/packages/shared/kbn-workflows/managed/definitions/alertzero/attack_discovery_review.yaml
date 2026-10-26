@@ -134,9 +134,10 @@ consts:
   author_name: "Attack Discovery worker"
   # What `resolve_analysis` falls back to when the analysis child produced no
   # payload. `failed` is an EXECUTION STATE, not a classification: the analysis
-  # never returns it, and it is reachable here only by the child failing after its
-  # own retries. The `failed` arm of the switch below is what makes that visible on
-  # the Investigation without taking any lifecycle action.
+  # never returns it, and it is reachable here only by the child failing (the child
+  # no longer retries; a failed required source fails its run on first attempt). The
+  # `failed` arm of the switch below is what makes that visible on the Investigation
+  # without taking any lifecycle action; the review owns whether to re-run.
   failed_verdict: failed
   default_autonomy: manual
   # Mirrors ALERTS_BATCH_MAX_SIZE in security_solution's common/constants, which is

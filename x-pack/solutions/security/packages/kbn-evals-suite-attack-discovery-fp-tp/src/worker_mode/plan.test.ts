@@ -267,8 +267,18 @@ describe.each(WORKER_MODE_EXAMPLES.map(({ id }) => [id]))('buildWorkerModePlan f
     expect(timestamps(all).filter((time) => time > NOW.getTime())).toEqual([]);
   });
 
-  it('returns a window deadline at least an hour after the seed', () => {
-    expect(Date.parse(plan.windowDeadline) - NOW.getTime()).toBeGreaterThanOrEqual(60 * 60 * 1000);
+  // `windowDeadline` is the first event plus 2h, so a multi-day span whose earliest
+  // stage sits days before the seed is past it: the Worker must be enabled before the
+  // deadline, which that example's run book states, not this assertion.
+  it('returns a window deadline at least an hour after the seed, unless the example spreads its alerts over days', () => {
+    const multiday = /multiday-span/.test(id);
+    if (!multiday) {
+      expect(Date.parse(plan.windowDeadline) - NOW.getTime()).toBeGreaterThanOrEqual(
+        60 * 60 * 1000
+      );
+    } else {
+      expect(Date.parse(plan.windowDeadline) - NOW.getTime()).toBeLessThan(60 * 60 * 1000);
+    }
   });
 });
 

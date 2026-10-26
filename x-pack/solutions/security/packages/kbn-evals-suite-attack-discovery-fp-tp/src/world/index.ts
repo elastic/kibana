@@ -21,6 +21,7 @@ export {
   FP_TP_BASE_TIME,
   FP_TP_BOOTSTRAP_RULE_ID,
   FP_TP_ENTITY_INDEX,
+  FP_TP_RAW_EVENT_BRANCH_SIZE,
   FP_TP_RAW_EVENT_PAGE_SIZE,
   FP_TP_RAW_EVENT_WINDOW_MS,
   FP_TP_REASONING_FEATURE_ID,
@@ -46,11 +47,14 @@ export {
   withCommandLine,
   withFilePath,
   withNetworkDestination,
+  withoutAlertHostId,
   withoutEventCategory,
   withoutEventIds,
   withoutProcessParent,
   withProcessExecutable,
   withProcessParent,
+  withStageEventSpan,
+  withStageSpan,
 } from './mutations';
 export {
   assertBulkOk,
