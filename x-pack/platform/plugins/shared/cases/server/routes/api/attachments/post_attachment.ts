@@ -15,11 +15,10 @@ import {
 } from '../../../../common/types/api';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
-import { createZodRouteValidation } from '../utils';
+import { createZodRouteValidation, getAttachmentRequestType } from '../utils';
 import { DEFAULT_CASES_ROUTE_SECURITY } from '../constants';
 import { pickCreatedOrExistingAttachment } from '../../../client/attachments/add';
 import { toUnifiedAttachment } from '../../../services/attachments/operations/utils';
-import { getAttachmentRequestType } from '../utils';
 
 export const postAttachmentRoute = createCasesRoute<
   { case_id: string },
@@ -57,7 +56,6 @@ export const postAttachmentRoute = createCasesRoute<
         comment: request.body,
         id,
       });
-      incrementAttachmentTypeCounters([getAttachmentRequestType(request.body)]);
 
       const created = pickCreatedOrExistingAttachment(updatedCase.comments, id, request.body);
       if (created == null) {
@@ -66,6 +64,7 @@ export const postAttachmentRoute = createCasesRoute<
 
       const attachment: attachmentDomainV2.UnifiedAttachment = toUnifiedAttachment(created);
 
+      incrementAttachmentTypeCounters([getAttachmentRequestType(request.body)]);
       return response.created({
         body: attachment,
       });

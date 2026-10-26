@@ -37,8 +37,8 @@ export const bulkCreateAttachmentsRoute = createCasesRoute({
         caseId,
         attachments,
       });
-      incrementAttachmentTypeCounters(attachments.map(getAttachmentRequestType));
 
+      incrementAttachmentTypeCounters(attachments.map(getAttachmentRequestType));
       return response.ok({
         body: created,
       });

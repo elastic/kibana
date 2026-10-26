@@ -76,5 +76,6 @@ describe('postAttachmentRoute', () => {
     );
     expect(error.boomify().output.statusCode).toBe(500);
     expect(response.created).not.toHaveBeenCalled();
+    expect(incrementAttachmentTypeCounters).not.toHaveBeenCalled();
   });
 });

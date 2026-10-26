@@ -76,8 +76,8 @@ export const postFileRoute = createCasesRoute({
           $abort,
         })
       );
-      incrementAttachmentTypeCounters([FILE_ATTACHMENT_TYPE]);
 
+      incrementAttachmentTypeCounters([FILE_ATTACHMENT_TYPE]);
       return response.ok({
         body: res,
       });

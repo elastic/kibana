@@ -41,12 +41,12 @@ export const postCommentRoute = createCasesRoute({
       const comment = toUnifiedAttachmentRequest(request.body);
       // 2. add the unified attachment (returns the case with comments)
       const updatedCase = await casesClient.attachments.add({ caseId, comment });
-      incrementAttachmentTypeCounters([
-        getAttachmentRequestType(request.body as AttachmentRequestV2),
-      ]);
       // 3. unified case -> v1 response
       const res: caseDomainV1.Case = toLegacyCaseResponse(updatedCase);
 
+      incrementAttachmentTypeCounters([
+        getAttachmentRequestType(request.body as AttachmentRequestV2),
+      ]);
       return response.ok({
         body: res,
       });
