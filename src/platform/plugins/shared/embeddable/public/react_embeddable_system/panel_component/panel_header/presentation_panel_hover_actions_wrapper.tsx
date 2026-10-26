@@ -17,7 +17,10 @@ import {
 import { css } from '@emotion/react';
 import classNames from 'classnames';
 import { BehaviorSubject } from 'rxjs';
-import type { PresentationPanelHoverActionsProps } from './presentation_panel_hover_actions';
+import type {
+  PanelSelection,
+  PresentationPanelHoverActionsProps,
+} from './presentation_panel_hover_actions';
 import { PresentationPanelHoverActions } from './presentation_panel_hover_actions';
 import { useHoverActionStyles } from './use_hover_actions_styles';
 
@@ -46,9 +49,15 @@ export const PresentationPanelHoverActionsWrapper = (
       selectionApi?.selectedPanelIds$ ?? new BehaviorSubject<string[]>([])
     );
   const containerStyles = useHoverActionStyles(props.viewMode === 'edit', props.showBorder);
-  const canSelect = Boolean(selectionApi) && props.viewMode === 'edit';
-  // While any panel is selected, every panel keeps its select checkbox visible
-  const isSelectionMode = canSelect && selectedPanelIds.length > 0;
+  const panelId = props.api?.uuid;
+  const selection: PanelSelection | undefined =
+    selectionApi && panelId && props.viewMode === 'edit'
+      ? {
+          isSelectionMode: selectedPanelIds.length > 0,
+          isSelected: selectedPanelIds.includes(panelId),
+          toggle: () => selectionApi.togglePanelSelection(panelId),
+        }
+      : undefined;
 
   let OverriddenHoverActionsComponent = null;
   if (canOverrideHoverActions(props.api) && overrideHoverActions) {
@@ -61,7 +70,7 @@ export const PresentationPanelHoverActionsWrapper = (
         'embPanel__hoverActionsAnchor--lockHoverActions':
           hasLockedHoverActions || Boolean(OverriddenHoverActionsComponent),
         'embPanel__hoverActionsAnchor--editMode': props.viewMode === 'edit',
-        'embPanel__hoverActionsAnchor--selectionMode': isSelectionMode,
+        'embPanel__hoverActionsAnchor--selectionMode': Boolean(selection?.isSelectionMode),
       })}
       data-test-embeddable-id={props.api?.uuid}
       data-test-subj={`embeddablePanelHoverActions-${(title || defaultTitle || '').replace(
@@ -77,7 +86,7 @@ export const PresentationPanelHoverActionsWrapper = (
       )}
       {props.children}
       {!OverriddenHoverActionsComponent && (
-        <PresentationPanelHoverActions {...props} selectedPanelIds={selectedPanelIds} />
+        <PresentationPanelHoverActions {...props} selection={selection} />
       )}
     </div>
   );

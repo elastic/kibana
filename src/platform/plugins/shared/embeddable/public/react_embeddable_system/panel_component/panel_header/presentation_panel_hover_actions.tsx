@@ -28,11 +28,7 @@ import { buildContextMenuForActions, triggers } from '@kbn/ui-actions-plugin/pub
 
 import { css } from '@emotion/react';
 import type { EmbeddableApiContext, PublishesTitle, ViewMode } from '@kbn/presentation-publishing';
-import {
-  apiCanLockHoverActions,
-  getSelectionApi,
-  useBatchedPublishingSubjects,
-} from '@kbn/presentation-publishing';
+import { apiCanLockHoverActions, useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { getPanelContextMenuTriggerId } from '@kbn/presentation-util';
 import type { ActionWithContext } from '@kbn/ui-actions-plugin/public/context_menu/build_eui_context_menu_panels';
 import { BehaviorSubject, Subscription, switchMap } from 'rxjs';
@@ -93,6 +89,14 @@ export interface PresentationPanelHoverActionsProps {
   showBorder?: boolean;
 }
 
+/** Selection state of a panel whose parent supports panel selection, while in edit mode */
+export interface PanelSelection {
+  /** True while any panel is selected; every panel then only offers its select checkbox */
+  isSelectionMode: boolean;
+  isSelected: boolean;
+  toggle: () => void;
+}
+
 export const PresentationPanelHoverActions = ({
   api,
   index,
@@ -101,14 +105,15 @@ export const PresentationPanelHoverActions = ({
   actionPredicate,
   className,
   viewMode,
-  selectedPanelIds,
+  selection,
 }: PresentationPanelHoverActionsProps & {
   /**
    * Owned by the wrapper (which also toggles the `--selectionMode` anchor class) so that the class
    * and the rendered actions change in the same render; separate subscriptions would commit in
    * separate frames and briefly show every action while leaving selection mode.
+   * Undefined when the panel cannot be selected.
    */
-  selectedPanelIds: string[];
+  selection: PanelSelection | undefined;
 }) => {
   const [quickActions, setQuickActions] = useState<Action<EmbeddableApiContext>[]>([]);
   const [contextMenuPanels, setContextMenuPanels] = useState<EuiContextMenuPanelDescriptor[]>([]);
@@ -116,8 +121,6 @@ export const PresentationPanelHoverActions = ({
   const dragHandleRef = useRef<HTMLButtonElement | null>(null);
 
   const { euiTheme } = useEuiTheme();
-
-  const selectionApi = useMemo(() => getSelectionApi(api), [api]);
 
   const [
     title,
@@ -354,47 +357,42 @@ export const PresentationPanelHoverActions = ({
     [setDragHandle, euiTheme.size.xs]
   );
 
-  const isSelected = Boolean(api?.uuid && selectedPanelIds.includes(api.uuid));
-  const canSelect = Boolean(selectionApi && api?.uuid && viewMode === 'edit');
-  // While any panel is selected, every panel only offers the select checkbox
-  const isSelectionMode = canSelect && selectedPanelIds.length > 0;
   // The checkbox only exists in selection mode and lives in the panel's top right corner (see
   // `.embPanel__selectPanel` styles) rather than in the floating hover bar, which is gone in that mode
-  const selectPanelLabel = isSelected
+  const selectPanelLabel = selection?.isSelected
     ? i18n.translate('embeddableApi.deselectPanel', {
         defaultMessage: 'Deselect panel',
       })
     : i18n.translate('embeddableApi.selectPanel', {
         defaultMessage: 'Select panel',
       });
-  const selectCheckbox =
-    selectionApi && api?.uuid && isSelectionMode ? (
-      <div className="embPanel__selectPanel" data-test-subj="embeddablePanelSelectPanel">
-        <EuiToolTip content={selectPanelLabel} disableScreenReaderOutput>
-          <EuiCheckbox
-            id={`embeddablePanelSelect-${api.uuid}`}
-            className="embPanel--selectPanel"
-            // round variant of the EUI checkbox: only the shape changes, colors, check icon and focus
-            // ring stay EUI's. EUI exposes no shape prop, so the faux control is targeted directly.
-            css={css`
-              .euiCheckboxControl {
-                border-radius: 50%;
-              }
-            `}
-            checked={isSelected}
-            aria-label={selectPanelLabel}
-            data-test-subj="embeddablePanelSelectToggle"
-            onChange={() => selectionApi.togglePanelSelection(api.uuid)}
-          />
-        </EuiToolTip>
-      </div>
-    ) : null;
+  const selectCheckbox = selection?.isSelectionMode ? (
+    <div className="embPanel__selectPanel" data-test-subj="embeddablePanelSelectPanel">
+      <EuiToolTip content={selectPanelLabel} disableScreenReaderOutput>
+        <EuiCheckbox
+          id={`embeddablePanelSelect-${api.uuid}`}
+          className="embPanel--selectPanel"
+          // round variant of the EUI checkbox: only the shape changes, colors, check icon and focus
+          // ring stay EUI's. EUI exposes no shape prop, so the faux control is targeted directly.
+          css={css`
+            .euiCheckboxControl {
+              border-radius: 50%;
+            }
+          `}
+          checked={selection.isSelected}
+          aria-label={selectPanelLabel}
+          data-test-subj="embeddablePanelSelectToggle"
+          onChange={selection.toggle}
+        />
+      </EuiToolTip>
+    </div>
+  ) : null;
 
   const showContextMenu = useMemo(() => {
     return contextMenuPanels.some(({ items }) => items?.length);
   }, [contextMenuPanels]);
 
-  if (isSelectionMode) {
+  if (selection?.isSelectionMode) {
     return (
       <>
         {/* keep the drag handle mounted (but hidden) so its registration with the grid is preserved */}
