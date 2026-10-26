@@ -260,7 +260,7 @@ To enable Inspector integration, pass an `inspector` object with your search req
 - `description` (optional): Additional description shown in the Inspector.
 - `getRequestStats` (optional): A function returning `RequestStatistics` to show in the Inspector's statistics panel before the request runs.
 
-For each request, the search method logs the request body, the search session ID, and either the raw response or the error. It also adds response statistics automatically:
+For each request, the search method logs the request body and either the raw response or the error. It also adds response statistics automatically:
 
 - `esql`: hits, query time, and documents processed
 - `dsl`: query time, total hits, and hits

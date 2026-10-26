@@ -176,7 +176,6 @@ describe('SearchMethodsService', () => {
 
         expect(inspector.adapter.start).toHaveBeenCalledWith('Test Request', {
           description: 'Test description',
-          searchSessionId: 'test-session-123',
         });
       });
 
@@ -650,7 +649,6 @@ describe('SearchMethodsService', () => {
 
         expect(inspector.adapter.start).toHaveBeenCalledWith('Test Request', {
           description: 'Test description',
-          searchSessionId: 'test-session',
         });
       });
 

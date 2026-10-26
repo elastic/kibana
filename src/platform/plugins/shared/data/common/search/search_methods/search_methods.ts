@@ -92,7 +92,6 @@ export class SearchMethodsService implements ISearchMethods {
 
     const requestResponder = options?.inspector?.adapter.start(options.inspector.title, {
       description: options.inspector.description,
-      searchSessionId: searchOptions?.sessionId,
     });
 
     requestResponder?.json({
@@ -141,7 +140,6 @@ export class SearchMethodsService implements ISearchMethods {
 
     const requestResponder = options?.inspector?.adapter.start(options.inspector.title, {
       description: options.inspector.description,
-      searchSessionId: searchOptions?.sessionId,
     });
 
     requestResponder?.json((request.params?.body ?? {}) as Record<string, unknown>);
@@ -205,7 +203,6 @@ export class SearchMethodsService implements ISearchMethods {
 
     const requestResponder = options?.inspector?.adapter.start(options.inspector.title, {
       description: options.inspector.description,
-      searchSessionId: searchOptions?.sessionId,
     });
 
     requestResponder?.json((request.params?.body ?? {}) as Record<string, unknown>);
@@ -241,7 +238,6 @@ export class SearchMethodsService implements ISearchMethods {
 
     const requestResponder = options?.inspector?.adapter.start(options.inspector.title, {
       description: options.inspector.description,
-      searchSessionId: searchOptions?.sessionId,
     });
 
     requestResponder?.json((request.params?.body ?? {}) as Record<string, unknown>);
