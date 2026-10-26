@@ -12,6 +12,7 @@
   ".azure_aks": "Artifacts not recorded yet; see https://github.com/elastic/kibana/issues/295688",
   ".azure_functions": "Artifacts not recorded yet; see https://github.com/elastic/kibana/issues/295688",
   ".azure_monitor": "Artifacts not recorded yet; see https://github.com/elastic/kibana/issues/295688",
+  ".azure_sql": "Talks to Azure SQL Database through the mssql driver's TDS protocol, not an HTTP API",
   ".azure-blob": "Artifacts not recorded yet; see https://github.com/elastic/kibana/issues/295688",
   ".bigquery": "Artifacts not recorded yet; see https://github.com/elastic/kibana/issues/295688",
   ".bitbucket": "Artifacts not recorded yet; see https://github.com/elastic/kibana/issues/295688",
