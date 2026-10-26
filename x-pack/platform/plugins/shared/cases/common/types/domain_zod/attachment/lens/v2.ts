@@ -7,14 +7,18 @@
 
 import { z } from '@kbn/zod/v4';
 import { LENS_ATTACHMENT_TYPE, LENS_SO_TYPE } from '../../../../constants/attachments';
-import { MAX_ATTACHMENT_ID_LENGTH, MAX_OWNER_LENGTH } from '../../../../constants';
-import { jsonValueSchema } from '../../../../schema_zod';
+import {
+  MAX_ATTACHMENT_ID_LENGTH,
+  MAX_OWNER_LENGTH,
+  MAX_TITLE_LENGTH,
+} from '../../../../constants';
+import { jsonValueSchema } from '../../../../schema';
 import { buildSavedObjectMetadataSchema, TimeRangeSchema } from '../saved_object/v2';
 
 // --- Persistable shape from legacy lens attachment ---
 /** `state` shape is owned by the lens plugin; kept permissive to round-trip what lens persists. */
 export const LensPersistableAttachmentDataSchema = z.object({
-  state: z.record(z.string(), z.unknown()),
+  state: z.record(z.string().max(MAX_TITLE_LENGTH), z.unknown()),
 });
 export type LensPersistableAttachmentData = z.infer<typeof LensPersistableAttachmentDataSchema>;
 
