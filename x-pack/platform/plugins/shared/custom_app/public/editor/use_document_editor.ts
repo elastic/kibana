@@ -102,6 +102,7 @@ export const useDocumentEditor = (initial: AppDocument): DocumentEditor => {
     add: (type, parentId = defaultParentId(document, selectedId)) => {
       const id = createNodeId(document, type);
       const probe = createDefaultNode(type, id, { valueKey: '' });
+      if (!probe) return { ok: false, reason: `Nothing to start a "${type}" from` };
       if (
         probe.type !== 'select' &&
         probe.type !== 'button_group' &&
@@ -118,6 +119,7 @@ export const useDocumentEditor = (initial: AppDocument): DocumentEditor => {
         probe.type === 'form' ? probe.fields[0].label : probe.label
       );
       const node = createDefaultNode(type, id, { valueKey });
+      if (!node) return { ok: false, reason: `Nothing to start a "${type}" from` };
       const startsAs = 'options' in node ? node.options[0]?.value ?? '' : '';
       const withValue = setStateDeclaration(
         document,

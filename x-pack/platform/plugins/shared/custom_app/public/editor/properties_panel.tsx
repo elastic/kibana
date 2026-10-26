@@ -43,6 +43,7 @@ import { ButtonActionsEditor } from './fields/workflow_action_editor';
 import { FormFieldsEditor } from './fields/form_fields_editor';
 import { TemplateField } from './fields/template_field';
 import { Section } from './fields/section';
+import { GenericNodeForm } from './fields/generic_node_form';
 
 export type UpdateNode = <T extends AppNodeType>(
   props: Partial<Omit<AppNodeOfType<T>, 'id' | 'type' | 'children'>>
@@ -843,7 +844,7 @@ export const PropertiesPanel = ({
           <EuiSpacer size="m" />
         </>
       )}
-      {form}
+      {form ?? <GenericNodeForm node={node} onEdit={onEdit} />}
     </div>
   );
 };

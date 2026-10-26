@@ -20,8 +20,12 @@ export interface NodeCatalogEntry {
   isContainer: boolean;
 }
 
-// A record, so adding a node type to the schema does not compile until it is described here.
-const ENTRIES: Record<AppNodeType, Omit<NodeCatalogEntry, 'type'>> = {
+/**
+ * What the editor offers to add, and how it names what it shows. A node type left out of here is
+ * still shown and changed, by the generic form, but is not offered to add: the schema and the
+ * renderer are all a new type needs, and an entry here is for one that is worth a place in the menu.
+ */
+const ENTRIES: Partial<Record<AppNodeType, Omit<NodeCatalogEntry, 'type'>>> = {
   stack: {
     label: i18n.translate('xpack.customApp.catalog.stack.label', { defaultMessage: 'Stack' }),
     description: i18n.translate('xpack.customApp.catalog.stack.description', {
@@ -200,7 +204,23 @@ export const NODE_CATALOG: readonly NodeCatalogEntry[] = (
   Object.entries(ENTRIES) as Array<[AppNodeType, Omit<NodeCatalogEntry, 'type'>]>
 ).map(([type, entry]) => ({ type, ...entry }));
 
-export const getCatalogEntry = (type: AppNodeType): NodeCatalogEntry => ({
-  type,
-  ...ENTRIES[type],
-});
+/** `custom_content` as words: `Custom content`. */
+const nameOf = (type: string): string => {
+  const words = type.replace(/_/g, ' ');
+  return `${words.charAt(0).toUpperCase()}${words.slice(1)}`;
+};
+
+/** How a node is shown: as catalogued, or as what its type is called when it is not. */
+export const getCatalogEntry = (type: AppNodeType): NodeCatalogEntry => {
+  const entry = ENTRIES[type];
+  return entry
+    ? { type, ...entry }
+    : {
+        type,
+        label: nameOf(type),
+        description: '',
+        iconType: 'package',
+        group: 'content',
+        isContainer: false,
+      };
+};

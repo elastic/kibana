@@ -45,13 +45,14 @@ const options = () => [
 ];
 
 /**
- * A new node with every field filled, with the value a new input sets.
+ * A new node with every field filled, with the value a new input sets. Absent for a type that has
+ * no starting point, which the editor then does not offer to add.
  */
 export const createDefaultNode = (
   type: AppNodeType,
   id: string,
   { valueKey }: DefaultsContext
-): AppNode => {
+): AppNode | undefined => {
   const bind = valueKey;
 
   switch (type) {
@@ -172,5 +173,7 @@ export const createDefaultNode = (
         children: [],
         title: i18n.translate('xpack.customApp.defaults.flyout', { defaultMessage: 'Details' }),
       };
+    default:
+      return undefined;
   }
 };
