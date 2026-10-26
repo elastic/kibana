@@ -19,6 +19,7 @@ project:
 dependsOn:
   - '@kbn/i18n'
   - '@kbn/core-application-browser'
+  - '@kbn/core-spaces-common'
   - '@kbn/proposals-common'
   - '@kbn/i18n-react'
   - '@kbn/ui-callout'
