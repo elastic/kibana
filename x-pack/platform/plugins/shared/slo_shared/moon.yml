@@ -22,6 +22,7 @@ dependsOn:
   - '@kbn/core-saved-objects-server'
   - '@kbn/i18n'
   - '@kbn/slo-schema'
+  - '@kbn/slo-constants'
 tags:
   - plugin
   - prod
@@ -33,6 +34,4 @@ fileGroups:
     - server/**/*
     - common/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

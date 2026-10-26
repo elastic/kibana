@@ -8,6 +8,7 @@
 import type { InvestigationRouteDependencies } from '../types';
 import { registerAssignInvestigationRoute } from './assign_investigation';
 import { registerSetInvestigationStatusRoute } from './set_investigation_status';
+import { registerSetInvestigationSeverityRoute } from './set_investigation_severity';
 import { registerGetInvestigationClosePreviewRoute } from './get_investigation_close_preview';
 import { registerGetSeverityCountsRoute } from './get_severity_counts';
 import { registerGetInvestigationRoute } from './get_investigation';
@@ -17,6 +18,7 @@ import { registerGetInvestigationsPrivilegesRoute } from './get_investigations_p
 export const registerInvestigationRoutes = (deps: InvestigationRouteDependencies) => {
   registerAssignInvestigationRoute(deps);
   registerSetInvestigationStatusRoute(deps);
+  registerSetInvestigationSeverityRoute(deps);
   registerGetInvestigationClosePreviewRoute(deps);
   // Before `{id}`, so `_severity_counts` is never read as an investigation id.
   registerGetSeverityCountsRoute(deps);

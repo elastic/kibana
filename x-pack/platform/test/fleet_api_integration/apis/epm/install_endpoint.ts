@@ -67,6 +67,19 @@ export default function (providerContext: FtrProviderContext) {
           );
           expect(res.statusCode).equal(200);
         });
+        // Endpoint ships legacy JSON transforms from a trusted source: they must keep running as
+        // kibana_system (roles), not be bound to the installing user's API key. metadata_united
+        // reads `.fleet-agents*`, which the installing user may not be able to read.
+        it(`should have bound the [${transform.id}] transform to kibana_system, not an API key`, async function () {
+          const { transforms: installed } = await es.transform.getTransform({
+            transform_id: `${transform.id}-${pkgVersion}`,
+          });
+          const authorization = installed[0].authorization as
+            | { api_key?: unknown; roles?: string[] }
+            | undefined;
+          expect(authorization?.roles).to.be.an('array');
+          expect(authorization?.api_key).to.be(undefined);
+        });
         it(`should have created the destination index for the [${transform.id}] transform`, async function () {
           // the  index is defined in the transform file
           const res = await es.transport.request(

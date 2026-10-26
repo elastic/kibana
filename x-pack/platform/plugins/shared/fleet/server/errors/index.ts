@@ -250,6 +250,13 @@ export class HostedAgentPolicyRestrictionRelatedError extends FleetError {
     );
   }
 }
+export class AgentlessAgentRestrictionError extends FleetError {
+  constructor(message = 'Cannot perform that action') {
+    super(
+      `${message} in Fleet because managed agents are managed by Elastic and do not support this action.`
+    );
+  }
+}
 export class PackagePolicyRestrictionRelatedError extends FleetError {
   constructor(message = 'Cannot perform that action') {
     super(

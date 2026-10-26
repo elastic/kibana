@@ -7,9 +7,9 @@
 
 import { createTestConfig } from '../common/config';
 
-// Attachments framework ON, but `attackAttachmentsEnabled` OFF. `security.attack` is a
-// unified-only attachment type registered by security_solution only when that experimental
-// flag is on, so this config is what proves the flag actually gates server-side writes.
+// Attachments framework ON, but `attackAttachments` OFF. `security.attack` is a unified-only
+// attachment type security_solution only accepts writes for while that experimental flag is
+// on, so this config is what proves the flag actually gates server-side writes.
 // The flag-ON counterpart runs under `config_trial_attachments.ts`.
 export default createTestConfig('security_and_spaces', {
   license: 'trial',
@@ -17,5 +17,5 @@ export default createTestConfig('security_and_spaces', {
   testFiles: [require.resolve('./tests/common/attachments_framework_no_attacks')],
   publicBaseUrl: true,
   kbnServerArgs: ['--xpack.cases.attachments.enabled=true'],
-  experimentalFeatures: ['entityAttachmentsEnabled'],
+  experimentalFeatures: ['entityAttachmentsEnabled', 'disable:attackAttachments'],
 });
