@@ -42,7 +42,11 @@ import { parseEsServiceAccountId } from './es_service_account_id';
 import type { CreateServiceAccountFakeRequestParams } from './fake_requests';
 import { SERVICE_ACCOUNT_TOKEN_RETRY_REUSE_MS, ServiceAccountFakeRequests } from './fake_requests';
 import { ServiceAccountTokenExchangeError } from './token_exchange_error';
-import type { ListServiceAccountsParams, ServiceAccountsBackend } from './types';
+import type {
+  ListServiceAccountsParams,
+  ServiceAccountFacts,
+  ServiceAccountsBackend,
+} from './types';
 import type { SecurityLicense } from '../../common';
 import type {
   DeleteServiceAccountResponse,
@@ -479,6 +483,45 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
     return toDirectoryEntry(account, await this.isAssumable(esClient, principal, stored));
   }
 
+  async getAccountFactsAsInternalUser(
+    id: string,
+    { signal }: { signal?: AbortSignal }
+  ): Promise<ServiceAccountFacts> {
+    // Only accounts in Kibana's namespace can be exchanged. Any other ID tells nothing about an
+    // account a workload could run as.
+    const principal = parseEsServiceAccountId(id);
+    if (!principal || principal.namespace !== ES_SERVICE_ACCOUNT_NAMESPACE) {
+      this.logger.debug(`Cannot look up service account [${id}]: not a Kibana-managed account ID`);
+      return { status: 'unknown' };
+    }
+
+    try {
+      const account = await this.readAccount(
+        this.clusterClient.asInternalUser,
+        principal.namespace,
+        principal.name,
+        { signal }
+      );
+      if (!account) {
+        return { status: 'missing' };
+      }
+
+      // Read the same way the exchange reads it, so the creation time is authenticated.
+      const credential = await this.credentialStore.getDecrypted(id);
+      if (!credential) {
+        return { status: 'present' };
+      }
+      if (credential.serviceAccountId !== id) {
+        this.logger.debug(`Stored credential for service account [${id}] names another account`);
+        return { status: 'unknown' };
+      }
+      return { status: 'present', credentialCreatedAt: credential.createdAt };
+    } catch (e) {
+      this.logger.debug(`Unable to look up service account [${id}]: ${getDetailedErrorMessage(e)}`);
+      return { status: 'unknown' };
+    }
+  }
+
   /**
    * Deletes the account's tokens, then the account, and invalidates the access tokens it was
    * issued. The credential Kibana stored for the account goes too, at whichever point keeps a
@@ -874,7 +917,8 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
   private async readAccount(
     esClient: ElasticsearchClient,
     namespace: string,
-    name: string
+    name: string,
+    { signal }: { signal?: AbortSignal } = {}
   ): Promise<ElasticsearchServiceAccount | undefined> {
     const principal = `${namespace}/${name}`;
 
@@ -888,7 +932,7 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
       },
       // An unknown principal is an empty 200 rather than a 404. Ignore 404 as well, so a future
       // tightening upstream does not turn "no such account" into an error.
-      { ignore: [404] }
+      { ignore: [404], ...(signal ? { signal } : {}) }
     );
 
     const entry = response?.[principal];

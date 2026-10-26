@@ -31,6 +31,7 @@ import { ServiceAccountTokenExchangeError } from './token_exchange_error';
 import type {
   CloudProjectContext,
   ListServiceAccountsParams,
+  ServiceAccountFacts,
   ServiceAccountsBackend,
 } from './types';
 import { UIAM_SERVICE_ACCOUNT_ROLE_LIMITS } from './uiam_role_limits';
@@ -340,6 +341,23 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
     } catch (e) {
       this.logger.error(`Failed to list service accounts: ${getDetailedErrorMessage(e)}`);
       throw e;
+    }
+  }
+
+  async getAccountFactsAsInternalUser(
+    id: string,
+    { signal }: { signal?: AbortSignal }
+  ): Promise<ServiceAccountFacts> {
+    try {
+      const account = await this.uiam.getServiceAccount(id, { signal });
+      // UIAM keeps a revoked account around for a while, but it cannot be exchanged.
+      return account.revoked ? { status: 'missing' } : { status: 'present' };
+    } catch (e) {
+      if (getNotFound(id, e)) {
+        return { status: 'missing' };
+      }
+      this.logger.debug(`Unable to look up service account [${id}]: ${getDetailedErrorMessage(e)}`);
+      return { status: 'unknown' };
     }
   }
 
