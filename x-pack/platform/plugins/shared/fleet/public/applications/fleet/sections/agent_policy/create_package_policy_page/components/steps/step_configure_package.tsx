@@ -104,11 +104,8 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
         : (packageInfo.data_streams ?? []).filter((dataStream) => dataStream.type === 'logs'),
     [packageInfo]
   );
-  const columnarNotReadyDataStreams = useMemo(
-    () =>
-      getLogsdbColumnarNotReadyDataStreams(packageInfo, logsDataStreams).map(
-        (dataStream) => dataStream.title || dataStream.dataset
-      ),
+  const isColumnarNotReady = useMemo(
+    () => getLogsdbColumnarNotReadyDataStreams(packageInfo, logsDataStreams).length > 0,
     [packageInfo, logsDataStreams]
   );
   const installationInfo =
@@ -128,12 +125,7 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
           <>
             <ColumnarIndexModeSwitch
               checked={isColumnarIndexModeEnabled}
-              notReady={columnarNotReadyDataStreams.length > 0}
-              notReadyDataStreams={
-                columnarNotReadyDataStreams.length < logsDataStreams.length
-                  ? columnarNotReadyDataStreams
-                  : []
-              }
+              notReady={isColumnarNotReady}
               onChange={() => onLogsdbColumnarChange(!isColumnarIndexModeEnabled)}
             />
             <EuiHorizontalRule margin="m" />

@@ -983,6 +983,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       datastreamsTSDS: `${ELASTIC_DOCS}manage-data/data-store/data-streams/time-series-data-stream-tsds`,
       datastreamsTSDSMetrics: `${ELASTIC_DOCS}manage-data/data-store/data-streams/time-series-data-stream-tsds#time-series-metric`,
       datastreamsDownsampling: `${ELASTIC_DOCS}manage-data/data-store/data-streams/downsampling-time-series-data-stream`,
+      datastreamsLogsdbColumnar: `${ELASTIC_DOCS}reference/elasticsearch/columnar`,
       installElasticAgent: `${ELASTIC_DOCS}reference/fleet/install-fleet-managed-elastic-agent`,
       installElasticAgentStandalone: `${ELASTIC_DOCS}reference/fleet/install-standalone-elastic-agent`,
       grantESAccessToStandaloneAgents: `${ELASTIC_DOCS}reference/fleet/grant-access-to-elasticsearch`,

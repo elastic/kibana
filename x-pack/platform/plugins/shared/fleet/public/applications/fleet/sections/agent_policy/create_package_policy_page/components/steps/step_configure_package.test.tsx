@@ -511,7 +511,7 @@ describe('StepConfigurePackage', () => {
       expect(html.indexOf(SWITCH)).toBeLessThan(html.indexOf('Collect logs from Nginx instances'));
     });
 
-    it('is greyed out, naming the data streams that are not ready, unless every logs data stream is', () => {
+    it('is greyed out, as not columnar-ready, unless every logs data stream is ready', () => {
       declareReadiness('opt_in', { withUnsupported: true });
       renderWithSwitch();
 
@@ -519,7 +519,7 @@ describe('StepConfigurePackage', () => {
       expect(switchEl).not.toBeChecked();
       expect(switchEl).toBeDisabled();
       expect(renderResult.getByTestId('columnarIndexModeNotReady')).toHaveTextContent(
-        'Nginx error logs'
+        "This integration isn't columnar-ready yet."
       );
     });
 
@@ -532,7 +532,7 @@ describe('StepConfigurePackage', () => {
       expect(switchEl).toBeChecked();
       expect(switchEl).not.toBeDisabled();
       expect(renderResult.getByTestId('columnarIndexModeNotReady')).toHaveTextContent(
-        "isn't columnar-ready anymore: Nginx error logs"
+        "This integration isn't columnar-ready yet."
       );
 
       fireEvent.click(switchEl);
