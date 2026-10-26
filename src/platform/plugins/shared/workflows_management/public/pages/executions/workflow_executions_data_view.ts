@@ -49,6 +49,7 @@ const WORKFLOW_EXECUTIONS_FIELD_SPECS: Record<string, FieldSpec> = {
   createdAt: dateField('createdAt'),
   finishedAt: dateField('finishedAt'),
   id: keywordField('id'),
+  runName: keywordField('runName'),
   workflowId: keywordField('workflowId'),
   status: keywordField('status'),
   triggeredBy: keywordField('triggeredBy'),

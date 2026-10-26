@@ -15,11 +15,16 @@ import { formatExecutionTimestamp } from '../../../shared/ui/use_formatted_date'
 
 interface ExecutionFlyoutTitleProps {
   workflowName: string;
+  runName?: string;
   /** ISO timestamp of when the run started. */
   startedAtIso: string | undefined;
 }
 
-export const ExecutionFlyoutTitle = ({ workflowName, startedAtIso }: ExecutionFlyoutTitleProps) => {
+export const ExecutionFlyoutTitle = ({
+  workflowName,
+  runName,
+  startedAtIso,
+}: ExecutionFlyoutTitleProps) => {
   const { settings } = useKibana().services;
   const timeZoneSetting: string | undefined = settings.client.get('dateFormat:tz');
   const startedAt = useMemo(() => (startedAtIso ? new Date(startedAtIso) : null), [startedAtIso]);
@@ -31,8 +36,13 @@ export const ExecutionFlyoutTitle = ({ workflowName, startedAtIso }: ExecutionFl
   return (
     <div>
       <EuiTitle size="s">
-        <h2 css={{ wordBreak: 'break-word' }}>{workflowName}</h2>
+        <h2 css={{ wordBreak: 'break-word' }}>{runName ?? workflowName}</h2>
       </EuiTitle>
+      {runName && (
+        <EuiText size="xs" color="subdued">
+          {workflowName}
+        </EuiText>
+      )}
       {formattedDate && startedAt && (
         <EuiToolTip content={formattedDateTooltip} position="top">
           <span tabIndex={0}>

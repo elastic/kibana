@@ -98,6 +98,21 @@ describe('WorkflowExecutionList', () => {
     expect(screen.getByText('Execution history')).toBeInTheDocument();
   });
 
+  it('shows the run name column only when a result has a name', () => {
+    const { unmount } = renderComponent();
+    expect(screen.queryByRole('columnheader', { name: 'Run name' })).not.toBeInTheDocument();
+    unmount();
+
+    renderComponent({
+      executions: {
+        ...mockExecutions,
+        results: [{ ...mockExecutions.results[0], runName: 'Deploy staging' }],
+      },
+    });
+    expect(screen.getByRole('columnheader', { name: 'Run name' })).toBeInTheDocument();
+    expect(screen.getByText('Deploy staging')).toBeInTheDocument();
+  });
+
   it('renders the container with the data-test-subj attribute', () => {
     renderComponent();
     expect(screen.getByTestId('workflowExecutionList')).toBeInTheDocument();

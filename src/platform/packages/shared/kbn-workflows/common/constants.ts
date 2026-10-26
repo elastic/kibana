@@ -12,6 +12,8 @@
  */
 export const WORKFLOWS_MANAGEMENT_FEATURE_ID = 'workflowsManagement';
 
+export const WORKFLOW_RUN_NAME_MAX_LENGTH = 1024;
+
 /**
  * UI Setting ID for enabling / disabling the workflows management UI
  */

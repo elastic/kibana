@@ -146,6 +146,7 @@ const RunModeFlask = ({ isTestRun, stepId }: { isTestRun: boolean; stepId?: stri
 
 export interface ExecutionHistoryColumnContext {
   euiTheme: EuiThemeComputed;
+  showRunName?: boolean;
   showExecutor: boolean;
   executedByUserProfiles: Map<string, UserProfileWithAvatar>;
   showUnresolvedExecutors: boolean;
@@ -181,7 +182,7 @@ export const getExecutionHistoryColumns = (
     }
   );
 
-  return [
+  const columns: Array<EuiBasicTableColumn<WorkflowExecutionListItemDto>> = [
     {
       field: 'status',
       name: i18n.translate('workflows.workflowExecutionList.column.status', {
@@ -355,4 +356,21 @@ export const getExecutionHistoryColumns = (
       },
     },
   ];
+
+  if (ctx.showRunName) {
+    columns.unshift({
+      field: 'runName',
+      name: i18n.translate('workflows.workflowExecutionList.column.runNameLabel', {
+        defaultMessage: 'Run name',
+      }),
+      truncateText: true,
+      render: (runName: string | undefined) => (
+        <EuiText size="xs" data-test-subj="workflowExecutionListRunNameCell">
+          <EuiTextTruncate text={runName ?? EM_DASH} />
+        </EuiText>
+      ),
+    });
+  }
+
+  return columns;
 };

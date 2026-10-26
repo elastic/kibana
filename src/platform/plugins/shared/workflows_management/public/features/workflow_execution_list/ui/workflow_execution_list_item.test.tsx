@@ -113,6 +113,13 @@ describe('execution history columns', () => {
     expect(screen.queryByText('Error')).not.toBeInTheDocument();
   });
 
+  it('shows run names when the name column is enabled', () => {
+    renderColumns({ ...baseExecution, runName: 'Deploy staging' }, { showRunName: true });
+    expect(screen.getByTestId('workflowExecutionListRunNameCell')).toHaveTextContent(
+      'Deploy staging'
+    );
+  });
+
   it('renders a flask for test runs and none for production', () => {
     const { unmount } = renderColumns({ ...baseExecution, isTestRun: false });
     expect(screen.queryByTestId('workflowExecutionListItemRunModeIcon')).not.toBeInTheDocument();

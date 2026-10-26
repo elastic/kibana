@@ -74,6 +74,39 @@ interface WorkflowExecution {
 
 ## Workflow Specification
 
+### Execution names
+
+Set the optional `run-name` property to name each execution with a Liquid template:
+
+```yaml
+name: Deploy service
+run-name: "Deploy {{ inputs.target }} by {{ execution.executedBy }}"
+triggers:
+  - type: manual
+    inputs:
+      properties:
+        target:
+          type: string
+          default: staging
+steps:
+  - name: log_target
+    type: console
+    with:
+      message: "Deploy to {{ inputs.target }}"
+```
+
+The template is evaluated once when the execution starts. It can use the initial workflow
+context, including `inputs`, `event`, `consts`, `workflow`, and `execution`. Step outputs are
+not available. The stored name does not change when the execution resumes or the workflow
+definition changes.
+
+The template can contain up to 1,024 characters. The result is trimmed and limited to 1,024
+characters. If the property is omitted, the result is blank or is not a string, or template
+evaluation fails, the execution keeps its default label and can continue.
+
+The executions page shows the name below the workflow name. Use its KQL search box to filter
+with `runName: "Deploy staging by elastic"` or `runName: Deploy*`.
+
 The package includes comprehensive schema definitions for workflow structure:
 
 - **Step Types**: Different types of workflow steps (action, condition, loop, etc.)

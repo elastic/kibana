@@ -387,7 +387,9 @@ export const WorkflowExecutionsDataGrid = ({
           sorting={sorting}
           onColumnResize={({ columnId, width }) => onColumnResize(columnId, width)}
           gridStyle={gridStyleWithSelection}
-          rowHeightsOptions={{ defaultHeight: { lineCount: 1 } }}
+          rowHeightsOptions={{
+            defaultHeight: { lineCount: executions.some((execution) => execution.runName) ? 2 : 1 },
+          }}
           toolbarVisibility={toolbarVisibility}
         />
       </div>

@@ -140,6 +140,7 @@ export type WorkflowStepTokenUsage = z.infer<typeof WorkflowStepTokenUsageSchema
 export interface EsWorkflowExecution {
   spaceId: string;
   id: string;
+  runName?: string;
   workflowId: string;
   managed?: boolean;
   managedBy?: string | null;
@@ -297,6 +298,7 @@ export interface WorkflowExecutionLogModel {
 export interface WorkflowExecutionDto {
   spaceId: string;
   id: string;
+  runName?: string;
   managed?: boolean;
   managedBy?: string | null;
   originManagedWorkflowId?: string | null;

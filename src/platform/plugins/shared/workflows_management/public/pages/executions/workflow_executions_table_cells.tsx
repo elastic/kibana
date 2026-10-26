@@ -16,6 +16,7 @@ import {
   EuiLoadingSpinner,
   EuiPopover,
   EuiPopoverTitle,
+  EuiText,
   EuiTextTruncate,
   EuiToolTip,
   useEuiTheme,
@@ -138,6 +139,11 @@ export const WorkflowExecutionWorkflowCell = ({
             }}
           </EuiTextTruncate>
         </EuiLink>
+        {execution.runName && (
+          <EuiText size="xs" color="subdued" data-test-subj="executionsTableRunName">
+            <EuiTextTruncate text={execution.runName} />
+          </EuiText>
+        )}
       </EuiFlexItem>
       {execution.status === ExecutionStatus.WAITING_FOR_INPUT ? (
         <EuiFlexItem grow={false}>

@@ -18,7 +18,11 @@ import {
   isManualTrigger,
   LegacyWorkflowInputSchema,
 } from './schema/triggers/manual_trigger_schema';
-import { CONNECTOR_ID_MAX_LENGTH, IF_CONDITION_MAX_LENGTH } from '../common/constants';
+import {
+  CONNECTOR_ID_MAX_LENGTH,
+  IF_CONDITION_MAX_LENGTH,
+  WORKFLOW_RUN_NAME_MAX_LENGTH,
+} from '../common/constants';
 import {
   HITL_EXTERNAL_APPROVE_LINK_CONTEXT_KEY,
   HITL_EXTERNAL_CHANNELS_DESCRIPTION,
@@ -1324,6 +1328,11 @@ export type BuiltInStepType = (typeof BuiltInStepTypes)[number];
 const WorkflowSchemaBase = z.object({
   version: z.literal('1').optional().default('1').describe('The version of the workflow schema'),
   name: z.string().min(1),
+  'run-name': z
+    .string()
+    .max(WORKFLOW_RUN_NAME_MAX_LENGTH)
+    .optional()
+    .describe('Execution name, evaluated once at start using Liquid and the workflow context.'),
   description: z.string().optional(),
   settings: WorkflowSettingsSchema.optional(),
   enabled: z.boolean().default(true),
@@ -1392,6 +1401,7 @@ const WorkflowSchemaForAutocompleteBase = z
   .object({
     version: z.literal('1').optional(),
     name: z.string().min(1).optional(),
+    'run-name': WorkflowSchemaBase.shape['run-name'],
     description: z.string().optional(),
     settings: WorkflowSettingsSchema.optional(),
     enabled: z.boolean().default(true).optional(),

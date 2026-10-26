@@ -129,16 +129,25 @@ export const WorkflowExecutionList = ({
     });
   }, [executedByUserProfiles, executedByValuesToResolve, showUnresolvedExecutors]);
 
+  const showRunName = executions?.results.some((execution) => Boolean(execution.runName));
   const columns = useMemo(
     () =>
       getExecutionHistoryColumns({
         euiTheme,
+        showRunName,
         showExecutor,
         executedByUserProfiles,
         showUnresolvedExecutors,
         timeZoneSetting,
       }),
-    [euiTheme, showExecutor, executedByUserProfiles, showUnresolvedExecutors, timeZoneSetting]
+    [
+      euiTheme,
+      showRunName,
+      showExecutor,
+      executedByUserProfiles,
+      showUnresolvedExecutors,
+      timeZoneSetting,
+    ]
   );
 
   const handleRowClick = useCallback(

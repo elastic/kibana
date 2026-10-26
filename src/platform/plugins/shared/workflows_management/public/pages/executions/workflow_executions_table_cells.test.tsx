@@ -79,6 +79,19 @@ describe('WorkflowExecutionWorkflowCell', () => {
     expect(onOpen).toHaveBeenCalledWith(execution);
   });
 
+  it('shows the run name below the workflow name', () => {
+    render(
+      <WorkflowExecutionWorkflowCell
+        execution={createExecution({ workflowName: 'Deploy', runName: 'Deploy staging' })}
+        onOpen={onOpen}
+      />,
+      { wrapper: getTestProvider({}) }
+    );
+
+    expect(screen.getByTestId('workflowExecutionWorkflowLink')).toHaveTextContent('Deploy');
+    expect(screen.getByTestId('executionsTableRunName')).toHaveTextContent('Deploy staging');
+  });
+
   it('renders action required badge when status is WAITING_FOR_INPUT', () => {
     render(
       <WorkflowExecutionWorkflowCell
