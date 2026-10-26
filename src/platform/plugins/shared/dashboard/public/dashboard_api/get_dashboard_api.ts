@@ -151,10 +151,10 @@ export function getDashboardApi({
     settingsManager,
     forcePublishOnReset$
   );
-  const projectRoutingManager =
-    creationOptions?.useProjectRoutingIntegration === false
-      ? undefined
-      : initializeProjectRoutingManager(initialState, settingsManager.api.projectRoutingRestore$);
+  const projectRoutingManager = initializeProjectRoutingManager(
+    initialState,
+    settingsManager.api.projectRoutingRestore$
+  );
 
   const approximationManager = initializeApproximationManager(initialState);
 
