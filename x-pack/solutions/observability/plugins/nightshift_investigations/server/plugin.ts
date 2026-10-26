@@ -629,6 +629,7 @@ export class NightshiftInvestigationsPlugin
           workflowsExtensions: this.workflowsExtensionsStart,
           workflowsManagement: this.workflowsManagement,
         }),
+      isAssistantEnabled: () => this.assistantEnabled,
     };
   }
 

@@ -20,6 +20,7 @@ const EVAL_IDS: readonly string[] = [INVESTIGATION_DATASET_ID, CONNECTOR_PROBE_D
 export interface EvalSelection {
   runSmoke: boolean;
   runInvestigations: boolean;
+  runOrca: boolean;
   runConnectorProbes: boolean;
   /** Smoke dataset ids for `selectDatasets`; `undefined` runs them all. Unused when `runSmoke` is false. */
   smokeDatasetsRequest: string | undefined;
@@ -31,6 +32,28 @@ export interface EvalSelection {
 export const resolveEvalSelection = (
   env: Record<string, string | undefined> = process.env
 ): EvalSelection => {
+  const orca = env.EVAL_SHARD_ID === 'orcabench' || env.NIGHTSHIFT_DATASETS?.trim() === 'orcabench';
+  if (orca) {
+    if (!env.SANDBOX_API_KEY) throw new Error('ORCA investigations require SANDBOX_API_KEY');
+    if (!env.NIGHTSHIFT_ORCA_TELEMETRY) {
+      throw new Error(
+        'ORCA investigations require a Scout server started with the ORCA telemetry hook'
+      );
+    }
+    return {
+      runSmoke: false,
+      runInvestigations: false,
+      runOrca: true,
+      runConnectorProbes: false,
+      smokeDatasetsRequest: undefined,
+      fellBackToSmoke: false,
+    };
+  }
+  if (env.NIGHTSHIFT_DATASETS?.split(',').some((id) => id.trim() === 'orcabench')) {
+    throw new Error(
+      'Run orcabench on its own Scout server; it cannot share the current telemetry target'
+    );
+  }
   const requested =
     env.NIGHTSHIFT_DATASETS?.trim() ||
     (env.NIGHTSHIFT_DATASET_NAME ? INVESTIGATION_DATASET_ID : undefined);
@@ -50,6 +73,7 @@ export const resolveEvalSelection = (
     // Only a genuinely unset value falls back; an explicit `all` asked for investigations too.
     if (requested) requiresSandbox('all');
     return {
+      runOrca: false,
       runSmoke: true,
       runInvestigations: hasSandbox,
       runConnectorProbes: false,
@@ -65,6 +89,7 @@ export const resolveEvalSelection = (
   if (runConnectorProbes) requiresSandbox(CONNECTOR_PROBE_DATASET_ID);
 
   return {
+    runOrca: false,
     runSmoke: smokeIds.length > 0,
     runInvestigations,
     runConnectorProbes,
