@@ -21,12 +21,13 @@ export const getAlertZeroInvestigationsCapabilities = (
   capabilities: Capabilities
 ): AgenticInvestigationsCapabilities => {
   const canWrite = capabilities[ALERTZERO_FEATURE_ID]?.write === true;
-  const { showEscalations, manageEscalations, manageInvestigations } =
+  const { showEscalations, manageEscalations, manageInvestigations, canAccessAgentBuilder } =
     getAgenticInvestigationsCapabilities(capabilities);
   return {
     showEscalations,
     manageEscalations: canWrite && manageEscalations,
     manageInvestigations: canWrite && manageInvestigations,
+    canAccessAgentBuilder,
   };
 };
 

@@ -132,12 +132,19 @@ const closedEscalation = {
 const assignMutate = jest.fn().mockResolvedValue({});
 
 const renderPage = (
-  overrides: { capabilities?: { showEscalations?: boolean; manageEscalations?: boolean } } = {}
+  overrides: {
+    capabilities?: {
+      showEscalations?: boolean;
+      manageEscalations?: boolean;
+      canAccessAgentBuilder?: boolean;
+    };
+  } = {}
 ) => {
   mockUseCapabilities.mockReturnValue({
     showEscalations: true,
     manageEscalations: true,
     manageInvestigations: true,
+    canAccessAgentBuilder: true,
     ...overrides.capabilities,
   });
   const core = coreMock.createStart();
@@ -379,6 +386,36 @@ describe('EscalationsPage', () => {
     // Read-only stub is rendered; interactive stub is not.
     expect(screen.getByTestId('mock-assignees-readonly-esc-open-1')).toBeInTheDocument();
     expect(screen.queryByTestId('mock-assign-esc-open-1')).not.toBeInTheDocument();
+  });
+
+  describe('without the Agent Builder privilege', () => {
+    it('explains which features are unavailable in a callout', () => {
+      mockBothQueues([openEscalation], []);
+      renderPage({ capabilities: { canAccessAgentBuilder: false } });
+
+      expect(screen.getByTestId('alertZeroAgentBuilderPrivilegeCallout')).toHaveTextContent(
+        'You need the Agent Builder Kibana privilege to open investigations and chats'
+      );
+    });
+
+    it('leaves the cards inert and hides the assignees', () => {
+      mockBothQueues([openEscalation], []);
+      renderPage({ capabilities: { canAccessAgentBuilder: false } });
+
+      fireEvent.click(screen.getByTestId('escalationCard-esc-open-1'));
+
+      expect(openChat).not.toHaveBeenCalled();
+      expect(screen.queryByTestId('escalationCardLink-esc-open-1')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('mock-assign-esc-open-1')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('mock-assignees-readonly-esc-open-1')).not.toBeInTheDocument();
+    });
+  });
+
+  it('shows no privilege callout when Agent Builder is accessible', () => {
+    mockBothQueues([openEscalation], []);
+    renderPage();
+
+    expect(screen.queryByTestId('alertZeroAgentBuilderPrivilegeCallout')).not.toBeInTheDocument();
   });
 
   it('shows the server total in the bucket badge even when the page holds fewer items', () => {

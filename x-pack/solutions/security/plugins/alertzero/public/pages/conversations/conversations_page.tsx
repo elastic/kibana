@@ -67,7 +67,12 @@ import { useAlertZeroDocTitle } from '../../hooks/use_alertzero_doc_title';
 import { useConversationsUrlParams } from './conversations_url_params';
 import { useInvestigationDetails } from './use_investigation_details';
 import { useCopyInvestigationLink } from './use_copy_investigation_link';
-import { COPY_LINK_TOASTS, IDLE_HEADER, QUEUE_PAGE_INFO } from './translations';
+import {
+  AGENT_BUILDER_PRIVILEGE_REQUIRED,
+  COPY_LINK_TOASTS,
+  IDLE_HEADER,
+  QUEUE_PAGE_INFO,
+} from './translations';
 import { ProposalsTrendChartRow } from '../../components/proposals_trend_chart';
 import { WorkersRunningPanel } from '../../components/workers_running_panel';
 import { useRunningSummary } from '../../hooks/use_running_summary';
@@ -76,6 +81,7 @@ import { InFlightProposalBadge } from './in_flight_proposal_badge';
 import { useQueueSections } from './queue/use_queue_sections';
 import { useDropDecidedProposal } from './queue/use_drop_decided_proposal';
 import { QueueSection } from './queue/queue_section';
+import { AgentBuilderPrivilegeCallout } from '../../components/agent_builder_privilege_callout/agent_builder_privilege_callout';
 import { ScanFailureCallout } from '../../components/scan_failure_callout/scan_failure_callout';
 import {
   ALERTZERO_UI_EVENTS,
@@ -294,8 +300,11 @@ const ConversationsPageContent: React.FC = () => {
   } = useKibana<CoreStart>();
 
   const canDecide = application.capabilities.proposals?.[PROPOSALS_UI_CAPABILITY_DECIDE] === true;
-  const { manageEscalations: canManageEscalations, manageInvestigations: canManageInvestigations } =
-    useAlertZeroInvestigationsCapabilities();
+  const {
+    manageEscalations: canManageEscalations,
+    manageInvestigations: canManageInvestigations,
+    canAccessAgentBuilder,
+  } = useAlertZeroInvestigationsCapabilities();
 
   // ---------------------------------------------------------------------------
   // Assignee picker — shared across all non-closed investigation cards
@@ -436,10 +445,16 @@ const ConversationsPageContent: React.FC = () => {
     [proposalsById, copyInvestigationLink, notifications]
   );
   useInvestigationDetails({
-    conversationId: selectedConversationId,
+    conversationId: canAccessAgentBuilder ? selectedConversationId : undefined,
     onClose: clearSelectedConversation,
     onCopyLink: copyInvestigationLinkFromFlyout,
   });
+  useEffect(() => {
+    if (selectedConversationId && !canAccessAgentBuilder) {
+      notifications?.toasts.addWarning(AGENT_BUILDER_PRIVILEGE_REQUIRED.toast);
+      clearSelectedConversation();
+    }
+  }, [selectedConversationId, canAccessAgentBuilder, notifications, clearSelectedConversation]);
 
   const actionInvestigation = useMemo(
     () =>
@@ -535,6 +550,11 @@ const ConversationsPageContent: React.FC = () => {
             })}
           />
         </EuiFlexItem>
+        {!canAccessAgentBuilder && (
+          <EuiFlexItem grow={false}>
+            <AgentBuilderPrivilegeCallout />
+          </EuiFlexItem>
+        )}
         <ScanFailureCallout surface="queue" wrapper={wrapScanFailureCallout} />
         <EuiFlexItem grow={false}>
           <ProposalsTrendChartRow />
@@ -566,6 +586,7 @@ const ConversationsPageContent: React.FC = () => {
                 onClickAction={onClickAction}
                 onClickCard={onClickCard}
                 onOpenChat={openChatForProposal}
+                canOpenInvestigationDetails={canAccessAgentBuilder}
                 getChatHref={getChatHrefForProposal}
                 canManageEscalations={canManageEscalations}
                 canCloseInvestigation={canManageInvestigations}

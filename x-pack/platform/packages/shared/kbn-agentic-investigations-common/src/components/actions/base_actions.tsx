@@ -92,6 +92,8 @@ export interface BaseActionsProps {
   canCloseInvestigation?: boolean;
   /** Always offered, including on a decided investigation, so the menu is never empty. */
   onCopyLink: (id: Investigation['id']) => void;
+  /** When false the menu trigger is disabled and its tooltip names the missing privilege. */
+  canOpenInvestigationDetails?: boolean;
   'data-test-subj'?: string;
 }
 
@@ -104,6 +106,7 @@ export const BaseActions = memo<BaseActionsProps>(
     canManageEscalations = false,
     canCloseInvestigation = false,
     onCopyLink,
+    canOpenInvestigationDetails = true,
     'data-test-subj': dataTestSubj,
   }) => {
     const [isOpen, setIsOpen] = useState(false);
@@ -117,6 +120,7 @@ export const BaseActions = memo<BaseActionsProps>(
         fill
         iconType="chevronSingleDown"
         iconSide="right"
+        isDisabled={!canOpenInvestigationDetails}
         onClick={handleToggle}
         data-test-subj={dataTestSubj ? `${dataTestSubj}-button` : undefined}
       >
@@ -126,7 +130,12 @@ export const BaseActions = memo<BaseActionsProps>(
       <ActionButton
         data-test-subj={dataTestSubj ? `${dataTestSubj}-button` : undefined}
         iconType="boxesVertical"
-        tooltipContent={ACTIONS_TRANSLATIONS.tooltips.openMenu}
+        tooltipContent={
+          canOpenInvestigationDetails
+            ? ACTIONS_TRANSLATIONS.tooltips.openMenu
+            : ACTIONS_TRANSLATIONS.tooltips.proposalsAgentBuilderPrivilegeRequired
+        }
+        isDisabled={!canOpenInvestigationDetails}
         onClick={handleToggle}
       />
     );

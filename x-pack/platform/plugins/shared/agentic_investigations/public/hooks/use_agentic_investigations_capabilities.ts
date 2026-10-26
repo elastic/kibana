@@ -19,6 +19,7 @@ export interface AgenticInvestigationsCapabilities {
   showEscalations: boolean;
   manageEscalations: boolean;
   manageInvestigations: boolean;
+  canAccessAgentBuilder: boolean;
 }
 
 /**
@@ -33,6 +34,7 @@ export const getAgenticInvestigationsCapabilities = (
     showEscalations: investigationsCap?.[ESCALATIONS_UI_CAPABILITY_SHOW] === true,
     manageEscalations: investigationsCap?.[ESCALATIONS_UI_CAPABILITY_MANAGE] === true,
     manageInvestigations: investigationsCap?.[INVESTIGATIONS_UI_CAPABILITY_MANAGE] === true,
+    canAccessAgentBuilder: capabilities.agentBuilder?.show === true,
   };
 };
 
