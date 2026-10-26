@@ -19,12 +19,8 @@ import type { ConnectorZodSchema } from '@kbn/connector-specs';
 import { getMeta, setMeta } from '@kbn/connector-specs';
 import { UseField, type FieldHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { ConnectorActionSelector } from '../components/connector_action_selector';
-import type {
-  ConnectorActionDef,
-  ConnectorSpecResponse,
-  ConnectorSpecWireResponse,
-} from '../apis/fetch_connector_spec';
-import { transformConnectorSpecResponse } from '../apis/fetch_connector_spec';
+import type { ConnectorActionDef, ConnectorSpecResponse } from '../apis/fetch_connector_spec';
+import { createSpecsClient } from '../apis/specs_client';
 import type { ActionConnectorFieldsProps, ActionTypeModel } from '../types/action_types';
 
 export type { ConnectorSpecResponse } from '../apis/fetch_connector_spec';
@@ -52,11 +48,7 @@ export async function fetchConnectorSpec(
   connectorTypeId: string,
   signal?: AbortSignal
 ): Promise<ConnectorSpecResponse> {
-  const wire = await http.get<ConnectorSpecWireResponse>(
-    `/internal/actions/connector_types/${encodeURIComponent(connectorTypeId)}/spec`,
-    { signal }
-  );
-  return transformConnectorSpecResponse(wire);
+  return createSpecsClient({ http }).get({ id: connectorTypeId, signal });
 }
 
 /**
