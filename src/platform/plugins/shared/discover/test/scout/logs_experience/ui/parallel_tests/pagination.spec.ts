@@ -137,5 +137,41 @@ spaceTest.describe(
         await expect(dataGrid.getNextPageButton()).toBeHidden();
       }
     );
+
+    spaceTest(
+      'should load more documents from the sample-size footer in singlePage mode',
+      async ({ page, pageObjects }) => {
+        const { logsExperience } = pageObjects;
+
+        const footer = page.testSubj.locator('unifiedDataTableFooter');
+        const loadMore = page.testSubj.locator('dscGridSampleSizeFetchMoreLink');
+        const limitedTo = (documentCount: string) =>
+          new RegExp(`Search results are limited to ${documentCount} documents\\.\\s*Load more`);
+
+        await logsExperience.gotoDataView(LOGS.SYNTH_FETCH_MORE_DATA_VIEW);
+
+        // In singlePage mode the footer only renders once the bottom of the grid is reached.
+        await logsExperience.scrollGridToBottom();
+        await expect(footer).toHaveText(limitedTo(LOGS.DEFAULT_SAMPLE_SIZE.toLocaleString('en')));
+        await expect(loadMore).toBeVisible();
+
+        // Loading more grows the grid past the viewport, which hides the footer until the new
+        // bottom is reached.
+        await loadMore.click();
+        await expect(footer).toBeHidden();
+        await logsExperience.scrollGridToBottom();
+        await expect(footer).toHaveText(
+          limitedTo((2 * LOGS.DEFAULT_SAMPLE_SIZE).toLocaleString('en'))
+        );
+
+        // The third sample size is past the total document count, so every row is now loaded and
+        // the footer has nothing left to report.
+        await loadMore.click();
+        await expect(footer).toBeHidden();
+        await logsExperience.scrollGridToBottom();
+        await expect(footer).toBeHidden();
+        await expect(loadMore).toBeHidden();
+      }
+    );
   }
 );
