@@ -284,7 +284,13 @@ export interface IEsqlSearchParams extends BaseSearchParams {
  * Options specific to ES|QL search. `params` shapes the query; `options` is Kibana plumbing
  * (session, inspector, abort, execution context, project routing).
  */
-export type IEsqlSearchOptions = IBaseSearchOptions;
+export interface IEsqlSearchOptions extends IBaseSearchOptions {
+  /**
+   * When true, the response is also mapped to an expressions `Datatable`, returned as `datatable`
+   * on the result. Defaults to false, so callers that only need `rawResponse` skip the mapping.
+   */
+  includeDataTable?: boolean;
+}
 
 /**
  * Result from an ES|QL search
@@ -300,6 +306,7 @@ export interface IEsqlSearchResult {
   warning?: string;
   /**
    * The response mapped to an expressions Datatable, ready for use in visualizations.
+   * Only present when `includeDataTable` is set.
    */
   datatable?: Datatable;
 }

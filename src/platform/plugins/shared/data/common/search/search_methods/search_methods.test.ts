@@ -155,14 +155,24 @@ describe('SearchMethodsService', () => {
       expect(params).not.toHaveProperty('settings');
     });
 
-    it('returns rawResponse and datatable', async () => {
+    it('returns rawResponse and datatable when includeDataTable is set', async () => {
+      const mockResponse = { columns: [], values: [] };
+      mockSearch.mockReturnValue(createMockResponse(mockResponse));
+
+      const result = await service.esql({ query: 'FROM logs' }, { includeDataTable: true });
+
+      expect(result.rawResponse).toEqual(mockResponse);
+      expect(result.datatable).toMatchObject({ type: 'datatable', columns: [], rows: [] });
+    });
+
+    it('does not compute the datatable by default', async () => {
       const mockResponse = { columns: [], values: [] };
       mockSearch.mockReturnValue(createMockResponse(mockResponse));
 
       const result = await service.esql({ query: 'FROM logs' });
 
       expect(result.rawResponse).toEqual(mockResponse);
-      expect(result.datatable).toMatchObject({ type: 'datatable', columns: [], rows: [] });
+      expect(result.datatable).toBeUndefined();
     });
 
     describe('inspector', () => {
@@ -271,7 +281,6 @@ describe('SearchMethodsService', () => {
         const result = await service.esql({ query: 'FROM logs' });
 
         expect(result.rawResponse).toEqual(mockResponse);
-        expect(result.datatable).toMatchObject({ type: 'datatable' });
       });
 
       it('calls requestResponder.error when search throws with error.attributes', async () => {

@@ -107,12 +107,14 @@ export class SearchMethodsService implements ISearchMethods {
         requestParams: response.requestParams,
       });
 
-      const datatable = mapEsqlResponseToDatatable(response.rawResponse as any, {
-        query: params.query,
-        timeRange: params.kibanaQueryContext?.timeRange,
-        esqlVariables: params.kibanaQueryContext?.esqlVariables,
-        warning: response.warning,
-      });
+      const datatable = options?.includeDataTable
+        ? mapEsqlResponseToDatatable(response.rawResponse as any, {
+            query: params.query,
+            timeRange: params.kibanaQueryContext?.timeRange,
+            esqlVariables: params.kibanaQueryContext?.esqlVariables,
+            warning: response.warning,
+          })
+        : undefined;
 
       return {
         rawResponse: response.rawResponse,

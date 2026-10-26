@@ -78,6 +78,19 @@ describe('getEsqlFn', () => {
     expect(params.includeExecutionMetadata).toBe(true);
   });
 
+  it('asks the search service for the datatable', async () => {
+    const mockSearchService = getMockSearchService();
+
+    await createEsqlFn(mockSearchService).fn(
+      null,
+      { query: 'FROM index' },
+      createExecutionContext()
+    );
+
+    const [, options] = mockSearchService.esql.mock.calls[0];
+    expect(options?.includeDataTable).toBe(true);
+  });
+
   describe('ignoreGlobalFilters', () => {
     const inputFilter = {
       meta: { alias: null, disabled: false, negate: false },

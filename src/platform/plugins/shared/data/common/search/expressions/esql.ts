@@ -174,6 +174,7 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
           abortSignal,
           sessionId: getSearchSessionId(),
           executionContext: getExecutionContext(),
+          includeDataTable: true,
           inspector: {
             adapter: inspectorAdapters.requests ?? new RequestAdapter(),
             title:
