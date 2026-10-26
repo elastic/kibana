@@ -37,9 +37,29 @@ const unionAlertIds = (existing: string[], incoming: readonly string[]): string[
 ];
 
 /**
- * Grows a live FP-closure proposal by unioning alert ids into `actionInput` and appending a
- * short batch note to the comment. Hunt's also-raised-by helper is comment-only; Triage needs
- * the alert list to grow so one approval closes every matching false positive.
+ * Rebuilds the triage FP-closure title so the count matches the merged alert list, preserving
+ * the entity summary wording from the existing title (same shape as floor_alert_triage_review).
+ */
+export const refreshFpClosureTitle = (title: string, alertCount: number): string => {
+  const match = title.match(/^Close (?:\d+ alerts?|alert)(.*) as false positive$/);
+  const entitySummary = match?.[1]?.trim() ?? '';
+  if (alertCount === 1 && entitySummary !== '') {
+    return `Close alert ${entitySummary} as false positive`;
+  }
+  if (alertCount === 1) {
+    return `Close 1 alert as false positive`;
+  }
+  if (entitySummary !== '') {
+    return `Close ${alertCount} alerts ${entitySummary} as false positive`;
+  }
+  return `Close ${alertCount} alerts as false positive`;
+};
+
+/**
+ * Grows a live FP-closure proposal by unioning alert ids into `actionInput`, refreshing the
+ * title count, and appending a short batch note to the comment. Hunt's also-raised-by helper
+ * is comment-only; Triage needs the alert list to grow so one approval closes every matching
+ * false positive.
  */
 export const createFpClosureConverger = ({
   proposalsService,
@@ -91,9 +111,15 @@ export const createFpClosureConverger = ({
       return { outcome: 'failed', alertIds: merged };
     }
 
+    const titleSource =
+      typeof proposal.title === 'string' && proposal.title.trim() !== ''
+        ? proposal.title
+        : live.title;
+
     await proposalsService.revise(
       {
         id: live.proposalId,
+        title: refreshFpClosureTitle(titleSource, merged.length),
         comment,
         actionInput: {
           ...(proposal.actionInput ?? {}),

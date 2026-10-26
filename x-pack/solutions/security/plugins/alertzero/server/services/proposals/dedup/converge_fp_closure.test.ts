@@ -5,23 +5,35 @@
  * 2.0.
  */
 
-import { createFpClosureConverger } from './converge_fp_closure';
+import { createFpClosureConverger, refreshFpClosureTitle } from './converge_fp_closure';
 import type { LiveProposal } from './resolve_proposal_slot';
 
 const live = (overrides: Partial<LiveProposal> = {}): LiveProposal => ({
   proposalId: 'prop-1',
   conversationId: 'conv-1',
-  title: 'Close alerts as false positive',
+  title: 'Close 30 alerts on host-a (root) as false positive',
   comment: 'Initial',
   revision: 1,
   revisable: true,
   ...overrides,
 });
 
+describe('refreshFpClosureTitle', () => {
+  it('updates the count while keeping the entity summary', () => {
+    expect(
+      refreshFpClosureTitle('Close 30 alerts on host-a (root) as false positive', 359)
+    ).toBe('Close 359 alerts on host-a (root) as false positive');
+    expect(refreshFpClosureTitle('Close alert on host-a (root) as false positive', 2)).toBe(
+      'Close 2 alerts on host-a (root) as false positive'
+    );
+  });
+});
+
 describe('createFpClosureConverger', () => {
-  it('unions alert ids into actionInput on revise', async () => {
+  it('unions alert ids into actionInput and refreshes the title count on revise', async () => {
     const revise = jest.fn().mockResolvedValue(undefined);
     const get = jest.fn().mockResolvedValue({
+      title: 'Close 30 alerts on host-a (root) as false positive',
       actionInput: { alertIds: ['a1'], reason: 'false_positive' },
       comment: 'Initial',
     });
@@ -38,6 +50,7 @@ describe('createFpClosureConverger', () => {
     expect(revise).toHaveBeenCalledWith(
       expect.objectContaining({
         id: 'prop-1',
+        title: 'Close 2 alerts on host-a (root) as false positive',
         actionInput: expect.objectContaining({
           alertIds: ['a1', 'a2'],
           reason: 'false_positive',

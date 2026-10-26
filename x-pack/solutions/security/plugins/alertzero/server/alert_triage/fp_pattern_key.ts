@@ -17,19 +17,13 @@ export const TRIAGE_FP_MAX_AUTOMATIC_REVISION = 20;
 /** Must stay aligned with `system-alertzero-action-close-alerts-fp`. */
 const FP_CLOSE_ACTION_WORKFLOW_ID = 'system-alertzero-action-close-alerts-fp';
 
-const GUID_RE = /\{?[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\}?/gi;
-const USER_PROFILE_RE = /([/\\])(?:users|home)\1[^/\\]+/gi;
+const HOST_PATHS = ['host.name', 'host.hostname', 'agent.hostname'] as const;
+const USER_PATHS = ['user.name', 'user.id', 'source.user.name'] as const;
 
 /**
- * Normalises a path-like value so the same binary under different users / GUID folders
- * lands on one pattern. Does not equalise distinct host names, user names, or hashes.
+ * Normalises entity values so casing / whitespace does not split the same host or user.
  */
-export const normalizePatternValue = (value: string): string => {
-  let next = value.trim().toLowerCase();
-  next = next.replace(USER_PROFILE_RE, '$1users$1<user>');
-  next = next.replace(GUID_RE, '<guid>');
-  return next;
-};
+export const normalizePatternValue = (value: string): string => value.trim().toLowerCase();
 
 const asString = (value: unknown): string | undefined => {
   if (typeof value === 'string' && value.trim() !== '') {
@@ -41,85 +35,37 @@ const asString = (value: unknown): string | undefined => {
   return undefined;
 };
 
-const readField = (alert: Record<string, unknown>, path: string): string | undefined => {
-  const raw = asString(get(alert, path));
-  return raw !== undefined ? normalizePatternValue(raw) : undefined;
+const readEntity = (
+  alert: Record<string, unknown>,
+  paths: readonly string[]
+): string | undefined => {
+  for (const path of paths) {
+    const raw = asString(get(alert, path));
+    if (raw !== undefined && raw !== '__missing__') {
+      return normalizePatternValue(raw);
+    }
+  }
+  return undefined;
 };
-
-type FieldSet = readonly string[];
-
-const PROCESS_FIELDS: FieldSet = [
-  'process.executable',
-  'process.code_signature.subject_name',
-  'process.parent.executable',
-];
-const FILE_FIELDS: FieldSet = ['file.path', 'process.executable'];
-const DLL_FIELDS: FieldSet = ['dll.path', 'dll.code_signature.subject_name'];
-const REGISTRY_FIELDS: FieldSet = ['registry.path', 'process.executable'];
-const HASH_FIELDS: FieldSet = [
-  'process.hash.sha256',
-  'file.hash.sha256',
-  'dll.hash.sha256',
-  'process.hash.sha1',
-  'file.hash.sha1',
-];
-
-const IDENTIFYING_PATHS = new Set([
-  'process.executable',
-  'process.parent.executable',
-  'file.path',
-  'dll.path',
-  'registry.path',
-  'process.code_signature.subject_name',
-  'dll.code_signature.subject_name',
-  ...HASH_FIELDS,
-]);
-
-const pickFieldSet = (alert: Record<string, unknown>): FieldSet => {
-  if (readField(alert, 'registry.path')) {
-    return REGISTRY_FIELDS;
-  }
-  if (readField(alert, 'dll.path')) {
-    return DLL_FIELDS;
-  }
-  if (readField(alert, 'file.path')) {
-    return FILE_FIELDS;
-  }
-  return PROCESS_FIELDS;
-};
-
-const isSigned = (alert: Record<string, unknown>, fields: FieldSet): boolean =>
-  fields.some(
-    (path) => path.endsWith('code_signature.subject_name') && readField(alert, path) !== undefined
-  );
 
 /**
- * Deterministic pattern material for one alert. `undefined` when no usable condition can be
- * built (caller pools those as one-offs under the rule alone).
+ * Deterministic pattern material for one alert: host + user. `undefined` when neither is
+ * present (caller pools those under the rule alone).
  */
 export const buildFpPatternMaterial = (alert: Record<string, unknown>): string | undefined => {
-  const fields = pickFieldSet(alert);
-  const parts: string[] = [];
-  for (const path of fields) {
-    const value = readField(alert, path);
-    if (value !== undefined) {
-      parts.push(`${path}=${value}`);
-    }
-  }
-  if (!isSigned(alert, fields)) {
-    for (const path of HASH_FIELDS) {
-      const value = readField(alert, path);
-      if (value !== undefined) {
-        parts.push(`${path}=${value}`);
-        break;
-      }
-    }
-  }
-  const hasIdentifier = parts.some((part) => IDENTIFYING_PATHS.has(part.split('=')[0] ?? ''));
-  if (!hasIdentifier || parts.length === 0) {
+  const host = readEntity(alert, HOST_PATHS);
+  const user = readEntity(alert, USER_PATHS);
+  if (host === undefined && user === undefined) {
     return undefined;
   }
-  return parts.sort().join('|');
+  const parts: string[] = [];
+  if (host !== undefined) {
+    parts.push(`host=${host}`);
+  }
+  if (user !== undefined) {
+    parts.push(`user=${user}`);
+  }
+  return parts.join('|');
 };
 
 export const buildFpPatternKey = ({
@@ -133,21 +79,19 @@ export const buildFpPatternKey = ({
   if (material === undefined) {
     return `rule:${ruleId}`;
   }
-  const digest = createHash('sha256').update(material).digest('hex').slice(0, 32);
-  return `rule:${ruleId}|pattern:${digest}`;
+  return `rule:${ruleId}|${material}`;
 };
 
 export const readRuleRevision = (alert: Record<string, unknown>): string | undefined => {
   const version =
     asString(get(alert, 'kibana.alert.rule.version')) ??
-    asString(get(alert, 'kibana.alert.rule.revision')) ??
-    asString(get(alert, 'kibana.alert.rule.rule_id'));
+    asString(get(alert, 'kibana.alert.rule.revision'));
   return version;
 };
 
 /**
- * Subject key for FP-closure proposals: same rule + pattern (+ optional rule revision) always
- * lands on the same Proposals slot, independent of Investigation.
+ * Subject key for FP-closure proposals: same rule + host/user pattern (+ optional rule
+ * revision) always lands on the same Proposals slot, independent of Investigation.
  */
 export const buildFpClosureSubjectKey = ({
   ruleId,
@@ -214,8 +158,8 @@ const buildEntitySummary = (alerts: Record<string, unknown>[]): string => {
 };
 
 /**
- * Groups confident-FP alert ids by pattern key. Alerts missing from `alertsById` are pooled
- * under the rule-only key so they still close together.
+ * Groups confident-FP alert ids by rule + host + user. Alerts missing host and user (or
+ * missing from `alertsById`) are pooled under the rule-only key so they still close together.
  */
 export const groupFpAlertsByPattern = ({
   ruleId,
@@ -226,7 +170,10 @@ export const groupFpAlertsByPattern = ({
   alertIds: readonly string[];
   alertsById: ReadonlyMap<string, Record<string, unknown>>;
 }): FpPatternGroup[] => {
-  const buckets = new Map<string, { patternKey: string; subjectKey: string; alerts: Record<string, unknown>[]; alertIds: string[] }>();
+  const buckets = new Map<
+    string,
+    { patternKey: string; subjectKey: string; alerts: Record<string, unknown>[]; alertIds: string[] }
+  >();
 
   for (const alertId of alertIds) {
     const alert = alertsById.get(alertId) ?? {};

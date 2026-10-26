@@ -27,12 +27,14 @@ describe('fp_decision', () => {
     const ruleId = 'rule-1';
     const low = {
       _id: 'low-1',
-      'process.executable': '/usr/bin/curl',
+      'host.name': 'host-a',
+      'user.name': 'root',
       'kibana.alert.severity': 'low',
     };
     const high = {
       _id: 'high-1',
-      'process.executable': '/usr/bin/curl',
+      'host.name': 'host-a',
+      'user.name': 'root',
       'kibana.alert.severity': 'high',
     };
     const patternKey = buildFpPatternKey({ ruleId, alert: low });
