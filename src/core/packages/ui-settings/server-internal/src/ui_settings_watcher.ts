@@ -46,15 +46,11 @@ export const toConfigDocRef = (type: ConfigDocRef['type'], namespace: string): C
 
 type DocState =
   | { readonly kind: 'pending' }
-  | { readonly kind: 'present'; readonly version?: string; readonly userProvided: UserProvided }
+  | { readonly kind: 'present'; readonly userProvided: UserProvided }
   | { readonly kind: 'missing'; readonly userProvided: UserProvided };
 
 type Observation =
-  | {
-      readonly kind: 'found';
-      readonly version?: string;
-      readonly attributes: Record<string, unknown>;
-    }
+  | { readonly kind: 'found'; readonly attributes: Record<string, unknown> }
   | { readonly kind: 'missing'; readonly attributes: Record<string, unknown> }
   | { readonly kind: 'stillMissing' }
   | { readonly kind: 'failed'; readonly error: Error };
@@ -94,19 +90,7 @@ const transition = (
 ): Transition => {
   switch (observation.kind) {
     case 'found':
-      // Same-value writes bump the version too, so a new version only means "maybe changed".
-      if (
-        state.kind === 'present' &&
-        observation.version !== undefined &&
-        state.version === observation.version
-      ) {
-        return { state };
-      }
-      return settle(state, {
-        kind: 'present',
-        version: observation.version,
-        userProvided: parse(observation.attributes),
-      });
+      return settle(state, { kind: 'present', userProvided: parse(observation.attributes) });
     case 'missing':
       return settle(state, { kind: 'missing', userProvided: parse(observation.attributes) });
     case 'stillMissing':
@@ -276,7 +260,7 @@ export class UiSettingsWatcher {
     result: SavedObjectBulkResult<Record<string, unknown>>
   ): Promise<Observation> {
     if (!isSavedObjectErrorResult(result)) {
-      return { kind: 'found', version: result.version, attributes: result.attributes };
+      return { kind: 'found', attributes: result.attributes };
     }
     const { error } = result;
     if (error.statusCode !== 404) {
