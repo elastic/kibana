@@ -9,7 +9,7 @@ import type { SlackBlock, SlackTableCell } from '@elastic/isomer-sdk/slack';
 import { SLACK_LIMITS, escapeMrkdwn } from '@elastic/isomer-sdk/slack';
 
 import type { TableNode } from './table';
-import { rowsNote, tableView } from './table_model';
+import { noRowsNote, rowsNote, tableView } from './table_model';
 
 const cell = (text: string): SlackTableCell => ({ type: 'raw_text', text });
 
@@ -42,7 +42,7 @@ export const tableSlackRenderer = (node: TableNode): SlackBlock[] => {
 
   const total = Math.max(node.totalRows ?? 0, node.rows.length);
   const footer =
-    total === 0 ? 'No rows' : rows.length < total ? rowsNote(rows.length, total) : undefined;
+    total === 0 ? noRowsNote() : rows.length < total ? rowsNote(rows.length, total) : undefined;
 
   return [
     {

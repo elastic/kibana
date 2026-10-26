@@ -15,7 +15,7 @@ import { SLACK_LIMITS } from '@elastic/isomer-sdk/slack';
 import { componentIcon, definePrimitive, plainText } from '../../lib';
 import { tableReactRenderer } from './table_react';
 import { tableSlackRenderer } from './table_slack';
-import { tableView, textTable } from './table_model';
+import { noRowsNote, tableView, textTable } from './table_model';
 
 const MAX_ROWS = 1000;
 
@@ -207,13 +207,13 @@ export const table = definePrimitive<TableNode, typeof tableSchema>({
     react: tableReactRenderer,
     text: (node) => {
       const view = tableView(node);
-      return [textTable(view), view.note ?? (view.rows.length === 0 ? 'No rows' : undefined)]
+      return [textTable(view), view.note ?? (view.rows.length === 0 ? noRowsNote() : undefined)]
         .filter(Boolean)
         .join('\n\n');
     },
     markdown: (node) => {
       const view = tableView(node);
-      const footer = view.note ?? (view.rows.length === 0 ? 'No rows' : undefined);
+      const footer = view.note ?? (view.rows.length === 0 ? noRowsNote() : undefined);
       return [
         md.table(
           view.columns.map(({ label }) => label),

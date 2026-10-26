@@ -16,10 +16,21 @@ import { classNames, isomerDistillery } from '@kbn/isomer-theme';
 import { componentIcon, definePrimitive, oneLine, plainText } from '../../lib';
 import type { ComponentsPackTypes } from '../../lib';
 import { linkSlackRenderer } from './link_slack';
-import { reactLinkHref, staticLinkUrl } from './resolve_link';
+import { appLinkPath, reactLinkHref, staticLinkUrl } from './resolve_link';
 
 const ABSOLUTE_HTTP = /^https?:\/\//i;
-const PARENT_SEGMENT = /(^|\/)\.\.(\/|$|[?#])/;
+const PROBE_APP = 'app';
+const PROBE_PATH = appLinkPath({ app: PROBE_APP });
+
+/** Whether `path` stays inside its app once a URL parser decodes and normalizes it, as hosts do. */
+const staysInApp = (path: string): boolean => {
+  try {
+    const { pathname } = new URL(appLinkPath({ app: PROBE_APP, path }), 'http://kibana.invalid');
+    return pathname === PROBE_PATH || pathname.startsWith(`${PROBE_PATH}/`);
+  } catch {
+    return false;
+  }
+};
 
 const pathSchema = z
   .string()
@@ -27,9 +38,7 @@ const pathSchema = z
   .refine((value) => /^[/?#]/.test(value) && !value.startsWith('//') && !value.includes('\\'), {
     error: 'must start with /, ? or #, and not with //',
   })
-  .refine((value) => !PARENT_SEGMENT.test(value.split(/[?#]/)[0]), {
-    error: 'must not leave the app with ..',
-  });
+  .refine(staysInApp, { error: 'must not leave the app with ..' });
 
 const linkSchema = z
   .object({
@@ -41,9 +50,13 @@ const linkSchema = z
     ),
     app: z
       .string()
-      .regex(/^[A-Za-z0-9_.:-]{1,100}$/, { error: 'must be a Kibana app id, such as discover' })
+      .regex(/^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$/, {
+        error: 'must be a Kibana app route, such as discover',
+      })
       .optional()
-      .describe('A Kibana app id, such as "discover". Each host resolves it in the current space.'),
+      .describe(
+        'The Kibana app route after /app/, such as "discover", or "security" for Security. It can differ from the app id. Each host resolves it in the current space.'
+      ),
     path: pathSchema.optional().describe('A path inside `app`, such as "/kibana/skills/my-skill".'),
     url: navigationHref({ max: SLACK_LIMITS.urlChars })
       .refine((value) => ABSOLUTE_HTTP.test(value), { error: 'must be an absolute http(s) URL' })

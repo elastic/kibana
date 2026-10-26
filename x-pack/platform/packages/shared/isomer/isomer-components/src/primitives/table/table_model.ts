@@ -7,6 +7,7 @@
 
 import type { StructuredValueFormat } from '@elastic/isomer-sdk';
 import { formatDisplayValue } from '@elastic/isomer-sdk';
+import { i18n } from '@kbn/i18n';
 
 import { oneLine } from '../../lib';
 import type { TableNode } from './table';
@@ -100,7 +101,14 @@ const count = (value: number): string => value.toLocaleString('en-US');
 
 /** "Showing N of M rows". */
 export const rowsNote = (shown: number, total: number): string =>
-  `Showing ${count(shown)} of ${count(total)} ${total === 1 ? 'row' : 'rows'}`;
+  i18n.translate('xpack.isomer.components.table.rowsNote', {
+    defaultMessage: 'Showing {shown} of {totalText} {total, plural, one {row} other {rows}}',
+    values: { shown: count(shown), totalText: count(total), total },
+  });
+
+/** The note on a table with no rows. */
+export const noRowsNote = (): string =>
+  i18n.translate('xpack.isomer.components.table.noRowsNote', { defaultMessage: 'No rows' });
 
 /** `node` sorted, capped at `maxRows` and at `limit`, and formatted. */
 export const tableView = (node: TableNode, limit = Infinity): TableView => {

@@ -13,7 +13,7 @@ import type { LinkNode } from './link';
 
 const ABSOLUTE_HTTP = /^https?:\/\//i;
 
-/** The path of `app` in Kibana, relative to the space's base URL, as `getUrlForApp` builds it. */
+/** The path of the app routed at `/app/{app}`, relative to the space's base URL. */
 export const appLinkPath = ({ app, path }: { app: string; path?: string }): string =>
   `/app/${app}${path ?? ''}`;
 
@@ -25,7 +25,7 @@ const absoluteHref = (href: string | null | undefined): string | null => {
 /** The node's `url`, which every surface can link to without a host. */
 export const staticLinkUrl = ({ url }: LinkNode): string | null => absoluteHref(url);
 
-/** The URL React links to: `url`, or `app` through the host's `resolveAppLink`. */
+/** The URL React links to: `url`, or the app path through the host's `resolveKibanaPath`. */
 export const reactLinkHref = (node: LinkNode, context: ComponentsRenderContext): string | null => {
   const { app, path, url } = node;
   if (url !== undefined) {
@@ -34,7 +34,7 @@ export const reactLinkHref = (node: LinkNode, context: ComponentsRenderContext):
   if (app === undefined) {
     return null;
   }
-  const resolved = context.resolveAppLink?.({ app, ...(path !== undefined ? { path } : {}) });
+  const resolved = context.resolveKibanaPath?.(appLinkPath({ app, path }));
   return resolved ? sanitizeNavigationHref(resolved) : null;
 };
 
