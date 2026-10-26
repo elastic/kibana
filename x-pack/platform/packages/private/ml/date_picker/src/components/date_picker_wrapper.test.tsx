@@ -10,6 +10,7 @@ import { render } from '@testing-library/react';
 import type { PropsWithChildren } from 'react';
 import React from 'react';
 
+import { EuiButton, EuiButtonIcon } from '@elastic/eui';
 import { DateRangePicker } from '@kbn/date-range-picker';
 
 import type { UI_SETTINGS } from '@kbn/data-plugin/common';
@@ -27,6 +28,12 @@ jest.mock('@elastic/eui', () => {
   const EuiSuperUpdateButtonMock = jest.fn(() => {
     return null;
   });
+  const EuiButtonIconMock = jest.fn(() => {
+    return null;
+  });
+  const EuiToolTipMock = jest.fn(({ children }: PropsWithChildren<unknown>) => {
+    return <>{children}</>;
+  });
   const EuiFlexGroupMock = jest.fn(({ children }: PropsWithChildren<unknown>) => {
     return <>{children}</>;
   });
@@ -36,6 +43,8 @@ jest.mock('@elastic/eui', () => {
   return {
     EuiButton: EuiButtonMock,
     EuiSuperUpdateButton: EuiSuperUpdateButtonMock,
+    EuiButtonIcon: EuiButtonIconMock,
+    EuiToolTip: EuiToolTipMock,
     EuiFlexGroup: EuiFlexGroupMock,
     EuiFlexItem: EuiFlexItemMock,
   };
@@ -137,11 +146,15 @@ const mockContextFactory = (addWarning: jest.Mock<void, []>) => {
 };
 
 const MockedDateRangePicker = DateRangePicker as jest.MockedFunction<typeof DateRangePicker>;
+const MockedEuiButton = EuiButton as jest.MockedFunction<typeof EuiButton>;
+const MockedEuiButtonIcon = EuiButtonIcon as jest.MockedFunction<typeof EuiButtonIcon>;
 
 describe('<DatePickerWrapper />', () => {
   beforeEach(() => {
     jest.useFakeTimers({ legacyFakeTimers: true });
     MockedDateRangePicker.mockClear();
+    MockedEuiButton.mockClear();
+    MockedEuiButtonIcon.mockClear();
   });
 
   afterEach(() => {
@@ -226,5 +239,36 @@ describe('<DatePickerWrapper />', () => {
 
     expect(refreshListener).toHaveBeenCalledTimes(1);
     refreshSubscription.unsubscribe();
+  });
+
+  test('should show the full picker when a time range is shown', () => {
+    (useRefreshIntervalUpdates as jest.Mock).mockReturnValue({ pause: true, value: 10000 });
+    (useDatePickerContext as jest.Mock).mockImplementation(mockContextFactory(jest.fn()));
+
+    render(<DatePickerWrapper width="full" />);
+
+    const calledWith = MockedDateRangePicker.mock.calls[0][0];
+    expect(calledWith.width).toBe('full');
+    expect(calledWith.collapsed).toBe(false);
+    expect(calledWith.showTimeWindowButtons).toEqual({ showZoomIn: true });
+  });
+
+  test('should collapse the picker and use an icon-only refresh button in auto-refresh-only mode', () => {
+    (useRefreshIntervalUpdates as jest.Mock).mockReturnValue({ pause: true, value: 10000 });
+    (useDatePickerContext as jest.Mock).mockImplementation(mockContextFactory(jest.fn()));
+
+    render(<DatePickerWrapper isAutoRefreshOnly showRefresh width="full" />);
+
+    const calledWith = MockedDateRangePicker.mock.calls[0][0];
+    expect(calledWith.width).toBe('restricted');
+    // Emotion turns the `css` prop into a generated class name.
+    expect(calledWith.className).toEqual(expect.stringContaining('css-'));
+    expect(calledWith.collapsed).toBe(true);
+    expect(calledWith.showTimeWindowButtons).toBe(false);
+    expect(MockedEuiButton).not.toHaveBeenCalled();
+    const buttonProps = MockedEuiButtonIcon.mock.calls[0][0];
+    expect(buttonProps.iconType).toBe('refresh');
+    expect(buttonProps['aria-label']).toBe('Refresh');
+    expect(buttonProps['data-test-subj']).toBe('mlDatePickerRefreshPageButton loaded');
   });
 });

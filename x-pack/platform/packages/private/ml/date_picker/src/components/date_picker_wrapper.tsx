@@ -9,10 +9,12 @@ import type { FC } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Subscription, map } from 'rxjs';
 import { debounce } from 'lodash';
+import { css } from '@emotion/react';
 
 import type { OnRefreshProps } from '@elastic/eui';
 import {
   EuiButton,
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSuperUpdateButton,
@@ -40,6 +42,13 @@ import { useDatePickerContext } from '../hooks/use_date_picker_context';
 import { mlTimefilterRefresh$ } from '../services/timefilter_refresh_service';
 
 const DEFAULT_REFRESH_INTERVAL_MS = 5000;
+
+// Without a time range the collapsed picker only shows its badge and auto-refresh countdown.
+// Sizing it to its content lets the surrounding flex layout squeeze the countdown, so it gets a
+// fixed width via the picker's documented `--kbnDateRangePickerWidthRestricted` override.
+const autoRefreshOnlyPickerStyles = css`
+  --kbnDateRangePickerWidthRestricted: 13rem;
+`;
 
 const DEFAULT_DATE_RANGE_PICKER_SETTINGS: DateRangePickerSettings = {
   roundRelativeTime: false,
@@ -376,11 +385,12 @@ export const DatePickerWrapper: FC<DatePickerWrapperProps> = (props) => {
   }, []);
 
   // The new picker has no built-in update button, so keep the picker and the button on one row
-  // regardless of the layout of the parent container.
+  // regardless of the layout of the parent container. Without a time range the collapsed picker
+  // has a fixed width, so it doesn't grow to fill the row.
   const datePicker = (
-    <EuiFlexItem>
+    <EuiFlexItem grow={!isAutoRefreshOnlyMode}>
       <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap={false}>
-        <EuiFlexItem>
+        <EuiFlexItem grow={!isAutoRefreshOnlyMode}>
           <DateRangePicker
             value={
               isAutoRefreshOnlyMode
@@ -394,9 +404,11 @@ export const DatePickerWrapper: FC<DatePickerWrapperProps> = (props) => {
             isInvalid={isDateRangeInvalid}
             disabled={isDisabled}
             readOnly={isAutoRefreshOnlyMode}
-            width={width}
+            width={isAutoRefreshOnlyMode ? 'restricted' : width}
+            css={isAutoRefreshOnlyMode ? autoRefreshOnlyPickerStyles : undefined}
             compressed={false}
-            showTimeWindowButtons={{ showZoomIn: true }}
+            showTimeWindowButtons={isAutoRefreshOnlyMode ? false : { showZoomIn: true }}
+            collapsed={isAutoRefreshOnlyMode}
             presets={dateRangePickerPresets.presets}
             recent={recentRanges}
             onPresetSave={dateRangePickerPresets.onPresetSave}
@@ -427,33 +439,43 @@ export const DatePickerWrapper: FC<DatePickerWrapperProps> = (props) => {
     </EuiFlexItem>
   );
 
+  const refreshLabel = needsUpdate
+    ? i18n.translate('xpack.ml.datePicker.pageUpdateButton', { defaultMessage: 'Update' })
+    : i18n.translate('xpack.ml.datePicker.pageRefreshButton', { defaultMessage: 'Refresh' });
+
   const flexItems = (
     <>
       {datePicker}
       {showRefresh === true || !isTimeRangeSelectorEnabled ? (
         <EuiFlexItem grow={false}>
-          <EuiToolTip content={tooltipMessage}>
-            <EuiButton
-              fill={false}
-              color={needsUpdate ? 'accentSecondary' : 'primary'}
-              iconType={needsUpdate ? 'kqlFunction' : 'refresh'}
-              onClick={handleRefresh}
-              data-test-subj={`${dataTestSubj}${isLoading ? ' loading' : ' loaded'}`}
-              isLoading={isLoading}
-              isDisabled={isDisabled}
-            >
-              {needsUpdate ? (
-                <FormattedMessage
-                  id="xpack.ml.datePicker.pageUpdateButton"
-                  defaultMessage="Update"
-                />
-              ) : (
-                <FormattedMessage
-                  id="xpack.ml.datePicker.pageRefreshButton"
-                  defaultMessage="Refresh"
-                />
-              )}
-            </EuiButton>
+          <EuiToolTip
+            content={tooltipMessage ?? (isAutoRefreshOnlyMode ? refreshLabel : undefined)}
+          >
+            {isAutoRefreshOnlyMode ? (
+              <EuiButtonIcon
+                display="base"
+                size="m"
+                color={needsUpdate ? 'accentSecondary' : 'primary'}
+                iconType={needsUpdate ? 'kqlFunction' : 'refresh'}
+                aria-label={refreshLabel}
+                onClick={handleRefresh}
+                data-test-subj={`${dataTestSubj}${isLoading ? ' loading' : ' loaded'}`}
+                isLoading={isLoading}
+                isDisabled={isDisabled}
+              />
+            ) : (
+              <EuiButton
+                fill={false}
+                color={needsUpdate ? 'accentSecondary' : 'primary'}
+                iconType={needsUpdate ? 'kqlFunction' : 'refresh'}
+                onClick={handleRefresh}
+                data-test-subj={`${dataTestSubj}${isLoading ? ' loading' : ' loaded'}`}
+                isLoading={isLoading}
+                isDisabled={isDisabled}
+              >
+                {refreshLabel}
+              </EuiButton>
+            )}
           </EuiToolTip>
         </EuiFlexItem>
       ) : null}
@@ -462,8 +484,9 @@ export const DatePickerWrapper: FC<DatePickerWrapperProps> = (props) => {
 
   const flexGroup = !isTimeRangeSelectorEnabled || isAutoRefreshOnly === true;
 
+  // The collapsed picker doesn't fill the row, so keep it flush with the end of the container.
   const wrapped = flexGroup ? (
-    <EuiFlexGroup gutterSize="s" alignItems="center">
+    <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="flexEnd">
       {flexItems}
     </EuiFlexGroup>
   ) : (
