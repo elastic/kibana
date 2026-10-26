@@ -207,6 +207,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           },
         });
 
+        /* Pause now: the KI sync sweep deletes exactly this orphan, and its guard is the only thing that stops it. */
+        await pauseMaintenance(apiClient);
+
         const seededRules = await alertingApi.searchRulesV2(roleAuthc, {
           search: 'Maintenance reset',
         });
@@ -268,7 +271,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           name: REGISTERED_DATA_STREAMS.join(','),
         });
 
-        await pauseMaintenance(apiClient);
         const reset = await resetMaintenance(apiClient);
         expect(reset.state).to.eql('enabled');
         if (!reset.deleted) {
