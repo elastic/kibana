@@ -434,83 +434,107 @@ const listValuesOf = (args: ESQLAstNode[]): string[] | undefined => {
 };
 
 /**
+ * `text` with every term occurrence of a rejected value blanked, so no fragment of one can ground
+ * a pattern. Longer values are blanked first so a shorter rejected term inside a longer one
+ * cannot split it before it is matched. Blanks keep the length so offsets stay aligned.
+ */
+const withoutRejectedMentions = (text: string, rejected: ReadonlySet<string>): string => {
+  let scrubbed = text;
+  const ordered = [...rejected].sort((a, b) => b.length - a.length);
+  for (const value of ordered) {
+    for (let at = scrubbed.indexOf(value); at !== -1; at = scrubbed.indexOf(value, at + 1)) {
+      const end = at + value.length;
+      const before = scrubbed[at - 1] ?? ' ';
+      const after = scrubbed[end] ?? ' ';
+      if (WORD_CHARACTER.test(before) || WORD_CHARACTER.test(after)) continue;
+      scrubbed = `${scrubbed.slice(0, at)}${' '.repeat(value.length)}${scrubbed.slice(end)}`;
+    }
+  }
+  return scrubbed;
+};
+
+/**
+ * Whether `value` is a substring of an eligible IOC that carries at least
+ * `MIN_GROUNDING_LENGTH` characters from the non-rejected part of that IOC.
+ *
+ * When a shared-platform root (`github.com`) is rejected while a specific URL under it
+ * (`https://github.com/attacker/stage2`) is eligible, a pattern like
+ * `LIKE "*github.com/attacker/stage2*"` hunts the eligible URL, whereas
+ * `LIKE "*https://github.com/*"` or `LIKE "*github.co*"` hunts only the rejected root.
+ * Blanking rejected terms out of both the eligible IOC and the candidate requires the
+ * candidate to include a distinguishing segment of the eligible IOC outside the rejected root.
+ */
+const isSpecificToEligibleIoc = (
+  value: string,
+  rejected: ReadonlySet<string>,
+  eligible: ReadonlySet<string>
+): boolean => {
+  const scrubbedValue = withoutRejectedMentions(value, rejected);
+  const hasMeaningfulPart = scrubbedValue
+    .replace(/^\s*https?:\/\//, '')
+    .split(/\s+/)
+    .some(
+      (part) =>
+        part.replace(/^[^\p{L}\p{N}_]+|[^\p{L}\p{N}_]+$/gu, '').length >= MIN_GROUNDING_LENGTH
+    );
+  if (!hasMeaningfulPart) return false;
+  for (const ioc of eligible) {
+    if (ioc.includes(value) && withoutRejectedMentions(ioc, rejected).includes(scrubbedValue)) {
+      return true;
+    }
+  }
+  return false;
+};
+
+/**
+ * Unescape regex punctuation (`\.` -> `.`) while turning regex character-class or boundary
+ * escapes (`\b`, `\d`, `\w`, `\s`) into spaces so they cannot glue onto an adjacent token.
+ */
+const unescapeRegex = (value: string): string =>
+  value.replace(/\\([A-Za-z0-9])|\\(.)/g, (_match, alpha, punct) => (alpha ? ' ' : punct));
+
+/**
  * The first rejected value a literal anywhere in the query carries, or undefined.
  *
- * Every function's literals are read, not only the `WHERE` predicates': `EVAL m = source.ip ==
- * "<rejected>" | WHERE m` filters on the value from an assignment. A literal carries a rejected
- * value when it equals one or embeds one as a term — a CIDR built on the rejected address, a URL
- * under the rejected domain — unless an eligible IOC embeds the literal the same way (an approved
- * URL under a rejected shared-platform root), in which case the eligible IOC wins as it does for
- * an exact match. `LIKE` patterns are read as their wildcard-free fragments so the `*` around a
- * fragment is not itself taken for an embedding.
+ * Every literal node in the AST is read (inside `WHERE`, `EVAL`, `IN (...)`, parenthesized
+ * expressions, `MATCH`, `RLIKE`, `NOT RLIKE`, or `QSTR`) rather than going through the
+ * positive-grounding `groundingRequirements` whitelist, which returns `[]` for operators or
+ * tokens it refuses to ground positively (`MATCH` on a dotted IP/domain, `RLIKE` with parens or
+ * quantifiers, `NOT RLIKE`) and would fail open here. A literal carries a rejected value when a
+ * wildcard-free or regex-unescaped fragment equals one or embeds one as a term, unless it is an
+ * eligible IOC or a distinguishing substring of one.
  */
 const rejectedValueCarriedBy = (
   query: ESQLAstQueryExpression,
   rejected: ReadonlySet<string>,
   eligible: ReadonlySet<string>
 ): string | undefined => {
-  const eligibleValues = [...eligible];
   let found: string | undefined;
   Walker.walk(query, {
-    visitFunction: (fn) => {
+    visitLiteral: (literal) => {
       if (found !== undefined) return;
-      const operator = fn.name.toLowerCase();
-      const literals = listValuesOf(fn.args) ?? literalsOf(fn.args);
-      for (const literal of literals) {
-        const candidates =
-          operator === 'like'
-            ? literal.split(LIKE_WILDCARDS)
-            : groundingRequirements(operator, literal).flat();
-        for (const candidate of candidates) {
-          const value = normalize(candidate);
-          if (value.length < MIN_GROUNDING_LENGTH) continue;
-          if (rejected.has(value)) {
-            found = value;
+      const stripped = valueOf(literal).replace(REGEXP_SURROUND, '');
+      const unescaped = unescapeRegex(stripped);
+      const candidates = [...stripped.split(LIKE_WILDCARDS), ...unescaped.split(LIKE_WILDCARDS)];
+      for (const candidate of candidates) {
+        const value = normalize(candidate);
+        if (value.length < MIN_GROUNDING_LENGTH) continue;
+        if (eligible.has(value)) continue;
+        if (rejected.has(value)) {
+          found = value;
+          return;
+        }
+        if (isSpecificToEligibleIoc(value, rejected, eligible)) continue;
+        for (const rejectedValue of rejected) {
+          if (appearsAsTerm(value, rejectedValue)) {
+            found = rejectedValue;
             return;
-          }
-          if (eligibleValues.some((ioc) => ioc.includes(value))) continue;
-          for (const rejectedValue of rejected) {
-            if (appearsAsTerm(value, rejectedValue)) {
-              found = rejectedValue;
-              return;
-            }
           }
         }
       }
     },
   });
   return found;
-};
-
-/**
- * `text` with every term occurrence of a rejected value blanked, so no fragment of one can ground
- * a pattern. An occurrence inside an eligible IOC's own occurrence is kept: the `github.com` in an
- * approved `https://github.com/<actor>/<repo>` is that IOC's text, not a rejected mention.
- * Blanks keep the length so the occurrence offsets stay valid while scanning.
- */
-const withoutRejectedMentions = (
-  text: string,
-  rejected: ReadonlySet<string>,
-  eligible: ReadonlySet<string>
-): string => {
-  const kept: Array<[number, number]> = [];
-  for (const ioc of eligible) {
-    for (let at = text.indexOf(ioc); at !== -1; at = text.indexOf(ioc, at + 1)) {
-      kept.push([at, at + ioc.length]);
-    }
-  }
-  let scrubbed = text;
-  for (const value of rejected) {
-    for (let at = scrubbed.indexOf(value); at !== -1; at = scrubbed.indexOf(value, at + 1)) {
-      const end = at + value.length;
-      const before = scrubbed[at - 1] ?? ' ';
-      const after = scrubbed[end] ?? ' ';
-      if (WORD_CHARACTER.test(before) || WORD_CHARACTER.test(after)) continue;
-      if (kept.some(([start, stop]) => at < stop && end > start)) continue;
-      scrubbed = `${scrubbed.slice(0, at)}${' '.repeat(value.length)}${scrubbed.slice(end)}`;
-    }
-  }
-  return scrubbed;
 };
 
 interface GroundingRules {
@@ -667,12 +691,10 @@ export const assertEsqlGroundedInReport = (
   // `kubernetes.io`) still grounds; one found nowhere else no longer does.
   const rawHaystack = normalize(reportText);
   const haystack =
-    excludedSet.size > 0
-      ? withoutRejectedMentions(rawHaystack, excludedSet, groundingIocs)
-      : rawHaystack;
+    excludedSet.size > 0 ? withoutRejectedMentions(rawHaystack, excludedSet) : rawHaystack;
 
   const qualifiesIn =
-    (text: string) =>
+    (text: string, scrubbed: boolean) =>
     (candidate: string, standalone: boolean): boolean => {
       const value = normalize(candidate);
       if (value.length < MIN_GROUNDING_LENGTH || sources.has(value)) {
@@ -681,20 +703,26 @@ export const assertEsqlGroundedInReport = (
       if (groundingIocs.has(value)) {
         return true;
       }
-      return standalone ? appearsAsTerm(text, value) : text.includes(value);
+      if (!standalone && isSpecificToEligibleIoc(value, excludedSet, groundingIocs)) {
+        return true;
+      }
+      return standalone
+        ? appearsAsTerm(text, value)
+        : text.includes(value) ||
+            (!scrubbed && [...groundingIocs].some((ioc) => ioc.includes(value)));
     };
 
   const groundsIn =
-    (text: string) =>
+    (text: string, scrubbed: boolean) =>
     (operator: string, literal: string): boolean => {
       const standalone = !PATTERN_OPERATORS.has(operator);
-      const qualifies = qualifiesIn(text);
+      const qualifies = qualifiesIn(text, scrubbed);
       return groundingRequirements(operator, literal).every((alternatives) =>
         alternatives.some((candidate) => qualifies(candidate, standalone))
       );
     };
 
-  const grounds = groundsIn(haystack);
+  const grounds = groundsIn(haystack, true);
 
   if (isPipelineGrounded(root, grounds)) {
     return { ok: true };
@@ -702,18 +730,20 @@ export const assertEsqlGroundedInReport = (
 
   // Grounded only while the rejected mentions were still in the text: the query steers on a
   // fragment of a rejected value. Name the fragment so the retry instruction can say which.
-  if (excludedSet.size > 0 && isPipelineGrounded(root, groundsIn(rawHaystack))) {
-    const qualifiesRaw = qualifiesIn(rawHaystack);
-    const qualifiesScrubbed = qualifiesIn(haystack);
+  if (excludedSet.size > 0 && isPipelineGrounded(root, groundsIn(rawHaystack, false))) {
+    const qualifiesRaw = qualifiesIn(rawHaystack, false);
+    const qualifiesScrubbed = qualifiesIn(haystack, true);
     let fragment: string | undefined;
     Walker.walk(root, {
       visitLiteral: (literal) => {
         if (fragment !== undefined) return;
-        fragment = groundingRequirements('like', valueOf(literal))
-          .flat()
-          .find(
-            (candidate) => qualifiesRaw(candidate, false) && !qualifiesScrubbed(candidate, false)
-          );
+        const text = valueOf(literal);
+        fragment = [
+          ...groundingRequirements('like', text).flat(),
+          ...groundingRequirements('rlike', text).flat(),
+        ].find(
+          (candidate) => qualifiesRaw(candidate, false) && !qualifiesScrubbed(candidate, false)
+        );
       },
     });
     return {

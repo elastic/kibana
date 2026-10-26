@@ -240,6 +240,11 @@ describe('assertEsqlGroundedInReport', () => {
           '169.254.169',
         ],
         [
+          'an RLIKE prefix of the rejected address',
+          String.raw`FROM logs-* | WHERE source.ip RLIKE "169\\.254\\.169\\..*" | LIMIT 10`,
+          '169.254.169.',
+        ],
+        [
           'a LIKE prefix of the rejected hash',
           'FROM logs-* | WHERE file.hash.sha256 LIKE "deadbeefdeadbeefdeadbeef*" | LIMIT 10',
           'deadbeefdeadbeefdeadbeef',
@@ -267,6 +272,34 @@ describe('assertEsqlGroundedInReport', () => {
           'an EVAL assignment a later WHERE filters on',
           `FROM logs-* | WHERE aws.cloudtrail.event_name == "AssumeRole" | EVAL m = source.ip == "${excluded}" | WHERE m | LIMIT 10`,
         ],
+        [
+          'a full-text MATCH on a dotted rejected value',
+          `FROM logs-* | WHERE aws.cloudtrail.event_name == "AssumeRole" AND MATCH(message, "${excluded}") | LIMIT 10`,
+        ],
+        [
+          'a full-text : operator on a dotted rejected value',
+          `FROM logs-* | WHERE aws.cloudtrail.event_name == "AssumeRole" AND message : "${excluded}" | LIMIT 10`,
+        ],
+        [
+          'an RLIKE with grouping parens around the rejected address',
+          String.raw`FROM logs-* | WHERE aws.cloudtrail.event_name == "AssumeRole" AND message RLIKE "(169\\.254\\.169\\.254)" | LIMIT 10`,
+        ],
+        [
+          'an RLIKE with word-boundary escapes around the rejected address',
+          String.raw`FROM logs-* | WHERE aws.cloudtrail.event_name == "AssumeRole" AND message RLIKE "\\b169\\.254\\.169\\.254\\b" | LIMIT 10`,
+        ],
+        [
+          'a NOT RLIKE carrying the rejected address',
+          String.raw`FROM logs-* | WHERE aws.cloudtrail.event_name == "AssumeRole" AND message NOT RLIKE ".*169\\.254\\.169\\.254.*" | LIMIT 10`,
+        ],
+        [
+          'a parenthesized literal carrying the rejected address',
+          `FROM logs-* | WHERE aws.cloudtrail.event_name == "AssumeRole" AND source.ip == ("${excluded}") | LIMIT 10`,
+        ],
+        [
+          'a mixed IN list carrying a column and the rejected address',
+          `FROM logs-* | WHERE aws.cloudtrail.event_name == "AssumeRole" AND source.ip IN (client.ip, "${excluded}") | LIMIT 10`,
+        ],
       ])('rejects %s even beside a grounded predicate', (_name, query) => {
         expect(assertEsqlGroundedInReport(query, options)).toEqual({
           ok: false,
@@ -286,7 +319,7 @@ describe('assertEsqlGroundedInReport', () => {
         ).toBe(true);
       });
 
-      it('keeps an eligible URL under a rejected shared-platform root grounded', () => {
+      it('keeps an eligible URL under a rejected shared-platform root grounded while rejecting bare-root patterns', () => {
         const repo = 'https://github.com/attacker/stage2';
         const text = `The dropper was fetched from ${repo} by the loader.`;
         const eligibleWins = {
@@ -306,6 +339,52 @@ describe('assertEsqlGroundedInReport', () => {
             eligibleWins
           ).ok
         ).toBe(true);
+        expect(
+          assertEsqlGroundedInReport(
+            String.raw`FROM logs-* | WHERE url.full RLIKE ".*github\\.com/attacker/stage2.*" | LIMIT 10`,
+            eligibleWins
+          ).ok
+        ).toBe(true);
+
+        // Bare shared-platform root with only URL punctuation still hunts all of GitHub.
+        expect(
+          assertEsqlGroundedInReport(
+            'FROM logs-* | WHERE url.full LIKE "*https://github.com/*" | LIMIT 10',
+            eligibleWins
+          )
+        ).toEqual({
+          ok: false,
+          reason: 'query filters on a value intel review rejected (github.com)',
+        });
+        expect(
+          assertEsqlGroundedInReport(
+            'FROM logs-* | WHERE url.full LIKE "*github.com/*" | LIMIT 10',
+            eligibleWins
+          )
+        ).toEqual({
+          ok: false,
+          reason: 'query filters on a value intel review rejected (github.com)',
+        });
+
+        // A prefix or sub-term of the rejected root must not borrow grounding from the URL's host.
+        expect(
+          assertEsqlGroundedInReport(
+            'FROM logs-* | WHERE dns.question.name LIKE "*github.co*" | LIMIT 10',
+            eligibleWins
+          )
+        ).toEqual({
+          ok: false,
+          reason: 'query filters on a fragment of a value intel review rejected (github.co)',
+        });
+        expect(
+          assertEsqlGroundedInReport(
+            'FROM logs-* | WHERE process.name == "github" | LIMIT 10',
+            eligibleWins
+          )
+        ).toEqual({
+          ok: false,
+          reason: 'query filters on a fragment of a value intel review rejected (github)',
+        });
       });
     });
   });
