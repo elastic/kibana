@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiBadge, EuiHealth, useEuiTheme } from '@elastic/eui';
+import { EuiBadge, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { ALERT_EPISODE_STATUS, type AlertEpisodeStatus } from '@kbn/alerting-v2-schemas';
@@ -52,7 +52,7 @@ export const getEpisodeStatusBadgeLabel = (status: AlertEpisodeStatus): string =
   });
 
 /**
- * Lifecycle-colored health dot and status label, for hosts that already own the hollow badge chrome.
+ * Lifecycle-colored dot and status label, for hosts that already own the hollow badge chrome.
  */
 export function AlertEpisodeStatusHealth({
   status,
@@ -62,9 +62,19 @@ export function AlertEpisodeStatusHealth({
   const color = alertTimelineStatusColor(euiTheme, status);
 
   return (
-    <EuiHealth color={color} textSize="inherit">
+    <span css={{ display: 'flex', alignItems: 'center', gap: euiTheme.size.xs }}>
+      <span
+        aria-hidden
+        css={{
+          width: euiTheme.size.s,
+          height: euiTheme.size.s,
+          borderRadius: '50%',
+          backgroundColor: color,
+          flexShrink: 0,
+        }}
+      />
       {children ?? getEpisodeStatusBadgeLabel(status)}
-    </EuiHealth>
+    </span>
   );
 }
 
