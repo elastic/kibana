@@ -11,7 +11,7 @@ import { defaultConfig } from '@kbn/storybook';
 
 module.exports = {
   ...defaultConfig,
-  stories: ['../src/**/*.stories.+(tsx|mdx)'],
+  stories: ['../kbn-esql-resource-browser/src/**/*.stories.+(tsx|mdx)'],
   reactOptions: {
     strictMode: true,
   },
