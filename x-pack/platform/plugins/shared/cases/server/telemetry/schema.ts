@@ -21,6 +21,7 @@ import type {
   ObservablesSchema,
   TemplatesSolutionTelemetrySchema,
   WorkflowsSolutionTelemetrySchema,
+  UserActionsSourceTelemetrySchema,
 } from './types';
 
 const long: TypeLong = { type: 'long' };
@@ -75,6 +76,29 @@ const attachmentFrameworkSchema: AttachmentFrameworkSchema = {
       items: {
         count: long,
         name: string,
+      },
+    },
+  },
+};
+
+const userActionsSourceSchema: UserActionsSourceTelemetrySchema = {
+  bySource: {
+    type: 'array',
+    items: {
+      source: {
+        type: 'keyword',
+        _meta: {
+          description:
+            'Source of the user action (e.g. user, api, agent, workflow, rule, attack). User actions without a source are reported as unknown',
+        },
+      },
+      type: {
+        type: 'keyword',
+        _meta: { description: 'User action type (e.g. comment, status, assignees)' },
+      },
+      total: {
+        type: 'long',
+        _meta: { description: 'Total number of user actions with this source and type' },
       },
     },
   },
@@ -432,7 +456,12 @@ export const casesSchema: CasesTelemetrySchema = {
     obs: solutionTelemetry,
     main: solutionTelemetry,
   },
-  userActions: { all: { ...countSchema, maxOnACase: long } },
+  userActions: {
+    all: { ...countSchema, maxOnACase: long, ...userActionsSourceSchema },
+    sec: userActionsSourceSchema,
+    obs: userActionsSourceSchema,
+    main: userActionsSourceSchema,
+  },
   comments: { all: { ...countSchema, maxOnACase: long } },
   alerts: {
     all: { ...countSchema, maxOnACase: long },
