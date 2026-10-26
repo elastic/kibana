@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
+import React, { memo, useMemo } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiCallOut,
@@ -16,6 +16,8 @@ import {
   type IconType,
 } from '@elastic/eui';
 import type { ApprovalOutcomeBanner } from './approval_outcome';
+import { createMarkdownLink } from './markdown_link';
+import type { GetUrlForApp } from './types';
 
 interface ApprovalContentBodyProps {
   /** Hidden while `'declining'`: `DeclineReasonForm` takes this space instead. */
@@ -28,12 +30,23 @@ interface ApprovalContentBodyProps {
   bannerSuffix?: React.ReactNode;
   /** A rejected `primaryAction`/`onDismiss` call, surfaced here rather than thrown away. */
   actionError?: string;
+  /** See `GetUrlForApp`. */
+  getUrlForApp?: GetUrlForApp;
   'data-test-subj'?: string;
 }
 
-const processingPluginList = getDefaultEuiMarkdownProcessingPlugins({
-  linkProps: { target: '_blank' },
-});
+/**
+ * EUI's default processing plugins with the `a` component swapped for one that resolves in-app
+ * links through `getUrlForApp`. Built per resolver: the default list is a module-level singleton,
+ * and `getDefaultEuiMarkdownProcessingPlugins` returns a fresh copy each call, so this never
+ * mutates anything shared with other markdown on the page.
+ */
+const buildProcessingPluginList = (getUrlForApp?: GetUrlForApp) => {
+  const plugins = getDefaultEuiMarkdownProcessingPlugins({ linkProps: { target: '_blank' } });
+  // The rehype-react plugin sits at index 1; its options carry the component map.
+  plugins[1][1].components.a = createMarkdownLink(getUrlForApp);
+  return plugins;
+};
 
 const bannerIconFor = (color: 'success' | 'primary' | 'danger'): IconType =>
   color === 'success' ? 'check' : color === 'danger' ? 'warning' : 'clock';
@@ -45,8 +58,20 @@ const bannerIconFor = (color: 'success' | 'primary' | 'danger'): IconType =>
  * viewport.
  */
 export const ApprovalContentBody = memo<ApprovalContentBodyProps>(
-  ({ mode, comment, banner, bannerSuffix, actionError, 'data-test-subj': dataTestSubj }) => {
+  ({
+    mode,
+    comment,
+    banner,
+    bannerSuffix,
+    actionError,
+    getUrlForApp,
+    'data-test-subj': dataTestSubj,
+  }) => {
     const { euiTheme } = useEuiTheme();
+    const processingPluginList = useMemo(
+      () => buildProcessingPluginList(getUrlForApp),
+      [getUrlForApp]
+    );
 
     return (
       <div

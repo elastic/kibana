@@ -173,7 +173,7 @@ steps:
             comment: |-
               **Review this detection gap?**
 
-              **Investigation:** [Detection coverage]({{ kibanaBasePath }}/s/{{ workflow.spaceId }}/app/agent_builder/conversations/{{ steps.create_investigation.output.conversation_id }})
+              **Investigation:** [Detection coverage](/s/{{ workflow.spaceId }}/app/agent_builder/conversations/{{ steps.create_investigation.output.conversation_id }})
 
               **Detection gap**
               {% if steps.gap.output.technique != null and steps.gap.output.technique != '' %}ATT&CK technique: {{ steps.gap.output.technique }}
@@ -426,8 +426,8 @@ steps:
   - name: compose_evidence
     type: data.set
     with:
-      rule_line: "{% if steps.resolve_rule.output.id != null %}**Rule:** [{{ steps.resolve_rule.output.name }}]({{ kibanaBasePath }}/s/{{ workflow.spaceId }}/app/security/rules/id/{{ steps.resolve_rule.output.id }}) (`{{ steps.resolve_rule.output.id }}`){% else %}**Rule:** {{ steps.coverage_check.output.structured_output.rule_name }} (`{{ steps.coverage_check.output.structured_output.rule_id }}`){% endif %}"
-      investigation_line: "**Investigation:** [Detection coverage]({{ kibanaBasePath }}/s/{{ workflow.spaceId }}/app/agent_builder/conversations/{{ steps.create_investigation.output.conversation_id }})"
+      rule_line: "{% if steps.resolve_rule.output.id != null %}**Rule:** [{{ steps.resolve_rule.output.name }}](/s/{{ workflow.spaceId }}/app/security/rules/id/{{ steps.resolve_rule.output.id }}) (`{{ steps.resolve_rule.output.id }}`){% else %}**Rule:** {{ steps.coverage_check.output.structured_output.rule_name }} (`{{ steps.coverage_check.output.structured_output.rule_id }}`){% endif %}"
+      investigation_line: "**Investigation:** [Detection coverage](/s/{{ workflow.spaceId }}/app/agent_builder/conversations/{{ steps.create_investigation.output.conversation_id }})"
       gap_block: |-
         **Detection gap**
         {% if steps.gap.output.technique != null and steps.gap.output.technique != '' %}ATT&CK technique: {{ steps.gap.output.technique }}
@@ -436,7 +436,7 @@ steps:
         **Evidence**
         {{ steps.gap.output.evidence }}
         {% endif %}
-      check_line: "**Coverage check:** [agent conversation]({{ kibanaBasePath }}/s/{{ workflow.spaceId }}/app/agent_builder/conversations/{{ steps.coverage_check.output.conversation_id }})"
+      check_line: "**Coverage check:** [agent conversation](/s/{{ workflow.spaceId }}/app/agent_builder/conversations/{{ steps.coverage_check.output.conversation_id }})"
 
   # Body shared by the four report proposals below: what the check found, where
   # to look, and that approving applies nothing.

@@ -28,7 +28,13 @@ import {
   isProposalExpired,
 } from './proposal_helpers';
 import { ProposalCaption } from './proposal_caption';
-import type { ApprovalAction, AlwaysAllowOption, DeclineParams, ApprovalProposal } from './types';
+import type {
+  ApprovalAction,
+  AlwaysAllowOption,
+  DeclineParams,
+  ApprovalProposal,
+  GetUrlForApp,
+} from './types';
 
 export interface ApprovalContentProps {
   /**
@@ -87,6 +93,12 @@ export interface ApprovalContentProps {
   onReopen?: () => Promise<void>;
   /** Whether this proposal's `onReopen` is in flight, from the host's mutation cache. */
   isReopening?: boolean;
+  /**
+   * `core.application.getUrlForApp`, so the comment's in-app links (`/app/security/...`) resolve
+   * through core with the server base path and current space. Without it they render as
+   * authored, which breaks under `server.basePath`.
+   */
+  getUrlForApp?: GetUrlForApp;
   'data-test-subj'?: string;
 }
 
@@ -125,6 +137,7 @@ export const ApprovalContent = memo<ApprovalContentProps>(
     onDismiss,
     onReopen,
     isReopening = false,
+    getUrlForApp,
     'data-test-subj': dataTestSubj,
   }) => {
     const generatedTitleId = useGeneratedHtmlId({ prefix: 'ApprovalContent' });
@@ -331,6 +344,7 @@ export const ApprovalContent = memo<ApprovalContentProps>(
           banner={banner}
           bannerSuffix={bannerSuffix}
           actionError={actionError}
+          getUrlForApp={getUrlForApp}
           data-test-subj={dataTestSubj}
         />
 

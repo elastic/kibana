@@ -62,7 +62,6 @@ export function buildInputDefaultRenderContext(
       ...pickWorkflowDocumentVersion(workflowExecution),
     },
     kibanaUrl,
-    kibanaBasePath: coreStart?.http?.basePath?.serverBasePath ?? '',
     consts: workflowExecution.workflowDefinition?.consts ?? {},
     event: workflowExecution.context?.event,
     inputs: workflowExecution.context?.inputs as Record<string, unknown> | undefined,

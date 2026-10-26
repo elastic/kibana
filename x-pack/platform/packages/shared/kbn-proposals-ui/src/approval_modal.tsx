@@ -9,7 +9,7 @@ import React, { memo } from 'react';
 import { css } from '@emotion/react';
 import { EuiModal, useEuiTheme, useGeneratedHtmlId } from '@elastic/eui';
 import { ApprovalContent } from './approval_content';
-import type { DeclineParams, AlwaysAllowOption, ApprovalProposal } from './types';
+import type { DeclineParams, AlwaysAllowOption, ApprovalProposal, GetUrlForApp } from './types';
 
 export interface ApprovalModalProps {
   /** Disables the Approve/Decline actions without hiding them, so a reopened decided-or-expired-looking proposal still reads the same. */
@@ -38,6 +38,8 @@ export interface ApprovalModalProps {
   /** See `ApprovalContentProps.onReopen`. */
   onReopen?: () => Promise<void>;
   isReopening?: boolean;
+  /** See `ApprovalContentProps.getUrlForApp`. */
+  getUrlForApp?: GetUrlForApp;
   'data-test-subj'?: string;
 }
 
@@ -66,6 +68,7 @@ export const ApprovalModal = memo<ApprovalModalProps>(
     currentActorName,
     onReopen,
     isReopening,
+    getUrlForApp,
     'data-test-subj': dataTestSubj,
   }) => {
     const { euiTheme } = useEuiTheme();
@@ -90,6 +93,7 @@ export const ApprovalModal = memo<ApprovalModalProps>(
           onDismiss={onDismiss}
           onReopen={onReopen}
           isReopening={isReopening}
+          getUrlForApp={getUrlForApp}
         />
       </EuiModal>
     );

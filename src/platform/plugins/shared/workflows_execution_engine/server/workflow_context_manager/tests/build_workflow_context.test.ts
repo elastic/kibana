@@ -74,21 +74,6 @@ describe('buildWorkflowContext', () => {
     mockGetInputsFromDefinition.mockReturnValue(undefined);
   });
 
-  describe('kibanaBasePath', () => {
-    it('exposes server.basePath so in-app links can stay relative', () => {
-      const coreStart = dependencies.coreStart;
-      // `serverBasePath` is readonly on the contract; the mock lets the test set it.
-      (coreStart.http.basePath as { serverBasePath: string }).serverBasePath = '/kbn';
-      const context = buildWorkflowContext(baseExecution, coreStart, dependencies);
-      expect(context.kibanaBasePath).toBe('/kbn');
-    });
-
-    it('is an empty string without a coreStart', () => {
-      const context = buildWorkflowContext(baseExecution, undefined, dependencies);
-      expect(context.kibanaBasePath).toBe('');
-    });
-  });
-
   describe('execution context', () => {
     it('should include executedBy and triggeredBy in execution context', () => {
       const execution: EsWorkflowExecution = {

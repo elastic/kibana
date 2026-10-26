@@ -1977,7 +1977,7 @@ steps:
                         ---
                         Error: the batch this alert was analyzed in returned no verdict for it.
                         {% if variables.investigation_conversation_id != '' %}
-                        - Investigation: [{{ variables.investigation_conversation_id }}]({{ kibanaBasePath }}/s/{{ workflow.spaceId }}/app/agent_builder/conversations/{{ variables.investigation_conversation_id }})
+                        - Investigation: [{{ variables.investigation_conversation_id }}](/s/{{ workflow.spaceId }}/app/agent_builder/conversations/{{ variables.investigation_conversation_id }})
                         {%- endif %}
                   headers:
                     kbn-xsrf: string

@@ -287,7 +287,6 @@ function buildExecutionLookupData(
     consts: asPlainObject(ctx.consts),
     event: asPlainObject(ctx.event),
     kibanaUrl: ctx.kibanaUrl,
-    kibanaBasePath: ctx.kibanaBasePath,
     steps: { ...steps },
   };
   if (foreachCtx) {

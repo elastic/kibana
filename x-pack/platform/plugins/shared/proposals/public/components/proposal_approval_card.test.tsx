@@ -142,6 +142,17 @@ jest.mock('@kbn/proposals-ui', () => {
   };
 });
 
+jest.mock('@kbn/kibana-react-plugin/public', () => ({
+  useKibana: () => ({
+    services: {
+      application: {
+        getUrlForApp: (appId: string, options?: { path?: string }) =>
+          `/app/${appId}${options?.path ?? ''}`,
+      },
+    },
+  }),
+}));
+
 jest.mock('@kbn/core-http-browser', () => ({
   isHttpFetchError: (e: unknown) => {
     return (e as { _isHttpFetchError?: boolean })?._isHttpFetchError === true;

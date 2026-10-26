@@ -8,6 +8,8 @@
 import React, { useCallback } from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { useQueryClient } from '@kbn/react-query';
+import type { CoreStart } from '@kbn/core/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ApprovalContent, type DeclineParams } from '@kbn/proposals-ui';
 import { useProposal } from '@kbn/proposals-plugin/public';
 import { KbnDangerCallout } from '@kbn/ui-callout';
@@ -32,6 +34,9 @@ export const ProposalDecision = ({
   proposalId,
 }: ProposalDecisionProps): React.ReactElement => {
   const queryClient = useQueryClient();
+  const {
+    services: { application },
+  } = useKibana<CoreStart>();
   const { data: proposal, isLoading } = useProposal(proposalId);
   const { readOnly, isSubmitting, currentActorName, approve, dismiss, reopen, isReopening } =
     useProposalDecision(proposalId);
@@ -90,6 +95,7 @@ export const ProposalDecision = ({
       onDismiss={handleDismiss}
       onReopen={handleReopen}
       isReopening={isReopening}
+      getUrlForApp={application.getUrlForApp}
       data-test-subj={`investigationHypothesisTreeProposal-${proposalId}`}
     />
   );

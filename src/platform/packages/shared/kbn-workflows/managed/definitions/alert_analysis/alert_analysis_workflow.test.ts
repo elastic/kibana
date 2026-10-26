@@ -1976,19 +1976,16 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW liquid execution (Worker path)', () =
     };
     const note = errorNote.with.body.note.note;
 
-    // Relative but base-path aware: resolves against whatever origin the browser reached Kibana through.
     const withInvestigation = engine.parseAndRenderSync(note, {
-      kibanaBasePath: '/kbn',
       workflow: { spaceId: 'default' },
       variables: { investigation_conversation_id: 'conv-1' },
     });
     expect(withInvestigation).toContain(
-      '- Investigation: [conv-1](/kbn/s/default/app/agent_builder/conversations/conv-1)'
+      '- Investigation: [conv-1](/s/default/app/agent_builder/conversations/conv-1)'
     );
 
     // Standalone runs have no Investigation, so the line must not render as a dead link.
     const standalone = engine.parseAndRenderSync(note, {
-      kibanaBasePath: '/kbn',
       workflow: { spaceId: 'default' },
       variables: { investigation_conversation_id: '' },
     });

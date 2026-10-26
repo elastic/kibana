@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { ApprovalModal } from '@kbn/proposals-ui';
-import type { ApprovalProposal, DeclineParams } from '@kbn/proposals-ui';
+import type { ApprovalProposal, DeclineParams, GetUrlForApp } from '@kbn/proposals-ui';
 import type { Investigation } from '../../types';
 import type { CardActionType } from '../actions/base_actions';
 import type { EscalationModalMode } from './escalation_modal/types';
@@ -66,6 +66,8 @@ export interface InvestigationActionModalsProps<
   isSubmitting?: 'applying' | 'declining';
   /** Who's approving, for the modal's "Applying"/"Declining" caption. */
   currentActorName?: string;
+  /** See `ApprovalModalProps.getUrlForApp`. */
+  getUrlForApp?: GetUrlForApp;
   /**
    * Replaces the default rationale-only dismiss modal. Supplied when a solution's
    * dismissal captures more than a rationale — a structured reason, say — which changes
@@ -114,6 +116,7 @@ export const InvestigationActionModals = <TProposal extends ApprovalProposal = A
   renderEscalationModal,
   isSubmitting,
   currentActorName,
+  getUrlForApp,
 }: InvestigationActionModalsProps<TProposal>) => (
   <>
     {approvalProposal ? (
@@ -133,6 +136,7 @@ export const InvestigationActionModals = <TProposal extends ApprovalProposal = A
         }
         isSubmitting={isSubmitting}
         currentActorName={currentActorName}
+        getUrlForApp={getUrlForApp}
       />
     ) : null}
 

@@ -269,6 +269,24 @@ describe('ApprovalContent', () => {
     expect(link).toHaveAttribute('rel', expect.stringContaining('noopener'));
   });
 
+  it('resolves in-app links in the comment through getUrlForApp, so they survive a base path', () => {
+    const getUrlForApp = jest.fn(
+      (appId: string, options?: { path?: string }) => `/kbn/app/${appId}${options?.path ?? ''}`
+    );
+    renderContent({
+      proposal: {
+        ...baseProposal,
+        comment: '**Rule:** [Noisy rule](/s/default/app/security/rules/id/abc)',
+      },
+      getUrlForApp,
+    });
+    expect(screen.getByRole('link', { name: /Noisy rule/ })).toHaveAttribute(
+      'href',
+      '/kbn/app/security/rules/id/abc'
+    );
+    expect(getUrlForApp).toHaveBeenCalledWith('security', { path: '/rules/id/abc' });
+  });
+
   it('renders a GFM table in the comment, which is how a proposal lists what it touches', () => {
     const { container } = renderContent({
       proposal: {

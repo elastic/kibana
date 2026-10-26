@@ -698,7 +698,7 @@ steps:
                   eventId: "{{ foreach.item.alert_id }}"
                   timelineId: ''
                   note: |
-                    [Alert Triage Investigation]({{ kibanaBasePath }}/s/{{ workflow.spaceId }}/app/agent_builder/conversations/{{ steps.create_investigation.output.conversation_id }}) · [Workflow execution]({{ execution.url }})
+                    [Alert Triage Investigation](/s/{{ workflow.spaceId }}/app/agent_builder/conversations/{{ steps.create_investigation.output.conversation_id }}) · [Workflow execution]({{ execution.url }})
 
                     **Verdict:** {{ foreach.item.classification }}
                     **Confidence:** {{ foreach.item.confidence_score }}
@@ -762,7 +762,7 @@ steps:
               eventId: "{{ foreach.item.alert_id }}"
               timelineId: ''
               note: |
-                [Alert Triage Investigation]({{ kibanaBasePath }}/s/{{ workflow.spaceId }}/app/agent_builder/conversations/{{ steps.create_investigation.output.conversation_id }}) · [Workflow execution]({{ execution.url }})
+                [Alert Triage Investigation](/s/{{ workflow.spaceId }}/app/agent_builder/conversations/{{ steps.create_investigation.output.conversation_id }}) · [Workflow execution]({{ execution.url }})
 
                 **Verdict:** {{ foreach.item.classification }}
                 **Confidence:** {{ foreach.item.confidence_score }}

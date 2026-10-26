@@ -508,6 +508,7 @@ const ConversationsPageContent: React.FC = () => {
         onConfirmApproval={confirmApproval}
         isSubmitting={isSubmittingSelected}
         currentActorName={currentActorName}
+        getUrlForApp={application.getUrlForApp}
         onDismissApproval={dismissApproval}
         renderCloseModal={canManageInvestigations ? renderCloseModal : undefined}
         renderDismissModal={renderDismissModal}

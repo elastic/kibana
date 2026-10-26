@@ -8,7 +8,15 @@
 import type { ReactNode } from 'react';
 import type { IconType, EuiButtonColor } from '@elastic/eui';
 import type { ProposalWithMetadata, DismissReason } from '@kbn/proposals-common';
+import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { ApprovalPhase } from './approval_outcome';
+
+/**
+ * `core.application.getUrlForApp`, supplied by the host so the comment's in-app links resolve
+ * through core (server base path, current space, the app's registered route) instead of being
+ * rendered as authored. Optional: without it, links render exactly as written.
+ */
+export type GetUrlForApp = ApplicationStart['getUrlForApp'];
 
 /** Impact vocabulary an action and a proposal share. */
 export type ApprovalProposalImpact = NonNullable<ProposalWithMetadata['impact']>;
