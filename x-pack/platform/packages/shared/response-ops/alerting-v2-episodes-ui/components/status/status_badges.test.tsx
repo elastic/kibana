@@ -104,6 +104,25 @@ describe('AlertEpisodeStatusBadges', () => {
     expect(tooltip).toHaveTextContent('field "host.name" is changed');
   });
 
+  it('reports a muted alert as indefinite even when the snooze has conditions', async () => {
+    const user = userEvent.setup();
+    renderWithI18n(
+      <AlertEpisodeStatusBadges
+        status={ALERT_EPISODE_STATUS.ACTIVE}
+        groupAction={{
+          lastSnoozeAction: ALERT_EPISODE_ACTION_TYPE.SNOOZE,
+          snoozedUntil: null,
+          snoozeConditions: [{ type: 'severity_change' }],
+          isMuted: true,
+        }}
+      />
+    );
+    await user.hover(screen.getByTestId('alertEpisodeStatusCellSnoozeIndicator'));
+    const tooltip = await screen.findByRole('tooltip');
+    expect(tooltip).toHaveTextContent('indefinitely');
+    expect(tooltip).not.toHaveTextContent('severity is changed');
+  });
+
   it('renders checkCircle badge when acknowledged via episodeAction', () => {
     renderWithI18n(
       <AlertEpisodeStatusBadges

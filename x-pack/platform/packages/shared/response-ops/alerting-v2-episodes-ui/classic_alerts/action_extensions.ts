@@ -24,6 +24,9 @@ const getActionContext = (episode: {
   source_action_context?: unknown;
 }): ClassicAlertActionContext => episode.source_action_context as ClassicAlertActionContext;
 
+const hasSnoozedInstance = (ep: AlertEpisode): boolean =>
+  ep.snoozed_until != null || Boolean(ep.snooze_conditions?.length);
+
 const groupByIndex = (episodes: AlertEpisode[]): Array<{ index: string; ids: string[] }> => {
   const groups = new Map<string, string[]>();
   for (const ep of episodes) {
@@ -230,13 +233,13 @@ export const classicActionExtensions: Array<EpisodeActionExtension<any>> = [
       const errors: string[] = [];
 
       const epsToUnmute = eps.filter((ep) => ep.is_muted === true);
-      const epsToUnsnooze = eps.filter((ep) => ep.snoozed_until != null);
+      const epsToUnsnooze = eps.filter(hasSnoozedInstance);
 
       let unmuteFailed = false;
 
       if (epsToUnmute.length > 0) {
         const rules = groupByRule(epsToUnmute);
-        const mutedOnlyCount = epsToUnmute.filter((ep) => ep.snoozed_until == null).length;
+        const mutedOnlyCount = epsToUnmute.filter((ep) => !hasSnoozedInstance(ep)).length;
         try {
           await bulkUnmuteAlerts({ http, rules });
           succeeded += mutedOnlyCount;

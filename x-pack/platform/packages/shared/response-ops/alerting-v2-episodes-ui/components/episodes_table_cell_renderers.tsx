@@ -139,6 +139,7 @@ export const EpisodeStatusCell = ({ row, columnId }: CellRendererProps) => {
     snoozedUntil: (row.flattened.snoozed_until as string | undefined) ?? null,
     snoozeConditions: row.flattened.snooze_conditions as SnoozeCondition[] | undefined,
     snoozeConditionOperator: row.flattened.snooze_condition_operator as 'any' | 'all' | undefined,
+    isMuted: row.flattened.is_muted as boolean | undefined,
   };
 
   return (
