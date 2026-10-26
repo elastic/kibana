@@ -22,6 +22,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { ResponseActionDetails } from '../../response_action';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { ActionCreatedBy } from './action_created_by';
 import { canUserCancelCommand } from '../../../../../common/endpoint/service/authz/cancel_authz_utils';
@@ -35,7 +36,6 @@ import { FormattedDate } from '../../../../common/components/formatted_date';
 import { ARIA_LABELS, TABLE_COLUMN_NAMES, UX_MESSAGES } from '../translations';
 import { getEmptyValue } from '../../../../common/components/empty_value';
 import { ResponseActionStatusBadge } from './response_action_status_badge';
-import { ActionsLogExpandedTray } from './action_log_expanded_tray';
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 import { MANAGEMENT_PAGE_SIZE_OPTIONS } from '../../../common/constants';
 import { useUrlPagination } from '../../../hooks/use_url_pagination';
@@ -108,7 +108,11 @@ export const ActionsLogTable = memo<ActionsLogTableProps>(
               idToRowMap[actionId] = <EuiSkeletonText size="relative" lines={8} />;
             } else {
               idToRowMap[actionId] = (
-                <ActionsLogExpandedTray action={actionItem} data-test-subj={dataTestSubj} />
+                <ResponseActionDetails
+                  action={actionItem}
+                  data-test-subj={dataTestSubj}
+                  textSize="xs"
+                />
               );
             }
             return idToRowMap;
@@ -134,7 +138,7 @@ export const ActionsLogTable = memo<ActionsLogTableProps>(
           // assign the expanded tray content to the map
           // with action details
           expandedRowMapCopy[action.id] = (
-            <ActionsLogExpandedTray action={action} data-test-subj={dataTestSubj} />
+            <ResponseActionDetails action={action} data-test-subj={dataTestSubj} textSize="xs" />
           );
         }
         onShowActionDetails(Object.keys(expandedRowMapCopy));
