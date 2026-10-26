@@ -201,6 +201,8 @@ export const buildWorkerModePlan = ({
     seededAt: now.toISOString(),
     lastAlertAt: new Date(Math.max(...alertTimes)).toISOString(),
     firstEventAt: firstEventMs === undefined ? undefined : new Date(firstEventMs).toISOString(),
+    // Kept on the manifest. The search no longer uses it: the analysis window follows
+    // the cited alerts' `kibana.alert.original_time`, not the discovery timestamp.
     windowDeadline: new Date(
       (firstEventMs ?? Math.min(...alertTimes)) + FP_TP_RAW_EVENT_WINDOW_MS
     ).toISOString(),
