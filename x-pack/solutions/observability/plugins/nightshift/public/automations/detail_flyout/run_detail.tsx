@@ -138,6 +138,14 @@ export const RunDetail = ({
                             'Daily trigger limit of {limit} was already reached, so this trigger did not start a run.',
                           values: { limit: run.dailyLimit ?? '—' },
                         })
+                      : run.skipReason === 'no_open_investigation'
+                      ? i18n.translate(
+                          'xpack.nightshift.automations.detail.noOpenInvestigationReason',
+                          {
+                            defaultMessage:
+                              'The alert recovered, but no open investigation holds it, so there was nothing to follow up on.',
+                          }
+                        )
                       : '—',
                 },
                 { title: labels.automation, description: automationName },
