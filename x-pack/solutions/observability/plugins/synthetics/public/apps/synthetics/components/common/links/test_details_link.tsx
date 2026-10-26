@@ -45,7 +45,7 @@ export const TestDetailsLink = ({
       href={getTestRunDetailLink({
         basePath,
         checkGroup: ping.monitor.check_group,
-        monitorId: ping?.config_id ?? '',
+        monitorId: ping?.config_id ?? ping.monitor?.id ?? '',
         locationId: selectedLocation?.id,
         spaceId,
         remoteName,

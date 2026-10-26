@@ -348,6 +348,10 @@ Give the suite its own Vault secret with `vaultSecret`, so rotating its credenti
 | `--profile <file profile>`   | `config.<profile>.json`, which holds the suite's blocks next to the general keys              |
 | No `vaultSecret` (any place) | The general config (`--profile` config locally, `KBN_EVALS_CONFIG_B64` in CI)                 |
 
+CI forwards the initial hook input as `KBN_EVALS_SCOUT_HOOK_CONFIG_B64`. The native `evals run`
+command reuses it when no datasets profile is selected, so both hook invocations see the same
+suite secret without another Vault read. Explicit profiles retain their own configuration.
+
 Manage the secret with the Vault scripts' `--suite` flag, which keeps the local copy in a gitignored `vault/config.json` next to the suite's `playwright.config.ts` (copy `vault/config.example.json` to start):
 
 ```bash

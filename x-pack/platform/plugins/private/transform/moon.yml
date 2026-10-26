@@ -114,6 +114,4 @@ fileGroups:
     - test/scout_cps_local/**/*
     - public/**/*.json
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

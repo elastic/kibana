@@ -7,7 +7,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import type { HorizontalAlignment } from '@elastic/eui';
 import {
-  EuiBadge,
   EuiBasicTable,
   EuiButton,
   EuiEmptyPrompt,
@@ -29,34 +28,29 @@ import type {
 } from '../../../../../../types';
 import type { AgentlessPolicyThroughput } from '../../../../../../../../../common/types/rest_spec/agentless_policy';
 import {
-  AGENTS_PREFIX,
   FLEET_CONNECTORS_PACKAGE,
   IS_AGENTLESS_QUERY_PARAM,
-  SO_SEARCH_LIMIT,
 } from '../../../../../../../../../common/constants';
 import type { usePagination } from '../../../../../../hooks';
 import {
   useLink,
-  sendGetAgents,
+  useAgentsForPolicyIds,
   useAuthz,
   useStartServices,
   useBulkGetAgentlessPolicyThroughput,
   useDiscoverLocator,
 } from '../../../../../../hooks';
-import {
-  getAgentlessThroughputIndexPatterns,
-  buildPolicyBaseIdsWithFallbackKuery,
-} from '../../../../../../../../../common/services';
+import { getAgentlessThroughputIndexPatterns } from '../../../../../../../../../common/services';
 import { removeVersionSuffixFromPolicyId } from '../../../../../../../../../common/services/version_specific_policies_utils';
 import { isAgentlessPoliciesUIEnabled } from '../../../../../../services';
 import {
   Loading,
   PackagePolicyActionsMenu,
   AgentlessEnrollmentFlyout,
+  AgentStatusBadge,
 } from '../../../../../../components';
 
 import { Persona } from '../persona';
-import { AgentHealth } from '../../../../../../../fleet/sections/agents/components';
 
 import { PackagePolicyUpgradeCell } from './package_policy_upgrade_cell';
 import { ThroughputCell } from './throughput_cell';
@@ -92,8 +86,6 @@ export const AgentlessPackagePoliciesTable = ({
   const { notifications } = core;
   const authz = useAuthz();
   const { getHref } = useLink();
-  const [isAgentsLoading, setIsAgentsLoading] = useState<boolean>(false);
-  const [agentsByPolicyId, setAgentsByPolicyId] = useState<Record<string, Agent>>({});
   const canReadAgents = authz.fleet.readAgents;
 
   // Collect ids for non-connector policies only; connectors don't ingest via agents
@@ -147,65 +139,48 @@ export const AgentlessPackagePoliciesTable = ({
     [discoverLocator]
   );
 
-  // Kuery for all agents enrolled into the agent policies associated with the package policies.
+  // Agents enrolled into the agent policies associated with the package policies, polled every 30
+  // seconds, if the user has access to read agents.
   // We use the first agent policy as agentless package policies have a 1:1 relationship with agent policies.
   // Maximum # of agent policies is 50, based on the max page size in UI.
-  // Uses policy_base_id (with policy_id fallback) so that agents on version-specific variants
-  // of these policies are included.
-  const agentsKuery = useMemo(() => {
-    const policyIds = packagePolicies.reduce<string[]>(
-      (ids, { agentPolicies: aps }) => (aps[0] ? [...ids, aps[0].id] : ids),
-      []
-    );
-    return buildPolicyBaseIdsWithFallbackKuery(
-      policyIds,
-      `${AGENTS_PREFIX}.policy_base_id`,
-      `${AGENTS_PREFIX}.policy_id`
-    );
-  }, [packagePolicies]);
+  const agentPolicyIds = useMemo(
+    () =>
+      packagePolicies.reduce<string[]>(
+        (ids, { agentPolicies: aps }) => (aps[0] ? [...ids, aps[0].id] : ids),
+        []
+      ),
+    [packagePolicies]
+  );
+  const {
+    agents,
+    isLoading: isAgentsLoading,
+    error: agentsError,
+  } = useAgentsForPolicyIds(agentPolicyIds, {
+    enabled: canReadAgents,
+    refetchInterval: REFRESH_INTERVAL_MS,
+  });
 
-  // Fetch agents using above kuery, if the user has access to read agents
-  // Polls every 30 seconds
+  // Keyed by the base policy id so the lookup at `agentsByPolicyId[agentPolicy.id]` resolves
+  // correctly for agents on version-specific variants.
+  const agentsByPolicyId = useMemo(
+    () =>
+      agents.reduce<Record<string, Agent>>((acc, agent) => {
+        if (agent.policy_id) {
+          acc[removeVersionSuffixFromPolicyId(agent.policy_id)] = agent;
+        }
+        return acc;
+      }, {}),
+    [agents]
+  );
+
   useEffect(() => {
-    const fetchAgents = async () => {
-      const { data: agentsData, error: agentsError } = await sendGetAgents({
-        perPage: SO_SEARCH_LIMIT,
-        kuery: agentsKuery,
-      });
-
-      setAgentsByPolicyId(
-        (agentsData?.items || []).reduce((acc, agent) => {
-          if (agent.policy_id) {
-            // Key by the base policy id so the lookup at `agentsByPolicyId[agentPolicy.id]`
-            // resolves correctly for agents on version-specific variants.
-            acc[removeVersionSuffixFromPolicyId(agent.policy_id)] = agent;
-          }
-          return acc;
-        }, {} as Record<string, Agent>)
-      );
-
-      if (agentsError) {
-        notifications.toasts.addError(agentsError, {
-          title: i18n.translate(
-            'xpack.fleet.epm.packageDetails.integrationList.agentlessStatusError',
-            {
-              defaultMessage: 'Error fetching managed integration status information',
-            }
-          ),
-        });
-      }
-      setIsAgentsLoading(false);
-    };
-
-    if (canReadAgents) {
-      setIsAgentsLoading(true);
-      fetchAgents();
-      const interval = setInterval(() => {
-        fetchAgents();
-      }, REFRESH_INTERVAL_MS);
-      return () => clearInterval(interval);
-    }
-  }, [agentsKuery, canReadAgents, notifications.toasts]);
+    if (!agentsError) return;
+    notifications.toasts.addError(agentsError, {
+      title: i18n.translate('xpack.fleet.epm.packageDetails.integrationList.agentlessStatusError', {
+        defaultMessage: 'Error fetching managed integration status information',
+      }),
+    });
+  }, [agentsError, notifications.toasts]);
 
   // Flyout state
   const { search } = useLocation();
@@ -382,31 +357,16 @@ export const AgentlessPackagePoliciesTable = ({
                     const agent =
                       (agentPolicy?.id && agentsByPolicyId[agentPolicy.id]) || undefined;
 
-                    // Status badge click handler
-                    const statusBadgeProps = {
-                      onClick: () => {
-                        setFlyoutOpenForPolicyId(packagePolicy.id);
-                        setFlyoutPackagePolicy(packagePolicy);
-                        setFlyoutAgentPolicy(agentPolicy);
-                      },
-                      'data-test-subj': 'agentlessStatusBadge',
-                      onClickAriaLabel: i18n.translate(
-                        'xpack.fleet.epm.packageDetails.integrationList.agentlessStatusAriaLabel',
-                        {
-                          defaultMessage: 'Open status details',
-                        }
-                      ),
-                    };
-
-                    return agent ? (
-                      <AgentHealth agent={agent} {...statusBadgeProps} />
-                    ) : (
-                      <EuiBadge color="default" {...statusBadgeProps}>
-                        <FormattedMessage
-                          id="xpack.fleet.packageDetails.integrationList.pendingAgentlessStatus"
-                          defaultMessage="Pending"
-                        />
-                      </EuiBadge>
+                    return (
+                      <AgentStatusBadge
+                        agent={agent}
+                        onClick={() => {
+                          setFlyoutOpenForPolicyId(packagePolicy.id);
+                          setFlyoutPackagePolicy(packagePolicy);
+                          setFlyoutAgentPolicy(agentPolicy);
+                        }}
+                        data-test-subj="agentlessStatusBadge"
+                      />
                     );
                   },
                 },

@@ -119,3 +119,16 @@ export const WORKFLOW_YAML_CHANGED_EVENT = 'workflow:yaml_changed';
  * trigger node. Matches `HIGHLIGHTED_STEP_TRIGGER` in workflows_management.
  */
 export const WORKFLOW_GRAPH_FOCUS_TRIGGER = '__trigger';
+
+/**
+ * Maximum number of alerts or documents a single run-workflow selection may carry.
+ *
+ * Sized against the 10 MB budget the server holds the expanded event to: a full selection fits
+ * when documents average under about 20 KB, which covers typical alerts and events. Unusually
+ * large documents can still exceed the budget, which the server rejects after expansion with a
+ * 400. Selections travel as `(id, index)` pairs, so a full selection of real pairs (64-character
+ * alert ids, index names around 60 characters) stays near 75 KB, well inside Kibana's default
+ * 1 MB `server.maxPayload`. The server enforces the count during trigger preprocessing and the UI
+ * reads the same number to disable a run on a larger selection.
+ */
+export const MAX_RUN_WORKFLOW_DOCS = 500;

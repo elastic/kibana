@@ -15,11 +15,13 @@ import { COPY_LINK_TOASTS } from './translations';
  */
 export const copyLink = (
   toasts: NotificationsStart['toasts'] | undefined,
-  link: string
+  link: string,
+  onFailureShown?: () => void
 ): boolean => {
   const copied = copyToClipboard(link);
   if (!copied) {
     toasts?.addDanger(COPY_LINK_TOASTS.failed);
+    onFailureShown?.();
   }
   return copied;
 };

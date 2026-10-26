@@ -30,7 +30,7 @@ export function registerGetTemplateRoute(
       path: '/internal/workflows/library/templates/{slug}',
       access: 'internal',
       security: WORKFLOW_READ_SECURITY,
-      summary: 'Get a Workflow Template Library template',
+      summary: 'Get a Workflow Template library template',
       description: 'Returns the parsed template-metadata block and workflow body for a slug.',
     })
     .addVersion(

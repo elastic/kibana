@@ -68,7 +68,37 @@ const testSubtechniques: MitreSubtechniqueSummary[] = [
   },
 ];
 
+const ATLAS_BASE = {
+  framework: 'atlas' as const,
+  framework_version: '5.1',
+  revoked: false,
+  deprecated: false,
+};
+
+const atlasTactics: MitreTacticSummary[] = [
+  {
+    ...ATLAS_BASE,
+    type: 'tactic',
+    id: 'AML.TA0000',
+    name: 'Reconnaissance',
+    reference: 'https://atlas.mitre.org/tactics/AML.TA0000/',
+    position: 0,
+  },
+];
+
+const atlasTechniques: MitreTechniqueSummary[] = [
+  {
+    ...ATLAS_BASE,
+    type: 'technique',
+    id: 'AML.T0044',
+    name: 'Full ML Model Access',
+    reference: 'https://atlas.mitre.org/techniques/AML.T0044/',
+    tactic_ids: ['AML.TA0000'],
+  },
+];
+
 const MITRE_FRAMEWORK = 'MITRE ATT&CK';
+const ATLAS_FRAMEWORK = 'MITRE ATLAS';
 
 const renderThreat = (threat: Threats) =>
   render(
@@ -78,14 +108,25 @@ const renderThreat = (threat: Threats) =>
   );
 
 beforeEach(() => {
-  mockUseMitreConfiguration.mockReturnValue({
-    tactics: testTactics,
-    techniques: testTechniques,
-    subtechniques: testSubtechniques,
-    frameworkVersion: '16.1',
-    isLoading: false,
-    isError: false,
-  });
+  mockUseMitreConfiguration.mockImplementation((params?: { framework?: string }) =>
+    params?.framework === 'atlas'
+      ? {
+          tactics: atlasTactics,
+          techniques: atlasTechniques,
+          subtechniques: [],
+          frameworkVersion: '5.1',
+          isLoading: false,
+          isError: false,
+        }
+      : {
+          tactics: testTactics,
+          techniques: testTechniques,
+          subtechniques: testSubtechniques,
+          frameworkVersion: '16.1',
+          isLoading: false,
+          isError: false,
+        }
+  );
 });
 
 describe('ThreatEuiFlexGroup', () => {
@@ -205,14 +246,14 @@ describe('ThreatEuiFlexGroup', () => {
   it('does not show warnings when the hook returns empty data with isLoading:false and isError:false (managed source not yet populated)', async () => {
     // Simulate the managed source returning empty arrays with isLoading:false, isError:false —
     // ensureInitialized() is false so the server returns a 200 with no entities yet.
-    mockUseMitreConfiguration.mockReturnValue({
+    mockUseMitreConfiguration.mockImplementation(() => ({
       tactics: [],
       techniques: [],
       subtechniques: [],
       frameworkVersion: undefined,
       isLoading: false,
       isError: false,
-    });
+    }));
 
     const threat: Threats = [
       {
@@ -242,14 +283,14 @@ describe('ThreatEuiFlexGroup', () => {
 
   it('does not show false-positive warnings before the MITRE dataset has loaded', async () => {
     // Simulate loading state: hook returns empty arrays with isLoading true.
-    mockUseMitreConfiguration.mockReturnValue({
+    mockUseMitreConfiguration.mockImplementation(() => ({
       tactics: [],
       techniques: [],
       subtechniques: [],
       frameworkVersion: undefined,
       isLoading: true,
       isError: false,
-    });
+    }));
 
     const threat: Threats = [
       {
@@ -367,5 +408,84 @@ describe('ThreatEuiFlexGroup', () => {
     expect(
       await screen.findByText('Abuse Elevation Control Mechanism (T1548)')
     ).toBeInTheDocument();
+  });
+
+  describe('framework groups', () => {
+    const attackEntry = {
+      framework: MITRE_FRAMEWORK,
+      tactic: {
+        id: 'TA0005',
+        name: 'Defense Evasion',
+        reference: 'https://attack.mitre.org/tactics/TA0005/',
+      },
+      technique: [],
+    };
+    const atlasEntry = (techniqueId: string) => ({
+      framework: ATLAS_FRAMEWORK,
+      tactic: {
+        id: 'AML.TA0000',
+        name: 'Reconnaissance',
+        reference: 'https://atlas.mitre.org/tactics/AML.TA0000/',
+      },
+      technique: [
+        {
+          id: techniqueId,
+          name: 'Some ATLAS Technique',
+          reference: `https://atlas.mitre.org/techniques/${techniqueId}/`,
+        },
+      ],
+    });
+
+    it('renders one titled group per framework, ATT&CK before ATLAS', async () => {
+      renderThreat([atlasEntry('AML.T0044'), attackEntry] as Threats);
+
+      const titles = await screen.findAllByTestId('threatFrameworkGroupTitle');
+      expect(titles.map((title) => title.textContent)).toEqual(['MITRE ATT&CK', 'MITRE ATLAS']);
+      expect(screen.getByTestId('threatFrameworkGroup-enterprise')).toBeInTheDocument();
+      expect(screen.getByTestId('threatFrameworkGroup-atlas')).toBeInTheDocument();
+    });
+
+    it('does not warn for ATLAS ids present in the ATLAS dataset', async () => {
+      renderThreat([atlasEntry('AML.T0044')] as Threats);
+
+      expect(await screen.findByText('Reconnaissance (AML.TA0000)')).toBeInTheDocument();
+      expect(
+        screen.queryByTestId('threatUnsupportedMitreIdWarning-AML.TA0000')
+      ).not.toBeInTheDocument();
+      expect(
+        screen.queryByTestId('threatUnsupportedMitreIdWarning-AML.T0044')
+      ).not.toBeInTheDocument();
+    });
+
+    it('warns, naming MITRE ATLAS, for an ATLAS id absent from the ATLAS dataset', async () => {
+      renderThreat([atlasEntry('AML.T9999')] as Threats);
+
+      const warning = await screen.findByTestId('threatUnsupportedMitreIdWarning-AML.T9999');
+      expect(warning).toHaveTextContent('MITRE ATLAS');
+    });
+
+    it('renders an unknown framework as its own group with a warning and no id warnings', async () => {
+      renderThreat([
+        {
+          ...attackEntry,
+          framework: 'Custom Framework',
+          tactic: { ...attackEntry.tactic, id: 'X1' },
+        },
+      ] as Threats);
+
+      const group = await screen.findByTestId('threatFrameworkGroup-unknown');
+      expect(group).toHaveTextContent('Custom Framework');
+      expect(screen.getByTestId('threatUnknownFrameworkWarning')).toBeInTheDocument();
+      expect(group.querySelector('[data-test-subj^="threatUnsupportedMitreIdWarning"]')).toBeNull();
+    });
+
+    it('renders entries with an empty framework under "MITRE ATT&CK"', async () => {
+      renderThreat([{ ...attackEntry, framework: '' }] as Threats);
+
+      expect(await screen.findByTestId('threatFrameworkGroupTitle')).toHaveTextContent(
+        'MITRE ATT&CK'
+      );
+      expect(screen.getByTestId('threatFrameworkGroup-enterprise')).toBeInTheDocument();
+    });
   });
 });

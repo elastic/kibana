@@ -269,13 +269,14 @@ export class SourcesClient {
     enabled?: boolean;
     ids?: string[];
   }): Promise<ListSourcesResponse> {
+    const term = search?.trim() || undefined;
     if (ids) {
-      return this.listByIds({ ids, page, perPage, search, enabled });
+      return this.listByIds({ ids, page, perPage, search: term, enabled });
     }
 
     const filters: string[] = [];
-    if (search) {
-      filters.push(`${NIGHTSHIFT_SOURCE_SO_TYPE}.attributes.title: ${escapeKuery(search)}*`);
+    if (term) {
+      filters.push(`${NIGHTSHIFT_SOURCE_SO_TYPE}.attributes.title: ${escapeKuery(term)}*`);
     }
     if (enabled !== undefined) {
       filters.push(`${NIGHTSHIFT_SOURCE_SO_TYPE}.attributes.enabled: ${enabled}`);
