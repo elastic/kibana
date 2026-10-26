@@ -26,7 +26,7 @@ import {
 } from './constants';
 import { DispatcherPipeline, type DispatcherPipelineContract } from './execution_pipeline';
 import { AlertScan } from './state';
-import { toAction } from './steps/store_actions_step';
+import { toAction } from './steps/utils/action_documents';
 import type {
   DispatcherExecutionParams,
   DispatcherExecutionResult,
