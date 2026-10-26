@@ -28,6 +28,7 @@ import type { OnUpdateAlertStatusError, OnUpdateAlertStatusSuccess } from './typ
 import { useAlertCloseInfoModal } from '../../../../detections/hooks/use_alert_close_info_modal';
 import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { useRunDocumentWorkflowPanel } from '../../../../detections/components/alerts_table/timeline_actions/use_run_document_workflow_panel';
+import { toDocumentSelections } from '../../../../detections/components/alerts_table/timeline_actions/to_document_selections';
 import { ALERT_STATUS_ACTION_IDS } from '../../../constants/action_ids';
 
 export type BulkActionMenuItem = AlertTableContextMenuItem;
@@ -233,17 +234,11 @@ export const useBulkActionItems = ({
       },
     });
 
-  // Send only (id, index) pairs and let the server fetch each source. Embedding the flattened
-  // ECS of every selected row put the request over the payload limit on large selections.
-  const workflowDocumentIds = useMemo(() => {
-    if (!data) return [];
-    return data
-      .filter((item) => eventIds.includes(item._id))
-      .map((item) => ({
-        _id: item._id,
-        _index: item._index ?? '',
-      }));
-  }, [data, eventIds]);
+  // Ids only, to keep large selections under `server.maxPayload`.
+  const workflowDocumentIds = useMemo(
+    () => toDocumentSelections((data ?? []).filter(({ _id }) => eventIds.includes(_id))),
+    [data, eventIds]
+  );
 
   const noop = useCallback(() => {}, []);
   const { runWorkflowMenuItem, runDocumentWorkflowPanel } = useRunDocumentWorkflowPanel({

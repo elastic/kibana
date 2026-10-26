@@ -8,8 +8,8 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { DocumentSelection } from '@kbn/workflows';
 import { MAX_RUN_WORKFLOW_DOCS } from '@kbn/workflows';
-import type { DocumentSelection } from '../../../../../common/types/document_types';
 import { WorkflowTriggerInputError } from '../../../workflow_trigger_input_error';
 
 export interface FetchedSource {

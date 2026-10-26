@@ -25,6 +25,7 @@ import { useInvestigateInTimeline } from '../../../../detections/components/aler
 import { useIsInSecurityApp } from '../../../../common/hooks/is_in_security_app';
 import { useRunAlertWorkflowPanel } from '../../../../detections/components/alerts_table/timeline_actions/use_run_alert_workflow_panel';
 import { useRunDocumentWorkflowPanel } from '../../../../detections/components/alerts_table/timeline_actions/use_run_document_workflow_panel';
+import { toDocumentSelections } from '../../../../detections/components/alerts_table/timeline_actions/to_document_selections';
 import type { HostIsolationAction } from '../../../../common/components/endpoint/host_isolation/from_alerts/use_host_isolation_action';
 import { useHostIsolationAction } from '../../../../common/components/endpoint/host_isolation/from_alerts/use_host_isolation_action';
 import { HostIsolationFlyout } from '../../../../common/components/endpoint/host_isolation/from_alerts/host_isolation_flyout';
@@ -183,10 +184,15 @@ export const TakeActionButton = memo(
       closePopover: closePopoverHandler,
     });
 
+    const documentIds = useMemo(
+      () => toDocumentSelections([{ _id: documentId, _index: hit.raw._index }]),
+      [documentId, hit.raw._index]
+    );
+
     const { runWorkflowMenuItem: documentWorkflowMenuItem, runDocumentWorkflowPanel } =
       useRunDocumentWorkflowPanel({
         closePopover: closePopoverHandler,
-        documentIds: [{ _id: documentId, _index: hit.raw._index ?? '' }],
+        documentIds,
       });
 
     const { exploreActionItems } = useExploreActions({

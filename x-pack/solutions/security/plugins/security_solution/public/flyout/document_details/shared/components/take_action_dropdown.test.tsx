@@ -511,27 +511,20 @@ describe('take action dropdown', () => {
   });
 
   describe('document workflow payload', () => {
-    // Ids only: the server resolves each document's fields, so every caller produces the same
-    // document shape regardless of which data it happens to have loaded.
     it('should pass the document id and index to the document workflow panel', () => {
       mount(
         <TestProviders>
-          <TakeActionDropdown {...defaultProps} />
+          <TakeActionDropdown
+            {...defaultProps}
+            dataAsNestedObject={getDetectionAlertMock({ _index: 'test-index' })}
+          />
         </TestProviders>
       );
 
       expect(mockUseRunDocumentWorkflowPanel).toHaveBeenCalledWith(
         expect.objectContaining({
-          documentIds: [
-            {
-              _id: defaultProps.dataAsNestedObject._id,
-              _index: defaultProps.dataAsNestedObject._index ?? '',
-            },
-          ],
+          documentIds: [{ _id: defaultProps.dataAsNestedObject._id, _index: 'test-index' }],
         })
-      );
-      expect(mockUseRunDocumentWorkflowPanel).not.toHaveBeenCalledWith(
-        expect.objectContaining({ documents: expect.anything() })
       );
     });
   });

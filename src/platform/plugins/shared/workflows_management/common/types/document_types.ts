@@ -7,10 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export interface DocumentSelection {
-  _id: string;
-  _index: string;
-}
+import type { DocumentSelection } from '@kbn/workflows';
 
 /** An expanded document as it appears in `event.documents` once preprocessing has run. */
 export type ExpandedDocument = DocumentSelection & Record<string, unknown>;

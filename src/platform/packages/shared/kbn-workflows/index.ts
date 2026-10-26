@@ -59,6 +59,7 @@ export * from './common/workflows_events';
 export type * from './common/event_trigger_replay';
 export * from './common/well_known_trigger_sources';
 export type { WorkflowExecutionEventDispatchMetadata } from './common/workflow_execution_schedule_metadata';
+export type { DocumentSelection } from './common/document_selection';
 export * from './common/privileges';
 export * from './common/utils';
 export * from './common/step_types';

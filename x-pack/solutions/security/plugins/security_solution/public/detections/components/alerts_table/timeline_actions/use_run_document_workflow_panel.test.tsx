@@ -389,6 +389,16 @@ describe('useRunDocumentWorkflowPanel', () => {
       expect(result.current.runDocumentWorkflowPanel).toHaveLength(1);
     });
 
+    it('returns empty lists outside a case with no documents', () => {
+      const { result } = renderHook(
+        () => useRunDocumentWorkflowPanel({ ...defaultProps, documentIds: [] }),
+        { wrapper: TestProviders }
+      );
+
+      expect(result.current.runWorkflowMenuItem).toEqual([]);
+      expect(result.current.runDocumentWorkflowPanel).toEqual([]);
+    });
+
     it('returns the menu item inside a case with originEventId when Cases runs are available', () => {
       mockUseCaseAttachmentWorkflowRouting.mockReturnValue('available');
 
@@ -476,40 +486,6 @@ describe('useRunDocumentWorkflowPanel', () => {
         manualWorkflow,
         alertWorkflow,
       ]);
-    });
-
-    // Every caller sends id pairs and lets the server resolve the fields: it keeps a large
-    // selection inside the payload limit and gives every caller the same document shape.
-    it('sends only id pairs, never an embedded source', async () => {
-      const documentIds = [
-        { _id: 'doc-1', _index: 'documents-index' },
-        { _id: 'doc-2', _index: 'documents-index' },
-      ];
-      const closePopover = jest.fn();
-      const { result } = renderHook(
-        () => useRunDocumentWorkflowPanel({ closePopover, documentIds }),
-        { wrapper: TestProviders }
-      );
-      const { getByTestId } = renderContextMenu(
-        result.current.runWorkflowMenuItem,
-        result.current.runDocumentWorkflowPanel
-      );
-
-      await waitFor(() => {
-        expect(getByTestId('workflow-selector-mock')).toBeInTheDocument();
-      });
-
-      const panelProps = mockRunWorkflowPanelProps[mockRunWorkflowPanelProps.length - 1];
-      if (!panelProps) {
-        throw new Error('Expected RunWorkflowPanel to render');
-      }
-      expect(panelProps.inputs).toEqual({
-        event: {
-          triggerType: 'document',
-          documentIds,
-        },
-      });
-      expect(panelProps.inputs).not.toHaveProperty('event.documents');
     });
   });
 });

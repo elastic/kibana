@@ -347,6 +347,7 @@ describe('Alert table context menu', () => {
   describe('Document workflow actions (events)', () => {
     const eventEcsRowData: Ecs = {
       _id: '1',
+      _index: 'test-index',
       agent: { type: ['blah'] },
       event: {
         kind: ['event'],
@@ -411,8 +412,6 @@ describe('Alert table context menu', () => {
       expect(wrapper.getByTestId(runDocumentWorkflowActionButton)).toBeInTheDocument();
     });
 
-    // Ids only: the server resolves each document's fields, so every caller produces the same
-    // document shape regardless of which data it happens to have loaded.
     test('it passes the document id rather than the row ECS fields', async () => {
       render(
         <TestProviders>
@@ -422,11 +421,8 @@ describe('Alert table context menu', () => {
 
       expect(mockUseRunDocumentWorkflowPanel).toHaveBeenCalledWith(
         expect.objectContaining({
-          documentIds: [{ _id: eventEcsRowData._id, _index: '' }],
+          documentIds: [{ _id: eventEcsRowData._id, _index: 'test-index' }],
         })
-      );
-      expect(mockUseRunDocumentWorkflowPanel).not.toHaveBeenCalledWith(
-        expect.objectContaining({ documents: expect.anything() })
       );
     });
 

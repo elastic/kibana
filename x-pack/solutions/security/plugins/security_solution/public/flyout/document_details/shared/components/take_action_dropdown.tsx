@@ -18,6 +18,7 @@ import { isNonLocalIndexName } from '@kbn/es-query';
 import type { SearchHit } from '../../../../../common/search_strategy';
 import { useRunAlertWorkflowPanel } from '../../../../detections/components/alerts_table/timeline_actions/use_run_alert_workflow_panel';
 import { useRunDocumentWorkflowPanel } from '../../../../detections/components/alerts_table/timeline_actions/use_run_document_workflow_panel';
+import { toDocumentSelections } from '../../../../detections/components/alerts_table/timeline_actions/to_document_selections';
 import { FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID } from './test_ids';
 import { getAlertDetailsFieldValue } from '../../../../common/lib/endpoint/utils/get_event_details_field_values';
 import { useAlertExceptionActions } from '../../../../detections/components/alerts_table/timeline_actions/use_add_exception_actions';
@@ -317,7 +318,8 @@ export const TakeActionDropdown = memo(
       });
 
     const documentIds = useMemo(
-      () => [{ _id: dataAsNestedObject._id, _index: dataAsNestedObject._index ?? '' }],
+      () =>
+        toDocumentSelections([{ _id: dataAsNestedObject._id, _index: dataAsNestedObject._index }]),
       [dataAsNestedObject._id, dataAsNestedObject._index]
     );
 

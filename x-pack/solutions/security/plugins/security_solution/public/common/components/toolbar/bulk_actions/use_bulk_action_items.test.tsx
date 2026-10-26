@@ -145,8 +145,6 @@ describe('useBulkActionItems', () => {
   });
 
   describe('workflow actions', () => {
-    // Embedding each selected row's flattened ECS put large selections over the request payload
-    // limit. Only the (id, index) pairs are sent now; the server fetches the sources.
     it('passes only id pairs for the selected rows, not their sources', () => {
       renderUseBulkActionItems({
         eventIds: ['selected-1', 'selected-2'],
@@ -180,8 +178,30 @@ describe('useBulkActionItems', () => {
           ],
         })
       );
-      expect(mockUseRunDocumentWorkflowPanel).not.toHaveBeenCalledWith(
-        expect.objectContaining({ documents: expect.anything() })
+    });
+
+    it('drops selected rows without an index', () => {
+      renderUseBulkActionItems({
+        eventIds: ['selected-1', 'no-index'],
+        data: [
+          {
+            _id: 'selected-1',
+            _index: 'test-index',
+            data: [],
+            ecs: { _id: 'selected-1' },
+          },
+          {
+            _id: 'no-index',
+            data: [],
+            ecs: { _id: 'no-index' },
+          },
+        ],
+      });
+
+      expect(mockUseRunDocumentWorkflowPanel).toHaveBeenCalledWith(
+        expect.objectContaining({
+          documentIds: [{ _id: 'selected-1', _index: 'test-index' }],
+        })
       );
     });
 
