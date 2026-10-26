@@ -23,5 +23,7 @@ export const customAppAttributesSchemaV1 = schema.object({
   document: schema.object({
     state: schema.recordOf(schema.string(), schema.any()),
     root: schema.recordOf(schema.string(), schema.any()),
+    /** How the app looks. Its accents and shapes are checked by the schema of the document. */
+    theme: schema.maybe(schema.recordOf(schema.string(), schema.any())),
   }),
 });

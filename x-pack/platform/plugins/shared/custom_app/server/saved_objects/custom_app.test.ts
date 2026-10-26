@@ -72,6 +72,15 @@ describe('the custom app saved object type', () => {
       expect(() => version['1'].schemas.create.validate(withoutDescription)).not.toThrow();
     });
 
+    it('accepts an app that has a theme, which is stored with the document and not indexed', () => {
+      const themed = {
+        ...attributes,
+        document: { ...attributes.document, theme: { accent: 'purple', shape: 'soft' } },
+      };
+
+      expect(version['1'].schemas.create.validate(themed)).toEqual(themed);
+    });
+
     it.each([
       ['no title', { ...attributes, title: undefined }],
       ['a title that is too long', { ...attributes, title: 'x'.repeat(257) }],

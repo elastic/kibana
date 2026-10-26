@@ -26,7 +26,6 @@ import { EditorFlyout } from '../editor/editor_flyout';
 import { useChatWithPage } from './use_chat_with_page';
 import { useListBack, useListBreadcrumb } from './list_breadcrumb';
 import { useUnsavedChangesGuard } from './use_unsaved_changes_guard';
-import { useUrlViewState } from './use_url_view_state';
 import type { AppServices } from './app';
 import type { SavedApp } from './saved_apps_client';
 
@@ -118,8 +117,6 @@ export const ViewPage = ({
     () => preview ?? draft ?? savedDocument ?? createEmptyDocument(),
     [preview, draft, savedDocument]
   );
-  // How the app is seen, such as its filters and an open flyout, is kept in the URL.
-  const { view, onViewChange } = useUrlViewState(shownDocument);
   // What the agent makes comes back here, as a change that is not saved yet.
   const describe = useChatWithPage({
     agentBuilder,
@@ -424,12 +421,7 @@ export const ViewPage = ({
             }}
           />
         ) : (
-          <LiveApp
-            document={shownDocument}
-            appId={app.id}
-            view={view}
-            onViewChange={onViewChange}
-          />
+          <LiveApp document={shownDocument} appId={app.id} />
         )}
       </EuiPageTemplate.Section>
 

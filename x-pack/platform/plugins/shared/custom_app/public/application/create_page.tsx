@@ -19,7 +19,6 @@ import { DetailsModal } from './details_modal';
 import { useChatWithPage } from './use_chat_with_page';
 import { useListBack, useListBreadcrumb } from './list_breadcrumb';
 import { useUnsavedChangesGuard } from './use_unsaved_changes_guard';
-import { useUrlViewState } from './use_url_view_state';
 import type { AppServices } from './app';
 
 const toMessage = (error: unknown): string =>
@@ -85,9 +84,6 @@ export const CreatePage = ({
   }, []);
 
   // What the agent makes comes back here, as a draft, and not only into the chat.
-  // How the app is seen, such as its filters and an open flyout, is kept in the URL.
-  const { view, onViewChange } = useUrlViewState(preview ?? draft);
-
   const describe = useChatWithPage({
     agentBuilder,
     getDocument: useCallback(() => draft, [draft]),
@@ -204,7 +200,7 @@ export const CreatePage = ({
             }}
           />
         ) : (
-          <LiveApp document={preview ?? draft} view={view} onViewChange={onViewChange} />
+          <LiveApp document={preview ?? draft} />
         )}
       </EuiPageTemplate.Section>
 

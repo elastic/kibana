@@ -7,7 +7,12 @@
 
 import { getESQLQueryVariables } from '@kbn/esql-utils';
 import type { CustomContentTemplateResolver } from '@kbn/custom-content-server';
-import { getNodeChildren, type AppNode, type StateDeclaration } from '@kbn/custom-app-common';
+import {
+  getNodeChildren,
+  type AppNode,
+  type AppTheme,
+  type StateDeclaration,
+} from '@kbn/custom-app-common';
 
 /** Each template is a call to a model, so one tool call can only ask for a few. */
 export const MAX_TEMPLATES_PER_CALL = 4;
@@ -45,9 +50,14 @@ const replaceNodes = (node: AppNode, replacements: ReadonlyMap<string, AppNode>)
   return node;
 };
 
-type Resolved =
-  | { document: { state: Record<string, StateDeclaration>; root: AppNode } }
-  | { error: string };
+/** What is resolved: the values and the components, and the rest of the document, such as its theme, as it is. */
+interface ResolvableDocument {
+  state: Record<string, StateDeclaration>;
+  root: AppNode;
+  theme?: AppTheme;
+}
+
+type Resolved = { document: ResolvableDocument } | { error: string };
 
 /**
  * Turns the `prompt` of each custom content component into its template, and drops the prompt.
@@ -56,7 +66,7 @@ type Resolved =
  * with no prompt keeps the template it came with.
  */
 export const resolveCustomContent = async (
-  document: { state: Record<string, StateDeclaration>; root: AppNode },
+  document: ResolvableDocument,
   resolver: CustomContentTemplateResolver
 ): Promise<Resolved> => {
   const prompted = collectPrompted(document.root);

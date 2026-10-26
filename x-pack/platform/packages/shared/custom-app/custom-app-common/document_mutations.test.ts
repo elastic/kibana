@@ -474,6 +474,29 @@ describe('stateKeyForColumn', () => {
   });
 });
 
+describe('a theme through the edits of a document', () => {
+  const themed = appDocumentSchema.parse({
+    theme: { accent: 'purple', shape: 'soft' },
+    state: { service: { type: 'string', default: '' } },
+    root: { type: 'stack', id: 'root', children: [{ type: 'text', id: 'intro', text: 'Hi' }] },
+  });
+
+  it('is kept when a node is added, changed, moved or removed', () => {
+    const added = addNode(themed, 'root', { type: 'text', id: 'more', text: 'More' });
+    expect(added.ok && added.document.theme).toEqual({ accent: 'purple', shape: 'soft' });
+
+    const changed = updateNode<'text'>(themed, 'intro', { text: 'Changed' });
+    expect(changed.ok && changed.document.theme).toEqual({ accent: 'purple', shape: 'soft' });
+
+    const removed = removeNode(themed, 'intro');
+    expect(removed.ok && removed.document.theme).toEqual({ accent: 'purple', shape: 'soft' });
+  });
+
+  it('is kept when the values that nothing uses are removed', () => {
+    expect(pruneUnusedValues(themed).theme).toEqual({ accent: 'purple', shape: 'soft' });
+  });
+});
+
 describe('pruneUnusedValues', () => {
   const withValues = (state: Record<string, unknown>, root: unknown) =>
     appDocumentSchema.parse({ state, root });

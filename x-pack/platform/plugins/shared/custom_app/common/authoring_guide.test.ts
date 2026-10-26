@@ -166,6 +166,17 @@ describe('the authoring guide', () => {
     expect(CUSTOM_APP_AUTHORING_GUIDE).toContain('do not guess it');
   });
 
+  it('teaches the theme: the accents, the shapes, and not to invent colours', () => {
+    expect(CUSTOM_APP_AUTHORING_GUIDE).toContain('"theme"');
+    expect(CUSTOM_APP_AUTHORING_GUIDE).toContain(
+      '"blue" | "teal" | "purple" | "pink" | "orange" | "green" | "red"'
+    );
+    expect(CUSTOM_APP_AUTHORING_GUIDE).toContain('"soft" | "sharp"');
+    expect(CUSTOM_APP_AUTHORING_GUIDE).toContain(
+      'There are no other colours, fonts or sizes to choose'
+    );
+  });
+
   it('says that a component has a query or a source, not both, and that a chart cannot show cases', () => {
     expect(CUSTOM_APP_AUTHORING_GUIDE).toContain('either a "query" or a "source", never both');
     expect(CUSTOM_APP_AUTHORING_GUIDE).toContain('A chart cannot show cases');

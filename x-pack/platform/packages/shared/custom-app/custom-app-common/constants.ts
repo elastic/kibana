@@ -60,6 +60,10 @@ export const CASES_SORT_FIELDS = [
 /** The filters of a cases source that can be set from a value of the app, in the order they are shown. */
 export const CASES_FILTERS = ['status', 'severity', 'search', 'tag'] as const;
 export const MAX_BUTTON_GROUP_OPTIONS = 10;
+/** The accents a page can have, a few named colours and not any colour, so that text stays readable. */
+export const THEME_ACCENTS = ['blue', 'teal', 'purple', 'pink', 'orange', 'green', 'red'] as const;
+/** How round the corners of a page are. */
+export const THEME_SHAPES = ['soft', 'sharp'] as const;
 /** A link to another page of Kibana: the longest path it can have, with its values in it. */
 export const MAX_LINK_PATH_LENGTH = 500;
 export const MAX_LINK_APP_ID_LENGTH = 100;

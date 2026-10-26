@@ -610,6 +610,54 @@ describe('forms', () => {
   });
 });
 
+describe('the theme of a page', () => {
+  const themed = (theme: unknown) => ({
+    theme,
+    root: { type: 'text', id: 't', text: 'x' },
+  });
+
+  it('is optional, and a page without one has none', () => {
+    const result = appDocumentSchema.parse({ root: { type: 'text', id: 't', text: 'x' } });
+
+    expect(result.theme).toBeUndefined();
+  });
+
+  it('is an accent, a shape, both or neither, from the lists', () => {
+    expect(appDocumentSchema.parse(themed({ accent: 'purple' })).theme).toEqual({
+      accent: 'purple',
+    });
+    expect(appDocumentSchema.parse(themed({ shape: 'soft' })).theme).toEqual({ shape: 'soft' });
+    expect(appDocumentSchema.parse(themed({ accent: 'teal', shape: 'sharp' })).theme).toEqual({
+      accent: 'teal',
+      shape: 'sharp',
+    });
+    expect(appDocumentSchema.parse(themed({})).theme).toEqual({});
+  });
+
+  it.each([
+    ['a colour of its own', { accent: '#ff0000' }],
+    ['a colour name that is not offered', { accent: 'magenta' }],
+    ['a shape that is not offered', { shape: 'round' }],
+    ['a setting that does not exist', { font: 'serif' }],
+  ])('is not %s', (_what, theme) => {
+    const result = appDocumentSchema.safeParse(themed(theme));
+
+    // An unknown setting is ignored by the schema; the others are refused.
+    if ('font' in theme) {
+      expect((result.success && result.data.theme) || {}).toEqual({});
+    } else {
+      expect(result.success).toBe(false);
+    }
+  });
+
+  it('is kept by the shape of a document that an agent tool takes', () => {
+    expect(appDocumentShapeSchema.parse(themed({ accent: 'pink', shape: 'soft' })).theme).toEqual({
+      accent: 'pink',
+      shape: 'soft',
+    });
+  });
+});
+
 describe('links', () => {
   const linkDoc = (to: unknown, state: Record<string, unknown> = {}, label = 'Open') => ({
     state,

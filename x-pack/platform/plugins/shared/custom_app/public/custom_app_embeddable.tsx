@@ -390,7 +390,7 @@ export const customAppEmbeddableFactory: EmbeddablePublicDefinition<
                       onUseExample={() => document$.next(createDefaultDocument())}
                     />
                   ) : (
-                    <AppFrame>
+                    <AppFrame theme={document.theme}>
                       <NodeRenderer node={document.root} />
                     </AppFrame>
                   )}

@@ -9,6 +9,8 @@ import { z } from '@kbn/zod/v4';
 import { CUSTOM_CONTENT_MAX_HEIGHT, CUSTOM_CONTENT_MIN_HEIGHT } from '@kbn/custom-content-common';
 import {
   CASES_SORT_FIELDS,
+  THEME_ACCENTS,
+  THEME_SHAPES,
   CUSTOM_APP_STATE_VERSION,
   MAX_ACTIONS_PER_EVENT,
   MAX_BUTTON_GROUP_OPTIONS,
@@ -484,14 +486,26 @@ export const getNodeChildren = (node: AppNode): readonly AppNode[] =>
  * to say what a document looks like, such as the input of an agent tool, whose own handler then
  * reports what is wrong with it in words an agent can act on.
  */
+/**
+ * How a page looks, as a choice from a short list and not as colours and sizes to set. It changes
+ * every component at once: the accent is the colour of what can be pressed and followed, and the
+ * shape is how round the corners are. A page with none looks as Kibana does.
+ */
+export const themeSchema = z.object({
+  accent: z.enum(THEME_ACCENTS).optional(),
+  shape: z.enum(THEME_SHAPES).optional(),
+});
+
 export const appDocumentShapeSchema = z.object({
   state: z.record(stateKeySchema, stateDeclarationSchema).default({}),
   root: nodeSchema,
+  theme: themeSchema.optional(),
 });
 
 export const appDocumentSchema = appDocumentShapeSchema.superRefine(validateDocument);
 
 export type StateDeclaration = z.output<typeof stateDeclarationSchema>;
+export type AppTheme = z.output<typeof themeSchema>;
 export type AppDocument = z.output<typeof appDocumentSchema>;
 
 /** The panel's own state, without the titles and time range every panel shares. */

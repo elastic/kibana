@@ -6,8 +6,10 @@
  */
 
 import React, { type ReactNode } from 'react';
-import { useEuiTheme } from '@elastic/eui';
+import { EuiThemeProvider, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
+import type { AppTheme } from '@kbn/custom-app-common';
+import { getThemeModifications, hasThemeModifications } from '../theme/page_theme';
 
 /**
  * The room an app has inside its panel: breathing space all round, and a scroll of its own if
@@ -17,10 +19,10 @@ import { css } from '@emotion/react';
  * only as much as its widest content. So the frame claims all of it, and what is stacked inside
  * is as wide as the panel, not as wide as its widest component.
  */
-export const AppFrame = ({ children }: { children: ReactNode }) => {
+export const AppFrame = ({ children, theme }: { children: ReactNode; theme?: AppTheme }) => {
   const { euiTheme } = useEuiTheme();
 
-  return (
+  const frame = (
     <div
       data-test-subj="customAppFrame"
       css={css({
@@ -34,5 +36,14 @@ export const AppFrame = ({ children }: { children: ReactNode }) => {
     >
       {children}
     </div>
+  );
+
+  // The theme of the page changes what is inside the frame, and nothing outside it.
+  return hasThemeModifications(theme) ? (
+    <EuiThemeProvider modify={getThemeModifications(theme)} wrapperProps={{ cloneElement: true }}>
+      {frame}
+    </EuiThemeProvider>
+  ) : (
+    frame
   );
 };
