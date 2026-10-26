@@ -593,7 +593,7 @@ describe('#toExpression', () => {
     const paletteExpression = (expression.chain[0].arguments.layers[0] as Ast).chain[1].arguments
       .palette[0] as Ast;
     expect(paletteExpression.chain[0].function).toEqual('system_palette');
-    expect(paletteExpression.chain[0].arguments.name).toEqual(['elastic_line_optimized']);
+    expect(paletteExpression.chain[0].arguments.name).toEqual(['elastic_line_optimized_extended']);
   });
 
   it('should use the default palette for non-line charts without explicit palette', () => {
@@ -743,7 +743,7 @@ describe('#toExpression', () => {
     const colorMappingConfig = JSON.parse(colorMappingJson);
     expect(colorMappingConfig).toEqual({
       ...DEFAULT_COLOR_MAPPING_CONFIG,
-      paletteId: 'elastic_line_optimized',
+      paletteId: 'elastic_line_optimized_extended',
     });
   });
 
@@ -861,7 +861,7 @@ describe('#toExpression', () => {
     const extendedDataLayer = layerChain[layerChain.length - 1];
     const paletteExpression = extendedDataLayer.arguments.palette[0] as Ast;
     expect(paletteExpression.chain[0].function).toEqual('system_palette');
-    expect(paletteExpression.chain[0].arguments.name).toEqual(['elastic_line_optimized']);
+    expect(paletteExpression.chain[0].arguments.name).toEqual(['elastic_line_optimized_extended']);
   });
 
   it('should ignore legacy palette and use series type default when collapsed', () => {
@@ -892,7 +892,7 @@ describe('#toExpression', () => {
     const extendedDataLayer = layerChain[layerChain.length - 1];
     const paletteExpression = extendedDataLayer.arguments.palette[0] as Ast;
     expect(paletteExpression.chain[0].function).toEqual('system_palette');
-    expect(paletteExpression.chain[0].arguments.name).toEqual(['elastic_line_optimized']);
+    expect(paletteExpression.chain[0].arguments.name).toEqual(['elastic_line_optimized_extended']);
   });
 
   it('should not set colorMapping when a legacy palette is explicitly set with active splits', () => {
