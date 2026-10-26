@@ -62,7 +62,7 @@ export function RequestFlyoutRedMetrics({
       titleTip: (
         <EuiIconTip
           content={i18n.translate('xpack.apm.requestFlyout.throughputHelp', {
-            defaultMessage: 'Throughput is measured in spans per minute (spm).',
+            defaultMessage: 'Throughput is measured in calls per minute (tpm).',
           })}
           position="right"
         />
