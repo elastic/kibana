@@ -17,13 +17,9 @@ import type {
 } from '@kbn/core/server';
 import { defineTopic } from '@kbn/core/server';
 import { AuthzDisabled } from '@kbn/core-security-server';
+import type { PingTopic } from '@kbn/pubsub-example-topic';
 
-interface PingData {
-  source: 'http' | 'timer';
-  message: string;
-}
-
-const pingTopic = defineTopic<PingData>('pubsubExample.ping');
+const pingTopic = defineTopic<PingTopic>('pubsubExample.ping');
 const TIMER_INTERVAL_MS = 30_000;
 
 export class PubSubExamplePlugin implements Plugin {

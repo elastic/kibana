@@ -20,6 +20,7 @@ dependsOn:
   - '@kbn/config-schema'
   - '@kbn/core'
   - '@kbn/core-security-server'
+  - '@kbn/pubsub-example-topic'
 tags:
   - plugin
   - prod

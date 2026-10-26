@@ -1957,6 +1957,7 @@
     "@kbn/plugin-helpers": "workspace:*",
     "@kbn/product-doc-artifact-builder": "workspace:*",
     "@kbn/profiler": "workspace:*",
+    "@kbn/pubsub-example-topic": "workspace:*",
     "@kbn/relocate": "workspace:*",
     "@kbn/repo-file-maps": "workspace:*",
     "@kbn/repo-linter": "workspace:*",

@@ -5,5 +5,10 @@
   },
   "include": ["server/**/*"],
   "exclude": ["target/**/*"],
-  "kbn_references": ["@kbn/config-schema", "@kbn/core", "@kbn/core-security-server"]
+  "kbn_references": [
+    "@kbn/config-schema",
+    "@kbn/core",
+    "@kbn/core-security-server",
+    "@kbn/pubsub-example-topic"
+  ]
 }

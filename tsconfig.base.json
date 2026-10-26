@@ -2133,6 +2133,8 @@
       "@kbn/proposals-ui/*": ["./x-pack/platform/packages/shared/kbn-proposals-ui/*"],
       "@kbn/pubsub-example-plugin": ["./examples/pubsub_example"],
       "@kbn/pubsub-example-plugin/*": ["./examples/pubsub_example/*"],
+      "@kbn/pubsub-example-topic": ["./examples/pubsub_example_topic"],
+      "@kbn/pubsub-example-topic/*": ["./examples/pubsub_example_topic/*"],
       "@kbn/query-activity-plugin": ["./x-pack/platform/plugins/shared/query_activity"],
       "@kbn/query-activity-plugin/*": ["./x-pack/platform/plugins/shared/query_activity/*"],
       "@kbn/random-sampling": ["./x-pack/platform/packages/private/kbn-random-sampling"],

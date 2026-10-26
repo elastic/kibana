@@ -5793,6 +5793,9 @@ importers:
       '@kbn/profiler':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-profiler
+      '@kbn/pubsub-example-topic':
+        specifier: workspace:*
+        version: link:examples/pubsub_example_topic
       '@kbn/relocate':
         specifier: workspace:*
         version: link:packages/kbn-relocate
@@ -6945,6 +6948,8 @@ importers:
   examples/preboot_example: {}
 
   examples/pubsub_example: {}
+
+  examples/pubsub_example_topic: {}
 
   examples/resizable_layout_examples: {}
 
