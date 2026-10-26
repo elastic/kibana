@@ -5,15 +5,11 @@
  * 2.0.
  */
 
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under the
- * Elastic License 2.0; you may not use this file except in compliance with the Elastic
- * License 2.0.
- */
-
 import type { ApiClientFixture } from '@kbn/scout-security';
+import type { KbnClient } from '@kbn/kbn-client';
 import {
   createApi,
+  createApiFromKbnClient,
   listWorkers,
   patchWorker,
   seedStubModel,
@@ -57,6 +53,46 @@ export const createOnboardingSpace = async (
   const api = createApi(apiClient, cookieHeader);
   // Worker routes 404 until the per-space gate is on; seeding and every later
   // spec depend on it.
+  await setAlertZeroEnabledInSpace(api, spaceId, true);
+  const stub = withStubModel ? await seedStubModel(api, spaceId) : undefined;
+
+  return {
+    spaceId,
+    api,
+    stub: stub ? { connectorId: stub.connectorId, cleanup: stub.cleanup } : undefined,
+    cleanup: async () => {
+      const failures: string[] = [];
+      const step = async (name: string, run: () => Promise<unknown>) => {
+        try {
+          await run();
+        } catch (error) {
+          failures.push(`${name}: ${error instanceof Error ? error.message : String(error)}`);
+        }
+      };
+      await step('disable workers', () => resetOnboardingState(api, spaceId));
+      if (stub) await step('stub model cleanup', stub.cleanup);
+      await step(`delete space ${spaceId}`, () => spaces.delete(spaceId));
+      if (failures.length > 0) {
+        throw new Error(`Onboarding space cleanup failed:\n${failures.join('\n')}`);
+      }
+    },
+  };
+};
+
+/**
+ * UI-suite twin of `createOnboardingSpace`: same space lifecycle, but on scout's
+ * `kbnClient` (admin basic auth, auto xsrf/internal-origin headers) via
+ * `createApiFromKbnClient`. `spaces` comes from the worker-scope `apiServices`.
+ */
+export const createUiOnboardingSpace = async (
+  kbnClient: KbnClient,
+  spaces: SpacesService,
+  { withStubModel = false }: { withStubModel?: boolean } = {}
+): Promise<OnboardingSpace> => {
+  const api = createApiFromKbnClient(kbnClient);
+  const spaceId = `${NAMESPACE}-${randomSuffix()}`;
+  await spaces.create({ id: spaceId, name: `Onboarding ${spaceId}` });
+
   await setAlertZeroEnabledInSpace(api, spaceId, true);
   const stub = withStubModel ? await seedStubModel(api, spaceId) : undefined;
 

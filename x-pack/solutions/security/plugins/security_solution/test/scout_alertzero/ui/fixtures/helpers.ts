@@ -13,6 +13,8 @@
 
 import { randomUUID } from 'crypto';
 import type { ApiClientFixture } from '@kbn/scout-security';
+import type { KbnClient } from '@kbn/kbn-client';
+import { KbnClientRequesterError } from '@kbn/kbn-client';
 import { INTERNAL_API_HEADERS } from '@kbn/scout-security';
 import {
   ALERTZERO_ENABLED_SETTING_ID,
@@ -89,6 +91,45 @@ export const createApi = (apiClient: ApiClientFixture, cookieHeader: Headers): A
   return {
     internal: (method, path, options) => send(method, path, internalHeaders, options?.body),
     public: (method, path, options) => send(method, path, publicHeaders, options?.body),
+    raw: (method, path, headers, body) => send(method, path, headers, body),
+  };
+};
+
+/**
+ * UI-suite twin of `createApi`: scout's `kbnClient` embeds admin credentials in its
+ * base URL and already sends `kbn-xsrf` + `x-elastic-internal-origin` on every call,
+ * so only the API-version header needs adding. Non-2xx responses resolve (instead of
+ * the requester's default throw) so `ok()` keeps deciding pass/fail.
+ */
+export const createApiFromKbnClient = (kbnClient: KbnClient): AlertZeroApi => {
+  const send = async <T>(
+    method: Method,
+    path: string,
+    headers: Headers,
+    body?: unknown
+  ): Promise<ApiResult<T>> => {
+    try {
+      const response = await kbnClient.request<T>({
+        method,
+        path,
+        headers,
+        body,
+        // The default 5 attempts turn one 4xx into five identical failures (and 10s+ of
+        // backoff); these helpers treat the status as data.
+        retries: 1,
+      });
+      return { statusCode: response.status, body: response.data };
+    } catch (error) {
+      if (error instanceof KbnClientRequesterError && error.status !== undefined) {
+        return { statusCode: error.status, body: (error.body ?? {}) as T };
+      }
+      throw error;
+    }
+  };
+  return {
+    internal: (method, path, options) =>
+      send(method, path, { 'elastic-api-version': '1' }, options?.body),
+    public: (method, path, options) => send(method, path, {}, options?.body),
     raw: (method, path, headers, body) => send(method, path, headers, body),
   };
 };
