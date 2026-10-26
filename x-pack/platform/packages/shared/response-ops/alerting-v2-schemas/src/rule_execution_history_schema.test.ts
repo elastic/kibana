@@ -11,18 +11,19 @@ import {
   EXECUTION_HISTORY_MAX_PER_PAGE,
   EXECUTION_HISTORY_MAX_RESULT_WINDOW,
   EXECUTION_HISTORY_MAX_RULE_ID_FILTER,
+  MAX_SEARCH_LENGTH,
 } from './constants';
 import {
   listRuleExecutionsRequestSchema,
   listRuleExecutionsResponseSchema,
   ruleExecutionOutcomeSchema,
   ruleExecutionViewSchema,
+  ruleSearchMatchCountsSchema,
 } from './rule_execution_history_schema';
 
 const validView = {
   id: 'doc-1',
   rule: { id: 'rule-1' },
-  space_id: 'default',
   started_at: '2026-06-01T00:00:00.000Z',
   ended_at: '2026-06-01T00:00:01.500Z',
   timings: { duration_ms: 1500, scheduled_delay_ms: 250 },
@@ -68,9 +69,38 @@ describe('rule_execution_history_schema', () => {
       it('does not inject rule_ids / outcomes / from / to when missing', () => {
         const parsed = listRuleExecutionsRequestSchema.parse({});
         expect(parsed).not.toHaveProperty('rule_ids');
+        expect(parsed).not.toHaveProperty('search');
         expect(parsed).not.toHaveProperty('outcomes');
         expect(parsed).not.toHaveProperty('from');
         expect(parsed).not.toHaveProperty('to');
+      });
+    });
+
+    describe('search', () => {
+      it('accepts a valid search string', () => {
+        expect(listRuleExecutionsRequestSchema.parse({ search: 'my rule' }).search).toBe('my rule');
+      });
+
+      it('trims surrounding whitespace', () => {
+        expect(listRuleExecutionsRequestSchema.parse({ search: '  hello  ' }).search).toBe('hello');
+      });
+
+      it('rejects a whitespace-only string (empty after trim)', () => {
+        expect(listRuleExecutionsRequestSchema.safeParse({ search: '   ' }).success).toBe(false);
+      });
+
+      it(`accepts a search of exactly MAX_SEARCH_LENGTH (${MAX_SEARCH_LENGTH}) chars`, () => {
+        expect(
+          listRuleExecutionsRequestSchema.safeParse({ search: 'a'.repeat(MAX_SEARCH_LENGTH) })
+            .success
+        ).toBe(true);
+      });
+
+      it(`rejects a search longer than MAX_SEARCH_LENGTH (${MAX_SEARCH_LENGTH}) chars`, () => {
+        expect(
+          listRuleExecutionsRequestSchema.safeParse({ search: 'a'.repeat(MAX_SEARCH_LENGTH + 1) })
+            .success
+        ).toBe(false);
       });
     });
 
@@ -493,5 +523,20 @@ describe('rule_execution_history_schema', () => {
         }).success
       ).toBe(false);
     });
+  });
+});
+
+describe('ruleSearchMatchCountsSchema', () => {
+  it('accepts a rule count with the truncation flag', () => {
+    expect(ruleSearchMatchCountsSchema.parse({ rule_count: 3, is_truncated: false })).toEqual({
+      rule_count: 3,
+      is_truncated: false,
+    });
+  });
+
+  it('rejects negative counts', () => {
+    expect(
+      ruleSearchMatchCountsSchema.safeParse({ rule_count: -1, is_truncated: false }).success
+    ).toBe(false);
   });
 });

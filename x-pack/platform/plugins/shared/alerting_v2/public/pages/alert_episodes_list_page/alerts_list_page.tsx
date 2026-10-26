@@ -51,9 +51,14 @@ import { useInvalidateEpisodeQueries } from '@kbn/alerting-v2-episodes-ui/hooks/
 import { useAlertingRulesCache } from '@kbn/alerting-v2-episodes-ui/hooks/use_alerting_rules_cache';
 import { useAlertingRuleSourceDataViews } from '@kbn/alerting-v2-episodes-ui/hooks/use_alerting_rule_source_data_views';
 import { getBreachEsqlQuery } from '@kbn/alerting-v2-schemas';
-import { createEpisodeActions, type EpisodeAction } from '@kbn/alerting-v2-episodes-ui/actions';
+import {
+  createEpisodeActions,
+  OPEN_ALERT_EVENTS_HISTORY_ACTION_ID,
+  type EpisodeAction,
+} from '@kbn/alerting-v2-episodes-ui/actions';
 import {
   EpisodeDurationCell,
+  EpisodeSuppressedCell,
   EpisodeSourceCell,
   EpisodeStatusCell,
   EpisodeTagsCell,
@@ -84,8 +89,13 @@ import { useEpisodesListUrlState } from './hooks/use_episodes_list_url_state';
 import { useEpisodesBulkActions } from './hooks/use_episodes_bulk_actions';
 import { DEFAULT_EPISODES_LIST_FILTER } from './utils/episodes_list_url_state';
 import { CLASSIC_ALERTS_DATA_SOURCE } from '../../alert_sources';
+import { getQueryFilterState } from './utils/episodes_query_filter';
 import { ClassicAlertDetailsFlyout } from './components/classic_alert_details_flyout';
-import { getDiscoverHrefForRuleAndAlertTimestamp } from '../../utils/discover_href_for_alert';
+import {
+  canOpenDiscover,
+  getDiscoverHrefForAlertEventsHistory,
+  getDiscoverHrefForRuleAndAlertTimestamp,
+} from '../../utils/discover_href_for_alert';
 import {
   filterAlertActionsByPrivilege,
   ALERT_ACTIONS_PRIVILEGE,
@@ -102,6 +112,8 @@ const getAlertsListMenu = ({ manageRulesHref }: { manageRulesHref: string }): Ap
     testId: 'alertingV2EpisodesListManageRules',
   },
 });
+
+const SUPPRESSED_COLUMN_ID = 'suppressed';
 
 // Neither tag column is in the episodes query's `ALLOWLISTED_SORT_FIELDS`, so a sort on them
 // falls back to `@timestamp` and only looks like it works.
@@ -125,6 +137,11 @@ const COLUMN_CUSTOMIZATIONS: CustomGridColumnsConfiguration = {
     displayAsText: i18n.EPISODES_LIST_COLUMN_SOURCE,
     isSortable: false,
   }),
+  [SUPPRESSED_COLUMN_ID]: ({ column }) => ({
+    ...column,
+    displayAsText: i18n.EPISODES_LIST_COLUMN_SUPPRESSED,
+    isSortable: false,
+  }),
 };
 
 // Drops the default column actions this table can't support yet.
@@ -140,10 +157,11 @@ const CUSTOM_GRID_COLUMNS_CONFIGURATION: CustomGridColumnsConfiguration = Object
   ])
 );
 
-// The table fills the space left below the KPIs and the histogram. On short viewports that space
-// only fits one or two rows, so we keep a floor that shows a usable number of rows and let the page
-// scroll instead.
-const MIN_TABLE_HEIGHT = 400;
+/*
+ * The table has a fixed height, independent of the KPIs and the histogram above it, so the grid
+ * always measures a definite height and virtualizes rows.
+ */
+const TABLE_HEIGHT = 400;
 
 /**
  * Two reasons this is a whole pixel value rather than the `1.6em` default:
@@ -232,6 +250,7 @@ const AlertsListPageContent = () => {
     () => !deepEqual(filterState, DEFAULT_EPISODES_LIST_FILTER),
     [filterState]
   );
+  const queryFilterState = useMemo(() => getQueryFilterState(filterState), [filterState]);
 
   const handleClearFilters = useCallback(() => {
     setFilterState({ ...DEFAULT_EPISODES_LIST_FILTER });
@@ -283,7 +302,7 @@ const AlertsListPageContent = () => {
   } = useFetchAlertingEpisodesQuery({
     pageSize: ALERT_EPISODES_LIST_PAGE_SIZE,
     services,
-    filterState,
+    filterState: queryFilterState,
     sortState,
     timeRange,
   });
@@ -435,10 +454,29 @@ const AlertsListPageContent = () => {
                 : undefined,
               alertIsoTimestamp: episodeIsoTimestamp,
             }),
+          getAlertEventsHistoryHref: ({ episodeId, episodeStart, spaceId }) =>
+            getDiscoverHrefForAlertEventsHistory({
+              share: services.share,
+              capabilities: services.application.capabilities,
+              uiSettings: services.uiSettings,
+              episodeId,
+              episodeStart,
+              spaceId,
+            }),
+          isAlertEventsHistoryAvailable: () =>
+            canOpenDiscover({
+              share: services.share,
+              capabilities: services.application.capabilities,
+              uiSettings: services.uiSettings,
+            }),
         }),
         alertsCapability
       ),
     [services, queryClient, additionalDataSource, rulesCache, alertsCapability]
+  );
+  const tableEpisodeActions = useMemo(
+    () => episodeActions.filter(({ id }) => id !== OPEN_ALERT_EVENTS_HISTORY_ACTION_ID),
+    [episodeActions]
   );
 
   const getRuleDetailsHref = useCallback(
@@ -503,7 +541,7 @@ const AlertsListPageContent = () => {
 
   const rowAdditionalLeadingControls: RowControlColumn[] = useMemo(
     () =>
-      episodeActions.map((action) => ({
+      tableEpisodeActions.map((action) => ({
         id: action.id,
         isAvailable: ({ record }: RowControlRowProps) => {
           const episodes = [dataTableRecordToEpisode(record)];
@@ -545,11 +583,11 @@ const AlertsListPageContent = () => {
           return control;
         },
       })),
-    [episodeActions, invalidateEpisodeQueries]
+    [tableEpisodeActions, invalidateEpisodeQueries]
   );
 
   const customBulkActions = useEpisodesBulkActions({
-    actions: episodeActions,
+    actions: tableEpisodeActions,
     episodesData,
     onSuccess: invalidateEpisodeQueries,
   });
@@ -580,6 +618,7 @@ const AlertsListPageContent = () => {
     () => ({
       'episode.status': (props) => <EpisodeStatusCell {...props} />,
       alerting_source: (props) => <EpisodeSourceCell {...props} />,
+      [SUPPRESSED_COLUMN_ID]: (props) => <EpisodeSuppressedCell {...props} />,
       duration: (props) => <EpisodeDurationCell {...props} />,
       severity: (props) => <EpisodeSeverityCell {...props} />,
       tags: (props) => <EpisodeTagsCell {...props} />,
@@ -638,6 +677,7 @@ const AlertsListPageContent = () => {
         title={i18n.EPISODES_LIST_PAGE_TITLE}
         spacing="bleed"
         menu={alertsMenu}
+        docLink={services.docLinks.links.alerting.viewAndManageAlerts}
       />
       <EuiSpacer size="m" />
       <NewAlertingExperienceBanner />
@@ -648,6 +688,7 @@ const AlertsListPageContent = () => {
           flex: 1;
           min-width: 0;
           ${logicalCSS('min-height')}: 0;
+          overflow-y: auto;
         `}
       >
         <EuiFlexItem grow={false}>
@@ -664,13 +705,13 @@ const AlertsListPageContent = () => {
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EpisodesKpis services={services} filterState={filterState} timeRange={timeRange} />
+          <EpisodesKpis services={services} filterState={queryFilterState} timeRange={timeRange} />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EpisodesHistogram
             services={services}
             dataView={dataView}
-            filterState={filterState}
+            filterState={queryFilterState}
             timeRange={timeRange}
             onTimeRangeChange={handleTimeChange}
             breakdownField={histogramBreakdownField}
@@ -678,10 +719,11 @@ const AlertsListPageContent = () => {
           />
         </EuiFlexItem>
         <EuiFlexItem
-          grow
+          grow={false}
           css={css`
             min-width: 0;
-            ${logicalCSS('min-height', `${MIN_TABLE_HEIGHT}px`)}
+            flex-shrink: 0;
+            ${logicalCSS('height', `${TABLE_HEIGHT}px`)}
           `}
         >
           <EuiFlexGroup
@@ -689,6 +731,7 @@ const AlertsListPageContent = () => {
             gutterSize="xs"
             responsive={false}
             css={css`
+              flex-grow: 1;
               ${logicalCSS('min-height')}: 0;
             `}
           >
@@ -728,7 +771,11 @@ const AlertsListPageContent = () => {
                     customGridColumnsConfiguration={CUSTOM_GRID_COLUMNS_CONFIGURATION}
                     externalCustomRenderers={externalCustomRenderers}
                     rows={rows}
-                    totalHits={!episodesData?.length ? 0 : ALERT_EPISODES_LIST_PAGE_SIZE + 1}
+                    // Report one more hit than the cap only when the list is capped, so the
+                    // grid footer shows the max limit callout and nothing else
+                    totalHits={
+                      isEpisodeListCapped ? ALERT_EPISODES_LIST_PAGE_SIZE + 1 : loadedEpisodesCount
+                    }
                     loadingState={isLoading ? DataLoadingState.loading : DataLoadingState.loaded}
                     isPaginationEnabled
                     paginationMode="singlePage"

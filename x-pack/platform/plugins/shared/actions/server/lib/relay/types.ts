@@ -102,6 +102,8 @@ export interface RelayTriggerInput {
   tenantKey: string;
   channel: string;
   message: string;
+  /** Slack Block Kit blocks. `message` stays the notification and fallback text. */
+  blocks?: Array<Record<string, unknown>>;
   /** Timestamp of the message to reply to, when posting into an existing thread. */
   threadTs?: string;
   /**

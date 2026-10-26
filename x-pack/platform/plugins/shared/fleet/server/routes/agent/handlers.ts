@@ -44,6 +44,7 @@ import type {
 import { FleetNotFoundError } from '../../errors';
 import * as AgentService from '../../services/agents';
 import { fetchAndAssignAgentMetrics } from '../../services/agents/agent_metrics';
+import { throwIfAgentInAgentlessPolicy } from '../../services/agents/hosted_agent';
 import { getAgentStatusForAgentPolicy } from '../../services/agents';
 import { isAgentInNamespace } from '../../services/spaces/agent_namespaces';
 import { getCurrentNamespace } from '../../services/spaces/get_current_namespace';
@@ -179,6 +180,11 @@ export const updateAgentHandler: FleetRequestHandler<
   try {
     const agent = await fleetContext.agentClient.asCurrentUser.getAgent(request.params.agentId);
     await verifyNamespace(agent, getCurrentNamespace(soClient));
+    await throwIfAgentInAgentlessPolicy(
+      soClient,
+      agent,
+      `Cannot update managed agent ${request.params.agentId}`
+    );
 
     await AgentService.updateAgent(esClient, request.params.agentId, partialAgent);
     const body = {

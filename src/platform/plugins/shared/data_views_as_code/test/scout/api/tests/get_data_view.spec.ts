@@ -51,7 +51,7 @@ apiTest.describe('GET /api/data_views/v2/{id} - as code', { tag: tags.deployment
     // Validate the meta
     expect(getResponse.body.meta.managed).toBe(false);
     expect(getResponse.body.meta.version).toBeDefined();
-    expect(getResponse.body.meta.namespaces).toBeDefined();
+    expect(getResponse.body.meta.spaces).toBeDefined();
   });
 
   apiTest('returns 404 for a non-existing data view', async ({ apiClient }) => {

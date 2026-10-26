@@ -34,7 +34,7 @@ describe('AutomationFlyoutFooter', () => {
   });
 
   it('disables both saves when blocked', () => {
-    renderFooter({ canSave: false, saveBlocker: 'Fix the cron expression to save' });
+    renderFooter({ canSave: false, saveBlocker: 'Select a trigger to save' });
 
     expect(screen.getByTestId('submitAutomation')).toBeDisabled();
     expect(screen.getByTestId('submitAndEnableAutomation')).toBeDisabled();

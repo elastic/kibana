@@ -84,6 +84,11 @@ export const STOP_SOURCE_ONBOARDING_BUTTON_LABEL = i18n.translate(
   { defaultMessage: 'Stop source onboarding' }
 );
 
+export const ONBOARDING_STARTING_TOOLTIP = i18n.translate(
+  'xpack.nightshift.sources.onboardingStartingTooltip',
+  { defaultMessage: 'Onboarding is starting. You can stop it once it runs.' }
+);
+
 export const DELETE_SOURCE_ACTION_LABEL = i18n.translate(
   'xpack.nightshift.sources.deleteActionLabel',
   { defaultMessage: 'Delete' }

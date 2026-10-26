@@ -13,7 +13,6 @@ import type {
   ConfiguredSource,
   SourceApiKey,
   SourceRuntimeMetadata,
-  SourceStatus,
   SourceType,
   SourceViewModel,
 } from './types';
@@ -29,16 +28,34 @@ const SUPPORTED_SOURCE_TYPES: SourceType[] = [
   'bulk',
 ];
 
-const OTLP_SIGNALS: StreamsV2.OtlpSignal[] = ['logs', 'metrics', 'traces'];
+export type SourceSignal = StreamsV2.OtlpSignal;
+
+/** Logs, metrics, and traces. Spec also has docs/profiles; those are not ingest choices here. */
+export const SOURCE_SIGNALS: SourceSignal[] = ['logs', 'metrics', 'traces'];
 
 const DEFAULT_SUPPORTED_TELEMETRY: Record<SourceType, UnitSource['supported_telemetry']> = {
-  otlp: ['logs', 'metrics', 'traces'],
-  es_otlp: ['logs', 'metrics', 'traces'],
+  otlp: [...SOURCE_SIGNALS],
+  es_otlp: [...SOURCE_SIGNALS],
+  // Prometheus Remote Write v1 decodes only to OTel metrics.
   prometheus_remote_write: ['metrics'],
   es_prometheus_remote_write: ['metrics'],
-  async_bulk: ['docs'],
+  // Async bulk is the ECS path for logs, metrics, and traces.
+  async_bulk: [...SOURCE_SIGNALS],
   bulk: ['docs'],
 };
+
+/** Signals the user can pick for this source type (empty when the type is fixed). */
+export const selectableSignalsForSourceType = (type: SourceType): SourceSignal[] =>
+  SOURCE_SIGNALS.filter((signal) => DEFAULT_SUPPORTED_TELEMETRY[type].includes(signal));
+
+export const sourceTypeSelectsSignals = (type: SourceType): boolean =>
+  selectableSignalsForSourceType(type).length > 1;
+
+export const defaultSignalsForSourceType = (type: SourceType): SourceSignal[] =>
+  sourceTypeSelectsSignals(type) ? selectableSignalsForSourceType(type) : [];
+
+const orderedSignals = (type: SourceType, signals: readonly SourceSignal[]): SourceSignal[] =>
+  selectableSignalsForSourceType(type).filter((signal) => signals.includes(signal));
 
 export const isSupportedSourceType = (type: string): type is SourceType =>
   SUPPORTED_SOURCE_TYPES.includes(type as SourceType);
@@ -47,16 +64,29 @@ export const createUnitSource = ({
   id,
   name,
   type,
+  supportedTelemetry,
 }: {
   id: string;
   name: string;
   type: SourceType;
+  supportedTelemetry?: UnitSource['supported_telemetry'];
 }): UnitSource => ({
   id,
   name,
   type,
-  supported_telemetry: DEFAULT_SUPPORTED_TELEMETRY[type],
+  supported_telemetry: supportedTelemetry ?? DEFAULT_SUPPORTED_TELEMETRY[type],
 });
+
+export const telemetryForSelectedSignals = (
+  type: SourceType,
+  signals: readonly SourceSignal[]
+): UnitSource['supported_telemetry'] => {
+  if (!sourceTypeSelectsSignals(type)) {
+    return DEFAULT_SUPPORTED_TELEMETRY[type];
+  }
+  const selected = orderedSignals(type, signals);
+  return selected.length > 0 ? selected : DEFAULT_SUPPORTED_TELEMETRY[type];
+};
 
 export const createConfiguredSource = ({
   id,
@@ -156,6 +186,7 @@ export const createRuntimeMetadata = (
   const { endpoint, endpoints } = resolveSourceCapabilities({
     type: source.type,
     sourceId: source.id,
+    signals: readConfiguredOtlpSignals(source),
     ...environment,
   });
   return {
@@ -168,25 +199,52 @@ export const createRuntimeMetadata = (
 export const createSourceViewModel = ({
   source,
   metadata,
-  status,
   apiKeys,
+  supportedTelemetry,
 }: {
   source: ConfiguredSource;
   metadata: SourceRuntimeMetadata;
-  status: SourceStatus;
   apiKeys: SourceApiKey[];
+  supportedTelemetry?: UnitSource['supported_telemetry'];
 }): SourceViewModel => ({
   ...source,
   ...metadata,
-  status,
   apiKeys,
+  supportedTelemetry,
 });
+
+/** Logs, metrics, and traces this source accepts, for badges and similar UI. */
+export const getSourceDisplaySignals = (
+  source: ConfiguredSource,
+  supportedTelemetry?: UnitSource['supported_telemetry']
+): SourceSignal[] => {
+  const configured = readConfiguredOtlpSignals(source);
+  if (configured && configured.length > 0) {
+    return SOURCE_SIGNALS.filter((signal) => configured.includes(signal));
+  }
+  if (supportedTelemetry !== undefined) {
+    return SOURCE_SIGNALS.filter((signal) => supportedTelemetry.includes(signal));
+  }
+  return SOURCE_SIGNALS.filter((signal) =>
+    DEFAULT_SUPPORTED_TELEMETRY[source.type].includes(signal)
+  );
+};
+
+const readConfiguredOtlpSignals = (source: ConfiguredSource): SourceSignal[] | undefined => {
+  if (source.type === 'otlp') {
+    return source.config?.otlp?.signals;
+  }
+  if (source.type === 'es_otlp') {
+    return source.config?.es_otlp?.signals;
+  }
+  return undefined;
+};
 
 function otlpSignalsFromTelemetry(
   supportedTelemetry: UnitSource['supported_telemetry']
 ): StreamsV2.NonEmptyArray<StreamsV2.OtlpSignal> | undefined {
   const signals = supportedTelemetry.filter((signal): signal is StreamsV2.OtlpSignal =>
-    OTLP_SIGNALS.includes(signal as StreamsV2.OtlpSignal)
+    SOURCE_SIGNALS.includes(signal as StreamsV2.OtlpSignal)
   );
   const [firstSignal, ...restSignals] = signals;
 

@@ -36,12 +36,14 @@ const NAV_ITEMS = {
   alerts: 'observability-nav-observabilityAlerting-alerts',
   alertsClassicTable: 'observability-nav-observability-overview-alerts_(classic)',
   flatAlerts: 'observability-nav-observability-overview-alerts',
+  ruleLibrary: 'observability-nav-observabilityAlerting-rule_library',
   actionPolicies: 'observability-nav-observabilityAlerting-action_policies',
   executionHistory: 'observability-nav-observabilityAlerting-execution_history',
 } as const;
 
 const ALERTING_SECTION_ITEMS = [
   NAV_ITEMS.alerts,
+  NAV_ITEMS.ruleLibrary,
   NAV_ITEMS.actionPolicies,
   NAV_ITEMS.executionHistory,
 ] as const;
@@ -54,6 +56,11 @@ const ALL_ALERTING_ITEMS = [
 
 const NAV_TARGETS = [
   { name: 'Alerts', navItem: NAV_ITEMS.alerts, urlRe: /\/app\/observability\/alerting\/alerts/ },
+  {
+    name: 'Rule Library',
+    navItem: NAV_ITEMS.ruleLibrary,
+    urlRe: /\/app\/observability\/alerting\/rule-library/,
+  },
   {
     name: 'Action Policies',
     navItem: NAV_ITEMS.actionPolicies,
@@ -294,6 +301,19 @@ test.describe(
         observabilityAlertingNavRole({ alerting_v2_alerts: ['read'] }),
         [NAV_ITEMS.alerts],
         { showV1AlertsTable: true }
+      );
+    });
+
+    test('shows only Rule Library when the user has only v2 rules read', async ({
+      browserAuth,
+      page,
+      kbnClient,
+      scoutSpace,
+    }) => {
+      await expectAlertingItemsForRole(
+        { browserAuth, page, kbnClient, scoutSpace },
+        observabilityAlertingNavRole({ alerting_v2_rules: ['read'] }),
+        [NAV_ITEMS.ruleLibrary]
       );
     });
 

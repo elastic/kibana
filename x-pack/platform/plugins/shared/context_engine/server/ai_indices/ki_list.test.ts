@@ -7,7 +7,7 @@
 
 import { errors } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { getKis } from './ki_list';
+import { getKis, probeColumns } from './ki_list';
 
 const BACKING_INDEX = 'ai-index-idx-sample';
 const INDEX_DEST = { type: 'index' as const, value: BACKING_INDEX };
@@ -526,5 +526,113 @@ describe('ki_list', () => {
     query.mockRejectedValueOnce(cause);
 
     await expect(getKis(esClient, { dest: INDEX_DEST, size: 25 })).rejects.toBe(cause);
+  });
+
+  describe('probeColumns', () => {
+    it('passes request options to the query', async () => {
+      await expect(
+        probeColumns(esClient, BACKING_INDEX, { requestTimeout: 30_000 })
+      ).resolves.toEqual(ALL_FIELDS);
+
+      expect(query).toHaveBeenCalledWith(
+        { query: `FROM "${BACKING_INDEX}" METADATA _id, _index\n| LIMIT 0` },
+        { requestTimeout: 30_000 }
+      );
+    });
+
+    it('resolves undefined for a missing index', async () => {
+      query.mockReset();
+      query.mockRejectedValueOnce(unknownIndexError());
+
+      await expect(probeColumns(esClient, BACKING_INDEX)).resolves.toBeUndefined();
+    });
+
+    it('rethrows other errors', async () => {
+      query.mockReset();
+      const cause = new Error('boom');
+      query.mockRejectedValueOnce(cause);
+
+      await expect(probeColumns(esClient, BACKING_INDEX)).rejects.toBe(cause);
+    });
+  });
+
+  it('filters rows and totals with fuzzy MATCH on title and description', async () => {
+    query.mockReset();
+    query
+      .mockResolvedValueOnce(probeResponse([...ALL_FIELDS, 'description']))
+      .mockResolvedValueOnce(rowsResponse([]))
+      .mockResolvedValueOnce(totalsResponse(0))
+      .mockResolvedValueOnce(bucketsResponse([]));
+
+    await getKis(esClient, { dest: INDEX_DEST, size: 10, query: 'refund' });
+
+    expect(query.mock.calls[1][0]).toEqual({
+      query: expect.stringContaining(
+        'WHERE (MATCH(title, ?searchQuery, {"fuzziness":"AUTO", "boost": 2}) OR MATCH(description, ?searchQuery, {"fuzziness":"AUTO"}))'
+      ),
+      params: [{ searchQuery: 'refund' }],
+    });
+    expect(queryText(0)).toContain('METADATA _id, _index, _score');
+    expect(queryText(0)).toContain('SORT _score DESC, revision_time DESC, id ASC');
+    expect(queryText(1)).toContain(
+      'WHERE (MATCH(title, ?searchQuery, {"fuzziness":"AUTO", "boost": 2}) OR MATCH(description, ?searchQuery, {"fuzziness":"AUTO"}))'
+    );
+    expect(queryText(2)).toContain(
+      'WHERE (MATCH(title, ?searchQuery, {"fuzziness":"AUTO", "boost": 2}) OR MATCH(description, ?searchQuery, {"fuzziness":"AUTO"}))'
+    );
+    expect(query.mock.calls[3][0]).toEqual({
+      query: expect.stringContaining('| STATS count = COUNT(*) BY type'),
+      params: [{ searchQuery: 'refund' }],
+    });
+  });
+
+  it('binds type and search params together on rows and totals', async () => {
+    query.mockReset();
+    query
+      .mockResolvedValueOnce(probeResponse(ALL_FIELDS))
+      .mockResolvedValueOnce(rowsResponse([]))
+      .mockResolvedValueOnce(totalsResponse(0, 0))
+      .mockResolvedValueOnce(bucketsResponse([]));
+
+    await getKis(esClient, {
+      dest: INDEX_DEST,
+      size: 10,
+      type: 'playbook',
+      query: 'refund',
+    });
+
+    expect(query.mock.calls[1][0]).toEqual({
+      query: expect.stringContaining('| WHERE type == ?type'),
+      params: [{ type: 'playbook' }, { searchQuery: 'refund' }],
+    });
+    expect(query.mock.calls[2][0].params).toEqual([
+      { type: 'playbook' },
+      { searchQuery: 'refund' },
+    ]);
+    expect(query.mock.calls[3][0]).toEqual({
+      query: expect.stringContaining('| STATS count = COUNT(*) BY type'),
+      params: [{ searchQuery: 'refund' }],
+    });
+    expect(queryText(2)).not.toContain('?type');
+  });
+
+  it('returns no rows when search is set but title and description are absent', async () => {
+    query.mockReset();
+    query.mockResolvedValueOnce(probeResponse(['id', '@timestamp', 'type']));
+    query
+      .mockResolvedValueOnce(rowsResponse([]))
+      .mockResolvedValueOnce(totalsResponse(0))
+      .mockResolvedValueOnce(bucketsResponse([]));
+
+    await expect(
+      getKis(esClient, { dest: INDEX_DEST, size: 25, query: 'anything' })
+    ).resolves.toEqual({
+      total: 0,
+      summary: { total: 0, counts_by_type: [] },
+      kis: [],
+    });
+
+    expect(queryText(0)).toContain('WHERE FALSE');
+    expect(queryText(0)).not.toContain('MATCH(');
   });
 });

@@ -57,9 +57,6 @@ triggers:
                       type: integer
                       minimum: 1
                       description: Process ID (PID) of the process to kill.
-                    kill_descendants:
-                      type: boolean
-                      description: Also kill descendant processes. Elastic Defend only.
                 - required:
                     - entity_id
                   properties:
@@ -68,9 +65,6 @@ triggers:
                       minLength: 1
                       maxLength: 256
                       description: Elastic Defend entity_id of the process to kill.
-                    kill_descendants:
-                      type: boolean
-                      description: Also kill descendant processes. Elastic Defend only.
             comment:
               type: string
               maxLength: 30000
@@ -100,6 +94,9 @@ steps:
     on-failure:
       continue: true
     with:
+      # Legacy path: fail on an auth proxy's sign-in redirect instead of passing with HTML (the self client already rejects redirects). See elastic/security-team#20135.
+      fetcher:
+        follow_redirects: false
       method: GET
       path: "/s/{{ workflow.spaceId }}/api/endpoint/action/{{ consts.privilege_probe_action_id }}"
       headers:
@@ -131,6 +128,9 @@ steps:
   - name: dispatch
     type: kibana.request
     with:
+      # Legacy path: fail on an auth proxy's sign-in redirect instead of passing with HTML (the self client already rejects redirects). See elastic/security-team#20135.
+      fetcher:
+        follow_redirects: false
       method: POST
       path: "/s/{{ workflow.spaceId }}/api/endpoint/action/kill_process"
       headers:
@@ -160,6 +160,9 @@ steps:
             max-attempts: 3
             delay: 5s
         with:
+          # Legacy path: fail on an auth proxy's sign-in redirect instead of passing with HTML (the self client already rejects redirects). See elastic/security-team#20135.
+          fetcher:
+            follow_redirects: false
           method: GET
           path: "/s/{{ workflow.spaceId }}/api/endpoint/action/{{ steps.dispatch.output.data.id }}"
           headers:

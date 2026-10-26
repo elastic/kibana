@@ -74,6 +74,35 @@ describe('CRUDClient', () => {
     });
   });
 
+  describe('listEntities (cursor mode)', () => {
+    beforeEach(() => {
+      esClient.search.mockResolvedValue({ hits: { hits: [] } } as unknown as Awaited<
+        ReturnType<typeof esClient.search>
+      >);
+    });
+
+    it('sorts by @timestamp desc with a _shard_doc tiebreaker by default', async () => {
+      await client.listEntities({ size: 10 });
+
+      expect(esClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({ sort: [{ '@timestamp': 'desc' }, { _shard_doc: 'desc' }] })
+      );
+    });
+
+    it('uses the given sort in place of @timestamp and still appends the _shard_doc tiebreaker', async () => {
+      await client.listEntities({
+        size: 10,
+        sort: [{ 'entity.risk.calculated_score_norm': 'desc' }],
+      });
+
+      expect(esClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          sort: [{ 'entity.risk.calculated_score_norm': 'desc' }, { _shard_doc: 'desc' }],
+        })
+      );
+    });
+  });
+
   describe('createEntitiesFromSource', () => {
     beforeEach(() => {
       esClient.indices.exists.mockResolvedValue(true);

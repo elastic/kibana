@@ -16,13 +16,12 @@ export default function getRuleExecutionKpiTests({ getService }: FtrProviderCont
 
   const retry = getService('retry');
 
-  // failing on CI, this file wasn't loaded in any config
-  describe.skip('getRuleExecutionKpi', () => {
+  describe('getRuleExecutionKpi', () => {
     const objectRemover = new ObjectRemover(supertest);
 
-    after(() => objectRemover.removeAll());
+    afterEach(() => objectRemover.removeAll());
 
-    it('should return KPI only from the current space', async () => {
+    it('should return KPI for the rule', async () => {
       const startTime = new Date().toISOString();
 
       const spaceId = UserAtSpaceScenarios[1].space.id;
@@ -42,25 +41,9 @@ export default function getRuleExecutionKpiTests({ getService }: FtrProviderCont
       const ruleId = response.body.id;
       objectRemover.add(spaceId, ruleId, 'rule', 'alerting');
 
-      const spaceId2 = UserAtSpaceScenarios[4].space.id;
-      const response2 = await supertest
-        .post(`${getUrlPrefix(spaceId2)}/api/alerting/rule`)
-        .set('kbn-xsrf', 'foo')
-        .send(
-          getTestRuleData({
-            rule_type_id: 'test.noop',
-            schedule: { interval: '1s' },
-            throttle: null,
-          })
-        );
-
-      expect(response2.status).to.eql(200);
-      const ruleId2 = response2.body.id;
-      objectRemover.add(spaceId2, ruleId2, 'rule', 'alerting');
-
+      // Wait for a successful execution before causing errors
       await retry.try(async () => {
-        // there can be a successful execute before the error one
-        const someEvents = await getEventLog({
+        const events = await getEventLog({
           getService,
           spaceId,
           type: 'alert',
@@ -68,8 +51,8 @@ export default function getRuleExecutionKpiTests({ getService }: FtrProviderCont
           provider: 'alerting',
           actions: new Map([['execute', { gte: 1 }]]),
         });
-
-        expect(someEvents.length).to.be.above(0);
+        const successfulEvents = events.filter((e) => e?.event?.outcome === 'success');
+        expect(successfulEvents.length).to.be.above(0);
       });
 
       await retry.try(async () => {
@@ -102,8 +85,7 @@ export default function getRuleExecutionKpiTests({ getService }: FtrProviderCont
       });
 
       const kpiLogs = await retry.try(async () => {
-        // there can be a successful execute before the error one
-        const logResponse = await supertestWithoutAuth
+        const kpiResponse = await supertestWithoutAuth
           .get(
             `${getUrlPrefix(
               spaceId
@@ -111,23 +93,26 @@ export default function getRuleExecutionKpiTests({ getService }: FtrProviderCont
           )
           .set('kbn-xsrf', 'foo')
           .auth(user.username, user.password);
-        expect(logResponse.statusCode).to.be(200);
+        expect(kpiResponse.statusCode).to.be(200);
 
-        return logResponse.body;
+        // The event log is indexed asynchronously, so only the counts are retried.
+        expect(kpiResponse.body.success).to.be.above(0);
+        expect(kpiResponse.body.failure).to.be.above(0);
+
+        return kpiResponse.body;
       });
 
       expect(Object.keys(kpiLogs)).to.eql([
         'success',
         'unknown',
         'failure',
+        'warning',
         'activeAlerts',
         'newAlerts',
         'recoveredAlerts',
         'erroredActions',
         'triggeredActions',
       ]);
-      expect(kpiLogs.success).to.be.above(0);
-      expect(kpiLogs.failure).to.be.above(0);
     });
   });
 }

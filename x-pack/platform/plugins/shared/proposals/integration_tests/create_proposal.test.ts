@@ -282,7 +282,7 @@ describe('create-investigation-proposal workflow execution', () => {
       await fixture.revise({ actionInput: { name: 'analyst-corrected-name' } });
       await fixture.resume(true);
 
-      const executions = fixture.stepExecutions('execute_action', 'workflow.execute');
+      const executions = fixture.stepExecutions('execute_as_approver', 'workflow.execute');
       expect(executions).toHaveLength(1);
       // The trigger's static `inputs.actionInput` still reads `original-name`;
       // asserting on the executed step's own recorded input, not on the
@@ -431,6 +431,52 @@ describe('create-investigation-proposal workflow execution', () => {
       expect(clone.decision).toBe('dismissed');
       expect(clone.status).toBe('no_action');
       expect(fixture.executionStatus()).toBe(ExecutionStatus.COMPLETED);
+    });
+  });
+
+  // A failed auto-approved attempt is re-offered to a human, and the retry runs from
+  // the other execute step. A step that did not run on a pass keeps its previous
+  // output, so the retry must settle on its own result, never the worker's stale one.
+  // This harness has no workflow registry, so both attempts fail; each error names the
+  // step that ran, which is what shows whose result was adopted.
+  describe('an auto-approved action that fails, then a human retry', () => {
+    beforeEach(async () => {
+      fixture.setActionMetadata({
+        name: 'Close alerts',
+        category: 'respond',
+        approvalPolicy: 'autonomy-dependent',
+      });
+      await fixture.start({ actionWorkflowId: ACTION_WORKFLOW_ID, autoApprove: true });
+    });
+
+    it('runs the first attempt as the worker and parks the clone for a human', () => {
+      const [first, clone] = fixture.proposals();
+
+      expect(fixture.stepExecutions('execute_as_worker', 'workflow.execute')).toHaveLength(1);
+      expect(fixture.stepExecutions('execute_as_approver', 'workflow.execute')).toHaveLength(0);
+      expect(first.status).toBe('failed');
+      expect(first.executionError).toContain('"execute_as_worker"');
+      expect(clone.status).toBe('pending');
+      expect(fixture.executionStatus()).toBe(ExecutionStatus.WAITING_FOR_INPUT);
+    });
+
+    it('runs the retry as the approver without re-running the worker step', async () => {
+      await fixture.resume(true);
+
+      expect(fixture.stepExecutions('execute_as_worker', 'workflow.execute')).toHaveLength(1);
+      expect(fixture.stepExecutions('execute_as_approver', 'workflow.execute')).toHaveLength(1);
+      // Only the first pass adopted a worker result.
+      expect(fixture.stepExecutions('adopt_worker_result', 'data.set')).toHaveLength(1);
+    });
+
+    it("settles the retry on the approver's own result, not the worker's stale error", async () => {
+      await fixture.resume(true);
+
+      const [, retry] = fixture.proposals();
+      expect(retry.decision).toBe('approved');
+      expect(retry.status).toBe('failed');
+      expect(retry.executionError).toContain('"execute_as_approver"');
+      expect(retry.executionError).not.toContain('"execute_as_worker"');
     });
   });
 
@@ -585,9 +631,20 @@ describe('create-investigation-proposal workflow execution', () => {
 
       await fixture.start({ actionWorkflowId: ACTION_WORKFLOW_ID, autoApprove: true });
 
-      // Declaring the policy explicitly must behave like declaring nothing;
-      // only `always-gate` overrides the caller.
+      // Only `always-gate` overrides the caller.
       expect(fixture.proposals()[0].decision).toBe('approved');
+    });
+
+    it('should gate an action that declares no approval policy', async () => {
+      fixture.setActionMetadata({ name: 'Create rule', category: 'tune' });
+
+      await fixture.start({ actionWorkflowId: ACTION_WORKFLOW_ID, autoApprove: true });
+
+      // The policy is required, so metadata without one is invalid and reads
+      // as unresolved: an action whose author never said it may run unattended
+      // waits for a human.
+      expect(fixture.executionStatus()).toBe(ExecutionStatus.WAITING_FOR_INPUT);
+      expect(fixture.onlyProposal().decision).toBeUndefined();
     });
   });
 });
