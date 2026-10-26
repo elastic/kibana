@@ -181,6 +181,22 @@ describe('setLogsdbColumnarChoice', () => {
     expect(handleNamespaceTemplateRestoreAfterPackageInstall).toHaveBeenCalledTimes(2);
   });
 
+  it('puts the index templates back and stores nothing when the write indices cannot be updated', async () => {
+    jest
+      .mocked(templateModule.updateCurrentWriteIndices)
+      .mockRejectedValueOnce(new Error('lifecycle update failed'));
+
+    await expect(setChoice(true)).rejects.toThrow('lifecycle update failed');
+
+    expect(writtenModes().slice(-3)).toEqual([
+      ['logs-pkg.ds', { lifecycle: { name: 'logs' } }],
+      ['logs-pkg.error', { lifecycle: { name: 'logs' } }],
+      ['logs-custom.ds', { lifecycle: { name: 'logs' } }],
+    ]);
+    expect(handleNamespaceTemplateRestoreAfterPackageInstall).toHaveBeenCalledTimes(2);
+    expect(savedObjectsClient.update).not.toHaveBeenCalled();
+  });
+
   it('refuses with 409 and changes nothing when an index template is missing', async () => {
     jest
       .mocked(fetchIndexTemplate)

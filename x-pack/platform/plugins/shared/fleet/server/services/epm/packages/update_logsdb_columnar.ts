@@ -62,9 +62,9 @@ const putIndexTemplate = (
  *
  * The mappings are the same in both modes, so this only sets or removes `index.mode` on the index
  * templates of the package's logs data streams and of the custom datasets based on them. Their
- * namespace-scoped copies are rebuilt from them, as after an install. If any step fails, the index
- * templates are put back and nothing is stored, so the request can be retried. The write indices
- * then roll over lazily, so the change applies to new data only.
+ * namespace-scoped copies are rebuilt from them, as after an install, and the write indices roll
+ * over lazily, so the change applies to new data only. The choice is stored last: if any step
+ * fails, the index templates are put back and nothing is stored, so the request can be retried.
  */
 export async function setLogsdbColumnarChoice({
   savedObjectsClient,
@@ -159,6 +159,7 @@ export async function setLogsdbColumnarChoice({
       written++;
     }
     await restoreNamespaceTemplates();
+    await updateCurrentWriteIndices(esClient, logger, switched, { rolloverOnIndexModeReset: true });
     auditLoggingService.writeCustomSoAuditLog({
       action: 'update',
       id: installedPackage.id,
@@ -181,6 +182,5 @@ export async function setLogsdbColumnarChoice({
     throw err;
   }
 
-  await updateCurrentWriteIndices(esClient, logger, switched, { rolloverOnIndexModeReset: true });
   return { changed: true };
 }
