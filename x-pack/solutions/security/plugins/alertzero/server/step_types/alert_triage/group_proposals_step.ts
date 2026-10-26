@@ -125,7 +125,9 @@ const createRuntime = async (
   }
   const { getProposalsService, getProposalPrivileges } = deps.getProposals();
   const service = getProposalsService();
-  await getProposalPrivileges().assertCanRead(request);
+  const privileges = getProposalPrivileges();
+  await privileges.assertCanRead(request);
+  await privileges.assertCanManage(request);
   const management = deps.getWorkflowsManagement();
   const isInvestigationOpen = createInvestigationOpenChecker({
     conversationClient: await deps.getConversations().getScopedClient({ request }),

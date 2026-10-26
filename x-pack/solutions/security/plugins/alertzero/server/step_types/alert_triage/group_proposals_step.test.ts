@@ -57,6 +57,10 @@ const setup = ({
     | { falsePositive: number; truePositive: number }
     | 'fails',
 } = {}) => {
+  const privileges = {
+    assertCanRead: jest.fn(),
+    assertCanManage: jest.fn(),
+  };
   const service = {
     list: jest.fn().mockResolvedValue({ proposals: heads, total: heads.length }),
     revise: jest.fn().mockResolvedValue({ proposalId: 'revision-id', revision: 2 }),
@@ -101,7 +105,7 @@ const setup = ({
       getProposals: () =>
         ({
           getProposalsService: () => service,
-          getProposalPrivileges: () => ({ assertCanRead: jest.fn() }),
+          getProposalPrivileges: () => privileges,
         } as never),
       getWorkflowsManagement: () => management as never,
       getConversations: () =>
@@ -123,6 +127,7 @@ const setup = ({
     } as unknown as StepHandlerContext<unknown, unknown>);
   return {
     service,
+    privileges,
     management,
     callKibanaApi,
     group: async (input: Record<string, unknown>) =>
@@ -155,6 +160,15 @@ describe('triage group false positives step', () => {
       expect(output.mints[0].proposal_id).not.toBe(GEN0);
     }
   );
+
+  it('requires manage_proposals before it revises a proposal', async () => {
+    const { group, privileges } = setup({ heads: [openHead()] });
+
+    await group({ ...baseInput, fp_candidate_ids: ['a1'] });
+
+    expect(privileges.assertCanManage).toHaveBeenCalled();
+    expect(privileges.assertCanRead).toHaveBeenCalled();
+  });
 
   it('joins the open proposal of the pattern, with a comment that counts the union', async () => {
     const { group, service } = setup({ heads: [openHead()] });
