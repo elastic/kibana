@@ -15,11 +15,12 @@ import { useLocation, useParams } from 'react-router-dom';
 import { readKiDocumentLifecycleStatus } from '../../../common/ki_lifecycle_status';
 import type { GetKiResponse } from '../../../common/http_api/knowledge_indicators';
 import { CONTEXT_ENGINE_UI_EBT } from '../../../common/telemetry';
-import type { ViewKiContentPanelSaveFields } from '../components/ki/view/content/view_ki_content_panel';
+import type { KiContentPanelSaveFields } from '../components/ki/view/content/ki_content_panel';
 import { ViewKiRawJsonPanel } from '../components/ki/view/content/view_ki_raw_json_panel';
 import { getViewKiHeaderBadges } from '../components/ki/view/metadata/view_ki_header_badges';
-import { ViewKiConfirmModals } from '../components/ki/view/view_ki_confirm_modals';
-import { ViewKiContentLayout } from '../components/ki/view/view_ki_content_layout';
+import { KiContentLayout } from '../components/ki/view/ki_content_layout';
+import { KiDeleteConfirmModal } from '../components/ki/view/ki_delete_confirm_modal';
+import { KiRestoreConfirmModal } from '../components/ki/view/ki_restore_confirm_modal';
 import { useCanWriteContextEngine } from '../hooks/use_can_write_context_engine';
 import { useContextEngineBreadcrumbs } from '../hooks/use_context_engine_breadcrumbs';
 import { useDeleteKi, useRestoreKi, useUpdateKi } from '../hooks/use_ki_mutations';
@@ -46,7 +47,7 @@ const getPageTitle = (ki: GetKiResponse | undefined, kiId: string): string => {
   return ki.id;
 };
 
-export const ViewKiPage = () => {
+export const KiPage = () => {
   const { id: aiIndexId = '', kiId: kiIdParam = '' } = useParams<{
     id: string;
     kiId: string;
@@ -92,7 +93,7 @@ export const ViewKiPage = () => {
   const lifecycleStatus = ki ? readKiDocumentLifecycleStatus(ki.document) : undefined;
   const isDeleted = lifecycleStatus === 'deleted';
   const canEditContent = canWrite && !isDeleted;
-  const canDelete = canWrite && !isDeleted;
+  const canDelete = canWrite && !isDeleted && !isEditing;
   const canRestore = canWrite && isDeleted;
 
   const headerBadges = useMemo(
@@ -230,12 +231,13 @@ export const ViewKiPage = () => {
   );
 
   const handleSaveContent = useCallback(
-    (fields: ViewKiContentPanelSaveFields) => {
+    (fields: KiContentPanelSaveFields) => {
       updateKiMutation.mutate(
         { content: fields.content },
         {
           onSuccess: () => {
             setIsEditing(false);
+
             notifications.toasts.addSuccess({
               title: i18n.translate('xpack.contextEngine.viewKi.saveSuccess.title', {
                 defaultMessage: 'Knowledge Indicator updated',
@@ -365,26 +367,32 @@ export const ViewKiPage = () => {
           selectedTab === 'document' ? (
             <ViewKiRawJsonPanel document={ki?.document} isLoading={isLoading} />
           ) : (
-            <ViewKiContentLayout
+            <KiContentLayout
               document={ki?.document}
               kiId={resolvedKiId}
               isLoading={isLoading}
               isEditing={canEditContent ? isEditing : false}
-              onEditingChange={canEditContent ? setIsEditing : undefined}
+              onCancel={canEditContent ? () => setIsEditing(false) : undefined}
               isSaving={updateKiMutation.isLoading}
               onSave={canEditContent ? handleSaveContent : undefined}
             />
           )
         ) : null}
       </ContextEnginePageSection>
-      <ViewKiConfirmModals
-        isDeleteConfirmOpen={isDeleteConfirmOpen}
-        onCloseDeleteConfirm={() => setIsDeleteConfirmOpen(false)}
-        onConfirmDelete={handleConfirmDelete}
-        isRestoreConfirmOpen={isRestoreConfirmOpen}
-        onCloseRestoreConfirm={() => setIsRestoreConfirmOpen(false)}
-        onConfirmRestore={handleConfirmRestore}
-      />
+      {isDeleteConfirmOpen ? (
+        <KiDeleteConfirmModal
+          onClose={() => setIsDeleteConfirmOpen(false)}
+          onConfirm={handleConfirmDelete}
+          isLoading={deleteKiMutation.isLoading}
+        />
+      ) : null}
+      {isRestoreConfirmOpen ? (
+        <KiRestoreConfirmModal
+          onClose={() => setIsRestoreConfirmOpen(false)}
+          onConfirm={handleConfirmRestore}
+          isLoading={restoreKiMutation.isLoading}
+        />
+      ) : null}
     </ContextEnginePageTemplate>
   );
 };

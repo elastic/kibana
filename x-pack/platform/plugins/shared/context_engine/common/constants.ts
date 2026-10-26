@@ -29,6 +29,8 @@ export const KI_SUMMARY_PAGE_SIZE = 0;
 
 export const MAX_KI_TYPE_FILTER_LENGTH = 256;
 export const MAX_KI_SEARCH_QUERY_LENGTH = 256;
+/** Max length of a Knowledge Indicator `content` field (bytes). */
+export const MAX_KI_CONTENT_LENGTH = 65536;
 
 /** Read-only Signals routes (internal): a preaggregated grouped list and a per-group fetch. */
 export const SIGNAL_GROUPS_PATH = `${INTERNAL_API_PATH}/signals/groups`;

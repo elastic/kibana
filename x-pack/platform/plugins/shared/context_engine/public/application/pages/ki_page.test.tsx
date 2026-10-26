@@ -20,7 +20,7 @@ import { uiPrivileges } from '../../../common/features';
 import { CONTEXT_ENGINE_BACK_BUTTON_TEST_SUBJ } from '../layout/context_engine_page_header';
 import { getAiIndexKnowledgeIndicatorsPath, getViewKiPath, CONTEXT_ENGINE_PATHS } from '../paths';
 import { createAppChromeMock } from '../test_utils/app_chrome_mock';
-import { ViewKiPage } from './view_ki_page';
+import { KiPage } from './ki_page';
 
 const mockUseKi = jest.fn();
 const mockNavigateToContextEngine = jest.fn();
@@ -65,10 +65,7 @@ const defaultKi: GetKiResponse = {
   },
 };
 
-const renderViewKiPage = (
-  initialEntry: string,
-  { canWrite = false }: { canWrite?: boolean } = {}
-) => {
+const renderKiPage = (initialEntry: string, { canWrite = false }: { canWrite?: boolean } = {}) => {
   const services = coreMock.createStart();
   services.application.getUrlForApp.mockImplementation(
     (appId, options) => `/app/${appId}${options?.path ?? ''}`
@@ -94,7 +91,7 @@ const renderViewKiPage = (
           >
             <QueryClientProvider client={queryClient}>
               <MemoryRouter initialEntries={[initialEntry]}>
-                <Route path={CONTEXT_ENGINE_PATHS.viewKi} component={ViewKiPage} />
+                <Route path={CONTEXT_ENGINE_PATHS.viewKi} component={KiPage} />
               </MemoryRouter>
             </QueryClientProvider>
           </KibanaContextProvider>
@@ -108,7 +105,7 @@ const openHeaderOverflowMenu = async () => {
   fireEvent.click(await screen.findByTestId(APP_MENU_TEST_SUBJECTS.overflowButton));
 };
 
-describe('ViewKiPage', () => {
+describe('KiPage', () => {
   beforeEach(() => {
     mockUseKi.mockReturnValue({
       ki: defaultKi,
@@ -126,7 +123,7 @@ describe('ViewKiPage', () => {
   it('back button links to the knowledge indicators tab', () => {
     const kiListPath = getAiIndexKnowledgeIndicatorsPath('sample-ki');
 
-    renderViewKiPage('/ai_index/sample-ki/ki/ki-1?index=ai-index-idx-sample-ki');
+    renderKiPage('/ai_index/sample-ki/ki/ki-1?index=ai-index-idx-sample-ki');
 
     expect(mockCreateContextEngineUrl).toHaveBeenCalledWith(kiListPath);
     expect(screen.getByTestId(CONTEXT_ENGINE_BACK_BUTTON_TEST_SUBJ)).toHaveAttribute(
@@ -138,7 +135,7 @@ describe('ViewKiPage', () => {
   it('navigates to the knowledge indicators tab on back click', () => {
     const kiListPath = getAiIndexKnowledgeIndicatorsPath('sample-ki');
 
-    renderViewKiPage('/ai_index/sample-ki/ki/ki-1?index=ai-index-idx-sample-ki');
+    renderKiPage('/ai_index/sample-ki/ki/ki-1?index=ai-index-idx-sample-ki');
 
     fireEvent.click(screen.getByTestId(CONTEXT_ENGINE_BACK_BUTTON_TEST_SUBJ));
 
@@ -146,7 +143,7 @@ describe('ViewKiPage', () => {
   });
 
   it('resolves kiId from a path built with getViewKiPath when the id contains %', () => {
-    renderViewKiPage(`${getViewKiPath('sample-ki', 'ki-1%2')}?index=ai-index-idx-sample-ki`);
+    renderKiPage(`${getViewKiPath('sample-ki', 'ki-1%2')}?index=ai-index-idx-sample-ki`);
 
     expect(mockUseKi).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -158,7 +155,7 @@ describe('ViewKiPage', () => {
   });
 
   it('resolves kiId from a path built with getViewKiPath when the id contains a slash', () => {
-    renderViewKiPage(`${getViewKiPath('sample-ki', 'a/b')}?index=ai-index-idx-sample-ki`);
+    renderKiPage(`${getViewKiPath('sample-ki', 'a/b')}?index=ai-index-idx-sample-ki`);
 
     expect(mockUseKi).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -170,13 +167,13 @@ describe('ViewKiPage', () => {
   });
 
   it('does not crash when a KI id contains a literal %-escape-like substring', () => {
-    renderViewKiPage(`${getViewKiPath('sample-ki', 'a%41b')}?index=ai-index-idx-sample-ki`);
+    renderKiPage(`${getViewKiPath('sample-ki', 'a%41b')}?index=ai-index-idx-sample-ki`);
 
     expect(mockUseKi).toHaveBeenCalled();
   });
 
   it('renders missing index prompt when index query param is absent', () => {
-    renderViewKiPage('/ai_index/sample-ki/ki/ki-1');
+    renderKiPage('/ai_index/sample-ki/ki/ki-1');
 
     expect(screen.getByTestId('contextViewKiMissingIndex')).toBeInTheDocument();
     expect(mockUseKi).toHaveBeenCalledWith(
@@ -193,7 +190,7 @@ describe('ViewKiPage', () => {
       error: new Error('boom'),
     });
 
-    renderViewKiPage('/ai_index/sample-ki/ki/ki-1?index=ai-index-idx-sample-ki');
+    renderKiPage('/ai_index/sample-ki/ki/ki-1?index=ai-index-idx-sample-ki');
 
     expect(screen.getByTestId('contextViewKiError')).toHaveTextContent('boom');
   });
@@ -205,7 +202,7 @@ describe('ViewKiPage', () => {
       error: undefined,
     });
 
-    renderViewKiPage('/ai_index/sample-ki/ki/ki-1?index=ai-index-idx-sample-ki');
+    renderKiPage('/ai_index/sample-ki/ki/ki-1?index=ai-index-idx-sample-ki');
 
     expect(screen.getByTestId('contextViewKiTab-details')).toBeInTheDocument();
     expect(screen.getByTestId('contextViewKiTab-document')).toBeInTheDocument();
@@ -221,7 +218,7 @@ describe('ViewKiPage', () => {
       error: undefined,
     });
 
-    renderViewKiPage('/ai_index/sample-ki/ki/ki-1?index=ai-index-idx-sample-ki');
+    renderKiPage('/ai_index/sample-ki/ki/ki-1?index=ai-index-idx-sample-ki');
 
     fireEvent.click(screen.getByTestId('contextViewKiTab-document'));
 
@@ -230,7 +227,7 @@ describe('ViewKiPage', () => {
   });
 
   it('renders details tab by default and switches to raw JSON on document tab click', () => {
-    renderViewKiPage('/ai_index/sample-ki/ki/ki-1?index=ai-index-idx-sample-ki');
+    renderKiPage('/ai_index/sample-ki/ki/ki-1?index=ai-index-idx-sample-ki');
 
     expect(screen.getByTestId('contextViewKiContentLayout')).toBeInTheDocument();
     expect(screen.queryByTestId('contextViewKiRawJsonPanel')).not.toBeInTheDocument();
@@ -242,7 +239,7 @@ describe('ViewKiPage', () => {
   });
 
   it('renders type badge when document has a type', () => {
-    renderViewKiPage('/ai_index/sample-ki/ki/ki-1?index=ai-index-idx-sample-ki');
+    renderKiPage('/ai_index/sample-ki/ki/ki-1?index=ai-index-idx-sample-ki');
 
     expect(screen.getByTestId('contextViewKiTypeBadge')).toHaveTextContent('playbook');
   });
@@ -260,7 +257,7 @@ describe('ViewKiPage', () => {
       error: undefined,
     });
 
-    renderViewKiPage('/ai_index/sample-ki/ki/ki-1?index=ai-index-idx-sample-ki');
+    renderKiPage('/ai_index/sample-ki/ki/ki-1?index=ai-index-idx-sample-ki');
 
     expect(screen.getByTestId('contextViewKiStatusBadge')).toHaveTextContent('deleted');
   });
@@ -281,7 +278,7 @@ describe('ViewKiPage', () => {
       error: undefined,
     });
 
-    renderViewKiPage('/ai_index/sample-ki/ki/ki-1?index=ai-index-idx-sample-ki');
+    renderKiPage('/ai_index/sample-ki/ki/ki-1?index=ai-index-idx-sample-ki');
 
     expect(screen.getByTestId('contextViewKiStatusBadge')).toHaveTextContent('expired');
 
@@ -301,20 +298,20 @@ describe('ViewKiPage', () => {
       error: undefined,
     });
 
-    renderViewKiPage('/ai_index/sample-ki/ki/ki-1?index=ai-index-idx-sample-ki');
+    renderKiPage('/ai_index/sample-ki/ki/ki-1?index=ai-index-idx-sample-ki');
 
     expect(screen.queryByTestId('contextViewKiStatusBadge')).not.toBeInTheDocument();
   });
 
   it('does not show delete or edit actions without write privilege', () => {
-    renderViewKiPage('/ai_index/sample-ki/ki/ki-1?index=ai-index-idx-sample-ki');
+    renderKiPage('/ai_index/sample-ki/ki/ki-1?index=ai-index-idx-sample-ki');
 
     expect(screen.queryByTestId('contextViewKiDeleteButton')).not.toBeInTheDocument();
     expect(screen.queryByTestId('contextViewKiEditButton')).not.toBeInTheDocument();
   });
 
   it('shows delete primary action and edit overflow when user can write', async () => {
-    renderViewKiPage('/ai_index/sample-ki/ki/ki-1?index=ai-index-idx-sample-ki', {
+    renderKiPage('/ai_index/sample-ki/ki/ki-1?index=ai-index-idx-sample-ki', {
       canWrite: true,
     });
 
@@ -325,7 +322,7 @@ describe('ViewKiPage', () => {
   });
 
   it('opens delete confirm modal and calls delete mutation on confirm', async () => {
-    renderViewKiPage('/ai_index/sample-ki/ki/ki-1?index=ai-index-idx-sample-ki', {
+    renderKiPage('/ai_index/sample-ki/ki/ki-1?index=ai-index-idx-sample-ki', {
       canWrite: true,
     });
 
@@ -353,7 +350,7 @@ describe('ViewKiPage', () => {
       error: undefined,
     });
 
-    renderViewKiPage('/ai_index/sample-ki/ki/ki-1?index=ai-index-idx-sample-ki', {
+    renderKiPage('/ai_index/sample-ki/ki/ki-1?index=ai-index-idx-sample-ki', {
       canWrite: true,
     });
 
@@ -361,8 +358,8 @@ describe('ViewKiPage', () => {
     expect(screen.queryByTestId('contextViewKiDeleteButton')).not.toBeInTheDocument();
   });
 
-  it('enters content edit mode from the header overflow menu', async () => {
-    renderViewKiPage('/ai_index/sample-ki/ki/ki-1?index=ai-index-idx-sample-ki', {
+  it('enters content edit mode from the header overflow menu and hides the delete action', async () => {
+    renderKiPage('/ai_index/sample-ki/ki/ki-1?index=ai-index-idx-sample-ki', {
       canWrite: true,
     });
 
@@ -370,6 +367,6 @@ describe('ViewKiPage', () => {
     fireEvent.click(screen.getByTestId('contextViewKiEditButton'));
 
     expect(screen.getByTestId('contextViewKiContentEditing')).toBeInTheDocument();
-    expect(screen.queryByTestId('contextViewKiDeleteButton')).toBeInTheDocument();
+    expect(screen.queryByTestId('contextViewKiDeleteButton')).not.toBeInTheDocument();
   });
 });

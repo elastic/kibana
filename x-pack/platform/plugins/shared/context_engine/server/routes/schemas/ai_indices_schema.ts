@@ -32,6 +32,7 @@ import {
   MAX_FEEDBACK_ANALYSIS_SIGNAL_FILTER_LENGTH,
   MAX_FEEDBACK_ANALYSIS_TIME_RANGE_FROM_LENGTH,
   MAX_INDEX_NAME_BYTES,
+  MAX_KI_CONTENT_LENGTH,
   MAX_KI_PAGE_SIZE,
   MAX_KI_SEARCH_QUERY_LENGTH,
   MAX_KI_TYPE_FILTER_LENGTH,
@@ -41,7 +42,6 @@ import type { ImprovementAction } from '../../../common/http_api/improvement_act
 import { IMPROVEMENT_ACTIONS } from '../../../common/http_api/improvement_actions';
 import {
   KI_LIFECYCLE_STATUSES,
-  MAX_KI_CONTENT_LENGTH,
   MAX_KI_ID_LENGTH,
   type KiLifecycleStatus,
 } from '../../../common/step_types/ki';
