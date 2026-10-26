@@ -7,6 +7,7 @@
 
 import type { DashboardAgentEvaluator, DashboardRoute } from '../types';
 import { skippedResult } from '../evaluator_utils';
+import { isToolOnlyAgentExample } from '../tool_only_agent';
 import {
   dashboardSkillWithoutVisualizationEvaluator,
   dashboardSkillNotActivatedEvaluator,
@@ -31,6 +32,9 @@ export const dashboardRoutingEvaluator: DashboardAgentEvaluator = {
   kind: 'CODE',
   direction: 'maximize',
   evaluate: async (params) => {
+    if (isToolOnlyAgentExample(params.metadata)) {
+      return skippedResult('The tool-only agent has no dashboards skill to route to.');
+    }
     const route = params.expected?.route;
     if (!route) {
       return skippedResult('No gold route.');

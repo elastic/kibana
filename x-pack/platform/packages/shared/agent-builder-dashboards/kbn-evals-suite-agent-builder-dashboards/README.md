@@ -12,7 +12,7 @@ Chart presentation is checked on each panel's Lens Config API config, against th
 
 ## What it evaluates
 
-- **Dashboard Skill Routing** (`CODE`): the request reaches the skill its gold `route` names. `dashboard` loads the dashboards skill, `visualization` loads visualization creation without generating a dashboard, and `none` uses neither. Enhance examples also have to read `dashboards/enhance.md`; that path is taken from the same `read_file` / `filestore.read` steps.
+- **Dashboard Skill Routing** (`CODE`): the request reaches the skill its gold `route` names. `dashboard` loads the dashboards skill, `visualization` loads visualization creation without generating a dashboard, and `none` uses neither. Enhance examples also have to read `dashboards/enhance.md`; that path is taken from the same `read_file` / `filestore.read` steps. Skipped on the tool-only agent, which has no skill to load.
 - **Dashboard Structure** (`CODE`): what the prompt pins down. That is a panel count range, an exact number of panels per kind (`{ metric: 6 }`), a section count, and sections matched by title terms and minimum size. Scored as the fraction of gold assertions that hold.
 - **Dashboard Layout Rules** (`CODE`): panels stay inside the 48-column grid, no two panels overlap in a section, and no metric or gauge spans the full width.
 - **Dashboard Composition Order** (`CODE`): metric and gauge panels come before other charts, in the top level and in every section. Panels are read top to bottom, then left to right, so a metric to the right of a chart in the same row counts as after it.
@@ -48,7 +48,7 @@ Chart presentation is checked on each panel's Lens Config API config, against th
   - Abstains when the agent never wrote the dashboard, since an unchanged seed keeps every invariant trivially.
 - **Enhance Defect Resolution** (`CODE`): the fraction of the seeded dashboard's declared defects the result no longer shows. Besides rule ids, a seed can declare seed defects that are judged against the seed itself, not by pattern-matching text. For example, `title_not_rewritten` holds when the title is unchanged from the seed, and `markdown_not_rewritten` holds when a seeded markdown panel still has its seeded text. A defect on a panel that was deleted without being allowed stays open, so deleting a broken chart does not count as fixing it; deleting a markdown panel is allowed in both modes, and appearance mode may delete nothing else. It abstains if the seeded dashboard does not actually show a declared defect, since that is a dataset bug.
 - **Enhance No Regression** (`CODE`): scored rules the seed already met still hold after enhance. This catches, for example, a metric that gains a title, or a new panel that runs the same ES|QL as another. The score is the fraction of panels with no newly introduced violation. Like Mode Compliance, it abstains when nothing was written.
-- **Trajectory**: `load_skill` → `generate_dashboard`. Content-mode enhance also expects `get_index_mapping` before the write, because it may change queries. Appearance mode changes no query, so reading the attachment is enough and the mapping call is not expected. Discover results examples read the attachment instead of the mapping, in every run on both models, so the mapping call is not expected there. Skipped on routing examples.
+- **Trajectory**: `load_skill` → `generate_dashboard`. Content-mode enhance also expects `get_index_mapping` before the write, because it may change queries. Appearance mode changes no query, so reading the attachment is enough and the mapping call is not expected. Discover results examples read the attachment instead of the mapping, in every run on both models, so the mapping call is not expected there. The tool-only agent expects `generate_dashboard` without `load_skill`. Skipped on routing examples.
 - **Trace-based**: tokens, latency, and tool-call counts from OTel spans.
 
 ### Rules
@@ -71,7 +71,7 @@ No LLM judge runs in this suite; every check is deterministic.
 
 Thirteen examples, because each dashboard example costs 150k–300k input tokens:
 
-- **Creation** (`datasets/creation.ts`, 4): a rich logs dashboard, two requested sections, six compact KPIs, and four KPIs above a time series.
+- **Creation** (`datasets/creation.ts`, 4): a rich logs dashboard, two requested sections, six compact KPIs, and four KPIs above a time series. The same four requests also run on a tool-only agent (`src/tool_only_agent.ts`). It has `generate_dashboard`, `list_indices`, `get_index_mapping`, `generate_esql` and `execute_esql`, but no skills and no Elastic capabilities, so it approximates an MCP client that sees only the tool description and input schema. Its calls still come from an agent, so the dashboard is stored as an attachment. The spec creates the agent before the run and deletes it after.
 - **Routing** (`datasets/routing.ts`, 3): a standalone chart, ES|QL help, and field discovery. Nothing is generated, so these are cheap.
 - **Enhance** (`datasets/enhance.ts`, 3), all over the same seeded dashboard:
   - `[/dashboards](skill://dashboards) Enhance this dashboard`, the prompt the dashboard's "Enhance this dashboard" action sends. The agent should ask for the mode, and the task answers the `ask_user_question` prompt by picking "Appearance only".
@@ -169,9 +169,10 @@ node scripts/evals start \
   --evaluation-connector-id eis-anthropic-claude-4-5-sonnet
 ```
 
-Test titles, one per spec:
+Test titles:
 
 - `creates dashboards that follow the layout and composition rules` (`dashboard_creation.spec.ts`)
+- `creates dashboards from the tool description and schema alone` (`dashboard_creation.spec.ts`, the tool-only agent)
 - `keeps non-dashboard requests out of the dashboard skill` (`dashboard_routing.spec.ts`)
 - `enhances a seeded dashboard in the requested mode` (`dashboard_enhance.spec.ts`)
 - `builds dashboards from DISSECT results with controls on mapped fields only` (`dashboard_discover_results.spec.ts`)

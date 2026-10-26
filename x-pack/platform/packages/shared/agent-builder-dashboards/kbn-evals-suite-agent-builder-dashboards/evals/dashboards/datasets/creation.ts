@@ -6,6 +6,7 @@
  */
 
 import type { DashboardDatasetExample } from '../../../src/types';
+import { toToolOnlyExample } from '../../../src/tool_only_agent';
 import { dashboardExample } from './factories';
 
 /**
@@ -40,3 +41,7 @@ export const DASHBOARD_CREATION_EXAMPLES: DashboardDatasetExample[] = [
     structure: { panelKinds: { metric: 4, xy: 1 } },
   }),
 ];
+
+/** The creation requests on the tool-only agent, which sees the tool's descriptions but not the skill. */
+export const DASHBOARD_CREATION_TOOL_ONLY_EXAMPLES: DashboardDatasetExample[] =
+  DASHBOARD_CREATION_EXAMPLES.map(toToolOnlyExample);
