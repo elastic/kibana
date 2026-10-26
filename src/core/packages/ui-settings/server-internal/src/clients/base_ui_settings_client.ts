@@ -57,6 +57,11 @@ export abstract class BaseUiSettingsClient implements IUiSettingsClient {
   }
 
   get$<T = any>(key: string): Observable<T> {
+    if (this.defaults[key]?.getValue) {
+      throw new Error(
+        `[${key}] has a request-dependent default, which get$ cannot resolve. Use get() with a request context instead.`
+      );
+    }
     const userProvided$ = this.isOverridden(key)
       ? of(this.overriddenUserProvided)
       : this.watchUserProvided();

@@ -46,6 +46,7 @@ export interface IUiSettingsClient {
    *   emitted within one poll interval (10 seconds).
    * - Never errors. While Elasticsearch is unreachable, the last value is kept.
    * - Completes when Kibana stops. A key overridden in `kibana.yml` emits once and completes.
+   * - Throws for a key registered with `getValue`, because its default depends on the request.
    *
    * The saved objects client the scoped client was created with only selects the space. Reads use Kibana's internal
    * identity, so the subscription can outlive the request that created the client.

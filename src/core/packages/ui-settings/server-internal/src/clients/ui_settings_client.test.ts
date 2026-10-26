@@ -1501,16 +1501,17 @@ describe('ui settings', () => {
       expect(values).toEqual(['default']);
     });
 
-    it('resolves dynamic defaults without a context', async () => {
+    it('throws for keys whose default depends on the request', () => {
       const getValue = jest.fn().mockResolvedValue('dynamic');
-      const { collect } = setupWithWatcher({
+      const { uiSettings, repository } = setupWithWatcher({
         defaults: { foo: { value: 'static', getValue, schema: schema.string() } },
       });
-      const { values } = collect<string>('foo');
-      await flush();
 
-      expect(values).toEqual(['dynamic']);
-      expect(getValue).toHaveBeenCalledWith(undefined);
+      expect(() => uiSettings.get$('foo')).toThrowErrorMatchingInlineSnapshot(
+        `"[foo] has a request-dependent default, which get$ cannot resolve. Use get() with a request context instead."`
+      );
+      expect(getValue).not.toHaveBeenCalled();
+      expect(repository.bulkGet).not.toHaveBeenCalled();
     });
 
     it('emits an overridden key once and completes without reading', async () => {
