@@ -22,8 +22,15 @@ describe('postAttachmentRoute', () => {
     body: { type: 'comment', data: { content: 'hello' }, owner: 'securitySolution' },
   };
 
+  const incrementAttachmentTypeCounters = jest.fn();
+
   const callHandler = () =>
-    postAttachmentRoute.handler({ context, request, response } as unknown as HandlerArgs);
+    postAttachmentRoute.handler({
+      context,
+      request,
+      response,
+      incrementAttachmentTypeCounters,
+    } as unknown as HandlerArgs);
 
   const getHandlerError = () =>
     callHandler().then(
@@ -48,6 +55,15 @@ describe('postAttachmentRoute', () => {
     expect(response.created).toHaveBeenCalledWith({
       body: expect.objectContaining({ type: 'comment', data: { content: 'test' } }),
     });
+    expect(incrementAttachmentTypeCounters).toHaveBeenCalledWith(['comment']);
+  });
+
+  it('does not count the attachment when the create fails', async () => {
+    casesClientMock.attachments.add.mockRejectedValue(new Error('create failed'));
+
+    await getHandlerError();
+
+    expect(incrementAttachmentTypeCounters).not.toHaveBeenCalled();
   });
 
   it('throws a 500 when the created attachment is missing from the case', async () => {
@@ -60,5 +76,6 @@ describe('postAttachmentRoute', () => {
     );
     expect(error.boomify().output.statusCode).toBe(500);
     expect(response.created).not.toHaveBeenCalled();
+    expect(incrementAttachmentTypeCounters).not.toHaveBeenCalled();
   });
 });

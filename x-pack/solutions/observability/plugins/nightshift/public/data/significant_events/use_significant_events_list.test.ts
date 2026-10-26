@@ -83,6 +83,8 @@ describe('useSignificantEventsList', () => {
         status: ['active', 'recovering'],
         severity: ['critical', 'high'],
         investigation: ['in_progress'],
+        entities: [],
+        unassigned: false,
         sortField: 'severity',
         sortOrder: 'desc',
       })
@@ -123,6 +125,8 @@ describe('useSignificantEventsList', () => {
         status: [],
         severity: [],
         investigation: [],
+        entities: [],
+        unassigned: false,
         sortField: 'severity',
         sortOrder: 'desc',
       })

@@ -61,6 +61,7 @@ const setupPlugin = ({ escalationsEnabled }: { escalationsEnabled?: boolean } = 
   const workflowsExtensions = { registerStepDefinition: jest.fn() };
   const agentBuilder = {
     attachments: { registerType: jest.fn() },
+    callbacks: { registerConversationResolver: jest.fn() },
     conversationEvents: { register: jest.fn() },
     tools: { register: jest.fn() },
   };
@@ -233,6 +234,15 @@ describe('AgenticInvestigationsPlugin', () => {
       );
       expect(agentBuilder.tools.register).toHaveBeenCalledWith(
         expect.objectContaining({ id: SET_HYPOTHESES_TOOL_ID })
+      );
+    });
+
+    it('registers the Slack thread conversation resolver during setup', () => {
+      const { agentBuilder } = setupPlugin();
+
+      expect(agentBuilder.callbacks.registerConversationResolver).toHaveBeenCalledTimes(1);
+      expect(agentBuilder.callbacks.registerConversationResolver).toHaveBeenCalledWith(
+        expect.any(Function)
       );
     });
 
