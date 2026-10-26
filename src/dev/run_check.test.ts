@@ -280,13 +280,16 @@ describe('run_check', () => {
       ...baseContext,
       runContext: {
         ...baseContext.runContext,
-        changedFiles: ['src/core/server/integration_tests/user_storage/remove.test.ts'],
+        changedFiles: [
+          'src/core/packages/core/server/integration_tests/user_storage/remove.test.ts',
+        ],
       },
     });
 
     mockExistsSync.mockImplementation(
       (p: string) =>
-        p === '/repo/src/core/server/integration_tests/user_storage/jest.integration.config.js'
+        p ===
+        '/repo/src/core/packages/core/server/integration_tests/user_storage/jest.integration.config.js'
     );
 
     await handler(createArgs());

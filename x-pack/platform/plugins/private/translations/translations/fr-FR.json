@@ -7935,7 +7935,6 @@
     "searchConnectors.nativeConnectors.postgresql.configuration.tablesLabel": "Liste de tables séparées par des virgules",
     "searchConnectors.nativeConnectors.postgresql.name": "PostgreSQL",
     "searchConnectors.nativeConnectors.retriesPerRequest.label": "Nouvelles tentatives par requête",
-    "searchConnectors.nativeConnectors.salesforce.name": "Salesforce",
     "searchConnectors.nativeConnectors.schemaLabel": "Schéma",
     "searchConnectors.nativeConnectors.servicenow.configuration.useDocumentLevelSecurityTooltip": "La sécurité au niveau du document permet de conserver dans Elasticsearch les identités et autorisations paramétrées dans ServiceNow. Vous pouvez ainsi restreindre et personnaliser l'accès en lecture des utilisateurs et des groupes pour les documents dans cet index. La synchronisation de contrôle d'accès garantit que ces métadonnées sont correctement actualisées dans vos documents Elasticsearch.",
     "searchConnectors.nativeConnectors.servicenow.name": "ServiceNow",

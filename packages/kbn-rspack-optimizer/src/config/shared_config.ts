@@ -15,6 +15,8 @@ import { DEFAULT_THEME_TAGS } from '@kbn/core-ui-settings-common';
 import { rspack } from '../rspack_runtime';
 import type { ThemeTag } from '../types';
 
+const CORE_STYLES_DIR = 'src/core/packages/core/public/styles';
+
 /**
  * Shared resolve configuration for all RSPack builds.
  * Used by both main Kibana build and external plugins.
@@ -277,7 +279,8 @@ function getSassLoaderChain(
   const nodeModulesPath = Path.resolve(repoRoot, 'node_modules');
   const globalsPath = Path.resolve(
     repoRoot,
-    `src/core/public/styles/core_app/_globals_${theme}.scss`
+    CORE_STYLES_DIR,
+    `core_app/_globals_${theme}.scss`
   ).replace(/\\/g, '/');
 
   return [
@@ -295,10 +298,10 @@ function getSassLoaderChain(
           outputStyle: dist ? 'compressed' : 'expanded',
           includePaths: [
             nodeModulesPath,
-            Path.resolve(repoRoot, 'src/core/public/styles'),
+            Path.resolve(repoRoot, CORE_STYLES_DIR),
             Path.resolve(repoRoot, 'packages'),
           ],
-          loadPaths: [nodeModulesPath, Path.resolve(repoRoot, 'src/core/public/styles')],
+          loadPaths: [nodeModulesPath, Path.resolve(repoRoot, CORE_STYLES_DIR)],
           quietDeps: true,
           silenceDeprecations: ['color-functions', 'import', 'global-builtin', 'legacy-js-api'],
         },
@@ -370,17 +373,18 @@ export function getNodeModulesScssLoaderRule(repoRoot: string, dist: boolean): R
         options: {
           additionalData: `@import "${Path.resolve(
             repoRoot,
-            'src/core/public/styles/core_app/_globals_borealislight.scss'
+            CORE_STYLES_DIR,
+            'core_app/_globals_borealislight.scss'
           ).replace(/\\/g, '/')}";\n`,
           implementation: require('sass-embedded'),
           sassOptions: {
             outputStyle: dist ? 'compressed' : 'expanded',
             includePaths: [
               nodeModulesPath,
-              Path.resolve(repoRoot, 'src/core/public/styles'),
+              Path.resolve(repoRoot, CORE_STYLES_DIR),
               Path.resolve(repoRoot, 'packages'),
             ],
-            loadPaths: [nodeModulesPath, Path.resolve(repoRoot, 'src/core/public/styles')],
+            loadPaths: [nodeModulesPath, Path.resolve(repoRoot, CORE_STYLES_DIR)],
             quietDeps: true,
             silenceDeprecations: ['color-functions', 'import', 'global-builtin', 'legacy-js-api'],
           },

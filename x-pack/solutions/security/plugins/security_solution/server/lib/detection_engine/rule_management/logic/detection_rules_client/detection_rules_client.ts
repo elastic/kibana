@@ -274,7 +274,7 @@ export const createDetectionRulesClient = ({
         if (analytics) {
           sendRuleImportTelemetryEvents(
             analytics,
-            result.successes.map(({ telemetry }) => telemetry),
+            result.successes.map(({ telemetry, outcome }) => ({ ...telemetry, outcome })),
             logger
           );
         }

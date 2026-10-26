@@ -57,6 +57,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { QueryStringInput, FilterButtonGroup } from '@kbn/kql/public';
 import type { SuggestionsAbstraction, SuggestionsListSize } from '@kbn/kql/public';
+import type { FirstDayOfWeek } from '@kbn/date-range-picker';
 import {
   DateRangePicker,
   type DateRangePickerSettings,
@@ -64,6 +65,7 @@ import {
   type AutoRefreshSettings,
 } from '@kbn/date-range-picker';
 import { useDateRangePickerPresets } from '@kbn/date-range-picker-presets';
+import moment from 'moment';
 import { AddFilterPopover } from './add_filter_popover';
 import type { DataViewPickerProps } from '../dataview_picker';
 import { DataViewPicker } from '../dataview_picker';
@@ -680,6 +682,15 @@ export const QueryBarTopRow = React.memo(
       return () => subscription.unsubscribe();
     }, [shouldUseLegacyTimePicker, propsOnRefreshChange, data.query.timefilter.timefilter]);
 
+    const dayOfWeekSetting: string = uiSettings.get('dateFormat:dow');
+
+    const calendarOptions = useMemo(
+      () => ({
+        firstDayOfWeek: moment.weekdays().indexOf(dayOfWeekSetting) as FirstDayOfWeek,
+      }),
+      [dayOfWeekSetting]
+    );
+
     // Visualize-style consumers request auto-refresh-only mode via
     // `showAutoRefreshOnly` + `!showDatePicker`: the picker renders readOnly with
     // only the auto-refresh play/pause button operable.
@@ -934,6 +945,7 @@ export const QueryBarTopRow = React.memo(
               refreshEpoch={autoRefreshEpoch}
               inputDateFormats={inputDateFormats}
               timeZone={uiSettings.get('dateFormat:tz')}
+              calendarOptions={calendarOptions}
               prependBasePath={http?.basePath.prepend}
               canAccessAdvancedSettings={
                 (application?.capabilities.advancedSettings?.save as boolean | undefined) ?? false

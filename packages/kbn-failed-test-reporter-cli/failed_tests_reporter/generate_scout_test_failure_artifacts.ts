@@ -70,7 +70,7 @@ export async function generateScoutTestFailureArtifacts({
       const htmlFilePath = Path.join(dirPath, htmlReportFilename);
       const failureHTML = fs.readFileSync(htmlFilePath, 'utf-8');
       const failureId = Path.basename(htmlReportFilename, '.html');
-      const { githubIssue, failureCount } = githubIssues[failureId] ?? {};
+      const { githubIssue, failureCount, infraReason } = githubIssues[failureId] ?? {};
 
       const hash = createHash('sha256').update(name).digest('hex');
       const filenameBase = `${
@@ -88,6 +88,7 @@ export async function generateScoutTestFailureArtifacts({
           jobName: bkMeta.jobName,
           ...(githubIssue ? { githubIssue } : {}),
           ...(failureCount !== undefined ? { failureCount } : {}),
+          ...(infraReason ? { infraReason } : {}),
         },
         null,
         2

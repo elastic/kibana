@@ -70,6 +70,12 @@ export const bayesianUpdate = ({
   modifier: number;
   score: number;
 }) => {
+  // At the maximum the prior odds are infinite and the update would evaluate Infinity / Infinity.
+  // Its limit is the maximum itself, whatever positive modifier is applied.
+  if (score >= max) {
+    return max;
+  }
+
   const priorProbability = score / (max - score);
   const newProbability = priorProbability * modifier;
   return (max * newProbability) / (1 + newProbability);

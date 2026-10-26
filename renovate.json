@@ -51,7 +51,6 @@
         "webpack",
         "webpack-bundle-analyzer",
         "webpack-cli",
-        "webpack-dev-server",
         "webpack-merge",
         "webpack-sources",
         "@statoscope/webpack-plugin",
@@ -1107,8 +1106,7 @@
         "mocha-junit-reporter",
         "mocha-multi-reporters",
         "mochawesome",
-        "mochawesome-merge",
-        "regenerate"
+        "mochawesome-merge"
       ],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
@@ -1172,7 +1170,7 @@
     },
     {
       "groupName": "stylelint",
-      "matchDepNames": ["meow", "stylelint", "stylelint-scss"],
+      "matchDepNames": ["stylelint", "stylelint-scss"],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Operations"],
@@ -1973,7 +1971,6 @@
         "@types/chromedriver",
         "@types/selenium-webdriver",
         "geckodriver",
-        "ms-chromium-edge-driver",
         "selenium-webdriver"
       ],
       "reviewers": ["team:kibana-operations"],
@@ -2032,13 +2029,14 @@
       "matchDepNames": [
         "@emotion/jest",
         "@jest/console",
+        "@ampproject/remapping",
         "@jest/reporters",
         "@jest/transform",
         "@jest/types",
+        "@swc/jest",
         "@types/jest",
         "babel-jest",
         "expect",
-        "jest",
         "jest-canvas-mock",
         "jest-config",
         "jest-diff",
@@ -2047,7 +2045,9 @@
         "jest-mock",
         "jest-runtime",
         "jest-snapshot",
-        "jest-styled-components"
+        "jest-styled-components",
+        "jest",
+        "magic-string"
       ],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
@@ -2059,7 +2059,7 @@
       "groupName": "storybook",
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main", "8.19"],
-      "matchDepNames": ["@pmmmwh/react-refresh-webpack-plugin", "fix-esm", "react-refresh"],
+      "matchDepNames": ["@pmmmwh/react-refresh-webpack-plugin", "react-refresh"],
       "matchDepPatterns": ["storybook"],
       "labels": ["Team:Operations", "release_note:skip", "ci:build-storybooks", "backport:skip"],
       "allowedVersions": "<9.0.0",

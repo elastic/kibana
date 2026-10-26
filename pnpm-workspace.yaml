@@ -33,7 +33,6 @@ allowBuilds:
   'core-js-pure': false # donation banner
   'es5-ext': false # prints an informational message
   'lmdb': false # native bindings; prebuilds are sufficient
-  'ms-chromium-edge-driver': false # downloads Edge driver only if EDGEDRIVER_DOWNLOAD_ON_INSTALL
   'msgpackr-extract': false # native bindings; prebuilds are sufficient
   'msw': false # copies a worker script if configured; unused
   'nice-napi': false # optional piscina nice-value helper
@@ -55,7 +54,7 @@ overrides:
   # Generated from package.json#resolutions by `kbn bootstrap` — edit
   # resolutions, not this block (yarn keys are mapped: `**/a` -> `a`, `a/b` -> `a>b`).
   # START GENERATED OVERRIDES
-  '@actions/http-client>undici': '6.28.1'
+  '@actions/http-client>undici': '6.29.1'
   '@aws-sdk/client-bedrock-agent-runtime': '3.1089.0'
   '@aws-sdk/client-bedrock-runtime': '3.1089.0'
   '@aws-sdk/client-kendra': '3.1089.0'
@@ -71,8 +70,8 @@ overrides:
   '@babel/runtime': '7.29.7'
   '@babel/traverse': '7.29.8'
   '@babel/types': '7.29.8'
-  '@elastic/opamp-client-node>undici': '6.28.1'
-  '@elastic/transport@8>undici': '6.28.1'
+  '@elastic/opamp-client-node>undici': '6.29.1'
+  '@elastic/transport@8>undici': '6.29.1'
   '@emotion/sheet': 'npm:@elastic/emotion-sheet@1.4.1'
   '@hapi/mimos>mime-db': '1.53.0'
   '@hello-pangea/dnd': '18.0.1'
@@ -96,10 +95,10 @@ overrides:
   'hoist-non-react-statics': '3.3.2'
   'isomorphic-fetch>node-fetch': '2.7.0'
   'pixelmatch': '5.3.0'
-  'qs': '6.16.0'
+  'qs': '6.16.1'
   'remark-parse>trim': '1.0.1'
   'serialize-javascript': '7.1.2'
-  'sharp': '0.35.4'
+  'sharp': '0.35.5'
   'socket.io-parser': '4.2.7'
   'typescript': '6.0.3'
   'util': '0.12.5'
@@ -305,7 +304,6 @@ packages:
   - 'packages/kbn-whereis-pkg-cli'
   - 'packages/kbn-yarn-lock-validator'
   - 'src/cli'
-  - 'src/core'
   - 'src/core/packages/analytics/browser'
   - 'src/core/packages/analytics/browser-internal'
   - 'src/core/packages/analytics/browser-mocks'
@@ -354,6 +352,7 @@ packages:
   - 'src/core/packages/chrome/sidebar/sidebar-internal'
   - 'src/core/packages/chrome/sidebar/sidebar-mocks'
   - 'src/core/packages/config/server-internal'
+  - 'src/core/packages/core'
   - 'src/core/packages/custom-branding/browser'
   - 'src/core/packages/custom-branding/browser-internal'
   - 'src/core/packages/custom-branding/browser-mocks'

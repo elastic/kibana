@@ -171,6 +171,7 @@ describe('UnenrollInactiveAgentsTask', () => {
       ).toISOString();
       expect(mockedUnenrollBatch).toHaveBeenCalledWith(undefined, expect.anything(), agents, {
         force: true,
+        skipAgentlessValidation: true,
         startTime: expectedStartTime,
         actionId: expect.stringContaining(SCHEDULED_UNENROLL_ACTION_ID_PREFIX),
       });
@@ -321,6 +322,59 @@ describe('UnenrollInactiveAgentsTask', () => {
 
       await runTask();
       expect(mockedUnenrollBatch).not.toHaveBeenCalled();
+      jest.useRealTimers();
+    });
+
+    it('Should unenroll due action agents that are active with a stale unenrolled_at', async () => {
+      const now = new Date('2025-06-01T02:00:00.000Z');
+      jest.useFakeTimers().setSystemTime(now);
+      mockedUnenrollBatch.mockResolvedValue({ actionId: 'actionid-01' });
+
+      esClient.search
+        // executeDueUnenrollments: find due UNENROLL action
+        .mockResolvedValueOnce({
+          hits: {
+            hits: [
+              {
+                _source: {
+                  action_id: `${SCHEDULED_UNENROLL_ACTION_ID_PREFIX}abc`,
+                  agents: ['agent-1'],
+                  start_time: new Date('2025-06-01T01:00:00.000Z').toISOString(),
+                  type: 'UNENROLL',
+                },
+              },
+            ],
+          },
+        } as any)
+        // executeDueUnenrollments: fetch all CANCEL actions (none)
+        .mockResolvedValueOnce({ hits: { hits: [] } } as any);
+
+      // execute phase re-validation: legacy doc, active but with a stale unenrolled_at
+      const legacyAgent = { id: 'agent-1', active: true, unenrolled_at: '2025-01-01T00:00:00Z' };
+      // schedule phase finds no eligible agents
+      mockedGetAgentsByKuery
+        .mockReset()
+        .mockImplementation((async (
+          _esClient: unknown,
+          _soClient: unknown,
+          options?: { kuery?: string }
+        ) =>
+          options?.kuery?.includes('agent.id:')
+            ? { agents: [legacyAgent] }
+            : { agents: [] }) as any);
+
+      await runTask();
+      expect(mockedUnenrollBatch).toHaveBeenCalledWith(
+        undefined,
+        expect.anything(),
+        [legacyAgent],
+        expect.objectContaining({
+          revoke: true,
+          force: true,
+          actionId: `${SCHEDULED_UNENROLL_ACTION_ID_PREFIX}abc`,
+          skipActionCreation: true,
+        })
+      );
       jest.useRealTimers();
     });
 

@@ -139,12 +139,16 @@ export function defineRoutes({ logger, router }: { logger: Logger; router: IRout
                   schema.object({
                     type: schema.string({ maxLength: 512 }),
                     metadata: schema.maybe(schema.string({ maxLength: 4096 })),
-                    values: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
+                    values: schema.maybe(
+                      schema.arrayOf(schema.string({ maxLength: 4096 }), { maxSize: 100 })
+                    ),
                   }),
                   { maxSize: 100 }
                 ),
                 actions: schema.object({
-                  ids: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 10000 })),
+                  ids: schema.maybe(
+                    schema.arrayOf(schema.string({ maxLength: 512 }), { maxSize: 10000 })
+                  ),
                   docs: schema.maybe(
                     schema.arrayOf(
                       schema.object({
@@ -349,7 +353,7 @@ export function defineRoutes({ logger, router }: { logger: Logger; router: IRout
       },
       validate: {
         query: schema.object({
-          searchQuery: schema.maybe(schema.string()),
+          searchQuery: schema.maybe(schema.string({ maxLength: 1000 })),
         }),
       },
     },
@@ -383,8 +387,8 @@ export function defineRoutes({ logger, router }: { logger: Logger; router: IRout
       },
       validate: {
         params: schema.object({
-          indexName: schema.string(),
-          documentId: schema.string(),
+          indexName: schema.string({ maxLength: 1024 }),
+          documentId: schema.string({ maxLength: 512 }),
         }),
       },
     },

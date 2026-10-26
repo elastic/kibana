@@ -437,6 +437,9 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
           const agentPolicy = agent.policy_id
             ? agentPoliciesIndexedById[removeVersionSuffixFromPolicyId(agent.policy_id)]
             : undefined;
+          if (agentPolicy?.supports_agentless) {
+            return 'This action is not available for managed agents';
+          }
           if (agentPolicy?.is_managed && agent.type !== 'OPAMP') {
             return 'This action is not available for agents enrolled in an externally managed agent policy';
           }

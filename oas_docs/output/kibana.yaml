@@ -3,13 +3,13 @@ info:
   contact:
     name: Kibana Team
   description: |
-    The Kibana REST APIs enable you to manage resources such as connectors, data views, and saved objects.
+    The Kibana REST API enables you to manage resources such as connectors, data views, and saved objects.
     The API calls are stateless.
     Each request that you make happens in isolation from other calls and must include all of the necessary information for Kibana to fulfill the
     request.
     API requests return JSON output, which is a format that is machine-readable and works well for automation.
 
-    To interact with Kibana APIs, use the following operations:
+    To interact with the Kibana API, use the following operations:
 
     - GET: Fetches the information.
     - PATCH: Applies partial modifications to the existing information.
@@ -34,7 +34,7 @@ info:
     It is provided under license [Attribution-NonCommercial-NoDerivatives 4.0 International](https://creativecommons.org/licenses/by-nc-nd/4.0/).
 
     This documentation contains work-in-progress information for future Elastic Stack releases.
-  title: Kibana APIs
+  title: Kibana API
   version: ''
   x-doc-license:
     name: Attribution-NonCommercial-NoDerivatives 4.0 International
@@ -54,7 +54,7 @@ tags:
   - name: agent builder
     description: |
       Agent Builder is a set of AI-powered capabilities for developing and interacting with agents that work with your Elasticsearch data.
-      Most users will probably want to integrate with Agent Builder using MCP or A2A, but you can also work programmatically with tools, agents, and conversations using these Kibana APIs.
+      Most users will probably want to integrate with Agent Builder using MCP or A2A, but you can also work programmatically with tools, agents, and conversations using the Kibana API.
       **Elastic Agent Builder requires an Enterprise subscription.**
     externalDocs:
       description: Agent Builder docs
@@ -534,8 +534,9 @@ paths:
       responses:
         '200':
           description: Returns the OAuth callback script
-      summary: ''
-      tags: []
+      summary: Get OAuth callback script
+      tags:
+        - connectors
       x-state: Added in 9.4.0
       x-metaTags:
         - content: Kibana
@@ -4406,15 +4407,21 @@ paths:
                         description: |-
                           Execute an ES|QL query and return the results in a tabular format.
 
-                          **IMPORTANT**: This tool only **runs** queries; it does not write them.
-                          Think of this as the final step after a query has been prepared.
+                          ## Usage
 
-                          You **must** get the query from one of two sources before calling this tool:
-                          1.  The output of the `platform.core.generate_esql` tool (if the tool is available).
-                          2.  A verbatim query provided directly by the user.
+                          This tool runs an ES|QL query; it does not write one.
 
-                          Under no circumstances should you invent, guess, or modify a query yourself for this tool.
-                          If you need a query, use the `platform.core.generate_esql` tool first.
+                          ### Where the query comes from
+
+                          By default, when you need a new query, use the `platform_core_generate_esql` tool rather than writing it yourself: it inspects the target data and applies ES|QL guidance that is easy to get wrong when writing a query from memory.
+                          Adapting an earlier query to a new question, such as another metric or field, counts as writing a new query: call `platform_core_generate_esql` again for each new question.
+
+                          You can run a query as-is when it comes from:
+                          - the user,
+                          - your instructions or a skill you loaded, such as a query template,
+                          - the result of another tool, or an attachment.
+
+                          These are default guidelines. If your instructions or a skill you loaded tell you to write ES|QL queries yourself and run them with this tool, do so. Do the same if the `platform_core_generate_esql` tool is not available to you.
                         id: platform.core.execute_esql
                         readonly: true
                         schema:
@@ -18379,7 +18386,7 @@ paths:
         - The `Content-Type: multipart/form-data` HTTP header.
         - A link to the `.ndjson` file containing the rules.
         > warn
-        > When used with [API key](https://www.elastic.co/docs/deploy-manage/api-keys) authentication, the user's key gets assigned to the affected rules. If the user's key gets deleted or the user becomes inactive, the rules will stop running.
+        > When used with [API key](https://www.elastic.co/docs/deploy-manage/api-keys) authentication, the user's key gets assigned to the created or updated rules. If the user's key gets deleted or the user becomes inactive, the rules will stop running.
 
         > If the API key that is used for authorization has different privileges than the key that created or most recently updated the rule, the rule behavior might change.
         > info
@@ -18393,7 +18400,7 @@ paths:
         > Similarly, any value lists used for rule exceptions are not included in rule exports or imports. Use the [Manage value lists](https://www.elastic.co/docs/solutions/security/detect-and-alert/create-manage-value-lists) UI (Rules → Detection rules (SIEM) → Manage value lists) to export and import value lists separately.
       operationId: ImportRules
       parameters:
-        - description: Determines whether existing rules with the same `rule_id` are overwritten.
+        - description: Determines whether existing rules with the same `rule_id` are overwritten. If an imported rule matches the existing rule's settings, including whether it's enabled, the existing rule isn't updated. It keeps its `revision`, `updated_at` timestamp, and API key, and is counted in `rules_summary.skipped`.
           in: query
           name: overwrite
           required: false
@@ -18450,6 +18457,11 @@ paths:
                     exceptions_success: true
                     exceptions_success_count: 0
                     rules_count: 1
+                    rules_summary:
+                      created: 1
+                      failed: 0
+                      skipped: 0
+                      updated: 0
                     success: true
                     success_count: 1
               schema:
@@ -18485,6 +18497,32 @@ paths:
                   rules_count:
                     minimum: 0
                     type: integer
+                  rules_summary:
+                    additionalProperties: false
+                    description: Counts of imported rules by outcome. `created`, `updated`, and `skipped` are included in `success_count`. `failed` did not import successfully.
+                    type: object
+                    properties:
+                      created:
+                        description: Rules created by this import.
+                        minimum: 0
+                        type: integer
+                      failed:
+                        description: Rules that did not import successfully.
+                        minimum: 0
+                        type: integer
+                      skipped:
+                        description: Existing rules skipped because nothing changed. Included in `success_count`.
+                        minimum: 0
+                        type: integer
+                      updated:
+                        description: Existing rules overwritten because the payload changed.
+                        minimum: 0
+                        type: integer
+                    required:
+                      - created
+                      - updated
+                      - skipped
+                      - failed
                   success:
                     type: boolean
                   success_count:
@@ -18497,6 +18535,7 @@ paths:
                   - rules_count
                   - success
                   - success_count
+                  - rules_summary
                   - errors
                   - action_connectors_errors
                   - action_connectors_warnings
@@ -136349,8 +136388,11 @@ components:
                   anyOf:
                     - type: string
                     - type: number
+                    - type: boolean
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_multi_value_cell'
                     - $ref: '#/components/schemas/Kibana_HTTP_APIs_range_key'
                     - $ref: '#/components/schemas/Kibana_HTTP_APIs_multi_field_key'
+                  nullable: true
                 maxItems: 1000
                 type: array
             required:
@@ -138107,23 +138149,28 @@ components:
               type: string
             groupBy:
               items:
+                maxLength: 1000
                 type: string
+              maxItems: 100
               type: array
             searchConfiguration:
               additionalProperties: false
               type: object
               properties:
                 index:
+                  maxLength: 10000
                   type: string
               required:
                 - index
             threshold:
               items:
                 type: number
+              maxItems: 2
               type: array
             timeSize:
               type: number
             timeUnit:
+              maxLength: 64
               type: string
           required:
             - timeUnit
@@ -144068,8 +144115,11 @@ components:
                   anyOf:
                     - type: string
                     - type: number
+                    - type: boolean
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_multi_value_cell'
                     - $ref: '#/components/schemas/Kibana_HTTP_APIs_range_key'
                     - $ref: '#/components/schemas/Kibana_HTTP_APIs_multi_field_key'
+                  nullable: true
                 maxItems: 100
                 type: array
             required:
@@ -156354,6 +156404,7 @@ components:
       type: object
     Kibana_HTTP_APIs_multi_field_key:
       additionalProperties: false
+      description: Composite key from a multi-terms bucket.
       properties:
         keys:
           items:
@@ -156369,6 +156420,22 @@ components:
         - keys
       title: Multi Field Key
       type: object
+    Kibana_HTTP_APIs_multi_value_cell:
+      anyOf:
+        - items:
+            type: string
+          maxItems: 100
+          type: array
+        - items:
+            type: number
+          maxItems: 100
+          type: array
+        - items:
+            type: boolean
+          maxItems: 100
+          type: array
+      description: Values of a multi-value cell.
+      title: Multi Value Cell
     Kibana_HTTP_APIs_new_agent_policy:
       additionalProperties: false
       properties:
@@ -160648,6 +160715,7 @@ components:
         - stream
     Kibana_HTTP_APIs_range_key:
       additionalProperties: false
+      description: Identifies a range bucket. Omit either bound for an open end.
       properties:
         from:
           anyOf:
@@ -160669,8 +160737,6 @@ components:
                   - type: string
                   - type: number
             required:
-              - from
-              - to
               - label
           maxItems: 100
           type: array
@@ -160684,8 +160750,6 @@ components:
           type: string
       required:
         - type
-        - from
-        - to
         - ranges
       title: Range Key
       type: object
@@ -165596,12 +165660,16 @@ components:
             excludeTransforms:
               default: null
               items:
+                maxLength: 1000
                 type: string
+              maxItems: 1000
               nullable: true
               type: array
             includeTransforms:
               items:
+                maxLength: 1000
                 type: string
+              maxItems: 1000
               type: array
             testsConfig:
               additionalProperties: false
