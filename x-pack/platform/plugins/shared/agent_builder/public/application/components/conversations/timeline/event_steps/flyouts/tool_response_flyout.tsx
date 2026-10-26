@@ -30,7 +30,7 @@ import { useConversationFlyoutSessionProps } from '../../../../../hooks/use_conv
 import { JsonCodeBlock } from '../json_code_block';
 import { ToolResult } from '../results/tool_result';
 import { SubAgentExecutionFlyout } from './sub_agent_execution_flyout';
-import { parametersLabel, executionLabel, resultLabel } from './flyout_labels';
+import { parametersLabel, executionLabel, resultLabel, stoppedLabel } from './flyout_labels';
 import { useSteppedFlyoutStyles } from './use_stepped_flyout_styles';
 
 const backLabel = i18n.translate('xpack.agentBuilder.conversation.toolResponseFlyout.back', {
@@ -53,12 +53,14 @@ const toolResponseTitle = i18n.translate(
 
 interface ToolResponseFlyoutProps {
   step: ToolCallStepData;
+  isAborted?: boolean;
   onClose: () => void;
   onBack?: () => void;
 }
 
 export const ToolResponseFlyout: React.FC<ToolResponseFlyoutProps> = ({
   step,
+  isAborted = false,
   onClose,
   onBack,
 }) => {
@@ -74,8 +76,9 @@ export const ToolResponseFlyout: React.FC<ToolResponseFlyoutProps> = ({
   const showExecutionSection = isSubAgentCall;
   const progressionSteps = (step.progression ?? []).filter((p) => !p.metadata?.agent_execution_id);
   const showProgressionSection = progressionSteps.length > 0;
-  const isSubAgentRunning = isSubAgentCall && step.results.length === 0;
   const showResultSection = step.results.length > 0;
+  const isStopped = isAborted && !showResultSection;
+  const isSubAgentRunning = isSubAgentCall && !showResultSection && !isStopped;
   const hasErrorResult = step.results.some(isErrorResult);
 
   const steps = [
@@ -88,7 +91,10 @@ export const ToolResponseFlyout: React.FC<ToolResponseFlyoutProps> = ({
       ? [
           {
             title: executionLabel,
-            status: (showResultSection ? 'complete' : 'loading') as 'loading' | 'complete',
+            status: (showResultSection ? 'complete' : isStopped ? 'incomplete' : 'loading') as
+              | 'incomplete'
+              | 'loading'
+              | 'complete',
             children: (
               <ul
                 css={css`
@@ -116,9 +122,18 @@ export const ToolResponseFlyout: React.FC<ToolResponseFlyoutProps> = ({
       ? [
           {
             title: executionLabel,
-            status: (isSubAgentRunning ? 'loading' : 'complete') as 'loading' | 'complete',
+            status: (isStopped ? 'incomplete' : isSubAgentRunning ? 'loading' : 'complete') as
+              | 'incomplete'
+              | 'loading'
+              | 'complete',
             children: !subAgentExecutionId ? (
-              <EuiLoadingSpinner size="s" />
+              isStopped ? (
+                <EuiText size="s" color="subdued">
+                  {stoppedLabel}
+                </EuiText>
+              ) : (
+                <EuiLoadingSpinner size="s" />
+              )
             ) : (
               <ul
                 css={css`
@@ -197,6 +212,7 @@ export const ToolResponseFlyout: React.FC<ToolResponseFlyoutProps> = ({
           executionId={subAgentExecutionId}
           params={step.params}
           isCompleted={!isSubAgentRunning}
+          isStopped={isStopped}
           onBack={isEmbeddedContext ? closeSubFlyout : undefined}
           onClose={isEmbeddedContext ? onClose : closeSubFlyout}
         />

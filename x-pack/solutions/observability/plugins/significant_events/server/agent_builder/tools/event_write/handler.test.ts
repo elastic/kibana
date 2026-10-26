@@ -755,27 +755,84 @@ describe('eventsWriteBulkHandler — lifecycle resolution', () => {
     expect(alertEventsClient.createAlertEvent).not.toHaveBeenCalled();
   });
 
-  it('refuses to open a new event without a breaching member', async () => {
-    await expect(
-      eventsWriteBulkHandler({
+  it('opens no event from healthy members: only evidence of an error is born', async () => {
+    const results = await eventsWriteBulkHandler({
+      eventSearchClient: makeEventSearchClient(),
+      inputs: [
+        {
+          ...baseInput,
+          status: undefined,
+          severity: 'low',
+          signals: [
+            makeDetectionSignal({
+              ruleUuid: 'rule-1',
+              verdict: 'refutes',
+              description: 'Healthy',
+              changePointType: 'dip',
+            }),
+          ],
+        },
+      ],
+    });
+
+    expect(results[0]).toMatchObject({
+      written: false,
+      skipped: true,
+      reason: 'unchanged_outcome',
+    });
+    expect(results[0]).not.toHaveProperty('status');
+    expect(alertEventsClient.createAlertEvent).not.toHaveBeenCalled();
+  });
+
+  it.each([['members that cannot be judged', 'inconclusive', 'active']] as const)(
+    'opens a new event from %s, with the status the verdicts give',
+    async (_label, verdict, status) => {
+      const results = await eventsWriteBulkHandler({
         eventSearchClient: makeEventSearchClient(),
         inputs: [
           {
             ...baseInput,
             status: undefined,
+            severity: 'low',
             signals: [
               makeDetectionSignal({
                 ruleUuid: 'rule-1',
-                verdict: 'refutes',
-                description: 'Healthy',
+                verdict,
+                description: 'Not breaching',
                 changePointType: 'dip',
               }),
             ],
           },
         ],
-      })
-    ).rejects.toThrow('without a breaching member');
-    expect(alertEventsClient.createAlertEvent).not.toHaveBeenCalled();
+      });
+
+      expect(results[0]).toMatchObject({ written: true, status });
+      expect(writtenDocs()[0].status).toBe(status);
+    }
+  );
+
+  it('rates an event with no confirming signal low, and caps its confidence', async () => {
+    await eventsWriteBulkHandler({
+      eventSearchClient: makeEventSearchClient(),
+      inputs: [
+        {
+          ...baseInput,
+          status: undefined,
+          severity: 'high',
+          confidence: 0.8,
+          signals: [
+            makeDetectionSignal({
+              ruleUuid: 'rule-1',
+              verdict: 'inconclusive',
+              description: 'Query returned nothing',
+              changePointType: 'dip',
+            }),
+          ],
+        },
+      ],
+    });
+
+    expect(writtenDocs()[0]).toMatchObject({ severity: 'low', confidence: 0.3 });
   });
 
   it('sets aside a refuting continuation of an unknown event without failing the batch', async () => {
@@ -1138,6 +1195,51 @@ describe('eventsWriteBulkHandler — narrative hijack guard', () => {
     const writtenDoc = writtenDocs()[0] as Partial<SignificantEvent>;
     expect(writtenDoc.title).toBe('EIS gateway — authorization endpoint HTTP errors');
     expect(writtenDoc.symptom_hypothesis).toBe('EIS auth route returns >=400 for all clients.');
+  });
+
+  it('narrative guard: lets the title and hypothesis change when a rule now confirms what the event stored as unconfirmed', async () => {
+    const eventId = 'event-narrative-escalates';
+    const stored = makeStoredEvent(eventId, {
+      signals: [
+        makeDetectionSignal({
+          ruleUuid: 'rule-eis-auth',
+          sourceId: 'logs.app',
+          verdict: 'inconclusive',
+        }),
+      ],
+    });
+    stored.title = 'EIS gateway — no current authorization errors';
+    stored.symptom_hypothesis = 'No authorization failure mechanism is established.';
+
+    const eventClient = makeEventSearchClient({
+      findByEventId: jest.fn().mockResolvedValue({ hits: [stored] }),
+    });
+
+    const [result] = await eventsWriteBulkHandler({
+      eventSearchClient: eventClient,
+      inputs: [
+        makeSnapshotInput(eventId, {
+          signals: [
+            makeDetectionSignal({
+              ruleUuid: 'rule-eis-auth',
+              sourceId: 'logs.app',
+              verdict: 'confirms',
+            }),
+          ],
+          title: 'EIS gateway — authorization endpoint HTTP errors',
+          symptom_hypothesis: 'EIS auth route returns >=400 for all clients.',
+        }),
+      ],
+    });
+
+    expect(result.written).toBe(true);
+    if (result.written) {
+      expect(result.narrative_preserved).toBeUndefined();
+    }
+    expect(writtenDocs()[0]).toMatchObject({
+      title: 'EIS gateway — authorization endpoint HTTP errors',
+      symptom_hypothesis: 'EIS auth route returns >=400 for all clients.',
+    });
   });
 });
 

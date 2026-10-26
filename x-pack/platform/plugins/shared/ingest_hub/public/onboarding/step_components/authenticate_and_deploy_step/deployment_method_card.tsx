@@ -6,74 +6,40 @@
  */
 
 import React, { useState } from 'react';
-import { css } from '@emotion/react';
-import {
-  EuiButton,
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiModal,
-  EuiModalBody,
-  EuiModalFooter,
-  EuiModalHeader,
-  EuiModalHeaderTitle,
-  EuiPanel,
-  EuiSelect,
-  EuiSpacer,
-  EuiText,
-  EuiToolTip,
-  useEuiTheme,
-  useGeneratedHtmlId,
-} from '@elastic/eui';
+import { EuiConfirmModal, EuiSpacer, EuiTitle, useGeneratedHtmlId } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { KbnWarningCallout } from '@kbn/ui-callout';
 
 import type { AwsServiceMatrixEntry, DeploymentMethod } from '../../aws_service_matrix';
+import { ChoiceCards } from '../choice_cards';
+import type { ChoiceCardOption } from '../choice_cards';
 
 // Re-export the canonical type from the matrix so all consumers use the same spelling.
 export type { DeploymentMethod };
 
-interface DeploymentMethodOption {
-  value: DeploymentMethod;
-  /** Label shown in the select dropdown */
-  text: string;
-  /** Short name shown bold in the card summary */
-  name: string;
-  /** Tagline shown after the name in the card summary */
-  tagline: string;
-}
-
-const DEPLOYMENT_METHOD_OPTIONS: DeploymentMethodOption[] = [
+const DEPLOYMENT_METHOD_OPTIONS: Array<ChoiceCardOption<DeploymentMethod>> = [
   {
     value: 'managed_integration',
-    text: i18n.translate(
-      'xpack.ingestHub.authenticateAndDeployStep.deploymentMethod.managedIntegrations.selectText',
-      { defaultMessage: 'Elastic Managed Integrations' }
-    ),
     name: i18n.translate(
       'xpack.ingestHub.authenticateAndDeployStep.deploymentMethod.managedIntegrations.name',
       { defaultMessage: 'Elastic Managed Integration' }
     ),
-    tagline: i18n.translate(
-      'xpack.ingestHub.authenticateAndDeployStep.deploymentMethod.managedIntegrations.tagline',
-      { defaultMessage: 'Simpler setup, no agent required.' }
+    description: i18n.translate(
+      'xpack.ingestHub.authenticateAndDeployStep.deploymentMethod.managedIntegrations.description',
+      { defaultMessage: 'Best for simple setup.' }
     ),
+    isRecommended: true,
   },
   {
     value: 'agent_based',
-    text: i18n.translate(
-      'xpack.ingestHub.authenticateAndDeployStep.deploymentMethod.agentBased.selectText',
-      { defaultMessage: 'Agent-based' }
-    ),
     name: i18n.translate(
       'xpack.ingestHub.authenticateAndDeployStep.deploymentMethod.agentBased.name',
       { defaultMessage: 'Agent-based' }
     ),
-    tagline: i18n.translate(
-      'xpack.ingestHub.authenticateAndDeployStep.deploymentMethod.agentBased.tagline',
-      { defaultMessage: 'For environments that require an Elastic Agent.' }
+    description: i18n.translate(
+      'xpack.ingestHub.authenticateAndDeployStep.deploymentMethod.agentBased.description',
+      { defaultMessage: 'Best if you need more control.' }
     ),
   },
 ];
@@ -81,207 +47,150 @@ const DEPLOYMENT_METHOD_OPTIONS: DeploymentMethodOption[] = [
 interface DeploymentMethodCardProps {
   selectedMethod: DeploymentMethod;
   onChange: (method: DeploymentMethod) => void;
-  /** When true, hides the edit button entirely (agent-based-only services selected). */
+  /** When true, the choice is fixed and the cards are not selectable (e.g. agent-based-only services selected). */
   locked?: boolean;
-  /** When true, the Edit button is disabled with a tooltip — deployment method is locked after the first deploy. */
+  /** When true, the cards are disabled with a tooltip — deployment method is locked after the first deploy. */
   disabled?: boolean;
   /**
-   * Methods offered in the edit modal. Omitted means all of them; self-managed passes
+   * Methods offered as cards. Omitted means all of them; self-managed passes
    * `['agent_based']` because the agentless infrastructure the other methods need is cloud-only.
    */
   availableMethods?: DeploymentMethod[];
   /** Selected services that choosing a method would remove from the selection. */
   unsupportedServices?: Partial<Record<DeploymentMethod, AwsServiceMatrixEntry[]>>;
+  /**
+   * True when changing the method would discard settings the user has entered (the agent policy
+   * name and options): switching asks for confirmation instead of applying straight away.
+   */
+  switchResetsSettings?: boolean;
 }
 
 export function DeploymentMethodCard({
   selectedMethod,
   onChange,
   locked = false,
-  disabled,
+  disabled = false,
   availableMethods,
   unsupportedServices,
+  switchResetsSettings = false,
 }: DeploymentMethodCardProps) {
-  const { euiTheme } = useEuiTheme();
-  const modalTitleId = useGeneratedHtmlId();
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [draftMethod, setDraftMethod] = useState<DeploymentMethod>(selectedMethod);
+  const confirmModalTitleId = useGeneratedHtmlId();
+  const [pendingMethod, setPendingMethod] = useState<DeploymentMethod | null>(null);
 
   const options = availableMethods
     ? DEPLOYMENT_METHOD_OPTIONS.filter((o) => availableMethods.includes(o.value))
     : DEPLOYMENT_METHOD_OPTIONS;
 
   // Defensive fallback: if a stale/hand-edited session-storage value carries an unknown method,
-  // show the first option rather than crashing. The type permits any DeploymentMethod string.
-  // The second fallback covers an availableMethods list that filters everything out.
+  // check the first option rather than leaving every card unchecked. The type permits any
+  // DeploymentMethod string. The second fallback covers an availableMethods list that filters
+  // everything out.
   const selectedOption =
     options.find((o) => o.value === selectedMethod) ?? options[0] ?? DEPLOYMENT_METHOD_OPTIONS[0];
 
-  const removedServiceNames = (unsupportedServices?.[draftMethod] ?? []).map((s) => s.name);
+  const cardsDisabled = locked || disabled;
 
-  const panelCss = css`
-    border: 1px solid ${euiTheme.colors.borderBaseSubdued};
-  `;
-
-  const openModal = () => {
-    setDraftMethod(selectedMethod);
-    setIsModalOpen(true);
+  const handleSelect = (method: DeploymentMethod) => {
+    if (cardsDisabled || method === selectedOption.value) return;
+    // Ask before dropping services from the selection or discarding settings; apply anything else
+    // straight away.
+    if (switchResetsSettings || (unsupportedServices?.[method] ?? []).length > 0) {
+      setPendingMethod(method);
+      return;
+    }
+    onChange(method);
   };
 
-  const handleSave = () => {
-    onChange(draftMethod);
-    setIsModalOpen(false);
-  };
-
-  const handleCancel = () => {
-    setIsModalOpen(false);
-  };
+  const removedServiceNames = pendingMethod
+    ? (unsupportedServices?.[pendingMethod] ?? []).map((s) => s.name)
+    : [];
 
   return (
-    <>
-      <EuiPanel
-        paddingSize="m"
-        color="subdued"
-        css={panelCss}
-        data-test-subj="deploymentMethodCard"
-      >
-        <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <EuiIcon type="gear" size="m" color="subdued" aria-hidden />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiText size="s">
-              <strong>
-                <FormattedMessage
-                  id="xpack.ingestHub.authenticateAndDeployStep.deploymentMethodCard.title"
-                  defaultMessage="Deployment method"
-                />
-              </strong>
-            </EuiText>
-            <EuiText size="s">
-              <strong>{selectedOption.name}.</strong> {selectedOption.tagline}
-            </EuiText>
-          </EuiFlexItem>
-          {!locked && (
-            <EuiFlexItem grow={false}>
-              <EuiToolTip
-                content={
-                  disabled
-                    ? i18n.translate(
-                        'xpack.ingestHub.authenticateAndDeployStep.deploymentMethodCard.disabledTooltip',
-                        {
-                          defaultMessage:
-                            'Deployment method cannot be changed after services have been deployed. Start a new session to choose a different method.',
-                        }
-                      )
-                    : undefined
+    <section data-test-subj="deploymentMethodCard">
+      <EuiTitle size="m">
+        <h2>
+          <FormattedMessage
+            id="xpack.ingestHub.authenticateAndDeployStep.deploymentMethodCard.title"
+            defaultMessage="Deployment method"
+          />
+        </h2>
+      </EuiTitle>
+      <EuiSpacer size="m" />
+      <ChoiceCards
+        options={options}
+        selectedValue={selectedOption.value}
+        onChange={handleSelect}
+        disabled={cardsDisabled}
+        // Only the lock after a deploy needs explaining; a forced method has nothing to explain.
+        disabledTooltip={
+          disabled && !locked
+            ? i18n.translate(
+                'xpack.ingestHub.authenticateAndDeployStep.deploymentMethodCard.disabledTooltip',
+                {
+                  defaultMessage:
+                    'Deployment method cannot be changed after services have been deployed. Start a new session to choose a different method.',
                 }
-              >
-                {/* span needed: disabled EuiButtonEmpty has pointer-events:none; span intercepts hover
-                    and keyboard focus (tabIndex) so the tooltip fires for mouse and keyboard users */}
-                <span style={{ display: 'inline-block' }} tabIndex={disabled ? 0 : undefined}>
-                  <EuiButtonEmpty
-                    size="xs"
-                    onClick={disabled ? undefined : openModal}
-                    disabled={disabled}
-                    data-test-subj="deploymentMethodCard-editButton"
-                  >
-                    <FormattedMessage
-                      id="xpack.ingestHub.authenticateAndDeployStep.deploymentMethodCard.editButton"
-                      defaultMessage="Edit"
-                    />
-                  </EuiButtonEmpty>
-                </span>
-              </EuiToolTip>
-            </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
-      </EuiPanel>
+              )
+            : undefined
+        }
+        testSubjPrefix="deploymentMethodCard"
+      />
 
-      {!locked && isModalOpen && (
-        <EuiModal
-          onClose={handleCancel}
-          aria-labelledby={modalTitleId}
-          data-test-subj="editDeploymentMethodModal"
+      {pendingMethod && (
+        <EuiConfirmModal
+          aria-labelledby={confirmModalTitleId}
+          titleProps={{ id: confirmModalTitleId }}
+          title={i18n.translate(
+            'xpack.ingestHub.authenticateAndDeployStep.confirmDeploymentMethodModal.title',
+            { defaultMessage: 'Change deployment method?' }
+          )}
+          onCancel={() => setPendingMethod(null)}
+          onConfirm={() => {
+            onChange(pendingMethod);
+            setPendingMethod(null);
+          }}
+          cancelButtonText={i18n.translate(
+            'xpack.ingestHub.authenticateAndDeployStep.confirmDeploymentMethodModal.cancelButton',
+            { defaultMessage: 'Cancel' }
+          )}
+          confirmButtonText={i18n.translate(
+            'xpack.ingestHub.authenticateAndDeployStep.confirmDeploymentMethodModal.confirmButton',
+            { defaultMessage: 'Change method' }
+          )}
+          data-test-subj="confirmDeploymentMethodModal"
         >
-          <EuiModalHeader>
-            <EuiModalHeaderTitle id={modalTitleId}>
+          {switchResetsSettings && (
+            <p data-test-subj="confirmDeploymentMethodModal-resetSettings">
               <FormattedMessage
-                id="xpack.ingestHub.authenticateAndDeployStep.editDeploymentMethodModal.title"
-                defaultMessage="Edit deployment method"
+                id="xpack.ingestHub.authenticateAndDeployStep.confirmDeploymentMethodModal.resetSettings"
+                defaultMessage="Changing the method resets the agent policy settings you entered."
               />
-            </EuiModalHeaderTitle>
-          </EuiModalHeader>
-          <EuiModalBody>
-            <EuiText size="s" color="subdued">
-              <p>
-                <FormattedMessage
-                  id="xpack.ingestHub.authenticateAndDeployStep.editDeploymentMethodModal.description"
-                  defaultMessage="The deployment method determines how Elastic connects to and collects data from your AWS services."
-                />
-              </p>
-            </EuiText>
-            <EuiSpacer size="m" />
-            <EuiSelect
-              fullWidth
-              options={options}
-              value={draftMethod}
-              onChange={(e) => setDraftMethod(e.target.value as DeploymentMethod)}
-              aria-label={i18n.translate(
-                'xpack.ingestHub.authenticateAndDeployStep.editDeploymentMethodModal.selectAriaLabel',
-                { defaultMessage: 'Deployment method' }
+            </p>
+          )}
+          {removedServiceNames.length > 0 && (
+            <KbnWarningCallout
+              announceOnMount
+              title={i18n.translate(
+                'xpack.ingestHub.authenticateAndDeployStep.confirmDeploymentMethodModal.removedServicesCallout.title',
+                { defaultMessage: 'Services will be removed' }
               )}
-              data-test-subj="editDeploymentMethodModal-select"
+              text={
+                <p>
+                  <FormattedMessage
+                    id="xpack.ingestHub.authenticateAndDeployStep.confirmDeploymentMethodModal.removedServicesCallout.body"
+                    defaultMessage="{services} can't be deployed by this method. Changing the method removes {count, plural, one {it} other {them}} from your selection."
+                    values={{
+                      services: <strong>{removedServiceNames.join(', ')}</strong>,
+                      count: removedServiceNames.length,
+                    }}
+                  />
+                </p>
+              }
+              data-test-subj="confirmDeploymentMethodModal-removedServicesCallout"
             />
-            {removedServiceNames.length > 0 && (
-              <>
-                <EuiSpacer size="m" />
-                <KbnWarningCallout
-                  announceOnMount
-                  title={i18n.translate(
-                    'xpack.ingestHub.authenticateAndDeployStep.editDeploymentMethodModal.removedServicesCallout.title',
-                    { defaultMessage: 'Services will be removed' }
-                  )}
-                  text={
-                    <p>
-                      <FormattedMessage
-                        id="xpack.ingestHub.authenticateAndDeployStep.editDeploymentMethodModal.removedServicesCallout.body"
-                        defaultMessage="{services} can't be deployed by this method. Saving removes {count, plural, one {it} other {them}} from your selection."
-                        values={{
-                          services: <strong>{removedServiceNames.join(', ')}</strong>,
-                          count: removedServiceNames.length,
-                        }}
-                      />
-                    </p>
-                  }
-                  data-test-subj="editDeploymentMethodModal-removedServicesCallout"
-                />
-              </>
-            )}
-          </EuiModalBody>
-          <EuiModalFooter>
-            <EuiButtonEmpty
-              onClick={handleCancel}
-              data-test-subj="editDeploymentMethodModal-cancelButton"
-            >
-              <FormattedMessage
-                id="xpack.ingestHub.authenticateAndDeployStep.editDeploymentMethodModal.cancelButton"
-                defaultMessage="Cancel"
-              />
-            </EuiButtonEmpty>
-            <EuiButton
-              fill
-              onClick={handleSave}
-              data-test-subj="editDeploymentMethodModal-saveButton"
-            >
-              <FormattedMessage
-                id="xpack.ingestHub.authenticateAndDeployStep.editDeploymentMethodModal.saveButton"
-                defaultMessage="Save"
-              />
-            </EuiButton>
-          </EuiModalFooter>
-        </EuiModal>
+          )}
+        </EuiConfirmModal>
       )}
-    </>
+    </section>
   );
 }

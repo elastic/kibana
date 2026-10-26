@@ -6,57 +6,26 @@
  */
 
 import React from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPageHeader,
-  EuiPanel,
-  EuiSkeletonRectangle,
-  EuiSkeletonText,
-  EuiSkeletonTitle,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiPanel, EuiSkeletonText, EuiSkeletonTitle, EuiSpacer } from '@elastic/eui';
+import { AppHeaderLoading } from '@kbn/app-header';
+import { i18n } from '@kbn/i18n';
+import { useAlertingLocators } from '../../application/locator_context';
 
 export const Skeleton: React.FunctionComponent = () => {
+  const { rulesLocators } = useAlertingLocators();
+  const rulesListHref = rulesLocators.useUrl({});
+
   return (
     <>
-      <EuiPageHeader
-        data-test-subj="ruleDetailsTitle"
-        bottomBorder
-        pageTitle={<EuiSkeletonTitle size="l" />}
-        description={
-          <EuiFlexGroup
-            alignItems="center"
-            justifyContent="flexStart"
-            gutterSize="m"
-            wrap={false}
-            responsive={false}
-          >
-            <EuiFlexItem grow={false}>
-              <EuiSkeletonRectangle width={72} height={24} borderRadius="m" />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
-                <EuiFlexItem grow={false}>
-                  <EuiSkeletonRectangle width={32} height={16} borderRadius="s" />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiSkeletonRectangle width={48} height={24} borderRadius="m" />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
-                <EuiFlexItem grow={false}>
-                  <EuiSkeletonRectangle width={36} height={16} borderRadius="s" />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiSkeletonRectangle width={64} height={24} borderRadius="m" />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        }
+      <AppHeaderLoading
+        back={{
+          href: rulesListHref,
+          label: i18n.translate('xpack.alertingV2.ruleDetails.header.backToRulesLabel', {
+            defaultMessage: 'Rules',
+          }),
+        }}
+        spacing="bleed"
+        sticky={false}
       />
 
       <EuiSpacer size="m" />
