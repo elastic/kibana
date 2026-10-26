@@ -6,7 +6,7 @@
  */
 
 module.exports = {
-  preset: '@kbn/test/jest_integration',
+  preset: '@kbn/jest/jest_integration',
   rootDir: '../../../../../../..',
   roots: [
     '<rootDir>/x-pack/solutions/security/plugins/alertzero/integration_tests/attack_discovery_worker_chain',

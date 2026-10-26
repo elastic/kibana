@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { lazySchema, z } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { getConversationMetadataStepCommonDefinition } from '@kbn/agent-builder-plugin/common/workflows/steps/get_conversation_metadata';
@@ -17,6 +17,7 @@ import { updateAttachmentStepCommonDefinition } from '@kbn/agent-builder-plugin/
 import { runAgentStepCommonDefinition } from '@kbn/agent-builder-plugin/common/step_types/run_agent_step';
 import { reopenInvestigationStepCommonDefinition } from '@kbn/agentic-investigations-plugin/common/investigations/step_types';
 import { createKiStepCommonDefinition } from '@kbn/context-engine-plugin/common/step_types/create_ki';
+import { reportWorkerOutcomeStepCommonDefinition } from '../../common/step_types/report_worker_outcome_step';
 
 /**
  * Local mirror of `security.setAttackStatus`'s contract (id + input/output shape).
@@ -44,6 +45,44 @@ const setAttackStatusStepCommonDefinition = {
 };
 
 /**
+ * Local mirror of `security.setAlertTags`'s contract, same reason as
+ * `setAttackStatusStepCommonDefinition`: importing from
+ * `@kbn/security-solution-plugin` would make the moon project graph cyclic.
+ */
+const setAlertTagsStepCommonDefinition = {
+  id: 'security.setAlertTags' as const,
+  category: StepCategory.KibanaSecurity,
+  label: 'Set Alert Tags',
+  description: 'Add or remove tags on one or multiple alerts.',
+  inputSchema: lazySchema(() =>
+    z.union([
+      z.object({
+        alert_ids: z.union([
+          z.string().min(1).max(256),
+          z.array(z.string().min(1).max(256)).min(1),
+        ]),
+        tags_to_add: z.array(z.string().min(1)).min(1),
+        tags_to_remove: z.array(z.string().min(1)).default([]),
+      }),
+      z.object({
+        alert_ids: z.union([
+          z.string().min(1).max(256),
+          z.array(z.string().min(1).max(256)).min(1),
+        ]),
+        tags_to_add: z.array(z.string().min(1)).default([]),
+        tags_to_remove: z.array(z.string().min(1)).min(1),
+      }),
+    ])
+  ),
+  outputSchema: lazySchema(() =>
+    z.object({
+      success: z.boolean(),
+      message: z.string().max(1000).optional(),
+    })
+  ),
+};
+
+/**
  * One conversation record: metadata plus every attachment, versioned.
  *
  * Modeled as a Map keyed by conversation id so the fake behaves like the real
@@ -64,6 +103,10 @@ export interface FakeAlertZeroBackend {
   conversations: Map<string, FakeConversation>;
   /** Every `security.setAttackStatus` call, in order, for assertions. */
   attackStatusCalls: Array<{ ids: string[]; status: string; reason?: string }>;
+  /** Every `security.setAlertTags` call, in order, for assertions. */
+  alertTagCalls: Array<{ alertIds: string[]; tagsToAdd: string[]; tagsToRemove: string[] }>;
+  /** Every `alertzero.reportWorkerOutcome` event payload, in order. */
+  workerOutcomeEvents: Array<Record<string, unknown>>;
   /** Every knowledge indicator `context-engine.createKi` wrote, keyed by ki_id. */
   knowledgeIndicators: Map<string, { ai_index_id: string; ki: unknown }>;
   /**
@@ -118,6 +161,8 @@ export const createFakeAlertZeroBackend = (): {
 } => {
   const conversations = new Map<string, FakeConversation>();
   const attackStatusCalls: Array<{ ids: string[]; status: string; reason?: string }> = [];
+  const alertTagCalls: FakeAlertZeroBackend['alertTagCalls'] = [];
+  const workerOutcomeEvents: FakeAlertZeroBackend['workerOutcomeEvents'] = [];
   const knowledgeIndicators = new Map<string, { ai_index_id: string; ki: unknown }>();
   const agentVerdictQueue: Array<{
     verdict: 'false_positive' | 'true_positive' | 'inconclusive';
@@ -292,6 +337,41 @@ export const createFakeAlertZeroBackend = (): {
     },
   });
 
+  // `security.setAlertTags`: mirror schema, fake handler that records the call
+  // for assertions (`tag_correlated_alerts` tags every correlated detection
+  // alert `az:ad_correlated` before escalating).
+  const setAlertTagsStep = createServerStepDefinition({
+    ...setAlertTagsStepCommonDefinition,
+    handler: async (context) => {
+      const input = context.input as {
+        alert_ids: string | string[];
+        tags_to_add?: string[];
+        tags_to_remove?: string[];
+      };
+      const alertIds = Array.isArray(input.alert_ids) ? input.alert_ids : [input.alert_ids];
+      const tagsToAdd = input.tags_to_add ?? [];
+      const tagsToRemove = input.tags_to_remove ?? [];
+      alertTagCalls.push({ alertIds, tagsToAdd, tagsToRemove });
+      return {
+        output: {
+          success: true,
+          message: `Successfully updated tags for ${alertIds.length} alert(s)`,
+        },
+      };
+    },
+  });
+
+  // `alertzero.reportWorkerOutcome`: REAL schema from alertzero's own common
+  // (importable — same package). The handler records the event instead of
+  // shipping telemetry, so the suite can assert on what was reported.
+  const reportWorkerOutcomeStep = createServerStepDefinition({
+    ...reportWorkerOutcomeStepCommonDefinition,
+    handler: async (context) => {
+      workerOutcomeEvents.push(context.input as Record<string, unknown>);
+      return { output: { reported: true } };
+    },
+  });
+
   // `investigations.reopen`: schema is the REAL common definition; the handler
   // mirrors the shipped one against the fake conversation store. The AlertZero
   // proposal bridge runs it before every escalation, and `resolve_auto_approve`
@@ -354,6 +434,8 @@ export const createFakeAlertZeroBackend = (): {
   const backend: FakeAlertZeroBackend = {
     conversations,
     attackStatusCalls,
+    alertTagCalls,
+    workerOutcomeEvents,
     knowledgeIndicators,
     seedInvestigation: ({ id, status, title }) => {
       conversations.set(id, {
@@ -378,6 +460,8 @@ export const createFakeAlertZeroBackend = (): {
       readAttachmentStep,
       updateAttachmentStep,
       setAttackStatusStep,
+      setAlertTagsStep,
+      reportWorkerOutcomeStep,
       reopenInvestigationStep,
       createKiStep,
       runAgentStep,

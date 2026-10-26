@@ -13,7 +13,7 @@ import {
   ConversationAccessControlRole,
 } from '@kbn/agent-builder-common/chat/access_control';
 import type { ConversationWriteSnapshot } from './describe_conversation_write';
-import { describeConversationWrite } from './describe_conversation_write';
+import { describeConversationWrite, diffMetadata } from './describe_conversation_write';
 
 const snapshot = (parts: Partial<ConversationWriteSnapshot> = {}): ConversationWriteSnapshot => ({
   id: 'conv-1',
@@ -331,5 +331,20 @@ describe('describeConversationWrite', () => {
         source: 'http_api',
       })?.changeKinds
     ).toEqual(['created', 'title']);
+  });
+});
+
+describe('diffMetadata', () => {
+  it('reports added, changed and removed keys and ignores identical ones', () => {
+    expect(
+      diffMetadata(
+        { same: 'a', changed: 'b', removed: 'c', list: ['x', 'y'] },
+        { same: 'a', changed: 'B', added: 'd', list: ['y', 'x'] }
+      ).sort()
+    ).toEqual(['added', 'changed', 'list', 'removed']);
+  });
+
+  it('is empty for identical records', () => {
+    expect(diffMetadata({ a: ['1'] }, { a: ['1'] })).toEqual([]);
   });
 });

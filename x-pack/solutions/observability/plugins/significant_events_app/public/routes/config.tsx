@@ -28,7 +28,7 @@ const significantEventsAppRoutes = {
     ),
     children: {
       '/': {
-        element: <RedirectTo path="/{tab}" params={{ path: { tab: 'sources' } }} />,
+        element: <RedirectTo path="/{tab}" params={{ path: { tab: 'queries' } }} />,
       },
       '/{tab}': {
         element: (

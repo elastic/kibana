@@ -213,17 +213,24 @@ export const createAttackDiscoveryChainFixture = (): AttackDiscoveryChainFixture
     canManage: async () => canDecide,
   };
 
+  // Upstream's `resolveStepUser` now requires BOTH resolvers: it prefers
+  // `resolveWorkerUser` (service-account display naming) and falls back to
+  // `resolveUser`. Both returning undefined matches the harness's prior
+  // behavior — proposals record no acting user.
   const resolveUser = async () => undefined;
+  const resolveWorkerUser = async () => undefined;
 
   const proposalStepDefinitions = [
     getCreateProposalStepDefinition({
       getProposalsService: () => proposalsService,
       resolveUser,
+      resolveWorkerUser,
       privileges,
     }),
     getUpdateProposalStepDefinition({
       getProposalsService: () => proposalsService,
       resolveUser,
+      resolveWorkerUser,
       privileges,
     }),
     getCheckDecidePrivilegesStepDefinition({ privileges }),
@@ -259,6 +266,10 @@ export const createAttackDiscoveryChainFixture = (): AttackDiscoveryChainFixture
   // rather than swapping the repository class the way the shared fixture already
   // mocks the execution repositories.
   const attackDiscoveryDocuments = new Map<string, Record<string, unknown>>();
+  // Every `kibana.SetAlertsStatus` write the fetch fake saw, so the
+  // `verify_alerts_retired` read-back below reports what the fakes actually
+  // wrote rather than a canned answer.
+  const alertStatusWrites: Array<{ status: string; alertIds: string[] }> = [];
   const fakeEsRequest = jest.fn(async (requestOptions: any) => {
     const body = requestOptions?.body ?? {};
     const path = requestOptions?.path ?? '';
@@ -293,6 +304,49 @@ export const createAttackDiscoveryChainFixture = (): AttackDiscoveryChainFixture
         hits: {
           hits: doc ? [{ _id: id, _source: doc }] : [],
           total: { value: doc ? 1 : 0 },
+        },
+      };
+    }
+
+    // The review's `verify_alerts_retired` read-back: `elasticsearch.search`
+    // with filter aggregations over the correlated alert ids. Matched on the
+    // `tagged` aggregation — the analysis child's `load_alerts` search also
+    // carries aggregations (min/max time bounds), so aggregations alone do not
+    // identify this step. Answered from the writes this harness actually
+    // recorded — `security.setAlertTags` (via the fake backend) and
+    // `kibana.SetAlertsStatus` (via the fetch fake's `onSetAlertsStatus`) — so
+    // the journal note reports what the fakes wrote, not a canned count. No
+    // fake ever closes an alert, so `closed` is empty.
+    if (
+      typeof path === 'string' &&
+      path.includes('alerts-security.alerts-') &&
+      !path.includes('attack.discovery') &&
+      body?.aggregations?.tagged
+    ) {
+      const requested: string[] = body?.query?.ids?.values ?? [];
+      const requestedSet = new Set(requested);
+      const tagged = new Set(
+        backend.alertTagCalls
+          .filter(({ tagsToAdd }) => tagsToAdd.length > 0)
+          .flatMap(({ alertIds }) => alertIds)
+          .filter((id) => requestedSet.has(id))
+      );
+      const acknowledged = new Set(
+        alertStatusWrites
+          .filter(({ status }) => status === 'acknowledged')
+          .flatMap(({ alertIds }) => alertIds)
+          .filter((id) => requestedSet.has(id))
+      );
+      const open = requested.filter((id) => !acknowledged.has(id));
+      const docCount = (count: number) => ({ doc_count: count });
+      return {
+        ...okShards,
+        hits: { hits: [], total: { value: requested.length } },
+        aggregations: {
+          tagged: docCount(tagged.size),
+          open: docCount(open.length),
+          acknowledged: docCount(acknowledged.size),
+          closed: docCount(0),
         },
       };
     }
@@ -349,8 +403,8 @@ export const createAttackDiscoveryChainFixture = (): AttackDiscoveryChainFixture
             ]
           : [];
       }),
+    onSetAlertsStatus: (update) => alertStatusWrites.push(update),
   });
-
   // The chain seam: `workflow.execute`'s sync strategy calls
   // `workflowsExecutionEngine.executeWorkflow(...)` and then polls the
   // execution repository for the child's terminal status. The shared

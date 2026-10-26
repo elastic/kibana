@@ -14,6 +14,7 @@ import { ContinuousOnboardingSection } from './components/continuous_onboarding_
 import { CostEstimate } from './components/cost_estimate';
 import { DeveloperModeBadge } from '../components/ui/developer_mode_badge';
 import { MaintenanceSection } from './components/maintenance_section';
+import { ResetSection } from './components/reset_section';
 import { RunLimitsSection } from './components/run_limits_section';
 import { ScheduledDiscoverySection } from './components/scheduled_discovery_section';
 import { SettingsSaveBar } from './components/settings_save_bar';
@@ -146,6 +147,10 @@ export const DetectionsSettingsTab = () => {
             data-test-subj="nightshiftAdvancedDeveloperSettingsSection"
           >
             <StaleEventCleanupSection canManage={form.canManage} />
+
+            <EuiHorizontalRule margin="l" />
+
+            <ResetSection canManage={form.canManageAndConfigure} />
 
             <EuiHorizontalRule margin="l" />
 

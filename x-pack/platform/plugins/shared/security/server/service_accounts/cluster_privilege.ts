@@ -11,11 +11,11 @@ import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { CheckPrivilegesWithRequest } from '@kbn/security-plugin-types-server';
 
 /**
- * The two cluster privileges service accounts are gated on. `manage_security` is the one gate on
- * every change to what a service account is or which workloads run as one. `read_security` is
- * enough to look at the directory, matching what Elasticsearch asks of its own read API.
+ * The cluster privilege service accounts are gated on. `manage_security` covers every service
+ * account operation, reads included, because the accounts and the workloads they run are a
+ * security administrator's concern.
  */
-export type ServiceAccountClusterPrivilege = 'manage_security' | 'read_security';
+export type ServiceAccountClusterPrivilege = 'manage_security';
 
 export interface EnsureClusterPrivilegeParams {
   request: KibanaRequest;
@@ -34,8 +34,8 @@ export interface EnsureClusterPrivilegeParams {
 
 /**
  * Rejects with a 403 unless the request holds the given cluster privilege. Elasticsearch answers
- * the check from the caller's effective permissions, so a `manage_security` holder passes a
- * `read_security` check without holding that name.
+ * the check from the caller's effective permissions, so a privilege that implies it, such as `all`,
+ * passes too.
  */
 export const ensureClusterPrivilege = async ({
   request,

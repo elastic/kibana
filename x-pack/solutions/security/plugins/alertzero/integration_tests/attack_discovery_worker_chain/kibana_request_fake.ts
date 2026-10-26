@@ -49,9 +49,12 @@ export const withFakeAuthorizationHeader = (request: KibanaRequest): KibanaReque
 export const installKibanaRequestFake = ({
   getProposal,
   findAttackDiscoveries,
+  onSetAlertsStatus,
 }: {
   getProposal: (id: string, spaceId: string) => Promise<unknown>;
   findAttackDiscoveries: (ids: string[]) => Array<Record<string, unknown>>;
+  /** Receives each `kibana.SetAlertsStatus` update parsed out of the route body. */
+  onSetAlertsStatus?: (update: { status: string; alertIds: string[] }) => void;
 }): jest.Mock => {
   const fetchMock = jest.fn(async (url: string | URL, init?: RequestInit) => {
     const path = typeof url === 'string' ? url : url.toString();
@@ -60,6 +63,25 @@ export const installKibanaRequestFake = ({
     const converseMatch = path.match(/\/s\/([^/]+)\/api\/chat\/converse$/);
     if (converseMatch && method === 'POST') {
       return jsonResponse(200, { conversation_id: 'journal', status: 'accepted' });
+    }
+
+    // `kibana.SetAlertsStatus` (the review's `acknowledge_correlated_alerts`
+    // step): any `200` object satisfies its `z.record` response schema. The
+    // parsed update feeds the fixture's `verify_alerts_retired` read-back.
+    if (method === 'POST' && /\/api\/detection_engine\/signals\/status/.test(path)) {
+      const body =
+        typeof init?.body === 'string' ? safeJsonParse(init.body) : init?.body ?? undefined;
+      const filter = (body as { query?: { bool?: { filter?: unknown[] } } })?.query?.bool?.filter;
+      const idsClause = Array.isArray(filter)
+        ? filter.find((clause) => (clause as { ids?: unknown })?.ids)
+        : undefined;
+      const alertIds =
+        ((idsClause as { ids?: { values?: string[] } })?.ids?.values as string[] | undefined) ?? [];
+      onSetAlertsStatus?.({
+        status: String((body as { status?: unknown })?.status ?? ''),
+        alertIds,
+      });
+      return jsonResponse(200, { updated: alertIds.length });
     }
 
     if (method === 'GET' && /\/api\/attack_discovery\/_find(\?|$)/.test(path)) {
@@ -88,6 +110,14 @@ export const installKibanaRequestFake = ({
 
   (global as { fetch: typeof fetch }).fetch = fetchMock as unknown as typeof fetch;
   return fetchMock;
+};
+
+const safeJsonParse = (text: string): unknown => {
+  try {
+    return JSON.parse(text);
+  } catch {
+    return undefined;
+  }
 };
 
 const jsonResponse = (status: number, body: unknown) => {

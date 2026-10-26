@@ -5,11 +5,14 @@
  * 2.0.
  */
 
-import { kqlQuery, termQuery, rangeQuery, wildcardQuery } from '@kbn/observability-plugin/server';
-import { ALERT_STATUS, ALERT_STATUS_ACTIVE, ALERT_RULE_PARAMETERS } from '@kbn/rule-data-utils';
+import { termQuery, rangeQuery, wildcardQuery } from '@kbn/observability-plugin/server';
+import {
+  ALERT_STATUS,
+  ALERT_STATUS_ACTIVE,
+  ALERT_TIME_RANGE,
+  ALERT_UUID,
+} from '@kbn/rule-data-utils';
 import { SERVICE_NAME, TRANSACTION_NAME, TRANSACTION_TYPE } from '../../../common/es_fields/apm';
-import { LatencyAggregationType } from '../../../common/latency_aggregation_types';
-import { AggregationType } from '../../../common/rules/apm_rule_types';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { getAlertsBadgeEndMs } from '../../utils/get_alerts_badge_end';
 import type { ApmAlertsClient } from '../../lib/helpers/get_apm_alerts_client';
@@ -20,36 +23,29 @@ export type ServiceTransactionGroupAlertsResponse = Array<{
   alertsCount: number;
 }>;
 
-const RuleAggregationType = {
-  [LatencyAggregationType.avg]: AggregationType.Avg,
-  [LatencyAggregationType.p99]: AggregationType.P99,
-  [LatencyAggregationType.p95]: AggregationType.P95,
-} as const;
-
+/**
+ * Active-alert counts per transaction.name for the transactions table.
+ * Matches service-level badge time/status/metric semantics (ALERT_TIME_RANGE + cardinality).
+ * Uses plain environmentQuery (no SLO burn-rate env carve-out — those alerts are not
+ * transaction-scoped). Scoped by transaction.type; ignores page kuery and latency mode.
+ */
 export async function getServiceTransactionGroupsAlerts({
   apmAlertsClient,
-  kuery,
   transactionType,
   serviceName,
-  latencyAggregationType,
   start,
   end,
   environment,
   searchQuery,
 }: {
   apmAlertsClient: ApmAlertsClient;
-  kuery?: string;
   serviceName?: string;
   transactionType?: string;
-  latencyAggregationType: LatencyAggregationType;
   start: number;
   end: number;
   environment?: string;
   searchQuery?: string;
 }): Promise<ServiceTransactionGroupAlertsResponse> {
-  const ALERT_RULE_PARAMETERS_AGGREGATION_TYPE = `${ALERT_RULE_PARAMETERS}.aggregationType`;
-
-  // Same window as service-level badge counts: extend a past picker end to now.
   const badgesEnd = getAlertsBadgeEndMs(end);
 
   const params = {
@@ -59,35 +55,11 @@ export async function getServiceTransactionGroupsAlerts({
       bool: {
         filter: [
           ...termQuery(ALERT_STATUS, ALERT_STATUS_ACTIVE),
-          ...rangeQuery(start, badgesEnd),
-          ...kqlQuery(kuery),
+          ...rangeQuery(start, badgesEnd, ALERT_TIME_RANGE),
           ...termQuery(SERVICE_NAME, serviceName),
           ...termQuery(TRANSACTION_TYPE, transactionType),
           ...environmentQuery(environment),
           ...wildcardQuery(TRANSACTION_NAME, searchQuery),
-        ],
-        must: [
-          {
-            bool: {
-              should: [
-                ...termQuery(
-                  ALERT_RULE_PARAMETERS_AGGREGATION_TYPE,
-                  RuleAggregationType[latencyAggregationType]
-                ),
-                {
-                  bool: {
-                    must_not: [
-                      {
-                        exists: {
-                          field: ALERT_RULE_PARAMETERS_AGGREGATION_TYPE,
-                        },
-                      },
-                    ],
-                  },
-                },
-              ],
-            },
-          },
         ],
       },
     },
@@ -96,7 +68,16 @@ export async function getServiceTransactionGroupsAlerts({
         terms: {
           field: TRANSACTION_NAME,
           size: MAX_NUMBER_OF_TX_GROUPS,
-          order: { _count: 'desc' as const },
+          // Order by unique-alert cardinality (not doc_count) so top-N cutoff
+          // matches the badge metric when there are more groups than size.
+          order: { alerts_count: 'desc' as const },
+        },
+        aggs: {
+          alerts_count: {
+            cardinality: {
+              field: ALERT_UUID,
+            },
+          },
         },
       },
     },
@@ -106,11 +87,8 @@ export async function getServiceTransactionGroupsAlerts({
 
   const buckets = response?.aggregations?.transaction_groups.buckets ?? [];
 
-  const servicesTransactionGroupsAlertsCount =
-    buckets.map((bucket) => ({
-      name: bucket.key as string,
-      alertsCount: bucket.doc_count,
-    })) ?? [];
-
-  return servicesTransactionGroupsAlertsCount;
+  return buckets.map((bucket) => ({
+    name: bucket.key as string,
+    alertsCount: bucket.alerts_count.value,
+  }));
 }

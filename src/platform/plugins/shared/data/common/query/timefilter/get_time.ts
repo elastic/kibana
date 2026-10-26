@@ -12,8 +12,8 @@ import dateMath from '@kbn/datemath';
 import { omitBy } from 'lodash';
 import type { TimeRange, RangeFilterParams } from '@kbn/es-query';
 import { buildRangeFilter } from '@kbn/es-query';
+import type { DataViewBase } from '@kbn/es-query';
 import type { Moment } from 'moment';
-import type { DataView } from '@kbn/data-views-plugin/common';
 import type { TimeRangeBounds } from '../..';
 
 export interface CalculateBoundsOptions {
@@ -51,8 +51,11 @@ export function getAbsoluteTimeRange(
   };
 }
 
+/** Anything with a time field to filter on: a `DataView`, or the source of any other app. */
+export type TimeFilterable = DataViewBase & { readonly timeFieldName?: string };
+
 export function getTime(
-  indexPattern: DataView | undefined,
+  indexPattern: TimeFilterable | undefined,
   timeRange: TimeRange,
   options?: { forceNow?: Date; fieldName?: string }
 ) {
@@ -66,7 +69,7 @@ export function getTime(
 }
 
 export function getRelativeTime(
-  indexPattern: DataView | undefined,
+  indexPattern: TimeFilterable | undefined,
   timeRange: TimeRange,
   options?: { forceNow?: Date; fieldName?: string }
 ) {
@@ -79,7 +82,7 @@ export function getRelativeTime(
   );
 }
 
-function getTimeField(indexPattern?: DataView, fieldName?: string) {
+function getTimeField(indexPattern?: TimeFilterable, fieldName?: string) {
   if (!indexPattern && fieldName) {
     return { name: fieldName, type: KBN_FIELD_TYPES.DATE };
   }
@@ -92,7 +95,7 @@ function getTimeField(indexPattern?: DataView, fieldName?: string) {
 }
 
 function createTimeRangeFilter(
-  indexPattern: DataView | undefined,
+  indexPattern: TimeFilterable | undefined,
   timeRange: TimeRange,
   fieldName?: string,
   forceNow?: Date,

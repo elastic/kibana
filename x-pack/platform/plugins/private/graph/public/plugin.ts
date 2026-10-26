@@ -62,10 +62,12 @@ export class GraphPlugin
     core: CoreSetup<GraphPluginStartDependencies>,
     { home, contentManagement }: GraphPluginSetupDependencies
   ) {
+    const graphTitle = i18n.translate('xpack.graph.pageTitle', { defaultMessage: 'Graph' });
+
     if (home) {
       home.featureCatalogue.register({
         id: 'graph',
-        title: 'Graph',
+        title: graphTitle,
         subtitle: i18n.translate('xpack.graph.pluginSubtitle', {
           defaultMessage: 'Reveal patterns and relationships.',
         }),
@@ -95,7 +97,7 @@ export class GraphPlugin
 
     core.application.register({
       id: 'graph',
-      title: 'Graph',
+      title: graphTitle,
       order: 6000,
       appRoute: '/app/graph',
       euiIconType: 'logoKibana',
@@ -103,9 +105,7 @@ export class GraphPlugin
       updater$: this.appUpdater$,
       mount: async (params: AppMountParameters) => {
         const [coreStart, pluginsStart] = await core.getStartServices();
-        coreStart.chrome.docTitle.change(
-          i18n.translate('xpack.graph.pageTitle', { defaultMessage: 'Graph' })
-        );
+        coreStart.chrome.docTitle.change(graphTitle);
         const { renderApp } = await import('./application');
         return renderApp({
           ...params,

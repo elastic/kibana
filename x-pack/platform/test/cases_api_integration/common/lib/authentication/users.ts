@@ -20,6 +20,8 @@ import {
   observabilityOnlyReadAlerts,
   securitySolutionOnlyReadAlerts,
   securitySolutionOnlyReadNoIndexAlerts,
+  securitySolutionOnlyReadAttackAlias,
+  securitySolutionOnlyNoIndexAttacks,
   securitySolutionOnlyReadDelete,
   noCasesConnectors as noCasesConnectorRole,
   onlyActions as onlyActionsRole,
@@ -101,6 +103,18 @@ export const secSolutionOnlyReadNoIndexAlerts: User = {
   username: 'sec_only_read_no_index_alerts',
   password: 'sec_only_read_no_index_alerts',
   roles: [securitySolutionOnlyReadNoIndexAlerts.name],
+};
+
+export const secOnlyReadAttackAlias: User = {
+  username: 'sec_only_read_attack_alias',
+  password: 'sec_only_read_attack_alias',
+  roles: [securitySolutionOnlyReadAttackAlias.name],
+};
+
+export const secOnlyNoIndexAttacks: User = {
+  username: 'sec_only_no_index_attacks',
+  password: 'sec_only_no_index_attacks',
+  roles: [securitySolutionOnlyNoIndexAttacks.name],
 };
 
 export const obsOnly: User = {
@@ -191,6 +205,8 @@ export const users = [
   secOnlyRead,
   secOnlyReadAlerts,
   secSolutionOnlyReadNoIndexAlerts,
+  secOnlyReadAttackAlias,
+  secOnlyNoIndexAttacks,
   secOnlyDelete,
   secOnlyReadDelete,
   secOnlyNoDelete,

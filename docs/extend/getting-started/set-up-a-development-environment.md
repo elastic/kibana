@@ -20,7 +20,7 @@ cd kibana
 
 ## Install dependencies
 
-Install the version of Node.js listed in the `.node-version` file. This can be automated with tools such as [nvm](https://github.com/creationix/nvm). As we also include a `.nvmrc` file you can switch to the correct version when using nvm by running:
+Install the version of Node.js listed in the `.nvmrc` file. This can be automated with tools such as [nvm](https://github.com/creationix/nvm), which switches to the correct version when you run:
 
 ```sh
 nvm use

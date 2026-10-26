@@ -384,6 +384,32 @@ describe('MitreAttackDataClient.list', () => {
     expect(result.techniques.map((t) => t.id)).toEqual(['T0001', 'T0002']);
   });
 
+  it('logs a warning when the find result is truncated', async () => {
+    const tactic = getMockMitreTactic();
+    savedObjectsRepository.find.mockResolvedValueOnce({
+      saved_objects: [
+        {
+          id: `${tactic.framework}:${tactic.framework_version}:${tactic.id}`,
+          type: MITRE_ATTACK_ENTITY_SO_TYPE,
+          references: [],
+          score: 1.0,
+          attributes: tactic,
+        },
+      ],
+      total: 10001,
+      per_page: 10000,
+      page: 1,
+    });
+
+    await buildClient().list({ frameworkVersion: tactic.framework_version });
+
+    expect(logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining(
+        `framework "${tactic.framework}" version "${tactic.framework_version}" was truncated`
+      )
+    );
+  });
+
   it('returns the empty collection and issues no repository call when ensureInitialized() resolves false', async () => {
     dataService.ensureInitialized.mockResolvedValueOnce(false);
 

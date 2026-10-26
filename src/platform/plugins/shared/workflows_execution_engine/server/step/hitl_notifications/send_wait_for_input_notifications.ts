@@ -25,13 +25,18 @@ import {
   assertConnectorSucceeded,
   buildServiceNowAddCommentInput,
   buildSlack2SendMessageInput,
+  buildTeamsSendChannelMessageInput,
   escapeServiceNowCommentText,
+  escapeTeamsHtml,
   executeHitlHttpChannel,
   fitHitlTextPreservingSuffix,
   renderServiceNowField,
+  renderTeamsField,
   SERVICENOW_COMMENT_MAX_LENGTH,
   serviceNowCommentLink,
   slackApiChannelTarget,
+  TEAMS_CONTENT_MAX_LENGTH,
+  teamsHtmlLink,
 } from './hitl_connector_helpers';
 import type { ConnectorExecutor } from '../../connector_executor';
 
@@ -52,6 +57,20 @@ function buildDefaultInputServiceNowComment({
     escapeServiceNowCommentText(stepMessage),
     serviceNowCommentLink(DEFAULT_HITL_INPUT_OPEN_FORM_LABEL, formUrl),
     SERVICENOW_COMMENT_MAX_LENGTH
+  );
+}
+
+function buildDefaultInputTeamsMessage({
+  stepMessage,
+  formUrl,
+}: {
+  stepMessage: string;
+  formUrl: string;
+}): string {
+  return fitHitlTextPreservingSuffix(
+    escapeTeamsHtml(stepMessage),
+    `<br>${teamsHtmlLink(DEFAULT_HITL_INPUT_OPEN_FORM_LABEL, formUrl)}`,
+    TEAMS_CONTENT_MAX_LENGTH
   );
 }
 
@@ -296,6 +315,43 @@ export async function sendWaitForInputNotifications({
       connectorType: 'servicenow_search',
       connectorNameOrId: serviceNowConnectorId,
       input: buildServiceNowAddCommentInput(table, sysId, comment),
+      abortController,
+    });
+    assertConnectorSucceeded(result);
+  }
+
+  const teamsConfig = channels.teams;
+  const teamsConnectorId = teamsConfig?.['connector-id'];
+  const teamId = teamsConfig?.['team-id'];
+  const channelId = teamsConfig?.['channel-id'];
+  if (teamsConnectorId && teamId && channelId) {
+    const renderedTeamId = renderTeamsField(teamId, renderTemplate, 'team-id');
+    const renderedChannelId = renderTeamsField(channelId, renderTemplate, 'channel-id');
+    const renderedComment =
+      teamsConfig.message != null
+        ? resolveWaitForInputChannelMessage({
+            channelMessageTemplate: teamsConfig.message,
+            stepMessage,
+            formUrl,
+            renderTemplate,
+          })
+        : undefined;
+    if (renderedComment != null && renderedComment.length > TEAMS_CONTENT_MAX_LENGTH) {
+      throw new Error(
+        `HITL Teams message is ${renderedComment.length} characters and exceeds the ${TEAMS_CONTENT_MAX_LENGTH} character connector limit`
+      );
+    }
+    const content = renderedComment ?? buildDefaultInputTeamsMessage({ stepMessage, formUrl });
+
+    const result = await connectorExecutor.execute({
+      connectorType: 'microsoft-teams',
+      connectorNameOrId: teamsConnectorId,
+      input: buildTeamsSendChannelMessageInput(
+        renderedTeamId,
+        renderedChannelId,
+        content,
+        renderedComment != null ? 'text' : 'html'
+      ),
       abortController,
     });
     assertConnectorSucceeded(result);

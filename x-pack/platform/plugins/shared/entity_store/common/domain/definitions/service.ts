@@ -10,38 +10,40 @@ import {
   getCommonFieldDescriptions,
   getEntityFieldsDescriptions,
 } from './common_fields';
-import type { EntityDefinitionManagedBy, EntityDefinitionWithoutId } from './entity_schema';
+import type { EntityDefinitionManagedBy, ManagedEntityDefinitionWithoutId } from './entity_schema';
 import { PLUGIN_ID } from '../../plugin_id';
 import { collectValues as collect, newestValue, oldestValue } from './field_retention_operations';
 
-export const serviceEntityDefinition: EntityDefinitionWithoutId & {
+export const serviceEntityDefinition: ManagedEntityDefinitionWithoutId & {
   managedBy: EntityDefinitionManagedBy;
 } = {
   type: 'service',
   managedBy: { kind: 'plugin', id: PLUGIN_ID },
-  name: `Security 'service' Entity Store Definition`,
+  name: 'Service',
+  description: 'A named application component that emits telemetry. Identified by service.name.',
   identityField: { singleField: 'service.name' },
-  indexPatterns: [],
-  entityTypeFallback: 'Service',
-  // No additional condition: service identity is just `service.name`.
-  creatableFromSingleDocument: {},
-  fieldEvaluations: [ENTITY_SOURCE_FIELD_EVALUATION],
-  fields: [
-    newestValue({ destination: 'entity.name', source: 'service.name' }),
-    oldestValue({ source: 'service.entity.id' }),
+  extraction: {
+    entityTypeFallback: 'Service',
+    // No additional condition: service identity is just `service.name`.
+    creatableFromSingleDocument: {},
+    fieldEvaluations: [ENTITY_SOURCE_FIELD_EVALUATION],
+    fields: [
+      newestValue({ destination: 'entity.name', source: 'service.name' }),
+      oldestValue({ source: 'service.entity.id' }),
 
-    collect({ source: 'service.name' }),
-    collect({ source: 'service.address' }),
-    collect({ source: 'service.environment' }),
-    collect({ source: 'service.ephemeral_id' }),
-    collect({ source: 'service.id' }),
-    collect({ source: 'service.node.name' }),
-    collect({ source: 'service.node.roles' }),
-    collect({ source: 'service.node.role' }),
-    newestValue({ source: 'service.state' }),
-    collect({ source: 'service.type' }),
-    newestValue({ source: 'service.version' }),
-    ...getCommonFieldDescriptions('service'),
-    ...getEntityFieldsDescriptions('service'),
-  ],
-} as const satisfies EntityDefinitionWithoutId;
+      collect({ source: 'service.name' }),
+      collect({ source: 'service.address' }),
+      collect({ source: 'service.environment' }),
+      collect({ source: 'service.ephemeral_id' }),
+      collect({ source: 'service.id' }),
+      collect({ source: 'service.node.name' }),
+      collect({ source: 'service.node.roles' }),
+      collect({ source: 'service.node.role' }),
+      newestValue({ source: 'service.state' }),
+      collect({ source: 'service.type' }),
+      newestValue({ source: 'service.version' }),
+      ...getCommonFieldDescriptions('service'),
+      ...getEntityFieldsDescriptions('service'),
+    ],
+  },
+} as const satisfies ManagedEntityDefinitionWithoutId;

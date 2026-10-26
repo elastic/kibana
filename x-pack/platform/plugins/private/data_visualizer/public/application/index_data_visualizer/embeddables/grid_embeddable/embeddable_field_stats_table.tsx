@@ -48,7 +48,11 @@ const EmbeddableFieldStatsTableWrapper = (
     overallStats,
     overallStatsProgress,
     setLastRefresh,
-  } = useDataVisualizerGridData(props, dataVisualizerListState);
+  } = useDataVisualizerGridData({
+    input: props,
+    dataVisualizerListState,
+    isInteractive: props.isInteractive,
+  });
 
   const totalCount = overallStats?.totalCount;
 
@@ -71,7 +75,7 @@ const EmbeddableFieldStatsTableWrapper = (
               item={item}
               dataView={props.dataView}
               combinedQuery={{ searchQueryLanguage, searchString }}
-              onAddFilter={onAddFilter}
+              onAddFilter={props.isInteractive ?? true ? onAddFilter : undefined}
               totalDocuments={props.totalDocuments}
             />
           );
@@ -79,7 +83,14 @@ const EmbeddableFieldStatsTableWrapper = (
         return m;
       }, {} as ItemIdToExpandedRowMap);
     },
-    [props.dataView, searchQueryLanguage, searchString, props.totalDocuments, onAddFilter]
+    [
+      props.dataView,
+      searchQueryLanguage,
+      searchString,
+      props.totalDocuments,
+      onAddFilter,
+      props.isInteractive,
+    ]
   );
 
   useEffect(() => {
@@ -104,6 +115,7 @@ const EmbeddableFieldStatsTableWrapper = (
       overallStatsRunning={overallStatsProgress.isRunning}
       totalCount={totalCount}
       renderFieldName={props.renderFieldName}
+      isInteractive={props.isInteractive}
     />
   );
 };

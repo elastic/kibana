@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import type { IndicesGetMappingResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import {
+  THREAT_REPORTS_GET_MAPPING_PARAMS,
+  THREAT_REPORTS_INDEX,
+  getReportEmbeddingEndpointIds,
+  isReportsIndexManaged,
+} from '@kbn/alertzero-common';
 import type { ThreatIntelSupplyHardGate } from './types';
-
-/** Matches security_solution threat reports index; AlertZero cannot import that plugin. */
-const THREAT_REPORTS_INDEX = '.kibana-threat-reports';
-
-const REQUIRED_REPORT_SEMANTIC_FIELDS = ['title', 'body_text'] as const;
 
 type ReportsIndexState = 'exists' | 'missing' | 'check_failed';
 
@@ -31,18 +33,23 @@ const checkReportsIndexState = async (
 };
 
 /**
- * The reports index template sets `dynamic: strict`; an index created by a write
- * before the template existed does not. Failed reads count as managed.
+ * One `indices.getMapping` round trip feeds both the managed-index and the embedding
+ * checks. `getMapping`, not `getFieldMapping`: the latter is unavailable (410) on
+ * serverless. A failed read yields `undefined`; each check decides what that means.
  */
-const checkReportsIndexManaged = async (esClient: ElasticsearchClient): Promise<boolean> => {
+const fetchReportsMapping = async (
+  esClient: ElasticsearchClient,
+  logger: Logger
+): Promise<IndicesGetMappingResponse | undefined> => {
   try {
-    const response = await esClient.indices.getMapping({
-      index: THREAT_REPORTS_INDEX,
-      expand_wildcards: ['open', 'hidden'],
-    });
-    return Object.values(response).every((entry) => entry.mappings?.dynamic === 'strict');
-  } catch {
-    return true;
+    return await esClient.indices.getMapping({ ...THREAT_REPORTS_GET_MAPPING_PARAMS });
+  } catch (err) {
+    logger.debug(
+      `Hunt supply hard-gate mapping read failed: ${
+        err instanceof Error ? err.message : String(err)
+      }`
+    );
+    return undefined;
   }
 };
 
@@ -52,27 +59,13 @@ const checkReportsIndexManaged = async (esClient: ElasticsearchClient): Promise<
  */
 const checkEmbeddingEndpoints = async (
   esClient: ElasticsearchClient,
+  mappings: IndicesGetMappingResponse | undefined,
   logger: Logger
 ): Promise<boolean> => {
+  if (!mappings) return false;
+  const endpointIds = getReportEmbeddingEndpointIds(mappings);
+  if (!endpointIds) return false;
   try {
-    const mappings = await esClient.indices.getFieldMapping({
-      index: THREAT_REPORTS_INDEX,
-      fields: REQUIRED_REPORT_SEMANTIC_FIELDS.map((field) => `content.${field}`),
-      include_defaults: true,
-    });
-    const fieldMappings = mappings[THREAT_REPORTS_INDEX]?.mappings;
-    const endpointIds = new Set<string>();
-
-    for (const field of REQUIRED_REPORT_SEMANTIC_FIELDS) {
-      const fullName = `content.${field}`;
-      const fieldMapping = fieldMappings?.[fullName];
-      const mapping = fieldMapping?.mapping[field] ?? fieldMapping?.mapping[fullName];
-      if (mapping?.type !== 'semantic_text' || !mapping.inference_id) {
-        return false;
-      }
-      endpointIds.add(mapping.inference_id);
-    }
-
     for (const endpointId of endpointIds) {
       await esClient.inference.get({ inference_id: endpointId });
     }
@@ -113,12 +106,14 @@ export const evaluateHuntSupplyHardGate = async ({
     return { ok: false, reasonCodes };
   }
 
-  if (!(await checkReportsIndexManaged(esClient))) {
+  const reportsMapping = await fetchReportsMapping(esClient, logger);
+  // A failed read counts as managed so unrelated errors do not masquerade as a template-free index.
+  if (reportsMapping && !isReportsIndexManaged(reportsMapping)) {
     reasonCodes.push('reports_index_unmanaged');
     return { ok: false, reasonCodes };
   }
 
-  const embeddingOk = await checkEmbeddingEndpoints(esClient, logger);
+  const embeddingOk = await checkEmbeddingEndpoints(esClient, reportsMapping, logger);
   if (!embeddingOk) {
     reasonCodes.push('embedding_endpoint_unavailable');
   }

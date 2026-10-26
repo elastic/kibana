@@ -111,21 +111,58 @@ export interface HuntThreatIntelSupplyHardGate {
   reasonCodes: string[];
 }
 
+/** The AlertZero model tiers Hunt runs on. */
+export type HuntModelTierId = 'efficient' | 'balanced' | 'frontier';
+
+/**
+ * Where a tier's model comes from, as the requesting user sees it:
+ *  - `configured`: an operator picked a model for the tier in Feature Settings.
+ *  - `recommended`: no pick, so the tier runs on its first provisioned recommended model.
+ *  - `configured_missing`: an operator picked models for the tier but none of them exist any
+ *    more (deleted, or the list was cleared). Hunt runs on a deployment default meanwhile, and
+ *    the pick needs repairing.
+ *  - `default_fallback`: nothing is configured for the tier, so it runs on a deployment default
+ *    (the platform default, or the connector the operator set as the default). Hunt works, but
+ *    the tier may be on a model much bigger or smaller than intended. This also covers a
+ *    deployment set to use the default connector only, which is a deliberate choice.
+ *  - `unavailable`: nothing resolves, so the consumers of this tier degrade.
+ */
+export type HuntModelTierState =
+  | 'configured'
+  | 'recommended'
+  | 'configured_missing'
+  | 'default_fallback'
+  | 'unavailable';
+
+export interface HuntModelTierStatus {
+  tier: HuntModelTierId;
+  state: HuntModelTierState;
+}
+
 export interface HuntThreatIntelSupplyStatus {
   workflows: HuntThreatIntelSupplyWorkflowStatus[];
   hardGate: HuntThreatIntelSupplyHardGate;
   drift: boolean;
   huntEnabled: boolean;
+  /**
+   * One entry per Hunt model tier, in tier order. Informational: it never feeds the hard gate,
+   * because Hunt degrades rather than fails when a tier has no model.
+   */
+  modelTiers: HuntModelTierStatus[];
 }
 
 export interface ScanFailureWorker {
   workerId: string;
   watchId: string;
+  /** The newest failed workflow: the Worker's own, or the child it went on past. */
+  workflowId: string;
+  lastFailedAt: string;
 }
 
 export interface ScanFailuresResponse {
   workers: ScanFailureWorker[];
   unknown: boolean;
+  lastFailedAt: string | null;
 }
 
 /** Agent Builder builtin tool wrapping the action catalog API. */
@@ -338,6 +375,12 @@ export const ALERTZERO_EFFICIENT_INFERENCE_FEATURE_ID = 'alertzero_efficient' as
 export const ALERTZERO_BALANCED_INFERENCE_FEATURE_ID = 'alertzero_balanced' as const;
 /** Complex, single-pass work where output quality matters most. Most capable model. */
 export const ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID = 'alertzero_frontier' as const;
+/**
+ * Optional model for the calls that can send an EIS prompt template: Attack Discovery,
+ * alert triage, and the FP/TP judge. Empty until an operator saves a model. Those calls
+ * list this id first in `connector-id-by-feature` and keep their tier until a model is saved.
+ */
+export const ALERTZERO_TEMPLATE_INFERENCE_FEATURE_ID = 'alertzero_template_models' as const;
 
 /** Agent Builder conversation template ids. A proposal is an attachment, not a template. */
 export const TEMPLATE_ID_INVESTIGATION = 'investigation' as const;

@@ -427,6 +427,41 @@ describe('TaskStore', () => {
       });
     });
 
+    test('passes refreshApiKey false to grantApiKeys', async () => {
+      const task = {
+        id: 'id',
+        params: { hello: 'world' },
+        state: { foo: 'bar' },
+        taskType: 'report',
+        traceparent: 'apmTraceparent',
+      };
+
+      const request = httpServerMock.createKibanaRequest();
+      const grantApiKeys = jest
+        .spyOn(EsApiKeyStrategy.prototype, 'grantApiKeys')
+        .mockResolvedValueOnce(new Map());
+
+      coreStart.savedObjects.getScopedClient.mockReturnValueOnce(scopedSavedObjectsClient);
+      scopedSavedObjectsClient.create.mockImplementation(
+        async (type: string, attributes: unknown) => ({
+          id: 'testid',
+          type,
+          attributes,
+          references: [],
+          version: '123',
+        })
+      );
+
+      await store.schedule(task as TaskInstance, { request, refreshApiKey: false });
+
+      const calls = [...grantApiKeys.mock.calls];
+      grantApiKeys.mockRestore();
+
+      expect(calls).toEqual([
+        [[task], request, coreStart.security, expect.objectContaining({ refreshApiKey: false })],
+      ]);
+    });
+
     test('errors when scheduling a task with API key if unable to encrypt SO', async () => {
       store = new TaskStore({
         logger: mockLogger(),

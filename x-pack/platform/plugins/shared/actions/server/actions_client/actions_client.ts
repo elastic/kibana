@@ -6,7 +6,6 @@
  */
 
 import Boom from '@hapi/boom';
-import url from 'url';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 
 import { i18n } from '@kbn/i18n';
@@ -18,6 +17,7 @@ import type {
   Logger,
 } from '@kbn/core/server';
 import type { SecurityServiceStart } from '@kbn/core-security-server';
+import type { SpaceId } from '@kbn/core-spaces-common';
 import { isSavedObjectErrorResult } from '@kbn/core/server';
 import type { AuditLogger } from '@kbn/security-plugin/server';
 import type { IEventLogClient } from '@kbn/event-log-plugin/server';
@@ -97,6 +97,11 @@ import { isSystemAction } from '../lib/is_system_action';
 import type { ConnectorExecuteParams } from '../application/connector/methods/execute/types';
 import { connectorFromInMemoryConnector } from '../application/connector/lib/connector_from_in_memory_connector';
 import { getAxiosInstance } from '../application/connector/methods/get_axios_instance';
+import { getSandboxCredentials } from '../application/connector/methods/get_sandbox_credentials';
+import type {
+  GetSandboxCredentialsOptions,
+  ResolvedSandboxCredentials,
+} from '../application/connector/methods/get_sandbox_credentials';
 import type { GetAxiosInstanceWithAuthFnOpts } from '../lib/get_axios_instance';
 import { invalidateInboundConnectorEventIdentity } from '../inbound/event_identity';
 import { deleteIngressCredentialForConnector } from '../inbound/ingress_credential';
@@ -117,7 +122,7 @@ export interface ConstructorOptions {
   /**
    * Optional space override. When set, connector operations and executions will be scoped to this spaceId
    */
-  spaceId?: string;
+  spaceId?: SpaceId;
   authorization: ActionsAuthorization;
   auditLogger?: AuditLogger;
   usageCounter?: UsageCounter;
@@ -147,7 +152,7 @@ export interface ActionsClientContext {
   inMemoryConnectors: InMemoryConnector[];
   actionExecutor: ActionExecutorContract;
   request: KibanaRequest;
-  spaceId?: string;
+  spaceId?: SpaceId;
   authorization: ActionsAuthorization;
   bulkExecutionEnqueuer: BulkExecutionEnqueuer<ExecutionResponse>;
   auditLogger?: AuditLogger;
@@ -274,10 +279,13 @@ export class ActionsClient {
   /**
    * Get all connectors with in-memory connectors
    */
-  public async getAll({ includeSystemActions = false } = {}): Promise<
+  public async getAll({
+    includeSystemActions = false,
+    sandboxCapableOnly = false,
+  }: { includeSystemActions?: boolean; sandboxCapableOnly?: boolean } = {}): Promise<
     ConnectorWithExtraFindData[]
   > {
-    return getAll({ context: this.context, includeSystemActions });
+    return getAll({ context: this.context, includeSystemActions, sandboxCapableOnly });
   }
 
   /**
@@ -419,13 +427,14 @@ export class ActionsClient {
     }
 
     // Verify that token url contains a hostname and uses https
-    const parsedUrl = url.parse(
-      options.tokenUrl,
-      false /* parseQueryString */,
-      true /* slashesDenoteHost */
-    );
+    let parsedUrl: URL | undefined;
+    try {
+      parsedUrl = new URL(options.tokenUrl);
+    } catch (err) {
+      parsedUrl = undefined;
+    }
 
-    if (!parsedUrl.hostname) {
+    if (!parsedUrl?.hostname) {
       throw Boom.badRequest(`Token URL must contain hostname`);
     }
 
@@ -698,6 +707,12 @@ export class ActionsClient {
 
   public async getAxiosInstance(actionId: string): Promise<AxiosInstance> {
     return getAxiosInstance(this.context, actionId);
+  }
+
+  public async getSandboxCredentials(
+    options: GetSandboxCredentialsOptions
+  ): Promise<ResolvedSandboxCredentials> {
+    return getSandboxCredentials(this.context, options);
   }
 
   public async bulkEnqueueExecution(

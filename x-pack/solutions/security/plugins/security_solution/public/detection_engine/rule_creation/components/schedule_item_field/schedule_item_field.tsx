@@ -45,8 +45,8 @@ export function ScheduleItemField({
   isDisabled,
   dataTestSubj,
   idAria,
-  minValue = Number.MIN_SAFE_INTEGER,
-  maxValue = Number.MAX_SAFE_INTEGER,
+  minValue,
+  maxValue,
   units = DEFAULT_TIME_DURATION_UNITS,
   fullWidth = false,
 }: ScheduleItemProps): JSX.Element {
@@ -92,13 +92,15 @@ export function ScheduleItemField({
 
   const onChangeTimeVal = useCallback<NonNullable<EuiFieldNumberProps['onChange']>>(
     (e) => {
-      const number = e.target.value === '' ? minValue : parseInt(e.target.value, 10);
+      const lowerBound = minValue ?? Number.MIN_SAFE_INTEGER;
+      const upperBound = maxValue ?? Number.MAX_SAFE_INTEGER;
+      const number = e.target.value === '' ? lowerBound : parseInt(e.target.value, 10);
 
       if (Number.isNaN(number)) {
         return;
       }
 
-      const newTimeValue = saturate(number, minValue, maxValue);
+      const newTimeValue = saturate(number, lowerBound, upperBound);
 
       setTimeVal(newTimeValue);
       setValue(`${newTimeValue}${timeType}`);
@@ -166,6 +168,8 @@ export function ScheduleItemField({
           />
         }
         fullWidth
+        // Only real bounds go to the DOM: VoiceOver announces a spinbutton's value as a percentage
+        // of its min-max range, so a sentinel like Number.MAX_SAFE_INTEGER is always read as "0%".
         min={minValue}
         max={maxValue}
         value={timeVal}

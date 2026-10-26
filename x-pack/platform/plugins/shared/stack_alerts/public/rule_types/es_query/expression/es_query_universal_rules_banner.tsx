@@ -9,8 +9,12 @@ import React from 'react';
 import { EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ALERTING_V2_RULES_BASE_PATH, ALERTING_V2_RULES_TAB_ID } from '@kbn/alerting-v2-constants';
-import { canAccessAlertingV2Rules } from '@kbn/alerting-v2-utils';
+import { ALERTING_V2_RULES_TAB_ID } from '@kbn/alerting-v2-constants';
+import { canAccessAlertingV2Rules, isAlertingV2AvailableInSolution } from '@kbn/alerting-v2-utils';
+import {
+  OBSERVABILITY_ALERTING_APP_ID,
+  OBSERVABILITY_ALERTING_RULES_V2_PATH,
+} from '@kbn/deeplinks-observability';
 import { useTriggerUiActionServices } from '../util';
 
 const BANNER_TITLE = i18n.translate('xpack.stackAlerts.esQuery.ui.universalRulesBanner.title', {
@@ -24,15 +28,21 @@ const UNIVERSAL_RULES_LINK_LABEL = i18n.translate(
 
 export const EsQueryUniversalRulesBanner = () => {
   const services = useTriggerUiActionServices();
-  const { application, http, tabs } = services;
+  const { application, tabs } = services;
 
-  if (!canAccessAlertingV2Rules(services)) {
+  if (
+    !canAccessAlertingV2Rules(services) ||
+    !isAlertingV2AvailableInSolution(services.chrome.getActiveSolutionNavId())
+  ) {
     return null;
   }
 
+  // Classic layouts omit the Universal tab. The rules page is the Observability Alerting mount.
   const href =
     tabs?.find((tab) => tab.id === ALERTING_V2_RULES_TAB_ID)?.href ??
-    http.basePath.prepend(ALERTING_V2_RULES_BASE_PATH);
+    application.getUrlForApp(OBSERVABILITY_ALERTING_APP_ID, {
+      path: OBSERVABILITY_ALERTING_RULES_V2_PATH,
+    });
 
   return (
     <>

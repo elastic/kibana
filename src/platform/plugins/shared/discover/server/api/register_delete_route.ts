@@ -30,12 +30,17 @@ export const registerDeleteRoute = (
     .delete({
       path: `${basePath}/{id}`,
       summary: 'Delete a Discover session',
+      operationId: 'delete-discover-session',
       description: 'Permanently deletes a Discover session by ID.',
       ...routeConfig,
     })
     .addVersion(
       {
         version: routeVersion,
+        options: {
+          oasOperationObject: async () =>
+            (await import('./oas_examples')).deleteDiscoverSessionOASOperationObject,
+        },
         validate: {
           request: {
             params: z

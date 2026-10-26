@@ -60,15 +60,19 @@ import { isLabelNode, isRelationshipNode, showErrorToast } from '../utils';
 import { GRAPH_SCOPE_ID } from '../constants';
 import { useGraphFilters } from '../filters/use_graph_filters';
 import { getEntityTimelineFilter } from './entity_timeline_filters';
+import type { GraphTelemetryHandler } from '../graph_telemetry';
+import { getFiltersChangedEvent, getSearchSubmittedEvent } from '../graph_telemetry';
 
 const useGraphPopovers = ({
   scopeId,
   onOpenEventPreview,
   onOpenNetworkPreview,
+  onTelemetryEvent,
 }: {
   scopeId: string;
   onOpenEventPreview?: (node: NodeViewModel) => void;
   onOpenNetworkPreview?: (ip: string, scopeId: string) => void;
+  onTelemetryEvent?: GraphTelemetryHandler;
 }) => {
   const [currentIps, setCurrentIps] = useState<string[]>([]);
   const [currentCountryCodes, setCurrentCountryCodes] = useState<string[]>([]);
@@ -79,8 +83,17 @@ const useGraphPopovers = ({
   // Async-hydrated: `null` until the EUID chunk loads, in which case entity filters fall back to
   // the unnarrowed sourceFields (see getIdentityFilterFields).
   const euidApi = useEntityStoreEuidApi() ?? undefined;
-  const nodeExpandPopover = useEntityNodeExpandPopover(scopeId, onOpenEventPreview, euidApi);
-  const labelExpandPopover = useLabelNodeExpandPopover(scopeId, onOpenEventPreview);
+  const nodeExpandPopover = useEntityNodeExpandPopover(
+    scopeId,
+    onOpenEventPreview,
+    euidApi,
+    onTelemetryEvent
+  );
+  const labelExpandPopover = useLabelNodeExpandPopover(
+    scopeId,
+    onOpenEventPreview,
+    onTelemetryEvent
+  );
   // Pass onOpenNetworkPreview so popover items call it directly instead of relying on PreviewLink.
   const onNetworkPreviewForPopover = useMemo(
     () =>
@@ -275,6 +288,12 @@ export interface GraphInvestigationProps {
    * Whether to show toggle search action button. Defaults value is false.
    */
   showToggleSearch?: boolean;
+
+  /**
+   * Optional callback invoked with semantic engagement events (popover actions, filter and
+   * search changes). Events carry enums and booleans only. When omitted, nothing is reported.
+   */
+  onTelemetryEvent?: GraphTelemetryHandler;
 }
 
 const EMPTY_QUERY: Query = { query: '', language: 'kuery' } as const;
@@ -299,6 +318,7 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
     onInvestigateInTimeline,
     onOpenEventPreview,
     onOpenNetworkPreview,
+    onTelemetryEvent,
   }: GraphInvestigationProps) => {
     const emptyEntityIds = useMemo(() => [], []);
 
@@ -400,6 +420,15 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
     );
     const lastValidEsQuery = useRef<EsQuery | undefined>();
     const [kquery, setKQuery] = useState<Query>(EMPTY_QUERY);
+
+    const onFiltersUpdated = useCallback(
+      (filters: Filter[]) => {
+        const event = getFiltersChangedEvent(searchFilters, filters);
+        if (event) onTelemetryEvent?.(event);
+        setSearchFilters(filters);
+      },
+      [searchFilters, setSearchFilters, onTelemetryEvent]
+    );
 
     const {
       services: { uiSettings, notifications },
@@ -539,6 +568,7 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
       scopeId,
       onOpenEventPreview,
       onOpenNetworkPreview,
+      onTelemetryEvent,
     });
 
     const nodeExpandButtonClickHandler = (...args: unknown[]) =>
@@ -838,9 +868,14 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
                       ) : undefined
                     }
                     submitButtonStyle={'iconOnly'}
-                    onFiltersUpdated={setSearchFilters}
+                    onFiltersUpdated={onFiltersUpdated}
                     onQuerySubmit={(payload, isUpdate) => {
                       if (isUpdate) {
+                        const event = getSearchSubmittedEvent(
+                          { timeRange, query: kquery },
+                          payload
+                        );
+                        if (event) onTelemetryEvent?.(event);
                         setTimeRange({ ...payload.dateRange });
                         setKQuery(payload.query || EMPTY_QUERY);
                       } else {
