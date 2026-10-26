@@ -9,6 +9,7 @@ import { ProposalConflictError } from '@kbn/proposals-plugin/server';
 import {
   GROUPED_PROPOSAL_JOIN_CONCURRENCY,
   GROUPED_PROPOSAL_JOIN_MARGIN_MS,
+  GROUPED_PROPOSAL_LIST_HEADS_TERMS,
   GROUPED_PROPOSAL_MAX_ALERTS,
   GROUPED_PROPOSAL_MAX_GENERATIONS,
   GROUPED_PROPOSAL_MAX_REVISIONS,
@@ -88,7 +89,7 @@ describe('isJoinableHead', () => {
 });
 
 describe('groupFpCandidates', () => {
-  it('reads the heads of every key in one search', async () => {
+  it('reads the heads of every key in one search when they fit one terms clause', async () => {
     const { deps, run } = setup();
     await run([
       { keyHash: 'key-a', alertIds: ['a1', 'a2'] },
@@ -96,6 +97,20 @@ describe('groupFpCandidates', () => {
     ]);
     expect(deps.listHeads).toHaveBeenCalledTimes(1);
     expect(deps.listHeads.mock.calls[0][0]).toHaveLength(2 * GROUPED_PROPOSAL_MAX_GENERATIONS);
+  });
+
+  it("partitions the head lookup so one terms query stays under Elasticsearch's clause limit", async () => {
+    const keysNeeded =
+      Math.floor(GROUPED_PROPOSAL_LIST_HEADS_TERMS / GROUPED_PROPOSAL_MAX_GENERATIONS) + 1;
+    const { deps, run } = setup();
+    await run(
+      Array.from({ length: keysNeeded }, (_, i) => ({ keyHash: `key-${i}`, alertIds: [`a${i}`] }))
+    );
+    expect(deps.listHeads.mock.calls.length).toBe(2);
+    expect(deps.listHeads.mock.calls[0][0]).toHaveLength(GROUPED_PROPOSAL_LIST_HEADS_TERMS);
+    expect(deps.listHeads.mock.calls[1][0]).toHaveLength(
+      keysNeeded * GROUPED_PROPOSAL_MAX_GENERATIONS - GROUPED_PROPOSAL_LIST_HEADS_TERMS
+    );
   });
 
   it('starts generation 0 for a key nothing is open for', async () => {

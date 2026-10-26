@@ -11,6 +11,7 @@ import { buildProposalId } from '../services/proposals/dedup/proposal_id';
 import {
   GROUPED_PROPOSAL_JOIN_CONCURRENCY,
   GROUPED_PROPOSAL_JOIN_MARGIN_MS,
+  GROUPED_PROPOSAL_LIST_HEADS_TERMS,
   GROUPED_PROPOSAL_MAX_ALERTS,
   GROUPED_PROPOSAL_MAX_GENERATIONS,
   GROUPED_PROPOSAL_MAX_REVISIONS,
@@ -178,7 +179,13 @@ export const groupFpCandidates = async ({
   }
   let allHeads: GroupingHead[];
   try {
-    allHeads = await deps.listHeads([...generationOf.keys()]);
+    const rootIds = [...generationOf.keys()];
+    allHeads = [];
+    for (let offset = 0; offset < rootIds.length; offset += GROUPED_PROPOSAL_LIST_HEADS_TERMS) {
+      allHeads.push(
+        ...(await deps.listHeads(rootIds.slice(offset, offset + GROUPED_PROPOSAL_LIST_HEADS_TERMS)))
+      );
+    }
   } catch (error) {
     if (!(error instanceof HeadsTruncatedError)) throw error;
     // Some heads are unknown, so a join could miss the open proposal and a derived id could collide.

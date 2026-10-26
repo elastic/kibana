@@ -82,5 +82,12 @@ export const GROUPED_PROPOSAL_JOIN_CONCURRENCY = 4;
  */
 export const GROUPED_PROPOSAL_MAX_GENERATIONS = 200;
 
+/**
+ * Most root ids one head lookup sends as a `terms` clause. Elasticsearch's default
+ * `indices.query.bool.max_clause_count` is 65,536; a batch of many keys times
+ * `GROUPED_PROPOSAL_MAX_GENERATIONS` can exceed that in one call.
+ */
+export const GROUPED_PROPOSAL_LIST_HEADS_TERMS = 10_000;
+
 /** Feature flag that turns Alert Triage grouping off: every batch then mints its own proposal. */
 export const TRIAGE_GROUPING_FLAG = 'alertzero.triageGrouping';
