@@ -56,6 +56,18 @@ describe('alertActionSchema', () => {
     expect(result.data).toMatchObject({ alert_id: 'alert-1', alert_status: 'active' });
   });
 
+  it('keeps the maintenance window id of a suppress action', () => {
+    const result = alertActionSchema.safeParse({
+      ...baseAction,
+      action_type: 'suppress',
+      actor: { type: 'internal' },
+      maintenance_window_id: 'mw-1',
+    });
+
+    expect(result.success).toBe(true);
+    expect(result.data).toMatchObject({ maintenance_window_id: 'mw-1' });
+  });
+
   it('accepts a null alert id for a series-level action', () => {
     const result = alertActionSchema.safeParse({
       ...baseAction,
@@ -92,10 +104,16 @@ describe('getAlertActionsResourceDefinition', () => {
     expect(mappings.properties).not.toHaveProperty('episode_status');
   });
 
+  it('maps maintenance_window_id as a keyword', () => {
+    const { mappings } = getAlertActionsResourceDefinition();
+
+    expect(mappings.properties).toMatchObject({ maintenance_window_id: { type: 'keyword' } });
+  });
+
   it('resets data streams created with the episode_* fields or the keyword actor mapping', () => {
     const { version, forceReset } = getAlertActionsResourceDefinition();
 
-    expect(version).toBe(8);
+    expect(version).toBe(9);
     expect(forceReset).toEqual({ version: 7 });
   });
 });

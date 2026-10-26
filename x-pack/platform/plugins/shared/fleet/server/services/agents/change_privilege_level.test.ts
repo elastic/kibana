@@ -11,7 +11,7 @@ import { packagePolicyService } from '../package_policy';
 
 import type { Agent } from '../../types';
 
-import { FleetUnauthorizedError } from '../../errors';
+import { AgentlessAgentRestrictionError, FleetUnauthorizedError } from '../../errors';
 
 import { SO_SEARCH_LIMIT } from '../../constants';
 
@@ -23,10 +23,17 @@ import {
 } from './change_privilege_level';
 import { getAgents } from './crud';
 import * as changePrivilegeRunner from './change_privilege_runner';
+import { isAgentlessAgent, throwIfAgentInAgentlessPolicy } from './hosted_agent';
 
 jest.mock('../package_policy');
 jest.mock('./crud');
 jest.mock('./actions');
+
+jest.mock('./hosted_agent', () => ({
+  throwIfAgentInAgentlessPolicy: jest.fn(),
+  getAgentPolicyRestrictions: jest.fn().mockResolvedValue({}),
+  isAgentlessAgent: jest.fn().mockReturnValue(false),
+}));
 
 jest.mock('./crud', () => {
   return {
@@ -55,6 +62,25 @@ describe('changeAgentPrivilegeLevel', () => {
     await expect(
       changeAgentPrivilegeLevel(esClientMock, soClientMock, agentId, {})
     ).rejects.toThrow(`Agent ${agentId} does not exist`);
+  });
+
+  it('should throw and not create an action for an agentless agent', async () => {
+    mockedCreateAgentAction.mockClear();
+    (getAgentById as jest.Mock).mockResolvedValue({
+      id: agentId,
+      agent: { version: '9.3.0' },
+      policy_id: policyId,
+    } as any);
+    (throwIfAgentInAgentlessPolicy as jest.Mock).mockRejectedValueOnce(
+      new AgentlessAgentRestrictionError(
+        `Cannot remove root privilege for managed agent ${agentId}`
+      )
+    );
+
+    await expect(
+      changeAgentPrivilegeLevel(esClientMock, soClientMock, agentId, {})
+    ).rejects.toThrow(AgentlessAgentRestrictionError);
+    expect(mockedCreateAgentAction).not.toHaveBeenCalled();
   });
 
   it('should return early if the agent is already unprivileged', async () => {
@@ -234,6 +260,31 @@ describe('bulkChangeAgentsPrivilegeLevel', () => {
       total: 2,
       type: 'PRIVILEGE_LEVEL_CHANGE',
     });
+  });
+
+  it('should exclude agentless agents from the action and record an error result for them', async () => {
+    const agentlessAgent = { ...mockedAgent, id: 'agentless-agent' };
+    (getAgents as jest.Mock).mockResolvedValue([mockedAgent, agentlessAgent]);
+    (isAgentlessAgent as jest.Mock).mockImplementation(
+      (_restrictions, agent) => agent.id === 'agentless-agent'
+    );
+    mockedPackagePolicyService.findAllForAgentPolicy.mockResolvedValue([]);
+
+    await bulkChangeAgentsPrivilegeLevel(esClientMock, soClientMock, {
+      agentIds: [mockedAgent.id, agentlessAgent.id],
+    });
+
+    expect(mockedCreateAgentAction).toHaveBeenCalledWith(
+      esClientMock,
+      soClientMock,
+      expect.objectContaining({ agents: [mockedAgent.id] })
+    );
+    expect(mockedCreateErrorActionResults).toHaveBeenCalledWith(
+      esClientMock,
+      expect.any(String),
+      { 'agentless-agent': expect.any(AgentlessAgentRestrictionError) },
+      'agent does not support privilege change action'
+    );
   });
 
   it('should record error result if agent policies contain integrations that require root privilege', async () => {

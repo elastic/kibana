@@ -51,6 +51,7 @@ import { pruneLookupIndex } from './lookup/prune_lookup_index';
 import { runResolutionScoringStep } from './steps/run_resolution_scoring_step';
 import { createRunMetricsTracker } from './utils/run_metrics_tracker';
 import { buildLookupIndex } from './steps/build_lookup_index';
+import { DEFAULT_ALERT_SAMPLE_SIZE } from '../constants';
 import { ENTITY_ANALYTICS_SPAN_NAMES, runWithSpan, wrapTaskRun } from '../../telemetry/traces';
 import {
   buildRiskScoreEntityMaintainerRunSummary,
@@ -454,7 +455,7 @@ const loadRunConfiguration = async ({
   const sampleSize =
     configuration.alertSampleSizePerShard ??
     entityAnalyticsConfig?.riskEngine?.alertSampleSizePerShard ??
-    10000;
+    DEFAULT_ALERT_SAMPLE_SIZE;
   const pageSize = configuration.pageSize ?? DEFAULT_RISK_SCORE_PAGE_SIZE;
   const entityTypes = configuration.identifierType
     ? [configuration.identifierType]

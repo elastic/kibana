@@ -5,10 +5,23 @@
  * 2.0.
  */
 
-import { serviceNameQuery } from './service_name_query';
+import { getServiceNames, serviceNameQuery } from './service_name_query';
 
 describe('serviceNameQuery', () => {
   it('fetches rum services', () => {
     expect(serviceNameQuery(0, 50000, {})).toMatchSnapshot();
+  });
+});
+
+describe('getServiceNames', () => {
+  it('returns the service name of each bucket', () => {
+    expect(getServiceNames({ services: { buckets: [{ key: 'shop' }, { key: 'blog' }] } })).toEqual([
+      'shop',
+      'blog',
+    ]);
+  });
+
+  it('returns no names without aggregations', () => {
+    expect(getServiceNames(undefined)).toEqual([]);
   });
 });

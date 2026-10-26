@@ -4,20 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIconTip,
-  EuiLink,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiTitle } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React from 'react';
-import { getMitreEntityDisplayName } from '@kbn/security-mitre-attack-common';
+import React, { useMemo } from 'react';
+import type { MitreFramework } from '@kbn/security-mitre-attack-common';
+import { THREAT_FRAMEWORK_NAME, groupThreatsByFramework } from '@kbn/security-mitre-attack-common';
+import type { Threats } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { BuildThreatDescription } from './types';
-import ListTreeIcon from './assets/list_tree_icon.svg';
 import * as i18n from './translations';
+import { ThreatEntryList } from './threat_entry_list';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useMitreConfiguration } from '../../../../common/hooks/mitre/use_mitre_configuration';
 
@@ -27,41 +22,16 @@ const threatEuiFlexGroupStyles = css`
   }
 `;
 
-const techniqueLinkItemStyles = css`
-  .euiIcon {
-    width: 8px;
-    height: 8px;
-  }
-
-  align-self: flex-start;
-`;
-
-const UnsupportedMitreIdWarning = ({ id }: { id: string }) => (
-  <EuiIconTip
-    type="warning"
-    color="warning"
-    size="s"
-    content={i18n.UNSUPPORTED_MITRE_ID_WARNING(id)}
-    aria-label={i18n.UNSUPPORTED_MITRE_ID_WARNING(id)}
-    iconProps={{ 'data-test-subj': `threatUnsupportedMitreIdWarning-${id}` }}
-  />
-);
-
-/**
- * NOTE: the agent builder rule attachment renders MITRE mappings with its own
- * context-free copy of this component
- * (`public/agent_builder/attachment_types/rule/mitre_display.tsx`), because this one
- * depends on the Security Solution redux store (via `useIsExperimentalFeatureEnabled`)
- * and throws when rendered outside the app's `<Provider>` (e.g. in the agent builder
- * chat flyout). If you change how threat entries are displayed here, propagate the
- * update there.
- */
-export const ThreatEuiFlexGroup = ({
-  threat,
-  'data-test-subj': dataTestSubj = 'threat',
-}: BuildThreatDescription) => {
-  const { euiTheme } = useEuiTheme();
-  const { tactics, techniques, subtechniques, isLoading, isError } = useMitreConfiguration();
+const ThreatFrameworkGroup = ({
+  framework,
+  entries,
+}: {
+  framework: MitreFramework;
+  entries: Threats;
+}) => {
+  const { tactics, techniques, subtechniques, isLoading, isError } = useMitreConfiguration({
+    framework,
+  });
 
   const isMitreAttackUpdatesUIEnabled = useIsExperimentalFeatureEnabled(
     'mitreAttackUpdatesUIEnabled'
@@ -77,109 +47,68 @@ export const ThreatEuiFlexGroup = ({
     isMitreAttackUpdatesUIEnabled && !isLoading && !isError && tactics.length > 0;
 
   return (
+    <ThreatEntryList
+      entries={entries}
+      resolve={{
+        tactics,
+        techniques,
+        subtechniques,
+        showUnsupportedWarnings,
+        frameworkLabel: THREAT_FRAMEWORK_NAME[framework],
+      }}
+    />
+  );
+};
+
+/**
+ * NOTE: the agent builder rule attachment renders MITRE mappings with its own
+ * context-free copy of this component
+ * (`public/agent_builder/attachment_types/rule/mitre_display.tsx`), because this one
+ * depends on the Security Solution redux store (via `useIsExperimentalFeatureEnabled`)
+ * and throws when rendered outside the app's `<Provider>` (e.g. in the agent builder
+ * chat flyout). If you change how threat entries are displayed here, propagate the
+ * update there.
+ */
+export const ThreatEuiFlexGroup = ({
+  threat,
+  'data-test-subj': dataTestSubj = 'threat',
+}: BuildThreatDescription) => {
+  const groups = useMemo(() => groupThreatsByFramework(threat), [threat]);
+
+  return (
     <EuiFlexGroup direction="column" data-test-subj={dataTestSubj} css={threatEuiFlexGroupStyles}>
-      {threat.map((singleThreat, index) => {
-        const threatTactic = singleThreat?.tactic;
-        const tactic = threatTactic ? tactics.find((t) => t.id === threatTactic.id) : undefined;
-        const tacticUnsupported = showUnsupportedWarnings && threatTactic != null && tactic == null;
+      {groups.map(({ framework, label, threats }) => {
         return (
-          <EuiFlexItem key={`${threatTactic?.name ?? 'threat'}-${index}`}>
-            {threatTactic ? (
-              <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false} wrap={false}>
+          <EuiFlexItem
+            key={framework ?? `unknown-${label}`}
+            data-test-subj={`threatFrameworkGroup-${framework ?? 'unknown'}`}
+          >
+            <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false} wrap={false}>
+              <EuiFlexItem grow={false}>
+                <EuiTitle size="xxxs">
+                  <h5 data-test-subj="threatFrameworkGroupTitle">
+                    {label || i18n.UNKNOWN_FRAMEWORK_LABEL}
+                  </h5>
+                </EuiTitle>
+              </EuiFlexItem>
+              {framework === undefined && (
                 <EuiFlexItem grow={false}>
-                  <EuiLink
-                    data-test-subj="threatTacticLink"
-                    href={threatTactic.reference}
-                    target="_blank"
-                  >
-                    {tactic != null
-                      ? getMitreEntityDisplayName(tactic)
-                      : getMitreEntityDisplayName(threatTactic)}
-                  </EuiLink>
+                  <EuiIconTip
+                    type="warning"
+                    color="warning"
+                    size="s"
+                    content={i18n.UNKNOWN_FRAMEWORK_WARNING}
+                    aria-label={i18n.UNKNOWN_FRAMEWORK_WARNING}
+                    iconProps={{ 'data-test-subj': 'threatUnknownFrameworkWarning' }}
+                  />
                 </EuiFlexItem>
-                {tacticUnsupported && (
-                  <EuiFlexItem grow={false}>
-                    <UnsupportedMitreIdWarning id={threatTactic.id} />
-                  </EuiFlexItem>
-                )}
-              </EuiFlexGroup>
-            ) : null}
-            <EuiFlexGroup gutterSize="none" alignItems="flexStart" direction="column">
-              {singleThreat?.technique &&
-                singleThreat.technique.map((technique, techniqueIndex) => {
-                  if (technique == null) {
-                    return null;
-                  }
-                  const myTechnique = techniques.find((t) => t.id === technique.id);
-                  const techniqueUnsupported = showUnsupportedWarnings && myTechnique == null;
-                  return (
-                    <EuiFlexItem key={myTechnique?.id ?? techniqueIndex}>
-                      <EuiFlexGroup gutterSize="xs" responsive={false} wrap={false}>
-                        <EuiFlexItem grow={false}>
-                          <EuiButtonEmpty
-                            data-test-subj="threatTechniqueLink"
-                            href={technique.reference}
-                            target="_blank"
-                            iconType={ListTreeIcon}
-                            size="xs"
-                            css={techniqueLinkItemStyles}
-                          >
-                            {myTechnique != null
-                              ? getMitreEntityDisplayName(myTechnique)
-                              : getMitreEntityDisplayName(technique)}
-                          </EuiButtonEmpty>
-                        </EuiFlexItem>
-                        {techniqueUnsupported && (
-                          <EuiFlexItem grow={false}>
-                            <UnsupportedMitreIdWarning id={technique.id} />
-                          </EuiFlexItem>
-                        )}
-                      </EuiFlexGroup>
-                      <EuiFlexGroup gutterSize="none" alignItems="flexStart" direction="column">
-                        {technique.subtechnique != null &&
-                          technique.subtechnique.map((subtechnique, subtechniqueIndex) => {
-                            if (subtechnique == null) {
-                              return null;
-                            }
-                            const mySubtechnique = subtechniques.find(
-                              (t) => t.id === subtechnique.id
-                            );
-                            const subtechniqueUnsupported =
-                              showUnsupportedWarnings && mySubtechnique == null;
-                            return (
-                              <EuiFlexItem
-                                key={mySubtechnique?.id ?? subtechniqueIndex}
-                                css={{ marginLeft: euiTheme.size.m }}
-                              >
-                                <EuiFlexGroup gutterSize="xs" responsive={false} wrap={false}>
-                                  <EuiFlexItem grow={false}>
-                                    <EuiButtonEmpty
-                                      data-test-subj="threatSubtechniqueLink"
-                                      href={subtechnique.reference}
-                                      target="_blank"
-                                      iconType={ListTreeIcon}
-                                      size="xs"
-                                      css={techniqueLinkItemStyles}
-                                    >
-                                      {mySubtechnique != null
-                                        ? getMitreEntityDisplayName(mySubtechnique)
-                                        : getMitreEntityDisplayName(subtechnique)}
-                                    </EuiButtonEmpty>
-                                  </EuiFlexItem>
-                                  {subtechniqueUnsupported && (
-                                    <EuiFlexItem grow={false}>
-                                      <UnsupportedMitreIdWarning id={subtechnique.id} />
-                                    </EuiFlexItem>
-                                  )}
-                                </EuiFlexGroup>
-                              </EuiFlexItem>
-                            );
-                          })}
-                      </EuiFlexGroup>
-                    </EuiFlexItem>
-                  );
-                })}
+              )}
             </EuiFlexGroup>
+            {framework === undefined ? (
+              <ThreatEntryList entries={threats} resolve={undefined} />
+            ) : (
+              <ThreatFrameworkGroup framework={framework} entries={threats} />
+            )}
           </EuiFlexItem>
         );
       })}

@@ -3232,9 +3232,11 @@ describe('Agent policy', () => {
       const deploy = async ({
         sentinelVersionFlag,
         options,
+        policyAttributes,
       }: {
         sentinelVersionFlag: boolean;
         options?: Parameters<typeof agentPolicyService.deployPolicies>[3];
+        policyAttributes?: Record<string, unknown>;
       }) => {
         const soClient = createSavedObjectClientMock();
         const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
@@ -3265,11 +3267,15 @@ describe('Agent policy', () => {
                 has_agent_version_conditions: false,
                 is_default_fleet_server: true,
                 schema_version: '99.0.0',
+                ...policyAttributes,
               },
               references: [],
             },
           ],
         });
+        jest
+          .spyOn(agentlessAgentService, 'createAgentlessAgent')
+          .mockResolvedValue(undefined as any);
 
         await agentPolicyService.deployPolicies(soClient, ['policy-1'], undefined, options);
 
@@ -3293,6 +3299,18 @@ describe('Agent policy', () => {
         expect(base.data.id).toEqual('policy-1');
         expect(base.default_fleet_server).toBe(true);
       });
+
+      it.each([
+        ['agentless', { supports_agentless: true }],
+        ['managed', { is_managed: true }],
+      ])(
+        'does not deploy the #sentinel policy for %s policies',
+        async (_name, policyAttributes) => {
+          const docs = await deploy({ sentinelVersionFlag: true, policyAttributes });
+
+          expect(docs.map((doc) => doc.policy_id)).toEqual(['policy-1']);
+        }
+      );
 
       it('deploys only the base policy when the flag is disabled', async () => {
         const docs = await deploy({ sentinelVersionFlag: false });

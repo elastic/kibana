@@ -152,6 +152,19 @@ describe('relaySendMessage', () => {
     expect(trigger).toHaveBeenCalledWith(expect.objectContaining({ threadTs: '1700.0001' }));
   });
 
+  it('forwards Block Kit blocks', async () => {
+    const trigger = jest.fn().mockResolvedValue({
+      ref: '1700.0002',
+      tenantKey: 'team-A',
+      channel: CHANNEL_ID,
+    });
+    const blocks = [{ type: 'section', text: { type: 'mrkdwn', text: 'hi' } }];
+
+    await send({ channel: CHANNEL_ID, text: 'hi', blocks }, { trigger });
+
+    expect(trigger).toHaveBeenCalledWith(expect.objectContaining({ message: 'hi', blocks }));
+  });
+
   it('rejects a blank channel before calling Relay', async () => {
     const trigger = jest.fn();
 
@@ -241,6 +254,19 @@ describe('relayUpdateMessage', () => {
       message: 'edited',
       messageTs: '1700.0002',
     });
+  });
+
+  it('forwards Block Kit blocks so the edit keeps its layout', async () => {
+    const trigger = jest.fn().mockResolvedValue({
+      ref: '1700.0002',
+      tenantKey: 'team-A',
+      channel: CHANNEL_ID,
+    });
+    const blocks = [{ type: 'header', text: { type: 'plain_text', text: 'Done' } }];
+
+    await update({ channel: CHANNEL_ID, messageTs: '1700.0002', text: 'Done', blocks }, trigger);
+
+    expect(trigger).toHaveBeenCalledWith(expect.objectContaining({ blocks }));
   });
 
   it('rejects a blank channel before calling Relay', async () => {

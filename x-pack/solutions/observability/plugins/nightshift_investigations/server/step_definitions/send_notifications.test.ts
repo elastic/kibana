@@ -225,7 +225,15 @@ describe('nightshift.sendNotifications step', () => {
       );
       await definition.handler(context('started'));
       await definition.handler(context('completed'));
-      expect(execute.mock.calls[1][0].params.subAction).toBe('updateMessage');
+      expect(execute.mock.calls[1][0].params).toMatchObject({
+        subAction: 'updateMessage',
+        subActionParams: {
+          channel: 'C123',
+          messageTs: '1.2',
+          text: expect.any(String),
+          blocks: expect.any(Array),
+        },
+      });
       expect(recordSlackThreadStatusMessage).toHaveBeenCalledTimes(1);
       expect(recordSlackThreadStatusMessage).toHaveBeenCalledWith(
         expect.objectContaining({ messageTs: '1.2' })

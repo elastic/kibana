@@ -18,7 +18,7 @@ export const createDashboardsSkill = (deps: GenerateDashboardToolDeps): SkillDef
     name: DASHBOARDS_SKILL_ID,
     basePath: 'skills/platform/dashboard',
     description:
-      'Compose and update Kibana dashboards, involving panel creation, layout, and inline visualization editing.',
+      'Create, find, and update Kibana dashboards, including generating every panel and visualization on them. Use this for any request that involves a dashboard, even if it also asks for charts; do not also load visualization-creation.',
     content: `## When to Use This Skill
 
 Use this skill when:

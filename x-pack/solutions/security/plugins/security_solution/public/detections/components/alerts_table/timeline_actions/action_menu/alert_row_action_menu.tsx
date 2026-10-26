@@ -33,6 +33,7 @@ export interface AlertRowActionGroupsProps {
   hasAgent: boolean;
   isAlert: boolean;
   osqueryItems: EuiContextMenuPanelItemDescriptor[];
+  removeFromCaseItems?: EuiContextMenuPanelItemDescriptor[];
   runAlertWorkflowItems: EuiContextMenuPanelItemDescriptor[];
   runDocumentWorkflowItems: EuiContextMenuPanelItemDescriptor[];
   statusItems: EuiContextMenuPanelItemDescriptor[];
@@ -54,11 +55,13 @@ export const getAlertRowActionGroups = ({
   hasAgent,
   isAlert,
   osqueryItems,
+  removeFromCaseItems = [],
   runAlertWorkflowItems,
   runDocumentWorkflowItems,
   statusItems,
 }: AlertRowActionGroupsProps): EuiContextMenuPanelItemDescriptor[][] => {
-  const alertManagementItems = [...alertAssigneeItems, ...addToCaseItems, ...alertTagItems];
+  const caseItems = [...addToCaseItems, ...removeFromCaseItems];
+  const alertManagementItems = [...alertAssigneeItems, ...caseItems, ...alertTagItems];
   const responseActionItems = [
     ...(isAlert ? runAlertWorkflowItems : runDocumentWorkflowItems),
     ...(hasAgent ? osqueryItems : []),
@@ -67,7 +70,7 @@ export const getAlertRowActionGroups = ({
     ? [statusItems, alertManagementItems, exceptionItems, responseActionItems, addToChatItems]
     : [
         [],
-        addToCaseItems,
+        caseItems,
         canCreateEndpointEventFilters ? eventFilterItems : [],
         responseActionItems,
         [],
@@ -90,6 +93,7 @@ export const AlertRowActionMenu = ({
   isAlert,
   osqueryItems,
   panels,
+  removeFromCaseItems,
   runAlertWorkflowItems,
   runDocumentWorkflowItems,
   statusItems,
@@ -106,6 +110,7 @@ export const AlertRowActionMenu = ({
       hasAgent,
       isAlert,
       osqueryItems,
+      removeFromCaseItems,
       runAlertWorkflowItems,
       runDocumentWorkflowItems,
       statusItems,
@@ -126,6 +131,7 @@ export const AlertRowActionMenu = ({
     hasAgent,
     isAlert,
     osqueryItems,
+    removeFromCaseItems,
     runAlertWorkflowItems,
     runDocumentWorkflowItems,
     statusItems,

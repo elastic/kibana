@@ -70,7 +70,7 @@ const getOnSaveProps = (
 const setup = async ({
   additionalPersistedTabs,
   dataViewsList,
-  draftSessionTitle,
+  initialTitle,
   initialCopyOnSave,
   initialTabDataView,
   isEmbedded = false,
@@ -87,7 +87,7 @@ const setup = async ({
 }: {
   additionalPersistedTabs?: DiscoverSessionTab[];
   dataViewsList?: DataView[];
-  draftSessionTitle?: string;
+  initialTitle?: string;
   initialCopyOnSave?: boolean;
   initialTabDataView?: DataView;
   isEmbedded?: boolean;
@@ -131,12 +131,6 @@ const setup = async ({
   await toolkit.initializeTabs({ persistedDiscoverSession: finalPersistedSession });
   await toolkit.initializeSingleTab({ tabId: toolkit.getCurrentTab().id });
 
-  if (draftSessionTitle) {
-    await toolkit.internalState
-      .dispatch(internalStateActions.renameDiscoverSession({ newTitle: draftSessionTitle }))
-      .unwrap();
-  }
-
   if (initialTabDataView) {
     toolkit.internalState.dispatch(
       internalStateActions.setDataView({
@@ -163,6 +157,7 @@ const setup = async ({
     <DiscoverToolkitTestProvider toolkit={toolkit}>
       <DiscoverSessionSaveModalContainer
         initialCopyOnSave={initialCopyOnSave}
+        initialTitle={initialTitle}
         onClose={onClose}
         onSaveCb={onSaveCb}
         services={services}
@@ -335,10 +330,10 @@ describe('DiscoverSessionSaveModalContainer', () => {
       });
     });
 
-    it('should prefill the title with the draft name of a new session', async () => {
+    it('should prefill the title with the initial title of a new session', async () => {
       const { modalProps } = await setup({
         persistedDiscoverSession: false,
-        draftSessionTitle: 'My draft',
+        initialTitle: 'My draft',
       });
 
       expect(modalProps?.title).toBe('My draft');
