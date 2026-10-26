@@ -1349,6 +1349,53 @@ steps:
       expect(result.yaml).toBe(PATH_WORKFLOW);
     });
 
+    const withConsts = (consts: string) =>
+      PATH_WORKFLOW.replace('triggers:', `consts:\n${consts}\ntriggers:`);
+
+    it('replaces a scalar with a map on the next lines', () => {
+      const yaml = withConsts('  query: old # note');
+      const result = modifyWorkflowProperty(yaml, 'consts.query', { match_all: {} });
+      expect(result.success).toBe(true);
+      expect(parseDocument(result.yaml).toJSON().consts).toEqual({ query: { match_all: {} } });
+    });
+
+    it('adds a key to an empty flow map', () => {
+      const yaml = PATH_WORKFLOW.replace('triggers:', 'consts: {}\ntriggers:');
+      const result = modifyWorkflowProperty(yaml, 'consts.url', 'https://example.com');
+      expect(result.success).toBe(true);
+      expect(parseDocument(result.yaml).toJSON().consts).toEqual({ url: 'https://example.com' });
+    });
+
+    it('keeps the list marker when replacing a null first field of a list item', () => {
+      const yaml = withConsts('  records:\n    - value: null\n      untouched: keep');
+      const result = modifyWorkflowProperty(yaml, 'consts.records.0.value', 'new');
+      expect(result.success).toBe(true);
+      expect(parseDocument(result.yaml).toJSON().consts).toEqual({
+        records: [{ value: 'new', untouched: 'keep' }],
+      });
+    });
+
+    it('replaces a whole list item', () => {
+      const result = modifyWorkflowProperty(PATH_WORKFLOW, 'triggers.1', {
+        type: 'manual',
+        inputs: { properties: { host: { type: 'string' } } },
+      });
+      expect(result.success).toBe(true);
+      const parsed = parseDocument(result.yaml).toJSON();
+      expect(parsed.triggers[1].inputs.properties.host).toEqual({ type: 'string' });
+      expect(parsed.triggers[0].with.every).toBe('5m');
+    });
+
+    it('replaces a scalar step property with a map', () => {
+      const result = modifyStepProperty(PATH_WORKFLOW, 'call_child', 'with.workflow-id', {
+        id: 'child',
+      });
+      expect(result.success).toBe(true);
+      expect(parseDocument(result.yaml).toJSON().steps[0].with['workflow-id']).toEqual({
+        id: 'child',
+      });
+    });
+
     it('rejects a path through a scalar', () => {
       const result = modifyWorkflowProperty(PATH_WORKFLOW, 'name.first', 'x');
       expect(result.success).toBe(false);
