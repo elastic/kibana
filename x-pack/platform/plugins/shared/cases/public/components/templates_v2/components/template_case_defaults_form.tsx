@@ -11,7 +11,7 @@ import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiComboBox, EuiForm, EuiFormRow, EuiSelect } from '@elastic/eui';
 import { getUserDisplayName } from '@kbn/user-profile-components';
 import type { ParsedTemplateDefinition } from '../../../../common/types/domain/template/v1';
-import type { CaseAssignees } from '../../../../common/types/domain_zod/user/v1';
+import type { CaseAssignees } from '../../../../common/types/domain/user/v1';
 import type { CaseSeverity } from '../../../../common/types/domain';
 import { severities } from '../../severity/config';
 import { SEVERITY_TITLE } from '../../severity/translations';

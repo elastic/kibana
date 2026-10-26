@@ -12,6 +12,7 @@ import { i18n } from '@kbn/i18n';
 import type { AggregateQuery, Filter, Query, TimeRange, ProjectRouting } from '@kbn/es-query';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import React, { useEffect, useMemo } from 'react';
+import type { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { useCustomContentHtml } from './use_custom_content_html';
 import { CustomContentEmptyPrompt } from './custom_content_empty_prompt';
 import { CustomContentGeneratingPrompt } from './custom_content_generating_prompt';
@@ -37,6 +38,8 @@ export interface CustomContentComponentProps {
   isGenerating?: boolean;
   /** False in a read-only view such as a dashboard preview, where nothing may navigate away. */
   isInteractive?: boolean;
+  /** Records the panel's ES|QL request so the host can offer Inspect. */
+  requestAdapter?: RequestAdapter;
   onLoadingChange: (isLoading: boolean) => void;
   setApproximationApplied?: (approximationApplied: boolean | undefined) => void;
   onGenerateWithChat?: () => void;
@@ -77,6 +80,7 @@ export const CustomContentComponent = ({
   isAiAvailable = false,
   isGenerating = false,
   isInteractive = true,
+  requestAdapter,
   onLoadingChange,
   setApproximationApplied,
   onGenerateWithChat,
@@ -97,6 +101,7 @@ export const CustomContentComponent = ({
     filters,
     esqlVariables,
     isInteractive,
+    requestAdapter,
     setApproximationApplied,
   });
 

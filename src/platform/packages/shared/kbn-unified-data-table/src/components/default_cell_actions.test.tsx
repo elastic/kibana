@@ -13,6 +13,7 @@ import React from 'react';
 import userEvent from '@testing-library/user-event';
 import {
   buildCellActions,
+  buildSummaryColumnCellActions,
   buildCopyValueButton,
   FilterInBtn,
   FilterOutBtn,
@@ -27,6 +28,7 @@ import { screen } from '@testing-library/react';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { servicesMock } from '../../__mocks__/services';
 import { UnifiedDataTableContext } from '../table_context';
+import { SOURCE_COLUMN } from '../utils/columns';
 
 const TestCellActionButton: EuiDataGridColumnCellActionProps['Component'] = EuiButtonEmpty;
 
@@ -282,7 +284,9 @@ describe('Default cell actions ', () => {
           <ReverseCategorizeBtn
             cellActionProps={createCellActionProps({ columnId: 'message' })}
             field={textField}
-            uiActions={{ executeTriggerActions } as unknown as UiActionsStart}
+            uiActions={
+              { executeTriggerActions, hasAction: () => true } as unknown as UiActionsStart
+            }
           />
         </UnifiedDataTableContext.Provider>
       );
@@ -300,6 +304,73 @@ describe('Default cell actions ', () => {
           timeRange: { from: 'now-1h', to: 'now' },
         })
       );
+    });
+  });
+
+  describe('ReverseCategorizeBtn on the summary column', () => {
+    const renderSummaryBtn = (messageEsTypes: string[]) => {
+      const executeTriggerActions = jest.fn();
+      const summaryMessageField = { name: 'message', esTypes: messageEsTypes };
+
+      renderWithI18n(
+        <UnifiedDataTableContext.Provider
+          value={{
+            ...dataTableContextMock,
+            dataView: {
+              ...dataTableContextMock.dataView,
+              isTimeBased: () => true,
+              fields: {
+                getByName: (name: string) => (name === 'message' ? summaryMessageField : undefined),
+              },
+            } as never,
+            getRowByIndex: () =>
+              buildDataTableRecord(
+                { _index: 'i', _id: '0', _source: { message: 'a log message' } },
+                dataViewMock
+              ),
+          }}
+        >
+          <ReverseCategorizeBtn
+            cellActionProps={createCellActionProps({ columnId: SOURCE_COLUMN })}
+            uiActions={
+              { executeTriggerActions, hasAction: () => true } as unknown as UiActionsStart
+            }
+          />
+        </UnifiedDataTableContext.Provider>
+      );
+
+      return { executeTriggerActions, summaryMessageField };
+    };
+
+    it('analyses the value of the message field when it is a text field', async () => {
+      const { executeTriggerActions, summaryMessageField } = renderSummaryBtn(['text']);
+
+      await userEvent.click(screen.getByTestId('reverseCategorizeButton'));
+
+      expect(executeTriggerActions).toHaveBeenCalledWith(
+        'REVERSE_CATEGORIZE_FIELD_TRIGGER',
+        expect.objectContaining({ field: summaryMessageField, fieldValue: 'a log message' })
+      );
+    });
+
+    it('is not shown when the message field is not a text field', () => {
+      renderSummaryBtn(['keyword']);
+
+      expect(screen.queryByTestId('reverseCategorizeButton')).toBeNull();
+    });
+
+    it('is added to the cell actions of the summary column', () => {
+      const cellActions = buildSummaryColumnCellActions(
+        servicesMock.toastNotifications,
+        dataTableContextMock.valueToStringConverter,
+        'table',
+        undefined,
+        { hasAction: () => true } as unknown as UiActionsStart,
+        { isTimeBased: () => true } as never
+      );
+
+      // copy value + find similar values
+      expect(cellActions).toHaveLength(2);
     });
   });
 

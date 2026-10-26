@@ -95,7 +95,9 @@ const mockTaskManagerSchedule = jest.fn();
 const mockTaskManagerEnsureScheduled = jest.fn();
 const mockTaskManagerRunSoon = jest.fn();
 
+import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { createAgentExecutionService } from './execution_service';
+import { CallbackDeliveryService } from './callback';
 import { ABORT_WAIT_FOR_TERMINAL_TIMEOUT_MS } from './constants';
 
 describe('AgentExecutionService', () => {
@@ -155,6 +157,11 @@ describe('AgentExecutionService', () => {
 
   const agentRegistry = createMockedAgentRegistry();
   const agentService = createAgentsServiceStartMock();
+  const callbackDeliveryService = new CallbackDeliveryService({
+    actions: actionsMock.createSetup(),
+    logger,
+  });
+  const resolveConversation = jest.spyOn(callbackDeliveryService, 'resolveConversation');
 
   const service = createAgentExecutionService({
     logger,
@@ -170,10 +177,12 @@ describe('AgentExecutionService', () => {
     savedObjects,
     meteringService,
     searchInferenceEndpoints,
+    callbackDeliveryService,
   });
 
   beforeEach(() => {
     jest.clearAllMocks();
+    resolveConversation.mockResolvedValue(undefined);
     getForFeature.mockResolvedValue({ endpoints: [], warnings: [], soEntryFound: false });
     agentService.getRegistry.mockResolvedValue(agentRegistry);
     agentRegistry.get.mockResolvedValue(createMockedInternalAgent({ id: 'agent-1' }));
@@ -1076,10 +1085,60 @@ describe('AgentExecutionService', () => {
         { code: InferenceTaskErrorCode.requestError, meta: { status: 400 } }
       );
 
-      expect(conversationService.getScopedClient).not.toHaveBeenCalled();
       expect(conversationClient.create).not.toHaveBeenCalled();
+      expect(conversationClient.appendEvents).not.toHaveBeenCalled();
       expect(mockExecutionClient.create).not.toHaveBeenCalled();
       expect(mockTaskManagerEnsureScheduled).not.toHaveBeenCalled();
+    });
+
+    it('validates the model of the agent the origin resolves to', async () => {
+      resolveConversation.mockResolvedValueOnce({
+        conversationId: 'investigation-1',
+        agentId: 'investigation-agent',
+      });
+      conversationClient.get.mockResolvedValueOnce(
+        createEmptyConversation({
+          id: 'investigation-1',
+          agent_id: 'investigation-agent',
+          schema_version: CONVERSATION_SCHEMA_VERSION,
+        })
+      );
+      agentRegistry.get.mockImplementation(async (agentId: string) =>
+        createMockedInternalAgent({
+          id: agentId,
+          configuration: {
+            tools: [],
+            ...(agentId === 'investigation-agent'
+              ? { inference_feature_id: 'investigation_feature' }
+              : {}),
+          },
+        })
+      );
+      getForFeature.mockResolvedValueOnce({
+        endpoints: [createEisConnector(['high'], 'feature-endpoint')],
+        warnings: [],
+        soEntryFound: false,
+      });
+
+      await expect(
+        service.executeAgent({
+          mode: AgentExecutionMode.conversation,
+          request: httpServerMock.createKibanaRequest(),
+          params: {
+            agentId: 'agent-1',
+            reasoningLevel: 'xhigh',
+            origin: { type: ConversationOriginType.Slack, external_conversation_id: 'thread-1' },
+            nextInput: { message: 'hello' },
+          },
+          useTaskManager: true,
+        })
+      ).rejects.toMatchObject({ code: InferenceTaskErrorCode.requestError });
+
+      expect(agentRegistry.get).toHaveBeenCalledWith('investigation-agent');
+      expect(getForFeature).toHaveBeenCalledWith('investigation_feature', expect.anything(), {
+        onlyReturnConfigured: true,
+      });
+      expect(mockExecutionClient.create).not.toHaveBeenCalled();
     });
 
     it('starts the execution when the requested connector cannot be resolved', async () => {
@@ -1366,6 +1425,87 @@ describe('AgentExecutionService', () => {
       conversationClient.create.mockResolvedValue(conversation);
     });
 
+    describe('with an origin and no conversation id', () => {
+      const origin = {
+        type: ConversationOriginType.Slack,
+        external_conversation_id: 'thread-1',
+      };
+      const boundConversation = createEmptyConversation({
+        id: 'investigation-1',
+        agent_id: 'investigation-agent',
+        schema_version: CONVERSATION_SCHEMA_VERSION,
+      });
+
+      it('continues the conversation the origin resolves to, on the agent it resolves to', async () => {
+        resolveConversation.mockResolvedValueOnce({
+          conversationId: 'investigation-1',
+          agentId: 'investigation-agent',
+        });
+        conversationClient.get.mockResolvedValueOnce(boundConversation);
+
+        await converse({ conversationId: undefined, origin });
+
+        expect(resolveConversation).toHaveBeenCalledWith(
+          {
+            origin: { type: ConversationOriginType.Slack, external_conversation_id: 'thread-1' },
+            spaceId: 'default',
+            request: expect.anything(),
+          },
+          conversationClient
+        );
+        expect(conversationClient.get).toHaveBeenCalledWith('investigation-1');
+        const [{ agentId, agentParams }] = mockExecutionClient.create.mock.calls[0];
+        expect(agentId).toBe('investigation-agent');
+        expect(agentParams).toMatchObject({
+          agentId: 'investigation-agent',
+          conversationId: 'investigation-1',
+          conversationOperation: 'UPDATE',
+        });
+      });
+
+      it('continues the conversation the origin resolves to, on the requested agent when no agent is resolved', async () => {
+        resolveConversation.mockResolvedValueOnce({ conversationId: 'investigation-1' });
+        conversationClient.get.mockResolvedValueOnce(boundConversation);
+
+        await converse({ conversationId: undefined, origin });
+
+        const [{ agentId, agentParams }] = mockExecutionClient.create.mock.calls[0];
+        expect(agentId).toBe('agent-1');
+        expect(agentParams).toMatchObject({
+          agentId: 'agent-1',
+          conversationId: 'investigation-1',
+          conversationOperation: 'UPDATE',
+        });
+      });
+
+      it('starts a conversation with the origin when nothing resolves it', async () => {
+        await converse({ conversationId: undefined, origin });
+
+        const [{ agentId, agentParams }] = mockExecutionClient.create.mock.calls[0];
+        expect(agentId).toBe('agent-1');
+        expect(agentParams).toMatchObject({ agentId: 'agent-1', conversationOperation: 'CREATE' });
+      });
+
+      it('does not resolve the origin when the request names its conversation, and keeps the requested agent', async () => {
+        conversationClient.get.mockResolvedValueOnce(boundConversation);
+
+        await converse({ conversationId: 'investigation-1', origin });
+
+        expect(resolveConversation).not.toHaveBeenCalled();
+        const [{ agentId }] = mockExecutionClient.create.mock.calls[0];
+        expect(agentId).toBe('agent-1');
+      });
+
+      it('propagates a resolver error', async () => {
+        resolveConversation.mockRejectedValueOnce(new Error('lookup failed'));
+
+        await expect(converse({ conversationId: undefined, origin })).rejects.toThrow(
+          'lookup failed'
+        );
+        expect(mockExecutionClient.create).not.toHaveBeenCalled();
+      });
+    });
+
     it('writes the opening user message on the round it reserved', async () => {
       await converse();
 
@@ -1397,6 +1537,16 @@ describe('AgentExecutionService', () => {
 
       const [, options] = conversationClient.appendEvents.mock.calls[0];
       expect(options).toMatchObject({ refresh: false });
+    });
+
+    it('passes the author decoration to the client and stores it for the run', async () => {
+      const author = { full_name: 'Attack Discovery Review' };
+
+      await converse({ author });
+
+      expect(conversationClient.getAuthor).toHaveBeenCalledWith(undefined, author);
+      const [{ agentParams }] = mockExecutionClient.create.mock.calls[0];
+      expect(agentParams).toMatchObject({ author });
     });
 
     it('falls back to the conversation owner when the requester has no author, as the round rewrite does', async () => {
@@ -1588,6 +1738,34 @@ describe('AgentExecutionService', () => {
       });
     });
 
+    it('passes the author decoration to the conversation client', async () => {
+      const author = { full_name: 'Attack Discovery Review' };
+
+      await append({ author });
+
+      expect(conversationClient.getAuthor).toHaveBeenCalledWith(undefined, author);
+    });
+
+    it('writes the service account name the client resolved onto the message actor', async () => {
+      conversationClient.getAuthor.mockReturnValueOnce({
+        id: 'service_account:kibana/alertzero-workers',
+        username: 'kibana/alertzero-workers',
+        type: 'service_account',
+        full_name: 'Attack Discovery Review',
+      });
+
+      await append({ author: { full_name: 'Attack Discovery Review' } });
+
+      const [{ events }] = conversationClient.appendEvents.mock.calls[0];
+      expect(events[0].actor).toMatchObject({
+        type: 'user',
+        id: 'service_account:kibana/alertzero-workers',
+        username: 'kibana/alertzero-workers',
+        principal_type: 'service_account',
+        full_name: 'Attack Discovery Review',
+      });
+    });
+
     it('persists the message without recording an execution', async () => {
       await append();
 
@@ -1680,7 +1858,7 @@ describe('AgentExecutionService', () => {
         },
       });
 
-      expect(conversationClient.getAuthor).toHaveBeenCalledWith(author);
+      expect(conversationClient.getAuthor).toHaveBeenCalledWith(author, undefined);
       const [{ events }] = conversationClient.appendEvents.mock.calls[0];
       expect(events[0].actor).toMatchObject({
         type: 'external',

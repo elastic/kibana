@@ -43,6 +43,7 @@ export const createInputControlVisController = (
     filterManager: FilterManager;
     updateSubsciption: any;
     timeFilterSubscription: Subscription;
+    themeSubscription: Subscription;
     visParams?: InputControlVisParams;
     isDarkMode?: boolean;
 
@@ -63,7 +64,13 @@ export const createInputControlVisController = (
           }
         });
 
-      this.isDarkMode = deps.core.theme.getTheme().darkMode;
+      this.themeSubscription = deps.core.theme.theme$.subscribe(({ darkMode }) => {
+        if (darkMode === this.isDarkMode) return;
+        this.isDarkMode = darkMode;
+        if (isLoaded) {
+          this.drawVis();
+        }
+      });
     }
 
     async render(visParams: InputControlVisParams) {
@@ -79,6 +86,7 @@ export const createInputControlVisController = (
     destroy() {
       this.updateSubsciption.unsubscribe();
       this.timeFilterSubscription.unsubscribe();
+      this.themeSubscription.unsubscribe();
       unmountComponentAtNode(el);
       this.controls.forEach((control) => control.destroy());
     }

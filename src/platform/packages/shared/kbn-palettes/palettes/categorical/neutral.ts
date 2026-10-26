@@ -15,7 +15,7 @@ import { KbnPalette } from '../../constants';
 const commonProps = {
   id: KbnPalette.Neutral,
   standalone: true,
-  name: i18n.translate('palettes.elastic.name', {
+  name: i18n.translate('palettes.neutral.name', {
     defaultMessage: 'Neutral',
   }),
 } satisfies Omit<KbnCategoricalPaletteConfig, 'colors'>;
