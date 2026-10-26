@@ -109,7 +109,7 @@ export const AppBadges = memo<AppBadgesProps>(({ badges }) => {
             >
               {overflowBadges.map((badge) => (
                 <EuiFlexItem grow={false} key={asPlainText(badge.label)}>
-                  <AppBadge badge={badge} onBadgeClick={handleClosePopover} />
+                  <AppBadge badge={badge} />
                 </EuiFlexItem>
               ))}
             </EuiFlexGroup>
