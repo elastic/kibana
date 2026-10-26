@@ -19,7 +19,6 @@
     "@kbn/core",
     "@kbn/core-ui-settings-common",
     "@kbn/es-errors",
-    "@kbn/i18n",
     "@kbn/inference-common",
     "@kbn/inference-langchain",
     "@kbn/inference-tracing",

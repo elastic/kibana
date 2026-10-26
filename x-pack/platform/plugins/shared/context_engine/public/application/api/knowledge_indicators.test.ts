@@ -38,6 +38,21 @@ describe('listKis', () => {
     expect(result).toBe(response);
   });
 
+  it('passes query when provided', async () => {
+    const http = createHttp();
+    http.get.mockResolvedValue(emptyListKisResponse);
+
+    await listKis(http, {
+      aiIndexId: 'support',
+      query: 'refund',
+    });
+
+    expect(http.get).toHaveBeenCalledWith('/internal/context_engine/ai_index/support/kis', {
+      version: AI_INDEX_INTERNAL_API_VERSION,
+      query: { query: 'refund' },
+    });
+  });
+
   it('passes size, type, and lifecycle_status when provided', async () => {
     const http = createHttp();
     http.get.mockResolvedValue(emptyListKisResponse);
@@ -54,7 +69,7 @@ describe('listKis', () => {
       query: {
         size: 50,
         type: 'playbook',
-        lifecycle_status: ['active', 'deleted'],
+        lifecycle_status: ['active', 'deleted', 'verification_failed'],
       },
     });
   });

@@ -28,6 +28,7 @@ import type {
   HealthDiagnosticQueryStats,
 } from '../diagnostic/health_diagnostic_service.types';
 
+import { ENTITY_ANALYTICS_EVENTS } from './events/entity_analytics';
 import { SIEM_MIGRATIONS_EVENTS } from './events/siem_migrations';
 import type {
   RuleBulkUpgradeTelemetry,
@@ -2742,6 +2743,7 @@ export const events = [
   TELEMETRY_INDEX_STATS_EVENT,
   TELEMETRY_INDEX_TEMPLATES_EVENT,
   TELEMETRY_NODE_INGEST_PIPELINES_STATS_EVENT,
+  ...ENTITY_ANALYTICS_EVENTS,
   ...SIEM_MIGRATIONS_EVENTS,
   GAP_DETECTED_EVENT,
   ...TRIAL_COMPANION_EVENTS,

@@ -31,13 +31,13 @@ const isSameTagSet = (requested: readonly string[], current: readonly string[]):
 };
 
 /**
- * Handler for replacing an alert's tags. A request that would leave the same
- * set in place is rejected rather than recorded.
+ * Handler for replacing an alert's tags. `null` clears them. A request that
+ * would leave the same set in place is rejected rather than recorded.
  */
 export const tagHandler: ActionHandler<TagAlertActionBody> = {
   requiresActionState: true,
   prepare: ({ action, alertEvent, alertActionDoc, alertActionState }) => {
-    if (isSameTagSet(action.tags, alertActionState.tags)) {
+    if (isSameTagSet(action.tags ?? [], alertActionState.tags)) {
       throw noOpConflict({
         code: ALERTING_ERROR_CODES.ALERT_ACTION_NO_OP,
         message: getTagsUnchangedMessage(alertEvent.episode_id),

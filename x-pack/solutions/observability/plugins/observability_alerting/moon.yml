@@ -31,6 +31,9 @@ dependsOn:
   - '@kbn/observability-plugin'
   - '@kbn/observability-shared-plugin'
   - '@kbn/alerting-v2-episodes-ui'
+  - '@kbn/cases-plugin'
+  - '@kbn/security-plugin'
+  - '@kbn/kibana-utils-plugin'
 tags:
   - plugin
   - prod
@@ -43,6 +46,4 @@ fileGroups:
     - public/**/*.tsx
     - test/scout*/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

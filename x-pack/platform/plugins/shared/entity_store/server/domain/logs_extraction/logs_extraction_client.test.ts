@@ -2650,8 +2650,11 @@ describe('LogsExtractionClient extraction metrics', () => {
 
 describe('LogsExtractionClient sampling wiring', () => {
   // Window: lookbackPeriod 10m → 11:50, delay 1m → effectiveWindowEnd 11:59. Kept inside one
-  // 15m sub-window because non-priority ignores the global maxTimeWindowSize override
-  // (NON_PRIORITY_EXCLUSIVE_FIELDS) and falls back to the 15m default.
+  // 15m sub-window by explicitly setting maxTimeWindowSize/maxLogsPerWindow to the real mode
+  // defaults in createSamplingContext below - non-priority now inherits these fields from global
+  // state like any other shared field (only maxLogsPerWindowCapBehavior stays exclusive), so the
+  // fixture's own 999d/0 "disabled" sentinel defaults (createMockGlobalStateClient) would
+  // otherwise reach it here and break every window/cap-dependent assertion in this block.
 
   const extractionRow: ESQLSearchResponse = {
     columns: extractionColumns,
@@ -2693,6 +2696,8 @@ describe('LogsExtractionClient sampling wiring', () => {
       engineDescriptorClient: mockEngineDescriptorClient as unknown as EngineDescriptorClient,
       globalStateClient: createMockGlobalStateClient({
         lookbackPeriod,
+        maxTimeWindowSize: '15m',
+        maxLogsPerWindow: 100_000,
       }) as unknown as EntityStoreGlobalStateClient,
       extractionMode: mode,
     });

@@ -10,7 +10,9 @@ import type { InvestigationTriggerType } from './workflows/triggers';
 
 export type { Severity } from '@kbn/significant-events-schema';
 
-export { MAX_RULE_NAMES } from './automation_limits';
+export { MAX_RULE_NAMES, MAX_AUTOMATION_INSTRUCTIONS_LENGTH } from './automation_limits';
+export { parsePresetSchedule, presetScheduleSchema } from './automation_schedule';
+export type { PresetSchedule } from './automation_schedule';
 
 export {
   INVESTIGATION_SUBJECT_TYPES,
@@ -60,6 +62,8 @@ export interface StartInvestigationRequest {
   /** What initiated the investigation. */
   trigger_type: InvestigationTriggerType;
   message?: string;
+  /** Optional upper bound for this investigation workflow run, in seconds. */
+  timeout_seconds?: number;
   /**
    * Nightshift source ids the investigation should scope its queries to. The
    * investigation workflow resolves them to slug and ES|QL view.
@@ -79,6 +83,8 @@ export interface SlackThreadReference {
   workspace: string;
   channel: string;
   thread_ts: string;
+  /** The Relay's key for the thread, when the event or post came through the Relay. */
+  external_conversation_id?: string;
 }
 
 /**
@@ -96,6 +102,18 @@ export const toSlackThreadKey = ({
   threadTs: string;
 }): string => ['slack', workspace, channel, threadTs].map(encodeURIComponent).join(':');
 
+/**
+ * The thread's subject id: the Relay's key when given, otherwise the same key built from the
+ * thread's ids.
+ */
+export const toSlackThreadSubjectId = ({
+  workspace,
+  channel,
+  thread_ts: threadTs,
+  external_conversation_id: externalConversationId,
+}: SlackThreadReference): string =>
+  externalConversationId || toSlackThreadKey({ workspace, channel, threadTs });
+
 export interface StartInvestigationResponse {
   /**
    * The investigation, which is an Agent Builder conversation with this id. A start whose
@@ -107,6 +125,9 @@ export interface StartInvestigationResponse {
 }
 
 export const NIGHTSHIFT_INVESTIGATION_AGENT_ID = 'nightshift.investigation';
+
+/** Answers one telemetry question from the sandbox without running an investigation. */
+export const NIGHTSHIFT_ASSISTANT_AGENT_ID = 'nightshift.assistant';
 
 /** Bound for investigation ids, concurrency keys, and other keyword-sized strings. */
 export const MAX_KEYWORD_LENGTH = 500;

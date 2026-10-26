@@ -140,7 +140,6 @@
     "@kbn/palettes",
     "@kbn/field-formats-plugin",
     "@kbn/datemath",
-    "@kbn/data-usage-plugin",
     "@kbn/response-ops-rule-params",
     "@kbn/serverless-common-settings",
     "@kbn/core-saved-objects-import-export-server-internal",

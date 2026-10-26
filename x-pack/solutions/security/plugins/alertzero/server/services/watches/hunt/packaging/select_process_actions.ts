@@ -158,6 +158,16 @@ export const isStale = (selector: ProcessSelector, state: CurrentRunState): bool
 };
 
 /**
+ * Why a capability is not relied on. An endpoint that reports no such capability and one whose
+ * metadata could not be read both lead to the conservative action, but the reader needs to know
+ * which one it was.
+ */
+const missingCapabilityClause = (host: CurrentRunHost, capability: string): string =>
+  host.capabilitiesSource === 'unavailable'
+    ? `the endpoint's capabilities could not be read (${capability} is not assumed)`
+    : `the endpoint does not report ${capability}`;
+
+/**
  * One primary response per process. Evaluated in order, first match wins; pure, no I/O.
  */
 export const selectProcessActions = ({
@@ -190,7 +200,12 @@ export const selectProcessActions = ({
       }`,
       heldBack: canDump
         ? `Kill and suspend were not proposed for ${process} on ${host.name}: it is a protected system process, so only a memory dump is proposed`
-        : `No action was proposed for ${process} on ${host.name}: it is a protected system process and the endpoint does not report ${MEMDUMP_PROCESS_CAPABILITY}`,
+        : `No action was proposed for ${process} on ${
+            host.name
+          }: it is a protected system process and ${missingCapabilityClause(
+            host,
+            MEMDUMP_PROCESS_CAPABILITY
+          )}`,
     };
   }
 
@@ -222,7 +237,10 @@ export const selectProcessActions = ({
   return {
     rule: 'suspend_only',
     actions: ['suspend'],
-    why: `Rule: default response; the endpoint does not report ${MEMDUMP_PROCESS_CAPABILITY}, so suspend is the only process action proposed`,
+    why: `Rule: default response; ${missingCapabilityClause(
+      host,
+      MEMDUMP_PROCESS_CAPABILITY
+    )}, so suspend is the only process action proposed`,
   };
 };
 
@@ -306,6 +324,6 @@ export const selectHostActions = (args: {
     } was not proposed: it was warranted (${decision.why.replace(
       /^Rule: /,
       ''
-    )}) but the endpoint does not report ${ISOLATION_CAPABILITY}`,
+    )}) but ${missingCapabilityClause(args.host, ISOLATION_CAPABILITY)}`,
   };
 };

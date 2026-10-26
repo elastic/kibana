@@ -1,0 +1,23 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { CoreRequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
+import type { ProfilingDataAccessPluginStart } from '@kbn/profiling-data-access-plugin/server';
+import type { ProfilingSchemasAvailability } from '@kbn/profiling-utils';
+import type { InfraProfilingSchemasRequestParams } from '../../../../common/http_api/profiling_api';
+import { getProfilingQuery } from './get_profiling_query';
+
+export async function fetchProfilingSchemas(
+  { kuery, from, to }: InfraProfilingSchemasRequestParams,
+  profilingDataAccess: ProfilingDataAccessPluginStart,
+  coreRequestContext: CoreRequestHandlerContext
+): Promise<ProfilingSchemasAvailability> {
+  return await profilingDataAccess.services.getAvailableSchemas({
+    esClient: coreRequestContext.elasticsearch.client.asCurrentUser,
+    query: getProfilingQuery({ kuery, from, to }),
+  });
+}

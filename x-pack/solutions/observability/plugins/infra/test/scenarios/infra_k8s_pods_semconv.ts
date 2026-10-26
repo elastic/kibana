@@ -12,7 +12,9 @@ import type { Scenario } from '@kbn/synthtrace';
 import { getBooleanOpt, getNumberOpt, withClient } from '@kbn/synthtrace';
 
 /**
- * Generates OpenTelemetry (kubeletstats) Kubernetes pod metrics.
+ * Generates OpenTelemetry (kubeletstats) Kubernetes pod metrics, plus a hostmetrics document per
+ * node. The Metric Detail metadata strip resolves a pod through `k8s.node.name` and then looks the
+ * node up as a host, so without the node documents that strip stays empty.
  */
 const scenario: Scenario<InfraDocument> = async ({ logger, scenarioOpts }) => {
   const numPods = getNumberOpt(scenarioOpts, 'numPods', 5);
@@ -32,28 +34,46 @@ const scenario: Scenario<InfraDocument> = async ({ logger, scenarioOpts }) => {
         };
       });
 
-      const metrics = range
+      const nodeList = times(numNodes).map((index) => infra.semconvHost(`semconv-host-${index}`));
+
+      // Stagger by 1 ms per doc — TSDB derives _id from dimensions that exclude `direction` /
+      // `interface`, so identical @timestamp + metricset = duplicate _id.
+      const nodeMetrics = range
         .interval('30s')
         .rate(1)
         .generator((timestamp) =>
-          podList.flatMap((pod) => {
-            // Stagger by 1 ms per doc — TSDB derives _id from dimensions that exclude
-            // `direction` / `interface`, so identical @timestamp + metricset = duplicate _id.
-            const docs = pod.omitLimits
-              ? [
-                  ...pod.entity.cpuWithoutLimit(),
-                  ...pod.entity.memoryWithoutLimit(),
-                  ...pod.entity.network({ interfaces: pod.interfaces }),
-                ]
-              : pod.entity.metrics({ interfaces: pod.interfaces });
-            return docs.map((doc, i) => doc.timestamp(timestamp + i));
-          })
+          nodeList
+            .flatMap((node) => [...node.cpu(), ...node.memory()])
+            .map((doc, i) => doc.timestamp(timestamp + i))
         );
 
-      return withClient(
-        infraEsClient,
-        logger.perf('generating_semconv_pods', () => metrics)
-      );
+      const podMetrics = range
+        .interval('30s')
+        .rate(1)
+        .generator((timestamp) =>
+          podList
+            .flatMap((pod) =>
+              pod.omitLimits
+                ? [
+                    ...pod.entity.cpuWithoutLimit(),
+                    ...pod.entity.memoryWithoutLimit(),
+                    ...pod.entity.network({ interfaces: pod.interfaces }),
+                  ]
+                : pod.entity.metrics({ interfaces: pod.interfaces })
+            )
+            .map((doc, i) => doc.timestamp(timestamp + i))
+        );
+
+      return [
+        withClient(
+          infraEsClient,
+          logger.perf('generating_semconv_pod_nodes', () => nodeMetrics)
+        ),
+        withClient(
+          infraEsClient,
+          logger.perf('generating_semconv_pods', () => podMetrics)
+        ),
+      ];
     },
   };
 };

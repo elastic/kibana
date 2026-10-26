@@ -33,7 +33,11 @@ describe('buildRiskMoversCountQuery', () => {
 
   it('uses LAST(risk_score, @timestamp) not MAX to get the actual snapshot at the boundary', () => {
     const query = buildRiskMoversCountQuery('default', '.entities-v1');
-    expect(query).toContain('STATS boundary_score = LAST(risk_score, @timestamp) BY entity_euid');
+    // The last value of each score type, then the group's if there is one, else the entity's own.
+    expect(query).toContain(
+      'STATS last_value = LAST(risk_score, @timestamp) BY entity_euid, is_group'
+    );
+    expect(query).toContain('EVAL boundary_score = COALESCE(group_value, own_value)');
     expect(query).not.toMatch(/MAX\(risk_score/);
   });
 
@@ -48,13 +52,19 @@ describe('buildRiskMoversCountQuery', () => {
     expect(query).not.toContain('LOOKUP JOIN');
   });
 
-  it('reads the current score from the scored entity docs', () => {
+  it('reads the current score from the group when there is one, else from the entity, on main entities only', () => {
     const query = buildRiskMoversCountQuery('default', '.entities-v1');
     expect(query).toContain('  FROM .entities-v1');
     expect(query).toContain(
-      `  | WHERE entity.risk.calculated_score_norm >= ${RISK_MOVER_MIN_SCORE_CHANGE} AND entity.name IS NOT NULL`
+      '  | WHERE `entity.relationships.resolution.resolved_to` IS NULL AND entity.name IS NOT NULL'
     );
-    expect(query).toContain('current_score = entity.risk.calculated_score_norm');
+    // Only an entity whose group score (else own score) is at least the minimum rise can qualify.
+    expect(query).toContain(
+      `    AND COALESCE(\`entity.relationships.resolution.risk.calculated_score_norm\`, entity.risk.calculated_score_norm) >= ${RISK_MOVER_MIN_SCORE_CHANGE}`
+    );
+    expect(query).toContain(
+      'current_score = COALESCE(`entity.relationships.resolution.risk.calculated_score_norm`, entity.risk.calculated_score_norm)'
+    );
   });
 
   it('derives entity_euid from all three entity types via COALESCE', () => {

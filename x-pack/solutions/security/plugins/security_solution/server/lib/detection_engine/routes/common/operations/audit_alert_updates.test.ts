@@ -228,16 +228,16 @@ describe('auditAlertUpdates', () => {
     );
   });
 
-  it('logs validation failures before an update helper runs', () => {
+  it('logs a precondition failure before an update helper runs', () => {
     const auditLogger = auditLoggerMock.create();
 
-    auditAlertUpdatePreOperationFailure(auditLogger, 'Invalid alert update request');
+    auditAlertUpdatePreOperationFailure(auditLogger, 'Alert update target unavailable');
 
     expect(auditLogger.log).toHaveBeenCalledTimes(1);
     expect(auditLogger.log).toHaveBeenCalledWith(
       expect.objectContaining({
         event: expect.objectContaining({ action: 'alert_update', outcome: 'failure' }),
-        error: expect.objectContaining({ message: 'Invalid alert update request' }),
+        error: expect.objectContaining({ message: 'Alert update target unavailable' }),
       })
     );
   });

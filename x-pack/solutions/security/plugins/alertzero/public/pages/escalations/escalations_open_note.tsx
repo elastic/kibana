@@ -14,8 +14,8 @@ import { ALERTZERO_APP_ID } from '@kbn/alertzero-common';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ESCALATIONS_OPEN_NOTE } from './translations';
 
-/** Centered explainer with the small Alert Zero icon, shown in the Open section. */
-export const EscalationsOpenNote: React.FC<{ isEmpty: boolean }> = ({ isEmpty }) => {
+/** Centered explainer with the small Alert Zero icon, shown in the Open section only when it is empty. */
+export const EscalationsOpenNote: React.FC = () => {
   const { euiTheme } = useEuiTheme();
   const {
     services: { application },
@@ -37,9 +37,7 @@ export const EscalationsOpenNote: React.FC<{ isEmpty: boolean }> = ({ isEmpty })
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiText size="s" textAlign="center">
-          <strong>
-            {isEmpty ? ESCALATIONS_OPEN_NOTE.emptyTitle : ESCALATIONS_OPEN_NOTE.title}
-          </strong>
+          <strong>{ESCALATIONS_OPEN_NOTE.emptyTitle}</strong>
         </EuiText>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>

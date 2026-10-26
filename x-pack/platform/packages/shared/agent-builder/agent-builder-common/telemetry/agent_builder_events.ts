@@ -121,6 +121,9 @@ export interface ReportRoundCompleteParams {
   origin?: TelemetryConversationOrigin;
   input_tokens: number;
   cached_input_tokens?: number;
+  reasoning_tokens?: number;
+  models?: string[];
+  models_count?: number;
   llm_calls: number;
   message_length: number;
   model?: string;
@@ -160,6 +163,9 @@ export interface ReportExecutionCompleteParams {
   outcome: 'responded' | 'prompt_requested';
   input_tokens: number;
   cached_input_tokens?: number;
+  reasoning_tokens?: number;
+  models?: string[];
+  models_count?: number;
   llm_calls: number;
   output_tokens: number;
   model?: string;
@@ -1081,6 +1087,34 @@ const ROUND_COMPLETE_EVENT: AgentBuilderTelemetryEvent = {
         optional: true,
       },
     },
+    reasoning_tokens: {
+      type: 'integer',
+      _meta: {
+        description:
+          'Number of reasoning (thinking) tokens during this round (subset of output_tokens), when reported by the provider',
+        optional: true,
+      },
+    },
+    models: {
+      type: 'array',
+      items: {
+        type: 'keyword',
+        _meta: { description: 'Model identifier used during this round' },
+      },
+      _meta: {
+        description:
+          'Distinct models that served the LLM calls of this round, when the per-model breakdown is available',
+        optional: true,
+      },
+    },
+    models_count: {
+      type: 'integer',
+      _meta: {
+        description:
+          'Number of distinct models in `models` (not the number of connectors: connectors serving the same model count once)',
+        optional: true,
+      },
+    },
     llm_calls: {
       type: 'integer',
       _meta: {
@@ -1267,6 +1301,34 @@ const EXECUTION_COMPLETE_EVENT: AgentBuilderTelemetryEvent = {
       type: 'integer',
       _meta: {
         description: 'Input tokens served from cache in this execution, a subset of input_tokens',
+        optional: true,
+      },
+    },
+    reasoning_tokens: {
+      type: 'integer',
+      _meta: {
+        description:
+          'Reasoning (thinking) tokens in this execution, a subset of output_tokens, when reported by the provider',
+        optional: true,
+      },
+    },
+    models: {
+      type: 'array',
+      items: {
+        type: 'keyword',
+        _meta: { description: 'Model identifier used during this execution' },
+      },
+      _meta: {
+        description:
+          'Distinct models that served the LLM calls of this execution, when the per-model breakdown is available',
+        optional: true,
+      },
+    },
+    models_count: {
+      type: 'integer',
+      _meta: {
+        description:
+          'Number of distinct models in `models` (not the number of connectors: connectors serving the same model count once)',
         optional: true,
       },
     },
