@@ -29,7 +29,7 @@ export const ipLocationCommand = {
   metadata: {
     docPreserving: true,
     preview: true,
-    description: i18n.translate('kbn-esql-language.esql.definitions.ipLocationDoc', {
+    description: i18n.translate('esqlLanguage.esql.definitions.ipLocationDoc', {
       defaultMessage:
         'Enriches rows with geographic information based on an IP address using a MaxMind or IPinfo database',
     }),

@@ -47,7 +47,12 @@ describe('createLiveQueryRoute', () => {
       string,
       { id?: string; query?: string; queries?: Array<{ query: string }> }
     > = {},
-    capabilities: { writeLiveQueries?: boolean; runSavedQueries?: boolean } = {}
+    capabilities: {
+      writeLiveQueries?: boolean;
+      runSavedQueries?: boolean;
+      readPacks?: boolean;
+      readSavedQueries?: boolean;
+    } = {}
   ): CoreStart => {
     const get = jest.fn(async (type: string, id: string) => {
       const found = savedObjects[id];
@@ -88,6 +93,8 @@ describe('createLiveQueryRoute', () => {
           osquery: {
             writeLiveQueries: capabilities.writeLiveQueries ?? false,
             runSavedQueries: capabilities.runSavedQueries ?? true,
+            readPacks: capabilities.readPacks ?? true,
+            readSavedQueries: capabilities.readSavedQueries ?? true,
           },
         }),
       },
@@ -514,5 +521,124 @@ describe('createLiveQueryRoute', () => {
 
     expect(response.forbidden).toHaveBeenCalled();
     expect(mockedCreateActionHandler).not.toHaveBeenCalled();
+  });
+
+  describe('read access to the referenced object', () => {
+    const PACK_ID = 'admin-pack';
+    const GUIDE_ALERT = {
+      _index: '.alerts-security.alerts-default',
+      'kibana.alert.rule.note': '!{osquery{"query":"select 1;","ecs_mapping":{}}}',
+    };
+
+    it('returns 403 without reading the pack when runSavedQueries lacks readPacks', async () => {
+      const coreStart = createMockCoreStart(
+        { [PACK_ID]: { queries: [{ query: 'select * from shadow;' }] } },
+        { runSavedQueries: true, readPacks: false }
+      );
+
+      const response = await invokeRoute(
+        { pack_id: PACK_ID, agent_ids: ['agent-1'] },
+        { coreStart }
+      );
+
+      expect(response.forbidden).toHaveBeenCalled();
+      expect(mockedCreateActionHandler).not.toHaveBeenCalled();
+      expect(coreStart.savedObjects.getScopedClient).not.toHaveBeenCalled();
+    });
+
+    it('returns 403 when writeLiveQueries lacks readPacks', async () => {
+      const coreStart = createMockCoreStart(
+        { [PACK_ID]: { queries: [{ query: 'select * from shadow;' }] } },
+        { writeLiveQueries: true, runSavedQueries: false, readPacks: false }
+      );
+
+      const response = await invokeRoute(
+        { pack_id: PACK_ID, agent_ids: ['agent-1'] },
+        { coreStart }
+      );
+
+      expect(response.forbidden).toHaveBeenCalled();
+      expect(mockedCreateActionHandler).not.toHaveBeenCalled();
+    });
+
+    it('returns 403 when runSavedQueries lacks readSavedQueries', async () => {
+      const coreStart = createMockCoreStart(
+        { [SAVED_QUERY_ID]: { query: STORED_QUERY } },
+        { runSavedQueries: true, readSavedQueries: false }
+      );
+
+      const response = await invokeRoute(
+        { saved_query_id: SAVED_QUERY_ID, query: STORED_QUERY, agent_ids: ['agent-1'] },
+        { coreStart }
+      );
+
+      expect(response.forbidden).toHaveBeenCalled();
+      expect(mockedCreateActionHandler).not.toHaveBeenCalled();
+    });
+
+    it('does not recover a denied pack_id through a matching investigation guide query', async () => {
+      const coreStart = createMockCoreStart(
+        { [PACK_ID]: { queries: [{ query: 'select * from shadow;' }] } },
+        { runSavedQueries: true, readPacks: false }
+      );
+      const racGet = jest.fn().mockResolvedValue(GUIDE_ALERT);
+
+      const response = await invokeRoute(
+        {
+          pack_id: PACK_ID,
+          query: 'select 1;',
+          alert_ids: ['alert-with-guide'],
+          agent_ids: ['agent-1'],
+        },
+        { coreStart, racGet }
+      );
+
+      expect(response.forbidden).toHaveBeenCalled();
+      expect(mockedCreateActionHandler).not.toHaveBeenCalled();
+    });
+
+    it('does not recover a denied saved_query_id through a matching investigation guide query', async () => {
+      // The stored SQL differs from the guide's, so authorization denies the reference; the guide
+      // match must not then dispatch under that saved_query_id.
+      const coreStart = createMockCoreStart(
+        { [SAVED_QUERY_ID]: { query: 'select 2;' } },
+        { runSavedQueries: true }
+      );
+      const racGet = jest.fn().mockResolvedValue(GUIDE_ALERT);
+
+      const response = await invokeRoute(
+        {
+          saved_query_id: SAVED_QUERY_ID,
+          query: 'select 1;',
+          alert_ids: ['alert-with-guide'],
+          agent_ids: ['agent-1'],
+        },
+        { coreStart, racGet }
+      );
+
+      expect(response.forbidden).toHaveBeenCalled();
+      expect(mockedCreateActionHandler).not.toHaveBeenCalled();
+    });
+
+    it('still recovers an investigation guide query without any reference or read access', async () => {
+      const coreStart = createMockCoreStart(
+        {},
+        { runSavedQueries: true, readPacks: false, readSavedQueries: false }
+      );
+      const racGet = jest.fn().mockResolvedValue(GUIDE_ALERT);
+
+      await invokeRoute(
+        { query: 'select 1;', alert_ids: ['alert-with-guide'], agent_ids: ['agent-1'] },
+        { coreStart, racGet }
+      );
+
+      expect(mockedCreateActionHandler).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.anything(),
+        expect.objectContaining({
+          dispatch: expect.objectContaining({ source: { kind: 'investigation_guide' } }),
+        })
+      );
+    });
   });
 });
