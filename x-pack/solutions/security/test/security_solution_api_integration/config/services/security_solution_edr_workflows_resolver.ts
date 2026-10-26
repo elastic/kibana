@@ -51,6 +51,7 @@ interface BulkCreateHeader {
 
 export function ResolverGeneratorProvider({ getService }: FtrProviderContext) {
   const client = getService('es');
+  const endpointDataStreamHelpers = getService('endpointDataStreamHelpers');
 
   return {
     async insertEvents(
@@ -120,21 +121,8 @@ export function ResolverGeneratorProvider({ getService }: FtrProviderContext) {
     },
     async deleteData(genData: { indices: string[] }) {
       for (const index of genData.indices) {
-        /**
-         * The ingest manager handles creating the template for the endpoint's indices. It is using a V2 template
-         * with data streams. Data streams aren't included in the javascript elasticsearch client in kibana yet so we
-         * need to do raw requests here. Delete a data stream is slightly different than that of a regular index which
-         * is why we're using _data_stream here.
-         */
-        await client.transport.request(
-          {
-            method: 'DELETE',
-            path: `_data_stream/${index}`,
-          },
-          {
-            ignore: [404],
-          }
-        );
+        // Keep these Fleet-owned data streams: re-creating a dropped one leaves the serverless search tier behind.
+        await endpointDataStreamHelpers.deleteAllDocsFromIndex(getService, index);
       }
     },
   };
