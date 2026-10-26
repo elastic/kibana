@@ -26,7 +26,11 @@ export const loadDataViewListOnce: InternalStateThunkActionCreator<[], Promise<v
     let request = initialDataViewListRequests.get(runtimeStateManager);
 
     if (!request) {
-      request = dispatch(loadDataViewList()).then(() => undefined);
+      request = dispatch(loadDataViewList()).then((action) => {
+        if (loadDataViewList.rejected.match(action)) {
+          initialDataViewListRequests.delete(runtimeStateManager);
+        }
+      });
       initialDataViewListRequests.set(runtimeStateManager, request);
     }
 
