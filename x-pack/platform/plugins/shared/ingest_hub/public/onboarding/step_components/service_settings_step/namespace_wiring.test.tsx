@@ -74,6 +74,7 @@ describe('ServiceSettingsFlyout namespace', () => {
           service={AGENTLESS}
           config={CONFIG}
           globalRegion="us-east-1"
+          isDuplicate
           onApply={onApply}
           onClose={jest.fn()}
           {...props}
@@ -83,22 +84,35 @@ describe('ServiceSettingsFlyout namespace', () => {
     return { onApply };
   }
 
-  it('saves the edited namespace', () => {
+  it('saves the namespace a duplicate edited', () => {
     const { onApply } = renderFlyout();
     typeNamespace('staging');
     fireEvent.click(screen.getByTestId('serviceSettingsFlyout-saveButton'));
     expect(onApply).toHaveBeenCalledWith(expect.anything(), expect.anything(), 'staging');
   });
 
-  it('disables Save while the namespace is invalid', () => {
+  it('starts a duplicate without a namespace of its own from the global one', () => {
+    renderFlyout({ config: { ...CONFIG, namespace: undefined }, globalNamespace: 'global' });
+    expect(screen.getByTestId('serviceSettings-namespaceField')).toHaveValue('global');
+  });
+
+  it('disables Save while the duplicate namespace is invalid', () => {
     renderFlyout();
     typeNamespace('Staging');
     expect(screen.getByTestId('serviceSettingsFlyout-saveButton')).toBeDisabled();
   });
 
-  it('shows the namespace read-only once the instance is deployed', () => {
-    renderFlyout({ isNamespaceLocked: true });
-    expect(screen.getByTestId('serviceSettings-namespaceField-locked')).toHaveValue('prod');
+  it('keeps the namespace editable once the duplicate is deployed, with a note', () => {
+    renderFlyout({ isDeployed: true });
+    expect(screen.getByTestId('serviceSettings-namespaceField')).toBeEnabled();
+    expect(screen.getByTestId('serviceSettings-namespaceField-note')).toBeInTheDocument();
+  });
+
+  it('has no namespace field for an original, which takes the global namespace', () => {
+    const { onApply } = renderFlyout({ isDuplicate: false });
+    expect(screen.queryByTestId('serviceSettings-namespaceField')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('serviceSettingsFlyout-saveButton'));
+    expect(onApply).toHaveBeenCalledWith(expect.anything(), expect.anything(), undefined);
   });
 
   it('hides the namespace for ECF-only services', () => {
@@ -108,7 +122,7 @@ describe('ServiceSettingsFlyout namespace', () => {
 });
 
 describe('DuplicateServiceModal namespace', () => {
-  function renderModal() {
+  function renderModal(props: Partial<React.ComponentProps<typeof DuplicateServiceModal>> = {}) {
     const onAdd = jest.fn();
     render(
       <I18nProvider>
@@ -118,17 +132,19 @@ describe('DuplicateServiceModal namespace', () => {
           suggestedName="Service [Duplicate]"
           existingNames={['Service']}
           globalRegion="us-east-1"
+          globalNamespace="global"
           onAdd={onAdd}
           onCancel={jest.fn()}
+          {...props}
         />
       </I18nProvider>
     );
     return { onAdd };
   }
 
-  it('starts from the source namespace', () => {
+  it('starts from the global namespace, not the source one', () => {
     renderModal();
-    expect(screen.getByTestId('serviceSettings-namespaceField')).toHaveValue('prod');
+    expect(screen.getByTestId('serviceSettings-namespaceField')).toHaveValue('global');
   });
 
   it('adds the duplicate with the namespace the user entered', () => {
@@ -140,6 +156,17 @@ describe('DuplicateServiceModal namespace', () => {
       expect.anything(),
       expect.anything(),
       'staging'
+    );
+  });
+
+  it('adds the duplicate with the global namespace when it was not changed', () => {
+    const { onAdd } = renderModal();
+    fireEvent.click(screen.getByTestId('duplicateServiceModal-addButton'));
+    expect(onAdd).toHaveBeenCalledWith(
+      'Service [Duplicate]',
+      expect.anything(),
+      expect.anything(),
+      'global'
     );
   });
 

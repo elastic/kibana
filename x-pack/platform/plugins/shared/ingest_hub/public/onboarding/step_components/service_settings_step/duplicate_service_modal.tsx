@@ -45,6 +45,8 @@ interface DuplicateServiceModalProps {
   /** All existing instance names — used for collision detection. */
   existingNames: string[];
   globalRegion: string;
+  /** The namespace the duplicate starts with. */
+  globalNamespace?: string;
   onAdd: (
     name: string,
     varsByDataStream: Record<string, ServiceDataStreamVars>,
@@ -60,6 +62,7 @@ export function DuplicateServiceModal({
   suggestedName,
   existingNames,
   globalRegion,
+  globalNamespace = '',
   onAdd,
   onCancel,
 }: DuplicateServiceModalProps) {
@@ -69,7 +72,7 @@ export function DuplicateServiceModal({
   const [draftByDs, setDraftByDs] = useState<Record<string, ServiceDataStreamVars>>(() => ({
     ...sourceConfig.varsByDataStream,
   }));
-  const [namespace, setNamespace] = useState(sourceConfig.namespace ?? '');
+  const [namespace, setNamespace] = useState(globalNamespace);
   const showNamespace = supportsNamespace(service);
   const isNamespaceInvalid = showNamespace && !!getNamespaceError(namespace);
 

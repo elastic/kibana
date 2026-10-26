@@ -34,6 +34,7 @@ import {
   getBareNamePackage,
   isMainPackageName,
 } from '../authenticate_and_deploy_step/deploy_group_helpers';
+import { getNamespaceError } from './instance_namespace_field';
 import {
   getDescriptionError,
   getIntegrationNameError,
@@ -57,7 +58,10 @@ export interface ServiceVars {
    * Per-data-stream var values. Keys are data stream ids (e.g. 'vpcflow', 'ec2_logs').
    */
   varsByDataStream: Record<string, ServiceDataStreamVars>;
-  /** Data stream namespace for this instance's policy. Empty or absent inherits the agent policy's. */
+  /**
+   * Data stream namespace of a duplicate's policy. Originals have none and take the global
+   * namespace; a duplicate with none takes it too.
+   */
   namespace?: string;
 }
 
@@ -87,6 +91,11 @@ export interface ServiceSettingsPersistedState {
   /** The last name the prefill generated. While the name still equals it, it follows the selection. */
   autoName?: string;
   description?: string;
+  /**
+   * Global data stream namespace. Every original instance deploys into it; a duplicate may pick
+   * its own (`ServiceVars.namespace`). Empty or absent inherits the agent policy's.
+   */
+  namespace?: string;
   /** Keyed by instanceId. */
   serviceVars: Record<string, ServiceVars>;
   /** Absent in old sessions — reconciled on read from selectedServiceIds. */
@@ -259,6 +268,18 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
     [persisted, setPersisted]
   );
 
+  const namespace = persisted?.namespace ?? '';
+
+  const setNamespace = useCallback(
+    (value: string) => {
+      setPersisted({
+        ...(persisted ?? { globalRegion: '', serviceVars: {} }),
+        namespace: value,
+      });
+    },
+    [persisted, setPersisted]
+  );
+
   const integrationName = persisted?.integrationName ?? '';
   const description = persisted?.description ?? '';
 
@@ -421,7 +442,7 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
       instanceId: string,
       newVarsByDataStream: Record<string, ServiceDataStreamVars>,
       enabledDataStreams: string[],
-      namespace?: string
+      instanceNamespace?: string
     ) => {
       const current = getServiceVars(instanceId);
       const merged = mergeVarsByDataStream(current.varsByDataStream, newVarsByDataStream);
@@ -433,7 +454,7 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
           [instanceId]: {
             enabledDataStreams,
             varsByDataStream: merged,
-            namespace: namespace ?? current.namespace,
+            namespace: instanceNamespace ?? current.namespace,
           },
         },
       });
@@ -447,7 +468,7 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
       newName: string,
       newVarsByDataStream: Record<string, ServiceDataStreamVars>,
       enabledDataStreams: string[],
-      namespace?: string
+      instanceNamespace?: string
     ) => {
       const source = instances.find((i) => i.instanceId === sourceInstanceId);
       if (!source) return;
@@ -479,7 +500,7 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
               ? enabledDataStreams
               : sourceVars.enabledDataStreams,
             varsByDataStream: mergedByDs,
-            namespace: namespace ?? sourceVars.namespace,
+            namespace: instanceNamespace ?? sourceVars.namespace,
           },
         },
       });
@@ -530,14 +551,16 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
 
   const integrationNameError = getIntegrationNameError(integrationName);
   const descriptionError = getDescriptionError(description);
+  const namespaceError = getNamespaceError(namespace);
 
   const isReady = useMemo(
     () =>
       !!globalRegion.trim() &&
       incompleteInstances.length === 0 &&
       !integrationNameError &&
-      !descriptionError,
-    [globalRegion, incompleteInstances, integrationNameError, descriptionError]
+      !descriptionError &&
+      !namespaceError,
+    [globalRegion, incompleteInstances, integrationNameError, descriptionError, namespaceError]
   );
 
   const [globalRegionTouched, setGlobalRegionTouched] = useState(false);
@@ -580,6 +603,9 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
     description,
     setDescription,
     descriptionError,
+    namespace,
+    setNamespace,
+    namespaceError,
     bareNamePackage,
     instances,
     filteredInstances,

@@ -15,6 +15,7 @@ import { DATA_STREAM_API_ROUTES, isValidDataStreamIndexPattern } from '@kbn/flee
 import type { ServiceChipState } from '../../onboarding_flow_context';
 import { useOnboardingFlow } from '../../onboarding_flow_context';
 import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
+import { getEffectiveNamespace } from '../../common/effective_namespace';
 import { getServiceIndexPatterns } from '../../common/service_index_patterns';
 import type { HasDataResponse } from '../../../../common/core/detection_api';
 import {
@@ -54,15 +55,15 @@ function batchPatterns(patterns: string[]): string[] {
   return batches;
 }
 
-// The index patterns of one instance, in its own namespace. Instances that cannot use the Fleet
+// The index patterns of one instance, in its effective namespace. Instances that cannot use the Fleet
 // agent data API are detected through these.
 function getInstancePatterns(
   entry: AwsServiceMatrixEntry,
   instanceId: string,
   serviceSettings: ServiceSettingsPersistedState
 ): string[] {
-  const { serviceVars = {} } = serviceSettings;
-  return getServiceIndexPatterns(entry, serviceVars[instanceId]?.namespace);
+  const { serviceVars = {}, namespace } = serviceSettings;
+  return getServiceIndexPatterns(entry, getEffectiveNamespace(instanceId, serviceVars, namespace));
 }
 
 /** The Fleet agent behind a service tile — the worst instance when a service is duplicated. */

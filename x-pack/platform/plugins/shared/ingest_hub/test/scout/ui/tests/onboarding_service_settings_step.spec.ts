@@ -516,13 +516,16 @@ test.describe('Onboarding Service Settings step', { tag: tags.stateful.classic }
     await expect(page.getByText(/AWS ELB.*\[Duplicate\]/)).toBeVisible();
   });
 
-  test('duplicate keeps its own namespace across reloads', async ({ browserAuth, page }) => {
+  test('duplicate starts from the global namespace and keeps its own across reloads', async ({
+    browserAuth,
+    page,
+  }) => {
     await navigateToServiceSettings(browserAuth, page, {
       selectedServiceIds: ['elb'],
+      namespace: 'prod',
       serviceVars: {
         elb: {
           enabledDataStreams: ['elb_logs'],
-          namespace: 'prod',
           varsByDataStream: {
             elb_logs: {
               enabledInputs: ['aws-s3'],
@@ -554,8 +557,29 @@ test.describe('Onboarding Service Settings step', { tag: tags.stateful.classic }
     await expect(flyoutNamespace).toContainText('staging');
     await page.testSubj.locator('serviceSettingsFlyout-closeButton').click();
 
+    // An original takes the global namespace, so its flyout has no namespace field.
     await page.testSubj.locator('serviceSettingsStep-editButton-elb').click();
-    await expect(flyoutNamespace).toContainText('prod');
+    await expect(page.testSubj.locator('serviceSettingsFlyout')).toBeVisible();
+    await expect(flyoutNamespace).toBeHidden();
+  });
+
+  test('global namespace is in the collapsed advanced options of the integration settings', async ({
+    browserAuth,
+    page,
+  }) => {
+    await navigateToServiceSettings(browserAuth, page, {
+      selectedServiceIds: ['elb'],
+      namespace: 'prod',
+    });
+
+    await expect(page.testSubj.locator('sharedSettingsSection')).toBeVisible();
+    await expect(page.testSubj.locator('sharedSettingsNamespace')).toBeHidden();
+
+    await page.testSubj.locator('sharedSettingsAdvancedToggle').click();
+    await expect(page.testSubj.locator('sharedSettingsNamespace')).toContainText('prod');
+
+    await page.testSubj.locator('sharedSettingsAdvancedToggle').click();
+    await expect(page.testSubj.locator('sharedSettingsNamespace')).toBeHidden();
   });
 
   test("duplicate row's config is independent from the original", async ({ browserAuth, page }) => {

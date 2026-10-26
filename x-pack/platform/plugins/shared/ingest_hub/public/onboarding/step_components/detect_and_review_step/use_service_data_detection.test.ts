@@ -116,6 +116,38 @@ describe('useServiceDataDetection', () => {
     );
   });
 
+  it('polls the global namespace for an original, and a duplicate’s own over it', async () => {
+    const { httpGet } = setup({
+      serviceSettings: {
+        globalRegion: 'us-east-1',
+        namespace: 'prod',
+        instances: [
+          { instanceId: 'cloudtrail', serviceId: 'cloudtrail', name: 'CT', isDuplicate: false },
+          {
+            instanceId: 'cloudtrail__dup-1',
+            serviceId: 'cloudtrail',
+            name: 'CT 2',
+            isDuplicate: true,
+          },
+        ],
+        serviceVars: {
+          'cloudtrail__dup-1': {
+            enabledDataStreams: ['cloudtrail'],
+            varsByDataStream: {},
+            namespace: 'staging',
+          },
+        },
+      },
+    });
+    renderHook(() => useServiceDataDetection());
+
+    await mockUseQuery.mock.calls[0][0].queryFn();
+
+    expect(httpGet.mock.calls[0][1].query.dataStreams).toBe(
+      'logs-aws.cloudtrail-prod,logs-aws.cloudtrail-staging'
+    );
+  });
+
   it('polls one pattern per instance namespace when a duplicate uses another one', async () => {
     const { httpGet } = setup({
       serviceSettings: {

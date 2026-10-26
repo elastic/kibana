@@ -79,27 +79,15 @@ describe('InstanceNamespaceField', () => {
     expect(screen.getByTestId('namespaceError')).toHaveTextContent('Namespace must be lowercase');
   });
 
-  it('renders a read-only value once the instance is deployed', () => {
-    renderField({ namespace: 'prod', isLocked: true });
-    expect(screen.getByTestId('serviceSettings-namespaceField-locked')).toBeDisabled();
-    expect(screen.getByTestId('serviceSettings-namespaceField-locked')).toHaveValue('prod');
-  });
-
-  it('shows the namespace an empty value resolves to when it is known', () => {
-    renderField({ namespace: '', isLocked: true, resolvedEmptyNamespace: 'default' });
-    expect(screen.getByTestId('serviceSettings-namespaceField-locked')).toHaveValue('default');
-  });
-
-  it('keeps the explicit namespace over the resolved one', () => {
-    renderField({ namespace: 'prod', isLocked: true, resolvedEmptyNamespace: 'default' });
-    expect(screen.getByTestId('serviceSettings-namespaceField-locked')).toHaveValue('prod');
-  });
-
-  it('says the namespace is inherited when locked with no namespace', () => {
-    renderField({ namespace: '', isLocked: true });
-    expect(screen.getByTestId('serviceSettings-namespaceField-locked')).toHaveAttribute(
-      'placeholder',
-      'Inherited from the agent policy'
+  it('shows the note under the field', () => {
+    renderField({ note: 'Existing data stays in the old namespace.' });
+    expect(screen.getByTestId('serviceSettings-namespaceField-note')).toHaveTextContent(
+      'Existing data stays in the old namespace.'
     );
+  });
+
+  it('shows no note by default', () => {
+    renderField();
+    expect(screen.queryByTestId('serviceSettings-namespaceField-note')).not.toBeInTheDocument();
   });
 });

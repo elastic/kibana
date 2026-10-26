@@ -7,19 +7,25 @@
 
 import React, { useState } from 'react';
 import {
+  EuiButton,
   EuiFieldText,
   EuiFlexGrid,
+  EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
+  EuiHorizontalRule,
+  EuiIcon,
   EuiIconTip,
   EuiPanel,
   EuiSpacer,
   EuiText,
   EuiTitle,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { GlobalRegionField } from './global_region_field';
+import { SharedAdvancedSettings } from './shared_advanced_settings';
 import { MAX_DESCRIPTION_LENGTH, MAX_INTEGRATION_NAME_LENGTH } from './integration_settings';
 
 interface SharedSettingsSectionProps {
@@ -35,6 +41,12 @@ interface SharedSettingsSectionProps {
   globalRegionTouched: boolean;
   onGlobalRegionTouched: () => void;
   isGlobalRegionDisabled?: boolean;
+  namespace: string;
+  onNamespaceChange: (namespace: string) => void;
+  /** Validation error of the namespace; the advanced section stays open while there is one. */
+  namespaceError?: string;
+  /** Whether services are already deployed, which changes what a new namespace means. */
+  hasDeployedServices?: boolean;
 }
 
 /**
@@ -54,27 +66,58 @@ export function SharedSettingsSection({
   globalRegionTouched,
   onGlobalRegionTouched,
   isGlobalRegionDisabled = false,
+  namespace,
+  onNamespaceChange,
+  namespaceError,
+  hasDeployedServices = false,
 }: SharedSettingsSectionProps) {
   // Show errors once the field was edited, so the prefilled form does not open with errors.
   const [nameTouched, setNameTouched] = useState(false);
   const [descriptionTouched, setDescriptionTouched] = useState(false);
+  // Collapsed by default. It cannot be collapsed over an error, which would hide why Next is off.
+  const [advancedToggled, setAdvancedToggled] = useState(false);
+  const isAdvancedOpen = advancedToggled || !!namespaceError;
+  const advancedId = useGeneratedHtmlId({ prefix: 'sharedAdvancedSettings' });
 
   return (
     <EuiPanel hasShadow={false} hasBorder paddingSize="m" data-test-subj="sharedSettingsSection">
-      <EuiTitle size="xs">
-        <h3>
-          {i18n.translate('xpack.ingestHub.integrationSettings.section.title', {
-            defaultMessage: 'Integration settings',
-          })}{' '}
-          <EuiIconTip
-            type="info"
-            color="subdued"
-            content={i18n.translate('xpack.ingestHub.integrationSettings.section.titleTooltip', {
-              defaultMessage: 'Applies to all selected services',
-            })}
-          />
-        </h3>
-      </EuiTitle>
+      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiTitle size="xs">
+            <h3>
+              {i18n.translate('xpack.ingestHub.integrationSettings.section.title', {
+                defaultMessage: 'Integration settings',
+              })}{' '}
+              <EuiIconTip
+                type="info"
+                color="subdued"
+                content={i18n.translate(
+                  'xpack.ingestHub.integrationSettings.section.titleTooltip',
+                  {
+                    defaultMessage: 'Applies to all selected services',
+                  }
+                )}
+              />
+            </h3>
+          </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            size="s"
+            color="text"
+            iconType="gear"
+            onClick={() => setAdvancedToggled((open) => !open)}
+            aria-expanded={isAdvancedOpen}
+            aria-controls={advancedId}
+            data-test-subj="sharedSettingsAdvancedToggle"
+          >
+            {i18n.translate('xpack.ingestHub.integrationSettings.section.advancedOptions', {
+              defaultMessage: 'Advanced options',
+            })}{' '}
+            <EuiIcon type={isAdvancedOpen ? 'arrowDown' : 'arrowRight'} size="s" aria-hidden />
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
       <EuiSpacer size="s" />
       <EuiFlexGrid columns={2} gutterSize="l">
         <EuiFlexItem>
@@ -143,6 +186,18 @@ export function SharedSettingsSection({
           </EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGrid>
+      <div id={advancedId}>
+        {isAdvancedOpen && (
+          <>
+            <EuiHorizontalRule margin="m" />
+            <SharedAdvancedSettings
+              namespace={namespace}
+              onNamespaceChange={onNamespaceChange}
+              hasDeployedServices={hasDeployedServices}
+            />
+          </>
+        )}
+      </div>
     </EuiPanel>
   );
 }

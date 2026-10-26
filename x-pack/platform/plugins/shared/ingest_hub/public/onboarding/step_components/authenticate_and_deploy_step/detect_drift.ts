@@ -8,7 +8,7 @@
 import { isEqual } from 'lodash';
 
 import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
-import type { ServiceVars } from '../service_settings_step/use_service_settings';
+import type { ServiceInstance, ServiceVars } from '../service_settings_step/use_service_settings';
 import { toSOServiceVars } from './package_inputs';
 
 /**
@@ -136,4 +136,20 @@ export function detectAgentPoliciesDrift(
   if (selected.size === 0 && agentHostsMode !== 'existing') return false;
   const deployed = new Set(so.agentPolicyIds ?? []);
   return selected.size !== deployed.size || [...selected].some((id) => !deployed.has(id));
+}
+
+/**
+ * Returns true when the global namespace differs from the one saved with the last deploy and an
+ * original instance is deployed. Originals take the global namespace; a duplicate keeps its own,
+ * which `detectServiceVarsDrift` already compares.
+ */
+export function detectGlobalNamespaceDrift(
+  sessionNamespace: string | undefined,
+  soNamespace: string | undefined,
+  deployedInstanceIds: Iterable<string>,
+  instances: ServiceInstance[] | undefined
+): boolean {
+  if ((sessionNamespace ?? '') === (soNamespace ?? '')) return false;
+  const deployed = new Set(deployedInstanceIds);
+  return (instances ?? []).some((i) => !i.isDuplicate && deployed.has(i.instanceId));
 }

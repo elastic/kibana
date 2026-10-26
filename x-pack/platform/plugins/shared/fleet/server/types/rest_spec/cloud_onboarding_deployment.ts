@@ -148,6 +148,11 @@ const CloudOnboardingDeploymentItemSchema = schema.object({
       meta: { description: 'Integration description from the Service settings step.' },
     })
   ),
+  namespace: schema.maybe(
+    schema.string({
+      meta: { description: 'Global data stream namespace from the Service settings step.' },
+    })
+  ),
   dataFormat: schema.maybe(DataFormatSchema),
   authMethod: schema.maybe(
     schema.oneOf(
@@ -262,6 +267,12 @@ export const CreateCloudOnboardingDeploymentRequestSchema = {
         meta: { description: 'Integration description from the Service settings step.' },
       })
     ),
+    namespace: schema.maybe(
+      schema.string({
+        maxLength: 100,
+        meta: { description: 'Global data stream namespace from the Service settings step.' },
+      })
+    ),
     dataFormat: schema.maybe(DataFormatSchema),
     authMethod: schema.maybe(
       schema.oneOf(
@@ -350,6 +361,17 @@ export const UpdateCloudOnboardingDeploymentRequestSchema = {
           meta: {
             description:
               'Integration description from the Service settings step. Send null to clear it.',
+          },
+        })
+      )
+    ),
+    namespace: schema.maybe(
+      schema.nullable(
+        schema.string({
+          maxLength: 100,
+          meta: {
+            description:
+              'Global data stream namespace from the Service settings step. Send null to clear it.',
           },
         })
       )

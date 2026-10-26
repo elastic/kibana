@@ -101,9 +101,16 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
         serviceSettings?.instances ?? [],
         selectedServiceIds,
         servicesMap ?? new Map(),
-        serviceSettings?.serviceVars ?? {}
+        serviceSettings?.serviceVars ?? {},
+        serviceSettings?.namespace
       ),
-    [serviceSettings?.instances, serviceSettings?.serviceVars, selectedServiceIds, servicesMap]
+    [
+      serviceSettings?.instances,
+      serviceSettings?.serviceVars,
+      serviceSettings?.namespace,
+      selectedServiceIds,
+      servicesMap,
+    ]
   );
 
   // The Existing Identity check renders the stack update without touching the connector; the

@@ -29,10 +29,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { KbnWarningCallout } from '@kbn/ui-callout';
 
 import { useOnboardingFlow } from '../../onboarding_flow_context';
-import {
-  DEFAULT_NAMESPACE,
-  getSourcePolicyName,
-} from '../authenticate_and_deploy_step/deploy_group_helpers';
+import { getSourcePolicyName } from '../authenticate_and_deploy_step/deploy_group_helpers';
+import { supportsNamespace } from './instance_namespace_field';
 import { supportsIntegrationSettings } from './integration_settings';
 import { getRegionFieldName, hasConfigurableFlyoutFields } from './field_config';
 import type { ServiceInstance } from './use_service_settings';
@@ -61,6 +59,9 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
     description,
     setDescription,
     descriptionError,
+    namespace,
+    setNamespace,
+    namespaceError,
     bareNamePackage,
     instances,
     filteredInstances,
@@ -131,9 +132,14 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
     (
       varsByDataStream: Record<string, import('./use_service_settings').ServiceDataStreamVars>,
       enabledDataStreams: string[],
-      namespace: string
+      instanceNamespace?: string
     ) => {
-      setServiceFieldsAndInputs(instanceId, varsByDataStream, enabledDataStreams, namespace);
+      setServiceFieldsAndInputs(
+        instanceId,
+        varsByDataStream,
+        enabledDataStreams,
+        instanceNamespace
+      );
       setActiveFlyoutInstanceId(null);
     };
 
@@ -141,10 +147,16 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
     name: string,
     varsByDataStream: Record<string, import('./use_service_settings').ServiceDataStreamVars>,
     enabledDataStreams: string[],
-    namespace: string
+    duplicateNamespace: string
   ) => {
     if (!duplicateSourceInstanceId) return;
-    addDuplicate(duplicateSourceInstanceId, name, varsByDataStream, enabledDataStreams, namespace);
+    addDuplicate(
+      duplicateSourceInstanceId,
+      name,
+      varsByDataStream,
+      enabledDataStreams,
+      duplicateNamespace
+    );
     setDuplicateSourceInstanceId(null);
   };
 
@@ -171,7 +183,7 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
         })
       );
     }
-    if (integrationNameError || descriptionError) {
+    if (integrationNameError || descriptionError || namespaceError) {
       reasons.push(
         i18n.translate('xpack.ingestHub.serviceSettingsStep.continueTooltip.integrationSettings', {
           defaultMessage: 'Fix the integration settings',
@@ -195,6 +207,7 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
     globalRegion,
     integrationNameError,
     descriptionError,
+    namespaceError,
     incompleteInstances,
   ]);
 
@@ -223,7 +236,11 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
         }),
         render: (inst: ServiceInstance) => {
           const service = awsServicesMap?.get(inst.serviceId);
-          const canConfigure = service ? hasConfigurableFlyoutFields(service) : false;
+          // A duplicate always has its namespace to edit, even where the service has no other field.
+          const canConfigure = service
+            ? hasConfigurableFlyoutFields(service) ||
+              (inst.isDuplicate && supportsNamespace(service))
+            : false;
           return (
             <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
               {canConfigure && (
@@ -440,6 +457,10 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
         globalRegionTouched={globalRegionTouched}
         onGlobalRegionTouched={() => setGlobalRegionTouched(true)}
         isGlobalRegionDisabled={isRegionDisabled}
+        namespace={namespace}
+        onNamespaceChange={setNamespace}
+        namespaceError={namespaceError}
+        hasDeployedServices={isRegionDisabled}
       />
       <EuiSpacer size="m" />
 
@@ -550,13 +571,9 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
           service={activeFlyoutService}
           config={getServiceVars(activeFlyoutInstance.instanceId)}
           globalRegion={globalRegion}
-          isNamespaceLocked={
-            !!detectAndReviewStep.policyIdsByInstance[activeFlyoutInstance.instanceId]
-          }
-          // Managed integrations put an empty namespace on `default`.
-          resolvedEmptyNamespace={
-            deploymentMethod === 'managed_integration' ? DEFAULT_NAMESPACE : undefined
-          }
+          isDuplicate={activeFlyoutInstance.isDuplicate}
+          globalNamespace={namespace}
+          isDeployed={!!detectAndReviewStep.policyIdsByInstance[activeFlyoutInstance.instanceId]}
           onApply={handleFlyoutApply(activeFlyoutInstance.instanceId)}
           onClose={() => setActiveFlyoutInstanceId(null)}
         />
@@ -574,7 +591,7 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
               ? getSourcePolicyName(
                   integrationName,
                   duplicateSourceService.packageName,
-                  getServiceVars(duplicateSourceInstance.instanceId).namespace,
+                  getServiceVars(duplicateSourceInstance.instanceId).namespace || namespace,
                   bareNamePackage
                 )
               : duplicateSourceService.name,
@@ -582,6 +599,7 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
           )}
           existingNames={allInstanceNames}
           globalRegion={globalRegion}
+          globalNamespace={namespace}
           onAdd={handleDuplicateAdd}
           onCancel={() => setDuplicateSourceInstanceId(null)}
         />

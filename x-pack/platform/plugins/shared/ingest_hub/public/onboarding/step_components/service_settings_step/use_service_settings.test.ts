@@ -211,6 +211,36 @@ describe('useServiceSettings — namespace', () => {
     expect(result.current.incompleteInstances).toHaveLength(0);
     expect(result.current.isReady).toBe(true);
   });
+
+  describe('global namespace', () => {
+    it('starts empty and stores the namespace that is set', () => {
+      const { result } = renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
+      expect(result.current.namespace).toBe('');
+      act(() => result.current.setNamespace('prod'));
+      expect(result.current.namespace).toBe('prod');
+      expect(result.current.namespaceError).toBeUndefined();
+    });
+
+    it('is not ready with an invalid global namespace', () => {
+      const { result } = renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
+      act(() => result.current.setGlobalRegion('us-east-1'));
+      act(() => result.current.setIntegrationName('my-aws'));
+      act(() => result.current.setServiceFieldsAndInputs('svc_a', filledVars, ['svc_a']));
+      expect(result.current.isReady).toBe(true);
+
+      act(() => result.current.setNamespace('Prod'));
+
+      expect(result.current.namespaceError).toBeDefined();
+      expect(result.current.isReady).toBe(false);
+    });
+
+    it('does not store a namespace on an original when its settings are saved', () => {
+      const { result } = renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
+      act(() => result.current.setNamespace('prod'));
+      act(() => result.current.setServiceFieldsAndInputs('svc_a', filledVars, ['svc_a']));
+      expect(result.current.getServiceVars('svc_a').namespace).toBeUndefined();
+    });
+  });
 });
 
 // --- signal filter ---
@@ -832,6 +862,7 @@ describe('useServiceSettings — integration name and description', () => {
       expect(mockUpdateDeployment).toHaveBeenCalledWith('dep-1', {
         integrationName: 'my-aws',
         description: 'Production',
+        namespace: null,
       });
       expect(onContinue).toHaveBeenCalled();
     });

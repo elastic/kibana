@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { detectServiceVarsDrift, detectAuthDrift } from './detect_drift';
+import {
+  detectServiceVarsDrift,
+  detectGlobalNamespaceDrift,
+  detectAuthDrift,
+} from './detect_drift';
 
 const emptyServicesMap = new Map();
 
@@ -137,5 +141,37 @@ describe('detectAuthDrift', () => {
 
   it('returns true when SO has connector but session does not', () => {
     expect(detectAuthDrift({}, { connectorId: 'conn-a' })).toBe(true);
+  });
+});
+
+describe('detectGlobalNamespaceDrift', () => {
+  const original = { instanceId: 'elb', serviceId: 'elb', name: 'ELB', isDuplicate: false };
+  const duplicate = {
+    instanceId: 'elb__dup-1',
+    serviceId: 'elb',
+    name: 'ELB [Duplicate]',
+    isDuplicate: true,
+  };
+
+  it('is clean when the namespace is unchanged', () => {
+    expect(detectGlobalNamespaceDrift('prod', 'prod', ['elb'], [original])).toBe(false);
+  });
+
+  it('treats an absent and an empty namespace as the same', () => {
+    expect(detectGlobalNamespaceDrift(undefined, '', ['elb'], [original])).toBe(false);
+    expect(detectGlobalNamespaceDrift('', undefined, ['elb'], [original])).toBe(false);
+  });
+
+  it('is dirty when the namespace changed and an original is deployed', () => {
+    expect(detectGlobalNamespaceDrift('prod', undefined, ['elb'], [original])).toBe(true);
+    expect(detectGlobalNamespaceDrift('', 'prod', ['elb'], [original])).toBe(true);
+  });
+
+  it('is clean when only duplicates are deployed, since they keep their own namespace', () => {
+    expect(detectGlobalNamespaceDrift('prod', 'dev', ['elb__dup-1'], [duplicate])).toBe(false);
+  });
+
+  it('is clean when the original is not deployed yet', () => {
+    expect(detectGlobalNamespaceDrift('prod', 'dev', [], [original])).toBe(false);
   });
 });
