@@ -35,6 +35,7 @@ jest.mock('./services', () => ({
       rendering: {},
     },
     search: jest.fn(),
+    isEditorEnabled: true,
     agentBuilder: mockAgentBuilder,
   }),
 }));

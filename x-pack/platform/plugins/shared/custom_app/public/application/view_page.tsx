@@ -16,12 +16,14 @@ import {
   appDocumentSchema,
   CUSTOM_APP_EMBEDDABLE_TYPE,
   isEmptyDocument,
+  updateNode,
   type AppDocument,
 } from '@kbn/custom-app-common';
 import { SavedObjectSaveModalDashboard } from '@kbn/presentation-util-plugin/public';
 import { EmptyApp } from '../components/empty_app';
 import { LiveApp } from '../components/live_app';
 import { createDefaultDocument, createEmptyDocument } from '../default_document';
+import { InlineEditContext, type ChangeNodeWords } from '../runtime/inline_edit_context';
 import { EditorFlyout } from '../editor/editor_flyout';
 import { useChatWithPage } from './use_chat_with_page';
 import { useListBack, useListBreadcrumb } from './list_breadcrumb';
@@ -52,11 +54,13 @@ export const ViewPage = ({
   chrome,
   notifications,
   canSave,
+  isEditorEnabled,
   agentBuilder,
   onAppLeave,
   stateTransfer,
   canWriteDashboards,
 }: AppServices) => {
+  const canEdit = canSave && isEditorEnabled;
   const { id } = useParams<{ id: string }>();
   const history = useHistory();
   const flyoutTitleId = useId();
@@ -132,6 +136,20 @@ export const ViewPage = ({
       [closeEditor, savedDocument]
     ),
   });
+
+  // Words changed on the page itself join the draft, to be saved with it like any other change.
+  const changeNodeWords = useMemo<ChangeNodeWords | undefined>(
+    () =>
+      canSave && savedDocument && !isEditing
+        ? (nodeId, field, words) => {
+            const result = updateNode(draft ?? savedDocument, nodeId, { [field]: words });
+            if (result.ok) {
+              setDraft(isEqual(result.document, savedDocument) ? undefined : result.document);
+            }
+          }
+        : undefined,
+    [canSave, draft, isEditing, savedDocument]
+  );
 
   const save = useCallback(
     async (details: { title: string; description?: string }, document: AppDocument) => {
@@ -261,7 +279,7 @@ export const ViewPage = ({
           testId: 'customAppSave',
           run: saveDraft,
         }
-      : canSave && state.status === 'ready'
+      : canEdit && state.status === 'ready'
       ? {
           id: 'edit',
           label: i18n.translate('xpack.customApp.standalone.edit', { defaultMessage: 'Edit' }),
@@ -272,7 +290,7 @@ export const ViewPage = ({
         }
       : undefined,
     items: [
-      ...(hasDraft && canSave && state.status === 'ready'
+      ...(hasDraft && canEdit && state.status === 'ready'
         ? [
             {
               id: 'edit',
@@ -404,7 +422,7 @@ export const ViewPage = ({
         ) : isEmptyDocument(preview ?? draft ?? state.document) ? (
           <EmptyApp
             canEdit={canSave}
-            onBuild={() => setIsEditing(true)}
+            onBuild={isEditorEnabled ? () => setIsEditing(true) : undefined}
             onDescribe={
               describe
                 ? () =>
@@ -415,13 +433,19 @@ export const ViewPage = ({
                     )
                 : undefined
             }
-            onUseExample={() => {
-              setSeed(createDefaultDocument());
-              setIsEditing(true);
-            }}
+            onUseExample={
+              isEditorEnabled
+                ? () => {
+                    setSeed(createDefaultDocument());
+                    setIsEditing(true);
+                  }
+                : undefined
+            }
           />
         ) : (
-          <LiveApp document={shownDocument} appId={app.id} />
+          <InlineEditContext.Provider value={preview ? undefined : changeNodeWords}>
+            <LiveApp document={shownDocument} appId={app.id} />
+          </InlineEditContext.Provider>
         )}
       </EuiPageTemplate.Section>
 

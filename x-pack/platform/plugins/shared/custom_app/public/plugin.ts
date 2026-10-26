@@ -6,7 +6,7 @@
  */
 
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
-import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
@@ -20,6 +20,7 @@ import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { CUSTOM_APP_EMBEDDABLE_TYPE } from '@kbn/custom-app-common';
 import { CUSTOM_APP_CONTEXT_ATTACHMENT_TYPE } from '../common/app_context_attachment';
 import type { CustomAppByReferenceState } from '../server';
+import type { CustomAppConfig } from '../server/config';
 import {
   ADD_CUSTOM_APP_ACTION_ID,
   CUSTOM_APP_APPLICATION_ID,
@@ -45,6 +46,8 @@ interface StartDeps {
 }
 
 export class CustomAppPlugin implements Plugin<void, void, SetupDeps, StartDeps> {
+  constructor(private readonly initializerContext?: PluginInitializerContext<CustomAppConfig>) {}
+
   setup(core: CoreSetup<StartDeps>, { embeddable }: SetupDeps) {
     core.application.register({
       id: CUSTOM_APP_APPLICATION_ID,
@@ -89,7 +92,16 @@ export class CustomAppPlugin implements Plugin<void, void, SetupDeps, StartDeps>
     core: CoreStart,
     { data, dataViews, embeddable, lens, uiActions, agentBuilder, share }: StartDeps
   ) {
-    setServices(core, data.search.search, embeddable, dataViews, lens, agentBuilder, share);
+    setServices(
+      core,
+      data.search.search,
+      embeddable,
+      dataViews,
+      lens,
+      agentBuilder,
+      share,
+      this.initializerContext?.config.get().editor.enabled ?? true
+    );
 
     uiActions.registerActionAsync<EmbeddableApiContext>(ADD_CUSTOM_APP_ACTION_ID, async () => {
       const { getAddCustomAppAction } = await import('./actions/add_custom_app_action');

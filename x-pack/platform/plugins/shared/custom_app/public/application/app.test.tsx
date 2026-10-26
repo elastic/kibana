@@ -194,6 +194,7 @@ const queryMenuItem = async (testId: string) => {
 
 const setup = ({
   canSave = true,
+  isEditorEnabled = true,
   canWriteDashboards = true,
   path = '/',
   prepare,
@@ -205,6 +206,7 @@ const setup = ({
   agentBuilder?: ReturnType<typeof makeAgentBuilder>;
   canWriteDashboards?: boolean;
   canSave?: boolean;
+  isEditorEnabled?: boolean;
   path?: string;
   /** Sets up what the client answers, before the page asks. */
   prepare?: (client: jest.Mocked<SavedAppsClient>) => void;
@@ -227,6 +229,7 @@ const setup = ({
         chrome={chrome as never}
         notifications={notifications as never}
         canSave={canSave}
+        isEditorEnabled={isEditorEnabled}
         agentBuilder={agentBuilder as never}
         onAppLeave={onAppLeave}
         stateTransfer={{ navigateToWithEmbeddablePackages } as never}
@@ -480,6 +483,14 @@ describe('the custom apps page', () => {
       expect(screen.queryByTestId('customAppEmptyDescribe')).not.toBeInTheDocument();
     });
 
+    it('offers no editor when it is turned off, and still offers to describe the app to the assistant', async () => {
+      setup({ path: '/create', isEditorEnabled: false, agentBuilder: makeAgentBuilder() });
+
+      await screen.findByTestId('customAppEmptyDescribe');
+      expect(screen.queryByTestId('customAppEmptyBuild')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('customAppEmptyExample')).not.toBeInTheDocument();
+    });
+
     it('shows the draft as the editor changes it, in place of the empty state', async () => {
       setup({ path: '/create' });
       await openEditor();
@@ -625,6 +636,16 @@ describe('the custom apps page', () => {
           'Unsaved changes'
         );
       });
+    });
+  });
+
+  describe('a saved app when the editor is turned off', () => {
+    it('is not offered to change in the editor, but can still be refined with the assistant', async () => {
+      setup({ path: '/view/app-1', isEditorEnabled: false, agentBuilder: makeAgentBuilder() });
+      await screen.findByTestId('liveApp');
+
+      expect(screen.queryByTestId('customAppEdit')).not.toBeInTheDocument();
+      expect(await findMenuItem('customAppRefineWithAi')).toBeInTheDocument();
     });
   });
 

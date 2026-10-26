@@ -116,7 +116,7 @@ export const customAppEmbeddableFactory: EmbeddablePublicDefinition<
 > = {
   type: CUSTOM_APP_EMBEDDABLE_TYPE,
   buildEmbeddable: async ({ initialState, finalizeApi, parentApi, uuid }) => {
-    const { core, search, agentBuilder } = getServices();
+    const { core, search, agentBuilder, isEditorEnabled } = getServices();
     const savedApps = createSavedAppsClient(core.http);
     // A panel is either an app of its own, or a link to one of the library.
     const libraryId = isByReferenceState(initialState) ? initialState.ref_id : undefined;
@@ -248,7 +248,7 @@ export const customAppEmbeddableFactory: EmbeddablePublicDefinition<
       defaultDescription$,
       dataLoading$: dataLayer.loading$,
       serializeState,
-      isEditingEnabled: () => true,
+      isEditingEnabled: () => isEditorEnabled,
       getDocument: () => document$.getValue(),
       getLibraryId: () => libraryId,
       onEdit: async ({ returnFocus } = {}) => {
@@ -385,9 +385,11 @@ export const customAppEmbeddableFactory: EmbeddablePublicDefinition<
                   {isEmptyDocument(document) ? (
                     <EmptyApp
                       canEdit={viewMode === 'edit'}
-                      onBuild={() => api.onEdit()}
+                      onBuild={isEditorEnabled ? () => api.onEdit() : undefined}
                       onDescribe={agentBuilder ? () => generateWithChat(document) : undefined}
-                      onUseExample={() => document$.next(createDefaultDocument())}
+                      onUseExample={
+                        isEditorEnabled ? () => document$.next(createDefaultDocument()) : undefined
+                      }
                     />
                   ) : (
                     <AppFrame theme={document.theme}>

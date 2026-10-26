@@ -19,6 +19,7 @@ import {
 import { useStateValues } from '../runtime/app_runtime_context';
 import { escapeMarkdownValues } from '../utils/escape_markdown';
 import { ChartNode } from './chart_node';
+import { EditableText } from './editable_text';
 import { CustomContentNode } from './custom_content_node';
 import { ButtonGroupNode } from './button_group_node';
 import { ButtonNode } from './button_node';
@@ -64,7 +65,11 @@ export const NodeRenderer = ({ node }: NodeRendererProps) => {
     case 'heading':
       return (
         <EuiTitle size="s" data-node-id={node.id}>
-          <h3>{text(node.text)}</h3>
+          <h3>
+            <EditableText nodeId={node.id} field="text" words={node.text}>
+              {text(node.text)}
+            </EditableText>
+          </h3>
         </EuiTitle>
       );
     case 'text':
@@ -80,7 +85,16 @@ export const NodeRenderer = ({ node }: NodeRendererProps) => {
     case 'callout': {
       const Callout = CALLOUTS[node.color];
       return (
-        <Callout announceOnMount={false} title={text(node.title)} size="s" data-node-id={node.id}>
+        <Callout
+          announceOnMount={false}
+          title={
+            <EditableText nodeId={node.id} field="title" words={node.title}>
+              {text(node.title)}
+            </EditableText>
+          }
+          size="s"
+          data-node-id={node.id}
+        >
           {node.text ? <p>{text(node.text)}</p> : null}
         </Callout>
       );

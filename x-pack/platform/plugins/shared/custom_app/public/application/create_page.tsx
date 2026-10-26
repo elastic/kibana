@@ -34,6 +34,7 @@ export const CreatePage = ({
   client,
   chrome,
   notifications,
+  isEditorEnabled,
   agentBuilder,
   onAppLeave,
 }: AppServices) => {
@@ -127,15 +128,21 @@ export const CreatePage = ({
     items: isEmpty
       ? []
       : [
-          {
-            id: 'edit',
-            order: 1,
-            label: i18n.translate('xpack.customApp.standalone.edit', { defaultMessage: 'Edit' }),
-            iconType: 'pencil',
-            disableButton: isEditing,
-            testId: 'customAppEdit',
-            run: () => setIsEditing(true),
-          },
+          ...(isEditorEnabled
+            ? [
+                {
+                  id: 'edit',
+                  order: 1,
+                  label: i18n.translate('xpack.customApp.standalone.edit', {
+                    defaultMessage: 'Edit',
+                  }),
+                  iconType: 'pencil',
+                  disableButton: isEditing,
+                  testId: 'customAppEdit',
+                  run: () => setIsEditing(true),
+                },
+              ]
+            : []),
           ...(describe
             ? [
                 {
@@ -183,7 +190,7 @@ export const CreatePage = ({
         {isEmptyDocument(preview ?? draft) ? (
           <EmptyApp
             canEdit
-            onBuild={() => setIsEditing(true)}
+            onBuild={isEditorEnabled ? () => setIsEditing(true) : undefined}
             onDescribe={
               describe
                 ? () =>
@@ -194,10 +201,14 @@ export const CreatePage = ({
                     )
                 : undefined
             }
-            onUseExample={() => {
-              setSeed(createDefaultDocument());
-              setIsEditing(true);
-            }}
+            onUseExample={
+              isEditorEnabled
+                ? () => {
+                    setSeed(createDefaultDocument());
+                    setIsEditing(true);
+                  }
+                : undefined
+            }
           />
         ) : (
           <LiveApp document={preview ?? draft} />

@@ -23,6 +23,8 @@ export interface AppServices {
   notifications: NotificationsStart;
   /** Whether the user may create, change and delete apps. */
   canSave: boolean;
+  /** Whether anything offers the editor; off, apps are made and changed by chat. */
+  isEditorEnabled: boolean;
   /** Chat with the assistant. Absent when it is not available, and then nothing offers it. */
   agentBuilder?: AgentBuilderPluginStart;
   onAppLeave: AppMountParameters['onAppLeave'];

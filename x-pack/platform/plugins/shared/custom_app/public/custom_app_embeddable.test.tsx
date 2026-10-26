@@ -17,6 +17,7 @@ import { customAppEmbeddableFactory } from './custom_app_embeddable';
 
 // Set by the tests that need chat; without it the panel behaves as when Agent Builder is absent.
 let mockAgentBuilder: unknown;
+let mockIsEditorEnabled = true;
 jest.mock('./services', () => ({
   getServices: () => ({
     core: {
@@ -26,6 +27,7 @@ jest.mock('./services', () => ({
       rendering: {},
     },
     search: jest.fn(),
+    isEditorEnabled: mockIsEditorEnabled,
     agentBuilder: mockAgentBuilder,
   }),
 }));
@@ -59,6 +61,7 @@ const build = async ({
   render(<Component />);
   return api as unknown as {
     onEdit: () => Promise<void>;
+    isEditingEnabled: () => boolean;
     serializeState: () => CustomAppEmbeddableState;
     getDocument: () => AppDocument;
     anyStateChange$: { subscribe: (next: () => void) => { unsubscribe: () => void } };
@@ -98,6 +101,24 @@ describe('the custom app panel', () => {
   describe('when there is nothing in it yet', () => {
     afterEach(() => {
       mockAgentBuilder = undefined;
+    });
+
+    it('offers no editor, but the assistant, when the editor is turned off', async () => {
+      mockIsEditorEnabled = false;
+      mockAgentBuilder = {
+        openChat: jest.fn(),
+        events: { ui: { activeConversation$: new Subject() } },
+      };
+      try {
+        const api = await build({ document: EMPTY, viewMode: 'edit' });
+
+        expect(api.isEditingEnabled()).toBe(false);
+        expect(screen.queryByTestId('customAppEmptyBuild')).not.toBeInTheDocument();
+        expect(screen.queryByTestId('customAppEmptyExample')).not.toBeInTheDocument();
+        expect(screen.getByTestId('customAppEmptyDescribe')).toBeInTheDocument();
+      } finally {
+        mockIsEditorEnabled = true;
+      }
     });
 
     it('invites whoever is laying out the dashboard to begin, not a blank panel', async () => {

@@ -21,6 +21,7 @@ import { getServices } from '../services';
 import { useSubjectValue } from '../utils/use_subject_value';
 import { getClickedRow } from './clicked_row';
 import { DataState } from './data_state';
+import { EditableText } from './editable_text';
 import { DroppedActions } from './dropped_actions';
 import { applyAccentToChart } from '../theme/accent_chart_colors';
 import { usePageAccent } from './app_frame';
@@ -103,7 +104,11 @@ export const ChartNode = ({ node }: { node: AppNodeOfType<'chart'> }) => {
     <EuiPanel hasBorder hasShadow={false} paddingSize="m" data-node-id={node.id}>
       {node.title ? (
         <EuiTitle size="xxs">
-          <h4>{interpolate(node.title, values)}</h4>
+          <h4>
+            <EditableText nodeId={node.id} field="title" words={node.title}>
+              {interpolate(node.title, values)}
+            </EditableText>
+          </h4>
         </EuiTitle>
       ) : null}
       <DataState state={state} onRetry={layer.retry}>

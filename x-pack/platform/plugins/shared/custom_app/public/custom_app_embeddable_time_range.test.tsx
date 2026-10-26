@@ -27,6 +27,7 @@ jest.mock('./services', () => ({
       rendering: {},
     },
     search: jest.fn(),
+    isEditorEnabled: true,
   }),
 }));
 jest.mock('./data/run_esql_query', () => ({ createRunEsqlQuery: () => runQuery }));
