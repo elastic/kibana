@@ -36,6 +36,7 @@ import { AttachmentActionType } from '../../../client/attachment_framework/types
 import { UnifiedAttachmentTypeRegistry } from '../../../client/attachment_framework/unified_attachment_registry';
 import { getCommentAttachmentType } from '../../attachments/comment';
 import { getStackAlertAttachmentType } from '../../attachments/alert';
+import { toStringArray } from '../../../../common/utils/attachments';
 import {
   SECURITY_ALERT_ATTACHMENT_TYPE,
   SECURITY_ENDPOINT_ATTACHMENT_TYPE,
@@ -708,6 +709,93 @@ describe('createCommentUserActionBuilder', () => {
         'added 2 alerts from Awesome rule'
       );
       expect(screen.getByTestId('comment-action-show-table-1234')).toBeInTheDocument();
+    });
+
+    describe('after some alerts are removed', () => {
+      const addedIds = ['alert-id-1', 'alert-id-2', 'alert-id-3', 'alert-id-4'];
+      const getAddedAlertsUserAction = (
+        attachmentId: string | string[] = addedIds,
+        ruleName = alertComment.rule.name
+      ) =>
+        getMultipleAlertsUserAction({
+          payload: {
+            comment: {
+              type: STACK_ALERT_ATTACHMENT_TYPE,
+              attachmentId,
+              metadata: {
+                index: toStringArray(attachmentId).map((id) => `index-${id}`),
+                rule: { ...alertComment.rule, name: ruleName },
+              },
+              owner: alertComment.owner,
+            },
+          },
+        });
+
+      const renderUserAction = (
+        userAction: ReturnType<typeof getMultipleAlertsUserAction>,
+        attachments: Array<ReturnType<typeof createUnifiedAlertAttachment>>
+      ) => {
+        const unifiedAttachmentTypeRegistry = new UnifiedAttachmentTypeRegistry();
+        unifiedAttachmentTypeRegistry.register(getCommentAttachmentType());
+        unifiedAttachmentTypeRegistry.register(getStackAlertAttachmentType());
+
+        const builder = createCommentUserActionBuilder({
+          ...builderArgs,
+          unifiedAttachmentTypeRegistry,
+          attachments,
+          userAction,
+        });
+
+        renderWithTestingProviders(<EuiCommentList comments={builder.build()} />);
+      };
+
+      it('keeps the added alerts count', () => {
+        renderUserAction(getAddedAlertsUserAction(), [
+          createUnifiedAlertAttachment({ attachmentId: ['alert-id-4'], index: ['index-4'] }),
+        ]);
+
+        expect(screen.getByTestId('alerts-user-action-alert-comment-id')).toHaveTextContent(
+          'added 4 alerts from Awesome rule'
+        );
+        expect(screen.getByTestId('comment-action-show-table-1234')).toBeInTheDocument();
+      });
+
+      it('counts the remaining alerts in the delete toast', async () => {
+        renderUserAction(getAddedAlertsUserAction(), [
+          createUnifiedAlertAttachment({
+            attachmentId: ['alert-id-3', 'alert-id-4'],
+            index: ['index-3', 'index-4'],
+          }),
+        ]);
+
+        await deleteAttachment('trash', 'Delete');
+
+        await waitFor(() => {
+          expect(builderArgs.handleDeleteComment).toHaveBeenCalledWith(
+            'alert-comment-id',
+            'Deleted 2 alerts',
+            undefined
+          );
+        });
+      });
+
+      it('keeps the added alerts count once every alert is removed', () => {
+        renderUserAction(getAddedAlertsUserAction(), []);
+
+        expect(screen.getByTestId('alerts-user-action-alert-comment-id')).toHaveTextContent(
+          'added 4 alerts from Awesome rule'
+        );
+      });
+
+      it('uses the live attachment when no alert is removed', () => {
+        renderUserAction(getAddedAlertsUserAction('alert-id-1', 'Old rule name'), [
+          createUnifiedAlertAttachment({ attachmentId: ['alert-id-1'], index: ['index-1'] }),
+        ]);
+
+        expect(screen.getByTestId('alerts-user-action-alert-comment-id')).toHaveTextContent(
+          'added an alert from Awesome rule'
+        );
+      });
     });
 
     it('deletes multiple alerts correctly', async () => {
