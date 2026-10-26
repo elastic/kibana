@@ -550,6 +550,15 @@ The system resolves icons in the following order:
 2. If `metadata.icon` is not set, the system looks up the connector ID in `ConnectorIconsMap`
 3. If no icon is found, defaults to the `'globe'` icon
 
+## Entry points
+
+| Import | Loads |
+| --- | --- |
+| `@kbn/connector-specs` | Full surface, including all bundled connector specs |
+| `@kbn/connector-specs/common` | Shared types, constants, and helpers. Does not load the specs barrel |
+| `@kbn/connector-specs/server` | Server-only auth types and client types |
+| `@kbn/connector-specs/icons` | Lazy icon map |
+
 ## TypeScript Support
 
 The package provides full TypeScript support:
