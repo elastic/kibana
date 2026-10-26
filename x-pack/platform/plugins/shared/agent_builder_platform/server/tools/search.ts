@@ -5,37 +5,42 @@
  * 2.0.
  */
 
+import { memoize } from 'lodash';
 import { z } from '@kbn/zod/v4';
 import type { CoreSetup } from '@kbn/core-lifecycle-server';
 import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
 import type { TopSnippetsConfig } from '@kbn/agent-builder-genai-utils/tools';
 import { runSearchTool } from '@kbn/agent-builder-genai-utils/tools';
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
-import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
+import type { DynamicSchemaBuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { resolveTimeRange } from './screen_context_utils';
-import { includeFrozenSchema } from './include_frozen_schema';
+import { createIncludeFrozenSchema, getIncludeFrozenByDefault } from './include_frozen_schema';
 
-const searchSchema = z.object({
-  query: z.string().describe('A natural language query expressing the search request'),
-  index: z
-    .string()
-    .optional()
-    .describe(
-      '(optional) Index or index-pattern to search against. If not provided, will automatically select the best index to use based on the query.'
-    ),
-  time_range: z
-    .object({
-      from: z
-        .string()
-        .describe('Start of the time range, e.g. "now-24h" or "2026-01-01T00:00:00Z"'),
-      to: z.string().describe('End of the time range, e.g. "now" or "2026-01-31T23:59:59Z"'),
-    })
-    .optional()
-    .describe(
-      '(optional) Time range to scope the search. Falls back to screen context or last 24 hours.'
-    ),
-  include_frozen: includeFrozenSchema,
-});
+const createSearchSchema = memoize((includeFrozenByDefault: boolean) =>
+  z.object({
+    query: z.string().describe('A natural language query expressing the search request'),
+    index: z
+      .string()
+      .optional()
+      .describe(
+        '(optional) Index or index-pattern to search against. If not provided, will automatically select the best index to use based on the query.'
+      ),
+    time_range: z
+      .object({
+        from: z
+          .string()
+          .describe('Start of the time range, e.g. "now-24h" or "2026-01-01T00:00:00Z"'),
+        to: z.string().describe('End of the time range, e.g. "now" or "2026-01-31T23:59:59Z"'),
+      })
+      .optional()
+      .describe(
+        '(optional) Time range to scope the search. Falls back to screen context or last 24 hours.'
+      ),
+    include_frozen: createIncludeFrozenSchema(includeFrozenByDefault),
+  })
+);
+
+type SearchSchema = ReturnType<typeof createSearchSchema>;
 
 export const searchTool = ({
   coreSetup,
@@ -43,7 +48,7 @@ export const searchTool = ({
 }: {
   coreSetup: CoreSetup;
   topSnippetsDefaults: TopSnippetsConfig;
-}): BuiltinToolDefinition<typeof searchSchema> => {
+}): DynamicSchemaBuiltinToolDefinition<SearchSchema> => {
   // Cache the start services promise so it is resolved at most once.
   let startServicesPromise: ReturnType<CoreSetup['getStartServices']> | undefined;
   const getStartServices = () => {
@@ -82,14 +87,10 @@ Note:
       idempotentHint: true,
       openWorldHint: false,
     },
-    schema: searchSchema,
+    getSchema: async (schemaContext) =>
+      createSearchSchema(await getIncludeFrozenByDefault(schemaContext)),
     handler: async (
-      {
-        query: nlQuery,
-        index,
-        time_range: explicitTimeRange,
-        include_frozen: includeFrozen = false,
-      },
+      { query: nlQuery, index, time_range: explicitTimeRange, include_frozen: includeFrozen },
       { esClient, modelProvider, logger, events, attachments, savedObjectsClient }
     ) => {
       logger.debug(`search tool called with query: ${nlQuery}, index: ${index}`);

@@ -14,6 +14,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 import { PopoverListItem } from '../../../../popovers/primitives/popover_list_item';
 import {
   GROUPED_ITEM_ACTIONS_BUTTON_TEST_ID,
@@ -87,6 +88,7 @@ export const EntityActionsButton = ({
   onShowEntity,
   euidApi,
 }: EntityActionsButtonProps) => {
+  const isDarkMode = useKibanaIsDarkMode();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
   const togglePopover = useCallback(() => setIsPopoverOpen((prev) => !prev), []);
@@ -165,6 +167,7 @@ export const EntityActionsButton = ({
       emitPinnedEuidToggle(scopeId, item.id, action);
     },
     showEntityRelationshipsDisabled: !item.entity.availableInEntityStore || isInitialEntity,
+    isDarkMode,
   });
 
   return (

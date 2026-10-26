@@ -139,6 +139,16 @@ export interface ToolCallProgress {
 }
 
 /**
+ * How the model reached a tool.
+ */
+export enum ToolCallInvocation {
+  /** Bound to the model as a native tool. */
+  native = 'native',
+  /** Reached through the `execute_dynamic_tool` meta-tool. */
+  dynamic = 'dynamic',
+}
+
+/**
  * Represents a tool call with the corresponding result.
  */
 export interface ToolCallWithResult {
@@ -173,6 +183,13 @@ export interface ToolCallWithResult {
    * outcome (usually `[]`). An empty `results` without this flag is a real empty return.
    */
   interrupted?: true;
+  /**
+   * How the model reached the tool; absent means `native` (steps persisted before this field
+   * existed have none). For `dynamic`, `tool_id` and `params` are the inner tool's; the
+   * `execute_dynamic_tool` wrapper is restored when the call is rendered back to the model or
+   * re-run on resume. Use `isDynamicToolCall` rather than comparing the value.
+   */
+  invocation?: ToolCallInvocation;
 }
 
 export type ToolCallStep = ConversationRoundStepMixin<
@@ -189,6 +206,11 @@ export const createToolCallStep = (toolCallWithResult: ToolCallWithResult): Tool
 
 export const isToolCallStep = (step: ConversationRoundStep): step is ToolCallStep => {
   return step.type === ConversationRoundStepType.toolCall;
+};
+
+/** True when the call went through the `execute_dynamic_tool` meta-tool. */
+export const isDynamicToolCall = (call: Pick<ToolCallWithResult, 'invocation'>): boolean => {
+  return call.invocation === ToolCallInvocation.dynamic;
 };
 
 export const createReasoningStep = (reasoningStepWithResult: ReasoningStepData): ReasoningStep => {
@@ -605,6 +627,9 @@ export interface ConversationRoundAuthor {
   type?: UserPrincipalType;
 }
 
+/** The display-only part of an author a writer may supply. */
+export type ConversationRoundAuthorDecoration = Pick<ConversationRoundAuthor, 'full_name'>;
+
 export const getConversationRoundAuthorDisplayName = (
   author?: Pick<ConversationRoundAuthor, 'id' | 'username' | 'full_name'>
 ): string | undefined => {
@@ -761,6 +786,9 @@ export const CONVERSATION_TITLE_MAX_LENGTH = 500;
  * Conversation ids are UUIDs, so this should be more than enough.
  */
 export const CONVERSATION_ID_MAX_LENGTH = 256;
+
+/** Maximum length of the display name a workflow may record on a user message it writes. */
+export const USER_MESSAGE_AUTHOR_NAME_MAX_LENGTH = 256;
 
 /** Maximum accepted length for a conversation metadata key */
 export const CONVERSATION_METADATA_KEY_MAX_LENGTH = 256;

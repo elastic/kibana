@@ -6,56 +6,65 @@
  */
 
 import type { IconType } from '@elastic/eui';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiSkeletonRectangle,
-  EuiText,
-  EuiTitle,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiAvatar, EuiFlexGroup, EuiFlexItem, EuiStat, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 
+export type MetricTone = 'neutral' | 'warning' | 'danger';
+
 export interface MetricCellProps {
   icon: IconType;
+  tone: MetricTone;
   value: number | undefined;
-  label: string;
-  tooltip: string;
+  getLabel: (count: number) => string;
   isLoading: boolean;
   testSubject: string;
 }
 
 export const MetricCell = ({
   icon,
+  tone,
   value,
-  label,
-  tooltip,
+  getLabel,
   isLoading,
   testSubject,
-}: MetricCellProps): React.ReactElement => (
-  <EuiToolTip content={tooltip} position="bottom">
-    <div data-test-subj={testSubject} tabIndex={0}>
-      <EuiTitle size="s">
-        <div>
-          {isLoading ? (
-            <EuiSkeletonRectangle width={48} height={24} borderRadius="s" />
-          ) : (
-            value?.toLocaleString(i18n.getLocale())
-          )}
-        </div>
-      </EuiTitle>
-      <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <EuiIcon type={icon} color="subdued" aria-hidden={true} />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiText size="xs" color="subdued">
-            <span>{label}</span>
-          </EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </div>
-  </EuiToolTip>
-);
+}: MetricCellProps): React.ReactElement => {
+  const { colors } = useEuiTheme().euiTheme;
+  const label = getLabel(value ?? 0);
+  const { background, iconColor } = {
+    neutral: { background: colors.backgroundLightText, iconColor: colors.textSubdued },
+    warning: { background: colors.backgroundLightWarning, iconColor: colors.textWarning },
+    danger: { background: colors.backgroundLightDanger, iconColor: colors.textDanger },
+  }[tone];
+
+  return (
+    <EuiFlexGroup
+      alignItems="center"
+      gutterSize="m"
+      responsive={false}
+      data-test-subj={testSubject}
+    >
+      <EuiFlexItem grow={false}>
+        <EuiAvatar
+          type="space"
+          size="l"
+          name={label}
+          iconType={icon}
+          color={background}
+          iconColor={iconColor}
+        />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiStat
+          title={value?.toLocaleString(i18n.getLocale()) ?? ''}
+          description={label}
+          titleSize="xs"
+          reverse
+          isLoading={isLoading}
+          descriptionElement="span"
+          titleElement="span"
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};

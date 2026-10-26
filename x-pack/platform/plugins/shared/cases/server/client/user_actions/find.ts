@@ -11,10 +11,10 @@ import type {
   UserActionFindResponse,
 } from '../../../common/types/api';
 import {
-  UserActionInternalFindRequestRt,
-  UserActionFindResponseRt,
+  UserActionInternalFindRequestSchema,
+  UserActionFindResponseSchema,
 } from '../../../common/types/api';
-import { decodeWithExcessOrThrow, decodeOrThrow } from '../../common/runtime_types';
+import { decodeWithExcessOrThrowZod, decodeOrThrowZod } from '../../common/runtime_types';
 import type { CasesClientArgs } from '../types';
 import type { UserActionFind } from './types';
 import { Operations } from '../../authorization';
@@ -56,12 +56,12 @@ export const find = async (
     const authors = asArray(params.authors);
     const sources = asArray(params.sources);
 
-    const queryParams = decodeWithExcessOrThrow(UserActionInternalFindRequestRt)({
+    const queryParams = decodeWithExcessOrThrowZod(UserActionInternalFindRequestSchema)({
       ...params,
       types,
       authors,
       sources,
-    });
+    }) as UserActionInternalFindRequest;
 
     const [authorizationFilterRes] = await Promise.all([
       authorization.getAuthorizationFilter(Operations.findUserActions),
@@ -99,7 +99,7 @@ export const find = async (
       total: userActions.total,
     };
 
-    return decodeOrThrow(UserActionFindResponseRt)(res);
+    return decodeOrThrowZod(UserActionFindResponseSchema)(res);
   } catch (error) {
     throw createCaseError({
       message: `Failed to find user actions for case id: ${caseId}: ${error}`,
@@ -123,7 +123,7 @@ const findWithSearch = async ({
    * `matchesSearch` only reads `type`, `payload`, and `created_by` off the raw
    * (transformed but undecoded) attributes, so we skip `decodeOrThrow` here and
    * only decode the page of results we actually return. Otherwise we'd pay the
-   * io-ts decode cost for every user action in the case just to discard most of
+   * zod decode cost for every user action in the case just to discard most of
    * them during filtering/pagination.
    */
   const allUserActions = await userActionService.finder.findAll({
@@ -174,5 +174,5 @@ const findWithSearch = async ({
     total: filtered.length,
   };
 
-  return decodeOrThrow(UserActionFindResponseRt)(res);
+  return decodeOrThrowZod(UserActionFindResponseSchema)(res);
 };

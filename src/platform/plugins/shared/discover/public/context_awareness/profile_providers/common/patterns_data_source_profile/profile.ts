@@ -158,6 +158,8 @@ export const createPatternsDataSourceProfileProvider = (
 
     const sparklineColumns = getSparklineColumns(query.esql);
 
+    void services.aiops?.aiopsUsage.trackRenderEsqlCategorizationResults();
+
     return {
       isMatch: true,
       context: {

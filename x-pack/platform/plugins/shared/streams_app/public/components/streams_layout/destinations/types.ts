@@ -17,24 +17,46 @@ export type DestinationStorageKind = 'local_elasticsearch' | 'external_storage';
 /** Unit destination types the UI can list and create. */
 export type DestinationType = 'elasticsearch';
 
+export type DestinationSignal = 'logs' | 'metrics' | 'traces';
+
+/** Default write-role globs for auto destinations, one per ingest signal. */
+export const AUTO_INDEX_PATTERNS: readonly string[] = ['logs-*-*', 'metrics-*-*', 'traces-*-*'];
+
+/** How an Elasticsearch destination chooses its indices. */
+export type DestinationIndexMode = 'static' | 'auto';
+
+export type StaticIndexValidationError =
+  | 'template'
+  | 'invalidName'
+  | 'uppercase'
+  | 'invalidCharacter'
+  | 'signalPattern';
+
+export type AutoWritePatternValidationError =
+  | 'required'
+  | 'uppercase'
+  | 'invalidCharacter'
+  | 'signalPattern';
+
 export interface DestinationViewModel {
   id: string;
   name: string;
   type: DestinationType;
-  /** Elasticsearch `config` entry `index`. */
-  index: string;
-  /**
-   * Elasticsearch `config` entry `index_patterns`.
-   * Static indexes that omit the entry surface the spec default of `[index]`.
-   */
-  indexPatterns: string[];
+  signals: DestinationSignal[];
+  mode: DestinationIndexMode;
+  index?: string;
+  /** User-defined write-role globs stored as unit `index_patterns`. */
+  indexPatterns?: string[];
 }
 
 /** Per-type form state. Each destination type owns its own slice. */
 export interface ElasticsearchDestinationFormData {
-  index: string;
-  /** Raw index patterns, one per line or comma-separated. */
-  indexPatterns: string;
+  /** When true, omit `index` so ES composes names from document metadata. */
+  auto: boolean;
+  /** Static index, or auto write-target glob, for logs. Empty in auto = no user pattern. */
+  logsIndex: string;
+  metricsIndex: string;
+  tracesIndex: string;
 }
 
 export interface DestinationCreationFormData {
@@ -45,11 +67,15 @@ export interface DestinationCreationFormData {
 
 export interface DestinationCreationFormErrors {
   destinationName?: DestinationNameValidationError;
-  index?: 'required';
-  indexPatterns?: 'required' | 'invalid';
+  staticIndexes?: 'required';
+  logsIndex?: StaticIndexValidationError | AutoWritePatternValidationError;
+  metricsIndex?: StaticIndexValidationError | AutoWritePatternValidationError;
+  tracesIndex?: StaticIndexValidationError | AutoWritePatternValidationError;
 }
 
 export const EMPTY_ELASTICSEARCH_DESTINATION_FORM: ElasticsearchDestinationFormData = {
-  index: '',
-  indexPatterns: '',
+  auto: true,
+  logsIndex: '',
+  metricsIndex: '',
+  tracesIndex: '',
 };
