@@ -150,11 +150,15 @@ export function useOnboardingDriftDetection({
           },
           { agentPolicyIds: item.agentPolicyIds }
         );
+        // Instances are absent from a session that never went through Step 2's Next, and then
+        // every deployed instance is an original, since duplicates only exist as instances.
+        const namespaceDeployedIds = serviceSettings?.instances
+          ? deployedInstanceIds
+          : Object.keys(policyIdsByInstance ?? {});
         const namespaceDirty = detectGlobalNamespaceDrift(
           serviceSettings?.namespace,
           item.namespace,
-          deployedInstanceIds,
-          serviceSettings?.instances,
+          namespaceDeployedIds,
           serviceSettings?.serviceVars
         );
         const dirty = dirtyVarIds.length > 0 || namespaceDirty || authDirty || agentPoliciesDirty;

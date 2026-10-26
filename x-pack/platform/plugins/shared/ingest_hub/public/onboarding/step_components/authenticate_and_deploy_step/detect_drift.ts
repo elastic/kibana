@@ -8,7 +8,7 @@
 import { isEqual } from 'lodash';
 
 import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
-import type { ServiceInstance, ServiceVars } from '../service_settings_step/use_service_settings';
+import type { ServiceVars } from '../service_settings_step/use_service_settings';
 import { toSOServiceVars } from './package_inputs';
 
 /**
@@ -147,12 +147,8 @@ export function detectGlobalNamespaceDrift(
   sessionNamespace: string | undefined,
   soNamespace: string | undefined,
   deployedInstanceIds: Iterable<string>,
-  instances: ServiceInstance[] | undefined,
   serviceVars: Record<string, { namespace?: string }> = {}
 ): boolean {
   if ((sessionNamespace ?? '') === (soNamespace ?? '')) return false;
-  const deployed = new Set(deployedInstanceIds);
-  return (instances ?? []).some(
-    (i) => deployed.has(i.instanceId) && !serviceVars[i.instanceId]?.namespace
-  );
+  return [...deployedInstanceIds].some((id) => !serviceVars[id]?.namespace);
 }

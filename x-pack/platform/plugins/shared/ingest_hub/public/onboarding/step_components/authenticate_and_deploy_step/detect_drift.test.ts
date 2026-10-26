@@ -145,48 +145,36 @@ describe('detectAuthDrift', () => {
 });
 
 describe('detectGlobalNamespaceDrift', () => {
-  const original = { instanceId: 'elb', serviceId: 'elb', name: 'ELB', isDuplicate: false };
-  const duplicate = {
-    instanceId: 'elb__dup-1',
-    serviceId: 'elb',
-    name: 'ELB [Duplicate]',
-    isDuplicate: true,
-  };
-
   it('is clean when the namespace is unchanged', () => {
-    expect(detectGlobalNamespaceDrift('prod', 'prod', ['elb'], [original])).toBe(false);
+    expect(detectGlobalNamespaceDrift('prod', 'prod', ['elb'])).toBe(false);
   });
 
   it('treats an absent and an empty namespace as the same', () => {
-    expect(detectGlobalNamespaceDrift(undefined, '', ['elb'], [original])).toBe(false);
-    expect(detectGlobalNamespaceDrift('', undefined, ['elb'], [original])).toBe(false);
+    expect(detectGlobalNamespaceDrift(undefined, '', ['elb'])).toBe(false);
+    expect(detectGlobalNamespaceDrift('', undefined, ['elb'])).toBe(false);
   });
 
-  it('is dirty when the namespace changed and an original is deployed', () => {
-    expect(detectGlobalNamespaceDrift('prod', undefined, ['elb'], [original])).toBe(true);
-    expect(detectGlobalNamespaceDrift('', 'prod', ['elb'], [original])).toBe(true);
+  it('is dirty when the namespace changed and an instance is deployed', () => {
+    expect(detectGlobalNamespaceDrift('prod', undefined, ['elb'])).toBe(true);
+    expect(detectGlobalNamespaceDrift('', 'prod', ['elb'])).toBe(true);
   });
 
   it('is clean when only duplicates with a namespace of their own are deployed', () => {
     expect(
-      detectGlobalNamespaceDrift('prod', 'dev', ['elb__dup-1'], [duplicate], {
+      detectGlobalNamespaceDrift('prod', 'dev', ['elb__dup-1'], {
         'elb__dup-1': { namespace: 'staging' },
       })
     ).toBe(false);
   });
 
-  it('is dirty when a deployed duplicate follows the global namespace and the original is not deployed', () => {
-    expect(detectGlobalNamespaceDrift('prod', 'dev', ['elb__dup-1'], [original, duplicate])).toBe(
-      true
-    );
+  it('is dirty when a deployed duplicate follows the global namespace', () => {
+    expect(detectGlobalNamespaceDrift('prod', 'dev', ['elb__dup-1'])).toBe(true);
     expect(
-      detectGlobalNamespaceDrift('prod', 'dev', ['elb__dup-1'], [original, duplicate], {
-        'elb__dup-1': { namespace: '' },
-      })
+      detectGlobalNamespaceDrift('prod', 'dev', ['elb__dup-1'], { 'elb__dup-1': { namespace: '' } })
     ).toBe(true);
   });
 
-  it('is clean when the original is not deployed yet', () => {
-    expect(detectGlobalNamespaceDrift('prod', 'dev', [], [original])).toBe(false);
+  it('is clean when nothing is deployed yet', () => {
+    expect(detectGlobalNamespaceDrift('prod', 'dev', [])).toBe(false);
   });
 });
