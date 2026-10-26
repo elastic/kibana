@@ -31,7 +31,7 @@ test.describe('Uptime feature controls - security', { tag: ['@local-stateful-cla
 
     await test.step('shows Uptime navlink', async () => {
       await expect(
-        page.getByRole('navigation').getByRole('link', { name: 'Uptime', exact: true })
+        page.getByRole('navigation').getByRole('link', { name: 'Uptime Monitors', exact: true })
       ).toBeVisible({
         timeout: 10_000,
       });
@@ -69,7 +69,7 @@ test.describe('Uptime feature controls - security', { tag: ['@local-stateful-cla
 
     await test.step('shows Uptime navlink', async () => {
       await expect(
-        page.getByRole('navigation').getByRole('link', { name: 'Uptime', exact: true })
+        page.getByRole('navigation').getByRole('link', { name: 'Uptime Monitors', exact: true })
       ).toBeVisible({
         timeout: 10_000,
       });
@@ -103,7 +103,7 @@ test.describe('Uptime feature controls - security', { tag: ['@local-stateful-cla
 
     await test.step('does not show Uptime navlink', async () => {
       await expect(
-        page.getByRole('navigation').getByRole('link', { name: 'Uptime', exact: true })
+        page.getByRole('navigation').getByRole('link', { name: 'Uptime Monitors', exact: true })
       ).toBeHidden({
         timeout: 10_000,
       });
