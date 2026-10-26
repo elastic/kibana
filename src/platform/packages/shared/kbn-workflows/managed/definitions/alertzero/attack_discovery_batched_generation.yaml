@@ -27,6 +27,11 @@ tags:
   - watch
   - watch-floor
   - attack-discovery
+settings:
+  # The parent step timeout does not replace this. Omitting it applies the
+  # engine's 6h default, which fails this child on a slow scan and so fails the
+  # runner before it can dispatch reviews. Same 12h as that parent step.
+  timeout: "12h"
 
 triggers:
   - type: manual
@@ -55,6 +60,16 @@ triggers:
             How far back to retrieve alerts: "30m", "2h", "7d".
           pattern: "^[0-9]+(ms|s|m|h|d|w)$"
           type: string
+        max_alerts:
+          default: 10000
+          description: >
+            How many alerts to retrieve before slicing into batches. The
+            per-space worker prorates this to its schedule interval. The LIMIT
+            below also stays at or under `batch_size * 100` (and 10000), so the
+            fan-out cannot exceed 100 branches.
+          maximum: 10000
+          minimum: 100
+          type: integer
 
 steps:
   # Ids only. Each batch's `security.attack-discovery.run` retrieves and anonymizes
@@ -83,15 +98,18 @@ steps:
       # false, for an alert with no closing reason. Kept as its own `| WHERE`
       # pipe (pipes are ANDed) so the `OR` cannot widen the clauses above it.
       #
-      # `LIMIT` is derived so the fan-out can never exceed 100 branches.
+      # `LIMIT` is the prorated alert cap, and never more than one page of
+      # branches (`batch_size * 100`, itself capped at 10000).
       query: |-
+        {%- assign branch_ceiling = inputs.batch_size | times: 100 | at_most: 10000 -%}
+        {%- assign alert_limit = inputs.max_alerts | default: 10000 | at_most: branch_ceiling -%}
         FROM .alerts-security.alerts-{{ workflow.spaceId }} METADATA _id
           | WHERE @timestamp >= NOW() - {{ inputs.lookback }}
           | WHERE kibana.alert.workflow_status IN ("open", "acknowledged")
           | WHERE kibana.alert.building_block_type IS NULL
           | WHERE kibana.alert.workflow_reason IS NULL OR kibana.alert.workflow_reason != "false_positive"
           | SORT @timestamp ASC
-          | LIMIT {{ inputs.batch_size | times: 100 | at_most: 10000 }}
+          | LIMIT {{ alert_limit }}
           | KEEP _id
 
   # `mode: settled` is what turns a failed batch into a gap instead of a failed
