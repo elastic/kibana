@@ -220,7 +220,7 @@ export const usePanelSelectionGestures = ({
       if (target.closest(KEEP_SELECTION_SELECTOR)) return;
       const panelId = findPanelId(target);
       if (panelId && dashboardApi.selectedPanelIds$.value.includes(panelId)) return;
-      dashboardApi.clearPanelSelection();
+      dashboardApi.clearSelectedPanels();
     };
 
     const onDocumentKeyDown = (e: KeyboardEvent) => {
@@ -230,7 +230,7 @@ export const usePanelSelectionGestures = ({
       // Let open menus, flyouts and text inputs consume their own Escape first
       const target = e.target instanceof HTMLElement ? e.target : null;
       if (target?.closest(ESCAPE_OWNED_BY_TARGET_SELECTOR)) return;
-      dashboardApi.clearPanelSelection();
+      dashboardApi.clearSelectedPanels();
     };
 
     const onRootMouseDown = (e: MouseEvent) => {
@@ -297,7 +297,7 @@ export const usePanelSelectionGestures = ({
             dashboardApi.togglePanelSelection(startPanelId);
           } else if (!hasModifier) {
             // plain click on the grid background while in selection mode
-            dashboardApi.clearPanelSelection();
+            dashboardApi.clearSelectedPanels();
           }
           return;
         }

@@ -134,7 +134,7 @@ export function initializeTrackPanel(
           current.includes(panelId) ? current.filter((id) => id !== panelId) : [...current, panelId]
         );
       },
-      clearPanelSelection: () => {
+      clearSelectedPanels: () => {
         if (selectedPanelIds$.value.length) selectedPanelIds$.next([]);
       },
       addPanelsToSelection: (panelIds: string[]) => {

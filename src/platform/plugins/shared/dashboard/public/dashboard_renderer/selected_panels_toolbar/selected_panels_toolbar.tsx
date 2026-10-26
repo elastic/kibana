@@ -42,7 +42,7 @@ export const SelectedPanelsToolbar = () => {
   const onDelete = useCallback(() => {
     if (dashboardApi.canRemovePanels && !dashboardApi.canRemovePanels()) return;
     dashboardApi.removePanels(dashboardApi.selectedPanelIds$.value);
-    dashboardApi.clearPanelSelection();
+    dashboardApi.clearSelectedPanels();
   }, [dashboardApi]);
 
   if (viewMode !== 'edit' || selectedPanelIds.length === 0) return null;
@@ -63,7 +63,7 @@ export const SelectedPanelsToolbar = () => {
               color="text"
               aria-label={clearSelectionLabel}
               data-test-subj="dashboardSelectedPanelsClear"
-              onClick={dashboardApi.clearPanelSelection}
+              onClick={dashboardApi.clearSelectedPanels}
             />
           </EuiToolTip>
         </EuiFlexItem>

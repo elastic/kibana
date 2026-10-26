@@ -15,7 +15,7 @@ import type { PublishingSubject } from '../../publishing_subject';
 export interface CanSelectPanels {
   selectedPanelIds$: PublishingSubject<string[]>;
   togglePanelSelection: (panelId: string) => void;
-  clearPanelSelection: () => void;
+  clearSelectedPanels: () => void;
 }
 
 /**
@@ -24,7 +24,7 @@ export interface CanSelectPanels {
 export const apiCanSelectPanels = (api: unknown): api is CanSelectPanels => {
   return (
     typeof (api as CanSelectPanels)?.togglePanelSelection === 'function' &&
-    typeof (api as CanSelectPanels)?.clearPanelSelection === 'function' &&
+    typeof (api as CanSelectPanels)?.clearSelectedPanels === 'function' &&
     Boolean((api as CanSelectPanels)?.selectedPanelIds$)
   );
 };
