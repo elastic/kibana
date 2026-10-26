@@ -253,6 +253,21 @@ describe('mergeAgentConfiguration', () => {
     });
   });
 
+  describe('final_answer_tool_id', () => {
+    it('takes the base value over the delta, and keeps the delta value when the base sets none', () => {
+      expect(
+        mergeAgentConfiguration(
+          { final_answer_tool_id: 'reply_user' },
+          { tools: [], final_answer_tool_id: 'other' }
+        ).final_answer_tool_id
+      ).toBe('reply_user');
+      expect(
+        mergeAgentConfiguration({}, { tools: [], final_answer_tool_id: 'other' })
+          .final_answer_tool_id
+      ).toBe('other');
+    });
+  });
+
   describe('disable_internal_tools and raw_system_prompt', () => {
     it.each(['disable_internal_tools', 'raw_system_prompt'] as const)(
       'pins %s from the base so the delta cannot undo it',

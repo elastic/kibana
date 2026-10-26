@@ -56,6 +56,7 @@ const createTestGraph = ({
   cacheControl,
   toolExecutionBuffer,
   cycleHooks,
+  finalAnswerToolId,
 }: {
   structuredOutput?: boolean;
   outputSchema?: Record<string, unknown>;
@@ -63,6 +64,7 @@ const createTestGraph = ({
   cacheControl?: ChatCompleteCacheControl;
   toolExecutionBuffer?: ToolExecutionBuffer;
   cycleHooks?: CycleHookRuntime;
+  finalAnswerToolId?: string;
 } = {}) => {
   const researchInvoke = jest.fn();
   const structuredInvoke = jest.fn();
@@ -98,7 +100,12 @@ const createTestGraph = ({
   const graph = createAgentGraph({
     chatModel,
     toolManager,
-    configuration: { instructions: '', rawSystemPrompt: false, aiIndices: [] },
+    configuration: {
+      instructions: '',
+      rawSystemPrompt: false,
+      aiIndices: [],
+      ...(finalAnswerToolId ? { finalAnswerToolId } : {}),
+    },
     logger: {} as Logger,
     events: { emit: jest.fn() } as unknown as AgentEventEmitter,
     structuredOutput,
@@ -221,6 +228,57 @@ describe('createAgentGraph', () => {
     expect(result.toolRenderState.c1.content).toContain('"ok":true');
     expect(result.toolOutcome).toEqual({ type: 'completed' });
     expect(result.finalAnswer).toBe('done');
+  });
+
+  it('ends the run with the response of the final-answer tool, without another model turn', async () => {
+    const { graph, researchInvoke } = createTestGraph({ finalAnswerToolId: 'my_tool' });
+    researchInvoke.mockResolvedValueOnce(
+      new AIMessage({
+        content: '',
+        tool_calls: [{ id: 'c1', name: 'my_tool', args: { response: 'The cause was X.' } }],
+      })
+    );
+    mockToolNodeOnce([
+      new ToolMessage({
+        tool_call_id: 'c1',
+        content: JSON.stringify({
+          results: [{ type: 'other', data: { response: 'The cause was X.' } }],
+        }),
+        artifact: { results: [{ type: 'other', data: { response: 'The cause was X.' } }] },
+      }),
+    ]);
+
+    const result = await graph.invoke({ cycleLimit: 5 });
+
+    expect(result.finalAnswer).toBe('The cause was X.');
+    expect(researchInvoke).toHaveBeenCalledTimes(1);
+    expect(result.steps.map((step: ConversationRoundStep) => step.type)).toEqual([
+      ConversationRoundStepType.toolCall,
+    ]);
+  });
+
+  it('keeps going after a tool that is not the final-answer tool', async () => {
+    const { graph, researchInvoke } = createTestGraph({ finalAnswerToolId: 'test-tool' });
+    researchInvoke
+      .mockResolvedValueOnce(
+        new AIMessage({
+          content: '',
+          tool_calls: [{ id: 'c1', name: 'my_tool', args: { response: 'not the answer' } }],
+        })
+      )
+      .mockResolvedValueOnce(new AIMessage({ content: 'the real answer' }));
+    mockToolNodeOnce([
+      new ToolMessage({
+        tool_call_id: 'c1',
+        content: JSON.stringify({ results: [{ type: 'other', data: { ok: true } }] }),
+        artifact: { results: [{ type: 'other', data: { ok: true } }] },
+      }),
+    ]);
+
+    const result = await graph.invoke({ cycleLimit: 5 });
+
+    expect(result.finalAnswer).toBe('the real answer');
+    expect(researchInvoke).toHaveBeenCalledTimes(2);
   });
 
   it('lets the model repair an ask_user_question call whose arguments failed validation', async () => {

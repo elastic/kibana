@@ -161,6 +161,8 @@ export const buildNightshiftAgentConfiguration = ({
           // attachment or metadata tools, and the agent's own prompt without Agent Builder's.
           disable_internal_tools: true,
           raw_system_prompt: true,
+          // The answer is the last thing the agent does: no closing message restating it.
+          final_answer_tool_id: REPLY_USER_TOOL_ID,
         }
       : {}),
     connector_ids: telemetryConnectorId ? [telemetryConnectorId] : [],

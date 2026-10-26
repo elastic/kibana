@@ -149,6 +149,12 @@ export interface AgentConfiguration {
   raw_system_prompt?: boolean;
 
   /**
+   * Id of a tool whose call ends the run: its `response` argument becomes the final answer, and
+   * the model gets no further turn to restate it. The tool must take a `response` string.
+   */
+  final_answer_tool_id?: string;
+
+  /**
    * Optional list of workflow IDs. When set, these workflows run before the agent is executed.
    */
   workflow_ids?: string[];
