@@ -445,6 +445,7 @@ t3_analyst:
         - feature_workflowsManagement.all
         - feature_alertzero.all
         - feature_agenticInvestigations.all
+        - feature_agenticInvestigations.escalations_all
         - feature_proposals.all
         - feature_workflowsManagement.workflow_update_managed
       resources: "*"
@@ -623,6 +624,7 @@ rule_author:
         - feature_workflowsManagement.all
         - feature_alertzero.all
         - feature_agenticInvestigations.all
+        - feature_agenticInvestigations.escalations_all
         - feature_proposals.all
         - feature_workflowsManagement.workflow_update_managed
       resources: "*"
@@ -725,6 +727,7 @@ soc_manager:
         - feature_workflowsManagement.all
         - feature_alertzero.all
         - feature_agenticInvestigations.all
+        - feature_agenticInvestigations.escalations_all
         - feature_proposals.all
         - feature_workflowsManagement.workflow_update_managed
       resources: "*"
@@ -806,6 +809,7 @@ detections_admin:
         - feature_workflowsManagement.all
         - feature_alertzero.all
         - feature_agenticInvestigations.all
+        - feature_agenticInvestigations.escalations_all
         - feature_proposals.all
         - feature_workflowsManagement.workflow_update_managed
       resources: "*"
@@ -894,6 +898,7 @@ platform_engineer:
         - feature_workflowsManagement.all
         - feature_alertzero.all
         - feature_agenticInvestigations.all
+        - feature_agenticInvestigations.escalations_all
         - feature_proposals.all
         - feature_workflowsManagement.workflow_update_managed
       resources: "*"
