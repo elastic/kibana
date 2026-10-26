@@ -270,7 +270,7 @@ export const CreateCloudOnboardingDeploymentRequestSchema = {
     namespace: schema.maybe(
       schema.string({
         maxLength: 100,
-        meta: { description: 'Global data stream namespace from the Service settings step.' },
+        meta: { description: 'Global data stream namespace from the Service settings step. When omitted, using the default namespace or the one inherited from the agent policy.' },
       })
     ),
     dataFormat: schema.maybe(DataFormatSchema),
