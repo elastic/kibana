@@ -79,7 +79,7 @@ apiTest.describe(
       expect(event.properties).toMatchObject({
         rule_id: created.id,
         enabled: true,
-        updated_fields: ['metadata.name', 'schedule.every', 'updated_at', 'version'],
+        updated_fields: ['metadata.name', 'schedule.every'],
         origin: API_ORIGIN,
       });
       expect(event.properties.origin.app).toBeUndefined();

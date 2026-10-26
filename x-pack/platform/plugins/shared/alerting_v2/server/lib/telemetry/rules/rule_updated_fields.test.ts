@@ -83,11 +83,9 @@ describe('collectRuleUpdatedFields', () => {
     const next = createRuleResponse({
       ...previous,
       id: 'other-rule',
-      version: previous.version + 1,
       enabled: !previous.enabled,
       created_at: '2026-02-01T00:00:00.000Z',
       created_by: { profile_uid: 'someone-else' },
-      updated_at: '2026-02-01T00:00:00.000Z',
       updated_by: { profile_uid: 'someone-else' },
     });
 
@@ -96,10 +94,18 @@ describe('collectRuleUpdatedFields', () => {
       'created_by.profile_uid',
       'enabled',
       'id',
-      'updated_at',
       'updated_by.profile_uid',
-      'version',
     ]);
+  });
+
+  it('never reports version or updated_at', () => {
+    const next = createRuleResponse({
+      ...previous,
+      version: previous.version + 1,
+      updated_at: '2026-02-01T00:00:00.000Z',
+    });
+
+    expect(collectRuleUpdatedFields(previous, next)).toEqual([]);
   });
 
   it('returns paths in sorted order', () => {

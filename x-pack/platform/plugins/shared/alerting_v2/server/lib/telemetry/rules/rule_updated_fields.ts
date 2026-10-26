@@ -63,9 +63,12 @@ const collectChangedPaths = (
   }
 };
 
+/** Bumped by every write, so they never describe what the user changed. */
+const EXCLUDED_PATHS: ReadonlySet<string> = new Set(['version', 'updated_at']);
+
 /** Dotted paths whose values differ between two rule responses, in path order. */
 export const collectRuleUpdatedFields = (previous: RuleResponse, next: RuleResponse): string[] => {
   const changed: string[] = [];
   collectChangedPaths(previous, next, '', changed);
-  return changed;
+  return changed.filter((path) => !EXCLUDED_PATHS.has(path));
 };

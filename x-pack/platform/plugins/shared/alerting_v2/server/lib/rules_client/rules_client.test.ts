@@ -4397,7 +4397,7 @@ describe('RulesClient', () => {
           ]
         );
         const [, [emitted]] = (ruleEventPublisher.emitRuleUpdated as jest.Mock).mock.calls[0];
-        expect(emitted.updatedFields).toEqual(['version']);
+        expect(emitted).not.toHaveProperty('updatedFields');
         const { attrs: savedAttrs } = rulesSavedObjectService.update.mock.calls[0][0];
         expect(savedAttrs.version).toBe(5);
       });

@@ -101,7 +101,7 @@ const ruleChangedEventSchema: EventTypeOpts<RuleChangedEbtData>['schema'] = {
     },
     _meta: {
       description:
-        'Dotted paths of rule fields whose values differ on a rule update. A nested object is reported at the leaf that changed; an array is reported as one path. Omitted when none differ, and on create, delete, enable, and disable.',
+        'Dotted paths of rule fields whose values differ on a rule update. A nested object is reported at the leaf that changed; an array is reported as one path. `version` and `updated_at` change on every write and are never reported. Omitted when none differ, and on create, delete, enable, and disable.',
       optional: true,
     },
   },
