@@ -7,7 +7,6 @@
 
 import { Builder, BasicPrettyPrinter, Parser } from '@elastic/esql';
 import type { ESQLSingleAstItem, BinaryExpressionComparisonOperator } from '@elastic/esql/types';
-import { escapeField } from '../shared/escape_esql_identifier';
 import {
   Aggregation,
   Comparator,
@@ -18,6 +17,7 @@ import {
   type SeverityConfig,
   type ThresholdFormValues,
 } from './form_types';
+import { escapeField } from '../shared/escape_esql_identifier';
 
 const AGG_FN_NAME: Record<Aggregation, string> = {
   [Aggregation.COUNT]: 'COUNT',

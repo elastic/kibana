@@ -8,9 +8,9 @@
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFieldText, EuiFormRow } from '@elastic/eui';
+import type { EvaluationDefinition, StatDefinition } from '@kbn/alerting-v2-rule-builders';
 import { SuggestionsDropdown } from '../shared/suggestions/suggestions_dropdown';
 import { useSuggestionsInput } from '../shared/suggestions/use_suggestions_input';
-import type { EvaluationDefinition, StatDefinition } from './form_types';
 import { createMetricSuggestionsProvider } from './suggestions_provider';
 import { EXPRESSION_UNKNOWN_REFERENCE_ERROR } from './translations';
 

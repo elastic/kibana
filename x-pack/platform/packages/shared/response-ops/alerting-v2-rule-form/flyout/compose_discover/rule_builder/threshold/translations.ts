@@ -11,7 +11,7 @@ import {
   Comparator,
   type ReservedSeverityLabelSource,
   type SeverityValidationError,
-} from './form_types';
+} from '@kbn/alerting-v2-rule-builders';
 
 export const AGGREGATION_OPTIONS = [
   {
