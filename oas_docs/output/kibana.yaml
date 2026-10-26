@@ -49784,7 +49784,7 @@ paths:
                   maxItems: 10
                   type: array
                 namespace:
-                  description: Global data stream namespace from the Service settings step.
+                  description: Global data stream namespace from the Service settings step. When omitted, an agent-based deployment inherits the agent policy namespace, other deployment methods use the default namespace.
                   maxLength: 100
                   type: string
                 provider:
@@ -49996,7 +49996,7 @@ paths:
                         maxItems: 10
                         type: array
                       namespace:
-                        description: Global data stream namespace from the Service settings step.
+                        description: Global data stream namespace from the Service settings step. When omitted, an agent-based deployment inherits the agent policy namespace, other deployment methods use the default namespace.
                         type: string
                       packagePolicyIds:
                         description: Package policy IDs created for this deployment (managed_integration and agent_based).
@@ -50352,7 +50352,7 @@ paths:
                         maxItems: 10
                         type: array
                       namespace:
-                        description: Global data stream namespace from the Service settings step.
+                        description: Global data stream namespace from the Service settings step. When omitted, an agent-based deployment inherits the agent policy namespace, other deployment methods use the default namespace.
                         type: string
                       packagePolicyIds:
                         description: Package policy IDs created for this deployment (managed_integration and agent_based).
@@ -50600,7 +50600,7 @@ paths:
                   maxItems: 10
                   type: array
                 namespace:
-                  description: Global data stream namespace from the Service settings step. Send null to clear it.
+                  description: Global data stream namespace from the Service settings step. Send null to clear it. When omitted or cleared, an agent-based deployment inherits the agent policy namespace, other deployment methods use the default namespace.
                   maxLength: 100
                   nullable: true
                   type: string
@@ -50782,7 +50782,7 @@ paths:
                         maxItems: 10
                         type: array
                       namespace:
-                        description: Global data stream namespace from the Service settings step.
+                        description: Global data stream namespace from the Service settings step. When omitted, an agent-based deployment inherits the agent policy namespace, other deployment methods use the default namespace.
                         type: string
                       packagePolicyIds:
                         description: Package policy IDs created for this deployment (managed_integration and agent_based).
@@ -51065,7 +51065,7 @@ paths:
                           maxItems: 10
                           type: array
                         namespace:
-                          description: Global data stream namespace from the Service settings step.
+                          description: Global data stream namespace from the Service settings step. When omitted, an agent-based deployment inherits the agent policy namespace, other deployment methods use the default namespace.
                           type: string
                         packagePolicyIds:
                           description: Package policy IDs created for this deployment (managed_integration and agent_based).
