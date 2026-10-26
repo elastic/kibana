@@ -30,6 +30,12 @@ interface UseEntityRiskScoreRecalculationParams<T extends EntityType> {
   entityFromStoreResult: { refetch: () => void };
   riskScoreState: { refetch: () => void };
   onRecalculation?: () => void;
+  /**
+   * True when the caller renders a resolution group for `entityId`. Forwarded to
+   * {@link useEntityRiskScores}, which only fetches the resolution score in the group view when the
+   * new entity analytics page flag is on. Defaults to false.
+   */
+  isGroupView?: boolean;
 }
 
 interface UseEntityRiskScoreRecalculationResult<T extends EntityType> {
@@ -57,8 +63,9 @@ export const useEntityRiskScoreRecalculation = <T extends EntityType>({
   entityFromStoreResult,
   riskScoreState,
   onRecalculation,
+  isGroupView = false,
 }: UseEntityRiskScoreRecalculationParams<T>): UseEntityRiskScoreRecalculationResult<T> => {
-  const entityRiskScores = useEntityRiskScores(entityType, entityId);
+  const entityRiskScores = useEntityRiskScores(entityType, entityId, { isGroupView });
   const refetchRiskInputsTab = useRefetchQueryById(RISK_INPUTS_TAB_QUERY_ID);
   const queryClient = useQueryClient();
 

@@ -33,6 +33,24 @@ describe('STATS', () => {
     ]);
   });
 
+  it('types a bare counter aggregate as double in a TS pipeline', () => {
+    const previousCommandFields: ESQLFieldWithMetadata[] = [
+      { name: 'requests', type: 'counter_double', userDefined: false },
+    ];
+
+    const result = columnsAfter(
+      synth.cmd`STATS var0=AVG(requests)`,
+      previousCommandFields,
+      '',
+      { ...additionalFieldsMock, isTimeseriesSource: true },
+      unmappedFieldsStrategy
+    );
+
+    expect(result).toEqual<ESQLColumnData[]>([
+      { name: 'var0', type: 'double', userDefined: true, location: { min: 0, max: 0 } },
+    ]);
+  });
+
   it('adds the escaped column, when no grouping is given', () => {
     const previousCommandFields: ESQLFieldWithMetadata[] = [
       { name: 'field1', type: 'keyword', userDefined: false },

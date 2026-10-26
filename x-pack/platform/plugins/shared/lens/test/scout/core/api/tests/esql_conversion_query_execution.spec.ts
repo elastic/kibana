@@ -94,6 +94,52 @@ apiTest.describe(
       cookieHeader = (await samlAuth.asInteractiveUser('viewer')).cookieHeader;
     });
 
+    apiTest('preserves population standard deviation', async ({ esClient }) => {
+      const index = 'lens-esql-standard-deviation-regression';
+      const field = 'taxful_total_price';
+      const conversionCase = EXECUTABLE_CASES.find(
+        ({ conversionCase: candidate }) =>
+          candidate.description === 'standard deviation of a numeric field'
+      )?.conversionCase;
+      if (!conversionCase) {
+        throw new Error('Missing standard deviation conversion case');
+      }
+
+      await esClient.indices.create({
+        index,
+        mappings: { properties: { [field]: { type: 'double' } } },
+      });
+      try {
+        await esClient.bulk({
+          refresh: 'wait_for',
+          operations: [0, 0, 0, 100].flatMap((value) => [
+            { index: { _index: index } },
+            { [field]: value },
+          ]),
+        });
+        const query = generateQueryForCase({
+          ...conversionCase,
+          dataset: { ...conversionCase.dataset, index, timeField: undefined },
+        });
+        const converted = await esClient.esql.query({ query });
+        const baseline = await esClient.search<never, { deviation: { std_deviation: number } }>({
+          index,
+          size: 0,
+          aggs: { deviation: { extended_stats: { field } } },
+        });
+
+        expect(converted.values).toHaveLength(1);
+        expect(converted.values[0][0]).toBeCloseTo(43.30127019, 6);
+        expect(baseline.aggregations).toBeDefined();
+        expect(baseline.aggregations?.deviation.std_deviation).toBeCloseTo(
+          converted.values[0][0] as number,
+          6
+        );
+      } finally {
+        await esClient.indices.delete({ index });
+      }
+    });
+
     // playwright/max-nested-describe allows only one level, so groups become
     // test-title prefixes instead of nested describe blocks.
     for (const queryCase of EXECUTABLE_CASES) {

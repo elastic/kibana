@@ -232,8 +232,8 @@ const threatReportDiamondSummarySchema = schema.object({
 export type ThreatReportDiamondSummary = TypeOf<typeof threatReportDiamondSummarySchema>;
 
 /**
- * Usable-bar summary for find results: identity, title/body, IOCs, severity,
- * and optional Diamond.
+ * Summary projection for find results: identity, title/body, severity, optional
+ * Diamond, and any IOCs present (the list may be empty).
  */
 const threatReportSummarySchema = schema.object({
   reportId: schema.string(),
@@ -278,6 +278,7 @@ export const findThreatReportsQuerySchema = schema.object({
   from: schema.maybe(schema.string({ maxLength: 64 })),
   to: schema.maybe(schema.string({ maxLength: 64 })),
   usableOnly: schema.maybe(schema.boolean()),
+  indicatorEligibleOnly: schema.maybe(schema.boolean()),
   sort: schema.maybe(
     schema.string({
       maxLength: 32,
@@ -306,7 +307,9 @@ export const readinessResponseSchema = schema.object({
   }),
   lastIngestAt: schema.maybe(schema.nullable(schema.string())),
   lastEnrichAt: schema.maybe(schema.nullable(schema.string())),
+  /** Count of hunt-usable reports (any finished report, with or without IOCs). */
   usableReportCount: schema.number(),
+  indicatorEligibleReportCount: schema.number(),
   optional: schema.maybe(
     schema.arrayOf(schema.string({ maxLength: 64 }), { maxSize: READINESS_MAX_REASON_CODES })
   ),

@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
@@ -35,8 +36,10 @@ jest.mock('../hooks/use_asset_details_flyout_url_state', () => ({
 jest.mock('../../../../hooks/use_time_range_metadata', () => ({
   useTimeRangeMetadataContext: jest.fn(),
 }));
-jest.mock('../../../../hooks/use_is_pod_schema_selector_enabled', () => ({
-  useIsPodSchemaSelectorEnabled: jest.fn(() => false),
+jest.mock('../../../../hooks/use_kibana', () => ({
+  useKibanaContextForPlugin: () => ({
+    services: { telemetry: { reportSchemaSelectorInteraction: jest.fn() } },
+  }),
 }));
 
 jest.mock('../../../../components/empty_states', () => ({
@@ -85,10 +88,6 @@ const mockedUseWaffleOptionsContext =
 const mockedUseTimeRangeMetadataContext = jest.requireMock(
   '../../../../hooks/use_time_range_metadata'
 ).useTimeRangeMetadataContext as jest.Mock;
-// Intentional `as jest.Mock` type assertion as jest.requireMock returns an untyped factory for the pod schema flag hook;
-const mockedUseIsPodSchemaSelectorEnabled = jest.requireMock(
-  '../../../../hooks/use_is_pod_schema_selector_enabled'
-).useIsPodSchemaSelectorEnabled as jest.Mock;
 
 const options: InfraWaffleMapOptions = {
   formatter: InfraFormatterType.percent,
@@ -114,9 +113,12 @@ const baseProps = {
   showLoading: true,
 };
 
+const mockChangePreferredSchema = jest.fn();
+
 const mockPreferredSchema = (preferredSchema: DataSchemaFormat | null) => {
   mockedUseWaffleOptionsContext.mockReturnValue({
     preferredSchema,
+    changePreferredSchema: mockChangePreferredSchema,
   });
 };
 
@@ -138,14 +140,11 @@ const renderOverview = () =>
 describe('NodesOverview', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockedUseIsPodSchemaSelectorEnabled.mockReturnValue(false);
     mockPreferredSchema('semconv');
     mockSchemas(['ecs']);
   });
 
-  it('shows SwitchSchemaMessage for pods when the flag is on and preferredSchema is unavailable', () => {
-    mockedUseIsPodSchemaSelectorEnabled.mockReturnValue(true);
-
+  it('shows SwitchSchemaMessage for pods when preferredSchema is unavailable', () => {
     renderOverview();
 
     expect(screen.getByTestId('noMetricsDataPrompt')).toBeInTheDocument();
@@ -156,18 +155,19 @@ describe('NodesOverview', () => {
     );
   });
 
-  it('keeps the generic empty state for pods when the flag is off', () => {
-    mockedUseIsPodSchemaSelectorEnabled.mockReturnValue(false);
-
+  it('switches to the available schema when the empty state call to action is clicked', async () => {
     renderOverview();
 
-    expect(screen.getByTestId('noMetricsDataPrompt')).toBeInTheDocument();
+    await userEvent.click(screen.getByTestId('infraInventoryViewNoDataInSelectedSchema'));
+
+    expect(mockChangePreferredSchema).toHaveBeenCalledWith('ecs');
+  });
+
+  it('does not offer schema documentation for pods', () => {
+    renderOverview();
+
     expect(
-      screen.queryByTestId('infraInventoryViewNoDataInSelectedSchema')
+      screen.queryByTestId('infraInventoryViewNoDataInSelectedSchemaLearnMore')
     ).not.toBeInTheDocument();
-    expect(
-      screen.getByTestId('infraNodesOverviewNoDataSupportedIntegrationLink')
-    ).toBeInTheDocument();
-    expect(screen.getByTestId('infraNoDataButton')).toBeInTheDocument();
   });
 });

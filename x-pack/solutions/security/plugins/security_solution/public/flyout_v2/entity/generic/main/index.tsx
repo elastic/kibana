@@ -220,6 +220,7 @@ export const GenericEntity: FC<GenericEntityProps> = memo(function GenericEntity
         onAssetCriticalityChange={calculateEntityRiskScore}
         flyoutBodyProps={{ panelProps: { paddingSize: 'none' } }}
         hideHeaderIcons
+        scopeId={scopeId}
       />
       <GenericEntityFlyoutFooter
         scopeId={scopeId}

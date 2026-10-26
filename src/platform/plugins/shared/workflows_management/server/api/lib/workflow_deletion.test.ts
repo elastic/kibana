@@ -73,9 +73,11 @@ const makeExecutionsDataAccess = () => {
       hits: { hits: [] },
     }),
     deleteByQuery: jest.fn().mockResolvedValue({ deleted: 0 }),
+    refresh: jest.fn().mockResolvedValue(undefined),
   } as unknown as WorkflowExecutionsDataClient;
   const stepExecutionsDataClient = {
     deleteByQuery: jest.fn().mockResolvedValue({ deleted: 0 }),
+    refresh: jest.fn().mockResolvedValue(undefined),
   } as unknown as StepExecutionsDataClient;
 
   return { workflowExecutionsDataClient, stepExecutionsDataClient };
@@ -776,11 +778,12 @@ describe('deleteWorkflows', () => {
           },
         ]);
         const dataClients = makeExecutionsDataAccess();
-        const deleteByQuery = jest.mocked(
+        const targetClient =
           target === 'steps'
-            ? dataClients.stepExecutionsDataClient.deleteByQuery
-            : dataClients.workflowExecutionsDataClient.deleteByQuery
-        );
+            ? dataClients.stepExecutionsDataClient
+            : dataClients.workflowExecutionsDataClient;
+        const deleteByQuery = jest.mocked(targetClient.deleteByQuery);
+        const refresh = jest.mocked(targetClient.refresh);
         const run = () =>
           deleteWorkflows({
             ids: ['wf-1'],
@@ -793,11 +796,11 @@ describe('deleteWorkflows', () => {
             logger,
             getWorkflowExecutions: noopExecutions,
           });
-        return { client, deleteByQuery, run };
+        return { client, deleteByQuery, refresh, run };
       };
 
       it('completes deletion when a version conflict clears on retry', async () => {
-        const { client, deleteByQuery, run } = privateForceDelete();
+        const { client, deleteByQuery, refresh, run } = privateForceDelete();
         deleteByQuery
           .mockResolvedValueOnce({ version_conflicts: 1 })
           .mockResolvedValueOnce({ deleted: 1 });
@@ -810,6 +813,12 @@ describe('deleteWorkflows', () => {
         });
         expect(client.delete).toHaveBeenCalledTimes(1);
         expect(deleteByQuery).toHaveBeenCalledTimes(2);
+        expect(refresh).toHaveBeenCalledTimes(2);
+        const [firstRefresh, secondRefresh] = refresh.mock.invocationCallOrder;
+        const [firstDelete, secondDelete] = deleteByQuery.mock.invocationCallOrder;
+        expect(firstRefresh).toBeLessThan(firstDelete);
+        expect(firstDelete).toBeLessThan(secondRefresh);
+        expect(secondRefresh).toBeLessThan(secondDelete);
       });
 
       it('completes deletion when a thrown version conflict clears on retry', async () => {

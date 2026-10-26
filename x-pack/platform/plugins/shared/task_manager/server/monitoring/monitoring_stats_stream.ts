@@ -9,7 +9,6 @@ import type { Observable } from 'rxjs';
 import { merge, of } from 'rxjs';
 import { map, scan } from 'rxjs';
 import { set } from '@kbn/safer-lodash-set';
-import type { Logger } from '@kbn/core/server';
 import type { JsonObject } from '@kbn/utility-types';
 import type { SummarizedWorkloadStat, WorkloadStat } from './workload_statistics';
 import { createWorkloadAggregator, summarizeWorkloadStat } from './workload_statistics';
@@ -22,6 +21,7 @@ import type { ConfigStat } from './configuration_statistics';
 import { createConfigurationAggregator } from './configuration_statistics';
 import type { TaskManagerConfig } from '../config';
 import type { CapacityEstimationStat } from './capacity_estimation';
+import type { HealthStatusLogger } from '../lib/health_status_logger';
 import { withCapacityEstimate } from './capacity_estimation';
 import type { AggregatedStatProvider } from '../lib/runtime_statistics_aggregator';
 import type { CreateMonitoringStatsOpts } from '.';
@@ -133,7 +133,7 @@ export function createMonitoringStatsStream(
 }
 
 export function summarizeMonitoringStats(
-  logger: Logger,
+  logger: HealthStatusLogger,
   { last_update, stats: { runtime, workload, configuration, utilization } }: MonitoringStats,
   config: TaskManagerConfig,
   assumedKibanaInstances: number

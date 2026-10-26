@@ -6,7 +6,12 @@
  */
 
 import { AgentExecutionMode } from './execution_mode';
-import { isApiAutoApproved, normalizeInteractive, toAutoApprovedApis } from './interactivity';
+import {
+  applyAgentApprovals,
+  isApiAutoApproved,
+  normalizeInteractive,
+  toAutoApprovedApis,
+} from './interactivity';
 
 describe('normalizeInteractive', () => {
   it('defaults to enabled=true for conversation mode when input is undefined', () => {
@@ -62,6 +67,99 @@ describe('toAutoApprovedApis', () => {
     ]);
     expect(toAutoApprovedApis({ elasticsearch: [], kibana: [] })).toEqual([]);
     expect(toAutoApprovedApis({})).toEqual([]);
+  });
+});
+
+describe('applyAgentApprovals', () => {
+  it('returns the interactivity unchanged when the agent has no defaults', () => {
+    const interactivity = {
+      enabled: true,
+      auto_approved_apis: [{ target: 'elasticsearch' as const, api: 'indices.create' }],
+    };
+
+    expect(applyAgentApprovals({ interactivity })).toBe(interactivity);
+    expect(applyAgentApprovals({ interactivity, approvals: {} })).toBe(interactivity);
+    expect(
+      applyAgentApprovals({
+        interactivity,
+        approvals: { auto_approved_apis: { elasticsearch: [], kibana: [] } },
+      })
+    ).toBe(interactivity);
+  });
+
+  it('applies the defaults when the caller granted nothing, keeping enabled', () => {
+    expect(
+      applyAgentApprovals({
+        interactivity: { enabled: false },
+        approvals: { auto_approved_apis: { elasticsearch: ['indices.*'] } },
+      })
+    ).toEqual({
+      enabled: false,
+      auto_approved_apis: [{ target: 'elasticsearch', api: 'indices.*' }],
+    });
+    expect(
+      applyAgentApprovals({
+        interactivity: { enabled: true },
+        approvals: { auto_approved_apis: { kibana: ['alerting.delete-alerting-rule-id'] } },
+      })
+    ).toEqual({
+      enabled: true,
+      auto_approved_apis: [{ target: 'kibana', api: 'alerting.delete-alerting-rule-id' }],
+    });
+  });
+
+  it('adds the defaults to the caller grant instead of narrowing it', () => {
+    const result = applyAgentApprovals({
+      interactivity: {
+        enabled: false,
+        auto_approved_apis: [{ target: 'elasticsearch', api: 'bulk' }],
+      },
+      approvals: { auto_approved_apis: { elasticsearch: ['indices.*'] } },
+    });
+
+    expect(result.auto_approved_apis).toEqual([
+      { target: 'elasticsearch', api: 'bulk' },
+      { target: 'elasticsearch', api: 'indices.*' },
+    ]);
+    expect(isApiAutoApproved({ interactivity: result, target: 'elasticsearch', api: 'bulk' })).toBe(
+      true
+    );
+    expect(
+      isApiAutoApproved({ interactivity: result, target: 'elasticsearch', api: 'indices.delete' })
+    ).toBe(true);
+  });
+
+  it('keeps each backend independent', () => {
+    const result = applyAgentApprovals({
+      interactivity: {
+        enabled: false,
+        auto_approved_apis: [{ target: 'kibana', api: 'alerting.delete-alerting-rule-id' }],
+      },
+      approvals: { auto_approved_apis: { elasticsearch: ['indices.create'] } },
+    });
+
+    expect(result.auto_approved_apis).toEqual([
+      { target: 'kibana', api: 'alerting.delete-alerting-rule-id' },
+      { target: 'elasticsearch', api: 'indices.create' },
+    ]);
+    expect(
+      isApiAutoApproved({ interactivity: result, target: 'kibana', api: 'indices.create' })
+    ).toBe(false);
+  });
+
+  it('deduplicates selectors granted by both sides', () => {
+    expect(
+      applyAgentApprovals({
+        interactivity: {
+          enabled: false,
+          auto_approved_apis: [{ target: 'elasticsearch', api: 'indices.create' }],
+        },
+        approvals: { auto_approved_apis: { elasticsearch: ['indices.create', 'indices.delete'] } },
+      }).auto_approved_apis
+    ).toEqual([
+      { target: 'elasticsearch', api: 'indices.create' },
+      { target: 'elasticsearch', api: 'indices.delete' },
+    ]);
   });
 });
 

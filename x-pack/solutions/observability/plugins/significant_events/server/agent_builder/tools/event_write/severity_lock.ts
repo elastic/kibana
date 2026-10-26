@@ -54,7 +54,9 @@ export const lockSeverityForCompletedInvestigation = ({
   }
 
   const isResolution = proposedStatus === 'inactive';
-  const isReactivation = latestEvent.status === 'inactive' && proposedStatus === 'active';
+  const isReactivation =
+    (latestEvent.status === 'inactive' || latestEvent.status === 'recovering') &&
+    proposedStatus === 'active';
 
   return isResolution || isReactivation || hasNewConfirmedRule(proposedSignals, latestEvent)
     ? proposedSeverity

@@ -112,6 +112,37 @@ describe('WorkflowExecuteManualForm built-in kibana input refs', () => {
     });
   });
 
+  it('does not mark required inputs with a default as required in the Monaco schema', async () => {
+    const jsonDefaultsSetDiagnosticsOptionsSpy = jest.spyOn(jsonDefaults, 'setDiagnosticsOptions');
+
+    render(
+      <WorkflowExecuteManualForm
+        value="{}"
+        inputs={
+          {
+            type: 'object',
+            properties: {
+              who: { type: 'string', default: 'world' },
+              name: { type: 'string' },
+            },
+            required: ['who', 'name'],
+          } as JsonModelSchemaType
+        }
+        setValue={jest.fn()}
+        errors={null}
+        setErrors={jest.fn()}
+      />,
+      { wrapper: I18nProvider }
+    );
+
+    await waitFor(() => {
+      expect(jsonDefaultsSetDiagnosticsOptionsSpy).toHaveBeenCalled();
+    });
+
+    const options = jsonDefaultsSetDiagnosticsOptionsSpy.mock.calls.at(-1)?.[0];
+    expect(options?.schemas?.[0]?.schema).toMatchObject({ required: ['name'] });
+  });
+
   it('reports Zod validation errors when required built-in ref payload is incomplete', async () => {
     const { setErrors } = renderForm(
       JSON.stringify(

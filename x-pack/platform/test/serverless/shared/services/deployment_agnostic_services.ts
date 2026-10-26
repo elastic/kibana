@@ -24,7 +24,6 @@ export const services = {
   security: commonFunctionalServices.security,
   supertestWithoutAuth: commonFunctionalServices.supertestWithoutAuth,
   // platform services
-  ingestPipelines: platformApiIntegrationServices.ingestPipelines,
   ml: platformApiIntegrationServices.ml,
   usageAPI: platformApiIntegrationServices.usageAPI,
 };

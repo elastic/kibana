@@ -45,8 +45,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     await esDeleteAllIndices([indexDoesNotExistName]);
   };
 
-  // Failing: See https://github.com/elastic/kibana/issues/249729
-  describe.skip('index details page - search solution', function () {
+  describe('index details page - search solution', function () {
     // fails on MKI, see https://github.com/elastic/kibana/issues/233476
     this.tags(['failsOnMKI']);
 
@@ -75,8 +74,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await testHasEmbeddedConsole(pageObjects);
         });
 
-        it('should have breadcrumb navigation', async () => {
-          await pageObjects.searchIndexDetailsPage.clickOnBreadcrumb('Indices');
+        it('should navigate back to the indices list', async () => {
+          await pageObjects.searchIndexDetailsPage.clickBackToIndicesList();
           await pageObjects.indexManagement.expectToBeOnIndexManagement();
           await svlSearchNavigation.navigateToIndexDetailPage(indexWithoutDataName);
         });

@@ -121,6 +121,9 @@ describe('useAlertTriggerDecorations', () => {
     // Each alert trigger produces a glyph decoration and a line highlight decoration
     expect(decorations.length).toBe(2);
     expect(decorations[0].options.glyphMarginClassName).toBe('alert-trigger-glyph');
+    expect(decorations[0].options.hoverMessage).toBe(
+      decorations[0].options.glyphMarginHoverMessage
+    );
     expect(decorations[1].options.after.content).toContain('Run Workflow');
   });
 

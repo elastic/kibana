@@ -10,6 +10,8 @@ import { cloneDeep } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import type { Role } from '@kbn/security-plugin-types-common';
 
+import { HIDDEN_PREDEFINED_ROLE_NAME_PREFIXES } from '../constants';
+
 /**
  * Returns whether given role is enabled or not
  *
@@ -28,6 +30,21 @@ export function isRoleEnabled(role: Partial<Role>) {
 export function isRoleReserved(role: Partial<Role>) {
   return (role.metadata?._reserved as boolean) ?? false;
 }
+
+/**
+ * Returns whether given role is a reserved role that Serverless hides from role listings.
+ * This is temporary until we have a proper way to hide roles from role listings. (Famous last words)
+ *
+ * @param role Role as returned by roles API
+ */
+export const isRoleHiddenOnServerless = (role: Partial<Role>): boolean => {
+  const { name } = role;
+  return (
+    isRoleReserved(role) &&
+    name !== undefined &&
+    HIDDEN_PREDEFINED_ROLE_NAME_PREFIXES.some((prefix) => name.startsWith(prefix))
+  );
+};
 
 /**
  * Returns whether given role is deprecated or not.

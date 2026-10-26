@@ -15,7 +15,11 @@ import type { EuiDataGridCellValueElementProps, EuiDataGridSetCellProps } from '
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { DataTableRecord, ShouldShowFieldInTableHandler } from '@kbn/discover-utils/types';
-import { formatFieldValueReact, tryPrettyPrintJsonBlocks } from '@kbn/discover-utils';
+import {
+  formatFieldValueReact,
+  tryPrettyPrintJsonBlocks,
+  MAX_RENDERED_FIELD_VALUE_LENGTH,
+} from '@kbn/discover-utils';
 import { css } from '@emotion/react';
 import type { DataSource } from '@kbn/data-source';
 import { getDataViewFieldFromDataSource } from '@kbn/discover-utils';
@@ -43,6 +47,7 @@ export const getRenderCellValueFn = ({
   documentsDisplayMode,
   jsonModeSettings,
   selectedColumns,
+  isInteractive = true,
 }: {
   dataView: DataView;
   rows: DataTableRecord[] | undefined;
@@ -56,6 +61,7 @@ export const getRenderCellValueFn = ({
   documentsDisplayMode: DocumentsDisplayMode;
   jsonModeSettings?: JsonModeSettings;
   selectedColumns?: string[];
+  isInteractive?: boolean;
 }) => {
   const UnifiedDataTableRenderCellValue = ({
     rowIndex,
@@ -184,6 +190,7 @@ export const getRenderCellValueFn = ({
         fieldFormats,
         closePopover,
         dataSource,
+        isInteractive,
       });
     }
 
@@ -199,6 +206,7 @@ export const getRenderCellValueFn = ({
           maxEntries={maxEntries}
           isCompressed={isCompressed}
           dataSource={dataSource}
+          isInteractive={isInteractive}
         />
       );
     }
@@ -211,6 +219,8 @@ export const getRenderCellValueFn = ({
           fieldFormats,
           dataView,
           field,
+          options: { isInteractive },
+          maxDisplayLength: MAX_RENDERED_FIELD_VALUE_LENGTH,
         })}
       </span>
     );
@@ -237,6 +247,7 @@ function renderPopoverContent({
   fieldFormats,
   closePopover,
   dataSource,
+  isInteractive = true,
 }: {
   row: DataTableRecord;
   field: DataViewField | undefined;
@@ -246,6 +257,7 @@ function renderPopoverContent({
   fieldFormats: FieldFormatsStart;
   closePopover: () => void;
   dataSource: DataSource | undefined;
+  isInteractive?: boolean;
 }) {
   const closeButton = (
     <EuiToolTip
@@ -312,6 +324,7 @@ function renderPopoverContent({
               fieldFormats,
               dataView,
               field,
+              options: { isInteractive },
             })}
           </div>
         </DataTablePopoverCellValue>

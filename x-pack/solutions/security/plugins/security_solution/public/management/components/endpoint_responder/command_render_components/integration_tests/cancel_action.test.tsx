@@ -27,10 +27,19 @@ import {
   ENDPOINT_CAPABILITIES,
   RESPONSE_ACTION_AGENT_TYPE,
 } from '../../../../../../common/endpoint/service/response_actions/constants';
-import type { PendingActionsResponse } from '../../../../../../common/endpoint/types';
+import type {
+  ActionDetails,
+  PendingActionsResponse,
+  ResponseActionCancelOutputContent,
+  ResponseActionCancelParameters,
+} from '../../../../../../common/endpoint/types';
+import { EndpointActionGenerator } from '../../../../../../common/endpoint/data_generators/endpoint_action_generator';
+import { endpointActionResponseCodes } from '../../lib/endpoint_action_response_codes';
+import { RESPONSE_ACTION_STATUS } from '../../../../common/translations';
 import { ExperimentalFeaturesService } from '../../../../../common/experimental_features_service';
 import { isActionSupportedByAgentType } from '../../../../../../common/endpoint/service/response_actions/is_response_action_supported';
 
+jest.mock('../../../../../common/components/user_privileges');
 jest.mock('../../../../../common/experimental_features_service');
 
 const mockedExperimentalFeaturesService = ExperimentalFeaturesService as jest.Mocked<
@@ -201,6 +210,130 @@ describe('When using cancel action from response actions console', () => {
 
       await waitFor(() => {
         expect(renderResult.getByTestId('cancel-action-arg-0')).toBeTruthy();
+      });
+    });
+
+    describe('and the cancel command is submitted', () => {
+      let cancelActionDetails: ActionDetails<
+        ResponseActionCancelOutputContent,
+        ResponseActionCancelParameters
+      >;
+
+      const submitCancelCommand = async () => {
+        const renderResult = await renderConsole(agentType);
+
+        await enterConsoleCommand(renderResult, user, 'cancel --action', { inputOnly: true });
+        await waitFor(() =>
+          user.click(renderResult.getAllByTestId('cancel-action-arg-0-script')[0])
+        );
+        await waitFor(() => {
+          expect(renderResult.queryByTestId('cancel-action-arg-0-popoverPanel')).toBeNull();
+        });
+        consoleMockUtils.submitCommand();
+
+        return renderResult;
+      };
+
+      beforeEach(() => {
+        cancelActionDetails = new EndpointActionGenerator('test').generateActionDetails<
+          ResponseActionCancelOutputContent,
+          ResponseActionCancelParameters
+        >({
+          command: 'cancel',
+          agentType,
+          agents: ['a.b.c'],
+          parameters: { id: '123' },
+        });
+
+        apiMocks.responseProvider.actionDetails.mockImplementation(() => ({
+          data: cancelActionDetails,
+        }));
+      });
+
+      it('should call the cancel api with the selected action id', async () => {
+        await submitCancelCommand();
+
+        await waitFor(() => {
+          expect(apiMocks.responseProvider.cancel).toHaveBeenCalledWith(
+            expect.objectContaining({
+              body: expect.stringContaining('"parameters":{"id":"123"}'),
+            })
+          );
+        });
+      });
+
+      it('should show success with the cancel results when action completes successfully', async () => {
+        const renderResult = await submitCancelCommand();
+
+        await waitFor(() => {
+          expect(renderResult.getByTestId('cancel-success')).toBeTruthy();
+        });
+
+        expect(renderResult.getByTestId('cancel-actionResult-hostStatus')).toHaveTextContent(
+          'cancel completed successfully'
+        );
+        expect(
+          renderResult.getByTestId('cancel-actionResult-cancelResults-success')
+        ).toHaveTextContent(RESPONSE_ACTION_STATUS.successMessage);
+      });
+
+      it('should display the response code message when action completes successfully', async () => {
+        cancelActionDetails.outputs = {
+          'a.b.c': {
+            type: 'json',
+            content: { code: 'ra_cancel_success_done' },
+          },
+        };
+        const renderResult = await submitCancelCommand();
+
+        await waitFor(() => {
+          expect(
+            renderResult.getByTestId('cancel-actionResult-cancelResults-success')
+          ).toHaveTextContent(endpointActionResponseCodes.ra_cancel_success_done);
+        });
+      });
+
+      it('should show failure with error output when action fails', async () => {
+        cancelActionDetails.wasSuccessful = false;
+        cancelActionDetails.status = 'failed';
+        cancelActionDetails.errors = ['error one', 'error two'];
+        cancelActionDetails.agentState = {
+          'a.b.c': {
+            isCompleted: true,
+            wasSuccessful: false,
+            wasCanceled: false,
+            completedAt: new Date().toISOString(),
+            errors: ['error one', 'error two'],
+          },
+        };
+        const renderResult = await submitCancelCommand();
+
+        await waitFor(() => {
+          expect(renderResult.getByTestId('cancel-actionFailure')).toBeTruthy();
+        });
+
+        expect(renderResult.getByTestId('cancel-actionResult-hostStatus')).toHaveTextContent(
+          'cancel failed'
+        );
+        expect(
+          renderResult.getByTestId(
+            'cancel-actionResult-cancelResults-failure-response-action-failure-info'
+          ).textContent
+        ).toMatch(/error one \| error two/);
+      });
+
+      it('should show api failure if cancel request fails', async () => {
+        apiMocks.responseProvider.cancel.mockRejectedValueOnce({
+          status: 500,
+          message: 'this is an error',
+        } as never);
+        const renderResult = await submitCancelCommand();
+
+        await waitFor(() => {
+          expect(renderResult.getByTestId('cancel-apiFailure').textContent).toMatch(
+            /this is an error/
+          );
+        });
       });
     });
 

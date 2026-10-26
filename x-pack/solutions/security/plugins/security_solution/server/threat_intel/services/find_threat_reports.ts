@@ -6,6 +6,7 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
+import { HUNT_USABLE_FILTER, INDICATOR_ELIGIBLE_FILTER } from '@kbn/alertzero-common';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import {
   FIND_THREAT_REPORTS_DEFAULT_PAGE_SIZE,
@@ -18,7 +19,6 @@ import {
 } from '../../../common/threat_intel';
 import { truncate } from './report_content';
 import { HIDDEN_INDEX_PIT_OPTIONS } from '../lib/es_options';
-import { USABLE_REPORT_FILTER } from '../lib/usable_report_filter';
 import { buildSpaceFilterTerms } from '../lib/space_filter';
 import { decodeCursor, encodeCursor, InvalidCursorError } from '../lib/report_cursor';
 
@@ -66,6 +66,7 @@ export const buildFindReportFilters = ({
   from,
   to,
   usableOnly,
+  indicatorEligibleOnly,
 }: {
   spaceId: string;
   source?: string;
@@ -74,6 +75,7 @@ export const buildFindReportFilters = ({
   from?: string;
   to?: string;
   usableOnly?: boolean;
+  indicatorEligibleOnly?: boolean;
 }): estypes.QueryDslQueryContainer[] => {
   const filters: estypes.QueryDslQueryContainer[] = [buildSpaceFilterTerms(spaceId)];
 
@@ -102,8 +104,12 @@ export const buildFindReportFilters = ({
     });
   }
 
-  if (usableOnly) {
-    filters.push(USABLE_REPORT_FILTER);
+  if (usableOnly || indicatorEligibleOnly) {
+    filters.push(HUNT_USABLE_FILTER);
+  }
+
+  if (indicatorEligibleOnly) {
+    filters.push(INDICATOR_ELIGIBLE_FILTER);
   }
 
   return filters;
@@ -224,6 +230,7 @@ export const findThreatReports = async (
     from,
     to,
     usableOnly,
+    indicatorEligibleOnly,
     sort = 'relevance',
   } = params;
 
@@ -240,6 +247,7 @@ export const findThreatReports = async (
     from,
     to,
     usableOnly,
+    indicatorEligibleOnly,
   });
 
   const query: estypes.QueryDslQueryContainer = {

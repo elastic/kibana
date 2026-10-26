@@ -32,7 +32,7 @@ const makeSignal = (
   };
   return {
     type: 'detection',
-    stream_name: 'logs.checkout',
+    source_id: 'logs.checkout',
     description: 'High Latency',
     verdict,
     metadata:
@@ -44,7 +44,7 @@ const makeSignal = (
 
 const makeInput = (overrides: Partial<EventsWriteInput> = {}): EventsWriteInput => ({
   status: 'active',
-  stream_names: ['logs.checkout'],
+  source_ids: ['logs.checkout'],
   title: 'Checkout latency',
   symptom_hypothesis: 'Checkout requests are delayed.',
   summary: 'P99 latency breached SLO',
@@ -62,7 +62,7 @@ const makeActiveEvent = (overrides: Partial<SignificantEvent> = {}): Significant
     event_id: 'existing-event-id',
     status: 'active',
     severity: 'high',
-    stream_names: ['logs.checkout'],
+    source_ids: ['logs.checkout'],
     signals: [makeSignal('rule-abc')],
     title: 'Test event',
     symptom_hypothesis: 'Test hypothesis',
@@ -151,7 +151,7 @@ describe('markDuplicateKeys', () => {
   it('keeps items with different stream sets or rule sets', () => {
     const { remaining } = flag([
       makeInput(),
-      makeInput({ stream_names: ['logs.payments'] }),
+      makeInput({ source_ids: ['logs.payments'] }),
       makeInput({ signals: [makeSignal('rule-xyz')] }),
     ]);
 
@@ -197,21 +197,21 @@ describe('fetchActiveEventsForDedup', () => {
       client,
       dedupCandidates([
         makeInput(),
-        makeInput({ stream_names: ['logs.payments'], signals: [makeSignal('rule-xyz')] }),
+        makeInput({ source_ids: ['logs.payments'], signals: [makeSignal('rule-xyz')] }),
       ])
     );
 
     expect(events).toEqual([hit]);
     expect(client.findLatestActive).toHaveBeenCalledTimes(1);
     expect(client.findLatestActive).toHaveBeenCalledWith({
-      streamNames: ['logs.checkout', 'logs.payments'],
+      sourceIds: ['logs.checkout', 'logs.payments'],
       ruleUuids: ['rule-abc', 'rule-xyz'],
     });
   });
 
-  it.each<{ field: 'ruleUuids' | 'streamNames'; override: Partial<EventsWriteInput> }>([
+  it.each<{ field: 'ruleUuids' | 'sourceIds'; override: Partial<EventsWriteInput> }>([
     { field: 'ruleUuids', override: { signals: [] } },
-    { field: 'streamNames', override: { stream_names: [] } },
+    { field: 'sourceIds', override: { source_ids: [] } },
   ])('omits $field from the scan when any candidate has none', async ({ field, override }) => {
     const client = makeClient();
 
@@ -352,8 +352,8 @@ describe('resolveDedupSkips', () => {
   describe('stream overlap', () => {
     it('covers a candidate whose streams are a subset of the active event streams', () => {
       const { toWrite } = resolve(
-        [makeInput({ stream_names: ['logs.payments'] })],
-        [makeActiveEvent({ stream_names: ['logs.checkout', 'logs.payments'] })]
+        [makeInput({ source_ids: ['logs.payments'] })],
+        [makeActiveEvent({ source_ids: ['logs.checkout', 'logs.payments'] })]
       );
 
       expect(toWrite).toEqual([]);
@@ -361,8 +361,8 @@ describe('resolveDedupSkips', () => {
 
     it('writes a new event when no stream overlaps, even if the rules match', () => {
       const { toWrite } = resolve(
-        [makeInput({ stream_names: ['logs.payments'] })],
-        [makeActiveEvent({ stream_names: ['logs.checkout'] })]
+        [makeInput({ source_ids: ['logs.payments'] })],
+        [makeActiveEvent({ source_ids: ['logs.checkout'] })]
       );
 
       expect(toWrite).toHaveLength(1);

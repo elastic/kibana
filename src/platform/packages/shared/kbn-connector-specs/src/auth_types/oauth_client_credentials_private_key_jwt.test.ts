@@ -200,4 +200,40 @@ describe('OAuthClientCredentialsPrivateKeyJwt', () => {
       ).rejects.toThrow(SECRETS.tokenUrl);
     });
   });
+
+  describe('getAuthHeaders', () => {
+    it('passes the same getToken opts as configure and returns the Authorization header', async () => {
+      const ctx = createMockContext();
+
+      const headers = await OAuthClientCredentialsPrivateKeyJwt.getAuthHeaders?.(ctx, SECRETS);
+
+      expect(ctx.getToken).toHaveBeenCalledWith({
+        authType: OAUTH_CLIENT_CREDENTIALS_PRIVATE_KEY_JWT_ID,
+        tokenUrl: SECRETS.tokenUrl,
+        scope: SECRETS.scope,
+        clientId: SECRETS.clientId,
+      });
+      expect(headers).toEqual({ Authorization: ACCESS_TOKEN });
+    });
+
+    it('wraps getToken failures with tokenUrl context and preserves cause', async () => {
+      const rootCause = new Error('invalid_client');
+      const ctx = createMockContext({ getToken: jest.fn().mockRejectedValue(rootCause) });
+
+      await expect(
+        OAuthClientCredentialsPrivateKeyJwt.getAuthHeaders?.(ctx, SECRETS)
+      ).rejects.toMatchObject({
+        message: expect.stringContaining(SECRETS.tokenUrl),
+        cause: rootCause,
+      });
+    });
+
+    it('throws when getToken resolves to null', async () => {
+      const ctx = createMockContext({ getToken: jest.fn().mockResolvedValue(null) });
+
+      await expect(
+        OAuthClientCredentialsPrivateKeyJwt.getAuthHeaders?.(ctx, SECRETS)
+      ).rejects.toThrow(SECRETS.tokenUrl);
+    });
+  });
 });

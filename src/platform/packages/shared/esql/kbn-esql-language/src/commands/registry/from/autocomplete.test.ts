@@ -8,7 +8,7 @@
  */
 import { expectSuggestions, getFieldNamesByType } from '../../../__tests__/commands/autocomplete';
 import { indexes, integrations, mockContext } from '../../../__tests__/commands/context_fixtures';
-import { METADATA_FIELDS } from '../options/metadata';
+import { CPS_METADATA_FIELDS, METADATA_FIELDS } from '../options/metadata';
 import {
   getRecommendedQueriesTemplates,
   getRecommendedQueriesTemplatesFromExtensions,
@@ -272,6 +272,15 @@ describe('FROM Autocomplete', () => {
     test('metadata field prefixes', async () => {
       await fromExpectSuggestions('from a, b METADATA _', metadataFields, mockCallbacks);
       await fromExpectSuggestions('from a, b METADATA _sour', metadataFields, mockCallbacks);
+    });
+
+    test('suggests CPS metadata fields only when serverless', async () => {
+      await fromExpectSuggestions('from a, b METADATA _proj', metadataFields, mockCallbacks);
+      await fromExpectSuggestions(
+        'from a, b METADATA _proj',
+        [...metadataFields, ...CPS_METADATA_FIELDS].sort(),
+        { ...mockCallbacks, isServerless: true }
+      );
     });
 
     test('on <kbd>SPACE</kbd> after "METADATA" column suggests command and pipe operators', async () => {

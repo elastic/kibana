@@ -7,10 +7,11 @@
 
 import type { Indicator } from '@kbn/slo-schema';
 import {
-  apmTransactionDurationIndicatorSchema,
-  apmTransactionErrorRateIndicatorSchema,
+  is,
+  apmTransactionDurationIndicatorSchemaZod,
+  apmTransactionErrorRateIndicatorSchemaZod,
 } from '@kbn/slo-schema';
 
 export const isApmIndicatorType = (indicator: Indicator): boolean =>
-  apmTransactionDurationIndicatorSchema.is(indicator) ||
-  apmTransactionErrorRateIndicatorSchema.is(indicator);
+  is(apmTransactionDurationIndicatorSchemaZod, indicator) ||
+  is(apmTransactionErrorRateIndicatorSchemaZod, indicator);

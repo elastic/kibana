@@ -82,7 +82,14 @@ Hard requirements:
   process / command → process.name / process.command_line / process.args;
   cloud API activity → event.action / event.provider / user.name / source.ip;
   packages & network flows → url.* / destination.domain / network.* / event.action.
-- Correlate more than one signal when the report supports it (e.g. process activity AND a
-  known C2 destination) — but never at the cost of the first requirement.
+- Alternatives widen the result, so each one must ground itself: every OR branch, every IN (...) member,
+  and every FORK branch must filter on a verbatim report or IOC artifact. One ungrounded alternative
+  discards the whole query.
+- Negations (!=, NOT, NOT IN, NOT LIKE, …) do not ground a query; a grounded positive predicate
+  must also be present.
+- Do not add generic process-name, path, or message branches that lack a report artifact.
+- Correlate signals by ANDing grounded predicates; never widen with OR alternatives that carry
+  no report artifact.
+- Do not use QSTR or KQL; write explicit field comparisons.
 - KEEP @timestamp, the fields the query filters on, and host.name / user.name when they exist
   in the mappings, so the preview surface shows the evidence.`;

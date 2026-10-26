@@ -13,6 +13,7 @@ import {
   DISCOVER_QUERY_MODE_KEY,
   type DiscoverGotoOptions,
   type DiscoverQueryMode,
+  type TimeoutOptions,
 } from './base';
 
 /** Navigation, query-mode switch, wait helpers, and chrome app-menu actions. */
@@ -21,9 +22,15 @@ export abstract class DiscoverNavigation extends DiscoverAppBase {
     await this.setQueryMode(options.queryMode);
     await this.page.gotoApp(
       'discover',
-      options.savedSearchId ? { hash: `/view/${options.savedSearchId}` } : undefined
+      options.savedSearchId ? { hash: `/view/${options.savedSearchId}` } : undefined,
+      // Resolve on 'commit': `waitForDiscoverPage()` is a stronger gate, with a longer budget.
+      { waitUntil: 'commit' }
     );
     await this.waitForDiscoverPage();
+    if (options.queryMode === 'esql') {
+      // Discover discards the seeded mode unless it matches the resolved `discover.isEsqlDefault`.
+      await this.selectTextBaseLang({ timeout: 30_000 });
+    }
   }
 
   protected async waitForDiscoverPage() {
@@ -41,6 +48,13 @@ export abstract class DiscoverNavigation extends DiscoverAppBase {
 
   async waitUntilSearchingHasFinished() {
     await this.dataGrid.waitForLoad();
+    // The query bar swaps `querySubmitButton` for `queryCancelButton` while a fetch is in
+    // flight. Unlike the grid and hit count indicators, which are not rendered during a first
+    // fetch with no prior results, it is present only once the fetch has settled. Checked after
+    // the grid wait so its probe overlaps the fetch, and so a fetch started meanwhile is caught.
+    await expect(this.page.testSubj.locator('querySubmitButton')).toBeVisible({
+      timeout: 30_000,
+    });
     await this.waitUntilHitCountHasSettled();
   }
 
@@ -55,15 +69,14 @@ export abstract class DiscoverNavigation extends DiscoverAppBase {
   /**
    * Seeds the persisted query mode in localStorage on the next page load. Discover
    * ignores `currentMode` unless `defaultMode` matches the resolved default (the
-   * `discover.isEsqlDefault` flag), so `defaultMode` defaults to `'classic'` to
-   * match today's default. When the flag is flipped to make ES|QL the default,
-   * update `defaultMode` or the seed is ignored.
+   * `discover.isEsqlDefault` flag), so `defaultMode` defaults to `'esql'` to
+   * match the current application default.
    *
    * Not idempotent: each call adds an `addInitScript` that reruns on every later
    * load in order, so the last write wins. Avoid calling it more than once per
    * test unless that stacking is intentional.
    */
-  public setQueryMode(currentMode: DiscoverQueryMode, defaultMode: DiscoverQueryMode = 'classic') {
+  public setQueryMode(currentMode: DiscoverQueryMode, defaultMode: DiscoverQueryMode = 'esql') {
     return this.page.addInitScript(
       ({ storageKey, storageValue }) => {
         window.localStorage.setItem(storageKey, storageValue);
@@ -76,15 +89,15 @@ export abstract class DiscoverNavigation extends DiscoverAppBase {
   }
 
   /** Detects whether Discover is in ES|QL or classic mode by checking which editor is visible. */
-  async getCurrentQueryMode(): Promise<DiscoverQueryMode> {
+  async getCurrentQueryMode({ timeout }: TimeoutOptions = {}): Promise<DiscoverQueryMode> {
     const esqlEditor = this.esqlEditor.editor;
     const classicQueryInput = this.page.testSubj.locator('queryInput');
-    await expect(esqlEditor.or(classicQueryInput)).toBeVisible();
+    await expect(esqlEditor.or(classicQueryInput)).toBeVisible({ timeout });
     return (await esqlEditor.isVisible()) ? 'esql' : 'classic';
   }
 
-  async selectTextBaseLang() {
-    const currentMode = await this.getCurrentQueryMode();
+  async selectTextBaseLang(options: TimeoutOptions = {}) {
+    const currentMode = await this.getCurrentQueryMode(options);
     if (currentMode !== 'esql') {
       await this.page.testSubj.click('select-text-based-language-btn');
     }

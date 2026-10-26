@@ -44,6 +44,7 @@ import {
   ENTITY_ANOMALY_TABLE_TIMESTAMP_COLUMN,
   ENTITY_ANOMALY_TABLE_ANOMALY_COLUMN,
   ENTITY_ANOMALY_RECENT_TABLE_EMPTY_MESSAGE,
+  ENTITY_ANOMALY_RECENT_TABLE_EMPTY_MESSAGE_FOR_TIMEFRAME,
 } from './translations';
 import { AnomalyJobName } from './table/anomaly_job_name';
 import { AnomalyTimestamp } from './table/anomaly_timestamp';
@@ -57,12 +58,14 @@ import { AnomaliesErrorPrompt } from './anomalies_error_prompt';
 import { MitreAttackChainPlaceholder } from './mitre/components/mitre_attack_chain_placeholder';
 import { AnomaliesTableLoadingSkeleton } from './table/loading_skeleton';
 import { AnomaliesTableEmptyMessage } from './table/empty_message';
+import { getAnomaliesTimeframeLabel } from './get_anomalies_timeframe_label';
 
 const RECENT_TABLE_OTHER_COLUMN_WIDTH = '35.71%';
 const RECENT_TABLE_ANOMALY_COLUMN_WIDTH = '28.57%';
 
 interface AnomaliesOverviewProps {
   data: GetAnomalyOverviewResponse;
+  scopeId?: string;
   isPreviewMode?: boolean;
   openDetailsPanel: (path: EntityDetailsPath) => void;
   hideHeaderIcons?: boolean;
@@ -72,6 +75,7 @@ interface AnomaliesOverviewProps {
 
 export const AnomaliesOverview: React.FC<AnomaliesOverviewProps> = ({
   data,
+  scopeId,
   isPreviewMode,
   openDetailsPanel,
   hideHeaderIcons,
@@ -260,7 +264,13 @@ export const AnomaliesOverview: React.FC<AnomaliesOverviewProps> = ({
                 noItemsMessage={
                   isEmpty ? (
                     <AnomaliesTableEmptyMessage
-                      message={ENTITY_ANOMALY_RECENT_TABLE_EMPTY_MESSAGE}
+                      message={
+                        scopeId
+                          ? ENTITY_ANOMALY_RECENT_TABLE_EMPTY_MESSAGE_FOR_TIMEFRAME(
+                              getAnomaliesTimeframeLabel(scopeId)
+                            )
+                          : ENTITY_ANOMALY_RECENT_TABLE_EMPTY_MESSAGE
+                      }
                       className="entityAnomaliesRecentTableEmptyMessage"
                     />
                   ) : undefined

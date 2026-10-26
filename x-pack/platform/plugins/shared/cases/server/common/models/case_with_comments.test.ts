@@ -19,6 +19,7 @@ import {
   LENS_ATTACHMENT_TYPE,
   OSQUERY_ATTACHMENT_TYPE,
   SECURITY_ALERT_ATTACHMENT_TYPE,
+  SECURITY_ATTACK_ATTACHMENT_TYPE,
   SECURITY_EVENT_ATTACHMENT_TYPE,
 } from '../../../common/constants/attachments';
 
@@ -47,6 +48,17 @@ const unifiedEventComment = {
   owner: SECURITY_SOLUTION_OWNER,
   attachmentId: 'event-id-1',
   metadata: { index: 'mock-index' },
+};
+
+const unifiedAttackComment = {
+  type: SECURITY_ATTACK_ATTACHMENT_TYPE,
+  owner: SECURITY_SOLUTION_OWNER,
+  attachmentId: 'attack-id-1',
+  metadata: {
+    index: '.alerts-security.attack.discovery.alerts-default',
+    title: 'Credential harvesting',
+    alertCount: 2,
+  },
 };
 
 const unifiedMultipleAlert = {
@@ -382,6 +394,14 @@ describe('CaseCommentModel', () => {
             createdDate,
           })
         ).rejects.toThrow('Event cannot be attached to a closed case');
+
+        await expect(
+          modelForClosedCase.createComment({
+            id: 'comment-1',
+            commentReq: unifiedAttackComment,
+            createdDate,
+          })
+        ).rejects.toThrow('Attack cannot be attached to a closed case');
       });
     });
   });
@@ -1163,6 +1183,50 @@ describe('CaseCommentModel', () => {
       expect(clientArgs.services.attachmentService.bulkCreate).not.toHaveBeenCalled();
     });
 
+    it('checks attack authorization before persisting the attachment (createComment)', async () => {
+      clientArgs.services.alertsService.ensureAttacksAuthorized.mockRejectedValueOnce(
+        new Error('not authorized')
+      );
+
+      await expect(
+        model.createComment({
+          id: 'comment-1',
+          commentReq: unifiedAttackComment,
+          createdDate,
+        })
+      ).rejects.toThrow('not authorized');
+
+      expect(clientArgs.services.alertsService.ensureAttacksAuthorized).toHaveBeenCalledWith({
+        attacks: [{ id: 'attack-id-1', index: '.alerts-security.attack.discovery.alerts-default' }],
+        spaceId: 'default',
+      });
+      expect(clientArgs.services.attachmentService.create).not.toHaveBeenCalled();
+    });
+
+    it('checks attack authorization before persisting the attachment batch (bulkCreate)', async () => {
+      clientArgs.services.alertsService.ensureAttacksAuthorized.mockRejectedValueOnce(
+        new Error('not authorized')
+      );
+
+      await expect(
+        model.bulkCreate({
+          attachments: [{ id: 'comment-1', ...unifiedAttackComment }],
+        })
+      ).rejects.toThrow('not authorized');
+
+      expect(clientArgs.services.attachmentService.bulkCreate).not.toHaveBeenCalled();
+    });
+
+    it('does not authorize an attack as a plain alert', async () => {
+      await model.createComment({
+        id: 'comment-1',
+        commentReq: unifiedAttackComment,
+        createdDate,
+      });
+
+      expect(clientArgs.services.alertsService.ensureAlertsAuthorized).not.toHaveBeenCalled();
+    });
+
     it('does not call ensureDocumentsExist for a batch with no event attachments', async () => {
       await model.bulkCreate({
         attachments: [{ id: 'comment-1', ...unifiedAlertComment }],
@@ -1191,6 +1255,253 @@ describe('CaseCommentModel', () => {
       const createOrder = clientArgs.services.attachmentService.create.mock.invocationCallOrder[0];
 
       expect(authorizeOrder).toBeLessThan(createOrder);
+    });
+
+    it('checks attack authorization before persisting the attachment (updateComment)', async () => {
+      clientArgs.services.alertsService.ensureAttacksAuthorized.mockRejectedValueOnce(
+        new Error('not authorized')
+      );
+
+      await expect(
+        model.updateComment({
+          updateRequest: {
+            id: 'comment-id',
+            version: 'comment-version',
+            ...unifiedAttackComment,
+          },
+          updatedAt: createdDate,
+          owner: SECURITY_SOLUTION_OWNER,
+        })
+      ).rejects.toThrow('not authorized');
+
+      expect(clientArgs.services.alertsService.ensureAttacksAuthorized).toHaveBeenCalledWith({
+        attacks: [{ id: 'attack-id-1', index: '.alerts-security.attack.discovery.alerts-default' }],
+        spaceId: 'default',
+      });
+      expect(clientArgs.services.attachmentService.update).not.toHaveBeenCalled();
+    });
+
+    it('checks alert authorization before persisting the attachment (updateComment)', async () => {
+      clientArgs.services.alertsService.ensureAlertsAuthorized.mockRejectedValueOnce(
+        new Error('not authorized')
+      );
+
+      await expect(
+        model.updateComment({
+          updateRequest: {
+            id: 'comment-id',
+            version: 'comment-version',
+            ...unifiedAlertComment,
+          },
+          updatedAt: createdDate,
+          owner: SECURITY_SOLUTION_OWNER,
+        })
+      ).rejects.toThrow('not authorized');
+
+      expect(clientArgs.services.attachmentService.update).not.toHaveBeenCalled();
+    });
+
+    it('checks event existence before persisting the attachment (updateComment)', async () => {
+      clientArgs.services.alertsService.ensureDocumentsExist.mockRejectedValueOnce(
+        new Error('document not found')
+      );
+
+      await expect(
+        model.updateComment({
+          updateRequest: {
+            id: 'comment-id',
+            version: 'comment-version',
+            ...unifiedEventComment,
+          },
+          updatedAt: createdDate,
+          owner: SECURITY_SOLUTION_OWNER,
+        })
+      ).rejects.toThrow('document not found');
+
+      expect(clientArgs.services.attachmentService.update).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('attack deduplication', () => {
+    it('drops an attack that is already attached to the case', async () => {
+      clientArgs.services.attachmentService.getter.getAttachedAttackIds.mockResolvedValueOnce(
+        new Set(['attack-id-1'])
+      );
+
+      await model.bulkCreate({
+        attachments: [{ id: 'comment-1', ...unifiedAttackComment }],
+      });
+
+      expect(clientArgs.services.attachmentService.bulkCreate).not.toHaveBeenCalled();
+    });
+
+    it('drops an attack that is already attached to the case on createComment', async () => {
+      clientArgs.services.attachmentService.getter.getAttachedAttackIds.mockResolvedValueOnce(
+        new Set(['attack-id-1'])
+      );
+
+      await model.createComment({
+        id: 'comment-1',
+        commentReq: unifiedAttackComment,
+        createdDate,
+      });
+
+      expect(clientArgs.services.attachmentService.create).not.toHaveBeenCalled();
+    });
+
+    it('dedupes the same attack repeated within one batch', async () => {
+      await model.bulkCreate({
+        attachments: [
+          { id: 'comment-1', ...unifiedAttackComment },
+          { id: 'comment-2', ...unifiedAttackComment },
+        ],
+      });
+
+      const attachments =
+        clientArgs.services.attachmentService.bulkCreate.mock.calls[0][0].attachments;
+
+      expect(attachments).toHaveLength(1);
+      expect(asUnifiedAttachmentSO(attachments[0]).attributes.attachmentId).toBe('attack-id-1');
+    });
+
+    it('keeps distinct attacks and leaves attachmentId a scalar', async () => {
+      await model.bulkCreate({
+        attachments: [
+          { id: 'comment-1', ...unifiedAttackComment },
+          { id: 'comment-2', ...unifiedAttackComment, attachmentId: 'attack-id-2' },
+        ],
+      });
+
+      const attachments =
+        clientArgs.services.attachmentService.bulkCreate.mock.calls[0][0].attachments;
+
+      expect(attachments).toHaveLength(2);
+      // the attack payload schema requires a string, so dedup must not widen it to an array
+      expect(asUnifiedAttachmentSO(attachments[0]).attributes.attachmentId).toBe('attack-id-1');
+      expect(asUnifiedAttachmentSO(attachments[1]).attributes.attachmentId).toBe('attack-id-2');
+    });
+
+    it('does not drop an alert that shares an id with an attack in the same batch', async () => {
+      await model.bulkCreate({
+        attachments: [
+          { id: 'comment-1', ...unifiedAttackComment, attachmentId: 'shared-id' },
+          {
+            id: 'comment-2',
+            ...unifiedAlertComment,
+            attachmentId: 'shared-id',
+            metadata: { ...unifiedAlertComment.metadata, index: 'idx-1' },
+          },
+        ],
+      });
+
+      const attachments =
+        clientArgs.services.attachmentService.bulkCreate.mock.calls[0][0].attachments;
+
+      expect(attachments).toHaveLength(2);
+    });
+
+    it('looks up only the attack ids the request carries', async () => {
+      await model.bulkCreate({
+        attachments: [
+          { id: 'comment-1', ...unifiedAttackComment },
+          { id: 'comment-2', ...unifiedAttackComment },
+          { id: 'comment-3', ...unifiedAttackComment, attachmentId: 'attack-id-2' },
+          { id: 'comment-4', ...unifiedAlertComment, attachmentId: 'alert-id-1' },
+        ],
+      });
+
+      expect(
+        clientArgs.services.attachmentService.getter.getAttachedAttackIds
+      ).toHaveBeenCalledTimes(1);
+      expect(
+        clientArgs.services.attachmentService.getter.getAttachedAttackIds
+      ).toHaveBeenCalledWith({
+        caseId: theCase.id,
+        attackIds: ['attack-id-1', 'attack-id-2'],
+      });
+    });
+
+    it('does not look up attached attacks when the request carries none', async () => {
+      await model.bulkCreate({
+        attachments: [{ id: 'comment-1', ...unifiedAlertComment }],
+      });
+
+      expect(
+        clientArgs.services.attachmentService.getter.getAttachedAttackIds
+      ).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('attack status sync on attach', () => {
+    it('syncs the attached attack to the current case status', async () => {
+      await model.createComment({
+        id: 'comment-1',
+        commentReq: unifiedAttackComment,
+        createdDate,
+      });
+
+      expect(clientArgs.services.alertsService.updateAlertsStatus).toHaveBeenCalledWith([
+        {
+          id: 'attack-id-1',
+          index: '.alerts-security.attack.discovery.alerts-default',
+          status: model.savedObject.attributes.status,
+        },
+      ]);
+    });
+
+    it('syncs an attack attached through bulkCreate to the current case status', async () => {
+      clientArgs.services.attachmentService.bulkCreate.mockResolvedValueOnce({
+        saved_objects: [{ ...mockCaseComments[0], id: 'comment-1' }],
+      });
+
+      await model.bulkCreate({
+        attachments: [{ id: 'comment-1', ...unifiedAttackComment }],
+      });
+
+      expect(clientArgs.services.alertsService.updateAlertsStatus).toHaveBeenCalledWith([
+        {
+          id: 'attack-id-1',
+          index: '.alerts-security.attack.discovery.alerts-default',
+          status: model.savedObject.attributes.status,
+        },
+      ]);
+    });
+
+    it('does not write the case id onto the attack document', async () => {
+      await model.createComment({
+        id: 'comment-1',
+        commentReq: unifiedAttackComment,
+        createdDate,
+      });
+
+      expect(clientArgs.services.alertsService.bulkUpdateCases).not.toHaveBeenCalled();
+    });
+
+    it('does not sync the attack when syncAlerts is off', async () => {
+      const unsyncedCase = {
+        ...theCase,
+        attributes: {
+          ...theCase.attributes,
+          settings: { ...theCase.attributes.settings, syncAlerts: false },
+        },
+      };
+      clientArgs.services.caseService.getCase.mockResolvedValue(unsyncedCase);
+      // `createComment` rebuilds the model from the patched case, so the patch result must carry
+      // the same settings or the sync flag would be clobbered by the shared fixture.
+      clientArgs.services.caseService.patchCase.mockResolvedValue(unsyncedCase);
+
+      const unsyncedModel = await CaseCommentModel.create(unsyncedCase.id, clientArgs);
+
+      await unsyncedModel.createComment({
+        id: 'comment-1',
+        commentReq: unifiedAttackComment,
+        createdDate,
+      });
+
+      expect(clientArgs.services.alertsService.updateAlertsStatus).not.toHaveBeenCalled();
+
+      clientArgs.services.caseService.getCase.mockResolvedValue(theCase);
+      clientArgs.services.caseService.patchCase.mockResolvedValue(theCase);
     });
   });
 });

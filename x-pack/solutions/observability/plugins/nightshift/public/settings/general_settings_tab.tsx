@@ -11,7 +11,7 @@ import { getNightshiftCapabilities } from '@kbn/nightshift-shared';
 import { useKibana } from '../hooks/use_kibana';
 import { AppsSection } from './components/apps_section';
 import { DeveloperModeSection } from './components/developer_mode_section';
-import { useDeveloperMode } from './hooks/use_developer_mode';
+import { useDeveloperMode } from '../hooks/use_developer_mode';
 
 export const GeneralSettingsTab = () => {
   const { application } = useKibana().services;

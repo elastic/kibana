@@ -89,9 +89,7 @@ export class DeployPrivateLocationMonitors {
       this.debugLog('No private locations found, skipping sync of private location monitors');
       return;
     }
-    const { syntheticsService } = this.syntheticsMonitorClient;
-
-    const paramsBySpace = await syntheticsService.getSyntheticsParams({
+    const paramsBySpace = await this.syntheticsMonitorClient.getSyntheticsParams({
       spaceId: ALL_SPACES_ID,
     });
 
@@ -378,9 +376,8 @@ export class DeployPrivateLocationMonitors {
     modifiedParamKeys?: string[];
     privateLocationId?: string;
   }) {
-    const { syntheticsService } = this.syntheticsMonitorClient;
-    const paramsBySpacePromise = syntheticsService.getSyntheticsParams({ spaceId });
-    const maintenanceWindowsPromise = syntheticsService.getMaintenanceWindows(spaceId);
+    const paramsBySpacePromise = this.syntheticsMonitorClient.getSyntheticsParams({ spaceId });
+    const maintenanceWindowsPromise = this.syntheticsMonitorClient.getMaintenanceWindows(spaceId);
     const monitorConfigRepository = new MonitorConfigRepository(
       soClient,
       encryptedSavedObjects.getClient()

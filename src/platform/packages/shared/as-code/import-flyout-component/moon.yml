@@ -20,6 +20,7 @@ dependsOn:
   - '@kbn/as-code-shared-schemas'
   - '@kbn/core-application-browser'
   - '@kbn/core-application-browser-mocks'
+  - '@kbn/core-http-browser'
   - '@kbn/core-notifications-browser'
   - '@kbn/core-notifications-browser-mocks'
   - '@kbn/i18n'
@@ -37,6 +38,4 @@ fileGroups:
     - '**/*.ts'
     - '**/*.tsx'
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

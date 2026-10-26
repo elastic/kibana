@@ -49,6 +49,12 @@ export const getConnectorsDict = (): Record<string, ConnectorClientSideDefinitio
     externalDocsUrl: '',
     platinumOnly: true,
   },
+  exchange_server: {
+    docsUrl: docLinks.connectorsExchangeServer,
+    externalAuthDocsUrl: '',
+    externalDocsUrl: '',
+    platinumOnly: true,
+  },
   github: {
     docsUrl: docLinks.connectorsGithub,
     externalAuthDocsUrl: '',
@@ -683,6 +689,23 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
       defaultMessage: 'Outlook',
     }),
     serviceType: 'outlook',
+  },
+  {
+    categories: ['search', 'elastic_stack', 'custom', 'connector', 'connector_client', 'outlook'],
+    description: i18n.translate(
+      'searchConnectors.content.nativeConnectors.exchangeServer.description',
+      {
+        defaultMessage: 'Search over your content on Exchange Server.',
+      }
+    ),
+    iconPath: 'outlook.svg',
+    isBeta: false,
+    isNative: true,
+    keywords: ['exchange', 'outlook', 'connector'],
+    name: i18n.translate('searchConnectors.content.nativeConnectors.exchangeServer.name', {
+      defaultMessage: 'Exchange Server',
+    }),
+    serviceType: 'exchange_server',
   },
   {
     categories: ['search', 'elastic_stack', 'custom', 'connector', 'connector_client', 'teams'],

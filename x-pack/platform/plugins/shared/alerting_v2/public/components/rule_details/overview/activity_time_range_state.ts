@@ -6,7 +6,7 @@
  */
 
 import datemath from '@kbn/datemath';
-import { z } from '@kbn/zod';
+import { lazySchema, z } from '@kbn/zod';
 import type { IKbnUrlStateStorage, Storage } from '@kbn/kibana-utils-plugin/public';
 import { ALERTING_V2_RULES_APP_ID, ALERTING_V2_SECTION_ID } from '@kbn/alerting-v2-constants';
 import { DEFAULT_ACTIVITY_TIME_RANGE } from './time_range';
@@ -24,10 +24,12 @@ type AppStateRecord = Record<string, unknown>;
 
 const MAX_TIME_RANGE_STRING_LENGTH = 128;
 
-const activityTimeRangeSchema = z.object({
-  from: z.string().min(1).max(MAX_TIME_RANGE_STRING_LENGTH),
-  to: z.string().min(1).max(MAX_TIME_RANGE_STRING_LENGTH),
-});
+const activityTimeRangeSchema = lazySchema(() =>
+  z.object({
+    from: z.string().min(1).max(MAX_TIME_RANGE_STRING_LENGTH),
+    to: z.string().min(1).max(MAX_TIME_RANGE_STRING_LENGTH),
+  })
+);
 
 export type AlertTimelineTimeRange = z.infer<typeof activityTimeRangeSchema>;
 

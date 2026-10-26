@@ -15,6 +15,7 @@ import type { MonitorFields } from '../../../common/runtime_types';
 import { ConfigKey } from '../../../common/runtime_types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { validateMonitor } from '../monitor_cruds/monitor_validation';
+import { isSecretConnectionsEnabled } from '../../config';
 
 export const runOnceSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'POST',
@@ -39,7 +40,12 @@ export const runOnceSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () =
       return response.badRequest({ body: { message: 'Monitor data is empty.' } });
     }
 
-    const validationResult = validateMonitor(monitor, spaceId, server.cloud?.isServerlessEnabled);
+    const validationResult = validateMonitor(
+      monitor,
+      spaceId,
+      server.cloud?.isServerlessEnabled,
+      isSecretConnectionsEnabled(server.config)
+    );
 
     const decodedMonitor = validationResult.decodedMonitor;
     if (!validationResult.valid || !decodedMonitor) {

@@ -36,7 +36,7 @@ export const getDetectionPausedCalloutTitle = (
 const getDetectionPausedCalloutActivityScope = (): string =>
   i18n.translate('xpack.significantEvents.maintenance.pausedCallout.activityScope', {
     defaultMessage:
-      'Nightshift activity is stopped across the deployment: scheduled discovery, continuous onboarding, detections, investigations, and the alerting rules backing knowledge indicator queries.',
+      'Nightshift activity is stopped in this space: scheduled discovery, continuous onboarding, detections, investigations, and the alerting rules backing knowledge indicator queries.',
   });
 
 export const getDetectionPausedCalloutBody = ({

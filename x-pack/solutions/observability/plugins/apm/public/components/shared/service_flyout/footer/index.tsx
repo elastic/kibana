@@ -7,46 +7,18 @@
 
 import { useEuiTheme } from '@elastic/eui';
 import type { FlyoutFooterMenuItem, FlyoutFooterMenuPanel } from '@kbn/flyout-template';
-import { EBT_CLICK_ACTIONS, getEbtProps } from '@kbn/ebt-click';
-import type { EbtClickAttrs } from '@kbn/ebt-click';
+import { EBT_CLICK_ACTIONS } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
-import type { MouseEvent } from 'react';
 import { useMemo } from 'react';
-import { isLeftClick, isModifiedClick } from '../../../../utils/mouse_event';
+import {
+  getFlyoutFooterMenuItem,
+  type FlyoutFooterMenuAction,
+} from '../../flyout_footer_menu/get_flyout_footer_menu_item';
 import { SERVICE_FLYOUT_EBT_ELEMENTS } from '../ebt_constants';
 import { useServiceFlyoutLinks } from '../hooks/use_service_flyout_links';
 import { useServiceFlyoutContext } from '../service_flyout_context';
 
 const DATA_TEST_SUBJ_PREFIX = 'serviceFlyoutActionsMenu';
-
-interface LeafAction {
-  id: string;
-  name: string;
-  href?: string;
-  onClick?: () => void;
-  ebt?: EbtClickAttrs;
-}
-
-/**
- * Resolves a menu item's navigation props. A combined href + onClick runs the handler on a plain
- * left-click and otherwise follows the href (e.g. cmd-click opens a new tab).
- */
-function getItemNavigation(href?: string, onClick?: () => void) {
-  if (href && onClick) {
-    return {
-      href,
-      onClick: (e: MouseEvent) => {
-        if (!isLeftClick(e) || isModifiedClick(e)) return;
-        e.preventDefault();
-        onClick();
-      },
-    };
-  }
-  if (href) {
-    return { href, target: '_self' as const };
-  }
-  return { onClick };
-}
 
 export interface ServiceFlyoutFooterMenu {
   panels: FlyoutFooterMenuPanel[];
@@ -88,12 +60,8 @@ export function useServiceFlyoutFooterMenu(): ServiceFlyoutFooterMenu {
   const panels = useMemo<FlyoutFooterMenuPanel[]>(() => {
     const items: FlyoutFooterMenuItem[] = [];
 
-    const makeItem = ({ id, name, href, onClick, ebt }: LeafAction): FlyoutFooterMenuItem => ({
-      name,
-      ...getItemNavigation(href, onClick),
-      ...(ebt ? getEbtProps(ebt) : {}),
-      'data-test-subj': `${DATA_TEST_SUBJ_PREFIX}Item-${id}`,
-    });
+    const makeItem = (action: FlyoutFooterMenuAction) =>
+      getFlyoutFooterMenuItem(action, DATA_TEST_SUBJ_PREFIX);
 
     const pushGroupLabel = (groupId: string, label: string) => {
       items.push({

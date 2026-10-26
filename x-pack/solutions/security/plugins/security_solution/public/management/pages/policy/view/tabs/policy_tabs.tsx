@@ -70,6 +70,7 @@ import { SEARCHABLE_FIELDS as BLOCKLISTS_SEARCHABLE_FIELDS } from '../../../bloc
 import { SEARCHABLE_FIELDS as CUSTOM_YARA_SIGNATURES_SEARCHABLE_FIELDS } from '../../../custom_yara_signatures/constants';
 import { SEARCHABLE_FIELDS as TRUSTED_DEVICES_SEARCHABLE_FIELDS } from '../../../trusted_devices/constants';
 import type { PolicyDetailsRouteState } from '../../../../../../common/endpoint/types';
+import { POLICY_PROTECTION_UPDATES_LABEL } from '../../../../../../common/endpoint/models/policy_settings_ui_labels';
 import { useHostIsolationExceptionsAccess } from '../../../../hooks/artifacts/use_host_isolation_exceptions_access';
 import { TrustedDevicesApiClient } from '../../../trusted_devices/service/api_client';
 import { POLICY_ARTIFACT_TRUSTED_DEVICES_LABELS } from './trusted_devices_translations';
@@ -557,12 +558,7 @@ export const PolicyTabs = React.memo(() => {
       [PolicyTabKeys.PROTECTION_UPDATES]: isEnterprise
         ? {
             id: PolicyTabKeys.PROTECTION_UPDATES,
-            name: i18n.translate(
-              'xpack.securitySolution.endpoint.policy.details.tabs.protectionUpdates',
-              {
-                defaultMessage: 'Protection updates',
-              }
-            ),
+            name: POLICY_PROTECTION_UPDATES_LABEL.label,
             content: (
               <>
                 <EuiSpacer />
