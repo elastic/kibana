@@ -525,10 +525,20 @@ export const ALERTING_LOG_CODES = {
 
   // ──────────────────────────── Rules client ─────────────────────────
   /**
-   * A rule saved object was persisted but its paired Task Manager call
-   * failed, leaving the rule's task state diverged from its saved object.
+   * A rule's Task Manager task state diverged from its saved object and was
+   * not repaired: removing an executor task failed, so the task may outlive
+   * its rule or its disabled state. The executor halts such a task on each run,
+   * and the caller is not told. Failed schedule attempts are not drift: see
+   * `RULE_TASK_SCHEDULE_FAILED`.
    */
   RULE_TASK_MANAGER_DRIFT: 'RULE_TASK_MANAGER_DRIFT',
+  /**
+   * Scheduling the executor task of a rule failed during a bulk create or a
+   * bulk enable. The change was backed out (a created rule is rolled back, an
+   * enabled rule stays disabled) and the caller gets a per-rule error, so rule
+   * and task state stay consistent. This is a failed operation, not drift.
+   */
+  RULE_TASK_SCHEDULE_FAILED: 'RULE_TASK_SCHEDULE_FAILED',
   /**
    * A bulk executor-task API key rotation call (`bulkUpdateSchedules`) failed
    * for one or more rules — e.g. the per-task-type key grant was rejected. The
