@@ -303,6 +303,42 @@ describe('AgentExecutionService', () => {
       expect(mockTaskManagerEnsureScheduled).not.toHaveBeenCalled();
     });
 
+    it('checks the privilege for the agent the conversation resolves to, not the requested one', async () => {
+      resolveConversation.mockResolvedValueOnce({
+        conversationId: 'investigation-1',
+        agentId: 'agent-1',
+      });
+      conversationClient.get.mockResolvedValueOnce(
+        createEmptyConversation({
+          id: 'investigation-1',
+          agent_id: 'agent-1',
+          schema_version: CONVERSATION_SCHEMA_VERSION,
+        })
+      );
+      agentRegistry.get.mockImplementation(async (agentId: string) =>
+        agentId === 'agent-1' ? boundAgent : createMockedInternalAgent({ id: agentId })
+      );
+      checkPrivileges.mockResolvedValue({ hasAllRequested: false });
+
+      await expect(
+        createBoundService().executeAgent({
+          mode: AgentExecutionMode.conversation,
+          request: httpServerMock.createKibanaRequest(),
+          params: {
+            agentId: 'unbound-agent',
+            origin: { type: ConversationOriginType.Slack, external_conversation_id: 'thread-1' },
+            nextInput: { message: 'hello' },
+          },
+          useTaskManager: true,
+        })
+      ).rejects.toMatchObject({ meta: { statusCode: 403 } });
+
+      expect(agentRegistry.get).toHaveBeenCalledWith('agent-1', { access: 'use' });
+      expect(conversationClient.create).not.toHaveBeenCalled();
+      expect(conversationClient.appendEvents).not.toHaveBeenCalled();
+      expect(mockExecutionClient.create).not.toHaveBeenCalled();
+    });
+
     it('refuses to run a bound agent while service accounts are disabled', async () => {
       await expect(
         converse(createBoundService({ serviceAccountsEnabled: false }), true)

@@ -134,8 +134,6 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     const spaceId = getCurrentSpaceId({ request, spaces: this.deps.spaces });
     const interactivity = normalizeInteractive(interactive, mode);
     const executionClient = this.createExecutionClient();
-    // Resolved first: a caller refused here leaves no execution record and no stored message.
-    const runAs = await this.resolveExecutionIdentity({ request, agentId });
 
     const { conversationClient, parentExecution } = await this.resolveConversationClient({
       request,
@@ -160,6 +158,9 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     const validatedParams = conversationParams ?? (await this.validateAttachments(params, request));
     const receivedAt = resolvedConversation?.receivedAt ?? new Date();
     const agentId = conversationParams?.agentId ?? this.requestedAgentId(params);
+    // Resolved once the agent is known, which may be the stored conversation's, and before any
+    // write: a caller refused here leaves no execution record, no conversation and no message.
+    const runAs = await this.resolveExecutionIdentity({ request, agentId });
 
     if (
       params.reasoningLevel !== undefined &&
