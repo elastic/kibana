@@ -80,7 +80,7 @@ e2e suite depends on; Task 3+ fixtures must match it.
   proposals out — **seed docs must set `origin: 'alertzero'`**.
 - **Mismatch recorded (product/doc question, not a test bend):** route description says
   "decided in the last 72 hours" (get_closed_proposals.ts:57-59) and the constant is 72h,
-  but issue #19934's text says 24h. Tests encode the code (72h): boundary seed **73h →
+  but the manual-QA scenario text says 24h. Tests encode the code (72h): boundary seed **73h →
   absent**, control **71h → present**. Age **`decidedAt`**, not `@timestamp` (sort key +
   `decidedWithinHours` field).
 - Response: `ProposalsPageResponse { proposals, total }` — decision-time field
@@ -130,5 +130,6 @@ stays polluted for sibling specs.
 ## 7. EIS-layer follow-up owner
 
 PR #296995 (`scout/alertzero-e2e-p1`) is **OPEN** as of 2026-10-26 → the EIS layer
-(`test/scout_alertzero_e2e/ui/`) is deferred to a follow-up card, created at Task 10.
-Record the card ID here when created. Nothing in this suite imports from that branch.
+(`test/scout_alertzero_e2e/ui/`) is deferred to a tracked follow-up (internal card
+"AlertZero onboarding e2e — real-EIS layer"). Nothing in this suite imports from that
+branch.
