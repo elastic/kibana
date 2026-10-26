@@ -42,8 +42,8 @@ export interface IUiSettingsClient {
    *
    * - Emits the value `get(key)` without a context would return, first after the first successful read, then once
    *   per change. Never emits synchronously, and two consecutive values are never deep-equal.
-   * - Changes written on this Kibana node are emitted right after the write. Changes written on other nodes are
-   *   emitted within one poll interval (10 seconds).
+   * - Changes written through this Kibana node are emitted before the write resolves. Changes written on other
+   *   nodes are emitted within one poll interval (10 seconds).
    * - Never errors. While Elasticsearch is unreachable, the last value is kept.
    * - Completes when Kibana stops. A key overridden in `kibana.yml` emits once and completes.
    * - Throws for a key registered with `getValue`, because its default depends on the request.

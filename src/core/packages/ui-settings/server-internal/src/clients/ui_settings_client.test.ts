@@ -1485,6 +1485,35 @@ describe('ui settings', () => {
       expect(values).toEqual(['default', 'new']);
     });
 
+    it('resolves a write only once the stream has it, so a later subscriber starts with it', async () => {
+      const { uiSettings, repository, collect } = setupWithWatcher({
+        defaults: { foo: { value: 'default', schema: schema.string() } },
+        esDocSource: { foo: 'old' },
+      });
+      collect<string>('foo');
+      await flush();
+
+      const bulkGet = repository.bulkGet.getMockImplementation()!;
+      let releaseRead!: () => void;
+      repository.bulkGet.mockImplementationOnce(async (objects) => {
+        await new Promise<void>((resolve) => (releaseRead = resolve));
+        return bulkGet(objects);
+      });
+      let written = false;
+      const write = uiSettings.set('foo', 'new').then(() => {
+        written = true;
+      });
+      await flush();
+      expect(written).toBe(false);
+
+      releaseRead();
+      await write;
+      const { values } = collect<string>('foo');
+      await flush();
+
+      expect(values).toEqual(['new']);
+    });
+
     it('does not emit when only other keys change', async () => {
       const { uiSettings, collect } = setupWithWatcher({
         defaults: {

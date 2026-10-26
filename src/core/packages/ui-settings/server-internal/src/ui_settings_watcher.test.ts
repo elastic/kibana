@@ -278,6 +278,24 @@ describe('UiSettingsWatcher', () => {
     expect(log.info).toHaveBeenCalledTimes(1);
   });
 
+  it('does not log a read that fails after stop', async () => {
+    const { repository, log, watcher, store, collect } = setup();
+    store('default', { foo: 'a' });
+    collect(DEFAULT_REF);
+    await flush();
+
+    let rejectRead!: (error: Error) => void;
+    repository.bulkGet.mockImplementationOnce(
+      () => new Promise((_resolve, reject) => (rejectRead = reject))
+    );
+    await nextPoll();
+    watcher.stop();
+    rejectRead(new Error('client closed'));
+    await flush();
+
+    expect(log.warn).not.toHaveBeenCalled();
+  });
+
   it('does not emit anything until the first read succeeds', async () => {
     const { repository, collect } = setup();
     repository.bulkGet.mockRejectedValue(new Error('es down'));

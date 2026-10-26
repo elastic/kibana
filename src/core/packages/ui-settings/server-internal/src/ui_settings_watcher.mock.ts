@@ -12,5 +12,5 @@ import type { UiSettingsServiceOptions } from './types';
 
 export const createWatcherMock = (): jest.Mocked<UiSettingsServiceOptions['watcher']> => ({
   watch: jest.fn().mockReturnValue(NEVER),
-  notifyLocalWrite: jest.fn(),
+  notifyLocalWrite: jest.fn().mockResolvedValue(undefined),
 });

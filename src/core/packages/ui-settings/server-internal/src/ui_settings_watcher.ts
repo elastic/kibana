@@ -136,7 +136,7 @@ const toBulkGetObject = (ref: ConfigDocRef, id: string): SavedObjectsBulkGetObje
 export class UiSettingsWatcher {
   private readonly docs = new Map<string, WatchedDoc>();
   private timer?: NodeJS.Timeout;
-  private running = false;
+  private inflight?: Promise<void>;
   private dirty = false;
   private failing = false;
   private stopped = false;
@@ -158,10 +158,8 @@ export class UiSettingsWatcher {
     });
   }
 
-  notifyLocalWrite(ref: ConfigDocRef): void {
-    if (this.docs.has(ref.namespace)) {
-      this.requestTick();
-    }
+  notifyLocalWrite(ref: ConfigDocRef): Promise<void> {
+    return this.docs.has(ref.namespace) ? this.requestTick() : Promise.resolve();
   }
 
   stop(): void {
@@ -203,30 +201,33 @@ export class UiSettingsWatcher {
   }
 
   // A request during a tick runs one more tick right after, so its read cannot predate the request.
-  private requestTick = (): void => {
+  // The returned promise resolves once a tick that started after the request has finished.
+  private requestTick = (): Promise<void> => {
     if (this.stopped || this.docs.size === 0) {
-      return;
+      return Promise.resolve();
     }
-    if (this.running) {
+    if (this.inflight) {
       this.dirty = true;
-      return;
+      return this.inflight;
     }
     clearTimeout(this.timer);
     this.timer = undefined;
-    void this.run();
+    this.inflight = this.run();
+    return this.inflight;
   };
 
   private async run(): Promise<void> {
-    this.running = true;
     do {
       this.dirty = false;
       try {
         await this.tick();
       } catch (error) {
-        this.reportHealth(error);
+        if (!this.stopped) {
+          this.reportHealth(error);
+        }
       }
     } while (this.dirty && !this.stopped);
-    this.running = false;
+    this.inflight = undefined;
     if (!this.stopped && this.docs.size > 0) {
       this.timer = setTimeout(this.requestTick, this.options.pollInterval);
     }

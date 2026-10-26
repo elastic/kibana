@@ -185,7 +185,7 @@ export class MyPlugin implements Plugin {
 
 - It emits the value `get(key)` would return without a request context. The first value arrives after the first successful read, then one value per change. Consecutive values are never deep-equal.
 - It throws for a setting registered with `getValue`, because that default depends on the request, for example on the solution of the active space. Use `get(key, { request })` for those settings.
-- Changes written on the same {{kib}} node are emitted right after the write. Changes written on other nodes are emitted within 10 seconds.
+- Changes written through the same {{kib}} node are emitted before the write resolves, so a subscription that starts after `await set(...)` sees the new value. Changes written on other nodes are emitted within 10 seconds.
 - It never errors. While {{es}} is unreachable, the last value is kept.
 - It completes when {{kib}} stops. A setting overridden in `kibana.yml` emits once and completes.
 - The saved objects client the scoped client was created with only selects the space. Reads use {{kib}}'s internal identity, so you can keep the subscription after the request that created the client has ended.
