@@ -81,6 +81,34 @@ describe('pickDateRounding', () => {
       false
     );
   });
+
+  it('rejects 3h for a New York spring-forward range that spans 101 zoned buckets', () => {
+    const ny = ianaTimeZone('America/New_York');
+    const range: ZonedDateRange = {
+      from: Date.parse('2024-03-09T05:00:00.000Z'),
+      to: Date.parse('2024-03-21T17:00:00.000Z'),
+      timeZone: ny,
+    };
+    const interval = pickDateRounding(100, range);
+    expect(interval.expression).toBe('12h');
+    expect(
+      fitsInBuckets({ expression: '3h', kind: 'fixed', nominalMs: 3 * hour }, range, 100)
+    ).toBe(false);
+  });
+
+  it('accepts 3h for a New York fall-back range that elapsed-hour counting over-counts', () => {
+    const ny = ianaTimeZone('America/New_York');
+    const range: ZonedDateRange = {
+      from: Date.parse('2024-11-02T04:00:00.000Z'),
+      to: Date.parse('2024-11-14T17:00:00.000Z'),
+      timeZone: ny,
+    };
+    const interval = pickDateRounding(100, range);
+    expect(interval.expression).toBe('3h');
+    expect(
+      fitsInBuckets({ expression: '3h', kind: 'fixed', nominalMs: 3 * hour }, range, 100)
+    ).toBe(true);
+  });
 });
 
 describe('fitsInBuckets', () => {
