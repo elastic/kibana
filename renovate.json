@@ -1411,8 +1411,8 @@
       "enabled": true
     },
     {
-      "groupName": "borc",
-      "matchDepNames": ["borc"],
+      "groupName": "cbor2",
+      "matchDepNames": ["cbor2"],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "labels": ["Team:Operations", "backport:all-open", "release_note:skip"],
