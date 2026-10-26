@@ -184,7 +184,7 @@ export function InternalDashboardTopNav({
     dataLoading,
     canCancel,
   ] = useBatchedPublishingSubjects(
-    dashboardApi.filterableSources$,
+    dashboardApi.dataSources$,
     dashboardApi.fullScreenMode$,
     dashboardApi.hasUnsavedChanges$,
     dashboardApi.isApproximate$,

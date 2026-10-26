@@ -71,7 +71,7 @@ export const useDashboardPreviewUnifiedSearch = ({
       return;
     }
 
-    setSources(dashboardApi.filterableSources$.value ?? []);
+    setSources(dashboardApi.dataSources$.value ?? []);
 
     const querySubscription = dashboardApi.query$.subscribe((nextQuery) => {
       const resolvedQuery = normalizeQuery(
@@ -81,7 +81,7 @@ export const useDashboardPreviewUnifiedSearch = ({
         isEqual(currentQuery, resolvedQuery) ? currentQuery : resolvedQuery
       );
     });
-    const sourcesSubscription = dashboardApi.filterableSources$.subscribe((nextSources) => {
+    const sourcesSubscription = dashboardApi.dataSources$.subscribe((nextSources) => {
       const resolvedSources = nextSources ?? [];
       setSources((currentSources) =>
         isEqual(currentSources, resolvedSources) ? currentSources : resolvedSources

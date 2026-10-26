@@ -8,60 +8,39 @@
  */
 
 import type { FilterableSource } from '@kbn/data-source';
-import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
-import type {
-  PublishesDataViews,
-  PublishesFilterableSources,
-  PublishingSubject,
-} from '@kbn/presentation-publishing';
+import type { PublishesDataSources, PublishingSubject } from '@kbn/presentation-publishing';
 import {
-  apiPublishesDataViews,
-  apiPublishesFilterableSources,
+  apiPublishesDataSources,
   combineCompatibleChildrenApis,
 } from '@kbn/presentation-publishing';
 import { uniqBy } from 'lodash';
-import { BehaviorSubject, combineLatest, switchMap } from 'rxjs';
+import { BehaviorSubject, switchMap } from 'rxjs';
 
 export function initializeDataViewsManager(
   children$: PublishingSubject<{ [key: string]: DefaultEmbeddableApi }>
 ) {
-  const dataViews$ = new BehaviorSubject<DataView[] | undefined>([]);
+  const dataSources$ = new BehaviorSubject<FilterableSource[] | undefined>([]);
 
-  const filterableSources$ = new BehaviorSubject<FilterableSource[] | undefined>([]);
-
-  const subscription = combineLatest([
-    combineCompatibleChildrenApis<PublishesDataViews, DataView[]>(
-      { children$ },
-      'dataViews$',
-      apiPublishesDataViews,
-      []
-    ),
-    combineCompatibleChildrenApis<PublishesFilterableSources, FilterableSource[]>(
-      { children$ },
-      'filterableSources$',
-      apiPublishesFilterableSources,
-      []
-    ),
-  ])
+  const dataSourcesSubscription = combineCompatibleChildrenApis<
+    PublishesDataSources,
+    FilterableSource[]
+  >({ children$ }, 'dataSources$', apiPublishesDataSources, [])
     .pipe(
-      switchMap(async ([childDataViews, childSources]) => ({
-        dataViews: uniqBy(childDataViews, 'id'),
-        filterableSources: uniqBy<FilterableSource>([...childDataViews, ...childSources], 'id'),
-      }))
+      switchMap(async (childDataSources) => {
+        return uniqBy(childDataSources, 'id');
+      })
     )
-    .subscribe(({ dataViews, filterableSources }) => {
-      dataViews$.next(dataViews);
-      filterableSources$.next(filterableSources);
+    .subscribe((nextDataSources) => {
+      dataSources$.next(nextDataSources);
     });
 
   return {
     api: {
-      dataViews$,
-      filterableSources$,
+      dataSources$,
     },
     cleanup: () => {
-      subscription.unsubscribe();
+      dataSourcesSubscription.unsubscribe();
     },
   };
 }

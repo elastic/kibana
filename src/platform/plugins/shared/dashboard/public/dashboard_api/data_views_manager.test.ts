@@ -32,64 +32,55 @@ const flush = () => new Promise((resolve) => setTimeout(resolve, 0));
 const ids = (list?: Array<{ id?: string }>) => list?.map(({ id }) => id);
 
 describe('initializeDataViewsManager', () => {
-  it('publishes the data views of the children as data views and as filterable sources', async () => {
-    const { api } = setup({ a: { dataViews$: new BehaviorSubject([dataView('dv-1')]) } });
-
-    await flush();
-
-    expect(ids(api.dataViews$.value)).toEqual(['dv-1']);
-    expect(ids(api.filterableSources$.value)).toEqual(['dv-1']);
-  });
-
-  it('publishes the filterable sources of the children without turning them into data views', async () => {
-    const { api } = setup({ a: { filterableSources$: new BehaviorSubject([source('esql-1')]) } });
-
-    await flush();
-
-    expect(api.dataViews$.value).toEqual([]);
-    expect(ids(api.filterableSources$.value)).toEqual(['esql-1']);
-  });
-
-  it('merges both lists and removes duplicated ids', async () => {
+  it('publishes the data sources of the children, whether they are data views or ES|QL datasets', async () => {
     const { api } = setup({
-      a: { dataViews$: new BehaviorSubject([dataView('dv-1'), dataView('shared')]) },
-      b: { filterableSources$: new BehaviorSubject([source('shared'), source('esql-1')]) },
+      a: { dataSources$: new BehaviorSubject([dataView('dv-1')]) },
+      b: { dataSources$: new BehaviorSubject([source('esql-1')]) },
     });
 
     await flush();
 
-    expect(ids(api.filterableSources$.value)).toEqual(['dv-1', 'shared', 'esql-1']);
+    expect(ids(api.dataSources$.value)).toEqual(['dv-1', 'esql-1']);
+  });
+
+  it('removes duplicated ids across children', async () => {
+    const { api } = setup({
+      a: { dataSources$: new BehaviorSubject([dataView('shared'), dataView('dv-1')]) },
+      b: { dataSources$: new BehaviorSubject([source('shared'), source('esql-1')]) },
+    });
+
+    await flush();
+
+    expect(ids(api.dataSources$.value)).toEqual(['shared', 'dv-1', 'esql-1']);
+  });
+
+  it('ignores children that do not publish data sources', async () => {
+    const { api } = setup({ a: {}, b: { dataSources$: new BehaviorSubject([source('esql-1')]) } });
+
+    await flush();
+
+    expect(ids(api.dataSources$.value)).toEqual(['esql-1']);
+  });
+
+  it('publishes an empty list when there are no children', async () => {
+    const { api } = setup({});
+
+    await flush();
+
+    expect(api.dataSources$.value).toEqual([]);
   });
 
   it('follows the children when they change', async () => {
     const published$ = new BehaviorSubject([source('esql-1')]);
-    const { api } = setup({ a: { filterableSources$: published$ } });
+    const { api, children$ } = setup({ a: { dataSources$: published$ } });
     await flush();
 
     published$.next([source('esql-2')]);
     await flush();
+    expect(ids(api.dataSources$.value)).toEqual(['esql-2']);
 
-    expect(ids(api.filterableSources$.value)).toEqual(['esql-2']);
-  });
-
-  it('updates both lists in the same tick, so they never disagree', async () => {
-    const { api, children$ } = setup({});
-    const seen: Array<{
-      dataViews?: Array<string | undefined>;
-      sources?: Array<string | undefined>;
-    }> = [];
-    api.filterableSources$.subscribe((sources) =>
-      seen.push({ dataViews: ids(api.dataViews$.value), sources: ids(sources) })
-    );
-
-    children$.next({
-      a: { dataViews$: new BehaviorSubject([dataView('dv-1')]) },
-    } as never);
+    children$.next({} as never);
     await flush();
-
-    expect(seen[seen.length - 1]).toEqual({ dataViews: ['dv-1'], sources: ['dv-1'] });
-    expect(seen.filter(({ sources }) => sources?.length === 1)).toEqual([
-      { dataViews: ['dv-1'], sources: ['dv-1'] },
-    ]);
+    expect(api.dataSources$.value).toEqual([]);
   });
 });

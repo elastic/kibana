@@ -89,7 +89,7 @@ export function FiltersNotificationPopover({ api }: { api: FiltersNotificationAc
   }, [api, setDisableEditButton]);
 
   const [dataViews, parentViewMode] = useBatchedPublishingSubjects(
-    api.parentApi?.filterableSources$ ?? new BehaviorSubject(undefined),
+    api.parentApi?.dataSources$ ?? new BehaviorSubject(undefined),
     getViewModeSubject(api) ?? new BehaviorSubject(undefined)
   );
 

@@ -184,7 +184,7 @@ describe('Internal dashboard top nav', () => {
     const dashboardApi: DashboardApi = {
       ...api,
       viewMode$: new BehaviorSubject<ViewMode>('view'),
-      filterableSources$: new BehaviorSubject<FilterableSource[] | undefined>([
+      dataSources$: new BehaviorSubject<FilterableSource[] | undefined>([
         { isTimeBased: () => false } as DataView,
       ]),
     };
@@ -218,7 +218,7 @@ describe('Internal dashboard top nav', () => {
     const dashboardApi: DashboardApi = {
       ...api,
       viewMode$: new BehaviorSubject<ViewMode>('view'),
-      filterableSources$: new BehaviorSubject<FilterableSource[] | undefined>([
+      dataSources$: new BehaviorSubject<FilterableSource[] | undefined>([
         { type: 'esql', timeFieldName: undefined, isTimeBased: () => false } as DataView,
       ]),
     };
@@ -252,7 +252,7 @@ describe('Internal dashboard top nav', () => {
     const dashboardApi: DashboardApi = {
       ...api,
       viewMode$: new BehaviorSubject<ViewMode>('view'),
-      filterableSources$: new BehaviorSubject<FilterableSource[] | undefined>([
+      dataSources$: new BehaviorSubject<FilterableSource[] | undefined>([
         { type: 'esql', timeFieldName: '@timestamp', isTimeBased: () => false } as DataView,
       ]),
     };
@@ -293,7 +293,7 @@ describe('Internal dashboard top nav', () => {
     const dashboardApi: DashboardApi = {
       ...api,
       viewMode$: new BehaviorSubject<ViewMode>('view'),
-      filterableSources$: new BehaviorSubject<FilterableSource[] | undefined>([esqlSource]),
+      dataSources$: new BehaviorSubject<FilterableSource[] | undefined>([esqlSource]),
     };
 
     renderWithChrome(
@@ -325,7 +325,7 @@ describe('Internal dashboard top nav', () => {
     const dashboardApi: DashboardApi = {
       ...api,
       viewMode$: new BehaviorSubject<ViewMode>('view'),
-      filterableSources$: new BehaviorSubject<FilterableSource[] | undefined>([
+      dataSources$: new BehaviorSubject<FilterableSource[] | undefined>([
         { isTimeBased: () => false } as DataView,
         { isTimeBased: () => true } as DataView,
       ]),

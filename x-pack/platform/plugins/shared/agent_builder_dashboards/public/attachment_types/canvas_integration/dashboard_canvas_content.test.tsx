@@ -39,11 +39,11 @@ describe('DashboardCanvasAttachment', () => {
     overrides: Partial<Pick<DashboardApi, 'isManaged' | 'isEditableByUser'>> = {}
   ): DashboardApi & {
     children$: BehaviorSubject<Record<string, unknown>>;
-    filterableSources$: BehaviorSubject<any[]>;
+    dataSources$: BehaviorSubject<any[]>;
     isApproximate$: BehaviorSubject<boolean>;
   } => {
     const children$ = new BehaviorSubject<Record<string, unknown>>({});
-    const filterableSources$ = new BehaviorSubject<any[]>([]);
+    const dataSources$ = new BehaviorSubject<any[]>([]);
     const filters$ = new BehaviorSubject<Filter[]>([]);
     const isApproximate$ = new BehaviorSubject(false);
     const query$ = new BehaviorSubject<Query | undefined>(undefined);
@@ -54,7 +54,7 @@ describe('DashboardCanvasAttachment', () => {
       locator: {
         navigate: jest.fn().mockResolvedValue(undefined),
       },
-      filterableSources$,
+      dataSources$,
       filters$,
       forceRefresh: jest.fn(),
       isApproximate$,
@@ -77,7 +77,7 @@ describe('DashboardCanvasAttachment', () => {
       ...overrides,
     } as unknown as DashboardApi & {
       children$: BehaviorSubject<Record<string, unknown>>;
-      filterableSources$: BehaviorSubject<any[]>;
+      dataSources$: BehaviorSubject<any[]>;
       isApproximate$: BehaviorSubject<boolean>;
     };
   };
@@ -521,7 +521,7 @@ describe('DashboardCanvasAttachment', () => {
     );
 
     act(() => {
-      mockApi.filterableSources$.next(nextDataViews as any);
+      mockApi.dataSources$.next(nextDataViews as any);
     });
 
     expect(getLatestSearchBarProps()).toEqual(

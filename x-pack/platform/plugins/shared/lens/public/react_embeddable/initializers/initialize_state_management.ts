@@ -4,11 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { DataView } from '@kbn/data-views-plugin/common';
 import type { StateComparators } from '@kbn/presentation-publishing';
 import {
   type PublishesBlockingError,
   type PublishesDataLoading,
-  type PublishesDataViews,
+  type PublishesDataSources,
   type PublishesSavedObjectId,
   type PublishesRendered,
 } from '@kbn/presentation-publishing';
@@ -27,7 +28,7 @@ import { isFlattenedAPIConfig, unflattenAPIConfig } from '../../../common/transf
 export interface StateManagementConfig {
   api: Pick<IntegrationCallbacks, 'updateAttributes' | 'updateRefId'> &
     PublishesSavedObjectId &
-    PublishesDataViews &
+    PublishesDataSources<DataView> &
     PublishesDataLoading &
     PublishesRendered &
     PublishesBlockingError;
@@ -73,7 +74,7 @@ export function initializeStateManagement(
       updateAttributes: internalApi.updateAttributes,
       updateRefId: (newRefId: LensRuntimeState['ref_id']) => savedObjectId$.next(newRefId),
       savedObjectId$,
-      dataViews$: internalApi.dataViews$,
+      dataSources$: internalApi.dataSources$,
       dataLoading$: internalApi.dataLoading$,
       blockingError$: internalApi.blockingError$,
       rendered$: internalApi.hasRenderCompleted$,

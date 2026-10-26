@@ -84,7 +84,7 @@ const DashboardViewComponent: React.FC<DashboardViewProps> = ({
       return;
     }
 
-    const subscription = dashboardContainer.filterableSources$.subscribe((publishedSources) => {
+    const subscription = dashboardContainer.dataSources$.subscribe((publishedSources) => {
       setDashboardSources(publishedSources?.length ? publishedSources : undefined);
     });
 

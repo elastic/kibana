@@ -63,7 +63,7 @@ The resulting HTML is rendered in an `<iframe sandbox="" srcDoc={...}>`. "Run Pr
 The embeddable subscribes to `fetch$` and republishes `timeRange`, `query`, `filters`, `isApproximate`, and `projectRouting` so ES|QL results respect the dashboard's time picker, KQL bar, filter pills, and approximation setting. It also publishes:
 
 - `usesEsql$` — whether the panel currently has a query.
-- `dataViews$` — an ad-hoc data view derived from the ES|QL query (`getESQLAdHocDataview`), which is what gives the KQL bar and filter builder field suggestions for this panel.
+- `dataSources$` — an ad-hoc data view derived from the ES|QL query (`getESQLAdHocDataview`), which is what gives the KQL bar and filter builder field suggestions for this panel.
 
 ### Theming
 
