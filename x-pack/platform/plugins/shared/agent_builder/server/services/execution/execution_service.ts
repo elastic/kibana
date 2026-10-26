@@ -28,6 +28,7 @@ import {
   agentBuilderDefaultAgentId,
   createBadRequestError,
   createInternalError,
+  isConversationBusyError,
   isExecutionAbortReason,
   isRequestAbortedError,
   roundUserMessageEventId,
@@ -59,15 +60,20 @@ import {
   collectAndWriteEvents,
   type AgentExecutionDeps,
 } from './execution_runner';
-import { resolveExecutionConnectorId, serializeExecutionError } from './utils';
+import {
+  getPendingResumeRound,
+  isExecutionLive,
+  resolveExecutionConnectorId,
+  serializeExecutionError,
+} from './utils';
 import { AbortMonitor } from './task/abort_monitor';
 import { HeartbeatReporter } from './task/heartbeat_reporter';
 import { followExecution$ } from './execution_follower';
 import type { ConversationClient } from '../conversation';
+import type { ConversationClaim } from '../conversation/client/types';
 import type { CallbackDeliveryService } from './callback';
 import {
   getConversation,
-  isPendingResumeConversation,
   persistUserMessage,
   type ConversationWithOperation,
 } from './utils/conversations';
@@ -232,29 +238,54 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
       throw err;
     }
 
-    // After the record, so an idempotency-key replay is recognised before a second message lands.
-    // A resume continues a round that is already open, so it does not write a new message.
-    if (
-      conversationParams &&
-      conversation &&
-      conversationParams.storeConversation !== false &&
-      !isPendingResumeConversation(conversation)
-    ) {
+    // After the record, so an idempotency-key replay is recognised before a second message lands
+    // or the run lock is claimed. A resume continues a round that is already open, so it claims
+    // the lock without writing a new message.
+    if (conversationParams && conversation && conversationParams.storeConversation !== false) {
+      const pendingResumeRound = getPendingResumeRound(conversation);
+      const claim: ConversationClaim = {
+        executionId,
+        triggerEventId: roundUserMessageEventId(pendingResumeRound?.id ?? roundId),
+        isHolderLive: async (holderExecutionId) =>
+          isExecutionLive(await executionClient.peek(holderExecutionId)),
+      };
+
       try {
-        await this.writeUserMessage({
-          conversation,
-          conversationClient,
-          params: conversationParams,
-          request,
-          receivedAt,
-          eventId: roundUserMessageEventId(roundId),
-          mergeAttachments: false,
-          parentExecution,
-          // The run reads the conversation by id (real-time). The conversation is already listed,
-          // so a list search before the next scheduled refresh only sees the previous `updated_at`.
-          appendRefresh: false,
-        });
+        if (pendingResumeRound) {
+          await conversationClient.claimActiveExecution(
+            { id: conversation.id, claim },
+            { source: 'execution' }
+          );
+        } else {
+          await this.writeUserMessage({
+            conversation,
+            conversationClient,
+            params: conversationParams,
+            request,
+            receivedAt,
+            eventId: roundUserMessageEventId(roundId),
+            mergeAttachments: false,
+            parentExecution,
+            // The run reads the conversation by id (real-time). The conversation is already
+            // listed, so a list search before the next scheduled refresh only sees the previous
+            // `updated_at`.
+            appendRefresh: false,
+            claim,
+          });
+        }
       } catch (err) {
+        if (isConversationBusyError(err)) {
+          // A refused run never started, so it leaves no execution record behind.
+          try {
+            await executionClient.delete(executionId);
+          } catch (deleteErr) {
+            this.logger.warn(
+              `Failed to delete execution ${executionId} refused on a busy conversation: ${deleteErr.message}`
+            );
+          }
+          throw err;
+        }
+
         try {
           await executionClient.updateStatus(executionId, ExecutionStatus.failed, {
             error: serializeExecutionError(err),
@@ -883,6 +914,7 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     mergeAttachments,
     parentExecution,
     appendRefresh,
+    claim,
   }: {
     conversation: ConversationWithOperation;
     conversationClient: ConversationClient;
@@ -893,6 +925,7 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     mergeAttachments: boolean;
     parentExecution?: ParentExecution;
     appendRefresh?: Refresh;
+    claim?: ConversationClaim;
   }): Promise<string> {
     const { nextInput, origin: requestOrigin, author: requestAuthor } = params;
     const author = conversationClient.getAuthor(requestOrigin?.author, requestAuthor);
@@ -904,6 +937,7 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
       eventId,
       author,
       appendRefresh,
+      ...(claim ? { claim } : {}),
       ...(origin ? { origin } : {}),
       ...(parentExecution
         ? {

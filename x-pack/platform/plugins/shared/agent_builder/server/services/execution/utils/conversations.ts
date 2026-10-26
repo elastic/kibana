@@ -48,6 +48,7 @@ import {
   roundUserMessageEventId,
 } from '@kbn/agent-builder-common';
 import type { ActivityContext, ConversationClient } from '../../conversation';
+import type { ConversationClaim } from '../../conversation/client/types';
 import {
   roundToEvents,
   userMessageEvent,
@@ -138,6 +139,7 @@ export const persistUserMessage = async ({
   attachments,
   activity,
   appendRefresh,
+  claim,
 }: {
   conversation: ConversationWithOperation;
   conversationClient: ConversationClient;
@@ -158,6 +160,8 @@ export const persistUserMessage = async ({
    * origin lookup finds conversations by search.
    */
   appendRefresh?: Refresh;
+  /** Claims the conversation's run lock for the execution this message opens. */
+  claim?: ConversationClaim;
 }): Promise<string> => {
   const event = userMessageEvent(
     {
@@ -198,6 +202,7 @@ export const persistUserMessage = async ({
           ...(conversation.parent_conversation
             ? { parent_conversation: conversation.parent_conversation }
             : {}),
+          ...(claim ? { claim } : {}),
         },
         { source: 'execution', ...(activity ? { activity } : {}) }
       );
@@ -210,7 +215,12 @@ export const persistUserMessage = async ({
   }
 
   await conversationClient.appendEvents(
-    { id: conversation.id, events, ...(attachments ? { attachments } : {}) },
+    {
+      id: conversation.id,
+      events,
+      ...(attachments ? { attachments } : {}),
+      ...(claim ? { claim } : {}),
+    },
     {
       access: 'converse',
       source: 'execution',
@@ -226,12 +236,15 @@ export const appendRoundTerminated$ = ({
   conversationClient,
   roundCompletedEvents$,
   title$,
+  releaseExecutionId,
 }: {
   conversation: ConversationWithOperation;
   conversationClient: ConversationClient;
   roundCompletedEvents$: Observable<RoundCompleteEvent>;
   /** When provided, its resolved value is persisted as the title alongside the END append. */
   title$?: Observable<string>;
+  /** The execution whose run lock this terminal write releases. */
+  releaseExecutionId: string;
 }): Observable<ChatEvent> => {
   return roundCompletedEvents$.pipe(
     switchMap((roundCompletedEvent) => {
@@ -268,6 +281,7 @@ export const appendRoundTerminated$ = ({
                   }
                 : {}),
               ...(workspaceId ? { workspaceId } : {}),
+              releaseExecutionId,
             },
             { access: 'converse', source: 'execution' }
           );
@@ -308,6 +322,7 @@ export const appendResumeExecution$ = ({
   input,
   author,
   title$,
+  releaseExecutionId,
 }: {
   conversation: ConversationWithOperation;
   conversationClient: ConversationClient;
@@ -317,6 +332,8 @@ export const appendResumeExecution$ = ({
   author?: ConversationRoundAuthor;
   /** When provided, its resolved value is persisted as the title alongside the resume append. */
   title$?: Observable<string>;
+  /** The execution whose run lock this terminal write releases. */
+  releaseExecutionId: string;
 }): Observable<ChatEvent> => {
   return roundCompletedEvents$.pipe(
     switchMap((roundCompletedEvent) =>
@@ -394,6 +411,7 @@ export const appendResumeExecution$ = ({
                   }
                 : {}),
               ...(workspaceId ? { workspaceId } : {}),
+              releaseExecutionId,
             },
             { access: 'converse', source: 'execution' }
           );
@@ -443,6 +461,8 @@ export interface PersistExecutionInterruptionParams {
   interrupted?: RoundInterruptedEventData;
   /** The `round_complete` payload, when the run completed but the success write failed. */
   completed?: RoundCompleteEventData;
+  /** The execution whose run lock this terminal write releases. */
+  releaseExecutionId: string;
   logger: Logger;
 }
 
@@ -475,6 +495,7 @@ export const persistExecutionInterruption = async (
     error,
     interrupted,
     completed,
+    releaseExecutionId,
     logger,
   } = params;
 
@@ -585,6 +606,7 @@ export const persistExecutionInterruption = async (
           events: [userMessage, ...executionEvents, ...attachmentEvents],
           status: ConversationRoundStatus.completed,
           skipIfTerminalExistsFor: executionId,
+          releaseExecutionId,
           ...attachmentsUpdate,
           ...workspaceUpdate,
           ...stateUpdate,
@@ -630,6 +652,7 @@ export const persistExecutionInterruption = async (
         events: [promptResponse, ...executionEvents, ...resumeAttachmentEvents],
         status: ConversationRoundStatus.completed,
         skipIfTerminalExistsFor: executionId,
+        releaseExecutionId,
         ...attachmentsUpdate,
         ...workspaceUpdate,
         ...stateUpdate,

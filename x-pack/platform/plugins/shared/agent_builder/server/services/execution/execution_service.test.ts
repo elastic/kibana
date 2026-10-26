@@ -24,12 +24,15 @@ import {
   ChatEventType,
   ChatTriggerMode,
   ConversationOriginType,
+  ConversationParentRelation,
   ConversationRoundStatus,
   EventActorType,
   ExecutionStatus,
   TimelineEventType,
+  createConversationBusyError,
   createRequestAbortedError,
   isBadRequestError,
+  isConversationBusyError,
 } from '@kbn/agent-builder-common';
 import { AGENT_BUILDER_INFERENCE_FEATURE_ID } from '@kbn/agent-builder-common/constants';
 import type { AgentExecutionClient } from './persistence';
@@ -1867,6 +1870,188 @@ describe('AgentExecutionService', () => {
         username: 'slack-bob',
         origin: { type: ConversationOriginType.Slack },
       });
+    });
+  });
+
+  describe('executeAgent on a busy conversation', () => {
+    const conversation = createEmptyConversation({
+      id: 'conversation-1',
+      agent_id: 'agent-1',
+      schema_version: CONVERSATION_SCHEMA_VERSION,
+    });
+
+    const converse = (params: Record<string, unknown> = {}) =>
+      service.executeAgent({
+        mode: AgentExecutionMode.conversation,
+        request: httpServerMock.createKibanaRequest(),
+        useTaskManager: true,
+        params: {
+          agentId: 'agent-1',
+          conversationId: 'conversation-1',
+          nextInput: { message: 'Hello' },
+          ...params,
+        },
+      });
+
+    const appendedClaim = () => {
+      const [{ claim }] = conversationClient.appendEvents.mock.calls[0];
+      return claim;
+    };
+
+    beforeEach(() => {
+      conversationClient.get.mockResolvedValue(conversation);
+      conversationClient.exists.mockResolvedValue(true);
+      conversationClient.appendEvents.mockResolvedValue(conversation);
+      conversationClient.create.mockResolvedValue(conversation);
+      conversationClient.claimActiveExecution.mockResolvedValue(conversation);
+    });
+
+    it('refuses with conversationBusy, deletes its execution record and schedules nothing', async () => {
+      conversationClient.appendEvents.mockRejectedValueOnce(
+        createConversationBusyError({
+          conversationId: 'conversation-1',
+          activeExecutionId: 'other-exec',
+        })
+      );
+
+      const error = await converse().catch((thrown) => thrown);
+
+      expect(isConversationBusyError(error)).toBe(true);
+      const [{ executionId }] = mockExecutionClient.create.mock.calls[0];
+      expect(mockExecutionClient.delete).toHaveBeenCalledWith(executionId);
+      expect(mockExecutionClient.updateStatus).not.toHaveBeenCalledWith(
+        expect.anything(),
+        ExecutionStatus.failed,
+        expect.anything()
+      );
+      expect(mockTaskManagerEnsureScheduled).not.toHaveBeenCalled();
+      expect(mockTaskManagerSchedule).not.toHaveBeenCalled();
+    });
+
+    it('still refuses when deleting the refused execution record fails', async () => {
+      conversationClient.appendEvents.mockRejectedValueOnce(
+        createConversationBusyError({
+          conversationId: 'conversation-1',
+          activeExecutionId: 'other-exec',
+        })
+      );
+      mockExecutionClient.delete.mockRejectedValueOnce(new Error('ES unavailable'));
+
+      const error = await converse().catch((thrown) => thrown);
+
+      expect(isConversationBusyError(error)).toBe(true);
+      expect(logger.warn).toHaveBeenCalled();
+    });
+
+    it("passes a claim that checks the holder's liveness", async () => {
+      await converse();
+
+      const claim = appendedClaim();
+      const [{ executionId }] = mockExecutionClient.create.mock.calls[0];
+      const [{ agentParams }] = mockExecutionClient.create.mock.calls[0];
+      const { roundId } = agentParams as { roundId?: string };
+      expect(claim).toMatchObject({ executionId, triggerEventId: `${roundId}::user_message` });
+
+      mockExecutionClient.peek.mockResolvedValueOnce({
+        status: ExecutionStatus.running,
+        lastHeartbeat: new Date().toISOString(),
+        eventCount: 0,
+      });
+      await expect(claim?.isHolderLive('e1')).resolves.toBe(true);
+      expect(mockExecutionClient.peek).toHaveBeenLastCalledWith('e1');
+
+      mockExecutionClient.peek.mockResolvedValueOnce({
+        status: ExecutionStatus.completed,
+        eventCount: 3,
+      });
+      await expect(claim?.isHolderLive('e1')).resolves.toBe(false);
+    });
+
+    it('claims with claimActiveExecution on a HITL resume', async () => {
+      conversationClient.get.mockResolvedValue({
+        ...conversation,
+        rounds: [createRound({ id: 'round-1', status: ConversationRoundStatus.awaitingPrompt })],
+      });
+
+      await converse();
+
+      const [{ executionId }] = mockExecutionClient.create.mock.calls[0];
+      expect(conversationClient.claimActiveExecution).toHaveBeenCalledWith(
+        {
+          id: 'conversation-1',
+          claim: expect.objectContaining({
+            executionId,
+            triggerEventId: 'round-1::user_message',
+          }),
+        },
+        { source: 'execution' }
+      );
+      expect(conversationClient.appendEvents).not.toHaveBeenCalled();
+    });
+
+    it('claims for a sub-agent conversation too', async () => {
+      conversationClient.get.mockResolvedValue({
+        ...conversation,
+        parent_conversation: { id: 'parent-1', relation: ConversationParentRelation.subagent },
+      });
+
+      await converse();
+
+      expect(appendedClaim()).toEqual(expect.objectContaining({ executionId: expect.any(String) }));
+    });
+
+    it('does not claim when storeConversation is false', async () => {
+      await converse({ storeConversation: false });
+
+      expect(conversationClient.appendEvents).not.toHaveBeenCalled();
+      expect(conversationClient.create).not.toHaveBeenCalled();
+      expect(conversationClient.claimActiveExecution).not.toHaveBeenCalled();
+    });
+
+    it('still returns the existing execution on an idempotent replay without claiming', async () => {
+      mockExecutionClient.create.mockRejectedValueOnce(conflictError());
+      mockExecutionClient.peek.mockResolvedValueOnce({
+        status: ExecutionStatus.completed,
+        eventCount: 3,
+      });
+
+      const result = await service.executeAgent({
+        mode: AgentExecutionMode.conversation,
+        request: httpServerMock.createKibanaRequest(),
+        executionId: 'exec-1',
+        metadata: { execution_idempotency_key: 'Ev123' },
+        params: { agentId: 'agent-1', nextInput: { message: 'hello' } },
+        useTaskManager: true,
+      });
+
+      expect(result.executionId).toBe('exec-1');
+      expect(conversationClient.appendEvents).not.toHaveBeenCalled();
+      expect(conversationClient.create).not.toHaveBeenCalled();
+      expect(conversationClient.claimActiveExecution).not.toHaveBeenCalled();
+      expect(mockExecutionClient.delete).not.toHaveBeenCalled();
+    });
+
+    it('trigger_mode never appends without a claim', async () => {
+      (attachmentsService.createStateManager as jest.Mock).mockReturnValue({
+        getAccessedRefs: () => [],
+        getAll: () => [],
+        drainChanges: () => [],
+      });
+
+      await service.maybeExecuteAgent({
+        mode: AgentExecutionMode.conversation,
+        request: httpServerMock.createKibanaRequest(),
+        params: {
+          agentId: 'agent-1',
+          conversationId: 'conversation-1',
+          triggerMode: ChatTriggerMode.Never,
+          nextInput: { message: 'Pool limit is now 200' },
+        },
+      });
+
+      expect(conversationClient.appendEvents).toHaveBeenCalledTimes(1);
+      expect(appendedClaim()).toBeUndefined();
+      expect(conversationClient.claimActiveExecution).not.toHaveBeenCalled();
     });
   });
 });
