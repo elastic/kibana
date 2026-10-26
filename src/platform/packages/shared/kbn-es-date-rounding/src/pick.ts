@@ -104,6 +104,10 @@ const BY_EXPRESSION = new Map<string, InternalInterval>(
   [...PRIMARY, ...SECONDARY].map((interval) => [interval.expression, interval])
 );
 
+/**
+ * Brand a known IANA zone id.
+ * @throws {Error} If `id` is empty, `Browser`, or not a known IANA zone.
+ */
 export function ianaTimeZone(id: string): IanaTimeZone {
   if (id === '' || id === 'Browser' || moment.tz.zone(id) == null) {
     throw new Error(`Invalid IANA time zone: ${id}`);
@@ -121,6 +125,10 @@ export function ianaTimeZoneOrUtc(id: string | undefined): IanaTimeZone {
   }
 }
 
+/**
+ * Epoch range `[0, durationMs)` for callers that only have a duration.
+ * @throws {Error} If `durationMs` is not a positive finite number.
+ */
 export function durationAsRange(durationMs: number): { from: 0; to: number } {
   if (!Number.isFinite(durationMs) || durationMs <= 0) {
     throw new Error('durationMs must be a positive finite number');
@@ -128,6 +136,11 @@ export function durationAsRange(durationMs: number): { from: 0; to: number } {
   return { from: 0, to: durationMs };
 }
 
+/**
+ * Finest ES DateRoundingPicker interval that produces at most `maxBuckets` in `range`.
+ * Searches the day→1ms primary ladder, then falls back through week, month, and year.
+ * @throws {Error} If `maxBuckets` is not a positive integer, or `range.from` is not finite and less than `range.to`.
+ */
 export function pickDateRounding(maxBuckets: number, range: ZonedDateRange): DateInterval {
   assertMaxBuckets(maxBuckets);
   assertRange(range);
@@ -156,6 +169,10 @@ export function pickDateRounding(maxBuckets: number, range: ZonedDateRange): Dat
   return toPublic(YEAR);
 }
 
+/**
+ * Whether `interval` stays within `maxBuckets` over `range`, using the picker's zoned count.
+ * @throws {Error} If `maxBuckets` is not a positive integer, `range` is invalid, or `interval.expression` is unknown.
+ */
 export function fitsInBuckets(
   interval: DateInterval,
   range: ZonedDateRange,
@@ -166,6 +183,7 @@ export function fitsInBuckets(
   return roundingIsOk(resolveInterval(interval), range, maxBuckets);
 }
 
+/** Resolve a public interval onto the picker ladder, or parse a manual `Nm`/`Nh`/… expression. */
 function resolveInterval(interval: DateInterval): InternalInterval {
   const known = BY_EXPRESSION.get(interval.expression);
   if (known) {
@@ -209,6 +227,7 @@ function resolveInterval(interval: DateInterval): InternalInterval {
   }
 }
 
+/** True when the interval's zoned buckets from `range.from` to `range.to` stay within `maxBuckets`. */
 function roundingIsOk(
   interval: InternalInterval,
   range: ZonedDateRange,
@@ -219,6 +238,7 @@ function roundingIsOk(
     : fixedFits(interval, range, maxBuckets);
 }
 
+/** Walk calendar start-of-unit boundaries in `range.timeZone` (day/week/month/year lengths vary). */
 function calendarFits(
   interval: CalendarInterval,
   range: ZonedDateRange,
@@ -236,10 +256,12 @@ function calendarFits(
   return true;
 }
 
+/**
+ * Count fixed-width buckets the way ES `roundingIsOkFixedWidthUnit` does: divide evenly
+ * inside a constant UTC-offset period, then realign after each DST transition.
+ */
 function fixedFits(interval: FixedInterval, range: ZonedDateRange, maxBuckets: number): boolean {
   const width = interval.nominalMs;
-  // Match ES DateRoundingPicker.roundingIsOkFixedWidthUnit: count arithmetically
-  // inside a constant-offset period, then realign on the post-transition offset.
   let boundary = alignFixed(range.from, interval, range.timeZone);
   let count = 0;
   let iterations = 0;
@@ -271,10 +293,12 @@ function fixedFits(interval: FixedInterval, range: ZonedDateRange, maxBuckets: n
   return true;
 }
 
+/** Round `from` down to the interval's calendar unit in `timeZone`. */
 function alignCalendar(from: number, interval: CalendarInterval, timeZone: IanaTimeZone): number {
   return moment.tz(from, timeZone).startOf(interval.startOf).valueOf();
 }
 
+/** Round `from` down to a local-offset epoch multiple of the fixed width (`fixed_interval` + `time_zone`). */
 function alignFixed(from: number, interval: FixedInterval, timeZone: IanaTimeZone): number {
   const width = interval.nominalMs;
   const offsetMs = moment.tz(from, timeZone).utcOffset() * 60 * 1000;
@@ -283,6 +307,7 @@ function alignFixed(from: number, interval: FixedInterval, timeZone: IanaTimeZon
   return from - localOffset;
 }
 
+/** Next DST/offset transition after `utcMillis`, if the zone has one. */
 function nextTransitionAfter(utcMillis: number, timeZone: IanaTimeZone): number | undefined {
   const zone = moment.tz.zone(timeZone);
   if (zone == null) {
@@ -291,6 +316,7 @@ function nextTransitionAfter(utcMillis: number, timeZone: IanaTimeZone): number 
   return zone.untils.find((until) => Number.isFinite(until) && until > utcMillis);
 }
 
+/** First fixed-interval boundary at or after `utcMillis` in the zone offset that applies there. */
 function firstBoundaryOnOrAfter(
   utcMillis: number,
   interval: FixedInterval,
