@@ -8,14 +8,7 @@
  */
 
 import type { ConnectorSpec } from './connector_spec';
-import { getConnectorSpec } from './get_connector_spec';
 
 /** True when the spec declares inbound event definitions (inbound-only or dual). */
 export const connectorSpecHasEvents = (spec: ConnectorSpec): boolean =>
   spec.events !== undefined && Object.keys(spec.events.definitions).length > 0;
-
-/** True when the registered spec for this type id accepts inbound hub events. */
-export const connectorTypeHasInboundEvents = (actionTypeId: string): boolean => {
-  const spec = getConnectorSpec(actionTypeId);
-  return spec !== undefined && connectorSpecHasEvents(spec);
-};

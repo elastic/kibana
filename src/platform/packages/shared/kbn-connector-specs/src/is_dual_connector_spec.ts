@@ -9,16 +9,9 @@
 
 import type { ConnectorSpec } from './connector_spec';
 import { connectorSpecHasEvents } from './connector_spec_has_events';
-import { getConnectorSpec } from './get_connector_spec';
 
 /**
  * Dual types have inbound events and outbound actions on the same spec.
  */
 export const isDualConnectorSpec = (spec: ConnectorSpec): boolean =>
   connectorSpecHasEvents(spec) && Object.keys(spec.actions).length > 0;
-
-/** True when the registered spec for this type id is dual (events + actions). */
-export const connectorTypeIsDual = (actionTypeId: string): boolean => {
-  const spec = getConnectorSpec(actionTypeId);
-  return spec !== undefined && isDualConnectorSpec(spec);
-};

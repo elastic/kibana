@@ -33,6 +33,9 @@ export {
   MAX_HANDSHAKE_CHALLENGE_LENGTH,
 } from './src/specs/inbound_webhook/constants';
 export { isToolAction, TEST_CONNECTOR_SUB_ACTION } from './src/connector_spec';
+export { connectorSpecHasEvents } from './src/connector_spec_has_events';
+export { isInboundOnlyConnectorSpec } from './src/is_inbound_only_connector_spec';
+export { isDualConnectorSpec } from './src/is_dual_connector_spec';
 export type {
   ConnectorIngressContext,
   EventDefinition,

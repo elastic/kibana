@@ -9,10 +9,9 @@
 
 import { z } from '@kbn/zod/v4';
 import type { ConnectorSpec } from './connector_spec';
-import { connectorSpecHasEvents, connectorTypeHasInboundEvents } from './connector_spec_has_events';
+import { connectorSpecHasEvents } from './connector_spec_has_events';
 import { InboundWebhook } from './specs/inbound_webhook/inbound_webhook';
 import { Unifi } from './specs/unifi/unifi';
-import { INBOUND_WEBHOOK_CONNECTOR_TYPE_ID } from './specs/inbound_webhook/constants';
 
 const createSpec = (overrides: Partial<ConnectorSpec>): ConnectorSpec => ({
   metadata: {
@@ -59,16 +58,5 @@ describe('connectorSpecHasEvents', () => {
     });
 
     expect(connectorSpecHasEvents(spec)).toBe(true);
-  });
-});
-
-describe('connectorTypeHasInboundEvents', () => {
-  it('is true for .inboundWebhook', () => {
-    expect(connectorTypeHasInboundEvents(INBOUND_WEBHOOK_CONNECTOR_TYPE_ID)).toBe(true);
-  });
-
-  it('is false for outbound specs and unknown types', () => {
-    expect(connectorTypeHasInboundEvents('.http')).toBe(false);
-    expect(connectorTypeHasInboundEvents('my-connector-type')).toBe(false);
   });
 });

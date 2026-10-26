@@ -12,13 +12,9 @@ export * from './common';
 export * as connectorsSpecs from './src/all_specs';
 export { getConnectorSpec } from './src/get_connector_spec';
 export {
-  connectorSpecHasEvents,
   connectorTypeHasInboundEvents,
-} from './src/connector_spec_has_events';
-export {
-  isInboundOnlyConnectorSpec,
+  connectorTypeIsDual,
   connectorTypeIsInboundOnly,
-} from './src/is_inbound_only_connector_spec';
-export { isDualConnectorSpec, connectorTypeIsDual } from './src/is_dual_connector_spec';
-export { connectorTypePublishesKeys } from './src/connector_type_publishes_keys';
+  connectorTypePublishesKeys,
+} from './src/connector_type_predicates';
 export { isEarsExperimentalConnector } from './src/lib/ears_experimental_utils';

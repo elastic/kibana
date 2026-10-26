@@ -9,7 +9,7 @@
 
 import { z } from '@kbn/zod/v4';
 import type { ConnectorSpec } from './connector_spec';
-import { connectorTypeIsDual, isDualConnectorSpec } from './is_dual_connector_spec';
+import { isDualConnectorSpec } from './is_dual_connector_spec';
 import { InboundWebhook } from './specs/inbound_webhook/inbound_webhook';
 import { Unifi } from './specs/unifi/unifi';
 
@@ -58,15 +58,5 @@ describe('isDualConnectorSpec', () => {
 
   it('is true for a spec with actions and events', () => {
     expect(isDualConnectorSpec(dualSpec)).toBe(true);
-  });
-});
-
-describe('connectorTypeIsDual', () => {
-  it('is false for .inboundWebhook', () => {
-    expect(connectorTypeIsDual('.inboundWebhook')).toBe(false);
-  });
-
-  it('is false for an unknown type', () => {
-    expect(connectorTypeIsDual('.not-a-spec')).toBe(false);
   });
 });
