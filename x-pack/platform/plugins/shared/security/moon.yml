@@ -56,6 +56,7 @@ dependsOn:
   - '@kbn/utils'
   - '@kbn/core-logging-server-mocks'
   - '@kbn/core-saved-objects-server'
+  - '@kbn/core-test-helpers-model-versions'
   - '@kbn/utility-types-jest'
   - '@kbn/es-errors'
   - '@kbn/logging'
