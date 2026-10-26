@@ -164,7 +164,7 @@ export function ServiceSettingsFlyout({
                 isDeployed
                   ? i18n.translate('xpack.ingestHub.serviceSettingsStep.namespace.deployedNote', {
                       defaultMessage:
-                        'A deployed service moves to the new namespace on the next deploy. Data already collected stays in the previous namespace.',
+                        'On the next deploy, this service switches to the namespace entered here. Data already collected stays in the previous namespace.',
                     })
                   : undefined
               }

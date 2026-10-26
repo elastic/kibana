@@ -107,7 +107,7 @@ export const NamespaceComboBox: React.FC<NamespaceFormRowProps> = ({
                 'xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyNamespaceTooltip',
                 {
                   defaultMessage:
-                    "This setting changes the name of the integration's data stream from default.",
+                    "Sets the namespace in the integration's data stream. Leave empty to use default or inherit the agent policy namespace.",
                 }
               )}
               anchorProps={{ 'data-test-subj': `${dataTestSubj}-helpTooltip` }}

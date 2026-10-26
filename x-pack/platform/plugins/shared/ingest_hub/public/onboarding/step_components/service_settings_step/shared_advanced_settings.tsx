@@ -41,7 +41,7 @@ export function SharedAdvancedSettings({
                   'xpack.ingestHub.integrationSettings.advanced.namespace.deployedNote',
                   {
                     defaultMessage:
-                      'Deployed services move to the new namespace on the next deploy. Data already collected stays in the previous namespace.',
+                      'On the next deploy, services that follow this setting switch to the value entered here. Data already collected stays in the previous namespace.',
                   }
                 )
               : undefined
