@@ -48,7 +48,7 @@ export const useBulkUntrackAlertsByQuery = ({
       context: AlertsQueryContext,
       onError: () => {
         toasts.addDanger(
-          i18n.translate('xpack.triggersActionsUI.alertsTable.untrackByQuery.failedMessage', {
+          i18n.translate('xpack.responseOpsAlertsTable.alertsTable.untrackByQuery.failedMessage', {
             defaultMessage: 'Failed to untrack alerts by query',
           })
         );
@@ -56,7 +56,7 @@ export const useBulkUntrackAlertsByQuery = ({
 
       onSuccess: () => {
         toasts.addSuccess(
-          i18n.translate('xpack.triggersActionsUI.alertsTable.untrackByQuery.successMessage', {
+          i18n.translate('xpack.responseOpsAlertsTable.alertsTable.untrackByQuery.successMessage', {
             defaultMessage: 'Untracked alerts',
           })
         );

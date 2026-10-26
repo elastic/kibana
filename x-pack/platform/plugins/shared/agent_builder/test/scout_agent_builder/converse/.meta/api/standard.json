@@ -1,5 +1,5 @@
 {
-  "sha1": "06ce9118e82c0a93158429ff4702ce0d7bbabf1c",
+  "sha1": "28e3ccd562f48ffefcfa6cc16cc1f54630ff8114",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -1043,6 +1043,48 @@
       }
     },
     {
+      "id": "d4715fb1272d42d-21c7644969d5435",
+      "title": "Agent Builder — Task Manager runs act as the API key owner the owner of a private agent can run it on Task Manager",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_task_manager_ownership_api.spec.ts",
+        "line": 194,
+        "column": 15
+      }
+    },
+    {
+      "id": "d4715fb1272d42d-7b51574e37ba431",
+      "title": "Agent Builder — Task Manager runs act as the API key owner the agent can write metadata to its owner private conversation on Task Manager",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_task_manager_ownership_api.spec.ts",
+        "line": 255,
+        "column": 32
+      }
+    },
+    {
+      "id": "d4715fb1272d42d-b213631e46799f4",
+      "title": "Agent Builder — Task Manager runs act as the API key owner a workflow run by the owner continues their private conversation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_task_manager_ownership_api.spec.ts",
+        "line": 291,
+        "column": 16
+      }
+    },
+    {
       "id": "12984d044214c4f-d856e86368deee2",
       "title": "Agent Builder — converse tool calling API [local] single tool call (search with esql)",
       "expectedStatus": "passed",
@@ -1120,20 +1162,6 @@
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_tracing_snapshot_api.spec.ts",
         "line": 207,
         "column": 9
-      }
-    },
-    {
-      "id": "f377d03cd6f648c-f765672e4a9c9fd",
-      "title": "Agent Builder — ai.agent workflow step on the owner private conversation a workflow run by the owner continues their private conversation",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_workflow_agent_step_ownership_api.spec.ts",
-        "line": 151,
-        "column": 28
       }
     },
     {

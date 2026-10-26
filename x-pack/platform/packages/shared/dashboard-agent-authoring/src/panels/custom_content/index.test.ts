@@ -7,69 +7,41 @@
 
 import { customContentPanelKind } from '.';
 
-describe('custom content panel kind schemas', () => {
-  const add = (input: Record<string, unknown>) =>
-    customContentPanelKind.addInputSchema.safeParse({
+describe('custom content panel kind content schema', () => {
+  const parse = (input: Record<string, unknown>) =>
+    customContentPanelKind.contentSchema.safeParse({
       source: 'request',
       renderer: 'custom_content',
-      query: 'status card per host',
-      ...input,
-    });
-  const edit = (input: Record<string, unknown>) =>
-    customContentPanelKind.editInputSchema.safeParse({
-      source: 'request',
-      renderer: 'custom_content',
-      panelId: 'panel-1',
       ...input,
     });
 
-  describe('add', () => {
-    it('accepts a static panel that states it has no data', () => {
-      expect(add({ hasData: false }).success).toBe(true);
-    });
-
-    it('rejects a panel that does not state whether it has data', () => {
-      expect(add({}).success).toBe(false);
-    });
-
-    it('accepts hasData and index to request a generated query', () => {
-      expect(add({ hasData: true, index: 'logs-*' }).success).toBe(true);
-    });
-
-    it('rejects an index longer than the limit', () => {
-      expect(add({ hasData: true, index: 'x'.repeat(257) }).success).toBe(false);
-    });
+  it('accepts a static panel that states it has no data', () => {
+    expect(parse({ query: 'status card per host', hasData: false }).success).toBe(true);
   });
 
-  describe('edit', () => {
-    it('accepts a style-only edit', () => {
-      expect(edit({ query: 'make the badges blue' }).success).toBe(true);
-    });
+  it('accepts hasData and index to request a generated query', () => {
+    expect(parse({ query: 'status card per host', hasData: true, index: 'logs-*' }).success).toBe(
+      true
+    );
+  });
 
-    it('accepts replacing or removing the query without a description', () => {
-      expect(edit({ esql: 'FROM logs-*' }).success).toBe(true);
-      expect(edit({ esql: null }).success).toBe(true);
-      expect(edit({ hasData: false }).success).toBe(true);
-    });
+  it('accepts replacing or removing the query without a description', () => {
+    expect(parse({ esql: 'FROM logs-*' }).success).toBe(true);
+    expect(parse({ esql: null }).success).toBe(true);
+    expect(parse({ hasData: false }).success).toBe(true);
+  });
 
-    it('accepts regenerateESQL with a description', () => {
-      expect(edit({ query: 'also show errors', regenerateESQL: true }).success).toBe(true);
-    });
+  it('accepts regenerateESQL with a description', () => {
+    expect(parse({ query: 'also show errors', regenerateESQL: true }).success).toBe(true);
+  });
 
-    it('requires a description to regenerate the query or to add data', () => {
-      expect(edit({ regenerateESQL: true }).success).toBe(false);
-      expect(edit({ hasData: true }).success).toBe(false);
-      expect(edit({ esql: 'FROM logs-*', regenerateESQL: true }).success).toBe(false);
-    });
+  it('rejects an index longer than the limit', () => {
+    expect(parse({ query: 'status card', hasData: true, index: 'x'.repeat(257) }).success).toBe(
+      false
+    );
+  });
 
-    it('rejects regenerateESQL together with hasData: false', () => {
-      expect(edit({ query: 'show hosts', regenerateESQL: true, hasData: false }).success).toBe(
-        false
-      );
-    });
-
-    it('rejects an empty edit', () => {
-      expect(edit({}).success).toBe(false);
-    });
+  it('rejects an empty description', () => {
+    expect(parse({ query: '' }).success).toBe(false);
   });
 });

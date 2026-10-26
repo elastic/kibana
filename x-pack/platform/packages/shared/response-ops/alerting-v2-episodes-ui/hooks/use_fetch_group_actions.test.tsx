@@ -10,7 +10,8 @@ import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { fetchGroupActions } from '../apis/fetch_group_actions';
 import type { GroupActionRow } from '../queries/group_actions_query';
 import { createMockSpaces, createQueryClientWrapper, createTestQueryClient } from './test_utils';
-import { useFetchGroupActions } from './use_fetch_group_actions';
+import type { AlertEpisodeGroupAction } from '../types/action';
+import { getGroupAction, getGroupActionKey, useFetchGroupActions } from './use_fetch_group_actions';
 
 jest.mock('../apis/fetch_group_actions');
 
@@ -50,7 +51,6 @@ describe('useFetchGroupActions', () => {
         last_deactivate_action: 'deactivate',
         last_snooze_action: 'snooze',
         snoozed_until: '2035-01-02T12:00:00.000Z',
-        tags: ['t1', 't2'],
         last_snooze_actor: 'actor-snooze',
         last_deactivate_actor: 'actor-deactivate',
       },
@@ -74,66 +74,9 @@ describe('useFetchGroupActions', () => {
       lastDeactivateAction: 'deactivate',
       lastSnoozeAction: 'snooze',
       snoozedUntil: '2035-01-02T12:00:00.000Z',
-      tags: ['t1', 't2'],
       lastSnoozeActor: 'actor-snooze',
       lastDeactivateActor: 'actor-deactivate',
     });
-  });
-
-  it('normalizes string tags into a single-element array', async () => {
-    const rows: GroupActionRow[] = [
-      {
-        group_hash: 'gh-2',
-        rule_id: null,
-        last_deactivate_action: null,
-        last_snooze_action: null,
-        snoozed_until: null,
-        tags: 'solo',
-        last_snooze_actor: null,
-        last_deactivate_actor: null,
-      },
-    ];
-    fetchGroupActionsMock.mockResolvedValue(rows);
-
-    const { result } = renderHook(
-      () =>
-        useFetchGroupActions({
-          groupHashes: ['gh-2'],
-          services: { expressions: mockExpressions, spaces: mockSpaces },
-        }),
-      { wrapper }
-    );
-
-    await waitFor(() => expect(result.current.data!.has(':gh-2')).toBe(true));
-    expect(result.current.data!.get(':gh-2')?.tags).toEqual(['solo']);
-  });
-
-  it('converts tags to empty array when row tags are null', async () => {
-    const rows: GroupActionRow[] = [
-      {
-        group_hash: 'gh-3',
-        rule_id: null,
-        last_deactivate_action: null,
-        last_snooze_action: null,
-        snoozed_until: null,
-        tags: null,
-        last_snooze_actor: null,
-        last_deactivate_actor: null,
-      },
-    ];
-    fetchGroupActionsMock.mockResolvedValue(rows);
-
-    const { result } = renderHook(
-      () =>
-        useFetchGroupActions({
-          groupHashes: ['gh-3'],
-          services: { expressions: mockExpressions, spaces: mockSpaces },
-        }),
-      { wrapper }
-    );
-
-    await waitFor(() => expect(result.current.data!.has(':gh-3')).toBe(true));
-    expect(result.current.data!.get(':gh-3')?.tags).toEqual([]);
   });
 
   it('keeps actions from different rules that share a group hash', async () => {
@@ -144,7 +87,6 @@ describe('useFetchGroupActions', () => {
         last_deactivate_action: null,
         last_snooze_action: 'snooze',
         snoozed_until: null,
-        tags: [],
         last_snooze_actor: null,
         last_deactivate_actor: null,
       },
@@ -154,7 +96,6 @@ describe('useFetchGroupActions', () => {
         last_deactivate_action: 'deactivate',
         last_snooze_action: null,
         snoozed_until: null,
-        tags: [],
         last_snooze_actor: null,
         last_deactivate_actor: null,
       },
@@ -173,5 +114,43 @@ describe('useFetchGroupActions', () => {
     await waitFor(() => expect(result.current.data?.size).toBe(2));
     expect(result.current.data?.get('r1:dup')?.lastSnoozeAction).toBe('snooze');
     expect(result.current.data?.get('r2:dup')?.lastDeactivateAction).toBe('deactivate');
+  });
+});
+
+describe('getGroupAction', () => {
+  const mockGroupAction = (ruleId: string | null): AlertEpisodeGroupAction => ({
+    groupHash: 'gh-1',
+    ruleId,
+    lastDeactivateAction: null,
+    lastSnoozeAction: 'snooze',
+    snoozedUntil: null,
+    lastSnoozeActor: null,
+    lastDeactivateActor: null,
+  });
+
+  it('returns the actions of the rule', () => {
+    const mockMap = new Map([
+      [getGroupActionKey('rule-a', 'gh-1'), mockGroupAction('rule-a')],
+      [getGroupActionKey(null, 'gh-1'), mockGroupAction(null)],
+    ]);
+
+    expect(getGroupAction(mockMap, 'rule-a', 'gh-1')?.ruleId).toBe('rule-a');
+  });
+
+  it("doesn't return the actions of another rule on the same group hash", () => {
+    const mockMap = new Map([[getGroupActionKey('rule-a', 'gh-1'), mockGroupAction('rule-a')]]);
+
+    expect(getGroupAction(mockMap, 'rule-b', 'gh-1')).toBeUndefined();
+  });
+
+  it('falls back to the actions without a rule', () => {
+    const mockMap = new Map([[getGroupActionKey(null, 'gh-1'), mockGroupAction(null)]]);
+
+    expect(getGroupAction(mockMap, 'rule-b', 'gh-1')?.ruleId).toBeNull();
+    expect(getGroupAction(mockMap, undefined, 'gh-1')?.ruleId).toBeNull();
+  });
+
+  it('returns undefined without a map', () => {
+    expect(getGroupAction(undefined, 'rule-a', 'gh-1')).toBeUndefined();
   });
 });

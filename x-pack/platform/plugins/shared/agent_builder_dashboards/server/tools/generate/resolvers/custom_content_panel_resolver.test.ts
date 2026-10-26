@@ -26,8 +26,6 @@ const addRequest = (
   overrides: Partial<CustomContentPanelAddRequest> = {}
 ): CustomContentPanelAddRequest => ({
   renderer: 'custom_content',
-  operationType: 'add_panels',
-  identifier: 'Show KPI',
   nlQuery: 'Show KPI',
   hasData: false,
   ...overrides,
@@ -38,8 +36,6 @@ const editRequest = (
   overrides: Partial<CustomContentPanelEditRequest> = {}
 ): CustomContentPanelEditRequest => ({
   renderer: 'custom_content',
-  operationType: 'edit_panels',
-  identifier: existingPanel.id,
   existingPanel,
   ...overrides,
 });
@@ -80,13 +76,6 @@ describe('createCustomContentPanelResolver', () => {
       expect(result).toMatchObject({
         panelContent: { config: { esql_query: ['FROM logs-* | STATS count = COUNT(*)'] } },
       });
-    });
-
-    it('does not generate a query for a static panel', async () => {
-      const result = await resolve(addRequest());
-
-      expect(generateEsql).not.toHaveBeenCalled();
-      expect(result).toMatchObject({ panelContent: { config: { esql_query: undefined } } });
     });
 
     it('does not generate a query when hasData is false', async () => {
@@ -130,26 +119,22 @@ describe('createCustomContentPanelResolver', () => {
       const result = await resolve(addRequest({ hasData: true }));
 
       expect(resolveTemplate).not.toHaveBeenCalled();
-      expect(result).toMatchObject({
+      expect(result).toEqual({
         type: 'failure',
-        failure: { error: 'Could not generate an ES|QL query for this panel' },
+        error: 'Could not generate an ES|QL query for this panel',
       });
     });
 
-    it('returns a failure attributed to the operation when template generation throws', async () => {
+    it('returns a failure when template generation throws', async () => {
       resolveTemplate.mockRejectedValue(
         new Error('Generated template was rejected: contains a <script> tag.')
       );
 
-      const result = await resolve(addRequest({ operationType: 'add_section' }));
+      const result = await resolve(addRequest());
 
       expect(result).toEqual({
         type: 'failure',
-        failure: {
-          type: 'add_section',
-          identifier: 'Show KPI',
-          error: 'Generated template was rejected: contains a <script> tag.',
-        },
+        error: 'Generated template was rejected: contains a <script> tag.',
       });
     });
   });

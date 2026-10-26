@@ -95,6 +95,7 @@ import { deleteLegacyEventsDataStream } from './lib/significant_events/events';
 import { registerStreamsAgentBuilder } from './agent_builder/register';
 import { registerSignificantEventsSkills } from './agent_builder/skills/register_skills';
 import { registerAgentBuilderSmlTypes } from './agent_builder/sml/register_sml_types';
+import { classifyDetectionsStepDefinition } from './step_definitions/classify_detections';
 import { resolveModelStepDefinition } from './step_definitions/resolve_model';
 import {
   createContinuousOnboardingWorkflowService,
@@ -448,6 +449,9 @@ export class SignificantEventsPlugin
         getUiSettings: () => this.server?.core?.uiSettings,
         logger: this.logger.get('resolve_model'),
       })
+    );
+    plugins.workflowsExtensions?.registerStepDefinition(
+      classifyDetectionsStepDefinition({ logger: this.logger.get('classify_detections') })
     );
 
     // Custom event-driven triggers users can subscribe to from their own workflows.

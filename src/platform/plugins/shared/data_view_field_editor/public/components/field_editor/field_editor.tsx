@@ -196,12 +196,14 @@ const FieldEditorComponent = ({ field, onChange, onFormModifiedChange, isDisable
     type: updatedType,
     script: updatedScript,
     format: updatedFormat,
+    customLabel: updatedCustomLabel,
   } = formData;
   const { name: nameField, type: typeField } = getFields();
   const nameHasChanged = (Boolean(field?.name) && nameField?.isModified) ?? false;
   const typeHasChanged = (Boolean(field?.type) && typeField?.isModified) ?? false;
 
   const isValueVisible = get(formData, '__meta__.isValueVisible');
+  const isCustomLabelVisible = get(formData, '__meta__.isCustomLabelVisible');
 
   const isComposite = updatedType?.[0].value === 'composite';
   const isScriptFieldMounted = updatedScript !== undefined;
@@ -271,6 +273,8 @@ const FieldEditorComponent = ({ field, onChange, onFormModifiedChange, isDisable
   useEffect(() => {
     updatePreviewParams({
       name: Boolean(updatedName?.trim()) ? updatedName : null,
+      customLabel:
+        isCustomLabelVisible && Boolean(updatedCustomLabel?.trim()) ? updatedCustomLabel! : null,
       type: updatedType?.[0].value,
       script:
         isValueVisible === false || Boolean(updatedScript?.source.trim()) === false
@@ -281,9 +285,11 @@ const FieldEditorComponent = ({ field, onChange, onFormModifiedChange, isDisable
     });
   }, [
     updatedName,
+    updatedCustomLabel,
     updatedType,
     updatedScript,
     isValueVisible,
+    isCustomLabelVisible,
     updatedFormat,
     updatePreviewParams,
     field,

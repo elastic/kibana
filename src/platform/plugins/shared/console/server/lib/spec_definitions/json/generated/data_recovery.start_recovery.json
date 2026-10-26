@@ -1,0 +1,26 @@
+{
+  "data_recovery.start_recovery": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
+      "master_timeout": [
+        "30s",
+        "-1",
+        "0"
+      ]
+    },
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "_data_recovery/recoveries"
+    ],
+    "documentation": "",
+    "availability": {
+      "stack": false,
+      "serverless": false
+    }
+  }
+}

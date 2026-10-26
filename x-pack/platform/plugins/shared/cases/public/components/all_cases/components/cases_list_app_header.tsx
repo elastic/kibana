@@ -14,12 +14,13 @@ import {
   useCasesTemplatesNavigation,
 } from '../../../common/navigation/hooks';
 import { useCasesContext } from '../../cases_context/use_cases_context';
-import { KibanaServices } from '../../../common/lib/kibana';
+import { KibanaServices, useKibana } from '../../../common/lib/kibana';
 import { CasesAppHeader } from '../../app/cases_app_header';
 import { useGetActionLicense } from '../../../containers/use_get_action_license';
 import { getListMenu } from './header_menu';
 
 export const CasesListAppHeader: FC = () => {
+  const { docLinks } = useKibana().services;
   const { permissions } = useCasesContext();
   const { navigateToCreateCase } = useCreateCaseNavigation();
   const { navigateToConfigureCases } = useConfigureCasesNavigation();
@@ -49,7 +50,7 @@ export const CasesListAppHeader: FC = () => {
     ]
   );
 
-  return <CasesAppHeader title={PAGE_TITLE} menu={menu} />;
+  return <CasesAppHeader title={PAGE_TITLE} menu={menu} docLink={docLinks.links.cases.overview} />;
 };
 
 CasesListAppHeader.displayName = 'CasesListAppHeader';

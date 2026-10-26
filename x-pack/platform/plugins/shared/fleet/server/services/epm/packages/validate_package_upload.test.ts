@@ -12,6 +12,7 @@ import type { IndicesDataStream } from '@elastic/elasticsearch/lib/api/types';
 
 import { ElasticsearchAssetType } from '../../../../common';
 import type { Installation } from '../../../../common';
+import type { ArchiveIterator } from '../../../../common/types';
 import { PackageInvalidArchiveError, PackageNotFoundError, RegistryError } from '../../../errors';
 import { appContextService } from '../../app_context';
 import * as Registry from '../registry';
@@ -81,12 +82,27 @@ function uploadedInstallation(name = 'my_integration'): SavedObject<Installation
   } as SavedObject<Installation>;
 }
 
+// Mirrors the real iterator: every entry is visited, but only entries accepted by `readBuffer`
+// carry a buffer.
+function archiveIteratorFor(assets: Record<string, string> = {}): ArchiveIterator {
+  return {
+    getPaths: async () => Object.keys(assets),
+    traverseEntries: async (onEntry, readBuffer) => {
+      for (const [path, content] of Object.entries(assets)) {
+        const includeBuffer = readBuffer ? readBuffer(path) : true;
+        await onEntry({ path, buffer: includeBuffer ? Buffer.from(content) : undefined });
+      }
+    },
+  };
+}
+
 function validateUpload(
-  params: Omit<Parameters<typeof validatePackageUpload>[0], 'esClient'> & {
+  params: Omit<Parameters<typeof validatePackageUpload>[0], 'esClient' | 'archiveIterator'> & {
     esClient?: ElasticsearchClient;
+    archiveIterator?: ArchiveIterator;
   }
 ) {
-  return validatePackageUpload({ esClient, ...params });
+  return validatePackageUpload({ esClient, archiveIterator: archiveIteratorFor(), ...params });
 }
 
 async function expectUploadRejected(params: Parameters<typeof validateUpload>[0]) {
@@ -102,6 +118,151 @@ describe('validatePackageUpload', () => {
     mockedGetPackageSavedObjects.mockResolvedValue({ saved_objects: [] });
     mockedGetBundledPackageByName.mockResolvedValue(undefined);
     esClient.indices.getDataStream.mockResolvedValue({ data_streams: [] });
+  });
+
+  describe('restricted transform indices', () => {
+    const transformPath = 'my_integration-1.0.0/elasticsearch/transform/policies/transform.yml';
+    const transformUpload = (spec: string, path = transformPath) => ({
+      packageInfo: validPackage,
+      paths: [path],
+      savedObjectsClient: soClient,
+      archiveIterator: archiveIteratorFor({ [path]: spec }),
+    });
+
+    it('rejects a transform whose source reads a restricted index', async () => {
+      await expectUploadRejected(
+        transformUpload('source:\n  index: [".fleet-policies"]\ndest:\n  index: "my_index"\n')
+      );
+    });
+
+    it('rejects a transform whose destination writes a restricted index', async () => {
+      await expectUploadRejected(
+        transformUpload('source:\n  index: ["my_index"]\ndest:\n  index: ".fleet-policies"\n')
+      );
+    });
+
+    it('rejects a restricted index behind an exclusion, date math, or remote cluster prefix', async () => {
+      for (const index of ['-.fleet-policies', '<.fleet-{now/d}>', 'remote:.fleet-policies']) {
+        await expectUploadRejected(
+          transformUpload(`source:\n  index: ["${index}"]\ndest:\n  index: "my_index"\n`)
+        );
+      }
+    });
+
+    // getDestinationIndexAliases accepts an array of strings, an array of {alias} objects, a bare
+    // string, and an object keyed by alias name. Screening only one shape would let the others
+    // install a dot-prefixed alias.
+    it.each([
+      [
+        'array of objects',
+        'dest:\n  index: "my_dest"\n  aliases:\n    - alias: ".fleet-policies"\n',
+      ],
+      ['array of strings', 'dest:\n  index: "my_dest"\n  aliases:\n    - ".fleet-policies"\n'],
+      ['bare string', 'dest:\n  index: "my_dest"\n  aliases: ".fleet-policies"\n'],
+      [
+        'object keyed by alias',
+        'dest:\n  index: "my_dest"\n  aliases:\n    ".fleet-policies": {}\n',
+      ],
+    ])('rejects a restricted destination alias given as %s', async (_label, destYaml) => {
+      await expectUploadRejected(transformUpload(`source:\n  index: ["my_index"]\n${destYaml}`));
+    });
+
+    it('allows ordinary destination aliases in every supported shape', async () => {
+      for (const destYaml of [
+        'dest:\n  index: "my_dest"\n  aliases:\n    - alias: "my_dest.latest"\n',
+        'dest:\n  index: "my_dest"\n  aliases:\n    - "my_dest.latest"\n',
+        'dest:\n  index: "my_dest"\n  aliases: "my_dest.latest"\n',
+        'dest:\n  index: "my_dest"\n  aliases:\n    "my_dest.latest": {}\n',
+      ]) {
+        await expect(
+          validateUpload(transformUpload(`source:\n  index: ["my_index"]\n${destYaml}`))
+        ).resolves.toBeUndefined();
+      }
+    });
+
+    it('rejects a restricted index in a legacy JSON transform spec', async () => {
+      const path = 'my_integration-1.0.0/elasticsearch/transform/policies/default.json';
+      await expectUploadRejected(
+        transformUpload(
+          JSON.stringify({ source: { index: ['.fleet-policies'] }, dest: { index: 'my_index' } }),
+          path
+        )
+      );
+    });
+
+    it('allows a transform that only targets ordinary indices', async () => {
+      await expect(
+        validateUpload(
+          transformUpload(
+            'source:\n  index: ["logs-my_integration.logs-*"]\ndest:\n  index: "my_integration_dest"\n'
+          )
+        )
+      ).resolves.toBeUndefined();
+    });
+
+    it('ignores transform-folder files that carry no source or dest', async () => {
+      await expect(
+        validateUpload(
+          transformUpload(
+            'start: true\n',
+            'my_integration-1.0.0/elasticsearch/transform/policies/manifest.yml'
+          )
+        )
+      ).resolves.toBeUndefined();
+    });
+
+    // Registry packages such as ti_greynoise legitimately source `.alerts-security.alerts-*`,
+    // and their maintainers upload them from elastic-package stacks, which set this flag. The
+    // unconditional control is the caller-bound transform identity, not this check.
+    it('is skipped when skipUploadPackageValidation is set', async () => {
+      mockedGetConfig.mockReturnValue({ internal: { skipUploadPackageValidation: true } });
+
+      await expect(
+        validateUpload(
+          transformUpload('source:\n  index: [".fleet-policies"]\ndest:\n  index: "my_index"\n')
+        )
+      ).resolves.toBeUndefined();
+    });
+
+    // `isTransform` keys off the third path segment alone, so these paths are installed as
+    // transforms even though they sit outside `elasticsearch/` or carry no file extension.
+    // The check must cover exactly what the installer installs, or an archive can dodge it by
+    // choosing where to put the spec.
+    it.each([
+      'my_integration-1.0.0/anything/transform/transform.yml',
+      'my_integration-1.0.0/elasticsearch/transform/policies/transform',
+    ])('rejects a restricted index in a transform at %s', async (path) => {
+      await expectUploadRejected(
+        transformUpload('source:\n  index: [".fleet-policies"]\ndest:\n  index: "my_index"\n', path)
+      );
+    });
+
+    // The legacy install path parses with JSON.parse, which resolves a duplicate key to the
+    // last value, while the yaml parser rejects the document outright. Screening only the yaml
+    // result would skip this file and let the installer see `.fleet-policies`.
+    it('rejects a restricted index hidden behind a duplicate key in a JSON spec', async () => {
+      await expectUploadRejected(
+        transformUpload(
+          '{"source":{"index":["ok-index"]},"source":{"index":[".fleet-policies"]},"dest":{"index":"attacker"}}',
+          'my_integration-1.0.0/elasticsearch/transform/policies/default.json'
+        )
+      );
+    });
+
+    it('rejects a transform asset that neither parser accepts', async () => {
+      await expectUploadRejected(transformUpload('source:\n\tindex: ["my_index"]\n'));
+    });
+
+    it.each([
+      '- .fleet-policies',
+      '--.fleet-policies',
+      'my_index,.fleet-policies',
+      '- <.fleet-{now/d}>',
+    ])('rejects the restricted index expression %p', async (index) => {
+      await expectUploadRejected(
+        transformUpload(`source:\n  index: ["${index}"]\ndest:\n  index: "my_index"\n`)
+      );
+    });
   });
 
   describe('V5 package name', () => {

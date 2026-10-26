@@ -8,7 +8,7 @@
  */
 
 import type { FC, ReactNode } from 'react';
-import React from 'react';
+import React, { Children } from 'react';
 import classNames from 'classnames';
 import type { UseEuiTheme } from '@elastic/eui';
 import { EuiButtonGroup, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
@@ -65,7 +65,7 @@ export const FilterButtonGroup: FC<Props> = ({ items, attached, size = 's', ...r
       wrap={false}
       {...rest}
     >
-      {items}
+      {Children.toArray(items)}
     </EuiButtonGroup>
   );
 };
