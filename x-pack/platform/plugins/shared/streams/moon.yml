@@ -69,7 +69,6 @@ dependsOn:
   - '@kbn/alerting-types'
   - '@kbn/core-http-common'
   - '@kbn/scout'
-  - '@kbn/esql-language'
   - '@kbn/esql-types'
   - '@kbn/esql'
   - '@kbn/logging-mocks'
