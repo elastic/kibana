@@ -10,7 +10,7 @@ import { OBSERVABILITY_STREAMS_ENABLE_CANVAS } from '@kbn/management-settings-id
 import { expect } from '@kbn/scout/ui';
 import { test } from '../fixtures';
 
-const TAB_NAMES = ['canvas', 'sources', 'destinations'];
+const TAB_NAMES = ['map', 'sources', 'destinations'];
 
 test.describe(
   'Streams layout',
@@ -32,22 +32,20 @@ test.describe(
       });
     });
 
-    test('renders every tab and lands on canvas', async ({ pageObjects: { streams } }) => {
+    test('renders every tab and lands on map', async ({ pageObjects: { streams } }) => {
       await streams.gotoStreamsLayout();
 
       for (const tabName of TAB_NAMES) {
         await expect(streams.getStreamsLayoutTab(tabName)).toBeVisible();
       }
 
-      await expect(streams.getStreamsLayoutTab('canvas')).toHaveAttribute('aria-selected', 'true');
+      await expect(streams.getStreamsLayoutTab('map')).toHaveAttribute('aria-selected', 'true');
     });
 
-    test('falls back to the canvas tab for an unknown tab', async ({
-      pageObjects: { streams },
-    }) => {
+    test('falls back to the map tab for an unknown tab', async ({ pageObjects: { streams } }) => {
       await streams.gotoStreamsLayoutTab('does-not-exist');
 
-      await expect(streams.getStreamsLayoutTab('canvas')).toHaveAttribute('aria-selected', 'true');
+      await expect(streams.getStreamsLayoutTab('map')).toHaveAttribute('aria-selected', 'true');
     });
 
     test('renders the sources table', async ({ pageObjects: { streams } }) => {

@@ -151,6 +151,7 @@ steps:
       # ${{ }} keeps the array. Liquid `{{ }}` stringifies it as "[object Object]…"
       # and JSON.parse in preprocess falls back to [], so every round distills from scratch.
       tool_calls: '${{ inputs.tool_calls }}'
+      tool_results: '${{ inputs.tool_results }}'
 
   # Mirrors the investigation and reinforcement workflows: the reinforcement agent runs on
   # the model the round used, with `connector_id` still the strict override for a manual run.
@@ -182,6 +183,7 @@ steps:
     with:
       prompt: '{{ inputs.prompt }}'
       response: '{{ inputs.response }}'
+      conversation_id: '{{ inputs.conversation_id }}'
       round_id: '{{ inputs.round_id }}'
       message: '{{ steps.prepare_turn.output.message }}'
       turn_kind: '{{ steps.prepare_turn.output.turn_kind }}'
