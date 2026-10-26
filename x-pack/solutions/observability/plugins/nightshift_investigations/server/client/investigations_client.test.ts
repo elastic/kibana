@@ -2458,3 +2458,38 @@ describe('NightshiftInvestigationsClient.followUpRecoveredAlert()', () => {
     expect(agenticInvestigationsClient.findOpenBySubjects).not.toHaveBeenCalled();
   });
 });
+
+describe('NightshiftInvestigationsClient.claimSlackThread()', () => {
+  const THREAD = {
+    investigationId: 'inv-1',
+    externalConversationId: 'slack:T1:C1:1.1',
+    channel: 'C1',
+    threadTs: '1.1',
+  };
+
+  it('claims the thread and records it on the investigation', async () => {
+    await expect(makeClient().claimSlackThread(THREAD)).resolves.toBe(true);
+
+    expect(subjectsClient.claimSubjects).toHaveBeenCalledWith(
+      expect.objectContaining({
+        conversationId: 'inv-1',
+        subjects: [{ type: 'slack_thread', id: 'slack:T1:C1:1.1' }],
+      })
+    );
+    expect(subjectsClient.upsertSubjects).toHaveBeenCalledWith('inv-1', [
+      {
+        type: 'slack_thread',
+        id: 'slack:T1:C1:1.1',
+        slack: { channel: 'C1', thread_ts: '1.1' },
+      },
+    ]);
+  });
+
+  it('leaves a thread another investigation holds with that investigation', async () => {
+    subjectsClient.claimSubjects.mockResolvedValue({ claimed: false, heldBy: 'inv-2' });
+
+    await expect(makeClient().claimSlackThread(THREAD)).resolves.toBe(false);
+
+    expect(subjectsClient.upsertSubjects).not.toHaveBeenCalled();
+  });
+});
