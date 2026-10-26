@@ -28,6 +28,7 @@ export const NIGHTSHIFT_EBT_ACTIONS = {
   EXPAND_IMPACTED_SERVICES: 'expandImpactedServices',
   EXPAND_DETECTIONS: 'expandDetections',
   FILTER_BY_IMPACTED_SERVICES: 'filterByImpactedServices',
+  FILTER_DETECTIONS_BY_ENTITY: 'filterDetectionsByEntity',
   OPEN_AUTOMATION: 'openAutomation',
   CONNECT_SLACK: 'connectSlack',
   DISCONNECT_SLACK: 'disconnectSlack',
@@ -50,6 +51,8 @@ export const NIGHTSHIFT_EBT_ACTIONS = {
   TOGGLE_SLACK_CHANNELS: 'toggleSlackChannels',
   VIEW_ALL_SIGNIFICANT_EVENTS: 'viewAllSignificantEvents',
   VIEW_AUTOMATION_RUNS: 'viewAutomationRuns',
+  VIEW_AUTOMATIONS: 'viewAutomations',
+  VIEW_DETECTIONS: 'viewDetections',
   VIEW_DETECTION: 'viewDetection',
   VIEW_DETECTION_TAB: 'viewDetectionTab',
   VIEW_ENTITY: 'viewEntity',
@@ -57,6 +60,7 @@ export const NIGHTSHIFT_EBT_ACTIONS = {
   VIEW_KNOWLEDGE: 'viewKnowledge',
   VIEW_MANAGEMENT: 'viewManagement',
   VIEW_RULE: 'viewRule',
+  VIEW_SIGNAL: 'viewSignal',
   VIEW_SETTINGS: 'viewSettings',
   VIEW_SIGNIFICANT_EVENT: 'viewSignificantEvent',
   VIEW_SIGNIFICANT_EVENTS: 'viewSignificantEvents',
@@ -74,7 +78,10 @@ export const NIGHTSHIFT_EBT_ELEMENTS = {
   DETECTION_FLYOUT: 'nightshiftDetectionFlyout',
   DETECTION_FLYOUT_ENTITIES: 'nightshiftDetectionFlyoutEntities',
   DETECTION_WORKSPACE_TABS: 'nightshiftDetectionWorkspaceTabs',
+  DETECTION_ENTITIES_PANEL: 'nightshiftDetectionEntitiesPanel',
   DETECTION_RULES_TABLE: 'nightshiftDetectionRulesTable',
+  DETECTION_SIGNALS_TABLE: 'nightshiftDetectionSignalsTable',
+  DETECTION_DETAILS_FLYOUT: 'nightshiftDetectionDetailsFlyout',
   RULE_FLYOUT: 'nightshiftRuleFlyout',
   ENTITY_FLYOUT: 'nightshiftEntityFlyout',
   EVENT_FLYOUT: 'nightshiftEventFlyout',
@@ -88,9 +95,12 @@ export const NIGHTSHIFT_EBT_ELEMENTS = {
 } as const;
 
 export const NIGHTSHIFT_EBT_DETAILS = {
+  // Entity filters report the row kind, never the slug: slugs are customer service names.
+  ENTITY: 'entity',
   EXISTING_CONVERSATION: 'existingConversation',
   IMPACTED_SERVICE_TYPE: 'entity',
   NEW_CONVERSATION: 'newConversation',
   NEEDS_ACTION: 'needsAction',
   RESOLVED: 'resolved',
+  UNASSIGNED_ENTITIES: 'unassigned',
 } as const;
