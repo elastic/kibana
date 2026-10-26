@@ -671,6 +671,11 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
     (showAgentSection && isAgentDeploying) ||
     (showAgentSection && !isAgentDone && !(driftSettled && isAgentNextReady));
 
+  const showDriftCallout =
+    (showMiSection || showAgentSection) &&
+    isDirty &&
+    (deployGroups.length > 0 || agentTargets.length > 0);
+
   return (
     <div data-test-subj="onboardingStep-authenticate-and-deploy">
       <DeploymentMethodCard
@@ -802,6 +807,9 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
       )}
 
       {showMiSection && <EuiHorizontalRule margin="l" />}
+      {/* The rule above separates these callouts from what precedes them; without the managed
+          integration section there is none, so they would sit against the method cards. */}
+      {!showMiSection && (driftCheckError || showDriftCallout) && <EuiSpacer size="m" />}
 
       {driftCheckError && (
         <>
@@ -837,38 +845,36 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
         </>
       )}
 
-      {(showMiSection || showAgentSection) &&
-        isDirty &&
-        (deployGroups.length > 0 || agentTargets.length > 0) && (
-          <>
-            <KbnWarningCallout
-              announceOnMount
-              title={
-                <FormattedMessage
-                  id="xpack.ingestHub.authenticateAndDeployStep.driftCallout.title"
-                  defaultMessage="Settings changed since last deployment"
-                />
-              }
-              text={
-                <p>
-                  {showAgentSection ? (
-                    <FormattedMessage
-                      id="xpack.ingestHub.authenticateAndDeployStep.driftCallout.bodyAgentBased"
-                      defaultMessage="Settings have changed since last deployment. Click Next to apply the updated configuration."
-                    />
-                  ) : (
-                    <FormattedMessage
-                      id="xpack.ingestHub.authenticateAndDeployStep.driftCallout.body"
-                      defaultMessage="Settings have changed since last deployment. Click Deploy to apply the updated configuration."
-                    />
-                  )}
-                </p>
-              }
-              data-test-subj="authenticateAndDeployStep-driftCallout"
-            />
-            <EuiSpacer size="m" />
-          </>
-        )}
+      {showDriftCallout && (
+        <>
+          <KbnWarningCallout
+            announceOnMount
+            title={
+              <FormattedMessage
+                id="xpack.ingestHub.authenticateAndDeployStep.driftCallout.title"
+                defaultMessage="Settings changed since last deployment"
+              />
+            }
+            text={
+              <p>
+                {showAgentSection ? (
+                  <FormattedMessage
+                    id="xpack.ingestHub.authenticateAndDeployStep.driftCallout.bodyAgentBased"
+                    defaultMessage="Settings have changed since last deployment. Click Next to apply the updated configuration."
+                  />
+                ) : (
+                  <FormattedMessage
+                    id="xpack.ingestHub.authenticateAndDeployStep.driftCallout.body"
+                    defaultMessage="Settings have changed since last deployment. Click Deploy to apply the updated configuration."
+                  />
+                )}
+              </p>
+            }
+            data-test-subj="authenticateAndDeployStep-driftCallout"
+          />
+          <EuiSpacer size="m" />
+        </>
+      )}
 
       {showMiSection && (
         <ManagedIntegrationsSection
