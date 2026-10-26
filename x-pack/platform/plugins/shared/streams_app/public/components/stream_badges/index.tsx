@@ -272,6 +272,7 @@ export function useDiscoverStreamLink({
   stream,
   hasDataStream = false,
   indexMode,
+  indexName,
 }: {
   stream?:
     | Streams.WiredStream.Definition
@@ -279,6 +280,7 @@ export function useDiscoverStreamLink({
     | Streams.QueryStream.Definition;
   hasDataStream?: boolean;
   indexMode?: IndicesIndexMode;
+  indexName?: string;
 }): string | undefined {
   const {
     dependencies: {
@@ -294,6 +296,8 @@ export function useDiscoverStreamLink({
         includeMetadata: Streams.WiredStream.Definition.is(stream),
         useViews: features.wiredStreamViews.enabled,
       })
+    : indexName
+    ? `FROM "${indexName.replaceAll('"', '')}"`
     : undefined;
 
   const discoverLink = share.url.locators.useUrl<DiscoverAppLocatorParams>(

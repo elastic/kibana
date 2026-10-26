@@ -46,7 +46,7 @@ export const ViewAlertDetailsAlertAction = typedMemo(
           href={linkToAlert}
           target={openLinksInNewTab ? '_blank' : undefined}
         >
-          {i18n.translate('xpack.triggersActionsUI.alertsTable.viewAlertDetails', {
+          {i18n.translate('xpack.responseOpsAlertsTable.alertsTable.viewAlertDetails', {
             defaultMessage: 'View alert details',
           })}
         </EuiContextMenuItem>
@@ -62,7 +62,7 @@ export const ViewAlertDetailsAlertAction = typedMemo(
           onExpandedAlertIndexChange(rowIndex);
         }}
       >
-        {i18n.translate('xpack.triggersActionsUI.alertsTable.viewAlertDetails', {
+        {i18n.translate('xpack.responseOpsAlertsTable.alertsTable.viewAlertDetails', {
           defaultMessage: 'View alert details',
         })}
       </EuiContextMenuItem>
