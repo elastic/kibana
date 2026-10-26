@@ -16,6 +16,8 @@ import type {
 } from '@kbn/core-ui-settings-common';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
 import { ValidationBadValueError, ValidationSettingNotFoundError } from '../ui_settings_errors';
+import type { UserProvided } from './user_provided';
+import { overridesAsUserProvided } from './user_provided';
 
 export interface BaseUiSettingsDefaultsClientOptions {
   overrides?: Record<string, any>;
@@ -30,12 +32,14 @@ export abstract class BaseUiSettingsClient implements IUiSettingsClient {
   protected readonly defaults: Record<string, UiSettingsParams>;
   protected readonly overrides: Record<string, any>;
   protected readonly log: Logger;
+  protected readonly overriddenUserProvided: UserProvided;
 
   protected constructor(options: BaseUiSettingsDefaultsClientOptions) {
     const { defaults = {}, overrides = {}, log } = options;
     this.log = log;
     this.overrides = overrides;
     this.defaults = defaults;
+    this.overriddenUserProvided = overridesAsUserProvided(overrides);
   }
 
   getRegistered() {
@@ -47,8 +51,15 @@ export abstract class BaseUiSettingsClient implements IUiSettingsClient {
   }
 
   async get<T = any>(key: string, context?: GetUiSettingsContext): Promise<T> {
+    return this.resolveValue<T>(key, await this.getUserProvided(), context);
+  }
+
+  protected async resolveValue<T>(
+    key: string,
+    userProvided: UserProvided,
+    context?: GetUiSettingsContext
+  ): Promise<T> {
     // Check for user-provided override first
-    const userProvided = await this.getUserProvided();
     if (userProvided[key]?.userValue !== undefined) {
       const value = userProvided[key].userValue as T;
       return value;
@@ -113,14 +124,6 @@ export abstract class BaseUiSettingsClient implements IUiSettingsClient {
       }
     }
     return { valid: true };
-  }
-
-  protected validateKey(key: string, value: unknown) {
-    const definition = this.defaults[key];
-    if (value === null || definition === undefined) return;
-    if (definition.schema) {
-      definition.schema.validate(value, {}, `validation [${key}]`);
-    }
   }
 
   private async getDefaultValues(context?: GetUiSettingsContext) {

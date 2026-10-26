@@ -12,17 +12,12 @@ import { createOrUpgradeSavedConfig } from '../create_or_upgrade_saved_config';
 import { CannotOverrideError } from '../ui_settings_errors';
 import type { UiSettingsServiceOptions } from '../types';
 import { BaseUiSettingsClient } from './base_ui_settings_client';
+import type { UserProvided } from './user_provided';
+import { parseUserProvided, validateUserValue } from './user_provided';
 
 interface ReadOptions {
   autoCreateOrUpgradeIfMissing?: boolean;
 }
-
-interface UserProvidedValue<T = unknown> {
-  userValue?: T;
-  isOverridden?: boolean;
-}
-
-type UserProvided<T = unknown> = Record<string, UserProvidedValue<T>>;
 
 /**
  * Common logic for setting / removing keys in a {@link IUiSettingsClient} implementation
@@ -82,16 +77,15 @@ export abstract class UiSettingsClientCommon extends BaseUiSettingsClient {
   }
 
   private applyOverrides<T = unknown>(userProvided: UserProvided<T>): UserProvided<T> {
-    const result = { ...userProvided };
-    for (const [key, value] of Object.entries(this.overrides)) {
-      result[key] =
-        value === null ? { isOverridden: true } : { isOverridden: true, userValue: value };
-    }
-    return result;
+    return { ...userProvided, ...(this.overriddenUserProvided as UserProvided<T>) };
   }
 
   private async computeUserProvided<T = unknown>(): Promise<UserProvided<T>> {
-    const userProvided: UserProvided<T> = this.onReadHook(await this.read());
+    const userProvided = parseUserProvided(
+      await this.read(),
+      { defaults: this.defaults, overrides: this.overrides },
+      this.log
+    ) as UserProvided<T>;
 
     this.sharedUserProvidedCache?.set(this.namespace, userProvided);
 
@@ -151,27 +145,8 @@ export abstract class UiSettingsClientCommon extends BaseUiSettingsClient {
     }
 
     for (const [key, value] of Object.entries(changes)) {
-      this.validateKey(key, value);
+      validateUserValue(this.defaults, key, value);
     }
-  }
-
-  private onReadHook<T = unknown>(values: Record<string, unknown>) {
-    // write the userValue for each key stored in the saved object that is not overridden
-    // validate value read from saved objects as it can be changed via SO API
-    const filteredValues: UserProvided<T> = {};
-    for (const [key, userValue] of Object.entries(values)) {
-      if (userValue === null || Object.hasOwn(this.overrides, key)) continue;
-      try {
-        this.validateKey(key, userValue);
-        filteredValues[key] = {
-          userValue: userValue as T,
-        };
-      } catch (error) {
-        this.log.warn(`Ignore invalid UiSettings value. ${error}.`);
-      }
-    }
-
-    return filteredValues;
   }
 
   private async write({

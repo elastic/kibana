@@ -21,23 +21,13 @@ export interface UiSettingsDefaultsClientOptions {
  * Implementation of the {@link IUiSettingsClient} that only gives a read-only access to the default UI Settings values and any overrides.
  */
 export class UiSettingsDefaultsClient extends BaseUiSettingsClient {
-  private readonly userProvided: Record<string, UserProvidedValues<unknown>>;
-
   constructor(options: UiSettingsDefaultsClientOptions) {
     super(options);
-
-    // The only "userProvided" settings `UiSettingsDefaultsClient` is aware about are explicit overrides.
-    this.userProvided = Object.fromEntries(
-      Object.entries(this.overrides).map(([key, value]) => [
-        key,
-        // Dropping the userValue if override is null
-        value === null ? { isOverridden: true } : { isOverridden: true, userValue: value },
-      ])
-    );
   }
 
+  // The only "userProvided" settings `UiSettingsDefaultsClient` is aware about are explicit overrides.
   async getUserProvided<T = unknown>(): Promise<Record<string, UserProvidedValues<T>>> {
-    return this.userProvided as Record<string, UserProvidedValues<T>>;
+    return this.overriddenUserProvided as Record<string, UserProvidedValues<T>>;
   }
 
   // Any mutating operations are not supported by default UI settings.
