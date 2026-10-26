@@ -96,9 +96,12 @@ By default, `page.gotoApp()` resolves on the browser `load` event, which waits f
 
 When a page object knows which element proves the app has rendered, pass it as `readyWhen`. Navigation then resolves as soon as the document starts loading (`commit`), and that element becomes the single readiness gate, with one budget (`readyTimeout`, 30s by default) covering bundle download, plugin start and first render.
 
-- Use `readyWhen` in page object `goto()` methods, on an element that only renders once the app is usable.
-- Without `readyWhen`, keep the default. Don't pass `waitUntil: 'commit'` on its own: the next step would run before Kibana's scripts have executed.
-- Raise `readyTimeout` only for apps that boot slowly, with a short comment explaining why.
+Which option to use:
+
+- **Page object `goto()`**: pass `readyWhen` with the app's own container or `-loaded` subject, not the chrome or a spinner.
+- **Test asserts a redirect or the URL, or no single element proves readiness**: keep the default `gotoApp()`, then assert the destination.
+- **App boots slowly**: raise `readyTimeout`, not the timeout of a later assertion, and add a short comment explaining why.
+- **Avoid** `waitUntil: 'commit'` or `'domcontentloaded'` followed by a separate wait; `readyWhen` replaces that pattern. Never pass `'commit'` with no wait at all (the next step runs before Kibana's scripts execute), and never use `'networkidle'`.
 
 :::::{dropdown} Example
 
