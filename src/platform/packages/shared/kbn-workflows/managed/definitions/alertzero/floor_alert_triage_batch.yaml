@@ -751,7 +751,7 @@ steps:
             with:
               conversation_id: "{{ steps.create_proposal_investigation.output.conversation_id }}"
               type: security.alerts
-              render_inline: true
+              render_inline: false  # security.alerts has no inline renderer: inline it draws an empty block
               data:
                 alertIds: "${{ foreach.item }}"
               description: "Alerts in this closure proposal"
@@ -805,7 +805,7 @@ steps:
             with:
               conversation_id: "{{ steps.process_joins.item.conversation_id }}"
               type: security.alerts
-              render_inline: true
+              render_inline: false
               data:
                 alertIds: "${{ foreach.item }}"
               description: "Alerts added to this closure proposal"
