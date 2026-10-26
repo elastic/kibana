@@ -810,6 +810,18 @@ steps:
                 alertIds: "${{ foreach.item }}"
               description: "Alerts added to this closure proposal"
 
+      - name: attach_joined_impact_gate
+        type: if
+        condition: "${{ steps.process_joins.item.impacted_entities.size > 0 }}"
+        steps:
+          - name: attach_joined_impact
+            type: investigations.attachImpact
+            on-failure:
+              continue: true
+            with:
+              conversationId: "{{ steps.process_joins.item.conversation_id }}"
+              entities: "${{ steps.process_joins.item.impacted_entities }}"
+
       - name: tag_joined_alerts
         type: foreach
         foreach: "${{ steps.process_joins.item.alert_ids | chunk: 500 | json }}"

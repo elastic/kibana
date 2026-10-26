@@ -1298,6 +1298,11 @@ describe('floor_alert_triage_batch — grouping', () => {
     expect(stepByName('attach_joined_alert_chunk')?.with?.conversation_id).toBe(
       '{{ steps.process_joins.item.conversation_id }}'
     );
+    expect(stepByName('attach_joined_impact')?.type).toBe('investigations.attachImpact');
+    expect(stepByName('attach_joined_impact')?.with).toEqual({
+      conversationId: '{{ steps.process_joins.item.conversation_id }}',
+      entities: '${{ steps.process_joins.item.impacted_entities }}',
+    });
     expect(stepByName('tag_joined_alert_chunk')?.with?.tags).toEqual({
       tags_to_add: ['az:proposal:{{ steps.process_joins.item.owner_proposal_id }}'],
       tags_to_remove: [],

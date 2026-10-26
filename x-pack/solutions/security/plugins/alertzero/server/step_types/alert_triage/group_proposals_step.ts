@@ -302,6 +302,7 @@ export const getTriageGroupFpCandidatesStepDefinition = (deps: GroupProposalsSte
               conversation_id: join.conversationId,
               alert_ids: join.alertIds,
               alerts_page_query: buildAlertsPagePath(join.alertIds, new Date().toISOString()),
+              impacted_entities: entitiesOf(join.alertIds),
             })),
             alerts_joined: plan.joins.reduce((sum, { alertIds }) => sum + alertIds.length, 0),
             alerts_pooled: plan.mints

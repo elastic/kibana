@@ -235,6 +235,9 @@ const groupFpCandidatesOutputSchema = lazySchema(() =>
           alerts_page_query: z
             .string()
             .describe('Query string of the Alerts page link that shows just the added alerts.'),
+          impacted_entities: z
+            .array(z.object({ id: z.string(), name: z.string(), type: z.enum(['host', 'user']) }))
+            .describe('Entities the added alerts name, for the owner Investigation.'),
         })
       )
       .describe('Alerts added to an open proposal.'),
