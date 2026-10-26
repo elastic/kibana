@@ -922,6 +922,30 @@ describe('SearchMethodsService', () => {
       );
     });
 
+    it('nextPage() keeps track_total_hits so later pages can detect more results', async () => {
+      const page = (ids: string[]) => ({
+        hits: {
+          hits: ids.map((id) => ({ _id: id, sort: [Number(id)] })),
+          total: { value: 100 },
+        },
+      });
+      mockSearch
+        .mockReturnValueOnce(createMockResponse(page(['1', '2'])))
+        .mockReturnValueOnce(createMockResponse(page(['3', '4'])))
+        .mockReturnValueOnce(createMockResponse(page(['5', '6'])));
+
+      const first = await service.dslPaginated({
+        index: 'logs-*',
+        sort: [{ timestamp: 'desc' }],
+      });
+      const second = await first.pagination.nextPage();
+      await second?.pagination.nextPage();
+
+      [0, 1, 2].forEach((call) => {
+        expect(mockSearch.mock.calls[call][0].params.body.track_total_hits).toBe(true);
+      });
+    });
+
     describe('search context', () => {
       const phraseFilter: Filter = {
         meta: { alias: null, disabled: false, negate: false },

@@ -186,7 +186,7 @@ export class SearchMethodsService implements ISearchMethods {
 
     return {
       rawResponse: response.rawResponse,
-      pagination: this.buildDslPagination(response.rawResponse, contextParams, options),
+      pagination: this.buildDslPagination(response.rawResponse, paginatedParams, options),
     };
   }
 
