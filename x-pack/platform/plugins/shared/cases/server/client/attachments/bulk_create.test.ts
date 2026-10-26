@@ -13,7 +13,7 @@ import {
   MAX_USER_ACTIONS_PER_CASE,
   SECURITY_SOLUTION_OWNER,
 } from '../../../common/constants';
-import { bulkCreate } from './bulk_create';
+import { bulkCreate, bulkCreateAndGetCase } from './bulk_create';
 import {
   createAttachmentServiceMock,
   createCaseServiceMock,
@@ -193,5 +193,34 @@ describe('bulkCreate', () => {
         owner: SECURITY_SOLUTION_OWNER,
       })
     );
+  });
+
+  describe('empty request', () => {
+    const theCase = { ...mockCases[0], id: caseId };
+
+    beforeEach(() => {
+      userActionService.getMultipleCasesUserActionsTotal.mockResolvedValue({ [caseId]: 0 });
+      caseService.getCase.mockResolvedValue(theCase);
+    });
+
+    it('authorizes against the case owner', async () => {
+      await bulkCreate({ attachments: [], caseId }, clientArgs);
+
+      expect(clientArgs.authorization.ensureAuthorized).toHaveBeenCalledTimes(1);
+      expect(clientArgs.authorization.ensureAuthorized).toHaveBeenCalledWith(
+        expect.objectContaining({
+          entities: [{ owner: theCase.attributes.owner, id: caseId }],
+        })
+      );
+    });
+
+    it('does not return the case when the user cannot access the case owner', async () => {
+      clientArgs.authorization.ensureAuthorized.mockRejectedValueOnce(new Error('Unauthorized'));
+
+      await expect(bulkCreateAndGetCase({ attachments: [], caseId }, clientArgs)).rejects.toThrow(
+        'Unauthorized'
+      );
+      expect(caseService.getAllCaseComments).not.toHaveBeenCalled();
+    });
   });
 });

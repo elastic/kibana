@@ -77,12 +77,23 @@ const createAttachments = async (
       [[], []]
     );
 
-    await authorization.ensureAuthorized({
-      operation: Operations.bulkCreateAttachments,
-      entities,
-    });
+    if (entities.length > 0) {
+      await authorization.ensureAuthorized({
+        operation: Operations.bulkCreateAttachments,
+        entities,
+      });
+    }
 
     const model = await CaseCommentModel.create(caseId, clientArgs);
+
+    // An empty request has no attachment owners, so check the case owner instead.
+    if (entities.length === 0) {
+      await authorization.ensureAuthorized({
+        operation: Operations.bulkCreateAttachments,
+        entities: [{ owner: model.savedObject.attributes.owner, id: caseId }],
+      });
+    }
+
     const { model: updatedModel, attachments: createdAttachments } = await model.bulkCreate({
       attachments: attachmentsWithIds,
     });
