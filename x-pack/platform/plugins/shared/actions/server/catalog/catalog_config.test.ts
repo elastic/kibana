@@ -23,10 +23,7 @@ describe('catalogConfigSchema', () => {
   });
 
   it('accepts an http url in development', () => {
-    const config = catalogConfigSchema.validate(
-      { url: 'http://127.0.0.1:8089' },
-      { dev: true }
-    );
+    const config = catalogConfigSchema.validate({ url: 'http://127.0.0.1:8089' }, { dev: true });
 
     expect(config.url).toBe('http://127.0.0.1:8089');
   });

@@ -8,6 +8,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import moment from 'moment';
+
+jest.mock('node-fetch', () =>
+  jest.fn(async () => {
+    throw new Error('catalog fetch disabled in plugin tests');
+  })
+);
 import { ByteSizeValue } from '@kbn/config-schema';
 import { z } from '@kbn/zod/v4';
 import type { PluginInitializerContext, RequestHandlerContext } from '@kbn/core/server';
@@ -1297,6 +1303,29 @@ describe('Actions Plugin', () => {
             taskType: 'actions:catalog_refresh',
             schedule: { interval: '300s' },
           })
+        );
+      });
+
+      it('returns from start while the catalog index read rejects', async () => {
+        const enabledContext = coreMock.createPluginInitializerContext<ActionsConfig>({
+          ...getConfig(),
+          catalog: {
+            enabled: true,
+            url: DEFAULT_CATALOG_URL,
+            refreshInterval: moment.duration(5, 'm'),
+          },
+        });
+        const enabledPlugin = new ActionsPlugin(enabledContext);
+        await enabledPlugin.setup(coreSetup, pluginsSetup);
+        (coreStart.elasticsearch.client.asInternalUser.get as jest.Mock).mockRejectedValue(
+          new Error('catalog index unavailable')
+        );
+        const startContract = enabledPlugin.start(coreStart, pluginsStart);
+        expect(startContract.isActionTypeEnabled).toEqual(expect.any(Function));
+        await new Promise((resolve) => setImmediate(resolve));
+        await new Promise((resolve) => setImmediate(resolve));
+        expect(enabledContext.logger.get().warn).toHaveBeenCalledWith(
+          expect.stringContaining('catalog index')
         );
       });
     });

@@ -25,7 +25,8 @@ const createRunner = (
 ) => {
   const taskManager = taskManagerMock.createSetup();
   registerCatalogRefreshTask(taskManager, getService);
-  const definition = taskManager.registerTaskDefinitions.mock.calls[0][0][CATALOG_REFRESH_TASK_TYPE];
+  const definition =
+    taskManager.registerTaskDefinitions.mock.calls[0][0][CATALOG_REFRESH_TASK_TYPE];
   return {
     taskManager,
     definition,
@@ -82,7 +83,11 @@ describe('catalog refresh task', () => {
 
   it('schedules a 5 minute interval as 300s', async () => {
     const taskManager = taskManagerMock.createStart();
-    await scheduleCatalogRefreshTask(taskManager, moment.duration(5, 'minutes'), loggerMock.create());
+    await scheduleCatalogRefreshTask(
+      taskManager,
+      moment.duration(5, 'minutes'),
+      loggerMock.create()
+    );
 
     expect(taskManager.ensureScheduled).toHaveBeenCalledWith({
       id: CATALOG_REFRESH_TASK_ID,

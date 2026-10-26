@@ -52,9 +52,14 @@ import { type ActionsConfig, type EnabledConnectorTypes } from './config';
 import { AllowedHosts, getValidatedConfig } from './config';
 import {
   CatalogService,
+  CATALOG_BOOT_FETCH_TIMEOUT_MS,
+  CATALOG_BOOT_HARD_STOP_MS,
+  createLogOnce,
   getCatalogPublicKeys,
   registerCatalogRefreshTask,
+  RemoteCatalogSource,
   scheduleCatalogRefreshTask,
+  withCatalogTimeout,
 } from './catalog';
 import { resolveCustomHosts } from './lib/custom_host_settings';
 import { events } from './lib/event_based_telemetry';
@@ -1283,20 +1288,42 @@ export class ActionsPlugin
     if (!this.actionsConfig.catalog.enabled) {
       return;
     }
-    // Consumed by the remote catalog source when fetch is wired.
-    void this.kibanaVersion;
+    const catalogLogger = this.logger.get('catalog');
     this.catalogService = new CatalogService({
-      logger: this.logger.get('catalog'),
+      source: new RemoteCatalogSource({
+        registryUrl: this.actionsConfig.catalog.url,
+        kibanaVersion: this.kibanaVersion,
+      }),
+      logger: catalogLogger,
+      logOnce: createLogOnce(catalogLogger),
       publicKeys: getCatalogPublicKeys(this.isDev),
       refreshIntervalMs: this.actionsConfig.catalog.refreshInterval.asMilliseconds(),
     });
     registerCatalogRefreshTask(plugins.taskManager, () => this.catalogService);
   }
 
-  private startCatalog(_core: CoreStart, plugins: ActionsPluginsStart): void {
+  private startCatalog(core: CoreStart, plugins: ActionsPluginsStart): void {
     if (!this.actionsConfig.catalog.enabled || !this.catalogService) {
       return;
     }
+    const catalogLogger = this.logger.get('catalog');
+    void withCatalogTimeout(
+      this.catalogService.loadAtBoot(
+        { esClient: core.elasticsearch.client.asInternalUser },
+        { timeoutMs: CATALOG_BOOT_FETCH_TIMEOUT_MS }
+      ),
+      CATALOG_BOOT_HARD_STOP_MS,
+      () => {
+        catalogLogger.warn(
+          'Connector catalog boot exceeded the hard stop; continuing in the background'
+        );
+      },
+      (error) => {
+        catalogLogger.warn(
+          `Connector catalog boot failed: ${error instanceof Error ? error.message : String(error)}`
+        );
+      }
+    );
     scheduleCatalogRefreshTask(
       plugins.taskManager,
       this.actionsConfig.catalog.refreshInterval,
