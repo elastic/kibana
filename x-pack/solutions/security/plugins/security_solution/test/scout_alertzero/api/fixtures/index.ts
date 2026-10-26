@@ -6,7 +6,6 @@
  */
 
 import type { ApiClientFixture, SamlAuth } from '@kbn/scout-security';
-import { apiTest } from '@kbn/scout-security';
 import { createApi } from './kbn';
 import type { AlertZeroApi } from './kbn';
 
@@ -20,6 +19,7 @@ export {
   HUNT_READ_ROUTES,
   HUNT_WORKER_URL,
   HUNT_WRITE_ROUTES,
+  SECURITY_READ_ONLY_ROLE,
   TI_HEADERS,
 } from './constants';
 export {
@@ -35,7 +35,6 @@ export {
   setupHuntPrerequisites,
   spaceUrl,
   withHuntHeaders,
-  SECURITY_READ_ONLY_ROLE,
   type HuntPrerequisites,
   type SupplyStatusBody,
 } from './helpers';
