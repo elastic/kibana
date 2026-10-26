@@ -57,7 +57,7 @@ export class PubSubService implements CoreService<InternalPubSubSetup, void> {
       throw new Error(`Cannot register topic "${topic.name}" outside of setup.`);
     }
 
-    // `Topic` is structural, so a caller can skip `defineTopic` and hand in `{ name }`.
+    // A cast can still skip `defineTopic`. Re-check the name here.
     defineTopic(topic.name);
 
     const registeredBy = this.topics.get(topic.name);

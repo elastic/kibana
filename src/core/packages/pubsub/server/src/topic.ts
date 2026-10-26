@@ -8,16 +8,23 @@
  */
 
 declare const dataType: unique symbol;
+/** Present on {@link Topic} so event data, even with a `name` field, is not a topic type. */
+declare const topicBrand: unique symbol;
 
 /**
  * A topic name plus the compile-time type of its event data.
  * Creating a topic does not register it. Topic names are unique across Kibana.
  *
+ * Share one of these from a types-only package (`Topic<PingData, 'pubsubExample.ping'>`) and pass
+ * it to {@link defineTopic}, so a typo in the name fails to compile. Two plugins that import that
+ * package do not reference each other.
+ *
  * @public
  */
-export interface Topic<TData = unknown> {
-  readonly name: string;
+export interface Topic<TData = never, TName extends string = string> {
+  readonly name: TName;
   readonly [dataType]?: TData;
+  readonly [topicBrand]: true;
 }
 
 /** A topic name is at most this many characters. */
@@ -29,20 +36,40 @@ const TOPIC_NAME_MAX_LENGTH = 256;
  */
 const TOPIC_NAME_PATTERN = /^[a-zA-Z][a-zA-Z0-9_-]*(\.[a-zA-Z][a-zA-Z0-9_-]*)*$/;
 
+type DefineTopicName<T> = [T] extends [never]
+  ? string
+  : [T] extends [Topic<unknown, infer TName>]
+  ? TName
+  : string;
+
+type DefineTopicResult<T> = [T] extends [never]
+  ? Topic<never, string>
+  : [T] extends [Topic<infer TData, infer TName extends string>]
+  ? Topic<TData, TName>
+  : Topic<T, string>;
+
 /**
  * Returns a topic token. Registration is a separate setup call.
  *
- * Producers and consumers each call this with the same name and a shared data type. Don't import
- * another plugin's token: that is a runtime dependency, and a consumer must not have to depend on
- * the producer. Share the data type instead (a type-only import, or a small types-only package
- * when two plugins would otherwise reference each other).
+ * Pass the event data, or a shared {@link Topic} type so the name is checked too. Producers and
+ * consumers each call this. Don't import another plugin's token. Share the topic type from a small
+ * types-only package so the plugins don't reference each other.
+ *
+ * ```ts
+ * type PingTopic = Topic<PingData, 'pubsubExample.ping'>;
+ * defineTopic<PingData>('pubsubExample.ping');
+ * defineTopic<PingTopic>('pubsubExample.ping');
+ * ```
+ *
+ * With no type argument the data type is `never`.
  */
-export const defineTopic = <TData = unknown>(name: string): Topic<TData> => {
+export const defineTopic = <T = never>(name: DefineTopicName<T>): DefineTopicResult<T> => {
   if (name.length > TOPIC_NAME_MAX_LENGTH || !TOPIC_NAME_PATTERN.test(name)) {
     throw new Error(
       `Topic name "${name}" is invalid. Use dot-separated segments of letters, numbers, "_" or "-", each starting with a letter.`
     );
   }
 
-  return { name };
+  // The brand exists only in the type. The runtime token is the name.
+  return { name } as unknown as DefineTopicResult<T>;
 };

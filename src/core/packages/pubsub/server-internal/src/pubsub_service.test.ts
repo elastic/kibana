@@ -9,7 +9,23 @@
 
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
 import { defineTopic } from '@kbn/core-pubsub-server';
+import type { Topic } from '@kbn/core-pubsub-server';
 import { PubSubService } from './pubsub_service';
+
+interface NamedData {
+  message: string;
+  name: string;
+}
+type NamedTopic = Topic<NamedData, 'cases.updated'>;
+const topicFromData = defineTopic<NamedData>('cases.updated');
+const topicFromSharedType = defineTopic<NamedTopic>('cases.updated');
+const topicWithoutType = defineTopic('orders');
+const _typedName: Topic<NamedData, string> = topicFromData;
+const _sharedType: Topic<NamedData, 'cases.updated'> = topicFromSharedType;
+const _untyped: Topic<never, string> = topicWithoutType;
+void _typedName;
+void _sharedType;
+void _untyped;
 
 describe('PubSubService registration', () => {
   const createService = () => new PubSubService(mockCoreContext.create());
@@ -62,6 +78,8 @@ describe('PubSubService registration', () => {
   it('throws when a topic is registered without going through defineTopic', () => {
     const setup = createService().setup();
 
-    expect(() => setup.registerTopic('ordersPlugin', { name: 'a..b' })).toThrow(/invalid/i);
+    expect(() => setup.registerTopic('ordersPlugin', { name: 'a..b' } as Topic)).toThrow(
+      /invalid/i
+    );
   });
 });
