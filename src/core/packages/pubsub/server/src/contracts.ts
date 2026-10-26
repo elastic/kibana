@@ -102,8 +102,9 @@ export interface PubSubStart {
    * Delivery is best effort and local to this Kibana node; a resolved promise means the event
    * was accepted, not that any consumer ran. A consumer's copy is dropped when that consumer
    * already has 1000 events pending. The overflow is logged once, then again with the drop count
-   * when the queue drains. Events still queued when Kibana stops are discarded. Consumers on
-   * other nodes never see the event.
+   * when the queue drains. Events still queued when Kibana stops are discarded, and a publish
+   * after stop resolves without queueing the event (logged at debug). Consumers on other nodes
+   * never see the event.
    */
   publish<TData>(
     topic: Topic<TData>,

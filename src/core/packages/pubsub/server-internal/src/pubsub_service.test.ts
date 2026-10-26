@@ -10,7 +10,7 @@
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
 import { createTestEnv, getEnvOptions } from '@kbn/config-mocks';
 import { defineTopic } from '@kbn/core-pubsub-server';
-import type { PubSubEvent, PubSubEventInit } from '@kbn/core-pubsub-server';
+import type { PubSubEvent, PubSubEventInit, Topic } from '@kbn/core-pubsub-server';
 import { loggerMock } from '@kbn/logging-mocks';
 import { scopeConsumerName } from './consumer_name';
 import type { InternalPubSubStart } from './internal_contracts';
@@ -22,6 +22,21 @@ import {
 } from './pubsub_service';
 
 const PLUGIN = 'ordersPlugin';
+
+interface NamedData {
+  message: string;
+  name: string;
+}
+type NamedTopic = Topic<NamedData, 'cases.updated'>;
+const topicFromData = defineTopic<NamedData>('cases.updated');
+const topicFromSharedType = defineTopic<NamedTopic>('cases.updated');
+const topicWithoutType = defineTopic('orders');
+const _typedName: Topic<NamedData, string> = topicFromData;
+const _sharedType: Topic<NamedData, 'cases.updated'> = topicFromSharedType;
+const _untyped: Topic<never, string> = topicWithoutType;
+void _typedName;
+void _sharedType;
+void _untyped;
 
 let idCounter = 0;
 const nextId = () => `evt-${++idCounter}`;
@@ -85,14 +100,19 @@ describe('PubSubService registration', () => {
   it('throws when a topic is registered without going through defineTopic', () => {
     const setup = createService().setup();
 
-    expect(() => setup.registerTopic('ordersPlugin', { name: 'a..b' })).toThrow(/invalid/i);
+    expect(() => setup.registerTopic('ordersPlugin', { name: 'a..b' } as Topic)).toThrow(
+      /invalid/i
+    );
   });
 
   it('throws when a subscription uses a topic that skipped defineTopic', () => {
     const setup = createService().setup();
 
     expect(() =>
-      setup.subscribe('ordersPlugin', { name: 'a..b' }, { consumer: 'sync', handler: () => {} })
+      setup.subscribe('ordersPlugin', { name: 'a..b' } as Topic, {
+        consumer: 'sync',
+        handler: () => {},
+      })
     ).toThrow(/invalid/i);
   });
 
@@ -454,8 +474,8 @@ describe('PubSubService dispatch', () => {
     expect(drained).not.toContain(secret);
   });
 
-  it('does not start a queued handler after stop, and rejects later publishes', async () => {
-    const { service, setup, topic } = createHarness();
+  it('does not start a queued handler after stop, and resolves later publishes', async () => {
+    const { logger, service, setup, topic } = createHarness();
     let calls = 0;
     const gate = deferred();
 
@@ -479,9 +499,18 @@ describe('PubSubService dispatch', () => {
     await flushDispatch();
 
     expect(calls).toBe(1);
-    await expect(
-      publish(PLUGIN, topic, { id: nextId(), data: { secret: 'late' } })
-    ).rejects.toThrow(/after stop/);
+    const lateId = nextId();
+    await expect(publish(PLUGIN, topic, { id: lateId, data: { secret: 'late' } })).resolves.toEqual(
+      { id: lateId, acceptedAt: expect.any(String) }
+    );
+
+    const debug = loggerMock
+      .collect(logger)
+      .debug.map(([message]) => String(message))
+      .join('\n');
+    expect(debug).toContain(lateId);
+    expect(debug).toContain('stopping');
+    expect(debug).not.toContain('late');
   });
 });
 

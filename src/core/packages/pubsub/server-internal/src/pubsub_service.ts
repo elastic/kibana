@@ -115,8 +115,8 @@ export class PubSubService implements CoreService<InternalPubSubSetup, InternalP
     topic: Topic<TData>,
     init: PubSubEventInit<TData>
   ): Promise<PubSubPublishResult> {
-    if (this.phase !== 'started') {
-      throw new Error('Pubsub publish is not available after stop.');
+    if (this.phase !== 'started' && this.phase !== 'stopped') {
+      throw new Error('Pubsub publish is only available after start.');
     }
 
     if (!this.topics.has(topic.name)) {
@@ -127,6 +127,13 @@ export class PubSubService implements CoreService<InternalPubSubSetup, InternalP
     const serializedData = this.serializeData(init.data);
     if (this.checkJsonRoundTrip) {
       this.assertJsonRoundTrip(topic.name, init.data, serializedData);
+    }
+
+    if (this.phase === 'stopped') {
+      this.logger.debug(
+        `Dropping pubsub event "${init.id}" on topic "${topic.name}" from plugin "${pluginId}" because Kibana is stopping.`
+      );
+      return { id: init.id, acceptedAt: new Date().toISOString() };
     }
 
     const event: AcceptedEvent = {
@@ -171,7 +178,7 @@ export class PubSubService implements CoreService<InternalPubSubSetup, InternalP
       );
     }
 
-    // `Topic` is structural, so a caller can skip `defineTopic` and hand in `{ name }`.
+    // A cast can still skip `defineTopic`. Re-check the name here.
     defineTopic(topic.name);
 
     const scopedConsumer = scopeConsumerName(pluginId, consumer);
